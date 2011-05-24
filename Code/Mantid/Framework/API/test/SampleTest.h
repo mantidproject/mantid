@@ -8,6 +8,7 @@
 #include "MantidAPI/SampleEnvironment.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <MantidGeometry/Crystal/OrientedLattice.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -63,6 +64,22 @@ public:
     TS_ASSERT_EQUALS(&sampleKit, kit);
     TS_ASSERT_EQUALS(sampleKit.getName(), envName);
     TS_ASSERT_EQUALS(sampleKit.nelements(), 1);
+  }
+
+  void test_OrientedLattice()
+  {
+    Sample sample;
+    const std::string envName("TestKit");
+    OrientedLattice *latt = new OrientedLattice(1.0,2.0,3.0, 90, 90, 90);
+
+    TS_ASSERT_THROWS_NOTHING(sample.setOrientedLattice(latt));
+
+    const OrientedLattice & retLatt = sample.getOrientedLattice();
+    // Test that this references the correct object
+    TS_ASSERT_EQUALS(&retLatt, latt);
+    TS_ASSERT_EQUALS(retLatt.a(), 1.0);
+    TS_ASSERT_EQUALS(retLatt.b(), 2.0);
+    TS_ASSERT_EQUALS(retLatt.c(), 3.0);
   }
 
   void test_Material_Returns_The_Correct_Value()

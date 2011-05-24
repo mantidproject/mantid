@@ -126,19 +126,42 @@ namespace Mantid
     {
       if( !m_environment )
       {
-	throw std::runtime_error("Sample::getEnvironment - No sample enviroment has been defined.");
+        throw std::runtime_error("Sample::getEnvironment - No sample enviroment has been defined.");
       }
       return *m_environment;
     }
 
     /**
-     * Attach an environment oto this sample
+     * Attach an environment onto this sample
      * @param env :: A pointer to a created sample environment. This takes 
      * ownership of the object.
      */
     void Sample::setEnvironment(SampleEnvironment * env)
     {
       m_environment = boost::shared_ptr<SampleEnvironment>(env);
+    }
+
+    /** Return a reference to the OrientedLattice of this sample
+     * @return A const reference to a OrientedLattice object
+     * @throw std::runtime_error If the OrientedLattice has not been defined
+     */
+    const OrientedLattice & Sample::getOrientedLattice() const
+    {
+      if( !m_lattice )
+      {
+        throw std::runtime_error("Sample::getOrientedLattice - No OrientedLattice has been defined.");
+      }
+      return *m_lattice;
+    }
+
+    /** Attach an OrientedLattice onto this sample
+     *
+     * @param env :: A pointer to a OrientedLattice. This takes
+     * ownership of the object.
+     */
+    void Sample::setOrientedLattice(OrientedLattice * latt)
+    {
+      m_lattice = boost::shared_ptr<OrientedLattice>(latt);
     }
 
     /**

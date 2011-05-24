@@ -27,7 +27,7 @@ private:
     basisDimensions.insert(MDBasisDimension("qy", true, 1,"",V3D(0,0,sqrt(3.)/2)));
     basisDimensions.insert(MDBasisDimension("p", false, 3));
 
-	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));
+	boost::shared_ptr<OrientedLattice> spCell = boost::shared_ptr<OrientedLattice>(new OrientedLattice(2.87,2.87,2.87));
     return new MDGeometryBasis(basisDimensions,spCell);
   }
 
@@ -40,7 +40,7 @@ public:
     basisDimensions.insert(MDBasisDimension("qx", true, 1));
     basisDimensions.insert(MDBasisDimension("qy", true, 1));
 
- 	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87)); 
+ 	boost::shared_ptr<OrientedLattice> spCell = boost::shared_ptr<OrientedLattice>(new OrientedLattice(2.87,2.87,2.87));
     TSM_ASSERT_THROWS("Duplicate column numbers were used. Should have thrown.", MDGeometryBasis(basisDimensions,spCell), std::logic_error);
    }
   void testConstructionNonOrthogonalBasisThrows()
@@ -51,7 +51,7 @@ public:
     basisDimensions.insert(MDBasisDimension("qx", true, 0,"",V3D(1,0,0)));
     basisDimensions.insert(MDBasisDimension("qy", true, 1,"",V3D(1,1,0)));
 
- 	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87)); 
+ 	boost::shared_ptr<OrientedLattice> spCell = boost::shared_ptr<OrientedLattice>(new OrientedLattice(2.87,2.87,2.87));
     TSM_ASSERT_THROWS("Non-orthogonal dimensions were used. Should have thrown.", MDGeometryBasis(basisDimensions,spCell), std::logic_error);
   }
  
@@ -62,7 +62,7 @@ public:
     std::set<MDBasisDimension> basisDimensions;
     basisDimensions.insert(MDBasisDimension("qx", true, 1));
     basisDimensions.insert(MDBasisDimension("qy", true, 2));
- 	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));  
+ 	boost::shared_ptr<OrientedLattice> spCell = boost::shared_ptr<OrientedLattice>(new OrientedLattice(2.87,2.87,2.87));
     TSM_ASSERT_THROWS("Number of any dimension has to be smaller then total number of dimensions. Should have thrown.", MDGeometryBasis(basisDimensions,spCell), std::invalid_argument);
 
   }
@@ -121,7 +121,7 @@ public:
       basisDimensions.insert(MDBasisDimension(stream.str(), false, i));
     }
    
-	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));  
+	boost::shared_ptr<OrientedLattice> spCell = boost::shared_ptr<OrientedLattice>(new OrientedLattice(2.87,2.87,2.87));
     TSM_ASSERT_THROWS("Cannot have this many basis dimensions.", MDGeometryBasis(basisDimensions,spCell), std::invalid_argument);
   }
 
@@ -141,7 +141,7 @@ public:
 	  }
       basisDimensions.insert(MDBasisDimension(stream.str(), is_reciprocal, i));
     }
-  	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));   
+  	boost::shared_ptr<OrientedLattice> spCell = boost::shared_ptr<OrientedLattice>(new OrientedLattice(2.87,2.87,2.87));
     TSM_ASSERT_THROWS("Cannot have this many reciprocal basis dimensions.", MDGeometryBasis(basisDimensions,spCell), std::invalid_argument);
   }*/
 

@@ -8,6 +8,9 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Material.h"
+#include <MantidGeometry/Crystal/OrientedLattice.h>
+
+using Mantid::Geometry::OrientedLattice;
 
 namespace Mantid
 {
@@ -84,6 +87,16 @@ namespace Mantid
       void setEnvironment(SampleEnvironment * env);
       //@}
 
+      /** @name Access the sample's lattice structure and orientation */
+      //@{
+      /// Get a reference to the sample's OrientedLattice
+      const OrientedLattice & getOrientedLattice() const;
+      /// Set the OrientedLattice defining the sample's lattice and orientation
+      void setOrientedLattice(OrientedLattice * latt);
+      //@}
+
+
+
       // Required for SANS work until we define a proper
       // sample object from the raw file information
       /**@name Legacy functions */
@@ -115,6 +128,8 @@ namespace Mantid
       Geometry::Material m_material;
       /// An owned pointer to the SampleEnvironment object
       boost::shared_ptr<SampleEnvironment> m_environment;
+      /// An owned pointer to the OrientedLattice object
+      boost::shared_ptr<OrientedLattice> m_lattice;
 
       /// The sample geometry flag
       int m_geom_id;

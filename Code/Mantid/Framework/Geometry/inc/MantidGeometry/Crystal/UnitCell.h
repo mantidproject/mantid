@@ -125,16 +125,6 @@ namespace Geometry
       double volume()const;
       double recVolume() const; 
       void recalculateFromGstar(Geometry::Matrix<double>& NewGstar);
-      /** funtion returns rotation matrix, used to transform a vector expressed in the
-       *  "orthogonal associated with the reciprocal lattice cell system of coordinates (RLU)"
-       *  into another coordinate system defined by vectors u and v, expressed in RLU coordinate system
-       **/
-      MantidMat getUmatrix(const V3D &u, const V3D &v)const;
-      /** function returns a transformattion matix, which allows to transform a vector, expressed in
-       *   the units of the cell, into the orthogonal system, defined by vectors u and v;
-       *  u and v have to be not parallel, throws otherwise.
-       **/
-      MantidMat getUBmatrix(const V3D &u, const V3D &v)const;
 
     private:	    
       /// Lattice parameter a,b,c,alpha,beta,gamma (in \f$ \mbox{ \AA } \f$ and radians)

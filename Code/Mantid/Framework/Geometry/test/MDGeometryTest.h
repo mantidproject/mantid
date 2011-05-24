@@ -40,7 +40,7 @@ class MDGeometryTest : public CxxTest::TestSuite
     basisDimensions.insert(MDBasisDimension("q3", true, 2));
     basisDimensions.insert(MDBasisDimension("p", false, 3));
     basisDimensions.insert(MDBasisDimension("T", false, 4));
-	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));   
+	boost::shared_ptr<OrientedLattice> spCell = boost::shared_ptr<OrientedLattice>(new OrientedLattice(2.87,2.87,2.87));
     MDGeometryBasis basis(basisDimensions,spCell);
 
     //Dimensions generated, but have default values for bins and extents.
@@ -77,7 +77,7 @@ public:
     basisDimensions.insert(MDBasisDimension("qy", true, 1));
     basisDimensions.insert(MDBasisDimension("qz", true, 2));
 
-	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));  
+	boost::shared_ptr<OrientedLattice> spCell = boost::shared_ptr<OrientedLattice>(new OrientedLattice(2.87,2.87,2.87));
 
     TSM_ASSERT_THROWS_NOTHING("Valid MD geometry constructor should not throw",tDND_geometry= std::auto_ptr<testMDGeometry>(new testMDGeometry(MDGeometryBasis(basisDimensions,spCell))));
     
@@ -157,7 +157,7 @@ void testMDGeometryUnitRotations(){
   void testSetSlicingRotations(){
 	  // get access to geometry basis and derive new transformation matrix, which would transform data into new basis, defined
 	  // by two vectors expressed in the units of the reciprocal lattice
-	  MantidMat rot = tDND_geometry->get_constMDGeomBasis().get_constUnitCell().getUmatrix(V3D(1,1,0),V3D(1,-1,0));
+	  MantidMat rot = tDND_geometry->get_MDGeomBasis().get_OrientedLattice().setUFromVectors(V3D(1,1,0),V3D(1,-1,0));
 
 	  TSM_ASSERT_THROWS_NOTHING("It is nothing to throw here",pSlice->setRotationMatrix(rot));
   }

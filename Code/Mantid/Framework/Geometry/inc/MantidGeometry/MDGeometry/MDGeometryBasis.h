@@ -14,6 +14,7 @@
 #include <string>
 #include <map>
 #include <boost/unordered_set.hpp>
+#include <MantidGeometry/Crystal/OrientedLattice.h>
 
 /** The class is the part of the VisualisationWorkspace and describes the basic multidimentional geometry of the object, 
 *   e.g. the dimensions of the reciprocal space and other possible dimenions  
@@ -64,7 +65,7 @@ namespace Mantid
       /// empty constructor used mainly to provide a dummy object for reading data into it
       MDGeometryBasis(size_t nDimensions=1,size_t nReciprocalDimensions=1);  
 	  /// fully functional constructor; 
-      MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> spSample);
+      MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<OrientedLattice> spSample);
 
       std::set<MDBasisDimension> getNonReciprocalDimensions() const;
       std::set<MDBasisDimension> getReciprocalDimensions() const;
@@ -88,19 +89,22 @@ namespace Mantid
 		*/
 	  std::vector<V3D>  get_constRecBasis(void)const;
 
-	  /// Returns reference to the unit cell, which used in basis; Will throw through dereference of sp if unit cell is not defined;
-	  UnitCell const & get_constUnitCell()const{return *spSample;}
+    /// Returns reference to the unit cell, which used in basis; Will throw through dereference of sp if unit cell is not defined;
+    OrientedLattice const & get_constOrientedLattice()const{return *spSample;}
+
+    /// Returns reference to the unit cell, which used in basis; Will throw through dereference of sp if unit cell is not defined;
+    OrientedLattice & get_OrientedLattice() {return *spSample;}
 
       /** function checks if the ids supplied  coinside with the tags for current basis e.g all 
 	   *  existing tags have to be there (the order of tags may be different) */
       bool checkIdCompartibility(const std::vector<std::string> &newTags)const;
 
-	  void init(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> spSample);
+	  void init(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<OrientedLattice> spSample);
 	  // copy constructor is used and can be default
 
     private:
 	 /// shared pointer to a class, describing reciporcal lattice of the sample and its orientation if crystal;
-	  boost::shared_ptr<UnitCell> spSample;
+	  boost::shared_ptr<OrientedLattice> spSample;
       /// logger -> to provide logging, for MD workspaces
       static Kernel::Logger& g_log;
       /// number of total dimensions in dataset;

@@ -105,8 +105,9 @@ namespace Mantid{
           (or NULL if not throwing parameter is specified); */
       boost::shared_ptr<const MDDimension>  get_constDimension(const std::string &tag,bool do_throw=true)const;
 
-	  MDGeometryBasis const & get_constMDGeomBasis()const{return m_basis;}
-  
+      MDGeometryBasis const & get_constMDGeomBasis()const{return m_basis;}
+      MDGeometryBasis & get_MDGeomBasis() {return m_basis;}
+
       /// Get the geometry in an xml/serialised form.
       std::string toXMLString() const;
 

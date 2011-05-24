@@ -78,5 +78,47 @@ namespace Geometry
     B.Invert();
     U=newUB*B;
   }
+
+
+
+ /** Set the U rotation matrix, used to transform a vector expressed in the
+   *  "orthogonal associated with the reciprocal lattice cell system of coordinates (RLU)"
+   *  into another coordinate system defined by vectors u and v, expressed in RLU coordinate system
+   *  Author: Alex Buts
+   *  @param u :: vector of ?
+   *  @param v :: vector of ?
+   *  @return the U matrix calculated
+   **/
+  MantidMat OrientedLattice::setUFromVectors(const V3D &u, const V3D &v)
+  {
+    //get  B-matrix of Busing and Levy
+    MantidMat B = this->getB();
+
+    // get orthogonal system, adjacent to the unit cell;
+    V3D e1 = B*u;
+    e1.normalize();
+    V3D V  = B*v;
+    V3D e3  =e1.cross_prod(V);
+    e3.normalize();
+    double norm2 = e3.norm2();
+    if(norm2<FLT_EPSILON){
+      throw(std::invalid_argument(" two parallel vectors do not define the projection plane"));
+    }
+
+    V3D e2= e3.cross_prod(e1);
+
+    MantidMat Transf(3,3);
+    Transf.setColumn(0,e1);
+    Transf.setColumn(1,e2);
+    Transf.setColumn(2,e3);
+    // some det may be -1
+    double det = Transf.determinant();
+    Transf /=det;
+
+    this->setU(Transf);
+    return Transf;
+  }
+
+
 }//Namespace Geometry
 }//Namespace Mantid

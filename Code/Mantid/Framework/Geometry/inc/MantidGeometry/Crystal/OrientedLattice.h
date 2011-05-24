@@ -54,6 +54,8 @@ namespace Geometry
       void setU(MantidMat& newU);
       void setUB(MantidMat& newUB);
 
+      MantidMat setUFromVectors(const V3D &u, const V3D &v);
+
     private:
       MantidMat U;
   };

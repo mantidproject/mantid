@@ -41,7 +41,7 @@ MDGeometryBasis::get_constRecBasis(void)const
 }
 //
 void
-MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> theSample)
+MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<OrientedLattice> theSample)
 { 
 	spSample = theSample;
 
@@ -65,7 +65,7 @@ MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions,boost:
     this->check_nDims(n_total_dim , n_reciprocal_dimensions);
 }
 
-MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> theSample):
+MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<OrientedLattice> theSample):
 n_reciprocal_dimensions(0), m_mdBasisDimensions(mdBasisDimensions)
 {
    this->init(mdBasisDimensions,theSample);

@@ -3,6 +3,7 @@
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/Math/Matrix.h"
+#include <MantidGeometry/Crystal/OrientedLattice.h>
 
 
 using namespace Mantid::Kernel;
@@ -377,7 +378,7 @@ MDGeometry::getRotations()const
         geomBasis.push_back(third);
     }
 
-    UnitCell fakeCell(geomBasis[0].norm(),geomBasis[1].norm(),geomBasis[2].norm());
+    OrientedLattice fakeCell(geomBasis[0].norm(),geomBasis[1].norm(),geomBasis[2].norm());
     // we have at least two base directions here 
     std::vector<V3D> baseDir(2);	
     int ic=0;
@@ -393,7 +394,7 @@ MDGeometry::getRotations()const
         throw(std::logic_error("we have to had 2 reciprocal dimensions here"));
     }
 
-    rez = fakeCell.getUmatrix(baseDir[0],baseDir[1]);
+    rez = fakeCell.setUFromVectors(baseDir[0],baseDir[1]);
 
     return rez;
 }

@@ -67,7 +67,7 @@ private:
     basisDimensions.insert(MDBasisDimension("u1", false, 3));
 
     
-    boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));
+    boost::shared_ptr<OrientedLattice> spCell = boost::shared_ptr<OrientedLattice>(new OrientedLattice(2.87,2.87,2.87));
     return std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, spCell)));
   } 
 //

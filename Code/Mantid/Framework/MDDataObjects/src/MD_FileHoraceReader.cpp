@@ -93,7 +93,7 @@ MD_FileHoraceReader::read_basis(Mantid::Geometry::MDGeometryBasis &basisGeometry
 
 
 	// here should be the operation to read the cell and goiniometer
-	boost::shared_ptr<UnitCell> spCell= boost::shared_ptr<UnitCell>(new UnitCell(a,b,c,aa,bb,cc));
+	boost::shared_ptr<OrientedLattice> spCell= boost::shared_ptr<OrientedLattice>(new OrientedLattice(a,b,c,aa,bb,cc));
 
 	basisGeometry.init(basisDimensions,spCell);
     // get_sqw_header should go here and define cell

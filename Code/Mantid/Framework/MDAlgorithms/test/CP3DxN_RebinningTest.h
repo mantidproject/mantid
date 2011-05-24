@@ -123,8 +123,8 @@ class CP3DxN_RebinningTest :  public CxxTest::TestSuite
 		pSlicing->pDimDescription("qz")->cut_max = r0+1;
 		pSlicing->pDimDescription("en")->cut_max = 50;
 		// and set a rotation
-		Geometry::UnitCell rotator(1,1,1);
-		Geometry::MantidMat Rot = rotator.getUmatrix(Geometry::V3D(1,1,1),Geometry::V3D(1,-1,-1));
+		Geometry::OrientedLattice rotator(1,1,1);
+		Geometry::MantidMat Rot = rotator.setUFromVectors(Geometry::V3D(1,1,1),Geometry::V3D(1,-1,-1));
 		pSlicing->setRotationMatrix(Rot);
   
    /*     pSlicing->pDimDescription("qx")->nBins = 200;
@@ -160,8 +160,8 @@ class CP3DxN_RebinningTest :  public CxxTest::TestSuite
 		pSlicing->pDimDescription("qz")->nBins = 200;
 		pSlicing->pDimDescription("en")->nBins  = 0;*/
 		// and set a rotation
-		Geometry::UnitCell rotator(1,1,1);
-		Geometry::MantidMat Rot = rotator.getUmatrix(Geometry::V3D(0,1,1),Geometry::V3D(1,-1,-1));
+		Geometry::OrientedLattice rotator(1,1,1);
+		Geometry::MantidMat Rot = rotator.setUFromVectors(Geometry::V3D(0,1,1),Geometry::V3D(1,-1,-1));
 		pSlicing->setRotationMatrix(Rot);
 
 
