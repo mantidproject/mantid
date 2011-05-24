@@ -1,8 +1,6 @@
 cmake_minimum_required( VERSION 2.6)
 project( MantidParaViewRebinningCutter )
 
-set_mantid_subprojects( Vates/VatesAPI )
-
 add_paraview_plugin( MantidParaViewRebinningCutterSMPlugin "1.0"
 	SERVER_MANAGER_XML RebinningCutter.xml
 	SERVER_MANAGER_SOURCES vtkRebinningCutter.cxx

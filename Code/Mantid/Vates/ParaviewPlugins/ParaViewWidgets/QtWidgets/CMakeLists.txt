@@ -20,9 +20,6 @@ set( SRC_FILES
 # Handle QtWidget header files
 qt4_wrap_cpp( MOCCED_FILES ${HDR_FILES} )
 
-# bring in Mantid/VATES API dependencies
-set_mantid_subprojects( Vates/VatesAPI )
-
 project( MantidParaViewQtWidgets )
 add_library( MantidParaViewQtWidgets ${SRC_FILES} ${MOCCED_FILES} ${INC_FILES} ) 
 target_link_libraries( MantidParaViewQtWidgets ${QT_LIBRARIES} 
