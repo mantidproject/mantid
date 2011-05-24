@@ -3,7 +3,6 @@ from PyQt4 import QtGui, QtCore, uic
 
 from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT
 from reduction_gui.settings.application_settings import GeneralSettings
-import reduction_gui.settings.qrc_resources
 import ui.ui_reduction_main
 import ui.ui_instrument_dialog
 

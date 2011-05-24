@@ -5,7 +5,6 @@ from distutils.core import setup
 
 # Compile resource file
 try:
-    os.system("pyrcc4 -o reduction_gui/settings/qrc_resources.py reduction_gui/settings/resources.qrc")
 
     # HFIR - new
     os.system("pyuic4 -o ui/sans/ui_hfir_background.py ui/sans/hfir_background.ui")
