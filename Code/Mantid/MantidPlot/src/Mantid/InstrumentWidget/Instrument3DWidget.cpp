@@ -479,18 +479,18 @@ void Instrument3DWidget::calculateCounts(bool firstCalculation)
     {
       double sum = m_specIntegrs[widx];
       //integrated_values[i] = sum;
-        if( sum < mWkspDataMin )
-        {
-          mWkspDataMin = sum;
-          if (sum > 0)
-          {
-            mWkspDataPositiveMin = sum;
-          }
-        }
-        else if( sum > mWkspDataMax )
-        {
-          mWkspDataMax = sum;
-        }
+      if( sum < mWkspDataMin )
+      {
+        mWkspDataMin = sum;
+      }
+      else if( sum > mWkspDataMax )
+      {
+        mWkspDataMax = sum;
+      }
+      if (sum > 0 && sum < mWkspDataPositiveMin)
+      {
+        mWkspDataPositiveMin = sum;
+      }
     }
   }
 
