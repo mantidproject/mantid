@@ -1,9 +1,9 @@
 find_package( ParaView REQUIRED )
 #bring in Paraview/VTK/QT dependencies
-include(${PARAVIEW_USE_FILE})
+include( ${PARAVIEW_USE_FILE} )
 
 #header files
-set(INC_FILES
+set( INC_FILES
  WidgetDllOption.h
  GeometryWidget.h
  DimensionWidget.h
@@ -22,14 +22,15 @@ set( SRC_FILES
 )
 
 #Handl QtWidget header files
-qt4_wrap_cpp ( MOCCED_FILES ${HDR_FILES} )
+qt4_wrap_cpp( MOCCED_FILES ${HDR_FILES} )
 
 #bring in Mantid/VATES API dependencies
-set_mantid_subprojects(Vates/VatesAPI)
+set_mantid_subprojects( Vates/VatesAPI )
 
-PROJECT(MantidParaViewQtWidgets)
-ADD_LIBRARY(MantidParaViewQtWidgets ${SRC_FILES} ${MOCCED_FILES} ${INC_FILES} ) 
-TARGET_LINK_LIBRARIES(MantidParaViewQtWidgets ${QT_LIBRARIES} ${MANTID_SUBPROJECT_LIBS} )
+project( MantidParaViewQtWidgets )
+add_library( MantidParaViewQtWidgets ${SRC_FILES} ${MOCCED_FILES} ${INC_FILES} ) 
+target_link_libraries( MantidParaViewQtWidgets ${QT_LIBRARIES} 
+${MANTID_SUBPROJECT_LIBS} )
 
-add_definitions ( -DIN_MANTIDPARAVIEWQT_MANTIDPARAVIEWWIDGETS )
+add_definitions( -DIN_MANTIDPARAVIEWQT_MANTIDPARAVIEWWIDGETS )
 

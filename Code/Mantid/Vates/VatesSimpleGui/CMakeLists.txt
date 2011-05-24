@@ -1,19 +1,19 @@
-cmake_minimum_required(VERSION 2.8)
-project(VatesSimpleGui)
-set(PROJECT_NAME VatesSimpleGui)
+cmake_minimum_required( VERSION 2.8 )
+project( VatesSimpleGui )
+set( PROJECT_NAME VatesSimpleGui )
 
 # Locate and import ParaView enviroment.
-include(${PARAVIEW_USE_FILE})
+include( ${PARAVIEW_USE_FILE} )
 #include(${ParaView_CMAKE_DIR}/ParaViewPlugins.cmake)
 
 # Setup the include locations.
 include_directories(
   inc
   ${CMAKE_CURRENT_BINARY_DIR}
-  ${QWT_INCLUDE_DIR})
+  ${QWT_INCLUDE_DIR} )
 
 # These are the C++ files to be compiled.
-set (INCLUDE_FILES
+set( INCLUDE_FILES
   inc/AxisInformation.h
   inc/AxisInteractor.h
   inc/GeometryParser.h
@@ -27,7 +27,7 @@ set (INCLUDE_FILES
   inc/ThreesliceView.h
   inc/TimeControlWidget.h
 )
-set (SOURCE_FILES
+set( SOURCE_FILES
   src/AxisInformation.cpp
   src/AxisInteractor.cpp
   src/GeometryParser.cpp
@@ -45,7 +45,7 @@ set (SOURCE_FILES
 
 # These are the headers to be preprocessed using
 # Qt's moc preprocessor.
-qt4_wrap_cpp(MOC_SRCS
+qt4_wrap_cpp( MOC_SRCS
   inc/AxisInteractor.h
   inc/ModeControlWidget.h
   inc/MpMainWindow.h
@@ -58,7 +58,7 @@ qt4_wrap_cpp(MOC_SRCS
 
 # These are the ui files to be processed using
 # Qt's ui file processor.
-qt4_wrap_ui(UI_BUILT_SOURCES
+qt4_wrap_ui( UI_BUILT_SOURCES
   ui/AxisInteractor.ui
   ui/ModeControlWidget.ui
   ui/MpMainWindow.ui
@@ -68,9 +68,9 @@ qt4_wrap_ui(UI_BUILT_SOURCES
   ui/TimeControlWidget.ui
 )
 
-add_executable(${PROJECT_NAME}
-${INCLUDE_FILES} ${SOURCE_FILES} ${MOC_SRCS} ${UI_BUILT_SOURCES})
+add_executable( ${PROJECT_NAME}
+${INCLUDE_FILES} ${SOURCE_FILES} ${MOC_SRCS} ${UI_BUILT_SOURCES} )
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries( ${PROJECT_NAME}
 pqCore pqComponents pqApplicationComponents
-${QT_LIBRARIES} ${QWT_LIBRARIES} ${POCO_LIBRARIES})
+${QT_LIBRARIES} ${QWT_LIBRARIES} ${POCO_LIBRARIES} )

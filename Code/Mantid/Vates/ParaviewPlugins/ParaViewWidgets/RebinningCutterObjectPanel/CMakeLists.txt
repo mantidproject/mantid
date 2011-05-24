@@ -1,18 +1,20 @@
 #Include Qt widgets
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../QtWidgets)
-set_mantid_subprojects(Vates/VatesAPI)
-FIND_PACKAGE(ParaView REQUIRED)
-INCLUDE(${PARAVIEW_USE_FILE})
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../QtWidgets )
+set_mantid_subprojects( Vates/VatesAPI )
+find_package( ParaView REQUIRED )
+include( ${PARAVIEW_USE_FILE} )
 
 #So that source file shows in VS.
-SET(INCLUDE_FILES RebinningCutterObjectPanel.h)
-SET(SRC_FILES RebinningCutterObjectPanel.cxx)
+set( INCLUDE_FILES RebinningCutterObjectPanel.h )
+set( SRC_FILES RebinningCutterObjectPanel.cxx )
 
-QT4_WRAP_CPP(MOC_SRCS RebinningCutterObjectPanel.h)
-ADD_PARAVIEW_OBJECT_PANEL(IFACES IFACE_SRCS 
-                         CLASS_NAME RebinningCutterObjectPanel
-                         XML_NAME RebinningCutter XML_GROUP filters)
-ADD_PARAVIEW_PLUGIN(MantidParaViewRebinningCutterObjectPanel "1.0"
-                    GUI_INTERFACES ${IFACES}
-                    SOURCES ${MOC_SRCS} ${IFACE_SRCS} ${INCLUDE_FILES} ${SRC_FILES})
-TARGET_LINK_LIBRARIES(MantidParaViewRebinningCutterObjectPanel MantidParaViewQtWidgets)
+qt4_wrap_cpp( MOC_SRCS RebinningCutterObjectPanel.h )
+add_paraview_object_panel( IFACES IFACE_SRCS 
+                           CLASS_NAME RebinningCutterObjectPanel
+                           XML_NAME RebinningCutter XML_GROUP filters)
+add_paraview_plugin( MantidParaViewRebinningCutterObjectPanel "1.0"
+                     GUI_INTERFACES ${IFACES}
+                     SOURCES ${MOC_SRCS} ${IFACE_SRCS} ${INCLUDE_FILES} 
+                     ${SRC_FILES} )
+target_link_libraries( MantidParaViewRebinningCutterObjectPanel 
+MantidParaViewQtWidgets )

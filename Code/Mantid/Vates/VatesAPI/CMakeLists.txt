@@ -1,9 +1,9 @@
 # This is mainly here so you don't get a complaint when running cmake
-cmake_minimum_required ( VERSION 2.6 )
+cmake_minimum_required( VERSION 2.6 )
 
-project ( VatesAPI )
+project( VatesAPI )
 
-set ( SRC_FILES 
+set( SRC_FILES 
 src/Clipper.cpp
 src/Common.cpp
 src/DimensionComparitor.cpp
@@ -30,7 +30,7 @@ src/vtkThresholdingQuadFactory.cpp
 src/vtkThresholdingUnstructuredGridFactory.cpp
 )
 
-set ( INC_FILES 
+set( INC_FILES 
 inc/MantidVatesAPI/Clipper.h
 inc/MantidVatesAPI/Common.h
 inc/MantidVatesAPI/DimensionComparitor.h
@@ -59,7 +59,7 @@ inc/MantidVatesAPI/vtkThresholdingQuadFactory.h
 inc/MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h
 )
 
-set (TEST_FILES
+set( TEST_FILES
 test/EscalatingRebinningActionManagerTest.h
 test/GeometryXMLParserTest.h
 test/vtkDataSetFactoryTest.h
@@ -85,37 +85,37 @@ test/TimeToTimeStepTest.h
 if( USE_PARAVIEW )
   #ParaView specific
   find_package( ParaView REQUIRED )
-  include(${PARAVIEW_USE_FILE})
-  include_directories (${ParaView_DIR}/VTK)
+  include( ${PARAVIEW_USE_FILE} )
+  include_directories( ${ParaView_DIR}/VTK )
   link_directories ( ${ParaView_DIR}/bin ) # TODO: handle /bin/Debug bin/Release
 endif( USE_PARAVIEW )
-include_directories (inc)
+include_directories( inc )
 
-set ( SRC_UNITY_IGNORE_FILES )
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(VatesAPI SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
+set( SRC_UNITY_IGNORE_FILES )
+if( UNITY_BUILD )
+  include( UnityBuild )
+  enable_unity_build( VatesAPI SRC_FILES SRC_UNITY_IGNORE_FILES 10 )
+endif( UNITY_BUILD )
 
 # For Windows:
-add_definitions ( -DIN_MANTID_VATESAPI )
+add_definitions( -DIN_MANTID_VATESAPI )
 # Add the target for this directory
-add_library ( VatesAPI ${SRC_FILES} ${INC_FILES})
+add_library( VatesAPI ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
-set_target_properties ( VatesAPI PROPERTIES OUTPUT_NAME MantidVatesAPI )
+set_target_properties( VatesAPI PROPERTIES OUTPUT_NAME MantidVatesAPI )
 # Add to the 'Framework' group in VS
-set_property ( TARGET VatesAPI PROPERTY FOLDER "MantidFramework" )
+set_property( TARGET VatesAPI PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries (VatesAPI
+target_link_libraries( VatesAPI
 ${MANTID_SUBPROJECT_LIBS} 
 vtkCommon 
 vtkFiltering
 )
 
 # Create test file projects
-if ( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
-  cxxtest_add_test ( VatesAPITest ${TEST_FILES} )
+if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
+  cxxtest_add_test( VatesAPITest ${TEST_FILES} )
   target_link_libraries( VatesAPITest VatesAPI ${GMOCK_LIBRARIES} 
       ${GTEST_LIBRARIES})
-  add_dependencies ( FrameworkTests VatesAPITest )
-endif ()
+  add_dependencies( FrameworkTests VatesAPITest )
+endif()
