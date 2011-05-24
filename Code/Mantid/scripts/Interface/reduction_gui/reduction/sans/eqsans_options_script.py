@@ -1,6 +1,8 @@
 """
     General options for EQSANS reduction
 """
+import xml.dom.minidom
+from reduction_gui.reduction.scripter import BaseScriptElement
 from hfir_options_script import ReductionOptions as BaseOptions
 
 class ReductionOptions(BaseOptions):
@@ -53,4 +55,45 @@ class ReductionOptions(BaseOptions):
         
         return script
             
-            
+    def to_xml(self):
+        """
+            Create XML from the current data.
+        """
+        xml = super(ReductionOptions, self).to_xml()
+        
+        # TOF cutoff and correction
+        xml += "<TOFcorr>\n"
+        xml += "  <low_tof_cut>%g</low_tof_cut>\n" % self.low_TOF_cut
+        xml += "  <high_tof_cut>%g</high_tof_cut>\n" % self.high_TOF_cut
+        xml += "  <use_config_cutoff>%s</use_config_cutoff>\n" % str(self.use_config_cutoff)
+        xml += "  <perform_flight_path_corr>%s</perform_flight_path_corr>\n" % str(self.correct_for_flight_path)
+        xml += "</TOFcorr>\n"
+        
+        return xml
+    
+    def from_xml(self, xml_str):
+        """
+            Read in data from XML
+            @param xml_str: text to read the data from
+        """    
+        self.reset()   
+        super(ReductionOptions, self).from_xml(xml_str)
+        
+        dom = xml.dom.minidom.parseString(xml_str)
+        
+        # TOF cutoff and correction
+        element_list = dom.getElementsByTagName("TOFcorr")
+        if len(element_list)>0: 
+            tof_dom = element_list[0]
+
+            self.use_config_cutoff = BaseScriptElement.getBoolElement(tof_dom, "use_config_cutoff",
+                                                                      default = ReductionOptions.use_config_cutoff)
+            self.correct_for_flight_path = BaseScriptElement.getBoolElement(tof_dom, "perform_flight_path_corr",
+                                                                            default = ReductionOptions.correct_for_flight_path)
+            self.low_TOF_cut = BaseScriptElement.getFloatElement(tof_dom, "low_tof_cut", 
+                                                                 default=ReductionOptions.low_TOF_cut)
+            self.high_TOF_cut = BaseScriptElement.getFloatElement(tof_dom, "high_tof_cut", 
+                                                                  default=ReductionOptions.high_TOF_cut)
+        
+        
+    
