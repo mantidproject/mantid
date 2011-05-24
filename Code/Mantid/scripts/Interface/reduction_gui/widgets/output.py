@@ -1,5 +1,5 @@
 from PyQt4 import QtGui, uic, QtCore
-from reduction_gui.reduction.hfir_reduction_steps import Output
+from reduction_gui.reduction.output_script import Output
 from reduction_gui.settings.application_settings import GeneralSettings
 from base_widget import BaseWidget
 import ui.ui_hfir_output
