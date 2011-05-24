@@ -89,19 +89,13 @@ endif ()
 
 if( MAKE_MULTIDIMENSIONAL )
   add_subdirectory (MDDataObjects)
-  set(MANTIDLIBS ${MANTIDLIBS} MDDataObjects)
+  # This is not ideal - can MDAlgorithms code to interfaces?
   include_directories(MDDataObjects/inc)
-  
-  set(MANTIDLIBS ${MANTIDLIBS} CurveFitting) 
   add_subdirectory (MDAlgorithms)
-  set(MANTIDLIBS ${MANTIDLIBS} MDAlgorithms) 
-  include_directories(MDAlgorithms/inc)
 endif ()
 
 # As of May 15, 2011, MDEvents is not an optional flag and is included in the main build.
 add_subdirectory (MDEvents)
-set(MANTIDLIBS ${MANTIDLIBS} MDEvents) 
-include_directories(MDEvents/inc) 
 
 ###########################################################################
 # Add a custom target to build all of the Framework
@@ -111,8 +105,8 @@ set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI DataObjects
                      DataHandling Nexus Algorithms CurveFitting ICat MDEvents
 )
 
-if ( MAKE_VATES )
-  set ( FRAMEWORK_LIBS ${FRAMEWORK_LIBS} MDDataObjects MDAlgorithms MDEvents)
+if ( MAKE_MULTIDIMENSIONAL )
+  set ( FRAMEWORK_LIBS ${FRAMEWORK_LIBS} MDDataObjects MDAlgorithms )
 endif ()
 
 add_custom_target ( Framework DEPENDS ${FRAMEWORK_LIBS})

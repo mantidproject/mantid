@@ -92,7 +92,7 @@ set_target_properties ( MDEvents PROPERTIES OUTPUT_NAME MantidMDEvents
 set_property ( TARGET MDEvents PROPERTY FOLDER "MantidFramework" )
 
 include_directories(${HDF5_INCLUDE_DIRS} inc ../Algorithms/inc)
-target_link_libraries ( MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES} Algorithms)
+target_link_libraries ( MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES} )
 
 # Create test file projects
 if ( CXXTEST_FOUND )

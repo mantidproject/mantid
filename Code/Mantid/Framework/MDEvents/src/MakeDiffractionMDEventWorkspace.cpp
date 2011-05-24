@@ -1,4 +1,3 @@
-#include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/ProgressText.h"
@@ -18,7 +17,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using namespace Mantid::Algorithms;
 
 namespace Mantid
 {

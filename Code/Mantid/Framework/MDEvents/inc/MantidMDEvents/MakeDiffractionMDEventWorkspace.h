@@ -13,7 +13,6 @@
 #include "MantidMDEvents/MakeDiffractionMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid
