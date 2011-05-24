@@ -1,7 +1,7 @@
 #Include Qt widgets
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../QtWidgets )
 set_mantid_subprojects( Vates/VatesAPI )
-find_package( ParaView REQUIRED )
+
 include( ${PARAVIEW_USE_FILE} )
 
 #So that source file shows in VS.

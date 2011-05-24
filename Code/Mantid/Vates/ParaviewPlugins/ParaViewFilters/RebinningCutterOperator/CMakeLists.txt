@@ -1,7 +1,6 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required( VERSION 2.6)
 project( MantidParaViewRebinningCutter )
 
-find_package( ParaView REQUIRED )
 include( ${PARAVIEW_USE_FILE} )
 
 set_mantid_subprojects( Vates/VatesAPI )

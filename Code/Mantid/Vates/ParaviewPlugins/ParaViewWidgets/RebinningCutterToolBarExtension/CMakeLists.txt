@@ -1,4 +1,3 @@
-find_package( ParaView REQUIRED )
 include( ${PARAVIEW_USE_FILE} )
 
 if( PARAVIEW_BUILD_QT_GUI )
