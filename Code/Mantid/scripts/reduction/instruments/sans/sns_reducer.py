@@ -25,11 +25,6 @@ import sans_reduction_steps
 
 class EqSansReducer(SANSReducer):
 
-    ## Transform TOF to wavelength
-    tof_to_wavelength = None
-    ## Frame skipping
-    frame_skipping = False
-    
     def __init__(self):
         super(EqSansReducer, self).__init__()
         ## Default beam finder
@@ -62,14 +57,6 @@ class EqSansReducer(SANSReducer):
         else:
             raise RuntimeError, "Reducer.set_normalizer expects an object of class ReductionStep"
         
-    def set_frame_skipping(self, value):
-        """
-            
-        """
-        if value not in [True, False]:
-            raise ValueError, "Set_frame_skipping only accepts True or False"
-        self.frame_skipping = value
-
     def _2D_steps(self):
         """
             Creates a list of reduction steps to be applied to

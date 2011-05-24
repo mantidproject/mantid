@@ -8,6 +8,7 @@ import sys
 from reduction import ReductionStep
 from sans_reduction_steps import BaseTransmission
 from reduction import extract_workspace_name
+from eqsans_config import EQSANSConfig
 
 # Mantid imports
 from mantidsimple import *
@@ -76,11 +77,42 @@ class LoadRun(ReductionStep):
     def __init__(self, datafile=None):
         super(LoadRun, self).__init__()
         self._data_file = datafile
+        
+        # TOF range definition
+        self._use_config_cutoff = False
+        self._low_TOF_cut = 0
+        self._high_TOF_cut = 0
+        self._correct_for_flight_path = False
    
     def clone(self, data_file=None):
         if data_file is None:
             data_file = self._data_file
-        return LoadRun(datafile=data_file)
+        loader = LoadRun(datafile=data_file)
+        loader._use_config_cutoff = self._use_config_cutoff
+        loader._low_TOF_cut = self._low_TOF_cut
+        loader._high_TOF_cut = self._high_TOF_cut
+        loader._correct_for_flight_path = self._correct_for_flight_path
+        return loader
+
+    def set_flight_path_correction(self, do_correction=False):
+        """
+            Set the flag to perform the TOF correction to take into
+            account the different in flight path at larger angle.
+            @param do_correction: if True, correction will be made
+        """
+        self._correct_for_flight_path = do_correction
+        
+    def set_TOF_cuts(self, low_cut=0, high_cut=0):
+        """
+            Set the range of TOF to be cut on each side of the frame.
+            @param low_cut: TOF to be cut from the low-TOF end
+            @param high_cut: TOF to be cut from the high-TOF end
+        """
+        self._low_TOF_cut = low_cut
+        self._high_TOF_cut = high_cut
+        
+    def use_config_cuts(self, use_config=False):
+        self._use_config_cutoff = use_config
 
     def set_beam_center(self, beam_center):
         """
@@ -153,7 +185,7 @@ class LoadRun(ReductionStep):
                     # The extension should be a run number
                     try:
                         ext = ext.replace('.','')
-                        config_files.append(_ConfigFile(int(ext),file))
+                        config_files.append(_ConfigFile(int(ext),os.path.join(directory,file)))
                     except:
                         # Bad extension, which means it's not the file we are looking for
                         pass
@@ -191,7 +223,7 @@ class LoadRun(ReductionStep):
         
         # Store the sample-detector distance.
         sdd = mtd[workspace+'_evt'].getRun()["detectorZ"].getStatistics().mean
-        mtd[workspace+'_evt'].getRun().addProperty_dbl("sample_detector_distance", sdd, True)
+        mtd[workspace+'_evt'].getRun().addProperty_dbl("sample_detector_distance", sdd, 'mm', True)
         
         # Move the detector to its correct position
         MoveInstrumentComponent(workspace+'_evt', "detector1", Z=sdd/1000.0, RelativePosition=0)
@@ -227,19 +259,36 @@ class LoadRun(ReductionStep):
             else:
                 mantid.sendLogMessage("Could not find run number file for %s" % workspace)
             
+        # Process the configuration file
+        low_TOF_cut = self._low_TOF_cut
+        high_TOF_cut = self._high_TOF_cut
+        
         if config_file is not None:
-            output_str +=  "Using configuration file: %s\n" % config_file
+            output_str +=  "  Using configuration file: %s\n" % config_file
+            conf = EQSANSConfig(config_file)
+            mtd[workspace+'_evt'].getRun().addProperty_dbl("low_tof_cut", conf.low_TOF_cut, "microsecond", True)
+            mtd[workspace+'_evt'].getRun().addProperty_dbl("high_tof_cut", conf.high_TOF_cut, "microsecond", True)
+            if self._use_config_cutoff:
+                low_TOF_cut = conf.low_TOF_cut
+                high_TOF_cut = conf.high_TOF_cut
         else:
             mantid.sendLogMessage("Could not find configuration file for %s" % workspace)
-            output_str += "Could not find configuration file for %s\n" % workspace
+            output_str += "  Could not find configuration file for %s\n" % workspace
             
         # Modify TOF
-        a = EQSANSTofStructure(InputWorkspace=workspace+'_evt')
+        #declareProperty("FlightPathCorrection", false, Kernel::Direction::Input);
+        output_str += "  Discarding low %6.1f and high %6.1f microsec\n" % (low_TOF_cut, high_TOF_cut)
+        if self._correct_for_flight_path:
+            output_str += "  Correcting TOF for flight path\n"
+        a = EQSANSTofStructure(InputWorkspace=workspace+'_evt', 
+                               LowTOFCut=low_TOF_cut, HighTOFCut=high_TOF_cut,
+                               FlightPathCorrection=self._correct_for_flight_path)
         offset = float(a.getPropertyValue("TofOffset"))
         wl_min = float(a.getPropertyValue("WavelengthMin"))
         wl_max = float(a.getPropertyValue("WavelengthMax"))
         frame_skipping = a.getPropertyValue("FrameSkipping")
         mantid.sendLogMessage("Frame-skipping option: %s" % str(frame_skipping))
+        output_str += "  Wavelength range: %6.1f - %-6.1f Angstrom  [Frame skipping = %s]" % (wl_min, wl_max, str(frame_skipping))
         
         x_step = 100
         x_min = offset-offset%x_step
@@ -271,8 +320,7 @@ class LoadRun(ReductionStep):
             
         # Remove the dirty flag if it existed
         reducer.clean(workspace)
-        output_str += "Data file loaded: %s" % (workspace)
-        return output_str
+        return "Data file loaded: %s\n%s" % (workspace, output_str)
 
 
 

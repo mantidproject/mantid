@@ -132,6 +132,13 @@ class SANSInstrumentWidget(BaseWidget):
         self.connect(self._summary.scale_chk, QtCore.SIGNAL("clicked(bool)"), self._scale_clicked)
         self._scale_clicked(self._summary.scale_chk.isChecked())
         
+        # TOF cut validator
+        self._summary.low_tof_edit.setValidator(QtGui.QDoubleValidator(self._summary.low_tof_edit))
+        self._summary.high_tof_edit.setValidator(QtGui.QDoubleValidator(self._summary.high_tof_edit))
+        
+        # TOF connections
+        self.connect(self._summary.tof_cut_chk, QtCore.SIGNAL("clicked(bool)"), self._tof_clicked)
+        
         # Since EQSANS does not currently use the absolute scale calculation, expose it in debug mode only for now
         if not self._settings.debug:
             self._summary.direct_beam_label.hide()
@@ -149,9 +156,23 @@ class SANSInstrumentWidget(BaseWidget):
             # Same thing for sample-detector distance and offset: not yet hooked in
             self._summary.geometry_options_groupbox.hide()
             
+            # Hide expert options
+            self._summary.config_mask_chk.hide()
+            self._summary.tof_cut_chk.hide()
+            self._summary.low_tof_edit.hide()
+            self._summary.high_tof_edit.hide()
+            self._summary.low_tof_label.hide()
+            self._summary.high_tof_label.hide()
+            
         if not self._in_mantidplot:
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
+            
+    def _tof_clicked(self, is_checked):
+        self._summary.low_tof_edit.setEnabled(not is_checked)
+        self._summary.high_tof_edit.setEnabled(not is_checked)
+        self._summary.low_tof_label.setEnabled(not is_checked)
+        self._summary.high_tof_label.setEnabled(not is_checked)
             
     def _normalization_clicked(self):
         if self._summary.normalization_none_radio.isChecked():
@@ -341,6 +362,15 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.left_edit.setText(QtCore.QString(str(state.left)))
         self._summary.right_edit.setText(QtCore.QString(str(state.right)))
             
+        # TOF cuts
+        self._summary.tof_cut_chk.setChecked(state.use_config_cutoff)
+        self._tof_clicked(self._summary.tof_cut_chk.isChecked())  
+        self._summary.low_tof_edit.setText(QtCore.QString(str(state.low_TOF_cut)))
+        self._summary.high_tof_edit.setText(QtCore.QString(str(state.high_TOF_cut)))
+        
+        # Flight path correction
+        self._summary
+        
         self._summary.listWidget.clear()
         for item in state.shapes:
             self._append_rectangle(item)
@@ -413,4 +443,9 @@ class SANSInstrumentWidget(BaseWidget):
         # Mask detector IDs
         m.detector_ids = self._masked_detectors
 
+        # TOF cuts
+        m.use_config_cutoff = self._summary.tof_cut_chk.isChecked()
+        m.low_TOF_cut = util._check_and_get_float_line_edit(self._summary.low_tof_edit)
+        m.high_TOF_cut = util._check_and_get_float_line_edit(self._summary.high_tof_edit)
+        
         return m

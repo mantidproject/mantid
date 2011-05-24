@@ -42,3 +42,13 @@ def BeamStopTransmission(normalize_to_unity=False, theta_dependent=False):
 def BckBeamStopTransmission(normalize_to_unity=False, theta_dependent=False):
     ReductionSingleton().set_bck_transmission(sns_reduction_steps.Transmission(normalize_to_unity=normalize_to_unity,
                                                                                theta_dependent=theta_dependent))
+
+def PerformFlightPathCorrection(do_correction=True):
+    ReductionSingleton().get_data_loader().set_flight_path_correction(do_correction)
+    
+def SetTOFTailsCutoff(low_cut=0.0, high_cut=0.0):
+    ReductionSingleton().get_data_loader().set_TOF_cuts(low_cut=low_cut, high_cut=high_cut)
+    
+def UseConfigTOFTailsCutoff(use_config=True):
+    ReductionSingleton().get_data_loader().use_config_cuts(use_config)
+    
