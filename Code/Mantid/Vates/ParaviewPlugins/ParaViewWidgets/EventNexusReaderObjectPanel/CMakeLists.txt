@@ -2,8 +2,6 @@
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../QtWidgets )
 set_mantid_subprojects( Vates/VatesAPI )
 
-include( ${PARAVIEW_USE_FILE} )
-
 # So that source file shows in VS.
 set( INCLUDE_FILES EventNexusReaderObjectPanel.h )
 set( SRC_FILES EventNexusReaderObjectPanel.cxx )

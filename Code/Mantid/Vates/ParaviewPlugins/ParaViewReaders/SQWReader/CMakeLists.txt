@@ -1,7 +1,5 @@
 project( MantidParaViewSQWReader )
 
-include( ${PARAVIEW_USE_FILE} )
-
 set_mantid_subprojects( Vates/VatesAPI )
 
 add_paraview_plugin( MantidParaViewSQWReaderSMPlugin "1.0"

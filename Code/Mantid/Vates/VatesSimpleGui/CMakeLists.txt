@@ -2,10 +2,6 @@ cmake_minimum_required( VERSION 2.8 )
 project( VatesSimpleGui )
 set( PROJECT_NAME VatesSimpleGui )
 
-# Locate and import ParaView enviroment.
-include( ${PARAVIEW_USE_FILE} )
-#include(${ParaView_CMAKE_DIR}/ParaViewPlugins.cmake)
-
 # Setup the include locations.
 include_directories(
   inc

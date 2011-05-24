@@ -1,6 +1,3 @@
-# bring in Paraview/VTK/QT dependencies
-include( ${PARAVIEW_USE_FILE} )
-
 # header files
 set( INC_FILES
  WidgetDllOption.h

@@ -1,5 +1,3 @@
-include( ${PARAVIEW_USE_FILE} )
-
 if( PARAVIEW_BUILD_QT_GUI )
   # So that source files show-up in VS.
   set( INCLUDE_FILES RebinningCutterToolBarActions.h )

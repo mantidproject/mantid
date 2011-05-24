@@ -1,10 +1,8 @@
-#Include Qt widgets
+# Include Qt widgets
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../QtWidgets )
 set_mantid_subprojects( Vates/VatesAPI )
 
-include( ${PARAVIEW_USE_FILE} )
-
-#So that source file shows in VS.
+# So that source file shows in VS.
 set( INCLUDE_FILES RebinningCutterObjectPanel.h )
 set( SRC_FILES RebinningCutterObjectPanel.cxx )
 

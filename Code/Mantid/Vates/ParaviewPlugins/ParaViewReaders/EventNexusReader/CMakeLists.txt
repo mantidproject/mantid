@@ -1,7 +1,5 @@
 project( MantidParaViewEventNexusReader )
 
-include( ${PARAVIEW_USE_FILE} )
-
 set_mantid_subprojects( Vates/VatesAPI )
 
 add_paraview_plugin( MantidParaViewEventNexusReaderSMPlugin "1.0"
