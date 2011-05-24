@@ -74,13 +74,13 @@ public:
     /// Virtual destructor.
     virtual ~TableColumn(){}
     /// Number of individual elements in the column.
-    size_t size()const{return m_data.size();}
+    int size()const{return int(m_data.size());}
     /// Type id of the data in the column
     const std::type_info& get_type_info()const{return typeid(Type);}
     /// Type id of the pointer to data in the column
     const std::type_info& get_pointer_type_info()const{return typeid(Type*);}
     /// Output to an ostream.
-    void print(std::ostream& s, size_t index)const{s << m_data[index];}
+    void print(std::ostream& s, int index)const{s << m_data[index];}
     /// Type check
     bool isBool()const{return typeid(Type) == typeid(API::Boolean);}
     /// Memory used by the column
@@ -90,19 +90,19 @@ public:
     std::vector<Type>& data(){return m_data;}
 protected:
     /// Resize.
-    void resize(size_t count){m_data.resize(count);}
+    void resize(int count){m_data.resize(count);}
     /// Inserts default value at position index. 
-    void insert(size_t index)
+    void insert(int index)
     {
-        if (index < m_data.size())
+        if (index < int(m_data.size()))
             m_data.insert(m_data.begin()+index,Type()); 
         else
             m_data.push_back(Type());
     }
     /// Removes an item at index.
-    void remove(size_t index){m_data.erase(m_data.begin()+index);}
+    void remove(int index){m_data.erase(m_data.begin()+index);}
     /// Returns a pointer to the data element.
-    void* void_pointer(size_t index){return &m_data[index];}
+    void* void_pointer(int index){return &m_data[index];}
 private:
     /// Column data
     std::vector<Type> m_data;

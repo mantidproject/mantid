@@ -72,10 +72,10 @@ class TableRow_DllExport TableRow
 public:
     TableRow(const TableRowHelper& trh);
     /// Returns the row number of the TableRow 
-    size_t row()const{return m_row;}
+    int row()const{return m_row;}
     /// Returns the number of rows in the TableWorkspace
-    size_t size()const{return m_nrows;}
-    void row(size_t i);
+    int size()const{return m_nrows;}
+    void row(int i);
     bool next();
     bool prev();
     /// Sets a new separator character(s) between elements in a text output
@@ -90,7 +90,7 @@ public:
     template<class T>
     TableRow& operator<<(const T& t)
     {
-        if (m_col >= m_columns.size())
+        if (m_col < 0 || m_col >= int(m_columns.size()))
         {
             g_log.error("Column index out of range.");
             throw std::range_error("Column index out of range.");
@@ -121,7 +121,7 @@ public:
     template<class T>
     const TableRow& operator>>(T& t)const
     {
-        if (m_col >= m_columns.size())
+        if (m_col < 0 || m_col >= int(m_columns.size()))
         {
             g_log.error("Column index out of range.");
             throw std::range_error("Column index out of range.");
@@ -140,9 +140,9 @@ public:
          @return cell of the template type
      */
     template<class T>
-    T& cell(size_t col)
+    T& cell(int col)
     {
-        if (col >= m_columns.size())
+        if (col < 0 || col >= int(m_columns.size()))
         {
             g_log.error("Column index out of range.");
             throw std::range_error("Column index out of range.");
@@ -157,32 +157,32 @@ public:
          @param col :: Position of the element
          @return Reference to the element
      */
-    int& Int(size_t col){return cell<int>(col);}
+    int& Int(int col){return cell<int>(col);}
 
     /**  Returns a reference to the element in position col if its type is double
          @param col :: Position of the element
          @return Reference to the element
      */
-    double& Double(size_t col){return cell<double>(col);}
+    double& Double(int col){return cell<double>(col);}
 
     /**  Returns a reference to the element in position col if its type is bool
          @param col :: Position of the element
          @return Reference to the element
      */
-    Boolean& Bool(size_t col){return cell<Boolean>(col);}
+    Boolean& Bool(int col){return cell<Boolean>(col);}
 
     /**  Returns a reference to the element in position col if its type is std::string
          @param col :: Position of the element
          @return Reference to the element
      */
-    std::string& String(size_t col){return cell<std::string>(col);}
+    std::string& String(int col){return cell<std::string>(col);}
 
 private:
     friend TableRow_DllExport std::ostream& operator<<(std::ostream& s,const TableRow& row);
     std::vector< Column_sptr > m_columns;  ///< Pointers to the columns in the ITableWorkspace
-    size_t m_row;          ///< Row number in the TableWorkspace
-    mutable size_t m_col;          ///< Current column number (for streaming operations)
-    size_t m_nrows;        ///< Number of rows in the TableWorkspace
+    int m_row;          ///< Row number in the TableWorkspace
+    mutable int m_col;          ///< Current column number (for streaming operations)
+    int m_nrows;        ///< Number of rows in the TableWorkspace
     std::string m_sep;  ///< Separator character(s) between elements in a text output
     /// Logger
     static Kernel::Logger& g_log;

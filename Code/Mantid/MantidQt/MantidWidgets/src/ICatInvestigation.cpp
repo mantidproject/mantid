@@ -299,8 +299,8 @@ namespace MantidQt
       {
         m_uiForm.invsttableWidget->removeRow(i);
       }
-      m_uiForm.invsttableWidget->setRowCount(int(ws_sptr->rowCount()));
-      m_uiForm.invsttableWidget->setColumnCount(int(ws_sptr->columnCount()));
+      m_uiForm.invsttableWidget->setRowCount(ws_sptr->rowCount());
+      m_uiForm.invsttableWidget->setColumnCount(ws_sptr->columnCount());
 
       for (int i=0;i<ws_sptr->rowCount();++i)
       {
@@ -427,8 +427,8 @@ namespace MantidQt
         (AnalysisDataService::Instance().retrieve("datafiles"));
       }
       long long fileId=0;
-      const size_t col=0;
-      size_t row=0;
+      const int col=0;
+      int row=0;
       std::vector<std::string>::const_iterator citr;
       for(citr=fileNames.begin();citr!=fileNames.end();++citr)
       {

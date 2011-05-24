@@ -564,7 +564,7 @@ std::string Expression::str()const
     for(size_t i=0;i<m_terms.size();i++)
     {
       res << m_terms[i].operator_name();
-      size_t prec1 = op_prec(m_terms[i].m_funct);
+      int prec1 = op_prec(m_terms[i].m_funct);
       bool isItUnary = false;
       if (m_terms[i].size() == 1 && is_unary(m_terms[i].m_funct))
       {

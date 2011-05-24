@@ -29,8 +29,8 @@ namespace DataObjects
     
 
     /// Number of individual elements in the column.
-    virtual size_t size() const
-    { return peaks.size(); }
+    virtual int size() const
+    { return static_cast<int>(peaks.size()); }
 
     /// Returns typeid for the data in the column
     virtual const std::type_info& get_type_info()const;
@@ -39,7 +39,7 @@ namespace DataObjects
     virtual const std::type_info& get_pointer_type_info()const;
 
     /// Prints
-    virtual void print(std::ostream& s, size_t index) const;
+    virtual void print(std::ostream& s, int index) const;
 
     /// Specialized type check
     virtual bool isBool()const;
@@ -49,13 +49,13 @@ namespace DataObjects
 
   protected:
     /// Sets the new column size.
-    virtual void resize(size_t count);
+    virtual void resize(int count);
     /// Inserts an item.
-    virtual void insert(size_t index);
+    virtual void insert(int index);
     /// Removes an item.
-    virtual void remove(size_t index);
+    virtual void remove(int index);
     /// Pointer to a data element
-    virtual void* void_pointer(size_t index);
+    virtual void* void_pointer(int index);
 
   private:
     /// Reference to the peaks object saved in the PeaksWorkspace.

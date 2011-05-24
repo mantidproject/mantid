@@ -127,9 +127,9 @@ namespace DataObjects
 
     //---------------------------------------------------------------------------------------------
     /// Number of columns in the workspace.
-    virtual size_t columnCount() const
+    virtual int columnCount() const
     {
-      return columns.size();
+      return static_cast<int>(columns.size());
     }
 
     //---------------------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ namespace DataObjects
     virtual int getColumnIndex(const std::string& name);
 
     /// Gets the shared pointer to a column by index.
-    virtual boost::shared_ptr<Mantid::API::Column> getColumn(size_t index);
+    virtual boost::shared_ptr<Mantid::API::Column> getColumn(int index);
 
 
     //---------------------------------------------------------------------------------------------
@@ -160,7 +160,7 @@ namespace DataObjects
 
     //---------------------------------------------------------------------------------------------
     /// Number of rows in the workspace.
-    virtual size_t rowCount() const
+    virtual int rowCount() const
     {
       return getNumberPeaks();
     }
@@ -186,38 +186,38 @@ namespace DataObjects
 
     // ===== Methods that are not implemented (read-only table) ==========
 
-    virtual bool addColumns(const std::string& /*type*/, const std::string& /*name*/, size_t /*n*/)
+    virtual bool addColumns(const std::string& /*type*/, const std::string& /*name*/, int /*n*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot add column."); }
 
     virtual void removeColumn( const std::string& /*name*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot remove column."); }
 
-    virtual void setRowCount(size_t /*count*/)
+    virtual void setRowCount(int /*count*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot setRowCount"); }
 
-    virtual size_t insertRow(size_t /*index*/)
+    virtual int insertRow(int /*index*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot insertRow"); }
 
-    virtual void removeRow(size_t /*index*/)
+    virtual void removeRow(int /*index*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot removeRow."); }
 
     /// find method to get the index of integer cell value in a table workspace
-    virtual void find(int /*value*/,size_t& /*row*/,const size_t & /*col*/)
+    virtual void find(int /*value*/,int& /*row*/,const int & /*col*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented."); }
     /// find method to get the index of  double cell value in a table workspace
-    virtual void find (double /*value*/,size_t& /*row*/,const size_t & /*col*/)
+    virtual void find (double /*value*/,int& /*row*/,const int & /*col*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented."); }
     /// find method to get the index of  float cell value in a table workspace
-    virtual void find(float /*value*/,size_t& /*row*/,const size_t & /*col*/)
+    virtual void find(float /*value*/,int& /*row*/,const int & /*col*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented."); }
     /// find method to get the index of  API::Boolean value cell in a table workspace
-    virtual void find(API::Boolean /*value*/,size_t& /*row*/,const size_t & /*col*/)
+    virtual void find(API::Boolean /*value*/,int& /*row*/,const int & /*col*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented."); }
     /// find method to get the index of cellstd::string  value in a table workspace
-    virtual void find(std::string /*value*/,size_t& /*row*/,const size_t & /*col*/)
+    virtual void find(std::string /*value*/,int& /*row*/,const int & /*col*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented."); }
     /// find method to get the index of  Mantid::Geometry::V3D cell value in a table workspace
-    virtual void find(Mantid::Geometry::V3D /*value*/,size_t& /*row*/,const size_t & /*col*/)
+    virtual void find(Mantid::Geometry::V3D /*value*/,int& /*row*/,const int & /*col*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented."); }
 
   };

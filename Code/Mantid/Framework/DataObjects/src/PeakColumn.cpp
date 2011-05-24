@@ -42,7 +42,7 @@ namespace DataObjects
    * @param s :: stream to output
    * @param index :: row index
    */
-  void PeakColumn::print(std::ostream& s, size_t index) const
+  void PeakColumn::print(std::ostream& s, int index) const
   {
     Peak & peak = peaks[index];
 
@@ -98,25 +98,25 @@ namespace DataObjects
 
 
   /// Sets the new column size.
-  void PeakColumn::resize(size_t /*count*/)
+  void PeakColumn::resize(int /*count*/)
   {
     throw std::runtime_error("Not implemented.");
   }
 
   /// Inserts an item.
-  void PeakColumn::insert(size_t /*index*/)
+  void PeakColumn::insert(int /*index*/)
   {
     throw std::runtime_error("Not implemented.");
   }
 
   /// Removes an item.
-  void PeakColumn::remove(size_t /*index*/)
+  void PeakColumn::remove(int /*index*/)
   {
     throw std::runtime_error("Not implemented.");
   }
 
   /// Pointer to a data element
-  void* PeakColumn::void_pointer(size_t /*index*/)
+  void* PeakColumn::void_pointer(int /*index*/)
   {
     throw std::runtime_error("void_pointer() not implemented. Looks to be unused?");
 

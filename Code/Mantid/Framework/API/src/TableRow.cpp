@@ -14,9 +14,9 @@ Kernel::Logger& TableRow::g_log = Kernel::Logger::get("TableRow");
   */
 TableRow::TableRow(const TableRowHelper& trh):m_row(trh.m_row),m_col(0),m_sep(",")
 {
-    for(size_t i=0;i<trh.m_workspace->columnCount();i++)
+    for(int i=0;i<trh.m_workspace->columnCount();i++)
         m_columns.push_back(trh.m_workspace->getColumn(i));
-    if (m_columns.size()) m_nrows = m_columns[0]->size();
+    if (m_columns.size()) m_nrows = int(m_columns[0]->size());
     else
         m_nrows = 0;
 }
@@ -24,7 +24,7 @@ TableRow::TableRow(const TableRowHelper& trh):m_row(trh.m_row),m_col(0),m_sep(",
 /**  Makes the TableRow point to i-th row in the TableWorkspace
      @param i :: New row number
  */
-void TableRow::row(size_t i)
+void TableRow::row(int i)
 {
     if (i >= 0 && i < m_nrows)
     {

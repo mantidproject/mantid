@@ -390,9 +390,9 @@ using namespace boost::python;
     // Table workspace
     // Some function pointers since MSVC can't figure out the function to call when 
     // placing this directly in the .def functions below
-    typedef int&(ITableWorkspace::*get_integer_ptr)(const std::string &, size_t);
-    typedef double&(ITableWorkspace::*get_double_ptr)(const std::string &, size_t);
-    typedef std::string&(ITableWorkspace::*get_string_ptr)(const std::string &, size_t);
+    typedef int&(ITableWorkspace::*get_integer_ptr)(const std::string &, int);
+    typedef double&(ITableWorkspace::*get_double_ptr)(const std::string &, int);
+    typedef std::string&(ITableWorkspace::*get_string_ptr)(const std::string &, int);
 
     // TableWorkspace class
     class_< ITableWorkspace, bases<API::Workspace>, boost::noncopyable >("ITableWorkspace", no_init)
