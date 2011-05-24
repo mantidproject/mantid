@@ -82,9 +82,6 @@ test/TimeStepToTimeStepTest.h
 test/TimeToTimeStepTest.h
 )
 
-include_directories( ${ParaView_DIR}/VTK )
-link_directories( ${ParaView_DIR}/bin ) # TODO: handle /bin/Debug bin/Release
-
 include_directories( inc )
 
 set( SRC_UNITY_IGNORE_FILES )
