@@ -129,7 +129,7 @@ namespace Mantid
 
       if (isdigit(hint[0]))
       {
-        instrPart = Kernel::ConfigService::Instance().getFacility().Instrument().shortName();
+        instrPart = Kernel::ConfigService::Instance().getInstrument().shortName();
         runPart = hint;
       }
       else
@@ -147,7 +147,7 @@ namespace Mantid
         runPart = hint.substr(nChars);
       }
 
-      Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().getFacility().Instrument(instrPart);
+      Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().getInstrument(instrPart);
       size_t nZero = instr.zeroPadding();
       // remove any leading zeros in case there are too many of them
       std::string::size_type i = runPart.find_first_not_of('0');
@@ -239,8 +239,9 @@ namespace Mantid
         filename = makeFileName(filename);
       }
 
-      const std::vector<std::string> facility_extensions =
-          Kernel::ConfigService::Instance().getFacility().extensions();
+      // TODO get the facility a different way, using the hint
+      const Kernel::FacilityInfo facility = Kernel::ConfigService::Instance().getFacility();
+      const std::vector<std::string> facility_extensions = facility.extensions();
       // select allowed extensions
       std::vector < std::string > extensions;
       if (!extension.empty())
@@ -283,11 +284,11 @@ namespace Mantid
       std::string archiveOpt = Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
       std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(), tolower);
       if (!archiveOpt.empty() && archiveOpt != "off"
-          && !Kernel::ConfigService::Instance().getFacility().archiveSearch().empty())
+          && !facility.archiveSearch().empty())
       {
         std::cout << "Starting archive search..." << std::endl;
         IArchiveSearch_sptr arch = ArchiveSearchFactory::Instance().create(
-            *Kernel::ConfigService::Instance().getFacility().archiveSearch().begin());
+            *facility.archiveSearch().begin());
         if (arch)
         {
           std::string path;
