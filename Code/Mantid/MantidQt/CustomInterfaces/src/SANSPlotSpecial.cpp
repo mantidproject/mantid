@@ -212,8 +212,6 @@ void SANSPlotSpecial::clearInterceptDerived()
 {
   m_rearrangingTable = true;
 
-  int nrows = m_uiForm.tbDerived->rowCount();
-
   for ( int i = 0; i < m_uiForm.tbDerived->rowCount(); i++ )
   {
     m_uiForm.tbDerived->item(i, 5)->setText("");
@@ -659,19 +657,15 @@ double SANSPlotSpecial::getValue(QTableWidgetItem* item)
   QString text = item->text().trimmed();
   if ( text == "nan" ) { item->setText(""); }
 
-  if ( text != "" && text != "nan" )
-  {
-    bool ok = false;
-    double result = item->text().trimmed().toDouble(&ok);
-    if ( ok )
-    {
-      return result;
-    }
-  }
-  else
+  bool ok(false);
+  const double result = item->text().trimmed().toDouble(&ok);
+
+  if ( text.isEmpty() || !ok )
   {
     throw std::invalid_argument("Could not convert value given to a double.");
   }
+
+  return result;
 }
 
 QPair<QStringList, QMap<QString, double> > SANSPlotSpecial::getProperties(const QString & transform)
