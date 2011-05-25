@@ -152,7 +152,16 @@ namespace Crystal
           out << "0 NRUN DETNUM    CHI    PHI  OMEGA MONCNT" << std::endl;
           out <<  "1" <<  std::setw( 5 ) <<  run <<  std::setw( 7 ) <<
               std::right <<  bank;
-          out << std::endl;
+
+          // TODO: Determine goniometer angles!
+          double chi = 0.0;
+          double phi = 0.0;
+          double omega = 0.0;
+          out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  chi;
+          out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  phi;
+          out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  omega;
+          out  <<  std::setw( 7 ) <<  (int)( 0 ) <<  std::endl;
+
           out << header << std::endl;
 
           // Go through each peak at this run / bank
@@ -176,7 +185,7 @@ namespace Crystal
             out << std::setw( 9 ) << std::fixed << std::setprecision( 3 )
             << (p.getL2()*100.0);
 
-            // TODO: Check if the definition of az/polar is consistent with ISAW
+            // This is the scattered beam direction
             V3D dir = p.getDetPos() - inst->getSample()->getPos();
             double scattering, azimuth;
 
@@ -184,13 +193,13 @@ namespace Crystal
             scattering = dir.angle( V3D(0.0, 0.0, 1.0) );
 
             // "Azimuthal" angle: project the beam onto the XY plane, and measure the angle between that and the +X axis (right-handed)
-            azimuth = atan2( dir.Z(), dir.X() );
+            azimuth = atan2( dir.Y(), dir.X() );
 
             out << std::setw( 9 ) << std::fixed << std::setprecision( 5 )
-            << (scattering * 180.0/M_PI); //two-theta scattering
+            << scattering; //two-theta scattering
 
             out << std::setw( 9 ) << std::fixed << std::setprecision( 5 )
-            << (azimuth * 180.0/M_PI);
+            << azimuth;
 
             out << std::setw( 10 ) << std::fixed << std::setprecision( 6 )
             << p.getWavelength();
