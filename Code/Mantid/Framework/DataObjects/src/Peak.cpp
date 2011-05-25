@@ -54,6 +54,29 @@ namespace DataObjects
     this->setWavelength(m_Wavelength);
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+   *
+   * @param m_inst :: Shared pointer to the instrument for this peak detection
+   * @param m_DetectorID :: ID to the detector of the center of the peak
+   * @param m_Wavelength :: incident neutron wavelength, in Angstroms
+   * @param HKL :: vector with H,K,L position of the peak
+   * @param goniometer :: a 3x3 rotation matrix
+   * @return
+   */
+  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL,Mantid::Geometry::Matrix<double> goniometer) :
+    m_inst(m_inst),
+    m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]),
+    m_Intensity(0), m_SigmaIntensity(0),
+    m_GoniometerMatrix(goniometer),
+    m_InverseGoniometerMatrix(3,3,true),
+    m_RunNumber(0)
+  {
+    this->setDetectorID(m_DetectorID);
+    this->setWavelength(m_Wavelength);
+  }
+
+
 //  /** Copy constructor
 //   * @param other :: Peak to copy.
 //   */
@@ -70,7 +93,7 @@ namespace DataObjects
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Set the incident wavelength of the neutron. Calculates the energy from this.
+  /** Set the incident wavelength of the neutron. Calculates the energy from this. Assumes elastic scattering.
    *
    * @param wavelength :: wavelength in Angstroms.
    */
@@ -130,11 +153,11 @@ namespace DataObjects
 
 
   // -------------------------------------------------------------------------------------
-  /** Calculate the neutron wavelength (in angstroms) at the peak */
+  /** Calculate the neutron wavelength (in angstroms) at the peak (Note for inelastic scattering - it is the wavelength corresponding to the final energy)*/
   double Peak::getWavelength() const
   {
     // Energy in J of the neutron
-    double energy =  PhysicalConstants::meV * m_InitialEnergy;
+    double energy =  PhysicalConstants::meV * m_FinalEnergy;
     // v = sqrt(2.0 * E / m)
     double velocity = sqrt(2.0*energy/PhysicalConstants::NeutronMass);
     // wavelength = h / mv
@@ -148,14 +171,17 @@ namespace DataObjects
    * using the geometry of the detector  */
   double Peak::getTOF() const
   {
-    // First, calculate the total neutron traveling distance
-    double distance = (detPos - samplePos).norm() + (samplePos - sourcePos).norm();
+    // First, get the neutron traveling distances
+    double L1 = this->getL1();
+    double L2 = this->getL2();
     // Energy in J of the neutron
-    double energy =  PhysicalConstants::meV * m_InitialEnergy;
+    double Ei =  PhysicalConstants::meV * m_InitialEnergy;
+    double Ef =  PhysicalConstants::meV * m_FinalEnergy;
     // v = sqrt(2 * E / m)
-    double velocity = sqrt(2.0*energy/PhysicalConstants::NeutronMass);
+    double vi = sqrt(2.0*Ei/PhysicalConstants::NeutronMass);
+    double vf = sqrt(2.0*Ef/PhysicalConstants::NeutronMass);
     // Time of flight in seconds = distance / speed
-    double tof = distance / velocity;
+    double tof = L1/vi+L2/vf;
     // Return in microsecond units
     return tof * 1e6;
   }

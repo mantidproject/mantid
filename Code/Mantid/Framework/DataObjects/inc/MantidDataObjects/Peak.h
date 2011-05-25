@@ -26,6 +26,7 @@ namespace DataObjects
 
     Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength);
     Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL);
+    Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL,Mantid::Geometry::Matrix<double> goniometer);
 
     // Copy constructor is compiler-provided.
     //    Peak(const Peak & other);
