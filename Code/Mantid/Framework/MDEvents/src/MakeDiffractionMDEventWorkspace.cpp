@@ -264,11 +264,18 @@ namespace MDEvents
     std::string dimensionUnits = "Angstroms^-1";
     if (OutputDimensions == "Q (sample frame)")
     {
-      // TODO: Set the matrix based on goniometer angles
+      // Set the matrix based on goniometer angles
+      mat = in_ws->mutableRun().getGoniometerMatrix();
+      // TODO: Is this right?: But we need to invert it, since we want to get the Q in the sample frame.
+      mat.Invert();
     }
     else if (OutputDimensions == "HKL")
     {
-      // TODO: Set the matrix based on UB etc.
+      // Set the matrix based on UB etc.
+      Geometry::Matrix<double> ub = in_ws->mutableSample().getOrientedLattice().getUB();
+      Geometry::Matrix<double> gon = in_ws->mutableRun().getGoniometerMatrix();
+      // As per Busing and Levy 1967, HKL = Goniometer * UB * q_lab_frame
+      mat = gon * ub;
       dimensionNames[0] = "H";
       dimensionNames[1] = "K";
       dimensionNames[2] = "L";

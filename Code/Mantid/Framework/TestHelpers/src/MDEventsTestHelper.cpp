@@ -9,6 +9,7 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidTestHelpers/DLLExport.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 
 using Mantid::DataObjects::EventWorkspace_sptr;
@@ -76,6 +77,10 @@ namespace MDEventsTestHelper
 
     //Set all the histograms at once.
     retVal->setAllX(x1);
+
+    // Give it a crystal and goniometer
+    WorkspaceCreationHelper::SetGoniometer(retVal, 0., 0., 0.);
+    WorkspaceCreationHelper::SetOrientedLattice(retVal, 1., 1., 1.);
 
     // Some sanity checks
     if (retVal->getInstrument()->getName() != "MINITOPAZ")
