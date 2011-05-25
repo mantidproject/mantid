@@ -69,9 +69,10 @@ namespace DataObjects
     m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(goniometer),
-    m_InverseGoniometerMatrix(3,3,true),
+    m_InverseGoniometerMatrix(goniometer),
     m_RunNumber(0)
   {
+    m_InverseGoniometerMatrix.Invert();
     this->setDetectorID(m_DetectorID);
     this->setWavelength(m_Wavelength);
   }
@@ -190,17 +191,15 @@ namespace DataObjects
   /** Calculate the d-spacing of the peak, in 1/Angstroms  */
   double Peak::getDSpacing() const
   {
-    // Get the neutron wavelength in angstroms
-    double wavelength = this->getWavelength();
     // The detector is at 2 theta scattering angle
     V3D beamDir = samplePos - sourcePos;
     V3D detDir = detPos - samplePos;
 
     double two_theta = detDir.angle(beamDir);
-    double sin_theta = sin(two_theta/2.0);
-
-    // Bragg condition is n*wavelength = 2 * dSpacing * sin(theta)
-    return wavelength / (2.0 * sin_theta);
+    
+    // In general case (2*pi/d)^2=k_i^2+k_f^2-2*k_i*k_f*cos(two_theta)
+    // E_i,f=k_i,f^2*hbar^2/(2 m)
+    return 1e10*PhysicalConstants::h/sqrt(2.0*PhysicalConstants::NeutronMass*PhysicalConstants::meV)/sqrt(m_InitialEnergy+m_FinalEnergy-2.0*sqrt(m_InitialEnergy*m_FinalEnergy)*cos(two_theta));
   }
 
   //----------------------------------------------------------------------------------------------
@@ -217,12 +216,21 @@ namespace DataObjects
     // Normalized detector direction
     V3D detDir = (detPos - samplePos);
     detDir /= detDir.norm();
-    // Normalized Q direction
-    V3D Q_dir = beamDir - detDir;
-    // Now calculate the wavevector of the incident neutron
-    double wavevector = 1.0 / this->getWavelength();
-    // And Q in the lab frame = this direction * the wave vector.
-    return Q_dir * wavevector;
+
+    // Energy in J of the neutron
+    double ei =  PhysicalConstants::meV * m_InitialEnergy;
+    // v = sqrt(2.0 * E / m)
+    double vi = sqrt(2.0*ei/PhysicalConstants::NeutronMass);
+    // wavelength = h / mv
+    double wi = PhysicalConstants::h / (PhysicalConstants::NeutronMass * vi);
+    // in angstroms
+    wi*= 1e10;
+    //wavevector=1/wavelength
+    double wvi=1.0/wi;
+    // Now calculate the wavevector of the scattered neutron
+    double wvf = 1.0 / this->getWavelength();
+    // And Q in the lab frame 
+    return beamDir*wvi-detDir*wvf;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -231,9 +239,8 @@ namespace DataObjects
   Mantid::Geometry::V3D Peak::getQSampleFrame() const
   {
     V3D Qlab = this->getQLabFrame();
-    // Multiply by the goniometer matrix to get the sample frame
-    // TODO: should I multiply by the inverse???
-    V3D Qsample = m_GoniometerMatrix * Qlab;
+    // Multiply by the inverse of the goniometer matrix to get the sample frame
+    V3D Qsample = m_InverseGoniometerMatrix * Qlab;
     return Qsample;
   }
 
@@ -354,10 +361,13 @@ namespace DataObjects
   void Peak::setSigmaIntensity(double m_SigmaIntensity)
   {    this->m_SigmaIntensity = m_SigmaIntensity;  }
 
-
+  /** Set the final energy
+   * @param m_FinalEnergy :: final energy in meV   */
   void Peak::setFinalEnergy(double m_FinalEnergy)
   {    this->m_FinalEnergy = m_FinalEnergy;  }
 
+  /** Set the initial energy
+   * @param m_InitialEnergy :: initial energy in meV   */
   void Peak::setInitialEnergy(double m_InitialEnergy)
   {    this->m_InitialEnergy = m_InitialEnergy;  }
 

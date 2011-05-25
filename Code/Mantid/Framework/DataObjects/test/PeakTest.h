@@ -74,8 +74,10 @@ public:
     // Energy in meV
     TS_ASSERT_DELTA(p.getInitialEnergy(), 81.805, 1e-3) // Conversion table at : www.ncnr.nist.gov/instruments/dcs/dcs_usersguide/Conversion_Factors.pdf
     TS_ASSERT_DELTA(p.getFinalEnergy(), p.getInitialEnergy(), 1e-5)
-    // TODO: Check that the conversion is correct (I just took the results and put them back into the test, they are within a reasonable range though)
-    TS_ASSERT_DELTA(p.getDSpacing(), 4.5469, 1e-3);
+    V3D dp=p.getDetPos();
+    double tt=dp.angle(V3D(0,0,1));
+    double d=0.5/sin(0.5*tt);  //d=lambda/2/sin(theta)=4.5469
+    TS_ASSERT_DELTA(p.getDSpacing(), d, 1e-3);
     TS_ASSERT_DELTA(p.getTOF(), 3823, 1);
 
     // Back-converting to wavelength should give you the same.
