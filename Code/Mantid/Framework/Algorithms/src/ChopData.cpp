@@ -137,7 +137,7 @@ void ChopData::exec()
     std::stringstream name;
     name << output << "-" << i+1;
     std::string wsname = name.str();
-    Mantid::API::AnalysisDataService::Instance().add(wsname, workspace);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(wsname, workspace);
 
     declareProperty(new WorkspaceProperty<>(wsname, wsname, Direction::Output));
     setProperty(wsname, workspace);
