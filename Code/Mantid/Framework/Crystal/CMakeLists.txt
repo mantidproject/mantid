@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/MaskPeaksWorkspace.cpp
 	src/PeakIntegration.cpp
 	src/PredictPeaks.cpp
+	src/SaveIsawPeaks.cpp
 	src/SavePeaksFile.cpp
 )
 
@@ -14,6 +15,7 @@ set ( INC_FILES
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PredictPeaks.h
+	inc/MantidCrystal/SaveIsawPeaks.h
 	inc/MantidCrystal/SavePeaksFile.h
 )
 
@@ -22,6 +24,7 @@ set ( TEST_FILES
 	test/LoadPeaksFileTest.h
 	test/MaskPeaksWorkspaceTest.h
 	test/PredictPeaksTest.h
+	test/SaveIsawPeaksTest.h
 	test/SavePeaksFileTest.h
 )
 
