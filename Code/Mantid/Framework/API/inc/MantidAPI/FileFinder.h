@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/DllExport.h"
 
@@ -63,7 +64,8 @@ namespace Mantid
       FileFinderImpl& operator=(const FileFinderImpl&);
       std::string extractAllowedSuffix(std::string & userString) const;
       std::pair<std::string,std::string> toInstrumentAndNumber(const std::string& hint)const;
-
+      /// reference to the logger class
+      Mantid::Kernel::Logger& g_log;
     };
 
     ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.

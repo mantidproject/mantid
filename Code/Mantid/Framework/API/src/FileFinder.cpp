@@ -30,7 +30,7 @@ namespace Mantid
     /**
      * Default constructor
      */
-    FileFinderImpl::FileFinderImpl()
+    FileFinderImpl::FileFinderImpl() : g_log(Mantid::Kernel::Logger::get("FileFinderImpl"))
     {
       // Make sure plugins are loaded
       std::string libpath = Kernel::ConfigService::Instance().getString("plugins.directory");
@@ -48,6 +48,7 @@ namespace Mantid
      */
     std::string FileFinderImpl::getFullPath(const std::string& fName) const
     {
+      g_log.debug() << "getFullPath(" << fName << ")\n";
       // If this is already a full path, nothing to do
       if (Poco::Path(fName).isAbsolute())
         return fName;
@@ -257,8 +258,12 @@ namespace Mantid
         filename = makeFileName(filename);
       }
 
-      // TODO get the facility a different way, using the hint
-      const Kernel::FacilityInfo facility = Kernel::ConfigService::Instance().getFacility();
+      // Get the facility through the instrument in the hint
+      std::string instr_str = this->toInstrumentAndNumber(hint).first;
+      const Kernel::InstrumentInfo instrument = Kernel::ConfigService::Instance().getInstrument(instr_str);
+      const Kernel::FacilityInfo facility = instrument.facility();
+
+      // work through the extensions
       const std::vector<std::string> facility_extensions = facility.extensions();
       // select allowed extensions
       std::vector < std::string > extensions;
