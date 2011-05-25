@@ -3,13 +3,13 @@
 
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Math/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
-#include "MantidGeometry/Math/Matrix.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;

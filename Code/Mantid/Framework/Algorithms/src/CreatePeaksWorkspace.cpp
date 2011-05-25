@@ -55,7 +55,6 @@ namespace Algorithms
   {
     MatrixWorkspace_sptr instWS = getProperty("InstrumentWorkspace");
 
-    // TODO Auto-generated execute stub
     PeaksWorkspace_sptr out(new PeaksWorkspace());
     setProperty("OutputWorkspace", out);
 

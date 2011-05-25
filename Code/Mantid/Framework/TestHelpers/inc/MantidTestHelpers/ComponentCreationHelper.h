@@ -109,7 +109,7 @@ namespace ComponentCreationHelper
    * @param num_banks: number of 9-cylinder banks to create
    * @param verbose: prints out the instrument after creation.
    */
-  DLL_TESTHELPERS Mantid::Geometry::IInstrument_sptr createTestInstrumentRectangular(int num_banks, int pixels);
+  DLL_TESTHELPERS Mantid::Geometry::IInstrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing = 0.008);
 
 }
 

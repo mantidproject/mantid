@@ -319,11 +319,11 @@ namespace ComponentCreationHelper
    * @param num_banks: number of rectangular banks to create
    * @param pixels :: number of pixels in each direction.
    */
-  IInstrument_sptr createTestInstrumentRectangular(int num_banks, int pixels)
+  IInstrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing)
   {
     boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
 
-    const double cylRadius(0.004);
+    const double cylRadius(pixelSpacing/2);
     const double cylHeight(0.0002);
     // One object
     Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0,-cylHeight/2.0,0.0), V3D(0.,1.0,0.), "pixel-shape");
@@ -336,8 +336,8 @@ namespace ComponentCreationHelper
 
       RectangularDetector * bank = new RectangularDetector(bankname.str());
       bank->initialize(pixelShape,
-          pixels, 0.0, cylRadius*2,
-          pixels, 0.0, cylRadius*2,
+          pixels, 0.0, pixelSpacing,
+          pixels, 0.0, pixelSpacing,
           banknum*pixels*pixels, true, pixels);
 
       // Mark them all as detectors
