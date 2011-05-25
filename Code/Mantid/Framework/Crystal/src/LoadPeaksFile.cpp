@@ -5,6 +5,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
@@ -16,6 +17,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+
+using Mantid::Kernel::Strings::readToEndOfLine;
+using Mantid::Kernel::Strings::getWord;
 
 namespace Mantid
 {
@@ -73,52 +77,6 @@ namespace Crystal
     declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "Path to an ISAW-style .peaks filename.");
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output), "Name of the output workspace.");
-  }
-
-
-
-
-  //-----------------------------------------------------------------------------------------------
-  /** Get a word from a line and strips spaces */
-  std::string getWord( std::ifstream &in ,  bool consumeEOL )
-  {
-    std::string s;
-    char c = 0;
-    if( in.good() )
-      for(  c = static_cast<char>(in.get()) ; c == ' ' && in.good() ; c = static_cast<char>(in.get()) )
-      {}
-    else
-      return std::string();
-
-    if( c == '\n' )
-    {
-      if( !consumeEOL )
-        in.putback( c );
-
-      return std::string();
-    }
-
-    s.push_back( c );
-
-    if( in.good() )
-      for(  c = static_cast<char>(in.get()) ; in.good()&&c != ' ' && c != '\n' && c != '\r' ; c = static_cast<char>(in.get()) )
-        s.push_back( c );
-
-    if( ((c == '\n') || (c == '\r')) && !consumeEOL )
-      in.putback( c );
-
-    return s;
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  /** Read up to the eol */
-  void readToEndOfLine( std::ifstream& in ,  bool ConsumeEOL )
-  {
-    while( in.good() && getWord( in ,  false ).length() > 0  )
-      getWord( in ,  false );
-    if( !ConsumeEOL )
-      return ;
-    getWord( in ,  true );
   }
 
 

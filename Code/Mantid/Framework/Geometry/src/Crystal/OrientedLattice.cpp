@@ -68,7 +68,6 @@ namespace Geometry
     U=newU;
   }
 
-
   void OrientedLattice::setUB(MantidMat& newUB)
   {
     MantidMat newGstar,B;

@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "MantidKernel/Strings.h"
+#include <iosfwd>
 
 using std::size_t;
 
@@ -96,7 +97,7 @@ std::string stripMultSpc(const std::string& Line)
 /**
   Checks that as least cnt letters of 
   works is part of the string. It is currently 
-  case sensative. It removes the Word if found
+  case sensitive. It removes the Word if found
   @param Line :: Line to process
   @param Word :: Word to use
   @param cnt :: Length of Word for significants [default =4]
@@ -732,6 +733,62 @@ int setValues(const std::string& Line,const std::vector<int>& Index,std::vector<
     }
   // Success since loop only gets here if sc is exhaused.
   return 0;
+}
+
+
+
+
+
+//-----------------------------------------------------------------------------------------------
+/** Get a word from a line and strips spaces
+ *
+ * @param in :: stream input
+ * @param consumeEOL :: set to true to remove the new lines at the end of the line
+ * @return a string with the word read in
+ */
+std::string getWord( std::ifstream &in ,  bool consumeEOL )
+{
+  std::string s;
+  char c = 0;
+  if( in.good() )
+    for(  c = static_cast<char>(in.get()) ; c == ' ' && in.good() ; c = static_cast<char>(in.get()) )
+    {}
+  else
+    return std::string();
+
+  if( c == '\n' )
+  {
+    if( !consumeEOL )
+      in.putback( c );
+
+    return std::string();
+  }
+
+  s.push_back( c );
+
+  if( in.good() )
+    for(  c = static_cast<char>(in.get()) ; in.good()&&c != ' ' && c != '\n' && c != '\r' ; c = static_cast<char>(in.get()) )
+      s.push_back( c );
+
+  if( ((c == '\n') || (c == '\r')) && !consumeEOL )
+    in.putback( c );
+
+  return s;
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Read up to the eol
+ *
+ * @param in :: stream input
+ * @param consumeEOL :: set to true to remove the new lines at the end of the line
+ */
+void readToEndOfLine( std::ifstream& in ,  bool ConsumeEOL )
+{
+  while( in.good() && getWord( in ,  false ).length() > 0  )
+    getWord( in ,  false );
+  if( !ConsumeEOL )
+    return ;
+  getWord( in ,  true );
 }
 
 

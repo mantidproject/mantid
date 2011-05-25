@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	src/LoadIsawUB.cpp
 	src/LoadPeaksFile.cpp
 	src/MaskPeaksWorkspace.cpp
 	src/PeakIntegration.cpp
@@ -8,6 +9,7 @@ set ( SRC_FILES
 
 set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
+	inc/MantidCrystal/LoadIsawUB.h
 	inc/MantidCrystal/LoadPeaksFile.h
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/PeakIntegration.h
@@ -16,6 +18,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	test/LoadIsawUBTest.h
 	test/LoadPeaksFileTest.h
 	test/MaskPeaksWorkspaceTest.h
 	test/PredictPeaksTest.h
