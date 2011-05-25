@@ -291,7 +291,7 @@ class LoadRun(ReductionStep):
             # Store mask information
             if self._use_config_mask:
                 mtd[workspace+'_evt'].getRun().addProperty_str("rectangular_masks", pickle.dumps(conf.rectangular_masks), "pixels", True)
-            
+                output_str +=  "  Using mask information found in configuration file\n"
         else:
             mantid.sendLogMessage("Could not find configuration file for %s" % workspace)
             output_str += "  Could not find configuration file for %s\n" % workspace
