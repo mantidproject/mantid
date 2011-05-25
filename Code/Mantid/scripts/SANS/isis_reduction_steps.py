@@ -785,7 +785,6 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             Multiply('ones', wksp, 'units')
             #do the super-position and clean up
             Minus(counts, 'units', wksp)
-            Minus(wksp, 'ones', wksp)
             mantid.deleteWorkspace('ones')
             mantid.deleteWorkspace('units')
 
