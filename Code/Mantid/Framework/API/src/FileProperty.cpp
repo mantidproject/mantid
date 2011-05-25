@@ -10,6 +10,7 @@
 #include <Poco/Path.h>
 #include <Poco/File.h>
 #include <cctype>
+#include <algorithm>
 
 namespace Mantid
 {
@@ -202,6 +203,16 @@ bool FileProperty::extsMatchRunFiles()
   return match;
 }
 
+namespace { // anonymous namespace keeps it here
+void addExtension(const std::string &extension, std::vector<std::string> &extensions)
+{
+  if (std::find(extensions.begin(), extensions.end(), extension) != extensions.end())
+    return;
+  else
+    extensions.push_back(extension);
+}
+}
+
 /**
  * Handles the filename if this is a load property
  * @param propValue :: The filename to treat as a filepath to be loaded
@@ -213,17 +224,30 @@ std::string FileProperty::setLoadProperty(const std::string & propValue)
   if( m_runFileProp )
   {
     std::set<std::string> allowedExts(allowedValues());
-    std::set<std::string> exts;
+    std::vector<std::string> exts;
+    if (!m_defaultExt.empty())
+    {
+      addExtension(m_defaultExt, exts);
+
+      std::string lower(m_defaultExt);
+      std::transform(m_defaultExt.begin(), m_defaultExt.end(), lower.begin(), tolower);
+      addExtension(lower, exts);
+
+      std::string upper(m_defaultExt);
+      std::transform(m_defaultExt.begin(), m_defaultExt.end(), upper.begin(), toupper);
+      addExtension(upper, exts);
+    }
     for(std::set<std::string>::iterator it = allowedExts.begin();it!=allowedExts.end();++it)
     {
       std::string lower(*it); 
       std::string upper(*it); 
       std::transform(it->begin(), it->end(), lower.begin(), tolower);
       std::transform(it->begin(), it->end(), upper.begin(), toupper);
-      exts.insert(lower);
-      exts.insert(upper);
+      addExtension(*it, exts);
+      addExtension(lower, exts);
+      addExtension(upper, exts);
     }
-    foundFile = FileFinder::Instance().findRun(propValue,&exts);
+    foundFile = FileFinder::Instance().findRun(propValue, exts);
   }
   else
   {
