@@ -14,9 +14,15 @@ public:
   {
     // Instantiating the object starts the timer
     Mantid::Kernel::Timer timer;
-    #ifdef _WIN32
+    #if defined _WIN64
       Sleep(200);
       TS_ASSERT_LESS_THAN( 0.19, timer.elapsed() );
+    #elif defined _WIN32 
+      // 32-bit windows doesn't seem to have brilliant resolution
+      // as the Sleep(200) can quite often cause the elapsed 
+      // time to be less than 0.19 seconds!
+      Sleep(200);
+      TS_ASSERT_LESS_THAN( 0.18, timer.elapsed() );
     #else
       usleep(200000);
       TS_ASSERT_LESS_THAN( 0.19, timer.elapsed() );
