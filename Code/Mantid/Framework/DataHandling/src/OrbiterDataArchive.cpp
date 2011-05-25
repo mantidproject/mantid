@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/Logger.h"
 #include "MantidDataHandling/OrbiterDataArchive.h"
 #include "MantidAPI/ArchiveSearchFactory.h"
 
@@ -22,6 +23,9 @@ namespace Mantid
 {
   namespace DataHandling
   {
+
+  // Get a reference to the logger
+  Mantid::Kernel::Logger & OrbiterDataArchive::g_log = Mantid::Kernel::Logger::get("OrbiterDataArchive");
 
     DECLARE_ARCHIVESEARCH(OrbiterDataArchive,OrbiterDataSearch);
 
@@ -72,7 +76,8 @@ namespace Mantid
 
       //TODO: Look for a space, and split on it.  Just take the first value.
 
-      //std::cout << "Returned Filename = " << out << std::endl;
+      // Debug statement to print returned filename
+      g_log.debug() << "Returned Filename = " << out << std::endl;
 
       return out;
     }

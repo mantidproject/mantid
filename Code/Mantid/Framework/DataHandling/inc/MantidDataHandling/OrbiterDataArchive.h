@@ -9,11 +9,18 @@
 
 #include <string>
 
+
 namespace Mantid
 {
+
+// Forward declaration
+namespace Kernel
+{
+class Logger;
+}
+
   namespace DataHandling
   {
-
   /**
    This class is for searching the Orbiter data archive
 
@@ -43,8 +50,11 @@ namespace Mantid
 
     class  DLLExport OrbiterDataArchive: public API::IArchiveSearch
     {
-      public:
-      std::string getPath(const std::string& fName) const;
+    public:
+        std::string getPath(const std::string& fName) const;
+    private:
+        // static reference to the logger class
+        static Mantid::Kernel::Logger & g_log;
     };
 
   }
