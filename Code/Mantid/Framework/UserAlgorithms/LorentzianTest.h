@@ -100,6 +100,13 @@ namespace Mantid
       /// The name of the fitting function
       std::string name()const{return "LorentzianTest";}
 
+      // ** OPTIONALLY MODIFY THIS **
+      /// The categories the Fit function belong to.
+      /// Categories must be listed as a comma separated list.
+      /// For example: "General, Muon\\Custom" which adds 
+      /// this function to the category "General" and the sub-category
+      /// "Muon\\Custom" 
+      virtual const std::string category() const { return "C++ User Defined";}
 
     protected:
       virtual void functionLocal(double* out, const double* xValues, const size_t nData)const;

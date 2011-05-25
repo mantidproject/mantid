@@ -238,6 +238,13 @@ public:
   /// Iinialize the function
   virtual void initialize(){this->init();}
 
+  /// The categories the Fit function belong to.
+  /// Categories must be listed as a comma separated list.
+  /// For example: "General, Muon\\Custom" which adds 
+  /// a function to the category "General" and the sub-category
+  /// "Muon\\Custom" 
+  virtual const std::string category() const { return "General";}
+
   /// Returns the size of the fitted data (number of double values returned by the function getData())
   virtual int dataSize()const = 0;
   /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.

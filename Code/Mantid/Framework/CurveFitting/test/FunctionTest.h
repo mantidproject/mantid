@@ -113,6 +113,8 @@ public:
   {
     FunctionTestGauss *g = new FunctionTestGauss();
 
+    TS_ASSERT_EQUALS(g->category(),"General");
+
     g->setParameter("c",5.5);
     g->setParameter("h",1.2);
     g->setParameter("s",1.);
