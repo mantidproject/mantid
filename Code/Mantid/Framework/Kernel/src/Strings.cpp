@@ -531,6 +531,9 @@ int convPartNum(const std::string& A,T& out)
   cx.str(A);
   cx.clear();
   cx>>retval;
+  // If we have reached the end of the stream, then we need to clear the error as 
+  // it will cause the tellg() call to return -1.  Not pretty but works for now.
+  cx.clear();
   const std::streamoff xpt = cx.tellg();
   if (xpt<0)
     return 0;
