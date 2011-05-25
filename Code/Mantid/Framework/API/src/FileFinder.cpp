@@ -259,9 +259,18 @@ namespace Mantid
       }
 
       // Get the facility through the instrument in the hint
-      std::string instr_str = this->toInstrumentAndNumber(hint).first;
-      const Kernel::InstrumentInfo instrument = Kernel::ConfigService::Instance().getInstrument(instr_str);
-      const Kernel::FacilityInfo facility = instrument.facility();
+      std::string facil_str("");
+      try {
+        std::string instr_str = this->toInstrumentAndNumber(hint).first;
+        const Kernel::InstrumentInfo instrument = Kernel::ConfigService::Instance().getInstrument(instr_str);
+        facil_str = instrument.facility().name();
+      }
+      catch (std::invalid_argument &arg)
+      {
+        // no biggie, just use the default facility
+      }
+      const Kernel::FacilityInfo facility = Kernel::ConfigService::Instance().getFacility(facil_str);
+
 
       // work through the extensions
       const std::vector<std::string> facility_extensions = facility.extensions();
@@ -312,7 +321,7 @@ namespace Mantid
       if (!archiveOpt.empty() && archiveOpt != "off"
           && !facility.archiveSearch().empty())
       {
-        std::cout << "Starting archive search..." << std::endl;
+        std::cout << "Starting archive search..." << *facility.archiveSearch().begin() << std::endl;
         IArchiveSearch_sptr arch = ArchiveSearchFactory::Instance().create(
             *facility.archiveSearch().begin());
         if (arch)
