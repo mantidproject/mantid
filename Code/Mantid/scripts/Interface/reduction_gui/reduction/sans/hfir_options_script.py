@@ -93,7 +93,6 @@ class ReductionOptions(BaseScriptElement):
     def to_script(self):
         """
             Generate reduction script
-            @param execute: if true, the script will be executed
         """
         script  = "%s()\n" % self.instrument_name
         

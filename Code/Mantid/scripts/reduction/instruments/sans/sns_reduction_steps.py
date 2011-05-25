@@ -5,6 +5,7 @@
 """
 import os
 import sys
+import pickle
 from reduction import ReductionStep
 from sans_reduction_steps import BaseTransmission
 from reduction import extract_workspace_name
@@ -83,6 +84,7 @@ class LoadRun(ReductionStep):
         self._low_TOF_cut = 0
         self._high_TOF_cut = 0
         self._correct_for_flight_path = False
+        self._use_config_mask = False
    
     def clone(self, data_file=None):
         if data_file is None:
@@ -92,6 +94,7 @@ class LoadRun(ReductionStep):
         loader._low_TOF_cut = self._low_TOF_cut
         loader._high_TOF_cut = self._high_TOF_cut
         loader._correct_for_flight_path = self._correct_for_flight_path
+        loader._use_config_mask = self._use_config_mask
         return loader
 
     def set_flight_path_correction(self, do_correction=False):
@@ -112,8 +115,21 @@ class LoadRun(ReductionStep):
         self._high_TOF_cut = high_cut
         
     def use_config_cuts(self, use_config=False):
+        """
+            Set the flag to cut the TOF tails on each side of the
+            frame according to the cuts found in the configuration file.
+            @param use_config: if True, the configuration file will be used
+        """
         self._use_config_cutoff = use_config
 
+    def use_config_mask(self, use_config=False):
+        """
+            Set the flag to use the mask defined in teh
+            configuration file.
+            @param use_config: if True, the configuration file will be used
+        """
+        self._use_config_mask = use_config
+        
     def set_beam_center(self, beam_center):
         """
             Sets the beam center to be used when loading the file
@@ -271,6 +287,11 @@ class LoadRun(ReductionStep):
             if self._use_config_cutoff:
                 low_TOF_cut = conf.low_TOF_cut
                 high_TOF_cut = conf.high_TOF_cut
+                
+            # Store mask information
+            if self._use_config_mask:
+                mtd[workspace+'_evt'].getRun().addProperty_str("rectangular_masks", pickle.dumps(conf.rectangular_masks), "pixels", True)
+            
         else:
             mantid.sendLogMessage("Could not find configuration file for %s" % workspace)
             output_str += "  Could not find configuration file for %s\n" % workspace

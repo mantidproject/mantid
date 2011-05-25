@@ -52,3 +52,5 @@ def SetTOFTailsCutoff(low_cut=0.0, high_cut=0.0):
 def UseConfigTOFTailsCutoff(use_config=True):
     ReductionSingleton().get_data_loader().use_config_cuts(use_config)
     
+def UseConfigMask(use_config=True):
+    ReductionSingleton().get_data_loader().use_config_mask(use_config)

@@ -201,7 +201,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         if mode is None:
             mode = not self.general_settings.debug
         self.general_settings.debug = mode
-        self._update_file_menu()
+        self._new()
+        self.setup_layout()
 
     def _change_instrument(self):
         """
@@ -236,6 +237,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         if dialog.result()==1:
             self._instrument = dialog.instr_combo.currentText()
             self.setup_layout()
+            self._new()
             
     def _clear_and_close(self):
         """

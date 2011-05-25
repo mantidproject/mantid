@@ -100,19 +100,13 @@ class SANSReducer(Reducer):
         center = self.instrument.get_default_beam_center()
         self._beam_finder = sans_reduction_steps.BaseBeamFinder(center[0], center[1])
 
-    def set_normalizer(self, option):
+    @validate_step
+    def set_normalizer(self, normalizer):
         """
-            Set normalization option (time or monitor)
-            @param option: normalization option
+            Set normalization
+            @param normalizer: normalization step object
         """
-        if option not in (None, SANSReducer.NORMALIZATION_TIME, 
-                          SANSReducer.NORMALIZATION_MONITOR):
-            raise RuntimeError, "SANSReducer.set_normalization: unrecognized normalization option."
-        
-        if option is None:
-            self._normalizer = None
-        else:
-            self._normalizer = sans_reduction_steps.Normalize(option)
+        self._normalizer = normalizer
         
     def get_normalizer(self):
         return self._normalizer

@@ -19,10 +19,10 @@ def SetBeamCenter(x,y):
     ReductionSingleton().set_beam_finder(sans_reduction_steps.BaseBeamFinder(x,y))
     
 def TimeNormalization():
-    ReductionSingleton().set_normalizer(SANSReducer.NORMALIZATION_TIME)
+    ReductionSingleton().set_normalizer(sans_reduction_steps.Normalize(SANSReducer.NORMALIZATION_TIME))
     
 def MonitorNormalization():
-    ReductionSingleton().set_normalizer(SANSReducer.NORMALIZATION_MONITOR)    
+    ReductionSingleton().set_normalizer(sans_reduction_steps.Normalize(SANSReducer.NORMALIZATION_MONITOR))
     
 def NoNormalization():
     ReductionSingleton().set_normalizer(None)

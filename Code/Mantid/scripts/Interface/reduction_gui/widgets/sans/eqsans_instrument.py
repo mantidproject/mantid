@@ -157,7 +157,7 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.geometry_options_groupbox.hide()
             
             # Hide expert options
-            self._summary.config_mask_chk.hide()
+            #self._summary.config_mask_chk.hide()
             self._summary.tof_cut_chk.hide()
             self._summary.low_tof_edit.hide()
             self._summary.high_tof_edit.hide()

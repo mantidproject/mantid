@@ -4,6 +4,7 @@
 import os
 import sys
 import math
+import pickle
 from reduction import ReductionStep
 from reduction import extract_workspace_name
 from reduction import validate_step
@@ -992,6 +993,16 @@ class Mask(ReductionStep):
         self.spec_list.extend(det_list) 
 
     def execute(self, reducer, workspace, instrument=None):
+        
+        # Check whether the workspace has mask information
+        if mtd[workspace].getRun().hasProperty("rectangular_masks"):
+            rectangular_masks = pickle.loads(mtd[workspace].getRun().getProperty("rectangular_masks").value)
+            for rec in rectangular_masks:
+                try:
+                    self.add_pixel_rectangle(rec[0], rec[1], rec[2], rec[3])
+                except:
+                    mantid.sendLogMessage("Badly defined mask from configuration file: %s" % str(rec))
+        
         for shape in self._xml:
             MaskDetectorsInShape(workspace, shape)
         

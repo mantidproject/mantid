@@ -29,6 +29,7 @@ class ReductionOptions(BaseOptions):
         
     def reset(self):
         super(ReductionOptions, self).reset()
+        self.instrument_name = ReductionOptions.instrument_name
         self.nx_pixels = ReductionOptions.nx_pixels
         self.ny_pixels = ReductionOptions.ny_pixels
         self.pixel_size = ReductionOptions.pixel_size
@@ -58,6 +59,9 @@ class ReductionOptions(BaseOptions):
                 
         # Flight path correction
         script += "PerformFlightPathCorrection(%s)\n" % self.correct_for_flight_path
+        
+        # Use mask defined in configuration file
+        script += "UseConfigMask(%s)\n" % self.use_config_mask
         
         return script
             
