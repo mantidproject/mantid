@@ -78,13 +78,6 @@ namespace DataObjects
   }
 
 
-//  /** Copy constructor
-//   * @param other :: Peak to copy.
-//   */
-//  Peak::Peak(const Peak & other)
-//  : m_inst(other.
-//  {
-//  }
 
   //----------------------------------------------------------------------------------------------
   /** Destructor
@@ -357,7 +350,7 @@ namespace DataObjects
   {    this->m_BinCount = m_BinCount;  }
 
   /** Set the error on the integrated peak intensity
-   * @param m_Intensity :: intensity error value   */
+   * @param m_SigmaIntensity :: intensity error value   */
   void Peak::setSigmaIntensity(double m_SigmaIntensity)
   {    this->m_SigmaIntensity = m_SigmaIntensity;  }
 
@@ -380,6 +373,7 @@ namespace DataObjects
   }
 
   /** Set the goniometer rotation matrix at which this peak was measured.
+   * @param goniometerMatrix :: 3x3 matrix that represents the rotation matrix of the goniometer
    * @throw std::invalid_argument if matrix is not 3x3*/
   void Peak::setGoniometerMatrix(Mantid::Geometry::Matrix<double> goniometerMatrix)
   {
