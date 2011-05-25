@@ -281,7 +281,10 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
   /// Step size in ID in each col
   m_idstep = idstep;
 
-  //TODO: some safety checks
+  // Some safety checks
+  if (m_xpixels <= 0) throw std::invalid_argument("RectangularDetector::initialize(): xpixels should be > 0");
+  if (m_ypixels <= 0) throw std::invalid_argument("RectangularDetector::initialize(): ypixels should be > 0");
+
   std::string name = this->getName();
   int minDetId=idstart,maxDetId=idstart;
   //Loop through all the pixels
@@ -442,7 +445,6 @@ bool RectangularDetector::isValid(const V3D& point) const
 {
   // Avoid compiler warning
   (void)point;
-  //TODO: Implement
   throw Kernel::Exception::NotImplementedError("RectangularDetector::isValid() is not implemented.");
   return false;
 }
@@ -453,7 +455,6 @@ bool RectangularDetector::isOnSide(const V3D& point) const
 {
   // Avoid compiler warning
   (void)point;
-  //TODO: Implement
   throw Kernel::Exception::NotImplementedError("RectangularDetector::isOnSide() is not implemented.");
   return false;
 }
@@ -465,7 +466,6 @@ int RectangularDetector::interceptSurface(Track& track) const
 {
   // Avoid compiler warning
   (void)track;
-  //TODO: Implement
   throw Kernel::Exception::NotImplementedError("RectangularDetector::interceptSurface() is not implemented.");
   return 0;
 }
@@ -477,7 +477,6 @@ double RectangularDetector::solidAngle(const V3D& observer) const
 {
   // Avoid compiler warning
   (void)observer;
-  //TODO: Implement
   throw Kernel::Exception::NotImplementedError("RectangularDetector::solidAngle() is not implemented.");
   return 0;
 }
@@ -489,7 +488,6 @@ int RectangularDetector::getPointInObject(V3D& point) const
 {
   // Avoid compiler warning
   (void)point;
- //TODO: Implement
   throw Kernel::Exception::NotImplementedError("RectangularDetector::getPointInObject() is not implemented.");
   return 0;
 }
