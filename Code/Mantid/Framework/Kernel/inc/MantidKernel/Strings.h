@@ -135,9 +135,9 @@ int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T
 /// Convert a VAX number to x86 little eindien
 float getVAXnum(const float A);
 
-void readToEndOfLine( std::ifstream& in ,  bool ConsumeEOL );
+DLLExport void readToEndOfLine( std::ifstream& in ,  bool ConsumeEOL );
 
-std::string getWord( std::ifstream &in ,  bool consumeEOL );
+DLLExport std::string getWord( std::ifstream &in ,  bool consumeEOL );
 
 
 }   // NAMESPACE Strings
