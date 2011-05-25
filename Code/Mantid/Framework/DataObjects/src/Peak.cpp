@@ -23,7 +23,7 @@ namespace DataObjects
   Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength)
   : m_inst(m_inst),
     m_H(0), m_K(0), m_L(0),
-    m_Intensity(0), m_SigmaIntensity(0),
+    m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
     m_RunNumber(0)
@@ -45,7 +45,7 @@ namespace DataObjects
   Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL) :
     m_inst(m_inst),
     m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]),
-    m_Intensity(0), m_SigmaIntensity(0),
+    m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
     m_RunNumber(0)
@@ -67,7 +67,7 @@ namespace DataObjects
   Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL,Mantid::Geometry::Matrix<double> goniometer) :
     m_inst(m_inst),
     m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]),
-    m_Intensity(0), m_SigmaIntensity(0),
+    m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(goniometer),
     m_InverseGoniometerMatrix(3,3,true),
     m_RunNumber(0)

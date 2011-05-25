@@ -378,7 +378,7 @@ namespace MDDataObjects
     // calculate the size of buffer for data indexes;
      indexBufSize = sizeof(uint32_t);
      if(MDDataPointEqual<T,I,S>::n_indFields>2){
-       indexBufSize+=sizeof(I)*(MDDataPointEqual<T,I,S>::n_indFields-2);
+       indexBufSize+=uint32_t(sizeof(I)*(MDDataPointEqual<T,I,S>::n_indFields-2));
      }
       
    }

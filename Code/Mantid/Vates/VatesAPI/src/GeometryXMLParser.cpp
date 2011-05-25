@@ -155,14 +155,14 @@ namespace Mantid
      Constructor
      @param dataSet : vtkDataSet to process
      */
-      GeometryXMLParser::GeometryXMLParser(const std::string& xmlToProcess) : m_xmlToProcess(xmlToProcess), m_executed(false)
+      GeometryXMLParser::GeometryXMLParser(const std::string& xmlToProcess) : m_executed(false), m_xmlToProcess(xmlToProcess)
       {
       }
 
       /**
       Constructor
      */
-      GeometryXMLParser::GeometryXMLParser() : m_xmlToProcess(""), m_executed(false)
+      GeometryXMLParser::GeometryXMLParser() :  m_executed(false), m_xmlToProcess("")
       {
       }
 

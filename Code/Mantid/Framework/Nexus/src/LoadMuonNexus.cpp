@@ -240,7 +240,7 @@ namespace Mantid
           }
         }
         // Just a sanity check
-        assert(counter == total_specs);
+        assert(counter == size_t(total_specs) );
 
         bool autogroup = getProperty("AutoGroup");
 

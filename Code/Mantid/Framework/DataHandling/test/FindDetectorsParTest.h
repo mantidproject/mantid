@@ -75,12 +75,12 @@ private:
 
 		inputWS  = WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST,10,1.0);
 
-	    int forSpecDetMap[NHIST];
+		specid_t forSpecDetMap[NHIST];
 		for (size_t j = 0; j < NHIST; ++j)
 		{
 			// Just set the spectrum number to match the index
-			inputWS->getAxis(1)->spectraNo(j) = j+1;
-			forSpecDetMap[j] = j+1;
+			inputWS->getAxis(1)->spectraNo(j) = specid_t(j+1);
+			forSpecDetMap[j] = specid_t(j+1);
 		}
 
 		AnalysisDataService::Instance().add(WS_Name,inputWS);
@@ -104,12 +104,12 @@ private:
 
 		inputWS  = WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST,10,1.0);
 
-	    int forSpecDetMap[NHIST];
+		specid_t forSpecDetMap[NHIST];
 		for (size_t j = 0; j < NHIST; ++j)
 		{
 			// Just set the spectrum number to match the index
-			inputWS->getAxis(1)->spectraNo(j) = j+1;
-			forSpecDetMap[j] = j+1;
+			inputWS->getAxis(1)->spectraNo(j) = specid_t(j+1);
+			forSpecDetMap[j] = specid_t(j+1);
 		}
 
 		AnalysisDataService::Instance().add(WS_Name,inputWS);
