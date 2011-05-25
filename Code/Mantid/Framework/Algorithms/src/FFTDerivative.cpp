@@ -18,6 +18,9 @@ void FFTDerivative::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,"Input workspace for differentiation"));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output,"Workspace with result derivatives"));
+  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  mustBePositive->setLower(1);
+  declareProperty("Order",1,mustBePositive,"The order of the derivative");
 }
 
 void FFTDerivative::exec()
@@ -83,14 +86,37 @@ void FFTDerivative::exec()
     Mantid::MantidVec& re = transWS->dataY(0);
     Mantid::MantidVec& im = transWS->dataY(1);
 
-    // Multiply the transform by 2*pi*i*w
+    int dn = getProperty("Order");
+    bool swap_re_im = dn % 2 != 0;
+    int sign_re =  1;
+    int sign_im = -1;
+    switch(dn % 4)
+    {
+    case 1: sign_re =  1; sign_im = -1; break;
+    case 2: sign_re = -1; sign_im = -1; break;
+    case 3: sign_re = -1; sign_im =  1; break;
+    }
+    // Multiply the transform by (2*pi*i*w)**dn
     for(size_t j=0; j < re.size(); ++j)
     {
       double w = 2 * M_PI * nu[j];
-      double a =  re[j]*w;
-      double b = -im[j]*w;
-      re[j] = b;
-      im[j] = a;
+      double ww = w;
+      for(int k = dn; k > 1; --k)
+      {
+        ww *= w;
+      }
+      double a = sign_re * re[j]*ww;
+      double b = sign_im * im[j]*ww;
+      if (swap_re_im)
+      {
+        re[j] = b;
+        im[j] = a;
+      }
+      else
+      {
+        re[j] = a;
+        im[j] = b;
+      }
     }
 
     // Inverse transform

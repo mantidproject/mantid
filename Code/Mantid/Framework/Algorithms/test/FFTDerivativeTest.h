@@ -45,7 +45,40 @@ public:
     for(size_t i=0; i < Y.size(); ++i)
     {
       double xx = X[i] - 5.1;
-      TS_ASSERT_DELTA( Y[i],(-2 * xx * exp(-(xx*xx)*2)*2),0.000001);
+      TS_ASSERT_DELTA( Y[i],(-4 * xx * exp(-(xx*xx)*2)),0.000001);
+    }
+
+    FrameworkManager::Instance().deleteWorkspace("FFTDerivative_WS_exp");
+    FrameworkManager::Instance().deleteWorkspace("FFTDerivative_out");
+  }
+
+  void testGaussianSecondOrderDerivative()
+  {
+    const int N = 100;
+
+    createWS(N,0,"exp");
+
+    IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFTDerivative");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFTDerivative_WS_exp");
+    fft->setPropertyValue("OutputWorkspace","FFTDerivative_out");
+    fft->setPropertyValue("Order","2");
+    fft->execute();
+
+    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+      (AnalysisDataService::Instance().retrieve("FFTDerivative_out"));
+
+    const MantidVec& X = fWS->readX(0);
+    const MantidVec& Y = fWS->readY(0);
+
+    TS_ASSERT_EQUALS(Y.size(),100);
+
+    for(size_t i=0; i < Y.size(); ++i)
+    {
+      double xx = X[i] - 5.1;
+      double ex = exp(-(xx*xx)*2);
+      //TS_ASSERT_DELTA( Y[i],((16 * xx*xx - 4.0) * ex),0.000001);
+      TS_ASSERT_DELTA( Y[i],(16 * xx*xx * ex - 4*ex),0.000001);
     }
 
     FrameworkManager::Instance().deleteWorkspace("FFTDerivative_WS_exp");
