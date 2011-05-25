@@ -80,10 +80,11 @@ namespace Geometry
       void setRotationAngle( size_t axisnumber, double value);
       // Get axis object
       GoniometerAxis getAxis(size_t axisnumber);
+      const GoniometerAxis getAxis(size_t axisnumber) const;
       // Get axis object
       GoniometerAxis getAxis(std::string axisname);
       // Return the number of axes
-      size_t getNumberAxes();
+      size_t getNumberAxes() const;
       // Make a default universal goniometer
       void makeUniversalGoniometer();
 

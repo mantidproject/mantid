@@ -7,6 +7,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/Run.h"
 
 namespace WorkspaceCreationHelper
 {
@@ -580,5 +582,53 @@ namespace WorkspaceCreationHelper
       std::cout<<std::endl;
     }
   }
+
+
+  // =====================================================================================
+  /** Utility function to add a TimeSeriesProperty with a name and value
+   *
+   * @param runInfo :: Run to add to
+   * @param name :: property name
+   * @param val :: value
+   */
+  void AddTSPEntry(Run & runInfo, std::string name, double val)
+  {
+    TimeSeriesProperty<double> * tsp;
+    tsp = new TimeSeriesProperty<double>(name);
+    tsp->addValue("2011-05-24T00:00:00", val);
+    runInfo.addProperty(tsp);
+  }
+
+  // =====================================================================================
+  /** Sets the OrientedLattice in the crystal as an crystal with given lattice lengths, angles of 90 deg
+   *
+   * @param ws :: workspace to set
+   * @param a :: lattice length
+   * @param b :: lattice length
+   * @param c :: lattice length
+   */
+  void SetOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a, double b, double c)
+  {
+    OrientedLattice * latt = new OrientedLattice(a,b,c, 90., 90., 90.);
+    ws->mutableSample().setOrientedLattice(latt);
+  }
+
+  // =====================================================================================
+  /** Create a default universal goniometer and set its angles
+   *
+   * @param ws :: workspace to set
+   * @param phi :: +Y rotation angle (deg)
+   * @param chi :: +X rotation angle (deg)
+   * @param omega :: +Y rotation angle (deg)
+   */
+  void SetGoniometer(Mantid::API::MatrixWorkspace_sptr ws, double phi, double chi, double omega)
+  {
+    AddTSPEntry( ws->mutableRun(), "phi", phi);
+    AddTSPEntry( ws->mutableRun(), "chi", chi);
+    AddTSPEntry( ws->mutableRun(), "omega", omega);
+    ws->mutableRun().getGoniometer().makeUniversalGoniometer();
+  }
+
+
 
 }

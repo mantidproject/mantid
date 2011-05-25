@@ -300,6 +300,38 @@ const std::string Run::ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm"
 
 
 
+  //-----------------------------------------------------------------------------------------------
+  /** Get the gonimeter rotation matrix, calculated using the
+   * previously set Goniometer object as well as the angles
+   * loaded in the run (if any).
+   *
+   * As of now, it uses the FIRST angle value found.
+   *
+   * @return 3x3 double rotation matrix
+   */
+  Mantid::Geometry::MantidMat Run::getGoniometerMatrix()
+  {
+    for (size_t i=0; i < m_goniometer.getNumberAxes(); ++i)
+    {
+      std::string name = m_goniometer.getAxis(i).name;
+      if (this->hasProperty(name))
+      {
+        Property * prop = this->getProperty(name);
+        TimeSeriesProperty<double> * tsp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
+        if (tsp)
+        {
+          // Set that angle
+          m_goniometer.setRotationAngle(i, tsp->firstValue());
+        }
+        else
+          throw std::runtime_error("Sample log for goniometer angle '" + name + "' was not a TimeSeriesProperty<double>.");
+      }
+      else
+        throw std::runtime_error("Could not find goniometer angle '" + name + "' in the run sample logs.");
+    }
+    return m_goniometer.getR();
+  }
+
 
 } //API namespace
 

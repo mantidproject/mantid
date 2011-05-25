@@ -9,6 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidAPI/Run.h"
 
 namespace WorkspaceCreationHelper
 {
@@ -94,6 +95,10 @@ namespace WorkspaceCreationHelper
   DLL_TESTHELPERS void DisplayDataX(const Mantid::API::MatrixWorkspace_sptr ws);
   //not strictly creating a workspace, but really helpfull to see what one contains
   DLL_TESTHELPERS void DisplayDataE(const Mantid::API::MatrixWorkspace_sptr ws);
+
+  DLL_TESTHELPERS void AddTSPEntry(Mantid::API::Run & runInfo, std::string name, double val);
+  DLL_TESTHELPERS void SetOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a, double b, double c);
+  DLL_TESTHELPERS void SetGoniometer(Mantid::API::MatrixWorkspace_sptr ws, double phi, double chi, double omega);
 
 };
 

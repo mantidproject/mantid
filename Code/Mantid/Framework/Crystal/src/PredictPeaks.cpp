@@ -8,6 +8,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include <cmath>
+#include <MantidGeometry/Crystal/OrientedLattice.h>
 
 namespace Mantid
 {
@@ -104,15 +105,17 @@ namespace Crystal
     PeaksWorkspace_sptr pw(new PeaksWorkspace());
     setProperty<PeaksWorkspace_sptr>("OutputWorkspace", pw);
 
-    // Get the UB matrix. TODO: Get from workspace somehow
+
+    // Retrieve the OrientedLattice (UnitCell) from the workspace
+    OrientedLattice crystal = inWS->sample().getOrientedLattice();
+
+    // Get the UB matrix from it
     Matrix<double> ub(3,3, true);
-    ub = ub * 0.05;
+    ub = crystal.getUB();
 
-    // TODO: Retrieve UnitCell from the workspace
-    UnitCell crystal;
-
-    // TODO: Retrieve the goniometer rotation matrix.
+    // Retrieve the goniometer rotation matrix
     Matrix<double> gonio(3,3, true);
+    gonio = inWS->mutableRun().getGoniometerMatrix();
 
     // Final transformation matrix (Q in lab frame to HKL)
     Matrix<double> mat = gonio * ub;

@@ -153,6 +153,12 @@ GoniometerAxis Goniometer::getAxis( size_t axisnumber)
 {
   return motors.at(axisnumber);//it will throw out of range exception if axisnumber is not in range
 }
+/// Get GoniometerAxis obfject using motor number
+/// @param axisnumber :: axis number (from 0)
+const GoniometerAxis Goniometer::getAxis( size_t axisnumber) const
+{
+  return motors.at(axisnumber);//it will throw out of range exception if axisnumber is not in range
+}
 
 /// Get GoniometerAxis obfject using motor name
 /// @param axisname :: axis name
@@ -176,7 +182,7 @@ GoniometerAxis Goniometer::getAxis( std::string axisname)
 }
 
 /// @return the number of axes
-size_t Goniometer::getNumberAxes()
+size_t Goniometer::getNumberAxes() const
 {
   return motors.size();
 }

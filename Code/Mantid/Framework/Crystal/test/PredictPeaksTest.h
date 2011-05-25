@@ -35,10 +35,13 @@ public:
     std::string outWSName("PredictPeaksTest_OutputWS");
 
     // Make the fake input workspace
-    Workspace2D_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace(10000, 1);
+    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace(10000, 1);
     IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
     inWS->setInstrument(inst);
-    //TODO: set ub and stuff
+
+    //Set ub and Goniometer rotation
+    WorkspaceCreationHelper::SetOrientedLattice(inWS, 10.0, 10.0, 10.0);
+    WorkspaceCreationHelper::SetGoniometer(inWS, 0., 0., 0.);
   
     PredictPeaks alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -47,7 +50,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("WavelengthMin", "0.1") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("WavelengthMax", "10.0") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("MinDSpacing", "0.1") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("MinDSpacing", "1.0") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     

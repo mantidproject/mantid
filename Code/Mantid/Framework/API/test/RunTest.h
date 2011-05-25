@@ -5,9 +5,13 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Property.h"
+#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Geometry::MantidMat;
 
 // Helper class
 namespace
@@ -119,7 +123,24 @@ public:
     TS_ASSERT_EQUALS( runCopy.getGoniometer().getNumberAxes(), 3 );
     runCopy = runInfo;
     TS_ASSERT_EQUALS( runCopy.getGoniometer().getNumberAxes(), 3 );
+  }
 
+
+  /** Setting up a goniometer and the angles to feed it
+   * using sample logs, then getting the right rotation matrix out.
+   */
+  void test_getGoniometerMatrix()
+  {
+    Run runInfo;
+    WorkspaceCreationHelper::AddTSPEntry(runInfo, "phi", 90.0);
+    WorkspaceCreationHelper::AddTSPEntry(runInfo, "chi", 90.0);
+    WorkspaceCreationHelper::AddTSPEntry(runInfo, "omega", 90.0);
+    runInfo.getGoniometer().makeUniversalGoniometer();
+    MantidMat r = runInfo.getGoniometerMatrix();
+    TS_ASSERT_DELTA( r[0][0], 0.0, 1e-4);
+    TS_ASSERT_DELTA( r[0][1], 1.0, 1e-4);
+    TS_ASSERT_DELTA( r[1][0], 1.0, 1e-4);
+    TS_ASSERT_DELTA( r[2][2], -1.0, 1e-4);
   }
 
 };
