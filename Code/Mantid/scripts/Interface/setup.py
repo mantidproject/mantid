@@ -18,6 +18,7 @@ try:
     os.system("pyuic4 -o ui/sans/ui_eqsans_instrument.py ui/sans/eqsans_instrument.ui")
     os.system("pyuic4 -o ui/sans/ui_eqsans_sample_data.py ui/sans/eqsans_sample_data.ui")
     os.system("pyuic4 -o ui/sans/ui_eqsans_background.py ui/sans/eqsans_background.ui")
+    os.system("pyuic4 -o ui/sans/ui_eqsans_info.py ui/sans/eqsans_info.ui")
     
     os.system("pyuic4 -o ui/ui_reduction_main.py ui/reduction_main.ui")
     os.system("pyuic4 -o ui/ui_hfir_output.py ui/hfir_output.ui")

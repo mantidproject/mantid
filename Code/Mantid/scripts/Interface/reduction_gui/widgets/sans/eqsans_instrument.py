@@ -7,6 +7,7 @@ from reduction_gui.reduction.sans.eqsans_options_script import ReductionOptions
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_eqsans_instrument
+import ui.sans.ui_eqsans_info
 
 class SANSInstrumentWidget(BaseWidget):    
     """
@@ -88,6 +89,7 @@ class SANSInstrumentWidget(BaseWidget):
         # Event connections
         self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
         self.connect(self._summary.sample_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_dist_clicked)
+        self.connect(self._summary.help_button, QtCore.SIGNAL("clicked()"), self._show_help)
     
         self.connect(self._summary.dark_current_check, QtCore.SIGNAL("clicked(bool)"), self._dark_clicked)
         self.connect(self._summary.dark_browse_button, QtCore.SIGNAL("clicked()"), self._dark_browse)
@@ -452,3 +454,12 @@ class SANSInstrumentWidget(BaseWidget):
         m.use_config_mask = self._summary.config_mask_chk.isChecked()
         
         return m
+
+    def _show_help(self):
+        class HelpDialog(QtGui.QDialog, ui.sans.ui_eqsans_info.Ui_Dialog): 
+            def __init__(self, instrument_list=None):
+                QtGui.QDialog.__init__(self)
+                self.instrument_list = instrument_list
+                self.setupUi(self)
+        dialog = HelpDialog()
+        dialog.exec_()
