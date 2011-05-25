@@ -3,8 +3,6 @@
 ###########################################################################
 set ( CMAKE_INCLUDE_PATH "${THIRD_PARTY}/include" )
 set ( BOOST_INCLUDEDIR "${THIRD_PARTY}/include" )
-# Multiprocessor compilation
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP" )
 
 set (Boost_NO_SYSTEM_PATHS TRUE)
 
@@ -17,6 +15,14 @@ else()
   set ( CMAKE_LIBRARY_PATH "${THIRD_PARTY}/lib/win32" )
   set ( BOOST_LIBRARYDIR  "${THIRD_PARTY}/lib/win32" )
 endif()
+
+##########################################################################
+# Additional compiler flags
+##########################################################################
+# /MP - Multiprocessor compilation within a project
+# /w34296 - Treat warning C4396, about comparison on unsigned and zero, 
+#           as a level 3 warning
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296" ) 
 
 ###########################################################################
 # On Windows we want to bundle Python. The necessary libraries are in
