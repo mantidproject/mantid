@@ -253,6 +253,7 @@ std::string FileProperty::setLoadProperty(const std::string & propValue)
   {
     foundFile = FileFinder::Instance().getFullPath(propValue);
   }
+
   if( foundFile.empty() )
   {
     return PropertyWithValue<std::string>::setValue(propValue);

@@ -585,7 +585,10 @@ int LoadEventNexus::fileCheck(const std::string& filePath)
 /// Initialisation method.
 void LoadEventNexus::init()
 {
-  this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
+  std::vector<std::string> exts;
+  exts.push_back("_event.nxs");
+  exts.push_back(".nxs");
+  this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
       "The name (including its full or relative path) of the Nexus file to\n"
       "attempt to load. The file extension must either be .nxs or .NXS" );
 
