@@ -1178,6 +1178,9 @@ const FacilityInfo& ConfigServiceImpl::getFacility() const
  */
 const FacilityInfo& ConfigServiceImpl::getFacility(const std::string& facilityName) const
 {
+  if (facilityName.empty())
+    return this->getFacility();
+
   std::vector<FacilityInfo*>::const_iterator it = m_facilities.begin();
   for (; it != m_facilities.end(); ++it)
   {
