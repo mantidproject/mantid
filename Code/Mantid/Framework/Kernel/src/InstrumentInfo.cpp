@@ -122,5 +122,11 @@ namespace Mantid
       return m_technique;
     }
 
+    // Return the facility
+    const FacilityInfo& InstrumentInfo::facility() const
+    {
+      return *m_facility;
+    }
+
   } // namespace Kernel
 } // namespace Mantid
