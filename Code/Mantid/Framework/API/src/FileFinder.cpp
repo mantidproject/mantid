@@ -215,6 +215,17 @@ namespace Mantid
     {
       if (hint.empty())
         return "";
+      std::vector<std::string> exts_v;
+      if (exts != NULL && exts->size() > 0)
+        exts_v.assign(exts->begin(), exts->end());
+
+      return this->findRun(hint, exts_v);
+    }
+
+    std::string FileFinderImpl::findRun(const std::string& hint,const std::vector<std::string> &exts)const
+    {
+      if (hint.empty())
+        return "";
 
       Poco::Path hintPath(hint);
       if (!hintPath.getExtension().empty())
@@ -248,13 +259,14 @@ namespace Mantid
       {
         extensions.push_back(extension);
       }
-      else if (exts != NULL)
+      else if (!exts.empty())
       {
+        extensions.insert(extensions.end(), exts.begin(), exts.end());
         // find intersection of facility_extensions and exts, preserving the order of facility_extensions
         std::vector<std::string>::const_iterator it = facility_extensions.begin();
         for (; it != facility_extensions.end(); ++it)
         {
-          if (exts->find(*it) != exts->end())
+          if (std::find(exts.begin(), exts.end(), *it) == exts.end())
           {
             extensions.push_back(*it);
           }
@@ -270,6 +282,7 @@ namespace Mantid
       std::transform(filename.begin(),filename.end(),filenames[1].begin(),toupper);
       std::transform(filename.begin(),filename.end(),filenames[2].begin(),tolower);
       std::vector<std::string>::const_iterator ext = extensions.begin();
+      std::cout << "checking for the file with different case" << std::endl; // REMOVE
       for (; ext != extensions.end(); ++ext)
       {
         for(size_t i = 0; i < filenames.size(); ++i)
@@ -283,6 +296,7 @@ namespace Mantid
       // Search the archive of the default facility
       std::string archiveOpt = Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
       std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(), tolower);
+      //std::cout << "Before archive search: facility = " << facility.name() << " archiveOpt = " << archiveOpt << std::endl; // REMOVE
       if (!archiveOpt.empty() && archiveOpt != "off"
           && !facility.archiveSearch().empty())
       {
