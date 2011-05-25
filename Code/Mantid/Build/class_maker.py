@@ -75,7 +75,7 @@ namespace %s
 } // namespace %s
 
 #endif  /* %s */
-""" % (guard, guard, alg_include, subproject, classname, datetime.datetime.now(), classname, alg_class_declare, classname, classname, algorithm_header, subproject, guard)
+""" % (guard, guard, alg_include, subproject, classname, datetime.datetime.now().date(), classname, alg_class_declare, classname, classname, algorithm_header, subproject, guard)
     f.write(s)
     f.close()
 
@@ -104,6 +104,7 @@ def write_source(subproject, classname, filename, args):
   {
     this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
     this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+    this->setWikiDescription("TODO: Enter the text to be placed in the Description section of the wiki page.");
   }
 
   //----------------------------------------------------------------------------------------------
