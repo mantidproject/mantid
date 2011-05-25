@@ -39,7 +39,7 @@ add_library ( DesignerPlugins ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} )
 if ( MSVC )
     # For some reason when the generator is MSVC  10 it ignores the  LIBRARY_OUTPUT_DIRECTORY 
     # property so we have to do something slightly different
-    set ( LIB_EXTS ".dll" ".lib" ".exp" )
+    set ( LIB_EXTS ".dll" )
     set ( SRC_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
     set ( DEST_DIR ${SRC_DIR}/designer )
     add_custom_command( TARGET DesignerPlugins POST_BUILD 
