@@ -13,6 +13,7 @@
 #include "MantidTestHelpers/AlgorithmHelper.h"
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/cow_ptr.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -105,17 +106,31 @@ public:
     dotestEventWorkspace(false, 1);
   }
 
-  void dotestEventWorkspace(bool inplace, size_t numgroups)
+  void test_EventWorkspace_TwoGroups_dontPreserveEvents()
+  {
+    dotestEventWorkspace(false, 2, false);
+  }
+
+  void test_EventWorkspace_OneGroup_dontPreserveEvents()
+  {
+    dotestEventWorkspace(false, 1, false);
+  }
+
+
+  void dotestEventWorkspace(bool inplace, size_t numgroups, bool preserveEvents = true, int bankWidthInPixels=16 )
   {
     std::string nxsWSname("DiffractionFocussing2Test_ws");
-    //----- Load some event data --------
-    AlgorithmHelper::runAlgorithm("LoadEventNexus", 4,
-        "Filename", "CNCS_7860_event.nxs",
-        "OutputWorkspace", nxsWSname.c_str());
+
+    // Create the fake event workspace
+    EventWorkspace_sptr inputW = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(3, bankWidthInPixels);
+    AnalysisDataService::Instance().addOrReplace(nxsWSname, inputW);
+
+//    //----- Load some event data --------
+//    AlgorithmHelper::runAlgorithm("LoadEventNexus", 4,
+//        "Filename", "CNCS_7860_event.nxs",
+//        "OutputWorkspace", nxsWSname.c_str());
 
     //-------- Check on the input workspace ---------------
-    EventWorkspace_sptr inputW = boost::dynamic_pointer_cast<EventWorkspace>
-            (AnalysisDataService::Instance().retrieve(nxsWSname));
     TS_ASSERT(inputW);
     if (!inputW) return;
 
@@ -133,11 +148,12 @@ public:
       xRef[4] = 1e6;
       //Set an X-axis
       inputW->setX(pix, axis);
+      inputW->getEventList(pix).addEventQuickly( TofEvent(1000.0, 1.0) );
     }
 
     // ------------ Create a grouping workspace by name -------------
-    std::string GroupNames = "bank36,bank37";
-    if (numgroups == 1) GroupNames = "bank36";
+    std::string GroupNames = "bank2,bank3";
+    if (numgroups == 1) GroupNames = "bank3";
     std::string groupWSName("DiffractionFocussing2Test_group");
     AlgorithmHelper::runAlgorithm("CreateGroupingWorkspace", 6,
         "InputWorkspace",  nxsWSname.c_str(),
@@ -154,60 +170,81 @@ public:
 
     //This fake calibration file was generated using DiffractionFocussing2Test_helper.py
     TS_ASSERT_THROWS_NOTHING( focus.setPropertyValue("GroupingWorkspace", groupWSName) );
-
+    TS_ASSERT_THROWS_NOTHING( focus.setProperty("PreserveEvents", preserveEvents) );
     //OK, run the algorithm
     TS_ASSERT_THROWS_NOTHING( focus.execute(); );
     TS_ASSERT( focus.isExecuted() );
 
-    EventWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws)) );
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputws)) );
     if (!output) return;
+
+    // ---- Did we keep the event workspace ----
+    EventWorkspace_const_sptr outputEvent;
+    TS_ASSERT_THROWS_NOTHING( outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(output) );
+    if (preserveEvents)
+    {
+      TS_ASSERT( outputEvent );
+      if (!outputEvent) return;
+    }
+    else
+    {
+      TS_ASSERT( !outputEvent );
+    }
 
     TS_ASSERT_EQUALS( output->getNumberHistograms(), numgroups);
     if (output->getNumberHistograms() != numgroups)
       return;
 
-    //The map between workspace index and spectrum # is still 1:1
+    TS_ASSERT_EQUALS( output->blocksize(), 4);
+
     TS_ASSERT_EQUALS( output->getAxis(1)->length(), numgroups);
-    TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(0), 0);
-    TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(numgroups-1), numgroups-1);
+    if (preserveEvents)
+      {TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(0), 0);}
+    else
+      // Groups are counted starting at 1, so spectrum number of workspace index 0 is 1
+      {TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(0), 1);}
 
     //Events in these two banks alone
-    TS_ASSERT_EQUALS(output->getNumberEvents(), (numgroups==2) ? 16260 : 7274);
+    if (preserveEvents)
+      TS_ASSERT_EQUALS(outputEvent->getNumberEvents(), (numgroups==2) ? (bankWidthInPixels * bankWidthInPixels *2) : bankWidthInPixels*bankWidthInPixels);
 
     //Now let's test the grouping of detector UDETS to groups
     for (size_t group=1; group<=numgroups; group++)
     {
-      specid_t workspaceindex_in_output = static_cast<specid_t>(group-1);
+      specid_t spectrumnumber_in_output = output->getAxis(1)->spectraNo(group-1);
       //This is the list of the detectors (grouped)
-      std::vector<detid_t> mylist = output->spectraMap().getDetectors(workspaceindex_in_output);
+      std::vector<detid_t> mylist = output->spectraMap().getDetectors(spectrumnumber_in_output);
       //1024 pixels in a bank
-      TS_ASSERT_EQUALS(mylist.size(), 1024);
+      TS_ASSERT_EQUALS(mylist.size(), bankWidthInPixels * bankWidthInPixels);
     }
 
-    //Now let's try to rebin using log parameters (this used to fail?)
-    Rebin rebin;
-    rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace", outputws);
-    rebin.setPropertyValue("OutputWorkspace", outputws);
-    // Check it fails if "Params" property not set
-    rebin.setPropertyValue("Params", "2.0,-1.0,65535");
-    TS_ASSERT(rebin.execute());
-    TS_ASSERT(rebin.isExecuted());
-
-    /* Get the output ws again */
-    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
-    double events_after_binning = 0;
-    for (size_t workspace_index=0; workspace_index<output->getNumberHistograms(); workspace_index++)
+    if (preserveEvents)
     {
-      //should be 16 bins
-      TS_ASSERT_EQUALS( output->refX(workspace_index)->size(), 16);
-      //There should be some data in the bins
-      for (int i=0; i<15; i++)
-        events_after_binning += output->dataY(workspace_index)[i];
+      //Now let's try to rebin using log parameters (this used to fail?)
+      Rebin rebin;
+      rebin.initialize();
+      rebin.setPropertyValue("InputWorkspace", outputws);
+      rebin.setPropertyValue("OutputWorkspace", outputws);
+      // Check it fails if "Params" property not set
+      rebin.setPropertyValue("Params", "2.0,-1.0,65535");
+      TS_ASSERT(rebin.execute());
+      TS_ASSERT(rebin.isExecuted());
+
+      /* Get the output ws again */
+      outputEvent = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
+      double events_after_binning = 0;
+      for (size_t workspace_index=0; workspace_index<outputEvent->getNumberHistograms(); workspace_index++)
+      {
+        //should be 16 bins
+        TS_ASSERT_EQUALS( outputEvent->refX(workspace_index)->size(), 16);
+        //There should be some data in the bins
+        for (int i=0; i<15; i++)
+          events_after_binning += outputEvent->dataY(workspace_index)[i];
+      }
+      // The count sums up to the same as the number of events
+      TS_ASSERT_DELTA( events_after_binning, (numgroups==2) ? double(bankWidthInPixels * bankWidthInPixels) * 2.0 :  double(bankWidthInPixels * bankWidthInPixels), 1e-4);
     }
-    // The count sums up to the same as the number of events
-    TS_ASSERT_DELTA( events_after_binning, (numgroups==2) ? 16260.0 : 7274.0, 1e-4);
   }
 
 
