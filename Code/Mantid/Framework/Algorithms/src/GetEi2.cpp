@@ -404,11 +404,20 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
     }
     for ( int64_t i = nyvals-1; i >= ipk_int; --i )
     {
-      if (peak_y[i]>hby2)
+      if (peak_y[i] > hby2)
       {
         ip2 = i+1;           //   ! point closest to peak after which the intensity is always below half height
         break;
       }
+    }
+    // A broad peak with many local maxima on the side can cause the algorithm to give the same indices
+    // for the two points either side of the half-width point. We know the algorithm isn't perfect so
+    // move one index such that there is at least a gap.
+    if( ip1==ip2 )
+    {
+      g_log.warning() << "A peak with a local maxima on the trailing edge has been found. The estimation of the "
+		      << "half-height point will not be as accurate.\n";
+      ip1--;
     }
     xp_hh = peak_x[ip2] + (peak_x[ip1]-peak_x[ip2])*((hby2-peak_y[ip2])/(peak_y[ip1]-peak_y[ip2]));
   }
@@ -436,6 +445,15 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
         im2 = i-1;   // ! point closest to peak after which the intensity is always below half height
         break;
       }
+    }
+    // A broad peak with many local maxima on the side can cause the algorithm to give the same indices
+    // for the two points either side of the half-width point. We know the algorithm isn't perfect so
+    // move one index such that there is at least a gap.
+    if( im1==im2 )
+    {
+      g_log.warning() << "A peak with a local maxima on the rising edge has been found. The estimation of the "
+		      << "half-height point will not be as accurate.\n";
+      im1++;
     }
     xm_hh = peak_x[im2] + (peak_x[im1]-peak_x[im2])*((hby2-peak_y[im2])/(peak_y[im1]-peak_y[im2]));
   }
