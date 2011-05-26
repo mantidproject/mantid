@@ -23,10 +23,10 @@ namespace Mantid
 
     const double SaveNXSPE::MASK_FLAG = -1e30;
     const double SaveNXSPE::MASK_ERROR = 0.0;
-	// works fine but there were cases that some compilers crush on this (VS2008 in mixed .net environment ?)
+    // works fine but there were cases that some compilers crush on this (VS2008 in mixed .net environment ?)
     const std::string SaveNXSPE::NXSPE_VER = "1.1";
 
-	SaveNXSPE::SaveNXSPE() :
+    SaveNXSPE::SaveNXSPE() :
       API::Algorithm()
     {
     }
@@ -103,6 +103,7 @@ namespace Mantid
 
       // Create the file.
       ::NeXus::File nxFile(this->filename, NXACC_CREATE5);
+       nxFile.putAttr("nxspe_version", NXSPE_VER);
 
       // Make the top level entry (and open it)
       nxFile.makeGroup(inputWS->getName(), "NXentry", true);
@@ -149,11 +150,11 @@ namespace Mantid
       bool kikfScaling = getProperty("ki_over_kf_scaling");
       if (kikfScaling)
         {
-      nxFile.writeData("ki_over_kf_scaling", 1);
+           nxFile.writeData("ki_over_kf_scaling", 1);
         }
       else
         {
-          nxFile.writeData("ki_over_kf_scaling", 0);
+           nxFile.writeData("ki_over_kf_scaling", 0);
         }
 
       nxFile.closeGroup(); // NXSPE_info
@@ -239,7 +240,7 @@ namespace Mantid
                   nxFile.openData("data");
                   slab_start[0] = i;
                   nxFile.putSlab(const_cast<MantidVec&> (inputWS->readY(i)),
-                      slab_start, slab_size);
+                                  slab_start, slab_size);
                   // Close the data
                   nxFile.closeData();
 
@@ -248,7 +249,7 @@ namespace Mantid
                   //MantidVec& tmparr = const_cast<MantidVec&>(inputWS->dataE(i));
                   //nxFile.putSlab((void*)(&(tmparr[0])), slab_start, slab_size);
                   nxFile.putSlab(const_cast<MantidVec&> (inputWS->readE(i)),
-                      slab_start, slab_size);
+                                 slab_start, slab_size);
                   // Close the error
                   nxFile.closeData();
                 }
@@ -275,19 +276,18 @@ namespace Mantid
             progress.report();
           }
         }
-	 // execute the subalgorithm to calculate the detector's parameters;
-	  IAlgorithm_sptr   spCalcDetPar = this->createSubAlgorithm("FindDetectorsPar", 0, 0.01, true, 1);
+     // execute the subalgorithm to calculate the detector's parameters;
+      IAlgorithm_sptr   spCalcDetPar = this->createSubAlgorithm("FindDetectorsPar", 0, 0.01, true, 1);
 
-	  spCalcDetPar->initialize();
-	  spCalcDetPar->setPropertyValue("InputWorkspace", inputWS->getName());
-	  spCalcDetPar->execute();
+      spCalcDetPar->initialize();
+      spCalcDetPar->setPropertyValue("InputWorkspace", inputWS->getName());
+      spCalcDetPar->execute();
 
-	  //
-	  FindDetectorsPar * pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
-	  if(!pCalcDetPar){
-		  // "can not get pointer to FindDetectorsPar algorithm"
-		  throw(std::bad_cast());
-	  }
+      //
+      FindDetectorsPar * pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
+      if(!pCalcDetPar){	  // "can not get pointer to FindDetectorsPar algorithm"
+          throw(std::bad_cast());
+      }
       const std::vector<double> & azimuthal           = pCalcDetPar->getAzimuthal();
       const std::vector<double> & polar               = pCalcDetPar->getPolar();
       const std::vector<double> & azimuthal_width     = pCalcDetPar->getAzimWidth();

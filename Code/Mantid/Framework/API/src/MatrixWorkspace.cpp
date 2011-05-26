@@ -501,7 +501,7 @@ namespace Mantid
       }
 
       const Geometry::V3D samplePos = sample->getPos();
-      const Geometry::V3D beamLine = samplePos - source->getPos();
+      const Geometry::V3D beamLine  = samplePos - source->getPos();
 
       return det->getTwoTheta(samplePos,beamLine);
     }

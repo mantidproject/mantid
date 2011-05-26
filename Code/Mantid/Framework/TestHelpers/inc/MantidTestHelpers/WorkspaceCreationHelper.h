@@ -10,6 +10,7 @@
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 namespace WorkspaceCreationHelper
 {
@@ -30,7 +31,7 @@ namespace WorkspaceCreationHelper
   DLL_TESTHELPERS Mantid::DataObjects::Workspace1D_sptr Create1DWorkspaceFib(int size);
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(int nHist, int nBins);
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
-  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(int64_t nHist, int64_t nBins, bool isHist=false, const std::set<int64_t> &
+  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(int64_t nHist, int64_t nBin, bool isHist=false, const std::set<int64_t> &
 					       maskedWorkspaceIndices = std::set<int64_t>());
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace154(int64_t nHist, int64_t nBins, bool isHist=false,
 					       const std::set<int64_t> & maskedWorkspaceIndices = std::set<int64_t>());
