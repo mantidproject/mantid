@@ -569,7 +569,7 @@ int LoadEventNexus::fileCheck(const std::string& filePath)
   int confidence(0);
   try
   {
-	// FIXME: We need a better test
+        // FIXME: We need a better test
     ::NeXus::File file = ::NeXus::File(filePath);
     // Open the base group called 'entry'
     file.openGroup("entry", "NXentry");
@@ -1012,7 +1012,7 @@ void LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
   instrument = nxfile.getStrData();
   g_log.debug() << "Instrument name read from NeXus file is " << instrument << std::endl;
   if (instrument.compare("POWGEN3") == 0) // hack for powgen b/c of bad long name
-	  instrument = "POWGEN";
+          instrument = "POWGEN";
   // Now let's close the file as we don't need it anymore to load the instrument.
   nxfile.close();
 

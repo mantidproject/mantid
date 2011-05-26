@@ -5,6 +5,7 @@
 #include "cxxtest/TestSuite.h"
 
 using Mantid::Geometry::OneToOneSpectraDetectorMap;
+using Mantid::Geometry::ISpectraDetectorMap;
 using Mantid::specid_t;
 using Mantid::detid_t;
 
@@ -12,6 +13,12 @@ class OneToOneSpectraDetectorMapTest : public CxxTest::TestSuite
 {
 public:
   
+  void test_That_Default_Construction_Gives_An_Empty_Map()
+  {
+    OneToOneSpectraDetectorMap empty;
+    TSM_ASSERT_EQUALS("A default map is empty", empty.nElements(), 0);
+  }
+
   void test_That_Map_Construction_Gives_A_Map_Including_Both_Ends()
   {
     OneToOneSpectraDetectorMap eleven(0,10);
@@ -31,6 +38,23 @@ public:
     }
   }
 
+  void test_That_Two_Objects_With_The_Same_Start_And_End_Are_Considered_Equal()
+  {
+    OneToOneSpectraDetectorMap lhs(0,4);
+    OneToOneSpectraDetectorMap rhs(0,4);
+    TSM_ASSERT("Two objects with equal start and end should be equal", lhs==rhs);
+  }
+
+  void test_That_Two_Objects_With_The_Different_Start_And_End_Are_Not_Considered_Equal()
+  {
+    OneToOneSpectraDetectorMap lhs(0,4);
+    OneToOneSpectraDetectorMap rhs(1,4);
+    TSM_ASSERT("Two objects with different start and end should not be equal", lhs!=rhs);
+    OneToOneSpectraDetectorMap lhs2(0,4);
+    OneToOneSpectraDetectorMap rhs2(1,4);
+    TSM_ASSERT("Two objects with different start and end should not be equal", lhs2 != rhs2);
+  }
+
   void test_That_A_Valid_Spectrum_Returns_The_Same_Number_For_The_DetectorID()
   {
     OneToOneSpectraDetectorMap spectramap(0,4);
@@ -44,9 +68,9 @@ public:
   {
     OneToOneSpectraDetectorMap spectramap(0,4);
     TSM_ASSERT_THROWS("An invalid spectrum number should throw an out_of_range error", 
-		      spectramap.getDetectors(5), std::out_of_range);
+                      spectramap.getDetectors(5), std::out_of_range);
     TSM_ASSERT_THROWS("A invalid spectrum number should throw an out_of_range error", 
-		      spectramap.getDetectors(-1), std::out_of_range);
+                      spectramap.getDetectors(-1), std::out_of_range);
   }
   
   void test_That_A_Valid_DetectorID_List_Returns_The_Same_Numbers()
@@ -60,7 +84,7 @@ public:
     }
     std::vector<specid_t> spectra;
     TSM_ASSERT_THROWS_NOTHING("A valid detector ID should not throw", 
-			      spectra = spectramap.getSpectra(detList));
+                              spectra = spectramap.getSpectra(detList));
     TSM_ASSERT_EQUALS("The list should be the same size as the ID list", spectra.size(), 3);
     for( specid_t i = 0; i < specid_t(ndets); ++i)
     {
@@ -77,32 +101,56 @@ public:
     detList[1] = 1;
     detList[2] = 5;
     TSM_ASSERT_THROWS("An invalid detector ID list should throw", 
-		      spectramap.getSpectra(detList), std::invalid_argument);
+                      spectramap.getSpectra(detList), std::invalid_argument);
   }
 
   void test_Iterator_Behaviour()
   {
     OneToOneSpectraDetectorMap spectramap(0,4);
-    spectramap.moveIteratorToStart();
-    TSM_ASSERT_EQUALS("Current spectrum should be the first",spectramap.getCurrentSpectrum(), 0);
-    TSM_ASSERT_EQUALS("We should have a next element", spectramap.hasNext(), true);
-    TSM_ASSERT_THROWS_NOTHING("Advancing should not throw", spectramap.advanceIterator());
-    TSM_ASSERT_EQUALS("Current spectrum should be the second",spectramap.getCurrentSpectrum(), 1);
-    
-    spectramap.advanceIterator(); //Now = 2
-    spectramap.advanceIterator(); //Now = 3
-    spectramap.advanceIterator(); //Now = 4
-    TSM_ASSERT_EQUALS("We should not have a next element", spectramap.hasNext(), false);
-    TSM_ASSERT_EQUALS("Current spectrum should be the end",spectramap.getCurrentSpectrum(), 4);
-
+    ISpectraDetectorMap::const_iterator itr = spectramap.cbegin();
+    TSM_ASSERT_EQUALS("Current spectrum should be the first", *itr, std::make_pair(0,0));
+    ++itr;
+    TSM_ASSERT_EQUALS("Current spectrum should be the second",*itr, std::make_pair(1,1));
+    ++itr;
+    doIteratorRangeTest(spectramap, itr, 3, 2);
   }
 
-  void test_Iterator_Behaviour_For_A_Single_Element()
+  void test_Iterators_For_Map_With_Single_Entry()
   {
-    OneToOneSpectraDetectorMap spectramap(5,5);
-    TSM_ASSERT_EQUALS("Current spectrum should be the first",spectramap.getCurrentSpectrum(), 5);
-    TSM_ASSERT_EQUALS("We should not have a next element", spectramap.hasNext(), false);
+    OneToOneSpectraDetectorMap spectramap(1,1);
+    doIteratorRangeTest(spectramap, spectramap.cbegin(), 1, 1);
   }
+
+  void test_Iterators_For_Empty_Map()
+  {
+    OneToOneSpectraDetectorMap spectramap;
+    doIteratorRangeTest(spectramap, spectramap.cbegin(), 0, 0);
+  }
+
+private:
+  
+  void doIteratorRangeTest(const ISpectraDetectorMap &spectramap, 
+                           ISpectraDetectorMap::const_iterator  itr, 
+                           const int remaining_itrs, const specid_t current_value)
+  {
+    int nloops(0);
+    specid_t value = current_value;
+    ISpectraDetectorMap::const_iterator iend = spectramap.cend();
+    for( ; itr != iend; ++itr )
+    {
+      ISpectraDetectorMap::value_type current = std::make_pair(value, value);
+      TS_ASSERT_EQUALS(*itr, current);
+      TS_ASSERT_EQUALS(itr->first, current.first);
+      TS_ASSERT_EQUALS(itr->second, current.second);
+      ++nloops;
+      ++value;
+    }
+    std::ostringstream os;
+    os << remaining_itrs << " further iteration(s) should have been performed";
+    TSM_ASSERT_EQUALS(os.str().c_str(), nloops, remaining_itrs);
+
+  }
+
 
 };
 

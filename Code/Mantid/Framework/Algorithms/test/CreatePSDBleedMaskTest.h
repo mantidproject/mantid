@@ -7,6 +7,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Detector.h"
 
@@ -106,7 +107,7 @@ private:
     Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(nSpectra,nBins);
     testWS->setInstrument(createTestInstrument(nTubes, nPixelsPerTube));
     // Need spectra mapping
-    testWS->mutableSpectraMap().populateSimple(0, nSpectra);
+    testWS->replaceSpectraMap(new Mantid::Geometry::OneToOneSpectraDetectorMap(0, nSpectra));
     // Set a spectra to have high count such that the fail the test
     const int failedTube(1);
     // Set a high value to tip that tube over the max count rate

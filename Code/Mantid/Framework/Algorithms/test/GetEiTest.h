@@ -77,8 +77,8 @@ private:
       const double xValue = 5.0 + 5.5*i;
       if( i < numBins )
       {
-	testWS->dataY(0)[i] = peakOneHeight * exp(-0.5*pow(xValue - peakOneCentre, 2.)/sigmaSqOne);
-	testWS->dataY(1)[i] = peakTwoHeight * exp(-0.5*pow(xValue - peakTwoCentre, 2.)/sigmaSqTwo);
+        testWS->dataY(0)[i] = peakOneHeight * exp(-0.5*pow(xValue - peakOneCentre, 2.)/sigmaSqOne);
+        testWS->dataY(1)[i] = peakTwoHeight * exp(-0.5*pow(xValue - peakTwoCentre, 2.)/sigmaSqTwo);
 
       }
       xdata.access()[i] = xValue;

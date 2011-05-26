@@ -161,7 +161,7 @@ public:
     loader.setPropertyValue("Workspace", m_IWSName);
     loader.execute(); 
 
-    m_2DWS->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, Nhist);
+    m_2DWS->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, Nhist));
 
     m_2DWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 

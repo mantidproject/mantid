@@ -207,7 +207,8 @@ namespace Mantid
       //Load instrument and other data once then copy it later
       m_progress->report("Loading instrument");
       loadRunDetails(local_workspace, entry);
-      local_workspace->mutableSpectraMap().populate(spec(),udet(),udet.dim0());
+      //Populate the Spectra Map with parameters
+      local_workspace->replaceSpectraMap(new SpectraDetectorMap(spec(),udet(),udet.dim0()));
       runLoadInstrument(local_workspace);
 
       loadSampleData(local_workspace, entry);

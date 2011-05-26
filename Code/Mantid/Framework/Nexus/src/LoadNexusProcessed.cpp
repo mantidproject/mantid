@@ -584,7 +584,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
     EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(local_workspace);
     for (std::size_t wi=0; wi<local_workspace->getNumberHistograms(); wi++)
     {
-      std::vector<detid_t> dets = local_workspace->mutableSpectraMap().getDetectors(static_cast<specid_t>(wi));
+      std::vector<detid_t> dets = local_workspace->spectraMap().getDetectors(static_cast<specid_t>(wi));
       EventList & el = ew->getEventList(wi);
       for (size_t i=0; i < dets.size(); i++)
         el.addDetectorID(dets[i]);
@@ -715,7 +715,7 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
       }
      
   }
-  local_workspace->mutableSpectraMap().populate(spectra_list, det_list.get(), ndets);
+  local_workspace->replaceSpectraMap(new SpectraDetectorMap(spectra_list, det_list.get(), ndets));
   delete[] spectra_list;
 }
 

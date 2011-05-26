@@ -304,7 +304,7 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
 /// @param map2 :: the second sp det map
 /// @retval true The maps match
 /// @retval false The maps do not match
-bool CheckWorkspacesMatch::checkSpectraMap(const API::SpectraDetectorMap& map1, const API::SpectraDetectorMap& map2)
+bool CheckWorkspacesMatch::checkSpectraMap(const Geometry::ISpectraDetectorMap& map1, const Geometry::ISpectraDetectorMap& map2)
 {
   // Use the SpectraDetectorMap::operator!= to check the maps
   if ( map1 != map2 )

@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -88,7 +89,7 @@ namespace WorkspaceCreationHelper
 
 
   Workspace2D_sptr Create2DWorkspace123(int64_t nHist, int64_t nBins,bool isHist,
-					const std::set<int64_t> & maskedWorkspaceIndices)
+                                        const std::set<int64_t> & maskedWorkspaceIndices)
   {
     MantidVecPtr x1,y1,e1;
     x1.access().resize(isHist?nBins+1:nBins,1);
@@ -108,7 +109,7 @@ namespace WorkspaceCreationHelper
   }
 
   Workspace2D_sptr Create2DWorkspace154(int64_t nHist, int64_t nBins,bool isHist,
-					const std::set<int64_t> & maskedWorkspaceIndices)
+                                        const std::set<int64_t> & maskedWorkspaceIndices)
   {
     MantidVecPtr x1,y1,e1;
     x1.access().resize(isHist?nBins+1:nBins,1);
@@ -134,10 +135,10 @@ namespace WorkspaceCreationHelper
     boost::shared_ptr<Instrument> instrument = workspace->getBaseInstrument();
 
     std::string xmlShape = "<sphere id=\"shape\"> ";
-    xmlShape +=	"<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" /> " ;
-    xmlShape +=	"<radius val=\"0.05\" /> " ;
-    xmlShape +=	"</sphere>";
-    xmlShape +=	"<algebra val=\"shape\" /> ";  
+    xmlShape += "<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" /> " ;
+    xmlShape += "<radius val=\"0.05\" /> " ;
+    xmlShape += "</sphere>";
+    xmlShape += "<algebra val=\"shape\" /> ";  
 
     ShapeFactory sFactory;
     boost::shared_ptr<Object> shape = sFactory.createShape(xmlShape);
@@ -149,7 +150,9 @@ namespace WorkspaceCreationHelper
     {
       workspace->getAxis(1)->spectraNo(i) = i;
     }
-    workspace->mutableSpectraMap().populateSimple(0, nhist);
+    // New spectra map
+    workspace->replaceSpectraMap(new Geometry::OneToOneSpectraDetectorMap(0, nhist));
+
 
     for( int i = 0; i < nhist; ++i )
     {
@@ -225,6 +228,11 @@ namespace WorkspaceCreationHelper
    */
   Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors)
   {
+    if( includeMonitors && nhist < 2 )
+    {
+      throw std::invalid_argument("Attemping to 2 include monitors for a workspace with fewer than 2 histograms");
+    }
+
     Workspace2D_sptr space = Create2DWorkspaceBinned(nhist, nbins);
     boost::shared_ptr<Instrument> testInst(new Instrument("testInst"));
     space->setInstrument(testInst);
@@ -248,7 +256,8 @@ namespace WorkspaceCreationHelper
       testInst->markAsDetector(physicalPixel);
     }
 
-    if( includeMonitors )
+    // Monitors last
+    if( includeMonitors ) // These occupy the last 2 spectra
     {
       Detector *monitor1 = new Detector("mon1", ndets, Object_sptr(), testInst.get());
       monitor1->setPos(-9.0,0.0,0.0);
@@ -261,13 +270,8 @@ namespace WorkspaceCreationHelper
       monitor2->markAsMonitor();
       testInst->add(monitor2);
       testInst->markAsMonitor(monitor2);
-      
-      space->mutableSpectraMap().populateSimple(0, ndets+2);
     }
-    else
-    {
-      space->mutableSpectraMap().populateSimple(0, ndets);
-    }
+
 
     // Define a source and sample position
     //Define a source component
@@ -357,8 +361,8 @@ namespace WorkspaceCreationHelper
   /** Create event workspace
    */
   EventWorkspace_sptr CreateEventWorkspace(int numPixels,
-					   int numBins, int numEvents, double x0, double binDelta,
-					   int eventPattern, int start_at_pixelID)
+                                           int numBins, int numEvents, double x0, double binDelta,
+                                           int eventPattern, int start_at_pixelID)
   {
     DateAndTime run_start("2010-01-01");
 
@@ -502,14 +506,18 @@ namespace WorkspaceCreationHelper
     Workspace2D_sptr retVal = Create2DWorkspaceBinned(static_cast<int>(numHist), numBins, 0.0, binDelta);
     retVal->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(static_cast<int>(numHist)) );
 
+    API::SpectraDetectorMap * groupedMap = new SpectraDetectorMap;
     // Set the detector IDs
     for (int g=0; g < static_cast<int>(numHist); g++)
     {
       std::vector<int> dets;
       for (int i=1; i<=9; i++)
+      {
         dets.push_back(g*9+i);
-      retVal->mutableSpectraMap().addSpectrumEntries(g, dets);
+      }
+      groupedMap->addSpectrumEntries(g,dets);
     }
+    retVal->replaceSpectraMap(groupedMap);
 
     return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
   }
@@ -521,13 +529,17 @@ namespace WorkspaceCreationHelper
      retVal->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(static_cast<int>(numHist)) );
 
     // Set the detector IDs
+     API::SpectraDetectorMap * groupedMap = new SpectraDetectorMap;
     for (int g=0; g < static_cast<int>(numHist); g++)
     {
       std::vector<int> dets;
       for (int i=1; i<=9; i++)
+      {
         dets.push_back(g*9+i);
-      retVal->mutableSpectraMap().addSpectrumEntries(g, dets);
+      }
+      groupedMap->addSpectrumEntries(g,dets);
     }
+    retVal->replaceSpectraMap(groupedMap);
 
     return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
 
@@ -543,7 +555,7 @@ namespace WorkspaceCreationHelper
       std::cout << "Histogram " << i << " = ";
       for (size_t j = 0; j < ws->blocksize(); ++j)
       {  
-	std::cout <<ws->readY(i)[j]<<" ";
+        std::cout <<ws->readY(i)[j]<<" ";
       }
       std::cout<<std::endl;
     }
@@ -562,7 +574,7 @@ namespace WorkspaceCreationHelper
       std::cout << "Histogram " << i << " = ";
       for (size_t j = 0; j < ws->blocksize(); ++j)
       {  
-	std::cout <<ws->readX(i)[j]<<" ";
+        std::cout <<ws->readX(i)[j]<<" ";
       }
       std::cout<<std::endl;
     }
@@ -577,7 +589,7 @@ namespace WorkspaceCreationHelper
       std::cout << "Histogram " << i << " = ";
       for (size_t j = 0; j < ws->blocksize(); ++j)
       {  
-	std::cout <<ws->readE(i)[j]<<" ";
+        std::cout <<ws->readE(i)[j]<<" ";
       }
       std::cout<<std::endl;
     }

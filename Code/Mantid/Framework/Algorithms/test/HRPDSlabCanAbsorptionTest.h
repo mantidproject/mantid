@@ -44,7 +44,6 @@ public:
 
     boost::shared_ptr<Instrument> testInst(new Instrument("testInst"));
     testWS->setInstrument(testInst);
-    testWS->mutableSpectraMap().populateSimple(0, 3);
 
     // Define a source and sample position
     //Define a source component

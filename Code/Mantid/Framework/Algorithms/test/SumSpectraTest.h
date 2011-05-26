@@ -51,7 +51,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("EndWorkspaceIndex","3") );
 
     size_t nspecEntries(0);
-    const Mantid::API::SpectraDetectorMap & specMap_in = inputSpace->spectraMap();
+    const Mantid::Geometry::ISpectraDetectorMap & specMap_in = inputSpace->spectraMap();
     // Spectra at workspace index 1 is masked
     for( int i = 2; i < 4; ++i )
     {
@@ -85,7 +85,7 @@ public:
     }
 
     // Check the detectors mapped to the single spectra
-    const SpectraDetectorMap & specMap_out = output2D->spectraMap();
+    const Geometry::ISpectraDetectorMap & specMap_out = output2D->spectraMap();
     const int newSpectrumNo = 1;
     TS_ASSERT_EQUALS( specMap_out.ndet(newSpectrumNo), nspecEntries);
 
@@ -117,7 +117,7 @@ public:
 
     size_t nspecEntries(0);
     const size_t nHist(inputSpace->getNumberHistograms());
-    const SpectraDetectorMap & specMap_in = inputSpace->spectraMap();
+    const Geometry::ISpectraDetectorMap & specMap_in = inputSpace->spectraMap();
     // Spectra at workspace index 1 is masked, 8 & 9 are monitors
     for( size_t i = 1; i < nHist-2; ++i )
     {
@@ -153,7 +153,7 @@ public:
     TS_ASSERT_DELTA( e[99], std::sqrt(y[99]), 0.00001 );
 
     // Check the detectors mapped to the single spectra
-    const SpectraDetectorMap & specMap_out = output2D->spectraMap();
+    const Geometry::ISpectraDetectorMap & specMap_out = output2D->spectraMap();
     const int newSpectrumNo(0);
     TS_ASSERT_EQUALS( specMap_out.ndet(newSpectrumNo), nspecEntries);
 

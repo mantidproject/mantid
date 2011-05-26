@@ -221,7 +221,7 @@ public:
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
 
     //This seems to be the size of the spectra map.
-    //TS_ASSERT_EQUALS( ew->mutableSpectraMap().nElements(), 50172); //or is it 50173
+    //TS_ASSERT_EQUALS( ew->spectraMap().nElements(), 50172); //or is it 50173
     //TODO: Figure out why that fails there above...
 
     //Check if the instrument was loaded correctly
@@ -244,7 +244,8 @@ public:
 
     //Copy geometry over.
     API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-    outputWS->mutableSpectraMap().clear();
+    outputWS->replaceSpectraMap(new SpectraDetectorMap);
+
     //You need to copy over the data as well.
     outputWS->copyDataFrom(*inputWS);
 
@@ -303,7 +304,7 @@ public:
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels);
 
     //This time, the max pixel ID is higher since we padded them.
-    TS_ASSERT_EQUALS( ew->mutableSpectraMap().nElements(), numpixels);
+    TS_ASSERT_EQUALS( ew->spectraMap().nElements(), numpixels);
 
 
     //Check if the instrument was loaded correctly

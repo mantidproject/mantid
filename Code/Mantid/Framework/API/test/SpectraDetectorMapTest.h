@@ -131,33 +131,43 @@ public:
     TS_ASSERT( sdMap != sdMapLocal )
   }
 
-  void test_Move_Iterator_To_Start_Gives_First_Element_When_Asked()
+  void test_Iterator_Behaviour()
   {
     SpectraDetectorMap sdmapLocal;
     sdmapLocal.populateSimple(10, 15);
-    // Ordered so the first element is 10
-    TS_ASSERT_THROWS_NOTHING(sdmapLocal.moveIteratorToStart());
-    TS_ASSERT_EQUALS(sdmapLocal.getCurrentSpectrum(), 10);
+    Geometry::ISpectraDetectorMap::const_iterator itr = sdmapLocal.cbegin();
+    TSM_ASSERT_EQUALS("Current spectrum should be the first", *itr, std::make_pair(10,10));
+    ++itr;
+    TSM_ASSERT_EQUALS("Current spectrum should be the second",*itr, std::make_pair(11,11));
+    ++itr;
   }
 
-  void test_Iterating_Over_The_Whole_Map_Doesnt_Throw()
+  void test_Iterating_Over_The_Whole_Map()
   {
     SpectraDetectorMap sdmapLocal;
     sdmapLocal.populateSimple(10, 15);
-    sdmapLocal.moveIteratorToStart();
-    int expected(10);
-    while(sdmapLocal.hasNext())
-    {
-      int value(-1);
-      TS_ASSERT_THROWS_NOTHING(value = sdmapLocal.getCurrentSpectrum());
-      TS_ASSERT_EQUALS(expected, value);
-      sdmapLocal.advanceIterator();
-      ++expected;
-    }
-    //Trying to advance the iterator again
-    TS_ASSERT_THROWS(sdmapLocal.advanceIterator(), std::out_of_range);
+    TS_ASSERT_EQUALS(sdmapLocal.nElements(), 5);
+    // Insert an element with the same spectra but different ID
+    sdmapLocal.addSpectrumEntries(14, std::vector<detid_t>(1,16));
+    const size_t iterations = sdmapLocal.nElements();
+    TS_ASSERT_EQUALS(iterations, 6);
+    doIteratorRangeTest(sdmapLocal.cbegin(),sdmapLocal.cend(), 6);    
   }
 
+  void test_Iterating_Over_A_Map_With_A_Single_Entry()
+  {
+    SpectraDetectorMap sdmapLocal;
+    sdmapLocal.populateSimple(0,1);
+    TS_ASSERT_EQUALS(sdmapLocal.nElements(), 1);
+    doIteratorRangeTest(sdmapLocal.cbegin(), sdmapLocal.cend(), 1);
+  }
+
+  void test_Iterating_Over_An_Empty_Map()
+  {
+    SpectraDetectorMap sdmapLocal;
+    TS_ASSERT_EQUALS(sdmapLocal.nElements(), 0);
+    doIteratorRangeTest(sdmapLocal.cbegin(), sdmapLocal.cend(), 0);
+  }
 
 
 private:
@@ -174,6 +184,21 @@ private:
     delete [] spec;
     delete [] udet;
   } 
+  
+  void doIteratorRangeTest(SpectraDetectorMap::const_iterator itr, 
+                           const SpectraDetectorMap::const_iterator & iend, 
+                           const int remaining_itrs)
+  {
+    int nloops(0);
+    for( ; itr != iend; ++itr )
+    {
+      ++nloops;
+    }
+    std::ostringstream os;
+    os << remaining_itrs << " further iteration(s) should have been performed";
+    TSM_ASSERT_EQUALS(os.str().c_str(), nloops, remaining_itrs);
+  }
+
 
   SpectraDetectorMap sdMap;
   int offset;

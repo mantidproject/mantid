@@ -128,15 +128,20 @@ void GroupDetectors2::exec()
   // prepare to move the requested histograms into groups, first estimate how long for progress reporting. +1 in the demonator gets rid of any divide by zero risk
   double prog4Copy=( (1.0 - m_FracCompl)/(static_cast<double>(numInHists-unGroupedSet.size())+1.) )*
     (keepAll ? static_cast<double>(numInHists-unGroupedSet.size())/static_cast<double>(numInHists): 1.);
-  // now do all the moving
-  const size_t outIndex = formGroups(inputWS, outputWS, prog4Copy);
+
+  // Build a new map
+  API::SpectraDetectorMap *groupedMap = new SpectraDetectorMap;
+  // Now replace the one that the output workspace has been given by default
+  outputWS->replaceSpectraMap(groupedMap);
+  const size_t outIndex = formGroups(inputWS, outputWS, groupedMap, prog4Copy);
 
   // If we're keeping ungrouped spectra
   if (keepAll)
   {
     // copy them into the output workspace
-    moveOthers(unGroupedSet, inputWS, outputWS, outIndex);
+    moveOthers(unGroupedSet, inputWS, outputWS, outIndex, groupedMap);
   }
+  
 
   g_log.information() << name() << " algorithm has finished\n";
 
@@ -528,19 +533,16 @@ double GroupDetectors2::fileReadProg(Mantid::DataHandling::GroupDetectors2::stor
 *  Move the user selected spectra in the input workspace into groups in the output workspace
 *  @param inputWS :: user selected input workspace for the algorithm
 *  @param outputWS :: user selected output workspace for the algorithm
+*  @param groupedMap :: The new spectra map that is being built
 *  @param prog4Copy :: the amount of algorithm progress to attribute to moving a single spectra
 *  @return number of new grouped spectra
 */
-size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, const double prog4Copy)
+size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, 
+				    API::SpectraDetectorMap *groupedMap, const double prog4Copy)
 {
   // Get hold of the axis that holds the spectrum numbers
   Axis *inputSpecNums = inputWS->getAxis(1);
-  // Get a reference to the spectra maps of the input and output workspace
-  API::SpectraDetectorMap &specDetecMap = outputWS->mutableSpectraMap();
-  const API::SpectraDetectorMap &inputSpecDetecMap = inputWS->spectraMap();
-
-  // delete content of output spectra to detector map
-  specDetecMap.clear();
+  const Geometry::ISpectraDetectorMap &inputSpecDetecMap = inputWS->spectraMap();
 
   // get "Behaviour" string
   const std::string behaviour = getProperty("Behaviour");
@@ -599,7 +601,7 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
       }
     }
     // detectors to add to firstSpecNum
-    specDetecMap.addSpectrumEntries(firstSpecNum, detToClump);
+    groupedMap->addSpectrumEntries(firstSpecNum, detToClump);
 
     // make regular progress reports and check for cancelling the algorithm
     if ( outIndex % INTERVAL == 0 )
@@ -635,16 +637,15 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
 *  @param inputWS :: user selected input workspace for the algorithm
 *  @param outputWS :: user selected output workspace for the algorithm
 *  @param outIndex :: the next spectra index available after the grouped spectra
+*  @param groupedMap :: The new spectra map that is being built
 */
-void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, size_t outIndex)
+void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, 
+				 size_t outIndex, API::SpectraDetectorMap *groupedMap)
 {
   g_log.debug() << "Starting to copy the ungrouped spectra" << std::endl;
   double prog4Copy = (1. - 1.*static_cast<double>(m_FracCompl))/static_cast<double>(unGroupedSet.size());
 
-  // Get a reference to the spectra maps of the input and output workspace
-  API::SpectraDetectorMap &specDetecMap = outputWS->mutableSpectraMap();
-  const API::SpectraDetectorMap &inputSpecDetecMap = inputWS->spectraMap();
-
+  const Geometry::ISpectraDetectorMap &inputSpecDetecMap = inputWS->spectraMap();
   std::set<int64_t>::const_iterator copyFrIt = unGroupedSet.begin();
   // go thorugh all the spectra in the input workspace
   for ( ; copyFrIt != unGroupedSet.end(); ++copyFrIt )
@@ -657,7 +658,7 @@ void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, API::Mat
     outputWS->dataE(outIndex) = inputWS->readE(sourceIndex);
     const specid_t specNum = inputWS->getAxis(1)->spectraNo(*copyFrIt);
     outputWS->getAxis(1)->spectraNo(outIndex) = specNum;
-    specDetecMap.addSpectrumEntries(specNum, inputSpecDetecMap.getDetectors(specNum));
+    groupedMap->addSpectrumEntries(specNum, inputSpecDetecMap.getDetectors(specNum));
     // go to the next free index in the output workspace
     outIndex ++;
     // make regular progress reports and check for cancelling the algorithm

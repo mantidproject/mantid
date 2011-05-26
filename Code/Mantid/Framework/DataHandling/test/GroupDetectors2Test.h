@@ -76,7 +76,8 @@ public:
     instr->markAsDetector(d5);
 
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->mutableSpectraMap().populate(specNums, detIDs, NHIST );
+    //space->mutableSpectraMap().populate(specNums, detIDs, NHIST );
+    space->replaceSpectraMap(new SpectraDetectorMap(specNums, detIDs, NHIST));
 
     // Register the workspace in the data service
     AnalysisDataService::Instance().add(inputWS, space);
@@ -437,7 +438,7 @@ public:
     Workspace2D_sptr output2D1 = boost::dynamic_pointer_cast<Workspace2D>(output1);
     TS_ASSERT_EQUALS( output2D1->getNumberHistograms(), 4);
 
-    const SpectraDetectorMap &specDetecMap = output2D1->spectraMap();
+    const Geometry::ISpectraDetectorMap &specDetecMap = output2D1->spectraMap();
     std::vector<detid_t> specDet = specDetecMap.getDetectors(1);
     TS_ASSERT_EQUALS( specDet[0], 1);
     specDet = specDetecMap.getDetectors(2);

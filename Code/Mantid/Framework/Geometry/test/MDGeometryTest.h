@@ -282,10 +282,11 @@ void testMDGeometryUnitRotations(){
 	  sample[5]=-1;
 	  sample[7]=1;
 	  double err(0);
-	  for(int i=0;i<9;i++){
-		  err+=fabs(rm[i]-sample[i]);
+	  for(int i=0;i<9;i++)
+	  {
+	    err+=fabs(rm[i]-sample[i]);
 	  }
-	  TSM_ASSERT_DELTA("samples should coinside with mathematical presision",0,err,FLT_EPSILON);
+	  TSM_ASSERT_DELTA("samples should coinside with mathematical presision",0.0,err,FLT_EPSILON);
 
 
 

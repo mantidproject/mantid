@@ -370,7 +370,7 @@ namespace Mantid
             groupedWS->getAxis(1)->spectraNo(k)= k + 1;
           }
 
-          groupedWS->mutableSpectraMap().populate(spec.get(),dets.get(),numHists);
+          groupedWS->replaceSpectraMap(new API::SpectraDetectorMap(spec.get(),dets.get(),numHists));
 
           // Assign the result to the output workspace property
           if(m_numberOfPeriods>1)
@@ -559,8 +559,10 @@ namespace Mantid
       detid_t ndet = static_cast<detid_t>(number[0]/m_numberOfPeriods);
       boost::shared_array<detid_t> det(new detid_t[ndet]);
       for(detid_t i=0;i<ndet;i++)
+      {
         det[i] = i + 1;
-      localWorkspace->mutableSpectraMap().populate(det.get(),det.get(),ndet);
+      }
+      localWorkspace->replaceSpectraMap(new API::SpectraDetectorMap(det.get(),det.get(),ndet));
     }
 
     /// Run the LoadLog sub-algorithm

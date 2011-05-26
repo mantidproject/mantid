@@ -123,6 +123,8 @@ double GetEi2::calculateEi(const double initial_guess)
     throw std::runtime_error("Error retrieving monitor spectra spectra from input workspace.");
   }
 
+  std::cerr << "Testing " << mon_indices[0] << " " << mon_indices[1] << "\n";
+
   // Calculate actual peak postion for each monitor peak
   double peak_times[2] = {0.0, 0.0};
   double det_distances[2] = {0.0, 0.0};
@@ -182,7 +184,7 @@ double GetEi2::getDistanceFromSource(size_t ws_index) const
   if( !det )
   {
     std::ostringstream msg;
-	msg << "A detector for monitor at workspace index " << ws_index << " cannot be found. ";
+        msg << "A detector for monitor at workspace index " << ws_index << " cannot be found. ";
     throw std::runtime_error(msg.str());
   }
   return det->getDistance(*source);
@@ -416,7 +418,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
     if( ip1==ip2 )
     {
       g_log.warning() << "A peak with a local maxima on the trailing edge has been found. The estimation of the "
-		      << "half-height point will not be as accurate.\n";
+                      << "half-height point will not be as accurate.\n";
       ip1--;
     }
     xp_hh = peak_x[ip2] + (peak_x[ip1]-peak_x[ip2])*((hby2-peak_y[ip2])/(peak_y[ip1]-peak_y[ip2]));
@@ -452,7 +454,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
     if( im1==im2 )
     {
       g_log.warning() << "A peak with a local maxima on the rising edge has been found. The estimation of the "
-		      << "half-height point will not be as accurate.\n";
+                      << "half-height point will not be as accurate.\n";
       im1++;
     }
     xm_hh = peak_x[im2] + (peak_x[im1]-peak_x[im2])*((hby2-peak_y[im2])/(peak_y[im1]-peak_y[im2]));

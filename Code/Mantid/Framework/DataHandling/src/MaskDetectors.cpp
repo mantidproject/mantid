@@ -139,7 +139,7 @@ void MaskDetectors::exec()
   }
   
   // Get a reference to the spectra-detector map to get hold of detector ID's
-  const SpectraDetectorMap& specMap = WS->spectraMap();
+  const Geometry::ISpectraDetectorMap& specMap = WS->spectraMap();
   double prog=0.0;
   std::vector<size_t>::const_iterator wit;
   for (wit = indexList.begin(); wit != indexList.end(); ++wit)

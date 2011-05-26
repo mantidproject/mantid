@@ -39,7 +39,7 @@ public:
   {
 
     Mantid::API::MatrixWorkspace_sptr inputWS =
-      WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,50,true);
+      WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(4,50,true); // Make sure this has a spectrum 3
     inputWS->getAxis(0)->unit() = 
       Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 

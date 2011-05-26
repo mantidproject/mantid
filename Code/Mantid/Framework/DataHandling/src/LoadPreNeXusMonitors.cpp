@@ -229,8 +229,8 @@ void LoadPreNeXusMonitors::exec()
   this->runLoadInstrument(instrumentName, localWorkspace);
 
   // Populate the Spectra Map
-  localWorkspace->mutableSpectraMap().populate(spectra_numbers.get(), detector_numbers.get(),
-      nMonitors);
+  localWorkspace->replaceSpectraMap(new API::SpectraDetectorMap(spectra_numbers.get(), detector_numbers.get(),
+								nMonitors));
 
   // Set the property
   setProperty("OutputWorkspace", localWorkspace);

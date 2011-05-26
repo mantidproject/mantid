@@ -87,7 +87,7 @@ namespace Mantid
 
       // Fit all the spectra with a gaussian
       Progress prog(this, 0, 1.0, nspec);
-      const SpectraDetectorMap & specMap = inputW->spectraMap();
+      const Geometry::ISpectraDetectorMap & specMap = inputW->spectraMap();
       PARALLEL_FOR1(inputW)
       for (int wi=0;wi<nspec;++wi)
       {

@@ -525,7 +525,7 @@ namespace Mantid
           g_log.error("Unable to read detector information (SPEC) from DAE " + m_daename);
           throw Exception::FileError("Unable to read detector information (SPEC) from DAE " , m_daename);
         }
-        localWorkspace->mutableSpectraMap().populate(spec.get(), udet.get(), ndet);
+	localWorkspace->replaceSpectraMap(new SpectraDetectorMap(spec.get(), udet.get(), ndet));
       }
 
     }

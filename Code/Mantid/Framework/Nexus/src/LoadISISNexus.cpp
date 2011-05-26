@@ -549,8 +549,7 @@ namespace Mantid
       closeNexusGroup(); // detector_1
 
       //Populate the Spectra Map with parameters
-      ws->mutableSpectraMap().populate(m_spec.get(),udet.get(),ndet);
-
+      ws->replaceSpectraMap(new SpectraDetectorMap(m_spec.get(),udet.get(),ndet));
     }
 
     /**  Loag the run details from the file

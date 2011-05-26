@@ -203,7 +203,7 @@ namespace Mantid
           // Only run the sub-algorithms once
           loadRunDetails(localWorkspace);
           runLoadInstrument(localWorkspace );
-          localWorkspace->mutableSpectraMap().populate(spectrum_index(),spectrum_index(),m_numberOfSpectra);
+	  localWorkspace->replaceSpectraMap(new SpectraDetectorMap(spectrum_index(),spectrum_index(),m_numberOfSpectra));
           loadLogs(localWorkspace, entry, period);
         }
         else   // We are working on a higher period of a multiperiod raw file

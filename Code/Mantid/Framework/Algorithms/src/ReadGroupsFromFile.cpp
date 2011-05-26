@@ -131,7 +131,7 @@ namespace Algorithms
     const int64_t nHist=localWorkspace->getNumberHistograms();
     API::Axis* specAxis=localWorkspace->getAxis(1);
     // Get the spectra to detector map
-    const API::SpectraDetectorMap& spectramap=localWorkspace->spectraMap();
+    const Geometry::ISpectraDetectorMap& spectramap=localWorkspace->spectraMap();
 
     // Determine whether the user wants to see unselected detectors or not
     const std::string su=getProperty("ShowUnselected");

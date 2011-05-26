@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
@@ -36,9 +37,9 @@ namespace Mantid
     /// Default constructor
     MatrixWorkspace::MatrixWorkspace() : 
       IMDWorkspace(), m_axes(), m_isInitialized(false),
-      sptr_instrument(new Instrument), m_spectramap(), m_sample(), m_run(),
-      m_YUnit(), m_YUnitLabel(), m_isDistribution(false), m_parmap(new ParameterMap(&(*m_spectramap))), 
-      m_masks(), m_indexCalculator()
+      sptr_instrument(new Instrument), m_spectraMap(new Geometry::OneToOneSpectraDetectorMap),
+      m_sample(), m_run(), m_YUnit(), m_YUnitLabel(), m_isDistribution(false), 
+      m_parmap(new ParameterMap(&(*m_spectraMap))), m_masks(), m_indexCalculator()
     {}
 
     /// Destructor
@@ -60,7 +61,7 @@ namespace Mantid
     void MatrixWorkspace::initialize(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
     {
       // Check validity of arguments
-      if (NVectors <= 0 || XLength <= 0 || YLength <= 0)
+      if (NVectors == 0 || XLength == 0 || YLength == 0)
       {
         g_log.error("All arguments to init must be positive and non-zero");
         throw std::out_of_range("All arguments to init must be positive and non-zero");
@@ -68,6 +69,10 @@ namespace Mantid
 
       // Bypass the initialization if the workspace has already been initialized.
       if (m_isInitialized) return;
+
+      // Setup a default 1:1 spectra map that goes from 0->(NVectors-1)
+      // Do this before derived init so that it can be replaced if necessary
+      this->replaceSpectraMap(new Geometry::OneToOneSpectraDetectorMap(0,static_cast<specid_t>(NVectors)-1));
 
       // Invoke init() method of the derived class inside a try/catch clause
       try
@@ -79,6 +84,7 @@ namespace Mantid
         g_log.error() << "Error initializing the workspace" << ex.what() << std::endl;
         throw;
       }
+
       m_indexCalculator =  MatrixWSIndexCalculator(this->blocksize());
       // Indicate that this Algorithm has been initialized to prevent duplicate attempts.
       m_isInitialized = true;
@@ -143,27 +149,21 @@ namespace Mantid
     *
     *  @return The SpectraDetectorMap
     */
-    const SpectraDetectorMap& MatrixWorkspace::spectraMap() const
+    const Geometry::ISpectraDetectorMap& MatrixWorkspace::spectraMap() const
     {
-      return *m_spectramap;
+      return *m_spectraMap;
     }
 
     //---------------------------------------------------------------------------------------
-    /** Get a reference to the SpectraDetectorMap associated with this workspace.
-    *  This non-const method will copy the map if it is shared between more than one workspace,
-    *  and the reference returned will be to the copy.
-    *  Can ONLY be taken by reference!
-    *
-    *  @return The SpectraDetectorMap
-    */
-    SpectraDetectorMap& MatrixWorkspace::mutableSpectraMap()
+    /**
+     * Replace the current spectra map with a new one. This object takes ownership
+     * @param spectraMap :: A pointer to a new SpectraDetectorMap.
+     */
+    void MatrixWorkspace::replaceSpectraMap(const Geometry::ISpectraDetectorMap * spectraMap)
     {
-      SpectraDetectorMap& spectramap = m_spectramap.access();
-      // Update the parameter map's copy (which wipes the nearest neighbour tree)
-      m_parmap->resetSpectraMap(&(spectramap));
-      return spectramap;
+      m_spectraMap.reset(spectraMap);
+      m_parmap->resetSpectraMap(spectraMap);
     }
-
 
     //---------------------------------------------------------------------------------------
     /** Return a map where:
@@ -238,7 +238,7 @@ namespace Mantid
         specid_t specNo = ax->spectraNo(workspaceIndex);
 
         //Now the list of detectors
-        std::vector<detid_t> detList = this->m_spectramap->getDetectors(specNo);
+        std::vector<detid_t> detList = m_spectraMap->getDetectors(specNo);
         if (throwIfMultipleDets)
         {
           if (detList.size() > 1)
@@ -285,7 +285,7 @@ namespace Mantid
         specid_t specNo = ax->spectraNo(workspaceIndex);
 
         //Now the list of detectors
-        std::vector<detid_t> detList = this->m_spectramap->getDetectors(specNo);
+        std::vector<detid_t> detList = this->m_spectraMap->getDetectors(specNo);
         if (detList.size() > 1)
         {
           delete map;
@@ -449,13 +449,13 @@ namespace Mantid
     */
     Geometry::IDetector_sptr MatrixWorkspace::getDetector(const size_t workspaceIndex) const
     {
-      if ( ! m_spectramap->nElements() )
+      if ( ! m_spectraMap->nElements() )
       {
         throw std::runtime_error("SpectraDetectorMap has not been populated.");
       }
 
       const specid_t spectrum_number = getAxis(1)->spectraNo(workspaceIndex);
-      const std::vector<detid_t> dets = m_spectramap->getDetectors(spectrum_number);
+      const std::vector<detid_t> dets = m_spectraMap->getDetectors(spectrum_number);
       if ( dets.empty() )
       {
         throw Kernel::Exception::NotFoundError("Spectrum number not found", spectrum_number);
@@ -740,7 +740,7 @@ namespace Mantid
       }
       
       specid_t spectrum_number = getAxis(1)->spectraNo(index);
-      const std::vector<detid_t> dets = m_spectramap->getDetectors(spectrum_number);
+      const std::vector<detid_t> dets = m_spectraMap->getDetectors(spectrum_number);
       for (std::vector<detid_t>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
       {
         try
@@ -1091,7 +1091,7 @@ namespace Mantid
       }
 
       IDetector_sptr detector;
-      if(m_spectramap->nElements() > 0)
+      if(m_spectraMap->nElements() > 0)
       {
         try
         {

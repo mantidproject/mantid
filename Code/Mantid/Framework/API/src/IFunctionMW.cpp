@@ -6,7 +6,7 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/AnalysisDataService.h"

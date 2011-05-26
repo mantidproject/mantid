@@ -9,6 +9,8 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
+#include <boost/scoped_ptr.hpp>
 
 using std::size_t;
 using namespace Mantid::Kernel;
@@ -79,14 +81,15 @@ public:
       ax->setValue(i, static_cast<double>(i)+20);
     m_axes[1] = ax;
 
+    SpectraDetectorMap *newMap = new SpectraDetectorMap;
+    this->replaceSpectraMap(newMap);
     //Detector id is 100 + workspace index = 80 + spectrum #
     for (size_t i=20; i<20+m_NVectors; i++)
     {
       std::vector<detid_t> vec;
       vec.push_back(static_cast<detid_t>(i)+80);
-      this->mutableSpectraMap().addSpectrumEntries(static_cast<specid_t>(i), vec);
+      newMap->addSpectrumEntries(static_cast<specid_t>(i), vec);
     }
-
   }
   size_t size() const {return vec.size();}
   size_t blocksize() const {return vec.size();}
@@ -131,7 +134,6 @@ public:
     {
       this->getAxis(1)->spectraNo(i) = static_cast<specid_t>(i);
     }
-    this->mutableSpectraMap().populateSimple(0, static_cast<detid_t>(NVectors));
 
     setInstrument(Instrument_sptr(new Instrument("TestInstrument")));
     Instrument_sptr inst = getBaseInstrument();
@@ -199,13 +201,44 @@ public:
     TS_ASSERT_EQUALS( ws->getInstrument()->type(), "Instrument" );
   }
 
+  void test_That_A_Workspace_Gets_SpectraMap_When_Initialized_With_NVector_Elements()
+  {
+    MatrixWorkspace_sptr testWS(new Mantid::DataObjects::WorkspaceTester);
+    // Starts with an empty one
+    TS_ASSERT_EQUALS(testWS->spectraMap().nElements(), 0);
+    const size_t nhist(10);
+    testWS->initialize(nhist,1,1);
+    TS_ASSERT_EQUALS(testWS->spectraMap().nElements(), nhist);    
+  }
+
   void testSpectraMap()
   {
     MatrixWorkspace_sptr ws2 = WorkspaceFactory::Instance().create(ws,1,1,1);
-    const SpectraDetectorMap &specs = ws2->spectraMap();
+    const Geometry::ISpectraDetectorMap &specs = ws2->spectraMap();
     TS_ASSERT_EQUALS( &(ws->spectraMap()), &specs );
-    SpectraDetectorMap &specs2 = ws2->mutableSpectraMap();
-    TS_ASSERT_DIFFERS( &(ws->spectraMap()), &specs2 );
+  }
+
+  void testReplacingSpectraMap()
+  {
+    boost::scoped_ptr<MatrixWorkspace> testWS(new Mantid::DataObjects::WorkspaceTester);
+    testWS->initialize(1,1,1);
+    const Geometry::ISpectraDetectorMap &specs = testWS->spectraMap();
+    // Default one
+    TS_ASSERT_EQUALS(specs.nElements(), 1);
+
+    testWS->replaceSpectraMap(new OneToOneSpectraDetectorMap(1,10));
+    // Has it been replaced
+    TS_ASSERT_EQUALS(testWS->spectraMap().nElements(), 10);
+  }
+  
+  void testSpectraMapCopiedWhenAWorkspaceIsCopied()
+  {
+    boost::shared_ptr<MatrixWorkspace> parent(new Mantid::DataObjects::WorkspaceTester);
+    parent->initialize(1,1,1);
+    parent->replaceSpectraMap(new OneToOneSpectraDetectorMap(1,10));
+    TS_ASSERT_EQUALS(parent->spectraMap().nElements(), 10);
+    MatrixWorkspace_sptr copied = WorkspaceFactory::Instance().create(parent,1,1,1);
+    TS_ASSERT_EQUALS(copied->spectraMap().nElements(), 10);
   }
 
   void testGetSetSample()

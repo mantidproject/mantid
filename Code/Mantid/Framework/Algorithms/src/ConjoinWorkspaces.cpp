@@ -286,7 +286,7 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
     return;
   // Loop through the first workspace adding all the spectrum numbers & UDETS to a set
   const Axis* axis1 = ws1->getAxis(1);
-  const SpectraDetectorMap& specmap1 = ws1->spectraMap();
+  const Geometry::ISpectraDetectorMap& specmap1 = ws1->spectraMap();
   std::set<specid_t> spectra;
   std::set<detid_t> detectors;
   const size_t& nhist1 = ws1->getNumberHistograms();
@@ -304,7 +304,7 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
 
   // Now go throught the spectrum numbers & UDETS in the 2nd workspace, making sure that there's no overlap
   const Axis* axis2 = ws2->getAxis(1);
-  const SpectraDetectorMap& specmap2 = ws2->spectraMap();
+  const Geometry::ISpectraDetectorMap& specmap2 = ws2->spectraMap();
   const size_t& nhist2 = ws2->getNumberHistograms();
   for (size_t j = 0; j < nhist2; ++j)
   {

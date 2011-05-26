@@ -47,7 +47,7 @@ namespace DataObjects
     this->setInstrument( inst );
 
     // Initialize the spectra-det-map
-    m_spectramap.access().populateWithVector(detectorIDs);
+    this->MatrixWorkspace::replaceSpectraMap(new API::SpectraDetectorMap(detectorIDs));
 
     // Make a simple 1-1 workspaceIndex to spectrumNumber axis.
     SpectraAxis * ax1 = dynamic_cast<SpectraAxis *>(this->m_axes[1]);
@@ -74,17 +74,6 @@ namespace DataObjects
       throw std::invalid_argument("SpecialWorkspace2D must have 'spectra' of length 1 only.");
     // Continue with standard initialization
     Workspace2D::init(NVectors, XLength, YLength);
-  }
-
-
-  //----------------------------------------------------------------------------------------------
-  /** Non-const access to the spectra map is disallowed!
-   * Always throws std::runtime_error
-   * @return nothing, it always throws.
-   */
-  SpectraDetectorMap& SpecialWorkspace2D::mutableSpectraMap()
-  {
-    throw std::runtime_error("Non-const access to the spectra map in a SpecialWorkspace2D is disallowed!");
   }
 
   //----------------------------------------------------------------------------------------------

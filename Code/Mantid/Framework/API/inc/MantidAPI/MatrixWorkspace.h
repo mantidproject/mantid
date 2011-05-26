@@ -30,11 +30,11 @@ namespace Mantid
     class MDCell;
     class MDPoint;
     class ParameterMap;
+    class ISpectraDetectorMap;
   }
   namespace API
   {
     class SpectraDetectorMap;
-    
     //----------------------------------------------------------------------------
     // Typedefs
     //----------------------------------------------------------------------------
@@ -96,9 +96,10 @@ namespace Mantid
       //@}
 
       /// Const access to the spectra-detector map
-      const SpectraDetectorMap& spectraMap() const;
-      /// Mutable access to the spectra-detector map
-      virtual SpectraDetectorMap& mutableSpectraMap();
+      const Geometry::ISpectraDetectorMap& spectraMap() const;
+      /// Replace the current spectra map with a new one
+      void replaceSpectraMap(const Geometry::ISpectraDetectorMap* spectramap);
+      
       // More mapping
       index2spec_map * getWorkspaceIndexToSpectrumMap() const;
       spec2index_map * getSpectrumToWorkspaceIndexMap() const;
@@ -295,8 +296,8 @@ namespace Mantid
       boost::shared_ptr<Geometry::Instrument> sptr_instrument;
 
     protected:
-      /// The SpectraDetector table used for this experiment. Inside a copy-on-write pointer.
-      Kernel::cow_ptr<SpectraDetectorMap> m_spectramap;
+      /// A shared pointer to the spectra-detector map
+      boost::shared_ptr<const Geometry::ISpectraDetectorMap> m_spectraMap;
       /// The information on the sample environment
       Kernel::cow_ptr<Sample> m_sample;
       /// The run information

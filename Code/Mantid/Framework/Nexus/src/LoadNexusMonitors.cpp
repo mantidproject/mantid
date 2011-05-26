@@ -175,8 +175,8 @@ void LoadNexusMonitors::exec()
   this->runLoadInstrument(instrumentName, this->WS);
 
   // Populate the Spectra Map
-  this->WS->mutableSpectraMap().populate(spectra_numbers.get(),
-      detector_numbers.get(), static_cast<int64_t> (nMonitors));
+  this->WS->replaceSpectraMap(new API::SpectraDetectorMap(spectra_numbers.get(),detector_numbers.get(), 
+							  static_cast<int64_t> (nMonitors)));
 
   this->setProperty("OutputWorkspace", this->WS);
 }

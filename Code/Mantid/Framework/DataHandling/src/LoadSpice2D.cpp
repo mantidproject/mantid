@@ -444,7 +444,7 @@ namespace Mantid
       }
 
       // Populate the Spectra Map with parameters
-      localWorkspace->mutableSpectraMap().populate(spec.get(), udet.get(), ndet);
+      localWorkspace->replaceSpectraMap(new API::SpectraDetectorMap(spec.get(), udet.get(), ndet));
     }
 
 

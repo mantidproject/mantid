@@ -56,7 +56,7 @@ void LoadMappingTable::exec()
     g_log.warning("The spectra to detector mapping table is empty");
   }
   //Populate the Spectra Map with parameters
-  localWorkspace->mutableSpectraMap().populate(iraw->spec,iraw->udet,number_spectra);
+  localWorkspace->replaceSpectraMap(new SpectraDetectorMap(iraw->spec,iraw->udet,number_spectra));
   progress(1);
   iraw.reset();
 

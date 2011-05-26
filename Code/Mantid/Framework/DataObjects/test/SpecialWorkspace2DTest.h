@@ -31,7 +31,6 @@ public:
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 100);
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
 
-    TS_ASSERT_THROWS_ANYTHING( ws->mutableSpectraMap());
     TS_ASSERT_THROWS_NOTHING( ws->spectraMap());
   }
 

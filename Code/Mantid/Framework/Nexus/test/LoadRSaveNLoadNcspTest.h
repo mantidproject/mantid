@@ -163,7 +163,7 @@ void testExecOnLoadraw()
 
     //
     // Get the map from the workspace : TESTS from LoadMappingTest.h
-  	  const SpectraDetectorMap& map=output->spectraMap();
+  	  const Geometry::ISpectraDetectorMap& map=output->spectraMap();
     TS_ASSERT( &map != NULL);
     if(&map != NULL )
     {

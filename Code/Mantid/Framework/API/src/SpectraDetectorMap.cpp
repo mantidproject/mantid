@@ -1,11 +1,16 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include <climits>
 #include <iostream>
 
 namespace Mantid
 {
+  using Geometry::ISpectraDetectorMap;
+
   namespace API
   {
+    // Iterator end flag
+    specid_t SpectraDetectorMap::g_iter_end = INT_MIN;
 
     // Get a reference to the logger
     Kernel::Logger& SpectraDetectorMap::g_log = Kernel::Logger::get("SpectraDetectorMap");
@@ -13,20 +18,49 @@ namespace Mantid
     /**
      * Default constrcutor
      */
-    SpectraDetectorMap::SpectraDetectorMap() : m_s2dmap(), m_citr(m_s2dmap.begin())
+    SpectraDetectorMap::SpectraDetectorMap() : m_s2dmap()
     {}
+    
+    /**
+     * Constructor with ID tables
+     * @param _spec :: An array of spectrum numbers
+     * @param _udet :: An array of detector IDs
+     * @param nentries :: The size of the _spec and _udet arrays
+     */
+    SpectraDetectorMap::SpectraDetectorMap(const specid_t* _spec, const detid_t* _udet, 
+                                           int64_t nentries) : 
+      m_s2dmap()
+    {
+      populate(_spec, _udet, nentries);
+    }
+
+    /**
+     * Constructor with a vector of detector IDs
+     * @param udetList :: A vector of detector IDs
+     */
+    SpectraDetectorMap::SpectraDetectorMap(const std::vector<detid_t>& udetList) 
+      : m_s2dmap()
+    {
+      populateWithVector(udetList);
+    }
 
     /**
      * Copy constructor
      * @param copy :: An object to copy from.  
      */
     SpectraDetectorMap::SpectraDetectorMap(const SpectraDetectorMap& copy) 
-      : m_s2dmap(copy.m_s2dmap), m_citr(copy.m_citr)
+      : m_s2dmap(copy.m_s2dmap)
     {}
 
     /// Destructor
     SpectraDetectorMap::~SpectraDetectorMap()
     {}
+
+    /// "Virtual copy constructor"
+    SpectraDetectorMap * SpectraDetectorMap::clone() const
+    {
+      return new SpectraDetectorMap(*this);
+    }
 
     /** Populate the map with 2 arrays; one detector per spectrum
      *
@@ -36,7 +70,7 @@ namespace Mantid
      */
     void SpectraDetectorMap::populate(const specid_t* _spectable, const detid_t* _udettable, int64_t nentries)
     {
-      m_s2dmap.clear();
+      clear();
       if (nentries<=0)
       {
         g_log.error("Populate : number of entries should be > 0");
@@ -61,7 +95,7 @@ namespace Mantid
      */
     void SpectraDetectorMap::populateSimple(const detid_t start, const detid_t end)
     {
-      m_s2dmap.clear();
+      clear();
       if (end<=start)
       {
         g_log.error("populateSimple : end should be > start");
@@ -69,7 +103,6 @@ namespace Mantid
       }
       for (detid_t i=start; i<end; ++i)
       {
-        // Uncomment the line below to get a print out of the mapping as it's loaded
         m_s2dmap.insert(std::pair<specid_t,detid_t>(i,i)); // Insert current detector with Spectra number as key
       }
       return;
@@ -150,13 +183,6 @@ namespace Mantid
       // Finally, remove the old spectrum number from the map
       m_s2dmap.erase(oldSpectrum);
     }
-
-    //------------------------------------------------------------------------------------------------
-    /// Empties the map - use with care!
-    void SpectraDetectorMap::clear()
-    {
-      m_s2dmap.clear();
-    }
     
     //------------------------------------------------------------------------------------------------
     /** Return the number of detectors for the given spectrum number
@@ -226,64 +252,52 @@ namespace Mantid
     }
 
     //------------------------------------------------------------------------------------------------
-    /** Tests whether the present map matches another
-     *  @param  other The other map against which to test
-     *  @return True if the maps match
-     */
-    bool SpectraDetectorMap::operator==(const SpectraDetectorMap& other) const
-    {
-      return ( m_s2dmap == other.m_s2dmap );
-    }
-
-    //------------------------------------------------------------------------------------------------
-    /** Tests whether the present map does not match another
-     *  @param  other The other map against which to test
-     *  @return True if the maps do not match
-     */
-    bool SpectraDetectorMap::operator!=(const SpectraDetectorMap& other) const
-    {
-      return !(*this == other);
-    }
-
-    //------------------------------------------------------------------------------------------------
     /**
-     * Setup the map for iteration from the beginning
+     * Return an iterator pointing at the first element
+     * @returns A ISpectraDetectorMap::const_iterator pointing at the first element
      */
-    void SpectraDetectorMap::moveIteratorToStart() const
+    ISpectraDetectorMap::const_iterator SpectraDetectorMap::cbegin() const
     {
-      m_citr = m_s2dmap.begin();
-    }
-
-    /**
-     * Returns whether a next element exists
-     * @returns True if there is another element to access, false otherwise
-     */
-    bool SpectraDetectorMap::hasNext() const
-    {
-      return m_citr != m_s2dmap.end();
-    }
-    
-    /**
-     * Advance the iterator to the next element
-     * @throws std::out_range_error If the final position is invalid. The iterator is left in 
-     * a valid state
-     */
-    void SpectraDetectorMap::advanceIterator() const
-    {
-      if( m_citr == m_s2dmap.end() )
+      smap_it beg = m_s2dmap.begin();
+      if( beg == m_s2dmap.end() ) //Empty map?
       {
-	throw std::out_of_range("SpectraDetectorMap::advanceIterator - Next element is out of range, have you cheked hasNext()?");
+        return cend();
       }
-      ++m_citr;
+      else
+      {
+        return ISpectraDetectorMap::const_iterator(this, std::make_pair(beg->first,beg->second));        
+      }
     }
 
     /**
-     * Returns the current element of the sequence
-     * @returns The element currently being pointed at.
+     * Return an iterator pointing at one past the element
+     * @returns A ISpectraDetectorMap::const_iterator pointing at one past the 
+     * last element
      */
-    specid_t SpectraDetectorMap::getCurrentSpectrum() const
+    ISpectraDetectorMap::const_iterator SpectraDetectorMap::cend() const
     {
-      return m_citr->first;
+      return ISpectraDetectorMap::const_iterator(this, std::make_pair(g_iter_end, g_iter_end));
+    }
+
+    //--------------------------------------------------------------------------
+    // Private methods
+    //--------------------------------------------------------------------------
+    /**
+     * Increment the given iterator by one
+     * @param left :: A reference to the iterator to move
+     */
+    void SpectraDetectorMap::increment(ISpectraDetectorMap::const_iterator& left) const
+    {
+      smap_it itr = m_s2dmap.begin();
+      std::advance(itr, left.increment_count);
+      if( itr != m_s2dmap.end() )
+      {
+        left.item = *itr;
+      }
+      else
+      {
+        left.item = std::make_pair(g_iter_end,g_iter_end);        
+      }
     }
 
   } // Namespace API 

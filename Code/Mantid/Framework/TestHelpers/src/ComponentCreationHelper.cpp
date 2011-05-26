@@ -498,5 +498,5 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
     }
 
     // Populate the Spectra Map with parameters
-    workspace->mutableSpectraMap().populate(spec.get(), udet.get(), ndet);
+    workspace->replaceSpectraMap(new SpectraDetectorMap(spec.get(), udet.get(), ndet));
   }

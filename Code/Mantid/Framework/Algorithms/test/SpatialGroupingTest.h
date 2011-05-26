@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 
 #include <Poco/Path.h>
 #include <Poco/File.h>
@@ -43,14 +44,14 @@ public:
     // Test the algorithm
     // Create a workspace
     const int nhist(18);
-    Mantid::API::MatrixWorkspace_sptr workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(WorkspaceCreationHelper::Create2DWorkspaceBinned(18, 1));
+    Mantid::API::MatrixWorkspace_sptr workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, 1));
     // Create a parameterised instrument
     Mantid::Geometry::Instrument_sptr instrument = boost::dynamic_pointer_cast<Mantid::Geometry::Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
     for( int i = 1; i < nhist + 1; ++i )
     {
       workspace->getAxis(1)->spectraNo(i-1) = i;
     }
-    workspace->mutableSpectraMap().populateSimple(1, nhist+1);
+    workspace->replaceSpectraMap(new Mantid::Geometry::OneToOneSpectraDetectorMap(1, nhist)); //Inclusive
     workspace->setInstrument(instrument);
 
     alg = new Mantid::Algorithms::SpatialGrouping();

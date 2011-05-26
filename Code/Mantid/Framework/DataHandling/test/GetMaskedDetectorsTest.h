@@ -57,7 +57,7 @@ public:
     instr->markAsDetector(d4);
 
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, 5 );
+    space->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 5));
 
     // Register the workspace in the data service
     inputWS = "test_masked_ws";

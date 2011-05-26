@@ -82,12 +82,10 @@ void Q1D::exec()
 
   const int numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
-  // Get a reference to the spectra-detector map
-  SpectraDetectorMap& specMap = outputWS->mutableSpectraMap();
-  // Clear the map, this will be faster than remap
-  specMap.clear();
-  //
-  const SpectraDetectorMap& inSpecMap = inputWS->spectraMap();
+  // Construct a new spectra map. This will be faster than remapping the old one
+  API::SpectraDetectorMap *specMap = new SpectraDetectorMap;
+  outputWS->replaceSpectraMap(specMap);
+  const Geometry::ISpectraDetectorMap& inSpecMap = inputWS->spectraMap();
 
   const Axis* const spectraAxis = inputWS->getAxis(1);
   int newSpectrumNo = -1;
@@ -134,8 +132,9 @@ void Q1D::exec()
          }
       }
       PARALLEL_CRITICAL(q1d_b)
-      {/* Write to shared memory - must protect */
-        specMap.addSpectrumEntries(newSpectrumNo,inSpecMap.getDetectors(spectraAxis->spectraNo(i)));
+      {
+	/* Write to shared memory - must protect */
+        specMap->addSpectrumEntries(newSpectrumNo,inSpecMap.getDetectors(spectraAxis->spectraNo(i)));
       }
     }
 

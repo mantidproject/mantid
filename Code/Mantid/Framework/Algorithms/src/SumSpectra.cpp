@@ -123,11 +123,11 @@ void SumSpectra::exec()
     // Get references to the output workspaces's data vectors
     MantidVec& YSum = outputWorkspace->dataY(0);
     MantidVec& YError = outputWorkspace->dataE(0);
-    // Get a reference to the spectra-detector map
-    SpectraDetectorMap& specMap = outputWorkspace->mutableSpectraMap();
-    // Clear and add is orders of magnitude faster than remap()
-    specMap.clear();
-    const SpectraDetectorMap & inputSpecMap = localworkspace->spectraMap();
+
+    //Build a new spectra map
+    API::SpectraDetectorMap * specMap = new SpectraDetectorMap;
+    outputWorkspace->replaceSpectraMap(specMap);
+    const Geometry::ISpectraDetectorMap & inputSpecMap = localworkspace->spectraMap();
     const Axis* const spectraAxis = localworkspace->getAxis(1);
     int newSpectrumNo = 0;
     if ( spectraAxis->isSpectra() )
@@ -177,7 +177,7 @@ void SumSpectra::exec()
       // Map all the detectors onto the spectrum of the output
       if (spectraAxis->isSpectra())
       {
-        specMap.addSpectrumEntries(newSpectrumNo,inputSpecMap.getDetectors(spectraAxis->spectraNo(i)));
+        specMap->addSpectrumEntries(newSpectrumNo,inputSpecMap.getDetectors(spectraAxis->spectraNo(i)));
       }
 
       progress.report();

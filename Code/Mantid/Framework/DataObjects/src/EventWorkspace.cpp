@@ -517,9 +517,7 @@ namespace DataObjects
     this->makeAxis1();
 
     //Now, make the spectra map (index -> detector ID)
-    API::SpectraDetectorMap& myMap = mutableSpectraMap();
-    myMap.clear();
-    myMap.populateWithVector(pixelIDs);
+    this->replaceSpectraMap(new API::SpectraDetectorMap(pixelIDs));
 
     //Clearing the MRU list is a good idea too.
     this->clearMRU();
@@ -534,19 +532,15 @@ namespace DataObjects
    */
   void EventWorkspace::makeSpectraMap()
   {
-    //Flush the existing one
-    API::SpectraDetectorMap& myMap = mutableSpectraMap();
-    myMap.clear();
+    API::SpectraDetectorMap *newMap = new API::SpectraDetectorMap;
 
     //Go through all the spectra
     for (size_t wi=0; wi<this->m_noVectors; wi++)
     {
-      //And copy over the set of detector IDs. Not the smartest way to do it, but we are kinda stuck.
-      myMap.addSpectrumEntries(specid_t(wi), this->data[wi]->getDetectorIDs() );
+      newMap->addSpectrumEntries(specid_t(wi), this->data[wi]->getDetectorIDs() );
     }
+    this->replaceSpectraMap(newMap);
   }
-
-
 
   //-----------------------------------------------------------------------------
   /** Generate the axes[1] (the mapping between workspace index and spectrum number)

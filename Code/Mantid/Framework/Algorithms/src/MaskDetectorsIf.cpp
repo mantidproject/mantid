@@ -75,7 +75,7 @@ void MaskDetectorsIf::exec()
 {
 	retrieveProperties();
 	const size_t nspec=inputW->getNumberHistograms();
-	const API::SpectraDetectorMap& spectramap = inputW->spectraMap();
+	const Geometry::ISpectraDetectorMap& spectramap = inputW->spectraMap();
 
 	for (size_t i=0;i<nspec;++i)
 	{

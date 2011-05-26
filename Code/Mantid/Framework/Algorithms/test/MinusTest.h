@@ -769,7 +769,7 @@ public:
       size_t ws2LoopCount = 0;
       if (work_in2->size() > 0)
       {
-        ws2LoopCount = work_in1->size()/work_in2->size();
+        ws2LoopCount = static_cast<int>(work_in1->size()/work_in2->size());
       }
       ws2LoopCount = (ws2LoopCount==0) ? 1 : ws2LoopCount;
 
@@ -1096,13 +1096,13 @@ public:
   
   void setUp()
   {
-  	ws2D_1 = WorkspaceCreationHelper::Create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);
-   	ws2D_2 = WorkspaceCreationHelper::Create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);
+        ws2D_1 = WorkspaceCreationHelper::Create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);
+        ws2D_2 = WorkspaceCreationHelper::Create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);
   }
   
   void test_large_2D()
   {
-  	MatrixWorkspace_sptr out = ws2D_1 * ws2D_2;
+        MatrixWorkspace_sptr out = ws2D_1 * ws2D_2;
   }
   
   

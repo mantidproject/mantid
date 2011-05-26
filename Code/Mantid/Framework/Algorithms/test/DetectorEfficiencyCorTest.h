@@ -149,7 +149,7 @@ public:
       specNums[i] = i+1;
       detIDs[i] = i+1;
     }
-    space2D->mutableSpectraMap().populate(specNums, detIDs, nspecs);
+    space2D->replaceSpectraMap(new SpectraDetectorMap(specNums, detIDs, nspecs));
     delete specNums;
     delete detIDs;
 

@@ -48,7 +48,7 @@ public:
     Mantid::Geometry::Detector *det = new Mantid::Geometry::Detector("NOTmonitor",1,NULL);
     instr->add(det);
     instr->markAsDetector(det);
-    input->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, 3);
+    input->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 3));
 
     AnalysisDataService::Instance().add("normMon",input);
 
@@ -64,7 +64,7 @@ public:
     //instr = boost::dynamic_pointer_cast<Instrument>(monWS->getInstrument());
     //instr->add(mon2);
     //instr->markAsMonitor(mon2);
-    monWS->mutableSpectraMap().populate(forSpecDetMap2, forSpecDetMap2, 1);
+    monWS->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap2, forSpecDetMap2, 1));
 
     AnalysisDataService::Instance().add("monWS",monWS);
   }

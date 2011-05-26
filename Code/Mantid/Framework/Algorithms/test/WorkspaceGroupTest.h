@@ -185,7 +185,7 @@ public:
       instr->add(det);
       instr->markAsDetector(det);
     }
-    work_in1->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, 20);
+    work_in1->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 20));
 
     for (int i = 0; i < nBins; i++)
     {
@@ -200,7 +200,7 @@ public:
       instr->add(det);
       instr->markAsDetector(det);
     }
-    work_in2->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, 20);
+    work_in1->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 20));
 
     WorkspaceGroup_sptr wsSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
     AnalysisDataService::Instance().add("testdead_in", wsSptr);

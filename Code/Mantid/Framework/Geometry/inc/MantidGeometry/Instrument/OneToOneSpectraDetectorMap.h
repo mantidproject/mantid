@@ -38,8 +38,12 @@ namespace Mantid
     class DLLExport OneToOneSpectraDetectorMap : public ISpectraDetectorMap
     {
     public:
+      /// Default constructor builds an empty map
+      OneToOneSpectraDetectorMap();
       /// Constructor
       OneToOneSpectraDetectorMap(const specid_t start, const specid_t nelements);
+      /// "Virtual copy constructor"
+      OneToOneSpectraDetectorMap * clone() const;
 
       /** 
        * Return number of detectors contributing to this spectrum, always 1
@@ -47,8 +51,8 @@ namespace Mantid
        */
       inline std::size_t ndet(const specid_t spectrumNumber) const 
       { 
-	UNUSED_ARG(spectrumNumber);
-	return 1; 
+        UNUSED_ARG(spectrumNumber);
+        return 1; 
       }
       /// Get a vector of detectors ids contributing to a spectrum.
       std::vector<detid_t> getDetectors(const specid_t spectrumNumber) const;
@@ -59,29 +63,27 @@ namespace Mantid
        * @returns The number of elements specified when the map was created
        */
       inline std::size_t nElements() const { return (m_end - m_start + 1); }
+      /// Clear the map
+      inline void clear() { m_end = 1; m_start = 2; }
 
       /**@name Iterate over the whole map */
       //@{
-      /// Setup the map for iteration from the beginning
-      void moveIteratorToStart() const;
-      /// Returns whether a next element exists
-      bool hasNext() const;
-      /// Advance the iterator to the next element
-      void advanceIterator() const;
-      /// Returns the current element of the sequence
-      specid_t getCurrentSpectrum() const;
+      /// Begin
+      ISpectraDetectorMap::const_iterator cbegin() const;
+      /// End
+      ISpectraDetectorMap::const_iterator cend() const;
       //@}
 
     private:
+      /// Advance the given iterator
+      virtual void increment(ISpectraDetectorMap::const_iterator& left) const;
       /// Checks if the given spectrum is in range
       bool isValid(const specid_t spectrumNo) const;
 
       /// The starting spectrum
-      const specid_t m_start;
+      specid_t m_start;
       /// The end spectrum
-      const specid_t m_end;
-      /// A 'pointer' to the current element
-      mutable specid_t m_current;
+      specid_t m_end;
     };
 
   } // namespace Geometry

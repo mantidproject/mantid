@@ -35,8 +35,6 @@ namespace DataObjects
     @return Standard string name  */
     virtual const std::string id() const {return "SpecialWorkspace2D";}
 
-    /// Non-const access to the spectra map is disallowed!
-    virtual Mantid::API::SpectraDetectorMap& mutableSpectraMap();
 
     double getValue(const detid_t detectorID) const;
     double getValue(const detid_t detectorID, const double defaultValue) const;
@@ -52,6 +50,9 @@ namespace DataObjects
     SpecialWorkspace2D& operator=(const SpecialWorkspace2D&);
 
     virtual void init(const size_t &NVectors, const size_t &XLength, const size_t &YLength);
+    
+    /// Non-const access to the spectra map is disallowed except by this classes constructor.
+    Workspace2D::replaceSpectraMap;
 
   protected:
     /** Vector with all the detector IDs, in the same order as the workspace indices.

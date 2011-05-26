@@ -77,8 +77,7 @@ public:
     std::vector<detid_t> specdetmap;
     for(detid_t i = 0; i < 9; ++i)
       specdetmap.push_back(i+1);
-    wksp->mutableSpectraMap().clear();
-    wksp->mutableSpectraMap().populateWithVector(specdetmap);
+    wksp->replaceSpectraMap(new SpectraDetectorMap(specdetmap));
     wksp->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
     AnalysisDataService::Instance().add("TestInputWS",wksp);
 

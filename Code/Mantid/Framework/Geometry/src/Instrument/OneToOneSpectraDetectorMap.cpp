@@ -4,21 +4,40 @@
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidKernel/Exception.h"
 #include <iostream>
+#include <sstream>
 
 namespace Mantid
 {
   namespace Geometry
   {
+
     /**
-     * Default constructor
+     * Default constructor builds an empty map
+     */
+    OneToOneSpectraDetectorMap::OneToOneSpectraDetectorMap()
+    {
+      clear();
+    }
+
+    /**
+     * Constructor taking a start and end
      * @param start :: The starting spectra/detector ID (inclusive)
      * @param end :: The end spectra/detector ID (inclusive)
      */
     OneToOneSpectraDetectorMap::OneToOneSpectraDetectorMap(const specid_t start, const specid_t end)
-      : m_start(start), m_end(end), m_current(start)
+      : m_start(start), m_end(end)
     {
     }
-    
+
+    /**
+     * Clone the current map. Note that this resets the iterator back to the beginning
+     */
+    OneToOneSpectraDetectorMap * 
+    OneToOneSpectraDetectorMap::clone() const 
+    { 
+      return new OneToOneSpectraDetectorMap(*this); 
+    }
+   
     /**
      * Get a vector of detectors ids contributing to a spectrum.
      * @param spectrumNo :: The spectrum number (unused)
@@ -31,11 +50,14 @@ namespace Mantid
     {
       if( isValid(spectrumNo) )
       {
-	return std::vector<detid_t>(1, detid_t(spectrumNo));
+        return std::vector<detid_t>(1, detid_t(spectrumNo));
       }
       else
       {
-	throw std::out_of_range("OneToOneSpectraDetectorMap::getDetectors - spectraNumber out of range");
+        std::ostringstream msg;
+        msg << "OneToOneSpectraDetectorMap::getDetectors - Spectrum " << spectrumNo << " out of range "
+            << "[" << m_start << "," << m_end << "]";
+        throw std::out_of_range(msg.str());
       }
     }
     
@@ -53,53 +75,52 @@ namespace Mantid
       std::vector<specid_t> spectra(nElements);
       for(size_t i = 0; i < nElements; ++i)
       {
-	specid_t spectrumNo = static_cast<specid_t>(detectorList[i]);
-	if( isValid(spectrumNo) )
-	{
-	  spectra[i] = spectrumNo;
-	}
-	else
-	{
-	  throw std::invalid_argument("OneToOneSpectraDetectorMap::getSpectra - ID out of range");
-	}
+        specid_t spectrumNo = static_cast<specid_t>(detectorList[i]);
+        if( isValid(spectrumNo) )
+        {
+          spectra[i] = spectrumNo;
+        }
+        else
+        {
+          std::ostringstream msg;
+          msg << "OneToOneSpectraDetectorMap::getSpectra - Detector ID " << detectorList[i] 
+              << " out of range. " << "[" << m_start << "," << m_end << "]";
+          throw std::invalid_argument(msg.str());
+        }
       }
       return spectra;
     }
+    
+    /**
+     * Return an iterator pointing at the first element
+     * @returns A ISpectraDetectorMap::const_iterator pointing at the first element
+     */
+    ISpectraDetectorMap::const_iterator OneToOneSpectraDetectorMap::cbegin() const
+    {
+      return ISpectraDetectorMap::const_iterator(this, std::make_pair(m_start,m_start));
+    }
 
     /**
-     * Setup the map for iteration from the beginning
+     * Return an iterator pointing at one past the element
+     * @returns A ISpectraDetectorMap::const_iterator pointing at one past the 
+     * last element
      */
-    void OneToOneSpectraDetectorMap::moveIteratorToStart() const
+    ISpectraDetectorMap::const_iterator OneToOneSpectraDetectorMap::cend() const
     {
-      m_current = m_start;
-    }
-    /**
-     * Returns whether a next element exists
-     * @returns True if a call to advanceIterator leaves the iterator in range
-     */
-    bool OneToOneSpectraDetectorMap::hasNext() const
-    {
-      return (m_current < m_end);
-    }
-    /**
-     * Advance the iterator to the next element
-     */
-    void OneToOneSpectraDetectorMap::advanceIterator() const
-    {
-      ++m_current;
-    }
-    /**
-     * Returns the current element of the sequence
-     * @returns The value currently pointed to by the iterator
-     */
-    inline specid_t OneToOneSpectraDetectorMap::getCurrentSpectrum() const
-    {
-      return m_current;
+      return ISpectraDetectorMap::const_iterator(this, std::make_pair(m_end+1,m_end+1));
     }
 
     //--------------------------------------------------------------------------
     // Private methods
     //--------------------------------------------------------------------------
+    /**
+     * Increment the given iterator by one
+     * @param left :: A reference to the iterator to move
+     */
+    void OneToOneSpectraDetectorMap::increment(ISpectraDetectorMap::const_iterator& left) const
+    {
+      left.item = std::make_pair(left->first + 1, left->second + 1);
+    }
 
     /**
      * Checks if the given spectrum is in range

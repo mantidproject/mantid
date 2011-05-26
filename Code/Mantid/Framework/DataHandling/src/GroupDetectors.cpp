@@ -101,13 +101,21 @@ void GroupDetectors::exec()
   const specid_t firstIndex = static_cast<specid_t>(indexList[0]);
   const specid_t firstSpectrum = spectraAxis->spectraNo(firstIndex);
   setProperty("ResultIndex",firstIndex);
+  const Geometry::ISpectraDetectorMap & inputSpectra = WS->spectraMap();
+  API::SpectraDetectorMap *groupedMap = dynamic_cast<API::SpectraDetectorMap*>(inputSpectra.clone());
+  if( !groupedMap )
+  {
+    throw std::invalid_argument("Input workspace with a 1:1 spectra-detector map is not supported "
+				"by this algorithm.");
+  }
+
   // loop over the spectra to group
   Progress progress(this, 0.0, 1.0, static_cast<int>(indexList.size()-1));
   for (size_t i = 0; i < indexList.size()-1; ++i)
   {
     const size_t currentIndex = indexList[i+1];
     // Move the current detector to belong to the first spectrum
-    WS->mutableSpectraMap().remap(spectraAxis->spectraNo(currentIndex),firstSpectrum);
+    groupedMap->remap(spectraAxis->spectraNo(currentIndex), firstSpectrum);
     // Add up all the Y spectra and store the result in the first one
     // Need to keep the next 3 lines inside loop for now until ManagedWorkspace mru-list works properly
     MantidVec &firstY = WS->dataY(firstIndex);
@@ -126,10 +134,12 @@ void GroupDetectors::exec()
     WS->dataY(currentIndex).assign(vectorSize,0.0);
     WS->dataE(currentIndex).assign(vectorSize,0.0);
     spectraAxis->spectraNo(currentIndex) = -1;
-
-	progress.report();
+    progress.report();
   }
+  g_log.information() << "Testing " << groupedMap->nElements() << "\n";
 
+  // Replace the old map
+  WS->replaceSpectraMap(groupedMap);
 }
 
 } // namespace DataHandling

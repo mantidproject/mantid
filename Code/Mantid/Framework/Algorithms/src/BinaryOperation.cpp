@@ -914,8 +914,8 @@ namespace Mantid
       BinaryOperationTable * table = new BinaryOperationTable();
 
       // Get the spectra detector maps
-      const SpectraDetectorMap & lhs_spec_det_map = lhs->spectraMap();
-      const SpectraDetectorMap & rhs_spec_det_map = rhs->spectraMap();
+      const Geometry::ISpectraDetectorMap & lhs_spec_det_map = lhs->spectraMap();
+      const Geometry::ISpectraDetectorMap & rhs_spec_det_map = rhs->spectraMap();
 
       int rhs_nhist = static_cast<int>(rhs->getNumberHistograms());
       int lhs_nhist = static_cast<int>(lhs->getNumberHistograms());

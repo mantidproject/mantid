@@ -93,7 +93,7 @@ private:
   void doComparison();
   bool checkData(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkAxes(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
-  bool checkSpectraMap(const API::SpectraDetectorMap& map1, const API::SpectraDetectorMap& map2);
+  bool checkSpectraMap(const Geometry::ISpectraDetectorMap& map1, const Geometry::ISpectraDetectorMap& map2);
   bool checkInstrument(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkMasking(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkSample(const API::Sample& sample1, const API::Sample& sample2);

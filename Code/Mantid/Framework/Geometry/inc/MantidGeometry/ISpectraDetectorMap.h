@@ -6,11 +6,11 @@
 //------------------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidGeometry/IDTypes.h"
+#include <iterator>
 #include <vector>
 
 namespace Mantid
 {
-
   namespace Geometry
   {
     /**
@@ -40,8 +40,82 @@ namespace Mantid
     class DLLExport ISpectraDetectorMap
     {
     public:
+      /// Typedef for the element type
+      typedef std::pair<specid_t, detid_t> value_type;
+
+      ///@cond
+      class const_iterator
+      {
+      public:
+        // Iterator traits
+        typedef size_t difference_type;
+        typedef ISpectraDetectorMap::value_type value_type;
+        typedef const value_type* pointer;
+        typedef const value_type& reference;
+        typedef std::forward_iterator_tag iterator_category;
+
+      public:
+        const_iterator(const ISpectraDetectorMap *map, const value_type item)
+          : item(item), increment_count(0), m_map(map) {}
+        const_iterator(const const_iterator & other)
+          : item(other.item), increment_count(other.increment_count), m_map(other.m_map) {}
+        const_iterator& operator=(const const_iterator& rhs) 
+        {
+          item = rhs.item;
+          increment_count = rhs.increment_count;
+          m_map = rhs.m_map;
+          return *this;
+        }
+        ///Prefix
+        const_iterator& operator++()
+        {
+          ++increment_count;
+          m_map->increment(*this);
+          return *this;
+        }
+        /// Postfix
+        const_iterator operator++(int)
+        {
+          const_iterator before = *this;
+          this->operator++();
+          return before;
+        }
+        // Return the current value
+        const value_type operator*() const
+        {
+          return item;
+        }
+        // Return a pointer to the current value 
+        const value_type* operator->() const
+        {
+          return &item;
+        }
+        // Comparison operator
+        bool operator==(const const_iterator &rhs)
+        {
+          return (m_map == rhs.m_map && item == rhs.item);
+        }
+        // Comparison operator
+        bool operator!=(const const_iterator &rhs)
+        {
+          return !(*this==rhs);
+        }
+      public:
+        // The current item
+        value_type item;
+        // Current position
+        size_t increment_count;
+      private:
+        // A pointer to the map implementation
+        const ISpectraDetectorMap *m_map;
+      };
+      ///@endcond
+
+    public:
       /// Virtual destructor
       virtual ~ISpectraDetectorMap() {}
+      /// "Virtual copy constructor"
+      virtual ISpectraDetectorMap * clone() const = 0;
 
       /// Return number of detectors contributing to this spectrum
       virtual std::size_t ndet(const specid_t spectrumNumber) const = 0;
@@ -51,19 +125,51 @@ namespace Mantid
       virtual std::vector<specid_t> getSpectra(const std::vector<detid_t>& detectorList) const = 0;
       /// Return the size of the map
       virtual std::size_t nElements() const = 0;
+      /// Clear the map
+      virtual void clear() = 0;
 
       /**@name Iterate over the whole map */
       //@{
-      /// Setup the map for iteration from the beginning
-      virtual void moveIteratorToStart() const = 0;
-      /// Returns whether a next element exists
-      virtual bool hasNext() const = 0;
-      /// Advance the iterator to the next element
-      virtual void advanceIterator() const = 0 ;
-      /// Returns the current element of the sequence
-      virtual specid_t getCurrentSpectrum() const = 0;
+      /// Begin
+      virtual const_iterator cbegin() const = 0;
+      /// End
+      virtual const_iterator cend() const = 0;
       //@}
+
+    private:
+      /// Advance the given iterator by one
+      virtual void increment(const_iterator& left) const = 0;
     };
+
+    /**
+     * Equality test for two objects implementing the ISpectraDetectorMap interface. 
+     * @lhs A reference to the lhs
+     * @rhs A reference to the rhs
+     * @returns True if the objects are considered equal, false otherwise
+     */
+    inline bool operator==(const ISpectraDetectorMap& lhs, const ISpectraDetectorMap& rhs)
+    {
+      // Quick return
+      if( lhs.nElements() != rhs.nElements() ) return false;
+      ISpectraDetectorMap::const_iterator l_end = lhs.cend();
+      ISpectraDetectorMap::const_iterator l_itr = lhs.cbegin();
+      ISpectraDetectorMap::const_iterator r_itr = lhs.cbegin();
+      for( ; l_itr != l_end; ++l_itr, ++r_itr )
+      {
+        if( *l_itr != *r_itr ) return false;
+      }
+      return true;
+    }
+    /**
+     * Inequality test for two objects of type ISpectraDetectorMap
+     * @lhs A reference to the lhs
+     * @rhs A reference to the rhs
+     * @returns True if the objects are not considerd equal, false otherwise
+     */
+    inline bool operator!=(const ISpectraDetectorMap& lhs, const ISpectraDetectorMap& rhs)
+    {
+      return !(lhs==rhs);
+    }
 
   } // namespace Geoemetry
 } // namespace Mantid

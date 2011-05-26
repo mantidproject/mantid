@@ -61,7 +61,7 @@ public:
     instr->markAsDetector(d4);
 
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, 5 );
+    space->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 5));
 
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("GroupTestWS", space);
@@ -119,6 +119,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
     TS_ASSERT( grouper.isExecuted() );
 
+    grouper.setPropertyValue("Workspace","GroupTestWS");
     grouper.setPropertyValue("WorkspaceIndexList","0,2");
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
     TS_ASSERT( grouper.isExecuted() );
@@ -135,40 +136,40 @@ public:
     std::vector<double> ones(5,1.0);
     std::vector<double> threes(5,3.0);
     std::vector<double> zeroes(5,0.0);
-    TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(0), threes )
+    TS_ASSERT_EQUALS( outputWS->dataX(0), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(0), threes );
     for (int i = 0; i < 5; ++i)
     {
-      TS_ASSERT_DELTA( outputWS->dataE(0)[i], 1.7321, 0.0001 )
+      TS_ASSERT_DELTA( outputWS->dataE(0)[i], 1.7321, 0.0001 );
     }
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(0), 0 )
-    TS_ASSERT_EQUALS( outputWS->dataX(1), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(1), ones )
-    TS_ASSERT_EQUALS( outputWS->dataE(1), ones )
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 1 )
-    TS_ASSERT_EQUALS( outputWS->dataX(2), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(2), zeroes )
-    TS_ASSERT_EQUALS( outputWS->dataE(2), zeroes )
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(2), -1 )
-    TS_ASSERT_EQUALS( outputWS->dataX(3), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(3), zeroes )
-    TS_ASSERT_EQUALS( outputWS->dataE(3), zeroes )
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(3), -1 )
-    TS_ASSERT_EQUALS( outputWS->dataX(4), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(4), ones )
-    TS_ASSERT_EQUALS( outputWS->dataE(4), ones )
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(4), 4 )
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(0), 0 );
+    TS_ASSERT_EQUALS( outputWS->dataX(1), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(1), ones );
+    TS_ASSERT_EQUALS( outputWS->dataE(1), ones );
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 1 );
+    TS_ASSERT_EQUALS( outputWS->dataX(2), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(2), zeroes );
+    TS_ASSERT_EQUALS( outputWS->dataE(2), zeroes );
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(2), -1 );
+    TS_ASSERT_EQUALS( outputWS->dataX(3), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(3), zeroes );
+    TS_ASSERT_EQUALS( outputWS->dataE(3), zeroes );
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(3), -1 );
+    TS_ASSERT_EQUALS( outputWS->dataX(4), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(4), ones );
+    TS_ASSERT_EQUALS( outputWS->dataE(4), ones );
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(4), 4 );
 
     boost::shared_ptr<IDetector> det;
-    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) )
-    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) )
-    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(1) )
-    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) )
-    TS_ASSERT_THROWS( outputWS->getDetector(2), Exception::NotFoundError )
-    TS_ASSERT_THROWS( outputWS->getDetector(3), Exception::NotFoundError )
-    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(4) )
-    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) )
-	AnalysisDataService::Instance().remove("GroupTestWS");
+    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) );
+    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) );
+    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(1) );
+    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) );
+    TS_ASSERT_THROWS( outputWS->getDetector(2), Exception::NotFoundError );
+    TS_ASSERT_THROWS( outputWS->getDetector(3), Exception::NotFoundError );
+    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(4) );
+    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) );
+    AnalysisDataService::Instance().remove("GroupTestWS");
   }
 
 private:

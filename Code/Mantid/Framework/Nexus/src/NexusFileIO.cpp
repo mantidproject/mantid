@@ -18,7 +18,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
@@ -1256,7 +1256,7 @@ using namespace DataObjects;
   {
 
 
-    const SpectraDetectorMap& spectraMap=localWorkspace->spectraMap();
+    const Geometry::ISpectraDetectorMap& spectraMap=localWorkspace->spectraMap();
     API::Axis *spectraAxis = localWorkspace->getAxis(1);
     const std::size_t nDetectors = spectraMap.nElements();
     if(nDetectors<1)

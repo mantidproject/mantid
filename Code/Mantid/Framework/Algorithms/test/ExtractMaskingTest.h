@@ -37,6 +37,8 @@ public:
     // Create a simple test workspace
     const int nvectors(5), nbins(10);
     Workspace2D_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspace(nvectors,nbins);
+    // Blank the default map
+    inputWS->replaceSpectraMap(new SpectraDetectorMap);
     const std::string inputName("inputWS");
     AnalysisDataService::Instance().add(inputName, inputWS);
     TS_ASSERT_THROWS(runExtractMask(inputName), std::invalid_argument);
@@ -117,25 +119,25 @@ private:
       IDetector_sptr inputDet, outputDet;
       try
       {
-	inputDet = inputWS->getDetector(i);
-	outputDet = outputWS->getDetector(i);
+        inputDet = inputWS->getDetector(i);
+        outputDet = outputWS->getDetector(i);
       }
       catch(Mantid::Kernel::Exception::NotFoundError&)
       {
-	expectedValue = 1.0;
-	inputDet = IDetector_sptr();
-	outputDet = IDetector_sptr();
+        expectedValue = 1.0;
+        inputDet = IDetector_sptr();
+        outputDet = IDetector_sptr();
       }
       
       if( inputDet && inputDet->isMasked() )
       {
-	expectedValue = 0.0;
-	outputMasked = true;
+        expectedValue = 0.0;
+        outputMasked = true;
       }
       else
       {
-	expectedValue = 1.0;
-	outputMasked = false;
+        expectedValue = 1.0;
+        outputMasked = false;
       }
       
       TS_ASSERT_EQUALS(outputWS->dataY(i)[0], expectedValue);
@@ -143,7 +145,7 @@ private:
       TS_ASSERT_EQUALS(outputWS->dataX(i)[0], 0.0);
       if( inputDet )
       {
-	TS_ASSERT_EQUALS(outputDet->isMasked(), outputMasked);
+        TS_ASSERT_EQUALS(outputDet->isMasked(), outputMasked);
       }      
     }
     

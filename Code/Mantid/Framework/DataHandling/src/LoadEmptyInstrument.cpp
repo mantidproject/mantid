@@ -125,7 +125,7 @@ namespace Mantid
           udet[counter-1] = it->first;
         }
 
-        localWorkspace->mutableSpectraMap().populate(spec,udet,number_spectra);
+	localWorkspace->replaceSpectraMap(new SpectraDetectorMap(spec,udet,number_spectra));
 
         counter = 0;
         MantidVecPtr x,v,v_monitor;

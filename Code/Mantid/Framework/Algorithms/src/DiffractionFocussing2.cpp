@@ -144,14 +144,17 @@ void DiffractionFocussing2::exec()
   //No problem? Then it is a normal Workspace2D
   API::MatrixWorkspace_sptr out=API::WorkspaceFactory::Instance().create(matrixInputW,nGroups,nPoints+1,nPoints);
 
-  // The spectaDetectorMap will have been copied from the input, but we don't want it
-  out->mutableSpectraMap().clear();
 
   // Now the real work
   std::vector<bool> flags(nGroups,true); //Flag to determine whether the X for a group has been set
   MantidVec limits(2), weights_default(1,1.0), emptyVec(1,0.0), EOutDummy(nPoints);  // Vectors for use with the masking stuff
 
-  const API::SpectraDetectorMap& inSpecMap = matrixInputW->spectraMap();
+  // The spectaDetectorMap will have been copied from the input, but we want a new one
+  API::SpectraDetectorMap * newSpecMap = new SpectraDetectorMap;
+  // Replace the old copied spectra map with a new one
+  out->replaceSpectraMap(newSpecMap);
+  const Geometry::ISpectraDetectorMap& inSpecMap = matrixInputW->spectraMap();
+
   const API::Axis* const inSpecAxis = matrixInputW->getAxis(1);
   
   Progress * prog;
@@ -184,7 +187,7 @@ void DiffractionFocussing2::exec()
       out->getAxis(1)->spectraNo(static_cast<int64_t>(dif)) = group;
     }
     // Add the detectors for this spectrum to the output workspace's spectra-detector map
-    out->mutableSpectraMap().addSpectrumEntries(group,inSpecMap.getDetectors(inSpecAxis->spectraNo(i)));
+    newSpecMap->addSpectrumEntries(group,inSpecMap.getDetectors(inSpecAxis->spectraNo(i)));
     // Get the references to Y and E output and rebin
     MantidVec& Yout=out->dataY(static_cast<int64_t>(dif));
     MantidVec& Eout=out->dataE(static_cast<int64_t>(dif));
@@ -248,7 +251,7 @@ void DiffractionFocussing2::exec()
       VectorHelper::rebin(limits,weights_default,emptyVec,Xout,groupWgt,EOutDummy,true,true);
     }
   }
-  
+
   // Now propagate the errors.
   // Pointer to sqrt function
   typedef double (*uf)(double);
@@ -471,7 +474,7 @@ void DiffractionFocussing2::execEvent()
 int DiffractionFocussing2::validateSpectrumInGroup(specid_t spectrum_number)
 {
   // Get the spectra to detector map
-  const API::SpectraDetectorMap& spectramap = matrixInputW->spectraMap();
+  const Geometry::ISpectraDetectorMap& spectramap = matrixInputW->spectraMap();
   const std::vector<detid_t> dets = spectramap.getDetectors(spectrum_number);
   if (dets.empty()) // Not in group
   {

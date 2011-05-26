@@ -81,7 +81,7 @@ namespace Mantid
       MatrixWorkspace_sptr integratedWorkspace = integrateWorkspace(getPropertyValue("OutputWorkspace"));
 
       // Get hold of the spectraDetectorMap and axis
-      const SpectraDetectorMap& specMap = integratedWorkspace->spectraMap();
+      const Geometry::ISpectraDetectorMap& specMap = integratedWorkspace->spectraMap();
       Axis* specAxis = integratedWorkspace->getAxis(1);
 
       std::vector<detid_t> deadDets;

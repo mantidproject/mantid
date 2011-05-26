@@ -161,7 +161,7 @@ private:
     loader.setPropertyValue("Workspace", input);
     loader.execute();
 
-    inputWS->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, NHIST);
+    inputWS->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, NHIST));
 
     // mask the detector
     Geometry::ParameterMap* m_Pmap = &(inputWS->instrumentParameters());

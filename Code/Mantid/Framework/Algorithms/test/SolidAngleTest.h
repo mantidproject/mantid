@@ -52,6 +52,8 @@ public:
       space2D->getAxis(1)->spectraNo(j) = j+1;
       forSpecDetMap[j] = j+1;
     }
+    // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
+    space2D->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, Nhist ));
 
     // Register the workspace in the data service
     inputSpace = "SATestWorkspace";
@@ -66,8 +68,6 @@ public:
     loader.setPropertyValue("Workspace", inputSpace);
     loader.execute();
 
-    // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space2D->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, Nhist );
 
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     

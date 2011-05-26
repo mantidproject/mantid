@@ -228,7 +228,7 @@ API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double pro
         spectra[i] = i + 1;
         ws->getAxis(1)->spectraNo(i)= i+1;
     }
-    ws->mutableSpectraMap().populate(spectra.get(),spectra.get(),nSpectra);
+    ws->replaceSpectraMap(new SpectraDetectorMap(spectra.get(),spectra.get(),nSpectra));
 
     NXFloat proton_charge = entry.openNXFloat("proton_charge");
     proton_charge.load();

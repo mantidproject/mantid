@@ -163,8 +163,9 @@ public:
     loader.setPropertyValue("Workspace", m_WB2Name);
     loader.execute(); 
 
-    inputA->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, Nhist);
-    inputB->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, Nhist);
+    inputA->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap,forSpecDetMap,Nhist));
+    inputB->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap,forSpecDetMap,Nhist));
+
     inputA->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     inputB->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   }

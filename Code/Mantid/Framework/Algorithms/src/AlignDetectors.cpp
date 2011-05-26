@@ -192,7 +192,7 @@ void AlignDetectors::exec()
   }
 
   // Ref. to the SpectraDetectorMap
-  const SpectraDetectorMap& specMap = inputWS->spectraMap();
+  const Geometry::ISpectraDetectorMap& specMap = inputWS->spectraMap();
   const int64_t numberOfSpectra = inputWS->getNumberHistograms();
 
   // generate map of the tof->d conversion factors
@@ -293,7 +293,7 @@ void AlignDetectors::execEvent()
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 
   // Ref. to the SpectraDetectorMap
-  const SpectraDetectorMap& specMap = inputWS->spectraMap();
+  const Geometry::ISpectraDetectorMap& specMap = inputWS->spectraMap();
   const int64_t numberOfSpectra = static_cast<int64_t>(inputWS->getNumberHistograms());
 
   // Initialise the progress reporting object

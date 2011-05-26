@@ -108,7 +108,7 @@ public:
     //----------------------------------------------------------------------
     // Tests to check that Loading SpectraDetectorMap is done correctly
     //----------------------------------------------------------------------
-    const SpectraDetectorMap& map= output2D->spectraMap();
+    const Geometry::ISpectraDetectorMap& map= output2D->spectraMap();
 
     // Check the total number of elements in the map for HET
     TS_ASSERT_EQUALS(map.nElements(),24964);
