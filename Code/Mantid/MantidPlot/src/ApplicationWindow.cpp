@@ -12079,11 +12079,11 @@ void ApplicationWindow::createActions()
   actionLogLevelDebug->setCheckable(true);
 
   logLevelMapper = new QSignalMapper(this);
-  logLevelMapper->setMapping(actionLogLevelError, Mantid::Kernel::Logger::Priority::PRIO_ERROR);
-  logLevelMapper->setMapping(actionLogLevelWarning, Mantid::Kernel::Logger::Priority::PRIO_WARNING);
-  logLevelMapper->setMapping(actionLogLevelNotice, Mantid::Kernel::Logger::Priority::PRIO_NOTICE);
-  logLevelMapper->setMapping(actionLogLevelInformation, Mantid::Kernel::Logger::Priority::PRIO_INFORMATION);
-  logLevelMapper->setMapping(actionLogLevelDebug, Mantid::Kernel::Logger::Priority::PRIO_DEBUG);
+  logLevelMapper->setMapping(actionLogLevelError, Mantid::Kernel::Logger::PRIO_ERROR);
+  logLevelMapper->setMapping(actionLogLevelWarning, Mantid::Kernel::Logger::PRIO_WARNING);
+  logLevelMapper->setMapping(actionLogLevelNotice, Mantid::Kernel::Logger::PRIO_NOTICE);
+  logLevelMapper->setMapping(actionLogLevelInformation, Mantid::Kernel::Logger::PRIO_INFORMATION);
+  logLevelMapper->setMapping(actionLogLevelDebug, Mantid::Kernel::Logger::PRIO_DEBUG);
   
   connect(actionLogLevelError, SIGNAL(activated()), logLevelMapper, SLOT (map()));
   connect(actionLogLevelWarning, SIGNAL(activated()), logLevelMapper, SLOT (map()));
