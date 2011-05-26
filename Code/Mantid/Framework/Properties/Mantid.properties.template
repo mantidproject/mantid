@@ -112,7 +112,7 @@ curvefitting.peakRadius = 5
 
 # logging configuration
 # root level message filter (drop to debug for more messages)
-logging.loggers.root.level = information
+logging.loggers.root.level = notice
 # splitting the messages to many logging channels
 logging.loggers.root.channel.class = SplitterChannel
 logging.loggers.root.channel.channel1 = consoleChannel

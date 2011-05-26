@@ -442,6 +442,20 @@ void ApplicationWindow::showLogWindowContextMenu(const QPoint & p)
   logLevelMenu->addAction(actionLogLevelNotice);
   logLevelMenu->addAction(actionLogLevelInformation);
   logLevelMenu->addAction(actionLogLevelDebug);
+
+  //check the right level
+  int level = Mantid::Kernel::Logger::get("").getLevel(); //get the root logger logging level
+  if (level == Mantid::Kernel::Logger::PRIO_ERROR)
+    actionLogLevelError->setChecked(true);
+  if (level == Mantid::Kernel::Logger::PRIO_WARNING)
+    actionLogLevelWarning->setChecked(true);
+  if (level == Mantid::Kernel::Logger::PRIO_NOTICE)
+    actionLogLevelNotice->setChecked(true);
+  if (level == Mantid::Kernel::Logger::PRIO_INFORMATION)
+    actionLogLevelInformation->setChecked(true);
+  if (level == Mantid::Kernel::Logger::PRIO_DEBUG)
+    actionLogLevelDebug->setChecked(true);
+
   //Mantid log level changes
   menu->popup(QCursor::pos());
 }
@@ -12085,7 +12099,6 @@ void ApplicationWindow::createActions()
   logLevelGroup->addAction(actionLogLevelNotice);
   logLevelGroup->addAction(actionLogLevelInformation);
   logLevelGroup->addAction(actionLogLevelDebug);
-  actionLogLevelInformation->setChecked(true);
 
 
   //mantid log level control
