@@ -48,6 +48,27 @@ public:
     TS_ASSERT_EQUALS(p.getInstrument(), inst)
   }
 
+  void test_constructorHKLGon()
+  {
+    Matrix<double> mats(3,3),mat(3,3);
+    for (int x=0; x<3; x++)
+      for (int y=0; y<3; y++)
+        mats[x][y]=1.0*x+1.0*y;
+    mat[0][0]=1.0;mat[1][2]=1.0;mat[2][1]=1.0;
+    
+    // detector IDs start at 10000
+    TS_ASSERT_THROWS_ANYTHING(Peak ps(inst, 10000, 2.0, V3D(1,2,3),mats );)
+    TS_ASSERT_THROWS_NOTHING(Peak p(inst, 10000, 2.0, V3D(1,2,3),mat );) 
+    Peak p(inst, 10000, 2.0, V3D(1,2,3),mat );
+    TS_ASSERT_DELTA(p.getH(), 1.0, 1e-5)
+    TS_ASSERT_DELTA(p.getK(), 2.0, 1e-5)
+    TS_ASSERT_DELTA(p.getL(), 3.0, 1e-5)
+    TS_ASSERT_EQUALS(p.getDetectorID(), 10000)
+    TS_ASSERT_EQUALS(p.getDetector()->getID(), 10000)
+    TS_ASSERT_EQUALS(p.getInstrument(), inst)
+    TS_ASSERT_EQUALS( p.getGoniometerMatrix(), mat);
+  }
+
   void test_copyConstructor()
   {
     Peak p(inst, 10102, 2.0);
@@ -101,13 +122,15 @@ public:
   void test_GoniometerMatrix()
   {
     Peak p(inst, 10000, 2.0);
-    Matrix<double> mat(3,3);
+    Matrix<double> mats(3,3),mat(3,3);
     for (int x=0; x<3; x++)
       for (int y=0; y<3; y++)
-        mat[x][y]=x+y;
-    p.setGoniometerMatrix(mat);
+        mats[x][y]=1.0*x+1.0*y;
+    TS_ASSERT_THROWS_ANYTHING(p.setGoniometerMatrix(mats)); //matrix is singular
+    TS_ASSERT_EQUALS( p.getGoniometerMatrix(), mats);
+    mat[0][0]=1.0;mat[1][2]=1.0;mat[2][1]=1.0;
+    TS_ASSERT_THROWS_NOTHING(p.setGoniometerMatrix(mat)); //matrix is not singular
     TS_ASSERT_EQUALS( p.getGoniometerMatrix(), mat);
-
     // Matrix must be 3x3
     Matrix<double> mat2(4,3);
     TS_ASSERT_THROWS_ANYTHING( p.setGoniometerMatrix(mat2) );

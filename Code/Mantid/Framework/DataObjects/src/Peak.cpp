@@ -72,7 +72,7 @@ namespace DataObjects
     m_InverseGoniometerMatrix(goniometer),
     m_RunNumber(0)
   {
-    m_InverseGoniometerMatrix.Invert();
+    if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Goniometer matrix must non-singular.");
     this->setDetectorID(m_DetectorID);
     this->setWavelength(m_Wavelength);
   }
@@ -382,7 +382,7 @@ namespace DataObjects
     this->m_GoniometerMatrix = goniometerMatrix;
     // Calc the inverse rotation matrix
     m_InverseGoniometerMatrix = m_GoniometerMatrix;
-    m_InverseGoniometerMatrix.Invert();
+    if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Goniometer matrix must non-singular.");
   }
 
 
