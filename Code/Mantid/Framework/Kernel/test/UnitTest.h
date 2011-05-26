@@ -220,7 +220,7 @@ public:
     std::vector<double> x(1,input);
     energy.toTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
     energyk.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
-    TS_ASSERT_DELTA( x[0], result, 1.0e-13 )
+    TS_ASSERT_DELTA( x[0], result, 1.0e-12 )
 
     TS_ASSERT( energy.quickConversion(lambda,factor,power) )
     result = factor * std::pow(input,power);
