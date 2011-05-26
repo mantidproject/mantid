@@ -7,6 +7,7 @@
 #include "MantidKernel/Timer.h"
 #include <iostream>
 
+using namespace Mantid;
 using namespace Mantid::Geometry;
 
 /** 
@@ -31,6 +32,7 @@ public:
     TS_ASSERT_EQUALS(bbox->yMax(), 4.0);
     TS_ASSERT_EQUALS(bbox->zMin(), 3.0);
     TS_ASSERT_EQUALS(bbox->zMax(), 5.0);
+    TS_ASSERT_EQUALS(bbox->isAxisAligned(),true);
     delete bbox;
   }
 
@@ -49,6 +51,7 @@ public:
     BoundingBox box;
     TS_ASSERT_EQUALS(box.isNull(), true);
     TS_ASSERT_EQUALS(box.isNonNull(), false);
+    TS_ASSERT_EQUALS(box.isAxisAligned(),true);
   }
 
   void test_That_Construction_With_Points_Gives_A_NonNull_Bounding_Box()
@@ -56,6 +59,7 @@ public:
     BoundingBox box(3.0,4.0,5.0,0.0,1.0,2.0);
     TS_ASSERT_EQUALS(box.isNonNull(), true);
     TS_ASSERT_EQUALS(box.isNull(), false);
+    TS_ASSERT_EQUALS(box.isAxisAligned(),true);
   }
 
   void test_That_Querying_For_The_Min_and_Max_Points_Gives_The_Correct_Points()
@@ -63,6 +67,7 @@ public:
     BoundingBox bbox(1.0, 2.0, 3.0, -1.0, -2.0, -3.0);
     TS_ASSERT_EQUALS(bbox.minPoint(), V3D(-1.0,-2.0,-3.0));
     TS_ASSERT_EQUALS(bbox.maxPoint(), V3D(1.0,2.0,3.0));
+    TS_ASSERT_EQUALS(bbox.isAxisAligned(),true);
   }
 
   void test_That_Querying_A_Point_Inside_A_Valid_Bounding_Box_Returns_That_This_It_Is_Inside()
@@ -165,6 +170,89 @@ public:
     BoundingBox box(3.0,4.0,5.0,1.0,1.0,2.5);
     TS_ASSERT_EQUALS(box.width(), V3D(2.0, 3.0, 2.5));
   }
+  void testNullifyWorks(){
+      BoundingBox box(3.0,4.0,5.0,1.0,1.0,2.5);
+      box.nullify();
+      TS_ASSERT_EQUALS(box.isNull(), true);
+      TS_ASSERT_EQUALS(box.maxPoint()==V3D(-FLT_MAX,-FLT_MAX,-FLT_MAX), true);
+      TS_ASSERT_EQUALS(box.minPoint()==V3D(FLT_MAX,FLT_MAX,FLT_MAX), true);
+  }
+  void testBB_expansion_works_fine(){
+      BoundingBox box(3.0,4.0,5.5,1.0,1.0,1.5);
+      std::vector<V3D> points;
+      box.getFullBox(points,V3D(1,1,1.5));
+
+      TS_ASSERT_EQUALS(points[0]==V3D(0,0,0),true);
+      TS_ASSERT_EQUALS(points[1]==V3D(2,0,0),true);
+      TS_ASSERT_EQUALS(points[2]==V3D(2,3,0),true);
+      TS_ASSERT_EQUALS(points[3]==V3D(0,3,0),true);
+      TS_ASSERT_EQUALS(points[4]==V3D(0,3,4),true);
+      TS_ASSERT_EQUALS(points[5]==V3D(0,0,4),true);
+      TS_ASSERT_EQUALS(points[6]==V3D(2,0,4),true);
+      TS_ASSERT_EQUALS(points[7]==V3D(2,3,4),true);
+  }
+  void testAxisAlignedCSisSimple(){
+    BoundingBox bbox(3.0,4.0,5.5,1.0,1.0,1.5);
+    std::vector<V3D> cs;
+    bbox.getCoordSystem(cs);
+    TS_ASSERT_EQUALS(bbox.isAxisAligned(),true);
+
+    TS_ASSERT_EQUALS(cs.size(),4);
+    TS_ASSERT_EQUALS(cs[0]==V3D(0,0,0),true);
+    TS_ASSERT_EQUALS(cs[1]==V3D(1,0,0),true);
+    TS_ASSERT_EQUALS(cs[2]==V3D(0,1,0),true);
+    TS_ASSERT_EQUALS(cs[3]==V3D(0,0,1),true);
+  }
+
+  void testBBAlignedToNewCoordinateSystemIsCorrect(){
+    BoundingBox bbox(3.0,4.0,5.5,1.0,1.0,1.5);
+    std::vector<V3D> ort(3);
+    ort[0]=V3D(0,1,0);
+    ort[1]=V3D(0,0,1);
+    ort[2]=V3D(1,0,0);
+    bbox.setBoxAlignment(V3D(1,1,1.5),ort);
+
+    bbox.getCoordSystem(ort);
+    TS_ASSERT_EQUALS(bbox.isAxisAligned(),false);
+
+    TS_ASSERT_EQUALS(ort.size(),4);
+    TS_ASSERT_EQUALS(ort[0]==V3D(1,1,1.5),true);
+    TS_ASSERT_EQUALS(ort[1]==V3D(0,1,0),true);
+    TS_ASSERT_EQUALS(ort[2]==V3D(0,0,1),true);
+    TS_ASSERT_EQUALS(ort[3]==V3D(1,0,0),true);
+
+    TS_ASSERT_THROWS(bbox.doesLineIntersect(V3D(-5.0,-1.0,0.0),V3D(1.0,1.0,0.0)),Kernel::Exception::NotImplementedError);
+    TS_ASSERT_THROWS(bbox.isPointInside(V3D(-5.0,-1.0,0.0)),Kernel::Exception::NotImplementedError);
+  }
+  void testBBAlignedToNewCoordinateSystemWorksCorrect(){
+      BoundingBox bbox(3.0,4.0,5.5,1.0,1.0,1.5);
+      std::vector<V3D> ort(3);
+      ort[0]=V3D(0,1,0);
+      ort[1]=V3D(0,0,1);
+      ort[2]=V3D(1,0,0);
+      bbox.setBoxAlignment(V3D(1,1,1.5),ort);
+      TS_ASSERT_EQUALS(bbox.isAxisAligned(),false);
+      bbox.realign();
+
+      TS_ASSERT_EQUALS(bbox.minPoint()==V3D(0,0,0),true);
+      TS_ASSERT_EQUALS(bbox.maxPoint()==V3D(3,4,2),true);
+  }
+  void testBBComplesRealignmentOK(){
+      BoundingBox bbox(2,2,2,1,1,1);
+      std::vector<V3D> cs(4);
+      cs[0] =V3D(1,1,1);
+      cs[1]= V3D(1, 1,0);
+      cs[2]= V3D(1,-1,0);
+      cs[1].normalize();
+      cs[2].normalize();
+      cs[3]=cs[1].cross_prod(cs[2]);
+
+      bbox.realign(&cs);
+      TS_ASSERT_EQUALS(bbox.isAxisAligned(),false);
+
+      TSM_ASSERT_EQUALS("min point should be (0,-sqrt(2.)/2,-1)",bbox.minPoint()==V3D(0,-sqrt(2.)/2,-1),true);
+      TSM_ASSERT_EQUALS("max point should be (sqrt(2.),sqrt(2.)/2,0)",bbox.maxPoint()==V3D(sqrt(2.),sqrt(2.)/2,0),true);
+    }
 
 private:
 

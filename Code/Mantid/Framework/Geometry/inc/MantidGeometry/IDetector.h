@@ -95,6 +95,7 @@ public:
  /// returns the geometry of detectors, meaningful for groups, rectangular for single
   virtual det_topology getTopology()const = 0;
 
+
   /// (Empty) Constructor
   IDetector() {}
   /// Virtual destructor

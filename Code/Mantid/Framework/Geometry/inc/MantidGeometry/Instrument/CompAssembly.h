@@ -87,6 +87,7 @@ public:
 
   /// Get the bounding box for this component and store it in the given argument
   virtual void getBoundingBox(BoundingBox& boundingBox) const;
+ 
   //! Print information about all children
   void printChildren(std::ostream&) const;
   void printTree(std::ostream&) const;

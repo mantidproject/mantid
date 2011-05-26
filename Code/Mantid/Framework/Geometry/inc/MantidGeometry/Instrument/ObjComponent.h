@@ -77,7 +77,8 @@ public:
   double solidAngle(const V3D& observer) const;
   ///@todo This should go in favour of just the class related one.
   void boundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
-  void getBoundingBox(BoundingBox& absoluteBB) const;
+  /// get bounding box, which may or may not be axis aligned;
+  void getBoundingBox(BoundingBox& absoluteBB) const;  
   /// get Height (Y-dimension) value for component
   virtual double getHeight() const;
   /// get Width (X-dimension) value for component
@@ -106,6 +107,9 @@ protected:
 
   const V3D factorOutComponentPosition(const V3D& point) const;
   const V3D takeOutRotation(V3D point) const;
+private:
+/// common part of the two Bounding box functions above;
+  void getRelativeBoundingBox(BoundingBox& RelativeBB) const;
 
 };
 

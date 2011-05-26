@@ -48,7 +48,7 @@ namespace Mantid
     {
     public:
       /// Default constructor constructs a zero-sized box
-      BoundingBox() : m_minPoint(), m_maxPoint(), m_null(true)
+      BoundingBox() : m_minPoint(), m_maxPoint(), m_null(true),is_axis_aligned(true)
       {
       }
 
@@ -61,7 +61,7 @@ namespace Mantid
       * @param zmin :: Value of minimum in Z. It must be less than zmax.
       */
       BoundingBox(double xmax, double ymax, double zmax, double xmin, double ymin, double zmin)
-        : m_minPoint(xmin,ymin,zmin), m_maxPoint(xmax, ymax, zmax), m_null(false)
+        : m_minPoint(xmin,ymin,zmin), m_maxPoint(xmax, ymax, zmax), m_null(false),is_axis_aligned(true)
       {
         // Sanity check
         if( xmax < xmin || ymax < ymin || zmax < zmin )
@@ -74,6 +74,7 @@ namespace Mantid
           throw std::invalid_argument(error.str());
         }
       }
+   
       /** @name Point access */
       //@{
       /// Return the minimum value of X
@@ -112,8 +113,16 @@ namespace Mantid
       bool doesLineIntersect(const V3D & startPoint, const V3D & lineDir) const;
       /// Calculate the angular half width from the given point
       double angularWidth(const V3D & observer) const;
+      /// Check if it is normal axis aligned bounding box or not. 
+      inline bool isAxisAligned()const{return is_axis_aligned;}
+      /// returns the coordinate system to which BB is alighned to;
+      void getCoordSystem(std::vector<V3D> &coordSyst)const;
+
       //@}
 
+   /** returns the expanded box consisting of all 8 box points, 
+     * shifted into the coordinate system with the observer centre; */
+      void getFullBox(std::vector<V3D> &box,const V3D &observer)const;
       /** @name Box mutation functions*/
       //@{
       /// Return the minimum value of X (non-const)
@@ -130,8 +139,14 @@ namespace Mantid
       inline double & zMax() { m_null = false; return m_maxPoint[2]; }
       /// Grow the bounding box so that it also encompasses the given box
       void grow(const BoundingBox & other);
+      /// change the BB alighnment
+      void setBoxAlignment(const V3D &R0,const std::vector<V3D> &orts);
+      /// set BB in to undefined state with min=FLT_MAX>max=-FLT_MAX
+      void nullify();
+      /// reallign the BB according to new coordinate system, provided earlier or specified as parameter;
+      void realign(std::vector<V3D> const* const pCS=NULL);
       //@}
-
+    
     private:
       /// The minimum point of the axis-aligned box
       V3D m_minPoint;
@@ -140,7 +155,13 @@ namespace Mantid
       /// Flag marking if we've been initialized using the default constructor, 
       /// with values or default values and user-set points
       bool m_null;
-    };
+      /// the parameter which describe if the bounding box is axis aligned or not
+      bool is_axis_aligned;
+      /** if the bounding box is not axis aligned, the vector below describes the coordinate system, 
+       to which the bounding box is alighned to. The vector has 4 members, with first describing 
+       new coordinate system center and three others -- orts of this system */
+      std::vector<V3D> coord_system;
+   };
 
     /// A shared pointer to a BoundingBox
     typedef boost::shared_ptr<BoundingBox> BoundingBox_sptr;

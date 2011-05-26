@@ -315,8 +315,7 @@ namespace Mantid
         boundingBox.grow(memberBox);
       }
     }
-
-    /**
+     /**
     * Returns a boolean indicating if the component has the named parameter
     * @param name :: The name of the parameter
     * @param recursive :: If true the parent components will also be searched (Default: true)

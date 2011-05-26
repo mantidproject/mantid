@@ -1,4 +1,3 @@
-//#include "MDDataObjects/stdafx.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
@@ -113,11 +112,7 @@ MDGeometry::initialize(const MDGeometryDescription &trf)
 void 
 MDGeometry::initialize(const std::vector<std::string> &DimensionTags)
 {
-
-
   bool congruent_geometries(true);
-
-
 
   // are the old geometry congruent to the new geometry? e.g the same nuber of dimensions and the same dimension tags;
   if(DimensionTags.size()!=m_basis.getNumDims()){
@@ -242,61 +237,60 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
 
 }
 //
-    boost::shared_ptr<IMDDimension>
-      MDGeometry::getYDimension(void)const
-    {
-      if(m_basis.getNumDims()<2){
-        throw(std::invalid_argument("No Y dimension is defined in this workspace"));
-      }
-      return theDimension[1];
-    }
-    //
-    boost::shared_ptr<IMDDimension> 
-      MDGeometry::getZDimension(void)const
-    {
-      if(m_basis.getNumDims()<3){
-        throw(std::invalid_argument("No Z dimension is defined in this workspace"));
-      }
-      return theDimension[2];
-    }
-    //
-    boost::shared_ptr<IMDDimension>
-      MDGeometry::getTDimension(void)const
-    {
-      if(m_basis.getNumDims()<4){
-        throw(std::invalid_argument("No T dimension is defined in this workspace"));
-      }
-      return theDimension[3];
-    }
-    //
-    std::vector<boost::shared_ptr<IMDDimension> >
-      MDGeometry::getIntegratedDimensions(void)const
-    {
-      std::vector<boost::shared_ptr<IMDDimension> > tmp;
+boost::shared_ptr<IMDDimension>
+  MDGeometry::getYDimension(void)const
+{
+  if(m_basis.getNumDims()<2){
+    throw(std::invalid_argument("No Y dimension is defined in this workspace"));
+  }
+  return theDimension[1];
+}
+//
+boost::shared_ptr<IMDDimension> 
+  MDGeometry::getZDimension(void)const
+{
+  if(m_basis.getNumDims()<3){
+    throw(std::invalid_argument("No Z dimension is defined in this workspace"));
+  }
+  return theDimension[2];
+}
+//
+boost::shared_ptr<IMDDimension>
+MDGeometry::getTDimension(void)const
+{
+  if(m_basis.getNumDims()<4){
+    throw(std::invalid_argument("No T dimension is defined in this workspace"));
+  }
+  return theDimension[3];
+}
+//
+std::vector<boost::shared_ptr<IMDDimension> >
+MDGeometry::getIntegratedDimensions(void)const
+{
+  std::vector<boost::shared_ptr<IMDDimension> > tmp;
 
-      if(this->n_expanded_dim<m_basis.getNumDims())
-      {
-        size_t size = m_basis.getNumDims()-this->n_expanded_dim;
-        tmp.resize(size);
-        size_t ic(0);
-        for(size_t i = this->n_expanded_dim;i<theDimension.size();i++){
-          tmp[ic] = theDimension[i];
-          ic++;
-        }
-      }
-      return tmp;
+  if(this->n_expanded_dim<m_basis.getNumDims())
+  {
+    size_t size = m_basis.getNumDims()-this->n_expanded_dim;
+    tmp.resize(size);
+    size_t ic(0);
+    for(size_t i = this->n_expanded_dim;i<theDimension.size();i++){
+      tmp[ic] = theDimension[i];
+      ic++;
     }
-
+  }
+  return tmp;
+}
 //  protected;
 boost::shared_ptr<MDDimension>
 MDGeometry::getDimension(size_t i)
-    {
+{
       
-      if(i>=m_basis.getNumDims()){
+  if(i>=m_basis.getNumDims()){
         g_log.error()<<"Geometry::getDimension: attemting to get the dimension N"<<i<<" but this is out of the dimensions range";
         throw(std::out_of_range("Geometry::getDimension: attemting to get the dimension with non-existing number"));
-      }
-      return theDimension[i];
+  }
+  return theDimension[i];
 }
 //  protected;
 boost::shared_ptr<MDDimension>

@@ -40,7 +40,7 @@ namespace Mantid
     *  @param material :: An optional pointer to the material object of this component
     */
     ObjComponent::ObjComponent(const std::string& name, Object_sptr shape, 
-			       IComponent* parent, Material_sptr material)
+                   IComponent* parent, Material_sptr material)
       : IObjComponent(), Component(name,parent), m_shape(shape), m_material(material)
     {
     }
@@ -149,19 +149,29 @@ namespace Mantid
       }
     }
 
-    /**
+    
+  /**
     * Given an input estimate of the axis aligned (AA) bounding box (BB), return an improved set of values.
     * The AA BB is determined in the frame of the object and the initial estimate will be transformed there.
     * The returned BB will be the frame of the ObjComponent and may not be optimal.
-    * @param absoluteBB :: [Out] The bounding box for this object component will be stored here.
+    * @param absoluteBB :: [InOut] The bounding box for this object component will be stored here.
+    * if BB alignment is different from axis alignment, the system of coordinates to alighn is taken fron  
+    * the absoluteBB
     */
-    void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
-    {
-      // Start with the box in the shape's coordinates
+  void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
+  {
+       std::vector<V3D> coord_system;
+// Start with the box in the shape's coordinates
       const BoundingBox & shapeBox = shape()->getBoundingBox();
-      absoluteBB = BoundingBox(shapeBox);
-      if ( shapeBox.isNull() ) return;
-      // modify in place for speed
+      if ( shapeBox.isNull() ){
+          absoluteBB.nullify();
+          return;
+      }
+      if(!absoluteBB.isAxisAligned()){
+          absoluteBB.getCoordSystem(coord_system);
+      }
+      absoluteBB =  BoundingBox(shapeBox);
+   // modify in place for speed
       V3D scaleFactor = getScaleFactor();
       // Scale
       absoluteBB.xMin() *= scaleFactor.X();
@@ -173,6 +183,10 @@ namespace Mantid
       // Rotate
       (this->getRotation()).rotateBB(absoluteBB.xMin(),absoluteBB.yMin(),absoluteBB.zMin(),
         absoluteBB.xMax(),absoluteBB.yMax(),absoluteBB.zMax());
+    
+      if(!coord_system.empty()){
+          absoluteBB.realign(&coord_system);
+      }  
       // Shift
       const V3D localPos = this->getPos();
       absoluteBB.xMin() += localPos.X(); 
@@ -181,8 +195,9 @@ namespace Mantid
       absoluteBB.yMax() += localPos.Y();
       absoluteBB.zMin() += localPos.Z(); 
       absoluteBB.zMax() += localPos.Z();
-    }
 
+  }
+ 
     /**
     * Gets the Height of the object by querying the underlying BoundingBox.
     * @return height of object

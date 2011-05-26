@@ -3,6 +3,7 @@
 //---------------------------------------------------------
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Track.h"
+#include <cfloat>
 
 namespace Mantid
 {
@@ -18,6 +19,10 @@ namespace Mantid
     */
     bool BoundingBox::isPointInside(const V3D & point) const
     {
+      if(!this->isAxisAligned()){
+          throw(Kernel::Exception::NotImplementedError("this function has not been modified properly"));
+      }
+
       if(point.X() <= xMax() + Tolerance && point.X() >= xMin() - Tolerance &&
          point.Y() <= yMax() + Tolerance && point.Y() >= yMin() - Tolerance && 
         point.Z() <= zMax() + Tolerance && point.Z() >= zMin() - Tolerance)
@@ -29,6 +34,7 @@ namespace Mantid
         return false;
       }
     }
+ 
 
     /** 
     * Does a defined track intersect the bounding box
@@ -37,7 +43,7 @@ namespace Mantid
     */
     bool BoundingBox::doesLineIntersect(const Track & track) const
     {
-      return this->doesLineIntersect(track.startPoint(), track.direction());
+       return this->doesLineIntersect(track.startPoint(), track.direction());
     }
 
     /** 
@@ -48,6 +54,9 @@ namespace Mantid
     */
     bool BoundingBox::doesLineIntersect(const V3D & startPoint, const V3D & lineDir) const
     {
+      if(!this->isAxisAligned()){
+          throw(Kernel::Exception::NotImplementedError("this function has not been modified properly"));
+      }
       // Method - Loop through planes looking for ones that are visible and check intercept
       // Assume that orig is outside of BoundingBox.
       const double tol = Mantid::Geometry::Tolerance;
@@ -124,15 +133,8 @@ namespace Mantid
     double BoundingBox::angularWidth(const Geometry::V3D& observer) const
     {
       Geometry::V3D centre = centrePoint() - observer;
-      std::vector<Geometry::V3D> pts(8);
-      pts[0] = Geometry::V3D(xMin(), yMin(), zMin()) - observer;
-      pts[1] = Geometry::V3D(xMin(), yMin(), zMax()) - observer;
-      pts[2] = Geometry::V3D(xMin(), yMax(), zMin()) - observer;
-      pts[3] = Geometry::V3D(xMin(), yMax(), zMax()) - observer;
-      pts[4] = Geometry::V3D(xMax(), yMin(), zMin()) - observer;
-      pts[5] = Geometry::V3D(xMax(), yMin(), zMax()) - observer;
-      pts[6] = Geometry::V3D(xMin(), yMax(), zMin()) - observer;
-      pts[7] = Geometry::V3D(xMin(), yMax(), zMax()) - observer;
+      std::vector<Geometry::V3D> pts;
+      this->getFullBox(pts,observer);
 
       std::vector<Geometry::V3D>::const_iterator ip;
       double centre_norm_inv = 1.0 / centre.norm();
@@ -145,7 +147,83 @@ namespace Mantid
       }
       return thetaMax;
     }
+    //
+    void BoundingBox::getFullBox(std::vector<V3D> &box,const V3D &observer)const
+    {
+      box.resize(8);
+      box[0] = Geometry::V3D(xMin(), yMin(), zMin())-observer;
+      box[1] = Geometry::V3D(xMax(), yMin(), zMin())-observer;
+      box[2] = Geometry::V3D(xMax(), yMax(), zMin())-observer;
+      box[3] = Geometry::V3D(xMin(), yMax(), zMin())-observer;
+      box[4] = Geometry::V3D(xMin(), yMax(), zMax())-observer;
+      box[5] = Geometry::V3D(xMin(), yMin(), zMax())-observer;
+      box[6] = Geometry::V3D(xMax(), yMin(), zMax())-observer;
+      box[7] = Geometry::V3D(xMax(), yMax(), zMax())-observer;
 
+    }
+    void BoundingBox::setBoxAlignment(const V3D &R0,const std::vector<V3D> &orts)
+    {
+        this->coord_system.resize(4);
+        coord_system[0] = R0;
+        coord_system[1] = orts[0];
+        coord_system[2] = orts[1];
+        coord_system[3] = orts[2];
+        is_axis_aligned = false;
+    }  
+    void BoundingBox::nullify()
+    {
+        this->m_null = true;
+        for(int i=0;i<3;i++){
+            this->m_minPoint[i]= FLT_MAX;
+            this->m_maxPoint[i]=-FLT_MAX;
+        }
+    }
+    /**
+    * returns the coordinate system to which this bounding box is alignet to;
+    */
+    void BoundingBox::getCoordSystem(std::vector<V3D> &coordSyst)const
+    {
+        
+        if(this->isAxisAligned()){
+            coordSyst.resize(4);
+            coordSyst[0] = V3D(0,0,0);
+            coordSyst[1] = V3D(1,0,0);
+            coordSyst[2] = V3D(0,1,0);
+            coordSyst[3] = V3D(0,0,1);
+        }else{
+            coordSyst = this->coord_system;
+        }
+    }
+    //
+    void BoundingBox::realign(std::vector<V3D> const*const pCS)
+    {
+       if(pCS){
+           this->coord_system    = *pCS;
+           this->is_axis_aligned = false;
+       }
+
+       if(this->isAxisAligned())return;
+
+    // expand the bounding box to full size and shift it to the coordinates with the 
+    // centre cpecified;
+       std::vector<V3D> BBpoints;
+       this->getFullBox(BBpoints,this->coord_system[0]);
+
+    // identify min-max vrt the new coordinate system;
+       double xMin( FLT_MAX),yMin( FLT_MAX),zMin( FLT_MAX);
+       double xMax(-FLT_MAX),yMax(-FLT_MAX),zMax(-FLT_MAX);
+       for(unsigned int i=0;i<8;i++){
+           double x = coord_system[1].scalar_prod(BBpoints[i]);
+           double y = coord_system[2].scalar_prod(BBpoints[i]);
+           double z = coord_system[3].scalar_prod(BBpoints[i]);
+           if(x<xMin)xMin = x;  if(x>xMax)xMax = x;
+           if(y<yMin)yMin = y;  if(y>yMax)yMax = y;
+           if(z<zMin)zMin = z;  if(z>zMax)zMax = z;
+       }
+       this->xMin()= xMin;   this->xMax()= xMax;
+       this->yMin()= yMin;   this->yMax()= yMax;
+       this->zMin()= zMin;   this->zMax()= zMax;
+    }
     /**
      * Enlarges this bounding box so that it encompasses that given.
      * @param other :: The bounding box that should be encompassed
@@ -199,6 +277,8 @@ namespace Mantid
 	 << "; Z from " <<  box.zMin() << " to " <<  box.zMax();
       return os;
     }
+
+  
 
   }
 }

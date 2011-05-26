@@ -67,12 +67,12 @@ public:
   std::map<int32_t, double> getNeighbours(double radius = 0.0);
   /// Returns a reference to itself
   IComponent* getComponent(){return static_cast<IComponent*>(this);}
-  // end IDetector methods
-
+  // end IDetector methods 
   void markAsMonitor(const bool flag = true);
   /** returns the detector's topology, namely, the meaning of the detector's angular measurements.
       It is different in cartesian and cylindrical coordinate system */
   det_topology getTopology()const{return rect;};
+ 
 private:
   /// The detector id
   mutable detid_t m_id;
