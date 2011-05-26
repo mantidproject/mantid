@@ -282,7 +282,7 @@ namespace Mantid
         // do analysis for each top level compoment element
         NodeList* pNL_comp = pRootElem->childNodes(); // here get all child nodes
         unsigned long pNL_comp_length = pNL_comp->length();
-        API::Progress prog(this,0,1,pNL_comp_length);
+        API::Progress prog(this,0,1,static_cast<int>(pNL_comp_length));
         for (unsigned long i = 0; i < pNL_comp_length; i++)
         {
           if (VERBOSE) std::cout << "exec(): Node = "<< pNL_comp->item(i)->nodeName() << "\n";
