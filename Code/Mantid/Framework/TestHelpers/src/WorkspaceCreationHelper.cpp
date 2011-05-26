@@ -292,6 +292,36 @@ namespace WorkspaceCreationHelper
 
 
   //================================================================================================================
+  /** Create an Workspace2D with an instrument that contains RectangularDetector's.
+   * Bins will be 0.0, 1.0, to numBins, filled with signal=2.0, sqrt(2.0)
+   *
+   * @param numBanks :: number of rectangular banks
+   * @param numPixels :: each bank will be numPixels*numPixels
+   * @param numBins :: each spectrum will have this # of bins
+   * @return The EventWorkspace
+   */
+  Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels, int numBins)
+  {
+    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(numBanks, numPixels);
+    Workspace2D_sptr ws = Create2DWorkspaceBinned(numBanks*numPixels*numPixels, numBins);
+    ws->setInstrument(inst);
+    ws->getAxis(0)->setUnit("dSpacing");
+    // Set the spectra-detector map
+    SpectraDetectorMap * specMap = new SpectraDetectorMap();
+    for (size_t wi=0; wi<ws->getNumberHistograms(); wi++)
+    {
+      // Set the spectrum number
+      ws->getAxis(1)->setValue(wi, double(wi));
+      std::vector<detid_t> dets;
+      dets.push_back(detid_t(numPixels*numPixels + wi)); // detector IDs start at numPixels*numPixels
+      specMap->addSpectrumEntries(specid_t(wi), dets);
+    }
+    ws->replaceSpectraMap(specMap);
+    return ws;
+  }
+
+
+  //================================================================================================================
   /** Create an Eventworkspace with an instrument that contains RectangularDetector's
    *
    * @param numBanks :: number of rectangular banks

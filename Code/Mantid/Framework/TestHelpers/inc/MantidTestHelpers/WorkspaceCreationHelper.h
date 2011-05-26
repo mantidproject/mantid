@@ -55,6 +55,8 @@ namespace WorkspaceCreationHelper
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nHist, int nBins,
                     bool includeMonitors = false);
 
+  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels, int numBins);
+
   /** Create an Eventworkspace with an instrument that contains RectangularDetector's */
   DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithFullInstrument(int numBanks, int numPixels);
 

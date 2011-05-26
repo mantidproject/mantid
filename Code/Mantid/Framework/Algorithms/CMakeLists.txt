@@ -427,6 +427,7 @@ set ( TEST_FILES
 	test/UnwrapSNSTest.h
 	test/UnwrapTest.h
 	test/WeightedMeanTest.h
+	test/WorkspaceCreationHelperTest.h
 	test/WorkspaceGroupTest.h
 )
 
