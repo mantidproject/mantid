@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 using namespace Mantid::Kernel;
 
@@ -35,8 +36,6 @@ public:
 
   void testUnit_quickConversion()
   {
-    Units::Wavelength w;
-
     UnitTester t;
     double factor;
     double power;
@@ -156,6 +155,14 @@ public:
     lambda.toTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
     energy.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
     TS_ASSERT_DELTA( x[0], result, 1.0e-10 )
+
+    TS_ASSERT( lambda.quickConversion(energyk,factor,power) )
+    double result2 = factor * std::pow(input,power);
+    TS_ASSERT_EQUALS( result2/result, Mantid::PhysicalConstants::meVtoWavenumber )
+    std::vector<double> x2(1,input);
+    lambda.toTOF(x2,x2,99.0,99.0,99.0,99,99.0,99.0);
+    energyk.fromTOF(x2,x2,99.0,99.0,99.0,99,99.0,99.0);
+    TS_ASSERT_DELTA( x2[0], result2, 1.0e-10 )
   }
 
   //----------------------------------------------------------------------
@@ -206,13 +213,86 @@ public:
   {
     // Test it gives the same answer as going 'the long way'
     double factor, power;
-    TS_ASSERT( energy.quickConversion(lambda,factor,power) )
+    TS_ASSERT( energy.quickConversion(energyk,factor,power) )
     double input = 100.1;
     double result = factor * std::pow(input,power);
+    TS_ASSERT_EQUALS ( result/input, Mantid::PhysicalConstants::meVtoWavenumber )
     std::vector<double> x(1,input);
     energy.toTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
-    lambda.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
-    TS_ASSERT_DELTA( x[0], result, 1.0e-15 )
+    energyk.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
+    TS_ASSERT_DELTA( x[0], result, 1.0e-13 )
+
+    TS_ASSERT( energy.quickConversion(lambda,factor,power) )
+    result = factor * std::pow(input,power);
+    std::vector<double> x2(1,input);
+    energy.toTOF(x2,x2,99.0,99.0,99.0,99,99.0,99.0);
+    lambda.fromTOF(x2,x2,99.0,99.0,99.0,99,99.0,99.0);
+    TS_ASSERT_DELTA( x2[0], result, 1.0e-15 )
+  }
+
+  //----------------------------------------------------------------------
+  // Energy_inWavenumber tests
+  //----------------------------------------------------------------------
+
+  void testEnergy_inWavenumber_unitID()
+  {
+    TS_ASSERT_EQUALS( energyk.unitID(), "Energy_inWavenumber" )
+  }
+
+  void testEnergy_inWavenumber_caption()
+  {
+    TS_ASSERT_EQUALS( energyk.caption(), "Energy" )
+  }
+
+  void testEnergy_inWavenumber_label()
+  {
+    TS_ASSERT_EQUALS( energyk.label(), "1/cm" )
+  }
+
+  void testEnergy_inWavenumber_cast()
+  {
+    Unit *u = NULL;
+    TS_ASSERT_THROWS_NOTHING( u = dynamic_cast<Unit*>(&energyk) );
+    TS_ASSERT_EQUALS(u->unitID(), "Energy_inWavenumber");
+  }
+
+  void testEnergy_inWavenumber_toTOF()
+  {
+    std::vector<double> x(1, 4.0), y(1, 1.0);
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING( energyk.toTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
+    TS_ASSERT_DELTA( x[0], 6492.989, 0.001 )
+    TS_ASSERT( yy == y )
+  }
+
+  void testEnergy_inWavenumber_fromTOF()
+  {
+    std::vector<double> x(1, 4.0), y(1, 1.0);
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING( energyk.fromTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
+    TS_ASSERT_DELTA( x[0], 10539725, 1.0 )
+    TS_ASSERT( yy == y )
+  }
+
+  void testEnergy_inWavenumber_quickConversions()
+  {
+    // Test it gives the same answer as going 'the long way'
+    double factor, power;
+    TS_ASSERT( energyk.quickConversion(energy,factor,power) )
+    double input = 100.1;
+    double result = factor * std::pow(input,power);
+    TS_ASSERT_EQUALS ( input/result, Mantid::PhysicalConstants::meVtoWavenumber )
+    std::vector<double> x(1,input);
+    energyk.toTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
+    energy.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
+    TS_ASSERT_DELTA( x[0], result, 1.0e-14 )
+
+    TS_ASSERT( energyk.quickConversion(lambda,factor,power) )
+    result = factor * std::pow(input,power);
+    std::vector<double> x2(1,input);
+    energyk.toTOF(x2,x2,99.0,99.0,99.0,99,99.0,99.0);
+    lambda.fromTOF(x2,x2,99.0,99.0,99.0,99,99.0,99.0);
+    TS_ASSERT_DELTA( x2[0], result, 1.0e-15 )
   }
 
   //----------------------------------------------------------------------
@@ -540,6 +620,7 @@ private:
   Units::TOF tof;
   Units::Wavelength lambda;
   Units::Energy energy;
+  Units::Energy_inWavenumber energyk;
   Units::dSpacing d;
   Units::MomentumTransfer q;
   Units::QSquared q2;

@@ -22,7 +22,7 @@ namespace Kernel
     @author Russell Taylor, Tessella Support Services plc
     @date 25/02/2008
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -129,28 +129,8 @@ public:
   const std::string caption() const { return ""; }
   const std::string label() const {return ""; }
 
-  /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
   void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
 
@@ -188,28 +168,8 @@ public:
   const std::string caption() const { return "Time-of-flight"; }
   const std::string label() const {return "microsecond"; }
   
-  /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
   void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
 
@@ -227,28 +187,8 @@ public:
   const std::string caption() const { return "Wavelength"; }
   const std::string label() const {return "Angstrom"; }
   
-  /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
   void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
 
@@ -266,28 +206,8 @@ public:
   const std::string caption() const { return "Energy"; }
   const std::string label() const {return "meV"; }
 
-  /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
   void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
 
@@ -297,6 +217,25 @@ public:
   ~Energy() {}
 };
 
+/// Absolute energy in units of wavenumber (cm^-1)
+class DLLExport Energy_inWavenumber : public Unit
+{
+public:
+  const std::string unitID() const; ///< "Energy_inWavenumber"
+  const std::string caption() const { return "Energy"; }
+  const std::string label() const {return "1/cm"; }
+
+  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+
+  /// Constructor
+  Energy_inWavenumber();
+  /// Destructor
+  ~Energy_inWavenumber() {}
+};
+
 /// d-Spacing in Angstrom
 class DLLExport dSpacing : public Unit
 {
@@ -304,28 +243,9 @@ public:
   const std::string unitID() const; ///< "dSpacing"
   const std::string caption() const { return "d-Spacing"; }
   const std::string label() const {return "Angstrom"; }
-  /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
+
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
   void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
 
@@ -343,28 +263,8 @@ public:
   const std::string caption() const { return "q"; }
   const std::string label() const {return "1/Angstrom"; }
 
-  /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
   void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
 
@@ -381,28 +281,9 @@ public:
   const std::string unitID() const; ///< "QSquared"
   const std::string caption() const { return "Q2"; }
   const std::string label() const {return "Angstrom^-2"; }
-  /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
+
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
   void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
 
@@ -419,28 +300,9 @@ public:
   const std::string unitID() const; ///< "DeltaE"
   const std::string caption() const { return "Energy transfer"; }
   const std::string label() const {return "meV"; }
-  /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
+
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
   void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
 
@@ -457,28 +319,9 @@ public:
   const std::string unitID() const; ///< "DeltaE_inWavenumber"
   const std::string caption() const { return "Energy transfer"; }
   const std::string label() const {return "1/cm"; }
-  /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
+
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
-   *  @param xdata ::    The array of X data to be converted
-   *  @param ydata ::    Not currently used (ConvertUnits passes an empty vector)
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param l2 ::       The sample-detector distance (in metres)
-   *  @param twoTheta :: The scattering angle (in radians)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *  @param delta ::    Not currently used
-   */
   void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
 

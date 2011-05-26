@@ -146,6 +146,7 @@ Wavelength::Wavelength() : Unit()
   const double factor = ( AngstromsSquared * PhysicalConstants::h * PhysicalConstants::h )
                                  / ( 2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV );
   addConversion("Energy",factor,-2.0);
+  addConversion("Energy_inWavenumber",factor*PhysicalConstants::meVtoWavenumber,-2.0);
 }
 
 
@@ -241,6 +242,7 @@ DECLARE_UNIT(Energy)
 /// Constructor
 Energy::Energy() : Unit()
 {
+  addConversion("Energy_inWavenumber",PhysicalConstants::meVtoWavenumber);
   const double toAngstroms = 1e10;
   const double factor = toAngstroms * PhysicalConstants::h
                                 / sqrt( 2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV);
@@ -270,6 +272,56 @@ void Energy::fromTOF(std::vector<double>& xdata, std::vector<double>&, const dou
 
   const double ltot = l1 + l2;
   const double factor = ( (PhysicalConstants::NeutronMass / 2.0) * ( ltot * ltot ) )
+                                       / (PhysicalConstants::meV * TOFisinMicroseconds);
+
+  std::vector<double>::iterator it;
+  for (it = xdata.begin(); it != xdata.end(); ++it)
+  {
+    if (*it == 0.0) *it = DBL_MIN; // Protect against divide by zero
+    *it = factor / ( (*it)*(*it) );
+  }
+}
+
+/* ENERGY IN UNITS OF WAVENUMBER
+ * =============================
+ *
+ * Conversion uses E = 1/2 mv^2, where v is (l1+l2)/tof.
+ */
+DECLARE_UNIT(Energy_inWavenumber)
+
+/// Constructor
+Energy_inWavenumber::Energy_inWavenumber() : Unit()
+{
+  addConversion("Energy",1.0/PhysicalConstants::meVtoWavenumber);
+  const double toAngstroms = 1e10;
+  const double factor = toAngstroms * PhysicalConstants::h
+                         / sqrt( 2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV / PhysicalConstants::meVtoWavenumber);
+  addConversion("Wavelength",factor,-0.5);
+}
+
+void Energy_inWavenumber::toTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
+    const double&, const int&, const double&, const double&) const
+{
+  const double TOFinMicroseconds = 1e6;
+
+  const double factor = sqrt( PhysicalConstants::NeutronMass * PhysicalConstants::meVtoWavenumber / (2.0*PhysicalConstants::meV) )
+                                     * ( l1 + l2 ) * TOFinMicroseconds;
+
+  std::vector<double>::iterator it;
+  for (it = xdata.begin(); it != xdata.end(); ++it)
+  {
+    if (*it == 0.0) *it = DBL_MIN; // Protect against divide by zero
+    *it = factor / sqrt(*it);
+  }
+}
+
+void Energy_inWavenumber::fromTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
+    const double&, const int&, const double&, const double&) const
+{
+  const double TOFisinMicroseconds = 1e-12;  // The input tof number gets squared so this is (10E-6)^2
+
+  const double ltot = l1 + l2;
+  const double factor = ( (PhysicalConstants::NeutronMass / 2.0) * ( ltot * ltot ) * PhysicalConstants::meVtoWavenumber )
                                        / (PhysicalConstants::meV * TOFisinMicroseconds);
 
   std::vector<double>::iterator it;
