@@ -103,7 +103,6 @@ namespace Mantid
 
       // Create the file.
       ::NeXus::File nxFile(this->filename, NXACC_CREATE5);
-       nxFile.putAttr("nxspe_version", NXSPE_VER);
 
       // Make the top level entry (and open it)
       nxFile.makeGroup(inputWS->getName(), "NXentry", true);
