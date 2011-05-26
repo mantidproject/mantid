@@ -155,6 +155,7 @@ set ( TEST_FILES
 	test/DefineGaugeVolumeTest.h
 	test/DeleteTableRowsTest.h
 	test/FindDetectorsInShapeTest.h
+	test/FindDetectorsParTest.h	
 	test/GetMaskedDetectorsTest.h
 	test/GroupDetectors2Test.h
 	test/GroupDetectorsTest.h
@@ -206,7 +207,6 @@ set ( TEST_FILES
 	test/SetScalingPSDTest.h
 	test/UpdateInstrumentFromFileTest.h
 	test/XMLlogfileTest.h
-	test/FindDetectorsParTest.h
 )
 
 if(UNITY_BUILD)
