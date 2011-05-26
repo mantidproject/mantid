@@ -53,7 +53,7 @@ FindDetectorsPar::exec()
 {
 
  // Get the input workspace
-    const MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
+  const MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   if(inputWS.get()==NULL){
       throw(Kernel::Exception::NotFoundError("can not obtain InoputWorkspace for the algorithm to work",""));
   }
@@ -72,7 +72,7 @@ FindDetectorsPar::exec()
   secondary_flightpath.resize(nHist);
 
    Progress progress(this,0,1,100);
-   const int progStep = (int)(ceil(nHist/100.0));
+   const int progStep = (int)(ceil(double(nHist)/100.0));
         
    // Loop over the spectra
    for (size_t i = 0; i < nHist; i++)
@@ -92,7 +92,7 @@ FindDetectorsPar::exec()
        }
         // make regular progress reports and check for canceling the algorithm
 	   if ( i % progStep == 0 ){
-          progress.report();
+           progress.report();
 	   }
    }
    if(!this->isChild()){
@@ -157,8 +157,8 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_sptr spDet,const Geom
             dist_sum+=d1*d1+d0*d0;
         }
 
-        azim_width = atan2(d1_max,d0)-atan2(d1_min,d0);
-        azim       = azim_sum/double(pDets.size());
+        azim_width = (atan2(d1_max,d0)-atan2(d1_min,d0))*rad2deg;
+        azim       = (azim_sum/double(pDets.size()))*rad2deg;
         dist       = sqrt(dist_sum/double(pDets.size()));
         
 }

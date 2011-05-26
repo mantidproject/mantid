@@ -117,8 +117,7 @@ namespace Mantid
         else
         {
           LoadInstrumentHelper helper;
-          m_filename = helper.getInstrumentFilename(instName, 
-            helper.getWorkspaceStartDate(m_workspace));
+          m_filename = helper.getInstrumentFilename(instName,helper.getWorkspaceStartDate(m_workspace));
         }
       }
 
