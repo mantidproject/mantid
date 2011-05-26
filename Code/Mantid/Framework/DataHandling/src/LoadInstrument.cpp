@@ -220,8 +220,8 @@ namespace Mantid
           throw Kernel::Exception::InstrumentDefinitionError("No type elements in XML instrument file", m_filename);
         }
 
-        size_t numberTypes = pNL_type->length();
-        for (size_t iType = 0; iType < numberTypes; iType++)
+        unsigned long numberTypes = pNL_type->length();
+        for (unsigned long iType = 0; iType < numberTypes; iType++)
         {
           Element* pTypeElem = static_cast<Element*>(pNL_type->item(iType));
           std::string typeName = pTypeElem->getAttribute("name");
@@ -262,8 +262,8 @@ namespace Mantid
         // create hasParameterElement
         NodeList* pNL_parameter = pRootElem->getElementsByTagName("parameter");
 
-        size_t numParameter = pNL_parameter->length();
-        for (size_t i = 0; i < numParameter; i++)
+        unsigned long numParameter = pNL_parameter->length();
+        for (unsigned long i = 0; i < numParameter; i++)
         {
           Element* pParameterElem = static_cast<Element*>(pNL_parameter->item(i));
           hasParameterElement.push_back( static_cast<Element*>(pParameterElem->parentNode()) );
@@ -281,9 +281,9 @@ namespace Mantid
 
         // do analysis for each top level compoment element
         NodeList* pNL_comp = pRootElem->childNodes(); // here get all child nodes
-        size_t pNL_comp_length = pNL_comp->length();
+        unsigned long pNL_comp_length = pNL_comp->length();
         API::Progress prog(this,0,1,pNL_comp_length);
-        for (size_t i = 0; i < pNL_comp_length; i++)
+        for (unsigned long i = 0; i < pNL_comp_length; i++)
         {
           if (VERBOSE) std::cout << "exec(): Node = "<< pNL_comp->item(i)->nodeName() << "\n";
           prog.report();
@@ -299,7 +299,7 @@ namespace Mantid
 
             // get all location elements contained in component element
             NodeList* pNL_location = pElem->getElementsByTagName("location");
-            size_t pNL_location_length = pNL_location->length();
+            unsigned long pNL_location_length = pNL_location->length();
             if (pNL_location_length == 0)
             {
               g_log.error(std::string("A component element must contain at least one location element") +
@@ -314,15 +314,15 @@ namespace Mantid
             {
               if (VERBOSE) std::cout << "exec(): This element has a type that is an assembly\n";
 
-              for (size_t i_loc = 0; i_loc < pNL_location_length; i_loc++)
+              for (unsigned long i_loc = 0; i_loc < pNL_location_length; i_loc++)
               {
                 Element* pLocElem = static_cast<Element*>(pNL_location->item(i_loc));
 
                 // check if <exclude> sub-elements for this location and create new exclude list to pass on 
                 NodeList* pNLexclude = pLocElem->getElementsByTagName("exclude");
-                size_t numberExcludeEle = pNLexclude->length();
+                unsigned long numberExcludeEle = pNLexclude->length();
                 std::vector<std::string> newExcludeList;
-                for (size_t i = 0; i < numberExcludeEle; i++)
+                for (unsigned long i = 0; i < numberExcludeEle; i++)
                 {
                   Element* pExElem = static_cast<Element*>(pNLexclude->item(i));
                   if ( pExElem->hasAttribute("sub-part") )
@@ -352,7 +352,7 @@ namespace Mantid
             else
             {	
 
-              for (size_t i_loc = 0; i_loc < pNL_location_length; i_loc++)
+              for (unsigned long i_loc = 0; i_loc < pNL_location_length; i_loc++)
               {
                 appendLeaf(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
               }
@@ -596,9 +596,9 @@ namespace Mantid
 
               // check if <exclude> sub-elements for this location and create new exclude list to pass on 
               NodeList* pNLexclude = pElem->getElementsByTagName("exclude");
-              size_t numberExcludeEle = pNLexclude->length();
+              unsigned long numberExcludeEle = pNLexclude->length();
               std::vector<std::string> newExcludeList;
-              for (size_t i = 0; i < numberExcludeEle; i++)
+              for (unsigned long i = 0; i < numberExcludeEle; i++)
               {
                 Element* pExElem = static_cast<Element*>(pNLexclude->item(i));
                 if ( pExElem->hasAttribute("sub-part") )
@@ -1432,9 +1432,9 @@ namespace Mantid
         if ( hasParameterElement.end() == std::find(hasParameterElement.begin(),hasParameterElement.end(),pElem) ) return;
 
       NodeList* pNL_comp = pElem->childNodes(); // here get all child nodes
-      size_t pNL_comp_length = pNL_comp->length();
+      unsigned long pNL_comp_length = pNL_comp->length();
 
-      for (size_t i = 0; i < pNL_comp_length; i++)
+      for (unsigned long i = 0; i < pNL_comp_length; i++)
       {
         // we are only interest in the top level parameter elements hence
         // the reason for the if statement below
@@ -1649,9 +1649,9 @@ namespace Mantid
             }
 
             NodeList* pNLpoint = pLookUp->getElementsByTagName("point");
-            size_t numberPoint = pNLpoint->length();
+            unsigned long numberPoint = pNLpoint->length();
 
-            for ( size_t i = 0; i < numberPoint; i++)
+            for ( unsigned long i = 0; i < numberPoint; i++)
             {
               Element* pPoint = static_cast<Element*>(pNLpoint->item(i));
               double x = atof( pPoint->getAttribute("x").c_str() );
@@ -1709,7 +1709,7 @@ namespace Mantid
     void LoadInstrument::setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pRootElem)
     {
       NodeList* pNL_link = pRootElem->getElementsByTagName("component-link");
-      size_t numberLinks = pNL_link->length();
+      unsigned long numberLinks = pNL_link->length();
 
 
       // check if any logfile cache units set. As of this writing the only unit to check is if "angle=radian"
@@ -1721,7 +1721,7 @@ namespace Mantid
           m_angleConvertConst = 180.0/M_PI;
       
 
-      for (size_t iLink = 0; iLink < numberLinks; iLink++)
+      for (unsigned long iLink = 0; iLink < numberLinks; iLink++)
       {
         Element* pLinkElem = static_cast<Element*>(pNL_link->item(iLink));
         std::string name = pLinkElem->getAttribute("name");
