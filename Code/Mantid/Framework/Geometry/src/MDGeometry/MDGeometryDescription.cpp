@@ -71,7 +71,6 @@ MDGeometryDescription::MDGeometryDescription(const MDGeometryBasis &basis):
 		num = it->getColumnNumber();
 		this->setPAxis(num,it->getId());
 	}
-
 }
 
 MDGeometryDescription::MDGeometryDescription(
@@ -95,29 +94,48 @@ nContributedPixels(0), Rotations(3,3,true)
  
   this->Rotations = MantidMat(rotationMatrix);
 
+  int count = 0; 
   //To get this to work with the rest of MDGeometeryDescription. have to order certain dimensions in a specific fashion.
-  DimensionVecIterator dimX = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensionX));
-  DimensionVecIterator dimY = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensionY));
-  DimensionVecIterator dimZ = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensionZ));
-  DimensionVecIterator dimT = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensiont));
+  DimensionVecIterator dimX = dimensions.end();
+  DimensionVecIterator dimY = dimensions.end();
+  DimensionVecIterator dimZ = dimensions.end();
+  DimensionVecIterator dimT = dimensions.end();
 
-  //Check dimensions;
-  createDimensionDescription(*dimX, 0);
-  createDimensionDescription(*dimY, 1);
-  createDimensionDescription(*dimZ, 2);
-  createDimensionDescription(*dimT, 3);
+  if(dimensionX.get() != NULL)
+  {
+    dimX = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensionX));
+    createDimensionDescription(*dimX, 0);
+    count++;
+  }
+  if(dimensionY.get() != NULL)
+  {
+    dimY = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensionY));
+    createDimensionDescription(*dimY, 1);
+    count++;
+  }
+  if(dimensionZ.get() != NULL)
+  {
+    dimZ = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensionZ)); 
+    createDimensionDescription(*dimZ, 2);
+    count++;
+  }
+  if(dimensiont.get() != NULL)
+  {
+    dimT = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensiont));
+    createDimensionDescription(*dimT, 3);
+    count++;
+  }
 
   //Now process dimension that are not already mapped.
   DimensionVecIterator it = dimensions.begin();
-  int count = 4; // mappings take priority see above.
-  while(it != dimensions.end())
-  {
+  for(;it != dimensions.end();++it)
+  { 
     if((it != dimX) && (it != dimY) && ( it != dimZ) && (it != dimT))
     {
       createDimensionDescription(*it, count);
       count++;
     }
-    it++;
+    
   }
 }
 

@@ -18,6 +18,9 @@
 #include "MantidVatesAPI/EscalatingRebinningActionManager.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
+#include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
+#include "MantidVatesAPI/vtkThresholdingQuadFactory.h"
+#include "MantidVatesAPI/vtkThresholdingLineFactory.h"
 #include "MantidVatesAPI/IMDWorkspaceProxy.h"
 #include "MantidVatesAPI/vtkProxyFactory.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
@@ -127,21 +130,16 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
     vtkInformation * inputInf = inputVector[0]->GetInformationObject(0);
     vtkDataSet * inputDataset = vtkDataSet::SafeDownCast(inputInf->Get(vtkDataObject::DATA_OBJECT()));
 
-    DimensionVec dimensionsVec(4);
-    dimensionsVec[0] = m_appliedXDimension;
-    dimensionsVec[1] = m_appliedYDimension;
-    dimensionsVec[2] = m_appliedZDimension;
-    dimensionsVec[3] = m_appliedTDimension;
-
     //Create the composite holder.
     CompositeImplicitFunction* compFunction = new CompositeImplicitFunction;
     vtkDataSet* clipDataSet = m_cachedVTKDataSet == NULL ? inputDataset : m_cachedVTKDataSet;
-    BoxFunction_sptr box = constructBox(clipDataSet); // Save the implicit function so that we may later determine if the extents have changed.
+   
+    BoxFunction_sptr box = constructBox(inputDataset); // Save the implicit function so that we may later determine if the extents have changed.
     compFunction->addFunction(box);
     
     // Construct reduction knowledge.
     m_presenter.constructReductionKnowledge(
-      dimensionsVec,
+      m_vecAppliedDimensions,
       m_appliedXDimension,
       m_appliedYDimension,
       m_appliedZDimension,
@@ -157,7 +155,7 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
 
     //Actually perform rebinning or specified action.
     int timestep = 0;
-    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
+    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()) && hasTDimension())
     {
       // usually only one actual step requested
       timestep = static_cast<int>(outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0]);
@@ -170,6 +168,7 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
     Mantid::API::IMDWorkspace_sptr spRebinnedWs = m_presenter.applyRebinningAction(action, updatehandler);
 
     //Build a vtkDataSet
+    int ndims = spRebinnedWs->getNumDims();
     vtkDataSetFactory_sptr spvtkDataSetFactory = createDataSetFactory(spRebinnedWs);
     outData = dynamic_cast<vtkUnstructuredGrid*> (m_presenter.createVisualDataSet(spvtkDataSetFactory));
     
@@ -182,7 +181,6 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
     {
       m_cachedVTKDataSet =outData; 
     }
-    
     output->ShallowCopy(outData);
   }
   return 1;
@@ -340,6 +338,11 @@ void vtkRebinningCutter::SetAppliedGeometryXML(std::string appliedGeometryXML)
     xmlBuilder.addYDimension(m_appliedYDimension);
     xmlBuilder.addZDimension(m_appliedZDimension);
     xmlBuilder.addTDimension(m_appliedTDimension);
+    VecIMDDimension_sptr::iterator it = m_vecAppliedDimensions.begin();
+    for(; it < m_vecAppliedDimensions.end(); it++)
+    {
+      xmlBuilder.addOrdinaryDimension(*it);
+    }
     const std::string existingGeometryXML = xmlBuilder.create();
 
     //When geometry xml is provided and that xml is different from the exising xml.
@@ -348,7 +351,14 @@ void vtkRebinningCutter::SetAppliedGeometryXML(std::string appliedGeometryXML)
       this->Modified();
       Mantid::VATES::GeometryXMLParser xmlParser(appliedGeometryXML);
       xmlParser.execute();
-      m_actionRequester->ask(RecalculateVisualDataSetOnly);
+      if(xmlParser.getNonIntegratedDimensions().size() == 4)
+      {
+        m_actionRequester->ask(RecalculateVisualDataSetOnly); //will therefore use proxy.
+      }
+      else
+      {
+        m_actionRequester->ask(RecalculateAll);
+      }
 
       Mantid::VATES::Dimension_sptr temp = xmlParser.getXDimension();
       formulateRequestUsingNBins(temp);
@@ -365,6 +375,8 @@ void vtkRebinningCutter::SetAppliedGeometryXML(std::string appliedGeometryXML)
       temp = xmlParser.getTDimension();
       formulateRequestUsingNBins(temp);
       this->m_appliedTDimension = temp;
+
+      this->m_vecAppliedDimensions = xmlParser.getAllDimensions();
     }
   }
 }
@@ -428,12 +440,15 @@ BoxFunction_sptr vtkRebinningCutter::constructBox(vtkDataSet* inputDataset) cons
   }
   else
   {
-    originX = (m_appliedXDimension->getMaximum() + m_appliedXDimension->getMinimum()) / 2;
-    originY = (m_appliedYDimension->getMaximum() + m_appliedYDimension->getMinimum()) / 2;
-    originZ = (m_appliedZDimension->getMaximum() + m_appliedZDimension->getMinimum()) / 2;
-    width = m_appliedXDimension->getMaximum() - m_appliedXDimension->getMinimum();
-    height = m_appliedYDimension->getMaximum() - m_appliedYDimension->getMinimum();
-    depth = m_appliedZDimension->getMaximum() - m_appliedZDimension->getMinimum();
+    vtkDataSetToGeometry metaDataProcessor(inputDataset);
+    metaDataProcessor.execute();
+
+    originX = (metaDataProcessor.getXDimension()->getMaximum() + metaDataProcessor.getXDimension()->getMinimum()) / 2;
+    originY = (metaDataProcessor.getYDimension()->getMaximum() + metaDataProcessor.getYDimension()->getMinimum()) / 2;
+    originZ = (metaDataProcessor.getZDimension()->getMaximum() + metaDataProcessor.getZDimension()->getMinimum()) / 2;
+    width = metaDataProcessor.getXDimension()->getMaximum() - metaDataProcessor.getXDimension()->getMinimum();
+    height = metaDataProcessor.getYDimension()->getMaximum() - metaDataProcessor.getYDimension()->getMinimum();
+    depth = metaDataProcessor.getZDimension()->getMaximum() - metaDataProcessor.getZDimension()->getMinimum();
   } 
   //Create domain parameters.
   OriginParameter originParam = OriginParameter(originX, originY, originZ);
@@ -451,16 +466,16 @@ BoxFunction_sptr vtkRebinningCutter::constructBox(vtkDataSet* inputDataset) cons
 vtkDataSetFactory_sptr vtkRebinningCutter::createDataSetFactory(
     Mantid::API::IMDWorkspace_sptr spRebinnedWs) const
 {
-  if(m_actionRequester->action() == RecalculateAll)
-  {
-    //This route regenerates the underlying image.
-    return createQuickRenderDataSetFactory(spRebinnedWs);
-  }
-  else
+  if((m_actionRequester->action() == RecalculateVisualDataSetOnly) && hasXDimension() && hasYDimension() && hasZDimension() && hasTDimension())
   {
     //This route rebinds the underlying image in such a way that dimension swapping can
     //be achieved very rapidly.
     return createQuickChangeDataSetFactory(spRebinnedWs);
+  }
+  else
+  {
+    //This route regenerates the underlying image.
+    return createQuickRenderDataSetFactory(spRebinnedWs);
   }
 }
 
@@ -491,37 +506,45 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickChangeDataSetFactory(
 vtkDataSetFactory_sptr vtkRebinningCutter::createQuickRenderDataSetFactory(
     Mantid::API::IMDWorkspace_sptr spRebinnedWs) const
 {
-  //Create a factory for generating a thresholding unstructured grid.
-  vtkDataSetFactory* pvtkDataSetFactory = new Mantid::VATES::vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(XMLDefinitions::signalName(), m_timestep,
-      m_thresholdMin, m_thresholdMax);
-
-  pvtkDataSetFactory->initialize(spRebinnedWs);
+  std::string scalarName = XMLDefinitions::signalName();
+  vtkThresholdingLineFactory* vtkGridFactory = new vtkThresholdingLineFactory(scalarName, m_thresholdMin, m_thresholdMax);
+  vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(scalarName, m_thresholdMin, m_thresholdMax);
+  vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(scalarName, m_thresholdMin, m_thresholdMax);
+  vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(scalarName, m_timestep, m_thresholdMin, m_thresholdMax);
+  vtkGridFactory->SetSuccessor(p_2dSuccessorFactory);
+  p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
+  p_3dSuccessorFactory->SetSuccessor(p_4dSuccessorFactory);
+  
+  vtkGridFactory->initialize(spRebinnedWs);
 
   //Return the generated factory.
-  return vtkDataSetFactory_sptr(pvtkDataSetFactory);
+  return vtkDataSetFactory_sptr(vtkGridFactory);
 }
 
 void vtkRebinningCutter::setTimeRange(vtkInformationVector* outputVector)
 {
   if(SetupDone == m_setup)
   {
-    double min = m_appliedTDimension->getMinimum();
-    double max = m_appliedTDimension->getMaximum();
-    unsigned int nBins = static_cast<int>( m_appliedTDimension->getNBins() );
-    double increment = (max - min) / nBins;
-    std::vector<double> timeStepValues(nBins);
-    for (unsigned int i = 0; i < nBins; i++)
+    if(hasTDimension())
     {
-      timeStepValues[i] = min + (i * increment);
-    }
-    vtkInformation *outInfo = outputVector->GetInformationObject(0);
-    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
-      static_cast<int> (timeStepValues.size()));
-    double timeRange[2];
-    timeRange[0] = timeStepValues.front();
-    timeRange[1] = timeStepValues.back();
+      double min = m_appliedTDimension->getMinimum();
+      double max = m_appliedTDimension->getMaximum();
+      unsigned int nBins = static_cast<int>( m_appliedTDimension->getNBins() );
+      double increment = (max - min) / nBins;
+      std::vector<double> timeStepValues(nBins);
+      for (unsigned int i = 0; i < nBins; i++)
+      {
+        timeStepValues[i] = min + (i * increment);
+      }
+      vtkInformation *outInfo = outputVector->GetInformationObject(0);
+      outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
+        static_cast<int> (timeStepValues.size()));
+      double timeRange[2];
+      timeRange[0] = timeStepValues.front();
+      timeRange[1] = timeStepValues.back();
 
-    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
+      outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
+    }
   }
 }
 

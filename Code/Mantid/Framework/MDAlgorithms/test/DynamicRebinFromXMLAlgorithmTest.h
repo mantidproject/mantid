@@ -108,7 +108,7 @@ private:
   };
 
   //Helper method provides sample instructional xml.
-  static std::string MDInstructionXMLString()
+  static std::string MDInstructionXMLString(std::string mappingX, std::string mappingY, std::string mappingZ, std::string mappingT)
   {
     return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
 "<MDInstruction>" +
@@ -143,16 +143,16 @@ private:
       "<ReciprocalDimensionMapping>q3</ReciprocalDimensionMapping>" +
     "</Dimension>" +
     "<XDimension>" +
-      "<RefDimensionId>qx</RefDimensionId>" +
+      "<RefDimensionId>" + mappingX + "</RefDimensionId>" +
     "</XDimension>" +
     "<YDimension>" +
-      "<RefDimensionId>qy</RefDimensionId>" +
+      "<RefDimensionId>" + mappingY + "</RefDimensionId>" +
     "</YDimension>" +
     "<ZDimension>" +
-      "<RefDimensionId>qz</RefDimensionId>" +
+      "<RefDimensionId>" + mappingZ + "</RefDimensionId>" +
     "</ZDimension>" +
     "<TDimension>" +
-      "<RefDimensionId>en</RefDimensionId>" +
+      "<RefDimensionId>" + mappingT + "</RefDimensionId>" +
     "</TDimension>" +
   "</DimensionSet>" +
   "<Function>" +
@@ -211,13 +211,12 @@ private:
   static Poco::XML::Element* MDInstructionXML()
   {
    Poco::XML::DOMParser pParser;
-   std::string xmlToParse = MDInstructionXMLString();
+   std::string xmlToParse = MDInstructionXMLString("qx", "qy", "qz", "en");
    Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
    return pDoc->documentElement();
   }
 
 public:
-
 
   void testName()
   {
@@ -345,7 +344,7 @@ public:
     xmlRebinAlg.setRethrows(true); 
     xmlRebinAlg.initialize();
     xmlRebinAlg.setPropertyValue("OutputWorkspace","MyOutputWS");
-    std::string xmlString = MDInstructionXMLString();
+    std::string xmlString = MDInstructionXMLString("qx", "qy", "qz", "en");
     xmlRebinAlg.setPropertyValue("XMLInputString", xmlString);
     xmlRebinAlg.execute();
     
@@ -358,7 +357,69 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of bins in rebinned workspace t-dimension.", 4, output->getTDimension()->getNBins());
     //840 = 7 * 5* 6 * 4
     TSM_ASSERT_EQUALS("The image size should be the product of the number of bins accross dimensions", 840, output->get_spMDImage()->getDataSize());
+  }
 
+  void testExecuteMapXOnly()
+  {
+    using namespace Mantid::MDDataObjects;
+
+    Mantid::MDAlgorithms::DynamicRebinFromXML xmlRebinAlg;
+    xmlRebinAlg.setRethrows(true); 
+    xmlRebinAlg.initialize();
+    xmlRebinAlg.setPropertyValue("OutputWorkspace","MyOutputWS");
+    std::string xmlString = MDInstructionXMLString("qx", "", "", "");
+    xmlRebinAlg.setPropertyValue("XMLInputString", xmlString);
+    xmlRebinAlg.execute();
+    
+    MDWorkspace_sptr output = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve("MyOutputWS"));
+
+    TSM_ASSERT_EQUALS("Wrong mapping for dimension x.", "qx", output->getXDimension()->getDimensionId());
+
+    //TODO MDWorkspace should return null for non mapped dimension y! does not currently do this because for MDWorkspace, mapped dimensions are keyed off overall dimension vector!
+    //TODO MDWorkspace should return null for non mapped dimension z! does not currently do this because for MDWorkspace, mapped dimensions are keyed off overall dimension vector!
+    //TODO MDWorkspace should return null for non mapped dimension t! does not currently do this because for MDWorkspace, mapped dimensions are keyed off overall dimension vector!
+ }
+  
+  void testExecuteMapXYOnly()
+  {
+    using namespace Mantid::MDDataObjects;
+
+    Mantid::MDAlgorithms::DynamicRebinFromXML xmlRebinAlg;
+    xmlRebinAlg.setRethrows(true); 
+    xmlRebinAlg.initialize();
+    xmlRebinAlg.setPropertyValue("OutputWorkspace","MyOutputWS");
+    std::string xmlString = MDInstructionXMLString("qx", "qy", "", "");
+    xmlRebinAlg.setPropertyValue("XMLInputString", xmlString);
+    xmlRebinAlg.execute();
+    
+    MDWorkspace_sptr output = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve("MyOutputWS"));
+
+    TSM_ASSERT_EQUALS("Wrong mapping for dimension x.", "qx", output->getXDimension()->getDimensionId());
+    TSM_ASSERT_EQUALS("Wrong mapping for dimension y.", "qy", output->getYDimension()->getDimensionId());
+
+    //TODO MDWorkspace should return null for non mapped dimension z! does not currently do this because for MDWorkspace, mapped dimensions are keyed off overall dimension vector!
+    //TODO MDWorkspace should return null for non mapped dimension t! does not currently do this because for MDWorkspace, mapped dimensions are keyed off overall dimension vector!
+  }
+
+  void testExecuteMapXYZOnly()
+  {
+    using namespace Mantid::MDDataObjects;
+
+    Mantid::MDAlgorithms::DynamicRebinFromXML xmlRebinAlg;
+    xmlRebinAlg.setRethrows(true); 
+    xmlRebinAlg.initialize();
+    xmlRebinAlg.setPropertyValue("OutputWorkspace","MyOutputWS");
+    std::string xmlString = MDInstructionXMLString("qx", "qy", "qz", "");
+    xmlRebinAlg.setPropertyValue("XMLInputString", xmlString);
+    xmlRebinAlg.execute();
+    
+    MDWorkspace_sptr output = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve("MyOutputWS"));
+
+    TSM_ASSERT_EQUALS("Wrong mapping for dimension x.", "qx", output->getXDimension()->getDimensionId());
+    TSM_ASSERT_EQUALS("Wrong mapping for dimension y.", "qy", output->getYDimension()->getDimensionId());
+    TSM_ASSERT_EQUALS("Wrong mapping for dimension z.", "qz", output->getZDimension()->getDimensionId());
+
+    //TODO MDWorkspace should return null for non mapped dimension t! does not currently do this because for MDWorkspace, mapped dimensions are keyed off overall dimension vector!
   }
 
 };

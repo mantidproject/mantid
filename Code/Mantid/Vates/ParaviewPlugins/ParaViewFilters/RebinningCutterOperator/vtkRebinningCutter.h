@@ -102,6 +102,42 @@ protected:
 
 private:
 
+    /**
+   Detect wheter x dimension is available.
+   @return true available, false otherwise.
+ */
+  bool hasXDimension() const
+  {
+    return NULL != m_appliedXDimension.get();
+  }
+
+  /**
+   Detect wheter y dimension is available.
+   @return true available, false otherwise.
+ */
+  bool hasYDimension() const
+  {
+    return NULL != m_appliedYDimension.get();
+  }
+
+  /**
+   Detect wheter z dimension is available.
+   @return true available, false otherwise.
+ */
+  bool hasZDimension() const
+  {
+    return NULL != m_appliedZDimension.get();
+  }
+
+  /**
+   Detect wheter t dimension is available.
+   @return true available, false otherwise.
+ */
+  bool hasTDimension() const
+  {
+    return NULL != m_appliedTDimension.get();
+  }
+
   vtkRebinningCutter(const vtkRebinningCutter&);
 
   void operator = (const vtkRebinningCutter&);
@@ -159,6 +195,8 @@ private:
   Mantid::VATES::Dimension_sptr m_appliedZDimension;
   /// the dimension information applied to the tDimension Mapping.
   Mantid::VATES::Dimension_sptr m_appliedTDimension;
+  /// holds all applied dimensions.
+  Mantid::Geometry::VecIMDDimension_sptr m_vecAppliedDimensions;
   /// Manages the precedence of rebinning related actions.
   RebinningActionManager_scptr m_actionRequester;
   /// Box implicit function, used to determine when the clipping has changed.

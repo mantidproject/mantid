@@ -15,9 +15,15 @@ namespace Mantid
         {
         }
 
-        void CompositeImplicitFunction::addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction> constituentFunction)
+        bool CompositeImplicitFunction::addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction> constituentFunction)
         {
+          bool bSuccess = false;
+          if(constituentFunction.get() != NULL)
+          {
             this->m_Functions.push_back(constituentFunction);
+            bSuccess = true;
+          }
+          return bSuccess;
         }
 
         std::string CompositeImplicitFunction::getName() const

@@ -8,6 +8,8 @@
 #include <vector>
 #include "WidgetDllOption.h"
 #include "GeometryWidget.h"
+#include "MantidVatesAPI/DimensionPresenter.h"
+
 
 //Foward decs
 class QLabel;
@@ -24,14 +26,13 @@ namespace Mantid
 }
 
 
-class EXPORT_OPT_MANTIDPARVIEW DimensionWidget: public QWidget
+class EXPORT_OPT_MANTIDPARVIEW DimensionWidget: public QWidget, public Mantid::VATES::DimensionView
 {
 Q_OBJECT
 public:
 
   /// Constructor.
-  DimensionWidget(GeometryWidget* geometryWidget, const std::string& name, const int dimensionIndex,
-      std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > nonIntegratedDimensions, DimensionLimitsOption limitsOption );
+  DimensionWidget(bool readOnlyLimits);
 
   /// Destructor
   ~DimensionWidget();
@@ -42,26 +43,6 @@ public:
   /// Get maximum
   double getMaximum() const;
 
-  /// Set minimum
-  void setMinimum(double minimum);
-
-  /// Set maximum
-  void setMaximum(double maximum);
-
-  /// Get the number of dimensions.
-  boost::shared_ptr<Mantid::Geometry::IMDDimension>  getDimension();
-
-  /// Get the number of bins.
-  int getNBins();
-
-  /// Get the selected index.
-  int getSelectedIndex() const;
-
-  /// Populates gui controls. May be called more than once.
-  void populateWidget(const int dimensionIndex);
-
-  /// Reset the bin values.
-  void resetBins();
 
 signals:
   void maxSet();
@@ -88,13 +69,7 @@ private:
 
   std::string m_name;
 
-  GeometryWidget* m_geometryWidget;
-
-  std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > m_vecNonIntegratedDimensions;
-
-  /// Creates gui layout and controls.
-  void constructWidget(const int dimensionIndex, DimensionLimitsOption limitsOption);
-
+ Mantid::VATES::DimensionPresenter* m_pDimensionPresenter;
 
 private slots:
 
@@ -107,7 +82,27 @@ private slots:
 
   void minBoxListener();
 
-  void integratedChanged(int checkedState);
+  void integratedChanged(bool checkedState);
+
+public:
+
+  virtual void showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr nonIntegratedDims);
+  
+  virtual void showAsIntegrated();
+      
+  virtual void accept(Mantid::VATES::DimensionPresenter* pDimensionPresenter);
+
+  virtual void configure();
+
+  virtual std::string getDimensionId() const;
+
+  virtual unsigned int getNBins() const;
+
+  virtual unsigned int getSelectedIndex() const;
+
+  virtual bool getIsIntegrated() const;
+
+
 };
 
 #endif

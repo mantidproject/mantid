@@ -143,6 +143,15 @@ public:
     TSM_ASSERT_EQUALS("Returned wrong number of non integrated dimensions", 3, xmlParser.getNonIntegratedDimensions().size());
   }
 
+  void testGetAllIntegratedDimensions()
+  {
+    using namespace Mantid::VATES;
+    //2 of the 5 dimensions have been setup to be integrated => nbins==1.
+    GeometryXMLParser xmlParser(constructXML("qy", "qx", "en", "qz"));
+    xmlParser.execute();
+    TSM_ASSERT_EQUALS("Returned wrong number of integrated dimensions", 2, xmlParser.getIntegratedDimensions().size());
+  }
+
   void testAllMappedDimensions()
   {
     using namespace Mantid::VATES;

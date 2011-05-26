@@ -17,12 +17,12 @@ namespace Mantid
   namespace VATES
   {
     /// Helper unary comparison type for finding IMDDimensions by a specified id.
-    struct findID : public std::unary_function <Mantid::Geometry::IMDDimension, bool>
+    struct findID : public std::unary_function <Mantid::Geometry::IMDDimension_sptr, bool>
     {
       const std::string m_id;
       findID(const std::string id) : m_id(id){ }
 
-      bool operator ()(const boost::shared_ptr<Mantid::Geometry::IMDDimension> obj) const
+      bool operator ()(const Mantid::Geometry::IMDDimension_sptr obj) const
       {
         return m_id == obj->getDimensionId();
       }
@@ -30,9 +30,9 @@ namespace Mantid
     };
 
     /// Helper unary comparison type for finding non-integrated dimensions.
-    struct findIntegrated : public std::unary_function <Mantid::Geometry::IMDDimension, bool>
+    struct findIntegrated : public std::unary_function <Mantid::Geometry::IMDDimension_sptr, bool>
     {
-      bool operator ()(const boost::shared_ptr<Mantid::Geometry::IMDDimension> obj) const
+      bool operator ()(const Mantid::Geometry::IMDDimension_sptr obj) const
       {
         return obj->getIsIntegrated();
       }
@@ -237,6 +237,18 @@ namespace Mantid
       }
 
        /**
+       Getter for all those dimensions which are integrated.
+       @return collection of non integrated dimensions parsed.
+      */
+       Mantid::Geometry::VecIMDDimension_sptr GeometryXMLParser::getIntegratedDimensions() const
+       {
+        validate();
+        Mantid::Geometry::VecIMDDimension_sptr temp = m_vecAllDims;
+        temp.erase(std::remove_if(temp.begin(), temp.end(), std::not1(findIntegrated())), temp.end());
+        return temp;
+       }
+
+       /**
        Getter for all dimensions parsed.
        @return collection of all dimensions parsed.
       */
@@ -306,6 +318,7 @@ namespace Mantid
           m_executed = other.m_executed;
           m_rootNodeName = other.m_rootNodeName;
           m_vecNonMappedDims = other.m_vecNonMappedDims; 
+          m_vecAllDims = other.m_vecAllDims;
           m_xDimension = other.m_xDimension;
           m_yDimension = other.m_yDimension;
           m_zDimension = other.m_zDimension;
@@ -322,11 +335,68 @@ namespace Mantid
           m_executed(other.m_executed),
           m_rootNodeName(other.m_rootNodeName),
           m_vecNonMappedDims(other.m_vecNonMappedDims),
+          m_vecAllDims(other.m_vecAllDims),
           m_xDimension(other.m_xDimension),
           m_yDimension(other.m_yDimension),
           m_zDimension(other.m_zDimension),
           m_tDimension(other.m_tDimension)
       {
+      }
+
+      bool GeometryXMLParser::isXDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
+      {
+        validate();
+        bool bResult = false;
+        if(hasXDimension())
+        {
+          if(candidate->getDimensionId() == m_xDimension->getDimensionId())
+          {
+            bResult = true;
+          }
+        }
+        return bResult;
+      }
+
+      bool GeometryXMLParser::isYDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
+      {
+        validate();
+        bool bResult = false;
+        if(hasYDimension())
+        {
+          if(candidate->getDimensionId() == m_yDimension->getDimensionId())
+          {
+            bResult = true;
+          }
+        }
+        return bResult;
+      }
+
+      bool GeometryXMLParser::isZDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
+      {
+        validate();
+        bool bResult = false;
+        if(hasZDimension())
+        {
+          if(candidate->getDimensionId() == m_zDimension->getDimensionId())
+          {
+            bResult = true;
+          }
+        }
+        return bResult;
+      }
+
+      bool GeometryXMLParser::isTDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
+      {
+        validate();
+        bool bResult = false;
+        if(hasTDimension())
+        {
+          if(candidate->getDimensionId() == m_tDimension->getDimensionId())
+          {
+            bResult = true;
+          }
+        }
+        return bResult;
       }
   }
 }

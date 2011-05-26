@@ -78,10 +78,11 @@ void MDGeometryBuilderXML<CheckDimensionPolicy>::applyPolicyChecking(IMDDimensio
 template <typename CheckDimensionPolicy>
 bool MDGeometryBuilderXML<CheckDimensionPolicy>::addXDimension(IMDDimension_const_sptr dimension) const
 {
-  applyPolicyChecking(dimension);
+  
   bool bAdded = false;
   if(dimension.get() != NULL)
   {
+    applyPolicyChecking(dimension);
     addOrdinaryDimension(dimension);
     m_spXDimension = dimension;
     m_changed = true;
@@ -98,10 +99,11 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addXDimension(IMDDimension_cons
 template <typename CheckDimensionPolicy>
 bool MDGeometryBuilderXML<CheckDimensionPolicy>::addYDimension(IMDDimension_const_sptr dimension) const
 {
-  applyPolicyChecking(dimension);
+ 
   bool bAdded = false;
   if(dimension.get() != NULL)
-  {
+  { 
+    applyPolicyChecking(dimension);
     addOrdinaryDimension(dimension);
     m_spYDimension = dimension;
     m_changed = true;
@@ -118,10 +120,10 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addYDimension(IMDDimension_cons
 template <typename CheckDimensionPolicy>
 bool MDGeometryBuilderXML<CheckDimensionPolicy>::addZDimension(IMDDimension_const_sptr dimension) const
 {
-  applyPolicyChecking(dimension);
   bool bAdded = false;
   if(dimension.get() != NULL)
   {
+    applyPolicyChecking(dimension);
     addOrdinaryDimension(dimension);
     m_spZDimension = dimension;
     m_changed = true;
@@ -138,10 +140,11 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addZDimension(IMDDimension_cons
 template <typename CheckDimensionPolicy>
 bool MDGeometryBuilderXML<CheckDimensionPolicy>::addTDimension(IMDDimension_const_sptr dimension) const
 {
-  applyPolicyChecking(dimension);
+  
   bool bAdded = false;
   if(dimension.get() != NULL)
   {
+    applyPolicyChecking(dimension);
     addOrdinaryDimension(dimension);
     m_spTDimension = dimension;
     m_changed = true;

@@ -65,8 +65,17 @@ public:
     boost::scoped_ptr<MDGeometryDescription> description(constructDescription());
     std::vector<std::string> ids = description->getDimensionsTags();
     TSM_ASSERT_EQUALS(
-        "The constructor has not provided the alignment correctly. The dimension should have appeared in the first position.",
+        "The constructor has not provided the alignment correctly. The dimension should have appeared in the fourth position.",
         ids[3], "T");
+  }
+
+  void testAlignOther()
+  {
+    boost::scoped_ptr<MDGeometryDescription> description(constructDescription());
+    std::vector<std::string> ids = description->getDimensionsTags();
+    TSM_ASSERT_EQUALS(
+        "This dimension has not alignment and thefore should occur after aligned dimensions. The dimension should have appeared in the fourth position.",
+        ids[4], "p");
   }
 
   void testMDGDconstructor()

@@ -86,6 +86,8 @@ namespace Mantid
 
       Mantid::Geometry::VecIMDDimension_sptr getNonIntegratedDimensions() const;
 
+      Mantid::Geometry::VecIMDDimension_sptr getIntegratedDimensions() const;
+
       Mantid::Geometry::VecIMDDimension_sptr getAllDimensions() const;
 
       bool hasXDimension() const;
@@ -95,6 +97,14 @@ namespace Mantid
       bool hasZDimension() const;
 
       bool hasTDimension() const;
+
+      bool isXDimension(Mantid::Geometry::IMDDimension_sptr) const;
+
+      bool isYDimension(Mantid::Geometry::IMDDimension_sptr) const;
+
+      bool isZDimension(Mantid::Geometry::IMDDimension_sptr) const;
+
+      bool isTDimension(Mantid::Geometry::IMDDimension_sptr) const;
 
       void SetRootNodeCheck(std::string elementName);
 

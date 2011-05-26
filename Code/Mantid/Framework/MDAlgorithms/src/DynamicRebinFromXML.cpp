@@ -88,6 +88,7 @@ namespace Mantid
 
     Mantid::Geometry::MDGeometryDescription* DynamicRebinFromXML::getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem, Mantid::API::ImplicitFunction* impFunction) const
     {
+
       using namespace Mantid::Geometry;
       Poco::XML::Element* geometryXML = pRootElem->getChildElement("DimensionSet");
 
@@ -123,30 +124,34 @@ namespace Mantid
       std::string tDimId = tDimensionElement->getChildElement("RefDimensionId")->innerText();
       DimensionVecIterator tDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(tDimId));
 
-      //Check that all mappings have actually been found.
-      if(xDimensionIt == dimensionVec.end())
-      {
-        throw std::invalid_argument("Cannot determine x-dimension mapping.");
-      }
-      if(yDimensionIt == dimensionVec.end())
-      {
-        throw std::invalid_argument("Cannot determine y-dimension mapping.");
-      }
-      if(zDimensionIt == dimensionVec.end())
-      {
-        throw std::invalid_argument("Cannot determine z-dimension mapping.");
-      }
-      if(tDimensionIt == dimensionVec.end())
-      {
-        throw std::invalid_argument("Cannot determine t-dimension mapping.");
-      }
-
       //Interpret planes found in the implicit function.
       PlaneInterpreter planeInterpreter;
-      std::vector<double> rotationMatrix = planeInterpreter(impFunction);
+      
+      //Check that all mappings have actually been found.
+      IMDDimension_sptr nullDimension;
+      if(xDimensionIt == dimensionVec.end())
+      {
+        return new MDGeometryDescription(dimensionVec, nullDimension, nullDimension, nullDimension, nullDimension, planeInterpreter(impFunction));
+      }
+      else if(yDimensionIt == dimensionVec.end())
+      {
+        return new MDGeometryDescription(dimensionVec, *xDimensionIt, nullDimension, nullDimension, nullDimension, planeInterpreter(impFunction));
+      }
+      else if(zDimensionIt == dimensionVec.end())
+      {
+        return new MDGeometryDescription(dimensionVec, *xDimensionIt, *yDimensionIt, nullDimension, nullDimension, planeInterpreter(impFunction));
+      }
+      else if(tDimensionIt == dimensionVec.end())
+      {
+        return new MDGeometryDescription(dimensionVec, *xDimensionIt, *yDimensionIt, *zDimensionIt, nullDimension, planeInterpreter(impFunction));
+      }
+      else
+      {
+        return new MDGeometryDescription(dimensionVec, *xDimensionIt, *yDimensionIt, *zDimensionIt, *tDimensionIt, planeInterpreter(impFunction));
+      }
 
       //Create A geometry Description.
-      return new MDGeometryDescription(dimensionVec, *xDimensionIt, *yDimensionIt, *zDimensionIt, *tDimensionIt, planeInterpreter(impFunction));
+      
     }
 
     void DynamicRebinFromXML::ApplyImplicitFunctionToMDGeometryDescription(Mantid::Geometry::MDGeometryDescription* description, Mantid::API::ImplicitFunction* impFunction) const

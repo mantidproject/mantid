@@ -29,20 +29,19 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-
-
-#include <qgridlayout.h>
-#include <qwidget.h>
 #include <memory>
 #include <boost/shared_ptr.hpp>
 #include "WidgetDllOption.h"
 #include "MantidVatesAPI/GeometryXMLParser.h"
+#include "MantidVatesAPI/GeometryView.h"
+#include "MantidVatesAPI/DimensionView.h"
+#include "DimensionWidgetFactory.h"
+#include "DimensionWidget.h"
 
 //Foward decs
 class QLabel;
 class QComboBox;
-class IntegratedDimensionWidget;
-class DimensionWidget;
+class QLayout;
 
 namespace Mantid
 {
@@ -51,52 +50,41 @@ namespace Mantid
  class MDGeometry;
  class IMDDimension;
  }
+ namespace VATES
+ {
+   class GeometryPresenter;
+ }
 }
 
 enum BinChangeStatus{ApplyBinChanges, IgnoreBinChanges};
 
-/// Enum describes options of enabling or disabling interaction with limits in the nested dimensions.
-enum DimensionLimitsOption{EnableDimensionLimits, DisableDimensionLimits};
-
-class EXPORT_OPT_MANTIDPARVIEW GeometryWidget: public QWidget
+class EXPORT_OPT_MANTIDPARVIEW GeometryWidget: public QWidget, public Mantid::VATES::GeometryView
 {
+
+private:
+
+  DimensionWidgetFactory m_widgetFactory;
+
+  Mantid::VATES::GeometryPresenter* m_pPresenter;
+
 Q_OBJECT
 public:
 Q_PROPERTY(QString GeometryXML READ getGeometryXML WRITE setGeometryXML NOTIFY valueChanged)
-GeometryWidget(DimensionLimitsOption limitsOption);
-void constructWidget(Mantid::VATES::GeometryXMLParser& source);
 
-void childAppliedNewDimensionSelection(
-    const unsigned int oldDimensionIndex,
-    boost::shared_ptr<Mantid::Geometry::IMDDimension> newDimension,
-    DimensionWidget* pDimensionWidget);
+ GeometryWidget(Mantid::VATES::GeometryPresenter* pPresenter, bool readOnlyLimits);
 
-void dimensionWidgetChanged(BinChangeStatus status);
+virtual void raiseModified();
+
+virtual void raiseNoClipping();
 
 ~GeometryWidget();
 
 /// Gets the chosen geometry configuration.
-QString getGeometryXML() const;
-
-bool hasXDimension() const
+QString getGeometryXML() const
 {
-  return m_xDimensionWidget != NULL;
+  return getGeometryXMLString().c_str();
 }
 
-bool hasYDimension() const
-{
-  return m_yDimensionWidget != NULL;
-}
-
-bool hasZDimension() const
-{
-  return m_zDimensionWidget != NULL;
-}
-
-bool hasTDimension() const
-{
-  return m_tDimensionWidget != NULL;
-}
 
 void setGeometryXML(QString value)
 {
@@ -105,31 +93,17 @@ void setGeometryXML(QString value)
 }
 
 
-bool isSetup() const
-{
-  return m_isConstructed;
-}
+
+virtual void addDimensionView(Mantid::VATES::DimensionView*);
+
+virtual std::string getGeometryXMLString() const;
+
+virtual const Mantid::VATES::DimensionViewFactory& getDimensionViewFactory();
 
 /// Single signal gets raised if anything changes
 Q_SIGNALS:
         void valueChanged();
         void ignoreBinChanges();
-
-private:
-
-/// Check that constructWidget has been called.
-void validateSetup() const;
-
-/// When dimensions are swapped. Ensure that every dimension widget is given the opportunity to update the nbins to 
-/// reflect the value contained in the dimension it now wraps.
-void applyBinsFromDimensions();
-
-DimensionWidget* m_xDimensionWidget;
-DimensionWidget* m_yDimensionWidget;
-DimensionWidget* m_zDimensionWidget;
-DimensionWidget* m_tDimensionWidget;
-bool m_isConstructed;
-DimensionLimitsOption m_limitsOption;
 
 };
 

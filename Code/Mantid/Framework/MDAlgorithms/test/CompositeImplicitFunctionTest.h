@@ -126,6 +126,15 @@ public:
     TSM_ASSERT_EQUALS("The returned function did not match input function type", (*it)->getName(), "C"  );
   }
 
+  void testCannotAddNullDimension()
+  {
+    using namespace Mantid::MDAlgorithms;
+    CompositeImplicitFunction function;
+
+    MockImplicitFunction* nullFunction = NULL;
+    TSM_ASSERT("A null function cannot be added to a function of type CompositeFunction", !function.addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(nullFunction)));
+  }
+
 };
 
 

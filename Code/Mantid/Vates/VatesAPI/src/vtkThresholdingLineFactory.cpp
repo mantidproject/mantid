@@ -80,7 +80,7 @@ namespace Mantid
         double posX;
 
         UnstructuredPoint unstructPoint;
-        double signalScalar;
+        float signalScalar;
         const int nPointsX = nBinsX;
         Column column(nPointsX);
 
@@ -89,8 +89,7 @@ namespace Mantid
         {
           posX = minX + (i * incrementX); //Calculate increment in x;
           
-
-            signalScalar = m_workspace->getCell(i).getSignal();
+          signalScalar = static_cast<float>(m_workspace->getCell(i).getSignal());
 
             if (boost::math::isnan( signalScalar ) || (signalScalar <= m_minThreshold) || (signalScalar >= m_maxThreshold))
             {

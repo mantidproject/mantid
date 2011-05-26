@@ -3,18 +3,21 @@ set( INC_FILES
  WidgetDllOption.h
  GeometryWidget.h
  DimensionWidget.h
+ DimensionWidgetFactory.h
 )
 
 # header files that are mocced
 set( HDR_FILES
   GeometryWidget.h
   DimensionWidget.h
+  DimensionWidgetFactory.h
 )
 
 # source files
 set( SRC_FILES
   GeometryWidget.cpp
   DimensionWidget.cpp
+  DimensionWidgetFactory.cpp
 )
 
 # Handle QtWidget header files

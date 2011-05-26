@@ -52,7 +52,7 @@ public:
   CompositeImplicitFunction();
 
   ~CompositeImplicitFunction();
-  void addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction> constituentFunction);
+  bool addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction> constituentFunction);
   bool evaluate(const Mantid::API::Point3D* pPoint3D) const;
   std::string getName() const;
   std::string toXMLString() const;
