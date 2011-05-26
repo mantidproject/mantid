@@ -77,7 +77,7 @@ public:
     MockGeometryPresenter gPresenter;
     DimensionPresenter presenter(&view, &gPresenter);
 
-    TSM_ASSERT_THROWS("::acceptModel not called first, so should have thrown", presenter.updateModel(), std::runtime_error, "");
+    TSM_ASSERT_THROWS("::acceptModel not called first, so should have thrown", presenter.updateModel(), std::runtime_error);
   }
 
   void testAcceptModel()

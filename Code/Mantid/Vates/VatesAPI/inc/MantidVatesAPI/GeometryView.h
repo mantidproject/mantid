@@ -14,7 +14,7 @@ namespace Mantid
       virtual void addDimensionView(DimensionView*) = 0;
       virtual std::string getGeometryXMLString() const = 0;
       virtual const DimensionViewFactory& getDimensionViewFactory() = 0;
-      virtual ~GeometryView()=0{};
+      virtual ~GeometryView(){};
       virtual void raiseModified() = 0;
       virtual void raiseNoClipping() = 0;
     };

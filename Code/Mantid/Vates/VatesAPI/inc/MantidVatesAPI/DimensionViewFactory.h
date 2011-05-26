@@ -10,7 +10,7 @@ namespace Mantid
     {
     public:
       virtual DimensionView* create() const = 0;
-      virtual ~DimensionViewFactory()=0{}
+      virtual ~DimensionViewFactory(){}
     };
   }
 }

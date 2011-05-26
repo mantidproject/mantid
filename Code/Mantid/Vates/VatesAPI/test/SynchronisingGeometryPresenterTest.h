@@ -15,7 +15,7 @@ using namespace testing;
 using namespace Mantid::VATES;
 using namespace Mantid::Geometry;
 
-class SyncronisingGeometryPresenterTest: public CxxTest::TestSuite
+class SynchronisingGeometryPresenterTest: public CxxTest::TestSuite
 {
   
 

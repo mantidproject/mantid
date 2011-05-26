@@ -20,7 +20,7 @@ namespace Mantid
       virtual unsigned int getNBins() const = 0;
       virtual unsigned int getSelectedIndex() const = 0;
       virtual bool getIsIntegrated() const = 0;
-      virtual ~DimensionView() = 0 {};
+      virtual ~DimensionView() {};
     };
   }
 }

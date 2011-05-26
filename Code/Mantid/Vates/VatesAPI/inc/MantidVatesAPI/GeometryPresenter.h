@@ -47,7 +47,7 @@ namespace Mantid
       virtual void dimensionRealigned(DimensionPresenter* pDimensionPresenter) = 0;
       virtual Mantid::Geometry::VecIMDDimension_sptr getNonIntegratedDimensions() const = 0;
       virtual std::string getGeometryXML() const = 0;
-      virtual ~GeometryPresenter() = 0{}
+      virtual ~GeometryPresenter() {}
       virtual void acceptView(GeometryView*)=0;
       virtual std::string getLabel(DimensionPresenter const * const  pDimensionPresenter) const = 0;
       virtual void setModified() = 0;
