@@ -1,8 +1,9 @@
 #ifndef MANTID_CRYSTAL_PREDICTPEAKS_H_
 #define MANTID_CRYSTAL_PREDICTPEAKS_H_
     
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
+#include "MantidGeometry/Crystal/ReflectionCondition.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -37,6 +38,8 @@ namespace Crystal
     /// Run the algorithm
     void exec();
 
+  private:
+    std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
 
   };
 

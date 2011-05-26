@@ -29,7 +29,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void test_exec()
+  void do_test_exec(std::string reflectionCondition, size_t expectedNumber)
   {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
@@ -40,7 +40,7 @@ public:
     inWS->setInstrument(inst);
 
     //Set ub and Goniometer rotation
-    WorkspaceCreationHelper::SetOrientedLattice(inWS, 10.0, 10.0, 10.0);
+    WorkspaceCreationHelper::SetOrientedLattice(inWS, 12.0, 12.0, 12.0);
     WorkspaceCreationHelper::SetGoniometer(inWS, 0., 0., 0.);
   
     PredictPeaks alg;
@@ -51,6 +51,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("WavelengthMin", "0.1") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("WavelengthMax", "10.0") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("MinDSpacing", "1.0") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ReflectionCondition", reflectionCondition) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     
@@ -60,13 +61,25 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
     
-    // TODO: Check the results
-    TS_ASSERT_EQUALS( ws->getNumberPeaks(), 1);
+    TS_ASSERT_EQUALS( ws->getNumberPeaks(), expectedNumber);
+//    std::cout << ws->getPeak(0).getHKL() << " hkl\n";
     
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
   
+  void test_exec()
+  {
+    do_test_exec("Primitive", 10);
+  }
+
+  /** Fewer HKLs if they are not allowed */
+  void test_exec_withReflectionCondition()
+  {
+    do_test_exec("C-face centred", 6);
+  }
+
+
   void test_Something()
   {
   }

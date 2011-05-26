@@ -43,6 +43,14 @@ public:
     checkRC(rc, h,k,l, v, 5);
   }
 
+  void test_getAllReflectionConditions()
+  {
+    std::vector<ReflectionCondition_sptr> refs = getAllReflectionConditions();
+    TS_ASSERT_EQUALS(refs.size(), 9);
+    TS_ASSERT(refs[0]);
+    TS_ASSERT_EQUALS(refs[0]->getName(), "Primitive");
+    TS_ASSERT(refs[8]);
+  }
 
 
 };

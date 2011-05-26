@@ -2,6 +2,8 @@
 #define MANTID_GEOMETRY_REFLECTIONCONDITION_H_
     
 #include "MantidKernel/System.h"
+#include <boost/shared_ptr.hpp>
+#include <vector>
 
 
 namespace Mantid
@@ -128,6 +130,12 @@ namespace Geometry
   };
 
 
+
+
+  /// Shared pointer to a ReflectionCondition
+  typedef boost::shared_ptr<ReflectionCondition> ReflectionCondition_sptr;
+
+  std::vector<ReflectionCondition_sptr> getAllReflectionConditions();
 
 } // namespace Mantid
 } // namespace Geometry
