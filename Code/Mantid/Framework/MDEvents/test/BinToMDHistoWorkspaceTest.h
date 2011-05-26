@@ -87,7 +87,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void test_exec()
+  void do_test_exec(std::string functionXML)
   {
     BinToMDHistoWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -103,6 +103,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimY", "Axis1,2.0,8.0, 6"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimZ", "Axis2,2.0,8.0, 6"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML",functionXML));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws"));
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
@@ -120,11 +121,24 @@ public:
     // Every box has a single event summed into it, so 1.0 weight
     for (size_t i=0; i < out->getNPoints(); i++)
     {
-      TS_ASSERT_DELTA(out->getSignalAt(i), 1.0, 1e-5);
-      TS_ASSERT_DELTA(out->getErrorAt(i), 1.0, 1e-5);
+      if (functionXML == "")
+      {
+        // Nothing rejected
+        TS_ASSERT_DELTA(out->getSignalAt(i), 1.0, 1e-5);
+        TS_ASSERT_DELTA(out->getErrorAt(i), 1.0, 1e-5);
+      }
+      else
+      {
+        // All NAN cause of implicit function
+        TS_ASSERT( boost::math::isnan( out->getSignalAt(i) ) ); //The implicit function should have ensured that no bins were present.
+      }
     }
-
     AnalysisDataService::Instance().remove("BinToMDHistoWorkspaceTest_ws");
+  }
+
+  void test_exec()
+  {
+    do_test_exec("");
   }
 
   void test_exec_with_impfunction()
@@ -135,42 +149,9 @@ public:
         "<ParameterList>"+
         "</ParameterList>"+
         "</Function>";
-
-
-    BinToMDHistoWorkspace alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-
-    IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
-    AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
-    // 1000 boxes with 1 event each
-    TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
-
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinToMDHistoWorkspaceTest_ws") );
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimX", "Axis0,2.0,8.0, 6"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimY", "Axis1,2.0,8.0, 6"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimZ", "Axis2,2.0,8.0, 6"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", ""));
-
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML",functionXML));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws"));
-
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
-
-      TS_ASSERT( alg.isExecuted() );
-
-    IMDWorkspace_sptr out ;
-    TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<IMDWorkspace>(
-      AnalysisDataService::Instance().retrieve("BinToMDHistoWorkspaceTest_ws")); )
-      TS_ASSERT(out);
-    if(!out) return;
-
-    // Took 6x6x6 bins in the middle of the box
-    for (size_t i=0; i < out->getNPoints(); i++)
-    {
-      TS_ASSERT( boost::math::isnan( out->getSignalAt(i) ) ); //The implicit function should have ensured that no bins were present.
-    }
+    do_test_exec(functionXML);
   }
+
 
 };
 

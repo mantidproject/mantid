@@ -28,7 +28,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  void test_exec()
+  void do_test_exec(bool binarySplit)
   {
     std::string wsName = "CreateMDEventWorkspaceTest_out";
     CreateMDEventWorkspace alg;
@@ -39,6 +39,7 @@ public:
     alg.setPropertyValue("Names", "x,y,z");
     alg.setPropertyValue("Units", "m,mm,um");
     alg.setPropertyValue("SplitInto", "6");
+    alg.setProperty("BinarySplit", binarySplit);
     alg.setPropertyValue("SplitThreshold", "500");
     alg.setPropertyValue("MaxRecursionDepth", "7");
     alg.setPropertyValue("OutputWorkspace",wsName);
@@ -76,48 +77,26 @@ public:
     BoxController_sptr bc = ews->getBoxController();
     TS_ASSERT( bc );
     if (!bc) return;
-    TS_ASSERT_EQUALS(bc->getSplitInto(0), 6 );
-    TS_ASSERT_EQUALS(bc->getSplitThreshold(), 500 );
-    TS_ASSERT_EQUALS(bc->getMaxDepth(), 7 );
+    if (binarySplit)
+    {
+      TS_ASSERT_EQUALS(bc->getBinarySplit(), true );
+    }
+    else
+    {
+      TS_ASSERT_EQUALS(bc->getSplitInto(0), 6 );
+      TS_ASSERT_EQUALS(bc->getSplitThreshold(), 500 );
+      TS_ASSERT_EQUALS(bc->getMaxDepth(), 7 );
+    }
   }
 
+  void test_exec()
+  {
+    do_test_exec(false);
+  }
 
   void test_exec_binary_split()
   {
-    std::string wsName = "CreateMDEventWorkspaceTest_out";
-    CreateMDEventWorkspace alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    alg.setPropertyValue("Dimensions", "3");
-    alg.setPropertyValue("Extents", "-1,1,-2,2,-3,3");
-    alg.setPropertyValue("Names", "x,y,z");
-    alg.setPropertyValue("Units", "m,mm,um");
-    alg.setPropertyValue("BinarySplit", "1");
-    alg.setPropertyValue("SplitInto", "6");
-    alg.setPropertyValue("SplitThreshold", "500");
-    alg.setPropertyValue("MaxRecursionDepth", "7");
-    alg.setPropertyValue("OutputWorkspace",wsName);
-
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
-
-    // Get it from data service
-    IMDEventWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(ws = boost::dynamic_pointer_cast<IMDEventWorkspace>( AnalysisDataService::Instance().retrieve(wsName) ));
-    TS_ASSERT( ws );
-
-    // Correct info?
-    TS_ASSERT_EQUALS( ws->getNumDims(), 3);
-    TS_ASSERT_EQUALS( ws->getNPoints(), 0);
-
-    // What about the box controller
-    MDEventWorkspace3::sptr ews = boost::dynamic_pointer_cast<MDEventWorkspace3>(ws);
-    TS_ASSERT( ews );
-    if (!ews) return;
-    BoxController_sptr bc = ews->getBoxController();
-    TS_ASSERT( bc );
-    if (!bc) return;
-    TS_ASSERT_EQUALS(bc->getBinarySplit(), true );
+    do_test_exec(true);
   }
 
 
