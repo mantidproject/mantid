@@ -109,7 +109,13 @@ void LoadNexusMonitors::exec()
     // Do not rely on the order in path list
     Poco::Path monPath(monitorNames[i]);
     std::string monitorName = monPath.getBaseName();
-    std::string::size_type loc = monitorName.rfind('r');
+
+	// check for monitor name - in our case will be of the form either monitor1 or monitor_1
+	std::string::size_type loc = monitorName.rfind('_');
+	if (loc == std::string::npos)
+	{
+		loc = monitorName.rfind('r');
+	}
 
     detid_t monIndex = boost::lexical_cast<int>(monitorName.substr(loc+1));
     std::size_t spectraIndex = i;
