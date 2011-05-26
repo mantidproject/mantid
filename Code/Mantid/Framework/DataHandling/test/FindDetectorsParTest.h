@@ -78,7 +78,7 @@ public:
  {// the functioning of FindDetectorsParTest is affected by a function call in the FrameworkManager's constructor, creating the algorithm in this way ensures that function is executed
     
     findPar =  FrameworkManager::Instance().createAlgorithm("FindDetectorsPar");
-  }
+ }
  ~FindDetectorsParTest(){
       FrameworkManager::Instance().clearAlgorithms();
       FrameworkManager::Instance().deleteWorkspace(inputWS->getName());
@@ -157,7 +157,7 @@ private:
       // underlying detectors have different id-s but the group has the ID of the first one'
       std::vector<detid_t> detIDDetails = pDet->getDetectorIDs();
 
-      inputWS->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, detIDDetails, NDET));
+      inputWS->replaceSpectraMap(new SpectraDetectorMap(&forSpecDetMap[0], &detIDDetails[0], NDET));
   
 
       AnalysisDataService::Instance().add(WS_Name,inputWS);
