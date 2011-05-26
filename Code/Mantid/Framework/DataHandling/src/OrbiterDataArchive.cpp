@@ -11,6 +11,8 @@
 #include <Poco/Net/Context.h>
 #include <Poco/URI.h>
 
+#include <boost/algorithm/string.hpp>
+
 #include <iostream>
 
 using Poco::Net::HTTPSClientSession;
@@ -42,7 +44,8 @@ namespace Mantid
       std::string findFileWS("/operation/findFile/format/space/filename/");
       std::string URL;
 
-      std::string out;
+      std::string wsResult = "";
+      std::string result = "";
 
       //#ifdef _WIN32
       //	// Return an empty string
@@ -70,16 +73,23 @@ namespace Mantid
       {
         rs.read(&buff[0], 300);
         n = rs.gcount();
-        out.append(&buff[0], n);
+        wsResult.append(&buff[0], n);
       } while (n == 300);
 
 
-      //TODO: Look for a space, and split on it.  Just take the first value.
+      //Look for spaces, and split on them.
+      std::vector<std::string> filenames;
+      boost::split(filenames, wsResult, boost::is_any_of(" "));
+      // For now just take the first result
+      result = filenames[0];
 
-      // Debug statement to print returned filename
-      g_log.debug() << "Returned Filename = " << out << std::endl;
+      // Debug statement to print returned filename(s)
+      for (std::size_t i = 0; i < filenames.size(); ++i) {
+    	  g_log.debug() << "Filename[" << i << "] = " << filenames[i] << std::endl;
+	  }
+      g_log.debug() << "Returning Filename = " << result << std::endl;
 
-      return out;
+      return result;
     }
 
   } // namespace DataHandling
