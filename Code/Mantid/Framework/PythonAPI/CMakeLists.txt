@@ -63,6 +63,7 @@ endif(UNITY_BUILD)
 # Add local dependencies
 ###########################################################################
 
+set ( Boost_LIBRARIES ) # Empty out the variable after previous use
 set ( Boost_USE_DEBUG_PYTHON TRUE )
 find_package ( Boost REQUIRED python )
 add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB )
