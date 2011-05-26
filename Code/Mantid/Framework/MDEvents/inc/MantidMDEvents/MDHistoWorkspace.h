@@ -110,6 +110,7 @@ namespace MDEvents
     std::string getGeometryXML() const;
 
 
+
     /// Sets the signal at the specified index.
     void setSignalAt(size_t index, double value)
     {
@@ -123,11 +124,7 @@ namespace MDEvents
     }
 
 
-    /// Get the signal at the specified index.
-    virtual double getSignalAt(size_t index) const
-    {
-      return m_signals[index];
-    }
+
 
     /// Get the error of the signal at the specified index.
     virtual double getErrorAt(size_t index) const
@@ -135,10 +132,16 @@ namespace MDEvents
       return m_errors[index];
     }
 
-    /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t)
-    virtual double getSignalAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+    /// Get the error at the specified index given in 4 dimensions (typically X,Y,Z,t)
+    virtual double getErrorAt(size_t index1, size_t index2) const
     {
-      return m_signals[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3 + indexMultiplier[2]*index4];
+      return m_errors[index1 + indexMultiplier[0]*index2];
+    }
+
+    /// Get the error at the specified index given in 4 dimensions (typically X,Y,Z,t)
+    virtual double getErrorAt(size_t index1, size_t index2, size_t index3) const
+    {
+      return m_errors[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3];
     }
 
     /// Get the error at the specified index given in 4 dimensions (typically X,Y,Z,t)
@@ -148,11 +151,59 @@ namespace MDEvents
     }
 
 
+
+    /// Get the signal at the specified index.
+    virtual double getSignalAt(size_t index) const
+    {
+      return m_signals[index];
+    }
+
+    /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t)
+    virtual double getSignalAt(size_t index1, size_t index2) const
+    {
+      return m_signals[index1 + indexMultiplier[0]*index2];
+    }
+
+    /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t)
+    virtual double getSignalAt(size_t index1, size_t index2, size_t index3) const
+    {
+      return m_signals[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3];
+    }
+
+    /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t)
+    virtual double getSignalAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+    {
+      return m_signals[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3 + indexMultiplier[2]*index4];
+    }
+
+
+
+
     /// Get the signal at the specified index, normalized by cell volume
     virtual double getSignalNormalizedAt(size_t index) const
     {
       return m_signals[index] * m_inverseVolume;
     }
+
+    /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
+    virtual double getSignalNormalizedAt(size_t index1, size_t index2) const
+    {
+      return getSignalAt(index1,index2) * m_inverseVolume;
+    }
+
+    /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
+    virtual double getSignalNormalizedAt(size_t index1, size_t index2, size_t index3) const
+    {
+      return getSignalAt(index1,index2,index3) * m_inverseVolume;
+    }
+
+    /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
+    virtual double getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+    {
+      return getSignalAt(index1,index2,index3,index4) * m_inverseVolume;
+    }
+
+
 
     /// Get the error of the signal at the specified index, normalized by cell volume
     virtual double getErrorNormalizedAt(size_t index) const
@@ -161,9 +212,15 @@ namespace MDEvents
     }
 
     /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
-    virtual double getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+    virtual double getErrorNormalizedAt(size_t index1, size_t index2) const
     {
-      return getSignalAt(index1,index2,index3,index4) * m_inverseVolume;
+      return getErrorAt(index1,index2) * m_inverseVolume;
+    }
+
+    /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
+    virtual double getErrorNormalizedAt(size_t index1, size_t index2, size_t index3) const
+    {
+      return getErrorAt(index1,index2,index3) * m_inverseVolume;
     }
 
     /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume

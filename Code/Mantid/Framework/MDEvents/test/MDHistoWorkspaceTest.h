@@ -61,6 +61,31 @@ public:
     std::vector<double> data = ws.getSignalDataVector();
     TS_ASSERT_EQUALS(data.size(), 5*5*5*5);
     TS_ASSERT_DELTA( data[5], 2.3456, 1e-5);
+
+    // Set a different value at every point
+    for (size_t i=0; i <  ws.getNPoints(); ++i)
+    {
+      ws.setSignalAt(i, (double) i);
+      ws.setErrorAt(i, (double) i);
+    }
+
+    // Test the 4 overloads of each method. Phew!
+    TS_ASSERT_DELTA( ws.getSignalAt(1), 1.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getSignalAt(1,2), 1.0+2*5.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getSignalAt(1,2,3), 1.0+2*5.0+3*25.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getSignalAt(1,2,3,4), 1.0+2*5.0+3*25.0+4*125.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorAt(1), 1.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorAt(1,2), 1.0+2*5.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorAt(1,2,3), 1.0+2*5.0+3*25.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorAt(1,2,3,4), 1.0+2*5.0+3*25.0+4*125.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getSignalNormalizedAt(1)*256.0, 1.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getSignalNormalizedAt(1,2)*256.0, 1.0+2*5.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getSignalNormalizedAt(1,2,3)*256.0, 1.0+2*5.0+3*25.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getSignalNormalizedAt(1,2,3,4)*256.0, 1.0+2*5.0+3*25.0+4*125.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(1)*256.0, 1.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(1,2)*256.0, 1.0+2*5.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(1,2,3)*256.0, 1.0+2*5.0+3*25.0, 1e-4);
+    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(1,2,3,4)*256.0, 1.0+2*5.0+3*25.0+4*125.0, 1e-4);
   }
 
 

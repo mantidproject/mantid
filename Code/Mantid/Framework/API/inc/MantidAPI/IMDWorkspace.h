@@ -90,16 +90,26 @@ namespace Mantid
       /// Get the dimension ids in their order
       virtual const std::vector<std::string> getDimensionIDs() const = 0;
 
+
+
+
+
       /// Get the signal at the specified index.
-      virtual double getSignalAt(size_t index) const
+      virtual double getSignalAt(size_t index1) const
       {
-        return getPoint(index).getSignal();
+        return getPoint(index1).getSignal();
       }
 
-      /// Get the error of the signal at the specified index.
-      virtual double getErrorAt(size_t index) const
+      /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t)
+      virtual double getSignalAt(size_t index1, size_t index2) const
       {
-        return getPoint(index).getError();
+        return getCell(index1,index2).getSignal();
+      }
+
+      /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t)
+      virtual double getSignalAt(size_t index1, size_t index2, size_t index3) const
+      {
+        return getCell(index1,index2,index3).getSignal();
       }
 
       /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t)
@@ -108,11 +118,31 @@ namespace Mantid
         return getCell(index1,index2,index3,index4).getSignal();
       }
 
+
+      /// Get the error of the signal at the specified index.
+      virtual double getErrorAt(size_t index) const
+      {
+        return getPoint(index).getError();
+      }
+
+      /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t)
+      virtual double getErrorAt(size_t index1, size_t index2) const
+      {
+        return getCell(index1,index2).getError();
+      }
+
+      /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t)
+      virtual double getErrorAt(size_t index1, size_t index2, size_t index3) const
+      {
+        return getCell(index1,index2,index3).getError();
+      }
+
       /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t)
       virtual double getErrorAt(size_t index1, size_t index2, size_t index3, size_t index4) const
       {
         return getCell(index1,index2,index3,index4).getError();
       }
+
 
       /// Get the signal at the specified index, normalized by cell volume
       virtual double getSignalNormalizedAt(size_t index) const
@@ -120,9 +150,15 @@ namespace Mantid
         throw std::runtime_error("Not implemented yet.");
       }
 
-      /// Get the error of the signal at the specified index, normalized by cell volume
-      virtual double getErrorNormalizedAt(size_t index) const
-      { UNUSED_ARG(index);
+      /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
+      virtual double getSignalNormalizedAt(size_t index1, size_t index2) const
+      { UNUSED_ARG(index1); UNUSED_ARG(index2);
+        throw std::runtime_error("Not implemented yet.");
+      }
+
+      /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
+      virtual double getSignalNormalizedAt(size_t index1, size_t index2, size_t index3) const
+      { UNUSED_ARG(index1); UNUSED_ARG(index2); UNUSED_ARG(index3);
         throw std::runtime_error("Not implemented yet.");
       }
 
@@ -132,11 +168,33 @@ namespace Mantid
         throw std::runtime_error("Not implemented yet.");
       }
 
+
+      /// Get the error of the signal at the specified index, normalized by cell volume
+      virtual double getErrorNormalizedAt(size_t index) const
+      { UNUSED_ARG(index);
+        throw std::runtime_error("Not implemented yet.");
+      }
+
+      /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
+      virtual double getErrorNormalizedAt(size_t index1, size_t index2) const
+      { UNUSED_ARG(index1); UNUSED_ARG(index2);
+        throw std::runtime_error("Not implemented yet.");
+      }
+
+      /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
+      virtual double getErrorNormalizedAt(size_t index1, size_t index2, size_t index3) const
+      { UNUSED_ARG(index1); UNUSED_ARG(index2); UNUSED_ARG(index3);
+        throw std::runtime_error("Not implemented yet.");
+      }
+
       /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
       virtual double getErrorNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
       { UNUSED_ARG(index1); UNUSED_ARG(index2); UNUSED_ARG(index3); UNUSED_ARG(index4);
         throw std::runtime_error("Not implemented yet.");
       }
+
+
+
 
       /// Return a vector containing a copy of the signal data in the workspace. TODO: Make this more efficient if needed.
       virtual std::vector<double> getSignalDataVector() const
@@ -151,9 +209,10 @@ namespace Mantid
       }
 
 
+
+
       /// Get the point at the specified index.
       virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const = 0;
-
 
       // TODO: JZ : As far as I can tell, these getCell() calls are relatively unused, and may perhaps be replaced by getSignal() calls
 
