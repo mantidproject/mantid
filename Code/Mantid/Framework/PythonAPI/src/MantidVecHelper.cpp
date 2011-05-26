@@ -79,7 +79,7 @@ namespace Mantid
     */
     PyObject * MantidVecHelper::createPythonList(const MantidVec & values)
     {
-      const Py_ssize_t nVals = values.size();
+      const Py_ssize_t nVals = static_cast<Py_ssize_t>(values.size());
       PyObject * pyValues = PyList_New(nVals);
       if( !pyValues )
       {
@@ -132,23 +132,23 @@ namespace Mantid
     const Geometry::MantidMat getMatrixFromArray(boost::python::numeric::array& a)
     {
       boost::python::tuple shape( a.attr("shape") );
-		  if( boost::python::len( shape ) != 2 )
-		  {
-			  throw std::logic_error( "numeric::array must have 2 dimensions" );
-		  }
+                  if( boost::python::len( shape ) != 2 )
+                  {
+                          throw std::logic_error( "numeric::array must have 2 dimensions" );
+                  }
       
       size_t nx,ny,i,j;
       nx=(size_t)(boost::python::extract< unsigned >( shape[0] ));
       ny=(size_t)(boost::python::extract< unsigned >( shape[1] ));
-	    Geometry::Matrix<double> m(nx,ny);
-		  for( i = 0; i < nx; i++ )
-		  {
-			  for( j = 0; j < ny; j++ )
-			  {
-				  m[i][j] = boost::python::extract< double >( a[ boost::python::make_tuple( i, j ) ] );
-			  }
-		  }
-		  return m;
+            Geometry::Matrix<double> m(nx,ny);
+                  for( i = 0; i < nx; i++ )
+                  {
+                          for( j = 0; j < ny; j++ )
+                          {
+                                  m[i][j] = boost::python::extract< double >( a[ boost::python::make_tuple( i, j ) ] );
+                          }
+                  }
+                  return m;
     }
   }
 }
