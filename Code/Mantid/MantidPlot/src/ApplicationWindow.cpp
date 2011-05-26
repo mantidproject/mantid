@@ -161,6 +161,7 @@
 #include <QMdiSubWindow>
 #include <QUndoStack>
 #include <QUndoView>
+#include <QSignalMapper>
 
 #include <zlib.h>
 
@@ -434,7 +435,21 @@ void ApplicationWindow::showLogWindowContextMenu(const QPoint & p)
   }
 
   menu->addAction(actionClearLogInfo);
+  //Mantid log level changes
+  QMenu *logLevelMenu = menu->addMenu("&Log Level");
+  logLevelMenu->addAction(actionLogLevelError);
+  logLevelMenu->addAction(actionLogLevelWarning);
+  logLevelMenu->addAction(actionLogLevelNotice);
+  logLevelMenu->addAction(actionLogLevelInformation);
+  logLevelMenu->addAction(actionLogLevelDebug);
+  //Mantid log level changes
   menu->popup(QCursor::pos());
+}
+
+void ApplicationWindow::setLogLevel(int level)
+{
+  //set the log level
+  Mantid::Kernel::Logger::setLevelForAll(level);
 }
 
 void ApplicationWindow::showScriptConsoleContextMenu(const QPoint &p)
@@ -12037,6 +12052,44 @@ void ApplicationWindow::createActions()
   actionClearLogInfo = new QAction(tr("Clear &Log Information"), this);
   connect(actionClearLogInfo, SIGNAL(activated()), this, SLOT(clearLogInfo()));
 
+  //mantid log level control
+  actionLogLevelError = new QAction(tr("&Error"), this);
+  actionLogLevelError->setCheckable(true);
+  actionLogLevelWarning = new QAction(tr("&Warning"), this);
+  actionLogLevelWarning->setCheckable(true);
+  actionLogLevelNotice = new QAction(tr("&Notice"), this);
+  actionLogLevelNotice->setCheckable(true);
+  actionLogLevelInformation = new QAction(tr("&Information"), this);
+  actionLogLevelInformation->setCheckable(true);
+  actionLogLevelDebug = new QAction(tr("&Debug"), this);
+  actionLogLevelDebug->setCheckable(true);
+
+  logLevelMapper = new QSignalMapper(this);
+  logLevelMapper->setMapping(actionLogLevelError, Mantid::Kernel::Logger::Priority::PRIO_ERROR);
+  logLevelMapper->setMapping(actionLogLevelWarning, Mantid::Kernel::Logger::Priority::PRIO_WARNING);
+  logLevelMapper->setMapping(actionLogLevelNotice, Mantid::Kernel::Logger::Priority::PRIO_NOTICE);
+  logLevelMapper->setMapping(actionLogLevelInformation, Mantid::Kernel::Logger::Priority::PRIO_INFORMATION);
+  logLevelMapper->setMapping(actionLogLevelDebug, Mantid::Kernel::Logger::Priority::PRIO_DEBUG);
+  
+  connect(actionLogLevelError, SIGNAL(activated()), logLevelMapper, SLOT (map()));
+  connect(actionLogLevelWarning, SIGNAL(activated()), logLevelMapper, SLOT (map()));
+  connect(actionLogLevelNotice, SIGNAL(activated()), logLevelMapper, SLOT (map()));
+  connect(actionLogLevelInformation, SIGNAL(activated()), logLevelMapper, SLOT (map()));
+  connect(actionLogLevelDebug, SIGNAL(activated()), logLevelMapper, SLOT (map()));
+
+	connect(logLevelMapper, SIGNAL(mapped(int)), this, SLOT(setLogLevel(int)));
+
+  logLevelGroup = new QActionGroup(this);
+  logLevelGroup->addAction(actionLogLevelError);
+  logLevelGroup->addAction(actionLogLevelWarning);
+  logLevelGroup->addAction(actionLogLevelNotice);
+  logLevelGroup->addAction(actionLogLevelInformation);
+  logLevelGroup->addAction(actionLogLevelDebug);
+  actionLogLevelInformation->setChecked(true);
+
+
+  //mantid log level control
+  
   actionClearConsole = new QAction(tr("Clear &Console"), this);
   connect(actionClearConsole, SIGNAL(activated()), console, SLOT(clear()));
 

@@ -64,6 +64,7 @@ class QToolBar;
 class QLocale;
 class QMdiArea;
 class QUndoView;
+class QSignalMapper;
 
 class Matrix;
 class Table;
@@ -334,6 +335,11 @@ public slots:
   void clearPolarFunctionsList();
   void updateFunctionLists(int type, QStringList &formulas);
   void updateSurfaceFuncList(const QString& s);
+  //@}
+
+  //! \name Mantid Log Level Functions
+  //@{
+  void setLogLevel(int level);
   //@}
 
   //! \name Matrices
@@ -1356,6 +1362,11 @@ private:
   QAction *actionShowUndoStack;
   QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
   QAction *actionMagnify;
+  //mantid log level control
+  QAction  *actionLogLevelError, *actionLogLevelWarning, *actionLogLevelNotice, *actionLogLevelInformation, *actionLogLevelDebug;
+  QActionGroup *logLevelGroup;
+  QSignalMapper *logLevelMapper;
+  //mantid log level control
 
   QList<QAction *> d_user_actions;
   QList<QMenu* > d_user_menus; //Mantid

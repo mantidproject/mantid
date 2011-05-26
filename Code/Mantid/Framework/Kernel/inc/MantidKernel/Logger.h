@@ -133,6 +133,9 @@ class ThreadSafeLogStream;
     /// Returns a reference to the Logger with the given name.
     static Logger& get(const std::string& name);
 
+    /// Sets the log level for all Loggers created so far, including the root logger.
+    static void setLevelForAll(const int level);
+
     ///destroy the given logger and releases resources
     static void destroy(Logger& logger);
 

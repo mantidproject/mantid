@@ -1384,19 +1384,27 @@ void MantidUI::logMessage(const Poco::Message& msg)
   //if (s_logEdit->document()->blockCount() > 1000) s_logEdit->document()->clear();
   //Ticket #671
   //to display the logwindow if there is ann error or higher log message
-  if (msg.getPriority() <= Poco::Message::PRIO_ERROR)
+  if (msg.getPriority() <= Mantid::Kernel::Logger::Priority::PRIO_ERROR)
   {
     appWindow()->logWindow->show();
   }
-  if (msg.getPriority() < Poco::Message::PRIO_WARNING)
+  if (msg.getPriority() < Mantid::Kernel::Logger::Priority::PRIO_ERROR)
     appWindow()->results->setTextColor(Qt::red);
+  else if (msg.getPriority() < Mantid::Kernel::Logger::Priority::PRIO_WARNING)
+    appWindow()->results->setTextColor(Qt::darkRed);
+  else if (msg.getPriority() > Mantid::Kernel::Logger::Priority::PRIO_INFORMATION)
+    appWindow()->results->setTextColor(Qt::gray);
+  else if (msg.getPriority() == Mantid::Kernel::Logger::Priority::PRIO_NOTICE)
+    appWindow()->results->setTextColor(Qt::darkBlue);
   else
     appWindow()->results->setTextColor(Qt::black);
   appWindow()->results->insertPlainText(str+"\n");
-  //cerr<<":"<<appWindow()->results->document()->blockCount()<<'\n';
+
   QTextCursor cur = appWindow()->results->textCursor();
   cur.movePosition(QTextCursor::End);
   appWindow()->results->setTextCursor(cur);
+  //set the colour back to the default (black)
+  appWindow()->results->setTextColor(Qt::black);
 }
 
 void MantidUI::manageMantidWorkspaces()

@@ -744,6 +744,7 @@ namespace Mantid
     /// puts out algorithm parameter information to the logger
     void Algorithm::algorithm_info() const
     {
+      g_log.notice() << name() << " started"<< std::endl;
       // Make use of the AlgorithmHistory class, which holds all the info we want here
       AlgorithmHistory AH(this);
       g_log.information() << AH;

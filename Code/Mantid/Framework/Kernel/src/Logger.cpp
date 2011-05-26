@@ -390,6 +390,16 @@ namespace Kernel
     }
   }
 
+  /** Sets the log level for all Loggers created so far, including the root logger.
+   * @param level :: the priority level to set for the loggers
+   */
+  void Logger::setLevelForAll(const int level)
+  {
+    // "" is the root logger
+    Poco::Logger::setLevel("",level);
+  }
+
+
   /** Returns a reference to the Logger with the given name.
    *  This logger is stored until in a static list until it is destroyed, released or Logger::shutdown is called.
    *
