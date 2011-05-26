@@ -135,7 +135,7 @@ namespace Geometry
   /// Shared pointer to a ReflectionCondition
   typedef boost::shared_ptr<ReflectionCondition> ReflectionCondition_sptr;
 
-  std::vector<ReflectionCondition_sptr> getAllReflectionConditions();
+  DLLExport std::vector<ReflectionCondition_sptr> getAllReflectionConditions();
 
 } // namespace Mantid
 } // namespace Geometry
