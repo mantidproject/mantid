@@ -7,6 +7,7 @@
 #include "MantidKernel/Strings.h"
 #include <fstream>
 #include "MantidDataObjects/Peak.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -95,18 +96,10 @@ namespace Crystal
     // Time offset of 0.00 for now
     out << "0.000" <<  std::endl;
 
-    if (false)
-    {
-      //TODO: Do we need to save the .detcal header
-      out <<  "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT     DEPTH   DETD  "
-          <<  " CenterX   CenterY   CenterZ   BaseX    BaseY    BaseZ    "
-          <<  "  UpX      UpY      UpZ" <<  std::endl;
-      // Here would save each detector...
-    }
-
     // We must sort the peaks first by run, then bank #, and save the list of workspace indices of it
     typedef std::map<int, std::vector<size_t> > bankMap_t;
     typedef std::map<int, bankMap_t> runMap_t;
+    std::set<int> uniqueBanks;
     runMap_t runMap;
 
     for (size_t i=0; i < peaks.size(); ++i)
@@ -126,8 +119,68 @@ namespace Crystal
 
       // Save in the map
       runMap[run][bank].push_back(i);
+      // Track unique bank numbers
+      uniqueBanks.insert(bank);
     }
 
+
+    // ============================== Save .detcal info =========================================
+    if (true)
+    {
+      out <<  "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ"
+          <<  std::endl;
+      // Here would save each detector...
+      std::set<int>::iterator it;
+      for (it = uniqueBanks.begin(); it != uniqueBanks.end(); it++)
+      {
+        // Build up the bank name
+        int bank = *it;
+        std::ostringstream mess;
+        mess << "bank" << bank;
+        std::string bankName = mess.str();
+        // Retrieve it
+        RectangularDetector_sptr det;
+        det = boost::dynamic_pointer_cast<RectangularDetector>(inst->getComponentByName(bankName));
+        if (det)
+        {
+          // Center of the detector
+          V3D center = det->getPos();
+          // Distance to center of detector
+          double detd = (center - inst->getSample()->getPos()).norm();
+
+          // Base unit vector (along the horizontal, X axis)
+          V3D base = det->getAtXY(det->xpixels()-1,0)->getPos() - det->getAtXY(0,0)->getPos();
+          base.normalize();
+          // Up unit vector (along the vertical, Y axis)
+          V3D up = det->getAtXY(0,det->ypixels()-1)->getPos() - det->getAtXY(0,0)->getPos();
+          up.normalize();
+
+          // Write the line
+          out << "5 "
+           << std::setw(6) << std::right << bank << " "
+           << std::setw(6) << std::right << det->xpixels() << " "
+           << std::setw(6) << std::right << det->ypixels() << " "
+           << std::setw(7) << std::right << std::fixed << std::setprecision(4) << 100.0*det->xsize() << " "
+           << std::setw(7) << std::right << std::fixed << std::setprecision(4) << 100.0*det->ysize() << " "
+           << "  0.2000 "
+           << std::setw(6) << std::right << std::fixed << std::setprecision(2) << 100.0*detd << " "
+           << std::setw(9) << std::right << std::fixed << std::setprecision(4) << 100.0*center.X() << " "
+           << std::setw(9) << std::right << std::fixed << std::setprecision(4) << 100.0*center.Y() << " "
+           << std::setw(9) << std::right << std::fixed << std::setprecision(4) << 100.0*center.Z() << " "
+           << std::setw(8) << std::right << std::fixed << std::setprecision(5) << base.X() << " "
+           << std::setw(8) << std::right << std::fixed << std::setprecision(5) << base.Y() << " "
+           << std::setw(8) << std::right << std::fixed << std::setprecision(5) << base.Z() << " "
+           << std::setw(8) << std::right << std::fixed << std::setprecision(5) << up.X() << " "
+           << std::setw(8) << std::right << std::fixed << std::setprecision(5) << up.Y() << " "
+           << std::setw(8) << std::right << std::fixed << std::setprecision(5) << up.Z() << " "
+           << std::endl;
+
+        }
+      }
+    }
+
+
+    // ============================== Save all Peaks =========================================
     // Sequence number
     int seqNum = 1;
 
