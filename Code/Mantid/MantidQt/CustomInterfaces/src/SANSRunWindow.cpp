@@ -1797,6 +1797,10 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
     m_uiForm.enableFlood_ck->isChecked() ? m_uiForm.floodFile->getFirstFilename().trimmed() : "";
   exec_reduce += "i.SetDetectorFloodFile('"+floodFile+"')\n";
 
+  if ( ( ! floodFile.isEmpty() ) && ( m_uiForm.detbank_sel->currentText() == "HAB" ) )
+  {
+    issueWarning("Flood file may not work", "Flood files have not always been compatible with the HAB detector you might want to check '"+floodFile+"'.\nThe reduction will continue");
+  }
   //Set the wavelength ranges, equal to those for the sample unless this box is checked
   if (m_uiForm.transFit_ck->isChecked())
   {
@@ -3030,6 +3034,15 @@ void SANSRunWindow::handleInputDirChange(Mantid::Kernel::ConfigValChangeNotifica
   {
     upDateDataDir();
   }
+}
+/** Prints the warning in a dialog box, Mantid log and the SANS GUI Logging tab
+*  @param title Brief summary the problem
+*  @param info detail to follow the summary
+*/
+void SANSRunWindow::issueWarning(const QString & title, const QString & info)
+{
+  g_log.warning() << "::SANS::warning" << title.toStdString() << ": " << info.toStdString() << std::endl;
+  QMessageBox::warning(this, title, info);
 }
 
 } //namespace CustomInterfaces

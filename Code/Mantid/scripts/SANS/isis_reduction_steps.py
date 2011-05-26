@@ -1485,6 +1485,11 @@ class UserFile(ReductionStep):
         # Check if one of the efficency files hasn't been set and assume the other is to be used
         reducer.instrument.copy_correction_files()
         
+        # this might change but right now there is no flood correct for the HAB 
+        if reducer.flood_file.get_filename():
+            if reducer.instrument.cur_detector().name() == 'HAB':
+                _issueWarning('Is your flood detection file "%s" valid on the HAB? Otherwise it my give negative intensities!' % reducer.flood_file.get_filename())
+        
         self.executed = True
         return self.executed
 

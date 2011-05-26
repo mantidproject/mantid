@@ -335,6 +335,7 @@ private:
   void makeValidator(QLabel * const newValid, QWidget * control, QWidget * tab, const QString & errorMsg);
   void upDateDataDir();
   void handleInputDirChange(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo);
+  void issueWarning(const QString & title, const QString & info);
   QString getInstrumentClass() const;
   bool entriesAreValid(const ValCheck check=ALL);
   bool entriesAreValid(ValMap & vals);
