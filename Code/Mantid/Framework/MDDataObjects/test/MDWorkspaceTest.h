@@ -306,6 +306,42 @@ public:
     TSM_ASSERT_THROWS("MDWorkspace::getCell() is not yet implemented. Should have thrown runtime exception", workspace->getCell(1, 1, 1, 1, 1), std::runtime_error);
   }
 
+  void testGetSignalNormalisedAt1D()
+  {
+    using namespace Mantid::API;
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
+    TS_ASSERT_EQUALS(workspace->getSignalAt(0), workspace->getSignalNormalizedAt(0));
+    TS_ASSERT_EQUALS(workspace->getSignalAt(1), workspace->getSignalNormalizedAt(1));
+    TS_ASSERT_EQUALS(workspace->getSignalAt(2), workspace->getSignalNormalizedAt(2));
+  }
+
+  void testGetSignalNormalisedAt2D()
+  {
+    using namespace Mantid::API;
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
+    TS_ASSERT_EQUALS(workspace->getSignalAt(0, 0), workspace->getSignalNormalizedAt(0, 0));
+    TS_ASSERT_EQUALS(workspace->getSignalAt(1, 1), workspace->getSignalNormalizedAt(1, 1));
+    TS_ASSERT_EQUALS(workspace->getSignalAt(2, 2), workspace->getSignalNormalizedAt(2, 2));
+  }
+
+  void testGetSignalNormalisedAt3D()
+  {
+    using namespace Mantid::API;
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
+    TS_ASSERT_EQUALS(workspace->getSignalAt(0, 0, 0), workspace->getSignalNormalizedAt(0, 0, 0));
+    TS_ASSERT_EQUALS(workspace->getSignalAt(1, 1, 1), workspace->getSignalNormalizedAt(1, 1, 1));
+    TS_ASSERT_EQUALS(workspace->getSignalAt(2, 2, 2), workspace->getSignalNormalizedAt(2, 2, 2));
+  }
+
+  void testGetSignalNormalisedAt4D()
+  {
+    using namespace Mantid::API;
+    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
+    TS_ASSERT_EQUALS(workspace->getSignalAt(0, 0, 0, 0), workspace->getSignalNormalizedAt(0, 0, 0, 0));
+    TS_ASSERT_EQUALS(workspace->getSignalAt(1, 1, 1, 1), workspace->getSignalNormalizedAt(1, 1, 1, 1));
+    TS_ASSERT_EQUALS(workspace->getSignalAt(2, 2, 2, 2), workspace->getSignalNormalizedAt(2, 2, 2, 2));
+  }
+
   //Test for the IMDWorkspace aspects of MDWorkspace.
   void testGetXDimension()
   {

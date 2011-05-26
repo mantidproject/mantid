@@ -321,9 +321,46 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
       return m_mdCellMap[singleDimensionIndex];
     }
 
+    /**
+    Getter for signal normalized by volume.
+    @parameter index1 : 1st dimension index.
+    @parameter index1 : 2nd dimension index.
+    @parameter index1 : 3rd dimension index.
+    @parameter index1 : 4th dimension index.
+    */
     double MDWorkspace::getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
     {
       return this->getSignalAt(index1, index2, index3, index4);
+    }
+
+    /**
+    Getter for signal normalized by volume.
+    @parameter index1 : 1st dimension index.
+    @parameter index1 : 2nd dimension index.
+    @parameter index1 : 3rd dimension index.
+    */
+    double MDWorkspace::getSignalNormalizedAt(size_t index1, size_t index2, size_t index3) const
+    {
+      return this->getSignalAt(index1, index2, index3);
+    }
+
+    /**
+    Getter for signal normalized by volume.
+    @parameter index1 : 1st dimension index.
+    @parameter index1 : 2nd dimension index.
+    */
+    double MDWorkspace::getSignalNormalizedAt(size_t index1, size_t index2) const
+    {
+      return this->getSignalAt(index1, index2);
+    }
+
+    /**
+    Getter for signal normalized by volume.
+    @parameter index1 : 1st dimension index.
+    */
+    double MDWorkspace::getSignalNormalizedAt(size_t index1) const
+    {
+      return this->getSignalAt(index1);
     }
 
     const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(...) const

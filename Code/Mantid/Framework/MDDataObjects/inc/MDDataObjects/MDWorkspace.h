@@ -168,9 +168,6 @@ namespace Mantid
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(...) const;
 
-      /// IMDWorkspace getNormalized signal.
-      virtual double getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const;
-
       /// Get the location of the workspace on disk, supports Horace implementation of rebinning.
       virtual std::string getWSLocation() const;
 
@@ -184,6 +181,18 @@ namespace Mantid
 
       /// Getter for those dimensions that are not collapsed.
       Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const;
+
+      /// Getter for normalized signal 4D.
+      double MDWorkspace::getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const;
+
+      /// Getter for normalized signal 3D.
+      double MDWorkspace::getSignalNormalizedAt(size_t index1, size_t index2, size_t index3) const;
+
+      /// Getter for normalized signal 2D.
+      double MDWorkspace::getSignalNormalizedAt(size_t index1, size_t index2) const;
+
+      /// Getter for normalized signal 1D.
+      double MDWorkspace::getSignalNormalizedAt(size_t index1) const;
 
     protected:
 

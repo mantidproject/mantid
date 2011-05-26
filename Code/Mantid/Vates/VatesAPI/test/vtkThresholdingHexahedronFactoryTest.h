@@ -56,7 +56,7 @@ private:
     MOCK_CONST_METHOD0(getDimensionIDs,const std::vector<std::string>());
     MOCK_CONST_METHOD0(getNPoints, uint64_t());
     MOCK_CONST_METHOD0(getNumDims, size_t());
-    MOCK_CONST_METHOD4(getSignalNormalizedAt, double(size_t index1, size_t index2, size_t index3, size_t index4));
+    MOCK_CONST_METHOD3(getSignalNormalizedAt, double(size_t index1, size_t index2, size_t index3));
     MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
 
     const Mantid::Geometry::SignalAggregate& getCell(...) const
@@ -98,7 +98,7 @@ private:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_, _, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(1));
+    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(1));
     EXPECT_CALL(*pMockWs, getXDimension()).Times(9).WillRepeatedly(Return(IMDDimension_const_sptr(
         new FakeIMDDimension("x"))));
     EXPECT_CALL(*pMockWs, getYDimension()).Times(9).WillRepeatedly(Return(IMDDimension_const_sptr(
@@ -135,7 +135,7 @@ private:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_, _, _, _)).WillRepeatedly(Return(1)); //Shouldn't access getSignal At
+    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_, _, _)).WillRepeatedly(Return(1)); //Shouldn't access getSignal At
     EXPECT_CALL(*pMockWs, getXDimension()).Times(AtLeast(1)).WillRepeatedly(Return(
         IMDDimension_const_sptr(new FakeIMDDimension("x"))));
     EXPECT_CALL(*pMockWs, getYDimension()).Times(AtLeast(1)).WillRepeatedly(Return(

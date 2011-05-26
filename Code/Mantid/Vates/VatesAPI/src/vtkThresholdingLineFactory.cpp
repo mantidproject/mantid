@@ -89,7 +89,7 @@ namespace Mantid
         {
           posX = minX + (i * incrementX); //Calculate increment in x;
           
-          signalScalar = static_cast<float>(m_workspace->getCell(i).getSignal());
+          signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
 
             if (boost::math::isnan( signalScalar ) || (signalScalar <= m_minThreshold) || (signalScalar >= m_maxThreshold))
             {

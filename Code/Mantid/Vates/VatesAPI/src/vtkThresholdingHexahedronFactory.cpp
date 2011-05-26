@@ -135,7 +135,7 @@ namespace VATES
           {
 
             posZ = minZ + (k * incrementZ); //Calculate increment in z;
-            signalScalar = m_workspace->getSignalNormalizedAt(i, j, k, 0);
+            signalScalar = m_workspace->getSignalNormalizedAt(i, j, k);
 
             if (boost::math::isnan( signalScalar ) || (signalScalar <= m_minThreshold) || (signalScalar >= m_maxThreshold))
             {
