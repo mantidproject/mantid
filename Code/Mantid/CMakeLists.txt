@@ -66,17 +66,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
-set ( MAKE_MULTIDIMENSIONAL OFF CACHE BOOL "Switch for compiling the MD framework projects")
 set ( REDUCER_TEST OFF CACHE BOOL "Switch for running flaky Reducer test")
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?") 
 
-if ( MAKE_VATES )
-  if( NOT MAKE_MULTIDIMENSIONAL )
-    message(SEND_ERROR "Cannot Make VATES visualisation without MAKE_MULTIDIMENSIONAL framework code.")
-  endif( NOT MAKE_MULTIDIMENSIONAL ) 
-  add_subdirectory ( Vates )
-endif ( MAKE_VATES )
+add_subdirectory ( Vates )
 
 # python unit tests
 if (PYUNITTEST_FOUND)

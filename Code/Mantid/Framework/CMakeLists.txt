@@ -119,15 +119,10 @@ if ( CXXTEST_FOUND )
   add_subdirectory (UserAlgorithms)
 endif ()
 
-
-if( MAKE_MULTIDIMENSIONAL )
-  add_subdirectory (MDDataObjects)
-  # This is not ideal - can MDAlgorithms code to interfaces?
-  include_directories(MDDataObjects/inc)
-  set(MANTIDLIBS ${MANTIDLIBS} MDDataObjects)
-  
-  add_subdirectory (MDAlgorithms)
-endif ()
+add_subdirectory (MDDataObjects)
+include_directories(MDDataObjects/inc)
+set(MANTIDLIBS ${MANTIDLIBS} MDDataObjects)
+add_subdirectory (MDAlgorithms)
 
 # As of May 15, 2011, MDEvents is not an optional flag and is included in the main build.
 add_subdirectory (MDEvents)
