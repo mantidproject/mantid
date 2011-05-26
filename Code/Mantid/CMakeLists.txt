@@ -70,7 +70,9 @@ set ( REDUCER_TEST OFF CACHE BOOL "Switch for running flaky Reducer test")
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?") 
 
-add_subdirectory ( Vates )
+if ( MAKE_VATES )
+  add_subdirectory ( Vates )
+endif ( MAKE_VATES )
 
 # python unit tests
 if (PYUNITTEST_FOUND)
