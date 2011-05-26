@@ -211,6 +211,34 @@ public:
     TS_ASSERT_DELTA(boundingBox.zMax(),-9.5,1e-5);
     TS_ASSERT_DELTA(boundingBox.zMin(),-10.5,1e-5);
   }
+   void testNAL_BoundingBoxCappedCylinder()
+  {
+    // Check that getBoundingBox transforms input guess to Object coordinates and
+    // result back to ObjComponent
+    ObjComponent A("ocyl", createCappedCylinder());
+    A.setPos(10,0,0);
+    A.setRot(Quat(90.0,V3D(0,0,1)));
+
+    BoundingBox boundingBox;
+    std::vector<V3D> ort(3);
+    ort[0] = V3D(0,0,1); //x is now old Z
+    ort[1] = V3D(1,0,0); //y is now old X
+    ort[2] = V3D(0,1,0); //z is now old Y
+
+    boundingBox.setBoxAlignment(V3D(10,0,0),ort);
+    A.getBoundingBox(boundingBox);
+
+    TS_ASSERT_DELTA(boundingBox.xMax(),0.5, 1e-5);
+    TS_ASSERT_DELTA(boundingBox.xMin(),-0.5,1e-5);
+
+    TS_ASSERT_DELTA(boundingBox.yMax(),0.5,1e-5);
+    TS_ASSERT_DELTA(boundingBox.yMin(),-0.5,1e-5);
+
+    TS_ASSERT_DELTA(boundingBox.zMax(),1.2,1e-5);
+    TS_ASSERT_DELTA(boundingBox.zMin(),-3.2,1e-5);
+
+     
+  }
 
   void testgetPointInObject()
   {

@@ -160,13 +160,14 @@ namespace Mantid
     */
   void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const
   {
-       std::vector<V3D> coord_system;
+ 
 // Start with the box in the shape's coordinates
       const BoundingBox & shapeBox = shape()->getBoundingBox();
       if ( shapeBox.isNull() ){
           absoluteBB.nullify();
           return;
       }
+      std::vector<V3D> coord_system;
       if(!absoluteBB.isAxisAligned()){
           absoluteBB.getCoordSystem(coord_system);
       }
@@ -184,9 +185,7 @@ namespace Mantid
       (this->getRotation()).rotateBB(absoluteBB.xMin(),absoluteBB.yMin(),absoluteBB.zMin(),
         absoluteBB.xMax(),absoluteBB.yMax(),absoluteBB.zMax());
     
-      if(!coord_system.empty()){
-          absoluteBB.realign(&coord_system);
-      }  
+  
       // Shift
       const V3D localPos = this->getPos();
       absoluteBB.xMin() += localPos.X(); 
@@ -196,6 +195,9 @@ namespace Mantid
       absoluteBB.zMin() += localPos.Z(); 
       absoluteBB.zMax() += localPos.Z();
 
+      if(!coord_system.empty()){
+          absoluteBB.realign(&coord_system);
+      }  
   }
  
     /**
