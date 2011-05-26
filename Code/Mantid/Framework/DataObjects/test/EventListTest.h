@@ -797,10 +797,10 @@ public:
   void test_EqualityOperator()
   {
     EventList el1, el2;
-    el1.addEventQuickly( TofEvent(1.5, static_cast<int64_t>(2.3)) );
+    el1.addEventQuickly( TofEvent(1.5, 5) );
     TS_ASSERT( !(el1 == el2) );
     TS_ASSERT( (el1 != el2) );
-    el2.addEventQuickly( TofEvent(1.5, static_cast<int64_t>(2.3)) );
+    el2.addEventQuickly( TofEvent(1.5, 5) );
     TS_ASSERT( (el1 == el2) );
     TS_ASSERT( !(el1 != el2) );
   }

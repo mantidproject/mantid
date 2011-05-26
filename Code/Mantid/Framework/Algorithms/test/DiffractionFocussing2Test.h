@@ -148,7 +148,7 @@ public:
       xRef[4] = 1e6;
       //Set an X-axis
       inputW->setX(pix, axis);
-      inputW->getEventList(pix).addEventQuickly( TofEvent(1000.0, 1.0) );
+      inputW->getEventList(pix).addEventQuickly( TofEvent(1000.0) );
     }
 
     // ------------ Create a grouping workspace by name -------------

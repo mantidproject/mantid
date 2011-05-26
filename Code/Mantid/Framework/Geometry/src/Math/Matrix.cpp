@@ -1053,7 +1053,7 @@ Matrix<T>::Invert()
   /**
     If the Matrix is square then invert the matrix
     using LU decomposition
-    @return Determinate (0 if the matrix is singular)
+    @return Determinant (0 if the matrix is singular)
   */
 {
   if (nx!=ny && nx<1)
