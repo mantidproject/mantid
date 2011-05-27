@@ -1,10 +1,3 @@
-/*
- * indicator.cpp
- *
- *  Created on: Apr 7, 2011
- *      Author: 2zr
- */
-
 #include "Indicator.h"
 
 #include <QBrush>
