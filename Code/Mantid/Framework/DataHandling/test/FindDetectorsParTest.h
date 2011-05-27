@@ -64,10 +64,10 @@ public:
 
  }
  void testSingleRingResults(){
-     TS_ASSERT_EQUALS(std::string("37.0451"),findPar->getPropertyValue("azimuthal"));
-     TS_ASSERT_EQUALS(std::string("0"),      findPar->getPropertyValue("polar"));
-     TS_ASSERT_EQUALS(std::string("23.2429"),findPar->getPropertyValue("azimuthal_width"));
-     TS_ASSERT_EQUALS(std::string("6.28319"),findPar->getPropertyValue("polar_width"));
+     TS_ASSERT_EQUALS(std::string("37.0451"),findPar->getPropertyValue("polar"));
+     TS_ASSERT_EQUALS(std::string("0"),      findPar->getPropertyValue("azimuthal"));
+     TS_ASSERT_EQUALS(std::string("23.2429"),findPar->getPropertyValue("polar_width"));
+     TS_ASSERT_EQUALS(std::string("0"),      findPar->getPropertyValue("azimuthal_width"));
      TS_ASSERT_EQUALS(std::string("7.52685"),findPar->getPropertyValue("secondary_flightpath"));
     
 
