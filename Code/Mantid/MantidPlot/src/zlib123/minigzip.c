@@ -235,14 +235,18 @@ void file_uncompress(file)
 
     strcpy(buf, file);
 
-    if (len > SUFFIX_LEN && strcmp(file+len-SUFFIX_LEN, GZ_SUFFIX) == 0) {
-        infile = file;
-        outfile = buf;
-        buf[len-3] = '\0';
-    } else {
+    if (len > SUFFIX_LEN && strcmp(file+len-SUFFIX_LEN, GZ_SUFFIX) == 0)
+    {
+      infile = file;
+      outfile = buf;
+      buf[len-3] = '\0';
+    }
+    else
+    {
         outfile = file;
         infile = buf;
-        strcat(infile, GZ_SUFFIX);
+        // Add the .gz suffix to the filename in buf/infile
+        strcat(buf, GZ_SUFFIX);
     }
     in = gzopen(infile, "rb");
     if (in == NULL) {
