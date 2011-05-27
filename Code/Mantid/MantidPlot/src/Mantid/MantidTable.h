@@ -5,6 +5,11 @@
 #include "WorkspaceObserver.h"
 #include "MantidAPI/ITableWorkspace.h"
 
+
+/** A MantidTable appears to be a MantidPlot "Table" object
+ * that shows the data from an ITableWorkspace.
+ *
+ */
 class MantidTable: public Table, public WorkspaceObserver
 {
   Q_OBJECT

@@ -119,15 +119,6 @@ namespace DataObjects
   void* PeakColumn::void_pointer(int /*index*/)
   {
     throw std::runtime_error("void_pointer() not implemented. Looks to be unused?");
-
-//    Peak & peak = peaks[index];
-//
-//    if (m_name == "h")
-//      return &peak.m_H;
-//    else if (m_name == "k")
-//      return &peak.m_K;
-//    else
-//      throw std::runtime_error("Unexpected column name");
   }
 
 } // namespace Mantid
