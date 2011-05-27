@@ -1,7 +1,7 @@
 #ifndef SYNCHRONISING_GEOMETRY_PRESENTER_H_
 #define SYNCHRONISING_GEOMETRY_PRESENTER_H_
 
-#include "MantidVatesAPI/GeometryXMLParser.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include "MantidVatesAPI/GeometryPresenter.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
@@ -48,7 +48,7 @@ namespace Mantid
     {
     public:
 
-      SynchronisingGeometryPresenter(Mantid::VATES::GeometryXMLParser& source);
+      SynchronisingGeometryPresenter(Mantid::Geometry::MDGeometryXMLParser& source);
 
       void dimensionResized(DimensionPresenter* pDimensionPresenter);
 
@@ -111,7 +111,7 @@ namespace Mantid
       /// Collection of synchronised integrated dimensions.
       Mantid::Geometry::VecIMDDimension_sptr m_integrated;
       /// Original geometry model/source.
-      Mantid::VATES::GeometryXMLParser m_source; 
+      Mantid::Geometry::MDGeometryXMLParser m_source; 
       /// The View with which the presenter will be bound.
       GeometryView* m_view;
     protected:

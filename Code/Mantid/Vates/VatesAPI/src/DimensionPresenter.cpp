@@ -1,7 +1,7 @@
 #include "MantidVatesAPI/DimensionPresenter.h"
 #include "MantidVatesAPI/GeometryPresenter.h"
 #include "MantidVatesAPI/DimensionView.h"
-#include "MantidMDAlgorithms/DimensionFactory.h"
+#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 namespace Mantid
 {
   namespace VATES
@@ -121,7 +121,7 @@ namespace Mantid
       double min = m_view->getMinimum();
       double max = m_view->getMaximum();
 
-      return Mantid::MDAlgorithms::createDimension(m_model->toXMLString(), nbins, min, max);
+      return Mantid::Geometry::createDimension(m_model->toXMLString(), nbins, min, max);
 
     }
 

@@ -1,6 +1,6 @@
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
-#include "MantidVatesAPI/RebinningXMLGenerator.h"
+#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidVatesAPI/vtkStructuredGridFactory.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
@@ -111,7 +111,7 @@ std::string MultiDimensionalDbPresenter::getZAxisName() const
   return m_workspace->getZDimension()->getDimensionId();
 }
 
-vtkDataSet* MultiDimensionalDbPresenter::getMesh(RebinningXMLGenerator& serializer, vtkDataSetFactory& factory) const
+vtkDataSet* MultiDimensionalDbPresenter::getMesh(RebinningKnowledgeSerializer& serializer, vtkDataSetFactory& factory) const
 {
   using namespace Mantid::MDDataObjects;
 

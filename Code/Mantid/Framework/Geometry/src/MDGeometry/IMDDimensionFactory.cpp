@@ -7,35 +7,35 @@
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidGeometry/MDGeometry/MDDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionRes.h"
-#include "MantidMDAlgorithms/DimensionFactory.h"
+#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/regex.hpp>
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace Geometry
 {
 
-DimensionFactory DimensionFactory::createDimensionFactory(const std::string& dimensionXMLString)
+IMDDimensionFactory IMDDimensionFactory::createDimensionFactory(const std::string& dimensionXMLString)
 {
   //Exception safe usage.
-  DimensionFactory factory;
+  IMDDimensionFactory factory;
   factory.setXMLString(dimensionXMLString);
   return factory;
 }
 
-DimensionFactory::DimensionFactory(Poco::XML::Element* dimensionXML) :
+IMDDimensionFactory::IMDDimensionFactory(Poco::XML::Element* dimensionXML) :
   m_dimensionXML(dimensionXML)
 {
 }
 
-DimensionFactory::DimensionFactory(const DimensionFactory& other) : m_dimensionXML(other.m_dimensionXML)
+IMDDimensionFactory::IMDDimensionFactory(const IMDDimensionFactory& other) : m_dimensionXML(other.m_dimensionXML)
 {
 }
 
 
-DimensionFactory& DimensionFactory::operator=(const DimensionFactory& other)
+IMDDimensionFactory& IMDDimensionFactory::operator=(const IMDDimensionFactory& other)
 {
   if(&other != this)
   {
@@ -45,15 +45,15 @@ DimensionFactory& DimensionFactory::operator=(const DimensionFactory& other)
 }
 
 
-DimensionFactory::DimensionFactory() : m_dimensionXML(NULL)
+IMDDimensionFactory::IMDDimensionFactory() : m_dimensionXML(NULL)
 {
 }
 
-DimensionFactory::~DimensionFactory()
+IMDDimensionFactory::~IMDDimensionFactory()
 {
 }
 
-void DimensionFactory::setXMLString(const std::string& dimensionXMLString)
+void IMDDimensionFactory::setXMLString(const std::string& dimensionXMLString)
 {
   Poco::XML::DOMParser pParser;
   Poco::XML::Document* pDoc = pParser.parseString(dimensionXMLString);
@@ -61,12 +61,12 @@ void DimensionFactory::setXMLString(const std::string& dimensionXMLString)
   m_dimensionXML = pDimensionElement;
 }
 
-Mantid::Geometry::IMDDimension* DimensionFactory::create() const
+Mantid::Geometry::IMDDimension* IMDDimensionFactory::create() const
 {
   return createAsMDDimension();
 }
 
-Mantid::Geometry::MDDimension* DimensionFactory::createAsMDDimension() const
+Mantid::Geometry::MDDimension* IMDDimensionFactory::createAsMDDimension() const
 {
   using namespace Mantid::Geometry;
 
@@ -105,7 +105,7 @@ Mantid::Geometry::MDDimension* DimensionFactory::createAsMDDimension() const
   return mdDimension;
 }
 
-Mantid::Geometry::MDDimension* DimensionFactory::createRawDimension(
+Mantid::Geometry::MDDimension* IMDDimensionFactory::createRawDimension(
     Poco::XML::Element* reciprocalMapping, const std::string& id) const
 {
   using namespace Mantid::Geometry;
@@ -134,7 +134,7 @@ Mantid::Geometry::MDDimension* DimensionFactory::createRawDimension(
     }
     else
     {
-      throw std::runtime_error("DimensionFactory cannot recognize reciprocal dimension");
+      throw std::runtime_error("IMDDimensionFactory cannot recognize reciprocal dimension");
     }
     //Create the dimension as a reciprocal dimension
     mdDimension = new MDDimensionRes(id, recipPrimitiveDirection);
@@ -154,8 +154,7 @@ Mantid::Geometry::MDDimension* DimensionFactory::createRawDimension(
  */
 Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString)
  {
-   using Mantid::MDAlgorithms::DimensionFactory;
-   DimensionFactory factory = DimensionFactory::createDimensionFactory(dimensionXMLString);
+   IMDDimensionFactory factory = IMDDimensionFactory::createDimensionFactory(dimensionXMLString);
    return Mantid::Geometry::IMDDimension_sptr(factory.create());
  }
 
@@ -169,8 +168,7 @@ Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimension
  */
  Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString, int nBins, double min, double max)
  {
-   using Mantid::MDAlgorithms::DimensionFactory;
-   DimensionFactory factory = DimensionFactory::createDimensionFactory(dimensionXMLString);
+   IMDDimensionFactory factory = IMDDimensionFactory::createDimensionFactory(dimensionXMLString);
    Mantid::Geometry::MDDimension* dimension = factory.createAsMDDimension();
    double currentMin = min;
    double currentMax = max;

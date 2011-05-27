@@ -6,18 +6,17 @@ project( VatesAPI )
 set( SRC_FILES 
 src/Clipper.cpp
 src/Common.cpp
-src/DimensionComparitor.cpp
 src/DimensionPresenter.cpp
 src/EscalatingRebinningActionManager.cpp
 src/FieldDataToMetadata.cpp
-src/GeometryXMLParser.cpp
+src/IMDDimensionComparitor.cpp
 src/IMDWorkspaceProxy.cpp
 src/MetadataToFieldData.cpp
 src/MultiDimensionalDbPresenter.cpp
 src/ProgressAction.cpp
 src/RebinningCutterPresenter.cpp
 src/RebinningCutterXMLDefinitions.cpp
-src/RebinningXMLGenerator.cpp
+src/RebinningKnowledgeSerializer.cpp
 src/SynchronisingGeometryPresenter.cpp
 src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
@@ -35,7 +34,6 @@ src/vtkThresholdingUnstructuredGridFactory.cpp
 set( INC_FILES 
 inc/MantidVatesAPI/Clipper.h
 inc/MantidVatesAPI/Common.h
-inc/MantidVatesAPI/DimensionComparitor.h
 inc/MantidVatesAPI/DimensionPresenter.h
 inc/MantidVatesAPI/DimensionView.h
 inc/MantidVatesAPI/DimensionViewFactory.h
@@ -44,7 +42,7 @@ inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/FilteringUpdateProgressAction.h
 inc/MantidVatesAPI/GeometryPresenter.h
 inc/MantidVatesAPI/GeometryView.h
-inc/MantidVatesAPI/GeometryXMLParser.h
+inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/IMDWorkspaceProxy.h
 inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/MultiDimensionalDbPresenter.h
@@ -52,7 +50,7 @@ inc/MantidVatesAPI/ProgressAction.h
 inc/MantidVatesAPI/RebinningActionManager.h
 inc/MantidVatesAPI/RebinningCutterPresenter.h
 inc/MantidVatesAPI/RebinningCutterXMLDefinitions.h 
-inc/MantidVatesAPI/RebinningXMLGenerator.h
+inc/MantidVatesAPI/RebinningKnowledgeSerializer.h
 inc/MantidVatesAPI/SynchronisingGeometryPresenter.h
 inc/MantidVatesAPI/TimeStepToTimeStep.h
 inc/MantidVatesAPI/TimeToTimeStep.h
@@ -70,7 +68,6 @@ inc/MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h
 set( TEST_FILES
 test/DimensionPresenterTest.h
 test/EscalatingRebinningActionManagerTest.h
-test/GeometryXMLParserTest.h
 test/vtkDataSetFactoryTest.h
 test/vtkClipperDataSetFactoryTest.h
 test/vtkDataSetToGeometryTest.h
@@ -86,7 +83,7 @@ test/IMDWorkspaceProxyTest.h
 test/MultiDimensionalDbPresenterTest.h
 test/MetadataToFieldDataTest.h
 test/RebinningCutterTest.h
-test/RebinningXMLGeneratorTest.h
+test/RebinningKnowledgeSerializerTest.h
 test/SynchronisingGeometryPresenterTest.h
 test/TimeStepToTimeStepTest.h
 test/TimeToTimeStepTest.h

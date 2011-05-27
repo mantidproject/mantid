@@ -1,16 +1,16 @@
-#ifndef DIMENSIONFACTORYTEST_H_
-#define DIMENSIONFACTORYTEST_H_
+#ifndef IMD_DIMENSIONFACTORYTEST_H_
+#define IMD_DIMENSIONFACTORYTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidMDAlgorithms/DimensionFactory.h"
+#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDDimensionRes.h"
 #include "MantidGeometry/MDGeometry/MDDimension.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 
-using namespace Mantid::MDAlgorithms;
+using namespace Mantid::Geometry;
 
-class DimensionFactoryTest: public CxxTest::TestSuite
+class IMDDimensionFactoryTest: public CxxTest::TestSuite
 {
 private:
 
@@ -58,14 +58,14 @@ public:
   void testCreationOfReciprocalMDDimensionThrows()
   {
     using namespace Mantid::Geometry;
-    DimensionFactory factory(constructUnknownReciprocalDimensionXML());
+    IMDDimensionFactory factory(constructUnknownReciprocalDimensionXML());
     TSM_ASSERT_THROWS("Uses tag/id 'unknown' which should not be possible to match to q1,q2,q3.", factory.create(),  std::runtime_error);
   }
 
   void testCreationOfReciprocalMDDimension()
   {
     using namespace Mantid::Geometry;
-    DimensionFactory factory(constructReciprocalDimensionXML());
+    IMDDimensionFactory factory(constructReciprocalDimensionXML());
     IMDDimension* dimension = factory.create();
 
     MDDimensionRes* resDimension = dynamic_cast<MDDimensionRes*> (dimension);
@@ -78,7 +78,7 @@ public:
   void testCreationOfMDDimension()
   {
     using namespace Mantid::Geometry;
-    DimensionFactory factory(constructNonReciprocalDimensionXML());
+    IMDDimensionFactory factory(constructNonReciprocalDimensionXML());
     IMDDimension* dimension = factory.create();
 
     MDDimension* resDimension = dynamic_cast<MDDimension*> (dimension);
@@ -93,8 +93,8 @@ public:
   {
     std::string xmlToParse = constructNonReciprocalDimensionXMLString();
 
-    DimensionFactory factoryA = DimensionFactory::createDimensionFactory(xmlToParse);
-    DimensionFactory factoryB(constructNonReciprocalDimensionXML());
+    IMDDimensionFactory factoryA = IMDDimensionFactory::createDimensionFactory(xmlToParse);
+    IMDDimensionFactory factoryB(constructNonReciprocalDimensionXML());
 
     //Constructed either way, the products should be equivalent
     TSM_ASSERT_EQUALS("Created through either route, the products should be equal", factoryA.create()->getDimensionId(), factoryB.create()->getDimensionId());

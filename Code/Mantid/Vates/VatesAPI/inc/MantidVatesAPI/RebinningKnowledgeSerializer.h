@@ -1,5 +1,6 @@
-#ifndef VATES_REBINNING_XML_GENERATOR_H
-#define VATES_REBINNING_XML_GENERATOR_H
+#ifndef VATES_REBINNING_KNOWLEDGE_SERIALIZER_H
+#define VATES_REBINNING_KNOWLEDGE_SERIALIZER_H
+
 #include <boost/shared_ptr.hpp>
 #include <string>
 
@@ -49,7 +50,7 @@ enum LocationPolicy{LocationMandatory, LocationNotRequired};
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org> */
 
-class DLLExport RebinningXMLGenerator
+class DLLExport RebinningKnowledgeSerializer
 {
 
 private:
@@ -63,7 +64,7 @@ private:
   LocationPolicy m_locationPolicy;
 public:
 
-  RebinningXMLGenerator(LocationPolicy locationPolicy=LocationMandatory);
+  RebinningKnowledgeSerializer(LocationPolicy locationPolicy=LocationMandatory);
 
   /// Set the implicit function to use called.
   void setImplicitFunction(boost::shared_ptr<const Mantid::API::ImplicitFunction> spFunction);

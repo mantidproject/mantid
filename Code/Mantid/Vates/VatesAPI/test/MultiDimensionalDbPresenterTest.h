@@ -81,7 +81,7 @@ void testConstruction()
 
   vtkStructuredGridFactory<TimeStepToTimeStep> vtkGridFactory("signal", 1);
   vtkDataArray* data = mdPresenter.getScalarDataFromTimeBin(vtkGridFactory);
-  RebinningXMLGenerator serializer;
+  RebinningKnowledgeSerializer serializer;
   vtkDataSet* visData = mdPresenter.getMesh(serializer, vtkGridFactory);
   TSM_ASSERT_EQUALS("Incorrect number of scalar signal points.", 18, data->GetSize());
   TSM_ASSERT_EQUALS("Incorrect number of visualisation vtkPoints generated", 48, visData->GetNumberOfPoints());
@@ -132,7 +132,7 @@ void testGetMeshThrows()
   MultiDimensionalDbPresenter mdPresenter;
 
   //No execution call. Test that type cannot be used improperly.
-  RebinningXMLGenerator serializer;
+  RebinningKnowledgeSerializer serializer;
   vtkStructuredGridFactory<TimeStepToTimeStep> vtkGridFactory("signal", 1);
   TSM_ASSERT_THROWS("Accessing mesh data without first calling execute should not be possible", mdPresenter.getMesh(serializer, vtkGridFactory), std::runtime_error);
 }

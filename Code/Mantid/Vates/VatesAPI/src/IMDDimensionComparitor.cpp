@@ -1,26 +1,26 @@
-#include "MantidVatesAPI/DimensionComparitor.h"
+#include "MantidVatesAPI/IMDDimensionComparitor.h"
 
 namespace Mantid
 {
   namespace VATES
   {
 
-    DimensionComparitor::DimensionComparitor(Mantid::API::IMDWorkspace_sptr workspace): m_workspace(workspace)
+    IMDDimensionComparitor::IMDDimensionComparitor(Mantid::API::IMDWorkspace_sptr workspace): m_workspace(workspace)
     {
     }
 
-    DimensionComparitor::~DimensionComparitor()
+    IMDDimensionComparitor::~IMDDimensionComparitor()
     {
     }
 
-    bool DimensionComparitor::isXDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
+    bool IMDDimensionComparitor::isXDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
     {
       //Compare dimensions on the basis of their ids.
       Mantid::Geometry::IMDDimension_const_sptr actualXDimension = m_workspace->getXDimension();
       return queryDimension->getDimensionId() == actualXDimension->getDimensionId();
     }
 
-    bool DimensionComparitor::isYDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
+    bool IMDDimensionComparitor::isYDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
     {
       Mantid::Geometry::IMDDimension_const_sptr actualYDimension = m_workspace->getYDimension();
       if(NULL == actualYDimension.get())
@@ -34,7 +34,7 @@ namespace Mantid
       }
     }
 
-    bool DimensionComparitor::isZDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
+    bool IMDDimensionComparitor::isZDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
     {
       Mantid::Geometry::IMDDimension_const_sptr actualZDimension = m_workspace->getZDimension();
       if(NULL == actualZDimension.get())
@@ -48,7 +48,7 @@ namespace Mantid
       }
     }
 
-    bool DimensionComparitor::istDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
+    bool IMDDimensionComparitor::istDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
     {
       Mantid::Geometry::IMDDimension_const_sptr actualtDimension = m_workspace->getTDimension();
       if(NULL == actualtDimension.get())

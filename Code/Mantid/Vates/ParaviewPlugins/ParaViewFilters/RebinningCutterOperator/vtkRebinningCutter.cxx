@@ -14,7 +14,7 @@
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/NullImplicitFunction.h"
-#include "MantidMDAlgorithms/DimensionFactory.h"
+#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidVatesAPI/EscalatingRebinningActionManager.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
@@ -27,7 +27,7 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/vtkDataSetToGeometry.h" 
-#include "MantidVatesAPI/GeometryXMLParser.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
 #include <boost/functional/hash.hpp>
@@ -118,6 +118,8 @@ void vtkRebinningCutter::determineAnyCommonExecutionActions(const int timestep, 
 int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInformationVector **inputVector,
   vtkInformationVector *outputVector)
 {
+  try
+  {
   using namespace Mantid::Geometry;
   using namespace Mantid::MDDataObjects;
   using namespace Mantid::MDAlgorithms;
@@ -184,6 +186,11 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
     output->ShallowCopy(outData);
   }
   return 1;
+  }
+  catch(std::exception& ex)
+  {
+    std::string what = ex.what();
+  }
 }
 
 void vtkRebinningCutter::UpdateAlgorithmProgress(double progress)
@@ -349,7 +356,7 @@ void vtkRebinningCutter::SetAppliedGeometryXML(std::string appliedGeometryXML)
     if(!appliedGeometryXML.empty() && existingGeometryXML != appliedGeometryXML)
     {
       this->Modified();
-      Mantid::VATES::GeometryXMLParser xmlParser(appliedGeometryXML);
+      Mantid::Geometry::MDGeometryXMLParser xmlParser(appliedGeometryXML);
       xmlParser.execute();
       if(xmlParser.getNonIntegratedDimensions().size() == 4)
       {

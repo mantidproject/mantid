@@ -19,7 +19,7 @@
 #include "MantidVatesAPI/vtkThresholdingLineFactory.h"
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
-#include "MantidVatesAPI/GeometryXMLParser.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 
 #include "MantidNexus/LoadEventNexus.h"
 #include <boost/format.hpp>
@@ -30,7 +30,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
-#include "MantidMDAlgorithms/DimensionFactory.h"
+#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 
 vtkCxxRevisionMacro(vtkEventNexusReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkEventNexusReader);
@@ -187,7 +187,7 @@ void vtkEventNexusReader::SetAppliedGeometryXML(std::string appliedGeometryXML)
     //If new xml has been provided and if that is different in any way from the existing.
     if(!appliedGeometryXML.empty() && existingGeometryXML != appliedGeometryXML)
     {
-      Mantid::VATES::GeometryXMLParser xmlParser(appliedGeometryXML);
+      Mantid::Geometry::MDGeometryXMLParser xmlParser(appliedGeometryXML);
       xmlParser.execute();
 
       this->m_appliedXDimension = xmlParser.getXDimension();
@@ -304,7 +304,7 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   vtkGridFactory.SetSuccessor(p_2dSuccessorFactory);
   p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
   
-  RebinningXMLGenerator serializer(LocationNotRequired); //Object handles serialization of meta data.
+  RebinningKnowledgeSerializer serializer(LocationNotRequired); //Object handles serialization of meta data.
   vtkUnstructuredGrid* structuredMesh = vtkUnstructuredGrid::SafeDownCast(m_presenter.getMesh(serializer, vtkGridFactory));
 
   output->ShallowCopy(structuredMesh);

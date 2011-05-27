@@ -24,6 +24,7 @@ set ( SRC_FILES
 	src/InstrumentRayTracer.cpp
 	src/MDGeometry/Coordinate.cpp
 	src/MDGeometry/IMDDimension.cpp
+	src/MDGeometry/IMDDimensionFactory.cpp
 	src/MDGeometry/MDBasisDimension.cpp
 	src/MDGeometry/MDCell.cpp
 	src/MDGeometry/MDDimension.cpp
@@ -32,6 +33,7 @@ set ( SRC_FILES
 	src/MDGeometry/MDGeometryBasis.cpp
 	src/MDGeometry/MDGeometryDescription.cpp
 	src/MDGeometry/MDGeometryXMLBuilder.cpp
+	src/MDGeometry/MDGeometryXMLParser.cpp
 	src/MDGeometry/MDHistoDimension.cpp
 	src/MDGeometry/MDPoint.cpp
 	src/Math/Acomp.cpp
@@ -109,6 +111,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/XMLlogfile.h
 	inc/MantidGeometry/MDGeometry/Coordinate.h
 	inc/MantidGeometry/MDGeometry/IMDDimension.h
+	inc/MantidGeometry/MDGeometry/IMDDimensionFactory.h
 	inc/MantidGeometry/MDGeometry/MDBasisDimension.h
 	inc/MantidGeometry/MDGeometry/MDCell.h
 	inc/MantidGeometry/MDGeometry/MDDimension.h
@@ -116,6 +119,8 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/MDGeometry.h
 	inc/MantidGeometry/MDGeometry/MDGeometryBasis.h
 	inc/MantidGeometry/MDGeometry/MDGeometryDescription.h
+	inc/MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h
+	inc/MantidGeometry/MDGeometry/MDGeometryXMLParser.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h
 	inc/MantidGeometry/MDGeometry/MDHistoDimension.h
 	inc/MantidGeometry/MDGeometry/MDPoint.h
@@ -172,6 +177,7 @@ set ( TEST_FILES
 	test/GeneralTest.h
 	test/GoniometerTest.h
 	test/IMDDimensionTest.h
+	test/IMDDimensionFactoryTest.h
 	test/InstrumentRayTracerTest.h
 	test/InstrumentTest.h
 	test/LineIntersectVisitTest.h
@@ -181,6 +187,7 @@ set ( TEST_FILES
 	test/MDGeometryBasisTest.h
 	test/MDGeometryDescriptionTest.h
 	test/MDGeometryTest.h
+	test/MDGeometryXMLParserTest.h
 	test/MDHistoDimensionTest.h
 	test/MDPointTest.h
 	test/MapSupportTest.h

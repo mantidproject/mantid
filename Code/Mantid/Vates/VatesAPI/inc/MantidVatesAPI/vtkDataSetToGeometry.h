@@ -3,7 +3,7 @@
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/System.h"
-#include "MantidVatesAPI/GeometryXMLParser.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 
 class vtkDataSet;
 namespace Mantid
@@ -38,7 +38,7 @@ namespace Mantid
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-    class DLLExport vtkDataSetToGeometry : public GeometryXMLParser
+    class DLLExport vtkDataSetToGeometry : public Mantid::Geometry::MDGeometryXMLParser
     {
 
     private:

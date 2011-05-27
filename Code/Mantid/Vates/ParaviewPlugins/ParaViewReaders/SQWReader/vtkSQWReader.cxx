@@ -47,7 +47,7 @@ int vtkSQWReader::RequestData(vtkInformation* vtkNotUsed(request), vtkInformatio
      time = static_cast<int>(outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0]);
   }
 
-  RebinningXMLGenerator serializer;
+  RebinningKnowledgeSerializer serializer;
   vtkStructuredGridFactory<TimeToTimeStep> factory("signal", time);
   vtkStructuredGrid* structuredMesh = vtkStructuredGrid::SafeDownCast(m_presenter.getMesh(serializer, factory));
   structuredMesh->GetCellData()->AddArray(m_presenter.getScalarDataFromTime(factory));

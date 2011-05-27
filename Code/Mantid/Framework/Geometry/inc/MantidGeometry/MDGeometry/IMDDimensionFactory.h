@@ -1,8 +1,8 @@
-#ifndef DIMENSIONFACTORY_H_
-#define DIMENSIONFACTORY_H_ 
+#ifndef IMDDIMENSIONFACTORY_H_
+#define IMDDIMENSIONFACTORY_H_ 
 
 /**
-*  DimensionFactory. Handles conversion of dimension xml to IMDDimension objects.
+*  IMDDimensionFactory. Handles conversion of dimension xml to IMDDimension objects.
 *
 *  This algorithm performs dynamic rebinning driven by the xml string passed as an input.
 *
@@ -45,29 +45,25 @@ namespace Mantid
 namespace Geometry
 {
 class MDDimension;
-}
-namespace MDAlgorithms
-{
-
-class DLLExport DimensionFactory
+class DLLExport IMDDimensionFactory
 {
 
 public:
 
   /// Constructor
-  DimensionFactory(Poco::XML::Element* dimensionXML);
+  IMDDimensionFactory(Poco::XML::Element* dimensionXML);
 
   /// Constructor
-  DimensionFactory(const DimensionFactory& other);
+  IMDDimensionFactory(const IMDDimensionFactory& other);
 
   /// Assignment operator
-  DimensionFactory& operator=(const DimensionFactory& other);
+  IMDDimensionFactory& operator=(const IMDDimensionFactory& other);
 
   /// Alternate Constructional method.
-  static DimensionFactory createDimensionFactory(const std::string& xmlString);
+  static IMDDimensionFactory createDimensionFactory(const std::string& xmlString);
 
   /// Destructor
-  ~DimensionFactory();
+  ~IMDDimensionFactory();
 
   /// Factory method.
   Mantid::Geometry::IMDDimension* create() const;
@@ -77,7 +73,7 @@ public:
   
 private:
 
-  DimensionFactory();
+  IMDDimensionFactory();
 
   void setXMLString(const std::string& xmlString);
 
@@ -88,11 +84,10 @@ private:
   Mantid::Geometry::MDDimension* createRawDimension(Poco::XML::Element* reciprocalMapping, const std::string& id) const;
 };
 
-  DLLExport Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString);
+  
+DLLExport Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString);
 
-  DLLExport Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString, int nBins, double min, double max);
-
-
+DLLExport Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString, int nBins, double min, double max);
 
 }
 }

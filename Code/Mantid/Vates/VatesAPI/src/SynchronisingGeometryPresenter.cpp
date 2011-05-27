@@ -37,7 +37,7 @@ namespace Mantid
     /**
     Constructor
     */
-    SynchronisingGeometryPresenter::SynchronisingGeometryPresenter(Mantid::VATES::GeometryXMLParser& source) : 
+    SynchronisingGeometryPresenter::SynchronisingGeometryPresenter(Mantid::Geometry::MDGeometryXMLParser& source) : 
       m_notIntegrated(source.getNonIntegratedDimensions()), 
       m_integrated(source.getIntegratedDimensions()),
       m_source(source)

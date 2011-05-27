@@ -6,7 +6,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <map>
 
-#include "MantidVatesAPI/DimensionComparitor.h"
+#include "MantidVatesAPI/IMDDimensionComparitor.h"
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
@@ -53,7 +53,7 @@ public:
 
   /// Constructional method.
   static Mantid::API::IMDWorkspace_sptr New(Mantid::API::IMDWorkspace_sptr workspace,
-      Dimension_const_sptr xDim, Dimension_const_sptr yDim, Dimension_const_sptr zDim, Dimension_const_sptr tDim);
+      Mantid::Geometry::IMDDimension_const_sptr xDim, Mantid::Geometry::IMDDimension_const_sptr yDim, Mantid::Geometry::IMDDimension_const_sptr zDim, Mantid::Geometry::IMDDimension_const_sptr tDim);
 
   /// Destructor.
   virtual ~IMDWorkspaceProxy();
@@ -116,8 +116,11 @@ public:
 private:
 
   /// Constructor.
-  IMDWorkspaceProxy(Mantid::API::IMDWorkspace_sptr workspace, Dimension_const_sptr xDim, Dimension_const_sptr yDim,
-      Dimension_const_sptr zDim, Dimension_const_sptr tDim);
+  IMDWorkspaceProxy(Mantid::API::IMDWorkspace_sptr workspace, 
+    Mantid::Geometry::IMDDimension_const_sptr xDim, 
+    Mantid::Geometry::IMDDimension_const_sptr yDim,
+    Mantid::Geometry::IMDDimension_const_sptr zDim, 
+    Mantid::Geometry::IMDDimension_const_sptr tDim);
 
   /// Separate initalizer as may throw.
   void initalize();
@@ -125,13 +128,13 @@ private:
   /// workspace shared ptr.
   Mantid::API::IMDWorkspace_sptr m_workspace;
   /// Actual x dimension
-  Dimension_const_sptr m_xDimension;
+  Mantid::Geometry::IMDDimension_const_sptr m_xDimension;
   /// Actual y dimension
-  Dimension_const_sptr m_yDimension;
+  Mantid::Geometry::IMDDimension_const_sptr m_yDimension;
   /// Actual z dimension
-  Dimension_const_sptr m_zDimension;
+  Mantid::Geometry::IMDDimension_const_sptr m_zDimension;
   /// Actual t dimension
-  Dimension_const_sptr m_tDimension;
+  Mantid::Geometry::IMDDimension_const_sptr m_tDimension;
   /// map of id to member function.
   std::map<std::string, MemFuncGetter> m_fmap;
 

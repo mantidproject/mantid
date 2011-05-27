@@ -1,5 +1,5 @@
-#ifndef GEOMETRY_XML_PARSER_H
-#define GEOMETRY_XML_PARSER_H
+#ifndef MDGEOMETRY_XML_PARSER_H
+#define MDGEOMETRY_XML_PARSER_H
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/System.h"
@@ -7,10 +7,10 @@
 
 namespace Mantid
 {
-  namespace VATES
+  namespace Geometry
   {
  
- /** @class GeometryXMLParser 
+ /** @class MDGeometryXMLParser 
 
  Handles the extraction of dimensions from a xml xml string to determine how mappings have been formed. 
 
@@ -37,7 +37,7 @@ namespace Mantid
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-    class DLLExport GeometryXMLParser
+    class DLLExport MDGeometryXMLParser
     {
 
     private:
@@ -64,13 +64,13 @@ namespace Mantid
 
       std::string m_xmlToProcess;
 
-      GeometryXMLParser();
+      MDGeometryXMLParser();
 
     public:
 
-      explicit GeometryXMLParser(const std::string& xmlToProcess);
+      explicit MDGeometryXMLParser(const std::string& xmlToProcess);
 
-      virtual ~GeometryXMLParser();
+      virtual ~MDGeometryXMLParser();
 
       virtual void execute();
 
@@ -108,9 +108,9 @@ namespace Mantid
 
       void SetRootNodeCheck(std::string elementName);
 
-      GeometryXMLParser& operator=(const GeometryXMLParser&);
+      MDGeometryXMLParser& operator=(const MDGeometryXMLParser&);
       
-      GeometryXMLParser(const GeometryXMLParser&);
+      MDGeometryXMLParser(const MDGeometryXMLParser&);
 
     };
   }

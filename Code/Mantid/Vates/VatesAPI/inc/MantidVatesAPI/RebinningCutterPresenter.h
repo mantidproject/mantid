@@ -11,7 +11,7 @@
 #include <MantidMDAlgorithms/CompositeImplicitFunction.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <boost/shared_ptr.hpp>
-#include <MantidVatesAPI/RebinningXMLGenerator.h>
+#include <MantidVatesAPI/RebinningKnowledgeSerializer.h>
 #include <MantidVatesAPI/ProgressAction.h>
 
 #include <Poco/ActiveMethod.h>
@@ -78,7 +78,7 @@ private:
   bool m_initalized;
 
   /// Serializer to create and pass on rebinning metadata.
-  RebinningXMLGenerator m_serializer;
+  RebinningKnowledgeSerializer m_serializer;
 
   /// Create a geometry from dimensions and then serialise it.
   std::string constructGeometryXML(DimensionVec dimensions,
@@ -141,7 +141,7 @@ public:
 
   /// Save reduction knowledge object. Serialise to xml and pass to dependent filters.
   void persistReductionKnowledge(vtkDataSet * out_ds,
-      const RebinningXMLGenerator& xmlGenerator, const char* id);
+      const RebinningKnowledgeSerializer& xmlGenerator, const char* id);
 
   /// Look for and extract exisiting reduction knowledge in input visualisation dataset.
   DLLExport Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(vtkDataSet *in_ds, const char* id);
@@ -157,15 +157,6 @@ public:
 
   /// Construct an input MDWorkspace by loading from a file. This should be achieved via a seperate loading algorithm.
   Mantid::API::IMDWorkspace_sptr constructMDWorkspace(const std::string& wsLocation);
-
-  /// Helper method to get dimensions from a geometry xml element.
-  DLLExport std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(Poco::XML::Element* geometryElement, bool nonIntegratedOnly = false);
-
-  /// Helper method to get dimensions from a geometry xml string.
-  DLLExport std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(const std::string& geometryXMLString, bool nonIntegratedOnly = false);
-
-  /// helper method to extract the bounding box.
-  DLLExport std::vector<double> getBoundingBox(const std::string& functionXMLString);
 
   /// Helper method. is used to determine whether processing of an input data set is possible.
   DLLExport bool canProcessInput(vtkDataSet* inputDataSet);

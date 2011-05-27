@@ -41,72 +41,72 @@ namespace VATES
 class DLLExport XMLDefinitions
 {
 public:
-  //XML schema tag definitions for generating xml.
-   static const std::string workspaceNameXMLTagStart()
-   {
-     return "<MDWorkspaceName>";
-   }
-   static const std::string workspaceNameXMLTagEnd()
-   {
-     return "</MDWorkspaceName>";
-   }
-   static const std::string workspaceLocationXMLTagStart()
-   {
-     return "<MDWorkspaceLocation>";
-   }
-   static const std::string workspaceLocationXMLTagEnd()
-   {
-     return "</MDWorkspaceLocation>";
-   }
-   static const std::string workspaceInstructionXMLTagStart()
-   {
-     return "<MDInstruction>";
-   }
-   static const std::string workspaceInstructionXMLTagEnd()
-   {
-     return "</MDInstruction>";
-   }
-   ///XML schema tag definitions for finding xml.
-   static const std::string workspaceNameElementName()
-   {
-     return "MDWorkspaceName";
-   }
-   static const std::string functionElementName()
-   {
-     return "Function";
-   }
-   static const std::string workspaceLocationElementName()
-   {
-     return "MDWorkspaceLocation";
-   }
-   static const std::string workspaceGeometryElementName()
-   {
-     return "DimensionSet";
-   }
-   static const std::string workspaceDimensionElementName()
-   {
-     return "Dimension";
-   }
-   static const std::string workspaceXDimensionElementName()
-   {
-     return "XDimension";
-   }
-   static const std::string workspaceYDimensionElementName()
-   {
-     return "YDimension";
-   }
-   static const std::string workspaceZDimensionElementName()
-   {
-     return "ZDimension";
-   }
-   static const std::string workspaceTDimensionElementName()
-   {
-     return "TDimension";
-   }
-   static const std::string workspaceRefDimensionElementName()
-   {
-     return "RefDimensionId";
-   }
+  ////XML schema tag definitions for generating xml.
+  // static const std::string workspaceNameXMLTagStart()
+  // {
+  //   return "<MDWorkspaceName>";
+  // }
+  // static const std::string workspaceNameXMLTagEnd()
+  // {
+  //   return "</MDWorkspaceName>";
+  // }
+  // static const std::string workspaceLocationXMLTagStart()
+  // {
+  //   return "<MDWorkspaceLocation>";
+  // }
+  // static const std::string workspaceLocationXMLTagEnd()
+  // {
+  //   return "</MDWorkspaceLocation>";
+  // }
+  // static const std::string workspaceInstructionXMLTagStart()
+  // {
+  //   return "<MDInstruction>";
+  // }
+  // static const std::string workspaceInstructionXMLTagEnd()
+  // {
+  //   return "</MDInstruction>";
+  // }
+  // ///XML schema tag definitions for finding xml.
+  // static const std::string workspaceNameElementName()
+  // {
+  //   return "MDWorkspaceName";
+  // }
+  // static const std::string functionElementName()
+  // {
+  //   return "Function";
+  // }
+  // static const std::string workspaceLocationElementName()
+  // {
+  //   return "MDWorkspaceLocation";
+  // }
+  // static const std::string workspaceGeometryElementName()
+  // {
+  //   return "DimensionSet";
+  // }
+  // static const std::string workspaceDimensionElementName()
+  // {
+  //   return "Dimension";
+  // }
+  // static const std::string workspaceXDimensionElementName()
+  // {
+  //   return "XDimension";
+  // }
+  // static const std::string workspaceYDimensionElementName()
+  // {
+  //   return "YDimension";
+  // }
+  // static const std::string workspaceZDimensionElementName()
+  // {
+  //   return "ZDimension";
+  // }
+  // static const std::string workspaceTDimensionElementName()
+  // {
+  //   return "TDimension";
+  // }
+  // static const std::string workspaceRefDimensionElementName()
+  // {
+  //   return "RefDimensionId";
+  // }
    ///An id for recognising specific vtkFieldData objects on inbound and outbound datasets.
    static const std::string metaDataId()
    {

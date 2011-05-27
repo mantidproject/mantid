@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/IMDWorkspaceProxy.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
@@ -138,16 +139,16 @@ private:
     using namespace testing;
         using Mantid::API::IMDWorkspace_sptr;
         using Mantid::VATES::IMDWorkspaceProxy;
-        using Mantid::VATES::Dimension_const_sptr;
+        using Mantid::Geometry::IMDDimension_const_sptr;
 
         MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
-        EXPECT_CALL(*pWorkspace, getXDimension()).WillRepeatedly(Return(Dimension_const_sptr(
+        EXPECT_CALL(*pWorkspace, getXDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
             createXDimension())));
-        EXPECT_CALL(*pWorkspace, getYDimension()).WillRepeatedly(Return(Dimension_const_sptr(
+        EXPECT_CALL(*pWorkspace, getYDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
             createYDimension())));
-        EXPECT_CALL(*pWorkspace, getZDimension()).WillRepeatedly(Return(Dimension_const_sptr(
+        EXPECT_CALL(*pWorkspace, getZDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
             createZDimension())));
-        EXPECT_CALL(*pWorkspace, getTDimension()).WillRepeatedly(Return(Dimension_const_sptr(
+        EXPECT_CALL(*pWorkspace, getTDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
             createTDimension())));
         return pWorkspace;
     }
@@ -158,14 +159,14 @@ private:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr workspace(createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createXDimension());
-    Dimension_const_sptr yDim(createYDimension());
-    Dimension_const_sptr zDim(createZDimension());
-    Dimension_const_sptr tDim(createTDimension());
+    IMDDimension_const_sptr xDim(createXDimension());
+    IMDDimension_const_sptr yDim(createYDimension());
+    IMDDimension_const_sptr zDim(createZDimension());
+    IMDDimension_const_sptr tDim(createTDimension());
 
     return IMDWorkspaceProxy::New(workspace, xDim, yDim, zDim, tDim);
   }
@@ -203,14 +204,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr(createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createXDimension());
-    Dimension_const_sptr yDim(createYDimension());
-    Dimension_const_sptr zDim(createZDimension());
-    Dimension_const_sptr tDim(createTDimension());
+    IMDDimension_const_sptr xDim(createXDimension());
+    IMDDimension_const_sptr yDim(createYDimension());
+    IMDDimension_const_sptr zDim(createZDimension());
+    IMDDimension_const_sptr tDim(createTDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -224,14 +225,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createTDimension());//New alignment
-    Dimension_const_sptr yDim(createZDimension());//New alignment
-    Dimension_const_sptr zDim(createYDimension());//New alignment
-    Dimension_const_sptr tDim(createXDimension());//New alignment
+    IMDDimension_const_sptr xDim(createTDimension());//New alignment
+    IMDDimension_const_sptr yDim(createZDimension());//New alignment
+    IMDDimension_const_sptr zDim(createYDimension());//New alignment
+    IMDDimension_const_sptr tDim(createXDimension());//New alignment
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -245,14 +246,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createXDimension());// x -> x
-    Dimension_const_sptr yDim(createYDimension());// y -> y
-    Dimension_const_sptr zDim(createZDimension());// z -> z
-    Dimension_const_sptr tDim(createTDimension());// t -> t
+    IMDDimension_const_sptr xDim(createXDimension());// x -> x
+    IMDDimension_const_sptr yDim(createYDimension());// y -> y
+    IMDDimension_const_sptr zDim(createZDimension());// z -> z
+    IMDDimension_const_sptr tDim(createTDimension());// t -> t
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
     uniqueArgumentCombination unique;
@@ -266,14 +267,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createXDimension());// x -> x
-    Dimension_const_sptr yDim(createZDimension());// y -> z
-    Dimension_const_sptr zDim(createYDimension());// z -> y
-    Dimension_const_sptr tDim(createTDimension());// t -> t
+    IMDDimension_const_sptr xDim(createXDimension());// x -> x
+    IMDDimension_const_sptr yDim(createZDimension());// y -> z
+    IMDDimension_const_sptr zDim(createYDimension());// z -> y
+    IMDDimension_const_sptr tDim(createTDimension());// t -> t
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -286,14 +287,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createYDimension());// x -> y (so x becomes 2nd argument)
-    Dimension_const_sptr yDim(createXDimension());// y -> x (so y becomes 1st argument)
-    Dimension_const_sptr zDim(createZDimension());// z -> z (so z becomes 3rd argument)
-    Dimension_const_sptr tDim(createTDimension());// t -> t (so t becomes 4th argument)
+    IMDDimension_const_sptr xDim(createYDimension());// x -> y (so x becomes 2nd argument)
+    IMDDimension_const_sptr yDim(createXDimension());// y -> x (so y becomes 1st argument)
+    IMDDimension_const_sptr zDim(createZDimension());// z -> z (so z becomes 3rd argument)
+    IMDDimension_const_sptr tDim(createTDimension());// t -> t (so t becomes 4th argument)
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -305,14 +306,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createZDimension());// x -> z (so becomes 3nd argument)
-    Dimension_const_sptr yDim(createXDimension());// y -> x (so becomes 1st argument)
-    Dimension_const_sptr zDim(createYDimension());// z -> y (so becomes 2nd argument)
-    Dimension_const_sptr tDim(createTDimension());// t -> t (so becomes 4th argument)
+    IMDDimension_const_sptr xDim(createZDimension());// x -> z (so becomes 3nd argument)
+    IMDDimension_const_sptr yDim(createXDimension());// y -> x (so becomes 1st argument)
+    IMDDimension_const_sptr zDim(createYDimension());// z -> y (so becomes 2nd argument)
+    IMDDimension_const_sptr tDim(createTDimension());// t -> t (so becomes 4th argument)
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -324,14 +325,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createYDimension());
-    Dimension_const_sptr yDim(createZDimension());
-    Dimension_const_sptr zDim(createXDimension());
-    Dimension_const_sptr tDim(createTDimension());
+    IMDDimension_const_sptr xDim(createYDimension());
+    IMDDimension_const_sptr yDim(createZDimension());
+    IMDDimension_const_sptr zDim(createXDimension());
+    IMDDimension_const_sptr tDim(createTDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -343,14 +344,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createYDimension());
-    Dimension_const_sptr yDim(createZDimension());
-    Dimension_const_sptr zDim(createTDimension());
-    Dimension_const_sptr tDim(createXDimension());
+    IMDDimension_const_sptr xDim(createYDimension());
+    IMDDimension_const_sptr yDim(createZDimension());
+    IMDDimension_const_sptr zDim(createTDimension());
+    IMDDimension_const_sptr tDim(createXDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -362,14 +363,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createYDimension());
-    Dimension_const_sptr yDim(createTDimension());
-    Dimension_const_sptr zDim(createZDimension());
-    Dimension_const_sptr tDim(createXDimension());
+    IMDDimension_const_sptr xDim(createYDimension());
+    IMDDimension_const_sptr yDim(createTDimension());
+    IMDDimension_const_sptr zDim(createZDimension());
+    IMDDimension_const_sptr tDim(createXDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -382,14 +383,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createZDimension());
-    Dimension_const_sptr yDim(createYDimension());
-    Dimension_const_sptr zDim(createTDimension());
-    Dimension_const_sptr tDim(createXDimension());
+    IMDDimension_const_sptr xDim(createZDimension());
+    IMDDimension_const_sptr yDim(createYDimension());
+    IMDDimension_const_sptr zDim(createTDimension());
+    IMDDimension_const_sptr tDim(createXDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -402,14 +403,14 @@ public:
 
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createTDimension());
-    Dimension_const_sptr yDim(createYDimension());
-    Dimension_const_sptr zDim(createZDimension());
-    Dimension_const_sptr tDim(createXDimension());
+    IMDDimension_const_sptr xDim(createTDimension());
+    IMDDimension_const_sptr yDim(createYDimension());
+    IMDDimension_const_sptr zDim(createZDimension());
+    IMDDimension_const_sptr tDim(createXDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -421,14 +422,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createZDimension());
-    Dimension_const_sptr yDim(createTDimension());
-    Dimension_const_sptr zDim(createYDimension());
-    Dimension_const_sptr tDim(createXDimension());
+    IMDDimension_const_sptr xDim(createZDimension());
+    IMDDimension_const_sptr yDim(createTDimension());
+    IMDDimension_const_sptr zDim(createYDimension());
+    IMDDimension_const_sptr tDim(createXDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -440,14 +441,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createTDimension());
-    Dimension_const_sptr yDim(createZDimension());
-    Dimension_const_sptr zDim(createYDimension());
-    Dimension_const_sptr tDim(createXDimension());
+    IMDDimension_const_sptr xDim(createTDimension());
+    IMDDimension_const_sptr yDim(createZDimension());
+    IMDDimension_const_sptr zDim(createYDimension());
+    IMDDimension_const_sptr tDim(createXDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -459,14 +460,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createXDimension());
-    Dimension_const_sptr yDim(createZDimension());
-    Dimension_const_sptr zDim(createTDimension());
-    Dimension_const_sptr tDim(createYDimension());
+    IMDDimension_const_sptr xDim(createXDimension());
+    IMDDimension_const_sptr yDim(createZDimension());
+    IMDDimension_const_sptr zDim(createTDimension());
+    IMDDimension_const_sptr tDim(createYDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -478,14 +479,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createXDimension());
-    Dimension_const_sptr yDim(createTDimension());
-    Dimension_const_sptr zDim(createZDimension());
-    Dimension_const_sptr tDim(createYDimension());
+    IMDDimension_const_sptr xDim(createXDimension());
+    IMDDimension_const_sptr yDim(createTDimension());
+    IMDDimension_const_sptr zDim(createZDimension());
+    IMDDimension_const_sptr tDim(createYDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -497,14 +498,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createZDimension());
-    Dimension_const_sptr yDim(createXDimension());
-    Dimension_const_sptr zDim(createTDimension());
-    Dimension_const_sptr tDim(createYDimension());
+    IMDDimension_const_sptr xDim(createZDimension());
+    IMDDimension_const_sptr yDim(createXDimension());
+    IMDDimension_const_sptr zDim(createTDimension());
+    IMDDimension_const_sptr tDim(createYDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -516,14 +517,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createTDimension());
-    Dimension_const_sptr yDim(createXDimension());
-    Dimension_const_sptr zDim(createZDimension());
-    Dimension_const_sptr tDim(createYDimension());
+    IMDDimension_const_sptr xDim(createTDimension());
+    IMDDimension_const_sptr yDim(createXDimension());
+    IMDDimension_const_sptr zDim(createZDimension());
+    IMDDimension_const_sptr tDim(createYDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -536,14 +537,14 @@ public:
 
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createZDimension());
-    Dimension_const_sptr yDim(createTDimension());
-    Dimension_const_sptr zDim(createXDimension());
-    Dimension_const_sptr tDim(createYDimension());
+    IMDDimension_const_sptr xDim(createZDimension());
+    IMDDimension_const_sptr yDim(createTDimension());
+    IMDDimension_const_sptr zDim(createXDimension());
+    IMDDimension_const_sptr tDim(createYDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -555,14 +556,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createTDimension());
-    Dimension_const_sptr yDim(createZDimension());
-    Dimension_const_sptr zDim(createXDimension());
-    Dimension_const_sptr tDim(createYDimension());
+    IMDDimension_const_sptr xDim(createTDimension());
+    IMDDimension_const_sptr yDim(createZDimension());
+    IMDDimension_const_sptr zDim(createXDimension());
+    IMDDimension_const_sptr tDim(createYDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -574,14 +575,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createXDimension());
-    Dimension_const_sptr yDim(createYDimension());
-    Dimension_const_sptr zDim(createTDimension());
-    Dimension_const_sptr tDim(createZDimension());
+    IMDDimension_const_sptr xDim(createXDimension());
+    IMDDimension_const_sptr yDim(createYDimension());
+    IMDDimension_const_sptr zDim(createTDimension());
+    IMDDimension_const_sptr tDim(createZDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -593,14 +594,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createXDimension());
-    Dimension_const_sptr yDim(createTDimension());
-    Dimension_const_sptr zDim(createYDimension());
-    Dimension_const_sptr tDim(createZDimension());
+    IMDDimension_const_sptr xDim(createXDimension());
+    IMDDimension_const_sptr yDim(createTDimension());
+    IMDDimension_const_sptr zDim(createYDimension());
+    IMDDimension_const_sptr tDim(createZDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -612,14 +613,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createYDimension());
-    Dimension_const_sptr yDim(createXDimension());
-    Dimension_const_sptr zDim(createTDimension());
-    Dimension_const_sptr tDim(createZDimension());
+    IMDDimension_const_sptr xDim(createYDimension());
+    IMDDimension_const_sptr yDim(createXDimension());
+    IMDDimension_const_sptr zDim(createTDimension());
+    IMDDimension_const_sptr tDim(createZDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -631,14 +632,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createTDimension());
-    Dimension_const_sptr yDim(createXDimension());
-    Dimension_const_sptr zDim(createYDimension());
-    Dimension_const_sptr tDim(createZDimension());
+    IMDDimension_const_sptr xDim(createTDimension());
+    IMDDimension_const_sptr yDim(createXDimension());
+    IMDDimension_const_sptr zDim(createYDimension());
+    IMDDimension_const_sptr tDim(createZDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -650,14 +651,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createYDimension());
-    Dimension_const_sptr yDim(createTDimension());
-    Dimension_const_sptr zDim(createXDimension());
-    Dimension_const_sptr tDim(createZDimension());
+    IMDDimension_const_sptr xDim(createYDimension());
+    IMDDimension_const_sptr yDim(createTDimension());
+    IMDDimension_const_sptr zDim(createXDimension());
+    IMDDimension_const_sptr tDim(createZDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 
@@ -669,14 +670,14 @@ public:
   {
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
-    using Mantid::VATES::Dimension_const_sptr;
+    using Mantid::Geometry::IMDDimension_const_sptr;
 
     IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
 
-    Dimension_const_sptr xDim(createTDimension());
-    Dimension_const_sptr yDim(createYDimension());
-    Dimension_const_sptr zDim(createXDimension());
-    Dimension_const_sptr tDim(createZDimension());
+    IMDDimension_const_sptr xDim(createTDimension());
+    IMDDimension_const_sptr yDim(createYDimension());
+    IMDDimension_const_sptr zDim(createXDimension());
+    IMDDimension_const_sptr tDim(createZDimension());
 
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
 

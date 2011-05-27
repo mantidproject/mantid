@@ -32,7 +32,7 @@
 #include <memory>
 #include <boost/shared_ptr.hpp>
 #include "WidgetDllOption.h"
-#include "MantidVatesAPI/GeometryXMLParser.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include "MantidVatesAPI/GeometryView.h"
 #include "MantidVatesAPI/DimensionView.h"
 #include "DimensionWidgetFactory.h"

@@ -1,5 +1,6 @@
 #include "MantidVatesAPI/IMDWorkspaceProxy.h"
 
+using namespace Mantid::Geometry;
 namespace Mantid
 {
 namespace VATES
@@ -14,7 +15,7 @@ namespace VATES
  */
 
 Mantid::API::IMDWorkspace_sptr IMDWorkspaceProxy::New(Mantid::API::IMDWorkspace_sptr workspace,
-    Dimension_const_sptr xDim, Dimension_const_sptr yDim, Dimension_const_sptr zDim, Dimension_const_sptr tDim)
+    IMDDimension_const_sptr xDim, IMDDimension_const_sptr yDim, IMDDimension_const_sptr zDim, IMDDimension_const_sptr tDim)
 {
   IMDWorkspaceProxy* workspaceProxy = new IMDWorkspaceProxy(workspace, xDim, yDim, zDim, tDim);
   workspaceProxy->initalize();
@@ -137,8 +138,8 @@ void IMDWorkspaceProxy::initalize()
  * @param tDim. t dimension Dimension_const_sptr.
  */
 
-IMDWorkspaceProxy::IMDWorkspaceProxy(Mantid::API::IMDWorkspace_sptr workspace, Dimension_const_sptr xDim,
-    Dimension_const_sptr yDim, Dimension_const_sptr zDim, Dimension_const_sptr tDim
+IMDWorkspaceProxy::IMDWorkspaceProxy(Mantid::API::IMDWorkspace_sptr workspace, IMDDimension_const_sptr xDim,
+    IMDDimension_const_sptr yDim, IMDDimension_const_sptr zDim, IMDDimension_const_sptr tDim
 
 ) :
   m_workspace(workspace), m_xDimension(xDim), m_yDimension(yDim), m_zDimension(zDim), m_tDimension(tDim)
@@ -196,8 +197,9 @@ double IMDWorkspaceProxy::getSignalNormalizedAt(size_t index1, size_t index2, si
 boost::function<double(size_t, size_t, size_t, size_t)> IMDWorkspaceProxy::getMappedSignalAt()
 {
   using namespace Mantid::API;
+  using namespace Mantid::Geometry;
   //This switch is used to determine how to remap the arguments to the getPoint member function of MDImage.
-  DimensionComparitor comparitor(m_workspace);
+  IMDDimensionComparitor comparitor(m_workspace);
 
   //Handle binding correctly any one of 4! arrangements. TODO There may be a better way of meta-programming these 4! options.
   if (comparitor.isXDimension(m_xDimension) && comparitor.isYDimension(m_yDimension)

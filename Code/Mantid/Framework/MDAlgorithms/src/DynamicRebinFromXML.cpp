@@ -14,7 +14,7 @@
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
 #include "MantidMDAlgorithms/BoxInterpreter.h"
 #include "MantidMDAlgorithms/PlaneInterpreter.h"
-#include "MantidMDAlgorithms/DimensionFactory.h"
+#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidGeometry/MDGeometry/MDDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionRes.h"
@@ -82,7 +82,7 @@ namespace Mantid
 
     Mantid::Geometry::MDDimension* DynamicRebinFromXML::createDimension(Poco::XML::Element* dimensionXML) const
     {
-      DimensionFactory dimensionFactory(dimensionXML);
+      Mantid::Geometry::IMDDimensionFactory dimensionFactory(dimensionXML);
       return dimensionFactory.createAsMDDimension();
     }
 

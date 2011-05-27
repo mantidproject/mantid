@@ -1,6 +1,6 @@
-#include "MantidVatesAPI/GeometryXMLParser.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
-#include "MantidMDAlgorithms/DimensionFactory.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
+#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -14,7 +14,7 @@
 
 namespace Mantid
 {
-  namespace VATES
+  namespace Geometry
   {
     /// Helper unary comparison type for finding IMDDimensions by a specified id.
     struct findID : public std::unary_function <Mantid::Geometry::IMDDimension_sptr, bool>
@@ -42,21 +42,20 @@ namespace Mantid
      /**
      Validate the current object. Take action if not set up properly.
      */
-     void GeometryXMLParser::validate() const
+     void MDGeometryXMLParser::validate() const
       {
         if(!m_executed)
         {
-          throw std::runtime_error("Attempting to get dimension information from GeometryXMLParser, before calling ::execute()");
+          throw std::runtime_error("Attempting to get dimension information from MDGeometryXMLParser, before calling ::execute()");
         }
       }
       
      /**
      Peforms the processing associated with these transformations.
      */
-      void GeometryXMLParser::execute()
+      void MDGeometryXMLParser::execute()
       {
         typedef std::vector<Mantid::Geometry::IMDDimension_sptr>::iterator Iterator;
-        using namespace Mantid::Geometry;
 
         Poco::XML::DOMParser pParser;
         Poco::XML::Document* pDoc = pParser.parseString(m_xmlToProcess);
@@ -80,7 +79,7 @@ namespace Mantid
         }
 
 
-        Poco::XML::NodeList* dimensionsXML = geometryXMLElement-> getElementsByTagName(XMLDefinitions::workspaceDimensionElementName());
+        Poco::XML::NodeList* dimensionsXML = geometryXMLElement-> getElementsByTagName(MDGeometryXMLDefinitions::workspaceDimensionElementName());
         size_t nDimensions = dimensionsXML->length();
         VecIMDDimension_sptr vecAllDims(nDimensions);
         
@@ -88,13 +87,13 @@ namespace Mantid
         for (size_t i = 0; i < nDimensions; i++)
         {
           Poco::XML::Element* dimensionXML = static_cast<Poco::XML::Element*> (dimensionsXML->item(i));
-          Mantid::MDAlgorithms::DimensionFactory factory(dimensionXML);
+          Mantid::Geometry::IMDDimensionFactory factory(dimensionXML);
           Mantid::Geometry::IMDDimension* dimension = factory.create();
           vecAllDims[i] = boost::shared_ptr<Mantid::Geometry::IMDDimension>(dimension);
         }
         VecIMDDimension_sptr vecNonMappedDims = vecAllDims;
-        Poco::XML::Element* xDimensionElement = geometryXMLElement->getChildElement(XMLDefinitions::workspaceXDimensionElementName());
-        std::string xDimId = xDimensionElement->getChildElement(XMLDefinitions::workspaceRefDimensionElementName())->innerText();
+        Poco::XML::Element* xDimensionElement = geometryXMLElement->getChildElement(MDGeometryXMLDefinitions::workspaceXDimensionElementName());
+        std::string xDimId = xDimensionElement->getChildElement(MDGeometryXMLDefinitions::workspaceRefDimensionElementName())->innerText();
         if(!xDimId.empty())
         {
           Iterator xDimensionIt = find_if(vecAllDims.begin(), vecAllDims.end(), findID(xDimId));
@@ -106,8 +105,8 @@ namespace Mantid
           vecNonMappedDims.erase(std::remove_if(vecNonMappedDims.begin(), vecNonMappedDims.end(), findID(xDimId)));
         }
 
-        Poco::XML::Element* yDimensionElement = geometryXMLElement->getChildElement(XMLDefinitions::workspaceYDimensionElementName());
-        std::string yDimId = yDimensionElement->getChildElement(XMLDefinitions::workspaceRefDimensionElementName())->innerText();
+        Poco::XML::Element* yDimensionElement = geometryXMLElement->getChildElement(MDGeometryXMLDefinitions::workspaceYDimensionElementName());
+        std::string yDimId = yDimensionElement->getChildElement(MDGeometryXMLDefinitions::workspaceRefDimensionElementName())->innerText();
         
         if(!yDimId.empty())
         {
@@ -120,8 +119,8 @@ namespace Mantid
           vecNonMappedDims.erase(std::remove_if(vecNonMappedDims.begin(), vecNonMappedDims.end(), findID(yDimId)));
         }
 
-        Poco::XML::Element* zDimensionElement = geometryXMLElement->getChildElement(XMLDefinitions::workspaceZDimensionElementName());
-        std::string zDimId = zDimensionElement->getChildElement(XMLDefinitions::workspaceRefDimensionElementName())->innerText();
+        Poco::XML::Element* zDimensionElement = geometryXMLElement->getChildElement(MDGeometryXMLDefinitions::workspaceZDimensionElementName());
+        std::string zDimId = zDimensionElement->getChildElement(MDGeometryXMLDefinitions::workspaceRefDimensionElementName())->innerText();
         
         if(!zDimId.empty())
         {
@@ -134,8 +133,8 @@ namespace Mantid
           vecNonMappedDims.erase(std::remove_if(vecNonMappedDims.begin(), vecNonMappedDims.end(), findID(zDimId)));
         }
 
-        Poco::XML::Element* tDimensionElement = geometryXMLElement->getChildElement(XMLDefinitions::workspaceTDimensionElementName());
-        std::string tDimId = tDimensionElement->getChildElement(XMLDefinitions::workspaceRefDimensionElementName())->innerText();
+        Poco::XML::Element* tDimensionElement = geometryXMLElement->getChildElement(MDGeometryXMLDefinitions::workspaceTDimensionElementName());
+        std::string tDimId = tDimensionElement->getChildElement(MDGeometryXMLDefinitions::workspaceRefDimensionElementName())->innerText();
         if(!tDimId.empty())
         {
           Iterator tDimensionIt = find_if(vecAllDims.begin(), vecAllDims.end(), findID(tDimId));
@@ -155,21 +154,21 @@ namespace Mantid
      Constructor
      @param dataSet : vtkDataSet to process
      */
-      GeometryXMLParser::GeometryXMLParser(const std::string& xmlToProcess) : m_executed(false), m_xmlToProcess(xmlToProcess)
+      MDGeometryXMLParser::MDGeometryXMLParser(const std::string& xmlToProcess) : m_executed(false), m_xmlToProcess(xmlToProcess)
       {
       }
 
       /**
       Constructor
      */
-      GeometryXMLParser::GeometryXMLParser() :  m_executed(false), m_xmlToProcess("")
+      MDGeometryXMLParser::MDGeometryXMLParser() :  m_executed(false), m_xmlToProcess("")
       {
       }
 
       /**
      Destructor
      */
-      GeometryXMLParser::~GeometryXMLParser()
+      MDGeometryXMLParser::~MDGeometryXMLParser()
       {
       }
 
@@ -178,7 +177,7 @@ namespace Mantid
      Getter for x dimension
      @return x dimension.
      */
-      Mantid::Geometry::IMDDimension_sptr GeometryXMLParser::getXDimension() const
+      Mantid::Geometry::IMDDimension_sptr MDGeometryXMLParser::getXDimension() const
       {
         validate();
         return m_xDimension;
@@ -188,7 +187,7 @@ namespace Mantid
      Getter for y dimension
      @return y dimension.
      */
-      Mantid::Geometry::IMDDimension_sptr GeometryXMLParser::getYDimension() const
+      Mantid::Geometry::IMDDimension_sptr MDGeometryXMLParser::getYDimension() const
       {
         validate();
         return m_yDimension;
@@ -198,7 +197,7 @@ namespace Mantid
      Getter for z dimension
      @return z dimension.
      */
-      Mantid::Geometry::IMDDimension_sptr GeometryXMLParser::getZDimension() const
+      Mantid::Geometry::IMDDimension_sptr MDGeometryXMLParser::getZDimension() const
       {
         validate();
         return m_zDimension;
@@ -208,7 +207,7 @@ namespace Mantid
      Getter for t dimension
      @return t dimension.
      */
-      Mantid::Geometry::IMDDimension_sptr GeometryXMLParser::getTDimension() const
+      Mantid::Geometry::IMDDimension_sptr MDGeometryXMLParser::getTDimension() const
       {
         validate();
         return m_tDimension;
@@ -218,7 +217,7 @@ namespace Mantid
        Getter for all those dimensions which are not mapped.
        @return collection of non-mapped dimensions parsed.
       */
-      Mantid::Geometry::VecIMDDimension_sptr GeometryXMLParser::getNonMappedDimensions() const
+      Mantid::Geometry::VecIMDDimension_sptr MDGeometryXMLParser::getNonMappedDimensions() const
       {
         validate();
         return m_vecNonMappedDims;
@@ -228,7 +227,7 @@ namespace Mantid
        Getter for all those dimensions which are not integrated.
        @return collection of non integrated dimensions parsed.
       */
-      Mantid::Geometry::VecIMDDimension_sptr GeometryXMLParser::getNonIntegratedDimensions() const
+      Mantid::Geometry::VecIMDDimension_sptr MDGeometryXMLParser::getNonIntegratedDimensions() const
       {
         validate();
         Mantid::Geometry::VecIMDDimension_sptr temp = m_vecAllDims;
@@ -240,7 +239,7 @@ namespace Mantid
        Getter for all those dimensions which are integrated.
        @return collection of non integrated dimensions parsed.
       */
-       Mantid::Geometry::VecIMDDimension_sptr GeometryXMLParser::getIntegratedDimensions() const
+       Mantid::Geometry::VecIMDDimension_sptr MDGeometryXMLParser::getIntegratedDimensions() const
        {
         validate();
         Mantid::Geometry::VecIMDDimension_sptr temp = m_vecAllDims;
@@ -252,7 +251,7 @@ namespace Mantid
        Getter for all dimensions parsed.
        @return collection of all dimensions parsed.
       */
-      Mantid::Geometry::VecIMDDimension_sptr GeometryXMLParser::getAllDimensions() const
+      Mantid::Geometry::VecIMDDimension_sptr MDGeometryXMLParser::getAllDimensions() const
       {
         validate();
         return m_vecAllDims;
@@ -262,7 +261,7 @@ namespace Mantid
        Determine wheter x dimension is present.
        @return true if available.
       */
-      bool GeometryXMLParser::hasXDimension() const
+      bool MDGeometryXMLParser::hasXDimension() const
       {
         validate();
         return NULL != m_xDimension.get();
@@ -272,7 +271,7 @@ namespace Mantid
        Determine wheter y dimension is present.
        @return true if available.
       */
-      bool GeometryXMLParser::hasYDimension() const
+      bool MDGeometryXMLParser::hasYDimension() const
       {
         validate();
         return NULL != m_yDimension.get();
@@ -282,7 +281,7 @@ namespace Mantid
        Determine wheter z dimension is present.
        @return true if available.
       */
-      bool GeometryXMLParser::hasZDimension() const
+      bool MDGeometryXMLParser::hasZDimension() const
       {
         validate();
         return NULL != m_zDimension.get();
@@ -292,7 +291,7 @@ namespace Mantid
        Determine wheter t dimension is present.
        @return true if available.
       */
-      bool GeometryXMLParser::hasTDimension() const
+      bool MDGeometryXMLParser::hasTDimension() const
       {
         validate();
         return NULL != m_tDimension.get();
@@ -302,16 +301,16 @@ namespace Mantid
       Setter for the root element.
       @parameter elementName : name of the element containing xml dimensions. Usually "Dimensions" unless xml snippet passed in directly, in which case do not set.
      */
-      void GeometryXMLParser::SetRootNodeCheck(std::string elementName)
+      void MDGeometryXMLParser::SetRootNodeCheck(std::string elementName)
       {
         m_rootNodeName = elementName;
       }
 
        /**
       Assignement operator
-      @parameter other : existing GeometryXMLParser to assign from.
+      @parameter other : existing MDGeometryXMLParser to assign from.
       */
-      GeometryXMLParser& GeometryXMLParser::operator=(const GeometryXMLParser& other)
+      MDGeometryXMLParser& MDGeometryXMLParser::operator=(const MDGeometryXMLParser& other)
       {
         if(this != &other)
         {
@@ -329,9 +328,9 @@ namespace Mantid
       
       /**
       Copy constructor
-      @parameter other : existing GeometryXMLParser to assign from.
+      @parameter other : existing MDGeometryXMLParser to assign from.
       */
-      GeometryXMLParser::GeometryXMLParser(const GeometryXMLParser& other) :
+      MDGeometryXMLParser::MDGeometryXMLParser(const MDGeometryXMLParser& other) :
           m_executed(other.m_executed),
           m_rootNodeName(other.m_rootNodeName),
           m_vecNonMappedDims(other.m_vecNonMappedDims),
@@ -343,7 +342,12 @@ namespace Mantid
       {
       }
 
-      bool GeometryXMLParser::isXDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
+      /**
+      Determines whether query dimension is the x dimension.
+      @parameter candiate : query dimension.
+      @return true if matches.
+      */
+      bool MDGeometryXMLParser::isXDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
       {
         validate();
         bool bResult = false;
@@ -357,7 +361,12 @@ namespace Mantid
         return bResult;
       }
 
-      bool GeometryXMLParser::isYDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
+      /**
+      Determines whether query dimension is the y dimension.
+      @parameter candiate : query dimension.
+      @return true if matches.
+      */
+      bool MDGeometryXMLParser::isYDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
       {
         validate();
         bool bResult = false;
@@ -371,7 +380,12 @@ namespace Mantid
         return bResult;
       }
 
-      bool GeometryXMLParser::isZDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
+      /**
+      Determines whether query dimension is the z dimension.
+      @parameter candiate : query dimension.
+      @return true if matches.
+      */
+      bool MDGeometryXMLParser::isZDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
       {
         validate();
         bool bResult = false;
@@ -385,7 +399,12 @@ namespace Mantid
         return bResult;
       }
 
-      bool GeometryXMLParser::isTDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
+      /**
+      Determines whether query dimension is the t dimension.
+      @parameter candiate : query dimension.
+      @return true if matches.
+      */
+      bool MDGeometryXMLParser::isTDimension(Mantid::Geometry::IMDDimension_sptr candidate) const
       {
         validate();
         bool bResult = false;

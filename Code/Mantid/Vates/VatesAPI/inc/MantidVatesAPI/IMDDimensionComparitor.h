@@ -1,8 +1,7 @@
-#ifndef MANTID_VATES_DIMENSION_COMPARITOR_H
-#define MANTID_VATES_DIMENSION_COMPARITOR_H
+#ifndef IMD_DIMENSION_COMPARITOR_H
+#define IMD_DIMENSION_COMPARITOR_H
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidVatesAPI/Common.h"
 
 namespace Mantid
 {
@@ -35,15 +34,15 @@ allow the utilising code to ask wheter some dimension maps to the x, y, or z dim
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-    class DimensionComparitor
+    class IMDDimensionComparitor
     {
     public:
      
     /// Constructor
-    DimensionComparitor(Mantid::API::IMDWorkspace_sptr workspace);
+    IMDDimensionComparitor(Mantid::API::IMDWorkspace_sptr workspace);
 
     /// Destructor
-    ~DimensionComparitor();
+    ~IMDDimensionComparitor();
 
     bool isXDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension);
     
@@ -55,12 +54,12 @@ allow the utilising code to ask wheter some dimension maps to the x, y, or z dim
 
     private:
       
-      /// imd workspace shared ptr.
-      Mantid::API::IMDWorkspace_sptr m_workspace;
+    /// imd workspace shared ptr.
+    Mantid::API::IMDWorkspace_sptr m_workspace;
      
-      DimensionComparitor operator=(DimensionComparitor&);
+    IMDDimensionComparitor operator=(IMDDimensionComparitor&);
       
-      DimensionComparitor(DimensionComparitor&);
+    IMDDimensionComparitor(IMDDimensionComparitor&);
 
     };
 

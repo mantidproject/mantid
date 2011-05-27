@@ -5,7 +5,7 @@
 #include "MantidVatesAPI/SynchronisingGeometryPresenter.h"
 #include "MantidVatesAPI/GeometryView.h"
 #include "MantidVatesAPI/DimensionView.h"
-#include "MantidVatesAPI/GeometryXMLParser.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include "MantidVatesAPI/DimensionPresenter.h"
 
 #include "gtest/gtest.h"
@@ -107,7 +107,7 @@ static std::string constructXML()
   class ExposedSynchronisingGeometryPresenter : public Mantid::VATES::SynchronisingGeometryPresenter
   {
   public:
-    ExposedSynchronisingGeometryPresenter(Mantid::VATES::GeometryXMLParser& source) : Mantid::VATES::SynchronisingGeometryPresenter(source) {}
+    ExposedSynchronisingGeometryPresenter(Mantid::Geometry::MDGeometryXMLParser& source) : Mantid::VATES::SynchronisingGeometryPresenter(source) {}
     Mantid::VATES::DimPresenter_sptr getDimensionPresenter(unsigned int index)
     {
       return m_dimPresenters[index];
@@ -118,7 +118,7 @@ public:
 
   void testConstruct()
   {
-    GeometryXMLParser parser(constructXML());
+    MDGeometryXMLParser parser(constructXML());
     parser.execute();
     SynchronisingGeometryPresenter presenter(parser); 
     TSM_ASSERT_EQUALS("Wrong number of nonintegrated dimensions", 3, presenter.getNonIntegratedDimensions().size());
@@ -139,7 +139,7 @@ public:
     EXPECT_CALL(gView, getDimensionViewFactory()).Times(1).WillRepeatedly(ReturnRef(factory));
     EXPECT_CALL(gView, addDimensionView(_)).Times(5);
 
-    GeometryXMLParser parser(constructXML());
+    MDGeometryXMLParser parser(constructXML());
     parser.execute();
 
     SynchronisingGeometryPresenter presenter(parser); 
@@ -160,7 +160,7 @@ public:
     NiceMock<MockGeometryView> gView;
     EXPECT_CALL(gView, getDimensionViewFactory()).WillRepeatedly(ReturnRef(factory));
 
-    GeometryXMLParser parser(constructXML());
+    MDGeometryXMLParser parser(constructXML());
     parser.execute();
 
     SynchronisingGeometryPresenter presenter(parser); 
@@ -182,7 +182,7 @@ public:
     NiceMock<MockGeometryView> gView;
     EXPECT_CALL(gView, getDimensionViewFactory()).WillRepeatedly(ReturnRef(factory));
 
-    GeometryXMLParser parser(constructXML());
+    MDGeometryXMLParser parser(constructXML());
     parser.execute();
 
     ExposedSynchronisingGeometryPresenter presenter(parser); 
@@ -214,7 +214,7 @@ public:
     NiceMock<MockGeometryView> gView;
     EXPECT_CALL(gView, getDimensionViewFactory()).WillRepeatedly(ReturnRef(factory));
 
-    GeometryXMLParser parser(constructXML());
+    MDGeometryXMLParser parser(constructXML());
     parser.execute();
 
     ExposedSynchronisingGeometryPresenter presenter(parser); 

@@ -1,18 +1,17 @@
 #include "MantidVatesAPI/vtkDataSetToGeometry.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
-#include "MantidMDAlgorithms/DimensionFactory.h"
-
+#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "vtkDataSet.h"
 
 #include<algorithm>
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
   namespace VATES
   {
-
-      
      /**
      Peforms the processing associated with these transformations.
      */
@@ -21,7 +20,7 @@ namespace Mantid
         FieldDataToMetadata convert;
         m_xmlToProcess = convert(m_dataSet->GetFieldData(), XMLDefinitions::metaDataId());
 
-        return GeometryXMLParser::execute();
+        return MDGeometryXMLParser::execute();
       }
 
      /**
@@ -31,7 +30,7 @@ namespace Mantid
       vtkDataSetToGeometry::vtkDataSetToGeometry(vtkDataSet* dataSet) : m_dataSet(dataSet)
       {
         //Format is to have DimensionSet as a nested element below MDInstructions.
-        SetRootNodeCheck(XMLDefinitions::workspaceGeometryElementName());
+        SetRootNodeCheck(Mantid::Geometry::MDGeometryXMLDefinitions::workspaceGeometryElementName());
       }
 
       /**
@@ -44,7 +43,7 @@ namespace Mantid
       /**
       Copy constructor
       */
-      vtkDataSetToGeometry::vtkDataSetToGeometry(const vtkDataSetToGeometry& other) : GeometryXMLParser(other)
+      vtkDataSetToGeometry::vtkDataSetToGeometry(const vtkDataSetToGeometry& other) : MDGeometryXMLParser(other)
         ,m_dataSet(other.m_dataSet)
       {
       }
@@ -57,7 +56,7 @@ namespace Mantid
       {
         if(this != &other)
         {
-          GeometryXMLParser::operator=(other);
+          MDGeometryXMLParser::operator=(other);
           m_dataSet = other.m_dataSet;
         }
         return *this;

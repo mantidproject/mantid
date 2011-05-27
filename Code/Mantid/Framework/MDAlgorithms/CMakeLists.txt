@@ -12,7 +12,6 @@ set ( SRC_FILES
 	src/CpRebinningNx3.cpp
 	src/CreateMDFitWorkspace.cpp
 	src/DepthParameter.cpp
-	src/DimensionFactory.cpp
 	src/DynamicCPRRebinning.cpp
 	src/DynamicRebinFromXML.cpp
 	src/HeightParameter.cpp
@@ -57,7 +56,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CpRebinningNx3.h
 	inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
 	inc/MantidMDAlgorithms/DepthParameter.h
-	inc/MantidMDAlgorithms/DimensionFactory.h
 	inc/MantidMDAlgorithms/DynamicCPRRebinning.h
 	inc/MantidMDAlgorithms/DynamicRebinFromXML.h
 	inc/MantidMDAlgorithms/HeightParameter.h
@@ -92,7 +90,6 @@ set ( TEST_FILES
 	#test/CobaltSWDTest.h
 	#test/CreateMDFitWorkspaceTest.h
 	test/DepthParameterTest.h
-	test/DimensionFactoryTest.h
 	test/DynamicRebinFromXMLAlgorithmTest.h 
 	test/HeightParameterTest.h
 	test/InvalidParameterParserTest.h
