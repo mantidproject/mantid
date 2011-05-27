@@ -35,7 +35,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( findPar->initialize() );
     TS_ASSERT( findPar->isInitialized() );
 
-    TSM_ASSERT_EQUALS("should be six propeties here",6,(size_t)(findPar->getProperties().size()));
+    TSM_ASSERT_EQUALS("should be seven propeties here",7,(size_t)(findPar->getProperties().size()));
   }
 
  void testSimpleExec(){
@@ -71,6 +71,13 @@ public:
      TS_ASSERT_EQUALS(std::string("7.52685"),findPar->getPropertyValue("secondary_flightpath"));
     
 
+ }
+ void testParFileProvided(){
+      TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("InputWorkspace", inputWS->getName()));
+      TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("ParFile", "test_par_file"));
+
+      TSM_ASSERT_THROWS_NOTHING("Calculating workspace parameters should not throw", findPar->execute() );
+      TSM_ASSERT("parameters calculations should complete successfully", findPar->isExecuted() );
  }
 
  //*******************************************************

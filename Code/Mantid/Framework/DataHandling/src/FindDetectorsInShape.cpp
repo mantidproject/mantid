@@ -70,7 +70,7 @@ void FindDetectorsInShape::initDocs()
 
 			//get the instrument out of the workspace
 			IInstrument_sptr instrument_sptr = WS->getInstrument();
-      IInstrument::plottables_const_sptr objCmptList = instrument_sptr->getPlottable();
+            IInstrument::plottables_const_sptr objCmptList = instrument_sptr->getPlottable();
 
 			std::vector<int> foundDets;
 

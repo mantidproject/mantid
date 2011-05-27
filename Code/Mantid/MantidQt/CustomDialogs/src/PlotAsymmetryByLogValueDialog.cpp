@@ -208,7 +208,7 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString&)
     }
     
   }
-  catch(std::exception& e)
+  catch(std::exception& )
   {
   }
 }

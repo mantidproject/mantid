@@ -1,9 +1,11 @@
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include <limits>
 
 namespace Mantid
@@ -19,8 +21,8 @@ Kernel::Logger& FindDetectorsPar::g_log=Kernel::Logger::get("DataHandling");
 /// Sets documentation strings for this algorithm
 void FindDetectorsPar::initDocs()
 {
-  this->setWikiSummary("The algorithm returns the angular parameters and second flight path for a workspace detectors (data, usually availble in par or phx file)");
-  //this->setOptionalMessage("Sums spectra bin-by-bin, equivalent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.");
+  this->setWikiSummary("The algorithm [[FindDetectorsPar]] returns the angular parameters and second flight path for a workspace detectors (data, usually availble in par or phx file)");
+  this->setOptionalMessage("he algorithm returns the angular parameters and second flight path for a workspace detectors (data, usually availble in par or phx file)");
 }
 
 
@@ -32,9 +34,21 @@ FindDetectorsPar::~FindDetectorsPar(){};
 
 void FindDetectorsPar::init()
 {
+    CompositeValidator<> * wsValidator = new CompositeValidator<> ;
+	  wsValidator->add(new API::InstrumentValidator<>);
+	  wsValidator->add(new API::CommonBinsValidator<>);
+  // input workspace
   declareProperty(
-    new WorkspaceProperty<>("InputWorkspace","", Direction::Input),
+     new WorkspaceProperty<>("InputWorkspace","", Direction::Input,wsValidator),
     "The name of the workspace that will be used as input for the algorithm" );
+ // optional par or phx file
+  std::vector<std::string> fileExts(2);
+    fileExts[0]=".par";
+    fileExts[1]=".phx";
+    declareProperty(new FileProperty("ParFile","",FileProperty::OptionalLoad, fileExts),
+    "An optional file that contains of the list of angular parameters for the detectors and detectors groups;\n"
+    "if specified, will use them instead the internal algorithm");
+
   //
   // Outputs:
   declareProperty(new ArrayProperty<double>("azimuthal", new NullValidator<std::vector<double> >, Direction::Output),
@@ -58,10 +72,24 @@ FindDetectorsPar::exec()
   if(inputWS.get()==NULL){
       throw(Kernel::Exception::NotFoundError("can not obtain InoputWorkspace for the algorithm to work",""));
   }
+ // Number of spectra
+  const size_t nHist = inputWS->getNumberHistograms();
+
+  // try to load par file if one is availible
+  std::string fileName = this->getProperty("ParFile");
+  if(fileName!=""){
+      size_t nPars = loadParFile(fileName);
+      if(nPars == nHist){
+          populate_values_from_file();
+          return;
+      }else{
+          g_log.information()<<" number of parameters in the file: "<<fileName<<"  not equal to the nuber of histohramm in the workspace"
+                              << inputWS->getName()<<std::endl;
+          g_log.information()<<" trying to calculate detectors parameters algorithmically\n";
+      }
+  }
   
    
-  // Number of spectra
-  const size_t nHist = inputWS->getNumberHistograms();
   // Get a pointer to the sample
    Geometry::IObjComponent_const_sptr sample =inputWS->getInstrument()->getSample();
 
@@ -82,7 +110,7 @@ FindDetectorsPar::exec()
      try{
         spDet= inputWS->getDetector(i);
      }catch(Kernel::Exception::NotFoundError &){
-       continue;
+        continue;
      }
     // Check that we aren't writing a monitor...
     if (!spDet->isMonitor()){             
@@ -103,7 +131,7 @@ FindDetectorsPar::exec()
    }
    if(!this->isChild()){
       Kernel::Property *pPAsim    = this->getPointerToProperty("azimuthal");            fill_property(pPAsim,azimuthal);
-      Kernel::Property *pPPol     = this->getPointerToProperty("polar");	              fill_property(pPPol,polar);
+      Kernel::Property *pPPol     = this->getPointerToProperty("polar");	            fill_property(pPPol,polar);
       Kernel::Property *pPAsWidth = this->getPointerToProperty("azimuthal_width");      fill_property(pPAsWidth,azimuthal_width);
       Kernel::Property *pPPolWidth= this->getPointerToProperty("polar_width");          fill_property(pPPolWidth,polar_width);
       Kernel::Property *pPFlp     = this->getPointerToProperty("secondary_flightpath"); fill_property(pPFlp,secondary_flightpath);
@@ -189,8 +217,6 @@ FindDetectorsPar::calc_rectDetPar(const API::MatrixWorkspace_sptr inputWS,
     polar_width  = atan2((ysize/2.0), dist)*rad2deg;
     azim_width   = atan2((xsize/2.0), dist)*rad2deg;
 }
-
-
 void 
 FindDetectorsPar::fill_property(Kernel::Property *const pProperty,std::vector<double> const&data)
 {
@@ -207,5 +233,17 @@ FindDetectorsPar::fill_property(Kernel::Property *const pProperty,std::vector<do
     Buf<<std::endl;
     pProperty->setValue( Buf.str());
 }
+//
+size_t 
+FindDetectorsPar::loadParFile(const std::string &fileName){
+    g_log.information()<<" load par file is not implemented at the moment\n";
+    return 0;
 }
+// 
+void 
+FindDetectorsPar::populate_values_from_file()
+{
 }
+
+}// end DataHandling namespace
+}// end MantidNamespace

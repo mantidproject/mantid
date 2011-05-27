@@ -100,6 +100,8 @@ private:
                        const Geometry::IDetector_sptr spDet,
                        const Geometry::IObjComponent_const_sptr sample,
                        double &azim, double &polar, double &azim_width, double &polar_width,double &dist);
+  size_t loadParFile(const std::string &fileName);
+  void   populate_values_from_file();
 };
 
 
