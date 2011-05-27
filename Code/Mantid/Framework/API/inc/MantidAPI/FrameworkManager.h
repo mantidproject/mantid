@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include <string>
-#include <vector>
 
 #ifdef MPI_BUILD
 #include <boost/mpi/environment.hpp>
@@ -13,8 +12,6 @@
 
 #include "MantidAPI/DllExport.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/Logger.h"
-
 
 namespace Mantid
 {
@@ -23,10 +20,9 @@ namespace Mantid
   {
     class Logger;
   }
-	
+
   namespace API
   {
-
     //----------------------------------------------------------------------
     // Forward declarations
     //----------------------------------------------------------------------

@@ -42,10 +42,10 @@ endif ()
 ###########################################################################
 
 set ( MPI_BUILD OFF CACHE BOOL "Enable MPI options" )
-# Create the variable 
+# Create the variable because it needs to exist later even if it's left empty
 set ( MPI_LIBRARIES )
 if ( MPI_BUILD )
-  # This find OpenMPI on rhel6 (assuming it's installed, of course)
+  # This finds OpenMPI on rhel6 (assuming it's installed, of course)
   find_package ( MPI REQUIRED )
   # Set things up to use the OpenMPI 'wrapper' compilers
   INCLUDE(CMakeForceCompiler)
@@ -57,6 +57,7 @@ if ( MPI_BUILD )
   find_package ( Boost REQUIRED mpi serialization )
   include_directories( ${Boost_INCLUDE_DIRS} )
   
+  # Add a definition that's used to guard MPI-specific parts of the main code
   add_definitions ( -DMPI_BUILD )
 endif ()
 
