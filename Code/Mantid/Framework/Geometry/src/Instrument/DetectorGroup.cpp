@@ -197,9 +197,9 @@ namespace Mantid
       for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
       {
         if ( !(*it).second->isMasked() ){
-			isMasked = false;
-			break;
-		}
+      isMasked = false;
+      break;
+    }
       }
       return isMasked;
     }
@@ -224,7 +224,7 @@ namespace Mantid
     {
       if( m_detectors.empty() )
       {
-	throw std::runtime_error("DetectorGroup::getNeighbours - Empty group");
+  throw std::runtime_error("DetectorGroup::getNeighbours - Empty group");
       }
       return m_detectors[m_id]->getNeighbours(radius);
     }
@@ -379,19 +379,28 @@ namespace Mantid
             // the topology can still be rectangular, but randomisation errors or small gaps between 
             // detectors caused central point not to belong to detectors; need more accrurate estinations 
             // assuming that distance between detectors can not be bigger then detecotor's half size
+             //// debug
+             //std::vector<IDetector_sptr> spDet = this->getDetectors();
+             //std::vector<BoundingBox>    boxes(spDet.size());
+             //for(int i=0;i<boxes.size();i++){
+             //   spDet[i]->getBoundingBox(boxes[i]);
+             //}
+             ////debug
 
             // get detector's size:
              IDetector_sptr spFirstDet = this->m_detectors.begin()->second;
+            
+
              BoundingBox bbox;
              spFirstDet->getBoundingBox(bbox);
              V3D width = bbox.width();
                       
              // loop if any near point belongs to group;
-             for(size_t i=0;i<6;i++){
+             for(int i=0;i<6;i++){
                  int ic = int(i)/2;
                  int is = (i%2==0)?-1:1;
                  V3D cs = center;
-                 cs[ic]    +=is*width[ic]/2;
+                 cs[ic]    +=is*width[ic]/4;
                  if(this->isValid(cs)){  // if it is, finish and end
                        group_topology = rect; break;
                  }

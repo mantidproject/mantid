@@ -107,18 +107,18 @@ Intersection::operator=(const Intersection& Iother)
       // first create new copy all fresh
       if (Iother.A)
         {
-	  Rule* Xa=Iother.A->clone();
-	  delete A;
-	  A=Xa;
-	  A->setParent(this);
-	}
+    Rule* Xa=Iother.A->clone();
+    delete A;
+    A=Xa;
+    A->setParent(this);
+  }
       if (Iother.B)
         {
-	  Rule* Xb=Iother.B->clone();
-	  delete B;
-	  B=Xb;
-	  B->setParent(this);
-	}
+    Rule* Xb=Iother.B->clone();
+    delete B;
+    B=Xb;
+    B->setParent(this);
+  }
     }
   return *this;
 }
@@ -341,22 +341,22 @@ Intersection::simplify()
  */
 void Intersection::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin)
 {
-	double Axmax,Aymax,Azmax,Axmin,Aymin,Azmin;
-	double Bxmax,Bymax,Bzmax,Bxmin,Bymin,Bzmin;
-	Axmax=Bxmax=xmax;
-	Aymax=Bymax=ymax;
-	Azmax=Bzmax=zmax;
-	Axmin=Bxmin=xmin;
-	Aymin=Bymin=ymin;
-	Azmin=Bzmin=zmin;
-	A->getBoundingBox(Axmax,Aymax,Azmax,Axmin,Aymin,Azmin);
-	B->getBoundingBox(Bxmax,Bymax,Bzmax,Bxmin,Bymin,Bzmin);
-	xmax=(Axmax<Bxmax)? Axmax:Bxmax;
-	xmin=(Axmin>Bxmin)? Axmin:Bxmin;
-	ymax=(Aymax<Bymax)? Aymax:Bymax;
-	ymin=(Aymin>Bymin)? Aymin:Bymin;
-	zmax=(Azmax<Bzmax)? Azmax:Bzmax;
-	zmin=(Azmin>Bzmin)? Azmin:Bzmin;
+  double Axmax,Aymax,Azmax,Axmin,Aymin,Azmin;
+  double Bxmax,Bymax,Bzmax,Bxmin,Bymin,Bzmin;
+  Axmax=Bxmax=xmax;
+  Aymax=Bymax=ymax;
+  Azmax=Bzmax=zmax;
+  Axmin=Bxmin=xmin;
+  Aymin=Bymin=ymin;
+  Azmin=Bzmin=zmin;
+  A->getBoundingBox(Axmax,Aymax,Azmax,Axmin,Aymin,Azmin);
+  B->getBoundingBox(Bxmax,Bymax,Bzmax,Bxmin,Bymin,Bzmin);
+  xmax=(Axmax<Bxmax)? Axmax:Bxmax;
+  xmin=(Axmin>Bxmin)? Axmin:Bxmin;
+  ymax=(Aymax<Bymax)? Aymax:Bymax;
+  ymin=(Aymin>Bymin)? Aymin:Bymin;
+  zmax=(Azmax<Bzmax)? Azmax:Bzmax;
+  zmin=(Azmin>Bzmin)? Azmin:Bzmin;
 }
 
 // -------------------------------------------------------------
@@ -440,18 +440,18 @@ Union::operator=(const Union& Iother)
       // first create new copy all fresh
       if (Iother.A)
         {
-	  Rule* Xa=Iother.A->clone();
-	  delete A;
-	  A=Xa;
-	  A->setParent(this);
-	}
+    Rule* Xa=Iother.A->clone();
+    delete A;
+    A=Xa;
+    A->setParent(this);
+  }
       if (Iother.B)
         {
-	  Rule* Xb=Iother.B->clone();
-	  delete B;
-	  B=Xb;
-	  B->setParent(this);
-	}
+    Rule* Xb=Iother.B->clone();
+    delete B;
+    B=Xb;
+    B->setParent(this);
+  }
     }
   return *this;
 }
@@ -600,7 +600,7 @@ Union::isValid(const Geometry::V3D& Vec) const
   */
 {
   return ((A && A->isValid(Vec)) ||
-	  (B && B->isValid(Vec))) ? true : false;
+    (B && B->isValid(Vec))) ? true : false;
 }
 
 bool 
@@ -614,7 +614,7 @@ Union::isValid(const std::map<int,int>& MX) const
   */
 {
   return ((A && A->isValid(MX)) ||
-	  (B && B->isValid(MX))) ? true : false;
+    (B && B->isValid(MX))) ? true : false;
 }
 
 
@@ -678,22 +678,22 @@ Union::displayAddress() const
  */
 void Union::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
 {
-	double Axmax,Aymax,Azmax,Axmin,Aymin,Azmin;
-	double Bxmax,Bymax,Bzmax,Bxmin,Bymin,Bzmin;
-	Axmax=Bxmax=xmax;
-	Aymax=Bymax=ymax;
-	Azmax=Bzmax=zmax;
-	Axmin=Bxmin=xmin;
-	Aymin=Bymin=ymin;
-	Azmin=Bzmin=zmin;
-	A->getBoundingBox(Axmax,Aymax,Azmax,Axmin,Aymin,Azmin);
-	B->getBoundingBox(Bxmax,Bymax,Bzmax,Bxmin,Bymin,Bzmin);
-	xmax=(Axmax>Bxmax)? Axmax:Bxmax;
-	xmin=(Axmin<Bxmin)? Axmin:Bxmin;
-	ymax=(Aymax>Bymax)? Aymax:Bymax;
-	ymin=(Aymin<Bymin)? Aymin:Bymin;
-	zmax=(Azmax>Bzmax)? Azmax:Bzmax;
-	zmin=(Azmin<Bzmin)? Azmin:Bzmin;
+  double Axmax,Aymax,Azmax,Axmin,Aymin,Azmin;
+  double Bxmax,Bymax,Bzmax,Bxmin,Bymin,Bzmin;
+  Axmax=Bxmax=xmax;
+  Aymax=Bymax=ymax;
+  Azmax=Bzmax=zmax;
+  Axmin=Bxmin=xmin;
+  Aymin=Bymin=ymin;
+  Azmin=Bzmin=zmin;
+  A->getBoundingBox(Axmax,Aymax,Azmax,Axmin,Aymin,Azmin);
+  B->getBoundingBox(Bxmax,Bymax,Bzmax,Bxmin,Bymin,Bzmin);
+  xmax=(Axmax>Bxmax)? Axmax:Bxmax;
+  xmin=(Axmin<Bxmin)? Axmin:Bxmin;
+  ymax=(Aymax>Bymax)? Aymax:Bymax;
+  ymin=(Aymin<Bymin)? Aymin:Bymin;
+  zmax=(Azmax>Bzmax)? Azmax:Bzmax;
+  zmin=(Azmin<Bzmin)? Azmin:Bzmin;
 }
 // -------------------------------------------------------------
 //         SURF KEYS
@@ -912,46 +912,46 @@ SurfPoint::displayAddress() const
  */
 void SurfPoint::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin)
 {
-	if(this->sign<1) //If the object sign is positive then include
-		key->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-	else{ //if the object sign is negative then get the complement
-		std::vector<V3D> listOfPoints;
-		double gXmax,gYmax,gZmax,gXmin,gYmin,gZmin;
-		gXmax=xmax; gYmax=ymax; gZmax=zmax; gXmin=xmin; gYmin=ymin; gZmin=zmin;
-		key->getBoundingBox(gXmax,gYmax,gZmax,gXmin,gYmin,gZmin);
-		if(!((xmax<=gXmax && xmax>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmax,ymax,zmax));
-		if(!((xmin<=gXmax && xmin>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmin,ymax,zmax));
-		if(!((xmin<=gXmax && xmin>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmin,ymax,zmin));
-		if(!((xmax<=gXmax && xmax>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmax,ymax,zmin));
-		if(!((xmin<=gXmax && xmin>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmin,ymin,zmin));
-		if(!((xmax<=gXmax && xmax>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmax,ymin,zmin));
-		if(!((xmax<=gXmax && xmax>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmax,ymin,zmax));
-		if(!((xmin<=gXmax && xmin>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmin,ymin,zmax));
+  if(this->sign<1) //If the object sign is positive then include
+    key->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+  else{ //if the object sign is negative then get the complement
+    std::vector<V3D> listOfPoints;
+    double gXmax,gYmax,gZmax,gXmin,gYmin,gZmin;
+    gXmax=xmax; gYmax=ymax; gZmax=zmax; gXmin=xmin; gYmin=ymin; gZmin=zmin;
+    key->getBoundingBox(gXmax,gYmax,gZmax,gXmin,gYmin,gZmin);
+    if(!((xmax<=gXmax && xmax>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmax,ymax,zmax));
+    if(!((xmin<=gXmax && xmin>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmin,ymax,zmax));
+    if(!((xmin<=gXmax && xmin>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmin,ymax,zmin));
+    if(!((xmax<=gXmax && xmax>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmax,ymax,zmin));
+    if(!((xmin<=gXmax && xmin>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmin,ymin,zmin));
+    if(!((xmax<=gXmax && xmax>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmax,ymin,zmin));
+    if(!((xmax<=gXmax && xmax>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmax,ymin,zmax));
+    if(!((xmin<=gXmax && xmin>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmin,ymin,zmax));
 
-		//group box inside input box
-		if(((gXmax<=xmax && gXmax>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmax!=ymax||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmax,gZmax));
-		if(((gXmin<=xmax && gXmin>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmax!=ymax||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmax,gZmax));
-		if(((gXmin<=xmax && gXmin>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmin!=xmin||gYmax!=ymax||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmin,gYmax,gZmin));
-		if(((gXmax<=xmax && gXmax>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmax!=xmax||gYmax!=ymax||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmax,gYmax,gZmin));
-		if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmin));
-		if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmin));
-		if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmax));
-		if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmax));
+    //group box inside input box
+    if(((gXmax<=xmax && gXmax>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmax!=ymax||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmax,gZmax));
+    if(((gXmin<=xmax && gXmin>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmax!=ymax||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmax,gZmax));
+    if(((gXmin<=xmax && gXmin>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmin!=xmin||gYmax!=ymax||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmin,gYmax,gZmin));
+    if(((gXmax<=xmax && gXmax>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmax!=xmax||gYmax!=ymax||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmax,gYmax,gZmin));
+    if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmin));
+    if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmin));
+    if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmax));
+    if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmax));
 
-		if(listOfPoints.size()>0){
-			xmin=ymin=zmin=DBL_MAX;
-			xmax=ymax=zmax=-DBL_MAX;
-			for(std::vector<V3D>::const_iterator it=listOfPoints.begin();it!=listOfPoints.end();++it){
-				//			std::cout<<(*it)<<std::endl;
-				if((*it)[0]<xmin)xmin=(*it)[0];
-				if((*it)[1]<ymin)ymin=(*it)[1];
-				if((*it)[2]<zmin)zmin=(*it)[2];
-				if((*it)[0]>xmax)xmax=(*it)[0];
-				if((*it)[1]>ymax)ymax=(*it)[1];
-				if((*it)[2]>zmax)zmax=(*it)[2];
-			}
-		}
-	}
+    if(listOfPoints.size()>0){
+      xmin=ymin=zmin=DBL_MAX;
+      xmax=ymax=zmax=-DBL_MAX;
+      for(std::vector<V3D>::const_iterator it=listOfPoints.begin();it!=listOfPoints.end();++it){
+        //			std::cout<<(*it)<<std::endl;
+        if((*it)[0]<xmin)xmin=(*it)[0];
+        if((*it)[1]<ymin)ymin=(*it)[1];
+        if((*it)[2]<zmin)zmin=(*it)[2];
+        if((*it)[0]>xmax)xmax=(*it)[0];
+        if((*it)[1]>ymax)ymax=(*it)[1];
+        if((*it)[2]>zmax)zmax=(*it)[2];
+      }
+    }
+  }
 }
 //----------------------------------------
 //       COMPOBJ
@@ -1162,44 +1162,44 @@ CompObj::displayAddress() const
  */
 void CompObj::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
 {
-	///To calculate the bounding box is formed by the all the points in input box that are not in object bounding box
-	///and all the points in object bounding box that are in the input box
-	std::vector<V3D> listOfPoints;
-	double gXmax,gYmax,gZmax,gXmin,gYmin,gZmin;
-	gXmax=xmax; gYmax=ymax; gZmax=zmax; gXmin=xmin; gYmin=ymin; gZmin=zmin;
-	key->getBoundingBox(gXmax,gYmax,gZmax,gXmin,gYmin,gZmin);
-	if(!((xmax<=gXmax && xmax>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmax,ymax,zmax));
-	if(!((xmin<=gXmax && xmin>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmin,ymax,zmax));
-	if(!((xmin<=gXmax && xmin>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmin,ymax,zmin));
-	if(!((xmax<=gXmax && xmax>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmax,ymax,zmin));
-	if(!((xmin<=gXmax && xmin>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmin,ymin,zmin));
-	if(!((xmax<=gXmax && xmax>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmax,ymin,zmin));
-	if(!((xmax<=gXmax && xmax>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmax,ymin,zmax));
-	if(!((xmin<=gXmax && xmin>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmin,ymin,zmax));
+  ///To calculate the bounding box is formed by the all the points in input box that are not in object bounding box
+  ///and all the points in object bounding box that are in the input box
+  std::vector<V3D> listOfPoints;
+  double gXmax,gYmax,gZmax,gXmin,gYmin,gZmin;
+  gXmax=xmax; gYmax=ymax; gZmax=zmax; gXmin=xmin; gYmin=ymin; gZmin=zmin;
+  key->getBoundingBox(gXmax,gYmax,gZmax,gXmin,gYmin,gZmin);
+  if(!((xmax<=gXmax && xmax>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmax,ymax,zmax));
+  if(!((xmin<=gXmax && xmin>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmin,ymax,zmax));
+  if(!((xmin<=gXmax && xmin>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmin,ymax,zmin));
+  if(!((xmax<=gXmax && xmax>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmax,ymax,zmin));
+  if(!((xmin<=gXmax && xmin>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmin,ymin,zmin));
+  if(!((xmax<=gXmax && xmax>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmax,ymin,zmin));
+  if(!((xmax<=gXmax && xmax>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmax,ymin,zmax));
+  if(!((xmin<=gXmax && xmin>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmin,ymin,zmax));
 
-	//object box inside input box
-	if(((gXmax<=xmax && gXmax>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmax!=ymax||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmax,gZmax));
-	if(((gXmin<=xmax && gXmin>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmax!=ymax||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmax,gZmax));
-	if(((gXmin<=xmax && gXmin>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmin!=xmin||gYmax!=ymax||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmin,gYmax,gZmin));
-	if(((gXmax<=xmax && gXmax>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmax!=xmax||gYmax!=ymax||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmax,gYmax,gZmin));
-	if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmin));
-	if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmin));
-	if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmax));
-	if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmax));
+  //object box inside input box
+  if(((gXmax<=xmax && gXmax>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmax!=ymax||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmax,gZmax));
+  if(((gXmin<=xmax && gXmin>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmax!=ymax||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmax,gZmax));
+  if(((gXmin<=xmax && gXmin>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmin!=xmin||gYmax!=ymax||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmin,gYmax,gZmin));
+  if(((gXmax<=xmax && gXmax>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmax!=xmax||gYmax!=ymax||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmax,gYmax,gZmin));
+  if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmin));
+  if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmin));
+  if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmax));
+  if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmax));
 
-	if(listOfPoints.size()>0){
-		xmin=ymin=zmin=DBL_MAX;
-		xmax=ymax=zmax=-DBL_MAX;
-		for(std::vector<V3D>::const_iterator it=listOfPoints.begin();it!=listOfPoints.end();++it){
-			//			std::cout<<(*it)<<std::endl;
-			if((*it)[0]<xmin)xmin=(*it)[0];
-			if((*it)[1]<ymin)ymin=(*it)[1];
-			if((*it)[2]<zmin)zmin=(*it)[2];
-			if((*it)[0]>xmax)xmax=(*it)[0];
-			if((*it)[1]>ymax)ymax=(*it)[1];
-			if((*it)[2]>zmax)zmax=(*it)[2];
-		}
-	}
+  if(listOfPoints.size()>0){
+    xmin=ymin=zmin=DBL_MAX;
+    xmax=ymax=zmax=-DBL_MAX;
+    for(std::vector<V3D>::const_iterator it=listOfPoints.begin();it!=listOfPoints.end();++it){
+      //			std::cout<<(*it)<<std::endl;
+      if((*it)[0]<xmin)xmin=(*it)[0];
+      if((*it)[1]<ymin)ymin=(*it)[1];
+      if((*it)[2]<zmin)zmin=(*it)[2];
+      if((*it)[0]>xmax)xmax=(*it)[0];
+      if((*it)[1]>ymax)ymax=(*it)[1];
+      if((*it)[2]>zmax)zmax=(*it)[2];
+    }
+  }
 }
 
 // -----------------------------------------------
@@ -1371,7 +1371,7 @@ BoolValue::displayAddress() const
  */
 void BoolValue::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
 {
-	//Returns what ever bounding box it gets
+  //Returns what ever bounding box it gets
   (void) xmax; //Avoid compiler warning
   (void) ymax; //Avoid compiler warning
   (void) zmax; //Avoid compiler warning
@@ -1431,11 +1431,11 @@ CompGrp::operator=(const CompGrp& Cother)
       Rule::operator=(Cother);
       if (Cother.A)
         {
-	  Rule* Xa=Cother.A->clone();
-	  delete A;
-	  A=Xa;
-	  A->setParent(this);
-	}
+    Rule* Xa=Cother.A->clone();
+    delete A;
+    A=Xa;
+    A->setParent(this);
+  }
     }
   return *this;
 }
@@ -1602,44 +1602,44 @@ CompGrp::displayAddress() const
  */
 void CompGrp::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
 {
-	///To calculate the bounding box is formed by the all the points in input box that are not in group bounding box
-	///and all the points in group bounding box that are in the input box
-	std::vector<V3D> listOfPoints;
-	double gXmax,gYmax,gZmax,gXmin,gYmin,gZmin;
-	gXmax=xmax; gYmax=ymax; gZmax=zmax; gXmin=xmin; gYmin=ymin; gZmin=zmin;
-	A->getBoundingBox(gXmax,gYmax,gZmax,gXmin,gYmin,gZmin);
-	if(!((xmax<=gXmax && xmax>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmax,ymax,zmax));
-	if(!((xmin<=gXmax && xmin>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmin,ymax,zmax));
-	if(!((xmin<=gXmax && xmin>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmin,ymax,zmin));
-	if(!((xmax<=gXmax && xmax>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmax,ymax,zmin));
-	if(!((xmin<=gXmax && xmin>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmin,ymin,zmin));
-	if(!((xmax<=gXmax && xmax>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmax,ymin,zmin));
-	if(!((xmax<=gXmax && xmax>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmax,ymin,zmax));
-	if(!((xmin<=gXmax && xmin>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmin,ymin,zmax));
+  ///To calculate the bounding box is formed by the all the points in input box that are not in group bounding box
+  ///and all the points in group bounding box that are in the input box
+  std::vector<V3D> listOfPoints;
+  double gXmax,gYmax,gZmax,gXmin,gYmin,gZmin;
+  gXmax=xmax; gYmax=ymax; gZmax=zmax; gXmin=xmin; gYmin=ymin; gZmin=zmin;
+  A->getBoundingBox(gXmax,gYmax,gZmax,gXmin,gYmin,gZmin);
+  if(!((xmax<=gXmax && xmax>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmax,ymax,zmax));
+  if(!((xmin<=gXmax && xmin>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmin,ymax,zmax));
+  if(!((xmin<=gXmax && xmin>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmin,ymax,zmin));
+  if(!((xmax<=gXmax && xmax>=gXmin)&&(ymax<=gYmax && ymax>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmax,ymax,zmin));
+  if(!((xmin<=gXmax && xmin>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmin,ymin,zmin));
+  if(!((xmax<=gXmax && xmax>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmin<=gZmax && zmin>=gZmin))) listOfPoints.push_back(V3D(xmax,ymin,zmin));
+  if(!((xmax<=gXmax && xmax>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmax,ymin,zmax));
+  if(!((xmin<=gXmax && xmin>=gXmin)&&(ymin<=gYmax && ymin>=gYmin)&&(zmax<=gZmax && zmax>=gZmin))) listOfPoints.push_back(V3D(xmin,ymin,zmax));
 
-	//group box inside input box
-	if(((gXmax<=xmax && gXmax>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmax!=ymax||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmax,gZmax));
-	if(((gXmin<=xmax && gXmin>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmax!=ymax||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmax,gZmax));
-	if(((gXmin<=xmax && gXmin>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmin!=xmin||gYmax!=ymax||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmin,gYmax,gZmin));
-	if(((gXmax<=xmax && gXmax>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmax!=xmax||gYmax!=ymax||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmax,gYmax,gZmin));
-	if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmin));
-	if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmin));
-	if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmax));
-	if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmax));
+  //group box inside input box
+  if(((gXmax<=xmax && gXmax>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmax!=ymax||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmax,gZmax));
+  if(((gXmin<=xmax && gXmin>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmax!=ymax||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmax,gZmax));
+  if(((gXmin<=xmax && gXmin>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmin!=xmin||gYmax!=ymax||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmin,gYmax,gZmin));
+  if(((gXmax<=xmax && gXmax>=xmin)&&(gYmax<=ymax && gYmax>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmax!=xmax||gYmax!=ymax||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmax,gYmax,gZmin));
+  if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmin));
+  if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmin<=zmax && gZmin>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmin!=zmin)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmin));
+  if(((gXmax<=xmax && gXmax>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmax!=xmax||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmax,gYmin,gZmax));
+  if(((gXmin<=xmax && gXmin>=xmin)&&(gYmin<=ymax && gYmin>=ymin)&&(gZmax<=zmax && gZmax>=zmin))&&(gXmin!=xmin||gYmin!=ymin||gZmax!=zmax)) listOfPoints.push_back(V3D(gXmin,gYmin,gZmax));
 
-	if(listOfPoints.size()>0){
-		xmin=ymin=zmin=DBL_MAX;
-		xmax=ymax=zmax=-DBL_MAX;
-		for(std::vector<V3D>::const_iterator it=listOfPoints.begin();it!=listOfPoints.end();++it){
-			//			std::cout<<(*it)<<std::endl;
-			if((*it)[0]<xmin)xmin=(*it)[0];
-			if((*it)[1]<ymin)ymin=(*it)[1];
-			if((*it)[2]<zmin)zmin=(*it)[2];
-			if((*it)[0]>xmax)xmax=(*it)[0];
-			if((*it)[1]>ymax)ymax=(*it)[1];
-			if((*it)[2]>zmax)zmax=(*it)[2];
-		}
-	}
+  if(listOfPoints.size()>0){
+    xmin=ymin=zmin=DBL_MAX;
+    xmax=ymax=zmax=-DBL_MAX;
+    for(std::vector<V3D>::const_iterator it=listOfPoints.begin();it!=listOfPoints.end();++it){
+      //			std::cout<<(*it)<<std::endl;
+      if((*it)[0]<xmin)xmin=(*it)[0];
+      if((*it)[1]<ymin)ymin=(*it)[1];
+      if((*it)[2]<zmin)zmin=(*it)[2];
+      if((*it)[0]>xmax)xmax=(*it)[0];
+      if((*it)[1]>ymax)ymax=(*it)[1];
+      if((*it)[2]>zmax)zmax=(*it)[2];
+    }
+  }
 }
 
 }  // NAMESPACE Geometry

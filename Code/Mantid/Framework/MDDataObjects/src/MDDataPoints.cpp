@@ -14,24 +14,24 @@ Kernel::Logger& MDDataPoints::g_log =Kernel::Logger::get("MDWorkspaces");
 void 
 MDDataPoints::store_pixels(const std::vector<char> &all_new_pixels,const std::vector<bool> &pixels_selected,const std::vector<size_t> &cell_indexes,size_t n_selected_pixels)
 {
-	if(this->memBased){
-		if(this->pMemoryMGR.get()){
-			API::MemoryInfo memInf=API::MemoryManager::Instance().getMemoryInfo();
-			size_t  free_memory = memInf.availMemory*1024;
-			this->memBased = pMemoryMGR->store_pixels(all_new_pixels,pixels_selected,cell_indexes,n_selected_pixels,free_memory,DataBuffer);
-			//TODO: this is stub to deal with very frequent possibility of target pixels not fitting memory;
-			if(!this->memBased){
-				g_log.error()<<" can not store rebinned pixels in memory and storing them on HDD is not implemented yet\n";
-				DataBuffer.clear();
-				return;
-			}
-		}else{
-			g_log.error()<<" MDDataPoints have not been initiated properly to use store pixels\n";
-			throw(std::logic_error("Incorrect MDDataPoints class initialisation"));
-		}
-	}else{
-		//TODO: StorePixelsOnHDD, in temporary or permanent swap file;
-	}
+  if(this->memBased){
+    if(this->pMemoryMGR.get()){
+      API::MemoryInfo memInf=API::MemoryManager::Instance().getMemoryInfo();
+      size_t  free_memory = memInf.availMemory*1024;
+      this->memBased = pMemoryMGR->store_pixels(all_new_pixels,pixels_selected,cell_indexes,n_selected_pixels,free_memory,DataBuffer);
+      //TODO: this is stub to deal with very frequent possibility of target pixels not fitting memory;
+      if(!this->memBased){
+        g_log.error()<<" can not store rebinned pixels in memory and storing them on HDD is not implemented yet\n";
+        DataBuffer.clear();
+        return;
+      }
+    }else{
+      g_log.error()<<" MDDataPoints have not been initiated properly to use store pixels\n";
+      throw(std::logic_error("Incorrect MDDataPoints class initialisation"));
+    }
+  }else{
+    //TODO: StorePixelsOnHDD, in temporary or permanent swap file;
+  }
 
 }
 
@@ -56,11 +56,11 @@ bool
 MDDataPoints::is_initialized(void)const
 {
     if(spMDImage.get()!=NULL){
-		if(spMDImage->getNMDDPoints()==this->n_data_points){
-			return true;
-		}else{
-			return false;
-		}
+    if(spMDImage->getNMDDPoints()==this->n_data_points){
+      return true;
+    }else{
+      return false;
+    }
     }else{
         return false;
     }
@@ -81,8 +81,8 @@ MDDataPoints::set_file_based()
 {
     //TODO: should verify and if there are fresh data in buffer, dump it on HDD (or algorithm should take care about it)
     this->memBased = false;
-	//throw(Kernel::Exception::NotImplementedError("This functionality is not implemented yet"));
-	// save pixels from memory
+  //throw(Kernel::Exception::NotImplementedError("This functionality is not implemented yet"));
+  // save pixels from memory
     //this->data_buffer.clear();
 }
 //
@@ -92,7 +92,7 @@ MDDataPoints::initialize(boost::shared_ptr<const MDImage> spImage,boost::shared_
     this->spMDImage   = spImage;
     this->spFileReader= in_spFile;
 
-	std::vector<std::string> dim_tags = spMDImage->get_const_MDGeometry().getBasisTags();
+  std::vector<std::string> dim_tags = spMDImage->get_const_MDGeometry().getBasisTags();
     std::vector<std::string> data_tags = this->pixDescription.getColumnNames();
     // check if the dimensions id are consistant with the data columns i.e. the MDImage and the MDpoints parts of the dataset are consistent
     for(size_t i=0;i<dim_tags.size();i++){
@@ -110,11 +110,11 @@ MDDataPoints::initialize(boost::shared_ptr<const MDImage> spImage,boost::shared_
    this->n_data_points          = this->spFileReader->getNPix();
    // check if the image is synchroneous with the MDDataPoints dataset;
    if(spMDImage->getNMDDPoints() != this->n_data_points){
-	// Data point initialization done this way can be suppported by an empty image only; will throw otherwise
-	   if(spMDImage->getNMDDPoints()!=0){
-		   g_log.error()<<" Number of points contributed into MD image = "<<spMDImage->getNMDDPoints()<<" is not consistent with number of points in MD Dataset ="<<this->n_data_points<<std::endl;
+  // Data point initialization done this way can be suppported by an empty image only; will throw otherwise
+     if(spMDImage->getNMDDPoints()!=0){
+       g_log.error()<<" Number of points contributed into MD image = "<<spMDImage->getNMDDPoints()<<" is not consistent with number of points in MD Dataset ="<<this->n_data_points<<std::endl;
            throw(std::logic_error("MD data image and MDDataPoints part of the workspace are non-synchronous "));
-	   } // if the image is empty, workspace would be not initialized;
+     } // if the image is empty, workspace would be not initialized;
    }
 
    this->memBased                = false;
@@ -133,31 +133,31 @@ MDDataPoints::initialize(boost::shared_ptr<const MDImage> spImage,boost::shared_
 size_t 
 MDDataPoints::get_pix_bufSize(void)const
 {
-	if(pMemoryMGR.get()){
-		return pMemoryMGR->getDataBufferSize(DataBuffer);
-	}else{
-		g_log.error()<<"MDDataPoints::get_pix_bufSize MDDataPoints class has not been initiated properly\n";
-		throw(std::invalid_argument("Call to non-initated MDDataPoints class"));
-	}
+  if(pMemoryMGR.get()){
+    return pMemoryMGR->getDataBufferSize(DataBuffer);
+  }else{
+    g_log.error()<<"MDDataPoints::get_pix_bufSize MDDataPoints class has not been initiated properly\n";
+    throw(std::invalid_argument("Call to non-initated MDDataPoints class"));
+  }
 
 }
 // 
 void
 MDDataPoints::initialize(boost::shared_ptr<const MDImage> pImage)
 {
-	this->spMDImage  = pImage;
+  this->spMDImage  = pImage;
 
 // Data point initialization done this way can be suppported by an empty image only throw otherwise; it will initiate empty target workspace for use with algorithms. 
-	if(pImage->getNMDDPoints()!=0){
-     	 g_log.error()<<" this kind of initialisation for MDDataPoints can be performed by an empty image only\n";
-	     throw(std::logic_error("this kind of initialisation for MDDataPoints can be performed by an empty image only"));
- 	}
+  if(pImage->getNMDDPoints()!=0){
+       g_log.error()<<" this kind of initialisation for MDDataPoints can be performed by an empty image only\n";
+       throw(std::logic_error("this kind of initialisation for MDDataPoints can be performed by an empty image only"));
+  }
 
   
-    this->n_data_points           = 0;
-	this->memBased                = true;
+  this->n_data_points           = 0;
+  this->memBased                = true;
 
-	size_t nDims= this->spMDImage->get_const_MDGeometry().getNumDims();
+  size_t nDims= this->spMDImage->get_const_MDGeometry().getNumDims();
 
    this->box_min.assign(nDims,FLT_MAX);
    this->box_max.assign(nDims,-FLT_MAX);
@@ -173,24 +173,24 @@ size_t
 MDDataPoints::get_pix_subset(const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
 {
     size_t ind_cell_read;
-	if(this->memBased){
-		ind_cell_read  = this->pMemoryMGR->get_pix_from_memory(pix_buf,selected_cells,starting_cell,pix_buf,n_pix_in_buffer);
-	}else{
-		ind_cell_read = this->spFileReader->read_pix_subset(*spMDImage,selected_cells,starting_cell,pix_buf,n_pix_in_buffer);
-	}
+  if(this->memBased){
+    ind_cell_read  = this->pMemoryMGR->get_pix_from_memory(pix_buf,selected_cells,starting_cell,pix_buf,n_pix_in_buffer);
+  }else{
+    ind_cell_read = this->spFileReader->read_pix_subset(*spMDImage,selected_cells,starting_cell,pix_buf,n_pix_in_buffer);
+  }
     return ind_cell_read; 
 }
 std::vector<char> *
 MDDataPoints::get_pBuffer(size_t buf_size)
 {
-	if(this->pMemoryMGR.get()){
-		// this will analyse the state of the data and do nothing if size is sufficient or try reallocating sufficient size and keep the data if the size is not sufficient;
-		pMemoryMGR->alloc_pix_array(DataBuffer,buf_size);
-		return &DataBuffer;
-	}else{
-		g_log.error()<<" MDDataPoints have not been initialized properly\n";
-		throw(Kernel::Exception::NullPointerException("MDDataPoints::get_pBuffer","The object has not been initiated properly"));
-	}
+  if(this->pMemoryMGR.get()){
+    // this will analyse the state of the data and do nothing if size is sufficient or try reallocating sufficient size and keep the data if the size is not sufficient;
+    pMemoryMGR->alloc_pix_array(DataBuffer,buf_size);
+    return &DataBuffer;
+  }else{
+    g_log.error()<<" MDDataPoints have not been initialized properly\n";
+    throw(Kernel::Exception::NullPointerException("MDDataPoints::get_pBuffer","The object has not been initiated properly"));
+  }
 }
 
 //***************************************************************************************

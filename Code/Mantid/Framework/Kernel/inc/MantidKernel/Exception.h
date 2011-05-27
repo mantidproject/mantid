@@ -12,45 +12,45 @@ namespace Mantid
 namespace Kernel
 {
 /**
-	The exception classes used by Mantid.
-	All exceptions inherit from std:exception.
+  The exception classes used by Mantid.
+  All exceptions inherit from std:exception.
 
-	The exception tree is
-	<ul>
-		<li><b>std::exception</b> - Superclass of all standard exception, never thrown itself
-		<ul>
-			<li><b>std::bad_alloc</b> - Thrown when new runs out of memory</li>
-			<li><b>std::bad_exception</b> - Thrown if an exception is thrown which is not listed in a function's exception specification.</li>
-			<li><b>std::bad_cast</b> - Thrown if you attempt an invalid dynamic_cast expression</li>
-			<li><b>std::bad_typeid</b> - Thrown if you use a NULL pointer in a typeid expression</li>
-			<li><b>std::logic_error</b> - Superclass for all logic errors, never thrown itself. Logic errors represent problems in the internal logic of a program; in theory, these are preventable, and even detectable before the program runs (e.g., violations of class invariants).
-			<ul>
-				<li><b>std::length_error</b> - Thrown when an object is constructed that would exceed its maximum
-				permitted size (e.g., a string instance).</li>
-				<li><b>std::domain_error</b> - Thrown to report domain errors (domain in the mathematical sense).</li>
-				<li><b>std::out_of_range</b> - Thrown if an argument has a value which is not within the expected range
-				(e.g. boundary checks in string).</li>
-				<li><b>std::invalid_argument</b> - Thrown to report invalid arguments to functions.</li>
-				<li><b>NotImplementedError</b> - Thrown if accessing areas of code that are not implmented yet.</li>
-			</ul>
-			</li>
-			<li><b>std::runtime_error</b> - Superclass for all runtime errors, never thrown itself. Runtime errors represent problems outside the scope of a program; they cannot be easily predicted and can generally only be caught as the program executes.
-			<ul>
-				<li><b>std::range_error</b> - Thrown to indicate range errors in internal computations.</li>
-				<li><b>std::overflow_error</b> - Thrown to indicate arithmetic overflow.</li>
-				<li><b>std::underflow_error</b> - Thrown to indicate arithmetic underflow.</li>
-				<li><b>FileError</b> - Thrown to indicate errors with file operations.</li>
-				<li><b>NotFoundError</b> - Thrown to indicate that an item was not found in a collection.</li>
-				<li><b>ExistsError</b> - Thrown to indicate that an item was is already found in a collection.</li>
+  The exception tree is
+  <ul>
+    <li><b>std::exception</b> - Superclass of all standard exception, never thrown itself
+    <ul>
+      <li><b>std::bad_alloc</b> - Thrown when new runs out of memory</li>
+      <li><b>std::bad_exception</b> - Thrown if an exception is thrown which is not listed in a function's exception specification.</li>
+      <li><b>std::bad_cast</b> - Thrown if you attempt an invalid dynamic_cast expression</li>
+      <li><b>std::bad_typeid</b> - Thrown if you use a NULL pointer in a typeid expression</li>
+      <li><b>std::logic_error</b> - Superclass for all logic errors, never thrown itself. Logic errors represent problems in the internal logic of a program; in theory, these are preventable, and even detectable before the program runs (e.g., violations of class invariants).
+      <ul>
+        <li><b>std::length_error</b> - Thrown when an object is constructed that would exceed its maximum
+        permitted size (e.g., a string instance).</li>
+        <li><b>std::domain_error</b> - Thrown to report domain errors (domain in the mathematical sense).</li>
+        <li><b>std::out_of_range</b> - Thrown if an argument has a value which is not within the expected range
+        (e.g. boundary checks in string).</li>
+        <li><b>std::invalid_argument</b> - Thrown to report invalid arguments to functions.</li>
+        <li><b>NotImplementedError</b> - Thrown if accessing areas of code that are not implmented yet.</li>
+      </ul>
+      </li>
+      <li><b>std::runtime_error</b> - Superclass for all runtime errors, never thrown itself. Runtime errors represent problems outside the scope of a program; they cannot be easily predicted and can generally only be caught as the program executes.
+      <ul>
+        <li><b>std::range_error</b> - Thrown to indicate range errors in internal computations.</li>
+        <li><b>std::overflow_error</b> - Thrown to indicate arithmetic overflow.</li>
+        <li><b>std::underflow_error</b> - Thrown to indicate arithmetic underflow.</li>
+        <li><b>FileError</b> - Thrown to indicate errors with file operations.</li>
+        <li><b>NotFoundError</b> - Thrown to indicate that an item was not found in a collection.</li>
+        <li><b>ExistsError</b> - Thrown to indicate that an item was is already found in a collection.</li>
         <li><b>InstrumentDefinitionError</b> - Thrown to indicate a problem with the instrument definition.</li>
         <li><b>MisMatch</b> - Error when two numbers should be identical (or close).</li>
         <li><b>IndexError</b> - Error when an incorrect index value is given.</li>
         <li><b>NullPointerException</b> - Thrown when a zero pointer is dereferenced.</li>
-			</ul>
-			</li>
-		</ul>
-		</li>
-	</ul>
+      </ul>
+      </li>
+    </ul>
+    </li>
+  </ul>
 
     @author Nick Draper, Tessella Support Services plc
     @date 8/11/2007
@@ -73,7 +73,7 @@ namespace Kernel
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
-	  Code Documentation is available at: <http://doxygen.mantidproject.org>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace Exception
 {

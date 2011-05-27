@@ -4,6 +4,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include <limits>
 
 namespace Mantid
 {
@@ -65,11 +66,11 @@ FindDetectorsPar::exec()
    Geometry::IObjComponent_const_sptr sample =inputWS->getInstrument()->getSample();
 
 
-  azimuthal.resize(nHist);
-  polar.resize(nHist);
-  azimuthal_width.resize(nHist);
-  polar_width.resize(nHist);
-  secondary_flightpath.resize(nHist);
+  azimuthal.assign(nHist,std::numeric_limits<double>::quiet_NaN());
+  polar.assign(nHist,std::numeric_limits<double>::quiet_NaN());
+  azimuthal_width.assign(nHist,std::numeric_limits<double>::quiet_NaN());
+  polar_width.assign(nHist,std::numeric_limits<double>::quiet_NaN());
+  secondary_flightpath.assign(nHist,std::numeric_limits<double>::quiet_NaN());
 
    Progress progress(this,0,1,100);
    const int progStep = (int)(ceil(double(nHist)/100.0));
@@ -77,9 +78,14 @@ FindDetectorsPar::exec()
    // Loop over the spectra
    for (size_t i = 0; i < nHist; i++)
    {
-       Geometry::IDetector_sptr spDet = inputWS->getDetector(i);
-       // Check that we aren't writing a monitor...
-       if (!spDet->isMonitor()){             
+     Geometry::IDetector_sptr spDet;
+     try{
+        spDet= inputWS->getDetector(i);
+     }catch(Kernel::Exception::NotFoundError &){
+       continue;
+     }
+    // Check that we aren't writing a monitor...
+    if (!spDet->isMonitor()){             
 
           Geometry::det_topology group_shape= spDet->getTopology();
           if(group_shape == Geometry::cyl){  // we have a ring;
@@ -91,15 +97,15 @@ FindDetectorsPar::exec()
           }
        }
         // make regular progress reports and check for canceling the algorithm
-	   if ( i % progStep == 0 ){
+     if ( i % progStep == 0 ){
            progress.report();
-	   }
+     }
    }
    if(!this->isChild()){
-      Kernel::Property *pPAsim    = this->getPointerToProperty("azimuthal");        fill_property(pPAsim,azimuthal);
-      Kernel::Property *pPPol     = this->getPointerToProperty("polar");	        fill_property(pPPol,polar);
-      Kernel::Property *pPAsWidth = this->getPointerToProperty("azimuthal_width");  fill_property(pPAsWidth,azimuthal_width);
-      Kernel::Property *pPPolWidth= this->getPointerToProperty("polar_width");       fill_property(pPPolWidth,polar_width);
+      Kernel::Property *pPAsim    = this->getPointerToProperty("azimuthal");            fill_property(pPAsim,azimuthal);
+      Kernel::Property *pPPol     = this->getPointerToProperty("polar");	              fill_property(pPPol,polar);
+      Kernel::Property *pPAsWidth = this->getPointerToProperty("azimuthal_width");      fill_property(pPAsWidth,azimuthal_width);
+      Kernel::Property *pPPolWidth= this->getPointerToProperty("polar_width");          fill_property(pPPolWidth,polar_width);
       Kernel::Property *pPFlp     = this->getPointerToProperty("secondary_flightpath"); fill_property(pPFlp,secondary_flightpath);
    }
 
@@ -112,13 +118,13 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_sptr spDet,const Geom
                                  double &azim, double &polar, double &azim_width, double &polar_width,double &dist)
 {
         // polar values are constants for ring;
-        polar_width= 2*M_PI;
-        polar      = 0;
+        azim_width= 0;
+        azim      = 0;
 
         // accumulators;
         double d1_min(FLT_MAX);
         double d1_max(-FLT_MAX);
-        double azim_sum(0);
+        double angle_sum(0);
         double dist_sum(0);
 
         std::vector<Geometry::V3D> coord(3);
@@ -153,13 +159,13 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_sptr spDet,const Geom
             double d_min = d1+bbox.xMin();  if(d_min<d1_min)d1_min = d_min;
             double d_max = d1+bbox.xMax();  if(d_max>d1_max)d1_max = d_max;
 
-            azim_sum+=atan2(d1,d0);
-            dist_sum+=d1*d1+d0*d0;
+            angle_sum+=atan2(d1,d0);
+            dist_sum +=d1*d1+d0*d0;
         }
 
-        azim_width = (atan2(d1_max,d0)-atan2(d1_min,d0))*rad2deg;
-        azim       = (azim_sum/double(pDets.size()))*rad2deg;
-        dist       = sqrt(dist_sum/double(pDets.size()));
+        polar_width = (atan2(d1_max,d0)-atan2(d1_min,d0))*rad2deg;
+        polar       = (angle_sum/double(pDets.size()))*rad2deg;
+        dist        = sqrt(dist_sum/double(pDets.size()));
         
 }
 
