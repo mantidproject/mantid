@@ -80,7 +80,7 @@ namespace Mantid
             ++nPeriod;
             // Create a new instance of the algorithm for each group member (needed if execute creates new properties)
            // alg = API::FrameworkManager::Instance().createAlgorithm(this->name(), this->version());
-            setProperties(alg,props,(*lhsItr),(*rhsItr),nPeriod,outWSGrp,blhsEqual,brhsEqual,bSimilarNames);
+            setTheProperties(alg,props,(*lhsItr),(*rhsItr),nPeriod,outWSGrp,blhsEqual,brhsEqual,bSimilarNames);
             bStatus=alg->execute();
             if(!bStatus)
             {
@@ -104,7 +104,7 @@ namespace Mantid
       
         for (;rhsItr!=rhsWSGrp.end();rhsItr++)
         {	++nPeriod;
-        setProperties(alg,props,(*lhsItr),(*rhsItr),nPeriod,outWSGrp,blhsEqual,brhsEqual,bSimilarNames);
+        setTheProperties(alg,props,(*lhsItr),(*rhsItr),nPeriod,outWSGrp,blhsEqual,brhsEqual,bSimilarNames);
         bStatus=alg->execute();
         if(!bStatus)
         {
@@ -126,7 +126,7 @@ namespace Mantid
         }
         for (;lhsItr!=lhsWSGrp.end();lhsItr++)
         {	++nPeriod;
-        setProperties(alg,props,(*lhsItr),(*rhsItr),nPeriod,outWSGrp,blhsEqual,brhsEqual,bSimilarNames);
+        setTheProperties(alg,props,(*lhsItr),(*rhsItr),nPeriod,outWSGrp,blhsEqual,brhsEqual,bSimilarNames);
         bStatus=alg->execute();
         if(!bStatus)
         {
@@ -156,7 +156,7 @@ namespace Mantid
     *  @param rhsEqual :: true if rhs and output ws are of same names
     *  @param bSimilarNames ::  if workspaces are of similar names
     */
-    void PairedGroupAlgorithm::setProperties(IAlgorithm* alg,const std::vector<Kernel::Property*>&props,
+    void PairedGroupAlgorithm::setTheProperties(IAlgorithm* alg,const std::vector<Kernel::Property*>&props,
       const std::string& lhswsName,const std::string& rhswsName,int nPeriod,WorkspaceGroup_sptr outWSGrp,bool lhsEqual,bool rhsEqual,bool bSimilarNames)
     {
       std::string prevPropName("");

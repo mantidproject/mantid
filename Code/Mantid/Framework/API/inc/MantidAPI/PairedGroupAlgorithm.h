@@ -54,18 +54,18 @@ namespace Mantid
       ///This method checks any one of the RHS and output workspaces are  same for binary algorithms
       bool isOutputequaltoRHS(const std::vector<Mantid::Kernel::Property*>& props);
 
-       /// This method checks the members workspaces are of similar names (example group_1,group_2) and returns true if they are.
-	   bool isGroupWorkspacesofSimilarNames(const std::string&,const std::vector<std::string>& grpmembersNames); 
+      /// This method checks the members workspaces are of similar names (example group_1,group_2) and returns true if they are.
+      bool isGroupWorkspacesofSimilarNames(const std::string&,const std::vector<std::string>& grpmembersNames);
      
     private:
       void getGroupNames(const std::vector<Kernel::Property*>&prop, 
         std::vector<std::string> &lhsWSGrpNames, std::vector<std::string> &rhsWSGrpNames) const;
-      void setProperties(IAlgorithm* alg,const std::vector<Kernel::Property*>&prop,
+      void setTheProperties(IAlgorithm* alg,const std::vector<Kernel::Property*>&prop,
         const std::string& lhsWSName,const std::string& rhsWSName,int nPeriod,API::WorkspaceGroup_sptr outWSGrp,bool lhsEqual,bool rhsEqual,bool bSimilarNames);
       bool isCompatibleSizes(const std::vector<std::string> &lhsWSGrpNames, 
         const std::vector<std::string> &rhsWSGrpNames) const;
-     /// This method returns true if the input and output workspaces are same
-			void getlhsandrhsworkspace(const std::vector<Mantid::Kernel::Property*>& props,std::string& lhswsName,
+      /// This method returns true if the input and output workspaces are same
+      void getlhsandrhsworkspace(const std::vector<Mantid::Kernel::Property*>& props,std::string& lhswsName,
                                           std::string& rhswsName,std::string& outputwsName );
 
       API::Progress* m_progress;  ///< Progress reporting
