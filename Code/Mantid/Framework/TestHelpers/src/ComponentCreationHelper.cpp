@@ -162,6 +162,28 @@ namespace ComponentCreationHelper
     return boost::shared_ptr<DetectorGroup>(new DetectorGroup(groupMembers, false));
   }
 
+//----------------------------------------------------------------------------------------------
+  /**
+   * Create a detector group containing N cylindrical detectors with gaps
+   */
+  boost::shared_ptr<DetectorGroup> createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet,double gap)
+  {
+
+    std::vector<boost::shared_ptr<IDetector> > groupMembers(nDet);
+    // One object
+    Object_sptr detShape = ComponentCreationHelper::createCappedCylinder(0.5, 1.5, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube"); 
+    for( int i = 0; i < nDet; ++i )
+    {
+      std::ostringstream os;
+      os << "d" << i;
+      boost::shared_ptr<Detector> det(new Detector(os.str(), i+1, detShape, NULL));
+      det->setPos(double(-0.5*nDet+i)+gap, 2.0, 2.0);
+      groupMembers[i] = det;
+    }
+
+    return boost::shared_ptr<DetectorGroup>(new DetectorGroup(groupMembers, false));
+  }
+
    //----------------------------------------------------------------------------------------------
   /**
    * Create a group of detectors arranged in a ring;

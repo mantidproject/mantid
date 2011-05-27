@@ -376,7 +376,30 @@ namespace Mantid
         if (this->isValid(center)){
              group_topology = rect;
         }else{
-             group_topology = cyl;
+            // the topology can still be rectangular, but randomisation errors or small gaps between 
+            // detectors caused central point not to belong to detectors; need more accrurate estinations 
+            // assuming that distance between detectors can not be bigger then detecotor's half size
+
+            // get detector's size:
+             IDetector_sptr spFirstDet = this->m_detectors.begin()->second;
+             BoundingBox bbox;
+             spFirstDet->getBoundingBox(bbox);
+             V3D width = bbox.width();
+                      
+             // loop if any near point belongs to group;
+             for(size_t i=0;i<6;i++){
+                 int ic = i/2;
+                 int is = (i%2==0)?-1:1;
+                 V3D cs = center;
+                 cs[ic]    +=is*width[ic]/2;
+                 if(this->isValid(cs)){  // if it is, finish and end
+                       group_topology = rect; break;
+                 }
+             }
+             // if not, consider this group to be a ring;
+             if(this->group_topology == undef){
+                    group_topology = cyl;
+             }
         }
     }
 } // namespace Geometry

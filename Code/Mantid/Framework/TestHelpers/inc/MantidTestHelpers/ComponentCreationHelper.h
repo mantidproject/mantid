@@ -83,6 +83,10 @@ namespace ComponentCreationHelper
    * Create a detector group containing 5 detectors
    */
   DLL_TESTHELPERS boost::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWith5CylindricalDetectors();
+   /**
+   * Create a detector group containing n detectors with gaps
+   */
+  DLL_TESTHELPERS boost::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet=4,double gap=0.01);
   /**
    * Create a detector group containing detectors ring
    * R_min -- min radius of the ring
