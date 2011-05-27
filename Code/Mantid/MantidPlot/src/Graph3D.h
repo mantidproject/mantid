@@ -39,8 +39,6 @@
 
 #include "Table.h"
 #include "Matrix.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "Mantid/MantidLog.h"
 
 using namespace Qwt3D;
 
@@ -388,7 +386,6 @@ private:
 	UserParametricSurface *d_surface;
 	Qwt3D::PLOTSTYLE style_;
 	
-	static Mantid::Kernel::Logger& logObject;
 	//scaling factor for zoom in the 3d graph
 	double m_zoomInScale;
 	//scaling factor for zoom out the 3d graph

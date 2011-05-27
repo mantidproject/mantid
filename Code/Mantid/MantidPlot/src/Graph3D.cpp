@@ -49,7 +49,6 @@
 
 #include <gsl/gsl_vector.h>
 #include <fstream>
-Mantid::Kernel::Logger& Graph3D::logObject=Mantid::Kernel::Logger::get("Graph3D");
 
 UserParametricSurface::UserParametricSurface(const QString& xFormula, const QString& yFormula,
 											 const QString& zFormula, SurfacePlot& pw)
