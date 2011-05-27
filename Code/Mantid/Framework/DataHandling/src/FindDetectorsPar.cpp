@@ -236,7 +236,7 @@ FindDetectorsPar::fill_property(Kernel::Property *const pProperty,std::vector<do
 //
 size_t 
 FindDetectorsPar::loadParFile(const std::string &fileName){
-    g_log.information()<<" load par file is not implemented at the moment\n";
+    g_log.information()<<" load par file "<<fileName<<" is not implemented at the moment\n";
     return 0;
 }
 // 
