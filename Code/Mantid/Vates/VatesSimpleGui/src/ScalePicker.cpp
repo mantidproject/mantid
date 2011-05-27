@@ -1,10 +1,3 @@
-/*
- * scalepicker.cpp
- *
- *  Created on: Apr 12, 2011
- *      Author: 2zr
- */
-
 #include "ScalePicker.h"
 
 #include <qwt_scale_draw.h>
