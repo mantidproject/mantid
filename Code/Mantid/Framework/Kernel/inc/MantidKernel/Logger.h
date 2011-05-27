@@ -4,13 +4,14 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "System.h"
 #include "MantidKernel/MultiThreaded.h"
-#include <string>
-#include <set>
+#include "System.h"
 #include <exception>
 #include <ostream>
+#include <Poco/Message.h>
+#include <set>
 #include <streambuf>
+#include <string>
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -67,16 +68,19 @@ class ThreadSafeLogStream;
   class DLLExport Logger
   {
   public:
-    /// An enumeration of the priority levels of a log message.
-    enum Priority
-    {
-      PRIO_FATAL = 1,		  ///< A fatal error. The application will most likely terminate. This is the highest priority.
-      PRIO_ERROR = 3,       ///< An error. An operation did not complete successfully, but the application as a whole is not affected.
-      PRIO_WARNING = 4,     ///< A warning. An operation completed with an unexpected result.
-      PRIO_NOTICE = 5,      ///< An informational message, usually denoting the successful completion of an Algorithm, These are the headlines of what we should be reporting to the user.
-      PRIO_INFORMATION = 6, ///< An informational message, usually denoting the successful completion of an operation.
-      PRIO_DEBUG = 7        ///< A debugging message.This is the lowest priority.
-    };
+    // Our logger's priority types are the same as POCO's Message's types.
+    typedef Poco::Message::Priority Priority;
+
+//    /// An enumeration of the priority levels of a log message.
+//    enum Priority
+//    {
+//      PRIO_FATAL = 1,		  ///< A fatal error. The application will most likely terminate. This is the highest priority.
+//      PRIO_ERROR = 3,       ///< An error. An operation did not complete successfully, but the application as a whole is not affected.
+//      PRIO_WARNING = 4,     ///< A warning. An operation completed with an unexpected result.
+//      PRIO_NOTICE = 5,      ///< An informational message, usually denoting the successful completion of an Algorithm, These are the headlines of what we should be reporting to the user.
+//      PRIO_INFORMATION = 6, ///< An informational message, usually denoting the successful completion of an operation.
+//      PRIO_DEBUG = 7        ///< A debugging message.This is the lowest priority.
+//    };
 
     /// Sets the Loggername to a new value.
     void setName(std::string newName);

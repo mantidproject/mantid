@@ -38,9 +38,9 @@ namespace Mantid
     Constructor
     */
     SynchronisingGeometryPresenter::SynchronisingGeometryPresenter(Mantid::VATES::GeometryXMLParser& source) : 
-    m_source(source),
       m_notIntegrated(source.getNonIntegratedDimensions()), 
-      m_integrated(source.getIntegratedDimensions())
+      m_integrated(source.getIntegratedDimensions()),
+      m_source(source)
     {
 
     }
@@ -264,7 +264,7 @@ namespace Mantid
       m_view = view;
       const DimensionViewFactory& factory = m_view->getDimensionViewFactory();
       Mantid::Geometry::VecIMDDimension_sptr vecAllDimensions = m_source.getAllDimensions();
-      for(int i =0; i < vecAllDimensions.size(); i++)
+      for(size_t i =0; i < vecAllDimensions.size(); i++)
       {
         DimensionView* dimView = factory.create();
         DimPresenter_sptr dimPresenter(new DimensionPresenter(dimView, this));

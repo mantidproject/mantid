@@ -62,65 +62,65 @@ namespace Kernel
     m_enabled = enabled;
   }
 
-  /** If the Logger's log level is at least PRIO_FATAL, creates a Message with
-   *  priority PRIO_FATAL and the given message text and sends it to the attached channel.
+  /** If the Logger's log level is at least Poco::Message::PRIO_FATAL, creates a Message with
+   *  priority Poco::Message::PRIO_FATAL and the given message text and sends it to the attached channel.
    *
    *  @param msg :: The message to log.
    */
   void Logger::fatal(const std::string& msg)
   {
-    log(msg, PRIO_FATAL);
+    log(msg, Poco::Message::PRIO_FATAL);
   }
 
-  /** If the Logger's log level is at least PRIO_ERROR, creates a Message with priority
-   *  PRIO_ERROR and the given message text and sends it to the attached channel.
+  /** If the Logger's log level is at least Poco::Message::PRIO_ERROR, creates a Message with priority
+   *  Poco::Message::PRIO_ERROR and the given message text and sends it to the attached channel.
    *
    *  @param msg :: The message to log.
    */
   void Logger::error(const std::string& msg)
   {
-    log(msg, PRIO_ERROR);
+    log(msg, Poco::Message::PRIO_ERROR);
   }
 
-  /** If the Logger's log level is at least PRIO_WARNING, creates a Message with
-   *  priority PRIO_WARNING and the given message text and sends it to the attached channel.
+  /** If the Logger's log level is at least Poco::Message::PRIO_WARNING, creates a Message with
+   *  priority Poco::Message::PRIO_WARNING and the given message text and sends it to the attached channel.
    *
    *  @param msg :: The message to log.
    */
   void Logger::warning(const std::string& msg)
   {
-    log(msg, PRIO_WARNING);
+    log(msg, Poco::Message::PRIO_WARNING);
   }
 
-  /** If the Logger's log level is at least PRIO_NOTICE, creates a Message with
-   *  priority PRIO_NOTICE and the given message text and sends it to the attached channel.
+  /** If the Logger's log level is at least Poco::Message::PRIO_NOTICE, creates a Message with
+   *  priority Poco::Message::PRIO_NOTICE and the given message text and sends it to the attached channel.
    *
    *  @param msg :: The message to log.
    */
   void Logger::notice(const std::string& msg)
   {
-    log(msg, PRIO_NOTICE);
+    log(msg, Poco::Message::PRIO_NOTICE);
   }
 
-  /** If the Logger's log level is at least PRIO_INFORMATION, creates a Message with
-   *  priority PRIO_INFORMATION and the given message text and sends it to the
+  /** If the Logger's log level is at least Poco::Message::PRIO_INFORMATION, creates a Message with
+   *  priority Poco::Message::PRIO_INFORMATION and the given message text and sends it to the
    *  attached channel.
    *
    *  @param msg :: The message to log.
    */
   void Logger::information(const std::string& msg)
   {
-    log(msg, PRIO_INFORMATION);
+    log(msg, Poco::Message::PRIO_INFORMATION);
   }
 
-  /** If the Logger's log level is at least PRIO_DEBUG, creates a Message with priority
-   *  PRIO_DEBUG and the given message text and sends it to the attached channel.
+  /** If the Logger's log level is at least Poco::Message::PRIO_DEBUG, creates a Message with priority
+   *  Poco::Message::PRIO_DEBUG and the given message text and sends it to the attached channel.
    *
    *  @param msg :: The message to log.
    */
   void Logger::debug(const std::string& msg)
   {
-    log(msg, PRIO_DEBUG);
+    log(msg, Poco::Message::PRIO_DEBUG);
   }
 
   /** Logs the given message at debug level, followed by the data in buffer.
@@ -453,17 +453,17 @@ namespace Kernel
     {
       switch( priority )
       {
-      case PRIO_FATAL: m_log->fatal(message);
+      case Poco::Message::PRIO_FATAL: m_log->fatal(message);
       break;
-      case PRIO_ERROR: m_log->error(message);
+      case Poco::Message::PRIO_ERROR: m_log->error(message);
       break;
-      case PRIO_WARNING: m_log->warning(message);
+      case Poco::Message::PRIO_WARNING: m_log->warning(message);
       break;
-      case PRIO_NOTICE: m_log->notice(message);
+      case Poco::Message::PRIO_NOTICE: m_log->notice(message);
       break;
-      case PRIO_INFORMATION: m_log->information(message);
+      case Poco::Message::PRIO_INFORMATION: m_log->information(message);
       break;
-      case PRIO_DEBUG: m_log->debug(message);
+      case Poco::Message::PRIO_DEBUG: m_log->debug(message);
       break;
       default:
         break;

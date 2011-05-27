@@ -445,15 +445,15 @@ void ApplicationWindow::showLogWindowContextMenu(const QPoint & p)
 
   //check the right level
   int level = Mantid::Kernel::Logger::get("").getLevel(); //get the root logger logging level
-  if (level == Mantid::Kernel::Logger::PRIO_ERROR)
+  if (level == Poco::Message::PRIO_ERROR)
     actionLogLevelError->setChecked(true);
-  if (level == Mantid::Kernel::Logger::PRIO_WARNING)
+  if (level == Poco::Message::PRIO_WARNING)
     actionLogLevelWarning->setChecked(true);
-  if (level == Mantid::Kernel::Logger::PRIO_NOTICE)
+  if (level == Poco::Message::PRIO_NOTICE)
     actionLogLevelNotice->setChecked(true);
-  if (level == Mantid::Kernel::Logger::PRIO_INFORMATION)
+  if (level == Poco::Message::PRIO_INFORMATION)
     actionLogLevelInformation->setChecked(true);
-  if (level == Mantid::Kernel::Logger::PRIO_DEBUG)
+  if (level == Poco::Message::PRIO_DEBUG)
     actionLogLevelDebug->setChecked(true);
 
   //Mantid log level changes
@@ -12079,11 +12079,11 @@ void ApplicationWindow::createActions()
   actionLogLevelDebug->setCheckable(true);
 
   logLevelMapper = new QSignalMapper(this);
-  logLevelMapper->setMapping(actionLogLevelError, Mantid::Kernel::Logger::PRIO_ERROR);
-  logLevelMapper->setMapping(actionLogLevelWarning, Mantid::Kernel::Logger::PRIO_WARNING);
-  logLevelMapper->setMapping(actionLogLevelNotice, Mantid::Kernel::Logger::PRIO_NOTICE);
-  logLevelMapper->setMapping(actionLogLevelInformation, Mantid::Kernel::Logger::PRIO_INFORMATION);
-  logLevelMapper->setMapping(actionLogLevelDebug, Mantid::Kernel::Logger::PRIO_DEBUG);
+  logLevelMapper->setMapping(actionLogLevelError, Poco::Message::PRIO_ERROR);
+  logLevelMapper->setMapping(actionLogLevelWarning, Poco::Message::PRIO_WARNING);
+  logLevelMapper->setMapping(actionLogLevelNotice, Poco::Message::PRIO_NOTICE);
+  logLevelMapper->setMapping(actionLogLevelInformation, Poco::Message::PRIO_INFORMATION);
+  logLevelMapper->setMapping(actionLogLevelDebug, Poco::Message::PRIO_DEBUG);
   
   connect(actionLogLevelError, SIGNAL(activated()), logLevelMapper, SLOT (map()));
   connect(actionLogLevelWarning, SIGNAL(activated()), logLevelMapper, SLOT (map()));
