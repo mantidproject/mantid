@@ -68,6 +68,11 @@ namespace MDEvents
     declareProperty(new PropertyWithValue<double>("PeakRadius",1.0,Direction::Input),
         "Fixed radius around each peak position in which to integrate.");
 
+    declareProperty(new PropertyWithValue<double>("BackgroundRadius",0.0,Direction::Input),
+        "Radius to use to evaluate the background of the peak.\n"
+        "The signal density around the peak (PeakRadius < r < BackgroundRadius) is used to estimate the background under the peak.\n"
+        "If smaller than PeakRadius, no background measurement is done." );
+
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::InOut),
         "A PeaksWorkspace containing the peaks to integrate. The peaks' integrated intensities will be updated"
         "with the new values.");
@@ -83,7 +88,20 @@ namespace MDEvents
     if (nd != 3)
       throw std::invalid_argument("For now, we expect the input MDEventWorkspace to have 3 dimensions only.");
 
-    //TODO: PRAGMA_OMP(parallel for schedule(dynamic, 10) )
+    /// Peak workspace to integrate
+    Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("PeaksWorkspace");
+
+    /// Value of the CoordinatesToUse property.
+    std::string CoordinatesToUse = getPropertyValue("CoordinatesToUse");
+
+    // TODO: Confirm that the coordinates requested match those in the MDEventWorkspace
+
+    /// Radius to use around peaks
+    double PeakRadius = getProperty("PeakRadius");
+    /// Background radius
+    double BackgroundRadius = getProperty("BackgroundRadius");
+
+    PRAGMA_OMP(parallel for schedule(dynamic, 10) )
     for (int i=0; i < int(peakWS->getNumberPeaks()); ++i)
     {
       // Get a direct ref to that peak.
@@ -98,8 +116,6 @@ namespace MDEvents
       else if (CoordinatesToUse == "HKL")
         pos = p.getHKL();
 
-      double radius = getProperty("PeakRadius");
-
       // Build the sphere transformation
       bool dimensionsUsed[nd];
       coord_t center[nd];
@@ -113,13 +129,44 @@ namespace MDEvents
       // Perform the integration into whatever box is contained within.
       double signal = 0;
       double errorSquared = 0;
-      ws->getBox()->integrateSphere(sphere, radius*radius, signal, errorSquared);
+      ws->getBox()->integrateSphere(sphere, PeakRadius*PeakRadius, signal, errorSquared);
+
+      // Integrate around the background radius
+      double bgSignal = 0;
+      double bgErrorSquared = 0;
+      if (BackgroundRadius > PeakRadius)
+      {
+        ws->getBox()->integrateSphere(sphere, BackgroundRadius*BackgroundRadius, bgSignal, bgErrorSquared);
+        // Subtract the peak part to get the intensity in the shell (PeakRadius < r < BackgroundRadius)
+        bgSignal -= signal;
+        // We can subtract the error (instead of adding) because the two values are 100% dependent; this is the same as integrating a shell.
+        bgErrorSquared -= errorSquared;
+
+        double ratio = (PeakRadius / BackgroundRadius);
+        // Relative volume of peak vs the background
+        double peakVolume = ratio * ratio * ratio;
+        // Volume of the bg shell
+        double bgVolume = 1.0 - ratio * ratio * ratio;
+        // Finally, you will multiply the bg intensity by this to get the estimated background under the peak volume
+        double scaleFactor = peakVolume / bgVolume;
+        bgSignal *= scaleFactor;
+        bgErrorSquared *= scaleFactor;
+
+        // Adjust the integrated values.
+        signal -= bgSignal;
+        // But we add the errors together
+        errorSquared += bgErrorSquared;
+      }
+
 
       // Save it back in the peak object.
       p.setIntensity(signal);
       p.setSigmaIntensity( sqrt(errorSquared) );
 
-      g_log.information() << "Peak " << i << " at " << pos << ": signal " << signal << std::endl;
+      g_log.information() << "Peak " << i << " at " << pos << ": signal "
+          << signal << " (sig^2 " << errorSquared << "), with background "
+          << bgSignal << " (sig^2 " << bgErrorSquared << ") subtracted."
+          << std::endl;
     }
 
   }
@@ -130,8 +177,6 @@ namespace MDEvents
   void MDEWPeakIntegration::exec()
   {
     inWS = getProperty("InputWorkspace");
-    peakWS = getProperty("PeaksWorkspace");
-    CoordinatesToUse = getPropertyValue("CoordinatesToUse");
 
     CALL_MDEVENT_FUNCTION(this->integrate, inWS);
   }

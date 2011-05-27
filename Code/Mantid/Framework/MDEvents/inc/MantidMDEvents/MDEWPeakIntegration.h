@@ -44,12 +44,6 @@ namespace MDEvents
     /// Input MDEventWorkspace
     Mantid::API::IMDEventWorkspace_sptr inWS;
 
-    /// Peak workspace to integrate
-    Mantid::DataObjects::PeaksWorkspace_sptr peakWS;
-
-    /// Value of the CoordinatesToUse property.
-    std::string CoordinatesToUse;
-
   };
 
 
