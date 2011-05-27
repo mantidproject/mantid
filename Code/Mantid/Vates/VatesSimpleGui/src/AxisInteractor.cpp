@@ -1,9 +1,3 @@
-/*
- * axisinteractor.cpp
- *
- *  Created on: Apr 7, 2011
- *      Author: 2zr
- */
 #include "AxisInteractor.h"
 #include "Indicator.h"
 #include "ScalePicker.h"
