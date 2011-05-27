@@ -74,4 +74,4 @@ private:
 	double maximum; ///< The maximum extent of the axis
 };
 
-#endif /* AXISINFORMATION_H_ */
+#endif // AXISINFORMATION_H_

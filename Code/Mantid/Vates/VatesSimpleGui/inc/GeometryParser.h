@@ -63,4 +63,4 @@ private:
 	Poco::AutoPtr<Poco::XML::Document> pDoc; ///< A XML document handle
 };
 
-#endif /* GEOMETRYPARSER_H_ */
+#endif // GEOMETRYPARSER_H_

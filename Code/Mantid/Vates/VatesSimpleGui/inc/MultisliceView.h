@@ -1,5 +1,5 @@
-#ifndef MULTISLICEVIEW_H
-#define MULTISLICEVIEW_H
+#ifndef MULTISLICEVIEW_H_
+#define MULTISLICEVIEW_H_
 
 #include <QtGui/QWidget>
 #include <QPointer>
@@ -111,4 +111,4 @@ private:
     Ui::MultiSliceViewClass ui; ///< The view's UI form
 };
 
-#endif // MULTISLICEVIEW_H
+#endif // MULTISLICEVIEW_H_

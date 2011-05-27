@@ -1,5 +1,5 @@
-#ifndef MODECONTROLWIDGET_H
-#define MODECONTROLWIDGET_H
+#ifndef MODECONTROLWIDGET_H_
+#define MODECONTROLWIDGET_H_
 
 #include <QtGui/QWidget>
 #include "ui_ModeControlWidget.h"
@@ -78,4 +78,4 @@ private:
     Ui::ModeControlWidgetClass ui; ///< The mode control widget's UI form
 };
 
-#endif // MODECONTROLWIDGET_H
+#endif // MODECONTROLWIDGET_H_

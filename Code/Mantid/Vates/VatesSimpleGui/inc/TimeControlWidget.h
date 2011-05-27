@@ -1,5 +1,5 @@
-#ifndef TIMECONTROLWIDGET_H
-#define	TIMECONTROLWIDGET_H
+#ifndef TIMECONTROLWIDGET_H_
+#define	TIMECONTROLWIDGET_H_
 
 #include "ui_TimeControlWidget.h"
 /**
@@ -43,4 +43,4 @@ public:
     virtual ~TimeControlWidget();
 };
 
-#endif	// TIMECONTROLWIDGET_H
+#endif	// TIMECONTROLWIDGET_H_

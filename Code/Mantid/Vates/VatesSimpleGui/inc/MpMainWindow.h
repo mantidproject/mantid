@@ -1,5 +1,5 @@
-#ifndef MPMAINWINDOW_H
-#define MPMAINWINDOW_H
+#ifndef MPMAINWINDOW_H_
+#define MPMAINWINDOW_H_
 
 #include <QtGui/QMainWindow>
 #include "ui_MpMainWindow.h"
@@ -87,4 +87,4 @@ private:
     void swapViews();
 };
 
-#endif // MPMAINWINDOW_H
+#endif // MPMAINWINDOW_H_

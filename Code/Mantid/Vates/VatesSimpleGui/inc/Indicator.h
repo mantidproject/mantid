@@ -100,4 +100,4 @@ private:
 	int left_edge; ///< The triangle's closest point to the axis indicator
 };
 
-#endif /* INDICATOR_H_ */
+#endif // INDICATOR_H_

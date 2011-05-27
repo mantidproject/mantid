@@ -68,4 +68,4 @@ public:
   enum Direction {X, Y, Z};
 };
 
-#endif /* IVIEW_H_ */
+#endif // IVIEW_H_

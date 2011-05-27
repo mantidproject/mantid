@@ -1,5 +1,5 @@
-#ifndef THREESLICEVIEW_H
-#define THREESLICEVIEW_H
+#ifndef THREESLICEVIEW_H_
+#define THREESLICEVIEW_H_
 
 #include <QtGui/QWidget>
 #include <QPointer>
@@ -102,4 +102,4 @@ private:
 
 };
 
-#endif // THREESLICEVIEW_H
+#endif // THREESLICEVIEW_H_

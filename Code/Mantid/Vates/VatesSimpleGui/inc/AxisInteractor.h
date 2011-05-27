@@ -116,4 +116,4 @@ private:
 	Ui::AxisInteractor ui; ///< The form for the widget
 };
 
-#endif /* AXISINTERACTOR_H_ */
+#endif // AXISINTERACTOR_H_

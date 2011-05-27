@@ -1,5 +1,5 @@
-#ifndef STANDARDVIEW_H
-#define STANDARDVIEW_H
+#ifndef STANDARDVIEW_H_
+#define STANDARDVIEW_H_
 
 #include <QtGui/QWidget>
 #include <QPointer>
@@ -73,4 +73,4 @@ private:
     QPointer<pqRenderView> view; ///< The main view
 };
 
-#endif // STANDARDVIEW_H
+#endif // STANDARDVIEW_H_
