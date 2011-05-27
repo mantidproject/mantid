@@ -66,6 +66,11 @@ add_definitions ( -DPOCO_NO_UNWINDOWS )
 set ( CONSOLE ON CACHE BOOL "Switch for enabling/disabling the console" )
 
 ###########################################################################
+# Windows import library needs to go to bin as well
+###########################################################################
+set ( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
+
+###########################################################################
 # (Fake) installation variables to keep windows sweet
 ###########################################################################
 set ( BIN_DIR bin )
