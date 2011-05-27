@@ -36,7 +36,7 @@ void ParameterReference::reset(IFitFunction* fun, size_t index)
   CompositeFunction* cf = dynamic_cast<CompositeFunction*>(fun);
   while (cf)
   {
-    int iFun = cf->functionIndex(iLocal); // TODO squashing the warning breaks the code
+    int iFun = static_cast<int>(cf->functionIndex(iLocal)); // TODO squashing the warning breaks the code
     fLocal = cf->getFunction(iFun);
     iLocal = fLocal->parameterIndex(cf->parameterLocalName(iLocal));
     cf = dynamic_cast<CompositeFunction*>(fLocal);
