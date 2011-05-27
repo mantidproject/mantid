@@ -153,7 +153,7 @@ namespace Mantid
             outputWS->dataE(i).assign(e_data.begin(), e_data.end());
 
             //Report progress
-            prog.report();
+            prog.report(name());
             PARALLEL_END_INTERUPT_REGION
           }
           PARALLEL_CHECK_INTERUPT_REGION
@@ -227,7 +227,7 @@ namespace Mantid
           // Populate the output workspace X values
           outputWS->setX(hist,XValues_new);
 
-          prog.report();
+          prog.report(name());
           PARALLEL_END_INTERUPT_REGION
         }
         PARALLEL_CHECK_INTERUPT_REGION
