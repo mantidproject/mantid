@@ -1407,6 +1407,7 @@ void MantidUI::logMessage(const Poco::Message& msg)
   appWindow()->results->setTextColor(Qt::black);
 }
 
+
 void MantidUI::manageMantidWorkspaces()
 {
 #ifdef _WIN32

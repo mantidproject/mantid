@@ -388,7 +388,7 @@ namespace Mantid
                       
              // loop if any near point belongs to group;
              for(size_t i=0;i<6;i++){
-                 int ic = i/2;
+                 int ic = int(i)/2;
                  int is = (i%2==0)?-1:1;
                  V3D cs = center;
                  cs[ic]    +=is*width[ic]/2;

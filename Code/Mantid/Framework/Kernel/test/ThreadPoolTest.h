@@ -241,7 +241,7 @@ public:
   class MyTestProgress : public ProgressBase
   {
   public:
-    MyTestProgress(double start,double end, int numSteps, ThreadPoolTest * myParent)
+    MyTestProgress(double start,double end, int64_t numSteps, ThreadPoolTest * myParent)
     : ProgressBase(start,end, numSteps), parent(myParent)
     {
     }
@@ -250,7 +250,7 @@ public:
     {
       parent->last_report_message = msg;
       parent->last_report_counter = m_i;
-      double p = m_start + m_step*(m_i - m_ifirst);
+      double p = m_start + m_step*double(m_i - m_ifirst);
       parent->last_report_value = p;
     }
 
@@ -259,7 +259,7 @@ public:
   };
 
   /// Index that was last set at doReport
-  int last_report_counter;
+  int64_t last_report_counter;
   double last_report_value;
   std::string last_report_message;
 
