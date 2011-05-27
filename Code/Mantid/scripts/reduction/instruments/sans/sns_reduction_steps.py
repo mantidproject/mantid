@@ -339,6 +339,11 @@ class LoadRun(ReductionStep):
             
             mantid[workspace].getRun().addProperty_str("transmission_ws", transmission_ws, True)
             
+            
+        #if workspace in reducer._data_files:  
+        #    CloneWorkspace(workspace, workspace+"_pristine")
+        #    Divide(workspace, workspace, workspace)
+        
         # Remove the dirty flag if it existed
         reducer.clean(workspace)
         return "Data file loaded: %s\n%s" % (workspace, output_str)
@@ -374,34 +379,38 @@ class Transmission(BaseTransmission):
         self._transmission_ws = None
     
     def execute(self, reducer, workspace):
-        # The transmission calculation only works on the original un-normalized counts
-        if not reducer.is_clean(workspace):
-            if mtd[workspace].getRun().hasProperty("transmission_ws"):
-                trans_prop = mtd[workspace].getRun().getProperty("transmission_ws")
-                if mtd.workspaceExists(trans_prop.value):
-                    self._transmission_ws = trans_prop.value
-                else:
-                    raise RuntimeError, "The transmission workspace for %s is no longer available" % trans_prop.value
+        if self._transmission_ws is not None and mtd.workspaceExists(self._transmission_ws):
+            # We have everything we need to apply the transmission correction
+            pass
+        elif mtd[workspace].getRun().hasProperty("transmission_ws"):
+            trans_prop = mtd[workspace].getRun().getProperty("transmission_ws")
+            if mtd.workspaceExists(trans_prop.value):
+                self._transmission_ws = trans_prop.value
             else:
+                raise RuntimeError, "The transmission workspace for %s is no longer available" % trans_prop.value
+        else:
+            # The transmission calculation only works on the original un-normalized counts
+            if not reducer.is_clean(workspace):
                 raise RuntimeError, "The transmission can only be calculated using un-modified data"
-        
-        beam_center = reducer.get_beam_center()
 
-        if self._transmission_ws is None:
-            self._transmission_ws = "transmission_"+workspace
+            beam_center = reducer.get_beam_center()
+    
+            if self._transmission_ws is None:
+                self._transmission_ws = "transmission_"+workspace
+    
+            # Calculate the transmission as a function of wavelength
+            EQSANSTransmission(InputWorkspace=workspace,
+                               OutputWorkspace=self._transmission_ws,
+                               XCenter=beam_center[0],
+                               YCenter=beam_center[1],
+                               NormalizeToUnity = self._normalize)
+            
+            mantid[workspace].getRun().addProperty_str("transmission_ws", self._transmission_ws, True)
 
-        # Calculate the transmission as a function of wavelength
-        EQSANSTransmission(InputWorkspace=workspace,
-                           OutputWorkspace=self._transmission_ws,
-                           XCenter=beam_center[0],
-                           YCenter=beam_center[1],
-                           NormalizeToUnity = self._normalize)
-        
         # Apply the transmission. For EQSANS, we just divide by the 
         # transmission instead of using the angular dependence of the
         # correction.
         reducer.dirty(workspace)
-        mantid[workspace].getRun().addProperty_str("transmission_ws", self._transmission_ws, True)
         if self._theta_dependent:
             # To apply the transmission correction using the theta-dependent algorithm
             # we should get the beam spectrum out of the measured transmission
