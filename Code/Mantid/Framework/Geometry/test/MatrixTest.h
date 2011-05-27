@@ -178,6 +178,15 @@ public:
 	  TSM_ASSERT_EQUALS("The data in a matrix have to be located row-wise, so multiplication by (0,0,1)^T selects 3-rd column ",true,V3D(2,5,8)==rez3);
   }
 
+
+  void testIsRotation()
+  {
+    Matrix<double> d(3,3,true);
+    TS_ASSERT(d.isRotation());
+    d[0][0]=-1;
+    TS_ASSERT(!d.isRotation());
+  }
+
   void testToRotation()
   {
     /*

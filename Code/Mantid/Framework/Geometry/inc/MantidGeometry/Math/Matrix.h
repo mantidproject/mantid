@@ -145,7 +145,9 @@ namespace Mantid
 
       int GaussJordan(Matrix<T>&);      ///< Create a Gauss-Jordan Invertion
       T compSum() const;
-
+      
+      // Check if a rotation matrix
+      bool isRotation();
       // Transform to a rotation matrix
       std::vector<T> toRotation();
     };
