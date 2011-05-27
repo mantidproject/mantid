@@ -97,7 +97,7 @@ void CheckWorkspacesMatch::doComparison()
     for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); i++)
     {
       PARALLEL_START_INTERUPT_REGION
-      prog->reportIncrement(1, "EventLists");
+      prog->report("EventLists");
       if (!mismatchedEvent) // This guard will avoid checking unnecessarily
       {
         const EventList &el1 = ews1->getEventList(i);
@@ -183,7 +183,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   for ( int i = 0; i < static_cast<int>(numHists); ++i )
   {
     PARALLEL_START_INTERUPT_REGION
-    prog->reportIncrement(1, "Histograms");
+    prog->report("Histograms");
     if (resultBool) // Avoid checking unnecessarily
     {
 

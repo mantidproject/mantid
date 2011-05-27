@@ -16,7 +16,7 @@ namespace API
     @param numSteps :: Number of times report(...) method will be called.
 */
 Progress::Progress(Algorithm* alg,double start,double end, int numSteps)
-  : ProgressBase(start, end, numSteps),
+  : ProgressBase(start, end, int64_t(numSteps)),
     m_alg(alg)
 {
 }
@@ -28,7 +28,7 @@ Progress::Progress(Algorithm* alg,double start,double end, int numSteps)
     @param numSteps :: Number of times report(...) method will be called.
 */
 Progress::Progress(Algorithm* alg,double start,double end, int64_t numSteps)
-  : ProgressBase(start, end, int(numSteps)),
+  : ProgressBase(start, end, int64_t(numSteps)),
     m_alg(alg)
 {
 }
@@ -40,7 +40,7 @@ Progress::Progress(Algorithm* alg,double start,double end, int64_t numSteps)
     @param numSteps :: Number of times report(...) method will be called.
 */
 Progress::Progress(Algorithm* alg,double start,double end, size_t numSteps)
-  : ProgressBase(start, end, int(numSteps)),
+  : ProgressBase(start, end, int64_t(numSteps)),
     m_alg(alg)
 {
 }
@@ -60,7 +60,7 @@ Progress::~Progress()
 void Progress::doReport(const std::string& msg)
 {
   // Progress as a float
-  double p = m_start + m_step*(m_i - m_ifirst);
+  double p = m_start + m_step*double(m_i - m_ifirst);
   if (p > m_end) p = m_end;
   if (!m_alg) return;
   m_alg->progress(p,msg);

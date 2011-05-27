@@ -20,7 +20,7 @@ namespace Kernel
   {
   public:
     ProgressBase();
-    ProgressBase(double start,double end, int numSteps);
+    ProgressBase(double start,double end, int64_t numSteps);
     virtual ~ProgressBase();
 
     /// Pure virtual method that does the progress reporting, to be overridden
@@ -41,10 +41,10 @@ namespace Kernel
     }
 
     void report(const std::string& msg);
-    void report(int i, const std::string& msg = "");
+    void report(int64_t i, const std::string& msg = "");
     void reportIncrement(int inc, const std::string& msg = "");
     void reportIncrement(size_t inc, const std::string& msg = "");
-    void setNumSteps(int nsteps);
+    void setNumSteps(int64_t nsteps);
     void setNotifyStep(double notifyStepPct);
 
   protected:
@@ -53,19 +53,19 @@ namespace Kernel
     /// Ending progress
     double m_end;
     /// Loop counter initial value
-    int m_ifirst;
+    int64_t m_ifirst;
     /// Loop counter upper bound
-    int m_numSteps;
+    int64_t m_numSteps;
     /// Frequency of sending the notification (every m_step times)
-    int m_notifyStep;
+    int64_t m_notifyStep;
     /// Frequency of sending the notification (as a min percentage step, e.g. 1 for 1 % (default) )
     double m_notifyStepPct;
     /// Progress increment at each loop
     double m_step;
     /// Loop counter
-    int m_i;
+    int64_t m_i;
     /// Last loop counter value the was a peport
-    int m_last_reported;
+    int64_t m_last_reported;
   };
 
 

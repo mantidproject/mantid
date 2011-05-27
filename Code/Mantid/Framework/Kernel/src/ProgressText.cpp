@@ -44,7 +44,7 @@ namespace Kernel
    */
   void ProgressText::doReport(const std::string & msg)
   {
-    double p = m_start + m_step*(m_i - m_ifirst);
+    double p = m_start + m_step*double(m_i - m_ifirst);
     if (p > m_end) p = m_end;
     // Print out
     int pct = static_cast<int>(p * 100.0);

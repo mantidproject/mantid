@@ -27,7 +27,7 @@ namespace Kernel
       @param end :: Ending progress
       @param numSteps :: Number of times report(...) method will be called.
   */
-  ProgressBase::ProgressBase(double start,double end, int numSteps)
+  ProgressBase::ProgressBase(double start,double end, int64_t numSteps)
     : m_start(start),m_end(end),
       m_ifirst(0),
       m_notifyStepPct(1),
@@ -66,7 +66,7 @@ namespace Kernel
       @param i ::   The new value of the loop counter
       @param msg :: Optional message string
   */
-  void ProgressBase::report(int i, const std::string& msg)
+  void ProgressBase::report(int64_t i, const std::string& msg)
   {
     // Set the loop coutner to the spot specified.
     m_i = i;
@@ -85,7 +85,7 @@ namespace Kernel
   void ProgressBase::reportIncrement(int inc, const std::string& msg)
   {
     // Increment the loop counter
-    m_i += inc;
+    m_i += int64_t(inc);
     if (m_i - m_last_reported < m_notifyStep ) return;
     m_last_reported = m_i;
     this->doReport(msg);
@@ -100,7 +100,7 @@ namespace Kernel
   */
   void ProgressBase::reportIncrement(size_t inc, const std::string& msg)
   {
-    m_i += int(inc);
+    m_i += int64_t(inc);
     if (m_i - m_last_reported < m_notifyStep ) return;
     m_last_reported = m_i;
     this->doReport(msg);
@@ -112,12 +112,12 @@ namespace Kernel
    *
    * @param nsteps :: the number of steps to take between start and end
    */
-  void ProgressBase::setNumSteps(int nsteps)
+  void ProgressBase::setNumSteps(int64_t nsteps)
   {
     m_numSteps = nsteps;
     if (m_numSteps <= 0) m_numSteps = 1; // Minimum of 1
-    m_step = (m_end-m_start) / (m_numSteps);
-    m_notifyStep = (static_cast<int>(double(m_numSteps)*m_notifyStepPct/100/(m_end-m_start)));
+    m_step = (m_end-m_start) / double(m_numSteps);
+    m_notifyStep = (static_cast<int64_t>(double(m_numSteps)*m_notifyStepPct/100/(m_end-m_start)));
     if (m_notifyStep <= 0) m_notifyStep = 1;
   }
 
@@ -132,7 +132,7 @@ namespace Kernel
   void ProgressBase::setNotifyStep(double notifyStepPct)
   {
     m_notifyStepPct = notifyStepPct;
-    m_notifyStep = (static_cast<int>(double(m_numSteps)*m_notifyStepPct/100/(m_end-m_start)));
+    m_notifyStep = (static_cast<int64_t>(double(m_numSteps)*m_notifyStepPct/100/(m_end-m_start)));
     if (m_notifyStep <= 0) m_notifyStep = 1;
   }
 

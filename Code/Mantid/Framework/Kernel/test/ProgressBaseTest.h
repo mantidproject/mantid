@@ -22,7 +22,7 @@ public:
   class MyTestProgress : public ProgressBase
   {
   public:
-    MyTestProgress(double start,double end, int numSteps)
+    MyTestProgress(double start,double end, int64_t numSteps)
     : ProgressBase(start,end, numSteps)
     {
     }
@@ -31,13 +31,13 @@ public:
     {
       last_report_message = msg;
       last_report_counter = m_i;
-      double p = m_start + m_step*(m_i - m_ifirst);
+      double p = m_start + m_step*double(m_i - m_ifirst);
       last_report_value = p;
     }
 
   public:
     /// Index that was last set at doReport
-    int last_report_counter;
+    int64_t last_report_counter;
     double last_report_value;
     std::string last_report_message;
   };
@@ -115,6 +115,25 @@ public:
     p.report(); TS_ASSERT_EQUALS( p.last_report_counter, 4);
   }
 
+
+  /** Progress report would work incorrectly for ridiculously large integer # of steps. */
+  void test_setNumSteps_forRidiculouslyLargeNumbers()
+  {
+    int64_t reallyBig = int64_t(1000 * 1000) * int64_t(1000 * 1000);
+    MyTestProgress p(0.0, 1.0, 10);
+    p.last_report_counter = -1;
+    p.setNumSteps(reallyBig);
+
+    p.report("");
+    TS_ASSERT_EQUALS( p.last_report_counter, -1); // Not reported yet
+
+    // Need 10*1e9 reports before you even reach 1%
+    for (size_t i=0; i<10; i++)
+      p.reportIncrement(1000000000, "");
+
+    TS_ASSERT_EQUALS( p.last_report_counter, 10000000001);
+    TS_ASSERT_DELTA( p.last_report_value, 1e-2, 1e-6);
+  }
 
 };
 

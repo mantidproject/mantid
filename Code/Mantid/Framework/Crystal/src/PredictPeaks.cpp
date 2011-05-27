@@ -179,11 +179,15 @@ namespace Crystal
 
     g_log.information() << "HKL range for d_min of " << minD << " is from " << hklMin << " to " << hklMax << ", a total of " << numHKLs << " possible HKL's\n";
 
+    if (numHKLs > 10000000000)
+      throw std::invalid_argument("More than 10 billion HKLs to search. Is your d_min value too small?");
+
 
     // Counter of possible peaks
     size_t numInRange = 0;
 
     Progress prog(this, 0.0, 1.0, numHKLs);
+    prog.setNotifyStep(0.01);
 
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int h=(int)hklMin[0]; h <= (int)hklMax[0]; h++)
