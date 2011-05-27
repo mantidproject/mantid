@@ -12,6 +12,14 @@
 #include "MantidMDEvents/MDEWPeakIntegration.h"
 #include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <boost/math/distributions/normal.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/math/special_functions/pow.hpp>
+#include <boost/random/linear_congruential.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -27,8 +35,7 @@ using namespace Mantid::MDEvents;
 class MDEWPeakIntegrationTest : public CxxTest::TestSuite
 {
 public:
-  std::string outWSName;
-    
+
   void test_Init()
   {
     MDEWPeakIntegration alg;
@@ -37,13 +44,14 @@ public:
   }
   
 
+  //-------------------------------------------------------------------------------
   /** Run the MDEWPeakIntegration with the given peak radius integration param */
-  void doRun(double PeakRadius, double BackgroundRadius)
+  static void doRun(double PeakRadius, double BackgroundRadius)
   {
     MDEWPeakIntegration alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", outWSName ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "MDEWPeakIntegrationTest_MDEWS" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "MDEWPeakIntegrationTest_peaks" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CoordinatesToUse", "HKL" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("PeakRadius", PeakRadius ) );
@@ -53,11 +61,10 @@ public:
   }
 
 
-  /** Full test using faked-out peak data */
-  void test_exec()
+  //-------------------------------------------------------------------------------
+  /** Create the (blank) MDEW */
+  static void createMDEW()
   {
-    outWSName = "MDEWPeakIntegrationTest_MDEWS";
-
     // ---- Start with empty MDEW ----
     AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 16,
         "Dimensions", "3",
@@ -67,19 +74,33 @@ public:
         "BinarySplit", "0",
         "SplitInto", "5",
         "MaxRecursionDepth", "2",
-        "OutputWorkspace", outWSName.c_str());
+        "OutputWorkspace", "MDEWPeakIntegrationTest_MDEWS");
+  }
 
-    // --- Give it a fake peak ------
+
+  //-------------------------------------------------------------------------------
+  /** Add a fake peak */
+  static void addPeak(size_t num, double x, double y, double z, double radius)
+  {
+    std::ostringstream mess;
+    mess << num << ", " << x << ", " << y << ", " << z << ", " << radius;
     AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
-        "InputWorkspace", outWSName.c_str(), "PeakParams", "1000, 0.,0.,0., 1.0");
+        "InputWorkspace", "MDEWPeakIntegrationTest_MDEWS", "PeakParams", mess.str().c_str());
 
-    AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
-        "InputWorkspace", outWSName.c_str(), "PeakParams", "1000, 2.,3.,4., 0.5");
+  }
 
-    AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
-        "InputWorkspace", outWSName.c_str(), "PeakParams", "1000, 5.,5.,5., 2.0");
 
-    MDEventWorkspace3::sptr mdews = boost::dynamic_pointer_cast<MDEventWorkspace3>(AnalysisDataService::Instance().retrieve(outWSName));
+  //-------------------------------------------------------------------------------
+  /** Full test using faked-out peak data */
+  void test_exec()
+  {
+    // --- Fake workspace with 3 peaks ------
+    createMDEW();
+    addPeak(1000, 0.,0.,0., 1.0);
+    addPeak(1000, 2.,3.,4., 0.5);
+    addPeak(1000, 5.,5.,5., 2.0);
+
+    MDEventWorkspace3::sptr mdews = boost::dynamic_pointer_cast<MDEventWorkspace3>(AnalysisDataService::Instance().retrieve("MDEWPeakIntegrationTest_MDEWS"));
     TS_ASSERT_EQUALS( mdews->getNPoints(), 3000);
     TS_ASSERT_DELTA( mdews->getBox()->getSignal(), 3000.0, 1e-2);
 
@@ -125,9 +146,8 @@ public:
     TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(), 15.0, 10);
 
     // ===============================================================================
-    // ---- Now add a background signal --------------
-    AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
-        "InputWorkspace", outWSName.c_str(), "PeakParams", "1000, 0.,0.,0., 2.0");
+    // ---- Now add a background signal over one peak--------------
+    addPeak(1000, 0.,0.,0., 2.0);
 
     // ------------- Integrate with 1.0 radius and 2.0 background------------------------
     doRun(1.0, 2.0);
@@ -156,7 +176,7 @@ public:
     TS_ASSERT_DELTA( peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
     TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(), 125.0, 10);
 
-    AnalysisDataService::Instance().remove(outWSName);
+    AnalysisDataService::Instance().remove("MDEWPeakIntegrationTest_MDEWS");
     AnalysisDataService::Instance().remove("MDEWPeakIntegrationTest_peaks");
   }
 
@@ -166,6 +186,109 @@ public:
 
 
 };
+
+
+//=========================================================================================
+class MDEWPeakIntegrationTestPerformance : public CxxTest::TestSuite
+{
+public:
+  size_t numPeaks;
+  PeaksWorkspace_sptr peakWS;
+
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MDEWPeakIntegrationTestPerformance *createSuite() { return new MDEWPeakIntegrationTestPerformance(); }
+  static void destroySuite( MDEWPeakIntegrationTestPerformance *suite ) { delete suite; }
+
+
+  MDEWPeakIntegrationTestPerformance()
+  {
+    numPeaks = 1000;
+    // Original MDEW.
+    MDEWPeakIntegrationTest::createMDEW();
+
+    // Add a uniform, random background.
+    AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
+        "InputWorkspace", "MDEWPeakIntegrationTest_MDEWS", "UniformParams", "100000");
+
+
+    // Make a fake instrument - doesn't matter, we won't use it really
+    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+
+    boost::mt19937 rng;
+    boost::uniform_real<double> u(-9.0, 9.0); // Random from -9 to 9.0
+    boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > gen(rng, u);
+
+    peakWS = PeaksWorkspace_sptr(new PeaksWorkspace());
+    for (size_t i=0; i < numPeaks; ++i)
+    {
+      // Random peak center
+      double x = gen();
+      double y = gen();
+      double z = gen();
+
+      // Make the peak
+      MDEWPeakIntegrationTest::addPeak(1000, x,y,z, 0.02);
+      // With a center with higher density. 2000 events total.
+      MDEWPeakIntegrationTest::addPeak(1000, x,y,z, 0.005);
+
+      // Make a few very strong peaks
+      if (i%21 == 0)
+        MDEWPeakIntegrationTest::addPeak(10000, x,y,z, 0.015);
+
+      // Add to peaks workspace
+      peakWS->addPeak( Peak(inst, 1, 1.0, V3D(x, y, z) ) );
+
+      if (i%100==0)
+        std::cout << "Peak " << i << " added\n";
+    }
+    AnalysisDataService::Instance().add("MDEWPeakIntegrationTest_peaks",peakWS);
+
+  }
+
+  ~MDEWPeakIntegrationTestPerformance()
+  {
+    AnalysisDataService::Instance().remove("MDEWPeakIntegrationTest_MDEWS");
+    AnalysisDataService::Instance().remove("MDEWPeakIntegrationTest_peaks");
+  }
+
+
+  void setUp()
+  {
+
+  }
+
+  void tearDown()
+  {
+  }
+
+
+  void test_performance_NoBackground()
+  {
+    for (size_t i=0; i<10; i++)
+    {
+      MDEWPeakIntegrationTest::doRun(0.02, 0.0);
+    }
+    // All peaks should be at least 1000 counts (some might be more if they overla)
+    for (size_t i=0; i<numPeaks; i += 7)
+    {
+      double expected=2000.0;
+      if ((i % 21) == 0)
+          expected += 10000.0;
+      TS_ASSERT_LESS_THAN(expected-1, peakWS->getPeak(int(i)).getIntensity());
+    }
+  }
+
+  void test_performance_WithBackground()
+  {
+    for (size_t i=0; i<10; i++)
+    {
+      MDEWPeakIntegrationTest::doRun(0.02, 0.03);
+    }
+  }
+
+};
+
 
 
 #endif /* MANTID_MDEVENTS_MDEWPEAKINTEGRATIONTEST_H_ */
