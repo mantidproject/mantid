@@ -13,6 +13,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
+#include "MantidAPI/SpectraAxis.h"
 
 #include <fstream>
 #include <sstream>
@@ -815,7 +816,7 @@ void LoadEventNexus::exec()
   }
   else
   {
-    Timer tim1;
+    //Timer tim1;
     //Pad pixels; parallel flag is off because it is actually slower :(
     if (doOneBank && SingleBankPixelsOnly)
     {
@@ -835,12 +836,16 @@ void LoadEventNexus::exec()
     }
     else
     {
-      WS->padPixels( true );
+      // Attempt to load a spectra mapping
+      if( !loadSpectraMapping(m_filename, WS) )
+      {
+        WS->padPixels( true );
+      }
     }
     //std::cout << tim1.elapsed() << "seconds to pad pixels.\n";
   }
 
-
+  
   // --------------------------- Time filtering ------------------------------------
   double filter_time_start_sec, filter_time_stop_sec;
   filter_time_start_sec = getProperty("FilterByTime_Start");
@@ -1083,6 +1088,71 @@ void LoadEventNexus::runLoadMonitors()
     this->g_log.error() << "Error while loading the monitors from the file. "
         << "File may contain no monitors." << std::endl;
   }
+}
+
+//
+/**
+ * Load a spectra mapping from the given file. This currently checks for the existence of
+ * an isis_vms_compat block in the file, if it exists it pulls out the spectra mapping listed there
+ * @param file :: A filename
+ * @param workspace :: The workspace whose spectra map is to be replaced
+ * @returns True if a map was loaded, false otherwise
+ */
+bool LoadEventNexus::loadSpectraMapping(const std::string & filename, 
+                                        DataObjects::EventWorkspace_sptr workspace) const
+{
+  ::NeXus::File file(filename);
+  try
+  {
+    file.openPath("entry/isis_vms_compat");
+  }
+  catch(::NeXus::Exception&)
+  {
+    return false; // Doesn't exist
+  }
+  API::SpectraDetectorMap *spectramap = new API::SpectraDetectorMap;
+  workspace->replaceSpectraMap(spectramap);
+
+  // NSP1 - Number of spectra
+  file.openData("NSP1");
+  std::vector<int32_t> nsp1;
+  file.getData(nsp1);
+  file.closeData();
+  // UDET
+  file.openData("UDET");
+  std::vector<int32_t> udet;
+  file.getData(udet);
+  file.closeData();
+  // SPEC
+  file.openData("SPEC");
+  std::vector<int32_t> spec;
+  file.getData(spec);
+  file.closeData();
+  // Close 
+  file.closeGroup();
+  file.close();
+
+  //Sanity check
+  if( nsp1.empty() )
+  {
+    throw std::runtime_error("loadSpectraMapping - Failed to load NSP1. Unable to determine spectra size.");
+  }
+  int32_t nspecs = nsp1.front();
+  if( spec.size() != static_cast<size_t>(nspecs) ) 
+  {
+    std::ostringstream os;
+    os << "Spectra list size inconsistent. NSP1=" << nsp1[0] << ", actual size=" << spec.size() << "\n";
+    throw std::runtime_error(os.str());
+  }
+  if( udet.size() != static_cast<size_t>(nspecs))
+  {
+    std::ostringstream os;
+    os << "UDET list size inconsistent. NSP1=" << nsp1[0] << ", actual size=" << udet.size() << "\n";
+    throw std::runtime_error(os.str());
+  }
+  spectramap->populate(spec.data(), udet.data(), nsp1[0]);
+  workspace->padSpectra(false);
+  return true;
 }
 
 

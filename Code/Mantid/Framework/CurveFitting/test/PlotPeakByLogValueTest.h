@@ -251,11 +251,15 @@ private:
     Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
       (WorkspaceFactory::Instance().create("Workspace2D",nSpec,nX,nY));
 
+    // MG: This test seems to require axis 1 to have a value of zero everywhere, I'm not sure why
+    for( int i=0; i < nSpec; ++i)
+    {
+      ws->getAxis(1)->spectraNo(i) = 0;
+    } 
+
     double spec;
     double x;
 
-    //Mantid::API::Axis* y  = new Mantid::API::SpectraAxis(3);
-    //ws->replaceAxis(1,y);
     for(int iSpec=0;iSpec<nSpec;iSpec++)
     {
       spec = iSpec;
@@ -271,8 +275,12 @@ private:
       }
       if (isHist)
         X.back() = X[nY-1] + dx;
-      //y->setValue(iSpec,iSpec+1);
     }
+
+
+
+
+
     return ws;
   }
 

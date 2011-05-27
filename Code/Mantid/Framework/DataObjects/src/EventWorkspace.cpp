@@ -143,7 +143,7 @@ namespace DataObjects
     //Do we copy only a range?
     if( sourceEndWorkspaceIndex == size_t(-1) ) sourceEndWorkspaceIndex = source_data_size - 1;
     if ((sourceStartWorkspaceIndex < source_data_size) && (sourceEndWorkspaceIndex < source_data_size)
-	&& (sourceEndWorkspaceIndex >= sourceStartWorkspaceIndex))
+        && (sourceEndWorkspaceIndex >= sourceStartWorkspaceIndex))
     {
       it_start += sourceStartWorkspaceIndex;
       it_end = source_data.begin() + sourceEndWorkspaceIndex + 1;
@@ -502,7 +502,7 @@ namespace DataObjects
 
     //Do each block in parallel
     PARALLEL_FOR_IF(parallel)
-    for (int i = 0; i < static_cast<int>(numpixels); i++)
+    for (int64_t i = 0; i < static_cast<int64_t>(numpixels); i++)
     {
       size_t wi = size_t(i);
       //Create an event list for here
@@ -519,6 +519,62 @@ namespace DataObjects
     //Now, make the spectra map (index -> detector ID)
     this->replaceSpectraMap(new API::SpectraDetectorMap(pixelIDs));
 
+    //Clearing the MRU list is a good idea too.
+    this->clearMRU();
+
+    //Marker makes it okay to go on.
+    done_loading_data = true;
+  }
+
+  // 
+  //-----------------------------------------------------------------------------
+  /** Pad the workspace with empty event lists for all the spectra in the workspace.
+   * This requires that a non-empty spectra-detector map
+   * Can do it in parallel, though my time tests show it takes MORE time in parallel :(
+   * This calls doneAddingEventLists() to finalize after the end.
+   *
+   * @param parallel: set to true to perform this padding in parallel, which
+   *        may increase speed, though my tests show it slows it down.
+   *
+   */
+  void EventWorkspace::padSpectra(bool parallel)
+  {
+    UNUSED_ARG(parallel);
+    using Geometry::ISpectraDetectorMap;
+    
+    const ISpectraDetectorMap & spectramap = this->spectraMap();
+    const size_t nspectra = spectramap.nElements();
+    if( nspectra == 0)
+    {
+      throw std::runtime_error("EventWorkspace::padSpectra - The spectra-detector map has not been "
+                               "populated.");
+    }
+
+    //Remove all old EventLists and resize the vector to hold everything
+    this->clearData();
+    data.resize(nspectra);
+    m_noVectors = nspectra;
+
+    // Make the spectra axis
+    delete m_axes[1];
+    API::SpectraAxis *ax1 = new API::SpectraAxis(m_noVectors);
+    m_axes[1] = ax1; //Default 1:1 starting at 1
+
+    for( size_t wi = 0; wi < nspectra; ++wi)
+    {
+      //Create an event list for here
+      EventList * newel = new EventList();
+      try
+      {
+        // Tag this with an effective ID
+        newel->addDetectorID( this->getDetector(wi)->getID() );
+      }
+      catch(Kernel::Exception::NotFoundError&) {}
+      //Save it in the list
+      data[wi] = newel;
+      ax1->spectraNo(wi) = specid_t(wi+1);
+    }
+    
     //Clearing the MRU list is a good idea too.
     this->clearMRU();
 

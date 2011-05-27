@@ -132,6 +132,11 @@ namespace Mantid
       void runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace);
       void runLoadMonitors();
 
+    private:
+      /// Load a spectra mapping from the given file
+      bool loadSpectraMapping(const std::string & filename, 
+                              DataObjects::EventWorkspace_sptr workspace) const;
+
     };
 
   } // namespace NeXus

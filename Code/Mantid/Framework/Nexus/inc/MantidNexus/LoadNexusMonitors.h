@@ -3,7 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
+#include <boost/scoped_array.hpp>
 //Copy of the NexusCpp API was placed in MantidNexus
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NeXusException.hpp"
@@ -66,6 +66,10 @@ namespace Mantid
     void init();
     /// Execution code
     void exec();
+
+    // Fix the detector numbers if the defaults are not correct
+    void fixUDets(boost::scoped_array<detid_t> &det_ids, ::NeXus::File & file, 
+                  const boost::scoped_array<specid_t> &spec_ids, const size_t nmonitors) const; 
     /// Load the appropriate instrument
     void runLoadInstrument(const std::string& instrument,
         API::MatrixWorkspace_sptr localWorkspace);

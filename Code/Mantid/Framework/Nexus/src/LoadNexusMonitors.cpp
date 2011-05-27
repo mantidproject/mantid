@@ -7,7 +7,6 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_array.hpp>
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -98,8 +97,8 @@ void LoadNexusMonitors::exec()
       this->nMonitors, 1, 1);
 
   // a temporary place to put the spectra/detector numbers
-  boost::shared_array<specid_t> spectra_numbers(new specid_t[this->nMonitors]);
-  boost::shared_array<detid_t> detector_numbers(new detid_t[this->nMonitors]);
+  boost::scoped_array<specid_t> spectra_numbers(new specid_t[this->nMonitors]);
+  boost::scoped_array<detid_t> detector_numbers(new detid_t[this->nMonitors]);
 
   API::Progress prog3(this, 0.6, 1.0, this->nMonitors);
 
@@ -110,25 +109,37 @@ void LoadNexusMonitors::exec()
     Poco::Path monPath(monitorNames[i]);
     std::string monitorName = monPath.getBaseName();
 
-	// check for monitor name - in our case will be of the form either monitor1 or monitor_1
-	std::string::size_type loc = monitorName.rfind('_');
-	if (loc == std::string::npos)
-	{
-		loc = monitorName.rfind('r');
-	}
+    // check for monitor name - in our case will be of the form either monitor1 or monitor_1
+    std::string::size_type loc = monitorName.rfind('_');
+    if (loc == std::string::npos)
+    {
+      loc = monitorName.rfind('r');
+    }
 
-    detid_t monIndex = boost::lexical_cast<int>(monitorName.substr(loc+1));
-    std::size_t spectraIndex = i;
+    detid_t monIndex = -1 * boost::lexical_cast<int>(monitorName.substr(loc+1)); // SNS default
+    file.openGroup(monitorNames[i], "NXmonitor");
+
+    // Check if the spectra index is there
+    specid_t spectrumNo(static_cast<specid_t>(i));
+    try
+    {
+      file.openData("spectrum_index");
+      file.getData(&spectrumNo);
+      file.closeData();
+    }
+    catch(::NeXus::Exception &)
+    {
+      // Use the default as matching the workspace index
+    }
 
     g_log.debug() << "monIndex = " << monIndex << std::endl;
-    g_log.debug() << "spectraIndex = " << spectraIndex << std::endl;
+    g_log.debug() << "spectrumNo = " << spectrumNo << std::endl;
 
-    spectra_numbers[spectraIndex] = monIndex;
-    detector_numbers[spectraIndex] = -monIndex;
-    this->WS->getAxis(1)->spectraNo(spectraIndex) = monIndex;
+    spectra_numbers[i] = spectrumNo;
+    detector_numbers[i] = monIndex;
+    this->WS->getAxis(1)->spectraNo(i) = spectrumNo;
 
     // Now, actually retrieve the necessary data
-    file.openGroup(monitorNames[i], "NXmonitor");
     file.openData("data");
     MantidVec data;
     MantidVec error;
@@ -147,11 +158,27 @@ void LoadNexusMonitors::exec()
     file.closeData();
     file.closeGroup();
 
-    this->WS->dataX(spectraIndex) = tof;
-    this->WS->dataY(spectraIndex) = data;
-    this->WS->dataE(spectraIndex) = error;
+    this->WS->dataX(i) = tof;
+    this->WS->dataY(i) = data;
+    this->WS->dataE(i) = error;
     prog3.report();
   }
+
+  // Fix the detector numbers if the defaults above are not correct
+  fixUDets(detector_numbers, file, spectra_numbers, nMonitors);
+
+  // Check for and ISIS compat block to get the detector IDs for the loaded spectrum numbers  
+  // @todo: Find out if there is a better (i.e. more generic) way to do this
+  try
+  {
+    file.openGroup("isis_vms_compat", "IXvms");
+    
+    file.closeGroup();
+  }
+  catch(::NeXus::Exception&)
+  {
+  }
+
 
   // Need to get the instrument name from the file
   // FIXME: System uses short name for now
@@ -182,10 +209,61 @@ void LoadNexusMonitors::exec()
 
   // Populate the Spectra Map
   this->WS->replaceSpectraMap(new API::SpectraDetectorMap(spectra_numbers.get(),detector_numbers.get(), 
-							  static_cast<int64_t> (nMonitors)));
+                                                          static_cast<int64_t> (nMonitors)));
 
   this->setProperty("OutputWorkspace", this->WS);
 }
+
+/**
+ * Fix the detector numbers if the defaults are not correct. Currently checks the isis_vms_compat
+ * block and reads them from there if possible
+ * @param det_ids :: An array of prefilled detector IDs
+ * @param file :: A reference to the NeXus file opened at the root entry
+ * @param spec_ids :: An array of spectrum numbers that the monitors have
+ * @param nmonitors :: The size of the det_ids and spec_ids arrays
+ */
+void LoadNexusMonitors::fixUDets(boost::scoped_array<detid_t> &det_ids, ::NeXus::File & file, 
+                                 const boost::scoped_array<specid_t> &spec_ids, 
+                                 const size_t nmonitors) const
+{
+  try
+  {
+    file.openGroup("isis_vms_compat", "IXvms");
+  }
+  catch(::NeXus::Exception&)
+  {
+    return;
+  }
+  // UDET
+  file.openData("UDET");
+  std::vector<int32_t> udet;
+  file.getData(udet);
+  file.closeData();
+  //SPEC
+  file.openData("SPEC");
+  std::vector<int32_t> spec;
+  file.getData(spec);
+  file.closeData();
+
+  // This is a little complicated: Each value in the spec_id array is a value found in the
+  // SPEC block of isis_vms_compat. The index that this value is found at then corresponds
+  // to the index within the UDET block that holds the detector ID
+  std::vector<int32_t>::const_iterator beg = spec.begin();
+  for( size_t mon_index = 0; mon_index < nmonitors; ++mon_index )
+  {
+    std::vector<int32_t>::const_iterator itr = std::find(spec.begin(), spec.end(), spec_ids[mon_index]);
+    if( itr == spec.end() ) 
+    {
+      det_ids[mon_index] = -1;
+      continue;
+    }
+    std::vector<int32_t>::difference_type udet_index = std::distance(beg, itr);
+    det_ids[mon_index] = udet[udet_index];
+  }
+  file.closeGroup();
+}
+
+
 /**
  * Load the instrument geometry File
  *  @param instrument :: instrument name.

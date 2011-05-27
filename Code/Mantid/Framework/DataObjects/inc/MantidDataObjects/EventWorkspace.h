@@ -147,7 +147,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   size_t getMemorySize() const;
 
   void copyDataFrom(const EventWorkspace& source,
-		    std::size_t sourceStartWorkspaceIndex=0, std::size_t sourceEndWorkspaceIndex=size_t(-1));
+                    std::size_t sourceStartWorkspaceIndex=0, std::size_t sourceEndWorkspaceIndex=size_t(-1));
 
   double getTofMin() const;
 
@@ -214,6 +214,8 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
   // Pad pixels in the workspace using the detectors in the instrument.
   void padPixels(bool parallel);
+  // Pad pixels in the workspace using the loaded spectra. Requires a non-empty spectra-detector map
+  void padSpectra(bool parallel);
 
   // Make all the mapping stuff
   void makeSpectraMap();
