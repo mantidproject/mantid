@@ -38,8 +38,12 @@ namespace DataObjects
     /// Returns typeid for the pointer type to the data element in the column
     virtual const std::type_info& get_pointer_type_info()const;
 
+    virtual bool getReadOnly() const;
+
     /// Prints
     virtual void print(std::ostream& s, int index) const;
+
+    virtual void read(const std::string & text, int index);
 
     /// Specialized type check
     virtual bool isBool()const;

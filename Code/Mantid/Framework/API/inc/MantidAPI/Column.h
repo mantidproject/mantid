@@ -91,8 +91,12 @@ public:
     virtual bool getReadOnly() const
     { return true; }
 
-    /// Prints
+    /// Prints out the value to a stream
     virtual void print(std::ostream& s, int index) const = 0;
+
+    /// Read in a string and set the value at the given index
+    virtual void read(const std::string & text, int index)
+    { UNUSED_ARG(text);UNUSED_ARG(index); }
 
     /// Specialized type check
     virtual bool isBool()const = 0;

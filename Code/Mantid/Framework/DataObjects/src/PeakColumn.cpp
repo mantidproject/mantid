@@ -1,5 +1,8 @@
 #include "MantidDataObjects/PeakColumn.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Strings.h"
+
+using namespace Mantid::Kernel;
 
 namespace Mantid
 {
@@ -37,6 +40,7 @@ namespace DataObjects
     return typeid(double*);
   }
 
+  //-------------------------------------------------------------------------------------
   /** Prints out the column string at the given row index.
    *
    * @param s :: stream to output
@@ -84,6 +88,65 @@ namespace DataObjects
       throw std::runtime_error("Unexpected column name");
   }
 
+  //-------------------------------------------------------------------------------------
+  /** Read in some text and convert to a number in the PeaksWorkspace
+   *
+   * @param text :: string to read
+   * @param index :: index of the peak to modify
+   */
+  void PeakColumn::read(const std::string & text, int index)
+  {
+    // Don't modify read-only ones
+    if (this->getReadOnly())
+      return;
+
+    // Avoid going out of bounds
+    if (size_t(index) >= peaks.size())
+      return;
+
+    // Reference to the peak in the workspace
+    Peak & peak = peaks[index];
+
+    // Convert to a double
+    double val = 0;
+    bool success = Strings::convert(text, val);
+    int ival = static_cast<int>(val);
+
+    if (!success)
+    {
+      g_log.error() << "Could not convert string '" << text << "' to a number.\n";
+      return;
+    }
+
+    if      (m_name == "h")
+      peak.setH(val);
+    else if (m_name == "k")
+      peak.setK(val);
+    else if (m_name == "l")
+      peak.setL(val);
+    else if (m_name == "RunNumber")
+      peak.setRunNumber(ival);
+    else
+      throw std::runtime_error("Unexpected column " + m_name + " being set.");
+  }
+
+
+  //-------------------------------------------------------------------------------------
+  /** @return true if the column is read-only */
+  bool PeakColumn::getReadOnly() const
+  {
+    if (
+        (m_name == "h") || (m_name == "k") || (m_name == "l") ||
+        (m_name == "RunNumber")
+       )
+      return false;
+    else
+      // Default to true for most columns
+      return true;
+  }
+
+
+  //-------------------------------------------------------------------------------------
   /// Specialized type check
   bool PeakColumn::isBool()const
   {

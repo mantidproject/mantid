@@ -20,6 +20,7 @@ signals:
   void needToClose();
 public slots:
   void deleteRows(int startRow, int endRow);
+  void cellEdited(int,int col);
 protected slots:
   void closeTable();
 protected:

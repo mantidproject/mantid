@@ -97,6 +97,25 @@ void MantidTable::afterReplaceHandle(const std::string& wsName,const boost::shar
 
 
 //------------------------------------------------------------------------------------------------
+/** Called when a cell is edited */
+void MantidTable::cellEdited(int row,int col)
+{
+  std::string text = d_table->text(row,col).remove(QRegExp("\\s")).toStdString();
+  Mantid::API::Column_sptr c = m_ws->getColumn(col);
+
+  // Have the column convert the text to a value internally
+  int index = row;
+  c->read(text, index);
+
+  // Set the table view to be the same text after editing.
+  // That way, if the string was stupid, it will be reset to the old value.
+  std::ostringstream s;
+  c->print(s, index);
+  d_table->setText(row, col, QString(s.str().c_str()));
+}
+
+
+//------------------------------------------------------------------------------------------------
 /** Call an algorithm in order to delete table rows
  *
  * @param startRow :: row index (starts at 1) to start to remove

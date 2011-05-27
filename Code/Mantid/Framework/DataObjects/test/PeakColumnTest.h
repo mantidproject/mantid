@@ -21,7 +21,9 @@ public:
     std::vector<Peak> peaks;
     PeakColumn pc(peaks, "h");
     TS_ASSERT_EQUALS( pc.name(), "h");
+    TS_ASSERT_EQUALS( pc.size(), 0);
   }
+
 
 
 };
