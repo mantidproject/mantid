@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/PredictPeaks.cpp
 	src/SaveIsawPeaks.cpp
 	src/SavePeaksFile.cpp
+	src/SetGoniometer.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -17,6 +18,7 @@ set ( INC_FILES
 	inc/MantidCrystal/PredictPeaks.h
 	inc/MantidCrystal/SaveIsawPeaks.h
 	inc/MantidCrystal/SavePeaksFile.h
+	inc/MantidCrystal/SetGoniometer.h
 )
 
 set ( TEST_FILES
@@ -26,6 +28,7 @@ set ( TEST_FILES
 	test/PredictPeaksTest.h
 	test/SaveIsawPeaksTest.h
 	test/SavePeaksFileTest.h
+	test/SetGoniometerTest.h
 )
 
 if(UNITY_BUILD)
