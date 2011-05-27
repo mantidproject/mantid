@@ -173,9 +173,13 @@ namespace MDEvents
 //    std::cout << "sizeof(MDBox<MDE,nd>) " << sizeof(MDBox<MDE,nd>) << std::endl;
 //    std::cout << "sizeof(MDGridBox<MDE,nd>) " << sizeof(MDGridBox<MDE,nd>) << std::endl;
     // Add up the events and the MDBoxes contained.
-    return this->getNPoints() * sizeof(MDE) +
-        this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE,nd>) +
-        this->m_BoxController->getTotalNumMDGridBoxes() * sizeof(MDGridBox<MDE,nd>);
+    size_t total = this->getNPoints() * sizeof(MDE);
+    total += this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE,nd>);
+    if (this->m_BoxController->getBinarySplit())
+      total += this->m_BoxController->getTotalNumMDGridBoxes() * sizeof(MDSplitBox<MDE,nd>);
+    else
+      total += this->m_BoxController->getTotalNumMDGridBoxes() * sizeof(MDGridBox<MDE,nd>);
+    return total;
   }
 
 

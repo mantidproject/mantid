@@ -158,6 +158,7 @@ namespace MDEvents
   {
     if (fullyContained)
     {
+      // For MDSplitBox, check if we've already found that all dimensions are fully contained
       size_t d;
       for (d=0; d<nd; ++d)
       {

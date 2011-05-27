@@ -29,7 +29,7 @@ results = []
 
 
 #========================================================================================================
-def plot_results_vs_other(results, x_field, y_field, other_field):
+def plot_results_vs_other(results, x_field, y_field, other_field, extra_title=""):
     """ Function to plot Y vs X of anything. It accesses the members of "results" to plot them.
     other_field is used to separate by another field, and make separate line plots for each"""
     others = set()
@@ -53,7 +53,8 @@ def plot_results_vs_other(results, x_field, y_field, other_field):
         ys = [y for (x,y) in data]
         p = plot(xs,ys, marker='.', label="%s = %f" % (other_field, other))
         
-    title("%s vs %s" % (y_field, x_field));
+    if extra_title != "": extra_title = "\n" + extra_title
+    title("%s vs %s%s" % (y_field, x_field, extra_title) );
     xlabel(x_field)
     ylabel(y_field)
     legend(loc='best')
@@ -119,6 +120,13 @@ def do_analysis(file_list, type):
         plot_results_with_slope(results, "NumberEvents", "MediumBinTime", x_scale=1e-9)
         plot_results_with_slope(results, "NumberEvents", "FineBinTime", x_scale=1e-9)
 
+    elif type == 3:
+        extra_title = "Binary Splitting Method"
+        plot_results_vs_other(results, "SplitThreshold", "MakeTime", "SplitInto", extra_title)
+        plot_results_vs_other(results, "SplitThreshold", "MemoryUsed", "SplitInto", extra_title)
+        plot_results_vs_other(results, "SplitThreshold", "CoarseBinTime", "SplitInto", extra_title)
+        plot_results_vs_other(results, "SplitThreshold", "MediumBinTime", "SplitInto", extra_title)
+        plot_results_vs_other(results, "SplitThreshold", "FineBinTime", "SplitInto", extra_title)
     show()
         
 
@@ -134,5 +142,6 @@ if __name__=="__main__":
 #    args = parser.parse_args()
 
     file_list = ["optimize_results.dat"]
-    do_analysis(file_list, 2)
+    do_analysis(file_list, 3)
     
+
