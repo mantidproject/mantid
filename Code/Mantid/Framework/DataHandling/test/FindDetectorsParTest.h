@@ -63,15 +63,15 @@ public:
      TSM_ASSERT("parameters calculations should complete successfully", findPar->isExecuted() );
 
  }
- /*void t__tSingleRingResults(){
-     TS_ASSERT_EQUALS(std::string("27.8095"),findPar->getPropertyValue("azimuthal"));
+ void testSingleRingResults(){
+     TS_ASSERT_EQUALS(std::string("37.0451"),findPar->getPropertyValue("azimuthal"));
      TS_ASSERT_EQUALS(std::string("0"),      findPar->getPropertyValue("polar"));
-     TS_ASSERT_EQUALS(std::string("35.8642"),findPar->getPropertyValue("azimuthal_width"));
+     TS_ASSERT_EQUALS(std::string("23.2429"),findPar->getPropertyValue("azimuthal_width"));
      TS_ASSERT_EQUALS(std::string("6.28319"),findPar->getPropertyValue("polar_width"));
-     TS_ASSERT_EQUALS(std::string("6.82302"),findPar->getPropertyValue("secondary_flightpath"));
+     TS_ASSERT_EQUALS(std::string("7.52685"),findPar->getPropertyValue("secondary_flightpath"));
     
 
- }*/
+ }
 
  //*******************************************************
  FindDetectorsParTest()
@@ -125,7 +125,7 @@ private:
            AnalysisDataService::Instance().remove(inputWS->getName());
        }
 
-       boost::shared_ptr<Geometry::DetectorGroup> pDet(ComponentCreationHelper::createRingOfCylindricalDetectors(2,4,4));
+       boost::shared_ptr<Geometry::DetectorGroup> pDet(ComponentCreationHelper::createRingOfCylindricalDetectors(4,5,4));
        const size_t NDET=pDet->nDets();
 
        inputWS  = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,10,1.0);

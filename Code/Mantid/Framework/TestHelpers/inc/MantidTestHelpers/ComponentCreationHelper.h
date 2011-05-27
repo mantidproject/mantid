@@ -94,7 +94,7 @@ namespace ComponentCreationHelper
    * z     -- axial z-coordinate of the detectors position; 
     The detectors are the cylinders with 1.5cm height and 0.5 cm radius
    */
-  DLL_TESTHELPERS boost::shared_ptr<Mantid::Geometry::DetectorGroup> createRingOfCylindricalDetectors(const double R_min=2.5, const double R_max=3.5, const double z=2);
+  DLL_TESTHELPERS boost::shared_ptr<Mantid::Geometry::DetectorGroup> createRingOfCylindricalDetectors(const double R_min=4.5, const double R_max=5, const double z=4);
   /**
    * Create a group of two monitors
    */
