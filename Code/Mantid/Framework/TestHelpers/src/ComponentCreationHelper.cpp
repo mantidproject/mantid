@@ -172,7 +172,7 @@ namespace ComponentCreationHelper
     std::vector<boost::shared_ptr<IDetector> > groupMembers(nDet);
     // One object
     Object_sptr detShape = ComponentCreationHelper::createCappedCylinder(0.5, 1.5, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube"); 
-    for( int i = 0; i < nDet; ++i )
+    for(unsigned int i = 0; i < nDet; ++i )
     {
       std::ostringstream os;
       os << "d" << i;
