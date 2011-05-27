@@ -5,6 +5,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <iomanip>
 #include <iostream>
+#include <boost/type_traits.hpp>
 
 using Mantid::Kernel::TimeSeriesProperty;
 
@@ -1517,6 +1518,54 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
     }
   std::cerr<<"Error :: Iterations are a problem"<<std::endl;
   return 0;
+}
+
+template<typename T>
+std::vector<T> Matrix<T>::toRotation() 
+/**
+  Transform the matrix to a rotation matrix, by normalizing each column to 1
+  @return :: a vector of scaling factors
+  @throw :: std::invalid_argument if the absolute value of the determinant is less then 1e-10 or not square matrix
+*/
+{
+  if (this->nx != this->ny) throw(std::invalid_argument("matrix is not square"));
+  if (fabs(this->determinant()) <1e-10) throw(std::invalid_argument("Determinant is too small"));
+  // step 1: orthogonalize the matrix
+  double spself,spother;
+  for (size_t i=0; i<this->ny;++i)
+  {
+    spself=0.;
+    for (size_t j=0; j<this->nx;++j) spself+=(V[j][i]*V[j][i]);
+    for (size_t k=i+1; k<this->ny;++k) 
+    {
+      spother=0;
+      for (size_t j=0; j<this->nx;++j) spother+=(V[j][i]*V[j][k]);
+      for (size_t j=0; j<this->nx;++j) V[j][k]-=static_cast<T>(V[j][i]*spother/spself);
+    }
+    
+  }
+  // step 2: get scales and rescsale the matrix
+  std::vector<T> scale(this->nx);
+  T currentScale;
+  for (size_t i=0; i<this->ny;++i)
+  {
+    currentScale=0.;
+    for (size_t j=0; j<this->nx;++j)
+      currentScale+=(V[j][i]*V[j][i]);
+    currentScale=static_cast<T>(sqrt(currentScale));
+    if (currentScale <1e-10) throw(std::invalid_argument("Scale is too small"));
+    scale[i]=currentScale;
+  }
+  Matrix<T> scalingMatrix(nx,ny),change(nx,ny,true);
+  for (size_t i=0; i<this->ny;++i) scalingMatrix[i][i]=static_cast<T>(1.0/scale[i]);
+  *this = this->operator*(scalingMatrix);
+  if (this->determinant() <0.)
+  {
+    scale[0]=-scale[0];
+    change[0][0]=-1.;
+    *this = this->operator*(change);
+  }
+  return scale;
 }
 
 template<typename T>

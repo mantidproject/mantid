@@ -178,6 +178,34 @@ public:
 	  TSM_ASSERT_EQUALS("The data in a matrix have to be located row-wise, so multiplication by (0,0,1)^T selects 3-rd column ",true,V3D(2,5,8)==rez3);
   }
 
+  void testToRotation()
+  {
+    /*
+    |1  0  0|
+    |1  2  0|
+    |0  0 -3|
+    transforms to
+    |-s-s  0|
+    |-s s  0|
+    |0  0 -1|
+    with s=sqrt(0.5) and scaling (-sqrt(2),sqrt(2),3)
+    */
+    Matrix<double> d(3,3,true);
+    d[1][0]=1.0;
+    d[1][1]=2.;
+    d[2][2]=-3.;
+    std::vector<double> v=d.toRotation();
+
+    TS_ASSERT_DELTA(d[0][0],-sqrt(0.5),1e-7);
+    TS_ASSERT_DELTA(d[0][1],-sqrt(0.5),1e-7);
+    TS_ASSERT_DELTA(d[1][0],-sqrt(0.5),1e-7);
+    TS_ASSERT_DELTA(d[1][1],sqrt(0.5),1e-7);
+    TS_ASSERT_DELTA(d[2][2],-1.,1e-7);
+    TS_ASSERT_DELTA(v[0],-sqrt(2.),1e-7);
+    TS_ASSERT_DELTA(v[1],sqrt(2.),1e-7);
+    TS_ASSERT_DELTA(v[2],3.,1e-7);
+  }
+
 };
 
 #endif
