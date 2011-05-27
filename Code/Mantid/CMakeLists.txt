@@ -213,8 +213,10 @@ if ( ENABLE_CPACK )
     set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},google-perftools" ) # doesn't exist on 64 bit RHEL
   ENDIF ( ${CPACK_RPM_ARCHITECTURE} MATCHES "i386" )
 
-  # TODO get this right <----------------------
-  set ( CPACK_DEBIAN_PACKAGE_DEPENDS "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy,poco" )
+  # TODO: MG - Find a better way of handling boost, the package versions on ubuntu are encoded in the names,
+  #            the versions here are for Ubuntu 10.04.
+  # We also need to create a debian package repository and have a nexus package in it
+  set ( CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-date-time1.40.0,libboost-regex1.40.0,libboost-signals1.40.0,libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9,nexus,libgsl0ldbl,libqtcore4 (>= 4.2),libqtgui4 (>= 4.2),libqt4-opengl (>= 4.2),libqt4-xml (>= 4.2),libqt4-svg (>= 4.2),libqt4-qt3support (>= 4.2),libqscintilla2-5,libqwt5-qt4,libqwtplot3d-qt4-0,libopencascade-foundation-6.3.0 (>= 6.3.0),libopencascade-modeling-6.3.0 (>= 6.3.0),libmuparser0,python-numpy" )
 
   # run cpack configuration
   include ( CPack )
