@@ -225,7 +225,7 @@ void ConvertUnits::fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS,
     // Copy over the X data
     outputWS->setX( i, inputWS->refX(i) );
 
-    prog.report();
+    prog.report("Convert to " + m_outputUnit->unitID());
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -267,7 +267,7 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
       {
         PARALLEL_START_INTERUPT_REGION
         outputWS->setX(j,xVals);
-        prog.report();
+        prog.report("Convert to " + m_outputUnit->unitID());
         PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
@@ -303,7 +303,7 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
       }
       eventWS->getEventList(k).setTofs(tofs);
     }
-    prog.report();
+    prog.report("Convert to " + m_outputUnit->unitID());
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -482,7 +482,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
       }
     }
 
-    prog.report();
+   prog.report("Convert to " + m_outputUnit->unitID());
     PARALLEL_END_INTERUPT_REGION
   } // loop over spectra
   PARALLEL_CHECK_INTERUPT_REGION
