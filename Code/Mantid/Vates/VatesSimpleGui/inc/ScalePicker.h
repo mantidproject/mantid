@@ -9,8 +9,9 @@ class QRect;
 class QwtScaleWidget;
 /**
  *
- This class creates a multislice view which is based on the Matlab(C)
- SliceOMatic view. This view is specfically designed for 3(+1)D datasets.
+ This class handles finding the axis location when a slice indicator is
+ created. It also handles the reverse operation of providing the GraphicsView
+ coordinate for a given axis location.
 
  @author Michael Reuter
  @date 24/05/2011
