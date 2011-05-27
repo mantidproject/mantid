@@ -339,7 +339,7 @@ public:
     alg.initialize();
 
     // Now set it...
-    alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(WS));
+    alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(WS));
 
     // specify name of file to save workspace to
     std::ostringstream mess;

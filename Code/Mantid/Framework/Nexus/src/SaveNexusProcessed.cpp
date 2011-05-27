@@ -51,7 +51,7 @@ namespace NeXus
    */
   void SaveNexusProcessed::init()
   {
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input),
         "Name of the workspace to be saved");
     // Declare required input parameters for algorithm
     std::vector<std::string> exts;
@@ -94,16 +94,25 @@ namespace NeXus
     //TODO: Remove?
     NXMEnableErrorReporting();
 
+    Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
+    boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
+                  boost::dynamic_pointer_cast<WorkspaceGroup>(inputWorkspace);
+    if(wsGrpSptr)
+    {
+      processGroups(wsGrpSptr, this->getProperties());
+      return;
+    }
+
     Progress prog_init(this, 0.0, 0.3, 5);
 
     // Retrieve the filename from the properties
     m_filename = getPropertyValue("Filename");
     //m_entryname = getPropertyValue("EntryName");
     m_title = getPropertyValue("Title");
-    m_inputWorkspace = getProperty("InputWorkspace");
-    m_eventWorkspace = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWorkspace);
+    MatrixWorkspace_const_sptr matrixWorkspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
+    m_eventWorkspace = boost::dynamic_pointer_cast<const EventWorkspace>(matrixWorkspace);
     // If no title's been given, use the workspace title field
-    if (m_title.empty()) m_title = m_inputWorkspace->getTitle();
+    if (m_title.empty()) m_title = matrixWorkspace->getTitle();
     // If we don't want to append then remove the file if it already exists
     bool append_to_file = getProperty("Append");
     if( !append_to_file )
@@ -115,6 +124,9 @@ namespace NeXus
       }
     }
 
+
+
+
     std::vector<int> spec_list = getProperty("WorkspaceIndexList");
     int spec_min = getProperty("WorkspaceIndexMin");
     int spec_max = getProperty("WorkspaceIndexMax");
@@ -122,7 +134,7 @@ namespace NeXus
     const bool interval = (spec_max != Mantid::EMPTY_INT());
     if ( spec_max == Mantid::EMPTY_INT() ) spec_max = 0;
 
-    const std::string workspaceID = m_inputWorkspace->id();
+    const std::string workspaceID = matrixWorkspace->id();
     if ((workspaceID.find("Workspace2D") == std::string::npos) &&
         !m_eventWorkspace)
       throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D or EventWorkspace.");
@@ -143,11 +155,11 @@ namespace NeXus
     prog_init.reportIncrement(1, "Writing header");
 
     // write instrument data, if present and writer enabled
-    IInstrument_const_sptr instrument = m_inputWorkspace->getInstrument();
+    IInstrument_const_sptr instrument = matrixWorkspace->getInstrument();
     nexusFile->writeNexusInstrument(instrument);
     prog_init.reportIncrement(1, "Writing instrument");
 
-    nexusFile->writeNexusParameterMap(m_inputWorkspace);
+    nexusFile->writeNexusParameterMap(matrixWorkspace);
     prog_init.reportIncrement(1, "Writing parameter map");
 
     // write XML source file name, if it exists - otherwise write "NoNameAvailable"
@@ -170,8 +182,8 @@ namespace NeXus
     else
       nexusFile->writeNexusInstrumentXmlName("NoNameAvailable","","");
 
-    if( nexusFile->writeNexusProcessedSample(m_inputWorkspace->sample().getName(), m_inputWorkspace->sample(),
-        m_inputWorkspace->run()) != 0 )
+    if( nexusFile->writeNexusProcessedSample(matrixWorkspace->sample().getName(), matrixWorkspace->sample(),
+        matrixWorkspace->run()) != 0 )
     {
       g_log.error("Failed to write NXsample");
       throw Exception::FileError("Failed to write NXsample", m_filename);
@@ -179,10 +191,10 @@ namespace NeXus
     prog_init.reportIncrement(1, "Writing sample");
 
 
-    const int numberOfHist = static_cast<int>(m_inputWorkspace->getNumberHistograms());
+    const int numberOfHist = static_cast<int>(matrixWorkspace->getNumberHistograms());
     std::vector<int> spec;
     // check if all X() are in fact the same array
-    const bool uniformSpectra = API::WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
+    const bool uniformSpectra = API::WorkspaceHelpers::commonBoundaries(matrixWorkspace);
     if( interval )
     {
       if ( spec_max < spec_min || spec_max > numberOfHist-1 )
@@ -235,14 +247,14 @@ namespace NeXus
     }
     else
     {
-      nexusFile->writeNexusProcessedData2D(m_inputWorkspace,uniformSpectra,spec, "workspace", true);
+      nexusFile->writeNexusProcessedData2D(matrixWorkspace,uniformSpectra,spec, "workspace", true);
     }
 
-    nexusFile->writeNexusProcessedProcess(m_inputWorkspace);
+    nexusFile->writeNexusProcessedProcess(matrixWorkspace);
     // MW 27/10/10 - don't try and save the spectra-detector map if there isn't one
-    if ( m_inputWorkspace->getAxis(1)->isSpectra() )
+    if ( matrixWorkspace->getAxis(1)->isSpectra() )
     {
-      nexusFile->writeNexusProcessedSpectraMap(m_inputWorkspace, spec);
+      nexusFile->writeNexusProcessedSpectraMap(matrixWorkspace, spec);
     }
     nexusFile->closeNexusFile();
 
