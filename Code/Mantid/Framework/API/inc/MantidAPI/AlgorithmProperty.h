@@ -55,6 +55,8 @@ namespace Mantid
                         unsigned int direction = Kernel::Direction::Input);
       /// Copy constructor
       AlgorithmProperty(const AlgorithmProperty & rhs);
+      // Unhide base class members (at minimum, avoids Intel compiler warning)
+      using Kernel::PropertyWithValue<HeldType>::operator=;
       /// Copy-Assignment operator
       AlgorithmProperty& operator=(const AlgorithmProperty & rhs);
       /// 'Virtual copy constructor'
