@@ -727,9 +727,12 @@ class WeightedAzimuthalAverage(ReductionStep):
             qmin = float(toks[0])
             qmax = float(toks[2])
             
-        output_ws = workspace+str(self._suffix)    
-        #Q1DTOF(InputWorkspace=workspace+"_pristine", CorrectionWorkspace=workspace, OutputWorkspace=output_ws, OutputBinning=self._binning)
-        Q1DWeighted(workspace, output_ws, self._binning,
+        output_ws = workspace+str(self._suffix)
+        if mtd[workspace].getRun().hasProperty("data_ws"):
+            data_ws = mtd[workspace].getRun().getProperty("data_ws").value 
+            Q1DTOF(InputWorkspace=data_ws, CorrectionWorkspace=workspace, OutputWorkspace=output_ws, OutputBinning=self._binning)
+        else:
+            Q1DWeighted(workspace, output_ws, self._binning,
                     NPixelDivision=self._nsubpix,
                     PixelSizeX=pixel_size_x,
                     PixelSizeY=pixel_size_y, ErrorWeighting=self._error_weighting)  

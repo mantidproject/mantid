@@ -83,8 +83,17 @@ class LoadRun(ReductionStep):
         self._use_config_cutoff = False
         self._low_TOF_cut = 0
         self._high_TOF_cut = 0
+        
+        # TOF flight path correction
         self._correct_for_flight_path = False
+        
+        # Use mask defined in configuration file
         self._use_config_mask = False
+        
+        # Workspace on which to apply correction that should be done
+        # independently of the pixel. If False, all correction will be 
+        # applied directly to the data workspace.
+        self._separate_corrections = True
    
     def clone(self, data_file=None):
         if data_file is None:
@@ -316,7 +325,6 @@ class LoadRun(ReductionStep):
         x_max = 2*1e6/60.0+offset
         x_max -= x_max%x_step
         Rebin(workspace+'_evt', workspace, "%6.0f, %6.0f, %6.0f" % (x_min, x_step, x_max), False )
-
         ConvertUnits(workspace, workspace, "Wavelength")
         
         # Rebin so all the wavelength bins are aligned
@@ -339,11 +347,18 @@ class LoadRun(ReductionStep):
             
             mantid[workspace].getRun().addProperty_str("transmission_ws", transmission_ws, True)
             
-            
-        #if workspace in reducer._data_files:  
-        #    CloneWorkspace(workspace, workspace+"_pristine")
-        #    Divide(workspace, workspace, workspace)
+        if self._separate_corrections:
+            # If we pick up the data file from the workspace, it's because we 
+            # are going through the reduction chain, otherwise we are just loading
+            # the file to compute a correction
+            if self._data_file is None:    
+                data_ws = "%s_data" % workspace
+                mantid[workspace].getRun().addProperty_str("data_ws", data_ws, True)
         
+                CloneWorkspace(workspace, data_ws)
+                Divide(workspace, workspace, workspace)
+                reducer.clean(data_ws)
+                    
         # Remove the dirty flag if it existed
         reducer.clean(workspace)
         return "Data file loaded: %s\n%s" % (workspace, output_str)
