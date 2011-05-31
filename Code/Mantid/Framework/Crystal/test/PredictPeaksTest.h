@@ -107,8 +107,7 @@ public:
   {
     std::vector<V3D> hkls;
     hkls.push_back(V3D(-6,-9,1));
-    hkls.push_back(V3D(-7,-7,1));
-    do_test_exec("Primitive", 2, hkls);
+    do_test_exec("Primitive", 1, hkls);
   }
 
 
@@ -139,7 +138,7 @@ public:
     u = gon.getR();
     inWS->mutableSample().getOrientedLattice().setU(u);
 
-    // Final rotation : 45 degrees around +Y so that hkl 1,0,0 goes to +X
+    // Final rotation should add up to 45 degrees around +Y so that hkl 1,0,0 goes to +X
     WorkspaceCreationHelper::SetGoniometer(inWS, GonioRotation, 0., 0.);
 
     MantidMat ub = inWS->sample().getOrientedLattice().getUB();
