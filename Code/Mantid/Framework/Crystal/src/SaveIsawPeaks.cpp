@@ -1,13 +1,13 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/SaveIsawPeaks.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/IInstrument.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Strings.h"
-#include <fstream>
 #include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/V3D.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
+#include <fstream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
