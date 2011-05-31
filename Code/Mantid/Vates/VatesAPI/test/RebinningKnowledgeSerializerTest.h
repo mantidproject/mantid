@@ -14,7 +14,7 @@
 
 using namespace Mantid::VATES;
 
-class RebinningXMLGeneratorTest: public CxxTest::TestSuite
+class RebinningKnowledgeSerializerTest: public CxxTest::TestSuite
 {
 private:
 
