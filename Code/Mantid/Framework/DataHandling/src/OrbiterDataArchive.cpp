@@ -85,9 +85,9 @@ namespace Mantid
 
       // Debug statement to print returned filename(s)
       for (std::size_t i = 0; i < filenames.size(); ++i) {
-    	  g_log.debug() << "Filename[" << i << "] = " << filenames[i] << std::endl;
+    	  g_log.debug() << "Filename[" << i << "] = \'" << filenames[i] << "\'\n";
 	  }
-      g_log.debug() << "Returning Filename = " << result << std::endl;
+      g_log.debug() << "Returning Filename = \'" << result << "\'\n";
 
       return result;
     }
