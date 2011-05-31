@@ -206,6 +206,11 @@ void PropertyHandler::initParameters()
     QString parName = QString::fromStdString(function()->parameterName(i));
     if (parName.contains('.')) continue;
     QtProperty* prop = m_browser->addDoubleProperty(parName);
+    QString toolTip = QString::fromStdString(function()->parameterDescription(i));
+    if (!toolTip.isEmpty())
+    {
+      prop->setToolTip(toolTip);
+    }
     m_browser->m_doubleManager->setValue(prop,function()->getParameter(i));
     m_item->property()->addSubProperty(prop);
     m_parameters << prop;
