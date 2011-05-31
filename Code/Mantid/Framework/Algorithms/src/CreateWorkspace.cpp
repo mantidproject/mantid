@@ -83,11 +83,11 @@ void CreateWorkspace::exec()
   // Verify length of vectors makes sense with NSpec
   if ( dataX.size() % nSpec != 0 )
   {
-    throw std::invalid_argument("Length of DataX must be divisable by NSpec");
+    throw std::invalid_argument("Length of DataX must be divisible by NSpec");
   }
   if ( ( dataY.size() % nSpec ) != 0 )
   {
-    throw std::invalid_argument("Length of DataY must be divisable by NSpec");
+    throw std::invalid_argument("Length of DataY must be divisible by NSpec");
   }
   if ( dataY.size() != dataE.size() )
   {
@@ -107,21 +107,28 @@ void CreateWorkspace::exec()
 
   for ( int i = 0; i < nSpec; i++ )
   {
-    std::vector<double> specX, specY, specE;
-    for ( int j = 0; j < ySize; j++ )
-    {
-      specY.push_back(dataY[(i*ySize)+j]);
-      specE.push_back(dataE[(i*ySize)+j]);
-      specX.push_back(dataX[(i*xSize)+j]);
-    }
-    if ( ySize != xSize )
-    {
-      specX.push_back(dataX[(i*xSize)+(xSize-1)]);
-    }
-
-    outputWS->dataX(i) = specX;
-    outputWS->dataY(i) = specY;
-    outputWS->dataE(i) = specE;
+//    std::vector<double> specX, specY, specE;
+//    for ( int j = 0; j < ySize; j++ )
+//    {
+//      specY.push_back(dataY[(i*ySize)+j]);
+//      specE.push_back(dataE[(i*ySize)+j]);
+//      specX.push_back(dataX[(i*xSize)+j]);
+//    }
+//    if ( ySize != xSize )
+//    {
+//      specX.push_back(dataX[(i*xSize)+(xSize-1)]);
+//    }
+//
+//    outputWS->dataX(i) = specX;
+//    outputWS->dataY(i) = specY;
+//    outputWS->dataE(i) = specE;
+    const std::vector<double>::difference_type xStart = i*xSize;
+    const std::vector<double>::difference_type xEnd = xStart + xSize;
+    const std::vector<double>::difference_type yStart = i*ySize;
+    const std::vector<double>::difference_type yEnd = yStart + ySize;
+    outputWS->dataX(i).assign(dataX.begin()+xStart,dataX.begin()+xEnd);
+    outputWS->dataY(i).assign(dataY.begin()+yStart,dataY.begin()+yEnd);
+    outputWS->dataE(i).assign(dataE.begin()+yStart,dataE.begin()+yEnd);
   }
 
   // Set the Unit of the X Axis
