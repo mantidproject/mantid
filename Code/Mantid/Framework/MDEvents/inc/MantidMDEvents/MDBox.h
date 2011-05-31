@@ -68,6 +68,8 @@ namespace MDEvents
 
     void integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const;
 
+    void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL);
+
   protected:
 
     /** Vector of MDEvent's, in no particular order.

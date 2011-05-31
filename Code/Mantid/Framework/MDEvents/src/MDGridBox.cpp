@@ -201,6 +201,8 @@ namespace MDEvents
     nPoints = 0;
     this->m_signal = 0;
     this->m_errorSquared = 0;
+    for (size_t d=0; d<nd; d++)
+      this->m_centroid[d] = 0;
 
     typename boxVector_t::iterator it;
     typename boxVector_t::iterator it_end = boxes.end();
@@ -219,6 +221,10 @@ namespace MDEvents
         nPoints += ibox->getNPoints();
         this->m_signal += ibox->getSignal();
         this->m_errorSquared += ibox->getErrorSquared();
+
+        // And track the centroid
+        for (size_t d=0; d<nd; d++)
+          this->m_centroid[d] += ibox->getCentroid(d) * ibox->getSignal();
       }
     }
     else
@@ -226,6 +232,10 @@ namespace MDEvents
       //---------- Parallel refresh --------------
       throw std::runtime_error("Not implemented");
     }
+
+    // Normalize centroid by the total signal
+    for (size_t d=0; d<nd; d++)
+      this->m_centroid[d] /= this->m_signal;
 
   }
 
@@ -379,7 +389,9 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Perform centerpoint binning of events.
+  /** Perform centerpoint binning of events, with bins defined
+   * in axes perpendicular to the axes of the workspace.
+   *
    * @param bin :: MDBin object giving the limits of events to accept.
    * @param fullyContained :: optional bool array sized [nd] of which dimensions are known to be fully contained (for MDSplitBox)
    */
@@ -481,6 +493,7 @@ namespace MDEvents
   }
 
 
+  //-----------------------------------------------------------------------------------------------
   /** Integrate the signal within a sphere; for example, to perform single-crystal
    * peak integration.
    * The CoordTransform object could be used for more complex shapes, e.g. "lentil" integration, as long

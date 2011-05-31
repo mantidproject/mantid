@@ -258,6 +258,14 @@ namespace MDEvents
       m_inverseVolume = invVolume;
     }
 
+    /** Return the centroid of the box.
+     * @param d :: index of the dimension to return.
+     */
+    coord_t getCentroid(size_t d)
+    {
+      return m_centroid[d];
+    }
+
   protected:
 
     /** Array of MDDimensionStats giving the extents and
@@ -265,10 +273,12 @@ namespace MDEvents
      */
     MDDimensionExtents extents[nd];
 
-    /** Cached total signal from all points within */
+    /** Cached total signal from all points within.
+     * Set when refreshCache() is called. */
     signal_t m_signal;
 
-    /** Cached total error (squared) from all points within */
+    /** Cached total error (squared) from all points within.
+    * Set when refreshCache() is called. */
     signal_t m_errorSquared;
 
     /// Inverse of the volume of the cell, to be used for normalized signal.
@@ -279,6 +289,11 @@ namespace MDEvents
 
     /// Recursion depth
     size_t m_depth;
+
+    /** The centroid (weighted center of mass) of the events in this MDBox.
+     * Set when refreshCache() is called.
+     */
+    coord_t m_centroid[nd];
 
   public:
     /// Convenience typedef for a shared pointer to a this type of class

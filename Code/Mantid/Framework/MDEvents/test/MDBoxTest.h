@@ -278,6 +278,40 @@ public:
     dotest_integrateSphere(box, 5.0,5.0,5.0,  1.1,   7.0);
     dotest_integrateSphere(box, 5.0,5.0,5.0,  10., 9*9*9);
   }
+
+  /** refreshCache() tracks the centroid */
+  void test_refreshCache_withCentroid()
+  {
+    MDBox<MDEvent<2>,2> b;
+
+    MDEvent<2> ev(2.0, 2.0);
+    ev.setCenter(0, 2.0);
+    ev.setCenter(1, 3.0);
+    b.addEvent(ev);
+
+    MDEvent<2> ev2(4.0, 4.0);
+    ev2.setCenter(0, 4.0);
+    ev2.setCenter(1, 4.0);
+    b.addEvent(ev2);
+
+    b.refreshCache();
+
+    // This should be the weighted centroid
+    TS_ASSERT_DELTA( b.getCentroid(0), 3.333, 0.001);
+    TS_ASSERT_DELTA( b.getCentroid(1), 3.666, 0.001);
+  }
+
+
+  /** Centroid of an empty MDBox is 0.0 */
+  void test_refreshCache_withCentroid_emptyMDBox()
+  {
+    MDBox<MDEvent<2>,2> b;
+    b.refreshCache();
+    TS_ASSERT_DELTA( b.getCentroid(0), 0.000, 0.001);
+    TS_ASSERT_DELTA( b.getCentroid(1), 0.000, 0.001);
+  }
+
+
 };
 
 

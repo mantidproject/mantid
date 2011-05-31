@@ -408,6 +408,10 @@ public:
 
     TS_ASSERT_EQUALS( superbox->getNPoints(), 3 );
 
+    // Check the centroid for these 3 events
+    TS_ASSERT_DELTA( superbox->getCentroid(0), 3.233, 0.001);
+    TS_ASSERT_DELTA( superbox->getCentroid(1), 3.200, 0.001);
+
     // Retrieve the 0th grid box
     boxes = superbox->getBoxes();
     gb = dynamic_cast<MDGridBox<MDEvent<2>,2> *>(boxes[0]);

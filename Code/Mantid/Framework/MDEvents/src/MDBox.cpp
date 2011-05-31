@@ -81,7 +81,37 @@ namespace MDEvents
     return out;
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /** Refresh the cache.
+   * For MDBox, the signal/error is tracked on adding, so
+   * this just calculates the centroid.
+   */
+  TMDE(
+  void MDBox)::refreshCache(Kernel::ThreadScheduler * /*ts*/)
+  {
+    for (size_t d=0; d<nd; d++)
+      this->m_centroid[d] = 0;
 
+    // Keep 0.0 if the signal is null. This avoids dividing by 0.0
+    if (this->m_signal == 0) return;
+
+    typename std::vector<MDE>::const_iterator it_end = data.end();
+    for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; it++)
+    {
+      const MDE & event = *it;
+      double signal = event.getSignal();
+      for (size_t d=0; d<nd; d++)
+      {
+        // Total up the coordinate weighted by the signal.
+        this->m_centroid[d] += event.getCenter(d) * signal;
+      }
+    }
+
+    // Normalize by the total signal
+    for (size_t d=0; d<nd; d++)
+      this->m_centroid[d] /= this->m_signal;
+
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Calculate the statistics for each dimension of this MDBox, using
