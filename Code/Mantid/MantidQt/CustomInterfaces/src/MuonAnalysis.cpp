@@ -1890,7 +1890,17 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
   int numOfHist = static_cast<int>(matrix_workspace->getNumberHistograms()); //Qt has no size_t understanding
   for (int wsIndex = 0; wsIndex < numOfHist; wsIndex++)
   {
-    IDetector_sptr det = matrix_workspace->getDetector(wsIndex);
+    IDetector_sptr det;
+    try // for some bizarry reason when reading EMUautorun_A.tmp this 
+        // underlying nexus file think there are more histogram than there is
+        // hence the reason for this try/catch here
+    {
+      det = matrix_workspace->getDetector(wsIndex);
+    }
+    catch (...)
+    {
+      break;
+    }
 
     if( boost::dynamic_pointer_cast<DetectorGroup>(det) )
     {
