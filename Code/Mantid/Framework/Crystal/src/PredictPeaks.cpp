@@ -77,6 +77,9 @@ namespace Crystal
     declareProperty(new PropertyWithValue<double>("MinDSpacing",1.0,Direction::Input),
         "Minimum d-spacing of peaks to consider.");
 
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("HKLPeaksWorkspace","",Direction::Input, true),
+        "Optional: An input PeaksWorkspace with the HKL of the peaks that we should predict.");
+
     // Build up a list of reflection conditions to use
     std::vector<std::string> propOptions;
     for (size_t i=0; i<m_refConds.size(); ++i)
@@ -88,6 +91,86 @@ namespace Crystal
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output), "An output PeaksWorkspace.");
   }
 
+
+  /** Calculate the prediction for this HKL
+   *
+   * @param h
+   * @param k
+   * @param l
+   */
+  void PredictPeaks::doHKL(const int h, const int k, const int l)
+  {
+    V3D hkl(h,k,l);
+
+    // Skip those with unacceptable d-spacings
+    double d = crystal.d(hkl);
+    if (d > minD)
+    {
+      // The q-vector direction of the peak is = goniometer * ub * hkl_vector
+      V3D q = mat * hkl;
+
+      // The incident wavevector is in the +Z direction, ki = 1/wl (in z direction)
+      // For elastic diffraction, kf - ki = q, therefore:
+      // kf = qx in x; qy in y; and (qz+2pi/wl) in z.
+      // AND: norm(kf) = norm(ki) = 1.0/wavelength
+      // THEREFORE: 1/wl = - norm(q)^2 / (2*qz)
+
+      double norm_q = q.norm();
+      double one_over_wl = -(norm_q*norm_q) / (2.0 * q.Z());
+      double wl = 1.0/one_over_wl;
+
+      // Only keep going for accepted wavelengths.
+      if (wl >= wlMin && wl <= wlMax)
+      {
+        // This is the scattered direction, kf = ki but with kf_z = (qz+1/wl)
+        V3D beam = q;
+        beam.setZ(q.Z() + one_over_wl);
+
+        //          std::cout << hkl << ", q = " << q << "; beam = " << beam << "; wl = " << wl << "\n";
+        PARALLEL_CRITICAL(PredictPeaks_numInRange)
+        { numInRange++;
+        }
+
+        // Create a ray tracer
+        InstrumentRayTracer tracker(inst);
+        // Find intersecting instrument components in this direction.
+        V3D beamNormalized = beam;
+        beamNormalized.normalize();
+        tracker.traceFromSample(beamNormalized);
+        Links results = tracker.getResults();
+
+        // Go through all results
+        Links::const_iterator resultItr = results.begin();
+        for (; resultItr != results.end(); resultItr++)
+        {
+          IComponent_sptr component = inst->getComponentByID(resultItr->componentID);
+          IDetector_sptr det = boost::dynamic_pointer_cast<IDetector>(component);
+          if (det)
+          {
+            if (!det->isMonitor())
+            {
+              // Found a detector (not a monitor) that intersected the ray. Take the first one!
+              //                std::cout << "HKL " << hkl << " and q " << q << " will project on id " << det->getID() << " at wl " << 1.0/one_over_wl << "\n";
+
+              // Create the peak
+              Peak p(inst, det->getID(), wl);
+              p.setHKL(hkl);
+
+              // Add it to the workspace
+              PARALLEL_CRITICAL(PredictPeaks_appendPeak)
+              {
+                pw->addPeak(p);
+              }
+
+              break;
+            }
+          } // (is a detector)
+        } // each ray tracer result
+      } // (wavelength is okay)
+    } // (d is acceptable)
+  }
+
+
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -95,9 +178,12 @@ namespace Crystal
   {
     // Get the input properties
     MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-    double wlMin = getProperty("WavelengthMin");
-    double wlMax = getProperty("WavelengthMax");
-    double minD = getProperty("MinDSpacing");
+
+    wlMin = getProperty("WavelengthMin");
+    wlMax = getProperty("WavelengthMax");
+    minD = getProperty("MinDSpacing");
+
+    PeaksWorkspace_sptr HKLPeaksWorkspace = getProperty("HKLPeaksWorkspace");
 
     // Check the values.
     if (!inWS) throw std::invalid_argument("Did not specify a valid InputWorkspace.");
@@ -106,7 +192,6 @@ namespace Crystal
     if (minD < 1e-4) throw std::invalid_argument("MinDSpacing must be stricly positive.");
 
     // Get the instrument and its detectors
-    IInstrument_sptr inst;
     inst = inWS->getInstrument();
     if (!inst) throw std::invalid_argument("No instrument found in input workspace!");
 
@@ -121,12 +206,11 @@ namespace Crystal
 
 
     // Create the output
-    PeaksWorkspace_sptr pw(new PeaksWorkspace());
+    pw = PeaksWorkspace_sptr(new PeaksWorkspace());
     setProperty<PeaksWorkspace_sptr>("OutputWorkspace", pw);
 
-
     // Retrieve the OrientedLattice (UnitCell) from the workspace
-    OrientedLattice crystal = inWS->sample().getOrientedLattice();
+    crystal = inWS->sample().getOrientedLattice();
 
     // Get the UB matrix from it
     Matrix<double> ub(3,3, true);
@@ -137,7 +221,7 @@ namespace Crystal
     gonio = inWS->mutableRun().getGoniometerMatrix();
 
     // Final transformation matrix (Q in lab frame to HKL)
-    Matrix<double> mat = gonio * ub;
+    mat = gonio * ub;
 
     // Sample position
     V3D samplePos = inst->getSample()->getPos();
@@ -149,132 +233,89 @@ namespace Crystal
     if ((fabs(beamDir.X()) > 1e-2) || (fabs(beamDir.Y()) > 1e-2)) // || (beamDir.Z() < 0))
         throw std::invalid_argument("Instrument must have a beam direction that is only in the +Z direction for this algorithm to be valid..");
 
-    // Determine which HKL to look for
-    // Inverse d-spacing that is the limit to look for.
-    double dstar = 1.0/minD;
-    V3D hklMin(0,0,0);
-    V3D hklMax(0,0,0);
-    for (double qx=-1; qx < 2; qx += 2)
-      for (double qy=-1; qy < 2; qy += 2)
-        for (double qz=-1; qz < 2; qz += 2)
-        {
-          // Build a q-vector for this corner of a cube
-          V3D Q(qx,qy,qz);
-          Q *= dstar;
-          V3D hkl = crystal.hklFromQ(Q);
-          // Find the limits of each hkl
-          for (size_t i=0; i<3; i++)
-          {
-            if (hkl[i] < hklMin[i]) hklMin[i] = hkl[i];
-            if (hkl[i] > hklMax[i]) hklMax[i] = hkl[i];
-          }
-        }
-    // Round to nearest int
-    hklMin.round();
-    hklMax.round();
 
-    // How many HKLs is that total?
-    V3D hklDiff = hklMax-hklMin + V3D(1,1,1);
-    size_t numHKLs = size_t( hklDiff[0] * hklDiff[1] * hklDiff[2]);
-
-    g_log.information() << "HKL range for d_min of " << minD << " is from " << hklMin << " to " << hklMax << ", a total of " << numHKLs << " possible HKL's\n";
-
-    if (numHKLs > 10000000000)
-      throw std::invalid_argument("More than 10 billion HKLs to search. Is your d_min value too small?");
-
-
-    // Counter of possible peaks
-    size_t numInRange = 0;
-
-    Progress prog(this, 0.0, 1.0, numHKLs);
-    prog.setNotifyStep(0.01);
-
-    PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-    for (int h=(int)hklMin[0]; h <= (int)hklMax[0]; h++)
+    if (HKLPeaksWorkspace)
     {
-      PARALLEL_START_INTERUPT_REGION
-      for (int k=(int)hklMin[1]; k <= (int)hklMax[1]; k++)
+      // --------------Use the HKL from a list in a PeaksWorkspace --------------------------
+      // Disable some of the other filters
+      minD = 0.0;
+      wlMin = 0.0;
+      wlMax = 1e10;
+
+      PRAGMA_OMP(parallel for schedule(dynamic, 1) )
+      for (int i=0; i < static_cast<int>(HKLPeaksWorkspace->getNumberPeaks()); ++i)
       {
-        for (int l=(int)hklMin[2]; l <= (int)hklMax[2]; l++)
-        {
-          if (refCond->isAllowed(h,k,l) && (h != 0) && (k != 0) && (l != 0))
+        PARALLEL_START_INTERUPT_REGION
+
+        Peak & p = HKLPeaksWorkspace->getPeak(i);
+        doHKL(p.getH(), p.getK(), p.getL());
+
+        PARALLEL_END_INTERUPT_REGION
+      } // for each hkl in the workspace
+      PARALLEL_CHECK_INTERUPT_REGION
+    }
+    else
+    {
+      // ---------------- Determine which HKL to look for -------------------------------------
+      // Inverse d-spacing that is the limit to look for.
+      double dstar = 1.0/minD;
+      V3D hklMin(0,0,0);
+      V3D hklMax(0,0,0);
+      for (double qx=-1; qx < 2; qx += 2)
+        for (double qy=-1; qy < 2; qy += 2)
+          for (double qz=-1; qz < 2; qz += 2)
           {
-            V3D hkl(h,k,l);
-
-            // Skip those with unacceptable d-spacings
-            double d = crystal.d(hkl);
-            if (d > minD)
+            // Build a q-vector for this corner of a cube
+            V3D Q(qx,qy,qz);
+            Q *= dstar;
+            V3D hkl = crystal.hklFromQ(Q);
+            // Find the limits of each hkl
+            for (size_t i=0; i<3; i++)
             {
-              // The q-vector direction of the peak is = goniometer * ub * hkl_vector
-              V3D q = mat * hkl;
+              if (hkl[i] < hklMin[i]) hklMin[i] = hkl[i];
+              if (hkl[i] > hklMax[i]) hklMax[i] = hkl[i];
+            }
+          }
+      // Round to nearest int
+      hklMin.round();
+      hklMax.round();
 
-              // The incident wavevector is in the +Z direction, ki = 1/wl (in z direction)
-              // For elastic diffraction, kf - ki = q, therefore:
-              // kf = qx in x; qy in y; and (qz+2pi/wl) in z.
-              // AND: norm(kf) = norm(ki) = 1.0/wavelength
-              // THEREFORE: 1/wl = - norm(q)^2 / (2*qz)
+      // How many HKLs is that total?
+      V3D hklDiff = hklMax-hklMin + V3D(1,1,1);
+      size_t numHKLs = size_t( hklDiff[0] * hklDiff[1] * hklDiff[2]);
 
-              double norm_q = q.norm();
-              double one_over_wl = -(norm_q*norm_q) / (2.0 * q.Z());
-              double wl = 1.0/one_over_wl;
+      g_log.information() << "HKL range for d_min of " << minD << " is from " << hklMin << " to " << hklMax << ", a total of " << numHKLs << " possible HKL's\n";
 
-              // Only keep going for accepted wavelengths.
-              if (wl >= wlMin && wl <= wlMax)
-              {
-                // This is the scattered direction, kf = ki but with kf_z = (qz+1/wl)
-                V3D beam = q;
-                beam.setZ(q.Z() + one_over_wl);
+      if (numHKLs > 10000000000)
+        throw std::invalid_argument("More than 10 billion HKLs to search. Is your d_min value too small?");
 
-                //          std::cout << hkl << ", q = " << q << "; beam = " << beam << "; wl = " << wl << "\n";
-                PARALLEL_CRITICAL(PredictPeaks_numInRange)
-                { numInRange++;
-                }
 
-                // Create a ray tracer
-                InstrumentRayTracer tracker(inst);
-                // Find intersecting instrument components in this direction.
-                V3D beamNormalized = beam;
-                beamNormalized.normalize();
-                tracker.traceFromSample(beamNormalized);
-                Links results = tracker.getResults();
+      // Counter of possible peaks
+      numInRange = 0;
 
-                // Go through all results
-                Links::const_iterator resultItr = results.begin();
-                for (; resultItr != results.end(); resultItr++)
-                {
-                  IComponent_sptr component = inst->getComponentByID(resultItr->componentID);
-                  IDetector_sptr det = boost::dynamic_pointer_cast<IDetector>(component);
-                  if (det)
-                  {
-                    if (!det->isMonitor())
-                    {
-                      // Found a detector (not a monitor) that intersected the ray. Take the first one!
-                      //                std::cout << "HKL " << hkl << " and q " << q << " will project on id " << det->getID() << " at wl " << 1.0/one_over_wl << "\n";
+      Progress prog(this, 0.0, 1.0, numHKLs);
+      prog.setNotifyStep(0.01);
 
-                      // Create the peak
-                      Peak p(inst, det->getID(), wl);
-                      p.setHKL(hkl);
+      PRAGMA_OMP(parallel for schedule(dynamic, 1) )
+      for (int h=(int)hklMin[0]; h <= (int)hklMax[0]; h++)
+      {
+        PARALLEL_START_INTERUPT_REGION
+        for (int k=(int)hklMin[1]; k <= (int)hklMax[1]; k++)
+        {
+          for (int l=(int)hklMin[2]; l <= (int)hklMax[2]; l++)
+          {
+            if (refCond->isAllowed(h,k,l) && (h != 0) && (k != 0) && (l != 0))
+            {
+              doHKL(h,k,l);
+            } // refl is allowed and not 0,0,0
+            prog.report();
+          } // for each l
+        } // for each k
+        PARALLEL_END_INTERUPT_REGION
+      } // for each h
+      PARALLEL_CHECK_INTERUPT_REGION
 
-                      // Add it to the workspace
-                      PARALLEL_CRITICAL(PredictPeaks_appendPeak)
-                      {
-                        pw->addPeak(p);
-                      }
-
-                      break;
-                    }
-                  } // (is a detector)
-                } // each ray tracer result
-              } // (wavelength is okay)
-            } // (d is acceptable)
-          } // refl is allowed and not 0,0,0
-
-          prog.report();
-        } // for each l
-      } // for each k
-      PARALLEL_END_INTERUPT_REGION
-    } // for each h
-    PARALLEL_CHECK_INTERUPT_REGION
+    } // Find the HKL automatically
 
     g_log.information() << "Out of " << numInRange << " allowed peaks within parameters, " << pw->getNumberPeaks() << " were found to hit a detector.\n";
   }

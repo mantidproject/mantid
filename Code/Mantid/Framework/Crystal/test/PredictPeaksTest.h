@@ -11,6 +11,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidGeometry/V3D.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
@@ -29,7 +30,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void do_test_exec(std::string reflectionCondition, size_t expectedNumber)
+  void do_test_exec(std::string reflectionCondition, size_t expectedNumber, std::vector<V3D> hkls)
   {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
@@ -42,6 +43,18 @@ public:
     //Set ub and Goniometer rotation
     WorkspaceCreationHelper::SetOrientedLattice(inWS, 12.0, 12.0, 12.0);
     WorkspaceCreationHelper::SetGoniometer(inWS, 0., 0., 0.);
+
+    PeaksWorkspace_sptr hklPW;
+    if (hkls.size() > 0)
+    {
+      hklPW = PeaksWorkspace_sptr(new PeaksWorkspace());
+      for (size_t i=0; i<hkls.size(); i++)
+      {
+        Peak p(inst, 10000, 1.0);
+        p.setHKL( hkls[i] );
+        hklPW->addPeak( p );
+      }
+    }
   
     PredictPeaks alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -52,6 +65,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("WavelengthMax", "10.0") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("MinDSpacing", "1.0") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ReflectionCondition", reflectionCondition) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("HKLPeaksWorkspace", hklPW) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     
@@ -62,7 +76,7 @@ public:
     if (!ws) return;
     
     TS_ASSERT_EQUALS( ws->getNumberPeaks(), expectedNumber);
-//    std::cout << ws->getPeak(0).getHKL() << " hkl\n";
+    std::cout << ws->getPeak(0).getHKL() << " hkl\n";
     
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -70,18 +84,21 @@ public:
   
   void test_exec()
   {
-    do_test_exec("Primitive", 10);
+    do_test_exec("Primitive", 10, std::vector<V3D>() );
   }
 
   /** Fewer HKLs if they are not allowed */
   void test_exec_withReflectionCondition()
   {
-    do_test_exec("C-face centred", 6);
+    do_test_exec("C-face centred", 6, std::vector<V3D>() );
   }
 
-
-  void test_Something()
+  void test_exec_withInputHKLList()
   {
+    std::vector<V3D> hkls;
+    hkls.push_back(V3D(6,9,-1));
+    hkls.push_back(V3D(7,7,-1));
+    do_test_exec("Primitive", 2, hkls);
   }
 
 

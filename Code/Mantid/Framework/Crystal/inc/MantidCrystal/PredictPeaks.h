@@ -2,8 +2,12 @@
 #define MANTID_CRYSTAL_PREDICTPEAKS_H_
     
 #include "MantidAPI/Algorithm.h" 
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
+#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/System.h"
+#include <MantidGeometry/Crystal/OrientedLattice.h>
+#include "MantidGeometry/Math/Matrix.h"
 
 namespace Mantid
 {
@@ -38,8 +42,28 @@ namespace Crystal
     /// Run the algorithm
     void exec();
 
+    void doHKL(const int h, const int k, const int l);
+
   private:
+    /// Reflection conditions possible
     std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
+
+    /// Min wavelength parameter
+    double wlMin;
+    /// Max wavelength parameter
+    double wlMax;
+    /// Instrument reference
+    Mantid::Geometry::IInstrument_sptr inst;
+    /// Output peaks workspace
+    Mantid::DataObjects::PeaksWorkspace_sptr pw;
+    /// Counter of possible peaks
+    size_t numInRange;
+    /// Crystal applied
+    OrientedLattice crystal;
+    /// Min D spacing to apply.
+    double minD;
+    /// Rotation matrix
+    Mantid::Geometry::Matrix<double> mat;
 
   };
 
