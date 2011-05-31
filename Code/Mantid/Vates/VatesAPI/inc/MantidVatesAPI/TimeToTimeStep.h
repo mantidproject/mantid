@@ -38,9 +38,16 @@ namespace VATES
 class DLLExport TimeToTimeStep: std::unary_function<double, int>
 {
 private:
+  // Minimum time.
   double m_timeMin;
+  // Maximum time
   double m_timeMax;
+  // Minimum time range - maximum time range.
   double m_timeRange;
+  // Used for internal linear calculations.
+  double m_c;
+  // Used for internal linear calculations.
+  double m_fraction;
   size_t m_nIntervalSteps;
   bool m_runnable;
   
