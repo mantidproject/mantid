@@ -93,7 +93,10 @@ class LoadRun(ReductionStep):
         # Workspace on which to apply correction that should be done
         # independently of the pixel. If False, all correction will be 
         # applied directly to the data workspace.
-        self._separate_corrections = True
+        self._separate_corrections = False
+        
+        self._sample_det_dist = None
+        self._sample_det_offset = 0
    
     def clone(self, data_file=None):
         if data_file is None:
@@ -106,6 +109,18 @@ class LoadRun(ReductionStep):
         loader._use_config_mask = self._use_config_mask
         return loader
 
+    def set_sample_detector_distance(self, distance):
+        # Check that the distance given is either None of a float
+        if distance is not None and type(distance) != int and type(distance) != float:
+            raise RuntimeError, "LoadRun.set_sample_detector_distance expects a float: %s" % str(distance)
+        self._sample_det_dist = distance
+        
+    def set_sample_detector_offset(self, offset):
+        # Check that the offset given is either None of a float
+        if offset is not None and type(offset) != int and type(offset) != float:
+            raise RuntimeError, "LoadRun.set_sample_detector_offset expects a float: %s" % str(offset)
+        self._sample_det_offset = offset
+        
     def set_flight_path_correction(self, do_correction=False):
         """
             Set the flag to perform the TOF correction to take into
@@ -248,6 +263,12 @@ class LoadRun(ReductionStep):
         
         # Store the sample-detector distance.
         sdd = mtd[workspace+'_evt'].getRun()["detectorZ"].getStatistics().mean
+
+        if self._sample_det_dist is not None:
+            sdd = self._sample_det_dist            
+        elif not self._sample_det_offset == 0:
+            sdd += self._sample_det_offset
+
         mtd[workspace+'_evt'].getRun().addProperty_dbl("sample_detector_distance", sdd, 'mm', True)
         
         # Move the detector to its correct position
