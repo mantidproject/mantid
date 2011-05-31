@@ -251,6 +251,32 @@ namespace Mantid
       return spectraList;
     }
 
+    /** 
+     * Returns the number of unique spectra in the map
+     * @returns The number of unqiue spectra numbers
+     */
+    std::size_t SpectraDetectorMap::nSpectra() const
+    {
+      if( m_s2dmap.empty() ) return 0;
+
+      size_t numUnique = 1;
+      smap_it itr = m_s2dmap.begin();
+      smap_it iend = m_s2dmap.end();
+      
+      specid_t lastKey = itr->first;
+      ++itr;
+      while( itr != iend )
+      {
+        if( lastKey < itr->first ) 
+        {
+          ++numUnique;
+          lastKey = itr->first;
+        }
+        ++itr;
+      }
+      return numUnique;
+    }
+
     //------------------------------------------------------------------------------------------------
     /**
      * Return an iterator pointing at the first element

@@ -125,6 +125,8 @@ namespace Mantid
       virtual std::vector<specid_t> getSpectra(const std::vector<detid_t>& detectorList) const = 0;
       /// Return the size of the map
       virtual std::size_t nElements() const = 0;
+      /// Returns the number of unique spectra in the map
+      virtual std::size_t nSpectra() const = 0;
       /// Clear the map
       virtual void clear() = 0;
 

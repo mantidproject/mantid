@@ -541,39 +541,49 @@ namespace DataObjects
   {
     UNUSED_ARG(parallel);
     using Geometry::ISpectraDetectorMap;
+
+    /** 
+     * This assumes that the spectra are always in blocks at the start or end of
+     * the spectra list
+     */
     
     const ISpectraDetectorMap & spectramap = this->spectraMap();
-    const size_t nspectra = spectramap.nElements();
-    if( nspectra == 0)
+    const size_t numSpectra = spectramap.nSpectra();
+    if( numSpectra == 0 )
     {
       throw std::runtime_error("EventWorkspace::padSpectra - The spectra-detector map has not been "
                                "populated.");
     }
-
-    //Remove all old EventLists and resize the vector to hold everything
-    this->clearData();
-    data.resize(nspectra);
-    m_noVectors = nspectra;
-
+    const std::vector<detid_t> monIDs = this->getInstrument()->getMonitors();
+    const size_t numMonitors = monIDs.size();
+    // Find the spectra for the first monitor
+    const std::vector<specid_t> specNos = spectramap.getSpectra(std::vector<detid_t>(1, monIDs[0]));
+    specid_t spectra_start(1);
+    if( specNos.size() == 1 && specNos[0] == 1 ) //Else the monitors are at the end
+    {
+      spectra_start += specid_t(numMonitors);
+    }
+    const size_t numHist = numSpectra - monIDs.size();
     // Make the spectra axis
     delete m_axes[1];
-    API::SpectraAxis *ax1 = new API::SpectraAxis(m_noVectors);
-    m_axes[1] = ax1; //Default 1:1 starting at 1
-
-    for( size_t wi = 0; wi < nspectra; ++wi)
+    API::SpectraAxis *ax1 = new API::SpectraAxis(numHist);
+    m_axes[1] = ax1;     
+    
+    // Remove all old EventLists and resize the vector to hold everything
+    this->clearData();
+    data.resize(numHist);
+    m_noVectors = numHist;
+    
+    for( size_t wi = 0; wi < numHist; ++wi )
     {
+      const specid_t specNo = specid_t(spectra_start+wi);
+      ax1->spectraNo(wi) = specNo;
       //Create an event list for here
       EventList * newel = new EventList();
-      try
-      {
-        // Tag this with an effective ID
-        newel->addDetectorID( this->getDetector(wi)->getID() );
-      }
-      catch(Kernel::Exception::NotFoundError&) {}
+      newel->addDetectorID( specNo );
       //Save it in the list
       data[wi] = newel;
-      ax1->spectraNo(wi) = specid_t(wi+1);
-    }
+    }           
     
     //Clearing the MRU list is a good idea too.
     this->clearMRU();

@@ -45,7 +45,7 @@ namespace Geometry
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
- 	  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+          along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
@@ -93,7 +93,8 @@ public:
   /// returns a list containing  detector ids of monitors
   virtual const std::vector<detid_t> getMonitors()const = 0;
 
-
+  /// Returns the number of monitors attached to this instrument
+  virtual size_t numMonitors() const = 0;
 
   /// Returns a shared pointer to a component
   virtual boost::shared_ptr<Geometry::IComponent> getComponentByID(Geometry::ComponentID id) = 0;

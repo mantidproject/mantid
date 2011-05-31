@@ -38,6 +38,18 @@ public:
     }
   }
 
+  void test_That_The_Number_Of_Spectra_Matches_The_Number_Of_Elements()
+  {
+    OneToOneSpectraDetectorMap single(0,0);
+    TSM_ASSERT_EQUALS("Number of elements should match number of spectra (1)", 1, single.nSpectra());
+    OneToOneSpectraDetectorMap empty;
+    TSM_ASSERT_EQUALS("Number of elements should match number of spectra (0)", 0, empty.nSpectra());
+    OneToOneSpectraDetectorMap many(1,10);
+    TSM_ASSERT_EQUALS("Number of elements should match number of spectra (10)", 10, many.nSpectra());
+    
+    
+  }
+
   void test_That_Two_Objects_With_The_Same_Start_And_End_Are_Considered_Equal()
   {
     OneToOneSpectraDetectorMap lhs(0,4);

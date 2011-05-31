@@ -66,7 +66,7 @@ public:
    *
    * @param alg :: LoadEventNexus
    * @param entry_name :: name of the bank
-   * @param pixelID_to_wi_map :: map pixel ID to Workspace Index
+   * @param specid_to_wi_map :: map pixel ID to Workspace Index
    * @param prog :: Progress reporter
    * @param scheduler :: ThreadScheduler running this task
    * @param event_id :: array with event IDs
@@ -76,12 +76,12 @@ public:
    * @param event_index_ptr :: ptr to a vector of event index (length of # of pulses)
    * @return
    */
-  ProcessBankData(LoadEventNexus * alg, std::string entry_name, detid2index_map * pixelID_to_wi_map,
+  ProcessBankData(LoadEventNexus * alg, std::string entry_name, spec2index_map * specID_to_wi_map,
       Progress * prog, ThreadScheduler * scheduler,
       uint32_t * event_id, float * event_time_of_flight,
       size_t numEvents, size_t startAt, std::vector<uint64_t> * event_index_ptr)
   : Task(),
-    alg(alg), entry_name(entry_name), pixelID_to_wi_map(pixelID_to_wi_map), prog(prog), scheduler(scheduler),
+    alg(alg), entry_name(entry_name), specID_to_wi_map(specID_to_wi_map), prog(prog), scheduler(scheduler),
     event_id(event_id), event_time_of_flight(event_time_of_flight), numEvents(numEvents), startAt(startAt),
     event_index_ptr(event_index_ptr), event_index(*event_index_ptr)
   {
@@ -124,7 +124,7 @@ public:
       for (pixID = counts.begin(); pixID != counts.end(); pixID++)
       {
         //Find the the workspace index corresponding to that pixel ID
-        size_t wi = static_cast<size_t>((*pixelID_to_wi_map)[ pixID->first ]);
+        size_t wi = static_cast<size_t>((*specID_to_wi_map)[ pixID->first ]);
         // Allocate it
         alg->WS->getEventList(wi).reserve( pixID->second );
         if (alg->getCancel()) break; // User cancellation
@@ -192,7 +192,8 @@ public:
         TofEvent event(tof, pulsetime);
 
         //Find the the workspace index corresponding to that pixel ID
-        size_t wi = static_cast<size_t>((*pixelID_to_wi_map)[event_id[i]]);
+        size_t wi = static_cast<size_t>((*specID_to_wi_map)[event_id[i]]);
+
         // Add it to the list at that workspace index
         WS->getEventList(wi).addEventQuickly( event );
 
@@ -247,7 +248,7 @@ private:
   /// NXS path to bank
   std::string entry_name;
   /// Map of pixel ID to Workspace Index
-  detid2index_map * pixelID_to_wi_map;
+  spec2index_map * specID_to_wi_map;
   /// Progress reporting
   Progress * prog;
   /// ThreadScheduler running this task
@@ -280,15 +281,15 @@ public:
   /** Constructor
    *
    * @param entry_name :: The pathname of the bank to load
-   * @param pixelID_to_wi_map :: a map where key = pixelID and value = the workpsace index to use.
+   * @param specID_to_wi_map :: a map where key = specNo and value = the workpsace index to use.
    * @param prog :: an optional Progress object
    * @param ioMutex :: a mutex shared for all Disk I-O tasks
    * @param scheduler :: the ThreadScheduler that runs this task.
    */
-  LoadBankFromDiskTask(LoadEventNexus * alg, std::string entry_name, detid2index_map * pixelID_to_wi_map,
+  LoadBankFromDiskTask(LoadEventNexus * alg, std::string entry_name, spec2index_map * specID_to_wi_map,
       Progress * prog, Mutex * ioMutex, ThreadScheduler * scheduler)
   : Task(),
-    alg(alg), entry_name(entry_name), pixelID_to_wi_map(pixelID_to_wi_map), prog(prog), scheduler(scheduler)
+    alg(alg), entry_name(entry_name), specID_to_wi_map(specID_to_wi_map), prog(prog), scheduler(scheduler)
   {
     setMutex(ioMutex);
   }
@@ -509,7 +510,7 @@ public:
     // No error? Launch a new task to process that data.
     size_t numEvents = load_size[0];
     size_t startAt = load_start[0];
-    ProcessBankData * newTask = new ProcessBankData(alg, entry_name,pixelID_to_wi_map,prog,scheduler,
+    ProcessBankData * newTask = new ProcessBankData(alg, entry_name,specID_to_wi_map,prog,scheduler,
         event_id,event_time_of_flight, numEvents, startAt, event_index_ptr);
     scheduler->push(newTask);
   }
@@ -522,7 +523,7 @@ private:
   /// NXS path to bank
   std::string entry_name;
   /// Map of pixel ID to Workspace Index
-  detid2index_map * pixelID_to_wi_map;
+  spec2index_map * specID_to_wi_map;
   /// Progress reporting
   Progress * prog;
   /// ThreadScheduler running this task
@@ -883,32 +884,7 @@ void LoadEventNexus::exec()
   Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*3);
 
   //This map will be used to find the workspace index
-  detid2index_map * pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(false);
-
-//  // Now go through each bank.
-//  // This'll be parallelized - but you can't run it in parallel if you couldn't pad the pixels.
-//  PARALLEL_FOR_IF( (this->instrument_loaded_correctly) )
-//  for (int i=0; i < static_cast<int>(bankNames.size()); i++)
-//  {
-//    PARALLEL_START_INTERUPT_REGION
-//    this->loadBankEventData(bankNames[i], pixelID_to_wi_map, prog2);
-//    PARALLEL_END_INTERUPT_REGION
-//  }
-//  PARALLEL_CHECK_INTERUPT_REGION
-//  delete prog2;
-
-
-
-//  // Create a thread pool with scheduler
-//  ThreadPool pool(new ThreadSchedulerLargestCost());
-//  for (int i=0; i < static_cast<int>(bankNames.size()); i++)
-//  {
-//    double cost = 1.0;
-//    pool.schedule( new FunctionTask(boost::bind(&LoadEventNexus::loadBankEventData, &*this, bankNames[i], pixelID_to_wi_map, prog2), cost ) );
-//  }
-//  // Start and end all threads
-//  pool.joinAll();
-//  delete prog2;
+  spec2index_map * specid_to_wi_map = WS->getSpectrumToWorkspaceIndexMap();
 
   // Make the thread pool
   ThreadScheduler * scheduler = new ThreadSchedulerLargestCost();
@@ -917,7 +893,7 @@ void LoadEventNexus::exec()
   for (int i=0; i < static_cast<int>(bankNames.size()); i++)
   {
     // We make tasks for loading
-    pool.schedule( new LoadBankFromDiskTask(this,bankNames[i],pixelID_to_wi_map, prog2, diskIOMutex, scheduler) );
+    pool.schedule( new LoadBankFromDiskTask(this,bankNames[i],specid_to_wi_map, prog2, diskIOMutex, scheduler) );
   }
   // Start and end all threads
   pool.joinAll();
@@ -926,7 +902,7 @@ void LoadEventNexus::exec()
 
 
   //Don't need the map anymore.
-  delete pixelID_to_wi_map;
+  delete specid_to_wi_map;
 
   if (is_time_filtered)
   {

@@ -107,7 +107,12 @@ namespace Mantid
 
       /// returns a list containing  detector ids of monitors
       const std::vector<detid_t> getMonitors()const ;
-
+      /**
+       * Returns the number of monitors attached to this instrument
+       * @returns The number of monitors within the instrument
+       */
+      inline size_t numMonitors() const { return m_monitorCache.size(); }
+  
       /// Get the bounding box for this component and store it in the given argument
       void getBoundingBox(BoundingBox& boundingBox) const;
 

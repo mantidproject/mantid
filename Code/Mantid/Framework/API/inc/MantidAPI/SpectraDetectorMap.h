@@ -115,6 +115,8 @@ namespace Mantid
       std::vector<specid_t> getSpectra(const std::vector<detid_t>& detectorList) const;
       /// Return the size of the map
       std::size_t nElements() const {return m_s2dmap.size();}
+      /// Returns the number of unique spectra in the map
+      std::size_t nSpectra() const;
 
       /**@name Iterate over the whole map */
       //@{

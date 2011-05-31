@@ -63,6 +63,13 @@ namespace Mantid
        * @returns The number of elements specified when the map was created
        */
       inline std::size_t nElements() const { return (m_end - m_start + 1); }
+      /**
+       * Returns the number of unique spectra in the map. In this case this always
+       * matches <code>nElements()</code>
+       * @returns The number of unique spectra in the map
+       */
+      inline std::size_t nSpectra() const { return nElements(); }
+
       /// Clear the map
       inline void clear() { m_end = 1; m_start = 2; }
 
