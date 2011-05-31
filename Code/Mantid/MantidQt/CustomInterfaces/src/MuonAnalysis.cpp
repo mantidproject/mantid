@@ -50,6 +50,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 
+#include <fstream>
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -399,7 +400,22 @@ void MuonAnalysis::runLoadCurrent()
 
   if ( instname == "EMU" || instname == "HIFI" || instname == "MUSR")
   {
-    QString psudoDAE = "\\\\" + instname + "\\data\\" + instname + "auto_A.tmp";
+    // first check if autosave.run exist
+    std::string autosavePointsTo = "";
+    std::string autosaveFile = "\\\\" + instname + "\\data\\autosave.run";
+    Poco::File pathAutosave( autosaveFile );
+    if ( pathAutosave.exists() )
+    {
+      std::ifstream autofileIn(autosaveFile.c_str(), std::ifstream::in); 
+      autofileIn >> autosavePointsTo;
+    }    
+
+    QString psudoDAE;
+    if ( autosavePointsTo.empty() )
+      psudoDAE = "\\\\" + instname + "\\data\\" + instname + "auto_A.tmp";
+    else
+      psudoDAE = "\\\\" + instname + "\\data\\" + autosavePointsTo.c_str();
+
     Poco::File l_path( psudoDAE.toStdString() );
     if ( !l_path.exists() )
     {
