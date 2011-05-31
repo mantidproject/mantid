@@ -448,19 +448,31 @@ void SANSPlotSpecial::deriveGuinierSpheres()
   QStringList unknown = props.first;
   QMap<QString, double> values = props.second;
 
-  if ( ( ( unknown.size() > 1 ) && ( unknown.indexOf("Phi") == -1 ) ) || ( unknown.size() > 2 ) )
+  bool doable = ( unknown.indexOf("C") != -1 ) ^ ( unknown.indexOf("Phi") != -1 );
+
+  if ( ( ( unknown.size() > 1 ) && ! doable ) || ( unknown.size() > 2 ) )
   {
     return;
   }
+  QString route = "Phi";
+  if ( unknown.indexOf("C") == -1 ) { route = "C"; }
 
-  double lhs = values["Intercept"] * Mantid::PhysicalConstants::N_A;
+  const double lhs = values["Intercept"] * Mantid::PhysicalConstants::N_A;
 
   foreach ( QString item, unknown )
   {
     double val;
     if ( item == "M" )
     {
-      val = ( lhs * std::pow(values["D"], 2.0) ) / ( values["C"] * std::pow(values["Deltarho"], 2.0) );
+      val = lhs * values["D"] / std::pow(values["Deltarho"], 2.0);
+      if ( route == "C" )
+      {
+        val = val * ( values["D"] / values["C"] );
+      }
+      else
+      {
+        val = val / values["Phi"];
+      }
     }
     else if ( item == "C" )
     {
@@ -468,11 +480,28 @@ void SANSPlotSpecial::deriveGuinierSpheres()
     }
     else if ( item == "Deltarho" )
     {
-      val = std::sqrt( ( lhs * std::pow(values["D"], 2.0) ) / ( values["M"] * values["C"] ) );
+      val = lhs * values["D"] / values["M"];
+      if ( route == "C" )
+      {
+        val = val * values["D"] / values["C"];
+      }
+      else
+      {
+        val = val / values["Phi"];
+      }
+      val = std::sqrt( val );
     }
     else if ( item == "D" )
     {
-      val = std::sqrt( lhs / ( values["M"] * values["C"] * std::pow(values["Deltarho"], 2.0) ) );
+      val = lhs / ( values["M"] * std::pow(values["Deltarho"], 2.0) );
+      if ( route == "C" )
+      {
+        val = std::sqrt( val / values["C"] );
+      }
+      else
+      {
+        val = val / values["Phi"];
+      }
     }
     else if ( item == "Phi" )
     {
@@ -501,7 +530,7 @@ void SANSPlotSpecial::deriveGuinierRods()
 
   double val;
 
-  double lhs = ( std::pow(2.71828183, values["Intercept"]) * Mantid::PhysicalConstants::N_A ) / M_PI;
+  const double lhs = ( std::pow(2.71828183, values["Intercept"]) * Mantid::PhysicalConstants::N_A ) / M_PI;
   
   if ( item == "C" )
   {
@@ -532,23 +561,43 @@ void SANSPlotSpecial::deriveZimm()
   QStringList unknown = props.first;
   QMap<QString, double> values = props.second;
 
-  double lhs = values["Intercept"] / Mantid::PhysicalConstants::N_A;
+  const double lhs = values["Intercept"] / Mantid::PhysicalConstants::N_A;
 
-  if ( unknown.size() > 2 || ( unknown.size() > 1 && unknown.indexOf("Phi") == -1 ) )
+  bool doable = ( unknown.indexOf("C") != -1 ) ^ ( unknown.indexOf("Phi") != -1 );
+  if ( ( ( unknown.size() > 1 ) && ! doable ) || ( unknown.size() > 2 ) )
   {
     return;
   }
+  QString route = "Phi";
+  if ( unknown.indexOf("C") == -1 ) { route = "C"; }
+
 
   foreach ( QString item, unknown )
   {
     double val;
     if ( item == "D" )
     {
-      val = std::sqrt( lhs * values["M"] * values["C"] * std::pow(values["Deltarho"], 2) );
+      val = lhs * values["M"] * std::pow(values["Deltarho"], 2);
+      if ( route == "C" )
+      {
+        val = std::sqrt( val * values["C"] );
+      }
+      else
+      {
+        val = val * values["Phi"];
+      }
     }
     else if ( item == "M" )
     {
-      val = lhs * ( values["C"] * std::pow(values["Deltarho"], 2) ) / std::pow(values["D"], 2);
+      val = lhs * std::pow(values["Deltarho"], 2.0) / values["D"];
+      if ( route == "C" )
+      {
+        val = val * values["C"] / values["D"];
+      }
+      else
+      {
+        val = val * values["Phi"];
+      }
     }
     else if ( item == "C" )
     {
@@ -556,7 +605,16 @@ void SANSPlotSpecial::deriveZimm()
     }
     else if ( item == "Deltarho" )
     {
-      val = std::sqrt( lhs * ( values["M"] * values["C"] ) / std::pow(values["D"], 2) ) ;
+      val = lhs * values["M"] / values["D"];
+      if ( route == "C" )
+      {
+        val = val * values["C"] / values["D"];
+      }
+      else
+      {
+        val = val * values["Phi"];
+      }
+      val = std::sqrt( val ) ;
     }
     else if ( item == "Phi" )
     {
@@ -576,13 +634,16 @@ void SANSPlotSpecial::deriveKratky()
   QStringList unknown = props.first;
   QMap<QString, double> values = props.second;
 
-  double lhs = Mantid::PhysicalConstants::N_A * values["Intercept"] / 2.0;
+  const double lhs = Mantid::PhysicalConstants::N_A * values["Intercept"] / 2.0;
 
-  if ( unknown.size() > 2 || ( unknown.size() == 2 && unknown.indexOf("Phi") == -1 ) )
+  bool doable = ( unknown.indexOf("C") != -1 ) ^ ( unknown.indexOf("Phi") != -1 );
+  if ( ( ( unknown.size() > 1 ) && ! doable ) || ( unknown.size() > 2 ) )
   {
     return;
   }
-
+  QString route = "Phi";
+  if ( unknown.indexOf("C") == -1 ) { route = "C"; }
+  
   foreach ( QString item, unknown )
   {
     double val;
@@ -593,19 +654,53 @@ void SANSPlotSpecial::deriveKratky()
     }
     else if ( item == "M" )
     {
-      val = lhs * ( std::pow(values["D"], 2) * std::pow(values["Rg"], 2) ) / ( values["C"] * std::pow(values["Deltarho"], 2) );
+      val = lhs * ( values["D"] * std::pow(values["Rg"], 2) ) / std::pow(values["Deltarho"], 2);
+      if ( route == "C" )
+      {
+        val = val * ( values["D"] / values["C"] );
+      }
+      else
+      {
+        val = val / values["Phi"];
+      }
     }
     else if ( item == "Deltarho" )
     {
-      val = std::sqrt( lhs * ( std::pow(values["D"], 2) * std::pow(values["Rg"], 2) ) / ( values["C"] * values["M"] ) );
+      val = lhs * ( values["D"] * std::pow(values["Rg"], 2) ) / values["M"];
+      if ( route == "C" )
+      {
+        val = val * ( values["D"] / values["C"] );
+      }
+      else
+      {
+        val = val / values["Phi"];
+      }
+      val = std::sqrt( val );
     }
     else if ( item == "D" )
     {
-      val = std::sqrt( lhs * std::pow(values["Rg"], 2) / ( values["C"] * values["M"] * std::pow(values["Deltarho"], 2 ) ) );
+      val = lhs * std::pow(values["Rg"], 2) / ( values["M"] * std::pow(values["Deltarho"], 2 ) );
+      if ( route == "C" )
+      {
+        val = std::sqrt(val / values["C"]);
+      }
+      else
+      {
+        val = val / values["Phi"];
+      }
     }
     else if ( item == "Rg" )
     {
-      val = std::sqrt( lhs * std::pow(values["D"], 2) / ( values["C"] * values["M"] * std::pow(values["Deltarho"], 2 ) ) );
+      val = lhs * values["D"] / ( values["M"] * std::pow(values["Deltarho"], 2 ) );
+      if ( route == "C" )
+      {
+        val = val * values["D"] / values["C"];
+      }
+      else
+      {
+        val = val / values["Phi"];
+      }
+      val = std::sqrt( val );
     }
     else if ( item == "Phi" )
     {
