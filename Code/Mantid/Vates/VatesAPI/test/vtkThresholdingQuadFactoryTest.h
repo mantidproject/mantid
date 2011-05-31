@@ -381,7 +381,7 @@ public:
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
     vtkThresholdingQuadFactory factory("signal");
     factory.initialize(ws_sptr);
-    TSM_ASSERT_THROWS_NOTHING(factory.create());
+    TS_ASSERT_THROWS_NOTHING(factory.create());
 	}
 };
 
