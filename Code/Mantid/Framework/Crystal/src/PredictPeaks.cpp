@@ -107,16 +107,18 @@ namespace Crystal
     if (d > minD)
     {
       // The q-vector direction of the peak is = goniometer * ub * hkl_vector
+      // This is in inelastic convention: momentum transfer of the LATTICE!
+      // Also, q does NOT have a 2pi factor = it is equal to 1/wavelength.
       V3D q = mat * hkl;
 
-      // The incident wavevector is in the +Z direction, ki = 1/wl (in z direction)
-      // For elastic diffraction, kf - ki = q, therefore:
-      // kf = qx in x; qy in y; and (qz+2pi/wl) in z.
-      // AND: norm(kf) = norm(ki) = 1.0/wavelength
-      // THEREFORE: 1/wl = - norm(q)^2 / (2*qz)
-
+      /* The incident neutron wavevector is in the +Z direction, ki = 1/wl (in z direction).
+       * In the inelastic convention, q = ki - kf.
+       * The final neutron wavector kf = -qx in x; -qy in y; and (-qz+1/wl) in z.
+       * AND: norm(kf) = norm(ki) = 1.0/wavelength
+       * THEREFORE: 1/wl = norm(q)^2 / (2*qz)
+       */
       double norm_q = q.norm();
-      double one_over_wl = -(norm_q*norm_q) / (2.0 * q.Z());
+      double one_over_wl = (norm_q*norm_q) / (2.0 * q.Z());
       double wl = 1.0/one_over_wl;
 
       g_log.information() << "Peak at " << hkl << " has d-spacing " << d << " and wavelength " << wl << std::endl;
@@ -124,9 +126,12 @@ namespace Crystal
       // Only keep going for accepted wavelengths.
       if (wl >= wlMin && wl <= wlMax)
       {
-        // This is the scattered direction, kf = ki but with kf_z = (qz+1/wl)
-        V3D beam = q;
-        beam.setZ(q.Z() + one_over_wl);
+        // This is the scattered direction, kf = (-qx, -qy, 1/wl-qz)
+        V3D beam = q * -1.0;
+        beam.setZ(one_over_wl - q.Z());
+        beam.normalize();
+
+        g_log.information() << "Peak at " << hkl << " scatters towards " << beam << "." << std::endl;
 
         //          std::cout << hkl << ", q = " << q << "; beam = " << beam << "; wl = " << wl << "\n";
         PARALLEL_CRITICAL(PredictPeaks_numInRange)
@@ -222,7 +227,7 @@ namespace Crystal
     Matrix<double> gonio(3,3, true);
     gonio = inWS->mutableRun().getGoniometerMatrix();
 
-    // Final transformation matrix (Q in lab frame to HKL)
+    // Final transformation matrix (HKL to Q in lab frame)
     mat = gonio * ub;
 
     // Sample position
@@ -235,6 +240,8 @@ namespace Crystal
     if ((fabs(beamDir.X()) > 1e-2) || (fabs(beamDir.Y()) > 1e-2)) // || (beamDir.Z() < 0))
         throw std::invalid_argument("Instrument must have a beam direction that is only in the +Z direction for this algorithm to be valid..");
 
+    // Counter of possible peaks
+    numInRange = 0;
 
     if (HKLPeaksWorkspace)
     {
@@ -290,10 +297,6 @@ namespace Crystal
 
       if (numHKLs > 10000000000)
         throw std::invalid_argument("More than 10 billion HKLs to search. Is your d_min value too small?");
-
-
-      // Counter of possible peaks
-      numInRange = 0;
 
       Progress prog(this, 0.0, 1.0, numHKLs);
       prog.setNotifyStep(0.01);

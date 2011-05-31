@@ -6,9 +6,11 @@
 #include <fstream>
 #include <iosfwd>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
+#include <MantidGeometry/Crystal/UnitCell.h>
 
 using namespace Mantid::Kernel::Strings;
 using Mantid::Geometry::MantidMat;
+using Mantid::Geometry::UnitCell;
 
 namespace Mantid
 {
@@ -98,6 +100,12 @@ namespace Crystal
     // Adjust the UB by transposing
     ub = ub.Transpose();
 
+    UnitCell uc;
+    MantidMat Gstar = ub.Tprime() * ub ;
+    uc.recalculateFromGstar( Gstar );
+    std::cout << uc.a() << " "  << uc.b() << " "  << uc.c() << " "
+        << uc.alpha() << " "  << uc.beta() << " "  << uc.gamma() << std::endl;
+
 //    // At this point, the UB uses the IPNS convention meaning that
 //    // for us, the output Q vector from UB.hkl = Qz, Qx, Qy
 //    Geometry::Matrix<double> adjust(3,3);
@@ -131,7 +139,7 @@ namespace Crystal
       U2[0][r] = U[1][r];
     }
     U = U2;
-    U *= -1.0;
+    //U *= -1.0;
 
     latt->setU( U );
 

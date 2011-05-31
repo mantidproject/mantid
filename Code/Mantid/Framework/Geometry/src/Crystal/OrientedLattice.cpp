@@ -54,8 +54,14 @@ namespace Geometry
     return U;
   }
   
-  /// Get the UB matrix
-  /// @return UB :: UB orientation matrix
+  /** Get the UB matrix.
+   The UB Matrix uses the inelastic convention:
+     q = UB . (hkl)
+   where q is the wavevector transfer of the LATTICE (not the neutron).
+     and |q| = 1.0/d_spacing
+
+   @return UB :: UB orientation matrix
+   */
   const MantidMat OrientedLattice::getUB() const
   {
     MantidMat UB;

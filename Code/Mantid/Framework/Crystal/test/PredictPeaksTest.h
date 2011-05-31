@@ -106,17 +106,19 @@ public:
   void test_exec_withInputHKLList()
   {
     std::vector<V3D> hkls;
-    hkls.push_back(V3D(6,9,-1));
-    hkls.push_back(V3D(7,7,-1));
+    hkls.push_back(V3D(-6,-9,1));
+    hkls.push_back(V3D(-7,-7,1));
     do_test_exec("Primitive", 2, hkls);
   }
+
+
 
   /** More manual test of predict peaks where we build a simple UB
    * and see that the peak falls where it should.
    * In this case, hkl 1,0,0 on a crystal rotated 45 deg. relative to +Y
    * should fall on a detector towards (+1.0, 0.0, 0.0)
    */
-  void test_manual()
+  void do_test_manual(double Urotation, double GonioRotation)
   {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
@@ -133,17 +135,17 @@ public:
     MantidMat u(3,3);
     Goniometer gon;
     gon.makeUniversalGoniometer();
-    gon.setRotationAngle(0, 22.5);
+    gon.setRotationAngle(0, Urotation);
     u = gon.getR();
     inWS->mutableSample().getOrientedLattice().setU(u);
 
     // Final rotation : 45 degrees around +Y so that hkl 1,0,0 goes to +X
-    WorkspaceCreationHelper::SetGoniometer(inWS, 22.5, 0., 0.);
+    WorkspaceCreationHelper::SetGoniometer(inWS, GonioRotation, 0., 0.);
 
     MantidMat ub = inWS->sample().getOrientedLattice().getUB();
 
     std::vector<V3D> hkls;
-    hkls.push_back(V3D(1,0,0));
+    hkls.push_back(V3D(-1,0,0));
     PeaksWorkspace_sptr hklPW = getHKLpw(inst, hkls, 0);
 
     PredictPeaks alg;
@@ -171,6 +173,16 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
+
+  void test_manual_goniometer_alone()
+  {
+    do_test_manual(0, 45.0);
+  }
+
+  void test_manual_U_and_gonio()
+  {
+    do_test_manual(22.5, 22.5);
+  }
 
 };
 
