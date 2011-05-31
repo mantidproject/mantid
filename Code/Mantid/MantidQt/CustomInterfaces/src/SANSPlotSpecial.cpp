@@ -144,22 +144,22 @@ void SANSPlotSpecial::calculateDerivatives()
   {
   case Transform::GuinierSpheres:
     // Gradient = -(Rg**2)/3 = -(R**2)/5
-    temp = - std::sqrt(3 * gradient);
+    temp = - std::sqrt(3 * std::abs(gradient) );
     m_derivatives["Rg"]->setText(QString::number(temp));
-    temp = - std::sqrt(5 * gradient);
+    temp = - std::sqrt(5 * std::abs(gradient) );
     m_derivatives["R"]->setText(QString::number(temp));
     // Intercept = M.[(c.(deltarho**2) / (NA.d**2)] = M.[(phi.(deltarho**2) / (NA.d)]
     deriveGuinierSpheres();
     break;
   case Transform::GuinierRods:
     // Gradient = -(Rg,xs**2)/2  (note dividing by 2 this time)
-    temp = - std::sqrt(2 * gradient);
+    temp = - std::sqrt(2 * std::abs(gradient) );
     m_derivatives["Rg,xs"]->setText(QString::number(temp));
     //Intercept (Q**2=0) = Ln[(pi.c.(deltarho**2).ML) / (NA.d**2)]
     deriveGuinierRods();
     break;
   case Transform::GuinierSheets:
-    temp = - std::sqrt(gradient * 12);
+    temp = - std::sqrt(std::abs(gradient) * 12);
     m_derivatives["T"]->setText(QString::number(temp));
     break;
   case Transform::Zimm:
@@ -751,7 +751,7 @@ void SANSPlotSpecial::Transform::init()
   case Porod:
     m_xWidgets.append(new QLabel("Q"));
     m_yWidgets.append(new QLabel("I * Q^4"));
-    m_iDeriv = "C|Deltarho|D|S|V";
+    m_iDeriv = "C|Deltarho|D|(S/V)";
     break;
   case LogLog:
     m_xWidgets.append(new QLabel("ln (Q)"));
