@@ -39,14 +39,19 @@ AxisInformation *GeometryParser::getAxisInfo(const std::string dimension)
 	Poco::XML::NodeList *cNodes = pNode->childNodes();
 	double min, max;
 	std::string title;
+	// Using ID for now. Remove if we go back to using axis name
+	title = label;
 	for (unsigned long int j = 0; j < cNodes->length(); ++j)
 	{
 		Poco::XML::Node *cNode = cNodes->item(j);
 		Poco::XML::XMLString elem = cNode->nodeName();
+		// Keeping below around in case we go back to using axis name
+		/*
 		if (elem == Poco::XML::XMLString("Name"))
 		{
 			title = cNode->innerText();
 		}
+		*/
 		if (elem == Poco::XML::XMLString("LowerBounds"))
 		{
 			min = this->convertBounds(cNode->innerText());
