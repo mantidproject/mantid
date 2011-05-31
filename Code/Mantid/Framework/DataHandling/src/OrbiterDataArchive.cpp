@@ -42,7 +42,8 @@ namespace Mantid
       std::string baseURL(
           "https://orbiter.sns.gov/orbiter/service/webservice/OrbiterFindFileService.php");
       std::string findFileWS("/operation/findFile/format/space/filename/");
-      std::string URL;
+      std::string URL(baseURL + findFileWS + fName);
+      g_log.debug() << "URL = \'" << URL << "\'\n";
 
       std::string wsResult = "";
       std::string result = "";
@@ -53,7 +54,7 @@ namespace Mantid
       //
       //#endif
 
-      Poco::URI uri(baseURL + findFileWS + fName);
+      Poco::URI uri(URL);
       std::string path(uri.getPathAndQuery());
 
       Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "",
