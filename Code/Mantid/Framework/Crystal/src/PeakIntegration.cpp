@@ -174,6 +174,7 @@ namespace Mantid
       // Get references to the current spectrum
       MantidVec& X = outputW->dataX(s);
       MantidVec& Y = outputW->dataY(s);
+      MantidVec& E = outputW->dataE(s);
       TOFPeak = VectorHelper::getBinIndex(X, TOFPeakd);
       TOFmin = TOFPeak+Binmin;
       if (TOFmin<0) TOFmin = 0;
@@ -181,10 +182,6 @@ namespace Mantid
       int numbins = static_cast<int>(Y.size());
       if (TOFmin > numbins) TOFmin = numbins;
       if (TOFmax > numbins) TOFmax = numbins;
-      /*for (int i = TOFmin; i < TOFmax; i++) std::cout << X[i] <<"  ";
-      std::cout <<"\n";
-      for (int i = TOFmin; i < TOFmax; i++) std::cout << Y[i] <<"  ";
-      std::cout <<"\n";*/
 
       double bktime = X[TOFmin] + X[TOFmax];
       double bkg0 = Y[TOFmin] + Y[TOFmax];
@@ -224,7 +221,7 @@ namespace Mantid
       MatrixWorkspace_sptr ws = fit_alg->getProperty("OutputWorkspace");
 
       double chisq = fit_alg->getProperty("OutputChi2overDoF");
-      if(chisq < 0.0) // Find some chisq for a good fit to initialize parameters for next peak
+      if(chisq < 0.0) // In future use fit of strong peaks for weak peaks
       {
         std::vector<double> params = fit_alg->getProperty("Parameters");
         IKI = params[0];
@@ -240,9 +237,10 @@ namespace Mantid
 
       setProperty("OutputWorkspace", ws);
 
+      //Evaluate fit at 1000 points
       IFitFunction *out = FunctionFactory::Instance().createInitialized(funct);
       IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
-      const int n=1000;
+      const int n = 1000;
       double *x = new double[n];
       double *y = new double[n];
       double dx=(X[TOFmax]-X[TOFmin])/double(n-1);
@@ -252,14 +250,19 @@ namespace Mantid
       }
       pk->setMatrixWorkspace(outputW, 0, -1, -1);
       pk->function(y,x,n);
-      /*for (int i = 0; i < 1000; i+=100) std::cout << y[i] <<"  ";
-      std::cout <<"\n";*/
 
+      //Calculate intensity
       I = 0.0;
       for (int i = 0; i < n; i++) I+= y[i];
       I*= double(TOFmax-TOFmin+1)/double(n);
-      sigI = sqrt(I+ratio*ratio*bkg0);
       I-= ratio*bkg0;
+
+      //Calculate errors correctly for nonPoisson distributions
+      sigI = 0.0;
+      for (int i = TOFmin; i <= TOFmax; i++) sigI+= E[i]*E[i];
+      double sigbkg0 = E[TOFmin]*E[TOFmin] + E[TOFmax]*E[TOFmax];
+      sigI = sqrt(sigI+ratio*ratio*sigbkg0);
+
       delete [] x;
       delete [] y;
       return;
