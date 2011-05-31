@@ -1005,6 +1005,11 @@ public:
   }
 
 
+  void test_refreshCache()
+  {
+    box3b->refreshCache();
+  }
+
   /** Performance test that adds lots of events to a recursively split box.
    * SINGLE-THREADED!
    */
