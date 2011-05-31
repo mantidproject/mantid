@@ -11,7 +11,7 @@ namespace Mantid
     @parameter view : MVP view.
     @parameter geometryPresenter : parent presenter wrapping all dimensions.
     */
-    DimensionPresenter::DimensionPresenter(DimensionView* view, GeometryPresenter * geometryPresenter) : m_view(view), m_geometryPresenter(geometryPresenter), m_lastIsIntegrated(false)
+    DimensionPresenter::DimensionPresenter(DimensionView* view, GeometryPresenter * geometryPresenter) : m_geometryPresenter(geometryPresenter), m_view(view), m_lastIsIntegrated(false)
     {
     }
 
