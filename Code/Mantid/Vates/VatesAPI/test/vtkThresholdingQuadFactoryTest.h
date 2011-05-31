@@ -9,162 +9,166 @@
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MDDataObjects/MDIndexCalculator.h"
 
+//=====================================================================================
+// Test helper types
+//=====================================================================================
+namespace
+{
 using Mantid::VATES::vtkThresholdingQuadFactory;
 const int dimension_size = 9;
-class vtkThresholdingQuadFactoryTest: public CxxTest::TestSuite
+
+///Helper class. Usage as fake MDCell.
+class FakeCell : public Mantid::Geometry::SignalAggregate
 {
+public:
+  FakeCell(){}
+  virtual std::vector<Mantid::Geometry::coordinate> getVertexes() const
+  {
+    return std::vector<Mantid::Geometry::coordinate>(4);
+  }
+  virtual double getSignal() const
+  {
+    return 1; //Hard-coded signal value. Required for threshold checking in tests that follow.
+  }
+  virtual double getError() const
+  {
+    throw std::runtime_error("Not implemented");
+  }
+  virtual std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > getContributingPoints() const
+  {
+    throw std::runtime_error("Not implemented");
+  }
+  virtual ~FakeCell(){};
+};
 
+/// Fake iterator helper. Ideally would not need to provide this sort of implementation in a test.
+class FakeIterator : public Mantid::API::IMDIterator
+{
 private:
-
-  ///Helper class. Usage as fake MDCell.
-  class FakeCell : public Mantid::Geometry::SignalAggregate
+  Mantid::API::IMDWorkspace const * const m_mockWorkspace;
+  size_t m_currentPointer;
+public:
+  FakeIterator(Mantid::API::IMDWorkspace const * const mockWorkspace) : m_mockWorkspace(mockWorkspace), m_currentPointer(0)
   {
-  public:
-    FakeCell(){}
-    virtual std::vector<Mantid::Geometry::coordinate> getVertexes() const
-    {
-      return std::vector<Mantid::Geometry::coordinate>(4);
-    }
-    virtual double getSignal() const
-    {
-      return 1; //Hard-coded signal value. Required for threshold checking in tests that follow.
-    }
-    virtual double getError() const
-    {
-      throw std::runtime_error("Not implemented");
-    }
-    virtual std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > getContributingPoints() const
-    {
-      throw std::runtime_error("Not implemented");
-    }
-    virtual ~FakeCell(){};
-  };
-
-  /// Fake iterator helper. Ideally would not need to provide this sort of implementation in a test.
-  class FakeIterator : public Mantid::API::IMDIterator
+  }
+  /// Get the size of the data
+  size_t getDataSize()const
   {
-  private:
-    Mantid::API::IMDWorkspace const * const m_mockWorkspace;
-    size_t m_currentPointer;
-  public:
-    FakeIterator(Mantid::API::IMDWorkspace const * const mockWorkspace) : m_mockWorkspace(mockWorkspace), m_currentPointer(0)
-    {
-    }
-    /// Get the size of the data
-    size_t getDataSize()const
-    {
-      return dimension_size * dimension_size; 
-    }
-    double getCoordinate(size_t i)const
-    {
-      std::string id = m_mockWorkspace->getDimensionIDs()[i];
-      std::vector<size_t> indexes;
-      Mantid::MDDataObjects::MDWorkspaceIndexCalculator indexCalculator(2); //2d
-      indexes.resize(indexCalculator.getNDimensions());
-      indexCalculator.calculateDimensionIndexes(m_currentPointer,indexes);
-      return m_mockWorkspace->getDimension(id)->getX(indexes[i]);
-    }
-    bool next()
-    {
-      m_currentPointer++;
-      if(m_currentPointer < (dimension_size * dimension_size) )
-      {
-        return true;
-      }
-      return false;
-      
-    }
-    size_t getPointer()const
-    {
-      return m_currentPointer;
-    }
-  };
-
-  ///Helper class. Concrete instance of IMDDimension.
-  class FakeIMDDimension: public Mantid::Geometry::IMDDimension
+    return dimension_size * dimension_size; 
+  }
+  double getCoordinate(size_t i)const
   {
-  private:
-    std::string m_id;
-  public:
-    FakeIMDDimension(std::string id) : m_id(id) {}
-    std::string getName() const {throw std::runtime_error("Not implemented");}
-    std::string getUnits() const {throw std::runtime_error("Not implemented");}
-    std::string getDimensionId() const {return m_id;}
-    double getMaximum() const {return 10;}
-    double getMinimum() const {return 0;};
-    size_t getNBins() const {return 10;};
-    std::string toXMLString() const {throw std::runtime_error("Not implemented");};
-    double getX(size_t) const {throw std::runtime_error("Not implemented");};
-    virtual ~FakeIMDDimension()
-    {
-    }
-  };
-
-
-  /// Mock IMDDimension.
-  class MockIMDWorkspace: public Mantid::API::IMDWorkspace
+    std::string id = m_mockWorkspace->getDimensionIDs()[i];
+    std::vector<size_t> indexes;
+    Mantid::MDDataObjects::MDWorkspaceIndexCalculator indexCalculator(2); //2d
+    indexes.resize(indexCalculator.getNDimensions());
+    indexCalculator.calculateDimensionIndexes(m_currentPointer,indexes);
+    return m_mockWorkspace->getDimension(id)->getX(indexes[i]);
+  }
+  bool next()
   {
-  public:
-
-    MOCK_CONST_METHOD0(id, const std::string());
-    MOCK_CONST_METHOD0(getMemorySize, size_t());
-    MOCK_CONST_METHOD1(getPoint,const Mantid::Geometry::SignalAggregate&(size_t index));
-    MOCK_CONST_METHOD1(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment));
-    MOCK_CONST_METHOD2(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment));
-    MOCK_CONST_METHOD3(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment));
-    MOCK_CONST_METHOD4(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment));
-
-    MOCK_CONST_METHOD0(getWSLocation,std::string());
-    MOCK_CONST_METHOD0(getGeometryXML,std::string());
-
-    MOCK_CONST_METHOD0(getXDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-    MOCK_CONST_METHOD0(getYDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-    MOCK_CONST_METHOD0(getZDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-    MOCK_CONST_METHOD0(getTDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
-    MOCK_CONST_METHOD1(getDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>(std::string id));
-    MOCK_METHOD1(getDimensionNum,boost::shared_ptr<Mantid::Geometry::IMDDimension>(size_t index));
-    MOCK_CONST_METHOD0(getDimensionIDs,const std::vector<std::string>());
-    MOCK_CONST_METHOD0(getNPoints, uint64_t());
-    MOCK_CONST_METHOD0(getNumDims, size_t());
-    MOCK_CONST_METHOD2(getSignalNormalizedAt, double(size_t index1, size_t index2));
-     MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
-    virtual Mantid::API::IMDIterator* createIterator() const
+    m_currentPointer++;
+    if(m_currentPointer < (dimension_size * dimension_size) )
     {
-      return new FakeIterator(this);
+      return true;
     }
+    return false;
 
-    const Mantid::Geometry::SignalAggregate& getCell(...) const
-    {
-      throw std::runtime_error("Not Implemented");
-    }
-
-    virtual ~MockIMDWorkspace() {}
-  };
-
-    /// Mock to allow the behaviour of the chain of responsibility to be tested.
-  class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory 
+  }
+  size_t getPointer()const
   {
-  public:
-    MOCK_CONST_METHOD0(create,
-      vtkDataSet*());
-    MOCK_CONST_METHOD0(createMeshOnly,
-      vtkDataSet*());
-    MOCK_CONST_METHOD0(createScalarArray,
-      vtkFloatArray*());
-    MOCK_METHOD1(initialize,
-      void(boost::shared_ptr<Mantid::API::IMDWorkspace>));
-    MOCK_METHOD1(SetSuccessor,
-      void(vtkDataSetFactory* pSuccessor));
-    MOCK_CONST_METHOD0(hasSuccessor,
-      bool());
-    MOCK_CONST_METHOD0(validate,
-      void());
-    MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
-  };
+    return m_currentPointer;
+  }
+};
 
+///Helper class. Concrete instance of IMDDimension.
+class FakeIMDDimension: public Mantid::Geometry::IMDDimension
+{
+private:
+  std::string m_id;
+  const unsigned int m_nbins;
+public:
+  FakeIMDDimension(std::string id, unsigned int nbins=10) : m_id(id), m_nbins(nbins) {}
+  std::string getName() const {throw std::runtime_error("Not implemented");}
+  std::string getUnits() const {throw std::runtime_error("Not implemented");}
+  std::string getDimensionId() const {return m_id;}
+  double getMaximum() const {return 10;}
+  double getMinimum() const {return 0;};
+  size_t getNBins() const {return m_nbins;};
+  std::string toXMLString() const {throw std::runtime_error("Not implemented");};
+  double getX(size_t) const {throw std::runtime_error("Not implemented");};
+  virtual ~FakeIMDDimension()
+  {
+  }
+};
 
+/// Mock IMDDimension.
+class MockIMDWorkspace: public Mantid::API::IMDWorkspace
+{
 public:
 
+  MOCK_CONST_METHOD0(id, const std::string());
+  MOCK_CONST_METHOD0(getMemorySize, size_t());
+  MOCK_CONST_METHOD1(getPoint,const Mantid::Geometry::SignalAggregate&(size_t index));
+  MOCK_CONST_METHOD1(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment));
+  MOCK_CONST_METHOD2(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment));
+  MOCK_CONST_METHOD3(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment));
+  MOCK_CONST_METHOD4(getCell,const Mantid::Geometry::SignalAggregate&(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment));
+
+  MOCK_CONST_METHOD0(getWSLocation,std::string());
+  MOCK_CONST_METHOD0(getGeometryXML,std::string());
+
+  MOCK_CONST_METHOD0(getXDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
+  MOCK_CONST_METHOD0(getYDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
+  MOCK_CONST_METHOD0(getZDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
+  MOCK_CONST_METHOD0(getTDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>());
+  MOCK_CONST_METHOD1(getDimension,boost::shared_ptr<const Mantid::Geometry::IMDDimension>(std::string id));
+  MOCK_METHOD1(getDimensionNum,boost::shared_ptr<Mantid::Geometry::IMDDimension>(size_t index));
+  MOCK_CONST_METHOD0(getDimensionIDs,const std::vector<std::string>());
+  MOCK_CONST_METHOD0(getNPoints, uint64_t());
+  MOCK_CONST_METHOD0(getNumDims, size_t());
+  MOCK_CONST_METHOD2(getSignalNormalizedAt, double(size_t index1, size_t index2));
+  MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
+  virtual Mantid::API::IMDIterator* createIterator() const
+  {
+    return new FakeIterator(this);
+  }
+
+  const Mantid::Geometry::SignalAggregate& getCell(...) const
+  {
+    throw std::runtime_error("Not Implemented");
+  }
+
+  virtual ~MockIMDWorkspace() {}
+};
+
+/// Mock to allow the behaviour of the chain of responsibility to be tested.
+class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory 
+{
+public:
+  MOCK_CONST_METHOD0(create,
+    vtkDataSet*());
+  MOCK_CONST_METHOD0(createMeshOnly,
+    vtkDataSet*());
+  MOCK_CONST_METHOD0(createScalarArray,
+    vtkFloatArray*());
+  MOCK_METHOD1(initialize,
+    void(boost::shared_ptr<Mantid::API::IMDWorkspace>));
+  MOCK_METHOD1(SetSuccessor,
+    void(vtkDataSetFactory* pSuccessor));
+  MOCK_CONST_METHOD0(hasSuccessor,
+    bool());
+  MOCK_CONST_METHOD0(validate,
+    void());
+  MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
+};
+}
+//=====================================================================================
+// Functional tests
+//=====================================================================================
+class vtkThresholdingQuadFactoryTest: public CxxTest::TestSuite
+{
+public:
   void testCreateMeshOnlyThrows()
   {
     vtkThresholdingQuadFactory factory("signal");
@@ -352,6 +356,33 @@ public:
     TS_ASSERT_EQUALS("vtkThresholdingQuadFactory", factory.getFactoryTypeName());
   }
 
+};
+
+//=====================================================================================
+// Performance tests
+//=====================================================================================
+class vtkThresholdingQuadFactoryTestPerformance : public CxxTest::TestSuite
+{
+public:
+
+	void testGenerateVTKDataSet()
+	{
+    using namespace Mantid::Geometry;
+    using namespace testing;
+
+    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    EXPECT_CALL(*pMockWs, getXDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("x", 100))));
+    EXPECT_CALL(*pMockWs, getYDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("y", 100))));
+    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_,_)).WillRepeatedly(Return(1));
+    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(2)));
+
+    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+
+    //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
+    vtkThresholdingQuadFactory factory("signal");
+    factory.initialize(ws_sptr);
+    TSM_ASSERT_THROWS_NOTHING(factory.create());
+	}
 };
 
 #endif
