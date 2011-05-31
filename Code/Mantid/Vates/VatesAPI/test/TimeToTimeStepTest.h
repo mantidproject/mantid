@@ -22,7 +22,20 @@ public:
     TSM_ASSERT_EQUALS("The timeStep index has not been calculated properly. Wrong result.", 25, converter(t))
     TSM_ASSERT_EQUALS("The timeStep index has not been calculated properly. Wrong result.", 0, converter(tMin))
     TSM_ASSERT_EQUALS("The timeStep index has not been calculated properly. Wrong result.", nBins, converter(tMax))
+  }
 
+  void testHandle_t_OutOfRange()
+  {
+    //Assume that t MUST sit somewhere between tmin and tmax. Zero out otherwise.
+    using namespace Mantid::VATES;
+    //Test that this type can perform rescaling from time to an index.
+    double tMin = 0;
+    double tMax = 100;
+    int nBins = 200;
+    TimeToTimeStep converter = TimeToTimeStep::construct(tMin, tMax, nBins);
+    TSM_ASSERT_EQUALS("T is greater is inside range. Should interpolate.", 60, converter(30));
+    TSM_ASSERT_EQUALS("T is greater than max. Should have zero'd out.", 0, converter(101));
+    TSM_ASSERT_EQUALS("T is less than max. Should have zero'd out.", 0, converter(-1));
   }
 
   void testBadTimeRangeThrows()
@@ -36,9 +49,10 @@ public:
     TSM_ASSERT_THROWS("Range is negative, should throw.", TimeToTimeStep::construct(tMin, tMax, nBins), std::runtime_error);
   }
 
-  void testUseWithDefaultConstructor()
+  void testUseWithDefaultConstructorThrows()
   {
-  
+   Mantid::VATES::TimeToTimeStep converter;
+   TSM_ASSERT_THROWS("Constructing via default constructor should throw when used.", converter(1), std::runtime_error);
   }
 
 };

@@ -29,7 +29,7 @@ size_t TimeToTimeStep::operator()(double time) const
 {
   if(!m_runnable)
   {
-    std::runtime_error("Not properly constructed. TimeToTimeStep instance does not have enough information to interpolate the time value.");
+    throw std::runtime_error("Not properly constructed. TimeToTimeStep instance does not have enough information to interpolate the time value.");
   }
   if(time > m_timeMax)
   {
