@@ -6,7 +6,9 @@
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/ISpectraDetectorMap.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 
 #include <map>
@@ -69,14 +71,20 @@ void SpatialGrouping::exec()
   double searchDist = getProperty("SearchDistance");
   m_pix = searchDist;
   int gridSize = getProperty("GridSize");
-  int nNeighbours = ( gridSize * gridSize ) - 1;
+  size_t nNeighbours = ( gridSize * gridSize ) - 1;
+
+  const Mantid::Geometry::ISpectraDetectorMap & smap = inputWorkspace->spectraMap();
   
-  Mantid::Geometry::IInstrument_sptr m_instrument = inputWorkspace->getInstrument();
-  m_instrument->getDetectors(m_detectors);
+  m_detectors.clear();
+  Mantid::spec2index_map * specTOwi = inputWorkspace->getSpectrumToWorkspaceIndexMap();
+  for ( Mantid::spec2index_map::iterator itr = specTOwi->begin(); itr != specTOwi->end(); ++itr )
+  {
+    m_detectors[(*itr).first] = inputWorkspace->getDetector((*itr).second);
+  }
   
   Mantid::API::Progress prog(this, 0.0, 1.0, m_detectors.size());
     
-  for ( std::map<detid_t, Mantid::Geometry::IDetector_sptr>::iterator detIt = m_detectors.begin(); detIt != m_detectors.end(); ++detIt )
+  for ( std::map<specid_t, Mantid::Geometry::IDetector_sptr>::iterator detIt = m_detectors.begin(); detIt != m_detectors.end(); ++detIt )
   {
     prog.report();
 
@@ -84,12 +92,12 @@ void SpatialGrouping::exec()
     // any of the other lists
     if ( detIt->second->isMonitor() )
     {
-      m_included[detIt->first] = false;
+      m_included.insert(detIt->first);
       continue;
     }
 
     // Or detectors already flagged as included in a group
-    std::map<detid_t, bool>::iterator inclIt = m_included.find(detIt->first);
+    std::set<specid_t>::iterator inclIt = m_included.find(detIt->first);
     if ( inclIt != m_included.end() )
     {
       continue;
@@ -98,27 +106,27 @@ void SpatialGrouping::exec()
     std::map<detid_t, double> nearest;
 
     const double empty = EMPTY_DBL();
-    Mantid::Geometry::V3D scale(empty,empty,empty);
     Mantid::Geometry::BoundingBox bbox(empty,empty,empty,empty,empty,empty);
 
-    createBox(detIt->second, bbox, scale);
+    createBox(detIt->second, bbox);
 
     bool extend = true;
-    while ( ( nNeighbours > static_cast<detid_t>(nearest.size()) ) && extend )
+    while ( ( nNeighbours > nearest.size() ) && extend )
     {
-      extend = expandNet(nearest, detIt->second, nNeighbours, bbox, scale);
+      extend = expandNet(nearest, detIt->first, nNeighbours, bbox);
     }
 
     if ( static_cast<detid_t>(nearest.size()) != nNeighbours ) continue;
 
     // if we've gotten to this point, we want to go and make the group list.
     std::vector<int> group;
-    m_included[detIt->first] = true;
+    m_included.insert(detIt->first);
     group.push_back(detIt->first);
-    std::map<detid_t, double>::iterator nrsIt;
+
+    std::map<specid_t, double>::iterator nrsIt;
     for ( nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt )
     {
-      m_included[nrsIt->first] = true;
+      m_included.insert(nrsIt->first);
       group.push_back(nrsIt->first);
     }
     m_groups.push_back(group);
@@ -160,7 +168,11 @@ void SpatialGrouping::exec()
     xml << "<group name=\"group" << grpID++ << "\"><detids val=\"" << (*grpIt)[0];
     for ( size_t i = 1; i < (*grpIt).size(); i++ )
     {
-      xml << "," << (*grpIt)[i];
+      std::vector<detid_t> detIds = smap.getDetectors((*grpIt)[i]);
+      for ( std::vector<detid_t>::iterator it = detIds.begin(); it != detIds.end(); ++it )
+      {
+        xml << "," << (*it);
+      }
     }
     xml << "\"/></group>\n";
   }
@@ -180,16 +192,16 @@ void SpatialGrouping::exec()
 * @param det :: pointer to the central detector, for calculating distances
 * @param noNeighbours :: number of neighbours that must be found (in total, including those already found)
 * @param bbox :: BoundingBox object representing the search region
-* @param scale :: V3D object used for scaling in determination of distances
 * @return true if neighbours were found matching the parameters, false otherwise
 */
-bool SpatialGrouping::expandNet(std::map<detid_t,double> & nearest, Mantid::Geometry::IDetector_sptr det,
-    const size_t & noNeighbours, const Mantid::Geometry::BoundingBox & bbox, const Mantid::Geometry::V3D & scale)
+bool SpatialGrouping::expandNet(std::map<specid_t,double> & nearest, specid_t spec,
+    const size_t & noNeighbours, const Mantid::Geometry::BoundingBox & bbox)
 {
-  const detid_t incoming = static_cast<detid_t>(nearest.size());
+  const size_t incoming = nearest.size();
 
-  const detid_t centDetID = det->getID();
-  std::map<detid_t, double> potentials;
+  Mantid::Geometry::IDetector_sptr det = m_detectors[spec];
+
+  std::map<specid_t, double> potentials;
 
   // Special case for first run for this detector
   if ( incoming == 0 )
@@ -198,44 +210,39 @@ bool SpatialGrouping::expandNet(std::map<detid_t,double> & nearest, Mantid::Geom
   }
   else
   {
-    for ( std::map<detid_t,double>::iterator nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt )
+    for ( std::map<specid_t,double>::iterator nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt )
     {
-      std::map<detid_t, double> results;
+      std::map<specid_t, double> results;
       results = m_detectors[nrsIt->first]->getNeighbours();
-      for ( std::map<detid_t, double>::iterator resIt = results.begin(); resIt != results.end(); ++resIt )
+      for ( std::map<specid_t, double>::iterator resIt = results.begin(); resIt != results.end(); ++resIt )
       {
         potentials[resIt->first] = resIt->second;
       }
     }
   }
 
-  for ( std::map<detid_t,double>::iterator potIt = potentials.begin(); potIt != potentials.end(); ++potIt )
+  for ( std::map<specid_t,double>::iterator potIt = potentials.begin(); potIt != potentials.end(); ++potIt )
   {
     // We do not want to include the detector in it's own list of nearest neighbours
-    if ( potIt->first == centDetID ) { continue; }
+    if ( potIt->first == spec ) { continue; }
 
     // Or detectors that are already in the nearest list passed into this function
     std::map<detid_t, double>::iterator nrsIt = nearest.find(potIt->first);
     if ( nrsIt != nearest.end() ) { continue; }
 
     // We should not include detectors already included in a group (or monitors for that matter)
-    std::map<detid_t,bool>::iterator inclIt = m_included.find(potIt->first);
+    std::set<specid_t>::iterator inclIt = m_included.find(potIt->first);
     if ( inclIt != m_included.end() ) { continue; }
 
     // If we get this far, we need to determine if the detector is of a suitable distance
     Mantid::Geometry::V3D pos = m_detectors[potIt->first]->getPos();
     if ( ! bbox.isPointInside(pos) ) { continue; }
     
-    // Add any that have survived to this point to the nearest
-    // But first we want to "scale" the distance attribute
-    pos -= det->getPos();
-    pos /= scale;
-    double distance = pos.norm();
-    
-    nearest[potIt->first] = distance;
+    // Elsewise, it's all good.
+    nearest[potIt->first] = potIt->second;
   }
 
-  if ( static_cast<detid_t>(nearest.size()) == incoming ) { return false; }
+  if ( nearest.size() == incoming ) { return false; }
 
   if ( nearest.size() > noNeighbours )
   {
@@ -274,12 +281,15 @@ void SpatialGrouping::sortByDistance(std::map<detid_t,double> & input, const siz
 * @param bndbox :: reference to BoundingBox object (changed by this function)
 * @param scale :: reference to V3D object (changed by this function)
 */
-void SpatialGrouping::createBox(boost::shared_ptr<Mantid::Geometry::IDetector> det, Mantid::Geometry::BoundingBox & bndbox, Mantid::Geometry::V3D & scale)
-{
-  boost::shared_ptr<Mantid::Geometry::Detector> detector = boost::dynamic_pointer_cast<Mantid::Geometry::Detector>(det);
-  
+void SpatialGrouping::createBox(boost::shared_ptr<Mantid::Geometry::IDetector> det, Mantid::Geometry::BoundingBox & bndbox)
+{ 
+
+  // We may have DetectorGroups here
+  // Unfortunately, IDetector doesn't contain the 
+  // boost::shared_ptr<Mantid::Geometry::Detector> detector = boost::dynamic_pointer_cast<Mantid::Geometry::Detector>(det);
+
   Mantid::Geometry::BoundingBox bbox;
-  detector->getBoundingBox(bbox);
+  det->getBoundingBox(bbox);
     
   double xmax = bbox.xMax();
   double ymax = bbox.yMax();
@@ -287,10 +297,6 @@ void SpatialGrouping::createBox(boost::shared_ptr<Mantid::Geometry::IDetector> d
   double xmin = bbox.xMin();
   double ymin = bbox.yMin();
   double zmin = bbox.zMin();
-
-  scale.setX((xmax-xmin));
-  scale.setY((ymax-ymin));
-  scale.setZ((zmax-zmin));
 
   double factor = 2.0 * m_pix;
 
