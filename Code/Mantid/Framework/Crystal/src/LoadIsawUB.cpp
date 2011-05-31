@@ -8,6 +8,7 @@
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 
 using namespace Mantid::Kernel::Strings;
+using Mantid::Geometry::MantidMat;
 
 namespace Mantid
 {
@@ -97,6 +98,15 @@ namespace Crystal
     // Adjust the UB by transposing
     ub = ub.Transpose();
 
+//    // At this point, the UB uses the IPNS convention meaning that
+//    // for us, the output Q vector from UB.hkl = Qz, Qx, Qy
+//    Geometry::Matrix<double> adjust(3,3);
+//    adjust[0][1] = 1.0;
+//    adjust[1][2] = 1.0;
+//    adjust[2][0] = 1.0;
+//    // This matrix will swap the axes around to get our convention.
+//    U = adjust * U;
+
     double lattPar[6];
     for (size_t c=0; c<6; c++)
     {
@@ -111,6 +121,18 @@ namespace Crystal
     // Set the UB in there.
     Geometry::Matrix<double> Binv = latt->getBinv(); // B^-1
     Geometry::Matrix<double> U = ub * Binv; // U = UB * B^-1
+
+    // Swap rows around to accound for IPNS convention
+    MantidMat U2 = U;
+    for (size_t r=0; r<3; r++)
+    {
+      U2[2][r] = U[0][r];
+      U2[1][r] = U[2][r];
+      U2[0][r] = U[1][r];
+    }
+    U = U2;
+    U *= -1.0;
+
     latt->setU( U );
 
     // Save it into the workspace

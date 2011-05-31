@@ -119,6 +119,8 @@ namespace Crystal
       double one_over_wl = -(norm_q*norm_q) / (2.0 * q.Z());
       double wl = 1.0/one_over_wl;
 
+      g_log.information() << "Peak at " << hkl << " has d-spacing " << d << " and wavelength " << wl << std::endl;
+
       // Only keep going for accepted wavelengths.
       if (wl >= wlMin && wl <= wlMax)
       {
@@ -248,7 +250,7 @@ namespace Crystal
         PARALLEL_START_INTERUPT_REGION
 
         Peak & p = HKLPeaksWorkspace->getPeak(i);
-        doHKL(p.getH(), p.getK(), p.getL());
+        doHKL(int(p.getH()), int(p.getK()), int(p.getL()));
 
         PARALLEL_END_INTERUPT_REGION
       } // for each hkl in the workspace

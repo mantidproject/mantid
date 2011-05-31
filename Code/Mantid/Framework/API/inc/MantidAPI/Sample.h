@@ -91,6 +91,8 @@ namespace Mantid
       //@{
       /// Get a reference to the sample's OrientedLattice
       const OrientedLattice & getOrientedLattice() const;
+      /// Get a reference to the sample's OrientedLattice
+      OrientedLattice & getOrientedLattice();
       /// Set the OrientedLattice defining the sample's lattice and orientation
       void setOrientedLattice(OrientedLattice * latt);
       //@}

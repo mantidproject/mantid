@@ -128,8 +128,17 @@ public:
 
     //Set ub and Goniometer rotation
     WorkspaceCreationHelper::SetOrientedLattice(inWS, 10.0, 10.0, 10.0);
-    // Rotate the crystal 45 degrees so that hkl 1,0,0 goes to +X
-    WorkspaceCreationHelper::SetGoniometer(inWS, 45., 0., 0.);
+
+    // Make a U matrix of 22.5 degree rotation around +Y
+    MantidMat u(3,3);
+    Goniometer gon;
+    gon.makeUniversalGoniometer();
+    gon.setRotationAngle(0, 22.5);
+    u = gon.getR();
+    inWS->mutableSample().getOrientedLattice().setU(u);
+
+    // Final rotation : 45 degrees around +Y so that hkl 1,0,0 goes to +X
+    WorkspaceCreationHelper::SetGoniometer(inWS, 22.5, 0., 0.);
 
     MantidMat ub = inWS->sample().getOrientedLattice().getUB();
 

@@ -141,11 +141,24 @@ namespace Mantid
       m_environment = boost::shared_ptr<SampleEnvironment>(env);
     }
 
-    /** Return a reference to the OrientedLattice of this sample
+    /** Return a const reference to the OrientedLattice of this sample
      * @return A const reference to a OrientedLattice object
      * @throw std::runtime_error If the OrientedLattice has not been defined
      */
     const OrientedLattice & Sample::getOrientedLattice() const
+    {
+      if( !m_lattice )
+      {
+        throw std::runtime_error("Sample::getOrientedLattice - No OrientedLattice has been defined.");
+      }
+      return *m_lattice;
+    }
+
+    /** Return a reference to the OrientedLattice of this sample
+     * @return A reference to a OrientedLattice object
+     * @throw std::runtime_error If the OrientedLattice has not been defined
+     */
+    OrientedLattice & Sample::getOrientedLattice()
     {
       if( !m_lattice )
       {
