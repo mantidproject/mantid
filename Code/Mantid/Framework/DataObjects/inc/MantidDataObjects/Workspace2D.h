@@ -71,8 +71,6 @@ public:
   virtual void setData(std::size_t const, const MantidVecPtr&);
   virtual void setData(std::size_t const, const MantidVecPtr&, const MantidVecPtr&);
   virtual void setData(std::size_t const, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
-  virtual void setX(size_t const, const MantidVecPtr&, const MantidVecPtr&);
-  virtual void setX(size_t const, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
   
   /// Returns the histogram number
   std::size_t getNumberHistograms() const;

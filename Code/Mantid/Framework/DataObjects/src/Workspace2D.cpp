@@ -46,7 +46,8 @@ namespace Mantid
       t2.access().resize(YLength);
       for (size_t i=0;i<m_noVectors;i++)
       {
-        this->setX(i,t1,t1);
+        this->setX(i,t1);
+        data[i].setDx(t1);
         // Y,E arrays populated
         this->setData(i,t2,t2);
       }
@@ -69,22 +70,6 @@ namespace Mantid
     }
 
     /**
-    Set the x values and errors
-    @param histnumber :: Index to the histogram
-    @param Vec :: Shared ptr base object
-    */
-    void Workspace2D::setX(const size_t histnumber, const MantidVecPtr::ptr_type& Vec, const MantidVecPtr::ptr_type& Err)
-    {
-
-      if (histnumber>=m_noVectors)
-        throw std::range_error("Workspace2D::setX, histogram number out of range");
-
-      data[histnumber].setX(Vec, Err);
-
-      return;
-    }
-
-    /**
     Set the x values
     @param histnumber :: Index to the histogram
     @param PA :: Reference counted histogram
@@ -95,21 +80,6 @@ namespace Mantid
         throw std::range_error("Workspace2D::setX, histogram number out of range");
       
       data[histnumber].setX(PA);
-
-      return;
-    }
-
-    /**
-    Set the x values and errors
-    @param histnumber :: Index to the histogram
-    @param PA :: Reference counted histogram
-    */
-    void Workspace2D::setX(const size_t histnumber, const MantidVecPtr& PA, const MantidVecPtr& Err)
-    {
-      if (histnumber>=m_noVectors)
-        throw std::range_error("Workspace2D::setX, histogram number out of range");
-
-      data[histnumber].setX(PA, Err);
 
       return;
     }
