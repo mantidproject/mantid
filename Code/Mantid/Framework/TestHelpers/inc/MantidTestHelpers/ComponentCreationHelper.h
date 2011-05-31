@@ -115,6 +115,8 @@ namespace ComponentCreationHelper
    */
   DLL_TESTHELPERS Mantid::Geometry::IInstrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing = 0.008);
 
+  DLL_TESTHELPERS Mantid::Geometry::IInstrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, double pixelSpacing = 0.008);
+
 }
 
 // SANS helpers

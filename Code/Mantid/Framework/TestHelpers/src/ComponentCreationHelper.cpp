@@ -391,6 +391,72 @@ namespace ComponentCreationHelper
 
     return testInst;
   }
+
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * Create an test instrument with n panels of rectangular detectors, pixels*pixels in size,
+   * a source and spherical sample shape.
+   *
+   * Banks are centered at (1*banknum, 0, 0) and are facing 0,0.
+   * Pixels are 4 mm wide.
+   *
+   * @param num_banks: number of rectangular banks to create
+   * @param pixels :: number of pixels in each direction.
+   */
+  IInstrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, double pixelSpacing)
+  {
+    boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
+
+    const double cylRadius(pixelSpacing/2);
+    const double cylHeight(0.0002);
+    // One object
+    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0,-cylHeight/2.0,0.0), V3D(0.,1.0,0.), "pixel-shape");
+
+    for (int banknum=1; banknum <= num_banks; banknum++)
+    {
+      //Make a new bank
+      std::ostringstream bankname;
+      bankname << "bank" << banknum;
+
+      RectangularDetector * bank = new RectangularDetector(bankname.str());
+      bank->initialize(pixelShape,
+          pixels, -pixels*pixelSpacing/2.0, pixelSpacing,
+          pixels, -pixels*pixelSpacing/2.0, pixelSpacing,
+          (banknum-1)*pixels*pixels, true, pixels);
+
+      // Mark them all as detectors
+      for (int x=0; x<pixels; x++)
+        for (int y=0; y<pixels; y++)
+        {
+          boost::shared_ptr<Detector> detector = bank->getAtXY(x,y);
+          if (detector)
+            //Mark it as a detector (add to the instrument cache)
+            testInst->markAsDetector(detector.get());
+        }
+
+      testInst->add(bank);
+      // Place the center.
+      bank->setPos(V3D(1.0*banknum, 0.0, 0.0));
+      // rotate detector 90 degrees along vertical
+      bank->setRot( Quat(90.0, V3D(0,1,0)) );
+    }
+
+    //Define a source component
+    ObjComponent *source = new ObjComponent("moderator", Object_sptr(new Object), testInst.get());
+    source->setPos(V3D(0.0, 0.0, -10.));
+    testInst->add(source);
+    testInst->markAsSource(source);
+
+    // Define a sample as a simple sphere
+    Object_sptr sampleSphere = createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
+    ObjComponent *sample = new ObjComponent("sample", sampleSphere, testInst.get());
+    testInst->setPos(0.0, 0.0, 0.0);
+    testInst->add(sample);
+    testInst->markAsSamplePos(sample);
+
+    return testInst;
+  }
 }
 
 /*****************************************************
