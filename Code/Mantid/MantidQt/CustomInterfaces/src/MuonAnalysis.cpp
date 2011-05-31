@@ -95,8 +95,8 @@ void MuonAnalysis::initLayout()
   // connect guess alpha 
   connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this, SLOT(guessAlphaClicked())); 
 
-	// signal/slot connections to respond to changes in instrument selection combo boxes
-	connect(m_uiForm.instrSelector, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
+        // signal/slot connections to respond to changes in instrument selection combo boxes
+        connect(m_uiForm.instrSelector, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(userSelectInstrument(const QString&)));
 
   // Load current
   connect(m_uiForm.loadCurrent, SIGNAL(clicked()), this, SLOT(runLoadCurrent())); 
@@ -240,16 +240,16 @@ void MuonAnalysis::runFrontPlotButton()
 */
 void MuonAnalysis::userSelectInstrument(const QString& prefix) 
 {
-	if ( prefix != m_curInterfaceSetup )
-	{
-		runClearGroupingButton();
+        if ( prefix != m_curInterfaceSetup )
+        {
+                runClearGroupingButton();
     m_curInterfaceSetup = prefix;
 
     // save this new choice
     QSettings group;
     group.beginGroup(m_settingsGroup + "instrument");
     group.setValue("name", prefix); 
-	}
+        }
 }
 
 
@@ -402,7 +402,7 @@ void MuonAnalysis::runLoadCurrent()
   {
     // first check if autosave.run exist
     std::string autosavePointsTo = "";
-    std::string autosaveFile = "\\\\" + instname + "\\data\\autosave.run";
+    std::string autosaveFile = "\\\\" + instname.toStdString() + "\\data\\autosave.run";
     Poco::File pathAutosave( autosaveFile );
     if ( pathAutosave.exists() )
     {
