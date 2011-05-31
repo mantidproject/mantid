@@ -41,7 +41,7 @@ public:
   EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents)
   {
     int numPixels = 10000;
-    int numBins = 1600;
+    int numBins = 16;
     double binDelta = 10.0;
     boost::mt19937 rng;
     boost::uniform_real<double> u2(0, 1.0); // Random from 0 to 1.0
@@ -179,7 +179,7 @@ public:
     alg.setProperty("YMax", 2);
     alg.setProperty("TOFBinMin", -5);
     alg.setProperty("TOFBinMax", 5);
-    alg.setProperty("Params", "10,10.0,16000");
+    alg.setProperty("Params", "5760.,10.0,5920.");
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
     TS_ASSERT( alg.isExecuted() )
 
@@ -189,8 +189,8 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
     Peak & peak = ws->getPeaks()[0];
-    TS_ASSERT_DELTA( peak.getIntensity(), 1382.5647, 10.0);
-    TS_ASSERT_DELTA( peak.getSigmaIntensity(), 71.5718, 1.0);
+    TS_ASSERT_DELTA( peak.getIntensity(), 1348.4223, 10.0);
+    TS_ASSERT_DELTA( peak.getSigmaIntensity(), 46.1214, 1.0);
     AnalysisDataService::Instance().remove("TOPAZ");
 
   }
