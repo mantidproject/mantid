@@ -7,6 +7,7 @@
 #include <float.h>
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h" 
+#include "MantidGeometry/Math/Matrix.h"
 
 using namespace Mantid::Geometry;
 
@@ -445,6 +446,23 @@ public:
     q(rX,rY,rZ);
     p(90, V3D(1,0,0));
     TS_ASSERT(p==q);
+  }
+
+  //FIXME: Re-enable this when this passes
+  /** Test that the rotation matrix is not transposed or otherwise funny */
+  void xtestGetRotation2()
+  {
+    V3D x(1,0,0);
+    Quat rot(90.0, x);
+    std::vector<double> matVec = rot.getRotation(true, true);
+    Matrix<double> mat(matVec);
+    std::cout << mat << "\n";
+
+    V3D init(0,1,0);
+    V3D final = mat * init;
+    TS_ASSERT_DELTA(final.X(), 0.0, 1e-5);
+    TS_ASSERT_DELTA(final.Y(), 0.0, 1e-5);
+    TS_ASSERT_DELTA(final.Z(), 1.0, 1e-5);
   }
 
   void compareArbitrary(const Quat& rotQ)
