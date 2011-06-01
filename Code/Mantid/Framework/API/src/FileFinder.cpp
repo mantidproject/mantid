@@ -5,6 +5,7 @@
 #include "MantidAPI/IArchiveSearch.h"
 #include "MantidAPI/ArchiveSearchFactory.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/LibraryManager.h"
@@ -22,6 +23,8 @@ namespace Mantid
 {
   namespace API
   {
+    using std::string;
+
     // this allowed string could be made into an array of allowed, currently used only by the ISIS SANS group
     const std::string FileFinderImpl::ALLOWED_SUFFIX = "-add";
     //----------------------------------------------------------------------
@@ -119,6 +122,49 @@ namespace Mantid
     }
 
     /**
+     * Return the name of the facility as determined from the hint.
+     *
+     * @param hint :: The name hint.
+     * @return This will return the default facility if it cannot be determined.
+     */
+    const Kernel::FacilityInfo FileFinderImpl::getFacility(const string& hint) const
+    {
+      if ((!hint.empty()) && (!isdigit(hint[0])))
+      {
+        string instrName = "";
+        if ((hint.find("PG3") == 0) || (hint.find("pg3") == 0))
+        {
+          instrName = hint.substr(0, 3);
+        }
+        else
+        {
+          // go forwards looking for the run number to start
+          {
+            string::const_iterator it = std::find_if(hint.begin(), hint.end(), std::ptr_fun(isdigit));
+            std::string::size_type nChars = std::distance(hint.begin(), it);
+            instrName = hint.substr(0, nChars);
+          }
+          // go backwards looking for the instrument name to end - gets around delimiters
+          if (!instrName.empty())
+          {
+            string::const_reverse_iterator it = std::find_if(instrName.rbegin(), instrName.rend(),
+                                                             std::ptr_fun(isalpha));
+            string::size_type nChars = std::distance(it,
+                                        static_cast<string::const_reverse_iterator>(instrName.rend()));
+            instrName = instrName.substr(0, nChars);
+          }
+        }
+        try {
+          const Kernel::InstrumentInfo instrument = Kernel::ConfigService::Instance().getInstrument(instrName);
+          return instrument.facility();
+        } catch (Kernel::Exception::NotFoundError &e) {
+          g_log.debug() << e.what() << "\n";
+        }
+      }
+      return Kernel::ConfigService::Instance().getFacility();;
+    }
+
+    /**
      * Extracts the instrument name and run number from a hint
      * @param hint :: The name hint
      * @return A pair of instrument name and run number
@@ -182,7 +228,7 @@ namespace Mantid
      * @throw NotFoundError if a required default is not set
      * @throw std::invalid_argument if the argument is malformed or run number is too long
      */
-    std::string FileFinderImpl::makeFileName(const std::string& hint) const
+    std::string FileFinderImpl::makeFileName(const std::string& hint, const Kernel::FacilityInfo& facility) const
     {
       if (hint.empty())
         return "";
@@ -192,8 +238,7 @@ namespace Mantid
 
       std::pair < std::string, std::string > p = toInstrumentAndNumber(filename);
 
-      Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().getInstrument(p.first);
-      std::string delimiter = instr.delimiter();
+      std::string delimiter = facility.delimiter();
 
       filename = p.first;
       if (!delimiter.empty())
@@ -235,15 +280,43 @@ namespace Mantid
       if (hint.empty())
         return "";
 
+      // so many things depend on the facility just get it now
+      const Kernel::FacilityInfo facility = this->getFacility(hint);
+      // initialize the archive searcher
+      IArchiveSearch_sptr arch;
+      { // hide in a local namespace so things fall out of scope
+        std::string archiveOpt = Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
+        std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(), tolower);
+        if (!archiveOpt.empty() && archiveOpt != "off" && !facility.archiveSearch().empty())
+        {
+          g_log.debug() << "Starting archive search..." << *facility.archiveSearch().begin() << "\n";
+          arch = ArchiveSearchFactory::Instance().create(*facility.archiveSearch().begin());
+        }
+      }
+
+      // if it looks like a full filename just do a quick search for it
       Poco::Path hintPath(hint);
       if (!hintPath.getExtension().empty())
       {
+        // check in normal search locations
         std::string path = getFullPath(hint);
         if (!path.empty() && Poco::File(path).exists())
         {
           return path;
         }
+        // ask the archive search for help
+
+        if (arch)
+        {
+          std::string path = arch->getPath(hint);
+          Poco::File file(path);
+          if (file.exists())
+          {
+            return file.path();
+          }
+        }
       }
+
       // Do we need to try and form a filename from our preset rules
       std::string filename(hint);
       std::string extension;
@@ -255,22 +328,8 @@ namespace Mantid
           extension = filename.substr(i);
           filename.erase(i);
         }
-        filename = makeFileName(filename);
+        filename = makeFileName(filename, facility);
       }
-
-      // Get the facility through the instrument in the hint
-      std::string facil_str("");
-      try {
-        std::string instr_str = this->toInstrumentAndNumber(hint).first;
-        const Kernel::InstrumentInfo instrument = Kernel::ConfigService::Instance().getInstrument(instr_str);
-        facil_str = instrument.facility().name();
-      }
-      catch (std::invalid_argument &arg)
-      {
-        // no biggie, just use the default facility
-      }
-      const Kernel::FacilityInfo facility = Kernel::ConfigService::Instance().getFacility(facil_str);
-
 
       // work through the extensions
       const std::vector<std::string> facility_extensions = facility.extensions();
@@ -303,7 +362,6 @@ namespace Mantid
       std::transform(filename.begin(),filename.end(),filenames[1].begin(),toupper);
       std::transform(filename.begin(),filename.end(),filenames[2].begin(),tolower);
       std::vector<std::string>::const_iterator ext = extensions.begin();
-      std::cout << "checking for the file with different case" << std::endl; // REMOVE
       for (; ext != extensions.end(); ++ext)
       {
         for(size_t i = 0; i < filenames.size(); ++i)
@@ -315,43 +373,34 @@ namespace Mantid
       }
 
       // Search the archive of the default facility
-      std::string archiveOpt = Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
-      std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(), tolower);
-      //std::cout << "Before archive search: facility = " << facility.name() << " archiveOpt = " << archiveOpt << std::endl; // REMOVE
-      if (!archiveOpt.empty() && archiveOpt != "off"
-          && !facility.archiveSearch().empty())
+      if (arch)
       {
-        std::cout << "Starting archive search..." << *facility.archiveSearch().begin() << std::endl;
-        IArchiveSearch_sptr arch = ArchiveSearchFactory::Instance().create(
-            *facility.archiveSearch().begin());
-        if (arch)
+        std::string path;
+        std::vector<std::string>::const_iterator ext = extensions.begin();
+        for (; ext != extensions.end(); ++ext)
         {
-          std::string path;
-          std::vector<std::string>::const_iterator ext = extensions.begin();
-          for (; ext != extensions.end(); ++ext)
+          for(size_t i = 0; i < filenames.size(); ++i)
           {
-            for(size_t i = 0; i < filenames.size(); ++i)
+            path = arch->getPath(filenames[i] + *ext);
+            Poco::Path pathPattern(path);
+            if (ext->find("*") != std::string::npos)
             {
-              path = arch->getPath(filenames[i] + *ext);
-              Poco::Path pathPattern(path);
-              if (ext->find("*") != std::string::npos)
+              continue;
+              std::set < std::string > files;
+              Kernel::Glob::glob(pathPattern, files);
+            }
+            else
+            {
+              Poco::File file(pathPattern);
+              if (file.exists())
               {
-                continue;
-                std::set < std::string > files;
-                Kernel::Glob::glob(pathPattern, files);
+                return file.path();
               }
-              else
-              {
-                Poco::File file(pathPattern);
-                if (file.exists())
-                {
-                  return file.path();
-                }
-              }
-            } // i
-          }  // ext
-        }
-      }
+            }
+          } // i
+        }  // ext
+      } // arch
+
       return "";
     }
 

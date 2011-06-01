@@ -5,8 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/DllExport.h"
+#include "MantidAPI/IArchiveSearch.h"
 
 #include <vector>
 #include <set>
@@ -46,7 +48,7 @@ namespace Mantid
     {
     public:
       std::string getFullPath(const std::string& fName)const;
-      std::string makeFileName(const std::string& hint)const;
+      std::string makeFileName(const std::string& hint, const Kernel::FacilityInfo& facility)const;
       std::string findRun(const std::string& hint,const std::set<std::string> *exts)const;
       std::string findRun(const std::string& hint,const std::vector<std::string> &exts  = std::vector<std::string>())const;
       std::vector<std::string> findRuns(const std::string& hint)const;
@@ -64,6 +66,7 @@ namespace Mantid
       FileFinderImpl& operator=(const FileFinderImpl&);
       std::string extractAllowedSuffix(std::string & userString) const;
       std::pair<std::string,std::string> toInstrumentAndNumber(const std::string& hint)const;
+      const Kernel::FacilityInfo getFacility(const std::string& hint) const;
       /// reference to the logger class
       Mantid::Kernel::Logger& g_log;
     };

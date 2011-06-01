@@ -93,47 +93,47 @@ public:
   void testMakeFileNameForISIS()
   {
     // Set the facility
-    ConfigService::Instance().setFacility("ISIS");
+    const FacilityInfo& facility = ConfigService::Instance().getFacility("ISIS");
 
     // Set the default instrument
     ConfigService::Instance().setString("default.instrument", "HRPD");
 
-    std::string fName = FileFinder::Instance().makeFileName("123");
+    std::string fName = FileFinder::Instance().makeFileName("123", facility);
     TS_ASSERT_EQUALS(fName, "HRP00123");
 
-    fName = FileFinder::Instance().makeFileName("ABC0123");
+    fName = FileFinder::Instance().makeFileName("ABC0123", facility);
     TS_ASSERT_EQUALS(fName, "ABC00000123");
 
-    fName = FileFinder::Instance().makeFileName("ABCD123");
+    fName = FileFinder::Instance().makeFileName("ABCD123", facility);
     TS_ASSERT_EQUALS(fName, "ABC00000123");
 
-    TS_ASSERT_THROWS(fName = FileFinder::Instance().makeFileName("ABCD"), std::invalid_argument);
-    TS_ASSERT_THROWS(fName = FileFinder::Instance().makeFileName("123456"), std::invalid_argument);
+    TS_ASSERT_THROWS(fName = FileFinder::Instance().makeFileName("ABCD", facility), std::invalid_argument);
+    TS_ASSERT_THROWS(fName = FileFinder::Instance().makeFileName("123456", facility), std::invalid_argument);
 
-    fName = FileFinder::Instance().makeFileName("0");
+    fName = FileFinder::Instance().makeFileName("0", facility);
     TS_ASSERT_EQUALS(fName, "HRP00000");
 
-    TS_ASSERT_EQUALS("EFG2H00000123", FileFinder::Instance().makeFileName("EFG2H123"));
+    TS_ASSERT_EQUALS("EFG2H00000123", FileFinder::Instance().makeFileName("EFG2H123", facility));
 
   }
 
   void testMakeFileNameForSNS()
   {
     // Set the facility
-    ConfigService::Instance().setFacility("SNS");
+    const FacilityInfo& facility = ConfigService::Instance().getFacility("SNS");
 
     // Set the default instrument
     ConfigService::Instance().setString("default.instrument", "CNCS");
 
     // Check that we remove any leading zeros
-    TS_ASSERT_EQUALS("CNCS_123", FileFinder::Instance().makeFileName("0123"));
+    TS_ASSERT_EQUALS("CNCS_123", FileFinder::Instance().makeFileName("0123", facility));
 
     // Test using long and short name
-    TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQUOIA21"));
-    TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQ21"));
+    TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQUOIA21", facility));
+    TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQ21", facility));
 
     // Test for REF_L (to check that the extra _ doesn't upset anything)
-    TS_ASSERT_EQUALS("REF_L_666", FileFinder::Instance().makeFileName("REF_L666"));
+    TS_ASSERT_EQUALS("REF_L_666", FileFinder::Instance().makeFileName("REF_L666", facility));
 
   }
 
