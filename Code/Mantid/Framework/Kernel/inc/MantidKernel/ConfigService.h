@@ -123,6 +123,8 @@ namespace Mantid
       // Searches for a configuration property and returns its value
       template<typename T>
       int getValue(const std::string& keyName, T& out);
+      /// Return the local properties filename.
+      std::string getLocalFilename() const;
       /// Return the user properties filename
       std::string getUserFilename() const;
 

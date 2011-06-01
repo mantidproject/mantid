@@ -179,6 +179,8 @@ ConfigServiceImpl::ConfigServiceImpl() :
   updateConfig(getPropertiesDir() + m_properties_file_name, false, false);
   propertiesFilesList = getPropertiesDir() + m_properties_file_name;
 
+  updateConfig(getLocalFilename(), true, false);
+
   if (Poco::Environment::has("MANTIDPROPERTIES"))
   {
     //and then append the user properties
@@ -867,8 +869,21 @@ int ConfigServiceImpl::getValue(const std::string& keyName, T& out)
 }
 
 /**
+ * Return the full filename of the local properties file.
+ * @returns A string containing the full path to the local file.
+ */
+std::string ConfigServiceImpl::getLocalFilename() const
+{
+#ifdef _WIN32
+  return "";
+#else
+  return "/etc/mantid.local.properties";
+#endif
+}
+
+/**
  * Return the full filename of the user properties file
- * @returns A string containg the full path to the user file
+ * @returns A string containing the full path to the user file
  */
 std::string ConfigServiceImpl::getUserFilename() const
 {
