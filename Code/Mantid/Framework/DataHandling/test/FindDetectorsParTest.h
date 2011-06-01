@@ -514,7 +514,7 @@ private:
      std::string polw_pattern("2.86236,2.86236,2.86236,");
  
 
-     std::vector<std::auto_ptr<std::stringstream> >bufs(5);
+     std::auto_ptr<std::stringstream> bufs[5];
      for(int j=0;j<5;j++){
          bufs[j] = std::auto_ptr<std::stringstream>(new std::stringstream);
          for(int i=0;i<3;i++){
