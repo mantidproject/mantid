@@ -96,6 +96,19 @@ namespace Mantid
         }
       }
       file.close();
+      if( !workspace->run().hasProperty("gd_prtn_chrg") )
+      {
+        
+        try
+        {
+          //Use the DAS logs to integrate the proton charge (if any).
+          workspace->mutableRun().integrateProtonCharge();
+        }
+        catch (Exception::NotFoundError &)
+        {
+          //Ignore not found property error.
+        }
+      }
     }
 
     /**
