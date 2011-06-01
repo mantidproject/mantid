@@ -89,29 +89,29 @@ public:
 
       remove(fileName.c_str());
  }
- void testParFileLoadedCorrectly(){
-    Mantid::DataObjects::TableWorkspace_sptr spResult =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PAR_ASCII"));
+ //void t__tParFileLoadedCorrectly(){
+ //   Mantid::DataObjects::TableWorkspace_sptr spResult =
+ //       boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PAR_ASCII"));
 
-        TS_ASSERT_EQUALS(3,inputWS->getNumberHistograms());
+ //       TS_ASSERT_EQUALS(3,inputWS->getNumberHistograms());
 
-        std::vector<std::string> pattern(5);
-        pattern[2] = "1,2,3,";  // dist
-        pattern[1] = "2,3,4,";    // azimutal
-        pattern[0] = "-3,-4,-5,"; //polar
-        pattern[4] = "4,5,6,";    // az_width
-        pattern[3] = "5,6,7,";    // pol_width
-        for(int i=0;i<5;i++){
-            std::stringstream buf;
-            for(int j=0;j<3;j++){
-                buf<<spResult->cell<double>(j,i)<<",";
-            }
-            TS_ASSERT_EQUALS(pattern[i],buf.str());
-        }
+ //       std::vector<std::string> pattern(5);
+ //       pattern[2] = "1,2,3,";  // dist
+ //       pattern[1] = "2,3,4,";    // azimutal
+ //       pattern[0] = "-3,-4,-5,"; //polar
+ //       pattern[4] = "4,5,6,";    // az_width
+ //       pattern[3] = "5,6,7,";    // pol_width
+ //       for(int i=0;i<5;i++){
+ //           std::stringstream buf;
+ //           for(int j=0;j<3;j++){
+ //               buf<<spResult->cell<double>(j,i)<<",";
+ //           }
+ //           TS_ASSERT_EQUALS(pattern[i],buf.str());
+ //       }
 
 
-        AnalysisDataService::Instance().remove("DET_PAR_ASCII");
- }
+ //       AnalysisDataService::Instance().remove("DET_PAR_ASCII");
+ //}
  
  void testParFileProvidedWrong(){
       std::string fileName("testParFile.par");
