@@ -1,12 +1,12 @@
 #include "IView.h"
 
-#include "pqActiveObjects.h"
-#include "pqApplicationCore.h"
-#include "pqObjectBuilder.h"
-#include "pqPipelineSource.h"
-#include "pqRenderView.h"
-#include "pqServer.h"
-#include "pqServerManagerModel.h"
+#include <pqActiveObjects.h>
+#include <pqApplicationCore.h>
+#include <pqObjectBuilder.h>
+#include <pqPipelineSource.h>
+#include <pqRenderView.h>
+#include <pqServer.h>
+#include <pqServerManagerModel.h>
 
 #include <QHBoxLayout>
 

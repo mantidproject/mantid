@@ -1,20 +1,20 @@
 #include "ThreesliceView.h"
 
-#include "pqActiveObjects.h"
-#include "pqApplicationCore.h"
-#include "pqDataRepresentation.h"
-#include "pqObjectBuilder.h"
-#include "pqPipelineBrowserWidget.h"
-#include "pqPipelineRepresentation.h"
-#include "pqPipelineSource.h"
-#include "pqProxyTabWidget.h"
-#include "pqRenderView.h"
-#include "pqServer.h"
-#include "pqServerManagerModel.h"
-#include "vtkDataObject.h"
-#include "vtkProperty.h"
-#include "vtkSMPropertyHelper.h"
-#include "vtkSMProxy.h"
+#include <pqActiveObjects.h>
+#include <pqApplicationCore.h>
+#include <pqDataRepresentation.h>
+#include <pqObjectBuilder.h>
+#include <pqPipelineBrowserWidget.h>
+#include <pqPipelineRepresentation.h>
+#include <pqPipelineSource.h>
+#include <pqProxyTabWidget.h>
+#include <pqRenderView.h>
+#include <pqServer.h>
+#include <pqServerManagerModel.h>
+#include <vtkDataObject.h>
+#include <vtkProperty.h>
+#include <vtkSMPropertyHelper.h>
+#include <vtkSMProxy.h>
 
 #include <iostream>
 

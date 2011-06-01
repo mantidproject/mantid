@@ -1,8 +1,8 @@
 #ifndef GEOMETRYPARSER_H_
 #define GEOMETRYPARSER_H_
 
-#include "Poco/DOM/AutoPtr.h"
-#include "Poco/DOM/Document.h"
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/Document.h>
 
 class AxisInformation;
 /**

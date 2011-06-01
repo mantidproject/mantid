@@ -1,11 +1,11 @@
 #include "GeometryParser.h"
 #include "AxisInformation.h"
 
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/Node.h"
-#include "Poco/DOM/NodeList.h"
-#include "Poco/DOM/NamedNodeMap.h"
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NamedNodeMap.h>
 
 #include <iostream>
 #include <sstream>

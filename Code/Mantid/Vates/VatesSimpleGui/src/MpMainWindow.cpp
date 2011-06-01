@@ -6,16 +6,16 @@
 #include "ThreesliceView.h"
 #include "TimeControlWidget.h"
 
-#include "pqActiveObjects.h"
-#include "pqApplicationCore.h"
-#include "pqLoadDataReaction.h"
-#include "pqObjectBuilder.h"
-#include "pqObjectInspectorWidget.h"
-#include "pqParaViewBehaviors.h"
-#include "pqPipelineSource.h"
-#include "pqRenderView.h"
-#include "vtkSMProxyManager.h"
-#include "vtkSMReaderFactory.h"
+#include <pqActiveObjects.h>
+#include <pqApplicationCore.h>
+#include <pqLoadDataReaction.h>
+#include <pqObjectBuilder.h>
+#include <pqObjectInspectorWidget.h>
+#include <pqParaViewBehaviors.h>
+#include <pqPipelineSource.h>
+#include <pqRenderView.h>
+#include <vtkSMProxyManager.h>
+#include <vtkSMReaderFactory.h>
 
 #include <QHBoxLayout>
 #include <QModelIndex>

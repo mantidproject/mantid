@@ -1,7 +1,7 @@
 #ifndef SCALEPICKER_H_
 #define SCALEPICKER_H_
 
-#include <qobject.h>
+#include <QObject>
 
 class QEvent;
 class QPoint;

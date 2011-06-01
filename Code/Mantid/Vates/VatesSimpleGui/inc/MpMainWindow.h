@@ -2,8 +2,8 @@
 #define MPMAINWINDOW_H_
 
 #include <QtGui/QMainWindow>
-#include "ui_MpMainWindow.h"
 #include <QPointer>
+#include "ui_MpMainWindow.h"
 
 class IView;
 

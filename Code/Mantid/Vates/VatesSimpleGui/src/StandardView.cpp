@@ -1,15 +1,15 @@
 #include "StandardView.h"
 
-#include "pqActiveObjects.h"
-#include "pqApplicationCore.h"
-#include "pqDataRepresentation.h"
-#include "pqObjectBuilder.h"
-#include "pqPipelineRepresentation.h"
-#include "pqPipelineSource.h"
-#include "pqRenderView.h"
-#include "vtkDataObject.h"
-#include "vtkProperty.h"
-#include "vtkSMPropertyHelper.h"
+#include <pqActiveObjects.h>
+#include <pqApplicationCore.h>
+#include <pqDataRepresentation.h>
+#include <pqObjectBuilder.h>
+#include <pqPipelineRepresentation.h>
+#include <pqPipelineSource.h>
+#include <pqRenderView.h>
+#include <vtkDataObject.h>
+#include <vtkProperty.h>
+#include <vtkSMPropertyHelper.h>
 
 #include <QHBoxLayout>
 
