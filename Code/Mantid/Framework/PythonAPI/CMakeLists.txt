@@ -35,7 +35,7 @@ set ( INC_FILES
 )
 
 # Python files that need copying across
-set ( PY_FILES MantidFramework.py __init__.py setup.py )
+set ( PY_FILES MantidFramework.py __init__.py setup.py mantidsimple_runtime.py)
 
 # cxxtest unit tests
 set ( TEST_FILES
