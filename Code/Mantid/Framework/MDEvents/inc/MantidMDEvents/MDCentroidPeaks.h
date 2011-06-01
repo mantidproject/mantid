@@ -1,8 +1,11 @@
 #ifndef MANTID_MDEVENTS_MDCENTROIDPEAKS_H_
 #define MANTID_MDEVENTS_MDCENTROIDPEAKS_H_
     
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h" 
+#include "MantidMDEvents/MDEventWorkspace.h"
 
 namespace Mantid
 {
@@ -34,6 +37,13 @@ namespace MDEvents
     void init();
     /// Run the algorithm
     void exec();
+
+    template<typename MDE, size_t nd>
+    void integrate(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
+    /// Input MDEventWorkspace
+    Mantid::API::IMDEventWorkspace_sptr inWS;
+
 
 
   };

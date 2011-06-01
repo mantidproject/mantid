@@ -98,7 +98,7 @@ public:
     createMDEW();
     addPeak(1000, 0.,0.,0., 1.0);
     addPeak(1000, 2.,3.,4., 0.5);
-    addPeak(1000, 5.,5.,5., 2.0);
+    addPeak(1000, 6.,6.,6., 2.0);
 
     MDEventWorkspace3::sptr mdews = boost::dynamic_pointer_cast<MDEventWorkspace3>(AnalysisDataService::Instance().retrieve("MDEWPeakIntegrationTest_MDEWS"));
     TS_ASSERT_EQUALS( mdews->getNPoints(), 3000);
@@ -111,7 +111,7 @@ public:
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
     peakWS->addPeak( Peak(inst, 1, 1.0, V3D(0., 0., 0.) ) );
     peakWS->addPeak( Peak(inst, 1, 1.0, V3D(2., 3., 4.) ) );
-    peakWS->addPeak( Peak(inst, 1, 1.0, V3D(5., 5., 5.) ) );
+    peakWS->addPeak( Peak(inst, 1, 1.0, V3D(6., 6., 6.) ) );
 
     TS_ASSERT_EQUALS( peakWS->getPeak(0).getIntensity(), 0.0);
     AnalysisDataService::Instance().add("MDEWPeakIntegrationTest_peaks",peakWS);
