@@ -20,7 +20,7 @@ namespace Mantid
     /// Constructor
     WorkspaceSingleValue::WorkspaceSingleValue(double value,double error) :
         API::MatrixWorkspace(),
-        _X(1,0),_Y(1,value),_E(1,error)
+        _X(1,0),_Y(1,value),_E(1,error),_Dx(1,0)
     { }
 
     /// Destructor

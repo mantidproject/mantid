@@ -191,6 +191,15 @@ public:
     TS_ASSERT_EQUALS( bigWorkspace.dataX(39)[10], 2.22 );
   }
 
+  void testDataDx()
+  {
+    TS_ASSERT_EQUALS( smallWorkspace.dataDx(0).size(), 4 );
+    TS_ASSERT_EQUALS( smallWorkspace.readDx(1)[3], 0.0 );
+
+    TS_ASSERT_THROWS_NOTHING( smallWorkspace.dataDx(1)[3] = 9.9 );
+    TS_ASSERT_EQUALS( smallWorkspace.readDx(1)[3], 9.9 );
+  }
+
   void testDataY()
   {
     MantidVec y;

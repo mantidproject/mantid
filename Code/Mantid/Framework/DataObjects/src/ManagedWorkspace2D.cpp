@@ -45,12 +45,7 @@ ManagedWorkspace2D::ManagedWorkspace2D() :
  */
 void ManagedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
 {
-  m_noVectors = NVectors;
-  m_axes.resize(2);
-  m_axes[0] = new API::RefAxis(XLength, this);
-  m_axes[1] = new API::SpectraAxis(NVectors);
-  m_XLength = XLength;
-  m_YLength = YLength;
+  AbsManagedWorkspace2D::init(NVectors,XLength,YLength);
 
   m_vectorSize = sizeof(int) + ( m_XLength + ( 2*m_YLength ) ) * sizeof(double);
 

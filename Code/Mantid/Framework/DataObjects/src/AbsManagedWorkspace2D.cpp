@@ -49,9 +49,7 @@ void AbsManagedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, 
   m_XLength = XLength;
   m_YLength = YLength;
 
-  m_vectorSize = ( m_XLength + ( 2*m_YLength ) ) * sizeof(double);
-
-  // Define m_vectorsPerBlock in the init() of the derived class
+  // Define m_vectorSize, m_vectorsPerBlock in the init() of the derived class
 
 }
 
@@ -179,6 +177,21 @@ MantidVec& AbsManagedWorkspace2D::dataE(const size_t index)
   return getDataBlock(index)->dataE(index);
 }
 
+/** Get the error x data for a specified histogram
+ *  @param index :: The number of the histogram
+ *  @return A vector of doubles containing the error x data
+ */
+MantidVec& AbsManagedWorkspace2D::dataDx(const size_t index)
+{
+  if (index>=m_noVectors)
+    throw std::range_error("AbsManagedWorkspace2D::dataDx, histogram number out of range");
+
+  // Need to create the storage for the X errors (in memory) the first time they are accessed
+  if (data.empty()) this->lazyDxFill();
+
+  return data[index].dataDx();
+}
+
 /** Get the x data of a specified histogram
 *  @param index :: The number of the histogram
 *  @return A vector of doubles containing the x data
@@ -213,6 +226,21 @@ const MantidVec& AbsManagedWorkspace2D::dataE(const size_t index) const
     throw std::range_error("AbsManagedWorkspace2D::dataE, histogram number out of range");
 
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE(index);
+}
+
+/** Get the error x data for a specified histogram
+ *  @param index :: The number of the histogram
+ *  @return A vector of doubles containing the error x data
+ */
+const MantidVec& AbsManagedWorkspace2D::dataDx(const size_t index) const
+{
+  if (index>=m_noVectors)
+    throw std::range_error("AbsManagedWorkspace2D::dataDx, histogram number out of range");
+
+  // Need to create the storage for the X errors (in memory) the first time they are accessed
+  if (data.empty()) const_cast<AbsManagedWorkspace2D*>(this)->lazyDxFill();
+
+  return data[index].dataDx();
 }
 
 Kernel::cow_ptr<MantidVec> AbsManagedWorkspace2D::refX(const size_t index) const
@@ -267,6 +295,17 @@ ManagedDataBlock2D* AbsManagedWorkspace2D::getDataBlock(const size_t index) cons
   return newBlock;
 }
 
-
+/// Method to create Dx vectors in memory (until it's done properly for 'Managed' types)
+/// only if applicable methods (dataDx) are called.
+void AbsManagedWorkspace2D::lazyDxFill()
+{
+  data.resize(m_noVectors);
+  MantidVecPtr t1;
+  t1.access().resize(m_XLength);
+  for (size_t i=0;i<m_noVectors;i++)
+  {
+    data[i].setDx(t1);
+  }
+}
 } // namespace DataObjects
 } // namespace Mantid

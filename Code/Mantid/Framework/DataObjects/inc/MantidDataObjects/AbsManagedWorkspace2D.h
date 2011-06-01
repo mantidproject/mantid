@@ -64,9 +64,11 @@ namespace DataObjects
     virtual MantidVec& dataX(const std::size_t index);
     virtual MantidVec& dataY(const std::size_t index);
     virtual MantidVec& dataE(const std::size_t index);
+    virtual MantidVec& dataDx(std::size_t const index);
     virtual const MantidVec& dataX(std::size_t const index) const;
     virtual const MantidVec& dataY(std::size_t const index) const;
     virtual const MantidVec& dataE(std::size_t const index) const;
+    virtual const MantidVec& dataDx(std::size_t const index) const;
     virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const;
 
     /// Returns the size of physical memory the workspace takes
@@ -113,6 +115,8 @@ namespace DataObjects
 
     ManagedDataBlock2D* getDataBlock(const std::size_t index) const;
 
+    /// Fills the Dx vectors in Workspace2D::data if an accessor method is called
+    void lazyDxFill();
 
   public:
     /// Callback func

@@ -43,7 +43,7 @@ namespace Mantid
       MantidVecPtr t1,t2;
       t1.access().resize(XLength);//this call initializes array to zero
       t2.access().resize(YLength);
-      this->setX(t1);
+      this->setX(t1,t1);
       // Y,E arrays populated
       this->setData(t2,t2);
     }
