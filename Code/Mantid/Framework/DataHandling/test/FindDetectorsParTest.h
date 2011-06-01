@@ -77,7 +77,7 @@ public:
        AnalysisDataService::Instance().remove("DET_PAR");
 
  }
- void testParFileProvided(){
+ /*void t__tParFileProvided(){
       std::string fileName("testParFile.par");
       writePARfile3(fileName.c_str());
       TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("InputWorkspace", inputWS->getName()));
@@ -88,7 +88,7 @@ public:
       TSM_ASSERT("parameters calculations should complete successfully", findPar->isExecuted() );
 
       remove(fileName.c_str());
- }
+ }*/
  //void t__tParFileLoadedCorrectly(){
  //   Mantid::DataObjects::TableWorkspace_sptr spResult =
  //       boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PAR_ASCII"));
@@ -158,20 +158,20 @@ public:
        AnalysisDataService::Instance().remove("DET_PAR2");
 
  }
- void testPHXExecCorrectly(){
-      std::string fileName("testPhxFile.phx");
-      // this is 1 row phx file for 1 detector workspace
-      writePHX1file(fileName.c_str());
-      // should use internal algorithm
-      TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("InputWorkspace", inputWS->getName()));
-      TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("OutputParTable", "DET_PHX_ASCII"));
-      TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("ParFile", fileName));
+ //void t__tPHXExecCorrectly(){
+ //     std::string fileName("testPhxFile.phx");
+ //     // this is 1 row phx file for 1 detector workspace
+ //     writePHX1file(fileName.c_str());
+ //     // should use internal algorithm
+ //     TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("InputWorkspace", inputWS->getName()));
+ //     TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("OutputParTable", "DET_PHX_ASCII"));
+ //     TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("ParFile", fileName));
 
-      TSM_ASSERT_THROWS_NOTHING("Calculating workspace parameters should not throw", findPar->execute() );
-      TSM_ASSERT("parameters calculations should complete successfully", findPar->isExecuted() );
+ //     TSM_ASSERT_THROWS_NOTHING("Calculating workspace parameters should not throw", findPar->execute() );
+ //     TSM_ASSERT("parameters calculations should complete successfully", findPar->isExecuted() );
 
-      remove(fileName.c_str());
- }
+ //     remove(fileName.c_str());
+ //}
  /*void t__tPHXProcessedCorrectly(){
     Mantid::DataObjects::TableWorkspace_sptr spResult =
         boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PAR2"));
