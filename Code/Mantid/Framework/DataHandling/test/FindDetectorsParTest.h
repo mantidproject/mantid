@@ -158,7 +158,35 @@ public:
        AnalysisDataService::Instance().remove("DET_PAR2");
 
  }
+ void testPHXExecCorrectly(){
+      std::string fileName("testPhxFile.phx");
+      // this is 1 row phx file for 1 detector workspace
+      writePHX1file(fileName.c_str());
+      // should use internal algorithm
+      TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("InputWorkspace", inputWS->getName()));
+      TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("OutputParTable", "DET_PHX_ASCII"));
+      TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("ParFile", fileName));
 
+      TSM_ASSERT_THROWS_NOTHING("Calculating workspace parameters should not throw", findPar->execute() );
+      TSM_ASSERT("parameters calculations should complete successfully", findPar->isExecuted() );
+
+      remove(fileName.c_str());
+ }
+ /*void t__tPHXProcessedCorrectly(){
+    Mantid::DataObjects::TableWorkspace_sptr spResult =
+        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PAR2"));
+
+       TSM_ASSERT_DELTA("azimut wrong",      0,       spResult->cell<double>(0,0),1.e-5);
+       TSM_ASSERT_DELTA("polar wrong ",      37.0451, spResult->cell<double>(0,1),1.e-3);
+       TSM_ASSERT_DELTA("flight path wrong ",7.52685, spResult->cell<double>(0,2),1.e-5);
+       TSM_ASSERT_DELTA("azim width wrong ", 0,       spResult->cell<double>(0,3),1.e-5);
+       TSM_ASSERT_DELTA("polar width wrong ",23.2429, spResult->cell<double>(0,4),1.e-4);
+
+       AnalysisDataService::Instance().remove("DET_PAR2");
+
+
+ }
+*/
  void testCount_changes(){
      // testing auxiliary function count changes;
      FindDetectorsParTestASCIIhelpers ASCII_helper;
