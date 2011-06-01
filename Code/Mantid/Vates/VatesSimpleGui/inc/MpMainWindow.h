@@ -8,6 +8,8 @@
 class IView;
 
 class pqPipelineSource;
+
+class QHBoxLayout;
 /**
  *
   This class represents the main level program.
@@ -68,9 +70,10 @@ signals:
 
 private:
     Q_DISABLE_COPY(mpMainWindow);
-    QPointer<pqPipelineSource> originSource; ///< Holder for the current source
     IView *currentView; ///< Holder for the current view
     IView *hiddenView; ///< Holder for the view that is being switched from
+    QPointer<pqPipelineSource> originSource; ///< Holder for the current source
+    QHBoxLayout *viewLayout; ///< Layout manager for the view widget
 
     /// Disable communication with the proxy tab widget.
     void removeProxyTabWidgetConnections();

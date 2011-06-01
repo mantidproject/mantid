@@ -17,6 +17,7 @@
 #include "vtkSMProxyManager.h"
 #include "vtkSMReaderFactory.h"
 
+#include <QHBoxLayout>
 #include <QModelIndex>
 
 #include <iostream>
@@ -24,6 +25,7 @@
 mpMainWindow::mpMainWindow(QWidget *parent) : QMainWindow(parent)
 {
   this->setupUi(this);
+  this->splitter_2->setStretchFactor(1, 1);
 
   // Unset the connections since the views aren't up yet.
   this->removeProxyTabWidgetConnections();
@@ -51,6 +53,13 @@ mpMainWindow::mpMainWindow(QWidget *parent) : QMainWindow(parent)
   // Set the standard view as the default
   this->currentView = this->setMainViewWidget(this->viewWidget,
 		  ModeControlWidget::STANDARD);
+
+  // Create a layout to manage the view properly
+  this->viewLayout = new QHBoxLayout(this->viewWidget);
+  this->viewLayout->setMargin(0);
+  this->viewLayout->setStretch(0, 1);
+  this->viewLayout->addWidget(this->currentView);
+
   this->setMainWindowComponentsForView();
 }
 
@@ -68,25 +77,29 @@ void mpMainWindow::removeProxyTabWidgetConnections()
 IView* mpMainWindow::setMainViewWidget(QWidget *container,
 		ModeControlWidget::Views v)
 {
+  IView *view;
 	switch(v)
 	{
 	case ModeControlWidget::STANDARD:
 	{
-		return new StandardView(container);
+		view = new StandardView(container);
 	}
 	break;
 	case ModeControlWidget::THREESLICE:
 	{
-		return new ThreeSliceView(container);
+		view = new ThreeSliceView(container);
 	}
 	break;
 	case ModeControlWidget::MULTISLICE:
 	{
-		return new MultiSliceView(container);
+		view = new MultiSliceView(container);
 	}
+	break;
 	default:
-		return NULL;
+		view = NULL;
+		break;
 	}
+	return view;
 }
 
 void mpMainWindow::setMainWindowComponentsForView()
@@ -127,7 +140,9 @@ void mpMainWindow::switchViews(ModeControlWidget::Views v)
 	this->removeProxyTabWidgetConnections();
 	this->hiddenView = this->setMainViewWidget(this->viewWidget, v);
 	this->hiddenView->hide();
+  this->viewLayout->removeWidget(this->currentView);
 	this->swapViews();
+  this->viewLayout->addWidget(this->currentView);
 	this->currentView->show();
 	this->hiddenView->hide();
 	this->setMainWindowComponentsForView();
