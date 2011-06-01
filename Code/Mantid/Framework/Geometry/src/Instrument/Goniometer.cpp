@@ -195,6 +195,15 @@ void Goniometer::makeUniversalGoniometer()
   this->pushAxis("phi",   0., 1., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
 }
 
+/** Return Euler angles acording to a convention
+* @param convention :: the convention used to calculate Euler Angles. The UniversalGoniometer is YXY, a triple axis goniometer at HFIR is YZX 
+*/
+std::vector<double> Goniometer::getEulerAngles(std::string convention)
+{
+  //translate convention to three integers X=0, Y=1, Z=2
+  std::vector<double> angles(3);
+  return angles;
+}
 
 /// Private function to recalculate the rotation matrix of the goniometer
 void Goniometer::recalculateR()

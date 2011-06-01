@@ -87,6 +87,8 @@ namespace Geometry
       size_t getNumberAxes() const;
       // Make a default universal goniometer
       void makeUniversalGoniometer();
+      // Return Euler angles acording to a convention
+      std::vector<double> getEulerAngles(std::string convention="YZX");
 
     private:
       /// Global rotation matrix of the goniometer
