@@ -213,7 +213,7 @@ namespace Mantid
 
       loadSampleData(local_workspace, entry);
       m_progress->report("Loading logs");
-      loadLogs(local_workspace, entry);
+      loadLogs(local_workspace);
 
       // Load first period outside loop
       m_progress->report("Loading data");
@@ -271,7 +271,7 @@ namespace Mantid
     {
       //Check the numbers supplied are not in the range and erase the ones that are
       struct range_check
-      {	
+      { 
         range_check(int64_t min, int64_t max) : m_min(min), m_max(max) {}
 
         bool operator()(int64_t x)
@@ -609,26 +609,26 @@ namespace Mantid
       // RPB struct info
       NXInt rpb_int = vms_compat.openNXInt("IRPB");
       rpb_int.load();
-      runDetails.addProperty("dur", rpb_int[0]);	// actual run duration
-      runDetails.addProperty("durunits", rpb_int[1]);	// scaler for above (1=seconds)
+      runDetails.addProperty("dur", rpb_int[0]);        // actual run duration
+      runDetails.addProperty("durunits", rpb_int[1]);   // scaler for above (1=seconds)
       runDetails.addProperty("dur_freq", rpb_int[2]);  // testinterval for above (seconds)
       runDetails.addProperty("dmp", rpb_int[3]);       // dump interval
-      runDetails.addProperty("dmp_units", rpb_int[4]);	// scaler for above
-      runDetails.addProperty("dmp_freq", rpb_int[5]);	// interval for above
-      runDetails.addProperty("freq", rpb_int[6]);	// 2**k where source frequency = 50 / 2**k
+      runDetails.addProperty("dmp_units", rpb_int[4]);  // scaler for above
+      runDetails.addProperty("dmp_freq", rpb_int[5]);   // interval for above
+      runDetails.addProperty("freq", rpb_int[6]);       // 2**k where source frequency = 50 / 2**k
       
       // Now double data
       NXFloat rpb_dbl = vms_compat.openNXFloat("RRPB");
       rpb_dbl.load();
       runDetails.addProperty("gd_prtn_chrg", static_cast<double>(rpb_dbl[7]));  // good proton charge (uA.hour)
       runDetails.addProperty("tot_prtn_chrg", static_cast<double>(rpb_dbl[8])); // total proton charge (uA.hour)
-      runDetails.addProperty("goodfrm",rpb_int[9]);	// good frames
-      runDetails.addProperty("rawfrm", rpb_int[10]);	// raw frames
+      runDetails.addProperty("goodfrm",rpb_int[9]);     // good frames
+      runDetails.addProperty("rawfrm", rpb_int[10]);    // raw frames
       runDetails.addProperty("dur_wanted", rpb_int[11]); // requested run duration (units as for "duration" above)
-      runDetails.addProperty("dur_secs", rpb_int[12]);	// actual run duration in seconds
-      runDetails.addProperty("mon_sum1", rpb_int[13]);	// monitor sum 1
-      runDetails.addProperty("mon_sum2", rpb_int[14]);	// monitor sum 2
-      runDetails.addProperty("mon_sum3",rpb_int[15]);	// monitor sum 3
+      runDetails.addProperty("dur_secs", rpb_int[12]);  // actual run duration in seconds
+      runDetails.addProperty("mon_sum1", rpb_int[13]);  // monitor sum 1
+      runDetails.addProperty("mon_sum2", rpb_int[14]);  // monitor sum 2
+      runDetails.addProperty("mon_sum3",rpb_int[15]);   // monitor sum 3
 
       // End date and time is stored separately in ISO format in the "raw_data1/endtime" class
       char_data = entry.openNXChar("end_time");
@@ -699,78 +699,34 @@ namespace Mantid
     *   /raw_data_1/runlog group of the file. Call to this method must be done
     *   within /raw_data_1 group.
     *   @param ws :: The workspace to load the logs to.
-    *   @param entry :: The Nexus entry
     *   @param period :: The period of this workspace
     */
-    void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr ws, NXEntry & entry,int period)
+    void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr ws, int period)
     {
-
-      NXMainClass runlogs = entry.openNXClass<NXMainClass>("runlog");
-
-      for(std::vector<NXClassInfo>::const_iterator it=runlogs.groups().begin();it!=runlogs.groups().end();it++)
+      IAlgorithm_sptr alg = createSubAlgorithm("LoadRunLogs", 0.0, 0.5);
+      alg->setPropertyValue("Filename", this->getProperty("Filename"));
+      alg->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
+      try
       {
-        if (it->nxclass == "NXlog")
-        {
-          
-          NXLog nxLog(runlogs,it->nxname);
-          nxLog.openLocal();
-
-          Kernel::Property* logv = nxLog.createTimeSeries();
-          if (!logv)
-          {
-            nxLog.close();
-            continue;
-          }
-          ws->mutableRun().addLogData(logv);
-          if (it->nxname == "icp_event")
-          {
-            LogParser parser(logv);
-            ws->mutableRun().addLogData(parser.createPeriodLog(period));
-            ws->mutableRun().addLogData(parser.createAllPeriodsLog());
-            ws->mutableRun().addLogData(parser.createRunningLog());
-          }
-          nxLog.close();
-        }
+        alg->executeAsSubAlg();
       }
-
-      NXMainClass selogs = entry.openNXClass<NXMainClass>("selog");
-      for(std::vector<NXClassInfo>::const_iterator it=selogs.groups().begin();it!=selogs.groups().end();it++)
+      catch(std::runtime_error&)
       {
-        if (it->nxclass == "IXseblock")
-        {
-          NXMainClass selog(selogs,it->nxname);
-          selog.openLocal("IXseblock");
-          NXLog nxLog(selog,"value_log");
-          bool ok = nxLog.openLocal();
-          std::string propName = it->nxname;
-          if (ws->run().hasProperty(propName))
-          {
-            propName = "selog_"+propName;
-          }
-
-          if (ok)
-          {
-            Kernel::Property* logv = nxLog.createTimeSeries("",propName);
-            if (!logv)
-            {
-              nxLog.close();
-              selog.close();
-              continue;
-            }
-            ws->mutableRun().addLogData(logv);
-            nxLog.close();
-          }
-          else
-          {
-            NXFloat value = selog.openNXFloat("value");
-            value.load();
-            ws->mutableRun().addProperty(propName,(double)*value());
-          }
-          selog.close();
-        }
+        g_log.warning() << "Unable to load run logs. There will be no log "
+                        << "data associated with this workspace\n";
+        return;
       }
-
       ws->populateInstrumentParameters();
+      // If we loaded an icp_event log then create the necessary period logs 
+      if( ws->run().hasProperty("icp_event") )
+      {
+        Kernel::Property *log = ws->run().getProperty("icp_event");
+        LogParser parser(log);
+        ws->mutableRun().addProperty(parser.createPeriodLog(period));
+        ws->mutableRun().addProperty(parser.createAllPeriodsLog());
+        ws->mutableRun().addProperty(parser.createRunningLog());
+      }
+
     }
 
     double LoadISISNexus2::dblSqrt(double in)
@@ -798,7 +754,7 @@ namespace Mantid
         return true;
       }
       else if ( (nread >= sizeof(g_hdf5_signature)) && 
-		(!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
+                (!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
       { 
         //hdf5
         return true;

@@ -14,6 +14,7 @@
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NeXusException.hpp"
 
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
@@ -60,8 +61,9 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport LoadLogsFromSNSNexus : public API::Algorithm
+    class DLLExport LoadLogsFromSNSNexus : public API::Algorithm, public API::DeprecatedAlgorithm
     {
+
     public:
       /// Default constructor
       LoadLogsFromSNSNexus();

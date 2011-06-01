@@ -627,10 +627,6 @@ void LoadEventNexus::init()
   declareProperty(
       new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
       "Load the monitors from the file (optional, default False).");
-//
-//  declareProperty(
-//      new PropertyWithValue<bool>("LoadLogs", true, Direction::Input),
-//      "Load the sample logs from the file (optional, default True).");
 
   declareProperty(
       new PropertyWithValue<bool>("Precount", false, Direction::Input),
@@ -657,7 +653,6 @@ void LoadEventNexus::exec()
   precount = getProperty("Precount");
   compressTolerance = getProperty("CompressTolerance");
 
-  //loadlogs = getProperty("LoadLogs");
   loadlogs = true;
 
   //Get the limits to the filter
@@ -709,7 +704,7 @@ void LoadEventNexus::exec()
     prog.doReport("Loading DAS logs");
     //The pulse times will be empty if not specified in the DAS logs.
     pulseTimes.clear();
-    IAlgorithm_sptr loadLogs = createSubAlgorithm("LoadLogsFromSNSNexus");
+    IAlgorithm_sptr loadLogs = createSubAlgorithm("LoadRunLogs");
 
     // Now execute the sub-algorithm. Catch and log any error, but don't stop.
     try

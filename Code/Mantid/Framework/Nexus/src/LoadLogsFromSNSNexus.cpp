@@ -41,7 +41,10 @@ using Geometry::Instrument;
 
 /// Empty default constructor
 LoadLogsFromSNSNexus::LoadLogsFromSNSNexus()
-{}
+{
+  useAlgorithm("LoadRunLogs");
+  deprecatedDate("2011-06-01");
+}
 
 /// Initialisation method.
 void LoadLogsFromSNSNexus::init()
@@ -52,9 +55,9 @@ void LoadLogsFromSNSNexus::init()
     "The name of the workspace in which to import the sample logs." );
 
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
-		  "The name (including its full or relative path) of the Nexus file to\n"
-		  "attempt to load the instrument from. The file extension must either be\n"
-		  ".nxs or .NXS" );
+                  "The name (including its full or relative path) of the Nexus file to\n"
+                  "attempt to load the instrument from. The file extension must either be\n"
+                  ".nxs or .NXS" );
   declareProperty(new PropertyWithValue<bool>("OverwriteLogs", true, Direction::Input));
 }
 

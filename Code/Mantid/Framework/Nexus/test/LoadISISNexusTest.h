@@ -56,17 +56,26 @@ public:
         TS_ASSERT(slog);
         TS_ASSERT_EQUALS(slog->size(),50);
 
-        TimeSeriesProperty<double>* dlog = dynamic_cast<TimeSeriesProperty<double>*>(ws->run().getLogData("total_counts"));
+        TimeSeriesProperty<int>* ilog = dynamic_cast<TimeSeriesProperty<int>*>(ws->run().getLogData("total_counts"));
+        TS_ASSERT(ilog);
+        TS_ASSERT_EQUALS(ilog->size(),172);
+
+        ilog = dynamic_cast<TimeSeriesProperty<int>*>(ws->run().getLogData("period"));
+        TS_ASSERT(ilog);
+        TS_ASSERT_EQUALS(ilog->size(),172);
+
+        TimeSeriesProperty<double> *dlog = dynamic_cast<TimeSeriesProperty<double>*>(ws->run().getLogData("proton_charge"));
         TS_ASSERT(dlog);
         TS_ASSERT_EQUALS(dlog->size(),172);
 
-        dlog = dynamic_cast<TimeSeriesProperty<double>*>(ws->run().getLogData("period"));
-        TS_ASSERT(dlog);
-        TS_ASSERT_EQUALS(dlog->size(),172);
 
         TimeSeriesProperty<bool>* blog = dynamic_cast<TimeSeriesProperty<bool>*>(ws->run().getLogData("period 1"));
         TS_ASSERT(blog);
         TS_ASSERT_EQUALS(blog->size(),1);
+
+        blog = dynamic_cast<TimeSeriesProperty<bool>*>(ws->run().getLogData("running"));
+        TS_ASSERT(blog);
+        TS_ASSERT_EQUALS(blog->size(),2);
 
         TS_ASSERT_EQUALS(ws->sample().getName(),"");
         
@@ -86,7 +95,7 @@ public:
         TS_ASSERT_THROWS_NOTHING(ld.execute());
         TS_ASSERT(ld.isExecuted());
 
-	    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+            MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
         TS_ASSERT_EQUALS(ws->blocksize(),5);
         TS_ASSERT_EQUALS(ws->getNumberHistograms(),14);
 
@@ -102,27 +111,27 @@ public:
         TS_ASSERT_EQUALS(ws->readY(10)[3],1.);
         TS_ASSERT_EQUALS(ws->readY(13)[4],1.);
     }
-	 void testMultiPeriodEntryNumberZero()
+         void testMultiPeriodEntryNumberZero()
     {
-		Mantid::API::FrameworkManager::Instance();
+                Mantid::API::FrameworkManager::Instance();
         LoadISISNexus2 ld;
         ld.initialize();
         ld.setPropertyValue("Filename","TEST00000008.nxs");
-	    ld.setPropertyValue("OutputWorkspace","outWS");
+            ld.setPropertyValue("OutputWorkspace","outWS");
         ld.setPropertyValue("SpectrumMin","10");
         ld.setPropertyValue("SpectrumMax","19");
- 		ld.setPropertyValue("EntryNumber","0");
-		//ld.setPropertyValue("SpectrumList","30,31");
+                ld.setPropertyValue("EntryNumber","0");
+                //ld.setPropertyValue("SpectrumList","30,31");
         TS_ASSERT_THROWS_NOTHING(ld.execute());
         TS_ASSERT(ld.isExecuted());
-		
-		WorkspaceGroup_sptr grpout;//=WorkspaceGroup_sptr(new WorkspaceGroup);
-		TS_ASSERT_THROWS_NOTHING(grpout=boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("outWS")));
+                
+                WorkspaceGroup_sptr grpout;//=WorkspaceGroup_sptr(new WorkspaceGroup);
+                TS_ASSERT_THROWS_NOTHING(grpout=boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("outWS")));
 
         MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS_1"));
         TS_ASSERT_EQUALS(ws->blocksize(),995);
         TS_ASSERT_EQUALS(ws->getNumberHistograms(),10);
-	TS_ASSERT_DELTA(ws->run().getProtonCharge(), 0.069991, 1e-6);
+        TS_ASSERT_DELTA(ws->run().getProtonCharge(), 0.069991, 1e-6);
 
         TS_ASSERT_EQUALS(ws->readX(0)[0],5.);
         TS_ASSERT_EQUALS(ws->readX(0)[1],6.);
@@ -136,7 +145,7 @@ public:
         TS_ASSERT_EQUALS(ws->readY(9)[3],0.);
         TS_ASSERT_EQUALS(ws->readY(9)[1],0.);
     }
-	  void testMultiPeriodEntryNumberNonZero()
+          void testMultiPeriodEntryNumberNonZero()
     {
         Mantid::API::FrameworkManager::Instance();
         LoadISISNexus2 ld;
@@ -145,17 +154,17 @@ public:
         ld.setPropertyValue("OutputWorkspace","outWS");
         ld.setPropertyValue("SpectrumMin","10");
         ld.setPropertyValue("SpectrumMax","20");
-	//	ld.setPropertyValue("SpectrumList","29,30,31");
-  		ld.setPropertyValue("EntryNumber","5");
+        //      ld.setPropertyValue("SpectrumList","29,30,31");
+                ld.setPropertyValue("EntryNumber","5");
         TS_ASSERT_THROWS_NOTHING(ld.execute());
         TS_ASSERT(ld.isExecuted());
-			
+                        
 
         MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
         TS_ASSERT_EQUALS(ws->blocksize(),995);
      //   TS_ASSERT_EQUALS(ws->getNumberHistograms(),14);
         TS_ASSERT_EQUALS(ws->getTitle(), "hello\\0");
-	TS_ASSERT_DELTA(ws->run().getProtonCharge(), 0.069991, 1e-6);
+        TS_ASSERT_DELTA(ws->run().getProtonCharge(), 0.069991, 1e-6);
         TS_ASSERT_EQUALS(ws->readX(0)[0],5.);
         TS_ASSERT_EQUALS(ws->readX(0)[1],6.);
         TS_ASSERT_EQUALS(ws->readX(0)[2],7.);
