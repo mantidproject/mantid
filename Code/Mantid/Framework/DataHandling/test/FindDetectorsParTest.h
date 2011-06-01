@@ -77,7 +77,7 @@ public:
        AnalysisDataService::Instance().remove("DET_PAR");
 
  }
- /*void t__tParFileProvided(){
+ void testParFileProvided(){
       std::string fileName("testParFile.par");
       writePARfile3(fileName.c_str());
       TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("InputWorkspace", inputWS->getName()));
@@ -88,30 +88,30 @@ public:
       TSM_ASSERT("parameters calculations should complete successfully", findPar->isExecuted() );
 
       remove(fileName.c_str());
- }*/
- //void t__tParFileLoadedCorrectly(){
- //   Mantid::DataObjects::TableWorkspace_sptr spResult =
- //       boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PAR_ASCII"));
+ }
+ void testParFileLoadedCorrectly(){
+    Mantid::DataObjects::TableWorkspace_sptr spResult =
+        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PAR_ASCII"));
 
- //       TS_ASSERT_EQUALS(3,inputWS->getNumberHistograms());
+        TS_ASSERT_EQUALS(3,inputWS->getNumberHistograms());
 
- //       std::vector<std::string> pattern(5);
- //       pattern[2] = "1,2,3,";  // dist
- //       pattern[1] = "2,3,4,";    // azimutal
- //       pattern[0] = "-3,-4,-5,"; //polar
- //       pattern[4] = "4,5,6,";    // az_width
- //       pattern[3] = "5,6,7,";    // pol_width
- //       for(int i=0;i<5;i++){
- //           std::stringstream buf;
- //           for(int j=0;j<3;j++){
- //               buf<<spResult->cell<double>(j,i)<<",";
- //           }
- //           TS_ASSERT_EQUALS(pattern[i],buf.str());
- //       }
+        std::vector<std::string> pattern(5);
+        pattern[2] = "1,2,3,";  // dist
+        pattern[1] = "2,3,4,";    // azimutal
+        pattern[0] = "-3,-4,-5,"; //polar
+        pattern[4] = "4,5,6,";    // az_width
+        pattern[3] = "5,6,7,";    // pol_width
+        for(int i=0;i<5;i++){
+            std::stringstream buf;
+            for(int j=0;j<3;j++){
+                buf<<spResult->cell<double>(j,i)<<",";
+            }
+            TS_ASSERT_EQUALS(pattern[i],buf.str());
+        }
 
 
- //       AnalysisDataService::Instance().remove("DET_PAR_ASCII");
- //}
+        AnalysisDataService::Instance().remove("DET_PAR_ASCII");
+ }
  
  void testParFileProvidedWrong(){
       std::string fileName("testParFile.par");
@@ -158,35 +158,35 @@ public:
        AnalysisDataService::Instance().remove("DET_PAR2");
 
  }
- //void t__tPHXExecCorrectly(){
- //     std::string fileName("testPhxFile.phx");
- //     // this is 1 row phx file for 1 detector workspace
- //     writePHX1file(fileName.c_str());
- //     // should use internal algorithm
- //     TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("InputWorkspace", inputWS->getName()));
- //     TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("OutputParTable", "DET_PHX_ASCII"));
- //     TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("ParFile", fileName));
+ void testPHXExecCorrectly(){
+      std::string fileName("testPhxFile.phx");
+      // this is 1 row phx file for 1 detector workspace
+      writePHX1file(fileName.c_str());
+      // should use internal algorithm
+      TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("InputWorkspace", inputWS->getName()));
+      TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("OutputParTable", "DET_PHX_ASCII"));
+      TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("ParFile", fileName));
 
- //     TSM_ASSERT_THROWS_NOTHING("Calculating workspace parameters should not throw", findPar->execute() );
- //     TSM_ASSERT("parameters calculations should complete successfully", findPar->isExecuted() );
+      TSM_ASSERT_THROWS_NOTHING("Calculating workspace parameters should not throw", findPar->execute() );
+      TSM_ASSERT("parameters calculations should complete successfully", findPar->isExecuted() );
 
- //     remove(fileName.c_str());
- //}
- /*void t__tPHXProcessedCorrectly(){
+      remove(fileName.c_str());
+ }
+ void testPHXProcessedCorrectly(){
     Mantid::DataObjects::TableWorkspace_sptr spResult =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PAR2"));
+        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PHX_ASCII"));
 
-       TSM_ASSERT_DELTA("azimut wrong",      0,       spResult->cell<double>(0,0),1.e-5);
-       TSM_ASSERT_DELTA("polar wrong ",      37.0451, spResult->cell<double>(0,1),1.e-3);
-       TSM_ASSERT_DELTA("flight path wrong ",7.52685, spResult->cell<double>(0,2),1.e-5);
-       TSM_ASSERT_DELTA("azim width wrong ", 0,       spResult->cell<double>(0,3),1.e-5);
-       TSM_ASSERT_DELTA("polar width wrong ",23.2429, spResult->cell<double>(0,4),1.e-4);
+       TSM_ASSERT_DELTA("azimut wrong",      6,       spResult->cell<double>(0,0),1.e-5);
+       TSM_ASSERT_DELTA("polar wrong ",      5,       spResult->cell<double>(0,1),1.e-3);
+       TSM_ASSERT_DELTA("flight path wrong ",7.5248,  spResult->cell<double>(0,2),1.e-4);
+       TSM_ASSERT_DELTA("azim width wrong ", 8,       spResult->cell<double>(0,3),1.e-4);
+       TSM_ASSERT_DELTA("polar width wrong ",7,       spResult->cell<double>(0,4),1.e-4);
 
-       AnalysisDataService::Instance().remove("DET_PAR2");
+       AnalysisDataService::Instance().remove("DET_PHX_ASCII");
 
 
  }
-*/
+
  void testCount_changes(){
      // testing auxiliary function count changes;
      FindDetectorsParTestASCIIhelpers ASCII_helper;
