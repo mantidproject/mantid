@@ -80,6 +80,8 @@ set ( SRC_FILES
 
 set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
         src/Instrument/ObjCompAssembly.cpp 
+        src/Rendering/OCGeometryHandler.cpp
+        src/Rendering/OCGeometryRenderer.cpp
         )
         
 set ( INC_FILES
