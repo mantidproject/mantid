@@ -11,19 +11,22 @@
     <UL>
     <LI> Workspace - The name of the input Workspace2D on which to perform the algorithm. 
 	     Detectors or detectors groups have to be loaded into workspace </LI>
+    <LI> OutputTable workspace name - if present, identify the name of the output table workspace with provided detectors parameters </LI>
+    <LI> Par or phx file name - if present, used to define the detectors parameters from the file instead of the parameters 
+         calculated from the instrument description</LI>
     </UL>
 
     Output Properties:
-	When algorithm runs as subalgorithm, these properties are not defined. To get access to the resulting arrays, 
+    <UL>Optional: OutputTableWorkspace - the workspace which contains five columns with the following values:</UL>
+	<UL><LI> azimuthal             - An array property containing the detectors azimutal angles</LI> </UL>
+    <UL><LI> polar                 - An array property containing the detectors polar angles</LI>    </UL>
+    <UL><LI> secondary_flightpath  - An array property containing the distance from detectors to the sample center</LI></UL>
+    <UL><LI> azimuthal_width       - An array property containing the detectors azimuthal angular width</LI></UL>
+    <UL><LI> polar_width           - An array property containing the detectors polar angular width</LI></UL>
+
+	When OutputTable workspace name is empty, the tabled workspace is not defined. To get access to the resulting arrays, 
 	the algorithm user has to deploy accessors (getAzimuthal(), getPolar() etc.), defined below, which allows avoiding the
-	transformation of these arrays into strings. A property, which control this behaviour can be easy introduced but not at the moment. 
-
-	<UL><LI> azimuthal            - An array property containing the detectors azimutal angles</LI> </UL>
-    <UL><LI> polar                - An array property containing the detectors polar angles</LI>    </UL>
-    <UL><LI> azimuthal_width      - An array property containing the detectors azimuthal angular width</LI></UL>
-    <UL><LI> polar_width          - An array property containing the detectors polar angular width</LI></UL>
-    <UL><LI> secondary_flightpath - An array property containing the distance from detectors to the sample center</LI></UL>
-
+	transformation of these arrays into strings. 
 
 
 
@@ -98,7 +101,7 @@ enum fileTypes{
 	NumFileTypes
 };
 /*!
-*   Description of the data header, common for all files
+*   Description of the ASCII data header, common for all ASCII PAR and PHX files
 */
 struct FileTypeDescriptor{
 	fileTypes Type;
@@ -109,6 +112,7 @@ struct FileTypeDescriptor{
 	    //Unix, 0x0D (CR) Mac and 0x0D 0x0A (CR LF) Win, but the last is interpreted as 0x0A here 
     FileTypeDescriptor():Type(BIN_file),data_start_position(0),nData_records(0),nData_blocks(0),line_end(0x0A){}
 };
+
 // Algorighm body itself
 class DLLExport FindDetectorsPar : public API::Algorithm
 {
@@ -144,9 +148,7 @@ private:
   /// logger -> to provide logging, for MD workspaces
   static Kernel::Logger& g_log;
 
-  /// auxiliary function, which transforms array into a string --> it seems, lexical cast already does this job?
-  void fill_property(Kernel::Property *const,std::vector<double> const &);
-  /// calculates par values for a detectors ring;
+   /// calculates par values for a detectors ring;
   void calc_cylDetPar(const Geometry::IDetector_sptr spDet,
                       const Geometry::IObjComponent_const_sptr sample,
                       double &azim, double &polar, double &azim_width, double &polar_width,double &dist);
@@ -155,13 +157,15 @@ private:
                        const Geometry::IDetector_sptr spDet,
                        const Geometry::IObjComponent_const_sptr sample,
                        double &azim, double &polar, double &azim_width, double &polar_width,double &dist);
-  size_t loadParFile(const std::string &fileName);
 
-  /// functions used to populate data from the phx or par file
-  void   populate_values_from_file();
   /// if ASCII file is selected as the datasource, this structure describes the type of this file. 
   FileTypeDescriptor current_ASCII_file;
-
+  /// internal function which sets the output table according to the algorithms properties
+  void set_output_table();
+  /// functions used to populate data from the phx or par file
+  void   populate_values_from_file(const API::MatrixWorkspace_sptr & inputWS);
+  /// load data from par or phx file;
+  size_t loadParFile(const std::string &fileName);
 protected: // for testing purposes
 /**!  function calculates number of colums in an ASCII file, assuming that colums are separated by spaces */
 int count_changes(const char *const Buf,size_t buf_size);

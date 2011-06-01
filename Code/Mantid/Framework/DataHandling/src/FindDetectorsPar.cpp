@@ -72,10 +72,11 @@ FindDetectorsPar::exec()
 
   // try to load par file if one is availible
   std::string fileName = this->getProperty("ParFile");
-  if(fileName!="not_used.par"){
+  if(!(fileName.empty()||fileName=="not_used.par")){
       size_t nPars = loadParFile(fileName);
       if(nPars == nHist){
-          populate_values_from_file();
+          this->populate_values_from_file(inputWS);
+          this->set_output_table();
           return;
       }else{
           g_log.information()<<" number of parameters in the file: "<<fileName<<"  not equal to the nuber of histohramm in the workspace"
@@ -108,55 +109,59 @@ FindDetectorsPar::exec()
         continue;
      }
     // Check that we aren't writing a monitor...
-    if (!spDet->isMonitor()){             
+    if (spDet->isMonitor())continue;         
 
-          Geometry::det_topology group_shape= spDet->getTopology();
-          if(group_shape == Geometry::cyl){  // we have a ring;
-              calc_cylDetPar(spDet,sample,azimuthal[i], polar[i], 
-                                          azimuthal_width[i], polar_width[i],secondary_flightpath[i]);
-          }else{  // we have a detector or a rectangular shape
-              calc_rectDetPar(inputWS,spDet,sample,azimuthal[i],polar[i],
-                                                   azimuthal_width[i],polar_width[i],secondary_flightpath[i]);
-          }
-       }
-        // make regular progress reports and check for canceling the algorithm
+     Geometry::det_topology group_shape= spDet->getTopology();
+     if(group_shape == Geometry::cyl){  // we have a ring;
+            calc_cylDetPar(spDet,sample,azimuthal[i], polar[i], 
+                           azimuthal_width[i], polar_width[i],secondary_flightpath[i]);
+     }else{  // we have a detector or a rectangular shape
+           calc_rectDetPar(inputWS,spDet,sample,azimuthal[i],polar[i],
+                           azimuthal_width[i],polar_width[i],secondary_flightpath[i]);
+     }
+     
+     // make regular progress reports and check for canceling the algorithm
      if ( i % progStep == 0 ){
-           progress.report();
+            progress.report();
      }
    }
-   std::string output = getProperty("OutputParTable");
-   if(!output.empty()){
-    // Store the result in a table workspace
-     try{
-      declareProperty(new WorkspaceProperty<API::ITableWorkspace>("OutputParTableWS","",Direction::Output));
-     }catch(std::exception &err){
-         g_log.information()<<" findDetecotorsPar: error while declaring property: OutputParTableWS\n";
-         g_log.information()<<" findDetecotorsPar: the error is: "<<err.what()<<std::endl;
-     }
 
-     // Set the name of the new workspace
-      setPropertyValue("OutputParTableWS",output);
-
-      Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-       m_result->addColumn("double","azimuthal");
-       m_result->addColumn("double","polar");
-       m_result->addColumn("double","secondary_flightpath");
-       m_result->addColumn("double","azimuthal_width");
-       m_result->addColumn("double","polar_width");
-
-       for(size_t i=0;i<azimuthal.size();i++){
-           Mantid::API::TableRow row = m_result->appendRow();
-           row << azimuthal[i] << polar[i] << secondary_flightpath[i] << azimuthal_width[i] << polar_width[i];
-       }
-       setProperty("OutputParTableWS",m_result);
-  
-   }
-
+   this->set_output_table();
    
 
 }
 // Constant for converting Radians to Degrees
 const double rad2deg = 180.0 / M_PI;
+void 
+FindDetectorsPar::set_output_table()
+{
+  std::string output = getProperty("OutputParTable");
+  if(output.empty())return;
+    // Store the result in a table workspace
+   try{
+      declareProperty(new WorkspaceProperty<API::ITableWorkspace>("OutputParTableWS","",Direction::Output));
+   }catch(std::exception &err){
+         g_log.information()<<" findDetecotorsPar: unsuccessfully declaring property: OutputParTableWS\n";
+         g_log.information()<<" findDetecotorsPar: the reason is: "<<err.what()<<std::endl;
+   }
+
+     // Set the name of the new workspace
+    setPropertyValue("OutputParTableWS",output);
+
+     Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+     m_result->addColumn("double","azimuthal");
+     m_result->addColumn("double","polar");
+     m_result->addColumn("double","secondary_flightpath");
+     m_result->addColumn("double","azimuthal_width");
+     m_result->addColumn("double","polar_width");
+
+     for(size_t i=0;i<azimuthal.size();i++){
+         Mantid::API::TableRow row = m_result->appendRow();
+         row << azimuthal[i] << polar[i] << secondary_flightpath[i] << azimuthal_width[i] << polar_width[i];
+     }
+     setProperty("OutputParTableWS",m_result);
+
+}
 
 void 
 FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_sptr spDet,const Geometry::IObjComponent_const_sptr sample,
@@ -234,32 +239,74 @@ FindDetectorsPar::calc_rectDetPar(const API::MatrixWorkspace_sptr inputWS,
     polar_width  = atan2((ysize/2.0), dist)*rad2deg;
     azim_width   = atan2((xsize/2.0), dist)*rad2deg;
 }
-void 
-FindDetectorsPar::fill_property(Kernel::Property *const pProperty,std::vector<double> const&data)
-{
-    std::stringstream Buf;
-    if(!data.empty()){
-        Buf<<data[0];
-    }else{
-        pProperty->setValue("");
-        return;
-    }
-    for(size_t i=1;i<data.size();i++){
-        Buf<<","<<data[i];
-    }
-    Buf<<std::endl;
-    pProperty->setValue( Buf.str());
-}
+
 //
 size_t 
 FindDetectorsPar::loadParFile(const std::string &fileName){
-    g_log.information()<<" load par file "<<fileName<<" is not implemented at the moment\n";
-    return 0;
+    // load ASCII par or phx file
+    std::ifstream dataStream;
+    std::vector<double> result;
+    this->current_ASCII_file = get_ASCII_header(fileName,dataStream);
+    load_plain(dataStream,result,current_ASCII_file);
+
+    size_t n_det_par = current_ASCII_file.nData_records;
+
+    dataStream.close();
+    // transfer par data into internal algorithm parameters;
+    azimuthal.resize(n_det_par);
+    polar.resize(n_det_par);
+    azimuthal_width.resize(n_det_par);
+    polar_width.resize(n_det_par);
+    secondary_flightpath.resize(n_det_par,std::numeric_limits<double>::quiet_NaN());
+    int Block_size,shift;
+    bool has_flightPath(false);
+    if(current_ASCII_file.Type==PAR_type){
+        Block_size  = 5; // this value coinside with the value defined in load_plain
+        shift       = 0;
+        has_flightPath=true;
+    }else if(current_ASCII_file.Type==PHX_type){
+         Block_size = 6; // this value coinside with the value defined in load_plain
+         shift      = 1;
+    }else{
+        g_log.error()<<" unsupported type of ASCII parameter file: "<<fileName<<std::endl;
+        throw(std::invalid_argument("unsupported ASCII file type"));
+    }
+
+    for(size_t i=0;i<n_det_par;i++){
+       azimuthal[i]       =result[shift+2+i*Block_size];
+       polar[i]           =result[shift+1+i*Block_size];
+       azimuthal_width[i] =result[shift+4+i*Block_size];
+       polar_width[i]     =result[shift+3+i*Block_size]; 
+       if(has_flightPath){
+           secondary_flightpath[i] = result[shift+0+i*Block_size];
+       }
+    }
+    return n_det_par;
 }
 // 
 void 
-FindDetectorsPar::populate_values_from_file()
+FindDetectorsPar::populate_values_from_file(const API::MatrixWorkspace_sptr & inputWS)
 {
+    if(this->current_ASCII_file.Type == PAR_type)return;
+
+    size_t nHist = inputWS->getNumberHistograms();
+
+    Geometry::IObjComponent_const_sptr sample =inputWS->getInstrument()->getSample();
+     // Loop over the spectra
+   for (size_t i = 0; i < nHist; i++){
+        Geometry::IDetector_sptr spDet;
+        try{
+            spDet= inputWS->getDetector(i);
+        }catch(Kernel::Exception::NotFoundError &){
+            continue;
+        }
+    // Check that we aren't writing a monitor...
+       if (spDet->isMonitor())continue;
+     /// this is the only value, which is not defined in phx file, so we calculate it   
+        secondary_flightpath[i]     =  spDet->getDistance(*sample);
+   }
+
+
 }
 //
 int 
