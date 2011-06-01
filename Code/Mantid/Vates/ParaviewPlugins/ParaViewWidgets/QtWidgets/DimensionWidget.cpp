@@ -125,8 +125,8 @@ void DimensionWidget::configure()
 {
   m_dimensionCombo->clear();
   Mantid::Geometry::VecIMDDimension_sptr vecNonIntegrated = m_pDimensionPresenter->getNonIntegratedDimensions();
-  size_t vecSize = vecNonIntegrated.size();
-  for(size_t i = 0; i < vecSize; i++)
+  unsigned int vecSize = static_cast<unsigned int>(vecNonIntegrated.size());
+  for(unsigned int i = 0; i < vecSize; i++)
   {
     boost::shared_ptr<Mantid::Geometry::IMDDimension> currentDimension = vecNonIntegrated[i];
     m_dimensionCombo->addItem( currentDimension->getDimensionId().c_str());
