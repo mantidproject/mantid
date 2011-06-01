@@ -805,6 +805,7 @@ void LoadEventNexus::exec()
   prog.report("Initializing all pixels");
 
   //----------------- Pad Empty Pixels -------------------------------
+  bool indexBySpectrum(false);
   if (!this->instrument_loaded_correctly)
   {
     g_log.warning() << "Warning! Cannot pad empty pixels, since the instrument geometry did not load correctly or was not specified. Sorry!\n";
@@ -832,8 +833,13 @@ void LoadEventNexus::exec()
     else
     {
       // Attempt to load a spectra mapping
-      if( !loadSpectraMapping(m_filename, WS) )
+      if( loadSpectraMapping(m_filename, WS) )
       {
+        indexBySpectrum = true;
+      }
+      else
+      {
+        indexBySpectrum = false;
         WS->padPixels( true );
       }
     }
@@ -878,33 +884,16 @@ void LoadEventNexus::exec()
   Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*3);
 
   //This map will be used to find the workspace index
-  detid2index_map * pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(false);
-
-
-//  // Now go through each bank.
-//  // This'll be parallelized - but you can't run it in parallel if you couldn't pad the pixels.
-//  PARALLEL_FOR_IF( (this->instrument_loaded_correctly) )
-//  for (int i=0; i < static_cast<int>(bankNames.size()); i++)
-//  {
-//    PARALLEL_START_INTERUPT_REGION
-//    this->loadBankEventData(bankNames[i], pixelID_to_wi_map, prog2);
-//    PARALLEL_END_INTERUPT_REGION
-//  }
-//  PARALLEL_CHECK_INTERUPT_REGION
-//  delete prog2;
-
-
-
-//  // Create a thread pool with scheduler
-//  ThreadPool pool(new ThreadSchedulerLargestCost());
-//  for (int i=0; i < static_cast<int>(bankNames.size()); i++)
-//  {
-//    double cost = 1.0;
-//    pool.schedule( new FunctionTask(boost::bind(&LoadEventNexus::loadBankEventData, &*this, bankNames[i], pixelID_to_wi_map, prog2), cost ) );
-//  }
-//  // Start and end all threads
-//  pool.joinAll();
-//  delete prog2;
+  //@todo: Move to always index by spectrum so that we don't have to do this
+  detid2index_map * pixelID_to_wi_map(NULL);
+  if( indexBySpectrum )
+  {
+    pixelID_to_wi_map = WS->getSpectrumToWorkspaceIndexMap();
+  }
+  else
+  {
+    pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(false);
+  }
 
   // Make the thread pool
   ThreadScheduler * scheduler = new ThreadSchedulerLargestCost();
