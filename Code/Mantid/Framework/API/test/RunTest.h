@@ -8,10 +8,12 @@
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/V3D.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::Geometry::MantidMat;
+using namespace Mantid::Geometry;
+using namespace Mantid;
 
 // Helper class
 namespace
@@ -141,6 +143,10 @@ public:
     TS_ASSERT_DELTA( r[0][1], 1.0, 1e-4);
     TS_ASSERT_DELTA( r[1][0], 1.0, 1e-4);
     TS_ASSERT_DELTA( r[2][2], -1.0, 1e-4);
+    V3D rot = r * V3D(-1,0,0);
+    TS_ASSERT_EQUALS( rot, V3D(0, -1, 0));
+    rot = r * V3D(0,0,1);
+    TS_ASSERT_EQUALS( rot, V3D(0, 0, -1));
   }
 
 };
