@@ -421,7 +421,10 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName, std::ifstream &d
     //let's find if there is one or more groups of symbols inside of the buffer;
     int space_to_symbol_change=count_changes(&BUF[0],BUF.size());
     if(space_to_symbol_change>1){  // more then one group of symbols in the string, spe file
-        int nDatas = sscanf(&BUF[0]," %d %d ",&file_descriptor.nData_records,&file_descriptor.nData_blocks);
+        int nData_records(0),nData_blocks(0);
+        int nDatas = sscanf(&BUF[0]," %d %d ",&nData_records,&nData_blocks);
+        file_descriptor.nData_records = (size_t)nData_records;
+        file_descriptor.nData_blocks  = (size_t)nData_blocks;
         if(nDatas!=2){    			
             g_log.error()<<" File "<<fileName<<" iterpreted as SPE but does not have two numbers in the first row\n";
             throw(Kernel::Exception::FileError(" File iterpreted as SPE but does not have two numbers in the first row",fileName));
@@ -498,12 +501,12 @@ FindDetectorsPar::load_plain(std::ifstream &stream,std::vector<double> &Data,Fil
         throw(std::invalid_argument(" can not rewind the file to the initial position where the data begin"));
     }
 
-    int nRead_Data;
+    int nRead_Data(0);
     for(unsigned int i=0;i<FILE_TYPE.nData_records;i++){
         stream.getline(&BUF[0],BUF.size(),EOL);
         if(!stream.good()){	
             g_log.error()<<" error reading input file\n";
-            throw(std::invalid_argument(" error reading input file\n"));
+            throw(std::invalid_argument(" error reading input file"));
         }
 
         switch(FILE_TYPE.Type){
@@ -515,6 +518,11 @@ FindDetectorsPar::load_plain(std::ifstream &stream,std::vector<double> &Data,Fil
                 nRead_Data= sscanf(&BUF[0],format,data_buf,data_buf+1,data_buf+2,data_buf+3,data_buf+4,data_buf+5);
                 break;
                             }
+            default:{
+                 g_log.error()<<" unsupported value of FILE_TYPE.Type: "<<FILE_TYPE.Type<<std::endl;
+            throw(std::invalid_argument(" unsupported value of FILE_TYPE.Type"));
+
+                    }
         }
         if(nRead_Data!=BlockSize){
             g_log.error()<<" Error reading data at file, row "<<i+1<<" column "<<nRead_Data<<" from total "<<FILE_TYPE.nData_records<<" rows, "<<BlockSize<<" columns\n";
