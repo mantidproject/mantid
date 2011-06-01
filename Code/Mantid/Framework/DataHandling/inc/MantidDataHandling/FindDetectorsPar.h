@@ -4,7 +4,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-
+#include <fstream>
 /** An algorithm to calculate workspace detectors angular coordinates, as they can be viewed from a sample (par or phx data)
 
     Required Properties:
@@ -55,6 +55,61 @@ namespace Mantid
 {
 namespace DataHandling
 {
+//
+/*!  file types currently supported by ASCII loader are:
+*1) an ASCII Tobyfit par file
+*     Syntax:
+*     >> par = get_ascii_file(filename,['par'])
+*
+*     filename            name of par file
+*
+*     par(5,ndet)         contents of array
+*
+*         1st column      sample-detector distance
+*         2nd  "          scattering angle (deg)
+*         3rd  "          azimuthal angle (deg)
+*                     (west bank = 0 deg, north bank = -90 deg etc.)
+*                     (Note the reversed sign convention cf .phx files)
+*         4th  "          width (m)
+*         5th  "          height (m)
+*-----------------------------------------------------------------------
+*2) load an ASCII phx file
+*     Syntax:
+*     >> phx = get_ascii_file(filename,['phx'])
+*
+*     filename            name of phx file
+*
+*     phx(7,ndet)         contents of array
+*
+*     Recall that only the 3,4,5,6 columns in the file (rows in the
+*     output of this routine) contain useful information
+*         3rd column      scattering angle (deg)
+*         4th  "          azimuthal angle (deg)
+*                     (west bank = 0 deg, north bank = 90 deg etc.)
+*         5th  "          angular width (deg)
+*         6th  "          angular height (deg)
+*-----------------------------------------------------------------------
+*/
+enum fileTypes{
+	PAR_type, //< ASCII PAR file
+	PHX_type, //< ASCII phx file
+	SPE_type, //< spe file, this loader would not work with spe file, left for compartibility with old algorithms. 
+    BIN_file, //< binary file is not an ASCII file, so ascii loader would not work on it
+	NumFileTypes
+};
+/*!
+*   Description of the data header, common for all files
+*/
+struct FileTypeDescriptor{
+	fileTypes Type;
+	std::streampos data_start_position; //< the position in the file where the data structure starts
+	size_t 	  nData_records,            //< number of data records -- actually nDetectors
+		      nData_blocks;             //< nEnergy bins for SPE file, 5 or 6 for PAR file and 7 for PHX file
+	char      line_end ;                //< the character which ends line in current ASCII file 0x0A (LF)
+	    //Unix, 0x0D (CR) Mac and 0x0D 0x0A (CR LF) Win, but the last is interpreted as 0x0A here 
+    FileTypeDescriptor():Type(BIN_file),data_start_position(0),nData_records(0),nData_blocks(0),line_end(0x0A){}
+};
+// Algorighm body itself
 class DLLExport FindDetectorsPar : public API::Algorithm
 {
 public:
@@ -101,7 +156,22 @@ private:
                        const Geometry::IObjComponent_const_sptr sample,
                        double &azim, double &polar, double &azim_width, double &polar_width,double &dist);
   size_t loadParFile(const std::string &fileName);
+
+  /// functions used to populate data from the phx or par file
   void   populate_values_from_file();
+  /// if ASCII file is selected as the datasource, this structure describes the type of this file. 
+  FileTypeDescriptor current_ASCII_file;
+
+protected: // for testing purposes
+/**!  function calculates number of colums in an ASCII file, assuming that colums are separated by spaces */
+int count_changes(const char *const Buf,size_t buf_size);
+/**! The function reads line from input stream and puts it into buffer. 
+*   It behaves like std::ifstream getline but the getline reads additional symbol from a row in a Unix-formatted file under windows;*/
+size_t get_my_line(std::ifstream &in, char *buf, size_t buf_size, const char DELIM);
+/// load file header and identify which file (PHX,PAR or SPE) it belongs to. It also identifies the position of the begining of the data
+FileTypeDescriptor get_ASCII_header(std::string const &fileName, std::ifstream &data_stream);
+/// load PAR or PHX file
+void load_plain(std::ifstream &stream,std::vector<double> &Data,FileTypeDescriptor const &FILE_TYPE);
 };
 
 
