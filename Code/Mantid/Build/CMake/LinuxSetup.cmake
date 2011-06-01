@@ -47,8 +47,11 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh  "#!/bin/csh\n"
                                                     "setenv PATH \"\${PATH}:\${MANTIDPATH}\"\n"
 )
 
-# Note: On older versions of CMake, this line may mean that to do a "make package" without being root
-# you will need to set the cache variable CPACK_SET_DESTDIR to ON.
-install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
-          DESTINATION /etc/profile.d 
-)
+set ( ENVVARS_ON_INSTALL ON CACHE BOOL "Whether to include the scripts in /etc/profile.d to set the MANTIDPATH variable and add it to PATH. Turning this off allows installing locally without being root." )
+if ( ENVVARS_ON_INSTALL )
+  # Note: On older versions of CMake, this line may mean that to do a "make package" without being root
+  # you will need to set the cache variable CPACK_SET_DESTDIR to ON.
+  install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
+            DESTINATION /etc/profile.d 
+  )
+endif ()
