@@ -2,7 +2,7 @@
 #include "DimensionWidget.h"
 #include "MantidVatesAPI/GeometryPresenter.h"
 
-GeometryWidget::GeometryWidget(Mantid::VATES::GeometryPresenter* pPresenter, bool readOnlyLimits) : m_pPresenter(pPresenter), m_widgetFactory(readOnlyLimits)
+GeometryWidget::GeometryWidget(Mantid::VATES::GeometryPresenter* pPresenter, bool readOnlyLimits) : m_widgetFactory(readOnlyLimits), m_pPresenter(pPresenter) 
 {
   this->setLayout(new QVBoxLayout()); 
   m_pPresenter->acceptView(this);

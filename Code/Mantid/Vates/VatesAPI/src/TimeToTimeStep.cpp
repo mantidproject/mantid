@@ -52,16 +52,14 @@ size_t TimeToTimeStep::operator()(double time) const
   {
     throw std::runtime_error("Not properly constructed. TimeToTimeStep instance does not have enough information to interpolate the time value.");
   }
-  int index;
   if(time > m_timeMax || time < m_timeMin)
   {
-    index = 0;
+    return 0;
   }
   else
   {
-    index =  (time * m_fraction) + m_c;  //Linear interpolation
+    return static_cast<size_t>((time * m_fraction) + m_c);  //Linear interpolation
   }
-  return static_cast<size_t>(index);
 }
 
 }

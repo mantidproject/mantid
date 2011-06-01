@@ -90,7 +90,7 @@ unsigned int DimensionWidget::getSelectedIndex() const
 }
 
 
-void DimensionWidget::showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr nonIntegratedDims)
+void DimensionWidget::showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr)
 {
   m_dimensionLabel->setText(m_pDimensionPresenter->getLabel().c_str());
   m_nBinsBox->setHidden(false);
@@ -99,7 +99,7 @@ void DimensionWidget::showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr
   m_ckIntegrated->setChecked(false);
   if(atoi(m_nBinsBox->text()) <= 1)
   {
-    int modelBins = m_pDimensionPresenter->getModel()->getNBins();
+    size_t modelBins = m_pDimensionPresenter->getModel()->getNBins();
     if( modelBins > 1)
     {
       m_nBinsBox->setText(boost::str(boost::format("%i") % modelBins).c_str());
@@ -125,8 +125,8 @@ void DimensionWidget::configure()
 {
   m_dimensionCombo->clear();
   Mantid::Geometry::VecIMDDimension_sptr vecNonIntegrated = m_pDimensionPresenter->getNonIntegratedDimensions();
-  unsigned int vecSize = vecNonIntegrated.size();
-  for(unsigned int i = 0; i < vecSize; i++)
+  size_t vecSize = vecNonIntegrated.size();
+  for(size_t i = 0; i < vecSize; i++)
   {
     boost::shared_ptr<Mantid::Geometry::IMDDimension> currentDimension = vecNonIntegrated[i];
     m_dimensionCombo->addItem( currentDimension->getDimensionId().c_str());
@@ -178,7 +178,7 @@ void DimensionWidget::maxBoxListener()
   m_pDimensionPresenter->updateModel();
 }
 
-void DimensionWidget::integratedChanged(bool checkedState)
+void DimensionWidget::integratedChanged(bool)
 {
   m_pDimensionPresenter->updateModel();
 }

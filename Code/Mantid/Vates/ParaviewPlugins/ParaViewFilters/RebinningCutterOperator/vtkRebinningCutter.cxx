@@ -118,8 +118,6 @@ void vtkRebinningCutter::determineAnyCommonExecutionActions(const int timestep, 
 int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInformationVector **inputVector,
   vtkInformationVector *outputVector)
 {
-  try
-  {
   using namespace Mantid::Geometry;
   using namespace Mantid::MDDataObjects;
   using namespace Mantid::MDAlgorithms;
@@ -134,7 +132,6 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
 
     //Create the composite holder.
     CompositeImplicitFunction* compFunction = new CompositeImplicitFunction;
-    vtkDataSet* clipDataSet = m_cachedVTKDataSet == NULL ? inputDataset : m_cachedVTKDataSet;
    
     BoxFunction_sptr box = constructBox(inputDataset); // Save the implicit function so that we may later determine if the extents have changed.
     compFunction->addFunction(box);
@@ -170,10 +167,8 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
     Mantid::API::IMDWorkspace_sptr spRebinnedWs = m_presenter.applyRebinningAction(action, updatehandler);
 
     //Build a vtkDataSet
-    int ndims = spRebinnedWs->getNumDims();
     vtkDataSetFactory_sptr spvtkDataSetFactory = createDataSetFactory(spRebinnedWs);
     outData = dynamic_cast<vtkUnstructuredGrid*> (m_presenter.createVisualDataSet(spvtkDataSetFactory));
-    
     
     m_timestep = timestep; //Not settable directly via a setter.
     m_box = box;
@@ -186,11 +181,6 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
     output->ShallowCopy(outData);
   }
   return 1;
-  }
-  catch(std::exception& ex)
-  {
-    std::string what = ex.what();
-  }
 }
 
 void vtkRebinningCutter::UpdateAlgorithmProgress(double progress)
