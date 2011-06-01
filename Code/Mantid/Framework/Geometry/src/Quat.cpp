@@ -524,7 +524,7 @@ void Quat::GLMatrix(double* mat) const
 	*mat=1.0;
 	return;
 }
-//
+///using convention at http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
 std::vector<double> 
 Quat::getRotation(bool check_normalisation,bool throw_on_errors)const
 {
@@ -560,15 +560,15 @@ Quat::getRotation(bool check_normalisation,bool throw_on_errors)const
 	std::vector<double> out(9);
 
 	out[0]= (1.0 - 2.0 * ( bb + cc ));
-	out[1]= 2.0 * ( ab + cw );
-    out[2]= 2.0 * ( ac - bw );
+        out[1]= 2.0 * ( ab - cw );
+        out[2]= 2.0 * ( ac + bw );
 	
-	out[3]= 2.0 * ( ab - cw );
+        out[3]= 2.0 * ( ab + cw );
 	out[4]= (1.0 - 2.0 * ( aa + cc ));
-	out[5]= 2.0 * ( bc + aw );
+        out[5]= 2.0 * ( bc - aw );
 	
-	out[6]=2.0 * ( ac + bw );
-	out[7]=2.0 * ( bc - aw );
+        out[6]=2.0 * ( ac - bw );
+        out[7]=2.0 * ( bc + aw );
 	out[8]=(1.0 - 2.0 * ( aa + bb ));
 	return out;
 }
@@ -608,32 +608,32 @@ void Quat::setQuat(double mat[16])
 		w=q[3];
 	}
 }
-//
+/// Using the convention at http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
 void 
 Quat::setQuat(const Geometry::MantidMat &rMat)
 {
-	double MAT[16];
-	for(int i=0;i<16;i++)MAT[i]=0;
-	
-	MAT[0]= rMat[0][0];
-	MAT[1]= rMat[0][1];
-	MAT[2]= rMat[0][2];
-
-	MAT[4]= rMat[1][0];
-	MAT[5]= rMat[1][1];
-	MAT[6]= rMat[1][2];
-
-	MAT[8] = rMat[2][0];
-	MAT[9] = rMat[2][1];
-	MAT[10]= rMat[2][2];
-
-	MAT[15]= 1;
-	this->setQuat(MAT);
-
-
-
-
-
+	int i=0,j,k;
+	if (rMat[1][1]>rMat[0][0]) i=1;
+	if (rMat[2][2]>rMat[1][1]) i=2;
+	j=(i+1)%3;
+	k=(j+1)%3;
+	double r=sqrt(1.+rMat[i][i]-rMat[j][j]-rMat[k][k]);
+	if (r==0)
+	{
+		a=0.;b=0.;c=0.;w=1.;
+	}
+	else
+	{
+		double q[4],f=0.5/r;
+		q[i]=0.5*r;
+		q[j]=f*(rMat[i][j]+rMat[j][i]);
+		q[k]=f*(rMat[k][i]+rMat[i][k]);
+		q[3]=f*(rMat[k][j]-rMat[j][k]);
+		a=q[0];
+		b=q[1];
+		c=q[2];
+		w=q[3];
+	}
 }
 /** Bracket operator overload
  * returns the internal representation values based on an index

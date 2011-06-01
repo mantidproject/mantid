@@ -6,7 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-
+#include "MantidGeometry/Quat.h"
 using namespace Mantid::Geometry;
 
 class GoniometerTest : public CxxTest::TestSuite
@@ -26,7 +26,6 @@ public:
   {
     Goniometer G;
     MantidMat M(3,3);
-    
     // Check simple constructor    
     M.identityMatrix();
     TS_ASSERT_EQUALS(G.getR(),M);
@@ -61,9 +60,9 @@ public:
     Goniometer G;
     G.makeUniversalGoniometer();
     TS_ASSERT_EQUALS(G.getNumberAxes(), 3);
-    TS_ASSERT_EQUALS(G.getAxis(0).name, "phi");
+    TS_ASSERT_EQUALS(G.getAxis(2).name, "phi");
     TS_ASSERT_EQUALS(G.getAxis(1).name, "chi");
-    TS_ASSERT_EQUALS(G.getAxis(2).name, "omega");
+    TS_ASSERT_EQUALS(G.getAxis(0).name, "omega");
   }
 
   void test_copy()
@@ -72,16 +71,16 @@ public:
     G1.makeUniversalGoniometer();
     G = G1;
     TS_ASSERT_EQUALS(G.getNumberAxes(), 3);
-    TS_ASSERT_EQUALS(G.getAxis(0).name, "phi");
+    TS_ASSERT_EQUALS(G.getAxis(2).name, "phi");
     TS_ASSERT_EQUALS(G.getAxis(1).name, "chi");
-    TS_ASSERT_EQUALS(G.getAxis(2).name, "omega");
+    TS_ASSERT_EQUALS(G.getAxis(0).name, "omega");
   }
 
 
   /** Test to make sure the goniometer rotation works as advertised
    * for a simple universal goniometer.
    */
-  void xtest_UniversalGoniometer_getR()
+  void test_UniversalGoniometer_getR()
   {
     Goniometer G;
     V3D init, rot;
@@ -91,30 +90,33 @@ public:
 
 
     init = V3D(0,0,1.0);
-    G.setRotationAngle(0, 45.0);
-    G.setRotationAngle(1,  0.0);
-    G.setRotationAngle(2,  0.0);
+    G.setRotationAngle("phi", 45.0);
+    G.setRotationAngle("chi",  0.0);
+    G.setRotationAngle("omega",  0.0);
+    
     rot = G.getR() * init;
+
     TS_ASSERT_DELTA( rot.X(), 0.707, 0.001);
     TS_ASSERT_DELTA( rot.Y(), 0.000, 0.001);
     TS_ASSERT_DELTA( rot.Z(), 0.707, 0.001);
 
     init = V3D(0,0,1.0);
-    G.setRotationAngle(0, 45.0);
-    G.setRotationAngle(1, 90.0);
-    G.setRotationAngle(2,  0.0);
+    G.setRotationAngle("phi", 45.0);
+    G.setRotationAngle("chi", 90.0);
+    G.setRotationAngle("omega",  0.0);
     rot = G.getR() * init;
+
     TS_ASSERT_DELTA( rot.X(),  0.707, 0.001);
     TS_ASSERT_DELTA( rot.Y(), -0.707, 0.001);
     TS_ASSERT_DELTA( rot.Z(),  0.000, 0.001);
 
     init = V3D(-1, 0, 0);
-    G.setRotationAngle(0, 90.0);
-    G.setRotationAngle(1, 90.0);
-    G.setRotationAngle(2,  0.0);
+    G.setRotationAngle("phi", 90.0);
+    G.setRotationAngle("chi", 90.0);
+    G.setRotationAngle("omega",  0.0);
     rot = G.getR() * init;
     TS_ASSERT_DELTA( rot.X(),  0.000, 0.001);
-    TS_ASSERT_DELTA( rot.Y(),  1.000, 0.001);
+    TS_ASSERT_DELTA( rot.Y(),  -1.000, 0.001);
     TS_ASSERT_DELTA( rot.Z(),  0.000, 0.001);
 
   }

@@ -292,13 +292,13 @@ public:
 
 	TSM_ASSERT_DELTA("Determinant for the proper rotation matrix has to be equal to 1 ",1.0,det,FLT_EPSILON);
 
-	double x1=(rotMatrix[0]*some.X()+rotMatrix[3]*some.Y()+rotMatrix[6]*some.Z())*targ_norm/some_norm;
+	double x1=(rotMatrix[0]*some.X()+rotMatrix[1]*some.Y()+rotMatrix[2]*some.Z())*targ_norm/some_norm;
 	TSM_ASSERT_DELTA("X -coordinate obtained using the rotation matxis have to coinside with the one obtained by rotation via quat",x1,target.X(),FLT_EPSILON);
 
-	double y1=(rotMatrix[1]*some.X()+rotMatrix[4]*some.Y()+rotMatrix[7]*some.Z())*targ_norm/some_norm;
+	double y1=(rotMatrix[3]*some.X()+rotMatrix[4]*some.Y()+rotMatrix[5]*some.Z())*targ_norm/some_norm;
 	TSM_ASSERT_DELTA("Y -coordinate obtained using the rotation matxis have to coinside with the one obtained by rotation via quat",y1,target.Y(),FLT_EPSILON);
 
- 	double z1=(rotMatrix[2]*some.X()+rotMatrix[5]*some.Y()+rotMatrix[8]*some.Z())*targ_norm/some_norm;
+ 	double z1=(rotMatrix[6]*some.X()+rotMatrix[7]*some.Y()+rotMatrix[8]*some.Z())*targ_norm/some_norm;
 	TSM_ASSERT_DELTA("Z -coordinate obtained using the rotation matxis have to coinside with the one obtained by rotation via quat",z1,target.Z(),FLT_EPSILON);
 
 	// if the vectors are not notmalized (not equal), the angle between the vectors calculated by the constructor below would not be equal to the one, calculated 
@@ -313,13 +313,13 @@ public:
 		TSM_ASSERT_DELTA("Elements of the rotation matrix obtained quat on 2 vectors have to be equivalent",rotMatrix[i],rotMatrix2[i],FLT_EPSILON);
 	}
 
-	x1=(rotMatrix2[0]*some.X()+rotMatrix2[3]*some.Y()+rotMatrix2[6]*some.Z());
+	x1=(rotMatrix2[0]*some.X()+rotMatrix2[1]*some.Y()+rotMatrix2[2]*some.Z());
 	TSM_ASSERT_DELTA("X -coordinate obtained using the rotation matxis have to coinside with the one obtained by rotation via quat",x1,target.X(),FLT_EPSILON);
 
-	y1=(rotMatrix2[1]*some.X()+rotMatrix2[4]*some.Y()+rotMatrix2[7]*some.Z());
+	y1=(rotMatrix2[3]*some.X()+rotMatrix2[4]*some.Y()+rotMatrix2[5]*some.Z());
 	TSM_ASSERT_DELTA("Y -coordinate obtained using the rotation matxis have to coinside with the one obtained by rotation via quat",y1,target.Y(),FLT_EPSILON);
 
- 	z1=(rotMatrix2[2]*some.X()+rotMatrix2[5]*some.Y()+rotMatrix2[8]*some.Z());
+ 	z1=(rotMatrix2[6]*some.X()+rotMatrix2[7]*some.Y()+rotMatrix2[8]*some.Z());
 	TSM_ASSERT_DELTA("Z -coordinate obtained using the rotation matxis have to coinside with the one obtained by rotation via quat",z1,target.Z(),FLT_EPSILON);
 
 
@@ -363,19 +363,13 @@ public:
 				Rot[0][0]=cT*cP;   Rot[1][0]=-cF*sP+sF*sT*cP;    Rot[2][0]=sF*sP+cF*sT*cP;
 		        Rot[0][1]=cT*sP;   Rot[1][1]= cF*cP+sF*sT*sP;    Rot[2][1]=-sF*cP+cF*sT*sP;
 		        Rot[0][2]=-sT;     Rot[1][2]= sF*cT;             Rot[2][2]= cT*cF;
-			    V3D e1(1,0,0);
-				V3D e2(0,1,0);
-				V3D e3(0,0,1);
-
-				V3D d1= Rot*e1;
-				V3D d2= Rot*e2;
-				V3D d3= Rot*e3;
+		
 
 			   Test.setQuat(Rot);
 			   rez = Test.getRotation();
 		       rot = Rot.get_vector();
 			   for(int ii=0;ii<9;ii++){
-					TSM_ASSERT_DELTA("This operation should return initial rotation matrix",rot[i],rez[i],1e-4);
+					TSM_ASSERT_DELTA("This operation should return initial rotation matrix",rot[ii],rez[ii],1e-4);
 			   }
 			 }
 		 }
@@ -448,15 +442,13 @@ public:
     TS_ASSERT(p==q);
   }
 
-  //FIXME: Re-enable this when this passes
   /** Test that the rotation matrix is not transposed or otherwise funny */
-  void xtestGetRotation2()
+  void testGetRotation2()
   {
     V3D x(1,0,0);
     Quat rot(90.0, x);
     std::vector<double> matVec = rot.getRotation(true, true);
     Matrix<double> mat(matVec);
-    std::cout << mat << "\n";
 
     V3D init(0,1,0);
     V3D final = mat * init;

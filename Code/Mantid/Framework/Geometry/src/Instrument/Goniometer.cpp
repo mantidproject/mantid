@@ -12,11 +12,8 @@ namespace Geometry
 
 /// Default constructor
 /// The rotation matrix is initialized to identity
-Goniometer::Goniometer():R(3,3),initFromR(false)
+Goniometer::Goniometer():R(3,3,true),initFromR(false)
 {
-  R[0][0]=1.;
-  R[1][1]=1.;
-  R[2][2]=1.;
 }
 
 /// Copy constructor
@@ -193,9 +190,9 @@ size_t Goniometer::getNumberAxes() const
 void Goniometer::makeUniversalGoniometer()
 {
   motors.clear();
-  this->pushAxis("phi",   0., 1., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
+  this->pushAxis("omega", 0., 1., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);  
   this->pushAxis("chi",   1., 0., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
-  this->pushAxis("omega", 0., 1., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
+  this->pushAxis("phi",   0., 1., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
 }
 
 
@@ -215,15 +212,7 @@ void Goniometer::recalculateR()
     QGlobal*=QCurrent;
   }  
   elements=QGlobal.getRotation();
-  R[0][0]=elements[0];
-  R[1][0]=elements[1];
-  R[2][0]=elements[2];
-  R[0][1]=elements[3];
-  R[1][1]=elements[4];
-  R[2][1]=elements[5];
-  R[0][2]=elements[6];
-  R[1][2]=elements[7];
-  R[2][2]=elements[8];
+  R=MantidMat(elements);
 }
 
 } //Namespace Geometry
