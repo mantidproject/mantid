@@ -505,6 +505,7 @@ private:
         }
         testFile.close();
    }
+  public:
   void check_SNS_patterns(const Mantid::DataObjects::TableWorkspace_sptr &spResult){
      std::string azim_pattern("0,0,0,");
      std::string pol_pattern("170.565,169.565,168.565,");
