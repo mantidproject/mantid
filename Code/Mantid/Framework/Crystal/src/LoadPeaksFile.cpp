@@ -341,9 +341,9 @@ namespace Crystal
         Peak peak = readPeak(outWS, s, in, seqNum, bankName);
 
         // Build the Rotation matrix using phi,chi,omega
-        uniGonio.setRotationAngle(0, phi);
-        uniGonio.setRotationAngle(1, chi);
-        uniGonio.setRotationAngle(2, omega);
+        uniGonio.setRotationAngle("phi", phi);
+        uniGonio.setRotationAngle("chi", chi);
+        uniGonio.setRotationAngle("omega", omega);
 
         // Get the calculated goniometer matrix
         Matrix<double> gonMat = uniGonio.getR();

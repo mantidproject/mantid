@@ -81,10 +81,12 @@ PredictPeaks(InputWorkspace="TOPAZ_3007",HKLPeaksWorkspace="TOPAZ_3007_peaks",Ou
 MaskPeaksWorkspace("TOPAZ_3007", "peaks")
    *
    */
-  void xtest_integration()
+  void test_integration()
   {
     Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 20);
+    PeaksWorkspace_sptr pw;
     AnalysisDataService::Instance().addOrReplace("TOPAZ_3007", ws);
+
     AlgorithmHelper::runAlgorithm("LoadInstrument", 4,
         "Workspace", "TOPAZ_3007",
         "Filename", "TOPAZ_Definition_2011-01-01.xml");
@@ -103,13 +105,21 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
         "Filename", "TOPAZ_3007.peaks",
         "OutputWorkspace", "TOPAZ_3007_peaks");
 
+//    pw = boost::dynamic_pointer_cast<PeaksWorkspace>(
+//        AnalysisDataService::Instance().retrieve("TOPAZ_3007_peaks") );
+//    for (int i=0; i<pw->getNumberPeaks(); i++)
+//    {
+//      V3D hkl = pw->getPeak(i).getHKL() * -1.0;
+//      pw->getPeak(i).setHKL( hkl);
+//    }
+
     // Load the .mat file into it
     AlgorithmHelper::runAlgorithm("PredictPeaks", 6,
         "HKLPeaksWorkspace", "TOPAZ_3007_peaks",
         "InputWorkspace", "TOPAZ_3007",
         "OutputWorkspace", "peaks_predicted" );
 
-    PeaksWorkspace_sptr pw = boost::dynamic_pointer_cast<PeaksWorkspace>(
+    pw = boost::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve("peaks_predicted") );
 
     TS_ASSERT(pw);

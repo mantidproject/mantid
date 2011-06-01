@@ -84,7 +84,7 @@ namespace Crystal
 
     out << "Version: 2.0  Facility: SNS " ;
     out <<  " Instrument: " <<  inst->getName() <<  " Date: " ;
-    out <<  " TODO: Instrument date " << std::endl;
+    out <<  " TODO: Instrument date " << std::endl; //TODO: Fill in instrument date
 
     out << "0     1     2    3    4      5       6       7        8       9       10        11        12     13      14      15    16" << std::endl;
     out << "-" << header.substr(1, header.size()-1) << std::endl;
@@ -206,10 +206,15 @@ namespace Crystal
           out <<  "1" <<  std::setw( 5 ) <<  run <<  std::setw( 7 ) <<
               std::right <<  bank;
 
-          // TODO: Determine goniometer angles!
-          double chi = 0.0;
-          double phi = 0.0;
-          double omega = 0.0;
+          // Determine goniometer angles
+          Goniometer gon;
+          gon.makeUniversalGoniometer();
+          std::vector<double> angles = gon.getEulerAngles("xyx");
+
+          double phi = angles[0];
+          double chi = angles[1];
+          double omega = angles[2];
+
           out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  chi;
           out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  phi;
           out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  omega;

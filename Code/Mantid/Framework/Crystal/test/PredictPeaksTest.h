@@ -134,7 +134,7 @@ public:
     MantidMat u(3,3);
     Goniometer gon;
     gon.makeUniversalGoniometer();
-    gon.setRotationAngle(0, Urotation);
+    gon.setRotationAngle("phi", Urotation);
     u = gon.getR();
     inWS->mutableSample().getOrientedLattice().setU(u);
 

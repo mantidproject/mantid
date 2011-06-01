@@ -139,7 +139,7 @@ namespace Crystal
       U2[0][r] = U[1][r];
     }
     U = U2;
-    //U *= -1.0;
+    U *= -1.0;
 
     latt->setU( U );
 

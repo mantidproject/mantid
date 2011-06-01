@@ -88,7 +88,6 @@ public:
     G.makeUniversalGoniometer();
     TS_ASSERT_EQUALS(G.getNumberAxes(), 3);
 
-
     init = V3D(0,0,1.0);
     G.setRotationAngle("phi", 45.0);
     G.setRotationAngle("chi",  0.0);
@@ -120,6 +119,26 @@ public:
     TS_ASSERT_DELTA( rot.Z(),  0.000, 0.001);
 
   }
+
+//  void test_getEulerAngles()
+//  {
+//    Goniometer G;
+//    MantidMat rotA;
+//    G.makeUniversalGoniometer();
+//    G.setRotationAngle("phi", 45.0);
+//    G.setRotationAngle("chi", 23.0);
+//    G.setRotationAngle("omega", 7.0);
+//    rotA = G.getR();
+//
+//    std::vector<double> angles = G.getEulerAngles("xyx", rotA);
+//
+//    G.setRotationAngle("phi", angles[0]);
+//    G.setRotationAngle("chi", angles[1]);
+//    G.setRotationAngle("omega", angles[2]);
+//
+//    // Those goniometer angles re-create the initial rotation matrix.
+//    TS_ASSERT( rotA.equals(G.getR(), 0.0001) );
+//  }
 };
 
 #endif
