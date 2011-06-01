@@ -222,11 +222,7 @@ public:
 #ifdef WIN32
     TS_ASSERT_EQUALS(char(0x0A),descr.line_end);
 #else 
-#ifdef __APPLE__
-    TS_ASSERT_EQUALS(char(0x0D),descr.line_end);
-#else
     TS_ASSERT_EQUALS(char(0x0A),descr.line_end);
-#endif
 #endif
     for(size_t j=0;j<descr.nData_records;j++){
         for(size_t i=0;i<5;i++){
@@ -259,11 +255,7 @@ public:
 #ifdef WIN32
     TS_ASSERT_EQUALS(char(0x0A),descr.line_end);
 #else
-#ifdef __APPLE__
-    TS_ASSERT_EQUALS(char(0x0D),descr.line_end);
-#else
     TS_ASSERT_EQUALS(char(0x0A),descr.line_end);
-#endif
 #endif
      for(size_t j=0;j<descr.nData_records;j++){
         for(size_t i=0;i<5;i++){
@@ -294,11 +286,7 @@ public:
 #ifdef WIN32
     TS_ASSERT_EQUALS(char(0x0A),descr.line_end);
 #else
-#ifdef __APPLE__
-    TS_ASSERT_EQUALS(char(0x0D),descr.line_end);
-#else
     TS_ASSERT_EQUALS(char(0x0A),descr.line_end);
-#endif
 #endif
     std::vector<double> pattern(6,0);
     pattern[0]=10;
