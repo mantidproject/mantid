@@ -52,7 +52,7 @@ void FindDetectorsPar::init()
     "If specified, will use data from file instead of the data, calculated from the instument description");
 
   //
-  // Outputs:
+
   declareProperty("OutputParTable","","If not empty, a table workspace of that "
       "name will contain the calculated par-values for the detectors");
 

@@ -407,30 +407,41 @@ private:
     }
 //*******************************************************************
     void writePARfile(const char *fileName){
-        std::string contents("2\n \
- 1.     2.   -3.     4.     5.     1\n \
- 2.     3.   -4.     5.     6.     2\n");
+        std::vector<std::string> cont(3);
+        cont[0] = "2";
+        cont[1] = " 1.     2.   -3.     4.     5.     1";
+        cont[2] = " 2.     3.   -4.     5.     6.     2";
+
         std::ofstream testFile(fileName);
-        testFile<<contents;
+        for(size_t i=0;i<cont.size();i++){
+            testFile<<cont[i]<<std::endl;
+        }
         testFile.close();
     }
    void writePARfile3(const char *fileName){
-        std::string contents("3\n \
-1.     2.   -3.     4.     5.     1\n \
-2.     3.   -4.     5.     6      2\n \
-3.     4.   -5.     6.     7.     3\n"); 
+        std::vector<std::string> cont(4);
+        cont[0] = "3";
+        cont[1] = "1.     2.   -3.     4.     5.     1";
+        cont[2] = "2.     3.   -4.     5.     6      2";
+        cont[3] = "3.     4.   -5.     6.     7.     3";
+
         std::ofstream testFile(fileName);
-        testFile<<contents;
+        for(size_t i=0;i<cont.size();i++){
+            testFile<<cont[i]<<std::endl;
+        }  
         testFile.close();
     }
    void writePHXfile(const char *fileName){
-        std::string contents("3\n\
-         10         0     5.000     6.000    7.000    8.0000     1\n\
-         10         0     5.000     6.000    7.000    8.0000     2\n\
-         10         0     5.000     6.000    7.000    8.0000     3\n");
+      std::vector<std::string> cont(4);
+        cont[0] = "3";
+        cont[1] = "10         0     5.000     6.000    7.000    8.0000     1";
+        cont[2] = "10         0     5.000     6.000    7.000    8.0000     2";
+        cont[3] = "10         0     5.000     6.000    7.000    8.0000     3";
 
         std::ofstream testFile(fileName);
-        testFile<<contents;
+        for(size_t i=0;i<cont.size();i++){
+            testFile<<cont[i]<<std::endl;
+        }
         testFile.close();
    }
 };
