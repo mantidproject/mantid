@@ -6,6 +6,21 @@ namespace Mantid
 namespace MDEvents
 {
 
+
+  //-----------------------------------------------------------------------------------------------
+  /** Default constructor.
+   */
+  TMDE(
+  IMDBox)::IMDBox()
+    : m_signal(0.0), m_errorSquared(0.0),
+      m_inverseVolume(1.0),
+      m_depth(0)
+  {
+    // Clear the running total of the centroid
+    for (size_t d=0; d<nd; d++)
+      m_centroid[d] = 0;
+  }
+
   //-----------------------------------------------------------------------------------------------
   /** Copy constructor. Copies the extents, depth, etc.
    * and recalculates the boxes' volume.
@@ -25,6 +40,9 @@ namespace MDEvents
       this->extents[d] = box->extents[d];
     // Copy the depth
     this->m_depth = box->getDepth();
+    // Clear the running total of the centroid
+    for (size_t d=0; d<nd; d++)
+      m_centroid[d] = 0;
     // Re-calculate the volume of the box
     this->calcVolume(); //TODO: Is this necessary or should we copy the volume?
 

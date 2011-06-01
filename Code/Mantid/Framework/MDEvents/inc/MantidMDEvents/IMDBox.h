@@ -10,6 +10,9 @@
 #include "MantidMDEvents/MDEvent.h"
 #include <iosfwd>
 
+/// Define to compare performance when tracking the centroid of events when adding (if true) or only in RefreshCache (if false)
+#define MDBOX_TRACKCENTROID_WHENADDING 1
+
 namespace Mantid
 {
 namespace MDEvents
@@ -38,8 +41,7 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------------------
     /** Default constructor.
      */
-    IMDBox() : m_signal(0.0), m_errorSquared(0.0), m_depth(0)
-    { }
+    IMDBox();
 
     /// Copy constructor
     IMDBox(IMDBox<MDE,nd> * box);
@@ -263,7 +265,11 @@ namespace MDEvents
      */
     coord_t getCentroid(size_t d)
     {
+#ifdef MDBOX_TRACKCENTROID_WHENADDING
+      return (m_signal == 0.0) ? 0.0 : m_centroid[d] / m_signal;
+#else
       return m_centroid[d];
+#endif
     }
 
   protected:

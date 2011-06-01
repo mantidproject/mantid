@@ -233,9 +233,11 @@ namespace MDEvents
       throw std::runtime_error("Not implemented");
     }
 
+#ifndef MDBOX_TRACKCENTROID_WHENADDING
     // Normalize centroid by the total signal
     for (size_t d=0; d<nd; d++)
       this->m_centroid[d] /= this->m_signal;
+#endif
 
   }
 
