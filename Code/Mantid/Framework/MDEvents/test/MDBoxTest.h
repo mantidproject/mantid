@@ -312,6 +312,52 @@ public:
   }
 
 
+  void test_centroidSphere()
+  {
+    MDBox<MDEvent<2>,2> b;
+
+    MDEvent<2> ev(2.0, 2.0);
+    ev.setCenter(0, 2.0);
+    ev.setCenter(1, 3.0);
+    b.addEvent(ev);
+
+    MDEvent<2> ev2(4.0, 4.0);
+    ev2.setCenter(0, 4.0);
+    ev2.setCenter(1, 4.0);
+    b.addEvent(ev2);
+
+
+    // The sphere transformation
+    bool dimensionsUsed[2] = {true,true};
+    coord_t center[2] = {0,0};
+    CoordTransformDistance sphere(2, center, dimensionsUsed);
+
+    // Set up the data for the centroid
+    coord_t centroid[2] = {0,0};
+    double signal = 0.0;
+    b.centroidSphere(sphere, 400., centroid, signal);
+    for (size_t d=0; d<2; d++)
+      centroid[d] /= signal;
+
+    // This should be the weighted centroid
+    TS_ASSERT_DELTA( signal, 6.000, 0.001);
+    TS_ASSERT_DELTA( centroid[0], 3.333, 0.001);
+    TS_ASSERT_DELTA( centroid[1], 3.666, 0.001);
+
+    // --- Reset and reduce the radius ------
+    signal = 0;
+    for (size_t d=0; d<2; d++)
+      centroid[d] = 0.0;
+    b.centroidSphere(sphere, 16., centroid, signal);
+    for (size_t d=0; d<2; d++)
+      centroid[d] /= signal;
+    // Only one event was contained
+    TS_ASSERT_DELTA( signal, 2.000, 0.001);
+    TS_ASSERT_DELTA( centroid[0], 2.000, 0.001);
+    TS_ASSERT_DELTA( centroid[1], 3.000, 0.001);
+
+  }
+
 };
 
 

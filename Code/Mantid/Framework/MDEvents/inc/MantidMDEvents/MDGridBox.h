@@ -56,11 +56,14 @@ namespace MDEvents
 
     void integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const;
 
+    void centroidSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const;
+
     void splitContents(size_t index, Kernel::ThreadScheduler * ts = NULL);
 
     void splitAllIfNeeded(Kernel::ThreadScheduler * ts = NULL);
 
     void refreshCache(Kernel::ThreadScheduler * ts = NULL);
+
 
     // ======================= Testing/Debugging Methods =================
     /** For testing: get 9a copy of) the vector of boxes */

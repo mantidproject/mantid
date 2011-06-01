@@ -54,6 +54,7 @@ class IMDBoxTester : public IMDBox<MDE,nd>
   {}
 
   virtual void integrateSphere(CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, signal_t & /*signal*/, signal_t & /*errorSquared*/) const {};
+  virtual void centroidSphere(CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, coord_t *, signal_t & ) const {};
 
 };
 

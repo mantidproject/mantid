@@ -609,8 +609,6 @@ namespace MDEvents
       {
         // There is a chance that this part of the box is within integration volume,
         // even if no vertex of it is.
-
-        IMDBox<MDE, nd> * box = boxes[i];
         coord_t boxCenter[nd];
         box->getCenter(boxCenter);
 
@@ -651,6 +649,43 @@ namespace MDEvents
     delete [] vertices_max;
     delete [] boxIndex;
     delete [] indexMaker;
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Find the centroid of all events contained within by doing a weighted average
+   * of their coordinates.
+   *
+   * @param radiusTransform :: nd-to-1 coordinate transformation that converts from these
+   *        dimensions to the distance (squared) from the center of the sphere.
+   * @param radiusSquared :: radius^2 below which to integrate
+   * @param[out] centroid :: array of size [nd]; its centroid will be added
+   * @param[out] signal :: set to the integrated signal
+   */
+  TMDE(
+  void MDGridBox)::centroidSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const
+  {
+    for (size_t i=0; i < numBoxes; ++i)
+    {
+      // Go through each contained box
+      IMDBox<MDE, nd> * box = boxes[i];
+      coord_t boxCenter[nd];
+      box->getCenter(boxCenter);
+
+      // Distance from center to the peak integration center
+      coord_t out[nd];
+      radiusTransform.apply(boxCenter, out);
+
+      if (out[0] < diagonalSquared*0.72 + radiusSquared)
+      {
+        // If the center is closer than the size of the box, then it MIGHT be touching.
+        // (We multiply by 0.72 (about sqrt(2)) to look for half the diagonal).
+        // NOTE! Watch out for non-spherical transforms!
+
+        // Go down one level to keep centroiding
+        box->centroidSphere(radiusTransform, radiusSquared, centroid, signal);
+      }
+    } // (for each box)
   }
 
 

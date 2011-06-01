@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/IMDBox.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
+	src/MDCentroidPeaks.cpp
 	src/MDEWPeakIntegration.cpp
 	src/MDEventFactory.cpp
 	src/MDEventWorkspace.cpp
@@ -38,6 +39,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/IMDBox.h
 	inc/MantidMDEvents/MDBin.h
 	inc/MantidMDEvents/MDBox.h
+	inc/MantidMDEvents/MDCentroidPeaks.h
 	inc/MantidMDEvents/MDDimensionExtents.h
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEWPeakIntegration.h
@@ -61,6 +63,7 @@ set ( TEST_FILES
 	test/IMDBoxTest.h
 	test/MDBinTest.h
 	test/MDBoxTest.h
+	test/MDCentroidPeaksTest.h
 	test/MDDimensionStatsTest.h
 	test/MDEWPeakIntegrationTest.h
 	test/MDEventFactoryTest.h

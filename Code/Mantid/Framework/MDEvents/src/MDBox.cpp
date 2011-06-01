@@ -278,6 +278,36 @@ namespace MDEvents
     }
   }
 
+  /** Find the centroid of all events contained within by doing a weighted average
+   * of their coordinates.
+   *
+   * @param radiusTransform :: nd-to-1 coordinate transformation that converts from these
+   *        dimensions to the distance (squared) from the center of the sphere.
+   * @param radiusSquared :: radius^2 below which to integrate
+   * @param[out] centroid :: array of size [nd]; its centroid will be added
+   * @param[out] signal :: set to the integrated signal
+   */
+  TMDE(
+  void MDBox)::centroidSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const
+  {
+    typename std::vector<MDE>::const_iterator it = data.begin();
+    typename std::vector<MDE>::const_iterator it_end = data.end();
+
+    // For each MDEvent
+    for (; it != it_end; ++it)
+    {
+      coord_t out[nd];
+      radiusTransform.apply(it->getCenter(), out);
+      if (out[0] < radiusSquared)
+      {
+        double eventSignal = it->getSignal();
+        signal += eventSignal;
+        for (size_t d=0; d<nd; d++)
+          centroid[d] += it->getCenter(d) * eventSignal;
+      }
+    }
+  }
+
 
 }//namespace MDEvents
 

@@ -10,7 +10,11 @@
 #include "MantidMDEvents/MDEvent.h"
 #include <iosfwd>
 
-/// Define to compare performance when tracking the centroid of events when adding (if true) or only in RefreshCache (if false)
+/** Define to compare performance when tracking the centroid of events when adding (if true)
+ *  or only in RefreshCache (if false).
+ *  An additional difference is that the centroid saved in the IMDBox object
+ *  will be normalized by the total signal if false.
+ */
 #define MDBOX_TRACKCENTROID_WHENADDING 1
 
 namespace Mantid
@@ -88,6 +92,9 @@ namespace MDEvents
 
     /** Sphere (peak) integration */
     virtual void integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const = 0;
+
+    /** Find the centroid around a sphere */
+    virtual void centroidSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const = 0;
 
     // -------------------------------------------------------------------------------------------
     /** Split sub-boxes, if this is possible and neede for this box */

@@ -848,7 +848,7 @@ public:
     do_check_integrateSphere(box, 4.51,4.5, 0.001, 0.0, "Tiny but off the event.");
     do_check_integrateSphere(box, 2.0,2.0,  0.49,  0.0, "At a corner but grabbing nothing");
     do_check_integrateSphere(box, 4.8,4.5,  0.35,  1.0, "Too small to contain any vertices");
-    do_check_integrateSphere(box, 5.0,5.0,  1.0,   4.0, "Contains a box completely");
+    do_check_integrateSphere(box, 5.0,5.0,  1.0,   4.0, "At a corner, containing 4 neighbors");
     do_check_integrateSphere(box, 4.5,4.5,  0.9,   1.0, "Contains one box completely");
     do_check_integrateSphere(box, 0.5,0.5,  0.9,   1.0, "Contains one box completely, at the edges");
     do_check_integrateSphere(box, 9.5,0.5,  0.9,   1.0, "Contains one box completely, at the edges");
@@ -953,6 +953,76 @@ public:
   }
 
 
+
+
+
+  //------------------------------------------------------------------------------------------------
+  /** For test_integrateSphere
+   *
+   * @param box
+   * @param radius :: radius to integrate
+   * @param xExpected :: expected centroid
+   * @param yExpected :: expected centroid
+   */
+  void do_check_centroidSphere(MDGridBox<MDEvent<2>,2> & box, coord_t x, coord_t y,
+      const coord_t radius,
+      double numExpected, coord_t xExpected, coord_t yExpected,
+      std::string message)
+  {
+    std::cout << "Centroid of sphere of radius " << radius << " at " << x << "," << y << "------" << message << "--\n";
+    // The sphere transformation
+    bool dimensionsUsed[2] = {true,true};
+    coord_t center[2] = {x,y};
+    CoordTransformDistance sphere(2, center, dimensionsUsed);
+
+    double signal = 0;
+    coord_t centroid[2] = {0., 0.};
+    box.centroidSphere(sphere, radius*radius, centroid, signal);
+    // Normalized
+    if (signal != 0.0)
+    {
+      for (size_t d=0; d<2; d++)
+        centroid[d] /= signal;
+    }
+
+    TSM_ASSERT_DELTA( message, signal, 1.0*numExpected, 1e-5);
+    TSM_ASSERT_DELTA( message, centroid[0], xExpected, 1e-5);
+    TSM_ASSERT_DELTA( message, centroid[1], yExpected, 1e-5);
+  }
+
+  /** Re-used suite of tests */
+  void test_centroidSphere()
+  {
+    // 10x10 sized box
+    MDGridBox<MDEvent<2>,2> * box_ptr = makeMDGridBox<2>();
+    feedMDBox<2>(box_ptr, 1);
+    // Events are at 0.5, 1.5, etc.
+    MDGridBox<MDEvent<2>,2> & box = *box_ptr;
+    TS_ASSERT_EQUALS( box.getNPoints(), 10*10);
+
+    do_check_centroidSphere(box, 4.5,4.5,  0.5,   1.0, 4.5, 4.5, "Too small to contain any vertices");
+    do_check_centroidSphere(box, 4.5, 4.5, 0.001, 1.0, 4.5, 4.5, "Tiny but still has an event.");
+    do_check_centroidSphere(box, 4.51,4.5, 0.001, 0.0, 0.0, 0.0, "Tiny but off the event.");
+    do_check_centroidSphere(box, 2.0,2.0,  0.49,  0.0, 0.0, 0.0, "At a corner but grabbing nothing");
+    do_check_centroidSphere(box, 4.8,4.5,  0.35,  1.0, 4.5, 4.5, "Too small to contain any vertices");
+    do_check_centroidSphere(box, 5.0,5.0,  1.0,   4.0, 5.0, 5.0, "At a corner, containing 4 neighbors");
+    do_check_centroidSphere(box, 4.5,4.5,  0.9,   1.0, 4.5, 4.5, "Contains one box completely");
+    do_check_centroidSphere(box, 0.5,0.5,  0.9,   1.0, 0.5, 0.5, "Contains one box completely, at the edges");
+    do_check_centroidSphere(box, 9.5,0.5,  0.9,   1.0, 9.5, 0.5, "Contains one box completely, at the edges");
+    do_check_centroidSphere(box, 0.5,9.5,  0.9,   1.0, 0.5, 9.5, "Contains one box completely, at the edges");
+    do_check_centroidSphere(box, 4.5,9.5,  0.9,   1.0, 4.5, 9.5, "Contains one box completely, at the edges");
+    do_check_centroidSphere(box, 9.5,9.5,  0.9,   1.0, 9.5, 9.5, "Contains one box completely, at the edges");
+    do_check_centroidSphere(box, 1.5,1.5,  1.95,  9.0, 1.5, 1.5, "Contains 5 boxes completely, and 4 boxes with a point");
+    do_check_centroidSphere(box, -1.0,0.5, 1.55,  1.0, 0.5, 0.5, "Off an edge but enough to get an event");
+
+    // Now I add an event very near an edge
+    coord_t center[2] = {0.001, 0.5};
+    box.addEvent(MDEvent<2>(1.0, 1.0, center));
+    do_check_integrateSphere(box, -1.0,0.5, 1.01,  1.0, "Off an edge but just barely enough to get an event");
+    do_check_integrateSphere(box, 0.0,0.5, 0.01,  1.0, "Tiny, but just barely enough to get an event");
+  }
+
+
 private:
   std::string message;
 };
@@ -968,14 +1038,18 @@ class MDGridBoxTestPerformance : public CxxTest::TestSuite
 {
 public:
 
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MDGridBoxTestPerformance *createSuite() { return new MDGridBoxTestPerformance(); }
+  static void destroySuite( MDGridBoxTestPerformance *suite ) { delete suite; }
+
   MDGridBox<MDEvent<3>,3> * box3;
   MDGridBox<MDEvent<3>,3> * box3b;
   std::vector<MDEvent<3> > events;
 
-  void setUp()
+  MDGridBoxTestPerformance()
   {
     // Split 5x5x5, 2 deep.
-    box3 = MDGridBoxTest::makeRecursiveMDGridBox<3>(5,1);
     box3b = MDGridBoxTest::makeRecursiveMDGridBox<3>(5,1);
 
     // Make the list of fake events, random dist.
@@ -998,10 +1072,20 @@ public:
     box3b->refreshCache();
   }
 
+  ~MDGridBoxTestPerformance()
+  {
+    delete box3b;
+  }
+
+  void setUp()
+  {
+    // Make a fresh box.
+    box3 = MDGridBoxTest::makeRecursiveMDGridBox<3>(5,1);
+  }
+
   void tearDown()
   {
     delete box3;
-    delete box3b;
   }
 
 
@@ -1026,69 +1110,117 @@ public:
     }
   }
 
-  /** Smallish sphere in the middle goes partially through lots of boxes */
-  void test_sphereIntegrate_inTheMiddle()
+  //-----------------------------------------------------------------------------
+  /** Do a sphere integration
+   *
+   * @param center :: coordinate of the center
+   * @param radius :: radius
+   */
+  void do_test_sphereIntegrate(coord_t * center, coord_t radius, double expectSignal, double tol)
   {
     // The sphere transformation
     bool dimensionsUsed[3] = {true,true,true};
-    coord_t center[3] = {2.5, 2.5, 2.5};
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
+    // Repeat the integration a lot
     double signal, errorSquared;
-
     for (size_t i=0; i < 1000; i++)
     {
       signal = 0;
       errorSquared = 0;
-      box3b->integrateSphere(sphere, 1.0, signal, errorSquared);
+      box3b->integrateSphere(sphere, radius*radius, signal, errorSquared);
     }
 
-    // The expected number of events, given a sphere of radius 1.0
-    TS_ASSERT_DELTA(signal, (1e6/125)*(4.0*3.14159/3.0), 2000);
+    TS_ASSERT_DELTA(signal, expectSignal, tol);
     TS_ASSERT_DELTA(signal, errorSquared, 1e-3);
+  }
+
+  /** Smallish sphere in the middle goes partially through lots of boxes */
+  void test_sphereIntegrate_inTheMiddle()
+  {
+    coord_t center[3] = {2.5, 2.5, 2.5};
+    do_test_sphereIntegrate(center, 1.0, (1e6/125)*(4.0*3.14159/3.0), 2000.0);
   }
 
   /** Huge sphere containing all within */
   void test_sphereIntegrate_inTheMiddle_largeSphere()
   {
-    // The sphere transformation
-    bool dimensionsUsed[3] = {true,true,true};
     coord_t center[3] = {2.5, 2.5, 2.5};
-    CoordTransformDistance sphere(3, center, dimensionsUsed);
-
-    double signal, errorSquared;
-
-    for (size_t i=0; i < 1000; i++)
-    {
-      signal = 0;
-      errorSquared = 0;
-      box3b->integrateSphere(sphere, 5.0*5.0, signal, errorSquared);
-    }
-    // Contains everything
-    TS_ASSERT_DELTA(signal, 1e6, 10);
-    TS_ASSERT_DELTA(signal, errorSquared, 1e-3);
+    do_test_sphereIntegrate(center, 5.0, 1e6, 1e-3);
   }
 
   /** Peak that is off the box entirely */
   void test_sphereIntegrate_OffTheBox()
   {
+    coord_t center[3] = {11., 5., 5.};
+    do_test_sphereIntegrate(center, 1.0, 0.0, 1e-3);
+  }
+
+
+
+
+
+
+  //-----------------------------------------------------------------------------
+  /** Do a sphere centroiding
+   *
+   * @param center :: coordinate of the center
+   * @param radius :: radius
+   */
+  void do_test_sphereCentroid(coord_t * center, coord_t radius, double expectSignal, double tol)
+  {
     // The sphere transformation
     bool dimensionsUsed[3] = {true,true,true};
-    coord_t center[3] = {11., 5., 5.};
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
-    double signal, errorSquared;
-
-    for (size_t i=0; i < 1000; i++)
+    // Repeat the integration a lot
+    double signal;
+    coord_t centroid[3];
+    for (size_t i=0; i < 100; i++)
     {
       signal = 0;
-      errorSquared = 0;
-      box3b->integrateSphere(sphere, 1.0, signal, errorSquared);
+      for (size_t d=0; d<3; d++)
+        centroid[d] = 0.0;
+      box3b->centroidSphere(sphere, radius*radius, centroid, signal) ;
+      if (signal != 0.0)
+      {
+        for (size_t d=0; d<3; d++)
+          centroid[d] /= signal;
+      }
     }
 
-    TS_ASSERT_EQUALS(signal, 0.0);
-    TS_ASSERT_DELTA(signal, errorSquared, 1e-3);
+    // The expected number of events, given a sphere of radius "radius"
+    TS_ASSERT_DELTA(signal, expectSignal, tol);
+
+    if (expectSignal > 0.0)
+    {
+      // And the centroid should be close to the sphere center
+      for (size_t d=0; d<3; d++)
+        TS_ASSERT_DELTA(centroid[d], center[d], 1e-2);
+    }
   }
+
+  /** Smallish sphere in the middle goes partially through lots of boxes */
+  void test_sphereCentroid_inTheMiddle()
+  {
+    coord_t center[3] = {2.5, 2.5, 2.5};
+    do_test_sphereCentroid(center, 1.0, (1e6/125)*(4.0*3.14159/3.0), 2000);
+  }
+
+  /** Huge sphere containing all within */
+  void test_sphereCentroid_inTheMiddle_largeSphere()
+  {
+    coord_t center[3] = {2.5, 2.5, 2.5};
+    do_test_sphereCentroid(center, 5.0, 1e6, 1e-3);
+  }
+
+  /** Peak that is off the box entirely */
+  void test_sphereCentroid_OffTheBox()
+  {
+    coord_t center[3] = {11., 5., 5.};
+    do_test_sphereCentroid(center, 1.0, 0.0, 1e-3);
+  }
+
 
 };
 
