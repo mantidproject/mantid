@@ -177,8 +177,6 @@ public:
   {
     SaveNexusProcessed algToBeTested;
 
-    //This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
     LoadNexus nxLoad;
     std::string outputSpace,inputFile;
     nxLoad.initialize();
@@ -234,8 +232,6 @@ public:
     //    TS_ASSERT( algToBeTested.isExecuted() );
     if(clearfiles) Poco::File(outputFile).remove();
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
-
-#endif /*_WIN64*/
   }
 
 
@@ -244,8 +240,6 @@ public:
   {
     SaveNexusProcessed algToBeTested;
 
-    //This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
     //  std::string s;
     //std::getline(std::cin,s);
 
@@ -298,8 +292,6 @@ public:
       if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
     }
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
-
-#endif /*_WIN64*/
   }
 
 

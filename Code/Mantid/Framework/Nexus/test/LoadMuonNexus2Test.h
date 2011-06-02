@@ -32,7 +32,6 @@ public:
   
   void testExec()
   {
-#ifndef _WIN64
     LoadMuonNexus2 nxLoad;
     nxLoad.initialize();
 
@@ -141,12 +140,10 @@ public:
 
 
     AnalysisDataService::Instance().remove(outputSpace);
-#endif
   }
 
   void testMinMax()
   {
-#ifndef _WIN64
     LoadMuonNexus2 nxLoad;
     nxLoad.initialize();
 
@@ -187,12 +184,10 @@ public:
     TS_ASSERT( ! output-> isDistribution() );
 
     AnalysisDataService::Instance().remove(outputSpace);
-#endif
   }
 
   void testList()
   {
-#ifndef _WIN64
     LoadMuonNexus2 nxLoad;
     nxLoad.initialize();
 
@@ -232,12 +227,10 @@ public:
     TS_ASSERT( ! output-> isDistribution() );
 
     AnalysisDataService::Instance().remove(outputSpace);
-#endif
   }
 
   void testMinMax_List()
   {
-#ifndef _WIN64
     LoadMuonNexus2 nxLoad;
     nxLoad.initialize();
 
@@ -279,12 +272,10 @@ public:
     TS_ASSERT( ! output-> isDistribution() );
 
     AnalysisDataService::Instance().remove(outputSpace);
-#endif
   }
 
   void testExec1()
   {
-#ifndef _WIN64
     LoadMuonNexus2 nxLoad;
     nxLoad.initialize();
 
@@ -381,12 +372,10 @@ public:
 
 
     AnalysisDataService::Instance().remove(outputSpace);
-#endif
   }
 
   void xtestExec2()
   {
-#ifndef _WIN64
     LoadMuonNexus2 nxLoad;
     nxLoad.initialize();
 
@@ -483,7 +472,6 @@ public:
 
 
     AnalysisDataService::Instance().remove(outputSpace);
-#endif
   }
 
 };

@@ -38,9 +38,6 @@ public:
 
   void testLoadNexusAndSetProperties()
   {
-    //This test does not compile on Windows64 as is does not support HDF4 files
-    #ifndef _WIN64
-
     //Load the muon nexus file
     loader.initialize();
     loader.setPropertyValue("Filename", "emu00006473.nxs");
@@ -66,24 +63,17 @@ public:
     asymCalc.setPropertyValue("Alpha", "1.0");
     asymCalc.setPropertyValue("ForwardSpectra", "0");
     asymCalc.setPropertyValue("BackwardSpectra", "16");
-
-    #endif /*_WIN64*/
   }
 
   void testProperties()
   {
     //this test is badly written and requires the previous test to have succeeded
-    //This test does not compile on Windows64 as is does not support HDF4 files
-    #ifndef _WIN64
     TS_ASSERT_EQUALS( asymCalc.getPropertyValue("Alpha"), "1");
-    #endif /*_WIN64*/
   }
 
   void testExecute()
   {
     //this test is badly written and requires the previous test to have succeeded
-    //This test does not compile on Windows64 as is does not support HDF4 files
-    #ifndef _WIN64
     try 
     {
       TS_ASSERT_EQUALS(asymCalc.execute(),true);
@@ -97,7 +87,6 @@ public:
 
     //Use a range as cxxtest seems to complain about the accuracy
     TS_ASSERT_DELTA(outputWS->dataY(0)[100],0.2965,0.005);
-    #endif /*_WIN64*/
   }
 
 private:

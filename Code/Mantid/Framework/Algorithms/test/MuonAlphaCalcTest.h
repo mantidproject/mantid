@@ -38,9 +38,6 @@ public:
 
   void testCalAlphaManySpectra()
   {
-    //This test does not compile on Windows64 as is does not support HDF4 files
-    #ifndef _WIN64
-
     //Load the muon nexus file
     loader.initialize();
     loader.setPropertyValue("Filename", "emu00006473.nxs");
@@ -64,15 +61,10 @@ public:
     }
     double alpha = alphaCalc.getProperty("Alpha");
     TS_ASSERT_DELTA(alpha,1.7875,0.0001);
-
-    #endif /*_WIN64*/
   }
 
   void testCalAlphaTwoSpectra()
   {
-    //This test does not compile on Windows64 as is does not support HDF4 files
-    #ifndef _WIN64
-
     //Load the muon nexus file
     loader.initialize();
     loader.setPropertyValue("Filename", "emu00006473.nxs");
@@ -96,8 +88,6 @@ public:
     }
     double alpha = alphaCalc.getProperty("Alpha");
     TS_ASSERT_DELTA(alpha,1.6880,0.0001);
-
-    #endif /*_WIN64*/
   }
 
 

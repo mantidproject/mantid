@@ -176,8 +176,6 @@ public:
   
   void testHDF4Nexus()
   {
-    // Note that there are no 64-bit HDF4 libraries for Windows.
-#ifndef _WIN64
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename","emu00006473.nxs");
@@ -186,24 +184,20 @@ public:
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
     TS_ASSERT(ws);
     AnalysisDataService::Instance().remove("LoadTest_Output");
-    #endif
   }
 
   void test_ARGUS_NXS()
   {
-#ifndef _WIN64
     Load loader;
     loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename","argus0026287.nxs"));
 
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadMuonNexus");
-#endif
   }
 
   void xtestHDF4NexusGroup()
   {
     // Note that there are no 64-bit HDF4 libraries for Windows.
-#ifndef _WIN64
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename","MUSR00015189.nxs");
@@ -216,7 +210,6 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
     AnalysisDataService::Instance().remove("LoadTest_Output_1");
     AnalysisDataService::Instance().remove("LoadTest_Output_2");
-#endif
   }
    void testISISNexus()
   {

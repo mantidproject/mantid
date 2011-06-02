@@ -38,8 +38,6 @@ public:
 
   void testExec()
   {
-    //This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
   
     outputSpace="LoadNexusTest";
@@ -73,14 +71,10 @@ public:
     TS_ASSERT_EQUALS( output2D->dataY(5).size(), output2D->dataY(17).size() );
     // Check one particular value
     TS_ASSERT_EQUALS( output2D->dataY(11)[686], 81);
-
-#endif /*_WIN64*/
   }
 
   void testExec2()
   {
-  //This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
 	  //multi period test
     // same tests but with 2nd Muon Nexus file that contains 4 periods
     if ( !alg2.isInitialized() ) alg2.initialize();
@@ -125,8 +119,6 @@ public:
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS( output2->getAxis(0)->unit()->unitID(), "TOF" );
-    
-#endif /*_WIN64*/
   }
  
 private:

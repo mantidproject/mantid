@@ -46,8 +46,6 @@ public:
 
   void testExecWithNexusDatafile()
   {
-  //This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
     //if ( !loader.isInitialized() ) loader.initialize();
 
     LoadMuonLog loaderNexusFile;
@@ -86,8 +84,6 @@ public:
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
 	TS_ASSERT_EQUALS( timeSeriesString.substr(0,24), "2006-Nov-21 07:03:08  50" );
-
-#endif /*_WIN64*/
   }
 
 private:

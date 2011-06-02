@@ -42,8 +42,6 @@ public:
 
   void testExec()
   {
-    //This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
     if ( !nxLoad.isInitialized() ) nxLoad.initialize();
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(nxLoad.execute(),std::runtime_error);
@@ -148,8 +146,7 @@ public:
     boost::shared_ptr<Mantid::Geometry::IDetector> test;
     TS_ASSERT_THROWS(test=map->getDetector(5),std::runtime_error);
     */
-   
-#endif /*_WIN64*/  
+ 
   }
 //  void testWithManagedWorkspace()
 //  {
@@ -171,8 +168,6 @@ public:
 
   void testTransvereDataset()
   {
-    //This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
     LoadMuonNexus nxL;
     if ( !nxL.isInitialized() ) nxL.initialize();
 
@@ -194,14 +189,10 @@ public:
     double firstgood = nxL.getProperty("FirstGoodData");
     TS_ASSERT_DELTA( firstgood, 0.656,0.001);
 
-
-#endif /*_WIN64*/  
   }
 
   void testExec2()
   {
-  //This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
     //test for multi period
     // Now set required filename and output workspace name
     inputFile2 = "emu00006475.nxs";
@@ -293,13 +284,10 @@ public:
     TS_ASSERT_EQUALS(output->sample().getName(), output2->sample().getName());
     TS_ASSERT_EQUALS(output->sample().getName(), "ptfe test");
 	
-	}  
-#endif /*_WIN64*/  
+	}   
   }
    void testExec2withZeroEntryNumber()
   {
-  //This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
     //test for multi period
     // Now set required filename and output workspace name
     inputFile2 = "emu00006475.nxs";
@@ -360,13 +348,10 @@ public:
     TS_ASSERT_EQUALS(output->sample().getName(), "ptfe test");
 	
 	}  
-#endif /*_WIN64*/  
   }
 
   void testarrayin()
   {
-  //This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
     if ( !nxload3.isInitialized() ) nxload3.initialize();
     
     nxload3.setPropertyValue("Filename", inputFile);    
@@ -398,8 +383,6 @@ public:
     TS_ASSERT_EQUALS( output2D->dataE(8)[479], 12);
     // Check that the error on that value is correct
     TS_ASSERT_DELTA( output2D->dataX(8)[479], 7.410, 0.0001);
-    
-#endif /*_WIN64*/  
   }
   
 private:

@@ -39,8 +39,6 @@ public:
   
 void testExecOnMuon()
   {
-  //This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
     LoadNexus nxLoad;
     std::string outputSpace,inputFile;
     nxLoad.initialize();
@@ -89,8 +87,6 @@ void testExecOnMuon()
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute()); 
     TS_ASSERT( algToBeTested.isExecuted() );
     remove(outputFile.c_str());
-   
-#endif /*_WIN64*/  
   }
 
   
