@@ -42,6 +42,10 @@ public:
 
         double val;
         Run& run = ws->mutableRun();
+        // The expected number
+        const std::vector< Property* >& logs = ws->run().getLogData();
+        TS_ASSERT_EQUALS(logs.size(), 39);
+        
         Property * prop;
         TimeSeriesProperty<double> * dProp;
 
