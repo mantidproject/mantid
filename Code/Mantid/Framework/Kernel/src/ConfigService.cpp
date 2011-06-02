@@ -179,7 +179,14 @@ ConfigServiceImpl::ConfigServiceImpl() :
   updateConfig(getPropertiesDir() + m_properties_file_name, false, false);
   propertiesFilesList = getPropertiesDir() + m_properties_file_name;
 
-  updateConfig(getLocalFilename(), true, false);
+  // Load the local (machine) properties file, if it exists
+  Poco::File localFile(getLocalFilename());
+  if ( localFile.exists() )
+  {
+    g_log.error("Yippee!");
+    updateConfig(getLocalFilename(), true, false);
+    propertiesFilesList += ", " + getLocalFilename();
+  }
 
   if (Poco::Environment::has("MANTIDPROPERTIES"))
   {
