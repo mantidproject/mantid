@@ -51,6 +51,8 @@ namespace Mantid
 
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "", Direction::Input), "Name of the peaks workspace.");
 
+      declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutPeaksWorkspace", "", Direction::Output), "Name of the output peaks workspace with integrated intensities.");
+
       declareProperty("XMin", -7, "Minimum of X (col) Range to integrate for peak");
       declareProperty("XMax", 7, "Maximum of X (col) Range to integrate for peak");
       declareProperty("YMin", -7, "Minimum of Y (row) Range to integrate for peak");
@@ -77,9 +79,15 @@ namespace Mantid
       Beta0 = 31.9;
       Kappa = 46.0;
   
-      PeaksWorkspace_sptr peaksW;
-      peaksW = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(getProperty("InPeaksWorkspace")));
+      /// Input peaks workspace
+      PeaksWorkspace_sptr inPeaksW = getProperty("InPeaksWorkspace");
 
+      /// Output peaks workspace, create if needed
+      PeaksWorkspace_sptr peaksW = getProperty("OutPeaksWorkspace");
+      if (peaksW != inPeaksW)
+        peaksW = inPeaksW->clone();
+
+      Progress prog(this, 0.0, 1.0, peaksW->getNumberPeaks());
 
       int i, XPeak, YPeak;
       double col, row, I, sigI;
@@ -144,7 +152,14 @@ namespace Mantid
         //std::cout << peak.getIntensity()<<"  " << I << "  " << peak.getSigmaIntensity() << "  "<< sigI << "\n";
         peak.setIntensity(I);
         peak.setSigmaIntensity(sigI);
+
+        std::ostringstream mess;
+        mess << "Peak " << peak.getHKL();
+        prog.report(mess.str());
       }
+
+      // Save the output
+      setProperty("OutPeaksWorkspace", peaksW);
     }
 
     void PeakIntegration::retrieveProperties()

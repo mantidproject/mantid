@@ -79,7 +79,8 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the MDCentroidPeaks with the given peak radius param */
-  void doRun( V3D startPos, double PeakRadius, V3D expectedResult, std::string message)
+  void doRun( V3D startPos, double PeakRadius, V3D expectedResult, std::string message,
+      std::string OutputWorkspace = "MDCentroidPeaksTest_Peaks")
   {
     // Make a fake instrument - doesn't matter, we won't use it really
     IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
@@ -105,9 +106,15 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "MDCentroidPeaksTest_MDEWS" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "MDCentroidPeaksTest_Peaks" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CoordinatesToUse", CoordinatesToUse ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", OutputWorkspace ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("PeakRadius", PeakRadius ) );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
+
+    peakWS = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(OutputWorkspace));
+    TS_ASSERT(peakWS);
+    if (!peakWS) return;
 
     // Compare the result to the expectation
     V3D result;
@@ -175,6 +182,16 @@ public:
   {
     CoordinatesToUse = "Q (lab frame)";
     do_test_exec();
+  }
+
+  void test_exec_HKL_NotInPlace()
+  {
+    CoordinatesToUse = "HKL";
+    createMDEW();
+    addPeak(1000, 0,0.,0., 1.0);
+    doRun(V3D( 0.,0.,0.), 1.0, V3D( 0.,0.,0.), "Start at the center, get the center",
+        "MDCentroidPeaksTest_MDEWS_outputCopy");
+
   }
 
 private:

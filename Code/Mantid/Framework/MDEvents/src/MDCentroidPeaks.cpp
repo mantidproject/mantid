@@ -72,9 +72,12 @@ namespace MDEvents
     declareProperty(new PropertyWithValue<double>("PeakRadius",1.0,Direction::Input),
         "Fixed radius around each peak position in which to calculate the centroid.");
 
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::InOut),
-        "A PeaksWorkspace containing the peaks to integrate. "
-        "The peaks' coordinates will be updated with the found centroids.");
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::Input),
+        "A PeaksWorkspace containing the peaks to centroid.");
+
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output),
+        "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
+        "with the peaks' positions modified by the new found centroids.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -87,8 +90,13 @@ namespace MDEvents
     if (nd != 3)
       throw std::invalid_argument("For now, we expect the input MDEventWorkspace to have 3 dimensions only.");
 
-    /// Peak workspace to integrate
-    Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("PeaksWorkspace");
+    /// Peak workspace to centroid
+    Mantid::DataObjects::PeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
+
+    /// Output peaks workspace, create if needed
+    Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
+    if (peakWS != inPeakWS)
+      peakWS = inPeakWS->clone();
 
     /// Value of the CoordinatesToUse property.
     std::string CoordinatesToUse = getPropertyValue("CoordinatesToUse");
@@ -161,6 +169,9 @@ namespace MDEvents
             << std::endl;
       }
     }
+
+    // Save the output
+    setProperty("OutputWorkspace", peakWS);
 
   }
 

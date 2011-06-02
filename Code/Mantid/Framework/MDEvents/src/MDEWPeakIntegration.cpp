@@ -73,9 +73,12 @@ namespace MDEvents
         "The signal density around the peak (PeakRadius < r < BackgroundRadius) is used to estimate the background under the peak.\n"
         "If smaller than PeakRadius, no background measurement is done." );
 
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::InOut),
-        "A PeaksWorkspace containing the peaks to integrate. The peaks' integrated intensities will be updated"
-        "with the new values.");
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::Input),
+        "A PeaksWorkspace containing the peaks to integrate.");
+
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output),
+        "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
+        "with the peaks' integrated intensities.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -89,7 +92,12 @@ namespace MDEvents
       throw std::invalid_argument("For now, we expect the input MDEventWorkspace to have 3 dimensions only.");
 
     /// Peak workspace to integrate
-    Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("PeaksWorkspace");
+    Mantid::DataObjects::PeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
+
+    /// Output peaks workspace, create if needed
+    Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
+    if (peakWS != inPeakWS)
+      peakWS = inPeakWS->clone();
 
     /// Value of the CoordinatesToUse property.
     std::string CoordinatesToUse = getPropertyValue("CoordinatesToUse");
@@ -168,6 +176,9 @@ namespace MDEvents
           << bgSignal << " (sig^2 " << bgErrorSquared << ") subtracted."
           << std::endl;
     }
+
+    // Save the output
+    setProperty("OutputWorkspace", peakWS);
 
   }
 

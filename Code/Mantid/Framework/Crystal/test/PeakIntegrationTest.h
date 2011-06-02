@@ -173,6 +173,7 @@ public:
     alg.setProperty("InputWorkspace", inputW);
     alg.setProperty("OutputWorkspace", "tmp");
     alg.setProperty("InPeaksWorkspace", "TOPAZ");
+    alg.setProperty("OutPeaksWorkspace", "TOPAZ");
     alg.setProperty("XMin", -2);
     alg.setProperty("XMax", 2);
     alg.setProperty("YMin", -2);

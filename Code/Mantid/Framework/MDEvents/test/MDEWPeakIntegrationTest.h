@@ -46,16 +46,18 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the MDEWPeakIntegration with the given peak radius integration param */
-  static void doRun(double PeakRadius, double BackgroundRadius)
+  static void doRun(double PeakRadius, double BackgroundRadius,
+      std::string OutputWorkspace = "MDEWPeakIntegrationTest_peaks")
   {
     MDEWPeakIntegration alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "MDEWPeakIntegrationTest_MDEWS" ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "MDEWPeakIntegrationTest_peaks" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CoordinatesToUse", "HKL" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("PeakRadius", PeakRadius ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("BackgroundRadius", BackgroundRadius ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "MDEWPeakIntegrationTest_peaks" ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", OutputWorkspace) );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
   }
@@ -181,6 +183,33 @@ public:
   }
 
 
+
+  //-------------------------------------------------------------------------------
+  void test_exec_NotInPlace()
+  {
+    // --- Fake workspace with 3 peaks ------
+    createMDEW();
+    addPeak(1000, 0.,0.,0., 1.0);
+
+    // Make a fake instrument - doesn't matter, we won't use it really
+    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    // --- Make a fake PeaksWorkspace ---
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    peakWS->addPeak( Peak(inst, 1, 1.0, V3D(0., 0., 0.) ) );
+    AnalysisDataService::Instance().add("MDEWPeakIntegrationTest_peaks",peakWS);
+
+    // Integrate and copy to a new peaks workspace
+    doRun(1.0,0.0, "MDEWPeakIntegrationTest_peaks_out");
+
+    // Old workspace is unchanged
+    TS_ASSERT_EQUALS( peakWS->getPeak(0).getIntensity(), 0.0);
+
+    PeaksWorkspace_sptr newPW = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve("MDEWPeakIntegrationTest_peaks_out"));
+    TS_ASSERT( newPW );
+
+    TS_ASSERT_DELTA( newPW->getPeak(0).getIntensity(), 1000.0, 1e-2);
+  }
 
 
 
