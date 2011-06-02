@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADRUNLOGS_H_
-#define MANTID_DATAHANDLING_LOADRUNLOGS_H_
+#ifndef MANTID_DATAHANDLING_LOADNEXUSLOGS_H_
+#define MANTID_DATAHANDLING_LOADNEXUSLOGS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -56,15 +56,15 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadRunLogs : public API::Algorithm
+    class DLLExport LoadNexusLogs : public API::Algorithm
     {
     public:
       /// Default constructor
-      LoadRunLogs();
+      LoadNexusLogs();
       /// Destructor
-      virtual ~LoadRunLogs() {}
+      virtual ~LoadNexusLogs() {}
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "LoadRunLogs"; }
+      virtual const std::string name() const { return "LoadNexusLogs"; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
@@ -97,4 +97,4 @@ namespace Mantid
   } // namespace NeXus
 } // namespace Mantid
 
-#endif /*MANTID_DATAHANDLING_LOADRUNLOGS_H_*/
+#endif /*MANTID_DATAHANDLING_LOADNEXUSLOGS_H_*/

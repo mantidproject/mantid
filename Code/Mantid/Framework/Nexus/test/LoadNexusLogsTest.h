@@ -1,7 +1,7 @@
-#ifndef LOADLOGSFROMSNSNEXUSTEST_H_
-#define LOADLOGSFROMSNSNEXUSTEST_H_
+#ifndef LOADNEXUSLOGSTEST_H_
+#define LOADNEXUSLOGSTEST_H_
 
-#include "MantidNexus/LoadRunLogs.h"
+#include "MantidNexus/LoadNexusLogs.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -19,14 +19,14 @@ using namespace Mantid::NeXus;
 #include "MantidAPI/WorkspaceGroup.h"
 #include <iostream>
 
-class LoadRunLogsTest : public CxxTest::TestSuite
+class LoadNexusLogsTest : public CxxTest::TestSuite
 {
 public:
 
   void testExec()
   {
       Mantid::API::FrameworkManager::Instance();
-      LoadRunLogs ld;
+      LoadNexusLogs ld;
       std::string outws_name = "CNCS_instrument";
       ld.initialize();
       ld.setPropertyValue("Filename","CNCS_7860.nxs");
@@ -73,4 +73,4 @@ public:
     }
 };
 
-#endif /*LOADRUNLOGS_H_*/
+#endif /* LOADNEXUSLOGS_H_*/

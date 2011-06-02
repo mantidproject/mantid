@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadRunLogs.h"
+#include "MantidNexus/LoadNexusLogs.h"
 #include "MantidNexus/NeXusException.hpp"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
@@ -19,10 +19,10 @@ namespace Mantid
   namespace NeXus
   {
     // Register the algorithm into the algorithm factory
-    DECLARE_ALGORITHM(LoadRunLogs)
+    DECLARE_ALGORITHM(LoadNexusLogs)
 
     /// Sets documentation strings for this algorithm
-    void LoadRunLogs::initDocs()
+    void LoadNexusLogs::initDocs()
     {
       this->setWikiSummary("Loads run logs (temperature, pulse charges, etc.) from a NeXus file and adds it to the run information in a [[workspace]].");
       this->setOptionalMessage("Loads run logs (temperature, pulse charges, etc.) from a NeXus file and adds it to the run information in a workspace.");
@@ -36,11 +36,11 @@ namespace Mantid
     using std::size_t;
 
     /// Empty default constructor
-    LoadRunLogs::LoadRunLogs()
+    LoadNexusLogs::LoadNexusLogs()
     {}
 
     /// Initialisation method.
-    void LoadRunLogs::init()
+    void LoadNexusLogs::init()
     {
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
       std::vector<std::string> exts;
@@ -59,7 +59,7 @@ namespace Mantid
     *  @throw Exception::FileError If the Nexus file cannot be found/opened
     *  @throw std::invalid_argument If the optional properties are set to invalid values
     */
-    void LoadRunLogs::exec()
+    void LoadNexusLogs::exec()
     {
       std::string filename = getPropertyValue("Filename");
       ::NeXus::File file(filename);
@@ -119,7 +119,7 @@ namespace Mantid
      * @param_entry_class :: The class type of the log entry
      * @param workspace :: A pointer to the workspace to store the logs
      */
-    void LoadRunLogs::loadLogs(::NeXus::File & file, const std::string & entry_name, 
+    void LoadNexusLogs::loadLogs(::NeXus::File & file, const std::string & entry_name, 
                                const std::string & entry_class, 
                                MatrixWorkspace_sptr workspace) const
     {
@@ -149,7 +149,7 @@ namespace Mantid
      * @param entry_name :: The name of the log entry
      * @param workspace :: A pointer to the workspace to store the logs
      */
-    void LoadRunLogs::loadNXLog(::NeXus::File & file, const std::string & entry_name, 
+    void LoadNexusLogs::loadNXLog(::NeXus::File & file, const std::string & entry_name, 
                                 MatrixWorkspace_sptr workspace) const
     {
       file.openGroup(entry_name, "NXlog");
@@ -185,7 +185,7 @@ namespace Mantid
      * @param entry_name :: The name of the log entry
      * @param workspace :: A pointer to the workspace to store the logs
      */
-    void LoadRunLogs::loadSELog(::NeXus::File & file, const std::string & entry_name, 
+    void LoadNexusLogs::loadSELog(::NeXus::File & file, const std::string & entry_name, 
                                 MatrixWorkspace_sptr workspace) const
     {
       // Open the entry
@@ -261,7 +261,7 @@ namespace Mantid
      * @param prop_name :: The name of the property
      * @returns A pointer to a new property containing the time series
      */
-    Kernel::Property * LoadRunLogs::createTimeSeries(::NeXus::File & file, 
+    Kernel::Property * LoadNexusLogs::createTimeSeries(::NeXus::File & file, 
                                                      const std::string & prop_name) const
     {
       file.openData("time");

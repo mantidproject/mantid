@@ -42,7 +42,7 @@ using Geometry::Instrument;
 /// Empty default constructor
 LoadLogsFromSNSNexus::LoadLogsFromSNSNexus()
 {
-  useAlgorithm("LoadRunLogs");
+  useAlgorithm("LoadNexusLogs");
   deprecatedDate("2011-06-01");
 }
 

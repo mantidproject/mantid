@@ -703,7 +703,7 @@ namespace Mantid
     */
     void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr ws, int period)
     {
-      IAlgorithm_sptr alg = createSubAlgorithm("LoadRunLogs", 0.0, 0.5);
+      IAlgorithm_sptr alg = createSubAlgorithm("LoadNexusLogs", 0.0, 0.5);
       alg->setPropertyValue("Filename", this->getProperty("Filename"));
       alg->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
       try

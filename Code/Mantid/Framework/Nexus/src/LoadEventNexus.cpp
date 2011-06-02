@@ -704,7 +704,7 @@ void LoadEventNexus::exec()
     prog.doReport("Loading DAS logs");
     //The pulse times will be empty if not specified in the DAS logs.
     pulseTimes.clear();
-    IAlgorithm_sptr loadLogs = createSubAlgorithm("LoadRunLogs");
+    IAlgorithm_sptr loadLogs = createSubAlgorithm("LoadNexusLogs");
 
     // Now execute the sub-algorithm. Catch and log any error, but don't stop.
     try

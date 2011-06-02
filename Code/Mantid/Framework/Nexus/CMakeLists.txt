@@ -15,7 +15,7 @@ set ( SRC_FILES
         src/LoadRaw/isisraw2.cpp
         src/LoadRaw/item_struct.cpp
         src/LoadRaw/vms_convert.cpp
-        src/LoadRunLogs.cpp
+        src/LoadNexusLogs.cpp
         src/LoadSNSEventNexus.cpp
         src/LoadSNSNexus.cpp
         src/LoadTOFRawNeXus.cpp
@@ -46,7 +46,7 @@ set ( INC_FILES
         inc/MantidNexus/LoadNeXus.h
         inc/MantidNexus/LoadNexusMonitors.h
         inc/MantidNexus/LoadNexusProcessed.h
-        inc/MantidNexus/LoadRunLogs.h
+        inc/MantidNexus/LoadNexusLogs.h
         inc/MantidNexus/LoadSNSEventNexus.h
         inc/MantidNexus/LoadSNSNexus.h
         inc/MantidNexus/LoadTOFRawNeXus.h
@@ -71,7 +71,7 @@ set ( TEST_FILES
         test/LoadNeXusTest.h
         test/LoadNexusMonitorsTest.h
         test/LoadNexusProcessedTest.h
-        test/LoadRunLogsTest.h
+        test/LoadNexusLogsTest.h
         test/LoadRSaveNLoadNcspTest.h
         test/LoadSNSEventNexusTest.h
         test/NexusAPITest.h
