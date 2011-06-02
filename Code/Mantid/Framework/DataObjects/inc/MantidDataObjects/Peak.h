@@ -1,11 +1,11 @@
 #ifndef MANTID_DATAOBJECTS_PEAK_H_
 #define MANTID_DATAOBJECTS_PEAK_H_
     
-#include "MantidKernel/System.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Math/Matrix.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/System.h"
 
 
 namespace Mantid
@@ -24,13 +24,17 @@ namespace DataObjects
     /// Allow PeakColumn class to directly access members.
     friend class PeakColumn;
 
+    Peak(Mantid::Geometry::IInstrument_sptr m_inst, Mantid::Geometry::V3D QSampleFrame, double detectorDistance=1.0);
+    Peak(Mantid::Geometry::IInstrument_sptr m_inst, Mantid::Geometry::V3D QSampleFrame, Mantid::Geometry::Matrix<double> goniometer, double detectorDistance=1.0);
     Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength);
     Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL);
-    Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL,Mantid::Geometry::Matrix<double> goniometer);
+    Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL, Mantid::Geometry::Matrix<double> goniometer);
 
     // Copy constructor is compiler-provided.
     //    Peak(const Peak & other);
     virtual ~Peak();
+
+    void setInstrument(Mantid::Geometry::IInstrument_sptr inst);
 
     int getDetectorID() const;
     void setDetectorID(int m_DetectorID);
@@ -52,6 +56,9 @@ namespace DataObjects
 
     Mantid::Geometry::V3D getQLabFrame() const;
     Mantid::Geometry::V3D getQSampleFrame() const;
+
+    void setQSampleFrame(Mantid::Geometry::V3D QSampleFrame, double detectorDistance=1.0);
+    void setQLabFrame(Mantid::Geometry::V3D QLabFrame, double detectorDistance=1.0);
 
     void setWavelength(double wavelength);
     double getWavelength() const;

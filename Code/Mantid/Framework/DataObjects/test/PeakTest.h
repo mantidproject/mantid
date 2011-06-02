@@ -172,7 +172,6 @@ public:
 
   void test_getQSampleFrame()
   {
-
     // Peak 3 is phi,chi,omega of 90,0,0; giving this matrix:
     Matrix<double> r2(3,3,false);
     r2[0][2] = 1;
@@ -192,6 +191,74 @@ public:
     // Did the peak properly invert the rotation matrix?
     TS_ASSERT_EQUALS(qLab, qSampleRotated);
   }
+
+
+  //------------------------------------------------------------------------------------
+  /** Can't have Q = 0,0,0 or 0 in the Z direction when creating */
+  void test_setQLabFrame_ThrowsIfQIsNull()
+  {
+    Peak p1(inst, 10000, 2.0);
+    TS_ASSERT_THROWS_ANYTHING(Peak p2(inst, V3D(0,0,0), 1.0));
+    TS_ASSERT_THROWS_ANYTHING(Peak p2(inst, V3D(1,2,0), 1.0));
+  }
+
+
+  /** Compare two peaks, but not the detector IDs etc. */
+  void comparePeaks(Peak & p1, Peak & p2)
+  {
+    TS_ASSERT_EQUALS( p1.getQLabFrame(), p2.getQLabFrame() );
+    TS_ASSERT_EQUALS( p1.getQSampleFrame(), p2.getQSampleFrame() );
+    TS_ASSERT_EQUALS( p1.getDetPos(), p2.getDetPos() );
+    TS_ASSERT_EQUALS( p1.getHKL(), p2.getHKL() );
+    TS_ASSERT_DELTA( p1.getWavelength(), p2.getWavelength(), 1e-5 );
+    TS_ASSERT_DELTA( p1.getL1(), p2.getL1(), 1e-5 );
+    TS_ASSERT_DELTA( p1.getL2(), p2.getL2(), 1e-5 );
+    TS_ASSERT_DELTA( p1.getTOF(), p2.getTOF(), 1e-5 );
+    TS_ASSERT_DELTA( p1.getInitialEnergy(), p2.getInitialEnergy(), 1e-5 );
+    TS_ASSERT_DELTA( p1.getFinalEnergy(), p2.getFinalEnergy(), 1e-5 );
+    TS_ASSERT( p1.getGoniometerMatrix().equals(p2.getGoniometerMatrix(), 1e-5) );
+  }
+
+  /** Create peaks using Q in the lab frame */
+  void test_setQLabFrame()
+  {
+    Peak p1(inst, 19999, 2.0);
+    V3D Qlab1 = p1.getQLabFrame();
+    V3D detPos1 = p1.getDetPos();
+
+    // Construct using just Q
+    Peak p2(inst, Qlab1, detPos1.norm());
+    comparePeaks(p1, p2);
+    TS_ASSERT_EQUALS( p2.getBankName(), "None");
+    TS_ASSERT_EQUALS( p2.getRow(), -1);
+    TS_ASSERT_EQUALS( p2.getCol(), -1);
+    TS_ASSERT_EQUALS( p2.getDetectorID(), -1);
+  }
+
+  /** Create peaks using Q in sample frame + a goniometer rotation matrix*/
+  void test_setQSampleFrame()
+  {
+    // A goniometer rotation matrix
+    Matrix<double> r2(3,3,false);
+    r2[0][2] = 1;
+    r2[1][1] = 1;
+    r2[2][0] = -1;
+
+    Peak p1(inst, 19999, 2.0, V3D(1,2,3), r2);
+    V3D q = p1.getQSampleFrame();
+    V3D detPos1 = p1.getDetPos();
+
+    // Construct using Q + rotation matrix
+    Peak p2(inst, q, r2, detPos1.norm());
+    p2.setHKL(V3D(1,2,3)); // Make sure HKL matches too.
+    comparePeaks(p1, p2);
+    TS_ASSERT_EQUALS( p2.getBankName(), "None");
+    TS_ASSERT_EQUALS( p2.getRow(), -1);
+    TS_ASSERT_EQUALS( p2.getCol(), -1);
+    TS_ASSERT_EQUALS( p2.getDetectorID(), -1);
+  }
+
+
 
 };
 

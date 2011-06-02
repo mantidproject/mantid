@@ -13,6 +13,53 @@ namespace DataObjects
 
 
   //----------------------------------------------------------------------------------------------
+  /** Constructor that uses the Q position of the peak (in the lab frame).
+   * No detector ID is set.
+   *
+   * @param m_inst :: Shared pointer to the instrument for this peak detection
+   * @param QLabFrame :: Q of the center of the peak, in reciprocal space
+   * @param detectorDistance :: distance between the sample and the detector.
+   *        Used to give a valid TOF. Default 1.0 meters.
+   */
+  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, Mantid::Geometry::V3D QLabFrame, double detectorDistance)
+  : m_H(0), m_K(0), m_L(0),
+    m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
+    m_GoniometerMatrix(3,3,true),
+    m_InverseGoniometerMatrix(3,3,true),
+    m_RunNumber(0)
+  {
+    this->setInstrument(m_inst);
+    this->setQLabFrame(QLabFrame, detectorDistance);
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor that uses the Q position of the peak (in the sample frame)
+   * and a goniometer rotation matrix.
+   * No detector ID is set.
+   *
+   * @param m_inst :: Shared pointer to the instrument for this peak detection
+   * @param QLabFrame :: Q of the center of the peak, in reciprocal space
+   * @param goniometer :: a 3x3 rotation matrix
+   * @param detectorDistance :: distance between the sample and the detector.
+   *        Used to give a valid TOF. Default 1.0 meters.
+   */
+  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, Mantid::Geometry::V3D QSampleFrame,
+      Mantid::Geometry::Matrix<double> goniometer, double detectorDistance)
+  : m_H(0), m_K(0), m_L(0),
+    m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
+    m_GoniometerMatrix(goniometer),
+    m_InverseGoniometerMatrix(goniometer),
+    m_RunNumber(0)
+  {
+    if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Goniometer matrix must non-singular.");
+    this->setInstrument(m_inst);
+    this->setQSampleFrame(QSampleFrame, detectorDistance);
+  }
+
+
+
+  //----------------------------------------------------------------------------------------------
   /** Constructor
    *
    * @param m_inst :: Shared pointer to the instrument for this peak detection
@@ -21,13 +68,13 @@ namespace DataObjects
    * @return
    */
   Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength)
-  : m_inst(m_inst),
-    m_H(0), m_K(0), m_L(0),
+  : m_H(0), m_K(0), m_L(0),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
     m_RunNumber(0)
   {
+    this->setInstrument(m_inst);
     this->setDetectorID(m_DetectorID);
     this->setWavelength(m_Wavelength);
   }
@@ -42,14 +89,14 @@ namespace DataObjects
    * @param HKL :: vector with H,K,L position of the peak
    * @return
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL) :
-    m_inst(m_inst),
-    m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]),
+  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL)
+  : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
     m_RunNumber(0)
   {
+    this->setInstrument(m_inst);
     this->setDetectorID(m_DetectorID);
     this->setWavelength(m_Wavelength);
   }
@@ -64,8 +111,7 @@ namespace DataObjects
    * @param goniometer :: a 3x3 rotation matrix
    * @return
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL,Mantid::Geometry::Matrix<double> goniometer) :
-    m_inst(m_inst),
+  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL, Mantid::Geometry::Matrix<double> goniometer) :
     m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(goniometer),
@@ -73,6 +119,7 @@ namespace DataObjects
     m_RunNumber(0)
   {
     if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Goniometer matrix must non-singular.");
+    this->setInstrument(m_inst);
     this->setDetectorID(m_DetectorID);
     this->setWavelength(m_Wavelength);
   }
@@ -86,8 +133,10 @@ namespace DataObjects
   {
   }
 
+
   //----------------------------------------------------------------------------------------------
-  /** Set the incident wavelength of the neutron. Calculates the energy from this. Assumes elastic scattering.
+  /** Set the incident wavelength of the neutron. Calculates the energy from this.
+   * Assumes elastic scattering.
    *
    * @param wavelength :: wavelength in Angstroms.
    */
@@ -102,6 +151,30 @@ namespace DataObjects
     m_FinalEnergy = m_InitialEnergy;
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Set the instrument (and save the source/sample pos).
+   * Call setDetectorID AFTER this call.
+   *
+   * @param inst :: Instrument sptr to use
+   */
+  void Peak::setInstrument(Mantid::Geometry::IInstrument_sptr inst)
+  {
+    m_inst = inst;
+    if (!inst) throw std::runtime_error("No instrument is set!");
+
+    // Cache some positions
+    const Geometry::IObjComponent_sptr sourceObj = m_inst->getSource();
+    if (sourceObj == NULL)
+      throw Exception::InstrumentDefinitionError("Failed to get source component from instrument");
+    const Geometry::IObjComponent_sptr sampleObj = m_inst->getSample();
+    if (sampleObj == NULL)
+      throw Exception::InstrumentDefinitionError("Failed to get sample component from instrument");
+
+    sourcePos = sourceObj->getPos();
+    samplePos = sampleObj->getPos();
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Set the detector ID and look up and cache values related to it.
    *
@@ -114,16 +187,6 @@ namespace DataObjects
     this->m_det = m_inst->getDetector(this->m_DetectorID);
     if (!m_det) throw std::runtime_error("No detector was found!");
 
-    // Cache some positions
-    const Geometry::IObjComponent_sptr sourceObj = m_inst->getSource();
-    if (sourceObj == NULL)
-      throw Exception::InstrumentDefinitionError("Failed to get source component from instrument");
-    const Geometry::IObjComponent_sptr sampleObj = m_inst->getSample();
-    if (sampleObj == NULL)
-      throw Exception::InstrumentDefinitionError("Failed to get sample component from instrument");
-
-    sourcePos = sourceObj->getPos();
-    samplePos = sampleObj->getPos();
     detPos = m_det->getPos();
 
     // We now look for the row/column. -1 if not found.
@@ -192,7 +255,8 @@ namespace DataObjects
     
     // In general case (2*pi/d)^2=k_i^2+k_f^2-2*k_i*k_f*cos(two_theta)
     // E_i,f=k_i,f^2*hbar^2/(2 m)
-    return 1e10*PhysicalConstants::h/sqrt(2.0*PhysicalConstants::NeutronMass*PhysicalConstants::meV)/sqrt(m_InitialEnergy+m_FinalEnergy-2.0*sqrt(m_InitialEnergy*m_FinalEnergy)*cos(two_theta));
+    return 1e10*PhysicalConstants::h/sqrt(2.0*PhysicalConstants::NeutronMass*PhysicalConstants::meV)
+        / sqrt(m_InitialEnergy+m_FinalEnergy-2.0*sqrt(m_InitialEnergy*m_FinalEnergy)*cos(two_theta));
   }
 
   //----------------------------------------------------------------------------------------------
@@ -236,6 +300,76 @@ namespace DataObjects
     V3D Qsample = m_InverseGoniometerMatrix * Qlab;
     return Qsample;
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Set the peak using the peak's position in reciprocal space, in the sample frame.
+   * The GoniometerMatrix will be used to find the Q in the lab frame, so it should
+   * be set beforehand.
+   *
+   * @param QSampleFrame :: Q of the center of the peak, in reciprocal space
+   *        This is in inelastic convention: momentum transfer of the LATTICE!
+   *        Also, q does NOT have a 2pi factor = it is equal to 1/wavelength.
+   * @param detectorDistance :: distance between the sample and the detector.
+   *        Used to give a valid TOF. Default 1.0 meters.
+   */
+  void Peak::setQSampleFrame(Mantid::Geometry::V3D QSampleFrame, double detectorDistance)
+  {
+    V3D Qlab = m_GoniometerMatrix * QSampleFrame;
+    this->setQLabFrame(Qlab, detectorDistance);
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Set the peak using the peak's position in reciprocal space, in the lab frame.
+   * The detector position will be determined.
+   * DetectorID, row and column will be set to -1 since they are not (necessarily) found.
+   *
+   * @param QLabFrame :: Q of the center of the peak, in reciprocal space.
+   *        This is in inelastic convention: momentum transfer of the LATTICE!
+   *        Also, q does NOT have a 2pi factor = it is equal to 1/wavelength (in Angstroms).
+   * @param detectorDistance :: distance between the sample and the detector.
+   *        Used to give a valid TOF. Default 1.0 meters.
+   */
+  void Peak::setQLabFrame(Mantid::Geometry::V3D QLabFrame, double detectorDistance)
+  {
+    // Clear out the detector = we can't know them
+    m_DetectorID = -1;
+    m_det = IDetector_sptr();
+    m_Row = -1;
+    m_Col = -1;
+    m_BankName = "None";
+
+    // The q-vector direction of the peak is = goniometer * ub * hkl_vector
+    V3D q = QLabFrame;
+
+    /* The incident neutron wavevector is in the +Z direction, ki = 1/wl (in z direction).
+     * In the inelastic convention, q = ki - kf.
+     * The final neutron wavector kf = -qx in x; -qy in y; and (-qz+1/wl) in z.
+     * AND: norm(kf) = norm(ki) = 1.0/wavelength
+     * THEREFORE: 1/wl = norm(q)^2 / (2*qz)
+     */
+    double norm_q = q.norm();
+
+    if (norm_q == 0.0)
+      throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0,0,0.");
+    if (q.Z() == 0.0)
+      throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0 in the Z (beam) direction.");
+
+    double one_over_wl = (norm_q*norm_q) / (2.0 * q.Z());
+    double wl = 1.0/one_over_wl;
+
+    // This is the scattered direction, kf = (-qx, -qy, 1/wl-qz)
+    V3D beam = q * -1.0;
+    beam.setZ(one_over_wl - q.Z());
+    beam.normalize();
+
+    // Save the wavelength
+    this->setWavelength(wl);
+
+    // Use the given detector distance to find the detector position.
+    detPos = beam * detectorDistance;
+  }
+
 
 
 
