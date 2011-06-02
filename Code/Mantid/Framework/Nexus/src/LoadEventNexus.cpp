@@ -1098,11 +1098,6 @@ bool LoadEventNexus::loadSpectraMapping(const std::string & filename,
   API::SpectraDetectorMap *spectramap = new API::SpectraDetectorMap;
   workspace->replaceSpectraMap(spectramap);
 
-  // NSP1 - Number of spectra
-  file.openData("NSP1");
-  std::vector<int32_t> nsp1;
-  file.getData(nsp1);
-  file.closeData();
   // UDET
   file.openData("UDET");
   std::vector<int32_t> udet;
@@ -1117,25 +1112,16 @@ bool LoadEventNexus::loadSpectraMapping(const std::string & filename,
   file.closeGroup();
   file.close();
 
-  //Sanity check
-  if( nsp1.empty() )
-  {
-    throw std::runtime_error("loadSpectraMapping - Failed to load NSP1. Unable to determine spectra size.");
-  }
-  int32_t nspecs = nsp1.front();
-  if( spec.size() != static_cast<size_t>(nspecs) ) 
+  // The spec array will contain a spectrum number for each udet, not that the spectrum number
+  // may be the same for more that one detector
+  const size_t ndets(udet.size());
+  if( ndets != spec.size() )
   {
     std::ostringstream os;
-    os << "Spectra list size inconsistent. NSP1=" << nsp1[0] << ", actual size=" << spec.size() << "\n";
+    os << "UDET/SPEC list size mismatch. UDET=" << udet.size() << ", SPEC=" << spec.size() << "\n";
     throw std::runtime_error(os.str());
   }
-  if( udet.size() != static_cast<size_t>(nspecs))
-  {
-    std::ostringstream os;
-    os << "UDET list size inconsistent. NSP1=" << nsp1[0] << ", actual size=" << udet.size() << "\n";
-    throw std::runtime_error(os.str());
-  }
-  spectramap->populate(spec.data(), udet.data(), nsp1[0]);
+  spectramap->populate(spec.data(), udet.data(), ndets);
   workspace->padSpectra(false);
   return true;
 }
