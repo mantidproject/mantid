@@ -938,7 +938,7 @@ class MantidPyFramework(FrameworkManager):
     __is_initialized = False
     __config_service = None
     __gui__ = False
-    __runtime_mtdsimple__ = False
+    __runtime_mtdsimple__ = True
     
     def __init__(self):
         # Call base class constructor
