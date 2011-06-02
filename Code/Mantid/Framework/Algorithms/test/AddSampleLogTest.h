@@ -8,6 +8,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/AddSampleLog.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -17,20 +18,56 @@ class AddSampleLogTest : public CxxTest::TestSuite
 {
 public:
 
-  void testInsertion2D()
+  void test_Workspace2D()
   {
-    ExecuteAlgorithm(WorkspaceCreationHelper::Create2DWorkspace(10,10));
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    ExecuteAlgorithm(ws, "My Name", "String", "My Value", 0.0);
   }
 
-  void testInsertionEvent()
+  void test_EventWorkspace()
   {
-    ExecuteAlgorithm(WorkspaceCreationHelper::CreateEventWorkspace(10,10));
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace(10,10);
+    ExecuteAlgorithm(ws, "My Name", "String", "My Value", 0.0);
   }
 
-  void ExecuteAlgorithm(MatrixWorkspace_sptr testWS)
+  void test_CanOverwrite()
+  {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    ExecuteAlgorithm(ws, "My Name", "String", "My Value", 0.0);
+    ExecuteAlgorithm(ws, "My Name", "String", "My New Value", 0.0);
+  }
+
+  void test_Number()
+  {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    ExecuteAlgorithm(ws, "My Name", "Number", "1.234", 1.234);
+    ExecuteAlgorithm(ws, "My Name", "Number", "2.456", 2.456);
+  }
+
+  void test_BadNumber()
+  {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    ExecuteAlgorithm(ws, "My Name", "Number", "OneTwoThreeFour", 0.0, true);
+  }
+
+  void test_BadNumberSeries()
+  {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    ExecuteAlgorithm(ws, "My Name", "Number Series", "FiveSixSeven", 0.0, true);
+  }
+
+  void test_NumberSeries()
+  {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234);
+    ExecuteAlgorithm(ws, "My Name", "Number Series", "2.456", 2.456);
+  }
+
+  void ExecuteAlgorithm(MatrixWorkspace_sptr testWS, std::string LogName, std::string LogType, std::string LogText,
+      double expectedValue, bool fails=false)
   {
     //add the workspace to the ADS
-    AnalysisDataService::Instance().add("AddSampleLogTest_Temporary", testWS);
+    AnalysisDataService::Instance().addOrReplace("AddSampleLogTest_Temporary", testWS);
 
     //execute algorithm
     AddSampleLog alg;
@@ -38,20 +75,45 @@ public:
     TS_ASSERT( alg.isInitialized() )
 
     alg.setPropertyValue("Workspace", "AddSampleLogTest_Temporary");
-    alg.setPropertyValue("LogName", "my name");
-    alg.setPropertyValue("LogText", "my data");
-
+    alg.setPropertyValue("LogName", LogName);
+    alg.setPropertyValue("LogText", LogText);
+    alg.setPropertyValue("LogType", LogType);
     TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT( alg.isExecuted() )
+    if (fails)
+    {
+      TS_ASSERT( !alg.isExecuted() )
+      return;
+    }
+    else
+    {
+      TS_ASSERT( alg.isExecuted() )
+    }
 
     //check output
     MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(alg.getProperty("Workspace")));
     
     const Run& wSpaceRun = output->run();
-    PropertyWithValue<std::string> *testProp = dynamic_cast<PropertyWithValue<std::string>*>(wSpaceRun.getLogData("my name"));
+    Property * prop;
+    TS_ASSERT_THROWS_NOTHING(prop = wSpaceRun.getLogData(LogName);)
+    if (!prop) return;
+
+    if (LogType == "String")
+    {
+      TS_ASSERT_EQUALS( prop->value(), LogText);
+    }
+    else if (LogType == "Number")
+    {
+      PropertyWithValue<double> *testProp = dynamic_cast<PropertyWithValue<double>*>(prop);
+      TS_ASSERT(testProp);
+      TS_ASSERT_DELTA((*testProp)(), expectedValue, 1e-5);
+    }
+    else if (LogType == "Number Series")
+    {
+      TimeSeriesProperty<double> *testProp = dynamic_cast<TimeSeriesProperty<double>*>(prop);
+      TS_ASSERT(testProp);
+      TS_ASSERT_DELTA(testProp->firstValue(), expectedValue, 1e-5);
+    }
     
-    TS_ASSERT(testProp)
-    TS_ASSERT_EQUALS(testProp->value(), "my data")
     //cleanup
     AnalysisDataService::Instance().remove(output->getName());
     
