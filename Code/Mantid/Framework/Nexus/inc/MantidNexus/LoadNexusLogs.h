@@ -82,7 +82,8 @@ namespace Mantid
                     const std::string & entry_class, 
                     boost::shared_ptr<API::MatrixWorkspace> workspace) const;
       /// Load an NXlog entry
-      void loadNXLog(::NeXus::File & file, const std::string & entry_name, 
+      void loadNXLog(::NeXus::File & file, const std::string & entry_name,
+                     const std::string & entry_class,
                      boost::shared_ptr<API::MatrixWorkspace> workspace) const;
       /// Load an IXseblock entry
       void loadSELog(::NeXus::File & file, const std::string & entry_name, 

@@ -130,9 +130,9 @@ namespace Mantid
           itr != iend; itr++)
       {
         std::string log_class = itr->second;
-        if( log_class == "NXlog" || entry_class == "NXpositioner" ) 
+        if( log_class == "NXlog" || log_class == "NXpositioner" ) 
         {
-          loadNXLog(file, itr->first, workspace);
+          loadNXLog(file, itr->first, log_class, workspace);
         }
         else if( log_class == "IXseblock" )
         {
@@ -144,15 +144,17 @@ namespace Mantid
     }
     
     /**
-     * Load an NX log entry
+     * Load an NX log entry a group type that has value and time entries.
      * @param file :: A reference to the NeXus file handle opened at the parent group
      * @param entry_name :: The name of the log entry
+     * @param entry_class :: The type of the entry
      * @param workspace :: A pointer to the workspace to store the logs
      */
     void LoadNexusLogs::loadNXLog(::NeXus::File & file, const std::string & entry_name, 
-                                MatrixWorkspace_sptr workspace) const
+                                  const std::string & entry_class,
+                                  MatrixWorkspace_sptr workspace) const
     {
-      file.openGroup(entry_name, "NXlog");
+      file.openGroup(entry_name, entry_class);
       // Validate the NX log class.
       std::map<std::string, std::string> entries = file.getEntries();
       if ((entries.find("value") == entries.end()) ||
