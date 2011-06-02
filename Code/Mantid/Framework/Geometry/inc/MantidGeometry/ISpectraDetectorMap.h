@@ -155,7 +155,7 @@ namespace Mantid
       if( lhs.nElements() != rhs.nElements() ) return false;
       ISpectraDetectorMap::const_iterator l_end = lhs.cend();
       ISpectraDetectorMap::const_iterator l_itr = lhs.cbegin();
-      ISpectraDetectorMap::const_iterator r_itr = lhs.cbegin();
+      ISpectraDetectorMap::const_iterator r_itr = rhs.cbegin();
       for( ; l_itr != l_end; ++l_itr, ++r_itr )
       {
         if( *l_itr != *r_itr ) return false;
