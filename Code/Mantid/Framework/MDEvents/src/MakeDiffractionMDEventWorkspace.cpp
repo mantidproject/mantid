@@ -97,8 +97,8 @@ namespace MDEvents
     propOptions.push_back("HKL");
     declareProperty("OutputDimensions", "Q (lab frame)",new ListValidator(propOptions),
       "What will be the dimensions of the output workspace?\n"
-      "  Q (lab frame): Wave-vector change of the neutron in the lab frame.\n"
-      "  Q (sample frame): Wave-vector change of the neutron in the frame of the sample (taking out goniometer rotation).\n"
+      "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
+      "  Q (sample frame): Wave-vector change of the lattice in the frame of the sample (taking out goniometer rotation).\n"
       "  HKL: Use the sample's UB matrix to convert to crystal's HKL indices."
        );
 
@@ -255,8 +255,7 @@ namespace MDEvents
     ws = boost::dynamic_pointer_cast<MDEventWorkspace3>( i_out );
 
     // Initalize the matrix to 3x3 identity
-    mat = Geometry::Matrix<double>(3,3);
-    mat.identityMatrix();
+    mat = Geometry::Matrix<double>(3,3, true);
 
     // ----------------- Handle the type of output -------------------------------------
 
@@ -266,7 +265,7 @@ namespace MDEvents
     {
       // Set the matrix based on goniometer angles
       mat = in_ws->mutableRun().getGoniometerMatrix();
-      // TODO: Is this right?: But we need to invert it, since we want to get the Q in the sample frame.
+      // But we need to invert it, since we want to get the Q in the sample frame.
       mat.Invert();
     }
     else if (OutputDimensions == "HKL")
@@ -281,6 +280,7 @@ namespace MDEvents
       dimensionNames[2] = "L";
       dimensionUnits = "lattice";
     }
+    // Q in the lab frame is the default, so nothing special to do.
 
     if (ws)
     {
