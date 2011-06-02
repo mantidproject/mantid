@@ -228,12 +228,15 @@ namespace Mantid
       }
       else if( entries.find("value") != entries.end() )
       {
-        float val_array[1];
         try
         {
+          // This may have a larger dimension than 1 bit it has no time field so take the first entry
           file.openData("value");
-          file.getData(val_array);
+          ::NeXus::Info info = file.getInfo();
+          boost::scoped_array<float> value(new float[info.dims[0]]);
+          file.getData(value.get());
           file.closeData();
+          logValue = new Kernel::PropertyWithValue<double>(propName, static_cast<double>(value[0]), true);
         }
         catch(::NeXus::Exception& e)
         {
@@ -243,7 +246,7 @@ namespace Mantid
           file.closeGroup();
           return;
         }
-        logValue = new Kernel::PropertyWithValue<double>(propName, static_cast<double>(val_array[0]), true);
+
       }
       else
       {
@@ -358,10 +361,11 @@ namespace Mantid
         try
         {
           const int nitems = info.dims[0];
-          boost::scoped_array<char> val_array(new char[nitems*item_length]);
+          const int total_length = nitems*item_length;
+          boost::scoped_array<char> val_array(new char[total_length]);
           file.getData(val_array.get());
           file.closeData();
-          values = std::string(val_array.get());
+          values = std::string(val_array.get(), total_length);
         }
         catch(::NeXus::Exception&)
         {
