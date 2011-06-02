@@ -1369,8 +1369,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
       pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ")\n";
     pyS += "l = gs.activeLayer()\n"
       "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
-      "l.setTitle(\"" + m_title.c_str() + "\")\n"
-      "l.setAxisTitle(Layer.Bottom, \"Time / microsecond\")\n";
+      "l.setTitle(\"" + m_title.c_str() + "\")\n";
 
     Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
     MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
@@ -1505,8 +1504,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
       pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + "0" + ")\n";
     pyS += "l = gs.activeLayer()\n"
       "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
-      "l.setTitle(\"" + m_title.c_str() + "\")\n"
-      "l.setAxisTitle(Layer.Bottom, \"Time / microsecond\")\n";
+      "l.setTitle(\"" + m_title.c_str() + "\")\n";
 
     Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
     MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);

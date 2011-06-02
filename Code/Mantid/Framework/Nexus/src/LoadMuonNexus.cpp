@@ -168,8 +168,12 @@ namespace Mantid
       // Create the 2D workspace for the output
       DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
         (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
-      // Set the units on the workspace to TOF & Counts
-      localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+      // Set the unit on the workspace to muon time, for now in the form of a Label Unit
+      boost::shared_ptr<Kernel::Units::Label> lblUnit = 
+        boost::dynamic_pointer_cast<Kernel::Units::Label>(UnitFactory::Instance().create("Label"));
+      lblUnit->setLabel("Time","microsecond");
+      localWorkspace->getAxis(0)->unit() = lblUnit;
+      // Set y axis unit
       localWorkspace->setYUnit("Counts");
 
       WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);

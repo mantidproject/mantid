@@ -83,7 +83,7 @@ public:
     TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
 
     // Check the unit has been set correctly
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" );
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "Label" );
     TS_ASSERT( ! output-> isDistribution() );
 
     /*  - other tests from LoadRawTest - These test data not in current Nexus files
@@ -235,7 +235,7 @@ public:
 		TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
 
 		// Check the unit has been set correctly
-		TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" );
+		TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "Label" );
     TS_ASSERT( ! output-> isDistribution() );
 
 			//check that sample name has been set correctly
@@ -274,7 +274,7 @@ public:
     TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
 
     // Check the unit has been set correctly
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" );
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "Label" );
     TS_ASSERT( ! output-> isDistribution() );
 
     //check that sample name has been set correctly
@@ -337,7 +337,7 @@ public:
     TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
 
     // Check the unit has been set correctly
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" );
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "Label" );
     TS_ASSERT( ! output-> isDistribution() );
 
     //check that sample name has been set correctly
