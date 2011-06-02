@@ -217,7 +217,13 @@ class LoadRun(ReductionStep):
             
             
             # Find available configuration files
-            directory,_ = os.path.split(filepath)
+            # First, check whether we have access to the SNS mount, if
+            # not we will look in the data directory
+            sns_mount = os.path.normcase("/SNS/EQSANS/shared/instrument_configuration/")
+            if os.path.isdir(sns_mount):
+                directory = sns_mount
+            else:
+                directory,_ = os.path.split(filepath)
             files = os.listdir(directory)
             for file in files:
                 name, ext = os.path.splitext(file)
