@@ -96,3 +96,8 @@ if ( CXXTEST_FOUND )
   set_property ( TARGET MDDataObjectsTest PROPERTY FOLDER "UnitTests" )
 endif ()
 
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS MDDataObjects DESTINATION ${PLUGINS_DIR} )
