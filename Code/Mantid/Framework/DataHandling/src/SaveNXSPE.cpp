@@ -66,6 +66,15 @@ namespace Mantid
 
       declareProperty("ki_over_kf_scaling", true,
           "Flags in the file whether Ki/Kf scaling has been done or not.");
+
+// optional par or phx file
+     std::vector<std::string> fileExts(2);
+        fileExts[0]=".par";
+        fileExts[1]=".phx";
+        declareProperty(new FileProperty("ParFile","not_used.par",FileProperty::OptionalLoad, fileExts),
+       "An optional file that contains the list of angular parameters for the detectors and detectors groups,\n\
+        used if the values produced by Mantid FindDetectorsPar algorithm are for some reason unsatisfactory\n\
+        If specified, will use data from the file instead of the data, calculated from the instument description");
     }
 
     /**
@@ -276,10 +285,14 @@ namespace Mantid
           }
         }
      // execute the subalgorithm to calculate the detector's parameters;
-      IAlgorithm_sptr   spCalcDetPar = this->createSubAlgorithm("FindDetectorsPar", 0, 0.01, true, 1);
+      IAlgorithm_sptr   spCalcDetPar = this->createSubAlgorithm("FindDetectorsPar", 0, 0.1, true, 1);
 
       spCalcDetPar->initialize();
       spCalcDetPar->setPropertyValue("InputWorkspace", inputWS->getName());
+      std::string parFileName = this->getPropertyValue("ParFile");
+      if(!(parFileName.empty()||parFileName=="not_used.par")){
+          spCalcDetPar->setPropertyValue("ParFile",parFileName);
+      }
       spCalcDetPar->execute();
 
       //

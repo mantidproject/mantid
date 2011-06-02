@@ -59,7 +59,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( saver->initialize() );
     TS_ASSERT( saver->isInitialized() );
 
-    TS_ASSERT_EQUALS( static_cast<int>(saver->getProperties().size()), 5 );
+    TS_ASSERT_EQUALS( static_cast<int>(saver->getProperties().size()), 6 );
   }
 
   void testExec()
@@ -89,7 +89,28 @@ public:
     if( Poco::File(outputFile).exists() )
       Poco::File(outputFile).remove();
   }
+  void testExecWithParFile()
+  {
+   
+     std::string WSName = "saveNXSPETest_input";
+     MatrixWorkspace_const_sptr input = makeWorkspace(WSName);
 
+     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) );
+     TS_ASSERT_THROWS_NOTHING( saver->setProperty("ParFile","testParFile.par"));
+     std::string outputFile("testNXSPE.nxspe");
+     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) );
+      outputFile = saver->getPropertyValue("Filename");//get absolute path
+
+    // throws file not exist from subalgorithm
+      saver->setRethrows(true);
+      TS_ASSERT_THROWS( saver->execute(),Kernel::Exception::FileError);
+  
+      TS_ASSERT( Poco::File(outputFile).exists() );
+
+   
+      if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
+      AnalysisDataService::Instance().remove(WSName);
+  }
   void xtestThatOutputIsValidFromWorkspaceWithNumericAxis()
   {
     // Create a small test workspace
@@ -99,6 +120,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) );
     const std::string outputFile("testNXSPE_Axis.nxspe");
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) );
+    // do not forget to nullify parFile property, as it will keep it from previous set 
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("ParFile", ""))
     saver->setRethrows(true);
     saver->execute();
     TS_ASSERT( saver->isExecuted() );
@@ -176,6 +199,7 @@ private:
 
     return inputWS;
   }
+ 
 private:
   IAlgorithm* saver;
 };

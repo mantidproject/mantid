@@ -78,6 +78,7 @@ public:
 
  }
  void testParFileProvided(){
+     // 3 point par file will be used with the 3-detector workspace defined above
       std::string fileName("testParFile.par");
       writePARfile3(fileName.c_str());
       TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("InputWorkspace", inputWS->getName()));
@@ -99,8 +100,8 @@ public:
         pattern[2] = "1,2,3,";  // dist
         pattern[1] = "2,3,4,";    // azimutal
         pattern[0] = "-3,-4,-5,"; //polar
-        pattern[4] = "4,5,6,";    // az_width
-        pattern[3] = "5,6,7,";    // pol_width
+        pattern[4] = "75.9638,68.1986,63.4349,"; // atan(4,5,6)/dist;    // az_width
+        pattern[3] = "78.6901,71.5651,66.8014,"; // atan(5,6,7)/dist;    // pol_width
         for(int i=0;i<5;i++){
             std::stringstream buf;
             for(int j=0;j<3;j++){
@@ -115,7 +116,7 @@ public:
  
  void testParFileProvidedWrong(){
       std::string fileName("testParFile.par");
-      // this is 2 row par file for 3 detectors workspace
+      // this is 2 row par file for 3 detectors workspace -- will be ignored, warning  and internal algorithm used instead
       writePARfile(fileName.c_str());
       // should use internal algorithm
       TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("InputWorkspace", inputWS->getName()));

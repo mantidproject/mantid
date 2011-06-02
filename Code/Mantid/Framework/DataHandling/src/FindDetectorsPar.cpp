@@ -7,6 +7,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/TableRow.h"
+#include <Poco/File.h>
 #include <limits>
 #include <iostream>
 
@@ -47,6 +48,7 @@ void FindDetectorsPar::init()
   std::vector<std::string> fileExts(2);
     fileExts[0]=".par";
     fileExts[1]=".phx";
+  
     declareProperty(new FileProperty("ParFile","not_used.par",FileProperty::OptionalLoad, fileExts),
     "An optional file that contains of the list of angular parameters for the detectors and detectors groups;\n"
     "If specified, will use data from file instead of the data, calculated from the instument description");
@@ -73,16 +75,20 @@ FindDetectorsPar::exec()
   // try to load par file if one is availible
   std::string fileName = this->getProperty("ParFile");
   if(!(fileName.empty()||fileName=="not_used.par")){
-      size_t nPars = loadParFile(fileName);
-      if(nPars == nHist){
+     if(!Poco::File(fileName).exists()){
+         g_log.error()<<" FindDetectorsPar: attempting to load par file: "<<fileName<<" but it does not exist\n";
+         throw(Kernel::Exception::FileError(" file not exist",fileName));
+     }
+     size_t nPars = loadParFile(fileName);
+     if(nPars == nHist){
           this->populate_values_from_file(inputWS);
           this->set_output_table();
           return;
-      }else{
-          g_log.information()<<" number of parameters in the file: "<<fileName<<"  not equal to the nuber of histohramm in the workspace"
+     }else{
+          g_log.warning()<<" number of parameters in the file: "<<fileName<<"  not equal to the nuber of histohramm in the workspace"
                               << inputWS->getName()<<std::endl;
-          g_log.information()<<" trying to calculate detectors parameters algorithmically\n";
-      }
+          g_log.warning()<<" calculating detectors parameters algorithmically\n";
+     }
   }
   
    
@@ -287,26 +293,32 @@ FindDetectorsPar::loadParFile(const std::string &fileName){
 void 
 FindDetectorsPar::populate_values_from_file(const API::MatrixWorkspace_sptr & inputWS)
 {
-    if(this->current_ASCII_file.Type == PAR_type)return;
-
     size_t nHist = inputWS->getNumberHistograms();
 
-    Geometry::IObjComponent_const_sptr sample =inputWS->getInstrument()->getSample();
-     // Loop over the spectra
-   for (size_t i = 0; i < nHist; i++){
-        Geometry::IDetector_sptr spDet;
-        try{
-            spDet= inputWS->getDetector(i);
-        }catch(Kernel::Exception::NotFoundError &){
-            continue;
+    if(this->current_ASCII_file.Type == PAR_type){
+        // in this case data in azimuthal width and polar width are in fact real sizes in meters; have to transform it in into angular values
+        for (size_t i = 0; i < nHist; i++){
+            azimuthal_width[i]=atan2(azimuthal_width[i],secondary_flightpath[i])*rad2deg;
+            polar_width[i]    =atan2(polar_width[i],secondary_flightpath[i])*rad2deg;
         }
-    // Check that we aren't writing a monitor...
-       if (spDet->isMonitor())continue;
-     /// this is the only value, which is not defined in phx file, so we calculate it   
-        secondary_flightpath[i]     =  spDet->getDistance(*sample);
-   }
+    }else{
 
+       Geometry::IObjComponent_const_sptr sample =inputWS->getInstrument()->getSample();
+     // Loop over the spectra
+     for (size_t i = 0; i < nHist; i++){
+            Geometry::IDetector_sptr spDet;
+            try{
+                spDet= inputWS->getDetector(i);
+            }catch(Kernel::Exception::NotFoundError &){
+                continue;
+            }
+        // Check that we aren't writing a monitor...
+        if (spDet->isMonitor())continue;
+        /// this is the only value, which is not defined in phx file, so we calculate it   
+           secondary_flightpath[i]     =  spDet->getDistance(*sample);
+     }
 
+    }
 }
 //
 int 
