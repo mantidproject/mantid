@@ -68,7 +68,11 @@ namespace DataObjects
 
     PeaksWorkspace();
 
+    PeaksWorkspace(PeaksWorkspace & other);
+
     virtual ~PeaksWorkspace();
+
+    boost::shared_ptr<PeaksWorkspace> clone();
 
     void appendFile( std::string filename, Mantid::Geometry::IInstrument_sptr inst);
 
@@ -178,6 +182,8 @@ namespace DataObjects
 
     /** Column names */
     std::vector<std::string> columnNames;
+
+    void initColumns();
 
 
   public:

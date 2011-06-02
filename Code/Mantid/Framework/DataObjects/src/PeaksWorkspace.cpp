@@ -44,7 +44,43 @@ namespace DataObjects
    *
    * @return PeaksWorkspace object
    */
-  PeaksWorkspace::PeaksWorkspace():ITableWorkspace( )
+  PeaksWorkspace::PeaksWorkspace()
+  : ITableWorkspace()
+  {
+    initColumns();
+  }
+
+
+  //---------------------------------------------------------------------------------------------
+  /** Copy constructor
+   *
+   * @param other :: other PeaksWorkspace to copy from
+   * @return
+   */
+  PeaksWorkspace::PeaksWorkspace(PeaksWorkspace & other)
+  : ITableWorkspace(),
+    peaks(other.peaks),
+    m_defaultInst(other.m_defaultInst)
+  {
+    initColumns();
+    this->peaks = other.peaks;
+  }
+
+  //---------------------------------------------------------------------------------------------
+  /** Clone a shared pointer
+   *
+   * @param other :: other PeaksWorkspace to copy from
+   * @return copy of the peaksworkspace
+   */
+  boost::shared_ptr<PeaksWorkspace> PeaksWorkspace::clone()
+  {
+    // Copy construct and return
+    return boost::shared_ptr<PeaksWorkspace>(new PeaksWorkspace(*this));
+  }
+
+  //---------------------------------------------------------------------------------------------
+  /** Initialize all columns */
+  void PeaksWorkspace::initColumns()
   {
     // Note: These column names must match what PeakColumn expects!
     addColumn( "int", "RunNumber");
@@ -65,7 +101,6 @@ namespace DataObjects
     addColumn( "V3D", "QLab");
     addColumn( "V3D", "QSample");
   }
-
 
 
   //---------------------------------------------------------------------------------------------
