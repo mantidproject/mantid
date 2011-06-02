@@ -280,6 +280,18 @@ namespace Mantid
       if (hint.empty())
         return "";
 
+      // if it looks like a full filename just do a quick search for it
+      Poco::Path hintPath(hint);
+      if (!hintPath.getExtension().empty())
+      {
+        // check in normal search locations
+        std::string path = getFullPath(hint);
+        if (!path.empty() && Poco::File(path).exists())
+        {
+          return path;
+        }
+      }
+
       // so many things depend on the facility just get it now
       const Kernel::FacilityInfo facility = this->getFacility(hint);
       // initialize the archive searcher
@@ -294,18 +306,9 @@ namespace Mantid
         }
       }
 
-      // if it looks like a full filename just do a quick search for it
-      Poco::Path hintPath(hint);
+      // ask the archive search for help
       if (!hintPath.getExtension().empty())
       {
-        // check in normal search locations
-        std::string path = getFullPath(hint);
-        if (!path.empty() && Poco::File(path).exists())
-        {
-          return path;
-        }
-        // ask the archive search for help
-
         if (arch)
         {
           std::string path = arch->getPath(hint);
