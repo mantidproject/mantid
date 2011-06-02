@@ -356,6 +356,8 @@ class Reducer(object):
     instrument = None    
     ## Path for data files
     _data_path = '.'
+    ## Path for output files
+    _output_path = None
     ## List of data files to process
     _data_files = {}
     ## List of workspaces that were modified
@@ -417,6 +419,17 @@ class Reducer(object):
             self._data_path = path
         else:
             raise RuntimeError, "Reducer.set_data_path: provided path is not a directory (%s)" % path
+        
+    def set_output_path(self, path):
+        """
+            Set the path for output files
+            @param path: output file path
+        """
+        path = os.path.normcase(path)
+        if os.path.isdir(path):
+            self._output_path = path
+        else:
+            raise RuntimeError, "Reducer.set_output_path: provided path is not a directory (%s)" % path
         
     def _full_file_path(self, filename):
         """
@@ -527,8 +540,16 @@ class Reducer(object):
         #any clean up, possibly removing workspaces 
         self.post_process()
     
+        # Determine which directory to use
+        output_dir = self._data_path
+        if self._output_path is not None:
+            if os.path.isdir(self._output_path):
+                output_dir = self._output_path
+            else:
+                output_dir = os.path.expanduser('~')
+
         self.log_text += "Reduction completed in %g sec\n" % (time.time()-t_0)
-        log_path = os.path.join(self._data_path,"%s_reduction.log" % instrument_name)
+        log_path = os.path.join(output_dir,"%s_reduction.log" % instrument_name)
         self.log_text += "Log saved to %s" % log_path
         
         # Write the log to file

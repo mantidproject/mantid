@@ -13,4 +13,5 @@ def NGSANS():
     SolidAngle()
     MonitorNormalization()
     AzimuthalAverage()
+    ReductionSingleton()._resolution_calculator = None
     

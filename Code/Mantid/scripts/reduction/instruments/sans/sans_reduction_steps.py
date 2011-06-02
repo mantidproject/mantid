@@ -12,7 +12,6 @@ from reduction import validate_step
 # Mantid imports
 from mantidsimple import *
     
-    
 class BaseBeamFinder(ReductionStep):
     """
         Base beam finder. Holds the position of the beam center
@@ -590,7 +589,7 @@ class LoadRun(ReductionStep):
             sdd += self._sample_det_offset
 
         # Store the sample-detector distance.
-        mantid[workspace].getRun().addProperty_dbl("sample_detector_distance", sdd, True)
+        mantid[workspace].getRun().addProperty_dbl("sample_detector_distance", sdd, 'mm', True)
         
         # Compute beam diameter at the detector
         src_to_sample = mtd[workspace].getRun().getProperty("source-sample-distance").value
@@ -732,6 +731,7 @@ class WeightedAzimuthalAverage(ReductionStep):
             data_ws = mtd[workspace].getRun().getProperty("data_ws").value 
             Q1DTOF(InputWorkspace=data_ws, CorrectionWorkspace=workspace, OutputWorkspace=output_ws, OutputBinning=self._binning)
         else:
+            #Q1D(InputWorkspace=workspace, InputForErrors=workspace, OutputWorkspace=output_ws, OutputBinning=self._binning)
             Q1DWeighted(workspace, output_ws, self._binning,
                     NPixelDivision=self._nsubpix,
                     PixelSizeX=pixel_size_x,
@@ -1071,13 +1071,21 @@ class SaveIqAscii(ReductionStep):
         super(SaveIqAscii, self).__init__()
         
     def execute(self, reducer, workspace):
+        # Determine which directory to use
+        output_dir = reducer._data_path
+        if reducer._output_path is not None:
+            if os.path.isdir(reducer._output_path):
+                output_dir = reducer._output_path
+            else:
+                raise RuntimeError, "SaveIqAscii could not save in the following directory: %s" % reducer._output_path
+            
         log_text = ""
         if reducer._azimuthal_averager is not None:
             output_ws = reducer._azimuthal_averager.get_output_workspace(workspace)
             if mtd.workspaceExists(output_ws):
-                filename = os.path.join(reducer._data_path, output_ws+'.txt')
+                filename = os.path.join(output_dir, output_ws+'.txt')
                 SaveAscii(Filename=filename, Workspace=output_ws)
-                filename = os.path.join(reducer._data_path, output_ws+'.xml')
+                filename = os.path.join(output_dir, output_ws+'.xml')
                 SaveCanSAS1D(Filename=filename, InputWorkspace=output_ws)
                 
                 log_text = "I(Q) saved in %s" % (filename)
@@ -1085,7 +1093,7 @@ class SaveIqAscii(ReductionStep):
         if reducer._two_dim_calculator is not None:
             output_ws = reducer._two_dim_calculator.get_output_workspace(workspace)
             if mtd.workspaceExists(output_ws):
-                filename = os.path.join(reducer._data_path, output_ws+'.dat')
+                filename = os.path.join(output_dir, output_ws+'.dat')
                 SaveNISTDAT(InputWorkspace=output_ws, Filename=filename)
                 
                 if len(log_text)>0:

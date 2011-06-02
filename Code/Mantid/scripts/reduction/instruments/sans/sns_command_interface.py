@@ -12,6 +12,8 @@ from hfir_command_interface import SaveIqAscii, NoSaveIq
 from hfir_command_interface import ThetaDependentTransmission, BckThetaDependentTransmission, SetBckTransmission
 from hfir_command_interface import TransmissionDarkCurrent, BckTransmissionDarkCurrent
 from hfir_command_interface import SetDirectBeamAbsoluteScale, SetAbsoluteScale
+from hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance
+from hfir_command_interface import SensitivityDirectBeamCenter, SetSensitivityBeamCenter, SensitivityScatteringBeamCenter
 from sns_reducer import EqSansReducer
 import sns_instrument
 import sns_reduction_steps

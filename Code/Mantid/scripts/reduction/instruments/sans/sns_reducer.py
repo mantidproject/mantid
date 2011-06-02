@@ -13,10 +13,6 @@
         _data_loader
         _background_subtracter
 
-    
-    Notes: 
-        - Default mask on EQ-SANS: read it from logs?
-
 """
 from sans_reducer import SANSReducer
 from reduction import ReductionStep

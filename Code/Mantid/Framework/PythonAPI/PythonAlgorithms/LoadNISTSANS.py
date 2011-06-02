@@ -3,6 +3,7 @@
     Code contributed by Andrew Jackson (NIST).
 """
 from MantidFramework import *
+from mantidsimple import *
 import math
   
 from struct import unpack

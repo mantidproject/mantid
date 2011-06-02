@@ -98,6 +98,12 @@ class SANSInstrumentWidget(BaseWidget):
         self.connect(self._summary.normalization_none_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
         self.connect(self._summary.normalization_monitor_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
 
+        # Output directory
+        self.connect(self._summary.select_output_dir_radio, QtCore.SIGNAL("clicked()"), self._output_dir_clicked)
+        self.connect(self._summary.use_data_dir_radio, QtCore.SIGNAL("clicked()"), self._output_dir_clicked)
+        self.connect(self._summary.output_dir_browse_button, QtCore.SIGNAL("clicked()"), self._output_dir_browse)
+        self._output_dir_clicked()
+        
         # Q range
         self._summary.n_q_bins_edit.setText(QtCore.QString("100"))
         self._summary.n_sub_pix_edit.setText(QtCore.QString("1"))
@@ -170,6 +176,19 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
             
+    def _output_dir_clicked(self):
+        use_data_dir = self._summary.use_data_dir_radio.isChecked()
+        self._summary.output_dir_edit.setEnabled(not use_data_dir)
+        self._summary.output_dir_browse_button.setEnabled(not use_data_dir)
+
+    def _output_dir_browse(self):
+        output_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
+                                                            os.path.expanduser('~'), 
+                                                            QtGui.QFileDialog.ShowDirsOnly
+                                                            | QtGui.QFileDialog.DontResolveSymlinks)
+        if output_dir:
+            self._summary.output_dir_edit.setText(output_dir)   
+        
     def _tof_clicked(self, is_checked):
         self._summary.low_tof_edit.setEnabled(not is_checked)
         self._summary.high_tof_edit.setEnabled(not is_checked)
@@ -378,6 +397,12 @@ class SANSInstrumentWidget(BaseWidget):
             self._append_rectangle(item)
             
         self._masked_detectors = state.detector_ids
+        
+        # Output directory
+        self._summary.select_output_dir_radio.setChecked(not state.use_data_directory)
+        self._summary.use_data_dir_radio.setChecked(state.use_data_directory)
+        self._summary.output_dir_edit.setText(QtCore.QString(str(state.output_directory)))
+        self._output_dir_clicked()        
 
     def _prepare_field(self, is_enabled, stored_value, chk_widget, edit_widget, suppl_value=None, suppl_edit=None):
         #to_display = str(stored_value) if is_enabled else ''
@@ -452,6 +477,10 @@ class SANSInstrumentWidget(BaseWidget):
         
         # Config Mask
         m.use_config_mask = self._summary.config_mask_chk.isChecked()
+
+        # Output directory
+        m.use_data_directory = self._summary.use_data_dir_radio.isChecked()
+        m.output_directory = str(self._summary.output_dir_edit.text())
         
         return m
 

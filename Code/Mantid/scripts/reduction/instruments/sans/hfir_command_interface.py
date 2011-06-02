@@ -210,14 +210,10 @@ def BckThetaDependentTransmission(theta_dependence=True):
     ReductionSingleton().get_background().set_trans_theta_dependence(theta_dependence)
     
 def SetSampleDetectorOffset(distance):
-    if not isinstance(ReductionSingleton().get_data_loader(), sans_reduction_steps.LoadRun):
-        raise RuntimeError, "SetSampleDetectorOffset was called with the wrong data loader: re-initialize your instrument (e.g. HFIRSANS() )"    
     ReductionSingleton().get_data_loader().set_sample_detector_offset(distance)
     
 
 def SetSampleDetectorDistance(distance):
-    if not isinstance(ReductionSingleton().get_data_loader(), sans_reduction_steps.LoadRun):
-        raise RuntimeError, "SetSampleDetectorDistance was called with the wrong data loader: re-initialize your instrument (e.g. HFIRSANS() )"    
     ReductionSingleton().get_data_loader().set_sample_detector_distance(distance)
     
 def SetWavelength(wavelength, spread):

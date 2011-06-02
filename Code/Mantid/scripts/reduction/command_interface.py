@@ -70,6 +70,9 @@ def Clear(reducer_cls=None):
 
 def DataPath(path):
     ReductionSingleton().set_data_path(path)
+    
+def OutputPath(path):
+    ReductionSingleton().set_output_path(path)
 
 def Reduce1D():
     return ReductionSingleton().reduce()

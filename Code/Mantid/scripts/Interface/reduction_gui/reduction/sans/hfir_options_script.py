@@ -79,7 +79,10 @@ class ReductionOptions(BaseScriptElement):
     
     # Masked detector IDs
     detector_ids = ''
-
+    
+    # Output directory
+    use_data_directory = True
+    output_directory = ''
     
     NORMALIZATION_NONE = 0
     NORMALIZATION_TIME = 1
@@ -149,7 +152,10 @@ class ReductionOptions(BaseScriptElement):
         #   Detector IDs
         if len(self.detector_ids)>0:
             script += "MaskDetectors([%s])\n" % self.detector_ids
-
+        # Output directory
+        if not self.use_data_directory:
+            script += "OutputPath(\"%s\")\n" % self.output_directory
+        
         return script           
     
     def to_xml(self):
@@ -179,6 +185,10 @@ class ReductionOptions(BaseScriptElement):
         xml += "  <log_binning>%s</log_binning>\n" % str(self.log_binning)
 
         xml += "  <normalization>%d</normalization>\n" % self.normalization
+ 
+        # Output directory
+        xml += "  <UseDataDirectory>%s</UseDataDirectory>\n" % str(self.use_data_directory)
+        xml += "  <OutputDirectory>%s</OutputDirectory>\n" % self.output_directory
         
         xml += "</Instrument>\n"
         
@@ -243,6 +253,12 @@ class ReductionOptions(BaseScriptElement):
         
         self.solid_angle_corr = BaseScriptElement.getBoolElement(instrument_dom, "solid_angle_corr",
                                                                  default = ReductionOptions.solid_angle_corr)
+        
+        # Output directory
+        self.use_data_directory = BaseScriptElement.getBoolElement(instrument_dom, "UseDataDirectory",
+                                                                   default = ReductionOptions.use_data_directory) 
+        self.output_directory = BaseScriptElement.getStringElement(instrument_dom, "OutputDirectory",
+                                                                   default = ReductionOptions.output_directory)
         
         # Dark current - take care of backward compatibility
         if mtd_version!=0 and mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
@@ -356,4 +372,7 @@ class ReductionOptions(BaseScriptElement):
         
         self.shapes = []
         self.detector_ids = ''
+
+        self.use_data_directory = ReductionOptions.use_data_directory
+        self.output_directory = ReductionOptions.output_directory
 
