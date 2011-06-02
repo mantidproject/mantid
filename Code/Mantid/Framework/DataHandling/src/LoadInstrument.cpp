@@ -165,6 +165,7 @@ namespace Mantid
         try
         {
           DateAndTime d(pRootElem->getAttribute("valid-from"));
+          m_instrument->setValidFromDate(d);
         }
         catch(...)
         {
@@ -174,6 +175,8 @@ namespace Mantid
 
       if ( !pRootElem->hasAttribute("valid-to") )
       {
+        DateAndTime d = DateAndTime::get_current_time();
+        m_instrument->setValidToDate(d);
         // Ticket #2335: no required valid-to date.
         //throw Kernel::Exception::InstrumentDefinitionError("<instrument> element must contain a valid-to tag", m_filename);
       }
@@ -182,6 +185,7 @@ namespace Mantid
         try
         {
           DateAndTime d(pRootElem->getAttribute("valid-to"));
+          m_instrument->setValidToDate(d);
         }
         catch(...)
         {

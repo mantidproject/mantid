@@ -11,6 +11,7 @@
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <string>
+#include "MantidKernel/DateAndTime.h"
 
 namespace Mantid
 {
@@ -60,6 +61,8 @@ public:
   virtual ~IInstrument() {}
 
   virtual std::string getName() const = 0;
+
+
 
   /// Returns a pointer to the geometrical object representing the source
   virtual Geometry::IObjComponent_sptr getSource() const = 0;
@@ -122,6 +125,30 @@ public:
 
   virtual void getInstrumentParameters(double & l1, Geometry::V3D & beamline,
       double & beamline_norm, Geometry::V3D & samplePos) const = 0;
+
+  /// @return the date from which the instrument definition begins to be valid.
+  Kernel::DateAndTime getValidFromDate() const
+  { return m_ValidFrom; }
+
+  /// @return the date at which the instrument definition is no longer valid.
+  Kernel::DateAndTime getValidToDate() const
+  { return m_ValidTo; }
+
+  /// Set the date from which the instrument definition begins to be valid.
+  /// @param val :: date
+  void setValidFromDate(const Kernel::DateAndTime val)
+  { m_ValidFrom = val; }
+
+  /// Set the date at which the instrument definition is no longer valid.
+  /// @param val :: date
+  void setValidToDate(const Kernel::DateAndTime val)
+  { m_ValidTo = val; }
+
+protected:
+  /// the date from which the instrument definition begins to be valid.
+  Kernel::DateAndTime m_ValidFrom;
+  /// the date at which the instrument definition is no longer valid.
+  Kernel::DateAndTime m_ValidTo;
 };
 
 /// Shared pointer to IInstrument

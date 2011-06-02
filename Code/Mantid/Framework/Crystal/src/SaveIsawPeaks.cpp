@@ -85,8 +85,9 @@ namespace Crystal
     out << "Version: 2.0  Facility: SNS " ;
     out <<  " Instrument: " <<  inst->getName() <<  "  Date: " ;
 
-    //TODO: Fill in instrument date
-    Kernel::DateAndTime expDate = Kernel::DateAndTime::get_current_time();
+    //TODO: The experiment date might be more useful than the instrument date.
+    // For now, this allows the proper instrument to be loaded back after saving.
+    Kernel::DateAndTime expDate = inst->getValidFromDate() + 1.0;
     out <<  expDate.to_ISO8601_string() << std::endl;
 
     out << "This is the header format:" << std::endl;

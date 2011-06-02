@@ -138,6 +138,12 @@ public:
     TS_ASSERT_THROWS_NOTHING( loadAgain.execute() );
     TS_ASSERT_EQUALS( output->getBaseInstrument(), i );
 
+    // Valid-from/to
+    Kernel::DateAndTime validFrom("1900-01-31T23:59:59");
+    Kernel::DateAndTime validTo("2100-01-31 23:59:59");
+    TS_ASSERT_EQUALS( i->getValidFromDate(), validFrom);
+    TS_ASSERT_EQUALS( i->getValidToDate(), validTo);
+
     AnalysisDataService::Instance().remove(wsName);
   }
 

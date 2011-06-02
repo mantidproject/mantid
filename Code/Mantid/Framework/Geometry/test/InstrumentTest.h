@@ -237,6 +237,17 @@ public:
     TS_ASSERT_EQUALS(dets.size(), 36*5);
   }
 
+  void test_getValidFromDate()
+  {
+    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
+    Kernel::DateAndTime validFrom("1900-01-31T23:59:59");
+    Kernel::DateAndTime validTo("2100-01-31 23:59:59");
+    inst->setValidFromDate(validFrom);
+    inst->setValidToDate(validTo);
+    TS_ASSERT_EQUALS( inst->getValidFromDate(), validFrom);
+    TS_ASSERT_EQUALS( inst->getValidToDate(), validTo);
+
+  }
 
 private:
   Instrument instrument;
