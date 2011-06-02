@@ -106,8 +106,6 @@ private:
     const int nSpectra(nTubes*nPixelsPerTube);
     Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(nSpectra,nBins);
     testWS->setInstrument(createTestInstrument(nTubes, nPixelsPerTube));
-    // Need spectra mapping
-    testWS->replaceSpectraMap(new Mantid::Geometry::OneToOneSpectraDetectorMap(0, nSpectra));
     // Set a spectra to have high count such that the fail the test
     const int failedTube(1);
     // Set a high value to tip that tube over the max count rate
@@ -127,8 +125,7 @@ private:
 
     // Need a tube based instrument.
     // pixels
-    // Pixels will be numbered simply from 0->nTubes*nPixelsPerTube with a 1:1 mapping to 
-    // workspace index and spectra number
+    // Pixels will be numbered simply from 1->nTubes*nPixelsPerTube with a 1:1 mapping 
     Instrument_sptr testInst(new Instrument("Merlin-like"));
     
     // Pixel shape
@@ -147,7 +144,7 @@ private:
       {
         lexer.str("");
         lexer << "pixel-" << i*nPixelsPerTube + j;
-        Detector * pixel = new Detector(lexer.str(), i*nPixelsPerTube + j, pixelShape, tube);
+        Detector * pixel = new Detector(lexer.str(), i*nPixelsPerTube + j + 1, pixelShape, tube);
         const double xpos = 0.0;
         const double ypos = j*pixelHeight;
         pixel->setPos(xpos, ypos, 0.0);

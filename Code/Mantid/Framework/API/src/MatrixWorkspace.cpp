@@ -70,9 +70,9 @@ namespace Mantid
       // Bypass the initialization if the workspace has already been initialized.
       if (m_isInitialized) return;
 
-      // Setup a default 1:1 spectra map that goes from 0->(NVectors-1)
+      // Setup a default 1:1 spectra map that goes from 1->NVectors
       // Do this before derived init so that it can be replaced if necessary
-      this->replaceSpectraMap(new Geometry::OneToOneSpectraDetectorMap(0,static_cast<specid_t>(NVectors)-1));
+      this->replaceSpectraMap(new Geometry::OneToOneSpectraDetectorMap(1,static_cast<specid_t>(NVectors)));
 
       // Invoke init() method of the derived class inside a try/catch clause
       try
@@ -633,9 +633,9 @@ namespace Mantid
       const size_t newLength = newAxis->length();
       if( newLength <= oldLength + 1 && newLength >= oldLength - 1 )
       {
-	// If we're OK, then delete the old axis and set the pointer to the new one
-	delete m_axes[axisIndex];
-	m_axes[axisIndex] = newAxis;
+        // If we're OK, then delete the old axis and set the pointer to the new one
+        delete m_axes[axisIndex];
+        m_axes[axisIndex] = newAxis;
       }
       else
       {

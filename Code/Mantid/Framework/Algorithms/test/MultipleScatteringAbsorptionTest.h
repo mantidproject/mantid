@@ -74,10 +74,6 @@ public:
   {
     // setup the test workspace
     Workspace2D_sptr wksp = WorkspaceCreationHelper::Create2DWorkspaceBinned(9,16,1000,1000);
-    std::vector<detid_t> specdetmap;
-    for(detid_t i = 0; i < 9; ++i)
-      specdetmap.push_back(i+1);
-    wksp->replaceSpectraMap(new SpectraDetectorMap(specdetmap));
     wksp->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
     AnalysisDataService::Instance().add("TestInputWS",wksp);
 

@@ -86,7 +86,7 @@ public:
 
     // Check the detectors mapped to the single spectra
     const Geometry::ISpectraDetectorMap & specMap_out = output2D->spectraMap();
-    const int newSpectrumNo = 1;
+    const int newSpectrumNo = 2;
     TS_ASSERT_EQUALS( specMap_out.ndet(newSpectrumNo), nspecEntries);
 
     // And their values
@@ -96,8 +96,8 @@ public:
       TS_FAIL("SpectraMap has been remapped incorrectly");
       return;
     }
-    TS_ASSERT_EQUALS(dets[0],2);
-    TS_ASSERT_EQUALS(dets[1],3);
+    TS_ASSERT_EQUALS(dets[0],3);
+    TS_ASSERT_EQUALS(dets[1],4);
   }
 
   void testExecWithoutLimits()
@@ -154,7 +154,7 @@ public:
 
     // Check the detectors mapped to the single spectra
     const Geometry::ISpectraDetectorMap & specMap_out = output2D->spectraMap();
-    const int newSpectrumNo(0);
+    const int newSpectrumNo(1);
     TS_ASSERT_EQUALS( specMap_out.ndet(newSpectrumNo), nspecEntries);
 
     // And their values
@@ -164,12 +164,12 @@ public:
       TS_FAIL("SpectraMap has been remapped incorrectly");
       return;
     }
-    TS_ASSERT_EQUALS(dets[0], 0);
-    TS_ASSERT_EQUALS(dets[1], 2);
-    TS_ASSERT_EQUALS(dets[2], 3);
-    TS_ASSERT_EQUALS(dets[3], 4);
-    TS_ASSERT_EQUALS(dets[4], 5);
-    TS_ASSERT_EQUALS(dets[5], 6);
+    TS_ASSERT_EQUALS(dets[0], 1);
+    TS_ASSERT_EQUALS(dets[1], 3);
+    TS_ASSERT_EQUALS(dets[2], 4);
+    TS_ASSERT_EQUALS(dets[3], 5);
+    TS_ASSERT_EQUALS(dets[4], 6);
+    TS_ASSERT_EQUALS(dets[5], 7);
   }
 
   void testExecEvent_inplace()

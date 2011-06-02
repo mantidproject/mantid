@@ -272,7 +272,6 @@ public:
     int spec[2] = {1,2};
     int det[2] = {99,98};
     ws2->replaceSpectraMap(new Mantid::API::SpectraDetectorMap(&spec[0],&det[0],2));
-    
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) );
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) );
     

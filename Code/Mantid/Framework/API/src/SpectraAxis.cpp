@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/Exception.h"
-
+#include "MantidKernel/MultiThreaded.h"
 #include <boost/lexical_cast.hpp>
 
 #include <iostream>
@@ -19,6 +19,12 @@ using std::size_t;
 SpectraAxis::SpectraAxis(const size_t& length): Axis()
 {
   m_values.resize(length);
+  // For small axes there is no point in the additional thread overhead
+  PARALLEL_FOR_IF((length > 1000)) 
+  for(specid_t i = 0; i < specid_t(length); ++i)
+  {
+    m_values[i] = i + 1;
+  }
 }
 
 /** Virtual constructor
@@ -146,9 +152,9 @@ void SpectraAxis::populateSimple(int64_t end)
  */
 bool SpectraAxis::operator==(const Axis& axis2) const
 {
-	if (length()!=axis2.length())
+  if (length()!=axis2.length())
   {
-		return false;
+    return false;
   }
   const SpectraAxis* spec2 = dynamic_cast<const SpectraAxis*>(&axis2);
   if (!spec2)

@@ -33,7 +33,7 @@ public:
   void test_Input_ASCII_File_Scales_Correctly()
   {
     const int ndets = 5;
-    // Test workspace with 5 detectors, 3 detectors + 2 monitors at the end. 1:1 mapping of index:ID
+    // Test workspace with 5 detectors, 3 detectors + 2 monitors at the end. 1:1 mapping of spectrum:ID
     Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(ndets, 1, true);
     const std::string scalingFile = createTestScalingFile(testWS);
     // Needs to be in the ADS for this algorithm
@@ -70,17 +70,17 @@ public:
       
       if( det->isMonitor() )
       {
-	TS_ASSERT_EQUALS(pmap.contains(det.get(), "sca"), false);
+        TS_ASSERT_EQUALS(pmap.contains(det.get(), "sca"), false);
       }
       else
       {
-	TS_ASSERT_EQUALS(pmap.contains(det.get(), "sca"), true);
-	Parameter_sptr scaleParam = pmap.get(det.get(), "sca");
-	const V3D scaleFactor = scaleParam->value<V3D>();
-	TS_ASSERT_EQUALS(scaleFactor.X(), 1.0);
-	TS_ASSERT_EQUALS(scaleFactor.Z(), 1.0);
-	TS_ASSERT_DELTA(scaleFactor.Y(), expectedYScale[i], 1e-06);
-	
+        TS_ASSERT_EQUALS(pmap.contains(det.get(), "sca"), true);
+        Parameter_sptr scaleParam = pmap.get(det.get(), "sca");
+        const V3D scaleFactor = scaleParam->value<V3D>();
+        TS_ASSERT_EQUALS(scaleFactor.X(), 1.0);
+        TS_ASSERT_EQUALS(scaleFactor.Z(), 1.0);
+        TS_ASSERT_DELTA(scaleFactor.Y(), expectedYScale[i], 1e-06);
+        
       }
     }
 
@@ -107,8 +107,8 @@ public:
     // Test a few detectors
     int testIndices[3] = {6,7,8};
     V3D expectedValues[3] = { V3D(-0.08982175,-1.03708771,3.88495351), \
-			      V3D(-0.09233499,-1.06610575,3.87703178), \
-			      V3D(-0.09484302,-1.09506369,3.86889169) };
+                              V3D(-0.09233499,-1.06610575,3.87703178), \
+                              V3D(-0.09484302,-1.09506369,3.86889169) };
     for( int i = 0; i < 3; ++i )
     {
       IDetector_sptr det = testWS->getDetector(testIndices[i]);
@@ -135,7 +135,7 @@ private:
     writer << filename << " created by unit test\n";
     writer << ndets << "\t" << -1 << "\n";
     writer << "det no.  offset    l2     code     theta        phi"
-	   << "         w_x         w_y         w_z         f_x         f_y\n";
+           << "         w_x         w_y         w_z         f_x         f_y\n";
     for( int i = 0; i < ndets; ++i )
     {
       IDetector_sptr det = testWS->getDetector(i);
@@ -144,7 +144,7 @@ private:
       oldPos.setY(oldPos.Y() - m_y_offset*(i+1));
       double l2, theta, phi;
       oldPos.getSpherical(l2, theta, phi);
-      writer << i << "\t" << -1 << "\t" << l2 << "\t" << -1 << "\t" << theta << "\t" << phi << "\n";
+      writer << det->getID() << "\t" << -1 << "\t" << l2 << "\t" << -1 << "\t" << theta << "\t" << phi << "\n";
     }
 
     writer.close();

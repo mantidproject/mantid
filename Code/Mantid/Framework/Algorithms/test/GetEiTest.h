@@ -30,8 +30,8 @@ public:
     GetEi2 alg;
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", outputName);
-    alg.setProperty("Monitor1Spec", 0);
-    alg.setProperty("Monitor2Spec", 1);
+    alg.setProperty("Monitor1Spec", 1);
+    alg.setProperty("Monitor2Spec", 2);
     alg.setProperty("EnergyEstimate", 15.0);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.execute());

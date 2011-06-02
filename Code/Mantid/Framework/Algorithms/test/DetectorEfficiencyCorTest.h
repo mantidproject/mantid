@@ -138,28 +138,20 @@ public:
     y.access()[nbins-1] = 0.0;
     e.access()[nbins-1] = 0.0;
     
-    int *specNums = new int[nspecs];
-    int *detIDs = new int[nspecs];
     for (int i=0; i< nspecs; i++)
     {
       space2D->setX(i,x);
       space2D->setData(i,y,e);
-      space2D->getAxis(1)->spectraNo(i) = i+1;
       
-      specNums[i] = i+1;
-      detIDs[i] = i+1;
     }
-    space2D->replaceSpectraMap(new SpectraDetectorMap(specNums, detIDs, nspecs));
-    delete specNums;
-    delete detIDs;
 
     std::string xmlShape = "<cylinder id=\"shape\"> ";
-    xmlShape +=	"<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> " ; 
-    xmlShape +=	"<axis x=\"0.0\" y=\"1.0\" z=\"0\" /> " ;
-    xmlShape +=	"<radius val=\"0.0127\" /> " ;
-    xmlShape +=	"<height val=\"1\" /> " ;
-    xmlShape +=	"</cylinder>";
-    xmlShape +=	"<algebra val=\"shape\" /> ";  
+    xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> " ; 
+    xmlShape += "<axis x=\"0.0\" y=\"1.0\" z=\"0\" /> " ;
+    xmlShape += "<radius val=\"0.0127\" /> " ;
+    xmlShape += "<height val=\"1\" /> " ;
+    xmlShape += "</cylinder>";
+    xmlShape += "<algebra val=\"shape\" /> ";  
     
     std::string shapeXML = "<type name=\"userShape\"> " + xmlShape + " </type>";
     

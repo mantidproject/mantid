@@ -128,20 +128,15 @@ public:
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(2);
     m_axes[0] = new NumericAxis(1);
-
-    m_axes[1] =  new SpectraAxis(m_NVectors);
-    for (size_t i=0; i<m_NVectors; i++)
-    {
-      this->getAxis(1)->spectraNo(i) = static_cast<specid_t>(i);
-    }
+    m_axes[1] = new SpectraAxis(NVectors);
 
     setInstrument(Instrument_sptr(new Instrument("TestInstrument")));
     Instrument_sptr inst = getBaseInstrument();
-    
+    // We get a 1:1 map by default so the detector ID should match the spectrum number
     for( size_t i = 0; i < NVectors; ++i )
     {
       // Create a detector for each spectra
-      Detector * det = new Detector("pixel", static_cast<int>(i), inst.get());
+      Detector * det = new Detector("pixel", static_cast<detid_t>(m_axes[1]->spectraNo(i)), inst.get());
       inst->add(det);
       inst->markAsDetector(det);
     }
@@ -315,11 +310,11 @@ public:
       TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(i));
       if( det )
       {
-	TS_ASSERT_EQUALS(det->isMasked(), false);
+        TS_ASSERT_EQUALS(det->isMasked(), false);
       }
       else
       {
-	TS_FAIL("No detector defined");
+        TS_FAIL("No detector defined");
       }
     }
 
@@ -334,13 +329,13 @@ public:
       bool expectedMasked(false);
       if( i == 0 )
       {
-	expectedValue = 1.0;
-	expectedMasked = false;
+        expectedValue = 1.0;
+        expectedMasked = false;
       }
       else
       {
-	expectedValue = maskValue;
-	expectedMasked = true;
+        expectedValue = maskValue;
+        expectedMasked = true;
       }
       TS_ASSERT_EQUALS(workspace->readY(i)[0], expectedValue);
       TS_ASSERT_EQUALS(workspace->readE(i)[0], expectedValue);
@@ -349,11 +344,11 @@ public:
       TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(i));
       if( det )
       {
-	TS_ASSERT_EQUALS(det->isMasked(), expectedMasked);
+        TS_ASSERT_EQUALS(det->isMasked(), expectedMasked);
       }
       else
       {
-	TS_FAIL("No detector defined");
+        TS_FAIL("No detector defined");
       }
     }
         

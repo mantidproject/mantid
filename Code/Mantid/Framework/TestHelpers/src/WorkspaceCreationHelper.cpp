@@ -102,7 +102,6 @@ namespace WorkspaceCreationHelper
       retVal->setX(i,x1);
       retVal->setData(i,y1,e1);
     }
-
     retVal = maskSpectra(retVal, maskedWorkspaceIndices);
 
     return retVal;
@@ -130,39 +129,36 @@ namespace WorkspaceCreationHelper
 
   Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace, const std::set<int64_t> & maskedWorkspaceIndices)
   {
-    // We need detectors to be able to mask them.
-    workspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
-    boost::shared_ptr<Instrument> instrument = workspace->getBaseInstrument();
-
-    std::string xmlShape = "<sphere id=\"shape\"> ";
-    xmlShape += "<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" /> " ;
-    xmlShape += "<radius val=\"0.05\" /> " ;
-    xmlShape += "</sphere>";
-    xmlShape += "<algebra val=\"shape\" /> ";  
-
-    ShapeFactory sFactory;
-    boost::shared_ptr<Object> shape = sFactory.createShape(xmlShape);
-
     const int nhist = static_cast<int>(workspace->getNumberHistograms());
-
+    if( workspace->getInstrument()->nelements() == 0 ) 
+    {
+      // We need detectors to be able to mask them.
+      workspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
+      boost::shared_ptr<Instrument> instrument = workspace->getBaseInstrument();
+      
+      std::string xmlShape = "<sphere id=\"shape\"> ";
+      xmlShape += "<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" /> " ;
+      xmlShape += "<radius val=\"0.05\" /> " ;
+      xmlShape += "</sphere>";
+      xmlShape += "<algebra val=\"shape\" /> ";  
+      
+      ShapeFactory sFactory;
+      boost::shared_ptr<Object> shape = sFactory.createShape(xmlShape);
+      for( int i = 0; i < nhist; ++i )
+      {
+        Detector *det = new Detector("det",specid_t(workspace->getAxis(1)->spectraNo(i)),shape, NULL);
+        det->setPos(i,i+1,1);
+        instrument->add(det);
+        instrument->markAsDetector(det);
+      }
+    }
     ParameterMap& pmap = workspace->instrumentParameters();
     for( int i = 0; i < nhist; ++i )
     {
-      workspace->getAxis(1)->spectraNo(i) = i;
-    }
-    // New spectra map
-    workspace->replaceSpectraMap(new Geometry::OneToOneSpectraDetectorMap(0, nhist));
-
-
-    for( int i = 0; i < nhist; ++i )
-    {
-      Detector *det = new Detector("det",i,shape, NULL);
-      det->setPos(i,i+1,1);
-      instrument->add(det);
-      instrument->markAsDetector(det);
+      IDetector_sptr det = workspace->getDetector(i);
       if ( maskedWorkspaceIndices.find(i) != maskedWorkspaceIndices.end() )
       {
-        pmap.addBool(det,"masked",true);
+        pmap.addBool(det.get(),"masked",true);
       }
     }
     return workspace;
@@ -187,7 +183,6 @@ namespace WorkspaceCreationHelper
     {
       retVal->setX(i,x);
       retVal->setData(i,y,e);
-      retVal->getAxis(1)->setValue(i,i);
     }
 
     return retVal;
@@ -233,11 +228,10 @@ namespace WorkspaceCreationHelper
       throw std::invalid_argument("Attemping to 2 include monitors for a workspace with fewer than 2 histograms");
     }
 
-    Workspace2D_sptr space = Create2DWorkspaceBinned(nhist, nbins);
+    Workspace2D_sptr space = Create2DWorkspaceBinned(nhist, nbins); // A 1:1 spectra is created by default
     boost::shared_ptr<Instrument> testInst(new Instrument("testInst"));
     space->setInstrument(testInst);
 
-    // Create detectors for each spectra and set a simple mapping between pixel ID = spectrum number = index
     const double pixelRadius(0.05);
     Object_sptr pixelShape = 
       ComponentCreationHelper::createCappedCylinder(pixelRadius, 0.02, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube"); 
@@ -249,7 +243,7 @@ namespace WorkspaceCreationHelper
     {
       std::ostringstream lexer;
       lexer << "pixel-" << i << ")";
-      Detector * physicalPixel = new Detector(lexer.str(), i, pixelShape, testInst.get());
+      Detector * physicalPixel = new Detector(lexer.str(), space->getAxis(1)->spectraNo(i), pixelShape, testInst.get());
       const double ypos = i*2.0*pixelRadius;
       physicalPixel->setPos(detXPos, ypos,0.0);
       testInst->add(physicalPixel);
@@ -259,13 +253,13 @@ namespace WorkspaceCreationHelper
     // Monitors last
     if( includeMonitors ) // These occupy the last 2 spectra
     {
-      Detector *monitor1 = new Detector("mon1", ndets, Object_sptr(), testInst.get());
+      Detector *monitor1 = new Detector("mon1", space->getAxis(1)->spectraNo(ndets), Object_sptr(), testInst.get());
       monitor1->setPos(-9.0,0.0,0.0);
       monitor1->markAsMonitor();
       testInst->add(monitor1);
       testInst->markAsMonitor(monitor1);
 
-      Detector *monitor2 = new Detector("mon2", ndets+1, Object_sptr(), testInst.get());
+      Detector *monitor2 = new Detector("mon2", space->getAxis(1)->spectraNo(ndets)+1, Object_sptr(), testInst.get());
       monitor2->setPos(-2.0,0.0,0.0);
       monitor2->markAsMonitor();
       testInst->add(monitor2);

@@ -59,15 +59,16 @@ public:
     testInst->markAsSamplePos(sample);
 
     // Add three detectors - one for each bank of HRPD
-    Detector * det1 = new Detector("2101",0,testInst.get());
+    Mantid::API::Axis* ax1 = testWS->getAxis(1);
+    Detector * det1 = new Detector("2101",ax1->spectraNo(0),testInst.get());
     det1->setPos(V3D(0.04528,0.04528,-0.887693));
     testInst->add(det1);
     testInst->markAsDetector(det1);
-    Detector * det2 = new Detector("911000",1,testInst.get());
+    Detector * det2 = new Detector("911000",ax1->spectraNo(1),testInst.get());
     det2->setPos(V3D(-1.60016,0.770105,0.293987));
     testInst->add(det2);
     testInst->markAsDetector(det2);
-    Detector * det3 = new Detector("10101",2,testInst.get());
+    Detector * det3 = new Detector("10101",ax1->spectraNo(2),testInst.get());
     det3->setPos(V3D(1.98194,0.0990971,3.19728));
     testInst->add(det3);
     testInst->markAsDetector(det3);
