@@ -120,25 +120,47 @@ public:
 
   }
 
-//  void test_getEulerAngles()
-//  {
-//    Goniometer G;
-//    MantidMat rotA;
-//    G.makeUniversalGoniometer();
-//    G.setRotationAngle("phi", 45.0);
-//    G.setRotationAngle("chi", 23.0);
-//    G.setRotationAngle("omega", 7.0);
-//    rotA = G.getR();
-//
-//    std::vector<double> angles = G.getEulerAngles("yzy", rotA);
-//
-//    G.setRotationAngle("phi", angles[0]);
-//    G.setRotationAngle("chi", angles[1]);
-//    G.setRotationAngle("omega", angles[2]);
-//
-//    // Those goniometer angles re-create the initial rotation matrix.
-//    TS_ASSERT( rotA.equals(G.getR(), 0.0001) );
-//  }
+  void test_getEulerAngles()
+  {
+    Goniometer G;
+    MantidMat rotA;
+    G.makeUniversalGoniometer();
+    G.setRotationAngle("phi", 45.0);
+    G.setRotationAngle("chi", 23.0);
+    G.setRotationAngle("omega", 7.0);
+    rotA = G.getR();
+
+    std::vector<double> angles = G.getEulerAngles("yzy"); 
+
+    G.setRotationAngle("phi", angles[2]);
+    G.setRotationAngle("chi", angles[1]);
+    G.setRotationAngle("omega", angles[0]);
+
+    // Those goniometer angles re-create the initial rotation matrix.
+    TS_ASSERT( rotA.equals(G.getR(), 0.0001) );
+  }
+
+  void test_getEulerAngles2()
+  {
+    Goniometer G;
+    MantidMat rotA;
+    std::vector<double> angles; 
+    G.makeUniversalGoniometer();
+    for (double phi=-172.;phi<=180.;phi+=30.)
+      for (double chi=-171.;chi<=180.;chi+=30.)
+        for (double omega=-175.3;omega<=180.;omega+=30.)
+          {
+            G.setRotationAngle("phi", phi);
+            G.setRotationAngle("chi", chi);
+            G.setRotationAngle("omega", omega);
+            rotA = G.getR();
+            angles = G.getEulerAngles("yzy"); 
+            G.setRotationAngle("phi", angles[2]);
+            G.setRotationAngle("chi", angles[1]);
+            G.setRotationAngle("omega", angles[0]);
+            TS_ASSERT( rotA.equals(G.getR(), 0.0001) );
+          }
+  }
 };
 
 #endif
