@@ -183,7 +183,6 @@ ConfigServiceImpl::ConfigServiceImpl() :
   Poco::File localFile(getLocalFilename());
   if ( localFile.exists() )
   {
-    g_log.error("Yippee!");
     updateConfig(getLocalFilename(), true, false);
     propertiesFilesList += ", " + getLocalFilename();
   }
@@ -882,7 +881,7 @@ int ConfigServiceImpl::getValue(const std::string& keyName, T& out)
 std::string ConfigServiceImpl::getLocalFilename() const
 {
 #ifdef _WIN32
-  return "";
+  return "Mantid.local.properties";
 #else
   return "/etc/mantid.local.properties";
 #endif
