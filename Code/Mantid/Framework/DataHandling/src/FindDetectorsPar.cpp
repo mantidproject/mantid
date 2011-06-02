@@ -156,7 +156,7 @@ FindDetectorsPar::set_output_table()
 
      Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
      m_result->addColumn("double","azimuthal");
-     m_result->addColumn("double","polar");
+     m_result->addColumn("double","twoTheta");
      m_result->addColumn("double","secondary_flightpath");
      m_result->addColumn("double","azimuthal_width");
      m_result->addColumn("double","polar_width");

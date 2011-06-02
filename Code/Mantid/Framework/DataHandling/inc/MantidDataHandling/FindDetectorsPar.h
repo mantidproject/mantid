@@ -10,7 +10,7 @@
     Required Properties:
     <UL>
     <LI> Workspace - The name of the input Workspace2D on which to perform the algorithm. 
-	     Detectors or detectors groups have to be loaded into workspace </LI>
+       Detectors or detectors groups have to be loaded into workspace </LI>
     <LI> OutputTable workspace name - if present, identify the name of the output table workspace with provided detectors parameters </LI>
     <LI> Par or phx file name - if present, used to define the detectors parameters from the file instead of the parameters 
          calculated from the instrument description</LI>
@@ -18,15 +18,15 @@
 
     Output Properties:
     <UL>Optional: OutputTableWorkspace - the workspace which contains five columns with the following values:</UL>
-	<UL><LI> azimuthal             - An array property containing the detectors azimutal angles</LI> </UL>
+  <UL><LI> azimuthal             - An array property containing the detectors azimutal angles</LI> </UL>
     <UL><LI> polar                 - An array property containing the detectors polar angles</LI>    </UL>
     <UL><LI> secondary_flightpath  - An array property containing the distance from detectors to the sample center</LI></UL>
     <UL><LI> azimuthal_width       - An array property containing the detectors azimuthal angular width</LI></UL>
     <UL><LI> polar_width           - An array property containing the detectors polar angular width</LI></UL>
 
-	When OutputTable workspace name is empty, the tabled workspace is not defined. To get access to the resulting arrays, 
-	the algorithm user has to deploy accessors (getAzimuthal(), getPolar() etc.), defined below, which allows avoiding the
-	transformation of these arrays into strings. 
+  When OutputTable workspace name is empty, the tabled workspace is not defined. To get access to the resulting arrays, 
+  the algorithm user has to deploy accessors (getAzimuthal(), getPolar() etc.), defined below, which allows avoiding the
+  transformation of these arrays into strings. 
 
 
 
@@ -94,22 +94,22 @@ namespace DataHandling
 *-----------------------------------------------------------------------
 */
 enum fileTypes{
-	PAR_type, //< ASCII PAR file
-	PHX_type, //< ASCII phx file
-	SPE_type, //< spe file, this loader would not work with spe file, left for compartibility with old algorithms. 
+  PAR_type, //< ASCII PAR file
+  PHX_type, //< ASCII phx file
+  SPE_type, //< spe file, this loader would not work with spe file, left for compartibility with old algorithms. 
     BIN_file, //< binary file is not an ASCII file, so ascii loader would not work on it
-	NumFileTypes
+  NumFileTypes
 };
 /*!
 *   Description of the ASCII data header, common for all ASCII PAR and PHX files
 */
 struct FileTypeDescriptor{
-	fileTypes Type;
-	std::streampos data_start_position; //< the position in the file where the data structure starts
-	size_t 	  nData_records,            //< number of data records -- actually nDetectors
-		      nData_blocks;             //< nEnergy bins for SPE file, 5 or 6 for PAR file and 7 for PHX file
-	char      line_end ;                //< the character which ends line in current ASCII file 0x0A (LF)
-	    //Unix, 0x0D (CR) Mac and 0x0D 0x0A (CR LF) Win, but the last is interpreted as 0x0A here 
+  fileTypes Type;
+  std::streampos data_start_position; //< the position in the file where the data structure starts
+  size_t 	  nData_records,            //< number of data records -- actually nDetectors
+          nData_blocks;             //< nEnergy bins for SPE file, 5 or 6 for PAR file and 7 for PHX file
+  char      line_end ;                //< the character which ends line in current ASCII file 0x0A (LF)
+      //Unix, 0x0D (CR) Mac and 0x0D 0x0A (CR LF) Win, but the last is interpreted as 0x0A here 
     FileTypeDescriptor():Type(BIN_file),data_start_position(0),nData_records(0),nData_blocks(0),line_end(0x0A){}
 };
 
