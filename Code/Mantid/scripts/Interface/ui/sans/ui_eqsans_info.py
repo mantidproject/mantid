@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_info.ui'
 #
-# Created: Wed May 25 14:03:27 2011
+# Created: Thu Jun  2 16:57:19 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(551, 255)
+        Dialog.resize(602, 310)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(242, 241, 241))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -46,12 +46,14 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "EQSANS help", None, QtGui.QApplication.UnicodeUTF8))
-        self.plainTextEdit.setPlainText(QtGui.QApplication.translate("Dialog", "This application uses event Nexus files. Make sure that the following files are in a directory for which you have write-access.\n"
+        self.plainTextEdit.setPlainText(QtGui.QApplication.translate("Dialog", "To use this application, you will need:\n"
 "\n"
 "- Your Nexus event files (.nxs)\n"
 "- The corresponding eqsans_configuration.xxxx files [optional]\n"
 "\n"
-"Data files need not be in only one directory as long as each data file and its corresponding configuration file are always in the same directory. You can use file links as needed.\n"
+"If you do not have write access to the directory containing your data, make sure to provide an output directory. \n"
 "\n"
-"The output files will be placed in the same directory as the raw data files.", None, QtGui.QApplication.UnicodeUTF8))
+"If you do not have access to the /SNS mount, make sure that each data file and its corresponding configuration file are always in the same directory. You can use file links as needed. Data files need not be in only one directory.\n"
+"\n"
+"The output files will be placed in the same directory as the raw data files unless an output directory is provided.", None, QtGui.QApplication.UnicodeUTF8))
 
