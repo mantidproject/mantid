@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/MDBin.cpp
 	src/MDBox.cpp
 	src/MDCentroidPeaks.cpp
+	src/MDEWFindPeaks.cpp
 	src/MDEWPeakIntegration.cpp
 	src/MDEventFactory.cpp
 	src/MDEventWorkspace.cpp
@@ -42,6 +43,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDCentroidPeaks.h
 	inc/MantidMDEvents/MDDimensionExtents.h
 	inc/MantidMDEvents/MDDimensionStats.h
+	inc/MantidMDEvents/MDEWFindPeaks.h
 	inc/MantidMDEvents/MDEWPeakIntegration.h
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
@@ -65,6 +67,7 @@ set ( TEST_FILES
 	test/MDBoxTest.h
 	test/MDCentroidPeaksTest.h
 	test/MDDimensionStatsTest.h
+	test/MDEWFindPeaksTest.h
 	test/MDEWPeakIntegrationTest.h
 	test/MDEventFactoryTest.h
 	test/MDEventTest.h
