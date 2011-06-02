@@ -167,7 +167,7 @@ void IQTransform::guinierSpheres(API::MatrixWorkspace_sptr ws)
   MantidVec& E = ws->dataE(0);
   std::transform(X.begin(),X.end(),X.begin(),VectorHelper::Squares<double>());
   std::transform(E.begin(),E.end(),Y.begin(),E.begin(),std::divides<double>());
-  std::transform(Y.begin(),Y.end(),Y.begin(),VectorHelper::Log<double>());
+  std::transform(Y.begin(),Y.end(),Y.begin(),VectorHelper::LogNoThrow<double>());
 
   ws->setYUnitLabel("Ln(I)");
   m_label->setLabel("Q^2");
@@ -184,7 +184,7 @@ void IQTransform::guinierRods(API::MatrixWorkspace_sptr ws)
   MantidVec& E = ws->dataE(0);
   std::transform(E.begin(),E.end(),Y.begin(),E.begin(),std::divides<double>());
   std::transform(Y.begin(),Y.end(),X.begin(),Y.begin(),std::multiplies<double>());
-  std::transform(Y.begin(),Y.end(),Y.begin(),VectorHelper::Log<double>());
+  std::transform(Y.begin(),Y.end(),Y.begin(),VectorHelper::LogNoThrow<double>());
   std::transform(X.begin(),X.end(),X.begin(),VectorHelper::Squares<double>());
 
   ws->setYUnitLabel("Ln(I x Q)");
@@ -203,7 +203,7 @@ void IQTransform::guinierSheets(API::MatrixWorkspace_sptr ws)
   std::transform(E.begin(),E.end(),Y.begin(),E.begin(),std::divides<double>());
   std::transform(X.begin(),X.end(),X.begin(),VectorHelper::Squares<double>());
   std::transform(Y.begin(),Y.end(),X.begin(),Y.begin(),std::multiplies<double>());
-  std::transform(Y.begin(),Y.end(),Y.begin(),VectorHelper::Log<double>());
+  std::transform(Y.begin(),Y.end(),Y.begin(),VectorHelper::LogNoThrow<double>());
 
   ws->setYUnitLabel("Ln(I x Q^2)");
   m_label->setLabel("Q^2");
@@ -322,7 +322,7 @@ void IQTransform::logLog(API::MatrixWorkspace_sptr ws)
   MantidVec& E = ws->dataE(0);
   std::transform(X.begin(),X.end(),X.begin(),VectorHelper::Log<double>());
   std::transform(E.begin(),E.end(),Y.begin(),E.begin(),std::divides<double>());
-  std::transform(Y.begin(),Y.end(),Y.begin(),VectorHelper::Log<double>());
+  std::transform(Y.begin(),Y.end(),Y.begin(),VectorHelper::LogNoThrow<double>());
 
   ws->setYUnitLabel("Ln(I)");
   m_label->setLabel("Ln(Q)");

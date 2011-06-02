@@ -153,14 +153,26 @@ namespace VectorHelper
     }
   };
 
-  /// Square functor
+  /// Log functor
   template <class T> struct Log: public std::unary_function<T,T>
   {
     Log(){}
-    /// Returns the square of the argument
+    /// Returns the logarithm of the argument
+    /// @throws std::range_error if x <= 0
     T operator()(const T& x) const
     {
       if (x <= 0 ) throw std::range_error("Attempt to take logarithm of zero or negative number.");
+      return std::log(x);
+    }
+  };
+
+  // Non-throwing version of the Log functor
+  template <class T> struct LogNoThrow: public std::unary_function<T,T>
+  {
+    LogNoThrow(){}
+    // Returns the logarithm of the argument
+    T operator()(const T& x) const
+    {
       return std::log(x);
     }
   };
