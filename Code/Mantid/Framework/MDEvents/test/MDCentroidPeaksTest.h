@@ -79,14 +79,23 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the MDCentroidPeaks with the given peak radius param */
-  static void doRun( V3D startHKL, double PeakRadius, V3D expectedHKL)
+  void doRun( V3D startPos, double PeakRadius, V3D expectedResult, std::string message)
   {
     // Make a fake instrument - doesn't matter, we won't use it really
     IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
-    // --- Make a fake PeaksWorkspace ---
+    // --- Make a fake PeaksWorkspace in the given coordinate space ---
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
-    peakWS->addPeak( Peak(inst, 1, 1.0, startHKL ) );
+
+    Peak pIn(inst, 1, 1.0, startPos );
+    if (CoordinatesToUse == "Q (lab frame)")
+      pIn.setQLabFrame(startPos);
+    else if (CoordinatesToUse == "Q (sample frame)")
+      pIn.setQSampleFrame(startPos);
+    else if (CoordinatesToUse == "HKL")
+      pIn.setHKL(startPos);
+    peakWS->addPeak( pIn );
+
     TS_ASSERT_EQUALS( peakWS->getPeak(0).getIntensity(), 0.0);
     AnalysisDataService::Instance().addOrReplace("MDCentroidPeaksTest_Peaks", peakWS);
 
@@ -95,26 +104,34 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "MDCentroidPeaksTest_MDEWS" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "MDCentroidPeaksTest_Peaks" ) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CoordinatesToUse", "HKL" ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CoordinatesToUse", CoordinatesToUse ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("PeakRadius", PeakRadius ) );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
 
     // Compare the result to the expectation
-    TS_ASSERT_DELTA( peakWS->getPeak(0).getH(), expectedHKL[0], 0.05);
-    TS_ASSERT_DELTA( peakWS->getPeak(0).getK(), expectedHKL[1], 0.05);
-    TS_ASSERT_DELTA( peakWS->getPeak(0).getL(), expectedHKL[2], 0.05);
+    V3D result;
+    Peak & p = peakWS->getPeak(0);
+    if (CoordinatesToUse == "Q (lab frame)")
+      result = p.getQLabFrame();
+    else if (CoordinatesToUse == "Q (sample frame)")
+      result = p.getQSampleFrame();
+    else if (CoordinatesToUse == "HKL")
+      result = p.getHKL();
+
+    for (size_t i=0; i<3; i++)
+      TSM_ASSERT_DELTA( message, result[i], expectedResult[i], 0.05);
 
     AnalysisDataService::Instance().remove("MDCentroidPeaksTest_Peaks");
   }
 
   //-------------------------------------------------------------------------------
   /** Full test using faked-out peak data */
-  void test_exec()
+  void do_test_exec()
   {
     // --- Fake workspace with 3 peaks ------
     createMDEW();
-    addPeak(1000, 0.,0.,0., 1.0);
+    addPeak(1000, 0,0.,0., 1.0);
     addPeak(1000, 2.,3.,4., 0.5);
     addPeak(1000, 6.,6.,6., 2.0);
 
@@ -122,29 +139,46 @@ public:
     TS_ASSERT_EQUALS( mdews->getNPoints(), 3000);
     TS_ASSERT_DELTA( mdews->getBox()->getSignal(), 3000.0, 1e-2);
 
-    // Start at the center, get the center
-    doRun(V3D( 0.,0.,0.), 1.0, V3D( 0.,0.,0.));
-    // Somewhat off center
-    doRun(V3D( 0.2,0.2,0.2), 1.8, V3D( 0.,0.,0.));
+    if (CoordinatesToUse == "HKL")
+    {
+      doRun(V3D( 0.,0.,0.), 1.0, V3D( 0.,0.,0.), "Start at the center, get the center");
 
-    // Start at the center, get the center
-    doRun(V3D( 2.,3.,4.), 1.0, V3D( 2.,3.,4.));
+      doRun(V3D( 0.2,0.2,0.2), 1.8, V3D( 0.,0.,0.), "Somewhat off center");
+    }
 
-    // Pretty far off
-    doRun(V3D( 1.5,2.5,3.5), 3.0, V3D( 2.,3.,4.));
+    doRun(V3D( 2.,3.,4.), 1.0, V3D( 2.,3.,4.), "Start at the center, get the center");
 
-    // Include two peaks, get the centroid of the two
-    doRun(V3D( 1.0,1.5,2.0), 4.0, V3D( 1.0,1.5,2.0));
+    doRun(V3D( 1.5,2.5,3.5), 3.0, V3D( 2.,3.,4.), "Pretty far off");
 
-    // Include nothing, get no change
-    doRun(V3D( 8.0, 0.0, 1.0), 1.0, V3D( 8.0, 0.0, 1.0));
+    doRun(V3D( 1.0,1.5,2.0), 4.0, V3D( 1.0,1.5,2.0), "Include two peaks, get the centroid of the two");
 
-    // Small radius still works
-    doRun(V3D( 0.,0.,0.), 0.1, V3D( 0.,0.,0.));
+    doRun(V3D( 8.0, 0.0, 1.0), 1.0, V3D( 8.0, 0.0, 1.0), "Include no events, get no change");
+
+    doRun(V3D( 6.,6.,6.), 0.1, V3D( 6.,6.,6.), "Small radius still works");
 
     AnalysisDataService::Instance().remove("MDCentroidPeaksTest_MDEWS");
   }
 
+  void test_exec_HKL()
+  {
+    CoordinatesToUse = "HKL";
+    do_test_exec();
+  }
+
+  void test_exec_QSampleFrame()
+  {
+    CoordinatesToUse = "Q (sample frame)";
+    do_test_exec();
+  }
+
+  void test_exec_QLabFrame()
+  {
+    CoordinatesToUse = "Q (lab frame)";
+    do_test_exec();
+  }
+
+private:
+  std::string CoordinatesToUse;
 
 
 

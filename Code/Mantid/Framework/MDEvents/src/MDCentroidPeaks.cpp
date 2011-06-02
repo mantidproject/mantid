@@ -62,8 +62,8 @@ namespace MDEvents
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input), "An input MDEventWorkspace.");
 
     std::vector<std::string> propOptions;
-//    propOptions.push_back("Q (lab frame)");
-//    propOptions.push_back("Q (sample frame)");
+    propOptions.push_back("Q (lab frame)");
+    propOptions.push_back("Q (sample frame)");
     propOptions.push_back("HKL");
     declareProperty("CoordinatesToUse", "HKL",new ListValidator(propOptions),
       "Which coordinates of the peak center do you wish to use to find the center? This should match the InputWorkspace's dimensions."
@@ -103,6 +103,7 @@ namespace MDEvents
     {
       // Get a direct ref to that peak.
       Peak & p = peakWS->getPeak(i);
+      double detectorDistance = p.getL2();
 
       // Get the peak center as a position in the dimensions of the workspace
       V3D pos;
@@ -138,12 +139,20 @@ namespace MDEvents
         for (size_t d=0; d<nd; d++)
           centroid[d] /= signal;
 
-        // Save it back in the peak object.
-        V3D newHKL(centroid[0], centroid[1], centroid[2]);
-        p.setHKL( newHKL );
+        V3D vecCentroid(centroid[0], centroid[1], centroid[2]);
+
+        // Save it back in the peak object, in the dimension specified.
+        if (CoordinatesToUse == "Q (lab frame)")
+          p.setQLabFrame( vecCentroid, detectorDistance);
+        else if (CoordinatesToUse == "Q (sample frame)")
+          p.setQSampleFrame( vecCentroid, detectorDistance);
+        else if (CoordinatesToUse == "HKL")
+          p.setHKL( vecCentroid );
+
 
         g_log.information() << "Peak " << i << " at " << pos << ": signal "
-            << signal << ", centroid " << newHKL
+            << signal << ", centroid " << vecCentroid
+            << " in " << CoordinatesToUse
             << std::endl;
       }
       else

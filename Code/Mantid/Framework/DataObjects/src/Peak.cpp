@@ -367,7 +367,7 @@ namespace DataObjects
     this->setWavelength(wl);
 
     // Use the given detector distance to find the detector position.
-    detPos = beam * detectorDistance;
+    detPos = samplePos + beam * detectorDistance;
   }
 
 
