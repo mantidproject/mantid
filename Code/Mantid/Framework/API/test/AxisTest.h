@@ -51,7 +51,7 @@ public:
     TS_ASSERT( numericAxis->unit().get() );
     for (int i=0; i<5; ++i)
     {
-      TS_ASSERT_EQUALS( (*spectraAxis)(i), 0.0 );
+      TS_ASSERT_EQUALS( (*spectraAxis)(i), static_cast<double>(i+1) );
       TS_ASSERT_EQUALS( (*numericAxis)(i), 0.0 );
     }
   }
