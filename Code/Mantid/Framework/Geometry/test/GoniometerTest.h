@@ -105,9 +105,9 @@ public:
     G.setRotationAngle("omega",  0.0);
     rot = G.getR() * init;
 
-    TS_ASSERT_DELTA( rot.X(),  0.707, 0.001);
-    TS_ASSERT_DELTA( rot.Y(), -0.707, 0.001);
-    TS_ASSERT_DELTA( rot.Z(),  0.000, 0.001);
+    TS_ASSERT_DELTA( rot.X(),  0.000, 0.001);
+    TS_ASSERT_DELTA( rot.Y(),  0.707, 0.001);
+    TS_ASSERT_DELTA( rot.Z(),  0.707, 0.001);
 
     init = V3D(-1, 0, 0);
     G.setRotationAngle("phi", 90.0);
@@ -115,8 +115,8 @@ public:
     G.setRotationAngle("omega",  0.0);
     rot = G.getR() * init;
     TS_ASSERT_DELTA( rot.X(),  0.000, 0.001);
-    TS_ASSERT_DELTA( rot.Y(),  -1.000, 0.001);
-    TS_ASSERT_DELTA( rot.Z(),  0.000, 0.001);
+    TS_ASSERT_DELTA( rot.Y(),  0.000, 0.001);
+    TS_ASSERT_DELTA( rot.Z(),  1.000, 0.001);
 
   }
 
@@ -130,7 +130,7 @@ public:
 //    G.setRotationAngle("omega", 7.0);
 //    rotA = G.getR();
 //
-//    std::vector<double> angles = G.getEulerAngles("xyx", rotA);
+//    std::vector<double> angles = G.getEulerAngles("yzy", rotA);
 //
 //    G.setRotationAngle("phi", angles[0]);
 //    G.setRotationAngle("chi", angles[1]);

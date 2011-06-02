@@ -116,7 +116,7 @@ void SpatialGrouping::exec()
       extend = expandNet(nearest, detIt->first, nNeighbours, bbox);
     }
 
-    if ( static_cast<detid_t>(nearest.size()) != nNeighbours ) continue;
+    if ( nearest.size() != nNeighbours ) continue;
 
     // if we've gotten to this point, we want to go and make the group list.
     std::vector<int> group;

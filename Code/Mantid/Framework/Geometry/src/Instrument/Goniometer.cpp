@@ -186,12 +186,16 @@ size_t Goniometer::getNumberAxes() const
 
 /** Make a default universal goniometer with phi,chi,omega angles
  * according to SNS convention.
+ * The rotations occur in this order:
+ *  1. Closest to sample is phi, around the +Y (vertical) axis
+ *  2. Chi, around the +Z (beam direction) axis
+ *  3. Omega, around the +Y (vertical) axis
  */
 void Goniometer::makeUniversalGoniometer()
 {
   motors.clear();
   this->pushAxis("omega", 0., 1., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);  
-  this->pushAxis("chi",   1., 0., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
+  this->pushAxis("chi",   0., 0., 1.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
   this->pushAxis("phi",   0., 1., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
 }
 

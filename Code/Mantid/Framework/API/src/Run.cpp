@@ -17,6 +17,9 @@ using namespace Kernel;
 const int Run::ADDABLES = 6;
 const std::string Run::ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm", "dur", "gd_prtn_chrg", "uA.hour"};
 
+// Get a reference to the logger
+Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
+
   //----------------------------------------------------------------------
   // Public member functions
   //----------------------------------------------------------------------
@@ -322,6 +325,7 @@ const std::string Run::ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm"
         {
           // Set that angle
           m_goniometer.setRotationAngle(i, tsp->firstValue());
+          g_log.debug() << "Goniometer angle " << name << " set to " << tsp->firstValue() << std::endl;
         }
         else
           throw std::runtime_error("Sample log for goniometer angle '" + name + "' was not a TimeSeriesProperty<double>.");

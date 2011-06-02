@@ -225,7 +225,17 @@ namespace Crystal
 
     // Retrieve the goniometer rotation matrix
     Matrix<double> gonio(3,3, true);
-    gonio = inWS->mutableRun().getGoniometerMatrix();
+    try
+    {
+      gonio = inWS->mutableRun().getGoniometerMatrix();
+    }
+    catch (std::runtime_error & e)
+    {
+      g_log.error() << "Error getting the goniometer rotation matrix from the workspace " << inWS->getName() << std::endl
+          << e.what() << std::endl;
+      g_log.information() << "Using identity goniometer rotation matrix." << std::endl;
+    }
+    //gonio.Invert();
 
     // Final transformation matrix (HKL to Q in lab frame)
     mat = gonio * ub;
@@ -251,7 +261,7 @@ namespace Crystal
       wlMin = 0.0;
       wlMax = 1e10;
 
-      PRAGMA_OMP(parallel for schedule(dynamic, 1) )
+//      PRAGMA_OMP(parallel for schedule(dynamic, 1) )
       for (int i=0; i < static_cast<int>(HKLPeaksWorkspace->getNumberPeaks()); ++i)
       {
         PARALLEL_START_INTERUPT_REGION
@@ -301,7 +311,7 @@ namespace Crystal
       Progress prog(this, 0.0, 1.0, numHKLs);
       prog.setNotifyStep(0.01);
 
-      PRAGMA_OMP(parallel for schedule(dynamic, 1) )
+//      PRAGMA_OMP(parallel for schedule(dynamic, 1) )
       for (int h=(int)hklMin[0]; h <= (int)hklMax[0]; h++)
       {
         PARALLEL_START_INTERUPT_REGION

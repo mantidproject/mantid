@@ -154,6 +154,10 @@ namespace Mantid
 
       /// Adds all the time series in from one property manager into another
       void mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd);
+
+      /// Static reference to the logger class
+      static Kernel::Logger &g_log;
+
     };
 
     /**

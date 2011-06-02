@@ -81,7 +81,7 @@ PredictPeaks(InputWorkspace="TOPAZ_3007",HKLPeaksWorkspace="TOPAZ_3007_peaks",Ou
 MaskPeaksWorkspace("TOPAZ_3007", "peaks")
    *
    */
-  void xtest_integration()
+  void test_integration()
   {
     Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 20);
     PeaksWorkspace_sptr pw;
