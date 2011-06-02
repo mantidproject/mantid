@@ -83,14 +83,19 @@ namespace Crystal
     inst->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
 
     out << "Version: 2.0  Facility: SNS " ;
-    out <<  " Instrument: " <<  inst->getName() <<  " Date: " ;
-    out <<  " TODO: Instrument date " << std::endl; //TODO: Fill in instrument date
+    out <<  " Instrument: " <<  inst->getName() <<  "  Date: " ;
+
+    //TODO: Fill in instrument date
+    Kernel::DateAndTime expDate = Kernel::DateAndTime::get_current_time();
+    out <<  expDate.to_ISO8601_string() << std::endl;
+
+    out << "This is the header format:" << std::endl;
 
     out << "0     1     2    3    4      5       6       7        8       9       10        11        12     13      14      15    16" << std::endl;
     out << "-" << header.substr(1, header.size()-1) << std::endl;
 
-    out << "6        L1    T0_SHIFT" <<  std::endl;
-    out << "7 "<< std::setw( 11 )  ;
+    out << "6         L1    T0_SHIFT" <<  std::endl;
+    out << "7 "<< std::setw( 10 )  ;
     out <<   std::setprecision( 4 ) <<  std::fixed <<  ( l1*100 ) ;
     out << std::setw( 12 ) <<  std::setprecision( 3 ) <<  std::fixed  ;
     // Time offset of 0.00 for now
@@ -206,14 +211,13 @@ namespace Crystal
           out <<  "1" <<  std::setw( 5 ) <<  run <<  std::setw( 7 ) <<
               std::right <<  bank;
 
-          // Determine goniometer angles
-          Goniometer gon;
-          gon.makeUniversalGoniometer();
-          std::vector<double> angles = gon.getEulerAngles("xyx");
+          // Determine goniometer angles by calculating from the goniometer matrix of a peak in the list
+          Goniometer gon(peaks[ids[0]].getGoniometerMatrix());
+          std::vector<double> angles = gon.getEulerAngles("yzy");
 
-          double phi = angles[0];
+          double phi = angles[2];
           double chi = angles[1];
-          double omega = angles[2];
+          double omega = angles[0];
 
           out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  chi;
           out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  phi;

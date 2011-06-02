@@ -323,6 +323,9 @@ namespace Crystal
     Mantid::Geometry::Goniometer uniGonio;
     uniGonio.makeUniversalGoniometer();
 
+    // TODO: Can we find the number of peaks to get better progress reporting?
+    Progress prog(this, 0.0, 1.0, 100);
+
     while( in.good() )
     {
       // Read the header if necessary
@@ -358,7 +361,10 @@ namespace Crystal
       {
         g_log.warning() << "Error reading peak SEQN " << seqNum << " : " << e.what() << std::endl;
       }
+
+      prog.report();
     }
+
   }
 
 
