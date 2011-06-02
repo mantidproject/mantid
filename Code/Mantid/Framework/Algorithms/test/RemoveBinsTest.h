@@ -180,13 +180,14 @@ public:
   }
 
 
-	void testRealData()
+	void xtestRealData()
 	{
 		Mantid::NeXus::LoadMuonNexus loader;
 		loader.initialize();
 		loader.setPropertyValue("Filename", "emu00006473.nxs");
 		loader.setPropertyValue("OutputWorkspace", "EMU6473");
 		loader.execute();
+    TS_ASSERT( loader.isExecuted() )
 		
 		//Test removing time bins from the front		
 		alg2.initialize();

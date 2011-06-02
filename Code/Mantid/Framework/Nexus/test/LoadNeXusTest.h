@@ -118,7 +118,7 @@ public:
     TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
 
     // Check the unit has been set correctly
-    TS_ASSERT_EQUALS( output2->getAxis(0)->unit()->unitID(), "TOF" );
+    TS_ASSERT_EQUALS( output2->getAxis(0)->unit()->unitID(), "Label" );
   }
  
 private:
