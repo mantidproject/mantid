@@ -70,11 +70,7 @@ namespace MDEvents
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
 
-    virtual std::vector<Mantid::Geometry::Coordinate> getVertexes() const
-    {
-      throw std::runtime_error("Not implemented.");
-    }
-
+    virtual std::vector<Mantid::Geometry::Coordinate> getVertexes() const;
 
     /** @return the MDPoints contained. throws. */
     virtual std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > getContributingPoints() const

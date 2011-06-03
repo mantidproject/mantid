@@ -142,6 +142,26 @@ public:
     TS_ASSERT_DELTA( b.getErrorSquaredNormalized(), 1.5, 1e-5);
   }
 
+
+
+  /** Get vertexes using the extents */
+  void test_getVertexes()
+  {
+    IMDBoxTester<MDEvent<2>,2> b;
+    b.setExtents(0, -10.0, 10.0);
+    b.setExtents(1, -4.0, 6.0);
+    std::vector<Mantid::Geometry::Coordinate> v = b.getVertexes();
+    TS_ASSERT_EQUALS( v[0].getX(), -10.0);
+    TS_ASSERT_EQUALS( v[0].getY(), -4.0);
+    TS_ASSERT_EQUALS( v[1].getX(), 10.0);
+    TS_ASSERT_EQUALS( v[1].getY(), -4.0);
+    TS_ASSERT_EQUALS( v[2].getX(), -10.0);
+    TS_ASSERT_EQUALS( v[2].getY(), 6.0);
+    TS_ASSERT_EQUALS( v[3].getX(), 10.0);
+    TS_ASSERT_EQUALS( v[3].getY(), 6.0);
+  }
+
+
 };
 
 

@@ -92,6 +92,48 @@ namespace MDEvents
     return numBad;
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /** Return the vertices of corners of the box
+   *
+   * @return a vector of Coordinate objects
+   */
+  TMDE(
+  std::vector<Mantid::Geometry::Coordinate> IMDBox)::getVertexes() const
+  {
+    if (nd > 4)
+      throw std::runtime_error("IMDBox::getVertexes(): At this time, cannot return vertexes for > 4 dimensions.");
+    std::vector<Mantid::Geometry::Coordinate> out;
+
+    // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd bits
+    size_t maxVertices = 1 << nd;
+
+    // For each vertex, increase an integeer
+    for (size_t i=0; i<maxVertices; ++i)
+    {
+      // Coordinates of the vertex
+      coord_t coords[nd];
+      for (size_t d=0; d<nd; d++)
+      {
+        // Use a bit mask to look at each bit of the integer we are iterating through.
+        size_t mask = 1 << d;
+        if ((i & mask) > 0)
+        {
+          // Bit is 1, use the max of the dimension
+          coords[d] = extents[d].max;
+        }
+        else
+        {
+          // Bit is 0, use the min of the dimension
+          coords[d] = extents[d].min;
+        }
+      } // (for each dimension)
+
+      // Create the coordinate object and add it to the vector
+      out.push_back( Mantid::Geometry::Coordinate(coords, nd) );
+    }
+
+    return out;
+  }
 
 
 
