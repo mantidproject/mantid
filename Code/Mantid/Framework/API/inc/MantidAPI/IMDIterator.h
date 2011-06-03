@@ -46,15 +46,18 @@ class IMDWorkspace;
   class DLLExport IMDIterator
   {
   public:
-    /// Get the size of the data
-    virtual size_t getDataSize()const = 0;
+    /// Get the size of the data (number of entries that will be iterated through)
+    virtual size_t getDataSize() const = 0;
+
     /// Get the i-th coordinate of the current cell
-    virtual double getCoordinate(std::size_t i)const = 0;
+    virtual double getCoordinate(std::size_t i) const = 0;
+
     /// Advance to the next cell. If the current cell is the last one in the workspace
     /// do nothing and return false.
     virtual bool next() = 0;
-    ///< return the current data pointer (index)
-    virtual size_t getPointer()const = 0;
+
+    /// Return the current data pointer (index) into the MDWorkspace
+    virtual size_t getPointer() const = 0;
   };
 
 
