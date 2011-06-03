@@ -1,9 +1,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CreateWorkspace.h"
-
-#include "MantidAPI/MatrixWorkspace.h"
-
 #include "MantidAPI/TextAxis.h"
 
 class CreateWorkspaceTest : public CxxTest::TestSuite
@@ -46,6 +43,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("test_CreateWorkspace")));
 
+    TS_ASSERT( ! ws->isHistogramData() );
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
 
     TS_ASSERT_EQUALS(ws->dataX(0)[0], 0);
@@ -95,7 +93,7 @@ public:
     values.push_back(3.0);
     values.push_back(4.0);
 
-    alg.setProperty<std::vector<double> >("DataX", values);
+    alg.setProperty<std::vector<double> >("DataX", std::vector<double>(2,1.1));
     alg.setProperty<std::vector<double> >("DataY", values);
     alg.setProperty<std::vector<double> >("DataE", values);
 
@@ -106,9 +104,10 @@ public:
     // Get hold of the output workspace
     Mantid::API::MatrixWorkspace_sptr workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("test_CreateWorkspace"));
 
-    TS_ASSERT( ! workspace->isHistogramData() );
-
+    TS_ASSERT( workspace->isHistogramData() );
     TS_ASSERT_EQUALS( workspace->getNumberHistograms(), 4 );
+    TS_ASSERT_EQUALS( workspace->readX(0)[0], 1.1 );
+    TS_ASSERT_EQUALS( workspace->readX(2)[1], 1.1 );
 
     Mantid::API::TextAxis* axis = dynamic_cast<Mantid::API::TextAxis*>(workspace->getAxis(1));
 
@@ -121,3 +120,34 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove("test_CreateWorkspace");
   }
 };
+
+class CreateWorkspaceTestPerformance : public CxxTest::TestSuite
+{
+public:
+  void setUp()
+  {
+    vec = new std::vector<double>(100000000,1.0);
+  }
+
+  void tearDown()
+  {
+    delete vec;
+  }
+
+  void testBigWorkspace()
+  {
+    Mantid::Algorithms::CreateWorkspace creator;
+    // The AlgorithmHistory operations take an age - this disables them
+    creator.setChild(true);
+    creator.initialize();
+    creator.setPropertyValue("OutputWorkspace","Out");
+    creator.setProperty("DataX",*vec);
+    creator.setProperty("DataY",*vec);
+    creator.setProperty("DataE",*vec);
+    creator.setProperty("NSpec",10000);
+    TS_ASSERT( creator.execute() );
+  }
+private:
+  std::vector<double>* vec;
+};
+

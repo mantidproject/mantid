@@ -13,6 +13,9 @@ namespace Mantid
 namespace Algorithms
 {
 
+using namespace Kernel;
+using namespace API;
+
 DECLARE_ALGORITHM(CreateWorkspace)
 
 /// Sets documentation strings for this algorithm
@@ -24,7 +27,7 @@ void CreateWorkspace::initDocs()
 
 
 /// Default (empty) constructor
-CreateWorkspace::CreateWorkspace() : API::Algorithm()
+CreateWorkspace::CreateWorkspace() : Algorithm()
 {}
 
 /// Default (empty) destructor
@@ -35,29 +38,29 @@ CreateWorkspace::~CreateWorkspace()
 void CreateWorkspace::init()
 {
 
-  std::vector<std::string> unitOptions = Mantid::Kernel::UnitFactory::Instance().getKeys();
+  std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
   unitOptions.push_back("SpectraNumber");
   unitOptions.push_back("Text");
 
   
-  declareProperty(new Mantid::API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output),
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
     "Name to be given to the created workspace.");
-  declareProperty(new Kernel::ArrayProperty<double>("DataX"),
+  declareProperty(new ArrayProperty<double>("DataX", new MandatoryValidator<std::vector<double> >),
     "X-axis data values for workspace.");
-  declareProperty(new Kernel::ArrayProperty<double>("DataY"),
+  declareProperty(new ArrayProperty<double>("DataY", new MandatoryValidator<std::vector<double> >),
     "Y-axis data values for workspace (measures).");
-  declareProperty(new Kernel::ArrayProperty<double>("DataE"),
-    "Error values for workspace.");
-  declareProperty(new Kernel::PropertyWithValue<int>("NSpec", 1),
+  declareProperty(new ArrayProperty<double>("DataE"),
+    "Error values for workspace. Optional.");
+  declareProperty(new PropertyWithValue<int>("NSpec", 1),
     "Number of spectra to divide data into.");
   declareProperty("UnitX","", "The unit to assign to the XAxis");
   
-  declareProperty("VerticalAxisUnit","SpectraNumber",new Mantid::Kernel::ListValidator(unitOptions),
+  declareProperty("VerticalAxisUnit","SpectraNumber",new ListValidator(unitOptions),
       "The unit to assign to the second Axis (leave blank for default Spectra number)");
-  declareProperty(new Kernel::ArrayProperty<std::string>("VerticalAxisValues"),
+  declareProperty(new ArrayProperty<std::string>("VerticalAxisValues"),
     "Values for the VerticalAxis.");
 
-  declareProperty(new Kernel::PropertyWithValue<bool>("Distribution", false),
+  declareProperty(new PropertyWithValue<bool>("Distribution", false),
     "Whether OutputWorkspace should be marked as a distribution.");
   declareProperty("YUnitLabel", "", "Label for Y Axis");
 
@@ -67,9 +70,14 @@ void CreateWorkspace::init()
 /// Exec function
 void CreateWorkspace::exec()
 {
-  const std::vector<double> dataX = getProperty("DataX");
-  const std::vector<double> dataY = getProperty("DataY");
-  const std::vector<double> dataE = getProperty("DataE");
+  // Contortions to get at the vector in the property without copying it
+  const Property * const dataXprop = getProperty("DataX");
+  const Property * const dataYprop = getProperty("DataY");
+  const Property * const dataEprop = getProperty("DataE");
+  const std::vector<double>& dataX = *dynamic_cast<const ArrayProperty<double>*>(dataXprop);
+  const std::vector<double>& dataY = *dynamic_cast<const ArrayProperty<double>*>(dataYprop);
+  const std::vector<double>& dataE = *dynamic_cast<const ArrayProperty<double>*>(dataEprop);
+
   const int nSpec = getProperty("NSpec");
   const std::string xUnit = getProperty("UnitX");
   const std::string vUnit = getProperty("VerticalAxisUnit");
@@ -81,66 +89,84 @@ void CreateWorkspace::exec()
   }
 
   // Verify length of vectors makes sense with NSpec
-  if ( dataX.size() % nSpec != 0 )
-  {
-    throw std::invalid_argument("Length of DataX must be divisible by NSpec");
-  }
   if ( ( dataY.size() % nSpec ) != 0 )
   {
     throw std::invalid_argument("Length of DataY must be divisible by NSpec");
   }
-  if ( dataY.size() != dataE.size() )
+  const std::size_t ySize = dataY.size() / nSpec;
+
+  // Check whether the X values provided are to be re-used for (are common to) every spectrum
+  const bool commonX( dataX.size() == ySize || dataX.size() == ySize+1 );
+
+  std::size_t xSize;
+  MantidVecPtr XValues;
+  if ( commonX )
   {
-    throw std::runtime_error("DataY and DataE must have the same dimensions");
+    xSize = dataX.size();
+    XValues.access() = dataX;
+  }
+  else
+  {
+    if ( dataX.size() % nSpec != 0 )
+    {
+      throw std::invalid_argument("Length of DataX must be divisible by NSpec");
+    }
+
+    xSize = static_cast<int>(dataX.size()) / nSpec;
+    if ( xSize < ySize || xSize > ySize + 1 )
+    {
+      throw std::runtime_error("DataX width must be as DataY or +1");
+    }
+
   }
 
-  int ySize = static_cast<int>(dataY.size()) / nSpec;
-  int xSize = static_cast<int>(dataX.size()) / nSpec;
-
-  if ( xSize < ySize || xSize > ySize + 1 )
+  const bool dataE_provided(dataE.size());
+  if ( dataE_provided && dataY.size() != dataE.size() )
   {
-    throw std::runtime_error("DataX width must be as DataY or +1");
+    throw std::runtime_error("DataE (if provided) must be the same size as DataY");
   }
-  
+
   // Create the OutputWorkspace
-  Mantid::API::MatrixWorkspace_sptr outputWS = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", nSpec, xSize, ySize);
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D", nSpec, xSize, ySize);
 
+  PARALLEL_FOR1(outputWS)
   for ( int i = 0; i < nSpec; i++ )
   {
-//    std::vector<double> specX, specY, specE;
-//    for ( int j = 0; j < ySize; j++ )
-//    {
-//      specY.push_back(dataY[(i*ySize)+j]);
-//      specE.push_back(dataE[(i*ySize)+j]);
-//      specX.push_back(dataX[(i*xSize)+j]);
-//    }
-//    if ( ySize != xSize )
-//    {
-//      specX.push_back(dataX[(i*xSize)+(xSize-1)]);
-//    }
-//
-//    outputWS->dataX(i) = specX;
-//    outputWS->dataY(i) = specY;
-//    outputWS->dataE(i) = specE;
+    PARALLEL_START_INTERUPT_REGION
+
     const std::vector<double>::difference_type xStart = i*xSize;
     const std::vector<double>::difference_type xEnd = xStart + xSize;
     const std::vector<double>::difference_type yStart = i*ySize;
     const std::vector<double>::difference_type yEnd = yStart + ySize;
-    outputWS->dataX(i).assign(dataX.begin()+xStart,dataX.begin()+xEnd);
+
+    // Just set the pointer if common X bins. Otherwise, copy in the right chunk (as we do for Y).
+    if ( commonX )
+    {
+      outputWS->setX(i,XValues);
+    }
+    else
+    {
+      outputWS->dataX(i).assign(dataX.begin()+xStart,dataX.begin()+xEnd);
+    }
+
     outputWS->dataY(i).assign(dataY.begin()+yStart,dataY.begin()+yEnd);
-    outputWS->dataE(i).assign(dataE.begin()+yStart,dataE.begin()+yEnd);
+
+    if ( dataE_provided) outputWS->dataE(i).assign(dataE.begin()+yStart,dataE.begin()+yEnd);
+
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Set the Unit of the X Axis
   try
   {
-    outputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create(xUnit);
+    outputWS->getAxis(0)->unit() = UnitFactory::Instance().create(xUnit);
   }
-  catch ( Mantid::Kernel::Exception::NotFoundError & )
+  catch ( Exception::NotFoundError & )
   {
-    outputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Label");
-    Mantid::Kernel::Unit_sptr unit = outputWS->getAxis(0)->unit();
-    boost::shared_ptr<Mantid::Kernel::Units::Label> label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(unit);
+    outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+    Unit_sptr unit = outputWS->getAxis(0)->unit();
+    boost::shared_ptr<Units::Label> label = boost::dynamic_pointer_cast<Units::Label>(unit);
     label->setLabel(xUnit, xUnit);
   }
 
@@ -149,7 +175,7 @@ void CreateWorkspace::exec()
   {
     if ( vUnit == "Text" )
     {
-      Mantid::API::TextAxis* const newAxis = new Mantid::API::TextAxis(vAxis.size());
+      TextAxis* const newAxis = new TextAxis(vAxis.size());
       outputWS->replaceAxis(1, newAxis);
       for ( size_t i = 0; i < vAxis.size(); i++ )
       {
@@ -158,8 +184,8 @@ void CreateWorkspace::exec()
     }
     else
     {
-      Mantid::API::NumericAxis* const newAxis = new Mantid::API::NumericAxis(vAxis.size());
-      newAxis->unit() = Mantid::Kernel::UnitFactory::Instance().create(vUnit);
+      NumericAxis* const newAxis = new NumericAxis(vAxis.size());
+      newAxis->unit() = UnitFactory::Instance().create(vUnit);
       outputWS->replaceAxis(1, newAxis);
       for ( size_t i = 0; i < vAxis.size(); i++ )
       {
@@ -176,7 +202,7 @@ void CreateWorkspace::exec()
   }
   else
   {
-    dynamic_cast<Mantid::API::SpectraAxis*>(outputWS->getAxis(1))->populateSimple(nSpec);
+    dynamic_cast<SpectraAxis*>(outputWS->getAxis(1))->populateSimple(nSpec);
   }
 
   // Set distribution flag

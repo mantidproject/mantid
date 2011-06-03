@@ -16,7 +16,8 @@ namespace Algorithms
 *
 *  Multiple spectra may be created by supplying the NSpec Property (integer, default 1). When this
 *  is provided the vectors are split into equal-sized spectra (all X, Y, E values must still be
-*  in a single vector for input).
+*  in a single vector for input). If the X values should be the same for all spectra, then DataX
+*  can just provide them once, i.e. its length can be length(DataY)/NSpec (or 1 longer for histograms).
 *  
 *  @date 20/10/2010
 *  @author Michael Whitty
