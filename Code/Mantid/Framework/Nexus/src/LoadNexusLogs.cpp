@@ -198,7 +198,7 @@ namespace Mantid
         propName = "selog_" + propName;
       }
       // There are two possible entries:
-      //   value_log - A time series entry
+      //   value_log - A time series entry. This can contain a corrupt value entry so if it does use the value one
       //   value - A single value float entry
       Kernel::Property *logValue(NULL);
       std::map<std::string, std::string> entries = file.getEntries();
@@ -220,9 +220,10 @@ namespace Mantid
         }
         catch(::NeXus::Exception& e)
         {
-          g_log.warning() << "IXseblock entry " << entry_name << " gave an error when loading "
-                          << "a time series:'" << e.what() << "'.\n";
-          file.closeGroup();
+          g_log.warning() << "IXseblock entry '" << entry_name << "' gave an error when loading "
+                          << "a time series:'" << e.what() << "'. Skipping entry\n";
+          file.closeGroup(); //value_log
+          file.closeGroup();//entry_name
           return;
         }
       }
@@ -233,10 +234,18 @@ namespace Mantid
           // This may have a larger dimension than 1 bit it has no time field so take the first entry
           file.openData("value");
           ::NeXus::Info info = file.getInfo();
-          boost::scoped_array<float> value(new float[info.dims[0]]);
-          file.getData(value.get());
-          file.closeData();
-          logValue = new Kernel::PropertyWithValue<double>(propName, static_cast<double>(value[0]), true);
+          if( info.type == ::NeXus::FLOAT32 )
+          {
+            boost::scoped_array<float> value(new float[info.dims[0]]);
+            file.getData(value.get());
+            file.closeData();
+            logValue = new Kernel::PropertyWithValue<double>(propName, static_cast<double>(value[0]), true);
+          }
+          else
+          {
+            file.closeGroup();
+            return;
+          }
         }
         catch(::NeXus::Exception& e)
         {
@@ -246,12 +255,11 @@ namespace Mantid
           file.closeGroup();
           return;
         }
-
       }
       else
       {
         g_log.warning() << "IXseblock entry " << entry_name 
-                        << " does not contain a value or value_log field, skipping entry.";
+                        << " cannot be read, skipping entry.\n";
         file.closeGroup();
         return;
       }
@@ -267,7 +275,7 @@ namespace Mantid
      * @returns A pointer to a new property containing the time series
      */
     Kernel::Property * LoadNexusLogs::createTimeSeries(::NeXus::File & file, 
-                                                     const std::string & prop_name) const
+                                                       const std::string & prop_name) const
     {
       file.openData("time");
       //----- Start time is an ISO8601 string date and time. ------
@@ -298,7 +306,6 @@ namespace Mantid
       {
         file.closeData();
         throw ::NeXus::Exception("Unsupported time unit '" + time_units + "'");
-          
       }
       //--- Load the seconds into a double array ---
       std::vector<double> time_double;
@@ -335,6 +342,12 @@ namespace Mantid
 
       // Now the actual data
       ::NeXus::Info info = file.getInfo();
+      // Check the size
+      if( info.dims[0] != time_double.size() )
+      {
+        file.closeData();
+        throw ::NeXus::Exception("Invalid value entry for time series");
+      }
       if( file.isDataInt() ) // Int type
       {
         std::vector<int> values;
