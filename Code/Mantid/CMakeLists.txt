@@ -179,14 +179,7 @@ if ( ENABLE_CPACK )
       FIND_PROGRAM ( RPMBUILD_CMD rpmbuild )
       IF ( RPMBUILD_CMD )
         set ( CPACK_GENERATOR "RPM" )
-        FIND_PROGRAM ( UNAME_CMD uname )
-        IF (UNAME_CMD)
-          execute_process( COMMAND ${UNAME_CMD} -m
-                           OUTPUT_VARIABLE CPACK_RPM_PACKAGE_ARCHITECTURE
-                           OUTPUT_STRIP_TRAILING_WHITESPACE )
-        ELSE (UNAME_CMD)
-          set (CPACK_RPM_PACKAGE_ARCHITECTURE "unknown")
-        ENDIF (UNAME_CMD)
+	set ( CPACK_RPM_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}" )
         # reset the release name to include the RHEL version if known
         IF ( ${UNIX_CODENAME} MATCHES "Tikanga" )
           set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el5" )
@@ -214,7 +207,7 @@ if ( ENABLE_CPACK )
   #            the versions here are for Ubuntu 10.04.
   # We also need to create a debian package repository and have a nexus package in it
   set ( CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-date-time1.40.0,libboost-regex1.40.0,libboost-signals1.40.0,libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9,libnexus0 (>= 4.2),libgsl0ldbl,libqtcore4 (>= 4.2),libqtgui4 (>= 4.2),libqt4-opengl (>= 4.2),libqt4-xml (>= 4.2),libqt4-svg (>= 4.2),libqt4-qt3support (>= 4.2),libqscintilla2-5,libqwt5-qt4,libqwtplot3d-qt4-0" )
-  set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libopencascade-foundation-6.3.0 (>= 6.3.0),libopencascade-modeling-6.3.0 (>= 6.3.0),libmuparser0,python-numpy,python-sip,python-qt4,libboost-python" )
+  set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libopencascade-foundation-6.3.0 (>= 6.3.0),libopencascade-modeling-6.3.0 (>= 6.3.0),libmuparser0,python-numpy,python-sip,python-qt4,libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}" )
 
   # soft requirement of tcmalloc - if built with it, then require it
   IF ( USE_TCMALLOC AND TCMALLOC_FOUND )
