@@ -97,22 +97,22 @@ set_target_properties ( MDEvents PROPERTIES OUTPUT_NAME MantidMDEvents
 # Add to the 'Framework' group in VS
 set_property ( TARGET MDEvents PROPERTY FOLDER "MantidFramework" )
 
-include_directories(${HDF5_INCLUDE_DIRS} inc ../Algorithms/inc)
-target_link_libraries ( MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES} )
+include_directories( inc ../Algorithms/inc )
+target_link_libraries ( MDEvents ${MANTIDLIBS} )
 
 # Create test file projects
 if ( CXXTEST_FOUND )
-  include_directories(${HDF5_INCLUDE_DIRS} inc ../TestHelpers/inc 
+  include_directories( inc ../TestHelpers/inc 
       ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../DataObjects/inc  )
   
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDEventsTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-    target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES}
+    target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS}
          ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} DataHandling Nexus 
          TestHelpers DataObjects )
   else ()
     cxxtest_add_test ( MDEventsTest ${TEST_FILES} )
-    target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES}
+    target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS}
          DataHandling Nexus TestHelpers DataObjects )
   endif ()
   
@@ -123,3 +123,8 @@ if ( CXXTEST_FOUND )
   
 endif ()
 
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS MDEvents DESTINATION ${PLUGINS_DIR} )
