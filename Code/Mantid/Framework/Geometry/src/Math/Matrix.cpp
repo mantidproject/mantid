@@ -961,7 +961,7 @@ Matrix<T>::GaussJordan(Matrix<T>& B)
 	    std::cerr<<"Error doing G-J elem on a singular matrix"<<std::endl;
 	    return 1;
     }
-    const double pivDiv= 1.0/V[icol][icol];
+    const T pivDiv= T(1.0)/V[icol][icol];
     V[icol][icol]=1;
     for(size_t l=0;l<nx;l++) 
     {
@@ -976,7 +976,7 @@ Matrix<T>::GaussJordan(Matrix<T>& B)
     {
       if (ll!=icol)
       {
-        const double div_num=V[ll][icol];
+        const T div_num=V[ll][icol];
         V[ll][icol]=0.0;
         for(size_t l=0;l<nx;l++) 
         {
