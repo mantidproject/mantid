@@ -1162,6 +1162,8 @@ void MuonAnalysis::updateFrontAndCombo()
   // could go for softer approach and check if is necessary
   // to complete reset this combo box
   int currentI = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
+  if (currentI < 0)  // in case this combobox has not been set yet
+    currentI = 0;
   m_uiForm.frontGroupGroupPairComboBox->clear();
 
   int numG = numGroups();
