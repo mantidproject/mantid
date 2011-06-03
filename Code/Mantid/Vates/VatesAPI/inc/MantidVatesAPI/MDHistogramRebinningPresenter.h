@@ -93,8 +93,9 @@ namespace Mantid
       
       double m_maxThreshold;
       double m_minThreshold;
-      double m_timestep;
       bool m_applyClip;
+      double m_timestep;
+      
       
       RebinningKnowledgeSerializer m_serializer;
 
