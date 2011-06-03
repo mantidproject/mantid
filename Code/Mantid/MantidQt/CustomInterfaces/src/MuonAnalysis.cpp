@@ -797,9 +797,9 @@ void MuonAnalysis::updatePairTable()
   }
 
 
-  // get previous number of groups
+  // get previous number of groups as listed in the pair comboboxes
   QComboBox* qwF = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(0,1));
-  int previousNumGroups = qwF->count();
+  int previousNumGroups = qwF->count(); // how many groups listed in pair combobox
   int newNumGroups = numGroups();
 
   // reset context of combo boxes
@@ -1161,6 +1161,7 @@ void MuonAnalysis::updateFrontAndCombo()
   // for now brute force clearing and adding new context
   // could go for softer approach and check if is necessary
   // to complete reset this combo box
+  int currentI = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
   m_uiForm.frontGroupGroupPairComboBox->clear();
 
   int numG = numGroups();
@@ -1172,7 +1173,10 @@ void MuonAnalysis::updateFrontAndCombo()
     m_uiForm.frontGroupGroupPairComboBox->addItem(
       m_uiForm.pairTable->item(m_pairToRow[i],0)->text());
   
-  m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
+  if ( currentI >= m_uiForm.frontGroupGroupPairComboBox->count() )
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(0);
+  else 
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(currentI);
 
   updateFront();
 }
@@ -2000,6 +2004,10 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
       {
         m_uiForm.pairTable->setItem(0, 3, new QTableWidgetItem("1.0"));
       } 
+      updatePairTable();
+      updateFrontAndCombo();
+      m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(2);
+      runFrontGroupGroupPairComboBox(2);
   }
   
   updatePairTable();
