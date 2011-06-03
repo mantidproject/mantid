@@ -185,6 +185,7 @@ public:
     BoxController_sptr splitter(new BoxController(nd));
     splitter->setSplitThreshold(5);
     splitter->resetNumBoxes();
+    splitter->setMaxDepth(levels+1);
     // Splits into splitInto x splitInto x ... boxes
     splitter->setSplitInto(splitInto);
     // Set the size to splitInto*1.0 in all directions
@@ -435,6 +436,36 @@ public:
     TS_ASSERT_EQUALS( b->getNPoints(), 1 );
   }
 
+
+  /** Recursive getting of a list of IMDBox */
+  void test_getBoxes()
+  {
+    MDGridBox<MDEvent<1>,1> * parent = this->makeRecursiveMDGridBox<1>(3,3);
+    TS_ASSERT(parent);
+    std::vector<IMDBox<MDEvent<1>,1> *> boxes;
+
+    boxes.clear();
+    parent->getBoxes(boxes, 0);
+    TS_ASSERT_EQUALS( boxes.size(), 1);
+    TS_ASSERT_EQUALS( boxes[0], parent);
+
+    boxes.clear();
+    parent->getBoxes(boxes, 1);
+    TS_ASSERT_EQUALS( boxes.size(), 4);
+    TS_ASSERT_EQUALS( boxes[0], parent);
+    TS_ASSERT_EQUALS( boxes[1]->getDepth(), 1);
+
+    boxes.clear();
+    parent->getBoxes(boxes, 2);
+    TS_ASSERT_EQUALS( boxes.size(), 4+9);
+    TS_ASSERT_EQUALS( boxes[0], parent);
+    TS_ASSERT_EQUALS( boxes[1]->getDepth(), 1);
+    TS_ASSERT_EQUALS( boxes[2]->getDepth(), 2);
+
+    boxes.clear();
+    parent->getBoxes(boxes, 3);
+    TS_ASSERT_EQUALS( boxes.size(), 4+9+27);
+  }
 
   //-------------------------------------------------------------------------------------
   /** Gauge how fast addEvent is with several levels of gridding
@@ -1046,6 +1077,7 @@ public:
   MDGridBox<MDEvent<3>,3> * box3;
   MDGridBox<MDEvent<3>,3> * box3b;
   std::vector<MDEvent<3> > events;
+  MDGridBox<MDEvent<1>,1> * recursiveParent;
 
   MDGridBoxTestPerformance()
   {
@@ -1070,6 +1102,9 @@ public:
 
     box3b->addEvents(events);
     box3b->refreshCache();
+    // Recursively gridded box with 1,111,111 boxes total.
+    recursiveParent = MDGridBoxTest::makeRecursiveMDGridBox<1>(10,6);
+
   }
 
   ~MDGridBoxTestPerformance()
@@ -1219,6 +1254,21 @@ public:
   {
     coord_t center[3] = {11., 5., 5.};
     do_test_sphereCentroid(center, 1.0, 0.0, 1e-3);
+  }
+
+
+  /** Recursive getting of a list of IMDBox.
+   * Gets about 11 million boxes */
+  void test_getBoxes()
+  {
+    std::vector<IMDBox<MDEvent<1>,1> *> boxes;
+    for (size_t i=0; i<10; i++)
+    {
+      boxes.clear();
+      recursiveParent->getBoxes(boxes, 6);
+      TS_ASSERT_EQUALS( boxes.size(), 1111111);
+      TS_ASSERT_EQUALS( boxes[0], recursiveParent);
+    }
   }
 
 

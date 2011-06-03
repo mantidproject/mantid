@@ -33,8 +33,8 @@ namespace MDEvents
     { throw std::runtime_error("Not yet implemented.");
     }
 
-    /// Get the i-th coordinate of the current cell
-    virtual double getCoordinate(std::size_t i) const;
+    /// Get the d-th coordinate of the current cell
+    virtual coord_t getCoordinate(std::size_t d) const;
 
     /// Advance to the next cell. If the current cell is the last one in the workspace
     /// do nothing and return false.

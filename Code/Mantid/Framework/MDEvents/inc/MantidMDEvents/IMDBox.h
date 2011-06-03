@@ -70,6 +70,9 @@ namespace MDEvents
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
 
+    /// Fill a vector with all the boxes up to a certain depth
+    virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth) = 0;
+
     virtual std::vector<Mantid::Geometry::Coordinate> getVertexes() const;
 
     /** @return the MDPoints contained. throws. */

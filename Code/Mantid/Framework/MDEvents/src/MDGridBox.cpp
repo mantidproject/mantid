@@ -254,6 +254,27 @@ namespace MDEvents
     return out;
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /** Return all boxes contained within.
+   *
+   * @param outBoxes :: vector to fill
+   * @param maxDepth :: max depth value of the returned boxes.
+   */
+  TMDE(
+  void MDGridBox)::getBoxes(std::vector<IMDBox<MDE,nd> *> & outBoxes, size_t maxDepth)
+  {
+    // Add this box
+    outBoxes.push_back(this);
+    if (this->getDepth() + 1 <= maxDepth)
+    {
+      for (size_t i=0; i<numBoxes; i++)
+      {
+        // Recursively go deeper, if needed
+        boxes[i]->getBoxes(outBoxes, maxDepth);
+      }
+    }
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Split a box that is contained in the GridBox, at the given index,

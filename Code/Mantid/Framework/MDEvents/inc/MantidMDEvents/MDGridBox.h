@@ -50,6 +50,8 @@ namespace MDEvents
 
     std::vector< MDE > * getEventsCopy();
 
+    virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth);
+
     void addEvent(const MDE & point);
 
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
@@ -66,7 +68,7 @@ namespace MDEvents
 
 
     // ======================= Testing/Debugging Methods =================
-    /** For testing: get 9a copy of) the vector of boxes */
+    /** For testing: get (a copy of) the vector of boxes */
     std::vector<IMDBox<MDE, nd>*> getBoxes()
     { return boxes; }
 

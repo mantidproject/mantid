@@ -72,6 +72,12 @@ namespace MDEvents
 
     void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL);
 
+    /// Fill a vector with all the boxes up to a certain depth
+    void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t /*maxDepth*/)
+    {
+      boxes.push_back(this);
+    }
+
   protected:
 
     /** Vector of MDEvent's, in no particular order.
