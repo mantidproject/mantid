@@ -8,10 +8,14 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
   ${QWT_INCLUDE_DIR} )
 
+set( NEW_AI_INC inc/AxisInteractorNew.h )
+set( NEW_AI_SRC src/AxisInteractorNew.cpp )
+
 # These are the C++ files to be compiled.
 set( INCLUDE_FILES
   inc/AxisInformation.h
   inc/AxisInteractor.h
+  ${NEW_AI_INC}
   inc/GeometryParser.h
   inc/Indicator.h
   inc/IView.h
@@ -26,6 +30,7 @@ set( INCLUDE_FILES
 set( SOURCE_FILES
   src/AxisInformation.cpp
   src/AxisInteractor.cpp
+  ${NEW_AI_SRC}
   src/GeometryParser.cpp
   src/Indicator.cpp
   src/IView.cpp
@@ -43,6 +48,7 @@ set( SOURCE_FILES
 # Qt's moc preprocessor.
 qt4_wrap_cpp( MOC_SRCS
   inc/AxisInteractor.h
+  ${NEW_AI_INC}
   inc/ModeControlWidget.h
   inc/MpMainWindow.h
   inc/MultisliceView.h

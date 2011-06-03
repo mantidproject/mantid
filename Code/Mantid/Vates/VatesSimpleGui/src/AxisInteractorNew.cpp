@@ -231,7 +231,7 @@ bool AxisInteractorNew::eventFilter(QObject *obj, QEvent *event)
 	}
 }
 
-ScalePos AxisInteractorNew::scalePosition()
+AxisInteractorNew::ScalePos AxisInteractorNew::scalePosition() const
 {
   return this->scalePos;
 }
