@@ -219,6 +219,9 @@
               <property name="text">
                <string>None</string>
               </property>
+              <property name="autoExclusive">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -249,6 +252,9 @@
               </property>
               <property name="text">
                <string>Total charge</string>
+              </property>
+              <property name="autoExclusive">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
@@ -1052,12 +1058,18 @@ in each direction and will create 9 sub-pixels.</string>
               <property name="text">
                <string>Use data directory</string>
               </property>
+              <property name="autoExclusive">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item>
              <widget class="QRadioButton" name="select_output_dir_radio">
               <property name="text">
                <string>Select</string>
+              </property>
+              <property name="autoExclusive">
+               <bool>false</bool>
               </property>
              </widget>
             </item>

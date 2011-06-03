@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_instrument.ui'
 #
-# Created: Wed Jun  1 11:34:48 2011
+# Created: Fri Jun  3 16:04:02 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -100,6 +100,7 @@ class Ui_Frame(object):
         self.normalization_none_radio.setSizePolicy(sizePolicy)
         self.normalization_none_radio.setMinimumSize(QtCore.QSize(100, 0))
         self.normalization_none_radio.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.normalization_none_radio.setAutoExclusive(False)
         self.normalization_none_radio.setObjectName("normalization_none_radio")
         self.horizontalLayout_5.addWidget(self.normalization_none_radio)
         self.normalization_monitor_radio = QtGui.QRadioButton(self.reduction_options_group)
@@ -111,6 +112,7 @@ class Ui_Frame(object):
         self.normalization_monitor_radio.setMinimumSize(QtCore.QSize(100, 0))
         self.normalization_monitor_radio.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.normalization_monitor_radio.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.normalization_monitor_radio.setAutoExclusive(False)
         self.normalization_monitor_radio.setObjectName("normalization_monitor_radio")
         self.horizontalLayout_5.addWidget(self.normalization_monitor_radio)
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -369,9 +371,11 @@ class Ui_Frame(object):
         self.label_5.setObjectName("label_5")
         self.horizontalLayout_14.addWidget(self.label_5)
         self.use_data_dir_radio = QtGui.QRadioButton(self.reduction_options_group)
+        self.use_data_dir_radio.setAutoExclusive(False)
         self.use_data_dir_radio.setObjectName("use_data_dir_radio")
         self.horizontalLayout_14.addWidget(self.use_data_dir_radio)
         self.select_output_dir_radio = QtGui.QRadioButton(self.reduction_options_group)
+        self.select_output_dir_radio.setAutoExclusive(False)
         self.select_output_dir_radio.setObjectName("select_output_dir_radio")
         self.horizontalLayout_14.addWidget(self.select_output_dir_radio)
         self.output_dir_edit = QtGui.QLineEdit(self.reduction_options_group)

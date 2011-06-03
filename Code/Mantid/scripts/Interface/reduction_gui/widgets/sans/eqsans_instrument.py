@@ -95,10 +95,18 @@ class SANSInstrumentWidget(BaseWidget):
         self.connect(self._summary.dark_browse_button, QtCore.SIGNAL("clicked()"), self._dark_browse)
         self.connect(self._summary.dark_plot_button, QtCore.SIGNAL("clicked()"),
                      functools.partial(self.show_instrument, file_name=self._summary.dark_file_edit.text))
+        g1 = QtGui.QButtonGroup(self)
+        g1.addButton(self._summary.normalization_none_radio)
+        g1.addButton(self._summary.normalization_monitor_radio)
+        g1.setExclusive(True)
         self.connect(self._summary.normalization_none_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
         self.connect(self._summary.normalization_monitor_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
 
         # Output directory
+        g2 = QtGui.QButtonGroup(self)
+        g2.addButton(self._summary.select_output_dir_radio)
+        g2.addButton(self._summary.use_data_dir_radio)
+        g2.setExclusive(True)        
         self.connect(self._summary.select_output_dir_radio, QtCore.SIGNAL("clicked()"), self._output_dir_clicked)
         self.connect(self._summary.use_data_dir_radio, QtCore.SIGNAL("clicked()"), self._output_dir_clicked)
         self.connect(self._summary.output_dir_browse_button, QtCore.SIGNAL("clicked()"), self._output_dir_browse)
