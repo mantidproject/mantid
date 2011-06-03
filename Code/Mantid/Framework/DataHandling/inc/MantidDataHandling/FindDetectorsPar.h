@@ -18,11 +18,11 @@
 
     Output Properties:
     <UL>Optional: OutputTableWorkspace - the workspace which contains five columns with the following values:</UL>
-  <UL><LI> azimuthal             - An array property containing the detectors azimutal angles</LI> </UL>
-    <UL><LI> polar                 - An array property containing the detectors polar angles</LI>    </UL>
-    <UL><LI> secondary_flightpath  - An array property containing the distance from detectors to the sample center</LI></UL>
-    <UL><LI> azimuthal_width       - An array property containing the detectors azimuthal angular width</LI></UL>
-    <UL><LI> polar_width           - An array property containing the detectors polar angular width</LI></UL>
+  <UL><LI> azimuthal             -   A columnt  containing the detectors azimutal angles</LI> </UL>
+    <UL><LI> polar                 - A column  containing the detectors polar angles</LI>    </UL>
+    <UL><LI> secondary_flightpath  - A column containing the distance from detectors to the sample center</LI></UL>
+    <UL><LI> azimuthal_width       - A column  containing the detectors azimuthal angular width</LI></UL>
+    <UL><LI> polar_width           - A column  containing the detectors polar angular width</LI></UL>
 
   When OutputTable workspace name is empty, the tabled workspace is not defined. To get access to the resulting arrays, 
   the algorithm user has to deploy accessors (getAzimuthal(), getPolar() etc.), defined below, which allows avoiding the

@@ -538,7 +538,7 @@ double GroupDetectors2::fileReadProg(Mantid::DataHandling::GroupDetectors2::stor
 *  @return number of new grouped spectra
 */
 size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, 
-				    API::SpectraDetectorMap *groupedMap, const double prog4Copy)
+            API::SpectraDetectorMap *groupedMap, const double prog4Copy)
 {
   // Get hold of the axis that holds the spectrum numbers
   Axis *inputSpecNums = inputWS->getAxis(1);
@@ -640,7 +640,7 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
 *  @param groupedMap :: The new spectra map that is being built
 */
 void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, 
-				 size_t outIndex, API::SpectraDetectorMap *groupedMap)
+         size_t outIndex, API::SpectraDetectorMap *groupedMap)
 {
   g_log.debug() << "Starting to copy the ungrouped spectra" << std::endl;
   double prog4Copy = (1. - 1.*static_cast<double>(m_FracCompl))/static_cast<double>(unGroupedSet.size());

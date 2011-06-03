@@ -180,8 +180,10 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_sptr spDet,const Geom
         // accumulators;
         double d1_min(FLT_MAX);
         double d1_max(-FLT_MAX);
-        double angle_sum(0);
+        double d1_sum(0);
         double dist_sum(0);
+        double d_azim(0);
+       
 
         std::vector<Geometry::V3D> coord(3);
 
@@ -214,14 +216,17 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_sptr spDet,const Geom
 
             double d_min = d1+bbox.xMin();  if(d_min<d1_min)d1_min = d_min;
             double d_max = d1+bbox.xMax();  if(d_max>d1_max)d1_max = d_max;
+            d_azim = (bbox.zMax()-bbox.zMin())/d1;
+            azim_width+=d_azim;
 
-            angle_sum+=atan2(d1,d0);
+            d1_sum   +=d1;
             dist_sum +=d1*d1+d0*d0;
         }
-
+        double dNdet= double(pDets.size());
         polar_width = (atan2(d1_max,d0)-atan2(d1_min,d0))*rad2deg;
-        polar       = (angle_sum/double(pDets.size()))*rad2deg;
-        dist        = sqrt(dist_sum/double(pDets.size()));
+        polar       = atan2(d1_sum/dNdet,d0)*rad2deg;
+        dist        = sqrt(dist_sum/dNdet);
+        azim_width *= rad2deg;
         
 }
 

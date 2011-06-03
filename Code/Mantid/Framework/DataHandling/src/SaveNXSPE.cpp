@@ -21,7 +21,9 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    const double SaveNXSPE::MASK_FLAG = -1e30;
+    //const double SaveNXSPE::MASK_FLAG = -1e30;
+   //
+    const double SaveNXSPE::MASK_FLAG = std::numeric_limits<double>::quiet_NaN();
     const double SaveNXSPE::MASK_ERROR = 0.0;
     // works fine but there were cases that some compilers crush on this (VS2008 in mixed .net environment ?)
     const std::string SaveNXSPE::NXSPE_VER = "1.1";
@@ -285,7 +287,7 @@ namespace Mantid
           }
         }
      // execute the subalgorithm to calculate the detector's parameters;
-      IAlgorithm_sptr   spCalcDetPar = this->createSubAlgorithm("FindDetectorsPar", 0, 0.1, true, 1);
+      IAlgorithm_sptr   spCalcDetPar = this->createSubAlgorithm("FindDetectorsPar", 0, 1, true, 1);
 
       spCalcDetPar->initialize();
       spCalcDetPar->setPropertyValue("InputWorkspace", inputWS->getName());
