@@ -75,6 +75,7 @@ set ( SRC_FILES
 	src/SaveSPE.cpp
 	src/SaveVTK.cpp
 	src/SetScalingPSD.cpp
+	src/SaveToSNSHistogramNexus.cpp
 	src/UpdateInstrumentFromFile.cpp
 	src/FindDetectorsPar.cpp
 )
@@ -145,6 +146,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetScalingPSD.h
+	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
 	inc/MantidDataHandling/FindDetectorsPar.h 
 )

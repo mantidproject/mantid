@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/SaveToSNSHistogramNexus.h"
+#include "MantidDataHandling/SaveToSNSHistogramNexus.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -28,7 +28,7 @@
 
 namespace Mantid
 {
-namespace NeXus
+namespace DataHandling
 {
 
   // Register the algorithm into the algorithm factory

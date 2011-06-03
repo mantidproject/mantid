@@ -28,7 +28,6 @@ set ( SRC_FILES
         src/SaveISISNeXus.cpp
         src/SaveNeXus.cpp
         src/SaveNexusProcessed.cpp
-        src/SaveToSNSHistogramNexus.cpp
 )
 
 
@@ -56,7 +55,6 @@ set ( INC_FILES
         inc/MantidNexus/SaveISISNeXus.h
         inc/MantidNexus/SaveNeXus.h
         inc/MantidNexus/SaveNexusProcessed.h
-        inc/MantidNexus/SaveToSNSHistogramNexus.h
 )
 
 set ( TEST_FILES

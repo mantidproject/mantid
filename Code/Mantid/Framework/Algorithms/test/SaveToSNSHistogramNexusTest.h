@@ -2,13 +2,13 @@
 #define SAVESNSNEXUSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidNexus/SaveToSNSHistogramNexus.h"
+#include "MantidDataHandling/SaveToSNSHistogramNexus.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IAlgorithm.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::NeXus;
+using namespace Mantid::DataHandling;
 
 class SaveToSNSHistogramNexusTest : public CxxTest::TestSuite
 {

@@ -1,5 +1,5 @@
-#ifndef MANTID_NEXUS_SAVESNSNEXUS_H_
-#define MANTID_NEXUS_SAVESNSNEXUS_H_
+#ifndef MANTID_DATAHANDLING_SAVESNSNEXUS_H_
+#define MANTID_DATAHANDLING_SAVESNSNEXUS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -22,10 +22,10 @@ using namespace ::NeXus;
 
 namespace Mantid
 {
-  namespace NeXus
+  namespace DataHandling
   {
     /**
-    Save a Workspace2D or an EventWorkspace into a Nexus file whose format
+    Save a Workspace2D or an EventWorkspace into a NeXus file whose format
     corresponds to that expected at the SNS.
     Uses an initial file to copy most of the contents, only with modified data and time_of_flight fields.
 
@@ -151,7 +151,7 @@ namespace Mantid
 
     };
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid
 
 #endif
