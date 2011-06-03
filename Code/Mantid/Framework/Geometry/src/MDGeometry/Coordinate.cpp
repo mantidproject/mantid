@@ -28,52 +28,50 @@ namespace Geometry
     return coordinate(xArg, yArg, zArg, tArg);
   }
 
+  /** Default Constructor */
   coordinate::coordinate()
+  : m_x(0),m_y(0),m_z(0),m_t(0)
   {
-    m_x = 0;
-    m_y = 0;
-    m_z = 0;
-    m_t = 0;
   }
 
-  coordinate::coordinate(const double& xArg)
+  /** Constructor
+   *
+   * @param coords :: array of coordinates
+   * @param numdims :: number of dimensions in array
+   */
+  coordinate::coordinate(Mantid::MDEvents::coord_t * coords, size_t numdims)
+  : m_x(0),m_y(0),m_z(0),m_t(0)
   {
-    m_x = xArg;
-    m_y = 0;
-    m_z = 0;
-    m_t = 0;
+    if (numdims > 0) m_x = coords[0];
+    if (numdims > 1) m_y = coords[1];
+    if (numdims > 2) m_z = coords[2];
+    if (numdims > 3) m_t = coords[3];
+  }
+
+
+  coordinate::coordinate(const double& xArg)
+  : m_x(xArg),m_y(0),m_z(0),m_t(0)
+  {
   }
 
   coordinate::coordinate(const double& xArg, const double& yArg)
+  : m_x(xArg),m_y(yArg),m_z(0),m_t(0)
   {
-    m_x = xArg;
-    m_y = yArg;
-    m_z = 0;
-    m_t = 0;
   }
 
   coordinate::coordinate(const double& xArg, const double& yArg, const double& zArg)
+  : m_x(xArg),m_y(yArg),m_z(zArg),m_t(0)
   {
-    m_x = xArg;
-    m_y = yArg;
-    m_z = zArg;
-    m_t = 0;
   }
 
   coordinate::coordinate(const double& xArg, const double& yArg,const double& zArg,const double& tArg)
+  : m_x(xArg),m_y(yArg),m_z(zArg),m_t(tArg)
   {
-    m_x = xArg;
-    m_y = yArg;
-    m_z = zArg;
-    m_t = tArg;
   }
 
   coordinate::coordinate(const coordinate & other)
+  : m_x(other.m_x),m_y(other.m_y),m_z(other.m_z),m_t(other.m_t)
   {
-    m_x = other.m_x;
-    m_y = other.m_y;
-    m_z = other.m_z;
-    m_t = other.m_t;
   }
 
   coordinate & coordinate::operator= (const coordinate & other)

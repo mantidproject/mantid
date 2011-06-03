@@ -172,14 +172,15 @@ set ( TEST_FILES
 	test/CompAssemblyTest.h
 	test/ComponentTest.h
 	test/ConeTest.h
+	test/CoordinateTest.h
 	test/CylinderTest.h
-	test/DetectorGroupTest.h	
+	test/DetectorGroupTest.h
 	test/DetectorTest.h
 	test/FitParameterTest.h
 	test/GeneralTest.h
 	test/GoniometerTest.h
-	test/IMDDimensionTest.h
 	test/IMDDimensionFactoryTest.h
+	test/IMDDimensionTest.h
 	test/InstrumentRayTracerTest.h
 	test/InstrumentTest.h
 	test/LineIntersectVisitTest.h
@@ -200,7 +201,7 @@ set ( TEST_FILES
 	test/ObjCompAssemblyTest.h
 	test/ObjComponentTest.h
 	test/ObjectTest.h
-        test/OneToOneSpectraDetectorMapTest.h
+	test/OneToOneSpectraDetectorMapTest.h
 	test/OrientedLatticeTest.h
 	test/ParCompAssemblyTest.h
 	test/ParComponentFactoryTest.h

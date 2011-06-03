@@ -2,6 +2,7 @@
 #define IMDBOX_H_
 
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/CoordTransform.h"
@@ -38,7 +39,7 @@ namespace MDEvents
    *
    * */
   TMDE_CLASS
-  class DLLExport IMDBox
+  class DLLExport IMDBox : public Mantid::Geometry::SignalAggregate
   {
   public:
 
@@ -68,6 +69,18 @@ namespace MDEvents
 
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
+
+    virtual std::vector<Mantid::Geometry::coordinate> getVertexes() const
+    {
+      throw std::runtime_error("Not implemented.");
+    }
+
+
+    /** @return the MDPoints contained. throws. */
+    virtual std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > getContributingPoints() const
+    {
+      throw std::runtime_error("Not implemented and never will be. This does not apply to MDBoxes.");
+    }
 
     /// Add a single event
     virtual void addEvent(const MDE & point) = 0;
@@ -191,6 +204,14 @@ namespace MDEvents
     virtual signal_t getSignal() const
     {
       return m_signal;
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Returns the integrated error from all points within.
+     */
+    virtual signal_t getError() const
+    {
+      return sqrt(m_errorSquared);
     }
 
     //-----------------------------------------------------------------------------------------------

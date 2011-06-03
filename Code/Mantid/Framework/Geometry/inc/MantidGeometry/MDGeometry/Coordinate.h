@@ -49,6 +49,9 @@ public:
   ///Default constructor. All vertexes zero.
   coordinate();
 
+  /// Construct from an array
+  coordinate(Mantid::MDEvents::coord_t * coords, size_t numdims);
+
   //Copy constructor
   coordinate(const coordinate & other);
 
