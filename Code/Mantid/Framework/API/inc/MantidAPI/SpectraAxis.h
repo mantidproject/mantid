@@ -14,6 +14,15 @@
 
 namespace Mantid
 {
+
+//----------------------------------------------------------------------
+// Forward declaration
+//----------------------------------------------------------------------
+namespace Geometry
+{
+  class ISpectraDetectorMap;
+}
+
 namespace API
 {
 //----------------------------------------------------------------------
@@ -49,7 +58,8 @@ class MatrixWorkspace;
 class DLLExport SpectraAxis: public Axis
 {
 public:
-  SpectraAxis(const std::size_t& length);
+  SpectraAxis(const std::size_t& length, const bool initWithDefaults = true);
+  SpectraAxis(const Geometry::ISpectraDetectorMap & spectramap);
   virtual ~SpectraAxis(){}
   virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
   virtual std::size_t length() const{return m_values.size();}
@@ -69,6 +79,8 @@ public:
   void populateSimple(int64_t end);
 
 private:
+  /// Default constructor
+  SpectraAxis();
   /// Private, undefined copy assignment operator
   const SpectraAxis& operator=(const SpectraAxis&);
   /// A vector holding the axis values for the axis.

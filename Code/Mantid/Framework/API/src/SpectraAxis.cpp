@@ -2,10 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
-#include <boost/lexical_cast.hpp>
+#include "MantidKernel/Exception.h"
+#include "MantidGeometry/ISpectraDetectorMap.h"
 
+#include <boost/lexical_cast.hpp>
 #include <iostream>
 
 namespace Mantid
@@ -15,15 +16,49 @@ namespace API
 
 using std::size_t;
 
-/// Constructor
-SpectraAxis::SpectraAxis(const size_t& length): Axis()
+/**
+ * Constructor taking a length and optional flag for initialization
+ * @param length :: The length of the axis
+ * @param initWithDefaults :: If true the axis values will be initialized 
+ * with values from 1->length
+ */
+SpectraAxis::SpectraAxis(const size_t& length, const bool initWithDefaults ): Axis()
 {
   m_values.resize(length);
-  // For small axes there is no point in the additional thread overhead
-  PARALLEL_FOR_IF((length > 1000)) 
-  for(specid_t i = 0; i < specid_t(length); ++i)
+  if( initWithDefaults )
   {
-    m_values[i] = i + 1;
+    // For small axes there is no point in the additional thread overhead
+    PARALLEL_FOR_IF((length > 1000)) 
+    for(specid_t i = 0; i < specid_t(length); ++i)
+    {
+      m_values[i] = i + 1;
+    }
+  }
+}
+
+/**
+ * Constructor taking a reference to an ISpectraDetectorMap implementation. The 
+ * axis is initialized to the unique spectra values provided by the map
+ * @param spectramap :: A reference to an ISpectraDetectorMap implementation.
+ */
+SpectraAxis::SpectraAxis(const Geometry::ISpectraDetectorMap & spectramap)
+{
+  m_values.resize(spectramap.nSpectra());
+  Geometry::ISpectraDetectorMap::const_iterator itr = spectramap.cbegin();
+  Geometry::ISpectraDetectorMap::const_iterator iend = spectramap.cend();
+  specid_t previous = itr->first;
+  m_values[0] = previous;
+  ++itr;
+  size_t index(1);
+  for(; itr != iend; ++itr)
+  {
+    const specid_t current = itr->first;
+    if( current != previous )
+    {
+      m_values[index] = current;
+      previous = current;
+      ++index;
+    }
   }
 }
 
