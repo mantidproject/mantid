@@ -466,6 +466,7 @@ addFileV('PyEXE', 'Py27.exe','python.exe',LIBDIR + '/Python27/python.exe',Mantid
 addFileV('PyDLL', 'Py27.dll','python27.dll',LIBDIR + '/Python27/python27.dll',MantidDlls)
 # Our Framework file
 addFileV('MtdFramework_py', 'MFWork.py', 'MantidFramework.py', FRAMEWORKDIR + '/PythonAPI/MantidFramework.py', MantidDlls)
+addFileV('MtdSimple_py', 'MSimple.py', 'mantidsimple_runtime.py', FRAMEWORKDIR + '/PythonAPI/mantidsimple_runtime.py', MantidDlls)
 
 # Our old installation would have left a PyQt4 directory lying around, it must be removed or the new bundled python will
 # be confusd
