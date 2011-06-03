@@ -100,7 +100,7 @@ set_target_properties ( MDEvents PROPERTIES OUTPUT_NAME MantidMDEvents
 # Add to the 'Framework' group in VS
 set_property ( TARGET MDEvents PROPERTY FOLDER "MantidFramework" )
 
-include_directories( inc ../Algorithms/inc )
+include_directories( inc )
 target_link_libraries ( MDEvents ${MANTIDLIBS} )
 
 # Create test file projects

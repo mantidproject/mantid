@@ -100,4 +100,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MDDataObjects DESTINATION ${PLUGINS_DIR} )
+install ( TARGETS MDDataObjects DESTINATION ${LIB_DIR} )

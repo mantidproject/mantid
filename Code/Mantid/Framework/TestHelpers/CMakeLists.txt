@@ -39,7 +39,5 @@ set ( TMP_MANTIDLIBS )
 
 
 #======== TARGET FOR A WIKI PAGE MAKER =================
-#add_executable(WikiMaker EXCLUDE_FROM_ALL ${CMAKE_CURRENT_SOURCE_DIR}/src/WikiMaker.cpp )
-
-add_executable(WikiMaker ${CMAKE_CURRENT_SOURCE_DIR}/src/WikiMaker.cpp )
-target_link_libraries ( WikiMaker ${MANTIDLIBS} Algorithms DataHandling DataObjects Geometry MDEvents)
+add_executable(WikiMaker EXCLUDE_FROM_ALL ${CMAKE_CURRENT_SOURCE_DIR}/src/WikiMaker.cpp )
+target_link_libraries ( WikiMaker ${MANTIDLIBS} Algorithms DataHandling MDEvents)

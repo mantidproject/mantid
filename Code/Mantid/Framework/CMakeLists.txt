@@ -121,11 +121,9 @@ if ( CXXTEST_FOUND )
 endif ()
 
 add_subdirectory (MDDataObjects)
-include_directories(MDDataObjects/inc)
-set(MANTIDLIBS ${MANTIDLIBS} MDDataObjects)
+include_directories (MDDataObjects/inc)
+set ( MANTIDLIBS ${MANTIDLIBS} MDDataObjects )
 add_subdirectory (MDAlgorithms)
-
-# As of May 15, 2011, MDEvents is not an optional flag and is included in the main build.
 add_subdirectory (MDEvents)
 
 ###########################################################################
@@ -133,8 +131,8 @@ add_subdirectory (MDEvents)
 ###########################################################################
 
 set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI DataObjects
-                     DataHandling Nexus Algorithms CurveFitting ICat MDEvents
-                     MDDataObjects MDAlgorithms
+                     DataHandling Nexus Algorithms CurveFitting ICat
+                     MDDataObjects MDAlgorithms MDEvents
 )
 
 add_custom_target ( Framework DEPENDS ${FRAMEWORK_LIBS})
