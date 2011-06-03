@@ -21,7 +21,7 @@
 AxisInteractorNew::AxisInteractorNew(QWidget *parent) : QWidget(parent)
 {
   this->orientation = Qt::Vertical;
-  this->scalePos = AxisInteractorNew::LeftScale;
+  this->scalePos = AxisInteractorNew::RightScale;
 
   this->graphicsView = new QGraphicsView(this);
   this->gridLayout = new QGridLayout(this);
@@ -54,46 +54,59 @@ void AxisInteractorNew::widgetLayout()
   }
 
   // All set for vertical orientation
-  QRect scaleRect(75, 150);
-  QRect gvRect(50, 150);
+  int scaleWidth = 75;
+  int scaleHeight = 150;
+  int gvWidth = 50;
+  int gvHeight = 150;
   QSizePolicy policy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
 
   if (this->orientation == Qt::Vertical)
   {
     switch (this->scalePos)
     {
-    case RightScale:
+    case LeftScale:
     {
       this->scaleWidget->setAlignment(QwtScaleDraw::RightScale);
+      this->gridLayout->addWidget(this->graphicsView, 0, 0, 1, 1);
+      this->gridLayout->addWidget(this->scaleWidget, 0, 1, 1, 1);
       break;
     }
-    case LeftScale:
+    case RightScale:
     default:
     {
       this->scaleWidget->setAlignment(QwtScaleDraw::LeftScale);
+      this->gridLayout->addWidget(this->scaleWidget, 0, 0, 1, 1);
+      this->gridLayout->addWidget(this->graphicsView, 0, 1, 1, 1);
       break;
     }
     }
   }
   else // Qt::Horizontal
   {
+    qSwap(scaleWidth, scaleHeight);
+    qSwap(gvWidth, gvHeight);
     policy.transpose();
     switch (this->scalePos)
     {
-    {
-    case TopScale:
+    case BottomScale:
     {
       this->scaleWidget->setAlignment(QwtScaleDraw::TopScale);
+      this->gridLayout->addWidget(this->scaleWidget, 0, 0, 1, 1);
+      this->gridLayout->addWidget(this->graphicsView, 1, 0, 1, 1);
       break;
     }
-    case BottomScale:
+    case TopScale:
     default:
     {
       this->scaleWidget->setAlignment(QwtScaleDraw::BottomScale);
+      this->gridLayout->addWidget(this->graphicsView, 0, 0, 1, 1);
+      this->gridLayout->addWidget(this->scaleWidget, 1, 0, 1, 1);
       break;
     }
     }
   }
+  this->scaleWidget->setMinimumSize(QSize(scaleWidth, scaleHeight));
+  this->graphicsView->setMinimumSize(QSize(gvWidth, gvHeight));
   this->setSizePolicy(policy);
 }
 
