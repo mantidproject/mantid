@@ -99,9 +99,9 @@ namespace Mantid
       //TODO fix ---
       Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(vtkDataSet* inputDataSet, const char* id);
 
-      std::string MDHistogramRebinningPresenter::findExistingWorkspaceName(vtkDataSet *inputDataSet, const char* id);
+      std::string findExistingWorkspaceName(vtkDataSet *inputDataSet, const char* id);
 
-      std::string MDHistogramRebinningPresenter::findExistingWorkspaceLocation(vtkDataSet *inputDataSet, const char* id);
+      std::string findExistingWorkspaceLocation(vtkDataSet *inputDataSet, const char* id);
 
       void addFunctionKnowledge();
 
