@@ -48,7 +48,7 @@ namespace Mantid
     {
       std::string extn=extension(filePath);
       bool bascii(false);
-      (!extn.compare("dat")||!extn.compare("csv")|| extn.compare("txt"))?bascii=true:bascii=false;
+      (!extn.compare("dat")||!extn.compare("csv")|| extn.compare("txt")|| extn.compare(""))?bascii=true:bascii=false;
 
       bool is_ascii (true);
       for(size_t i=0; i<nread; i++)
@@ -363,6 +363,7 @@ namespace Mantid
       exts.push_back(".dat");
       exts.push_back(".txt");
       exts.push_back(".csv");
+      exts.push_back("");
 
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "A comma separated Ascii file");
