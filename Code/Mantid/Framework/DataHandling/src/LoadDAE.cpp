@@ -328,7 +328,7 @@ namespace Mantid
 
       // Set the unit on the workspace to TOF
       localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-
+      localWorkspace->setYUnit("Counts");
       loadSpectraMap(dae_handle, localWorkspace);
 
       const int histTotal = static_cast<int>(total_specs) * m_numberOfPeriods;
@@ -525,7 +525,7 @@ namespace Mantid
           g_log.error("Unable to read detector information (SPEC) from DAE " + m_daename);
           throw Exception::FileError("Unable to read detector information (SPEC) from DAE " , m_daename);
         }
-	localWorkspace->replaceSpectraMap(new SpectraDetectorMap(spec.get(), udet.get(), ndet));
+        localWorkspace->replaceSpectraMap(new SpectraDetectorMap(spec.get(), udet.get(), ndet));
       }
 
     }
