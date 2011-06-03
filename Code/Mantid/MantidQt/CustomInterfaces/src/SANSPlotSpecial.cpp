@@ -70,12 +70,15 @@ void SANSPlotSpecial::plot()
   }
   // Run iq transform algorithm
   m_workspaceIQT = runIQTransform();
-  // plot data to the plotWindow
-  m_dataCurve = plotMiniplot(m_dataCurve, m_workspaceIQT);
-  // update fields of table of "derived" values?
-  QPair<QStringList, QList<QPair<int, int> > > deriv = m_transforms[m_uiForm.cbPlotType->currentText()]->derivatives();
-  tableDisplay(deriv.first, deriv.second);
-  calculateDerivatives();
+  if ( m_workspaceIQT )
+  {
+    // plot data to the plotWindow
+    m_dataCurve = plotMiniplot(m_dataCurve, m_workspaceIQT);
+    // update fields of table of "derived" values?
+    QPair<QStringList, QList<QPair<int, int> > > deriv = m_transforms[m_uiForm.cbPlotType->currentText()]->derivatives();
+    tableDisplay(deriv.first, deriv.second);
+    calculateDerivatives();
+  }
 }
 
 void SANSPlotSpecial::help()
@@ -144,22 +147,22 @@ void SANSPlotSpecial::calculateDerivatives()
   {
   case Transform::GuinierSpheres:
     // Gradient = -(Rg**2)/3 = -(R**2)/5
-    temp = - std::sqrt(3 * std::abs(gradient) );
+    temp = std::sqrt(3 * std::abs(gradient) );
     m_derivatives["Rg"]->setText(QString::number(temp));
-    temp = - std::sqrt(5 * std::abs(gradient) );
+    temp = std::sqrt(5 * std::abs(gradient) );
     m_derivatives["R"]->setText(QString::number(temp));
     // Intercept = M.[(c.(deltarho**2) / (NA.d**2)] = M.[(phi.(deltarho**2) / (NA.d)]
     deriveGuinierSpheres();
     break;
   case Transform::GuinierRods:
     // Gradient = -(Rg,xs**2)/2  (note dividing by 2 this time)
-    temp = - std::sqrt(2 * std::abs(gradient) );
+    temp = std::sqrt(2 * std::abs(gradient) );
     m_derivatives["Rg,xs"]->setText(QString::number(temp));
     //Intercept (Q**2=0) = Ln[(pi.c.(deltarho**2).ML) / (NA.d**2)]
     deriveGuinierRods();
     break;
   case Transform::GuinierSheets:
-    temp = - std::sqrt(std::abs(gradient) * 12);
+    temp = std::sqrt(std::abs(gradient) * 12);
     m_derivatives["T"]->setText(QString::number(temp));
     break;
   case Transform::Zimm:
@@ -202,8 +205,6 @@ void SANSPlotSpecial::tableUpdated(int row, int column)
 
   if ( m_rearrangingTable ) { return; }
   if ( ! ( column == 3 || column == 5 ) ) { return; }
-
-  // Transform::TransformType type = m_transforms[m_uiForm.cbPlotType->currentText()]->type();
 
   calculateDerivatives();
 }
@@ -249,7 +250,14 @@ Mantid::API::MatrixWorkspace_sptr SANSPlotSpecial::runIQTransform()
   // Run the IQTransform algorithm for the current settings on the GUI
   Mantid::API::IAlgorithm_sptr iqt = Mantid::API::AlgorithmManager::Instance().create("IQTransform");
   iqt->initialize();
-  iqt->setPropertyValue("InputWorkspace", m_uiForm.wsInput->currentText().toStdString());
+  try
+  {
+    iqt->setPropertyValue("InputWorkspace", m_uiForm.wsInput->currentText().toStdString());
+  } catch ( std::invalid_argument & )
+  {
+    m_uiForm.lbPlotOptionsError->setText("Selected input workspace is not appropriate for the IQTransform algorithm. Please refer to the documentation for guidelines.");
+    return Mantid::API::MatrixWorkspace_sptr();
+  }
   iqt->setPropertyValue("OutputWorkspace", "__sans_isis_display_iqt");
   iqt->setPropertyValue("TransformType", m_uiForm.cbPlotType->currentText().toStdString());
   

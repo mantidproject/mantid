@@ -206,11 +206,20 @@
         </item>
         <item>
          <widget class="QLabel" name="lbPlotOptionsError" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Preferred" hsizetype="Maximum" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="styleSheet" >
            <string notr="true" >color:rgb(255, 0, 0)</string>
           </property>
           <property name="text" >
            <string/>
+          </property>
+          <property name="wordWrap" >
+           <bool>true</bool>
           </property>
          </widget>
         </item>
