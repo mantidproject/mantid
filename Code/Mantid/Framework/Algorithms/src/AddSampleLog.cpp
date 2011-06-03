@@ -39,6 +39,9 @@ void AddSampleLog::init()
   declareProperty("LogName", "", new MandatoryValidator<std::string>,
     "The name that will identify the log entry");
 
+  declareProperty("LogText", "",
+    "The content of the log");
+
   std::vector<std::string> propOptions;
   propOptions.push_back("String");
   propOptions.push_back("Number");
@@ -46,9 +49,6 @@ void AddSampleLog::init()
   declareProperty("LogType", "String",new ListValidator(propOptions),
     "The type that the log data will be."
      );
-
-  declareProperty("LogText", "",
-    "The content of the log");
 }
 
 void AddSampleLog::exec()
