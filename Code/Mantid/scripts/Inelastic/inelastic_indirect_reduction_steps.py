@@ -1,5 +1,6 @@
 from reducer import ReductionStep
 from mantidsimple import *
+import string
 
 class LoadData(ReductionStep):
     """Handles the loading of the data for Indirect instruments. The summing
