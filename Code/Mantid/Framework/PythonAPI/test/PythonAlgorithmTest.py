@@ -45,7 +45,8 @@ class DummyAlg(PythonAlgorithm):
     
     def PyExec(self):
         output_ws = self.getPropertyValue("OutputWorkspace")
-        a = self.executeSubAlg(CreateWorkspace, output_ws, [0,1,2], [0,1,2], [0,0,0])
+        a = self.executeSubAlg(CreateWorkspace, OutputWorkspace=output_ws, DataX=[0,1,2], DataY=[0,1,2], DataE=[0,0,0])
+        #a = self.executeSubAlg(CreateWorkspace, output_ws, [0,1,2], [0,1,2], [0,0,0])
         self._setWorkspaceProperty("OutputWorkspace", a._getWorkspaceProperty("OutputWorkspace"))
 
 
