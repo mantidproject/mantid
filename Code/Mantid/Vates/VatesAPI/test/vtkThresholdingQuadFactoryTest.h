@@ -9,6 +9,8 @@
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MDDataObjects/MDIndexCalculator.h"
 
+using namespace Mantid;
+
 //=====================================================================================
 // Test helper types
 //=====================================================================================
@@ -22,15 +24,15 @@ class FakeCell : public Mantid::Geometry::SignalAggregate
 {
 public:
   FakeCell(){}
-  virtual std::vector<Mantid::Geometry::coordinate> getVertexes() const
+  virtual std::vector<Mantid::Geometry::Coordinate> getVertexes() const
   {
-    return std::vector<Mantid::Geometry::coordinate>(4);
+    return std::vector<Mantid::Geometry::Coordinate>(4);
   }
-  virtual double getSignal() const
+  virtual signal_t getSignal() const
   {
     return 1; //Hard-coded signal value. Required for threshold checking in tests that follow.
   }
-  virtual double getError() const
+  virtual signal_t getError() const
   {
     throw std::runtime_error("Not implemented");
   }
@@ -127,7 +129,7 @@ public:
   MOCK_CONST_METHOD0(getDimensionIDs,const std::vector<std::string>());
   MOCK_CONST_METHOD0(getNPoints, uint64_t());
   MOCK_CONST_METHOD0(getNumDims, size_t());
-  MOCK_CONST_METHOD2(getSignalNormalizedAt, double(size_t index1, size_t index2));
+  MOCK_CONST_METHOD2(getSignalNormalizedAt, signal_t(size_t index1, size_t index2));
   MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
   virtual Mantid::API::IMDIterator* createIterator() const
   {

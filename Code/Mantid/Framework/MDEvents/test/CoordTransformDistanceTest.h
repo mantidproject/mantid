@@ -1,14 +1,14 @@
 #ifndef MANTID_MDEVENTS_COORDTRANSFORMDISTANCETEST_H_
 #define MANTID_MDEVENTS_COORDTRANSFORMDISTANCETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
+#include "MantidKernel/Timer.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
+#include <cxxtest/TestSuite.h>
+#include <iomanip>
+#include <iostream>
 
+using namespace Mantid;
 using namespace Mantid::MDEvents;
 
 class CoordTransformDistanceTest : public CxxTest::TestSuite

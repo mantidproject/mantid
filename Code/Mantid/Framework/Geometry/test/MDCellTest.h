@@ -5,6 +5,9 @@
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
 #include <boost/scoped_ptr.hpp>
+#include "MantidKernel/System.h"
+
+using namespace Mantid;
 
 class MDCellTest :    public CxxTest::TestSuite
 {
@@ -15,12 +18,12 @@ private:
   {
   public:
     
-    double getSignal() const
+    signal_t getSignal() const
     {
       return 1;
     }
 
-    double getError() const
+    signal_t getError() const
     {
       return 0.1;
     }
@@ -30,8 +33,8 @@ private:
   static Mantid::Geometry::MDCell* constructMDCell()
   {
     using namespace Mantid::Geometry;
-    std::vector<coordinate> vertexes;
-    coordinate c = coordinate::createCoordinate4D(4, 3, 2, 1);
+    std::vector<Coordinate> vertexes;
+    Coordinate c = Coordinate::createCoordinate4D(4, 3, 2, 1);
     vertexes.push_back(c);
 
     std::vector<boost::shared_ptr<MDPoint> > points;
@@ -72,9 +75,9 @@ public:
 //  {
 //    using namespace Mantid::Geometry;
 //    boost::scoped_ptr<MDCell> cell(constructMDCell());
-//    std::vector<coordinate> vertexes = cell->getVertexes();
+//    std::vector<Coordinate> vertexes = cell->getVertexes();
 //    TSM_ASSERT_EQUALS("A single vertex should be present.", 1, vertexes.size());
-//    coordinate v1 = vertexes.at(0);
+//    Coordinate v1 = vertexes.at(0);
 //    TSM_ASSERT_EQUALS("Vertex x value incorrect", 4, v1.getX());
 //    TSM_ASSERT_EQUALS("Vertex y value incorrect", 3, v1.getY());
 //    TSM_ASSERT_EQUALS("Vertex z value incorrect", 2, v1.getZ());

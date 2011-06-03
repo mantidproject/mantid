@@ -38,7 +38,7 @@ namespace Mantid
             // assume that the first point in the vertexes array is the centre point anf that the gett getter
             // returns a energy value in the appropriate units.
             for(size_t i=0; i<points.size();i++){
-                std::vector<Mantid::Geometry::coordinate> vertexes = points[i]->getVertexes();
+                std::vector<Mantid::Geometry::Coordinate> vertexes = points[i]->getVertexes();
                 eps=vertexes[0].gett();
                 //int run=points[i]->getRunId(); // testing
                 bgSignal+=constant+eps*(linear+eps*quadratic);

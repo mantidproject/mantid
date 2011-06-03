@@ -471,7 +471,7 @@ namespace Mantid{
         std::out_of_range("Cell index is out of range");
       }
       MDCell& cell = m_cells[index];
-      cell = MDCell(points,std::vector<coordinate>());
+      cell = MDCell(points,std::vector<Coordinate>());
     }
 
 

@@ -1,14 +1,14 @@
 #ifndef MANTID_MDEVENTS_IMDBOXTEST_H_
 #define MANTID_MDEVENTS_IMDBOXTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
+#include "MantidKernel/Timer.h"
 #include "MantidMDEvents/IMDBox.h"
+#include <cxxtest/TestSuite.h>
+#include <iomanip>
+#include <iostream>
 
+using namespace Mantid;
 using namespace Mantid::MDEvents;
 
 
@@ -79,6 +79,7 @@ public:
     box.setErrorSquared(456.0);
     TS_ASSERT_EQUALS( box.getSignal(), 123.0);
     TS_ASSERT_EQUALS( box.getErrorSquared(), 456.0);
+    TS_ASSERT_DELTA( box.getError(), sqrt(456.0), 1e-4);
   }
 
   /** Setting and getting the extents;

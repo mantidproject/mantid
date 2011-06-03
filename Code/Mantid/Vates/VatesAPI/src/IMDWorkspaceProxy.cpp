@@ -179,13 +179,13 @@ Mantid::Geometry::IMDDimension_const_sptr IMDWorkspaceProxy::getTDimension(void)
 }
 
 
-double IMDWorkspaceProxy::getSignalAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+signal_t IMDWorkspaceProxy::getSignalAt(size_t index1, size_t index2, size_t index3, size_t index4) const
 {
   return m_function(index1, index2, index3, index4);
 }
 
  
-double IMDWorkspaceProxy::getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+signal_t IMDWorkspaceProxy::getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
 { 
   return m_function(index1, index2, index3, index4); //TODO: need to divide by cell volume at this point.
 }

@@ -9,6 +9,7 @@
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MDDataObjects/MDIndexCalculator.h"
 
+using namespace Mantid;
 
 //=====================================================================================
 // Test Helper Types
@@ -104,7 +105,7 @@ public:
   MOCK_CONST_METHOD0(getDimensionIDs,const std::vector<std::string>());
   MOCK_CONST_METHOD0(getNPoints, uint64_t());
   MOCK_CONST_METHOD0(getNumDims, size_t());
-  MOCK_CONST_METHOD1(getSignalNormalizedAt, double(size_t index1));
+  MOCK_CONST_METHOD1(getSignalNormalizedAt, signal_t(size_t index1));
   MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
 
   virtual Mantid::API::IMDIterator* createIterator() const

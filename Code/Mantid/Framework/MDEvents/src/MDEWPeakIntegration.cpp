@@ -135,13 +135,13 @@ namespace MDEvents
       CoordTransformDistance sphere(nd, center, dimensionsUsed);
 
       // Perform the integration into whatever box is contained within.
-      double signal = 0;
-      double errorSquared = 0;
+      signal_t signal = 0;
+      signal_t errorSquared = 0;
       ws->getBox()->integrateSphere(sphere, PeakRadius*PeakRadius, signal, errorSquared);
 
       // Integrate around the background radius
-      double bgSignal = 0;
-      double bgErrorSquared = 0;
+      signal_t bgSignal = 0;
+      signal_t bgErrorSquared = 0;
       if (BackgroundRadius > PeakRadius)
       {
         ws->getBox()->integrateSphere(sphere, BackgroundRadius*BackgroundRadius, bgSignal, bgErrorSquared);

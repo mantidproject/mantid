@@ -208,6 +208,7 @@ template
 
 
 template  DLLExport void indexSort(const std::vector<double>&,std::vector<int>&);
+template  DLLExport void indexSort(const std::vector<float>&,std::vector<int>&);
 template  DLLExport void indexSort(const std::vector<int>&,std::vector<int>&);
 
 

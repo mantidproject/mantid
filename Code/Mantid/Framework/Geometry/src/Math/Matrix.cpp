@@ -1660,9 +1660,11 @@ Matrix<T>::str() const
 ///\cond TEMPLATE
 
 template class DLLExport Matrix<double>;
+template class DLLExport Matrix<float>;
 template class DLLExport Matrix<int>;
 
 template DLLExport std::ostream& operator<<(std::ostream&,const Geometry::Matrix<double>&);
+template DLLExport std::ostream& operator<<(std::ostream&,const Geometry::Matrix<float>&);
 template DLLExport std::ostream& operator<<(std::ostream&,const Geometry::Matrix<int>&);
 
 ///\endcond TEMPLATE

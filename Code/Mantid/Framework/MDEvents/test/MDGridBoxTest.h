@@ -122,7 +122,7 @@ public:
     while (!allDone)
     {
       // Generate the position from the counter
-      double centers[nd];
+      coord_t centers[nd];
       for (size_t d=0;d<nd;d++)
         centers[d] = double(counters[d])*step + start;
 
@@ -391,15 +391,15 @@ public:
 
     TS_ASSERT_EQUALS( superbox->getNPoints(), 0 );
     { // One event in 0th box of the 0th box.
-      double centers[2] = {0.05, 0.05};
+      coord_t centers[2] = {0.05, 0.05};
       superbox->addEvent( MDEvent<2>(2.0, 2.0, centers) );
     }
     { // One event in 1st box of the 0th box.
-      double centers[2] = {0.15, 0.05};
+      coord_t centers[2] = {0.15, 0.05};
       superbox->addEvent( MDEvent<2>(2.0, 2.0, centers) );
     }
     { // One event in 99th box.
-      double centers[2] = {9.5, 9.5};
+      coord_t centers[2] = {9.5, 9.5};
       superbox->addEvent( MDEvent<2>(2.0, 2.0, centers) );
     }
 
@@ -461,7 +461,7 @@ public:
         {
           for (size_t i=0; i<num_to_repeat; i++)
           {
-            double centers[2] = {x,y};
+            coord_t centers[2] = {x,y};
             box->addEvent( MDEvent<2>(2.0, 2.0, centers) );
           }
         }
@@ -491,7 +491,7 @@ public:
     for (double x=0.5; x < 10; x += 1.0)
       for (double y=0.5; y < 10; y += 1.0)
       {
-        double centers[2] = {x,y};
+        coord_t centers[2] = {x,y};
         events.push_back( MDEvent<2>(2.0, 2.0, centers) );
       }
 
@@ -523,7 +523,7 @@ public:
     for (double x=-5.0; x < 20; x += 20.0)
       for (double y=-5.0; y < 20; y += 20.0)
       {
-        double centers[2] = {x,y};
+        coord_t centers[2] = {x,y};
         events.push_back( MDEvent<2>(2.0, 2.0, centers) );
       }
     // Get the right totals again
@@ -550,7 +550,7 @@ public:
     for (double x=0.5; x < 10; x += 1.0)
       for (double y=0.5; y < 10; y += 1.0)
       {
-        double centers[2] = {x,y};
+        coord_t centers[2] = {x,y};
         events.push_back( MDEvent<2>(2.0, 2.0, centers) );
       }
 
@@ -581,7 +581,7 @@ public:
       for (double x=0.5; x < 10; x += 1.0)
         for (double y=0.5; y < 10; y += 1.0)
         {
-          double centers[2] = {x,y};
+          coord_t centers[2] = {x,y};
           events.push_back( MDEvent<2>(2.0, 2.0, centers) );
         }
       TS_ASSERT_THROWS_NOTHING( b->addEvents( events ); );
@@ -629,7 +629,7 @@ public:
     for (size_t i=0; i < num_repeat; i++)
     {
       // Make an event in the middle of each box
-      double centers[2] = {1e-10, 1e-10};
+      coord_t centers[2] = {1e-10, 1e-10};
       events.push_back( MDEvent<2>(2.0, 2.0, centers) );
     }
     TS_ASSERT_THROWS_NOTHING( b->addEvents( events ); );
@@ -695,7 +695,7 @@ public:
     for (double x=0.5; x < 10; x += 1.0)
       for (double y=0.5; y < 10; y += 1.0)
       {
-        double centers[2] = {x,y};
+        coord_t centers[2] = {x,y};
         for (size_t i=0; i < num_repeat; i++)
         {
           // Make an event in the middle of each box
@@ -829,8 +829,8 @@ public:
     coord_t center[2] = {x,y};
     CoordTransformDistance sphere(2, center, dimensionsUsed);
 
-    double signal = 0;
-    double errorSquared = 0;
+    signal_t signal = 0;
+    signal_t errorSquared = 0;
     box.integrateSphere(sphere, radius*radius, signal, errorSquared);
     TSM_ASSERT_DELTA( message, signal, 1.0*numExpected, 1e-5);
     TSM_ASSERT_DELTA( message, errorSquared, 1.0*numExpected, 1e-5);
@@ -924,8 +924,8 @@ public:
     coord_t center[3] = {x,y,z};
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
-    double signal = 0;
-    double errorSquared = 0;
+    signal_t signal = 0;
+    signal_t errorSquared = 0;
     box.integrateSphere(sphere, radius*radius, signal, errorSquared);
     TSM_ASSERT_DELTA( message, signal, 1.0*numExpected, 1e-5);
     TSM_ASSERT_DELTA( message, errorSquared, 1.0*numExpected, 1e-5);
@@ -975,7 +975,7 @@ public:
     coord_t center[2] = {x,y};
     CoordTransformDistance sphere(2, center, dimensionsUsed);
 
-    double signal = 0;
+    signal_t signal = 0;
     coord_t centroid[2] = {0., 0.};
     box.centroidSphere(sphere, radius*radius, centroid, signal);
     // Normalized
@@ -1123,7 +1123,7 @@ public:
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
     // Repeat the integration a lot
-    double signal, errorSquared;
+    signal_t signal, errorSquared;
     for (size_t i=0; i < 1000; i++)
     {
       signal = 0;
@@ -1174,7 +1174,7 @@ public:
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
     // Repeat the integration a lot
-    double signal;
+    signal_t signal;
     coord_t centroid[3];
     for (size_t i=0; i < 100; i++)
     {

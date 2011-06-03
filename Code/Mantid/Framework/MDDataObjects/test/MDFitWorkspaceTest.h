@@ -31,8 +31,8 @@ public:
     do
     {
       std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > points(2);
-      points[0].reset(new MDPoint(double(rand() % 100),1.0,std::vector<coordinate>(),IDetector_sptr(),IInstrument_sptr()));
-      points[1].reset(new MDPoint(double(rand() % 100),1.0,std::vector<coordinate>(),IDetector_sptr(),IInstrument_sptr()));
+      points[0].reset(new MDPoint(double(rand() % 100),1.0,std::vector<Coordinate>(),IDetector_sptr(),IInstrument_sptr()));
+      points[1].reset(new MDPoint(double(rand() % 100),1.0,std::vector<Coordinate>(),IDetector_sptr(),IInstrument_sptr()));
       size_t i = it->getPointer();
       ws.setCell(i,points);
     }

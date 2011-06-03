@@ -7,6 +7,8 @@
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
 
+using namespace Mantid;
+
 //=====================================================================================
 // Test Helpers Types
 //=====================================================================================
@@ -58,7 +60,7 @@ namespace
     MOCK_CONST_METHOD0(getDimensionIDs,const std::vector<std::string>());
     MOCK_CONST_METHOD0(getNPoints, uint64_t());
     MOCK_CONST_METHOD0(getNumDims, size_t());
-    MOCK_CONST_METHOD4(getSignalNormalizedAt, double(size_t index1, size_t index2, size_t index3, size_t index4));
+    MOCK_CONST_METHOD4(getSignalNormalizedAt, signal_t(size_t index1, size_t index2, size_t index3, size_t index4));
     MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
 
     const Mantid::Geometry::SignalAggregate& getCell(...) const

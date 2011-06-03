@@ -133,7 +133,7 @@ namespace MDEvents
       CoordTransformDistance sphere(nd, center, dimensionsUsed);
 
       // Initialize the centroid to 0.0
-      double signal = 0;
+      signal_t signal = 0;
       coord_t centroid[nd];
       for (size_t d=0; d<nd; d++)
         centroid[d] = 0.0;

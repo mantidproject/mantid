@@ -132,7 +132,7 @@ public:
       {
         for (size_t i=0; i < num_repeat; i++)
         {
-          double centers[2] = {x, y};
+          coord_t centers[2] = {x, y};
           events.push_back( MDEvent<2>(2.0, 2.0, centers) );
         }
       }
@@ -329,8 +329,8 @@ public:
     bool dimensionsUsed[3] = {true,true,true};
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
-    double signal = 0;
-    double errorSquared = 0;
+    signal_t signal = 0;
+    signal_t errorSquared = 0;
     ws->getBox()->integrateSphere(sphere, 1.0, signal, errorSquared);
 
     //TODO:

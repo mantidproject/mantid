@@ -34,8 +34,8 @@ private:
   static Mantid::Geometry::MDPoint* constructMDPoint()
   {
     using namespace Mantid::Geometry;
-    std::vector<coordinate> vertexes;
-    coordinate c = coordinate::createCoordinate4D(1, 2, 3, 4);
+    std::vector<Coordinate> vertexes;
+    Coordinate c = Coordinate::createCoordinate4D(1, 2, 3, 4);
     vertexes.push_back(c);
     IDetector_sptr detector = IDetector_sptr(new DummyDetector("dummydetector"));
     IInstrument_sptr instrument = IInstrument_sptr(new DummyInstrument("dummyinstrument"));
@@ -83,9 +83,9 @@ public:
 //  {
 //    using namespace Mantid::Geometry;
 //    boost::scoped_ptr<MDPoint> point(constructMDPoint());
-//    std::vector<coordinate> vertexes = point->getVertexes();
+//    std::vector<Coordinate> vertexes = point->getVertexes();
 //    TSM_ASSERT_EQUALS("A single vertex should be present.", 1, vertexes.size());
-//    coordinate v1 = vertexes.at(0);
+//    Coordinate v1 = vertexes.at(0);
 //    TSM_ASSERT_EQUALS("Vertex x value incorrect", 1, v1.getX());
 //    TSM_ASSERT_EQUALS("Vertex y value incorrect", 2, v1.getY());
 //    TSM_ASSERT_EQUALS("Vertex z value incorrect", 3, v1.getZ());

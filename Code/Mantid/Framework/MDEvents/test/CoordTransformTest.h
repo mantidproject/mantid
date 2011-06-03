@@ -1,15 +1,15 @@
 #ifndef MANTID_MDEVENTS_COORDTRANSFORMTEST_H_
 #define MANTID_MDEVENTS_COORDTRANSFORMTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
+#include "MantidKernel/Timer.h"
 #include "MantidMDEvents/CoordTransform.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include <cxxtest/TestSuite.h>
+#include <iomanip>
+#include <iostream>
 
+using namespace Mantid;
 using namespace Mantid::MDEvents;
 
 class CoordTransformTest : public CxxTest::TestSuite

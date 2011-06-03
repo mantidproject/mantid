@@ -43,19 +43,19 @@ namespace Mantid
     private:
       double m_cachedSignal;
       double m_cachedError;
-      std::vector<coordinate> m_vertexes;
+      std::vector<Coordinate> m_vertexes;
       std::vector<boost::shared_ptr<MDPoint> > m_contributingPoints;
       inline void calculateCachedValues();
     public:
       /// Default constructor
       MDCell(){};
       /// Construct from exising points.
-      MDCell(std::vector<boost::shared_ptr<MDPoint> > pContributingPoints, std::vector<coordinate> vertexes);
+      MDCell(std::vector<boost::shared_ptr<MDPoint> > pContributingPoints, std::vector<Coordinate> vertexes);
       /// Construct image-only mode. No contributing points maintained.
-      MDCell(const double& signal,const double& error, const std::vector<coordinate>& vertexes);
-      std::vector<coordinate> getVertexes() const;
-      double getSignal() const;
-      double getError() const;
+      MDCell(const double& signal,const double& error, const std::vector<Coordinate>& vertexes);
+      std::vector<Coordinate> getVertexes() const;
+      signal_t getSignal() const;
+      signal_t getError() const;
       std::vector<boost::shared_ptr<MDPoint> > getContributingPoints() const;
       ~MDCell();
     };

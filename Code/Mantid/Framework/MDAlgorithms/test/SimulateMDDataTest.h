@@ -176,8 +176,8 @@ private:
     static Mantid::Geometry::MDCell constructMDCell(int npnts)
     {
         using namespace Mantid::Geometry;
-        std::vector<coordinate> vertices;
-        coordinate c = coordinate::createCoordinate4D(4, 3, 2, 1);
+        std::vector<Coordinate> vertices;
+        Coordinate c = Coordinate::createCoordinate4D(4, 3, 2, 1);
         vertices.push_back(c);
 
         std::vector<boost::shared_ptr<MDPoint> > points;
@@ -212,8 +212,8 @@ private:
     static Mantid::Geometry::MDPoint* constructMDPoint(double s, double e, double x, double y, double z, double t)
     {
         using namespace Mantid::Geometry;
-        std::vector<coordinate> vertices;
-        coordinate c = coordinate::createCoordinate4D(x, y, z, t);
+        std::vector<Coordinate> vertices;
+        Coordinate c = Coordinate::createCoordinate4D(x, y, z, t);
         vertices.push_back(c);
         IDetector_sptr detector = IDetector_sptr(new DummyDetector("dummydetector"));
         IInstrument_sptr instrument = IInstrument_sptr(new DummyInstrument("dummyinstrument"));
@@ -242,7 +242,7 @@ public:
         TS_ASSERT_EQUALS(myCut->getXDimension()->getNBins(),2);
 
         std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > contributingPoints;
-        std::vector<Mantid::Geometry::coordinate> vertices;
+        std::vector<Mantid::Geometry::Coordinate> vertices;
 
         // test that cells and points are as expected
         int firstCell = 0;

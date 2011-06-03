@@ -183,16 +183,16 @@ namespace Mantid
       Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const;
 
       /// Getter for normalized signal 4D.
-      double getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const;
+      signal_t getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const;
 
       /// Getter for normalized signal 3D.
-      double getSignalNormalizedAt(size_t index1, size_t index2, size_t index3) const;
+      signal_t getSignalNormalizedAt(size_t index1, size_t index2, size_t index3) const;
 
       /// Getter for normalized signal 2D.
-      double getSignalNormalizedAt(size_t index1, size_t index2) const;
+      signal_t getSignalNormalizedAt(size_t index1, size_t index2) const;
 
       /// Getter for normalized signal 1D.
-      double getSignalNormalizedAt(size_t index1) const;
+      signal_t getSignalNormalizedAt(size_t index1) const;
 
     protected:
 

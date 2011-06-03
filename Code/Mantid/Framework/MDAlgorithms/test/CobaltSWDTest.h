@@ -244,31 +244,31 @@ private:
     static Mantid::Geometry::MDCell constructMDCell(int npnts)
     {
         using namespace Mantid::Geometry;
-        std::vector<coordinate> vertices;
+        std::vector<Coordinate> vertices;
 
         std::vector<boost::shared_ptr<MDPoint> > points;
-        coordinate c;
+        Coordinate c;
         if(npnts==1) {
             points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(16,4,1,2,3,0)) );
-            c = coordinate::createCoordinate4D(1, 2, 3, 0);
+            c = Coordinate::createCoordinate4D(1, 2, 3, 0);
         }
         else if(npnts==2) {
             points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(25,5,1,2,3,1)) );
             points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(36,6,1,2,3,2)) );
-            c = coordinate::createCoordinate4D(1, 2, 3, 1.5);
+            c = Coordinate::createCoordinate4D(1, 2, 3, 1.5);
         }
         else if(npnts==3) {
             points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(49,7,1,2,3,3)) );
             points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(49,7,1,2,3,4)) );
             points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(64,8,1,2,3,5)) );
-            c = coordinate::createCoordinate4D(1, 2, 3, 4);
+            c = Coordinate::createCoordinate4D(1, 2, 3, 4);
         }
         else if(npnts==4) {
             points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(81,9,1,2,3,6)) );
             points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(81,9,1,2,3,6.5)) );
             points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(100,10,1,2,3,7)) );
             points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(100,10,1,2,3,7.5)) );
-            c = coordinate::createCoordinate4D(1, 2, 3, 6);
+            c = Coordinate::createCoordinate4D(1, 2, 3, 6);
         }
         vertices.push_back(c);
 
@@ -295,8 +295,8 @@ private:
     static Mantid::Geometry::MDPoint* constructMDPoint(double s, double e, double x, double y, double z, double t)
     {
         using namespace Mantid::Geometry;
-        std::vector<coordinate> vertices;
-        coordinate c = coordinate::createCoordinate4D(x, y, z, t);
+        std::vector<Coordinate> vertices;
+        Coordinate c = Coordinate::createCoordinate4D(x, y, z, t);
         vertices.push_back(c);
         IDetector_sptr detector = IDetector_sptr(new DummyDetector("dummydetector"));
         IInstrument_sptr instrument = IInstrument_sptr(new DummyInstrument("dummyinstrument"));
@@ -326,7 +326,7 @@ public:
         TS_ASSERT_EQUALS(myCut->getXDimension()->getNBins(),4);
 
         std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > contributingPoints;
-        std::vector<Mantid::Geometry::coordinate> vertices;
+        std::vector<Mantid::Geometry::Coordinate> vertices;
 
         // test that cells and points are as expected
         int firstCell = 0;

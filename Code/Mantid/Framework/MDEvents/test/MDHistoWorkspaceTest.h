@@ -1,18 +1,18 @@
 #ifndef MANTID_MDEVENTS_MDHISTOWORKSPACETEST_H_
 #define MANTID_MDEVENTS_MDHISTOWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <iostream>
-#include <iomanip>
-#include <boost/math/special_functions/fpclassify.hpp>
-
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <cxxtest/TestSuite.h>
+#include <iomanip>
+#include <iostream>
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
+using namespace Mantid;
 
 class MDHistoWorkspaceTest : public CxxTest::TestSuite
 {
@@ -58,15 +58,15 @@ public:
     TS_ASSERT_DELTA( ws.getErrorAt(5), 1.234, 1e-5);
     TS_ASSERT_DELTA( ws.getErrorNormalizedAt(5), 1.234 / 256.0, 1e-5); // Cell volume is 256
 
-    std::vector<double> data = ws.getSignalDataVector();
+    std::vector<signal_t> data = ws.getSignalDataVector();
     TS_ASSERT_EQUALS(data.size(), 5*5*5*5);
     TS_ASSERT_DELTA( data[5], 2.3456, 1e-5);
 
     // Set a different value at every point
     for (size_t i=0; i <  ws.getNPoints(); ++i)
     {
-      ws.setSignalAt(i, (double) i);
-      ws.setErrorAt(i, (double) i);
+      ws.setSignalAt(i, (signal_t) i);
+      ws.setErrorAt(i, (signal_t) i);
     }
 
     // Test the 4 overloads of each method. Phew!
@@ -113,7 +113,7 @@ public:
     ws.setErrorAt(5,1.234);
     TS_ASSERT_DELTA( ws.getErrorAt(5), 1.234, 1e-5);
 
-    std::vector<double> data = ws.getSignalDataVector();
+    std::vector<signal_t> data = ws.getSignalDataVector();
     TS_ASSERT_EQUALS(data.size(), 5*5);
     TS_ASSERT_DELTA( data[5], 2.3456, 1e-5);
   }
@@ -141,7 +141,7 @@ public:
     ws.setErrorAt(5,1.234);
     TS_ASSERT_DELTA( ws.getErrorAt(5), 1.234, 1e-5);
 
-    std::vector<double> data = ws.getSignalDataVector();
+    std::vector<signal_t> data = ws.getSignalDataVector();
     TS_ASSERT_EQUALS(data.size(), 3*3*3*3*3*3*3);
     TS_ASSERT_DELTA( data[5], 2.3456, 1e-5);
   }

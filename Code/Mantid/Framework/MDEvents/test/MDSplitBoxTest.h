@@ -62,7 +62,7 @@ public:
     for (double x=40; x<60; x++) //20
       for (double y=20; y<80; y++) //60
       {
-        double centers[2] = {x*0.1,y*0.1 + 0.05};
+        coord_t centers[2] = {x*0.1,y*0.1 + 0.05};
         mdbox->addEvent( MDEvent<2>(2.0, 2.0, centers) );
       }
     TS_ASSERT_EQUALS(mdbox->getNPoints(), 20*60);

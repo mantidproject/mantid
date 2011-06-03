@@ -194,7 +194,7 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
       double signal  = *(MDDataPoint+base+signal_shift);
       double error= *(MDDataPoint+base+signal_shift+1);
 
-      std::vector<coordinate> vertexes;
+      std::vector<Coordinate> vertexes;
 
       IDetector_sptr detector; //TODO determine detector.
 
@@ -328,7 +328,7 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
     @parameter index1 : 3rd dimension index.
     @parameter index1 : 4th dimension index.
     */
-    double MDWorkspace::getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+    signal_t MDWorkspace::getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
     {
       return this->getSignalAt(index1, index2, index3, index4);
     }
@@ -339,7 +339,7 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
     @parameter index1 : 2nd dimension index.
     @parameter index1 : 3rd dimension index.
     */
-    double MDWorkspace::getSignalNormalizedAt(size_t index1, size_t index2, size_t index3) const
+    signal_t MDWorkspace::getSignalNormalizedAt(size_t index1, size_t index2, size_t index3) const
     {
       return this->getSignalAt(index1, index2, index3);
     }
@@ -349,7 +349,7 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
     @parameter index1 : 1st dimension index.
     @parameter index1 : 2nd dimension index.
     */
-    double MDWorkspace::getSignalNormalizedAt(size_t index1, size_t index2) const
+    signal_t MDWorkspace::getSignalNormalizedAt(size_t index1, size_t index2) const
     {
       return this->getSignalAt(index1, index2);
     }
@@ -358,7 +358,7 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
     Getter for signal normalized by volume.
     @parameter index1 : 1st dimension index.
     */
-    double MDWorkspace::getSignalNormalizedAt(size_t index1) const
+    signal_t MDWorkspace::getSignalNormalizedAt(size_t index1) const
     {
       return this->getSignalAt(index1);
     }
@@ -441,22 +441,22 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
   double delta_t = (tDimension->getMaximum() - tDimension->getMinimum()) / double(tDimension->getNBins());
   //Make two Hexahedrons at each time interval.
   VecCoordinate vertexes(16);
-  vertexes[0] = coordinate::createCoordinate4D(dim1Increment * delta_x, dim2Increment * delta_y, dim3Increment * delta_z,dim4Increment);
-  vertexes[1] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, dim3Increment* delta_z, dim4Increment);
-  vertexes[2] = coordinate::createCoordinate4D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z, dim4Increment);
-  vertexes[3] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z, dim4Increment);
-  vertexes[4] = coordinate::createCoordinate4D(dim1Increment * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z, dim4Increment);
-  vertexes[5] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z, dim4Increment);
-  vertexes[6] = coordinate::createCoordinate4D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment + 1)* delta_z, dim4Increment);
-  vertexes[7] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment+ 1) * delta_z, dim4Increment);
-  vertexes[8] = coordinate::createCoordinate4D(dim1Increment * delta_x, dim2Increment * delta_y, dim3Increment * delta_z,delta_t + dim4Increment);
-  vertexes[9] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, dim3Increment* delta_z, delta_t + dim4Increment);
-  vertexes[10] = coordinate::createCoordinate4D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z, delta_t + dim4Increment);
-  vertexes[11] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z, delta_t + dim4Increment);
-  vertexes[12] = coordinate::createCoordinate4D(dim1Increment * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z, delta_t + dim4Increment);
-  vertexes[13] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z, delta_t + dim4Increment);
-  vertexes[14] = coordinate::createCoordinate4D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment + 1)* delta_z, delta_t + dim4Increment);
-  vertexes[15] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment+ 1) * delta_z, delta_t + dim4Increment);
+  vertexes[0] = Coordinate::createCoordinate4D(dim1Increment * delta_x, dim2Increment * delta_y, dim3Increment * delta_z,dim4Increment);
+  vertexes[1] = Coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, dim3Increment* delta_z, dim4Increment);
+  vertexes[2] = Coordinate::createCoordinate4D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z, dim4Increment);
+  vertexes[3] = Coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z, dim4Increment);
+  vertexes[4] = Coordinate::createCoordinate4D(dim1Increment * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z, dim4Increment);
+  vertexes[5] = Coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z, dim4Increment);
+  vertexes[6] = Coordinate::createCoordinate4D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment + 1)* delta_z, dim4Increment);
+  vertexes[7] = Coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment+ 1) * delta_z, dim4Increment);
+  vertexes[8] = Coordinate::createCoordinate4D(dim1Increment * delta_x, dim2Increment * delta_y, dim3Increment * delta_z,delta_t + dim4Increment);
+  vertexes[9] = Coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, dim3Increment* delta_z, delta_t + dim4Increment);
+  vertexes[10] = Coordinate::createCoordinate4D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z, delta_t + dim4Increment);
+  vertexes[11] = Coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z, delta_t + dim4Increment);
+  vertexes[12] = Coordinate::createCoordinate4D(dim1Increment * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z, delta_t + dim4Increment);
+  vertexes[13] = Coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z, delta_t + dim4Increment);
+  vertexes[14] = Coordinate::createCoordinate4D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment + 1)* delta_z, delta_t + dim4Increment);
+  vertexes[15] = Coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment+ 1) * delta_z, delta_t + dim4Increment);
   return vertexes;
 }
 
@@ -473,14 +473,14 @@ VecCoordinate createPolyhedron(
   double delta_z = (zDimension->getMaximum() - zDimension->getMinimum()) /double( zDimension->getNBins());
   //Make a Hexahedron
   VecCoordinate vertexes(8);
-  vertexes[0] = coordinate::createCoordinate3D(dim1Increment * delta_x, dim2Increment * delta_y, dim3Increment * delta_z);
-  vertexes[1] = coordinate::createCoordinate3D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, dim3Increment* delta_z);
-  vertexes[2] = coordinate::createCoordinate3D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z);
-  vertexes[3] = coordinate::createCoordinate3D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z);
-  vertexes[4] = coordinate::createCoordinate3D(dim1Increment * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z);
-  vertexes[5] = coordinate::createCoordinate3D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z);
-  vertexes[6] = coordinate::createCoordinate3D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment + 1)* delta_z);
-  vertexes[7] = coordinate::createCoordinate3D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment+ 1) * delta_z);
+  vertexes[0] = Coordinate::createCoordinate3D(dim1Increment * delta_x, dim2Increment * delta_y, dim3Increment * delta_z);
+  vertexes[1] = Coordinate::createCoordinate3D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, dim3Increment* delta_z);
+  vertexes[2] = Coordinate::createCoordinate3D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z);
+  vertexes[3] = Coordinate::createCoordinate3D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z);
+  vertexes[4] = Coordinate::createCoordinate3D(dim1Increment * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z);
+  vertexes[5] = Coordinate::createCoordinate3D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z);
+  vertexes[6] = Coordinate::createCoordinate3D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment + 1)* delta_z);
+  vertexes[7] = Coordinate::createCoordinate3D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment+ 1) * delta_z);
   return vertexes;
 }
 
@@ -494,10 +494,10 @@ VecCoordinate createPolygon(
   double delta_y = (yDimension->getMaximum() - yDimension->getMinimum()) /double( yDimension->getNBins());
   //Make a square
   VecCoordinate vertexes(4);
-  vertexes[0] = coordinate::createCoordinate2D(dim1Increment * delta_x, dim2Increment * delta_y);
-  vertexes[1] = coordinate::createCoordinate2D((dim1Increment + 1) * delta_x, dim2Increment * delta_y);
-  vertexes[2] = coordinate::createCoordinate2D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y);
-  vertexes[3] = coordinate::createCoordinate2D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y);
+  vertexes[0] = Coordinate::createCoordinate2D(dim1Increment * delta_x, dim2Increment * delta_y);
+  vertexes[1] = Coordinate::createCoordinate2D((dim1Increment + 1) * delta_x, dim2Increment * delta_y);
+  vertexes[2] = Coordinate::createCoordinate2D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y);
+  vertexes[3] = Coordinate::createCoordinate2D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y);
   return vertexes;
 }
 
@@ -508,8 +508,8 @@ VecCoordinate createLine(
   double delta_x = (xDimension->getMaximum() - xDimension->getMinimum()) / double(xDimension->getNBins());
   VecCoordinate vertexes(2);
   //Make a line
-  vertexes[0] = coordinate::createCoordinate1D(dim1Increment * delta_x);
-  vertexes[1] = coordinate::createCoordinate1D((dim1Increment + 1) * delta_x);
+  vertexes[0] = Coordinate::createCoordinate1D(dim1Increment * delta_x);
+  vertexes[1] = Coordinate::createCoordinate1D((dim1Increment + 1) * delta_x);
   return vertexes;
 }
 

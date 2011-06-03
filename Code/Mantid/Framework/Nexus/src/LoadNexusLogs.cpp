@@ -343,7 +343,7 @@ namespace Mantid
       // Now the actual data
       ::NeXus::Info info = file.getInfo();
       // Check the size
-      if( info.dims[0] != time_double.size() )
+      if( size_t(info.dims[0]) != time_double.size() )
       {
         file.closeData();
         throw ::NeXus::Exception("Invalid value entry for time series");

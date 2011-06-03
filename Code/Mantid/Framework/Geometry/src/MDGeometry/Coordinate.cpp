@@ -4,42 +4,42 @@ namespace Mantid
 {
 namespace Geometry
 {
-///Construction Method for 1D.
-  coordinate coordinate::createCoordinate1D(const double& xArg)
+  ///Construction Method for 1D.
+  Coordinate Coordinate::createCoordinate1D(const coord_t& xArg)
   {
-    return coordinate(xArg);
+    return Coordinate(xArg);
   }
 
   ///Construction Method for 2D.
-  coordinate coordinate::createCoordinate2D(const double& xArg, const double& yArg)
+  Coordinate Coordinate::createCoordinate2D(const coord_t& xArg, const coord_t& yArg)
   {
-    return coordinate(xArg, yArg);
+    return Coordinate(xArg, yArg);
   }
 
   ///Construction Method for 3D.
-  coordinate coordinate::createCoordinate3D(const double& xArg, const double& yArg, const double& zArg)
+  Coordinate Coordinate::createCoordinate3D(const coord_t& xArg, const coord_t& yArg, const coord_t& zArg)
   {
-    return coordinate(xArg, yArg, zArg);
+    return Coordinate(xArg, yArg, zArg);
   }
 
   ///Construction Method for 4D.
-  coordinate coordinate::createCoordinate4D(const double& xArg, const double& yArg,const double& zArg,const double& tArg)
+  Coordinate Coordinate::createCoordinate4D(const coord_t& xArg, const coord_t& yArg,const coord_t& zArg,const coord_t& tArg)
   {
-    return coordinate(xArg, yArg, zArg, tArg);
+    return Coordinate(xArg, yArg, zArg, tArg);
   }
 
   /** Default Constructor */
-  coordinate::coordinate()
+  Coordinate::Coordinate()
   : m_x(0),m_y(0),m_z(0),m_t(0)
   {
   }
 
   /** Constructor
    *
-   * @param coords :: array of coordinates
+   * @param coords :: array of Coordinates
    * @param numdims :: number of dimensions in array
    */
-  coordinate::coordinate(Mantid::MDEvents::coord_t * coords, size_t numdims)
+  Coordinate::Coordinate(Mantid::coord_t * coords, size_t numdims)
   : m_x(0),m_y(0),m_z(0),m_t(0)
   {
     if (numdims > 0) m_x = coords[0];
@@ -49,32 +49,32 @@ namespace Geometry
   }
 
 
-  coordinate::coordinate(const double& xArg)
+  Coordinate::Coordinate(const coord_t& xArg)
   : m_x(xArg),m_y(0),m_z(0),m_t(0)
   {
   }
 
-  coordinate::coordinate(const double& xArg, const double& yArg)
+  Coordinate::Coordinate(const coord_t& xArg, const coord_t& yArg)
   : m_x(xArg),m_y(yArg),m_z(0),m_t(0)
   {
   }
 
-  coordinate::coordinate(const double& xArg, const double& yArg, const double& zArg)
+  Coordinate::Coordinate(const coord_t& xArg, const coord_t& yArg, const coord_t& zArg)
   : m_x(xArg),m_y(yArg),m_z(zArg),m_t(0)
   {
   }
 
-  coordinate::coordinate(const double& xArg, const double& yArg,const double& zArg,const double& tArg)
+  Coordinate::Coordinate(const coord_t& xArg, const coord_t& yArg,const coord_t& zArg,const coord_t& tArg)
   : m_x(xArg),m_y(yArg),m_z(zArg),m_t(tArg)
   {
   }
 
-  coordinate::coordinate(const coordinate & other)
+  Coordinate::Coordinate(const Coordinate & other)
   : m_x(other.m_x),m_y(other.m_y),m_z(other.m_z),m_t(other.m_t)
   {
   }
 
-  coordinate & coordinate::operator= (const coordinate & other)
+  Coordinate & Coordinate::operator= (const Coordinate & other)
   {
     if(this != &other)
     {
@@ -86,19 +86,19 @@ namespace Geometry
     return *this;
   }
 
-  double coordinate::getX() const
+  coord_t Coordinate::getX() const
   {
     return m_x;
   }
-  double coordinate::getY() const
+  coord_t Coordinate::getY() const
   {
     return m_y;
   }
-  double coordinate::getZ() const
+  coord_t Coordinate::getZ() const
   {
     return m_z;
   }
-  double coordinate::gett() const
+  coord_t Coordinate::gett() const
   {
     return m_t;
   }

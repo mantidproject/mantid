@@ -204,7 +204,7 @@ public:
   void testGetPointVertexes()
   {
     const Mantid::Geometry::SignalAggregate& pointA = workspace.getPoint(4);
-    std::vector<coordinate> vertexes = pointA.getVertexes();
+    std::vector<Coordinate> vertexes = pointA.getVertexes();
     TSM_ASSERT_EQUALS("Wrong number of vertexes returned", 4, vertexes.size());
 
     TSM_ASSERT_EQUALS("The v0 x-value is incorrect.", 4, vertexes.at(0).getX());

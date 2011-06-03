@@ -1077,17 +1077,17 @@ namespace Mantid
     {
       VecCoordinate verts(4);
 
-      double x = this->dataX(histogram)[bin];
-      double signal = this->dataY(histogram)[bin];
-      double error = this->dataE(histogram)[bin];
-      double histogram_d = static_cast<double>(histogram);
+      signal_t signal = this->dataY(histogram)[bin];
+      signal_t error = this->dataE(histogram)[bin];
+      coord_t x = this->dataX(histogram)[bin];
+      coord_t histogram_d = static_cast<double>(histogram);
 
       if(isHistogramData()) //TODO. complete vertex generating cases.
       {
-        verts[0] = coordinate::createCoordinate2D(x, histogram_d);
-        verts[1] = coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram_d);
-        verts[2] = coordinate::createCoordinate2D(x, histogram_d+1.);
-        verts[3] = coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram_d+1.);
+        verts[0] = Coordinate::createCoordinate2D(x, histogram_d);
+        verts[1] = Coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram_d);
+        verts[2] = Coordinate::createCoordinate2D(x, histogram_d+1.);
+        verts[3] = Coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram_d+1.);
       }
 
       IDetector_sptr detector;

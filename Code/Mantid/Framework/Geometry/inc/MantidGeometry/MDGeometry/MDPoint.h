@@ -32,10 +32,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllExport.h"
-#include <vector>
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/MDGeometry/Coordinate.h"
+#include "MantidKernel/System.h"
+#include <vector>
 
 namespace Mantid
 {
@@ -46,9 +47,9 @@ namespace Mantid
     class EXPORT_OPT_MANTID_GEOMETRY SignalAggregate
     {
     public:
-      virtual std::vector<coordinate> getVertexes() const = 0;
-      virtual double getSignal() const = 0;
-      virtual double getError() const = 0;
+      virtual std::vector<Coordinate> getVertexes() const = 0;
+      virtual signal_t getSignal() const = 0;
+      virtual signal_t getError() const = 0;
       virtual std::vector<boost::shared_ptr<MDPoint> > getContributingPoints() const = 0;
       virtual ~SignalAggregate(){};
     };
@@ -56,19 +57,19 @@ namespace Mantid
     class EXPORT_OPT_MANTID_GEOMETRY MDPoint : public SignalAggregate
     {
     private:
-      double m_signal;
-      double m_error;
+      signal_t m_signal;
+      signal_t m_error;
       IInstrument_sptr m_instrument;
       IDetector_sptr m_detector;
-      std::vector<coordinate> m_vertexes;
+      std::vector<Coordinate> m_vertexes;
       int m_runId;
     public:
       MDPoint(){};
-      MDPoint(double signal, double error, const std::vector<coordinate>& vertexes, IDetector_sptr detector, IInstrument_sptr instrument,
+      MDPoint(signal_t signal, signal_t error, const std::vector<Coordinate>& vertexes, IDetector_sptr detector, IInstrument_sptr instrument,
           const int runId = 0);
-      std::vector<coordinate> getVertexes() const;
-      double getSignal() const;
-      double getError() const;
+      std::vector<Coordinate> getVertexes() const;
+      signal_t getSignal() const;
+      signal_t getError() const;
       IDetector_sptr getDetector() const;
       IInstrument_sptr getInstrument() const;
       int getRunId() const;

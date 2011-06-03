@@ -70,7 +70,7 @@ namespace MDEvents
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
 
-    virtual std::vector<Mantid::Geometry::coordinate> getVertexes() const
+    virtual std::vector<Mantid::Geometry::Coordinate> getVertexes() const
     {
       throw std::runtime_error("Not implemented.");
     }
@@ -226,7 +226,7 @@ namespace MDEvents
     /** Sets the integrated signal from all points within  (mostly used for testing)
      * @param signal :: new Signal amount.
      */
-    virtual void setSignal(const double signal)
+    virtual void setSignal(const signal_t signal)
     {
       m_signal = signal;
     }
@@ -235,7 +235,7 @@ namespace MDEvents
     /** Sets the integrated error squared from all points within (mostly used for testing)
      * @param ErrorSquared :: new squared error.
      */
-    virtual void setErrorSquared(const double ErrorSquared)
+    virtual void setErrorSquared(const signal_t ErrorSquared)
     {
       m_errorSquared = ErrorSquared;
     }

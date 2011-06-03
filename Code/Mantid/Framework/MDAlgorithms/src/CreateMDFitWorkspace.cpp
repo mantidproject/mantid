@@ -89,10 +89,10 @@ namespace Mantid
         for(int i = 1; i < n; ++i)
         {
           double s = double(rand()) / RAND_MAX * signal * 0.75;
-          points[i].reset(new MDPoint(s,error,std::vector<coordinate>(),IDetector_sptr(),IInstrument_sptr()));
+          points[i].reset(new MDPoint(s,error,std::vector<Coordinate>(),IDetector_sptr(),IInstrument_sptr()));
           signal -= s;
         }
-        points[0].reset(new MDPoint(signal,error,std::vector<coordinate>(),IDetector_sptr(),IInstrument_sptr()));
+        points[0].reset(new MDPoint(signal,error,std::vector<Coordinate>(),IDetector_sptr(),IInstrument_sptr()));
         size_t i = it->getPointer();
         ws->setCell(i,points);
       }

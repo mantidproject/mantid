@@ -68,11 +68,11 @@ namespace MDEvents
       indexMultiplier[d] = 0;
 
     // Allocate the linear arrays
-    m_signals = new double[m_length];
-    m_errors = new double[m_length];
+    m_signals = new signal_t[m_length];
+    m_errors = new signal_t[m_length];
 
     // Initialize them to NAN (quickly)
-    double nan = std::numeric_limits<double>::quiet_NaN();
+    signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
     for (size_t i=0; i < m_length; i++)
     {
       m_signals[i] = nan;
@@ -80,7 +80,7 @@ namespace MDEvents
     }
 
     // Compute the volume of each cell.
-    double volume = 1.0;
+    coord_t volume = 1.0;
     for (size_t i=0; i < m_dimensions.size(); ++i)
       volume *= m_dimensions[i]->getBinWidth();
     m_inverseVolume = 1.0 / volume;
@@ -101,15 +101,15 @@ namespace MDEvents
   /** Return the memory used, in bytes */
   size_t MDHistoWorkspace::getMemorySize() const
   {
-    return m_length * 2 * sizeof(double);
+    return m_length * 2 * sizeof(signal_t);
   }
 
   //----------------------------------------------------------------------------------------------
   /// @return a vector containing a copy of the signal data in the workspace.
-  std::vector<double> MDHistoWorkspace::getSignalDataVector() const
+  std::vector<signal_t> MDHistoWorkspace::getSignalDataVector() const
   {
     // TODO: Make this more efficient if needed.
-    std::vector<double> out;
+    std::vector<signal_t> out;
     out.resize(m_length, 0.0);
     for (size_t i=0; i<m_length; ++i)
       out[i] = m_signals[i];
@@ -118,10 +118,10 @@ namespace MDEvents
   }
 
   /// @return a vector containing a copy of the error data in the workspace.
-  std::vector<double> MDHistoWorkspace::getErrorDataVector() const
+  std::vector<signal_t> MDHistoWorkspace::getErrorDataVector() const
   {
     // TODO: Make this more efficient if needed.
-    std::vector<double> out;
+    std::vector<signal_t> out;
     out.resize(m_length, 0.0);
     for (size_t i=0; i<m_length; ++i)
         out[i] = m_errors[i];

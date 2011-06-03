@@ -5,10 +5,10 @@
  *      Author: owen
  */
 
-#ifndef MD_COORDINATE_H_
-#define MD_COORDINATE_H_
+#ifndef MD_Coordinate_H_
+#define MD_Coordinate_H_
 
-/** The class represents a 4dimensional coordinate. Supports simple rendering of MDCells and MDPoints.
+/** The class represents a 4dimensional Coordinate. Supports simple rendering of MDCells and MDPoints.
 *
 *   Abstract type for a multi dimensional dimension. Gives a read-only layer to the concrete implementation.
 
@@ -43,67 +43,67 @@ namespace Mantid
 {
 namespace Geometry
 {
-class EXPORT_OPT_MANTID_GEOMETRY coordinate
+class EXPORT_OPT_MANTID_GEOMETRY Coordinate
 {
 public:
   ///Default constructor. All vertexes zero.
-  coordinate();
+  Coordinate();
 
   /// Construct from an array
-  coordinate(Mantid::MDEvents::coord_t * coords, size_t numdims);
+  Coordinate(Mantid::coord_t * coords, size_t numdims);
 
   //Copy constructor
-  coordinate(const coordinate & other);
+  Coordinate(const Coordinate & other);
 
   //Assignment operator
-  coordinate & operator= (const coordinate & other);
+  Coordinate & operator= (const Coordinate & other);
 
   ///Construction Method for 1D.
-  static coordinate createCoordinate1D(const double& xArg);
+  static Coordinate createCoordinate1D(const coord_t& xArg);
 
   ///Construction Method for 2D.
-  static coordinate createCoordinate2D(const double& xArg, const double& yArg);
+  static Coordinate createCoordinate2D(const coord_t& xArg, const coord_t& yArg);
 
   ///Construction Method for 3D.
-  static coordinate createCoordinate3D(const double& xArg, const double& yArg, const double& zArg);
+  static Coordinate createCoordinate3D(const coord_t& xArg, const coord_t& yArg, const coord_t& zArg);
 
   ///Construction Method for 4D.
-  static coordinate createCoordinate4D(const double& xArg, const double& yArg,const double& zArg,const double& tArg);
+  static Coordinate createCoordinate4D(const coord_t& xArg, const coord_t& yArg,const coord_t& zArg,const coord_t& tArg);
 
   /// Getter for x value
-  double getX() const;
+  coord_t getX() const;
 
   /// Getter for y value.
-  double getY() const;
+  coord_t getY() const;
 
   /// Getter for z value.
-  double getZ() const;
+  coord_t getZ() const;
 
   /// Getter for t value.
-  double gett() const;
+  coord_t gett() const;
 
 private:
 
-  double m_x;
-  double m_y;
-  double m_z;
-  double m_t;
+  coord_t m_x;
+  coord_t m_y;
+  coord_t m_z;
+  coord_t m_t;
 
   ///Constructor for 1D.
-  coordinate(const double& xArg);
+  Coordinate(const coord_t& xArg);
 
   ///Constructor for 2D.
-  coordinate(const double& xArg, const double& yArg);
+  Coordinate(const coord_t& xArg, const coord_t& yArg);
 
   ///Constructor for 3D.
-  coordinate(const double& xArg, const double& yArg, const double& zArg);
+  Coordinate(const coord_t& xArg, const coord_t& yArg, const coord_t& zArg);
 
   ///Constructor for 4D.
-  coordinate(const double& xArg, const double& yArg,const double& zArg,const double& tArg);
+  Coordinate(const coord_t& xArg, const coord_t& yArg,const coord_t& zArg,const coord_t& tArg);
 };
 
-typedef std::vector<coordinate> VecCoordinate;
+typedef std::vector<Coordinate> VecCoordinate;
 }
 }
 
-#endif /* COORDINATE_H_ */
+#endif /* Coordinate_H_ */

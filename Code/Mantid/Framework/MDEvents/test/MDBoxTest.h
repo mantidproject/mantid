@@ -334,7 +334,7 @@ public:
 
     // Set up the data for the centroid
     coord_t centroid[2] = {0,0};
-    double signal = 0.0;
+    signal_t signal = 0.0;
     b.centroidSphere(sphere, 400., centroid, signal);
     for (size_t d=0; d<2; d++)
       centroid[d] /= signal;

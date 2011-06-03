@@ -55,7 +55,7 @@ namespace Mantid
                 double answer=0.,error=0.;
                 // loop over each MDPoint in current MDCell
                 for(size_t j=0; j<cellPoints.size(); j++){
-                    std::vector<Mantid::Geometry::coordinate> vertexes = cellPoints[j]->getVertexes();
+                    std::vector<Mantid::Geometry::Coordinate> vertexes = cellPoints[j]->getVertexes();
                     //double eps=vertexes[0].gett();
                     sqwConvolution(cellPoints[j],answer,error);
                 }

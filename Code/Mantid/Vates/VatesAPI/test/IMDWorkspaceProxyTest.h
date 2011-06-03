@@ -7,6 +7,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+using namespace Mantid;
+
 class IMDWorkspaceProxyTest: public CxxTest::TestSuite
 {
 private:
@@ -91,7 +93,7 @@ private:
     {
       throw std::runtime_error("Not Implemented");
     }
-    double getSignalAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+    signal_t getSignalAt(size_t index1, size_t index2, size_t index3, size_t index4) const
     {
       uniqueArgumentCombination unique; //Creates a unique return value based on the inputs. Used to determine the arranagement of input arguments after remapping.
       return unique(index1, index2, index3, index4);

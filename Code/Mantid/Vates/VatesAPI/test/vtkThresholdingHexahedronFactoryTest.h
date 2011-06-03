@@ -6,6 +6,8 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
 
+using namespace Mantid;
+
 //=====================================================================================
 // Helper types common to Functional and Performance tests
 //=====================================================================================
@@ -57,7 +59,7 @@ public:
   MOCK_CONST_METHOD0(getDimensionIDs,const std::vector<std::string>());
   MOCK_CONST_METHOD0(getNPoints, uint64_t());
   MOCK_CONST_METHOD0(getNumDims, size_t());
-  MOCK_CONST_METHOD3(getSignalNormalizedAt, double(size_t index1, size_t index2, size_t index3));
+  MOCK_CONST_METHOD3(getSignalNormalizedAt, signal_t(size_t index1, size_t index2, size_t index3));
   MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
   const Mantid::Geometry::SignalAggregate& getCell(...) const
   {
