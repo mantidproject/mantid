@@ -11,7 +11,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidPythonAPI/FrameworkManagerProxy.h"
 #include "MantidPythonAPI/PyAlgorithmWrapper.h"
-#include "MantidPythonAPI/SimplePythonAPI.h"
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
@@ -42,11 +41,6 @@ FrameworkManagerProxy::FrameworkManagerProxy()
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_add_observer);
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replace_observer);
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clear_observer);
-
-  // Create a blank module to satisfy Python algorithm dependencies on startup so that we don't have to create the
-  // actual module twice on startup
-  std::string simpleapi = SimplePythonAPI::getModuleFilename();
-  std::ofstream file(simpleapi.c_str(), std::ios_base::out);
 }
 
 ///Destructor
@@ -179,7 +173,7 @@ std::vector<std::string> * FrameworkManagerProxy::getPropertyOrder(const API::IA
 
   // get a sorted copy of the properties
   PropertyVector properties(algm->getProperties());
-  std::sort(properties.begin(), properties.end(), SimplePythonAPI::PropertyOrdering());
+  std::sort(properties.begin(), properties.end(), PropertyOrdering());
 
   // generate the sanitized names
   PropertyVector::const_iterator pIter = properties.begin();
@@ -189,7 +183,7 @@ std::vector<std::string> * FrameworkManagerProxy::getPropertyOrder(const API::IA
   size_t numProps = properties.size();
   for ( size_t i = 0; i < numProps; ++i)
   {
-    names->push_back(SimplePythonAPI::removeCharacters(properties[i]->name(), ""));
+    names->push_back(removeCharacters(properties[i]->name(), ""));
   }
   return names;
 }
@@ -209,7 +203,7 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algNam
 
   // get a sorted copy of the properties
   PropertyVector properties(algm->getProperties());
-  std::sort(properties.begin(), properties.end(), SimplePythonAPI::PropertyOrdering());
+  std::sort(properties.begin(), properties.end(), PropertyOrdering());
 
   // generate the sanitized names
   PropertyVector::const_iterator pIter = properties.begin();
@@ -218,7 +212,7 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algNam
   size_t numProps = properties.size();
   for ( size_t i = 0; i < numProps; ++i) 
   {
-    names[i] = SimplePythonAPI::removeCharacters(properties[i]->name(), "");
+    names[i] = removeCharacters(properties[i]->name(), "");
   }
 
   buffer << "Property descriptions: " << EOL << EOL;
@@ -462,16 +456,6 @@ std::vector<std::string> FrameworkManagerProxy::getWorkspaceGroupEntries(const s
 }
 
 /**
-  * Create the simple Python API module
-  * @param gui :: Whether the module is being made for use with qtiplot or not
-  **/
-void FrameworkManagerProxy::createPythonSimpleAPI()
-{
-  //Redirect to static helper class
-  SimplePythonAPI::createModule();
-}
-
-/**
  * Send a log message to Mantid
  * @param msg :: The log message
  */
@@ -582,8 +566,6 @@ void FrameworkManagerProxy::clearNotificationReceived(Mantid::API::ClearADSNotif
 void FrameworkManagerProxy::
 handleAlgorithmFactoryUpdate(Mantid::API::AlgorithmFactoryUpdateNotification_ptr)
 {
-  // First rewrite the simple API
-  createPythonSimpleAPI();
   //Call up to python via a virtual function
   algorithmFactoryUpdated();
 }
@@ -592,6 +574,68 @@ void FrameworkManagerProxy::releaseFreeMemory()
 {
   Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 }
+
+/**
+* Takes a string and removes the characters given in the optional second argument. If none are given then only alpha-numeric
+* characters are retained.
+* @param value The string to analyse
+* @param cs A string of characters to remove
+* @param eol_to_space Flag signalling whether end of line characters should be changed to a space
+* @returns The sanitized value
+*/
+std::string FrameworkManagerProxy::removeCharacters(const std::string & value, const std::string & cs, bool eol_to_space)
+{
+  if (value.empty())
+    return value;
+
+  std::string retstring;
+  std::string::const_iterator sIter = value.begin();
+  std::string::const_iterator sEnd = value.end();
+
+  // No characeters specified, only keep alpha-numeric
+  if (cs.empty())
+  {
+    for (; sIter != sEnd; ++sIter)
+    {
+      int letter = static_cast<int> (*sIter);
+      if ((letter >= 48 && letter <= 57) || (letter >= 97 && letter <= 122) || (letter >= 65 && letter <= 90) || (letter == 95))
+      {
+        retstring.push_back(*sIter);
+      }
+    }
+  }
+  else
+  {
+    for (; sIter != sEnd; ++sIter)
+    {
+      const char letter = (*sIter);
+      // If the letter is NOT one to remove
+      if (cs.find_first_of(letter) == std::string::npos)
+      {
+        //This is because I use single-quotes to delimit my strings in the module and if any in strings
+        //that I try to write contain these, it will confuse Python so I'll convert them
+        if (letter == '\'')
+        {
+          retstring.push_back('\"');
+        }
+        // Keep the character
+        else
+        {
+          retstring.push_back(letter);
+        }
+      }
+      else
+      {
+        if (eol_to_space && letter == '\n')
+        {
+          retstring.push_back(' ');
+        }
+      }
+    }
+  }
+  return retstring;
+}
+
 
 }
 }

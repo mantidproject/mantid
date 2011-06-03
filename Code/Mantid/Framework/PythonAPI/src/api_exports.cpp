@@ -70,7 +70,6 @@ using namespace boost::python;
       .def("getWorkspaceNames", &FrameworkManagerProxy::getWorkspaceNames)
       .def("getWorkspaceGroupNames", &FrameworkManagerProxy::getWorkspaceGroupNames)
       .def("getWorkspaceGroupEntries", &FrameworkManagerProxy::getWorkspaceGroupEntries)
-      .def("createPythonSimpleAPI", &FrameworkManagerProxy::createPythonSimpleAPI)
       .def("sendLogMessage", &FrameworkManagerProxy::sendLogMessage)
       .def("workspaceExists", &FrameworkManagerProxy::workspaceExists)
       .def("getConfigProperty", &FrameworkManagerProxy::getConfigProperty)

@@ -9,7 +9,6 @@ set ( SRC_FILES
 	src/PythonInterfaceFunctions.cpp
 	src/PythonScriptWriter.cpp
 	src/PythonWrapper.cpp
-	src/SimplePythonAPI.cpp
 	src/WorkspaceProxies.cpp
 	src/api_exports.cpp
 	src/geometry_exports.cpp
@@ -25,7 +24,6 @@ set ( INC_FILES
 	inc/MantidPythonAPI/PyAlgorithmWrapper.h
 	inc/MantidPythonAPI/PythonInterfaceFunctions.h
 	inc/MantidPythonAPI/PythonScriptWriter.h
-	inc/MantidPythonAPI/SimplePythonAPI.h
 	inc/MantidPythonAPI/WorkspaceProxies.h
 	inc/MantidPythonAPI/api_exports.h
 	inc/MantidPythonAPI/geometryhelper.h
@@ -35,13 +33,12 @@ set ( INC_FILES
 )
 
 # Python files that need copying across
-set ( PY_FILES MantidFramework.py __init__.py setup.py mantidsimple_runtime.py)
+set ( PY_FILES MantidFramework.py __init__.py setup.py mantidsimple.py)
 
 # cxxtest unit tests
 set ( TEST_FILES
 	test/PythonFrameworkTests.h
 	test/PythonScriptWriterTest.h
-	test/SimplePythonAPITest.h
 )
 
 # Python unit tests

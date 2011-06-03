@@ -938,7 +938,6 @@ class MantidPyFramework(FrameworkManager):
     __is_initialized = False
     __config_service = None
     __gui__ = False
-    __runtime_mtdsimple__ = True
     
     def __init__(self):
         # Call base class constructor
@@ -949,7 +948,7 @@ class MantidPyFramework(FrameworkManager):
         self._pyalg_objs = {}
 
     def runtime_mtdsimple(self, is_runtime=True):
-        self.__runtime_mtdsimple__ = is_runtime
+        self.sendLogMessage("DEPRECATION WARNING: mtd.runtime_mtdsimple() is no longer used. Simply remove this line from your code.")
 
     def __getitem__(self, key):
         """
@@ -1002,16 +1001,9 @@ class MantidPyFramework(FrameworkManager):
             self.__gui__ = GUI
 
         # Run through init steps 
-        if self.__runtime_mtdsimple__:
-            self._importSimpleAPIToMain()
-            self._pyalg_loader.load_modules(refresh=False)
-            self._importSimpleAPIToMain()
-        else:
-            self.createPythonSimpleAPI()
-            # Load and register python algorithm modules (these will try to call this function too)
-            self._pyalg_loader.load_modules(refresh=False)
-            self.createPythonSimpleAPI() # TODO this line should go
-            self._importSimpleAPIToMain()
+        self._importSimpleAPIToMain()
+        self._pyalg_loader.load_modules(refresh=False)
+        self._importSimpleAPIToMain()
 
         self.__is_initialized = True
 
@@ -1160,34 +1152,12 @@ class MantidPyFramework(FrameworkManager):
 
 
     def _importSimpleAPIToMain(self):
-        if self.__runtime_mtdsimple__:
-            if sys.modules.has_key("mantidsimple"):
-                mod = sys.modules['mantidsimple']
-            else:
-                mod = __import__('mantidsimple_runtime')
-                sys.modules['mantidsimple'] = mod
-            mod.translate()
-        else:
-            simpleapi = 'mantidsimple'
-            if simpleapi in sys.modules:
-                mod = sys.modules[simpleapi]
-                # At startup the pyc file is created too close to the creation of the module itself and successful reloads require that
-                # it be removed first
-                pyc_file = mod.__file__
-                if pyc_file.endswith('.py'):
-                    pyc_file += 'c'
-                try:
-                    os.remove(pyc_file)
-                except OSError:
-                    # Don't care if it's not there
-                    pass
-                mod = reload(sys.modules[simpleapi])
-            else:
-                mod = __import__(simpleapi)
-        for name in dir(mod):
+        import mantidsimple
+        mantidsimple.translate()
+        for name in dir(mantidsimple):
             if name.startswith('_'):
                 continue
-            setattr(__main__, name, getattr(mod, name))
+            setattr(__main__, name, getattr(mantidsimple, name))
             
     def _refreshPyAlgorithms(self):
         # Reload the modules that have been loaded

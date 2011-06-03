@@ -71,6 +71,23 @@ namespace PythonAPI
 class DLLExport FrameworkManagerProxy
 {
 public:
+  /// Removes all non-alphanumeric characters (those not [0-9, a-z, A-Z])
+  static std::string removeCharacters(const std::string & value, const std::string & cs = "",
+              bool eol_to_space = false);
+
+  ///Functor for use with std::sort to put the properties that do not
+  ///have valid values first
+  struct PropertyOrdering
+  {
+    ///Comparator operator for sort algorithm, places optional properties lower in the list
+    bool operator()(const Mantid::Kernel::Property * p1,
+        const Mantid::Kernel::Property * p2) const
+    {
+      //this is false, unless p1 is not valid and p2 is valid
+      return ( p1->isValid() != "" ) && ( p2->isValid() == "" );
+    }
+  };
+
   /// Constructor
   FrameworkManagerProxy();
   /// Destructor

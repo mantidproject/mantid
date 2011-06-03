@@ -7,7 +7,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidPythonAPI/FrameworkManagerProxy.h"
-#include "MantidPythonAPI/SimplePythonAPI.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
@@ -79,15 +78,6 @@ public:
     TS_ASSERT(temp.empty());
   }
 	
-  void xtestCreatePythonSimpleAPI() // TODO renable this test
-  {
-    TS_ASSERT_THROWS_NOTHING( mgr->createPythonSimpleAPI() );
-    Poco::File apimodule(SimplePythonAPI::getModuleFilename());
-    TS_ASSERT( apimodule.exists() );
-    TS_ASSERT_THROWS_NOTHING( apimodule.remove() );
-    TS_ASSERT( !apimodule.exists() );
-  }
-
   void testDoesWorkspaceExist()
   {
     const std::string name = "outer";
