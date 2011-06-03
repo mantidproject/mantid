@@ -105,11 +105,6 @@ public:
    {
      return "RefDimensionId";
    }
-   ///An id for recognising specific vtkFieldData objects on inbound and outbound datasets.
-   static const std::string metaDataId()
-   {
-     return "VATES_Metadata";
-   }
    static const std::string signalName()
    {
      return "signal";

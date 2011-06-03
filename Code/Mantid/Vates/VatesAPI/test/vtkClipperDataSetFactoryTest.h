@@ -23,6 +23,7 @@ class MockClipper: public Mantid::VATES::Clipper
     MOCK_METHOD1(SetOutput, void(vtkUnstructuredGrid* out_ds));
     MOCK_METHOD0(Update, void());
     MOCK_METHOD0(Delete,void());
+    MOCK_METHOD0(GetOutput, vtkDataSet*());
     MOCK_METHOD0(die, void());
     virtual ~MockClipper()
     {

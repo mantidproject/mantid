@@ -34,7 +34,6 @@ private:
     }
     bool hasSuccessorConcrete() const
     {
-
       return vtkDataSetFactory::hasSuccessor();
     }
   };

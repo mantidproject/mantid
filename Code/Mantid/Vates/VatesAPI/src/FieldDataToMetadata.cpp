@@ -16,6 +16,10 @@ std::string FieldDataToMetadata::operator()(vtkFieldData* fieldData, std::string
 std::string FieldDataToMetadata::execute(vtkFieldData* fieldData, const std::string& id) const
 {
   std::string sXml;
+  if(fieldData == NULL)
+  {
+    throw std::runtime_error("vtkFieldData argument is null");
+  }
   vtkDataArray* arry =  fieldData->GetArray(id.c_str());
   if(arry == NULL)
   {

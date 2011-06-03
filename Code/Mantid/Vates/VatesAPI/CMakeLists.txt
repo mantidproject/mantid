@@ -11,8 +11,10 @@ src/EscalatingRebinningActionManager.cpp
 src/FieldDataToMetadata.cpp
 src/IMDDimensionComparitor.cpp
 src/IMDWorkspaceProxy.cpp
+src/MDHistogramRebinningPresenter.cpp
 src/MetadataToFieldData.cpp
 src/MultiDimensionalDbPresenter.cpp
+src/NullRebinningPresenter.cpp
 src/ProgressAction.cpp
 src/RebinningCutterPresenter.cpp
 src/RebinningCutterXMLDefinitions.cpp
@@ -42,10 +44,14 @@ inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/FilteringUpdateProgressAction.h
 inc/MantidVatesAPI/GeometryPresenter.h
 inc/MantidVatesAPI/GeometryView.h
+inc/MantidVatesAPI/MDHistogramRebinningPresenter.h
+inc/MantidVatesAPI/MDRebinningPresenter.h
+inc/MantidVatesAPI/MDRebinningView.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/IMDWorkspaceProxy.h
 inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/MultiDimensionalDbPresenter.h
+inc/MantidVatesAPI/NullRebinningPresenter.h
 inc/MantidVatesAPI/ProgressAction.h
 inc/MantidVatesAPI/RebinningActionManager.h
 inc/MantidVatesAPI/RebinningCutterPresenter.h
@@ -81,6 +87,8 @@ test/FieldDataToMetadataTest.h
 test/FilteringUpdateProgressActionTest.h
 test/IMDWorkspaceProxyTest.h
 test/MultiDimensionalDbPresenterTest.h
+test/MDHistogramRebinningPresenterTest.h
+test/NullRebinningPresenterTest.h
 test/MetadataToFieldDataTest.h
 test/RebinningCutterTest.h
 test/RebinningKnowledgeSerializerTest.h

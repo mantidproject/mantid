@@ -1,16 +1,17 @@
-#ifndef GEOMETRY_VIEW_H
-#define GEOMETRY_VIEW_H
+#ifndef MANTID_VATES_MD_REBINNING_PRESENTER
+#define MANTID_VATES_MD_REBINNING_PRESENTER
+
 #include "MantidKernel/System.h"
-#include "MantidVatesAPI/DimensionView.h"
-#include "MantidVatesAPI/DimensionViewFactory.h"
+
+class vtkUnstructuredGrid;
 namespace Mantid
 {
   namespace VATES
   {
-    class QString;
+    class ProgressAction;
 
-    /** 
-    @class GeometryView, Abstract view for controlling multi-dimensional geometries.
+     /** 
+    @class MDRebinningPresenter, Abstract presenters for multi-dimensional rebinning of various types.
     @author Owen Arnold, Tessella plc
     @date 03/06/2011
 
@@ -34,16 +35,15 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport GeometryView 
+    class DLLExport MDRebinningPresenter
     {
     public:
-      virtual void addDimensionView(DimensionView*) = 0;
-      virtual std::string getGeometryXMLString() const = 0;
-      virtual const DimensionViewFactory& getDimensionViewFactory() = 0;
-      virtual ~GeometryView(){};
-      virtual void raiseModified() = 0;
-      virtual void raiseNoClipping() = 0;
+      virtual void updateModel() = 0;
+      virtual vtkUnstructuredGrid* execute(ProgressAction& eventHandler) = 0;
+      virtual std::string getAppliedGeometryXML() const = 0;
+      virtual ~MDRebinningPresenter(){}
     };
+
   }
 }
 

@@ -1,16 +1,16 @@
-#ifndef GEOMETRY_VIEW_H
-#define GEOMETRY_VIEW_H
+#ifndef MANTID_VATES_MD_REBINNING_VIEW
+#define MANTID_VATES_MD_REBINNING_VIEW
+
 #include "MantidKernel/System.h"
-#include "MantidVatesAPI/DimensionView.h"
-#include "MantidVatesAPI/DimensionViewFactory.h"
+
+class vtkImplicitFunction;
 namespace Mantid
 {
   namespace VATES
   {
-    class QString;
 
-    /** 
-    @class GeometryView, Abstract view for controlling multi-dimensional geometries.
+     /** 
+    @class MDRebinningView, Abstract view for controlling multi-dimensional rebinning.
     @author Owen Arnold, Tessella plc
     @date 03/06/2011
 
@@ -34,16 +34,20 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport GeometryView 
+    class DLLExport MDRebinningView
     {
     public:
-      virtual void addDimensionView(DimensionView*) = 0;
-      virtual std::string getGeometryXMLString() const = 0;
-      virtual const DimensionViewFactory& getDimensionViewFactory() = 0;
-      virtual ~GeometryView(){};
-      virtual void raiseModified() = 0;
-      virtual void raiseNoClipping() = 0;
+
+      virtual vtkImplicitFunction* getImplicitFunction() const = 0;
+      virtual double getMaxThreshold() const = 0;
+      virtual double getMinThreshold() const = 0;
+      virtual bool getApplyClip() const = 0;
+      virtual double getTimeStep() const = 0;
+      virtual std::string getAppliedGeometryXML() const = 0;
+      virtual void updateAlgorithmProgress(double) = 0;
+      virtual ~MDRebinningView(){}
     };
+
   }
 }
 

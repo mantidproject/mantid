@@ -57,6 +57,8 @@ public:
   virtual ~Clipper() =0;
 
   virtual void Delete() = 0;
+
+  virtual vtkDataSet* GetOutput() =0;
 };
 
 }
