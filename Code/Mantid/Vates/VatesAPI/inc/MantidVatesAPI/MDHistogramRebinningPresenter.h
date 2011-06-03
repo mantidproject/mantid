@@ -83,18 +83,20 @@ namespace Mantid
       MDHistogramRebinningPresenter& operator=(const MDHistogramRebinningPresenter& other);
 
       boost::scoped_ptr<vtkDataSetFactory> m_factory;
+      vtkDataSetToGeometry m_inputParser;
+      vtkDataSet* m_input;
       boost::scoped_ptr<RebinningActionManager> m_request;
       MDRebinningView* m_view;
-      vtkDataSetToGeometry m_inputParser;
 
-      vtkDataSet* m_input;
-      double m_timestep;
+      ImplicitFunction_sptr m_box;
+      boost::scoped_ptr<Clipper> m_clipper;
+      
       double m_maxThreshold;
       double m_minThreshold;
+      double m_timestep;
       bool m_applyClip;
-      ImplicitFunction_sptr m_box;
+      
       RebinningKnowledgeSerializer m_serializer;
-      boost::scoped_ptr<Clipper> m_clipper;
 
       //TODO fix ---
       Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(vtkDataSet* inputDataSet, const char* id);

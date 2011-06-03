@@ -1,5 +1,6 @@
 #include "MantidVatesAPI/NullRebinningPresenter.h"
 #include <vtkUnstructuredGrid.h>
+#include <exception>
 
 namespace Mantid
 {
