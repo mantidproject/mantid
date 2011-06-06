@@ -24,6 +24,10 @@ AxisInteractorNew::AxisInteractorNew(QWidget *parent) : QWidget(parent)
   this->scalePos = AxisInteractorNew::RightScale;
 
   this->graphicsView = new QGraphicsView(this);
+  this->graphicsView->setFrameShape(QFrame::NoFrame);
+  this->graphicsView->setFrameShadow(QFrame::Plain);
+  this->graphicsView->setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing);
+
   this->gridLayout = new QGridLayout(this);
   this->scaleWidget = new QwtScaleWidget(this);
 
@@ -31,7 +35,7 @@ AxisInteractorNew::AxisInteractorNew(QWidget *parent) : QWidget(parent)
 	this->scene->setItemIndexMethod(QGraphicsScene::NoIndex);
 	this->isSceneGeomInit = false;
 
-	this->widgetLayout();
+	//this->widgetLayout();
 
 	this->graphicsView->setScene(this->scene);
 	this->graphicsView->installEventFilter(this);
@@ -58,7 +62,7 @@ void AxisInteractorNew::widgetLayout()
   int scaleHeight = 150;
   int gvWidth = 50;
   int gvHeight = 150;
-  QSizePolicy policy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
+  QSizePolicy policy(QSizePolicy::Fixed, QSizePolicy::Minimum);
 
   if (this->orientation == Qt::Vertical)
   {
@@ -238,20 +242,7 @@ AxisInteractorNew::ScalePos AxisInteractorNew::scalePosition() const
 
 void AxisInteractorNew::setOrientation(Qt::Orientation orient, ScalePos scalePos)
 {
-  if ( orient == this->orientation && scalePos == this->scalePos )
-  {
-      return;
-  }
-
   this->scalePos = scalePos;
-
-  if ( orient != this->orientation )
-  {
-    QSizePolicy sp = this->sizePolicy();
-    sp.transpose();
-    this->setSizePolicy(sp);
-  }
-
   this->orientation = orient;
   this->widgetLayout();
 }
