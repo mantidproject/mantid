@@ -1,0 +1,14 @@
+Release 0.0.2
+===================
+
+Bug Fixes
+---------
+1. ColorMapEditor:
+	the level values are now displayed using DoubleSpinBox objects 
+	
+2. DoubleSpinBox:
+	stepBy problem fixed
+	
+Release 0.0.1
+===================
+Initial release.

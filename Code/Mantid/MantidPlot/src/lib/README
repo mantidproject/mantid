@@ -1,0 +1,25 @@
+
+The Qti Widget Library
+----------------------
+
+      Qti is an extension to the Qt GUI library from Troll Tech AS.  
+      The Qti library contains widgets and components which were 
+      primarily developed for the QtiPlot software.
+
+Installation
+------------
+      
+      Read INSTALL file in order to find out how to build the Qti library.
+
+Copyright
+---------
+
+    Qti Widget Library 
+    Copyright (C) 2008	Ion Vasilief
+
+    Qti is published under the GPL License, Version 3.0.
+    You should have received a copy of this licence in the file gpl-3.0.txt.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

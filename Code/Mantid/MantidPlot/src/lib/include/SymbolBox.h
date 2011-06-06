@@ -1,11 +1,11 @@
 /***************************************************************************
-    File                 : ColorButton.h
+    File                 : SymbolBox.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2007 by Ion Vasilief
+    Copyright            : (C) 2006 by Ion Vasilief
     Email (use @ for *)  : ion_vasilief*yahoo.fr
-    Description          : A button used for color selection
-
+    Description          : Plot symbol combo box
+                           
  ***************************************************************************/
 
 /***************************************************************************
@@ -26,34 +26,44 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
+#ifndef SYMBOLBOX_H
+#define SYMBOLBOX_H
 
-#ifndef COLORBUTTON_H
-#define COLORBUTTON_H
+#include <QComboBox>
+#include <qwt_symbol.h>
 
-#include <QPushButton>
-
-//! A button used for color selection
-class ColorButton : public QPushButton
+//! A modified QComboBox allowing to choose a QwtSmbol style.
+/**
+ * This is a simple hack on top of the QComboBox class.
+ \image html images/symbol_box.png
+ */
+class SymbolBox : public QComboBox
 {
-	Q_OBJECT
-
+  Q_OBJECT
 public:
-	//! Constructor
-	ColorButton(QWidget *parent = 0);
-	//! Set the color of the display part
-	void setColor(const QColor& c);
-	//! Get the color of the display part
-	QColor color(){return d_color;};
+		//! Constructor.
+		/**
+		 * \param parent parent widget (only affects placement of the widget)
+		 */
+		SymbolBox(bool showNoSymbol = true, QWidget *parent = 0);
+
+  		void setStyle(const QwtSymbol::Style& c);
+ 		QwtSymbol::Style selectedSymbol() const;
+
+  		static QwtSymbol::Style style(int index);
+  		static int symbolIndex(const QwtSymbol::Style& style);
+		static QList<int> defaultSymbols();
 
 signals:
-    void colorChanged();
+		//! Signal emitted when the box gains focus
+		void activated(SymbolBox *);
 
-private slots:
-    void pickColor();
+protected:
+		void init(bool showNoSymbol);
+		void focusInEvent(QFocusEvent *);
 
 private:
-    void updateColor();
-	QColor d_color;
+		static const QwtSymbol::Style symbols[];
 };
 
 #endif

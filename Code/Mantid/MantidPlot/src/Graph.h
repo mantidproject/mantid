@@ -244,6 +244,7 @@ public slots:
   int curveIndex(QwtPlotCurve *c) const;
   //! map curve title to index
   int curveIndex(const QString &title){return plotItemsList().findIndex(title);}
+  DataCurve* dataCurve(int index);
   //! get curve by index
   QwtPlotCurve* curve(int index);
   //! get curve by name
@@ -711,6 +712,21 @@ public slots:
   void notifyFontChange(const QFont& f){emit currentFontChanged(f);};
   void enableTextEditor();
 
+  //! \name Waterfall
+  //@{
+  bool isWaterfallPlot(){return d_waterfall_offset_x != 0 || d_waterfall_offset_y != 0;};
+  int waterfallXOffset(){return d_waterfall_offset_x;};
+  int waterfallYOffset(){return d_waterfall_offset_y;};
+  void setWaterfallOffset(int x, int y, bool update = false);
+  void setWaterfallXOffset(int);
+  void setWaterfallYOffset(int);
+  void setWaterfallSideLines(bool on = true);
+  void setWaterfallFillColor(const QColor&);
+  void updateWaterfallFill(bool on);
+  //@}
+  void updateDataCurves();
+  void reverseCurveOrder();
+
 signals:
   void selectedGraph (Graph*);
   void closedGraph();
@@ -811,5 +827,8 @@ private:
   bool m_errors;
   // to keep fixed axes
   QSet<int> m_fixed_axes;
+
+  int d_waterfall_offset_x, d_waterfall_offset_y;
+
 };
 #endif // GRAPH_H

@@ -1309,6 +1309,7 @@ void ApplicationWindow::plotMenuAboutToShow()
   plot2DMenu->addAction(actionPlotLP);
 
   QMenu *specialPlotMenu = plot2DMenu->addMenu (tr("Special Line/Symb&ol"));
+  specialPlotMenu->addAction(actionWaterfallPlot);
   specialPlotMenu->addAction(actionPlotVerticalDropLines);
   specialPlotMenu->addAction(actionPlotSpline);
   specialPlotMenu->addAction(actionPlotVertSteps);
@@ -6540,6 +6541,7 @@ void ApplicationWindow::showColMenu(int c)
     plot.addAction(QIcon(getQPixmap("pPlot_xpm")),tr("&Scatter"), this, SLOT(plotP()));
     plot.addAction(QIcon(getQPixmap("lpPlot_xpm")),tr("Line + S&ymbol"), this,SLOT(plotLP()));
 
+    specialPlot.addAction(actionWaterfallPlot);
     specialPlot.addAction(QIcon(getQPixmap("dropLines_xpm")),tr("Vertical &Drop Lines"), this, SLOT(plotVerticalDropLines()));
     specialPlot.addAction(QIcon(getQPixmap("spline_xpm")),tr("&Spline"), this, SLOT(plotSpline()));
     specialPlot.addAction(QIcon(getQPixmap("vert_steps_xpm")),tr("&Vertical Steps"), this, SLOT(plotVertSteps()));
@@ -8031,6 +8033,8 @@ void ApplicationWindow::pasteSelection()
       g->copy(lastCopiedLayer);
       QPoint pos = plot->mapFromGlobal(QCursor::pos());
       plot->setGraphGeometry(pos.x(), pos.y()-20, lastCopiedLayer->width(), lastCopiedLayer->height());
+      if (g->isWaterfallPlot())
+        g->updateDataCurves();
 
       QApplication::restoreOverrideCursor();
     } else {
@@ -10393,6 +10397,9 @@ void ApplicationWindow::autoArrangeLayers()
   plot->setMargins(5, 5, 5, 5);
   plot->setSpacing(5, 5);
   plot->arrangeLayers(true, false);
+
+  if (plot->isWaterfallPlot())
+    plot->updateWaterfalls();
 }
 
 void ApplicationWindow::addLayer()
@@ -12780,6 +12787,10 @@ void ApplicationWindow::createActions()
   actionAdvancedSearch = new QAction("Advanced Search",this);
   actionAdvancedSearch->setToolTip(tr("Catalog Advanced Search"));
   connect(actionAdvancedSearch, SIGNAL(activated()), this, SLOT(ICatAdvancedSearch()));
+
+  actionWaterfallPlot = new QAction(QIcon(":/waterfall_plot.png"), tr("&Waterfall Plot"), this);
+  connect(actionWaterfallPlot, SIGNAL(activated()), this, SLOT(waterfallPlot()));
+
 }
 
 void ApplicationWindow::translateActionsStrings()
@@ -13397,6 +13408,8 @@ void ApplicationWindow::translateActionsStrings()
   actionFitFrame->setToolTip( tr( "Fit frame to window" ) );
   actionFitFrame->setStatusTip( tr( "Fit frame to window" ) );
 
+  actionWaterfallPlot->setMenuText(tr("&Waterfall Plot"));
+  actionWaterfallPlot->setToolTip(tr("Waterfall Plot"));
 
 }
 
@@ -16744,3 +16757,43 @@ void  ApplicationWindow::executeloadAlgorithm(const QString& algName,const QStri
   mantidUI->executeloadAlgorithm(algName,fileName,wsName);
 }
 
+MultiLayer* ApplicationWindow::waterfallPlot()
+{
+  Table *t = (Table *)activeWindow(TableWindow);
+  if (!t)
+    return 0;
+
+  return waterfallPlot(t, t->selectedYColumns());
+}
+
+MultiLayer* ApplicationWindow::waterfallPlot(Table *t, const QStringList& list)
+{
+  if (!t)
+    return 0;
+
+  if(list.count() < 1){
+    QMessageBox::warning(this, tr("QtiPlot - Plot error"),tr("Please select a Y column to plot!"));
+    return 0;
+  }
+
+  MultiLayer* ml = new MultiLayer(this);
+
+  Graph *g = ml->activeGraph();//Layer();
+  setPreferences(g);
+  g->enableAxis(QwtPlot::xTop, false);
+  g->enableAxis(QwtPlot::yRight, false);
+  g->setCanvasFrame(0);
+  g->setTitle(QString::null);
+  g->setMargin(0);
+  g->setFrame(0);
+  g->addCurves(t, list, Graph::Line);
+  g->setWaterfallOffset(10, 20);
+
+  initMultilayerPlot(ml);
+  ml->arrangeLayers(false, true);
+  ml->setWaterfallLayout();
+
+  // TODO: RJT put back in. g->newLegend()->move(QPoint(g->x() + g->canvas()->x() + 5, 5));
+
+  return ml;
+}

@@ -86,6 +86,8 @@ public:
   /// Set whether the MultiLayer should close itself when it becomes empty
   void setCloseOnEmpty(bool yes=true){d_close_on_empty = yes;}
 
+  void setWaterfallLayout(bool on = true);
+
 public slots:
 	Graph* addLayer(int x = 0, int y = 0, int width = 0, int height = 0);
 	void setLayersNumber(int n);
@@ -158,6 +160,17 @@ public slots:
 
   void maybeNeedToClose();
 
+  //! \name Waterfall Plots
+  //@{
+  void showWaterfallOffsetDialog();
+  void reverseWaterfallOrder();
+  void showWaterfallFillDialog();
+  void updateWaterfalls();
+  bool isWaterfallPlot(){return d_is_waterfall_plot;}
+  QColor waterfallFillColor(){return d_waterfall_fill_color;}
+  void setWaterfallFillColor(const QColor& c);
+  //@}
+
 signals:
 	void showTextDialog();
 	void showPlotDialog(int);
@@ -196,6 +209,8 @@ private:
 
   void removeLayerSelectionFrame();
 
+  void createWaterfallBox();
+
 	Graph* active_graph;
 	//! Used for resizing of layers.
 	int d_cols, d_rows, graph_width, graph_height, colsSpace, rowsSpace;
@@ -205,12 +220,16 @@ private:
 
     QList<LayerButton *> buttonsList;
     QList<Graph *> graphsList;
-	QHBoxLayout *layerButtonsBox;
+  QHBoxLayout *layerButtonsBox, *waterfallBox;
   QHBoxLayout *buttonsLine;
     QWidget *canvas;
 
 	QPointer<SelectionMoveResizer> d_layers_selector;
   bool d_close_on_empty;/// true makes Multilayer close itself if it becomes empty
+
+  bool d_is_waterfall_plot;
+  QColor d_waterfall_fill_color;
+
 };
 
 //! Button with layer number

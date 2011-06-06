@@ -247,6 +247,8 @@ public slots:
   MultiLayer* multilayerPlot(const QString& caption, int layers = 1, int rows = 1, int cols = 1);
   //! used by the plot wizard
   MultiLayer* multilayerPlot(const QStringList& colList);
+  MultiLayer* waterfallPlot();
+  MultiLayer* waterfallPlot(Table *t, const QStringList& list);
   void connectMultilayerPlot(MultiLayer *g);
   void addLayer();
   void deleteLayer();
@@ -261,7 +263,7 @@ public slots:
 
   //! Rearrange the layersin order to fit to the size of the plot window
   void autoArrangeLayers();
-  void initMultilayerPlot(MultiLayer* g, const QString& name);
+  void initMultilayerPlot(MultiLayer* g, const QString& name = QString());
   void polishGraph(Graph *g, int style);
   void plot2VerticalLayers();
   void plot2HorizontalLayers();
@@ -1362,6 +1364,8 @@ private:
   QAction *actionShowUndoStack;
   QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
   QAction *actionMagnify;
+  QAction *actionWaterfallPlot;
+
   //mantid log level control
   QAction  *actionLogLevelError, *actionLogLevelWarning, *actionLogLevelNotice, *actionLogLevelInformation, *actionLogLevelDebug;
   QActionGroup *logLevelGroup;

@@ -13,7 +13,6 @@
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
 #include "../ScriptingWindow.h"
-#include "../ColorBox.h"
 
 #include "MantidKernel/Property.h"
 #include "MantidKernel/DateAndTime.h"

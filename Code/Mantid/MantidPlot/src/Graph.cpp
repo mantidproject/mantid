@@ -111,6 +111,10 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 {	
   setWindowFlags(f);
   n_curves=0;
+
+  d_waterfall_offset_x = 0;
+  d_waterfall_offset_y = 0;
+
   d_active_tool = NULL;
   d_selected_text = NULL;
   d_legend = NULL; // no legend for an empty graph
@@ -2749,6 +2753,15 @@ int Graph::curveIndex(QwtPlotCurve *c) const
   return plotItemIndex(c);
 }
 
+DataCurve * Graph::dataCurve(int index)
+{
+  PlotCurve *c = dynamic_cast<PlotCurve*>(curve(index));
+  if (c && c->type() != Function)
+    return (DataCurve*)c;
+
+  return 0;
+}
+
 int Graph::range(int index, double *start, double *end)
 {
   if (d_range_selector && d_range_selector->selectedCurve() == curve(index)) {
@@ -4415,6 +4428,9 @@ void Graph::showGrid(int axis)
 
 void Graph::copy(Graph* g)
 {
+  d_waterfall_offset_x = g->waterfallXOffset();
+  d_waterfall_offset_y = g->waterfallYOffset();
+
   Plot *plot = g->plotWidget();
   d_plot->setMargin(plot->margin());
   setBackgroundColor(plot->paletteBackgroundColor());
@@ -5502,3 +5518,119 @@ void Graph::enablePanningMagnifier(bool on)
   }
 }
 
+void Graph::setWaterfallXOffset(int offset)
+{
+  if (offset == d_waterfall_offset_x)
+    return;
+
+  d_waterfall_offset_x = offset;
+  updateDataCurves();
+  emit modifiedGraph();
+}
+
+void Graph::setWaterfallYOffset(int offset)
+{
+  if (offset == d_waterfall_offset_y)
+    return;
+
+  d_waterfall_offset_y = offset;
+  updateDataCurves();
+  emit modifiedGraph();
+}
+
+void Graph::setWaterfallOffset(int x, int y, bool update)
+{
+  d_waterfall_offset_x = x;
+  d_waterfall_offset_y = y;
+
+  if (update){
+    updateDataCurves();
+    emit modifiedGraph();
+  }
+}
+
+void Graph::updateWaterfallFill(bool on)
+{
+  int n = d_plot->curvesList().size(); //d_curves.size();
+  if (!n)
+    return;
+
+  for (int i = 0; i < n; i++){
+    PlotCurve *cv = (PlotCurve *)curve(i);
+    if (!cv)
+      continue;
+
+    if (on && multiLayer())
+      cv->setBrush(QBrush(multiLayer()->waterfallFillColor()));
+    else
+      cv->setBrush(QBrush());
+  }
+  replot();
+  emit modifiedGraph();
+}
+
+void Graph::setWaterfallSideLines(bool on)
+{
+	// TODO: Make this work
+	//int n = d_curves.size();
+	//if (!n)
+	//	return;
+
+	//if (curve(0)->sideLinesEnabled() == on)
+	//	return;
+
+	//for (int i = 0; i < n; i++){
+	//	PlotCurve *cv = (PlotCurve *)curve(i);
+	//	if (cv)
+	//		cv->enableSideLines(on);
+	//}
+	//replot();
+	//emit modifiedGraph();
+}
+
+void Graph::setWaterfallFillColor(const QColor& c)
+{
+  int n = d_plot->curvesList().size(); //d_curves.size();
+  if (!n)
+    return;
+
+  for (int i = 0; i < n; i++){
+    PlotCurve *cv = (PlotCurve *)curve(i);
+    if (cv)
+      cv->setBrush(QBrush(c));
+  }
+  replot();
+  emit modifiedGraph();
+}
+
+void Graph::reverseCurveOrder()
+{
+	// No-op at the mo. TODO: Implement
+	return;
+	//if (d_plot->curvesList().isEmpty()) //d_curves.isEmpty())
+	//	return;
+
+	//QList<QwtPlotItem *> lst;
+	//int n = d_plot->curvesList().size(); //d_curves.size();
+	//for (int i = 0; i < n; i++)
+	//	lst << d_curves[n - i - 1];
+
+	//setCurvesList(lst);
+	//emit modifiedGraph();
+}
+
+void Graph::updateDataCurves()
+{
+  int n = d_plot->curvesList().size(); //d_curves.size();
+  if (!n)
+    return;
+
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  for (int i = 0; i < n; i++){
+    DataCurve *c = dataCurve(i);
+    if (c)
+      c->loadData();
+  }
+  replot();
+  QApplication::restoreOverrideCursor();
+}

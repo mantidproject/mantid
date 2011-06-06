@@ -1,0 +1,37 @@
+Introduction
+============
+
+Qti uses qmake to build all its components and examples. 
+qmake is part of a Qt distribution. 
+
+qmake reads project files, that contain the options and rules how to 
+build a certain project. A project file ends with the suffix "*.pro". 
+
+You need Qt4 and Qwt 5.1 installed on your system.
+
+A) Unix Qt4
+==========================
+
+qmake
+make
+
+If you have installed a shared library it's path has to be known to 
+the run-time linker of your operating system. On Linux systems read
+"man ldconfig" ( or google for it ). Another option is to use
+the LD_LIBRARY_PATH (on some systems LIBPATH is used instead, on MacOSX
+it is called DYLD_LIBRARY_PATH) environment variable.
+
+B) Win32/MSVC Qt4
+=====================
+
+Please read the qmake documentation how to convert 
+your *.pro files into your development environment.
+
+F.e MSVC with nmake:
+qmake qti.pro
+nmake
+
+C) Win32/MinGW Qt4
+==================
+qmake qti.pro
+make

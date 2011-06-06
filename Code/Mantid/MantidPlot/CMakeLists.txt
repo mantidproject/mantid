@@ -13,8 +13,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Bar.cpp
                    src/BoxCurve.cpp
                    src/CanvasPicker.cpp
-                   src/ColorBox.cpp
-                   src/ColorButton.cpp
                    src/ColorMapDialog.cpp
                    src/ColorMapEditor.cpp
                    src/Cone3D.cpp
@@ -137,6 +135,11 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/plot2D/ScaleEngine.cpp
                    src/analysis/fft2D.cpp
                    src/zlib123/minigzip.c
+                   # Have added all of current qtiplot 'lib' to repository
+                   # but only including what we want to use here
+                   src/lib/src/ColorBox.cpp
+                   src/lib/src/ColorButton.cpp
+                   src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.cpp
 )
 
 set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
@@ -218,8 +221,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Bar.h
                    src/BoxCurve.h
                    src/CanvasPicker.h
-                   src/ColorBox.h
-                   src/ColorButton.h
                    src/ColorMapDialog.h
                    src/ColorMapEditor.h
                    src/Cone3D.h
@@ -348,6 +349,9 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/analysis/fft2D.h
                    src/origin/OPJFile.h
                    src/plot2D/ScaleEngine.h
+                   src/lib/include/ColorBox.h
+                   src/lib/include/ColorButton.h
+                   src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
 )
 
 set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
@@ -512,8 +516,8 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/AssociationsDialog.h
                         src/AxesDialog.h
                         src/CanvasPicker.h
-                        src/ColorBox.h
-                        src/ColorButton.h
+                        #src/ColorBox.h
+                        #src/ColorButton.h
                         src/ColorMapDialog.h
                         src/ColorMapEditor.h
                         src/ConfigDialog.h
@@ -611,6 +615,9 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/TextFormatButtons.h
                         src/TitlePicker.h
                         src/TranslateCurveTool.h
+                        src/lib/include/ColorBox.h
+                        src/lib/include/ColorButton.h
+                        src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
 )
 
 set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
@@ -650,7 +657,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
                        src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
                        src/Mantid/InstrumentWidget/ColorMapWidget.h
-					   src/Mantid/InstrumentWidget/MantidGLWidget.h
+                       src/Mantid/InstrumentWidget/MantidGLWidget.h
                        src/Mantid/InstrumentWidget/OneCurvePlot.h
                        src/Mantid/InstrumentWidget/CollapsiblePanel.h
 )
@@ -664,6 +671,12 @@ set ( UI_FILES src/Mantid/FirstTimeSetup.ui
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${QTIPLOT_MOC_FILES} ${MANTID_MOC_FILES} )
+# Call separate function on third-party code that expects moc output to have certain name
+qt4_generate_moc ( src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.cpp
+                   ${CMAKE_CURRENT_BINARY_DIR}/qtcolorpicker.moc )
+set_source_files_properties ( ${CMAKE_CURRENT_BINARY_DIR}/qtcolorpicker.moc
+                             PROPERTIES HEADER_FILE_ONLY true )
+set ( MOCCED_FILES ${MOCCED_FILES} ${CMAKE_CURRENT_BINARY_DIR}/qtcolorpicker.moc )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 # The generated ui headers will go here:
@@ -695,6 +708,8 @@ add_definitions ( -DSCRIPTING_PYTHON )
 add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
 
 include_directories ( src )
+include_directories ( src/lib/include )
+include_directories ( src/lib/3rdparty/qtcolorpicker/src )
 
 set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
 set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )

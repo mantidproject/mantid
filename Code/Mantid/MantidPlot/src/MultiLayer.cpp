@@ -37,6 +37,9 @@
 #include <QPainter>
 #include <QPicture>
 #include <QClipboard>
+#include <QCheckBox>
+#include <QGroupBox>
+#include <QSpinBox>
 
 #if QT_VERSION >= 0x040300
 	#include <QSvgGenerator>
@@ -53,6 +56,7 @@
 #include "LegendWidget.h"
 #include "SelectionMoveResizer.h"
 #include "ApplicationWindow.h"
+#include <ColorButton.h>
 
 #include "Mantid/MantidDock.h"
 #include "Mantid/MantidCurve.h"
@@ -100,12 +104,16 @@ MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols
                          hor_align(HCenter),
                          vert_align(VCenter),
                          d_scale_on_print(true),
-                         d_print_cropmarks(false)
+                         d_print_cropmarks(false),
+						 d_is_waterfall_plot(false),
+d_waterfall_fill_color(Qt::black)
 {
 	layerButtonsBox = new QHBoxLayout();
+	waterfallBox = new QHBoxLayout();
 	buttonsLine = new QHBoxLayout();
 	buttonsLine->addLayout(layerButtonsBox);
 	buttonsLine->addStretch();
+		buttonsLine->addLayout(waterfallBox);
 
 	canvas = new QWidget();
 
@@ -286,6 +294,9 @@ void MultiLayer::resizeLayers (QResizeEvent *re)
                 g->scaleFonts(h_ratio);
 		}
 	}
+
+	if (d_is_waterfall_plot)
+		updateWaterfalls();
 
 	emit modifiedPlot();
 	repaint();
@@ -1224,6 +1235,10 @@ void MultiLayer::copy(MultiLayer* ml)
 		g2->setIgnoreResizeEvents(g->ignoresResizeEvents());
 		g2->setAutoscaleFonts(g->autoscaleFonts());
 	}
+
+	if (ml->isWaterfallPlot())
+		setWaterfallLayout(true);
+
 	show();
 }
 
@@ -1323,3 +1338,158 @@ void MultiLayer::maybeNeedToClose()
     if (shouldClose) close();
   }
 }
+
+void MultiLayer::setWaterfallLayout(bool on)
+{
+	if (graphsList.isEmpty())
+		return;
+
+	d_is_waterfall_plot = on;
+
+	if (on){
+		createWaterfallBox();
+		updateWaterfalls();
+	} else {
+		for (int i = 0; i < waterfallBox->count(); i++){
+			QLayoutItem *item = waterfallBox->itemAt(i);
+			if (item){
+				waterfallBox->removeItem(item);
+				delete item;
+			}
+		}
+	}
+}
+
+void MultiLayer::createWaterfallBox()
+{
+	QPushButton *btn = new QPushButton(tr("Offset Amount..."));
+	connect (btn, SIGNAL(clicked()), this, SLOT(showWaterfallOffsetDialog()));
+
+	waterfallBox->addWidget(btn);
+	btn = new QPushButton(tr("Reverse Order"));
+	connect (btn, SIGNAL(clicked()), this, SLOT(reverseWaterfallOrder()));
+
+	waterfallBox->addWidget(btn);
+	btn = new QPushButton(tr("Fill Area..."));
+	connect (btn, SIGNAL(clicked()), this, SLOT(showWaterfallFillDialog()));
+	waterfallBox->addWidget(btn);
+}
+
+void MultiLayer::updateWaterfalls()
+{
+	if (!d_is_waterfall_plot || graphsList.isEmpty())
+		return;
+
+	foreach(Graph *g, graphsList){
+		if (g->isWaterfallPlot())
+			g->updateDataCurves();
+	}
+}
+
+void MultiLayer::showWaterfallOffsetDialog()
+{
+	if (graphsList.isEmpty() || !active_graph)
+		return;
+	if (active_graph->curvesList().isEmpty())
+		return;
+
+	QDialog *offsetDialog = new QDialog(this);
+	offsetDialog->setWindowTitle(tr("Offset Dialog"));
+
+	QGroupBox *gb1 = new QGroupBox();
+	QGridLayout *hl1 = new QGridLayout(gb1);
+
+	hl1->addWidget(new QLabel(tr("Total Y Offset (%)")), 0, 0);
+	QSpinBox *yOffsetBox = new QSpinBox();
+	yOffsetBox->setRange(-INT_MAX, INT_MAX);
+	yOffsetBox->setValue(active_graph->waterfallYOffset());
+	hl1->addWidget(yOffsetBox, 0, 1);
+
+	hl1->addWidget(new QLabel(tr("Total X Offset (%)")), 1, 0);
+	QSpinBox *xOffsetBox = new QSpinBox();
+	xOffsetBox->setRange(-INT_MAX, INT_MAX);
+	xOffsetBox->setValue(active_graph->waterfallXOffset());
+	hl1->addWidget(xOffsetBox, 1, 1);
+	hl1->setRowStretch(2, 1);
+
+	connect(yOffsetBox, SIGNAL(valueChanged(int)), active_graph, SLOT(setWaterfallYOffset(int)));
+	connect(xOffsetBox, SIGNAL(valueChanged(int)), active_graph, SLOT(setWaterfallXOffset(int)));
+
+	QPushButton *applyBtn = new QPushButton(tr("&Apply"));
+	connect(applyBtn, SIGNAL(clicked()), this, SLOT(updateWaterfalls()));
+
+	QPushButton *closeBtn = new QPushButton(tr("&Close"));
+	connect(closeBtn, SIGNAL(clicked()), offsetDialog, SLOT(reject()));
+
+	QHBoxLayout *hl2 = new QHBoxLayout();
+	hl2->addStretch();
+	hl2->addWidget(applyBtn);
+	hl2->addWidget(closeBtn);
+
+	QVBoxLayout *vl = new QVBoxLayout(offsetDialog);
+	vl->addWidget(gb1);
+	vl->addLayout(hl2);
+	offsetDialog->exec();
+}
+
+void MultiLayer::reverseWaterfallOrder()
+{
+	if (graphsList.isEmpty() || !active_graph)
+		return;
+
+	active_graph->reverseCurveOrder();
+	active_graph->updateDataCurves();
+	emit modifiedWindow(this);
+}
+
+void MultiLayer::showWaterfallFillDialog()
+{
+	if (graphsList.isEmpty() || !active_graph)
+		return;
+	if (active_graph->curvesList().isEmpty())
+		return;
+
+	QDialog *waterfallFillDialog = new QDialog(this);
+	waterfallFillDialog->setWindowTitle(tr("Fill Curves"));
+
+	QGroupBox *gb1 = new QGroupBox(tr("Enable Fill"));
+	gb1->setCheckable(true);
+
+	QGridLayout *hl1 = new QGridLayout(gb1);
+	hl1->addWidget(new QLabel(tr("Fill with Color")), 0, 0);
+	ColorButton *fillColorBox = new ColorButton();
+	hl1->addWidget(fillColorBox, 0, 1);
+
+	QCheckBox *sideLinesBox = new QCheckBox(tr("Side Lines"));
+	//sideLinesBox->setChecked(active_graph->curve(0)->sideLinesEnabled());
+	hl1->addWidget(sideLinesBox, 1, 0);
+	hl1->setRowStretch(2, 1);
+
+	QBrush brush = active_graph->curve(0)->brush();
+	fillColorBox->setColor(brush.style() != Qt::NoBrush ? brush.color() : d_waterfall_fill_color);
+	gb1->setChecked(brush.style() != Qt::NoBrush);
+
+	connect(gb1, SIGNAL(toggled(bool)), active_graph, SLOT(updateWaterfallFill(bool)));
+	connect(fillColorBox, SIGNAL(colorChanged(const QColor&)), this, SLOT(setWaterfallFillColor(const QColor&)));
+	connect(sideLinesBox, SIGNAL(toggled(bool)), active_graph, SLOT(setWaterfallSideLines(bool)));
+
+	QPushButton *closeBtn = new QPushButton(tr("&Close"));
+	connect(closeBtn, SIGNAL(clicked()), waterfallFillDialog, SLOT(reject()));
+
+	QHBoxLayout *hl2 = new QHBoxLayout();
+	hl2->addStretch();
+	hl2->addWidget(closeBtn);
+
+	QVBoxLayout *vl = new QVBoxLayout(waterfallFillDialog);
+	vl->addWidget(gb1);
+	vl->addLayout(hl2);
+	waterfallFillDialog->exec();
+}
+
+void MultiLayer::setWaterfallFillColor(const QColor& c)
+{
+	d_waterfall_fill_color = c;
+	if (active_graph)
+		active_graph->setWaterfallFillColor(c);
+}
+
