@@ -13,9 +13,13 @@ namespace Mantid
 
       virtual void updateModel();
 
-      virtual vtkUnstructuredGrid* execute(ProgressAction&);
+      virtual vtkUnstructuredGrid* execute(vtkDataSetFactory*, ProgressAction&);
 
-      virtual std::string getAppliedGeometryXML() const;
+      virtual const std::string& getAppliedGeometryXML() const;
+
+      virtual std::vector<double> getTimeStepValues() const;
+
+      virtual bool hasTDimensionAvailable() const;
 
       virtual ~NullRebinningPresenter();
 

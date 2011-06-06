@@ -12,21 +12,31 @@ namespace Mantid
 
     void NullRebinningPresenter::updateModel()
     {
-      throw std::runtime_error("NullRebinningPresenter does not implement this type. Misused");
     }
 
-    vtkUnstructuredGrid* NullRebinningPresenter::execute(ProgressAction&)
+    vtkUnstructuredGrid* NullRebinningPresenter::execute(vtkDataSetFactory*, ProgressAction&)
     {
-      throw std::runtime_error("NullRebinningPresenter does not implement this type. Misused");
+      throw std::runtime_error("NullRebinningPresenter does not implement this method. Misused");
     }
 
-    std::string NullRebinningPresenter::getAppliedGeometryXML() const
+    const std::string& NullRebinningPresenter::getAppliedGeometryXML() const
     {
-      throw std::runtime_error("NullRebinningPresenter does not implement this type. Misused");
+      throw std::runtime_error("NullRebinningPresenter does not implement this method. Misused");
     }
 
     NullRebinningPresenter::~NullRebinningPresenter()
     {
     }
+
+    std::vector<double> NullRebinningPresenter::getTimeStepValues() const
+    {
+      throw std::runtime_error("NullRebinningPresenter does not implement this method. Misused");
+    }
+
+    bool NullRebinningPresenter::hasTDimensionAvailable() const
+    {
+      throw std::runtime_error("NullRebinningPresenter does not implement this method. Misused");
+    }
+
   }
 }

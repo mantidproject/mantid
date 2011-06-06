@@ -2,6 +2,7 @@
 #define MANTID_VATES_MD_REBINNING_PRESENTER
 
 #include "MantidKernel/System.h"
+#include <vector>
 
 class vtkUnstructuredGrid;
 namespace Mantid
@@ -9,7 +10,7 @@ namespace Mantid
   namespace VATES
   {
     class ProgressAction;
-
+    class vtkDataSetFactory;
      /** 
     @class MDRebinningPresenter, Abstract presenters for multi-dimensional rebinning of various types.
     @author Owen Arnold, Tessella plc
@@ -39,8 +40,10 @@ namespace Mantid
     {
     public:
       virtual void updateModel() = 0;
-      virtual vtkUnstructuredGrid* execute(ProgressAction& eventHandler) = 0;
-      virtual std::string getAppliedGeometryXML() const = 0;
+      virtual vtkUnstructuredGrid* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler) = 0;
+      virtual const std::string& getAppliedGeometryXML() const = 0;
+      virtual bool hasTDimensionAvailable() const = 0;
+      virtual std::vector<double> getTimeStepValues() const = 0;
       virtual ~MDRebinningPresenter(){}
     };
 

@@ -4,6 +4,9 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/NullRebinningPresenter.h"
 #include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include <vtkDataSet.h>
+#include <vtkFloatArray.h>
 
 using namespace Mantid::VATES;
 
@@ -16,25 +19,55 @@ private:
     virtual void eventRaised(double){}
   };
 
+  class FakeDataSetFactory : public Mantid::VATES::vtkDataSetFactory 
+  {
+  public:
+    virtual ~FakeDataSetFactory(){ }
+  private:
+    
+    virtual vtkDataSet* create() const{ throw std::runtime_error("Not implemented on test type");}
+    virtual vtkDataSet* createMeshOnly() const{ throw std::runtime_error("Not implemented on test type");}
+    virtual vtkFloatArray* createScalarArray() const{ throw std::runtime_error("Not implemented on test type");}
+    virtual void initialize(boost::shared_ptr<Mantid::API::IMDWorkspace>){throw std::runtime_error("Not implemented on test type");}
+    virtual void SetSuccessor(vtkDataSetFactory* pSuccessor){ throw std::runtime_error("Not implemented on test type");}
+    virtual bool hasSuccessor() const{ throw std::runtime_error("Not implemented on test type");}
+    virtual std::string getFactoryTypeName() const{ throw std::runtime_error("Not implemented on test type");}
+    virtual void validate() const{ throw std::runtime_error("Not implemented on test type");}
+  };
+
 public:
   
-  void testUpdateModelThrows()
+  void testUpdateModelDoewNothing()
   {
     NullRebinningPresenter nullObject;
-    TS_ASSERT_THROWS(nullObject.updateModel(), std::runtime_error);
+    TS_ASSERT_THROWS_NOTHING(nullObject.updateModel());
   }
 
   void executeThrows()
   {
     NullRebinningPresenter nullObject;
     FakeProgressAction progressAction;
-    TS_ASSERT_THROWS(nullObject.execute(progressAction), std::runtime_error);
+    FakeDataSetFactory* pFactory = new FakeDataSetFactory;
+    TS_ASSERT_THROWS(nullObject.execute(pFactory, progressAction), std::runtime_error);
+    delete pFactory;
   }
 
   void getAppliedGeometryXMLThrows()
   {
     NullRebinningPresenter nullObject;
     TS_ASSERT_THROWS(nullObject.getAppliedGeometryXML(), std::runtime_error);
+  }
+
+  void hasTDimensionAvailableThrows()
+  {
+    NullRebinningPresenter nullObject;
+    TS_ASSERT_THROWS(nullObject.hasTDimensionAvailable(), std::runtime_error);
+  }
+
+  void getTimeStepValuesThrows()
+  {
+    NullRebinningPresenter nullObject;
+    TS_ASSERT_THROWS(nullObject.getTimeStepValues(), std::runtime_error);
   }
 
 };

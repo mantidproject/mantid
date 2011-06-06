@@ -43,11 +43,10 @@ namespace Mantid
       virtual double getMinThreshold() const = 0;
       virtual bool getApplyClip() const = 0;
       virtual double getTimeStep() const = 0;
-      virtual std::string getAppliedGeometryXML() const = 0;
+      virtual const char* getAppliedGeometryXML() const = 0;
       virtual void updateAlgorithmProgress(double) = 0;
       virtual ~MDRebinningView(){}
     };
-
   }
 }
 
