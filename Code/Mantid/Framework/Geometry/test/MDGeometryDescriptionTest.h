@@ -129,6 +129,7 @@ void testMDGDDefaultConstructor(){
       }
       // and original slice still exist and do not throw:
       size_t nDims = pSlice->getNumDims();
+      TSM_ASSERT_EQUALS("Initial slice had 4D",4,nDims);
   }
  
 private:
