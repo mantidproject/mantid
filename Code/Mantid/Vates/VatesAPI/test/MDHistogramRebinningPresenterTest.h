@@ -490,18 +490,13 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pDataSetFactory));
+    delete pDataSetFactory;
     product->Delete();
   }
 
   void testExecutionThrowsWhenNoFieldData()
   {
     MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0)); //NoChange
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0)); //NoChange
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0)); //NoChange
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(true)); //NoChange
-    std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
-    EXPECT_CALL(view, getAppliedGeometryXML()).Times(2).WillRepeatedly(Return(viewXML.c_str())); // NoChange
 
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, action()).WillRepeatedly(Return(RecalculateAll)); //Request is preset to RecalculateAll.
