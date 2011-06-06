@@ -280,7 +280,7 @@ public:
   }
 
   /** refreshCache() tracks the centroid */
-  void test_refreshCache_withCentroid()
+  void test_refreshCentroid()
   {
     MDBox<MDEvent<2>,2> b;
 
@@ -294,7 +294,9 @@ public:
     ev2.setCenter(1, 4.0);
     b.addEvent(ev2);
 
+    // Must call the signal cache first.
     b.refreshCache();
+    b.refreshCentroid();
 
     // This should be the weighted centroid
     TS_ASSERT_DELTA( b.getCentroid(0), 3.333, 0.001);
@@ -307,6 +309,7 @@ public:
   {
     MDBox<MDEvent<2>,2> b;
     b.refreshCache();
+    b.refreshCentroid();
     TS_ASSERT_DELTA( b.getCentroid(0), 0.000, 0.001);
     TS_ASSERT_DELTA( b.getCentroid(1), 0.000, 0.001);
   }

@@ -66,6 +66,8 @@ namespace MDEvents
 
     void refreshCache(Kernel::ThreadScheduler * ts = NULL);
 
+    void refreshCentroid(Kernel::ThreadScheduler * ts = NULL);
+
 
     // ======================= Testing/Debugging Methods =================
     /** For testing: get (a copy of) the vector of boxes */

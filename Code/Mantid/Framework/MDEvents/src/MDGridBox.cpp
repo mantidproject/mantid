@@ -233,12 +233,55 @@ namespace MDEvents
       throw std::runtime_error("Not implemented");
     }
 
-#ifndef MDBOX_TRACKCENTROID_WHENADDING
+  }
+
+
+  // -------------------------------------------------------------------------------------------
+  /** Cache the centroid of this box and all sub-boxes.
+   * @param ts :: ThreadScheduler for parallel processing.
+   */
+  TMDE(
+  void MDGridBox)::refreshCentroid(Kernel::ThreadScheduler * ts)
+  {
+    UNUSED_ARG(ts);
+
+    // Start at 0.0
+    for (size_t d=0; d<nd; d++)
+      this->m_centroid[d] = 0;
+
+    // Signal was calculated before (when adding)
+    // Keep 0.0 if the signal is null. This avoids dividing by 0.0
+    if (this->m_signal == 0) return;
+
+    typename boxVector_t::iterator it;
+    typename boxVector_t::iterator it_end = boxes.end();
+
+    if (!ts)
+    {
+      //--------- Serial -----------
+      for (it = boxes.begin(); it != it_end; it++)
+      {
+        IMDBox<MDE,nd> * ibox = *it;
+
+        // Refresh the centroid of all sub-boxes.
+        ibox->refreshCentroid();
+
+        signal_t iBoxSignal = ibox->getSignal();
+
+        // And track the centroid
+        for (size_t d=0; d<nd; d++)
+          this->m_centroid[d] += ibox->getCentroid(d) * iBoxSignal;
+      }
+    }
+    else
+    {
+      //---------- Parallel refresh --------------
+      throw std::runtime_error("Not implemented");
+    }
+
     // Normalize centroid by the total signal
     for (size_t d=0; d<nd; d++)
       this->m_centroid[d] /= this->m_signal;
-#endif
-
   }
 
 

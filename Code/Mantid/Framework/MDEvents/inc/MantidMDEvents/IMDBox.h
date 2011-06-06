@@ -11,13 +11,6 @@
 #include "MantidMDEvents/MDEvent.h"
 #include <iosfwd>
 
-/** Define to compare performance when tracking the centroid of events when adding (if true)
- *  or only in RefreshCache (if false).
- *  An additional difference is that the centroid saved in the IMDBox object
- *  will be normalized by the total signal if false.
- */
-#define MDBOX_TRACKCENTROID_WHENADDING 1
-
 namespace Mantid
 {
 namespace MDEvents
@@ -125,6 +118,9 @@ namespace MDEvents
       // Do nothing by default.
     }
 
+    // -------------------------------------------------------------------------------------------
+    /** Cache the centroid of this box and all sub-boxes. */
+    virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL) {} //= 0;
 
     // -------------------------------------------------------------------------------------------
     /// @return the box controller saved.
@@ -287,16 +283,13 @@ namespace MDEvents
       m_inverseVolume = invVolume;
     }
 
+    //-----------------------------------------------------------------------------------------------
     /** Return the centroid of the box.
      * @param d :: index of the dimension to return.
      */
     coord_t getCentroid(size_t d)
     {
-#ifdef MDBOX_TRACKCENTROID_WHENADDING
-      return (m_signal == 0.0) ? 0.0 : m_centroid[d] / m_signal;
-#else
       return m_centroid[d];
-#endif
     }
 
   protected:

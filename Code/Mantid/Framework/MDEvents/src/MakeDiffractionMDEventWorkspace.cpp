@@ -428,6 +428,11 @@ namespace MDEvents
 #endif
     if (DODEBUG) std::cout << cputim << ": Performing the refreshCache().\n";
 
+    //TODO: Centroid in parallel, maybe?
+    ws->getBox()->refreshCentroid(NULL);
+    if (DODEBUG) std::cout << cputim << ": Performing the refreshCentroid().\n";
+
+
     if (DODEBUG)
     {
       std::cout << "Workspace has " << ws->getNPoints() << " events. This took " << cputimtotal << " in total.\n";

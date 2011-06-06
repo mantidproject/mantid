@@ -89,10 +89,19 @@ namespace MDEvents
   TMDE(
   void MDBox)::refreshCache(Kernel::ThreadScheduler * /*ts*/)
   {
-#ifndef MDBOX_TRACKCENTROID_WHENADDING
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Calculate and ccache the centroid of this box.
+   */
+  TMDE(
+  void MDBox)::refreshCentroid(Kernel::ThreadScheduler * /*ts*/)
+  {
     for (size_t d=0; d<nd; d++)
       this->m_centroid[d] = 0;
 
+    // Signal was calculated before (when adding)
     // Keep 0.0 if the signal is null. This avoids dividing by 0.0
     if (this->m_signal == 0) return;
 
@@ -111,8 +120,8 @@ namespace MDEvents
     // Normalize by the total signal
     for (size_t d=0; d<nd; d++)
       this->m_centroid[d] /= this->m_signal;
-#endif
   }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Calculate the statistics for each dimension of this MDBox, using

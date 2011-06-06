@@ -406,6 +406,7 @@ public:
 
     // You must refresh the cache after adding individual events.
     superbox->refreshCache(NULL);
+    superbox->refreshCentroid(NULL);
 
     TS_ASSERT_EQUALS( superbox->getNPoints(), 3 );
 
@@ -1265,11 +1266,32 @@ public:
     for (size_t i=0; i<10; i++)
     {
       boxes.clear();
+      boxes.reserve(1111111);
       recursiveParent->getBoxes(boxes, 6);
       TS_ASSERT_EQUALS( boxes.size(), 1111111);
       TS_ASSERT_EQUALS( boxes[0], recursiveParent);
     }
   }
+
+
+//  /** Recursive getting of a list of IMDBox.
+//   * Gets about 11 million boxes */
+//  void test_getBoxesParallel()
+//  {
+//    for (size_t j=0; j<10; j++)
+//    {
+//      std::vector<IMDBox<MDEvent<1>,1> *> boxes1;
+//      recursiveParent->getBoxes(boxes1, 1);
+//      PRAGMA_OMP(parallel for)
+//      for (int i=1; i<boxes1.size(); i++)
+//      {
+//        std::vector<IMDBox<MDEvent<1>,1> *> boxes;
+//        boxes.clear();
+//        boxes1[i]->getBoxes(boxes, 6);
+//        TS_ASSERT_EQUALS( boxes.size(), 111111);
+//      }
+//    }
+//  }
 
 
 };
