@@ -23,6 +23,8 @@ AxisInteractorNew::AxisInteractorNew(QWidget *parent) : QWidget(parent)
   this->orientation = Qt::Vertical;
   this->scalePos = AxisInteractorNew::RightScale;
 
+  this->setStyleSheet(QString::fromUtf8("QGraphicsView {background: transparent;}"));
+
   this->graphicsView = new QGraphicsView(this);
   this->graphicsView->setFrameShape(QFrame::NoFrame);
   this->graphicsView->setFrameShadow(QFrame::Plain);
