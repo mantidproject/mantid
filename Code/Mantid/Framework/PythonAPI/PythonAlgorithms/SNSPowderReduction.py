@@ -227,7 +227,8 @@ class SNSPowderReduction(PythonAlgorithm):
                 MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=info.tmax, XMax=5.*info.tmax)
         except AttributeError:
             pass
-        AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
+        MaskDetectors(Workspace=wksp, MaskedWorkspace=self._instrument + "_mask")
+        AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets")
         LRef = self.getProperty("UnwrapRef")
         DIFCref = self.getProperty("LowResRef")
         if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
@@ -250,8 +251,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref,
                                 K=3.22, **kwargs)
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing") # put it back to the original units
-        DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
-                             GroupingFileName=calib)
+        DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp, GroupingWorkspace=self._instrument + "_group")
         if len(self._binning) == 3:
             info.has_dspace = self._bin_in_dspace
         if info.has_dspace:
@@ -335,6 +335,11 @@ class SNSPowderReduction(PythonAlgorithm):
         self._outTypes = self.getProperty("SaveAs")
         samRuns = self.getProperty("RunNumber")
         filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
+
+        # load the calibration file if the workspaces aren't already in memory
+        if (mtd[self._instrument + "_offsets"] is None) or (mtd[self._instrument + "_mask"] is None) \
+            or (mtd[self._instrument + "_group"] is None):
+            LoadCalFile(InstrumentName=self._instrument, CalFileName=calib, WorkspaceName=self._instrument)
 
         if self.getProperty("Sum"):
             samRun = None
