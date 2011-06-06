@@ -177,6 +177,15 @@ class LoadRun(ReductionStep):
                 raise RuntimeError, "SNSReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace
         else:
             data_file = self._data_file
+
+        # Check whether that file was already loaded
+        # The file also has to be pristine
+        if mtd[workspace] is not None and not force and reducer.is_clean(workspace):
+            if not mtd[workspace].getRun().hasProperty("loaded_by_eqsans_reduction"):
+                raise RuntimeError, "Workspace %s was loaded outside the EQSANS reduction. Delete it before restarting." % workspace
+            
+            mantid.sendLogMessage("Data %s is already loaded: delete it first if reloading is intended" % (workspace))
+            return "Data %s is already loaded: delete it first if reloading is intended\n" % (workspace)
         
         # Configuration files
         config_file = None
@@ -189,12 +198,6 @@ class LoadRun(ReductionStep):
         # Load data
         def _load_data_file(file_name, wks_name):
             filepath = reducer._full_file_path(file_name)
-    
-            # Check whether that file was already loaded
-            # The file also has to be pristine
-            if mtd[workspace] is not None and not force and reducer.is_clean(workspace):
-                mantid.sendLogMessage("Data %s is already loaded: delete it first if reloading is intended" % (workspace))
-                return "Data %s is already loaded: delete it first if reloading is intended\n" % (workspace)
     
             # Find all the necessary files
             event_file = ""
@@ -388,6 +391,8 @@ class LoadRun(ReductionStep):
                     
         # Remove the dirty flag if it existed
         reducer.clean(workspace)
+        mtd[workspace].getRun().addProperty_int("loaded_by_eqsans_reduction", 1, True)
+        
         return "Data file loaded: %s\n%s" % (workspace, output_str)
 
 
