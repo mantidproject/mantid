@@ -1,6 +1,8 @@
 #ifndef INDICATOR_H_
 #define INDICATOR_H_
 
+#include "AxisInteractorNew.h"
+
 #include <QGraphicsItem>
 
 class QColor;
@@ -62,6 +64,11 @@ public:
 	 */
 	void setPoints(const QPoint &eloc, const QRect &rect);
 	/**
+	 * Set the orientation of the head of the indicator.
+	 * @param orient the orientation of the associated axis scale
+	 */
+	void setOrientation(AxisInteractorNew::ScalePos orient);
+	/**
 	 * Get the type value for the indicator graphicsitem.
 	 * @return the numeric value for the indicator graphicsitem type
 	 */
@@ -88,16 +95,17 @@ private:
 	/**
 	 * Adjust the indicator's coordinates to get the apex point to point near
 	 * the requested axis position.
-	 * @param ylevel the requested position
-	 * @return the fixed vertical position for the indicator
+	 * @param level the requested position
+	 * @return the fixed position for the indicator
 	 */
-	int fixVerticalPos(int ylevel);
+	int fixPosition(int level);
 
 	QColor fillColor; ///< The fill color for the triangle
 	QColor outlineColor; ///< The outline color for the triangle
 	QPolygonF path; ///< The holder for the triangle's shape coordinates
 	int half_base; ///< Half the size of the triangle's base
-	int left_edge; ///< The triangle's closest point to the axis indicator
+	int tip_edge; ///< The triangle's closest point (apex) to the axis indicator
+	AxisInteractorNew::ScalePos orientation; ///< The orientation of the indicator apex
 };
 
 #endif // INDICATOR_H_

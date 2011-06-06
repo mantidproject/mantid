@@ -114,6 +114,7 @@ void AxisInteractorNew::widgetLayout()
   }
   this->scaleWidget->setSizePolicy(policy);
   this->scaleWidget->setMinimumSize(QSize(scaleWidth, scaleHeight));
+  this->graphicsView->setSizePolicy(policy);
   this->graphicsView->setMinimumSize(QSize(gvWidth, gvHeight));
   this->setSizePolicy(policy);
 }
@@ -134,6 +135,7 @@ void AxisInteractorNew::createIndicator(const QPoint &point)
 		this->isSceneGeomInit = true;
 	}
 	Indicator *tri = new Indicator();
+	tri->setOrientation(this->scalePos);
 	tri->setPoints(point, gv_rect);
 	this->scene->addItem(tri);
 }

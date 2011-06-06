@@ -1,6 +1,7 @@
 #include "MultisliceView.h"
 
 #include "AxisInformation.h"
+#include "AxisInteractorNew.h"
 #include "GeometryParser.h"
 #include "ScalePicker.h"
 
@@ -28,6 +29,9 @@
 MultiSliceView::MultiSliceView(QWidget *parent) : IView(parent)
 {
 	this->ui.setupUi(this);
+	this->ui.xAxisWidget->setScalePosition(AxisInteractorNew::LeftScale);
+  this->ui.yAxisWidget->setScalePosition(AxisInteractorNew::TopScale);
+	this->ui.zAxisWidget->setScalePosition(AxisInteractorNew::RightScale);
 
 	this->mainView = this->createRenderView(this->ui.renderFrame);
 
