@@ -1774,12 +1774,6 @@ mantid = mtd
 Mantid = mtd
 Mtd = mtd
 
-# Update search path on posix machines where mantidsimple.py goes to the user directory
-if os.name == 'posix':
-    outputdir = os.path.expanduser('~/.mantid')
-    if not outputdir in sys.path:
-        sys.path.append(outputdir)
-
 # Required directories (config service has changed them to absolute paths)
 MantidPyFramework._addToPySearchPath(mtd.settings['requiredpythonscript.directories'])
 # Now additional user specified directories

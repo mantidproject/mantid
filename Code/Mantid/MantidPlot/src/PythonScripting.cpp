@@ -126,11 +126,6 @@ bool PythonScripting::start()
         "if not mantidbin in sys.path:\n"
         "\tsys.path.insert(0,mantidbin)\n";
 
-    QDir mantidoutput(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getUserPropertiesDir()));
-    if( mantidoutput != mantidbin )
-    {
-      pycode += QString("sys.path.insert(1,'") + mantidoutput.absolutePath() + QString("')\n");
-    }
     PyRun_SimpleString(pycode.toStdString().c_str());
 
     //Keep a hold of the globals, math and sys dictionary objects
