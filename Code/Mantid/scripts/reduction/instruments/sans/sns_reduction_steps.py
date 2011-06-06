@@ -12,7 +12,52 @@ from reduction import extract_workspace_name
 from eqsans_config import EQSANSConfig
 
 # Mantid imports
+from MantidFramework import *
 from mantidsimple import *
+
+def find_file(filename=None, startswith=None, data_dir=None):
+    """
+        Returns a list of file paths for the search criteria.
+        @param filename: exact name of a file. The first file found will be returned.
+        @param startswith: string that files should start with.
+        @param data_dir: additional directory to search
+    """
+    # Files found
+    files_found = []
+    
+    # List of directory to look into
+    # The best place would be the location of the configuration files on the SNS mount
+    search_dirs = ["/SNS/EQSANS/shared/instrument_configuration/"]
+    # The second best location would be with the data itself
+    if data_dir is not None:
+        search_dirs.append(data_dir)
+    search_dirs.extend(ConfigService().getDataSearchDirs())
+    search_dirs.append(os.getcwd())
+    
+    # Look for specific file
+    if filename is not None:
+        for d in search_dirs:
+            if not os.path.isdir(d):
+                continue
+            file_path = os.path.join(os.path.normcase(d), filename)
+            if os.path.isfile(file_path):
+                files_found.append(file_path)
+                # If we are looking for a specific file, return right after we find the first
+                if startswith is None:
+                    return files_found
+
+    # Look for files that starts with a specific string
+    if startswith is not None:
+        for d in search_dirs:
+            if not os.path.isdir(d):
+                continue
+            files = os.listdir(d)
+            for file in files:
+                if file.startswith(startswith):
+                    file_path = os.path.join(os.path.normcase(d), file)
+                    files_found.append(file_path)
+
+    return files_found
 
 class QuickLoad(ReductionStep):
     """
@@ -218,27 +263,19 @@ class LoadRun(ReductionStep):
                 # Doesn't look like event pre-nexus, try event nexus
                 is_event_nxs = True
             
-            
             # Find available configuration files
-            # First, check whether we have access to the SNS mount, if
-            # not we will look in the data directory
-            sns_mount = os.path.normcase("/SNS/EQSANS/shared/instrument_configuration/")
-            if os.path.isdir(sns_mount):
-                directory = sns_mount
-            else:
-                directory,_ = os.path.split(filepath)
-            files = os.listdir(directory)
+            data_dir,_ = os.path.split(filepath)
+            files = find_file(startswith="eqsans_configuration", data_dir=data_dir)
             for file in files:
                 name, ext = os.path.splitext(file)
-                if name.startswith("eqsans_configuration"):
-                    # The extension should be a run number
-                    try:
-                        ext = ext.replace('.','')
-                        config_files.append(_ConfigFile(int(ext),os.path.join(directory,file)))
-                    except:
-                        # Bad extension, which means it's not the file we are looking for
-                        pass
-                
+                # The extension should be a run number
+                try:
+                    ext = ext.replace('.','')
+                    config_files.append(_ConfigFile(int(ext),file))
+                except:
+                    # Bad extension, which means it's not the file we are looking for
+                    pass
+                           
             if is_event_nxs:
                 mantid.sendLogMessage("Loading %s as event Nexus" % (filepath))
                 LoadEventNexus(Filename=filepath, OutputWorkspace=workspace+'_evt')
@@ -409,12 +446,10 @@ class Normalize(ReductionStep):
         # First, check whether we have access to the SNS mount, if
         # not we will look in the data directory
         flux_data_path = None
-        if os.path.isfile(os.path.normcase("/SNS/EQSANS/shared/instrument_configuration/bl6_flux_at_sample")):
-           flux_data_path =  os.path.normcase("/SNS/EQSANS/shared/instrument_configuration/bl6_flux_at_sample")
-        elif os.path.isfile(os.path.join(os.path.normcase(reducer._data_path), "bl6_flux_at_sample")):
-            flux_data_path = os.path.join(os.path.normcase(reducer._data_path), "bl6_flux_at_sample")
-        elif os.path.isfile(os.path.join(__file__, "bl6_flux_at_sample")):
-            flux_data_path = os.path.join(__file__, "bl6_flux_at_sample")
+        
+        flux_files = find_file(filename="bl6_flux_at_sample", data_dir=reducer._data_path)
+        if len(flux_files)>0:
+            flux_data_path = flux_files[0]
         else:
             mantid.sendLogMessage("Could not find beam flux file!")
             
