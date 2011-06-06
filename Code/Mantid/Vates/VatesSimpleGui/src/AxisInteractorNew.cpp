@@ -26,6 +26,7 @@ AxisInteractorNew::AxisInteractorNew(QWidget *parent) : QWidget(parent)
   this->setStyleSheet(QString::fromUtf8("QGraphicsView {background: transparent;}"));
 
   this->graphicsView = new QGraphicsView(this);
+  this->graphicsView->setMouseTracking(true);
   this->graphicsView->setFrameShape(QFrame::NoFrame);
   this->graphicsView->setFrameShadow(QFrame::Plain);
   this->graphicsView->setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing);
