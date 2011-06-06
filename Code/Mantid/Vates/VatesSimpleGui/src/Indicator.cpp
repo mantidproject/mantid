@@ -16,7 +16,7 @@ Indicator::Indicator(QGraphicsItem *parent) : QGraphicsPolygonItem(parent)
 	this->fillColor = Qt::blue;
 	this->outlineColor = Qt::black;
 	this->half_base = 10;
-	this->orientation = AxisInteractorNew::LeftScale;
+	this->orientation = AxisInteractor::LeftScale;
 	this->setOpacity(1.0);
 	this->setBrush(QBrush(this->fillColor));
 	this->setPen(QPen(this->outlineColor));
@@ -24,7 +24,7 @@ Indicator::Indicator(QGraphicsItem *parent) : QGraphicsPolygonItem(parent)
 			QGraphicsItem::ItemIsSelectable);
 }
 
-void Indicator::setOrientation(AxisInteractorNew::ScalePos orient)
+void Indicator::setOrientation(AxisInteractor::ScalePos orient)
 {
   this->orientation = orient;
 }
@@ -40,7 +40,7 @@ void Indicator::setPoints(const QPoint &eloc, const QRect &rect)
 
   switch (this->orientation)
   {
-  case AxisInteractorNew::LeftScale:
+  case AxisInteractor::LeftScale:
     half_triangle_height = rect.width() / 2;
     this->tip_edge = rect.left() + half_triangle_height;
     p1_x = half_triangle_height;
@@ -53,7 +53,7 @@ void Indicator::setPoints(const QPoint &eloc, const QRect &rect)
     pa_x = this->tip_edge;
     pa_y = static_cast<int>(apex_pos);
     break;
-  case AxisInteractorNew::RightScale:
+  case AxisInteractor::RightScale:
     half_triangle_height = rect.width() / 2;
     this->tip_edge = rect.left() + half_triangle_height;
     p1_x = -half_triangle_height;
@@ -66,7 +66,7 @@ void Indicator::setPoints(const QPoint &eloc, const QRect &rect)
     pa_x = this->tip_edge;
     pa_y = static_cast<int>(apex_pos);
     break;
-  case AxisInteractorNew::TopScale:
+  case AxisInteractor::TopScale:
     half_triangle_height = rect.height() / 2;
     this->tip_edge = rect.top() + half_triangle_height;
     p1_x = 0;
@@ -79,7 +79,7 @@ void Indicator::setPoints(const QPoint &eloc, const QRect &rect)
     pa_x = static_cast<int>(apex_pos);
     pa_y = this->tip_edge;
     break;
-  case AxisInteractorNew::BottomScale:
+  case AxisInteractor::BottomScale:
     half_triangle_height = rect.height() / 2;
     this->tip_edge = rect.top() + half_triangle_height;
     p1_x = 0;
@@ -134,12 +134,12 @@ void Indicator::updatePos(const QPoint &pos)
 	// but it seems to work best.
   switch (this->orientation)
   {
-  case AxisInteractorNew::LeftScale:
-  case AxisInteractorNew::RightScale:
+  case AxisInteractor::LeftScale:
+  case AxisInteractor::RightScale:
     this->setPos(this->tip_edge, pos.y() + this->half_base * 1.5);
     break;
-  case AxisInteractorNew::TopScale:
-  case AxisInteractorNew::BottomScale:
+  case AxisInteractor::TopScale:
+  case AxisInteractor::BottomScale:
     this->setPos(pos.x() + this->half_base * 1.5, this->tip_edge);
     break;
   }
@@ -150,12 +150,12 @@ void Indicator::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	QPointF pos = this->mapToScene(event->pos());
   switch (this->orientation)
   {
-  case AxisInteractorNew::LeftScale:
-  case AxisInteractorNew::RightScale:
+  case AxisInteractor::LeftScale:
+  case AxisInteractor::RightScale:
     this->setPos(this->tip_edge, this->fixPosition(static_cast<int>(pos.y())));
     break;
-  case AxisInteractorNew::TopScale:
-  case AxisInteractorNew::BottomScale:
+  case AxisInteractor::TopScale:
+  case AxisInteractor::BottomScale:
     this->setPos(this->fixPosition(static_cast<int>(pos.x())), this->tip_edge);
     break;
   }

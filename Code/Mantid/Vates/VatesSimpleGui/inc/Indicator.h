@@ -1,7 +1,7 @@
 #ifndef INDICATOR_H_
 #define INDICATOR_H_
 
-#include "AxisInteractorNew.h"
+#include "AxisInteractor.h"
 
 #include <QGraphicsItem>
 
@@ -67,7 +67,7 @@ public:
 	 * Set the orientation of the head of the indicator.
 	 * @param orient the orientation of the associated axis scale
 	 */
-	void setOrientation(AxisInteractorNew::ScalePos orient);
+	void setOrientation(AxisInteractor::ScalePos orient);
 	/**
 	 * Get the type value for the indicator graphicsitem.
 	 * @return the numeric value for the indicator graphicsitem type
@@ -105,7 +105,7 @@ private:
 	QPolygonF path; ///< The holder for the triangle's shape coordinates
 	int half_base; ///< Half the size of the triangle's base
 	int tip_edge; ///< The triangle's closest point (apex) to the axis indicator
-	AxisInteractorNew::ScalePos orientation; ///< The orientation of the indicator apex
+	AxisInteractor::ScalePos orientation; ///< The orientation of the indicator apex
 };
 
 #endif // INDICATOR_H_

@@ -2,13 +2,15 @@
 #define AXISINTERACTOR_H_
 
 #include <QtGui/QWidget>
-#include "ui_AxisInteractor.h"
 
 class QGraphicsScene;
+class QGraphicsView;
+class QGridLayout;
 class QMouseEvent;
 class QString;
 class QwtScaleEngine;
 class QwtScaleTransformation;
+class QwtScaleWidget;
 class ScalePicker;
 /**
  *
@@ -45,7 +47,18 @@ class AxisInteractor : public QWidget
 {
 	Q_OBJECT
 
+	Q_ENUMS(ScalePos)
+
+	Q_PROPERTY( ScalePos scalePosition READ scalePosition
+	        WRITE setScalePosition )
+
 public:
+	/// Enumeration for scale orientation
+	enum ScalePos {
+	  LeftScale,
+    RightScale,
+    TopScale,
+    BottomScale };
 	/**
 	 * Default constructor.
 	 * @param parent the parent UI object for the axis interactor widget
@@ -54,19 +67,29 @@ public:
 	/// Default destructor.
 	virtual ~AxisInteractor() {}
 	/**
-	 * Get the associated ScalePicker for the indicator.
-	 * @return the associated ScalePicker
-	 */
-	ScalePicker *getScalePicker() { return this->scalePicker; }
-	/**
 	 * Remove highlights from all selected indicators.
 	 */
 	void clearSelections();
+  /**
+   * Get the associated ScalePicker for the indicator.
+   * @return the associated ScalePicker
+   */
+  ScalePicker *getScalePicker() { return this->scalePicker; }
 	/**
 	 * Is there at least one indicator?
 	 * @return true if yes
 	 */
 	bool hasIndicator();
+	/**
+	 * Return the orientation of the axis scale ticket marks
+	 * @return the orientation code
+	 */
+  ScalePos scalePosition() const;
+  /**
+   * Highlight the requested indicator.
+   * @param name the name of the slice being highlighted
+   */
+  void selectIndicator(const QString &name);
 	/**
 	 * Set the axis information for the associated dataset axis.
 	 * @param title the dataset axis title
@@ -75,10 +98,16 @@ public:
 	 */
 	void setInformation(QString title, double min, double max);
 	/**
-	 * Highlight the requested indicator.
-	 * @param name the name of the slice being highlighted
+	 * Set the orientation of the axis scale and graphicsview.
+	 * @param orient the orientation of the graphicsview
+	 * @param scalePos the orientation of the axis scale
 	 */
-	void selectIndicator(const QString &name);
+  void setOrientation(Qt::Orientation orient, ScalePos scalePos);
+  /**
+   * Set the orientation of the axis scale tick marks.
+   * @param scalePos the orientation code
+   */
+  void setScalePosition(ScalePos scalePos);
 	/**
 	 * Update the current indicator to a new location.
 	 * @param value the new location for the indicator
@@ -108,12 +137,19 @@ protected:
 	bool eventFilter(QObject *obj, QEvent *event);
 
 private:
+	/// Handle the setup of the widget based on orientation requests.
+	void widgetLayout();
+
 	QwtScaleEngine *engine; ///< The scale type for the axis widget
+	QGraphicsView *graphicsView; ///< The holder for the slice indicators
+	QGridLayout *gridLayout; ///< Layout manager for widgets
 	bool isSceneGeomInit; ///< Flag to ensure the scene is initialized once
+  Qt::Orientation orientation; ///< The overall orientation of the widget
 	ScalePicker *scalePicker; ///< The picker that retrieves the axis location
+  ScalePos scalePos; ///< The orientation of the axis scale tick marks
+  QwtScaleWidget *scaleWidget; ///< The axis scale widget
 	QGraphicsScene *scene; ///< The contained for the slice indicators
 	QwtScaleTransformation *transform; ///< The scale type for the engine
-	Ui::AxisInteractor ui; ///< The form for the widget
 };
 
 #endif // AXISINTERACTOR_H_

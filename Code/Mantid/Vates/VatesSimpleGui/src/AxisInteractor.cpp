@@ -10,6 +10,8 @@
 #include <QGraphicsItem>
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
+#include <QGraphicsView>
+#include <QGridLayout>
 #include <QList>
 #include <QMouseEvent>
 #include <QString>
@@ -18,36 +20,122 @@
 #include <iostream>
 AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
 {
+  this->orientation = Qt::Vertical;
+  this->scalePos = AxisInteractor::RightScale;
+
+  this->setStyleSheet(QString::fromUtf8("QGraphicsView {background: transparent;}"));
+
+  this->graphicsView = new QGraphicsView(this);
+  this->graphicsView->setMouseTracking(true);
+  this->graphicsView->setFrameShape(QFrame::NoFrame);
+  this->graphicsView->setFrameShadow(QFrame::Plain);
+  this->graphicsView->setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing);
+
+  this->gridLayout = new QGridLayout(this);
+  this->scaleWidget = new QwtScaleWidget(this);
+
 	this->scene = new QGraphicsScene(this);
 	this->scene->setItemIndexMethod(QGraphicsScene::NoIndex);
 	this->isSceneGeomInit = false;
-	this->ui.setupUi(this);
-	this->ui.graphicsView->setScene(this->scene);
-	this->ui.graphicsView->installEventFilter(this);
-	this->ui.scaleWidget->setAlignment(QwtScaleDraw::LeftScale);
+
+	//this->widgetLayout();
+
+	this->graphicsView->setScene(this->scene);
+	this->graphicsView->installEventFilter(this);
+
 	this->engine = new QwtLinearScaleEngine;
 	this->transform = new QwtScaleTransformation(QwtScaleTransformation::Linear);
-	this->scalePicker = new ScalePicker(this->ui.scaleWidget);
+	this->scalePicker = new ScalePicker(this->scaleWidget);
 	QObject::connect(this->scalePicker, SIGNAL(makeIndicator(const QPoint &)),
 			this, SLOT(createIndicator(const QPoint &)));
 }
 
+void AxisInteractor::widgetLayout()
+{
+  if (!this->gridLayout->isEmpty())
+  {
+    for (int i = 0; i < this->gridLayout->count(); ++i)
+    {
+      this->gridLayout->removeItem(this->gridLayout->itemAt(i));
+    }
+  }
+
+  // All set for vertical orientation
+  int scaleWidth = 75;
+  int scaleHeight = 150;
+  int gvWidth = 50;
+  int gvHeight = 150;
+  QSizePolicy policy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+
+  if (this->orientation == Qt::Vertical)
+  {
+    switch (this->scalePos)
+    {
+    case LeftScale:
+    {
+      this->scaleWidget->setAlignment(QwtScaleDraw::RightScale);
+      this->gridLayout->addWidget(this->graphicsView, 0, 0, 1, 1);
+      this->gridLayout->addWidget(this->scaleWidget, 0, 1, 1, 1);
+      break;
+    }
+    case RightScale:
+    default:
+    {
+      this->scaleWidget->setAlignment(QwtScaleDraw::LeftScale);
+      this->gridLayout->addWidget(this->scaleWidget, 0, 0, 1, 1);
+      this->gridLayout->addWidget(this->graphicsView, 0, 1, 1, 1);
+      break;
+    }
+    }
+  }
+  else // Qt::Horizontal
+  {
+    qSwap(scaleWidth, scaleHeight);
+    qSwap(gvWidth, gvHeight);
+    policy.transpose();
+    switch (this->scalePos)
+    {
+    case BottomScale:
+    {
+      this->scaleWidget->setAlignment(QwtScaleDraw::TopScale);
+      this->gridLayout->addWidget(this->scaleWidget, 0, 0, 1, 1);
+      this->gridLayout->addWidget(this->graphicsView, 1, 0, 1, 1);
+      break;
+    }
+    case TopScale:
+    default:
+    {
+      this->scaleWidget->setAlignment(QwtScaleDraw::BottomScale);
+      this->gridLayout->addWidget(this->graphicsView, 0, 0, 1, 1);
+      this->gridLayout->addWidget(this->scaleWidget, 1, 0, 1, 1);
+      break;
+    }
+    }
+  }
+  this->scaleWidget->setSizePolicy(policy);
+  this->scaleWidget->setMinimumSize(QSize(scaleWidth, scaleHeight));
+  this->graphicsView->setSizePolicy(policy);
+  this->graphicsView->setMinimumSize(QSize(gvWidth, gvHeight));
+  this->setSizePolicy(policy);
+}
+
 void AxisInteractor::setInformation(QString title, double min, double max)
 {
-	this->ui.scaleWidget->setTitle(title);
-	this->ui.scaleWidget->setScaleDiv(this->transform,
+	this->scaleWidget->setTitle(title);
+	this->scaleWidget->setScaleDiv(this->transform,
 			this->engine->divideScale(std::floor(min), std::ceil(max), 10, 0));
 }
 
 void AxisInteractor::createIndicator(const QPoint &point)
 {
-	QRect gv_rect = this->ui.graphicsView->geometry();
+	QRect gv_rect = this->graphicsView->geometry();
 	if (! this->isSceneGeomInit)
 	{
 		this->scene->setSceneRect(gv_rect);
 		this->isSceneGeomInit = true;
 	}
 	Indicator *tri = new Indicator();
+	tri->setOrientation(this->scalePos);
 	tri->setPoints(point, gv_rect);
 	this->scene->addItem(tri);
 }
@@ -125,7 +213,7 @@ void AxisInteractor::updateIndicator(double value)
 
 bool AxisInteractor::eventFilter(QObject *obj, QEvent *event)
 {
-	if (obj == this->ui.graphicsView)
+	if (obj == this->graphicsView)
 	{
 		if (event->type() == QEvent::MouseButtonPress ||
 				event->type() == QEvent::MouseButtonDblClick)
@@ -151,4 +239,28 @@ bool AxisInteractor::eventFilter(QObject *obj, QEvent *event)
 	{
 		return AxisInteractor::eventFilter(obj, event);
 	}
+}
+
+AxisInteractor::ScalePos AxisInteractor::scalePosition() const
+{
+  return this->scalePos;
+}
+
+void AxisInteractor::setOrientation(Qt::Orientation orient, ScalePos scalePos)
+{
+  this->scalePos = scalePos;
+  this->orientation = orient;
+  this->widgetLayout();
+}
+
+void AxisInteractor::setScalePosition(ScalePos scalePos)
+{
+    if ((scalePos == BottomScale) || (scalePos == TopScale))
+    {
+        this->setOrientation(Qt::Horizontal, scalePos);
+    }
+    else if ((scalePos == LeftScale) || (scalePos == RightScale))
+    {
+        this->setOrientation(Qt::Vertical, scalePos);
+    }
 }
