@@ -16,6 +16,7 @@ namespace Algorithms
    */
   class DLLExport PDFFT  : public API::Algorithm
   {
+	    static const double PI = 3.1415926545;
   public:
     PDFFT();
     ~PDFFT();
@@ -25,7 +26,7 @@ namespace Algorithms
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
-    virtual const std::string category() const { return "General";}
+    virtual const std::string category() const { return "Diffraction";}  // category better be in diffraction than general
     
   private:
     API::MatrixWorkspace_const_sptr Sspace;
