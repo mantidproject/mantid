@@ -196,7 +196,7 @@ class SNSPowderReduction(PythonAlgorithm):
         else:
             return self._loadPreNeXusData(runnumber, extension)
 
-    def _focus(self, wksp, calib, info, filterLogs=None):
+    def _focus(self, wksp, calib, info, filterLogs=None, preserveEvents=True):
         if wksp is None:
             return None
 
@@ -251,7 +251,6 @@ class SNSPowderReduction(PythonAlgorithm):
                 RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref,
                                 K=3.22, **kwargs)
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing") # put it back to the original units
-        DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp, GroupingWorkspace=self._instrument + "_group")
         if len(self._binning) == 3:
             info.has_dspace = self._bin_in_dspace
         if info.has_dspace:
@@ -260,8 +259,12 @@ class SNSPowderReduction(PythonAlgorithm):
             else:
                 binning = [info.dmin, self._binning[0], info.dmax]
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
+        else:
+            preserveEvents = True
+        DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp, GroupingWorkspace=self._instrument + "_group", PreserveEvents=preserveEvents)
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
-        CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
+        if preserveEvents:
+            CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         if not info.has_dspace:
             if len(self._binning) == 3:
                 binning = self._binning
@@ -391,8 +394,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 temp = mtd["%s_%d" % (self._instrument, vanRun)]
                 if temp is None:
                     vanRun = self._loadData(vanRun, SUFFIX, (0., 0.))
-                    vanRun = self._focus(vanRun, calib, info)
-                    ConvertToMatrixWorkspace(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                    vanRun = self._focus(vanRun, calib, info, preserveEvents=False)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
                     StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, PeakWidthPercent=self._vanPeakWidthPercent)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
