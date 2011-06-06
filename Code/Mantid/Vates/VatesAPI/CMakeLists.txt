@@ -16,7 +16,6 @@ src/MetadataToFieldData.cpp
 src/MultiDimensionalDbPresenter.cpp
 src/NullRebinningPresenter.cpp
 src/ProgressAction.cpp
-src/RebinningCutterPresenter.cpp
 src/RebinningCutterXMLDefinitions.cpp
 src/RebinningKnowledgeSerializer.cpp
 src/SynchronisingGeometryPresenter.cpp
@@ -54,7 +53,6 @@ inc/MantidVatesAPI/MultiDimensionalDbPresenter.h
 inc/MantidVatesAPI/NullRebinningPresenter.h
 inc/MantidVatesAPI/ProgressAction.h
 inc/MantidVatesAPI/RebinningActionManager.h
-inc/MantidVatesAPI/RebinningCutterPresenter.h
 inc/MantidVatesAPI/RebinningCutterXMLDefinitions.h 
 inc/MantidVatesAPI/RebinningKnowledgeSerializer.h
 inc/MantidVatesAPI/SynchronisingGeometryPresenter.h
@@ -90,7 +88,6 @@ test/MultiDimensionalDbPresenterTest.h
 test/MDHistogramRebinningPresenterTest.h
 test/NullRebinningPresenterTest.h
 test/MetadataToFieldDataTest.h
-test/RebinningCutterTest.h
 test/RebinningKnowledgeSerializerTest.h
 test/SynchronisingGeometryPresenterTest.h
 test/TimeStepToTimeStepTest.h

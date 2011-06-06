@@ -7,7 +7,6 @@
 #include <QMessageBox>
 #include <QCheckBox>
 #include "GeometryWidget.h"
-#include "MantidVatesAPI/RebinningCutterPresenter.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include "MantidVatesAPI/SynchronisingGeometryPresenter.h"
 
