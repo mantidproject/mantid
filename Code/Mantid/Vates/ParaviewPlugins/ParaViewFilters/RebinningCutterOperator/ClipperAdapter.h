@@ -77,7 +77,7 @@ public:
     delete this;
   }
 
-  ClipperAdapter::~ClipperAdapter()
+  ~ClipperAdapter()
   {
     m_clipper->Delete();
   }
