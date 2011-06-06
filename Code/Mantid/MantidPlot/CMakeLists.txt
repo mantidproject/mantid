@@ -142,6 +142,12 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.cpp
 )
 
+# Suppress compiler warning on file that isn't ours
+if ( CMAKE_COMPILER_IS_GNUCXX )
+  set_source_files_properties ( src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.cpp 
+                                PROPERTIES COMPILE_FLAGS -Wno-cast-qual )
+endif ()
+
 set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/AlgMonitor.cpp
                    src/Mantid/AlgorithmHistoryWindow.cpp
@@ -711,7 +717,7 @@ include_directories ( src )
 include_directories ( src/lib/include )
 include_directories ( src/lib/3rdparty/qtcolorpicker/src )
 
-set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
+set ( SRC_FILES ${QTIPLOT_SRCS} ${QT_SOLUTIONS_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
 set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
 
 ###########################################################################

@@ -5571,6 +5571,7 @@ void Graph::updateWaterfallFill(bool on)
 
 void Graph::setWaterfallSideLines(bool on)
 {
+  UNUSED_ARG(on)
 	// TODO: Make this work
 	//int n = d_curves.size();
 	//if (!n)

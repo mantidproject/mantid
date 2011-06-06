@@ -377,12 +377,12 @@ void DataCurve::loadData()
       double xmin = c->minXValue();
       double dx = index*g->waterfallXOffset()*0.01*plot->canvas()->width()/(double)(curves - 1);
       //double dx = index*g->waterfallXOffset()*0.01*g->canvas()->width()/(double)(curves - 1);
-      d_x_offset = plot->invTransform(xAxis, plot->transform(xAxis, xmin) + dx) - xmin;
+      d_x_offset = plot->invTransform(xAxis, plot->transform(xAxis, xmin) + (int)dx) - xmin;
 
       double ymin = c->minYValue();
       double dy = index*g->waterfallYOffset()*0.01*plot->canvas()->height()/(double)(curves - 1);
       //double dy = index*g->waterfallYOffset()*0.01*g->canvas()->height()/(double)(curves - 1);
-      d_y_offset = ymin - plot->invTransform(yAxis(), plot->transform(yAxis(), ymin) + dy);
+      d_y_offset = ymin - plot->invTransform(yAxis(), plot->transform(yAxis(), ymin) + (int)dy);
 
       setZ(-index);
       setBaseline(d_y_offset);
