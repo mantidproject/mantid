@@ -4,7 +4,7 @@ from MantidFramework import mtd
 mtd.initialise()
 from mantidsimple import *
 
-class PythonAlgorithmTest(unittest.TestCase):
+class SANSWorkflowTest(unittest.TestCase):
     """
         Tests SANS workflow algorithms
     """
