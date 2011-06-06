@@ -346,7 +346,7 @@ class SANSReducer(Reducer):
         
         # Apply transmission correction
         if self._transmission_calculator is not None:
-            self._reduction_steps.append(self._transmission_calculator) 
+            self.append_step(self._transmission_calculator) 
         
         # Subtract the background
         if self._background_subtracter is not None:

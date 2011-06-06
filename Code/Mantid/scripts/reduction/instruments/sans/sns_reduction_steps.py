@@ -400,6 +400,29 @@ class Normalize(ReductionStep):
         # Flag the workspace as dirty
         reducer.dirty(workspace)
         
+        # Find available beam flux file
+        # First, check whether we have access to the SNS mount, if
+        # not we will look in the data directory
+        flux_data_path = None
+        if os.path.isfile(os.path.normcase("/SNS/EQSANS/shared/instrument_configuration/bl6_flux_at_sample")):
+           flux_data_path =  os.path.normcase("/SNS/EQSANS/shared/instrument_configuration/bl6_flux_at_sample")
+        elif os.path.isfile(os.path.join(os.path.normcase(reducer._data_path), "bl6_flux_at_sample")):
+            flux_data_path = os.path.join(os.path.normcase(reducer._data_path), "bl6_flux_at_sample")
+        elif os.path.isfile(os.path.join(__file__, "bl6_flux_at_sample")):
+            flux_data_path = os.path.join(__file__, "bl6_flux_at_sample")
+        else:
+            mantid.sendLogMessage("Could not find beam flux file!")
+            
+        if flux_data_path is not None:
+            beam_flux_ws = "__beam_flux"
+            LoadAscii(flux_data_path, beam_flux_ws, Separator="Tab", Unit="Wavelength")
+            ConvertToHistogram(beam_flux_ws, beam_flux_ws)
+            RebinToWorkspace(beam_flux_ws, workspace, beam_flux_ws)
+            Divide(workspace, beam_flux_ws, workspace)
+            mtd[workspace].getRun().addProperty_str("beam_flux_ws", beam_flux_ws, True)
+        else:
+            flux_data_path = "Could not find beam flux file!"
+        
         #NormaliseByCurrent(workspace, workspace)
         proton_charge = mantid.getMatrixWorkspace(workspace).getRun()["proton_charge"].getStatistics().mean
         duration = mantid.getMatrixWorkspace(workspace).getRun()["proton_charge"].getStatistics().duration
@@ -407,15 +430,15 @@ class Normalize(ReductionStep):
         acc_current = 1.0e-12 * proton_charge * duration * frequency
         Scale(InputWorkspace=workspace, OutputWorkspace=workspace, Factor=1.0/acc_current, Operation="Multiply")
         
-        return "Data normalized to accelerator current" 
+        return "Data normalized to accelerator current\n  Beam flux file: %s" % flux_data_path 
     
     
-class Transmission(BaseTransmission):
+class BeamStopTransmission(BaseTransmission):
     """
-        Perform the transmission correction for EQ-SANS
+        Perform the transmission correction for EQ-SANS using the beam stop hole
     """
     def __init__(self, normalize_to_unity=False, theta_dependent=False):
-        super(Transmission, self).__init__()
+        super(BeamStopTransmission, self).__init__()
         self._normalize = normalize_to_unity
         self._theta_dependent = theta_dependent
         self._transmission_ws = None
@@ -453,16 +476,36 @@ class Transmission(BaseTransmission):
         # transmission instead of using the angular dependence of the
         # correction.
         reducer.dirty(workspace)
+
+        output_str = "Beam hole transmission correction applied"
+        # Get the beam spectrum, if available
+        transmission_ws = self._transmission_ws
+        if mtd[workspace].getRun().hasProperty("beam_flux_ws"):
+            beam_flux_ws_name = mtd[workspace].getRun().getProperty("beam_flux_ws").value
+            if mtd.workspaceExists(beam_flux_ws_name):
+                beam_flux_ws = mtd[beam_flux_ws_name]
+                transmission_ws = "__transmission_tmp"
+                Divide(self._transmission_ws, beam_flux_ws, transmission_ws)
+                output_str += "\n  Transmission corrected for beam spectrum"
+            else:
+                output_str += "\n  Transmission was NOT corrected for beam spectrum: inconsistent meta-data!"
+        else:
+            output_str += "\n  Transmission was NOT corrected for beam spectrum: check your normalization option!"
+        
         if self._theta_dependent:
             # To apply the transmission correction using the theta-dependent algorithm
             # we should get the beam spectrum out of the measured transmission
             # We should then re-apply it when performing normalization
-            ApplyTransmissionCorrection(workspace, workspace, self._transmission_ws)
+            ApplyTransmissionCorrection(workspace, workspace, transmission_ws)
         else:
-            Divide(workspace, self._transmission_ws, workspace)
+            Divide(workspace, transmission_ws, workspace)
         ReplaceSpecialValues(workspace, workspace, NaNValue=0.0,NaNError=0.0)
         
-        return "Transmission correction applied"
+        # Clean up 
+        if mtd.workspaceExists('__transmission_tmp'):
+            mtd.deleteWorkspace('__transmission_tmp')
+                
+        return output_str
     
     
 class SubtractDarkCurrent(ReductionStep):

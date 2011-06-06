@@ -38,11 +38,11 @@ def MonitorNormalization():
     TotalChargeNormalization()
       
 def BeamStopTransmission(normalize_to_unity=False, theta_dependent=False):
-    ReductionSingleton().set_transmission(sns_reduction_steps.Transmission(normalize_to_unity=normalize_to_unity,
+    ReductionSingleton().set_transmission(sns_reduction_steps.BeamStopTransmission(normalize_to_unity=normalize_to_unity,
                                                                            theta_dependent=theta_dependent))
     
 def BckBeamStopTransmission(normalize_to_unity=False, theta_dependent=False):
-    ReductionSingleton().set_bck_transmission(sns_reduction_steps.Transmission(normalize_to_unity=normalize_to_unity,
+    ReductionSingleton().set_bck_transmission(sns_reduction_steps.BeamStopTransmission(normalize_to_unity=normalize_to_unity,
                                                                                theta_dependent=theta_dependent))
 
 def PerformFlightPathCorrection(do_correction=True):
