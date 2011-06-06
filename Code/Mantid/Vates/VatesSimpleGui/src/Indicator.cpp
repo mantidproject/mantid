@@ -41,53 +41,47 @@ void Indicator::setPoints(const QPoint &eloc, const QRect &rect)
   switch (this->orientation)
   {
   case AxisInteractor::LeftScale:
-    half_triangle_height = rect.width() / 2;
-    this->tip_edge = rect.left() + half_triangle_height;
-    p1_x = half_triangle_height;
-    p1_y = 0;
-    p2_x = -half_triangle_height;
-    p2_y = this->half_base;
-    p3_x = -half_triangle_height;
-    p3_y = -this->half_base;
-    apex_pos = eloc.y() + 2 * this->half_base;
-    pa_x = this->tip_edge;
-    pa_y = static_cast<int>(apex_pos);
-    break;
   case AxisInteractor::RightScale:
     half_triangle_height = rect.width() / 2;
     this->tip_edge = rect.left() + half_triangle_height;
-    p1_x = -half_triangle_height;
+    if (this->orientation == AxisInteractor::LeftScale)
+    {
+      p1_x = half_triangle_height;
+      p2_x = -half_triangle_height;
+      p3_x = -half_triangle_height;
+    }
+    if (this->orientation == AxisInteractor::RightScale)
+    {
+      p1_x = -half_triangle_height;
+      p2_x = half_triangle_height;
+      p3_x = half_triangle_height;
+    }
     p1_y = 0;
-    p2_x = half_triangle_height;
     p2_y = this->half_base;
-    p3_x = half_triangle_height;
     p3_y = -this->half_base;
     apex_pos = eloc.y() + 2 * this->half_base;
     pa_x = this->tip_edge;
     pa_y = static_cast<int>(apex_pos);
     break;
   case AxisInteractor::TopScale:
-    half_triangle_height = rect.height() / 2;
-    this->tip_edge = rect.top() + half_triangle_height;
-    p1_x = 0;
-    p1_y = half_triangle_height;
-    p2_x = this->half_base;
-    p2_y = -half_triangle_height;
-    p3_x = -this->half_base;
-    p3_y = -half_triangle_height;
-    apex_pos = eloc.x() + 2 * this->half_base;
-    pa_x = static_cast<int>(apex_pos);
-    pa_y = this->tip_edge;
-    break;
   case AxisInteractor::BottomScale:
     half_triangle_height = rect.height() / 2;
     this->tip_edge = rect.top() + half_triangle_height;
+    if (this->orientation == AxisInteractor::TopScale)
+    {
+      p1_y = half_triangle_height;
+      p2_y = -half_triangle_height;
+      p3_y = -half_triangle_height;
+    }
+    if (this->orientation == AxisInteractor::BottomScale)
+    {
+      p1_y = -half_triangle_height;
+      p2_y = half_triangle_height;
+      p3_y = half_triangle_height;
+    }
     p1_x = 0;
-    p1_y = -half_triangle_height;
     p2_x = this->half_base;
-    p2_y = half_triangle_height;
     p3_x = -this->half_base;
-    p3_y = half_triangle_height;
     apex_pos = eloc.x() + 2 * this->half_base;
     pa_x = static_cast<int>(apex_pos);
     pa_y = this->tip_edge;
