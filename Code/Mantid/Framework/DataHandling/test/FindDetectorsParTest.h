@@ -511,8 +511,8 @@ private:
      std::string azim_pattern("0,0,0,");
      std::string pol_pattern("170.565,169.565,168.565,");
      std::string sfp_pattern("1,1,1,");
-     std::string azw_pattern("0.396157,0.394998,0.393718,");
-     std::string polw_pattern("2.86236,2.86236,2.86236,");
+     std::string azw_pattern("0.792313,0.789995,0.787437,");
+     std::string polw_pattern("5.72472,5.72472,5.72472,");
  
 
      std::auto_ptr<std::stringstream> bufs[5];
