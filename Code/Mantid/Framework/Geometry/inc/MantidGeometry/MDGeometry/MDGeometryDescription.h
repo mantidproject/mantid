@@ -1,5 +1,5 @@
-#ifndef MDGEOMETRY_DESCRIPTION_H
-#define MDGEOMETRY_DESCRIPTION_H
+#ifndef H_MDGEOMETRY_DESCRIPTION
+#define H_MDGEOMETRY_DESCRIPTION
 
 #include <deque>
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
@@ -88,6 +88,8 @@ public:
 
   MDGeometryDescription(const MDGeometryBasis &basis);
   MDGeometryDescription(size_t numDims=4, size_t nReciprocalDims=3);
+  /// another type of default constructor if description is NULL or copy constructor if not
+  MDGeometryDescription(MDGeometryDescription const* const);
   MDGeometryDescription(const MDGeometry &origin);
   virtual ~MDGeometryDescription(void);
   /** sets the transformation matrix, () which would transform MDDPoints from MDDData system of coordinates
@@ -157,7 +159,7 @@ public:
    * The requested tag is deleted from old location and inserted into the new location, leaving all other data as before.
    * the tag has to be present in the array initially -> throws otherwise */
   void setPAxis(size_t i, const std::string &tag);
-  ///the variable used to generate test data only
+  ///the variable used to generate test data only as geomety does not have access to this parameter (its MDImage feature)
   uint64_t nContributedPixels;
 private:
 

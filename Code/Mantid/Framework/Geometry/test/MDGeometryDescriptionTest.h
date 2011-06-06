@@ -32,6 +32,9 @@ class MDGeometryDescriptionTest: public CxxTest::TestSuite
   
 
 public:
+ static MDGeometryDescriptionTest *createSuite() { return new MDGeometryDescriptionTest(); }
+ static void destroySuite(MDGeometryDescriptionTest *suite) { delete suite; }
+
 
   void testAlignX()
   {
@@ -113,9 +116,22 @@ void testMDGDDefaultConstructor(){
     TSM_ASSERT_EQUALS("The image size described by this description differs from expected", 100 * 100
         * 100, pDescr->getImageSize());
   }
+  void testCopyFromPointer(){
+      {
+        std::auto_ptr<MDGeometryDescription> pNewDescr = std::auto_ptr<MDGeometryDescription>
+              (new MDGeometryDescription(pSlice));
+
+         TS_ASSERT_EQUALS(pNewDescr->getNumDims(),pSlice->getNumDims());
+         TS_ASSERT_EQUALS(pNewDescr->getImageSize(),pSlice->getImageSize());
+         TS_ASSERT_EQUALS(vec2str(pNewDescr->getDimensionsTags()),vec2str(pSlice->getDimensionsTags()));
+         TS_ASSERT_EQUALS(pNewDescr->getNumRecDims(),pSlice->getNumRecDims());
+         TSM_ASSERT_EQUALS("Copyed rotations should be equal",true,pNewDescr->getRotations()==pSlice->getRotations());
+      }
+      // and original slice still exist and do not throw:
+      size_t nDims = pSlice->getNumDims();
+  }
  
-
-
+private:
   MDGeometryDescriptionTest() :
     pSlice(NULL)
   {
@@ -124,5 +140,12 @@ void testMDGDDefaultConstructor(){
   {
     if (pSlice)
       delete pSlice;
+  }
+  std::string vec2str(const std::vector<std::string> &origin){
+      std::stringstream Buf;
+      for(size_t i=0;i<origin.size();i++){
+          Buf<<origin[i]<<", ";
+      }
+      return Buf.str();
   }
 };

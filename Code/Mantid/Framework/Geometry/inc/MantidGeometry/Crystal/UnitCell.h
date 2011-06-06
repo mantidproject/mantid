@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_UNITCELL_H_
 
 #include <MantidKernel/System.h>
+#include <MantidKernel/PhysicalConstants.h>
 #include <MantidGeometry/Math/Matrix.h>
 #include <MantidGeometry/Quat.h>
 #include <MantidGeometry/V3D.h>

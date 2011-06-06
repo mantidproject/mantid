@@ -148,6 +148,27 @@ MDGeometryDescription::MDGeometryDescription(size_t numDims, size_t numRecDims):
     this->intit_default_slicing(nDimensions,nReciprocalDimensions);
 
 }
+// 
+MDGeometryDescription::MDGeometryDescription(MDGeometryDescription const * const pOrigin)
+{
+    if(pOrigin){
+        this->nContributedPixels   = pOrigin->nContributedPixels;
+        this->nDimensions          = pOrigin->nDimensions;
+        this->nReciprocalDimensions= pOrigin->nReciprocalDimensions;
+        this->Rotations            = pOrigin->Rotations;
+        // copy dimensions description
+        this->data                 = pOrigin->data;
+
+    }else{
+        this->nContributedPixels=19531253125000;
+        this->nDimensions = 4;
+        this->nReciprocalDimensions=3;
+        this->Rotations = MantidMat(3,3,true);
+
+        this->intit_default_slicing(nDimensions,nReciprocalDimensions);
+    }
+
+}
 
 void MDGeometryDescription::createDimensionDescription(Dimension_sptr dimension, const int i)
 {

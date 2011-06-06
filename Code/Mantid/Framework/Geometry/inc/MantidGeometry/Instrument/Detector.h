@@ -70,7 +70,7 @@ public:
   // end IDetector methods 
   void markAsMonitor(const bool flag = true);
   /** returns the detector's topology, namely, the meaning of the detector's angular measurements.
-      It is different in cartesian and cylindrical coordinate system */
+      It is different in cartesian and cylindrical (surrounding the beam) coordinate system */
   det_topology getTopology()const{return rect;};
  
 private:
