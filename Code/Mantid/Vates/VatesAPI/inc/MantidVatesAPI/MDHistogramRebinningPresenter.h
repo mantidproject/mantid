@@ -1,30 +1,29 @@
 #ifndef MANTID_VATES_MD_REBINNING_HISTOGRAM_PRESENTER
 #define MANTID_VATES_MD_REBINNING_HISTOGRAM_PRESENTER
 
-#include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
-#include "MantidAPI/ImplicitFunction.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidVatesAPI/MDRebinningPresenter.h"
-#include "MantidVatesAPI/vtkDataSetToGeometry.h"
-#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
-
 #include <vtkUnstructuredGrid.h>
 #include <vtkDataSet.h>
-#include <vtkBox.h>
+#include <vtkBox.h> 
 #include <vtkFieldData.h>
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
+
 #include "MantidAPI/ImplicitFunctionFactory.h"
+#include "MantidAPI/ImplicitFunction.h"
+#include "MantidAPI/IMDWorkspace.h"
+
 #include "MantidMDAlgorithms/NullImplicitFunction.h" 
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
-
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidMDAlgorithms/DynamicRebinFromXML.h"
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
+
+#include "MantidVatesAPI/MDRebinningPresenter.h"
 #include "MantidVatesAPI/MDHistogramRebinningPresenter.h"
 #include "MantidVatesAPI/RebinningActionManager.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
@@ -36,7 +35,7 @@
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/IMDWorkspaceProxy.h"
-
+#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 
 //Forward declarations
 class vtkDataSet;
@@ -78,6 +77,9 @@ namespace Mantid
     class DLLExport MDHistogramRebinningPresenter : public MDRebinningPresenter
     {
     public:
+
+      /*----------------------------------- MDRebinningPresenter methods  -------------------------------------*/
+
       virtual void updateModel();
 
       virtual vtkUnstructuredGrid* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler);
@@ -92,6 +94,8 @@ namespace Mantid
 
       std::vector<double> getTimeStepValues() const;
 
+       /*-----------------------------------End MDRebinningPresenter methods -------------------------------------*/
+
     private:
 
       std::string constructGeometryXML(
@@ -102,49 +106,75 @@ namespace Mantid
         Mantid::Geometry::IMDDimension_sptr );
 
       void forumulateBinChangeRequest(Mantid::Geometry::MDGeometryXMLParser& old_geometry, Mantid::Geometry::MDGeometryXMLParser& new_geometry);
+
+      /// Construct a box from the interactor.
       ImplicitFunction_sptr constructBoxFromVTKBox(vtkBox* box) const;
+
+      /// Construct a box from the input dataset metadata.
       ImplicitFunction_sptr constructBoxFromInput() const;
 
+      /// Disabled copy constructor.
       MDHistogramRebinningPresenter(const MDHistogramRebinningPresenter& other);
 
+      /// Disabled assignment.
       MDHistogramRebinningPresenter& operator=(const MDHistogramRebinningPresenter& other);
-
-      vtkDataSetToGeometry m_inputParser;
-      vtkDataSet* m_input;
-      boost::scoped_ptr<RebinningActionManager> m_request;
-      ViewType* m_view;
-
-      ImplicitFunction_sptr m_box;
-      boost::scoped_ptr<Clipper> m_clipper;
-      
-      double m_maxThreshold;
-      double m_minThreshold;
-      bool m_applyClip;
-      double m_timestep;
-      mutable std::string m_wsGeometry;
-      
-      
-      RebinningKnowledgeSerializer m_serializer;
 
       //TODO fix ---
       Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(vtkDataSet* inputDataSet, const char* id);
 
+      /// Find the name for the passed-in workspace.
       std::string findExistingWorkspaceName(vtkDataSet *inputDataSet, const char* id);
 
+      /// Find the location for the passed-in workspace.
       std::string findExistingWorkspaceLocation(vtkDataSet *inputDataSet, const char* id);
 
+      /// Add existing function knowledge onto the serilizer.
       void addFunctionKnowledge();
 
       Mantid::API::IMDWorkspace_sptr constructMDWorkspace(const std::string& wsLocation);
 
       void persistReductionKnowledge(vtkDataSet* out_ds, const RebinningKnowledgeSerializer& xmlGenerator, const char* id);
       //TODO end fix --
+
+      ///Parser used to process input vtk to extract metadata.
+      vtkDataSetToGeometry m_inputParser;
+      ///Input vtk dataset.
+      vtkDataSet* m_input;
+      ///Request, encapsulating priorisation of requests made for rebinning/redrawing.
+      boost::scoped_ptr<RebinningActionManager> m_request;
+      ///The view of this MVP pattern.
+      ViewType* m_view;
+      ///Box implicit function used to determine boundaries via evaluation.
+      ImplicitFunction_sptr m_box;
+      ///Clipper used to determine boundaries.
+      boost::scoped_ptr<Clipper> m_clipper;
+      ///Maximum threshold
+      double m_maxThreshold;
+      ///Minimum threshold
+      double m_minThreshold;
+      ///Flag indicating that clipping should be applied.
+      bool m_applyClip;
+      ///The current timestep.
+      double m_timestep;
+      ///The workspace geometry. Cached value.
+      mutable std::string m_wsGeometry;
+      ///Serializer, which may generate and store the rebinning knowledge.
+      RebinningKnowledgeSerializer m_serializer;
     };
 
+    /*---------------------------------------------------------------------------------------------------------
+    Templated Implementations.
+    ---------------------------------------------------------------------------------------------------------*/
 
+    /** Constructor
+    * @param input : Input vtkdataset.
+    * @param request : Request managing object
+    * @param view : MVP view
+    * @param clipper : Clipper for determining boundaries.
+    */
     template<typename ViewType>
     MDHistogramRebinningPresenter<ViewType>::MDHistogramRebinningPresenter(vtkDataSet* input, RebinningActionManager* request, ViewType* view, Clipper* clipper) :
-      m_inputParser(input), 
+    m_inputParser(input), 
       m_input(input), 
       m_request(request), 
       m_view(view), 
@@ -203,6 +233,13 @@ namespace Mantid
       m_box = constructBoxFromInput();
     }
 
+    /** constructs geometry xml string from dimensions.
+    * @param dimensions : all dimension
+    * @param dimensionX : x mapping
+    * @param dimensionY : y mapping
+    * @param dimensionZ : z mapping
+    * @param dimensionT : t mapping
+    */
     template<typename ViewType>
     std::string MDHistogramRebinningPresenter<ViewType>::constructGeometryXML(
       DimensionVec dimensions,
@@ -226,6 +263,10 @@ namespace Mantid
       return xmlBuilder.create();
     }
 
+    /** Uses changes in the number of bins for each mapped dimension to determine when to perform rebinning.
+    * @param old_geometry : previous instance geometry
+    * @param new_geometry : view instance geometry
+    */
     template<typename ViewType>
     void MDHistogramRebinningPresenter<ViewType>::forumulateBinChangeRequest(Mantid::Geometry::MDGeometryXMLParser& old_geometry, Mantid::Geometry::MDGeometryXMLParser& new_geometry)
     {
@@ -259,6 +300,11 @@ namespace Mantid
       }
     }
 
+
+    /** Converts a vtkbox into an implicitfunction box.
+    * @param box : vtkImplicitFunction.
+    * @return ImplicitFunction_sptr containing ImplicitFunction box.
+    */
     template<typename ViewType>
     ImplicitFunction_sptr MDHistogramRebinningPresenter<ViewType>::constructBoxFromVTKBox(vtkBox* box) const
     {
@@ -295,6 +341,9 @@ namespace Mantid
       return ImplicitFunction_sptr(boxFunction);
     }
 
+    /** Constructs a box from the inputs vtkdataset.
+    * @return ImplicitFunction_sptr containing ImplicitFunction box.
+    */
     template<typename ViewType>
     ImplicitFunction_sptr MDHistogramRebinningPresenter<ViewType>::constructBoxFromInput() const
     {
@@ -325,6 +374,8 @@ namespace Mantid
       return ImplicitFunction_sptr(boxFunction);
     }
 
+    /** Update the MVP model, forumulates and hive-off a request for rebinning
+    */
     template<typename ViewType>
     void MDHistogramRebinningPresenter<ViewType>::updateModel()
     {
@@ -359,7 +410,7 @@ namespace Mantid
           m_box = constructBoxFromInput();
           m_request->ask(RecalculateVisualDataSetOnly);
         }
-        
+
         m_applyClip = m_view->getApplyClip();
       }
       addFunctionKnowledge();
@@ -401,6 +452,10 @@ namespace Mantid
       m_serializer.setImplicitFunction(ImplicitFunction_sptr(compFunction));
     }
 
+    /** Coordinate the production of a vtkDataSet matching the request
+    @parameter factory : vtkDataSet producing factory chain.
+    @parameter eventHandler : observer/listenter 
+    */
     template<typename ViewType>
     vtkUnstructuredGrid* MDHistogramRebinningPresenter<ViewType>::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
     {
@@ -443,7 +498,7 @@ namespace Mantid
       sourceGeometry.execute();
       if((m_request->action() == RecalculateVisualDataSetOnly) && sourceGeometry.hasXDimension() && sourceGeometry.hasYDimension() && sourceGeometry.hasZDimension() && sourceGeometry.hasTDimension())
       {
-          IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(
+        IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(
           outputWs, 
           sourceGeometry.getXDimension(),
           sourceGeometry.getYDimension(),
@@ -456,7 +511,7 @@ namespace Mantid
         factory->initialize(outputWs);
       }
       vtkUnstructuredGrid* temp = static_cast<vtkUnstructuredGrid*>(factory->create());
-      
+
       persistReductionKnowledge(temp, this->m_serializer, XMLDefinitions::metaDataId().c_str());
       m_request->reset();
       //TODO. Add xml back onto dataset. Persist!
@@ -476,7 +531,7 @@ namespace Mantid
 
     template<typename ViewType>
     bool
-    MDHistogramRebinningPresenter<ViewType>::hasTDimensionAvailable() const
+      MDHistogramRebinningPresenter<ViewType>::hasTDimensionAvailable() const
     {
       Mantid::Geometry::MDGeometryXMLParser sourceGeometry(m_serializer.getWorkspaceGeometry());
       sourceGeometry.execute();

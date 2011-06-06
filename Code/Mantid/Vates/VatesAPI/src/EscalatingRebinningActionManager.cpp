@@ -5,10 +5,14 @@ namespace Mantid
 namespace VATES
 {
 
+///Constructor
 EscalatingRebinningActionManager::EscalatingRebinningActionManager() :
   m_currentAction(UseCache)
 {
 }
+
+ /** Request that some level of action is peformed.
+ * @param requestedAction */
 void EscalatingRebinningActionManager::ask(RebinningIterationAction requestedAction)
 {
   //Very simply, only allow escalation if the requested action is more 'severe' than the current one.
@@ -18,16 +22,21 @@ void EscalatingRebinningActionManager::ask(RebinningIterationAction requestedAct
   }
 }
 
+/** Get the selected action.
+ * @return the selected action
+ */
 RebinningIterationAction EscalatingRebinningActionManager::action() const
 {
   return m_currentAction;
 }
 
+///Reset the escalation path to the minimum level.
 void EscalatingRebinningActionManager::reset()
 {
   m_currentAction = UseCache;
 }
 
+///Destructor
 EscalatingRebinningActionManager::~EscalatingRebinningActionManager()
 {
 }

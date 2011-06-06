@@ -63,39 +63,60 @@ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Co
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-
-
-
-
-
+/** Getter for the implicit function
+@return The implicit function
+*/
 vtkImplicitFunction* vtkRebinningCutter::getImplicitFunction() const
 {
   return m_clipFunction;
 }
 
+/** Getter for the max threshold
+@return max threshold
+*/
 double vtkRebinningCutter::getMaxThreshold() const
 {
   return m_thresholdMax;
 }
 
+/** Getter for the min threshold
+@return min threshold
+*/
 double vtkRebinningCutter::getMinThreshold() const
 {
   return m_thresholdMin;
 }
 
+/** Getter flag indicating wheter clipping is applied.
+*/
 bool vtkRebinningCutter::getApplyClip() const
 {
   return m_clip == ApplyClipping;
 }
 
+/** Getter for the timestep
+@return timestep value
+*/
 double vtkRebinningCutter::getTimeStep() const
 {
   return m_timestep;
 }
 
+/** Getter for applied geometry xml.
+@return ptr to applied geometry string.
+*/
 const char* vtkRebinningCutter::getAppliedGeometryXML() const
 {
   return m_appliedGeometryXML.c_str();
+}
+
+/** Setter for the algorithm progress..
+@parameter progress
+*/
+void vtkRebinningCutter::UpdateAlgorithmProgress(double progress)
+{
+  this->SetProgressText("Executing Mantid Rebinning Algorithm...");
+  this->UpdateProgress(progress);
 }
 
 
@@ -106,6 +127,7 @@ vtkStandardNewMacro(vtkRebinningCutter)
 
 using namespace Mantid::VATES;
 
+///Constructor.
 vtkRebinningCutter::vtkRebinningCutter() :
 m_presenter(new NullRebinningPresenter()),
   m_clipFunction(NULL),
@@ -120,6 +142,7 @@ m_presenter(new NullRebinningPresenter()),
   this->SetNumberOfOutputPorts(1);
 }
 
+///Destructor.
 vtkRebinningCutter::~vtkRebinningCutter()
 {
   delete m_presenter;
@@ -147,6 +170,7 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
       m_timestep = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
     }
 
+    //Create chain-of-responsibility for translating imdworkspaces.
     std::string scalarName = XMLDefinitions::signalName();
     vtkThresholdingLineFactory* vtkGridFactory = new vtkThresholdingLineFactory(scalarName, m_thresholdMin, m_thresholdMax);
     vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(scalarName, m_thresholdMin, m_thresholdMax);
@@ -156,19 +180,12 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
     p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
     p_3dSuccessorFactory->SetSuccessor(p_4dSuccessorFactory);
 
-
     vtkUnstructuredGrid* outData = m_presenter->execute(vtkGridFactory, updatehandler);
     delete vtkGridFactory;
 
     output->ShallowCopy(outData);
   }
   return 1;
-}
-
-void vtkRebinningCutter::UpdateAlgorithmProgress(double progress)
-{
-  this->SetProgressText("Executing Mantid Rebinning Algorithm...");
-  this->UpdateProgress(progress);
 }
 
 int vtkRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(request), vtkInformationVector **inputVector,
