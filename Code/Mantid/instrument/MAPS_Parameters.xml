@@ -5,7 +5,7 @@
 
 <!-- Specify that the detector positions should be taken from the data file -->
 <parameter name="det-pos-source" type="string">
-  <value val="datafile"/>
+  <value val="xml"/>
 </parameter>
 
 

@@ -247,8 +247,8 @@ FindDetectorsPar::calc_rectDetPar(const API::MatrixWorkspace_sptr inputWS,
     double xsize = bbox.xMax() - bbox.xMin();
     double ysize = bbox.yMax() - bbox.yMin();
 
-    polar_width  = atan2((ysize/2.0), dist)*rad2deg;
-    azim_width   = atan2((xsize/2.0), dist)*rad2deg;
+    polar_width  = atan2((ysize/2.0), dist)*2*rad2deg;
+    azim_width   = atan2((xsize/2.0), dist)*2*rad2deg;
 }
 
 //

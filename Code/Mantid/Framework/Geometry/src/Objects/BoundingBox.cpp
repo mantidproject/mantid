@@ -273,8 +273,8 @@ namespace Mantid
     std::ostream& operator<<(std::ostream& os, const BoundingBox& box)
     {
       os << "X from " <<  box.xMin() << " to " <<  box.xMax()
-	 << "; Y from " <<  box.yMin() << " to " <<  box.yMax()
-	 << "; Z from " <<  box.zMin() << " to " <<  box.zMax();
+   << "; Y from " <<  box.yMin() << " to " <<  box.yMax()
+   << "; Z from " <<  box.zMin() << " to " <<  box.zMax();
       return os;
     }
 

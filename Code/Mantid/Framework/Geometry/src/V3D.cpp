@@ -439,7 +439,7 @@ V3D::norm() const
 double
 V3D::norm2() const
 {
-	return (x*x+y*y+z*z);
+  return (x*x+y*y+z*z);
 }
 
   /**
