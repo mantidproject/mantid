@@ -68,6 +68,9 @@ public:
       "    <instrument name=\"REF_L\" shortname=\"REF_L\">"
       "      <technique>Reflectometer</technique>"
       "    </instrument>"
+      "    <instrument name=\"POWGEN\" shortname=\"PG3\">"
+      "      <technique>Reflectometer</technique>"
+      "    </instrument>"
       "  </facility>"
       "</facilities>";
 
@@ -135,6 +138,16 @@ public:
     // Test for REF_L (to check that the extra _ doesn't upset anything)
     TS_ASSERT_EQUALS("REF_L_666", FileFinder::Instance().makeFileName("REF_L666", facility));
 
+  }
+
+  void testGetFacility()
+  {
+    std::string name; // place to put results
+    ConfigService::Instance().setFacility("ISIS");
+
+    TS_ASSERT_EQUALS(FileFinder::Instance().getFacility("").name(), "ISIS");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getFacility("PG3_1234_event.nxs").name(), "SNS");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getFacility("/home/user123/CNCS_234_neutron_event.dat").name(), "SNS");
   }
 
   void testFindRunForSNS()

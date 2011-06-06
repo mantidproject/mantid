@@ -131,19 +131,22 @@ namespace Mantid
     {
       if ((!hint.empty()) && (!isdigit(hint[0])))
       {
-        string instrName = "";
-        if ((hint.find("PG3") == 0) || (hint.find("pg3") == 0))
+        string instrName(hint);
+        Poco::Path path(instrName);
+        instrName = path.getFileName();
+        if ((instrName.find("PG3") == 0) || (instrName.find("pg3") == 0))
         {
-          instrName = hint.substr(0, 3);
+          instrName = instrName.substr(0, 3);
         }
         else
         {
           // go forwards looking for the run number to start
           {
-            string::const_iterator it = std::find_if(hint.begin(), hint.end(), std::ptr_fun(isdigit));
-            std::string::size_type nChars = std::distance(hint.begin(), it);
-            instrName = hint.substr(0, nChars);
+            string::const_iterator it = std::find_if(instrName.begin(), instrName.end(), std::ptr_fun(isdigit));
+            std::string::size_type nChars = std::distance( static_cast<string::const_iterator>(instrName.begin()), it);
+            instrName = instrName.substr(0, nChars);
           }
+
           // go backwards looking for the instrument name to end - gets around delimiters
           if (!instrName.empty())
           {
