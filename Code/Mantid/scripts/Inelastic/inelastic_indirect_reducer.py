@@ -3,6 +3,7 @@ from mantidsimple import *
 
 from reducer import Reducer
 import inelastic_indirect_reduction_steps as steps
+import os.path
 
 class IndirectReducer(Reducer):
     """Reducer class for Inelastic Indirect Spectroscopy. Curently a work in
@@ -180,9 +181,11 @@ class IndirectReducer(Reducer):
         
     def set_parameter_file(self, file):
         if self._instrument_name is None:
-            raise NotImplementedError("Instrument name not set.")
-        self._parameter_file = file
-        LoadParameterFile(self._workspace_instrument, file)
+            raise ValueError("Instrument name not set.")
+        self._parameter_file = \
+            os.path.join(mtd.settings["parameterDefinition.directory"], file)
+        LoadParameterFile(self._workspace_instrument, 
+            self._parameter_file)
         
     def set_rebin_string(self, rebin):
         self._rebin_string = rebin

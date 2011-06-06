@@ -46,7 +46,7 @@ class LoadData(ReductionStep):
         wsname = ''
 
         for file in self._data_files:
-            Load(file, file, LoadLogFiles=False)
+            LoadRaw(file, file, LoadLogFiles=False)
 
             if self._parameter_file != None:
                 LoadParameterFile(file, self._parameter_file)
