@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidCurveFitting/UserFunction.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 using namespace Mantid::CurveFitting;
 using namespace Mantid; 
@@ -77,7 +78,7 @@ using namespace Mantid;
     */
     
     
-   class  DLLExport  BivariateNormal: public CurveFitting::UserFunction
+   class  DLLExport  BivariateNormal: public API::ParamFunction, public API::IFunctionMW
     {
     
     public:
@@ -93,8 +94,13 @@ using namespace Mantid;
       /// overwrite IFunction base class methods
       std::string name()const
           {return "BivariateNormal";}
+
+      void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
+      void setParameter(int , const double& value, bool explicitlySet = true);
+
+      void 	function  (double *out, const double *xValues, const size_t nData)const ;
           
-      void 	function  (double *out, const double *xValues, const size_t nData) ; 
+    
       
       void 	functionDeriv  (API::Jacobian  *out, const double *xValues, const size_t nData);
       
