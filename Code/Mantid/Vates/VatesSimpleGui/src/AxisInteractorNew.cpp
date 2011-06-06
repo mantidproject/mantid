@@ -112,6 +112,7 @@ void AxisInteractorNew::widgetLayout()
     }
     }
   }
+  this->scaleWidget->setSizePolicy(policy);
   this->scaleWidget->setMinimumSize(QSize(scaleWidth, scaleHeight));
   this->graphicsView->setMinimumSize(QSize(gvWidth, gvHeight));
   this->setSizePolicy(policy);
