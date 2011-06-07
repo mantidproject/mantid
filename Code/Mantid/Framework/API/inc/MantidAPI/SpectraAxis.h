@@ -58,8 +58,8 @@ class MatrixWorkspace;
 class DLLExport SpectraAxis: public Axis
 {
 public:
-  SpectraAxis(const std::size_t& length, const bool initWithDefaults = true);
-  SpectraAxis(const Geometry::ISpectraDetectorMap & spectramap);
+  explicit SpectraAxis(const std::size_t& length, const bool initWithDefaults = true);
+  explicit SpectraAxis(const size_t length, const Geometry::ISpectraDetectorMap & spectramap);
   virtual ~SpectraAxis(){}
   virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
   virtual std::size_t length() const{return m_values.size();}

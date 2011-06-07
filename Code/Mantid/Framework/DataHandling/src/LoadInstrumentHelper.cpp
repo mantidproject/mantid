@@ -2,59 +2,41 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadInstrumentHelper.h"
-#include "MantidDataHandling/LoadParameterFile.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Instrument/Instrument.h"
-#include "MantidAPI/InstrumentDataService.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
-#include "MantidAPI/Progress.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
-#include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/Interpolation.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FacilityInfo.h"
-
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
+#include "MantidKernel/InstrumentInfo.h"
+#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <sstream>
-
-#include <Poco/DirectoryIterator.h>
 #include <Poco/RegularExpression.h>
+#include <Poco/DirectoryIterator.h>
 
-#include <Poco/SAX/SAXParser.h>
 #include <Poco/SAX/ContentHandler.h>
+#include <Poco/SAX/SAXParser.h>
 #include <Poco/SAX/Attributes.h>
 
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
-using Poco::XML::Node;
-using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
 
 namespace Mantid
 {
 namespace DataHandling
 {
-using namespace Kernel;
-using namespace API;
-using namespace Geometry;
-using namespace Poco::XML;
+  using Kernel::DateAndTime;
+  using Kernel::ConfigService;
+  using Kernel::Logger;
+  using Geometry::Instrument;
+  using Geometry::OneToOneSpectraDetectorMap;
+  using API::MatrixWorkspace;
+  using API::Run;
+  using API::SpectraDetectorMap;
+  using Poco::XML::XMLString;
+  using Poco::XML::Attributes;
+  using Poco::XML::SAXParser;
+  using Poco::XML::XMLChar;
+  using Poco::XML::Locator;
 
 Logger& LoadInstrumentHelper::g_log = Logger::get("LoadInstrumentHelper");
 
@@ -206,7 +188,7 @@ std::string LoadInstrumentHelper::getInstrumentFilename(const std::string& instr
     if ( regex.match(l_filenamePart) )
     {
       std::string validFrom, validTo;
-      getValidFromTo(dir_itr->path(), validFrom, validTo);
+      LoadInstrumentHelper::getValidFromTo(dir_itr->path(), validFrom, validTo);
 
       DateAndTime from(validFrom);
       // Use a default valid-to date if none was found.

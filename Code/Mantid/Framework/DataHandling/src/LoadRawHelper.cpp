@@ -366,14 +366,14 @@ namespace Mantid
       WorkspaceGroup_sptr grpws_sptr, DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods, bool bMonitor)
     {
       Property *ws = getProperty("OutputWorkspace");
-	  if(!ws) return;
-	  if(!grpws_sptr) return;
-	  if(!ws_sptr)return;
+          if(!ws) return;
+          if(!grpws_sptr) return;
+          if(!ws_sptr)return;
       std::string wsName = ws->value();
       if (bMonitor)
-	  {
+          {
         wsName += "_Monitors";
-	  }
+          }
       
       ws_sptr->setTitle(title);
       ws_sptr->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
@@ -569,6 +569,7 @@ namespace Mantid
       {
         loadInst->setPropertyValue("InstrumentName", instrumentID);
         loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+        loadInst->setProperty("RewriteSpectraMap", false); // No point as we will load the one from the file
         loadInst->execute();
       } catch (std::invalid_argument&)
       {
@@ -736,22 +737,22 @@ namespace Mantid
       runDetails.addProperty("nperiods", static_cast<int>(localISISRaw->t_nper));
 
       // RPB struct info
-      runDetails.addProperty("dur", localISISRaw->rpb.r_dur);	// actual run duration
-      runDetails.addProperty("durunits", localISISRaw->rpb.r_durunits);	// scaler for above (1=seconds)
+      runDetails.addProperty("dur", localISISRaw->rpb.r_dur);   // actual run duration
+      runDetails.addProperty("durunits", localISISRaw->rpb.r_durunits); // scaler for above (1=seconds)
       runDetails.addProperty("dur_freq",localISISRaw->rpb.r_dur_freq);  // testinterval for above (seconds)
       runDetails.addProperty("dmp", localISISRaw->rpb.r_dmp);       // dump interval
-      runDetails.addProperty("dmp_units", localISISRaw->rpb.r_dmp_units);	// scaler for above
-      runDetails.addProperty("dmp_freq",localISISRaw->rpb.r_dmp_freq);	// interval for above
-      runDetails.addProperty("freq",localISISRaw->rpb.r_freq);	// 2**k where source frequency = 50 / 2**k
+      runDetails.addProperty("dmp_units", localISISRaw->rpb.r_dmp_units);       // scaler for above
+      runDetails.addProperty("dmp_freq",localISISRaw->rpb.r_dmp_freq);  // interval for above
+      runDetails.addProperty("freq",localISISRaw->rpb.r_freq);  // 2**k where source frequency = 50 / 2**k
       runDetails.addProperty("gd_prtn_chrg", static_cast<double>(localISISRaw->rpb.r_gd_prtn_chrg));  // good proton charge (uA.hour)
       runDetails.addProperty("tot_prtn_chrg", static_cast<double>(localISISRaw->rpb.r_tot_prtn_chrg)); // total proton charge (uA.hour)
-      runDetails.addProperty("goodfrm",localISISRaw->rpb.r_goodfrm);	// good frames
-      runDetails.addProperty("rawfrm", localISISRaw->rpb.r_rawfrm);	// raw frames
+      runDetails.addProperty("goodfrm",localISISRaw->rpb.r_goodfrm);    // good frames
+      runDetails.addProperty("rawfrm", localISISRaw->rpb.r_rawfrm);     // raw frames
       runDetails.addProperty("dur_wanted",localISISRaw->rpb.r_dur_wanted); // requested run duration (units as for "duration" above)
-      runDetails.addProperty("dur_secs",localISISRaw->rpb.r_dur_secs );	// actual run duration in seconds
-      runDetails.addProperty("mon_sum1", localISISRaw->rpb.r_mon_sum1);	// monitor sum 1
-      runDetails.addProperty("mon_sum2",localISISRaw->rpb.r_mon_sum2);	// monitor sum 2
-      runDetails.addProperty("mon_sum3",localISISRaw->rpb.r_mon_sum3);	// monitor sum 3
+      runDetails.addProperty("dur_secs",localISISRaw->rpb.r_dur_secs ); // actual run duration in seconds
+      runDetails.addProperty("mon_sum1", localISISRaw->rpb.r_mon_sum1); // monitor sum 1
+      runDetails.addProperty("mon_sum2",localISISRaw->rpb.r_mon_sum2);  // monitor sum 2
+      runDetails.addProperty("mon_sum3",localISISRaw->rpb.r_mon_sum3);  // monitor sum 3
       runDetails.addProperty("rb_proposal",localISISRaw->rpb.r_prop); // RB (proposal) number
 
       // Note isis raw date format which is stored in DD-MMM-YYYY. Store dates in ISO 8601
@@ -1050,7 +1051,7 @@ namespace Mantid
     {
       if( nread > 88 && (buffer[84] == 32) && (buffer[88] == 126) )
       {
-	return true;
+        return true;
       }
       else return false;
     }
@@ -1068,11 +1069,11 @@ namespace Mantid
       bool braw = (!extn.compare("raw")||!extn.compare("add")||extn[0]=='s') ? true : false;
       if( isRawFileHeader(static_cast<int>(nread), header.full_hdr) || braw )
       {
-	      return true;
+              return true;
       }
       else
       {
-	      return false;
+              return false;
       }
     }
     /**Checks the file by opening it and reading few lines 

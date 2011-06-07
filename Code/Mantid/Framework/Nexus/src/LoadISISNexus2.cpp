@@ -544,6 +544,7 @@ namespace Mantid
       {
         loadInst->setPropertyValue("InstrumentName", m_instrument_name);
         loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+        loadInst->setProperty("RewriteSpectraMap", false);
         loadInst->execute();
       }
       catch( std::invalid_argument&)

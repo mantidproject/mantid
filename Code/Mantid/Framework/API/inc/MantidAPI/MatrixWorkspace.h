@@ -99,6 +99,8 @@ namespace Mantid
       const Geometry::ISpectraDetectorMap& spectraMap() const;
       /// Replace the current spectra map with a new one
       void replaceSpectraMap(const Geometry::ISpectraDetectorMap* spectramap);
+      /// Build the default spectra mapping, most likely wanted after an instrument update
+      void rebuildSpectraMapping(const bool includeMonitors = true);
       
       // More mapping
       index2spec_map * getWorkspaceIndexToSpectrumMap() const;

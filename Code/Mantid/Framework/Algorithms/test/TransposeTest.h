@@ -7,7 +7,7 @@
 
 #include "MantidAlgorithms/Transpose.h"
 
-#include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataHandling/LoadRaw3.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -41,7 +41,7 @@ public:
   void testExec()
   {
     IAlgorithm* loader;
-    loader = new Mantid::DataHandling::LoadRaw;
+    loader = new Mantid::DataHandling::LoadRaw3;
     loader->initialize();
     loader->setPropertyValue("Filename", "IRS21360.raw");
     loader->setPropertyValue("OutputWorkspace", "transpose_irs_r");

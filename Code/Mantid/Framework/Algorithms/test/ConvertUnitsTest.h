@@ -54,6 +54,9 @@ public:
       space2D->getAxis(1)->spectraNo(j) = j;
       forSpecDetMap[j] = j;
     }
+    // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
+    space2D->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 256 ));
+    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     // Register the workspace in the data service
     this->inputSpace = "testWorkspace";
@@ -66,12 +69,8 @@ public:
     std::string inputFile = "HET_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", this->inputSpace);
+    loader.setProperty("RewriteSpectraMap",false);
     loader.execute();
-
-    // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space2D->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 256 ));
-
-    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   }
 
   void testInit()

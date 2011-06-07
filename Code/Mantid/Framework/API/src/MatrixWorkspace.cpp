@@ -165,6 +165,37 @@ namespace Mantid
       m_parmap->resetSpectraMap(spectraMap);
     }
 
+    /**
+     * Rebuild the default spectra mapping for a workspace. If a non-empty 
+     * instrument is set then the default maps each detector to a spectra with 
+     * the same ID. If an empty instrument is set then a 1:1 map from 1->NHistograms
+     * is created. If axis one contains a spectra axis then this method also 
+     * rebuilds this axis to match the generated mapping.
+     * @param includeMonitors :: If false the monitors are not included
+     */
+    void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors)
+    {
+      if( sptr_instrument->nelements() == 0 )
+      {
+        return;
+      }
+      SpectraDetectorMap *spectramap = new SpectraDetectorMap;
+      replaceSpectraMap(spectramap);
+      std::vector<detid_t> pixelIDs = this->getInstrument()->getDetectorIDs(!includeMonitors);
+      std::vector<detid_t>::const_iterator iend = pixelIDs.end();
+      for( std::vector<detid_t>::const_iterator it = pixelIDs.begin();
+           it != iend; ++it )
+      {
+        const specid_t specNo = specid_t(*it);
+        spectramap->addSpectrumEntries(specNo, std::vector<detid_t>(1, specNo));
+      }    
+      if( m_axes.size() > 1 && m_axes[1]->isSpectra() )
+      {
+        delete m_axes[1];
+        m_axes[1] = new SpectraAxis(pixelIDs.size(), this->spectraMap());
+      }
+    }
+
     //---------------------------------------------------------------------------------------
     /** Return a map where:
     *    KEY is the Workspace Index
@@ -627,25 +658,9 @@ namespace Mantid
         g_log.error() << "Value of axisIndex (" << axisIndex << ") is invalid for this (" << m_axes.size() << " axis) workspace" << std::endl;
         throw Kernel::Exception::IndexError(axisIndex, m_axes.size(),"Value of axisIndex is invalid for this workspace");
       }
-      // Now check that the new axis is of the correct length
-      // Later, may want to allow axis to be one longer than number of vectors, to allow bins.
-      const size_t oldLength = m_axes[axisIndex]->length();
-      const size_t newLength = newAxis->length();
-      if( newLength <= oldLength + 1 && newLength >= oldLength - 1 )
-      {
-        // If we're OK, then delete the old axis and set the pointer to the new one
-        delete m_axes[axisIndex];
-        m_axes[axisIndex] = newAxis;
-      }
-      else
-      {
-        std::stringstream msg;
-        msg << "replaceAxis: The new axis is not a valid length (original axis: "
-          << oldLength << "; new axis: " << newLength << ")." << std::endl;
-        g_log.error(msg.str());
-        throw std::runtime_error("replaceAxis: The new axis is not a valid length");
-      }
-
+      // If we're OK, then delete the old axis and set the pointer to the new one
+      delete m_axes[axisIndex];
+      m_axes[axisIndex] = newAxis;
     }
 
     /**

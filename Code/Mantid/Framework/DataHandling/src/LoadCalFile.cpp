@@ -104,6 +104,7 @@ namespace DataHandling
       childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
       childAlg->setPropertyValue("Filename", InstrumentFilename);
       childAlg->setPropertyValue("InstrumentName", InstrumentName);
+      childAlg->setProperty("RewriteSpectraMap", false);
       childAlg->executeAsSubAlg();
       inst = tempWS->getInstrument();
     }

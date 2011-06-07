@@ -38,20 +38,29 @@ SpectraAxis::SpectraAxis(const size_t& length, const bool initWithDefaults ): Ax
 
 /**
  * Constructor taking a reference to an ISpectraDetectorMap implementation. The 
- * axis is initialized to the unique spectra values provided by the map
+ * axis is initialized to first length unique spectra values provided by the map
+ * @param length :: The length of the axis
  * @param spectramap :: A reference to an ISpectraDetectorMap implementation.
  */
-SpectraAxis::SpectraAxis(const Geometry::ISpectraDetectorMap & spectramap)
+SpectraAxis::SpectraAxis(const size_t length, const Geometry::ISpectraDetectorMap & spectramap) :
+  Axis()
 {
-  m_values.resize(spectramap.nSpectra());
+  m_values.resize(length);
+  if( length == 0 ) return;
   Geometry::ISpectraDetectorMap::const_iterator itr = spectramap.cbegin();
   Geometry::ISpectraDetectorMap::const_iterator iend = spectramap.cend();
+  if( itr == iend ) 
+  {
+      m_values.resize(0);
+      return;
+  }
   specid_t previous = itr->first;
   m_values[0] = previous;
   ++itr;
   size_t index(1);
   for(; itr != iend; ++itr)
   {
+    if( index == length ) break;
     const specid_t current = itr->first;
     if( current != previous )
     {

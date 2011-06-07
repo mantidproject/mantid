@@ -3,6 +3,7 @@
 
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
@@ -167,6 +168,22 @@ public:
     SpectraDetectorMap sdmapLocal;
     TS_ASSERT_EQUALS(sdmapLocal.nElements(), 0);
     doIteratorRangeTest(sdmapLocal.cbegin(), sdmapLocal.cend(), 0);
+  }
+
+  void test_LARGE_MAP_ITERATOR()
+  {
+    SpectraDetectorMap sdmapLocal;
+    sdmapLocal.populateSimple(0,5000000);
+    int counter(0);
+    SpectraDetectorMap::const_iterator iend = sdmapLocal.cend();
+    Mantid::Kernel::Timer clock;
+    for(SpectraDetectorMap::const_iterator itr = sdmapLocal.cbegin(); 
+        itr != iend; ++itr )
+    {
+      ++counter;
+    }
+    std::cerr << "\nElapsed: " << clock.elapsed() << "\n";
+   
   }
 
 

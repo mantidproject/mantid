@@ -82,8 +82,30 @@ namespace Mantid
       //@}
 
     private:
-      /// Advance the given iterator
-      virtual void increment(ISpectraDetectorMap::const_iterator& left) const;
+      ///@cond
+      class OneToOneProxy : public ISpectraDetectorMap::IteratorProxy
+      {
+      public:
+        OneToOneProxy(const specid_t current)
+          : m_current(current,current) {}
+        inline void increment() { ++m_current.first; ++m_current.second; }
+        inline const ISpectraDetectorMap::value_type & dereference() const 
+        { 
+          return m_current;
+        }
+        inline bool equals(const IteratorProxy* other) const 
+        {
+          const OneToOneProxy *otherOne = (const OneToOneProxy*)other;
+          return (otherOne) ? otherOne->m_current == m_current: false;
+        }
+        /// "Copy constructor"
+        virtual OneToOneProxy * clone() const { return new OneToOneProxy(m_current.first); }
+      private:
+        ISpectraDetectorMap::value_type m_current;
+      };
+      ///@endcond
+
+    private:
       /// Checks if the given spectrum is in range
       bool isValid(const specid_t spectrumNo) const;
 

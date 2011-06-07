@@ -109,10 +109,8 @@ namespace DataObjects
     m_axes.resize(2);
     //I'm not sure what the heck this first axis is supposed to be; copying from Workspace2D
     m_axes[0] = new API::RefAxis(XLength, this);
-    // Ok, looks like the second axis is supposed to be the spectrum # for each entry in the workspace index
-    //  I have no idea why it is such a convoluted way of doing it.
+    // Spectrum axis
     m_axes[1] = new API::SpectraAxis(m_noVectors);
-
   }
 
   //-----------------------------------------------------------------------------
@@ -491,6 +489,7 @@ namespace DataObjects
    */
   void EventWorkspace::padPixels(bool parallel)
   {
+    throw std::runtime_error("Should not call pad pixels anymore!");
     //Build a vector with the pixel IDs in order; skipping the monitors
     std::vector<detid_t> pixelIDs = this->getInstrument()->getDetectorIDs(true);
     size_t numpixels = pixelIDs.size();
@@ -499,7 +498,7 @@ namespace DataObjects
     this->clearData();
     data.resize(numpixels);
     m_noVectors = numpixels;
-
+    
     //Do each block in parallel
     PARALLEL_FOR_IF(parallel)
     for (int64_t i = 0; i < static_cast<int64_t>(numpixels); i++)
@@ -513,11 +512,11 @@ namespace DataObjects
       data[wi] = newel;
     }
 
-    //Finalize by building the spectra map, etc.
-    this->makeAxis1();
-
     //Now, make the spectra map (index -> detector ID)
     this->replaceSpectraMap(new API::SpectraDetectorMap(pixelIDs));
+
+    // Make the spectra axis
+    this->makeAxis1();
 
     //Clearing the MRU list is a good idea too.
     this->clearMRU();
@@ -537,16 +536,9 @@ namespace DataObjects
    *        may increase speed, though my tests show it slows it down.
    *
    */
-  void EventWorkspace::padSpectra(bool parallel)
+  void EventWorkspace::padSpectra()
   {
-    UNUSED_ARG(parallel);
     using Geometry::ISpectraDetectorMap;
-
-    /** 
-     * This assumes that the spectra are always in blocks at the start or end of
-     * the spectra list
-     */
-    
     const ISpectraDetectorMap & spectramap = this->spectraMap();
     const size_t numSpectra = spectramap.nSpectra();
     if( numSpectra == 0 )
@@ -554,30 +546,24 @@ namespace DataObjects
       throw std::runtime_error("EventWorkspace::padSpectra - The spectra-detector map has not been "
                                "populated.");
     }
-    const std::vector<detid_t> monIDs = this->getInstrument()->getMonitors();
-    const size_t numMonitors = monIDs.size();
-    // Find the spectra for the first monitor
-    const std::vector<specid_t> specNos = spectramap.getSpectra(std::vector<detid_t>(1, monIDs[0]));
-    specid_t spectra_start(1);
-    if( specNos.size() == 1 && specNos[0] == 1 ) //Else the monitors are at the end
+    API::Axis *ax1 = getAxis(1);
+    if( !ax1 )
     {
-      spectra_start += specid_t(numMonitors);
+      throw std::runtime_error("EventWorkspace::padSpectra - NULL axis 1");
     }
-    const size_t numHist = numSpectra - monIDs.size();
-    // Make the spectra axis
-    delete m_axes[1];
-    API::SpectraAxis *ax1 = new API::SpectraAxis(numHist);
-    m_axes[1] = ax1;     
+    if( !ax1->isSpectra() )
+    {
+      throw std::runtime_error("EventWorkspace::padSpectra - Axis 1 is not a SpectraAxis");
+    }
     
     // Remove all old EventLists and resize the vector to hold everything
     this->clearData();
-    data.resize(numHist);
-    m_noVectors = numHist;
+    data.resize(numSpectra);
+    m_noVectors = numSpectra;
     
-    for( size_t wi = 0; wi < numHist; ++wi )
+    for( size_t wi = 0; wi < numSpectra; ++wi )
     {
-      const specid_t specNo = specid_t(spectra_start+wi);
-      ax1->spectraNo(wi) = specNo;
+      const specid_t specNo = ax1->spectraNo(wi);
       //Create an event list for here
       EventList * newel = new EventList();
       newel->addDetectorID( specNo );
@@ -614,12 +600,17 @@ namespace DataObjects
    */
   void EventWorkspace::makeAxis1()
   {
-    //We create a spectra-type axis that holds the spectrum # at each workspace index.
-    //  It is a simple 1-1 map (workspace index = spectrum #)
+    // We create a spectra-type axis that holds the spectrum # at each workspace index.
+    // based off the current spectra map if it has entries
     delete m_axes[1];
-    API::SpectraAxis * ax1 = new API::SpectraAxis(m_noVectors);
-    ax1->populateSimple(m_noVectors);
-    m_axes[1] = ax1;
+    if( this->spectraMap().nElements() > 0 )
+    {
+      m_axes[1] = new API::SpectraAxis(this->m_noVectors,this->spectraMap());
+    }
+    else
+    {
+      m_axes[1] = new API::SpectraAxis(m_noVectors);
+    }
   }
 
 
@@ -632,11 +623,11 @@ namespace DataObjects
    */
   void EventWorkspace::doneAddingEventLists()
   {
-    //Make the wi to spectra map
-    this->makeAxis1();
-
     //Now, make the spectra map (index -> detector ID)
     this->makeSpectraMap();
+
+    //Make the wi to spectra map
+    this->makeAxis1();
 
     //Clearing the MRU list is a good idea too.
     this->clearMRU();
@@ -674,11 +665,11 @@ namespace DataObjects
       counter++;
     }
 
-    //Make the wi to spectra map
-    this->makeAxis1();
-
     //Now, make the spectra map (index -> detector ID)
     this->makeSpectraMap();
+
+    //Make the wi to spectra map
+    this->makeAxis1();
 
     //Now clear the data_map. We don't need it anymore
     this->data_map.clear();

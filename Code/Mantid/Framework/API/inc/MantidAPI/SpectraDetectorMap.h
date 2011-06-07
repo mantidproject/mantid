@@ -86,13 +86,13 @@ namespace Mantid
       virtual ~SpectraDetectorMap();
       /// "Virtual copy constructor"
       SpectraDetectorMap * clone() const;
-      
-      // @todo: go private
+
       /// Populate the Map with _spec and _udet C array
-      void populate(const specid_t* _spec, const detid_t* _udet, int64_t nentries); 
+      void populate(const specid_t* _spec, const detid_t* _udet, int64_t nentries, 
+                    const std::set<detid_t> & ignore = std::set<detid_t>());
       /// Populate with a vector of pixel IDs
       void populateWithVector(const std::vector<detid_t>& udetList);
-      
+
       //@todo: remove in favour of other implementation
       /// Populate with a simple 1-1 correspondance between spec and udet; 
       /// from start (inclusive) to end (exclusive).
@@ -127,10 +127,34 @@ namespace Mantid
       //@}
 
     private:
-      /// Increment the given iterator
-      void increment(ISpectraDetectorMap::const_iterator& left) const;
+      ///@cond
+      class MapIteratorProxy : public ISpectraDetectorMap::IteratorProxy
+      {
+      public:
+        MapIteratorProxy(const smap::const_iterator current) 
+          : m_iter(current), m_value(*current) { }
+        inline void increment() { ++m_iter; m_value = *m_iter; }
+        inline const ISpectraDetectorMap::value_type & dereference() const 
+        { 
+          return m_value;
+        }
+        inline bool equals(const IteratorProxy* other) const 
+        {
+          const MapIteratorProxy *otherOne = (const MapIteratorProxy*)other;
+          return (otherOne) ? otherOne->m_iter == m_iter : false;
+        }
+        /// "Copy constructor"
+        virtual MapIteratorProxy * clone() const { return new MapIteratorProxy(m_iter); }
+      private:
+        smap::const_iterator m_iter;
+        value_type m_value;
+      };
+      ///@endcond
+
+    private:
       /// Copy Contructor
       SpectraDetectorMap(const SpectraDetectorMap& copy);
+
       /// internal spectra detector map instance
       smap m_s2dmap;
       /// Flag value for the end of the iterator

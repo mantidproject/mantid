@@ -215,7 +215,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   // Pad pixels in the workspace using the detectors in the instrument.
   void padPixels(bool parallel);
   // Pad pixels in the workspace using the loaded spectra. Requires a non-empty spectra-detector map
-  void padSpectra(bool parallel);
+  void padSpectra();
 
   // Make all the mapping stuff
   void makeSpectraMap();

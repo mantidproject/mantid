@@ -85,7 +85,9 @@ namespace Mantid
         "List of detector ids of monitors loaded in to the workspace");
       declareProperty( "InstrumentName", "",
         "Name of instrument. Can be used instead of Filename to specify an IDF" );
-
+      declareProperty("RewriteSpectraMap", true, "If true then the spectra-detector mapping "
+                      "for the input workspace will be overwritten with a 1:1 map of spectrum "
+                      "number to detector ID");
       m_angleConvertConst = 1.0;
     }
 
@@ -116,8 +118,8 @@ namespace Mantid
         }
         else
         {
-          LoadInstrumentHelper helper;
-          m_filename = helper.getInstrumentFilename(instName,helper.getWorkspaceStartDate(m_workspace));
+          const std::string date = LoadInstrumentHelper::getWorkspaceStartDate(m_workspace);
+          m_filename = LoadInstrumentHelper::getInstrumentFilename(instName,date);
         }
       }
 
@@ -353,7 +355,7 @@ namespace Mantid
               }
             }
             else
-            {	
+            {   
 
               for (unsigned long i_loc = 0; i_loc < pNL_location_length; i_loc++)
               {
@@ -450,15 +452,22 @@ namespace Mantid
         // Add the instrument to the InstrumentDataService
         InstrumentDataService::Instance().add(instrumentFile,m_instrument);
       }
-
+      // release XML document
+      pDoc->release();
+      
       // populate parameter map of workspace 
       m_workspace->populateInstrumentParameters();
 
       // check if default parameter file is also present
       runLoadParameterFile();
-
-      // release XML document
-      pDoc->release();
+      
+      // Rebuild the spectra map for this workspace so that it matches the instrument
+      // if required
+      const bool rewriteSpectraMap = getProperty("RewriteSpectraMap");
+      if( rewriteSpectraMap )
+      {
+        m_workspace->rebuildSpectraMapping();
+      }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------
@@ -984,11 +993,11 @@ namespace Mantid
         if ( pElem->hasAttribute("z") ) z = atof((pElem->getAttribute("z")).c_str());
 
         retVal(x,y,z);
-	  }
+          }
 
-	  return retVal;
-	}
-	
+          return retVal;
+        }
+        
 
     //-----------------------------------------------------------------------------------------------------------------------
     /** Set location (position) of comp as specified in XML location element.
@@ -1062,7 +1071,7 @@ namespace Mantid
 
           if (tElem)
           {
-	     posTrans = getRelativeTranslation(comp, tElem);
+             posTrans = getRelativeTranslation(comp, tElem);
 
           // to get the change in translation relative to current rotation of comp
           Geometry::CompAssembly compToGetRot;
@@ -1695,7 +1704,7 @@ namespace Mantid
 
 
           boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, resultUnit, 
-	    paramName, type, tie, constraint, penaltyFactor, fittingFunction, extractSingleValueAs, eq, comp, m_angleConvertConst));
+            paramName, type, tie, constraint, penaltyFactor, fittingFunction, extractSingleValueAs, eq, comp, m_angleConvertConst));
           logfileCache.insert( std::pair<std::string,boost::shared_ptr<XMLlogfile> >(logfileID,temp));
         } // end of if statement
       }

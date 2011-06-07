@@ -63,13 +63,25 @@ public:
     ISpectraDetectorMap *one2one = new OneToOneSpectraDetectorMap(5,9);
     TS_ASSERT_EQUALS(one2one->nElements(), 5);
 
-    SpectraAxis local(*one2one);
+    SpectraAxis local(one2one->nElements(),*one2one);
+    TS_ASSERT_EQUALS(local.length(), 5);
     TS_ASSERT_EQUALS( local.title(), "" );
     TS_ASSERT( local.unit().get() );
     for (int i=0; i<5; ++i)
     {
       TS_ASSERT_EQUALS( local(i), static_cast<double>(i+5) );
     }
+    
+    // Now limit the axis length
+    SpectraAxis localShort(2,*one2one);
+    TS_ASSERT_EQUALS(localShort.length(), 2);
+    TS_ASSERT_EQUALS( localShort.title(), "" );
+    TS_ASSERT( localShort.unit().get() );
+    for (int i=0; i<2; ++i)
+    {
+      TS_ASSERT_EQUALS( localShort(i), static_cast<double>(i+5) );
+    }
+    
     delete one2one;
   }
 

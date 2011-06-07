@@ -154,8 +154,6 @@ void FilterByTime::exec()
     this->setProperty("OutputWorkspace", matrixOutputWS);
   }
 
-
-
   size_t numberOfSpectra = inputWS->getNumberHistograms();
 
   // Initialise the progress reporting object

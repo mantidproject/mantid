@@ -70,8 +70,11 @@ public:
 
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-
-    // Path to test input file assumes Test directory checked out from SVN
+    // We want to test id the spectra mapping changes
+    TS_ASSERT_EQUALS(ws2D->getAxis(1)->spectraNo(0), 1);
+    TS_ASSERT_EQUALS(ws2D->getAxis(1)->spectraNo(256), 257);
+    TS_ASSERT_EQUALS(ws2D->spectraMap().nElements(), histogramNumber);
+    
     loader.setPropertyValue("Filename", "HET_Definition.xml");
     inputFile = loader.getPropertyValue("Filename");
     loader.setPropertyValue("Workspace", wsName);
@@ -114,6 +117,15 @@ public:
     boost::shared_ptr<IDetector> ptrMonitor = i->getDetector(601);
     TS_ASSERT( ptrMonitor->isMonitor() );
 
+    // Spectra mapping has been updated
+    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(0), 1);
+    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(256), 601);
+    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(257), 602);
+    std::vector<detid_t> ids_from_map = output->spectraMap().getDetectors(602);
+    IDetector_sptr det_from_ws = output->getDetector(257);
+    TS_ASSERT_EQUALS(ids_from_map.size(), 1);
+    TS_ASSERT_EQUALS(ids_from_map[0], 602);
+    TS_ASSERT_EQUALS(det_from_ws->getID(), 602);
 
     // also a few tests on the last detector and a test for the one beyond the last
     boost::shared_ptr<IDetector> ptrDetLast = i->getDetector(413256);
@@ -125,7 +137,6 @@ public:
     Workspace2D_sptr output2DInst = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584
     TS_ASSERT_EQUALS( output2DInst->getNumberHistograms(), histogramNumber);
-
 
     // Check running algorithm for same XML file leads to same instrument object being attached
     boost::shared_ptr<Instrument> instr(new Instrument());
@@ -166,6 +177,7 @@ public:
     inputFile = loaderGEM.getPropertyValue("Filename");
 
     loaderGEM.setPropertyValue("Workspace", wsName);
+    loaderGEM.setPropertyValue("RewriteSpectraMap", "0"); //Do not overwrite the spectra map
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loaderGEM.getPropertyValue("Filename") );
@@ -218,6 +230,10 @@ public:
     // test of some detector...
     boost::shared_ptr<IDetector> ptrDetShape = i->getDetector(101001);
     TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
+
+    // Spectra mapping should still be the default one
+    TS_ASSERT_EQUALS(output->spectraMap().nElements(), 1);
+    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(0), 1);
 
     AnalysisDataService::Instance().remove(wsName);
   }

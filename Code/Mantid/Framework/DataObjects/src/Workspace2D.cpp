@@ -38,7 +38,7 @@ namespace Mantid
       data.resize(m_noVectors);
       m_axes.resize(2);
       m_axes[0] = new API::RefAxis(XLength, this);
-      // This axis is always a spectra one for now
+      // This axis is always a spectra one for now. By default its values run from 1->NVectors
       m_axes[1] = new API::SpectraAxis(m_noVectors);
 
       MantidVecPtr t1,t2;

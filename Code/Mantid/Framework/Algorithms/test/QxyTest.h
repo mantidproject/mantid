@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/Qxy.h"
-#include "MantidDataHandling/LoadRaw2.h"
+#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 
 using namespace Mantid::API;
@@ -35,7 +35,7 @@ public:
 
   void testNoGravity()
   {
-    Mantid::DataHandling::LoadRaw2 loader;
+    Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
     loader.setPropertyValue("Filename","LOQ48098.raw");
     loader.setPropertyValue("OutputWorkspace",m_inputWS);

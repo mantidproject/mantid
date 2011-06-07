@@ -45,13 +45,12 @@ namespace DataObjects
 
     // Copy the instrument
     this->setInstrument( inst );
-
-    // Initialize the spectra-det-map
+    
+    // Initialize the spectra-det-map, 1:1 between spectrum number and det ID
     this->MatrixWorkspace::replaceSpectraMap(new API::SpectraDetectorMap(detectorIDs));
-
-    // Make a simple 1-1 workspaceIndex to spectrumNumber axis.
-    SpectraAxis * ax1 = dynamic_cast<SpectraAxis *>(this->m_axes[1]);
-    ax1->populateSimple(int(detectorIDs.size()));
+    // Build the spectra axis to represent this
+    delete m_axes[1];
+    m_axes[1] = new API::SpectraAxis(detectorIDs.size(), this->spectraMap());
   }
 
   //----------------------------------------------------------------------------------------------

@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
-#include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -25,7 +25,7 @@ public:
   void setupWS()
   {
     IAlgorithm* loader;
-    loader = new Mantid::DataHandling::LoadRaw;
+    loader = new Mantid::DataHandling::LoadRaw3;
     loader->initialize();
     loader->setPropertyValue("Filename", "OSI11886.raw");
     loader->setPropertyValue("OutputWorkspace", "top");
@@ -35,7 +35,7 @@ public:
     TS_ASSERT( loader->isExecuted() );
     delete loader;
 
-    loader = new Mantid::DataHandling::LoadRaw;
+    loader = new Mantid::DataHandling::LoadRaw3;
     loader->initialize();
     loader->setPropertyValue("Filename", "OSI11886.raw");
     loader->setPropertyValue("OutputWorkspace", "bottom");

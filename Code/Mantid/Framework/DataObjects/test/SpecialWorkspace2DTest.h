@@ -36,7 +36,7 @@ public:
 
   void test_constructor_from_Instrument()
   {
-    // Fake instrument with 5*9 pixels
+    // Fake instrument with 5*9 pixels with ID starting at 1
     IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D(inst));
 
@@ -44,7 +44,7 @@ public:
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
     TS_ASSERT_EQUALS( ws->getInstrument()->getName(), "basic"); // Name of the test instrument
     TS_ASSERT_EQUALS( ws->spectraMap().nElements(), 45);
-    std::vector<detid_t> dets = ws->spectraMap().getDetectors(0);
+    std::vector<detid_t> dets = ws->spectraMap().getDetectors(1);
     TS_ASSERT_EQUALS(dets.size(), 1);
 
     TS_ASSERT_EQUALS( ws->getDetectorID(0), 1);

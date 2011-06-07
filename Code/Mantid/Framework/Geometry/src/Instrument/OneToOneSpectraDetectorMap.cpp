@@ -97,7 +97,7 @@ namespace Mantid
      */
     ISpectraDetectorMap::const_iterator OneToOneSpectraDetectorMap::cbegin() const
     {
-      return ISpectraDetectorMap::const_iterator(this, std::make_pair(m_start,m_start));
+      return ISpectraDetectorMap::const_iterator(new OneToOneProxy(m_start));
     }
 
     /**
@@ -107,21 +107,12 @@ namespace Mantid
      */
     ISpectraDetectorMap::const_iterator OneToOneSpectraDetectorMap::cend() const
     {
-      return ISpectraDetectorMap::const_iterator(this, std::make_pair(m_end+1,m_end+1));
+      return ISpectraDetectorMap::const_iterator(new OneToOneProxy(m_end+1));
     }
 
     //--------------------------------------------------------------------------
     // Private methods
     //--------------------------------------------------------------------------
-    /**
-     * Increment the given iterator by one
-     * @param left :: A reference to the iterator to move
-     */
-    void OneToOneSpectraDetectorMap::increment(ISpectraDetectorMap::const_iterator& left) const
-    {
-      left.item = std::make_pair(left->first + 1, left->second + 1);
-    }
-
     /**
      * Checks if the given spectrum is in range
      * @param spectrumNo :: A spectrum number

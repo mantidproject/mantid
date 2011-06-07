@@ -61,8 +61,8 @@ namespace Mantid
       exts.push_back(".add");
 
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-		      "The name of the RAW file to read, including its full or relative\n"
-		      "path. (N.B. case sensitive if running on Linux).");
+                      "The name of the RAW file to read, including its full or relative\n"
+                      "path. (N.B. case sensitive if running on Linux).");
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
         "The name of the workspace that will be created, filled with the\n"
         "read-in data and stored in the Analysis Data Service.  If the input\n"
@@ -113,7 +113,7 @@ namespace Mantid
 
       // Call private method to validate the optional parameters, if set
       checkOptionalProperties();
-	   std::vector<Kernel::Property*> period1logProp;
+           std::vector<Kernel::Property*> period1logProp;
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
       specid_t total_specs;
@@ -172,7 +172,7 @@ namespace Mantid
         {
           localWorkspace->mutableRun().addLogData(log);
         }
-	      localWorkspace->mutableRun().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+              localWorkspace->mutableRun().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
         for (int i = 0; i < m_numberOfSpectra; ++i)
           localWorkspace->getAxis(1)->spectraNo(i)= i+1;
         localWorkspace->populateInstrumentParameters();
@@ -271,18 +271,18 @@ namespace Mantid
           std::string WSName = localWSName + "_" + suffix.str();
           declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
           g_log.information() << "Workspace " << WSName << " created. \n";
-         		 
-	  //remove previous period data
-	  std::stringstream index;
-	  index << (period);
-	  std::string prevPeriod="PERIOD "+index.str();
-	  localWorkspace->mutableRun().removeLogData(prevPeriod);
-	  //add current period data
-	  Property* log=createPeriodLog(period+1);
-	  if(log)
-	  {
-	    localWorkspace->mutableRun().addLogData(log);
-	  }
+                         
+          //remove previous period data
+          std::stringstream index;
+          index << (period);
+          std::string prevPeriod="PERIOD "+index.str();
+          localWorkspace->mutableRun().removeLogData(prevPeriod);
+          //add current period data
+          Property* log=createPeriodLog(period+1);
+          if(log)
+          {
+            localWorkspace->mutableRun().addLogData(log);
+          }
         }
 
         // check if values stored in logfiles should be used to define parameters of the instrument
@@ -306,7 +306,7 @@ namespace Mantid
 Kernel::Property*  LoadRaw2::createPeriodLog(int period)const
 {
     Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_perioids.get());
-	if(!periods) return 0;
+        if(!periods) return 0;
     std::ostringstream ostr;
     ostr<<period;
     Kernel::TimeSeriesProperty<bool>* p = new Kernel::TimeSeriesProperty<bool> ("period "+ostr.str());
@@ -378,6 +378,7 @@ Kernel::Property*  LoadRaw2::createPeriodLog(int period)const
       {
         loadInst->setPropertyValue("InstrumentName", instrumentID);
         loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+        loadInst->setProperty("RewriteSpectraMap", false);
         loadInst->execute();
       }
       catch( std::invalid_argument&)
@@ -436,7 +437,7 @@ Kernel::Property*  LoadRaw2::createPeriodLog(int period)const
       }
       catch (std::runtime_error&)
       {
-    	  g_log.error("Unable to successfully execute LoadMappingTable sub-algorithm");
+          g_log.error("Unable to successfully execute LoadMappingTable sub-algorithm");
       }
 
       if ( ! loadmap->isExecuted() ) g_log.error("LoadMappingTable sub-algorithm is not executed");
@@ -465,8 +466,8 @@ Kernel::Property*  LoadRaw2::createPeriodLog(int period)const
       }
 
       if ( ! loadLog->isExecuted() ) g_log.error("Unable to successfully run LoadLog sub-algorithm");
-	  LoadLog* plog=dynamic_cast<LoadLog*>(loadLog.get());
-	  if(plog) m_perioids=plog->getPeriodsProperty();
+          LoadLog* plog=dynamic_cast<LoadLog*>(loadLog.get());
+          if(plog) m_perioids=plog->getPeriodsProperty();
     }
 
     double LoadRaw2::dblSqrt(double in)

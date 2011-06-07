@@ -6,7 +6,7 @@
 //------------------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidGeometry/IDTypes.h"
-#include <iterator>
+#include <boost/scoped_ptr.hpp>
 #include <vector>
 
 namespace Mantid
@@ -44,7 +44,20 @@ namespace Mantid
       typedef std::pair<specid_t, detid_t> value_type;
 
       ///@cond
-      class const_iterator
+      class IteratorProxy
+      {
+      public:
+        /// Increment the iterator
+        virtual void increment() = 0;
+        /// Dereference
+        virtual const value_type & dereference() const = 0;
+        /// Equality
+        virtual bool equals(const IteratorProxy* other) const = 0;
+        /// "Copy constructor"
+        virtual IteratorProxy * clone() const = 0;
+      };     
+
+      class const_iterator //Deliberately breaks Mantid naming conventions for consistency with STL
       {
       public:
         // Iterator traits
@@ -55,22 +68,21 @@ namespace Mantid
         typedef std::forward_iterator_tag iterator_category;
 
       public:
-        const_iterator(const ISpectraDetectorMap *map, const value_type item)
-          : item(item), increment_count(0), m_map(map) {}
+        const_iterator(IteratorProxy *itr_proxy)
+          : m_proxy(itr_proxy) {}
         const_iterator(const const_iterator & other)
-          : item(other.item), increment_count(other.increment_count), m_map(other.m_map) {}
+        {
+          m_proxy.reset(other.m_proxy->clone());
+        }
         const_iterator& operator=(const const_iterator& rhs) 
         {
-          item = rhs.item;
-          increment_count = rhs.increment_count;
-          m_map = rhs.m_map;
+          m_proxy.reset(rhs.m_proxy->clone());
           return *this;
         }
         ///Prefix
         const_iterator& operator++()
         {
-          ++increment_count;
-          m_map->increment(*this);
+          m_proxy->increment();
           return *this;
         }
         /// Postfix
@@ -81,36 +93,31 @@ namespace Mantid
           return before;
         }
         // Return the current value
-        const value_type operator*() const
+        const value_type & operator*() const
         {
-          return item;
+          return m_proxy->dereference();
         }
         // Return a pointer to the current value 
         const value_type* operator->() const
         {
-          return &item;
+          return &m_proxy->dereference();
         }
         // Comparison operator
         bool operator==(const const_iterator &rhs)
         {
-          return (m_map == rhs.m_map && item == rhs.item);
+          return m_proxy->equals(rhs.m_proxy.get());
         }
         // Comparison operator
         bool operator!=(const const_iterator &rhs)
         {
           return !(*this==rhs);
         }
-      public:
-        // The current item
-        value_type item;
-        // Current position
-        size_t increment_count;
       private:
-        // A pointer to the map implementation
-        const ISpectraDetectorMap *m_map;
+        // A pointer to the proxy that holds the actual iterator
+        boost::scoped_ptr<IteratorProxy> m_proxy;
       };
       ///@endcond
-
+      
     public:
       /// Virtual destructor
       virtual ~ISpectraDetectorMap() {}
@@ -137,10 +144,6 @@ namespace Mantid
       /// End
       virtual const_iterator cend() const = 0;
       //@}
-
-    private:
-      /// Advance the given iterator by one
-      virtual void increment(const_iterator& left) const = 0;
     };
 
     /**

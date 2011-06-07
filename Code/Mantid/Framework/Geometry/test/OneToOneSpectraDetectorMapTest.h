@@ -142,7 +142,7 @@ public:
 private:
   
   void doIteratorRangeTest(const ISpectraDetectorMap &spectramap, 
-                           ISpectraDetectorMap::const_iterator  itr, 
+                           ISpectraDetectorMap::const_iterator itr, 
                            const int remaining_itrs, const specid_t current_value)
   {
     int nloops(0);

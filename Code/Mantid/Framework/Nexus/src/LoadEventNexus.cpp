@@ -742,6 +742,7 @@ void LoadEventNexus::exec()
   }
   prog.report("Loading instrument");
 
+
   //Load the instrument
   runLoadInstrument(m_filename, WS);
 
@@ -761,9 +762,8 @@ void LoadEventNexus::exec()
   file.openGroup("entry", "NXentry");
 
   //Now we want to go through all the bankN_event entries
+  vector<string> bankNames;
   map<string, string> entries = file.getEntries();
-  std::vector<string> bankNames;
-
   map<string,string>::const_iterator it = entries.begin();
   for (; it != entries.end(); it++)
   {
@@ -779,7 +779,7 @@ void LoadEventNexus::exec()
   file.closeGroup();
   file.close();
 
-  // --------- Loading only one bank ----------------------------------
+  // --------- Loading only one bank ? ----------------------------------
   std::string onebank = getProperty("BankName");
   bool doOneBank = (onebank != "");
   bool SingleBankPixelsOnly = getProperty("SingleBankPixelsOnly");
@@ -787,14 +787,24 @@ void LoadEventNexus::exec()
   {
     bool foundIt = false;
     for (std::vector<string>::iterator it=bankNames.begin(); it!= bankNames.end(); it++)
+    {
       if (*it == ( onebank + "_events") )
+      {
         foundIt = true;
+        break;
+      }
+    }
     if (!foundIt)
     {
       throw std::invalid_argument("No entry named '" + onebank + "_events'" + " was found in the .NXS file.\n");
     }
     bankNames.clear();
     bankNames.push_back( onebank + "_events" );
+    if( !SingleBankPixelsOnly ) onebank = ""; // Marker to load all pixels 
+  }
+  else
+  {
+    onebank = "";
   }
 
   // Delete the output workspace name if it existed
@@ -806,46 +816,10 @@ void LoadEventNexus::exec()
 
   //----------------- Pad Empty Pixels -------------------------------
   bool indexBySpectrum(false);
-  if (!this->instrument_loaded_correctly)
-  {
-    g_log.warning() << "Warning! Cannot pad empty pixels, since the instrument geometry did not load correctly or was not specified. Sorry!\n";
-  }
-  else
-  {
-    //Timer tim1;
-    //Pad pixels; parallel flag is off because it is actually slower :(
-    if (doOneBank && SingleBankPixelsOnly)
-    {
-      // ---- Pad a pixel for each detector inside the bank -------
-      std::vector<IDetector_sptr> dets;
-      // Get the vector of contained detectors
-      WS->getInstrument()->getDetectorsInBank(dets, onebank);
-      if (dets.size() > 0)
-      {
-        // Make an event list for each.
-        for(size_t wi=0; wi < dets.size(); wi++)
-          WS->getOrAddEventList(wi).addDetectorID( dets[wi]->getID() );
-        WS->doneAddingEventLists();
-      }
-      else
-        throw std::runtime_error("Could not find the bank named " + onebank + " as a component assembly in the instrument tree; or it did not contain any detectors.");
-    }
-    else
-    {
-      // Attempt to load a spectra mapping
-      if( loadSpectraMapping(m_filename, WS) )
-      {
-        indexBySpectrum = true;
-      }
-      else
-      {
-        indexBySpectrum = false;
-        WS->padPixels( true );
-      }
-    }
-    //std::cout << tim1.elapsed() << "seconds to pad pixels.\n";
-  }
-
+  // Create the required spectra mapping so that the workspace knows what to pad to
+  createSpectraMapping(m_filename, WS, onebank);
+  WS->padSpectra();
+  indexBySpectrum=true;
   
   // --------------------------- Time filtering ------------------------------------
   double filter_time_start_sec, filter_time_stop_sec;
@@ -1006,7 +980,6 @@ void LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
   // Now let's close the file as we don't need it anymore to load the instrument.
   nxfile.close();
 
-
   // do the actual work
   IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
 
@@ -1016,6 +989,7 @@ void LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
   {
     loadInst->setPropertyValue("InstrumentName", instrument);
     loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+    loadInst->setProperty("RewriteSpectraMap", false);
     loadInst->execute();
 
     // Populate the instrument parameters in this workspace - this works around a bug
@@ -1042,6 +1016,56 @@ void LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
   }
 }
 
+//-----------------------------------------------------------------------------
+/**
+ * Create the required spectra mapping. If the file contains an isis_vms_compat block then
+ * the mapping is read from there, otherwise a 1:1 map with the instrument is created (along
+ * with the associated spectra axis)
+ * @param nxsfile :: The name of a nexus file to load the mapping from
+ * @param workspace :: The workspace to contain the spectra mapping
+ * @param bankName :: An optional bank name for loading a single bank
+ */
+void LoadEventNexus::createSpectraMapping(const std::string &nxsfile, 
+                                          API::MatrixWorkspace_sptr workspace,
+                                          const std::string & bankName)
+{
+  Geometry::ISpectraDetectorMap *spectramap(NULL);
+  if( !bankName.empty() )
+  {
+    // Only build the map for the single bank
+    std::vector<IDetector_sptr> dets;
+    WS->getInstrument()->getDetectorsInBank(dets, bankName);
+    if (dets.size() > 0)
+    {
+      SpectraDetectorMap *singlebank = new API::SpectraDetectorMap;
+      // Make an event list for each.
+      for(size_t wi=0; wi < dets.size(); wi++)
+      {
+        const detid_t detID = dets[wi]->getID();
+        singlebank->addSpectrumEntries(specid_t(detID), std::vector<detid_t>(1, detID));
+      }
+      spectramap = singlebank;
+      g_log.debug() << "Populated spectra map for single bank " << bankName << "\n";
+    }
+    else
+      throw std::runtime_error("Could not find the bank named " + bankName + " as a component assembly in the instrument tree; or it did not contain any detectors.");
+  }
+  if( !spectramap )
+  {
+    spectramap = loadSpectraMapping(nxsfile);
+  }
+  if( !spectramap )
+  {
+    // The default 1:1 will suffice but exclude the monitors as they are always in a separate workspace
+    workspace->rebuildSpectraMapping(false);
+    g_log.debug() << "Populated 1:1 spectra map for the whole instrument \n";
+  }
+  else
+  {
+    workspace->replaceSpectraMap(spectramap);
+    workspace->replaceAxis(1, new API::SpectraAxis(spectramap->nSpectra(), *spectramap));
+  }    
+}
 
 //-----------------------------------------------------------------------------
 /**
@@ -1080,11 +1104,9 @@ void LoadEventNexus::runLoadMonitors()
  * Load a spectra mapping from the given file. This currently checks for the existence of
  * an isis_vms_compat block in the file, if it exists it pulls out the spectra mapping listed there
  * @param file :: A filename
- * @param workspace :: The workspace whose spectra map is to be replaced
- * @returns True if a map was loaded, false otherwise
+ * @returns A pointer to a new map or NULL if the block does not exist
  */
-bool LoadEventNexus::loadSpectraMapping(const std::string & filename, 
-                                        DataObjects::EventWorkspace_sptr workspace) const
+Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::string & filename) const
 {
   ::NeXus::File file(filename);
   try
@@ -1093,11 +1115,9 @@ bool LoadEventNexus::loadSpectraMapping(const std::string & filename,
   }
   catch(::NeXus::Exception&)
   {
-    return false; // Doesn't exist
+    return NULL; // Doesn't exist
   }
   API::SpectraDetectorMap *spectramap = new API::SpectraDetectorMap;
-  workspace->replaceSpectraMap(spectramap);
-
   // UDET
   file.openData("UDET");
   std::vector<int32_t> udet;
@@ -1112,7 +1132,7 @@ bool LoadEventNexus::loadSpectraMapping(const std::string & filename,
   file.closeGroup();
   file.close();
 
-  // The spec array will contain a spectrum number for each udet, not that the spectrum number
+  // The spec array will contain a spectrum number for each udet but the spectrum number
   // may be the same for more that one detector
   const size_t ndets(udet.size());
   if( ndets != spec.size() )
@@ -1121,9 +1141,14 @@ bool LoadEventNexus::loadSpectraMapping(const std::string & filename,
     os << "UDET/SPEC list size mismatch. UDET=" << udet.size() << ", SPEC=" << spec.size() << "\n";
     throw std::runtime_error(os.str());
   }
-  spectramap->populate(spec.data(), udet.data(), ndets);
-  workspace->padSpectra(false);
-  return true;
+  // We need to filter the monitors out as they are included in the block also. Here we assume that they
+  // occur in a contiguous block
+  
+  const std::vector<detid_t> monitors = WS->getInstrument()->getMonitors();
+  spectramap->populate(spec.data(), udet.data(), ndets, 
+                       std::set<detid_t>(monitors.begin(), monitors.end()));
+  g_log.debug() << "Loaded spectra map from " << filename << "\n";
+  return spectramap;
 }
 
 

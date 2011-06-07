@@ -20,6 +20,7 @@
 #include <boost/shared_array.hpp>
 #include "MantidGeometry/IDetector.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/SpectraAxis.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -587,4 +588,5 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
 
     // Populate the Spectra Map with parameters
     workspace->replaceSpectraMap(new SpectraDetectorMap(spec.get(), udet.get(), ndet));
+    workspace->replaceAxis(1, new SpectraAxis(ndet, workspace->spectraMap()));
   }

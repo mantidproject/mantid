@@ -139,7 +139,7 @@ namespace Mantid
 
       WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
       if(m_numberOfPeriods>1)
-      {	
+      { 
           setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
       }
 
@@ -164,7 +164,7 @@ namespace Mantid
           {
             runLoadInstrument(localWorkspace );
             loadMappingTable(localWorkspace );
-	    loadRunDetails(localWorkspace);
+            loadRunDetails(localWorkspace);
             loadLogs(localWorkspace );
           }
         }
@@ -173,7 +173,7 @@ namespace Mantid
           // Only run the sub-algorithms once
           runLoadInstrument(localWorkspace );
           loadMappingTable(localWorkspace );
-	  loadRunDetails(localWorkspace);
+          loadRunDetails(localWorkspace);
           loadLogs(localWorkspace );
         }
         else   // We are working on a higher period of a multiperiod file
@@ -480,6 +480,7 @@ namespace Mantid
       {
         loadInst->setPropertyValue("InstrumentName", m_instrument_name);
         loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+        loadInst->setProperty("RewriteSpectraMap", false);
         loadInst->execute();
       }
       catch( std::invalid_argument&)
@@ -587,22 +588,22 @@ namespace Mantid
       getNexusData(&rpb_dbl[0]);
       closeNexusData();
       
-      runDetails.addProperty("dur", rpb_int[0]);	// actual run duration
-      runDetails.addProperty("durunits", rpb_int[1]);	// scaler for above (1=seconds)
+      runDetails.addProperty("dur", rpb_int[0]);        // actual run duration
+      runDetails.addProperty("durunits", rpb_int[1]);   // scaler for above (1=seconds)
       runDetails.addProperty("dur_freq", rpb_int[2]);  // testinterval for above (seconds)
       runDetails.addProperty("dmp", rpb_int[3]);       // dump interval
-      runDetails.addProperty("dmp_units", rpb_int[4]);	// scaler for above
-      runDetails.addProperty("dmp_freq", rpb_int[5]);	// interval for above
-      runDetails.addProperty("freq", rpb_int[6]);	// 2**k where source frequency = 50 / 2**k
+      runDetails.addProperty("dmp_units", rpb_int[4]);  // scaler for above
+      runDetails.addProperty("dmp_freq", rpb_int[5]);   // interval for above
+      runDetails.addProperty("freq", rpb_int[6]);       // 2**k where source frequency = 50 / 2**k
       runDetails.addProperty("gd_prtn_chrg", rpb_dbl[7]);  // good proton charge (uA.hour)
       runDetails.addProperty("tot_prtn_chrg", rpb_dbl[8]); // total proton charge (uA.hour)
-      runDetails.addProperty("goodfrm",rpb_int[9]);	// good frames
-      runDetails.addProperty("rawfrm", rpb_int[10]);	// raw frames
+      runDetails.addProperty("goodfrm",rpb_int[9]);     // good frames
+      runDetails.addProperty("rawfrm", rpb_int[10]);    // raw frames
       runDetails.addProperty("dur_wanted", rpb_int[11]); // requested run duration (units as for "duration" above)
-      runDetails.addProperty("dur_secs", rpb_int[12]);	// actual run duration in seconds
-      runDetails.addProperty("mon_sum1", rpb_int[13]);	// monitor sum 1
-      runDetails.addProperty("mon_sum2", rpb_int[14]);	// monitor sum 2
-      runDetails.addProperty("mon_sum3",rpb_int[15]);	// monitor sum 3
+      runDetails.addProperty("dur_secs", rpb_int[12]);  // actual run duration in seconds
+      runDetails.addProperty("mon_sum1", rpb_int[13]);  // monitor sum 1
+      runDetails.addProperty("mon_sum2", rpb_int[14]);  // monitor sum 2
+      runDetails.addProperty("mon_sum3",rpb_int[15]);   // monitor sum 3
       
       closeNexusGroup(); // isis_vms_compat
 

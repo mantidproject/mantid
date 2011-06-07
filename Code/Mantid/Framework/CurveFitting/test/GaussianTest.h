@@ -118,6 +118,7 @@ public:
     std::string instrumentName = "HRPD_for_UNIT_TESTING.xml";
     reLoadInstrument.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" + instrumentName);
     reLoadInstrument.setPropertyValue("Workspace", outputSpace);
+    reLoadInstrument.setProperty("RewriteSpectraMap", false);
     TS_ASSERT_THROWS_NOTHING(reLoadInstrument.execute());
     TS_ASSERT( reLoadInstrument.isExecuted() );
 
@@ -210,6 +211,7 @@ public:
     std::string instrumentName = "HRPD_for_UNIT_TESTING2.xml";
     reLoadInstrument.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" + instrumentName);
     reLoadInstrument.setPropertyValue("Workspace", outputSpace);
+    reLoadInstrument.setProperty("RewriteSpectraMap", false);
     TS_ASSERT_THROWS_NOTHING(reLoadInstrument.execute());
     TS_ASSERT( reLoadInstrument.isExecuted() );
 
@@ -299,6 +301,7 @@ public:
     std::string instrumentName = "HRPD_for_UNIT_TESTING.xml";
     reLoadInstrument.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" + instrumentName);
     reLoadInstrument.setPropertyValue("Workspace", outputSpace);
+    reLoadInstrument.setProperty("RewriteSpectraMap", false);
     TS_ASSERT_THROWS_NOTHING(reLoadInstrument.execute());
     TS_ASSERT( reLoadInstrument.isExecuted() );
 
@@ -382,6 +385,7 @@ public:
     std::string instrumentName = "HRPD_for_UNIT_TESTING2.xml";
     reLoadInstrument.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" + instrumentName);
     reLoadInstrument.setPropertyValue("Workspace", outputSpace);
+    reLoadInstrument.setProperty("RewriteSpectraMap", false);
     TS_ASSERT_THROWS_NOTHING(reLoadInstrument.execute());
     TS_ASSERT( reLoadInstrument.isExecuted() );
 

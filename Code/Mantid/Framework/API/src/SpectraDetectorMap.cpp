@@ -62,32 +62,6 @@ namespace Mantid
       return new SpectraDetectorMap(*this);
     }
 
-    /** Populate the map with 2 arrays; one detector per spectrum
-     *
-     * @param _spectable :: bare vector of the spectrum numbers
-     * @param _udettable :: bare vector of the detector ids (same length as spectable)
-     * @param nentries :: number of entries in the vectors
-     */
-    void SpectraDetectorMap::populate(const specid_t* _spectable, const detid_t* _udettable, int64_t nentries)
-    {
-      clear();
-      if (nentries<=0)
-      {
-        g_log.error("Populate : number of entries should be > 0");
-        throw std::invalid_argument("Populate : number of entries should be > 0");
-      }
-      for (int64_t i=0; i<nentries; ++i)
-      {
-        // Uncomment the line below to get a print out of the mapping as it's loaded
-        // g_log.error() << *_spectable << " " << *_udettable << std::endl;
-        m_s2dmap.insert(std::pair<specid_t,detid_t>(*_spectable,*_udettable)); // Insert current detector with Spectra number as key
-        ++_spectable;
-        ++_udettable;
-      }
-      return;
-    }
-
-    //------------------------------------------------------------------------------------------------
     /** Populate a simple spectrum-to-detector map, with a 1:1 correspondence
      *
      * @param start :: first spectrum number
@@ -108,20 +82,53 @@ namespace Mantid
       return;
     }
 
-
-    //------------------------------------------------------------------------------------------------
     /** Fill the SpectraDetectorMap with a simple list of pixel ids,
      * where the nth entry in the vector has a single detector, specified
      * by the value at that entry in the vector.
-     * @param  udetList list of ints where the index = spectrum number; value = pixel ID.
+     * @param  udetList list of ints where the spectrum number = pixel ID.
      */
     void SpectraDetectorMap::populateWithVector(const std::vector<detid_t>& udetList)
     {
       specid_t size = static_cast<specid_t>(udetList.size());
       for (specid_t i=0; i < size; i++)
       {
-        m_s2dmap.insert(std::pair<specid_t,detid_t>(i, udetList[i]));
+        m_s2dmap.insert(std::pair<specid_t,detid_t>(specid_t(udetList[i]), udetList[i]));
       }
+    }
+
+    /** Populate the map with 2 arrays. The spectra table can contain multiple entries with the
+     * same value. This joins the corresponding entries in the udet table together into a single
+     * spectra with that value.
+     *
+     * @param _spectable :: bare vector of the spectrum numbers
+     * @param _udettable :: bare vector of the detector ids (same length as spectable)
+     * @param nentries :: number of entries in the vectors
+     * @param ignore :: A reference to a set of det IDs to skip in the supplied det table
+     */
+    void SpectraDetectorMap::populate(const specid_t* _spectable, const detid_t* _udettable, 
+                                      int64_t nentries, const std::set<detid_t> & ignore)
+    {
+      clear();
+      if (nentries<=0)
+      {
+        g_log.error("Populate : number of entries should be > 0");
+        throw std::invalid_argument("Populate : number of entries should be > 0");
+      }
+      nentries -= ignore.size();
+      for (int64_t i=0; i<nentries; ++i)
+      {
+        // Uncomment the line below to get a print out of the mapping as it's loaded
+        // g_log.error() << *_spectable << " " << *_udettable << std::endl;
+        const detid_t det_id = *_udettable;
+        if( ignore.find(det_id) == ignore.end() )
+        {
+          // Insert current detector with Spectra number as key
+          m_s2dmap.insert(std::pair<specid_t,detid_t>(*_spectable,det_id)); 
+        }
+        ++_spectable;
+        ++_udettable;
+      }
+      return;
     }
 
     //------------------------------------------------------------------------------------------------
@@ -135,7 +142,7 @@ namespace Mantid
       std::vector<detid_t>::const_iterator it;
       for (it = udetList.begin(); it != udetList.end(); ++it)
       {
-        m_s2dmap.insert(std::pair<specid_t,detid_t>(spectrum,*it));
+        m_s2dmap.insert(std::pair<specid_t, detid_t>(spectrum,*it));
       }
     }
     
@@ -151,7 +158,7 @@ namespace Mantid
       std::set<detid_t>::const_iterator it;
       for (it = detectorIDs.begin(); it != detectorIDs.end(); ++it)
       {
-        m_s2dmap.insert(std::pair<specid_t,detid_t>(spectrum,*it));
+        m_s2dmap.insert(std::pair<specid_t, detid_t>(spectrum,*it));
       }
     }
 
@@ -284,15 +291,7 @@ namespace Mantid
      */
     ISpectraDetectorMap::const_iterator SpectraDetectorMap::cbegin() const
     {
-      smap_it beg = m_s2dmap.begin();
-      if( beg == m_s2dmap.end() ) //Empty map?
-      {
-        return cend();
-      }
-      else
-      {
-        return ISpectraDetectorMap::const_iterator(this, std::make_pair(beg->first,beg->second));        
-      }
+      return ISpectraDetectorMap::const_iterator(new MapIteratorProxy(m_s2dmap.begin()));
     }
 
     /**
@@ -302,28 +301,7 @@ namespace Mantid
      */
     ISpectraDetectorMap::const_iterator SpectraDetectorMap::cend() const
     {
-      return ISpectraDetectorMap::const_iterator(this, std::make_pair(g_iter_end, g_iter_end));
-    }
-
-    //--------------------------------------------------------------------------
-    // Private methods
-    //--------------------------------------------------------------------------
-    /**
-     * Increment the given iterator by one
-     * @param left :: A reference to the iterator to move
-     */
-    void SpectraDetectorMap::increment(ISpectraDetectorMap::const_iterator& left) const
-    {
-      smap_it itr = m_s2dmap.begin();
-      std::advance(itr, left.increment_count);
-      if( itr != m_s2dmap.end() )
-      {
-        left.item = *itr;
-      }
-      else
-      {
-        left.item = std::make_pair(g_iter_end,g_iter_end);        
-      }
+      return ISpectraDetectorMap::const_iterator(new MapIteratorProxy(m_s2dmap.end()));
     }
 
   } // Namespace API 

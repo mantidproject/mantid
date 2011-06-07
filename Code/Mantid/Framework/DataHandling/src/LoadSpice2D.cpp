@@ -381,6 +381,7 @@ namespace Mantid
       {
         loadInst->setPropertyValue("InstrumentName", inst_name);
         loadInst->setProperty<API::MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+        loadInst->setProperty("RewriteSpectraMap", false);
         loadInst->execute();
       } catch (std::invalid_argument&)
       {
@@ -504,10 +505,10 @@ namespace Mantid
       Element* pRootElem = pDoc->documentElement();
       if(pRootElem)
       {
-	if(pRootElem->tagName().compare("SPICErack") == 0)
-	{
-	  confidence = 80;
-	}
+        if(pRootElem->tagName().compare("SPICErack") == 0)
+        {
+          confidence = 80;
+        }
       }
       pDoc->release();
       return confidence;

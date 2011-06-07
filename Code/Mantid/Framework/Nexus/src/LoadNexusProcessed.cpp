@@ -199,10 +199,6 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
     pulsetimes = pulsetime.sharedBuffer();
   }
 
-//  std::vector<NXInfo>& grps = wksp_cls.datasets();
-//  for (std::vector<NXInfo>::iterator it = grps.begin(); it != grps.end(); it++)
-//    std::cout << it->nxname << "\n";
-
   boost::shared_array<double> tofs;
   if (wksp_cls.isValid("tof"))
   {
@@ -245,8 +241,6 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
     PARALLEL_START_INTERUPT_REGION
     int64_t index_start = indices[wi];
     int64_t index_end = indices[wi+1];
-    //std::cout << wi << ":" << index_start << " to " << index_end << std::endl;
-
     if (index_end >= index_start)
     {
       EventList & el = ws->getEventList(wi);
@@ -572,6 +566,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
 
   progress(progressStart+0.1*progressRange,"Reading the instrument details...");
   readInstrumentGroup(mtd_entry, local_workspace);
+
   if ( ! local_workspace->getAxis(1)->isSpectra() )
   { // If not a spectra axis, load the axis data into the workspace. (MW 25/11/10)
     loadNonSpectraAxis(local_workspace, wksp_cls);
@@ -587,7 +582,9 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
       std::vector<detid_t> dets = local_workspace->spectraMap().getDetectors(static_cast<specid_t>(wi));
       EventList & el = ew->getEventList(wi);
       for (size_t i=0; i < dets.size(); i++)
+      {
         el.addDetectorID(dets[i]);
+      }
     }
   }
 
@@ -626,10 +623,12 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
   }
   catch(std::runtime_error & )
   {
-    return;
+    //return;
   }
-  runLoadInstrument(instname, local_workspace);
-
+  if( !instname.empty() )
+  {
+    runLoadInstrument(instname, local_workspace);
+  }
   if ( ! inst.containsGroup("detector") )
   {
     g_log.information() << "Detector block not found. The workspace will not contain any detector information.\n";
@@ -684,7 +683,6 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
   //Now build the spectra list
   int *spectra_list = new int[ndets];
   API::Axis *axis1 = local_workspace->getAxis(1);
-
   int index=0;
 
   for(int i = 1; i <= nspectra; ++i)
@@ -1185,7 +1183,7 @@ void LoadNexusProcessed::readBinMasking(NXData & wksp_cls, API::MatrixWorkspace_
 
 
 //-------------------------------------------------------------------------------------------------
-/** Run the sub-algorithm LoadInstrument (as for LoadRaw)
+/** Run the sub-algorithm LoadInstrument
  * @param inst_name :: The name written in the Nexus file
  * @param localWorkspace :: The workspace to insert the instrument into
  */
@@ -1200,6 +1198,7 @@ void LoadNexusProcessed::runLoadInstrument(const std::string & inst_name,
   {
     loadInst->setPropertyValue("InstrumentName", inst_name);
     loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+    loadInst->setProperty("RewriteSpectraMap", false);
     loadInst->execute();
   }
   catch( std::invalid_argument&)
@@ -1443,7 +1442,7 @@ size_t LoadNexusProcessed::calculateWorkspacesize(const size_t numberofspectra)
         return true;
       }
       else if ( (nread >= sizeof(g_hdf5_signature)) && 
-		(!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
+                (!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
       {    
         //hdf5
         return true;

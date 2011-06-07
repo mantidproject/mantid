@@ -216,7 +216,7 @@ public:
 
 
   //------------------------------------------------------------------------------
-  void test_padPixels()
+  void test_padSpectra()
   {
     bool timing = false;
     ew = createEventWorkspace(1, 0);
@@ -224,10 +224,12 @@ public:
     int numpixels = timing ? 900000 : 1800;
     //Make an instrument with lots of pixels
     ew->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(numpixels/9));
+    // Build a spectra map to match it
+    ew->rebuildSpectraMapping();
 
     Timer timer;
-    ew->padPixels(false);
-    if (timing) std::cout << "\n" << timer.elapsed() << " seconds for padPixels(false).\n";
+    ew->padSpectra();
+    if (timing) std::cout << "\n" << timer.elapsed() << " seconds for padSpectra().\n";
 
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), numpixels);
     int badcount = 0;
@@ -248,8 +250,8 @@ public:
     {
       ew->clearData();
       Timer timer2;
-      ew->padPixels(true);
-      std::cout << "\n" << timer2.elapsed() << " seconds for padPixels(true).\n";
+      ew->padSpectra();
+      std::cout << "\n" << timer2.elapsed() << " seconds for padSpectra().\n";
 
       padPixels_manually_timing(numpixels);
     }

@@ -4,20 +4,37 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidKernel/Logger.h"
+#include <boost/shared_ptr.hpp>
 
 //----------------------------------------------------------------------
-// Forward declaration
+// Poco Forward declaration
 //----------------------------------------------------------------------
 /// @cond Exclude from doxygen documentation
-namespace Poco {
-namespace XML {
-  class Element;
-}}
+namespace Poco 
+{
+  namespace XML 
+  {
+    class Element;
+  }
+}
 /// @endcond
 
 namespace Mantid
 {
+  //----------------------------------------------------------------------
+  // Mantid Forward declaration
+  //----------------------------------------------------------------------
+  namespace Geometry
+  {
+    class ISpectraDetectorMap;
+    class Instrument;
+  }
+  namespace API
+  {
+    class MatrixWorkspace;
+  }  
+
   namespace DataHandling
   {
     /** @class LoadInstrumentHelper LoadInstrumentHelper.h DataHandling/LoadInstrumentHelper.h
@@ -56,17 +73,14 @@ namespace Mantid
       virtual ~LoadInstrumentHelper() {}
 
       /// Return from an IDF the values of the valid-from and valid-to attributes
-      void getValidFromTo(const std::string& IDFfilename, std::string& outValidFrom,
-                          std::string& outValidTo);
-
+      static void getValidFromTo(const std::string& IDFfilename, std::string& outValidFrom,
+                                 std::string& outValidTo);
       /// Return full path of IDF given instrument name (e.g. GEM) and a date
-      std::string getInstrumentFilename(const std::string& instName, const std::string& date);
-
+      static std::string getInstrumentFilename(const std::string& instName, const std::string& date);
       /// Return workspace start date as an ISO 8601 string
-      std::string getWorkspaceStartDate(const boost::shared_ptr<API::MatrixWorkspace>& workspace);
+      static std::string getWorkspaceStartDate(const boost::shared_ptr<API::MatrixWorkspace>& workspace);
 
     private:
-
       /// static reference to the logger class
       static Kernel::Logger& g_log;
     };

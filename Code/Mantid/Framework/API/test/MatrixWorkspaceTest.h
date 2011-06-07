@@ -270,9 +270,6 @@ public:
 
   void testReplaceAxis()
   {
-    Axis* axBad = new SpectraAxis(5);
-    TS_ASSERT_THROWS( ws->replaceAxis(0,axBad), std::runtime_error );
-    delete axBad;
     Axis* ax = new SpectraAxis(1);
     TS_ASSERT_THROWS( ws->replaceAxis(1,ax), Exception::IndexError );
     TS_ASSERT_THROWS_NOTHING( ws->replaceAxis(0,ax) );

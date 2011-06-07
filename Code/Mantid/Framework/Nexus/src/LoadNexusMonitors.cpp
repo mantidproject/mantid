@@ -281,8 +281,8 @@ void LoadNexusMonitors::runLoadInstrument(const std::string &instrument,
   try
   {
     loadInst->setPropertyValue("InstrumentName", instrument);
-    loadInst->setProperty<API::MatrixWorkspace_sptr> ("Workspace",
-        localWorkspace);
+    loadInst->setProperty<API::MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+    loadInst->setProperty("RewriteSpectraMap", false); // We have a custom mapping
     loadInst->execute();
 
     // Populate the instrument parameters in this workspace - this works around a bug
