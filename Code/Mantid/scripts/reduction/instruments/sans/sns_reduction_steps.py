@@ -282,7 +282,7 @@ class LoadRun(ReductionStep):
             else:
                 # Mapping file
                 mapping_file = reducer.instrument.definition.getStringParameter("TS_mapping_file")[0]
-                mapping_file = os.path.join(directory, mapping_file)
+                mapping_file = os.path.join(data_dir, mapping_file)
                 
                 mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
                 nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
