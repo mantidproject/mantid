@@ -10,11 +10,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/BivariateNormal.h"
-#include "MantidAPI/IFitFunction.h"
+#include "MantidGeometry/Math/Matrix.h"
+/*#include "MantidAPI/IFitFunction.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidGeometry/Math/Matrix.h"
+*/
 #include <iostream>
 #include <cmath>
 #include <stdio.h>
@@ -108,52 +109,52 @@ public:
 
       NormalFit.functionDeriv(&Jac, x, nCells);
       delete x;
-      int p = 1;
+      size_t p = 1;
       {
-        TS_ASSERT_LESS_THAN(abs(Jac.get(0, p) - 0.000122447), .000004);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (nCells / 4), p) - 0.00108531), .000004);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (2 * nCells / 4), p) - 0.00215938), .000004);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (3 * nCells / 4), p) - 0.000867142), .000004);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t)0, p) - 0.000122447), .000004);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (nCells / 4), p) - 0.00108531), .000004);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (2 * nCells / 4), p) - 0.00215938), .000004);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (3 * nCells / 4), p) - 0.000867142), .000004);
 
       }
       p = 2;
       {
-        TS_ASSERT_LESS_THAN(abs(Jac.get(0, p) + 0.0024171), .00003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (nCells / 4), p) + 0.0107128), .00003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (2 * nCells / 4), p) - 0.0031733), .00003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (3 * nCells / 4), p) - 0.00983232), .00003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t)0, p) + 0.0024171), .00003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t)(nCells / 4), p) + 0.0107128), .00003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (2 * nCells / 4), p) - 0.0031733), .00003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (3 * nCells / 4), p) - 0.00983232), .00003);
 
       }
       p = 3;
       {
-        TS_ASSERT_LESS_THAN(abs(Jac.get(0, p) + 0.00172312), .00003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (nCells / 4), p) + 0.00739412), .00003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (2 * nCells / 4), p) - 0.00124563), .00003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (3 * nCells / 4), p) - 0.00679517), .00003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t)0, p) + 0.00172312), .00003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (nCells / 4), p) + 0.00739412), .00003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (2 * nCells / 4), p) - 0.00124563), .00003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (3 * nCells / 4), p) - 0.00679517), .00003);
 
       }
       p = 4;
       {
-        TS_ASSERT_LESS_THAN(abs(Jac.get(0, p) - 0.000211919), .000003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (nCells / 4), p) + 0.00012903), .000003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (2 * nCells / 4), p) + 0.00155881), .000003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (3 * nCells / 4), p) - 6.77865e-05), .000003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t)0, p) - 0.000211919), .000003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (nCells / 4), p) + 0.00012903), .000003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t)(2 * nCells / 4), p) + 0.00155881), .000003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (3 * nCells / 4), p) - 6.77865e-05), .000003);
 
       }
       p = 5;
       {
-        TS_ASSERT_LESS_THAN(abs(Jac.get(0, p)) - 0.000103899, .000003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (nCells / 4), p) + 0.000120544), .000003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (2 * nCells / 4), p) + 0.000869656), .000003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (3 * nCells / 4), p) + 1.40357e-05), .000003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t)0, p)) - 0.000103899, .000003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (nCells / 4), p) + 0.000120544), .000003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (2 * nCells / 4), p) + 0.000869656), .000003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (3 * nCells / 4), p) + 1.40357e-05), .000003);
 
       }
       p = 6;
       {
-        TS_ASSERT_LESS_THAN(abs(Jac.get(0, p) - 0.000414602), .000003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (nCells / 4), p) - 0.000782418), .000003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (2 * nCells / 4), p) + 0.000258266), .000003);
-        TS_ASSERT_LESS_THAN(abs(Jac.get((int) (3 * nCells / 4), p) - 0.000862286), .000003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t)0, p) - 0.000414602), .000003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (nCells / 4), p) - 0.000782418), .000003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (2 * nCells / 4), p) + 0.000258266), .000003);
+        TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t) (3 * nCells / 4), p) - 0.000862286), .000003);
         ;
 
       }
@@ -210,7 +211,7 @@ public:
 
     double sav = out[0];
     NormalFit.addPenalty(out);
-    TS_ASSERT_LESS_THAN(abs(out[0] - sav - 89767.5), .5);
+    TS_ASSERT_LESS_THAN(fabs(out[0] - sav - 89767.5), .5);
     delete x;
     delete out;
   }

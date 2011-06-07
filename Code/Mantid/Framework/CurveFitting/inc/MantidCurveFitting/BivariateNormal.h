@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionMW.h"
-#include "MantidCurveFitting/UserFunction.h"
+//#include "MantidCurveFitting/UserFunction.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 using namespace Mantid::CurveFitting;

@@ -44,7 +44,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/BFGS_Minimizer.h
 	inc/MantidCurveFitting/BackToBackExponential.h
 	inc/MantidCurveFitting/BackgroundFunction.h
-	inc/MantidCurveFitting/BivariateNormal.h
 	inc/MantidCurveFitting/BoundaryConstraint.h
 	inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/Convolution.h
@@ -84,7 +83,7 @@ set ( INC_FILES
 	      
 set ( TEST_FILES
 	test/BackToBackExponentialTest.h
-	test/BivariateNormalTest.h
+        test/BivariateNormalTest.h
 	test/BoundaryConstraintTest.h
 	test/ChebyshevTest.h
 	test/CompositeFunctionTest.h
