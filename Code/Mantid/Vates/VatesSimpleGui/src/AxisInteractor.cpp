@@ -61,7 +61,7 @@ void AxisInteractor::widgetLayout()
   }
 
   // All set for vertical orientation
-  int scaleWidth = 75;
+  int scaleWidth = 50;
   int scaleHeight = 150;
   int gvWidth = 50;
   int gvHeight = 150;
