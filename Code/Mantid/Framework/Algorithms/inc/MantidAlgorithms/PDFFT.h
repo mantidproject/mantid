@@ -16,7 +16,6 @@ namespace Algorithms
    */
   class DLLExport PDFFT  : public API::Algorithm
   {
-	    static const double PI = 3.1415926545;
   public:
     PDFFT();
     ~PDFFT();

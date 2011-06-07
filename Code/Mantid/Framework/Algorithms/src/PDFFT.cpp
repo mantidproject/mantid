@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/PDFFT.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -109,8 +110,8 @@ void PDFFT::exec() {
 	const MantidVec& inputx = Sspace->dataX(0);
 	int sizesq = inputx.size();
 	if (unit == "d") {
-		dataqmax = 2 * PI / inputx[inputx.size() - 1];
-		dataqmin = 2 * PI / inputx[0];
+		dataqmax = 2 * M_PI / inputx[inputx.size() - 1];
+		dataqmin = 2 * M_PI / inputx[0];
 	} else {
 		dataqmin = inputx[0];
 		dataqmax = inputx[inputx.size() - 1];
@@ -177,21 +178,21 @@ double PDFFT::CalculateGrFromD(double r, double& egr, double qmin, double qmax) 
 
 	double temp, d, s, deltad;
 	double error = 0;
-	double dmin = 2.0 * PI / qmax;
-	double dmax = 2.0 * PI / qmin;
+	double dmin = 2.0 * M_PI / qmax;
+	double dmax = 2.0 * M_PI / qmin;
 	for (size_t i = 1; i < vd.size(); i++) {
 		d = vd[i];
 		if (d >= dmin && d <= dmax) {
 			s = vs[i];
 			deltad = vd[i] - vd[i - 1];
-			temp = (s - 1) * sin(2 * PI * r / d) * 4 * PI * PI / (d * d * d)
+			temp = (s - 1) * sin(2 * M_PI * r / d) * 4 * M_PI * M_PI / (d * d * d)
 					* deltad;
 			gr += temp;
 			error += ve[i] * ve[i];
 		}
 	}
 
-	gr = gr * 2 / PI;
+	gr = gr * 2 / M_PI;
 	egr = sqrt(error); //TODO: Wrong!
 
 	return gr;
