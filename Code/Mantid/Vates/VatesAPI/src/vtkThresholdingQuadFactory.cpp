@@ -100,7 +100,7 @@ namespace Mantid
 
             signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i, j));
 
-            if (boost::math::isnan( signalScalar ) || (signalScalar <= m_minThreshold) || (signalScalar >= m_maxThreshold))
+            if (boost::math::isnan( signalScalar ) || (signalScalar < m_minThreshold) || (signalScalar > m_maxThreshold))
             {
               //Flagged so that topological and scalar data is not applied.
               unstructPoint.isSparse = true;

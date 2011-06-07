@@ -137,7 +137,7 @@ namespace VATES
             posZ = minZ + (k * incrementZ); //Calculate increment in z;
             signalScalar = m_workspace->getSignalNormalizedAt(i, j, k);
 
-            if (boost::math::isnan( signalScalar ) || (signalScalar <= m_minThreshold) || (signalScalar >= m_maxThreshold))
+            if (boost::math::isnan( signalScalar ) || (signalScalar < m_minThreshold) || (signalScalar > m_maxThreshold))
             {
               //Flagged so that topological and scalar data is not applied.
               unstructPoint.isSparse = true;
