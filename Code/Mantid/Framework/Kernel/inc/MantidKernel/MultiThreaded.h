@@ -47,22 +47,28 @@ typedef Poco::FastMutex Mutex;
     PRAGMA(omp parallel for)
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
-*		The workspace is checked to ensure it is suitable for multithreaded access.
+*		The workspace is checked to ensure it is suitable for multithreaded access
+*   NULL workspaces are assumed suitable
 */
 #define PARALLEL_FOR1(workspace1) \
-		PRAGMA(omp parallel for if (workspace1->threadSafe()))
+		PRAGMA(omp parallel for if ( !workspace1 || workspace1->threadSafe() ) )
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
-*	 Both workspaces are checked to ensure they suitable for multithreaded access.
+*	 Both workspaces are checked to ensure they suitable for multithreaded access
+*  or equal to NULL which is also safe
 */
 #define PARALLEL_FOR2(workspace1, workspace2) \
-		PRAGMA(omp parallel for if (workspace1->threadSafe() && workspace2->threadSafe()))
+		PRAGMA(omp parallel for if ( ( !workspace1 || workspace1->threadSafe() ) && \
+    ( !workspace2 || workspace2->threadSafe() ) ))
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
-*	 All three workspaces are checked to ensure they suitable for multithreaded access.
+*	 All three workspaces are checked to ensure they are suitable for multithreaded access
+*  but NULL workspaces are assumed to be safe
 */
 #define PARALLEL_FOR3(workspace1, workspace2, workspace3) \
-                PRAGMA(omp parallel for if (workspace1->threadSafe() && workspace2->threadSafe() && workspace3->threadSafe()))
+    PRAGMA(omp parallel for if ( (!workspace1 || workspace1->threadSafe()) && \
+    ( !workspace2 || workspace2->threadSafe() ) && \
+    ( !workspace3 || workspace3->threadSafe() ) ))
 
 /** Ensures that the next execution line or block is only executed if
 * there are multple threads execting in this region
