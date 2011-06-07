@@ -78,6 +78,7 @@ set ( SRC_FILES
 	src/SaveToSNSHistogramNexus.cpp
 	src/UpdateInstrumentFromFile.cpp
 	src/FindDetectorsPar.cpp
+	src/LoadLogsForSNSPulsedMagnet.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
@@ -149,6 +150,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
 	inc/MantidDataHandling/FindDetectorsPar.h 
+	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
 )
 
 set ( TEST_FILES

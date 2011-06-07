@@ -48,8 +48,9 @@ void PDFFT::init() {
 			Direction::Output), "An output workspace G(r)");
 	declareProperty(new WorkspaceProperty<> ("OutputWorkspace1", "",
 			Direction::Output), "An output workspace for Q(S(Q)-1))");
-	declareProperty(new Kernel::PropertyWithValue<double>("RMax", 20));
-	declareProperty(new Kernel::PropertyWithValue<double>("DeltaR", 0.1));
+	// declareProperty(new Kernel::PropertyWithValue<double>("RMax", 20));
+	declareProperty("RMax", 20.0);
+    declareProperty(new Kernel::PropertyWithValue<double>("DeltaR", 0.1));
 	declareProperty(new Kernel::PropertyWithValue<double>("Qmin", 0.0));
 	declareProperty(new Kernel::PropertyWithValue<double>("Qmax", 100.0));
 	declareProperty(new Kernel::PropertyWithValue<bool>("DebugMode", false));
