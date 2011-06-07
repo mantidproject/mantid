@@ -89,6 +89,7 @@ namespace API
       if (index < 0)
       {
         g_log.warning("WorkspaceIndex not set, defaulting to 0");
+        index = 0;
       }
       else if (index >= static_cast<int>(mws->getNumberHistograms()))
       {
