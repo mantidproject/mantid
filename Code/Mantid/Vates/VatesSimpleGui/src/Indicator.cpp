@@ -15,7 +15,7 @@ Indicator::Indicator(QGraphicsItem *parent) : QGraphicsPolygonItem(parent)
 {
 	this->fillColor = Qt::blue;
 	this->outlineColor = Qt::black;
-	this->half_base = 10;
+	this->half_base = 8;
 	this->orientation = AxisInteractor::LeftScale;
 	this->setOpacity(1.0);
 	this->setBrush(QBrush(this->fillColor));
@@ -37,7 +37,7 @@ void Indicator::setPoints(const QPoint &eloc, const QRect &rect)
   double apex_pos = 0.0;
   int pa_x, pa_y;
   pa_x = pa_y = 0;
-
+  int factor = 1;
   switch (this->orientation)
   {
   case AxisInteractor::LeftScale:
@@ -59,7 +59,7 @@ void Indicator::setPoints(const QPoint &eloc, const QRect &rect)
     p1_y = 0;
     p2_y = this->half_base;
     p3_y = -this->half_base;
-    apex_pos = eloc.y() + 2 * this->half_base;
+    apex_pos = eloc.y() + factor * this->half_base;
     pa_x = this->tip_edge;
     pa_y = static_cast<int>(apex_pos);
     break;
@@ -82,7 +82,7 @@ void Indicator::setPoints(const QPoint &eloc, const QRect &rect)
     p1_x = 0;
     p2_x = this->half_base;
     p3_x = -this->half_base;
-    apex_pos = eloc.x() + 2 * this->half_base;
+    apex_pos = eloc.x() + factor * this->half_base;
     pa_x = static_cast<int>(apex_pos);
     pa_y = this->tip_edge;
     break;
@@ -124,17 +124,18 @@ int Indicator::fixPosition(int level)
 
 void Indicator::updatePos(const QPoint &pos)
 {
+  double factor = 1.0;
 	// Not sure why the y position needs to have this particular offset
 	// but it seems to work best.
   switch (this->orientation)
   {
   case AxisInteractor::LeftScale:
   case AxisInteractor::RightScale:
-    this->setPos(this->tip_edge, pos.y() + this->half_base * 1.5);
+    this->setPos(this->tip_edge, pos.y() + this->half_base * factor);
     break;
   case AxisInteractor::TopScale:
   case AxisInteractor::BottomScale:
-    this->setPos(pos.x() + this->half_base * 1.5, this->tip_edge);
+    this->setPos(pos.x() + this->half_base * factor, this->tip_edge);
     break;
   }
 }
