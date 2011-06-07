@@ -534,6 +534,8 @@ addFileV('MantidCurveFitting','MCF.dll','MantidCurveFitting.dll',MANTIDRELEASE +
 addFileV('MantidICat','MIC.dll','MantidICat.dll',MANTIDRELEASE + '/MantidICat.dll',Plugins)
 addFileV('MantidCrystal','MCR.dll','MantidCrystal.dll',MANTIDRELEASE + '/MantidCrystal.dll',Plugins)
 addFileV('MantidNexus','MNex.dll','MantidNexus.dll',MANTIDRELEASE + '/MantidNexus.dll',Plugins)
+addFileV('MantidMDDataObjects', 'MMDO.dll', 'MantidMDDataObjects.dll',MANTIDRELEASE + '/MantidMDDataObjects.dll',Plugins) 
+addFileV('MantidMDAlgorithms', 'MMDA.dll', 'MantidMDAlgorithms.dll',MANTIDRELEASE + '/MantidMDAlgorithms.dll',Plugins) 
 # NeXus dlls for the plugins path
 addFileV('hdf5dlldll','hdf5dll.dll','hdf5dll.dll',CODEDIR + '/Third_Party/lib/win' + ARCH + '/hdf5dll.dll',Plugins)
 addFileV('hd425mdll','hd425m.dll','hd425m.dll',CODEDIR + '/Third_Party/lib/win' + ARCH + '/hd425m.dll',Plugins)
