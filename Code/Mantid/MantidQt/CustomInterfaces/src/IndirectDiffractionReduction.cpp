@@ -14,7 +14,8 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  DECLARE_SUBWINDOW(IndirectDiffractionReduction);
+
+DECLARE_SUBWINDOW(IndirectDiffractionReduction);
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -23,7 +24,7 @@ using namespace MantidQt::CustomInterfaces;
 //----------------------
 ///Constructor
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent) :
-  UserSubWindow(parent), m_realDiffraction(false)
+  UserSubWindow(parent)
 {
 }
 
@@ -31,37 +32,34 @@ void IndirectDiffractionReduction::demonRun()
 {
   if ( validateDemon() )
   {
-    QString pyInput = "from IndirectDiffractionReduction import demon\n"
-      "files = [r'" + m_uiForm.dem_rawFiles->getFilenames().join("',r'") + "']\n"
-      "first = " +m_uiForm.set_leSpecMin->text()+"\n"
-      "last = " +m_uiForm.set_leSpecMax->text()+"\n"
-      "instrument = '" + m_uiForm.set_cbInst->currentText() + "'\n"
-      "cal = r'" + m_uiForm.dem_calFile->getFirstFilename() + "'\n"
-      "grouping = " + grouping() + "\n";
-
-    if ( m_uiForm.dem_cbCorrection->currentText() == "Monitor" )
+    if ( m_uiForm.cbInst->currentText() != "OSIRIS" )
     {
-      pyInput += "vanadium = ''\n"
-        "monitor = True\n";
+      // MSGDiffractionReduction
+      QString pfile = m_uiForm.cbInst->currentText() + "_diffraction_" + m_uiForm.cbReflection->currentText() + "_Parameters.xml";
+      QString pyInput =
+        "from IndirectDiffractionReduction import MSGDiffractionReducer\n"
+        "reducer = MSGDiffractionReducer()\n"
+        "reducer.set_instrument_name('" + m_uiForm.cbInst->currentText() + "')\n"
+        "reducer.set_detector_range("+m_uiForm.set_leSpecMin->text()+"-1, " +m_uiForm.set_leSpecMax->text()+"-1)\n"
+        "reducer.set_parameter_file('" + pfile + "')\n"
+        "files = [r'" + m_uiForm.dem_rawFiles->getFilenames().join("',r'") + "']\n"
+        "for file in files:\n"
+        "    reducer.append_data_file(file)\n";
+        
+      if ( m_uiForm.dem_ckSumFiles->isChecked() )
+      {
+        pyInput += "reducer.set_sum_files(True)\n";
+      }
+
+      pyInput +=
+        "reducer.reduce()\n";
+
+      QString pyOutput = runPythonCode(pyInput).trimmed();
     }
-    else // Divide by Vanadium run
+    else
     {
-      pyInput += "vanadium = r'" + m_uiForm.dem_vanadiumFile->getFirstFilename() + "'\n"
-        "monitor = False\n";
+      // OSIRISDiffractionReduction
     }
-
-    pyInput += "plot = '" + m_uiForm.cbPlotType->currentText() + "'\n";
-
-    if ( m_uiForm.dem_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-    else pyInput += "verbose = False\n";
-
-    if ( m_uiForm.dem_ckSave->isChecked() ) pyInput += "save = True\n";
-    else pyInput += "save = False\n";
-    
-    pyInput += "ws = demon(files, first, last, instrument, grouping=grouping, "
-      "Monitor=monitor, Vanadium=vanadium, cal=cal, Verbose=verbose, Plot=plot, "
-      "Save=save)\n";
-    QString pyOutput = runPythonCode(pyInput).trimmed();
   }
   else
   {
@@ -71,13 +69,18 @@ void IndirectDiffractionReduction::demonRun()
 
 void IndirectDiffractionReduction::instrumentSelected(int)
 {
-  m_uiForm.set_cbReflection->blockSignals(true);
-  m_uiForm.set_cbReflection->clear();
+  if ( ! m_uiForm.cbInst->isVisible() )
+  {
+    // If the interface is not shown, do not go looking for parameter files, etc.
+    return;
+  }
+
+  m_uiForm.cbReflection->blockSignals(true);
+  m_uiForm.cbReflection->clear();
 
   QString pyInput = 
     "from IndirectEnergyConversion import getInstrumentDetails\n"
-    "result = getInstrumentDetails('" + m_uiForm.set_cbInst->currentText() + "')\n"
-    "print result\n";
+    "print getInstrumentDetails('" + m_uiForm.cbInst->currentText() + "')\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -97,35 +100,35 @@ void IndirectDiffractionReduction::instrumentSelected(int)
         QStringList reflections = analyser[1].split(",", QString::SkipEmptyParts);
         for ( int j = 0; j < reflections.count(); j++ )
         {
-          m_uiForm.set_cbReflection->addItem(reflections[j]);
+          m_uiForm.cbReflection->addItem(reflections[j]);
         }
-        if ( reflections.count() == 1 )
+        if ( reflections.count() > 1 )
         {
-          m_uiForm.set_lbReflection->hide();
-          m_uiForm.set_cbReflection->hide();          
+          m_uiForm.swReflections->setCurrentIndex(0);         
         }
         else
         {
-          m_uiForm.set_lbReflection->show();
-          m_uiForm.set_cbReflection->show();
+          m_uiForm.swReflections->setCurrentIndex(1);
         }
       }
     }
 
-    reflectionSelected(m_uiForm.set_cbReflection->currentIndex());
+    reflectionSelected(m_uiForm.cbReflection->currentIndex());
 
-    m_uiForm.set_cbReflection->blockSignals(false);
+    m_uiForm.cbReflection->blockSignals(false);
 
-    // Set options for "real diffraction"
-    if ( m_uiForm.set_cbInst->currentText() == "OSIRIS" )
+    pyInput = "from IndirectDiffractionReduction import getStringProperty\n"
+      "print getStringProperty('__empty_" + m_uiForm.cbInst->currentText() + "', 'Workflow.Diffraction.Correction')\n";
+
+    pyOutput = runPythonCode(pyInput).trimmed();
+
+    if ( pyOutput == "Vanadium" )
     {
-      m_realDiffraction = true;
-      m_uiForm.dem_swGrouping->setCurrentIndex(0);
+      m_uiForm.swVanadium->setCurrentIndex(0);
     }
     else
     {
-      m_realDiffraction = false;
-      m_uiForm.dem_swGrouping->setCurrentIndex(1);
+      m_uiForm.swVanadium->setCurrentIndex(1);
     }
   }
 }
@@ -134,8 +137,8 @@ void IndirectDiffractionReduction::reflectionSelected(int)
 {
   QString pyInput =
     "from IndirectEnergyConversion import getReflectionDetails\n"
-    "instrument = '" + m_uiForm.set_cbInst->currentText() + "'\n"
-    "reflection = '" + m_uiForm.set_cbReflection->currentText() + "'\n"
+    "instrument = '" + m_uiForm.cbInst->currentText() + "'\n"
+    "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n"
     "print getReflectionDetails(instrument, 'diffraction', reflection)\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
@@ -152,19 +155,6 @@ void IndirectDiffractionReduction::reflectionSelected(int)
     m_uiForm.set_leSpecMin->setText(values[1]);
     m_uiForm.set_leSpecMax->setText(values[2]);
   }
-}
-
-void IndirectDiffractionReduction::correctionSelected(int index)
-{
-  m_uiForm.dem_vanadiumFile->setEnabled((index==1));
-}
-
-
-void IndirectDiffractionReduction::groupingSelected(const QString & selected)
-{
-  bool state = ( selected == "N Groups" );
-  m_uiForm.dem_leNumGroups->setEnabled(state);
-  m_uiForm.dem_lbNumGroups->setEnabled(state);  
 }
 
 void IndirectDiffractionReduction::openDirectoryDialog()
@@ -188,11 +178,9 @@ void IndirectDiffractionReduction::initLayout()
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(demonRun()));
 
-  connect(m_uiForm.set_cbInst, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentSelected(int)));
-  connect(m_uiForm.set_cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(reflectionSelected(int)));
-  connect(m_uiForm.dem_cbCorrection, SIGNAL(currentIndexChanged(int)), this, SLOT(correctionSelected(int)));
-  connect(m_uiForm.dem_cbGrouping, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(groupingSelected(const QString &)));
-
+  connect(m_uiForm.cbInst, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentSelected(int)));
+  connect(m_uiForm.cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(reflectionSelected(int)));
+  
   loadSettings();
 }
 
@@ -217,27 +205,6 @@ void IndirectDiffractionReduction::loadSettings()
 bool IndirectDiffractionReduction::validateDemon()
 {
   return m_uiForm.dem_rawFiles->isValid();
-}
-
-QString IndirectDiffractionReduction::grouping()
-{
-  QString option = "'" + m_uiForm.dem_cbGrouping->currentText() + "'";
-
-  if ( option == "'Individual'" || option == "'All'" )
-  {
-    return option;
-  }
-  else
-  {
-    QString pyInput = "import IndirectEnergyConversion as IEC\n"
-      "nspec =  (( %2 - %3 ) + 1 )/ %1\n"
-      "file = IEC.createMappingFile('demon.map', %1, nspec, %3)\n"
-      "print file\n";
-    pyInput = pyInput.arg(m_uiForm.dem_leNumGroups->text(), m_uiForm.set_leSpecMax->text(), m_uiForm.set_leSpecMin->text());
-    QString pyOutput = runPythonCode(pyInput).trimmed();
-    return "r'" + pyOutput + "'";
-  }
-
 }
 
 }

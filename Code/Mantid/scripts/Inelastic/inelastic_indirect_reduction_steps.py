@@ -447,6 +447,8 @@ class HandleMonitor(ReductionStep):
             raise ValueError('Unable to retrieve monitor thickness and '
                 'area from Instrument Parameter file.')
         else:
+            if ( area == -1 or thickness == -1 ):
+                return
             OneMinusExponentialCor(monitor, monitor, (8.3 * thickness), area)
 
     def _scale_monitor(self, monitor):
@@ -461,17 +463,20 @@ class HandleMonitor(ReductionStep):
         except IndexError:
             print "Monitor is not being scaled."
         else:
-            Scale(monitor, monitor, ( 1.0 / factor ), 'Multiply')
+            if factor != 1.0:
+                Scale(monitor, monitor, ( 1.0 / factor ), 'Multiply')
 
 class CorrectByMonitor(ReductionStep):
     """
     """
 
     _multiple_frames = False
+    _emode = "Indirect"
 
-    def __init__(self, MultipleFrames=False):
+    def __init__(self, MultipleFrames=False, EMode="Indirect"):
         super(CorrectByMonitor, self).__init__()
         self._multiple_frames = MultipleFrames
+        self._emode = EMode
 
     def execute(self, reducer, file_ws):
         if ( self._multiple_frames ):
@@ -483,10 +488,15 @@ class CorrectByMonitor(ReductionStep):
             workspaces = [file_ws]
 
         for ws in workspaces:
-            ConvertUnits(ws, ws, 'Wavelength', 'Indirect')
+            ConvertUnits(ws, ws, "Wavelength", self._emode)
             RebinToWorkspace(ws, ws+'_mon', ws)
             Divide(ws, ws+'_mon', ws)
             DeleteWorkspace(ws+'_mon')
+
+    def set_emode(self, emode):
+        """
+        """
+        self._emode = emode
 
 class FoldData(ReductionStep):
     """
@@ -520,10 +530,13 @@ class FoldData(ReductionStep):
         
     def _create_scaling_workspace(self, wsgroup, merged):
         wsname = '__scaling'
+        unit = ''
         ranges = []
         lowest = 0
         highest = 0
         for ws in wsgroup:
+            if ( unit == '' ):
+                unit = mtd[ws].getAxis(0).getUnit().name()
             low = mtd[ws].dataX(0)[0]
             high = mtd[ws].dataX(0)[mtd[ws].getNumberBins()-1]
             ranges.append([low, high])
@@ -535,7 +548,7 @@ class FoldData(ReductionStep):
         for i in range(0, mtd[merged].getNumberBins()):
             dataE.append(0.0)
             dataY.append(self._ws_in_range(ranges, dataX[i]))
-        CreateWorkspace(wsname, dataX, dataY, dataE, UnitX='DeltaE')
+        CreateWorkspace(wsname, dataX, dataY, dataE, UnitX=unit)
         return wsname
 
     def _ws_in_range(self, ranges, xval):

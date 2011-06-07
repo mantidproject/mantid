@@ -35,6 +35,11 @@
 <parameter name="Workflow.NamingConvention" type="string">
     <value val="AnalyserReflection" />
 </parameter>
+
+<parameter name="Workflow.Diffraction.Correction" type="string">
+    <value val="Vanadium" />
+</parameter>
+
 </component-link>
 
 </parameter-file>

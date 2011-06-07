@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>539</width>
-    <height>348</height>
+    <width>521</width>
+    <height>302</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -14,145 +14,160 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2" >
    <item>
-    <widget class="QGroupBox" name="gbDemon" >
-     <property name="title" >
-      <string>DEMON</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout" >
-      <item>
-       <layout class="QGridLayout" name="gridLayout_3" >
-        <item row="0" column="0" >
-         <widget class="QLabel" name="set_lbInst" >
-          <property name="text" >
-           <string>Instrument</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1" >
-         <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="set_cbInst" >
-          <property name="techniques" >
-           <stringlist>
-            <string>TOF Indirect Geometry Spectroscopy</string>
-           </stringlist>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2" >
-         <widget class="QLabel" name="set_lbReflection" >
-          <property name="text" >
-           <string>Reflection</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3" >
-         <widget class="QComboBox" name="set_cbReflection" />
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2" >
-        <item>
-         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_rawFiles" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
-            <horstretch>0</horstretch>
-            <verstretch>41</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="label" stdset="0" >
-           <string>Run Number</string>
-          </property>
-          <property name="multipleFiles" stdset="0" >
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="dem_ckSumFiles" >
-          <property name="text" >
-           <string>Sum Files</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_11" >
-        <item>
-         <widget class="QLabel" name="label" >
-          <property name="text" >
-           <string>Spectra Min</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="set_leSpecMin" />
-        </item>
-        <item>
-         <widget class="QLabel" name="label_2" >
-          <property name="text" >
-           <string>Spectra Max</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="set_leSpecMax" />
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <layout class="QVBoxLayout" name="verticalLayout_3" >
+    <layout class="QHBoxLayout" name="horizontalLayout_6" >
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4" >
-       <item>
-        <widget class="QLabel" name="label_4" >
-         <property name="text" >
-          <string>Correct By:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="dem_cbCorrection" >
-         <item>
-          <property name="text" >
-           <string>Monitor</string>
-          </property>
-         </item>
-         <item>
-          <property name="text" >
-           <string>Vanadium Run</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLabel" name="set_lbInst" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Preferred" hsizetype="Maximum" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text" >
+        <string>Instrument</string>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_vanadiumFile" >
-       <property name="enabled" >
-        <bool>false</bool>
-       </property>
+      <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInst" >
        <property name="sizePolicy" >
-        <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="techniques" stdset="0" >
+        <stringlist>
+         <string>TOF Indirect Geometry Spectroscopy</string>
+        </stringlist>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QStackedWidget" name="swReflections" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="currentIndex" >
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="page_3" >
+        <property name="sizePolicy" >
+         <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_5" >
+         <item>
+          <widget class="QLabel" name="set_lbReflection" >
+           <property name="text" >
+            <string>Reflection</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cbReflection" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="page_4" >
+        <property name="sizePolicy" >
+         <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout" >
+         <item>
+          <widget class="QLabel" name="label_3" >
+           <property name="text" >
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer" >
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2" >
+     <item>
+      <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="dem_rawFiles" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
          <horstretch>0</horstretch>
          <verstretch>41</verstretch>
         </sizepolicy>
        </property>
        <property name="label" stdset="0" >
-        <string>Vanadium File</string>
+        <string>Run Numbers</string>
        </property>
        <property name="multipleFiles" stdset="0" >
-        <bool>false</bool>
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="dem_ckSumFiles" >
+       <property name="text" >
+        <string>Sum Files</string>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="QStackedWidget" name="dem_swGrouping" >
+    <layout class="QHBoxLayout" name="horizontalLayout_11" >
+     <item>
+      <widget class="QLabel" name="label" >
+       <property name="text" >
+        <string>Spectra Min</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="set_leSpecMin" />
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2" >
+       <property name="text" >
+        <string>Spectra Max</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="set_leSpecMax" />
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QStackedWidget" name="swVanadium" >
      <property name="sizePolicy" >
       <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
        <horstretch>0</horstretch>
@@ -163,13 +178,22 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="page" >
-      <layout class="QVBoxLayout" name="verticalLayout_4" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3" >
+       <property name="margin" >
+        <number>0</number>
+       </property>
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_calFile" >
+        <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="dem_calFile" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
            <horstretch>0</horstretch>
-           <verstretch>41</verstretch>
+           <verstretch>0</verstretch>
           </sizepolicy>
          </property>
          <property name="label" stdset="0" >
@@ -179,87 +203,45 @@
           <bool>false</bool>
          </property>
          <property name="optional" stdset="0" >
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
-         <property name="fileExtensions" >
+         <property name="fileExtensions" stdset="0" >
           <stringlist>
            <string>.cal</string>
           </stringlist>
          </property>
         </widget>
        </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="page_2" >
-      <layout class="QVBoxLayout" name="verticalLayout_5" >
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3" >
-         <item>
-          <widget class="QLabel" name="label_3" >
-           <property name="enabled" >
-            <bool>true</bool>
-           </property>
-           <property name="text" >
-            <string>Grouping Policy</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="dem_cbGrouping" >
-           <property name="enabled" >
-            <bool>true</bool>
-           </property>
-           <item>
-            <property name="text" >
-             <string>Individual</string>
-            </property>
-           </item>
-           <item>
-            <property name="text" >
-             <string>All</string>
-            </property>
-           </item>
-           <item>
-            <property name="text" >
-             <string>N Groups</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="dem_lbNumGroups" >
-           <property name="enabled" >
-            <bool>true</bool>
-           </property>
-           <property name="text" >
-            <string>Number of Groups</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="dem_leNumGroups" >
-           <property name="enabled" >
-            <bool>true</bool>
-           </property>
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="dem_vanadiumFile" >
+         <property name="enabled" >
+          <bool>true</bool>
+         </property>
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="label" stdset="0" >
+          <string>Vanadium Runs</string>
+         </property>
+         <property name="multipleFiles" stdset="0" >
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="ckNormByCurrent" >
-     <property name="text" >
-      <string>Normalise by Current</string>
-     </property>
+     <widget class="QWidget" name="page_2" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_4" />
+     </widget>
     </widget>
    </item>
    <item>
@@ -276,11 +258,6 @@
        <item>
         <property name="text" >
          <string>None</string>
-        </property>
-       </item>
-       <item>
-        <property name="text" >
-         <string>Contour</string>
         </property>
        </item>
        <item>

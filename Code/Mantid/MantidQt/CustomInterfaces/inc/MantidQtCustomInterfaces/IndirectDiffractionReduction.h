@@ -24,14 +24,9 @@ public:
   IndirectDiffractionReduction(QWidget *parent = 0);
 
 public slots:
-  void demonRun();
-  
+  void demonRun();  
   void instrumentSelected(int);
   void reflectionSelected(int);
-
-  void correctionSelected(int);
-  void groupingSelected(const QString & selected);
-
   void openDirectoryDialog();
   void help();
 
@@ -42,13 +37,10 @@ private:
   void loadSettings();
 
   bool validateDemon();
-  QString grouping();
 
 private:
   /// The form generated using Qt Designer
   Ui::IndirectDiffractionReduction m_uiForm;
-  /// Whether to do "real" diffraction stuff (AlignDetectors, etc)
-  bool m_realDiffraction;
 
 };
 
