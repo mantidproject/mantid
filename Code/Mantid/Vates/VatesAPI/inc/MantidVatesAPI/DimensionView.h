@@ -10,7 +10,8 @@ namespace Mantid
     class DLLExport DimensionView
     {
     public:
-      virtual void configure() = 0;
+      virtual void configureStrongly() = 0;
+      virtual void configureWeakly() = 0;
       virtual void showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr nonIntegratedDims) = 0;
       virtual void showAsIntegrated() = 0;
       virtual void accept(DimensionPresenter* pDimensionPresenter) = 0; //TODO should accept non-deleting unique pointer.

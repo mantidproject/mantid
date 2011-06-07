@@ -60,8 +60,8 @@ namespace Mantid
     {
       VecDimPresenter_sptr::iterator pos = find_if (m_dimPresenters.begin(), m_dimPresenters.end(), FindId( pDimensionPresenter->getDimensionId()));
       Mantid::Geometry::IMDDimension_sptr temp = (*pos)->getModel();
-      (*pos)->acceptModel(pDimensionPresenter->getModel());
-      pDimensionPresenter->acceptModel(temp);
+      (*pos)->acceptModelWeakly(pDimensionPresenter->getModel());
+      pDimensionPresenter->acceptModelWeakly(temp);
       //Pass on via-view that clipping boxes should be disregarded.
       m_view->raiseNoClipping();
     }
@@ -289,7 +289,7 @@ namespace Mantid
         }
 
         dimView->accept(dimPresenter.get());
-        dimPresenter->acceptModel(model);
+        dimPresenter->acceptModelStrongly(model);
         m_view->addDimensionView(dimView);
         m_dimPresenters.push_back(dimPresenter);
       }

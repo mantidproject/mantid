@@ -19,7 +19,8 @@ private:
   class MockDimensionView : public DimensionView
   {
   public:
-    MOCK_METHOD0(configure, void());
+    MOCK_METHOD0(configureStrongly, void());
+    MOCK_METHOD0(configureWeakly, void());
     MOCK_METHOD1(showAsNotIntegrated, void(VecIMDDimension_sptr));
     MOCK_METHOD0(showAsIntegrated, void());
     MOCK_METHOD1(accept, void(DimensionPresenter*));
@@ -80,7 +81,7 @@ public:
     TSM_ASSERT_THROWS("::acceptModel not called first, so should have thrown", presenter.updateModel(), std::runtime_error);
   }
 
-  void testAcceptModel()
+  void testAcceptModelStrongly()
   {
     MockIMDDimension* pMockDimension = new MockIMDDimension();
     EXPECT_CALL(*pMockDimension, getDimensionId()).Times(2).WillRepeatedly(Return("1"));
@@ -88,14 +89,37 @@ public:
     IMDDimension_sptr model(pMockDimension);
     
     MockDimensionView view;
-    EXPECT_CALL(view, configure()).Times(1);
+    EXPECT_CALL(view, configureStrongly()).Times(1);
     EXPECT_CALL(view, showAsNotIntegrated(_)).Times(1);
 
     MockGeometryPresenter gPresenter;
     EXPECT_CALL(gPresenter, getNonIntegratedDimensions()).Times(1).WillOnce(Return(VecIMDDimension_sptr()));
     
     DimensionPresenter presenter(&view, &gPresenter);
-    presenter.acceptModel(model);
+    presenter.acceptModelStrongly(model);
+
+    TSM_ASSERT_EQUALS("Applied model should be the same as the one provided", model->getDimensionId(), presenter.getModel()->getDimensionId());
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pMockDimension));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&gPresenter));
+  }
+
+  void testAcceptModelWeakly()
+  {
+    MockIMDDimension* pMockDimension = new MockIMDDimension();
+    EXPECT_CALL(*pMockDimension, getDimensionId()).Times(2).WillRepeatedly(Return("1"));
+    EXPECT_CALL(*pMockDimension, getIsIntegrated()).Times(1);
+    IMDDimension_sptr model(pMockDimension);
+    
+    MockDimensionView view;
+    EXPECT_CALL(view, configureWeakly()).Times(1);
+    EXPECT_CALL(view, showAsNotIntegrated(_)).Times(1);
+
+    MockGeometryPresenter gPresenter;
+    EXPECT_CALL(gPresenter, getNonIntegratedDimensions()).Times(1).WillOnce(Return(VecIMDDimension_sptr()));
+    
+    DimensionPresenter presenter(&view, &gPresenter);
+    presenter.acceptModelWeakly(model);
 
     TSM_ASSERT_EQUALS("Applied model should be the same as the one provided", model->getDimensionId(), presenter.getModel()->getDimensionId());
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockDimension));
@@ -106,7 +130,7 @@ public:
   void testDriveViewToBeIntegrated()
   {
     MockDimensionView view;
-    EXPECT_CALL(view, configure()).Times(1);
+    EXPECT_CALL(view, configureStrongly()).Times(1);
     EXPECT_CALL(view, showAsIntegrated()).Times(2);
     EXPECT_CALL(view, showAsNotIntegrated(_)).Times(0); //Explicitly should never use this.
     EXPECT_CALL(view, getIsIntegrated()).WillOnce(Return(true));
@@ -121,7 +145,7 @@ public:
     EXPECT_CALL(gPresenter, setModified()).Times(1);
 
     DimensionPresenter presenter(&view, &gPresenter); 
-    presenter.acceptModel(model);
+    presenter.acceptModelStrongly(model);
     TSM_ASSERT_THROWS_NOTHING("A model exists on the presenter, updating should it should operate without exception.", presenter.updateModel());
 
 
@@ -133,7 +157,7 @@ public:
   void testDriveViewToBeNotIntegrated()
   {
     MockDimensionView view;
-    EXPECT_CALL(view, configure()).Times(1);
+    EXPECT_CALL(view, configureStrongly()).Times(1);
     EXPECT_CALL(view, showAsNotIntegrated(_)).Times(2);
     EXPECT_CALL(view, showAsIntegrated()).Times(0); //Explicitly should never use this
     EXPECT_CALL(view, getIsIntegrated()).Times(AnyNumber()).WillRepeatedly(Return(false));//View is not integrated. 
@@ -148,7 +172,7 @@ public:
     EXPECT_CALL(gPresenter, getNonIntegratedDimensions()).Times(2).WillRepeatedly(Return(VecIMDDimension_sptr())) ; //Will ask the GeometryPresenter for non-integrated dimensions
     EXPECT_CALL(gPresenter, setModified()).Times(1);
     DimensionPresenter presenter(&view, &gPresenter);
-    presenter.acceptModel(model);
+    presenter.acceptModelStrongly(model);
     
     TSM_ASSERT_THROWS_NOTHING("A model exists on the presenter, updating should it should operate without exception.", presenter.updateModel());
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockDimension));
@@ -159,7 +183,7 @@ public:
   void testGetAppliedModelWhenViewIntegrated()
   {
     MockDimensionView view;
-    EXPECT_CALL(view, configure()).Times(1);
+    EXPECT_CALL(view, configureStrongly()).Times(1);
     EXPECT_CALL(view, showAsIntegrated()).Times(1);
     EXPECT_CALL(view, getIsIntegrated()).Times(1).WillRepeatedly(Return(true)); // view says it's integrated
     EXPECT_CALL(view, getMinimum()).Times(1).WillOnce(Return(0));
@@ -174,7 +198,7 @@ public:
     MockGeometryPresenter gPresenter;
 
     DimensionPresenter presenter(&view, &gPresenter); 
-    presenter.acceptModel(model);
+    presenter.acceptModelStrongly(model);
     Mantid::Geometry::IMDDimension_sptr product = presenter.getAppliedModel();
 
     TSM_ASSERT_EQUALS("Wrong number of bins for an integrated dimension", 1, product->getNBins());

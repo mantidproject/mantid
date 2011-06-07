@@ -16,13 +16,29 @@ namespace Mantid
     }
 
     /**
-    Accept a model.
+    Accept a model. In this schenario the model overrules any settings on the view.
     @parameter model : The model to manage/contain.
     */
-    void DimensionPresenter::acceptModel(Mantid::Geometry::IMDDimension_sptr model)
+    void DimensionPresenter::acceptModelStrongly(Mantid::Geometry::IMDDimension_sptr model)
     {
       m_model = model;
-      m_view->configure();
+      m_view->configureStrongly();
+      commonSetup();
+    }
+
+    /**
+    Accept a model. In this schenario the model does not overrule settings on the view relating to nbins/max/mins.
+    @parameter model : The model to manage/contain.
+    */
+    void DimensionPresenter::acceptModelWeakly(Mantid::Geometry::IMDDimension_sptr model)
+    {
+      m_model = model;
+      m_view->configureWeakly();
+      commonSetup();
+    }
+
+    void DimensionPresenter::commonSetup()
+    {
       if(m_model->getIsIntegrated())
       {
         m_view->showAsIntegrated();
@@ -87,7 +103,7 @@ namespace Mantid
     {
       if(!m_view->getIsIntegrated())
       {
-        m_view->configure();
+        m_view->configureWeakly();
         m_view->showAsNotIntegrated(m_geometryPresenter->getNonIntegratedDimensions());
         m_lastIsIntegrated = false;
       }

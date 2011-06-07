@@ -91,7 +91,8 @@ static std::string constructXML()
   class MockDimensionView : public DimensionView
   {
   public:
-    MOCK_METHOD0(configure, void());
+    MOCK_METHOD0(configureStrongly, void());
+    MOCK_METHOD0(configureWeakly, void());
     MOCK_METHOD1(showAsNotIntegrated, void(VecIMDDimension_sptr));
     MOCK_METHOD0(showAsIntegrated, void());
     MOCK_METHOD1(accept, void(DimensionPresenter*));
@@ -128,7 +129,7 @@ public:
   {
     MockDimensionView dView;
     EXPECT_CALL(dView, accept(_)).Times(5);
-    EXPECT_CALL(dView, configure()).Times(5);
+    EXPECT_CALL(dView, configureStrongly()).Times(5);
     EXPECT_CALL(dView, showAsNotIntegrated(_)).Times(3);
     EXPECT_CALL(dView, showAsIntegrated()).Times(2);
 

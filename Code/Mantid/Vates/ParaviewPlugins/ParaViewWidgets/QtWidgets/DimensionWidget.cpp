@@ -121,7 +121,9 @@ void DimensionWidget::showAsIntegrated()
   m_ckIntegrated->setChecked(true);
 }
 
-void DimensionWidget::configure()
+/** Configure the DimensionView to override only selection choice controls. Otherwise leave nbins, max, min in their current state.
+*/
+void DimensionWidget::configureWeakly()
 {
   m_dimensionCombo->clear();
   Mantid::Geometry::VecIMDDimension_sptr vecNonIntegrated = m_pDimensionPresenter->getNonIntegratedDimensions();
@@ -135,6 +137,13 @@ void DimensionWidget::configure()
       m_dimensionCombo->setCurrentItem(i);
     }
   }
+}
+
+/** Configure the DimensionView to override any controls with the values obtained from the model.
+*/
+void DimensionWidget::configureStrongly()
+{
+  configureWeakly();
 
   std::string nBinsString = boost::str(boost::format("%i") % m_pDimensionPresenter->getModel()->getNBins());
   m_nBinsBox->setText(nBinsString.c_str());

@@ -92,7 +92,9 @@ public:
       
   virtual void accept(Mantid::VATES::DimensionPresenter* pDimensionPresenter);
 
-  virtual void configure();
+  virtual void configureStrongly();
+
+  virtual void configureWeakly();
 
   virtual std::string getDimensionId() const;
 

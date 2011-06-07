@@ -41,7 +41,8 @@ namespace Mantid
     {
     public:
       DimensionPresenter(DimensionView* view, GeometryPresenter * geometryPresenter);
-      void acceptModel(Mantid::Geometry::IMDDimension_sptr model);
+      void acceptModelStrongly(Mantid::Geometry::IMDDimension_sptr model);
+      void acceptModelWeakly(Mantid::Geometry::IMDDimension_sptr model);
       void acceptAppliedModel();
       void updateModel();
       Mantid::Geometry::IMDDimension_sptr getAppliedModel() const;
@@ -52,6 +53,7 @@ namespace Mantid
       void updateIfNotIntegrated();
       virtual ~DimensionPresenter();
     private:
+      void commonSetup();
       DimensionPresenter(const DimensionPresenter&);
       DimensionPresenter& operator=(const DimensionPresenter&);
       Mantid::Geometry::IMDDimension_sptr m_model;
