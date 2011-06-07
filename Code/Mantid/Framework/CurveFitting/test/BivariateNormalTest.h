@@ -11,6 +11,9 @@
 
 #include "MantidCurveFitting/BivariateNormal.h"
 #include "MantidGeometry/Math/Matrix.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 /*#include "MantidAPI/IFitFunction.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/GSLFunctions.h"
@@ -25,6 +28,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::DataObjects;
 
 /**
  * Used for testing only
@@ -62,6 +66,7 @@ public:
   void test_Normal()
   {
     BivariateNormal NormalFit;
+
     try
     {
       NormalFit.setAttribute("StartRow", IFitFunction::Attribute(195.0));
@@ -70,6 +75,7 @@ public:
 
       NormalFit.setAttribute("NRows", IFitFunction::Attribute(33.));
       NormalFit.setAttribute("NCols", IFitFunction::Attribute(26.));
+
       NormalFit.setAttribute("Intensities", IFitFunction::Attribute(79.0));
       NormalFit.setAttribute("SSIx", IFitFunction::Attribute(18490.0));
       NormalFit.setAttribute("SSIy", IFitFunction::Attribute(16625.0));
@@ -83,6 +89,7 @@ public:
       NormalFit.setAttribute("SSxy", IFitFunction::Attribute(4.2453411E7));
 
       NormalFit.initialize();
+
       NormalFit.setParameter("Background", 0.0, true);
       NormalFit.setParameter("Intensity", 79.0, true);
       NormalFit.setParameter("Mcol", 234.0506329, true);
@@ -99,16 +106,16 @@ public:
       double* out = new double[nCells];
       NormalFit.function(out, x, nCells);
 
-      TS_ASSERT_LESS_THAN(abs(out[0] - .0096733), .00004);
-      TS_ASSERT_LESS_THAN(abs(out[(int) (nCells / 4)] - 0.0857393), .00004);
-      TS_ASSERT_LESS_THAN(abs(out[(int) (2 * nCells / 4)] - 0.170591), .00004);
-      TS_ASSERT_LESS_THAN(abs(out[(int) (3 * nCells / 4)] - .0685042), .00004);
-      delete out;
+      TS_ASSERT_LESS_THAN(fabs(out[0] - .0096733), .00004);
+      TS_ASSERT_LESS_THAN(fabs(out[(int) (nCells / 4)] - 0.0857393), .00004);
+      TS_ASSERT_LESS_THAN(fabs(out[(int) (2 * nCells / 4)] - 0.170591), .00004);
+      TS_ASSERT_LESS_THAN(fabs(out[(int) (3 * nCells / 4)] - .0685042), .00004);
+      delete[] out;
 
       Jacob Jac(7, nCells);
 
       NormalFit.functionDeriv(&Jac, x, nCells);
-      delete x;
+      delete[] x;
       size_t p = 1;
       {
         TS_ASSERT_LESS_THAN(fabs(Jac.get((size_t)0, p) - 0.000122447), .000004);
@@ -172,12 +179,16 @@ public:
   void test_Bounds()
   {
     BivariateNormal NormalFit;
+    int nCells = 33 * 26;
+    MatrixWorkspace_sptr ws1 = WorkspaceFactory::Instance().create("Workspace2D",1,nCells,nCells);
+    Workspace2D_sptr ws = boost::dynamic_pointer_cast<Workspace2D>(ws1);
 
     NormalFit.setAttribute("StartRow", IFitFunction::Attribute(195.0));
 
     NormalFit.setAttribute("StartCol", IFitFunction::Attribute(222.0));
 
     NormalFit.setAttribute("NRows", IFitFunction::Attribute(33.));
+
     NormalFit.setAttribute("NCols", IFitFunction::Attribute(26.));
     NormalFit.setAttribute("Intensities", IFitFunction::Attribute(79.0));
     NormalFit.setAttribute("SSIx", IFitFunction::Attribute(18490.0));
@@ -201,19 +212,28 @@ public:
     NormalFit.setParameter("SSrow", 98.98093254, true);
     NormalFit.setParameter("SSrc", -8.76926775, true);
 
-    int nCells = 33 * 26;
+
     double* x = new double[nCells];
     for (int i = 0; i < nCells; i++)
       x[i] = i;
+
+    MantidVecPtr x_vec_ptr;
+    for (int i = 0; i < nCells; i++)
+      x_vec_ptr.access().push_back( x[i] );
+    
+    ws->setX(0,x_vec_ptr);
+
+    NormalFit.setWorkspace( ws, std::string("StartX=0,EndX=857,WorkspaceIndex=0") );
 
     double* out = new double[nCells];
     NormalFit.function(out, x, nCells);
 
     double sav = out[0];
+    
     NormalFit.addPenalty(out);
     TS_ASSERT_LESS_THAN(fabs(out[0] - sav - 89767.5), .5);
-    delete x;
-    delete out;
+    delete[] x;
+    delete[] out;
   }
 
 };

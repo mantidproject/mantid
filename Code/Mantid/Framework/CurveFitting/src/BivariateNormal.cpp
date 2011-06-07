@@ -76,13 +76,13 @@ BivariateNormal::~BivariateNormal()
 {
 
   if (!Attrib)
-    delete Attrib;
+    delete[] Attrib;
 
   if (!expVals)
-    delete expVals;
+    delete[] expVals;
 
   if (!LastParams)
-    delete LastParams;
+    delete[] LastParams;
 
   if (!BackConstraint)
     delete BackConstraint;
@@ -290,7 +290,8 @@ void BivariateNormal::initCommon()
         << ")";
 
     // std::cout<<"row formula="<< ssyy.str()<<std::endl;
-    API::ParameterTie* pt = tie("SSrow", ssyy.str());
+    //API::ParameterTie* pt =
+        tie("SSrow", ssyy.str());
     //  std::cout << "  ddK" <<pt->eval()<< std::endl;
 
     ssxx << std::string("(") << (SIxx) << "+(Mcol-" << (mIx) << ")*(Mcol-" << (mIx) << ")*"
@@ -299,7 +300,8 @@ void BivariateNormal::initCommon()
         << ")";
 
     // std::cout<<"col formula="<< ssxx.str()<<std::endl;
-    API::ParameterTie* ptx = tie("SScol", ssxx.str());
+    //API::ParameterTie* ptx =
+    tie("SScol", ssxx.str());
     // std::cout << "  ddK" <<ptx->eval()<< std::endl;
 
     ssxy << std::string("(") << (SIxy) << "+(Mcol-" << (mIx) << ")*(Mrow-" << (mIy) << ")*"
@@ -308,7 +310,8 @@ void BivariateNormal::initCommon()
         << ")";
 
     //std::cout<<"cov formula="<< ssxy.str()<<std::endl;
-    API::ParameterTie* ptxy = tie("SSrc", ssxy.str());
+   // API::ParameterTie* ptxy =
+    tie("SSrc", ssxy.str());
     //std::cout << "   ddK" <<ptxy->eval()<< std::endl;
 
 
