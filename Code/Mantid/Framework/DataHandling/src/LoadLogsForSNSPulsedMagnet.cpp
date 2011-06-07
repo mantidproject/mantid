@@ -107,7 +107,7 @@ namespace DataHandling
     struct stat results;
     int filesize = -1;
     if (stat(logfilename, &results) == 0){
-        filesize = results.st_size;
+        filesize = int(results.st_size);
         g_log.information() << "File Size = " << filesize << endl;
     }
     else{
@@ -121,9 +121,9 @@ namespace DataHandling
 
     // 3. Parse
     ifstream logFile(logfilename, ios::in|ios::binary);
-    unsigned int *pulseindices = new unsigned int[numpulses];
+    // unsigned int *pulseindices = new unsigned int[numpulses];
     unsigned int *delaytimes = new unsigned int[numpulses];
-    char buffer[4];
+    // char buffer[4];
     int index = 0;
     unsigned int chopperindices[4];
     unsigned int localdelaytimes[4];
@@ -142,7 +142,7 @@ namespace DataHandling
         }
 
         // Check
-        for (int i = 0; i < 4; i ++){
+        for (unsigned int i = 0; i < 4; i ++){
             if (i != chopperindices[i]){
                 g_log.information() << "Warning Here 111  Pulsed = " << index << " Chopper Index = " << chopperindices[i] << "  vs " << i << endl;
             }
@@ -167,7 +167,7 @@ namespace DataHandling
     struct stat results;
     int filesize = -1;
     if (stat(logfilename, &results) == 0){
-        filesize = results.st_size;
+        filesize = int(results.st_size);
         g_log.information() << "File Size = " << filesize << endl;
     }
     else{
@@ -212,8 +212,8 @@ namespace DataHandling
     TimeSeriesProperty<unsigned int>* m_properties = new TimeSeriesProperty<unsigned int>("PulsedMagnet");
 
     for (int pid = 0; pid < m_numpulses; pid++){
-      long pidhigh = long(m_pulseidhighs[pid]);
-      long pidlow = long(m_pulseidlows[pid]);
+      int64_t pidhigh = int64_t(m_pulseidhighs[pid]);
+      int64_t pidlow = int64_t(m_pulseidlows[pid]);
       DateAndTime dt(pidhigh, pidlow);
       m_properties->addValue(dt, m_delaytimes[pid]);
     }
