@@ -12,6 +12,7 @@ include_directories(
 set( INCLUDE_FILES
   inc/AxisInformation.h
   inc/AxisInteractor.h
+  inc/ColorSelectionWidget.h
   inc/GeometryParser.h
   inc/Indicator.h
   inc/ModeControlWidget.h
@@ -26,6 +27,7 @@ set( INCLUDE_FILES
 set( SOURCE_FILES
   src/AxisInformation.cpp
   src/AxisInteractor.cpp
+  src/ColorSelectionWidget.cpp
   src/GeometryParser.cpp
   src/Indicator.cpp
   src/main.cpp
@@ -43,6 +45,7 @@ set( SOURCE_FILES
 # Qt's moc preprocessor.
 qt4_wrap_cpp( MOC_SRCS
   inc/AxisInteractor.h
+  inc/ColorSelectionWidget.h
   inc/ModeControlWidget.h
   inc/MpMainWindow.h
   inc/MultisliceView.h
@@ -55,6 +58,7 @@ qt4_wrap_cpp( MOC_SRCS
 # These are the ui files to be processed using
 # Qt's ui file processor.
 qt4_wrap_ui( UI_BUILT_SOURCES
+  ui/ColorSelectionWidget.ui
   ui/ModeControlWidget.ui
   ui/MpMainWindow.ui
   ui/MultisliceView.ui
