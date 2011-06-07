@@ -200,6 +200,11 @@ class SNSPowderReduction(PythonAlgorithm):
         if wksp is None:
             return None
 
+        # load the calibration file if the workspaces aren't already in memory
+        if (mtd[self._instrument + "_offsets"] is None) or (mtd[self._instrument + "_mask"] is None) \
+            or (mtd[self._instrument + "_group"] is None):
+            LoadCalFile(InputWorkspace=wksp, CalFileName=calib, WorkspaceName=self._instrument)
+
         # take care of filtering events
         if self._filterBadPulses and not self.getProperty("CompressOnRead"):
             FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
@@ -338,11 +343,6 @@ class SNSPowderReduction(PythonAlgorithm):
         self._outTypes = self.getProperty("SaveAs")
         samRuns = self.getProperty("RunNumber")
         filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
-
-        # load the calibration file if the workspaces aren't already in memory
-        if (mtd[self._instrument + "_offsets"] is None) or (mtd[self._instrument + "_mask"] is None) \
-            or (mtd[self._instrument + "_group"] is None):
-            LoadCalFile(InstrumentName=self._instrument, CalFileName=calib, WorkspaceName=self._instrument)
 
         if self.getProperty("Sum"):
             samRun = None
