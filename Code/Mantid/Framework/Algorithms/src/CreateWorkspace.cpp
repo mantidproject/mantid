@@ -129,6 +129,8 @@ void CreateWorkspace::exec()
   // Create the OutputWorkspace
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D", nSpec, xSize, ySize);
 
+  Progress progress(this,0,1,nSpec);
+
   PARALLEL_FOR1(outputWS)
   for ( int i = 0; i < nSpec; i++ )
   {
@@ -153,6 +155,7 @@ void CreateWorkspace::exec()
 
     if ( dataE_provided) outputWS->dataE(i).assign(dataE.begin()+yStart,dataE.begin()+yEnd);
 
+    progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION

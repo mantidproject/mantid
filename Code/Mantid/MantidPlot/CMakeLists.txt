@@ -717,7 +717,7 @@ include_directories ( src )
 include_directories ( src/lib/include )
 include_directories ( src/lib/3rdparty/qtcolorpicker/src )
 
-set ( SRC_FILES ${QTIPLOT_SRCS} ${QT_SOLUTIONS_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
+set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
 set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
 
 ###########################################################################

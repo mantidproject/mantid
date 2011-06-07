@@ -46,10 +46,6 @@
 #include <map>
 #include <cmath>
 
-#ifndef PACKAGE_VERSION
-#define PACKAGE_VERSION "unknown"
-#endif
-
 namespace Mantid
 {
 namespace API
