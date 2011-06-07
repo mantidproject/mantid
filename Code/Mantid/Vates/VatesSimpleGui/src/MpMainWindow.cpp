@@ -74,10 +74,10 @@ void mpMainWindow::removeProxyTabWidgetConnections()
 			this->proxyTabWidget, 0);
 }
 
-IView* mpMainWindow::setMainViewWidget(QWidget *container,
+ViewBase* mpMainWindow::setMainViewWidget(QWidget *container,
 		ModeControlWidget::Views v)
 {
-  IView *view;
+  ViewBase *view;
 	switch(v)
 	{
 	case ModeControlWidget::STANDARD:
@@ -158,7 +158,7 @@ void mpMainWindow::switchViews(ModeControlWidget::Views v)
 
 void mpMainWindow::swapViews()
 {
-	IView *temp;
+	ViewBase *temp;
 	temp = this->currentView;
 	this->currentView = this->hiddenView;
 	this->hiddenView = temp;

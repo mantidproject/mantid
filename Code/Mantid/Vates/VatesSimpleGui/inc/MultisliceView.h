@@ -3,7 +3,7 @@
 
 #include <QtGui/QWidget>
 #include <QPointer>
-#include "IView.h"
+#include "ViewBase.h"
 #include "ui_MultisliceView.h"
 
 class pqPipelineRepresentation;
@@ -39,7 +39,7 @@ class QModelIndex;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MultiSliceView : public IView
+class MultiSliceView : public ViewBase
 {
     Q_OBJECT
 
@@ -53,11 +53,11 @@ public:
     virtual ~MultiSliceView();
 
     /**
-     * IView::getView
+     * ViewBase::getView
      */
     pqRenderView* getView();
     /**
-     * IView::render
+     * ViewBase::render
      */
     void render();
 

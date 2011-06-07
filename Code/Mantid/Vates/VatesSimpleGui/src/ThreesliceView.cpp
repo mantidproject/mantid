@@ -18,7 +18,7 @@
 
 #include <iostream>
 
-ThreeSliceView::ThreeSliceView(QWidget *parent) : IView(parent)
+ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
 {
 	this->setupUi(this);
 
@@ -73,7 +73,7 @@ void ThreeSliceView::render()
 	this->renderAll();
 }
 
-void ThreeSliceView::makeSlice(IView::Direction i, pqRenderView *view,
+void ThreeSliceView::makeSlice(ViewBase::Direction i, pqRenderView *view,
 		pqPipelineSource *cut, pqPipelineRepresentation *repr)
 {
 	pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
@@ -90,7 +90,7 @@ void ThreeSliceView::makeSlice(IView::Direction i, pqRenderView *view,
 	double orient[3], up[3];
 	switch(i)
 	{
-	case IView::X:
+	case ViewBase::X:
 		orient[0] = 1.0;
 		orient[1] = 0.0;
 		orient[2] = 0.0;
@@ -98,7 +98,7 @@ void ThreeSliceView::makeSlice(IView::Direction i, pqRenderView *view,
 		up[1] = 0.0;
 		up[2] = 1.0;
 		break;
-	case IView::Y:
+	case ViewBase::Y:
 		orient[0] = 0.0;
 		orient[1] = 1.0;
 		orient[2] = 0.0;
@@ -106,7 +106,7 @@ void ThreeSliceView::makeSlice(IView::Direction i, pqRenderView *view,
 		up[1] = 0.0;
 		up[2] = 1.0;
 		break;
-	case IView::Z:
+	case ViewBase::Z:
 		orient[0] = 0.0;
 		orient[1] = 0.0;
 		orient[2] = 1.0;
@@ -135,9 +135,9 @@ void ThreeSliceView::makeThreeSlice()
 	this->originSourceRepr->colorByArray("signal",
 			vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
-	this->makeSlice(IView::X, this->xView, this->xCut, this->xCutRepr);
-	this->makeSlice(IView::Y, this->yView, this->yCut, this->yCutRepr);
-	this->makeSlice(IView::Z, this->zView, this->zCut, this->zCutRepr);
+	this->makeSlice(ViewBase::X, this->xView, this->xCut, this->xCutRepr);
+	this->makeSlice(ViewBase::Y, this->yView, this->yCut, this->yCutRepr);
+	this->makeSlice(ViewBase::Z, this->zView, this->zCut, this->zCutRepr);
 }
 
 void ThreeSliceView::renderAll()

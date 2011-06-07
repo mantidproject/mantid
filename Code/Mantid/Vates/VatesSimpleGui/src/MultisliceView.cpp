@@ -26,7 +26,7 @@
 #include <QString>
 
 #include <iostream>
-MultiSliceView::MultiSliceView(QWidget *parent) : IView(parent)
+MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
 {
 	this->ui.setupUi(this);
 	this->ui.xAxisWidget->setScalePosition(AxisInteractor::LeftScale);

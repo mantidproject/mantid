@@ -5,7 +5,7 @@
 #include <QPointer>
 #include "ui_MpMainWindow.h"
 
-class IView;
+class ViewBase;
 
 class pqPipelineSource;
 
@@ -70,8 +70,8 @@ signals:
 
 private:
     Q_DISABLE_COPY(mpMainWindow);
-    IView *currentView; ///< Holder for the current view
-    IView *hiddenView; ///< Holder for the view that is being switched from
+    ViewBase *currentView; ///< Holder for the current view
+    ViewBase *hiddenView; ///< Holder for the view that is being switched from
     QPointer<pqPipelineSource> originSource; ///< Holder for the current source
     QHBoxLayout *viewLayout; ///< Layout manager for the view widget
 
@@ -85,7 +85,7 @@ private:
      * @param v the view mode to set on the main window
      * @return the requested view
      */
-    IView *setMainViewWidget(QWidget *container, ModeControlWidget::Views v);
+    ViewBase *setMainViewWidget(QWidget *container, ModeControlWidget::Views v);
     /// Helper function to swap current and hidden view pointers.
     void swapViews();
 };

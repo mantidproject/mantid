@@ -13,7 +13,7 @@
 
 #include <QHBoxLayout>
 
-StandardView::StandardView(QWidget *parent) : IView(parent)
+StandardView::StandardView(QWidget *parent) : ViewBase(parent)
 {
 	this->setupUi(this);
 

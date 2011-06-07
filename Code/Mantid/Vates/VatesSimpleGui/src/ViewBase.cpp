@@ -1,4 +1,4 @@
-#include "IView.h"
+#include "ViewBase.h"
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
@@ -10,12 +10,12 @@
 
 #include <QHBoxLayout>
 
-IView::IView(QWidget *parent) : QWidget(parent)
+ViewBase::ViewBase(QWidget *parent) : QWidget(parent)
 {
 
 }
 
-pqRenderView* IView::createRenderView(QWidget* widget)
+pqRenderView* ViewBase::createRenderView(QWidget* widget)
 {
 	QHBoxLayout *hbox = new QHBoxLayout(widget);
 	hbox->setMargin(0);
@@ -32,7 +32,7 @@ pqRenderView* IView::createRenderView(QWidget* widget)
 	return view;
 }
 
-void IView::destroyFilter(pqObjectBuilder *builder, const QString &name)
+void ViewBase::destroyFilter(pqObjectBuilder *builder, const QString &name)
 {
 	pqServer *server = pqActiveObjects::instance().activeServer();
 	pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();

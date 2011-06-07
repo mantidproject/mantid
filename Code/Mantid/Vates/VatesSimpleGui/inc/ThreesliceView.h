@@ -3,7 +3,7 @@
 
 #include <QtGui/QWidget>
 #include <QPointer>
-#include "IView.h"
+#include "ViewBase.h"
 #include "ui_ThreesliceView.h"
 
 class pqPipelineRepresentation;
@@ -38,7 +38,7 @@ class pqRenderView;
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class ThreeSliceView : public IView, public Ui::ThreeSliceView
+class ThreeSliceView : public ViewBase, public Ui::ThreeSliceView
 {
     Q_OBJECT
 
@@ -52,11 +52,11 @@ public:
     virtual ~ThreeSliceView();
 
     /**
-     * IView::getView
+     * ViewBase::getView
      */
     pqRenderView* getView();
     /**
-     * IView::render
+     * ViewBase::render
      */
     void render();
 
@@ -79,7 +79,7 @@ private:
      * @param cut the created Cartesian slice
      * @param repr the representation of the Cartesian slice
      */
-    void makeSlice(IView::Direction i, pqRenderView *view,
+    void makeSlice(ViewBase::Direction i, pqRenderView *view,
     		pqPipelineSource *cut, pqPipelineRepresentation *repr);
     /// Helper function that creates all three Cartesian orthogonal slices.
     void makeThreeSlice();

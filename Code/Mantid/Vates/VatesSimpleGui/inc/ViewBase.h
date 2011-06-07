@@ -1,5 +1,5 @@
-#ifndef IVIEW_H_
-#define IVIEW_H_
+#ifndef VIEWBASE_H_
+#define VIEWBASE_H_
 
 #include <QtGui/QWidget>
 
@@ -33,15 +33,15 @@ class QString;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class IView : public QWidget {
+class ViewBase : public QWidget {
 public:
   /**
    * Default constructor.
    * @param parent the parent widget for the view
    */
-	IView(QWidget *parent = 0);
+	ViewBase(QWidget *parent = 0);
 	/// Default destructor.
-	virtual ~IView() {}
+	virtual ~ViewBase() {}
 	/**
 	 * Function that creates a single view instance.
 	 * @param container the UI widget to associate the view with
@@ -68,4 +68,4 @@ public:
   enum Direction {X, Y, Z};
 };
 
-#endif // IVIEW_H_
+#endif // VIEWBASE_H_

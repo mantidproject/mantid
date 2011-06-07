@@ -14,7 +14,6 @@ set( INCLUDE_FILES
   inc/AxisInteractor.h
   inc/GeometryParser.h
   inc/Indicator.h
-  inc/IView.h
   inc/ModeControlWidget.h
   inc/MpMainWindow.h
   inc/MultisliceView.h
@@ -22,14 +21,13 @@ set( INCLUDE_FILES
   inc/StandardView.h
   inc/ThreesliceView.h
   inc/TimeControlWidget.h
+  inc/ViewBase.h
 )
 set( SOURCE_FILES
   src/AxisInformation.cpp
   src/AxisInteractor.cpp
-  ${NEW_AI_SRC}
   src/GeometryParser.cpp
   src/Indicator.cpp
-  src/IView.cpp
   src/main.cpp
   src/ModeControlWidget.cpp
   src/MpMainWindow.cpp
@@ -38,6 +36,7 @@ set( SOURCE_FILES
   src/StandardView.cpp
   src/ThreesliceView.cpp
   src/TimeControlWidget.cpp
+  src/ViewBase.cpp
 )
 
 # These are the headers to be preprocessed using
