@@ -14,8 +14,8 @@
    <string>Mantid ParaView GUI Mockup</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <spacer name="horizontalSpacer">
@@ -37,6 +37,9 @@
        <widget class="ModeControlWidget" name="modeControlWidget" native="true"/>
       </item>
       <item>
+       <widget class="ColorSelectionWidget" name="colorSelectionWidget" native="true"/>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -51,7 +54,7 @@
       </item>
      </layout>
     </item>
-    <item row="1" column="0">
+    <item>
      <widget class="QSplitter" name="splitter_2">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -210,6 +213,12 @@
    <class>ModeControlWidget</class>
    <extends>QWidget</extends>
    <header>ModeControlWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ColorSelectionWidget</class>
+   <extends>QWidget</extends>
+   <header>ColorSelectionWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
