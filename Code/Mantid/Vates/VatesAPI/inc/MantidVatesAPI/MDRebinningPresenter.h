@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include <vector>
+#include <string>
 
 class vtkUnstructuredGrid;
 namespace Mantid

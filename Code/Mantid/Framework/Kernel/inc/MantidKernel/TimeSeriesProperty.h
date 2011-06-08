@@ -76,7 +76,7 @@ struct TimeSeriesPropertyStatistics
  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template<typename TYPE>
-class MANTID_KERNEL_DLL TimeSeriesProperty: public Property
+class DLLExport TimeSeriesProperty: public Property
 {
 private:
   /// typedef for the storage of a TimeSeries
@@ -798,7 +798,7 @@ public:
   {
     std::map<DateAndTime, bool> fmap = filter->valueAsMap();
     std::map<DateAndTime, bool>::const_iterator f = fmap.begin();
-	if(fmap.empty()) return;
+        if(fmap.empty()) return;
     typename timeMap::iterator it = m_propertySeries.begin();
     if (f->first < it->first)// expand this series
     {

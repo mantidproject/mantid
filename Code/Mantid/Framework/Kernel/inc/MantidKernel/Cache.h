@@ -42,7 +42,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     template< class KEYTYPE, class VALUETYPE >
-    class MANTID_KERNEL_DLL Cache
+    class DLLExport Cache
     {
     public:
 
@@ -87,7 +87,7 @@ namespace Mantid
       bool getCache(const KEYTYPE& key, VALUETYPE& value) const
       {
       #ifdef USE_CACHE_STATS
-	bool found = getCacheNoStats(key,value);
+        bool found = getCacheNoStats(key,value);
         if (found) 
         {
           PARALLEL_ATOMIC
@@ -100,7 +100,7 @@ namespace Mantid
         }
         return found;
        #else
-	return getCacheNoStats(key,value);
+        return getCacheNoStats(key,value);
        #endif
       }
 
