@@ -7,7 +7,6 @@ from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_trans_direct_beam
 import ui.sans.ui_eqsans_sample_data
 from reduction_gui.reduction.mantid_util import DataFileProxy
-import functools
 
 from hfir_sample_data import DirectBeam
 
@@ -71,12 +70,14 @@ class SampleDataWidget(BaseWidget):
         self.connect(self._content.dark_current_button, QtCore.SIGNAL("clicked()"), self._dark_current_browse)
         
         self.connect(self._content.data_file_plot_button, QtCore.SIGNAL("clicked()"), self._data_file_plot)
-        self.connect(self._content.dark_current_plot_button, QtCore.SIGNAL("clicked()"),
-                     functools.partial(self.show_instrument, file_name=self._content.dark_current_edit.text))
+        self.connect(self._content.dark_current_plot_button, QtCore.SIGNAL("clicked()"), self._dark_plot_clicked)
 
         if not self._in_mantidplot:
             self._content.dark_current_plot_button.hide()
             self._content.data_file_plot_button.hide()
+
+    def _dark_plot_clicked(self):
+        self.show_instrument(file_name=self._content.dark_current_edit.text)
 
     def set_state(self, state):
         """

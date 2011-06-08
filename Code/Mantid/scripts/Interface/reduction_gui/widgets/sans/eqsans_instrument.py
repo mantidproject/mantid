@@ -2,7 +2,6 @@ from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import math
 import os
-import functools
 from reduction_gui.reduction.sans.eqsans_options_script import ReductionOptions
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
@@ -93,8 +92,7 @@ class SANSInstrumentWidget(BaseWidget):
     
         self.connect(self._summary.dark_current_check, QtCore.SIGNAL("clicked(bool)"), self._dark_clicked)
         self.connect(self._summary.dark_browse_button, QtCore.SIGNAL("clicked()"), self._dark_browse)
-        self.connect(self._summary.dark_plot_button, QtCore.SIGNAL("clicked()"),
-                     functools.partial(self.show_instrument, file_name=self._summary.dark_file_edit.text))
+        self.connect(self._summary.dark_plot_button, QtCore.SIGNAL("clicked()"), self._dark_plot_clicked)
         g1 = QtGui.QButtonGroup(self)
         g1.addButton(self._summary.normalization_none_radio)
         g1.addButton(self._summary.normalization_monitor_radio)
@@ -141,8 +139,7 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.scale_beam_radius_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_beam_radius_edit))
         self._summary.scale_att_trans_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_att_trans_edit))
         self.connect(self._summary.scale_data_browse_button, QtCore.SIGNAL("clicked()"), self._scale_data_browse)
-        self.connect(self._summary.scale_data_plot_button, QtCore.SIGNAL("clicked()"),
-                     functools.partial(self.show_instrument, file_name=self._summary.scale_data_edit.text))
+        self.connect(self._summary.scale_data_plot_button, QtCore.SIGNAL("clicked()"), self._scale_data_plot_clicked)
         self.connect(self._summary.thickness_chk, QtCore.SIGNAL("clicked(bool)"), self._thickness_clicked)
         self.connect(self._summary.beamstop_chk, QtCore.SIGNAL("clicked(bool)"), self._beamstop_clicked)
         self.connect(self._summary.scale_chk, QtCore.SIGNAL("clicked(bool)"), self._scale_clicked)
@@ -183,7 +180,13 @@ class SANSInstrumentWidget(BaseWidget):
         if not self._in_mantidplot:
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
-            
+
+    def _scale_data_plot_clicked(self):
+        self.show_instrument(file_name=self._summary.scale_data_edit.text)
+        
+    def _dark_plot_clicked(self):
+        self.show_instrument(file_name=self._summary.dark_file_edit.text)
+                    
     def _output_dir_clicked(self):
         use_data_dir = self._summary.use_data_dir_radio.isChecked()
         self._summary.output_dir_edit.setEnabled(not use_data_dir)

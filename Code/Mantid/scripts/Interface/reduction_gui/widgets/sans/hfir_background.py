@@ -1,7 +1,6 @@
 from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import os
-import functools
 from reduction_gui.reduction.sans.hfir_background_script import Background
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
@@ -94,10 +93,8 @@ class BackgroundWidget(BaseWidget):
         self.connect(self._content.background_browse, QtCore.SIGNAL("clicked()"), self._background_browse)
         self.connect(self._content.trans_dark_current_button, QtCore.SIGNAL("clicked()"), self._trans_dark_current_browse)
 
-        self.connect(self._content.background_plot_button, QtCore.SIGNAL("clicked()"),
-             functools.partial(self.show_instrument, file_name=self._content.background_edit.text))
-        self.connect(self._content.trans_dark_current_plot_button, QtCore.SIGNAL("clicked()"),
-             functools.partial(self.show_instrument, file_name=self._content.trans_dark_current_edit.text))
+        self.connect(self._content.background_plot_button, QtCore.SIGNAL("clicked()"), self._background_plot_clicked)
+        self.connect(self._content.trans_dark_current_plot_button, QtCore.SIGNAL("clicked()"), self._trans_dark_current_plot_clicked)
         
         # Process transmission option
         if not self.show_transmission:
@@ -117,6 +114,12 @@ class BackgroundWidget(BaseWidget):
         if not self._in_mantidplot:
             self._content.background_plot_button.hide()
             self._content.trans_dark_current_plot_button.hide()
+
+    def _background_plot_clicked(self):
+        self.show_instrument(file_name=self._content.background_edit.text)
+
+    def _trans_dark_current_plot_clicked(self):
+        self.show_instrument(file_name=self._content.trans_dark_current_edit.text)
 
     def set_state(self, state):
         """

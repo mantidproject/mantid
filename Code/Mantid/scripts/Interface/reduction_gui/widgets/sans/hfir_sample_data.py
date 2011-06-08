@@ -8,7 +8,6 @@ import ui.sans.ui_trans_direct_beam
 import ui.sans.ui_trans_spreader
 import ui.sans.ui_hfir_sample_data
 from reduction_gui.reduction.mantid_util import DataFileProxy
-import functools
 
 class DirectBeam(BaseWidget):
     """
@@ -44,14 +43,18 @@ class DirectBeam(BaseWidget):
         self.connect(self._content.sample_browse, QtCore.SIGNAL("clicked()"), self._sample_browse)
         self.connect(self._content.direct_browse, QtCore.SIGNAL("clicked()"), self._direct_browse)
         
-        self.connect(self._content.sample_plot, QtCore.SIGNAL("clicked()"),
-                     functools.partial(self.show_instrument, file_name=self._content.sample_edit.text))
-        self.connect(self._content.direct_plot, QtCore.SIGNAL("clicked()"),
-                     functools.partial(self.show_instrument, file_name=self._content.direct_edit.text))
+        self.connect(self._content.sample_plot, QtCore.SIGNAL("clicked()"), self._sample_plot_clicked)
+        self.connect(self._content.direct_plot, QtCore.SIGNAL("clicked()"), self._direct_plot_clicked)
         
         if not self._in_mantidplot:
             self._content.sample_plot.hide()
             self._content.direct_plot.hide()
+
+    def _sample_plot_clicked(self):
+        self.show_instrument(file_name=self._content.sample_edit.text)
+
+    def _direct_plot_clicked(self):
+        self.show_instrument(file_name=self._content.direct_edit.text)
 
     def set_state(self, state):
         """
@@ -119,20 +122,28 @@ class BeamSpreader(BaseWidget):
         self.connect(self._content.direct_scatt_browse, QtCore.SIGNAL("clicked()"), self._direct_scatt_browse)
         self.connect(self._content.direct_spread_browse, QtCore.SIGNAL("clicked()"), self._direct_spread_browse)
 
-        self.connect(self._content.sample_scatt_plot, QtCore.SIGNAL("clicked()"),
-                     functools.partial(self.show_instrument, file_name=self._content.sample_scatt_edit.text))
-        self.connect(self._content.sample_spread_plot, QtCore.SIGNAL("clicked()"),
-                     functools.partial(self.show_instrument, file_name=self._content.sample_spread_edit.text))
-        self.connect(self._content.direct_scatt_plot, QtCore.SIGNAL("clicked()"),
-                     functools.partial(self.show_instrument, file_name=self._content.direct_scatt_edit.text))
-        self.connect(self._content.direct_spread_plot, QtCore.SIGNAL("clicked()"),
-                     functools.partial(self.show_instrument, file_name=self._content.direct_spread_edit.text))
+        self.connect(self._content.sample_scatt_plot, QtCore.SIGNAL("clicked()"), self._sample_scatt_plot_clicked)
+        self.connect(self._content.sample_spread_plot, QtCore.SIGNAL("clicked()"), self._sample_spread_plot_clicked)
+        self.connect(self._content.direct_scatt_plot, QtCore.SIGNAL("clicked()"), self._direct_scatt_plot_clicked)
+        self.connect(self._content.direct_spread_plot, QtCore.SIGNAL("clicked()"), self._direct_spread_plot_clicked)
 
         if not self._in_mantidplot:
             self._content.sample_scatt_plot.hide()
             self._content.sample_spread_plot.hide()
             self._content.direct_scatt_plot.hide()
             self._content.direct_spread_plot.hide()
+
+    def _sample_scatt_plot_clicked(self):
+        self.show_instrument(file_name=self._content.sample_scatt_edit.text)
+
+    def _sample_spread_plot_clicked(self):
+        self.show_instrument(file_name=self._content.sample_spread_edit.text)
+
+    def _direct_scatt_plot_clicked(self):
+        self.show_instrument(file_name=self._content.direct_scatt_edit.text)
+
+    def _direct_spread_plot_clicked(self):
+        self.show_instrument(file_name=self._content.direct_spread_edit.text)
 
     def set_state(self, state):
         """
@@ -229,12 +240,14 @@ class SampleDataWidget(BaseWidget):
         self.connect(self._content.dark_current_button, QtCore.SIGNAL("clicked()"), self._dark_current_browse)
         
         self.connect(self._content.data_file_plot_button, QtCore.SIGNAL("clicked()"), self._data_file_plot)
-        self.connect(self._content.dark_current_plot_button, QtCore.SIGNAL("clicked()"),
-                     functools.partial(self.show_instrument, file_name=self._content.dark_current_edit.text))
+        self.connect(self._content.dark_current_plot_button, QtCore.SIGNAL("clicked()"), self._dark_plot_clicked)
 
         if not self._in_mantidplot:
             self._content.dark_current_plot_button.hide()
             self._content.data_file_plot_button.hide()
+
+    def _dark_plot_clicked(self):
+        self.show_instrument(file_name=self._content.dark_current_edit.text)
 
     def set_state(self, state):
         """

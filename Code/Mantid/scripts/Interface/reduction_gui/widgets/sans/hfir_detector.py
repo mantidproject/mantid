@@ -1,7 +1,6 @@
 from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import os
-import functools
 from reduction_gui.reduction.sans.hfir_detector_script import Detector
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
@@ -69,20 +68,28 @@ class DetectorWidget(BaseWidget):
         self._use_sample_center_changed(self._content.use_sample_center_checkbox.isChecked())
 
 
-        self.connect(self._content.sensitivity_plot_button, QtCore.SIGNAL("clicked()"),
-                     functools.partial(self.show_instrument, file_name=self._content.sensitivity_file_edit.text))
-        self.connect(self._content.data_file_plot_button, QtCore.SIGNAL("clicked()"),
-                     functools.partial(self.show_instrument, file_name=self._content.beam_data_file_edit.text))
-        self.connect(self._content.sensitivity_dark_plot_button, QtCore.SIGNAL("clicked()"),
-                     functools.partial(self.show_instrument, file_name=self._content.sensitivity_dark_file_edit.text))
-        self.connect(self._content.data_file_plot_button_2, QtCore.SIGNAL("clicked()"),
-                     functools.partial(self.show_instrument, file_name=self._content.beam_data_file_edit_2.text))
+        self.connect(self._content.sensitivity_plot_button, QtCore.SIGNAL("clicked()"), self._sensitivity_plot_clicked)
+        self.connect(self._content.data_file_plot_button, QtCore.SIGNAL("clicked()"), self._data_file_plot_clicked)
+        self.connect(self._content.sensitivity_dark_plot_button, QtCore.SIGNAL("clicked()"), self._sensitivity_dark_plot_clicked)
+        self.connect(self._content.data_file_plot_button_2, QtCore.SIGNAL("clicked()"), self._data_file_plot2_clicked)
 
         if not self._in_mantidplot:
             self._content.sensitivity_plot_button.hide()
             self._content.sensitivity_dark_plot_button.hide()
             self._content.data_file_plot_button.hide()
             self._content.data_file_plot_button_2.hide()
+
+    def _sensitivity_plot_clicked(self):
+        self.show_instrument(file_name=self._content.sensitivity_file_edit.text)
+
+    def _data_file_plot_clicked(self):
+        self.show_instrument(file_name=self._content.beam_data_file_edit.text)
+
+    def _sensitivity_dark_plot_clicked(self):
+        self.show_instrument(file_name=self._content.sensitivity_dark_file_edit.text)
+
+    def _data_file_plot2_clicked(self):
+        self.show_instrument(file_name=self._content.beam_data_file_edit_2.text)
 
     def set_state(self, state):
         """
