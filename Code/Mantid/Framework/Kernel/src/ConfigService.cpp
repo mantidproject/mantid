@@ -33,6 +33,10 @@
 #include <string>
 #include <algorithm>
 
+#ifdef __APPLE__
+  #include <mach-o/dyld.h>
+#endif
+
 namespace Mantid
 {
 /**
