@@ -3,7 +3,7 @@ import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 from mantidsimple import *
 import SANSUtility
 
-class CentreFinder():
+class CentreFinder(object):
     """
         Aids estimating the effective centre of the particle beam by calculating Q in four
         quadrants and using the asymmetry to calculate the direction to the beam centre. A
