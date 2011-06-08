@@ -5,7 +5,7 @@
     Copyright            : (C) 2006 by Tomomasa Ohkubo, Ion Vasilief
     Email (use @ for *)  : ion_vasilief*yahoo.fr
     Description          : Pattern combox box
-                           
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -33,21 +33,21 @@
 #include <qpainter.h>
 
 const Qt::BrushStyle PatternBox::patterns[] = {
-  Qt::SolidPattern,
-  Qt::HorPattern,
-  Qt::VerPattern,
-  Qt::CrossPattern,
-  Qt::BDiagPattern,
-  Qt::FDiagPattern,
-  Qt::DiagCrossPattern,
-  Qt::Dense1Pattern,
-  Qt::Dense2Pattern,
-  Qt::Dense3Pattern,
-  Qt::Dense4Pattern,
-  Qt::Dense5Pattern,
-  Qt::Dense6Pattern,
-  Qt::Dense7Pattern,
-  Qt::NoBrush
+    Qt::SolidPattern,
+    Qt::HorPattern,
+    Qt::VerPattern,
+    Qt::CrossPattern,
+    Qt::BDiagPattern,
+    Qt::FDiagPattern,
+    Qt::DiagCrossPattern,
+    Qt::Dense1Pattern,
+    Qt::Dense2Pattern,
+    Qt::Dense3Pattern,
+    Qt::Dense4Pattern,
+    Qt::Dense5Pattern,
+    Qt::Dense6Pattern,
+    Qt::Dense7Pattern,
+    Qt::NoBrush
 };
 
 PatternBox::PatternBox(QWidget *parent) : QComboBox(parent)

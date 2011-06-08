@@ -38,21 +38,21 @@
  */
 class ColorButton : public QtColorPicker
 {
-	Q_OBJECT
+  Q_OBJECT
 
 public:
-	//! Constructor.
-	/**
-	* \param parent parent widget (only affects placement of the widget)
-	*/
-	ColorButton(QWidget *parent = 0);
-	//! Set the current color to be displayed
-	void setColor(const QColor& c){setCurrentColor (c);};
-	//! Get the current color
-	QColor color(){return currentColor();};
+  //! Constructor.
+  /**
+   * \param parent parent widget (only affects placement of the widget)
+   */
+  ColorButton(QWidget *parent = 0);
+  //! Set the current color to be displayed
+  void setColor(const QColor& c){setCurrentColor (c);};
+  //! Get the current color
+  QColor color(){return currentColor();};
 
 signals:
-    void colorChanged();
+  void colorChanged();
 };
 
 #endif

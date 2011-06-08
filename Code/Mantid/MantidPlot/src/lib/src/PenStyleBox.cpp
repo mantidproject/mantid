@@ -5,7 +5,7 @@
     Copyright            : (C) 2008 Ion Vasilief
     Email (use @ for *)  : ion_vasilief*yahoo.fr
     Description          : Pen style combox box
-                           
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -31,21 +31,21 @@
 #include <algorithm>
 
 const Qt::PenStyle PenStyleBox::patterns[] = {
-	Qt::SolidLine,
-	Qt::DashLine,
-	Qt::DotLine,
-	Qt::DashDotLine,
-	Qt::DashDotDotLine
+    Qt::SolidLine,
+    Qt::DashLine,
+    Qt::DotLine,
+    Qt::DashDotLine,
+    Qt::DashDotDotLine
 };
 
 PenStyleBox::PenStyleBox(QWidget *parent) : QComboBox(parent)
 {
-  	setEditable(false);
-	addItem("_____");
-	addItem("_ _ _");
-	addItem(".....");
-	addItem("_._._");
-	addItem("_.._..");
+  setEditable(false);
+  addItem("_____");
+  addItem("_ _ _");
+  addItem(".....");
+  addItem("_._._");
+  addItem("_.._..");
 }
 
 void PenStyleBox::setStyle(const Qt::PenStyle& style)

@@ -1,10 +1,10 @@
 /***************************************************************************
-    File                 : DoubleSpinBox.cpp
-    Project              : QtiPlot
-    --------------------------------------------------------------------
-    Copyright            : (C) 2007-2008 by Ion Vasilief
-    Email (use @ for *)  : ion_vasilief*yahoo.fr
-    Description          : A Double Spin Box
+ File                 : DoubleSpinBox.cpp
+ Project              : QtiPlot
+ --------------------------------------------------------------------
+ Copyright            : (C) 2007-2008 by Ion Vasilief
+ Email (use @ for *)  : ion_vasilief*yahoo.fr
+ Description          : A Double Spin Box
 
  ***************************************************************************/
 
@@ -34,134 +34,133 @@
 #include <float.h>
 #include <math.h>
 
-DoubleSpinBox::DoubleSpinBox(const char format, QWidget * parent)
-:QAbstractSpinBox(parent),
-d_format(format),
-d_min_val(-DBL_MAX),
-d_max_val(DBL_MAX),
-d_value(0.0),
-d_step(0.1),
-d_prec(14)
+DoubleSpinBox::DoubleSpinBox(const char format, QWidget * parent) :
+  QAbstractSpinBox(parent), d_format(format), d_min_val(-DBL_MAX), d_max_val(DBL_MAX), d_value(0.0),
+  d_step(0.1), d_prec(14)
 {
-	if (format == 'f')
-		d_prec = 1;
+  if (format == 'f')
+    d_prec = 1;
 
-	setFocusPolicy(Qt::StrongFocus);
-	lineEdit()->setText(locale().toString(d_value, d_format, d_prec));
-	setWrapping(false);
-	connect(this, SIGNAL(editingFinished()), this, SLOT(interpretText()));
+  setFocusPolicy(Qt::StrongFocus);
+  lineEdit()->setText(locale().toString(d_value, d_format, d_prec));
+  setWrapping(false);
+  connect(this, SIGNAL(editingFinished()), this, SLOT(interpretText()));
 }
 
 void DoubleSpinBox::setSingleStep(double val)
 {
-    if (d_step != val && val < d_max_val)
-        d_step = val;
+  if (d_step != val && val < d_max_val)
+    d_step = val;
 }
 
 void DoubleSpinBox::setMaximum(double max)
 {
-	if (max == d_max_val || max > DBL_MAX)
-		return;
+  if (max == d_max_val || max > DBL_MAX)
+    return;
 
-	d_max_val = max;
+  d_max_val = max;
 }
 
 void DoubleSpinBox::setMinimum(double min)
 {
-	if (min == d_min_val || min < -DBL_MAX)
-		return;
+  if (min == d_min_val || min < -DBL_MAX)
+    return;
 
-	d_min_val = min;
+  d_min_val = min;
 }
 
 void DoubleSpinBox::setRange(double min, double max)
 {
-	setMinimum(min);
-	setMaximum(max);
+  setMinimum(min);
+  setMaximum(max);
 }
 
 void DoubleSpinBox::interpretText()
 {
-	bool ok = false;
-	QString s = text();
-	double value = locale().toDouble(s, &ok);
-	if (ok && value == d_value)
-		return;
+  bool ok = false;
+  QString s = text();
+  double value = locale().toDouble(s, &ok);
+  if (ok && value == d_value)
+    return;
 
-	if (!ok){
-		MyParser parser;
-		parser.setLocale(QLocale());
-		parser.addGSLConstants();
-		try {
-			parser.SetExpr(s.toAscii().constData());
-			value = parser.Eval();
-		} catch (mu::ParserError &e){
-			lineEdit()->setText(textFromValue(d_value));
-			return;
-		}
-	}
+  if (!ok)
+  {
+    MyParser parser;
+    parser.setLocale(QLocale());
+    parser.addGSLConstants();
+    try
+    {
+      parser.SetExpr(s.toAscii().constData());
+      value = parser.Eval();
+    } catch (mu::ParserError &e)
+    {
+      lineEdit()->setText(textFromValue(d_value));
+      return;
+    }
+  }
 
-	if (setValue(value))
-        emit valueChanged(d_value);
-    else
-        lineEdit()->setText(textFromValue(d_value));
+  if (setValue(value))
+    emit valueChanged( d_value);
+  else
+    lineEdit()->setText(textFromValue(d_value));
 }
 
-void DoubleSpinBox::stepBy ( int steps )
+void DoubleSpinBox::stepBy(int steps)
 {
-	double val = d_value + steps*d_step;
-	if (fabs(fabs(d_value) - d_step) < 1e-14 && d_value * steps < 0)//possible zero
-		val = 0.0;
+  double val = d_value + steps * d_step;
+  if (fabs(fabs(d_value) - d_step) < 1e-14 && d_value * steps < 0)//possible zero
+    val = 0.0;
 
-	if (setValue(val))
-    	emit valueChanged(d_value);
+  if (setValue(val))
+    emit valueChanged( d_value);
 }
 
-QAbstractSpinBox::StepEnabled DoubleSpinBox::stepEnabled () const
+QAbstractSpinBox::StepEnabled DoubleSpinBox::stepEnabled() const
 {
-	QAbstractSpinBox::StepEnabled stepDown = QAbstractSpinBox::StepNone;
-	if (d_value > d_min_val)
-		stepDown = StepDownEnabled;
+  QAbstractSpinBox::StepEnabled stepDown = QAbstractSpinBox::StepNone;
+  if (d_value > d_min_val)
+    stepDown = StepDownEnabled;
 
-	QAbstractSpinBox::StepEnabled stepUp = QAbstractSpinBox::StepNone;
-	if (d_value < d_max_val)
-		stepUp = StepUpEnabled;
+  QAbstractSpinBox::StepEnabled stepUp = QAbstractSpinBox::StepNone;
+  if (d_value < d_max_val)
+    stepUp = StepUpEnabled;
 
-	return stepDown | stepUp;
+  return stepDown | stepUp;
 }
 
 bool DoubleSpinBox::setValue(double val)
 {
-	if (val >= d_min_val && val <= d_max_val){
-		d_value = val;
-        lineEdit()->setText(textFromValue(d_value));
-        return true;
-	}
+  if (val >= d_min_val && val <= d_max_val)
+  {
+    d_value = val;
+    lineEdit()->setText(textFromValue(d_value));
+    return true;
+  }
 
-	lineEdit()->setText(textFromValue(d_value));
-	return false;
+  lineEdit()->setText(textFromValue(d_value));
+  return false;
 }
 
-QString DoubleSpinBox::textFromValue (double value) const
+QString DoubleSpinBox::textFromValue(double value) const
 {
-	if (!specialValueText().isEmpty() && value == d_min_val)
-		return specialValueText();
+  if (!specialValueText().isEmpty() && value == d_min_val)
+    return specialValueText();
 
-	if (d_prec <= 14)
-		return locale().toString(value, d_format, d_prec);
+  if (d_prec <= 14)
+    return locale().toString(value, d_format, d_prec);
 
-	return locale().toString(value, d_format, 6);
+  return locale().toString(value, d_format, 6);
 }
 
-QValidator::State DoubleSpinBox::validate(QString & , int & ) const
+QValidator::State DoubleSpinBox::validate(QString &, int &) const
 {
-	return QValidator::Acceptable;
+  return QValidator::Acceptable;
 }
 
 void DoubleSpinBox::focusInEvent(QFocusEvent * e)
 {
-	emit activated(this);
-	return QAbstractSpinBox::focusInEvent(e);
+  emit activated(this);
+  return QAbstractSpinBox::focusInEvent(e);
 }
 
 /*****************************************************************************
@@ -170,35 +169,34 @@ void DoubleSpinBox::focusInEvent(QFocusEvent * e)
  *
  *****************************************************************************/
 
-RangeLimitBox::RangeLimitBox(LimitType type, QWidget * parent)
-:QWidget(parent),
-d_type(type)
+RangeLimitBox::RangeLimitBox(LimitType type, QWidget * parent) :
+      QWidget(parent), d_type(type)
 {
-    d_checkbox = new QCheckBox();
-	d_spin_box = new DoubleSpinBox();
-	d_spin_box->setSpecialValueText(" ");
-	d_spin_box->setValue(-DBL_MAX);
-	d_spin_box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-	d_spin_box->setEnabled(false);
+  d_checkbox = new QCheckBox();
+  d_spin_box = new DoubleSpinBox();
+  d_spin_box->setSpecialValueText(" ");
+  d_spin_box->setValue(-DBL_MAX);
+  d_spin_box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  d_spin_box->setEnabled(false);
 
-	QHBoxLayout *l = new QHBoxLayout(this);
-	l->setMargin(0);
-	l->setSpacing(0);
-	l->addWidget(d_checkbox);
-	l->addWidget(d_spin_box);
+  QHBoxLayout *l = new QHBoxLayout(this);
+  l->setMargin(0);
+  l->setSpacing(0);
+  l->addWidget(d_checkbox);
+  l->addWidget(d_spin_box);
 
-	setFocusPolicy(Qt::StrongFocus);
-    setFocusProxy(d_spin_box);
-	connect(d_checkbox, SIGNAL(toggled(bool)), d_spin_box, SLOT(setEnabled(bool)));
+  setFocusPolicy(Qt::StrongFocus);
+  setFocusProxy( d_spin_box);
+  connect(d_checkbox, SIGNAL(toggled(bool)), d_spin_box, SLOT(setEnabled(bool)));
 }
 
 double RangeLimitBox::value()
 {
-	if (d_checkbox->isChecked())
-		return d_spin_box->value();
+  if (d_checkbox->isChecked())
+    return d_spin_box->value();
 
-	double val = -DBL_MAX;
-	if (d_type == RightLimit)
-		return DBL_MAX;
-	return val;
+  double val = -DBL_MAX;
+  if (d_type == RightLimit)
+    return DBL_MAX;
+  return val;
 }

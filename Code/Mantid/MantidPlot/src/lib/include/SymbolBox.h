@@ -5,7 +5,7 @@
     Copyright            : (C) 2006 by Ion Vasilief
     Email (use @ for *)  : ion_vasilief*yahoo.fr
     Description          : Plot symbol combo box
-                           
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -41,29 +41,29 @@ class SymbolBox : public QComboBox
 {
   Q_OBJECT
 public:
-		//! Constructor.
-		/**
-		 * \param parent parent widget (only affects placement of the widget)
-		 */
-		SymbolBox(bool showNoSymbol = true, QWidget *parent = 0);
+  //! Constructor.
+  /**
+   * \param parent parent widget (only affects placement of the widget)
+   */
+  SymbolBox(bool showNoSymbol = true, QWidget *parent = 0);
 
-  		void setStyle(const QwtSymbol::Style& c);
- 		QwtSymbol::Style selectedSymbol() const;
+  void setStyle(const QwtSymbol::Style& c);
+  QwtSymbol::Style selectedSymbol() const;
 
-  		static QwtSymbol::Style style(int index);
-  		static int symbolIndex(const QwtSymbol::Style& style);
-		static QList<int> defaultSymbols();
+  static QwtSymbol::Style style(int index);
+  static int symbolIndex(const QwtSymbol::Style& style);
+  static QList<int> defaultSymbols();
 
 signals:
-		//! Signal emitted when the box gains focus
-		void activated(SymbolBox *);
+  //! Signal emitted when the box gains focus
+  void activated(SymbolBox *);
 
 protected:
-		void init(bool showNoSymbol);
-		void focusInEvent(QFocusEvent *);
+  void init(bool showNoSymbol);
+  void focusInEvent(QFocusEvent *);
 
 private:
-		static const QwtSymbol::Style symbols[];
+  static const QwtSymbol::Style symbols[];
 };
 
 #endif

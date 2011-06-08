@@ -5,7 +5,7 @@
     Copyright            : (C) 2006 by Tomomasa Ohkubo, Ion Vasilief
     Email (use @ for *)  : ion_vasilief*yahoo.fr
     Description          : Pattern combo box
-                           
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -38,24 +38,24 @@
 class PatternBox : public QComboBox
 {
   Q_OBJECT
-	
-public:
-		//! Constructor.
-		/**
-		 * \param parent parent widget (only affects placement of the widget)
-		 */
-		PatternBox(QWidget *parent = 0);
-		void setPattern(const Qt::BrushStyle& c);
-		Qt::BrushStyle getSelectedPattern() const;
 
-		static int patternIndex(const Qt::BrushStyle& style);
-		static Qt::BrushStyle brushStyle(int index);
+public:
+  //! Constructor.
+  /**
+   * \param parent parent widget (only affects placement of the widget)
+   */
+  PatternBox(QWidget *parent = 0);
+  void setPattern(const Qt::BrushStyle& c);
+  Qt::BrushStyle getSelectedPattern() const;
+
+  static int patternIndex(const Qt::BrushStyle& style);
+  static Qt::BrushStyle brushStyle(int index);
 
 protected:
-		void init();
+  void init();
 
 private:
-		static const Qt::BrushStyle patterns[];
+  static const Qt::BrushStyle patterns[];
 };
 
 #endif

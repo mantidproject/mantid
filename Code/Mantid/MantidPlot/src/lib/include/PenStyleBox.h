@@ -5,7 +5,7 @@
     Copyright            : (C) 2008 Ion Vasilief
     Email (use @ for *)  : ion_vasilief*yahoo.fr
     Description          : Pen style combo box
-                           
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -38,21 +38,21 @@
 class PenStyleBox : public QComboBox
 {
   Q_OBJECT
-	
-public:
-		//! Constructor.
-		/**
-		 * \param parent parent widget (only affects placement of the widget)
-		 */
-		PenStyleBox(QWidget *parent = 0);
-  		void setStyle(const Qt::PenStyle& style);
-  		Qt::PenStyle style() const;
 
-  		static int styleIndex(const Qt::PenStyle& style);
-  		static Qt::PenStyle penStyle(int index);
+public:
+  //! Constructor.
+  /**
+   * \param parent parent widget (only affects placement of the widget)
+   */
+  PenStyleBox(QWidget *parent = 0);
+  void setStyle(const Qt::PenStyle& style);
+  Qt::PenStyle style() const;
+
+  static int styleIndex(const Qt::PenStyle& style);
+  static Qt::PenStyle penStyle(int index);
 
 private:
-  		static const Qt::PenStyle patterns[];
+  static const Qt::PenStyle patterns[];
 };
 
 #endif

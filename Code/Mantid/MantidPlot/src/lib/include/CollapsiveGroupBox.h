@@ -38,18 +38,18 @@
  */
 class CollapsiveGroupBox : public QGroupBox
 {
-	Q_OBJECT
+  Q_OBJECT
 
 public:
-	//! Constructor.
-	/**
-	* \param parent parent widget (only affects placement of the widget)
-	*/
-	CollapsiveGroupBox(const QString & title = QString(), QWidget * parent = 0);
+  //! Constructor.
+  /**
+   * \param parent parent widget (only affects placement of the widget)
+   */
+  CollapsiveGroupBox(const QString & title = QString(), QWidget * parent = 0);
 
 public slots:
-	void setCollapsed (bool collapsed = true);
-	void setExpanded (bool expanded = true);
+  void setCollapsed (bool collapsed = true);
+  void setExpanded (bool expanded = true);
 };
 
 #endif
