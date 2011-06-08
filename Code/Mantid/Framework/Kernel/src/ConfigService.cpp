@@ -31,6 +31,7 @@
 #include <sstream>
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 namespace Mantid
 {
