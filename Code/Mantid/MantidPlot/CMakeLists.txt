@@ -14,7 +14,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/BoxCurve.cpp
                    src/CanvasPicker.cpp
                    src/ColorMapDialog.cpp
-                   src/ColorMapEditor.cpp
                    src/Cone3D.cpp
                    src/ConfigDialog.cpp
                    src/ContourLinesEditor.cpp
@@ -26,12 +25,10 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/DataPickerTool.cpp
                    src/DataSetDialog.cpp
                    src/Differentiation.cpp
-                   src/DoubleSpinBox.cpp
                    src/ErrDialog.cpp
                    src/ExpDecayDialog.cpp
                    src/ExponentialFit.cpp
                    src/ExportDialog.cpp
-                   src/ExtensibleFileDialog.cpp
                    src/FFT.cpp
                    src/FFTDialog.cpp
                    src/FFTFilter.cpp
@@ -80,8 +77,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Note.cpp
                    src/nrutil.cpp
                    src/OpenProjectDialog.cpp
-                   src/PatternBox.cpp
-                   src/PenStyleBox.cpp
                    src/pixmaps.cpp
                    src/Plot3DDialog.cpp
                    src/Plot.cpp
@@ -119,14 +114,11 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/SortDialog.cpp
                    src/Spectrogram.cpp
                    src/SurfaceDialog.cpp
-                   src/SymbolBox.cpp
-                   src/SymbolDialog.cpp
                    src/Table.cpp
                    src/TableDialog.cpp
                    src/TableStatistics.cpp
                    src/TextDialog.cpp
                    src/TextEditor.cpp
-                   src/TextFormatButtons.cpp
                    src/TitlePicker.cpp
                    src/TranslateCurveTool.cpp
                    src/UserFunction.cpp
@@ -135,10 +127,18 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/plot2D/ScaleEngine.cpp
                    src/analysis/fft2D.cpp
                    src/zlib123/minigzip.c
-                   # Have added all of current qtiplot 'lib' to repository
-                   # but only including what we want to use here
+                   src/lib/src/CollapsiveGroupBox.cpp
                    src/lib/src/ColorBox.cpp
                    src/lib/src/ColorButton.cpp
+                   src/lib/src/ColorMapEditor.cpp
+                   src/lib/src/DoubleSpinBox.cpp
+                   src/lib/src/ExtensibleFileDialog.cpp
+                   src/lib/src/LineNumberDisplay.cpp
+                   src/lib/src/PatternBox.cpp
+                   src/lib/src/PenStyleBox.cpp
+                   src/lib/src/SymbolBox.cpp
+                   src/lib/src/SymbolDialog.cpp
+                   src/lib/src/TextFormatButtons.cpp
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.cpp
 )
 
@@ -228,7 +228,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/BoxCurve.h
                    src/CanvasPicker.h
                    src/ColorMapDialog.h
-                   src/ColorMapEditor.h
                    src/Cone3D.h
                    src/ConfigDialog.h
                    src/ContourLinesEditor.h
@@ -242,12 +241,10 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/DataPickerTool.h
                    src/DataSetDialog.h
                    src/Differentiation.h
-                   src/DoubleSpinBox.h
                    src/ErrDialog.h
                    src/ExpDecayDialog.h
                    src/ExponentialFit.h
                    src/ExportDialog.h
-                   src/ExtensibleFileDialog.h
                    src/FFTDialog.h
                    src/FFTFilter.h
                    src/FFT.h
@@ -297,8 +294,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Note.h
                    src/nrutil.h
                    src/OpenProjectDialog.h
-                   src/PatternBox.h
-                   src/PenStyleBox.h
                    src/pixmaps.h
                    src/Plot3DDialog.h
                    src/PlotCurve.h
@@ -340,14 +335,11 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/SortDialog.h
                    src/Spectrogram.h
                    src/SurfaceDialog.h
-                   src/SymbolBox.h
-                   src/SymbolDialog.h
                    src/TableDialog.h
                    src/Table.h
                    src/TableStatistics.h
                    src/TextDialog.h
                    src/TextEditor.h
-                   src/TextFormatButtons.h
                    src/TitlePicker.h
                    src/TranslateCurveTool.h
                    src/UserFunction.h
@@ -355,8 +347,18 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/analysis/fft2D.h
                    src/origin/OPJFile.h
                    src/plot2D/ScaleEngine.h
+                   src/lib/include/CollapsiveGroupBox.h
                    src/lib/include/ColorBox.h
                    src/lib/include/ColorButton.h
+                   src/lib/include/ColorMapEditor.h
+                   src/lib/include/DoubleSpinBox.h
+                   src/lib/include/ExtensibleFileDialog.h
+                   src/lib/include/LineNumberDisplay.h
+                   src/lib/include/PatternBox.h
+                   src/lib/include/PenStyleBox.h
+                   src/lib/include/SymbolBox.h
+                   src/lib/include/SymbolDialog.h
+                   src/lib/include/TextFormatButtons.h
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
 )
 
@@ -522,10 +524,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/AssociationsDialog.h
                         src/AxesDialog.h
                         src/CanvasPicker.h
-                        #src/ColorBox.h
-                        #src/ColorButton.h
                         src/ColorMapDialog.h
-                        src/ColorMapEditor.h
                         src/ConfigDialog.h
                         src/ContourLinesEditor.h
                         src/Convolution.h
@@ -536,12 +535,10 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/DataPickerTool.h
                         src/DataSetDialog.h
                         src/Differentiation.h
-                        src/DoubleSpinBox.h
                         src/ErrDialog.h
                         src/ExpDecayDialog.h
                         src/ExponentialFit.h
                         src/ExportDialog.h
-                        src/ExtensibleFileDialog.h
                         src/FFTDialog.h
                         src/FFTFilter.h
                         src/FFT.h
@@ -580,8 +577,6 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/NonLinearFit.h
                         src/Note.h
                         src/OpenProjectDialog.h
-                        src/PatternBox.h
-                        src/PenStyleBox.h
                         src/Plot3DDialog.h
                         src/PlotCurve.h
                         src/PlotDialog.h
@@ -611,18 +606,25 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/SmoothFilter.h
                         src/SortDialog.h
                         src/SurfaceDialog.h
-                        src/SymbolBox.h
-                        src/SymbolDialog.h
                         src/TableDialog.h
                         src/Table.h
                         src/TableStatistics.h
                         src/TextDialog.h
                         src/TextEditor.h
-                        src/TextFormatButtons.h
                         src/TitlePicker.h
                         src/TranslateCurveTool.h
+                        src/lib/include/CollapsiveGroupBox.h
                         src/lib/include/ColorBox.h
                         src/lib/include/ColorButton.h
+                        src/lib/include/ColorMapEditor.h
+                        src/lib/include/DoubleSpinBox.h
+                        src/lib/include/ExtensibleFileDialog.h
+                        src/lib/include/LineNumberDisplay.h
+                        src/lib/include/PatternBox.h
+                        src/lib/include/PenStyleBox.h
+                        src/lib/include/SymbolBox.h
+                        src/lib/include/SymbolDialog.h
+                        src/lib/include/TextFormatButtons.h
                         src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
 )
 

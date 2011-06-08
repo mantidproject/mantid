@@ -1622,8 +1622,7 @@ void AxesDialog::initAxesPage()
 	buttonLabelFont = new QPushButton(tr("&Font"));
 	hl->addWidget(buttonLabelFont);
 
-	formatButtons = new TextFormatButtons(boxTitle);
-	formatButtons->toggleCurveButton(false);
+	formatButtons = new TextFormatButtons(boxTitle, TextFormatButtons::AxisLabel);
 	hl->addWidget(formatButtons);
 	hl->addStretch();
 

@@ -77,32 +77,54 @@ void DoubleSpinBox::setRange(double min, double max)
 
 void DoubleSpinBox::interpretText()
 {
+// RJT: Keep our version of this, which contains a bug fix (see [10521]).
+// Also, there are lines referring to methods that don't exist in our (older) MyParser class.
   bool ok = false;
-  QString s = text();
-  double value = locale().toDouble(s, &ok);
-  if (ok && value == d_value)
-    return;
-
-  if (!ok)
+  double value = locale().toDouble(text(), &ok);
+  if (ok && setValue(value))
   {
-    MyParser parser;
-    parser.setLocale(QLocale());
-    parser.addGSLConstants();
-    try
+    emit valueChanged(d_value);
+  }
+  else
+  {
+    QString val = text().remove(",");
+    value = locale().toDouble(val, &ok);
+    if ( ok && setValue(value) )
     {
-      parser.SetExpr(s.toAscii().constData());
-      value = parser.Eval();
-    } catch (mu::ParserError &e)
+      emit valueChanged(d_value);
+    }
+    else
     {
       lineEdit()->setText(textFromValue(d_value));
-      return;
     }
   }
 
-  if (setValue(value))
-    emit valueChanged( d_value);
-  else
-    lineEdit()->setText(textFromValue(d_value));
+//  bool ok = false;
+//  QString s = text();
+//  double value = locale().toDouble(s, &ok);
+//  if (ok && value == d_value)
+//    return;
+//
+//  if (!ok)
+//  {
+//    MyParser parser;
+//    parser.setLocale(QLocale());
+//    parser.addGSLConstants();
+//    try
+//    {
+//      parser.SetExpr(s.toAscii().constData());
+//      value = parser.Eval();
+//    } catch (mu::ParserError &e)
+//    {
+//      lineEdit()->setText(textFromValue(d_value));
+//      return;
+//    }
+//  }
+//
+//  if (setValue(value))
+//    emit valueChanged( d_value);
+//  else
+//    lineEdit()->setText(textFromValue(d_value));
 }
 
 void DoubleSpinBox::stepBy(int steps)

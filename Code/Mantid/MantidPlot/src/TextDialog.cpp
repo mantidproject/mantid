@@ -156,8 +156,7 @@ TextDialog::TextDialog(TextType type, QWidget* parent, Qt::WFlags fl)
 	textEditBox->setTextFormat(Qt::PlainText);
 	textEditBox->setFont(QFont());
 
-	formatButtons =  new TextFormatButtons(textEditBox);
-	formatButtons->toggleCurveButton(textType == TextMarker);
+	formatButtons =  new TextFormatButtons(textEditBox, TextFormatButtons::AxisLabel);
 
 	setFocusPolicy(Qt::StrongFocus);
 	setFocusProxy(textEditBox);

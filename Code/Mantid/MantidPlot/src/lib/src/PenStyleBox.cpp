@@ -54,7 +54,7 @@ void PenStyleBox::setStyle(const Qt::PenStyle& style)
   if (ite == patterns + sizeof(patterns))
     this->setCurrentIndex(0); // default style is solid.
   else
-    this->setCurrentIndex(ite - patterns);
+    this->setCurrentIndex(int(ite - patterns));
 }
 
 Qt::PenStyle PenStyleBox::penStyle(int index)
@@ -80,5 +80,5 @@ int PenStyleBox::styleIndex(const Qt::PenStyle& style)
   if (ite == patterns + sizeof(patterns))
     return 0; // default style is solid.
   else
-    return (ite - patterns);
+    return (int(ite - patterns));
 }

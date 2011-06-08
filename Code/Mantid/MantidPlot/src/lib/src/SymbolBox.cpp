@@ -153,7 +153,7 @@ void SymbolBox::setStyle(const QwtSymbol::Style& style)
   if (ite == symbols + sizeof(symbols))
     this->setCurrentIndex(0);
   else
-    this->setCurrentIndex(ite - symbols);
+    this->setCurrentIndex(int(ite - symbols));
 }
 
 QwtSymbol::Style SymbolBox::selectedSymbol() const
@@ -171,7 +171,7 @@ int SymbolBox::symbolIndex(const QwtSymbol::Style& style)
   if (ite == symbols + sizeof(symbols))
     return 0;
 
-  return (ite - symbols);
+  return (int(ite - symbols));
 }
 
 QwtSymbol::Style SymbolBox::style(int index)

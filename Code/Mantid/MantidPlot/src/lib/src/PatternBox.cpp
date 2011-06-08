@@ -157,7 +157,7 @@ void PatternBox::setPattern(const Qt::BrushStyle& style)
   if (ite == patterns + sizeof(patterns))
     this->setCurrentIndex(14); // default pattern is none.
   else
-    this->setCurrentIndex(ite - patterns);
+    this->setCurrentIndex(int(ite - patterns));
 }
 
 Qt::BrushStyle PatternBox::brushStyle(int index)
@@ -183,5 +183,5 @@ int PatternBox::patternIndex(const Qt::BrushStyle& style)
   if (ite == patterns + sizeof(patterns))
     return 14; // default pattern is none.
   else
-    return (ite - patterns);
+    return (int(ite - patterns));
 }
