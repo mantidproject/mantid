@@ -32,7 +32,7 @@ namespace Kernel
    * the comma operator can be used to make a call to the factories' subscribe
    * method in the first part.
    */
-  class MANTID_KERNEL_DLL RegistrationHelper
+  class DLLExport RegistrationHelper
   {
   public:
     /** Constructor. Does nothing.

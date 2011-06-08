@@ -133,10 +133,11 @@ namespace Mantid
       {
       public:
         MapIteratorProxy(const smap::const_iterator current) 
-          : m_iter(current), m_value(*current) { }
-        inline void increment() { ++m_iter; m_value = *m_iter; }
+          : m_iter(current),m_value(*current) { }
+        inline void increment() { ++m_iter; }
         inline const ISpectraDetectorMap::value_type & dereference() const 
         { 
+	  const_cast<MapIteratorProxy*>(this)->m_value = *m_iter;
           return m_value;
         }
         inline bool equals(const IteratorProxy* other) const 
@@ -148,7 +149,7 @@ namespace Mantid
         virtual MapIteratorProxy * clone() const { return new MapIteratorProxy(m_iter); }
       private:
         smap::const_iterator m_iter;
-        value_type m_value;
+	ISpectraDetectorMap::value_type m_value;
       };
       ///@endcond
 
