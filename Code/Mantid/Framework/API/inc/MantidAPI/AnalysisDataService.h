@@ -50,7 +50,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL AnalysisDataServiceImpl : public Kernel::DataService<API::Workspace>
+class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Workspace>
 {
  public:
   /** @name Extra notifications only applicable to the ADS */
@@ -110,9 +110,9 @@ private:
 ///Forward declaration of a specialisation of SingletonHolder for AnalysisDataServiceImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
   // this breaks new namespace declaraion rules; need to find a better fix
-  template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>;
+  template class DLLExport Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>;
 #endif /* _WIN32 */
-  typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl> AnalysisDataService;
+  typedef DLLExport Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl> AnalysisDataService;
 
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification WorkspaceAddNotification;
 typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification>& WorkspaceAddNotification_ptr;

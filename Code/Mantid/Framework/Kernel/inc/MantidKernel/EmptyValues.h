@@ -32,10 +32,10 @@ namespace Mantid
 {
   
   /// Returns what we consider an "empty" integer
-  MANTID_KERNEL_DLL int EMPTY_INT();
+  DLLExport int EMPTY_INT();
 
   /// Return what we consider to be an empty double
-  MANTID_KERNEL_DLL double EMPTY_DBL();
+  DLLExport double EMPTY_DBL();
 
 }
 

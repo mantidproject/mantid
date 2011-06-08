@@ -57,7 +57,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename T>
-class MANTID_KERNEL_DLL DataService
+class DLLExport DataService
 {
 public:
 

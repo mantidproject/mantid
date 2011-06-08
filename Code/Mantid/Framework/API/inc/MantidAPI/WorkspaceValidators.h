@@ -45,7 +45,7 @@ namespace API
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE = MatrixWorkspace>
-class MANTID_API_DLL CompositeValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport CompositeValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
   CompositeValidator() {}
@@ -115,7 +115,7 @@ private:
  *  @date 16/09/2008
  */
 template <typename TYPE = MatrixWorkspace>
-class MANTID_API_DLL WorkspaceUnitValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport WorkspaceUnitValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
   /** Constructor
@@ -169,7 +169,7 @@ private:
  *  @date 16/09/2008
  */
 template <typename TYPE = MatrixWorkspace>
-class MANTID_API_DLL HistogramValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport HistogramValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
   /** Constructor
@@ -218,7 +218,7 @@ private:
  *  @date 13/08/2010
  */
 template <typename TYPE = MatrixWorkspace>
-class MANTID_API_DLL EventWorkspaceValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport EventWorkspaceValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
   /** Constructor
@@ -270,7 +270,7 @@ private:
  *  @date 16/09/2008
  */
 template <typename TYPE = MatrixWorkspace>
-class MANTID_API_DLL RawCountValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport RawCountValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
   /** Constructor
@@ -321,7 +321,7 @@ private:
  *  @date 18/09/2008
  */
 template <typename TYPE = MatrixWorkspace>
-class MANTID_API_DLL CommonBinsValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport CommonBinsValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
   CommonBinsValidator() {}
@@ -363,7 +363,7 @@ private:
  *  @date 15/09/2010
  */
 template <typename TYPE = MatrixWorkspace>
-class MANTID_API_DLL SpectraAxisValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport SpectraAxisValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
   /** Class constructor with parameter.
@@ -397,7 +397,7 @@ private:
  *  @date 15/09/2010
  */
 template <typename TYPE = MatrixWorkspace>
-class MANTID_API_DLL NumericAxisValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport NumericAxisValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
   /** Class constructor with parameter.
@@ -434,7 +434,7 @@ private:
  *  @date 17/12/2010
  */
 template <typename TYPE = MatrixWorkspace>
-class MANTID_API_DLL InstrumentValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport InstrumentValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
   /** Constructor

@@ -51,7 +51,7 @@ namespace DataObjects
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_DATAOBJECTS_DLL ManagedDataBlock2D
+class DLLExport ManagedDataBlock2D
 {
   /// Output a string representation to a stream
   friend DLLExport std::fstream& operator<<(std::fstream&, ManagedDataBlock2D&);

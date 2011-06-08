@@ -39,7 +39,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 template <typename T>
-class MANTID_KERNEL_DLL ArrayProperty : public PropertyWithValue< std::vector<T> >
+class DLLExport ArrayProperty : public PropertyWithValue< std::vector<T> >
 {
 public:
   /** Constructor

@@ -114,7 +114,7 @@ namespace Mantid
 
     /// Templated class for parameters of type \c Type
     template<class Type>
-    class MANTID_GEOMETRY_DLL ParameterType : public Parameter
+    class DLLExport ParameterType : public Parameter
     {
     public:
       /// Returns the value of the property as a string

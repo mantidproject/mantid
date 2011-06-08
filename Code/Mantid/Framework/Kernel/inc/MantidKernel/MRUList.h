@@ -50,7 +50,7 @@ namespace Kernel
       Code Documentation is available at: <http://doxygen.mantidproject.org>
    */
   template<class T>
-  class MANTID_KERNEL_DLL MRUList
+  class DLLExport MRUList
   {
   private:
     /// hideous typedef for the container holding the list

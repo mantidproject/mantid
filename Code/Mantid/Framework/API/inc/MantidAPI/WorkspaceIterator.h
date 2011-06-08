@@ -38,7 +38,7 @@ namespace API
  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template<typename _Iterator, typename _Container>
-class MANTID_API_DLL workspace_iterator
+class DLLExport workspace_iterator
 {
 private:
   ///internal workspace pointer

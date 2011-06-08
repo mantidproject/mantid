@@ -38,7 +38,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE>
-class MANTID_KERNEL_DLL IValidator
+class DLLExport IValidator
 {
 public:
   ///virtual Destructor

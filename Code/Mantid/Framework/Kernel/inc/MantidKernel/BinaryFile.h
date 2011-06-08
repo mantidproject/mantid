@@ -36,7 +36,7 @@ static const size_t MIN_BLOCK_SIZE = 1000;
  *
  */
 template<typename T>
-class MANTID_KERNEL_DLL BinaryFile
+class DLLExport BinaryFile
 {
 public:
   //------------------------------------------------------------------------------------

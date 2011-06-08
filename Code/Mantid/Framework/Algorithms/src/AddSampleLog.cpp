@@ -6,6 +6,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include <string>
 
 namespace Mantid
