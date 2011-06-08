@@ -59,7 +59,7 @@ namespace Strings
  * @return
  */
 template<typename ITERATOR_TYPE>
-MANTID_KERNEL_DLL std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string separator)
+DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string separator)
 {
   std::ostringstream output;
   ITERATOR_TYPE it;
