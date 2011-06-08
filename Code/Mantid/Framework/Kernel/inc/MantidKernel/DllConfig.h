@@ -28,7 +28,7 @@
 */
 #include "MantidKernel/System.h"
 
-#ifdef IN_MANTID_GEOMETRY
+#ifdef IN_MANTID_KERNEL
 #define MANTID_KERNEL_DLL DLLExport
 #else
 #define MANTID_KERNEL_DLL DLLImport
