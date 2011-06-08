@@ -38,7 +38,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE>
-class DLLExport NullValidator : public IValidator<TYPE>
+class MANTID_KERNEL_DLL NullValidator : public IValidator<TYPE>
 {
 public:
   IValidator<TYPE>* clone() { return new NullValidator(*this); }

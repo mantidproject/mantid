@@ -1,7 +1,7 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENT_NEARESTNEIGHBOURS
 #define MANTID_GEOMETRY_INSTRUMENT_NEARESTNEIGHBOURS
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IDTypes.h"
 // Boost graphing
@@ -60,12 +60,12 @@ namespace Mantid
      *  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
      *  Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport NearestNeighbours
+    class MANTID_GEOMETRY_DLL NearestNeighbours
     {
     public:
       /// Constructor with an instrument and a spectra map
       NearestNeighbours(boost::shared_ptr<const IInstrument> instrument,
-			const ISpectraDetectorMap & spectraMap);
+                        const ISpectraDetectorMap & spectraMap);
       /// Default (empty) destructor
       virtual ~NearestNeighbours() {};
 
@@ -75,9 +75,9 @@ namespace Mantid
     private:
       /// typedef for Graph object used to hold the calculated information
       typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
-	boost::property<boost::vertex_name_t, int64_t>,
-	boost::property<boost::edge_name_t, double>
-	> Graph;
+        boost::property<boost::vertex_name_t, int64_t>,
+        boost::property<boost::edge_name_t, double>
+        > Graph;
       /// Vertex descriptor object for Graph
       typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
       /// map object of int to Graph Vertex descriptor
@@ -91,8 +91,8 @@ namespace Mantid
 
       /// Get the spectra associated with all in the instrument
       std::map<specid_t, IDetector_sptr> 
-	getSpectraDetectors(boost::shared_ptr<const IInstrument> instrument, 
-			    const ISpectraDetectorMap & spectraMap);
+        getSpectraDetectors(boost::shared_ptr<const IInstrument> instrument, 
+                            const ISpectraDetectorMap & spectraMap);
 
       /// A pointer the the instrument
       boost::shared_ptr<const IInstrument> m_instrument;

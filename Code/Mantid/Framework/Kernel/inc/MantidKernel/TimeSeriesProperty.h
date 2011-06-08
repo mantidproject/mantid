@@ -7,7 +7,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSplitter.h"
@@ -76,7 +76,7 @@ struct TimeSeriesPropertyStatistics
  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template<typename TYPE>
-class DLLExport TimeSeriesProperty: public Property
+class MANTID_KERNEL_DLL TimeSeriesProperty: public Property
 {
 private:
   /// typedef for the storage of a TimeSeries

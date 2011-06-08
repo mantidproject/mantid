@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/MultiThreaded.h"
 
 #include <boost/multi_index_container.hpp>
@@ -50,7 +50,7 @@ namespace Kernel
       Code Documentation is available at: <http://doxygen.mantidproject.org>
    */
   template<class T>
-  class DLLExport MRUList
+  class MANTID_KERNEL_DLL MRUList
   {
   private:
     /// hideous typedef for the container holding the list

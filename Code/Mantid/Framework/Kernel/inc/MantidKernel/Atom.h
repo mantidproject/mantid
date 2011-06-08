@@ -3,7 +3,7 @@
 
 #include <ostream>
 #include <string>
-#include "MantidKernel/DllExport.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/NeutronAtom.h"
 
 namespace Mantid
@@ -15,7 +15,7 @@ namespace PhysicalConstants
    * to the NeutronAtom information by a pointer. The information in this table
    * is generated using the DANSE project's periodictable python module.
    */
-  struct EXPORT_OPT_MANTID_KERNEL Atom {
+  struct MANTID_KERNEL_DLL Atom {
     Atom(const std::string & symbol, const uint16_t z, const uint16_t a, const double abundance,
          const double mass, const double density);
     Atom(const Atom& other);
@@ -47,11 +47,11 @@ namespace PhysicalConstants
     const NeutronAtom neutron;
   };
 
-  DLLExport bool operator==(const Atom& left, const Atom & right);
-  DLLExport bool operator!=(const Atom& left, const Atom & right);
-  DLLExport std::ostream& operator<<(std::ostream& out, const Atom &atom);
-  DLLExport Atom getAtom(const uint16_t z_number, const uint16_t a_number = 0);
-  DLLExport Atom getAtom(const std::string& symbol, const uint16_t a_number = 0);
+  MANTID_KERNEL_DLL bool operator==(const Atom& left, const Atom & right);
+  MANTID_KERNEL_DLL bool operator!=(const Atom& left, const Atom & right);
+  MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream& out, const Atom &atom);
+  MANTID_KERNEL_DLL Atom getAtom(const uint16_t z_number, const uint16_t a_number = 0);
+  MANTID_KERNEL_DLL Atom getAtom(const std::string& symbol, const uint16_t a_number = 0);
 
 } // namespace PhysicalConstants
 } // namespace Mantid

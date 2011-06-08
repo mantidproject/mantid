@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 
 #include <boost/shared_ptr.hpp>
 #include <string>
@@ -47,7 +47,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport IArchiveSearch
+    class MANTID_API_DLL IArchiveSearch
     {
     public:
       /// Virtual destructor
@@ -59,8 +59,8 @@ namespace Mantid
       virtual std::string getPath(const std::string& fName)const = 0;
     };
 
-		///Typedef for a shared pointer to an IArchiveSearch
-		typedef boost::shared_ptr<IArchiveSearch> IArchiveSearch_sptr;
+                ///Typedef for a shared pointer to an IArchiveSearch
+                typedef boost::shared_ptr<IArchiveSearch> IArchiveSearch_sptr;
 
   }
 }

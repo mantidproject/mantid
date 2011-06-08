@@ -30,7 +30,7 @@ namespace Mantid
 {
   namespace Kernel
   {
-    template<> DLLExport
+    template<> MANTID_API_DLL
     API::ITableWorkspace_sptr IPropertyManager::getValue<API::ITableWorkspace_sptr>(const std::string &name) const
     {
       PropertyWithValue<API::ITableWorkspace_sptr>* prop =

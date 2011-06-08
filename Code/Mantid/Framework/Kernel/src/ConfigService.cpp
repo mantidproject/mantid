@@ -145,7 +145,7 @@ ConfigServiceImpl::ConfigServiceImpl() :
   if (!f.exists())
   {
     // Check the executable directory to see if it includes a mantid.properties file
-    m_strBaseDir = Mantid::Kernel::getDirectoryOfExecutable();
+    m_strBaseDir = getDirectoryOfExecutable();
     f = Poco::File(m_strBaseDir + m_properties_file_name);
     if (!f.exists())
     {
@@ -960,6 +960,120 @@ std::string ConfigServiceImpl::getTempDir()
 {
   return m_pSysConfig->getString("system.tempDir");
 }
+
+/**
+ * Get the directory containing the program executable
+ * @returns A string containing the path of the directory 
+ * containing the executable, including a trailing slash
+ */
+std::string ConfigServiceImpl::getDirectoryOfExecutable()
+{
+  return Poco::Path(getPathToExecutable()).parent().toString();
+}
+
+/**
+  * Get the full path to the executing program (i.e. whatever Mantid is embedded in) 
+  * @returns A string containing the full path the the executable
+  */
+std::string ConfigServiceImpl::getPathToExecutable()
+{
+  std::string execpath("");
+  const size_t LEN(1024);
+  char pBuf[LEN];
+  
+#ifdef _WIN32
+  unsigned int bytes = GetModuleFileName(NULL, pBuf, LEN);
+#elif defined __linux__
+  char szTmp[32];
+  sprintf(szTmp, "/proc/%d/exe", getpid());
+  ssize_t bytes = readlink(szTmp, pBuf, LEN);
+#elif defined __APPLE__
+  // Two calls to _NSGetExecutablePath required - first to get size of buffer
+  uint32_t bytes(0);
+  _NSGetExecutablePath(pBuf,&bytes);
+  const int success = _NSGetExecutablePath(pBuf,&bytes);
+  if (success < 0) bytes = 1025;
+#endif
+
+  if( bytes > 0 && bytes < 1024 )
+  {
+    pBuf[bytes] = '\0';
+    execpath = std::string(pBuf);
+  }
+  return execpath;
+}
+
+/**
+ * Check if the path is on a network drive
+ * @param path :: The path to be checked
+ * @return True if the path is on a network drive.
+ */
+bool ConfigServiceImpl::isNetworkDrive(const std::string & path)
+{
+#ifdef _WIN32
+  // if path is relative get the full one
+  char buff[MAX_PATH];
+  GetFullPathName(path.c_str(),MAX_PATH,buff,NULL);
+  std::string fullName(buff);
+  size_t i = fullName.find(':');
+
+  // if the full path doesn't contain a drive letter assume it's on the network
+  if (i == std::string::npos) return true;
+
+  fullName.erase(i+1);
+  fullName += '\\';  // make sure the name has the trailing backslash
+  UINT type = GetDriveType(fullName.c_str());
+  return DRIVE_REMOTE == type;
+#elif defined __linux__
+  // This information is only present in the /proc/mounts file on linux. There are no drives on
+  // linux only mount locations therefore the test will have to check the path against
+  // entries in /proc/mounts to see if the filesystem type is NFS or SMB (any others ????)
+  // Each line corresponds to a particular mounted location
+  // 1st column - device name
+  // 2nd column - mounted location
+  // 3rd column - filesystem type commonly ext2, ext3 for hard drives and NFS or SMB for
+  //              network locations
+
+  std::ifstream mntfile("/proc/mounts");
+  std::string txtread("");
+  while( getline(mntfile, txtread) )
+  {
+    std::istringstream strm(txtread);
+    std::string devname(""), mntpoint(""), fstype("");
+    strm >> devname >> mntpoint >> fstype;
+    if( !strm ) continue;
+    // I can't be sure that the file system type is always lower case
+    std::transform(fstype.begin(), fstype.end(), fstype.begin(), toupper);
+    // Skip the current line if the file system isn't a network one
+    if( fstype != "NFS" && fstype != "SMB" ) continue;
+    // Now we have a line containing a network filesystem and just need to check if the path
+    // supplied contains the mount location. There is a small complication in that the mount
+    // points within the file have certain characters transformed into their octal 
+    // representations, for example spaces->040.
+    std::string::size_type idx = mntpoint.find("\\0");
+    if( idx != std::string::npos ) 
+    {
+      std::string oct = mntpoint.substr(idx + 1, 3);
+      strm.str(oct);
+      int printch(-1);
+      strm.setf( std::ios::oct, std::ios::basefield );  
+      strm >> printch;
+      if( printch != -1 )
+      { 
+        mntpoint = mntpoint.substr(0, idx) + static_cast<char>(printch) + mntpoint.substr(idx + 4);
+      }
+      // Search for this at the start of the path
+      if( path.find(mntpoint) == 0 ) return true;
+    }     
+  }
+  return false;
+#else
+  // Not yet implemented for the mac
+  return false;
+#endif
+}
+
+
 
 /**
  * Gets the directory that we consider to be the directory containing the Mantid.properties file. 

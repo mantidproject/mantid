@@ -101,7 +101,7 @@ set ( INC_FILES
         inc/MantidAPI/ConstraintFactory.h
         inc/MantidAPI/DeclareUserAlg.h
         inc/MantidAPI/DeprecatedAlgorithm.h
-        inc/MantidAPI/DllExport.h
+        inc/MantidAPI/DllConfig.h
         inc/MantidAPI/Expression.h
         inc/MantidAPI/FileFinder.h
         inc/MantidAPI/FileProperty.h

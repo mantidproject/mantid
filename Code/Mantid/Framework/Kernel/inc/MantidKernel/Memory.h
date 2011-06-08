@@ -2,7 +2,7 @@
 #define MANTID_KERNEL_MEMORY_H_
 
 #include <string>
-#include "MantidKernel/DllExport.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Logger.h"
 
@@ -12,11 +12,11 @@ namespace Mantid
   {
     /// Enmuerate the ignored memory fields
 
-    enum DLLExport MemoryStatsIgnore{MEMORY_STATS_IGNORE_NONE, MEMORY_STATS_IGNORE_SYSTEM, MEMORY_STATS_IGNORE_PROCESS};
+    enum MANTID_KERNEL_DLL MemoryStatsIgnore{MEMORY_STATS_IGNORE_NONE, MEMORY_STATS_IGNORE_SYSTEM, MEMORY_STATS_IGNORE_PROCESS};
     namespace MemoryOptions
     {
       /// Initialize platform-dependent options for memory management
-      DLLExport void initAllocatorOptions();
+      MANTID_KERNEL_DLL void initAllocatorOptions();
     }
 
     /** 
@@ -42,7 +42,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport MemoryStats
+    class MANTID_KERNEL_DLL MemoryStats
     {
     public:
       MemoryStats(const MemoryStatsIgnore ignore=MEMORY_STATS_IGNORE_NONE);
@@ -64,12 +64,12 @@ namespace Mantid
       std::size_t total_memory; ///< Total physical memory of system in kiB.
       std::size_t avail_memory; ///< Available memory of system in kiB.
       static Logger &g_log; ///< Logger
-      friend DLLExport std::ostream& operator<<(std::ostream& out, const MemoryStats &stats);
+      friend MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream& out, const MemoryStats &stats);
       /// Mutex to avoid simultaneous access to memory resources
       static Mutex mutexMemory;
     };
 
-    DLLExport std::ostream& operator<<(std::ostream& out, const MemoryStats &stats);
+    MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream& out, const MemoryStats &stats);
 
     /// Convert a (number) for memory in kiB to a string with proper units.
     template <typename TYPE>

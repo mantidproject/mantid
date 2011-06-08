@@ -14,7 +14,7 @@
 #include <Poco/NotificationCenter.h>
 #include <Poco/Notification.h>
 
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
@@ -57,7 +57,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename T>
-class DLLExport DataService
+class MANTID_KERNEL_DLL DataService
 {
 public:
 

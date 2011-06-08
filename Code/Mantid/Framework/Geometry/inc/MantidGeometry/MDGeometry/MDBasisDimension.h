@@ -43,7 +43,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/V3D.h"
@@ -55,21 +55,21 @@ namespace Mantid
   namespace Geometry
   {
 
-    class DLLExport MDBasisDimension
+    class MANTID_GEOMETRY_DLL MDBasisDimension
     {
     public:
       /** Constructor for basis dimensions:
-	  * @param id            -- arbitrary name, which describes the direction and allows to identify the direction and request it from the geometry by its name
-	  *                         e.g. qx or q1, qy or q2, En, T etc.
-	  *                         it has to be defined when the class of MD workspaces, specific for a particular problem is constructed, as the workspaces
-	  *                         with different id-s can not be mixed in the same binary operation.
-	  * @param isReciprocal  -- a boolean value, sepcifying if the direction is reciprocal or orthogonal
-	  * @param columnNumber -- the position of the data, describing the coordinate of MD Data point in this direction in the MDDataPoints table (see MDDPoints class)
-	  *                         Has to be consistent with MDDPoint and MDDPoints
-	  * @param inDirection   -- direction of this basis vector. Zero vector for orthogonal dimensions and has to be defined properly for reciprocal
-	  * @param UnitID        -- the units for this direction. A reciprocal dimension always have a "MomentumTransfer" unit, which overrides the value, specified in 
-	  *                         the constructor. An orthogonal dimention can have any unit, known by the unit factory. The default is enerty transfer. 
-	  */
+          * @param id            -- arbitrary name, which describes the direction and allows to identify the direction and request it from the geometry by its name
+          *                         e.g. qx or q1, qy or q2, En, T etc.
+          *                         it has to be defined when the class of MD workspaces, specific for a particular problem is constructed, as the workspaces
+          *                         with different id-s can not be mixed in the same binary operation.
+          * @param isReciprocal  -- a boolean value, sepcifying if the direction is reciprocal or orthogonal
+          * @param columnNumber -- the position of the data, describing the coordinate of MD Data point in this direction in the MDDataPoints table (see MDDPoints class)
+          *                         Has to be consistent with MDDPoint and MDDPoints
+          * @param inDirection   -- direction of this basis vector. Zero vector for orthogonal dimensions and has to be defined properly for reciprocal
+          * @param UnitID        -- the units for this direction. A reciprocal dimension always have a "MomentumTransfer" unit, which overrides the value, specified in 
+          *                         the constructor. An orthogonal dimention can have any unit, known by the unit factory. The default is enerty transfer. 
+          */
       explicit MDBasisDimension(std::string id, bool isReciprocal, int columnNumber,const std::string &UnitID="",const V3D &inDirection=V3D());
       
       bool operator==(const MDBasisDimension &other) const;
@@ -79,19 +79,19 @@ namespace Mantid
       std::string getId() const;
       bool getIsReciprocal() const;
       int getColumnNumber() const;
-	  V3D getDirection()const{return direction;}
-	  Kernel::Unit & getUnits()const{return *spUnit;}
+          V3D getDirection()const{return direction;}
+          Kernel::Unit & getUnits()const{return *spUnit;}
    private:
-	  std::string m_id; //Equivalent to tag in older definitions.
+          std::string m_id; //Equivalent to tag in older definitions.
       bool m_isReciprocal;
-	  //Column number correponding to the particular tag
+          //Column number correponding to the particular tag
       int  m_columnNumber;
       //Some convertable Unit e.g. energy for an orthogonal dimension or momentum transfer for a reciprocal
-	  boost::shared_ptr<Kernel::Unit> spUnit;
+          boost::shared_ptr<Kernel::Unit> spUnit;
       /** the direction of the lattice vector. The length of this vector is equal to lattice 
-	    * parameter for a reciprocal axis in this direction expressed in units above or 0 if this is an orthogonal direction like T or DE
-		(as orthogonal directions are ortogonal to the 3D space, represented by V3D )*/
-	  V3D direction;
+            * parameter for a reciprocal axis in this direction expressed in units above or 0 if this is an orthogonal direction like T or DE
+                (as orthogonal directions are ortogonal to the 3D space, represented by V3D )*/
+          V3D direction;
     };
 
   }

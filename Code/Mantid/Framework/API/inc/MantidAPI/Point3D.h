@@ -35,7 +35,7 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport Point3D
+        class MANTID_API_DLL Point3D
         {
         public:
           /// Return the X value

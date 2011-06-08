@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <stdexcept>
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/V3D.h"
 #include <boost/shared_ptr.hpp>
 
@@ -44,7 +44,7 @@ namespace Mantid
       Code Documentation is available at: <http://doxygen.mantidproject.org>
       */
 
-  class DLLExport IMDDimension
+  class MANTID_GEOMETRY_DLL IMDDimension
   {
   public:
     /// Destructor

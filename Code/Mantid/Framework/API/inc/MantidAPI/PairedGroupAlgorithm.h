@@ -39,7 +39,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport PairedGroupAlgorithm : public API::Algorithm
+    class MANTID_API_DLL PairedGroupAlgorithm : public API::Algorithm
     {
     public:
       /// Default constructor

@@ -4,7 +4,7 @@
 //-----------------------------------
 //Includes
 //-----------------------------------
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/Algorithm.h"
@@ -61,7 +61,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class EXPORT_OPT_MANTID_API WorkspaceTracerImpl
+class MANTID_API_DLL WorkspaceTracerImpl
 {
   
  private:
@@ -193,11 +193,11 @@ private:
   ///WorkspaceTracerImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
   // this breaks new namespace declaraion rules; need to find a better fix
-  template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<WorkspaceTracerImpl>;
+  template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<WorkspaceTracerImpl>;
 #endif /* _WIN32 */
   
   /// The specialisation of the SingletonHolder for this class
-  typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<WorkspaceTracerImpl> WorkspaceTracer;
+  typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<WorkspaceTracerImpl> WorkspaceTracer;
 
 } // namepace API
 

@@ -59,9 +59,9 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */	
+    */  
     
-    class DLLExport MDPropertyGeometry :  public Geometry::MDGeometryDescription, public Kernel::PropertyWithValue<std::string>
+    class MANTID_API_DLL MDPropertyGeometry :  public Geometry::MDGeometryDescription, public Kernel::PropertyWithValue<std::string>
     {
     public:
       /** Constructor.

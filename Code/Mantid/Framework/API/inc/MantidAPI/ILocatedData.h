@@ -1,7 +1,7 @@
 #ifndef MANTIDAPI_ILOCATEDDATA_H
 #define MANTIDAPI_ILOCATEDDATA_H
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IDataItem.h"
 
 namespace Mantid
@@ -16,7 +16,7 @@ namespace API
   Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
- 	
+        
   Mantid is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
@@ -32,7 +32,7 @@ namespace API
   
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-  class DLLExport ILocatedData : public IDataItem
+  class MANTID_API_DLL ILocatedData : public IDataItem
 {
   public:
 

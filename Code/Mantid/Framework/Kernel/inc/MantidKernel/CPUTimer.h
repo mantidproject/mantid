@@ -1,7 +1,7 @@
 #ifndef MANTID_KERNEL_CPUTIMER_H_
 #define MANTID_KERNEL_CPUTIMER_H_
     
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Timer.h"
 
 
@@ -16,7 +16,7 @@ namespace Kernel
    * @author Janik Zikovsky
    * @date 2011-04-04 12:17:48.579100
    */
-  class DLLExport CPUTimer 
+  class MANTID_KERNEL_DLL CPUTimer 
   {
   public:
     CPUTimer();
@@ -36,7 +36,7 @@ namespace Kernel
   };
 
 
-  DLLExport std::ostream& operator<<(std::ostream&, CPUTimer&);
+  MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, CPUTimer&);
 
 } // namespace Mantid
 } // namespace Kernel

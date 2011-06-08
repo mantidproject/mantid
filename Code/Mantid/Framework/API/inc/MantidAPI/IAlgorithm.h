@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/IPropertyManager.h"
 #include <Poco/ActiveResult.h>
 #include <boost/weak_ptr.hpp>
@@ -53,7 +54,7 @@ typedef void* AlgorithmID;
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.    
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport IAlgorithm : virtual public Kernel::IPropertyManager
+class MANTID_API_DLL IAlgorithm : virtual public Kernel::IPropertyManager
 {
 public:
 

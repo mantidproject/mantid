@@ -2,7 +2,7 @@
 #define THREADSCHEDULER_H_
 
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <vector>
@@ -46,7 +46,7 @@ namespace Kernel
   //===========================================================================
   //===========================================================================
   //===========================================================================
-  class DLLExport ThreadScheduler
+  class MANTID_KERNEL_DLL ThreadScheduler
   {
   public:
     /** Constructor
@@ -161,7 +161,7 @@ namespace Kernel
    * they were submitted.
    * 
    */
-  class DLLExport ThreadSchedulerFIFO : public ThreadScheduler
+  class MANTID_KERNEL_DLL ThreadSchedulerFIFO : public ThreadScheduler
   {
   public:
     ThreadSchedulerFIFO()
@@ -240,7 +240,7 @@ namespace Kernel
    * the last Task added is the first one returned.
    *
    */
-  class DLLExport ThreadSchedulerLIFO : public ThreadSchedulerFIFO
+  class MANTID_KERNEL_DLL ThreadSchedulerLIFO : public ThreadSchedulerFIFO
   {
 
     //-------------------------------------------------------------------------------
@@ -277,7 +277,7 @@ namespace Kernel
    *
    * Interally, it uses a multimap to keep elements sorted while inserting them.
    */
-  class DLLExport ThreadSchedulerLargestCost : public ThreadScheduler
+  class MANTID_KERNEL_DLL ThreadSchedulerLargestCost : public ThreadScheduler
   {
   public:
     ThreadSchedulerLargestCost()

@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <boost/shared_ptr.hpp>
 #include <vector>
@@ -83,7 +83,7 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport ParComponentFactory 
+    class MANTID_GEOMETRY_DLL ParComponentFactory 
     {
     public:
 
@@ -92,11 +92,11 @@ namespace Mantid
       static boost::shared_ptr<Detector> createDetector(const IDetector *base, const ParameterMap *map);
       /// Create a parameterized component from the given base component and ParameterMap
       static boost::shared_ptr<Instrument> createInstrument(boost::shared_ptr<Instrument> base, 
-							    boost::shared_ptr<ParameterMap> map);
+                                                            boost::shared_ptr<ParameterMap> map);
       /// Create a parameterized component from the given base component and ParameterMap
       /// This has to check to is slower than the aobve functions
       static boost::shared_ptr<IComponent> create(boost::shared_ptr<const IComponent> base, 
-						  const ParameterMap * map);
+                                                  const ParameterMap * map);
 
     private:
       // A pool of existing detectors

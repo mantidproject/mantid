@@ -4,12 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Interpolation.h"
 #include <string>
 
 namespace Mantid
-{	
+{       
 
   namespace Kernel {
     template <typename TYPE>
@@ -49,7 +49,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     */
-    class DLLExport XMLlogfile
+    class MANTID_GEOMETRY_DLL XMLlogfile
     {
     public:
       /// Default constructor

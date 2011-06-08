@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include <boost/scoped_ptr.hpp>
 #include <vector>
@@ -37,7 +37,7 @@ namespace Mantid
        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
        Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport ISpectraDetectorMap
+    class MANTID_GEOMETRY_DLL ISpectraDetectorMap
     {
     public:
       /// Typedef for the element type

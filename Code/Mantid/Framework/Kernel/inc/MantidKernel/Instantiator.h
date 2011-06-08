@@ -36,7 +36,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <class Base>
-class DLLExport AbstractInstantiator
+class MANTID_KERNEL_DLL AbstractInstantiator
 /// The base class for instantiators
 {
 public:
@@ -71,7 +71,7 @@ private:
 // instances are to be instantiated must have a no-argument
 // constructor.
 template <class C, class Base>
-class DLLExport Instantiator: public AbstractInstantiator<Base>
+class MANTID_KERNEL_DLL Instantiator: public AbstractInstantiator<Base>
 {
 public:
   /// Creates the Instantiator.

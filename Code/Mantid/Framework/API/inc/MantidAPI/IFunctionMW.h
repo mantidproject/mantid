@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IFitFunction.h"
@@ -115,7 +115,7 @@ class FunctionHandler;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IFunctionMW: public virtual IFitFunction
+class MANTID_API_DLL IFunctionMW: public virtual IFitFunction
 {
 public:
 
@@ -211,9 +211,9 @@ protected:
  */
 #define DECLARE_FUNCTION(classname) \
         namespace { \
-	Mantid::Kernel::RegistrationHelper register_function_##classname( \
+        Mantid::Kernel::RegistrationHelper register_function_##classname( \
   ((Mantid::API::FunctionFactory::Instance().subscribe<classname>(#classname)) \
-	, 0)); \
-	}
+        , 0)); \
+        }
 
 #endif /*MANTID_API_IFunctionMW_H_*/

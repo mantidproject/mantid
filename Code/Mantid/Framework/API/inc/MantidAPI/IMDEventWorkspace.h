@@ -2,7 +2,7 @@
 #define IMDEVENTWORKSPACE_H_
 
 #include "MantidAPI/Workspace.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -23,7 +23,7 @@ namespace API
    * @date Dec 3, 2010
    *
    * */
-  class DLLExport IMDEventWorkspace  : public API::Workspace
+  class MANTID_API_DLL IMDEventWorkspace  : public API::Workspace
   {
   public:
 

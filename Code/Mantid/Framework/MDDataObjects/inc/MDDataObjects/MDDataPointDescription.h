@@ -1,12 +1,10 @@
 #ifndef MD_DATAPOINT_DESCRIPTION_H
 #define MD_DATAPOINT_DESCRIPTION_H
 
-#include "MantidKernel/System.h"
+#include "MDDataObjects/DllConfig.h"
 #include <vector> 
-//#include <string>
 #include <cstring>
 #include <stdexcept>
-#include "MantidKernel/DllExport.h"
 
 /**  the description for classes, which process the MDDataPoints packed into data buffer
 *    The class describes the location and srtucre of classes, which process this data buffer
@@ -60,7 +58,7 @@ struct MDPointStructure{
                                   // 0 here should mean a class with even DimID fields -> implemented;
                                  //TO DO: does this specialisation is practically usefull?  necessary?
   MDPointStructure():NumDimensions(4),NumRecDimensions(3),NumDataFields(2),NumDimIDs(3),
-	                       DimIDlength(2),SignalLength(8),DimLength(4),
+                               DimIDlength(2),SignalLength(8),DimLength(4),
                            DimFieldsPresent(true),DataFieldsPresent(true),NumPixCompressionBits(10){}
 };
 
@@ -79,7 +77,7 @@ MDPointDescription(const MDPointStructure &pixInfo,const std::vector<std::string
 MDPointDescription(const MDPointStructure &pixInfo);
 // use defauld pixInfo and defailt tags
 MDPointDescription();
-		           
+                           
 MDPointStructure & PixInfo(){return PixDescriptor;}
  /** Returns the column name, first come the names of dimensions (if any), data
    * (if any) after that and indexes of dimensions to follow (these are always present)

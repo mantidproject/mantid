@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataObjects/Histogram1D.h"
-#include "MantidKernel/DllExport.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 #include <fstream>
 #include <vector>
@@ -20,7 +20,7 @@ namespace Kernel
 {
   class Logger;
 }
-	
+        
 namespace DataObjects
 {
 /** Stores a block of 2D data.
@@ -51,7 +51,7 @@ namespace DataObjects
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ManagedDataBlock2D
+class MANTID_DATAOBJECTS_DLL ManagedDataBlock2D
 {
   /// Output a string representation to a stream
   friend DLLExport std::fstream& operator<<(std::fstream&, ManagedDataBlock2D&);
@@ -73,7 +73,7 @@ public:
   void setData(const std::size_t histnumber, const MantidVecPtr&);
   void setData(const std::size_t histnumber, const MantidVecPtr&, const MantidVecPtr&);
   void setData(const std::size_t histnumber, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
-	
+        
   MantidVec& dataX(const std::size_t index);
   MantidVec& dataY(const std::size_t index);
   MantidVec& dataE(const std::size_t index);

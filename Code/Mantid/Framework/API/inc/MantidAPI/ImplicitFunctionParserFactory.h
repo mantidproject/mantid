@@ -30,8 +30,8 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
-#include "DllExport.h"
 #include "ImplicitFunctionParser.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "ImplicitFunctionParameterParserFactory.h"
@@ -40,7 +40,7 @@ namespace Mantid
 {
   namespace API
   {
-    class EXPORT_OPT_MANTID_API ImplicitFunctionParserFactoryImpl : public Kernel::DynamicFactory<ImplicitFunctionParser>
+    class MANTID_API_DLL ImplicitFunctionParserFactoryImpl : public Kernel::DynamicFactory<ImplicitFunctionParser>
     {
     public:
 
@@ -56,7 +56,7 @@ namespace Mantid
       friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionParserFactoryImpl>;
 
       /// Private Constructor for singleton class
-      ImplicitFunctionParserFactoryImpl();	
+      ImplicitFunctionParserFactoryImpl();      
       /// Private copy constructor - NO COPY ALLOWED
       ImplicitFunctionParserFactoryImpl(const ImplicitFunctionParserFactoryImpl&);
       /// Private assignment operator - NO ASSIGNMENT ALLOWED
@@ -68,10 +68,10 @@ namespace Mantid
     ///Forward declaration of a specialisation of SingletonHolder for ImplicitFunctionFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
     // this breaks new namespace declaraion rules; need to find a better fix
-    template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<ImplicitFunctionParserFactoryImpl>;
+    template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<ImplicitFunctionParserFactoryImpl>;
 #endif /* _WIN32 */
 
-    typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<ImplicitFunctionParserFactoryImpl> ImplicitFunctionParserFactory;
+    typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<ImplicitFunctionParserFactoryImpl> ImplicitFunctionParserFactory;
 
   }
 }

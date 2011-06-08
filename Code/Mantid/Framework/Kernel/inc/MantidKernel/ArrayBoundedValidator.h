@@ -38,7 +38,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE>
-class DLLExport ArrayBoundedValidator: public IValidator<std::vector<TYPE> >
+class MANTID_KERNEL_DLL ArrayBoundedValidator: public IValidator<std::vector<TYPE> >
 {
 public:
   ArrayBoundedValidator();

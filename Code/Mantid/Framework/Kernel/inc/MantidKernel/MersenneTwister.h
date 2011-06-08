@@ -45,7 +45,7 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class EXPORT_OPT_MANTID_KERNEL MersenneTwister : public RandomNumberGenerator
+    class MANTID_KERNEL_DLL MersenneTwister : public RandomNumberGenerator
     {
       /// Typedef for a uniform distribution of doubles
       typedef boost::uniform_real<double> uniform_double;

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/shared_ptr.hpp>
@@ -44,7 +44,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 
     */
-    class DLLExport Material
+    class MANTID_GEOMETRY_DLL Material
     {
     public:
       /// Default constructor. Required for other parts of the code to 

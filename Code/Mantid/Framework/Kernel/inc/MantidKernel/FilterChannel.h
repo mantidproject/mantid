@@ -33,7 +33,7 @@
 #ifndef Foundation_FilterChannel_INCLUDED
 #define Foundation_FilterChannel_INCLUDED
 
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 
 #include <Poco/Foundation.h>
 #include <Poco/Channel.h>
@@ -45,7 +45,7 @@ namespace Poco {
 
 /// This channel sends a message to multiple
 /// channels simultaneously.
-class DLLExport FilterChannel: public Channel
+class MANTID_KERNEL_DLL FilterChannel: public Channel
 
 {
 public:

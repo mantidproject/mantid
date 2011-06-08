@@ -1,7 +1,7 @@
 #ifndef MANTIDAPI_LOCATEDDATAVALUE_H
 #define MANTIDAPI_LOCATEDDATAVALUE_H
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ILocatedData.h"
 
 namespace Mantid
@@ -32,7 +32,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport LocatedDataValue : public ILocatedData
+    class MANTID_API_DLL LocatedDataValue : public ILocatedData
     {
     public:
 

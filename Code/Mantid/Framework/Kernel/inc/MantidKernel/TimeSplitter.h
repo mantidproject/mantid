@@ -20,7 +20,7 @@ namespace Kernel
  *
  * Author: Janik Zikovsky, SNS
  */
-class DLLExport SplittingInterval
+class MANTID_KERNEL_DLL SplittingInterval
 {
 public:
   /// Default constructor
@@ -61,10 +61,10 @@ private:
 typedef std::vector< SplittingInterval > TimeSplitterType;
 
 // -------------- Operators ---------------------
-DLLExport TimeSplitterType operator +(const TimeSplitterType& a, const TimeSplitterType& b);
-DLLExport TimeSplitterType operator &(const TimeSplitterType& a, const TimeSplitterType& b);
-DLLExport TimeSplitterType operator |(const TimeSplitterType& a, const TimeSplitterType& b);
-DLLExport TimeSplitterType operator ~(const TimeSplitterType& a);
+MANTID_KERNEL_DLL TimeSplitterType operator +(const TimeSplitterType& a, const TimeSplitterType& b);
+MANTID_KERNEL_DLL TimeSplitterType operator &(const TimeSplitterType& a, const TimeSplitterType& b);
+MANTID_KERNEL_DLL TimeSplitterType operator |(const TimeSplitterType& a, const TimeSplitterType& b);
+MANTID_KERNEL_DLL TimeSplitterType operator ~(const TimeSplitterType& a);
 
 } //Namespace Kernel
 } //Namespace Mantid

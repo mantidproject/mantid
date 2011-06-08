@@ -1,7 +1,7 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/V3D.h"
 #include <string>
@@ -47,7 +47,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
 
-    class DLLExport Sphere : public Quadratic
+    class MANTID_GEOMETRY_DLL Sphere : public Quadratic
     {
     private:
 
@@ -70,7 +70,7 @@ namespace Mantid
       // Visit acceptor
       virtual void acceptVisitor(BaseVisit& A) const
       {  A.Accept(*this); }
-      ///Set the sphere defination by input string in MCNP format	
+      ///Set the sphere defination by input string in MCNP format       
       int setSurface(const std::string&);
       ///Checks the given input point to be inside, outside or on the surface of sphere
       int side(const Geometry::V3D&) const;

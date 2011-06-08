@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/DateAndTime.h"
 #include <ctime>
@@ -42,23 +43,23 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-class DLLExport AlgorithmHistory
+class MANTID_API_DLL AlgorithmHistory
 {
 public:
   /// The date-and-time will be stored as the Mantid::Kernel::DateAndTime type
 
   explicit AlgorithmHistory(const Algorithm* const alg,
-			    const Mantid::Kernel::DateAndTime& start = Mantid::Kernel::DateAndTime::defaultTime(),
+                            const Mantid::Kernel::DateAndTime& start = Mantid::Kernel::DateAndTime::defaultTime(),
                             const double& duration = -1,std::size_t uexeccount=0);
   virtual ~AlgorithmHistory();
   AlgorithmHistory& operator=(const AlgorithmHistory&);
   AlgorithmHistory(const AlgorithmHistory&);
   AlgorithmHistory(const std::string& name, int vers, 
-		   const Mantid::Kernel::DateAndTime& start = Mantid::Kernel::DateAndTime::defaultTime(),
+                   const Mantid::Kernel::DateAndTime& start = Mantid::Kernel::DateAndTime::defaultTime(),
                    const double& duration = -1,unsigned int uexeccount=0);
   void addExecutionInfo(const Mantid::Kernel::DateAndTime& start, const double& duration);
   void addProperty(const std::string& name,const std::string& value,bool isdefault, 
-		   const unsigned int& direction = 99);
+                   const unsigned int& direction = 99);
   // get functions
   /// get name of algorithm in history const
   const std::string& name() const {return m_name;}
@@ -78,8 +79,8 @@ public:
   inline bool operator==(const AlgorithmHistory &other) const
   {
     return (name() == other.name() && 
-	    version() == other.version() && 
-	    getProperties() == other.getProperties());
+            version() == other.version() && 
+            getProperties() == other.getProperties());
   }
   /// Create a concrete algorithm based on a history record
   boost::shared_ptr<IAlgorithm> createAlgorithm() const;
@@ -99,7 +100,7 @@ private:
   std::size_t m_execCount;
 };
 
-DLLExport std::ostream& operator<<(std::ostream&, const AlgorithmHistory&);
+MANTID_API_DLL std::ostream& operator<<(std::ostream&, const AlgorithmHistory&);
 
 } // namespace API
 } // namespace Mantid

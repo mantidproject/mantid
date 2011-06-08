@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
 #include "MantidAPI/Axis.h"
 
@@ -46,7 +46,7 @@ class MatrixWorkspace;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport NumericAxis: public Axis
+class MANTID_API_DLL NumericAxis: public Axis
 {
 public:
   NumericAxis(const std::size_t& length);

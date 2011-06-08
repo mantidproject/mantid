@@ -28,7 +28,7 @@
 #ifndef Foundation_SignalChannel_INCLUDED
 #define Foundation_SignalChannel_INCLUDED
 
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 
 #include <Poco/Foundation.h>
 #include <Poco/Channel.h>
@@ -43,7 +43,7 @@ namespace Poco {
    class SignalChannel passes log messages to slots, connected to it. 
 
 **/
-class DLLExport SignalChannel: public Channel
+class MANTID_KERNEL_DLL SignalChannel: public Channel
     /// This channel sends a message through boost::signal.
 {
 public:

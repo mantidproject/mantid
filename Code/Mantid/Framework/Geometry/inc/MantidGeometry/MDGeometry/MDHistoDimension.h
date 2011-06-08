@@ -1,7 +1,7 @@
 #ifndef MANTID_GEOMETRY_MDHISTODIMENSION_H_
 #define MANTID_GEOMETRY_MDHISTODIMENSION_H_
     
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
@@ -18,7 +18,7 @@ namespace Geometry
    * @author Janik Zikovsky
    * @date 2011-03-24 14:16:39.231608
    */
-  class DLLExport MDHistoDimension : public IMDDimension
+  class MANTID_GEOMETRY_DLL MDHistoDimension : public IMDDimension
   {
   public:
 

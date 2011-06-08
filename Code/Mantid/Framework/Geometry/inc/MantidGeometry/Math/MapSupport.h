@@ -13,7 +13,7 @@
   Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
- 	
+        
   Mantid is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
@@ -30,7 +30,7 @@
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 
 
 namespace MapSupport
@@ -99,14 +99,14 @@ namespace MapSupport
       /// Set Value to check
       valEqual(const NumPart& V) :
         value(V)
-	{ }
+        { }
 
       /// Equality operator vs Map second object
       bool
       operator()(const std::pair<KeyPart,NumPart>& A) const
-	{
-	  return A.second==value;
-	}
+        {
+          return A.second==value;
+        }
     };
   /**
     \class mapClone
@@ -129,10 +129,10 @@ namespace MapSupport
 
         /// clone function to return insert object
         std::pair<KeyPart,PtrPart> 
-	operator()(const std::pair<KeyPart,PtrPart>& A) const
-	  {
-	    return std::pair<KeyPart,PtrPart>(A.first,A.second->clone());
-	  }
+        operator()(const std::pair<KeyPart,PtrPart>& A) const
+          {
+            return std::pair<KeyPart,PtrPart>(A.first,A.second->clone());
+          }
     };
 
   /**
@@ -153,11 +153,11 @@ namespace MapSupport
 
         /// deletion of the map:second ptr
         void
-	operator()(std::pair<const KeyPart,PtrPart>& A)
-	  {
-	    delete A.second;
-	    A.second=0;
-	  }
+        operator()(std::pair<const KeyPart,PtrPart>& A)
+          {
+            delete A.second;
+            A.second=0;
+          }
     };
 
   /**
@@ -173,16 +173,16 @@ namespace MapSupport
   template<typename KeyPart,typename BodyPart>
   class mapSwap :
     public std::unary_function<std::pair<BodyPart,KeyPart>,
-			       std::pair<KeyPart,BodyPart> >
+                               std::pair<KeyPart,BodyPart> >
     {
       public:
 
       /// Operator()
       std::pair<BodyPart,KeyPart> 
       operator()(const std::pair<KeyPart,BodyPart>& A) const
-	{
-	  return std::pair<BodyPart,KeyPart>(A.second,A.first);
-	}
+        {
+          return std::pair<BodyPart,KeyPart>(A.second,A.first);
+        }
     };
 
   /**
@@ -202,10 +202,10 @@ namespace MapSupport
 
         /// Write both the key and object 
         void 
-	operator()(const std::pair<PartA,PartB>& A) const
-	  {
-	    std::cout<<A.first<<" "<<A.second<<std::endl;
-	  }
+        operator()(const std::pair<PartA,PartB>& A) const
+          {
+            std::cout<<A.first<<" "<<A.second<<std::endl;
+          }
     };
 
   /**
@@ -238,16 +238,16 @@ namespace MapSupport
       /// Create with Map
        sndValue(const std::map<KeyPart,NumPart>& Mr) :
          MRef(Mr)
-	 { }
+         { }
 
        /// Access via key
       NumPart
       operator()(const KeyPart& Ky) const
-	{
-	  typename std::map<KeyPart,NumPart>::const_iterator vc; 
-	  vc=MRef.find(Ky);
-	  return vc->second;
-	}
+        {
+          typename std::map<KeyPart,NumPart>::const_iterator vc; 
+          vc=MRef.find(Ky);
+          return vc->second;
+        }
     };
 }
 

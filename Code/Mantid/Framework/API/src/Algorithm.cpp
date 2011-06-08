@@ -31,16 +31,16 @@ namespace Mantid
     }
 
     template <>
-    DLLExport
+    MANTID_API_DLL
     bool Algorithm::isEmpty(const double toCheck)
     {
       return std::abs( (toCheck - EMPTY_DBL())/(EMPTY_DBL()) ) < 1e-8  ;
     }
 
     // concrete instantiations
-    template DLLExport bool Algorithm::isEmpty<int> (const int);
-    template DLLExport bool Algorithm::isEmpty<int64_t> (const int64_t);
-    template DLLExport bool Algorithm::isEmpty<std::size_t> (const std::size_t);
+    template MANTID_API_DLL bool Algorithm::isEmpty<int> (const int);
+    template MANTID_API_DLL bool Algorithm::isEmpty<int64_t> (const int64_t);
+    template MANTID_API_DLL bool Algorithm::isEmpty<std::size_t> (const std::size_t);
 
     /// Initialize static algorithm counter
     size_t Algorithm::g_execCount=0;
@@ -185,14 +185,14 @@ namespace Mantid
             //{
             //checking the input is a group
             try
-            {	  //check if the pointer is valid, it won't be if it is a group
+            {     //check if the pointer is valid, it won't be if it is a group
               Workspace_sptr wsSptr=wsProp->getWorkspace();
               if(!wsName.empty() && !wsSptr)
               {
                 boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
                   boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
                 if(wsGrpSptr)
-                {	 //this must be a group - test for that
+                {        //this must be a group - test for that
                   g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
 
                   return processGroups(wsGrpSptr,Prop);
@@ -830,7 +830,7 @@ namespace Mantid
       //size is one if only group header.
       //return if atleast one meber is not there in group to process
       if(nSize<1)
-      {	throw std::runtime_error("Input WorkspaceGroup has no members to process");
+      { throw std::runtime_error("Input WorkspaceGroup has no members to process");
       }
 
       int execTotal=0;
@@ -851,14 +851,14 @@ namespace Mantid
 
       std::vector<std::string>::const_iterator wsItr=inputWSNames.begin();
       for(;wsItr!=inputWSNames.end();++wsItr)
-      {	//set  properties
+      { //set  properties
         std::vector<Mantid::Kernel::Property*>::const_iterator itr;
         for (itr=props.begin();itr!=props.end();itr++)
         {
           int outWSCount=0;
 
           if(isWorkspaceProperty(*itr) )
-          {		
+          {             
             if(isInputWorkspaceProperty(*itr))
             {
 
@@ -944,7 +944,7 @@ namespace Mantid
     {
       std::vector<Mantid::Kernel::Property*>::const_iterator itr;
       for (itr=props.begin();itr!=props.end();++itr)
-      {  	       
+      {                
         if(isInputWorkspaceProperty(*itr))
         { 
           try
@@ -1090,13 +1090,13 @@ namespace Mantid
         //input member ws2 = "Sally",// output member ws2="Sally_NewGroup" 
       }
       else
-      {	
+      { 
         if(bSimilarNames) //if group are of similar names
         {
           outmemberwsName=outgrpwsName+"_"+suffix.str(); // input group ws ="Group"  ,//OutPut GroupWs ="NewGroup"
           //input member ws1="Group_1",//output member ws1="NewGroup_1"
           //input member ws2="Group_2",//output member ws2="NewGroup_2" 
-        }	
+        }       
         else
         {
           outmemberwsName= inmemberwsName+"_"+outgrpwsName;//InputPut GroupWs ="Group",//OutPut GroupWs ="NewGroup"
@@ -1137,7 +1137,7 @@ namespace Mantid
         return false;
       }
       const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty*>(prop);
-      return (wsProp ? true : false);	
+      return (wsProp ? true : false);   
     }
 
     /** checks the property is a input workspace property
@@ -1145,7 +1145,7 @@ namespace Mantid
     *  @returns true if this is a input workspace property
     */
     bool Algorithm::isInputWorkspaceProperty(const Kernel::Property* const prop) const
-    {	
+    {   
       if(!prop)
       {
         return false;
@@ -1233,7 +1233,7 @@ namespace Mantid
      * @param name :: The name of the property
      * @returns A pointer to an algorithm
      */
-    template<> DLLExport
+    template<> MANTID_API_DLL
       API::IAlgorithm_sptr IPropertyManager::getValue<API::IAlgorithm_sptr>(const std::string &name) const
     {
       PropertyWithValue<API::IAlgorithm_sptr>* prop =
@@ -1254,7 +1254,7 @@ namespace Mantid
      * @param name :: The name of the property
      * @returns A pointer to an algorithm
      */
-    template<> DLLExport
+    template<> MANTID_API_DLL
       API::IAlgorithm_const_sptr IPropertyManager::getValue<API::IAlgorithm_const_sptr>(const std::string &name) const
     {
       PropertyWithValue<API::IAlgorithm_sptr>* prop =

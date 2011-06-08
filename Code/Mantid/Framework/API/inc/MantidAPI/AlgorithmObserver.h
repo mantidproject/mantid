@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 
 #include <boost/shared_ptr.hpp>
@@ -46,7 +46,7 @@ namespace API
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport AlgorithmObserver
+class MANTID_API_DLL AlgorithmObserver
 {
 public:
     /// Default constructor. Notification hanlders are not connected to any algorithm

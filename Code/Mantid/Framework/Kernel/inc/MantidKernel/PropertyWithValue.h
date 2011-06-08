@@ -17,6 +17,7 @@
 
 namespace Mantid
 {
+
 namespace Kernel
 {
 /** The concrete, templated class for properties.

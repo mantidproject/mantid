@@ -16,10 +16,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -58,7 +57,7 @@ namespace API
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class EXPORT_OPT_MANTID_API WorkspaceFactoryImpl : public Kernel::DynamicFactory<Workspace>
+class MANTID_API_DLL WorkspaceFactoryImpl : public Kernel::DynamicFactory<Workspace>
 {
 public:
   MatrixWorkspace_sptr create(const MatrixWorkspace_const_sptr& parent,
@@ -102,9 +101,9 @@ private:
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
   // this breaks new namespace declaraion rules; need to find a better fix
-  template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>;
+  template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>;
 #endif /* _WIN32 */
-typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl> WorkspaceFactory;
+typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl> WorkspaceFactory;
 
 } // namespace Kernel
 } // namespace Mantid

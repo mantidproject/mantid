@@ -35,15 +35,15 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-#include "MantidGeometry/DllExport.h"
-
+#include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <vector>
 
 namespace Mantid
 {
 namespace Geometry
 {
-class EXPORT_OPT_MANTID_GEOMETRY Coordinate
+class MANTID_GEOMETRY_DLL Coordinate
 {
 public:
   ///Default constructor. All vertexes zero.

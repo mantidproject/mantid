@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/cow_ptr.h"
@@ -59,7 +60,7 @@ namespace Mantid
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
         Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport SpectraDetectorMap : public Geometry::ISpectraDetectorMap
+    class MANTID_API_DLL SpectraDetectorMap : public Geometry::ISpectraDetectorMap
     {
     public:
       friend class Kernel::cow_ptr<SpectraDetectorMap>;

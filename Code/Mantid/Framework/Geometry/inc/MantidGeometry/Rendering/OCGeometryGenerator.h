@@ -1,7 +1,7 @@
 #ifndef OC_GEOMETRYGENERATOR_H
 #define OC_GEOMETRYGENERATOR_H
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include <boost/shared_ptr.hpp>
 
@@ -59,9 +59,9 @@ namespace Mantid
 
        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport OCGeometryGenerator
+    class MANTID_GEOMETRY_DLL OCGeometryGenerator
     {
-    private:			
+    private:                    
       static Kernel::Logger& PLog; ///< Static reference to the logger class
       const Object *Obj; ///< Input Object
       TopoDS_Shape* ObjSurface; ///< Storage for the output surface

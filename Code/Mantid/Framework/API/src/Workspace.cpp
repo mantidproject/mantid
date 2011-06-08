@@ -89,7 +89,7 @@ namespace Mantid
 namespace Kernel
 {
 
-template<> DLLExport
+template<> MANTID_API_DLL
 Mantid::API::Workspace_sptr IPropertyManager::getValue<Mantid::API::Workspace_sptr>(const std::string &name) const
 {
   PropertyWithValue<Mantid::API::Workspace_sptr>* prop =
@@ -105,7 +105,7 @@ Mantid::API::Workspace_sptr IPropertyManager::getValue<Mantid::API::Workspace_sp
   }
 }
 
-template<> DLLExport
+template<> MANTID_API_DLL
 Mantid::API::Workspace_const_sptr IPropertyManager::getValue<Mantid::API::Workspace_const_sptr>(const std::string &name) const
 {
   PropertyWithValue<Mantid::API::Workspace_sptr>* prop =

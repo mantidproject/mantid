@@ -2,7 +2,7 @@
 #define GLU_GEOMETRYHANDLER_H
 
 #include <boost/shared_ptr.hpp>
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 
 namespace Mantid
@@ -44,15 +44,15 @@ namespace Mantid
 
        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport GluGeometryHandler: public GeometryHandler
+    class MANTID_GEOMETRY_DLL GluGeometryHandler: public GeometryHandler
     {
       /// the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
       enum GEOMETRY_TYPE
       {
-	CUBOID,   ///< CUBOID
-	CYLINDER, ///< CYLINDER
-	CONE,     ///< CONE
-	SPHERE,    ///< SPHERE
+        CUBOID,   ///< CUBOID
+        CYLINDER, ///< CYLINDER
+        CONE,     ///< CONE
+        SPHERE,    ///< SPHERE
         SEGMENTED_CYLINDER ///< Cylinder with 1 or more segments (along the axis). Sizes of segments are important.
       }; 
     private:

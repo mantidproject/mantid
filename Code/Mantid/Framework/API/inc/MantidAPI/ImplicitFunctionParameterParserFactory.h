@@ -30,16 +30,16 @@ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Co
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "DllExport.h"
 #include "ImplicitFunctionParameterParser.h"
 
 namespace Mantid
 {
   namespace API
   {
-    class EXPORT_OPT_MANTID_API ImplicitFunctionParameterParserFactoryImpl : public Kernel::DynamicFactory<ImplicitFunctionParameterParser>
+    class MANTID_API_DLL ImplicitFunctionParameterParserFactoryImpl : public Kernel::DynamicFactory<ImplicitFunctionParameterParser>
     {
     public:
       
@@ -51,7 +51,7 @@ namespace Mantid
       friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionParameterParserFactoryImpl>;
 
       /// Private Constructor for singleton class
-      ImplicitFunctionParameterParserFactoryImpl();	
+      ImplicitFunctionParameterParserFactoryImpl();     
       /// Private copy constructor - NO COPY ALLOWED
       ImplicitFunctionParameterParserFactoryImpl(const ImplicitFunctionParameterParserFactoryImpl&);
       /// Private assignment operator - NO ASSIGNMENT ALLOWED
@@ -63,10 +63,10 @@ namespace Mantid
     ///Forward declaration of a specialisation of SingletonHolder for ImplicitFunctionFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
     #ifdef _WIN32
       // this breaks new namespace declaraion rules; need to find a better fix
-      template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<ImplicitFunctionParameterParserFactoryImpl>;
+      template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<ImplicitFunctionParameterParserFactoryImpl>;
     #endif /* _WIN32 */
 
-    typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<ImplicitFunctionParameterParserFactoryImpl> ImplicitFunctionParameterParserFactory;
+    typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<ImplicitFunctionParameterParserFactoryImpl> ImplicitFunctionParameterParserFactory;
 
   }
 }

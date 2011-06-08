@@ -149,7 +149,7 @@ public:
   {
     Mantid::API::FileProperty *fp = 
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load, 
-				    std::vector<std::string>(1, ".raw"));
+                                    std::vector<std::string>(1, ".raw"));
     std::string error = fp->setValue("48127");
     TS_ASSERT_EQUALS(error, "");
     TS_ASSERT_DIFFERS(fp->value().find("LOQ48127"),std::string::npos);
@@ -190,7 +190,7 @@ public:
 
   void testDirectoryPasses()
   {
-    std::string TestDir(getDirectoryOfExecutable()+"MyTestFolder");
+    std::string TestDir(ConfigService::Instance().getDirectoryOfExecutable() + "MyTestFolder");
     Poco::File dir(TestDir);
     dir.createDirectory();
 

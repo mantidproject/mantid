@@ -1,6 +1,7 @@
 #ifndef MANTID_API_RUN_H_
 #define MANTID_API_RUN_H_
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSplitter.h"
@@ -40,7 +41,7 @@ namespace Mantid
        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
        Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Run
+    class MANTID_API_DLL Run
     {
 
     public:

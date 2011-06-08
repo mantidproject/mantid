@@ -16,37 +16,37 @@ namespace Mantid
   namespace Geometry
   {
     /** Holds a collection of detectors.
-	Responds to IDetector methods as though it were a single detector.
-	Currently, detectors in a group are treated as pointlike (or at least)
-	homogenous entities. This means that it's up to the use to make
-	only sensible groupings of similar detectors since no weighting according
-	to solid angle size takes place and the DetectorGroup's position is just
-	a simple average of its constituents.
-	
-	@author Russell Taylor, Tessella Support Services plc
-	@date 08/04/2008
-	
-	Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-	
-	This file is part of Mantid.
-	
-	Mantid is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; either version 3 of the License, or
-	(at your option) any later version.
-	
-	Mantid is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-	
-	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
-	Code Documentation is available at: <http://doxygen.mantidproject.org>
+        Responds to IDetector methods as though it were a single detector.
+        Currently, detectors in a group are treated as pointlike (or at least)
+        homogenous entities. This means that it's up to the use to make
+        only sensible groupings of similar detectors since no weighting according
+        to solid angle size takes place and the DetectorGroup's position is just
+        a simple average of its constituents.
+        
+        @author Russell Taylor, Tessella Support Services plc
+        @date 08/04/2008
+        
+        Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+        
+        This file is part of Mantid.
+        
+        Mantid is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 3 of the License, or
+        (at your option) any later version.
+        
+        Mantid is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+        
+        You should have received a copy of the GNU General Public License
+        along with this program.  If not, see <http://www.gnu.org/licenses/>.
+        
+        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+        Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport DetectorGroup : public virtual IDetector
+    class MANTID_GEOMETRY_DLL DetectorGroup : public virtual IDetector
     {
     public:
       DetectorGroup();
@@ -119,7 +119,7 @@ namespace Mantid
   /** returns the detector's group topology if it has been calculated before or invokes the procedure of 
       calculating such topology if it was not */
      det_topology getTopology()const;
-	protected:
+        protected:
       /// The ID of this effective detector
       int m_id;
       /// The type of collection used for the detectors

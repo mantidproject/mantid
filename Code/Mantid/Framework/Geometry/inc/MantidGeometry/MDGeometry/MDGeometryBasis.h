@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/DllExport.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDWorkspaceConstants.h"
 #include "MantidGeometry/MDGeometry/MDBasisDimension.h"
 #include "MantidGeometry/Crystal/UnitCell.h" // has to be replaced by oriented cell later
@@ -59,12 +59,12 @@ namespace Mantid
   namespace Geometry
   {
     //****************************************************************************************************************************************
-    class EXPORT_OPT_MANTID_GEOMETRY MDGeometryBasis
+    class MANTID_GEOMETRY_DLL MDGeometryBasis
     {
     public:
       /// empty constructor used mainly to provide a dummy object for reading data into it
       MDGeometryBasis(size_t nDimensions=1,size_t nReciprocalDimensions=1);  
-	  /// fully functional constructor; 
+          /// fully functional constructor; 
       MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<OrientedLattice> spSample);
 
       std::set<MDBasisDimension> getNonReciprocalDimensions() const;
@@ -76,18 +76,18 @@ namespace Mantid
       size_t getNumDims() const {return this->m_mdBasisDimensions.size();}
       /// returns the number of reciprocal dimensions
       size_t getNumReciprocalDims() const {return this->n_reciprocal_dimensions;};
-	  /** function returns symbolioc names(IDs) of the dimensions. 
-	   *  These names have to coinside with  id-s found in MDDataPoints as each 
-	   *  dimID describes one column of MDDPoints table*/
-	  std::vector<std::string> getBasisIDs(void)const;
-	  /** function returns the existing Reciprocal geometry basis, which describes MDDPoints basis too; 
-	    *  It is an orthogonal basis which differs from the basis attached to the reciprocal cell as some axis 
-		*  can be in different position in relation to the cell (cell has x-axis placed along a* direction of unit cell 
-		   when recBasis can have it everywhere
+          /** function returns symbolioc names(IDs) of the dimensions. 
+           *  These names have to coinside with  id-s found in MDDataPoints as each 
+           *  dimID describes one column of MDDPoints table*/
+          std::vector<std::string> getBasisIDs(void)const;
+          /** function returns the existing Reciprocal geometry basis, which describes MDDPoints basis too; 
+            *  It is an orthogonal basis which differs from the basis attached to the reciprocal cell as some axis 
+                *  can be in different position in relation to the cell (cell has x-axis placed along a* direction of unit cell 
+                   when recBasis can have it everywhere
 
-		   TODO: what to return in 1D mode (powder) (rather how to interpret this mode)
-		*/
-	  std::vector<V3D>  get_constRecBasis(void)const;
+                   TODO: what to return in 1D mode (powder) (rather how to interpret this mode)
+                */
+          std::vector<V3D>  get_constRecBasis(void)const;
 
     /// Returns reference to the unit cell, which used in basis; Will throw through dereference of sp if unit cell is not defined;
     OrientedLattice const & get_constOrientedLattice()const{return *spSample;}
@@ -96,15 +96,15 @@ namespace Mantid
     OrientedLattice & get_OrientedLattice() {return *spSample;}
 
       /** function checks if the ids supplied  coinside with the tags for current basis e.g all 
-	   *  existing tags have to be there (the order of tags may be different) */
+           *  existing tags have to be there (the order of tags may be different) */
       bool checkIdCompartibility(const std::vector<std::string> &newTags)const;
 
-	  void init(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<OrientedLattice> spSample);
-	  // copy constructor is used and can be default
+          void init(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<OrientedLattice> spSample);
+          // copy constructor is used and can be default
 
     private:
-	 /// shared pointer to a class, describing reciporcal lattice of the sample and its orientation if crystal;
-	  boost::shared_ptr<OrientedLattice> spSample;
+         /// shared pointer to a class, describing reciporcal lattice of the sample and its orientation if crystal;
+          boost::shared_ptr<OrientedLattice> spSample;
       /// logger -> to provide logging, for MD workspaces
       static Kernel::Logger& g_log;
       /// number of total dimensions in dataset;

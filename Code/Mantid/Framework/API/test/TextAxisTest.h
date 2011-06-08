@@ -8,6 +8,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/EmptyValues.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

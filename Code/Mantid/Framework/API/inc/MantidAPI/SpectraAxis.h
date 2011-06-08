@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
 #include <boost/shared_ptr.hpp>
 #include <string>
@@ -55,7 +55,7 @@ class MatrixWorkspace;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SpectraAxis: public Axis
+class MANTID_API_DLL SpectraAxis: public Axis
 {
 public:
   explicit SpectraAxis(const std::size_t& length, const bool initWithDefaults = true);

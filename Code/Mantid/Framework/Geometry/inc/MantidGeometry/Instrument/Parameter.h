@@ -1,12 +1,23 @@
 #ifndef MANTID_GEOMETRY_PARAMETER_H_
 #define MANTID_GEOMETRY_PARAMETER_H_
 
+/* Register classes into the factory
+ *
+ */
+#define DECLARE_PARAMETER(classname,classtype) \
+namespace { \
+  Mantid::Kernel::RegistrationHelper register_par_##classname( \
+    ((Mantid::Geometry::ParameterFactory::subscribe< Mantid::Geometry::ParameterType<classtype> >(#classname)) \
+     , 0)); \
+}
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
+#include "MantidKernel/DynamicFactory.h" // For RegistrationHelper
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <typeinfo>
@@ -30,7 +41,7 @@ namespace Mantid
     class ParameterMap;
     
     /** @class Parameter Parameter.h Geometry/Parameter.h
-	
+        
       Base class for parameters of an instrument.
       
       @author Roman Tolchenov, Tessella Support Services plc
@@ -56,7 +67,7 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Parameter
+    class MANTID_GEOMETRY_DLL Parameter
     {
     public:
       /// Virtual destructor
@@ -83,8 +94,8 @@ namespace Mantid
       friend class ParameterMap;
 
       /** Sets the value of type T to the parameter if it has type ParameterType<T>
-	  Throws an exception if the types don't match.
-	  @param t :: Value to set
+          Throws an exception if the types don't match.
+          @param t :: Value to set
       */ 
       template<class T>
       void set(const T& t);
@@ -103,7 +114,7 @@ namespace Mantid
 
     /// Templated class for parameters of type \c Type
     template<class Type>
-    class DLLExport ParameterType : public Parameter
+    class MANTID_GEOMETRY_DLL ParameterType : public Parameter
     {
     public:
       /// Returns the value of the property as a string
@@ -214,26 +225,20 @@ namespace Mantid
     /// Typedef for the shared pointer
     typedef boost::shared_ptr<Parameter> Parameter_sptr;
     /// Parameter of type int
-    typedef DLLExport ParameterType<int> ParameterInt;
+    typedef MANTID_GEOMETRY_DLL ParameterType<int> ParameterInt;
     /// Parameter of type double
-    typedef DLLExport ParameterType<double> ParameterDouble;
+    typedef MANTID_GEOMETRY_DLL ParameterType<double> ParameterDouble;
     /// Parameter of type bool
-    typedef DLLExport ParameterType<bool> ParameterBool;
+    typedef MANTID_GEOMETRY_DLL ParameterType<bool> ParameterBool;
     /// Parameter of type std::string
-    typedef DLLExport ParameterType<std::string> ParameterString;
+    typedef MANTID_GEOMETRY_DLL ParameterType<std::string> ParameterString;
     /// Parameter of type V3D
-    typedef DLLExport ParameterType<V3D> ParameterV3D;
+    typedef MANTID_GEOMETRY_DLL ParameterType<V3D> ParameterV3D;
     /// Parameter of type Quat
-    typedef DLLExport ParameterType<Quat> ParameterQuat;
+    typedef MANTID_GEOMETRY_DLL ParameterType<Quat> ParameterQuat;
 
   } // namespace Geometry
 } // namespace Mantid
 
-#define DECLARE_PARAMETER(classname,classtype) \
-namespace { \
-  Mantid::Kernel::RegistrationHelper register_par_##classname( \
-    ((Mantid::Geometry::ParameterFactory::subscribe< Mantid::Geometry::ParameterType<classtype> >(#classname)) \
-     , 0)); \
-}
 
 #endif /*MANTID_GEOMETRY_PARAMETER_H_*/

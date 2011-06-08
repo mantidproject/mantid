@@ -4,7 +4,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Material.h"
@@ -52,7 +52,7 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class EXPORT_OPT_MANTID_API Sample
+    class MANTID_API_DLL Sample
     {
     public:
       /// Default constructor (required for cow_ptr)

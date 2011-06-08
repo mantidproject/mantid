@@ -2,7 +2,7 @@
 #define OBJCOMPONENT_ASSEMBLY_
 #include <string> 
 #include <vector>
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 
@@ -44,7 +44,7 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ObjCompAssembly : public virtual ICompAssembly, public virtual ObjComponent
+class MANTID_GEOMETRY_DLL ObjCompAssembly : public virtual ICompAssembly, public virtual ObjComponent
 {
     typedef std::vector< ObjComponent* >::iterator comp_it;///< Iterator type
     typedef std::vector< ObjComponent* >::const_iterator const_comp_it;///< Const iterator type
@@ -101,7 +101,7 @@ private:
   std::vector< ObjComponent* > group;
 };
 
-DLLExport std::ostream& operator<<(std::ostream&, const ObjCompAssembly&);
+MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const ObjCompAssembly&);
 
 } //Namespace Geometry
 } //Namespace Mantid

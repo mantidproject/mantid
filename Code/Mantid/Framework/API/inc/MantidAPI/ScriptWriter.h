@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ScriptWriterFactory.h"
 
 namespace Mantid
@@ -46,7 +46,7 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class EXPORT_OPT_MANTID_API ScriptWriter 
+    class MANTID_API_DLL ScriptWriter 
     {
     public:
       /// Virtual destructor for base class

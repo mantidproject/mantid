@@ -1,7 +1,7 @@
 #ifndef DATE_AND_TIME_H
 #define DATE_AND_TIME_H
 
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 //#include "c:\Mantid\Code\Third_Party\include\boost\date_time\posix_time\posix_time.hpp"
 #include <ctime>
@@ -30,7 +30,7 @@ typedef boost::posix_time::time_duration time_duration;
 
 //Make the compiler pack the data size aligned to 1-byte, to use as little space as possible
 #pragma pack(push, 1)
-class DLLExport DateAndTime
+class MANTID_KERNEL_DLL DateAndTime
 {
 public:
   explicit DateAndTime();
@@ -135,7 +135,7 @@ static const boost::posix_time::ptime GPS_EPOCH(boost::gregorian::date(1990, 1, 
 /// Const of one second time duration
 static const time_duration oneSecond = boost::posix_time::time_duration(0,0,1,0);
 
-DLLExport time_t utc_mktime(struct tm *utctime);
+MANTID_KERNEL_DLL time_t utc_mktime(struct tm *utctime);
 
 }
 
@@ -165,7 +165,7 @@ DLLExport time_t utc_mktime(struct tm *utctime);
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport TimeInterval
+class MANTID_KERNEL_DLL TimeInterval
 {
 public:
     /// Default constructor

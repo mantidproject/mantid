@@ -40,7 +40,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template< class TYPE >
-class DLLExport MandatoryValidator : public IValidator<TYPE>
+class MANTID_KERNEL_DLL MandatoryValidator : public IValidator<TYPE>
 {
 public:
   IValidator<TYPE>* clone() { return new MandatoryValidator(*this); }

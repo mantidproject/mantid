@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Instantiator.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Logger.h"
@@ -23,12 +23,12 @@
 
 namespace Mantid
 {
-	
+        
 namespace Kernel
 {
   class Logger;
 }
-	
+        
 namespace Geometry
 {
 
@@ -80,7 +80,7 @@ private:
   /// A typedef for the instantiator
   typedef Kernel::AbstractInstantiator<Parameter> AbstractFactory;
   /// An inner class to specialise map such that it does a deep delete when s_map is destroyed
-  class DLLExport FactoryMap : public std::map<std::string, AbstractFactory*>
+  class MANTID_GEOMETRY_DLL FactoryMap : public std::map<std::string, AbstractFactory*>
   {
   public:
     /// Destructor. Deletes the AbstractInstantiator objects stored in the map.

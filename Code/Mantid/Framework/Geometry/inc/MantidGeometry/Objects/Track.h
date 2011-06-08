@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/IComponent.h"
@@ -50,7 +50,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    struct DLLExport Link
+    struct MANTID_GEOMETRY_DLL Link
     {
       /**
        * Default constructor
@@ -138,7 +138,7 @@ namespace Mantid
     *
     * @author S. Ansell
     */
-    class DLLExport Track
+    class MANTID_GEOMETRY_DLL Track
     {
     public:
       typedef std::list<Link> LType;       ///< Type for the Link storage
@@ -159,7 +159,7 @@ namespace Mantid
       void addPoint(const int directionFlag, const V3D& endPoint, const ComponentID compID = NULL);
       /// Adds a link to the track
       int addLink(const V3D& firstPoint,const V3D& secondPoint, 
-		  const double distanceAlongTrack, const ComponentID compID = NULL);
+                  const double distanceAlongTrack, const ComponentID compID = NULL);
       /// Remove touching Links that have identical components
       void removeCojoins();
       /// Construct links between added points

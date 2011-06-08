@@ -51,7 +51,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport LineIntersectVisit : public BaseVisit
+    class MANTID_GEOMETRY_DLL LineIntersectVisit : public BaseVisit
     {
     private:
 

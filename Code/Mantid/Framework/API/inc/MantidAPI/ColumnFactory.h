@@ -5,13 +5,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid
 {
-	
+        
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
@@ -24,7 +24,7 @@ namespace API
 {
   class Column;
 }
-	
+        
 namespace API
 {
 
@@ -72,39 +72,39 @@ namespace API
   class ColumnFactory_DllExport ColumnFactoryImpl : public Kernel::DynamicFactory<Column>
   {
   public:
-	  ///Creates an instance of a column
+          ///Creates an instance of a column
       boost::shared_ptr<Column> create(const std::string& type) const;
 
       /*// Column factory specific function to subscribe columns, calls the dynamic factory subscribe function internally
-	  template <class C>
+          template <class C>
       void subscribe()
-	  {
-          Kernel::DynamicFactory<Algorithm>::subscribe<C>();	
-	  }*/
+          {
+          Kernel::DynamicFactory<Algorithm>::subscribe<C>();    
+          }*/
 
   private:
-	friend struct Mantid::Kernel::CreateUsingNew<ColumnFactoryImpl>;
+        friend struct Mantid::Kernel::CreateUsingNew<ColumnFactoryImpl>;
 
-	/// Private Constructor for singleton class
+        /// Private Constructor for singleton class
     ColumnFactoryImpl();
-	/// Private copy constructor - NO COPY ALLOWED
-	ColumnFactoryImpl(const ColumnFactoryImpl&);
-	/// Private assignment operator - NO ASSIGNMENT ALLOWED
-	ColumnFactoryImpl& operator = (const ColumnFactoryImpl&);
-	///Private Destructor
-	virtual ~ColumnFactoryImpl();
-	///static reference to the logger class
-	Kernel::Logger& g_log;
+        /// Private copy constructor - NO COPY ALLOWED
+        ColumnFactoryImpl(const ColumnFactoryImpl&);
+        /// Private assignment operator - NO ASSIGNMENT ALLOWED
+        ColumnFactoryImpl& operator = (const ColumnFactoryImpl&);
+        ///Private Destructor
+        virtual ~ColumnFactoryImpl();
+        ///static reference to the logger class
+        Kernel::Logger& g_log;
   
   };
   
-	///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
+        ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-	template class ColumnFactory_DllExport Mantid::Kernel::SingletonHolder<ColumnFactoryImpl>;
+        template class ColumnFactory_DllExport Mantid::Kernel::SingletonHolder<ColumnFactoryImpl>;
 #endif /* _WIN32 */
-	typedef ColumnFactory_DllExport Mantid::Kernel::SingletonHolder<ColumnFactoryImpl> ColumnFactory;
-	
+        typedef ColumnFactory_DllExport Mantid::Kernel::SingletonHolder<ColumnFactoryImpl> ColumnFactory;
+        
 } // namespace API
 } // namespace Mantid
 

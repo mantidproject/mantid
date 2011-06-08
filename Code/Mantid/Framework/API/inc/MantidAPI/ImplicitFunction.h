@@ -25,7 +25,7 @@
 #include <Poco/XML/XMLWriter.h>
 #include <sstream>
 #include <vector>
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "Point3D.h"
 
 namespace Mantid
@@ -62,7 +62,7 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport ImplicitFunction
+        class MANTID_API_DLL ImplicitFunction
         {
         public:
             virtual bool evaluate(const Point3D* pPoint3D) const = 0;

@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include <string>
 #include <typeinfo>
@@ -51,7 +51,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Component : public virtual IComponent
+    class MANTID_GEOMETRY_DLL Component : public virtual IComponent
     {
     public:
       /// Constructor for parametrized component

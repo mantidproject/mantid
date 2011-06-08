@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -111,7 +111,7 @@ class FitFunctionHandler;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IFitFunction
+class MANTID_API_DLL IFitFunction
 {
 public:
 
@@ -123,7 +123,7 @@ public:
    * implementation of Attribute::value() method for an example.
    */
   template<typename T = void>
-  class DLLExport AttributeVisitor: public boost::static_visitor<T>
+  class MANTID_API_DLL AttributeVisitor: public boost::static_visitor<T>
   {
   public:
     /// Virtual destructor
@@ -147,7 +147,7 @@ public:
    * Const version of AttributeVisitor. 
    */
   template<typename T = void>
-  class DLLExport ConstAttributeVisitor: public boost::static_visitor<T>
+  class MANTID_API_DLL ConstAttributeVisitor: public boost::static_visitor<T>
   {
   public:
     /// Virtual destructor
@@ -170,7 +170,7 @@ public:
   /// Attribute is a non-fitting parameter.
   /// It can be one of the types: std::string, int, or double
   /// Examples: file name, polinomial order
-  class DLLExport Attribute
+  class MANTID_API_DLL Attribute
   {
   public:
     /// Create string attribute
@@ -425,7 +425,7 @@ protected:
 };
 
 /// Overload operator <<
-DLLExport std::ostream& operator<<(std::ostream& ostr,const IFitFunction& f);
+MANTID_API_DLL std::ostream& operator<<(std::ostream& ostr,const IFitFunction& f);
 
 /**
  * Classes inherited from FunctionHandler will handle the function.
@@ -457,9 +457,9 @@ protected:
  */
 #define DECLARE_FUNCTION(classname) \
         namespace { \
-	Mantid::Kernel::RegistrationHelper register_function_##classname( \
+        Mantid::Kernel::RegistrationHelper register_function_##classname( \
   ((Mantid::API::FunctionFactory::Instance().subscribe<classname>(#classname)) \
-	, 0)); \
-	}
+        , 0)); \
+        }
 
 #endif /*MANTID_API_IFITFUNCTION_H_*/

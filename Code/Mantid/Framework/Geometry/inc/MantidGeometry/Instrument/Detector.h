@@ -42,7 +42,7 @@ namespace Geometry
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport Detector : public virtual IDetector, public ObjComponent
+class MANTID_GEOMETRY_DLL Detector : public virtual IDetector, public ObjComponent
 {
 public:
   ///A string representation of the component type

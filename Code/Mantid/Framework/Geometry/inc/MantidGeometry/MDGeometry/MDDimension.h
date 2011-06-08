@@ -61,12 +61,12 @@ namespace Geometry
  // forward declaration;
   class DimensionDescription;
 
-  class DLLExport MDDimension : public IMDDimension
+  class MANTID_GEOMETRY_DLL MDDimension : public IMDDimension
   {
   public:
    ///virtual function return the unique dimension ID, identifying the current dimension among others
      std::string getDimensionId() const;
-	///virtual 
+        ///virtual 
      bool getIsIntegrated() const;
 
     virtual ~MDDimension();
@@ -90,14 +90,14 @@ namespace Geometry
     bool        getIntegrated(void)const{return isIntegrated;}
     /** virtual: function returns a direction of the dimension in the system of coordinates described by the MDBasis; 
        *  Orthogonal dimensions always have direction 1 (e.g. V3D={1,0,0})according to their direction in the coordinate 
-	   * system. Norm of the vector, returned by this function has to be 1    */
-	V3D getDirection(void)const{return direction;}
-	  /** virtual: Return direction in the crystallogrpahical sence, e.g. output V3D is normalized in such a way that the size of
-	   smallest (by module) non-0 component of the vector is 1; In this case, all vectors representing valid crystallographical axis would 
-	   have integer values; */
-	 V3D getDirectionCryst(void)const{return direction;}
+           * system. Norm of the vector, returned by this function has to be 1    */
+        V3D getDirection(void)const{return direction;}
+          /** virtual: Return direction in the crystallogrpahical sence, e.g. output V3D is normalized in such a way that the size of
+           smallest (by module) non-0 component of the vector is 1; In this case, all vectors representing valid crystallographical axis would 
+           have integer values; */
+         V3D getDirectionCryst(void)const{return direction;}
 
-	/// get Axis data; 
+        /// get Axis data; 
     std::vector<double> const &  getAxis(void)const{return Axis;}
     ///virtual the function returns the center points of the axis bins; There are nBins of such points 
     /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)
@@ -118,8 +118,8 @@ namespace Geometry
 
     bool operator==(const MDDimension& other) const;
     bool operator!=(const MDDimension& other) const;
-	/// function sets axis name (meaningfull value displayed by graphth) One of a few public MDDimension setters
-	void  setName(const std::string & name){this->AxisName.assign(name); }    
+        /// function sets axis name (meaningfull value displayed by graphth) One of a few public MDDimension setters
+        void  setName(const std::string & name){this->AxisName.assign(name); }    
 
    //Serialization as an xml string.
     virtual std::string toXMLString() const;
@@ -134,7 +134,7 @@ virtual void  setRange(double rMin=-1,double rMax=1,size_t nBins=1);
     // set all non-inter-dimension-dependent values on the dimesion from the dimension description
     virtual void initialize(const DimensionDescription &descr); //, const std::vector<double> &rotation_mat=std::vector<double>Rot(9) );
     // function sets the coordinates of the dimension; An orthogonal dimension does nothing with it; Part of initialisation routine if rotations are present
-	virtual void setDirection(const V3D &){};
+        virtual void setDirection(const V3D &){};
 
     //********  SET. -> geometry should set it properly as any set operation here is also rebinning operation on MDImage; 
     /** Set the scale of a particular dimension
@@ -162,9 +162,9 @@ virtual void  setRange(double rMin=-1,double rMax=1,size_t nBins=1);
 
     /// Helper method actually implementing the bulk of toXMLString. Allows subtypes to use the same serialisation code, with the ability to append to the same root element.
     void ApplySerialization(Poco::XML::Document* pDoc, Poco::XML::Element* pDimensionElement) const;
-	// direction of a vector in the basis system of coordinates;
+        // direction of a vector in the basis system of coordinates;
    /// the coordinate of a dimension in an WorkspaceGeometry system of coordinates (always 0 here and |1| triplet for reciprocals) 
-	V3D   direction;
+        V3D   direction;
   private:
     /// name of the axis;
     std::string AxisName;

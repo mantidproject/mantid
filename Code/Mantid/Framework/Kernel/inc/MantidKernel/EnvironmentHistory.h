@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include <string>
 #include <iostream>
 
@@ -37,7 +37,7 @@ namespace Mantid
      File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
    */
-    class DLLExport EnvironmentHistory
+    class MANTID_KERNEL_DLL EnvironmentHistory
     {
     public:
       /// returns the framework version
@@ -55,7 +55,7 @@ namespace Mantid
 
     };
 
-    DLLExport std::ostream& operator<<(std::ostream&, const EnvironmentHistory&);
+    MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const EnvironmentHistory&);
 
   } // namespace Kernel
 } // namespace Mantid

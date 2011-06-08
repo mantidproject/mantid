@@ -36,7 +36,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport RebinParamsValidator : public IValidator<std::vector<double> >
+class MANTID_KERNEL_DLL RebinParamsValidator : public IValidator<std::vector<double> >
 {
 public:
   RebinParamsValidator() {}

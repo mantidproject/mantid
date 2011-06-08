@@ -8,6 +8,7 @@
 #ifndef DEPRECATEDALGORITHM_H_
 #define DEPRECATEDALGORITHM_H_
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 #include <string>
@@ -17,7 +18,7 @@ namespace Mantid
 namespace API
 {
 
-class DLLExport DeprecatedAlgorithm
+class MANTID_API_DLL DeprecatedAlgorithm
 {
 public:
   DeprecatedAlgorithm();

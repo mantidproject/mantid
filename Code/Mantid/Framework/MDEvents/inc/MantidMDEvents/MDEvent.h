@@ -3,8 +3,9 @@
 
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <numeric>
-#include <math.h>
+#include <cmath>
 
 namespace Mantid
 {

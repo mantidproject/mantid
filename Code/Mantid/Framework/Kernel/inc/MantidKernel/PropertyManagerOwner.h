@@ -47,7 +47,7 @@ class PropertyManager;
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport PropertyManagerOwner: virtual public IPropertyManager
+class MANTID_KERNEL_DLL PropertyManagerOwner: virtual public IPropertyManager
 {
 public:
     PropertyManagerOwner();

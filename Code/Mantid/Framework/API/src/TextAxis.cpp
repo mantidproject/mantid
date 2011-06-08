@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/EmptyValues.h"
 
 namespace Mantid
 {
@@ -60,16 +61,16 @@ void TextAxis::setValue(const size_t& index, const double& value)
  */
 bool TextAxis::operator==(const Axis& axis2) const
 {
-	if (length()!=axis2.length())
+        if (length()!=axis2.length())
   {
-		return false;
+                return false;
   }
   const TextAxis* spec2 = dynamic_cast<const TextAxis*>(&axis2);
   if (!spec2)
   {
     return false;
   }
-	return std::equal(m_values.begin(),m_values.end(),spec2->m_values.begin());
+        return std::equal(m_values.begin(),m_values.end(),spec2->m_values.begin());
 }
 
 /** Returns a text label which shows the value at index and identifies the

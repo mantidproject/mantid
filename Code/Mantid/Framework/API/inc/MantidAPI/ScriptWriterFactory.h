@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
@@ -44,13 +44,13 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class EXPORT_OPT_MANTID_API ScriptWriterFactoryImpl : public Kernel::DynamicFactory<ScriptWriter>
+    class MANTID_API_DLL ScriptWriterFactoryImpl : public Kernel::DynamicFactory<ScriptWriter>
     {
     private:
       /// Allow the singleton holder to create an object
       friend struct Mantid::Kernel::CreateUsingNew<ScriptWriterFactoryImpl>;
       /// Private Constructor for singleton class
-      ScriptWriterFactoryImpl() {};	
+      ScriptWriterFactoryImpl() {};     
       /// Private copy constructor - NO COPY ALLOWED
       ScriptWriterFactoryImpl(const ScriptWriterFactoryImpl&);
       /// Private assignment operator - NO ASSIGNMENT ALLOWED
@@ -63,10 +63,10 @@ namespace Mantid
     ///for ScriptWriterFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
     // this breaks new namespace declaraion rules; need to find a better fix
-    template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<ScriptWriterFactoryImpl>;
+    template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<ScriptWriterFactoryImpl>;
 #endif /* _WIN32 */
 
-typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<ScriptWriterFactoryImpl> ScriptWriterFactory;
+typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<ScriptWriterFactoryImpl> ScriptWriterFactory;
 
     
   } // namespace Mantid

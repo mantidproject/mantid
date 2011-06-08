@@ -30,7 +30,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "ImplicitFunctionBuilder.h"
 #include "ImplicitFunctionParameterParser.h"
@@ -66,7 +66,7 @@ namespace API
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport ImplicitFunctionParser
+class MANTID_API_DLL ImplicitFunctionParser
 {
 public:
 

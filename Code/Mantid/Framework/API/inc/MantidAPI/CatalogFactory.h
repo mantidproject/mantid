@@ -19,7 +19,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
@@ -70,10 +70,10 @@ class ICatalog;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTID_API CatalogFactoryImpl : public Kernel::DynamicFactory<ICatalog>
+class MANTID_API_DLL CatalogFactoryImpl : public Kernel::DynamicFactory<ICatalog>
 {
 public:
-	/// create an instance of the catalog specified by the calssName
+        /// create an instance of the catalog specified by the calssName
   virtual boost::shared_ptr<ICatalog> create(const std::string& className) const;
 
 private:
@@ -98,7 +98,7 @@ private:
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) .
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-  template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<CatalogFactoryImpl>;
+  template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<CatalogFactoryImpl>;
 #endif /* _WIN32 */
 /// The specialisation of the SingletonHolder class that holds the CatalogFactory
 typedef Mantid::Kernel::SingletonHolder<CatalogFactoryImpl> CatalogFactory;

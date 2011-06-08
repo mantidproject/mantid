@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/PropertyManagerOwner.h"
 #include <boost/shared_ptr.hpp>
@@ -58,7 +59,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport AlgorithmProxy : public IAlgorithm, public Kernel::PropertyManagerOwner
+    class MANTID_API_DLL AlgorithmProxy : public IAlgorithm, public Kernel::PropertyManagerOwner
     {
     public:
       AlgorithmProxy(Algorithm_sptr alg);

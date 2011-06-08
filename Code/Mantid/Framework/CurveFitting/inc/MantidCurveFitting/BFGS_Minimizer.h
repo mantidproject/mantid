@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/IFuncMinimizer.h"
 #include "MantidCurveFitting/GSLFunctions.h"
 #include <gsl/gsl_multimin.h>
@@ -74,8 +75,8 @@ private:
   /// GSL container
   gsl_multimin_function_fdf m_gslMultiminContainer;
 
-	/// Static reference to the logger class
-	static Kernel::Logger& g_log;
+        /// Static reference to the logger class
+        static Kernel::Logger& g_log;
 };
 
 

@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -43,16 +43,16 @@ namespace Geometry
 
     Mantid is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
- 	  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- 	  GNU General Public License for more details.
+          MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+          GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
- 	  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+          along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ObjComponent : public virtual IObjComponent, public Component
+class MANTID_GEOMETRY_DLL ObjComponent : public virtual IObjComponent, public Component
 {
 public:
   ///type string
@@ -63,7 +63,7 @@ public:
   // Looking to get rid of the first of these constructors in due course (and probably add others)
   explicit ObjComponent(const std::string& name, IComponent* parent=0);
   explicit ObjComponent(const std::string& name, Object_sptr shape, IComponent* parent=0,
-			Material_sptr material = Material_sptr());
+                        Material_sptr material = Material_sptr());
   virtual ~ObjComponent();
 
   /** Virtual Copy Constructor

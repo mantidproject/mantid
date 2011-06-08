@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
 #include "MantidAPI/IFitFunction.h"
 #include <boost/shared_ptr.hpp>
@@ -53,7 +53,7 @@ class IConstraint;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTID_API ParamFunction : public virtual IFitFunction
+class MANTID_API_DLL ParamFunction : public virtual IFitFunction
 {
 public:
   /// Default constructor

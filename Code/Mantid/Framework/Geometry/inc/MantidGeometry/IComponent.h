@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/V3D.h"
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include <string>
 #include <vector>
 #include <set>
@@ -63,7 +63,7 @@ namespace Mantid
     */
 
 
-    class DLLExport IComponent
+    class MANTID_GEOMETRY_DLL IComponent
     {
     public:
       /// Returns a string representation of the IComponent type
@@ -154,7 +154,7 @@ namespace Mantid
 
     /** Prints a text representation
     */
-    DLLExport std::ostream& operator<<(std::ostream&, const IComponent&);
+    MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const IComponent&);
 
   } //Namespace Geometry
 

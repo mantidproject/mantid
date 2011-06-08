@@ -1,7 +1,7 @@
 #ifndef GLU_GEOMETRYRENDERER_H
 #define GLU_GEOMETRYRENDERER_H
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
 namespace Mantid
 {
@@ -39,14 +39,14 @@ namespace Mantid
     class IObjComponent;
     class V3D;
 
-    class DLLExport GluGeometryRenderer
+    class MANTID_GEOMETRY_DLL GluGeometryRenderer
     {
     private:
 
       static Kernel::Logger& PLog;           ///< The official logger
       unsigned int           iDisplaylistId; ///< OpenGL display list id
       bool                   boolDisplaylistCreated; ///< flag to store whether display list is created or not
-      int					           mErrorCode; ///< The lastest error code
+      int                                                  mErrorCode; ///< The lastest error code
     public:
       GluGeometryRenderer();       ///< Constructor
       ~GluGeometryRenderer();      ///< Destructor

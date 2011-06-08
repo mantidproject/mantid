@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/MultiThreaded.h"
-#include "System.h"
+#include "MantidKernel/DllConfig.h"
 #include <exception>
 #include <ostream>
 #include <Poco/Message.h>
@@ -37,10 +37,10 @@ class ThreadSafeLogStream;
     of Logger objects on request. This class currently uses the Logging functionality
     provided through the POCO (portable components) library.
 
-	Usage example:
-	    Logger ls(someLogger);
-	    ls.error("Some informational message");
-	    ls.error() << "Some error message" << std::endl;
+        Usage example:
+            Logger ls(someLogger);
+            ls.error("Some informational message");
+            ls.error() << "Some error message" << std::endl;
 
     @author Nicholas Draper, Tessella Support Services plc
     @date 12/10/2007
@@ -65,7 +65,7 @@ class ThreadSafeLogStream;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  class DLLExport Logger
+  class MANTID_KERNEL_DLL Logger
   {
   public:
     // Our logger's priority types are the same as POCO's Message's types.
@@ -74,7 +74,7 @@ class ThreadSafeLogStream;
 //    /// An enumeration of the priority levels of a log message.
 //    enum Priority
 //    {
-//      PRIO_FATAL = 1,		  ///< A fatal error. The application will most likely terminate. This is the highest priority.
+//      PRIO_FATAL = 1,           ///< A fatal error. The application will most likely terminate. This is the highest priority.
 //      PRIO_ERROR = 3,       ///< An error. An operation did not complete successfully, but the application as a whole is not affected.
 //      PRIO_WARNING = 4,     ///< A warning. An operation completed with an unexpected result.
 //      PRIO_NOTICE = 5,      ///< An informational message, usually denoting the successful completion of an Algorithm, These are the headlines of what we should be reporting to the user.
@@ -84,7 +84,7 @@ class ThreadSafeLogStream;
 
     /// Sets the Loggername to a new value.
     void setName(std::string newName);
-    /// Logs at Fatal level	
+    /// Logs at Fatal level     
     void fatal(const std::string& msg);
     /// Logs at error level
     void error(const std::string& msg);
@@ -99,26 +99,26 @@ class ThreadSafeLogStream;
 
     /// Logs at Fatal level
     std::ostream& fatal();
-    /// Logs at error level			
+    /// Logs at error level                     
     std::ostream& error();
-    /// Logs at warning level			
+    /// Logs at warning level                   
     std::ostream& warning();
-    /// Logs at notice level		
-    std::ostream& notice();			
+    /// Logs at notice level            
+    std::ostream& notice();                     
     /// Logs at information level
     std::ostream& information();
     /// Logs at debug level
-    std::ostream& debug();			
+    std::ostream& debug();                      
 
     /// Logs the given message at debug level, followed by the data in buffer.
     void dump(const std::string& msg, const void* buffer, std::size_t length);
 
     /// Sets the Logger's log level.
     void setLevel(int level);
-		
+                
     /// Returns the Logger's log level.
     int getLevel() const;
-		
+                
     /// Sets the Logger's log level using a symbolic value.
     void setLevel(const std::string& level);
 
@@ -127,7 +127,7 @@ class ThreadSafeLogStream;
 
     ///set if the logging is enabled
     void setEnabled(const bool enabled);
-		
+                
     /// Returns true if at least the given log level is set.
     bool is(int level) const;
 

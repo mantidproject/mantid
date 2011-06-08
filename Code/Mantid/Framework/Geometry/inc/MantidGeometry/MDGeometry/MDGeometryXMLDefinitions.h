@@ -2,7 +2,7 @@
 #define MDGEOMETRY_XMLDEFINITIONS_H_
 
 #include <string>
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 namespace Mantid
 {
 namespace Geometry
@@ -36,7 +36,7 @@ namespace Geometry
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org> */
  
-class DLLExport MDGeometryXMLDefinitions
+class MANTID_GEOMETRY_DLL MDGeometryXMLDefinitions
 {
 public:
   //XML schema tag definitions for generating xml.

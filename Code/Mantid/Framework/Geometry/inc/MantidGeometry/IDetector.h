@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IObjComponent.h"
@@ -57,7 +57,7 @@ enum det_topology{
     cyl,   //< cylindrical geometry
     undef  //< the geometry is yet undefined, if you need to know the geometry, a method to identify it must be deployed
 };
-class DLLExport IDetector : public virtual IObjComponent
+class MANTID_GEOMETRY_DLL IDetector : public virtual IObjComponent
 {
 public:
   /// Get the detector ID

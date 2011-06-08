@@ -2,7 +2,7 @@
 #define MANTID_GEOMETRY_ICOMPASSEMBLY_
 
 #include "MantidGeometry/IComponent.h"
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include <boost/shared_ptr.hpp>
 #include <deque>
 #include <string>
@@ -45,7 +45,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport ICompAssembly : public virtual IComponent
+    class MANTID_GEOMETRY_DLL ICompAssembly : public virtual IComponent
     {
     public:
       ///String description of the type of component

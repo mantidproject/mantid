@@ -63,7 +63,7 @@ namespace Mantid
 namespace Kernel
 {
   /** In order to be able to cast PropertyWithValue classes correctly a definition for the PropertyWithValue<IMDEventWorkspace> is required */
-  template<> DLLExport
+  template<> MANTID_API_DLL
   Mantid::API::IMDEventWorkspace_sptr IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_sptr>(const std::string &name) const
   {
     PropertyWithValue<Mantid::API::IMDEventWorkspace_sptr>* prop =
@@ -80,7 +80,7 @@ namespace Kernel
   }
 
   /** In order to be able to cast PropertyWithValue classes correctly a definition for the PropertyWithValue<IMDEventWorkspace> is required */
-  template<> DLLExport
+  template<> MANTID_API_DLL
   Mantid::API::IMDEventWorkspace_const_sptr IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_const_sptr>(const std::string &name) const
   {
     PropertyWithValue<Mantid::API::IMDEventWorkspace_const_sptr>* prop =

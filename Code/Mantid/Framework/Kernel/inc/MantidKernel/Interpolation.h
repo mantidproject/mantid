@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Unit.h"
@@ -47,7 +47,7 @@ namespace Kernel
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Interpolation
+class MANTID_KERNEL_DLL Interpolation
 {
 private:
   ///internal storage of x values
@@ -104,8 +104,8 @@ public:
 };
 
 // defining operator << and >>
-DLLExport std::ostream& operator<<(std::ostream&, const Interpolation& );
-DLLExport std::istream& operator>>(std::istream&, Interpolation&);
+MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const Interpolation& );
+MANTID_KERNEL_DLL std::istream& operator>>(std::istream&, Interpolation&);
 
 } // namespace Kernel
 } // namespace Mantid

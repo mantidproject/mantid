@@ -5,7 +5,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
@@ -36,7 +36,7 @@ static const size_t MIN_BLOCK_SIZE = 1000;
  *
  */
 template<typename T>
-class DLLExport BinaryFile
+class MANTID_KERNEL_DLL BinaryFile
 {
 public:
   //------------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 #ifndef VTKGEOMETRYCACHEREADER_H
 #define VTKGEOMETRYCACHEREADER_H
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
 
 namespace Poco
@@ -46,7 +46,7 @@ namespace Mantid
 
        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport vtkGeometryCacheReader
+    class MANTID_GEOMETRY_DLL vtkGeometryCacheReader
     {
     private:
 

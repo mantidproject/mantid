@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DllExport.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Logger.h"
 
 #include <set>
@@ -56,7 +56,7 @@ class FacilityInfo;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTID_KERNEL InstrumentInfo
+class MANTID_KERNEL_DLL InstrumentInfo
 {
 public:
   /// Constructor

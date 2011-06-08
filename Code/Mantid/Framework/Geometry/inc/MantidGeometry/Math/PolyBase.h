@@ -1,7 +1,7 @@
 #ifndef mathLevel_PolyBase_h
 #define mathLevel_PolyBase_h
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 
 namespace Mantid
 {
@@ -25,7 +25,7 @@ namespace mathLevel
     \todo ADD solveQuartic
   */
 
-class DLLExport PolyBase
+class MANTID_GEOMETRY_DLL PolyBase
 {
  private:  
 
@@ -35,7 +35,7 @@ class DLLExport PolyBase
 
   int solveQuadratic(std::complex<double>&,std::complex<double>&) const;
   int solveCubic(std::complex<double>&,std::complex<double>&,
-		 std::complex<double>&) const;
+                 std::complex<double>&) const;
 
 
 public:

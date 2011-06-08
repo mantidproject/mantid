@@ -17,7 +17,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -30,6 +30,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -96,7 +97,7 @@ class AlgorithmProxy;
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport Algorithm : public IAlgorithm, public Kernel::PropertyManagerOwner
+class MANTID_API_DLL Algorithm : public IAlgorithm, public Kernel::PropertyManagerOwner
 {
 public:
 
@@ -317,8 +318,8 @@ protected:
   /// checks the property is output workspace property
   bool isOutputWorkspaceProperty(const Kernel::Property* const prop) const;
   /// This method checks the members workspaces are of similar names (example group_1,group_2) and returns true if they are.
-	bool isGroupWorkspacesofSimilarNames(const std::string&,const std::vector<std::string>& grpmembersNames); 
-		
+        bool isGroupWorkspacesofSimilarNames(const std::string&,const std::vector<std::string>& grpmembersNames); 
+                
   /// process workspace groups
   virtual bool processGroups(WorkspaceGroup_sptr ingrpws_sptr,const std::vector<Mantid::Kernel::Property*>&props);
   /// virtual method to set non workspace properties for an algorithm,it's useful for checking the period number when a member in a group workspace is executed

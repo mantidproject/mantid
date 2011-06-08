@@ -1,7 +1,7 @@
 #ifndef MANTID_API_IDATAFILECHECKER_H
 #define MANTID_API_IDATAFILECHECKER_H
 
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 
 // Most file header checking requires use of the ntohl c-library function defined here
@@ -46,7 +46,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
     */
-    class EXPORT_OPT_MANTID_API IDataFileChecker : public Algorithm
+    class MANTID_API_DLL IDataFileChecker : public Algorithm
     {
     public:
       ///constructor

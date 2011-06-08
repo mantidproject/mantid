@@ -1,7 +1,7 @@
 #ifndef OC_GEOMETRYHANDLER_H
 #define OC_GEOMETRYHANDLER_H
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -45,7 +45,7 @@ namespace Mantid
 
        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport OCGeometryHandler: public GeometryHandler
+    class MANTID_GEOMETRY_DLL OCGeometryHandler: public GeometryHandler
     {
     private:
       static Kernel::Logger& PLog;           ///< The official logger

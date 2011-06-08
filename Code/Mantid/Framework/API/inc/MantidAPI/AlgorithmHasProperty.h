@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 //Includes
 //------------------------------------------------------------------------------
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/IValidator.h"
 #include <boost/shared_ptr.hpp>
 
@@ -26,26 +26,26 @@ namespace Mantid
       @date 30/03/2011
 
       Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-	
+        
       This file is part of Mantid.
-	
+        
       Mantid is free software; you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation; either version 3 of the License, or
       (at your option) any later version.
-	
+        
       Mantid is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
       GNU General Public License for more details.
-	
+        
       You should have received a copy of the GNU General Public License
       along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
+        
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class EXPORT_OPT_MANTID_API AlgorithmHasProperty : 
+    class MANTID_API_DLL AlgorithmHasProperty : 
       public Kernel::IValidator<boost::shared_ptr<IAlgorithm> >
     {
     public:
@@ -61,7 +61,7 @@ namespace Mantid
       /// Make a copy of the present type of validator
       inline Kernel::IValidator<boost::shared_ptr<IAlgorithm> >* clone() 
       { 
-	return new AlgorithmHasProperty(*this); 
+        return new AlgorithmHasProperty(*this); 
       }
 
     protected:

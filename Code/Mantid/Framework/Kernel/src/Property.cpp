@@ -2,6 +2,7 @@
 #include "MantidKernel/Exception.h"
 #include <string>
 #include <sstream>
+#include <utility>
 
 namespace Mantid
 {
@@ -183,8 +184,108 @@ void Property::splitByTime(TimeSplitterType& splitter, std::vector< Property * >
   return;
 }
 
+} // End Kernel namespace
 
 
+//-------------------------- Utility function for class name lookup -----------------------------
+
+// MG 16/07/09: Some forward declarations.I need this so
+// that the typeid function in getUnmangledTypeName knows about them
+// This way I don't need to actually include the headers and I don't
+// introduce unwanted dependencies
+namespace API
+{
+  class Workspace;
+  class MatrixWorkspace;
+  class ITableWorkspace;
+  class IMDEventWorkspace;
+  class IMDWorkspace;
+  class IEventWorkspace;
+}
+namespace DataObjects
+{
+  class EventWorkspace;
+  class PeaksWorkspace;
+  class GroupingWorkspace;
+  class OffsetsWorkspace;
+  class SpecialWorkspace2D;
+  class Workspace2D;
+}
+namespace MDDataObjects
+{
+  class MDWorkspace;
+}
+
+namespace Kernel
+{
+/**
+ * Get the unmangled name of the given typestring for some common types that we use. Note that
+ * this is just a lookup and NOT an unmangling algorithm
+ * @param type :: A pointer to the type_info object for this type
+ * @returns An unmangled version of the name
+ */
+std::string getUnmangledTypeName(const std::type_info& type)
+{
+  using std::string;
+  using std::make_pair;
+  using namespace Mantid::API;
+  using namespace Mantid::DataObjects;
+  using namespace Mantid::MDDataObjects;
+  // Compile a lookup table. This is a static local variable that
+  // will get initialized when the function is first used
+  static std::map<string, string> typestrings;
+  if( typestrings.empty() ) 
+  {
+    typestrings.insert(make_pair(typeid(char).name(), string("letter")));
+    typestrings.insert(make_pair(typeid(int).name(), string("number")));
+    typestrings.insert(make_pair(typeid(long long).name(), string("number")));
+    typestrings.insert(make_pair(typeid(double).name(), string("number")));
+    typestrings.insert(make_pair(typeid(bool).name(), string("boolean")));
+    typestrings.insert(make_pair(typeid(string).name(), string("string")));
+    typestrings.insert(make_pair(typeid(std::vector<string>).name(), string("str list")));
+    typestrings.insert(make_pair(typeid(std::vector<int>).name(), string("int list")));
+    typestrings.insert(make_pair(typeid(std::vector<double>).name(), string("dbl list")));
+
+    //Workspaces
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<Workspace>).name(), 
+                                      string("Workspace")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<MatrixWorkspace>).name(), 
+                                      string("MatrixWorkspace")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<ITableWorkspace>).name(), 
+                                      string("TableWorkspace")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<IMDWorkspace>).name(), 
+                                      string("IMDWorkspace")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<IMDEventWorkspace>).name(), 
+                                      string("MDEventWorkspace")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<IEventWorkspace>).name(), 
+                                      string("IEventWorkspace")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<Workspace2D>).name(), 
+                                      string("Workspace2D")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<EventWorkspace>).name(), 
+                                      string("EventWorkspace")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<PeaksWorkspace>).name(), 
+                                      string("PeaksWorkspace")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<GroupingWorkspace>).name(), 
+                                      string("GroupingWorkspace")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<OffsetsWorkspace>).name(), 
+                                      string("OffsetsWorkspace")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<SpecialWorkspace2D>).name(), 
+                                      string("SpecialWorkspace2D")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<MDWorkspace>).name(), 
+                                      string("MDWorkspace")));
+
+
+  }
+  std::map<std::string, std::string>::const_iterator mitr = typestrings.find(type.name());
+  if( mitr != typestrings.end() )
+  {
+    return mitr->second;
+  }
+
+  return type.name();
+
+}
 
 } // namespace Kernel
+
 } // namespace Mantid

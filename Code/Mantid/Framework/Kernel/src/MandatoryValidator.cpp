@@ -2,7 +2,8 @@
 // Includes
 //------------------------------------------
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/EmptyValues.h"
 #include <cmath>
 
 namespace Mantid

@@ -1,7 +1,7 @@
 #ifndef RotaryCounter_h
 #define RotaryCounter_h
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
 
 namespace Mantid
@@ -20,7 +20,7 @@ namespace Geometry
   going to 1,2,N-1 and then 1,3,4 etc...
 */
 
-class DLLExport RotaryCounter
+class MANTID_GEOMETRY_DLL RotaryCounter
 {
   friend std::ostream& operator<<(std::ostream&,const RotaryCounter&);
 

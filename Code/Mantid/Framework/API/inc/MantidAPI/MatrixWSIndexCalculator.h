@@ -1,7 +1,7 @@
 #ifndef _MATRIX_WS_INDEX_CALCULATOR_H_
 #define _MATRIX_WS_INDEX_CALCULATOR_H_
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 
 namespace Mantid
 {
@@ -42,7 +42,7 @@ namespace Mantid
     /// Denotes index of a particular histogram in the Matrix Workspace.
     typedef size_t HistogramIndex;
 
-    class DLLExport MatrixWSIndexCalculator
+    class MANTID_API_DLL MatrixWSIndexCalculator
     {
     private:
 

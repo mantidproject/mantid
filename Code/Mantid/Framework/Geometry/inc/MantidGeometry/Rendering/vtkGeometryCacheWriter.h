@@ -1,7 +1,7 @@
 #ifndef VTKGEOMETRYCACHEWRITER_H
 #define VTKGEOMETRYCACHEWRITER_H
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include <string>
 namespace Poco{
@@ -44,13 +44,13 @@ namespace Mantid
        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
     class Object;
-    class DLLExport vtkGeometryCacheWriter
+    class MANTID_GEOMETRY_DLL vtkGeometryCacheWriter
     {
     private:
 
       static Kernel::Logger& PLog;           ///< The official logger
       Poco::XML::Document* mDoc;         ///< The XML document    
-      Poco::XML::Element*  mRoot;	     ///< The root XML element
+      Poco::XML::Element*  mRoot;            ///< The root XML element
       std::string          mFileName;    ///< The file name
       //Private Methods
       void Init();

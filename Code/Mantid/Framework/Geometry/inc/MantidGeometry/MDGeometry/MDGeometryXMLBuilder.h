@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Logger.h"
 
@@ -44,7 +44,7 @@ namespace Geometry
 
  */
 template <typename CheckDimensionPolicy>
-class DLLExport MDGeometryBuilderXML
+class MANTID_GEOMETRY_DLL MDGeometryBuilderXML
 {
 
 public:

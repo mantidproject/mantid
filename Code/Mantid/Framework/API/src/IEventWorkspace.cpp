@@ -7,8 +7,8 @@
 #include "MantidAPI/WorkspaceIteratorCode.h"
 
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef,Mantid::API::IEventWorkspace>;
-template DLLExport class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::API::IEventWorkspace>;
+template MANTID_API_DLL class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef,Mantid::API::IEventWorkspace>;
+template MANTID_API_DLL class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::API::IEventWorkspace>;
 
 /*
  * In order to be able to cast PropertyWithValue classes correctly a definition for the PropertyWithValue<IEventWorkspace> is required 
@@ -19,7 +19,7 @@ namespace Mantid
 namespace Kernel
 {
 
-template<> DLLExport
+template<> MANTID_API_DLL
 Mantid::API::IEventWorkspace_sptr IPropertyManager::getValue<Mantid::API::IEventWorkspace_sptr>(const std::string &name) const
 {
   PropertyWithValue<Mantid::API::IEventWorkspace_sptr>* prop =
@@ -35,7 +35,7 @@ Mantid::API::IEventWorkspace_sptr IPropertyManager::getValue<Mantid::API::IEvent
   }
 }
 
-template<> DLLExport
+template<> MANTID_API_DLL
 Mantid::API::IEventWorkspace_const_sptr IPropertyManager::getValue<Mantid::API::IEventWorkspace_const_sptr>(const std::string &name) const
 {
   PropertyWithValue<Mantid::API::IEventWorkspace_sptr>* prop =

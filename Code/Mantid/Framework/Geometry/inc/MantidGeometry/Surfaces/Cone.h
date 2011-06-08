@@ -1,7 +1,7 @@
 #ifndef Cone_h
 #define Cone_h
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/Logger.h"
 namespace Mantid
@@ -23,7 +23,7 @@ namespace Geometry
   Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
- 	
+        
   Mantid is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
@@ -42,7 +42,7 @@ namespace Geometry
 */
 
 
-class DLLExport Cone : public Quadratic
+class MANTID_GEOMETRY_DLL Cone : public Quadratic
 {
  private:
 
@@ -68,9 +68,9 @@ class DLLExport Cone : public Quadratic
   int operator==(const Cone&) const;
   ~Cone();
   
-	///Calculate if the point R is within the cone (return -1) or outside (return 1)
+        ///Calculate if the point R is within the cone (return -1) or outside (return 1)
   int side(const Geometry::V3D& R) const;
-	/// Calculate if the point R is on the cone(1=on the surface, 0=not)
+        /// Calculate if the point R is on the cone(1=on the surface, 0=not)
   int onSurface(const Geometry::V3D& R) const;
 
    /// Accept visitor for line calculation
@@ -102,7 +102,7 @@ class DLLExport Cone : public Quadratic
   void write(std::ostream&) const;
 
   ///This will get the bounding box for the cone
-  void getBoundingBox(double& xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);	
+  void getBoundingBox(double& xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);   
 
   /// The number of slices to approximate a cone
   static int g_nslices;

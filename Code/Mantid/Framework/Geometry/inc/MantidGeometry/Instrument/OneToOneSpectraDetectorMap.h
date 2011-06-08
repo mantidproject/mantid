@@ -35,7 +35,7 @@ namespace Mantid
        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
        Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport OneToOneSpectraDetectorMap : public ISpectraDetectorMap
+    class MANTID_GEOMETRY_DLL OneToOneSpectraDetectorMap : public ISpectraDetectorMap
     {
     public:
       /// Default constructor builds an empty map

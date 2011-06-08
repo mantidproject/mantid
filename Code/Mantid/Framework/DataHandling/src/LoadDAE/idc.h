@@ -16,7 +16,8 @@
     GNU General Public License
 */
 
-#include "MantidKernel/DllExport.h"
+#include "MantidDataHandling/DllConfig.h"
+
 ///@cond nodoc
 /** 
 * holds information about the DAE connection - defined fully in idc.c

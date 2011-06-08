@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include <boost/shared_ptr.hpp>
 #include <map>
@@ -58,7 +58,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LogParser
+    class MANTID_KERNEL_DLL LogParser
     {
     public:
       /// Create given the icpevent file name
@@ -103,10 +103,10 @@ namespace Mantid
     };
 
     /// Returns the mean value if the property is TimeSeriesProperty<double>
-    DLLExport double timeMean(const Kernel::Property* p);
+    MANTID_KERNEL_DLL double timeMean(const Kernel::Property* p);
 
     /// Extract a line from input stream, discarding any EOL characters encountered
-    DLLExport std::istream& extractToEOL(std::istream& is, std::string& str);
+    MANTID_KERNEL_DLL std::istream& extractToEOL(std::istream& is, std::string& str);
 
 
 

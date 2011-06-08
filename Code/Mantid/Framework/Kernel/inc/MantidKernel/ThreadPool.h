@@ -2,7 +2,7 @@
 #define THREADPOOL_H_
 
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadPoolRunnable.h"
@@ -47,7 +47,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
    */
 
-  class DLLExport ThreadPool
+  class MANTID_KERNEL_DLL ThreadPool
   {
   public:
     ThreadPool(ThreadScheduler * scheduler = new ThreadSchedulerFIFO(), size_t numCores = 0,
@@ -91,9 +91,9 @@ namespace Kernel
 ///// Singleton declaration
 //#ifdef _WIN32
 //    // this breaks new namespace declaraion rules; need to find a better fix
-//    template class EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ThreadPoolImpl>;
+//    template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ThreadPoolImpl>;
 //#endif /* _WIN32 */
-//    typedef EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ThreadPoolImpl> ThreadPool;
+//    typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ThreadPoolImpl> ThreadPool;
 
 
 } // namespace Kernel

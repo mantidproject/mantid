@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IFitFunction.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
@@ -43,7 +43,7 @@ class IMDWorkspace;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  class DLLExport IMDIterator
+  class MANTID_API_DLL IMDIterator
   {
   public:
     /// Get the size of the data (number of entries that will be iterated through)

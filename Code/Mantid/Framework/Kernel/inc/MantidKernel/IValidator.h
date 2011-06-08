@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include <string>
 
@@ -38,7 +38,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE>
-class DLLExport IValidator
+class MANTID_KERNEL_DLL IValidator
 {
 public:
   ///virtual Destructor

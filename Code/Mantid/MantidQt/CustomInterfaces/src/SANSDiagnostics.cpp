@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/SANSDiagnostics.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UserStringParser.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidAPI/SpectraDetectorMap.h"

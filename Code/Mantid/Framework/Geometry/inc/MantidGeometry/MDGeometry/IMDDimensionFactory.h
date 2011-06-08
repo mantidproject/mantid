@@ -45,7 +45,7 @@ namespace Mantid
 namespace Geometry
 {
 class MDDimension;
-class DLLExport IMDDimensionFactory
+class MANTID_GEOMETRY_DLL IMDDimensionFactory
 {
 
 public:
@@ -85,9 +85,9 @@ private:
 };
 
   
-DLLExport Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString);
+MANTID_GEOMETRY_DLL Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString);
 
-DLLExport Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString, int nBins, double min, double max);
+MANTID_GEOMETRY_DLL Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString, int nBins, double min, double max);
 
 }
 }

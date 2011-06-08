@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 
-#include "MantidKernel/DllExport.h"
+#include "MantidKernel/DllConfig.h"
 #include <boost/tokenizer.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -48,7 +48,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-  class EXPORT_OPT_MANTID_KERNEL UserStringParser
+  class MANTID_KERNEL_DLL UserStringParser
   {
   public:
     

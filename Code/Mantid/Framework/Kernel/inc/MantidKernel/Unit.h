@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -42,7 +42,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Unit
+class MANTID_KERNEL_DLL Unit
 {
 public:
   /// The name of the unit. For a concrete unit, this method's definition is in the DECLARE_UNIT
@@ -122,7 +122,7 @@ namespace Units
 {
 
 /// Empty unit
-class DLLExport Empty : public Unit
+class MANTID_KERNEL_DLL Empty : public Unit
 {
 public:
   const std::string unitID() const; ///< "Empty"
@@ -141,7 +141,7 @@ public:
 };
 
 /// Label unit
-class DLLExport Label : public Empty
+class MANTID_KERNEL_DLL Label : public Empty
 {
 public:
   const std::string unitID() const; ///< "Label"
@@ -161,7 +161,7 @@ private:
 };
 
 /// Time of flight in microseconds
-class DLLExport TOF : public Unit
+class MANTID_KERNEL_DLL TOF : public Unit
 {
 public:
   const std::string unitID() const; ///< "TOF"
@@ -180,7 +180,7 @@ public:
 };
 
 /// Wavelength in Angstrom
-class DLLExport Wavelength : public Unit
+class MANTID_KERNEL_DLL Wavelength : public Unit
 {
 public:
   const std::string unitID() const; ///< "Wavelength"
@@ -199,7 +199,7 @@ public:
 };
 
 /// Energy in milli-electronvolts
-class DLLExport Energy : public Unit
+class MANTID_KERNEL_DLL Energy : public Unit
 {
 public:
   const std::string unitID() const; ///< "Energy"
@@ -218,7 +218,7 @@ public:
 };
 
 /// Absolute energy in units of wavenumber (cm^-1)
-class DLLExport Energy_inWavenumber : public Unit
+class MANTID_KERNEL_DLL Energy_inWavenumber : public Unit
 {
 public:
   const std::string unitID() const; ///< "Energy_inWavenumber"
@@ -237,7 +237,7 @@ public:
 };
 
 /// d-Spacing in Angstrom
-class DLLExport dSpacing : public Unit
+class MANTID_KERNEL_DLL dSpacing : public Unit
 {
 public:
   const std::string unitID() const; ///< "dSpacing"
@@ -256,7 +256,7 @@ public:
 };
 
 /// Momentum Transfer in Angstrom^-1
-class DLLExport MomentumTransfer : public Unit
+class MANTID_KERNEL_DLL MomentumTransfer : public Unit
 {
 public:
   const std::string unitID() const; ///< "MomentumTransfer"
@@ -275,7 +275,7 @@ public:
 };
 
 /// Momentum transfer squared in Angstrom^-2
-class DLLExport QSquared : public Unit
+class MANTID_KERNEL_DLL QSquared : public Unit
 {
 public:
   const std::string unitID() const; ///< "QSquared"
@@ -294,7 +294,7 @@ public:
 };
 
 /// Energy transfer in milli-electronvolts
-class DLLExport DeltaE : public Unit
+class MANTID_KERNEL_DLL DeltaE : public Unit
 {
 public:
   const std::string unitID() const; ///< "DeltaE"
@@ -313,7 +313,7 @@ public:
 };
 
 /// Energy transfer in units of wavenumber (cm^-1)
-class DLLExport DeltaE_inWavenumber : public Unit
+class MANTID_KERNEL_DLL DeltaE_inWavenumber : public Unit
 {
 public:
   const std::string unitID() const; ///< "DeltaE_inWavenumber"

@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Objects/Track.h"
 #include <boost/shared_ptr.hpp>
@@ -42,16 +42,16 @@ class GeometryHandler;
 
     Mantid is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
- 	  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- 	  GNU General Public License for more details.
+          MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+          GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
- 	  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+          along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IObjComponent : public virtual IComponent
+class MANTID_GEOMETRY_DLL IObjComponent : public virtual IComponent
 {
 public:
   ///type string

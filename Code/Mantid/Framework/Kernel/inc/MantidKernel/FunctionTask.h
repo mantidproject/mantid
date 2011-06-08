@@ -1,7 +1,7 @@
 #ifndef MANTID_KERNEL_FUNCTIONTASK_H_
 #define MANTID_KERNEL_FUNCTIONTASK_H_
 
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Task.h"
 #include <stdexcept>
 #include <boost/bind.hpp>
@@ -21,7 +21,7 @@ namespace Kernel
  * @author Janik Zikovsky, SNS
  * @date Feb 8, 2011
  */
-class DLLExport FunctionTask : public Task
+class MANTID_KERNEL_DLL FunctionTask : public Task
 {
 public:
 

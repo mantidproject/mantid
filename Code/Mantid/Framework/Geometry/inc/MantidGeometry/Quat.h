@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <vector>
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidKernel/Logger.h"
 
@@ -54,12 +54,12 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport Quat
+    class MANTID_GEOMETRY_DLL Quat
     {
 
     public:
       Quat();
-	  // direct quat definition
+          // direct quat definition
       Quat(const double, const double, const double, const double);
     // * Construct a Quat between two vectors; 
     // * The angle between them is defined differently from usual if vectors are not unit or the same length vectors, so quat would be not consistent
@@ -69,8 +69,8 @@ namespace Mantid
       Quat& operator=(const Quat&);
       //! Set quaternion form an angle in degrees and an axis
       Quat(const double _deg, const V3D& _axis);
-	  // set a quaternion from a rotational matrix;
-	  Quat(const Geometry::MantidMat &RotMat);
+          // set a quaternion from a rotational matrix;
+          Quat(const Geometry::MantidMat &RotMat);
       ~Quat();
       void operator()(const Quat&);
       void operator()(const double ww, const double aa, const double bb, const double cc);
@@ -103,13 +103,13 @@ namespace Mantid
       //! stored as an linear array of 16 double
       //! The function glRotated must be called
       void GLMatrix(double* glmat) const;
-	  //! returns the rotation matrix defined by this quaternion as an 9-point vector representing M33 matrix 
-	  //! (m33 is not used at the moment), if check_normalisation selected, verify if the mod(quat) is indeed == 1 and throws otherwise. 
-	  std::vector<double> getRotation(bool check_normalisation=false,bool throw_on_errors=false)const; 
+          //! returns the rotation matrix defined by this quaternion as an 9-point vector representing M33 matrix 
+          //! (m33 is not used at the moment), if check_normalisation selected, verify if the mod(quat) is indeed == 1 and throws otherwise. 
+          std::vector<double> getRotation(bool check_normalisation=false,bool throw_on_errors=false)const; 
       //! Convert GL Matrix into Quat
       void setQuat(double[16]);
-	  //! Convert usual 3D rotation matrix into quat; Will throw if matirix is not rotational;
-	  void setQuat(const Geometry::MantidMat &RotMat);
+          //! Convert usual 3D rotation matrix into quat; Will throw if matirix is not rotational;
+          void setQuat(const Geometry::MantidMat &RotMat);
       //! Rotate a vector
       void rotate(V3D&) const;
 
@@ -154,12 +154,12 @@ namespace Mantid
       /// Internal value
       double c;
 
-	  //
+          //
      static Kernel::Logger& quatG_log;
     };
 
-    DLLExport std::ostream& operator<<(std::ostream&, const Quat&);
-    DLLExport std::istream& operator>>(std::istream&,Quat& q);
+    MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const Quat&);
+    MANTID_GEOMETRY_DLL std::istream& operator>>(std::istream&,Quat& q);
 
 
   } // Namespace Mantid

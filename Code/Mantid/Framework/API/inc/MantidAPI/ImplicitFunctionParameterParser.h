@@ -30,7 +30,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "ImplicitFunctionParameter.h"
 #include <boost/interprocess/smart_ptr/unique_ptr.hpp>
@@ -72,7 +72,7 @@ namespace API
  * Deletion policy for unique pointers.
  */
 template<typename T>
-class DLLExport DeleterPolicy
+class MANTID_API_DLL DeleterPolicy
 {
 public:
   void operator()(T* pParser)
@@ -84,7 +84,7 @@ public:
 /*
  * ImplicitFunctionParameterParser definition. Used to parse implicit function xml.
  */
-class DLLExport ImplicitFunctionParameterParser
+class MANTID_API_DLL ImplicitFunctionParameterParser
 {
 public:
 

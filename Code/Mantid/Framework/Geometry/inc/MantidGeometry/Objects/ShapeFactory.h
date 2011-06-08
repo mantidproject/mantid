@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/V3D.h"
 #include <boost/shared_ptr.hpp>
 #include <map>
@@ -15,12 +15,12 @@
 /// @cond Exclude from doxygen documentation
 namespace Poco {
 namespace XML {
-	class Element;
+        class Element;
 }}
 /// @endcond
 
 namespace Mantid
-{	
+{       
   namespace Kernel
   {
     class Logger;
@@ -63,7 +63,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     */
-    class DLLExport ShapeFactory
+    class MANTID_GEOMETRY_DLL ShapeFactory
     {
     public:
       ShapeFactory();
@@ -88,7 +88,7 @@ namespace Mantid
 
       Poco::XML::Element* getShapeElement(Poco::XML::Element* pElem, const std::string& name);
       double getDoubleAttribute(Poco::XML::Element* pElem, const std::string& name);
-      V3D parsePosition(Poco::XML::Element* pElem);	
+      V3D parsePosition(Poco::XML::Element* pElem);     
       void createGeometryHandler(Poco::XML::Element*,boost::shared_ptr<Object>);
 
       /// static reference to the logger class

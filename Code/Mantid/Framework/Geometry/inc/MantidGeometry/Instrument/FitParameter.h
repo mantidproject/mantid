@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Interpolation.h"
 
 namespace Mantid
@@ -40,7 +40,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport FitParameter 
+    class MANTID_GEOMETRY_DLL FitParameter 
     {
     public:
       /// Constructor
@@ -113,13 +113,13 @@ namespace Mantid
       std::string m_formulaUnit; ///< the unit that the formula expects
       std::string m_resultUnit;  ///<the rsult unit
 
-	    /// Static reference to the logger class
-	    static Kernel::Logger& g_log;
+            /// Static reference to the logger class
+            static Kernel::Logger& g_log;
     };
 
     // defining operator << and >>
-    DLLExport std::ostream& operator<<(std::ostream&, const FitParameter& );
-    DLLExport std::istream& operator>>(std::istream&,FitParameter&);
+    MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const FitParameter& );
+    MANTID_GEOMETRY_DLL std::istream& operator>>(std::istream&,FitParameter&);
 
   } // namespace Geometry
 } // namespace Mantid

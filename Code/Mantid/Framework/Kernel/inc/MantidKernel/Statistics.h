@@ -2,7 +2,7 @@
 #define STATISTICS_H_
 
 #include <vector>
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 
 namespace Mantid
 {

@@ -4,7 +4,7 @@
 //--------------------------------------------
 // Includes
 //--------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include <Poco/Logger.h>
 #include <Poco/LogStream.h>
 #include <Poco/UnbufferedStreamBuf.h>
@@ -44,7 +44,7 @@ namespace Kernel
    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ThreadSafeLogStreamBuf: public Poco::LogStreamBuf
+class MANTID_KERNEL_DLL ThreadSafeLogStreamBuf: public Poco::LogStreamBuf
 {
 public:
   /// Constructor
@@ -68,7 +68,7 @@ private:
   From Poco/Foundation/LogStream.h - This class is needed to ensure the correct initialization
   order of the stream buffer and base classes.
  */
-class DLLExport ThreadSafeLogIOS: public virtual std::ios
+class MANTID_KERNEL_DLL ThreadSafeLogIOS: public virtual std::ios
 {
 public:
   ///Constructor
@@ -97,7 +97,7 @@ protected:
       ls << "Some informational message" << std::endl;
       ls.error() << "Some error message" << std::endl;
  */
-class DLLExport ThreadSafeLogStream : public ThreadSafeLogIOS, public std::ostream
+class MANTID_KERNEL_DLL ThreadSafeLogStream : public ThreadSafeLogIOS, public std::ostream
 {
 public:
   /// Creates the ThreadSafeLogStream, using the given logger and priority.

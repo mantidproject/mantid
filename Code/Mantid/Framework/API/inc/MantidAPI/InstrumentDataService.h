@@ -1,7 +1,7 @@
 #ifndef MANTID_API_INSTRUMENTDATASERVICE_
 #define MANTID_API_INSTRUMENTDATASERVICE_
 
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DataService.h"
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -36,7 +36,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class EXPORT_OPT_MANTID_API InstrumentDataServiceImpl : public Mantid::Kernel::DataService<Mantid::Geometry::Instrument>
+    class MANTID_API_DLL InstrumentDataServiceImpl : public Mantid::Kernel::DataService<Mantid::Geometry::Instrument>
     {
     private:
       friend struct Mantid::Kernel::CreateUsingNew<InstrumentDataServiceImpl>;
@@ -53,9 +53,9 @@ namespace Mantid
     ///Forward declaration of a specialisation of SingletonHolder for AnalysisDataServiceImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
     // this breaks new namespace declaraion rules; need to find a better fix
-    template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<InstrumentDataServiceImpl>;
+    template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<InstrumentDataServiceImpl>;
 #endif /* _WIN32 */
-    typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<InstrumentDataServiceImpl> InstrumentDataService;
+    typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<InstrumentDataServiceImpl> InstrumentDataService;
 
   } // Namespace API
 } // Namespace Mantid

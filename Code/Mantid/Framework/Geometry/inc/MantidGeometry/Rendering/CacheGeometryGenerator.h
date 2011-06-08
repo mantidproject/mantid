@@ -1,7 +1,7 @@
 #ifndef CACHE_GEOMETRYGENERATOR_H
 #define CACHE_GEOMETRYGENERATOR_H
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include <boost/shared_ptr.hpp>
 
@@ -41,9 +41,9 @@ namespace Mantid
        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
     class Object;
-    class DLLExport CacheGeometryGenerator
+    class MANTID_GEOMETRY_DLL CacheGeometryGenerator
     {
-    private:			
+    private:                    
       static Kernel::Logger& PLog; ///< Static reference to the logger class
       Object *Obj; ///< Input Object
       int mNoOfVertices; ///< number of vertices 

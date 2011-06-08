@@ -27,7 +27,7 @@
 #include <stdexcept>
 #include <typeinfo>
 #include <iostream>
-#include <MantidKernel/DllExport.h>
+#include <MantidKernel/DllConfig.h>
 
 namespace Mantid
 {
@@ -37,8 +37,8 @@ namespace Kernel
 /// prototype for function passed to atexit()
 typedef void (*atexit_func_t)();
 
-extern EXPORT_OPT_MANTID_KERNEL void CleanupSingletons();
-extern EXPORT_OPT_MANTID_KERNEL void AddSingleton(atexit_func_t func);
+extern MANTID_KERNEL_DLL void CleanupSingletons();
+extern MANTID_KERNEL_DLL void AddSingleton(atexit_func_t func);
 
 /// class to manage an instance of an object as a singleton
 template <typename T>

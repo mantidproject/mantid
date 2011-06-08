@@ -2,7 +2,7 @@
 #define COMPONENT_ASSEMBLY_
 #include <string> 
 #include <vector>
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/ICompAssembly.h"
 
@@ -45,7 +45,7 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CompAssembly : public virtual ICompAssembly, public Component
+class MANTID_GEOMETRY_DLL CompAssembly : public virtual ICompAssembly, public Component
 {
 protected:
   typedef std::vector< IComponent* >::iterator comp_it;///< Iterator type
@@ -108,7 +108,7 @@ protected:
   mutable BoundingBox *m_cachedBoundingBox;
 };
 
-DLLExport std::ostream& operator<<(std::ostream&, const CompAssembly&);
+MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const CompAssembly&);
 
 } //Namespace Geometry
 } //Namespace Mantid

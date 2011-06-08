@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <map>
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/MultiThreaded.h"
 
 #include <iostream>
@@ -42,7 +42,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     template< class KEYTYPE, class VALUETYPE >
-    class DLLExport Cache
+    class MANTID_KERNEL_DLL Cache
     {
     public:
 

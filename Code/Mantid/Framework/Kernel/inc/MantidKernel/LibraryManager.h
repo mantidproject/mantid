@@ -9,7 +9,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/DllExport.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/LibraryWrapper.h"
 
 namespace Mantid
@@ -43,7 +43,7 @@ class Logger;
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTID_KERNEL LibraryManagerImpl
+class MANTID_KERNEL_DLL LibraryManagerImpl
 {
 public:
 	//opens all suitable libraries on a given path
@@ -74,8 +74,8 @@ private:
 #ifdef __APPLE__
 inline
 #endif
-template class EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<LibraryManagerImpl>;
-typedef EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<LibraryManagerImpl> LibraryManager;
+template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<LibraryManagerImpl>;
+typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<LibraryManagerImpl> LibraryManager;
 
 } // namespace Kernel
 } // namespace Mantid

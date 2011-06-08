@@ -39,7 +39,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport RefAxis : public NumericAxis
+class MANTID_API_DLL RefAxis : public NumericAxis
 {
 public:
   RefAxis(const std::size_t& length, const MatrixWorkspace* const parentWorkspace);

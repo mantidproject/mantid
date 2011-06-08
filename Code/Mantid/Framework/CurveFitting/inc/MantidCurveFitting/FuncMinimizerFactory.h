@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include "MantidAPI/DllExport.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
@@ -68,13 +68,13 @@ namespace CurveFitting
     Kernel::Logger& g_log;
   };
   
-	///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
+        ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-	template class Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl>;
+        template class Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl>;
 #endif /* _WIN32 */
-	typedef Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl> FuncMinimizerFactory;
-	
+        typedef Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl> FuncMinimizerFactory;
+        
 } // namespace API
 } // namespace Mantid
 

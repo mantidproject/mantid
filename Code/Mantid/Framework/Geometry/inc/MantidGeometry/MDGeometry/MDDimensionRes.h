@@ -37,7 +37,7 @@ namespace Mantid{
         q3
  }; 
 
-class DLLExport MDDimensionRes :   public MDDimension
+class MANTID_GEOMETRY_DLL MDDimensionRes :   public MDDimension
 {
    // this is to initiate and set the Dimensions from the Geometry
     friend class MDGeometry;
@@ -57,10 +57,10 @@ public:
     ///virtual Implementation of toXMLString providing additional fields over parent MDDimension relating to reciprocal nature.
      std::string toXMLString() const;
     /// virtual 
-	V3D getDirectionCryst(void)const;
-	/**Main constructor for a reciprocal dimension Initial direction should be set as in MDGeometryBasis, correspondent direction */
+        V3D getDirectionCryst(void)const;
+        /**Main constructor for a reciprocal dimension Initial direction should be set as in MDGeometryBasis, correspondent direction */
     MDDimensionRes(const std::string &ID,const rec_dim nDim, const V3D *pDir=NULL);
-	MDDimensionRes(const MDBasisDimension &Dim);
+        MDDimensionRes(const MDBasisDimension &Dim);
 protected:
     // function sets the coordinates of the dimension;
     virtual void setDirection(const V3D &theDirection);
@@ -74,7 +74,7 @@ private:
 
 /**  The class is used in algorithms when number of reciprocal dimensions is less then 3 to provide meaningfull representation of missing reciprocal dimensions
 */
-class DLLExport MDDimDummy : public MDDimensionRes
+class MANTID_GEOMETRY_DLL MDDimDummy : public MDDimensionRes
 {
 public:
   MDDimDummy(unsigned int nRecDim);

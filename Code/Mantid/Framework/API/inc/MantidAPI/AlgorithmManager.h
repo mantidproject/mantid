@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include <deque>
 #include <string>
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/Algorithm.h"
@@ -42,7 +42,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTID_API AlgorithmManagerImpl
+class MANTID_API_DLL AlgorithmManagerImpl
 {
 
 public:
@@ -94,7 +94,7 @@ private:
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmManagerImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl>;
+template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl>;
 #endif /* _WIN32 */
 typedef Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl> AlgorithmManager;
 

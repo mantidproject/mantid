@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
@@ -56,7 +56,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Instrument : public Geometry::CompAssembly, public IInstrument
+    class MANTID_GEOMETRY_DLL Instrument : public Geometry::CompAssembly, public IInstrument
     {
     public:
       ///String description of the type of component

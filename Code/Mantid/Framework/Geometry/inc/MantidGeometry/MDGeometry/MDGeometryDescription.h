@@ -72,7 +72,7 @@ typedef std::vector<boost::shared_ptr<IMDDimension> > DimensionVec;
 typedef std::vector<boost::shared_ptr<IMDDimension> >::iterator DimensionVecIterator;
 typedef std::vector<double> RotationMatrix;
 
-class DLLExport MDGeometryDescription
+class MANTID_GEOMETRY_DLL MDGeometryDescription
 {
 public:
   //  MDGeometryDescription(std::vector<MDDataObjects::DimensionsID> &IDs);
@@ -95,7 +95,7 @@ public:
   /** sets the transformation matrix, () which would transform MDDPoints from MDDData system of coordinates
    *  into MDImage system of coordinates  As there are no info about 
       MDDPoints system of coodinates in this class, the matrix has to be calculated externaly (except when building from geomerty,
-	  which provides example of retrieving this matrix	  */
+          which provides example of retrieving this matrix        */
   void setRotationMatrix(const MantidMat &rotMatrix){this->Rotations = rotMatrix;}
 /// return the rotations, which transform old coordinate system into the new one, set by the projection axis;
   MantidMat const & getRotations()const;

@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Logger.h"
@@ -57,7 +57,7 @@ class CloneableAlgorithm;
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory<Algorithm>
+class MANTID_API_DLL AlgorithmFactoryImpl : public Kernel::DynamicFactory<Algorithm>
 {
 public:
   // Unhide the base class version (to satisfy the intel compiler)
@@ -79,7 +79,7 @@ public:
     if (!className.empty())
     {
       if( it == m_vmap.end())
-        m_vmap[className] = version;	
+        m_vmap[className] = version;    
       else
       {
         if(version == it->second )
@@ -90,7 +90,7 @@ public:
         if(version > it->second)
           m_vmap[className]=version;
       }  
-      Kernel::DynamicFactory<Algorithm>::subscribe<C>(createName(className,version));	
+      Kernel::DynamicFactory<Algorithm>::subscribe<C>(createName(className,version));   
     }
   }
 
@@ -102,7 +102,7 @@ public:
   int highestVersion(const std::string & algName) const;
   /// Return the version of the algorithm where the given property is first found
   int versionForProperty(const std::string & algName, const std::string & propName) const;
-	  
+          
   /// Store a pointer to an algorithm that has alread been constructed; for instance an algorithm created in Python
   bool storeCloneableAlgorithm(CloneableAlgorithm* algorithm);
 
@@ -116,9 +116,9 @@ public:
 
   ///Create an algorithm object with the specified name
   boost::shared_ptr<Algorithm> createAlgorithm(const std::string & name, const int version) const;
-	
+        
   /// Private Constructor for singleton class
-  AlgorithmFactoryImpl();	
+  AlgorithmFactoryImpl();       
   /// Private copy constructor - NO COPY ALLOWED
   AlgorithmFactoryImpl(const AlgorithmFactoryImpl&);
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
@@ -142,10 +142,10 @@ public:
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>;
+template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>;
 #endif /* _WIN32 */
 
-typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl> AlgorithmFactory;
+typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl> AlgorithmFactory;
 
 /// Convenient typedef for an UpdateNotification
 typedef Mantid::Kernel::DynamicFactory<Algorithm>::UpdateNotification AlgorithmFactoryUpdateNotification;

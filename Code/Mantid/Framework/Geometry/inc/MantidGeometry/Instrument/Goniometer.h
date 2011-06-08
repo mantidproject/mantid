@@ -57,7 +57,7 @@ namespace Geometry
     GoniometerAxis(std::string initname,V3D initrotationaxis,double initangle,int initsense,int initangleunit):name(initname),rotationaxis(initrotationaxis),angle(initangle),sense(initsense),angleunit(initangleunit){}
   };
 
-  class DLLExport Goniometer
+  class MANTID_GEOMETRY_DLL Goniometer
   {
     public:
       // Default constructor

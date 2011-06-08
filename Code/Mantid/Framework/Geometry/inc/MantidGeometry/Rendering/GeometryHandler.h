@@ -1,7 +1,7 @@
 #ifndef GEOMETRYHANDLER_H
 #define GEOMETRYHANDLER_H
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/V3D.h"
 #include <boost/shared_ptr.hpp>
@@ -44,7 +44,7 @@ namespace Mantid
 
        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport GeometryHandler
+    class MANTID_GEOMETRY_DLL GeometryHandler
     {
     private:
       static Kernel::Logger& PLog;           ///< The official logger
@@ -82,9 +82,9 @@ namespace Mantid
       /// return the actual type and points of one of the "standard" objects, cuboid/cone/cyl/sphere
       virtual void GetObjectGeom(int& mytype, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight)
       {
-	UNUSED_ARG(vectors); UNUSED_ARG(myradius); UNUSED_ARG(myheight);
-	// Flag that this is unknown at this point
-	mytype = -1;        
+        UNUSED_ARG(vectors); UNUSED_ARG(myradius); UNUSED_ARG(myheight);
+        // Flag that this is unknown at this point
+        mytype = -1;        
       };
     };
 

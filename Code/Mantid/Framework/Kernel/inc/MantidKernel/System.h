@@ -1,8 +1,15 @@
 #ifndef MANTID_KERNEL_SYSTEM_H_
 #define MANTID_KERNEL_SYSTEM_H_
 
-#include <typeinfo>
-#include <limits>
+/*******************************************************************************
+ *                      READ THIS!! (AND THEN READ IT AGAIN)
+ *
+ *
+ * PLEASE DON'T EDIT THIS FILE UNLESS ADDING SOMETHING THAT ABSOLUTELY 
+ * MUST BE SEEN BY **EVERY** FILE IN MANTID
+ *
+ *
+ *******************************************************************************/
 
 /*  A system-wide file to contain, e.g., useful system-dependent macros
 
@@ -30,14 +37,14 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-
 /**
- * Definitions of the DLLImport and DLLExport compiler directives for MSVC
+ * Definitions of the DLLImport and MANTID_KERNEL_DLL compiler directives for MSVC
  */
 #ifdef _WIN32
   #pragma warning( disable: 4251 )
-  // MG: Given that we are compiling everything with msvc under Windows and linking all with the same runtime we can disable the warning about
-  // inheriting from a non-exported interface, e.g. std::runtime_error
+  /** MG: Given that we are compiling everything with msvc under Windows and 
+   * linking all with the same runtime we can disable the warning about
+   * inheriting from a non-exported interface, e.g. std::runtime_error */
   #pragma warning( disable : 4275 )
   #define DLLExport __declspec( dllexport )
   #define DLLImport __declspec( dllimport )
@@ -49,7 +56,7 @@
 /**
  * Function arguments are sometimes unused in certain implentations
  * but are required for documentation purposes.
- * These are macros to silence compiler warnings about the subject
+ * This is a macro to silence compiler warnings about the subject
  */
 #define UNUSED_ARG(x) (void)x;
 
@@ -64,6 +71,11 @@
 #pragma message("WARNING: You need to implement DEPRECATED for this compiler")
 #define DEPRECATED(func) func
 #endif
+
+/**
+ *  For size_t and ptrdiff_t
+ */
+#include <cstddef> 
 
 /**
  * Information for holding onto stdint.h if it is
@@ -96,79 +108,5 @@ typedef unsigned long  uint64_t;
 #endif
 #endif
 #endif
-
-
-#include <string>
-
-namespace Mantid
-{
-
-  /** Typedef for the data type to use for coordinate axes in MD objects such
-   * as MDBox, MDEventWorkspace, etc.
-   *
-   * This could be a float or a double, depending on requirements.
-   * We can change this in order to compare
-   * performance/memory/accuracy requirements.
-   */
-  typedef double coord_t;
-
-  /// Minimum value (large negative number) that a coordinate can take
-  static const coord_t coord_t_min = -std::numeric_limits<coord_t>::max();
-
-  /// Maximum value (large positive number) that a coordinate can take
-  static const coord_t coord_t_max = std::numeric_limits<coord_t>::max();
-
-  /** Typedef for the data type to use for the signal and error
-   * integrated in MDWorkspaces, MDBoxes, MDEventWorkspace etc.
-   *
-   * This could be a float or a double, depending on requirements/platform.
-   * We can change this in order to compare performance/memory/accuracy requirements.
-   */
-  typedef double signal_t;
-  
-}
-
-
-namespace Mantid 
-{
-
-  /// Return what we consider to be an empty integer, -INT_MAX
-  DLLExport int EMPTY_INT();
-
-  /// Return what we consider to be an empty double, -DBL_MAX
-  DLLExport double EMPTY_DBL();
-
-namespace Kernel
-{
-
-  /** This class is simply used in the subscription of classes into the various
-   *  factories in Mantid. The fact that the constructor takes an int means that
-   *  the comma operator can be used to make a call to the factories' subscribe
-   *  method in the first part.
-   */
-  class DLLExport RegistrationHelper
-  {
-  public:
-    /// Constructor. Does nothing.
-    /// @param i :: Takes an int
-    RegistrationHelper(int i); // Implemented in cpp file to kill compiler warning
-  };
-
-  //Return the executable path
-  DLLExport std::string getDirectoryOfExecutable();
-  
-  //Return the full path to the executable
-  DLLExport std::string getPathToExecutable();
-
-  //Check if the path is on a network drive
-  DLLExport bool isNetworkDrive(const std::string & path);
-
-  /// Return the name corresponding to the mangled string given by typeid
-  DLLExport std::string getUnmangledTypeName(const std::type_info& type);
-
-} // namespace Kernel
-} // namespace Mantid
-
-
 
 #endif /*MANTID_KERNEL_SYSTEM_H_*/

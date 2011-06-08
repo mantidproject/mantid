@@ -52,7 +52,7 @@ namespace Mantid
     */
 
 
-    class DLLExport IMDWorkspace : public Workspace
+    class MANTID_API_DLL IMDWorkspace : public Workspace
     {
     public:
       

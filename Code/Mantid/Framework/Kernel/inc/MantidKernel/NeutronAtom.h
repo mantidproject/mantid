@@ -6,7 +6,7 @@
 //------------------------------------------------------------------------------
 #include <ostream>
 #include <string>
-#include "MantidKernel/DllExport.h"
+#include "MantidKernel/DllConfig.h"
 
 namespace Mantid
 {
@@ -37,7 +37,7 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.   
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    struct EXPORT_OPT_MANTID_KERNEL NeutronAtom {
+    struct MANTID_KERNEL_DLL NeutronAtom {
 
       /// The reference wavelength value for absorption cross sections
       static const double ReferenceLambda;
@@ -94,10 +94,10 @@ namespace Mantid
       double abs_scatt_xs;
     };
 
-    DLLExport bool operator==(const NeutronAtom& left, const NeutronAtom& right);
-    DLLExport bool operator!=(const NeutronAtom& left, const NeutronAtom& right);
-    DLLExport std::ostream& operator<<(std::ostream& out, const NeutronAtom &atom);
-    DLLExport NeutronAtom getNeutronAtom(const int z_number, const int a_number = 0);
+    MANTID_KERNEL_DLL bool operator==(const NeutronAtom& left, const NeutronAtom& right);
+    MANTID_KERNEL_DLL bool operator!=(const NeutronAtom& left, const NeutronAtom& right);
+    MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream& out, const NeutronAtom &atom);
+    MANTID_KERNEL_DLL NeutronAtom getNeutronAtom(const int z_number, const int a_number = 0);
 
   } //Namespace PhysicalConstants
 } //Namespace Mantid

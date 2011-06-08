@@ -4,13 +4,14 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSplitter.h"
 #include <string>
 #include <typeinfo>
 #include <set>
-#include "System.h"
+
 
 namespace Mantid
 {
@@ -78,7 +79,7 @@ struct Direction
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Property
+class MANTID_KERNEL_DLL Property
 {
 public:
   /// 'Virtual copy constructor'
@@ -165,6 +166,9 @@ private:
   /// Private default constructor
   Property();
 };
+
+  /// Return the name corresponding to the mangled string given by typeid
+  MANTID_KERNEL_DLL std::string getUnmangledTypeName(const std::type_info& type);
 
 } // namespace Kernel
 } // namespace Mantid

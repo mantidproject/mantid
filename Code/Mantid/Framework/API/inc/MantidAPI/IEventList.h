@@ -1,6 +1,6 @@
 #ifndef MANTID_API_IEVENTLIST_H_
 #define MANTID_API_IEVENTLIST_H_
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -18,7 +18,7 @@ namespace API
    * @author Janik Zikovsky
    * @date 2011-04-12 11:48:38.252379
    */
-  class DLLExport IEventList 
+  class MANTID_API_DLL IEventList 
   {
   public:
     virtual Mantid::API::EventType getEventType() const = 0;

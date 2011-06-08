@@ -1,7 +1,7 @@
 #ifndef MANTID_KERNEL_TASK_H_
 #define MANTID_KERNEL_TASK_H_
 
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -21,7 +21,7 @@ namespace Kernel
    * @author Janik Zikovsky, SNS
    * @date Feb 8, 2011
    */
-  class DLLExport Task
+  class MANTID_KERNEL_DLL Task
   {
   public:
     //---------------------------------------------------------------------------------------------

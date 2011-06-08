@@ -11,6 +11,7 @@
 
 namespace Mantid
 {
+
 namespace Kernel
 {
 //----------------------------------------------------------------------
@@ -48,7 +49,7 @@ class Logger;
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport IPropertyManager
+class MANTID_KERNEL_DLL IPropertyManager
 {
 public:
     //IPropertyManager(){}
@@ -231,7 +232,7 @@ protected:
   virtual void clear() = 0;
 
   /// Utility class that enables the getProperty() method to effectively be templated on the return type
-  struct DLLExport TypedValue
+  struct MANTID_KERNEL_DLL TypedValue
   {
     /// Reference to the containing PropertyManager
     const IPropertyManager& pm;

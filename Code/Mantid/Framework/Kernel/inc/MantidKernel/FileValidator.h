@@ -39,7 +39,7 @@ bool has_ending(const std::string &value, const std::string & ending);
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FileValidator : public IValidator<std::string>
+class MANTID_KERNEL_DLL FileValidator : public IValidator<std::string>
 {
 public:
   FileValidator();

@@ -5,6 +5,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/LibraryManager.h"
+#include "MantidKernel/ConfigService.h"
 
 class LibraryManagerTest : public CxxTest::TestSuite
 {
@@ -15,7 +16,8 @@ public:
     using namespace Mantid::Kernel;
     // This first line can go once scons does
     int libsOpened = LibraryManager::Instance().OpenAllLibraries("../../Build/Plugins/", false);
-    libsOpened += LibraryManager::Instance().OpenAllLibraries(getDirectoryOfExecutable(), false);
+    std::string exeDir = ConfigService::Instance().getDirectoryOfExecutable();
+    libsOpened += LibraryManager::Instance().OpenAllLibraries(exeDir, false);
 
     TSM_ASSERT ( "No shared libraries could be loaded", libsOpened ); 
   }

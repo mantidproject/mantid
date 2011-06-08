@@ -7,7 +7,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IArchiveSearch.h"
 
 #include <vector>
@@ -44,7 +44,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class EXPORT_OPT_MANTID_API FileFinderImpl
+    class MANTID_API_DLL FileFinderImpl
     {
     public:
       std::string getFullPath(const std::string& fName)const;
@@ -75,10 +75,10 @@ namespace Mantid
     ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
     // this breaks new namespace declaraion rules; need to find a better fix
-    template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<FileFinderImpl>;
+    template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<FileFinderImpl>;
 #endif /* _WIN32 */
 
-    typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<FileFinderImpl> FileFinder;
+    typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FileFinderImpl> FileFinder;
 
   }
 }

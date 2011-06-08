@@ -36,7 +36,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IBackgroundFunction : public IFunctionWithLocation
+class MANTID_API_DLL IBackgroundFunction : public IFunctionWithLocation
 {
 public:
   ///Fits the function

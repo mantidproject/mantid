@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DllExport.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/InstrumentInfo.h"
 
@@ -52,7 +52,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTID_KERNEL FacilityInfo
+class MANTID_KERNEL_DLL FacilityInfo
 {
 public:
   FacilityInfo(const Poco::XML::Element* elem);

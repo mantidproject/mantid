@@ -2,7 +2,7 @@
 #define MDGEOMETRY_XML_PARSER_H
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include <string>
 
 namespace Mantid
@@ -37,7 +37,7 @@ namespace Mantid
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-    class DLLExport MDGeometryXMLParser
+    class MANTID_GEOMETRY_DLL MDGeometryXMLParser
     {
 
     private:

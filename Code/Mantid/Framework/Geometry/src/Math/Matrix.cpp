@@ -91,24 +91,24 @@ Matrix<T>::Matrix(const std::vector<T>& A,const std::vector<T>& B)
 template<typename T>
 Matrix<T>::Matrix(const std::vector<T>&data) : nx(0),ny(0),V(0)
 {
-	size_t numel = data.size();
-	size_t nxt =(size_t)sqrt(double(numel));
-	size_t test = nxt*nxt;
-	if(test != numel){
-		throw(std::invalid_argument("number of elements in input vector have to be square of some value"));
-	}
+        size_t numel = data.size();
+        size_t nxt =(size_t)sqrt(double(numel));
+        size_t test = nxt*nxt;
+        if(test != numel){
+                throw(std::invalid_argument("number of elements in input vector have to be square of some value"));
+        }
 
-	setMem(nxt,nxt);
+        setMem(nxt,nxt);
 
-	size_t ic(0);
-	for(size_t i=0;i<nx;i++)
-	{
-		for(size_t j=0;j<ny;j++)
-		{
-			V[i][j]=data[ic];
-			ic++;
-		}
-	}  
+        size_t ic(0);
+        for(size_t i=0;i<nx;i++)
+        {
+                for(size_t j=0;j<ny;j++)
+                {
+                        V[i][j]=data[ic];
+                        ic++;
+                }
+        }  
 }
 
 template<typename T>
@@ -141,7 +141,7 @@ Matrix<T>::Matrix(const Matrix<T>& A,const size_t nrow,const size_t ncol)
           jR++;
         }
       }
-  	  iR++;
+          iR++;
     }
   }
 }
@@ -163,7 +163,7 @@ Matrix<T>::Matrix(const Matrix<T>& A)
     {
       for(size_t j=0;j<ny;j++)
       {
-	V[i][j]=A.V[i][j];
+        V[i][j]=A.V[i][j];
       }
     }
   }
@@ -184,13 +184,13 @@ Matrix<T>::operator=(const Matrix<T>& A)
       setMem(A.nx,A.ny);
       if (nx*ny)
       {
-	for(size_t i=0;i<nx;i++)
-	{
-	  for(size_t j=0;j<ny;j++)
-	  {
-	    V[i][j]=A.V[i][j];
-	  }
-	}
+        for(size_t i=0;i<nx;i++)
+        {
+          for(size_t j=0;j<ny;j++)
+          {
+            V[i][j]=A.V[i][j];
+          }
+        }
       }
     }
   return *this;
@@ -305,7 +305,7 @@ Matrix<T>::operator*(const Matrix<T>& A) const
     {
       for(size_t kk=0;kk<ny;kk++)
       {
-	      X.V[i][j]+=V[i][kk]*A.V[kk][j];
+              X.V[i][j]+=V[i][kk]*A.V[kk][j];
       }
     }
   }
@@ -684,7 +684,7 @@ Matrix<T>::identityMatrix()
     {
       for(size_t j=0;j<ny;j++)
       {
-      	V[i][j]=(j==i) ? 1 : 0;
+        V[i][j]=(j==i) ? 1 : 0;
       }
     }
   }
@@ -694,37 +694,37 @@ template<typename T>
 void 
 Matrix<T>::setColumn(const size_t nCol,const std::vector<T> &newCol)
 {
-	if(nCol>=this->ny){
-		throw(std::invalid_argument("nCol requested> nCol availible"));
-	}
-	size_t nxM = newCol.size();
-	if(nx < nxM) nxM=nx;
-	for(size_t i=0; i< nxM;i++)
+        if(nCol>=this->ny){
+                throw(std::invalid_argument("nCol requested> nCol availible"));
+        }
+        size_t nxM = newCol.size();
+        if(nx < nxM) nxM=nx;
+        for(size_t i=0; i< nxM;i++)
   {
-		V[i][nCol]=newCol[i];
-	}
+                V[i][nCol]=newCol[i];
+        }
 
 }
 template<typename T> 
 void 
 Matrix<T>::setRow(const size_t nRow,const std::vector<T> &newRow)
 {
-	if(nRow>=this->nx){
-		throw(std::invalid_argument("nRow requested> nRow availible"));
-	}
-	size_t nyM = newRow.size();
-	if(ny < nyM) nyM=ny;
-	for(size_t j=0; j < nyM;j++)
+        if(nRow>=this->nx){
+                throw(std::invalid_argument("nRow requested> nRow availible"));
+        }
+        size_t nyM = newRow.size();
+        if(ny < nyM) nyM=ny;
+        for(size_t j=0; j < nyM;j++)
   {
-		V[nRow][j]=newRow[j];
-	}
+                V[nRow][j]=newRow[j];
+        }
 
 }
 
 template<typename T>
 void
 Matrix<T>::rotate(const double tau,const double s,const int i,const int j,
-		  const int k,const int m)
+                  const int k,const int m)
   /**
     Applies a rotation to a particular point of tan(theta)=tau.
     Note that you need both sin(theta) and tan(theta) because of 
@@ -790,7 +790,7 @@ Matrix<T>::bDiagonal(const std::vector<T>& Dvec) const
     {
       std::ostringstream cx;
       cx<<"Error Matrix::bDiaognal size:: "<<Dvec.size()
-	<<" "<<nx<<" "<<ny;
+        <<" "<<nx<<" "<<ny;
       throw std::runtime_error(cx.str());
     }
 
@@ -925,41 +925,41 @@ Matrix<T>::GaussJordan(Matrix<T>& B)
     // Get Biggest non-pivoted item
     double bigItem=0.0;         // get point to pivot over
     for(size_t j=0;j<nx;j++)
-   	{
-	    if (pivoted[j]!= 1)  //check only non-pivots
-	    {
-	      for(size_t k=0;k<nx;k++)
         {
-      		if (!pivoted[k])
-		      {
-		        if (fabs(V[j][k]) >=bigItem)
-		        {
-			        bigItem=fabs(V[j][k]);
-			        irow=j;
-			        icol=k;
-		        }
-    		  }
+            if (pivoted[j]!= 1)  //check only non-pivots
+            {
+              for(size_t k=0;k<nx;k++)
+        {
+                if (!pivoted[k])
+                      {
+                        if (fabs(V[j][k]) >=bigItem)
+                        {
+                                bigItem=fabs(V[j][k]);
+                                irow=j;
+                                icol=k;
+                        }
+                  }
         }
       }
-	    else if (pivoted[j]>1)
+            else if (pivoted[j]>1)
       {
-	      throw std::runtime_error("Error doing G-J elem on a singular matrix");
+              throw std::runtime_error("Error doing G-J elem on a singular matrix");
       }
     }
     pivoted[icol]++;
     // Swap in row/col to make a diagonal item 
     if (irow != icol)
-  	{
-	    swapRows(irow,icol);
-	    B.swapRows(irow,icol);
-	  }
+        {
+            swapRows(irow,icol);
+            B.swapRows(irow,icol);
+          }
     indxrow[i]=static_cast<int>(irow);
     indxcol[i]=static_cast<int>(icol);
     
     if (V[icol][icol] == 0.0)
-	  {
-	    std::cerr<<"Error doing G-J elem on a singular matrix"<<std::endl;
-	    return 1;
+          {
+            std::cerr<<"Error doing G-J elem on a singular matrix"<<std::endl;
+            return 1;
     }
     const T pivDiv= T(1.0)/V[icol][icol];
     V[icol][icol]=1;
@@ -1066,7 +1066,7 @@ Matrix<T>::Invert()
   int d;
   Matrix<T> Lcomp(*this);
   Lcomp.lubcmp(indx,d);
-	
+        
   double det=static_cast<double>(d);
   for(size_t j=0;j<nx;j++)
     det *= Lcomp.V[j][j];
@@ -1074,11 +1074,11 @@ Matrix<T>::Invert()
   for(size_t j=0;j<nx;j++)
     {
       for(size_t i=0;i<nx;i++)
-	col[i]=0.0;
+        col[i]=0.0;
       col[j]=1.0;
       Lcomp.lubksb(indx,col);
       for(size_t i=0;i<nx;i++)
-	V[i][j]=static_cast<T>(col[i]);
+        V[i][j]=static_cast<T>(col[i]);
     } 
   delete [] indx;
   delete [] col;
@@ -1095,7 +1095,7 @@ Matrix<T>::determinant() const
 {
   if (nx!=ny)
     throw Kernel::Exception::MisMatch<size_t>(nx,ny,
-	"Determinate error :: Matrix is not NxN");
+        "Determinate error :: Matrix is not NxN");
 
   Matrix<T> Mt(*this);         //temp copy
   T D=Mt.factor();
@@ -1123,33 +1123,33 @@ Matrix<T>::factor()
       Pmax=fabs(V[i][i]);
       for(int j=i+1;j<static_cast<int>(nx);j++)     // find max in Row i
         {
-	  if (fabs(V[i][j])>Pmax)
+          if (fabs(V[i][j])>Pmax)
             {
-	      Pmax=fabs(V[i][j]);
-	      jmax=j;
-	    }
-	}
+              Pmax=fabs(V[i][j]);
+              jmax=j;
+            }
+        }
       if (Pmax<1e-8)         // maxtrix signular 
         {
-	  std::cerr<<"Matrix Singlular"<<std::endl;
-	  return 0;
-	}
+          std::cerr<<"Matrix Singlular"<<std::endl;
+          return 0;
+        }
       // Swap Columns
       if (i!=jmax) 
         {
-	  swapCols(i,jmax);
-	  deter*=-1;            //change sign.
-	}
+          swapCols(i,jmax);
+          deter*=-1;            //change sign.
+        }
       // zero all rows below diagonal
       Pmax=V[i][i];
       deter*=Pmax;
       for(int k=i+1;k<static_cast<int>(nx);k++)  // row index
         {
-	  const double scale=V[k][i]/Pmax;
-	  V[k][i]=static_cast<T>(0);
-	  for(int q=i+1;q<static_cast<int>(nx);q++)   //column index
-	    V[k][q]-=static_cast<T>(scale*V[i][q]);
-	}
+          const double scale=V[k][i]/Pmax;
+          V[k][i]=static_cast<T>(0);
+          for(int q=i+1;q<static_cast<int>(nx);q++)   //column index
+            V[k][q]-=static_cast<T>(scale*V[i][q]);
+        }
     }
   deter*=V[nx-1][nx-1];
   return static_cast<T>(deter);
@@ -1223,13 +1223,13 @@ Matrix<T>::lubcmp(int* rowperm,int& interchange)
       big=0.0;
       for(j=0;j<static_cast<int>(nx);j++)
       if ((temp=fabs(V[i][j])) > big) 
-	  big=temp;
+          big=temp;
 
       if (big == 0.0) 
         {
-	  delete [] vv;
-	  return;
-	}
+          delete [] vv;
+          return;
+        }
       vv[i]=1.0/big;
     }
 
@@ -1381,7 +1381,7 @@ Matrix<T>::sortEigen(Matrix<T>& DiagMatrix)
   if (ny!=nx || nx!=DiagMatrix.nx || nx!=DiagMatrix.ny)
     {
       std::cerr<<"Matrix not Eigen Form"<<std::endl;
-	  throw(std::invalid_argument(" Matrix is not in an eigenvalue format"));
+          throw(std::invalid_argument(" Matrix is not in an eigenvalue format"));
     }
   std::vector<int> index;
   std::vector<T> X=DiagMatrix.Diagonal();
@@ -1419,10 +1419,10 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
     for(size_t j=i+1;j<nx;j++)
       if (fabs(V[i][j]-V[j][i])>1e-6)
         {
-	  std::cerr<<"Matrix not symmetric"<<std::endl;
-	  std::cerr<< (*this);
-	  return 0;
-	}
+          std::cerr<<"Matrix not symmetric"<<std::endl;
+          std::cerr<< (*this);
+          return 0;
+        }
     
   Matrix<T> A(*this);
   //Make V an identity matrix
@@ -1447,74 +1447,74 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
     {
       sm=0.0;           // sum of off-diagonal terms
       for(size_t ip=0;ip<nx-1;ip++)
-	for(size_t iq=ip+1;iq<nx;iq++)
-	  sm+=fabs(A.V[ip][iq]);
+        for(size_t iq=ip+1;iq<nx;iq++)
+          sm+=fabs(A.V[ip][iq]);
 
       if (sm==0.0)           // Nothing to do return...
-	{
-	  // Make OUTPUT -- D + A
-	  // sort Output::
-	  std::vector<int> index;
-	  for(size_t ix=0;ix<nx;ix++)
-	    DiagMatrix.V[ix][ix]=static_cast<T>(Diag[ix]);
-	  return 1;
-	}
+        {
+          // Make OUTPUT -- D + A
+          // sort Output::
+          std::vector<int> index;
+          for(size_t ix=0;ix<nx;ix++)
+            DiagMatrix.V[ix][ix]=static_cast<T>(Diag[ix]);
+          return 1;
+        }
 
       // Threshold large for first 5 sweeps
       tresh= (i<6) ? 0.2*sm/static_cast<int>(nx*nx) : 0.0;
 
       for(int ip=0;ip<static_cast<int>(nx)-1;ip++)
-	{
-	  for(int iq=ip+1;iq<static_cast<int>(nx);iq++)
-	    {
-	      double g=100.0*fabs(A.V[ip][iq]);
-	      // After 4 sweeps skip if off diagonal small
-	      if (i>6 && 
-		  static_cast<float>(fabs(Diag[ip]+g))==static_cast<float>(fabs(Diag[ip])) &&
-		  static_cast<float>(fabs(Diag[iq]+g))==static_cast<float>(fabs(Diag[iq])))
-		A.V[ip][iq]=0;
+        {
+          for(int iq=ip+1;iq<static_cast<int>(nx);iq++)
+            {
+              double g=100.0*fabs(A.V[ip][iq]);
+              // After 4 sweeps skip if off diagonal small
+              if (i>6 && 
+                  static_cast<float>(fabs(Diag[ip]+g))==static_cast<float>(fabs(Diag[ip])) &&
+                  static_cast<float>(fabs(Diag[iq]+g))==static_cast<float>(fabs(Diag[iq])))
+                A.V[ip][iq]=0;
 
-	      else if (fabs(A.V[ip][iq])>tresh)
-		{
-		  double h=Diag[iq]-Diag[ip];
-		  if (static_cast<float>((fabs(h)+g)) == static_cast<float>(fabs(h)))
-		    tanAngle=A.V[ip][iq]/h;      // tanAngle=1/(2theta)
-		  else
-		    {
-		      theta=0.5*h/A.V[ip][iq];
-		      tanAngle=1.0/(fabs(theta)+sqrt(1.0+theta*theta));
-		      if (theta<0.0)
-			tanAngle = -tanAngle;
-		    }
-		  cosAngle=1.0/sqrt(1+tanAngle*tanAngle);
-		  sinAngle=tanAngle*cosAngle;
-		  double tau=sinAngle/(1.0+cosAngle);
-		  h=tanAngle*A.V[ip][iq];
-		  ZeroComp[ip] -= h;
-		  ZeroComp[iq] += h;
-		  Diag[ip] -= h;
-		  Diag[iq] += h;
-		  A.V[ip][iq]=0;
-		  // Rotations 0<j<p
-		  for(int j=0;j<ip;j++)
-		    A.rotate(tau,sinAngle,j,ip,j,iq);
-		  for(int j=ip+1;j<iq;j++)
-		    A.rotate(tau,sinAngle,ip,j,j,iq);
-		  for(int j=iq+1;j<static_cast<int>(nx);j++)
-		    A.rotate(tau,sinAngle,ip,j,iq,j);
-		  for(int j=0;j<static_cast<int>(nx);j++)
-		    EigenVec.rotate(tau,sinAngle,j,ip,j,iq);
-		  iteration++;
-		}
-	    }
-	}   
+              else if (fabs(A.V[ip][iq])>tresh)
+                {
+                  double h=Diag[iq]-Diag[ip];
+                  if (static_cast<float>((fabs(h)+g)) == static_cast<float>(fabs(h)))
+                    tanAngle=A.V[ip][iq]/h;      // tanAngle=1/(2theta)
+                  else
+                    {
+                      theta=0.5*h/A.V[ip][iq];
+                      tanAngle=1.0/(fabs(theta)+sqrt(1.0+theta*theta));
+                      if (theta<0.0)
+                        tanAngle = -tanAngle;
+                    }
+                  cosAngle=1.0/sqrt(1+tanAngle*tanAngle);
+                  sinAngle=tanAngle*cosAngle;
+                  double tau=sinAngle/(1.0+cosAngle);
+                  h=tanAngle*A.V[ip][iq];
+                  ZeroComp[ip] -= h;
+                  ZeroComp[iq] += h;
+                  Diag[ip] -= h;
+                  Diag[iq] += h;
+                  A.V[ip][iq]=0;
+                  // Rotations 0<j<p
+                  for(int j=0;j<ip;j++)
+                    A.rotate(tau,sinAngle,j,ip,j,iq);
+                  for(int j=ip+1;j<iq;j++)
+                    A.rotate(tau,sinAngle,ip,j,j,iq);
+                  for(int j=iq+1;j<static_cast<int>(nx);j++)
+                    A.rotate(tau,sinAngle,ip,j,iq,j);
+                  for(int j=0;j<static_cast<int>(nx);j++)
+                    EigenVec.rotate(tau,sinAngle,j,ip,j,iq);
+                  iteration++;
+                }
+            }
+        }   
       for(size_t j=0;j<nx;j++)
-	{
-	  B[j]+=ZeroComp[j];
-	  Diag[j]=B[j];
-	  ZeroComp[j]=0.0;
-	}
-	    
+        {
+          B[j]+=ZeroComp[j];
+          Diag[j]=B[j];
+          ZeroComp[j]=0.0;
+        }
+            
     }
   std::cerr<<"Error :: Iterations are a problem"<<std::endl;
   return 0;
@@ -1617,12 +1617,12 @@ Matrix<T>::write(std::ostream& Fh,const int blockCnt) const
       BCnt += blockNumber;
       if (BCnt>ny)
       {
-    	  BCnt=ny;
+          BCnt=ny;
       }
 
       if (ACnt)
       {
-      	Fh<<" ----- "<<ACnt<<" "<<BCnt<<" ------ "<<std::endl;
+        Fh<<" ----- "<<ACnt<<" "<<BCnt<<" ------ "<<std::endl;
       }
       for(size_t i=0;i<nx;i++)
       {
@@ -1659,13 +1659,13 @@ Matrix<T>::str() const
 
 ///\cond TEMPLATE
 
-template class DLLExport Matrix<double>;
-template class DLLExport Matrix<float>;
-template class DLLExport Matrix<int>;
+template class MANTID_GEOMETRY_DLL Matrix<double>;
+template class MANTID_GEOMETRY_DLL Matrix<float>;
+template class MANTID_GEOMETRY_DLL Matrix<int>;
 
-template DLLExport std::ostream& operator<<(std::ostream&,const Geometry::Matrix<double>&);
-template DLLExport std::ostream& operator<<(std::ostream&,const Geometry::Matrix<float>&);
-template DLLExport std::ostream& operator<<(std::ostream&,const Geometry::Matrix<int>&);
+template MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&,const Geometry::Matrix<double>&);
+template MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&,const Geometry::Matrix<float>&);
+template MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&,const Geometry::Matrix<int>&);
 
 ///\endcond TEMPLATE
 } // namespace Geometry

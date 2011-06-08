@@ -5,13 +5,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid
 {
-	
+        
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
@@ -60,7 +60,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 
-  class EXPORT_OPT_MANTID_API FunctionFactoryImpl : public Kernel::DynamicFactory<IFitFunction>
+  class MANTID_API_DLL FunctionFactoryImpl : public Kernel::DynamicFactory<IFitFunction>
   {
   public:
     /**Creates an instance of a function
@@ -114,13 +114,13 @@ namespace API
 
   };
   
-	///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
+        ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-	template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>;
+        template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>;
 #endif /* _WIN32 */
-	typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<FunctionFactoryImpl> FunctionFactory;
-	
+        typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FunctionFactoryImpl> FunctionFactory;
+        
 } // namespace API
 } // namespace Mantid
 

@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include <string>
 #include <iostream>
 
@@ -44,7 +44,7 @@ class Property;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PropertyHistory
+class MANTID_KERNEL_DLL PropertyHistory
 {
 public:
   PropertyHistory(const std::string& name, const std::string& value, const std::string& type,
@@ -89,7 +89,7 @@ private:
   unsigned int m_direction;
 };
 
-DLLExport std::ostream& operator<<(std::ostream&, const PropertyHistory&);
+MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const PropertyHistory&);
 
 
 } // namespace Kernel

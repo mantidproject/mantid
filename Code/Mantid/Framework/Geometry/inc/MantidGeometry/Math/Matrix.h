@@ -1,9 +1,10 @@
 #ifndef MANTID_GEOMETRY_MATRIX_H_
 #define MANTID_GEOMETRY_MATRIX_H_
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include <vector>
 #include <cfloat>
+#include <ostream>
 
 namespace Mantid
 {
@@ -40,7 +41,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
     template<typename T>
-    class DLLExport Matrix
+    class MANTID_GEOMETRY_DLL Matrix
     {
     private:
 
@@ -153,7 +154,7 @@ namespace Mantid
     };
 
     template<typename T>
-    DLLExport std::ostream&
+    MANTID_GEOMETRY_DLL std::ostream&
       operator<<(std::ostream&,const Geometry::Matrix<T>&);
     typedef Mantid::Geometry::Matrix<double> MantidMat;
   }

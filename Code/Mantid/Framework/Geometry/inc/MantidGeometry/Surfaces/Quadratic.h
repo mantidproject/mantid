@@ -1,7 +1,7 @@
 #ifndef Geometry_Quadratic_h
 #define Geometry_Quadratic_h
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/Logger.h"
 #include <vector>
@@ -24,7 +24,7 @@ namespace Mantid
 
     */
 
-    class DLLExport Quadratic : public Surface
+    class MANTID_GEOMETRY_DLL Quadratic : public Surface
     {
     private:
 

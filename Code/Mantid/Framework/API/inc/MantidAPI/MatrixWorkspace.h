@@ -13,7 +13,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/Instrument/Instrument.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/cow_ptr.h"
@@ -67,7 +67,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport MatrixWorkspace : public IMDWorkspace
+    class MANTID_API_DLL MatrixWorkspace : public IMDWorkspace
     {
     public:
 

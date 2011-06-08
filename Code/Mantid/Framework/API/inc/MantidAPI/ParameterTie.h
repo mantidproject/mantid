@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IFitFunction.h"
 #include "MantidAPI/ParameterReference.h"
 
@@ -45,7 +45,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ParameterTie: public ParameterReference
+  class MANTID_API_DLL ParameterTie: public ParameterReference
 {
 public:
   /// Constructor

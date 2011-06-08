@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/Math/Matrix.h"
-
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 namespace Mantid
 {

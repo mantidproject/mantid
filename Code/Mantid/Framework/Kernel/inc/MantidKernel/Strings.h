@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -59,7 +59,7 @@ namespace Strings
  * @return
  */
 template<typename ITERATOR_TYPE>
-DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string separator)
+MANTID_KERNEL_DLL std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string separator)
 {
   std::ostringstream output;
   ITERATOR_TYPE it;
@@ -74,27 +74,27 @@ DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::st
 }
 
 /// Return a string with all matching occurence-strings
-DLLExport std::string replace(const std::string input, const std::string find_what, const std::string replace_with);
+MANTID_KERNEL_DLL std::string replace(const std::string input, const std::string find_what, const std::string replace_with);
 
 /// determine if a character group exists in a string
-DLLExport int confirmStr(const std::string& S,const std::string& fullPhrase);
+MANTID_KERNEL_DLL int confirmStr(const std::string& S,const std::string& fullPhrase);
 /// Get a word from a string
-DLLExport int extractWord(std::string& Line,const std::string& Word,const int cnt = 4);
+MANTID_KERNEL_DLL int extractWord(std::string& Line,const std::string& Word,const int cnt = 4);
 
 /// strip all spaces
-DLLExport std::string removeSpace(const std::string& CLine);
+MANTID_KERNEL_DLL std::string removeSpace(const std::string& CLine);
 /// strip pre/post spaces
-DLLExport std::string fullBlock(const std::string& A);
+MANTID_KERNEL_DLL std::string fullBlock(const std::string& A);
 /// strip pre/post spaces
-DLLExport std::string strip(const std::string& A);
+MANTID_KERNEL_DLL std::string strip(const std::string& A);
 /// strip trailling comments
-DLLExport void stripComment(std::string& A);
+MANTID_KERNEL_DLL void stripComment(std::string& A);
 /// Determines if a string is only spaces
-DLLExport int isEmpty(const std::string& A);
+MANTID_KERNEL_DLL int isEmpty(const std::string& A);
 /// Get a line and strip comments 
-DLLExport std::string getLine(std::istream& fh,const int spc = 256);
+MANTID_KERNEL_DLL std::string getLine(std::istream& fh,const int spc = 256);
 /// get a part of a long line
-DLLExport int getPartLine(std::istream& fh,std::string& Out,std::string& Excess,const int spc = 256);
+MANTID_KERNEL_DLL int getPartLine(std::istream& fh,std::string& Out,std::string& Excess,const int spc = 256);
 
 template<typename T> int convPartNum(const std::string& A,T& out);
 
@@ -119,10 +119,10 @@ template<typename T> int section(char* cA,T& out);
 template<typename T> int sectionMCNPX(std::string& A,T& out);
 
 /// Write file in standard MCNPX input form 
-DLLExport void writeMCNPX(const std::string& Line,std::ostream& OX);
+MANTID_KERNEL_DLL void writeMCNPX(const std::string& Line,std::ostream& OX);
 
 /// Split tring into spc deliminated components
-DLLExport std::vector<std::string> StrParts(std::string Ln);
+MANTID_KERNEL_DLL std::vector<std::string> StrParts(std::string Ln);
 
 /// Write a set of containers to a file
 template<template<typename T,typename A> class V,typename T,typename A>
@@ -135,9 +135,9 @@ int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T
 /// Convert a VAX number to x86 little eindien
 float getVAXnum(const float A);
 
-DLLExport void readToEndOfLine( std::ifstream& in ,  bool ConsumeEOL );
+MANTID_KERNEL_DLL void readToEndOfLine( std::ifstream& in ,  bool ConsumeEOL );
 
-DLLExport std::string getWord( std::ifstream &in ,  bool consumeEOL );
+MANTID_KERNEL_DLL std::string getWord( std::ifstream &in ,  bool consumeEOL );
 
 
 }   // NAMESPACE Strings

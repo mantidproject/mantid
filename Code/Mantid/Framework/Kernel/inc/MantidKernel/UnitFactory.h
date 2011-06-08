@@ -21,7 +21,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DllExport.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
@@ -65,7 +65,7 @@ class Logger;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTID_KERNEL UnitFactoryImpl : public DynamicFactory<Unit>
+class MANTID_KERNEL_DLL UnitFactoryImpl : public DynamicFactory<Unit>
 {
 public:
   virtual boost::shared_ptr<Unit> create(const std::string& className) const;
@@ -92,7 +92,7 @@ private:
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) .
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-  template class EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<UnitFactoryImpl>;
+  template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<UnitFactoryImpl>;
 #endif /* _WIN32 */
 /// The specialisation of the SingletonHolder class that holds the UnitFactory
 typedef SingletonHolder<UnitFactoryImpl> UnitFactory;

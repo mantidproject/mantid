@@ -34,6 +34,7 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES src/NeXusFile.cpp)
 
 set ( INC_FILES
+        inc/MantidNexus/DllConfig.h
         inc/MantidNexus/LoadEventNexus.h
         inc/MantidNexus/LoadISISNexus.h
         inc/MantidNexus/LoadISISNexus2.h

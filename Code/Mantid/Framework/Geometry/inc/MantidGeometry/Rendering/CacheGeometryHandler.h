@@ -2,7 +2,7 @@
 #define CACHE_GEOMETRYHANDLER_H
 
 #include <boost/shared_ptr.hpp>
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 
 namespace Mantid
@@ -45,7 +45,7 @@ namespace Mantid
 
        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport CacheGeometryHandler: public GeometryHandler
+    class MANTID_GEOMETRY_DLL CacheGeometryHandler: public GeometryHandler
     {
     private:
       static Kernel::Logger& PLog;           ///< The official logger

@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "ImplicitFunction.h"
 #include "ImplicitFunctionParameter.h"
 
@@ -43,7 +43,7 @@ namespace Mantid
         */
 
 
-        class DLLExport ImplicitFunctionBuilder
+        class MANTID_API_DLL ImplicitFunctionBuilder
         {
         public:
             virtual Mantid::API::ImplicitFunction* create() const = 0;

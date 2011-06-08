@@ -1,7 +1,7 @@
 #ifndef MANTIDAPI_LOCATEDDATAREF_H
 #define MANTIDAPI_LOCATEDDATAREF_H
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ILocatedData.h"
 
 namespace Mantid
@@ -18,7 +18,7 @@ namespace API
   Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
- 	
+        
   Mantid is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
@@ -34,7 +34,7 @@ namespace API
   
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-  class DLLExport LocatedDataRef : public ILocatedData
+  class MANTID_API_DLL LocatedDataRef : public ILocatedData
 {
   public:
   const double& X() const;

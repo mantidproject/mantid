@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "MantidKernel/DllExport.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid
@@ -16,7 +16,7 @@ namespace PhysicalConstants
    * rare earth, and actinide atoms and ions. Data is taken from International Tables of 
    * Crystalography, volume C, section 4.4.5 http://it.iucr.org/Cb/ch4o4v0001/sec4o4o5/
    */
-  struct EXPORT_OPT_MANTID_KERNEL MagneticIon {
+  struct MANTID_KERNEL_DLL MagneticIon {
     MagneticIon();
     MagneticIon(const std::string symbol, const uint16_t charge,const  double j0[8],
          const double j2[8],const  double j4[8],const  double j6[8]);
@@ -38,8 +38,8 @@ namespace PhysicalConstants
   static std::map<std::string,MagneticIon> ion_map;
   int initializeMap();
 
-  DLLExport MagneticIon getMagneticIon(const std::string symbol,const uint16_t charge);
-  DLLExport std::vector <double> getJL(const std::string symbol,const uint16_t charge, const uint16_t l = 0);
+  MANTID_KERNEL_DLL MagneticIon getMagneticIon(const std::string symbol,const uint16_t charge);
+  MANTID_KERNEL_DLL std::vector <double> getJL(const std::string symbol,const uint16_t charge, const uint16_t l = 0);
 
 } // namespace PhysicalConstants
 } // namespace Mantid

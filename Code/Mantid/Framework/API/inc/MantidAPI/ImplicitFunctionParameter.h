@@ -13,7 +13,7 @@
 #include <sstream>
 #include <vector>
 #include <memory>
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 
 namespace Mantid
 {
@@ -45,7 +45,7 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport ImplicitFunctionParameter
+        class MANTID_API_DLL ImplicitFunctionParameter
         {
 
         public:

@@ -1300,15 +1300,15 @@ namespace Mantid
 
 
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef,Mantid::API::MatrixWorkspace>;
-template DLLExport class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::API::MatrixWorkspace>;
+template MANTID_API_DLL class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef,Mantid::API::MatrixWorkspace>;
+template MANTID_API_DLL class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::API::MatrixWorkspace>;
 
 namespace Mantid
 {
   namespace Kernel
   {
 
-    template<> DLLExport
+    template<> MANTID_API_DLL
       Mantid::API::MatrixWorkspace_sptr IPropertyManager::getValue<Mantid::API::MatrixWorkspace_sptr>(const std::string &name) const
     {
       PropertyWithValue<Mantid::API::MatrixWorkspace_sptr>* prop =
@@ -1324,7 +1324,7 @@ namespace Mantid
       }
     }
 
-    template<> DLLExport
+    template<> MANTID_API_DLL
       Mantid::API::MatrixWorkspace_const_sptr IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(const std::string &name) const
     {
       PropertyWithValue<Mantid::API::MatrixWorkspace_sptr>* prop =

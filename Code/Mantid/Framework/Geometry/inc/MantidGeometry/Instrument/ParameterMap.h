@@ -1,7 +1,7 @@
 #ifndef PARAMETERMAP_H_ 
 #define PARAMETERMAP_H_
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Cache.h"
 #include "MantidGeometry/Instrument/Parameter.h"
@@ -62,7 +62,7 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ParameterMap
+  class MANTID_GEOMETRY_DLL ParameterMap
   {
   public:
 #ifndef HAS_UNORDERED_MAP_H
@@ -163,12 +163,12 @@ namespace Geometry
     boost::shared_ptr<Parameter> get(const IComponent* comp, const char * name) const;
     /// Get a parameter with a given name and optional type
     boost::shared_ptr<Parameter> get(const IComponent* comp,const std::string& name,
-				     const std::string & type = "")const;
+                                     const std::string & type = "")const;
     /// Use get() recursively to see if can find param in all parents of comp.
     boost::shared_ptr<Parameter> getRecursive(const IComponent* comp, const char * name) const;
     /// Use get() recursively to see if can find param in all parents of comp and given type
     boost::shared_ptr<Parameter> getRecursive(const IComponent* comp,const std::string& name, 
-					      const std::string & type = "")const;
+                                              const std::string & type = "")const;
 
     /** Get the values of a given parameter of all the components that have the name: compName
      *  @tparam The parameter type
@@ -263,7 +263,7 @@ namespace Geometry
     ParameterMap& operator=(ParameterMap * rhs);
     /// Retrieve a parameter by either creating a new one of getting an existing one
     Parameter_sptr retrieveParameter(bool &created, const std::string & type, const IComponent* comp, 
-				     const std::string & name);
+                                     const std::string & name);
     /// report an error
     void reportError(const std::string& str);
 

@@ -1,7 +1,7 @@
 #ifndef MANTID_API_ALGORITHMPROPERTY_H_
 #define MANTID_API_ALGORITHMPROPERTY_H_
 
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/NullValidator.h"
 
@@ -43,7 +43,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class EXPORT_OPT_MANTID_API AlgorithmProperty : public Kernel::PropertyWithValue<boost::shared_ptr<IAlgorithm> >
+    class MANTID_API_DLL AlgorithmProperty : public Kernel::PropertyWithValue<boost::shared_ptr<IAlgorithm> >
     {
     public:
       /// Typedef the held type

@@ -1,10 +1,10 @@
 #ifndef MANTID_GEOMETRY_REFLECTIONCONDITION_H_
 #define MANTID_GEOMETRY_REFLECTIONCONDITION_H_
     
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include <boost/shared_ptr.hpp>
 #include <vector>
-
+#include <string>
 
 namespace Mantid
 {
@@ -18,7 +18,7 @@ namespace Geometry
    * @author Janik Zikovsky
    * @date 2011-05-16 11:55:15.983855
    */
-  class DLLExport ReflectionCondition 
+  class MANTID_GEOMETRY_DLL ReflectionCondition 
   {
   public:
     ReflectionCondition() {}
@@ -31,7 +31,7 @@ namespace Geometry
 
   //------------------------------------------------------------------------
   /** Primitive ReflectionCondition */
-  class DLLExport ReflectionConditionPrimitive : public ReflectionCondition
+  class MANTID_GEOMETRY_DLL ReflectionConditionPrimitive : public ReflectionCondition
   {
   public:
     /// Name of the reflection condition
@@ -42,7 +42,7 @@ namespace Geometry
 
   //------------------------------------------------------------------------
   /** C-face centred ReflectionCondition */
-  class DLLExport ReflectionConditionCFaceCentred : public ReflectionCondition
+  class MANTID_GEOMETRY_DLL ReflectionConditionCFaceCentred : public ReflectionCondition
   {
   public:
     /// Name of the reflection condition
@@ -53,7 +53,7 @@ namespace Geometry
 
   //------------------------------------------------------------------------
   /** A-face centred ReflectionCondition */
-  class DLLExport ReflectionConditionAFaceCentred : public ReflectionCondition
+  class MANTID_GEOMETRY_DLL ReflectionConditionAFaceCentred : public ReflectionCondition
   {
   public:
     /// Name of the reflection condition
@@ -64,7 +64,7 @@ namespace Geometry
 
   //------------------------------------------------------------------------
   /** B-face centred ReflectionCondition */
-  class DLLExport ReflectionConditionBFaceCentred : public ReflectionCondition
+  class MANTID_GEOMETRY_DLL ReflectionConditionBFaceCentred : public ReflectionCondition
   {
   public:
     /// Name of the reflection condition
@@ -75,7 +75,7 @@ namespace Geometry
 
   //------------------------------------------------------------------------
   /** Body centred ReflectionCondition */
-  class DLLExport ReflectionConditionBodyCentred : public ReflectionCondition
+  class MANTID_GEOMETRY_DLL ReflectionConditionBodyCentred : public ReflectionCondition
   {
   public:
     /// Name of the reflection condition
@@ -86,7 +86,7 @@ namespace Geometry
 
   //------------------------------------------------------------------------
   /** All-face centred ReflectionCondition */
-  class DLLExport ReflectionConditionAllFaceCentred : public ReflectionCondition
+  class MANTID_GEOMETRY_DLL ReflectionConditionAllFaceCentred : public ReflectionCondition
   {
   public:
     /// Name of the reflection condition
@@ -98,7 +98,7 @@ namespace Geometry
 
   //------------------------------------------------------------------------
   /** Rhombohedrally centred, obverse ReflectionCondition*/
-  class DLLExport ReflectionConditionRhombohedrallyObverse : public ReflectionCondition
+  class MANTID_GEOMETRY_DLL ReflectionConditionRhombohedrallyObverse : public ReflectionCondition
   {
   public:
     /// Name of the reflection condition
@@ -109,7 +109,7 @@ namespace Geometry
 
   //------------------------------------------------------------------------
   /** Rhombohedrally centred, reverse ReflectionCondition*/
-  class DLLExport ReflectionConditionRhombohedrallyReverse : public ReflectionCondition
+  class MANTID_GEOMETRY_DLL ReflectionConditionRhombohedrallyReverse : public ReflectionCondition
   {
   public:
     /// Name of the reflection condition
@@ -120,7 +120,7 @@ namespace Geometry
 
   //------------------------------------------------------------------------
   /** Hexagonally centred, reverse ReflectionCondition*/
-  class DLLExport ReflectionConditionHexagonallyReverse : public ReflectionCondition
+  class MANTID_GEOMETRY_DLL ReflectionConditionHexagonallyReverse : public ReflectionCondition
   {
   public:
     /// Name of the reflection condition
@@ -135,7 +135,7 @@ namespace Geometry
   /// Shared pointer to a ReflectionCondition
   typedef boost::shared_ptr<ReflectionCondition> ReflectionCondition_sptr;
 
-  DLLExport std::vector<ReflectionCondition_sptr> getAllReflectionConditions();
+  MANTID_GEOMETRY_DLL std::vector<ReflectionCondition_sptr> getAllReflectionConditions();
 
 } // namespace Mantid
 } // namespace Geometry

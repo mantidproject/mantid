@@ -47,7 +47,7 @@ namespace Mantid{
 
     class  MDGeometryDescription;
 
-    class DLLExport MDGeometry
+    class MANTID_GEOMETRY_DLL MDGeometry
     {
     public:
       ///Embedded type information.
@@ -58,8 +58,8 @@ namespace Mantid{
       MDGeometry(const MDGeometryBasis &basis, const MDGeometryDescription &description);
     /** function resets MDGeometryBasis and MDGeometry to new state;
       *   
-	  *  modified substantially from initial idea
-	  *  throws if any dimension ID in geometry descrition (trf) lies outside of the id-s currently present in the geometry;
+          *  modified substantially from initial idea
+          *  throws if any dimension ID in geometry descrition (trf) lies outside of the id-s currently present in the geometry;
       */
       void initialize(const MDGeometryDescription &trf);
 
@@ -83,11 +83,11 @@ namespace Mantid{
       */
       std::vector<boost::shared_ptr<IMDDimension> > getDimensions(bool sort_by_basis=false)const;
 
- 	  /// function returns the number of cells, which an Image with this geometry would have;
-	  size_t getGeometryExtend()const{return nGeometrySize;}
-	  /** function returns the rotations matrix, used to transform reciprocal MDDimensions of the MDImage 
-	     from MDGeometryBasis to whaterver position it currently occupies */
-	  MantidMat getRotations()const;
+          /// function returns the number of cells, which an Image with this geometry would have;
+          size_t getGeometryExtend()const{return nGeometrySize;}
+          /** function returns the rotations matrix, used to transform reciprocal MDDimensions of the MDImage 
+             from MDGeometryBasis to whaterver position it currently occupies */
+          MantidMat getRotations()const;
  
       /// return the numbers of dimensions in current geometry; 
       size_t getNumDims()const{return m_basis.getNumDims();}
@@ -111,11 +111,11 @@ namespace Mantid{
       /// Get the geometry in an xml/serialised form.
       std::string toXMLString() const;
 
-	  /// comparison operator == for a geometry; Incomplete operator -> only dimensions are compared while basises are not. They have to!!!
-	  /// TODO: ref #2886 Make full comparison operators for geometry
-	  bool operator==(const MDGeometry &geom2)const;
-	  /// comparison operator != for a geometry;
-	  bool operator!=(const MDGeometry &geom2)const;
+          /// comparison operator == for a geometry; Incomplete operator -> only dimensions are compared while basises are not. They have to!!!
+          /// TODO: ref #2886 Make full comparison operators for geometry
+          bool operator==(const MDGeometry &geom2)const;
+          /// comparison operator != for a geometry;
+          bool operator!=(const MDGeometry &geom2)const;
 
     protected: 
      /// functions return the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
@@ -134,8 +134,8 @@ namespace Mantid{
     private:
       /** function sets ranges of the data as in transformation request; Useless without real change of the ranges e.g. rebinning */
       void setRanges(const MDGeometryDescription &trf);
-	  /// the number of data cells, which such geometry would occupy
-	  size_t nGeometrySize;
+          /// the number of data cells, which such geometry would occupy
+          size_t nGeometrySize;
 
       MDGeometryBasis m_basis;
       //void init_empty_dimensions();
@@ -152,7 +152,7 @@ namespace Mantid{
       and moving all non-collapsped dimensions first. Throws if an input tag is not among the tags, defined in the geometry */
       void arrangeDimensionsProperly(const std::vector<std::string> &tags);
 
-	  void init_empty_dimensions();
+          void init_empty_dimensions();
     };
   }  // Geometry
 }  // Mantid

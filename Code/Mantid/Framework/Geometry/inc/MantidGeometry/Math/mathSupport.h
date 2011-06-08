@@ -1,7 +1,7 @@
 #ifndef MANTID_MATH_MATHSUPPORT_H_
 #define MANTID_MATH_MATHSUPPORT_H_
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include <functional>
 #include <vector>
@@ -13,16 +13,16 @@ namespace Mantid
 
   /// Create an index of the vector in sorted order.
   template<typename T>
-  DLLExport void indexSort(const std::vector<T>&,std::vector<int>&);
+  MANTID_GEOMETRY_DLL void indexSort(const std::vector<T>&,std::vector<int>&);
 
   /// Solve a Quadratic equation
   template<typename InputIter>
-  DLLExport int solveQuadratic(InputIter,
+  MANTID_GEOMETRY_DLL int solveQuadratic(InputIter,
     std::pair<std::complex<double>,std::complex<double> >&);
 
   /// Solve a Cubic equation
   template<typename InputIter>
-  DLLExport int solveCubic(InputIter,std::complex<double>&,
+  MANTID_GEOMETRY_DLL int solveCubic(InputIter,std::complex<double>&,
     std::complex<double>&,std::complex<double>&);
 
   namespace mathSupport

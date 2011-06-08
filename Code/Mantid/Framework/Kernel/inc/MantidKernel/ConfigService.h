@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DllExport.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
 #include <vector>
 #include <map>
@@ -32,7 +32,7 @@ namespace Mantid
 {
 
   /// Returns the welcome message for Mantid.
-  DLLExport std::string welcomeMessage();
+  MANTID_KERNEL_DLL std::string welcomeMessage();
 
   namespace Kernel
   {
@@ -71,7 +71,7 @@ namespace Mantid
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
         Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class EXPORT_OPT_MANTID_KERNEL ConfigServiceImpl
+    class MANTID_KERNEL_DLL ConfigServiceImpl
     {
     public:
 
@@ -99,7 +99,7 @@ namespace Mantid
         *   @param prevvalue :: previous value of property
         */
         ValueChanged(const std::string &name, const std::string &newvalue, const std::string &prevvalue) 
-	  : ConfigServiceNotification(), m_name(name), m_value(newvalue), m_prev(prevvalue) {}
+          : ConfigServiceNotification(), m_name(name), m_value(newvalue), m_prev(prevvalue) {}
         /// The name of the user property that has changed, as it appears in the user.properties file
         const std::string & key() const { return this->m_name; } ///< @return The name of the changed the property
         /// The new value for the property
@@ -144,6 +144,12 @@ namespace Mantid
       std::string getCurrentDir();
       /// Returns the system's temp directory
       std::string getTempDir();
+      //Return the executable path
+      std::string getDirectoryOfExecutable();
+      //Return the full path to the executable
+      std::string getPathToExecutable();
+      //Check if the path is on a network drive
+      bool isNetworkDrive(const std::string & path);
       //@}
 
       /// Returns the directory where the Mantid.properties file is found.
@@ -265,8 +271,8 @@ namespace Mantid
 #ifdef __APPLE__
     inline
 #endif
-    template class EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
-    typedef EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ConfigServiceImpl> ConfigService;
+    template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
+    typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ConfigServiceImpl> ConfigService;
 
     typedef Mantid::Kernel::ConfigServiceImpl::ValueChanged ConfigValChangeNotification;
     typedef const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged>& ConfigValChangeNotification_ptr;

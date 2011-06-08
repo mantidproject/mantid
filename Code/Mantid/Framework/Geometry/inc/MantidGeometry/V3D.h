@@ -5,7 +5,7 @@
 #include <cfloat>
 #include <complex>
 #include <vector>
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Math/Matrix.h"
 
 namespace Mantid
@@ -39,7 +39,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport V3D
+    class MANTID_GEOMETRY_DLL V3D
     {
     public:
 
@@ -54,8 +54,8 @@ namespace Mantid
       V3D operator+(const V3D& v) const;
       V3D& operator+=(const V3D& v);
 
-	  // explicit conversion into vector
-	  operator std::vector<double>()const{std::vector<double> tmp(3); tmp[0]=x;tmp[1]=y; tmp[2]=z;return  tmp;}
+          // explicit conversion into vector
+          operator std::vector<double>()const{std::vector<double> tmp(3); tmp[0]=x;tmp[1]=y; tmp[2]=z;return  tmp;}
 
       V3D operator-(const V3D& v) const;
       V3D& operator-=(const V3D& v);
@@ -134,8 +134,8 @@ namespace Mantid
     };
 
     // Overload operator <<
-    DLLExport std::ostream& operator<<(std::ostream&, const V3D&);
-    DLLExport std::istream& operator>>(std::istream&,V3D&);
+    MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const V3D&);
+    MANTID_GEOMETRY_DLL std::istream& operator>>(std::istream&,V3D&);
 
   } // Namespace Geometry
 } // Namespace Mantid

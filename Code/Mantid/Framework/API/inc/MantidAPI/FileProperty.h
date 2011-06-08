@@ -4,6 +4,7 @@
 //-----------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid
@@ -23,7 +24,7 @@ namespace API
        FileAction type parameter in the constructor.
 
    */
-class DLLExport FileProperty : public Kernel::PropertyWithValue<std::string>
+class MANTID_API_DLL FileProperty : public Kernel::PropertyWithValue<std::string>
 {
 public:
   /// An enumeration for load/save types. This is passed on to the FileValidator as a constructor parameter.
@@ -40,10 +41,10 @@ public:
 
   ///Constructor
   FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
-	       const std::vector<std::string> & exts = std::vector<std::string>(), 
-	       unsigned int direction = Kernel::Direction::Input);
+               const std::vector<std::string> & exts = std::vector<std::string>(), 
+               unsigned int direction = Kernel::Direction::Input);
   FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
-	       const std::string & ext, unsigned int direction = Kernel::Direction::Input);
+               const std::string & ext, unsigned int direction = Kernel::Direction::Input);
 
   /// 'Virtual copy constructor
   Kernel::Property* clone() { return new FileProperty(*this); }

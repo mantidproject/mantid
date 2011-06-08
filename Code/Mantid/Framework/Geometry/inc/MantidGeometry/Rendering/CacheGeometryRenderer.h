@@ -1,7 +1,7 @@
 #ifndef CACHE_GEOMETRYRENDERER_H
 #define CACHE_GEOMETRYRENDERER_H
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
 namespace Mantid
 {
@@ -38,7 +38,7 @@ namespace Mantid
 
        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport CacheGeometryRenderer
+    class MANTID_GEOMETRY_DLL CacheGeometryRenderer
     {
     private:
 

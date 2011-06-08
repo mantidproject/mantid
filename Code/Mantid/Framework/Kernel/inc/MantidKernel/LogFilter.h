@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -46,7 +46,7 @@ template<class TYPE> class TimeSeriesProperty;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LogFilter
+class MANTID_KERNEL_DLL LogFilter
 {
 public:
     /// Constructor

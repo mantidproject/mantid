@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 #include <vector>
 #include <functional>
@@ -43,25 +43,25 @@ namespace Kernel
  */
 namespace VectorHelper
 {
-  int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::vector<double>& xnew);
+  int MANTID_KERNEL_DLL createAxisFromRebinParams(const std::vector<double>& params, std::vector<double>& xnew);
 
-  void DLLExport rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
+  void MANTID_KERNEL_DLL rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
         const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, 
         bool distribution, bool addition = false);
 
   // New method to rebin Histogram data, should be faster than previous one
-  void DLLExport rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
+  void MANTID_KERNEL_DLL rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
                                 const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool addition);
 
   /// Convert an array of bin boundaries to bin centre values.
-  void DLLExport convertToBinCentre(const std::vector<double> & bin_edges, std::vector<double> & bin_centres);
-  bool DLLExport isConstantValue(const MantidVec &arra);
+  void MANTID_KERNEL_DLL convertToBinCentre(const std::vector<double> & bin_edges, std::vector<double> & bin_centres);
+  bool MANTID_KERNEL_DLL isConstantValue(const MantidVec &arra);
 
-  DLLExport std::vector<double> splitStringIntoVector(std::string listString);
+  MANTID_KERNEL_DLL std::vector<double> splitStringIntoVector(std::string listString);
 
-  DLLExport int getBinIndex(std::vector<double>& bins, const double X );
+  MANTID_KERNEL_DLL int getBinIndex(std::vector<double>& bins, const double X );
   // Linearly interpolate between a set of Y values. Assumes the values are set for the calculated nodes
-  DLLExport void linearlyInterpolateY(const std::vector<double> & x, std::vector<double> & y, const double stepSize);
+  MANTID_KERNEL_DLL void linearlyInterpolateY(const std::vector<double> & x, std::vector<double> & y, const double stepSize);
 
   //-------------------------------------------------------------------------------------
   /** Generic method to convert an iterator to an array of type T.

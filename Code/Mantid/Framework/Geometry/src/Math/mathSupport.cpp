@@ -41,7 +41,7 @@ indexSort(const std::vector<T>& pVec,std::vector<int>& Index)
 template<typename InputIter>
 int
 solveQuadratic(const InputIter Coef,std::pair<std::complex<double>,
-	       std::complex<double> >& OutAns)
+               std::complex<double> >& OutAns)
   /**
     Solves Complex Quadratic 
     @param Coef :: iterator over all the coefients in the order
@@ -58,17 +58,17 @@ solveQuadratic(const InputIter Coef,std::pair<std::complex<double>,
   if (a==0.0)
     {
       if (b==0.0)
-	{
-	  OutAns.first=std::complex<double>(0.0,0.0);
-	  OutAns.second=std::complex<double>(0.0,0.0);
-	  return 0;
-	}
+        {
+          OutAns.first=std::complex<double>(0.0,0.0);
+          OutAns.second=std::complex<double>(0.0,0.0);
+          return 0;
+        }
       else
-	{
-	  OutAns.first=std::complex<double>(-c/b,0.0);
-	  OutAns.second=OutAns.first;
-	  return 1;
-	}
+        {
+          OutAns.first=std::complex<double>(-c/b,0.0);
+          OutAns.second=OutAns.first;
+          return 1;
+        }
     }
   cf=b*b-4*a*c;
   if (cf>=0)          /* Real Roots */
@@ -94,7 +94,7 @@ solveQuadratic(const InputIter Coef,std::pair<std::complex<double>,
 template<typename CInputIter>
 int
 solveCubic(const CInputIter Coef,std::complex<double>& AnsA,
-	   std::complex<double>& AnsB,std::complex<double>& AnsC)
+           std::complex<double>& AnsB,std::complex<double>& AnsC)
   /**
     Solves Cubic equation
     @param Coef :: iterator over all the coefients in the order
@@ -184,32 +184,32 @@ solveCubic(const CInputIter Coef,std::complex<double>& AnsA,
 /// \cond TEMPLATE  
 
 template
-DLLExport int solveQuadratic(const double*,
+MANTID_GEOMETRY_DLL int solveQuadratic(const double*,
        std::pair<std::complex<double>,std::complex<double> >&);
  template
-DLLExport int solveQuadratic(double*,
+MANTID_GEOMETRY_DLL int solveQuadratic(double*,
        std::pair<std::complex<double>,std::complex<double> >&);
 template
- DLLExport int solveQuadratic(const std::vector<double>::const_iterator,
+ MANTID_GEOMETRY_DLL int solveQuadratic(const std::vector<double>::const_iterator,
        std::pair<std::complex<double>,std::complex<double> >&);
 template
- DLLExport int solveCubic(const double*,std::complex<double>&,
-	       std::complex<double>&,std::complex<double>&);
+ MANTID_GEOMETRY_DLL int solveCubic(const double*,std::complex<double>&,
+               std::complex<double>&,std::complex<double>&);
 template
- DLLExport int solveCubic(double*,std::complex<double>&,
-	       std::complex<double>&,std::complex<double>&);
+ MANTID_GEOMETRY_DLL int solveCubic(double*,std::complex<double>&,
+               std::complex<double>&,std::complex<double>&);
 
 template
- DLLExport int solveCubic(const std::vector<double>::iterator,std::complex<double>&,
-	       std::complex<double>&,std::complex<double>&);
+ MANTID_GEOMETRY_DLL int solveCubic(const std::vector<double>::iterator,std::complex<double>&,
+               std::complex<double>&,std::complex<double>&);
 template
- DLLExport int solveCubic(const std::vector<double>::const_iterator,std::complex<double>&,
-	       std::complex<double>&,std::complex<double>&);
+ MANTID_GEOMETRY_DLL int solveCubic(const std::vector<double>::const_iterator,std::complex<double>&,
+               std::complex<double>&,std::complex<double>&);
 
 
-template  DLLExport void indexSort(const std::vector<double>&,std::vector<int>&);
-template  DLLExport void indexSort(const std::vector<float>&,std::vector<int>&);
-template  DLLExport void indexSort(const std::vector<int>&,std::vector<int>&);
+template  MANTID_GEOMETRY_DLL void indexSort(const std::vector<double>&,std::vector<int>&);
+template  MANTID_GEOMETRY_DLL void indexSort(const std::vector<float>&,std::vector<int>&);
+template  MANTID_GEOMETRY_DLL void indexSort(const std::vector<int>&,std::vector<int>&);
 
 
 /// \endcond TEMPLATE 

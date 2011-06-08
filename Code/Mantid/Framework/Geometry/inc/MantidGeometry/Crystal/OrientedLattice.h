@@ -32,7 +32,7 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
    */
-  class DLLExport OrientedLattice: public UnitCell
+  class MANTID_GEOMETRY_DLL OrientedLattice: public UnitCell
   {
     public:
       // Default constructor. a = b = c = 1, alpha = beta = gamma = 90 degrees

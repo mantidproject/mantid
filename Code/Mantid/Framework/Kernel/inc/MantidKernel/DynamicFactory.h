@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Instantiator.h"
 #include "MantidKernel/Exception.h"
 
@@ -25,11 +25,31 @@ namespace Mantid
 {
 namespace Kernel
 {
-class Logger;	
+  
+  /** 
+   * This class is simply used in the subscription of classes into the various
+   * factories in Mantid. The fact that the constructor takes an int means that
+   * the comma operator can be used to make a call to the factories' subscribe
+   * method in the first part.
+   */
+  class MANTID_KERNEL_DLL RegistrationHelper
+  {
+  public:
+    /** Constructor. Does nothing.
+     * @param i :: Takes an int and does nothing with it
+     */
+    inline RegistrationHelper(int i) { UNUSED_ARG(i); } 
+  };
+
+  //----------------------------------------------------------------------------
+  // Forward declarations
+  //----------------------------------------------------------------------------
+  class Logger; 
     
 /** @class DynamicFactory DynamicFactory.h Kernel/DynamicFactory.h
 
-    The dynamic factory is a base dynamic factory for serving up objects in response to requests from other classes.
+    The dynamic factory is a base dynamic factory for serving up objects in response 
+    to requests from other classes.
     
     @author Nick Draper, Tessella Support Services plc
     @date 10/10/2007

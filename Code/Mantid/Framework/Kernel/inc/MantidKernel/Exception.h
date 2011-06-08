@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <stdexcept>
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 
 namespace Mantid
 {
@@ -81,7 +81,7 @@ namespace Exception
 /// Records the filename and the description of failure.
 class
 #ifdef IN_MANTID_KERNEL
-DLLExport
+MANTID_KERNEL_DLL
 #else
 DLLImport
 #endif /* IN_MANTID_KERNEL */
@@ -107,7 +107,7 @@ FileError : public std::runtime_error
 /// Marks code as not implemented yet.
 class
 #ifdef IN_MANTID_KERNEL
-DLLExport
+MANTID_KERNEL_DLL
 #else
 DLLImport
 #endif /* IN_MANTID_KERNEL */
@@ -127,7 +127,7 @@ NotImplementedError : public std::logic_error
 /// Exception for when an item is not found in a collection.
 class
 #ifdef IN_MANTID_KERNEL
-DLLExport
+MANTID_KERNEL_DLL
 #else
 DLLImport
 #endif /* IN_MANTID_KERNEL */
@@ -156,7 +156,7 @@ NotFoundError : public std::runtime_error
 /// Exception for when an item is already in a collection.
 class
 #ifdef IN_MANTID_KERNEL
-DLLExport
+MANTID_KERNEL_DLL
 #else
 DLLImport
 #endif /* IN_MANTID_KERNEL */
@@ -203,7 +203,7 @@ ExistsError : public std::runtime_error
 
 class
 #ifdef IN_MANTID_KERNEL
-DLLExport
+MANTID_KERNEL_DLL
 #else
 DLLImport
 #endif /* IN_MANTID_KERNEL */
@@ -228,7 +228,7 @@ AbsObjMethod : public std::runtime_error
 
 /// Exception for errors associated with the instrument definition.
 /// This might e.g. occur while reading the instrument definition file.
-class DLLExport InstrumentDefinitionError : public std::runtime_error
+class MANTID_KERNEL_DLL InstrumentDefinitionError : public std::runtime_error
 {
  private:
   /// The name of the search object
@@ -251,7 +251,7 @@ class DLLExport InstrumentDefinitionError : public std::runtime_error
 /**
  * OpenGL Exception
  */
-class DLLExport OpenGLError: public std::runtime_error
+class MANTID_KERNEL_DLL OpenGLError: public std::runtime_error
 {
  private:
   /// The name of the search object
@@ -310,7 +310,7 @@ class DLLExport OpenGLError: public std::runtime_error
   Called when an index falls out of range
 
   */
-  class DLLExport IndexError : public std::runtime_error
+  class MANTID_KERNEL_DLL IndexError : public std::runtime_error
   {
   private:
 
@@ -336,7 +336,7 @@ class DLLExport OpenGLError: public std::runtime_error
    */
   class
   #ifdef IN_MANTID_KERNEL
-    DLLExport
+    MANTID_KERNEL_DLL
   #else
     DLLImport
   #endif /* IN_MANTID_KERNEL */

@@ -51,9 +51,9 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     ChangeLog:
-    22.04.2008: Sri,  Missing DLLExport and Destructor was virtual it's changed to normal destructor
+    22.04.2008: Sri,  Missing MANTID_GEOMETRY_DLL and Destructor was virtual it's changed to normal destructor
     */
-    class DLLExport Line 
+    class MANTID_GEOMETRY_DLL Line 
     {
 
     private:

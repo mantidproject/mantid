@@ -1,7 +1,7 @@
 #ifndef GEOMETRY_BASEVISIT_H
 #define GEOMETRY_BASEVISIT_H
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 
 namespace Mantid
 {
@@ -44,7 +44,7 @@ namespace Mantid
 
     */
 
-    class DLLExport BaseVisit
+    class MANTID_GEOMETRY_DLL BaseVisit
     {
 
     public:

@@ -37,7 +37,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CompositeFunction : public virtual IFitFunction
+class MANTID_API_DLL CompositeFunction : public virtual IFitFunction
 {
 public:
   /// Default constructor

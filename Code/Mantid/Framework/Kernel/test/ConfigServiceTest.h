@@ -162,7 +162,7 @@ public:
     TS_ASSERT_LESS_THAN(0, osCompName.length()); //check that the string is not empty
     TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getOSVersion().length()); //check that the string is not empty
     TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getCurrentDir().length()); //check that the string is not empty
-//	  TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getHomeDir().length()); //check that the string is not empty
+//        TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getHomeDir().length()); //check that the string is not empty
     TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getTempDir().length()); //check that the string is not empty
   }
 
@@ -204,7 +204,7 @@ public:
   {
 
     //This should clear out all old properties
-    const std::string propfilePath = getDirectoryOfExecutable();
+    const std::string propfilePath = ConfigService::Instance().getDirectoryOfExecutable();
     const std::string propfile = propfilePath + "MantidTest.properties";
     ConfigService::Instance().updateConfig(propfile);
     //this should return an empty string
@@ -234,7 +234,8 @@ public:
 
   void testSaveConfigCleanFile()
   {
-    const std::string propfile = getDirectoryOfExecutable() + "MantidTest.properties";
+    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() 
+      + "MantidTest.properties";
     ConfigService::Instance().updateConfig(propfile);
 
     const std::string filename("user.settings");

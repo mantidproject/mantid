@@ -13,7 +13,7 @@ static std::list<atexit_func_t>* cleanup_list = NULL;
 /// all our singletons
 /// This function may be registed with atexit() more than once, so it needs to
 /// clear the list once it has called all the functions
-EXPORT_OPT_MANTID_KERNEL void CleanupSingletons()
+MANTID_KERNEL_DLL void CleanupSingletons()
 {
     if (cleanup_list == NULL)
     {
@@ -31,7 +31,7 @@ EXPORT_OPT_MANTID_KERNEL void CleanupSingletons()
 /// Adds singleton cleanup function to our atexit list
 /// functions are added to the start of the list so on deletion it is last in, first out
 /// @param func :: Exit function to call - the singleton destructor function
-EXPORT_OPT_MANTID_KERNEL void AddSingleton(atexit_func_t func)
+MANTID_KERNEL_DLL void AddSingleton(atexit_func_t func)
 {
     if (cleanup_list == NULL)
     {

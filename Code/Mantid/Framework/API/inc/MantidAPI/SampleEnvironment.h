@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 
 namespace Mantid
@@ -15,7 +15,7 @@ namespace Mantid
       This class stores details regarding the sample environment that was used during
       a specific run. It is implemented as a type of CompAssembly so that enviroment kits
       consisting of objects made from different materials can be constructed easily.
-	
+        
       @author Martyn Gigg, Tessella plc
       @date 23/11/2010
       
@@ -39,7 +39,7 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class EXPORT_OPT_MANTID_API SampleEnvironment : public Geometry::CompAssembly
+    class MANTID_API_DLL SampleEnvironment : public Geometry::CompAssembly
     {
     public:
       /// Constructor defining the name of the environment

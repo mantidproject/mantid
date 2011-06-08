@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 
-//#include "MantidKernel/System.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Column.h"
 #include "MantidGeometry/V3D.h"

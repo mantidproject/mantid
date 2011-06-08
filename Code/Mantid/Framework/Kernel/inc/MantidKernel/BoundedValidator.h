@@ -42,7 +42,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template< class TYPE >
-class DLLExport BoundedValidator : public IValidator<TYPE>
+class MANTID_KERNEL_DLL BoundedValidator : public IValidator<TYPE>
 {
 public:
   /// No-arg Constructor

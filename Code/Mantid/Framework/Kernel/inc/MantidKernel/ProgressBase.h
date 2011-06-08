@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_PROGRESSBASE_H_
 #define MANTID_KERNEL_PROGRESSBASE_H_
     
-#include "MantidKernel/System.h"
-
+#include "MantidKernel/DllConfig.h"
+#include <string>
 
 namespace Mantid
 {
@@ -16,7 +16,7 @@ namespace Kernel
    * @author Janik Zikovsky, SNS
    * @date 2011-03-28 15:57:54.187764
    */
-  class DLLExport ProgressBase 
+  class MANTID_KERNEL_DLL ProgressBase 
   {
   public:
     ProgressBase();

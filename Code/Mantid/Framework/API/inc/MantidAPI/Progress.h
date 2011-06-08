@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/ProgressBase.h"
 
 namespace Mantid
@@ -39,7 +39,7 @@ class Algorithm;
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport Progress : public Mantid::Kernel::ProgressBase
+class MANTID_API_DLL Progress : public Mantid::Kernel::ProgressBase
 {
 public:
   Progress();

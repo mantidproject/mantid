@@ -1,10 +1,10 @@
 #ifndef MANTID_API_EXPRESSION_H
 #define MANTID_API_EXPRESSION_H
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 
 #include <boost/shared_ptr.hpp>
-#include <string.h>
+#include <string>
 #include <vector>
 #include <map>
 #include <set>
@@ -43,7 +43,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Expression
+    class MANTID_API_DLL Expression
     {
     public:
       /// Default contructor

@@ -1,7 +1,7 @@
 #ifndef MANTID_API_AXIS_H_
 #define MANTID_API_AXIS_H_
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
 #include "MantidGeometry/IDTypes.h"
 #include <boost/shared_ptr.hpp>
@@ -42,7 +42,7 @@ class MatrixWorkspace;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Axis
+class MANTID_API_DLL Axis
 {
 public:
 

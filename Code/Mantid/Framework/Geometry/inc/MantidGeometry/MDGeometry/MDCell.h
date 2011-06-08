@@ -31,14 +31,14 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 namespace Mantid
 {
   namespace Geometry
   {
-    class DLLExport MDCell : public SignalAggregate
+    class MANTID_GEOMETRY_DLL MDCell : public SignalAggregate
     {
     private:
       double m_cachedSignal;

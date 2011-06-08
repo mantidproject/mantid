@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DataService.h"
-#include "MantidAPI/DllExport.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/Workspace.h"
 
@@ -50,7 +50,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Workspace>
+class MANTID_API_DLL AnalysisDataServiceImpl : public Kernel::DataService<API::Workspace>
 {
  public:
   /** @name Extra notifications only applicable to the ADS */
@@ -76,7 +76,7 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
     public:
       /// Constructor
       UnGroupingWorkspaceNotification(const std::string& name,const boost::shared_ptr<Workspace> &obj) : 
-	DataServiceNotification(name,obj) {}
+        DataServiceNotification(name,obj) {}
     };
     //@}
 
@@ -110,9 +110,9 @@ private:
 ///Forward declaration of a specialisation of SingletonHolder for AnalysisDataServiceImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
   // this breaks new namespace declaraion rules; need to find a better fix
-  template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>;
+  template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>;
 #endif /* _WIN32 */
-  typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl> AnalysisDataService;
+  typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl> AnalysisDataService;
 
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification WorkspaceAddNotification;
 typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification>& WorkspaceAddNotification_ptr;

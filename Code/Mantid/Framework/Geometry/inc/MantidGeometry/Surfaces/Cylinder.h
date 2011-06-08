@@ -1,7 +1,7 @@
 #ifndef Cylinder_h
 #define Cylinder_h
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/V3D.h"
 
@@ -46,7 +46,7 @@ namespace Mantid
 
     */
 
-    class DLLExport Cylinder : public Quadratic
+    class MANTID_GEOMETRY_DLL Cylinder : public Quadratic
     {
     private:
 

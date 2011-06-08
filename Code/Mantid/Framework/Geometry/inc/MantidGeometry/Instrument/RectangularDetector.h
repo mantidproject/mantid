@@ -2,7 +2,7 @@
 #define RECTANGULAR_DETECTOR_H
 #include <string> 
 #include <vector>
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
@@ -44,7 +44,7 @@ namespace Geometry
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport RectangularDetector : public CompAssembly, public IObjComponent
+class MANTID_GEOMETRY_DLL RectangularDetector : public CompAssembly, public IObjComponent
 {
 public:
   ///String description of the type of component
@@ -194,7 +194,7 @@ private:
 
 };
 
-DLLExport std::ostream& operator<<(std::ostream&, const RectangularDetector&);
+MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const RectangularDetector&);
 
 typedef boost::shared_ptr<RectangularDetector> RectangularDetector_sptr;
 typedef boost::shared_ptr<const RectangularDetector> RectangularDetector_const_sptr;

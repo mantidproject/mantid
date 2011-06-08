@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include <vector>
 #include <functional>
 #include <cmath>
@@ -28,7 +28,7 @@ namespace Kernel
    *
    * Does work for consecutive bins of different steps, or mixing lin and log binning.
    */
-  class DLLExport BinFinder
+  class MANTID_KERNEL_DLL BinFinder
   {
   public:
     BinFinder(const std::vector<double>& binParams);

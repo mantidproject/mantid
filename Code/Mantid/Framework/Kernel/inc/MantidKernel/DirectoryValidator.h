@@ -39,7 +39,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport DirectoryValidator : public FileValidator
+class MANTID_KERNEL_DLL DirectoryValidator : public FileValidator
 {
 public:
   explicit DirectoryValidator(bool testDirectoryExists = true);

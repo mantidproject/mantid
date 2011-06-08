@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include <boost/shared_ptr.hpp>
 
@@ -47,7 +47,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport Workspace
+class MANTID_API_DLL Workspace
 {
 public:
     /// Return the workspace typeID (normally the type name as a string)

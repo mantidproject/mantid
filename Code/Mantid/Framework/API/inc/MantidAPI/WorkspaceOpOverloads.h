@@ -1,7 +1,7 @@
 #ifndef MANTID_API_WORKOPOVERLOADS_H_
 #define MANTID_API_WORKOPOVERLOADS_H_
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
@@ -12,38 +12,38 @@ namespace API
 namespace OperatorOverloads
 {
   // Helper function for operator overloads
-  DLLExport MatrixWorkspace_sptr 
+  MANTID_API_DLL MatrixWorkspace_sptr 
     executeBinaryOperation(const std::string & algorithmName, const MatrixWorkspace_sptr lhs, 
-			   const MatrixWorkspace_sptr rhs, bool lhsAsOutput = false, 
-			   bool child = true, const std::string & name = "", bool rethrow = false);
+                           const MatrixWorkspace_sptr rhs, bool lhsAsOutput = false, 
+                           bool child = true, const std::string & name = "", bool rethrow = false);
 
 }
 
-bool DLLExport equals(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs, double tolerance = 0.0);
+bool MANTID_API_DLL equals(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs, double tolerance = 0.0);
 
 // Workspace operator overloads
-MatrixWorkspace_sptr DLLExport operator+(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr DLLExport operator-(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr DLLExport operator*(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr DLLExport operator/(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator+(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator-(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator*(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator/(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
 
-MatrixWorkspace_sptr DLLExport operator+(const MatrixWorkspace_sptr lhs, const double& rhsValue);
-MatrixWorkspace_sptr DLLExport operator-(const MatrixWorkspace_sptr lhs, const double& rhsValue);
-MatrixWorkspace_sptr DLLExport operator-(const double& lhsValue, const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr DLLExport operator*(const MatrixWorkspace_sptr lhs, const double& rhsValue);
-MatrixWorkspace_sptr DLLExport operator*(const double& lhsValue, const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr DLLExport operator/(const MatrixWorkspace_sptr lhs, const double& rhsValue);
-MatrixWorkspace_sptr DLLExport operator/(const double& lhsValue, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator+(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr MANTID_API_DLL operator-(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr MANTID_API_DLL operator-(const double& lhsValue, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator*(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr MANTID_API_DLL operator*(const double& lhsValue, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator/(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr MANTID_API_DLL operator/(const double& lhsValue, const MatrixWorkspace_sptr rhs);
 
-MatrixWorkspace_sptr DLLExport operator+=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr DLLExport operator-=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr DLLExport operator*=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
-MatrixWorkspace_sptr DLLExport operator/=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator+=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator-=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator*=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr MANTID_API_DLL operator/=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
 
-MatrixWorkspace_sptr DLLExport operator+=(const MatrixWorkspace_sptr lhs, const double& rhsValue);
-MatrixWorkspace_sptr DLLExport operator-=(const MatrixWorkspace_sptr lhs, const double& rhsValue);
-MatrixWorkspace_sptr DLLExport operator*=(const MatrixWorkspace_sptr lhs, const double& rhsValue);
-MatrixWorkspace_sptr DLLExport operator/=(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr MANTID_API_DLL operator+=(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr MANTID_API_DLL operator-=(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr MANTID_API_DLL operator*=(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr MANTID_API_DLL operator/=(const MatrixWorkspace_sptr lhs, const double& rhsValue);
 
 /** A collection of static functions for use with workspaces
 
@@ -70,7 +70,7 @@ MatrixWorkspace_sptr DLLExport operator/=(const MatrixWorkspace_sptr lhs, const 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-struct DLLExport WorkspaceHelpers
+struct MANTID_API_DLL WorkspaceHelpers
 {
   // Checks whether a workspace has common X bins/values
   static bool commonBoundaries(const MatrixWorkspace_const_sptr WS);

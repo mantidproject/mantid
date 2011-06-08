@@ -1,6 +1,6 @@
 #ifndef Triple_h
 #define Triple_h
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 
 namespace Mantid
 {
@@ -17,7 +17,7 @@ namespace Mantid
   Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
- 	
+        
   Mantid is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
@@ -35,7 +35,7 @@ namespace Mantid
 */
 
 template<typename T>
-class DLLExport Triple
+class MANTID_GEOMETRY_DLL Triple
 {
   public:
   
@@ -71,7 +71,7 @@ class DLLExport Triple
 */
 
 template<typename F,typename S,typename T>
-class DLLExport DTriple 
+class MANTID_GEOMETRY_DLL DTriple 
 {
   public:
   

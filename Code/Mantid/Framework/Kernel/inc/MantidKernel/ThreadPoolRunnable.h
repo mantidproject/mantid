@@ -1,7 +1,7 @@
 #ifndef MANTID_KERNEL_THREADPOOLRUNNABLE_H_
 #define MANTID_KERNEL_THREADPOOLRUNNABLE_H_
     
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include <Poco/Mutex.h>
@@ -20,7 +20,7 @@ namespace Kernel
    * @author: Janik Zikovsky
    * @date: 2011-02-23 10:40:46.297133
    */
-  class DLLExport ThreadPoolRunnable: public Poco::Runnable
+  class MANTID_KERNEL_DLL ThreadPoolRunnable: public Poco::Runnable
   {
   public:
     ThreadPoolRunnable(size_t threadnum, ThreadScheduler * scheduler,
