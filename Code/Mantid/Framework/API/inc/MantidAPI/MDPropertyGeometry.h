@@ -61,7 +61,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */  
     
-    class MANTID_API_DLL MDPropertyGeometry :  public Geometry::MDGeometryDescription, public Kernel::PropertyWithValue<std::string>
+    class DLLExport MDPropertyGeometry :  public Geometry::MDGeometryDescription, public Kernel::PropertyWithValue<std::string>
     {
     public:
       /** Constructor.

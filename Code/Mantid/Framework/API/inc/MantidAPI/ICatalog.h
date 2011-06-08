@@ -40,7 +40,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-class MANTID_API_DLL ICatalog
+class DLLExport ICatalog
 {
 public:
   // virtual destructor

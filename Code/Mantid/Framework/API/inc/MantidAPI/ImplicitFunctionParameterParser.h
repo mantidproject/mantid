@@ -72,7 +72,7 @@ namespace API
  * Deletion policy for unique pointers.
  */
 template<typename T>
-class MANTID_API_DLL DeleterPolicy
+class DLLExport DeleterPolicy
 {
 public:
   void operator()(T* pParser)

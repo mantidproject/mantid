@@ -21,7 +21,7 @@ namespace Kernel
  * @author Janik Zikovsky, SNS
  * @date Feb 8, 2011
  */
-class MANTID_KERNEL_DLL FunctionTask : public Task
+class DLLExport FunctionTask : public Task
 {
 public:
 

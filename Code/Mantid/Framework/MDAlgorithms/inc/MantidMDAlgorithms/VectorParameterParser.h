@@ -4,6 +4,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/System.h"
+
+#include "MantidAPI/ImplicitFunctionParameterParser.h"
+#include "MantidMDAlgorithms/UpParameter.h"
+#include "MantidMDAlgorithms/PerpendicularParameter.h"
+#include "MantidMDAlgorithms/NormalParameter.h"
+#include "MantidMDAlgorithms/OriginParameter.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -15,13 +22,7 @@
 #include <Poco/Path.h>
 
 #include <boost/algorithm/string.hpp>
-#include "MantidKernel/System.h"
 
-#include "MantidAPI/ImplicitFunctionParameterParser.h"
-#include "MantidMDAlgorithms/UpParameter.h"
-#include "MantidMDAlgorithms/PerpendicularParameter.h"
-#include "MantidMDAlgorithms/NormalParameter.h"
-#include "MantidMDAlgorithms/OriginParameter.h"
 
 namespace Mantid
 {
