@@ -44,12 +44,12 @@ namespace DataHandling
     void ParsePulseIDLogFile();
 
     /// Integrate to TimeSeriesProperty
-    void IntegrateProperty();
+    void addProperty();
 
     std::string m_delaytimefilename;
     std::string m_pulseidfilename;
 
-    int m_numpulses;
+    std::size_t m_numpulses;
     unsigned int* m_delaytimes;
     unsigned int* m_pulseidlows;
     unsigned int* m_pulseidhighs;

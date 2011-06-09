@@ -7,7 +7,8 @@
 #include <fstream>
 #include <sys/stat.h>
 
-using namespace std;
+using std::size_t;
+using std::vector;
 
 namespace Mantid
 {
@@ -67,7 +68,7 @@ namespace DataHandling
                       "attempt to load the PulseID. The file extension must either be\n"
                       ".dat or .DAT" );
 
-    m_numpulses = -1;
+    m_numpulses = 0;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -92,7 +93,7 @@ namespace DataHandling
     ParsePulseIDLogFile();
 
     // 4. Integrate answer
-    IntegrateProperty();
+    addProperty();
 
 
     return;
@@ -105,29 +106,29 @@ namespace DataHandling
 
     // 1. Determine length of file
     struct stat results;
-    int filesize = -1;
+    size_t filesize = -1;
     if (stat(logfilename, &results) == 0){
-        filesize = int(results.st_size);
-        g_log.information() << "File Size = " << filesize << endl;
+        filesize = static_cast<size_t>(results.st_size);
+        g_log.information() << "File Size = " << filesize << "\n";
     }
     else{
-        g_log.error() << "File Error!  Cannot Read File Size" << endl;
+        g_log.error() << "File Error!  Cannot Read File Size" << "\n";
         return;
     }
 
     // 2. Determine number of magnetic pulses
-    int numpulses = filesize/4/8;
-    g_log.information() << "Number of Pulses = " << numpulses << endl;
+    size_t numpulses = filesize/4/8;
+    g_log.information() << "Number of Pulses = " << numpulses << "\n";
 
     // 3. Parse
-    ifstream logFile(logfilename, ios::in|ios::binary);
+    std::ifstream logFile(logfilename, std::ios::in|std::ios::binary);
     // unsigned int *pulseindices = new unsigned int[numpulses];
     unsigned int *delaytimes = new unsigned int[numpulses];
     // char buffer[4];
-    int index = 0;
+    size_t index = 0;
     unsigned int chopperindices[4];
     unsigned int localdelaytimes[4];
-    for (int p = 0; p < numpulses; p ++){
+    for (size_t p = 0; p < numpulses; p ++){
         // logFile.read(buffer, 4);
         for (int i = 0; i < 4; i ++){
             unsigned int chopperindex;
@@ -135,7 +136,7 @@ namespace DataHandling
             logFile.read((char*)&chopperindex, sizeof(unsigned int));
             logFile.read((char*)&delaytime, sizeof(unsigned int));
             if (delaytime != 0){
-                g_log.information() << "Pulse Index =  " << index << "  Chopper = " << chopperindex << "   Delay Time = " << delaytime << endl;
+                g_log.information() << "Pulse Index =  " << index << "  Chopper = " << chopperindex << "   Delay Time = " << delaytime << "\n";
             }
             chopperindices[i] = chopperindex;
             localdelaytimes[i] = delaytime;
@@ -144,7 +145,7 @@ namespace DataHandling
         // Check
         for (unsigned int i = 0; i < 4; i ++){
             if (i != chopperindices[i]){
-                g_log.information() << "Warning Here 111  Pulsed = " << index << " Chopper Index = " << chopperindices[i] << "  vs " << i << endl;
+                g_log.information() << "Warning Here 111  Pulsed = " << index << " Chopper Index = " << chopperindices[i] << "  vs " << i << "\n";
             }
         }
 
@@ -168,10 +169,10 @@ namespace DataHandling
     int filesize = -1;
     if (stat(logfilename, &results) == 0){
         filesize = int(results.st_size);
-        g_log.information() << "File Size = " << filesize << endl;
+        g_log.information() << "File Size = " << filesize << "\n";
     }
     else{
-        g_log.error() << "File Error!  Cannot Read File Size" << endl;
+        g_log.error() << "File Error!  Cannot Read File Size" << "\n";
         return;
     }
 
@@ -179,14 +180,14 @@ namespace DataHandling
     int structsize = 4+4+8+8;
     int numpulses = filesize/structsize;
     if (filesize%structsize != 0){
-      g_log.error() << "Pulse ID File Length Incorrect!" << endl;
+      g_log.error() << "Pulse ID File Length Incorrect!" << "\n";
     }
-    g_log.information() << "Number of Pulses (In Pulse ID File) = " << numpulses << endl;
+    g_log.information() << "Number of Pulses (In Pulse ID File) = " << numpulses << "\n";
 
     unsigned int* pulseIDhighs = new unsigned int[numpulses];
     unsigned int* pulseIDlows = new unsigned int[numpulses];
 
-    ifstream logFile(logfilename, ios::in|ios::binary);
+    std::ifstream logFile(logfilename, std::ios::in|std::ios::binary);
     for (int pid = 0; pid < numpulses; pid++){
       unsigned int pidlow, pidhigh;
       unsigned long eventid;
@@ -207,21 +208,29 @@ namespace DataHandling
     return;
   }
 
-  void LoadLogsForSNSPulsedMagnet::IntegrateProperty(){
+  void LoadLogsForSNSPulsedMagnet::addProperty(){
+//    DateAndTime epoc(int64_t(m_pulseidhighs[0]), int64_t(m_pulseidhighs[0]));
+    // create values to put into the property
+//    std::vector<double> times;
+//    std::vector<double> values;*/
 
-    TimeSeriesProperty<unsigned int>* m_properties = new TimeSeriesProperty<unsigned int>("PulsedMagnet");
+    TimeSeriesProperty<double>* property = new TimeSeriesProperty<double>("PulsedMagnetDelay");
+//    property->create(start_time, times, values);
+    property->setUnits("nanoseconds");
 
-    for (int pid = 0; pid < m_numpulses; pid++){
-      int64_t pidhigh = int64_t(m_pulseidhighs[pid]);
-      int64_t pidlow = int64_t(m_pulseidlows[pid]);
+    for (size_t pulse_index = 0; pulse_index < m_numpulses; pulse_index++){
+      int64_t pidhigh = int64_t(m_pulseidhighs[pulse_index]);
+      int64_t pidlow = int64_t(m_pulseidlows[pulse_index]);
       DateAndTime dt(pidhigh, pidlow);
-      m_properties->addValue(dt, m_delaytimes[pid]);
+      property->addValue(dt, static_cast<double>(m_delaytimes[pulse_index]));
+//      if (m_delaytimes[pulse_index] > 0) // REMOVE
+//        std::cout << pulse_index << ": " << dt << " " << static_cast<double>(m_delaytimes[pulse_index]) << std::endl; // REMOVE
     }
 
-    WS->mutableRun().addProperty(m_properties, false);
+    WS->mutableRun().addProperty(property, false);
     // addProperty(Kernel::Property *prop, bool overwrite = false);
 
-    g_log.information() << "Integration is Over!" << endl;
+    g_log.information() << "Integration is Over!\n";
 
     return;
   }
