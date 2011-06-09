@@ -98,6 +98,7 @@ set ( SRC_FILES
 	src/MuonRemoveExpDecay.cpp
 	src/NormaliseByCurrent.cpp
 	src/NormaliseToMonitor.cpp
+	src/NormaliseToUnity.cpp
 	src/OneMinusExponentialCor.cpp
 	src/PDFFT.cpp
 	src/PlotAsymmetryByLogValue.cpp
@@ -108,6 +109,7 @@ set ( SRC_FILES
 	src/Power.cpp
 	src/PowerLawCorrection.cpp
 	src/Q1D.cpp
+	#src/Q1DTOF.cpp
 	src/Q1DWeighted.cpp
 	src/Qxy.cpp
 	src/ReadGroupsFromFile.cpp
@@ -247,6 +249,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MuonRemoveExpDecay.h
 	inc/MantidAlgorithms/NormaliseByCurrent.h
 	inc/MantidAlgorithms/NormaliseToMonitor.h
+	inc/MantidAlgorithms/NormaliseToUnity.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
 	inc/MantidAlgorithms/PDFFT.h
 	inc/MantidAlgorithms/PlotAsymmetryByLogValue.h
@@ -257,6 +260,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Power.h
 	inc/MantidAlgorithms/PowerLawCorrection.h
 	inc/MantidAlgorithms/Q1D.h
+	#inc/MantidAlgorithms/Q1DTOF.h
 	inc/MantidAlgorithms/Q1DWeighted.h
 	inc/MantidAlgorithms/Qxy.h
 	inc/MantidAlgorithms/ReadGroupsFromFile.h
@@ -438,6 +442,10 @@ set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
     src/SetUncertaintiesToZero.cpp
     )
 
+# Python unit tests
+set ( TEST_PY_FILES test/NormaliseToUnityTest.py
+)
+
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(Algorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
@@ -480,6 +488,14 @@ if ( CXXTEST_FOUND )
   set_property ( TARGET AlgorithmsTest PROPERTY FOLDER "UnitTests" )
 endif ()
 
+# python unit tests
+if (PYUNITTEST_FOUND)
+  pyunittest_add_test ( AlgorithmPythonUnitTests.py ${TEST_PY_FILES} )
+  add_dependencies ( AlgorithmPythonUnitTests.py PythonAPI )
+  add_dependencies ( FrameworkTests AlgorithmPythonUnitTests.py )
+  # Add to the 'UnitTests' group in VS
+  set_property ( TARGET AlgorithmPythonUnitTests.py PROPERTY FOLDER "UnitTests" )
+endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################
