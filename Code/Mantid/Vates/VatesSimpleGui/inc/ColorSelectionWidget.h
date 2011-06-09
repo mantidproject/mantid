@@ -48,6 +48,8 @@ protected slots:
   /**
    * Function that enables or diables the min and max line edits based on
    * state of the automatic scaling checkbox.
+   *
+   * @param state the current state of the checkbox
    */
   void autoOrManualScaling(int state);
 
