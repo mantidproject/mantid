@@ -61,6 +61,8 @@ public:
   };
 
 public:
+  enum Column { FitInformation, FitInformationValues, GradientLabels, GradientDerived, GradientUnits,
+    InterceptLabels, InterceptDerived, InterceptUnits };
   SANSPlotSpecial(QWidget *parent = 0);
   ~SANSPlotSpecial();
 
@@ -73,12 +75,6 @@ public slots:
   void calculateDerivatives();
   void tableUpdated(int row, int column);
   void clearInterceptDerived();
-
-  void startXadjusted(double);
-  void startXadjusted(const QString &);
-  void endXadjusted(double);
-  void endXadjusted(const QString &);
-
   void scalePlot(double, double);
   void resetSelectors();
 
@@ -107,6 +103,7 @@ private:
   MantidWidgets::RangeSelector* m_rangeSelector;
   QMap<QString, Transform*> m_transforms;
   QMap<QString, QTableWidgetItem*> m_derivatives;
+  QMap<QString, QString> m_units;
   QString m_current;
   QwtPlotCurve* m_dataCurve;
   QwtPlotCurve* m_linearCurve;

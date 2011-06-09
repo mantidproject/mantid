@@ -30,7 +30,9 @@ SANSPlotSpecial::~SANSPlotSpecial()
 }
 
 void SANSPlotSpecial::rangeChanged(double low, double high)
-{  
+{
+  if ( ! m_workspaceIQT ) { return; }
+
   Mantid::API::IAlgorithm_sptr fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
   fit->initialize();
   fit->setProperty<Mantid::API::MatrixWorkspace_sptr>("InputWorkspace", m_workspaceIQT);
@@ -122,10 +124,12 @@ void SANSPlotSpecial::clearTable()
   int nrows = m_uiForm.tbDerived->rowCount();
   for ( int i = 0; i < nrows; i++ )
   {
-    m_uiForm.tbDerived->setItem(i, 2, new QTableWidgetItem(*m_emptyCell));
-    m_uiForm.tbDerived->setItem(i, 4, new QTableWidgetItem(*m_emptyCell));
-    m_uiForm.tbDerived->takeItem(i, 3);
-    m_uiForm.tbDerived->takeItem(i, 5);
+    m_uiForm.tbDerived->setItem(i, Column::GradientLabels, new QTableWidgetItem(*m_emptyCell));
+    m_uiForm.tbDerived->setItem(i, Column::GradientUnits, new QTableWidgetItem(*m_emptyCell));
+    m_uiForm.tbDerived->setItem(i, Column::InterceptLabels, new QTableWidgetItem(*m_emptyCell));
+    m_uiForm.tbDerived->setItem(i, Column::InterceptUnits, new QTableWidgetItem(*m_emptyCell));
+    m_uiForm.tbDerived->takeItem(i, Column::GradientDerived);
+    m_uiForm.tbDerived->takeItem(i, Column::InterceptDerived);
   }
 
   while ( m_uiForm.tbDerived->rowCount() > 3 )
@@ -204,7 +208,7 @@ void SANSPlotSpecial::tableUpdated(int row, int column)
   UNUSED_ARG(row);
 
   if ( m_rearrangingTable ) { return; }
-  if ( ! ( column == 3 || column == 5 ) ) { return; }
+  if ( ! ( column == Column::GradientDerived || column == Column::InterceptDerived ) ) { return; }
 
   calculateDerivatives();
 }
@@ -215,19 +219,11 @@ void SANSPlotSpecial::clearInterceptDerived()
 
   for ( int i = 0; i < m_uiForm.tbDerived->rowCount(); i++ )
   {
-    m_uiForm.tbDerived->item(i, 5)->setText("");
+    m_uiForm.tbDerived->item(i, Column::InterceptDerived)->setText("");
   }
 
   m_rearrangingTable = false;
 }
-
-void SANSPlotSpecial::startXadjusted(double val) {}
-
-void SANSPlotSpecial::startXadjusted(const QString & val) {}
-
-void SANSPlotSpecial::endXadjusted(double val) {}
-
-void SANSPlotSpecial::endXadjusted(const QString & val) {}
 
 void SANSPlotSpecial::scalePlot(double start, double end)
 {
@@ -336,8 +332,11 @@ void SANSPlotSpecial::tableDisplay(QStringList properties, QList<QPair<int, int>
     QTableWidgetItem* lblItm = new QTableWidgetItem(*m_emptyCell);
     lblItm->setToolTip(m_derivatives[(*it)]->toolTip());
     lblItm->setText((*it));
+    QTableWidgetItem* unitItm = new QTableWidgetItem(*m_emptyCell);
+    unitItm->setText(m_units[(*it)]);
     m_uiForm.tbDerived->setItem(row, column, lblItm);
     m_uiForm.tbDerived->setItem(row, column+1, m_derivatives[(*it)]);
+    m_uiForm.tbDerived->setItem(row, column+2, unitItm);
   }
 
   m_rearrangingTable = false;
@@ -413,43 +412,57 @@ void SANSPlotSpecial::setupTable()
   m_derivatives["Chi Squared"] = new QTableWidgetItem(*m_emptyCell);
 
   QTableWidgetItem* lbl = new QTableWidgetItem(*m_emptyCell); lbl->setText("Gradient");
-  m_uiForm.tbDerived->setItem(0,0, lbl);
-  m_uiForm.tbDerived->setItem(0,1, m_derivatives["Gradient"]);
+  m_uiForm.tbDerived->setItem(0, Column::FitInformation, lbl);
+  m_uiForm.tbDerived->setItem(0, Column::FitInformationValues, m_derivatives["Gradient"]);
   lbl = new QTableWidgetItem(*m_emptyCell); lbl->setText("Intercept");
-  m_uiForm.tbDerived->setItem(1,0, lbl);
-  m_uiForm.tbDerived->setItem(1,1, m_derivatives["Intercept"]);
+  m_uiForm.tbDerived->setItem(1, Column::FitInformation, lbl);
+  m_uiForm.tbDerived->setItem(1, Column::FitInformationValues, m_derivatives["Intercept"]);
   lbl = new QTableWidgetItem(*m_emptyCell); lbl->setText("Chi Squared");
-  m_uiForm.tbDerived->setItem(2,0, lbl);
-  m_uiForm.tbDerived->setItem(2,1, m_derivatives["Chi Squared"]);
+  m_uiForm.tbDerived->setItem(2, Column::FitInformation, lbl);
+  m_uiForm.tbDerived->setItem(2, Column::FitInformationValues, m_derivatives["Chi Squared"]);
     
   m_derivatives["Rg"] = new QTableWidgetItem();
   m_derivatives["Rg"]->setToolTip("Radius of gyration");
+  m_units["Rg"] = QString::fromUtf8("\xc3\x85");
   m_derivatives["Rg,xs"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["Rg,xs"]->setToolTip("Cross-sectional radius of gyration");
+  m_units["Rg,xs"] = QString::fromUtf8("\xc3\x85");
   m_derivatives["R"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["R"]->setToolTip("Equivalent spherical radius");
+  m_units["R"] = QString::fromUtf8("\xc3\x85");
   m_derivatives["T"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["T"]->setToolTip("Thickness");
+  m_units["T"] = QString::fromUtf8("\xc3\x85");
   m_derivatives["C"] = new QTableWidgetItem();
   m_derivatives["C"]->setToolTip("Concentration");
+  m_units["C"] = "g/cm^3";
   m_derivatives["Phi"] = new QTableWidgetItem();
   m_derivatives["Phi"]->setToolTip("Volume fraction");
+  m_units["Phi"] = "%/100";
   m_derivatives["Deltarho"] = new QTableWidgetItem();
   m_derivatives["Deltarho"]->setToolTip("Difference in neutron scattering length densities (solute-solvent)");
+  m_units["Deltarho"] = "cm^-2";
   m_derivatives["M"] = new QTableWidgetItem();
   m_derivatives["M"]->setToolTip("Molecular weight");
+  m_units["M"] = "g/mol";
   m_derivatives["ML"] = new QTableWidgetItem();
   m_derivatives["ML"]->setToolTip("Mass per unit length");
+  m_units["ML"] = "g/mol per segment";
   m_derivatives["D"] = new QTableWidgetItem();
   m_derivatives["D"]->setToolTip("Bulk density");
+  m_units["D"] = "g/cm^3";
   m_derivatives["N"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["N"]->setToolTip("Q-Dependence");
+  m_units["N"] = "(unitless)";
   m_derivatives["V"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["V"]->setToolTip("Excluded volume component");
+  m_units["V"] = "(unitless)";
   m_derivatives["Zeta"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["Zeta"]->setToolTip("Characteristic length");
+  m_units["Zeta"] = QString::fromUtf8("\xc3\x85");
   m_derivatives["(S/V)"] = new QTableWidgetItem();
   m_derivatives["(S/V)"]->setToolTip("Surface area-to-volume ratio");
+  m_units["(S/V)"] = "cm^-1";
 }
 
 QwtPlotCurve* SANSPlotSpecial::plotMiniplot(QwtPlotCurve* curve, Mantid::API::MatrixWorkspace_sptr workspace,
@@ -962,12 +975,12 @@ QPair<QStringList, QList<QPair<int, int> > > SANSPlotSpecial::Transform::derivat
 
   for ( int i = 0; i < dg.size(); i++ )
   {
-    positions.append(QPair<int, int>(i,2));
+    positions.append(QPair<int, int>(i, SANSPlotSpecial::Column::GradientLabels));
   }
 
   for ( int i = 0; i < di.size(); i++ )
   {
-    positions.append(QPair<int, int>(i,4));
+    positions.append(QPair<int, int>(i, SANSPlotSpecial::Column::InterceptLabels));
   }
 
   QPair<QStringList, QList<QPair<int, int> > > result = QPair<QStringList, QList<QPair<int, int> > >(items, positions);

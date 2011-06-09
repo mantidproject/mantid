@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>639</width>
-    <height>504</height>
+    <width>844</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -302,7 +302,7 @@
       <number>3</number>
      </property>
      <property name="columnCount" >
-      <number>6</number>
+      <number>8</number>
      </property>
      <row/>
      <row/>
@@ -329,12 +329,22 @@
      </column>
      <column>
       <property name="text" >
+       <string>Unit</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
        <string>I Derived</string>
       </property>
      </column>
      <column>
       <property name="text" >
        <string>Result</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Unit</string>
       </property>
      </column>
     </widget>
@@ -377,8 +387,6 @@
     </layout>
    </item>
   </layout>
-  <zorder>tbDerived</zorder>
-  <zorder>leStartX</zorder>
  </widget>
  <customwidgets>
   <customwidget>
