@@ -72,11 +72,15 @@ namespace Mantid
           : m_proxy(itr_proxy) {}
         const_iterator(const const_iterator & other)
         {
-          m_proxy.reset(other.m_proxy->clone());
+          this->operator=(other);
         }
         const_iterator& operator=(const const_iterator& rhs) 
         {
-          m_proxy.reset(rhs.m_proxy->clone());
+          if( &rhs != this )
+          {
+            delete m_proxy;
+            m_proxy = rhs.m_proxy;
+          }
           return *this;
         }
         ///Prefix
@@ -105,7 +109,7 @@ namespace Mantid
         // Comparison operator
         bool operator==(const const_iterator &rhs)
         {
-          return m_proxy->equals(rhs.m_proxy.get());
+          return m_proxy->equals(rhs.m_proxy);
         }
         // Comparison operator
         bool operator!=(const const_iterator &rhs)
@@ -114,7 +118,7 @@ namespace Mantid
         }
       private:
         // A pointer to the proxy that holds the actual iterator
-        boost::scoped_ptr<IteratorProxy> m_proxy;
+        IteratorProxy * m_proxy;
       };
       ///@endcond
       

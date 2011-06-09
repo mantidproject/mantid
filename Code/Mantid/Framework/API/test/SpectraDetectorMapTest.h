@@ -75,101 +75,101 @@ public:
     }
   }
 
-  //void xtestGetDetectors()
-  //{
-  //  /*for (int i = 0; i < length; i++)
-  //  {
-  //  std::vector<detid_t> dvec = sdMap.getDetectors(offset+i);
-  //  TS_ASSERT_EQUALS(dvec.size(),1);
-  //  TS_ASSERT_EQUALS(dvec[0],i);
-  //  }*/
-  //}
+  void testGetDetectors()
+  {
+    for (int i = 0; i < length; i++)
+    {
+      std::vector<detid_t> dvec = sdMap.getDetectors(offset+i);
+      TS_ASSERT_EQUALS(dvec.size(),1);
+      TS_ASSERT_EQUALS(dvec[0],i);
+    }
+  }
 
-  //void xtestRemap()
-  //{
-  //  //use my own local sdmap as I will be altering it
-  //  SpectraDetectorMap sdMapLocal;
-  //  populateSDMap(sdMapLocal,length,offset);
+  void testRemap()
+  {
+    //use my own local sdmap as I will be altering it
+    SpectraDetectorMap sdMapLocal;
+    populateSDMap(sdMapLocal,length,offset);
 
-  //  TS_ASSERT_EQUALS(sdMapLocal.nElements(),length);
+    TS_ASSERT_EQUALS(sdMapLocal.nElements(),length);
 
-  //  //remap to a new spectra that doesn't exist -> no action
-  //  sdMapLocal.remap(offset,offset+length+1);
-  //  TS_ASSERT_EQUALS(sdMapLocal.nElements(),length);
+    //remap to a new spectra that doesn't exist -> no action
+    sdMapLocal.remap(offset,offset+length+1);
+    TS_ASSERT_EQUALS(sdMapLocal.nElements(),length);
 
-  //  //remap to a new spectra that does exist
-  //  sdMapLocal.remap(offset,offset+1);
-  //  TS_ASSERT_EQUALS(sdMapLocal.ndet(offset),0);
-  //  TS_ASSERT_EQUALS(sdMapLocal.ndet(offset+1),2);
-  //}
+    //remap to a new spectra that does exist
+    sdMapLocal.remap(offset,offset+1);
+    TS_ASSERT_EQUALS(sdMapLocal.ndet(offset),0);
+    TS_ASSERT_EQUALS(sdMapLocal.ndet(offset+1),2);
+  }
 
 
-  //void xtestGetSpectra()
-  //{
-  //  //create a vector of detectorids to map
-  //  std::vector<detid_t> dets;
-  //  int detLength=20;
-  //  for (int i = 0; i < detLength; i++)
-  //  {
-  //    dets.push_back(i);
-  //  }
+  void testGetSpectra()
+  {
+    //create a vector of detectorids to map
+    std::vector<detid_t> dets;
+    int detLength=20;
+    for (int i = 0; i < detLength; i++)
+    {
+      dets.push_back(i);
+    }
 
-  //  //remap them
-  //  //std::vector<specid_t> spectra = sdMap.getSpectra(dets);
-  //  //for (int i = 0; i < detLength; i++)
-  //  //{
-  //  //  TS_ASSERT_EQUALS(spectra[i],dets[i]+offset);
-  //  //}
-  //}
+    //remap them
+    std::vector<specid_t> spectra = sdMap.getSpectra(dets);
+    for (int i = 0; i < detLength; i++)
+    {
+      TS_ASSERT_EQUALS(spectra[i],dets[i]+offset);
+    }
+  }
 
-  //void xtestOperatorEquals()
-  //{
-  //  TS_ASSERT( sdMap == sdMap )
-  //}
+  void testOperatorEquals()
+  {
+    TS_ASSERT( sdMap == sdMap )
+  }
 
-  //void xtestOperatorNotEquals()
-  //{
-  //  SpectraDetectorMap sdMapLocal;
-  //  TS_ASSERT( sdMap != sdMapLocal )
-  //}
+  void testOperatorNotEquals()
+  {
+    SpectraDetectorMap sdMapLocal;
+    TS_ASSERT( sdMap != sdMapLocal )
+  }
 
-  //void xtest_Iterator_Behaviour()
-  //{
-  //  SpectraDetectorMap sdmapLocal;
-  //  //sdmapLocal.populateSimple(10, 15);
-  //  //Geometry::ISpectraDetectorMap::const_iterator itr = sdmapLocal.cbegin();
-  //  //TSM_ASSERT_EQUALS("Current spectrum should be the first", *itr, std::make_pair(10,10));
-  //  //++itr;
-  //  //TSM_ASSERT_EQUALS("Current spectrum should be the second",*itr, std::make_pair(11,11));
-  //  //++itr;
-  //}
+  void test_Iterator_Behaviour()
+  {
+    SpectraDetectorMap sdmapLocal;
+    sdmapLocal.populateSimple(10, 15);
+    Geometry::ISpectraDetectorMap::const_iterator itr = sdmapLocal.cbegin();
+    TSM_ASSERT_EQUALS("Current spectrum should be the first", *itr, std::make_pair(10,10));
+    ++itr;
+    TSM_ASSERT_EQUALS("Current spectrum should be the second",*itr, std::make_pair(11,11));
+    ++itr;
+  }
 
-  //void xtest_Iterating_Over_The_Whole_Map()
-  //{
-  //  SpectraDetectorMap sdmapLocal;
-  //  sdmapLocal.populateSimple(10, 15);
-  //  TS_ASSERT_EQUALS(sdmapLocal.nElements(), 5);
-  //  // Insert an element with the same spectra but different ID
-  //  sdmapLocal.addSpectrumEntries(14, std::vector<detid_t>(1,16));
-  //  const size_t iterations = sdmapLocal.nElements();
-  //  TS_ASSERT_EQUALS(iterations, 6);
-  //  doIteratorRangeTest(sdmapLocal.cbegin(),sdmapLocal.cend(), 6);    
-  //}
+  void test_Iterating_Over_The_Whole_Map()
+  {
+    SpectraDetectorMap sdmapLocal;
+    sdmapLocal.populateSimple(10, 15);
+    TS_ASSERT_EQUALS(sdmapLocal.nElements(), 5);
+    // Insert an element with the same spectra but different ID
+    sdmapLocal.addSpectrumEntries(14, std::vector<detid_t>(1,16));
+    const size_t iterations = sdmapLocal.nElements();
+    TS_ASSERT_EQUALS(iterations, 6);
+    doIteratorRangeTest(sdmapLocal.cbegin(),sdmapLocal.cend(), 6);    
+  }
 
-  //void xtest_Iterating_Over_A_Map_With_A_Single_Entry()
-  //{
-  //  SpectraDetectorMap sdmapLocal;
-  //  sdmapLocal.populateSimple(0,1);
-  //  TS_ASSERT_EQUALS(sdmapLocal.nElements(), 1);
-  //  doIteratorRangeTest(sdmapLocal.cbegin(), sdmapLocal.cend(), 1);
-  //}
+  void test_Iterating_Over_A_Map_With_A_Single_Entry()
+  {
+    SpectraDetectorMap sdmapLocal;
+    sdmapLocal.populateSimple(0,1);
+    TS_ASSERT_EQUALS(sdmapLocal.nElements(), 1);
+    doIteratorRangeTest(sdmapLocal.cbegin(), sdmapLocal.cend(), 1);
+  }
 
-  //void xtest_Iterating_Over_An_Empty_Map()
-  //{
-  //  SpectraDetectorMap sdmapLocal;
-  //  TS_ASSERT_EQUALS(sdmapLocal.nElements(), 0);
-  //  doIteratorRangeTest(sdmapLocal.cbegin(), sdmapLocal.cend(), 0);
-  //}
+  void test_Iterating_Over_An_Empty_Map()
+  {
+    SpectraDetectorMap sdmapLocal;
+    TS_ASSERT_EQUALS(sdmapLocal.nElements(), 0);
+    doIteratorRangeTest(sdmapLocal.cbegin(), sdmapLocal.cend(), 0);
+  }
 
 private:
   void populateSDMap(SpectraDetectorMap& sdMap, int length, const int offset)
