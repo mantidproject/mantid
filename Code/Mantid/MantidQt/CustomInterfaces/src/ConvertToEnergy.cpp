@@ -189,6 +189,11 @@ void ConvertToEnergy::setDefaultInstrument(const QString & name)
  */
 void ConvertToEnergy::instrumentSelectChanged(const QString& name)
 {
+  if ( ! m_uiForm.cbInst->isVisible() )
+  {
+    return;
+  }
+
   QString defFile = getIDFPath(name);
 
   if ( defFile == "" )

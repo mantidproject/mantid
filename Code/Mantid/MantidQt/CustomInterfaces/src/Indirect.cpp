@@ -185,7 +185,7 @@ void Indirect::runConvertToEnergy()
 
   if ( m_uiForm.ckSumFiles->isChecked() )
   {
-    pyInput += "reducer.set_sum(True)\n";
+    pyInput += "reducer.set_sum_files(True)\n";
   }
 
   if ( m_bgRemoval )
