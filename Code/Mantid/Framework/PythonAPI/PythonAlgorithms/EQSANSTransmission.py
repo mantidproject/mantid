@@ -235,7 +235,7 @@ class EQSANSTransmission(PythonAlgorithm):
         
         # Sum transmission peak counts as a function of TOF
         dataX = input_ws.readX(0)
-        if HAS_NUMPY:
+        if HAS_NUMPY and type(dataX) == numpy.ndarray:
             dataX = dataX.tolist()
         nTOF = len(dataX)
         dataY = (nTOF-1)*[0]
