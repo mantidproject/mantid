@@ -39,6 +39,7 @@ class ReductionOptions(BaseOptions):
         self.low_TOF_cut = ReductionOptions.low_TOF_cut
         self.high_TOF_cut = ReductionOptions.high_TOF_cut
         self.correct_for_flight_path = ReductionOptions.correct_for_flight_path
+        self.normalization = ReductionOptions.NORMALIZATION_MONITOR
         
         self.use_config_mask = ReductionOptions.use_config_mask
 

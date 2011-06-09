@@ -93,12 +93,6 @@ class SANSInstrumentWidget(BaseWidget):
         self.connect(self._summary.dark_current_check, QtCore.SIGNAL("clicked(bool)"), self._dark_clicked)
         self.connect(self._summary.dark_browse_button, QtCore.SIGNAL("clicked()"), self._dark_browse)
         self.connect(self._summary.dark_plot_button, QtCore.SIGNAL("clicked()"), self._dark_plot_clicked)
-        g1 = QtGui.QButtonGroup(self)
-        g1.addButton(self._summary.normalization_none_radio)
-        g1.addButton(self._summary.normalization_monitor_radio)
-        g1.setExclusive(True)
-        self.connect(self._summary.normalization_none_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
-        self.connect(self._summary.normalization_monitor_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
 
         # Output directory
         g2 = QtGui.QButtonGroup(self)
@@ -205,15 +199,7 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.high_tof_edit.setEnabled(not is_checked)
         self._summary.low_tof_label.setEnabled(not is_checked)
         self._summary.high_tof_label.setEnabled(not is_checked)
-            
-    def _normalization_clicked(self):
-        if self._summary.normalization_none_radio.isChecked():
-            self._summary.scale_chk.setChecked(False)
-            self._scale_clicked(False)
-            self._summary.scale_chk.setEnabled(False)
-        else:
-            self._summary.scale_chk.setEnabled(True)
-            
+                        
     def _thickness_clicked(self, is_checked):
         self._summary.thickness_edit.setEnabled(is_checked and self._summary.scale_chk.isChecked())
         
@@ -376,14 +362,6 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.dark_file_edit.setText(QtCore.QString(state.dark_current_data))
         self._dark_clicked(self._summary.dark_current_check.isChecked())  
         
-        # Normalization
-        if state.normalization == state.NORMALIZATION_NONE:
-            self._summary.normalization_none_radio.setChecked(True)
-        elif state.normalization == state.NORMALIZATION_TIME:
-            raise RuntimeError, "Got an invalid normalization option for EQSANS (TIME)"
-        elif state.normalization == state.NORMALIZATION_MONITOR:
-            self._summary.normalization_monitor_radio.setChecked(True)
-        
         # Q range
         self._summary.n_q_bins_edit.setText(QtCore.QString(str(state.n_q_bins)))
         self._summary.n_sub_pix_edit.setText(QtCore.QString(str(state.n_sub_pix)))
@@ -457,12 +435,6 @@ class SANSInstrumentWidget(BaseWidget):
         m.dark_current_corr = self._summary.dark_current_check.isChecked()
         m.dark_current_data = unicode(self._summary.dark_file_edit.text())
         
-        # Normalization
-        if self._summary.normalization_none_radio.isChecked():
-            m.normalization = m.NORMALIZATION_NONE
-        elif self._summary.normalization_monitor_radio.isChecked():
-            m.normalization = m.NORMALIZATION_MONITOR
-            
         # Q range
         m.n_q_bins = util._check_and_get_int_line_edit(self._summary.n_q_bins_edit)
         m.n_sub_pix = util._check_and_get_int_line_edit(self._summary.n_sub_pix_edit)
