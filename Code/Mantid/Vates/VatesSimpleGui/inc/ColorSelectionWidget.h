@@ -44,6 +44,13 @@ public:
   /// Default destructor.
   virtual ~ColorSelectionWidget() {}
 
+protected slots:
+  /**
+   * Function that enables or diables the min and max line edits based on
+   * state of the automatic scaling checkbox.
+   */
+  void autoOrManualScaling(int state);
+
 private:
   Ui::ColorSelectionWidgetClass ui; ///< The mode control widget's UI form
 };
