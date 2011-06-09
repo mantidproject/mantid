@@ -79,13 +79,7 @@ namespace Exception
 {
 
 /// Records the filename and the description of failure.
-class
-#ifdef IN_MANTID_KERNEL
-MANTID_KERNEL_DLL
-#else
-DLLImport
-#endif /* IN_MANTID_KERNEL */
-FileError : public std::runtime_error
+class MANTID_KERNEL_DLL FileError : public std::runtime_error
 {
  private:
   /// The name of the file relating to the error
@@ -105,13 +99,7 @@ FileError : public std::runtime_error
 };
 
 /// Marks code as not implemented yet.
-class
-#ifdef IN_MANTID_KERNEL
-MANTID_KERNEL_DLL
-#else
-DLLImport
-#endif /* IN_MANTID_KERNEL */
-NotImplementedError : public std::logic_error
+class MANTID_KERNEL_DLL NotImplementedError : public std::logic_error
 {
  public:
   NotImplementedError(const std::string&);
@@ -125,13 +113,7 @@ NotImplementedError : public std::logic_error
 };
 
 /// Exception for when an item is not found in a collection.
-class
-#ifdef IN_MANTID_KERNEL
-MANTID_KERNEL_DLL
-#else
-DLLImport
-#endif /* IN_MANTID_KERNEL */
-NotFoundError : public std::runtime_error
+class MANTID_KERNEL_DLL NotFoundError : public std::runtime_error
 {
  private:
   /// The name of the search object
@@ -154,13 +136,7 @@ NotFoundError : public std::runtime_error
 };
 
 /// Exception for when an item is already in a collection.
-class
-#ifdef IN_MANTID_KERNEL
-MANTID_KERNEL_DLL
-#else
-DLLImport
-#endif /* IN_MANTID_KERNEL */
-ExistsError : public std::runtime_error
+class MANTID_KERNEL_DLL ExistsError : public std::runtime_error
 {
  private:
   /// The name of the search object
@@ -201,13 +177,7 @@ ExistsError : public std::runtime_error
    -- Note: I believe this was tabled for Cx00 but rejected (why?)
 */
 
-class
-#ifdef IN_MANTID_KERNEL
-MANTID_KERNEL_DLL
-#else
-DLLImport
-#endif /* IN_MANTID_KERNEL */
-AbsObjMethod : public std::runtime_error
+class MANTID_KERNEL_DLL AbsObjMethod : public std::runtime_error
 {
  private:
   /// The name of the search object
@@ -334,12 +304,7 @@ class MANTID_KERNEL_DLL OpenGLError: public std::runtime_error
    *  @author Russell Taylor, Tessella Support Services plc
    *  @date 01/07/2008
    */
-  class
-  #ifdef IN_MANTID_KERNEL
-    MANTID_KERNEL_DLL
-  #else
-    DLLImport
-  #endif /* IN_MANTID_KERNEL */
+  class MANTID_KERNEL_DLL
   NullPointerException : public std::runtime_error
   {
   private:
