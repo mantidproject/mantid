@@ -3,6 +3,9 @@
 
 #include <QtGui/QWidget>
 #include "ui_ColorSelectionWidget.h"
+
+class pqColorPresetManager;
+
 /**
  *
   This class controls the color scale for the main level program viewed
@@ -53,7 +56,19 @@ protected slots:
    */
   void autoOrManualScaling(int state);
 
+  /**
+   * Function that presents the user with the available color presets and gets the
+   * result from the user.
+   */
+  void loadPreset();
+
 private:
+  /**
+   * Function that sets up various colormaps. This is copied verbaitum from pqColorScaleEditor.
+   */
+  void loadBuiltinColorPresets();
+
+  pqColorPresetManager *presets; ///< Dialog for choosing color presets
   Ui::ColorSelectionWidgetClass ui; ///< The mode control widget's UI form
 };
 
