@@ -108,12 +108,12 @@ namespace Mantid
           return &m_proxy->dereference();
         }
         // Comparison operator
-        bool operator==(const const_iterator &rhs)
+        bool operator==(const ISpectraDetectorMap::const_iterator &rhs) const
         {
           return m_proxy->equals(rhs.m_proxy);
         }
         // Comparison operator
-        bool operator!=(const const_iterator &rhs)
+        bool operator!=(const ISpectraDetectorMap::const_iterator &rhs) const
         {
           return !(*this==rhs);
         }

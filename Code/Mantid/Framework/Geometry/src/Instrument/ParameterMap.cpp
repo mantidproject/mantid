@@ -611,7 +611,7 @@ namespace Mantid
     {
       if( !m_spectraMap )
       {
-	throw Kernel::Exception::NullPointerException("ParameterMap::buildNearestNeighbours", 
+      	throw Kernel::Exception::NullPointerException("ParameterMap::buildNearestNeighbours", 
 						      "SpectraDetectorMap");
       }
 

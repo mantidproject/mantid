@@ -227,8 +227,7 @@ namespace Mantid
       if( spectraMap.nElements() == 0 ) return spectra;
       ISpectraDetectorMap::const_iterator cend = spectraMap.cend();
       specid_t lastSpectrum(INT_MAX);
-      for( ISpectraDetectorMap::const_iterator citr = spectraMap.cbegin();
-           citr != cend; ++citr )
+      for( ISpectraDetectorMap::const_iterator citr = spectraMap.cbegin(); citr != cend; ++citr )
       {
         specid_t spectrumNo = citr->first;
         if( spectrumNo != lastSpectrum )
