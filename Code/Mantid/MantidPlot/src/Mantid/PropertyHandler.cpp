@@ -17,6 +17,7 @@
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
 #include <QMessageBox>
+#include <QMenu>
 
 // Visual studio 2010 can't deal with NULL (for a pointer) being passed to the constructor of an std::pair
 // You have to use the c++0x keyword 'nullptr' instead.
@@ -1269,7 +1270,7 @@ void PropertyHandler::plot(Graph* g)const
     connect(m_curve,SIGNAL(forgetMe(PlotCurve*)),this,SLOT(plotRemoved(PlotCurve*)));
     if (this == m_browser->getHandler())
     {
-      m_browser->m_btnPlotGuess->setText("Remove guess");
+      m_browser->m_displayActionPlotGuess->setText("Remove guess");
     }
   }
 }
@@ -1285,7 +1286,7 @@ void PropertyHandler::removePlot()
     m_curve = NULL;
     if (this == m_browser->getHandler())
     {
-      m_browser->m_btnPlotGuess->setText("Plot guess");
+      m_browser->m_displayActionPlotGuess->setText("Plot guess");
     }
   }
 }

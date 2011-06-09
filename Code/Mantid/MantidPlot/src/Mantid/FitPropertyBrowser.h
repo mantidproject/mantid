@@ -21,6 +21,11 @@ class QtBrowserItem;
 
 class QPushButton;
 class QLabel;
+class QLineEdit;
+class QComboBox;
+class QSignalMapper;
+class QMenu;
+class QAction;
 
 class ApplicationWindow;
 
@@ -181,6 +186,9 @@ public slots:
   void clearBrowser();
   void setPeakToolOn(bool on);
   void findPeaks();
+  void executeFitMenu(const QString&);
+  void executeDisplayMenu(const QString&);
+  void executeSetupMenu(const QString&);
 
 signals:
   void currentChanged()const;
@@ -284,17 +292,33 @@ private:
   void validateGroupMember();
 
   /// Button for doing fit
-  QPushButton* m_btnFit;
+  //QPushButton* m_btnFit;
+  QSignalMapper* m_fitMapper;
+  QMenu* m_fitMenu;
+  QAction* m_fitActionUndoFit;
+  QAction* m_fitActionSeqFit;
+  QAction* m_fitActionFit;
+  QAction* m_displayActionPlotGuess;
   /// Button for undoing fit
-  QPushButton* m_btnUnFit;
+  //QPushButton* m_btnUnFit;
   /// Button for plotting the overall function
-  QPushButton* m_btnPlotGuess;
+  //QPushButton* m_btnPlotGuess;
   /// Button for the sequential fit
-  QPushButton* m_btnSeqFit;
+  //QPushButton* m_btnSeqFit;
   /// Button for FindPeaks algorithm
-  QPushButton* m_btnFindPeaks;
+  //QPushButton* m_btnFindPeaks;
   /// To display a tip text
   QLabel* m_tip;
+  /// Quality label for quality of plot
+  QLabel* m_qualityLabel;
+  /// Quality label for quality of plot
+  QLineEdit* m_qualityLineEdit;
+  /// Setup label
+  QLabel* m_setupLabel;
+  /// Setup combobox
+  QComboBox* m_setupCombobox;
+  /// Setup save button
+  QPushButton* m_btnSaveSetup;
 
   QtTreePropertyBrowser* m_browser;
   /// Property managers:

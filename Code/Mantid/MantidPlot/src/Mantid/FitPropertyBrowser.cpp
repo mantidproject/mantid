@@ -224,33 +224,81 @@ m_decimals(-1)
   QVBoxLayout* layout = new QVBoxLayout(w);
   QGridLayout* buttonsLayout = new QGridLayout();
 
-  m_btnFit = new QPushButton("Fit");
-  connect(m_btnFit,SIGNAL(clicked()),this,SLOT(fit()));
+  QPushButton* btnFit = new QPushButton("Fit");
+  //connect(m_btnFit,SIGNAL(clicked()),this,SLOT(fit()));
 
-  m_btnUnFit = new QPushButton("Undo Fit");
-  connect(m_btnUnFit,SIGNAL(clicked()),this,SLOT(undoFit()));
+  //m_btnUnFit = new QPushButton("Undo Fit");
+  //connect(m_btnUnFit,SIGNAL(clicked()),this,SLOT(undoFit()));
 
-  QPushButton* btnClear = new QPushButton("Clear all");
-  connect(btnClear,SIGNAL(clicked()),this,SLOT(clear()));
+  //QPushButton* btnClear = new QPushButton("Clear all");
+  //connect(btnClear,SIGNAL(clicked()),this,SLOT(clear()));
 
-  m_btnSeqFit = new QPushButton("Sequential fit");
-  connect(m_btnSeqFit,SIGNAL(clicked()),this,SLOT(sequentialFit()));
+  //m_btnSeqFit = new QPushButton("Sequential fit");
+  //connect(m_btnSeqFit,SIGNAL(clicked()),this,SLOT(sequentialFit()));
 
-  m_btnFindPeaks = new QPushButton("Find peaks");
-  connect(m_btnFindPeaks,SIGNAL(clicked()),this,SLOT(findPeaks()));
-
-  m_btnPlotGuess = new QPushButton("Plot guess");
-  connect(m_btnPlotGuess,SIGNAL(clicked()),this,SLOT(plotOrRemoveGuessAll()));
-  m_btnPlotGuess->setEnabled(false);
 
   m_tip = new QLabel("",w);
 
-  buttonsLayout->addWidget(m_btnFit,0,0);
-  buttonsLayout->addWidget(m_btnUnFit,0,1);
-  buttonsLayout->addWidget(btnClear,0,2);
-  buttonsLayout->addWidget(m_btnSeqFit,1,0);
-  buttonsLayout->addWidget(m_btnFindPeaks,1,1);
-  buttonsLayout->addWidget(m_btnPlotGuess,1,2);
+  m_qualityLabel = new QLabel("Quality:");
+  m_qualityLineEdit = new QLineEdit();
+  QHBoxLayout* chiLayout = new QHBoxLayout(w);
+  chiLayout->addWidget(m_qualityLabel);
+  chiLayout->addWidget(m_qualityLineEdit);
+
+
+  m_fitMenu = new QMenu(this);
+  m_fitActionFit = new QAction("Fit",this);
+  m_fitActionSeqFit = new QAction("Sequencial Fit",this);
+  m_fitActionUndoFit = new QAction("Undo Fit",this);
+  m_fitMapper = new QSignalMapper(this);
+  m_fitMapper->setMapping(m_fitActionFit,"Fit");
+  m_fitMapper->setMapping(m_fitActionSeqFit,"SeqFit");
+  m_fitMapper->setMapping(m_fitActionUndoFit,"UndoFit");
+  connect(m_fitActionFit,SIGNAL(activated()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionSeqFit,SIGNAL(activated()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionUndoFit,SIGNAL(activated()), m_fitMapper, SLOT(map()));
+  connect(m_fitMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeFitMenu(const QString&)));
+  m_fitMenu->addAction(m_fitActionFit);
+  m_fitMenu->addAction(m_fitActionSeqFit);
+  m_fitMenu->addSeparator();
+  m_fitMenu->addAction(m_fitActionUndoFit);
+  btnFit->setMenu(m_fitMenu);
+
+  QPushButton* btnDisplay = new QPushButton("Display");
+  QMenu* displayMenu = new QMenu(this);
+  m_displayActionPlotGuess = new QAction("Plot Guess",this);
+  m_displayActionPlotGuess->setEnabled(false);
+  QAction* displayActionQuality = new QAction("Quality",this);
+  displayActionQuality->setCheckable(true);
+  QSignalMapper* displayMapper = new QSignalMapper(this);
+  displayMapper->setMapping(m_displayActionPlotGuess,"PlotGuess");
+  displayMapper->setMapping(displayActionQuality,"Quality");
+  connect(m_displayActionPlotGuess,SIGNAL(activated()), displayMapper, SLOT(map()));
+  connect(displayActionQuality,SIGNAL(activated()), displayMapper, SLOT(map()));
+  connect(displayMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeDisplayMenu(const QString&)));
+  displayMenu->addAction(m_displayActionPlotGuess);
+  displayMenu->addAction(displayActionQuality);
+  btnDisplay->setMenu(displayMenu);
+
+  QPushButton* btnSetup = new QPushButton("Setup");
+  QMenu* setupMenu = new QMenu(this);
+  QAction* setupActionClearAll = new QAction("Clear All",this);
+  QAction* setupActionFindPeaks = new QAction("Find Peaks",this);
+  QSignalMapper* setupMapper = new QSignalMapper(this);
+  setupMapper->setMapping(setupActionClearAll,"ClearAll");
+  setupMapper->setMapping(setupActionFindPeaks,"FindPeaks");
+  connect(setupActionClearAll,SIGNAL(activated()), setupMapper, SLOT(map()));
+  connect(setupActionFindPeaks,SIGNAL(activated()), setupMapper, SLOT(map()));
+  connect(setupMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeSetupMenu(const QString&)));
+  setupMenu->addAction(setupActionClearAll);
+  setupMenu->addAction(setupActionFindPeaks);
+  btnSetup->setMenu(setupMenu);
+
+
+  buttonsLayout->addWidget(btnFit,0,0);
+  buttonsLayout->addWidget(btnDisplay,0,1);
+  buttonsLayout->addWidget(btnSetup,0,2);
+
 
   layout->addLayout(buttonsLayout);
   layout->addWidget(m_tip);
@@ -266,6 +314,32 @@ m_decimals(-1)
 
   m_changeSlotsEnabled = true;
 
+}
+
+void FitPropertyBrowser::executeFitMenu(const QString& item)
+{
+  if (item == "Fit")
+    fit();
+  if (item == "SeqFit")
+    sequentialFit();
+  if (item == "UndoFit")
+    undoFit();
+}
+
+void FitPropertyBrowser::executeDisplayMenu(const QString& item)
+{
+  if (item == "PlotGuess")
+    plotOrRemoveGuessAll();
+//  if (item == "Quality")
+//    sequentialFit();
+}
+
+void FitPropertyBrowser::executeSetupMenu(const QString& item)
+{
+  if (item == "ClearAll")
+    clear();
+  if (item == "FindPeaks")
+    findPeaks();
 }
 
 /// Destructor
@@ -757,6 +831,13 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
       if (f) setCurrentFunction(f);
       emit functionChanged();
   }
+  else if (prop->propertyName() == "Cost function")
+  {
+    if ( prop->valueText() == "Least squares" )
+      m_qualityLabel->setText("Chi-sq");
+    else
+      m_qualityLabel->setText("Quality");      
+  }
 }
 
 /** Called when a bool property changed
@@ -1069,7 +1150,7 @@ void FitPropertyBrowser::fit()
     {
       m_initialParameters[i] = compositeFunction()->getParameter(i);
     }
-    m_btnUnFit->setEnabled(true);
+    m_fitActionUndoFit->setEnabled(true);
 
     std::string funStr;
     if (m_compositeFunction->nFunctions() > 1)
@@ -1127,6 +1208,9 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
 {
   std::string out = alg->getProperty("OutputWorkspace");
   getFitResults();
+  // update top Quality of fit textedit
+  double quality = alg->getProperty("OutputChi2overDoF");
+  m_qualityLineEdit->setText(QString::number(quality));
   if (!isWorkspaceAGroup())
   {
     emit algorithmFinished(QString::fromStdString(out));
@@ -1391,7 +1475,7 @@ void FitPropertyBrowser::undoFit()
 void FitPropertyBrowser::disableUndo()
 {
   m_initialParameters.clear();
-  m_btnUnFit->setEnabled(false);
+  m_fitActionUndoFit->setEnabled(false);
 }
 
 /// Tells if undo can be done
@@ -1403,14 +1487,14 @@ bool FitPropertyBrowser::isUndoEnabled()const
 /// Enable/disable the Fit button;
 void FitPropertyBrowser::setFitEnabled(bool yes)
 {
-  m_btnFit->setEnabled(yes);
-  m_btnSeqFit->setEnabled(yes);
+  m_fitActionFit->setEnabled(yes);
+  m_fitActionSeqFit->setEnabled(yes);
 }
 
 /// Returns true if the function is ready for a fit
 bool FitPropertyBrowser::isFitEnabled()const
 {
-  return m_btnFit->isEnabled();
+  return m_fitActionFit->isEnabled();
 }
 
 /** 
@@ -2140,7 +2224,7 @@ void FitPropertyBrowser::findPeaks()
 void FitPropertyBrowser::setPeakToolOn(bool on)
 {
   m_peakToolOn = on;
-  m_btnPlotGuess->setEnabled(on);
+  m_displayActionPlotGuess->setEnabled(on);
 }
 
 void FitPropertyBrowser::updateDecimals()
