@@ -124,12 +124,12 @@ void SANSPlotSpecial::clearTable()
   int nrows = m_uiForm.tbDerived->rowCount();
   for ( int i = 0; i < nrows; i++ )
   {
-    m_uiForm.tbDerived->setItem(i, Column::GradientLabels, new QTableWidgetItem(*m_emptyCell));
-    m_uiForm.tbDerived->setItem(i, Column::GradientUnits, new QTableWidgetItem(*m_emptyCell));
-    m_uiForm.tbDerived->setItem(i, Column::InterceptLabels, new QTableWidgetItem(*m_emptyCell));
-    m_uiForm.tbDerived->setItem(i, Column::InterceptUnits, new QTableWidgetItem(*m_emptyCell));
-    m_uiForm.tbDerived->takeItem(i, Column::GradientDerived);
-    m_uiForm.tbDerived->takeItem(i, Column::InterceptDerived);
+    m_uiForm.tbDerived->setItem(i, SANSPlotSpecial::GradientLabels, new QTableWidgetItem(*m_emptyCell));
+    m_uiForm.tbDerived->setItem(i, SANSPlotSpecial::GradientUnits, new QTableWidgetItem(*m_emptyCell));
+    m_uiForm.tbDerived->setItem(i, SANSPlotSpecial::InterceptLabels, new QTableWidgetItem(*m_emptyCell));
+    m_uiForm.tbDerived->setItem(i, SANSPlotSpecial::InterceptUnits, new QTableWidgetItem(*m_emptyCell));
+    m_uiForm.tbDerived->takeItem(i, SANSPlotSpecial::GradientDerived);
+    m_uiForm.tbDerived->takeItem(i, SANSPlotSpecial::InterceptDerived);
   }
 
   while ( m_uiForm.tbDerived->rowCount() > 3 )
@@ -208,7 +208,7 @@ void SANSPlotSpecial::tableUpdated(int row, int column)
   UNUSED_ARG(row);
 
   if ( m_rearrangingTable ) { return; }
-  if ( ! ( column == Column::GradientDerived || column == Column::InterceptDerived ) ) { return; }
+  if ( ! ( column == SANSPlotSpecial::GradientDerived || column == SANSPlotSpecial::InterceptDerived ) ) { return; }
 
   calculateDerivatives();
 }
@@ -219,7 +219,7 @@ void SANSPlotSpecial::clearInterceptDerived()
 
   for ( int i = 0; i < m_uiForm.tbDerived->rowCount(); i++ )
   {
-    m_uiForm.tbDerived->item(i, Column::InterceptDerived)->setText("");
+    m_uiForm.tbDerived->item(i, SANSPlotSpecial::InterceptDerived)->setText("");
   }
 
   m_rearrangingTable = false;
@@ -412,14 +412,14 @@ void SANSPlotSpecial::setupTable()
   m_derivatives["Chi Squared"] = new QTableWidgetItem(*m_emptyCell);
 
   QTableWidgetItem* lbl = new QTableWidgetItem(*m_emptyCell); lbl->setText("Gradient");
-  m_uiForm.tbDerived->setItem(0, Column::FitInformation, lbl);
-  m_uiForm.tbDerived->setItem(0, Column::FitInformationValues, m_derivatives["Gradient"]);
+  m_uiForm.tbDerived->setItem(0, SANSPlotSpecial::FitInformation, lbl);
+  m_uiForm.tbDerived->setItem(0, SANSPlotSpecial::FitInformationValues, m_derivatives["Gradient"]);
   lbl = new QTableWidgetItem(*m_emptyCell); lbl->setText("Intercept");
-  m_uiForm.tbDerived->setItem(1, Column::FitInformation, lbl);
-  m_uiForm.tbDerived->setItem(1, Column::FitInformationValues, m_derivatives["Intercept"]);
+  m_uiForm.tbDerived->setItem(1, SANSPlotSpecial::FitInformation, lbl);
+  m_uiForm.tbDerived->setItem(1, SANSPlotSpecial::FitInformationValues, m_derivatives["Intercept"]);
   lbl = new QTableWidgetItem(*m_emptyCell); lbl->setText("Chi Squared");
-  m_uiForm.tbDerived->setItem(2, Column::FitInformation, lbl);
-  m_uiForm.tbDerived->setItem(2, Column::FitInformationValues, m_derivatives["Chi Squared"]);
+  m_uiForm.tbDerived->setItem(2, SANSPlotSpecial::FitInformation, lbl);
+  m_uiForm.tbDerived->setItem(2, SANSPlotSpecial::FitInformationValues, m_derivatives["Chi Squared"]);
     
   m_derivatives["Rg"] = new QTableWidgetItem();
   m_derivatives["Rg"]->setToolTip("Radius of gyration");
@@ -975,12 +975,12 @@ QPair<QStringList, QList<QPair<int, int> > > SANSPlotSpecial::Transform::derivat
 
   for ( int i = 0; i < dg.size(); i++ )
   {
-    positions.append(QPair<int, int>(i, SANSPlotSpecial::Column::GradientLabels));
+    positions.append(QPair<int, int>(i, SANSPlotSpecial::GradientLabels));
   }
 
   for ( int i = 0; i < di.size(); i++ )
   {
-    positions.append(QPair<int, int>(i, SANSPlotSpecial::Column::InterceptLabels));
+    positions.append(QPair<int, int>(i, SANSPlotSpecial::InterceptLabels));
   }
 
   QPair<QStringList, QList<QPair<int, int> > > result = QPair<QStringList, QList<QPair<int, int> > >(items, positions);
