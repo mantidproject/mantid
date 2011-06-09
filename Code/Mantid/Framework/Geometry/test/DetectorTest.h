@@ -23,8 +23,9 @@ public:
   }
   void testDetTopology()
   {
+      Geometry::V3D center;
       Detector det("det1",0,0);
-      TSM_ASSERT_EQUALS("single detector should have rectangular topology",rect,det.getTopology());
+      TSM_ASSERT_EQUALS("single detector should have rectangular topology",rect,det.getTopology(center));
   }
 
   void testNameParentConstructor()

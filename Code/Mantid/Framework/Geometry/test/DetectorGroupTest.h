@@ -55,16 +55,19 @@ public:
   }
 
   void testIdentRectShape(){
+      Geometry::V3D center;
       boost::shared_ptr<Mantid::Geometry::DetectorGroup> rectGroup = ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
-      TSM_ASSERT_EQUALS("should be rectangular shape",rect,rectGroup->getTopology());
+      TSM_ASSERT_EQUALS("should be rectangular shape",rect,rectGroup->getTopology(center));
   }
   void testIdentRectShapeWithGaps(){
+      Geometry::V3D center;
       boost::shared_ptr<Mantid::Geometry::DetectorGroup> rectGroup = ComponentCreationHelper::createDetectorGroupWithNCylindricalDetectorsWithGaps(4,0.0);
-      TSM_ASSERT_EQUALS("should be rectangular shape",rect,rectGroup->getTopology());
+      TSM_ASSERT_EQUALS("should be rectangular shape",rect,rectGroup->getTopology(center));
   }
   void testIdentRingShape(){
+      Geometry::V3D center;
       boost::shared_ptr<Mantid::Geometry::DetectorGroup> rectGroup = ComponentCreationHelper::createRingOfCylindricalDetectors();
-      TSM_ASSERT_EQUALS("should be ring shape",cyl,rectGroup->getTopology());
+      TSM_ASSERT_EQUALS("should be ring shape",cyl,rectGroup->getTopology(center));
   }
   void testGetID()
   {
