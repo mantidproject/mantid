@@ -54,7 +54,9 @@ namespace Mantid
 
     /// Destructor
     SpectraDetectorMap::~SpectraDetectorMap()
-    {}
+    {
+      m_s2dmap.clear();
+    }
 
     /// "Virtual copy constructor"
     SpectraDetectorMap * SpectraDetectorMap::clone() const

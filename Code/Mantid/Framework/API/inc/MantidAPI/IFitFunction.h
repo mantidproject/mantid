@@ -123,7 +123,7 @@ public:
    * implementation of Attribute::value() method for an example.
    */
   template<typename T = void>
-  class MANTID_API_DLL AttributeVisitor: public boost::static_visitor<T>
+  class DLLExport AttributeVisitor: public boost::static_visitor<T>
   {
   public:
     /// Virtual destructor
@@ -147,7 +147,7 @@ public:
    * Const version of AttributeVisitor. 
    */
   template<typename T = void>
-  class MANTID_API_DLL ConstAttributeVisitor: public boost::static_visitor<T>
+  class DLLExport ConstAttributeVisitor: public boost::static_visitor<T>
   {
   public:
     /// Virtual destructor

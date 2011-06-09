@@ -132,12 +132,13 @@ namespace Mantid
       class MapIteratorProxy : public ISpectraDetectorMap::IteratorProxy
       {
       public:
+        //m_value init is left out deliberately as current could point to end(). Must only be set when dereferenced
         MapIteratorProxy(const smap::const_iterator current) 
-          : m_iter(current),m_value(*current) { }
+          : m_iter(current) {}
         inline void increment() { ++m_iter; }
         inline const ISpectraDetectorMap::value_type & dereference() const 
         { 
-	  const_cast<MapIteratorProxy*>(this)->m_value = *m_iter;
+          const_cast<MapIteratorProxy*>(this)->m_value = *m_iter;
           return m_value;
         }
         inline bool equals(const IteratorProxy* other) const 
@@ -149,7 +150,7 @@ namespace Mantid
         virtual MapIteratorProxy * clone() const { return new MapIteratorProxy(m_iter); }
       private:
         smap::const_iterator m_iter;
-	ISpectraDetectorMap::value_type m_value;
+        ISpectraDetectorMap::value_type m_value;
       };
       ///@endcond
 
