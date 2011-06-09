@@ -168,6 +168,7 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
       m_canvas->setCursor(Qt::PointingHandCursor);
       m_minChanging = false;
       m_maxChanging = false;
+      emit selectionChangedLazy(m_min, m_max);
     }
     m_plot->replot();
     return true;
@@ -180,39 +181,40 @@ bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
     }
   case QEvent::MouseButtonRelease: // User has finished moving something (perhaps)
     {
-    if ( m_minChanging || m_maxChanging )
-    {
-    m_canvas->setCursor(Qt::PointingHandCursor);
-    QPoint p = ((QMouseEvent*)evn)->pos();
-    double x;
-    switch ( m_type )
-    {
-    case XMINMAX:
-    case XSINGLE:
-      x = m_plot->invTransform(QwtPlot::xBottom, p.x());
+      if ( m_minChanging || m_maxChanging )
+      {
+        m_canvas->setCursor(Qt::PointingHandCursor);
+        QPoint p = ((QMouseEvent*)evn)->pos();
+        double x;
+        switch ( m_type )
+        {
+        case XMINMAX:
+        case XSINGLE:
+          x = m_plot->invTransform(QwtPlot::xBottom, p.x());
+          break;
+        case YMINMAX:
+        case YSINGLE:
+          x = m_plot->invTransform(QwtPlot::yLeft, p.y());
+          break;
+        }
+        if ( inRange(x) )
+        {
+          if ( m_minChanging )
+            setMin(x);
+          else
+            setMax(x);
+        }
+        m_plot->replot();
+        m_minChanging = false;
+        m_maxChanging = false;
+        emit selectionChangedLazy(m_min, m_max);
+        return true;
+      }
+      else
+      {
+        return false;
+      }
       break;
-    case YMINMAX:
-    case YSINGLE:
-      x = m_plot->invTransform(QwtPlot::yLeft, p.y());
-      break;
-    }
-    if ( inRange(x) )
-    {
-    if ( m_minChanging )
-      setMin(x);
-    else
-      setMax(x);
-    }
-    m_plot->replot();
-    m_minChanging = false;
-    m_maxChanging = false;
-    return true;
-    }
-    else
-    {
-    return false;
-    }
-    break;
     }
   default:
     return false;
@@ -235,8 +237,6 @@ void RangeSelector::setRange(double min, double max)
 
 void RangeSelector::setRange(std::pair<double,double> range)
 {
-  //double min = range.first;
-  //double max = range.second;
   this->setRange(range.first, range.second);
 }
 

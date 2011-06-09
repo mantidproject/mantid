@@ -221,6 +221,36 @@ void SANSPlotSpecial::clearInterceptDerived()
   m_rearrangingTable = false;
 }
 
+void SANSPlotSpecial::startXadjusted(double val) {}
+
+void SANSPlotSpecial::startXadjusted(const QString & val) {}
+
+void SANSPlotSpecial::endXadjusted(double val) {}
+
+void SANSPlotSpecial::endXadjusted(const QString & val) {}
+
+void SANSPlotSpecial::scalePlot(double start, double end)
+{
+  double delta = end - start;
+  double limA = start - ( delta / 10 );
+  double limB = end + ( delta / 10 );
+  m_uiForm.plotWindow->setAxisScale(QwtPlot::xBottom, limA, limB);
+  m_uiForm.plotWindow->replot();
+}
+
+void SANSPlotSpecial::resetSelectors()
+{
+  if ( m_dataCurve )
+  {
+    const double min = m_dataCurve->minXValue();
+    const double max = m_dataCurve->maxXValue();
+    m_uiForm.plotWindow->setAxisScale(QwtPlot::xBottom, min, max);
+    m_rangeSelector->setMinimum(min);
+    m_rangeSelector->setMaximum(max);
+    m_uiForm.plotWindow->replot();
+  }
+}
+
 void SANSPlotSpecial::initLayout()
 {
   createTransforms();
@@ -234,6 +264,11 @@ void SANSPlotSpecial::initLayout()
   // Setup RangeSelector widget for use on the plotWindow
   m_rangeSelector = new MantidWidgets::RangeSelector(m_uiForm.plotWindow);
   connect(m_rangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
+
+  // Scale the plot based on the range selection
+  connect(m_rangeSelector, SIGNAL(selectionChangedLazy(double, double)), this, SLOT(scalePlot(double, double)));
+
+  connect(m_uiForm.pbResetRangeSelectors, SIGNAL(clicked()), this, SLOT(resetSelectors()));
 
   // Other signal/slot connections
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plot()));

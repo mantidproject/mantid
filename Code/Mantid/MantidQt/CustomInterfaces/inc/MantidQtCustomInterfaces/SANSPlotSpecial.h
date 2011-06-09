@@ -74,6 +74,14 @@ public slots:
   void tableUpdated(int row, int column);
   void clearInterceptDerived();
 
+  void startXadjusted(double);
+  void startXadjusted(const QString &);
+  void endXadjusted(double);
+  void endXadjusted(const QString &);
+
+  void scalePlot(double, double);
+  void resetSelectors();
+
 private:
   void initLayout();
   boost::shared_ptr<Mantid::API::MatrixWorkspace> runIQTransform();
