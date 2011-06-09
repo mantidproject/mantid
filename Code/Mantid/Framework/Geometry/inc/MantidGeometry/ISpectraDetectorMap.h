@@ -47,6 +47,7 @@ namespace Mantid
       class IteratorProxy
       {
       public:
+        virtual ~IteratorProxy() {}
         /// Increment the iterator
         virtual void increment() = 0;
         /// Dereference
@@ -74,12 +75,12 @@ namespace Mantid
         {
           this->operator=(other);
         }
+        ~const_iterator() { delete m_proxy; }
         const_iterator& operator=(const const_iterator& rhs) 
         {
           if( &rhs != this )
           {
-            delete m_proxy;
-            m_proxy = rhs.m_proxy;
+            m_proxy = rhs.m_proxy->clone();
           }
           return *this;
         }
