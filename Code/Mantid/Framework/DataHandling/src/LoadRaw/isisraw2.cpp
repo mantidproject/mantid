@@ -5,11 +5,26 @@
 #include "byte_rel_comp.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include <boost/lexical_cast.hpp>
 
+/// Init logger
+Mantid::Kernel::Logger & ISISRAW2::g_log = Mantid::Kernel::Logger::get("ISISRAW2");
+
 /// No arg Constructor
-ISISRAW2::ISISRAW2() : ISISRAW(NULL,false),outbuff(0)
+ISISRAW2::ISISRAW2() : ISISRAW(NULL,false),outbuff(0), m_bufferSize(0)
 {
+  // Determine the size of the output buffer to create from the config service.
+  g_log.debug() << "Determining ioRaw buffer size\n";
+  if ( Mantid::Kernel::ConfigService::Instance().getValue("loadraw.readbuffer.size", m_bufferSize) == 0 )
+  {
+    m_bufferSize = 200000;
+    g_log.debug() << "loadraw.readbuffer.size not found, setting to " << m_bufferSize << "\n";
+  }
+  else
+  {
+    g_log.debug() << "loadraw.readbuffer.size set to " << m_bufferSize << "\n";
+  }
 }
 
 /** Loads the headers of the file, leaves the file pointer at a specific position
@@ -87,23 +102,6 @@ int ISISRAW2::ioRAW(FILE* file, bool from_file, bool read_data)
   fgetpos(file, &dhdr_pos);
   ISISRAW::ioRAW(file, &dhdr, 1, from_file);
 
-  // Determine the size of the output buffer to create from the config service.
-  std::string obuff_size = Mantid::Kernel::ConfigService::Instance().getString("loadraw.readbuffer.size");
-  if ( obuff_size == "" )
-  {
-    m_bufferSize = 200000;
-  }
-  else
-  {
-    try
-    {
-      m_bufferSize = boost::lexical_cast<int>(obuff_size);
-    } catch ( boost::bad_lexical_cast & )
-    {
-      m_bufferSize = 200000;
-    }
-  }
-
   outbuff = new char[m_bufferSize];
   ndes = t_nper * (t_nsp1+1);
   ISISRAW::ioRAW(file, &ddes, ndes, true);
@@ -130,8 +128,9 @@ bool ISISRAW2::readData(FILE* file, int i)
 {
     if (i >= ndes) return false;
     int nwords = 4*ddes[i].nwords;
-    if ( nwords > m_bufferSize )
+    if ( nwords > m_bufferSize )   
     {
+      g_log.debug() << "Overflow error, nwords > buffer size. nwords = " << nwords << ", buffer=" << m_bufferSize << "\n";
       throw std::overflow_error("LoadRaw input file buffer too small for selected data. Try increasing the \"loadraw.readbuffer.size\" user property.");
     }
     int res = ISISRAW::ioRAW(file, outbuff, nwords, true);

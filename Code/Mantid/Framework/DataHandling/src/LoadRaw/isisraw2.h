@@ -1,8 +1,15 @@
 #ifndef ISISRAW2_H
 #define ISISRAW2_H
 
-
 #include "isisraw.h"
+
+namespace Mantid
+{
+namespace Kernel
+{
+  class Logger;
+}
+}
 
 /// isis raw file.
 //  isis raw
@@ -22,6 +29,7 @@ public:
 private:
 	char* outbuff;  ///<output buffer
   int m_bufferSize;
+  static Mantid::Kernel::Logger & g_log;
 };
 
 

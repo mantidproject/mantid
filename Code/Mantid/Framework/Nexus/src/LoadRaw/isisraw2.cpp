@@ -4,11 +4,27 @@
 #include "isisraw2.h"
 #include "byte_rel_comp.h"
 
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
+#include <boost/lexical_cast.hpp>
 
+/// Init logger
+Mantid::Kernel::Logger & ISISRAW2::g_log = Mantid::Kernel::Logger::get("ISISRAW2");
 
 /// No arg Constructor
-ISISRAW2::ISISRAW2() : ISISRAW(NULL,false),outbuff(0)
+ISISRAW2::ISISRAW2() : ISISRAW(NULL,false),outbuff(0), m_bufferSize(0)
 {
+  // Determine the size of the output buffer to create from the config service.
+  g_log.debug() << "Determining ioRaw buffer size\n";
+  if ( Mantid::Kernel::ConfigService::Instance().getValue("loadraw.readbuffer.size", m_bufferSize) == 0 )
+  {
+    m_bufferSize = 200000;
+    g_log.debug() << "loadraw.readbuffer.size not found, setting to " << m_bufferSize << "\n";
+  }
+  else
+  {
+    g_log.debug() << "loadraw.readbuffer.size set to " << m_bufferSize << "\n";
+  }
 }
 
 /** Loads the headers of the file, leaves the file pointer at a specific position
@@ -71,12 +87,12 @@ int ISISRAW2::ioRAW(FILE* file, bool from_file, bool read_data)
   ISISRAW::ioRAW(file, &t_pre1, 1, from_file);
   ISISRAW::ioRAW(file, &t_tcb1, t_ntc1+1, from_file);
   ISISRAW::ioRAW(file, &ver7, 1, from_file);
-// it appear that the VMS ICP traditionally sets u_len to 1 regardless
-// of its real size; thus we cannot rely on it for reading and must instead
-// use section offsets
+  // it appear that the VMS ICP traditionally sets u_len to 1 regardless
+  // of its real size; thus we cannot rely on it for reading and must instead
+  // use section offsets
   i = 0;
   ISISRAW::ioRAW(file, &i, 1, from_file);
-//		ISISRAW::ioRAW(file, &u_len, 1, from_file);
+  //		ISISRAW::ioRAW(file, &u_len, 1, from_file);
   if (from_file)
   {
     u_len = add.ad_data - add.ad_user - 2; 
@@ -86,12 +102,11 @@ int ISISRAW2::ioRAW(FILE* file, bool from_file, bool read_data)
   fgetpos(file, &dhdr_pos);
   ISISRAW::ioRAW(file, &dhdr, 1, from_file);
 
-  int outbuff_size = 100000;
-  outbuff = new char[outbuff_size];
+  outbuff = new char[m_bufferSize];
   ndes = t_nper * (t_nsp1+1);
   ISISRAW::ioRAW(file, &ddes, ndes, true);
   dat1 = new uint32_t[ t_ntc1+1 ];  //  space for just one spectrum
-  memset(outbuff, 0, outbuff_size); // so when we round up words we get a zero written
+  memset(outbuff, 0, m_bufferSize); // so when we round up words we get a zero written
 
   return 0; // stop reading here
 }
@@ -113,6 +128,11 @@ bool ISISRAW2::readData(FILE* file, int i)
 {
     if (i >= ndes) return false;
     int nwords = 4*ddes[i].nwords;
+    if ( nwords > m_bufferSize )   
+    {
+      g_log.debug() << "Overflow error, nwords > buffer size. nwords = " << nwords << ", buffer=" << m_bufferSize << "\n";
+      throw std::overflow_error("LoadRaw input file buffer too small for selected data. Try increasing the \"loadraw.readbuffer.size\" user property.");
+    }
     int res = ISISRAW::ioRAW(file, outbuff, nwords, true);
     if (res != 0) return false;
     byte_rel_expn(outbuff, nwords, 0, (int*)dat1, t_ntc1+1);
