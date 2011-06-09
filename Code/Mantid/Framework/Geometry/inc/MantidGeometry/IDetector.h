@@ -92,8 +92,8 @@ public:
 
   /// Must return a pointer to itself if derived from IComponent
   virtual IComponent* getComponent();
- /// returns the geometry of detectors, meaningful for groups, rectangular for single
-  virtual det_topology getTopology()const = 0;
+ /// returns the geometry of detectors, meaningful for groups, rectangular for single; returns the centre of a detector
+  virtual det_topology getTopology(V3D &center)const = 0;
 
 
   /// (Empty) Constructor

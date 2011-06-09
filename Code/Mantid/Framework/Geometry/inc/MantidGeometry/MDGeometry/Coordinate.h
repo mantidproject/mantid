@@ -41,8 +41,19 @@
 
 namespace Mantid
 {
+ ///** Typedef for the data type to use for the signal and error
+ //  * integrated in MDWorkspaces, MDBoxes, MDEventWorkspace etc.
+ //  *
+ //  * This could be a float or a double, depending on requirements/platform.
+ //  * We can change this in order to compare performance/memory/accuracy requirements.
+ //  */
+ //typedef double coord_t;
+ //typedef double signal_t;
+
 namespace Geometry
 {
+  
+
 class MANTID_GEOMETRY_DLL Coordinate
 {
 public:

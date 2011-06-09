@@ -71,7 +71,7 @@ public:
   void markAsMonitor(const bool flag = true);
   /** returns the detector's topology, namely, the meaning of the detector's angular measurements.
       It is different in cartesian and cylindrical (surrounding the beam) coordinate system */
-  det_topology getTopology()const{return rect;};
+  det_topology getTopology(V3D &center)const;
  
 private:
   /// The detector id

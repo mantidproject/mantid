@@ -684,7 +684,7 @@ Matrix<T>::identityMatrix()
     {
       for(size_t j=0;j<ny;j++)
       {
-        V[i][j]=(j==i) ? 1 : 0;
+        V[i][j]=(T)((j==i) ? 1 : 0);
       }
     }
   }
@@ -1568,7 +1568,7 @@ std::vector<T> Matrix<T>::toRotation()
   T currentScale;
   for (size_t i=0; i<this->ny;++i)
   {
-    currentScale=0.;
+    currentScale=T(0.);
     for (size_t j=0; j<this->nx;++j)
       currentScale+=(V[j][i]*V[j][i]);
     currentScale=static_cast<T>(sqrt(static_cast<double>(currentScale)));
@@ -1581,7 +1581,7 @@ std::vector<T> Matrix<T>::toRotation()
   if (this->determinant() <0.)
   {
     scale[0]=-scale[0];
-    change[0][0]=-1.;
+    change[0][0]=(T)(-1);
     *this = this->operator*(change);
   }
   return scale;

@@ -354,11 +354,12 @@ namespace Mantid
     }
     /// 
     det_topology
-    DetectorGroup::getTopology()const
+    DetectorGroup::getTopology(V3D &center)const
     {
         if(group_topology==undef){
             this->calculateGroupTopology();
         }
+        center = this->groupCentre;
         return group_topology;
     }
     /** the private function calculates the topology of the detector's group, namely if the detectors arranged into 
@@ -370,23 +371,16 @@ namespace Mantid
     {
         if(m_detectors.size()==1){
             group_topology = rect;
+     
             return;
         }
-        V3D center = this->getPos();
-        if (this->isValid(center)){
+        this->groupCentre = this->getPos();
+        if (this->isValid(groupCentre)){
              group_topology = rect;
         }else{
             // the topology can still be rectangular, but randomisation errors or small gaps between 
             // detectors caused central point not to belong to detectors; need more accrurate estinations 
-            // assuming that distance between detectors can not be bigger then detecotor's half size
-             //// debug
-             //std::vector<IDetector_sptr> spDet = this->getDetectors();
-             //std::vector<BoundingBox>    boxes(spDet.size());
-             //for(int i=0;i<boxes.size();i++){
-             //   spDet[i]->getBoundingBox(boxes[i]);
-             //}
-             ////debug
-
+            // assuming that distance between detectors can not be bigger then detector's half size
             // get detector's size:
              IDetector_sptr spFirstDet = this->m_detectors.begin()->second;
             
@@ -399,7 +393,7 @@ namespace Mantid
              for(int i=0;i<6;i++){
                  int ic = int(i)/2;
                  int is = (i%2==0)?-1:1;
-                 V3D cs = center;
+                 V3D cs = groupCentre;
                  cs[ic]    +=is*width[ic]/4;
                  if(this->isValid(cs)){  // if it is, finish and end
                        group_topology = rect; break;

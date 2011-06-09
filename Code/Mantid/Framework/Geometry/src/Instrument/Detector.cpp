@@ -80,6 +80,14 @@ double Detector::getPhi() const
   this->getPos().getSpherical(dummy,dummy,phi);
   return phi*M_PI/180.0;
 }
+ /** returns the detector's topology, namely, the meaning of the detector's angular measurements.
+ *     It is different in cartesian and cylindrical (surrounding the beam) coordinate system
+ */
+det_topology Detector::getTopology(V3D &center)const
+{
+    center = this->getPos();
+    return rect;
+}
 
 /** Returns true if the detector is masked. Only Parametrized instruments
  * can have masked detectors.

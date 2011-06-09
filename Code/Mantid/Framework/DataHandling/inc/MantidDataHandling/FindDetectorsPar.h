@@ -145,17 +145,21 @@ private:
   std::vector<double> azimuthal_width;
   std::vector<double> polar_width;
   std::vector<double> secondary_flightpath;
+  std::vector<double> width;
+  std::vector<double> height;
   /// logger -> to provide logging, for MD workspaces
   static Kernel::Logger& g_log;
 
    /// calculates par values for a detectors ring;
   void calc_cylDetPar(const Geometry::IDetector_sptr spDet,
                       const Geometry::IObjComponent_const_sptr sample,
+                      const Geometry::V3D &groupCentre,
                       double &azim, double &polar, double &azim_width, double &polar_width,double &dist);
   /// calculates par values for a detectors block or a detector;
   void calc_rectDetPar(const API::MatrixWorkspace_sptr inputWS,
                        const Geometry::IDetector_sptr spDet,
                        const Geometry::IObjComponent_const_sptr sample,
+                       const Geometry::V3D &groupCentre,
                        double &azim, double &polar, double &azim_width, double &polar_width,double &dist);
 
   /// if ASCII file is selected as the datasource, this structure describes the type of this file. 

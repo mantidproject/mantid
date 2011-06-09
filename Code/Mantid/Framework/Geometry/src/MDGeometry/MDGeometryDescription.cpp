@@ -156,7 +156,7 @@ MDGeometryDescription::MDGeometryDescription(MDGeometryDescription const * const
         this->nDimensions          = pOrigin->nDimensions;
         this->nReciprocalDimensions= pOrigin->nReciprocalDimensions;
         this->Rotations            = pOrigin->Rotations;
-        // copy dimensions description
+        // copy dimension descriptions
         this->data                 = pOrigin->data;
 
     }else{

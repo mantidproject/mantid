@@ -495,7 +495,7 @@ private:
         }
         testFile.close();
    }
-  void writePHX1file(const char *fileName){
+   void writePHX1file(const char *fileName){
       std::vector<std::string> cont(2);
         cont[0] = "1";
         cont[1] = "10         0     5.000     6.000    7.000    8.0000     1";
@@ -511,8 +511,8 @@ private:
      std::string azim_pattern("0,0,0,");
      std::string pol_pattern("170.565,169.565,168.565,");
      std::string sfp_pattern("1,1,1,");
-     std::string azw_pattern("0.792313,0.789995,0.787437,");
-     std::string polw_pattern("5.72472,5.72472,5.72472,");
+     std::string azw_pattern("5.72472,5.72472,5.72472,");
+     std::string polw_pattern("0.792313,0.789995,0.787437,");
  
 
      std::auto_ptr<std::stringstream> bufs[5];

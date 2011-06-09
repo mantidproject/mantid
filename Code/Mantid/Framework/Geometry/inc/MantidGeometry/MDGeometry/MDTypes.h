@@ -40,7 +40,9 @@ namespace Mantid
    * We can change this in order to compare
    * performance/memory/accuracy requirements.
    */
-  typedef double coord_t;
+  typedef double coord_t;  // moved our of here to the coordinate and the header itself -- from coordinate header to 
+  typedef double signal_t; // avoid strange conflict between numeric_limits and <climits> (presumably)
+ 
   
   /// Minimum value (large negative number) that a coordinate can take
   static const coord_t coord_t_min = -std::numeric_limits<coord_t>::max();
@@ -48,13 +50,7 @@ namespace Mantid
   /// Maximum value (large positive number) that a coordinate can take
   static const coord_t coord_t_max = std::numeric_limits<coord_t>::max();
 
-  /** Typedef for the data type to use for the signal and error
-   * integrated in MDWorkspaces, MDBoxes, MDEventWorkspace etc.
-   *
-   * This could be a float or a double, depending on requirements/platform.
-   * We can change this in order to compare performance/memory/accuracy requirements.
-   */
-  typedef double signal_t;
+ 
 }
 
 #endif //MANTID_GEOMETRY_MDTYPES_H_

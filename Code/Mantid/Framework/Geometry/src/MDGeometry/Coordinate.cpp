@@ -1,4 +1,5 @@
 #include "MantidGeometry/MDGeometry/Coordinate.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 namespace Mantid
 {

@@ -118,7 +118,7 @@ namespace Mantid
       std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const;
   /** returns the detector's group topology if it has been calculated before or invokes the procedure of 
       calculating such topology if it was not */
-     det_topology getTopology()const;
+     det_topology getTopology(V3D &center)const;
         protected:
       /// The ID of this effective detector
       int m_id;
@@ -131,6 +131,8 @@ namespace Mantid
      /** the parameter describes the topology of the detector's group namely if detectors form a box or a ring.  
       *  the topology is undefined on construction and caclulated on first request   */
       mutable det_topology group_topology;
+      /// group centre is the geometrical centre of the detectors group calculated when the calculate group topology is invoked
+      mutable V3D  groupCentre; 
    
       // functions inherited from IComponent
       Component* clone() const{ return NULL; }
