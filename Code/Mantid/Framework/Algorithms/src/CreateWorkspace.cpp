@@ -173,7 +173,7 @@ void CreateWorkspace::exec()
     label->setLabel(xUnit, xUnit);
   }
 
-  // Populate the VerticalAxis
+  // Populate the VerticalAxis. A spectra one is there by default with a 1->N mapping
   if ( vUnit != "SpectraNumber" )
   {
     if ( vUnit == "Text" )
@@ -202,10 +202,6 @@ void CreateWorkspace::exec()
         }
       }
     }
-  }
-  else
-  {
-    dynamic_cast<SpectraAxis*>(outputWS->getAxis(1))->populateSimple(nSpec);
   }
 
   // Set distribution flag
