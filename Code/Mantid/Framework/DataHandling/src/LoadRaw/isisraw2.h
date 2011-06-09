@@ -21,6 +21,7 @@ public:
 	int ndes; ///<ndes
 private:
 	char* outbuff;  ///<output buffer
+  int m_bufferSize;
 };
 
 
