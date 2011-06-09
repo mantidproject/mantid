@@ -5,8 +5,8 @@
 ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent)
 {
   this->ui.setupUi(this);
-  this->ui.maxValLineEdit->setValidator(new QDoubleValidator());
-  this->ui.minValLineEdit->setValidator(new QDoubleValidator());
+  this->ui.maxValLineEdit->setValidator(new QDoubleValidator(this));
+  this->ui.minValLineEdit->setValidator(new QDoubleValidator(this));
 
   QObject::connect(this->ui.autoColorScaleCheckBox, SIGNAL(stateChanged(int)),
       this, SLOT(autoOrManualScaling(int)));
