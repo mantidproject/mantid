@@ -496,6 +496,7 @@ class Normalize(ReductionStep):
             LoadAscii(flux_data_path, beam_flux_ws, Separator="Tab", Unit="Wavelength")
             ConvertToHistogram(beam_flux_ws, beam_flux_ws)
             RebinToWorkspace(beam_flux_ws, workspace, beam_flux_ws)
+            NormaliseToUnity(beam_flux_ws, beam_flux_ws)
             Divide(workspace, beam_flux_ws, workspace)
             mtd[workspace].getRun().addProperty_str("beam_flux_ws", beam_flux_ws, True)
         else:
