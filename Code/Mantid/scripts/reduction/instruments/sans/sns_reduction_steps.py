@@ -8,93 +8,12 @@ import sys
 import pickle
 from reduction import ReductionStep
 from sans_reduction_steps import BaseTransmission
-from reduction import extract_workspace_name
+from reduction import extract_workspace_name, find_file, find_data
 from eqsans_config import EQSANSConfig
 
 # Mantid imports
 from MantidFramework import *
 from mantidsimple import *
-
-def find_data(file, data_dir=None):
-    """
-        Finds a file path for the specified data set, which can either be:
-            - a run number
-            - an absolute path
-            - a file name
-    """
-    # First, check whether it's an absolute path
-    if os.path.isfile(file):
-        return file
-    
-    # Second, check whether it's a file name. If so, return the best match.
-    files_found = find_file(filename=file, data_dir=data_dir)
-    if len(files_found)>0:
-        return files_found[0]
-    
-    # Third, build a file name assuming it's a run number
-    run = None
-    try:
-        run = int(file)
-    except:
-        # Not a run number...
-        pass
-    if run is not None:
-        filename="EQSANS_%d_event.nxs" % run
-        files_found = find_file(filename=filename, data_dir=data_dir)
-        if len(files_found)>0:
-            return files_found[0]
-    
-    #TODO: Finally, look in the catalog...
-    
-    # If we didn't find anything, raise an exception
-    raise RuntimeError, "Could not find a file for [%s]" % str(file)
-
-def find_file(filename=None, startswith=None, data_dir=None):
-    """
-        Returns a list of file paths for the search criteria.
-        @param filename: exact name of a file. The first file found will be returned.
-        @param startswith: string that files should start with.
-        @param data_dir: additional directory to search
-    """
-    # Files found
-    files_found = []
-    
-    # List of directory to look into
-    # The preferred way to operate is to have a symbolic link in a work directory,
-    # so look in the current working directory first
-    search_dirs = [os.getcwd()]
-    # The second best location would be with the data itself
-    if data_dir is not None:
-        search_dirs.append(data_dir)
-    # The standard place would be the location of the configuration files on the SNS mount
-    search_dirs.append("/SNS/EQSANS/shared/instrument_configuration/")
-    search_dirs.extend(ConfigService().getDataSearchDirs())
-    
-    
-    # Look for specific file
-    if filename is not None:
-        for d in search_dirs:
-            if not os.path.isdir(d):
-                continue
-            file_path = os.path.join(os.path.normcase(d), filename)
-            if os.path.isfile(file_path):
-                files_found.append(file_path)
-                # If we are looking for a specific file, return right after we find the first
-                if startswith is None:
-                    return files_found
-
-    # Look for files that starts with a specific string
-    if startswith is not None:
-        for d in search_dirs:
-            if not os.path.isdir(d):
-                continue
-            files = os.listdir(d)
-            for file in files:
-                if file.startswith(startswith):
-                    file_path = os.path.join(os.path.normcase(d), file)
-                    files_found.append(file_path)
-
-    return files_found
 
 class QuickLoad(ReductionStep):
     """
@@ -115,7 +34,7 @@ class QuickLoad(ReductionStep):
             data_file = self._data_file
         
         # Load data
-        filepath = reducer._full_file_path(data_file)
+        filepath = find_data(file_name, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
 
         # Find all the necessary files
         event_file = ""
@@ -279,8 +198,7 @@ class LoadRun(ReductionStep):
         
         # Load data
         def _load_data_file(file_name, wks_name):
-            filepath = find_data(file_name, data_dir=reducer._data_path)
-            #filepath = reducer._full_file_path(file_name)
+            filepath = find_data(file_name, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
     
             # Find all the necessary files
             event_file = ""
@@ -327,7 +245,7 @@ class LoadRun(ReductionStep):
                 LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace+'_evt', PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
                 LoadNexusLogs(Workspace=workspace+'_evt', Filename=nxs_file)
             
-            return ''
+            return "  Data directory: %s\n" % data_dir
         
         # Check whether we have a list of files that need merging
         if type(data_file)==list:
@@ -613,7 +531,7 @@ class SubtractDarkCurrent(ReductionStep):
         # Check whether the dark current was already loaded, otherwise load it
         # Load dark current, which will be used repeatedly
         if self._dark_current_ws is None:
-            filepath = reducer._full_file_path(self._dark_current_file)
+            filepath = find_data(file_name, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
             self._dark_current_ws = extract_workspace_name(filepath)
             reducer._data_loader.__class__(datafile=filepath).execute(reducer, self._dark_current_ws)
             RebinToWorkspace(WorkspaceToRebin=self._dark_current_ws, WorkspaceToMatch=workspace, OutputWorkspace=self._dark_current_ws)

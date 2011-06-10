@@ -42,6 +42,20 @@ class EqSansReducer(SANSReducer):
 
     def set_instrument(self, configuration):
         super(SANSReducer, self).set_instrument(configuration)
+
+    def run_to_data_file(self, run_number):
+        """
+            Transforms a run number into the best guess for a corresponding
+            data file for this instrument
+            @param run_number: run number (int)
+        """
+        run = None
+        try:
+            run = int(run_number)
+        except:
+            # Not a run number...
+            return None
+        return "EQSANS_%d_event.nxs" % run
         
     def set_normalizer(self, normalizer):
         """

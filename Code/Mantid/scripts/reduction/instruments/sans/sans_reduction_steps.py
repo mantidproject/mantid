@@ -6,7 +6,7 @@ import sys
 import math
 import pickle
 from reduction import ReductionStep
-from reduction import extract_workspace_name
+from reduction import extract_workspace_name, find_file, find_data
 from reduction import validate_step
 
 # Mantid imports
@@ -61,7 +61,7 @@ class BaseBeamFinder(ReductionStep):
             @param reducer: Reducer object for which this step is executed
         """
         # Load the file to extract the beam center from, and process it.
-        filepath = reducer._full_file_path(self._datafile)
+        filepath = find_data(self._datafile, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
         
         # Check whether that file was already meant to be processed
         workspace_default = "beam_center_"+extract_workspace_name(filepath)
@@ -237,19 +237,19 @@ class BeamSpreaderTransmission(BaseTransmission):
             self._transmission_ws = "transmission_fit_"+workspace
             
             sample_spreader_ws = "_trans_sample_spreader"
-            filepath = reducer._full_file_path(self._sample_spreader)
+            filepath = find_data(self._sample_spreader, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
             Load(filepath, sample_spreader_ws)
             
             direct_spreader_ws = "_trans_direct_spreader"
-            filepath = reducer._full_file_path(self._direct_spreader)
+            filepath = find_data(self._direct_spreader, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
             Load(filepath, direct_spreader_ws)
             
             sample_scatt_ws = "_trans_sample_scatt"
-            filepath = reducer._full_file_path(self._sample_scattering)
+            filepath = find_data(self._sample_scattering, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
             Load(filepath, sample_scatt_ws)
             
             direct_scatt_ws = "_trans_direct_scatt"
-            filepath = reducer._full_file_path(self._direct_scattering)
+            filepath = find_data(self._direct_scattering, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
             Load(filepath, direct_scatt_ws)
             
             # Subtract dark current
@@ -318,11 +318,11 @@ class DirectBeamTransmission(BaseTransmission):
             self._transmission_ws = "transmission_fit_"+workspace
 
             sample_ws = "_transmission_sample"
-            filepath = reducer._full_file_path(self._sample_file)
+            filepath = find_data(self._sample_file, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
             Load(filepath, sample_ws)
             
             empty_ws = "_transmission_empty"
-            filepath = reducer._full_file_path(self._empty_file)
+            filepath = find_data(self._empty_file, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
             Load(filepath, empty_ws)
             
             # Subtract dark current
@@ -415,7 +415,7 @@ class SubtractDarkCurrent(ReductionStep):
         # Check whether the dark current was already loaded, otherwise load it
         # Load dark current, which will be used repeatedly
         if self._dark_current_ws is None:
-            filepath = reducer._full_file_path(self._dark_current_file)
+            filepath = find_data(self._dark_current_file, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
             self._dark_current_ws = "_dark_"+extract_workspace_name(filepath)
             Load(filepath, self._dark_current_ws)
             
@@ -550,28 +550,31 @@ class LoadRun(ReductionStep):
             data_file = self._data_file
         
         def _load_data_file(file_name, wks_name):
-            filepath = reducer._full_file_path(file_name)
+            filepath = find_data(file_name, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
+            data_dir,_ = os.path.split(filepath)
             if self._wavelength is None:
                 LoadSpice2D(filepath, wks_name)
             else:
                 LoadSpice2D(filepath, wks_name, 
                             Wavelength=self._wavelength,
                             WavelengthSpread=self._wavelength_spread)
+            return data_dir
 
         # Check whether we have a list of files that need merging
+        data_dir = ''
         if type(data_file)==list:
             for i in range(len(data_file)):
                 if i==0:
-                    _load_data_file(data_file[i], workspace)
+                    data_dir = _load_data_file(data_file[i], workspace)
                 else:
-                    _load_data_file(data_file[i], '__tmp_wksp')
+                    data_dir = _load_data_file(data_file[i], '__tmp_wksp')
                     Plus(LHSWorkspace=workspace,
                          RHSWorkspace='__tmp_wksp',
                          OutputWorkspace=workspace)
             if mtd.workspaceExists('__tmp_wksp'):
                 mtd.deleteWorkspace('__tmp_wksp')
         else:
-            _load_data_file(data_file, workspace)
+            data_dir = _load_data_file(data_file, workspace)
         
         # Get the original sample-detector distance from the data file
         sdd = mtd[workspace].getRun().getProperty("sample-detector-distance").value
@@ -619,7 +622,7 @@ class LoadRun(ReductionStep):
         n_files = 1
         if type(data_file)==list:
             n_files = len(data_file)
-        return "Data set loaded: %s [%g file(s)]" % (workspace, n_files)
+        return "Data set loaded: %s [%g file(s)]\n   Data directory: %s" % (workspace, n_files, str(data_dir))
     
 class Normalize(ReductionStep):
     """
@@ -852,7 +855,7 @@ class SensitivityCorrection(ReductionStep):
         #TODO: check that the workspaces have the same binning!
         if self._efficiency_ws is None:
             # Load the flood data
-            filepath = reducer._full_file_path(self._flood_data)
+            filepath = find_data(self._flood_data, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
             flood_ws = "flood_"+extract_workspace_name(filepath)
             
             beam_center = None

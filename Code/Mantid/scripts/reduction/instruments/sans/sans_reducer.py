@@ -100,6 +100,15 @@ class SANSReducer(Reducer):
         center = self.instrument.get_default_beam_center()
         self._beam_finder = sans_reduction_steps.BaseBeamFinder(center[0], center[1])
 
+    def run_to_data_file(self, run_number):
+        """
+            Transforms a run number into the best guess for a corresponding
+            data file for this instrument
+            @param run_number: run number (int)
+        """
+        # We do not allow this option for HFIR
+        return None
+               
     @validate_step
     def set_normalizer(self, normalizer):
         """
