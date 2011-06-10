@@ -52,9 +52,9 @@ RectangularDetectorActor::RectangularDetectorActor(const InstrumentActor& instrA
     }
   }
 
-  genTexture(image_data,clist.begin(),false);
+  genTexture(image_data,clist,false);
   std::vector<GLColor>::iterator dummy_iterator;
-  genTexture(pick_data, dummy_iterator, true);
+  genTexture(pick_data, std::vector<GLColor>(), true);
   uploadTexture(image_data);
 
 }
@@ -126,7 +126,7 @@ void RectangularDetectorActor::draw(bool picking)const
  * @param useDetectorIDs :: set to true to make a fake texture using the detector IDs. If false, the iterator is used.
  *
  */
-int RectangularDetectorActor::genTexture(char * & image_data, std::vector<GLColor>::iterator& list, bool useDetectorIDs)
+int RectangularDetectorActor::genTexture(char * & image_data, std::vector<GLColor>& list, bool useDetectorIDs)
 {
   int num = mDet->xpixels() * mDet->ypixels();
 
@@ -151,6 +151,7 @@ int RectangularDetectorActor::genTexture(char * & image_data, std::vector<GLColo
 
   //For using color IDs
   int rgb = 0;
+  std::vector<GLColor>::iterator list_it = list.begin();
 
   for (int y=0; y < mDet->ypixels(); y++)
   {
@@ -168,9 +169,9 @@ int RectangularDetectorActor::genTexture(char * & image_data, std::vector<GLColo
       else
       {
         //Get the current color
-        list->get(r,g,b);
+        list_it->get(r,g,b);
         //Go to the next color
-        list++;
+        list_it++;
       }
 
         //      //TEMP: way to show the colors
@@ -275,104 +276,8 @@ void RectangularDetectorActor::setColors()
       clist.push_back(m_instrActor.getColor(id));
     }
   }
-  genTexture(image_data,clist.begin(),false);
+  genTexture(image_data,clist,false);
   uploadTexture(image_data);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-/** Append the detector ID of this object to the list, if it is a detector.
- *
- * @param idList :: sequential list of detector IDs.
- */
-void RectangularDetectorActor::appendObjCompID(std::vector<int>& idList)
-{
-  if (mDet)
-  {
-    //Append all the detector IDs of this rectangular detector
-    if (VERBOSE) std::cout << "RectangularDetectorActor::appendObjCompID() called for " << mDet->getName() << "\n";
-    for (int y=0; y < mDet->ypixels(); y++)
-      for (int x=0; x < mDet->xpixels(); x++)
-        idList.push_back( mDet->getAtXY(x,y)->getID() );
-
-  }
-}
-
-
-
-//------------------------------------------------------------------------------------------------
-/**
- * Set the starting color reference for CompAssembly
- * @param rgb :: input color id
- * @return  the number of color ids that are used.
- */
-int RectangularDetectorActor::setStartingReferenceColor(int rgb)
-{
-  //if (VERBOSE) std::cout << "RectangularDetectorActor::setStartingReferenceColor() called for " << mDet->getName() << " with rgb = " << rgb << "\n";
-//  mColorStartID=rgb;
-  return this->getNumberOfDetectors();
-}
-
-//------------------------------------------------------------------------------------------------
-/**
- * This method searches the child actors for the input rgb color and returns the detector id corresponding to the rgb color. if the
- * detector is not found then returns -1.
- * @param  rgb :: input color id
- * @return the detector id of the input rgb color.if detector id not found then returns -1
- */
-int RectangularDetectorActor::findDetectorIDUsingColor(int rgb)
-{
-  if (VERBOSE) std::cout << "RectangularDetectorActor::findDetectorIDUsingColor() called for " << mDet->getName() << "\n";
-  //The row and column of the detector can be found from the color
-  int diff_rgb = rgb;// - mColorStartID;
-  int y = diff_rgb / mDet->xpixels();
-  int x = diff_rgb % mDet->xpixels();
-  //And now we return that ID :)
-  return mDet->getAtXY(x,y)->getID();
-}
-
-
-//------------------------------------------------------------------------------------------------
-/**
- * The colors are set using the iterator of the color list. The order of the detectors
- * in this color list was defined by the calls to appendObjCompID().
- *
- * @param list :: Color list iterator
- * @return the number of detectors
- */
-int RectangularDetectorActor::setInternalDetectorColors(std::vector<GLColor>::iterator& list)
-{
-  int num = this->genTexture(image_data, list, false);
-  this->uploadTexture(image_data);
-  return num;
-}
-
-//------------------------------------------------------------------------------------------------
-/**
- * This method draws the children with the ColorID rather than the children actual color. used in picking the component
- */
-void RectangularDetectorActor::drawUsingColorID()
-{
-  std::vector<GLColor>::iterator dummy_iterator;
-  this->genTexture(pick_data, dummy_iterator, true);
-  this->uploadTexture(pick_data);
-
-  //And now draw it with the newly defined texture.
-  this->draw();
-
-  //Re-upload the good data from before.
-  this->uploadTexture(image_data);
 }
 
 

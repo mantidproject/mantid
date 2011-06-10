@@ -79,13 +79,8 @@ public:
   void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const;
   virtual void setColors();
 
-  void appendObjCompID(std::vector<int>& idList);
-  int setInternalDetectorColors(std::vector<GLColor>::iterator & list);
-  int genTexture(char * & image_data, std::vector<GLColor>::iterator& list, bool useDetectorIDs);
+  int genTexture(char * & image_data, std::vector<GLColor>& list, bool useDetectorIDs);
   void uploadTexture(char * & image_data)const;
-
-  virtual int  setStartingReferenceColor(int rgb);
-  virtual void drawUsingColorID();
 
 private:
   /// Texture ID that holds the texture.
