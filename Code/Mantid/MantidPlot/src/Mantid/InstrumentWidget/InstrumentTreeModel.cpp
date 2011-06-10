@@ -5,7 +5,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument/Instrument.h"
-#include "MantidObject.h"
 
 using Mantid::Geometry::IInstrument;
 using Mantid::Geometry::IComponent;

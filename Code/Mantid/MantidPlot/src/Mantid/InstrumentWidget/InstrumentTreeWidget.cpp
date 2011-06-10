@@ -4,7 +4,6 @@
 #endif
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/ICompAssembly.h"
-#include "MantidObject.h"
 #include "GLActor.h"
 #include <queue>
 #include <QMessageBox>

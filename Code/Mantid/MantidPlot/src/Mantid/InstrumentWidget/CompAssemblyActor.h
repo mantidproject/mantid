@@ -48,7 +48,6 @@ namespace Geometry
 
 }
 
-class MantidObject;
 class ObjComponentActor;
 
 class CompAssemblyActor : public ICompAssemblyActor

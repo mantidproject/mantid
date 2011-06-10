@@ -3,13 +3,8 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
-//#include "MantidGeometry/IDetector.h"
-//#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Exception.h"
-#include "MantidObject.h"
 #include "ICompAssemblyActor.h"
-//#include "ObjComponentActor.h"
-//#include "RectangularDetectorActor.h"
 #include <cfloat>
 using namespace Mantid;
 using namespace Geometry;

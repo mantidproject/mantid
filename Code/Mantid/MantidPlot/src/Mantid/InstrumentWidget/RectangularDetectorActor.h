@@ -50,7 +50,6 @@ namespace API
 
 }
 
-class MantidObject;
 class ObjComponentActor;
 
 class RectangularDetectorActor : public ICompAssemblyActor //ObjComponentActor
@@ -87,11 +86,6 @@ public:
 
   virtual int  setStartingReferenceColor(int rgb);
   virtual void drawUsingColorID();
-
-  virtual MantidObject* getMantidObject(const boost::shared_ptr<const Mantid::Geometry::Object>, bool)
-  {
-    return NULL;
-  }
 
 private:
   /// Texture ID that holds the texture.
