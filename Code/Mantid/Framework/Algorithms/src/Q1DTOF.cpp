@@ -368,8 +368,9 @@ void Q1DTOF::getUnmaskedWidths(const size_t specIndex, MantidVec & widths) const
       
     // Create a zero vector for the errors because we don't care about them here
     const MantidVec zeroes(solidAngleVec.size(),0.0);
+    MantidVec tmp(widths.size());
     // Rebin the solid angles - note that this is a distribution
-    VectorHelper::rebin(included_bins,solidAngleVec,zeroes,Qx, widths, MantidVec(),true,true);
+    VectorHelper::rebin(included_bins,solidAngleVec,zeroes,Qx, widths, tmp,true,true);
   }
 }
 /** Map all the detectors onto the spectrum of the output
