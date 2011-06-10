@@ -171,9 +171,9 @@ void SANSPlotSpecial::calculateDerivatives()
     break;
   case Transform::Zimm:
     // Gradient = (Rg**2)/3 = (R**2)/5
-    temp = std::sqrt(3 * gradient);
+    temp = std::sqrt(3 * std::abs(gradient) / intercept );
     m_derivatives["Rg"]->setText(QString::number(temp));
-    temp = std::sqrt(5 * gradient);
+    temp = std::sqrt(5 * std::abs(gradient) / intercept );
     m_derivatives["R"]->setText(QString::number(temp));
     // Intercept = (1/M).[(NA.d**2) / (c.(deltarho**2)] = (1/M).[(NA.d) / (phi.(deltarho**2)]
     deriveZimm();
@@ -189,7 +189,7 @@ void SANSPlotSpecial::calculateDerivatives()
   case Transform::LogLog:
     temp = - gradient;
     m_derivatives["N"]->setText(QString::number(temp));
-    temp = 1 / gradient;
+    temp = -1 / gradient;
     m_derivatives["V"]->setText(QString::number(temp));
     break;
   case Transform::Porod:
