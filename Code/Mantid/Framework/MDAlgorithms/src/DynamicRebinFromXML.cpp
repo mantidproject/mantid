@@ -176,7 +176,7 @@ namespace Mantid
       
       //current implmentation of geometry description uses ordering so that x, y, z, t mappings appear first in the arrangement of dimensions.
 
-	    description->pDimDescription(0)->cut_max=impBox.getUpperX();
+      description->pDimDescription(0)->cut_max=impBox.getUpperX();
       description->pDimDescription(0)->cut_min=impBox.getLowerX();
 
 
@@ -241,7 +241,7 @@ namespace Mantid
       loadWsAlg->initialize();
       loadWsAlg->setPropertyValue("inFilename", location);
       loadWsAlg->setPropertyValue("MDWorkspace",name);
-	  loadWsAlg->execute();
+    loadWsAlg->execute();
 
       IAlgorithm_sptr rebinningAlg = this->createSubAlgorithm("CenterpieceRebinning", 0.01, 1, true, 1);
 

@@ -116,7 +116,7 @@ namespace Mantid
       /// Check if it is normal axis aligned bounding box or not. 
       inline bool isAxisAligned()const{return is_axis_aligned;}
       /// returns the coordinate system to which BB is alighned to;
-      void getCoordSystem(std::vector<V3D> &coordSyst)const;
+      std::vector<V3D> const & getCoordSystem()const{return coord_system;}
 
       //@}
 

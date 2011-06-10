@@ -39,7 +39,7 @@ namespace Mantid
     Instrument::Instrument(const boost::shared_ptr<Instrument> instr, ParameterMap_sptr map)
     : CompAssembly(instr.get(), map.get() ),
       _sourceCache(instr->_sourceCache), _sampleCache(instr->_sampleCache),
-	  m_defaultViewAxis(instr->m_defaultViewAxis),
+    m_defaultViewAxis(instr->m_defaultViewAxis),
       m_instr(instr),
       m_map_nonconst(map)
     {
@@ -263,17 +263,17 @@ namespace Mantid
       const size_t ndets(det_ids.size());
       if( ndets == 1)
       {
-	return this->getDetector(det_ids[0]);
+  return this->getDetector(det_ids[0]);
       }
       else
       {
-	boost::shared_ptr<DetectorGroup> det_group(new DetectorGroup());
-	bool warn(false);
-	for( size_t i = 0; i < ndets; ++i )
-	{
-	  det_group->addDetector(this->getDetector(det_ids[i]), warn);
-	}
-	return det_group;
+  boost::shared_ptr<DetectorGroup> det_group(new DetectorGroup());
+  bool warn(false);
+  for( size_t i = 0; i < ndets; ++i )
+  {
+    det_group->addDetector(this->getDetector(det_ids[i]), warn);
+  }
+  return det_group;
       }
     }
 
@@ -462,7 +462,7 @@ namespace Mantid
         }
         // Loop over the children and define a box large enough for all of them
         ComponentID sourceID = getSource()->getComponentID();
-        assemblyBox = BoundingBox();
+        assemblyBox = BoundingBox(); // this makes the instrument BB always axis aligned
         int nchildren = nelements();
         for(int i = 0; i < nchildren; ++i)
         {
@@ -517,8 +517,8 @@ namespace Mantid
         const plottables::size_type total = res.size();
         for(plottables::size_type i = 0; i < total; ++i)
         {
-	  res[i] = boost::dynamic_pointer_cast<const Detector>(
-	    ParComponentFactory::create(objs->at(i), m_map));
+    res[i] = boost::dynamic_pointer_cast<const Detector>(
+      ParComponentFactory::create(objs->at(i), m_map));
         }
         return objs;
 

@@ -16,7 +16,7 @@ using namespace Mantid::Geometry;
 class CompAssemblyTest : public CxxTest::TestSuite
 {
 public:
-	void testEmptyConstructor()
+  void testEmptyConstructor()
   {
     CompAssembly q;
     TS_ASSERT_EQUALS(q.nelements(), 0);

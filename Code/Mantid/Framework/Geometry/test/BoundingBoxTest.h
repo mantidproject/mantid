@@ -193,15 +193,14 @@ public:
   }
   void testAxisAlignedCSisSimple(){
     BoundingBox bbox(3.0,4.0,5.5,1.0,1.0,1.5);
-    std::vector<V3D> cs;
-    bbox.getCoordSystem(cs);
+    const std::vector<V3D> *cs = &(bbox.getCoordSystem());
     TS_ASSERT_EQUALS(bbox.isAxisAligned(),true);
 
-    TS_ASSERT_EQUALS(cs.size(),4);
-    TS_ASSERT_EQUALS(cs[0]==V3D(0,0,0),true);
-    TS_ASSERT_EQUALS(cs[1]==V3D(1,0,0),true);
-    TS_ASSERT_EQUALS(cs[2]==V3D(0,1,0),true);
-    TS_ASSERT_EQUALS(cs[3]==V3D(0,0,1),true);
+    TS_ASSERT_EQUALS(cs->size(),4);
+    TS_ASSERT_EQUALS((*cs)[0]==V3D(0,0,0),true);
+    TS_ASSERT_EQUALS((*cs)[1]==V3D(1,0,0),true);
+    TS_ASSERT_EQUALS((*cs)[2]==V3D(0,1,0),true);
+    TS_ASSERT_EQUALS((*cs)[3]==V3D(0,0,1),true);
   }
 
   void testBBAlignedToNewCoordinateSystemIsCorrect(){
@@ -212,14 +211,14 @@ public:
     ort[2]=V3D(1,0,0);
     bbox.setBoxAlignment(V3D(1,1,1.5),ort);
 
-    bbox.getCoordSystem(ort);
+    std::vector<V3D> ort1 = bbox.getCoordSystem();
     TS_ASSERT_EQUALS(bbox.isAxisAligned(),false);
 
-    TS_ASSERT_EQUALS(ort.size(),4);
-    TS_ASSERT_EQUALS(ort[0]==V3D(1,1,1.5),true);
-    TS_ASSERT_EQUALS(ort[1]==V3D(0,1,0),true);
-    TS_ASSERT_EQUALS(ort[2]==V3D(0,0,1),true);
-    TS_ASSERT_EQUALS(ort[3]==V3D(1,0,0),true);
+    TS_ASSERT_EQUALS(ort1.size(),4);
+    TS_ASSERT_EQUALS(ort1[0]==V3D(1,1,1.5),true);
+    TS_ASSERT_EQUALS(ort1[1]==V3D(0,1,0),true);
+    TS_ASSERT_EQUALS(ort1[2]==V3D(0,0,1),true);
+    TS_ASSERT_EQUALS(ort1[3]==V3D(1,0,0),true);
 
     TS_ASSERT_THROWS(bbox.doesLineIntersect(V3D(-5.0,-1.0,0.0),V3D(1.0,1.0,0.0)),Kernel::Exception::NotImplementedError);
     TS_ASSERT_THROWS(bbox.isPointInside(V3D(-5.0,-1.0,0.0)),Kernel::Exception::NotImplementedError);

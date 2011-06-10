@@ -178,31 +178,19 @@ namespace Mantid
             this->m_maxPoint[i]=-FLT_MAX;
         }
     }
-    /**
-    * returns the coordinate system to which this bounding box is alignet to;
-    */
-    void BoundingBox::getCoordSystem(std::vector<V3D> &coordSyst)const
-    {
-        
-        if(this->isAxisAligned()){
-            coordSyst.resize(4);
-            coordSyst[0] = V3D(0,0,0);
-            coordSyst[1] = V3D(1,0,0);
-            coordSyst[2] = V3D(0,1,0);
-            coordSyst[3] = V3D(0,0,1);
-        }else{
-            coordSyst = this->coord_system;
-        }
-    }
-    //
+     //
     void BoundingBox::realign(std::vector<V3D> const*const pCS)
     {
        if(pCS){
-           this->coord_system    = *pCS;
-           this->is_axis_aligned = false;
+         this->coord_system.resize(pCS->size());
+         for(unsigned int i=0;i<pCS->size();i++){
+           this->coord_system[i]    = pCS->operator[](i);
+         }
+         this->is_axis_aligned = false;
+         if(this->m_null) return;
+       }else{
+          if(this->isAxisAligned())return;
        }
-
-       if(this->isAxisAligned())return;
 
     // expand the bounding box to full size and shift it to the coordinates with the 
     // centre cpecified;

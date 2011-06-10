@@ -107,7 +107,7 @@ struct FileTypeDescriptor{
   fileTypes Type;
   std::streampos data_start_position; //< the position in the file where the data structure starts
   size_t 	  nData_records,            //< number of data records -- actually nDetectors
-          nData_blocks;             //< nEnergy bins for SPE file, 5 or 6 for PAR file and 7 for PHX file
+            nData_blocks;             //< nEnergy bins for SPE file, 5 or 6 for PAR file and 7 for PHX file
   char      line_end ;                //< the character which ends line in current ASCII file 0x0A (LF)
       //Unix, 0x0D (CR) Mac and 0x0D 0x0A (CR LF) Win, but the last is interpreted as 0x0A here 
     FileTypeDescriptor():Type(BIN_file),data_start_position(0),nData_records(0),nData_blocks(0),line_end(0x0A){}
@@ -132,14 +132,17 @@ public:
   std::vector<double>const & getAzimWidth()const{return azimuthal_width;}
   std::vector<double>const & getPolarWidth()const{return polar_width;}
   std::vector<double>const & getFlightPath()const{return secondary_flightpath;}
-
+  std::vector<size_t>const & getDetID()const{return det_ID;}
+  /// number of real detectors, calculated by algorithm
+  size_t getNDetectors()const{return nDetectors;}
 private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   // Implement abstract Algorithm methods
   void init();
   void exec();
-
+  // number of real (not monitors)detectors, processed by algorithm;
+  size_t nDetectors;
   std::vector<double> azimuthal;
   std::vector<double> polar;
   std::vector<double> azimuthal_width;
@@ -147,6 +150,7 @@ private:
   std::vector<double> secondary_flightpath;
   std::vector<double> width;
   std::vector<double> height;
+  std::vector<size_t> det_ID;
   /// logger -> to provide logging, for MD workspaces
   static Kernel::Logger& g_log;
 

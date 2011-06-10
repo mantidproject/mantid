@@ -167,9 +167,9 @@ namespace Mantid
           absoluteBB.nullify();
           return;
       }
-      std::vector<V3D> coord_system;
-      if(!absoluteBB.isAxisAligned()){
-          absoluteBB.getCoordSystem(coord_system);
+      std::vector<V3D> Coord_system;
+      if(!absoluteBB.isAxisAligned()){ // copy coordinate system (it is better then copying the whole BB later)
+        Coord_system.assign(absoluteBB.getCoordSystem().begin(),absoluteBB.getCoordSystem().end());
       }
       absoluteBB =  BoundingBox(shapeBox);
    // modify in place for speed
@@ -195,8 +195,8 @@ namespace Mantid
       absoluteBB.zMin() += localPos.Z(); 
       absoluteBB.zMax() += localPos.Z();
 
-      if(!coord_system.empty()){
-          absoluteBB.realign(&coord_system);
+      if(Coord_system.size()>0){
+        absoluteBB.realign(&Coord_system);
       }  
   }
  

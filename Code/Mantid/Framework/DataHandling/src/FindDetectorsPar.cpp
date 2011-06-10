@@ -101,11 +101,14 @@ FindDetectorsPar::exec()
   azimuthal_width.assign(nHist,std::numeric_limits<double>::quiet_NaN());
   polar_width.assign(nHist,std::numeric_limits<double>::quiet_NaN());
   secondary_flightpath.assign(nHist,std::numeric_limits<double>::quiet_NaN());
+  det_ID.assign(nHist,std::numeric_limits<size_t>::quiet_NaN());
+  this->nDetectors = 0;
 
-   Progress progress(this,0,1,100);
+  Progress progress(this,0,1,100);
    const int progStep = (int)(ceil(double(nHist)/100.0));
-        
+
    // Loop over the spectra
+   size_t ic(0);
    for (size_t i = 0; i < nHist; i++)
    {
      Geometry::IDetector_sptr spDet;
@@ -114,24 +117,28 @@ FindDetectorsPar::exec()
      }catch(Kernel::Exception::NotFoundError &){
         continue;
      }
+ 
     // Check that we aren't writing a monitor...
-    if (spDet->isMonitor())continue;         
+    if (spDet->isMonitor())continue;   
+     det_ID[ic] = spDet->getID();
+
      Geometry::V3D groupCentre;  
      Geometry::det_topology group_shape= spDet->getTopology(groupCentre);
      if(group_shape == Geometry::cyl){  // we have a ring;
-            calc_cylDetPar(spDet,sample,groupCentre,azimuthal[i], polar[i], 
-                           azimuthal_width[i], polar_width[i],secondary_flightpath[i]);
+            calc_cylDetPar(spDet,sample,groupCentre,azimuthal[ic], polar[ic], 
+                           azimuthal_width[ic], polar_width[ic],secondary_flightpath[ic]);
      }else{  // we have a detector or a rectangular shape
-           calc_rectDetPar(inputWS,spDet,sample,groupCentre,azimuthal[i],polar[i],
-                           azimuthal_width[i],polar_width[i],secondary_flightpath[i]);
+           calc_rectDetPar(inputWS,spDet,sample,groupCentre,azimuthal[ic],polar[ic],
+                           azimuthal_width[ic],polar_width[ic],secondary_flightpath[ic]);
      }
-     
+     ic++ ;
      // make regular progress reports and check for canceling the algorithm
      if ( i % progStep == 0 ){
             progress.report();
      }
-   }
 
+   }
+   nDetectors = ic;
    this->set_output_table();
    
 
@@ -155,15 +162,16 @@ FindDetectorsPar::set_output_table()
     setPropertyValue("OutputParTableWS",output);
 
      Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-     m_result->addColumn("double","azimuthal");
      m_result->addColumn("double","twoTheta");
+     m_result->addColumn("double","azimuthal");
      m_result->addColumn("double","secondary_flightpath");
-     m_result->addColumn("double","azimuthal_width");
      m_result->addColumn("double","polar_width");
-
-     for(size_t i=0;i<azimuthal.size();i++){
+     m_result->addColumn("double","azimuthal_width");
+     m_result->addColumn("long64","detID");
+ 
+     for(size_t i=0;i<nDetectors;i++){
          Mantid::API::TableRow row = m_result->appendRow();
-         row << azimuthal[i] << polar[i] << secondary_flightpath[i] << azimuthal_width[i] << polar_width[i];
+         row << polar[i] << azimuthal[i] << secondary_flightpath[i] << polar_width[i] << azimuthal_width[i] << (int64_t)det_ID[i];
      }
      setProperty("OutputParTableWS",m_result);
 
@@ -211,6 +219,7 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_sptr spDet,const Geom
             coord[2]  = coord[0].cross_prod(coord[1]);
 
              // obtain the bounding box, aligned accordingly to the coordinates;
+            bbox.nullify();
             bbox.setBoxAlignment(center,coord);
             pDets[i]->getBoundingBox(bbox);
 
@@ -246,7 +255,7 @@ FindDetectorsPar::calc_rectDetPar(const API::MatrixWorkspace_sptr inputWS,
      beamDetVector.normalize();
      std::vector<Geometry::V3D> coord(3);
      coord[0]  = beamDetVector;
-     coord[1]  = Geometry::V3D(0,0,1); // along beamline, which is always oz;
+     coord[1]  = Geometry::V3D(0,0,1); // along beamline, which is always oz; (can be amended)
      coord[2]  = coord[0].cross_prod(coord[1]);  // tangential to the ring and anticloakwise;
   
 

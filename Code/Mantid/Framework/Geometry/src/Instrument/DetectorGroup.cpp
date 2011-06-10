@@ -306,10 +306,15 @@ namespace Mantid
     */
     void DetectorGroup::getBoundingBox(BoundingBox & boundingBox) const
     {
-      boundingBox = BoundingBox();
+     // boundingBox = BoundingBox(); // this change may modify a lot of behaviour -> verify
       for( DetCollection::const_iterator cit = m_detectors.begin(); cit != m_detectors.end(); ++cit )
       {
         BoundingBox memberBox;
+        if(!boundingBox.isAxisAligned()){
+           // coordinate system
+          const std::vector<V3D> *cs = &(boundingBox.getCoordSystem());
+          memberBox.realign(cs);
+        }
         IComponent_sptr det = cit->second;
         det->getBoundingBox(memberBox);
         boundingBox.grow(memberBox);
