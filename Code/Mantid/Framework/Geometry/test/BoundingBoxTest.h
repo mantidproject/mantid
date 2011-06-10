@@ -196,11 +196,8 @@ public:
     const std::vector<V3D> *cs = &(bbox.getCoordSystem());
     TS_ASSERT_EQUALS(bbox.isAxisAligned(),true);
 
-    TS_ASSERT_EQUALS(cs->size(),4);
-    TS_ASSERT_EQUALS((*cs)[0]==V3D(0,0,0),true);
-    TS_ASSERT_EQUALS((*cs)[1]==V3D(1,0,0),true);
-    TS_ASSERT_EQUALS((*cs)[2]==V3D(0,1,0),true);
-    TS_ASSERT_EQUALS((*cs)[3]==V3D(0,0,1),true);
+    TS_ASSERT_EQUALS(cs->size(),0);
+   
   }
 
   void testBBAlignedToNewCoordinateSystemIsCorrect(){
