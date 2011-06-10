@@ -754,7 +754,15 @@ class Grouping(ReductionStep):
         return workspace
 
 class SaveItem(ReductionStep):
-    
+    """This routine will save a given workspace in the selected file formats.
+    The currently recognised formats are:
+        * 'spe' - SPE ASCII format
+        * 'nxs' - NeXus compressed file format
+        * 'nxspe' - NeXus SPE file format
+        * 'ascii' - Comma Seperated Values (file extension '.dat')
+        * 'gss' - GSAS file format (N.B.: units will be converted to Time of
+            Flight if not already in that unit for saving in this format).
+    """
     _formats = []
     
     def __init__(self):
@@ -773,6 +781,10 @@ class SaveItem(ReductionStep):
                 SaveNXSPE(file_ws, filename+'.nxspe')
             elif format == 'ascii':
                 SaveAscii(file_ws, filename+'.dat')
+            elif format == 'gss':
+                ConvertUnits(file_ws, "__save_item_temp", "TOF")
+                SaveGSS("__save_item_temp", filename+".gss")
+                DeleteWorkspace("__save_item_temp")
             
     def set_formats(self, formats):
         self._formats = formats

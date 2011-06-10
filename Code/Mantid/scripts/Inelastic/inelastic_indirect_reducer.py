@@ -27,7 +27,6 @@ class IndirectReducer(MSGReducer):
     _background_end = None
     _detailed_balance_temp = None
     _rename_result = True
-    _save_formats = []
     
     def __init__(self):
         """
@@ -40,7 +39,6 @@ class IndirectReducer(MSGReducer):
         self._background_end = None
         self._detailed_balance_temp = None
         self._rename_result = True
-        self._save_formats = []
         
     def _setup_steps(self):
         """**NB: This function is run automatically by the base reducer class
@@ -107,21 +105,6 @@ class IndirectReducer(MSGReducer):
             step = steps.Naming()
             self.append_step(step)
     
-    def set_save_formats(self, formats):
-        """Selects the save formats in which to export the reduced data.
-        formats should be a list object of strings containing the file
-        extension that signifies the type.
-        For example:
-            reducer.set_save_formats(['nxs', 'spe'])
-        Tells the reducer to save the final result as a NeXuS file, and as an
-        SPE file.
-        Please see the documentation for the SaveItem reduction step for more
-        details.
-        """
-        if not isinstance(formats, list):
-            raise TypeError("formats variable must be of list type")
-        self._save_formats = formats
-        
     def set_rebin_string(self, rebin):
         if not isinstance(rebin, str):
             raise TypeError("rebin variable must be of string type")
@@ -134,26 +117,14 @@ class IndirectReducer(MSGReducer):
         if mtd[workspace] is None:
             raise ValueError("Selected calibration workspace not found.")
         self._calibration_workspace = workspace
-        
+
     def set_background(self, start, end):
         self._background_start = float(start)
         self._background_end = float(end)
-        
+
     def set_detailed_balance(self, temp):
         self._detailed_balance_temp = float(temp)
-        
-    def get_result_workspaces(self):
-        nsteps = len(self._reduction_steps)
-        for i in range(0, nsteps):
-            try:
-                step = self._reduction_steps[nsteps-(i+1)]
-                return step.get_result_workspaces()
-            except AttributeError:
-                pass
-            except IndexError:
-                raise RuntimeError("None of the reduction steps implement "
-                    "the get_result_workspaces() method.")
-        
+
     def set_rename(self, value):
         if not isinstance(value, bool):
             raise TypeError("value must be either True or False (boolean)")

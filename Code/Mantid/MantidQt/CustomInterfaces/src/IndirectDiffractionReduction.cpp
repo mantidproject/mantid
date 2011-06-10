@@ -51,6 +51,12 @@ void IndirectDiffractionReduction::demonRun()
         pyInput += "reducer.set_sum_files(True)\n";
       }
 
+      pyInput += "formats = []\n";
+      if ( m_uiForm.ckGSS->isChecked() ) pyInput += "formats.append('gss')\n";
+      if ( m_uiForm.ckNexus->isChecked() ) pyInput += "formats.append('nxs')\n";
+      if ( m_uiForm.ckAscii->isChecked() ) pyInput += "formats.append('ascii')\n";
+
+      pyInput += "reducer.set_save_formats(formats)\n";
       pyInput +=
         "reducer.reduce()\n";
 

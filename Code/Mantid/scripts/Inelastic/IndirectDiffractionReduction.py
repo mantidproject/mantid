@@ -30,6 +30,12 @@ class MSGDiffractionReducer(MSGReducer):
         step.set_mask_list(self._masking_detectors)
         step.set_grouping_policy("All")
         self.append_step(step)
+        
+        # The "SaveItem" step saves the files in the requested formats.
+        if (len(self._save_formats) > 0):
+            step = steps.SaveItem()
+            step.set_formats(self._save_formats)
+            self.append_step(step)
 
 def getStringProperty(workspace, property):
     """This function is used in the interface.

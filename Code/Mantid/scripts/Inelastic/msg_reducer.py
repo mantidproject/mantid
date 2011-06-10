@@ -21,6 +21,7 @@ class MSGReducer(reducer.Reducer):
     _masking_detectors = []
     _parameter_file = None
     _fold_multiple_frames = True
+    _save_formats = []
     
     def __init__(self):
         super(MSGReducer, self).__init__()
@@ -101,6 +102,35 @@ class MSGReducer(reducer.Reducer):
             raise TypeError("value must be either True or False (boolean)")
         self._sum = value
         
+    def set_save_formats(self, formats):
+        """Selects the save formats in which to export the reduced data.
+        formats should be a list object of strings containing the file
+        extension that signifies the type.
+        For example:
+            reducer.set_save_formats(['nxs', 'spe'])
+        Tells the reducer to save the final result as a NeXuS file, and as an
+        SPE file.
+        Please see the documentation for the SaveItem reduction step for more
+        details.
+        """
+        if not isinstance(formats, list):
+            raise TypeError("formats variable must be of list type")
+        self._save_formats = formats
+        
+    def get_result_workspaces(self):
+        """
+        """
+        nsteps = len(self._reduction_steps)
+        for i in range(0, nsteps):
+            try:
+                step = self._reduction_steps[nsteps-(i+1)]
+                return step.get_result_workspaces()
+            except AttributeError:
+                pass
+            except IndexError:
+                raise RuntimeError("None of the reduction steps implement "
+                    "the get_result_workspaces() method.")
+
     def _load_empty_instrument(self):
         """Returns an empty workspace for the instrument.
         Raises: 
