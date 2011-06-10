@@ -225,6 +225,8 @@ if(UNITY_BUILD)
   enable_unity_build(CurveFitting SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
+add_definitions ( -DIN_NEXUS_CPP_LIBRARY )
+
 # Add the target for this directory
 add_library ( DataHandling ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
