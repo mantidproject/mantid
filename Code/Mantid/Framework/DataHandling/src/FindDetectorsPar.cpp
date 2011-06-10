@@ -289,7 +289,7 @@ FindDetectorsPar::loadParFile(const std::string &fileName){
     det_ID.resize(n_det_par);
 
     int Block_size,shift;
-    bool has_flightPath(false);
+    
     if(current_ASCII_file.Type==PAR_type){
         Block_size  = 5; // this value coinside with the value defined in load_plain
         shift       = 0;

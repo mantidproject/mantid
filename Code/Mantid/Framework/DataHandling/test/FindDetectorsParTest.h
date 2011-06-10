@@ -98,10 +98,10 @@ public:
 
         std::vector<std::string> pattern(5);
         pattern[2] = "1,2,3,";  // dist
-        pattern[1] = "2,3,4,";    // azimutal
-        pattern[0] = "-3,-4,-5,"; //polar
-        pattern[4] = "75.9638,68.1986,63.4349,"; // atan(4,5,6)/dist;    // az_width
-        pattern[3] = "78.6901,71.5651,66.8014,"; // atan(5,6,7)/dist;    // pol_width
+        pattern[0] = "2,3,4,";    // azimutal
+        pattern[1] = "-3,-4,-5,"; //polar
+        pattern[3] = "75.9638,68.1986,63.4349,"; // atan(4,5,6)/dist;    // az_width
+        pattern[4] = "78.6901,71.5651,66.8014,"; // atan(5,6,7)/dist;    // pol_width
         for(int i=0;i<5;i++){
             std::stringstream buf;
             for(int j=0;j<3;j++){
@@ -150,11 +150,11 @@ public:
     Mantid::DataObjects::TableWorkspace_sptr spResult =
         boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PAR2"));
 
-       TSM_ASSERT_DELTA("polar wrong ",      37.0858,  spResult->cell<double>(0,0),1.e-5);
+       TSM_ASSERT_DELTA("polar wrong ",      37.0858,  spResult->cell<double>(0,0),1.e-3);
        TSM_ASSERT_DELTA("azimut wrong",       0,       spResult->cell<double>(0,1),1.e-3);
-       TSM_ASSERT_DELTA("flight path wrong ",7.52685,  spResult->cell<double>(0,2),1.e-5);
-       TSM_ASSERT_DELTA("polar width wrong ",23.2429,  spResult->cell<double>(0,3),1.e-4); // despite looking strange, this may have cence as detectors overlap; wander what MAPS will be 
-       TSM_ASSERT_DELTA("azim width wrong ", 875.7862, spResult->cell<double>(0,4),1.e-4);
+       TSM_ASSERT_DELTA("flight path wrong ",7.52685,  spResult->cell<double>(0,2),1.e-3);
+       TSM_ASSERT_DELTA("polar width wrong ",23.2429,  spResult->cell<double>(0,3),1.e-3); // despite looking strange, this may have cence as detectors overlap; wander what MAPS will be 
+       TSM_ASSERT_DELTA("azim width wrong ", 875.7862, spResult->cell<double>(0,4),1.e-3);
 
        AnalysisDataService::Instance().remove("DET_PAR2");
 
@@ -177,11 +177,11 @@ public:
     Mantid::DataObjects::TableWorkspace_sptr spResult =
         boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PHX_ASCII"));
 
-       TSM_ASSERT_DELTA("azimut wrong",      6,       spResult->cell<double>(0,0),1.e-5);
-       TSM_ASSERT_DELTA("polar wrong ",      5,       spResult->cell<double>(0,1),1.e-3);
+       TSM_ASSERT_DELTA("polar wrong ",      5,       spResult->cell<double>(0,0),1.e-5);
+       TSM_ASSERT_DELTA("azimut wrong",      6,       spResult->cell<double>(0,1),1.e-3);
        TSM_ASSERT_DELTA("flight path wrong ",7.5248,  spResult->cell<double>(0,2),1.e-4);
-       TSM_ASSERT_DELTA("azim width wrong ", 8,       spResult->cell<double>(0,3),1.e-4);
-       TSM_ASSERT_DELTA("polar width wrong ",7,       spResult->cell<double>(0,4),1.e-4);
+       TSM_ASSERT_DELTA("polar width wrong ",7,       spResult->cell<double>(0,3),1.e-4);
+       TSM_ASSERT_DELTA("azim width wrong ", 8,       spResult->cell<double>(0,4),1.e-4);
 
        AnalysisDataService::Instance().remove("DET_PHX_ASCII");
 
