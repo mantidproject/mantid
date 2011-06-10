@@ -47,6 +47,19 @@ public:
   /// Default destructor.
   virtual ~ColorSelectionWidget() {}
 
+signals:
+  /**
+   * Signal to pass on information about a change to the color map.
+   */
+  void colorMapChanged(double min, double max);
+  /**
+   * Signal to pass on information that the color scale has changed.
+   *
+   * @param min the minimum value of the color scale
+   * @param max the maximum value of the color scale
+   */
+  void colorScaleChanged(double min, double max);
+
 protected slots:
   /**
    * Function that enables or diables the min and max line edits based on
@@ -55,7 +68,17 @@ protected slots:
    * @param state the current state of the checkbox
    */
   void autoOrManualScaling(int state);
-
+  /**
+   * Function to get the new color scale range.
+   */
+  void getColorScaleRange();
+  /**
+   * Function to set the color scale range into the range widgets.
+   *
+   * @param min the minimum value of the color scale range
+   * @param max the maximum value of the color scale range
+   */
+  void setColorScaleRange(double min, double max);
   /**
    * Function that presents the user with the available color presets and gets the
    * result from the user.
@@ -67,6 +90,12 @@ private:
    * Function that sets up various colormaps. This is copied verbaitum from pqColorScaleEditor.
    */
   void loadBuiltinColorPresets();
+  /**
+   * Function that sets the status of the editor widgets.
+   *
+   * @param status the state to set the editor widgets to
+   */
+  void setEditorStatus(bool status);
 
   pqColorPresetManager *presets; ///< Dialog for choosing color presets
   Ui::ColorSelectionWidgetClass ui; ///< The mode control widget's UI form

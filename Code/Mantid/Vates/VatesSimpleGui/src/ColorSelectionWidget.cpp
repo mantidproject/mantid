@@ -7,9 +7,13 @@
 
 #include <QDoubleValidator>
 
+#include <iostream>
 ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent)
 {
   this->ui.setupUi(this);
+  this->ui.autoColorScaleCheckBox->setChecked(true);
+  this->setEditorStatus(false);
+
   this->presets = new pqColorPresetManager(this);
   this->presets->restoreSettings();
 
@@ -19,9 +23,17 @@ ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent)
   this->ui.minValLineEdit->setValidator(new QDoubleValidator(this));
 
   QObject::connect(this->ui.autoColorScaleCheckBox, SIGNAL(stateChanged(int)),
-      this, SLOT(autoOrManualScaling(int)));
+  this, SLOT(autoOrManualScaling(int)));
   QObject::connect(this->ui.presetButton, SIGNAL(clicked()),
-                   this, SLOT(loadPreset()));
+  this, SLOT(loadPreset()));
+}
+
+void ColorSelectionWidget::setEditorStatus(bool status)
+{
+  this->ui.maxValLabel->setEnabled(status);
+  this->ui.maxValLineEdit->setEnabled(status);
+  this->ui.minValLabel->setEnabled(status);
+  this->ui.minValLineEdit->setEnabled(status);
 }
 
 void ColorSelectionWidget::loadBuiltinColorPresets()
@@ -84,25 +96,40 @@ void ColorSelectionWidget::autoOrManualScaling(int state)
   switch (state)
   {
   case Qt::Unchecked:
-    this->ui.maxValLabel->setEnabled(true);
-    this->ui.maxValLineEdit->setEnabled(true);
-    this->ui.minValLabel->setEnabled(true);
-    this->ui.minValLineEdit->setEnabled(true);
+    this->setEditorStatus(true);
     break;
   case Qt::Checked:
-    this->ui.maxValLabel->setEnabled(false);
-    this->ui.maxValLineEdit->setEnabled(false);
-    this->ui.minValLabel->setEnabled(false);
-    this->ui.minValLineEdit->setEnabled(false);
+    this->setEditorStatus(false);
     break;
   }
 }
 
 void ColorSelectionWidget::loadPreset()
 {
-    this->presets->setUsingCloseButton(false);
-    if (this->presets->exec() == QDialog::Accepted)
+  this->presets->setUsingCloseButton(false);
+  if (this->presets->exec() == QDialog::Accepted)
+  {
+    // Get the color map from the selection.
+    QItemSelectionModel *selection = this->presets->getSelectionModel();
+    QModelIndex index = selection->currentIndex();
+    const pqColorMapModel *colorMap = this->presets->getModel()->getColorMap(index.row());
+    pqChartValue min, max;
+    if (colorMap)
     {
 
     }
+  }
+}
+
+void ColorSelectionWidget::getColorScaleRange()
+{
+  double min = this->ui.minValLineEdit->text().toDouble();
+  double max = this->ui.maxValLineEdit->text().toDouble();
+  emit this->colorScaleChanged(min, max);
+}
+
+void ColorSelectionWidget::setColorScaleRange(double min, double max)
+{
+  this->ui.minValLineEdit->insert(QString::number(min));
+  this->ui.maxValLineEdit->insert(QString::number(max));
 }
