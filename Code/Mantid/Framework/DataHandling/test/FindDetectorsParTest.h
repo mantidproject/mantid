@@ -150,11 +150,11 @@ public:
     Mantid::DataObjects::TableWorkspace_sptr spResult =
         boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("DET_PAR2"));
 
-       TSM_ASSERT_DELTA("azimut wrong",      0,       spResult->cell<double>(0,0),1.e-5);
-       TSM_ASSERT_DELTA("polar wrong ",      37.0858, spResult->cell<double>(0,1),1.e-3);
-       TSM_ASSERT_DELTA("flight path wrong ",7.52685, spResult->cell<double>(0,2),1.e-5);
-       TSM_ASSERT_DELTA("azim width wrong ", 875.7862,spResult->cell<double>(0,3),1.e-4); // despite looking strange, this may have cence as detectors overlap; wander what MAPS will be 
-       TSM_ASSERT_DELTA("polar width wrong ",23.2429, spResult->cell<double>(0,4),1.e-4);
+       TSM_ASSERT_DELTA("polar wrong ",      37.0858,  spResult->cell<double>(0,0),1.e-5);
+       TSM_ASSERT_DELTA("azimut wrong",       0,       spResult->cell<double>(0,1),1.e-3);
+       TSM_ASSERT_DELTA("flight path wrong ",7.52685,  spResult->cell<double>(0,2),1.e-5);
+       TSM_ASSERT_DELTA("polar width wrong ",23.2429,  spResult->cell<double>(0,3),1.e-4); // despite looking strange, this may have cence as detectors overlap; wander what MAPS will be 
+       TSM_ASSERT_DELTA("azim width wrong ", 875.7862, spResult->cell<double>(0,4),1.e-4);
 
        AnalysisDataService::Instance().remove("DET_PAR2");
 
@@ -522,11 +522,11 @@ private:
              *(bufs[j])<<spResult->cell<double>(i,j)<<",";
          }
      }
-     TSM_ASSERT_EQUALS("azimut wrong",azim_pattern,bufs[0]->str());
-     TSM_ASSERT_EQUALS("polar wrong ",pol_pattern,bufs[1]->str());
+     TSM_ASSERT_EQUALS("azimut wrong",pol_pattern,bufs[0]->str());
+     TSM_ASSERT_EQUALS("polar wrong ",azim_pattern,bufs[1]->str());
      TSM_ASSERT_EQUALS("flight path wrong ",sfp_pattern,bufs[2]->str());
-     TSM_ASSERT_EQUALS("azim width wrong ",azw_pattern,bufs[3]->str());
-     TSM_ASSERT_EQUALS("polar width wrong ",polw_pattern,bufs[4]->str());
+     TSM_ASSERT_EQUALS("azim width wrong ",polw_pattern,bufs[3]->str());
+     TSM_ASSERT_EQUALS("polar width wrong ",azw_pattern,bufs[4]->str());
   }
 };
 #endif

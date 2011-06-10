@@ -286,6 +286,8 @@ FindDetectorsPar::loadParFile(const std::string &fileName){
     // transfer par data into internal algorithm parameters;
     azimuthal.resize(n_det_par);
     polar.resize(n_det_par);
+    det_ID.resize(n_det_par);
+
     int Block_size,shift;
     bool has_flightPath(false);
     if(current_ASCII_file.Type==PAR_type){
@@ -294,12 +296,14 @@ FindDetectorsPar::loadParFile(const std::string &fileName){
         width.resize(n_det_par);
         height.resize(n_det_par);
         secondary_flightpath.resize(n_det_par,std::numeric_limits<double>::quiet_NaN());
+   
         for(size_t i=0;i<n_det_par;i++){
            azimuthal[i]            =result[shift+2+i*Block_size];
            polar[i]                =result[shift+1+i*Block_size];
            width[i]                =result[shift+3+i*Block_size];
            height[i]               =result[shift+4+i*Block_size]; 
            secondary_flightpath[i] =result[shift+0+i*Block_size];
+           det_ID[i]               = i+1;
         }
 
     }else if(current_ASCII_file.Type==PHX_type){
@@ -312,6 +316,7 @@ FindDetectorsPar::loadParFile(const std::string &fileName){
              polar[i]           =result[shift+1+i*Block_size];
              azimuthal_width[i] =result[shift+4+i*Block_size];
              polar_width[i]     =result[shift+3+i*Block_size]; 
+             det_ID[i]               = i+1;
          }
     }else{
         g_log.error()<<" unsupported type of ASCII parameter file: "<<fileName<<std::endl;
