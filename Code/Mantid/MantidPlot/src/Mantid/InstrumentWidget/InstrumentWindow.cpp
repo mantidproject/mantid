@@ -340,8 +340,8 @@ void InstrumentWindow::spectraInfoDialog()
   }
   else
   {
-    std::vector<int> wksp_indices;
-    for(size_t i = 0; i < m_selectedDetectors.size(); ++i)
+    std::vector<size_t> wksp_indices;
+    for(int i = 0; i < m_selectedDetectors.size(); ++i)
     {
       wksp_indices.push_back(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i]));
     }
@@ -378,7 +378,7 @@ void InstrumentWindow::showDetectorTable()
   std::vector<int> indexes;
   for(int i = 0; i < m_selectedDetectors.size(); ++i)
   {
-    indexes.push_back(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i]));
+    indexes.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
   }
   emit createDetectorTable(QString::fromStdString(m_workspace->getName()), indexes, true);
 }
@@ -418,7 +418,7 @@ void InstrumentWindow::groupDetectors()
   std::vector<int> wksp_indices;
   for(int i = 0; i < m_selectedDetectors.size(); ++i)
   {
-    wksp_indices.push_back(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i]));
+    wksp_indices.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
   }
 
   QString inputWS = QString::fromStdString(m_workspace->getName());
@@ -440,7 +440,7 @@ void InstrumentWindow::maskDetectors()
   std::vector<int> wksp_indices;
   for(int i = 0; i < m_selectedDetectors.size(); ++i)
   {
-    wksp_indices.push_back(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i]));
+    wksp_indices.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
   }
 
   QString inputWS = QString::fromStdString(m_workspace->getName());
@@ -482,11 +482,6 @@ void InstrumentWindow::setColorMapMinValue(double minValue)
 void InstrumentWindow::setColorMapMaxValue(double maxValue)
 {
   m_renderTab->setMaxValue(maxValue);
-}
-
-void InstrumentWindow::setDataMappingIntegral(double minValue,double maxValue,bool entireRange)
-{
-//  mInstrumentDisplay->setDataMappingIntegral(minValue, maxValue, entireRange);
 }
 
 /**

@@ -121,7 +121,7 @@ void ObjCompAssemblyActor::generateTexture(unsigned char* data, unsigned int& id
   * @param i :: Index of the detector in ObjCompAssembly
   * @param c :: The colour
   */
-void ObjCompAssemblyActor::setDetectorColor(unsigned char* data,int i,GLColor c)
+void ObjCompAssemblyActor::setDetectorColor(unsigned char* data,size_t i,GLColor c)
 {
     int pos = 3*i;
     float r,g,b,a;

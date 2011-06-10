@@ -92,7 +92,7 @@ void Projection3D::resize(int w, int h)
   }
 }
 
-void Projection3D::drawSurface(MantidGLWidget* widget,bool picking)const
+void Projection3D::drawSurface(MantidGLWidget*,bool picking)const
 {
   OpenGLError::check("GL3DWidget::draw3D()[begin]");
 
@@ -224,20 +224,10 @@ void Projection3D::mouseMoveEventMove(QMouseEvent* event)
   OpenGLError::check("GL3DWidget::mouseMoveEvent");
 }
 
-void Projection3D::mouseReleaseEventMove(QMouseEvent* event)
+void Projection3D::mouseReleaseEventMove(QMouseEvent*)
 {
   m_isKeyPressed=false;
   m_viewChanged = true;
-  //setSceneHighResolution();
-  //if(iInteractionMode == GL3DWidget::PickMode)
-  //{
-  //  mPickBox->mouseReleased(event->buttons(), event->pos());
-  //  std::set<QRgb> result=mPickBox->getListOfColorsPicked();
-  //  if(!result.empty())
-  //  {
-  //    emit actorsPicked(result);
-  //  }
-  //}
 }
 
 void Projection3D::wheelEventMove(QWheelEvent* event)
@@ -299,8 +289,7 @@ void Projection3D::getSelectedDetectors(QList<int>& dets)
   QRect rect = selectionRect();
   int w,h;
   m_viewport->getViewport(&w,&h);
-  double width = xmax - xmin;
-  double height = ymax - ymin;
+
   double xLeft = xmin + (xmax - xmin) * rect.left() / w;
   double xRight = xmin + (xmax - xmin) * rect.right() / w;
   double yBottom = ymin + (ymax - ymin) * (h - rect.bottom()) / h;
@@ -321,7 +310,7 @@ void Projection3D::getSelectedDetectors(QList<int>& dets)
     if (pos.X() >= xLeft && pos.X() <= xRight &&
         pos.Y() >= yBottom && pos.Y() <= yTop)
     {
-      dets.push_back(det->getID());
+      dets.push_back(int(det->getID()));
     }
   }
 }

@@ -568,7 +568,6 @@ QString UnwrappedSurface::getInfoText()const
   {
     return getPickInfoText();
   }
-  QString text = "Left mouse click and drag to zoom in.\n";
-                 "Right mouse click to zoom out.";
+  QString text = "Left mouse click and drag to zoom in.\nRight mouse click to zoom out.";
   return text;
 }

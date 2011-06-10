@@ -53,7 +53,7 @@ public:
   //virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const;
   virtual void setColors();
 private:
-  void setDetectorColor(unsigned char* data, int i,GLColor c); ///< set colour to a detector
+  void setDetectorColor(unsigned char* data, size_t i,GLColor c); ///< set colour to a detector
   void generateTexture(unsigned char* data, unsigned int& id);
   /// Swap between drawing counts and drawing detector code colours
   void swap();

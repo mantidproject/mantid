@@ -94,7 +94,6 @@ public:
   void setColorMapMinValue(double minValue);
   void setColorMapMaxValue(double maxValue);
   void setColorMapRange(double minValue, double maxValue);
-  void setDataMappingIntegral(double minValue,double maxValue,bool entireRange=false);
   void selectComponent(const QString & name);
   void setScaleType(GraphOptions::ScaleType type);
   /// for saving the instrument window  to mantid project

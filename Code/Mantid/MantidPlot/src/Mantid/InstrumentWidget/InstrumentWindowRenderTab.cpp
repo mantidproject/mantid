@@ -39,7 +39,6 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   QPushButton* mSelectBin = new QPushButton(tr("Select X Range"));
   connect(mSelectBin, SIGNAL(clicked()), this, SLOT(selectBinButtonClicked()));
   mBinDialog = new BinDialog(this);
-  //connect(mBinDialog,SIGNAL(IntegralMinMax(double,double,bool)), m_instrWindow->getInstrumentDisplay(), SLOT(setDataMappingIntegral(double,double,bool)));
 
   // Save image control
   mSaveImage = new QPushButton(tr("Save image"));

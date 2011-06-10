@@ -11,6 +11,7 @@
 #include <QSet>
 #include <QMenu>
 #include <QMouseEvent>
+#include <QPainter>
 
 #include <cfloat>
 #include <limits>
@@ -213,7 +214,7 @@ void ProjectionSurface::mouseReleaseEventPick(QMouseEvent* e)
   m_leftButtonDown = false;
 }
 
-void ProjectionSurface::wheelEventPick(QWheelEvent* e)
+void ProjectionSurface::wheelEventPick(QWheelEvent*)
 {
 }
 
@@ -384,8 +385,8 @@ int ProjectionSurface::getDetectorID(int x, int y)
 
 int ProjectionSurface::getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const
 {
-  unsigned int index = GLActor::decodePickColor(r,g,b);
-  if (/*index == 0 || */size_t(index) > m_instrActor->ndetectors())
+  size_t index = GLActor::decodePickColor(r,g,b);
+  if (index > m_instrActor->ndetectors())
   {
     return -1;
   }

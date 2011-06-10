@@ -124,7 +124,6 @@ void InstrumentWindowPickTab::updatePlot(int detid)
   if (m_plotPanel->isCollapsed()) return;
   InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
-  size_t wi = instrActor->getWorkspaceIndex(detid);
   if (detid >= 0)
   {
     if (m_one->isChecked() || m_peak->isChecked())
