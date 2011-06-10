@@ -153,11 +153,22 @@ void PatternBox::init()
 
 void PatternBox::setPattern(const Qt::BrushStyle& style)
 {
-  const Qt::BrushStyle*ite = std::find(patterns, patterns + sizeof(patterns), style);
-  if (ite == patterns + sizeof(patterns))
-    this->setCurrentIndex(14); // default pattern is none.
-  else
-    this->setCurrentIndex(int(ite - patterns));
+  // Avoid compiler warnings relating to patterns + sizeof(patterns) being out of range
+  size_t n = sizeof(patterns);
+  for(size_t i = 0; i < n; ++i)
+  {
+    if (patterns[i] == style)
+    {
+      setCurrentIndex(int(i));
+      return;
+    }
+  }
+  setCurrentIndex(14); // default pattern is none.
+//  const Qt::BrushStyle*ite = std::find(patterns, patterns + sizeof(patterns), style);
+//  if (ite == patterns + sizeof(patterns))
+//    this->setCurrentIndex(14); // default pattern is none.
+//  else
+//    this->setCurrentIndex(int(ite - patterns));
 }
 
 Qt::BrushStyle PatternBox::brushStyle(int index)
@@ -179,9 +190,19 @@ Qt::BrushStyle PatternBox::getSelectedPattern() const
 
 int PatternBox::patternIndex(const Qt::BrushStyle& style)
 {
-  const Qt::BrushStyle*ite = std::find(patterns, patterns + sizeof(patterns), style);
-  if (ite == patterns + sizeof(patterns))
-    return 14; // default pattern is none.
-  else
-    return (int(ite - patterns));
+  // Avoid compiler warnings relating to patterns + sizeof(patterns) being out of range
+  size_t n = sizeof(patterns);
+  for(size_t i = 0; i < n; ++i)
+  {
+    if (patterns[i] == style)
+    {
+      return int(i);
+    }
+  }
+  return 14; // default pattern is none.
+//  const Qt::BrushStyle*ite = std::find(patterns, patterns + sizeof(patterns), style);
+//  if (ite == patterns + sizeof(patterns))
+//    return 14; // default pattern is none.
+//  else
+//    return (int(ite - patterns));
 }
