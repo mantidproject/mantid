@@ -258,7 +258,7 @@ namespace Mantid
       .def( "recAngle", (double ( Geometry::UnitCell::* )( double,double,double,double,double,double,int const ) const)( &Geometry::UnitCell::recAngle ), ( arg("h1"), arg("k1"), arg("l1"), arg("h2"), arg("k2"), arg("l2"), arg("Unit")=(int)(Geometry::angDegrees) ) )
       .def( "recVolume", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::recVolume ) )    
       .def( "set", (void ( Geometry::UnitCell::* )( double,double,double,double,double,double,int const ) )( &Geometry::UnitCell::set ), ( arg("_a"), arg("_b"), arg("_c"), arg("_alpha"), arg("_beta"), arg("_gamma"), arg("Unit")=(int)(Geometry::angDegrees) ) )
-      .def( "seta", (void ( Geometry::UnitCell::* )( double ) )( &Geometry::UnitCell::seta ), ( arg("_a") ) )    
+      .def( "seta", (void ( Geometry::UnitCell::* )( double ) )( &Geometry::UnitCell::seta ), ( arg("_a") ) ) 
       .def( "setalpha", (void ( Geometry::UnitCell::* )( double,int const ) )( &Geometry::UnitCell::setalpha ), ( arg("_alpha"), arg("Unit")=(int)(Geometry::angDegrees) ) )
       .def( "setb", (void ( Geometry::UnitCell::* )( double ) )( &Geometry::UnitCell::setb ), ( arg("_b") ) )    
       .def( "setbeta", (void ( Geometry::UnitCell::* )( double,int const ) )( &Geometry::UnitCell::setbeta ), ( arg("_beta"), arg("Unit")=(int)(Geometry::angDegrees) ) )
@@ -267,7 +267,8 @@ namespace Mantid
       .def( "volume", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::volume ) )
       .def( "getG",( &UnitCellWrapper::getG ) )
       .def( "getGstar",( &UnitCellWrapper::getGstar ) )
-      .def( "getB",( &UnitCellWrapper::getB ) );
+      .def( "getB",( &UnitCellWrapper::getB ) )
+      .def( "recalculateFromGstar", ( &UnitCellWrapper::recalculateFromGstar ) ) ;
 
       scope().attr("deg2rad") = Geometry::deg2rad;
       scope().attr("rad2deg") = Geometry::rad2deg;

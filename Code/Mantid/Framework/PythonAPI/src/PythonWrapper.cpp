@@ -7,7 +7,7 @@
 #include "MantidKernel/MantidVersion.h"
 #include "MantidPythonAPI/stl_proxies.h"
 #include "MantidPythonAPI/MantidVecHelper.h"
-
+#include "Numeric/arrayobject.h"
 // Noisy MSVC compiler that complains about Boost stuff we can do nothing about. For some reason
 // it wouldn't accept it in the BoostPython_Silent.h header
 #ifdef _MSC_VER
@@ -47,7 +47,8 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 #endif
 {
   using namespace Mantid::PythonAPI;
-
+  import_array();
+  boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
   boost::python::def("mantid_build_version", mantid_version);
   MantidVecHelper::initializeDependencies();
   // Export some frequently used stl containers

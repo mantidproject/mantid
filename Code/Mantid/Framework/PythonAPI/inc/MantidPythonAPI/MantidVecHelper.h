@@ -62,7 +62,7 @@ namespace Mantid
       /// Create a numpy array using the already allocated data for Matrix
       static PyObject * createNumPyArray(const Geometry::MantidMat & values, bool readonly);
       /// Import a Matrix from a 2D numpy array
-      const Geometry::MantidMat getMatrixFromArray(boost::python::numeric::array& array);
+      static Geometry::MantidMat getMatrixFromArray(PyObject *p);
     };
   }
 }
