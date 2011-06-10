@@ -6,6 +6,8 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include <vector>
+
 namespace Mantid
 {
 namespace DataHandling
@@ -51,8 +53,8 @@ namespace DataHandling
 
     std::size_t m_numpulses;
     unsigned int* m_delaytimes;
-    unsigned int* m_pulseidlows;
-    unsigned int* m_pulseidhighs;
+    std::vector<uint32_t> m_pulseidseconds;
+    std::vector<uint32_t> m_pulseidnanoseconds;
 
     API::MatrixWorkspace_sptr WS;
 

@@ -1,4 +1,5 @@
 #include "MantidDataHandling/LoadLogsForSNSPulsedMagnet.h"
+#include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
@@ -137,6 +138,7 @@ namespace DataHandling
             logFile.read((char*)&delaytime, sizeof(unsigned int));
             if (delaytime != 0){
                 g_log.information() << "Pulse Index =  " << index << "  Chopper = " << chopperindex << "   Delay Time = " << delaytime << "\n";
+                std::cout << "Pulse Index =  " << index << "  Chopper = " << chopperindex << "   Delay Time = " << delaytime << "\n";
             }
             chopperindices[i] = chopperindex;
             localdelaytimes[i] = delaytime;
@@ -159,53 +161,35 @@ namespace DataHandling
     return;
   }
 
+#pragma pack(push, 4) //Make sure the structure is 16 bytes.
+struct Pulse
+{
+  /// The number of nanoseconds since the seconds field. This is not necessarily less than one second.
+  uint32_t nanoseconds;
+
+  /// The number of seconds since January 1, 1990.
+  uint32_t seconds;
+
+  /// The index of the first event for this pulse.
+  uint64_t event_index;
+
+  /// The proton charge for the pulse.
+  double pCurrent;
+};
+#pragma pack(pop)
+
   void LoadLogsForSNSPulsedMagnet::ParsePulseIDLogFile()
   {
-
-    char* logfilename = &m_pulseidfilename[0];
-
-    // 1. Determine length of file
-    struct stat results;
-    int filesize = -1;
-    if (stat(logfilename, &results) == 0){
-        filesize = int(results.st_size);
-        g_log.information() << "File Size = " << filesize << "\n";
+    std::vector<Pulse> * pulses;
+    BinaryFile<Pulse> pulseFile(m_pulseidfilename);
+    this->m_numpulses = pulseFile.getNumElements();
+    pulses = pulseFile.loadAll();
+    for (std::vector<Pulse>::iterator it = pulses->begin(); it != pulses->end(); it++)
+    {
+      this->m_pulseidseconds.push_back(it->seconds);
+      this->m_pulseidnanoseconds.push_back(it->nanoseconds);
     }
-    else{
-        g_log.error() << "File Error!  Cannot Read File Size" << "\n";
-        return;
-    }
-
-    // 2. Determine number of magnetic pulses
-    int structsize = 4+4+8+8;
-    int numpulses = filesize/structsize;
-    if (filesize%structsize != 0){
-      g_log.error() << "Pulse ID File Length Incorrect!" << "\n";
-    }
-    g_log.information() << "Number of Pulses (In Pulse ID File) = " << numpulses << "\n";
-
-    unsigned int* pulseIDhighs = new unsigned int[numpulses];
-    unsigned int* pulseIDlows = new unsigned int[numpulses];
-
-    std::ifstream logFile(logfilename, std::ios::in|std::ios::binary);
-    for (int pid = 0; pid < numpulses; pid++){
-      unsigned int pidlow, pidhigh;
-      unsigned long eventid;
-      double charge;
-      logFile.read((char*)&pidlow, sizeof(unsigned int));
-      logFile.read((char*)&pidhigh, sizeof(unsigned int));
-      logFile.read((char*)&eventid, sizeof(unsigned long));
-      logFile.read((char*)&charge, sizeof(double));
-
-      pulseIDhighs[pid] = pidhigh;
-      pulseIDlows[pid] = pidlow;
-    }
-
-    // 4. Set to class variable
-    m_pulseidlows = pulseIDlows;
-    m_pulseidhighs = pulseIDhighs;
-
-    return;
+    delete pulses;
   }
 
   void LoadLogsForSNSPulsedMagnet::addProperty(){
@@ -219,9 +203,8 @@ namespace DataHandling
     property->setUnits("nanoseconds");
 
     for (size_t pulse_index = 0; pulse_index < m_numpulses; pulse_index++){
-      int64_t pidhigh = int64_t(m_pulseidhighs[pulse_index]);
-      int64_t pidlow = int64_t(m_pulseidlows[pulse_index]);
-      DateAndTime dt(pidhigh, pidlow);
+      DateAndTime dt(static_cast<int32_t>(m_pulseidseconds[pulse_index]),
+                     static_cast<int32_t>(m_pulseidnanoseconds[pulse_index]));
       property->addValue(dt, static_cast<double>(m_delaytimes[pulse_index]));
 //      if (m_delaytimes[pulse_index] > 0) // REMOVE
 //        std::cout << pulse_index << ": " << dt << " " << static_cast<double>(m_delaytimes[pulse_index]) << std::endl; // REMOVE
