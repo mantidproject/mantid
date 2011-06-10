@@ -5,7 +5,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include <iostream>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidNexus/LoadSNSEventNexus.h"
+#include "MantidDataHandling/LoadSNSEventNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"

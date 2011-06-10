@@ -1,5 +1,4 @@
 set ( SRC_FILES
-        src/LoadEventNexus.cpp
         src/LoadISISNexus.cpp
         src/LoadISISNexus2.cpp
         src/LoadInstrumentFromNexus.cpp
@@ -16,7 +15,6 @@ set ( SRC_FILES
         src/LoadRaw/item_struct.cpp
         src/LoadRaw/vms_convert.cpp
         src/LoadNexusLogs.cpp
-        src/LoadSNSEventNexus.cpp
         src/LoadSNSNexus.cpp
         src/LoadTOFRawNeXus.cpp
         src/MuonNexusReader.cpp
@@ -35,7 +33,6 @@ set ( SRC_UNITY_IGNORE_FILES src/NeXusFile.cpp)
 
 set ( INC_FILES
         inc/MantidNexus/DllConfig.h
-        inc/MantidNexus/LoadEventNexus.h
         inc/MantidNexus/LoadISISNexus.h
         inc/MantidNexus/LoadISISNexus2.h
         inc/MantidNexus/LoadInstrumentFromNexus.h
@@ -47,7 +44,6 @@ set ( INC_FILES
         inc/MantidNexus/LoadNexusMonitors.h
         inc/MantidNexus/LoadNexusProcessed.h
         inc/MantidNexus/LoadNexusLogs.h
-        inc/MantidNexus/LoadSNSEventNexus.h
         inc/MantidNexus/LoadSNSNexus.h
         inc/MantidNexus/LoadTOFRawNeXus.h
         inc/MantidNexus/MuonNexusReader.h
@@ -61,7 +57,6 @@ set ( INC_FILES
 set ( TEST_FILES
         #test/LoadSNSNexusTest.h # TODO has no active tests in it
         #test/LoadTOFRawNeXusTest.h # TODO has no active tests in it
-        test/LoadEventNexusTest.h
         test/LoadISISNexusTest.h
         test/LoadLogsFromSNSNexusTest.h
         test/LoadMuonLogTest.h
@@ -72,7 +67,6 @@ set ( TEST_FILES
         test/LoadNexusProcessedTest.h
         test/LoadNexusLogsTest.h
         test/LoadRSaveNLoadNcspTest.h
-        test/LoadSNSEventNexusTest.h
         test/NexusAPITest.h
         test/SaveNeXusTest.h
         test/SaveNexusProcessedTest.h

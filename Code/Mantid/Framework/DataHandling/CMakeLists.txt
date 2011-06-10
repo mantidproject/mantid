@@ -21,6 +21,7 @@ set ( SRC_FILES
 	src/LoadDetectorInfo.cpp
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
+	src/LoadEventNexus.cpp
 	src/LoadEventPreNeXus.cpp
 	src/LoadGSS.cpp
 	src/LoadInstrument.cpp
@@ -51,6 +52,7 @@ set ( SRC_FILES
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
+	src/LoadSNSEventNexus.cpp
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/ManagedRawFileWorkspace2D.cpp
@@ -103,6 +105,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDetectorInfo.h
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
+	inc/MantidDataHandling/LoadEventNexus.h
 	inc/MantidDataHandling/LoadEventPreNeXus.h
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadInstrument.h
@@ -123,6 +126,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
 	inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
+	inc/MantidDataHandling/LoadSNSEventNexus.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/ManagedRawFileWorkspace2D.h
@@ -172,6 +176,7 @@ set ( TEST_FILES
 	test/LoadDetectorInfoTest.h
 	test/LoadDspacemapTest.h
 	test/LoadEmptyInstrumentTest.h
+	test/LoadEventNexusTest.h
 	test/LoadEventPreNeXusTest.h
 	test/LoadInstrumentFromRawTest.h
 	test/LoadInstrumentHelperTest.h
@@ -186,6 +191,7 @@ set ( TEST_FILES
 	test/LoadRawBin0Test.h
 	test/LoadRawSpectrum0Test.h
 	test/LoadRawTest.h
+	test/LoadSNSEventNexusTest.h
 	test/LoadSNSspecTest.h
 	test/LoadSPETest.h
 	test/LoadSaveAsciiTest.h

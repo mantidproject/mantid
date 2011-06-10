@@ -1,5 +1,5 @@
-#ifndef MANTID_NEXUS_LOADEVENTNEXUS_H_
-#define MANTID_NEXUS_LOADEVENTNEXUS_H_
+#ifndef MANTID_DATAHANDLING_LOADEVENTNEXUS_H_
+#define MANTID_DATAHANDLING_LOADEVENTNEXUS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -19,7 +19,7 @@
 namespace Mantid
 {
 
-  namespace NeXus
+  namespace DataHandling
   {
     /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
@@ -139,8 +139,8 @@ namespace Mantid
 
     };
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_NEXUS_LOADEVENTNEXUS_H_*/
+#endif /*MANTID_DATAHANDLING_LOADEVENTNEXUS_H_*/
 

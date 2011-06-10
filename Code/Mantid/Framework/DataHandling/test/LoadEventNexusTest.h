@@ -15,7 +15,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidNexus/LoadEventNexus.h"
+#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidNexus/LoadLogsFromSNSNexus.h"
 #include <cxxtest/TestSuite.h>
 #include <iostream>
@@ -26,6 +26,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
+using namespace Mantid::DataHandling;
 
 class LoadEventNexusTest : public CxxTest::TestSuite
 {

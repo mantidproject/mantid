@@ -1,5 +1,5 @@
-#ifndef MANTID_NEXUS_LOADSNSEVENTNEXUS_H_
-#define MANTID_NEXUS_LOADSNSEVENTNEXUS_H_
+#ifndef MANTID_DATAHANDLING_LOADSNSEVENTNEXUS_H_
+#define MANTID_DATAHANDLING_LOADSNSEVENTNEXUS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -7,7 +7,7 @@
 #include "MantidAPI/IDataFileChecker.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexus/LoadEventNexus.h"
+#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -17,7 +17,7 @@
 namespace Mantid
 {
 
-  namespace NeXus
+  namespace DataHandling
   {
     /** @class LoadSNSEventNexus LoadSNSEventNexus.h Nexus/LoadSNSEventNexus.h
 
@@ -71,8 +71,8 @@ namespace Mantid
 
     };
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_NEXUS_LOADSNSEVENTNEXUS_H_*/
+#endif /*MANTID_DATAHANDLING_LOADSNSEVENTNEXUS_H_*/
 

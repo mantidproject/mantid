@@ -15,7 +15,7 @@
 #include "MantidNexus/SaveNexusProcessed.h"
 #include "MantidNexus/LoadMuonNexus.h"
 #include "MantidNexus/LoadNeXus.h"
-#include "MantidNexus/LoadSNSEventNexus.h"
+#include "MantidDataHandling/LoadSNSEventNexus.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -381,7 +381,7 @@ public:
   {
 
     //----- Now we re-load with precounting and compare memory use ----
-    LoadSNSEventNexus ld2;
+    Mantid::DataHandling::LoadSNSEventNexus ld2;
     std::string outws_name = "SaveNexusProcessed_Loaded";
     ld2.initialize();
     ld2.setPropertyValue("Filename","CNCS_7860_event.nxs");

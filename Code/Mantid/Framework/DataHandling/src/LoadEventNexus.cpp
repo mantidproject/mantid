@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadEventNexus.h"
+#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidKernel/ConfigService.h"
@@ -33,7 +33,7 @@ using namespace Mantid::Kernel;
 
 namespace Mantid
 {
-namespace NeXus
+namespace DataHandling
 {
 
 DECLARE_ALGORITHM(LoadEventNexus)
@@ -1152,5 +1152,5 @@ Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::st
 }
 
 
-} // namespace NeXus
+} // namespace DataHandling
 } // namespace Mantid

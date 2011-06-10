@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadSNSEventNexus.h"
+#include "MantidDataHandling/LoadSNSEventNexus.h"
 #include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
 
 using namespace ::NeXus;
@@ -10,7 +10,7 @@ using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
-namespace NeXus
+namespace DataHandling
 {
 
 DECLARE_ALGORITHM(LoadSNSEventNexus)
@@ -43,5 +43,5 @@ int LoadSNSEventNexus::fileCheck(const std::string& filePath)
   return 0;
 }
 
-} // namespace NeXus
+} // namespace DataHandling
 } // namespace Mantid

@@ -1,7 +1,7 @@
 #ifndef LOADSNSEVENTNEXUSTEST_H_
 #define LOADSNSEVENTNEXUSTEST_H_
 
-#include "MantidNexus/LoadSNSEventNexus.h"
+#include "MantidDataHandling/LoadSNSEventNexus.h"
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 
@@ -11,6 +11,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
+using namespace Mantid::DataHandling;
 
 
 /* NOTE: More thorough tests are in LoadEventNexusTest */
