@@ -209,6 +209,7 @@ set ( TEST_FILES
 	test/SaveRKHTest.h
 	test/SaveSPETest.h
 	test/SetScalingPSDTest.h
+	test/SaveToSNSHistogramNexusTest.h
 	test/UpdateInstrumentFromFileTest.h
 	test/XMLlogfileTest.h
 )
