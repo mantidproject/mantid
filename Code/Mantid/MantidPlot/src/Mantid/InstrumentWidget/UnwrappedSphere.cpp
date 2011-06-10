@@ -2,7 +2,7 @@
 #include "MantidGeometry/IDetector.h"
 #include <cmath>
 
-UnwrappedSphere::UnwrappedSphere(const InstrumentActor *rootActor, const Mantid::Geometry::V3D &origin, const Mantid::Geometry::V3D &axis):
+UnwrappedSphere::UnwrappedSphere(const InstrumentActor* rootActor, const Mantid::Geometry::V3D &origin, const Mantid::Geometry::V3D &axis):
     UnwrappedSurface(rootActor,origin,axis)
 {
   init();
@@ -29,7 +29,7 @@ void UnwrappedSphere::calcUV(UnwrappedDetector& udet)
 
 }
 
-void UnwrappedSphere::calcRot(UnwrappedDetector& udet, Mantid::Geometry::Quat& R)
+void UnwrappedSphere::calcRot(const UnwrappedDetector& udet, Mantid::Geometry::Quat& R)const
 {
   // Basis vectors for a detector image on the screen
   const Mantid::Geometry::V3D X(-1,0,0);
@@ -50,7 +50,7 @@ void UnwrappedSphere::calcRot(UnwrappedDetector& udet, Mantid::Geometry::Quat& R
   x.normalize();
   y = z.cross_prod(x);
   Mantid::Geometry::Quat R1;
-  BasisRotation(x,y,z,X,Y,Z,R1);
+  InstrumentActor::BasisRotation(x,y,z,X,Y,Z,R1);
 
   R = R1 * udet.detector->getRotation();
 

@@ -1,6 +1,8 @@
 #ifndef GLCOLOR_H_
 #define GLCOLOR_H_
 
+#include <iostream>
+
 /**
   \class  GLColor
   \brief  class handling OpenGL color for objects
@@ -34,11 +36,10 @@
 class GLColor
 {
 public:
-  /// Enumeration for painting type
-  enum PaintMethod {PLAIN = 0, MATERIAL = 1, EMIT = 2};
-  
+ 
   /// Default Constructor
-  GLColor(float red = 0, float green = 0,float blue = 0, float alpha = 0);
+  GLColor(float red = 0, float green = 0,float blue = 0, float alpha = 1.0f);
+  GLColor(int r, int g, int b);
   /// Destructor
   virtual ~GLColor();  
 
@@ -46,14 +47,23 @@ public:
   void set(float red, float green ,float blue, float alpha);
   /// Retrieve the component colours
   void get(float&,float&,float&,float&)const;
+  void get(unsigned char& r,unsigned char& g,unsigned char& b)const;
   /// Retrieve the component colours
   void getUB3(unsigned char* c)const;
   /// Set the painting method
-  void paint(GLColor::PaintMethod pm);
+  void paint()const;
+  int red()const{return int(m_rgba[0]);}
+  int green()const{return int(m_rgba[1]);}
+  int blue()const{return int(m_rgba[2]);}
+  int alpha()const{return int(m_rgba[3]);}
+
 private:
   /// The individual components
-  float m_rgba[4];
+  //float m_rgba[4];
+  unsigned char m_rgba[4];
 };
+
+std::ostream& operator<<(std::ostream& ostr, const GLColor& c);
 
 #endif /*GLCOLOR_H_*/
 

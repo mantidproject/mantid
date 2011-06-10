@@ -1,8 +1,6 @@
 #ifndef COLORMAPWIDGET_H_
 #define COLORMAPWIDGET_H_
 
-#include "Instrument3DWidget.h"
-
 #include <QFrame>
 
 class MantidColorMap;

@@ -1,3 +1,8 @@
+#include "ObjCompAssemblyActor.h"
+#include "ObjComponentActor.h"
+#include "InstrumentActor.h"
+#include "OpenGLError.h"
+
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -7,43 +12,39 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 //#include "MantidGeometry/Instrument/ParObjCompAssembly.h"
 #include "MantidKernel/Exception.h"
-#include "MantidObject.h"
-#include "ObjCompAssemblyActor.h"
-#include "ObjComponentActor.h"
-#include "TexObject.h"
 #include <cfloat>
 using namespace Mantid;
 using namespace Geometry;
 
-ObjCompAssemblyActor::ObjCompAssemblyActor(boost::shared_ptr<std::map<const boost::shared_ptr<const Mantid::Geometry::Object>,MantidObject*> >& objs,
-    Mantid::Geometry::ComponentID id, 
-    boost::shared_ptr<Mantid::Geometry::IInstrument> ins,
-    bool withDisplayList):
-  ICompAssemblyActor(objs,id,ins,withDisplayList)
+ObjCompAssemblyActor::ObjCompAssemblyActor(const InstrumentActor& instrActor,Mantid::Geometry::ComponentID compID):
+  ICompAssemblyActor(instrActor,compID),
+  m_idData(0),
+  m_idPick(0),
+  m_n(getObjCompAssembly()->nelements()),
+  m_pick_data()
 {
-  boost::shared_ptr<IComponent> ic = ins->getComponentByID(id);
-  boost::shared_ptr<ObjCompAssembly> oca = boost::dynamic_pointer_cast<ObjCompAssembly>(ic);
-  if (oca)
+
+  ObjCompAssembly_const_sptr objAss = getObjCompAssembly();
+  mNumberOfDetectors = objAss->nelements();
+  assert(m_n == mNumberOfDetectors);
+  m_data = new unsigned char[m_n*3];
+  m_pick_data = new unsigned char[m_n*3];
+  for(int i=0;i<getNumberOfDetectors();++i)
   {
-    m_ObjAss = oca;
+    IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(objAss->getChild(i));
+    assert(det);
+    detid_t id = det->getID();
+    m_detIDs.push_back(id);
+    size_t pickID = instrActor.push_back_detid(id);
+    setDetectorColor(m_pick_data,i,GLActor::makePickColor(pickID));
   }
-  else
-  {
-    boost::shared_ptr<ObjCompAssembly> poca = boost::dynamic_pointer_cast<ObjCompAssembly>(ic);
-    if (!poca)
-    {
-      throw Mantid::Kernel::Exception::InstrumentDefinitionError("Expected ObjCompAssembly, found "+ic->type());
-    }
-    //m_ObjAss.reset(dynamic_cast<const ObjCompAssembly*>(poca->base()),NoDeleting());
-    m_ObjAss = ic;
-  }
-  if (!m_ObjAss)
-  {
-    throw Mantid::Kernel::Exception::InstrumentDefinitionError("Expected ObjCompAssembly, found "+ic->type());
-  }
-  setName(m_ObjAss->getName());
-  m_tex.reset(new TexObject(m_ObjAss,withDisplayList));
-  initChilds(withDisplayList);
+  Mantid::Geometry::BoundingBox boundBox;
+  objAss->getBoundingBox(boundBox);
+  minBoundBox[0]=boundBox.xMin(); minBoundBox[1]=boundBox.yMin(); minBoundBox[2]=boundBox.zMin();
+  maxBoundBox[0]=boundBox.xMax(); maxBoundBox[1]=boundBox.yMax(); maxBoundBox[2]=boundBox.zMax();
+
+  setColors();
+  generateTexture(m_pick_data,m_idPick);
 }
 
 /**
@@ -51,204 +52,108 @@ ObjCompAssemblyActor::ObjCompAssemblyActor(boost::shared_ptr<std::map<const boos
 */
 ObjCompAssemblyActor::~ObjCompAssemblyActor()
 {
+  if (m_data)
+  {
+    delete[] m_data;
+    delete[] m_pick_data;
+  }
 }
 
 /**
 * This function is concrete implementation that renders the Child ObjComponents and Child CompAssembly's
 */
-void ObjCompAssemblyActor::define()
+void ObjCompAssemblyActor::draw(bool picking)const
 {
   //Only draw the CompAssembly Children only if they are visible
   if(mVisible)
   {
+    OpenGLError::check("ObjCompAssemblyActor::draw(0)");
+    ObjCompAssembly_const_sptr objAss = getObjCompAssembly();
     glPushMatrix();
-    // Translation first
-    V3D pos = m_ObjAss->getPos();
-    if (!(pos.nullVector()))
-    {
-            glTranslated(pos[0],pos[1],pos[2]);
-    }
-    //Rotation
-    Quat rot = m_ObjAss->getRotation();
-    if (!(rot.isNull()))
-    {
-            double deg,ax0,ax1,ax2;
-            rot.getAngleAxis(deg,ax0,ax1,ax2);
-            glRotated(deg,ax0,ax1,ax2);
-    }
-    //Scale
-    V3D scaleFactor = boost::dynamic_pointer_cast<const Mantid::Geometry::IObjComponent>(m_ObjAss)->getScaleFactor();
-    if (!(scaleFactor==V3D(1,1,1)))
-    {
-            glScaled(scaleFactor[0],scaleFactor[1],scaleFactor[2]);
-    }
 
-    //std::cout << "ObjCompAssemblyActor::define() called with pos=" << pos << " and rot=" << rot << " and scale=" << scaleFactor << ".\n";
-
-    m_tex->define();
+    unsigned int texID = picking? m_idPick : m_idData;
+    // Because texture colours are combined with the geometry colour
+    // make sure the current colour is white
+    glColor3f(1.0f,1.0f,1.0f);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texID);
+    objAss->draw();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    OpenGLError::check("ObjCompAssemblyActor::draw()");
 
     glPopMatrix();
   }
 }
 
-
-/**
-* Initialises the CompAssembly Children and creates actors for each children
-* @param withDisplayList :: the new actors for the children with same display list attribute as parent
-*/
-void ObjCompAssemblyActor::initChilds(bool withDisplayList)
+void ObjCompAssemblyActor::generateTexture(unsigned char* data, unsigned int& id)
 {
-  (void) withDisplayList; //Avoid compiler warnings
-  Mantid::Geometry::ICompAssembly_const_sptr objAss = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(m_ObjAss);
-  mNumberOfDetectors = objAss->nelements();
-  for(int i=0;i<getNumberOfDetectors();++i)
+  if (id > 0)
   {
-    mObjCompIDs.push_back(objAss->getChild(i)->getComponentID());
+    glDeleteTextures(1,&id);
+    OpenGLError::check("TexObject::generateTexture()[delete texture] ");
   }
-  Mantid::Geometry::IObjComponent_const_sptr objComp = boost::dynamic_pointer_cast<const Mantid::Geometry::IObjComponent>(m_ObjAss);
-  Mantid::Geometry::BoundingBox boundBox;
-  objComp->getBoundingBox(boundBox);
-  minBoundBox[0]=boundBox.xMin(); minBoundBox[1]=boundBox.yMin(); minBoundBox[2]=boundBox.zMin();
-  maxBoundBox[0]=boundBox.xMax(); maxBoundBox[1]=boundBox.yMax(); maxBoundBox[2]=boundBox.zMax();
-}
+  bool vertical = true; // depends on the tex coordinates of the shape object
 
-/**
-* This method checks the list of Objects in mObjects for obj, if found returns the MantidObject. if the obj is not found
-* then creates a new MantidObject for obj and adds to the list of mObjects and returns the newly created MantidObject.
-* @param obj :: Object input for which MantidObject needed
-* @param withDisplayList :: whether the new MantidObject if needed uses the display list attribute
-* @return  the MantidObject corresponding to the obj.
-*/
-MantidObject*	ObjCompAssemblyActor::getMantidObject(const boost::shared_ptr<const Mantid::Geometry::Object> obj,bool withDisplayList)
-{
-  if (!obj)
+  int width = m_n;
+  int height = 1;
+  if (vertical)
   {
-    throw std::runtime_error("An instrument component does not have a shape.");
+    width = 1;
+    height = m_n;
   }
-  std::map<const boost::shared_ptr<const Object>,MantidObject*>::iterator iObj=mObjects->find(obj);
-  if(iObj==mObjects->end()) //create an new Mantid Object
+
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+  glGenTextures(1, &id);					// Create The Texture
+  OpenGLError::check("TexObject::generateTexture()[generate] ");
+  glBindTexture(GL_TEXTURE_2D, id);
+  OpenGLError::check("TexObject::generateTexture()[bind] ");
+
+  GLint texParam = GL_NEAREST;
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+  OpenGLError::check("TexObject::generateTexture()[set data] ");
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,texParam);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,texParam);
+  OpenGLError::check("TexObject::generateTexture()[parameters] ");
+}
+
+/**
+  * Set colour to a detector.
+  * @param i :: Index of the detector in ObjCompAssembly
+  * @param c :: The colour
+  */
+void ObjCompAssemblyActor::setDetectorColor(unsigned char* data,int i,GLColor c)
+{
+    int pos = 3*i;
+    float r,g,b,a;
+    c.get(r,g,b,a);
+    data[pos]   = (unsigned char)(r*255);
+    data[pos+1] = (unsigned char)(g*255);
+    data[pos+2] = (unsigned char)(b*255);
+}
+
+void ObjCompAssemblyActor::swap()
+{
+  if (!m_pick_data)
   {
-    MantidObject* retObj=new MantidObject(obj,withDisplayList);
-    retObj->draw();
-    mObjects->insert(mObjects->begin(),std::pair<const boost::shared_ptr<const Object>,MantidObject*>(obj,retObj));
-    return retObj;
+    m_pick_data = new  unsigned char[m_n*3];
   }
-  return (*iObj).second;
+  unsigned char* tmp = m_data;
+  m_data = m_pick_data;
+  m_pick_data = tmp;
 }
 
-/**
-* Set the starting color reference for CompAssembly
-* @param rgb :: input color id
-* @return  the number of color ids that are used.
-*/
-int ObjCompAssemblyActor::setStartingReferenceColor(int rgb)
+const unsigned char* ObjCompAssemblyActor::getColor(int i)const
 {
-  mColorStartID=rgb;
-  return getNumberOfDetectors();
+  return &m_data[3*i];
 }
 
-/**
-* Concrete implementation of init method of GLObject. this method draws the children
-*/
-void ObjCompAssemblyActor::init()
+void ObjCompAssemblyActor::setColors()
 {
-}
-
-/**
-* This method adds the detector ids of the children of CompAssembly to the input idList.
-* @param idList :: output list of detector ids for child detectors
-*/
-void ObjCompAssemblyActor::appendObjCompID(std::vector<int>& idList)
-{
-  Mantid::Geometry::ICompAssembly_const_sptr objAss = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(m_ObjAss);
-  for(int i=0;i<getNumberOfDetectors();++i)
+  for(size_t i = 0; i < size_t(m_n); ++i)
   {
-    idList.push_back(boost::dynamic_pointer_cast<IDetector>(objAss->getChild(i))->getID());
+    GLColor c = m_instrActor.getColor(m_detIDs[i]);
+    setDetectorColor(m_data,i,c);
   }
+  generateTexture(m_data,m_idData);
 }
 
-/**
-* The colors are set using the iterator of the color list.
-* @param list :: Color list iterator
-* @return the number of detectors
-*/
-int ObjCompAssemblyActor::setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator& list)
-{
-  for(int i=0;i<getNumberOfDetectors();++i)
-  {
-    m_tex->setDetectorColor(i,**list);
-    list++;
-  }
-  m_tex->generateTexture();
-  return getNumberOfDetectors();
-}
-
-/**
-* This method redraws the CompAssembly children compassembly actors redraw. this method is used to redraw all the children
-*/
-void ObjCompAssemblyActor::redraw()
-{
-  mChanged=true;
-  construct();
-}
-
-
-
-/**
-* This method draws the children with the ColorID rather than the children actual color. used in picking the component
-*/
-void ObjCompAssemblyActor::drawUsingColorID()
-{
-  //Check whether this assembly and its child components can be drawn
-  if(mVisible)
-  {
-    m_tex->swap(); // swap to pick texture
-    //Iterate throught the children with the starting reference color mColorStartID and incrementing
-    int rgb=mColorStartID;
-    float r,g,b;
-    for(int i = 0;i < getNumberOfDetectors();++i)
-    {
-      r=static_cast<float>(rgb/65536);
-      g=static_cast<float>((rgb%65536)/256);
-      b=static_cast<float>((rgb%65536)%256);
-      GLColor c(r/255,g/255,b/255);
-      m_tex->setDetectorColor(i,c);
-      rgb++;
-    }
-    m_tex->generateTexture();
-    define();
-    m_tex->swap(); // swap to show the data
-    m_tex->generateTexture();
-  }
-}
-
-/**
-* This method searches the child actors for the input rgb color and returns the detector id corresponding to the rgb color. if the
-* detector is not found then returns -1.
-* @param  rgb :: input color id; this is the color that was set for the given detector ID in drawUsingColorID()
-* @return the detector id of the input rgb color. If detector id not found then returns -1
-*/
-int ObjCompAssemblyActor::findDetectorIDUsingColor(int rgb)
-{
-  int i = rgb - mColorStartID;
-  if (i >= 0 && i < getNumberOfDetectors())
-  {
-    Mantid::Geometry::ICompAssembly_const_sptr objAss = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(m_ObjAss);
-    return boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(objAss->getChild(i))->getID();
-  }
-  return -1;
-}
-
-void ObjCompAssemblyActor::detectorCallback(DetectorCallback* callback)const
-{
-  Mantid::Geometry::ICompAssembly_const_sptr objAss = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(m_ObjAss);
-  for(int i=0;i<getNumberOfDetectors();++i)
-  {
-    const unsigned char* clr(m_tex->getColor(i));
-    float red = float(*clr) / 255;
-    float green = float(*(clr+1)) / 255;
-    float blue = float(*(clr+2)) / 255;
-    callback->callback(boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(objAss->getChild(i)),
-                       DetectorCallbackData(GLColor(red,green,blue)));
-  }
-}

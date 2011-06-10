@@ -16,6 +16,8 @@
 #include <string>
 #include <iostream>
 #include <cfloat>
+#include <typeinfo>
+
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
 #endif
@@ -26,61 +28,39 @@
 
 
 MantidGLWidget::MantidGLWidget(QWidget* parent):
-  QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel|QGL::SampleBuffers),parent)
+  QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel|QGL::SampleBuffers),parent),
+  m_bgColor(QColor(0,0,0,1)),
+  //m_polygonMode(SOLID),
+  m_lightingState(0),
+  m_isKeyPressed(false),
+  m_firstFrame(true),
+  m_surface(NULL)
 {
 
   if (!this->format().depth())
   {
     std::cout << "Warning! OpenGL Depth buffer could not be initialized.\n";
   }
-  //std::cout << "Depth buffer size is " << this->format().depthBufferSize() << "\n";
 
-  isKeyPressed=false;
-  m_interactionMode=MantidGLWidget::MoveMode;
   setFocusPolicy(Qt::StrongFocus);
   setAutoFillBackground(false);
-  m_bgColor=QColor(0,0,0,1);
-  m_polygonMode = SOLID;
-  m_lightingState = 0;
-  m_firstFrame = true;
-  m_renderMode = FULL3D;
-  //m_unwrappedSurface = NULL;
-  //m_unwrappedSurfaceChanged = true;
-  //m_unwrappedViewChanged = true;
-
   //Enable right-click in pick mode
   setContextMenuPolicy(Qt::DefaultContextMenu);
-  setRenderingOptions();
-
 }
 
 MantidGLWidget::~MantidGLWidget()
 {
-  //if (m_unwrappedSurface)
-  //{
-  //  delete m_unwrappedSurface;
-  //}
-}
-
-void MantidGLWidget::setInteractionModePick()
-{
-  m_interactionMode = PickMode;
-  setMouseTracking(true);
-  setCursor(Qt::ArrowCursor);
-  update();
-}
-
-void MantidGLWidget::setInteractionModeMove()
-{
-  m_interactionMode = MoveMode;
-  setMouseTracking(false);
-  //setCursor(Qt::PointingHandCursor);
-  glEnable(GL_NORMALIZE);
-  if (m_lightingState > 0)
+  if (m_surface)
   {
-    glEnable(GL_LIGHTING);
+    delete m_surface;
   }
-  update();
+}
+
+void MantidGLWidget::setSurface(ProjectionSurface* surface)
+{
+  m_surface = surface;
+  m_firstFrame = true;
+  initializeGL();
 }
 
 /**
@@ -93,6 +73,7 @@ void MantidGLWidget::initializeGL()
   
   // Set the relevant OpenGL rendering options
   setRenderingOptions();
+  glViewport(0,0,width(),height());
   
   // Clear the memory buffers
   glClearColor(GLclampf(m_bgColor.red()/255.0),GLclampf(m_bgColor.green()/255.0),GLclampf(m_bgColor.blue()/255.0),1.0);
@@ -163,37 +144,22 @@ void MantidGLWidget::setLightingModel(int state)
 void MantidGLWidget::paintEvent(QPaintEvent *event)
 {
   UNUSED_ARG(event)
-  //(void) event; //avoid compiler warning
-  //makeCurrent();
-  //if(iInteractionMode == MantidGLWidget::PickMode)
-  //{
-  //  if (m_renderMode == FULL3D)
-  //  {
-  //    if(mPickingDraw==true)
-  //    {
-  //      switchToPickingMode();
-  //    }
-  //    QPainter painter(this);
-  //    painter.setRenderHint(QPainter::Antialiasing);
-  //    mPickBox->draw(&painter);
-  //    painter.end();
-  //  }
-  //  else
-  //  {
-  //    drawUnwrapped();
-  //  }
-  //}
-  //else
-  //{
-  //  drawDisplayScene();
-  //}
+  makeCurrent();
+  if(m_surface)
+  {
+    m_surface->draw(this);
+  }
 
+  //swapBuffers();
+  OpenGLError::check("paintEvent");
 
-  //if (m_firstFrame)
-  //{
-  //  update();
-  //  m_firstFrame = false;
-  //}
+  if (m_firstFrame)
+  {
+    update();
+    m_firstFrame = false;
+    //saveToFile("C:/Users/hqs74821/Work/Mantid_stuff/InstrumentView/firstframe.png");
+    //std::cerr <<"Saved\n";
+  }
 }
 
 /**
@@ -202,8 +168,29 @@ void MantidGLWidget::paintEvent(QPaintEvent *event)
  */
 void MantidGLWidget::resizeGL(int width, int height)
 {
-  UNUSED_ARG(width)
-  UNUSED_ARG(height)
+  if (m_surface)
+  {
+    m_surface->resize(width, height);
+  }
+}
+
+/**
+ * Called when a context menu event is recieved
+ */
+void MantidGLWidget::contextMenuEvent(QContextMenuEvent * event)
+{
+  UNUSED_ARG(event) //avoid compiler warning
+  //if( m_interactionMode == MantidGLWidget::PickMode )
+  //{
+    //mPickBox->mousePressed(Qt::RightButton, QCursor::pos());
+    //mPickBox->mouseReleased(Qt::RightButton, QCursor::pos());
+    //std::set<QRgb> result=mPickBox->getListOfColorsPicked();
+    //if(!result.empty())
+    //{
+    //  emit actorsPicked(result);
+    //}
+
+  //}
 }
 
 /**
@@ -216,26 +203,11 @@ void MantidGLWidget::resizeGL(int width, int height)
  */
 void MantidGLWidget::mousePressEvent(QMouseEvent* event)
 {
-  UNUSED_ARG(event)
-}
-
-/**
- * Called when a context menu event is recieved
- */
-void MantidGLWidget::contextMenuEvent(QContextMenuEvent * event)
-{
-  UNUSED_ARG(event) //avoid compiler warning
-  if( m_interactionMode == MantidGLWidget::PickMode )
+  if (m_surface)
   {
-    //mPickBox->mousePressed(Qt::RightButton, QCursor::pos());
-    //mPickBox->mouseReleased(Qt::RightButton, QCursor::pos());
-    //std::set<QRgb> result=mPickBox->getListOfColorsPicked();
-    //if(!result.empty())
-    //{
-    //  emit actorsPicked(result);
-    //}
-
+    m_surface->mousePressEvent(event);
   }
+  update();
 }
 
 /**
@@ -249,7 +221,11 @@ void MantidGLWidget::contextMenuEvent(QContextMenuEvent * event)
  */
 void MantidGLWidget::mouseMoveEvent(QMouseEvent* event)
 {
-  UNUSED_ARG(event)
+  if (m_surface)
+  {
+    m_surface->mouseMoveEvent(event);
+  }
+  repaint();
 }
 
 /**
@@ -258,7 +234,11 @@ void MantidGLWidget::mouseMoveEvent(QMouseEvent* event)
  */
 void MantidGLWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-  UNUSED_ARG(event)
+  if (m_surface)
+  {
+    m_surface->mouseReleaseEvent(event);
+  }
+  repaint();
 }
 
 /**
@@ -267,8 +247,11 @@ void MantidGLWidget::mouseReleaseEvent(QMouseEvent* event)
  */
 void MantidGLWidget::wheelEvent(QWheelEvent* event)
 {
-  UNUSED_ARG(event)
-  OpenGLError::check("MantidGLWidget::wheelEvent");
+  if (m_surface)
+  {
+    m_surface->wheelEvent(event);
+  }
+  update();
 }
 
 /**
@@ -288,7 +271,7 @@ void MantidGLWidget::keyReleaseEvent(QKeyEvent *event)
 {
   releaseKeyboard();
   setCursor(Qt::PointingHandCursor);
-  isKeyPressed=false;
+  m_isKeyPressed=false;
   if(!event->isAutoRepeat())
   {
     update();
@@ -307,7 +290,10 @@ void MantidGLWidget::setBackgroundColor(QColor input)
   glClearColor(GLclampf(m_bgColor.red()/255.0),GLclampf(m_bgColor.green()/255.0),GLclampf(m_bgColor.blue()/255.0),1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   OpenGLError::check("MantidGLWidget::setBackgroundColor");
-  //m_unwrappedSurfaceChanged = true;
+  if (m_surface)
+  {
+    m_surface->updateView();
+  }
   update();
 }
 
@@ -356,104 +342,33 @@ void MantidGLWidget::enableLighting(bool on)
   update();
 }
 
-/**
-  * Set wireframe view on or off
-  * @param on :: If true set wireframe, otherwise it's SOLID
-  */
-void MantidGLWidget::setWireframe(bool on)
-{
-  m_polygonMode = on ? WIREFRAME : SOLID;
-  update();
-}
-
-void MantidGLWidget::setRenderMode(int mode)
-{
-  makeCurrent();
-  if (mode < RENDERMODE_SIZE)
-  {
-    m_renderMode = RenderMode(mode);
-    resetUnwrappedViews();
-  }
-  //if (mode == FULL3D)
-  //{
-  //  _viewport->issueGL();
-  //}
-  update();
-}
-
-void MantidGLWidget::resetUnwrappedViews()
-{
-  if (m_unwrappedSurface)
-  {
-    delete m_unwrappedSurface;
-    m_unwrappedSurface = NULL;
-  }
-  m_unwrappedSurfaceChanged = true;
-}
-
 void MantidGLWidget::draw()
 {
   QApplication::setOverrideCursor(Qt::WaitCursor);
-  //if (m_unwrappedSurfaceChanged)
-  //{
-  //  GLActor* actor = scene->getActor(0);
-  //  if (!actor) return;
-  //  InstrumentActor* instrActor = dynamic_cast<InstrumentActor*>(actor);
-  //  if (!instrActor) return;
-  //  boost::shared_ptr<Mantid::Geometry::IInstrument> instr = instrActor->getInstrument();
-  //  Mantid::Geometry::IObjComponent_sptr sample = instr->getSample();
-  //  Mantid::Geometry::V3D sample_pos = sample->getPos();
-
-  //  QTime time;
-  //  time.start();
-  //  if (m_unwrappedSurface) delete m_unwrappedSurface;
-  //  Mantid::Geometry::V3D axis;
-  //  if (m_renderMode == SPHERICAL_Y || m_renderMode == CYLINDRICAL_Y)
-  //  {
-  //    axis = Mantid::Geometry::V3D(0,1,0);
-  //  }
-  //  else if (m_renderMode == SPHERICAL_Z || m_renderMode == CYLINDRICAL_Z)
-  //  {
-  //    axis = Mantid::Geometry::V3D(0,0,1);
-  //  }
-  //  else // SPHERICAL_X || CYLINDRICAL_X
-  //  {
-  //    axis = Mantid::Geometry::V3D(1,0,0);
-  //  }
-
-  //  if (m_renderMode <= CYLINDRICAL_X)
-  //  {
-  //    m_unwrappedSurface = new UnwrappedCylinder(instrActor,sample_pos,axis);
-  //  }
-  //  else // SPHERICAL
-  //  {
-  //    m_unwrappedSurface = new UnwrappedSphere(instrActor,sample_pos,axis);
-  //  }
-
-  //  m_unwrappedSurfaceChanged = false;
-  //}
-
-  //m_unwrappedSurface->draw(this);
-
+  if (m_surface)
+  {
+    m_surface->draw(this);
+  }
   QApplication::restoreOverrideCursor();
   OpenGLError::check("MantidGLWidget::drawUnwrapped()");
 }
 
-//void MantidGLWidget::componentSelected(Mantid::Geometry::ComponentID id)
-//{
-//  if (m_unwrappedSurface)
-//  {
-//    m_unwrappedSurface->componentSelected(id);
-//    update();
-//  }
-//}
+void MantidGLWidget::componentSelected(Mantid::Geometry::ComponentID id)
+{
+  if (m_surface)
+  {
+    m_surface->componentSelected(id);
+    m_surface->updateView();
+    repaint();
+  }
+}
 
 void MantidGLWidget::refreshView()
 {
-  if( m_interactionMode == PickMode) //This is when in picking mode and the window is resized so update the image
-  {
+  //if( m_interactionMode == PickMode) //This is when in picking mode and the window is resized so update the image
+  //{
     //mPickingDraw=true;
-  }
-  m_unwrappedViewChanged = true;
+  //}
+  m_surface->updateView();
   update();
 }

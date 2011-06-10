@@ -84,7 +84,8 @@ public:
   QVector<QRgb> colorTable(const QwtDoubleInterval & interval) const;
 
   /// Return a GLColor object that can be assigned to an instrument actor
-  boost::shared_ptr<GLColor> getColor(unsigned char index) const;
+  //boost::shared_ptr<GLColor> getColor(unsigned char index) const;
+  GLColor getColor(unsigned char index) const;
 
   /**
    * Get the number of colors in this map
@@ -110,7 +111,8 @@ private:
   /// An array of shared pointers to objects that define how the color should be painted on
   /// an OpenGL surface. QVector objects are implicitly shared so offer better performance than
   /// standard vectors
-  QVector<boost::shared_ptr<GLColor> > m_colors;
+  //QVector<boost::shared_ptr<GLColor> > m_colors;
+  QVector<GLColor> m_colors;
 
   /// The number of colors in this map
   short m_num_colors;

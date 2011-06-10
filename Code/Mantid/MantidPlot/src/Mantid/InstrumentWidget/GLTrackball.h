@@ -82,6 +82,7 @@ public:
 	void reset();
 	//! Rotates a bounding box
 	void rotateBoundingBox(double& xmin,double& xmax,double& ymin,double& ymax,double& zmin,double& zmax);
+  Mantid::Geometry::Quat getRotation() const {return _quaternion;}
 private:
 	//! Pointer to the viewport to which the trackball is attached
   GLViewport* _viewport;

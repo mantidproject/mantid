@@ -57,7 +57,7 @@ class RectangularDetectorActor : public ICompAssemblyActor //ObjComponentActor
 {
 public:
   /// Constructor
-  RectangularDetectorActor(boost::shared_ptr<Mantid::Geometry::RectangularDetector> rectDet);
+  RectangularDetectorActor(const InstrumentActor& instrActor, const Mantid::Geometry::ComponentID& compID);
   /// Destructor
   virtual ~RectangularDetectorActor();
 
@@ -66,9 +66,9 @@ private:
 
 protected:
   /// The rectangular detector
-  boost::shared_ptr<Mantid::Geometry::RectangularDetector> mDet;
+  boost::shared_ptr<const Mantid::Geometry::RectangularDetector> mDet;
 
-  void init();
+  void init()const;
   void redraw();
   int findDetectorIDUsingColor(int rgb);
   virtual void initChilds(bool) {}
@@ -76,13 +76,14 @@ protected:
 public:
   virtual std::string type()const {return "RectangularDetectorActor";} ///< Type of the GL object
 
-  void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
+  void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
+  void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const;
+  virtual void setColors();
 
   void appendObjCompID(std::vector<int>& idList);
-  int setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator & list);
-  int genTexture(char * & image_data, std::vector<boost::shared_ptr<GLColor> >::iterator& list, bool useDetectorIDs);
-  void uploadTexture(char * & image_data);
-  void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound);
+  int setInternalDetectorColors(std::vector<GLColor>::iterator & list);
+  int genTexture(char * & image_data, std::vector<GLColor>::iterator& list, bool useDetectorIDs);
+  void uploadTexture(char * & image_data)const;
 
   virtual int  setStartingReferenceColor(int rgb);
   virtual void drawUsingColorID();
@@ -92,19 +93,18 @@ public:
     return NULL;
   }
 
-  void detectorCallback(DetectorCallback* callback)const;
-
 private:
   /// Texture ID that holds the texture.
-  unsigned int mTextureID;
+  mutable unsigned int mTextureID;
 
   /// Pointer to the array holding the texture color data
-  char * image_data;
+  mutable char * image_data;
 
   /// Pointer to the array holding the color data for picking the scene
-  char * pick_data;
+  mutable char * pick_data;
 
-
+  /// pick ids
+  std::vector<size_t> m_pickIDs;
 };
 
 #endif /*RECTANGULAR_DETECTOR_ACTOR__H_*/

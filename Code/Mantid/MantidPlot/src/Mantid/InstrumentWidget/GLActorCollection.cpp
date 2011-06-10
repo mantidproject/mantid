@@ -1,20 +1,21 @@
 #include "GLActorCollection.h"
+#include "OpenGLError.h"
+
+#include "MantidKernel/Exception.h"
+
 #include <stdexcept>
 #include <iostream>
 #include <functional>
 #include <algorithm>
 #include <float.h>
 
-//static int hash(unsigned char r, unsigned char g, unsigned char b)
-//{
-//	 return r*65536+g*256+b;
-//}
-
-GLActorCollection::GLActorCollection():GLObject(true)
+GLActorCollection::GLActorCollection()
+  :GLActor(),
+  m_minBound(DBL_MAX,DBL_MAX,DBL_MAX),
+  m_maxBound(-DBL_MAX,-DBL_MAX,-DBL_MAX),
+  m_displayListId(0),
+  m_useDisplayList(false)
 {
-	referenceColorID[0] = 0;
-	referenceColorID[1] = 0;
-	referenceColorID[2] = 1;
 }
 
 GLActorCollection::~GLActorCollection()
@@ -24,16 +25,57 @@ GLActorCollection::~GLActorCollection()
 	  delete (*i);
 	}
 	mActorsList.clear();
+	if(m_displayListId != 0)
+  {
+		glDeleteLists(m_displayListId,1);
+  }
+
 }
 
 /**
  * This method does the drawing by calling the list of actors to draw themselfs
  */
-void GLActorCollection::define()
+void GLActorCollection::draw(bool picking)const
 {
-    for_each(mActorsList.begin(),mActorsList.end(),std::mem_fun(&GLActor::draw));
+  OpenGLError::check("GLActorCollection::draw(0)");
+  if (picking)
+  {
+    drawGL(picking);
+  }
+  else
+  {
+    if (m_useDisplayList)
+    {
+      glCallList(m_displayListId);
+    }
+    else if (m_displayListId == 0)
+    {
+      m_displayListId = glGenLists(1);
+      // child actors can also create display lists, so delay
+      // until all the children have finished making theirs
+      drawGL(picking);
+    }
+    else
+    {
+      m_useDisplayList = true;
+      glNewList(m_displayListId,GL_COMPILE); //Construct display list for object representation
+      drawGL(picking);
+      glEndList();
+      if(glGetError()==GL_OUT_OF_MEMORY) //Throw an exception
+        throw Mantid::Kernel::Exception::OpenGLError("OpenGL: Out of video memory");
+      glCallList(m_displayListId);
+    }
+  }
+  OpenGLError::check("GLActorCollection::draw()");
 }
 
+void GLActorCollection::drawGL(bool picking )const
+{
+  for(std::vector<GLActor*>::const_iterator it = mActorsList.begin();it != mActorsList.end();++it)
+  {
+    (**it).draw(picking);
+  }
+}
 
 /**
  * This method addes a new actor to the collection.
@@ -41,17 +83,20 @@ void GLActorCollection::define()
  */
 void GLActorCollection::addActor(GLActor* a)
 {
-        if( !a )
+  if( !a )
 	{
 	  return;
 	}
 	mActorsList.push_back(a);
-	int rgb = referenceColorID[0]*65536 + referenceColorID[1]*256 + referenceColorID[2];
-	int noOfColors = a->setStartingReferenceColor(rgb);
-	rgb += noOfColors;
-	referenceColorID[0] = (unsigned char)(rgb / 65536);
-	referenceColorID[1] = (unsigned char)((rgb % 65536) / 256);
-	referenceColorID[2] = (unsigned char)((rgb % 65536) % 256);
+  Mantid::Geometry::V3D minBound;
+  Mantid::Geometry::V3D maxBound;
+  a->getBoundingBox(minBound,maxBound);
+  if(m_minBound[0]>minBound[0]) m_minBound[0]=minBound[0];
+  if(m_minBound[1]>minBound[1]) m_minBound[1]=minBound[1];
+  if(m_minBound[2]>minBound[2]) m_minBound[2]=minBound[2];
+  if(m_maxBound[0]<maxBound[0]) m_maxBound[0]=maxBound[0];
+  if(m_maxBound[1]<maxBound[1]) m_maxBound[1]=maxBound[1];
+  if(m_maxBound[2]<maxBound[2]) m_maxBound[2]=maxBound[2];
 }
 
 /**
@@ -83,47 +128,18 @@ GLActor* GLActorCollection::getActor(int index)
 	return mActorsList.at(index);
 }
 
-/**
- * This method is to find the matching input color id in the collection of actors color and mark the matched actor as picked.
- * @param color :: input color
- */
-GLActor* GLActorCollection::findColorID(unsigned char color[3])
+void GLActorCollection::getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const
 {
-  (void) color; //avoid compiler warning
-
-	GLActor* picked=0;
-	throw std::runtime_error("Find colorid not implemented");
-	//int key=hash(color[0],color[1],color[2]);
-	//Actormap::const_iterator it=_actors.find(key);
-	//if (it!=_actors.end())
-	//{
-	//	picked=(*it).second;
-	//	picked->markPicked();
-	//}
-	return picked;
+  minBound = m_minBound;
+  maxBound = m_maxBound;
 }
 
-/**
- * This method redraws the entire scene because of change in the color
- */
-void GLActorCollection::refresh()
+void GLActorCollection::invalidateDisplayList()const
 {
-	this->mChanged=true;
+	if(m_displayListId != 0)
+  {
+		glDeleteLists(m_displayListId,1);
+    m_displayListId = 0;
+    m_useDisplayList = false;
+  }
 }
-
-/**
- * This method calls all the initialisation of the Actors in the collection
- */
-void GLActorCollection::init()
-{
-    for_each(mActorsList.begin(),mActorsList.end(),std::mem_fun(&GLActor::init));
-}
-
-//void GLActorCollection::addToUnwrappedList(UnwrappedCylinder& cylinder, QList<UnwrappedDetectorCyl>& list)
-//{
-//  std::vector<GLActor*>::iterator it = mActorsList.begin();
-//  for(;it != mActorsList.end();++it)
-//  {
-//    (**it).addToUnwrappedList(cylinder,list);
-//  }
-//}

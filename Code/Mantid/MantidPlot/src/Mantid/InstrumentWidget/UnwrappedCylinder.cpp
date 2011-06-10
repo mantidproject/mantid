@@ -1,11 +1,8 @@
 #include "UnwrappedCylinder.h"
-//#include "GLColor.h"
-//#include "GL3DWidget.h"
-//
-#include "MantidGeometry/IDetector.h"
-//#include "MantidGeometry/Objects/Object.h"
 
-UnwrappedCylinder::UnwrappedCylinder(const InstrumentActor *rootActor, const Mantid::Geometry::V3D &origin, const Mantid::Geometry::V3D &axis):
+#include "MantidGeometry/IDetector.h"
+
+UnwrappedCylinder::UnwrappedCylinder(const InstrumentActor* rootActor, const Mantid::Geometry::V3D &origin, const Mantid::Geometry::V3D &axis):
     UnwrappedSurface(rootActor,origin,axis)
 {
   init();
@@ -29,7 +26,7 @@ void UnwrappedCylinder::calcUV(UnwrappedDetector& udet)
 
 }
 
-void UnwrappedCylinder::calcRot(UnwrappedDetector& udet, Mantid::Geometry::Quat& R)
+void UnwrappedCylinder::calcRot(const UnwrappedDetector& udet, Mantid::Geometry::Quat& R)const
 {
   // Basis vectors for a detector image on the screen
   const Mantid::Geometry::V3D X(-1,0,0);
@@ -47,7 +44,7 @@ void UnwrappedCylinder::calcRot(UnwrappedDetector& udet, Mantid::Geometry::Quat&
   z = z - y * z.scalar_prod(y);
   z.normalize();
   Mantid::Geometry::Quat R1;
-  BasisRotation(x,y,z,X,Y,Z,R1);
+  InstrumentActor::BasisRotation(x,y,z,X,Y,Z,R1);
 
   R =  R1 * udet.detector->getRotation();
 

@@ -1,6 +1,7 @@
 #ifndef OBJCOMPONENT_ACTOR_H_
 #define OBJCOMPONENT_ACTOR_H_
-#include "GLActor.h"
+#include "ComponentActor.h"
+#include "GLColor.h"
 /**
   \class  ObjComponentActor
   \brief  ObjComponentActor is an actor class for rendering ObjComponents.
@@ -35,25 +36,23 @@ namespace Mantid{
 		class V3D;
 	}
 }
-class MantidObject;
+class InstrumentActor;
 
-class ObjComponentActor : public GLActor
+class ObjComponentActor : public ComponentActor
 {
-private:
-  MantidObject *mObject;
-  boost::shared_ptr<Mantid::Geometry::IObjComponent> mObjComp;
 public:
-  ObjComponentActor(bool withDisplayList=false); ///< Default Constructor
-  ObjComponentActor(MantidObject *obj, boost::shared_ptr<Mantid::Geometry::IObjComponent> objComp, bool withDisplayList=false); ///< Default Constructor
+  ObjComponentActor(const InstrumentActor& instrActor,Mantid::Geometry::ComponentID compID); ///< Default Constructor
   ~ObjComponentActor();								   ///< Destructor
   virtual std::string type()const {return "ObjComponentActor";} ///< Type of the GL object
-  virtual void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-  virtual void appendObjCompID(std::vector<int>& idList);
-  virtual int setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator & list);
-  virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound);
+  virtual void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
+  virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const;
+  virtual void setColors();
 
-  const boost::shared_ptr<Mantid::Geometry::IObjComponent> getObjComponent() const{return mObjComp;}
-  void detectorCallback(DetectorCallback* callback)const;
+  void setColor(const GLColor& c){m_dataColor = c;}
+
+private:
+  GLColor m_dataColor;
+  GLColor m_pickColor;
 };
 
 #endif /*OBJCOMPONENT_ACTOR_H_*/

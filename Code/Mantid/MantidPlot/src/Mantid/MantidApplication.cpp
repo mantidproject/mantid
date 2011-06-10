@@ -27,8 +27,14 @@ bool MantidApplication::notify( QObject * receiver, QEvent * event )
   catch(std::exception& e) 
   {
 
-      if (MantidQt::API::MantidDialog::handle(receiver,e))
-          return true; // stops event propagation
+    if (MantidQt::API::MantidDialog::handle(receiver,e))
+      return true; // stops event propagation
+
+    // Restore possible override cursor
+    while(QApplication::overrideCursor())
+    {
+      QApplication::restoreOverrideCursor();
+    }
 
     g_log.fatal()<<"Unexpected exception: "<<e.what()<<"\n";
     QMessageBox ask;

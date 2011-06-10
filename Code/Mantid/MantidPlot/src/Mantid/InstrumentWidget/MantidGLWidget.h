@@ -1,10 +1,12 @@
 #ifndef MANTIDGLWIDGET_H_
 #define MANTIDGLWIDGET_H_
 
+#include "MantidGeometry/IComponent.h"
+
 #include <QGLWidget>
 #include <QString>
 
-class UnwrappedSurface;
+class ProjectionSurface;
 
 /**
   \class  MantidGLWidget
@@ -15,26 +17,21 @@ class MantidGLWidget : public QGLWidget
 {
   Q_OBJECT
 public:
-  enum InteractionMode {MoveMode = 0, PickMode = 1}; ///< Move around or select things
-  enum PolygonMode{ SOLID, WIREFRAME };
-  enum RenderMode{ FULL3D = 0, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z, RENDERMODE_SIZE };
+  //enum PolygonMode{ SOLID, WIREFRAME };
   MantidGLWidget(QWidget* parent=0); ///< Constructor
   virtual ~MantidGLWidget();         ///< Destructor
-  void setInteractionModeMove();
-  void setInteractionModePick();
-  InteractionMode getInteractionMode()const{return m_interactionMode;}
+  void setSurface(ProjectionSurface* surface);
+  ProjectionSurface* getSurface(){return m_surface;}
+  
   void setBackgroundColor(QColor);
   QColor currentBackgroundColor() const;
   void saveToFile(const QString & filename);
-  RenderMode getRenderMode()const{return m_renderMode;}
 
 public slots:
   void enableLighting(bool);
-  void setWireframe(bool);
-  void resetUnwrappedViews();
-  //void setSelectionType(int);
-  void setRenderMode(int);
+  //void setWireframe(bool);
   void refreshView();
+  void componentSelected(Mantid::Geometry::ComponentID id);
 
 protected:
   void initializeGL();
@@ -42,8 +39,8 @@ protected:
   void MakeObject();
   void paintEvent(QPaintEvent *event);
   void resizeGL(int,int);
-  void mousePressEvent(QMouseEvent*);
   void contextMenuEvent(QContextMenuEvent*);
+  void mousePressEvent(QMouseEvent*);
   void mouseMoveEvent(QMouseEvent*);
   void mouseReleaseEvent(QMouseEvent*);
   void wheelEvent(QWheelEvent *);
@@ -57,17 +54,13 @@ private:
   void setLightingModel(int);
 
   QColor m_bgColor;                 ///< Background color
-  InteractionMode m_interactionMode;
-  RenderMode m_renderMode;       ///< 3D view or unwrapped
-  bool isKeyPressed;
+  //PolygonMode m_polygonMode;     ///< SOLID or WIREFRAME
   int m_lightingState;           ///< 0 = light off; 2 = light on
-  PolygonMode m_polygonMode;     ///< SOLID or WIREFRAME
+  bool m_isKeyPressed;
   bool m_firstFrame;
 
-  //// Unwrapping stuff
-  UnwrappedSurface* m_unwrappedSurface;
-  bool m_unwrappedSurfaceChanged;
-  bool m_unwrappedViewChanged;   ///< set when the unwrapped image must be redrawn, but the surface is the same
+  //// Surface stuff
+  ProjectionSurface* m_surface;
   //boost::scoped_ptr<DetSelector> m_detSelector;    ///< draws the selection region
 
 };

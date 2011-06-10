@@ -23,23 +23,23 @@
 InstrumentWindowRenderTab::InstrumentWindowRenderTab(InstrumentWindow* instrWindow):
 QFrame(instrWindow),m_instrWindow(instrWindow)
 {
-  mInstrumentDisplay = m_instrWindow->getInstrumentDisplay();
+  m_InstrumentDisplay = m_instrWindow->getInstrumentDisplay();
   QVBoxLayout* renderControlsLayout=new QVBoxLayout(this);
 
   // Render Mode control
   QComboBox* renderMode = new QComboBox(this);
   renderMode->setToolTip("Set render mode");
   QStringList modeList;
-  modeList << "Full 3D" << "Cylindrical Y" << "Cylindrical Z" << "Cylindrical X" << "Spherical Y" << "Spherical Z" << "Spherical X";
+  modeList << "Full 3D" << "Cylindrical X"  << "Cylindrical Y" << "Cylindrical Z" << "Spherical X" << "Spherical Y" << "Spherical Z";
   renderMode->insertItems(0,modeList);
-  connect(renderMode,SIGNAL(currentIndexChanged(int)),m_instrWindow,SLOT(setRenderMode(int)));
+  connect(renderMode,SIGNAL(currentIndexChanged(int)),m_instrWindow,SLOT(setSurfaceType(int)));
   connect(renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(showResetView(int)));
 
   // X selection control
   QPushButton* mSelectBin = new QPushButton(tr("Select X Range"));
   connect(mSelectBin, SIGNAL(clicked()), this, SLOT(selectBinButtonClicked()));
   mBinDialog = new BinDialog(this);
-  connect(mBinDialog,SIGNAL(IntegralMinMax(double,double,bool)), m_instrWindow->getInstrumentDisplay(), SLOT(setDataMappingIntegral(double,double,bool)));
+  //connect(mBinDialog,SIGNAL(IntegralMinMax(double,double,bool)), m_instrWindow->getInstrumentDisplay(), SLOT(setDataMappingIntegral(double,double,bool)));
 
   // Save image control
   mSaveImage = new QPushButton(tr("Save image"));
@@ -55,7 +55,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_lighting = new QAction("Lighting",this);
   m_lighting->setCheckable(true);
   m_lighting->setChecked(false);
-  connect(m_lighting,SIGNAL(toggled(bool)),mInstrumentDisplay,SLOT(enableLighting(bool)));
+  //connect(m_lighting,SIGNAL(toggled(bool)),mInstrumentDisplay,SLOT(enableLighting(bool)));
   m_displayAxes = new QAction("Display Axes",this);
   m_displayAxes->setCheckable(true);
   m_displayAxes->setChecked(true);
@@ -63,7 +63,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_wireframe = new QAction("Wireframe",this);
   m_wireframe->setCheckable(true);
   m_wireframe->setChecked(false);
-  connect(m_wireframe, SIGNAL(toggled(bool)), m_instrWindow->getInstrumentDisplay(), SLOT(setWireframe(bool)));
+  connect(m_wireframe, SIGNAL(toggled(bool)), m_instrWindow, SLOT(setWireframe(bool)));
   displaySettingsMenu->addAction(m_colorMap);
   displaySettingsMenu->addAction(m_backgroundColor);
   displaySettingsMenu->addSeparator();
@@ -75,10 +75,10 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   QFrame * axisViewFrame = setupAxisFrame();
 
   // Colormap widget
-  m_colorMapWidget = new ColorMapWidget(mInstrumentDisplay->getColorMap().getScaleType(),this);
-  connect(m_colorMapWidget, SIGNAL(scaleTypeChanged(int)), this, SLOT(scaleTypeChanged(int)));
-  connect(m_colorMapWidget,SIGNAL(minValueChanged(double)),this, SLOT(minValueChanged(double)));
-  connect(m_colorMapWidget,SIGNAL(maxValueChanged(double)),this, SLOT(maxValueChanged(double)));
+  m_colorMapWidget = new ColorMapWidget(0,this);
+  connect(m_colorMapWidget, SIGNAL(scaleTypeChanged(int)), m_instrWindow, SLOT(changeScaleType(int)));
+  connect(m_colorMapWidget,SIGNAL(minValueChanged(double)),m_instrWindow, SLOT(changeColorMapMinValue(double)));
+  connect(m_colorMapWidget,SIGNAL(maxValueChanged(double)),m_instrWindow, SLOT(changeColorMapMaxValue(double)));
 
   // layout
   renderControlsLayout->addWidget(renderMode);
@@ -124,28 +124,12 @@ QFrame * InstrumentWindowRenderTab::setupAxisFrame()
 }
 
 /**
- * A slot called when the scale type combo box's selection changes
- */
-void InstrumentWindowRenderTab::scaleTypeChanged(int index)
-{
-  if( m_instrWindow->isVisible() )
-  {
-    GraphOptions::ScaleType type = (GraphOptions::ScaleType)index;
-    mInstrumentDisplay->mutableColorMap().changeScaleType(type);
-    mInstrumentDisplay->calculateCounts();
-    setupColorBarScaling();
-    mInstrumentDisplay->calculateColors();
-    mInstrumentDisplay->refresh();
-  }
-}
-
-/**
  *
  */
-void InstrumentWindowRenderTab::setupColorBarScaling()
+void InstrumentWindowRenderTab::setupColorBarScaling(const MantidColorMap& cmap,double minPositive)
 {
-  m_colorMapWidget->setMinPositiveValue(mInstrumentDisplay->getWSPositiveMin());
-  m_colorMapWidget->setupColorBarScaling(mInstrumentDisplay->getColorMap());
+  m_colorMapWidget->setMinPositiveValue(minPositive);
+  m_colorMapWidget->setupColorBarScaling(cmap);
 }
 
 /**
@@ -154,7 +138,6 @@ void InstrumentWindowRenderTab::setupColorBarScaling()
 void InstrumentWindowRenderTab::changeColormap(const QString &filename)
 {
   m_instrWindow->changeColormap(filename);
-  setupColorBarScaling();
 }
 
 /**
@@ -162,28 +145,28 @@ void InstrumentWindowRenderTab::changeColormap(const QString &filename)
  */
 void InstrumentWindowRenderTab::minValueChanged(double value)
 {
-  double updated_value = value;
-  double old_value = mInstrumentDisplay->getDataMinValue();
-  // If the new value is the same
-  if( std::abs( (updated_value - old_value) / old_value) < 1e-08 ) return;
-  //Check it is less than the max
-  if( updated_value < mInstrumentDisplay->getDataMaxValue() )
-  {
-    mInstrumentDisplay->setMinData(updated_value);
+  //double updated_value = value;
+  //double old_value = mInstrumentDisplay->getDataMinValue();
+  //// If the new value is the same
+  //if( std::abs( (updated_value - old_value) / old_value) < 1e-08 ) return;
+  ////Check it is less than the max
+  //if( updated_value < mInstrumentDisplay->getDataMaxValue() )
+  //{
+  //  mInstrumentDisplay->setMinData(updated_value);
 
-    if( this->isVisible() )
-    { 
-      setupColorBarScaling();
-      mInstrumentDisplay->recount();
-    }
-  }
-  else
-  {
-    // Invalid. Reset value.
-    m_colorMapWidget->blockSignals(true);
-    m_colorMapWidget->setMinValue(old_value);
-    m_colorMapWidget->blockSignals(false);
-  }
+  //  if( this->isVisible() )
+  //  { 
+  //    setupColorBarScaling();
+  //    mInstrumentDisplay->recount();
+  //  }
+  //}
+  //else
+  //{
+  //  // Invalid. Reset value.
+  //  m_colorMapWidget->blockSignals(true);
+  //  m_colorMapWidget->setMinValue(old_value);
+  //  m_colorMapWidget->blockSignals(false);
+  //}
 }
 
 /**
@@ -191,59 +174,59 @@ void InstrumentWindowRenderTab::minValueChanged(double value)
  */
 void InstrumentWindowRenderTab::maxValueChanged(double value)
 {
-  double updated_value = value;
-  double old_value = mInstrumentDisplay->getDataMaxValue();
-  // If the new value is the same
-  if( std::abs( (updated_value - old_value) / old_value) < 1e-08 ) return;
-  // Check that it is valid
-  if( updated_value > mInstrumentDisplay->getDataMinValue() )
-  {
-    mInstrumentDisplay->setMaxData(updated_value);
+  //double updated_value = value;
+  //double old_value = mInstrumentDisplay->getDataMaxValue();
+  //// If the new value is the same
+  //if( std::abs( (updated_value - old_value) / old_value) < 1e-08 ) return;
+  //// Check that it is valid
+  //if( updated_value > mInstrumentDisplay->getDataMinValue() )
+  //{
+  //  mInstrumentDisplay->setMaxData(updated_value);
 
-    if( this->isVisible() )
-    { 
-      setupColorBarScaling();
-      mInstrumentDisplay->recount();
-    }
-  }
-  else
-  {
-    // Invalid. Reset
-    m_colorMapWidget->blockSignals(true);
-    m_colorMapWidget->setMaxValue(old_value);
-    m_colorMapWidget->blockSignals(false);
-  }
+  //  if( this->isVisible() )
+  //  { 
+  //    setupColorBarScaling();
+  //    mInstrumentDisplay->recount();
+  //  }
+  //}
+  //else
+  //{
+  //  // Invalid. Reset
+  //  m_colorMapWidget->blockSignals(true);
+  //  m_colorMapWidget->setMaxValue(old_value);
+  //  m_colorMapWidget->blockSignals(false);
+  //}
 }
 
 void InstrumentWindowRenderTab::selectBinButtonClicked()
 {
-  //At this point (only) do we calculate the bin ranges.
-  mInstrumentDisplay->calculateBinRange();
-  //Set the values found + the bool for entire range
-  mBinDialog->setIntegralMinMax(mInstrumentDisplay->getBinMinValue(), mInstrumentDisplay->getBinMaxValue(), mInstrumentDisplay->getBinEntireRange());
-  //Show the dialog
-  mBinDialog->exec();
+  ////At this point (only) do we calculate the bin ranges.
+  //mInstrumentDisplay->calculateBinRange();
+  ////Set the values found + the bool for entire range
+  //mBinDialog->setIntegralMinMax(mInstrumentDisplay->getBinMinValue(), mInstrumentDisplay->getBinMaxValue(), mInstrumentDisplay->getBinEntireRange());
+  ////Show the dialog
+  //mBinDialog->exec();
 }
 
 void InstrumentWindowRenderTab::loadSettings(const QString& section)
 {
   QSettings settings;
   settings.beginGroup(section);
-  int show3daxes = settings.value("3DAxesShown", 1 ).toInt();
-  m_instrWindow->set3DAxesState(show3daxes != 0);
-  m_displayAxes->blockSignals(true);
-  m_displayAxes->setChecked(show3daxes != 0);
-  m_displayAxes->blockSignals(false);
+  //int show3daxes = settings.value("3DAxesShown", 1 ).toInt();
+  //m_instrWindow->set3DAxesState(show3daxes != 0);
+  //m_displayAxes->blockSignals(true);
+  //m_displayAxes->setChecked(show3daxes != 0);
+  //m_displayAxes->blockSignals(false);
   settings.endGroup();
 }
 
 void InstrumentWindowRenderTab::saveSettings(const QString& section)
 {
-  QSettings settings;
-  settings.beginGroup(section);
-  int val = 0;  if (m_displayAxes->isChecked()) val = 1;
-  settings.setValue("3DAxesShown", QVariant(val));
-  settings.endGroup();
+  //QSettings settings;
+  //settings.beginGroup(section);
+  //int val = 0;  if (m_displayAxes->isChecked()) val = 1;
+  //settings.setValue("3DAxesShown", QVariant(val));
+  //settings.endGroup();
 }
 
 void InstrumentWindowRenderTab::setMinValue(double value, bool apply)
@@ -280,7 +263,8 @@ void InstrumentWindowRenderTab::setAxis(const QString& axisNameArg)
 
 bool InstrumentWindowRenderTab::areAxesOn()const
 {
-  return mInstrumentDisplay->areAxesOn();
+//  return mInstrumentDisplay->areAxesOn();
+  return false;
 }
 
 /**

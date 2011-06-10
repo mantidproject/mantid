@@ -2,6 +2,7 @@
 #include "InstrumentWindowPickTab.h"
 #include "OneCurvePlot.h"
 #include "CollapsiblePanel.h"
+#include "InstrumentActor.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -23,9 +24,10 @@
 
 #include <numeric>
 #include <cfloat>
+#include <algorithm>
 
 InstrumentWindowPickTab::InstrumentWindowPickTab(InstrumentWindow* instrWindow):
-QFrame(instrWindow),m_instrWindow(instrWindow)
+QFrame(instrWindow),m_instrWindow(instrWindow),m_currentDetID(-1)
 {
   mInstrumentDisplay = m_instrWindow->getInstrumentDisplay();
   m_plotSum = true;
@@ -112,7 +114,7 @@ bool InstrumentWindowPickTab::canUpdateTouchedDetector()const
   return ! m_peak->isChecked();
 }
 
-void InstrumentWindowPickTab::updatePlot(const Instrument3DWidget::DetInfo & cursorPos)
+void InstrumentWindowPickTab::updatePlot(int detid)
 {
   if (m_instrWindow->blocked())
   {
@@ -120,17 +122,18 @@ void InstrumentWindowPickTab::updatePlot(const Instrument3DWidget::DetInfo & cur
     return;
   }
   if (m_plotPanel->isCollapsed()) return;
-  Mantid::API::MatrixWorkspace_const_sptr ws = cursorPos.getWorkspace();
-  int wi = cursorPos.getWorkspaceIndex();
-  if (cursorPos.getDetID() >= 0 && wi >= 0)
+  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+  Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+  size_t wi = instrActor->getWorkspaceIndex(detid);
+  if (detid >= 0)
   {
     if (m_one->isChecked() || m_peak->isChecked())
     {// plot spectrum of a single detector
-      plotSingle(cursorPos);
+      plotSingle(detid);
     }
     else if (m_tube->isChecked())
     {// plot integrals
-      plotTube(cursorPos);
+      plotTube(detid);
     }
   }
   else
@@ -141,20 +144,22 @@ void InstrumentWindowPickTab::updatePlot(const Instrument3DWidget::DetInfo & cur
   m_plot->replot();
 }
 
-void InstrumentWindowPickTab::updateSelectionInfo(const Instrument3DWidget::DetInfo & cursorPos)
+void InstrumentWindowPickTab::updateSelectionInfo(int detid)
 {
   if (m_instrWindow->blocked()) 
   {
     m_selectionInfoDisplay->clear();
     return;
   }
-  if (cursorPos.getDetID() >= 0)
+  if (detid >= 0)
   {
-    Mantid::API::MatrixWorkspace_const_sptr ws = cursorPos.getWorkspace();
-    Mantid::Geometry::IDetector_sptr det = ws->getInstrument()->getDetector(cursorPos.getDetID());
+    InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+    Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+    size_t wi = instrActor->getWorkspaceIndex(detid);
+    Mantid::Geometry::IDetector_sptr det = ws->getInstrument()->getDetector(detid);
     QString text = "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
-    text += "Detector ID: " + QString::number(cursorPos.getDetID()) + '\n';
-    text += "Workspace index: " + QString::number(cursorPos.getWorkspaceIndex()) + '\n';
+    text += "Detector ID: " + QString::number(detid) + '\n';
+    text += "Workspace index: " + QString::number(wi) + '\n';
     Mantid::Geometry::V3D pos = det->getPos();
     text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) + "," + QString::number(pos.Z())  + '\n';
     double r,t,p;
@@ -221,44 +226,77 @@ void InstrumentWindowPickTab::integrateTimeBins()
   setPlotCaption();
 }
 
-void InstrumentWindowPickTab::updatePick(const Instrument3DWidget::DetInfo & cursorPos)
+void InstrumentWindowPickTab::updatePick(int detid)
 {
-  m_currentPos = cursorPos;
-  updatePlot(cursorPos);
-  updateSelectionInfo(cursorPos);
+  updatePlot(detid);
+  updateSelectionInfo(detid);
+  m_currentDetID = detid;
 }
 
-void InstrumentWindowPickTab::plotSingle(const Instrument3DWidget::DetInfo & cursorPos)
+void InstrumentWindowPickTab::getBinMinMaxIndex(size_t wi,size_t& imin, size_t& imax)
 {
-  Mantid::API::MatrixWorkspace_const_sptr ws = cursorPos.getWorkspace();
-  int wi = cursorPos.getWorkspaceIndex();
+  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+  Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+  const Mantid::MantidVec& x = ws->readX(wi);
+  if (instrActor->wholeRange())
+  {
+    imin = 0;
+    imax = x.size() - 1;
+  }
+  else
+  {
+    Mantid::MantidVec::const_iterator x_begin = std::lower_bound(x.begin(),x.end(),instrActor->minBinValue());
+    Mantid::MantidVec::const_iterator x_end = std::lower_bound(x.begin(),x.end(),instrActor->maxBinValue());
+    imin = static_cast<size_t>(x_begin - x.begin());
+    imax = static_cast<size_t>(x_end - x.begin());
+  }
+}
+
+void InstrumentWindowPickTab::plotSingle(int detid)
+{
+  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+  Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+  size_t wi = instrActor->getWorkspaceIndex(detid);
   const Mantid::MantidVec& x = ws->readX(wi);
   const Mantid::MantidVec& y = ws->readY(wi);
-  m_plot->setXScale(x.front(),x.back());
-  Mantid::MantidVec::const_iterator min_it = std::min_element(y.begin(),y.end());
-  Mantid::MantidVec::const_iterator max_it = std::max_element(y.begin(),y.end());
+  size_t imin,imax;
+  getBinMinMaxIndex(wi,imin,imax);
+
+  Mantid::MantidVec::const_iterator y_begin = y.begin() + imin;
+  Mantid::MantidVec::const_iterator y_end = y.begin() + imax;
+
+  m_plot->setXScale(x[imin],x[imax]);
+
+  Mantid::MantidVec::const_iterator min_it = std::min_element(y_begin,y_end);
+  Mantid::MantidVec::const_iterator max_it = std::max_element(y_begin,y_end);
   m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
   m_plot->setYScale(*min_it,*max_it);
 }
 
-void InstrumentWindowPickTab::plotBox(const Instrument3DWidget::DetInfo & /*cursorPos*/)
+//void InstrumentWindowPickTab::plotBox(const Instrument3DWidget::DetInfo & /*cursorPos*/)
+//{
+//}
+//
+void InstrumentWindowPickTab::plotTube(int detid)
 {
-}
-
-void InstrumentWindowPickTab::plotTube(const Instrument3DWidget::DetInfo & cursorPos)
-{
-  Mantid::API::MatrixWorkspace_const_sptr ws = cursorPos.getWorkspace();
-  int wi = cursorPos.getWorkspaceIndex();
-  Mantid::Geometry::IDetector_sptr det = ws->getInstrument()->getDetector(cursorPos.getDetID());
+  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+  Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+  size_t wi = instrActor->getWorkspaceIndex(detid);
+  Mantid::Geometry::IDetector_sptr det = ws->getInstrument()->getDetector(detid);
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
   Mantid::Geometry::ICompAssembly_const_sptr ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent);
   if (parent && ass)
   {
+    size_t imin,imax;
+    getBinMinMaxIndex(wi,imin,imax);
+
     const int n = ass->nelements();
     if (m_plotSum) // plot sums over detectors vs time bins
     {
       const Mantid::MantidVec& x = ws->readX(wi);
-      m_plot->setXScale(x.front(),x.back());
+
+      m_plot->setXScale(x[imin],x[imax]);
+
       std::vector<double> y(ws->blocksize());
       //std::cerr<<"plotting sum of " << ass->nelements() << " detectors\n";
       for(int i = 0; i < n; ++i)
@@ -266,16 +304,16 @@ void InstrumentWindowPickTab::plotTube(const Instrument3DWidget::DetInfo & curso
         Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
         if (idet)
         {
-          int index = cursorPos.getIndexOf(idet->getID());
-          if (index >= 0)
-          {
-            const Mantid::MantidVec& Y = ws->readY(index);
-            std::transform(y.begin(),y.end(),Y.begin(),y.begin(),std::plus<double>());
-          }
+          size_t index = instrActor->getWorkspaceIndex(idet->getID());
+          const Mantid::MantidVec& Y = ws->readY(index);
+          std::transform(y.begin(),y.end(),Y.begin(),y.begin(),std::plus<double>());
         }
       }
-      Mantid::MantidVec::const_iterator min_it = std::min_element(y.begin(),y.end());
-      Mantid::MantidVec::const_iterator max_it = std::max_element(y.begin(),y.end());
+      Mantid::MantidVec::const_iterator y_begin = y.begin() + imin;
+      Mantid::MantidVec::const_iterator y_end = y.begin() + imax;
+
+      Mantid::MantidVec::const_iterator min_it = std::min_element(y_begin,y_end);
+      Mantid::MantidVec::const_iterator max_it = std::max_element(y_begin,y_end);
       m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
       m_plot->setYScale(*min_it,*max_it);
     }
@@ -290,14 +328,11 @@ void InstrumentWindowPickTab::plotTube(const Instrument3DWidget::DetInfo & curso
         if (idet)
         {
           const int id = idet->getID();
-          int index = cursorPos.getIndexOf(id);
-          if (index >= 0)
-          {
-            x.push_back(id);
-            const Mantid::MantidVec& Y = ws->readY(index);
-            double sum = std::accumulate(Y.begin(),Y.end(),0);
-            ymap[id] = sum;
-          }
+          size_t index = instrActor->getWorkspaceIndex(id);
+          x.push_back(id);
+          const Mantid::MantidVec& Y = ws->readY(index);
+          double sum = std::accumulate(Y.begin() + imin,Y.begin() + imax,0);
+          ymap[id] = sum;
         }
       }
       if (!x.empty())
@@ -348,7 +383,7 @@ void InstrumentWindowPickTab::setSelectionType()
     m_activeTool->setText("Tool: Single crystal peak selection");
   }
   setPlotCaption();
-  mInstrumentDisplay->setSelectionType(m_selectionType);
+  //mInstrumentDisplay->setSelectionType(m_selectionType);
 }
 
 /**
@@ -359,7 +394,7 @@ void InstrumentWindowPickTab::setSelectionType()
 void InstrumentWindowPickTab::addPeak(double x,double y)
 {
   UNUSED_ARG(y)
-  if (!m_peak->isChecked() ||  m_currentPos.getDetID() < 0) return;
+  if (!m_peak->isChecked() ||  m_currentDetID < 0) return;
   std::string peakTableName = "SingleCrystalPeakTable";
   Mantid::API::ITableWorkspace_sptr tw;
   if (! Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName))
@@ -382,10 +417,12 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   const double mN =   1.67492729e-27;
   const double hbar = 1.054571628e-34;
   
-  Mantid::Geometry::IInstrument_const_sptr instr = m_currentPos.getWorkspace()->getInstrument();
+  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+  Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+  Mantid::Geometry::IInstrument_const_sptr instr = ws->getInstrument();
   Mantid::Geometry::IObjComponent_const_sptr source = instr->getSource();
   Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
-  Mantid::Geometry::IDetector_const_sptr det = instr->getDetector(m_currentPos.getDetID());
+  Mantid::Geometry::IDetector_const_sptr det = instr->getDetector(m_currentDetID);
 
   const Mantid::Geometry::V3D samplePos = sample->getPos();
   const Mantid::Geometry::V3D beamLine = samplePos - source->getPos();

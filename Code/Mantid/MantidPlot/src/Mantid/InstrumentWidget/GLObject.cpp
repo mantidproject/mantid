@@ -28,7 +28,7 @@ GLObject::~GLObject()
 /**
  * This method draws the opengl display list.
  */
-void GLObject::draw()
+void GLObject::draw()const
 {
   //std::cout << "GLObject::draw() for " << this->mName << "\n";
   if (mChanged) construct();
@@ -39,14 +39,14 @@ void GLObject::draw()
   }
   else
   {
-    define();
+    this->define();
   }
 }
 
 /**
  * This method constructs the opengl display list
  */
-void GLObject::construct()
+void GLObject::construct()const
 {
 	if(mDisplayListId==0)
 	{
@@ -58,7 +58,7 @@ void GLObject::construct()
         this->define();
 	glEndList();
         //if (dynamic_cast<ObjCompAssemblyActor*>(this))
-        //std::cerr<<"construct " << getName() << ' ' << mDisplayListId << '\n';
+        std::cerr<<"construct " << getName() << ' ' << mDisplayListId << '\n';
 	if(glGetError()==GL_OUT_OF_MEMORY) //Throw an exception
 	  throw Mantid::Kernel::Exception::OpenGLError("OpenGL: Out of video memory");
 	mChanged=false;  //Object Marked as changed.
@@ -67,14 +67,14 @@ void GLObject::construct()
 /**
  * Virtual method which initializes the the Object before creating the display list
  */
-void GLObject::init()
+void GLObject::init()const
 {
 }
 
 /**
  * Virtual method which constructs the opengl rendering commands.
  */
-void GLObject::define()
+void GLObject::define()const
 {
 }
 

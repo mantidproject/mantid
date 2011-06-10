@@ -1,27 +1,31 @@
+#include "ObjComponentActor.h"
+#include "InstrumentActor.h"
+#include "OpenGLError.h"
+
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/IDetector.h"
-#include "ObjComponentActor.h"
-#include "MantidObject.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 
 using namespace Mantid;
 using namespace Geometry;
 
-ObjComponentActor::ObjComponentActor(bool withDisplayList)
-  :GLActor(withDisplayList)
+ObjComponentActor::ObjComponentActor(const InstrumentActor& instrActor,Mantid::Geometry::ComponentID compID)
+  : ComponentActor(instrActor,compID)
 {
-}
-
-
-ObjComponentActor::ObjComponentActor(MantidObject *obj, boost::shared_ptr<Mantid::Geometry::IObjComponent> objComp, bool withDisplayList)
-  : GLActor(withDisplayList)
-{
-	mObjComp=objComp;
-	mObject=obj;
-	this->setName( objComp->getName() );
+  setColors();
+  IDetector_const_sptr det = getDetector();
+  if (det)
+  {
+    size_t pickID = instrActor.push_back_detid(det->getID());
+    m_pickColor = makePickColor(pickID);
+  }
+  else
+  {
+    m_pickColor = GLColor();
+  }
 }
 
 ObjComponentActor::~ObjComponentActor()
@@ -32,89 +36,40 @@ ObjComponentActor::~ObjComponentActor()
 /**
  * Concrete implementation of rendering ObjComponent.
  */
-void ObjComponentActor::define()
+void ObjComponentActor::draw(bool picking)const
 {
-	glPushMatrix();
-	// Translation first
-	V3D pos = mObjComp->getPos();
-	if (!(pos.nullVector()))
-	{
-		glTranslated(pos[0],pos[1],pos[2]);
-	}
-	//Rotation
-	Quat rot = mObjComp->getRotation();
-	if (!(rot.isNull()))
-	{
-		double deg,ax0,ax1,ax2;
-		rot.getAngleAxis(deg,ax0,ax1,ax2);
-		glRotated(deg,ax0,ax1,ax2);
-	}
-	//Scale
-	V3D scaleFactor = mObjComp->getScaleFactor();
-	if (!(scaleFactor==V3D(1,1,1)))
-	{
-		glScaled(scaleFactor[0],scaleFactor[1],scaleFactor[2]);
-	}
-
-	//std::cout << "ObjComponentActor::define() called with pos=" << pos << " and rot=" << rot << " and scale=" << scaleFactor << ".\n";
-
-	//If a mantidObject was specified, call ITS draw routine
-	if (mObject)
-	  mObject->draw();
-	else
-	  //Otherwise, use the ObjComponent draw routine. This is what RectangularDetector will use.
-	  mObjComp->draw();
-
-	glPopMatrix();
-}
-
-
-//-------------------------------------------------------------------------------------------------
-/** Append the detector ID of this object to the list, if it is a detector.
- *
- * @param idList :: sequential list of detector IDs.
- */
-void ObjComponentActor::appendObjCompID(std::vector<int>& idList)
-{
-  //check the component type if its detector or not
-  const boost::shared_ptr<Mantid::Geometry::IDetector>  detector = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(this->getObjComponent());
-  if( detector != boost::shared_ptr<Mantid::Geometry::IDetector>() )
+  OpenGLError::check("ObjComponentActor::draw(0)");
+  glPushMatrix();
+  if (picking)
   {
-    if( !detector->isMonitor() )
-    {
-      idList.push_back(detector->getID());
-    }
-    else
-    {
-      idList.push_back(-1);
-    }
-  }
-}
-
-
-//------------------------------------------------------------------------------------------------
-/**
- * The colors are set using the iterator of the color list. The order of the detectors
- * in this color list was defined by the calls to appendObjCompID().
- *
- * @param list :: Color list iterator
- * @return the number of detectors
- */
-int ObjComponentActor::setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator & list)
-{
-  const boost::shared_ptr<Mantid::Geometry::IDetector>  detector =
-      boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(this->getObjComponent());
-  if( detector != boost::shared_ptr<Mantid::Geometry::IDetector>() )
-  {
-    this->setColor((*list));
-    //Increment for the next one
-    list++;
-    return 1;
+    m_pickColor.paint();
   }
   else
-    return 0;
+  {
+    m_dataColor.paint();
+  }
+  OpenGLError::check("ObjComponentActor::draw(1)");
+  getObjComponent()->draw();
+  if (OpenGLError::hasError("ObjComponentActor::draw(2)"))
+  {
+    std::cerr << "Here" << std::endl;
+  }
+  glPopMatrix();
+  OpenGLError::check("ObjComponentActor::draw()");
 }
 
+void ObjComponentActor::setColors()
+{
+  IDetector_const_sptr det = getDetector();
+  if (det)
+  {
+    setColor(m_instrActor.getColor(det->getID()));
+  }
+  else
+  {
+    setColor(defaultDetectorColor());
+  }
+}
 
 
 //-------------------------------------------------------------------------------------------------
@@ -123,20 +78,11 @@ int ObjComponentActor::setInternalDetectorColors(std::vector<boost::shared_ptr<G
  * @param minBound :: min point of the bounding box
  * @param maxBound :: max point of the bounding box
  */
-void ObjComponentActor::getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)
+void ObjComponentActor::getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const
 {
   Mantid::Geometry::BoundingBox boundBox;
-  mObjComp->getBoundingBox(boundBox);
+  getComponent()->getBoundingBox(boundBox);
   minBound = boundBox.minPoint();
   maxBound = boundBox.maxPoint();
 }
 
-void ObjComponentActor::detectorCallback(DetectorCallback* callback)const
-{
-  boost::shared_ptr<const Mantid::Geometry::IDetector> det =
-      boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector> (mObjComp);
-  if (det)
-  {
-    callback->callback(det,DetectorCallbackData(*getColor()));
-  }
-}

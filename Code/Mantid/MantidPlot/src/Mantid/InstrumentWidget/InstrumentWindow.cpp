@@ -2,10 +2,13 @@
 #include "InstrumentWindowRenderTab.h"
 #include "InstrumentWindowPickTab.h"
 #include "XIntegrationControl.h"
+#include "InstrumentActor.h"
+#include "UnwrappedCylinder.h"
+#include "UnwrappedSphere.h"
+#include "Projection3D.h"
 #include "../MantidUI.h"
 #include "../AlgMonitor.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/MatrixWorkspace.h"
 
 #include <Poco/Path.h>
 
@@ -28,8 +31,10 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QImageWriter>
+#include <QApplication>
 
 #include <numeric>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -40,6 +45,8 @@ using namespace Mantid::Geometry;
 InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ): 
   MdiSubWindow(label, app, name, f), WorkspaceObserver(), mViewChanged(false),m_blocked(false)
 {
+  m_instrumentActor = NULL;
+  m_surfaceType = FULL3D;
   m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
   setFocusPolicy(Qt::StrongFocus);
@@ -54,20 +61,18 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
   // Create the display widget
-  mInstrumentDisplay = new Instrument3DWidget(this);
-  controlPanelLayout->addWidget(mInstrumentDisplay);
+  //mInstrumentDisplay = new Instrument3DWidget(this);
+  m_InstrumentDisplay = new MantidGLWidget(this);
+  controlPanelLayout->addWidget(m_InstrumentDisplay);
   mainLayout->addWidget(controlPanelLayout);
 
   m_xIntegration = new XIntegrationControl(this);
   mainLayout->addWidget(m_xIntegration);
-  connect(m_xIntegration,SIGNAL(changed(double,double,bool)),mInstrumentDisplay,SLOT(setDataMappingIntegral(double,double,bool)));
+  connect(m_xIntegration,SIGNAL(changed(double,double)),this,SLOT(setIntegrationRange(double,double)));
 
   //Set the mouse/keyboard operation info
   mInteractionInfo = new QLabel();
   mainLayout->addWidget(mInteractionInfo);
-  connect(mInstrumentDisplay, SIGNAL(actionDetectorHighlighted(const Instrument3DWidget::DetInfo &)),this,SLOT(detectorHighlighted(const Instrument3DWidget::DetInfo &)));
-  connect(mInstrumentDisplay, SIGNAL(actionDetectorTouched(const Instrument3DWidget::DetInfo &)),this,SLOT(detectorTouched(const Instrument3DWidget::DetInfo &)));
-  connect(mInstrumentDisplay, SIGNAL(detectorsSelected()), this, SLOT(showPickOptions()));
 
   // Load settings is called after mInstrumentDisplay is created but before m_renderTab
   loadSettings();
@@ -106,6 +111,18 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   mMaskDetsAction = new QAction(tr("&Mask"), this);
   connect(mMaskDetsAction, SIGNAL(triggered()), this, SLOT(maskDetectors()));
 
+  m_ExtractDetsToWorkspaceAction = new QAction("Extract to new workspace",this);
+  connect(m_ExtractDetsToWorkspaceAction,SIGNAL(activated()),this,SLOT(extractDetsToWorkspace()));
+
+  m_SumDetsToWorkspaceAction = new QAction("Sum to new workspace",this);
+  connect(m_SumDetsToWorkspaceAction,SIGNAL(activated()),this,SLOT(sumDetsToWorkspace()));
+
+  m_createIncludeGroupingFileAction = new QAction("Include",this);
+  connect(m_createIncludeGroupingFileAction,SIGNAL(activated()),this,SLOT(createIncludeGroupingFile()));
+
+  m_createExcludeGroupingFileAction = new QAction("Exclude",this);
+  connect(m_createExcludeGroupingFileAction,SIGNAL(activated()),this,SLOT(createExcludeGroupingFile()));
+
   askOnCloseEvent(app->confirmCloseInstrWindow);
 
   setAttribute(Qt::WA_DeleteOnClose);
@@ -132,35 +149,125 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 }
 
 /**
+ * Destructor
+ */
+InstrumentWindow::~InstrumentWindow()
+{
+  saveSettings();
+  delete m_InstrumentDisplay;
+  if (m_instrumentActor)
+  {
+    delete m_instrumentActor;
+  }
+}
+
+void InstrumentWindow::setSurfaceType(int type)
+{
+  if (type < RENDERMODE_SIZE)
+  {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    m_surfaceType = SurfaceType(type);
+    if (!m_instrumentActor) return;
+    boost::shared_ptr<Mantid::Geometry::IInstrument> instr = m_workspace->getInstrument();
+    Mantid::Geometry::IObjComponent_sptr sample = instr->getSample();
+    Mantid::Geometry::V3D sample_pos = sample->getPos();
+    Mantid::Geometry::V3D axis;
+    if (m_surfaceType == SPHERICAL_Y || m_surfaceType == CYLINDRICAL_Y)
+    {
+      axis = Mantid::Geometry::V3D(0,1,0);
+    }
+    else if (m_surfaceType == SPHERICAL_Z || m_surfaceType == CYLINDRICAL_Z)
+    {
+      axis = Mantid::Geometry::V3D(0,0,1);
+    }
+    else // SPHERICAL_X || CYLINDRICAL_X
+    {
+      axis = Mantid::Geometry::V3D(1,0,0);
+    }
+
+    ProjectionSurface* surface;
+
+    if (m_surfaceType == FULL3D)
+    {
+      surface = new Projection3D(m_instrumentActor,m_InstrumentDisplay->width(),m_InstrumentDisplay->height());
+    }
+    else if (m_surfaceType <= CYLINDRICAL_X)
+    {
+      surface = new UnwrappedCylinder(m_instrumentActor,sample_pos,axis);
+    }
+    else // SPHERICAL
+    {
+      surface = new UnwrappedSphere(m_instrumentActor,sample_pos,axis);
+    }
+    m_InstrumentDisplay->setSurface(surface);
+    m_InstrumentDisplay->update();
+    connect(surface,SIGNAL(singleDetectorTouched(int)),this,SLOT(singleDetectorTouched(int)));
+    connect(surface,SIGNAL(singleDetectorPicked(int)),this,SLOT(singleDetectorPicked(int)));
+    connect(surface,SIGNAL(multipleDetectorsSelected(QList<int>&)),this,SLOT(multipleDetectorsSelected(QList<int>&)));
+    QApplication::restoreOverrideCursor();
+  }
+  update();
+}
+
+/**
+ * This method sets the workspace name for the Instrument
+ */
+void InstrumentWindow::setWorkspaceName(std::string wsName)
+{
+  mWorkspaceName = wsName;
+  m_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(mWorkspaceName));
+  if (m_instrumentActor)
+  {
+    delete m_instrumentActor;
+  }
+  m_InstrumentDisplay->makeCurrent();
+  m_instrumentActor = new InstrumentActor(m_workspace);
+  m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),m_instrumentActor->maxBinValue());
+  setSurfaceType(m_surfaceType);
+  setupColorMap();
+  mInstrumentTree->setInstrument(m_instrumentActor->getInstrument());
+  setInfoText(m_InstrumentDisplay->getSurface()->getInfoText());
+}
+
+void InstrumentWindow::setupColorMap()
+{
+  m_renderTab->setMinValue(m_instrumentActor->minValue(),false);
+  m_renderTab->setMaxValue(m_instrumentActor->maxValue(),false);
+  m_renderTab->setupColorBarScaling(m_instrumentActor->getColorMap(),m_instrumentActor->minPositiveValue());
+}
+
+/**
   * Connected to QTabWidget::currentChanged signal
   */
 void InstrumentWindow::tabChanged(int i)
 {
+  ProjectionSurface* surface = m_InstrumentDisplay->getSurface();
   QString text;
-  if (i == 1) 
+  if (i == 1) // picking
   {
-    mInstrumentDisplay->setInteractionModePick();
-    text = "Move cursor over instrument to see detector information.";
-  }
-  else
-  {
-    mInstrumentDisplay->setInteractionModeMove();
-    if (mInstrumentDisplay->getRenderMode() == GL3DWidget::FULL3D)
+    if (surface)
     {
-      text = tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate");
-      if( mInstrumentDisplay->areAxesOn() )
+      surface->setInteractionModePick();
+    }
+    m_InstrumentDisplay->setMouseTracking(true);
+  }
+  else // no picking
+  {
+    if (surface)
+    {
+      surface->setInteractionModeMove();
+      if (i == 0)
       {
-        text += "\nAxes: X = Red; Y = Green; Z = Blue";
+        surface->componentSelected();
       }
     }
-    else
-    {
-      text = "Left mouse click and drag to zoom in.\n";
-      text += "Right mouse click to zoom out.";
-    }
+    m_InstrumentDisplay->setMouseTracking(false);
   }
-  setInfoText(text);
-
+  if (surface)
+  {
+    setInfoText(surface->getInfoText());
+    m_InstrumentDisplay->refreshView();
+  }
 }
 
 /**
@@ -168,12 +275,13 @@ void InstrumentWindow::tabChanged(int i)
  */
 void InstrumentWindow::changeColormap(const QString &filename)
 {
+  if (!m_instrumentActor) return;
   QString fileselection;
   //Use a file dialog if no parameter is passed
   if( filename.isEmpty() )
   {
     fileselection = QFileDialog::getOpenFileName(this, tr("Pick a Colormap"), 
-						 QFileInfo(mCurrentColorMap).absoluteFilePath(),
+						 QFileInfo(m_instrumentActor->getCurrentColorMap()).absoluteFilePath(),
 						 tr("Colormaps (*.map *.MAP)"));
     // User cancelled if filename is still empty
     if( fileselection.isEmpty() ) return;
@@ -184,71 +292,59 @@ void InstrumentWindow::changeColormap(const QString &filename)
     if( !QFileInfo(fileselection).exists() ) return;
   }
   
-  if( fileselection == mCurrentColorMap ) return;
+  if( fileselection == m_instrumentActor->getCurrentColorMap() ) return;
 
-  mCurrentColorMap = fileselection;
-  mInstrumentDisplay->mutableColorMap().loadMap(mCurrentColorMap);
+  m_instrumentActor->loadColorMap(fileselection);
   if( this->isVisible() )
   {
-    m_renderTab->setupColorBarScaling();
-    mInstrumentDisplay->updateColorsForNewMap();
+    setupColorMap();
+    m_InstrumentDisplay->refreshView();
   }
 }
 
 void InstrumentWindow::showPickOptions()
 {
-  if (m_pickTab->canUpdateTouchedDetector())
+  if (m_pickTab->canUpdateTouchedDetector() && !m_selectedDetectors.empty())
   {
-    QMenu context(mInstrumentDisplay);
+    QMenu context(m_InstrumentDisplay);
 
     context.addAction(mInfoAction);
     context.addAction(mPlotAction);
     context.addAction(mDetTableAction);
 
-    if( mInstrumentDisplay->getSelectedWorkspaceIndices().size() > 1 )
-    {
-      context.insertSeparator();
-      context.addAction(mGroupDetsAction);
-      context.addAction(mMaskDetsAction);
-    }
+    context.insertSeparator();
+    context.addAction(mGroupDetsAction);
+    context.addAction(mMaskDetsAction);
+    context.addAction(m_ExtractDetsToWorkspaceAction);
+    context.addAction(m_SumDetsToWorkspaceAction);
+    QMenu *gfileMenu = context.addMenu("Create grouping file");
+    gfileMenu->addAction(m_createIncludeGroupingFileAction);
+    gfileMenu->addAction(m_createExcludeGroupingFileAction);
 
     context.exec(QCursor::pos());
   }
-  mInstrumentDisplay->hidePickBox();
 }
 
-/**
- * This is the detector information slot executed when a detector is highlighted by moving mouse in graphics widget.
- * @param information :: about the detector that is at the location of the users mouse pointer
- */
-void InstrumentWindow::detectorHighlighted(const Instrument3DWidget::DetInfo & cursorPos)
-{
-  mInteractionInfo->setText(cursorPos.display());
-  m_pickTab->updatePick(cursorPos);
-}
-void InstrumentWindow::detectorTouched(const Instrument3DWidget::DetInfo & cursorPos)
-{
-  if (m_pickTab->canUpdateTouchedDetector())
-  {
-    mInteractionInfo->setText(cursorPos.display());
-    m_pickTab->updatePick(cursorPos);
-  }
-}
 /**
  * This is slot for the dialog to appear when a detector is picked and the info menu is selected
  */
 void InstrumentWindow::spectraInfoDialog()
 {
   QString info;
-  const std::vector<int> & det_ids = mInstrumentDisplay->getSelectedDetectorIDs();
-  const std::vector<int> & wksp_indices = mInstrumentDisplay->getSelectedWorkspaceIndices();
-  const int ndets = static_cast<int>(det_ids.size());
+  const int ndets = static_cast<int>(m_selectedDetectors.size());
   if( ndets == 1 )
   {
-    info = QString("Workspace index: %1\nDetector ID: %2").arg(QString::number(wksp_indices.front()),QString::number(det_ids.front()));
+    info = QString("Workspace index: %1\nDetector ID: %2").arg(
+      QString::number(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors.front())),
+      QString::number(m_selectedDetectors.front()));
   }
   else
   {
+    std::vector<int> wksp_indices;
+    for(size_t i = 0; i < m_selectedDetectors.size(); ++i)
+    {
+      wksp_indices.push_back(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i]));
+    }
     info = QString("Index list size: %1\nDetector list size: %2").arg(QString::number(wksp_indices.size()), QString::number(ndets));
   }
   QMessageBox::information(this,tr("Detector/Spectrum Information"), info, 
@@ -260,12 +356,17 @@ void InstrumentWindow::spectraInfoDialog()
  */
 void InstrumentWindow::plotSelectedSpectra()
 {
-  std::set<int> indices(mInstrumentDisplay->getSelectedWorkspaceIndices().begin(), mInstrumentDisplay->getSelectedWorkspaceIndices().end());
+  if (m_selectedDetectors.empty()) return;
+  std::set<int> indices;
+  for(int i = 0; i < m_selectedDetectors.size(); ++i)
+  {
+    indices.insert(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
+  }
   if (indices.count(-1) > 0)
   {
     indices.erase(-1);
   }
-  emit plotSpectra( mInstrumentDisplay->getWorkspaceName(), indices);
+  emit plotSpectra( QString::fromStdString(m_workspace->getName()), indices);
 }
 
 /**
@@ -273,7 +374,13 @@ void InstrumentWindow::plotSelectedSpectra()
  */
 void InstrumentWindow::showDetectorTable()
 {
-  emit createDetectorTable(mInstrumentDisplay->getWorkspaceName(), mInstrumentDisplay->getSelectedWorkspaceIndices(), true);
+  if (m_selectedDetectors.empty()) return;
+  std::vector<int> indexes;
+  for(int i = 0; i < m_selectedDetectors.size(); ++i)
+  {
+    indexes.push_back(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i]));
+  }
+  emit createDetectorTable(QString::fromStdString(m_workspace->getName()), indexes, true);
 }
 
 QString InstrumentWindow::confirmDetectorOperation(const QString & opName, const QString & inputWS, int ndets)
@@ -301,15 +408,21 @@ QString InstrumentWindow::confirmDetectorOperation(const QString & opName, const
   }
   return outputWS;
 }
+
 /**
  * Group selected detectors
  */
 void InstrumentWindow::groupDetectors()
 {
-  const std::vector<int> & wksp_indices = mInstrumentDisplay->getSelectedWorkspaceIndices();
-  const std::vector<int> & det_ids = mInstrumentDisplay->getSelectedDetectorIDs();
-  QString inputWS = mInstrumentDisplay->getWorkspaceName();
-  QString outputWS = confirmDetectorOperation("grouped", inputWS, static_cast<int>(det_ids.size()));
+  if (m_selectedDetectors.empty()) return;
+  std::vector<int> wksp_indices;
+  for(int i = 0; i < m_selectedDetectors.size(); ++i)
+  {
+    wksp_indices.push_back(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i]));
+  }
+
+  QString inputWS = QString::fromStdString(m_workspace->getName());
+  QString outputWS = confirmDetectorOperation("grouped", inputWS, static_cast<int>(m_selectedDetectors.size()));
   if( outputWS.isEmpty() ) return;
   QString param_list = "InputWorkspace=%1;OutputWorkspace=%2;WorkspaceIndexList=%3;KeepUngroupedSpectra=1";
   emit execMantidAlgorithm("GroupDetectors",
@@ -323,15 +436,16 @@ void InstrumentWindow::groupDetectors()
  */
 void InstrumentWindow::maskDetectors()
 {
-  const std::vector<int> & wksp_indices = mInstrumentDisplay->getSelectedWorkspaceIndices();
+  if (m_selectedDetectors.empty()) return;
+  std::vector<int> wksp_indices;
+  for(int i = 0; i < m_selectedDetectors.size(); ++i)
+  {
+    wksp_indices.push_back(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i]));
+  }
 
-  //Following variable is unused:
-  //const std::vector<int> & det_ids = mInstrumentDisplay->getSelectedDetectorIDs();
-
-  QString inputWS = mInstrumentDisplay->getWorkspaceName();
+  QString inputWS = QString::fromStdString(m_workspace->getName());
   // Masking can only replace the input workspace so no need to ask for confirmation
   QString param_list = "Workspace=%1;WorkspaceIndexList=%2";
-  QString indices = asString(mInstrumentDisplay->getSelectedWorkspaceIndices());
   emit execMantidAlgorithm("MaskDetectors",param_list.arg(inputWS, asString(wksp_indices)),this);
 }
 
@@ -349,116 +463,6 @@ QString InstrumentWindow::asString(const std::vector<int>& numbers) const
   //Remove trailing comma
   num_str.chop(1);
   return num_str;
-}
-
-
-/**
- * Destructor
- */
-InstrumentWindow::~InstrumentWindow()
-{
-  saveSettings();
-  delete mInstrumentDisplay;
-}
-
-/**
- * This method sets the workspace name for the Instrument
- */
-void InstrumentWindow::setWorkspaceName(std::string wsName)
-{
-  mWorkspaceName = wsName;
-}
-
-void InstrumentWindow::updateWindow()
-{
-  if( mWorkspaceName.empty() ) return;
-
-  bool resultError=false;
-
-  MatrixWorkspace_sptr workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(mWorkspaceName));
-  if( !workspace.get() ) return;
-
-  try
-  {
-    renderInstrument(workspace.get());
-  }
-  catch(...)
-  {
-    mInstrumentDisplay->resetWidget();
-    mInstrumentDisplay->setSlowRendering();
-    resultError = true;
-  }
-  if(resultError)
-  {
-    QMessageBox::critical(this,"Mantid -- Error","Trying Slow Rendering");
-    try
-    {
-      renderInstrument(workspace.get());
-    }
-    catch(std::bad_alloc &)
-    {
-      QMessageBox::critical(this,"Mantid -- Error","not enough memory to display this instrument");
-      mInstrumentDisplay->resetWidget();
-    }
-  }
-
-  connect(mInstrumentTree->selectionModel(),SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
-	  this, SLOT(componentSelected(const QItemSelection&, const QItemSelection&)));
-}
-
-void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
-{
-  mInstrumentDisplay->setWorkspace(QString::fromStdString(mWorkspaceName));
-  // Need to check if the values have already been set for the range
-  if( !mInstrumentDisplay->dataMinValueEdited() )
-  {
-    m_renderTab->setMinValue(mInstrumentDisplay->getDataMinValue(),false);
-  }
-  if( !mInstrumentDisplay->dataMaxValueEdited() )
-  {
-    m_renderTab->setMaxValue(mInstrumentDisplay->getDataMaxValue(),false);
-  }
-  
-  mInstrumentDisplay->calculateBinRange();
-  m_xIntegration->setTotalRange(mInstrumentDisplay->getBinMinValue(),mInstrumentDisplay->getBinMaxValue());
-  if (workspace->axes() == 0)
-  {
-    m_xIntegration->setUnits("Unitless");
-  }
-  else
-  {
-    Mantid::Kernel::Unit_sptr unit = workspace->getAxis(0)->unit();
-    if (unit)
-    {
-      m_xIntegration->setUnits(QString::fromStdString(unit->caption()));
-    }
-    else
-    {
-      m_xIntegration->setUnits("Unitless");
-    }
-  }
-
-  // Setup the colour map details
-  GraphOptions::ScaleType type = m_renderTab->getScaleType();
-  mInstrumentDisplay->mutableColorMap().changeScaleType(type);
-  m_renderTab->setupColorBarScaling();
-  
-  mInstrumentDisplay->resetUnwrappedViews();
-  // Ensure the 3D display is up-to-date
-  mInstrumentDisplay->update();
-  // Populate the instrument tree
-  mInstrumentTree->setInstrument(workspace->getInstrument());
-
-  if ( ! mViewChanged )
-  {
-    // set the default view, the axis that the instrument is be viewed from initially can be set in the instrument definition and there is always a value in the Instrument
-    QString axisName = QString::fromStdString(
-    workspace->getInstrument()->getDefaultAxis());
-    m_renderTab->setAxis(axisName);
-    // this was an automatic view change, only flag that the view changed if the user initiated the change
-    mViewChanged = false;
-  }
-
 }
 
 /// Set a maximum and minimum for the colour map range
@@ -482,7 +486,7 @@ void InstrumentWindow::setColorMapMaxValue(double maxValue)
 
 void InstrumentWindow::setDataMappingIntegral(double minValue,double maxValue,bool entireRange)
 {
-  mInstrumentDisplay->setDataMappingIntegral(minValue, maxValue, entireRange);
+//  mInstrumentDisplay->setDataMappingIntegral(minValue, maxValue, entireRange);
 }
 
 /**
@@ -490,32 +494,14 @@ void InstrumentWindow::setDataMappingIntegral(double minValue,double maxValue,bo
  */
 void InstrumentWindow::setViewDirection(const QString& input)
 {
-	if(input.compare("X+")==0)
-	{
-		mInstrumentDisplay->setViewDirectionXPositive();
-	}
-	else if(input.compare("X-")==0)
-	{
-		mInstrumentDisplay->setViewDirectionXNegative();
-	}
-	else if(input.compare("Y+")==0)
-	{
-		mInstrumentDisplay->setViewDirectionYPositive();
-	}
-	else if(input.compare("Y-")==0)
-	{
-		mInstrumentDisplay->setViewDirectionYNegative();
-	}
-	else if(input.compare("Z+")==0)
-	{
-		mInstrumentDisplay->setViewDirectionZPositive();
-	}
-	else if(input.compare("Z-")==0)
-	{
-		mInstrumentDisplay->setViewDirectionZNegative();
-	}
-
+  Projection3D* p3d = dynamic_cast<Projection3D*>(m_InstrumentDisplay->getSurface());
+  if (p3d)
+  {
+    p3d->setViewDirection(input);
+  }
   mViewChanged = true;
+  m_InstrumentDisplay->repaint();
+  repaint();
 }
 
 /**
@@ -540,24 +526,24 @@ void InstrumentWindow::setScaleType(GraphOptions::ScaleType type)
 }
 
 /// A slot for the mouse selection
-void InstrumentWindow::componentSelected(const QItemSelection & selected, const QItemSelection &)
-{
-  QModelIndexList items = selected.indexes();
-  if( items.isEmpty() ) return;
-
-  if (mInstrumentDisplay->getRenderMode() == GL3DWidget::FULL3D)
-  {
-    double xmax(0.), xmin(0.), ymax(0.), ymin(0.), zmax(0.), zmin(0.);
-    mInstrumentTree->getSelectedBoundingBox(items.first(), xmax, ymax, zmax, xmin, ymin, zmin);
-    V3D pos = mInstrumentTree->getSamplePos();
-    mInstrumentDisplay->setView(pos, xmax, ymax, zmax, xmin, ymin, zmin);
-  }
-  else
-  {
-    mInstrumentTree->sendComponentSelectedSignal(items.first());
-  }
-
-}
+//void InstrumentWindow::componentSelected(const QItemSelection & selected, const QItemSelection &)
+//{
+//  QModelIndexList items = selected.indexes();
+//  if( items.isEmpty() ) return;
+//
+//  if (mInstrumentDisplay->getRenderMode() == GL3DWidget::FULL3D)
+//  {
+//    double xmax(0.), xmin(0.), ymax(0.), ymin(0.), zmax(0.), zmin(0.);
+//    mInstrumentTree->getSelectedBoundingBox(items.first(), xmax, ymax, zmax, xmin, ymin, zmin);
+//    V3D pos = mInstrumentTree->getSamplePos();
+//    mInstrumentDisplay->setView(pos, xmax, ymax, zmax, xmin, ymin, zmin);
+//  }
+//  else
+//  {
+//    mInstrumentTree->sendComponentSelectedSignal(items.first());
+//  }
+//
+//}
 
 /**
  * This method opens a color dialog to pick the background color,
@@ -566,7 +552,7 @@ void InstrumentWindow::componentSelected(const QItemSelection & selected, const 
 void InstrumentWindow::pickBackgroundColor()
 {
 	QColor color = QColorDialog::getColor(Qt::green,this);
-	mInstrumentDisplay->setBackgroundColor(color);
+	m_InstrumentDisplay->setBackgroundColor(color);
 }
 
 void InstrumentWindow::saveImage()
@@ -608,32 +594,20 @@ void InstrumentWindow::saveImage()
     }
   }
   
-  mInstrumentDisplay->saveToFile(filename);
+  m_InstrumentDisplay->saveToFile(filename);
 }
 
-/**
- * Update the text display that informs the user of the current mode and details about it
- */
+///**
+// * Update the text display that informs the user of the current mode and details about it
+// */
 void InstrumentWindow::setInfoText(const QString& text)
 {
- // if(mInstrumentDisplay->getInteractionMode() == Instrument3DWidget::PickMode)
-	//{
- //   text = tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate");
- //   if( mInstrumentDisplay->areAxesOn() )
- //   {
- //     text += "\nAxes: X = Red; Y = Green; Z = Blue";
- //   }
- // }
- // else
- // {
- //  text = tr("Use Mouse Left Button to Pick an detector\n Click on 'Normal' button to get into interactive mode");
- // }
   mInteractionInfo->setText(text);
 }
 
-/**
- * This method loads the setting from QSettings
- */
+///**
+// * This method loads the setting from QSettings
+// */
 void InstrumentWindow::loadSettings()
 {
   //Load Color
@@ -641,16 +615,8 @@ void InstrumentWindow::loadSettings()
   settings.beginGroup("Mantid/InstrumentWindow");
   
   // Background colour
-  mInstrumentDisplay->setBackgroundColor(settings.value("BackgroundColor",QColor(0,0,0,1.0)).value<QColor>());
+  m_InstrumentDisplay->setBackgroundColor(settings.value("BackgroundColor",QColor(0,0,0,1.0)).value<QColor>());
   
-  //Load Colormap. If the file is invalid the default stored colour map is used
-  mCurrentColorMap = settings.value("ColormapFile", "").toString();
-  // Set values from settings
-  mInstrumentDisplay->mutableColorMap().loadMap(mCurrentColorMap);
-  
-  GraphOptions::ScaleType type = (GraphOptions::ScaleType)settings.value("ScaleType", GraphOptions::Log10).toUInt();
-  mInstrumentDisplay->mutableColorMap().changeScaleType(type);
-
   settings.endGroup();
 }
 
@@ -661,10 +627,7 @@ void InstrumentWindow::saveSettings()
 {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWindow");
-  settings.setValue("BackgroundColor", mInstrumentDisplay->currentBackgroundColor());
-  settings.setValue("ColormapFile", mCurrentColorMap);
-  settings.setValue("ScaleType", mInstrumentDisplay->getColorMap().getScaleType());
-  settings.setValue("ColormapFile", mCurrentColorMap);
+  settings.setValue("BackgroundColor", m_InstrumentDisplay->currentBackgroundColor());
   settings.endGroup();
 }
 
@@ -684,7 +647,7 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
   //Replace current workspace
   if (wsName == mWorkspaceName)
   {
-    updateWindow();
+    //updateWindow();
   }
 }
 
@@ -715,7 +678,7 @@ QString InstrumentWindow::saveToString(const QString& geometry, bool saveAsTempl
  */
 void InstrumentWindow::showEvent(QShowEvent*)
 {
-  updateWindow();
+  //updateWindow();
 }
 
 
@@ -728,34 +691,264 @@ QFrame * InstrumentWindow::createInstrumentTreeTab(QTabWidget* ControlsTab)
   mInstrumentTree = new InstrumentTreeWidget(0);
   instrumentTreeLayout->addWidget(mInstrumentTree);
   connect(mInstrumentTree,SIGNAL(componentSelected(Mantid::Geometry::ComponentID)),
-          mInstrumentDisplay,SLOT(componentSelected(Mantid::Geometry::ComponentID)));
+          m_InstrumentDisplay,SLOT(componentSelected(Mantid::Geometry::ComponentID)));
   return instrumentTree;
 }
 
-  void InstrumentWindow::block()
+void InstrumentWindow::block()
+{
+  m_blocked = true;
+}
+
+void InstrumentWindow::unblock()
+{
+  m_blocked = false;
+}
+
+void InstrumentWindow::set3DAxesState(bool on)
+{
+  Projection3D* p3d = dynamic_cast<Projection3D*>(m_InstrumentDisplay->getSurface());
+  if (p3d)
   {
-    m_blocked = true;
+    p3d->set3DAxesState(on);
+  }
+  m_InstrumentDisplay->refreshView();
+  m_InstrumentDisplay->repaint();
+  //repaint();
+}
+
+void InstrumentWindow::finishHandle(const Mantid::API::IAlgorithm* alg)
+{
+  UNUSED_ARG(alg)
+  m_InstrumentDisplay->refreshView();
+}
+
+void InstrumentWindow::changeScaleType(int type)
+{
+  m_instrumentActor->changeScaleType(type);
+  setupColorMap();
+  m_InstrumentDisplay->refreshView();
+}
+
+void InstrumentWindow::changeColorMapMinValue(double minValue)
+{
+  m_instrumentActor->setMinValue(minValue);
+  setupColorMap();
+  m_InstrumentDisplay->refreshView();
+}
+
+/// Set the maximumu value of the colour map
+void InstrumentWindow::changeColorMapMaxValue(double maxValue)
+{
+  m_instrumentActor->setMaxValue(maxValue);
+  setupColorMap();
+  m_InstrumentDisplay->refreshView();
+}
+
+void InstrumentWindow::changeColorMapRange(double minValue, double maxValue)
+{
+  m_instrumentActor->setMinMaxRange(minValue,maxValue);
+  setupColorMap();
+  m_InstrumentDisplay->refreshView();
+}
+
+void InstrumentWindow::setWireframe(bool on)
+{
+  Projection3D* p3d = dynamic_cast<Projection3D*>(m_InstrumentDisplay->getSurface());
+  if (p3d)
+  {
+    p3d->setWireframe(on);
+  }
+  m_InstrumentDisplay->refreshView();
+  m_InstrumentDisplay->repaint();
+}
+
+void InstrumentWindow::setIntegrationRange(double xmin,double xmax)
+{
+  m_instrumentActor->setIntegrationRange(xmin,xmax);
+  setupColorMap();
+  m_InstrumentDisplay->refreshView();
+  m_InstrumentDisplay->repaint();
+}
+
+void InstrumentWindow::singleDetectorTouched(int detid)
+{
+  if (m_pickTab->canUpdateTouchedDetector())
+  {
+    //mInteractionInfo->setText(cursorPos.display());
+    m_pickTab->updatePick(detid);
+  }
+}
+
+void InstrumentWindow::singleDetectorPicked(int detid)
+{
+  m_pickTab->updatePick(detid);
+}
+
+void InstrumentWindow::multipleDetectorsSelected(QList<int>& detlist)
+{
+  m_selectedDetectors = detlist;
+  showPickOptions();
+}
+
+/** A class for creating grouping xml files
+  */
+class DetXMLFile
+{
+public:
+  enum Option {List,Sum};
+  /// Create a grouping file to extract all detectors in detector_list excluding those in dets
+  DetXMLFile(const std::vector<int>& detector_list, const QList<int>& dets, const QString& fname)
+  {
+    m_fileName = fname;
+    m_delete = false;
+    std::ofstream out(m_fileName.toStdString().c_str());
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
+    out << "<group name=\"sum\"> <detids val=\"";
+    std::vector<int>::const_iterator idet = detector_list.begin();
+    for(; idet != detector_list.end(); ++idet)
+    {
+      if (!dets.contains(*idet))
+      {
+        out <<  *idet << ',';
+      }
+    }
+    out << "\"/> </group> \n</detector-grouping>\n";
   }
 
-  void InstrumentWindow::unblock()
+  /// Create a grouping file to extract detectors in dets. Option List - one group - one detector,
+  /// Option Sum - one group which is a sum of the detectors
+  /// If fname is empty create a temporary file
+  DetXMLFile(const QList<int>& dets, Option opt = List, const QString& fname = "")
   {
-    m_blocked = false;
+    if (dets.empty())
+    {
+      m_fileName = "";
+      return;
+    }
+
+    if (fname.isEmpty())
+    {
+      QTemporaryFile mapFile;
+      mapFile.open();
+      m_fileName = mapFile.fileName() + ".xml";
+      mapFile.close();
+      m_delete = true;
+    }
+    else
+    {
+      m_fileName = fname;
+      m_delete = false;
+    }
+
+    switch(opt)
+    {
+    case Sum: makeSumFile(dets); break;
+    case List: makeListFile(dets); break;
+    }
+
   }
 
-  void InstrumentWindow::set3DAxesState(bool on)
+  /// Make grouping file where each detector is put into its own group
+  void makeListFile(const QList<int>& dets)
   {
-    mInstrumentDisplay->set3DAxesState(on);
-    tabChanged(0);
+    std::ofstream out(m_fileName.toStdString().c_str());
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
+    foreach(int det,dets)
+    {
+      out << "<group name=\"" << det << "\"> <detids val=\"" << det << "\"/> </group> \n";
+    }
+    out << "</detector-grouping>\n";
   }
 
-  void InstrumentWindow::setRenderMode(int mode)
+  /// Make grouping file for putting the detectors into one group (summing the detectors)
+  void makeSumFile(const QList<int>& dets)
   {
-    mInstrumentDisplay->setRenderMode(mode);
-    tabChanged(0);
+    std::ofstream out(m_fileName.toStdString().c_str());
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
+    out << "<group name=\"sum\"> <detids val=\"";
+    foreach(int det,dets)
+    {
+      out << det << ',';
+    }
+    out << "\"/> </group> \n</detector-grouping>\n";
   }
 
-  void InstrumentWindow::finishHandle(const Mantid::API::IAlgorithm* alg)
+  ~DetXMLFile()
   {
-    UNUSED_ARG(alg)
-    mInstrumentDisplay->refreshView();
+    if (m_delete)
+    {
+      QDir dir;
+      dir.remove(m_fileName);
+    }
   }
+
+  /// Return the name of the created grouping file
+  const std::string operator()()const{return m_fileName.toStdString();}
+
+private:
+  QString m_fileName; ///< holds the grouping file name
+  bool m_delete;      ///< if true delete the file on destruction
+};
+
+/**
+  * Extract selected detectors to a new workspace
+  */
+void InstrumentWindow::extractDetsToWorkspace()
+{
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  DetXMLFile mapFile(m_selectedDetectors);
+  std::string fname = mapFile();
+
+  if (!fname.empty())
+  {
+    Mantid::API::IAlgorithm* alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("GroupDetectors");
+    alg->setPropertyValue("InputWorkspace",m_workspace->getName());
+    alg->setPropertyValue("MapFile",fname);
+    alg->setPropertyValue("OutputWorkspace",m_workspace->getName()+"_selection");
+    alg->execute();
+  }
+
+  QApplication::restoreOverrideCursor();
+}
+
+/**
+  * Sum selected detectors to a new workspace
+  */
+void InstrumentWindow::sumDetsToWorkspace()
+{
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  DetXMLFile mapFile(m_selectedDetectors,DetXMLFile::Sum);
+  std::string fname = mapFile();
+
+  if (!fname.empty())
+  {
+    Mantid::API::IAlgorithm* alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("GroupDetectors");
+    alg->setPropertyValue("InputWorkspace",m_workspace->getName());
+    alg->setPropertyValue("MapFile",fname);
+    alg->setPropertyValue("OutputWorkspace",m_workspace->getName()+"_sum");
+    alg->execute();
+  }
+
+  QApplication::restoreOverrideCursor();
+}
+
+void InstrumentWindow::createIncludeGroupingFile()
+{
+  QString fname = QFileDialog::getSaveFileName(this,"Save grouping file");
+  if (!fname.isEmpty())
+  {
+    DetXMLFile mapFile(m_selectedDetectors,DetXMLFile::Sum,fname);
+  }
+
+}
+
+void InstrumentWindow::createExcludeGroupingFile()
+{
+  QString fname = QFileDialog::getSaveFileName(this,"Save grouping file");
+  if (!fname.isEmpty())
+  {
+    DetXMLFile mapFile(m_instrumentActor->getAllDetIDs(),m_selectedDetectors,fname);
+  }
+}
+

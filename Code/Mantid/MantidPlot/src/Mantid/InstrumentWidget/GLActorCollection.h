@@ -1,9 +1,10 @@
 #ifndef GLACTORCOLLECTION_H_
 #define GLACTORCOLLECTION_H_
 #include "GLActor.h"
-#include "GLObject.h"
-#include <vector>
+
 #include "MantidGeometry/V3D.h"
+
+#include <vector>
 
 #ifndef HAS_UNORDERED_MAP_H
 #include <map>
@@ -44,23 +45,26 @@
 */
 
 
-class GLActorCollection: public GLObject
+class GLActorCollection: public GLActor
 {
 public:
   GLActorCollection(); ///< Default Constructor
   virtual ~GLActorCollection(); ///< Destructor
+  void draw(bool picking = false)const;
+  void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const;
+
   void addActor(GLActor*);
   void removeActor(GLActor*);
   int  getNumberOfActors();
   GLActor* getActor(int index);
-  void define();
-  GLActor* findColorID(unsigned char[3]);
-  void refresh();
-  //void addToUnwrappedList(UnwrappedCylinder& cylinder, QList<UnwrappedDetectorCyl>& list);
+  void invalidateDisplayList()const;
 private:
-  void init();
-  std::vector<GLActor*> mActorsList;    ///< Vector of GLActors for fast access.
-  unsigned char referenceColorID[3];
+  void drawGL(bool picking = false)const;
+  mutable std::vector<GLActor*> mActorsList;    ///< Vector of GLActors for fast access.
+  Mantid::Geometry::V3D m_minBound;
+  Mantid::Geometry::V3D m_maxBound;
+  mutable GLuint m_displayListId;
+  mutable bool m_useDisplayList;
 };
 
 

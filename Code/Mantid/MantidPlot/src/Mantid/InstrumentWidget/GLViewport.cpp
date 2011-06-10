@@ -61,6 +61,9 @@ void GLViewport::setOrtho(double l,double r,double b,double t,double nearz,doubl
         }
 
 	mProjection=GLViewport::ORTHO;
+  mZoomFactor=1.0;
+  mXTrans=0.0;
+  mYTrans=0.0;
 }
 
 /**
@@ -100,31 +103,7 @@ void GLViewport::getProjection(double& xmin,double& xmax,double& ymin,double& ym
 	zmax=mFar;
 }
 
-void GLViewport::setZoomFactor(double val)
-{
-	mZoomFactor=val;
-	issueGL();
-}
-
-double GLViewport::getZoomFactor()
-{
-	return mZoomFactor;
-}
-
-void GLViewport::setTranslation(double xval,double yval)
-{
-	mXTrans=xval;
-	mYTrans=yval;
-	issueGL();
-}
-void GLViewport::getTranslation(double& xval,double& yval)
-{
-	xval=mXTrans;
-	yval=mYTrans;
-}
-
-/** Issue the OpenGL commands that define the viewport and projection. */
-void GLViewport::issueGL() const
+void GLViewport::getInstantProjection(double& xmin,double& xmax,double& ymin,double& ymax,double& zmin,double& zmax)const
 {
   Mantid::Geometry::V3D center((mRight+mLeft)/2.0,(mTop+mBottom)/2.0,(mNear+mFar)/2.0);
 
@@ -166,6 +145,89 @@ void GLViewport::issueGL() const
   }
   //use zoom now
   distance*=mZoomFactor/2.0;
+  
+  double tmpNear = center[2]+distance[2];
+  double nearVal = tmpNear < mNear ? tmpNear : mNear;//center[2]+distance[2];
+  double farVal = mFar;
+
+	xmin=center[0]-distance[0]-mXTrans;
+	xmax=center[0]+distance[0]-mXTrans;
+	ymin=center[1]-distance[1]-mYTrans;
+	ymax=center[1]+distance[1]-mYTrans;
+	zmin=nearVal;
+	zmax=farVal;
+
+}
+
+void GLViewport::setZoomFactor(double val)
+{
+	mZoomFactor=val;
+	issueGL();
+}
+
+double GLViewport::getZoomFactor()
+{
+	return mZoomFactor;
+}
+
+void GLViewport::setTranslation(double xval,double yval)
+{
+	mXTrans=xval;
+	mYTrans=yval;
+	issueGL();
+}
+void GLViewport::getTranslation(double& xval,double& yval)
+{
+	xval=mXTrans;
+	yval=mYTrans;
+}
+
+/** Issue the OpenGL commands that define the viewport and projection. */
+void GLViewport::issueGL() const
+{
+  //Mantid::Geometry::V3D center((mRight+mLeft)/2.0,(mTop+mBottom)/2.0,(mNear+mFar)/2.0);
+
+  //Mantid::Geometry::V3D distance(mRight-mLeft,mTop-mBottom,mNear-mFar);
+  ////Window Aspect ratio
+  //GLdouble windowAspect= mHeight > 0 ? (GLdouble)mWidth/(GLdouble)mHeight : 1.0;
+  ////Adjust width and height to show the dimensions correct
+  ////Adjust window aspect ratio
+  //if(windowAspect<1.0) //window height is higher than width (x<y)
+  //{
+  //  if(distance[0]<distance[1]&&distance[0]/windowAspect<distance[1])///TESTING
+  //  {
+  //    distance[0]=distance[1];
+  //    distance[0]*=windowAspect;
+  //  }
+  //  else
+  //  {
+  //    distance[1]=distance[0];
+  //    distance[1]/=windowAspect;
+  //  }
+  //}
+  //else
+  //{
+  //  if(distance[0]<distance[1])
+  //  {
+  //    distance[0]=distance[1];
+  //    distance[0]*=windowAspect;
+  //  }
+  //  else if(distance[0]/windowAspect<distance[1])
+  //  {
+  //    distance[0]=distance[1];
+  //    distance[0]*=windowAspect;
+  //  }
+  //  else
+  //  {
+  //    distance[1]=distance[0];
+  //    distance[1]/=windowAspect;
+  //  }
+  //}
+  ////use zoom now
+  //distance*=mZoomFactor/2.0;
+
+  double xmin,xmax,ymin,ymax,zmin,zmax;
+  getInstantProjection(xmin,xmax,ymin,ymax,zmin,zmax);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glViewport(0, 0, mWidth, mHeight);
@@ -176,29 +238,32 @@ void GLViewport::issueGL() const
   OpenGLError::check("GLViewport::issueGL()");
   if(mProjection==GLViewport::PERSPECTIVE)
   {
-    glFrustum(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans,
-              center[1]-distance[1]-mYTrans, center[1]+distance[1]-mYTrans,
-              center[2]+distance[2], mFar);
+    //glFrustum(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans,
+    //          center[1]-distance[1]-mYTrans, center[1]+distance[1]-mYTrans,
+    //          center[2]+distance[2], mFar);
+    glFrustum(xmin,xmax,ymin,ymax,zmin,zmax);
   }
   else
   {
     //    glOrtho(mLeft*mZoomFactor-mXTrans, mRight*mZoomFactor-mXTrans, mBottom*mZoomFactor-mYTrans, mTop*mZoomFactor-mYTrans, mNear*mZoomFactor, mFar);
 
-    double tmpNear = center[2]+distance[2];
-    double nearVal = tmpNear < mNear ? tmpNear : mNear;//center[2]+distance[2];
-    double farVal = mFar;
+    //double tmpNear = center[2]+distance[2];
+    //double nearVal = tmpNear < mNear ? tmpNear : mNear;//center[2]+distance[2];
+    //double farVal = mFar;
 
-    glOrtho(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans,
-            center[1]-distance[1]-mYTrans, center[1]+distance[1]-mYTrans,
-            nearVal, farVal);
+    //glOrtho(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans,
+    //        center[1]-distance[1]-mYTrans, center[1]+distance[1]-mYTrans,
+    //        nearVal, farVal);
+
+    glOrtho(xmin,xmax,ymin,ymax,zmin,zmax);
 
     if (OpenGLError::hasError("GLViewport::issueGL()"))
     {
       OpenGLError::log() << "Arguments to glOrtho:\n";
-      OpenGLError::log() << center << '\n'
-                         << distance << '\n'
-                         << mXTrans << ' ' << mYTrans << '\n'
-                         << nearVal << ' ' << farVal << "\n\n";
+      OpenGLError::log() 
+                         << xmin << ' ' << xmax << '\n'
+                         << ymin << ' ' << ymax << '\n'
+                         << zmin << ' ' << zmax << "\n\n";
     }
   }
   glMatrixMode(GL_MODELVIEW);

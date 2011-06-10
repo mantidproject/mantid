@@ -76,17 +76,17 @@ namespace Mantid
     {
       if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
       {
-	while(glGetError() != GL_NO_ERROR);
-	iDisplaylistId=glGenLists(1);
-	glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
-	CreateCone(center,axis,radius,height);
-	glEndList();
-	mErrorCode=glGetError();
-	boolDisplaylistCreated=true;
+        while(glGetError() != GL_NO_ERROR);
+        iDisplaylistId=glGenLists(1);
+        glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
+        CreateCone(center,axis,radius,height);
+        glEndList();
+        mErrorCode=glGetError();
+        boolDisplaylistCreated=true;
       }else if(mErrorCode == GL_NO_ERROR){
-	glCallList(iDisplaylistId);
+        glCallList(iDisplaylistId);
       }else {
-	CreateCone(center,axis,radius,height);
+        CreateCone(center,axis,radius,height);
       }
     }
 
@@ -95,25 +95,25 @@ namespace Mantid
     {
       if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
       {
-	GLenum error;
-	do{
-	  error=glGetError();
-	  if(error==GL_OUT_OF_MEMORY)
-	  {
-	    mErrorCode=GL_OUT_OF_MEMORY;
-	    return;
-	  }
-	}while(error != GL_NO_ERROR);
-	iDisplaylistId=glGenLists(1);
-	glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
-	CreateCylinder(center,axis,radius,height);
-	glEndList();
-	mErrorCode=glGetError();
-	boolDisplaylistCreated=true;
+        GLenum error;
+        do{
+          error=glGetError();
+          if(error==GL_OUT_OF_MEMORY)
+          {
+            mErrorCode=GL_OUT_OF_MEMORY;
+            return;
+          }
+        }while(error != GL_NO_ERROR);
+        iDisplaylistId=glGenLists(1);
+        glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
+        CreateCylinder(center,axis,radius,height);
+        glEndList();
+        mErrorCode=glGetError();
+        boolDisplaylistCreated=true;
       }else if(mErrorCode == GL_NO_ERROR){
-	glCallList(iDisplaylistId);
+        glCallList(iDisplaylistId);
       }else{
-	CreateCylinder(center,axis,radius,height);
+        CreateCylinder(center,axis,radius,height);
       }
     }
 
@@ -121,17 +121,17 @@ namespace Mantid
     {
       if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
       {
-	while(glGetError() != GL_NO_ERROR);
-	iDisplaylistId=glGenLists(1);
-	glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
-	CreateSegmentedCylinder(center,axis,radius,height);
-	glEndList();
-	mErrorCode=glGetError();
-	boolDisplaylistCreated=true;
+        while(glGetError() != GL_NO_ERROR);
+        iDisplaylistId=glGenLists(1);
+        glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
+        CreateSegmentedCylinder(center,axis,radius,height);
+        glEndList();
+        mErrorCode=glGetError();
+        boolDisplaylistCreated=true;
       }else if(mErrorCode == GL_NO_ERROR){
-	glCallList(iDisplaylistId);
+        glCallList(iDisplaylistId);
       }else {
-	CreateSegmentedCylinder(center,axis,radius,height);
+        CreateSegmentedCylinder(center,axis,radius,height);
       }
     }
 

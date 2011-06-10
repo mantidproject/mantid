@@ -5,10 +5,11 @@
 #include <QFrame>
 
 class InstrumentWindow;
-class Instrument3DWidget;
+class MantidGLWidget;
 class BinDialog;
 //class QwtScaleWidget;
 class ColorMapWidget;
+class MantidColorMap;
 
 class QPushButton;
 class QLineEdit;
@@ -25,7 +26,7 @@ class InstrumentWindowRenderTab: public QFrame
 public:
   InstrumentWindowRenderTab(InstrumentWindow* instrWindow);
   ~InstrumentWindowRenderTab();
-  void setupColorBarScaling();
+  void setupColorBarScaling(const MantidColorMap&,double);
   void loadSettings(const QString& section);
   void saveSettings(const QString& section);
   void setMinValue(double value, bool apply = true);
@@ -35,7 +36,6 @@ public:
   void setAxis(const QString& axisName);
   bool areAxesOn()const;
 private slots:
-  void scaleTypeChanged(int);
   void changeColormap(const QString & filename = "");
   void minValueChanged(double);
   void maxValueChanged(double);
@@ -45,7 +45,7 @@ private:
   QFrame * setupAxisFrame();
 
   InstrumentWindow* m_instrWindow;
-  Instrument3DWidget *mInstrumentDisplay;
+  MantidGLWidget *m_InstrumentDisplay;
   QPushButton *mSaveImage;
   BinDialog *mBinDialog;
   ColorMapWidget* m_colorMapWidget;

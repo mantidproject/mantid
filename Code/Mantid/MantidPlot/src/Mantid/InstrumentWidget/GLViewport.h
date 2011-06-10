@@ -50,6 +50,7 @@ public:
 	void getViewport(int*, int*) const;
 	ProjectionType getProjectionType()const;
 	void getProjection(double&,double&,double&,double&,double&,double&);
+	void getInstantProjection(double&,double&,double&,double&,double&,double&)const;
 	void issueGL() const;
         void setOrtho(double,double,double,double,double,double,bool useZ = true);
 	void setPrespective(double,double,double,double,double,double);

@@ -73,15 +73,15 @@ namespace Geometry
 
     glEnable (GL_TEXTURE_2D); // enable texture mapping
 
-    //Point to the ID of the texture that was created before - in RectangularDetectorActor.
-    int texture_id = mRectDet->getTextureID();
     int texx, texy;
     mRectDet->getTextureSize(texx, texy);
     double tex_frac_x = (1.0 * mRectDet->xpixels()) / (texx);
     double tex_frac_y = (1.0 * mRectDet->ypixels()) / (texy);
 
-    glBindTexture (GL_TEXTURE_2D, texture_id);
-    if (glGetError()>0) std::cout << "OpenGL error in glBindTexture \n";
+    //Point to the ID of the texture that was created before - in RectangularDetectorActor.
+    //int texture_id = mRectDet->getTextureID();
+    //glBindTexture (GL_TEXTURE_2D, texture_id);
+    //if (glGetError()>0) std::cout << "OpenGL error in glBindTexture \n";
 
     glBegin (GL_QUADS);
 

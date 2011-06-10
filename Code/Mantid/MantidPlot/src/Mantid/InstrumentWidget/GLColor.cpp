@@ -14,10 +14,18 @@
  */
 GLColor::GLColor(float red, float green, float blue, float alpha)
 {
-  m_rgba[0] = red;
-  m_rgba[1] = green;
-  m_rgba[2] = blue;
-  m_rgba[3] = alpha;
+  m_rgba[0] = (unsigned char)(red * 255);
+  m_rgba[1] = (unsigned char)(green * 255);
+  m_rgba[2] = (unsigned char)(blue * 255);
+  m_rgba[3] = (unsigned char)(alpha * 255);
+}
+
+GLColor::GLColor(int r, int g, int b)
+{
+  m_rgba[0] = r;
+  m_rgba[1] = g;
+  m_rgba[2] = b;
+  m_rgba[3] = 255;
 }
 
 /**
@@ -36,10 +44,10 @@ GLColor::~GLColor()
  */
 void GLColor::set(float red, float green, float blue, float alpha)
 {
-  m_rgba[0] = red;
-  m_rgba[1] = green;
-  m_rgba[2] = blue;
-  m_rgba[3] = alpha;
+  m_rgba[0] = (unsigned char)(red * 255);
+  m_rgba[1] = (unsigned char)(green * 255);
+  m_rgba[2] = (unsigned char)(blue * 255);
+  m_rgba[3] = (unsigned char)(alpha * 255);
 }
 
 /**
@@ -51,10 +59,17 @@ void GLColor::set(float red, float green, float blue, float alpha)
  */
 void GLColor::get(float& red, float& green, float& blue, float& alpha)const
 {
-  red = m_rgba[0];
-  green = m_rgba[1];
-  blue = m_rgba[2];
-  alpha = m_rgba[3];
+  red = float(m_rgba[0])/255;
+  green = float(m_rgba[1])/255;
+  blue = float(m_rgba[2])/255;
+  alpha = float(m_rgba[3])/255;
+}
+
+void GLColor::get(unsigned char& r,unsigned char& g,unsigned char& b)const
+{
+  r = m_rgba[0];
+  g = m_rgba[1];
+  b = m_rgba[2];
 }
 
 /**
@@ -63,30 +78,22 @@ void GLColor::get(float& red, float& green, float& blue, float& alpha)const
   */
 void GLColor::getUB3(unsigned char* c)const
 {
-  *c = (unsigned char)(m_rgba[0]*255);
-  *(c+1) = (unsigned char)(m_rgba[1]*255);
-  *(c+2) = (unsigned char)(m_rgba[2]*255);
+  *c = m_rgba[0];
+  *(c+1) = m_rgba[1];
+  *(c+2) = m_rgba[2];
 }
 
 /**
  * This method executes opengl color commands based on the method provided.
  * @param pm :: type of opengl color to be used
  */
-void GLColor::paint(GLColor::PaintMethod pm)
+void GLColor::paint()const
 {
-  if(pm == PLAIN) 
-  {
-    glColor4fv(m_rgba);
-  }
-  else if(pm == MATERIAL)
-  {
-    //GLfloat mat_specular[]={1.0,1.0,1.0,1.0};
-    glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,m_rgba); 
-    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,20.0);
-    //glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,mat_specular);
-  }
-  else 
-  {
-    glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,m_rgba);
-  }
+  glColor4ubv(m_rgba);
+}
+
+std::ostream& operator<<(std::ostream& ostr, const GLColor& c)
+{
+  ostr << '['<<c.red()<<','<<c.green()<<','<<c.blue()<<','<<c.alpha()<<']';
+  return ostr;
 }

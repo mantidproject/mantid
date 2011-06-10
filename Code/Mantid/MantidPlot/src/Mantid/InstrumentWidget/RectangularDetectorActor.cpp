@@ -1,3 +1,8 @@
+#include "RectangularDetectorActor.h"
+#include "ObjComponentActor.h"
+#include "RectangularDetectorActor.h"
+#include "InstrumentActor.h"
+
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -7,10 +12,6 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Exception.h"
-#include "MantidObject.h"
-#include "RectangularDetectorActor.h"
-#include "ObjComponentActor.h"
-#include "RectangularDetectorActor.h"
 #include <cfloat>
 using namespace Mantid;
 using namespace Geometry;
@@ -23,22 +24,38 @@ static const bool VERBOSE = false;
  *
  * @param withDisplayList :: true to create a display list
  */
-RectangularDetectorActor::RectangularDetectorActor(boost::shared_ptr<Mantid::Geometry::RectangularDetector> rectDet)
+RectangularDetectorActor::RectangularDetectorActor(const InstrumentActor& instrActor, const Mantid::Geometry::ComponentID& compID)
 :
-    ICompAssemblyActor(false), mTextureID(0)
+    ICompAssemblyActor(instrActor,compID), mTextureID(0)
 {
   mNumberOfDetectors = 0;
-  mDet = rectDet;
+  mDet = boost::dynamic_pointer_cast<const RectangularDetector>(getComponent());
   image_data = NULL;
   pick_data = NULL;
 
-  if (mDet)
+  if (!mDet) return;
+  
+  BoundingBox compBox;
+  mDet->getBoundingBox(compBox);
+  mNumberOfDetectors =  mDet->xpixels() * mDet->ypixels();
+  this->AppendBoundingBox(compBox.minPoint(), compBox.maxPoint());  
+
+  std::vector<GLColor> clist;
+  for (int y=0; y < mDet->ypixels(); y++)
   {
-    BoundingBox compBox;
-    mDet->getBoundingBox(compBox);
-    mNumberOfDetectors =  mDet->xpixels() * mDet->ypixels();
-    this->AppendBoundingBox(compBox.minPoint(), compBox.maxPoint());
+    for (int x=0; x < mDet->xpixels() ; x++)
+    {
+      detid_t id = mDet->getAtXY(x,y)->getID();
+      size_t pickID = instrActor.push_back_detid(id);
+      m_pickIDs.push_back(pickID);
+      clist.push_back(instrActor.getColor(id));
+    }
   }
+
+  genTexture(image_data,clist.begin(),false);
+  std::vector<GLColor>::iterator dummy_iterator;
+  genTexture(pick_data, dummy_iterator, true);
+  uploadTexture(image_data);
 
 }
 
@@ -57,7 +74,7 @@ RectangularDetectorActor::~RectangularDetectorActor()
 /**
  * This function is concrete implementation that renders the Child ObjComponents and Child CompAssembly's
  */
-void RectangularDetectorActor::define()
+void RectangularDetectorActor::draw(bool picking)const
 {
   if (VERBOSE) std::cout << "RectangularDetectorActor::define() called for " << mDet->getName() << "\n";
 
@@ -83,97 +100,20 @@ void RectangularDetectorActor::define()
     glScaled(scaleFactor[0],scaleFactor[1],scaleFactor[2]);
   }
 
+  //glBindTexture(GL_TEXTURE_2D, mTextureID);
+  if (picking)
+  {
+    this->uploadTexture(pick_data);
+  }
+  else
+  {
+    this->uploadTexture(image_data);
+  }
   // RectangularDetector will use.
   mDet->draw();
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   glPopMatrix();
-}
-
-
-//-------------------------------------------------------------------------------------------------
-/**
- * Concrete implementation of init method of GLObject. this method draws the children
- */
-void RectangularDetectorActor::init()
-{
-  if (VERBOSE) std::cout << "RectangularDetectorActor::init() called for " << mDet->getName() << "\n";
-}
-
-
-//-------------------------------------------------------------------------------------------------
-/**
- * This method redraws the CompAssembly children compassembly actors redraw. this method is used to redraw all the children
- */
-void RectangularDetectorActor::redraw()
-{
-  if (VERBOSE) std::cout << "RectangularDetectorActor::redraw() called for " << mDet->getName() << "\n";
-}
-
-//-------------------------------------------------------------------------------------------------
-/** Append the detector ID of this object to the list, if it is a detector.
- *
- * @param idList :: sequential list of detector IDs.
- */
-void RectangularDetectorActor::appendObjCompID(std::vector<int>& idList)
-{
-  if (mDet)
-  {
-    //Append all the detector IDs of this rectangular detector
-    if (VERBOSE) std::cout << "RectangularDetectorActor::appendObjCompID() called for " << mDet->getName() << "\n";
-    for (int y=0; y < mDet->ypixels(); y++)
-      for (int x=0; x < mDet->xpixels(); x++)
-        idList.push_back( mDet->getAtXY(x,y)->getID() );
-
-  }
-}
-
-
-
-//------------------------------------------------------------------------------------------------
-/**
- * Set the starting color reference for CompAssembly
- * @param rgb :: input color id
- * @return  the number of color ids that are used.
- */
-int RectangularDetectorActor::setStartingReferenceColor(int rgb)
-{
-  if (VERBOSE) std::cout << "RectangularDetectorActor::setStartingReferenceColor() called for " << mDet->getName() << " with rgb = " << rgb << "\n";
-  mColorStartID=rgb;
-  return this->getNumberOfDetectors();
-}
-
-//------------------------------------------------------------------------------------------------
-/**
- * This method searches the child actors for the input rgb color and returns the detector id corresponding to the rgb color. if the
- * detector is not found then returns -1.
- * @param  rgb :: input color id
- * @return the detector id of the input rgb color.if detector id not found then returns -1
- */
-int RectangularDetectorActor::findDetectorIDUsingColor(int rgb)
-{
-  if (VERBOSE) std::cout << "RectangularDetectorActor::findDetectorIDUsingColor() called for " << mDet->getName() << "\n";
-  //The row and column of the detector can be found from the color
-  int diff_rgb = rgb - mColorStartID;
-  int y = diff_rgb / mDet->xpixels();
-  int x = diff_rgb % mDet->xpixels();
-  //And now we return that ID :)
-  return mDet->getAtXY(x,y)->getID();
-}
-
-
-//------------------------------------------------------------------------------------------------
-/**
- * The colors are set using the iterator of the color list. The order of the detectors
- * in this color list was defined by the calls to appendObjCompID().
- *
- * @param list :: Color list iterator
- * @return the number of detectors
- */
-int RectangularDetectorActor::setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator& list)
-{
-  int num = this->genTexture(image_data, list, false);
-  this->uploadTexture(image_data);
-  return num;
 }
 
 
@@ -186,7 +126,7 @@ int RectangularDetectorActor::setInternalDetectorColors(std::vector<boost::share
  * @param useDetectorIDs :: set to true to make a fake texture using the detector IDs. If false, the iterator is used.
  *
  */
-int RectangularDetectorActor::genTexture(char * & image_data, std::vector<boost::shared_ptr<GLColor> >::iterator& list, bool useDetectorIDs)
+int RectangularDetectorActor::genTexture(char * & image_data, std::vector<GLColor>::iterator& list, bool useDetectorIDs)
 {
   int num = mDet->xpixels() * mDet->ypixels();
 
@@ -195,9 +135,6 @@ int RectangularDetectorActor::genTexture(char * & image_data, std::vector<boost:
   mDet->getTextureSize(text_x_size, text_y_size);
 
   //std::cerr << "Texture size: " << text_x_size << ',' << text_y_size <<std::endl;
-
-  //For using color IDs
-  int rgb = this->mColorStartID;
 
   //------ Create the image data buffer -------
   if (!image_data)
@@ -212,30 +149,26 @@ int RectangularDetectorActor::genTexture(char * & image_data, std::vector<boost:
   //Fill with 0 (black) everywhere
   std::fill(image_data, image_data + 3*text_x_size*text_y_size, 0);
 
+  //For using color IDs
+  int rgb = 0;
+
   for (int y=0; y < mDet->ypixels(); y++)
   {
     for (int x=0; x < mDet->xpixels() ; x++)
     {
       //Use black as the default color (for going off the edges)
-      char r, g, b;
+      unsigned char r, g, b;
 
       if (useDetectorIDs)
       {
-        //Use the rgb int that is incremented for each detector
-        r=char(rgb/65536);
-        g=char((rgb%65536)/256);
-        b=char((rgb%65536)%256);
+        GLColor c = GLActor::makePickColor(m_pickIDs[rgb]);
+        c.get(r,g,b);
         rgb++;
       }
       else
       {
         //Get the current color
-        float rf, gf, bf, af;
-        (*list)->get(rf,gf,bf,af);
-        //Convert to bytes
-        r = (char) (255*rf);
-        g = (char) (255*gf);
-        b = (char) (255*bf);
+        list->get(r,g,b);
         //Go to the next color
         list++;
       }
@@ -264,10 +197,9 @@ int RectangularDetectorActor::genTexture(char * & image_data, std::vector<boost:
   return num;
 }
 
-
 //------------------------------------------------------------------------------------------------
 /** Upload the texture to the video card. */
-void RectangularDetectorActor::uploadTexture(char * & image_data)
+void RectangularDetectorActor::uploadTexture(char * & image_data)const
 {
   if (!image_data)
     throw std::runtime_error("Empty pointer passed to RectangularDetectorActor::uploadTexture()!");
@@ -281,7 +213,7 @@ void RectangularDetectorActor::uploadTexture(char * & image_data)
     glDeleteTextures(1,&mTextureID);
   glGenTextures(1, &mTextureID);          // Create The Texture
   if (VERBOSE) std::cout << mDet->getName() << " is drawing with texture id " << mTextureID << "\n";
-  mDet->setTextureID(mTextureID);
+  //mDet->setTextureID(mTextureID);
 
   glBindTexture(GL_TEXTURE_2D, mTextureID);
 
@@ -304,46 +236,13 @@ void RectangularDetectorActor::uploadTexture(char * & image_data)
 
 }
 
-//
-///** Swaps between the image_data and pick_data in order
-// * to swap the texture between the real one and the pick-color-one.
-// */
-//void RectangularDetectorActor::swapTexture()
-//{
-//  char * temp = pick_data;
-//  pick_data = image_data;
-//  image_data = temp;
-//}
-
-
-
-//------------------------------------------------------------------------------------------------
-/**
- * This method draws the children with the ColorID rather than the children actual color. used in picking the component
- */
-void RectangularDetectorActor::drawUsingColorID()
-{
-  std::vector<boost::shared_ptr<GLColor> >::iterator dummy_iterator;
-  this->genTexture(pick_data, dummy_iterator, true);
-  this->uploadTexture(pick_data);
-
-  //And now draw it with the newly defined texture.
-  this->define();
-
-  //Re-upload the good data from before.
-  this->uploadTexture(image_data);
-}
-
-
-
-
 //-------------------------------------------------------------------------------------------------
 /**
  * Return the bounding box, from the one calculated in the cache previously.
  * @param minBound :: min point of the bounding box
  * @param maxBound :: max point of the bounding box
  */
-void RectangularDetectorActor::getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)
+void RectangularDetectorActor::getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const
 {
   minBound=minBoundBox;
   maxBound=maxBoundBox;
@@ -365,41 +264,116 @@ void RectangularDetectorActor::AppendBoundingBox(const Mantid::Geometry::V3D& mi
   if(maxBoundBox[2]<maxBound[2]) maxBoundBox[2]=maxBound[2];
 }
 
-/**
-  * Call the DetectorCallback::callback method for each detector
-  */
-void RectangularDetectorActor::detectorCallback(DetectorCallback* callback)const
+void RectangularDetectorActor::setColors()
 {
-  //The texture size must be 2^n power.
-  int text_x_size, text_y_size;
-  mDet->getTextureSize(text_x_size, text_y_size);
-  //Pointer to where we are in it.
-  char * image_data_ptr = image_data;
+  std::vector<GLColor> clist;
   for (int y=0; y < mDet->ypixels(); y++)
   {
     for (int x=0; x < mDet->xpixels() ; x++)
     {
-      char r, g, b;
-      //Read the color data from the buffer
-      r = *image_data_ptr;
-      image_data_ptr++;
-      g = *image_data_ptr;
-      image_data_ptr++;
-      b = *image_data_ptr;
-      image_data_ptr++;
-      if (r == 0 && g == 0 && b == 0)
-      {
-        std::cerr << "black\n";
-      }
-      boost::shared_ptr<const Mantid::Geometry::IDetector> det =
-        boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector> (mDet->getAtXY(x,y));
-      if (det)
-      {
-        callback->callback(det,DetectorCallbackData(GLColor(float(r)/255,float(g)/255,float(b)/255,1.0)));
-      }
+      detid_t id = mDet->getAtXY(x,y)->getID();
+      clist.push_back(m_instrActor.getColor(id));
     }
-    //Skip any padding in x. 3 bytes per pixel
-    image_data_ptr += 3*(text_x_size-mDet->xpixels());
   }
-  
+  genTexture(image_data,clist.begin(),false);
+  uploadTexture(image_data);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+/** Append the detector ID of this object to the list, if it is a detector.
+ *
+ * @param idList :: sequential list of detector IDs.
+ */
+void RectangularDetectorActor::appendObjCompID(std::vector<int>& idList)
+{
+  if (mDet)
+  {
+    //Append all the detector IDs of this rectangular detector
+    if (VERBOSE) std::cout << "RectangularDetectorActor::appendObjCompID() called for " << mDet->getName() << "\n";
+    for (int y=0; y < mDet->ypixels(); y++)
+      for (int x=0; x < mDet->xpixels(); x++)
+        idList.push_back( mDet->getAtXY(x,y)->getID() );
+
+  }
+}
+
+
+
+//------------------------------------------------------------------------------------------------
+/**
+ * Set the starting color reference for CompAssembly
+ * @param rgb :: input color id
+ * @return  the number of color ids that are used.
+ */
+int RectangularDetectorActor::setStartingReferenceColor(int rgb)
+{
+  //if (VERBOSE) std::cout << "RectangularDetectorActor::setStartingReferenceColor() called for " << mDet->getName() << " with rgb = " << rgb << "\n";
+//  mColorStartID=rgb;
+  return this->getNumberOfDetectors();
+}
+
+//------------------------------------------------------------------------------------------------
+/**
+ * This method searches the child actors for the input rgb color and returns the detector id corresponding to the rgb color. if the
+ * detector is not found then returns -1.
+ * @param  rgb :: input color id
+ * @return the detector id of the input rgb color.if detector id not found then returns -1
+ */
+int RectangularDetectorActor::findDetectorIDUsingColor(int rgb)
+{
+  if (VERBOSE) std::cout << "RectangularDetectorActor::findDetectorIDUsingColor() called for " << mDet->getName() << "\n";
+  //The row and column of the detector can be found from the color
+  int diff_rgb = rgb;// - mColorStartID;
+  int y = diff_rgb / mDet->xpixels();
+  int x = diff_rgb % mDet->xpixels();
+  //And now we return that ID :)
+  return mDet->getAtXY(x,y)->getID();
+}
+
+
+//------------------------------------------------------------------------------------------------
+/**
+ * The colors are set using the iterator of the color list. The order of the detectors
+ * in this color list was defined by the calls to appendObjCompID().
+ *
+ * @param list :: Color list iterator
+ * @return the number of detectors
+ */
+int RectangularDetectorActor::setInternalDetectorColors(std::vector<GLColor>::iterator& list)
+{
+  int num = this->genTexture(image_data, list, false);
+  this->uploadTexture(image_data);
+  return num;
+}
+
+//------------------------------------------------------------------------------------------------
+/**
+ * This method draws the children with the ColorID rather than the children actual color. used in picking the component
+ */
+void RectangularDetectorActor::drawUsingColorID()
+{
+  std::vector<GLColor>::iterator dummy_iterator;
+  this->genTexture(pick_data, dummy_iterator, true);
+  this->uploadTexture(pick_data);
+
+  //And now draw it with the newly defined texture.
+  this->draw();
+
+  //Re-upload the good data from before.
+  this->uploadTexture(image_data);
+}
+
+
+

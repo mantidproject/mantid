@@ -16,6 +16,7 @@
 #include "GLObject.h"
 #include "GLColor.h"
 #include <boost/shared_ptr.hpp>
+
 #include <ostream>
 
 #include <QList>
@@ -31,24 +32,6 @@ namespace Mantid
     class IDetector;
   }
 }
-
-struct DetectorCallbackData
-{
-  DetectorCallbackData(const GLColor& c):color(c){}
-  GLColor color;
-};
-
-/**
-  * Class for collecting information about detectors form actors.
-  * The information includes the detector id and the fields of the DetectorCallbackData struct
-  */
-class DetectorCallback
-{
-public:
-  /// An actor calls this method for each of its detectors and passes the detetctor id and
-  /// a reference to a DetectorCallbackData struct filled with the information about that detector
-  virtual void callback(boost::shared_ptr<const Mantid::Geometry::IDetector> det,const DetectorCallbackData& data) = 0;
-};
 
 /**
   \class  GLActor
@@ -79,25 +62,19 @@ public:
 
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-class GLActor : public GLObject
+class GLActor
 {
 public:
-
-  GLActor(bool withDisplayList);          ///< Constructor with name of actor as input string
-  GLActor(const GLActor&);        ///< Constructor with another actor as input
   virtual ~GLActor();             ///< Virtual destructor
-  void setColor(boost::shared_ptr<GLColor>);
-  const boost::shared_ptr<GLColor> getColor()const{return mColor;}
-  void markPicked();
-  void markUnPicked();
   void setVisibility(bool);
   bool getVisibility();
-  virtual int  setStartingReferenceColor(int){return 1;}
-  /// Calls the DetectorCallback::callback method for each detector
-  virtual void detectorCallback(DetectorCallback* /*callback*/)const{}
+  virtual void draw(bool picking = false)const = 0;
+  virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const = 0;
+  static GLColor makePickColor(size_t pickID);
+  static size_t decodePickColor(const GLColor& c);
+  static size_t decodePickColor(unsigned char r,unsigned char g,unsigned char b);
+  static GLColor defaultDetectorColor();
 protected:
-  boost::shared_ptr<GLColor> mColor;           ///< Color of the geometry object
-  bool  mPicked;                   ///< Flag Whether the actor is picked by mouse click or not
   bool  mVisible;					 ///< Flag whether the actor is visible or not
 };
 

@@ -1,4 +1,6 @@
 #include "ColorMapWidget.h"
+#include "MantidColorMap.h"
+#include "GraphOptions.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -73,7 +75,7 @@ void ColorMapWidget::setupColorBarScaling(const MantidColorMap& colorMap)
   double minValue = m_minValueBox->displayText().toDouble();
   double maxValue = m_maxValueBox->displayText().toDouble();
 
-  GraphOptions::ScaleType type = (GraphOptions::ScaleType)m_scaleOptions->itemData(m_scaleOptions->currentIndex()).toUInt();
+  GraphOptions::ScaleType type = colorMap.getScaleType();
   if( type == GraphOptions::Linear )
   {
     QwtLinearScaleEngine linScaler;
@@ -94,6 +96,9 @@ void ColorMapWidget::setupColorBarScaling(const MantidColorMap& colorMap)
     m_scaleWidget->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, 20, 5));
     m_scaleWidget->setColorMap(QwtDoubleInterval(logmin, maxValue), colorMap);
   }
+  m_scaleOptions->blockSignals(true);
+  m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
+  m_scaleOptions->blockSignals(false);
 }
 
 void ColorMapWidget::minValueChanged()

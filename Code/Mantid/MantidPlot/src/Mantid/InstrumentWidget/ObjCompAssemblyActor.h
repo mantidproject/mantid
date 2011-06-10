@@ -1,7 +1,9 @@
 #ifndef OBJCOMPASSEMBLY_ACTOR__H_
 #define OBJCOMPASSEMBLY_ACTOR__H_
 #include "ICompAssemblyActor.h"
+
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/V3D.h"
 
 class TexObject;
@@ -42,30 +44,27 @@ namespace Mantid{
 */
 class ObjCompAssemblyActor : public ICompAssemblyActor
 {
-  std::vector<Mantid::Geometry::ComponentID> mObjCompIDs;     ///< List of Component IDs
-  boost::shared_ptr<const Mantid::Geometry::IComponent> m_ObjAss;    ///< Pointer to the ObjCompAssembly
-  boost::shared_ptr<TexObject> m_tex;                        ///< MantidObject with a texture
-  void initChilds(bool);
-  void init();
-  void redraw();
-  void appendObjCompID(std::vector<int>&);
-  MantidObject*	getMantidObject(const boost::shared_ptr<const Mantid::Geometry::Object>,bool withDisplayList);
-  int findDetectorIDUsingColor(int rgb);
 public:
-  ///< Constructor
-  ObjCompAssemblyActor(bool withDisplayList):ICompAssemblyActor(withDisplayList){};
   /// Constructor
-  ObjCompAssemblyActor(boost::shared_ptr<std::map<const boost::shared_ptr<const Mantid::Geometry::Object>,MantidObject*> >& objs,
-                       Mantid::Geometry::ComponentID id,
-                       boost::shared_ptr<Mantid::Geometry::IInstrument> ins,
-                       bool withDisplayList);
+  ObjCompAssemblyActor(const InstrumentActor& instrActor,Mantid::Geometry::ComponentID compID);
   virtual ~ObjCompAssemblyActor();								   ///< Destructor
-  int  setStartingReferenceColor(int rgb);
   virtual std::string type()const {return "ObjCompAssemblyActor";} ///< Type of the GL object
-  void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-  void drawUsingColorID();
-  int setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator& list);
-  void detectorCallback(DetectorCallback* callback)const;
+  virtual void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
+  //virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const;
+  virtual void setColors();
+private:
+  void setDetectorColor(unsigned char* data, int i,GLColor c); ///< set colour to a detector
+  void generateTexture(unsigned char* data, unsigned int& id);
+  /// Swap between drawing counts and drawing detector code colours
+  void swap();
+  const unsigned char* getColor(int i)const;
+
+  std::vector<Mantid::detid_t> m_detIDs;     ///< List of Component IDs
+  unsigned int m_idData;     ///< OpenGL texture id
+  unsigned int m_idPick;     ///< OpenGL texture id
+  int m_n;               ///< texture size in one dimension, the other dimension is 1
+  unsigned char* m_data; ///< texture colour data
+  unsigned char* m_pick_data; ///< texture with detector code colours
 };
 
 #endif /*OBJCOMPASSEMBLY_ACTOR__H_*/

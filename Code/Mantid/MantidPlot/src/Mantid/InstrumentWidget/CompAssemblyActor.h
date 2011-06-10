@@ -1,7 +1,9 @@
 #ifndef COMPASSEMBLY_ACTOR__H_
 #define COMPASSEMBLY_ACTOR__H_
-#include "GLActor.h"
+
 #include "ICompAssemblyActor.h"
+#include "GLActor.h"
+
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/V3D.h"
 /**
@@ -51,28 +53,18 @@ class ObjComponentActor;
 
 class CompAssemblyActor : public ICompAssemblyActor
 {
+public:
+  CompAssemblyActor(const InstrumentActor& instrActor,const Mantid::Geometry::ComponentID& compID); ///< Constructor
+  virtual ~CompAssemblyActor();					
+  virtual std::string type()const {return "CompAssemblyActor";} ///< Type of the GL object
+  virtual void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
+  virtual void setColors();
+
+protected:
+  mutable std::vector<ObjComponentActor*> mChildObjCompActors;     ///< List of ObjComponent Actors
+  mutable std::vector<ICompAssemblyActor*> mChildCompAssemActors;   ///< List of CompAssembly Actors
 private:
   void AppendBoundingBox(const Mantid::Geometry::V3D& minBound,const Mantid::Geometry::V3D& maxBound);
-protected:
-  std::vector<ObjComponentActor*> mChildObjCompActors;     ///< List of ObjComponent Actors
-  std::vector<ICompAssemblyActor*> mChildCompAssemActors;   ///< List of CompAssembly Actors
-  void initChilds(bool);
-  void init();
-  void redraw();
-  void appendObjCompID(std::vector<int>&);
-  MantidObject*	getMantidObject(const boost::shared_ptr<const Mantid::Geometry::Object>,bool withDisplayList);
-  int setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator& list);
-  int findDetectorIDUsingColor(int rgb);
-public:
-  CompAssemblyActor(bool withDisplayList);                       ///< Constructor
-  CompAssemblyActor(boost::shared_ptr<std::map<const boost::shared_ptr<const Mantid::Geometry::Object>,MantidObject*> >& ,  Mantid::Geometry::ComponentID id, boost::shared_ptr<Mantid::Geometry::IInstrument> ins,bool withDisplayList); ///< Constructor
-  virtual ~CompAssemblyActor();								   ///< Destructor
-  int  setStartingReferenceColor(int rgb);
-  virtual std::string type()const {return "CompAssemblyActor";} ///< Type of the GL object
-  void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-  void drawUsingColorID();
-  //void addToUnwrappedList(UnwrappedCylinder& cylinder, QList<UnwrappedDetectorCyl>& list);
-  void detectorCallback(DetectorCallback* callback)const;
 };
 
 #endif /*GLTRIANGLE_H_*/

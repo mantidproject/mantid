@@ -1,6 +1,40 @@
 #ifndef INSTRUMENTACTOR_H_
 #define INSTRUMENTACTOR_H_
-#include "CompAssemblyActor.h"
+
+#include "GLColor.h"
+#include "GLActor.h"
+#include "GLActorCollection.h"
+#include "MantidColorMap.h"
+
+#include "MantidGeometry/IInstrument.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
+
+#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
+
+#include <vector>
+#include <map>
+
+#include <QObject>
+
+namespace Mantid
+{
+  namespace API
+  {
+    class MatrixWorkspace;
+  }
+  namespace Geometry
+  {
+    class IDetector;
+  }
+}
+
+//struct DetectorInfo
+//{
+//  GLColor color;
+//  boost::shared_ptr<const Mantid::Geometry::IDetector> detector;
+//};
+
 /**
   \class  InstrumentActor
   \brief  InstrumentActor class is wrapper actor for the instrument.
@@ -30,19 +64,78 @@
 
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-class InstrumentActor : public CompAssemblyActor
+class InstrumentActor: public QObject, public GLActor
 {
+  Q_OBJECT
 public:
-	InstrumentActor(boost::shared_ptr<Mantid::Geometry::IInstrument> ins, bool withDisplayList); ///< Constructor
+	InstrumentActor(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace); ///< Constructor
 	~InstrumentActor();								   ///< Destructor
 	virtual std::string type()const {return "InstrumentActor";} ///< Type of the GL object
-	void getDetectorIDList(std::vector<int>&);
-	void setDetectorColors(std::vector<boost::shared_ptr<GLColor> >& list);
-	void refresh();
-	int  getDetectorIDFromColor(int rgb);
-	void setObjectResolutionToLow();
-	void setObjectResolutionToHigh();
+  boost::shared_ptr<const Mantid::Geometry::IInstrument> getInstrument()const;
+  boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace()const{return m_workspace;}
+  const MantidColorMap & getColorMap() const;
+  void loadColorMap(const QString& ,bool reset_colors = true);
+  void changeScaleType(int);
+  void setIntegrationRange(const double& xmin,const double& xmax);
+  double minValue()const{return m_DataMinValue;}
+  double maxValue()const{return m_DataMaxValue;}
+  void setMinValue(double value);
+  void setMaxValue(double value);
+  void setMinMaxRange(double vmin, double vmax);
+  double minPositiveValue()const{return m_WkspDataPositiveMin;}
+  double minBinValue()const{return m_BinMinValue;}
+  double maxBinValue()const{return m_BinMaxValue;}
+  bool wholeRange()const;
+  void draw(bool picking = false)const;
+  void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const{m_scene.getBoundingBox(minBound,maxBound);}
+  size_t ndetectors()const{return m_detIDs.size();}
+  boost::shared_ptr<Mantid::Geometry::IDetector> getDetector(size_t pickID)const;
+  Mantid::detid_t getDetID(size_t pickID)const{return m_detIDs.at(pickID);}
+  const std::vector<Mantid::detid_t>& getAllDetIDs()const{return m_detIDs;}
+  GLColor getColor(Mantid::detid_t id)const;
+  size_t getWorkspaceIndex(Mantid::detid_t id)const{return (*m_id2wi_map)[id];}
+  void invalidateDisplayLists()const{m_scene.invalidateDisplayList();}
+  QString getCurrentColorMap()const{return m_currentColorMap;}
+  static void InstrumentActor::BasisRotation(const Mantid::Geometry::V3D& Xfrom,
+                  const Mantid::Geometry::V3D& Yfrom,
+                  const Mantid::Geometry::V3D& Zfrom,
+                  const Mantid::Geometry::V3D& Xto,
+                  const Mantid::Geometry::V3D& Yto,
+                  const Mantid::Geometry::V3D& Zto,
+                  Mantid::Geometry::Quat& R,
+                  bool out = false
+                  );
+signals:
+  void colorMapChanged();
+protected:
+  void resetColors();
+  void loadSettings();
+  void saveSettings();
+  /// Add a detid to the m_detIDs. The order of detids define the pickIDs for detectors. Returns pickID for added detector
+  size_t push_back_detid(Mantid::detid_t)const;
+  boost::shared_ptr<Mantid::API::MatrixWorkspace> m_workspace;
+  MantidColorMap m_colorMap;
+  /// integrated spectra
+  std::vector<double> m_specIntegrs;
+  /// The workspace data and bin range limits
+  double m_WkspDataMin, m_WkspDataMax,m_WkspDataPositiveMin;
+  double m_WkspBinMin, m_WkspBinMax;
+  /// The user requested data and bin ranges
+  double m_DataMinValue, m_DataMaxValue;
+  double m_BinMinValue, m_BinMaxValue;
+  boost::shared_ptr<const Mantid::Geometry::IInstrument::plottables> m_plottables;
+  boost::scoped_ptr<Mantid::detid2index_map> m_id2wi_map;
+  mutable std::vector<Mantid::detid_t> m_detIDs; ///< all det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors
+  mutable std::vector<GLColor> m_colors; ///< colors in order of workspace indexes
+  QString m_currentColorMap;
+
+  GLActorCollection m_scene;
+  static double m_tolerance;
+
+  friend class ObjComponentActor;
+  friend class ObjCompAssemblyActor;
+  friend class RectangularDetectorActor;
 };
 
-#endif /*GLTRIANGLE_H_*/
+#endif /*InstrumentActor_H_*/
 

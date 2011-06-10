@@ -1,7 +1,7 @@
 #ifndef INSTRUMENTWINDOWPICKTAB_H_
 #define INSTRUMENTWINDOWPICKTAB_H_
 
-#include "Instrument3DWidget.h"
+#include "MantidGLWidget.h"
 #include "DetSelector.h"
 
 #include <QFrame>
@@ -26,7 +26,7 @@ class InstrumentWindowPickTab: public QFrame
 public:
   
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
-  void updatePick(const Instrument3DWidget::DetInfo & cursorPos);
+  void updatePick(int detid);
   bool canUpdateTouchedDetector()const;
 private slots:
   void plotContextMenu();
@@ -36,14 +36,16 @@ private slots:
   void setSelectionType();
   void addPeak(double,double);
 private:
-  void updatePlot(const Instrument3DWidget::DetInfo & cursorPos);
-  void updateSelectionInfo(const Instrument3DWidget::DetInfo & cursorPos);
-  void plotSingle(const Instrument3DWidget::DetInfo & cursorPos);
-  void plotBox(const Instrument3DWidget::DetInfo & cursorPos);
-  void plotTube(const Instrument3DWidget::DetInfo & cursorPos);
+  void updatePlot(int detid);
+  void updateSelectionInfo(int detid);
+  void plotSingle(int detid);
+  //void plotBox(const Instrument3DWidget::DetInfo & cursorPos);
+  void plotTube(int detid);
+  /// Calc indexes for min and max bin values defined in the instrument Actor
+  void getBinMinMaxIndex(size_t wi,size_t& imin, size_t& imax);
 
   InstrumentWindow* m_instrWindow;
-  Instrument3DWidget *mInstrumentDisplay;
+  MantidGLWidget *mInstrumentDisplay;
   /* Pick tab controls */
   OneCurvePlot* m_plot;
   QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
@@ -61,7 +63,7 @@ private:
   QTextEdit* m_selectionInfoDisplay; ///< Text control for displaying selection information
   CollapsiblePanel* m_infoPanel;
   DetSelectionType m_selectionType;
-  Instrument3DWidget::DetInfo m_currentPos;
+  int m_currentDetID;
 };
 
 

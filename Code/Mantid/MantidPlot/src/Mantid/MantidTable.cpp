@@ -123,7 +123,7 @@ void MantidTable::cellEdited(int row,int col)
  */
 void MantidTable::deleteRows(int startRow, int endRow)
 {
-  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("DeleteTableRow");
+  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("DeleteTableRows");
   alg->setPropertyValue("TableWorkspace",m_ws->getName());
   QStringList rows;
   rows << QString::number(startRow - 1) << QString::number(endRow - 1);

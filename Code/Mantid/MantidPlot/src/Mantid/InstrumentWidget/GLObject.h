@@ -46,22 +46,23 @@ public:
   /// Destructor
   virtual ~GLObject();
   /// Draw the object in direct mode or using glCallList
-  void draw();
+  void draw()const;
   /// Define the drawing here.
-  virtual void define();
+  virtual void define()const;
   /// Don't know about this
-  virtual void init();
+  virtual void init()const;
   /// Set the name of the GLObject
   void setName(const std::string& name);
   /// Get the name of the GLObject
   std::string getName() const;
   /// Re-construct the opengl scene
-  void construct();
+  void construct()const;
+  virtual void update()const{mChanged = true;}
 protected:
   /// Name
   std::string mName;
-  GLuint mDisplayListId;                   ///< OpengGL Display list id
-  bool mChanged;                         ///< Flag holding the change in the object
+  mutable GLuint mDisplayListId;                   ///< OpengGL Display list id
+  mutable bool mChanged;                         ///< Flag holding the change in the object
 };
 #endif /*MANTIDPLOT_GLOBJECT_H*/
 

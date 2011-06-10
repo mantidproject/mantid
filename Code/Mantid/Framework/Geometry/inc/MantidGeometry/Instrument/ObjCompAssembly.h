@@ -101,6 +101,12 @@ private:
   std::vector< ObjComponent* > group;
 };
 
+/// Shared pointer to ObjCompAssembly
+typedef boost::shared_ptr<ObjCompAssembly> ObjCompAssembly_sptr;
+/// Shared pointer to ObjCompAssembly (const version)
+typedef boost::shared_ptr<const ObjCompAssembly> ObjCompAssembly_const_sptr;
+
+DLLExport std::ostream& operator<<(std::ostream&, const ObjCompAssembly&);
 MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const ObjCompAssembly&);
 
 } //Namespace Geometry

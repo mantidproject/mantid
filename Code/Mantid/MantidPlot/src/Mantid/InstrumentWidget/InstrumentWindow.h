@@ -1,7 +1,8 @@
 #ifndef INSTRUMENTWINDOW_H_
 #define INSTRUMENTWINDOW_H_
 
-#include "Instrument3DWidget.h"
+//#include "Instrument3DWidget.h"
+#include "MantidGLWidget.h"
 #include "InstrumentTreeWidget.h"
 #include "../../MdiSubWindow.h"
 #include "../../GraphOptions.h"
@@ -15,7 +16,7 @@
 #include <Poco/NObserver.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmObserver.h"
-
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -27,6 +28,7 @@ class MatrixWorkspace;
 
 }
 
+class InstrumentActor;
 class OneCurvePlot;
 class CollapsiblePanel;
 class InstrumentWindowRenderTab;
@@ -79,10 +81,14 @@ class InstrumentWindow : public MdiSubWindow, public WorkspaceObserver, public M
   Q_OBJECT
 
 public:
+  enum SurfaceType{ FULL3D = 0, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z, RENDERMODE_SIZE };
+
   InstrumentWindow(const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
   ~InstrumentWindow();
   void setWorkspaceName(std::string wsName);
   void updateWindow();
+
+  SurfaceType getSurfaceType()const{return m_surfaceType;}
 
   /// Alter data from a script. These just foward calls to the 3D widget
   void setColorMapMinValue(double minValue);
@@ -93,8 +99,10 @@ public:
   void setScaleType(GraphOptions::ScaleType type);
   /// for saving the instrument window  to mantid project
   QString saveToString(const QString& geometry, bool saveAsTemplate= false);
-  Instrument3DWidget* getInstrumentDisplay(){return mInstrumentDisplay;}
+  MantidGLWidget* getInstrumentDisplay(){return m_InstrumentDisplay;}
+  InstrumentActor* getInstrumentActor(){return m_instrumentActor;}
   bool blocked()const{return m_blocked;}
+//  const MantidColorMap & getColorMap() const{return m_instrumentActor->getColorMap();}
 
 protected:
   /// Called just before a show event
@@ -104,22 +112,37 @@ protected:
 
 public slots:
   void tabChanged(int i);
-  void detectorHighlighted(const Instrument3DWidget::DetInfo & cursorPos);
-  void detectorTouched(const Instrument3DWidget::DetInfo & cursorPos);
+  void singleDetectorPicked(int);
+  void singleDetectorTouched(int);
+  void multipleDetectorsSelected(QList<int>&);
   void showPickOptions();
   void spectraInfoDialog();
   void plotSelectedSpectra();
   void showDetectorTable();
   void groupDetectors();
   void maskDetectors();
+
+  void extractDetsToWorkspace();
+  void sumDetsToWorkspace();
+  void createIncludeGroupingFile();
+  void createExcludeGroupingFile();
+
+  void setupColorMap();
   void changeColormap(const QString & filename = "");
+  void changeScaleType(int);
+  void changeColorMapMinValue(double minValue);
+  void changeColorMapMaxValue(double maxValue);
+  void changeColorMapRange(double minValue, double maxValue);
+  void setIntegrationRange(double,double);
+
+  //void componentSelected(const QItemSelection&, const QItemSelection&);
   void setViewDirection(const QString&);
-  void componentSelected(const QItemSelection&, const QItemSelection&);
   void pickBackgroundColor();
   void saveImage();
   void setInfoText(const QString&);
   void set3DAxesState(bool);
-  void setRenderMode(int);
+  void setSurfaceType(int);
+  void setWireframe(bool);
 
 signals:
   void plotSpectra(const QString&,const std::set<int>&);
@@ -137,7 +160,6 @@ private:
 
   void loadSettings();
   void saveSettings();
-  void renderInstrument(Mantid::API::MatrixWorkspace* workspace);
 
   QString asString(const std::vector<int>& numbers) const;
   QString confirmDetectorOperation(const QString & opName, const QString & inputWS, int ndets);
@@ -145,8 +167,16 @@ private:
   QTabWidget*  mControlsTab;
   // Actions for the pick menu
   QAction *mInfoAction, *mPlotAction, *mDetTableAction, *mGroupDetsAction, *mMaskDetsAction;
+  QAction *m_ExtractDetsToWorkspaceAction;  ///< Extract selected detector ids to a new workspace
+  QAction *m_SumDetsToWorkspaceAction;      ///< Sum selected detectors to a new workspace
+  QAction *m_createIncludeGroupingFileAction; ///< Create grouping xml file which includes selected detectors
+  QAction *m_createExcludeGroupingFileAction; ///< Create grouping xml file which excludes selected detectors
 
-  Instrument3DWidget* mInstrumentDisplay; ///< This is the opengl 3d widget for instrument
+  Mantid::API::MatrixWorkspace_sptr m_workspace;
+  MantidGLWidget* m_InstrumentDisplay;
+  InstrumentActor* m_instrumentActor;
+  SurfaceType m_surfaceType;       ///< 3D view or unwrapped
+
   int          mSpectraIDSelected; ///< spectra index id
   int          mDetectorIDSelected; ///< detector id
   std::set<int> mSpectraIDSelectedList;
@@ -155,7 +185,6 @@ private:
 
   std::string mWorkspaceName; ///< The name of workpace that this window is associated with
   QString mDefaultColorMap; ///< The full path of the default color map
-  QString mCurrentColorMap;
   QString m_savedialog_dir; /// The last used dialog directory
 
   InstrumentWindowRenderTab * m_renderTab;
@@ -165,6 +194,7 @@ private:
   bool mViewChanged;                ///< stores whether the user changed the view (so don't automatically change it)
 
   bool m_blocked;     ///< Set to true to block access to instrument during algorithm executions
+  QList<int> m_selectedDetectors;
 
 
 private:

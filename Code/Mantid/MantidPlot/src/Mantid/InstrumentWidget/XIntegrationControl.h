@@ -1,7 +1,7 @@
 #ifndef XINTEGRATIONCONTROL_H_
 #define XINTEGRATIONCONTROL_H_
 
-#include "Instrument3DWidget.h"
+#include "MantidGLWidget.h"
 
 #include <QFrame>
 #include <QScrollBar>
@@ -61,7 +61,7 @@ public:
   double getMaximum()const;
   double getWidth()const;
 signals:
-  void changed(double,double,bool);
+  void changed(double,double);
 private slots:
   void sliderChanged(double,double);
   void sliderRunning(double,double);
@@ -70,7 +70,7 @@ private slots:
 private:
   void updateTextBoxes();
   InstrumentWindow* m_instrWindow;
-  Instrument3DWidget *mInstrumentDisplay;
+  MantidGLWidget *mInstrumentDisplay;
   XIntegrationScrollBar* m_scrollBar;
   QLineEdit* m_minText;
   QLineEdit* m_maxText;

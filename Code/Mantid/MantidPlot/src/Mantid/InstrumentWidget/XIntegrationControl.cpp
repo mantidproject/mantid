@@ -10,6 +10,8 @@
 #include <QAction>
 #include <QLabel>
 #include <QApplication>
+#include <QEvent>
+#include <QMouseEvent>
 
 #include <numeric>
 #include <cfloat>
@@ -251,7 +253,7 @@ void XIntegrationControl::sliderChanged(double minimum,double maximum)
   m_minimum = m_totalMinimum + minimum * w;
   m_maximum = m_totalMinimum + maximum * w;
   updateTextBoxes();
-  emit changed(m_minimum,m_maximum,(m_minimum == m_totalMinimum && m_maximum == m_totalMaximum));
+  emit changed(m_minimum,m_maximum);
 }
 
 void XIntegrationControl::sliderRunning(double minimum,double maximum)
@@ -294,6 +296,7 @@ void XIntegrationControl::setRange(double minimum,double maximum)
   double w = m_totalMaximum - m_totalMinimum;
   m_scrollBar->set((m_minimum - m_totalMinimum) / w, (m_maximum - m_totalMinimum) / w);
   updateTextBoxes();
+  emit changed(m_minimum,m_maximum);
 }
 
 void XIntegrationControl::setWholeRange()

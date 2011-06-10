@@ -78,7 +78,8 @@ bool MantidColorMap::loadMap(const QString & filename)
   // Reading directly to the color store will mean that if the file is corrupt 
   // at some point then I can't revert to my previous map. Using a QVector means
   // that copying the data at the end is not an expensive operation
-  QVector<boost::shared_ptr<GLColor> > new_colormap;
+  //QVector<boost::shared_ptr<GLColor> > new_colormap;
+  QVector<GLColor> new_colormap;
   new_colormap.reserve(getLargestAllowedCIndex() + 1);
 
   float red(0.0f), green(0.0f), blue(0.0f);
@@ -92,7 +93,7 @@ bool MantidColorMap::loadMap(const QString & filename)
     reader >> red >> green >> blue;
     if( reader )
     {
-      new_colormap.push_back(boost::shared_ptr<GLColor>(new GLColor(red/255.0f, green/255.0f, blue/255.0f, 1.0)));
+      new_colormap.push_back(GLColor((unsigned char)(red), (unsigned char)green, (unsigned char)blue));
       ++count;
     }
     else 
@@ -155,7 +156,7 @@ void MantidColorMap::setupDefaultMap()
   {
     std::stringstream reader(line);
     reader >> red >> green >> blue;
-    m_colors.push_back(boost::shared_ptr<GLColor>(new GLColor(red/255.0f, green/255.0f, blue/255.0f, 1.0)));
+    m_colors.push_back(GLColor((unsigned char)(red), (unsigned char)green, (unsigned char)blue));
   }  
 }
 
@@ -209,9 +210,9 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value
  */
 QRgb MantidColorMap::rgb(const QwtDoubleInterval & interval, double value) const
 {
-  boost::shared_ptr<GLColor> col = getColor(colorIndex(interval, value));
+  GLColor col = getColor(colorIndex(interval, value));
   float r(0.0f), g(0.0f), b(0.0f), a(0.0f);
-  col->get(r,g,b,a);
+  col.get(r,g,b,a);
   return qRgb(int(r*255),int(g*255),int(b*255));
 }
 
@@ -272,7 +273,7 @@ QVector<QRgb> MantidColorMap::colorTable(const QwtDoubleInterval & interval) con
  * @param An :: index within this color map's range.
  *
  */
-boost::shared_ptr<GLColor> MantidColorMap::getColor(unsigned char index) const
+GLColor MantidColorMap::getColor(unsigned char index) const
 {
   short ci = static_cast<short>(index);
   if( ci >= 0 && ci < m_num_colors )
@@ -281,5 +282,5 @@ boost::shared_ptr<GLColor> MantidColorMap::getColor(unsigned char index) const
   }
 
   // Otherwise return black
-  return boost::shared_ptr<GLColor>(new GLColor(0.0f, 0.0f, 0.0f, 1.0f));
+  return GLColor();
 }

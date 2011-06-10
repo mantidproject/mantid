@@ -43,8 +43,8 @@ namespace Mantid
     private:
 
       static Kernel::Logger& PLog;           ///< The official logger
-      unsigned int           iDisplaylistId; ///< OpenGL display list id
-      bool                   boolDisplaylistCreated; ///< flag to store whether display list is created or not
+      mutable unsigned int    iDisplaylistId; ///< OpenGL display list id
+      mutable bool            boolDisplaylistCreated; ///< flag to store whether display list is created or not
 
     public:
       CacheGeometryRenderer();       ///< Constructor
@@ -54,7 +54,7 @@ namespace Mantid
       /// Render using triangulation information
       void Render(int noPts,int noFaces,double* points,int* faces) const;
       /// Initialize using triangulation information
-      void Initialize(int noPts,int noFaces,double* points,int* faces);
+      void Initialize(int noPts,int noFaces,double* points,int* faces)const;
       /// Initialize using an object component
       void Initialize(IObjComponent* ObjComp);
     };

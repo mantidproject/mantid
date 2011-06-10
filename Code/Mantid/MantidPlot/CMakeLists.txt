@@ -181,16 +181,14 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/WorkspaceObserver.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
                    src/Mantid/InstrumentWidget/CompAssemblyActor.cpp
-                   src/Mantid/InstrumentWidget/GL3DWidget.cpp
+                   src/Mantid/InstrumentWidget/ComponentActor.cpp
                    src/Mantid/InstrumentWidget/GLActorCollection.cpp
                    src/Mantid/InstrumentWidget/GLActor.cpp
                    src/Mantid/InstrumentWidget/GLColor.cpp
-                   src/Mantid/InstrumentWidget/GLGroupPickBox.cpp
                    src/Mantid/InstrumentWidget/GLObject.cpp
                    src/Mantid/InstrumentWidget/GLTrackball.cpp
                    src/Mantid/InstrumentWidget/GLViewport.cpp
                    src/Mantid/InstrumentWidget/ICompAssemblyActor.cpp
-                   src/Mantid/InstrumentWidget/Instrument3DWidget.cpp
                    src/Mantid/InstrumentWidget/InstrumentActor.cpp
                    src/Mantid/InstrumentWidget/InstrumentTreeModel.cpp
                    src/Mantid/InstrumentWidget/InstrumentTreeWidget.cpp
@@ -200,16 +198,15 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/MantidColorMap.cpp
                    src/Mantid/InstrumentWidget/MantidGLWidget.cpp
                    src/Mantid/InstrumentWidget/ColorMapWidget.cpp
-                   src/Mantid/InstrumentWidget/MantidObject.cpp
                    src/Mantid/InstrumentWidget/ObjCompAssemblyActor.cpp
                    src/Mantid/InstrumentWidget/ObjComponentActor.cpp
                    src/Mantid/InstrumentWidget/OpenGLError.cpp
                    src/Mantid/InstrumentWidget/RectangularDetectorActor.cpp
-                   src/Mantid/InstrumentWidget/TexObject.cpp
                    src/Mantid/InstrumentWidget/UnwrappedCylinder.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSphere.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSurface.cpp
                    src/Mantid/InstrumentWidget/ProjectionSurface.cpp
+                   src/Mantid/InstrumentWidget/Projection3D.cpp
                    src/Mantid/InstrumentWidget/OneCurvePlot.cpp
                    src/Mantid/InstrumentWidget/CollapsiblePanel.cpp
                    src/Mantid/InstrumentWidget/DetSelector.cpp
@@ -395,16 +392,14 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/WorkspaceObserver.h
                    src/Mantid/InstrumentWidget/BinDialog.h
                    src/Mantid/InstrumentWidget/CompAssemblyActor.h
-                   src/Mantid/InstrumentWidget/GL3DWidget.h
+                   src/Mantid/InstrumentWidget/ComponentActor.h
                    src/Mantid/InstrumentWidget/GLActorCollection.h
                    src/Mantid/InstrumentWidget/GLActor.h
                    src/Mantid/InstrumentWidget/GLColor.h
-                   src/Mantid/InstrumentWidget/GLGroupPickBox.h
                    src/Mantid/InstrumentWidget/GLObject.h
                    src/Mantid/InstrumentWidget/GLTrackball.h
                    src/Mantid/InstrumentWidget/GLViewport.h
                    src/Mantid/InstrumentWidget/ICompAssemblyActor.h
-                   src/Mantid/InstrumentWidget/Instrument3DWidget.h
                    src/Mantid/InstrumentWidget/InstrumentActor.h
                    src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                    src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
@@ -414,16 +409,15 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/MantidColorMap.h
                    src/Mantid/InstrumentWidget/MantidGLWidget.h
                    src/Mantid/InstrumentWidget/ColorMapWidget.h
-                   src/Mantid/InstrumentWidget/MantidObject.h
                    src/Mantid/InstrumentWidget/ObjCompAssemblyActor.h
                    src/Mantid/InstrumentWidget/ObjComponentActor.h
                    src/Mantid/InstrumentWidget/OpenGLError.h
                    src/Mantid/InstrumentWidget/RectangularDetectorActor.h
-                   src/Mantid/InstrumentWidget/TexObject.h
                    src/Mantid/InstrumentWidget/UnwrappedCylinder.h
                    src/Mantid/InstrumentWidget/UnwrappedSphere.h
                    src/Mantid/InstrumentWidget/UnwrappedSurface.h
                    src/Mantid/InstrumentWidget/ProjectionSurface.h
+                   src/Mantid/InstrumentWidget/Projection3D.h
                    src/Mantid/InstrumentWidget/OneCurvePlot.h
                    src/Mantid/InstrumentWidget/CollapsiblePanel.h
                    src/Mantid/InstrumentWidget/DetSelector.h
@@ -657,8 +651,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/WorkspaceObserver.h
                        src/Mantid/InstrumentWidget/XIntegrationControl.h
                        src/Mantid/InstrumentWidget/BinDialog.h
-                       src/Mantid/InstrumentWidget/GL3DWidget.h
-                       src/Mantid/InstrumentWidget/Instrument3DWidget.h
                        src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                        src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
@@ -668,6 +660,8 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/InstrumentWidget/MantidGLWidget.h
                        src/Mantid/InstrumentWidget/OneCurvePlot.h
                        src/Mantid/InstrumentWidget/CollapsiblePanel.h
+                       src/Mantid/InstrumentWidget/InstrumentActor.h
+                       src/Mantid/InstrumentWidget/ProjectionSurface.h
 )
 
 set ( UI_FILES src/Mantid/FirstTimeSetup.ui

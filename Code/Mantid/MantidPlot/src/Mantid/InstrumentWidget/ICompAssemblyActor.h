@@ -1,6 +1,6 @@
 #ifndef ICOMPASSEMBLY_ACTOR__H_
 #define ICOMPASSEMBLY_ACTOR__H_
-#include "GLActor.h"
+#include "ComponentActor.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/V3D.h"
 
@@ -49,49 +49,21 @@ namespace Geometry
 
 }
 
-class MantidObject;
 class ObjComponentActor;
 
-class ICompAssemblyActor : public GLActor
+class ICompAssemblyActor : public ComponentActor
 {
+public:
+  ICompAssemblyActor(const InstrumentActor& instrActor,const Mantid::Geometry::ComponentID& compID); ///< Constructor
+  void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const;
+
+  virtual std::string type()const {return "ICompAssemblyActor";} ///< Type of the GL object
+  int getNumberOfDetectors() const { return mNumberOfDetectors;}
+
 protected:
   int mNumberOfDetectors;
   Mantid::Geometry::V3D minBoundBox;
   Mantid::Geometry::V3D maxBoundBox;
-  //void AppendBoundingBox(const Mantid::Geometry::V3D& minBound,const Mantid::Geometry::V3D& maxBound);
-
-  Mantid::Geometry::ComponentID mId; ///< Component ID of the CompAssembly
-  boost::shared_ptr<Mantid::Geometry::IInstrument> mInstrument; ///< Instrument
-  boost::shared_ptr<std::map<const boost::shared_ptr<const Mantid::Geometry::Object>,MantidObject*> > mObjects; ///< List of Objects in the Instrument, its built as the Instrument is parsed through
-  int mColorStartID;                                       ///< Starting picking colorid for the subcomponents to CompAssembly
-  virtual void initChilds(bool) = 0;
-public:
-  ICompAssemblyActor(bool withDisplayList);                       ///< Constructor
-  ICompAssemblyActor(boost::shared_ptr<std::map<const boost::shared_ptr<const Mantid::Geometry::Object>,MantidObject*> >& mmm,
-                     Mantid::Geometry::ComponentID id,
-                     boost::shared_ptr<Mantid::Geometry::IInstrument> ins,
-                     bool withDisplayList); ///< Constructor
-  virtual ~ICompAssemblyActor(){}								   ///< Destructor
-  virtual int  setStartingReferenceColor(int rgb) = 0;
-  virtual std::string type()const {return "ICompAssemblyActor";} ///< Type of the GL object
-  //virtual void define() = 0;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-  int getNumberOfDetectors() const { return mNumberOfDetectors;}
-  virtual void drawUsingColorID() = 0;
-  void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound);
-  boost::shared_ptr<Mantid::Geometry::IInstrument> getInstrument(){return mInstrument;}
-  boost::shared_ptr<const Mantid::Geometry::IInstrument> getInstrument()const{return mInstrument;}
-
-  //virtual void init() = 0;
-  virtual void redraw() = 0;
-  virtual void appendObjCompID(std::vector<int>&) = 0;
-  virtual MantidObject*	getMantidObject(const boost::shared_ptr<const Mantid::Geometry::Object>,bool withDisplayList) = 0;
-  virtual int setInternalDetectorColors(std::vector<boost::shared_ptr<GLColor> >::iterator& list) = 0;
-  virtual int findDetectorIDUsingColor(int rgb) = 0;
-
-  /// Return the starting color ID (for picking)
-  virtual int getColorStartID()
-  { return mColorStartID; }
-
 };
 
 #endif /*GLTRIANGLE_H_*/

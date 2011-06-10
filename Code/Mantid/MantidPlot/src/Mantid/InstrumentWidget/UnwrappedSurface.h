@@ -5,6 +5,7 @@
 #include "MantidGeometry/Quat.h"
 #include "MantidGeometry/IComponent.h"
 #include "InstrumentActor.h"
+#include "ProjectionSurface.h"
 #include <boost/shared_ptr.hpp>
 
 #include <QImage>
@@ -20,6 +21,7 @@ namespace Mantid{
 }
 
 class GLColor;
+class QGLWidget;
 class GL3DWidget;
 
 /**
@@ -56,79 +58,50 @@ public:
   * @date 18 Nov 2010
   */
 
-class UnwrappedSurface: public DetectorCallback
+class UnwrappedSurface: /*public DetectorCallback,*/ public ProjectionSurface
 {
   //Q_OBJECT
 public:
   UnwrappedSurface(const InstrumentActor* rootActor,const Mantid::Geometry::V3D& origin,const Mantid::Geometry::V3D& axis);
   ~UnwrappedSurface();
-  void startSelection(int x,int y);
-  void moveSelection(int x,int y);
-  void endSelection(int x,int y);
-  void zoom();
-  void zoom(const QRectF& area);
-  void unzoom();
-  void updateView();
-  void updateDetectors();
-
-  void draw(GL3DWidget* widget);
-
-  void componentSelected(Mantid::Geometry::ComponentID);
-  void getPickedDetector(QSet<int>& dets);
-  int getDetectorID(int x, int y);
-  bool hasSelection()const;
+  void componentSelected(Mantid::Geometry::ComponentID = NULL);
+  void getSelectedDetectors(QList<int>& dets);
+  virtual QString getInfoText()const;
 
 protected:
+  virtual void drawSurface(MantidGLWidget* widget,bool picking = false)const;
+  virtual void changeColorMap();
+
+  virtual void mousePressEventMove(QMouseEvent*);
+  virtual void mouseMoveEventMove(QMouseEvent*);
+  virtual void mouseReleaseEventMove(QMouseEvent*);
+  virtual void wheelEventMove(QWheelEvent*);
+
+  /// calculate and assign udet.u and udet.v
   virtual void calcUV(UnwrappedDetector& udet) = 0;
-  virtual void calcRot(UnwrappedDetector& udet, Mantid::Geometry::Quat& R) = 0;
-  virtual void drawSurface(GL3DWidget* widget,bool picking = false);
+  /// calculate rotation R for a udet
+  virtual void calcRot(const UnwrappedDetector& udet, Mantid::Geometry::Quat& R)const = 0;
   virtual double uPeriod()const{return 0.0;}
 
   void init();
   void calcSize(UnwrappedDetector& udet,const Mantid::Geometry::V3D& X,
                 const Mantid::Geometry::V3D& Y);
-  void callback(boost::shared_ptr<const Mantid::Geometry::IDetector> det,const DetectorCallbackData& data);
-  void clear();
-  void setColor(int index,bool picking);
+  //void callback(boost::shared_ptr<const Mantid::Geometry::IDetector> det,const DetectorCallbackData& data);
+  void setColor(int index,bool picking)const;
   void showPickedDetector();
-  int getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const;
-  int getDetectorID(unsigned char r,unsigned char g,unsigned char b)const;
-  QRect selectionRect()const;
-  QRectF selectionRectUV()const;
   void calcAssemblies(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,const QRectF& compRect);
   void findAndCorrectUGap();
 
   const InstrumentActor* m_instrActor;
-  const Mantid::Geometry::V3D m_pos;   ///< Origin (sample position)
-  const Mantid::Geometry::V3D m_zaxis; ///< The z axis, symmetry axis of the cylinder
-  Mantid::Geometry::V3D m_xaxis;       ///< The x axis, defines the zero of the polar phi angle
-  Mantid::Geometry::V3D m_yaxis;       ///< The y axis, rotation from x to y defines positive phi
   double m_u_min;                      ///< Minimum u
   double m_u_max;                      ///< Maximum u
   double m_v_min;                      ///< Minimum v
   double m_v_max;                      ///< Maximum v
   double m_height_max;  ///< Maximum detector height
   double m_width_max;   ///< Maximum detector width
-  QImage* m_unwrappedImage;      ///< storage for unwrapped image
-  QImage* m_pickImage;      ///< storage for picking image
-  bool m_unwrappedViewChanged;   ///< set when the unwrapped image must be redrawn
   QList<UnwrappedDetector> m_unwrappedDetectors;  ///< info needed to draw detectors onto unwrapped image
   QMap<Mantid::Geometry::ComponentID,QRectF> m_assemblies;
-  QRectF m_unwrappedView;
-  QRect m_selectRect;
-  QStack<QRectF> m_zoomStack;
 
-  static double m_tolerance;     ///< tolerance for comparing 3D vectors
-
-  void BasisRotation(const Mantid::Geometry::V3D& Xfrom,
-                  const Mantid::Geometry::V3D& Yfrom,
-                  const Mantid::Geometry::V3D& Zfrom,
-                  const Mantid::Geometry::V3D& Xto,
-                  const Mantid::Geometry::V3D& Yto,
-                  const Mantid::Geometry::V3D& Zto,
-                  Mantid::Geometry::Quat& R,
-                  bool out = false
-                  );
 };
 
 #endif // UNWRAPPEDSURFACE_H
