@@ -96,7 +96,7 @@ public:
   size_t getWorkspaceIndex(Mantid::detid_t id)const{return (*m_id2wi_map)[id];}
   void invalidateDisplayLists()const{m_scene.invalidateDisplayList();}
   QString getCurrentColorMap()const{return m_currentColorMap;}
-  static void InstrumentActor::BasisRotation(const Mantid::Geometry::V3D& Xfrom,
+  static void BasisRotation(const Mantid::Geometry::V3D& Xfrom,
                   const Mantid::Geometry::V3D& Yfrom,
                   const Mantid::Geometry::V3D& Zfrom,
                   const Mantid::Geometry::V3D& Xto,
