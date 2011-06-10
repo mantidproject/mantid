@@ -40,9 +40,8 @@ class PlotCurve: public QObject, public QwtPlotCurve
 {
 Q_OBJECT
 public:
-	PlotCurve(const QString& name = QString()): QwtPlotCurve(name), d_type(0), d_x_offset(0.0), d_y_offset(0.0){};
- PlotCurve(const PlotCurve& c): QObject(), QwtPlotCurve(c.title().text()), d_type(c.d_type), 
-    d_x_offset(c.d_x_offset), d_y_offset(c.d_y_offset){};
+  PlotCurve(const QString& name = QString());
+  PlotCurve(const PlotCurve& c);
 
   virtual PlotCurve* clone()const = 0;
 
@@ -54,6 +53,9 @@ public:
 
 	double yOffset()const{return d_y_offset;};
 	void setYOffset(double dy){d_y_offset = dy;};
+
+  bool sideLinesEnabled(){return d_side_lines;};
+  void enableSideLines(bool on){d_side_lines = on;};
 
 	QString saveCurveLayout();
 	void restoreCurveLayout(const QStringList& lst);
@@ -74,8 +76,12 @@ signals:
   void forgetMe(PlotCurve*);
 
 protected:
+  virtual void drawCurve(QPainter *p, int style, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const;
+  void drawSideLines(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const;
+
 	int d_type;
 	double d_x_offset, d_y_offset;
+  bool d_side_lines;
 };
 
 class DataCurve: public PlotCurve

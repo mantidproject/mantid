@@ -37,6 +37,14 @@
 #include <qwt_symbol.h>
 #include <qwt_plot_canvas.h>
 
+PlotCurve::PlotCurve(const QString& name) : QwtPlotCurve(name),
+  d_type(0), d_x_offset(0.0), d_y_offset(0.0), d_side_lines(false)
+{}
+
+PlotCurve::PlotCurve(const PlotCurve& c) : QObject(), QwtPlotCurve(c.title().text()),
+  d_type(c.d_type), d_x_offset(c.d_x_offset), d_y_offset(c.d_y_offset), d_side_lines(c.d_side_lines)
+{}
+
 QString PlotCurve::saveCurveLayout()
 {		
 	Plot *plot = (Plot *)this->plot();
@@ -168,6 +176,40 @@ void PlotCurve::restoreCurveLayout(const QStringList& lst)
 void PlotCurve::aboutToBeDeleted()
 {
   emit forgetMe(this);
+}
+
+void PlotCurve::drawCurve(QPainter *p, int style, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const
+{
+  if(d_side_lines)
+    drawSideLines(p, xMap, yMap, from, to);
+  QwtPlotCurve::drawCurve(p, style, xMap, yMap, from, to);
+}
+
+void PlotCurve::drawSideLines(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const
+{
+  if (!p || dataSize() <= 0)
+    return;
+
+  if (to < 0)
+    to = dataSize() - 1;
+
+  p->save();
+  QPen pen = p->pen();
+  pen.setCapStyle(Qt::FlatCap);
+  pen.setJoinStyle(Qt::MiterJoin);
+  p->setPen(pen);
+
+  double lw = 0.5*pen.widthF();
+  const double xl = xMap.xTransform(x(from)) - lw;
+  const double xr = xMap.xTransform(x(to)) + lw;
+  const double yl = yMap.xTransform(y(from)) - lw;
+  const double yr = yMap.xTransform(y(to)) - lw;
+  const double base = yMap.xTransform(baseline());
+
+  p->drawLine(QPointF(xl, yl), QPointF(xl, base));
+  p->drawLine(QPointF(xr, yr), QPointF(xr, base));
+
+  p->restore();
 }
 
 DataCurve::DataCurve(Table *t, const QString& xColName, const QString& name, int startRow, int endRow):

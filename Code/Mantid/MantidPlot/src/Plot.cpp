@@ -715,6 +715,24 @@ void Plot::updateCurveLabels()
     }
 }
 
+// Created for waterfall plots.
+// Contains the functionality that's in Graph.cpp of today's qtiplot (where Plot & Graph have been merged)
+void Plot::reverseCurveOrder()
+{
+  if (d_curves.isEmpty())
+    return;
+
+  QMap<int,QwtPlotItem *> lst;
+  QList<int> keys = curveKeys();
+  int n = d_curves.size();
+  for (int i = 0; i < n; i++)
+    lst.insert(keys[i],d_curves[keys[n - i - 1]]);
+//  Qtiplot code: lst << d_curves[n - i - 1];
+
+  d_curves = lst;
+//  Qtiplot code: setCurvesList(lst);
+}
+
 void Plot::showEvent (QShowEvent * event)
 {
     event->accept();

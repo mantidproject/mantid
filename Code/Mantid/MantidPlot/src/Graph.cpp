@@ -5571,22 +5571,21 @@ void Graph::updateWaterfallFill(bool on)
 
 void Graph::setWaterfallSideLines(bool on)
 {
-  UNUSED_ARG(on)
-	// TODO: Make this work
-	//int n = d_curves.size();
-	//if (!n)
-	//	return;
+  int n = d_plot->curvesList().size(); //d_curves.size();
+  if (!n)
+    return;
 
-	//if (curve(0)->sideLinesEnabled() == on)
-	//	return;
+  PlotCurve *cv = dynamic_cast<PlotCurve*>(curve(0));
+  if ( cv && cv->sideLinesEnabled() == on)
+    return;
 
-	//for (int i = 0; i < n; i++){
-	//	PlotCurve *cv = (PlotCurve *)curve(i);
-	//	if (cv)
-	//		cv->enableSideLines(on);
-	//}
-	//replot();
-	//emit modifiedGraph();
+  for (int i = 0; i < n; i++){
+    cv = dynamic_cast<PlotCurve*>(curve(i));
+    if (cv)
+      cv->enableSideLines(on);
+  }
+  replot();
+  emit modifiedGraph();
 }
 
 void Graph::setWaterfallFillColor(const QColor& c)
@@ -5606,18 +5605,10 @@ void Graph::setWaterfallFillColor(const QColor& c)
 
 void Graph::reverseCurveOrder()
 {
-	// No-op at the mo. TODO: Implement
-	return;
-	//if (d_plot->curvesList().isEmpty()) //d_curves.isEmpty())
-	//	return;
+  // RJT: Just call through to Plot - functionality placed there
+  d_plot->reverseCurveOrder();
 
-	//QList<QwtPlotItem *> lst;
-	//int n = d_plot->curvesList().size(); //d_curves.size();
-	//for (int i = 0; i < n; i++)
-	//	lst << d_curves[n - i - 1];
-
-	//setCurvesList(lst);
-	//emit modifiedGraph();
+  emit modifiedGraph();
 }
 
 void Graph::updateDataCurves()

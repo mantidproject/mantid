@@ -16793,7 +16793,7 @@ MultiLayer* ApplicationWindow::waterfallPlot(Table *t, const QStringList& list)
   ml->arrangeLayers(false, true);
   ml->setWaterfallLayout();
 
-  // TODO: RJT put back in. g->newLegend()->move(QPoint(g->x() + g->canvas()->x() + 5, 5));
+  g->newLegend()->move(QPoint(g->x() + g->plotWidget()->canvas()->x() + 5, 5));
 
   return ml;
 }

@@ -101,6 +101,8 @@ public:
 
     void updateCurveLabels();
 
+  void reverseCurveOrder(); // Created in connection with waterfall plots. Called from Graph method of same name.
+
 protected:
     void showEvent (QShowEvent * event);
     void printFrame(QPainter *painter, const QRect &rect) const;

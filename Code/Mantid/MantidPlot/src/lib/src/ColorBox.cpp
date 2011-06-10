@@ -114,38 +114,45 @@ QColor ColorBox::color(int colorIndex)
 
 QList<QColor> ColorBox::colorList()
 {
-#ifdef Q_OS_MAC
-  QSettings settings(QSettings::IniFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
-#else
-  QSettings settings(QSettings::NativeFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
-#endif
-  settings.beginGroup("/General");
+  // RJT: I don't see why we particularly need the ability to change the list of colours
+  // and it was causing problems even after I changed the organization and application
+  // names. So I'm just going to disable it and stick with the hard-coded defaults.
+
+//#ifdef Q_OS_MAC
+//  QSettings settings(QSettings::IniFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
+//#else
+//  QSettings settings(QSettings::NativeFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
+//#endif
+//  settings.beginGroup("/General");
 
   QList<QColor> indexedColors;
-  QStringList lst = settings.value("/IndexedColors").toStringList();
-  if (!lst.isEmpty()){
-    for (int i = 0; i < lst.size(); i++)
-      indexedColors << QColor(lst[i]);
-  } else {
+//  QStringList lst = settings.value("/IndexedColors").toStringList();
+//  if (!lst.isEmpty()){
+//    for (int i = 0; i < lst.size(); i++)
+//      indexedColors << QColor(lst[i]);
+//  } else {
     for (int i = 0; i < colors_count; i++)
       indexedColors << colors[i];
-  }
-  settings.endGroup();
+//  }
+//  settings.endGroup();
 
   return indexedColors;
 }
 
 QStringList ColorBox::colorNames()
 {
-#ifdef Q_OS_MAC
-  QSettings settings(QSettings::IniFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
-#else
-  QSettings settings(QSettings::NativeFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
-#endif
-  settings.beginGroup("/General");
-  QStringList color_names = settings.value("/IndexedColorNames", defaultColorNames()).toStringList();
-  settings.endGroup();
-  return color_names;
+  // RJT: See comment at top of previous method
+
+//#ifdef Q_OS_MAC
+//  QSettings settings(QSettings::IniFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
+//#else
+//  QSettings settings(QSettings::NativeFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
+//#endif
+//  settings.beginGroup("/General");
+//  QStringList color_names = settings.value("/IndexedColorNames", defaultColorNames()).toStringList();
+//  settings.endGroup();
+//  return color_names;
+  return defaultColorNames();
 }
 
 QColor ColorBox::defaultColor(int colorIndex)
