@@ -1,5 +1,4 @@
 from mantidsimple import *
-from mantidplot import *
 from msg_reducer import MSGReducer
 import inelastic_indirect_reduction_steps as steps
 
@@ -9,20 +8,15 @@ class MSGDiffractionReducer(MSGReducer):
 
     def __init__(self):
         super(MSGDiffractionReducer, self).__init__()
-        
-    def pre_process(self):
-        super(MSGDiffractionReducer, self).pre_process()
-        
-        self.setup_steps()
     
-    def setup_steps(self):
+    def _setup_steps(self):
         self.append_step(steps.HandleMonitor(
             MultipleFrames=self._multiple_frames))
         self.append_step(steps.CorrectByMonitor(
             MultipleFrames=self._multiple_frames, EMode="Elastic"))
         if self._multiple_frames:
             self.append_step(steps.FoldData())
-            
+        
         step = mtd.createAlgorithm("ConvertUnits")
         step.setPropertyValue("Target", "dSpacing")
         step.setPropertyValue("EMode", "Elastic")

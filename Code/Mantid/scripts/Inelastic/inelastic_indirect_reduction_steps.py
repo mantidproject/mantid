@@ -499,9 +499,6 @@ class CorrectByMonitor(ReductionStep):
         self._emode = emode
 
 class FoldData(ReductionStep):
-    """
-    """
-
     _result_workspaces = []
     
     def __init__(self):
@@ -509,8 +506,6 @@ class FoldData(ReductionStep):
         self._result_workspaces = []
         
     def execute(self, reducer, file_ws):
-        """Folds data back into a single workspace if it has been "chopped".
-        """
         try:
             wsgroup = mtd[file_ws].getNames()
         except AttributeError:

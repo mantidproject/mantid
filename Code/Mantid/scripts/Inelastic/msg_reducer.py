@@ -13,9 +13,9 @@ class MSGReducer(reducer.Reducer):
     providing a semi-consistent interface to both.
     """
     
-    _instrument_name = None # Name of the instrument used in experiment
-    _sum = False # Whether to sum input files or treat them sequentially
-    _monitor_index = None # Index of Monitor specturm
+    _instrument_name = None #: Name of the instrument used in experiment
+    _sum = False #: Whether to sum input files or treat them sequentially
+    _monitor_index = None #: Index of Monitor specturm
     _multiple_frames = False
     _detector_range = [-1, -1]
     _masking_detectors = []
@@ -42,7 +42,14 @@ class MSGReducer(reducer.Reducer):
         if ( self._sum ):
             self._data_files = loadData.get_ws_list()
             
+        self._setup_steps()
+
     def set_detector_range(self, start, end):
+        """Sets the start and end detector points for the reduction process.
+        These numbers are to be the workspace index, not the spectrum number.
+        """
+        if ( not isinstance(start, int) ) or ( not isinstance(end, int) ):
+            raise TypeError("start and end must be integer values")
         self._detector_range = [ start, end ]
         
     def set_instrument_name(self, instrument):
@@ -50,12 +57,14 @@ class MSGReducer(reducer.Reducer):
         instruments. Instead, we load the instrument and parameter file and
         query it for information.
         Raises:
-            * ValueError if instrument not selected.
+            * ValueError if an instrument name is not provided.
             * RuntimeError if IDF could not be found or is invalid.
             * RuntimeError if workspace index of the Monitor could not be
                 determined.
+        Example use:
+            reducer.set_instrument_name("IRIS")
         """
-        if instrument is None:
+        if not isinstance(instrument, str):
             raise ValueError("Instrument name must be given.")
         self._instrument_name = instrument
         self._load_empty_instrument()
@@ -64,6 +73,12 @@ class MSGReducer(reducer.Reducer):
             raise RuntimeError("Could not find Monitor in Instrument.")
         
     def set_parameter_file(self, file):
+        """Sets the parameter file to be used in the reduction. The parameter
+        file will contain some settings that are used throughout the reduction
+        process.
+        Note: This is *not* the base parameter file, ie "IRIS_Parameters.xml"
+        but, rather, the additional parameter file.
+        """
         if self._instrument_name is None:
             raise ValueError("Instrument name not set.")
         self._parameter_file = \
@@ -73,8 +88,11 @@ class MSGReducer(reducer.Reducer):
         
     def set_sum_files(self, value):
         """Mark whether multiple runs should be summed together for the process
-        or treated individually. Default: False
+        or treated individually.
+        The default value for this is False.
         """
+        if not isinstance(value, bool):
+            raise TypeError("value must be either True or False (boolean)")
         self._sum = value
         
     def _load_empty_instrument(self):
@@ -96,6 +114,8 @@ class MSGReducer(reducer.Reducer):
         return mtd[self._workspace_instrument]
 
     def _get_monitor_index(self):
+        """Determined the workspace index of the first monitor spectrum.
+        """
         workspace = self._load_empty_instrument()
         for counter in range(0, workspace.getNumberHistograms()):
             try:

@@ -5,8 +5,7 @@ from msg_reducer import MSGReducer
 import inelastic_indirect_reduction_steps as steps
 
 class IndirectReducer(MSGReducer):
-    """Reducer class for Inelastic Indirect Spectroscopy. Curently a work in
-    progress.
+    """Reducer class for Inelastic Indirect Spectroscopy.
     
     Example for use:
     >> import inelastic_indirect_reducer as iir
@@ -18,12 +17,11 @@ class IndirectReducer(MSGReducer):
     >> reducer.reduce()
     
     Will perform the same steps as the ConvertToEnergy interface does on the
-    default settings (nearly).
+    default settings.
     """
     
     _rebin_string = None
     _grouping_policy = None
-    _calib_raw_files = []
     _calibration_workspace = None
     _background_start = None
     _background_end = None
@@ -32,14 +30,11 @@ class IndirectReducer(MSGReducer):
     _save_formats = []
     
     def __init__(self):
-        """Constructor function for IndirectReducer.
-        Calls base class constructor and initialises data members to known
-        starting values.
+        """
         """
         super(IndirectReducer, self).__init__()
         self._rebin_string = None
         self._grouping_policy = None
-        self._calib_raw_files = []
         self._calibration_workspace = None
         self._background_start = None
         self._background_end = None
@@ -47,30 +42,11 @@ class IndirectReducer(MSGReducer):
         self._rename_result = True
         self._save_formats = []
         
-    def pre_process(self):
-        """Handles the loading of the data files. This is done once, at the
-        beginning rather than for each individually because the user may want
-        to sum their files.
-        """
-        # Run the base MSGReducer step (runs LoadData)
-        super(IndirectReducer, self).pre_process()
-
-        # If necessary, create the workspace for the calibration step.
-        if len(self._calib_raw_files) > 0:
-            calib = steps.CreateCalibrationWorkspace()
-            calib.set_files(self._calib_raw_files)
-            calib.set_instrument_workspace(self._workspace_instrument)
-            calib.set_detector_range(self._detector_range[0],
-                self._detector_range[1])
-            calib.execute(self, None)
-            self._calibration_workspace = calib.result_workspace()
-        
-        # Setup the steps for the rest of the reduction, based on selected
-        # user settings.
-        self.setup_steps()
-
-    def setup_steps(self):
-        """Setup the steps for the reduction.
+    def _setup_steps(self):
+        """**NB: This function is run automatically by the base reducer class
+        and so does not require user interaction.**
+        Setup the steps for the reduction. Please refer to the individual
+        steps for details on their operation.
         """
         
         # "HandleMonitor" converts the monitor to Wavelength, possibly Unwraps
@@ -118,6 +94,7 @@ class IndirectReducer(MSGReducer):
         if self._multiple_frames:
             self.append_step(steps.FoldData())
             
+        # The "SaveItem" step saves the files in the requested formats.
         if (len(self._save_formats) > 0):
             step = steps.SaveItem()
             step.set_formats(self._save_formats)
@@ -127,31 +104,40 @@ class IndirectReducer(MSGReducer):
             step = steps.Naming()
             self.append_step(step)
     
-    def post_process(self):
-        """Deletes the calibration workspace (if we created it).
-        """
-        if ( self._calibration_workspace is not None ) and ( 
-                len(self._calib_raw_files) > 0 ):
-            DeleteWorkspace(self._calibration_workspace)
-
     def set_save_formats(self, formats):
+        """Selects the save formats in which to export the reduced data.
+        formats should be a list object of strings containing the file
+        extension that signifies the type.
+        For example:
+            reducer.set_save_formats(['nxs', 'spe'])
+        Tells the reducer to save the final result as a NeXuS file, and as an
+        SPE file.
+        Please see the documentation for the SaveItem reduction step for more
+        details.
+        """
+        if not isinstance(formats, list):
+            raise TypeError("formats variable must be of list type")
         self._save_formats = formats
         
     def set_rebin_string(self, rebin):
+        if not isinstance(rebin, str):
+            raise TypeError("rebin variable must be of string type")
         self._rebin_string = rebin
 
     def set_grouping_policy(self, policy):
         self._grouping_policy = policy
 
     def set_calibration_workspace(self, workspace):
+        if mtd[workspace] is None:
+            raise ValueError("Selected calibration workspace not found.")
         self._calibration_workspace = workspace
         
     def set_background(self, start, end):
-        self._background_start = start
-        self._background_end = end
+        self._background_start = float(start)
+        self._background_end = float(end)
         
     def set_detailed_balance(self, temp):
-        self._detailed_balance_temp = temp
+        self._detailed_balance_temp = float(temp)
         
     def get_result_workspaces(self):
         nsteps = len(self._reduction_steps)
@@ -166,4 +152,6 @@ class IndirectReducer(MSGReducer):
                     "the get_result_workspaces() method.")
         
     def set_rename(self, value):
+        if not isinstance(value, bool):
+            raise TypeError("value must be either True or False (boolean)")
         self._rename_result = value
