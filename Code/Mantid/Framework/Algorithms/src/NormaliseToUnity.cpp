@@ -17,7 +17,7 @@ DECLARE_ALGORITHM(NormaliseToUnity)
 void NormaliseToUnity::initDocs()
 {
   this->setWikiSummary("NormaliseToUnity takes a 2D [[workspace]] or an [[EventWorkspace]] as input and normalises it to 1. Optionally, the range summed can be restricted in either dimension. ");
-  this->setOptionalMessage("NormalizeToUnity takes a 2D workspace or an EventWorkspace as input and normalises it to 1. Optionally, the range summed can be restricted in either dimension.");
+  this->setOptionalMessage("NormaliseToUnity takes a 2D workspace or an EventWorkspace as input and normalises it to 1. Optionally, the range summed can be restricted in either dimension.");
 }
 
 
@@ -77,7 +77,7 @@ void NormaliseToUnity::exec()
   integrateAlg->setProperty<int>("EndWorkspaceIndex", m_MaxSpec);
   integrateAlg->setProperty<bool>("IncludePartialBins", incPartBins);
   integrateAlg->executeAsSubAlg();
-  progress.report(" Normalising to unity");
+  progress.report("Normalising to unity");
 
   MatrixWorkspace_sptr integrated = integrateAlg->getProperty("OutputWorkspace");
 
@@ -86,13 +86,13 @@ void NormaliseToUnity::exec()
   sumAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integrated);
   sumAlg->setProperty<bool>("IncludeMonitors", keepMonitors);
   sumAlg->executeAsSubAlg();
-  progress.report(" Normalising to unity");
+  progress.report("Normalising to unity");
 
   MatrixWorkspace_sptr summed = sumAlg->getProperty("OutputWorkspace");
 
   // Divide by the sum
   MatrixWorkspace_sptr result = localworkspace/summed;
-  progress.report(" Normalising to unity");
+  progress.report("Normalising to unity");
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", result);
