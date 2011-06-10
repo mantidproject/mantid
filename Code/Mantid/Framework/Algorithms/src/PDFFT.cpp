@@ -109,7 +109,7 @@ void PDFFT::exec() {
 	// 4. Check qmax, qmin
 	double dataqmax, dataqmin;
 	const MantidVec& inputx = Sspace->dataX(0);
-	int sizesq = inputx.size();
+	int sizesq = static_cast<int>(inputx.size());
 	if (unit == "d") {
 		dataqmax = 2 * M_PI / inputx[inputx.size() - 1];
 		dataqmin = 2 * M_PI / inputx[0];
@@ -152,7 +152,7 @@ void PDFFT::exec() {
 			"Workspace2D", 1, sizesq, sizesq);
 	const MantidVec& vecq = Sspace->dataX(0);
 	const MantidVec& vecs = Sspace->dataY(0);
-	const MantidVec& vece = Sspace->dataE(0);
+	// const MantidVec& vece = Sspace->dataE(0);
 	MantidVec& qsqq = QSspace->dataX(0);
 	MantidVec& qsqs = QSspace->dataY(0);
 	MantidVec& qsqe = QSspace->dataE(0);
