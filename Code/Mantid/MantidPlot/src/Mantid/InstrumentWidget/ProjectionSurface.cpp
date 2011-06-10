@@ -392,7 +392,7 @@ int ProjectionSurface::getDetectorIndex(unsigned char r,unsigned char g,unsigned
   }
   else
   {
-    return index;
+    return int(index);
   }
 }
 

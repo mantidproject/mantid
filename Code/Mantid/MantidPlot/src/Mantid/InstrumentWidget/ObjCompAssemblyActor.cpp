@@ -123,7 +123,7 @@ void ObjCompAssemblyActor::generateTexture(unsigned char* data, unsigned int& id
   */
 void ObjCompAssemblyActor::setDetectorColor(unsigned char* data,size_t i,GLColor c)
 {
-    int pos = 3*i;
+    size_t pos = 3*i;
     float r,g,b,a;
     c.get(r,g,b,a);
     data[pos]   = (unsigned char)(r*255);

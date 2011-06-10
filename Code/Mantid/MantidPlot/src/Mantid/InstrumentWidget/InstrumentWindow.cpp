@@ -189,7 +189,9 @@ void InstrumentWindow::setSurfaceType(int type)
 
     if (m_surfaceType == FULL3D)
     {
-      surface = new Projection3D(m_instrumentActor,m_InstrumentDisplay->width(),m_InstrumentDisplay->height());
+      Projection3D* p3d = new Projection3D(m_instrumentActor,m_InstrumentDisplay->width(),m_InstrumentDisplay->height());
+      p3d->set3DAxesState(m_renderTab->areAxesOn());
+      surface = p3d;
     }
     else if (m_surfaceType <= CYLINDRICAL_X)
     {
@@ -200,6 +202,7 @@ void InstrumentWindow::setSurfaceType(int type)
       surface = new UnwrappedSphere(m_instrumentActor,sample_pos,axis);
     }
     m_InstrumentDisplay->setSurface(surface);
+    //set3DAxesState(m_renderTab->areAxesOn());
     m_InstrumentDisplay->update();
     connect(surface,SIGNAL(singleDetectorTouched(int)),this,SLOT(singleDetectorTouched(int)));
     connect(surface,SIGNAL(singleDetectorPicked(int)),this,SLOT(singleDetectorPicked(int)));
@@ -520,26 +523,6 @@ void InstrumentWindow::setScaleType(GraphOptions::ScaleType type)
   m_renderTab->setScaleType(type);
 }
 
-/// A slot for the mouse selection
-//void InstrumentWindow::componentSelected(const QItemSelection & selected, const QItemSelection &)
-//{
-//  QModelIndexList items = selected.indexes();
-//  if( items.isEmpty() ) return;
-//
-//  if (mInstrumentDisplay->getRenderMode() == GL3DWidget::FULL3D)
-//  {
-//    double xmax(0.), xmin(0.), ymax(0.), ymin(0.), zmax(0.), zmin(0.);
-//    mInstrumentTree->getSelectedBoundingBox(items.first(), xmax, ymax, zmax, xmin, ymin, zmin);
-//    V3D pos = mInstrumentTree->getSamplePos();
-//    mInstrumentDisplay->setView(pos, xmax, ymax, zmax, xmin, ymin, zmin);
-//  }
-//  else
-//  {
-//    mInstrumentTree->sendComponentSelectedSignal(items.first());
-//  }
-//
-//}
-
 /**
  * This method opens a color dialog to pick the background color,
  * and then sets it.
@@ -706,10 +689,9 @@ void InstrumentWindow::set3DAxesState(bool on)
   if (p3d)
   {
     p3d->set3DAxesState(on);
+    m_InstrumentDisplay->refreshView();
+    m_InstrumentDisplay->repaint();
   }
-  m_InstrumentDisplay->refreshView();
-  m_InstrumentDisplay->repaint();
-  //repaint();
 }
 
 void InstrumentWindow::finishHandle(const Mantid::API::IAlgorithm* alg)

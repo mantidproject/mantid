@@ -35,11 +35,10 @@ public:
   void setScaleType(GraphOptions::ScaleType type);
   void setAxis(const QString& axisName);
   bool areAxesOn()const;
+public slots:
+  void showAxes(bool on);
 private slots:
   void changeColormap(const QString & filename = "");
-  void minValueChanged(double);
-  void maxValueChanged(double);
-  void selectBinButtonClicked();
   void showResetView(int);
 private:
   QFrame * setupAxisFrame();

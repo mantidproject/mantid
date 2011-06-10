@@ -58,7 +58,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_displayAxes = new QAction("Display Axes",this);
   m_displayAxes->setCheckable(true);
   m_displayAxes->setChecked(true);
-  connect(m_displayAxes, SIGNAL(toggled(bool)), m_instrWindow, SLOT(set3DAxesState(bool)));
+  connect(m_displayAxes, SIGNAL(toggled(bool)), this, SLOT(showAxes(bool)));
   m_wireframe = new QAction("Wireframe",this);
   m_wireframe->setCheckable(true);
   m_wireframe->setChecked(false);
@@ -88,7 +88,6 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   renderControlsLayout->addWidget(m_colorMapWidget);
 
 
-  loadSettings("Mantid/InstrumentWindow");
 }
 
 InstrumentWindowRenderTab::~InstrumentWindowRenderTab()
@@ -119,6 +118,7 @@ QFrame * InstrumentWindowRenderTab::setupAxisFrame()
 
   connect(mAxisCombo,SIGNAL(currentIndexChanged(const QString&)),m_instrWindow,SLOT(setViewDirection(const QString&)));
 
+  loadSettings("Mantid/InstrumentWindow");
   return m_resetViewFrame;
 }
 
@@ -139,93 +139,25 @@ void InstrumentWindowRenderTab::changeColormap(const QString &filename)
   m_instrWindow->changeColormap(filename);
 }
 
-/**
- *
- */
-void InstrumentWindowRenderTab::minValueChanged(double value)
-{
-  //double updated_value = value;
-  //double old_value = mInstrumentDisplay->getDataMinValue();
-  //// If the new value is the same
-  //if( std::abs( (updated_value - old_value) / old_value) < 1e-08 ) return;
-  ////Check it is less than the max
-  //if( updated_value < mInstrumentDisplay->getDataMaxValue() )
-  //{
-  //  mInstrumentDisplay->setMinData(updated_value);
-
-  //  if( this->isVisible() )
-  //  { 
-  //    setupColorBarScaling();
-  //    mInstrumentDisplay->recount();
-  //  }
-  //}
-  //else
-  //{
-  //  // Invalid. Reset value.
-  //  m_colorMapWidget->blockSignals(true);
-  //  m_colorMapWidget->setMinValue(old_value);
-  //  m_colorMapWidget->blockSignals(false);
-  //}
-}
-
-/**
- *
- */
-void InstrumentWindowRenderTab::maxValueChanged(double value)
-{
-  //double updated_value = value;
-  //double old_value = mInstrumentDisplay->getDataMaxValue();
-  //// If the new value is the same
-  //if( std::abs( (updated_value - old_value) / old_value) < 1e-08 ) return;
-  //// Check that it is valid
-  //if( updated_value > mInstrumentDisplay->getDataMinValue() )
-  //{
-  //  mInstrumentDisplay->setMaxData(updated_value);
-
-  //  if( this->isVisible() )
-  //  { 
-  //    setupColorBarScaling();
-  //    mInstrumentDisplay->recount();
-  //  }
-  //}
-  //else
-  //{
-  //  // Invalid. Reset
-  //  m_colorMapWidget->blockSignals(true);
-  //  m_colorMapWidget->setMaxValue(old_value);
-  //  m_colorMapWidget->blockSignals(false);
-  //}
-}
-
-void InstrumentWindowRenderTab::selectBinButtonClicked()
-{
-  ////At this point (only) do we calculate the bin ranges.
-  //mInstrumentDisplay->calculateBinRange();
-  ////Set the values found + the bool for entire range
-  //mBinDialog->setIntegralMinMax(mInstrumentDisplay->getBinMinValue(), mInstrumentDisplay->getBinMaxValue(), mInstrumentDisplay->getBinEntireRange());
-  ////Show the dialog
-  //mBinDialog->exec();
-}
-
 void InstrumentWindowRenderTab::loadSettings(const QString& section)
 {
   QSettings settings;
   settings.beginGroup(section);
-  //int show3daxes = settings.value("3DAxesShown", 1 ).toInt();
-  //m_instrWindow->set3DAxesState(show3daxes != 0);
-  //m_displayAxes->blockSignals(true);
-  //m_displayAxes->setChecked(show3daxes != 0);
-  //m_displayAxes->blockSignals(false);
+  int show3daxes = settings.value("3DAxesShown", 1 ).toInt();
+  m_instrWindow->set3DAxesState(show3daxes != 0);
+  m_displayAxes->blockSignals(true);
+  m_displayAxes->setChecked(show3daxes != 0);
+  m_displayAxes->blockSignals(false);
   settings.endGroup();
 }
 
 void InstrumentWindowRenderTab::saveSettings(const QString& section)
 {
-  //QSettings settings;
-  //settings.beginGroup(section);
-  //int val = 0;  if (m_displayAxes->isChecked()) val = 1;
-  //settings.setValue("3DAxesShown", QVariant(val));
-  //settings.endGroup();
+  QSettings settings;
+  settings.beginGroup(section);
+  int val = 0;  if (m_displayAxes->isChecked()) val = 1;
+  settings.setValue("3DAxesShown", QVariant(val));
+  settings.endGroup();
 }
 
 void InstrumentWindowRenderTab::setMinValue(double value, bool apply)
@@ -262,8 +194,7 @@ void InstrumentWindowRenderTab::setAxis(const QString& axisNameArg)
 
 bool InstrumentWindowRenderTab::areAxesOn()const
 {
-//  return mInstrumentDisplay->areAxesOn();
-  return false;
+  return m_displayAxes->isChecked();
 }
 
 /**
@@ -273,4 +204,12 @@ bool InstrumentWindowRenderTab::areAxesOn()const
 void InstrumentWindowRenderTab::showResetView(int iv)
 {
   m_resetViewFrame->setVisible(iv == 0);
+}
+
+void InstrumentWindowRenderTab::showAxes(bool on)
+{
+  m_instrWindow->set3DAxesState(on);
+  m_displayAxes->blockSignals(true);
+  m_displayAxes->setChecked(on);
+  m_displayAxes->blockSignals(false);
 }

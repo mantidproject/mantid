@@ -301,7 +301,7 @@ void Projection3D::getSelectedDetectors(QList<int>& dets)
   size_t ndet = m_instrActor->ndetectors();
   Quat rot = m_trackball->getRotation();
   //std::cerr << m_trackball->getModelCenter() << ' ' << rot << std::endl;
-  for(int i = 0; i < ndet; ++i)
+  for(size_t i = 0; i < ndet; ++i)
   {
     boost::shared_ptr<IDetector> det = m_instrActor->getDetector(i);
     V3D pos = det->getPos();
