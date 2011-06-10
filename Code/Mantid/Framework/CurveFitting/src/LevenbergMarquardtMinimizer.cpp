@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/LevenbergMarquardtMinimizer.h"
-#include "MantidCurveFitting/CostFunctionFactory.h"
+#include "MantidAPI/CostFunctionFactory.h"
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
 #include "MantidAPI/IFitFunction.h"
 #include "MantidKernel/Exception.h"
@@ -33,7 +33,7 @@ void LevenbergMarquardtMinimizer::initialize(double* X, const double* Y,
 
   if ( costFunction.compare("Least squares") == 0 )
   {
-    m_data = new GSL_FitData(function,CostFunctionFactory::Instance().createUnwrapped(costFunction));
+    m_data = new GSL_FitData(function,API::CostFunctionFactory::Instance().createUnwrapped(costFunction));
   }
   else
   {
@@ -66,7 +66,7 @@ void LevenbergMarquardtMinimizer::initialize(API::IFitFunction* function, const 
 
   if ( costFunction.compare("Least squares") == 0 )
   {
-    m_data = new GSL_FitData(function,CostFunctionFactory::Instance().createUnwrapped(costFunction));
+    m_data = new GSL_FitData(function,API::CostFunctionFactory::Instance().createUnwrapped(costFunction));
   }
   else
   {

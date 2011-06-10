@@ -1,17 +1,17 @@
-#ifndef MANTID_CURVEFITTING_COSTFUNCTIONFACTORY_H_
-#define MANTID_CURVEFITTING_COSTFUNCTIONFACTORY_H_
+#ifndef MANTID_API_COSTFUNCTIONFACTORY_H_
+#define MANTID_API_COSTFUNCTIONFACTORY_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include "MantidCurveFitting/DllConfig.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid
 {
-namespace CurveFitting
+namespace API
 {
 
 //----------------------------------------------------------------------
@@ -78,4 +78,4 @@ namespace CurveFitting
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_COSTFUNCTIONFACTORY_H_*/
+#endif /*MANTID_API_COSTFUNCTIONFACTORY_H_*/

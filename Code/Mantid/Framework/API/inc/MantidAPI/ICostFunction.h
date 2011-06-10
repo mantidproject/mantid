@@ -1,15 +1,15 @@
-#ifndef MANTID_CURVEFITTING_ICOSTFUNCTION_H_
-#define MANTID_CURVEFITTING_ICOSTFUNCTION_H_
+#ifndef MANTID_API_ICOSTFUNCTION_H_
+#define MANTID_API_ICOSTFUNCTION_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include "MantidCurveFitting/CostFunctionFactory.h"
+#include "MantidAPI/CostFunctionFactory.h"
 
 namespace Mantid
 {
-namespace CurveFitting
+namespace API
 {
 /** An interface for specifying the cost function to be used with Fit,
     for example, the default being least squares fitting
@@ -64,11 +64,11 @@ public:
 #define DECLARE_COSTFUNCTION(classname,username) \
         namespace { \
 	Mantid::Kernel::RegistrationHelper register_costfunction_##classname( \
-  ((Mantid::CurveFitting::CostFunctionFactory::Instance().subscribe<classname>(#username)) \
+  ((Mantid::API::CostFunctionFactory::Instance().subscribe<classname>(#username)) \
 	, 0)); \
 	} 
 
-} // namespace CurveFitting
+} // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_ICOSTFUNCTION_H_*/
+#endif /*MANTID_API_ICOSTFUNCTION_H_*/

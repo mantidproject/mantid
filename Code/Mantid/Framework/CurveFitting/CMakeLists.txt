@@ -8,7 +8,6 @@ set ( SRC_FILES
         src/Convolution.cpp
         src/CostFuncIgnorePosPeaks.cpp
         src/CostFuncLeastSquares.cpp
-        src/CostFunctionFactory.cpp
         src/DeltaFunction.cpp
         src/ExpDecay.cpp
         src/FRConjugateGradientMinimizer.cpp
@@ -50,7 +49,6 @@ set ( INC_FILES
         inc/MantidCurveFitting/Convolution.h
         inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
         inc/MantidCurveFitting/CostFuncLeastSquares.h
-        inc/MantidCurveFitting/CostFunctionFactory.h
         inc/MantidCurveFitting/DeltaFunction.h
         inc/MantidCurveFitting/DllConfig.h
         inc/MantidCurveFitting/ExpDecay.h
@@ -63,7 +61,6 @@ set ( INC_FILES
         inc/MantidCurveFitting/Gaussian1D.h
         inc/MantidCurveFitting/GaussianLinearBG1D.h
         inc/MantidCurveFitting/GenericFit.h
-        inc/MantidCurveFitting/ICostFunction.h
         inc/MantidCurveFitting/IFuncMinimizer.h
         inc/MantidCurveFitting/IkedaCarpenterPV.h
         inc/MantidCurveFitting/LevenbergMarquardtMinimizer.h
@@ -90,7 +87,6 @@ set ( TEST_FILES
         test/ChebyshevTest.h
         test/CompositeFunctionTest.h
         test/ConvolutionTest.h
-        test/CostFunctionFactoryTest.h
         test/ExpDecayTest.h
         test/FitTest.h
         test/FuncMinimizerFactoryTest.h

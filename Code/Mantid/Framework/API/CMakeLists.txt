@@ -17,6 +17,7 @@ set ( SRC_FILES
         src/CompositeFunctionMD.cpp
         src/CompositeFunctionMW.cpp
         src/ConstraintFactory.cpp
+        src/CostFunctionFactory.cpp
         src/DeprecatedAlgorithm.cpp
         src/Expression.cpp
         src/FileFinder.cpp
@@ -99,6 +100,7 @@ set ( INC_FILES
         inc/MantidAPI/CompositeFunctionMD.h
         inc/MantidAPI/CompositeFunctionMW.h
         inc/MantidAPI/ConstraintFactory.h
+        inc/MantidAPI/CostFunctionFactory.h
         inc/MantidAPI/DeclareUserAlg.h
         inc/MantidAPI/DeprecatedAlgorithm.h
         inc/MantidAPI/DllConfig.h
@@ -112,6 +114,7 @@ set ( INC_FILES
         inc/MantidAPI/IBackgroundFunction.h
         inc/MantidAPI/ICatalog.h
         inc/MantidAPI/IConstraint.h
+        inc/MantidAPI/ICostFunction.h
         inc/MantidAPI/IDataFileChecker.h
         inc/MantidAPI/IDataItem.h
         inc/MantidAPI/IEventList.h
@@ -182,6 +185,7 @@ set ( TEST_FILES
         test/AnalysisDataServiceTest.h
         test/AsynchronousTest.h
         test/CompositeFunctionTest.h
+        test/CostFunctionFactoryTest.h
         test/ExpressionTest.h
         test/FileFinderTest.h
         test/FilePropertyTest.h

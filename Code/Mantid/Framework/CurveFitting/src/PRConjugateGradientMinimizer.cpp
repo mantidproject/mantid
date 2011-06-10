@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/PRConjugateGradientMinimizer.h"
-#include "MantidCurveFitting/CostFunctionFactory.h"
+#include "MantidAPI/CostFunctionFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
@@ -29,7 +29,7 @@ void PRConjugateGradientMinimizer::initialize(double* X, const double* Y,
   UNUSED_ARG(sqrtWeight);
   UNUSED_ARG(nData);
   // set-up GSL container to be used with GSL simplex algorithm
-  m_data = new GSL_FitData(function,CostFunctionFactory::Instance().createUnwrapped(costFunction));
+  m_data = new GSL_FitData(function,API::CostFunctionFactory::Instance().createUnwrapped(costFunction));
 
   const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_conjugate_pr;
 
@@ -56,7 +56,7 @@ void PRConjugateGradientMinimizer::initialize(double* X, const double* Y,
 void PRConjugateGradientMinimizer::initialize(API::IFitFunction* function, const std::string& costFunction) 
 {
   // set-up GSL container to be used with GSL simplex algorithm
-  m_data = new GSL_FitData(function,CostFunctionFactory::Instance().createUnwrapped(costFunction));
+  m_data = new GSL_FitData(function,API::CostFunctionFactory::Instance().createUnwrapped(costFunction));
 
   const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_conjugate_pr;
 

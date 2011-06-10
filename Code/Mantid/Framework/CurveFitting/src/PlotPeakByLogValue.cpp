@@ -12,7 +12,7 @@
 
 #include "MantidCurveFitting/PlotPeakByLogValue.h"
 #include "MantidCurveFitting/FuncMinimizerFactory.h"
-#include "MantidCurveFitting/CostFunctionFactory.h"
+#include "MantidAPI/CostFunctionFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/TimeSeriesProperty.h"

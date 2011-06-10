@@ -85,7 +85,7 @@ namespace CurveFitting
     declareProperty("Minimizer","Levenberg-Marquardt",new ListValidator(minimizerOptions),
       "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::InOut);
 
-    std::vector<std::string> costFuncOptions = CostFunctionFactory::Instance().getKeys();
+    std::vector<std::string> costFuncOptions = API::CostFunctionFactory::Instance().getKeys();
     declareProperty("CostFunction","Least squares",new ListValidator(costFuncOptions),
       "The cost function to be used for the fit, default is Least squares", Direction::InOut);
   }

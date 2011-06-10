@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/CostFunctionFactory.h"
+#include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidCurveFitting/ICostFunction.h"
+#include "MantidAPI/ICostFunction.h"
 #include "MantidKernel/System.h"
 
 #include <sstream>
 
 using namespace Mantid;
-using namespace Mantid::CurveFitting;
+using namespace Mantid::API;
 using namespace Mantid::API;
 
 class CostFunctionFactoryTest_A: public ICostFunction

@@ -1,11 +1,11 @@
-#include "MantidCurveFitting/CostFunctionFactory.h"
-#include "MantidCurveFitting/ICostFunction.h"
+#include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/ICostFunction.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/LibraryManager.h"
 
 namespace Mantid
 {
-  namespace CurveFitting
+  namespace API
   {
 
     CostFunctionFactoryImpl::CostFunctionFactoryImpl() : Kernel::DynamicFactory<ICostFunction>(), g_log(Kernel::Logger::get("CostFunctionFactory"))

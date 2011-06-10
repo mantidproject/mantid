@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/SimplexMinimizer.h"
-#include "MantidCurveFitting/CostFunctionFactory.h"
+#include "MantidAPI/CostFunctionFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
@@ -32,7 +32,7 @@ void SimplexMinimizer::initialize(double* X, const double* Y, double *sqrtWeight
   gsl_vector_set_all (m_simplexStepSize, m_size);  
 
   // set-up GSL container to be used with GSL simplex algorithm
-  m_data = new GSL_FitData(function,CostFunctionFactory::Instance().createUnwrapped(costFunction));
+  m_data = new GSL_FitData(function,API::CostFunctionFactory::Instance().createUnwrapped(costFunction));
 
   // setup simplex container
   gslContainer.n = nParam;  
@@ -61,7 +61,7 @@ void SimplexMinimizer::initialize(API::IFitFunction* function, const std::string
   gsl_vector_set_all (m_simplexStepSize, m_size);  
 
   // set-up GSL container to be used with GSL simplex algorithm
-  m_data = new GSL_FitData(function,CostFunctionFactory::Instance().createUnwrapped(costFunction));
+  m_data = new GSL_FitData(function,API::CostFunctionFactory::Instance().createUnwrapped(costFunction));
 
   // setup simplex container
   gslContainer.n = function->nActive();  

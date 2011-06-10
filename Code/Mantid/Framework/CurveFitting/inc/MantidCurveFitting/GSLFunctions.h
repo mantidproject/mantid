@@ -12,14 +12,11 @@ namespace Mantid
   namespace API
   {
     class IFitFunction;
+    class ICostFunction;
   }
 
   namespace CurveFitting
   {
-    // forward declaration
-    //class Fit;
-    class ICostFunction;
-
     /**
     Various GSL specific functions used GSL specific minimizers
 
@@ -96,7 +93,7 @@ namespace Mantid
   /// Structure to contain least squares data and used by GSL
   struct GSL_FitData {
     /// Constructor
-    GSL_FitData(API::IFitFunction* fun,ICostFunction* cf);
+    GSL_FitData(API::IFitFunction* fun,API::ICostFunction* cf);
     /// Destructor
     ~GSL_FitData();
     /// number of points to be fitted (size of X, Y and sqrtWeightData arrays)
@@ -114,7 +111,7 @@ namespace Mantid
     /// Initial function parameters
     gsl_vector *initFuncParams;
     /// pointer to the cost function
-    ICostFunction* costFunc;
+    API::ICostFunction* costFunc;
     /// Jacobi matrix interface
     JacobianImpl1 J;
     /// To use the none least-squares gsl algorithms within the gsl least-squared framework

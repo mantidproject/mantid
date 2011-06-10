@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GSLFunctions.h"
-#include "MantidCurveFitting/ICostFunction.h"
+#include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 
 
@@ -141,7 +141,7 @@ namespace CurveFitting
    * @param fun :: Pointer to the Fit algorithm
    * @param cf :: ICostFunction
    */
-  GSL_FitData::GSL_FitData(API::IFitFunction* fun,ICostFunction* cf):
+  GSL_FitData::GSL_FitData(API::IFitFunction* fun,API::ICostFunction* cf):
   function(fun),costFunc(cf)
   {
     p = fun->nActive();

@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/BFGS_Minimizer.h"
-#include "MantidCurveFitting/CostFunctionFactory.h"
+#include "MantidAPI/CostFunctionFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
@@ -25,7 +25,7 @@ void BFGS_Minimizer::initialize(double* X, const double* Y,
   UNUSED_ARG(Y);
   UNUSED_ARG(sqrtWeight);
   // set-up GSL container to be used with GSL simplex algorithm
-  m_data = new GSL_FitData(function,CostFunctionFactory::Instance().createUnwrapped(costFunction));
+  m_data = new GSL_FitData(function,API::CostFunctionFactory::Instance().createUnwrapped(costFunction));
 
   const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_vector_bfgs2;
 
@@ -52,7 +52,7 @@ void BFGS_Minimizer::initialize(double* X, const double* Y,
 void BFGS_Minimizer::initialize(API::IFitFunction* function, const std::string& costFunction) 
 {
   // set-up GSL container to be used with GSL simplex algorithm
-  m_data = new GSL_FitData(function,CostFunctionFactory::Instance().createUnwrapped(costFunction));
+  m_data = new GSL_FitData(function,API::CostFunctionFactory::Instance().createUnwrapped(costFunction));
 
   const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_vector_bfgs2;
 

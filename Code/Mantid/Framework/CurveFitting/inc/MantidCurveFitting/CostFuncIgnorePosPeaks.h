@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/ICostFunction.h"
+#include "MantidAPI/ICostFunction.h"
 
 namespace Mantid
 {
@@ -36,7 +36,7 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CostFuncIgnorePosPeaks : public ICostFunction 
+class DLLExport CostFuncIgnorePosPeaks : public API::ICostFunction 
 {
 public:
   /// Virtual destructor
