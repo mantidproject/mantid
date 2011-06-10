@@ -15,6 +15,40 @@ from eqsans_config import EQSANSConfig
 from MantidFramework import *
 from mantidsimple import *
 
+def find_data(file, data_dir=None):
+    """
+        Finds a file path for the specified data set, which can either be:
+            - a run number
+            - an absolute path
+            - a file name
+    """
+    # First, check whether it's an absolute path
+    if os.path.isfile(file):
+        return file
+    
+    # Second, check whether it's a file name. If so, return the best match.
+    files_found = find_file(filename=file, data_dir=data_dir)
+    if len(files_found)>0:
+        return files_found[0]
+    
+    # Third, build a file name assuming it's a run number
+    run = None
+    try:
+        run = int(file)
+    except:
+        # Not a run number...
+        pass
+    if run is not None:
+        filename="EQSANS_%d_event.nxs" % run
+        files_found = find_file(filename=filename, data_dir=data_dir)
+        if len(files_found)>0:
+            return files_found[0]
+    
+    #TODO: Finally, look in the catalog...
+    
+    # If we didn't find anything, raise an exception
+    raise RuntimeError, "Could not find a file for [%s]" % str(file)
+
 def find_file(filename=None, startswith=None, data_dir=None):
     """
         Returns a list of file paths for the search criteria.
@@ -26,13 +60,16 @@ def find_file(filename=None, startswith=None, data_dir=None):
     files_found = []
     
     # List of directory to look into
-    # The best place would be the location of the configuration files on the SNS mount
-    search_dirs = ["/SNS/EQSANS/shared/instrument_configuration/"]
+    # The preferred way to operate is to have a symbolic link in a work directory,
+    # so look in the current working directory first
+    search_dirs = [os.getcwd()]
     # The second best location would be with the data itself
     if data_dir is not None:
         search_dirs.append(data_dir)
+    # The standard place would be the location of the configuration files on the SNS mount
+    search_dirs.append("/SNS/EQSANS/shared/instrument_configuration/")
     search_dirs.extend(ConfigService().getDataSearchDirs())
-    search_dirs.append(os.getcwd())
+    
     
     # Look for specific file
     if filename is not None:
@@ -111,7 +148,7 @@ class QuickLoad(ReductionStep):
             mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
             nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
             LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace, PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
-            LoadLogsFromSNSNexus(Workspace=workspace, Filename=nxs_file)
+            LoadNexusLogs(Workspace=workspace, Filename=nxs_file)
 
         return "Quick-load of data file: %s" % (workspace)
     
@@ -242,7 +279,8 @@ class LoadRun(ReductionStep):
         
         # Load data
         def _load_data_file(file_name, wks_name):
-            filepath = reducer._full_file_path(file_name)
+            filepath = find_data(file_name, data_dir=reducer._data_path)
+            #filepath = reducer._full_file_path(file_name)
     
             # Find all the necessary files
             event_file = ""
@@ -287,7 +325,7 @@ class LoadRun(ReductionStep):
                 mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
                 nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
                 LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace+'_evt', PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
-                LoadLogsFromSNSNexus(Workspace=workspace+'_evt', Filename=nxs_file)
+                LoadNexusLogs(Workspace=workspace+'_evt', Filename=nxs_file)
             
             return ''
         

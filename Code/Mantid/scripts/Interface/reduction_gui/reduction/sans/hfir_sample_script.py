@@ -183,9 +183,10 @@ class SampleData(BaseScriptElement):
         # Data files
         if len(self.data_files)>0:
             parts = os.path.split(str(self.data_files[0]).strip())
-            if len(parts[0])==0:
-                raise RuntimeError, "Trying to generate reduction script without a data file."
-            script += "DataPath(\"%s\")\n" % parts[0]
+            if len(parts[0])>0:
+                script += "DataPath(\"%s\")\n" % parts[0]
+            else:
+                script += "#Note: Data path was not found at script generation, will try at run time.\n"
             script += "AppendDataFile([\"%s\"])\n" % '\",\"'.join(self.data_files)
         else:
             raise RuntimeError, "Trying to generate reduction script without a data file."

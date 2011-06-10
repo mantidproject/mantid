@@ -482,17 +482,10 @@ class Reducer(object):
             else:
                 raise RuntimeError, "Trying to append a data set without a file name or an existing workspace."
         if type(data_file)==list:
-            for item in data_file:
-                # Check that the file exists
-                self._full_file_path(item)
-            
             if workspace is None:
-                # Use the first file to deternine the workspace name
+                # Use the first file to determine the workspace name
                 workspace = extract_workspace_name(data_file[0])
         else:
-            # Check that the file exists
-            self._full_file_path(data_file)
-            
             if workspace is None:
                 workspace = extract_workspace_name(data_file)
                 
