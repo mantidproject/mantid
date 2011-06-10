@@ -231,6 +231,11 @@ void Indirect::runConvertToEnergy()
     pyInput += "reducer.set_rename(False)\n";
   }
 
+  if ( ! m_uiForm.ckFold->isChecked() )
+  {
+    pyInput += "reducer.set_fold_multiple_frames(False)\n";
+  }
+
   pyInput += "reducer.set_save_formats([" + savePyCode() + "])\n";
 
   pyInput +=

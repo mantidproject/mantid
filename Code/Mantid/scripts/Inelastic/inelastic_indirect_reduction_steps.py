@@ -51,14 +51,6 @@ class LoadData(ReductionStep):
             if self._parameter_file != None:
                 LoadParameterFile(file, self._parameter_file)
 
-            try:
-                msk = mtd[file].getInstrument().getStringParameter(
-                    'Workflow.Masking')[0]
-            except IndexError:
-                msk = 'None'
-            if ( msk == 'IdentifyNoisyDetectors' ):
-                self._identify_bad_detectors(file)
-
             if ( wsname == '' ):
                 wsname = file
 
@@ -82,6 +74,14 @@ class LoadData(ReductionStep):
                 CropWorkspace(ws, ws, 
                     StartWorkspaceIndex=self._detector_range_start,
                     EndWorkspaceIndex=self._detector_range_end)
+                    
+            try:
+                msk = mtd[workspaces[0]].getInstrument().getStringParameter(
+                    'Workflow.Masking')[0]
+            except IndexError:
+                msk = 'None'
+            if ( msk == 'IdentifyNoisyDetectors' ):
+                self._identify_bad_detectors(workspaces[0])
 
         if ( self._sum ) and ( len(self._data_files) > 1 ):
             ## Sum files
@@ -588,6 +588,11 @@ class ConvertToEnergy(ReductionStep):
 
     def _rebin_mf(self, workspaces):
         nbin = 0
+        rstwo = self._rebin_string.split(",")
+        if len(rstwo) >= 5:
+            rstwo = ",".join(rstwo[2:])
+        else:
+            rstwo = self._rebin_string
         for ws in workspaces:
             nbins = mtd[ws].getNumberBins()
             if nbins > nbin: nbin = nbins
@@ -595,7 +600,7 @@ class ConvertToEnergy(ReductionStep):
             if (mtd[ws].getNumberBins() == nbin):
                 Rebin(ws, ws, self._rebin_string)
             else:
-                Rebin(ws, ws, '3,-0.005,1000')
+                Rebin(ws, ws, rstwo)
 
 class DetailedBalance(ReductionStep):
     """
@@ -737,8 +742,12 @@ class Grouping(ReductionStep):
             return workspace
         elif ( grouping == 'All' ):
             nhist = mtd[workspace].getNumberHistograms()
+            wslist = []
+            for i in range(0, nhist):
+                if i not in self._masking_detectors:
+                    wslist.append(i)
             GroupDetectors(workspace, workspace, 
-                WorkspaceIndexList=range(0,nhist), Behaviour='Average')
+                WorkspaceIndexList=wslist, Behaviour='Average')
         else:
             GroupDetectors(workspace, workspace, MapFile=grouping,
                 Behaviour='Average')

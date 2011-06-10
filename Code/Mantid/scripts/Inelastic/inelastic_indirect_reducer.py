@@ -92,7 +92,10 @@ class IndirectReducer(MSGReducer):
         
         # "FoldData" puts workspaces that have been chopped back together.
         if self._multiple_frames:
-            self.append_step(steps.FoldData())
+            if self._fold_multiple_frames:
+                self.append_step(steps.FoldData())
+            else:
+                return
             
         # The "SaveItem" step saves the files in the requested formats.
         if (len(self._save_formats) > 0):

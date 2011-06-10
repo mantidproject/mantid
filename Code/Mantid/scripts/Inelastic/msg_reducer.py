@@ -20,6 +20,7 @@ class MSGReducer(reducer.Reducer):
     _detector_range = [-1, -1]
     _masking_detectors = []
     _parameter_file = None
+    _fold_multiple_frames = True
     
     def __init__(self):
         super(MSGReducer, self).__init__()
@@ -51,6 +52,11 @@ class MSGReducer(reducer.Reducer):
         if ( not isinstance(start, int) ) or ( not isinstance(end, int) ):
             raise TypeError("start and end must be integer values")
         self._detector_range = [ start, end ]
+        
+    def set_fold_multiple_frames(self, value):
+        if not isinstance(value, bool):
+            raise TypeError("value must be of boolean type")
+        self._fold_multiple_frames = value
         
     def set_instrument_name(self, instrument):
         """Unlike the SANS reducers, we do not create a class to describe the

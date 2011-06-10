@@ -14,14 +14,22 @@ class MSGDiffractionReducer(MSGReducer):
             MultipleFrames=self._multiple_frames))
         self.append_step(steps.CorrectByMonitor(
             MultipleFrames=self._multiple_frames, EMode="Elastic"))
+
         if self._multiple_frames:
-            self.append_step(steps.FoldData())
+            if self._fold_multiple_frames:
+                self.append_step(steps.FoldData())
+            else:
+                return
         
         step = mtd.createAlgorithm("ConvertUnits")
         step.setPropertyValue("Target", "dSpacing")
         step.setPropertyValue("EMode", "Elastic")
         self.append_step(step)
-
+        
+        step = steps.Grouping()
+        step.set_mask_list(self._masking_detectors)
+        step.set_grouping_policy("All")
+        self.append_step(step)
 
 def getStringProperty(workspace, property):
     """This function is used in the interface.

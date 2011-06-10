@@ -1596,14 +1596,35 @@ p, li { white-space: pre-wrap; }
                </layout>
               </item>
               <item>
-               <widget class="QCheckBox" name="ckRenameWorkspace" >
-                <property name="text" >
-                 <string>Rename workspace</string>
-                </property>
-                <property name="checked" >
-                 <bool>true</bool>
-                </property>
-               </widget>
+               <layout class="QHBoxLayout" name="horizontalLayout_9" >
+                <item>
+                 <widget class="QCheckBox" name="ckRenameWorkspace" >
+                  <property name="text" >
+                   <string>Rename workspace</string>
+                  </property>
+                  <property name="checked" >
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="ckFold" >
+                  <property name="enabled" >
+                   <bool>true</bool>
+                  </property>
+                  <property name="toolTip" >
+                   <string>If this box is unchecked and the raw files are determined to contain multiple frames, then the reduction process will end at the step where they would have been folded together.
+Later steps in the process (saving, renaming) will not be done.</string>
+                  </property>
+                  <property name="text" >
+                   <string>Fold Multiple Frames</string>
+                  </property>
+                  <property name="checked" >
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
              </layout>
             </widget>
