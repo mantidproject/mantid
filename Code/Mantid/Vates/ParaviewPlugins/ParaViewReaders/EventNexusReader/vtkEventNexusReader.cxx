@@ -21,7 +21,7 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 
-#include "MantidNexus/LoadEventNexus.h"
+#include "MantidDataHandling/LoadEventNexus.h"
 #include <boost/format.hpp>
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
