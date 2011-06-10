@@ -38,47 +38,47 @@ namespace Mantid
     void DetectorEfficiencyVariation::init()
     {
       HistogramValidator<MatrixWorkspace> *val =
-	new HistogramValidator<MatrixWorkspace>;
+        new HistogramValidator<MatrixWorkspace>;
       declareProperty(
-	new WorkspaceProperty<MatrixWorkspace>("WhiteBeamBase", "",
-					       Direction::Input,val),
-	"Name of a white beam vanadium workspace" );
+        new WorkspaceProperty<MatrixWorkspace>("WhiteBeamBase", "",
+                                               Direction::Input,val),
+        "Name of a white beam vanadium workspace" );
       // The histograms, the detectors in each histogram and their first and last bin boundary must match
       declareProperty(
-	new WorkspaceProperty<MatrixWorkspace>("WhiteBeamCompare","",Direction::Input,
-					       val->clone()),
-	"Name of a matching second white beam vanadium run from the same\n"
-	"instrument" );
+        new WorkspaceProperty<MatrixWorkspace>("WhiteBeamCompare","",Direction::Input,
+                                               val->clone()),
+        "Name of a matching second white beam vanadium run from the same\n"
+        "instrument" );
       declareProperty(
-	new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-	"A MaskWorkpace where each spectra that failed the test is masked" );
+        new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+        "A MaskWorkpace where each spectra that failed the test is masked" );
 
       BoundedValidator<double> *moreThanZero = new BoundedValidator<double>();
       // Variation can't be zero as we take its reciprocal, 
       // so I've set the minimum to something below which double precession arithmetic might start to fail
       moreThanZero->setLower(1e-280);
       declareProperty("Variation", 1.1, moreThanZero,
-		      "Identify spectra whose total number of counts has changed by more\n"
-		      "than this factor of the median change between the two input workspaces" );
+                      "Identify spectra whose total number of counts has changed by more\n"
+                      "than this factor of the median change between the two input workspaces" );
       BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
       mustBePosInt->setLower(0);
       declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
-		      "The index number of the first entry in the Workspace to include in\n"
-		      "the calculation (default: 0)" );
+                      "The index number of the first entry in the Workspace to include in\n"
+                      "the calculation (default: 0)" );
 
       //Mantid::EMPTY_INT() and EMPTY_DBL() are tags that indicate that no 
       // value has been set and we want to use the default
       declareProperty("EndWorkspaceIndex", Mantid::EMPTY_INT(), mustBePosInt->clone(),
-		      "The index number of the last entry in the Workspace to include in\n"
-		      "the calculation (default: the last spectrum in the workspace)" );
+                      "The index number of the last entry in the Workspace to include in\n"
+                      "the calculation (default: the last spectrum in the workspace)" );
       declareProperty("RangeLower", Mantid::EMPTY_DBL(),
-		      "No bin with a boundary at an x value less than this will be included\n"
-		      "in the summation used to decide if a detector is 'bad' (default: the\n"
-		      "start of each histogram)" );
+                      "No bin with a boundary at an x value less than this will be included\n"
+                      "in the summation used to decide if a detector is 'bad' (default: the\n"
+                      "start of each histogram)" );
       declareProperty("RangeUpper", Mantid::EMPTY_DBL(),
-		      "No bin with a boundary at an x value higher than this value will\n"
-		      "be included in the summation used to decide if a detector is 'bad'\n"
-		      "(default: the end of each histogram)" );
+                      "No bin with a boundary at an x value higher than this value will\n"
+                      "be included in the summation used to decide if a detector is 'bad'\n"
+                      "(default: the end of each histogram)" );
       declareProperty("NumberOfFailures", 0, Direction::Output);
     }
 
@@ -100,29 +100,29 @@ namespace Mantid
       const double rangeUpper = getProperty("RangeUpper");
 
       MatrixWorkspace_sptr counts1 = integrateSpectra(WB1, minSpec, maxSpec, rangeLower, 
-						      rangeUpper);
+                                                      rangeUpper);
       MatrixWorkspace_sptr counts2 = integrateSpectra(WB2, minSpec, maxSpec, rangeLower, 
-						      rangeUpper);
+                                                      rangeUpper);
       MatrixWorkspace_sptr countRatio;
       try
       {
-	// Note. This can produce NAN/INFs. Leave for now and sort it out in the later tests
-	countRatio = counts1/counts2;     
+        // Note. This can produce NAN/INFs. Leave for now and sort it out in the later tests
+        countRatio = counts1/counts2;     
       } 
       catch (std::invalid_argument&) 
       {
-	g_log.error() << "The two white beam workspaces size must match.";
-	throw;
+        g_log.error() << "The two white beam workspaces size must match.";
+        throw;
       }
       std::set<int> badIndices;
       double average = calculateMedian(countRatio, badIndices);
       g_log.notice() << name() << ": The median of the ratio of the integrated counts is: " 
-		     << average << std::endl;
+                     << average << std::endl;
       // 
       int numFailed = doDetectorTests(counts1, counts2, average, variation, badIndices);
 
-      g_log.information() << "Tests failed " << numFailed << " spectra. "
-			  << "These have been masked on the OutputWorkspace\n";
+      g_log.notice() << "Tests failed " << numFailed << " spectra. "
+                     << "These have been masked on the OutputWorkspace\n";
 
       // counts1 was overwriten by the last function, now register it 
       setProperty("NumberOfFailures", numFailed);
@@ -139,19 +139,19 @@ namespace Mantid
      */
     void DetectorEfficiencyVariation::
     retrieveProperties(API::MatrixWorkspace_sptr &whiteBeam1, API::MatrixWorkspace_sptr &whiteBeam2,
-		       double &variation, int &minSpec, int &maxSpec )
+                       double &variation, int &minSpec, int &maxSpec )
     {
       whiteBeam1 = getProperty("WhiteBeamBase");
       whiteBeam2 = getProperty("WhiteBeamCompare");
       if ( whiteBeam1->getBaseInstrument()->getName() !=
-	   whiteBeam2->getBaseInstrument()->getName() )
+           whiteBeam2->getBaseInstrument()->getName() )
       {
-	throw std::invalid_argument("The two input white beam vanadium workspaces must be from the same instrument");
+        throw std::invalid_argument("The two input white beam vanadium workspaces must be from the same instrument");
       }
       int maxSpecIndex = static_cast<int>(whiteBeam1->getNumberHistograms()) - 1;
       if ( maxSpecIndex != static_cast<int>(whiteBeam2->getNumberHistograms()) - 1 )
       {//we would get a crash later on if this were not true
-	throw std::invalid_argument("The input white beam vanadium workspaces must be have the same number of histograms");
+        throw std::invalid_argument("The input white beam vanadium workspaces must be have the same number of histograms");
       }
       // construting this object will throw an invalid_argument if there is no instrument information, 
       //we don't catch it we the algorithm will be stopped
@@ -159,16 +159,16 @@ namespace Mantid
       InputWSDetectorInfo testingTestingTesting(whiteBeam2); 
       try
       {//now try to access the detector map, this is non-fatal
-	testingTesting.aDetecIsMaskedinSpec(0);
-	testingTestingTesting.aDetecIsMaskedinSpec(0);
+        testingTesting.aDetecIsMaskedinSpec(0);
+        testingTestingTesting.aDetecIsMaskedinSpec(0);
       }
       catch(Kernel::Exception::NotFoundError)
       {
-	m_usableMaskMap = false;
-	// it still makes sense to carry on
-	g_log.warning(
-	  "Precision warning: Detector masking map can't be found, assuming that no detectors "
-	  "have been previously marked unreliable in this workspace");
+        m_usableMaskMap = false;
+        // it still makes sense to carry on
+        g_log.warning(
+          "Precision warning: Detector masking map can't be found, assuming that no detectors "
+          "have been previously marked unreliable in this workspace");
       }
 
       variation = getProperty("Variation");
@@ -176,21 +176,21 @@ namespace Mantid
       minSpec = getProperty("StartWorkspaceIndex");
       if ( (minSpec < 0) || (minSpec > maxSpecIndex) )
       {
-	g_log.warning("StartWorkspaceIndex out of range, changed to 0");
-	minSpec = 0;
+        g_log.warning("StartWorkspaceIndex out of range, changed to 0");
+        minSpec = 0;
       }
       maxSpec = getProperty("EndWorkspaceIndex");
       if (maxSpec == Mantid::EMPTY_INT()) maxSpec = maxSpecIndex;
       if ( (maxSpec < 0) || (maxSpec > maxSpecIndex ) )
       {
-	g_log.warning("EndWorkspaceIndex out of range, changed to max Workspace number");
-	maxSpec = maxSpecIndex;
+        g_log.warning("EndWorkspaceIndex out of range, changed to max Workspace number");
+        maxSpec = maxSpecIndex;
       }
       if ( (maxSpec < minSpec) )
       {
-	g_log.warning("EndWorkspaceIndex can not be less than the StartWorkspaceIndex, "
-		      "changed to max Workspace number");
-	maxSpec = maxSpecIndex;
+        g_log.warning("EndWorkspaceIndex can not be less than the StartWorkspaceIndex, "
+                      "changed to max Workspace number");
+        maxSpec = maxSpecIndex;
       }
     }
 
@@ -205,14 +205,14 @@ namespace Mantid
      * @return number of detectors for which tests failed
      */
     int DetectorEfficiencyVariation::doDetectorTests(API::MatrixWorkspace_const_sptr counts1, 
-						     API::MatrixWorkspace_const_sptr counts2,
-						     const double average, double variation,
-						     const std::set<int> & badIndices)
+                                                     API::MatrixWorkspace_const_sptr counts2,
+                                                     const double average, double variation,
+                                                     const std::set<int> & badIndices)
     {
       // DIAG in libISIS did this.  A variation of less than 1 doesn't make sense in this algorithm
       if ( variation < 1 )
       {
-	variation = 1.0/variation;
+        variation = 1.0/variation;
       }
       // criterion for if the the first spectrum is larger than expected
       double largest = average*variation;

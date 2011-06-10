@@ -123,8 +123,6 @@ double GetEi2::calculateEi(const double initial_guess)
     throw std::runtime_error("Error retrieving monitor spectra spectra from input workspace.");
   }
 
-  std::cerr << "Testing " << mon_indices[0] << " " << mon_indices[1] << "\n";
-
   // Calculate actual peak postion for each monitor peak
   double peak_times[2] = {0.0, 0.0};
   double det_distances[2] = {0.0, 0.0};

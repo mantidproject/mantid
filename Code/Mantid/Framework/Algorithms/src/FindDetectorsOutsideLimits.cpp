@@ -120,11 +120,11 @@ namespace Mantid
         // Value passed the tests, flag it.
         integratedWorkspace->dataY(i)[0] = liveValue;
       }
-	
+        
       const int totalNumFailed(numLow+numHigh);
-      g_log.information() << "Found a total of " << totalNumFailed << " failing "
-			  << "spectra (" << numLow << " reading low and " << numHigh
-			  << " reading high)" << std::endl;
+      g_log.notice() << "Found a total of " << totalNumFailed << " failing "
+                     << "spectra (" << numLow << " reading low and " << numHigh
+                     << " reading high)" << std::endl;
   
       setProperty("NumberOfFailures", totalNumFailed);
       // Assign it to the output workspace property

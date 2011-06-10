@@ -128,7 +128,7 @@ namespace Mantid
         }
       }
 
-      g_log.information() << "Found a total of " << countDets << " 'dead' detectors within "
+      g_log.notice() << "Found a total of " << countDets << " 'dead' detectors within "
                           << countSpec << " 'dead' spectra." << std::endl;
 
       // Assign it to the output workspace property

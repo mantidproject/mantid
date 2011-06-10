@@ -27,44 +27,44 @@ namespace Mantid
     void MedianDetectorTest::init()
     {
       declareProperty(
-	new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-				new HistogramValidator<>),
-	"Name of the input workspace" );
+        new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
+                                new HistogramValidator<>),
+        "Name of the input workspace" );
       declareProperty(
-	new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-	"A MaskWorkspace where 0 denotes a masked spectra. Any spectra containing"
-	"a zero is also masked on the output");
+        new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+        "A MaskWorkspace where 0 denotes a masked spectra. Any spectra containing"
+        "a zero is also masked on the output");
 
       BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
       mustBePositive->setLower(0);
       declareProperty("SignificanceTest", 3.3, mustBePositive,
-		      "Set this to a nonzero value and detectors in spectra with a total\n"
-		      "number of counts is within this number of standard deviations from the\n"
-		      "median will not be labelled bad (default 3.3)" );
+                      "Set this to a nonzero value and detectors in spectra with a total\n"
+                      "number of counts is within this number of standard deviations from the\n"
+                      "median will not be labelled bad (default 3.3)" );
       declareProperty("LowThreshold", 0.1,
-		      "Detectors corresponding to spectra with total counts equal to or less\n"
-		      "than this proportion of the median number of counts will be identified\n"
-		      "as reading badly (default 0.1)" );
+                      "Detectors corresponding to spectra with total counts equal to or less\n"
+                      "than this proportion of the median number of counts will be identified\n"
+                      "as reading badly (default 0.1)" );
       declareProperty("HighThreshold", 1.5,
-		      "Detectors corresponding to spectra with total counts equal to or more\n"
-		      "than this number of the median will be identified as reading badly\n"
-		      "(default 1.5)" );
+                      "Detectors corresponding to spectra with total counts equal to or more\n"
+                      "than this number of the median will be identified as reading badly\n"
+                      "(default 1.5)" );
       BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
       mustBePosInt->setLower(0);
       declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
-		      "The index number of the first spectrum to include in the calculation\n"
-		      "(default 0)" );
+                      "The index number of the first spectrum to include in the calculation\n"
+                      "(default 0)" );
       declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt->clone(),
-		      "The index number of the last spectrum to include in the calculation\n"
-		      "(default the last histogram)" );
+                      "The index number of the last spectrum to include in the calculation\n"
+                      "(default the last histogram)" );
       declareProperty("RangeLower", EMPTY_DBL(),
-		      "No bin with a boundary at an x value less than this will be included\n"
-		      "in the summation used to decide if a detector is 'bad' (default: the\n"
-		      "start of each histogram)" );
+                      "No bin with a boundary at an x value less than this will be included\n"
+                      "in the summation used to decide if a detector is 'bad' (default: the\n"
+                      "start of each histogram)" );
       declareProperty("RangeUpper", EMPTY_DBL(),
-		      "No bin with a boundary at an x value higher than this value will\n"
-		      "be included in the summation used to decide if a detector is 'bad'\n"
-		      "(default: the end of each histogram)" );
+                      "No bin with a boundary at an x value higher than this value will\n"
+                      "be included in the summation used to decide if a detector is 'bad'\n"
+                      "(default: the end of each histogram)" );
       declareProperty("NumberOfFailures", 0, Direction::Output);
     }
 
@@ -81,26 +81,26 @@ namespace Mantid
 
       //Adds the counts from all the bins and puts them in one total bin
       MatrixWorkspace_sptr counts = integrateSpectra(m_inputWS, m_minSpec, m_maxSpec, 
-						     m_rangeLower, m_rangeUpper, true);
+                                                     m_rangeLower, m_rangeUpper, true);
       counts = convertToRate(counts); 
 
-	  // FIXME: The next section that calculates the solid angle is commented out until 
-	  //        the SolidAngle algorithm is corrected to return the correct number.
-	  //        (see http://trac.mantidproject.org/mantid/ticket/2596)
-	  
+          // FIXME: The next section that calculates the solid angle is commented out until 
+          //        the SolidAngle algorithm is corrected to return the correct number.
+          //        (see http://trac.mantidproject.org/mantid/ticket/2596)
+          
       //MatrixWorkspace_sptr angles = getSolidAngles(m_minSpec, m_maxSpec);
 
       //Gets the count rate per solid angle (in steradians), if it exists, for each spectrum
       //this calculation is optional, it depends on angle information existing
       //if ( angles.use_count() == 1 )
       //{
-		//if some numbers in angles are zero we will get the infinity flag value 
-		// in the output work space which needs to be dealt with later
-	  //counts = counts/angles;     
+                //if some numbers in angles are zero we will get the infinity flag value 
+                // in the output work space which needs to be dealt with later
+          //counts = counts/angles;     
       //}
       
       // End of Solid Angle commented out section
-	   
+           
 
       // An average of the data, the median is less influenced by a small number of huge values than the mean
       std::set<int> badIndices;
@@ -115,9 +115,9 @@ namespace Mantid
 
       int numFailed = doDetectorTests(counts, maskWS, average, badIndices);
 
-      g_log.information() << "Median test results:\n"
-			  << "\tNumber of failures - " << numFailed << "\n"
-			  << "\tNumber of skipped spectra - " << badIndices.size() << "\n";
+      g_log.notice() << "Median test results:\n"
+                     << "\tNumber of failures - " << numFailed << "\n"
+                     << "\tNumber of skipped spectra - " << badIndices.size() << "\n";
 
       setProperty("NumberOfFailures", numFailed);
       setProperty("OutputWorkspace", maskWS);
@@ -135,27 +135,27 @@ namespace Mantid
       m_minSpec = getProperty("StartWorkspaceIndex");
       if ( (m_minSpec < 0) || (m_minSpec > maxSpecIndex) )
       {
-	g_log.warning("StartSpectrum out of range, changed to 0");
-	m_minSpec = 0;
+        g_log.warning("StartSpectrum out of range, changed to 0");
+        m_minSpec = 0;
       }
       m_maxSpec = getProperty("EndWorkspaceIndex");
       if (m_maxSpec == EMPTY_INT() ) m_maxSpec = maxSpecIndex;
       if ( (m_maxSpec < 0) || (m_maxSpec > maxSpecIndex ) )
       {
-	g_log.warning("EndSpectrum out of range, changed to max spectrum number");
-	m_maxSpec = maxSpecIndex;
+        g_log.warning("EndSpectrum out of range, changed to max spectrum number");
+        m_maxSpec = maxSpecIndex;
       }
       if ( (m_maxSpec < m_minSpec) )
       {
-	g_log.warning("EndSpectrum can not be less than the StartSpectrum, changed to max spectrum number");
-	m_maxSpec = maxSpecIndex;
+        g_log.warning("EndSpectrum can not be less than the StartSpectrum, changed to max spectrum number");
+        m_maxSpec = maxSpecIndex;
       }
 
       m_Low = getProperty("LowThreshold");
       m_High = getProperty("HighThreshold");
       if ( !(m_Low < m_High) )
       {
-	throw std::invalid_argument("The threshold for reading high must be greater than the low threshold");
+        throw std::invalid_argument("The threshold for reading high must be greater than the low threshold");
       }
 
       // Integration Range
@@ -211,8 +211,8 @@ namespace Mantid
      * @return The number of detectors that failed the tests, not including those skipped
      */
     int MedianDetectorTest::doDetectorTests(const API::MatrixWorkspace_sptr countWorkspace,
-					    API::MatrixWorkspace_sptr maskWS, 
-					    const double average, const std::set<int> & badIndices)
+                                            API::MatrixWorkspace_sptr maskWS, 
+                                            const double average, const std::set<int> & badIndices)
     {
       g_log.information("Applying the criteria to find failing detectors");
   
@@ -236,73 +236,73 @@ namespace Mantid
       PARALLEL_FOR1(countWorkspace)
       for (int i = 0; i <= numSpec; ++i)
       {
-	PARALLEL_START_INTERUPT_REGION
-	  
-	// update the progressbar information
-	if (i % progStep == 0)
-	{
-	  progress(advanceProgress(progStep*static_cast<double>(RTMarkDetects)/numSpec));
-	}
+        PARALLEL_START_INTERUPT_REGION
+          
+        // update the progressbar information
+        if (i % progStep == 0)
+        {
+          progress(advanceProgress(progStep*static_cast<double>(RTMarkDetects)/numSpec));
+        }
 
 
-	// If the value is not in the badIndices set then assume it is good
-	// else skip tests for it
-	if( badIndices.count(i) == 1 )
-	{
-	  maskWS->maskWorkspaceIndex(i);
-	  continue;
-	}
-	//Do tests
-	const double sig = minSigma*countWorkspace->readE(i)[0];
-	// Check the significance value is okay
-	if( boost::math::isinf(std::abs(sig)) || boost::math::isinf(sig) )
-	{
-	  PARALLEL_CRITICAL(MedianDetectorTest_failed_a)
-	  {
-	    maskWS->maskWorkspaceIndex(i);
-	    ++numLow;
-	  }
-	  continue;
-	}
+        // If the value is not in the badIndices set then assume it is good
+        // else skip tests for it
+        if( badIndices.count(i) == 1 )
+        {
+          maskWS->maskWorkspaceIndex(i);
+          continue;
+        }
+        //Do tests
+        const double sig = minSigma*countWorkspace->readE(i)[0];
+        // Check the significance value is okay
+        if( boost::math::isinf(std::abs(sig)) || boost::math::isinf(sig) )
+        {
+          PARALLEL_CRITICAL(MedianDetectorTest_failed_a)
+          {
+            maskWS->maskWorkspaceIndex(i);
+            ++numLow;
+          }
+          continue;
+        }
 
-	const double yIn = countWorkspace->dataY(i)[0];
-	if ( yIn <= lowLim )
-	{
-	  // compare the difference against the size of the errorbar -statistical significance check
-	  if(average - yIn > sig)
-	  {
-	    PARALLEL_CRITICAL(MedianDetectorTest_failed_b)
-	    {
-	      maskWS->maskWorkspaceIndex(i);
-	      ++numLow;
-	    }
-	    continue;
-	  }
-	}
-	if (yIn >= highLim)
-	{
-	  // compare the difference against the size of the errorbar -statistical significance check
-	  if(yIn - average > sig)
-	  {
-	    PARALLEL_CRITICAL(MedianDetectorTest_failed_c)
-	    {
-	      maskWS->maskWorkspaceIndex(i);
-	      ++numHigh;
-	    }
-	    continue;
-	  }
-	}
-	// Reaching here passes the tests
-	maskWS->dataY(i)[0] = live_value;
-	
-	PARALLEL_END_INTERUPT_REGION
+        const double yIn = countWorkspace->dataY(i)[0];
+        if ( yIn <= lowLim )
+        {
+          // compare the difference against the size of the errorbar -statistical significance check
+          if(average - yIn > sig)
+          {
+            PARALLEL_CRITICAL(MedianDetectorTest_failed_b)
+            {
+              maskWS->maskWorkspaceIndex(i);
+              ++numLow;
+            }
+            continue;
+          }
+        }
+        if (yIn >= highLim)
+        {
+          // compare the difference against the size of the errorbar -statistical significance check
+          if(yIn - average > sig)
+          {
+            PARALLEL_CRITICAL(MedianDetectorTest_failed_c)
+            {
+              maskWS->maskWorkspaceIndex(i);
+              ++numHigh;
+            }
+            continue;
+          }
+        }
+        // Reaching here passes the tests
+        maskWS->dataY(i)[0] = live_value;
+        
+        PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
 
       // Log finds
       g_log.information() << "-- Detector tests --\n " 
-			  << "Number recording low: " << numLow << "\n"
-			  << "Number recording high: " << numHigh << "\n";
+                          << "Number recording low: " << numLow << "\n"
+                          << "Number recording high: " << numHigh << "\n";
       
       return (numLow + numHigh);
     }
