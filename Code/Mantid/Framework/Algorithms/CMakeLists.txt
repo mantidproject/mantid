@@ -109,7 +109,7 @@ set ( SRC_FILES
 	src/Power.cpp
 	src/PowerLawCorrection.cpp
 	src/Q1D.cpp
-	#src/Q1DTOF.cpp
+	src/Q1DTOF.cpp
 	src/Q1DWeighted.cpp
 	src/Qxy.cpp
 	src/ReadGroupsFromFile.cpp
@@ -260,7 +260,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Power.h
 	inc/MantidAlgorithms/PowerLawCorrection.h
 	inc/MantidAlgorithms/Q1D.h
-	#inc/MantidAlgorithms/Q1DTOF.h
+	inc/MantidAlgorithms/Q1DTOF.h
 	inc/MantidAlgorithms/Q1DWeighted.h
 	inc/MantidAlgorithms/Qxy.h
 	inc/MantidAlgorithms/ReadGroupsFromFile.h
@@ -399,6 +399,7 @@ set ( TEST_FILES
 	test/PowerLawCorrectionTest.h
 	test/PowerTest.h
 	test/Q1DTest.h
+	test/Q1DTOFTest.h
 	test/Q1DWeightedTest.h
 	test/QxyTest.h
 	test/ReadGroupsFromFileTest.h

@@ -22,7 +22,7 @@ namespace Mantid
 
        //this is the LineOfSight assuming no drop, the drop is added (and subtracted) later in the code when required
        m_cachedLineOfSight = m_det->getPos()-m_samplePos;
-       // the drop is proportional to the wave length squared and using this and doing the full calculation only once increases the speed a lot
+       // the drop is proportional to the wave length squared and using this to do the full calculation only once increases the speed a lot
        m_dropPerAngstrom2 = ws->gravitationalDrop(m_det, 1e-10);
      }
     /** Caclulates the sin of the that the neutron left the sample at, before the effect of gravity

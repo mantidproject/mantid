@@ -1,38 +1,38 @@
-#ifndef MANTID_ALGORITHMS_Q1DTOF_H_
-#define MANTID_ALGORITHMS_Q1DTOF_H_
+#ifndef MANTID_ALGORITHMS_Q1D_H_
+#define MANTID_ALGORITHMS_Q1D_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/GravitySANSHelper.h"
 
 namespace Mantid
 {
 namespace Algorithms
 {
-/**
-    Part of data reduction for SANS. Transforms a 2D detector array into I(Q) by assigning each
-    2D pixel to a Q bin. The contribution of each pixel is weighted by either 1 or a function of the error
-    on the signal in that pixel.
+/** Takes account of the effects of gravity for instruments where the y-axis points upwards, for
+    example SANS instruments
 
-    The weighting of the pixel by the error follows the HFIR/SANS reduction code implemented in IGOR
-    by Ken Littrell, ORNL.
+    @author Steve Williams ISIS Rutherford Appleton Laboratory 
+    @date 10/12/2010
 
-    Choosing to weight each pixel by 1 gives I(q) where each bin is the average of all pixels contributing to
-    that bin.
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
-    Each pixel is sub-divided in NPixelDivision*NPixelDivision sub-pixels when averaging.
+    This file is part of Mantid.
 
-    Required Properties:
-    <UL>
-    <LI> InputWorkspace    - The (partly) corrected data in units of wavelength. </LI>
-    <LI> OutputWorkspace   - The workspace in which to store the result histogram. </LI>
-    <LI> OutputBinning     - The bin parameters to use for the final result. </LI>
-    <LI> NPixelDivision    - The number of pixel sub-divisions in each direction used for calculation. </LI>
-    <LI> PixelSizeX        - The pixel size, in meter, in the X direction.</LI>
-    <LI> PixelSizeY        - The pixel size, in meter, in the Y direction. </LI>
-    <LI> ErrorWeighting    - Whether to weight pixel contribution by their error (default: false). </LI>
-    </UL>
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
@@ -41,7 +41,7 @@ class DLLExport Q1DTOF : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  Q1DTOF() : API::Algorithm() {}
+  Q1DTOF() : API::Algorithm(), m_distr(true), m_numInBins(0) {}
   /// Virtual destructor
   virtual ~Q1DTOF() {}
   /// Algorithm's name
@@ -52,15 +52,30 @@ public:
   virtual const std::string category() const { return "SANS"; }
 
 private:
+  /// the experimental workspace with counts across the detector
+  API::MatrixWorkspace_const_sptr m_dataWS;
+  /// true if the input workspaces are distributions, the output will initially match the distribution status of the input and then change to a distribution
+  bool m_distr;
+  /// number of bin boundies in the input workspace
+  size_t m_numInBins;
+
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   /// Initialisation code
   void init();
   /// Execution code
   void exec();
+
+  void examineInput(API::MatrixWorkspace_const_sptr binAdj, API::MatrixWorkspace_const_sptr detectAdj);
+  API::MatrixWorkspace_sptr setUpOutputWorkspace(const std::vector<double> & binParams,  const API::SpectraDetectorMap * const specMap) const;
+  void convertWavetoQ(const size_t specIndex, const bool doGravity, MantidVec & Qs) const;
+  void getNormFromSpec(API::MatrixWorkspace_const_sptr pixelAdj, const size_t specIndex, const MantidVec & binNorms, const MantidVec & binNormEs, MantidVec & outNorms, MantidVec & outEs) const;
+  double pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,  const size_t specIndex) const;
+  void getUnmaskedWidths(const size_t specIndex, MantidVec & widths) const;
+  void updateSpecMap(const size_t specIndex, API::SpectraDetectorMap * const specMap, const Geometry::ISpectraDetectorMap & inSpecMap, API::MatrixWorkspace_sptr outputWS) const;
 };
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_Q1DTOF_H_*/
+#endif /*MANTID_ALGORITHMS_Q1D_H_*/
