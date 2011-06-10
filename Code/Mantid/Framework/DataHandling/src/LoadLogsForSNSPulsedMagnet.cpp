@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <sys/stat.h>
+#include <sstream>
 
 using std::size_t;
 using std::vector;
@@ -123,8 +124,9 @@ namespace DataHandling
 
     // 3. Parse
     std::ifstream logFile(logfilename, std::ios::in|std::ios::binary);
-    // unsigned int *pulseindices = new unsigned int[numpulses];
-    unsigned int *delaytimes = new unsigned int[numpulses];
+    unsigned int **delaytimes = new unsigned int*[numpulses];
+    for (unsigned int i = 0; i < numpulses; i ++)
+      delaytimes[i] = new unsigned int[4];
     // char buffer[4];
     size_t index = 0;
     unsigned int chopperindices[4];
@@ -144,11 +146,9 @@ namespace DataHandling
             localdelaytimes[i] = delaytime;
         }
 
-        // Check
-        for (unsigned int i = 0; i < 4; i ++){
-            if (i != chopperindices[i]){
-                g_log.information() << "Warning Here 111  Pulsed = " << index << " Chopper Index = " << chopperindices[i] << "  vs " << i << "\n";
-            }
+        // Load
+        for (int i = 0; i < 4; i ++){
+          delaytimes[p][i] =localdelaytimes[i];
         }
 
         index ++;
@@ -198,20 +198,25 @@ struct Pulse
 //    std::vector<double> times;
 //    std::vector<double> values;*/
 
-    TimeSeriesProperty<double>* property = new TimeSeriesProperty<double>("PulsedMagnetDelay");
-//    property->create(start_time, times, values);
-    property->setUnits("nanoseconds");
+    TimeSeriesProperty<double>** property = new TimeSeriesProperty<double>*[4];
+    for (int i = 0; i < 4; i ++){
+      std::stringstream namess;
+      namess << "PulsedMagnetDelay" << i;
+      std::string tempname = namess.str();
+      property[i] = new TimeSeriesProperty<double>(tempname);
+      property[i]->setUnits("nanoseconds");
+    }
 
     for (size_t pulse_index = 0; pulse_index < m_numpulses; pulse_index++){
       DateAndTime dt(static_cast<int32_t>(m_pulseidseconds[pulse_index]),
                      static_cast<int32_t>(m_pulseidnanoseconds[pulse_index]));
-      property->addValue(dt, static_cast<double>(m_delaytimes[pulse_index]));
-//      if (m_delaytimes[pulse_index] > 0) // REMOVE
-//        std::cout << pulse_index << ": " << dt << " " << static_cast<double>(m_delaytimes[pulse_index]) << std::endl; // REMOVE
+      for (int i = 0; i < 4; i ++){
+        property[i]->addValue(dt, static_cast<double>(m_delaytimes[pulse_index][i]));
+      }
     }
 
-    WS->mutableRun().addProperty(property, false);
-    // addProperty(Kernel::Property *prop, bool overwrite = false);
+    for (int i = 0; i < 4; i ++)
+      WS->mutableRun().addProperty(property[i], false);
 
     g_log.information() << "Integration is Over!\n";
 

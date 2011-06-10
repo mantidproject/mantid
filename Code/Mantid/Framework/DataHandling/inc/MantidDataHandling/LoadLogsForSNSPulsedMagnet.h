@@ -52,7 +52,7 @@ namespace DataHandling
     std::string m_pulseidfilename;
 
     std::size_t m_numpulses;
-    unsigned int* m_delaytimes;
+    unsigned int** m_delaytimes;
     std::vector<uint32_t> m_pulseidseconds;
     std::vector<uint32_t> m_pulseidnanoseconds;
 
