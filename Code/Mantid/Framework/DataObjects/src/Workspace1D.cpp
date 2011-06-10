@@ -61,7 +61,7 @@ namespace Mantid
      */
     size_t Workspace1D::blocksize() const
     {
-      int retVal = 1000000000;
+      size_t retVal = 1000000000;
       //if not empty
       if (size() > 0)
       {

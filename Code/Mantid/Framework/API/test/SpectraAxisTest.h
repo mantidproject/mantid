@@ -85,12 +85,12 @@ public:
     delete one2one;
   }
 
-  void testPopulateSimple()
+  void testPopulateOneToOne()
   {
     SpectraAxis ax(5);
-    ax.populateSimple(100);
+    ax.populateOneToOne(1,100);
     TS_ASSERT_EQUALS( ax.length(), 100);
-    TS_ASSERT_EQUALS( ax.spectraNo(23), 23);
+    TS_ASSERT_EQUALS( ax.spectraNo(23), 24);
   }
 
   void testCopyConstructor()

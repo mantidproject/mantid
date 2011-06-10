@@ -158,7 +158,7 @@ void SpectraAxis::getIndexSpectraMap(index2spec_map& map)const
   map.clear();
   for (size_t i=0; i < nel; ++i )
   {
-    map.insert(std::make_pair<int64_t,int64_t>(i, m_values[i]));
+    map.insert(std::make_pair<size_t,specid_t>(i, m_values[i]));
   }
 }
 
@@ -176,17 +176,25 @@ void SpectraAxis::getSpectraIndexMap(spec2index_map& map)const
   map.clear();
   for (size_t i=0; i < nel; ++i )
   {
-    map.insert(std::make_pair<int64_t,int64_t>(m_values[i],i));
+    map.insert(std::make_pair<specid_t,size_t>(m_values[i],i));
   }
 }
 
-/** Populate the SpectraAxis with a simple 1:1 map from 0 to end-1.
+/** 
+ * Populate the SpectraAxis with a 1:1 map from start to end (inclusive).
  */
-void SpectraAxis::populateSimple(int64_t end)
+void SpectraAxis::populateOneToOne(int64_t start, int64_t end)
 {
-  m_values.resize(static_cast<size_t>(end), 0);
-  for (int64_t i=0; i < end; i++)
-    m_values[i] = static_cast<specid_t>(i);
+  if( start > end )
+  {
+    throw std::invalid_argument("SpectraAxis::populateOneToOne - start > end");
+  }
+  const size_t nvalues(end-start+1);
+  m_values.resize(nvalues, 0);
+  for (size_t i=0; i < nvalues; i++)
+  {
+    m_values[i] = static_cast<specid_t>(start+i);
+  }
 }
 
 

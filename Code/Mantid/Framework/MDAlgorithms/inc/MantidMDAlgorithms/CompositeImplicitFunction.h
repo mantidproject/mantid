@@ -5,9 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
+#include "MantidAPI/ImplicitFunction.h"
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
-#include "MantidAPI/ImplicitFunction.h"
 
 namespace Mantid
 {

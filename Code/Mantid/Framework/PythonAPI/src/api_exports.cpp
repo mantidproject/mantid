@@ -442,9 +442,9 @@ using namespace boost::python;
       ;
     // Spectra Axis subclass
     class_< API::SpectraAxis, bases<API::Axis>, boost::noncopyable >("SpectraAxis", no_init)
-      .def("spectraNumber", (const specid_t & (Mantid::API::SpectraAxis::*)(const size_t &) const) & API::SpectraAxis::spectraNo, return_value_policy<copy_const_reference>() ) // (const int & (Mantid::API::SpectraAxis::*)() const)
+      .def("spectraNumber", (const specid_t & (Mantid::API::SpectraAxis::*)(const size_t &) const) & API::SpectraAxis::spectraNo, return_value_policy<copy_const_reference>() )
       .def("setValue", & API::SpectraAxis::setValue)
-      .def("populateSimple", & API::SpectraAxis::populateSimple)
+      .def("populateOneToOne", & API::SpectraAxis::populateOneToOne)
       ;
     // Text Axis subclass
     class_< API::TextAxis, bases<API::Axis>, boost::noncopyable >("TextAxis", no_init)

@@ -283,7 +283,7 @@ namespace Algorithms
         {
           outWS->setValue(detID, double(group));
         }
-        catch (std::invalid_argument & e)
+        catch (std::invalid_argument &)
         {
           numNotFound++;
         }

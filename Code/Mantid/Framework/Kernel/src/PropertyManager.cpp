@@ -96,7 +96,7 @@ namespace Mantid
           //Use the property's += operator to add THAT. Isn't abstraction fun?!
           (*lhs_prop) += it->second;
         }
-        catch (Exception::NotFoundError & err)
+        catch (Exception::NotFoundError &)
         {
           //The property isnt on the lhs.
           //Let's copy it

@@ -1,6 +1,6 @@
+#include "MantidMDAlgorithms/OriginParameter.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "MantidMDAlgorithms/OriginParameter.h"
 
 namespace Mantid
 {

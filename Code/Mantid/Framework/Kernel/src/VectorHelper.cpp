@@ -1,6 +1,3 @@
-// define placed here to suppress boost library warning
-#define _SCL_SECURE_NO_WARNINGS
-
 #include <stdexcept>
 #include <cmath>
 

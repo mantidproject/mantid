@@ -1,15 +1,6 @@
 #ifndef SAVENEXUSPROCESSEDTEST_H_
 #define SAVENEXUSPROCESSEDTEST_H_
 
-
-//TODO: Remove this before checking in the test
-//#define _WIN64
-
-
-
-#include <fstream>
-#include <cxxtest/TestSuite.h>
-
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this test case.
 #include "MantidDataObjects/WorkspaceSingleValue.h"
@@ -30,6 +21,10 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
+
+#include <fstream>
+#include <cxxtest/TestSuite.h>
+
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

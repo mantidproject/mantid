@@ -1,6 +1,6 @@
+#include "MantidMDAlgorithms/DepthParameter.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "MantidMDAlgorithms/DepthParameter.h"
 
 namespace Mantid
 {

@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Fit1D.h"
-#include <muParser.h>
+#include "MantidGeometry/muParser_Silent.h"
 #include <boost/shared_array.hpp>
 
 namespace Mantid

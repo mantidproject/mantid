@@ -109,10 +109,10 @@ namespace DataObjects
 
     // Convert to a double
     double val = 0;
-    bool success = Strings::convert(text, val);
+    int success = Strings::convert(text, val);
     int ival = static_cast<int>(val);
 
-    if (!success)
+    if (success == 0)
     {
       g_log.error() << "Could not convert string '" << text << "' to a number.\n";
       return;
@@ -156,7 +156,7 @@ namespace DataObjects
   /// Must return overall memory size taken by the column.
   long int PeakColumn::sizeOfData()const
   {
-    return sizeof(double) * peaks.size();
+    return sizeof(double) * static_cast<long int>(peaks.size());
   }
 
 

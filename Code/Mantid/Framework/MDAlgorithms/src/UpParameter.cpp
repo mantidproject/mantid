@@ -1,7 +1,7 @@
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 #include "MantidMDAlgorithms/UpParameter.h"
 #include <cmath>
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 namespace Mantid
 {

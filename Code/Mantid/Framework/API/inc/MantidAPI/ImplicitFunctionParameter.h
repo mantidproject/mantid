@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/DllConfig.h"
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
@@ -13,7 +14,6 @@
 #include <sstream>
 #include <vector>
 #include <memory>
-#include "MantidAPI/DllConfig.h"
 
 namespace Mantid
 {

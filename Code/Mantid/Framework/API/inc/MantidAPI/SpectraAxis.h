@@ -76,7 +76,7 @@ public:
   void getSpectraIndexMap(spec2index_map&) const;
   void getIndexSpectraMap(index2spec_map& map) const;
 
-  void populateSimple(int64_t end);
+  void populateOneToOne(int64_t start, int64_t end);
 
 private:
   /// Default constructor

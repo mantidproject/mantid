@@ -1,10 +1,11 @@
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidAPI/Point3D.h"
 #include "MantidGeometry/V3D.h"
 #include <cmath>
 #include <vector>
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
+
 
 namespace Mantid
 {

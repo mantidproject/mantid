@@ -390,7 +390,7 @@ namespace MDEvents
           dimensionToBinFrom.push_back(dim_index);
           binDimensions.push_back(binDimensionsIn[i]);
         }
-        catch (std::runtime_error & e)
+        catch (std::runtime_error &)
         {
           // The dimension was not found, so we are not binning across it. TODO: Log message?
           if (binDimensionsIn[i]->getNBins() > 1)
