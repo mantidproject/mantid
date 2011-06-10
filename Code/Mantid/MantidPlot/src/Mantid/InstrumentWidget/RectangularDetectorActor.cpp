@@ -53,8 +53,7 @@ RectangularDetectorActor::RectangularDetectorActor(const InstrumentActor& instrA
   }
 
   genTexture(image_data,clist,false);
-  std::vector<GLColor>::iterator dummy_iterator;
-  genTexture(pick_data, std::vector<GLColor>(), true);
+  genTexture(pick_data, clist, true);
   uploadTexture(image_data);
 
 }
