@@ -28,9 +28,23 @@ public:
   {
   }
 
-  void testHRPD()
+  void testHRPD_With_Moving_Monitors()
   {
-    InstrumentDataService::Instance().remove("HRPD_Definition.xml");
+    runTest(true);
+  }
+
+  void testHRPD_Without_Moving_Monitors()
+  {
+    runTest(false);
+  }
+
+private:
+  
+  void runTest(const bool moveMonitors)
+  {
+    const std::string xmlFile("HRPD_for_UNIT_TESTING.xml");
+    InstrumentDataServiceImpl & ids = InstrumentDataService::Instance();
+    if( ids.doesExist(xmlFile) ) ids.remove(xmlFile);
 
     //create a workspace with some sample data and put in data service
     wsName = "LoadInstrumentTestHRPD";
@@ -41,7 +55,7 @@ public:
     // load instrument def file
     LoadInstrument loaderHRP;
     TS_ASSERT_THROWS_NOTHING(loaderHRP.initialize());
-    loaderHRP.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/HRPD_for_UNIT_TESTING.xml");
+    loaderHRP.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" + xmlFile);
     inputFile = loaderHRP.getPropertyValue("Filename");
     loaderHRP.setPropertyValue("Workspace", wsName);
     TS_ASSERT_THROWS_NOTHING(loaderHRP.execute());
@@ -52,6 +66,7 @@ public:
     loadRawPos.initialize();
     loadRawPos.setPropertyValue("Filename", "HRP38692.raw");
     loadRawPos.setPropertyValue("Workspace", wsName);
+    loadRawPos.setProperty("MoveMonitors", moveMonitors);
     TS_ASSERT_THROWS_NOTHING(loadRawPos.execute());
     TS_ASSERT( loadRawPos.isExecuted() );
 
@@ -66,8 +81,26 @@ public:
     TS_ASSERT_DELTA( ptrDet->getPos().X(), 0.0866,0.01);
     TS_ASSERT_DELTA( ptrDet->getPos().Z(), -0.9962,0.01);
 
+    boost::shared_ptr<IDetector> mon1 = i->getDetector(1001);
+    TS_ASSERT(mon1->isMonitor());
+    double r(-1.0), theta(-1.0), phi(-1.0);
+    mon1->getPos().getSpherical(r, theta, phi);
+    if( moveMonitors )
+    {
+      TS_ASSERT_DELTA(r, 2.5, 1e-08);
+      TS_ASSERT_DELTA(theta, 0.0, 1e-08);
+      TS_ASSERT_DELTA(phi, 0.0, 1e-08);
+    }
+    else
+    {
+      TS_ASSERT_DELTA(r, 0.6, 1e-08);
+      TS_ASSERT_DELTA(theta, 180.0, 1e-08);
+      TS_ASSERT_DELTA(phi, 0.0, 1e-08);
+    }
 
+    InstrumentDataService::Instance().remove(xmlFile);
     AnalysisDataService::Instance().remove(wsName);
+
   }
 
 

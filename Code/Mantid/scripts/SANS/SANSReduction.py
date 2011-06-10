@@ -689,7 +689,7 @@ def SetPhiLimit(phimin,phimax, phimirror=True):
             phimin = -90.0
         if abs(phimax) > 180.0 :
             phimax = 90.0
-	
+        
         if phimax - phimin == 180.0 :
             phimin = -90.0
             phimax = 90.0
@@ -697,7 +697,7 @@ def SetPhiLimit(phimin,phimax, phimirror=True):
             phimin = SANSUtility.normalizePhi(phimin)
             phimax = SANSUtility.normalizePhi(phimax)
           
-  	
+        
     global PHIMIN, PHIMAX, PHIMIRROR
     PHIMIN = phimin
     PHIMAX = phimax
@@ -1234,8 +1234,8 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
         #retrieve the user setting that tells us whether Rebin or InterpolatingRebin will be used during the normalisation 
         if INSTRUMENT.name() == 'LOQ':
             # Change the instrument definition to the correct one in the LOQ case
-            LoadInstrument(trans_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
-            LoadInstrument(direct_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
+            LoadInstrument(trans_raw, INSTR_DIR + "/LOQ_trans_Definition.xml", RewriteSpectraMap=False)
+            LoadInstrument(direct_raw, INSTR_DIR + "/LOQ_trans_Definition.xml", RewriteSpectraMap=False)
             
             trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw,
                 '1,2', BACKMON_START, BACKMON_END, wavbin, 
@@ -1612,7 +1612,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         oldY2 = newY2
         XNEW += XSTEP
         YNEW += YSTEP
-	
+        
     if ITER_NUM == MaxIter:
         _printMessage("::SANS:: Out of iterations, new coordinates may not be the best!")
         XNEW -= XSTEP

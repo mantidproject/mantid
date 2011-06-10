@@ -51,6 +51,9 @@ namespace Mantid
         "The filename of the input file.\n"
         "Currently supports RAW and ISIS NeXus."
         );
+      declareProperty("MoveMonitors", false, 
+                      "If true the positions of any detectors marked as monitors "
+                      "in the IDF will be moved also");
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -166,6 +169,8 @@ namespace Mantid
       const std::vector<int32_t> & detID, const std::vector<float> & l2, 
       const std::vector<float> & theta, const std::vector<float> & phi)
       {
+        const bool moveMonitors = getProperty("MoveMonitors");
+        const bool ignoreMonitors(!moveMonitors);
         const int numDetector = static_cast<int>(detID.size());
         g_log.information() << "Setting new positions for " << numDetector << " detectors\n";
         for (int i = 0; i < numDetector; ++i)
@@ -173,6 +178,7 @@ namespace Mantid
           try
           {
             Geometry::IDetector_sptr det = instrument->getDetector(detID[i]);
+            if( ignoreMonitors && det->isMonitor() ) continue;
             V3D parentPos;
             if( det->getParent() ) parentPos = det->getParent()->getPos();
             Geometry::V3D pos;

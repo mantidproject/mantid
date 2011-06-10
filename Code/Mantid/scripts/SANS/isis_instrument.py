@@ -489,7 +489,7 @@ class LOQ(ISISInstrument):
         """
         trans_definition_file = mtd.getConfigProperty('instrumentDefinition.directory')
         trans_definition_file += '/'+self._NAME+'_trans_Definition.xml'
-        LoadInstrument(workspace, trans_definition_file)
+        LoadInstrument(workspace, trans_definition_file, RewriteSpectraMap=False)
 
     def check_can_logs(self):
         """
