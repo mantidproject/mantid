@@ -241,9 +241,10 @@ m_decimals(-1)
 
   m_qualityLabel = new QLabel("Quality:");
   m_qualityLineEdit = new QLineEdit();
-  QHBoxLayout* chiLayout = new QHBoxLayout(w);
+  QHBoxLayout* chiLayout = new QHBoxLayout();
   chiLayout->addWidget(m_qualityLabel);
   chiLayout->addWidget(m_qualityLineEdit);
+  layout->addLayout(chiLayout);
 
 
   m_fitMenu = new QMenu(this);
