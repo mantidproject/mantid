@@ -49,6 +49,10 @@ public:
 
 signals:
   /**
+   * Signal to let views know that autoscaling is on.
+   */
+  void autoScale();
+  /**
    * Signal to pass on information about a change to the color map.
    */
   void colorMapChanged(double min, double max);

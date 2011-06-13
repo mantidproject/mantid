@@ -104,6 +104,7 @@ void ColorSelectionWidget::autoOrManualScaling(int state)
     break;
   case Qt::Checked:
     this->setEditorStatus(false);
+    emit this->autoScale();
     break;
   }
 }
