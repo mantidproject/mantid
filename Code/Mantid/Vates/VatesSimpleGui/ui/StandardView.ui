@@ -45,6 +45,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="integrateButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Integrate</string>
        </property>
