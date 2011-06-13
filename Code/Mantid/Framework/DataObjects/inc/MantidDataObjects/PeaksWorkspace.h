@@ -168,6 +168,7 @@ namespace DataObjects
     {
       return getNumberPeaks();
     }
+    virtual bool threadSafe() const { return true;}
 
 
   private:
