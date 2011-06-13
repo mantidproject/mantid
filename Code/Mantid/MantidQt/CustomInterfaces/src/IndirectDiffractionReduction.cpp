@@ -24,7 +24,7 @@ using namespace MantidQt::CustomInterfaces;
 //----------------------
 ///Constructor
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent) :
-  UserSubWindow(parent)
+  UserSubWindow(parent), m_valInt(NULL), m_valDbl(NULL)
 {
 }
 
@@ -56,9 +56,23 @@ void IndirectDiffractionReduction::demonRun()
       if ( m_uiForm.ckNexus->isChecked() ) pyInput += "formats.append('nxs')\n";
       if ( m_uiForm.ckAscii->isChecked() ) pyInput += "formats.append('ascii')\n";
 
+      QString rebin = m_uiForm.leRebinStart->text() + "," + m_uiForm.leRebinWidth->text() 
+        + "," + m_uiForm.leRebinEnd->text();
+      if ( rebin != ",," )
+      {
+        pyInput += "reducer.set_rebin_string('" + rebin +"')\n";
+      }
+
       pyInput += "reducer.set_save_formats(formats)\n";
       pyInput +=
         "reducer.reduce()\n";
+
+      if ( m_uiForm.cbPlotType->currentText() == "Spectra" )
+      {
+        pyInput += "wslist = reducer.get_result_workspaces()\n"
+          "from mantidplot import *\n"
+          "plotSpectrum(wslist, 0)\n";
+      }
 
       QString pyOutput = runPythonCode(pyInput).trimmed();
     }
@@ -108,17 +122,18 @@ void IndirectDiffractionReduction::instrumentSelected(int)
         {
           m_uiForm.cbReflection->addItem(reflections[j]);
         }
-        if ( reflections.count() > 1 )
-        {
-          m_uiForm.swReflections->setCurrentIndex(0);         
-        }
-        else
-        {
-          m_uiForm.swReflections->setCurrentIndex(1);
-        }
       }
     }
 
+    if ( m_uiForm.cbReflection->count() > 1 )
+    {
+      m_uiForm.swReflections->setCurrentIndex(0);
+    }
+    else
+    {
+      m_uiForm.swReflections->setCurrentIndex(1);
+    }
+    
     reflectionSelected(m_uiForm.cbReflection->currentIndex());
 
     m_uiForm.cbReflection->blockSignals(false);
@@ -187,6 +202,16 @@ void IndirectDiffractionReduction::initLayout()
   connect(m_uiForm.cbInst, SIGNAL(currentIndexChanged(int)), this, SLOT(instrumentSelected(int)));
   connect(m_uiForm.cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(reflectionSelected(int)));
   
+  m_valInt = new QIntValidator(this);
+  m_valDbl = new QDoubleValidator(this);
+
+  m_uiForm.set_leSpecMin->setValidator(m_valInt);
+  m_uiForm.set_leSpecMax->setValidator(m_valInt);
+
+  m_uiForm.leRebinStart->setValidator(m_valDbl);
+  m_uiForm.leRebinWidth->setValidator(m_valDbl);
+  m_uiForm.leRebinEnd->setValidator(m_valDbl);
+
   loadSettings();
 }
 
@@ -210,7 +235,42 @@ void IndirectDiffractionReduction::loadSettings()
 
 bool IndirectDiffractionReduction::validateDemon()
 {
-  return m_uiForm.dem_rawFiles->isValid();
+  bool valid = true;
+
+  if ( ! m_uiForm.dem_rawFiles->isValid() ) { valid = false; }
+
+  QString rebin = m_uiForm.leRebinStart->text() + "," + m_uiForm.leRebinEnd->text() +
+    "," + m_uiForm.leRebinEnd->text();
+  if ( rebin != ",," )
+  {
+    // validate rebin parameters
+    if ( m_uiForm.leRebinStart->text() == "" )
+    {
+      valid = false;
+      m_uiForm.valRebinStart->setText("*");
+    } else { m_uiForm.valRebinStart->setText(""); }
+
+    if ( m_uiForm.leRebinWidth->text() == "" )
+    {
+      valid = false;
+      m_uiForm.valRebinWidth->setText("*");
+    } else { m_uiForm.valRebinWidth->setText(""); }
+
+    if ( m_uiForm.leRebinEnd->text() == "" )
+    {
+      valid = false;
+      m_uiForm.valRebinEnd->setText("*");
+    } else { m_uiForm.valRebinEnd->setText(""); }
+
+    if ( m_uiForm.leRebinStart->text().toDouble() > m_uiForm.leRebinEnd->text().toDouble() )
+    {
+      valid = false;
+      m_uiForm.valRebinStart->setText("*");
+      m_uiForm.valRebinEnd->setText("*");
+    }
+  }
+
+  return valid;
 }
 
 }

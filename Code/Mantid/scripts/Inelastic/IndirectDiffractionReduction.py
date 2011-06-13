@@ -26,6 +26,11 @@ class MSGDiffractionReducer(MSGReducer):
         step.setPropertyValue("EMode", "Elastic")
         self.append_step(step)
         
+        if self._rebin_string is not None:
+            step = mtd.createAlgorithm("Rebin")
+            step.setPropertyValue("Params", self._rebin_string)
+            self.append_step(step)
+        
         step = steps.Grouping()
         step.set_mask_list(self._masking_detectors)
         step.set_grouping_policy("All")

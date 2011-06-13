@@ -20,6 +20,7 @@ class MSGReducer(reducer.Reducer):
     _detector_range = [-1, -1]
     _masking_detectors = []
     _parameter_file = None
+    _rebin_string = None
     _fold_multiple_frames = True
     _save_formats = []
     
@@ -48,13 +49,21 @@ class MSGReducer(reducer.Reducer):
 
     def set_detector_range(self, start, end):
         """Sets the start and end detector points for the reduction process.
-        These numbers are to be the workspace index, not the spectrum number.
+        These numbers are to be the *workspace index*, not the spectrum number.
+        Example:
+            reducer.set_detector_range(2,52)
         """
         if ( not isinstance(start, int) ) or ( not isinstance(end, int) ):
             raise TypeError("start and end must be integer values")
         self._detector_range = [ start, end ]
         
     def set_fold_multiple_frames(self, value):
+        """When this is set to False, the reducer will not run the FoldData
+        reduction step or any step which appears after it in the reduction
+        chain.
+        This will only affect data which would ordinarily have used this
+        function (ie TOSCA on multiple frames).
+        """
         if not isinstance(value, bool):
             raise TypeError("value must be of boolean type")
         self._fold_multiple_frames = value
@@ -92,6 +101,13 @@ class MSGReducer(reducer.Reducer):
             os.path.join(mtd.settings["parameterDefinition.directory"], file)
         LoadParameterFile(self._workspace_instrument, 
             self._parameter_file)
+
+    def set_rebin_string(self, rebin):
+        """Sets the rebin string to be used with the Rebin algorithm.
+        """
+        if not isinstance(rebin, str):
+            raise TypeError("rebin variable must be of string type")
+        self._rebin_string = rebin
         
     def set_sum_files(self, value):
         """Mark whether multiple runs should be summed together for the process
@@ -118,7 +134,14 @@ class MSGReducer(reducer.Reducer):
         self._save_formats = formats
         
     def get_result_workspaces(self):
-        """
+        """Returns a Python list object containing the names of the workspaces
+        processed at the last reduction step. Using this, you can incorporate
+        the reducer into your own scripts.
+        It will only be effective after the reduce() function has run.
+        Example:
+            wslist = reducer.get_result_workspaces()
+            plotSpectrum(wslist, 0) # Plot the first spectrum of each of
+                    # the result workspaces
         """
         nsteps = len(self._reduction_steps)
         for i in range(0, nsteps):
@@ -150,7 +173,7 @@ class MSGReducer(reducer.Reducer):
         return mtd[self._workspace_instrument]
 
     def _get_monitor_index(self):
-        """Determined the workspace index of the first monitor spectrum.
+        """Determine the workspace index of the first monitor spectrum.
         """
         workspace = self._load_empty_instrument()
         for counter in range(0, workspace.getNumberHistograms()):

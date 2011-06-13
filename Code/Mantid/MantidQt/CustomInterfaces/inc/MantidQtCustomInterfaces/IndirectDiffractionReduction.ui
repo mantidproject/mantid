@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>535</width>
-    <height>362</height>
+    <width>495</width>
+    <height>307</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -240,7 +240,77 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_4" />
+      <layout class="QHBoxLayout" name="horizontalLayout_4" >
+       <item>
+        <widget class="QGroupBox" name="gbRebin" >
+         <property name="title" >
+          <string>Rebin in D-Spacing (Leave Blank to Not Rebin)</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_7" >
+          <item>
+           <widget class="QLabel" name="lbRebinStart" >
+            <property name="text" >
+             <string>Start:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="leRebinStart" />
+          </item>
+          <item>
+           <widget class="QLabel" name="valRebinStart" >
+            <property name="styleSheet" >
+             <string notr="true" >color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text" >
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lbRebinWidth" >
+            <property name="text" >
+             <string>Width:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="leRebinWidth" />
+          </item>
+          <item>
+           <widget class="QLabel" name="valRebinWidth" >
+            <property name="styleSheet" >
+             <string notr="true" >color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text" >
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lbRebinEnd" >
+            <property name="text" >
+             <string>End:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="leRebinEnd" />
+          </item>
+          <item>
+           <widget class="QLabel" name="valRebinEnd" >
+            <property name="styleSheet" >
+             <string notr="true" >color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text" >
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>

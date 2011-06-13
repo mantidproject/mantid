@@ -41,6 +41,8 @@ private:
 private:
   /// The form generated using Qt Designer
   Ui::IndirectDiffractionReduction m_uiForm;
+  QIntValidator * m_valInt;
+  QDoubleValidator * m_valDbl;
 
 };
 

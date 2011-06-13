@@ -19,8 +19,7 @@ class IndirectReducer(MSGReducer):
     Will perform the same steps as the ConvertToEnergy interface does on the
     default settings.
     """
-    
-    _rebin_string = None
+
     _grouping_policy = None
     _calibration_workspace = None
     _background_start = None
@@ -32,7 +31,6 @@ class IndirectReducer(MSGReducer):
         """
         """
         super(IndirectReducer, self).__init__()
-        self._rebin_string = None
         self._grouping_policy = None
         self._calibration_workspace = None
         self._background_start = None
@@ -105,11 +103,6 @@ class IndirectReducer(MSGReducer):
             step = steps.Naming()
             self.append_step(step)
     
-    def set_rebin_string(self, rebin):
-        if not isinstance(rebin, str):
-            raise TypeError("rebin variable must be of string type")
-        self._rebin_string = rebin
-
     def set_grouping_policy(self, policy):
         self._grouping_policy = policy
 
