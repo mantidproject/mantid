@@ -2,7 +2,7 @@
 #define ENDIAN_CONVERT
 
 // We aren't going to EVER change this code - so let's ignore the warnings.
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
     #pragma GCC diagnostic ignored "-Wconversion"
     #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #elif defined(_WIN32)
