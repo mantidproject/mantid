@@ -602,7 +602,7 @@ void SANSPlotSpecial::deriveGuinierRods()
   }
   else if ( item == "D" )
   {
-    val = std::sqrt( lhs / ( values["C"] * values["ML"] * std::pow(values["Deltarho"], 2) ) );
+    val = std::sqrt( 1 / ( lhs / ( values["C"] * values["ML"] * std::pow(values["Deltarho"], 2) ) ) );
   }
   else { return; }
 
@@ -738,11 +738,11 @@ void SANSPlotSpecial::deriveKratky()
       val = lhs * std::pow(values["Rg"], 2) / ( values["M"] * std::pow(values["Deltarho"], 2 ) );
       if ( route == "C" )
       {
-        val = std::sqrt(val / values["C"]);
+        val = std::sqrt( 1 / ( val / values["C"] ) );
       }
       else
       {
-        val = val / values["Phi"];
+        val = 1 / ( val / values["Phi"] );
       }
     }
     else if ( item == "Rg" )
@@ -756,7 +756,7 @@ void SANSPlotSpecial::deriveKratky()
       {
         val = val / values["Phi"];
       }
-      val = std::sqrt( val );
+      val = std::sqrt( 1 / val );
     }
     else if ( item == "Phi" )
     {
