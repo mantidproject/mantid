@@ -225,11 +225,7 @@ if(UNITY_BUILD)
   enable_unity_build(CurveFitting SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-# Add the dependency on the nexus library
-find_package ( Nexus REQUIRED )
-include_directories ( ${NEXUS_INCLUDE_DIR} src)
 
-add_definitions ( -DIN_NEXUS_CPP_LIBRARY )
 
 # Add the target for this directory
 add_library ( DataHandling ${SRC_FILES} ${INC_FILES})
@@ -240,7 +236,7 @@ set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc ../Nexus/inc)
 
-target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} )
+target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus )
 
 if ( CXXTEST_FOUND )
   include_directories ( ../TestHelpers/inc )
