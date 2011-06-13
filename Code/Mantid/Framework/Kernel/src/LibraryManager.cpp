@@ -54,7 +54,7 @@ namespace Mantid
         for (Poco::DirectoryIterator itr(libPath); itr != end_itr; ++itr)
         {
           const Poco::Path & item = itr.path();
-          if ( Poco::File(item).isDirectory() )
+          if ( item.isDirectory() )
           {
             if (isRecursive)
             {
