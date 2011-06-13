@@ -552,11 +552,11 @@ void SANSPlotSpecial::deriveGuinierSpheres()
       val = lhs / ( values["M"] * std::pow(values["Deltarho"], 2.0) );
       if ( route == "C" )
       {
-        val = std::sqrt( val / values["C"] );
+        val = 1 / ( std::sqrt( val / values["C"] ) );
       }
       else
       {
-        val = val / values["Phi"];
+        val = 1 / ( val / values["Phi"] );
       }
     }
     else if ( item == "Phi" )
@@ -648,16 +648,16 @@ void SANSPlotSpecial::deriveZimm()
       val = lhs * std::pow(values["Deltarho"], 2.0) / values["D"];
       if ( route == "C" )
       {
-        val = val * values["C"] / values["D"];
+        val = 1 / ( val * values["C"] / values["D"] );
       }
       else
       {
-        val = val * values["Phi"];
+        val = 1 / ( val * values["Phi"] );
       }
     }
     else if ( item == "C" )
     {
-      val = lhs * ( values["M"] * std::pow(values["Deltarho"], 2) ) / std::pow(values["D"], 2);
+      val = 1 / ( lhs * ( values["M"] * std::pow(values["Deltarho"], 2) ) / std::pow(values["D"], 2) );
     }
     else if ( item == "Deltarho" )
     {
@@ -670,7 +670,7 @@ void SANSPlotSpecial::deriveZimm()
       {
         val = val * values["Phi"];
       }
-      val = std::sqrt( val ) ;
+      val = std::sqrt( 1 / val ) ;
     }
     else if ( item == "Phi" )
     {
