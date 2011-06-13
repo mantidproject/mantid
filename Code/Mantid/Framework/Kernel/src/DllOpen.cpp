@@ -97,8 +97,8 @@ const std::string DllOpen::ConvertToLibName(const std::string& fileName)
     //prefix not found
     return "";
   }
-
-  if (retVal.rfind(LIB_POSTFIX) == (retVal.size()-LIB_POSTFIX.size()))
+  std::string::size_type pos = retVal.rfind(LIB_POSTFIX);
+  if ( pos != std::string::npos && pos == (retVal.size()-LIB_POSTFIX.size()) )
   {
     //found
     retVal = retVal.substr(0, retVal.size()-LIB_POSTFIX.size());
