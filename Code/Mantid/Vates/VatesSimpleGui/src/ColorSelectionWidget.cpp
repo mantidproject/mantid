@@ -26,6 +26,10 @@ ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent)
   this, SLOT(autoOrManualScaling(int)));
   QObject::connect(this->ui.presetButton, SIGNAL(clicked()),
   this, SLOT(loadPreset()));
+  QObject::connect(this->ui.minValLineEdit, SIGNAL(editingFinished()),
+  this, SLOT(getColorScaleRange()));
+  QObject::connect(this->ui.maxValLineEdit, SIGNAL(editingFinished()),
+  this, SLOT(getColorScaleRange()));
 }
 
 void ColorSelectionWidget::setEditorStatus(bool status)
