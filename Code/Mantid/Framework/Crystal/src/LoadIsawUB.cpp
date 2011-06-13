@@ -99,7 +99,10 @@ namespace Crystal
 
     // Adjust the UB by transposing
     ub = ub.Transpose();
-
+    
+    OrientedLattice ol;
+    ol.setUB(ub);
+  /*
     UnitCell uc;
     MantidMat Gstar = ub.Tprime() * ub ;
     uc.recalculateFromGstar( Gstar );
@@ -129,8 +132,9 @@ namespace Crystal
     // Set the UB in there.
     Geometry::Matrix<double> Binv = latt->getBinv(); // B^-1
     Geometry::Matrix<double> U = ub * Binv; // U = UB * B^-1
-
+*/
     // Swap rows around to accound for IPNS convention
+    Geometry::Matrix<double> U=ol.getU();
     MantidMat U2 = U;
     for (size_t r=0; r<3; r++)
     {
@@ -139,12 +143,12 @@ namespace Crystal
       U2[0][r] = U[1][r];
     }
     U = U2;
-    U *= -1.0;
+   // U *= -1.0;
 
-    latt->setU( U );
+    ol.setU( U );
 
     // Save it into the workspace
-    ws->mutableSample().setOrientedLattice(latt);
+    ws->mutableSample().setOrientedLattice(new OrientedLattice(ol));
 
 
     this->setProperty("InputWorkspace", ws);

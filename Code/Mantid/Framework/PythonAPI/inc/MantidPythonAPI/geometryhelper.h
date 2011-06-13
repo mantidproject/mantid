@@ -9,7 +9,7 @@
 
 #include <MantidGeometry/Crystal/UnitCell.h>
 #include "MantidPythonAPI/MantidVecHelper.h"
-
+#include <MantidGeometry/Crystal/OrientedLattice.h>
 namespace Mantid 
 {
 namespace PythonAPI
@@ -35,6 +35,36 @@ class UnitCellWrapper: public UnitCell
 		/// Stored Python object
 		PyObject *m_self;
 };
+
+class OrientedLatticeWrapper: public OrientedLattice
+{
+   public:
+		/// Constructor
+		OrientedLatticeWrapper(PyObject *self);
+    OrientedLatticeWrapper(PyObject *self,PyObject* p);
+		/// Destructor
+		~OrientedLatticeWrapper();
+		/// Return the UnitCell metric tensor
+		static PyObject * getG(OrientedLattice& self);
+		/// Return the UnitCell reciprocal metric tensor
+		static PyObject * getGstar(OrientedLattice& self);
+		/// Return the UnitCell B matrix
+		static PyObject * getB(OrientedLattice& self);
+		/// Return the UnitCell U matrix
+		static PyObject * getU(OrientedLattice& self);
+		/// Return the UnitCell UB matrix
+		static PyObject * getUB(OrientedLattice& self);
+    /// Recalculate unit cell parameters from G* - 3x3 numpy array U is set to unity
+    static void recalculateFromGstar(OrientedLattice& self,PyObject* p);
+    /// Set U - 3x3 numpy array 
+    static void setU(OrientedLattice& self,PyObject* p);
+    /// setUB - 3x3 numpy array 
+    static void setUB(OrientedLattice& self,PyObject* p);    
+	private:
+		/// Stored Python object
+		PyObject *m_self;
+};
+
 }
 }
 #endif /* GEOMETRYHELPER_H_ */

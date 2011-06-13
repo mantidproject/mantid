@@ -18,6 +18,7 @@
 #include <MantidGeometry/V3D.h>
 #include <MantidGeometry/Quat.h>
 #include <MantidGeometry/Crystal/UnitCell.h>
+#include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidGeometry/Instrument/ObjComponent.h>
 #include <MantidGeometry/Instrument/Component.h>
 #include <MantidGeometry/Instrument/CompAssembly.h>
@@ -25,7 +26,6 @@
 #include <MantidGeometry/Instrument/Instrument.h>
 #include <MantidGeometry/Instrument/DetectorGroup.h>
 #include "MantidPythonAPI/geometryhelper.h" //exports for matrices to numpy arrays
-
 
 namespace Mantid
 {
@@ -274,12 +274,68 @@ namespace Mantid
       scope().attr("rad2deg") = Geometry::rad2deg;
     }
 
+  void export_oriented_lattice()
+  {
+    /// OrientedLattice class Python bindings. If a function uses or returns a matrix, the OrientedLatticeWrapper class is used instead   
+    //all functions inherited from UnitCell first
+    class_< Geometry::OrientedLattice >( "OrientedLattice", init< >() )    
+      .def( init< Geometry::OrientedLattice const & >(( arg("other") )) )    
+      .def( init< double, double, double >(( arg("_a"), arg("_b"), arg("_c") )) )    
+      .def( init< double, double, double, double, double, double, optional< int > >(( arg("_a"), arg("_b"), arg("_c"), arg("_alpha"), arg("_beta"), arg("_gamma"), arg("Unit")=(int)(Geometry::angDegrees) )) )
+      .def( "a", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::a ) )    
+      .def( "a1", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::a1 ) )    
+      .def( "a2", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::a2 ) )    
+      .def( "a3", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::a3 ) )    
+      .def( "alpha", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::alpha ) )    
+      .def( "alpha1", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::alpha1 ) )    
+      .def( "alpha2", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::alpha2 ) )    
+      .def( "alpha3", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::alpha3 ) )    
+      .def( "alphastar", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::alphastar ) )    
+      .def( "astar", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::astar ) )    
+      .def( "b", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::b ) )    
+      .def( "b1", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::b1 ) )    
+      .def( "b2", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::b2 ) )    
+      .def( "b3", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::b3 ) )    
+      .def( "beta", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::beta ) )    
+      .def( "beta1", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::beta1 ) )    
+      .def( "beta2", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::beta2 ) )    
+      .def( "beta3", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::beta3 ) )    
+      .def( "betastar", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::betastar ) )    
+      .def( "bstar", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::bstar ) )    
+      .def( "c", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::c ) )    
+      .def( "cstar", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::cstar ) )    
+      .def( "d", (double ( Geometry::OrientedLattice::* )( double,double,double ) const)( &Geometry::OrientedLattice::d ), (arg("h"), arg("k"), arg("l") ) )    
+      .def( "dstar", (double ( Geometry::OrientedLattice::* )( double,double,double ) const)( &Geometry::OrientedLattice::dstar ), (arg("h"), arg("k"), arg("l") ) )    
+      .def( "gamma", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::gamma ) )    
+      .def( "gammastar", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::gammastar ) )    
+      .def( "recAngle", (double ( Geometry::OrientedLattice::* )( double,double,double,double,double,double,int const ) const)( &Geometry::OrientedLattice::recAngle ), ( arg("h1"), arg("k1"), arg("l1"), arg("h2"), arg("k2"), arg("l2"), arg("Unit")=(int)(Geometry::angDegrees) ) )
+      .def( "recVolume", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::recVolume ) )    
+      .def( "set", (void ( Geometry::OrientedLattice::* )( double,double,double,double,double,double,int const ) )( &Geometry::OrientedLattice::set ), ( arg("_a"), arg("_b"), arg("_c"), arg("_alpha"), arg("_beta"), arg("_gamma"), arg("Unit")=(int)(Geometry::angDegrees) ) )
+      .def( "seta", (void ( Geometry::OrientedLattice::* )( double ) )( &Geometry::OrientedLattice::seta ), ( arg("_a") ) ) 
+      .def( "setalpha", (void ( Geometry::OrientedLattice::* )( double,int const ) )( &Geometry::OrientedLattice::setalpha ), ( arg("_alpha"), arg("Unit")=(int)(Geometry::angDegrees) ) )
+      .def( "setb", (void ( Geometry::OrientedLattice::* )( double ) )( &Geometry::OrientedLattice::setb ), ( arg("_b") ) )    
+      .def( "setbeta", (void ( Geometry::OrientedLattice::* )( double,int const ) )( &Geometry::OrientedLattice::setbeta ), ( arg("_beta"), arg("Unit")=(int)(Geometry::angDegrees) ) )
+      .def( "setc", (void ( Geometry::OrientedLattice::* )( double ) )( &Geometry::OrientedLattice::setc ), ( arg("_c") ) )    
+      .def( "setgamma", (void ( Geometry::OrientedLattice::* )( double,int const ) )( &Geometry::OrientedLattice::setgamma ), ( arg("_gamma"), arg("Unit")=(int)(Geometry::angDegrees) ) )
+      .def( "volume", (double ( Geometry::OrientedLattice::* )(  ) const)( &Geometry::OrientedLattice::volume ) )
+      .def( "getG",( &OrientedLatticeWrapper::getG ) )
+      .def( "getGstar",( &OrientedLatticeWrapper::getGstar ) )
+      .def( "getB",( &OrientedLatticeWrapper::getB ) )
+      .def( "recalculateFromGstar", ( &OrientedLatticeWrapper::recalculateFromGstar ) ) 
+// new functions speific to oriented lattice
+      .def( init< Geometry::UnitCell >(( arg("uc") )) )  
+      .def( "getU",( &OrientedLatticeWrapper::getU ) )
+      .def( "setU", ( &OrientedLatticeWrapper::setU ) ) 
+      .def( "getUB",( &OrientedLatticeWrapper::getUB ) )
+      .def( "setUB", ( &OrientedLatticeWrapper::setUB ) ) ;
+    }
     void export_geometry_namespace()
     {
       export_utils();
       export_components();
       export_instrument();
       export_unit_cell();
+      export_oriented_lattice();
     }
 
   }

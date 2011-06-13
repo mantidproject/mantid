@@ -149,6 +149,8 @@ namespace Mantid
       
       // Check if a rotation matrix
       bool isRotation();
+      // Check if orthogonal
+      bool isOrthogonal();
       // Transform to a rotation matrix
       std::vector<T> toRotation();
     };

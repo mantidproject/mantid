@@ -50,7 +50,7 @@ namespace Geometry
 
       // Access private variables
       const MantidMat& getU() const;
-      const MantidMat getUB() const;
+      const MantidMat& getUB() const;
       void setU(MantidMat& newU);
       void setUB(MantidMat& newUB);
 
@@ -58,6 +58,7 @@ namespace Geometry
 
     private:
       MantidMat U;
+      MantidMat UB;
   };
 } // namespace Mantid
 } // namespace Geometry

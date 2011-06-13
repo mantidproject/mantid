@@ -1540,6 +1540,27 @@ bool Matrix<T>::isRotation()
 }
 
 template<typename T>
+bool Matrix<T>::isOrthogonal()
+/** Check if a matrix is orthogonal. Same as isRotation, but allows determinant to be -1
+@ return :: true/false
+*/
+{
+  if (this->nx != this->ny) throw(std::invalid_argument("matrix is not square"));
+  if (fabs(fabs(this->determinant())-1.) >1e-5) 
+  {
+    return false;
+  }
+  else
+  {
+    Matrix<T> prod(nx,ny),ident(nx,ny,true);
+    prod= this->operator*(this->Tprime());
+    return prod.equals(ident, 1e-7);
+  }
+}
+
+
+
+template<typename T>
 std::vector<T> Matrix<T>::toRotation() 
 /**
   Transform the matrix to a rotation matrix, by normalizing each column to 1
