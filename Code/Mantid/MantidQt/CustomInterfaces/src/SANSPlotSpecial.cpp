@@ -796,7 +796,7 @@ void SANSPlotSpecial::derivePorod()
   }
   else if ( item == "D" )
   {
-    val = lhs / ( values["C"] * std::pow(values["Deltarho"], 2) * values["(S/V)"] );
+    val =  1 / ( lhs / ( values["C"] * std::pow(values["Deltarho"], 2) * values["(S/V)"] ) );
   }
   else { return; }
 
