@@ -171,7 +171,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     alg.setProperty("InputWorkspace", inputW);
-    alg.setProperty("OutputWorkspace", "tmp");
     alg.setProperty("InPeaksWorkspace", "TOPAZ");
     alg.setProperty("OutPeaksWorkspace", "TOPAZ");
     alg.setProperty("XMin", -2);
@@ -190,8 +189,8 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
     Peak & peak = ws->getPeaks()[0];
-    TS_ASSERT_DELTA( peak.getIntensity(), 1348.4223, 10.0);
-    TS_ASSERT_DELTA( peak.getSigmaIntensity(), 44.6417, 1.0);
+    TS_ASSERT_DELTA( peak.getIntensity(), 660.846, 10.0);
+    TS_ASSERT_DELTA( peak.getSigmaIntensity(), 35.5412, 1.0);
     AnalysisDataService::Instance().remove("TOPAZ");
 
   }

@@ -57,9 +57,13 @@ private:
   void init();
   void exec();
   /// Call Gaussian as a sub-algorithm to fit the peak in a spectrum
-  void fitSpectra(const int s, double& I, double& sigI);
+  void fitSpectra(const int s, double TOFPeakd, double& I, double& sigI);
   /// Read in all the input parameters
   void retrieveProperties();
+  void sumneighbours(std::string det_name, int x0, int y0, int SumX, int SumY, double TOFPeakd, bool &haveMask, double PeakIntensity, int ***mask, int idet);
+  void neighbours(double **matrix, int i, int j, int m, int n, int **mask);
+  void cluster(double **matrix, int m, int n, int **mask);
+  void smooth(double **matrix, int m, int n, double **smmatrix);
   
   
   int Xmin;        ///< The start of the X range for fitting
@@ -68,12 +72,6 @@ private:
   int Ymax;        ///< The end of the Y range for fitting
   int Binmin;        ///< The start of the Bin range for fitting
   int Binmax;        ///< The end of the TOF range for fitting
-  int TOFmin;        ///< The start of the TOF range for fitting
-  int TOFmax;        ///< The end of the TOF range for fitting
-  int TOFPeak;       ///< The peak in the TOF range for fitting
-  double TOFPeakd;    /// TOF Peak as double
-  int nspec;          ///< The number of spectra in the input workspace
-  double IKI, Alpha0, Alpha1, Beta0, Kappa, SigmaSquared, Gamma, X0; ///<Ikeda-Carpender function 
 
 };
 
