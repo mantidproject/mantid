@@ -130,6 +130,8 @@ void ColorSelectionWidget::getColorScaleRange()
 
 void ColorSelectionWidget::setColorScaleRange(double min, double max)
 {
+  this->ui.minValLineEdit->clear();
   this->ui.minValLineEdit->insert(QString::number(min));
+  this->ui.maxValLineEdit->clear();
   this->ui.maxValLineEdit->insert(QString::number(max));
 }
