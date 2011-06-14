@@ -1064,7 +1064,210 @@ class CorrectToFileStep(ReductionStep):
         if self._filename:
             CorrectToFile(workspace, self._filename, workspace,
                           self._corr_type, self._operation)
-            
+
+class CalculateNorm(object):
+    """
+        Generates the normalization workspaces required by Q1D from output
+        of other, sometimes optional, reduction_steps or specified workspaces.
+        Workspaces for wavelength adjustment must have their
+        distribution/non-distribution flag set correctly as they maybe converted
+    """
+    TMP_WORKSPACE_NAME = '__CalculateNorm_loaded_temp'
+    TMP_WAVE_CORR_NAME = '__Q_WAVE_conversion_temp'
+    TMP_PIXEL_CORR_NAME = '__Q_pixel_conversion_temp'
+    
+    def  __init__(self, wavelength_deps=[]):
+        super(CalculateNorm, self).__init__()
+        self._wave_steps = wavelength_deps
+        self._wave_adjs = []
+        self._pixel_file = ''
+
+        #algorithm to be used to load correction files
+        self._load='Load'
+        #a parameters string to add as the last argument to the above algorithm
+        self._load_params=''
+
+    def addWavelengthCorr(self, wksp):
+        """
+            Adds another scaling with wavelength to the multiplication of
+            workspaces that will happen at execution
+        """
+        self._wave_adjs.append(wksp)
+
+    def setPixelCorrFile(self, filename):
+        """
+            Adds a scaling that is a function of the detector (spectrum index)
+            from a file
+        """
+        self._pixel_file = filename
+
+    def getPixelCorrFile(self):
+        """
+            @return the file that has been set to load as the pixelAdj workspace or '' if none has been set
+        """
+        return self._pixel_file
+    
+    def _is_point_data(self, wksp):
+        """
+            Tests if the workspace whose name is passed contains point or histogram data
+            The test is if the X and Y array lengths are the same = True, different = false
+            @param wksp: name of the workspace to test
+            @return True for point data, false for histogram
+        """
+        handle = mtd[wksp]
+        if len(handle.readX(0)) == len(handle.readY(0)):
+            return True
+        else:
+            return False 
+
+    def calculate(self, reducer):
+        """
+            Multiplies all the wavelength scalings into one workspace and all the detector
+            dependent scalings into another workspace that can be used by ConvertToQ. It is important
+            that the wavelength correction workspaces have a know distribution/non-distribution state
+        """
+        wave_wksps = self._wave_adjs
+        for step in self._wave_steps:
+            if step.output_wksp:
+                wave_wksps.append(step.output_wksp)
+
+        wave_adj = None
+        for wksp in wave_wksps:
+            #before the workspaces can be combined they all need to match 
+            RebinToWorkspace(wksp, reducer.output_wksp, self.TMP_WORKSPACE_NAME)
+
+            if not wave_adj:
+                #first time around this loop
+                wave_adj = self.TMP_WAVE_CORR_NAME
+                RenameWorkspace(self.TMP_WORKSPACE_NAME, wave_adj)
+            else:
+                #multiplying two raw counts workspaces gives a dependence on the bin width^2 which Mantid isn't set up to handle (dependence on the bin width = is distribution = is handled)
+                if not mtd[wave_adj].isDistribution():
+                    if not mtd[self.TMP_WORKSPACE_NAME].isDistribution():
+                        ConvertToDistribution(self.TMP_WORKSPACE_NAME)
+                Multiply(self.TMP_WORKSPACE_NAME, wave_adj, wave_adj)
+
+        pixel_adj = None
+        if self._pixel_file:
+            pixel_adj = self.TMP_PIXEL_CORR_NAME
+            load_com = self._load+'("'+self._pixel_file+'","'+pixel_adj+'"'
+            if self._load_params:
+                load_com  += ','+self._load_params
+            load_com += ')'
+            eval(load_com)
+        
+        if mtd.workspaceExists(self.TMP_WORKSPACE_NAME):
+            DeleteWorkspace(self.TMP_WORKSPACE_NAME)
+        
+        return wave_adj, pixel_adj
+
+class ConvertToQ(ReductionStep):
+    """
+        Runs the Q1D or Qxy algorithms to convert wavelength data into momentum transfer, Q
+    """
+    # the list of possible Q conversion algorithms to use
+    _OUTPUT_TYPES = {'1D' : 'Q1D',
+                     '2D' : 'Qxy'}
+    # defines if Q1D should correct for gravity by default
+    _DEFAULT_GRAV = False    
+    def __init__(self, normalizations):
+        """
+            @param normalizations: the CalcNorm object contains the workspace, ReductionSteps or files require for the optional normalization arguments to Q1D
+        """
+        super(ConvertToQ, self).__init__()
+        
+        if not issubclass(normalizations.__class__, CalculateNorm):
+            raise RuntimeError('Error initializing ConvertToQ, invalid normalization object')
+        #contains the normalization optional workspaces to pass to the Q algorithm 
+        self._norms = normalizations
+        
+        #this should be set to 1D or 2D
+        self._output_type = '1D'
+        #the algorithm that corresponds to the above choice
+        self._Q_alg = self._OUTPUT_TYPES[self._output_type]
+        #if true gravity is taken into account in the Q1D calculation
+        self._use_gravity = self._DEFAULT_GRAV
+        #used to implement a default setting for gravity that can be over written but doesn't over write
+        self._grav_set = False
+        #this should contain the rebin parameters
+        self.binning = None
+    
+    def set_output_type(self, descript):
+        """
+            Requests the given output from the Q conversion, either 1D or 2D. For
+            the 1D calculation it asks the reducer to keep a workspace for error
+            estimates
+            @param descript: 1D or 2D
+        """
+        self._Q_alg = self._OUTPUT_TYPES[descript]
+        self._output_type = descript
+                    
+    def get_output_type(self):
+        return self._output_type
+
+    output_type = property(get_output_type, set_output_type, None, None)
+
+    def get_gravity(self):
+        return self._use_gravity
+
+    def set_gravity(self, flag, override=True):
+        """
+            Enable or disable including gravity when calculating Q
+            @param flag: set to True to enable the gravity correction
+            @param override: over write the setting from a previous call to this method (default is True)
+        """
+        if override:
+            self._grav_set = True
+
+        if (not self._grav_set) or override:
+                self._use_gravity = bool(flag)
+        else:
+            msg = "User file can't override previous gravity setting, do gravity correction remains " + str(self._use_gravity) 
+            print msg
+            mantid.sendLogMessage('::SANS::Warning: ' + msg)
+
+    def execute(self, reducer, workspace):
+        """
+            Calculate the normalization workspaces and then call the chosen Q conversion algorithm
+        """
+        #create normalization workspaces
+        
+        if self._norms:
+            wave_adj, pixel_adj = self._norms.calculate(reducer)
+        else:
+            raise RuntimeError('Normalization workspaces must be created by CalculateNorm() and passed to this step')
+
+        try:         
+            if self._Q_alg == 'Q1D':
+                if pixel_adj:
+                    Q1D(workspace, workspace, OutputBinning=reducer.Q_REBIN, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity)
+                else:
+                    Q1D(workspace, workspace, OutputBinning=reducer.Q_REBIN, WavelengthAdj=wave_adj, AccountForGravity=self._use_gravity)
+    
+            elif self._Q_alg == 'Qxy':
+                Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, AccountForGravity=self._use_gravity)
+                ReplaceSpecialValues(workspace, workspace, NaNValue="0", InfinityValue="0")
+            else:
+                raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
+        except:
+            #when we are all up to Python 2.5 replace the duplicated code below with one finally:        
+            self._deleteWorkspaces([wave_adj, pixel_adj])
+            raise
+
+        self._deleteWorkspaces([wave_adj, pixel_adj])
+
+    def _deleteWorkspaces(self, workspaces):
+        """
+            Deletes a list of workspaces if they exist but ignores any errors
+            @param workspaces: list of workspaces to try to delete
+        """
+        for wk in workspaces:
+            try:
+                if wk and mantid.workspaceExists(wk):
+                    DeleteWorkspace(wk)
+            except:
+                #if the workspace can't be deleted this function does nothing
+                pass
             
 class SaveIqAscii(ReductionStep):
     """

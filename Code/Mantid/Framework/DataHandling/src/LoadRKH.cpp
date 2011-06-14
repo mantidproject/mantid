@@ -94,6 +94,9 @@ void LoadRKH::exec()
   //Use one line of the file to diagnose if it is 1D or 2D, this line contains some data required by the 2D data reader
   MatrixWorkspace_sptr result = is2D(line) ? read2D(line) : read1D();
 
+    
+  // all RKH files contain distribution data
+  result->isDistribution(true);
   //Set the output workspace
   setProperty("OutputWorkspace", result);
 }
@@ -335,9 +338,6 @@ Progress LoadRKH::read2DHeader(const std::string & initalLine, MatrixWorkspace_s
     "Workspace2D", nAxis1Values, nAxis0Boundaries, nAxis0Values);
   outWrksp->getAxis(0)->unit() = UnitFactory::Instance().create(XUnit);
   outWrksp->setYUnitLabel(intensityUnit);
-  
-  // all RKH files should contain distribution data
-  outWrksp->isDistribution(true);
 
   NumericAxis* const axis1 = new Mantid::API::NumericAxis(nAxis1Boundaries);
   axis1->unit() = Mantid::Kernel::UnitFactory::Instance().create(YUnit);

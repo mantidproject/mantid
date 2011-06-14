@@ -230,6 +230,20 @@ class DetectorBank:
         """
         dummy = self._ORIENTED[orien]
         self._orientation = orien
+        
+    def crop_to_detector(self, input_name, output_name=None):
+        """
+            Crops the workspace that is passed so that it only contains the spectra that correspond
+            to this detector
+            @param input_name: name of the workspace to crop
+            @param output_name: name the workspace will take (default is the input name)
+        """
+        if not output_name:
+            output_name = input_name
+
+        CropWorkspace(input_name, output_name,
+            StartWorkspaceIndex = self.get_first_spec_num() - 1,
+            EndWorkspaceIndex = self.last_spec_num - 1)
 
 class ISISInstrument(instrument.Instrument):
     def __init__(self, filename=None):
