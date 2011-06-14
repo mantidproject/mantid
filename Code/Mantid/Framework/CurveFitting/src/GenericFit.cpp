@@ -235,10 +235,14 @@ namespace CurveFitting
 
     g_log.information() << "Method used = " << methodUsed << "\n" <<
       "Iteration = " << iter << "\n";
+    Mantid::API::ICostFunction* costfun 
+     = Mantid::API::CostFunctionFactory::Instance().createUnwrapped(costFunction);
     if ( reportOfGenericFit == "success" )
-      g_log.information() << reportOfGenericFit << "  Chi^2/DoF = " << finalCostFuncVal << "\n";
+      g_log.notice() << reportOfGenericFit << "  " << costfun->shortName() << 
+         " (" << costfun->name() << ") = " << finalCostFuncVal << "\n";
     else
-      g_log.warning() << reportOfGenericFit << "  Chi^2/DoF = " << finalCostFuncVal << "\n";
+      g_log.warning() << reportOfGenericFit << "  " << costfun->shortName() << 
+         " (" << costfun->name() << ") = " << finalCostFuncVal << "\n";
     for (int i = 0; i < m_function->nParams(); i++)
     {
       g_log.debug() << m_function->parameterName(i) << " = " << m_function->getParameter(i) << "  \n";
