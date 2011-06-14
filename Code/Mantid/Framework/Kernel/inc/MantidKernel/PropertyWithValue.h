@@ -296,6 +296,7 @@ public:
       g_log.debug() << "Could not set property " << name() << ": " << except.what();
       return except.what();
     }
+    return "";
   }
 
   ///Copy assignment operator assigns only the value and the validator not the name, default (initial) value, etc.
