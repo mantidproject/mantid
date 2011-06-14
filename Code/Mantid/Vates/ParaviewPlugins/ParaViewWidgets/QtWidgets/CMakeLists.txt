@@ -29,5 +29,8 @@ target_link_libraries( MantidParaViewQtWidgets ${QT_LIBRARIES}
 ${MANTID_SUBPROJECT_LIBS} )
 
 add_definitions( -DIN_MANTIDPARAVIEWQT_MANTIDPARAVIEWWIDGETS )
-install(TARGETS MantidParaViewQtWidgets RUNTIME DESTINATION ${LIB_DIR})
 
+# Windows-only at the moment.
+if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+  install(TARGETS MantidParaViewQtWidgets RUNTIME DESTINATION ${LIB_DIR})
+endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )

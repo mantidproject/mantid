@@ -15,4 +15,8 @@ add_paraview_plugin( MantidParaViewEventNexusReaderObjectPanel "1.0"
                      ${SRC_FILES} )
 target_link_libraries( MantidParaViewEventNexusReaderObjectPanel 
 MantidParaViewQtWidgets )
-install(TARGETS MantidParaViewEventNexusReaderObjectPanel RUNTIME DESTINATION ${LIB_DIR})
+
+# Windows-only at the moment.
+if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+  install(TARGETS MantidParaViewEventNexusReaderObjectPanel RUNTIME DESTINATION ${LIB_DIR})
+endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )

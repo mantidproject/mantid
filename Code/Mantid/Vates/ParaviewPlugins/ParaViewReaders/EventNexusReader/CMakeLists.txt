@@ -8,4 +8,8 @@ add_paraview_plugin( MantidParaViewEventNexusReaderSMPlugin "1.0"
 
 target_link_libraries( MantidParaViewEventNexusReaderSMPlugin 
 ${MANTID_SUBPROJECT_LIBS} )
-install(TARGETS MantidParaViewEventNexusReaderSMPlugin RUNTIME DESTINATION ${LIB_DIR})
+
+# Windows-only at the moment.
+if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+  install(TARGETS MantidParaViewEventNexusReaderSMPlugin RUNTIME DESTINATION ${LIB_DIR})
+endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
