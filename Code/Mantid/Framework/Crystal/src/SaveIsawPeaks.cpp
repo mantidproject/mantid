@@ -78,7 +78,7 @@ namespace Crystal
 
     std::ofstream out( filename.c_str() );
 
-    IInstrument_sptr inst = ws->getInstrument();
+    IInstrument_const_sptr inst = ws->getInstrument();
     double l1; V3D beamline; double beamline_norm; V3D samplePos;
     inst->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
 
@@ -145,8 +145,7 @@ namespace Crystal
         mess << "bank" << bank;
         std::string bankName = mess.str();
         // Retrieve it
-        RectangularDetector_sptr det;
-        det = boost::dynamic_pointer_cast<RectangularDetector>(inst->getComponentByName(bankName));
+        RectangularDetector_const_sptr det = boost::dynamic_pointer_cast<const RectangularDetector>(inst->getComponentByName(bankName));
         if (det)
         {
           // Center of the detector

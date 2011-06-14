@@ -204,7 +204,7 @@ namespace Mantid
       boost::noncopyable>("IInstrument", no_init)
       .def("getSample", &Geometry::IInstrument::getSample)
       .def("getSource", &Geometry::IInstrument::getSource)
-      .def("getComponentByName", &Geometry::IInstrument::getComponentByName)
+      .def("getComponentByName", (boost::shared_ptr<Geometry::IComponent> (IInstrument::*)(const std::string&))&Geometry::IInstrument::getComponentByName)
       .def("getDetector", (IDetector_sptr (IInstrument::*)(const detid_t&)const)&Geometry::IInstrument::getDetector)
       ;
 

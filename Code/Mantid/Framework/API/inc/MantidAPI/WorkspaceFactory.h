@@ -22,6 +22,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 namespace Mantid
 {
@@ -78,6 +79,9 @@ public:
 
   /// Create a ITableWorkspace
   ITableWorkspace_sptr createTable(const std::string& className = "TableWorkspace") const;
+
+  /// Create a IPeaksWorkspace
+  IPeaksWorkspace_sptr createPeaks(const std::string& className = "PeaksWorkspace") const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<WorkspaceFactoryImpl>;

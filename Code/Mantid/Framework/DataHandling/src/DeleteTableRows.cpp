@@ -4,6 +4,7 @@
 #include "MantidDataHandling/DeleteTableRows.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 
 #include <set>
@@ -41,13 +42,22 @@ namespace Mantid
     void DeleteTableRows::exec()
     {
       API::ITableWorkspace_sptr tw = getProperty("TableWorkspace");
+      API::IPeaksWorkspace_sptr pw = boost::dynamic_pointer_cast<API::IPeaksWorkspace>(tw);
       std::vector<size_t> rows = getProperty("Rows");
       // sort the row indices in reverse order
       std::set<size_t,std::greater<size_t> > sortedRows(rows.begin(),rows.end());
       std::set<size_t,std::greater<size_t> >::iterator it = sortedRows.begin();
       for(; it != sortedRows.end(); ++it)
       {
-        tw->removeRow(static_cast<int>(*it));
+        int i = static_cast<int>(*it);
+        if (pw)
+        {
+          pw->removePeak(i);
+        }
+        else
+        {
+          tw->removeRow(i);
+        }
       }
       setProperty("TableWorkspace",tw);
     }

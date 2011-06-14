@@ -33,7 +33,9 @@ set ( SRC_FILES
         src/IMDEventWorkspace.cpp
         src/IMDIterator.cpp
         src/IMDWorkspace.cpp
+        src/IPeak.cpp
         src/IPeakFunction.cpp
+        src/IPeaksWorkspace.cpp
         src/ITableWorkspace.cpp
         src/ImplicitFunctionParameterParserFactory.cpp
         src/ImplicitFunctionParserFactory.cpp
@@ -128,7 +130,9 @@ set ( INC_FILES
         inc/MantidAPI/IMDEventWorkspace.h
         inc/MantidAPI/IMDIterator.h
         inc/MantidAPI/IMDWorkspace.h
+        inc/MantidAPI/IPeak.h
         inc/MantidAPI/IPeakFunction.h
+        inc/MantidAPI/IPeaksWorkspace.h
         inc/MantidAPI/ITableWorkspace.h
         inc/MantidAPI/IWorkspaceProperty.h
         inc/MantidAPI/ImplicitFunction.h

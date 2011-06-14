@@ -35,11 +35,6 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   connect(renderMode,SIGNAL(currentIndexChanged(int)),m_instrWindow,SLOT(setSurfaceType(int)));
   connect(renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(showResetView(int)));
 
-  // X selection control
-  QPushButton* mSelectBin = new QPushButton(tr("Select X Range"));
-  connect(mSelectBin, SIGNAL(clicked()), this, SLOT(selectBinButtonClicked()));
-  mBinDialog = new BinDialog(this);
-
   // Save image control
   mSaveImage = new QPushButton(tr("Save image"));
   connect(mSaveImage, SIGNAL(clicked()), m_instrWindow, SLOT(saveImage()));
@@ -83,7 +78,6 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   renderControlsLayout->addWidget(renderMode);
   renderControlsLayout->addWidget(axisViewFrame);
   renderControlsLayout->addWidget(displaySettings);
-  //renderControlsLayout->addWidget(mSelectBin);
   renderControlsLayout->addWidget(mSaveImage);
   renderControlsLayout->addWidget(m_colorMapWidget);
 

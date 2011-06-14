@@ -45,7 +45,7 @@ namespace DataObjects
    * @return PeaksWorkspace object
    */
   PeaksWorkspace::PeaksWorkspace()
-  : ITableWorkspace()
+  : IPeaksWorkspace()
   {
     initColumns();
   }
@@ -58,7 +58,7 @@ namespace DataObjects
    * @return
    */
   PeaksWorkspace::PeaksWorkspace(PeaksWorkspace & other)
-  : ITableWorkspace(),
+  : IPeaksWorkspace(),
     peaks(other.peaks),
     m_defaultInst(other.m_defaultInst)
   {

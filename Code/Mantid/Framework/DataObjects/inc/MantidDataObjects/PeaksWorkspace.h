@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/Column.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -30,6 +30,8 @@ namespace Kernel
 {
 class Logger;
 }
+
+using namespace API;
 
 namespace DataObjects
 {
@@ -60,7 +62,7 @@ namespace DataObjects
 
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
    */
-  class DLLExport PeaksWorkspace: public Mantid::API::ITableWorkspace
+  class DLLExport PeaksWorkspace: public Mantid::API::IPeaksWorkspace
   {
   public:
 
@@ -77,11 +79,11 @@ namespace DataObjects
     void appendFile( std::string filename, Mantid::Geometry::IInstrument_sptr inst);
 
     /** Sets the default instrument for new peaks */
-    void setInstrument(Mantid::Geometry::IInstrument_sptr inst)
+    void setInstrument(Mantid::Geometry::IInstrument_const_sptr inst)
     { m_defaultInst = inst; }
 
     /** Returns the default instrument for new peaks */
-    Mantid::Geometry::IInstrument_sptr getInstrument()
+    Mantid::Geometry::IInstrument_const_sptr getInstrument() const
     { return m_defaultInst; }
 
     //---------------------------------------------------------------------------------------------
@@ -106,9 +108,9 @@ namespace DataObjects
     /** Add a peak to the list
      * @param peak :: Peak object to add (copy) into this.
      */
-    void addPeak(const Peak peak)
+    void addPeak(const IPeak& ipeak)
     {
-      peaks.push_back(peak);
+      peaks.push_back(Peak(ipeak));
     }
 
     //---------------------------------------------------------------------------------------------
@@ -116,10 +118,21 @@ namespace DataObjects
      * @param peakNum :: index of the peak to get.
      * @return a reference to a Peak object.
      */
-    Peak & getPeak(const int peakNum)
+    IPeak & getPeak(const int peakNum)
     {
       if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0 ) throw std::invalid_argument("PeaksWorkspace::getPeak(): peakNum is out of range.");
       return peaks[peakNum];
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Create an instance of a Peak
+     * @param QLabFrame :: Q of the center of the peak, in reciprocal space
+     * @param detectorDistance :: distance between the sample and the detector.
+     * @return a pointer to a new Peak object.
+     */
+    IPeak* createPeak(Mantid::Geometry::V3D QLabFrame, double detectorDistance=1.0)
+    {
+      return new Peak(getInstrument(),QLabFrame,detectorDistance);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -176,7 +189,7 @@ namespace DataObjects
     std::vector<Peak> peaks;
 
     /// Default instrument for new peaks
-    Mantid::Geometry::IInstrument_sptr m_defaultInst;
+    Mantid::Geometry::IInstrument_const_sptr m_defaultInst;
 
     /** Column shared pointers. */
     std::vector<boost::shared_ptr<Mantid::DataObjects::PeakColumn> > columns;

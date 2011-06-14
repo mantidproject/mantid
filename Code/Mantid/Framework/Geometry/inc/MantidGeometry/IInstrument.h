@@ -108,6 +108,9 @@ public:
   /// Returns a pointer to the first component encountered with the given name
   boost::shared_ptr<Geometry::IComponent> getComponentByName(const std::string & cname);
 
+  /// Returns a pointer to the first component encountered with the given name
+  boost::shared_ptr<const Geometry::IComponent> getComponentByName(const std::string & cname) const;
+
   /// Returns pointers to all components encountered with the given name
   std::vector<boost::shared_ptr<Geometry::IComponent> > getAllComponentsWithName(const std::string & cname);
 

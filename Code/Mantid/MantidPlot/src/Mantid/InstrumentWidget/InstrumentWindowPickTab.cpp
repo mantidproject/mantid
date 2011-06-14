@@ -7,6 +7,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
 
@@ -394,25 +395,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
 {
   UNUSED_ARG(y)
   if (!m_peak->isChecked() ||  m_currentDetID < 0) return;
-  std::string peakTableName = "SingleCrystalPeakTable";
-  Mantid::API::ITableWorkspace_sptr tw;
-  if (! Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName))
-  {
-    tw = Mantid::API::WorkspaceFactory::Instance().createTable();
-    tw->addColumn("double","Qx");
-    tw->addColumn("double","Qy");
-    tw->addColumn("double","Qz");
-    Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
-  }
-  else
-  {
-    tw = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(peakTableName));
-    if (!tw)
-    {
-      QMessageBox::critical(this,"Mantid - Error","Workspace " + QString::fromStdString(peakTableName) + " is not a TableWorkspace");
-      return;
-    }
-  }
+
   const double mN =   1.67492729e-27;
   const double hbar = 1.054571628e-34;
   
@@ -423,6 +406,26 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
   Mantid::Geometry::IDetector_const_sptr det = instr->getDetector(m_currentDetID);
 
+  std::string peakTableName = "SingleCrystalPeakTable";
+  Mantid::API::IPeaksWorkspace_sptr tw;
+  if (! Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName))
+  {
+    tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
+    tw->setInstrument(instr);
+    //tw->addColumn("double","Qx");
+    //tw->addColumn("double","Qy");
+    //tw->addColumn("double","Qz");
+    Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
+  }
+  else
+  {
+    tw = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(peakTableName));
+    if (!tw)
+    {
+      QMessageBox::critical(this,"Mantid - Error","Workspace " + QString::fromStdString(peakTableName) + " is not a TableWorkspace");
+      return;
+    }
+  }
   const Mantid::Geometry::V3D samplePos = sample->getPos();
   const Mantid::Geometry::V3D beamLine = samplePos - source->getPos();
   double theta2 = det->getTwoTheta(samplePos,beamLine);
@@ -431,13 +434,17 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   double Qx=sin(theta2)*cos(phi);
   double Qy=sin(theta2)*sin(phi);
   double Qz=cos(theta2)-1.0;
-  double knorm=mN*(source->getDistance(*sample) + det->getDistance(*sample))/(hbar*x*1e-6)/1e10;
+  double l1 = source->getDistance(*sample);
+  double l2 = det->getDistance(*sample);
+  double knorm=mN*(l1 + l2)/(hbar*x*1e-6)/1e10;
   Qx *= knorm;
   Qy *= knorm;
   Qz *= knorm;
 
-  Mantid::API::TableRow row = tw->appendRow();
-  row << Qx << Qy << Qz;
+  Mantid::API::IPeak* peak = tw->createPeak(Mantid::Geometry::V3D(Qx,Qy,Qz),l2);
+  peak->setDetectorID(m_currentDetID);
+  tw->addPeak(*peak);
+  delete peak;
   tw->modified();
 
   //std::cerr << "id=" << det->getID() << std::endl;

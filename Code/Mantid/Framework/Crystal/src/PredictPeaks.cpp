@@ -266,7 +266,7 @@ namespace Crystal
       {
         PARALLEL_START_INTERUPT_REGION
 
-        Peak & p = HKLPeaksWorkspace->getPeak(i);
+        IPeak & p = HKLPeaksWorkspace->getPeak(i);
         doHKL(int(p.getH()), int(p.getK()), int(p.getL()));
 
         PARALLEL_END_INTERUPT_REGION

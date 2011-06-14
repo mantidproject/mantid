@@ -113,7 +113,7 @@ namespace MDEvents
     for (int i=0; i < int(peakWS->getNumberPeaks()); ++i)
     {
       // Get a direct ref to that peak.
-      Peak & p = peakWS->getPeak(i);
+      IPeak & p = peakWS->getPeak(i);
 
       // Get the peak center as a position in the dimensions of the workspace
       V3D pos;

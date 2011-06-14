@@ -21,7 +21,7 @@ namespace DataObjects
    * @param detectorDistance :: distance between the sample and the detector.
    *        Used to give a valid TOF. Default 1.0 meters.
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, Mantid::Geometry::V3D QLabFrame, double detectorDistance)
+  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, Mantid::Geometry::V3D QLabFrame, double detectorDistance)
   : m_H(0), m_K(0), m_L(0),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
@@ -44,7 +44,7 @@ namespace DataObjects
    * @param detectorDistance :: distance between the sample and the detector.
    *        Used to give a valid TOF. Default 1.0 meters.
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, Mantid::Geometry::V3D QSampleFrame,
+  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, Mantid::Geometry::V3D QSampleFrame,
       Mantid::Geometry::Matrix<double> goniometer, double detectorDistance)
   : m_H(0), m_K(0), m_L(0),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
@@ -67,7 +67,7 @@ namespace DataObjects
    * @param m_Wavelength :: incident neutron wavelength, in Angstroms
    * @return
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength)
+  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength)
   : m_H(0), m_K(0), m_L(0),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
@@ -89,7 +89,7 @@ namespace DataObjects
    * @param HKL :: vector with H,K,L position of the peak
    * @return
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL)
+  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL)
   : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
@@ -111,7 +111,7 @@ namespace DataObjects
    * @param goniometer :: a 3x3 rotation matrix
    * @return
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL, Mantid::Geometry::Matrix<double> goniometer) :
+  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL, Mantid::Geometry::Matrix<double> goniometer) :
     m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(goniometer),
@@ -124,7 +124,29 @@ namespace DataObjects
     this->setWavelength(m_Wavelength);
   }
 
-
+  //----------------------------------------------------------------------------------------------
+  /** Constructor making a Peak from IPeak interface
+   *
+   * @param ipeak :: const reference to an IPeak object
+   * @return
+   */
+  Peak::Peak(const API::IPeak & ipeak):
+  m_H(ipeak.getH()),
+  m_K(ipeak.getK()),
+  m_L(ipeak.getL()),
+  m_Intensity(ipeak.getIntensity()),
+  m_SigmaIntensity(ipeak.getSigmaIntensity()),
+  m_BinCount(ipeak.getBinCount()),
+  m_InitialEnergy(ipeak.getInitialEnergy()),
+  m_FinalEnergy(ipeak.getFinalEnergy()),
+  m_GoniometerMatrix(ipeak.getGoniometerMatrix()),
+  m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
+  m_RunNumber(ipeak.getRunNumber())
+  {
+    if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Goniometer matrix must non-singular.");
+    setInstrument(ipeak.getInstrument());
+    setDetectorID(ipeak.getDetectorID());
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Destructor
@@ -158,7 +180,7 @@ namespace DataObjects
    *
    * @param inst :: Instrument sptr to use
    */
-  void Peak::setInstrument(Mantid::Geometry::IInstrument_sptr inst)
+  void Peak::setInstrument(Mantid::Geometry::IInstrument_const_sptr inst)
   {
     m_inst = inst;
     if (!inst) throw std::runtime_error("No instrument is set!");
@@ -375,11 +397,11 @@ namespace DataObjects
 
   //----------------------------------------------------------------------------------------------
   /** Return a shared ptr to the detector at center of peak. */
-  Mantid::Geometry::IDetector_sptr Peak::getDetector() const
+  Mantid::Geometry::IDetector_const_sptr Peak::getDetector() const
   {    return m_det;  }
 
   /** Return a shared ptr to the instrument for this peak. */
-  Mantid::Geometry::IInstrument_sptr Peak::getInstrument() const
+  Mantid::Geometry::IInstrument_const_sptr Peak::getInstrument() const
   {    return m_inst;  }
 
   //----------------------------------------------------------------------------------------------

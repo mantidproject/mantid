@@ -223,11 +223,11 @@ namespace Crystal
     lastStr = getWord( in , false );
 
     // Find the detector ID from row/col
-    IInstrument_sptr inst = outWS->getInstrument();
+    IInstrument_const_sptr inst = outWS->getInstrument();
     if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace!");
-    IComponent_sptr bank = inst->getComponentByName(bankName);
+    IComponent_const_sptr bank = inst->getComponentByName(bankName);
     if (!bank) throw std::runtime_error("Bank named " + bankName + " not found!");
-    RectangularDetector_sptr rect = boost::dynamic_pointer_cast<RectangularDetector>(bank);
+    RectangularDetector_const_sptr rect = boost::dynamic_pointer_cast<const RectangularDetector>(bank);
     if (!rect) throw std::runtime_error("Bank named " + bankName + " is not a RectangularDetector!");
     IDetector_sptr det = rect->getAtXY(int(col), int(row));
     if (!det) throw std::runtime_error("Detector not found on " + bankName + "!");

@@ -46,7 +46,6 @@ private:
   InstrumentWindow* m_instrWindow;
   MantidGLWidget *m_InstrumentDisplay;
   QPushButton *mSaveImage;
-  BinDialog *mBinDialog;
   ColorMapWidget* m_colorMapWidget;
   QFrame* m_resetViewFrame;
   QComboBox *mAxisCombo;

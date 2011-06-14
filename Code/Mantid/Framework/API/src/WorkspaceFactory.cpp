@@ -232,6 +232,28 @@ ITableWorkspace_sptr WorkspaceFactoryImpl::createTable(const std::string& classN
     return ws;
 }
 
+/// Create a IPeaksWorkspace
+IPeaksWorkspace_sptr WorkspaceFactoryImpl::createPeaks(const std::string& className) const
+{
+    IPeaksWorkspace_sptr ws;
+    try
+    {
+        ws = boost::dynamic_pointer_cast<IPeaksWorkspace>(this->create(className));    
+        if (!ws)
+        {
+            //g_log.error("Class "+className+" cannot be cast to IPeaksWorkspace");
+            throw std::runtime_error("Class "+className+" cannot be cast to IPeaksWorkspace");
+        }
+    }
+    catch(Kernel::Exception::NotFoundError& e)
+    {
+        g_log.error(e.what());
+        throw;
+    }
+    return ws;
+}
+
+
  /// this create method is currently used to build MD workspaces from MD workspaces, but may be used to build MD workspaces from matrix workspaces in a future;
 /*
 IMDWorkspace_sptr 

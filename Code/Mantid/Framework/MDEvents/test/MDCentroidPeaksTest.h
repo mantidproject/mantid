@@ -118,7 +118,7 @@ public:
 
     // Compare the result to the expectation
     V3D result;
-    Peak & p = peakWS->getPeak(0);
+    IPeak & p = peakWS->getPeak(0);
     if (CoordinatesToUse == "Q (lab frame)")
       result = p.getQLabFrame();
     else if (CoordinatesToUse == "Q (sample frame)")
