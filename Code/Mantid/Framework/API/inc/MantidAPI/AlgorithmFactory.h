@@ -98,10 +98,6 @@ public:
   const std::vector<std::string> getKeys() const;
   /// Returns algorithm descriptors.
   std::vector<Algorithm_descriptor> getDescriptors() const;
-  /// Returns the highest version number of an algorithm
-  int highestVersion(const std::string & algName) const;
-  /// Return the version of the algorithm where the given property is first found
-  int versionForProperty(const std::string & algName, const std::string & propName) const;
           
   /// Store a pointer to an algorithm that has alread been constructed; for instance an algorithm created in Python
   bool storeCloneableAlgorithm(CloneableAlgorithm* algorithm);

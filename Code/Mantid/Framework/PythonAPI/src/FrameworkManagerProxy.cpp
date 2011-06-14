@@ -188,11 +188,10 @@ std::vector<std::string> * FrameworkManagerProxy::getPropertyOrder(const API::IA
   return names;
 }
 
-std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algName)
+std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algName, const int version)
 {
   const std::string EOL="\n";
-  // Highest version
-  API::IAlgorithm_sptr algm = API::AlgorithmManager::Instance().createUnmanaged(algName);
+  API::IAlgorithm_sptr algm = API::AlgorithmManager::Instance().createUnmanaged(algName, version);
   algm->initialize();
 
   // Put in the quick overview message
@@ -226,11 +225,6 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algNam
     if (!prop->isValid().empty())
       buffer << ":req";
     buffer << ") *" << prop->type() << "* ";
-    int versionFound = API::AlgorithmFactory::Instance().versionForProperty(algName, prop->name());
-    if( versionFound != 1 )
-    {
-      buffer << "(Only Version >= " << versionFound << ")" << EOL;
-    }
     std::set<std::string> allowed = prop->allowedValues();
     if (!prop->documentation().empty() || !allowed.empty())
     {

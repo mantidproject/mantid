@@ -42,7 +42,7 @@ def create_algorithm(algorithm, version):
         return algm
     
     algorithm_wrapper.__name__ = algorithm
-    algorithm_wrapper.__doc__ = mtd.createAlgorithmDocs(algorithm)
+    algorithm_wrapper.__doc__ = mtd.createAlgorithmDocs(algorithm, version)
     
     # Dark magic to get the correct function signature
     # Calling help(...) on the wrapper function will produce a function 
@@ -88,7 +88,7 @@ def create_algorithm_dialog(algorithm, version):
         _version = version
         if "Version" in kwargs:
             _version = kwargs["Version"]
-            kwargs.pop(kwargs.index("Version"))
+            del kwargs["Version"]
         for item in ["Message", "Enable", "Disable"]:
             if item not in kwargs:
                 kwargs[item] = ""
