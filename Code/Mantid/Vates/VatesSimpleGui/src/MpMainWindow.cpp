@@ -121,7 +121,7 @@ void mpMainWindow::setMainWindowComponentsForView()
       SLOT(updateSelectedIndicator()));
 	}
   QObject::connect(this->colorSelectionWidget, SIGNAL(colorMapChanged(const pqColorMapModel *)),
-    this->currentView, SLOT(onColorMapChange(pqColorMapModel *)));
+    this->currentView, SLOT(onColorMapChange(const pqColorMapModel *)));
   QObject::connect(this->colorSelectionWidget, SIGNAL(colorScaleChanged(double, double)),
     this->currentView, SLOT(onColorScaleChange(double, double)));
   QObject::connect(this->currentView, SIGNAL(dataRange(double, double)),
