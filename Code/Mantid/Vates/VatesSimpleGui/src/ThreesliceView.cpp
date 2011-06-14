@@ -137,6 +137,9 @@ void ThreeSliceView::makeThreeSlice()
 	this->originSourceRepr->colorByArray("signal",
 			vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
+  QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
+  emit this->dataRange(range.first, range.second);
+
 	this->makeSlice(ViewBase::X, this->xView, this->xCut, this->xCutRepr);
 	this->makeSlice(ViewBase::Y, this->yView, this->yCut, this->yCutRepr);
 	this->makeSlice(ViewBase::Z, this->zView, this->zCut, this->zCutRepr);
