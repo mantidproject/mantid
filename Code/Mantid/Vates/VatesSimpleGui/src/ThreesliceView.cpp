@@ -9,6 +9,7 @@
 #include <pqPipelineSource.h>
 #include <pqProxyTabWidget.h>
 #include <pqRenderView.h>
+#include <pqScalarsToColors.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
 #include <vtkDataObject.h>
@@ -151,4 +152,28 @@ void ThreeSliceView::renderAll()
 	this->xView->render();
 	this->yView->render();
 	this->zView->render();
+}
+
+void ThreeSliceView::onColorScaleChange(double min, double max)
+{
+  this->originSourceRepr->getLookupTable()->setScalarRange(min, max);
+  this->originSourceRepr->getProxy()->UpdateVTKObjects();
+  this->mainView->render();
+  this->xView->render();
+  this->yView->render();
+  this->zView->render();
+}
+
+void ThreeSliceView::onAutoScale()
+{
+  QPair<double, double> val = this->originSourceRepr->getColorFieldRange();
+  double min = val.first;
+  double max = val.second;
+  this->originSourceRepr->getLookupTable()->setScalarRange(min, max);
+  this->originSourceRepr->getProxy()->UpdateVTKObjects();
+  this->mainView->render();
+  this->xView->render();
+  this->yView->render();
+  this->zView->render();
+  emit this->dataRange(min, max);
 }

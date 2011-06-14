@@ -41,27 +41,29 @@ class QModelIndex;
  */
 class MultiSliceView : public ViewBase
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    /**
-     * Default constructor.
-     * @param parent the parent widget of the multislice view widget
-     */
-    MultiSliceView(QWidget *parent = 0);
-    /// Default constructor.
-    virtual ~MultiSliceView();
+  /**
+   * Default constructor.
+   * @param parent the parent widget of the multislice view widget
+   */
+  MultiSliceView(QWidget *parent = 0);
+  /// Default constructor.
+  virtual ~MultiSliceView();
 
-    /**
-     * ViewBase::getView
-     */
-    pqRenderView* getView();
-    /**
-     * ViewBase::render
-     */
-    void render();
+  /**
+   * ViewBase::getView
+   */
+  pqRenderView* getView();
+  /**
+   * ViewBase::render
+   */
+  void render();
 
 protected slots:
+  /// Set the color scale back to the original bounds.
+  void onAutoScale();
   /**
    * Create a slice in the YZ plane at a specific point on the dataset x axis.
    * @param value create a YZ slice at the given x axis location
@@ -77,6 +79,12 @@ protected slots:
    * @param value create a XY slice at the given z axis location
    */
 	void makeZcut(double value);
+  /**
+   * Set the color scale to the currently requested bounds.
+   * @param min the minimum value for the color scale
+   * @param max the maximum value for the color scale
+   */
+  void onColorScaleChange(double min, double max);
 	/// Select the appropriate indicator on the correct axis interactor widget.
 	void selectIndicator();
 	/// Move the selected indicator to a given position.
@@ -84,10 +92,16 @@ protected slots:
 
 signals:
   /**
-   * Signal to identifiy the name of a created slice indicator.
+   * Signal to identify the name of a created slice indicator.
    * @param name the name of the ParaView slice representation
    */
 	void sliceNamed(const QString &name);
+  /**
+   * Signal to get the range of the data.
+   * @param min the minimum value of the data
+   * @param max the maximum value of the data
+   */
+  void dataRange(double min, double max);
 
 private:
     Q_DISABLE_COPY(MultiSliceView);

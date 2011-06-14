@@ -39,38 +39,55 @@ class pqRenderView;
  */
 class StandardView : public ViewBase, public Ui::StandardView
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    /**
-     * Default constructor.
-     * @param parent the parent widget for the standard view
-     */
-    StandardView(QWidget *parent = 0);
-    /// Default destructor.
-    virtual ~StandardView();
+  /**
+   * Default constructor.
+   * @param parent the parent widget for the standard view
+   */
+  StandardView(QWidget *parent = 0);
+  /// Default destructor.
+  virtual ~StandardView();
 
-    /**
-     * ViewBase::getView
-     */
-    pqRenderView* getView();
-    /**
-     * ViewBase::render
-     */
-    void render();
+  /**
+   * ViewBase::getView
+   */
+  pqRenderView* getView();
+  /**
+   * ViewBase::render
+   */
+  void render();
+
+signals:
+  /**
+   * Signal to get the range of the data.
+   * @param min the minimum value of the data
+   * @param max the maximum value of the data
+   */
+  void dataRange(double min, double max);
 
 protected slots:
-    /// Add a slice to the current dataset.
-    void onCutButtonClicked();
-    /// Invoke the RebinnerCutter on the current dataset.
-    void onRebinButtonClicked();
+  /// Set the color scale back to the original bounds.
+  void onAutoScale();
+  /// Add a slice to the current dataset.
+  void onCutButtonClicked();
+  /**
+   * Set the data color scale range to the requested bounds.
+   * @param min the minimum bound for the color scale
+   * @param max the maximum bound for the color scale
+   */
+  void onColorScaleChange(double min, double max);
+  /// Invoke the RebinnerCutter on the current dataset.
+  void onRebinButtonClicked();
+  void onColorMapChange(double min, double max);
 
 private:
-    Q_DISABLE_COPY(StandardView);
-    QPointer<pqPipelineSource> origSource; ///< The current source
-    QPointer<pqPipelineRepresentation> originSourceRepr; ///< The current source representation
-    QPointer<pqPipelineSource> rebinCut; ///< Holder for the RebinnerCutter
-    QPointer<pqRenderView> view; ///< The main view
+  Q_DISABLE_COPY(StandardView);
+  QPointer<pqPipelineSource> origSource; ///< The current source
+  QPointer<pqPipelineRepresentation> originSourceRepr; ///< The current source representation
+  QPointer<pqPipelineSource> rebinCut; ///< Holder for the RebinnerCutter
+  QPointer<pqRenderView> view; ///< The main view
 };
 
 #endif // STANDARDVIEW_H_

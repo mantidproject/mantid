@@ -60,6 +60,24 @@ public:
      */
     void render();
 
+signals:
+  /**
+   * Signal to get the range of the data.
+   * @param min the minimum value of the data
+   * @param max the maximum value of the data
+   */
+  void dataRange(double min, double max);
+
+protected slots:
+  /// Set the color scale back to the original bounds.
+  void onAutoScale();
+  /**
+   * Set the data color scale range to the requested bounds.
+   * @param min the minimum bound for the color scale
+   * @param max the maximum bound for the color scale
+   */
+  void onColorScaleChange(double min, double max);
+
 protected:
     /**
      * Function that creates a 2D view by reducing the functionality of a 3D

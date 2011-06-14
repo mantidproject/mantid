@@ -112,14 +112,22 @@ void mpMainWindow::setMainWindowComponentsForView()
 	if (this->currentView->inherits("MultiSliceView"))
 	{
 		QObject::connect(this->pipelineBrowser,
-				SIGNAL(clicked(const QModelIndex &)),
-				static_cast<MultiSliceView *>(this->currentView),
-				SLOT(selectIndicator()));
+      SIGNAL(clicked(const QModelIndex &)),
+      static_cast<MultiSliceView *>(this->currentView),
+      SLOT(selectIndicator()));
 		QObject::connect(this->proxyTabWidget->getObjectInspector(),
-				SIGNAL(accepted()),
-				static_cast<MultiSliceView *>(this->currentView),
-				SLOT(updateSelectedIndicator()));
+      SIGNAL(accepted()),
+      static_cast<MultiSliceView *>(this->currentView),
+      SLOT(updateSelectedIndicator()));
 	}
+  //QObject::connect(this->colorSelectionWidget, SIGNAL(colorMapChanged(double, double)),
+  // this->currentView, SLOT(onColorMapChange(double, double)));
+  QObject::connect(this->colorSelectionWidget, SIGNAL(colorScaleChanged(double, double)),
+    this->currentView, SLOT(onColorScaleChange(double, double)));
+  QObject::connect(this->currentView, SIGNAL(dataRange(double, double)),
+    this->colorSelectionWidget, SLOT(setColorScaleRange(double, double)));
+  QObject::connect(this->colorSelectionWidget, SIGNAL(autoScale()),
+    this->currentView, SLOT(onAutoScale()));
 }
 
 void mpMainWindow::onDataLoaded(pqPipelineSource* source)
@@ -132,7 +140,7 @@ void mpMainWindow::onDataLoaded(pqPipelineSource* source)
 
   this->currentView->render();
   this->proxyTabWidget->getObjectInspector()->accept();
-  emit enableModeButtons();
+  emit this->enableModeButtons();
 }
 
 void mpMainWindow::switchViews(ModeControlWidget::Views v)

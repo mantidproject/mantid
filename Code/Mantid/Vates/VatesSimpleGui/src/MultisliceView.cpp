@@ -13,6 +13,7 @@
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
 #include <pqRenderView.h>
+#include <pqScalarsToColors.h>
 #include <pqServerManagerModel.h>
 #include <pqServerManagerSelectionModel.h>
 #include <vtkDataObject.h>
@@ -80,6 +81,9 @@ void MultiSliceView::setupData()
 	this->originSourceRepr = qobject_cast<pqPipelineRepresentation*>(drep);
 	this->originSourceRepr->colorByArray("signal",
 			vtkDataObject::FIELD_ASSOCIATION_CELLS);
+
+  QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
+  emit this->dataRange(range.first, range.second);
 }
 
 void MultiSliceView::setupAxisInfo()
@@ -199,4 +203,22 @@ void MultiSliceView::updateSelectedIndicator()
 	{
 		this->ui.zAxisWidget->updateIndicator(origin[2]);
 	}
+}
+
+void MultiSliceView::onColorScaleChange(double min, double max)
+{
+  this->originSourceRepr->getLookupTable()->setScalarRange(min, max);
+  this->originSourceRepr->getProxy()->UpdateVTKObjects();
+  this->mainView->render();
+}
+
+void MultiSliceView::onAutoScale()
+{
+  QPair<double, double> val = this->originSourceRepr->getColorFieldRange();
+  double min = val.first;
+  double max = val.second;
+  this->originSourceRepr->getLookupTable()->setScalarRange(min, max);
+  this->originSourceRepr->getProxy()->UpdateVTKObjects();
+  this->mainView->render();
+  emit this->dataRange(min, max);
 }
