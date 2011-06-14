@@ -110,7 +110,14 @@ namespace DataObjects
      */
     void addPeak(const IPeak& ipeak)
     {
-      peaks.push_back(Peak(ipeak));
+      if (dynamic_cast<const Peak*>(&ipeak))
+      {
+        peaks.push_back((const Peak&)ipeak);
+      }
+      else
+      {
+        peaks.push_back(Peak(ipeak));
+      }
     }
 
     //---------------------------------------------------------------------------------------------

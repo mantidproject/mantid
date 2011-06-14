@@ -32,7 +32,7 @@ namespace DataObjects
     Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL, Mantid::Geometry::Matrix<double> goniometer);
 
     // Copy constructor is compiler-provided.
-    //    Peak(const Peak & other);
+    Peak(const Peak & other);
     Peak(const API::IPeak & ipeak);
     virtual ~Peak();
 

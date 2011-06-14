@@ -130,6 +130,36 @@ namespace DataObjects
    * @param ipeak :: const reference to an IPeak object
    * @return
    */
+  Peak::Peak(const Peak & peak):
+    m_inst(peak.m_inst),
+    m_det(peak.m_det),
+    m_BankName(peak.m_BankName),
+    m_DetectorID(peak.m_DetectorID),
+    m_H(peak.m_H),
+    m_K(peak.m_K),
+    m_L(peak.m_L),
+    m_Intensity(peak.m_Intensity),
+    m_SigmaIntensity(peak.m_SigmaIntensity),
+    m_BinCount(peak.m_BinCount),
+    m_InitialEnergy(peak.m_InitialEnergy),
+    m_FinalEnergy(peak.m_FinalEnergy),
+    m_GoniometerMatrix(peak.m_GoniometerMatrix),
+    m_InverseGoniometerMatrix(peak.m_InverseGoniometerMatrix),
+    m_RunNumber(peak.m_RunNumber),
+    m_Row(peak.m_Row),
+    m_Col(peak.m_Col),
+    sourcePos(peak.sourcePos),
+    samplePos(peak.samplePos),
+    detPos(peak.detPos)
+  {
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor making a Peak from IPeak interface
+   *
+   * @param ipeak :: const reference to an IPeak object
+   * @return
+   */
   Peak::Peak(const API::IPeak & ipeak):
   m_H(ipeak.getH()),
   m_K(ipeak.getK()),
@@ -145,7 +175,11 @@ namespace DataObjects
   {
     if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Goniometer matrix must non-singular.");
     setInstrument(ipeak.getInstrument());
-    setDetectorID(ipeak.getDetectorID());
+    detid_t id = ipeak.getDetectorID();
+    if (id >= 0)
+    {
+      setDetectorID(id);
+    }
   }
 
   //----------------------------------------------------------------------------------------------

@@ -122,7 +122,10 @@ public:
     if (CoordinatesToUse == "Q (lab frame)")
       result = p.getQLabFrame();
     else if (CoordinatesToUse == "Q (sample frame)")
+    {
+      std::cerr << p.getGoniometerMatrix() << std::endl;
       result = p.getQSampleFrame();
+    }
     else if (CoordinatesToUse == "HKL")
       result = p.getHKL();
 
