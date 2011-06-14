@@ -153,8 +153,8 @@ namespace Mantid
       // Transform to a rotation matrix
       std::vector<T> toRotation();
     private:
-      template<typename T> friend std::ostream& operator<<(std::ostream&,const Geometry::Matrix<T>&);
-      template<typename T> friend std::istream& operator>>(std::istream&, Geometry::Matrix<T>&);
+      template<typename TYPE> friend std::ostream& operator<<(std::ostream&,const Geometry::Matrix<TYPE>&);
+      template<typename TYPE> friend std::istream& operator>>(std::istream&, Geometry::Matrix<TYPE>&);
     };
 
     template<typename T>
