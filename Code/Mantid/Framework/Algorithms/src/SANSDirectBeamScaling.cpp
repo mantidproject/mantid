@@ -134,7 +134,7 @@ void SANSDirectBeamScaling::exec()
       nPixels += 1;
       sdd += pixelDistance;
     }
-    progress.report("Summing beam counts");
+    progress.report("Absolute Scaling");
   }
   // Get the average SDD for the counted pixels, and transform to mm.
   sdd = sdd/nPixels*1000.0;

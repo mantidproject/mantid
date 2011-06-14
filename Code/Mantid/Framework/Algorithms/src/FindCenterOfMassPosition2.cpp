@@ -210,7 +210,7 @@ void FindCenterOfMassPosition2::exec()
     distance_check = distance;
     first_run = false;
 
-    progress.report();
+    progress.report("Find Beam Center");
   }
 
   std::string output = getProperty("Output");

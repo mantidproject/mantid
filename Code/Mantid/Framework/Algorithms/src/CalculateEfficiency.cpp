@@ -64,7 +64,7 @@ void CalculateEfficiency::exec()
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
-  Progress progress(this,0.0,1.0,5);
+  Progress progress(this,0.0,1.0,4);
 
   // Sum up all the wavelength bins
   IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
@@ -80,7 +80,7 @@ void CalculateEfficiency::exec()
   }
   setProperty("OutputWorkspace",outputWS);
 
-  progress.report();
+  progress.report("Detector Efficiency");
 
   double sum = 0.0;
   double err = 0.0;
@@ -90,7 +90,7 @@ void CalculateEfficiency::exec()
   // Skip monitors and masked detectors
   sumUnmaskedDetectors(rebinnedWS, sum, err, npixels);
 
-  progress.report();
+  progress.report("Detector Efficiency");
 
   // Normalize each detector pixel by the sum we just found to get the
   // relative efficiency. If the minimum and maximum efficiencies are
@@ -101,7 +101,7 @@ void CalculateEfficiency::exec()
   // the newly masked detectors.
   normalizeDetectors(rebinnedWS, outputWS, sum, err, npixels, min_eff, max_eff);
 
-  progress.report();
+  progress.report("Detector Efficiency");
 
   if ( !isEmpty(min_eff) || !isEmpty(max_eff) )
   {
@@ -109,7 +109,7 @@ void CalculateEfficiency::exec()
     // the acceptable efficiency range.
     sumUnmaskedDetectors(rebinnedWS, sum, err, npixels);
 
-    progress.report();
+    progress.report("Detector Efficiency");
 
     // Now that we have a normalization factor that excludes bad pixels,
     // recompute the relative efficiency.

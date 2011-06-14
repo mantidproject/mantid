@@ -120,7 +120,7 @@ void ApplyTransmissionCorrection::exec()
       EOut[j] = sqrt( d1*d1 + d2*d2 );
       YOut[j] = YIn[j]/t_term;
     }
-    progress.report();
+    progress.report("Applying Transmission Correction");
   }
 }
 

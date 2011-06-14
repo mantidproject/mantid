@@ -455,7 +455,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     procEventsLinear(workspace, event_buffer, current_event_buffer_size, fileOffset);
 
     //Report progress
-    prog.report();
+    prog.report("Load Event PreNeXus");
   }
 
   //Clean up the buffers

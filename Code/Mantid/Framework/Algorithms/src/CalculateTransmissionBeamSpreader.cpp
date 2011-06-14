@@ -195,7 +195,7 @@ void CalculateTransmissionBeamSpreader::exec()
       {
         E[i] = std::abs(E[i]/Y[i]);
         Y[i] = std::log10(Y[i]);
-        progress.report();
+        progress.report("Calculate Transmission");
       }
   
       // Now fit this to a straight line

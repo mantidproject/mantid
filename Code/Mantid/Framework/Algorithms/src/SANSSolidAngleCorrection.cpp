@@ -91,7 +91,7 @@ void SANSSolidAngleCorrection::exec()
       YOut[j] = YIn[j]*corr;
       EOut[j] = fabs(EIn[j]*corr);
     }
-    progress.report();
+    progress.report("Solid Angle Correction");
   }
 
 }
