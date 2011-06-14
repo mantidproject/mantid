@@ -19,7 +19,7 @@ public:
 
 void testVersion()
   {
-    TS_ASSERT_EQUALS( Q1D.version(), 3 )
+    TS_ASSERT_EQUALS( Q1D.version(), 1 )
   }
 
   void testCategory()

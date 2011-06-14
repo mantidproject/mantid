@@ -17,7 +17,7 @@ namespace Algorithms
 {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(Q1D2)
+//DECLARE_ALGORITHM(Q1D2)
 
 /// Sets documentation strings for this algorithm
 void Q1D2::initDocs()
