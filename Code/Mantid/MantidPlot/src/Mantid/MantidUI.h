@@ -160,7 +160,7 @@ public:
     MultiLayer* createGraphFromTable(Table* t, int type = 0);
 
     // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
-    MultiLayer* plotSelectedRows(MantidMatrix *m, bool errs = true);
+    MultiLayer* plotSelectedRows(const MantidMatrix * const m, bool errs = true);
 
   /// This method executes loadraw algorithm from  ICatInterface
   void loadrawfromICatInterface(const QString& fileName,const QString& wsName);
@@ -331,6 +331,8 @@ public slots:
     void copyDetectorsToTable();
     void copyValues();
     void copyRowsToWaterfall();
+    // Slot callable from Workspace menu item
+    void plotWholeAsWaterfall();
 
     // Execute selected algorithm
     void executeAlgorithm();
@@ -445,6 +447,10 @@ private:
   
   /// This method accepts user inputs and executes loadraw/load nexus algorithm
   void executeAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg);
+
+  /// Common method to convert a plot of a set of spectra into a waterfall plot
+  void convertToWaterfall(MultiLayer* ml);
+
     // Private variables
 
     ApplicationWindow *m_appWindow;             // QtiPlot main ApplicationWindow

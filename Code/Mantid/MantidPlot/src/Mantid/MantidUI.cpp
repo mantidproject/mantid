@@ -609,9 +609,22 @@ void MantidUI::copyRowToGraphErr()
 
 void MantidUI::copyRowsToWaterfall()
 {
-  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  const MantidMatrix* const m = (MantidMatrix*)appWindow()->activeWindow();
   if (!m || !m->isA("MantidMatrix")) return;
   MultiLayer* ml = plotSelectedRows(m,false);
+  convertToWaterfall(ml);
+}
+
+void MantidUI::plotWholeAsWaterfall()
+{
+  const MantidMatrix* const m = (MantidMatrix*)appWindow()->activeWindow();
+  if (!m || !m->isA("MantidMatrix")) return;
+  MultiLayer* ml = plotSpectraRange(m->workspaceName(),0,m->numRows()-1,false);
+  convertToWaterfall(ml);
+}
+
+void MantidUI::convertToWaterfall(MultiLayer* ml)
+{
   ml->hide();
   ml->activeGraph()->setWaterfallOffset(10,20);
   ml->setWaterfallLayout();
@@ -1612,6 +1625,10 @@ void MantidUI::menuMantidMatrixAboutToShow()
   connect(action,SIGNAL(triggered()),m_exploreMantid,SLOT(plotSpectra()));
   menuMantidMatrix->addAction(action);
 
+  action = new QAction("Plot as waterfall",this);
+  connect(action,SIGNAL(triggered()),SLOT(plotWholeAsWaterfall()));
+  menuMantidMatrix->addAction(action);
+
   action = new QAction("Sample Logs...", this);
   connect(action,SIGNAL(triggered()),this,SLOT(showLogFileWindow()));
   menuMantidMatrix->addAction(action);
@@ -2498,7 +2515,7 @@ MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bo
      @param m :: Mantid matrix
      @param errs :: True if the errors to be plotted
  */
-MultiLayer* MantidUI::plotSelectedRows(MantidMatrix *m, bool errs)
+MultiLayer* MantidUI::plotSelectedRows(const MantidMatrix * const m, bool errs)
 {
   const QList<int>& rows = m->getSelectedRows();
   std::set<int> rowSet(rows.constBegin(),rows.constEnd());
