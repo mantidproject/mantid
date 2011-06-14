@@ -11,6 +11,7 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidAPI/Axis.h"
 #include <cfloat>
 #include <fstream>
 #include <iterator>
@@ -55,11 +56,11 @@ void DiffractionFocussing2::init()
 {
 
   API::CompositeValidator<MatrixWorkspace> *wsValidator = new API::CompositeValidator<MatrixWorkspace>;
-  wsValidator->add(new API::WorkspaceUnitValidator<MatrixWorkspace>("dSpacing"));
+  // wsValidator->add(new API::WorkspaceUnitValidator<MatrixWorkspace>("dSpacing"));
   wsValidator->add(new API::RawCountValidator<MatrixWorkspace>);
   declareProperty(
     new API::WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
-    "A 2D workspace with X values of d-spacing" );
+    "A 2D workspace with X values of d-spacing/Q-spacing" );
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The result of diffraction focussing of InputWorkspace" );
 
@@ -111,6 +112,14 @@ void DiffractionFocussing2::exec()
   nPoints = static_cast<int>(matrixInputW->blocksize());
   nHist = static_cast<int>(matrixInputW->getNumberHistograms());
 
+  // Validate UnitID (spacing)
+  Axis* axis = matrixInputW->getAxis(0);
+  std::string unitid = axis->unit()->unitID();
+  if (unitid != "dSpacing" && unitid != "MomentumTransfer"){
+    g_log.error() << "UnitID " << unitid << " is not a supported spacing" << std::endl;
+    throw new std::invalid_argument("Workspace Invalid Spacing/UnitID");
+  }
+
   // --- Do we need to read the grouping workspace? ----
   if (groupingFileName != "")
   {
@@ -125,8 +134,9 @@ void DiffractionFocussing2::exec()
   // Fill the map
   progress(0.2, "Determine Rebin Params");
   udet2group.clear();
+  // std::cout << "(1) nGroups " << nGroups << "\n";
   groupWS->makeDetectorIDToGroupMap(udet2group, nGroups);
-  //std::cout << "nGroups " << nGroups << "\n";
+  // std::cout << "(2) nGroups " << nGroups << "\n";
 
   //This finds the rebin parameters (used in both versions)
   // It also initializes the groupAtWorkspaceIndex[] array.
@@ -478,7 +488,7 @@ int DiffractionFocussing2::validateSpectrumInGroup(specid_t spectrum_number)
   const std::vector<detid_t> dets = spectramap.getDetectors(spectrum_number);
   if (dets.empty()) // Not in group
   {
-    std::cout << spectrum_number << " <- this spectrum is empty!\n";
+//    std::cout << spectrum_number << " <- this spectrum is empty!\n";
     return -1;
   }
 
