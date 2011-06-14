@@ -268,6 +268,9 @@ m_decimals(-1)
   m_displayActionQuality->setCheckable(true);
   m_displayActionQuality->setChecked(true);
   QSignalMapper* displayMapper = new QSignalMapper(this);
+
+  //displayMapper->disconnect(
+
   displayMapper->setMapping(m_displayActionPlotGuess,"PlotGuess");
   displayMapper->setMapping(m_displayActionQuality,"Quality");
   connect(m_displayActionPlotGuess,SIGNAL(activated()), displayMapper, SLOT(map()));
@@ -279,15 +282,42 @@ m_decimals(-1)
 
   QPushButton* btnSetup = new QPushButton("Setup");
   QMenu* setupMenu = new QMenu(this);
-  QAction* setupActionClearAll = new QAction("Clear All",this);
+
+  QAction* setupActionManageSetup = new QAction("Manage Setup",this);
+  m_setupActionCustomSetup = new QAction("Custom Setup",this);
+  QAction* setupActionClearFit = new QAction("Clear Fit",this);
+  setupActionClearFit->setToolTip("Remove all fit functions");
+  setupActionClearFit->setWhatsThis("Remove all fit functions");
+  setupActionClearFit->setIconText("Remove all fit functions");
   QAction* setupActionFindPeaks = new QAction("Find Peaks",this);
+
+  QMenu* setupSubMenuCustom = new QMenu(this);
+  m_setupActionCustomSetup->setMenu(setupSubMenuCustom);
+
+  QMenu* setupSubMenuManage = new QMenu(this);
+  QAction* setupActionSave = new QAction("Save Setup",this);
+  QAction* setupActionRemove = new QAction("Remove Setup",this);
+  QAction* setupActionCopyToClipboard = new QAction("Copy To Clipboard",this);
+  QAction* setupActionLoadFromString = new QAction("Load From String",this);
+  setupSubMenuManage->addAction(setupActionSave);
+  setupSubMenuManage->addAction(setupActionRemove);
+  setupSubMenuManage->addAction(setupActionCopyToClipboard);
+  setupSubMenuManage->addAction(setupActionLoadFromString);
+  setupActionManageSetup->setMenu(setupSubMenuManage); 
+
+  QMenu* setupSubMenuRemove = new QMenu(this);
+  setupActionRemove->setMenu(setupSubMenuRemove); 
+
   QSignalMapper* setupMapper = new QSignalMapper(this);
-  setupMapper->setMapping(setupActionClearAll,"ClearAll");
+  setupMapper->setMapping(setupActionClearFit,"ClearFit");
   setupMapper->setMapping(setupActionFindPeaks,"FindPeaks");
-  connect(setupActionClearAll,SIGNAL(activated()), setupMapper, SLOT(map()));
+  connect(setupActionClearFit,SIGNAL(activated()), setupMapper, SLOT(map()));
   connect(setupActionFindPeaks,SIGNAL(activated()), setupMapper, SLOT(map()));
   connect(setupMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeSetupMenu(const QString&)));
-  setupMenu->addAction(setupActionClearAll);
+
+  setupMenu->addAction(setupActionManageSetup);
+  setupMenu->addAction(m_setupActionCustomSetup);
+  setupMenu->addAction(setupActionClearFit);
   setupMenu->addAction(setupActionFindPeaks);
   btnSetup->setMenu(setupMenu);
 
@@ -311,6 +341,48 @@ m_decimals(-1)
 
 }
 
+/// Update setup menus according to how these are set in
+/// settings
+void FitPropertyBrowser::updateSetupMenus()
+{
+/*  QMenu* menu = m_setupActionCustomSetup->menu();
+  menu->clear();
+ 
+  QSettings settings;
+  settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
+  QStringList names = settings.childKeys();
+
+  for (int i = 0; i < names.size(); i++)
+  {
+    menu->addAction( new QAction(names.at(i), this) );
+
+  }
+
+
+  QString name = QInputDialog::getItem(this,"Mantid - Input","Please select a function to load",names,0,false);
+  if (!name.isEmpty())
+  {
+    QString str = settings.value(name).toString();
+
+
+ 
+  m_displayActionPlotGuess = new QAction("Plot Guess",this);
+  m_displayActionPlotGuess->setEnabled(false);
+  m_displayActionQuality = new QAction("Quality",this);
+  m_displayActionQuality->setCheckable(true);
+  m_displayActionQuality->setChecked(true);
+  QSignalMapper* displayMapper = new QSignalMapper(this);
+  displayMapper->setMapping(m_displayActionPlotGuess,"PlotGuess");
+  displayMapper->setMapping(m_displayActionQuality,"Quality");
+  connect(m_displayActionPlotGuess,SIGNAL(activated()), displayMapper, SLOT(map()));
+  connect(m_displayActionQuality,SIGNAL(activated()), displayMapper, SLOT(map()));
+  connect(displayMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeDisplayMenu(const QString&)));
+  displayMenu->addAction(m_displayActionPlotGuess);
+  displayMenu->addAction(m_displayActionQuality);
+*/
+}
+
+
 void FitPropertyBrowser::executeFitMenu(const QString& item)
 {
   if (item == "Fit")
@@ -331,7 +403,7 @@ void FitPropertyBrowser::executeDisplayMenu(const QString& item)
 
 void FitPropertyBrowser::executeSetupMenu(const QString& item)
 {
-  if (item == "ClearAll")
+  if (item == "ClearFit")
     clear();
   if (item == "FindPeaks")
     findPeaks();

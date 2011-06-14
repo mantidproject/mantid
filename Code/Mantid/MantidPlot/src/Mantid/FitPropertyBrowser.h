@@ -302,18 +302,12 @@ private:
   QAction* m_displayActionQuality;
   QString m_windowBaseString;
 
+  /// Setup menu
+  QAction* m_setupActionCustomSetup; 
+  void updateSetupMenus();
+
   /// To display a tip text
   QLabel* m_tip;
-  /// Quality label for quality of plot
-  //QLabel* m_qualityLabel;
-  /// Quality label for quality of plot
-  //QLineEdit* m_qualityLineEdit;
-  /// Setup label
-  //QLabel* m_setupLabel;
-  /// Setup combobox
-  //QComboBox* m_setupCombobox;
-  /// Setup save button
-  //QPushButton* m_btnSaveSetup;
 
   QtTreePropertyBrowser* m_browser;
   /// Property managers:
