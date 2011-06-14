@@ -85,8 +85,8 @@ public:
 
   }
 void testMDGeometryUnitRotations(){
-	MantidMat rotMat = tDND_geometry->getRotations();
-	MantidMat uno(3,3,true);
+	DblMatrix rotMat = tDND_geometry->getRotations();
+	DblMatrix uno(3,3,true);
 
 	TSM_ASSERT_EQUALS("Natural rotation matrix for unmodified geomerty should be unit matrix",true,rotMat.equals(uno,FLT_EPSILON));
 }
@@ -157,7 +157,7 @@ void testMDGeometryUnitRotations(){
   void testSetSlicingRotations(){
 	  // get access to geometry basis and derive new transformation matrix, which would transform data into new basis, defined
 	  // by two vectors expressed in the units of the reciprocal lattice
-	  MantidMat rot = tDND_geometry->get_MDGeomBasis().get_OrientedLattice().setUFromVectors(V3D(1,1,0),V3D(1,-1,0));
+	  DblMatrix rot = tDND_geometry->get_MDGeomBasis().get_OrientedLattice().setUFromVectors(V3D(1,1,0),V3D(1,-1,0));
 
 	  TSM_ASSERT_THROWS_NOTHING("It is nothing to throw here",pSlice->setRotationMatrix(rot));
   }

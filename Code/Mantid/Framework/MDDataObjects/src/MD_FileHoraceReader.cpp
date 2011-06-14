@@ -146,8 +146,8 @@ MD_FileHoraceReader::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescript
         }
     }
     i0 += ic*4;
-	MantidMat UEmat(u_to_Rlu);
-	MantidMat Rot(3,3);
+	DblMatrix UEmat(u_to_Rlu);
+	DblMatrix Rot(3,3);
 	for(int i=0;i<3;i++){
 		for(j=0;j<3;j++){
 			Rot[i][j]=UEmat[i][j];

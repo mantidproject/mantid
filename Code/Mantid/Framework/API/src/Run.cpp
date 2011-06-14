@@ -312,7 +312,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    *
    * @return 3x3 double rotation matrix
    */
-  Mantid::Geometry::MantidMat Run::getGoniometerMatrix()
+  Mantid::Geometry::DblMatrix Run::getGoniometerMatrix()
   {
     for (size_t i=0; i < m_goniometer.getNumberAxes(); ++i)
     {

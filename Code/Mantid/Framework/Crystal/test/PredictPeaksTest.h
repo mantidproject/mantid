@@ -131,7 +131,7 @@ public:
     WorkspaceCreationHelper::SetOrientedLattice(inWS, 10.0, 10.0, 10.0);
 
     // Make a U matrix of 22.5 degree rotation around +Y
-    MantidMat u(3,3);
+    DblMatrix u(3,3);
     Goniometer gon;
     gon.makeUniversalGoniometer();
     gon.setRotationAngle("phi", Urotation);
@@ -141,7 +141,7 @@ public:
     // Final rotation should add up to 45 degrees around +Y so that hkl 1,0,0 goes to +X
     WorkspaceCreationHelper::SetGoniometer(inWS, GonioRotation, 0., 0.);
 
-    MantidMat ub = inWS->sample().getOrientedLattice().getUB();
+    DblMatrix ub = inWS->sample().getOrientedLattice().getUB();
 
     std::vector<V3D> hkls;
     hkls.push_back(V3D(-1,0,0));

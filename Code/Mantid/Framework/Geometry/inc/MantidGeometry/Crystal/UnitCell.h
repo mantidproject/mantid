@@ -111,10 +111,10 @@ namespace Geometry
       void setgamma(double _gamma,const int angleunit=angDegrees);
 
       // Access private variables
-      const Geometry::MantidMat& getG() const;
-      const Geometry::MantidMat& getGstar() const;
-      const Geometry::MantidMat& getB() const;
-      const Geometry::MantidMat& getBinv() const;
+      const Geometry::DblMatrix& getG() const;
+      const Geometry::DblMatrix& getGstar() const;
+      const Geometry::DblMatrix& getB() const;
+      const Geometry::DblMatrix& getBinv() const;
 
       // Calculate things about lattice and vectors      
       double d(double h, double k, double l) const;
@@ -138,25 +138,25 @@ namespace Geometry
         ab\cos(\gamma) & bb & bc\cos(\alpha) \\
         ac\cos(\beta) & bc\cos(\alpha) & cc \end{array} \right) \f]
        */
-      MantidMat G;
+      DblMatrix G;
       /** Reciprocal lattice tensor
        *\f[ \left( \begin{array}{ccc}
         a^*a^* & a^*b^*\cos(\gamma^*) & a^*c^*\cos(\beta^*) \\
         a^*b^*\cos(\gamma^*) & b^*b^* & b^*c^*\cos(\alpha^*) \\
         a^*c^*\cos(\beta^*) & b^*c^*\cos(\alpha^*) & c^*c^* \end{array} \right) \f]
        */
-      MantidMat Gstar; 
+      DblMatrix Gstar; 
       /** B matrix for a right-handed coordinate system, in Busing-Levy convention
        \f[ \left( \begin{array}{ccc}
         a^* & b^*\cos(\gamma^*) & c^*\cos(\beta^*) \\
         0 & b^*\sin(\gamma^*) & -c^*\sin(\beta^*)\cos(\alpha) \\
         0 & 0 & 1/c \end{array} \right) \f]
        */
-      MantidMat B;  
+      DblMatrix B;  
 
       /** Inverse of the B matrix.
        */
-      MantidMat Binv;
+      DblMatrix Binv;
 
       // Private functions
       void recalculate();

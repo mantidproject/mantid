@@ -25,10 +25,10 @@ Goniometer::Goniometer(const Goniometer& other):R(other.R),motors(other.motors),
 }
 
 /// Constructor from a rotation matrix
-/// @param rot :: #MantidMat matrix that is going to be the internal rotation matrix of the goniometer. Cannot push additional axes
-Goniometer::Goniometer(MantidMat rot)
+/// @param rot :: #DblMatrix matrix that is going to be the internal rotation matrix of the goniometer. Cannot push additional axes
+Goniometer::Goniometer(DblMatrix rot)
 {
-  MantidMat ide(3,3),rtr(3,3);
+  DblMatrix ide(3,3),rtr(3,3);
   rtr=rot.Tprime()*rot;
   ide.identityMatrix();
   if (rtr==ide)
@@ -47,7 +47,7 @@ Goniometer::~Goniometer()
 
 /// Return global rotation matrix
 /// @return R :: 3x3 rotation matrix 
-const Geometry::MantidMat& Goniometer::getR() const
+const Geometry::DblMatrix& Goniometer::getR() const
 {
   return R;
 }
@@ -231,7 +231,7 @@ std::vector<double> Goniometer::getEulerAngles(std::string convention)
   angles[2]=atan2(s3,c3)*rad2deg;
   V3D axis3(0,0,0);
   axis3[last]=1.;  
-  MantidMat Rm3(Quat(-angles[2],axis3).getRotation()),Rp;
+  DblMatrix Rm3(Quat(-angles[2],axis3).getRotation()),Rp;
   Rp=R*Rm3;
   s1=par01*Rp[(first-par01+9)%3][(first+par01+9)%3];
   c1=Rp[second][second];
@@ -259,7 +259,7 @@ void Goniometer::recalculateR()
     QGlobal*=QCurrent;
   }  
   elements=QGlobal.getRotation();
-  R=MantidMat(elements);
+  R=DblMatrix(elements);
 }
 
 } //Namespace Geometry

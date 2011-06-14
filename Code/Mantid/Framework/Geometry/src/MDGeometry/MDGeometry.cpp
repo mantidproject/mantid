@@ -44,8 +44,8 @@ MDGeometry::setRanges(MDGeometryDescription const &trf)
     }
   }
   // if rotations are present, the directions of new transformed reciprocal dimensions are set as proper transformation of MDGeometryBasis dimensions;
-  MantidMat Rot = trf.getRotations();
-  MantidMat test(3,3);
+  DblMatrix Rot = trf.getRotations();
+  DblMatrix test(3,3);
   test.identityMatrix();
   // set the directions of the reciprocal dimensions availible as proper rotations of MDGeometry basis
   if(!Rot.equals(test,FLT_EPSILON)){
@@ -357,11 +357,11 @@ n_expanded_dim(0), nGeometrySize(0), m_basis(basis)
   this->init_empty_dimensions();
 }
 //
-MantidMat 
+DblMatrix 
 MDGeometry::getRotations()const
 {
 
-    MantidMat rez(3,3);
+    DblMatrix rez(3,3);
     if(this->m_basis.getNumReciprocalDims()==1){
         rez.identityMatrix();
         return rez;

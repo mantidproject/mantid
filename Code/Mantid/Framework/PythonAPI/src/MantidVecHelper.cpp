@@ -100,7 +100,7 @@ namespace Mantid
     * @param readonly :: If true the array is flagged as read only (only used for numpy arrays)
     * @returns A pointer to a PyObject that contains the data
     */
-    PyObject * MantidVecHelper::createPythonWrapper(const Geometry::MantidMat & values, bool readonly)
+    PyObject * MantidVecHelper::createPythonWrapper(const Geometry::DblMatrix & values, bool readonly)
     {
       if( g_useNumPy )
       {
@@ -117,7 +117,7 @@ namespace Mantid
     * @param readonly :: If true the array is flagged as read only
     * @returns A numpy wrapped array C-array
     */
-    PyObject * MantidVecHelper::createNumPyArray(const Geometry::MantidMat & values, bool readonly)
+    PyObject * MantidVecHelper::createNumPyArray(const Geometry::DblMatrix & values, bool readonly)
     {
       npy_intp dims[2] =  {values.size().first,values.size().second} ;
       PyArrayObject * ndarray = 
@@ -129,7 +129,7 @@ namespace Mantid
       return (PyObject*)ndarray;
     }
 //
-    Geometry::MantidMat MantidVecHelper::getMatrixFromArray(PyObject *p)
+    Geometry::DblMatrix MantidVecHelper::getMatrixFromArray(PyObject *p)
     {       
       _import_array();
       if(PyArray_Check(p)==1)

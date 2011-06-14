@@ -25,7 +25,7 @@ public:
   void test_Goniometer()
   {
     Goniometer G;
-    MantidMat M(3,3);
+    DblMatrix M(3,3);
     // Check simple constructor    
     M.identityMatrix();
     TS_ASSERT_EQUALS(G.getR(),M);
@@ -123,7 +123,7 @@ public:
   void test_getEulerAngles()
   {
     Goniometer G;
-    MantidMat rotA;
+    DblMatrix rotA;
     G.makeUniversalGoniometer();
     G.setRotationAngle("phi", 45.0);
     G.setRotationAngle("chi", 23.0);
@@ -143,7 +143,7 @@ public:
   void test_getEulerAngles2()
   {
     Goniometer G;
-    MantidMat rotA;
+    DblMatrix rotA;
     std::vector<double> angles; 
     G.makeUniversalGoniometer();
     for (double phi=-172.;phi<=180.;phi+=30.)

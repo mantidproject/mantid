@@ -112,7 +112,7 @@ namespace Mantid
       { return m_goniometer; }
 
       // Retrieve the goniometer rotation matrix
-      Mantid::Geometry::MantidMat getGoniometerMatrix();
+      Mantid::Geometry::DblMatrix getGoniometerMatrix();
 
       /**
        * Add a log entry

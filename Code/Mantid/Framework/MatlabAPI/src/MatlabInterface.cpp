@@ -99,7 +99,7 @@ static mexfunc_s_t mex_functions[] = {
 
 /*
  *The mex function is called with the class name followed by the operation name
- * as the first two matlab arguments e.g. MantidMatlabAPI("ixtestclass", "plus")
+ * as the first two matlab arguments e.g. DblMatrixlabAPI("ixtestclass", "plus")
  * From this a FORTRAN function name is created (ixtestclass_plus) which is then called with
  * the rest of the parameters
  */

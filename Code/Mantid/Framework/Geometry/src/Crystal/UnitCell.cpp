@@ -409,7 +409,7 @@ namespace Geometry
 
   /// Get the metric tensor
   /// @return G :: metric tensor
-  const Geometry::MantidMat& UnitCell::getG() const
+  const Geometry::DblMatrix& UnitCell::getG() const
   {
     return G;
   }
@@ -417,21 +417,21 @@ namespace Geometry
 
 	/// Get the reciprocal metric tensor
 	/// @return Gstar :: metric tensor of the reciprocal lattice
-  const Geometry::MantidMat& UnitCell::getGstar() const
+  const Geometry::DblMatrix& UnitCell::getGstar() const
   {
     return Gstar;
   }
 
   /// Get the B-matrix
   /// @return B :: B matrix in Busing-Levy convention
-  const Geometry::MantidMat& UnitCell::getB() const
+  const Geometry::DblMatrix& UnitCell::getB() const
   {
     return B;
   }
 
   /// Get the inverse of the B-matrix
   /// @return Binv :: inverse of the B matrix in Busing-Levy convention
-  const Geometry::MantidMat& UnitCell::getBinv() const
+  const Geometry::DblMatrix& UnitCell::getBinv() const
   {
     return Binv;
   }
@@ -508,7 +508,7 @@ namespace Geometry
 
 
   /// Recalculate lattice from reciprocal metric tensor (Gstar=transpose(UB)*UB)
-  void UnitCell::recalculateFromGstar(MantidMat& NewGstar)
+  void UnitCell::recalculateFromGstar(DblMatrix& NewGstar)
   {
     if (NewGstar[0][0]*NewGstar[1][1]*NewGstar[2][2]<=0.) throw std::invalid_argument("NewGstar");
     Gstar=NewGstar;

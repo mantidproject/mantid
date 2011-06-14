@@ -31,7 +31,7 @@ public:
   {
     // test more advanced calculations
     // the new Gstar shold yield a=2.5, b=6, c=8, alpha=93, beta=88, gamma=97.
-    MantidMat newGstar(3,3);
+    DblMatrix newGstar(3,3);
     newGstar[0][0]=0.162546756312;
     newGstar[0][1]=0.00815256992072;
     newGstar[0][2]=-0.00145274558861;
@@ -70,7 +70,7 @@ public:
   void testUnitRotation()
   {
     OrientedLattice theCell;
-    MantidMat rot;
+    DblMatrix rot;
     TSM_ASSERT_THROWS_NOTHING("The unit transformation should not throw",theCell.setUFromVectors(V3D(1,0,0),V3D(0,1,0)));
     rot = theCell.getUB();
 
@@ -91,7 +91,7 @@ public:
   void testParallelProjThrows()
   {
     OrientedLattice theCell;
-    MantidMat rot;
+    DblMatrix rot;
     TSM_ASSERT_THROWS("The transformation to plane defined by two parallel vectors should throw",
         theCell.setUFromVectors(V3D(0,1,0),V3D(0,1,0)),std::invalid_argument);
     rot = theCell.getUB();
@@ -101,7 +101,7 @@ public:
   void testPermutations()
   {
     OrientedLattice theCell;
-    MantidMat rot;
+    DblMatrix rot;
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(0,1,0),V3D(1,0,0)));
     rot = theCell.getUB();
 
@@ -122,7 +122,7 @@ public:
   void testRotations2D()
   {
     OrientedLattice theCell;
-    MantidMat rot;
+    DblMatrix rot;
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(1,1,0),V3D(1,-1,0)));
     rot = theCell.getUB();
     V3D dir0(sqrt(2.),0,0);
@@ -141,7 +141,7 @@ public:
   void testRotations3D()
   {
     OrientedLattice theCell;
-    MantidMat rot;
+    DblMatrix rot;
     // two orthogonal vectors
     V3D ort1(sqrt(2.),-1,-1);
     V3D ort2(sqrt(2.),1,1);
@@ -169,7 +169,7 @@ public:
   void testRotations3DNonOrthogonal()
   {
     OrientedLattice theCell(1,2,3,30,60,45);
-    MantidMat rot;
+    DblMatrix rot;
     TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",theCell.setUFromVectors(V3D(1,0,0),V3D(0,1,0)));
     rot = theCell.getUB();
 

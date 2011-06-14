@@ -96,9 +96,9 @@ public:
    *  into MDImage system of coordinates  As there are no info about 
       MDDPoints system of coodinates in this class, the matrix has to be calculated externaly (except when building from geomerty,
           which provides example of retrieving this matrix        */
-  void setRotationMatrix(const MantidMat &rotMatrix){this->Rotations = rotMatrix;}
+  void setRotationMatrix(const DblMatrix &rotMatrix){this->Rotations = rotMatrix;}
 /// return the rotations, which transform old coordinate system into the new one, set by the projection axis;
-  MantidMat const & getRotations()const;
+  DblMatrix const & getRotations()const;
 
   /// obtain number of dimensions in the geometry
   size_t getNumDims(void)const{return nDimensions;}
@@ -171,7 +171,7 @@ private:
   size_t nReciprocalDimensions;
   /** the matrix which would allow to thransform a vector, expressed in MDGeomBasis (MDDPoints) system of coordinates into 
       MDImage system of coordinates. */
-   MantidMat  Rotations;
+   DblMatrix  Rotations;
 
  
   /** auxiliary function which check if the index requested is allowed. ErrinFuncName allows to add to the error message the name of the calling function*/

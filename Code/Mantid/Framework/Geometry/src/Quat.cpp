@@ -62,7 +62,7 @@ Quat::Quat(const V3D& src,const V3D& des)
 	}
   }
 }
-Quat::Quat(const Geometry::MantidMat &RotMat)
+Quat::Quat(const Geometry::DblMatrix &RotMat)
 {
 	this->setQuat(RotMat);
 }
@@ -610,7 +610,7 @@ void Quat::setQuat(double mat[16])
 }
 /// Using the convention at http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
 void 
-Quat::setQuat(const Geometry::MantidMat &rMat)
+Quat::setQuat(const Geometry::DblMatrix &rMat)
 {
 	int i=0,j,k;
 	if (rMat[1][1]>rMat[0][0]) i=1;

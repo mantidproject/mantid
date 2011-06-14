@@ -70,7 +70,7 @@ namespace Mantid
       //! Set quaternion form an angle in degrees and an axis
       Quat(const double _deg, const V3D& _axis);
           // set a quaternion from a rotational matrix;
-          Quat(const Geometry::MantidMat &RotMat);
+          Quat(const Geometry::DblMatrix &RotMat);
       ~Quat();
       void operator()(const Quat&);
       void operator()(const double ww, const double aa, const double bb, const double cc);
@@ -109,7 +109,7 @@ namespace Mantid
       //! Convert GL Matrix into Quat
       void setQuat(double[16]);
           //! Convert usual 3D rotation matrix into quat; Will throw if matirix is not rotational;
-          void setQuat(const Geometry::MantidMat &RotMat);
+          void setQuat(const Geometry::DblMatrix &RotMat);
       //! Rotate a vector
       void rotate(V3D&) const;
 

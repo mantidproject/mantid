@@ -9,7 +9,7 @@
 #include <MantidGeometry/Crystal/UnitCell.h>
 
 using namespace Mantid::Kernel::Strings;
-using Mantid::Geometry::MantidMat;
+using Mantid::Geometry::DblMatrix;
 using Mantid::Geometry::UnitCell;
 
 namespace Mantid
@@ -104,7 +104,7 @@ namespace Crystal
     ol.setUB(ub);
   /*
     UnitCell uc;
-    MantidMat Gstar = ub.Tprime() * ub ;
+    DblMatrix Gstar = ub.Tprime() * ub ;
     uc.recalculateFromGstar( Gstar );
     std::cout << uc.a() << " "  << uc.b() << " "  << uc.c() << " "
         << uc.alpha() << " "  << uc.beta() << " "  << uc.gamma() << std::endl;
@@ -135,7 +135,7 @@ namespace Crystal
 */
     // Swap rows around to accound for IPNS convention
     Geometry::Matrix<double> U=ol.getU();
-    MantidMat U2 = U;
+    DblMatrix U2 = U;
     for (size_t r=0; r<3; r++)
     {
       U2[2][r] = U[0][r];

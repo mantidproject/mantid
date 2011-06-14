@@ -325,7 +325,7 @@ public:
 
  }
  void testUnitQuatFromUnitRotMatrix(){
-	 MantidMat Rot(3,3);
+	 DblMatrix Rot(3,3);
 	 Rot[0][0]=1;
 	 Rot[1][1]=1;
 	 Rot[2][2]=1;
@@ -340,7 +340,7 @@ public:
  }
 
  void testQuatFromRotMatrix(){
-	 MantidMat Rot(3,3);
+	 DblMatrix Rot(3,3);
 	 int Nx(5),Ny(5),Nz(3);
 	 double Phi=M_PI/2/Nx;
 	 double Tht=M_PI/2/Ny;

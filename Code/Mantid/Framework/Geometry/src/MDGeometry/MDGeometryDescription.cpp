@@ -25,7 +25,7 @@ struct findDimension
 };
 
 //
-MantidMat const & 
+DblMatrix const & 
 MDGeometryDescription::getRotations()const
 {
 	return Rotations;
@@ -92,7 +92,7 @@ nContributedPixels(0), Rotations(3,3,true)
     throw std::logic_error("Nine components are required for a rotation matrix.");
   }
  
-  this->Rotations = MantidMat(rotationMatrix);
+  this->Rotations = DblMatrix(rotationMatrix);
 
   int count = 0; 
   //To get this to work with the rest of MDGeometeryDescription. have to order certain dimensions in a specific fashion.
@@ -163,7 +163,7 @@ MDGeometryDescription::MDGeometryDescription(MDGeometryDescription const * const
         this->nContributedPixels=19531253125000;
         this->nDimensions = 4;
         this->nReciprocalDimensions=3;
-        this->Rotations = MantidMat(3,3,true);
+        this->Rotations = DblMatrix(3,3,true);
 
         this->intit_default_slicing(nDimensions,nReciprocalDimensions);
     }

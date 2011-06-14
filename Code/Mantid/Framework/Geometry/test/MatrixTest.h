@@ -10,6 +10,8 @@
 #include "MantidGeometry/Math/Matrix.h" 
 #include "MantidGeometry/V3D.h"
 
+#include <boost/lexical_cast.hpp>
+
 using namespace Mantid;
 using namespace Geometry;
 
@@ -215,6 +217,123 @@ public:
     TS_ASSERT_DELTA(v[2],3.,1e-7);
   }
 
+  void test_Input_Stream_Throws_On_Bad_Input()
+  {
+    DblMatrix rot;
+    std::istringstream is;
+    is.str("Matr(3,3)1,2,3,4,5,6,7,8,9");
+    TS_ASSERT_THROWS(is >> rot, std::invalid_argument);
+    is.str("Matrix3,3)1,2,3,4,5,6,7,8,9");
+    TS_ASSERT_THROWS(is >> rot, std::invalid_argument);
+    is.str("Matrix(3,31,2,3,4,5,6,7,8,9");
+    TS_ASSERT_THROWS(is >> rot, std::invalid_argument);
+  }
+
+
+  void test_Input_Stream_On_Square_Matrix()
+  {
+    DblMatrix rot;
+    std::istringstream is;
+    is.str("Matrix(3,3)1,2,3,4,5,6,7,8,9");
+    TS_ASSERT_THROWS_NOTHING(is >> rot);
+    TS_ASSERT_EQUALS(rot.numRows(), 3);
+    TS_ASSERT_EQUALS(rot.numCols(), 3);
+    for( size_t i = 0; i < 3; ++i )
+    {
+      for( size_t j = 0; j < 3; ++j )
+      {
+        TS_ASSERT_EQUALS(rot[i][j], static_cast<double>(i*rot.numRows() + j + 1));
+      }
+    }
+  }
+
+   void test_Input_Stream_On_Non_Square_Matrix()
+  {
+    DblMatrix rot;
+    std::istringstream is;
+    is.str("Matrix(2,4)0,1,2,3,10,11,12,13");
+    TS_ASSERT_THROWS_NOTHING(is >> rot);
+    TS_ASSERT_EQUALS(rot.numRows(), 2);
+    TS_ASSERT_EQUALS(rot.numCols(), 4);
+    for( size_t i = 0; i < 2; ++i )
+    {
+      for( size_t j = 0; j < 4; ++j )
+      {
+        if( i < 1 ) 
+        {
+          TS_ASSERT_EQUALS(rot[i][j], static_cast<double>(i+j));
+        }
+        else
+        {
+          TS_ASSERT_EQUALS(rot[i][j], static_cast<double>(9+i+j));
+        }
+      }
+    }
+  }
+
+   void test_Construction_From_Output_Stream()
+   {
+     DblMatrix ref(2,3);
+     ref[0][0] = 5;
+     ref[0][1] = 10;
+     ref[0][2] = 15;
+     ref[1][0] = 105;
+     ref[1][1] = 110;
+     ref[1][2] = 115;
+
+     std::ostringstream os;
+     os << ref;
+     TS_ASSERT_EQUALS(os.str(), "Matrix(2,3)5,10,15,105,110,115");
+
+     DblMatrix copy;
+     std::istringstream is;
+     is.str(os.str());
+     is >> copy;
+     TS_ASSERT_EQUALS(copy[0][0], 5.0);
+     TS_ASSERT_EQUALS(copy[0][1], 10.0);
+     TS_ASSERT_EQUALS(copy[0][2], 15.0);
+     TS_ASSERT_EQUALS(copy[1][0], 105.0);
+     TS_ASSERT_EQUALS(copy[1][1], 110.0);
+     TS_ASSERT_EQUALS(copy[1][2], 115.0);
+
+     DblMatrix square(2,2);
+     square[0][0] = 2;
+     square[0][1] = 4;
+     square[1][0] = 6;
+     square[1][1] = 8;
+
+     os.clear(); //Clear any eof flags that may have been set
+     os.str("");
+     os << square;
+     TS_ASSERT_EQUALS(os.str(), "Matrix(2,2)2,4,6,8");
+     
+     is.clear();
+     is.str(os.str());
+     is >> copy;
+     TS_ASSERT_EQUALS(copy[0][0], 2.0);
+     TS_ASSERT_EQUALS(copy[0][1], 4.0);
+     TS_ASSERT_EQUALS(copy[1][0], 6.0);
+     TS_ASSERT_EQUALS(copy[1][1], 8.0);
+   }
+
+   void test_lexical_cast()
+   {
+      try
+      {
+        DblMatrix R = boost::lexical_cast<DblMatrix>("Matrix(2,2)2,4,6,8");
+        TS_ASSERT_EQUALS(R.numRows(), 2);
+        TS_ASSERT_EQUALS(R.numCols(), 2);
+        TS_ASSERT_EQUALS(R[0][0], 2.0);
+        TS_ASSERT_EQUALS(R[0][1], 4.0);
+        TS_ASSERT_EQUALS(R[1][0], 6.0);
+        TS_ASSERT_EQUALS(R[1][1], 8.0);
+      }
+      catch(boost::bad_lexical_cast & e)
+      {
+        TS_FAIL(e.what());
+      }
+
+   }
 };
 
 #endif

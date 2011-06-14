@@ -21,9 +21,6 @@
 #include "idc.h"
 #include "isisds_command.h"
 
-//suppress warnings that say that vsprintf has been deprecated
-#define _CRT_SECURE_NO_WARNINGS
-
 ///@cond nodoc
 /** used to keep status information about the DAE connection */
 struct idc_info

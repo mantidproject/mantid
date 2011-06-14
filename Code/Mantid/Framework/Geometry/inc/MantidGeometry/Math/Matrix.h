@@ -41,7 +41,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
     template<typename T>
-    class MANTID_GEOMETRY_DLL Matrix
+    class DLLExport Matrix
     {
     private:
 
@@ -58,9 +58,9 @@ namespace Mantid
     public:
 
       Matrix(const size_t nrow = 0, const size_t ncol = 0, bool const makeIdentity=false);
-/**     Constructor to take two vectors and multiply them to  construct a matrix. (assuming that we have columns x row vector. */
+      /** Constructor to take two vectors and multiply them to  construct a matrix. (assuming that we have columns x row vector. */
       Matrix(const std::vector<T>&,const std::vector<T>&);
-/// build square matrix from a linear vector. Throw if the vector.size() != nx*nx;
+      /// Build square matrix from a linear vector. Throw if the vector.size() != nx*nx;
       Matrix(const std::vector<T>&);
       Matrix(const Matrix<T>&,const size_t nrow,const size_t ncol);
 
@@ -83,7 +83,6 @@ namespace Mantid
       std::vector<T> operator*(const std::vector<T>&) const; ///< Multiply M*Vec
       V3D operator*(const V3D&) const; ///< Multiply M*Vec
       Matrix<T> operator*(const T&) const;              ///< Multiply by constant
-
 
       Matrix<T>& operator*=(const Matrix<T>&);            ///< Basic matrix multipy
       Matrix<T>& operator*=(const T&);                 ///< Multiply by constant
@@ -153,12 +152,20 @@ namespace Mantid
       bool isOrthogonal();
       // Transform to a rotation matrix
       std::vector<T> toRotation();
+    private:
+      template<typename T> friend std::ostream& operator<<(std::ostream&,const Geometry::Matrix<T>&);
+      template<typename T> friend std::istream& operator>>(std::istream&, Geometry::Matrix<T>&);
     };
 
     template<typename T>
-    MANTID_GEOMETRY_DLL std::ostream&
-      operator<<(std::ostream&,const Geometry::Matrix<T>&);
-    typedef Mantid::Geometry::Matrix<double> MantidMat;
+    DLLExport std::ostream& operator<<(std::ostream&,const Geometry::Matrix<T>&);
+    template<typename T>
+    DLLExport std::istream& operator>>(std::istream&, Geometry::Matrix<T>&);
+
+    /// A matrix of doubles
+    typedef Mantid::Geometry::Matrix<double> DblMatrix;
+    /// A matrix of ints
+    typedef Mantid::Geometry::Matrix<int> IntMatrix;
   }
 }  
 #endif //MANTID_GEOMETRY_MATRIX_H_

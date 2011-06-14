@@ -5,7 +5,10 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <iomanip>
 #include <iostream>
-#include <boost/type_traits.hpp>
+
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/regex.hpp>
 
 using Mantid::Kernel::TimeSeriesProperty;
 
@@ -18,20 +21,84 @@ namespace Geometry
   // 
   #define fabs(x) std::fabs((x)*1.0)
 
-template<typename T>
-std::ostream& 
-operator<<(std::ostream& of,const Matrix<T>& A)
   /**
-    External Friend :: outputs point to a stream 
-    @param of :: output stream
-    @param A :: Matrix to write out
-    @return The output stream (of)
+   * Write an object to a stream. Format should be Matrix(nrows,ncols)x_00,x_01...,x_10,x_11
+   * @param os :: output stream
+   * @param matrix :: Matrix to write out
+   * @return The output stream (of)
   */
+template<typename T>
+std::ostream& operator<<(std::ostream& os,const Matrix<T>& matrix)
 {
-  of<<std::endl;
-  A.write(of,5);
-  return of;
+  size_t nrows(matrix.numRows()), ncols(matrix.numCols());
+  os << "Matrix(" << nrows << "," << ncols << ")";
+  for( size_t i = 0; i < nrows; ++i )
+  {
+    for( size_t j = 0; j < ncols; ++j )
+    {
+      os << matrix[i][j];
+      if( i < nrows - 1 || j < ncols - 1 ) os << ",";
+    }
+  }
+  return os;
 }
+
+/**
+ * Fill an object from a stream. Format should be Matrix(nrows,ncols)x_00,x_01...,x_10,x_11
+ * @param is :: A stream object
+ * @param in :: An object to fill
+ * @returns A reference to the stream
+ */
+template<typename T>
+std::istream& operator>>(std::istream& is, Geometry::Matrix<T>& in)
+{
+  // Stream should start with Matrix(
+  char dump;
+  std::string start(7, ' ');
+  for (int i = 0; i < 7; ++i) 
+  {
+    is >> dump;
+    start[i] = dump;
+    if( !is ) throw std::invalid_argument("Unexpected character when reading Matrix from stream.");
+  }
+  if( start != "Matrix(" ) throw std::invalid_argument("Incorrect input format for Matrix stream.");
+  // Now read a nrows,ncols and )
+  size_t nrows(0), ncols(0);
+  is >> nrows;
+  if( !is ) throw std::invalid_argument("Expected number of rows when reading Matrix from stream, found something else.");
+  is >> dump;
+  is >> ncols;
+  if( !is ) throw std::invalid_argument("Expected number of columns when reading Matrix from stream, found something else.");
+  is >> dump;
+  if( dump != ')' ) throw std::invalid_argument("Expected closing parenthesis after ncols when reading Matrix from stream, found something else: " + dump);
+
+  // Resize the matrix
+  in.setMem(nrows,ncols);
+
+  // Use getline with the delimiter set to "," to read 
+  std::string value_str;
+  size_t row(0), col(0);
+  while( !is.eof() && std::getline(is, value_str, ',') )
+  {
+    try
+    {
+      T value = boost::lexical_cast<T>(value_str);
+      in.V[row][col] = value;
+    }
+    catch(boost::bad_lexical_cast &)
+    {
+      throw std::invalid_argument("Unexpected type found while reading Matrix from stream: \"" + value_str + "\"");
+    }
+    ++col;
+    if( col == ncols ) // New row
+    {
+      col = 0;
+      ++row;
+    }
+  }
+  return is;
+}
+
 
 template<typename T>
 std::vector<T> 
@@ -1680,13 +1747,17 @@ Matrix<T>::str() const
 
 ///\cond TEMPLATE
 
+// Symbol definitions for common types
 template class MANTID_GEOMETRY_DLL Matrix<double>;
-template class MANTID_GEOMETRY_DLL Matrix<float>;
 template class MANTID_GEOMETRY_DLL Matrix<int>;
+template class MANTID_GEOMETRY_DLL Matrix<float>;
 
-template MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&,const Geometry::Matrix<double>&);
-template MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&,const Geometry::Matrix<float>&);
-template MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&,const Geometry::Matrix<int>&);
+template MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const DblMatrix&);
+template MANTID_GEOMETRY_DLL std::istream& operator>>(std::istream&, DblMatrix&);
+template MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const Matrix<float>&);
+template MANTID_GEOMETRY_DLL std::istream& operator>>(std::istream&, Matrix<float>&);
+template MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const IntMatrix&);
+template MANTID_GEOMETRY_DLL std::istream& operator>>(std::istream&, IntMatrix&);
 
 ///\endcond TEMPLATE
 } // namespace Geometry

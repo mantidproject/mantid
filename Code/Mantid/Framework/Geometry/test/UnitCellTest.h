@@ -46,7 +46,7 @@ public:
     TS_ASSERT_DELTA(u.getB()[2][2],0.125,1e-10);
 
     // Inverse B matrix
-    MantidMat I = u.getB() * u.getBinv();
+    DblMatrix I = u.getB() * u.getBinv();
     TS_ASSERT_EQUALS( I, Matrix<double>(3,3,true));
 
     // d spacing for direct lattice at (1,1,1) (will automatically check dstar)
@@ -65,7 +65,7 @@ public:
   {
     // test more advanced calculations
     // the new Gstar shold yield a=2.5, b=6, c=8, alpha=93, beta=88, gamma=97.
-    MantidMat newGstar(3,3);
+    DblMatrix newGstar(3,3);
     newGstar[0][0]=0.162546756312;
     newGstar[0][1]=0.00815256992072;
     newGstar[0][2]=-0.00145274558861;

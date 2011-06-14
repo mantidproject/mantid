@@ -138,7 +138,7 @@ public:
     WorkspaceCreationHelper::AddTSPEntry(runInfo, "chi", 90.0);
     WorkspaceCreationHelper::AddTSPEntry(runInfo, "omega", 90.0);
     runInfo.getGoniometer().makeUniversalGoniometer();
-    MantidMat r = runInfo.getGoniometerMatrix();
+    DblMatrix r = runInfo.getGoniometerMatrix();
     V3D rot = r * V3D(-1,0,0);
     TS_ASSERT_EQUALS( rot, V3D(1, 0, 0));
     rot = r * V3D(0,0,1);
@@ -152,7 +152,7 @@ public:
     WorkspaceCreationHelper::AddTSPEntry(runInfo, "chi", 90.0);
     WorkspaceCreationHelper::AddTSPEntry(runInfo, "omega", 0.0);
     runInfo.getGoniometer().makeUniversalGoniometer();
-    MantidMat r = runInfo.getGoniometerMatrix();
+    DblMatrix r = runInfo.getGoniometerMatrix();
     V3D rot = r * V3D(-1,0,0);
     TS_ASSERT_EQUALS( rot, V3D(0, -sqrt(0.5), sqrt(0.5)));
   }

@@ -65,11 +65,11 @@ namespace Geometry
       // Copy constructor
       Goniometer(const Goniometer& other);
       // Constructor from a rotation matrix
-      Goniometer(MantidMat rot);
+      Goniometer(DblMatrix rot);
       // Default destructor
       virtual ~Goniometer();
       // Return rotation matrix
-      const Geometry::MantidMat& getR() const;
+      const Geometry::DblMatrix& getR() const;
       // Return information about axes  
       std::string axesInfo();
       // Add axis to goniometer
@@ -92,7 +92,7 @@ namespace Geometry
 
     private:
       /// Global rotation matrix of the goniometer
-      MantidMat R;
+      DblMatrix R;
       /// Motors vector contains #GoniometerAxis objects, the last one is the closest to the sample
       std::vector<GoniometerAxis> motors;
       /// Flag to specify if the goniometer is initialized from a rotation matrix

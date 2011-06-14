@@ -7,7 +7,7 @@ namespace Geometry
   /** Default constructor
   @param Umatrix :: orientation matrix U. By default this will be identity matrix
   */
-  OrientedLattice::OrientedLattice(MantidMat Umatrix):UnitCell()
+  OrientedLattice::OrientedLattice(DblMatrix Umatrix):UnitCell()
   {
     if (Umatrix.isRotation()==true)
     { 
@@ -27,7 +27,7 @@ namespace Geometry
   /** Constructor
   @param _a, _b, _c :: lattice parameters \f$ a, b, c \f$ \n
   with \f$\alpha = \beta = \gamma = 90^\circ \f$*/      
-  OrientedLattice::OrientedLattice(const double _a,const double _b,const double _c,MantidMat Umatrix):UnitCell(_a,_b,_c)
+  OrientedLattice::OrientedLattice(const double _a,const double _b,const double _c,DblMatrix Umatrix):UnitCell(_a,_b,_c)
   {
     if (Umatrix.isRotation()==true)
     { 
@@ -41,7 +41,7 @@ namespace Geometry
   @param _a, _b, _c, _alpha, _beta, _gamma :: lattice parameters\n
   @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
   */
-  OrientedLattice::OrientedLattice(const double _a,const double _b,const double _c,const double _alpha,const double _beta,const double _gamma,MantidMat Umatrix, const int angleunit):UnitCell(_a,_b,_c,_alpha,_beta,_gamma,angleunit)
+  OrientedLattice::OrientedLattice(const double _a,const double _b,const double _c,const double _alpha,const double _beta,const double _gamma,DblMatrix Umatrix, const int angleunit):UnitCell(_a,_b,_c,_alpha,_beta,_gamma,angleunit)
   {
     if (Umatrix.isRotation()==true)
     { 
@@ -55,7 +55,7 @@ namespace Geometry
   @param uc :: UnitCell
   @param Umatrix :: orientation matrix U. By default this will be identity matrix
   */
-  OrientedLattice::OrientedLattice(UnitCell uc,MantidMat Umatrix):UnitCell(uc),U(Umatrix)
+  OrientedLattice::OrientedLattice(UnitCell uc,DblMatrix Umatrix):UnitCell(uc),U(Umatrix)
   {
     if (Umatrix.isRotation()==true)
     { 
@@ -73,7 +73,7 @@ namespace Geometry
 
   /// Get the U matrix
   /// @return U :: U orientation matrix
-  const MantidMat& OrientedLattice::getU() const
+  const DblMatrix& OrientedLattice::getU() const
   {
     return U;
   }
@@ -86,12 +86,12 @@ namespace Geometry
 
    @return UB :: UB orientation matrix
    */
-  const MantidMat& OrientedLattice::getUB() const
+  const DblMatrix& OrientedLattice::getUB() const
   {
     return UB;
   }
 
-  void OrientedLattice::setU(MantidMat& newU)
+  void OrientedLattice::setU(DblMatrix& newU)
   {
     if (newU.isRotation()==true)
     {
@@ -101,12 +101,12 @@ namespace Geometry
     else throw std::invalid_argument("U is not a proper rotation");
   }
 
-  void OrientedLattice::setUB(MantidMat& newUB)
+  void OrientedLattice::setUB(DblMatrix& newUB)
   {
     if (UB.determinant()>0)
     {
       UB=newUB;
-      MantidMat newGstar,B;
+      DblMatrix newGstar,B;
       newGstar=newUB.Tprime()*newUB;
       this->recalculateFromGstar(newGstar);
       B=this->getB();
@@ -126,10 +126,10 @@ namespace Geometry
    *  @param v :: vector of ?
    *  @return the U matrix calculated
    **/
-  MantidMat OrientedLattice::setUFromVectors(const V3D &u, const V3D &v)
+  DblMatrix OrientedLattice::setUFromVectors(const V3D &u, const V3D &v)
   {
     //get  B-matrix of Busing and Levy
-    MantidMat B = this->getB();
+    DblMatrix B = this->getB();
 
     // get orthogonal system, adjacent to the unit cell;
     V3D e1 = B*u;
@@ -144,7 +144,7 @@ namespace Geometry
 
     V3D e2= e3.cross_prod(e1);
 
-    MantidMat Transf(3,3);
+    DblMatrix Transf(3,3);
     Transf.setColumn(0,e1);
     Transf.setColumn(1,e2);
     Transf.setColumn(2,e3);
