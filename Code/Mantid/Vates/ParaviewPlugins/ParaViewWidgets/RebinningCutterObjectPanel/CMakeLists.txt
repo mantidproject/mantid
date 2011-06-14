@@ -16,7 +16,11 @@ add_paraview_plugin( MantidParaViewRebinningCutterObjectPanel "1.0"
 target_link_libraries( MantidParaViewRebinningCutterObjectPanel 
 MantidParaViewQtWidgets )
 
+# Put library into subfolder.
+#output_binary_to( MantidParaViewRebinningCutterObjectPanel PVPlugins)
+
 # Windows-only at the moment.
 if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
-  install(TARGETS MantidParaViewRebinningCutterObjectPanel RUNTIME DESTINATION ${LIB_DIR})
+  install(TARGETS MantidParaViewRebinningCutterObjectPanel RUNTIME DESTINATION ${LIB_DIR}/PVPlugins)
 endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+

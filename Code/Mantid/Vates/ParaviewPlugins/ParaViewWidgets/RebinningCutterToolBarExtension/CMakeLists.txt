@@ -14,9 +14,15 @@ if( PARAVIEW_BUILD_QT_GUI )
                        SOURCES RebinningCutterToolBarActions.cxx ${MOC_SRCS} 
                        ${IFACE_SRCS} ${INCLUDE_FILES} ${SRC_FILES} )
 					   
+
+# Put library into subfolder.
+#output_binary_to( MantidParaViewRebinningCutterToolBarActions PVPlugins)	
+				   
  # Windows-only at the moment.
  if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
-   install(TARGETS MantidParaViewRebinningCutterToolBarActions RUNTIME DESTINATION ${LIB_DIR})
+   install(TARGETS MantidParaViewRebinningCutterToolBarActions RUNTIME DESTINATION ${LIB_DIR}/PVPlugins)
  endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
  
+
+
 endif( PARAVIEW_BUILD_QT_GUI )

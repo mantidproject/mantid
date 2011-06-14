@@ -30,7 +30,11 @@ ${MANTID_SUBPROJECT_LIBS} )
 
 add_definitions( -DIN_MANTIDPARAVIEWQT_MANTIDPARAVIEWWIDGETS )
 
+# Put library into subfolder.
+#output_binary_to(MantidParaViewQtWidgets PVPlugins)
+
 # Windows-only at the moment.
 if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
-  install(TARGETS MantidParaViewQtWidgets RUNTIME DESTINATION ${LIB_DIR})
+  install(TARGETS MantidParaViewQtWidgets RUNTIME DESTINATION ${LIB_DIR}/PVPlugins)
 endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+
