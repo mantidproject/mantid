@@ -75,7 +75,44 @@ namespace Mantid
     */
     boost::shared_ptr<const Geometry::IComponent> IInstrument::getComponentByName(const std::string & cname) const
     {
-      return getComponentByName(cname);
+      boost::shared_ptr<const IComponent> node = boost::shared_ptr<const IComponent>(this, NoDeleting());
+      // Check the instrument name first
+      if( this->getName() == cname ) 
+      {
+        return node;
+      }
+      // Otherwise Search the instrument tree using a breadth-first search algorithm since most likely candidates 
+      // are higher-level components
+      // I found some useful info here http://www.cs.bu.edu/teaching/c/tree/breadth-first/
+      std::deque<boost::shared_ptr<const IComponent> > nodeQueue;
+      // Need to be able to enter the while loop
+      nodeQueue.push_back(node);
+      while( !nodeQueue.empty() )
+      {
+        node = nodeQueue.front();
+        nodeQueue.pop_front();
+        int nchildren(0);
+        boost::shared_ptr<const ICompAssembly> asmb = boost::dynamic_pointer_cast<const ICompAssembly>(node);
+        if( asmb )
+        {
+          nchildren = asmb->nelements();
+        }
+        for( int i = 0; i < nchildren; ++i )
+        {
+          boost::shared_ptr<const Geometry::IComponent> comp = (*asmb)[i];
+          if( comp->getName() == cname )
+          {
+            return comp;
+          }
+          else
+          {
+            nodeQueue.push_back(comp);
+          }
+        } 
+      }// while-end
+
+      // If we have reached here then the search failed
+      return boost::shared_ptr<const IComponent>();
     }
 
     /**
