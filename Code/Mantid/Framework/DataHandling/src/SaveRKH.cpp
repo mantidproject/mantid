@@ -2,7 +2,6 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/SaveRKH.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include <Poco/LocalDateTime.h>
@@ -45,7 +44,7 @@ SaveRKH::~SaveRKH()
 void SaveRKH::init()
 {
   declareProperty(
-    new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input, new RawCountValidator<>(false)),
+    new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input),
     "The name of the workspace to save");
   std::vector<std::string> exts;
   exts.push_back(".txt");

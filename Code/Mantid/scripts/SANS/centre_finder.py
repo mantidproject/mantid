@@ -35,7 +35,6 @@ class CentreFinder(object):
     
         #phi masking will remove areas of the detector that we need 
         self.reducer.mask.mask_phi = False
-        self.reducer.keep_un_normalised(False)
         self.reducer.run_no_Q('centre')
     
         self._group_into_quadrants('centre', trial[0], trial[1], suffix='_tmp')

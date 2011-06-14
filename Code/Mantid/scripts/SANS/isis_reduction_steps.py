@@ -909,75 +909,9 @@ class CropDetBank(ReductionStep):
     def execute(self, reducer, workspace):
         if len(self.out_container) > 0:
             reducer.output_wksp = self.out_container[0]
-        # Get the detector bank that is to be used in this analysis leave the complete workspace
-        CropWorkspace(workspace, reducer.output_wksp,
-            StartWorkspaceIndex = reducer.instrument.cur_detector().get_first_spec_num() - 1,
-            EndWorkspaceIndex = reducer.instrument.cur_detector().last_spec_num - 1)
-
-class ConvertToQ(ReductionStep):
-    _OUTPUT_TYPES = {'1D' : 'Q1D',
-                     '2D': 'Qxy'}
-    _DEFAULT_GRAV = False
-    
-    def __init__(self, container=None):
-        super(ConvertToQ, self).__init__()
-	#allows running the reducers keep_un_normalised(), if required
-	self._error_holder = container
         
-        #this should be set to 1D or 2D
-        self._output_type = '1D'
-        #the algorithm that corrosponds to the above choice
-        self._Q_alg = self._OUTPUT_TYPES[self._output_type]
-        #if true gravity is taken into account in the Q1D calculation
-        self._use_gravity = self._DEFAULT_GRAV
-        self._grav_set = False
-    
-    def set_output_type(self, descript):
-        """
-	    Requests the given output from the Q conversion, either 1D or 2D. For
-	    the 1D calculation it asks the reducer to keep a workspace for error
-	    estimates
-	    @param descript: 1D or 2D
-	"""
-        self._Q_alg = self._OUTPUT_TYPES[descript]
-        self._output_type = descript
-	
-        if self._output_type == '1D':
-            if not self._error_holder['Q1D errors']:
-                raise RuntimeError('Could not find the un-normalised sample workspace needed for error estimates')
-	        	
-    def get_output_type(self):
-        return self._output_type
-
-    output_type = property(get_output_type, set_output_type, None, None)
-
-    def get_gravity(self):
-        return self._use_gravity
-
-    def set_gravity(self, flag, override=True):
-        if override:
-            self._grav_set = True
-            
-        if (not self._grav_set) or override:
-                self._use_gravity = bool(flag)
-        else:
-            _issueWarning("User file can't override previous gravity setting, do gravity correction remains " + str(self._use_gravity)) 
-
-    def execute(self, reducer, workspace):
-        if self._Q_alg == 'Q1D':
-	    #use a counts workspace for errors only if it exists, otherwise use the data workspace as a dummy
-            if self._error_holder['Q1D errors']:
-                errors = self._error_holder['Q1D errors']
-	    else:
-	        errors = workspace
-
-            Q1D(workspace, errors, workspace, reducer.Q_REBIN, AccountForGravity=self._use_gravity)
-
-        elif self._Q_alg == 'Qxy':
-            Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, AccountForGravity=self._use_gravity)
-            ReplaceSpecialValues(workspace, workspace, NaNValue="0", InfinityValue="0")
-        else:
-            raise NotImplementedError('The type of Q reduction hasn\'t been set, e.g. 1D or 2D')
+        # Get the detector bank that is to be used in this analysis leave the complete workspace
+        reducer.instrument.cur_detector().crop_to_detector(workspace, reducer.output_wksp)
 
 class NormalizeToMonitor(sans_reduction_steps.Normalize):
     """
@@ -994,8 +928,9 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             index_num = None
         super(NormalizeToMonitor, self).__init__(index_num)
         self._raw_ws = raw_ws
-	#it is possible to keep the un-normalised workspace, to do this set this to the name you want this workspace to have
-	self.save_original = None
+
+        #the result of this calculation that will be used by CalculateNorm() and the ConvertToQ
+        self.output_wksp = None
 
     def execute(self, reducer, workspace):
         normalization_spectrum = self._normalization_spectrum 
@@ -1008,24 +943,21 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             raw_ws = reducer.data_loader.uncropped
 
         mantid.sendLogMessage('::SANS::Normalizing to monitor ' + str(normalization_spectrum))
-        # Get counting time or monitor
-        norm_ws = workspace+"_normalization"
-        norm_ws = 'Monitor'
 
-        
-        CropWorkspace(raw_ws, norm_ws,
+        self.output_wksp = 'Monitor'       
+        CropWorkspace(raw_ws, self.output_wksp,
                       StartWorkspaceIndex = normalization_spectrum-1, 
                       EndWorkspaceIndex   = normalization_spectrum-1)
     
         if reducer.instrument.name() == 'LOQ':
-            RemoveBins(norm_ws, norm_ws, '19900', '20500',
+            RemoveBins(self.output_wksp, self.output_wksp, '19900', '20500',
                 Interpolation="Linear")
         
         # Remove flat background
         TOF_start, TOF_end = reducer.inst.get_TOFs(
                                     self.NORMALISATION_SPEC_NUMBER)
         if TOF_start and TOF_end:
-            FlatBackground(norm_ws, norm_ws, StartX=TOF_start, EndX=TOF_end,
+            FlatBackground(self.output_wksp, self.output_wksp, StartX=TOF_start, EndX=TOF_end,
                 WorkspaceIndexList=self.NORMALISATION_SPEC_INDEX, Mode='Mean')
 
         #perform the same conversion on the monitor spectrum as was applied to the workspace but with a possibly different rebin
@@ -1033,17 +965,7 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             r_alg = 'InterpolatingRebin'
         else :
             r_alg = 'Rebin'
-        reducer.to_wavelen.execute(reducer, norm_ws, bin_alg=r_alg)
-
-        out_workspace = workspace
-        if self.save_original:
-            # At this point need to fork off workspace name to keep a workspace containing raw counts
-            RenameWorkspace(workspace, self.save_original)
-            workspace = self.save_original
-
-        Divide(workspace, norm_ws, out_workspace)
-
-        DeleteWorkspace(norm_ws)
+        reducer.to_wavelen.execute(reducer, self.output_wksp, bin_alg=r_alg)
 
 class TransmissionCalc(sans_reduction_steps.BaseTransmission):
     """
@@ -1097,6 +1019,9 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         # a custom transmission workspace, if we have this there is much less to do 
         self.calculated_samp = ''
         self.calculated_can = None
+        #the result of this calculation that will be used by CalculateNorm() and the ConvertToQ
+        self.output_wksp = None
+
 
     def set_trans_fit(self, min=None, max=None, fit_method=None, override=True):
         if min: min = float(min)
@@ -1193,13 +1118,9 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
                 #if no transmission files were specified this isn't an error, we just do nothing
                 return None
 
-        rebinned = trans_ws+'_rebinned'
-        RebinToWorkspace(trans_ws, workspace, rebinned)
+        self.output_wksp = trans_ws+'_rebinned'
+        RebinToWorkspace(trans_ws, workspace, self.output_wksp)
         
-        Divide(workspace, rebinned, workspace)
-
-        DeleteWorkspace(rebinned)
-
     def _get_run_wksps(self):
         """
             Retrieves the names runs that contain the user specified for calculation
@@ -1301,24 +1222,13 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         return fitted_name, unfitted
 
 
-class ISISCorrections(ReductionStep):
+class AbsoluteUnits(ReductionStep):
     DEFAULT_SCALING = 100.0
     def __init__(self):
         # Scaling values [%]
         self.rescale= self.DEFAULT_SCALING
     
-    def set_filename(self, filename):
-        raise AttributeError('The correction must be set in the instrument, or use the CorrectionToFileStep instead')
-
     def execute(self, reducer, workspace):
-        #use the instrument's correction file
-        corr_file = reducer.instrument.cur_detector().correction_file
-        corr = sans_reduction_steps.CorrectToFileStep(corr_file, "Wavelength", "Divide")
-        try:
-            corr.execute(reducer, workspace)
-        except ValueError:
-            raise ValueError('Could not find the correction file %s, is the path incorrect or is it not the same directory as your user file?' % corr_file)
-
         scalefactor = self.rescale
         # Data reduced with Mantid is a factor of ~pi higher than Colette.
         # For LOQ only, divide by this until we understand why.
@@ -1328,22 +1238,45 @@ class ISISCorrections(ReductionStep):
 
         ws = mantid[workspace]
         ws *= scalefactor
-
-class CorrectToFileISIS(sans_reduction_steps.CorrectToFileStep):
+        
+class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
     """
-        Adds the ability to change the name of the output workspace to
-        its CorrectToFileStep (the base ReductionStep) 
+        Generates the normalization workspaces required by Q1D from normalization
+        produced by other, sometimes optional, reduction_steps or a specified
+        workspace
     """
-    def __init__(self, file='', corr_type='', operation='', name_container=[]):
-        super(CorrectToFileISIS, self).__init__(file, corr_type, operation)
-        self.out_container = name_container
+    TMP_WORKSPACE_NAME = '__CalculateNormISIS_loaded_tmp'
+    
+    def  __init__(self, wavelength_deps=[]):
+        super(CalculateNormISIS, self).__init__(wavelength_deps)
+        #algorithm to be used to load correction files
+        self._load='Load'
+        #a parameters string to add as the last argument to the above algorithm
+        self._load_params='FirstColumnValue="SpectrumNumber"'
 
-    def execute(self, reducer, workspace):
-        if self._filename:
-            if len(self.out_container) > 0:
-                reducer.output_wksp = self.out_container[0]
-                CorrectToFile(workspace, self._filename, reducer.output_wksp,
-                              self._corr_type, self._operation)
+    def calculate(self, reducer):
+        """
+            Multiplies all the wavelength scalings into one workspace and all the detector
+            dependent scalings into another workspace that can be used by ConvertToQ
+        """
+        #use the instrument's correction file
+        corr_file = reducer.instrument.cur_detector().correction_file
+        if corr_file:
+            LoadRKH(corr_file, self.TMP_WORKSPACE_NAME, "Wavelength")
+            self._wave_adjs.append(self.TMP_WORKSPACE_NAME)
+            
+            if self._is_point_data(self.TMP_WORKSPACE_NAME):
+                ConvertToHistogram(self.TMP_WORKSPACE_NAME, self.TMP_WORKSPACE_NAME)
+
+        wave_adj, pixel_adj = super(CalculateNormISIS, self).calculate(reducer)
+
+        if pixel_adj:
+            #remove all the pixels that are not present in the sample data (the other detector)
+            reducer.instrument.cur_detector().crop_to_detector(pixel_adj, pixel_adj)
+        
+        isis_reducer.deleteWorkspaces([self.TMP_WORKSPACE_NAME])
+        
+        return wave_adj, pixel_adj
 
 class UnitsConvert(ReductionStep):
     """
@@ -1474,7 +1407,7 @@ class UserFile(ReductionStep):
         reducer.user_file_path = os.path.dirname(user_file)
         # Re-initializes default values
         self._initialize_mask(reducer)
-        reducer.flood_file.set_filename("")
+        reducer.prep_normalize.setPixelCorrFile('')
     
         file_handle = open(user_file, 'r')
         for line in file_handle:
@@ -1486,9 +1419,9 @@ class UserFile(ReductionStep):
         reducer.instrument.copy_correction_files()
         
         # this might change but right now there is no flood correct for the HAB 
-        if reducer.flood_file.get_filename():
+        if reducer.prep_normalize.getPixelCorrFile():
             if reducer.instrument.cur_detector().name() == 'HAB':
-                _issueWarning('Is your flood detection file "%s" valid on the HAB? Otherwise it my give negative intensities!' % reducer.flood_file.get_filename())
+                _issueWarning('Is your flood detection file "%s" valid on the HAB? Otherwise it my give negative intensities!' % reducer.prep_normalize.getPixelCorrFile())
         
         self.executed = True
         return self.executed
@@ -1723,7 +1656,7 @@ class UserFile(ReductionStep):
                         except AttributeError:
                             raise AttributeError('Detector HAB does not exist for the current instrument, set the instrument to LOQ first')
                     elif parts[0].upper() == 'FLAT':
-                        reducer.flood_file.set_filename(filepath)
+                        reducer.prep_normalize.setPixelCorrFile(filepath)
                     else:
                         pass
                 elif len(parts) == 2:

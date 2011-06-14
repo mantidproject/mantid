@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/Q1DTOF.h"
+#include "MantidAlgorithms/Q1D2.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -16,11 +16,11 @@ namespace Mantid
 namespace Algorithms
 {
 
-// undelcacted algorithm
-//DECLARE_ALGORITHM(Q1DTOF)
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(Q1D2)
 
 /// Sets documentation strings for this algorithm
-void Q1DTOF::initDocs()
+void Q1D2::initDocs()
 {
   this->setWikiSummary("Part of the 1D data reduction chain for SANS instruments. ");
   this->setOptionalMessage("Part of the 1D data reduction chain for SANS instruments.");
@@ -31,7 +31,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
-void Q1DTOF::init()
+void Q1D2::init()
 {
   CompositeValidator<> *dataVal = new CompositeValidator<>;
   dataVal->add(new WorkspaceUnitValidator<>("Wavelength"));
@@ -51,7 +51,7 @@ void Q1DTOF::init()
 /**
   @ throw invalid_argument if the workspaces are not mututially compatible
 */
-void Q1DTOF::exec()
+void Q1D2::exec()
 {
   m_dataWS = getProperty("DetBankWorkspace");
   MatrixWorkspace_const_sptr waveAdj = getProperty("WavelengthAdj");
@@ -162,10 +162,10 @@ void Q1DTOF::exec()
     const double c = normSum[k];
     const double a = YOut[k] /= c;
     // when a = b/c, the formula for Da, the error on a, in terms of Db, etc. is (Da/a)^2 = (Db/b)^2 + (Dc/c)^2
-    //(Da)^2 = ((Db/b)^2 + (Dc/c)^2)*(b^2/c^2) = ((Db/c)^2 + (b*Dc/c^2)^2) = (Db^2 + (b*Dc/c)^2)/c^2 = Db^2 + (Dc*a/c)^2
+    //(Da)^2 = ((Db/b)^2 + (Dc/c)^2)*(b^2/c^2) = ((Db/c)^2 + (b*Dc/c^2)^2) = (Db^2 + (b*Dc/c)^2)/c^2 = (Db^2 + (Dc*a)^2)/c^2
     //this will work as long as c>0, but then the above formula above can't deal with 0 either
     const double aOverc = a/c;
-    EOutTo2[k] = std::sqrt(EOutTo2[k] + normError2[k]*aOverc*aOverc);
+    EOutTo2[k] = std::sqrt(EOutTo2[k]/(c*c) + normError2[k]*aOverc*aOverc);
 
     progress.report("Computing I(Q)");
   }
@@ -178,7 +178,7 @@ void Q1DTOF::exec()
   @param detectWS passing NULL for this wont raise an error, if set it will be checked this workspace has as many histograms as dataWS each with one bin
   @throw invalid_argument if the workspaces are not mututially compatible
 */
-void Q1DTOF::examineInput(API::MatrixWorkspace_const_sptr binAdj, API::MatrixWorkspace_const_sptr detectAdj)
+void Q1D2::examineInput(API::MatrixWorkspace_const_sptr binAdj, API::MatrixWorkspace_const_sptr detectAdj)
 {
   if ( m_dataWS->getNumberHistograms() < 1 )
   {
@@ -237,7 +237,7 @@ if ( binAdj->isDistribution() != m_dataWS->isDistribution() )
 *  @param specMap a spectra map that the new workspace should use and take owner ship of
 *  @return A pointer to the newly-created workspace
 */
-API::MatrixWorkspace_sptr Q1DTOF::setUpOutputWorkspace(const std::vector<double> & binParams,  const API::SpectraDetectorMap * const specMap) const
+API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> & binParams,  const API::SpectraDetectorMap * const specMap) const
 {
   // Calculate the output binning
   MantidVecPtr XOut;
@@ -263,7 +263,7 @@ API::MatrixWorkspace_sptr Q1DTOF::setUpOutputWorkspace(const std::vector<double>
 *  @param[out] Qs a preallocated array that is large enough to contain all the calculated Q values
 *  @throw NotFoundError if the detector associated with the spectrum is not found in the instrument definition
 */
-void Q1DTOF::convertWavetoQ(const size_t specIndex, const bool doGravity, MantidVec & Qs) const
+void Q1D2::convertWavetoQ(const size_t specIndex, const bool doGravity, MantidVec & Qs) const
 {
   static const double FOUR_PI=4.0*M_PI;
   const MantidVec & XIn = m_dataWS->readX(specIndex);
@@ -301,7 +301,7 @@ void Q1DTOF::convertWavetoQ(const size_t specIndex, const bool doGravity, Mantid
 *  @param[out] error the error on the weight, only non-zero if pixelAdj
 *  @throw LogicError if the solid angle is tiny or negative
 */
-void Q1DTOF::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,  const size_t specIndex, double & weight, double & error) const
+void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,  const size_t specIndex, double & weight, double & error) const
 {
   const V3D samplePos = m_dataWS->getInstrument()->getSample()->getPos();
 
@@ -328,7 +328,7 @@ void Q1DTOF::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,  const size_t
 *  @param[in,out] outNorms normalization for each bin, this method multiplise this by the proportion that is not masked and the normalization workspace
 *  @param[in, out] outETo2 the error on the normalisation term before the WavelengthAdj term
 */
-void Q1DTOF::addWaveAdj(API::MatrixWorkspace_const_sptr pixelAdj, const MantidVec * const binNorms, const MantidVec * const binNormEs, MantidVec & outNorms, MantidVec & outETo2) const
+void Q1D2::addWaveAdj(API::MatrixWorkspace_const_sptr pixelAdj, const MantidVec * const binNorms, const MantidVec * const binNormEs, MantidVec & outNorms, MantidVec & outETo2) const
 {
 
   // normalize by the wavelength dependent correction, keeping the percentage errors the same
@@ -355,7 +355,7 @@ void Q1DTOF::addWaveAdj(API::MatrixWorkspace_const_sptr pixelAdj, const MantidVe
 *  @param[in,out] theNorms normalization for each bin, this is multiplied by the proportion that is not masked and the normalization workspace
 *  @param[in,out] errorSquared the running total of the error on the normalization
 */
-void Q1DTOF::normToBinWidth(const size_t specIndex, const MantidVec & QIns, MantidVec & theNorms, MantidVec & errorSquared) const
+void Q1D2::normToBinWidth(const size_t specIndex, const MantidVec & QIns, MantidVec & theNorms, MantidVec & errorSquared) const
 {
 /*  //normally this is false but handling this would mean more combinations of distribution/raw counts workspaces could be accepted
   if (m_convToDistr)
@@ -383,47 +383,6 @@ void Q1DTOF::normToBinWidth(const size_t specIndex, const MantidVec & QIns, Mant
       errorSquared[it->first] *= factor*factor;
     }
   }
-
-/*
-
-
-
-  // take masking into account
-  // I hope to change this in my Qxy changes, generalise and simplify and add it to workspace or vector helper
-  MantidVec included_bins,solidAngleVec;
-  const MantidVec & Qx = m_dataWS->readX(specIndex);
-  included_bins.push_back(Qx.front());
-  // Get a reference to the list of masked bins
-  const MatrixWorkspace::MaskList & mask = m_dataWS->maskedBins(specIndex);
-  // Now iterate over the list, adjusting the weights for the affected bins
-  // Since we've reversed Qx, we need to reverse the list too
-  MatrixWorkspace::MaskList::const_reverse_iterator it;
-  for (it = mask.rbegin(); it != mask.rend(); ++it)
-  {
-    const double currentX = Qx[m_numInBins-2-(*it).first];
-    // Add an intermediate bin with full weight if masked bins aren't consecutive
-    if (included_bins.back() != currentX) 
-    {
-      solidAngleVec.push_back(1);
-      included_bins.push_back(currentX);
-    }
-    // The weight for this masked bin is 1 - the degree to which this bin is masked
-    solidAngleVec.push_back( 1 * (1.0-(*it).second) );
-    included_bins.push_back( Qx[m_numInBins-1-(*it).first]);
-  }
-  // Add on a final bin with full weight if masking doesn't go up to the end
-  if (included_bins.back() != Qx.back()) 
-  {
-    solidAngleVec.push_back(1);
-    included_bins.push_back(Qx.back());
-  }
-      
-  // Create a zero vector for the errors because we don't care about them here
-  const MantidVec zeroes(solidAngleVec.size(),0.0);
-  MantidVec tmp(widths.size());
-  // Rebin the solid angles - note that this is a distribution
-  VectorHelper::rebin(included_bins,solidAngleVec,zeroes,Qx, widths, tmp,true,true);
-  */
 }
 /** !!!PROTOTYPE needs more testing !!! Map all the detectors onto the spectrum of the output
 *  @param[in] specIndex the spectrum to add
@@ -431,7 +390,7 @@ void Q1DTOF::normToBinWidth(const size_t specIndex, const MantidVec & QIns, Mant
 *  @param[in] inSpecMap spectrum data
 *  @param[out] outputWS the workspace with the spectra axis
 */
-void Q1DTOF::updateSpecMap(const size_t specIndex, API::SpectraDetectorMap * const specMap, const Geometry::ISpectraDetectorMap & inSpecMap, API::MatrixWorkspace_sptr outputWS) const
+void Q1D2::updateSpecMap(const size_t specIndex, API::SpectraDetectorMap * const specMap, const Geometry::ISpectraDetectorMap & inSpecMap, API::MatrixWorkspace_sptr outputWS) const
 {
   Axis* const spectraAxis = m_dataWS->getAxis(1);
   if (spectraAxis->isSpectra())
@@ -440,7 +399,6 @@ void Q1DTOF::updateSpecMap(const size_t specIndex, API::SpectraDetectorMap * con
     specMap->addSpectrumEntries(newSpectrumNo,inSpecMap.getDetectors(spectraAxis->spectraNo(specIndex)));
   }
 }
-
 
 } // namespace Algorithms
 } // namespace Mantid

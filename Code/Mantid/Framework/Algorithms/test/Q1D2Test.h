@@ -1,8 +1,8 @@
-#ifndef Q1DTEST_H_
-#define Q1DTEST_H_
+#ifndef Q1D2Test_H_
+#define Q1D2Test_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/Q1DTOF.h"
+#include "MantidAlgorithms/Q1D2.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CropWorkspace.h"
@@ -14,34 +14,36 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 
-class Q1DTOFTest : public CxxTest::TestSuite
+class Q1D2Test : public CxxTest::TestSuite
 {
 public:
   void testStatics()
   {
-    Mantid::Algorithms::Q1DTOF Q1DTOF;
-    TS_ASSERT_EQUALS( Q1DTOF.name(), "Q1DTOF" )
-    TS_ASSERT_EQUALS( Q1DTOF.version(), 1 )
-    TS_ASSERT_EQUALS( Q1DTOF.category(), "SANS" )
+    Mantid::Algorithms::Q1D2 Q1D2;
+    TS_ASSERT_EQUALS( Q1D2.name(), "Q1D" )
+    TS_ASSERT_EQUALS( Q1D2.version(), 2 )
+    TS_ASSERT_EQUALS( Q1D2.category(), "SANS" )
   }
 
-  /// Test that we can run without the optional workspacespace
+  ///Test that we can run without the optional workspacespace
   void xtestNoPixelAdj()
   {
-    Mantid::Algorithms::Q1DTOF Q1DTOF;
-    Q1DTOF.initialize();
+    Mantid::Algorithms::Q1D2 Q1D2;
+    Q1D2.initialize();
 
-    const std::string outputWS("Q1DTOFTest_result");
+    const std::string outputWS("Q1D2Test_result");
     TS_ASSERT_THROWS_NOTHING(
-      Q1DTOF.setProperty("DetBankWorkspace", m_inputWS);
-      Q1DTOF.setProperty("WavelengthAdj", m_wavNorm);
-      Q1DTOF.setPropertyValue("OutputWorkspace",outputWS);
-      Q1DTOF.setPropertyValue("OutputBinning","0,0.02,0.5");
+      Q1D2.setProperty("DetBankWorkspace", m_inputWS);
+      Q1D2.setProperty("WavelengthAdj", m_wavNorm);
+      Q1D2.setPropertyValue("OutputWorkspace",outputWS);
+      Q1D2.setPropertyValue("OutputBinning","0,0.02,0.5");
       // property PixelAdj is undefined but that shouldn't cause this to throw
-      Q1DTOF.execute()
+      Q1D2.execute()
     )
+        /*std::string s;
+    std::getline(std::cin, s);*/
 
-    TS_ASSERT( Q1DTOF.isExecuted() )
+    TS_ASSERT( Q1D2.isExecuted() )
     
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
@@ -72,20 +74,19 @@ public:
     
   void xtestPixelAdj()
   {
-    Mantid::Algorithms::Q1DTOF Q1DTOF;
-    Q1DTOF.initialize();
+    Mantid::Algorithms::Q1D2 Q1D;
+    Q1D.initialize();
 
     TS_ASSERT_THROWS_NOTHING(
-      Q1DTOF.setProperty("DetBankWorkspace", m_inputWS);
-      Q1DTOF.setProperty("WavelengthAdj", m_wavNorm);
-      Q1DTOF.setPropertyValue("PixelAdj", m_pixel);
-      Q1DTOF.setPropertyValue("OutputWorkspace", m_noGrav);
-      Q1DTOF.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
+      Q1D.setProperty("DetBankWorkspace", m_inputWS);
+      Q1D.setProperty("WavelengthAdj", m_wavNorm);
+      Q1D.setPropertyValue("PixelAdj", m_pixel);
+      Q1D.setPropertyValue("OutputWorkspace", m_noGrav);
+      Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
     )
     //#default is don't correct for gravity
-
-    TS_ASSERT_THROWS_NOTHING( Q1DTOF.execute() )
-    TS_ASSERT( Q1DTOF.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( Q1D.execute() )
+    TS_ASSERT( Q1D.isExecuted() )
     
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
@@ -116,22 +117,22 @@ public:
     
   void xtestGravity()
   {
-    Mantid::Algorithms::Q1DTOF Q1DTOF;
-    TS_ASSERT_THROWS_NOTHING( Q1DTOF.initialize() );
-    TS_ASSERT( Q1DTOF.isInitialized() )
+    Mantid::Algorithms::Q1D2 Q1D;
+    TS_ASSERT_THROWS_NOTHING( Q1D.initialize() );
+    TS_ASSERT( Q1D.isInitialized() )
 
-    const std::string outputWS("Q1DTOFTest_result");
+    const std::string outputWS("Q1D2Test_result");
     TS_ASSERT_THROWS_NOTHING(
-      Q1DTOF.setProperty("DetBankWorkspace", m_inputWS);
-      Q1DTOF.setProperty("WavelengthAdj", m_wavNorm);
-      Q1DTOF.setPropertyValue("PixelAdj", m_pixel);
-      Q1DTOF.setPropertyValue("OutputWorkspace", outputWS);
-      Q1DTOF.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
-      Q1DTOF.setPropertyValue("AccountForGravity", "1");
+      Q1D.setProperty("DetBankWorkspace", m_inputWS);
+      Q1D.setProperty("WavelengthAdj", m_wavNorm);
+      Q1D.setPropertyValue("PixelAdj", m_pixel);
+      Q1D.setPropertyValue("OutputWorkspace", outputWS);
+      Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
+      Q1D.setPropertyValue("AccountForGravity", "1");
       
-      Q1DTOF.execute()
+      Q1D.execute()
     )
-    TS_ASSERT( Q1DTOF.isExecuted() )
+    TS_ASSERT( Q1D.isExecuted() )
     
     Mantid::API::MatrixWorkspace_sptr gravity, refNoGrav = 
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
@@ -159,39 +160,40 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
     
-  void xtestInvalidInput()
+  void testInvalidInput()
   {
-    Mantid::Algorithms::Q1DTOF Q1DTOF;
-    Q1DTOF.initialize();
+    Mantid::Algorithms::Q1D2 Q1D;
+    Q1D.initialize();
     
     //this is a small change to the normalization workspace that should be enough to stop progress
     Mantid::MantidVec & xData = m_wavNorm->dataX(0);
     xData[15] += 0.001;
 
-    const std::string outputWS("Q1DTOFTest_invalid_result");
+    const std::string outputWS("Q1D2Test_invalid_result");
     TS_ASSERT_THROWS_NOTHING(
-      Q1DTOF.setProperty("DetBankWorkspace", m_inputWS);
-      Q1DTOF.setProperty("WavelengthAdj", m_wavNorm);
-      Q1DTOF.setPropertyValue("OutputWorkspace", outputWS);
-      Q1DTOF.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
-      Q1DTOF.setPropertyValue("AccountForGravity", "1");
+      Q1D.setProperty("DetBankWorkspace", m_inputWS);
+      Q1D.setProperty("WavelengthAdj", m_wavNorm);
+      Q1D.setPropertyValue("OutputWorkspace", outputWS);
+      Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
+      Q1D.setPropertyValue("AccountForGravity", "1");
     )
 
-    TS_ASSERT( ! Q1DTOF.isExecuted() )
+    TS_ASSERT( ! Q1D.isExecuted() )
   }
     
 
 void createInputWorkspaces()
   {
-    std::string wsName("Q1DTOFTest_inputworkspace"), wavNorm("Q1DTOFTest_wave");
+    std::string wsName("Q1D2Test_inputworkspace"), wavNorm("Q1D2Test_wave");
 
     LoadRaw3 loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","LOQ54431.raw");
+    loader.setPropertyValue("Filename","LOQ48097.raw");
 
     loader.setPropertyValue("OutputWorkspace", wavNorm);
     loader.setProperty("LoadLogFiles", false);
-    loader.setPropertyValue("SpectrumList","1,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20");
+    loader.setPropertyValue("SpectrumMin","8603");
+    loader.setPropertyValue("SpectrumMax","8632");
     loader.execute();
 
     Mantid::Algorithms::ConvertUnits convert;
@@ -234,18 +236,18 @@ void createInputWorkspaces()
     loadRkh.execute();
     crop.setPropertyValue("InputWorkspace",m_pixel);
     crop.setPropertyValue("OutputWorkspace",m_pixel);
-    crop.setPropertyValue("StartWorkspaceIndex","5");
-    crop.setPropertyValue("EndWorkspaceIndex","20");
+    crop.setPropertyValue("StartWorkspaceIndex","8603");
+    crop.setPropertyValue("EndWorkspaceIndex","8632");
     crop.execute();
     
   }
   
   ///stop the constructor from being run every time algorithms test suit is initialised
-  static Q1DTOFTest *createSuite() { return new Q1DTOFTest(); }
-  static void destroySuite(Q1DTOFTest *suite) { delete suite; }
-  Q1DTOFTest() : m_noGrav("Q1DTOFTest_no_gravity_result"), m_pixel("Q1DTOFTest_flat_file")
+  static Q1D2Test *createSuite() { return new Q1D2Test(); }
+  static void destroySuite(Q1D2Test *suite) { delete suite; }
+  Q1D2Test() : m_noGrav("Q1D2Test_no_gravity_result"), m_pixel("Q1DTest_flat_file")
   {
-    //createInputWorkspaces();
+    createInputWorkspaces();
   }
 
 private:
@@ -253,4 +255,4 @@ private:
   std::string m_noGrav, m_pixel;
 };
 
-#endif /*Q1DTEST_H_*/
+#endif /*Q1D2Test_H_*/

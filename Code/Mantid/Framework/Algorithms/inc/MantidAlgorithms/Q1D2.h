@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_Q1DTOF_H_
-#define MANTID_ALGORITHMS_Q1DTOF_H_
+#ifndef MANTID_ALGORITHMS_Q1D2_H_
+#define MANTID_ALGORITHMS_Q1D2_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -37,17 +37,17 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Q1DTOF : public API::Algorithm
+class DLLExport Q1D2 : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  Q1DTOF() : API::Algorithm(), m_numInBins(0) {}
+  Q1D2() : API::Algorithm(), m_numInBins(0) {}
   /// Virtual destructor
-  virtual ~Q1DTOF() {}
+  virtual ~Q1D2() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "Q1DTOF"; }
+  virtual const std::string name() const { return "Q1D"; }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  virtual int version() const { return (2); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "SANS"; }
 
@@ -77,4 +77,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_Q1DTOF_H_*/
+#endif /*MANTID_ALGORITHMS_Q1D2_H_*/
