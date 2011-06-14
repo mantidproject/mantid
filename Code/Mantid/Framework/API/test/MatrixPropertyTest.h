@@ -4,7 +4,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAPI/MatrixProperty.h"
-#include <cxxTest/TestSuite.h>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::API::MatrixProperty;
 using Mantid::Geometry::DblMatrix;
