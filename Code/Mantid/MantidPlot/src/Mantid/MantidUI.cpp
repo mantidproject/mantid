@@ -615,6 +615,9 @@ void MantidUI::copyRowsToWaterfall()
   ml->hide();
   ml->activeGraph()->setWaterfallOffset(10,20);
   ml->setWaterfallLayout();
+  // Next two lines replace the legend so that it works on reversing the curve order
+  ml->activeGraph()->removeLegend();
+  ml->activeGraph()->newLegend();
   ml->show();
 }
 

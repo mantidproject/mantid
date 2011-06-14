@@ -162,6 +162,7 @@ void MantidCurve::loadData()
   MantidQwtData * data = mantidData();
   // ...and apply them
   data->applyOffsets(d_x_offset,d_y_offset);
+  invalidateBoundingRect();
 }
 
 void MantidCurve::setData(const QwtData &data)
