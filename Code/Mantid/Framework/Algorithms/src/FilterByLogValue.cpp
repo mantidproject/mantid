@@ -80,6 +80,11 @@ void FilterByLogValue::init()
     "For a single log value at time T, all events between T+-Tolerance are kept.\n"
     "If there are several consecutive log values matching the filter, events between T1-Tolerance and T2+Tolerance are kept.");
 
+  std::vector<std::string> types(2);
+  types.push_back("Centre");
+  types.push_back("Left");
+  declareProperty("LogBoundary", "Centre", new Mantid::Kernel::ListValidator(types),
+                  "How to treat log values as being measured in the centre of the time, or beggining (left) boundary");
 }
 
 
@@ -128,7 +133,8 @@ void FilterByLogValue::exec()
   if (log)
   {
     //This function creates the splitter vector we will use to filter out stuff.
-    log->makeFilterByValue(splitter, min, max, tolerance);
+    log->makeFilterByValue(splitter, min, max, tolerance,
+                           (this->getPropertyValue("LogBoundary") == "Centre"));
 
     if (log->realSize() >= 1 && handle_edge_values)
     {

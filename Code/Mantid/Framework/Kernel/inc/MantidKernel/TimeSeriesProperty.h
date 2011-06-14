@@ -301,8 +301,9 @@ public:
    * @param min :: min value
    * @param max :: max value
    * @param TimeTolerance :: offset added to times in seconds.
+   * @param centre :: Whether the log value time is considered centred or at the beginning.
    */
-  void makeFilterByValue(TimeSplitterType& split, TYPE min, TYPE max, double TimeTolerance)
+  void makeFilterByValue(TimeSplitterType& split, TYPE min, TYPE max, double TimeTolerance, bool centre=true)
   {
     //Do nothing if the log is empty.
     if (m_propertySeries.size() == 0)
@@ -335,7 +336,10 @@ public:
         if (isGood)
         {
           //Start of a good section
-          start = t - tol;
+          if (centre)
+            start = t - tol;
+          else
+            start = t;
         }
         else
         {
