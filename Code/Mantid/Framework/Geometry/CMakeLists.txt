@@ -2,6 +2,7 @@ set ( SRC_FILES
         src/Crystal/OrientedLattice.cpp
         src/Crystal/ReflectionCondition.cpp
         src/Crystal/UnitCell.cpp
+        src/Crystal/IndexingUtils.cpp
         src/IDetector.cpp
         src/IInstrument.cpp
         src/IObjComponent.cpp
@@ -88,6 +89,7 @@ set ( INC_FILES
         inc/MantidGeometry/Crystal/OrientedLattice.h
         inc/MantidGeometry/Crystal/ReflectionCondition.h
         inc/MantidGeometry/Crystal/UnitCell.h
+        inc/MantidGeometry/Crystal/IndexingUtils.h
         inc/MantidGeometry/DllConfig.h
         inc/MantidGeometry/ICompAssembly.h
         inc/MantidGeometry/IComponent.h
@@ -231,6 +233,7 @@ set ( TEST_FILES
         test/TrackTest.h
         test/TripleTest.h
         test/UnitCellTest.h
+        test/IndexingUtilsTest.h
         test/V3DTest.h
 )
 
