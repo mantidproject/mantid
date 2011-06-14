@@ -27,6 +27,12 @@ class Instrument(object):
                 
         self.definition = self.load_instrument() 
 
+    def get_default_instrument(self):
+        instr_filen = self._NAME+'_Definition.xml'
+        self._definition_file = MantidFramework.mtd.getConfigProperty(
+            'instrumentDefinition.directory')+'/'+instr_filen
+        return self.load_instrument() 
+
     def load_instrument(self):
         """
             Runs LoadInstrument get the parameters for the instrument

@@ -7,7 +7,7 @@ import os
 import sys
 import pickle
 from reduction import ReductionStep
-from sans_reduction_steps import BaseTransmission, BaseBeamFinder
+from sans_reduction_steps import BaseTransmission, BaseBeamFinder, WeightedAzimuthalAverage
 from reduction import extract_workspace_name, find_file, find_data
 from eqsans_config import EQSANSConfig
 
@@ -55,15 +55,16 @@ class QuickLoad(ReductionStep):
             # Doesn't look like event pre-nexus, try event nexus
             is_event_nxs = True
         
-        # Mapping file
-        mapping_file = reducer.instrument.definition.getStringParameter("TS_mapping_file")[0]
-        directory,_ = os.path.split(event_file)
-        mapping_file = os.path.join(directory, mapping_file)
-        
         if is_event_nxs:
             mantid.sendLogMessage("Loading %s as event Nexus" % (filepath))
             LoadEventNexus(Filename=filepath, OutputWorkspace=workspace)
         else:
+            # Mapping file
+            default_instrument = reducer.instrument.get_default_instrument()
+            mapping_file = default_instrument.getStringParameter("TS_mapping_file")[0]
+            directory,_ = os.path.split(event_file)
+            mapping_file = os.path.join(directory, mapping_file)
+            
             mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
             nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
             LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace, PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
@@ -237,7 +238,9 @@ class LoadRun(ReductionStep):
                 LoadEventNexus(Filename=filepath, OutputWorkspace=workspace+'_evt')
             else:
                 # Mapping file
-                mapping_file = reducer.instrument.definition.getStringParameter("TS_mapping_file")[0]
+                default_instrument = reducer.instrument.get_default_instrument()
+
+                mapping_file = default_instrument.getStringParameter("TS_mapping_file")[0]
                 mapping_file = os.path.join(data_dir, mapping_file)
                 
                 mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
@@ -353,6 +356,9 @@ class LoadRun(ReductionStep):
         wl_min = float(a.getPropertyValue("WavelengthMin"))
         wl_max = float(a.getPropertyValue("WavelengthMax"))
         frame_skipping = a.getPropertyValue("FrameSkipping")
+        mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_min", wl_min, "Angstrom", True)
+        mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_max", wl_max, "Angstrom", True)
+        mtd[workspace+'_evt'].getRun().addProperty_int("is_frame_skipping", int(frame_skipping), True)
         mantid.sendLogMessage("Frame-skipping option: %s" % str(frame_skipping))
         output_str += "  Wavelength range: %6.1f - %-6.1f Angstrom  [Frame skipping = %s]" % (wl_min, wl_max, str(frame_skipping))
         
@@ -563,4 +569,58 @@ class SubtractDarkCurrent(ReductionStep):
         
         return "Dark current subtracted [%s]" % (scaled_dark_ws)
     
+class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
+    """
+        ReductionStep class that performs azimuthal averaging
+        and transforms the 2D reduced data set into I(Q).
+        Done for each frame independently.
+    """
+    def __init__(self, binning=None, suffix="_Iq", error_weighting=False, n_bins=100, n_subpix=1, log_binning=False):
+        super(AzimuthalAverageByFrame, self).__init__(binning, suffix, error_weighting, n_bins, n_subpix, log_binning)
+        self._is_frame_skipping = False
+        
+    def get_output_workspace(self, workspace):
+        if not self._is_frame_skipping:
+            return workspace+str(self._suffix)
+        return [workspace+str(self._suffix)+'_frame1', workspace+str(self._suffix)+'_frame2']
+        
+    def execute(self, reducer, workspace):
+        if mtd[workspace].getRun().hasProperty("is_frame_skipping") \
+            and mtd[workspace].getRun().getProperty("is_frame_skipping").value==0:
+            self._is_frame_skipping = False
+            return super(AzimuthalAverageByFrame, self).execute(reducer, workspace)
+        
+        self._is_frame_skipping = True
+        wl_min = min(mtd[workspace].readX(0))
+        wl_max = max(mtd[workspace].readX(0))
+        frame_cutoff = (wl_max+wl_min)/2.0
+        CropWorkspace(workspace, workspace+'_frame1', XMin=wl_min, XMax=frame_cutoff)
+        CropWorkspace(workspace, workspace+'_frame2', XMin=frame_cutoff, XMax=wl_max)
+        
+        iq_frame1 = WeightedAzimuthalAverage(binning=self._binning, suffix=self._suffix, error_weighting=self._error_weighting, 
+                                             n_bins=self._nbins, n_subpix=self._nsubpix, log_binning=self._log_binning)
+        iq_frame1.execute(reducer, workspace+'_frame1')
+        
+        iq_frame2 = WeightedAzimuthalAverage(binning=self._binning, suffix=self._suffix, error_weighting=self._error_weighting, 
+                                             n_bins=self._nbins, n_subpix=self._nsubpix, log_binning=self._log_binning)
+        iq_frame2.execute(reducer, workspace+'_frame2')
+        
+        return "Performed radial averaging: frame 1 = [%g, %g], frame 2 = [%g, %g]" % (wl_min, frame_cutoff, frame_cutoff, wl_max)
+        
+    def get_data(self, workspace):
+        if not self._is_frame_skipping:
+            return super(AzimuthalAverageByFrame, self).get_data(workspace)
+        
+        class DataSet(object):
+            x=[]
+            y=[]
+            dy=[]
+        
+        d = DataSet()
+        d.x = mtd[self.get_output_workspace(workspace)[0]].dataX(0)[1:]
+        d.y = mtd[self.get_output_workspace(workspace)[0]].dataY(0)
+        d.dx = mtd[self.get_output_workspace(workspace)[0]].dataE(0)
+        return d
+        
+        
         

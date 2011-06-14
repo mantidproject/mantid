@@ -334,7 +334,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.reduce_button.setEnabled(True)
         self.export_button.setEnabled(True)
 
-        self._recent_files.append(file_path)
         self._filename = file_path
         self._update_file_menu()
         self._set_window_title()

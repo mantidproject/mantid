@@ -1303,14 +1303,17 @@ class SaveIqAscii(ReductionStep):
             
         log_text = ""
         if reducer._azimuthal_averager is not None:
-            output_ws = reducer._azimuthal_averager.get_output_workspace(workspace)
-            if mtd.workspaceExists(output_ws):
-                filename = os.path.join(output_dir, output_ws+'.txt')
-                SaveAscii(Filename=filename, Workspace=output_ws)
-                filename = os.path.join(output_dir, output_ws+'.xml')
-                SaveCanSAS1D(Filename=filename, InputWorkspace=output_ws)
-                
-                log_text = "I(Q) saved in %s" % (filename)
+            output_list = reducer._azimuthal_averager.get_output_workspace(workspace)
+            if type(output_list) is not list:
+                output_list = [output_list]
+            for output_ws in output_list:
+                if mtd.workspaceExists(output_ws):
+                    filename = os.path.join(output_dir, output_ws+'.txt')
+                    SaveAscii(Filename=filename, Workspace=output_ws)
+                    filename = os.path.join(output_dir, output_ws+'.xml')
+                    SaveCanSAS1D(Filename=filename, InputWorkspace=output_ws)
+                    
+                    log_text = "I(Q) saved in %s" % (filename)
         
         if reducer._two_dim_calculator is not None:
             output_ws = reducer._two_dim_calculator.get_output_workspace(workspace)
