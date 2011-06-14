@@ -244,7 +244,6 @@ public slots:
   int curveIndex(QwtPlotCurve *c) const;
   //! map curve title to index
   int curveIndex(const QString &title){return plotItemsList().findIndex(title);}
-  DataCurve* dataCurve(int index);
   //! get curve by index
   QwtPlotCurve* curve(int index);
   //! get curve by name

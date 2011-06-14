@@ -96,6 +96,9 @@ MantidUI::MantidUI(ApplicationWindow *aw):
   actionCopyRowToGraphErr->setIcon(QIcon(getQPixmap("graph_xpm")));
   connect(actionCopyRowToGraphErr, SIGNAL(activated()), this, SLOT(copyRowToGraphErr()));
 
+  actionWaterfallPlot = new QAction(QIcon(":/waterfall_plot.png"), tr("Plot spectra as waterfall"), this);
+  connect(actionWaterfallPlot, SIGNAL(activated()), this, SLOT(copyRowsToWaterfall()));
+
   actionCopyDetectorsToTable = new QAction(tr("View detectors table"), this);
   actionCopyDetectorsToTable->setIcon(QIcon(getQPixmap("table_xpm")));
   connect(actionCopyDetectorsToTable, SIGNAL(activated()), this, SLOT(copyDetectorsToTable()));
@@ -545,6 +548,8 @@ void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
     {
       cm.addAction(actionCopyRowToGraph);
       cm.addAction(actionCopyRowToGraphErr);
+      if (static_cast<MantidMatrix*>(w)->getSelectedRows().size() > 1)
+        cm.addAction(actionWaterfallPlot);
     }
     if (areColumnsSelected)
     {
@@ -600,6 +605,15 @@ void MantidUI::copyRowToGraphErr()
   if (!m || !m->isA("MantidMatrix")) return;
   plotSelectedRows(m,true);
 
+}
+
+void MantidUI::copyRowsToWaterfall()
+{
+  MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+  if (!m || !m->isA("MantidMatrix")) return;
+  MultiLayer* ml = plotSelectedRows(m,false);
+  ml->activeGraph()->setWaterfallOffset(10,20);
+  ml->setWaterfallLayout();
 }
 
 void MantidUI::copyDetectorsToTable()

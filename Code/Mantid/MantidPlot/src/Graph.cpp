@@ -2753,15 +2753,6 @@ int Graph::curveIndex(QwtPlotCurve *c) const
   return plotItemIndex(c);
 }
 
-DataCurve * Graph::dataCurve(int index)
-{
-  PlotCurve *c = dynamic_cast<PlotCurve*>(curve(index));
-  if (c && c->type() != Function)
-    return (DataCurve*)c;
-
-  return 0;
-}
-
 int Graph::range(int index, double *start, double *end)
 {
   if (d_range_selector && d_range_selector->selectedCurve() == curve(index)) {
@@ -3404,6 +3395,8 @@ void Graph::updateVectorsLayout(int curve, const QColor& color, double width,
 
 void Graph::updatePlot()
 {
+  if ( isWaterfallPlot() ) updateDataCurves();
+
   if (d_auto_scale && !zoomOn() && d_active_tool==NULL){
     for (int i = 0; i < QwtPlot::axisCnt; i++)
       d_plot->setAxisAutoScale(i);
@@ -5619,9 +5612,11 @@ void Graph::updateDataCurves()
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   for (int i = 0; i < n; i++){
-    DataCurve *c = dataCurve(i);
-    if (c)
+    PlotCurve *pc = dynamic_cast<PlotCurve*>(curve(i));
+    if (DataCurve *c = dynamic_cast<DataCurve*>(pc))
       c->loadData();
+    else if (MantidCurve *mc = dynamic_cast<MantidCurve*>(pc))
+      mc->loadData();
   }
   replot();
   QApplication::restoreOverrideCursor();

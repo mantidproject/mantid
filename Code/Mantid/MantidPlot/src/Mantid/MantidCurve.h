@@ -65,6 +65,9 @@ public:
   /// Curve type. Used in the QtiPlot API.
   int rtti() const{return Rtti_PlotUserItem;}
 
+  /// Used for waterfall plots: updates the data curves with an offset
+  void loadData();
+
   /// Overrides qwt_plot_curve::setData to make sure only data of MantidQwtData type can  be set
   void setData(const QwtData &data);
 
@@ -200,6 +203,8 @@ public:
   bool logScale()const{return m_logScale;}
   void saveLowestPositiveValue(const double v);
 
+  void applyOffsets(const double xOffset, const double yOffset);
+
 private:
 
   friend class MantidCurve;
@@ -209,13 +214,11 @@ private:
   /// Spectrum index in the workspace
   int m_spec;
   /// Copy of the X vector
-  const Mantid::MantidVec m_X;
-
+  Mantid::MantidVec m_X;
   /// Copy of the Y vector
-  const Mantid::MantidVec m_Y;
-
+  Mantid::MantidVec m_Y;
   /// Copy of the E vector
-  const Mantid::MantidVec m_E;
+  Mantid::MantidVec m_E;
 
   /// Is the spectrum a histogram?
   bool m_isHistogram;

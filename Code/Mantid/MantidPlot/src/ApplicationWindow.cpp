@@ -16772,7 +16772,7 @@ MultiLayer* ApplicationWindow::waterfallPlot(Table *t, const QStringList& list)
     return 0;
 
   if(list.count() < 1){
-    QMessageBox::warning(this, tr("QtiPlot - Plot error"),tr("Please select a Y column to plot!"));
+    QMessageBox::warning(this, tr("MantidPlot - Plot error"),tr("Please select a Y column to plot!"));
     return 0;
   }
 

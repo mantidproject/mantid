@@ -1283,6 +1283,8 @@ void MultiLayer::dropEvent( QDropEvent * event )
   }
   // Update the axes
   g->setAutoScale();
+
+  if (d_is_waterfall_plot) updateWaterfalls();
 }
 
 /**

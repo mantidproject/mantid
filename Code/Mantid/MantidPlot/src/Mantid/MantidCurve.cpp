@@ -154,6 +154,16 @@ MantidCurve::~MantidCurve()
 {
 }
 
+void MantidCurve::loadData()
+{
+  // This should only be called for waterfall plots
+  // Calculate the offsets...
+  computeWaterfallOffsets();
+  MantidQwtData * data = mantidData();
+  // ...and apply them
+  data->applyOffsets(d_x_offset,d_y_offset);
+}
+
 void MantidCurve::setData(const QwtData &data)
 {
   if (!dynamic_cast<const MantidQwtData*>(&data)) 
@@ -456,3 +466,8 @@ void MantidQwtData::saveLowestPositiveValue(const double v)
   if (v > 0) m_minPositive = v;
 }
 
+void MantidQwtData::applyOffsets(const double xOffset, const double yOffset)
+{
+  std::transform(m_workspace->readX(m_spec).begin(),m_workspace->readX(m_spec).end(),m_X.begin(),std::bind2nd(std::plus<double>(),xOffset));
+  std::transform(m_workspace->readY(m_spec).begin(),m_workspace->readY(m_spec).end(),m_Y.begin(),std::bind2nd(std::plus<double>(),yOffset));
+}

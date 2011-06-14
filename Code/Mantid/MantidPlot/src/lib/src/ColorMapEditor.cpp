@@ -134,6 +134,7 @@ void ColorMapEditor::setColorMap(const QwtLinearColorMap& map)
 
     QColor c = QColor(map.rgb(QwtDoubleInterval(0, 1), colors[i]));
     QTableWidgetItem *it = new QTableWidgetItem(c.name());
+// Avoid compiler warning
 //#ifdef Q_CC_MSVC
     it->setFlags(it->flags() & (~Qt::ItemIsEditable));
 //#else
@@ -186,6 +187,7 @@ void ColorMapEditor::insertLevel()
   table->setCellWidget(row, 0, sb);
 
   QTableWidgetItem *it = new QTableWidgetItem(c.name());
+// Avoid compiler warning
 //#ifdef Q_CC_MSVC
   it->setFlags(it->flags() & (~Qt::ItemIsEditable));
 //#else

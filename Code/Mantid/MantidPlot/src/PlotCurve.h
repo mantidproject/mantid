@@ -78,6 +78,7 @@ signals:
 protected:
   virtual void drawCurve(QPainter *p, int style, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const;
   void drawSideLines(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const;
+  void computeWaterfallOffsets();
 
 	int d_type;
 	double d_x_offset, d_y_offset;

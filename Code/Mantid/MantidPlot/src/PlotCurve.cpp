@@ -27,6 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "PlotCurve.h"
+#include "Grid.h"
 #include "ScaleDraw.h"
 #include "SymbolBox.h"
 #include "PatternBox.h"
@@ -210,6 +211,44 @@ void PlotCurve::drawSideLines(QPainter *p, const QwtScaleMap &xMap, const QwtSca
   p->drawLine(QPointF(xr, yr), QPointF(xr, base));
 
   p->restore();
+}
+
+void PlotCurve::computeWaterfallOffsets()
+{
+  Plot *plot = (Plot *)this->plot();
+  Graph *g = (Graph *)plot->parent();
+
+  int xAxis = QwtPlot::xBottom;
+
+  // reset the offsets
+  d_x_offset = 0.0;
+  d_y_offset = 0.0;
+
+  if (g->isWaterfallPlot()){
+    int index = g->curveIndex(this);
+    int curves = g->curves();//Count();
+    PlotCurve *c = dynamic_cast<PlotCurve*>(g->curve(0));
+    if (index > 0 && c){
+      double xmin = c->minXValue();
+      double dx = index*g->waterfallXOffset()*0.01*plot->canvas()->width()/(double)(curves - 1);
+      //double dx = index*g->waterfallXOffset()*0.01*g->canvas()->width()/(double)(curves - 1);
+      d_x_offset = plot->invTransform(xAxis, plot->transform(xAxis, xmin) + (int)dx) - xmin;
+
+      double ymin = c->minYValue();
+      double dy = index*g->waterfallYOffset()*0.01*plot->canvas()->height()/(double)(curves - 1);
+      //double dy = index*g->waterfallYOffset()*0.01*g->canvas()->height()/(double)(curves - 1);
+      d_y_offset = ymin - plot->invTransform(yAxis(), plot->transform(yAxis(), ymin) + (int)dy);
+
+      setZ(-index);
+      setBaseline(d_y_offset);
+
+    } else {
+      setZ(0);
+      setBaseline(0.0);
+    }
+    if (g->grid())
+      g->grid()->setZ(-g->curves()/*Count()*/ - 1);
+  }
 }
 
 DataCurve::DataCurve(Table *t, const QString& xColName, const QString& name, int startRow, int endRow):
@@ -411,35 +450,19 @@ void DataCurve::loadData()
   X.resize(size);
   Y.resize(size);
 
-  if (g->isWaterfallPlot()){
-    int index = g->curveIndex(this);
-    int curves = g->curves();//Count();
-    DataCurve *c = g->dataCurve(0);
-    if (index > 0 && c){
-      double xmin = c->minXValue();
-      double dx = index*g->waterfallXOffset()*0.01*plot->canvas()->width()/(double)(curves - 1);
-      //double dx = index*g->waterfallXOffset()*0.01*g->canvas()->width()/(double)(curves - 1);
-      d_x_offset = plot->invTransform(xAxis, plot->transform(xAxis, xmin) + (int)dx) - xmin;
-
-      double ymin = c->minYValue();
-      double dy = index*g->waterfallYOffset()*0.01*plot->canvas()->height()/(double)(curves - 1);
-      //double dy = index*g->waterfallYOffset()*0.01*g->canvas()->height()/(double)(curves - 1);
-      d_y_offset = ymin - plot->invTransform(yAxis(), plot->transform(yAxis(), ymin) + (int)dy);
-
-      setZ(-index);
-      setBaseline(d_y_offset);
-
-      for (int i = 0; i < size; i++){
-        X[i] = X[i] + d_x_offset;
-        Y[i] = Y[i] + d_y_offset;
-      }
-    } else {
-      setZ(0);
-      setBaseline(0.0);
+  // The code for calculating the waterfall offsets, that is here in QtiPlot, has been moved up to
+  // PlotCurve so that MantidCurve can access it as well.
+  if (g->isWaterfallPlot())
+  {
+    // Calculate the offsets
+    computeWaterfallOffsets();
+    // Apply them to each data point
+    for (int i = 0; i < size; i++){
+      X[i] = X[i] + d_x_offset;
+      Y[i] = Y[i] + d_y_offset;
     }
-    //if (g->grid())
-    //	g->grid()->setZ(-g->curveCount() - 1);
   }
+  // End re-jigged waterfall offset code
 
 	if (!size){
 		remove();

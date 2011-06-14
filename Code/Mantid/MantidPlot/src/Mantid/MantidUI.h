@@ -330,6 +330,7 @@ public slots:
     void copyColumnToGraphErr();
     void copyDetectorsToTable();
     void copyValues();
+    void copyRowsToWaterfall();
 
     // Execute selected algorithm
     void executeAlgorithm();
@@ -454,6 +455,7 @@ private:
     QAction *actionCopyRowToTable;
     QAction *actionCopyRowToGraph;
     QAction *actionCopyRowToGraphErr;
+    QAction *actionWaterfallPlot;
     QAction *actionCopyColumnToTable;
     QAction *actionCopyColumnToGraph;
     QAction *actionCopyColumnToGraphErr;
