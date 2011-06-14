@@ -6,6 +6,7 @@
 #include "ViewBase.h"
 #include "ui_ThreesliceView.h"
 
+class pqColorMapModel;
 class pqPipelineRepresentation;
 class pqPipelineSource;
 class pqRenderView;
@@ -72,6 +73,11 @@ protected slots:
   /// Set the color scale back to the original bounds.
   void onAutoScale();
   /**
+   * Set the requested color map on the data.
+   * @param model the color map to use
+   */
+  void onColorMapChange(const pqColorMapModel *model);
+  /**
    * Set the data color scale range to the requested bounds.
    * @param min the minimum bound for the color scale
    * @param max the maximum bound for the color scale
@@ -101,8 +107,11 @@ private:
     		pqPipelineSource *cut, pqPipelineRepresentation *repr);
     /// Helper function that creates all three Cartesian orthogonal slices.
     void makeThreeSlice();
-    /// Render all of the views.
-    void renderAll();
+    /**
+     * Render all of the views.
+     * @param resetDisplay flag to tell function to reset displays on views
+     */
+    void renderAll(bool resetDisplay = true);
 
     QPointer<pqPipelineSource> origSource; ///< The current source
     QPointer<pqPipelineRepresentation> originSourceRepr; ///< The current source representation

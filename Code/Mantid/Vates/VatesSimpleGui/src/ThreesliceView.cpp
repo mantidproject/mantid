@@ -2,6 +2,8 @@
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
+#include <pqChartValue.h>
+#include <pqColorMapModel.h>
 #include <pqDataRepresentation.h>
 #include <pqObjectBuilder.h>
 #include <pqPipelineBrowserWidget.h>
@@ -12,6 +14,7 @@
 #include <pqScalarsToColors.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
+#include <pqSMAdaptor.h>
 #include <vtkDataObject.h>
 #include <vtkProperty.h>
 #include <vtkSMPropertyHelper.h>
@@ -145,13 +148,15 @@ void ThreeSliceView::makeThreeSlice()
 	this->makeSlice(ViewBase::Z, this->zView, this->zCut, this->zCutRepr);
 }
 
-void ThreeSliceView::renderAll()
+void ThreeSliceView::renderAll(bool resetDisplay)
 {
-	this->mainView->resetDisplay();
-	this->xView->resetDisplay();
-	this->yView->resetDisplay();
-	this->zView->resetDisplay();
-
+  if (resetDisplay)
+  {
+    this->mainView->resetDisplay();
+    this->xView->resetDisplay();
+    this->yView->resetDisplay();
+    this->zView->resetDisplay();
+  }
 	this->mainView->render();
 	this->xView->render();
 	this->yView->render();
@@ -162,10 +167,7 @@ void ThreeSliceView::onColorScaleChange(double min, double max)
 {
   this->originSourceRepr->getLookupTable()->setScalarRange(min, max);
   this->originSourceRepr->getProxy()->UpdateVTKObjects();
-  this->mainView->render();
-  this->xView->render();
-  this->yView->render();
-  this->zView->render();
+  this->renderAll(false);
 }
 
 void ThreeSliceView::onAutoScale()
@@ -175,9 +177,43 @@ void ThreeSliceView::onAutoScale()
   double max = val.second;
   this->originSourceRepr->getLookupTable()->setScalarRange(min, max);
   this->originSourceRepr->getProxy()->UpdateVTKObjects();
-  this->mainView->render();
-  this->xView->render();
-  this->yView->render();
-  this->zView->render();
+  this->renderAll(false);
   emit this->dataRange(min, max);
+}
+
+void ThreeSliceView::onColorMapChange(const pqColorMapModel *model)
+{
+  pqScalarsToColors *lut = this->originSourceRepr->getLookupTable();
+  // Need the scalar bounds to calculate the color point settings
+  QPair<double, double> bounds = lut->getScalarRange();
+
+  vtkSMProxy *lutProxy = lut->getProxy();
+
+  // Set the ColorSpace
+  pqSMAdaptor::setElementProperty(lutProxy->GetProperty("ColorSpace"),
+                                  model->getColorSpace());
+  // Set the NaN color
+  QList<QVariant> values;
+  QColor nanColor;
+  model->getNanColor(nanColor);
+  values << nanColor.redF() << nanColor.greenF() << nanColor.blueF();
+  pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("NanColor"),
+                                          values);
+
+  // Set the RGB points
+  QList<QVariant> rgbPoints;
+  for(int i = 0; i < model->getNumberOfPoints(); i++)
+  {
+    QColor rgbPoint;
+    pqChartValue fraction;
+    model->getPointColor(i, rgbPoint);
+    model->getPointValue(i, fraction);
+    rgbPoints << fraction.getDoubleValue() * bounds.second << rgbPoint.redF()
+              << rgbPoint.greenF() << rgbPoint.blueF();
+  }
+  pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("RGBPoints"),
+                                          rgbPoints);
+
+  lutProxy->UpdateVTKObjects();
+  this->renderAll(false);
 }

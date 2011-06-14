@@ -6,6 +6,7 @@
 #include "ViewBase.h"
 #include "ui_StandardView.h"
 
+class pqColorMapModel;
 class pqPipelineRepresentation;
 class pqPipelineSource;
 class pqRenderView;
@@ -73,6 +74,11 @@ protected slots:
   /// Add a slice to the current dataset.
   void onCutButtonClicked();
   /**
+   * Set the requested color map on the data.
+   * @param model the color map to use
+   */
+  void onColorMapChange(const pqColorMapModel *model);
+  /**
    * Set the data color scale range to the requested bounds.
    * @param min the minimum bound for the color scale
    * @param max the maximum bound for the color scale
@@ -80,7 +86,7 @@ protected slots:
   void onColorScaleChange(double min, double max);
   /// Invoke the RebinnerCutter on the current dataset.
   void onRebinButtonClicked();
-  void onColorMapChange(double min, double max);
+
 
 private:
   Q_DISABLE_COPY(StandardView);

@@ -6,6 +6,7 @@
 #include "ViewBase.h"
 #include "ui_MultisliceView.h"
 
+class pqColorMapModel;
 class pqPipelineRepresentation;
 class pqPipelineSource;
 class pqRenderView;
@@ -79,6 +80,11 @@ protected slots:
    * @param value create a XY slice at the given z axis location
    */
 	void makeZcut(double value);
+  /**
+   * Set the requested color map on the data.
+   * @param model the color map to use
+   */
+  void onColorMapChange(const pqColorMapModel *model);
   /**
    * Set the color scale to the currently requested bounds.
    * @param min the minimum value for the color scale

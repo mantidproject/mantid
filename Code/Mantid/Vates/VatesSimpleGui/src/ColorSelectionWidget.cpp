@@ -121,7 +121,7 @@ void ColorSelectionWidget::loadPreset()
     pqChartValue min, max;
     if (colorMap)
     {
-
+      emit this->colorMapChanged(colorMap);
     }
   }
 }

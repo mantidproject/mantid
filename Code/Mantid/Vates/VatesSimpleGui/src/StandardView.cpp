@@ -2,15 +2,19 @@
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
+#include <pqChartValue.h>
+#include <pqColorMapModel.h>
 #include <pqDataRepresentation.h>
 #include <pqObjectBuilder.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
 #include <pqRenderView.h>
 #include <pqScalarsToColors.h>
+#include <pqSMAdaptor.h>
 #include <vtkDataObject.h>
 #include <vtkProperty.h>
 #include <vtkSMPropertyHelper.h>
+#include <vtkSMProxy.h>
 
 #include <QHBoxLayout>
 
@@ -76,10 +80,41 @@ void StandardView::onRebinButtonClicked()
   this->origSource);
 }
 
-void StandardView::onColorMapChange(double min, double max)
+void StandardView::onColorMapChange(const pqColorMapModel *model)
 {
-  this->originSourceRepr->getLookupTable()->setScalarRange(min, max);
-  this->originSourceRepr->getProxy()->UpdateVTKObjects();
+  pqScalarsToColors *lut = this->originSourceRepr->getLookupTable();
+  // Need the scalar bounds to calculate the color point settings
+  QPair<double, double> bounds = lut->getScalarRange();
+
+  vtkSMProxy *lutProxy = lut->getProxy();
+
+  // Set the ColorSpace
+  pqSMAdaptor::setElementProperty(lutProxy->GetProperty("ColorSpace"),
+                                  model->getColorSpace());
+  // Set the NaN color
+  QList<QVariant> values;
+  QColor nanColor;
+  model->getNanColor(nanColor);
+  values << nanColor.redF() << nanColor.greenF() << nanColor.blueF();
+  pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("NanColor"),
+                                          values);
+
+  // Set the RGB points
+  QList<QVariant> rgbPoints;
+  for(int i = 0; i < model->getNumberOfPoints(); i++)
+  {
+    QColor rgbPoint;
+    pqChartValue fraction;
+    model->getPointColor(i, rgbPoint);
+    model->getPointValue(i, fraction);
+    rgbPoints << fraction.getDoubleValue() * bounds.second << rgbPoint.redF()
+              << rgbPoint.greenF() << rgbPoint.blueF();
+  }
+  pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("RGBPoints"),
+                                          rgbPoints);
+
+  lutProxy->UpdateVTKObjects();
+  this->view->render();
 }
 
 void StandardView::onColorScaleChange(double min, double max)

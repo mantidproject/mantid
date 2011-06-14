@@ -120,8 +120,8 @@ void mpMainWindow::setMainWindowComponentsForView()
       static_cast<MultiSliceView *>(this->currentView),
       SLOT(updateSelectedIndicator()));
 	}
-  //QObject::connect(this->colorSelectionWidget, SIGNAL(colorMapChanged(double, double)),
-  // this->currentView, SLOT(onColorMapChange(double, double)));
+  QObject::connect(this->colorSelectionWidget, SIGNAL(colorMapChanged(const pqColorMapModel *)),
+    this->currentView, SLOT(onColorMapChange(pqColorMapModel *)));
   QObject::connect(this->colorSelectionWidget, SIGNAL(colorScaleChanged(double, double)),
     this->currentView, SLOT(onColorScaleChange(double, double)));
   QObject::connect(this->currentView, SIGNAL(dataRange(double, double)),

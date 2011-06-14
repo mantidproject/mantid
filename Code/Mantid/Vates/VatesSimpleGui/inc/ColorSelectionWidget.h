@@ -4,6 +4,7 @@
 #include <QtGui/QWidget>
 #include "ui_ColorSelectionWidget.h"
 
+class pqColorMapModel;
 class pqColorPresetManager;
 
 /**
@@ -54,8 +55,9 @@ signals:
   void autoScale();
   /**
    * Signal to pass on information about a change to the color map.
+   * @param model the color map to send
    */
-  void colorMapChanged(double min, double max);
+  void colorMapChanged(const pqColorMapModel *model);
   /**
    * Signal to pass on information that the color scale has changed.
    *
