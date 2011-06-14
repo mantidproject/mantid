@@ -73,3 +73,4 @@ ${INCLUDE_FILES} ${SOURCE_FILES} ${MOC_SRCS} ${UI_BUILT_SOURCES} )
 target_link_libraries( ${PROJECT_NAME}
 pqCore pqComponents pqApplicationComponents
 ${QT_LIBRARIES} ${QWT_LIBRARIES} ${POCO_LIBRARIES} )
+install(TARGETS VatesSimpleGui RUNTIME DESTINATION ${LIB_DIR})

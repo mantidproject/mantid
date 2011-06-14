@@ -124,3 +124,5 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
       ${GTEST_LIBRARIES})
   add_dependencies( FrameworkTests VatesAPITest )
 endif()
+
+install ( TARGETS VatesAPI RUNTIME DESTINATION ${LIB_DIR} )

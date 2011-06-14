@@ -9,4 +9,8 @@ add_paraview_plugin( MantidParaViewSQWReaderSMPlugin "1.0"
 target_link_libraries( MantidParaViewSQWReaderSMPlugin 
 ${MANTID_SUBPROJECT_LIBS} )
 
+# Windows-only at the moment.
+if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+  install(TARGETS MantidParaViewSQWReaderSMPlugin RUNTIME DESTINATION ${LIB_DIR})
+endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
 

@@ -15,3 +15,8 @@ add_paraview_plugin( MantidParaViewRebinningCutterObjectPanel "1.0"
                      ${SRC_FILES} )
 target_link_libraries( MantidParaViewRebinningCutterObjectPanel 
 MantidParaViewQtWidgets )
+
+# Windows-only at the moment.
+if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+  install(TARGETS MantidParaViewRebinningCutterObjectPanel RUNTIME DESTINATION ${LIB_DIR})
+endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )

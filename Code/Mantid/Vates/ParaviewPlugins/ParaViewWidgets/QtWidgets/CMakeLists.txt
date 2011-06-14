@@ -29,4 +29,5 @@ target_link_libraries( MantidParaViewQtWidgets ${QT_LIBRARIES}
 ${MANTID_SUBPROJECT_LIBS} )
 
 add_definitions( -DIN_MANTIDPARAVIEWQT_MANTIDPARAVIEWWIDGETS )
+install(TARGETS MantidParaViewQtWidgets RUNTIME DESTINATION ${LIB_DIR})
 

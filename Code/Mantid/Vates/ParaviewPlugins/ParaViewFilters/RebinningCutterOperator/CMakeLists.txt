@@ -10,3 +10,8 @@ add_paraview_plugin( MantidParaViewRebinningCutterSMPlugin "1.0"
 
 target_link_libraries( MantidParaViewRebinningCutterSMPlugin 
 ${MANTID_SUBPROJECT_LIBS} )
+
+# Windows-only at the moment.
+if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+  install(TARGETS MantidParaViewRebinningCutterSMPlugin RUNTIME DESTINATION ${LIB_DIR})
+endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )

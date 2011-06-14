@@ -15,3 +15,4 @@ add_paraview_plugin( MantidParaViewEventNexusReaderObjectPanel "1.0"
                      ${SRC_FILES} )
 target_link_libraries( MantidParaViewEventNexusReaderObjectPanel 
 MantidParaViewQtWidgets )
+install(TARGETS MantidParaViewEventNexusReaderObjectPanel RUNTIME DESTINATION ${LIB_DIR})

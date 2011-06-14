@@ -8,3 +8,4 @@ add_paraview_plugin( MantidParaViewEventNexusReaderSMPlugin "1.0"
 
 target_link_libraries( MantidParaViewEventNexusReaderSMPlugin 
 ${MANTID_SUBPROJECT_LIBS} )
+install(TARGETS MantidParaViewEventNexusReaderSMPlugin RUNTIME DESTINATION ${LIB_DIR})

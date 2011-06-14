@@ -108,114 +108,115 @@ install ( DIRECTORY Installers/colormaps/ DESTINATION ${INBUNDLE}colormaps PATTE
 set ( ENABLE_CPACK CACHE BOOL "Switch to enable CPack package generation")
 if ( ENABLE_CPACK )
   # generic package level information
-  set ( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neutron Scattering Data Analysis" )
-  set ( CPACK_PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory and NScD Oak Ridge National Laboratory" )
-  set ( CPACK_PACKAGE_URL http://www.mantidproject.org/ )
-  set ( CPACK_PACKAGE_CONTACT mantid-help@mantidproject.org )
-  set ( CPACK_PACKAGE_ICON Images/MantidPlot_Icon_32offset.png )
-  set ( CPACK_PACKAGE_NAME mantid )
-  set ( CPACK_PACKAGE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${MtdVersion_WC_LAST_CHANGED_REV} )
-  set ( CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR} )
-  set ( CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR} )
-  set ( CPACK_PACKAGE_VERSION_PATCH ${MtdVersion_WC_LAST_CHANGED_REV} )
-  set ( CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
+  if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set ( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neutron Scattering Data Analysis" )
+    set ( CPACK_PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory and NScD Oak Ridge National Laboratory" )
+    set ( CPACK_PACKAGE_URL http://www.mantidproject.org/ )
+    set ( CPACK_PACKAGE_CONTACT mantid-help@mantidproject.org )
+    set ( CPACK_PACKAGE_ICON Images/MantidPlot_Icon_32offset.png )
+    set ( CPACK_PACKAGE_NAME mantid )
+    set ( CPACK_PACKAGE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${MtdVersion_WC_LAST_CHANGED_REV} )
+    set ( CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR} )
+    set ( CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR} )
+    set ( CPACK_PACKAGE_VERSION_PATCH ${MtdVersion_WC_LAST_CHANGED_REV} )
+    set ( CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
   
-  # Mac Packagemaker settings
-  set ( CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/MacOSX-README.rtf )
-  set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/Installers/WinInstaller/License.rtf )
+    # Mac Packagemaker settings
+    set ( CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/MacOSX-README.rtf )
+    set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/Installers/WinInstaller/License.rtf )
 
-  # RPM information - only used if generating a rpm
-  #set ( CPACK_RPM_PACKAGE_ARCHITECTURE x86_64 )
-  set ( CPACK_RPM_PACKAGE_LICENSE GPLv3+ )
-  set ( CPACK_RPM_PACKAGE_RELEASE 1 )
-  set ( CPACK_RPM_PACKAGE_GROUP Applications/Engineering )
+    # RPM information - only used if generating a rpm
+    #set ( CPACK_RPM_PACKAGE_ARCHITECTURE x86_64 )
+    set ( CPACK_RPM_PACKAGE_LICENSE GPLv3+ )
+    set ( CPACK_RPM_PACKAGE_RELEASE 1 )
+    set ( CPACK_RPM_PACKAGE_GROUP Applications/Engineering )
 
 
-  # DEB information - only used if generating a deb
-  set ( CPACK_DEBIAN_PACKAGE_RELEASE 1 )
+    # DEB information - only used if generating a deb
+    set ( CPACK_DEBIAN_PACKAGE_RELEASE 1 )
 
-  IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
-    # define the source generators
-    set ( CPACK_SOURCE_GENERATOR TGZ )
+    IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+      # define the source generators
+      set ( CPACK_SOURCE_GENERATOR TGZ )
 
-    FIND_PROGRAM (LSB_CMD lsb_release)
-    IF ( LSB_CMD )
-      # get the distribution
-      execute_process ( COMMAND ${LSB_CMD} -i
-                        OUTPUT_VARIABLE UNIX_DIST
-                        OUTPUT_STRIP_TRAILING_WHITESPACE )
-      string ( REGEX REPLACE "Distributor ID:" "" UNIX_DIST ${UNIX_DIST} )
-      string ( STRIP ${UNIX_DIST} UNIX_DIST )
-      string ( REGEX REPLACE "RedHatEnterpriseClient" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
-      string ( REGEX REPLACE "RedHatEnterpriseWorkstation" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
-      # get the codename
-      execute_process ( COMMAND ${LSB_CMD} -c
+      FIND_PROGRAM (LSB_CMD lsb_release)
+      IF ( LSB_CMD )
+        # get the distribution
+        execute_process ( COMMAND ${LSB_CMD} -i
+                          OUTPUT_VARIABLE UNIX_DIST
+                          OUTPUT_STRIP_TRAILING_WHITESPACE )
+        string ( REGEX REPLACE "Distributor ID:" "" UNIX_DIST ${UNIX_DIST} )
+        string ( STRIP ${UNIX_DIST} UNIX_DIST )
+        string ( REGEX REPLACE "RedHatEnterpriseClient" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
+        string ( REGEX REPLACE "RedHatEnterpriseWorkstation" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
+        # get the codename
+        execute_process ( COMMAND ${LSB_CMD} -c
                         OUTPUT_VARIABLE UNIX_CODENAME
                         OUTPUT_STRIP_TRAILING_WHITESPACE )
-      string ( REGEX REPLACE "Codename:" "" UNIX_CODENAME ${UNIX_CODENAME} )
-      string ( STRIP ${UNIX_CODENAME} UNIX_CODENAME )
-    ELSE ( LSB_CMD )
-      set ( UNIX_DIST "" )
-      set ( UNIX_CODENAME "" )
-    ENDIF ( LSB_CMD )
-    message ( STATUS " DIST: ${UNIX_DIST} CODENAME: ${UNIX_CODENAME}" )
+        string ( REGEX REPLACE "Codename:" "" UNIX_CODENAME ${UNIX_CODENAME} )
+        string ( STRIP ${UNIX_CODENAME} UNIX_CODENAME )
+      ELSE ( LSB_CMD )
+        set ( UNIX_DIST "" )
+        set ( UNIX_CODENAME "" )
+      ENDIF ( LSB_CMD )
+      message ( STATUS " DIST: ${UNIX_DIST} CODENAME: ${UNIX_CODENAME}" )
 
-    # define which binary generators to use
-    IF ( ${UNIX_DIST} MATCHES "Ubuntu" )
-      FIND_PROGRAM(DPKG_CMD dpkg)
-      IF ( DPKG_CMD )
-        set ( CPACK_GENERATOR "DEB" )
-        execute_process( COMMAND ${DPKG_CMD} --print-architecture
-                         OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
-                         OUTPUT_STRIP_TRAILING_WHITESPACE )
-        # acording to debian <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb 
-        set( CPACK_PACKAGE_FILE_NAME
-             "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")   
-      ENDIF( DPKG_CMD ) 
-    ENDIF ( ${UNIX_DIST} MATCHES "Ubuntu" )
+      # define which binary generators to use
+      IF ( ${UNIX_DIST} MATCHES "Ubuntu" )
+        FIND_PROGRAM(DPKG_CMD dpkg)
+        IF ( DPKG_CMD )
+          set ( CPACK_GENERATOR "DEB" )
+          execute_process( COMMAND ${DPKG_CMD} --print-architecture
+                           OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+                           OUTPUT_STRIP_TRAILING_WHITESPACE )
+          # acording to debian <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb 
+          set( CPACK_PACKAGE_FILE_NAME
+               "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")   
+        ENDIF( DPKG_CMD ) 
+      ENDIF ( ${UNIX_DIST} MATCHES "Ubuntu" )
 
-    #RedHatEnterpriseClient RedHatEnterpriseWorkstation
-    IF ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
-      FIND_PROGRAM ( RPMBUILD_CMD rpmbuild )
-      IF ( RPMBUILD_CMD )
-        set ( CPACK_GENERATOR "RPM" )
-	set ( CPACK_RPM_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}" )
-        # reset the release name to include the RHEL version if known
-        IF ( ${UNIX_CODENAME} MATCHES "Tikanga" )
-          set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el5" )
-        ELSEIF ( ${UNIX_CODENAME} MATCHES "Santiago" )
-          set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el6" )
-        ENDIF ( ${UNIX_CODENAME} MATCHES "Tikanga" )
+      #RedHatEnterpriseClient RedHatEnterpriseWorkstation
+      IF ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
+        FIND_PROGRAM ( RPMBUILD_CMD rpmbuild )
+        IF ( RPMBUILD_CMD )
+          set ( CPACK_GENERATOR "RPM" )
+	  set ( CPACK_RPM_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}" )
+          # reset the release name to include the RHEL version if known
+          IF ( ${UNIX_CODENAME} MATCHES "Tikanga" )
+            set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el5" )
+          ELSEIF ( ${UNIX_CODENAME} MATCHES "Santiago" )
+            set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el6" )
+          ENDIF ( ${UNIX_CODENAME} MATCHES "Tikanga" )
         
-        # according to rpm.org: name-version-release.architecture.rpm
-        set ( CPACK_PACKAGE_FILE_NAME
-            "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}.${CPACK_RPM_PACKAGE_ARCHITECTURE}" )
+          # according to rpm.org: name-version-release.architecture.rpm
+          set ( CPACK_PACKAGE_FILE_NAME
+              "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}.${CPACK_RPM_PACKAGE_ARCHITECTURE}" )
        
-    ENDIF ( RPMBUILD_CMD)
-    ENDIF ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
+      ENDIF ( RPMBUILD_CMD)
+      ENDIF ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
 
-    # let people know what is coming out the other end
-    message ( status " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
+      # let people know what is coming out the other end
+      message ( status " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
+    ENDIF ()
 
-  ENDIF ()
+    # rhel requirements
+    set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
+    set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
 
-  # rhel requirements
-  set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
-  set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
+    # TODO: MG - Find a better way of handling boost, the package versions on ubuntu are encoded in the names,
+    #            the versions here are for Ubuntu 10.04.
+    # We also need to create a debian package repository and have a nexus package in it
+    set ( CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-date-time1.40.0,libboost-regex1.40.0,libboost-signals1.40.0,libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9,libnexus0 (>= 4.2),libgsl0ldbl,libqtcore4 (>= 4.2),libqtgui4 (>= 4.2),libqt4-opengl (>= 4.2),libqt4-xml (>= 4.2),libqt4-svg (>= 4.2),libqt4-qt3support (>= 4.2),libqscintilla2-5,libqwt5-qt4,libqwtplot3d-qt4-0" )
+    set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libopencascade-foundation-6.3.0 (>= 6.3.0),libopencascade-modeling-6.3.0 (>= 6.3.0),libmuparser0,python-numpy,python-sip,python-qt4,libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}" )
 
-  # TODO: MG - Find a better way of handling boost, the package versions on ubuntu are encoded in the names,
-  #            the versions here are for Ubuntu 10.04.
-  # We also need to create a debian package repository and have a nexus package in it
-  set ( CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-date-time1.40.0,libboost-regex1.40.0,libboost-signals1.40.0,libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9,libnexus0 (>= 4.2),libgsl0ldbl,libqtcore4 (>= 4.2),libqtgui4 (>= 4.2),libqt4-opengl (>= 4.2),libqt4-xml (>= 4.2),libqt4-svg (>= 4.2),libqt4-qt3support (>= 4.2),libqscintilla2-5,libqwt5-qt4,libqwtplot3d-qt4-0" )
-  set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libopencascade-foundation-6.3.0 (>= 6.3.0),libopencascade-modeling-6.3.0 (>= 6.3.0),libmuparser0,python-numpy,python-sip,python-qt4,libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}" )
+    # soft requirement of tcmalloc - if built with it, then require it
+    IF ( USE_TCMALLOC AND TCMALLOC_FOUND )
+      message ( status " Adding google-perftools to the package requirements" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},google-perftools" )
+      set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},google-perftools" )
+    ENDIF ( )
 
-  # soft requirement of tcmalloc - if built with it, then require it
-  IF ( USE_TCMALLOC AND TCMALLOC_FOUND )
-    message ( status " Adding google-perftools to the package requirements" )
-    set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},google-perftools" )
-    set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},google-perftools" )
-  ENDIF ( )
-
-  # run cpack configuration
-  include ( CPack )
+    # run cpack configuration
+    include ( CPack )
+  ENDIF(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif ()

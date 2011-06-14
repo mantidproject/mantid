@@ -13,4 +13,10 @@ if( PARAVIEW_BUILD_QT_GUI )
                        GUI_INTERFACES ${IFACES}
                        SOURCES RebinningCutterToolBarActions.cxx ${MOC_SRCS} 
                        ${IFACE_SRCS} ${INCLUDE_FILES} ${SRC_FILES} )
+					   
+ # Windows-only at the moment.
+ if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+   install(TARGETS MantidParaViewRebinningCutterToolBarActions RUNTIME DESTINATION ${LIB_DIR})
+ endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+ 
 endif( PARAVIEW_BUILD_QT_GUI )
