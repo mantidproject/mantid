@@ -47,7 +47,7 @@ public:
   /// Algorithm's name
   virtual const std::string name() const { return "Q1D"; }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  virtual int version() const { return (3); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "SANS"; }
 

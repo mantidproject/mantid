@@ -58,7 +58,8 @@ class ISISReducer(SANSReducer):
         #---- creates a new workspace leaving the raw data behind 
         self._fork_ws = [self.out_name]
 
-        self._proc_TOF = [self.crop_detector]
+        self._proc_TOF = [self.flood_file]
+        self._proc_TOF.append(self.crop_detector)
         self._proc_TOF.append(self.mask)
         self._proc_TOF.append(self.to_wavelen)
 
@@ -83,13 +84,15 @@ class ISISReducer(SANSReducer):
     def _init_steps(self):
         """
             Initialises the steps that are not initialised by (ISIS)CommandInterface.
-        """       
+        """
+        
         self.data_loader =     None
         self.user_settings =   None
         self.place_det_sam =   isis_reduction_steps.MoveComponents()
         self.geometry =        sans_reduction_steps.GetSampleGeom()
         self.out_name =       isis_reduction_steps.GetOutputName()
-#this needs to change
+        self.flood_file =      isis_reduction_steps.CorrectToFileISIS(
+            '', 'SpectrumNumber','Divide', self.out_name.name_holder)
         self.crop_detector =   isis_reduction_steps.CropDetBank(
             self.out_name.name_holder)
         self.samp_trans_load = None
@@ -99,13 +102,9 @@ class ISISReducer(SANSReducer):
         self.norm_mon =        isis_reduction_steps.NormalizeToMonitor()
         self.transmission_calculator =\
                                isis_reduction_steps.TransmissionCalc(loader=None)
-        self._corr_and_scale = isis_reduction_steps.AbsoluteUnits()
-        
-        #this object isn't a step but is required by the ConvertToQ step below
-        self.prep_normalize = isis_reduction_steps.CalculateNormISIS(
-                [self.norm_mon, self.transmission_calculator])
-
-        self.to_Q =            sans_reduction_steps.ConvertToQ(self.prep_normalize)
+        self._corr_and_scale = isis_reduction_steps.ISISCorrections()
+        self.to_Q =            isis_reduction_steps.ConvertToQ(
+	                                         container=self._temporys)
         self.background_subtracter = None
         self._geo_corr =       sans_reduction_steps.SampleGeomCor(self.geometry)
         self._zero_error_flags=isis_reduction_steps.ReplaceErrors()
@@ -119,12 +118,12 @@ class ISISReducer(SANSReducer):
         self.sample_wksp = None
         self.full_trans_wav = False
         self._monitor_set = False
-        #workspaces that this reducer uses and will delete at the end
-        self._temporys = {}
-        #the output workspaces created by a data analysis
-        self._outputs = {}
-        #all workspaces created by this reducer
-        self._workspace = [self._temporys, self._outputs] 
+	#workspaces that this reducer uses and will delete at the end
+        self._temporys = {'Q1D errors' : None}
+	#the output workspaces created by a data analysis
+	self._outputs = {}
+	#all workspaces created by this reducer
+	self._workspace = [self._temporys, self._outputs] 
 
         self._init_steps()
 	
@@ -182,6 +181,8 @@ class ISISReducer(SANSReducer):
         new_reducer.output_wksp = new_wksp
 
         #give the name of the new workspace to the first algorithm that was run
+        new_reducer.flood_file.out_container[0] = new_wksp
+        #the line below is required if the step above is optional
         new_reducer.crop_detector.out_container[0] = new_wksp
         
         if new_reducer.transmission_calculator:
@@ -199,7 +200,9 @@ class ISISReducer(SANSReducer):
             new_reducer.run_no_Q(new_wksp)
 
     def name_outwksp(self, new_name):
-        #give the name of the new workspace to the first algorithm that is run
+        #give the name of the new workspace to the first algorithm that was run
+        self.flood_file.out_container = [new_name]
+        #the line below is required if the step above is optional
         self.crop_detector.out_container = [new_name]
 
     def run_from_raw(self):
@@ -258,7 +261,25 @@ class ISISReducer(SANSReducer):
         self.clean = False
         return self.output_wksp
 
+    def keep_un_normalised(self, keep):
+        """
+	        Use this function to keep the un-normalised workspace from the
+	        normalise to monitor step and use it for the Q1D error estimate.
+	        Call this function with keep = False to disable this
+	        @param keep: set tot True to keep the workspace, False to delete it
+        """
+        if keep:
+            self._temporys['Q1D errors'] = 'to_delete_prenormed'
+        else:
+            if self._temporys['Q1D errors']:
+               if mtd.workspaceExists(self._temporys['Q1D errors']):
+                   DeleteWorkspace(self._temporys['Q1D errors'])
+                   self._temporys['Q1D errors'] = None
+	    
+	self.norm_mon.save_original = self._temporys['Q1D errors']
+
     def set_Q_output_type(self, out_type):
+       self.keep_un_normalised(self.to_Q.output_type == '1D')
        self.to_Q.set_output_type(out_type)
 
     def post_process(self):
@@ -267,7 +288,7 @@ class ISISReducer(SANSReducer):
             user_file = 'None'
         else:
             user_file = self.user_settings.filename
-        AddSampleLog(self.output_wksp, "UserFile", LogText=user_file)
+        AddSampleLog(self.output_wksp, "UserFile", user_file)
 	
 	for role in self._temporys.keys():
 	    try:
@@ -360,16 +381,3 @@ class ISISReducer(SANSReducer):
 
     CENT_FIND_RMIN = None
     CENT_FIND_RMAX = None
-    
-def deleteWorkspaces(workspaces):
-    """
-        Deletes a list of workspaces if they exist but ignores any errors
-    """
-    for wk in workspaces:
-        try:
-            if wk and mantid.workspaceExists(wk):
-                DeleteWorkspace(wk)
-        except:
-            #if the workspace can't be deleted this function does nothing
-            pass
-

@@ -17,10 +17,11 @@ public:
     TS_ASSERT_EQUALS( Q1D.name(), "Q1D" )
   }
 
-  void testVersion()
+/*this algorithm must be reset to being old when the SANS group are happy with the new version
+void testVersion()
   {
     TS_ASSERT_EQUALS( Q1D.version(), 1 )
-  }
+  }*/
 
   void testCategory()
   {

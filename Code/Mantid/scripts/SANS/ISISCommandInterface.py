@@ -288,7 +288,7 @@ def SetFrontEfficiencyFile(filename):
     front_det.correction_file = filename
 
 def SetDetectorFloodFile(filename):
-    ReductionSingleton().prep_normalize.setPixelCorrFile(filename)
+    ReductionSingleton().flood_file.set_filename(filename)
 
 def displayUserFile():
     print '-- Mask file defaults --'

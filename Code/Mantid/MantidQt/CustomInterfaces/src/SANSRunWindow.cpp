@@ -733,7 +733,7 @@ bool SANSRunWindow::loadUserFile()
     "print i.ReductionSingleton().instrument.detector_file('front')"));
 
   QString file = runReduceScriptFunction(
-    "print i.ReductionSingleton().prep_normalize.getPixelCorrFile()");
+    "print i.ReductionSingleton().flood_file.get_filename()");
   file = file.trimmed();
   //Check if the file name is set to Python's None object and then adjust the controls if there is an empty entry
   m_uiForm.floodFile->setFileText(file == "None" ? "" : file);
