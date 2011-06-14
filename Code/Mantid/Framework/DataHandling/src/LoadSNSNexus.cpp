@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadSNSNexus.h"
+#include "MantidDataHandling/LoadSNSNexus.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -16,6 +16,7 @@
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NeXusException.hpp"
+#include "MantidNexus/NexusClasses.h"
 
 #include <cmath>
 #include <iostream>
@@ -25,7 +26,7 @@
 
 namespace Mantid
 {
-namespace NeXus
+namespace DataHandling
 {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadSNSNexus)
@@ -41,6 +42,7 @@ void LoadSNSNexus::initDocs()
 
 using namespace Kernel;
 using namespace API;
+using namespace Mantid::NeXus;
 
 /// Empty default constructor
 LoadSNSNexus::LoadSNSNexus():m_L1(0) {}
@@ -118,7 +120,7 @@ void LoadSNSNexus::exec()
  *  @param progress_end :: The ending progress
  *  @return A shared pointer to the created workspace
  */
-API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double progress_start, double progress_end)
+API::Workspace_sptr LoadSNSNexus::loadEntry(Mantid::NeXus::NXEntry entry,int period, double progress_start, double progress_end)
 {
     (void)period;
     std::cerr << "loadEntry00:" << std::endl;// REMOVE

@@ -15,7 +15,6 @@ set ( SRC_FILES
         src/LoadRaw/item_struct.cpp
         src/LoadRaw/vms_convert.cpp
         src/LoadNexusLogs.cpp
-        src/LoadSNSNexus.cpp
         src/LoadTOFRawNeXus.cpp
         src/MuonNexusReader.cpp
         src/NeXusException.cpp
@@ -44,7 +43,6 @@ set ( INC_FILES
         inc/MantidNexus/LoadNexusMonitors.h
         inc/MantidNexus/LoadNexusProcessed.h
         inc/MantidNexus/LoadNexusLogs.h
-        inc/MantidNexus/LoadSNSNexus.h
         inc/MantidNexus/LoadTOFRawNeXus.h
         inc/MantidNexus/MuonNexusReader.h
         inc/MantidNexus/NexusClasses.h
@@ -55,7 +53,6 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-        #test/LoadSNSNexusTest.h # TODO has no active tests in it
         #test/LoadTOFRawNeXusTest.h # TODO has no active tests in it
         test/LoadISISNexusTest.h
         test/LoadLogsFromSNSNexusTest.h

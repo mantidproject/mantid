@@ -53,6 +53,7 @@ set ( SRC_FILES
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
 	src/LoadSNSEventNexus.cpp
+	src/LoadSNSNexus.cpp
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/ManagedRawFileWorkspace2D.cpp
@@ -123,10 +124,11 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
+	inc/MantidDataHandling/LoadSNSEventNexus.h
+	inc/MantidDataHandling/LoadSNSNexus.h
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
 	inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
-	inc/MantidDataHandling/LoadSNSEventNexus.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/ManagedRawFileWorkspace2D.h
@@ -192,6 +194,7 @@ set ( TEST_FILES
 	test/LoadRawSpectrum0Test.h
 	test/LoadRawTest.h
 	test/LoadSNSEventNexusTest.h
+	#test/LoadSNSNexusTest.h # TODO has no active tests in it
 	test/LoadSNSspecTest.h
 	test/LoadSPETest.h
 	test/LoadSaveAsciiTest.h
