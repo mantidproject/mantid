@@ -105,7 +105,7 @@ class BaseBeamFinder(ReductionStep):
         
         # Compute the relative distance to the current beam center in pixels
         if self._beam_center_x is None or self._beam_center_y is None:
-            [self._beam_center_x, self._beam_center_y] = reducer.instrument.get_default_beam_center()
+            [self._beam_center_x, self._beam_center_y] = reducer.instrument.get_default_beam_center(workspace)
             
         # Move detector array to correct position. Do it here so that we don't need to
         # move it if we need to load that data set for analysis later.
@@ -113,14 +113,16 @@ class BaseBeamFinder(ReductionStep):
         # Note: if the relative translation is correct, we shouldn't have to keep 
         #       the condition below. Check with EQSANS data (where the beam center and the data are the same workspace)
         if not workspace == workspace_default:
-            old_ctr = reducer.instrument.get_coordinate_from_pixel(self._beam_center_x, self._beam_center_y)
+            old_ctr = reducer.instrument.get_coordinate_from_pixel(self._beam_center_x, self._beam_center_y, workspace)
             detector_ID=mtd[workspace].getInstrument().getStringParameter("detector-name")[0]
             MoveInstrumentComponent(workspace, detector_ID, 
                                     X = old_ctr[0]-float(ctr[0]),
                                     Y = old_ctr[1]-float(ctr[1]),
                                     RelativePosition="1")        
 
-        [self._beam_center_x, self._beam_center_y] = reducer.instrument.get_pixel_from_coordinate(float(ctr[0]), float(ctr[1]))
+        [self._beam_center_x, self._beam_center_y] = reducer.instrument.get_pixel_from_coordinate(float(ctr[0]), float(ctr[1]), workspace)
+        mantid[workspace].getRun().addProperty_dbl("beam_center_x", self._beam_center_x, 'pixel', True)            
+        mantid[workspace].getRun().addProperty_dbl("beam_center_y", self._beam_center_y, 'pixel', True)                                
         
         return "Beam Center found at: %g %g" % (self._beam_center_x, self._beam_center_y)
 
@@ -609,15 +611,28 @@ class LoadRun(ReductionStep):
         else:
             [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
         if pixel_ctr_x is not None and pixel_ctr_y is not None:
-            [beam_ctr_x, beam_ctr_y] = reducer.instrument.get_coordinate_from_pixel(pixel_ctr_x, pixel_ctr_y)
-            [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
-            [default_x, default_y] = reducer.instrument.get_coordinate_from_pixel(default_pixel_x, default_pixel_y)
+            [beam_ctr_x, beam_ctr_y] = reducer.instrument.get_coordinate_from_pixel(pixel_ctr_x, pixel_ctr_y, workspace)
+            [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center(workspace)
+            [default_x, default_y] = reducer.instrument.get_coordinate_from_pixel(default_pixel_x, default_pixel_y, workspace)
             MoveInstrumentComponent(workspace, detector_ID, 
                                     X = default_x-beam_ctr_x,
                                     Y = default_y-beam_ctr_y,
                                     RelativePosition="1")
+            mantid[workspace].getRun().addProperty_dbl("beam_center_x", pixel_ctr_x, 'pixel', True)            
+            mantid[workspace].getRun().addProperty_dbl("beam_center_y", pixel_ctr_y, 'pixel', True)            
         else:
-            mantid.sendLogMessage("Beam center isn't defined: skipping beam center alignment for %s" % workspace)
+            # Don't move the detector and use the default beam center
+            [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center(workspace)
+            mantid[workspace].getRun().addProperty_dbl("beam_center_x", default_pixel_x, 'pixel', True)            
+            mantid[workspace].getRun().addProperty_dbl("beam_center_y", default_pixel_y, 'pixel', True)            
+            if type(reducer._beam_finder) is BaseBeamFinder:
+                reducer.set_beam_finder(BaseBeamFinder(default_pixel_x, default_pixel_y))
+                mantid.sendLogMessage("No beam finding method: setting to default [%-6.1f, %-6.1f]" % (default_pixel_x, 
+                                                                                                       default_pixel_y))
+                
+            mantid.sendLogMessage("Beam center isn't defined: using default [%-6.1f, %-6.1f] for %s" % (default_pixel_x, 
+                                                                                                        default_pixel_y,
+                                                                                                        workspace))
         
         n_files = 1
         if type(data_file)==list:
@@ -1020,7 +1035,8 @@ class Mask(ReductionStep):
             self.masked_pixels.extend(instrument.get_masked_pixels(self._nx_low,
                                                                    self._nx_high,
                                                                    self._ny_low,
-                                                                   self._ny_high))
+                                                                   self._ny_high,
+                                                                   workspace))
 
         if len(self.spec_list)>0:
             MaskDetectors(workspace, SpectraList = self.spec_list)

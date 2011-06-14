@@ -7,7 +7,7 @@ import os
 import sys
 import pickle
 from reduction import ReductionStep
-from sans_reduction_steps import BaseTransmission
+from sans_reduction_steps import BaseTransmission, BaseBeamFinder
 from reduction import extract_workspace_name, find_file, find_data
 from eqsans_config import EQSANSConfig
 
@@ -286,8 +286,20 @@ class LoadRun(ReductionStep):
                                     X = default_x-beam_ctr_x,
                                     Y = default_y-beam_ctr_y,
                                     RelativePosition="1")
+            mtd[workspace+'_evt'].getRun().addProperty_dbl("beam_center_x", pixel_ctr_x, 'pixel', True)            
+            mtd[workspace+'_evt'].getRun().addProperty_dbl("beam_center_y", pixel_ctr_y, 'pixel', True)   
+            mantid.sendLogMessage("Beam center: %-6.1f, %-6.1f" % (pixel_ctr_x, pixel_ctr_y))                             
         else:
-            mantid.sendLogMessage("Beam center isn't defined: skipping beam center alignment for %s" % workspace)
+            # Don't move the detector and use the default beam center
+            [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
+            mantid[workspace+'_evt'].getRun().addProperty_dbl("beam_center_x", default_pixel_x, 'pixel', True)            
+            mantid[workspace+'_evt'].getRun().addProperty_dbl("beam_center_y", default_pixel_y, 'pixel', True)            
+            if type(reducer._beam_finder) is BaseBeamFinder:
+                reducer.set_beam_finder(BaseBeamFinder(default_pixel_x, default_pixel_y))
+                mantid.sendLogMessage("No beam finding method: setting to default [%-6.1f, %-6.1f]" % (default_pixel_x, 
+                                                                                                       default_pixel_y))
+            
+            mantid.sendLogMessage("Beam center isn't defined: skipping beam center alignment for %s" % workspace+'_evt')
 
         # Choose and process configuration file
         if len(config_files)>0:
@@ -312,6 +324,7 @@ class LoadRun(ReductionStep):
         high_TOF_cut = self._high_TOF_cut
         
         if config_file is not None:
+            mantid.sendLogMessage("Using configuration file: %s\n" % config_file)
             output_str +=  "  Using configuration file: %s\n" % config_file
             conf = EQSANSConfig(config_file)
             mtd[workspace+'_evt'].getRun().addProperty_dbl("low_tof_cut", conf.low_TOF_cut, "microsecond", True)
@@ -406,6 +419,7 @@ class Normalize(ReductionStep):
         flux_files = find_file(filename="bl6_flux_at_sample", data_dir=reducer._data_path)
         if len(flux_files)>0:
             flux_data_path = flux_files[0]
+            mantid.sendLogMessage("Using beam flux file: %s" % flux_data_path)
         else:
             mantid.sendLogMessage("Could not find beam flux file!")
             

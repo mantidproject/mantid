@@ -10,7 +10,9 @@ class EQSANS(Instrument):
     _NAME = "EQ-SANS"
     
     def __init__(self) :
-        super(EQSANS, self).__init__()
+        # We skip the base class initialization because we don't need
+        # to load the instrument description until later 
+        
         ## Number of detector pixels in X
         self.nx_pixels = 192
         ## Number of detector pixels in Y
@@ -21,14 +23,14 @@ class EQSANS(Instrument):
         ## Detector name
         self.detector_ID = "detector1"
 
-    def get_default_beam_center(self):
+    def get_default_beam_center(self, workspace=None):
         """
             Returns the default beam center position, or the pixel location
             of real-space coordinates (0,0).
         """
-        return self.get_pixel_from_coordinate(0, 0)
+        return self.get_pixel_from_coordinate(0, 0, workspace)
 
-    def get_pixel_from_coordinate(self, x=0, y=0):
+    def get_pixel_from_coordinate(self, x, y, workspace=None):
         """
             Returns the pixel coordinates corresponding to the
             given real-space position.
@@ -42,7 +44,7 @@ class EQSANS(Instrument):
         return [x/self.pixel_size_x*1000.0 + self.nx_pixels/2.0-0.5,
                 y/self.pixel_size_y*1000.0 + self.ny_pixels/2.0-0.5]
     
-    def get_coordinate_from_pixel(self, x=0, y=0):
+    def get_coordinate_from_pixel(self, x, y, workspace=None):
         """
             Returns the real-space coordinates corresponding to the
             given pixel coordinates [m].
@@ -56,7 +58,7 @@ class EQSANS(Instrument):
         return [(x-self.nx_pixels/2.0+0.5) * self.pixel_size_x/1000.0,
                 (y-self.ny_pixels/2.0+0.5) * self.pixel_size_y/1000.0]
             
-    def get_masked_pixels(self, nx_low, nx_high, ny_low, ny_high):
+    def get_masked_pixels(self, nx_low, nx_high, ny_low, ny_high, workspace=None):
         """
             Generate a list of masked pixels.
             @param nx_low: number of pixels to mask on the lower-x side of the detector

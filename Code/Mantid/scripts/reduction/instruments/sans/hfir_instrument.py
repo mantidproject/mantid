@@ -6,42 +6,22 @@ class HFIRSANS(Instrument):
         HFIR SANS instrument description
     """
     def __init__(self, instrument_id="BIOSANS") :
+        # We skip the base class initialization because we don't need
+        # to load the instrument description until later 
         self._NAME = instrument_id
-        super(HFIRSANS, self).__init__()
-        
-        ## Number of detector pixels in X
-        self.nx_pixels = int(self.definition.getNumberParameter("number-of-x-pixels")[0])
-        ## Number of detector pixels in Y
-        self.ny_pixels = int(self.definition.getNumberParameter("number-of-y-pixels")[0])
-        ## Number of counters. This is the number of detector channels (spectra) before the
-        # data channels start
-        self.nMonitors = int(self.definition.getNumberParameter("number-of-monitors")[0])
-        ## Pixel size in mm
-        self.pixel_size_x = self.definition.getNumberParameter("x-pixel-size")[0]
-        self.pixel_size_y = self.definition.getNumberParameter("y-pixel-size")[0]
-        ## Detector name
-        self.detector_ID = self.definition.getStringParameter("detector-name")[0]
 
-    def set_wavelength(self, wavelength=None, spread=None):
-        """
-            Sets the wavelength. If the wavelength is set to something other 
-            than None, that value will take precedence over any value read in 
-            the data files.
-            @param wavelength: value of the wavelength [Angstrom]
-            @param spread: wavelength spread [Angstrom]
-        """
-        self.wavelength = wavelength
-        self.wavelength_spread = spread
-        
-    def get_default_beam_center(self):
+    def get_default_beam_center(self, workspace=None):
         """
             Returns the default beam center position, or the pixel location
             of real-space coordinates (0,0).
         """
-        return self.get_pixel_from_coordinate(0, 0)
+        # If a workspace is not provided, we'll figure out the position later
+        if workspace is None:
+            return [None, None]
+        return self.get_pixel_from_coordinate(0, 0, workspace)
 
         
-    def get_pixel_from_coordinate(self, x=0, y=0):
+    def get_pixel_from_coordinate(self, x, y, workspace):
         """
             Returns the pixel coordinates corresponding to the
             given real-space position.
@@ -51,11 +31,14 @@ class HFIRSANS(Instrument):
             
             @param x: real-space x coordinate [m]
             @param y: real-space y coordinate [m]
+            @param workspace: the pixel number and size info will be taken from the workspace
         """
-        return [x/self.pixel_size_x*1000.0 + self.nx_pixels/2.0-0.5,
-                y/self.pixel_size_y*1000.0 + self.ny_pixels/2.0-0.5]
+        nx_pixels, ny_pixels, pixel_size_x, pixel_size_y = self._get_pixel_info(workspace)
+            
+        return [x/pixel_size_x*1000.0 + nx_pixels/2.0-0.5,
+                y/pixel_size_y*1000.0 + ny_pixels/2.0-0.5]
     
-    def get_coordinate_from_pixel(self, x=0, y=0):
+    def get_coordinate_from_pixel(self, x, y, workspace):
         """
             Returns the real-space coordinates corresponding to the
             given pixel coordinates [m].
@@ -65,33 +48,52 @@ class HFIRSANS(Instrument):
             
             @param x: pixel x coordinate
             @param y: pixel y coordinate
+            @param workspace: the pixel number and size info will be taken from the workspace
         """
-        return [(x-self.nx_pixels/2.0+0.5) * self.pixel_size_x/1000.0,
-                (y-self.ny_pixels/2.0+0.5) * self.pixel_size_y/1000.0]
+        nx_pixels, ny_pixels, pixel_size_x, pixel_size_y = self._get_pixel_info(workspace)
+
+        return [(x-nx_pixels/2.0+0.5) * pixel_size_x/1000.0,
+                (y-ny_pixels/2.0+0.5) * pixel_size_y/1000.0]
     
-    def get_masked_pixels(self, nx_low, nx_high, ny_low, ny_high):
+    def get_masked_pixels(self, nx_low, nx_high, ny_low, ny_high, workspace):
         """
             Generate a list of masked pixels.
             @param nx_low: number of pixels to mask on the lower-x side of the detector
             @param nx_high: number of pixels to mask on the higher-x side of the detector
             @param ny_low: number of pixels to mask on the lower-y side of the detector
             @param ny_high: number of pixels to mask on the higher-y side of the detector
-            
-            TODO: hide this in an instrument-specific mask implementation
+            @param workspace: the pixel number and size info will be taken from the workspace                        
         """
+        nx_pixels, ny_pixels, pixel_size_x, pixel_size_y = self._get_pixel_info(workspace)
+        
         masked_x = range(0, nx_low)
-        masked_x.extend(range(self.nx_pixels-nx_high, self.nx_pixels))
+        masked_x.extend(range(nx_pixels-nx_high, nx_pixels))
 
         masked_y = range(0, ny_low)
-        masked_y.extend(range(self.ny_pixels-ny_high, self.ny_pixels))
+        masked_y.extend(range(ny_pixels-ny_high, ny_pixels))
         
         masked_pts = []
         for y in masked_y:
-            masked_pts.extend([ [y,x] for x in range(self.nx_pixels) ])
+            masked_pts.extend([ [y,x] for x in range(nx_pixels) ])
         for x in masked_x:
-            masked_pts.extend([ [y,x] for y in range(ny_low, self.ny_pixels-ny_high) ])
+            masked_pts.extend([ [y,x] for y in range(ny_low, ny_pixels-ny_high) ])
         
         return masked_pts
+        
+    def _get_pixel_info(self, workspace):
+        """
+            Get the pixel size and number of pixels from the workspace
+            @param workspace: workspace to extract the pixel information from
+        """
+        ## Number of detector pixels in X
+        nx_pixels = int(MantidFramework.mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+        ## Number of detector pixels in Y
+        ny_pixels = int(MantidFramework.mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+        ## Pixel size in mm
+        pixel_size_x = MantidFramework.mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
+        pixel_size_y = MantidFramework.mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
+
+        return nx_pixels, ny_pixels, pixel_size_x, pixel_size_y
         
     def get_detector_from_pixel(self, pixel_list):
         """
@@ -104,6 +106,7 @@ class HFIRSANS(Instrument):
     def get_aperture_distance(self, workspace):
         """
             Return the aperture distance
+            @param workspace: workspace to get the aperture distance from
         """
         try:
             nguides = MantidFramework.mtd[workspace].getRun().getProperty("number-of-guides").value
