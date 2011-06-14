@@ -182,7 +182,7 @@ namespace Mantid
       m_clipper(clipper),
       m_maxThreshold(0),
       m_minThreshold(0),
-      m_applyClip(true),
+      m_applyClip(false),
       m_timestep(0),
       m_wsGeometry("")
     {
@@ -394,25 +394,42 @@ namespace Mantid
         m_request->ask(RecalculateVisualDataSetOnly);
         m_minThreshold = m_view->getMinThreshold();
       }
-      if(m_view->getApplyClip() != m_applyClip)
+      bool hasAppliedClipping = m_view->getApplyClip();
+      if(hasAppliedClipping != m_applyClip)
       {
         //check it's a box.
         //extract a box.
         //compare boxes.
         vtkBox* box = dynamic_cast<vtkBox*>(m_view->getImplicitFunction());
-        if(NULL != box && m_view->getApplyClip())
+        if(NULL != box && hasAppliedClipping)
         {
           m_box = constructBoxFromVTKBox(box);
-          m_request->ask(RecalculateAll);
         }
         else
         {
           m_box = constructBoxFromInput();
-          m_request->ask(RecalculateVisualDataSetOnly);
         }
+        m_request->ask(RecalculateAll);
 
         m_applyClip = m_view->getApplyClip();
       }
+
+      //Should always do clipping comparison
+      if(hasAppliedClipping == true)
+      {
+        vtkBox* box = dynamic_cast<vtkBox*>(m_view->getImplicitFunction());
+        if(NULL != box)
+        {
+          boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> boxA = boost::dynamic_pointer_cast<Mantid::MDAlgorithms::BoxImplicitFunction>(constructBoxFromVTKBox(box));
+          boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> boxB = boost::dynamic_pointer_cast<Mantid::MDAlgorithms::BoxImplicitFunction>(m_box);
+          if(boxA != boxB)
+          {
+            m_box = boxA;
+            m_request->ask(RecalculateAll);
+          }
+        }
+      }
+
       addFunctionKnowledge();
 
       if(m_view->getAppliedGeometryXML() != m_serializer.getWorkspaceGeometry())

@@ -157,7 +157,9 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
   //Setup is not complete until metadata has been correctly provided.
   if(SetupDone == m_setup)
   {
-
+    //Updating again at this point is the only way to pick-up changes to clipping.
+    m_presenter->updateModel();
+    
     FilterUpdateProgressAction<vtkRebinningCutter> updatehandler(this);
 
     vtkInformation *outInfo = outputVector->GetInformationObject(0);

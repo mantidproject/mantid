@@ -255,7 +255,7 @@ public:
     EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
     EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
     EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(true));
+    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
     EXPECT_CALL(view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
 
@@ -280,7 +280,7 @@ public:
     EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
     EXPECT_CALL(view, getMaxThreshold()).Times(2).WillRepeatedly(Return(1)); //Maxthreshold non-zero
     EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(true));
+    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
     EXPECT_CALL(view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
 
@@ -305,7 +305,7 @@ public:
     EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
     EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0)); 
     EXPECT_CALL(view, getMinThreshold()).Times(2).WillRepeatedly(Return(1)); //Minthreshold non-zero
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(true));
+    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
     EXPECT_CALL(view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
 
@@ -330,7 +330,7 @@ public:
     EXPECT_CALL(view, getTimeStep()).Times(2).WillRepeatedly(Return(1)); //Timestep updated
     EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
     EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(true));
+    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
     EXPECT_CALL(view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
    
@@ -355,7 +355,7 @@ public:
     EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
     EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
     EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(true));
+    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "en", "qz");
     EXPECT_CALL(view, getAppliedGeometryXML()).Times(3).WillRepeatedly(Return(viewXML.c_str())); //Geometry (4D) should reflect on request.
    
@@ -380,7 +380,7 @@ public:
     EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
     EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
     EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(true));
+    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en", "11");
     EXPECT_CALL(view, getAppliedGeometryXML()).Times(3).WillRepeatedly(Return(viewXML.c_str())); //Geometry (4D) should reflect on request.
    
@@ -406,7 +406,7 @@ public:
     EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
     EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
     EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(true));
+    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en", "11", "11");
     EXPECT_CALL(view, getAppliedGeometryXML()).Times(3).WillRepeatedly(Return(viewXML.c_str()));
 
@@ -433,7 +433,7 @@ public:
     EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
     EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
     EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillRepeatedly(Return(true));
+    EXPECT_CALL(view, getApplyClip()).WillRepeatedly(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en", "11", "11", "11");
     EXPECT_CALL(view, getAppliedGeometryXML()).Times(3).WillRepeatedly(Return(viewXML.c_str()));
 
@@ -464,7 +464,7 @@ public:
     EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0)); //NoChange
     EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0)); //NoChange
     EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0)); //NoChange
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(true)); //NoChange
+    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false)); //NoChange
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
     EXPECT_CALL(view, getAppliedGeometryXML()).Times(2).WillRepeatedly(Return(viewXML.c_str())); // NoChange
 
