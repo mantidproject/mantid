@@ -1454,7 +1454,8 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
       connect(actionNoteExecute, SIGNAL(activated()), w, SLOT(execute()));
       connect(actionNoteExecuteAll, SIGNAL(activated()), w, SLOT(executeAll()));
       connect(actionNoteEvaluate, SIGNAL(activated()), w, SLOT(evaluate()));
-    } 
+    } else if (!mantidUI->menuAboutToShow(w)) // Note that this call has a side-effect (it enables menus)
+        disableActions();
    
   } else
     disableActions();
