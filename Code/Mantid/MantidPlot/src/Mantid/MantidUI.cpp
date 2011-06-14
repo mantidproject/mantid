@@ -612,8 +612,10 @@ void MantidUI::copyRowsToWaterfall()
   MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
   if (!m || !m->isA("MantidMatrix")) return;
   MultiLayer* ml = plotSelectedRows(m,false);
+  ml->hide();
   ml->activeGraph()->setWaterfallOffset(10,20);
   ml->setWaterfallLayout();
+  ml->show();
 }
 
 void MantidUI::copyDetectorsToTable()

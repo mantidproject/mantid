@@ -16791,9 +16791,11 @@ MultiLayer* ApplicationWindow::waterfallPlot(Table *t, const QStringList& list)
 
   initMultilayerPlot(ml);
   ml->arrangeLayers(false, true);
+  ml->hide(); // RJT: Fix for window not displaying properly prior to a resize
   ml->setWaterfallLayout();
 
   g->newLegend()->move(QPoint(g->x() + g->plotWidget()->canvas()->x() + 5, 5));
 
+  ml->show(); // RJT: Fix for window not displaying properly prior to a resize
   return ml;
 }
