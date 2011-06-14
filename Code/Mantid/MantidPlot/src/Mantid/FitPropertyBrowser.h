@@ -205,6 +205,7 @@ signals:
   void plotCurrentGuess();
   void removeGuess();
   void removeCurrentGuess();
+  void changeWindowTitle(const QString&);
 
 private slots:
 
@@ -291,34 +292,28 @@ private:
   /// Make sure m_groupMember belongs to the group
   void validateGroupMember();
 
-  /// Button for doing fit
-  //QPushButton* m_btnFit;
+  /// Fit and Display menu
   QSignalMapper* m_fitMapper;
   QMenu* m_fitMenu;
   QAction* m_fitActionUndoFit;
   QAction* m_fitActionSeqFit;
   QAction* m_fitActionFit;
   QAction* m_displayActionPlotGuess;
-  /// Button for undoing fit
-  //QPushButton* m_btnUnFit;
-  /// Button for plotting the overall function
-  //QPushButton* m_btnPlotGuess;
-  /// Button for the sequential fit
-  //QPushButton* m_btnSeqFit;
-  /// Button for FindPeaks algorithm
-  //QPushButton* m_btnFindPeaks;
+  QAction* m_displayActionQuality;
+  QString m_windowBaseString;
+
   /// To display a tip text
   QLabel* m_tip;
   /// Quality label for quality of plot
-  QLabel* m_qualityLabel;
+  //QLabel* m_qualityLabel;
   /// Quality label for quality of plot
-  QLineEdit* m_qualityLineEdit;
+  //QLineEdit* m_qualityLineEdit;
   /// Setup label
-  QLabel* m_setupLabel;
+  //QLabel* m_setupLabel;
   /// Setup combobox
-  QComboBox* m_setupCombobox;
+  //QComboBox* m_setupCombobox;
   /// Setup save button
-  QPushButton* m_btnSaveSetup;
+  //QPushButton* m_btnSaveSetup;
 
   QtTreePropertyBrowser* m_browser;
   /// Property managers:

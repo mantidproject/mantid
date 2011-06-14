@@ -49,7 +49,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 
-  class DLLExport CostFunctionFactoryImpl : public Kernel::DynamicFactory<ICostFunction>
+  class MANTID_API_DLL CostFunctionFactoryImpl : public Kernel::DynamicFactory<ICostFunction>
   {
   public:
     /**Creates an instance of a function
@@ -71,9 +71,9 @@ namespace API
         ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-        template class Mantid::Kernel::SingletonHolder<CostFunctionFactoryImpl>;
+        template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<CostFunctionFactoryImpl>;
 #endif /* _WIN32 */
-        typedef Mantid::Kernel::SingletonHolder<CostFunctionFactoryImpl> CostFunctionFactory;
+        typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<CostFunctionFactoryImpl> CostFunctionFactory;
         
 } // namespace API
 } // namespace Mantid

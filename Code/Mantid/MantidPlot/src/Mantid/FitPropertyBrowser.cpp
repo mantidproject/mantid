@@ -16,6 +16,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
 
+#include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/ICostFunction.h"
+
 #include "MantidQtMantidWidgets/UserFunctionDialog.h"
 
 #include "StringDialogEditorFactory.h"
@@ -144,6 +147,9 @@ m_decimals(-1)
   m_filenameManager = new QtStringPropertyManager(w);
   m_formulaManager = new QtStringPropertyManager(w);
 
+  // to be able to change windows title from tread
+  connect(this,SIGNAL(changeWindowTitle(const QString&)),this,SLOT(setWindowTitle(const QString&)));
+
     /* Create the top level group */
 
   /*QtProperty* fitGroup = */m_groupManager->addProperty("Fit");
@@ -225,26 +231,15 @@ m_decimals(-1)
   QGridLayout* buttonsLayout = new QGridLayout();
 
   QPushButton* btnFit = new QPushButton("Fit");
-  //connect(m_btnFit,SIGNAL(clicked()),this,SLOT(fit()));
-
-  //m_btnUnFit = new QPushButton("Undo Fit");
-  //connect(m_btnUnFit,SIGNAL(clicked()),this,SLOT(undoFit()));
-
-  //QPushButton* btnClear = new QPushButton("Clear all");
-  //connect(btnClear,SIGNAL(clicked()),this,SLOT(clear()));
-
-  //m_btnSeqFit = new QPushButton("Sequential fit");
-  //connect(m_btnSeqFit,SIGNAL(clicked()),this,SLOT(sequentialFit()));
-
 
   m_tip = new QLabel("",w);
 
-  m_qualityLabel = new QLabel("Quality:");
-  m_qualityLineEdit = new QLineEdit();
-  QHBoxLayout* chiLayout = new QHBoxLayout();
-  chiLayout->addWidget(m_qualityLabel);
-  chiLayout->addWidget(m_qualityLineEdit);
-  layout->addLayout(chiLayout);
+  //m_qualityLabel = new QLabel("Quality:");
+  //m_qualityLineEdit = new QLineEdit();
+  //QHBoxLayout* chiLayout = new QHBoxLayout();
+  //chiLayout->addWidget(m_qualityLabel);
+  //chiLayout->addWidget(m_qualityLineEdit);
+  //layout->addLayout(chiLayout);
 
 
   m_fitMenu = new QMenu(this);
@@ -269,16 +264,17 @@ m_decimals(-1)
   QMenu* displayMenu = new QMenu(this);
   m_displayActionPlotGuess = new QAction("Plot Guess",this);
   m_displayActionPlotGuess->setEnabled(false);
-  QAction* displayActionQuality = new QAction("Quality",this);
-  displayActionQuality->setCheckable(true);
+  m_displayActionQuality = new QAction("Quality",this);
+  m_displayActionQuality->setCheckable(true);
+  m_displayActionQuality->setChecked(true);
   QSignalMapper* displayMapper = new QSignalMapper(this);
   displayMapper->setMapping(m_displayActionPlotGuess,"PlotGuess");
-  displayMapper->setMapping(displayActionQuality,"Quality");
+  displayMapper->setMapping(m_displayActionQuality,"Quality");
   connect(m_displayActionPlotGuess,SIGNAL(activated()), displayMapper, SLOT(map()));
-  connect(displayActionQuality,SIGNAL(activated()), displayMapper, SLOT(map()));
+  connect(m_displayActionQuality,SIGNAL(activated()), displayMapper, SLOT(map()));
   connect(displayMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeDisplayMenu(const QString&)));
   displayMenu->addAction(m_displayActionPlotGuess);
-  displayMenu->addAction(displayActionQuality);
+  displayMenu->addAction(m_displayActionQuality);
   btnDisplay->setMenu(displayMenu);
 
   QPushButton* btnSetup = new QPushButton("Setup");
@@ -295,11 +291,9 @@ m_decimals(-1)
   setupMenu->addAction(setupActionFindPeaks);
   btnSetup->setMenu(setupMenu);
 
-
   buttonsLayout->addWidget(btnFit,0,0);
   buttonsLayout->addWidget(btnDisplay,0,1);
   buttonsLayout->addWidget(btnSetup,0,2);
-
 
   layout->addLayout(buttonsLayout);
   layout->addWidget(m_tip);
@@ -832,13 +826,6 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
       if (f) setCurrentFunction(f);
       emit functionChanged();
   }
-  else if (prop->propertyName() == "Cost function")
-  {
-    if ( prop->valueText() == "Least squares" )
-      m_qualityLabel->setText("Chi-sq");
-    else
-      m_qualityLabel->setText("Quality");      
-  }
 }
 
 /** Called when a bool property changed
@@ -1209,14 +1196,24 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
 {
   std::string out = alg->getProperty("OutputWorkspace");
   getFitResults();
-  // update top Quality of fit textedit
-  double quality = alg->getProperty("OutputChi2overDoF");
-  m_qualityLineEdit->setText(QString::number(quality));
   if (!isWorkspaceAGroup())
   {
     emit algorithmFinished(QString::fromStdString(out));
   }
+  // update Quality string
+  if ( m_displayActionQuality->isChecked() )
+  {
+    double quality = alg->getProperty("OutputChi2overDoF");
+    std::string costFunction = alg->getProperty("CostFunction");
+    Mantid::API::ICostFunction* costfun 
+     = Mantid::API::CostFunctionFactory::Instance().createUnwrapped(costFunction);
+    emit changeWindowTitle(QString("Fit Function (") 
+      + costfun->shortName().c_str() + " = " + QString::number(quality) + ")");
+  }
+  else
+    emit changeWindowTitle("Fit Function");
 }
+
 
 /// Get and store available workspace names
 void FitPropertyBrowser::populateWorkspaceNames()
