@@ -1,6 +1,6 @@
-#include <MantidGeometry/Crystal/UnitCell.h>
-#include <MantidGeometry/V3D.h>
-#include <MantidKernel/System.h>
+#include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidGeometry/V3D.h"
+#include "MantidKernel/System.h"
 #include <stdexcept>
 #include <cfloat>
 
