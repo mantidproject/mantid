@@ -35,7 +35,7 @@ def create_algorithm(algorithm, version):
         _version = version
         if "Version" in kwargs:
             _version = kwargs["Version"]
-            kwargs.pop(kwargs.index("Version"))
+            del kwargs["Version"]
         algm = mtd.createAlgorithm(algorithm, _version)
         algm.setPropertyValues(*args, **kwargs)
         algm.execute()
