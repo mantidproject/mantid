@@ -1,6 +1,5 @@
 set ( SRC_FILES
         src/LoadMuonLog.cpp
-        src/LoadNeXus.cpp
         src/LoadRaw/byte_rel_comp.cpp
         src/LoadRaw/isisraw.cpp
         src/LoadRaw/isisraw2.cpp
@@ -21,7 +20,6 @@ set ( SRC_UNITY_IGNORE_FILES src/NeXusFile.cpp)
 set ( INC_FILES
         inc/MantidNexus/DllConfig.h
         inc/MantidNexus/LoadMuonLog.h
-        inc/MantidNexus/LoadNeXus.h
         inc/MantidNexus/LoadNexusLogs.h
         inc/MantidNexus/MuonNexusReader.h
         inc/MantidNexus/NexusClasses.h
@@ -31,7 +29,6 @@ set ( INC_FILES
 
 set ( TEST_FILES
         test/LoadMuonLogTest.h
-        test/LoadNeXusTest.h
         test/LoadNexusLogsTest.h
         test/NexusAPITest.h
 )

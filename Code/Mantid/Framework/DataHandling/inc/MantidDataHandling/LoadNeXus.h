@@ -12,9 +12,9 @@
 
 namespace Mantid
 {
-  namespace NeXus
+  namespace DataHandling
   {
-    /** @class LoadNexus LoadNeXus.h MantidDataHandling/LoadNeXus.h
+    /** @class LoadNexus LoadNeXus.h DataHandling/LoadNeXus.h
 
     Loads a file in NeXus format and stores it in a 2D workspace 
     (Workspace2D class). LoadNexus is an algorithm and as such inherits
@@ -23,7 +23,7 @@ namespace Mantid
 
     Required Properties:
     <UL>
-    <LI> Filename - The name of and path to the input Nexus file </LI>
+    <LI> Filename - The name of and path to the input NeXus file </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
 	</UL>
 	Optional Properties:
@@ -98,7 +98,7 @@ namespace Mantid
         /// run LoadSNSNexus
       void runLoadSNSNexus();
     };
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid
 
 #endif /*MANTID_DATAHANDLING_LOADNEXUS_H_*/

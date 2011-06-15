@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadNeXus.h"
+#include "MantidDataHandling/LoadNeXus.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
@@ -18,7 +18,7 @@
 
 namespace Mantid
 {
-  namespace NeXus
+  namespace DataHandling
   {
 
     // Register the algorithm into the algorithm factory
@@ -90,7 +90,7 @@ namespace Mantid
       std::string dataName="analysis", muonTD="muonTD", pulsedTD="pulsedTD";
       std::string value;
       std::vector<std::string> entryName,definition;
-      int count= getNexusEntryTypes(m_filename,entryName,definition);
+      int count= Mantid::NeXus::getNexusEntryTypes(m_filename,entryName,definition);
       if(count<=-1)
       {
         g_log.error("Error reading file " + m_filename);
@@ -115,11 +115,11 @@ namespace Mantid
       }
       else
       {
-        NXRoot root(m_filename);
-        NXEntry entry = root.openEntry(root.groups().front().nxname);
+    	Mantid::NeXus::NXRoot root(m_filename);
+    	Mantid::NeXus::NXEntry entry = root.openEntry(root.groups().front().nxname);
         try
         {
-          NXChar nxc = entry.openNXChar("instrument/SNSdetector_calibration_id");
+        	Mantid::NeXus::NXChar nxc = entry.openNXChar("instrument/SNSdetector_calibration_id");
         }
         catch(...)
         {
@@ -374,5 +374,5 @@ namespace Mantid
       }
     }
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid

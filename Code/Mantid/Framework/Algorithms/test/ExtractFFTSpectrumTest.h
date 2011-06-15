@@ -5,13 +5,12 @@
 
 #include "MantidAlgorithms/ExtractFFTSpectrum.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidNexus/LoadNeXus.h"
+#include "MantidDataHandling/LoadNeXus.h"
 #include "MantidAlgorithms/Rebin.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
-using namespace Mantid::NeXus;
 using namespace Mantid::DataObjects;
 
 class ExtractFFTSpectrumTest : public CxxTest::TestSuite
@@ -41,7 +40,7 @@ public:
   void testExec()
   {
     IAlgorithm* loader;
-    loader = new LoadNexus;
+    loader = new Mantid::DataHandling::LoadNexus;
     loader->initialize();
     loader->setPropertyValue("Filename", "IRS26176_ipg.nxs");
     loader->setPropertyValue("OutputWorkspace", "alg_irs_r");

@@ -14,7 +14,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
-#include "MantidNexus/LoadNeXus.h"
+#include "MantidDataHandling/LoadNeXus.h"
 #include "MantidDataHandling/LoadSNSEventNexus.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"

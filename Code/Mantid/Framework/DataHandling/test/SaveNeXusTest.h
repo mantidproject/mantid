@@ -16,7 +16,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveNeXus.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
-#include "MantidNexus/LoadNeXus.h"
+#include "MantidDataHandling/LoadNeXus.h"
 #include <Poco/Path.h>
 
 using namespace Mantid::API;
@@ -40,7 +40,7 @@ public:
   
 void testExecOnMuon()
   {
-    Mantid::NeXus::LoadNexus nxLoad;
+    Mantid::DataHandling::LoadNexus nxLoad;
     std::string outputSpace,inputFile;
     nxLoad.initialize();
     // Now set required filename and output workspace name
