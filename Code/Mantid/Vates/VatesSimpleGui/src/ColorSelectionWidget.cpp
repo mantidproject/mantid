@@ -118,7 +118,6 @@ void ColorSelectionWidget::loadPreset()
     QItemSelectionModel *selection = this->presets->getSelectionModel();
     QModelIndex index = selection->currentIndex();
     const pqColorMapModel *colorMap = this->presets->getModel()->getColorMap(index.row());
-    pqChartValue min, max;
     if (colorMap)
     {
       emit this->colorMapChanged(colorMap);
