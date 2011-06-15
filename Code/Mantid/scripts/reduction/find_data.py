@@ -76,7 +76,7 @@ def find_data(file, data_dir=None, run_to_file_func=None):
                 return files_found[0]
     
     # Fourth, stay compatible with ISIS
-    system_path = MantidFramework.FileFinder.getFullPath(file).strip()
+    system_path = FileFinder.getFullPath(file).strip()
     if system_path :
         return system_path
 
