@@ -110,4 +110,5 @@ endif ()
 # Installation settings
 ###########################################################################
 
+# This MUST go to here rather than plugins for the Mac install to work
 install ( TARGETS DataObjects DESTINATION ${LIB_DIR} )

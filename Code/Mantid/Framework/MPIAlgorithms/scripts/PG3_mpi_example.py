@@ -42,6 +42,8 @@ def mpimethod():
         data = focus(name + "_event.nxs", name, binning)
         van = None
 
+    # MPI algorithms MUST be called by ALL processes in a job, or all the processes
+    # that call it just hang (at least with OpenMPI).
     BroadcastWorkspace(InputWorkspace=van,OutputWorkspace="Vanadium",BroadcasterRank=len(runs))
 
     if mpi.world.rank < len(runs):
@@ -50,6 +52,8 @@ def mpimethod():
     else:
         data = None
 
+    # MPI algorithms MUST be called by ALL processes in a job, or all the processes
+    # that call it just hang (at least with OpenMPI).
     GatherWorkspaces(InputWorkspace=data, OutputWorkspace="Mn5Si3")
 
     if mpi.world.rank == 0:
