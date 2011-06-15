@@ -14,7 +14,6 @@ set ( SRC_FILES
         src/NexusClasses.cpp
         src/NexusFileIO.cpp
         src/SaveISISNeXus.cpp
-        src/SaveNeXus.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/NeXusFile.cpp)
@@ -28,7 +27,6 @@ set ( INC_FILES
         inc/MantidNexus/NexusClasses.h
         inc/MantidNexus/NexusFileIO.h
         inc/MantidNexus/SaveISISNeXus.h
-        inc/MantidNexus/SaveNeXus.h
 )
 
 set ( TEST_FILES
@@ -36,7 +34,6 @@ set ( TEST_FILES
         test/LoadNeXusTest.h
         test/LoadNexusLogsTest.h
         test/NexusAPITest.h
-        test/SaveNeXusTest.h
 )
 
 if(UNITY_BUILD)

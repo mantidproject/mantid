@@ -1,5 +1,5 @@
-#ifndef MANTID_NEXUS_SAVENEXUS_H_
-#define MANTID_NEXUS_SAVENEXUS_H_
+#ifndef MANTID_DATAHANDLING_SAVENEXUS_H_
+#define MANTID_DATAHANDLING_SAVENEXUS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -9,18 +9,18 @@
 
 namespace Mantid
 {
-  namespace NeXus
+  namespace DataHandling
   {
     /**
-    Loads a file in NeXus format and stores it in a 2D workspace 
-    (Workspace2D class). LoadNeXus is an algorithm and as such inherits
+    Saves a file in NeXus format and from a 2D workspace
+    (Workspace2D class). SaveNeXus is an algorithm and as such inherits
     from the Algorithm class, via DataHandlingCommand, and overrides
     the init() & exec() methods.
 
     Required Properties:
     <UL>
-    <LI> Filename - The name of and path to the input RAW file </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
+    <LI> Filename - The name of and path to the output NeXus file </LI>
+    <LI> OutputWorkspace - The name of the workspace from which to write the exported data </LI>
     </UL>
 
     @author Freddie Akeroyd, STFC ISIS Facility, GB
@@ -90,7 +90,7 @@ namespace Mantid
 		
     };
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_NEXUS_SAVENEXUS_H_*/
+#endif /*MANTID_DATAHANDLING_SAVENEXUS_H_*/

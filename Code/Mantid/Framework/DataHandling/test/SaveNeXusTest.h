@@ -14,15 +14,16 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidNexus/SaveNeXus.h"
+#include "MantidDataHandling/SaveNeXus.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidNexus/LoadNeXus.h"
 #include <Poco/Path.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::NeXus;
+using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+
 
 class SaveNeXusTest : public CxxTest::TestSuite
 {
@@ -39,7 +40,7 @@ public:
   
 void testExecOnMuon()
   {
-    LoadNexus nxLoad;
+    Mantid::NeXus::LoadNexus nxLoad;
     std::string outputSpace,inputFile;
     nxLoad.initialize();
     // Now set required filename and output workspace name
