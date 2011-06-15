@@ -1,6 +1,7 @@
 #include <vector>
 #include <sstream>
 #include <napi.h>
+#include "MantidKernel/System.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include <boost/scoped_array.hpp>
 
@@ -33,7 +34,7 @@ MuonNexusReader::~MuonNexusReader()
 //
 // @param filename ::  name of existing NeXus Muon file to read
 int MuonNexusReader::readFromFile(const std::string& filename)
-{
+{ 
   NXhandle fileID;
   NXaccess mode= NXACC_READ;
   NXstatus stat=NXopen(filename.c_str(), mode, &fileID);
