@@ -13,7 +13,7 @@ namespace Mantid
 {
   namespace NeXus
   {
-    int getNexusEntryTypes(const std::string& fileName, std::vector<std::string>& entryName,
+    DLLExport int getNexusEntryTypes(const std::string& fileName, std::vector<std::string>& entryName,
                            std::vector<std::string>& definition );
 
     /** @class NexusFileIO NexusFileIO.h NeXus/NexusFileIO.h
