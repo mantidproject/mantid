@@ -7,7 +7,6 @@
 #include "MantidKernel/MantidVersion.h"
 #include "MantidPythonAPI/stl_proxies.h"
 #include "MantidPythonAPI/MantidVecHelper.h"
-#include <numpy/arrayobject.h>
 // Noisy MSVC compiler that complains about Boost stuff we can do nothing about. For some reason
 // it wouldn't accept it in the BoostPython_Silent.h header
 #ifdef _MSC_VER
