@@ -31,6 +31,8 @@ set ( SRC_FILES
 	src/LoadLOQDistancesFromRaw.cpp
 	src/LoadLog.cpp
 	src/LoadMappingTable.cpp
+	src/LoadMuonNexus.cpp
+    src/LoadMuonNexus2.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNeXusMonitors.cpp
 	src/LoadRKH.cpp
@@ -117,6 +119,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadLOQDistancesFromRaw.h
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadMappingTable.h
+	inc/MantidDataHandling/LoadMuonNexus.h
+    inc/MantidDataHandling/LoadMuonNexus2.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNeXusMonitors.h
 	inc/MantidDataHandling/LoadRKH.h
@@ -187,6 +191,8 @@ set ( TEST_FILES
 	test/LoadInstrumentTest.h
 	test/LoadLogTest.h
 	test/LoadMappingTableTest.h
+	test/LoadMuonNexus2Test.h
+    test/LoadMuonNexusTest.h
 	test/LoadParameterFileTest.h
 	test/LoadPreNeXusMonitorsTest.h
 	test/LoadRKHTest.h

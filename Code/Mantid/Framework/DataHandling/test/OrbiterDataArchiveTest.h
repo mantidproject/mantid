@@ -13,7 +13,7 @@ class OrbiterDataArchiveTest : public CxxTest::TestSuite
 {
 public: 
 
-  void xtestSearch()
+  void testSearch()
   {
       OrbiterDataArchive arch;
       std::string path = arch.getPath("cncs_23412_event.nxs");

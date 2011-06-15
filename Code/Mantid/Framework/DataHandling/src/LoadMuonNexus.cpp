@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadMuonNexus.h"
+#include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -23,7 +23,7 @@
 
 namespace Mantid
 {
-  namespace NeXus
+  namespace DataHandling
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadMuonNexus)
@@ -31,14 +31,15 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void LoadMuonNexus::initDocs()
     {
-      this->setWikiSummary("The LoadMuonNexus algorithm will read the given Nexus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a Nexus file of this type. ");
-      this->setOptionalMessage("The LoadMuonNexus algorithm will read the given Nexus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a Nexus file of this type.");
+      this->setWikiSummary("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a NeXus file of this type. ");
+      this->setOptionalMessage("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.");
     }
     
 
     using namespace Kernel;
     using namespace API;
     using Geometry::IInstrument;
+    using namespace Mantid::NeXus;
 
     /// Empty default constructor
     LoadMuonNexus::LoadMuonNexus() : 

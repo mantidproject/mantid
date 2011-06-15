@@ -11,7 +11,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexus/LoadMuonNexus2.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <iostream>
@@ -324,7 +324,7 @@ public:
 
   void testReadingFromXML()
   {
-    LoadMuonNexus2 nxLoad;
+    Mantid::DataHandling::LoadMuonNexus2 nxLoad;
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
@@ -364,7 +364,7 @@ public:
 
   void testReadingFromXMLCheckDublicateIndex()
   {
-    LoadMuonNexus2 nxLoad;
+    Mantid::DataHandling::LoadMuonNexus2 nxLoad;
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
@@ -404,7 +404,7 @@ public:
 
   void testReadingFromXMLCheckDublicateIndex2()
   {
-    LoadMuonNexus2 nxLoad;
+    Mantid::DataHandling::LoadMuonNexus2 nxLoad;
     nxLoad.initialize();
 
     // Now set required filename and output workspace name

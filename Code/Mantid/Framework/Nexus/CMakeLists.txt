@@ -3,8 +3,6 @@ set ( SRC_FILES
         src/LoadISISNexus2.cpp
         src/LoadLogsFromSNSNexus.cpp
         src/LoadMuonLog.cpp
-        src/LoadMuonNexus.cpp
-        src/LoadMuonNexus2.cpp
         src/LoadNeXus.cpp
         src/LoadNexusMonitors.cpp
         src/LoadNexusProcessed.cpp
@@ -26,7 +24,6 @@ set ( SRC_FILES
         src/SaveNexusProcessed.cpp
 )
 
-
 set ( SRC_UNITY_IGNORE_FILES src/NeXusFile.cpp)
 
 set ( INC_FILES
@@ -35,8 +32,6 @@ set ( INC_FILES
         inc/MantidNexus/LoadISISNexus2.h
         inc/MantidNexus/LoadLogsFromSNSNexus.h
         inc/MantidNexus/LoadMuonLog.h
-        inc/MantidNexus/LoadMuonNexus.h
-        inc/MantidNexus/LoadMuonNexus2.h
         inc/MantidNexus/LoadNeXus.h
         inc/MantidNexus/LoadNexusMonitors.h
         inc/MantidNexus/LoadNexusProcessed.h
@@ -55,8 +50,6 @@ set ( TEST_FILES
         test/LoadISISNexusTest.h
         test/LoadLogsFromSNSNexusTest.h
         test/LoadMuonLogTest.h
-        test/LoadMuonNexus2Test.h
-        test/LoadMuonNexusTest.h
         test/LoadNeXusTest.h
         test/LoadNexusMonitorsTest.h
         test/LoadNexusProcessedTest.h

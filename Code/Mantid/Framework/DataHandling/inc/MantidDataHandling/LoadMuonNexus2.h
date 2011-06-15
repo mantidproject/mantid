@@ -4,31 +4,40 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadMuonNexus.h"
+#include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidAPI/IDataFileChecker.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid
 {
-  namespace NeXus
+namespace NeXus
+{
+  // Forward declarations
+  template<class T>
+  class NXDataSetTyped;
+  typedef NXDataSetTyped<int> NXInt;
+}
+
+
+  namespace DataHandling
   {
     // Forward declarations
     template<class T>
     class NXDataSetTyped;
     typedef NXDataSetTyped<int> NXInt;
-    class NXEntry;
 
     /**
-    Loads an file in Nexus Muon format and stores it in a 2D workspace 
+    Loads an file in NeXus Muon format and stores it in a 2D workspace
     (Workspace2D class). LoadMuonNexus is an algorithm and as such inherits
     from the Algorithm class, via DataHandlingCommand, and overrides
     the init() & exec() methods.
 
     Required Properties:
     <UL>
-    <LI> Filename - The name of and path to the input Nexus file </LI>
+    <LI> Filename - The name of and path to the input NeXus file </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the imported data 
     (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)
-    [ not yet implemented for Nexus ]</LI>
+    [ not yet implemented for NeXus ]</LI>
     </UL>
 
     Optional Properties: (note that these options are not available if reading a multiperiod file)
@@ -83,13 +92,13 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
       
-      void loadData(const NXInt& counts,const std::vector<double>& timeBins,int wsIndex,
+      void loadData(const Mantid::NeXus::NXInt& counts,const std::vector<double>& timeBins,int wsIndex,
                     int period,int spec,API::MatrixWorkspace_sptr localWorkspace);
-      void loadLogs(API::MatrixWorkspace_sptr ws, NXEntry & entry,int period);
+      void loadLogs(API::MatrixWorkspace_sptr ws, Mantid::NeXus::NXEntry & entry,int period);
       void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
     };
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid
 
 #endif /*MANTID_DATAHANDLING_LOADMUONNEXUS2_H_*/

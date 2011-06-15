@@ -12,7 +12,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexus/LoadMuonNexus.h"
+#include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidNexus/LoadNexusProcessed.h"
 #include "MantidNexus/SaveNexusProcessed.h"

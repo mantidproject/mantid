@@ -13,7 +13,7 @@
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidNexus/SaveNexusProcessed.h"
-#include "MantidNexus/LoadMuonNexus.h"
+#include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidDataHandling/LoadSNSEventNexus.h"
 #include "MantidKernel/UnitFactory.h"

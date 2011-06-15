@@ -11,7 +11,7 @@
 #include <fstream>
 #include <cxxtest/TestSuite.h>
 
-#include "MantidNexus/LoadMuonNexus2.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -24,6 +24,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
+using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
 class LoadMuonNexus2Test : public CxxTest::TestSuite

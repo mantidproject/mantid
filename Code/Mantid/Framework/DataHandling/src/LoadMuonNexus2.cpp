@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadMuonNexus2.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -12,9 +12,9 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidNexus/NexusClasses.h"
-
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NeXusException.hpp"
+
 
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include <Poco/Path.h>
@@ -26,20 +26,22 @@
 
 namespace Mantid
 {
-  namespace NeXus
+  namespace DataHandling
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadMuonNexus2)
     DECLARE_LOADALGORITHM(LoadMuonNexus2)
+
     using namespace Kernel;
     using namespace API;
     using Geometry::IInstrument;
+    using namespace Mantid::NeXus;
     
     /// Sets documentation strings for this algorithm
     void LoadMuonNexus2::initDocs()
     {
-      this->setWikiSummary("The LoadMuonNexus algorithm will read the given Nexus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a Nexus file of this type. ");
-      this->setOptionalMessage("The LoadMuonNexus algorithm will read the given Nexus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a Nexus file of this type.");
+      this->setWikiSummary("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a NeXus file of this type. ");
+      this->setOptionalMessage("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.");
     }
     
 
@@ -79,7 +81,7 @@ namespace Mantid
         }
         else
         {
-          throw std::runtime_error("Unknown Muon Nexus file format");
+          throw std::runtime_error("Unknown Muon NeXus file format");
         }
       }
       else
@@ -118,7 +120,7 @@ namespace Mantid
       }
       NXData dataGroup = entry.openNXData(detectorName);
 
-      NXInt spectrum_index = dataGroup.openNXInt("spectrum_index");
+      Mantid::NeXus::NXInt spectrum_index = dataGroup.openNXInt("spectrum_index");
       spectrum_index.load();
       m_numberOfSpectra = spectrum_index.dim0();
 
@@ -174,10 +176,10 @@ namespace Mantid
         setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
       }
 
-      NXInt period_index = dataGroup.openNXInt("period_index");
+      Mantid::NeXus::NXInt period_index = dataGroup.openNXInt("period_index");
       period_index.load();
 
-      NXInt counts = dataGroup.openIntData();
+      Mantid::NeXus::NXInt counts = dataGroup.openIntData();
       counts.load();
 
 
@@ -283,7 +285,7 @@ namespace Mantid
     /** loadData
      *  Load the counts data from an NXInt into a workspace
      */
-    void LoadMuonNexus2::loadData(const NXInt& counts,const std::vector<double>& timeBins,int wsIndex,
+    void LoadMuonNexus2::loadData(const Mantid::NeXus::NXInt& counts,const std::vector<double>& timeBins,int wsIndex,
       int period,int spec,API::MatrixWorkspace_sptr localWorkspace)
     {
       MantidVec& X = localWorkspace->dataX(wsIndex);

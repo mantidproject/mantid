@@ -17,9 +17,9 @@ class MuonNexusReader;
 
 namespace Mantid
 {
-  namespace NeXus
+  namespace DataHandling
   {
-    /** @class LoadMuonNexus LoadMuonNexus.h NeXus/LoadMuonNexus.h
+    /** @class LoadMuonNexus LoadMuonNexus.h DataHandling/LoadMuonNexus.h
 
     Loads an file in Nexus Muon format and stores it in a 2D workspace 
     (Workspace2D class). LoadMuonNexus is an algorithm and as such inherits
@@ -28,7 +28,7 @@ namespace Mantid
 
     Required Properties:
     <UL>
-    <LI> Filename - The name of and path to the input Nexus file </LI>
+    <LI> Filename - The name of and path to the input NeXus file </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the imported data 
          (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)
          [ not yet implemented for Nexus ]</LI>
@@ -128,7 +128,7 @@ namespace Mantid
       void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
     };
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid
 
 #endif /*MANTID_DATAHANDLING_LOADMUONNEXUS_H_*/
