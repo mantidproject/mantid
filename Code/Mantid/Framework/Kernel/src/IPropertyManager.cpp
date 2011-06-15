@@ -73,13 +73,20 @@ namespace Mantid
 
 
 #ifdef __INTEL_COMPILER
+  } // namespace Kernel
+} // namespace Mantid
+// These must precede the operator() declaration
+DEFINE_IPROPERTYMANAGER_GETVALUE(unsigned long);
+DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<unsigned long>);
+namespace Mantid
+{
+  namespace Kernel
+  {
     // Intel 64-bit size_t   
     IPropertyManager::TypedValue::operator unsigned long () { return pm.getValue<unsigned long>(prop); }
   } // namespace Kernel
 } // namespace Mantid
 
-    DEFINE_IPROPERTYMANAGER_GETVALUE(unsigned long);
-    DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<unsigned long>);
 #else
   } // namespace Kernel
 } // namespace Mantid
