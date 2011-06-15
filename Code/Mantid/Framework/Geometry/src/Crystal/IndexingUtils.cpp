@@ -5,34 +5,35 @@
 #include <MantidGeometry/V3D.h>
 #include <MantidGeometry/Math/Matrix.h>
 
+#include <iostream>
+#include <stdexcept>
+
 extern "C"
 {
+#include <gsl/gsl_sys.h> 
 #include <gsl/gsl_vector.h> 
 #include <gsl/gsl_matrix.h> 
 #include <gsl/gsl_linalg.h> 
 }
 
-
 using namespace std;
 using namespace Mantid::Geometry;
 
-
-IndexingUtils::IndexingUtils() 
-{ // Nothing to do here 
-}
 
 double IndexingUtils::BestFit_UB(      Matrix<double> & UB,
                                  const vector<V3D>    & hkl_vectors, 
                                  const vector<V3D>    & q_vectors )
 {
+  if ( hkl_vectors.size() < 3 ) 
+   throw std::invalid_argument("Three or more indexed peaks needed to find UB");
+
+  if ( hkl_vectors.size() != q_vectors.size() )
+   throw std::invalid_argument("Number of hkl_vectors != number of q_vectors");
+
   gsl_matrix *H_transpose = gsl_matrix_alloc( hkl_vectors.size(), 3 );
   gsl_vector *tau         = gsl_vector_alloc( 3 );
-  gsl_vector *UB_row      = gsl_vector_alloc( 3 );
-  gsl_vector *q           = gsl_vector_alloc( q_vectors.size() );
-  gsl_vector *residual    = gsl_vector_alloc( q_vectors.size() );
 
   double sum_sq_error = 0;
-
                                       // Make the H-transpose matrix from the
                                       // hkl vectors and form QR factorization
   for ( size_t row = 0; row < hkl_vectors.size(); row++ )
@@ -41,15 +42,36 @@ double IndexingUtils::BestFit_UB(      Matrix<double> & UB,
 
   int returned_flag = gsl_linalg_QR_decomp( H_transpose, tau );
 
+  if ( returned_flag != 0 )
+  {
+    gsl_matrix_free( H_transpose );
+    gsl_vector_free( tau );
+    throw std::runtime_error("gsl QR_decomp failed, invalid hkl values");
+  }
                                       // solve for each row of UB, using the 
                                       // QR factorization of and accumulate the 
                                       // sum of the squares of the residuals
+  gsl_vector *UB_row      = gsl_vector_alloc( 3 );
+  gsl_vector *q           = gsl_vector_alloc( q_vectors.size() );
+  gsl_vector *residual    = gsl_vector_alloc( q_vectors.size() );
+
+  bool found_UB = true;
+
   for ( size_t row = 0; row < 3; row++ )
   {
     for ( size_t i = 0; i < q_vectors.size(); i++ )
       gsl_vector_set( q, i, (q_vectors[i])[row] );
 
-    gsl_linalg_QR_lssolve( H_transpose, tau, q, UB_row, residual );
+    returned_flag = gsl_linalg_QR_lssolve(H_transpose,tau,q,UB_row,residual);
+    if ( returned_flag != 0 )
+      found_UB = false;
+
+    for ( size_t i = 0; i < 3; i++ )
+    {
+      double value = gsl_vector_get( UB_row, i );      
+      if ( gsl_isnan( value ) || gsl_isinf( value) )
+        found_UB = false;
+    }
 
     V3D row_values( gsl_vector_get( UB_row, 0 ), 
                     gsl_vector_get( UB_row, 1 ),
@@ -66,9 +88,11 @@ double IndexingUtils::BestFit_UB(      Matrix<double> & UB,
   gsl_vector_free( q );
   gsl_vector_free( residual );
 
-  if ( returned_flag == 0 )
-    return sum_sq_error;
-  else
-    return 0;
-}
+  if ( !found_UB )
+    throw std::runtime_error("Failed to find UB, invalid hkl or Q values");
+  
+  if ( fabs ( UB.determinant() ) < 1.0e-10 )
+    throw std::runtime_error("UB is singular, invalid hkl or Q values");
 
+  return sum_sq_error;
+}

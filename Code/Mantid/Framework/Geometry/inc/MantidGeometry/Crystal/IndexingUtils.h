@@ -21,8 +21,6 @@ namespace Geometry
 class MANTID_GEOMETRY_DLL IndexingUtils
 {
   public:
-  // Default constructor does nothing
-  IndexingUtils();
 
   // STATIC method BestFit_UB: Calculates the matrix that most nearly maps
   // the specified hkl_vectors to the specified q_vectors.  The calculated
@@ -41,6 +39,13 @@ class MANTID_GEOMETRY_DLL IndexingUtils
   //
   // @return  This will return the sum of the squares of the residual errors.
   //
+  // @throws  std::invalid_argument exception if there are not at least 3
+  //                                hkl and q vectors, or if the numbers of
+  //                                hkl and q vectors are not the same.
+  //
+  // @throws  std::runtime_error    exception if the QR factorization fails or
+  //                                the UB matrix can't be calculated or if 
+  //                                UB is a singular matrix.
   static double BestFit_UB(     Matrix<double>    & UB,
                           const std::vector<V3D>  & hkl_vectors, 
                           const std::vector<V3D>  & q_vectors );
