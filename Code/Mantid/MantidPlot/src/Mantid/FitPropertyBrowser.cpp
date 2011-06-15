@@ -234,14 +234,6 @@ m_decimals(-1)
 
   m_tip = new QLabel("",w);
 
-  //m_qualityLabel = new QLabel("Quality:");
-  //m_qualityLineEdit = new QLineEdit();
-  //QHBoxLayout* chiLayout = new QHBoxLayout();
-  //chiLayout->addWidget(m_qualityLabel);
-  //chiLayout->addWidget(m_qualityLineEdit);
-  //layout->addLayout(chiLayout);
-
-
   m_fitMenu = new QMenu(this);
   m_fitActionFit = new QAction("Fit",this);
   m_fitActionSeqFit = new QAction("Sequencial Fit",this);
@@ -269,8 +261,6 @@ m_decimals(-1)
   m_displayActionQuality->setChecked(true);
   QSignalMapper* displayMapper = new QSignalMapper(this);
 
-  //displayMapper->disconnect(
-
   displayMapper->setMapping(m_displayActionPlotGuess,"PlotGuess");
   displayMapper->setMapping(m_displayActionQuality,"Quality");
   connect(m_displayActionPlotGuess,SIGNAL(activated()), displayMapper, SLOT(map()));
@@ -283,30 +273,35 @@ m_decimals(-1)
   QPushButton* btnSetup = new QPushButton("Setup");
   QMenu* setupMenu = new QMenu(this);
 
-  QAction* setupActionManageSetup = new QAction("Manage Setup",this);
   m_setupActionCustomSetup = new QAction("Custom Setup",this);
-  QAction* setupActionClearFit = new QAction("Clear Fit",this);
-  setupActionClearFit->setToolTip("Remove all fit functions");
-  setupActionClearFit->setWhatsThis("Remove all fit functions");
-  setupActionClearFit->setIconText("Remove all fit functions");
+  QAction* setupActionManageSetup = new QAction("Manage Setup",this);
   QAction* setupActionFindPeaks = new QAction("Find Peaks",this);
+  QAction* setupActionClearFit = new QAction("Clear Fit",this);
 
   QMenu* setupSubMenuCustom = new QMenu(this);
   m_setupActionCustomSetup->setMenu(setupSubMenuCustom);
 
   QMenu* setupSubMenuManage = new QMenu(this);
   QAction* setupActionSave = new QAction("Save Setup",this);
-  QAction* setupActionRemove = new QAction("Remove Setup",this);
+  m_setupActionRemove = new QAction("Remove Setup",this);
   QAction* setupActionCopyToClipboard = new QAction("Copy To Clipboard",this);
   QAction* setupActionLoadFromString = new QAction("Load From String",this);
+  QSignalMapper* setupManageMapper = new QSignalMapper(this);
+  setupManageMapper->setMapping(setupActionSave,"SaveSetup");
+  setupManageMapper->setMapping(setupActionCopyToClipboard,"CopyToClipboard");
+  setupManageMapper->setMapping(setupActionLoadFromString,"LoadFromString");
+  connect(setupActionSave,SIGNAL(activated()), setupManageMapper, SLOT(map()));
+  connect(setupActionCopyToClipboard,SIGNAL(activated()), setupManageMapper, SLOT(map()));
+  connect(setupActionLoadFromString,SIGNAL(activated()), setupManageMapper, SLOT(map()));
+  connect(setupManageMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeSetupManageMenu(const QString&)));
   setupSubMenuManage->addAction(setupActionSave);
-  setupSubMenuManage->addAction(setupActionRemove);
+  setupSubMenuManage->addAction(m_setupActionRemove);
   setupSubMenuManage->addAction(setupActionCopyToClipboard);
   setupSubMenuManage->addAction(setupActionLoadFromString);
   setupActionManageSetup->setMenu(setupSubMenuManage); 
 
   QMenu* setupSubMenuRemove = new QMenu(this);
-  setupActionRemove->setMenu(setupSubMenuRemove); 
+  m_setupActionRemove->setMenu(setupSubMenuRemove); 
 
   QSignalMapper* setupMapper = new QSignalMapper(this);
   setupMapper->setMapping(setupActionClearFit,"ClearFit");
@@ -315,11 +310,15 @@ m_decimals(-1)
   connect(setupActionFindPeaks,SIGNAL(activated()), setupMapper, SLOT(map()));
   connect(setupMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeSetupMenu(const QString&)));
 
-  setupMenu->addAction(setupActionManageSetup);
   setupMenu->addAction(m_setupActionCustomSetup);
-  setupMenu->addAction(setupActionClearFit);
+  setupMenu->addAction(setupActionManageSetup);
+  setupMenu->addSeparator();
   setupMenu->addAction(setupActionFindPeaks);
+  setupMenu->addSeparator();
+  setupMenu->addAction(setupActionClearFit);
   btnSetup->setMenu(setupMenu);
+
+  updateSetupMenus();
 
   buttonsLayout->addWidget(btnFit,0,0);
   buttonsLayout->addWidget(btnDisplay,0,1);
@@ -338,50 +337,57 @@ m_decimals(-1)
   createCompositeFunction();
 
   m_changeSlotsEnabled = true;
-
 }
 
 /// Update setup menus according to how these are set in
 /// settings
 void FitPropertyBrowser::updateSetupMenus()
 {
-/*  QMenu* menu = m_setupActionCustomSetup->menu();
-  menu->clear();
- 
+  QMenu* menuLoad = m_setupActionCustomSetup->menu();
+  menuLoad->clear();
+  QMenu* menuRemove = m_setupActionRemove->menu();
+  menuRemove->clear();
+
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
   QStringList names = settings.childKeys();
 
+  QSignalMapper* mapperLoad = new QSignalMapper(this);
+  QSignalMapper* mapperRemove = new QSignalMapper(this);
   for (int i = 0; i < names.size(); i++)
   {
-    menu->addAction( new QAction(names.at(i), this) );
-
+    QAction* itemLoad = new QAction(names.at(i), this);
+    QAction* itemRemove = new QAction(names.at(i), this);
+    mapperLoad->setMapping(itemLoad,names.at(i));
+    mapperRemove->setMapping(itemRemove,names.at(i));
+    connect(itemLoad,SIGNAL(activated()), mapperLoad, SLOT(map()));
+    connect(itemRemove,SIGNAL(activated()), mapperRemove, SLOT(map()));
+    menuLoad->addAction( itemLoad );
+    menuRemove->addAction( itemRemove );
   }
-
-
-  QString name = QInputDialog::getItem(this,"Mantid - Input","Please select a function to load",names,0,false);
-  if (!name.isEmpty())
-  {
-    QString str = settings.value(name).toString();
-
-
- 
-  m_displayActionPlotGuess = new QAction("Plot Guess",this);
-  m_displayActionPlotGuess->setEnabled(false);
-  m_displayActionQuality = new QAction("Quality",this);
-  m_displayActionQuality->setCheckable(true);
-  m_displayActionQuality->setChecked(true);
-  QSignalMapper* displayMapper = new QSignalMapper(this);
-  displayMapper->setMapping(m_displayActionPlotGuess,"PlotGuess");
-  displayMapper->setMapping(m_displayActionQuality,"Quality");
-  connect(m_displayActionPlotGuess,SIGNAL(activated()), displayMapper, SLOT(map()));
-  connect(m_displayActionQuality,SIGNAL(activated()), displayMapper, SLOT(map()));
-  connect(displayMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeDisplayMenu(const QString&)));
-  displayMenu->addAction(m_displayActionPlotGuess);
-  displayMenu->addAction(m_displayActionQuality);
-*/
+  connect(mapperLoad, SIGNAL(mapped(const QString &)), this, SLOT(executeCustomSetupLoad(const QString&)));
+  connect(mapperRemove, SIGNAL(mapped(const QString &)), this, SLOT(executeCustomSetupRemove(const QString&)));
 }
 
+void FitPropertyBrowser::executeCustomSetupLoad(const QString& name)
+{
+  QSettings settings;
+  settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
+  QStringList names = settings.childKeys();
+
+  QString str = settings.value(name).toString();
+  loadFunction(str);
+}
+
+void FitPropertyBrowser::executeCustomSetupRemove(const QString& name)
+{
+  QSettings settings;
+  settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
+  QStringList names = settings.childKeys();
+
+  settings.remove(name);
+  updateSetupMenus();
+}
 
 void FitPropertyBrowser::executeFitMenu(const QString& item)
 {
@@ -397,8 +403,6 @@ void FitPropertyBrowser::executeDisplayMenu(const QString& item)
 {
   if (item == "PlotGuess")
     plotOrRemoveGuessAll();
-//  if (item == "Quality")
-//    sequentialFit();
 }
 
 void FitPropertyBrowser::executeSetupMenu(const QString& item)
@@ -407,6 +411,16 @@ void FitPropertyBrowser::executeSetupMenu(const QString& item)
     clear();
   if (item == "FindPeaks")
     findPeaks();
+}
+
+void FitPropertyBrowser::executeSetupManageMenu(const QString& item)
+{
+  if (item == "SaveSetup")
+    saveFunction();
+  if (item == "CopyToClipboard")
+    copy();
+  if (item == "LoadFromString")
+    loadFunctionFromString();
 }
 
 /// Destructor
@@ -552,7 +566,7 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
     connect(action,SIGNAL(triggered()),this,SLOT(loadFunction()));
     menu->addAction(action);
 
-    action = new QAction("Copy",this);
+    action = new QAction("Copy To Clipboard",this);
     connect(action,SIGNAL(triggered()),this,SLOT(copy()));
     menu->addAction(action);
 
@@ -1948,6 +1962,11 @@ void FitPropertyBrowser::checkFunction()
 void FitPropertyBrowser::saveFunction()
 {
   QString fnName = QInputDialog::getText(this,"Mantid - Input","Please select a name for the function");
+  saveFunction(fnName);
+}
+
+void FitPropertyBrowser::saveFunction(const QString& fnName)
+{
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
   QStringList names = settings.childKeys();
@@ -1957,6 +1976,7 @@ void FitPropertyBrowser::saveFunction()
     return;
   }
   settings.setValue(fnName,QString::fromStdString(*theFunction()));
+  updateSetupMenus();
 }
 
 void FitPropertyBrowser::loadFunction()
@@ -1974,10 +1994,26 @@ void FitPropertyBrowser::loadFunction()
   {
     QString str = settings.value(name).toString();
   
-    getHandler()->removeAllPlots();
-    clearBrowser();
-    createCompositeFunction(str);
+    loadFunction(str);
   }
+}
+
+void FitPropertyBrowser::loadFunctionFromString()
+{
+  QString str = QInputDialog::getText(this, "Mantid - Input", "Specify fit function string");
+
+  if (!str.isEmpty())
+  {
+    loadFunction(str);
+  }
+}
+
+
+void FitPropertyBrowser::loadFunction(const QString& funcString)
+{
+  getHandler()->removeAllPlots();
+  clearBrowser();
+  createCompositeFunction(funcString);
 }
 
 void FitPropertyBrowser::copy()

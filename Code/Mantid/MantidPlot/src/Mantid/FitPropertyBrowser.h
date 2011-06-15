@@ -189,6 +189,7 @@ public slots:
   void executeFitMenu(const QString&);
   void executeDisplayMenu(const QString&);
   void executeSetupMenu(const QString&);
+  void executeSetupManageMenu(const QString&);
 
 signals:
   void currentChanged()const;
@@ -240,6 +241,8 @@ private slots:
   void plotOrRemoveGuessAll();
   void saveFunction();
   void loadFunction();
+  void loadFunctionFromString();
+
   void copy();///< Copy the function string to the clipboard
   void paste();///< Paste a function string from the clipboard
   void updateDecimals();
@@ -249,8 +252,13 @@ private slots:
   /* Context menu slots */
   void addFunction();
   void deleteFunction();
-private:
 
+  void executeCustomSetupLoad(const QString& name);
+  void executeCustomSetupRemove(const QString& name);
+private:
+  /// load and save function
+  void loadFunction(const QString& funcString);
+  void saveFunction(const QString& fnName);
   /// Create CompositeFunction
   void createCompositeFunction(const QString& str = "");
   /// Get and store available workspace names
@@ -303,7 +311,8 @@ private:
   QString m_windowBaseString;
 
   /// Setup menu
-  QAction* m_setupActionCustomSetup; 
+  QAction* m_setupActionCustomSetup;
+  QAction* m_setupActionRemove; 
   void updateSetupMenus();
 
   /// To display a tip text
