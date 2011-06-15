@@ -47,10 +47,8 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 #endif
 {
   using namespace Mantid::PythonAPI;
-  import_array();
-  boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
   boost::python::def("mantid_build_version", mantid_version);
-  MantidVecHelper::initializeDependencies();
+  MantidVecHelper::initializeDependencies(); // This initializes numpy if it is available
   // Export some frequently used stl containers
   vector_proxy<Mantid::Kernel::DateAndTime>::wrap("cpp_list_dateandtime");
   vector_proxy<int>::wrap("cpp_list_int");

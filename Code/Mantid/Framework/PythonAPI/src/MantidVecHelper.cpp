@@ -31,6 +31,7 @@ namespace Mantid
       else
       {
         MantidVecHelper::g_useNumPy = true;
+        boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
       }
 
       MantidVecHelper::g_isInitialized = true;
