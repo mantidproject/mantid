@@ -10,7 +10,7 @@
 
 // class MuonNexusReader - based on ISISRAW this class implements a simple
 // reader for Nexus Muon data files.
-class MuonNexusReader
+class DLLExport MuonNexusReader
 {
     /** @class MuonNexusReader MuonNexusReader.h
 
@@ -75,13 +75,13 @@ class MuonNexusReader
 
 	public:
 		/// Default constructor
-		DLLExport MuonNexusReader();
+		MuonNexusReader();
 		/// Destructor
-		DLLExport ~MuonNexusReader();
+		~MuonNexusReader();
 
-		DLLExport int readFromFile(const std::string& filename); ///< read histogram data
+		int readFromFile(const std::string& filename); ///< read histogram data
 		int readLogData(const std::string& filename);  ///< read log data
-		DLLExport int getTimeChannels(float* timechannels, const int& len) const; ///< get time bin boundaries
+		int getTimeChannels(float* timechannels, const int& len) const; ///< get time bin boundaries
         /// return sample name
 		std::string getSampleName() const {return nexus_samplename; };
 		int numberOfLogs() const;  ///< Number of NXlog sections read from file
@@ -101,7 +101,7 @@ class MuonNexusReader
 		int* counts;         ///< temp store of histogram data
 		int* detectorGroupings; ///< detector grouping info
 		int numDetectors; ///< detector count
-		DLLExport std::string getInstrumentName(); ///< return instrument name
+		std::string getInstrumentName(); ///< return instrument name
 };
 
 
