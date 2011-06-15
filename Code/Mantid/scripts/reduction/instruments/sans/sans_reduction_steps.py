@@ -6,7 +6,7 @@ import sys
 import math
 import pickle
 from reduction import ReductionStep
-from reduction import extract_workspace_name, find_file, find_data
+from reduction import extract_workspace_name, find_data
 from reduction import validate_step
 
 # Mantid imports
@@ -61,7 +61,7 @@ class BaseBeamFinder(ReductionStep):
             @param reducer: Reducer object for which this step is executed
         """
         # Load the file to extract the beam center from, and process it.
-        filepath = find_data(self._datafile, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file, instrument=reducer.instrument.name())
+        filepath = find_data(self._datafile, instrument=reducer.instrument.name())
         
         # Check whether that file was already meant to be processed
         workspace_default = "beam_center_"+extract_workspace_name(filepath)
@@ -239,19 +239,19 @@ class BeamSpreaderTransmission(BaseTransmission):
             self._transmission_ws = "transmission_fit_"+workspace
             
             sample_spreader_ws = "_trans_sample_spreader"
-            filepath = find_data(self._sample_spreader, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file, instrument=reducer.instrument.name())
+            filepath = find_data(self._sample_spreader, instrument=reducer.instrument.name())
             Load(filepath, sample_spreader_ws)
             
             direct_spreader_ws = "_trans_direct_spreader"
-            filepath = find_data(self._direct_spreader, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file, instrument=reducer.instrument.name())
+            filepath = find_data(self._direct_spreader, instrument=reducer.instrument.name())
             Load(filepath, direct_spreader_ws)
             
             sample_scatt_ws = "_trans_sample_scatt"
-            filepath = find_data(self._sample_scattering, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file, instrument=reducer.instrument.name())
+            filepath = find_data(self._sample_scattering, instrument=reducer.instrument.name())
             Load(filepath, sample_scatt_ws)
             
             direct_scatt_ws = "_trans_direct_scatt"
-            filepath = find_data(self._direct_scattering, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file, instrument=reducer.instrument.name())
+            filepath = find_data(self._direct_scattering, instrument=reducer.instrument.name())
             Load(filepath, direct_scatt_ws)
             
             # Subtract dark current
@@ -320,11 +320,11 @@ class DirectBeamTransmission(BaseTransmission):
             self._transmission_ws = "transmission_fit_"+workspace
 
             sample_ws = "_transmission_sample"
-            filepath = find_data(self._sample_file, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file, instrument=reducer.instrument.name())
+            filepath = find_data(self._sample_file, instrument=reducer.instrument.name())
             Load(filepath, sample_ws)
             
             empty_ws = "_transmission_empty"
-            filepath = find_data(self._empty_file, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file, instrument=reducer.instrument.name())
+            filepath = find_data(self._empty_file, instrument=reducer.instrument.name())
             Load(filepath, empty_ws)
             
             # Subtract dark current
@@ -417,7 +417,7 @@ class SubtractDarkCurrent(ReductionStep):
         # Check whether the dark current was already loaded, otherwise load it
         # Load dark current, which will be used repeatedly
         if self._dark_current_ws is None:
-            filepath = find_data(self._dark_current_file, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file, instrument=reducer.instrument.name())
+            filepath = find_data(self._dark_current_file, instrument=reducer.instrument.name())
             self._dark_current_ws = "_dark_"+extract_workspace_name(filepath)
             Load(filepath, self._dark_current_ws)
             
@@ -552,7 +552,7 @@ class LoadRun(ReductionStep):
             data_file = self._data_file
         
         def _load_data_file(file_name, wks_name):
-            filepath = find_data(file_name, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file, instrument=reducer.instrument.name())
+            filepath = find_data(file_name, instrument=reducer.instrument.name())
             data_dir,_ = os.path.split(filepath)
             if self._wavelength is None:
                 LoadSpice2D(filepath, wks_name)
@@ -870,7 +870,7 @@ class SensitivityCorrection(ReductionStep):
         #TODO: check that the workspaces have the same binning!
         if self._efficiency_ws is None:
             # Load the flood data
-            filepath = find_data(self._flood_data, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file, instrument=reducer.instrument.name())
+            filepath = find_data(self._flood_data, instrument=reducer.instrument.name())
             flood_ws = "flood_"+extract_workspace_name(filepath)
             
             beam_center = None

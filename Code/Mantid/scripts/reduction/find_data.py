@@ -48,50 +48,30 @@ def find_file(filename=None, startswith=None, data_dir=None):
 
     return files_found
 
-def find_data(file, data_dir=None, run_to_file_func=None, instrument=None):
+def find_data(file, instrument=''):
     """
         Finds a file path for the specified data set, which can either be:
             - a run number
             - an absolute path
             - a file name
         @param file: file name or part of a file name
-        @param data_dir: additional data directory to look into
-        @param run_to_file_func: function that generates a file name given a run number
         @param instrument: if supplied, FindNeXus will be tried as a last resort
     """
-    # First, check whether it's an absolute path
-    if os.path.isfile(file):
-        return file
-    
-    # Second, check whether it's a file name. If so, return the best match.
-    files_found = find_file(filename=file, data_dir=data_dir)
-    if len(files_found)>0:
-        return files_found[0]
-    
-    # Third, build a file name assuming it's a run number
-    if run_to_file_func is not None:
-        filename = run_to_file_func(file)
-        if filename is not None:
-            files_found = find_file(filename=filename, data_dir=data_dir)
-            if len(files_found)>0:
-                return files_found[0]
-    
-    # Fourth, stay compatible with ISIS
-    system_path = FileFinder.getFullPath(file).strip()
-    if system_path :
-        return system_path
+    # First, assume a file name
+    file_path = FileFinder.getFullPath(file)
+    if file_path is not None and len(file_path)>0:
+        return file_path
 
-    #Finally, look in the catalog...
-    if instrument is not None:
-        # Assume the string that was passed is a run number
-        try:
-            f = FindSNSNeXus(Instrument=instrument, RunNumber=file, Extension="_event.nxs")
-            file = f.getProperty("ResultPath").value
-            if os.path.isfile(file):
-                return file
-        except:
-            # FindNeXus couldn't make sense of the the supplied information
-            pass
+    # Second, assume a run number    
+    try:
+        # FileFinder doesn't like dashes...
+        instrument=instrument.replace('-','')
+        f = FileFinder.findRuns(instrument+file)
+        if os.path.isfile(f[0]):
+            return f[0]
+    except:
+        # FileFinder couldn't make sense of the the supplied information
+        pass
 
     # If we didn't find anything, raise an exception
     raise RuntimeError, "Could not find a file for [%s]" % str(file)
