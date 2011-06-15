@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadLogsFromSNSNexus.h"
+#include "MantidDataHandling/LoadLogsFromSNSNexus.h"
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -22,7 +22,7 @@ static bool VERBOSE = false;
 
 namespace Mantid
 {
-namespace NeXus
+namespace DataHandling
 {
 
 DECLARE_ALGORITHM(LoadLogsFromSNSNexus)
@@ -301,5 +301,5 @@ void LoadLogsFromSNSNexus::loadSampleLog(::NeXus::File& file, std::string entry_
 }
 
 
-} // namespace NeXus
+} // namespace DataHandling
 } // namespace Mantid

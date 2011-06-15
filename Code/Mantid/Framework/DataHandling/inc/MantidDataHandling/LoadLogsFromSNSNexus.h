@@ -1,5 +1,5 @@
-#ifndef MANTID_NEXUS_LOADLOGSFROMSNSNEXUS_H_
-#define MANTID_NEXUS_LOADLOGSFROMSNSNEXUS_H_
+#ifndef MANTID_DATAHANDLING_LOADLOGSFROMSNSNEXUS_H_
+#define MANTID_DATAHANDLING_LOADLOGSFROMSNSNEXUS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -26,16 +26,16 @@ namespace Mantid
     class Instrument;
   }
 
-  namespace NeXus
+  namespace DataHandling
   {
-    /** @class LoadLogsFromSNSNexus LoadLogsFromSNSNexus.h Nexus/LoadLogsFromSNSNexus.h
+    /** @class LoadLogsFromSNSNexus LoadLogsFromSNSNexus.h DataHandling/LoadLogsFromSNSNexus.h
 
-    Load sample logs (single values and time series data) from a SNS nexus format file.
+    Load sample logs (single values and time series data) from a SNS NeXus format file.
     This is meant to be used as a sub-algorithm to other algorithms.
 
     Required Properties:
     <UL>
-    <LI> Filename - The name of and path to the input NEXUS file </LI>
+    <LI> Filename - The name of and path to the input NeXus file </LI>
     <LI> Workspace - The name of the workspace in which to use as a basis for any data to be added.</LI>
     </UL>
 
@@ -98,8 +98,8 @@ namespace Mantid
 
     };
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_NEXUS_LOADLOGSFROMSNSNEXUS_H_*/
+#endif /*MANTID_DATAHANDLING_LOADLOGSFROMSNSNEXUS_H_*/
 

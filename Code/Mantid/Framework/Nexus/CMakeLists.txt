@@ -1,5 +1,4 @@
 set ( SRC_FILES
-        src/LoadLogsFromSNSNexus.cpp
         src/LoadMuonLog.cpp
         src/LoadNeXus.cpp
         src/LoadNexusMonitors.cpp
@@ -25,7 +24,6 @@ set ( SRC_UNITY_IGNORE_FILES src/NeXusFile.cpp)
 
 set ( INC_FILES
         inc/MantidNexus/DllConfig.h
-        inc/MantidNexus/LoadLogsFromSNSNexus.h
         inc/MantidNexus/LoadMuonLog.h
         inc/MantidNexus/LoadNeXus.h
         inc/MantidNexus/LoadNexusMonitors.h
@@ -40,7 +38,6 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-        test/LoadLogsFromSNSNexusTest.h
         test/LoadMuonLogTest.h
         test/LoadNeXusTest.h
         test/LoadNexusMonitorsTest.h

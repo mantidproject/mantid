@@ -16,7 +16,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidNexus/LoadLogsFromSNSNexus.h"
+#include "MantidDataHandling/LoadLogsFromSNSNexus.h"
 
 //#ifndef _WIN32
 //  #include <sys/resource.h>
