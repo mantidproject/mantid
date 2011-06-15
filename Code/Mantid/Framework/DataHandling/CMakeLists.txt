@@ -25,6 +25,7 @@ set ( SRC_FILES
 	src/LoadEventPreNeXus.cpp
 	src/LoadGSS.cpp
 	src/LoadInstrument.cpp
+	src/LoadInstrumentFromNexus.cpp
 	src/LoadInstrumentFromRaw.cpp
 	src/LoadInstrumentHelper.cpp
 	src/LoadLOQDistancesFromRaw.cpp
@@ -110,6 +111,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventPreNeXus.h
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadInstrument.h
+	inc/MantidDataHandling/LoadInstrumentFromNexus.h
 	inc/MantidDataHandling/LoadInstrumentFromRaw.h
 	inc/MantidDataHandling/LoadInstrumentHelper.h
 	inc/MantidDataHandling/LoadLOQDistancesFromRaw.h

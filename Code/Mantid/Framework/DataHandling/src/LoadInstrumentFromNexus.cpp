@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadInstrumentFromNexus.h"
+#include "MantidDataHandling/LoadInstrumentFromNexus.h"
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
@@ -15,7 +15,7 @@
 
 namespace Mantid
 {
-namespace NeXus
+namespace DataHandling
 {
 
 DECLARE_ALGORITHM(LoadInstrumentFromNexus)
@@ -145,5 +145,5 @@ void LoadInstrumentFromNexus::exec()
 }
 
 
-} // namespace NeXus
+} // namespace DataHandling
 } // namespace Mantid

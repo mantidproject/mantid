@@ -1,5 +1,5 @@
-#ifndef MANTID_NEXUS_LOADINSTRUMENTFROMNEXUS_H_
-#define MANTID_NEXUS_LOADINSTRUMENTFROMNEXUS_H_
+#ifndef MANTID_DATAHANDLING_LOADINSTRUMENTFROMNEXUS_H_
+#define MANTID_DATAHANDLING_LOADINSTRUMENTFROMNEXUS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -16,15 +16,15 @@ namespace Mantid
     class Instrument;
   }
 
-  namespace NeXus
+  namespace DataHandling
   {
-    /** @class LoadInstrumentFromNexus LoadInstrumentFromNexus.h Nexus/LoadInstrumentFromNexus.h
+    /** @class LoadInstrumentFromNexus LoadInstrumentFromNexus.h DataHandling/LoadInstrumentFromNexus.h
 
-    Attempt to load information about the instrument from a ISIS nexus file. In particular attempt to
+    Attempt to load information about the instrument from a ISIS NeXus file. In particular attempt to
     read L2 and 2-theta detector position values and add detectors which are positioned relative
     to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,0.0). Also adds dummy source
     and samplepos components to instrument.
-    As this information appears to be absent from the existing nexus Muon sample files, it seems that
+    As this information appears to be absent from the existing NeXus Muon sample files, it seems that
     little to this can be done at present. The new version of Muon nexus files may be more useful.
 
     LoadInstrumentFromNexus is intended to be used as a child algorithm of
@@ -94,8 +94,8 @@ namespace Mantid
       std::string m_filename;
     };
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_NEXUS_LOADINSTRUMENTFROMNEXUS_H_*/
+#endif /*MANTID_DATAHANDLING_LOADINSTRUMENTFROMNEXUS_H_*/
 

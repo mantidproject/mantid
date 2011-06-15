@@ -1,7 +1,6 @@
 set ( SRC_FILES
         src/LoadISISNexus.cpp
         src/LoadISISNexus2.cpp
-        src/LoadInstrumentFromNexus.cpp
         src/LoadLogsFromSNSNexus.cpp
         src/LoadMuonLog.cpp
         src/LoadMuonNexus.cpp
@@ -34,7 +33,6 @@ set ( INC_FILES
         inc/MantidNexus/DllConfig.h
         inc/MantidNexus/LoadISISNexus.h
         inc/MantidNexus/LoadISISNexus2.h
-        inc/MantidNexus/LoadInstrumentFromNexus.h
         inc/MantidNexus/LoadLogsFromSNSNexus.h
         inc/MantidNexus/LoadMuonLog.h
         inc/MantidNexus/LoadMuonNexus.h
