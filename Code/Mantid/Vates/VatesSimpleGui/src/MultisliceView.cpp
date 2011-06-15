@@ -84,9 +84,6 @@ void MultiSliceView::setupData()
 	this->originSourceRepr = qobject_cast<pqPipelineRepresentation*>(drep);
 	this->originSourceRepr->colorByArray("signal",
 			vtkDataObject::FIELD_ASSOCIATION_CELLS);
-
-  QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
-  emit this->dataRange(range.first, range.second);
 }
 
 void MultiSliceView::setupAxisInfo()
@@ -117,6 +114,9 @@ void MultiSliceView::render()
 	this->setupAxisInfo();
 	this->mainView->resetDisplay();
 	this->mainView->render();
+
+  QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
+  emit this->dataRange(range.first, range.second);
 }
 
 void MultiSliceView::makeXcut(double value)

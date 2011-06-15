@@ -59,11 +59,11 @@ void StandardView::render()
 	this->originSourceRepr->colorByArray("signal",
   vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
-  QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
-  emit this->dataRange(range.first, range.second);
-
 	this->view->resetDisplay();
 	this->view->render();
+
+  QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
+  emit this->dataRange(range.first, range.second);
 }
 
 void StandardView::onCutButtonClicked()

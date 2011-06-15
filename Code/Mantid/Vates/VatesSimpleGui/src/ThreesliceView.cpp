@@ -76,6 +76,9 @@ void ThreeSliceView::render()
 	this->makeThreeSlice();
 	this->mainView->resetViewDirection(-1, -1, -1, 0, 1, 0);
 	this->renderAll();
+
+  QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
+  emit this->dataRange(range.first, range.second);
 }
 
 void ThreeSliceView::makeSlice(ViewBase::Direction i, pqRenderView *view,
@@ -139,9 +142,6 @@ void ThreeSliceView::makeThreeSlice()
 	this->originSourceRepr = qobject_cast<pqPipelineRepresentation*>(drep);
 	this->originSourceRepr->colorByArray("signal",
 			vtkDataObject::FIELD_ASSOCIATION_CELLS);
-
-  QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
-  emit this->dataRange(range.first, range.second);
 
 	this->makeSlice(ViewBase::X, this->xView, this->xCut, this->xCutRepr);
 	this->makeSlice(ViewBase::Y, this->yView, this->yCut, this->yCutRepr);
