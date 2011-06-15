@@ -1,5 +1,5 @@
-#ifndef MANTID_NEXUS_LOADNEXUSMONITORS_H_
-#define MANTID_NEXUS_LOADNEXUSMONITORS_H_
+#ifndef MANTID_DATAHANDLING_LOADNEXUSMONITORS_H_
+#define MANTID_DATAHANDLING_LOADNEXUSMONITORS_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -11,15 +11,15 @@
 namespace Mantid
 {
 
-  namespace NeXus
+  namespace DataHandling
   {
-  /** @class LoadNexusMonitors LoadNexusMonitors.h Nexus/LoadNexusMonitors.h
+  /** @class LoadNexusMonitors LoadNexusMonitors.h DataHandling/LoadNexusMonitors.h
 
   Load Monitors from NeXus files.
 
   Required Properties:
   <UL>
-  <LI> Filename - The name of and path to the input NEXUS file </LI>
+  <LI> Filename - The name of and path to the input NeXus file </LI>
   <LI> Workspace - The name of the workspace to output</LI>
   </UL>
 
@@ -86,4 +86,4 @@ namespace Mantid
 
   }
 }
-#endif /* MANTID_NEXUS_LOADNEXUSMONITORS_H_ */
+#endif /* MANTID_DATAHANDLING_LOADNEXUSMONITORS_H_ */

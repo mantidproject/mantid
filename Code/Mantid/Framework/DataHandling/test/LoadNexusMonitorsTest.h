@@ -2,7 +2,7 @@
 #define LOADNEXUSMONITORSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidNexus/LoadNexusMonitors.h"
+#include "MantidDataHandling/LoadNexusMonitors.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -12,7 +12,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using namespace Mantid::NeXus;
+using namespace Mantid::DataHandling;
 
 class LoadNexusMonitorsTest : public CxxTest::TestSuite
 {

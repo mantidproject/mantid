@@ -1,4 +1,4 @@
-#include "MantidNexus/LoadNexusMonitors.h"
+#include "MantidDataHandling/LoadNexusMonitors.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ConfigService.h"
@@ -14,7 +14,7 @@
 
 namespace Mantid
 {
-namespace NeXus
+namespace DataHandling
 {
 
 DECLARE_ALGORITHM(LoadNexusMonitors)
@@ -41,13 +41,13 @@ void LoadNexusMonitors::init()
 {
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
       ".nxs"),
-      "The name (including its full or relative path) of the Nexus file to\n"
+      "The name (including its full or relative path) of the NeXus file to\n"
       "attempt to load. The file extension must either be .nxs or .NXS" );
 
   declareProperty(
     new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "",
         Kernel::Direction::Output),
-    "The name of the output workspace in which to load the Nexus monitors." );
+    "The name of the output workspace in which to load the NeXus monitors." );
 }
 
 /**
@@ -310,5 +310,5 @@ void LoadNexusMonitors::runLoadInstrument(const std::string &instrument,
   }
 }
 
-} // end NeXus
+} // end DataHandling
 } // end Mantid
