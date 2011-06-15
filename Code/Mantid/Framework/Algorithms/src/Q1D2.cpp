@@ -80,11 +80,11 @@ void Q1D2::exec()
   MantidVec normError2(YOut.size(), 0.0);
 
   const Geometry::ISpectraDetectorMap & inSpecMap = m_dataWS->spectraMap();
-  const Axis* const spectraAxis = m_dataWS->getAxis(1);
+  //const Axis* const spectraAxis = m_dataWS->getAxis(1);
 
 
 
-  const size_t numSpec = m_dataWS->getNumberHistograms();
+  const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.1, 1.0, numSpec+1);
 
   PARALLEL_FOR3(m_dataWS, outputWS, pixelAdj)
@@ -156,7 +156,7 @@ void Q1D2::exec()
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  for (int k = 0; k < YOut.size(); ++k)
+  for (size_t k = 0; k < YOut.size(); ++k)
   {
     // the normalisation is a = b/c where b = counts c =normalistion term
     const double c = normSum[k];
@@ -330,7 +330,7 @@ void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,  const size_t s
 */
 void Q1D2::addWaveAdj(API::MatrixWorkspace_const_sptr pixelAdj, const MantidVec * const binNorms, const MantidVec * const binNormEs, MantidVec & outNorms, MantidVec & outETo2) const
 {
-
+  UNUSED_ARG(pixelAdj)
   // normalize by the wavelength dependent correction, keeping the percentage errors the same
   if (binNorms && binNormEs)
   {
@@ -357,6 +357,7 @@ void Q1D2::addWaveAdj(API::MatrixWorkspace_const_sptr pixelAdj, const MantidVec 
 */
 void Q1D2::normToBinWidth(const size_t specIndex, const MantidVec & QIns, MantidVec & theNorms, MantidVec & errorSquared) const
 {
+  UNUSED_ARG(QIns)
 /*  //normally this is false but handling this would mean more combinations of distribution/raw counts workspaces could be accepted
   if (m_convToDistr)
   {
