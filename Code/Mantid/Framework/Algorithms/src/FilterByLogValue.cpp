@@ -133,8 +133,9 @@ void FilterByLogValue::exec()
   if (log)
   {
     //This function creates the splitter vector we will use to filter out stuff.
-    log->makeFilterByValue(splitter, min, max, tolerance,
-                           (this->getPropertyValue("LogBoundary") == "Centre"));
+    std::string logBoundary(this->getPropertyValue("LogBoundary"));
+    std::transform(logBoundary.begin(), logBoundary.end(), logBoundary.begin(), tolower);
+    log->makeFilterByValue(splitter, min, max, tolerance, (logBoundary.compare("centre") == 0));
 
     if (log->realSize() >= 1 && handle_edge_values)
     {
