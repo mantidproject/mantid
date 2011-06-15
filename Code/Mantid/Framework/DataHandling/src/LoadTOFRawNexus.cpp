@@ -1,28 +1,28 @@
 // Includes
 
-#include "MantidNexus/LoadTOFRawNeXus.h"
+#include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
-namespace NeXus
+namespace DataHandling
 {
 // Register the algorithm into the algorithm factory
-//DECLARE_ALGORITHM( LoadTOFRawNeXus)
+//DECLARE_ALGORITHM( LoadTOFRawNexus)
 
 using namespace Kernel;
 using namespace API;
 
-LoadTOFRawNeXus::LoadTOFRawNeXus()
+LoadTOFRawNexus::LoadTOFRawNexus()
 {
   // TODO Auto-generated constructor stub
 
 }
 
 /// Initialisation method.
-void LoadTOFRawNeXus::init()
+void LoadTOFRawNexus::init()
 {
 
   std::vector < std::string > exts;
@@ -46,17 +46,17 @@ void LoadTOFRawNeXus::init()
  *  @throw Exception::FileError If the Nexus file cannot be found/opened
  *  @throw std::invalid_argument If the optional properties are set to invalid values
  */
-void LoadTOFRawNeXus::exec()
+void LoadTOFRawNexus::exec()
 {
   // Create the root Nexus class
-  NXRoot root(getPropertyValue("Filename"));
+  Mantid::NeXus::NXRoot root(getPropertyValue("Filename"));
 
   // Open the default data group 'entry'
   // TODO: Loop over the available entries
-  NXEntry entry = root.openEntry("entry");
+  Mantid::NeXus::NXEntry entry = root.openEntry("entry");
 
 }
 
-} // namespace NeXus
+} // namespace DataHandling
 } // namespace Mantid
 

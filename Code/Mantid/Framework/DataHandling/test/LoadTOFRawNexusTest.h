@@ -3,14 +3,16 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidNexus/LoadTOFRawNeXus.h"
+#include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 
-class LoadTOFRawNeXusTest: public CxxTest::TestSuite
+class LoadTOFRawNexusTest: public CxxTest::TestSuite
 {
 public:
+
+  // As the algorithm isn't finished and doesn't do anything... no need for real tests.
 
   void testNothing()
   {
@@ -20,15 +22,15 @@ public:
   void xtestExec()
   {
     Mantid::API::FrameworkManager::Instance();
-    LoadTOFRawNeXus ld;
+    Mantid::DataHandling::LoadTOFRawNexus ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "../../../../Test/AutoTestData/CNCS_7860.nxs");
     ld.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve("outWS"));
+    Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("outWS"));
     TS_ASSERT_EQUALS(ws->blocksize(), 2000);
   }
 

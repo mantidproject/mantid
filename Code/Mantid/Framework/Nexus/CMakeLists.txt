@@ -12,7 +12,6 @@ set ( SRC_FILES
         src/LoadRaw/item_struct.cpp
         src/LoadRaw/vms_convert.cpp
         src/LoadNexusLogs.cpp
-        src/LoadTOFRawNeXus.cpp
         src/MuonNexusReader.cpp
         src/NeXusException.cpp
         src/NeXusFile.cpp
@@ -36,7 +35,6 @@ set ( INC_FILES
         inc/MantidNexus/LoadNexusMonitors.h
         inc/MantidNexus/LoadNexusProcessed.h
         inc/MantidNexus/LoadNexusLogs.h
-        inc/MantidNexus/LoadTOFRawNeXus.h
         inc/MantidNexus/MuonNexusReader.h
         inc/MantidNexus/NexusClasses.h
         inc/MantidNexus/NexusFileIO.h

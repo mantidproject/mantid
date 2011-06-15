@@ -59,6 +59,7 @@ set ( SRC_FILES
 	src/LoadSNSNexus.cpp
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
+	src/LoadTOFRawNexus.cpp
 	src/ManagedRawFileWorkspace2D.cpp
 	src/MaskDetectors.cpp
 	src/MaskDetectorsInShape.cpp
@@ -137,6 +138,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
+	inc/MantidDataHandling/LoadTOFRawNexus.h
 	inc/MantidDataHandling/ManagedRawFileWorkspace2D.h
 	inc/MantidDataHandling/MaskDetectors.h
 	inc/MantidDataHandling/MaskDetectorsInShape.h
@@ -208,6 +210,7 @@ set ( TEST_FILES
 	test/LoadSaveAsciiTest.h
 	test/LoadSpice2dTest.h
 	test/LoadTest.h
+	test/LoadTOFRawNexusTest.h
 	test/ManagedRawFileWorkspace2DTest.h
 	test/MaskDetectorsInShapeTest.h
 	test/MaskDetectorsTest.h

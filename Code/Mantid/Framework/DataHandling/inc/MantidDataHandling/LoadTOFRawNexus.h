@@ -12,7 +12,7 @@
 namespace Mantid
 {
 
-namespace NeXus
+namespace DataHandling
 {
 /**
  Loads a NeXus file that conforms to the TOFRaw instrument definition format and stores it in a 2D workspace.
@@ -21,7 +21,7 @@ namespace NeXus
 
  Required Properties:
  <UL>
- <LI> Filename - The name of and path to the input Nexus file </LI>
+ <LI> Filename - The name of and path to the input NeXus file </LI>
  <LI> OutputWorkspace - The name of the workspace in which to store the imported data
  (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)</LI>
  </UL>
@@ -54,19 +54,19 @@ namespace NeXus
 
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  */
-class DLLExport LoadTOFRawNeXus : public API::Algorithm
+class DLLExport LoadTOFRawNexus : public API::Algorithm
 {
 public:
   /// Default Constructor
-  LoadTOFRawNeXus();
+  LoadTOFRawNexus();
 
   // Destructor
-  virtual ~LoadTOFRawNeXus()
+  virtual ~LoadTOFRawNexus()
   {}
 
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const
-  { return "LoadTOFRawNeXus";}
+  { return "LoadTOFRawNexus";}
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const
@@ -90,7 +90,7 @@ private:
   void runLoadInstrument(DataObjects::Workspace2D_sptr);
 
   /// Load in details about the sample
-  void loadSampleData(DataObjects::Workspace2D_sptr, NXEntry & entry);
+  void loadSampleData(DataObjects::Workspace2D_sptr, Mantid::NeXus::NXEntry & entry);
 
   /// The name and path of the input file
   std::string m_filename;
@@ -101,7 +101,7 @@ private:
 
 };
 
-} // namespace NeXus
+} // namespace DataHandling
 } // namespace Mantid
 
 #endif /* MANTID_DATAHANDLINGLOADTOFRAWNEXUS_H_ */
