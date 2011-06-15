@@ -2,6 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAPI/MatrixProperty.h"
+#include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid
 {
@@ -43,6 +44,16 @@ namespace Mantid
     template class MANTID_API_DLL MatrixProperty<int>;
     template class MANTID_API_DLL MatrixProperty<float>;
     ///@endcond
-
   }
 }
+
+/**
+ * IPropertyManager::getValue definitions so that algorithm.getProperty will work
+ */
+///@cond
+DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Geometry::DblMatrix);
+DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Geometry::IntMatrix);
+DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Geometry::Matrix<float>);
+
+///@endcond
+

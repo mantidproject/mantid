@@ -286,4 +286,28 @@ public:
 } // namespace Kernel
 } // namespace Mantid
 
+/// A macro for defining getValue functions for new types. Puts them in the Mantid::Kernel namespace so
+/// the macro should be used outside of any namespace scope
+#define DEFINE_IPROPERTYMANAGER_GETVALUE(type) \
+    namespace Mantid \
+    { \
+      namespace Kernel \
+      { \
+        template<> DLLExport \
+        type IPropertyManager::getValue<type>(const std::string &name) const \
+        { \
+          PropertyWithValue<type> *prop = dynamic_cast<PropertyWithValue<type>*>(getPointerToProperty(name)); \
+          if (prop) \
+          { \
+            return *prop; \
+          } \
+          else \
+          { \
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected type "#type; \
+            throw std::runtime_error(message); \
+          } \
+        } \
+      } \
+    }
+
 #endif /*MANTID_KERNEL_IPROPERTYMANAGER_H_*/

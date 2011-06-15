@@ -6,47 +6,28 @@
 #include "MantidKernel/System.h"
 #include <algorithm>
 
+///@cond
+DEFINE_IPROPERTYMANAGER_GETVALUE(int16_t);
+DEFINE_IPROPERTYMANAGER_GETVALUE(uint16_t);
+DEFINE_IPROPERTYMANAGER_GETVALUE(int32_t);
+DEFINE_IPROPERTYMANAGER_GETVALUE(uint32_t);
+DEFINE_IPROPERTYMANAGER_GETVALUE(int64_t);
+DEFINE_IPROPERTYMANAGER_GETVALUE(uint64_t);
+DEFINE_IPROPERTYMANAGER_GETVALUE(bool);
+DEFINE_IPROPERTYMANAGER_GETVALUE(double);
+DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<int16_t>);
+DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<uint16_t>);
+DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<int32_t>);
+DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<uint32_t>);
+DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<int64_t>);
+DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<uint64_t>);
+DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<double>);
+DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<std::string>);
+
 namespace Mantid
 {
-namespace Kernel
-{
-
-/// @cond
-
-/// Macro for declaring getValue more quickly.
-#define IPROPERTYMANAGER_GETVALUE(type) \
-    template<> DLLExport \
-    type IPropertyManager::getValue<type>(const std::string &name) const \
-    { \
-        PropertyWithValue<type> *prop = dynamic_cast<PropertyWithValue<type>*>(getPointerToProperty(name)); \
-        if (prop) \
-        { \
-            return *prop; \
-        } \
-        else \
-        { \
-            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected type "#type; \
-            throw std::runtime_error(message); \
-        } \
-    }
-
-    IPROPERTYMANAGER_GETVALUE(int16_t);
-    IPROPERTYMANAGER_GETVALUE(uint16_t);
-    IPROPERTYMANAGER_GETVALUE(int32_t);
-    IPROPERTYMANAGER_GETVALUE(uint32_t);
-    IPROPERTYMANAGER_GETVALUE(int64_t);
-    IPROPERTYMANAGER_GETVALUE(uint64_t);
-    IPROPERTYMANAGER_GETVALUE(bool);
-    IPROPERTYMANAGER_GETVALUE(double);
-    IPROPERTYMANAGER_GETVALUE(std::vector<int16_t>);
-    IPROPERTYMANAGER_GETVALUE(std::vector<uint16_t>);
-    IPROPERTYMANAGER_GETVALUE(std::vector<int32_t>);
-    IPROPERTYMANAGER_GETVALUE(std::vector<uint32_t>);
-    IPROPERTYMANAGER_GETVALUE(std::vector<int64_t>);
-    IPROPERTYMANAGER_GETVALUE(std::vector<uint64_t>);
-    IPROPERTYMANAGER_GETVALUE(std::vector<double>);
-    IPROPERTYMANAGER_GETVALUE(std::vector<std::string>);
-
+  namespace Kernel
+  {
 
     template <> DLLExport
     const char* IPropertyManager::getValue<const char*>(const std::string &name) const
@@ -89,17 +70,19 @@ namespace Kernel
     IPropertyManager::TypedValue::operator double () { return pm.getValue<double>(prop); }
     IPropertyManager::TypedValue::operator std::string () { return pm.getPropertyValue(prop); }
     IPropertyManager::TypedValue::operator Property* () { return pm.getPointerToProperty(prop); }
-    /// @endcond
 
-  #ifdef __INTEL_COMPILER
 
-    IPROPERTYMANAGER_GETVALUE(unsigned long);
-    IPROPERTYMANAGER_GETVALUE(std::vector<unsigned long>);
-
+#ifdef __INTEL_COMPILER
     // Intel 64-bit size_t   
     IPropertyManager::TypedValue::operator unsigned long () { return pm.getValue<unsigned long>(prop); }
-  #endif
-
-
-} // namespace Kernel
+  } // namespace Kernel
 } // namespace Mantid
+
+    DEFINE_IPROPERTYMANAGER_GETVALUE(unsigned long);
+    DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<unsigned long>);
+#else
+  } // namespace Kernel
+} // namespace Mantid
+#endif
+
+    /// @endcond
