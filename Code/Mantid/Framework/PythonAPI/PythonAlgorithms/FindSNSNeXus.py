@@ -74,8 +74,13 @@ class FindSNSNeXus(PythonAlgorithm):
         self.nxsfile = instrument + "_" + str(runnumber) + ".nxs"
         self.realfile = instrument + "_" + str(runnumber) + extension
 
+        # Check whether we want histo or events
+        nexusformat = None
+        if extension == "_event.nxs":
+            nexusformat = "Event"
+
         info = ArchiveInfo(instrument=instrument)
-        self.finder = Finder(info, usews=usews)
+        self.finder = Finder(info, usews=usews, nexusformat=nexusformat, find_all=True)
         if extension.endswith(".nxs"):
             result = self.findNeXus(runnumber)
         else:
