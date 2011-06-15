@@ -1,6 +1,4 @@
 set ( SRC_FILES
-        src/LoadISISNexus.cpp
-        src/LoadISISNexus2.cpp
         src/LoadLogsFromSNSNexus.cpp
         src/LoadMuonLog.cpp
         src/LoadNeXus.cpp
@@ -27,8 +25,6 @@ set ( SRC_UNITY_IGNORE_FILES src/NeXusFile.cpp)
 
 set ( INC_FILES
         inc/MantidNexus/DllConfig.h
-        inc/MantidNexus/LoadISISNexus.h
-        inc/MantidNexus/LoadISISNexus2.h
         inc/MantidNexus/LoadLogsFromSNSNexus.h
         inc/MantidNexus/LoadMuonLog.h
         inc/MantidNexus/LoadNeXus.h
@@ -44,8 +40,6 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-        #test/LoadTOFRawNeXusTest.h # TODO has no active tests in it
-        test/LoadISISNexusTest.h
         test/LoadLogsFromSNSNexusTest.h
         test/LoadMuonLogTest.h
         test/LoadNeXusTest.h

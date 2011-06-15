@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadISISNexus.h"
+#include "MantidDataHandling/LoadISISNexus.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -24,7 +24,7 @@
 
 namespace Mantid
 {
-  namespace NeXus
+  namespace DataHandling
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadISISNexus)

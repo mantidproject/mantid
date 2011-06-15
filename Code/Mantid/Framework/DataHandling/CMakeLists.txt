@@ -28,6 +28,8 @@ set ( SRC_FILES
 	src/LoadInstrumentFromNexus.cpp
 	src/LoadInstrumentFromRaw.cpp
 	src/LoadInstrumentHelper.cpp
+	src/LoadISISNexus.cpp
+    src/LoadISISNexus2.cpp
 	src/LoadLOQDistancesFromRaw.cpp
 	src/LoadLog.cpp
 	src/LoadMappingTable.cpp
@@ -117,6 +119,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadInstrumentFromNexus.h
 	inc/MantidDataHandling/LoadInstrumentFromRaw.h
 	inc/MantidDataHandling/LoadInstrumentHelper.h
+	inc/MantidDataHandling/LoadISISNexus.h
+    inc/MantidDataHandling/LoadISISNexus2.h
 	inc/MantidDataHandling/LoadLOQDistancesFromRaw.h
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadMappingTable.h
@@ -191,6 +195,7 @@ set ( TEST_FILES
 	test/LoadInstrumentFromRawTest.h
 	test/LoadInstrumentHelperTest.h
 	test/LoadInstrumentTest.h
+	test/LoadISISNexusTest.h
 	test/LoadLogTest.h
 	test/LoadMappingTableTest.h
 	test/LoadMuonNexus2Test.h
@@ -210,7 +215,7 @@ set ( TEST_FILES
 	test/LoadSaveAsciiTest.h
 	test/LoadSpice2dTest.h
 	test/LoadTest.h
-	test/LoadTOFRawNexusTest.h
+	#test/LoadTOFRawNexusTest.h # TODO has no active tests in it
 	test/ManagedRawFileWorkspace2DTest.h
 	test/MaskDetectorsInShapeTest.h
 	test/MaskDetectorsTest.h

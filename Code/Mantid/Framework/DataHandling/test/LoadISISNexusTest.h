@@ -2,17 +2,17 @@
 #define LOADISISNEXUSTEST_H_
 
 #include "MantidDataHandling/LoadInstrument.h" 
-
-#include "MantidNexus/LoadISISNexus.h"
+#include "MantidDataHandling/LoadISISNexus.h"
+#include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidNexus/LoadISISNexus2.h"
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::NeXus;
+using namespace Mantid::DataHandling;
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceGroup.h"

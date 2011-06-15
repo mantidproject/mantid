@@ -20,10 +20,10 @@
 
 namespace Mantid
 {
-    namespace NeXus
+    namespace DataHandling
     {
 
-        /** Structure for keeping information about a Nexus data set,
+        /** Structure for keeping information about a NeXus data set,
          *  such as the dimensions and type
          */
         struct NexusInfo
@@ -33,7 +33,7 @@ namespace Mantid
             int type;    ///< type of the data, e.g. NX_CHAR, NX_FLOAT32, see napi.h
         };
 
-        /** @class LoadISISNexus LoadISISNexus.h NeXus/LoadISISNexus.h
+        /** @class LoadISISNexus LoadISISNexus.h DataHandling/LoadISISNexus.h
 
         Loads a file in a Nexus format and stores it in a 2D workspace 
         (Workspace2D class). LoadISISNexus is an algorithm and as such inherits
@@ -42,10 +42,10 @@ namespace Mantid
 
         Required Properties:
         <UL>
-        <LI> Filename - The name of and path to the input Nexus file </LI>
+        <LI> Filename - The name of and path to the input NeXus file </LI>
         <LI> OutputWorkspace - The name of the workspace in which to store the imported data 
         (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)
-        [ not yet implemented for Nexus ]</LI>
+        [ not yet implemented for NeXus ]</LI>
         </UL>
 
         Optional Properties: (note that these options are not available if reading a multiperiod file)
@@ -204,7 +204,7 @@ namespace Mantid
 
 
 
-    } // namespace NeXus
+    } // namespace DataHandling
 } // namespace Mantid
 
 #endif /*MANTID_DATAHANDLING_LOADISISNEXUS_H_*/

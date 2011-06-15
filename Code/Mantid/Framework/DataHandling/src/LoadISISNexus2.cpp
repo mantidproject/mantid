@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadISISNexus2.h"
+#include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -30,7 +30,7 @@
 
 namespace Mantid
 {
-  namespace NeXus
+  namespace DataHandling
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadISISNexus2)
@@ -38,6 +38,7 @@ namespace Mantid
     
     using namespace Kernel;
     using namespace API;
+    using namespace NeXus;
     using std::size_t;
 
     /// Empty default constructor

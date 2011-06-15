@@ -16,18 +16,18 @@
 //----------------------------------------------------------------------
 namespace Mantid
 {
-  namespace NeXus
+  namespace DataHandling
   {
 
     /** 
 
-    Loads a file in a Nexus format and stores it in a 2D workspace. LoadISISNexus2 is an algorithm and 
+    Loads a file in a NeXus format and stores it in a 2D workspace. LoadISISNexus2 is an algorithm and
     as such inherits  from the Algorithm class, via DataHandlingCommand, and overrides
     the init() & exec() methods.
 
     Required Properties:
     <UL>
-    <LI> Filename - The name of and path to the input Nexus file </LI>
+    <LI> Filename - The name of and path to the input NeXus file </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the imported data 
     (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)</LI>
     </UL>
@@ -90,17 +90,17 @@ namespace Mantid
       /// Run LoadInstrument as a subalgorithm
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
       /// Load in details about the run
-      void loadRunDetails(DataObjects::Workspace2D_sptr local_workspace, NXEntry & entry);
+      void loadRunDetails(DataObjects::Workspace2D_sptr local_workspace, Mantid::NeXus::NXEntry & entry);
       /// Parse an ISO formatted date-time string into separate date and time strings
       void parseISODateTime(const std::string & datetime_iso, std::string & date, std::string & time) const;
       /// Load in details about the sample
-      void loadSampleData(DataObjects::Workspace2D_sptr, NXEntry & entry);
+      void loadSampleData(DataObjects::Workspace2D_sptr, Mantid::NeXus::NXEntry & entry);
       /// Load log data from the nexus file
       void loadLogs(DataObjects::Workspace2D_sptr, int period = 1);
       // Load a given period into the workspace
-      void loadPeriodData(int64_t period, NXEntry & entry, DataObjects::Workspace2D_sptr local_workspace);
+      void loadPeriodData(int64_t period, Mantid::NeXus::NXEntry & entry, DataObjects::Workspace2D_sptr local_workspace);
       // Load a data block
-      void loadBlock(NXDataSetTyped<int> & data, int64_t blocksize, int64_t period, int64_t start,
+      void loadBlock(Mantid::NeXus::NXDataSetTyped<int> & data, int64_t blocksize, int64_t period, int64_t start,
           int64_t &hist, int64_t& spec_num, DataObjects::Workspace2D_sptr localWorkspace);
 
 
@@ -155,7 +155,7 @@ namespace Mantid
       static double dblSqrt(double in);
     };
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid
 
 #endif /*MANTID_DATAHANDLING_LoadISISNexus2_H_*/
