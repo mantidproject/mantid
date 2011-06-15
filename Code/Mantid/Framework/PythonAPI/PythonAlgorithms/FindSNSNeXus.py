@@ -81,11 +81,14 @@ class FindSNSNeXus(PythonAlgorithm):
 
         info = ArchiveInfo(instrument=instrument)
         self.finder = Finder(info, usews=usews, nexusformat=nexusformat, find_all=True)
-        if extension.endswith(".nxs"):
-            result = self.findNeXus(runnumber)
-        else:
-            result = self.findPreNeXus(runnumber)
-        self.log().information(result)
+        try:
+            if extension.endswith(".nxs"):
+                result = self.findNeXus(runnumber)
+            else:
+                result = self.findPreNeXus(runnumber)
+        except:
+            result = ""
+        self.log().information("FindSNSNeXus found: %s" % result)
         self.setProperty("ResultPath", result)
 
 mtd.registerPyAlgorithm(FindSNSNeXus())
