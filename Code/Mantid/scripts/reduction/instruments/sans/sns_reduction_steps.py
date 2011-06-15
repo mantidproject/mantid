@@ -34,7 +34,7 @@ class QuickLoad(ReductionStep):
             data_file = self._data_file
         
         # Load data
-        filepath = find_data(file_name, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
+        filepath = find_data(file_name, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file, instrument=reducer.instrument.name())
 
         # Find all the necessary files
         event_file = ""
@@ -199,7 +199,7 @@ class LoadRun(ReductionStep):
         
         # Load data
         def _load_data_file(file_name, wks_name):
-            filepath = find_data(file_name, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
+            filepath = find_data(file_name, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file, instrument=reducer.instrument.name())
     
             # Find all the necessary files
             event_file = ""
@@ -551,7 +551,7 @@ class SubtractDarkCurrent(ReductionStep):
         # Check whether the dark current was already loaded, otherwise load it
         # Load dark current, which will be used repeatedly
         if self._dark_current_ws is None:
-            filepath = find_data(file_name, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file)
+            filepath = find_data(file_name, data_dir=reducer._data_path, run_to_file_func=reducer.run_to_data_file, instrument=reducer.instrument.name())
             self._dark_current_ws = extract_workspace_name(filepath)
             reducer._data_loader.__class__(datafile=filepath).execute(reducer, self._dark_current_ws)
             RebinToWorkspace(WorkspaceToRebin=self._dark_current_ws, WorkspaceToMatch=workspace, OutputWorkspace=self._dark_current_ws)

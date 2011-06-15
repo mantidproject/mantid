@@ -48,7 +48,7 @@ def find_file(filename=None, startswith=None, data_dir=None):
 
     return files_found
 
-def find_data(file, data_dir=None, run_to_file_func=None):
+def find_data(file, data_dir=None, run_to_file_func=None, instrument=None):
     """
         Finds a file path for the specified data set, which can either be:
             - a run number
@@ -57,6 +57,7 @@ def find_data(file, data_dir=None, run_to_file_func=None):
         @param file: file name or part of a file name
         @param data_dir: additional data directory to look into
         @param run_to_file_func: function that generates a file name given a run number
+        @param instrument: if supplied, FindNeXus will be tried as a last resort
     """
     # First, check whether it's an absolute path
     if os.path.isfile(file):
@@ -80,7 +81,17 @@ def find_data(file, data_dir=None, run_to_file_func=None):
     if system_path :
         return system_path
 
-    #TODO: Finally, look in the catalog...
-    
+    #Finally, look in the catalog...
+    if instrument is not None:
+        # Assume the string that was passed is a run number
+        try:
+            f = FindSNSNeXus(Instrument=instrument, RunNumber=file, Extension="_event.nxs")
+            file = f.getProperty("ResultPath").value
+            if os.path.isfile(file):
+                return file
+        except:
+            # FindNeXus couldn't make sense of the the supplied information
+            pass
+
     # If we didn't find anything, raise an exception
     raise RuntimeError, "Could not find a file for [%s]" % str(file)
