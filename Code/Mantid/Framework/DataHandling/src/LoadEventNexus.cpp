@@ -480,7 +480,7 @@ public:
     } //no error
 
     } // try block
-    catch (std::exception e)
+    catch (std::exception & e)
     {
       alg->getLogger().error() << "Error while loading bank " << entry_name << ":" << std::endl;
       alg->getLogger().error() << e.what() << std::endl;
