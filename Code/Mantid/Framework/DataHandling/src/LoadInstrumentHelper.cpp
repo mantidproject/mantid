@@ -120,7 +120,7 @@ void LoadInstrumentHelper::getValidFromTo(const std::string& IDFfilename, std::s
       {
         pParser.parse(IDFfilename);
       }
-      catch(DummyException e)
+      catch(DummyException &e)
       {
         outValidFrom = e.m_validFrom;
         outValidTo = e.m_validTo;
