@@ -12,7 +12,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidNexus/SaveNexusProcessed.h"
+#include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidDataHandling/LoadSNSEventNexus.h"
@@ -28,8 +28,9 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::NeXus;
+using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using namespace Mantid::NeXus;
 
 class SaveNexusProcessedTest : public CxxTest::TestSuite
 {

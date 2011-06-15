@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/SaveNexusProcessed.h"
+#include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -20,7 +20,7 @@ using namespace Mantid::API;
 
 namespace Mantid
 {
-namespace NeXus
+namespace DataHandling
 {
 
   using namespace Kernel;
@@ -140,7 +140,7 @@ namespace NeXus
       throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D or EventWorkspace.");
 
 
-    NexusFileIO *nexusFile= new NexusFileIO();
+    Mantid::NeXus::NexusFileIO *nexusFile= new Mantid::NeXus::NexusFileIO();
     if( nexusFile->openNexusWrite( m_filename ) != 0 )
     {
       g_log.error("Failed to open file");
@@ -307,7 +307,7 @@ namespace NeXus
   /** Execute the saving of event data.
    * This will make one long event list for all events contained.
    * */
-  void SaveNexusProcessed::execEvent(NexusFileIO * nexusFile,const bool uniformSpectra,const std::vector<int> spec)
+  void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO * nexusFile,const bool uniformSpectra,const std::vector<int> spec)
   {
     prog = new Progress(this, 0.3, 1.0, m_eventWorkspace->getNumberEvents()*2);
 
@@ -431,5 +431,5 @@ namespace NeXus
       Algorithm::setOtherProperties(alg,propertyName,propertyValue,perioidNum);
   }
 
-} // namespace NeXus
+} // namespace DataHandling
 } // namespace Mantid

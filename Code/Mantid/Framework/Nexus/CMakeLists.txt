@@ -2,7 +2,6 @@ set ( SRC_FILES
         src/LoadMuonLog.cpp
         src/LoadNeXus.cpp
         src/LoadNexusMonitors.cpp
-        src/LoadNexusProcessed.cpp
         src/LoadRaw/byte_rel_comp.cpp
         src/LoadRaw/isisraw.cpp
         src/LoadRaw/isisraw2.cpp
@@ -17,7 +16,6 @@ set ( SRC_FILES
         src/NexusFileIO.cpp
         src/SaveISISNeXus.cpp
         src/SaveNeXus.cpp
-        src/SaveNexusProcessed.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/NeXusFile.cpp)
@@ -27,26 +25,21 @@ set ( INC_FILES
         inc/MantidNexus/LoadMuonLog.h
         inc/MantidNexus/LoadNeXus.h
         inc/MantidNexus/LoadNexusMonitors.h
-        inc/MantidNexus/LoadNexusProcessed.h
         inc/MantidNexus/LoadNexusLogs.h
         inc/MantidNexus/MuonNexusReader.h
         inc/MantidNexus/NexusClasses.h
         inc/MantidNexus/NexusFileIO.h
         inc/MantidNexus/SaveISISNeXus.h
         inc/MantidNexus/SaveNeXus.h
-        inc/MantidNexus/SaveNexusProcessed.h
 )
 
 set ( TEST_FILES
         test/LoadMuonLogTest.h
         test/LoadNeXusTest.h
         test/LoadNexusMonitorsTest.h
-        test/LoadNexusProcessedTest.h
         test/LoadNexusLogsTest.h
-        test/LoadRSaveNLoadNcspTest.h
         test/NexusAPITest.h
         test/SaveNeXusTest.h
-        test/SaveNexusProcessedTest.h
 )
 
 if(UNITY_BUILD)

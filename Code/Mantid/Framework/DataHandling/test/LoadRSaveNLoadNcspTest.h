@@ -14,8 +14,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidNexus/LoadNeXus.h"
-#include "MantidNexus/LoadNexusProcessed.h"
-#include "MantidNexus/SaveNexusProcessed.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataHandling/SaveNexusProcessed.h"
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <Poco/Path.h>
@@ -25,6 +25,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using namespace Mantid::DataHandling;
 using namespace Mantid::NeXus;
 
 class LoadRSaveNLoadNcspTest : public CxxTest::TestSuite

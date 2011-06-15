@@ -7,8 +7,8 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/Instrument.h"
-#include "MantidNexus/LoadNexusProcessed.h"
-#include "MantidNexus/SaveNexusProcessed.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataHandling/SaveNexusProcessed.h"
 #include "SaveNexusProcessedTest.h"
 #include <cxxtest/TestSuite.h>
 #include <iostream>

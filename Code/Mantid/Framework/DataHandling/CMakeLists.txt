@@ -36,6 +36,7 @@ set ( SRC_FILES
 	src/LoadMappingTable.cpp
 	src/LoadMuonNexus.cpp
     src/LoadMuonNexus2.cpp
+    src/LoadNexusProcessed.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNeXusMonitors.cpp
 	src/LoadRKH.cpp
@@ -78,6 +79,7 @@ set ( SRC_FILES
 	src/SaveDspacemap.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveGSS.cpp
+	src/SaveNexusProcessed.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SavePHX.cpp
@@ -128,6 +130,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMuonNexus.h
     inc/MantidDataHandling/LoadMuonNexus2.h
+    inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNeXusMonitors.h
 	inc/MantidDataHandling/LoadRKH.h
@@ -160,6 +163,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveDspacemap.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveGSS.h
+	inc/MantidDataHandling/SaveNexusProcessed.h
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
 	inc/MantidDataHandling/SavePHX.h
@@ -203,6 +207,7 @@ set ( TEST_FILES
 	test/LoadMappingTableTest.h
 	test/LoadMuonNexus2Test.h
     test/LoadMuonNexusTest.h
+    test/LoadNexusProcessedTest.h
 	test/LoadParameterFileTest.h
 	test/LoadPreNeXusMonitorsTest.h
 	test/LoadRKHTest.h
@@ -211,6 +216,7 @@ set ( TEST_FILES
 	test/LoadRawBin0Test.h
 	test/LoadRawSpectrum0Test.h
 	test/LoadRawTest.h
+	test/LoadRSaveNLoadNcspTest.h
 	test/LoadSNSEventNexusTest.h
 	#test/LoadSNSNexusTest.h # TODO has no active tests in it
 	test/LoadSNSspecTest.h
@@ -231,6 +237,7 @@ set ( TEST_FILES
 	test/SaveDASCTest.h
 	test/SaveDspacemapTest.h
 	test/SaveFocussedXYETest.h
+	test/SaveNexusProcessedTest.h
 	test/SaveNISTDATTest.h
 	test/SaveNXSPETest.h
 	test/SavePHXTest.h

@@ -12,9 +12,9 @@
 
 namespace Mantid
 {
-  namespace NeXus
+  namespace DataHandling
   {
-    /** @class SaveNexusProcessed SaveNexusProcessed.h NeXus/SaveNexusProcessed.h
+    /** @class SaveNexusProcessed SaveNexusProcessed.h DataHandling/SaveNexusProcessed.h
 
     Saves a workspace as a Nexus Processed entry in a Nexus file. 
     SaveNexusProcessed is an algorithm and as such inherits
@@ -23,7 +23,7 @@ namespace Mantid
 
     Required Properties:
     <UL>
-    <LI> Filename - The name of and path to the output Nexus file (may exist) </LI>
+    <LI> Filename - The name of and path to the output NeXus file (may exist) </LI>
     <LI> InputWorkspace - The name of the workspace to store the file </LI>
     <LI> Title - the title to describe the saved processed data
     </UL>
@@ -73,7 +73,7 @@ namespace Mantid
       template<class T>
       static void appendEventListData( std::vector<T> events, size_t offset, double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes);
 
-      void execEvent(NexusFileIO * nexusFile,const bool uniformSpectra,const std::vector<int> spec);
+      void execEvent(Mantid::NeXus::NexusFileIO * nexusFile,const bool uniformSpectra,const std::vector<int> spec);
 	    /// sets non workspace properties for the algorithm
       void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 
@@ -93,7 +93,7 @@ namespace Mantid
 
     };
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid
 
 #endif /*MANTID_DATAHANDLING_SAVENEXUSPROCESSED_H_*/
