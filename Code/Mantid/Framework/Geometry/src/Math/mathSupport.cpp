@@ -179,12 +179,6 @@ template
  MANTID_GEOMETRY_DLL int solveCubic(const std::vector<double>::const_iterator,std::complex<double>&,
                std::complex<double>&,std::complex<double>&);
 
-
-template  MANTID_GEOMETRY_DLL void indexSort(const std::vector<double>&,std::vector<int>&);
-template  MANTID_GEOMETRY_DLL void indexSort(const std::vector<float>&,std::vector<int>&);
-template  MANTID_GEOMETRY_DLL void indexSort(const std::vector<int>&,std::vector<int>&);
-
-
 /// \endcond TEMPLATE 
 
 }

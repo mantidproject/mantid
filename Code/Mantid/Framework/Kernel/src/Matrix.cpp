@@ -73,7 +73,9 @@ namespace Kernel
       transform(PartList.begin(),PartList.end(),Index.begin(),PSep<T>());
       return;
     }
-
+    template void indexSort(const std::vector<double>&,std::vector<int>&);
+    template void indexSort(const std::vector<float>&,std::vector<int>&);
+    template void indexSort(const std::vector<int>&,std::vector<int>&);
   }
 
   /**
