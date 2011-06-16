@@ -8,6 +8,47 @@
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
 
+/*  Following A.J.Schultz's anvred, the weight factors should be:
+ * 
+ *    sin^2(theta) / (lamda^4 * spec * eff * trans)
+ *
+ *  where theta = scattering_angle/2
+ *        lamda = wavelength (in angstroms?)
+ *        spec  = incident spectrum correction
+ *        eff   = pixel efficiency
+ *        trans = absorption correction
+ *  
+ *  The quantity:
+ *
+ *    sin^2(theta) / eff 
+ *
+ *  depends only on the pixel and can be pre-calculated 
+ *  for each pixel.  It could be saved in array pix_weight[].
+ *  For now, pix_weight[] is calculated by the method:
+ *  BuildPixWeights() and just holds the sin^2(theta) values.
+ *
+ *  The wavelength dependent portion of the correction is saved in
+ *  the array lamda_weight[].
+ *  The time-of-flight is converted to wave length by multiplying
+ *  by tof_to_lamda[id], then (int)STEPS_PER_ANGSTROM * lamda
+ *  gives an index into the table lamda_weight[].
+ *
+ *  The lamda_weight[] array contains values like:
+ *
+ *      1/(lamda^power * spec(lamda))
+ *   
+ *  which are pre-calculated for each lamda.  These values are
+ *  saved in the array lamda_weight[].  The optimal value to use
+ *  for the power should be determined when a good incident spectrum
+ *  has been determined.  Currently, power=3 when used with an 
+ *  incident spectrum and power=2.4 when used without an incident
+ *  spectrum.
+ *
+ *  The pixel efficiency and incident spectrum correction are NOT CURRENTLY USED.
+ *  The absorption correction, trans, depends on both lamda and the pixel,
+ *  Which is a fairly expensive calulation when done for each event.
+ */
+
 namespace Mantid
 {
 namespace Crystal
@@ -103,6 +144,9 @@ void AnvredCorrection::exec()
   {
     PARALLEL_START_INTERUPT_REGION
 
+    // Get a reference to the Y's in the output WS for storing the factors
+    MantidVec& Y = correctionFactors->dataY(i);
+
     // Copy over bin boundaries
     const MantidVec& Xin = m_inputWS->readX(i);
     correctionFactors->dataX(i) = Xin;
@@ -122,9 +166,6 @@ void AnvredCorrection::exec()
     // If no detector found, skip onto the next spectrum
     if ( !det ) continue;
 
-    // Get a reference to the Y's in the output WS for storing the factors
-    MantidVec& Y = correctionFactors->dataY(i);
-
     // This is the scattered beam direction
     IInstrument_sptr inst = m_inputWS->getInstrument();
     V3D dir = det->getPos() - samplePos;
@@ -136,7 +177,7 @@ void AnvredCorrection::exec()
     {
       const double lambda = (isHist ? (0.5 * (Xin[j] + Xin[j + 1])) : Xin[j]);
 
-      Y[j] = Yin[j]*this->getEventWeight(scattering, lambda);
+      Y[j] = Yin[j]*this->getEventWeight(lambda, scattering);
 
       // Make certain that last point is calculates
       if ( x_step > 1 && j+x_step >= specSize && j+1 != specSize)
@@ -217,17 +258,20 @@ void AnvredCorrection::execEvent()
       el.switchTo(WEIGHTED_NOTIME);
       std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
 
-      //std::vector<TofEvent>::iterator itev;
-      //std::vector<TofEvent>::iterator itev_end = events.end();
+      std::vector<WeightedEventNoTime>::iterator itev;
+      std::vector<WeightedEventNoTime>::iterator itev_end = events.end();
 
       // multiplying an event list by a scalar value
-      /*for (itev = events.begin(); itev != itev_end; itev++)
+      for (itev = events.begin(); itev != itev_end; itev++)
       {
         const double lambda = itev->tof();
-        double value = this->getEventWeight(scattering, lambda);
+        double value = this->getEventWeight(lambda, scattering);
         itev->m_errorSquared = static_cast<float>(itev->m_errorSquared * value*value);
         itev->m_weight *= static_cast<float>(value);
-      }*/
+      }
+      EventList elOut;
+      elOut += events;
+      correctionFactors->getOrAddEventList(i) +=elOut;
 
     prog.report();
 
@@ -235,6 +279,7 @@ void AnvredCorrection::execEvent()
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+  correctionFactors->doneAddingEventLists();
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(correctionFactors));
 
   // Now do some cleaning-up since destructor may not be called immediately
@@ -378,6 +423,7 @@ double AnvredCorrection::absor_sphere(double& twoth, double& wl)
 //    power = power_ns;                      // This is commented out, so we
                                              // don't override user specified 
                                              // value.
+      lamda_weight.reserve(NUM_WAVELENGTHS);
       for ( int i = 0; i < NUM_WAVELENGTHS; i++ )
         lamda_weight.push_back(1.);
     }
