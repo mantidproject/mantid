@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	src/AnvredCorrection.cpp
 	src/LoadIsawUB.cpp
 	src/LoadPeaksFile.cpp
 	src/MaskPeaksWorkspace.cpp
@@ -11,6 +12,7 @@ set ( SRC_FILES
 
 set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
+	inc/MantidCrystal/AnvredCorrection.h
 	inc/MantidCrystal/LoadIsawUB.h
 	inc/MantidCrystal/LoadPeaksFile.h
 	inc/MantidCrystal/MaskPeaksWorkspace.h
