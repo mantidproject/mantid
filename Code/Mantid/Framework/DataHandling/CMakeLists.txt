@@ -44,15 +44,10 @@ set ( SRC_FILES
 	src/LoadRKH.cpp
 	src/LoadRaw.cpp
 	src/LoadRaw/byte_rel_comp.cpp
-	src/LoadRaw/byte_rel_comp.h
 	src/LoadRaw/isisraw.cpp
-	src/LoadRaw/isisraw.h
 	src/LoadRaw/isisraw2.cpp
-	src/LoadRaw/isisraw2.h
 	src/LoadRaw/item_struct.cpp
-	src/LoadRaw/item_struct.h
 	src/LoadRaw/vms_convert.cpp
-	src/LoadRaw/vms_convert.h
 	src/LoadRaw2.cpp
 	src/LoadRaw3.cpp
 	src/LoadRawBin0.cpp
@@ -81,6 +76,7 @@ set ( SRC_FILES
 	src/SaveDspacemap.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveGSS.cpp
+	src/SaveISISNeXus.cpp
 	src/SaveNeXus.cpp
 	src/SaveNexusProcessed.cpp
 	src/SaveNISTDAT.cpp
@@ -168,6 +164,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveDspacemap.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveGSS.h
+	inc/MantidDataHandling/SaveISISNeXus.h
 	inc/MantidDataHandling/SaveNeXus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
 	inc/MantidDataHandling/SaveNISTDAT.h

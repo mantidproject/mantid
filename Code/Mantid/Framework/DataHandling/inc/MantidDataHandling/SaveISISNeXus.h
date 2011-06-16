@@ -1,26 +1,30 @@
-#ifndef MANTID_NEXUS_SAVEISISNEXUS_H_
-#define MANTID_NEXUS_SAVEISISNEXUS_H_
+#ifndef MANTID_DATAHANDLING_SAVEISISNEXUS_H_
+#define MANTID_DATAHANDLING_SAVEISISNEXUS_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "LoadRaw/isisraw2.h"
 #include <napi.h>
 
 #include <climits>
 
+//----------------------------------------------------------------------
+// Forward declaration
+//----------------------------------------------------------------------
+class ISISRAW2;
+
 namespace Mantid
 {
-  namespace NeXus
+  namespace DataHandling
   {
     /**
-    Reads a raw file and saves it in a ISIS NeXus file.
+    The SaveISISNexus algorithm will convert a RAW file to a Nexus file.
 
     Required Properties:
     <UL>
-    <LI> Filename - The name of and path to the input RAW file </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
+    <LI> InputFilename - The name of and path to the input RAW file </LI>
+    <LI> OutputFilename - The name of and path to the input NeXus file </LI>
     </UL>
 
     @author Roman Tolchenov, Tessella plc
@@ -155,7 +159,7 @@ namespace Mantid
 		
     };
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_NEXUS_SAVEISISNEXUS_H_*/
+#endif /*MANTID_DATAHANDLING_SAVEISISNEXUS_H_*/

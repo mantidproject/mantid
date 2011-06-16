@@ -4,8 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/SaveISISNeXus.h"
+#include "MantidDataHandling/SaveISISNeXus.h"
 #include "MantidAPI/FileProperty.h"
+
+#include "LoadRaw/isisraw2.h"
 
 #include <boost/scoped_array.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -26,7 +28,7 @@
 
 namespace Mantid
 {
-namespace NeXus
+namespace DataHandling
 {
 
 // Register the algorithm into the algorithm factory

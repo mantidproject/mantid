@@ -12,7 +12,6 @@ set ( SRC_FILES
         src/NeXusStream.cpp
         src/NexusClasses.cpp
         src/NexusFileIO.cpp
-        src/SaveISISNeXus.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/NeXusFile.cpp)
@@ -24,7 +23,6 @@ set ( INC_FILES
         inc/MantidNexus/MuonNexusReader.h
         inc/MantidNexus/NexusClasses.h
         inc/MantidNexus/NexusFileIO.h
-        inc/MantidNexus/SaveISISNeXus.h
 )
 
 set ( TEST_FILES
