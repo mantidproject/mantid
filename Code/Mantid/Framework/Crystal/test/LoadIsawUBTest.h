@@ -58,12 +58,12 @@ public:
     TS_ASSERT_DELTA( latt.beta(), 105.0738, 1e-4 );
     TS_ASSERT_DELTA( latt.gamma(), 90.0000, 1e-4 );
 
-//    Matrix<double> UB = latt.getUB();
-//    TS_ASSERT_EQUALS( UB.numRows(), 3);
-//    TS_ASSERT_EQUALS( UB.numCols(), 3);
-//    TS_ASSERT_DELTA( UB[0][0],  0.0574, 1e-4);
-//    TS_ASSERT_DELTA( UB[1][0], -0.0454, 1e-4);
-//    TS_ASSERT_DELTA( UB[2][2],  0.1169, 1e-4);
+    Matrix<double> UB = latt.getUB();
+    TS_ASSERT_EQUALS( UB.numRows(), 3);
+    TS_ASSERT_EQUALS( UB.numCols(), 3);
+    TS_ASSERT_DELTA( UB[0][0], -0.0453, 1e-4); // (Values were taken from the result, for consistency)
+    TS_ASSERT_DELTA( UB[1][0],  0.0013, 1e-4);
+    TS_ASSERT_DELTA( UB[2][2],  0.0273, 1e-4);
 
     AnalysisDataService::Instance().remove("LoadIsawUBTest_ws");
   }
@@ -105,14 +105,6 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
         "Filename", "TOPAZ_3007.peaks",
         "OutputWorkspace", "TOPAZ_3007_peaks");
 
-//    pw = boost::dynamic_pointer_cast<PeaksWorkspace>(
-//        AnalysisDataService::Instance().retrieve("TOPAZ_3007_peaks") );
-//    for (int i=0; i<pw->getNumberPeaks(); i++)
-//    {
-//      V3D hkl = pw->getPeak(i).getHKL() * -1.0;
-//      pw->getPeak(i).setHKL( hkl);
-//    }
-
     // Load the .mat file into it
     AlgorithmHelper::runAlgorithm("PredictPeaks", 6,
         "HKLPeaksWorkspace", "TOPAZ_3007_peaks",
@@ -125,8 +117,7 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
     TS_ASSERT(pw);
     if (!pw) return;
 
-   //FIXME: U is not set correctly
-   // TS_ASSERT_EQUALS( pw->getNumberPeaks(), 43);
+   TS_ASSERT_EQUALS( pw->getNumberPeaks(), 43);
 
 
   }

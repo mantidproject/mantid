@@ -232,13 +232,20 @@ namespace Crystal
             size_t wi = ids[i];
             Peak & p = peaks[wi];
 
-            out <<  "3" <<  std::setw( 7 ) <<  seqNum <<  std::setw( 5 ) << static_cast<int>(p.getH())
-                <<  std::setw( 5 ) <<  static_cast<int>(p.getK()) <<  std::setw( 5 ) <<  static_cast<int>(p.getL());
+            // Sequence (run) number
+            out <<  "3" <<  std::setw( 7 ) << seqNum;
+
+            // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
+            out <<  std::setw( 5 ) << static_cast<int>(-p.getH())
+                <<  std::setw( 5 ) << static_cast<int>(-p.getK())
+                <<  std::setw( 5 ) << static_cast<int>(-p.getL());
+
+            // Row/column
             out <<  std::setw( 8 ) <<  std::fixed << std::setprecision( 2 )
-            << static_cast<double>(p.getCol());
+              << static_cast<double>(p.getCol());
 
             out << std::setw( 8 ) << std::fixed << std::setprecision( 2 )
-            << static_cast<double>(p.getRow());
+              << static_cast<double>(p.getRow());
 
             out << std::setw( 8 ) << std::fixed << std::setprecision( 0 )
             << p.getTOF();

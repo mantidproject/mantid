@@ -100,42 +100,15 @@ namespace Crystal
     // Adjust the UB by transposing
     ub = ub.Transpose();
     
-    OrientedLattice ol;
-    ol.setUB(ub);
-  /*
-    UnitCell uc;
-    DblMatrix Gstar = ub.Tprime() * ub ;
-    uc.recalculateFromGstar( Gstar );
-    std::cout << uc.a() << " "  << uc.b() << " "  << uc.c() << " "
-        << uc.alpha() << " "  << uc.beta() << " "  << uc.gamma() << std::endl;
+    /* The method in OrientedLattice gets both the lattice parameters and the U matrix from the UB matrix.
+     * This is compatible (same results) with the ISAW lattice parameters */
+    OrientedLattice * latt = new OrientedLattice();
+    latt->setUB(ub);
+    DblMatrix U=latt->getU();
 
-//    // At this point, the UB uses the IPNS convention meaning that
-//    // for us, the output Q vector from UB.hkl = Qz, Qx, Qy
-//    Kernel::DblMatrix<double> adjust(3,3);
-//    adjust[0][1] = 1.0;
-//    adjust[1][2] = 1.0;
-//    adjust[2][0] = 1.0;
-//    // This matrix will swap the axes around to get our convention.
-//    U = adjust * U;
-
-    double lattPar[6];
-    for (size_t c=0; c<6; c++)
-    {
-      s = getWord(in, true);
-      if (!convert(s, val))
-        throw std::runtime_error("The string '" + s + "' in the file was not understood as a number.");
-      lattPar[c] = val;
-    }
-
-    // Create the lattice from the file's parameter
-    OrientedLattice * latt = new OrientedLattice(lattPar[0], lattPar[1], lattPar[2], lattPar[3], lattPar[4], lattPar[5]);
-    // Set the UB in there.
-    Kernel::DblMatrix Binv = latt->getBinv(); // B^-1
-    Kernel::DblMatrix U = ub * Binv; // U = UB * B^-1
-*/
     // Swap rows around to accound for IPNS convention
-    DblMatrix U=ol.getU();
     DblMatrix U2 = U;
+    // Swap rows around
     for (size_t r=0; r<3; r++)
     {
       U2[2][r] = U[0][r];
@@ -143,12 +116,11 @@ namespace Crystal
       U2[0][r] = U[1][r];
     }
     U = U2;
-   // U *= -1.0;
 
-    ol.setU( U );
+    latt->setU( U );
 
     // Save it into the workspace
-    ws->mutableSample().setOrientedLattice(new OrientedLattice(ol));
+    ws->mutableSample().setOrientedLattice(latt);
 
 
     this->setProperty("InputWorkspace", ws);

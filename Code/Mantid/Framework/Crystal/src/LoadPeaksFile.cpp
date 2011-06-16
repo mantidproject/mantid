@@ -234,7 +234,8 @@ namespace Crystal
 
     //Create the peak object
     Peak peak(outWS->getInstrument(), det->getID(), wl);
-    peak.setHKL(h,k,l);
+    // HKL's are flipped by -1 because of the internal Q convention
+    peak.setHKL(-h,-k,-l);
     peak.setIntensity(Inti);
     peak.setSigmaIntensity(SigI);
     peak.setBinCount(IPK);

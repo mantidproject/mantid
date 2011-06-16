@@ -1651,6 +1651,7 @@ bool Matrix<T>::isRotation()
 */
 {
   if (this->nx != this->ny) throw(std::invalid_argument("matrix is not square"));
+//  std::cout << "Matrix determinant-1 is " << (this->determinant()-1) << std::endl;
   if (fabs(this->determinant()-1) >1e-5) 
   {
     return false;
@@ -1659,7 +1660,8 @@ bool Matrix<T>::isRotation()
   {
     Matrix<T> prod(nx,ny),ident(nx,ny,true);
     prod= this->operator*(this->Tprime());
-    return prod.equals(ident, 1e-7);
+//    std::cout << "Matrix * Matrix' = " << std::endl << prod << std::endl;
+    return prod.equals(ident, 1e-5);
   }
 }
 

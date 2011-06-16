@@ -52,9 +52,9 @@ public:
 
     Peak p = ws->getPeaks()[0];
     TS_ASSERT_EQUALS( p.getRunNumber(), 1241)
-    TS_ASSERT_DELTA( p.getH(), 3, 1e-4);
-    TS_ASSERT_DELTA( p.getK(), -1, 1e-4);
-    TS_ASSERT_DELTA( p.getL(), -1, 1e-4);
+    TS_ASSERT_DELTA( p.getH(), -3, 1e-4);
+    TS_ASSERT_DELTA( p.getK(), 1, 1e-4);
+    TS_ASSERT_DELTA( p.getL(), 1, 1e-4);
     TS_ASSERT_EQUALS( p.getBankName(), "bank1");
     TS_ASSERT_DELTA( p.getCol(), 34, 1e-4);
     TS_ASSERT_DELTA( p.getRow(), 232, 1e-4);
@@ -93,9 +93,9 @@ public:
 
     Peak p = ws->getPeaks()[0];
     TS_ASSERT_EQUALS( p.getRunNumber(), 2479)
-    TS_ASSERT_DELTA( p.getH(), 1, 1e-4);
-    TS_ASSERT_DELTA( p.getK(), 2, 1e-4);
-    TS_ASSERT_DELTA( p.getL(), 27, 1e-4);
+    TS_ASSERT_DELTA( p.getH(), -1, 1e-4);
+    TS_ASSERT_DELTA( p.getK(), -2, 1e-4);
+    TS_ASSERT_DELTA( p.getL(), -27, 1e-4);
     TS_ASSERT_EQUALS( p.getBankName(), "bank17");
     TS_ASSERT_DELTA( p.getCol(), 87, 1e-4);
     TS_ASSERT_DELTA( p.getRow(), 16, 1e-4);
