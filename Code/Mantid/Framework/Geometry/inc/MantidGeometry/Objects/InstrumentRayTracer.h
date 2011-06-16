@@ -13,7 +13,7 @@ namespace Mantid
 {
   namespace Kernel
   {
-    class Kernel::V3D;
+    class V3D;
   }
   namespace Geometry
   {
