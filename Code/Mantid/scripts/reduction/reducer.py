@@ -417,6 +417,7 @@ class Reducer(object):
         path = os.path.normcase(path)
         if os.path.isdir(path):
             self._data_path = path
+            MantidFramework.ConfigService().appendDataSearchDir(path)
         else:
             raise RuntimeError, "Reducer.set_data_path: provided path is not a directory (%s)" % path
         
