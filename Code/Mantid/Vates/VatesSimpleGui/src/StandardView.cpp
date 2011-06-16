@@ -75,9 +75,12 @@ void StandardView::onCutButtonClicked()
 
 void StandardView::onRebinButtonClicked()
 {
-  pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-  this->rebinCut = builder->createFilter("filters", "RebinningCutter",
-  this->origSource);
+  if (this->origSource)
+  {
+    pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+    this->rebinCut = builder->createFilter("filters", "RebinningCutter",
+    this->origSource);
+  }
 }
 
 void StandardView::onColorMapChange(const pqColorMapModel *model)
