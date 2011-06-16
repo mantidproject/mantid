@@ -2011,9 +2011,21 @@ void FitPropertyBrowser::loadFunctionFromString()
 
 void FitPropertyBrowser::loadFunction(const QString& funcString)
 {
+  // when loading a function from a sting initially
+  // do not try to do auto background even if set 
+  bool isAutoBGset = false;
+  if ( m_auto_back )
+  {
+    isAutoBGset = true;
+    m_auto_back = false;
+  }
+
   getHandler()->removeAllPlots();
   clearBrowser();
   createCompositeFunction(funcString);
+
+  if ( isAutoBGset )
+    m_auto_back = true;
 }
 
 void FitPropertyBrowser::copy()
