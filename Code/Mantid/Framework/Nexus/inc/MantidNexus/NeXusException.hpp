@@ -4,9 +4,11 @@
 #include <string>
 #include <stdexcept>
 
+#include "NeXusFile.hpp"
+
 namespace NeXus
 {
-  class Exception : public std::runtime_error
+  class NXDLL_EXPORT Exception : public std::runtime_error
   {
   public:
     Exception(const std::string& msg = "GENERIC ERROR", const int status = 0);
