@@ -30,8 +30,8 @@ namespace Mantid
 
       static Kernel::Logger& PLog;           ///< The official logger
 
-      void matrixForm(Geometry::Matrix<double>&,
-        Geometry::V3D&,double&) const;          
+      void matrixForm(Kernel::Matrix<double>&,
+        Kernel::V3D&,double&) const;          
 
     protected:
 
@@ -56,17 +56,17 @@ namespace Mantid
 
       const std::vector<double>& copyBaseEqn() const { return BaseEqn; }  ///< access BaseEquation vector
 
-      virtual int side(const Geometry::V3D&) const; 
+      virtual int side(const Kernel::V3D&) const; 
 
       virtual void setBaseEqn() =0;      ///< Abstract set baseEqn 
-      double eqnValue(const Geometry::V3D&) const;
+      double eqnValue(const Kernel::V3D&) const;
 
-      virtual int onSurface(const Geometry::V3D&) const;          ///< is point valid on surface 
-      virtual double distance(const Geometry::V3D&) const;        ///< distance between point and surface (approx)
-      virtual Geometry::V3D surfaceNormal(const Geometry::V3D&) const;    ///< Normal at surface
+      virtual int onSurface(const Kernel::V3D&) const;          ///< is point valid on surface 
+      virtual double distance(const Kernel::V3D&) const;        ///< distance between point and surface (approx)
+      virtual Kernel::V3D surfaceNormal(const Kernel::V3D&) const;    ///< Normal at surface
 
-      virtual void displace(const Geometry::V3D&);
-      virtual void rotate(const Geometry::Matrix<double>&);
+      virtual void displace(const Kernel::V3D&);
+      virtual void rotate(const Kernel::Matrix<double>&);
 
       virtual void write(std::ostream&) const;
       virtual void print() const;

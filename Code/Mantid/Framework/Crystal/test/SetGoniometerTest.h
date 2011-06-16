@@ -10,7 +10,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
@@ -18,6 +18,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::Geometry::Goniometer;
+using Mantid::Kernel::V3D;
 
 class SetGoniometerTest : public CxxTest::TestSuite
 {

@@ -7,13 +7,16 @@
 
 namespace Mantid
 {
-
-namespace Geometry
+namespace Kernel
 {
-
   class V3D;
   template<class T>
   class Matrix;
+}
+namespace Geometry
+{
+
+
 /**
   \class  Surface
   \brief Holds a basic quadratic surface
@@ -74,20 +77,20 @@ class MANTID_GEOMETRY_DLL Surface
 
   /// Sets the surface based on a string input in MCNPX format
   virtual int setSurface(const std::string& R) =0; 
-  virtual int side(const V3D&) const;
+  virtual int side(const Kernel::V3D&) const;
 
   /// is point valid on surface 
-  virtual int onSurface(const V3D& R) const =0;
+  virtual int onSurface(const Kernel::V3D& R) const =0;
 
   /// returns the minimum distance to the surface
-  virtual double distance(const V3D&) const =0; 
+  virtual double distance(const Kernel::V3D&) const =0; 
   /// returns the normal to the closest point on the surface
-  virtual V3D surfaceNormal(const V3D&) const =0;
+  virtual Kernel::V3D surfaceNormal(const Kernel::V3D&) const =0;
 
   ///translates the surface
-  virtual void displace(const V3D&)  =0;
+  virtual void displace(const Kernel::V3D&)  =0;
   ///rotates the surface
-  virtual void rotate(const Matrix<double>&) =0;
+  virtual void rotate(const Kernel::Matrix<double>&) =0;
 
   void writeHeader(std::ostream&) const;
   virtual void write(std::ostream&) const;

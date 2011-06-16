@@ -70,19 +70,19 @@ public:
   virtual IComponent* clone() const = 0;
 
   /// Does the point given lie within this object component?
-  virtual bool isValid(const V3D& point) const = 0;
+  virtual bool isValid(const Kernel::V3D& point) const = 0;
 
   /// Does the point given lie on the surface of this object component?
-  virtual bool isOnSide(const V3D& point) const = 0;
+  virtual bool isOnSide(const Kernel::V3D& point) const = 0;
 
   ///Checks whether the track given will pass through this Component.
   virtual int interceptSurface(Track& track) const = 0;
 
   /// Finds the approximate solid angle covered by the component when viewed from the point given
-  virtual double solidAngle(const V3D& observer) const = 0;
+  virtual double solidAngle(const Kernel::V3D& observer) const = 0;
 
   ///Try to find a point that lies within (or on) the object
-  virtual int getPointInObject(V3D& point) const = 0;
+  virtual int getPointInObject(Kernel::V3D& point) const = 0;
 
   //Rendering member functions
   ///Draws the objcomponent.

@@ -3,7 +3,7 @@
 
 #include "MantidTestHelpers/DLLExport.h"
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -53,16 +53,16 @@ namespace ComponentCreationHelper
    * Create a capped cylinder object
    */
   DLL_TESTHELPERS Mantid::Geometry::Object_sptr 
-  createCappedCylinder(double radius, double height, const Mantid::Geometry::V3D & baseCentre, 
-               const Mantid::Geometry::V3D & axis, const std::string & id);
+  createCappedCylinder(double radius, double height, const Mantid::Kernel::V3D & baseCentre, 
+               const Mantid::Kernel::V3D & axis, const std::string & id);
   /**
    * Return the XML for a sphere.
    */
-  DLL_TESTHELPERS std::string sphereXML(double radius, const Mantid::Geometry::V3D & centre, const std::string & id);
+  DLL_TESTHELPERS std::string sphereXML(double radius, const Mantid::Kernel::V3D & centre, const std::string & id);
   /**
    * Create a sphere object
    */
-  DLL_TESTHELPERS Mantid::Geometry::Object_sptr createSphere(double radius, const Mantid::Geometry::V3D & centre, const std::string & id);
+  DLL_TESTHELPERS Mantid::Geometry::Object_sptr createSphere(double radius, const Mantid::Kernel::V3D & centre, const std::string & id);
   /** Create a cuboid shape for your pixels */
   DLL_TESTHELPERS Mantid::Geometry::Object_sptr createCuboid(double x_side_length, double y_side_length = -1.0, 
                                  double z_side_length = -1.0);
@@ -78,7 +78,7 @@ namespace ComponentCreationHelper
    * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and r2
    */
   DLL_TESTHELPERS Mantid::Geometry::Object_sptr createHollowShell(double innerRadius, double outerRadius, 
-                        const Mantid::Geometry::V3D & centre = Mantid::Geometry::V3D());
+                        const Mantid::Kernel::V3D & centre = Mantid::Kernel::V3D());
   /**
    * Create a detector group containing 5 detectors
    */

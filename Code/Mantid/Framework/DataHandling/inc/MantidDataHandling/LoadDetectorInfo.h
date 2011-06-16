@@ -99,7 +99,7 @@ private:
   /// If set to true then update the detector positions base on the information in the given file
   bool m_moveDets;
   /// Store the sample position as we may need it repeatedly
-  Geometry::V3D m_samplePos;
+  Kernel::V3D m_samplePos;
 
   // Implement abstract Algorithm methods
   void init();

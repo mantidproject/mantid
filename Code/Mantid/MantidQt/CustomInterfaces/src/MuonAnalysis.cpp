@@ -20,7 +20,7 @@
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"

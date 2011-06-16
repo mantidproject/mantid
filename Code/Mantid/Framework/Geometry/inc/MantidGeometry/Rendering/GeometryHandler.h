@@ -3,7 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
@@ -80,7 +80,7 @@ namespace Mantid
         UNUSED_ARG(noPts); UNUSED_ARG(noFaces); UNUSED_ARG(pts); UNUSED_ARG(faces);
       };
       /// return the actual type and points of one of the "standard" objects, cuboid/cone/cyl/sphere
-      virtual void GetObjectGeom(int& mytype, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight)
+      virtual void GetObjectGeom(int& mytype, std::vector<Kernel::V3D>& vectors, double& myradius, double & myheight)
       {
         UNUSED_ARG(vectors); UNUSED_ARG(myradius); UNUSED_ARG(myheight);
         // Flag that this is unknown at this point

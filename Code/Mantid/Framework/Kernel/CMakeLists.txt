@@ -30,6 +30,7 @@ set ( SRC_FILES
         src/MandatoryValidator.cpp
         src/MantidVersion.cpp
         src/MaskedProperty.cpp
+        src/Matrix.cpp
         src/Memory.cpp
         src/MersenneTwister.cpp
         src/NeutronAtom.cpp
@@ -40,6 +41,7 @@ set ( SRC_FILES
         src/PropertyManager.cpp
         src/PropertyManagerOwner.cpp
         src/PropertyWithValue.cpp
+        src/Quat.cpp
         src/RebinParamsValidator.cpp
         src/RegexStrings.cpp
         src/SignalChannel.cpp
@@ -57,6 +59,7 @@ set ( SRC_FILES
         src/UnitFactory.cpp
         src/UserStringParser.cpp
         src/Utils.cpp
+        src/V3D.cpp
         src/VectorHelper.cpp
 )
 
@@ -84,6 +87,7 @@ set ( INC_FILES
         inc/MantidKernel/CPUTimer.h
         inc/MantidKernel/Cache.h
         inc/MantidKernel/ConfigService.h
+        inc/MantidKernel/cow_ptr.h
         inc/MantidKernel/DataService.h
         inc/MantidKernel/DateAndTime.h
         inc/MantidKernel/DateValidator.h
@@ -116,6 +120,7 @@ set ( INC_FILES
         inc/MantidKernel/MandatoryValidator.h
         inc/MantidKernel/MantidVersion.h
         inc/MantidKernel/MaskedProperty.h
+        inc/MantidKernel/Matrix.h
         inc/MantidKernel/Memory.h
         inc/MantidKernel/MersenneTwister.h
         inc/MantidKernel/MultiThreaded.h
@@ -129,6 +134,7 @@ set ( INC_FILES
         inc/MantidKernel/PropertyManager.h
         inc/MantidKernel/PropertyManagerOwner.h
         inc/MantidKernel/PropertyWithValue.h
+        inc/MantidKernel/Quat.h
         inc/MantidKernel/RandomNumberGenerator.h
         inc/MantidKernel/RebinParamsValidator.h
         inc/MantidKernel/RegexStrings.h
@@ -145,12 +151,13 @@ set ( INC_FILES
         inc/MantidKernel/TimeSeriesProperty.h
         inc/MantidKernel/TimeSplitter.h
         inc/MantidKernel/Timer.h
+        inc/MantidKernel/Tolerance.h
         inc/MantidKernel/Unit.h
         inc/MantidKernel/UnitFactory.h
         inc/MantidKernel/UserStringParser.h
         inc/MantidKernel/Utils.h
+        inc/MantidKernel/V3D.h
         inc/MantidKernel/VectorHelper.h
-        inc/MantidKernel/cow_ptr.h
 )
 
 set ( TEST_FILES
@@ -181,6 +188,7 @@ set ( TEST_FILES
         test/MagneticIonTest.h
         test/MandatoryValidatorTest.h
         test/MaskedPropertyTest.h
+        test/MatrixTest.h
         test/MemoryTest.h
         test/MersenneTwisterTest.h
         test/NeutronAtomTest.h
@@ -191,6 +199,7 @@ set ( TEST_FILES
         test/PropertyManagerTest.h
         test/PropertyTest.h
         test/PropertyWithValueTest.h
+        test/QuatTest.h
         test/RandomNumberGeneratorTest.h
         test/RebinHistogramTest.h
         test/RebinParamsValidatorTest.h
@@ -210,6 +219,7 @@ set ( TEST_FILES
         test/UnitTest.h
         test/UserStringParserTest.h
         test/UtilsTest.h
+        test/V3DTest.h
 )
 
 if(UNITY_BUILD)

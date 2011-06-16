@@ -7,11 +7,12 @@
 #include <algorithm>
 #include <sstream>
 
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 
 using namespace Mantid;
 using namespace Geometry;
+using Mantid::Kernel::V3D;
 
 class CylinderTest: public CxxTest::TestSuite
 {
@@ -188,7 +189,7 @@ public:
     std::vector<std::string> CylStr;
     CylStr.push_back("cx 1");                // Cylinder origin
     CylStr.push_back("c/x 1.0 1.0 1.0");     // also cylinder at ?origin?
-    Geometry::V3D P(0,-1.2,0);
+    Kernel::V3D P(0,-1.2,0);
     double results[]={ 1.2-1,  1.41661 };
 
     std::vector<std::string>::const_iterator vc;

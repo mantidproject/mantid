@@ -2,7 +2,7 @@
 #define GLACTORCOLLECTION_H_
 #include "GLActor.h"
 
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 
 #include <vector>
 
@@ -51,7 +51,7 @@ public:
   GLActorCollection(); ///< Default Constructor
   virtual ~GLActorCollection(); ///< Destructor
   void draw(bool picking = false)const;
-  void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const;
+  void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const;
 
   void addActor(GLActor*);
   void removeActor(GLActor*);
@@ -61,8 +61,8 @@ public:
 private:
   void drawGL(bool picking = false)const;
   mutable std::vector<GLActor*> mActorsList;    ///< Vector of GLActors for fast access.
-  Mantid::Geometry::V3D m_minBound;
-  Mantid::Geometry::V3D m_maxBound;
+  Mantid::Kernel::V3D m_minBound;
+  Mantid::Kernel::V3D m_maxBound;
   mutable GLuint m_displayListId;
   mutable bool m_useDisplayList;
 };

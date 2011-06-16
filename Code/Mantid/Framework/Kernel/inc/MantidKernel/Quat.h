@@ -1,19 +1,18 @@
-#ifndef MANTID_QUAT_H_
-#define MANTID_QUAT_H_
+#ifndef MANTID_KERNEL_QUAT_H_
+#define MANTID_KERNEL_QUAT_H_
 
+#include "MantidKernel/DllConfig.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/Logger.h"
 #include <iostream>
 #include <vector>
-#include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
-  namespace Geometry
+  namespace Kernel
   {
     //Forward declarations
     class V3D;
-    class M33;
 
     /** @class Quat Quat.h Geometry/Quat.h
     @brief Class for quaternions
@@ -54,7 +53,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class MANTID_GEOMETRY_DLL Quat
+    class MANTID_KERNEL_DLL Quat
     {
 
     public:
@@ -69,20 +68,17 @@ namespace Mantid
       Quat& operator=(const Quat&);
       //! Set quaternion form an angle in degrees and an axis
       Quat(const double _deg, const V3D& _axis);
-          // set a quaternion from a rotational matrix;
-          Quat(const Geometry::DblMatrix &RotMat);
+      // set a quaternion from a rotational matrix;
+      Quat(const DblMatrix &RotMat);
       ~Quat();
       void operator()(const Quat&);
       void operator()(const double ww, const double aa, const double bb, const double cc);
       void operator()(const double angle, const V3D&);
       void operator()(const V3D& rX, const V3D& rY, const V3D& rZ);
 
-      // Set quaternion from a 3x3 matrix
-      //void operator()(const M33&);
       void set(const double ww, const double aa, const double bb, const double cc);
       void setAngleAxis(const double _deg, const V3D& _axis);
       void getAngleAxis(double& _deg,double& _axis1,double& _axis2,double& axis3) const;
-      //void setRotMatrix(const M33&);
       //! Norm of a quaternion
       /// Set the rotation (both don't change rotation axis)
       void setRotation(const double deg);
@@ -103,13 +99,13 @@ namespace Mantid
       //! stored as an linear array of 16 double
       //! The function glRotated must be called
       void GLMatrix(double* glmat) const;
-          //! returns the rotation matrix defined by this quaternion as an 9-point vector representing M33 matrix 
-          //! (m33 is not used at the moment), if check_normalisation selected, verify if the mod(quat) is indeed == 1 and throws otherwise. 
-          std::vector<double> getRotation(bool check_normalisation=false,bool throw_on_errors=false)const; 
+      //! returns the rotation matrix defined by this quaternion as an 9-point vector representing M33 matrix 
+      //! (m33 is not used at the moment), if check_normalisation selected, verify if the mod(quat) is indeed == 1 and throws otherwise. 
+      std::vector<double> getRotation(bool check_normalisation=false,bool throw_on_errors=false)const; 
       //! Convert GL Matrix into Quat
       void setQuat(double[16]);
-          //! Convert usual 3D rotation matrix into quat; Will throw if matirix is not rotational;
-          void setQuat(const Geometry::DblMatrix &RotMat);
+      //! Convert usual 3D rotation matrix into quat; Will throw if matirix is not rotational;
+      void setQuat(const DblMatrix &RotMat);
       //! Rotate a vector
       void rotate(V3D&) const;
 
@@ -154,16 +150,16 @@ namespace Mantid
       /// Internal value
       double c;
 
-          //
-     static Kernel::Logger& quatG_log;
+     // Logger
+     static Kernel::Logger& quat_log;
     };
 
-    MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const Quat&);
-    MANTID_GEOMETRY_DLL std::istream& operator>>(std::istream&,Quat& q);
+    MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const Quat&);
+    MANTID_KERNEL_DLL std::istream& operator>>(std::istream&,Quat& q);
 
 
   } // Namespace Mantid
 
-} // Namespace Geometry
+} // Namespace Kernel
 
-#endif /*MANTID_QUAT_H_*/
+#endif /*MANTID_KERNEL_QUAT_H_*/

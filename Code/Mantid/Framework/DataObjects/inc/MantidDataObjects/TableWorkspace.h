@@ -35,7 +35,7 @@ namespace DataObjects
      - "double" for double
      - "bool"   for bool
      - "str"    for std::string
-     - "V3D"    for Mantid::Geometry::V3D
+     - "V3D"    for Mantid::Kernel::V3D
 
      User defined types can be used after declaring them with DECLARE_TABLECOLUMN macro: 
      DECLARE_TABLECOLUMN(typeName, UserDefinedType)
@@ -162,12 +162,12 @@ namespace DataObjects
     {
       findValue(value,row,col);
     }
-    /** This method finds the row and column index of an Mantid::Geometry::V3D cell value in a table workspace
+    /** This method finds the row and column index of an Mantid::Kernel::V3D cell value in a table workspace
      * @param value :: -value to search
      * @param  row  row number of the value  searched
      * @param  col  column number of the value searched
      */
-    void find(Mantid::Geometry::V3D value,int& row,const int & col)
+    void find(Mantid::Kernel::V3D value,int& row,const int & col)
     {
       findValue(value,row,col);
     }
@@ -253,12 +253,12 @@ private:
     {
       findValue(value,row,col);
     }
-    /** This method finds the row and column index of an Mantid::Geometry::V3D cell value in a table workspace
+    /** This method finds the row and column index of an Mantid::Kernel::V3D cell value in a table workspace
     * @param value :: -value to search
     * @param  row  row number of the value  searched
     * @param  col  column number of the value searched
     */
-    void find(Mantid::Geometry::V3D value,int& row,int & col)
+    void find(Mantid::Kernel::V3D value,int& row,int & col)
     {
       findValue(value,row,col);
     }

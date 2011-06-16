@@ -15,14 +15,17 @@
 
 namespace Mantid
 {
+namespace Kernel
+{
+  //----------------------------------------------------------------------
+  // Forward declaration
+  //----------------------------------------------------------------------
+  class Kernel::V3D;
+}
 
 namespace Geometry
 {
 
-  //----------------------------------------------------------------------
-  // Forward declaration
-  //----------------------------------------------------------------------
-  class V3D;
 
 /** Interface class for detector objects.
 
@@ -77,7 +80,7 @@ public:
    *  @param axis ::     The axis to which the required angle is relative
    *  @return The angle in radians
    */
-  virtual double getTwoTheta(const V3D& observer, const V3D& axis) const = 0;
+  virtual double getTwoTheta(const Kernel::V3D& observer, const Kernel::V3D& axis) const = 0;
 
   /// Gives the phi of this detector object in radians
   virtual double getPhi() const = 0;
@@ -93,7 +96,7 @@ public:
   /// Must return a pointer to itself if derived from IComponent
   virtual IComponent* getComponent();
  /// returns the geometry of detectors, meaningful for groups, rectangular for single; returns the centre of a detector
-  virtual det_topology getTopology(V3D &center)const = 0;
+  virtual det_topology getTopology(Kernel::V3D &center)const = 0;
 
 
   /// (Empty) Constructor

@@ -19,7 +19,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Unit.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 //
 #include <vector>
 #include <algorithm>

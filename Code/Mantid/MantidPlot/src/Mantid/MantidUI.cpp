@@ -715,7 +715,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
       boost::shared_ptr<Mantid::Geometry::IDetector> det = ws->getDetector(ws_index);
       detID = det->getID();
       // We want the position of the detector relative to the sample
-      Mantid::Geometry::V3D pos = det->getPos() - sample->getPos();
+      Mantid::Kernel::V3D pos = det->getPos() - sample->getPos();
       pos.getSpherical(R,Theta,Phi);
       // Need to get R & Theta through these methods to be correct for grouped detectors
       R = det->getDistance(*sample);
@@ -2853,8 +2853,8 @@ void MantidUI::test()
       if (first)
       {
         static int i = 0;
-        Mantid::Geometry::V3D u = i++ ? Mantid::Geometry::V3D(1,0,0) : Mantid::Geometry::V3D(0,1,0);
-        Mantid::Geometry::Quat q(30,u);
+        Mantid::Kernel::V3D u = i++ ? Mantid::Kernel::V3D(1,0,0) : Mantid::Kernel::V3D(0,1,0);
+        Mantid::Kernel::Quat q(30,u);
         first->rotate(q);
         return;
       }

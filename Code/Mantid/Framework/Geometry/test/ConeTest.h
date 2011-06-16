@@ -3,13 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Cone.h"
 
 using namespace Mantid;
 using namespace Geometry;
-
+using Mantid::Kernel::V3D;
 
 class ConeTest: public CxxTest::TestSuite
 {

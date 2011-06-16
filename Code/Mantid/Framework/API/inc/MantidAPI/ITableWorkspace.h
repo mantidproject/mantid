@@ -7,7 +7,7 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Column.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
@@ -61,7 +61,7 @@ public:
      - "double" for double
      - "bool"   for bool
      - "str"    for std::string
-     - "V3D"    for Mantid::Geometry::V3D
+     - "V3D"    for Mantid::Kernel::V3D
 
      User defined types can be used after declaring them with DECLARE_TABLECOLUMN macro: 
      DECLARE_TABLECOLUMN(typeName, UserDefinedType)
@@ -276,8 +276,8 @@ public:
   virtual void find(API::Boolean value,int& row,const int & col)=0;
   /// find method to get the index of cellstd::string  value in a table workspace
   virtual void find(std::string value,int& row,const int & col)=0;
-  /// find method to get the index of  Mantid::Geometry::V3D cell value in a table workspace
-  virtual void find(Mantid::Geometry::V3D value,int& row,const int & col)=0;
+  /// find method to get the index of  Mantid::Kernel::V3D cell value in a table workspace
+  virtual void find(Mantid::Kernel::V3D value,int& row,const int & col)=0;
 
   void modified();
 

@@ -14,9 +14,9 @@
 #include "MantidKernel/Logger.h"
 
 #include "MantidKernel/Strings.h"
-#include "MantidGeometry/Tolerance.h"
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/Tolerance.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
@@ -28,7 +28,8 @@ namespace Mantid
 
   namespace Geometry
   {
-
+    using Kernel::Tolerance;
+    using Kernel::V3D;
 
     Kernel::Logger& Cone::PLog(Kernel::Logger::get("Cone"));
 
@@ -137,8 +138,8 @@ namespace Mantid
       if (!Mantid::Kernel::Strings::section(Line,tanAng))
 	return -5;
 
-      Centre=Geometry::V3D(cent);
-      Normal=Geometry::V3D(norm);
+      Centre=Kernel::V3D(cent);
+      Normal=Kernel::V3D(norm);
       setTanAngle(sqrt(tanAng));
       setBaseEqn();
       return 0;
@@ -188,7 +189,7 @@ namespace Mantid
     }
 
     void
-    Cone::rotate(const Geometry::Matrix<double>& R)
+    Cone::rotate(const Kernel::Matrix<double>& R)
     /**
        Rotate both the centre and the normal direction 
        @param R :: Matrix for rotation. 
@@ -201,11 +202,11 @@ namespace Mantid
     }
 
     void 
-    Cone::displace(const Geometry::V3D& A)
+    Cone::displace(const Kernel::V3D& A)
     /**
        Displace the centre
        Only need to update the centre position 
-       @param A :: Geometry::V3D to add
+       @param A :: Kernel::V3D to add
     */
     {
       Centre+=A;
@@ -214,7 +215,7 @@ namespace Mantid
     }
 
     void 
-    Cone::setCentre(const Geometry::V3D& A)
+    Cone::setCentre(const Kernel::V3D& A)
     /**
        Sets the central point and the Base Equation
        @param A :: New Centre point
@@ -226,7 +227,7 @@ namespace Mantid
     }
 
     void 
-    Cone::setNorm(const Geometry::V3D& A)
+    Cone::setNorm(const Kernel::V3D& A)
     /**
        Sets the Normal and the Base Equation
        @param A :: New Normal direction
@@ -270,7 +271,7 @@ namespace Mantid
     }
 
     double
-    Cone::distance(const Geometry::V3D& Pt) const
+    Cone::distance(const Kernel::V3D& Pt) const
     /**
        Calculates the distance from the point to the Cone
        does not calculate the point on the cone that is closest
@@ -282,7 +283,7 @@ namespace Mantid
        @return distance to Pt
     */
     {
-      const Geometry::V3D Px=Pt-Centre;
+      const Kernel::V3D Px=Pt-Centre;
       // test is the centre to point distance is zero
       if(Px.norm()<Tolerance)
 	return Px.norm();
@@ -306,10 +307,10 @@ namespace Mantid
        @param R :: Point to determine if in/out of cone
        @return Side of R
     */
-    int Cone::side(const Geometry::V3D& R) const
+    int Cone::side(const Kernel::V3D& R) const
     {
 
-      const Geometry::V3D cR = R-Centre;
+      const Kernel::V3D cR = R-Centre;
       double rptAngle=cR.scalar_prod(Normal);
       rptAngle*=rptAngle/cR.scalar_prod(cR);
       const double eqn(sqrt(rptAngle));
@@ -326,10 +327,10 @@ namespace Mantid
 	@param R :: Point to check
 	@return 1 if on surface and 0 if not not on surface
     */
-    int Cone::onSurface(const Geometry::V3D& R) const
+    int Cone::onSurface(const Kernel::V3D& R) const
     {
 
-      const Geometry::V3D cR = R-Centre;
+      const Kernel::V3D cR = R-Centre;
       double rptAngle=cR.scalar_prod(Normal);
       rptAngle*=rptAngle/cR.scalar_prod(cR);
       const double eqn(sqrt(rptAngle));

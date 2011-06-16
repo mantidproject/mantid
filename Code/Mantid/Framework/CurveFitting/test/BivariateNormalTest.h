@@ -10,7 +10,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/BivariateNormal.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"

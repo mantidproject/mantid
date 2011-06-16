@@ -13,7 +13,7 @@ namespace Mantid
 
     using Geometry::Object;
     using Geometry::Material;
-    using Geometry::V3D;
+    using Kernel::V3D;
     
     /**
      * Default constructor

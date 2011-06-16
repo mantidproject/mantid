@@ -6,8 +6,11 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include "MantidGeometry/Quat.h"
+#include "MantidKernel/Quat.h"
 using namespace Mantid::Geometry;
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::Quat;
+using Mantid::Kernel::DblMatrix;
 
 class GoniometerTest : public CxxTest::TestSuite
 {

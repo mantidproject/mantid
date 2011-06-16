@@ -6,12 +6,14 @@
 #include <MantidKernel/System.h>
 #include <iostream>
 #include <iomanip>
-#include <MantidGeometry/V3D.h>
-#include <MantidGeometry/Math/Matrix.h>
+#include <MantidKernel/V3D.h>
+#include <MantidKernel/Matrix.h>
 
 #include <MantidGeometry/Crystal/IndexingUtils.h>
 
 using namespace Mantid::Geometry;
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::Matrix;
 
 class IndexingUtilsTest : public CxxTest::TestSuite
 {

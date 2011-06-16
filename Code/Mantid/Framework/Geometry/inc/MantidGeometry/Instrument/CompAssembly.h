@@ -80,9 +80,9 @@ public:
   //! Get a pointer to the ith component in the assembly
   boost::shared_ptr<IComponent> operator[](int i) const;
 
-  V3D getPos() const;
+  Kernel::V3D getPos() const;
 
-  const Quat getRotation() const;
+  const Kernel::Quat getRotation() const;
 
 
   /// Get the bounding box for this component and store it in the given argument

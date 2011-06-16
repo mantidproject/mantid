@@ -75,7 +75,7 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("TestWorkspace"));
     
     const Mantid::Geometry::Object& sample = ws->sample().getShape();
-    Mantid::Geometry::V3D point(x,y,z);
+    Mantid::Kernel::V3D point(x,y,z);
     
     if( inside )
     {

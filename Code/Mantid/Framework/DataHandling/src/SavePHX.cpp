@@ -37,7 +37,7 @@ void SavePHX::exec() {
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
   // Get the sample position
-  const Geometry::V3D samplePos =
+  const Kernel::V3D samplePos =
       inputWorkspace->getInstrument()->getSample()->getPos();
 
   // Retrieve the filename from the properties

@@ -50,14 +50,14 @@ class MANTID_GEOMETRY_DLL Torus : public Surface
 
   static Kernel::Logger& PLog;           ///< The official logger
 
-  Geometry::V3D Centre;        ///< Geometry::Vec3D for centre
-  Geometry::V3D Normal;        ///< Normal
+  Kernel::V3D Centre;        ///< Geometry::Vec3D for centre
+  Kernel::V3D Normal;        ///< Normal
   double Iradius;                ///< Inner radius
   double Dradius;                ///< Inner radius
   double Displacement;           ///< Displacement
 
-  void rotate(const Geometry::Matrix<double>&);
-  void displace(const Geometry::V3D&);
+  void rotate(const Kernel::Matrix<double>&);
+  void displace(const Kernel::V3D&);
 
  public:
 
@@ -76,18 +76,18 @@ class MANTID_GEOMETRY_DLL Torus : public Surface
   {  A.Accept(*this); }
 
   int setSurface(const std::string& Pstr);
-  int side(const Geometry::V3D& R) const;
-  int onSurface(const Geometry::V3D& R) const;
-  double distance(const Geometry::V3D& Pt) const;   
+  int side(const Kernel::V3D& R) const;
+  int onSurface(const Kernel::V3D& R) const;
+  double distance(const Kernel::V3D& Pt) const;   
 
   /// Return centre point
-  Geometry::V3D getCentre() const { return Centre; }              
+  Kernel::V3D getCentre() const { return Centre; }              
   /// Central normal
-  Geometry::V3D getNormal() const { return Normal; }       
-  Geometry::V3D surfaceNormal(const Geometry::V3D& Pt) const;
+  Kernel::V3D getNormal() const { return Normal; }       
+  Kernel::V3D surfaceNormal(const Kernel::V3D& Pt) const;
 
-  void setCentre(const Geometry::V3D& A);              
-  void setNorm(const Geometry::V3D& A);
+  void setCentre(const Kernel::V3D& A);              
+  void setNorm(const Kernel::V3D& A);
 
   /// Suppose to set the distance from centre of the torus to the centre of tube. 
   ///TODO:

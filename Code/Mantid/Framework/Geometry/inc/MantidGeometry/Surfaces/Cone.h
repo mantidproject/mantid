@@ -2,7 +2,7 @@
 #define Cone_h
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/Logger.h"
 namespace Mantid
 {
@@ -48,13 +48,13 @@ class MANTID_GEOMETRY_DLL Cone : public Quadratic
 
   static Kernel::Logger& PLog;    ///< The official logger
   
-  Geometry::V3D Centre;        ///< Geometry::V3D for centre
-  Geometry::V3D Normal;        ///< Normal
+  Kernel::V3D Centre;        ///< Kernel::V3D for centre
+  Kernel::V3D Normal;        ///< Normal
   double alpha;                  ///< Angle (degrees)
   double cangle;                 ///< Cos(angle)
   
-  void rotate(const Geometry::Matrix<double>&);
-  void displace(const Geometry::V3D&);
+  void rotate(const Kernel::Matrix<double>&);
+  void displace(const Kernel::V3D&);
 
  public:
 
@@ -69,29 +69,29 @@ class MANTID_GEOMETRY_DLL Cone : public Quadratic
   ~Cone();
   
         ///Calculate if the point R is within the cone (return -1) or outside (return 1)
-  int side(const Geometry::V3D& R) const;
+  int side(const Kernel::V3D& R) const;
         /// Calculate if the point R is on the cone(1=on the surface, 0=not)
-  int onSurface(const Geometry::V3D& R) const;
+  int onSurface(const Kernel::V3D& R) const;
 
    /// Accept visitor for line calculation
   virtual void acceptVisitor(BaseVisit& A) const
   {  A.Accept(*this); }
 
   /// Return centre point
-  Geometry::V3D getCentre() const { return Centre; }              
+  Kernel::V3D getCentre() const { return Centre; }              
   /// Central normal
-  Geometry::V3D getNormal() const { return Normal; }       
+  Kernel::V3D getNormal() const { return Normal; }       
   /// Edge Angle
   double getCosAngle() const { return cangle; } 
   ///This method returns the distance of the point from the cone
-  double distance(const Geometry::V3D&) const;   
+  double distance(const Kernel::V3D&) const;   
 
   ///This method sets the cone surface using the input string in MCNPx format
   int setSurface(const std::string&);
   ///This method sets the centre of the cone
-  void setCentre(const Geometry::V3D&);              
+  void setCentre(const Kernel::V3D&);              
   ///This method sets the cone normal
-  void setNorm(const Geometry::V3D&);
+  void setNorm(const Kernel::V3D&);
   ///This method sets the angle of the cone
   void setAngle(double const);  
   ///This method sets the tan angle which will be converted to cos used for MCNPX format

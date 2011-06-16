@@ -3,8 +3,6 @@
 //-----------------------------------------
 #include "MantidQtCustomDialogs/MantidGLWidget.h"
 #include "MantidGeometry/Objects/Object.h"
-//#include "MantidGeometry/V3D.h"
-//#include "MantidGeometry/Quat.h"
 
 #include <QtOpenGL>
 #include <QMessageBox>

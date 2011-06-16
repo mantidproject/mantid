@@ -4,7 +4,7 @@
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/AlgorithmHelper.h"

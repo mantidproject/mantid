@@ -16,6 +16,7 @@
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::V3D;
 
 /**
 * Everything must be in one test or the instrument/detector list goes AWOL.

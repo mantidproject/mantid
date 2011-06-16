@@ -3,7 +3,7 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include <vector>
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Math/Acomp.h"
 
 using namespace Mantid;

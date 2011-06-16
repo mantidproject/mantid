@@ -18,44 +18,6 @@ using namespace mathSupport;
 class MathSupportTest: public CxxTest::TestSuite
 {
 public:
-	void testIndexSort(){
-		//Test double
-		std::vector<double> udArray;
-		std::vector<int> sdArray,cdArray;
-		udArray.push_back(3.3);
-		udArray.push_back(4.4);
-		udArray.push_back(2.2);
-		udArray.push_back(5.5);
-		udArray.push_back(1.1);
-		udArray.push_back(5.4999999999999999999);
-		indexSort(udArray,sdArray);
-		cdArray.push_back(4);
-		cdArray.push_back(2);
-		cdArray.push_back(0);
-		cdArray.push_back(1);
-		cdArray.push_back(3);
-		cdArray.push_back(5);
-		TS_ASSERT_EQUALS(sdArray,cdArray);
-
-		std::vector<int> uiArray;
-		std::vector<int> siArray,ciArray;
-		uiArray.push_back(3);
-		uiArray.push_back(4);
-		uiArray.push_back(2);
-		uiArray.push_back(5);
-		uiArray.push_back(1);
-		indexSort(uiArray,siArray);
-		ciArray.push_back(4);
-		ciArray.push_back(2);
-		ciArray.push_back(0);
-		ciArray.push_back(1);
-		ciArray.push_back(3);
-		TS_ASSERT_EQUALS(siArray,ciArray);
-
-		std::vector<int> uzArray,szArray;
-		indexSort(uzArray,szArray);
-		TS_ASSERT_EQUALS(uzArray,szArray);
-	}
 
 	void testSolveQuadratic(){ //Test quadratic solution
 		double xp1w2[3]={1,2,1}; //(x+1)^2 one solution

@@ -31,9 +31,14 @@
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 namespace Mantid{
-	namespace Geometry{
+namespace Kernel
+{
+  class V3D;
+}
+
+  namespace Geometry{
 		class IObjComponent;
-		class V3D;
+
 	}
 }
 class InstrumentActor;
@@ -45,7 +50,7 @@ public:
   ~ObjComponentActor();								   ///< Destructor
   virtual std::string type()const {return "ObjComponentActor";} ///< Type of the GL object
   virtual void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-  virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const;
+  virtual void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const;
   virtual void setColors();
 
   void setColor(const GLColor& c){m_dataColor = c;}

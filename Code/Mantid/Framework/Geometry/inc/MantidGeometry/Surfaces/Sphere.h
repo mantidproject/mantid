@@ -3,7 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include <string>
 
 namespace Mantid
@@ -52,12 +52,12 @@ namespace Mantid
     private:
 
       static Kernel::Logger& PLog;           ///< The official logger  
-      V3D Centre;        ///< Point for centre
+      Kernel::V3D Centre;        ///< Point for centre
       double Radius;                 ///< Radius of sphere
-      void rotate(const Geometry::Matrix<double>&);
-      void displace(const Geometry::V3D&);
+      void rotate(const Kernel::Matrix<double>&);
+      void displace(const Kernel::V3D&);
       /// Compute the distance from the centre of the sphere to the given point
-      double centreToPoint(const V3D & pt) const;
+      double centreToPoint(const Kernel::V3D & pt) const;
 
     public:
       Sphere();
@@ -73,15 +73,15 @@ namespace Mantid
       ///Set the sphere defination by input string in MCNP format       
       int setSurface(const std::string&);
       ///Checks the given input point to be inside, outside or on the surface of sphere
-      int side(const Geometry::V3D&) const;
+      int side(const Kernel::V3D&) const;
       ///Checks whether the give input point is on the surface
-      int onSurface(const Geometry::V3D&) const;
+      int onSurface(const Kernel::V3D&) const;
       ///Gets the distance from the sphere to the input point
-      double distance(const Geometry::V3D&) const;
+      double distance(const Kernel::V3D&) const;
       ///Setter for centre of sphere
-      void setCentre(const Geometry::V3D&);              
+      void setCentre(const Kernel::V3D&);              
       /// Get Centre
-      Geometry::V3D getCentre() const { return Centre; } 
+      Kernel::V3D getCentre() const { return Centre; } 
       /// Get Radius
       double getRadius() const { return Radius; }      
       /// Set Radius

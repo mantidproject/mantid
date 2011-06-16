@@ -42,9 +42,9 @@ namespace Mantid
 
     private:
       /// coordinates of the sample
-      Geometry::V3D m_samplePos;
+      Kernel::V3D m_samplePos;
       /// the displacement from the source to the sample
-      Geometry::V3D m_beamLine;
+      Kernel::V3D m_beamLine;
       /// twice the distance from the source to the sample
       double m_beamLineNorm;
 
@@ -53,11 +53,11 @@ namespace Mantid
       /// the drop is proportional to the wavelength squared, storing this drop increases calculation speed a lot
       double m_dropPerAngstrom2;
       /// the location that the neutron would have been detected at if it continued in a straight line, without gravity
-      mutable Geometry::V3D m_cachedLineOfSight;
+      mutable Kernel::V3D m_cachedLineOfSight;
       /// the drop that was last caclulated, this allows m_cachedDetLoc to be recalculated each time without its original value being stored
       mutable double m_cachedDrop;
 
-      const Geometry::V3D & getDetLoc(const double wav) const;
+      const Kernel::V3D & getDetLoc(const double wav) const;
       /** Calculates the drop very much faster than running the workspace's gravitationalDrop function assuming
       *  the drop is proportional to the wavelength squared
       *  @param wav :: the wave length in Angstrom

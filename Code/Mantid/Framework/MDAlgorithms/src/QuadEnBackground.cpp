@@ -4,9 +4,9 @@
 #include "MantidMDAlgorithms/QuadEnBackground.h"
 #include <math.h>
 
-#include "MantidGeometry/Tolerance.h"
+#include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid
 {

@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 #include <cxxtest/TestSuite.h>
 #include <boost/shared_ptr.hpp>
-#include <MantidGeometry/Math/Matrix.h>
+#include <MantidKernel/Matrix.h>
 #include <MantidMDAlgorithms/NormalParameter.h>
 #include <MantidMDAlgorithms/OriginParameter.h>
 #include <MantidMDAlgorithms/PlaneInterpreter.h>
@@ -15,7 +15,7 @@
 
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::MDDataObjects;
-using namespace Mantid::Geometry;
+using Mantid::Kernel::V3D;
 
 class PlaneInterpreterTest: public CxxTest::TestSuite
 {

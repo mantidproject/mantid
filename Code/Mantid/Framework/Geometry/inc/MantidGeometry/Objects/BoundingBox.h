@@ -1,9 +1,10 @@
 #ifndef MANTIDGEOMETRY_BOUNDINGBOX_H_
 #define MANTIDGEOMETRY_BOUNDINGBOX_H_
 
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Tolerance.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/Tolerance.h"
+#include "MantidKernel/V3D.h"
 #include <boost/shared_ptr.hpp>
 #include <sstream>
 
@@ -90,13 +91,13 @@ namespace Mantid
       /// Return the maximum value of Z
       inline const double & zMax() const { return m_maxPoint.Z(); }
       /// Returns the min point of the box
-      inline const V3D & minPoint() const { return m_minPoint; }
+      inline const Kernel::V3D & minPoint() const { return m_minPoint; }
       /// Returns the min point of the box
-      inline const V3D & maxPoint() const { return m_maxPoint; }
+      inline const Kernel::V3D & maxPoint() const { return m_maxPoint; }
       /// Returns the centre of the bounding box
-      inline V3D centrePoint() const { return V3D(0.5*(xMax() + xMin()), 0.5*(yMax() + yMin()), 0.5*(zMax() + zMin())); }
+      inline Kernel::V3D centrePoint() const { return Kernel::V3D(0.5*(xMax() + xMin()), 0.5*(yMax() + yMin()), 0.5*(zMax() + zMin())); }
       /// Returns the width of the box
-      inline V3D width() const { return V3D(m_maxPoint-m_minPoint); }
+      inline Kernel::V3D width() const { return Kernel::V3D(m_maxPoint-m_minPoint); }
       //@}
       
       /** @name Querying */
@@ -106,23 +107,23 @@ namespace Mantid
       /// Is the box considered valid. Convenience for !isNull()
       inline bool isNonNull() const { return !m_null; }
       /// Is the given point within the bounding box?
-      bool isPointInside(const V3D & point) const;
+      bool isPointInside(const Kernel::V3D & point) const;
       /// Does a specified track intersect the bounding box
       bool doesLineIntersect(const Track & track) const;
       /// Does a line intersect the bounding box
-      bool doesLineIntersect(const V3D & startPoint, const V3D & lineDir) const;
+      bool doesLineIntersect(const Kernel::V3D & startPoint, const Kernel::V3D & lineDir) const;
       /// Calculate the angular half width from the given point
-      double angularWidth(const V3D & observer) const;
+      double angularWidth(const Kernel::V3D & observer) const;
       /// Check if it is normal axis aligned bounding box or not. 
       inline bool isAxisAligned()const{return is_axis_aligned;}
       /// returns the coordinate system to which BB is alighned to;
-      std::vector<V3D> const & getCoordSystem()const{return coord_system;}
+      std::vector<Kernel::V3D> const & getCoordSystem()const{return coord_system;}
 
       //@}
 
    /** returns the expanded box consisting of all 8 box points, 
      * shifted into the coordinate system with the observer centre; */
-      void getFullBox(std::vector<V3D> &box,const V3D &observer)const;
+      void getFullBox(std::vector<Kernel::V3D> &box,const Kernel::V3D &observer)const;
       /** @name Box mutation functions*/
       //@{
       /// Return the minimum value of X (non-const)
@@ -140,18 +141,18 @@ namespace Mantid
       /// Grow the bounding box so that it also encompasses the given box
       void grow(const BoundingBox & other);
       /// change the BB alighnment
-      void setBoxAlignment(const V3D &R0,const std::vector<V3D> &orts);
+      void setBoxAlignment(const Kernel::V3D &R0,const std::vector<Kernel::V3D> &orts);
       /// set BB in to undefined state with min=FLT_MAX>max=-FLT_MAX
       void nullify();
       /// reallign the BB according to new coordinate system, provided earlier or specified as parameter;
-      void realign(std::vector<V3D> const* const pCS=NULL);
+      void realign(std::vector<Kernel::V3D> const* const pCS=NULL);
       //@}
     
     private:
       /// The minimum point of the axis-aligned box
-      V3D m_minPoint;
+      Kernel::V3D m_minPoint;
       /// The maximum point of the axis-aligned box
-      V3D m_maxPoint;
+      Kernel::V3D m_maxPoint;
       /// Flag marking if we've been initialized using the default constructor, 
       /// with values or default values and user-set points
       bool m_null;
@@ -160,7 +161,7 @@ namespace Mantid
       /** if the bounding box is not axis aligned, the vector below describes the coordinate system, 
        to which the bounding box is alighned to. The vector has 4 members, with first describing 
        new coordinate system center and three others -- orts of this system */
-      std::vector<V3D> coord_system;
+      std::vector<Kernel::V3D> coord_system;
    };
 
     /// A shared pointer to a BoundingBox

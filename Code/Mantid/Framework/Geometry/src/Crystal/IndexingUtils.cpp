@@ -1,9 +1,6 @@
 /* File: IndexingUtils.cpp */
 
 #include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidKernel/System.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Math/Matrix.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -16,8 +13,9 @@ extern "C"
 #include <gsl/gsl_linalg.h> 
 }
 
-using namespace std;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::DblMatrix;
 
 /** 
     STATIC method BestFit_UB: Calculates the matrix that most nearly maps
@@ -45,9 +43,9 @@ using namespace Mantid::Geometry;
                                    the UB matrix can't be calculated or if 
                                    UB is a singular matrix.
 */  
-double IndexingUtils::BestFit_UB(      Matrix<double> & UB,
-                                 const vector<V3D>    & hkl_vectors, 
-                                 const vector<V3D>    & q_vectors )
+double IndexingUtils::BestFit_UB(    DblMatrix & UB,
+                                 const std::vector<V3D>    & hkl_vectors, 
+                                 const std::vector<V3D>    & q_vectors )
 {
   if ( hkl_vectors.size() < 3 ) 
   {

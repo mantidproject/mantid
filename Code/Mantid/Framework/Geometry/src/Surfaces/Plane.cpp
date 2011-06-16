@@ -1,7 +1,7 @@
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
-#include "MantidGeometry/Tolerance.h"
+#include "MantidKernel/Tolerance.h"
 #include <cfloat>
 
 namespace Mantid
@@ -9,6 +9,9 @@ namespace Mantid
 
 namespace Geometry
 {
+
+  using Kernel::Tolerance;
+  using Kernel::V3D;
 
 Kernel::Logger& Plane::PLog(Kernel::Logger::get("Plane"));
 
@@ -95,9 +98,9 @@ Plane::setSurface(const std::string& Pstr)
 		return -3;
       if (cnt==9)          // V3D type
         {
-	  Geometry::V3D A=Geometry::V3D(surf[0],surf[1],surf[2]);
-	  Geometry::V3D B=Geometry::V3D(surf[3],surf[4],surf[5]);
-	  Geometry::V3D C=Geometry::V3D(surf[6],surf[7],surf[8]);
+	  Kernel::V3D A=Kernel::V3D(surf[0],surf[1],surf[2]);
+	  Kernel::V3D B=Kernel::V3D(surf[3],surf[4],surf[5]);
+	  Kernel::V3D C=Kernel::V3D(surf[6],surf[7],surf[8]);
 	  B-=A;
 	  C-=A;
 	  NormV = B*C;
@@ -106,7 +109,7 @@ Plane::setSurface(const std::string& Pstr)
 	}
       else        // Norm Equation:
         { 
-	  NormV=Geometry::V3D(surf[0],surf[1],surf[2]);
+	  NormV=Kernel::V3D(surf[0],surf[1],surf[2]);
 	  const double ll=NormV.normalize();
 	  if (ll<Tolerance)   // avoid 
 	    return -4;
@@ -121,7 +124,7 @@ Plane::setSurface(const std::string& Pstr)
       surf[ptype]=1.0;
       if (!Mantid::Kernel::Strings::convert(Line,Dist))
 	return -6;                      //Too short or no number
-      NormV=Geometry::V3D(surf[0],surf[1],surf[2]);
+      NormV=Kernel::V3D(surf[0],surf[1],surf[2]);
     }
   else
     return -3;       // WRONG NAME
@@ -131,7 +134,7 @@ Plane::setSurface(const std::string& Pstr)
 }
 
 int
-Plane::setPlane(const Geometry::V3D& P,const Geometry::V3D& N) 
+Plane::setPlane(const Kernel::V3D& P,const Kernel::V3D& N) 
   /**
     Given a point and a normal direction set the plane
     @param P :: Point for plane to pass thought
@@ -147,7 +150,7 @@ Plane::setPlane(const Geometry::V3D& P,const Geometry::V3D& N)
 }
 
 void
-Plane::rotate(const Geometry::Matrix<double>& MA) 
+Plane::rotate(const Kernel::Matrix<double>& MA) 
   /**
     Rotate the plane about the origin by MA 
     @param MA :: direct rotation matrix (3x3)
@@ -160,7 +163,7 @@ Plane::rotate(const Geometry::Matrix<double>& MA)
 }
 
 void
-Plane::displace(const Geometry::V3D& Sp) 
+Plane::displace(const Kernel::V3D& Sp) 
   /**
     Displace the plane by Point Sp.  
     i.e. r+sp now on the plane 
@@ -173,7 +176,7 @@ Plane::displace(const Geometry::V3D& Sp)
 }
 
 double
-Plane::distance(const Geometry::V3D& A) const
+Plane::distance(const Kernel::V3D& A) const
   /**
     Determine the distance of point A from the plane 
     returns a value relative to the normal
@@ -194,7 +197,7 @@ Plane::dotProd(const Plane& A) const
   return NormV.scalar_prod(A.NormV);
 }
 
-Geometry::V3D
+Kernel::V3D
 Plane::crossProd(const Plane& A) const
   /**
     Take the cross produce of the normals
@@ -208,7 +211,7 @@ Plane::crossProd(const Plane& A) const
 
 
 int
-Plane::side(const Geometry::V3D& A) const
+Plane::side(const Kernel::V3D& A) const
   /**
     Calcualates the side that the point is on
     @param A :: test point
@@ -225,7 +228,7 @@ Plane::side(const Geometry::V3D& A) const
 }
 
 int
-Plane::onSurface(const Geometry::V3D& A) const
+Plane::onSurface(const Kernel::V3D& A) const
   /** 
      Calcuate the side that the point is on
      and returns success if it is on the surface.

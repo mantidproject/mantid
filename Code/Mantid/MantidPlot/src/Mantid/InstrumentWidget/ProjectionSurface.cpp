@@ -23,7 +23,7 @@
   * @param origin :: Defines the origin of the projection reference system (if applicable)
   * @param axis :: 
   */
-ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mantid::Geometry::V3D& origin,const Mantid::Geometry::V3D& axis):
+ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis):
     m_instrActor(rootActor),
     m_pos(origin),
     m_zaxis(axis),

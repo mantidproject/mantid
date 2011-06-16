@@ -12,7 +12,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include <Poco/File.h>
 #include <sstream>
 #include <numeric>

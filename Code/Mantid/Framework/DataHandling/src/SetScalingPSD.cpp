@@ -72,7 +72,7 @@ namespace DataHandling
     //m_workspace = getPropertyValue("Workspace");
     m_workspace = getProperty("Workspace");
     m_scalingOption = getProperty("ScalingOption");
-    std::vector<Geometry::V3D> truepos;
+    std::vector<Kernel::V3D> truepos;
     processScalingFile(m_filename,truepos);
     //calculateDetectorShifts(truepos);
     
@@ -84,15 +84,15 @@ namespace DataHandling
    *  @param truepos :: V3D vector of actual positions as read from the file
    *  @return False if unable to open file, True otherwise
    */
-  bool SetScalingPSD::processScalingFile(const std::string& scalingFile, std::vector<Geometry::V3D>& truepos)
+  bool SetScalingPSD::processScalingFile(const std::string& scalingFile, std::vector<Kernel::V3D>& truepos)
   {
       // Read the scaling information from a text file (.sca extension) or from a raw file (.raw)
       // This is really corrected positions as (r,theta,phi) for each detector
       // Compare these with the instrument values to determine the change in position and the scaling
       // which may be necessary for each pixel if in a tube.
       // movePos is used to updated positions
-      std::map<int,Geometry::V3D> posMap;
-      std::map<int,Geometry::V3D>::iterator it;
+      std::map<int,Kernel::V3D> posMap;
+      std::map<int,Kernel::V3D>::iterator it;
       std::map<int,double> scaleMap;
       std::map<int,double>::iterator its;
 
@@ -122,7 +122,7 @@ namespace DataHandling
           truepos.reserve(detectorCount);
           getline(sFile,str); // skip title line
           int detIdLast=-10;
-          Geometry:: V3D truPosLast,detPosLast;
+          Kernel::V3D truPosLast,detPosLast;
          
           Progress prog(this,0.0,0.5,detectorCount);
           // Now loop through lines, one for each detector/monitor. The latter are ignored.
@@ -144,7 +144,7 @@ namespace DataHandling
                   g_log.error("Position angle data out of range in .sca file");
                   throw std::runtime_error("Position angle data out of range in .sca file"); 
               }
-              Geometry::V3D truPos;
+              Kernel::V3D truPos;
               // use abs as correction file has -ve l2 for first few detectors
               truPos.spherical(fabs(l2),theta,phi);
               truepos.push_back(truPos);
@@ -158,17 +158,17 @@ namespace DataHandling
 	      {
 		continue;
 	      }
-              Geometry::V3D detPos = det->getPos();
-              Geometry::V3D shift=truPos-detPos;
+              Kernel::V3D detPos = det->getPos();
+              Kernel::V3D shift=truPos-detPos;
               double scale=1.0;
 
               // scaling applied to dets that are not monitors and have sequential IDs
               if(detIdLast==detIndex-1 && !det->isMonitor())
               {
-                  Geometry::V3D diffI=detPos-detPosLast;
-                  Geometry::V3D diffT=truPos-truPosLast;
+                  Kernel::V3D diffI=detPos-detPosLast;
+                  Kernel::V3D diffT=truPos-truPosLast;
                   scale=diffT.norm()/diffI.norm();
-                  Geometry::V3D scaleDir=diffT/diffT.norm();
+                  Kernel::V3D scaleDir=diffT/diffT.norm();
                   // Wish to store the scaling in a map, if we already have a scaling
                   // for this detector (i.e. from the other side) we average the two
                   // values. End of tube detectors only have one scaling estimate.
@@ -191,7 +191,7 @@ namespace DataHandling
       else if(scalingFile.find(".raw")!=std::string::npos || scalingFile.find(".RAW")!=std::string::npos )
       {
           std::vector<int> detID;
-          std::vector<Geometry::V3D> truepos;
+          std::vector<Kernel::V3D> truepos;
           getDetPositionsFromRaw(scalingFile,detID,truepos);
           //
           int detectorCount = static_cast<int>(detID.size());
@@ -201,7 +201,7 @@ namespace DataHandling
               throw std::runtime_error("Failed to read any detectors from RAW file");
           }
           int detIdLast=-10;
-          Geometry:: V3D truPosLast,detPosLast;
+          Kernel::V3D truPosLast,detPosLast;
           Progress prog(this,0.0,0.5,detectorCount);
           for(int i=0;i<detectorCount;i++)
           {
@@ -215,15 +215,15 @@ namespace DataHandling
 	      {
 		continue;
 	      }
-              Geometry::V3D detPos = det->getPos();
-              Geometry::V3D shift=truepos[i]-detPos;
+              Kernel::V3D detPos = det->getPos();
+              Kernel::V3D shift=truepos[i]-detPos;
               double scale;
               if(detIdLast==detIndex-1 && !det->isMonitor()) 
               {
-                  Geometry::V3D diffI=detPos-detPosLast;
-                  Geometry::V3D diffT=truepos[i]-truPosLast;
+                  Kernel::V3D diffI=detPos-detPosLast;
+                  Kernel::V3D diffT=truepos[i]-truPosLast;
                   scale=diffT.norm()/diffI.norm();
-                  Geometry::V3D scaleDir=diffT/diffT.norm();
+                  Kernel::V3D scaleDir=diffT/diffT.norm();
                   scaleMap[detIndex]=scale;
                   its=scaleMap.find(detIndex-1);
                   if(its==scaleMap.end())
@@ -264,7 +264,7 @@ namespace DataHandling
 
 
 
-void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D>& posMap,
+void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Kernel::V3D>& posMap,
                             std::map<int,double>& scaleMap)
 {
 
@@ -274,7 +274,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
   *   @param posMap :: A map of integer detector ID and corresponding position shift
   *   @param scaleMap :: A map of integer detectorID and corresponding scaling (in Y)
   */
-  std::map<int,Geometry::V3D>::iterator iter = posMap.begin();
+  std::map<int,Kernel::V3D>::iterator iter = posMap.begin();
   boost::shared_ptr<IInstrument> inst = WS->getInstrument();
   boost::shared_ptr<IComponent> comp;
 
@@ -364,7 +364,7 @@ void SetScalingPSD::findAll(boost::shared_ptr<Geometry::IComponent> comp)
  * @param detID :: Vector of detector numbers
  * @param pos :: V3D of detector positions corresponding to detID
  */
-void SetScalingPSD::getDetPositionsFromRaw(std::string rawfile,std::vector<int>& detID, std::vector<Geometry::V3D>& pos)
+void SetScalingPSD::getDetPositionsFromRaw(std::string rawfile,std::vector<int>& detID, std::vector<Kernel::V3D>& pos)
 {
   (void) rawfile; // Avoid compiler warning
 
@@ -389,7 +389,7 @@ void SetScalingPSD::getDetPositionsFromRaw(std::string rawfile,std::vector<int>&
     }
     detID.reserve(numDetector);
     pos.reserve(numDetector);
-    Geometry::V3D point;
+    Kernel::V3D point;
     for (int i = 0; i < numDetector; ++i)
     {
        point.spherical(r[i], angle[i], phi[i]);

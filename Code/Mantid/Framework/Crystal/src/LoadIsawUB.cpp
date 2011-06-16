@@ -1,6 +1,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/LoadIsawUB.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include <fstream>
@@ -9,7 +9,7 @@
 #include <MantidGeometry/Crystal/UnitCell.h>
 
 using namespace Mantid::Kernel::Strings;
-using Mantid::Geometry::DblMatrix;
+using Mantid::Kernel::DblMatrix;
 using Mantid::Geometry::UnitCell;
 
 namespace Mantid
@@ -80,7 +80,7 @@ namespace Crystal
     // Open the file
     std::ifstream in( Filename.c_str() );
 
-    Geometry::Matrix<double> ub(3,3);
+    Kernel::DblMatrix ub(3,3);
     std::string s;
     double val;
 
@@ -111,7 +111,7 @@ namespace Crystal
 
 //    // At this point, the UB uses the IPNS convention meaning that
 //    // for us, the output Q vector from UB.hkl = Qz, Qx, Qy
-//    Geometry::Matrix<double> adjust(3,3);
+//    Kernel::DblMatrix<double> adjust(3,3);
 //    adjust[0][1] = 1.0;
 //    adjust[1][2] = 1.0;
 //    adjust[2][0] = 1.0;
@@ -130,11 +130,11 @@ namespace Crystal
     // Create the lattice from the file's parameter
     OrientedLattice * latt = new OrientedLattice(lattPar[0], lattPar[1], lattPar[2], lattPar[3], lattPar[4], lattPar[5]);
     // Set the UB in there.
-    Geometry::Matrix<double> Binv = latt->getBinv(); // B^-1
-    Geometry::Matrix<double> U = ub * Binv; // U = UB * B^-1
+    Kernel::DblMatrix Binv = latt->getBinv(); // B^-1
+    Kernel::DblMatrix U = ub * Binv; // U = UB * B^-1
 */
     // Swap rows around to accound for IPNS convention
-    Geometry::Matrix<double> U=ol.getU();
+    DblMatrix U=ol.getU();
     DblMatrix U2 = U;
     for (size_t r=0; r<3; r++)
     {

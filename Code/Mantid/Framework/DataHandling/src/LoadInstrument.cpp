@@ -919,10 +919,10 @@ namespace Mantid
     *
     *  @return  Thrown if second argument is not a pointer to a 'location' XML element
     */
-    Geometry::V3D LoadInstrument::getRelativeTranslation(const Geometry::IComponent* comp, const Poco::XML::Element* pElem)
+    Kernel::V3D LoadInstrument::getRelativeTranslation(const Geometry::IComponent* comp, const Poco::XML::Element* pElem)
     {
 
-      Geometry::V3D retVal;  // position relative to parent
+      Kernel::V3D retVal;  // position relative to parent
 
       // Polar coordinates can be labelled as (r,t,p) or (R,theta,phi)
       if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") || pElem->hasAttribute("p") ||
@@ -944,7 +944,7 @@ namespace Mantid
           // so need to do some extra calculation before they're stored internally as x,y,z offsets.
 
           // Temporary vector to hold the parent's absolute position (will be 0,0,0 if no parent)
-          Geometry::V3D parentPos;
+          Kernel::V3D parentPos;
           // Get the parent's absolute position (if the component has a parent)
           if ( comp->getParent() )
           {
@@ -971,7 +971,7 @@ namespace Mantid
           m_tempPosHolder[comp] = tmp;
 
           // Create a V3D and set its position to be the child's absolute position
-          Geometry::V3D absPos;
+          Kernel::V3D absPos;
           absPos.spherical(R,theta,phi);
 
           // Subtract the two V3D's to get what we want (child's relative position in x,y,z)
@@ -1017,7 +1017,7 @@ namespace Mantid
         throw std::logic_error( "Second argument to function setLocation must be a pointer to an XML element with tag name location." );
       }
 
-      //Geometry::V3D pos;  // position for <location>
+      //Kernel::V3D pos;  // position for <location>
 
 
       comp->translate(getRelativeTranslation(comp, pElem));
@@ -1041,7 +1041,7 @@ namespace Mantid
         if ( pElem->hasAttribute("axis-z") )
           axis_z = atof( (pElem->getAttribute("axis-z")).c_str() );
 
-        comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(axis_x,axis_y,axis_z)));
+        comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(axis_x,axis_y,axis_z)));
       }
 
 
@@ -1067,7 +1067,7 @@ namespace Mantid
           stillTransElement = false;
           }
 
-          Geometry::V3D posTrans;
+          Kernel::V3D posTrans;
 
           if (tElem)
           {
@@ -1102,7 +1102,7 @@ namespace Mantid
           if ( rElem->hasAttribute("axis-z") )
               axis_z = atof( (rElem->getAttribute("axis-z")).c_str() );
 
-          comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(axis_x,axis_y,axis_z)));      
+          comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(axis_x,axis_y,axis_z)));      
 
           // for recursive action
           pRecursive = rElem; 
@@ -1284,7 +1284,7 @@ namespace Mantid
     */
     void LoadInstrument::makeXYplaneFaceComponent(Geometry::IComponent* &in, const Geometry::ObjComponent* facing)
     {
-      const Geometry::V3D facingPoint = facing->getPos();
+      const Kernel::V3D facingPoint = facing->getPos();
 
       makeXYplaneFaceComponent(in, facingPoint);
     }
@@ -1299,13 +1299,13 @@ namespace Mantid
     *  @param in ::  Component to be rotated
     *  @param facingPoint :: position to face
     */
-    void LoadInstrument::makeXYplaneFaceComponent(Geometry::IComponent* &in, const Geometry::V3D& facingPoint)
+    void LoadInstrument::makeXYplaneFaceComponent(Geometry::IComponent* &in, const Kernel::V3D& facingPoint)
     {
-      Geometry::V3D pos = in->getPos();
+      Kernel::V3D pos = in->getPos();
 
       // vector from facing object to component we want to rotate
 
-      Geometry::V3D facingDirection = pos - facingPoint;
+      Kernel::V3D facingDirection = pos - facingPoint;
       facingDirection.normalize();
 
       if ( facingDirection.norm() == 0.0 ) return;
@@ -1314,22 +1314,22 @@ namespace Mantid
       // now aim to rotate shape such that the z-axis of of the object we want to rotate
       // points in the direction of facingDirection. That way the XY plane faces the 'facing object'.
 
-      Geometry::V3D z = Geometry::V3D(0,0,1);
-      Geometry::Quat R = in->getRotation();
+      Kernel::V3D z = Kernel::V3D(0,0,1);
+      Kernel::Quat R = in->getRotation();
       R.inverse();
       R.rotate(facingDirection);
 
-      Geometry::V3D normal = facingDirection.cross_prod(z);
+      Kernel::V3D normal = facingDirection.cross_prod(z);
       normal.normalize();
       double theta = (180.0/M_PI)*facingDirection.angle(z);
 
       if ( normal.norm() > 0.0 )
-        in->rotate(Geometry::Quat(-theta, normal));
+        in->rotate(Kernel::Quat(-theta, normal));
       else
       {
         // To take into account the case where the facing direction is in the (0,0,1)
         // or (0,0,-1) direction.
-        in->rotate(Geometry::Quat(-theta, Geometry::V3D(0,1,0)));
+        in->rotate(Kernel::Quat(-theta, Kernel::V3D(0,1,0)));
       }
     }
 
@@ -1340,10 +1340,10 @@ namespace Mantid
     *  @param pElem ::  Facing type element to parse
     *  @return Return parsed position as a V3D
     */
-    Geometry::V3D LoadInstrument::parseFacingElementToV3D(Poco::XML::Element* pElem)
+    Kernel::V3D LoadInstrument::parseFacingElementToV3D(Poco::XML::Element* pElem)
     {
 
-      Geometry::V3D retV3D;
+      Kernel::V3D retV3D;
 
       // Polar coordinates can be labelled as (r,t,p) or (R,theta,phi)
       if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") || pElem->hasAttribute("p") ||
@@ -1402,7 +1402,7 @@ namespace Mantid
         if ( facingElem->hasAttribute("rot") )
         {
           double rotAngle = m_angleConvertConst*atof( (facingElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
-          comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(0,0,1)));
+          comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(0,0,1)));
         }
 
 

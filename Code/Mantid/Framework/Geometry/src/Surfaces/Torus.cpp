@@ -13,9 +13,9 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Tolerance.h"
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/Tolerance.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Torus.h"
@@ -25,8 +25,10 @@ namespace Mantid
 
 namespace Geometry
 {
+  using Kernel::Tolerance;
+  using Kernel::V3D;
 
-Kernel::Logger& Torus::PLog( Kernel::Logger::get("Torus"));
+  Kernel::Logger& Torus::PLog( Kernel::Logger::get("Torus"));
 
 Torus::Torus() : Surface(),
 		 Centre(), Normal(1,0,0), 
@@ -121,11 +123,11 @@ Torus::operator==(const Torus& A) const
   @param A :: string for input and output.
   @return 1 on success 0 on failure
 */
-int sectionV3D(std::string& A,Mantid::Geometry::V3D& out)
+int sectionV3D(std::string& A,Mantid::Kernel::V3D& out)
 {
   if (A.empty()) return 0;
   std::istringstream cx;
-  Mantid::Geometry::V3D retval;
+  Mantid::Kernel::V3D retval;
   cx.str(A);
   cx.clear();
   cx>>retval;
@@ -167,9 +169,9 @@ Torus::setSurface(const std::string& Pstr)
   if (ptype<0 || ptype>=3)
     return errAxis;
 
-  Geometry::V3D Norm;
-  Geometry::V3D Cent;
-  Geometry::V3D PtVec;
+  Kernel::V3D Norm;
+  Kernel::V3D Cent;
+  Kernel::V3D PtVec;
   Norm[ptype]=1.0;
 
   // Torus on X/Y/Z axis
@@ -186,7 +188,7 @@ Torus::setSurface(const std::string& Pstr)
 } 
 
 void
-Torus::rotate(const Geometry::Matrix<double>& R)
+Torus::rotate(const Kernel::Matrix<double>& R)
   /**
     Rotate both the centre and the normal direction 
     @param R :: Matrix for rotation. 
@@ -198,7 +200,7 @@ Torus::rotate(const Geometry::Matrix<double>& R)
 }
 
 void 
-Torus::displace(const Geometry::V3D& A)
+Torus::displace(const Kernel::V3D& A)
   /**
     Displace the centre
     Only need to update the centre position 
@@ -210,7 +212,7 @@ Torus::displace(const Geometry::V3D& A)
 }
 
 void 
-Torus::setCentre(const Geometry::V3D& A)
+Torus::setCentre(const Kernel::V3D& A)
   /**
     Sets the central point and the Base Equation
     @param A :: New Centre point
@@ -221,7 +223,7 @@ Torus::setCentre(const Geometry::V3D& A)
 }
 
 void 
-Torus::setNorm(const Geometry::V3D& A)
+Torus::setNorm(const Kernel::V3D& A)
   /**
     Sets the Normal and the Base Equation
     @param A :: New Normal direction
@@ -235,8 +237,8 @@ Torus::setNorm(const Geometry::V3D& A)
   return;
 }
 
-Geometry::V3D
-Torus::surfaceNormal(const Geometry::V3D& Pt) const
+Kernel::V3D
+Torus::surfaceNormal(const Kernel::V3D& Pt) const
   /**
     Get the normal at a point
     @param Pt :: The Point of interest
@@ -250,7 +252,7 @@ Torus::surfaceNormal(const Geometry::V3D& Pt) const
 
 
 double
-Torus::distance(const Geometry::V3D& Pt) const
+Torus::distance(const Kernel::V3D& Pt) const
   /**
     Calculates the distance from the point to the Torus
     does not calculate the point on the Torusthat is closest
@@ -262,7 +264,7 @@ Torus::distance(const Geometry::V3D& Pt) const
     @return distance to Pt
   */
 {
-  const Geometry::V3D Px=Pt-Centre;
+  const Kernel::V3D Px=Pt-Centre;
   // test is the centre to point distance is zero
   if(Px.norm()<Tolerance)
     return Px.norm();
@@ -270,7 +272,7 @@ Torus::distance(const Geometry::V3D& Pt) const
 }
 
 int
-Torus::side(const Geometry::V3D& R) const
+Torus::side(const Kernel::V3D& R) const
 
   /**
     Calculate if the point R is within
@@ -288,7 +290,7 @@ Torus::side(const Geometry::V3D& R) const
 }
 
 int
-Torus::onSurface(const Geometry::V3D& R) const
+Torus::onSurface(const Kernel::V3D& R) const
 {
   /** 
      Calculate if the point R is on

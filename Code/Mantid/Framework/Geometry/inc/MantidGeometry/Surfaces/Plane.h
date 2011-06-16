@@ -2,7 +2,7 @@
 #define PLANE_H
 
 #include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include <string>
 
 namespace Mantid
@@ -11,6 +11,7 @@ namespace Mantid
   namespace Kernel
   {
     class Logger;
+    template <typename T> class Matrix;
   }
 
   namespace Geometry
@@ -19,7 +20,6 @@ namespace Mantid
     // Forward declaration
     //---------------------------------------------
     class BaseVisit;
-    template <typename T> class Matrix;
 
     /**
     \class Plane
@@ -56,7 +56,7 @@ namespace Mantid
 
       static Kernel::Logger& PLog;           ///< The official logger
 
-      Geometry::V3D NormV;         ///< Normal vector
+      Kernel::V3D NormV;         ///< Normal vector
       double Dist;                   ///< Distance 
 
       int planeType() const;         ///< are we alined on an axis
@@ -75,20 +75,20 @@ namespace Mantid
       virtual void acceptVisitor(BaseVisit& A) const
       {  A.Accept(*this); }
 
-      int setPlane(const Geometry::V3D&,const Geometry::V3D&);
+      int setPlane(const Kernel::V3D&,const Kernel::V3D&);
       //  int setPlane(const std::string&);
-      int side(const Geometry::V3D&) const;
-      int onSurface(const Geometry::V3D&) const;
+      int side(const Kernel::V3D&) const;
+      int onSurface(const Kernel::V3D&) const;
       // stuff for finding intersections etc.
       double dotProd(const Plane&) const;      ///< returns normal dot product
-      Geometry::V3D crossProd(const Plane&) const;      ///< returns normal cross product
-      double distance(const Geometry::V3D&) const;      ///< distance from a point
+      Kernel::V3D crossProd(const Plane&) const;      ///< returns normal cross product
+      double distance(const Kernel::V3D&) const;      ///< distance from a point
 
       double getDistance() const { return Dist; }  ///< Distance from origin
-      Geometry::V3D getNormal() const { return NormV; }    ///< Normal to plane (+ve surface)
+      Kernel::V3D getNormal() const { return NormV; }    ///< Normal to plane (+ve surface)
 
-      void rotate(const Geometry::Matrix<double>&);
-      void displace(const Geometry::V3D&);
+      void rotate(const Kernel::Matrix<double>&);
+      void displace(const Kernel::V3D&);
 
       int setSurface(const std::string&);
       void print() const;
@@ -96,7 +96,7 @@ namespace Mantid
 
       void setBaseEqn() ;                      ///< set up to be eqn based
 
-      int  LineIntersectionWithPlane(V3D startpt,V3D endpt,V3D& output);
+      int  LineIntersectionWithPlane(Kernel::V3D startpt,Kernel::V3D endpt,Kernel::V3D& output);
       void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);
     };
 

@@ -83,10 +83,10 @@ protected:
 
   API::MatrixWorkspace_const_sptr m_inputWS;     ///< A pointer to the input workspace
   const Geometry::Object* m_sampleObject;        ///< Local cache of sample object.
-  Geometry::V3D m_beamDirection;                 ///< The direction of the beam.
+  Kernel::V3D m_beamDirection;                 ///< The direction of the beam.
   std::vector<double> m_L1s,                     ///< Cached L1 distances
                       m_elementVolumes;          ///< Cached element volumes
-  std::vector<Geometry::V3D> m_elementPositions; ///< Cached element positions
+  std::vector<Kernel::V3D> m_elementPositions; ///< Cached element positions
   size_t m_numVolumeElements;                    ///< The number of volume elements
   double m_sampleVolume;                         ///< The total volume of the sample
 

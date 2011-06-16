@@ -11,7 +11,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/IDTypes.h"
 
 using namespace Mantid;
@@ -19,6 +19,8 @@ using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::DblMatrix;
 
 class PredictPeaksTest : public CxxTest::TestSuite
 {

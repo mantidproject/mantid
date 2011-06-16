@@ -3,7 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Math/BnId.h"
 #include "MantidGeometry/Math/Acomp.h"
 

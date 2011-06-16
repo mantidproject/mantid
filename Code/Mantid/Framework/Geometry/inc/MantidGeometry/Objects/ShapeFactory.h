@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include <boost/shared_ptr.hpp>
 #include <map>
 
@@ -88,7 +88,7 @@ namespace Mantid
 
       Poco::XML::Element* getShapeElement(Poco::XML::Element* pElem, const std::string& name);
       double getDoubleAttribute(Poco::XML::Element* pElem, const std::string& name);
-      V3D parsePosition(Poco::XML::Element* pElem);     
+      Kernel::V3D parsePosition(Poco::XML::Element* pElem);     
       void createGeometryHandler(Poco::XML::Element*,boost::shared_ptr<Object>);
 
       /// static reference to the logger class

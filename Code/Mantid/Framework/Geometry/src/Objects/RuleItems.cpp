@@ -17,8 +17,8 @@
 #include "MantidKernel/Exception.h"
 
 #include "MantidGeometry/Math/Triple.h"
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
@@ -30,6 +30,7 @@ namespace Mantid
 
 namespace Geometry
 {
+  using Kernel::V3D;
 
 Kernel::Logger& Intersection::PLog(Kernel::Logger::get("Intersection"));
 
@@ -286,7 +287,7 @@ Intersection::displayAddress() const
 }
 
 bool 
-Intersection::isValid(const Geometry::V3D& Vec) const
+Intersection::isValid(const Kernel::V3D& Vec) const
   /**
     Calculates if Vec is within the object
     @param Vec :: Point to test
@@ -591,7 +592,7 @@ Union::simplify()
 }
 
 bool 
-Union::isValid(const Geometry::V3D& Vec) const
+Union::isValid(const Kernel::V3D& Vec) const
   /**
     Calculates if Vec is within the object
     @param Vec :: Point to test
@@ -844,7 +845,7 @@ SurfPoint::simplify()
 }
 
 bool 
-SurfPoint::isValid(const Geometry::V3D& Pt) const
+SurfPoint::isValid(const Kernel::V3D& Pt) const
   /** 
     Determines if a point  is valid.  
     @param Pt :: Point to test
@@ -1089,7 +1090,7 @@ CompObj::findLeaf(const Rule* A) const
 }
 
 bool
-CompObj::isValid(const Geometry::V3D& Pt) const
+CompObj::isValid(const Kernel::V3D& Pt) const
   /** 
     Determines if a point  is valid.  
     Checks to see if the point is valid in the object
@@ -1295,7 +1296,7 @@ BoolValue::findLeaf(const Rule* A) const
 }
 
 bool
-BoolValue::isValid(const Geometry::V3D& pt) const
+BoolValue::isValid(const Kernel::V3D& pt) const
   /** 
     Determines if a point  is valid.  
     @param pt :: Point to test
@@ -1517,7 +1518,7 @@ CompGrp::findLeaf(const Rule* R) const
 }
 
 bool
-CompGrp::isValid(const Geometry::V3D& Pt) const
+CompGrp::isValid(const Kernel::V3D& Pt) const
   /** 
     Determines if a point  is valid.  
     Checks to see if the point is valid in the object

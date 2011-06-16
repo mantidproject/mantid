@@ -6,7 +6,7 @@
 //-----------------------------------
 #include "MantidAPI/MatrixWorkspace.h"  // For MantidVec typedef
 #include "MantidPythonAPI/BoostPython_Silent.h"
-#include <MantidGeometry/Math/Matrix.h>// For Matrix
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid
 {
@@ -58,11 +58,11 @@ namespace Mantid
       /// Flag if the init routine has been called already
       static bool g_isInitialized;
       /// Choose an appropriate wrapping for a Matrix
-      static PyObject * createPythonWrapper(const Geometry::DblMatrix & values, bool readonly);
+      static PyObject * createPythonWrapper(const Kernel::DblMatrix & values, bool readonly);
       /// Create a numpy array using the already allocated data for Matrix
-      static PyObject * createNumPyArray(const Geometry::DblMatrix & values, bool readonly);
+      static PyObject * createNumPyArray(const Kernel::DblMatrix & values, bool readonly);
       /// Import a Matrix from a 2D numpy array
-      static Geometry::DblMatrix getMatrixFromArray(PyObject *p);
+      static Kernel::DblMatrix getMatrixFromArray(PyObject *p);
     };
   }
 }

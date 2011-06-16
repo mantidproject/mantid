@@ -12,6 +12,13 @@
 
 namespace Mantid
 {
+  namespace Kernel
+  {
+    //----------------------------------------------------------------------
+    // Forward declaration
+    //----------------------------------------------------------------------
+    class V3D;
+  }
   namespace Geometry
   {
     //------------------------------------------------------------------------------
@@ -19,7 +26,6 @@ namespace Mantid
     //------------------------------------------------------------------------------
     class IInstrument;
     class IComponent;
-    class V3D;
     class ISpectraDetectorMap;
 
     /**
@@ -111,7 +117,7 @@ namespace Mantid
       /// property map holding the edge's related Distance value.
       boost::property_map<Graph, boost::edge_name_t>::type m_edgeLength;
       /// V3D for scaling
-      boost::scoped_ptr<V3D> m_scale;
+      boost::scoped_ptr<Kernel::V3D> m_scale;
     };
     
     /// Typedef for shared pointer to the NearestNeighbours class

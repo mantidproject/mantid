@@ -60,7 +60,7 @@ namespace Mantid
             std::string name()const{return "CobaltSpinWaveDSHO";}
             /// sqwBroad returns the expected scattering weight for the given Q,w point
             virtual double sqwBroad(const std::vector<double> & point, const std::vector<double> & fgParams,
-                    const double temp, const Geometry::Matrix<double> & ubinv) const;
+                    const double temp, const Kernel::Matrix<double> & ubinv) const;
            
         protected:
             /// load parameter values into local memory

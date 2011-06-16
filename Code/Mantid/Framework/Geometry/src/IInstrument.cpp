@@ -6,15 +6,16 @@
 
 namespace Mantid
 {
+  using Kernel::V3D;
+
   namespace Geometry
   {
-
 
     /** Gets the beam direction (i.e. source->sample direction).
     *  Not virtual because it relies the getSample() & getPos() virtual functions
     *  @returns A unit vector denoting the direction of the beam
     */
-    Geometry::V3D IInstrument::getBeamDirection() const
+    Kernel::V3D IInstrument::getBeamDirection() const
     {
       V3D retval = getSample()->getPos() - getSource()->getPos();
       retval.normalize();

@@ -12,6 +12,8 @@ namespace Mantid
 {
   namespace Geometry
   {
+    using Kernel::V3D;
+    using Kernel::Quat;
 
     /** Constructor for a parametrized ObjComponent
      * @param base: the base (un-parametrized) IComponent

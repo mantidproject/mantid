@@ -11,7 +11,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "MantidGeometry/V3D.h" 
+#include "MantidKernel/V3D.h" 
 #include "MantidGeometry/Objects/Object.h" 
 #include "MantidGeometry/Surfaces/Cylinder.h" 
 #include "MantidGeometry/Surfaces/Sphere.h" 
@@ -24,6 +24,7 @@
 
 using namespace Mantid;
 using namespace Geometry;
+using Mantid::Kernel::V3D;
 
 class ObjectTest: public CxxTest::TestSuite
 {
@@ -345,8 +346,8 @@ public:
     object2.setObject(4,ObjB);
     object2.populate(SMap);
 
-    Track TL(Geometry::V3D(-5,0,0),
-      Geometry::V3D(1,0,0));
+    Track TL(Kernel::V3D(-5,0,0),
+      Kernel::V3D(1,0,0));
 
     // CARE: This CANNOT be called twice
     TS_ASSERT(object1.interceptSurface(TL)!=0);
@@ -377,7 +378,7 @@ public:
     object2.setObject(4,ObjB);
     object2.populate(SMap);
 
-    Track TL(Geometry::V3D(-5,0,0), Geometry::V3D(1,0,0));
+    Track TL(Kernel::V3D(-5,0,0), Kernel::V3D(1,0,0));
 
     // CARE: This CANNOT be called twice
     TS_ASSERT(object1.interceptSurface(TL)!=0);
@@ -409,8 +410,8 @@ public:
     object2.setObject(4,ObjB);
     object2.populate(SMap);
 
-    Track TL(Geometry::V3D(-5,0,0),
-      Geometry::V3D(1,0,0));
+    Track TL(Kernel::V3D(-5,0,0),
+      Kernel::V3D(1,0,0));
 
     // CARE: This CANNOT be called twice
     TS_ASSERT(object1.interceptSurface(TL)!=0);
@@ -441,7 +442,7 @@ public:
     object2.setObject(4,ObjB);
     object2.populate(SMap);
 
-    Track TL(Geometry::V3D(-5,0,0), Geometry::V3D(1,0,0));
+    Track TL(Kernel::V3D(-5,0,0), Kernel::V3D(1,0,0));
 
 
     // CARE: This CANNOT be called twice
@@ -473,8 +474,8 @@ public:
     object2.setObject(4,ObjB);
     object2.populate(SMap);
 
-    Track TL(Geometry::V3D(-5,0,0),
-      Geometry::V3D(0,1,0));
+    Track TL(Kernel::V3D(-5,0,0),
+      Kernel::V3D(0,1,0));
 
 
     // CARE: This CANNOT be called twice
@@ -492,7 +493,7 @@ public:
   {
     Object_sptr geom_obj = createUnitCube();
     // initial guess in object
-    Geometry::V3D pt;
+    Kernel::V3D pt;
     TS_ASSERT_EQUALS(geom_obj->getPointInObject(pt),1);
     TS_ASSERT_EQUALS(pt,V3D(0,0,0));
     // initial guess not in object, but on x-axis

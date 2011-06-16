@@ -15,8 +15,6 @@
 
 #include "MantidPythonAPI/BoostPython_Silent.h"
 //Geometry
-#include <MantidGeometry/V3D.h>
-#include <MantidGeometry/Quat.h>
 #include <MantidGeometry/Crystal/UnitCell.h>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidGeometry/Instrument/ObjComponent.h>
@@ -32,63 +30,6 @@ namespace Mantid
   namespace PythonAPI
   {
     using namespace boost::python;
-
-
-    void export_utils()
-    {
-      //V3D class
-      class_< Geometry::V3D >("V3D",init<>("Construct a V3D at 0,0,0"))
-        .def(init<double, double, double>("Construct a V3D with X,Y,Z coordinates"))
-        .def("getX", &Geometry::V3D::X, return_value_policy< copy_const_reference >())
-        .def("getY", &Geometry::V3D::Y, return_value_policy< copy_const_reference >())
-        .def("getZ", &Geometry::V3D::Z, return_value_policy< copy_const_reference >())
-        .def("distance", &Geometry::V3D::distance)
-        .def("angle", &Geometry::V3D::angle)
-        .def("zenith", &Geometry::V3D::zenith)
-        .def("scalar_prod", &Geometry::V3D::scalar_prod)
-        .def("cross_prod", &Geometry::V3D::cross_prod)
-        .def("norm", &Geometry::V3D::norm)
-        .def("norm2", &Geometry::V3D::norm2)
-        .def(self + self)
-        .def(self += self)
-        .def(self - self)
-        .def(self -= self)
-        .def(self * self)
-        .def(self *= self)
-        .def(self / self)
-        .def(self /= self)
-        .def(self * int())
-        .def(self *= int())
-        .def(self * double())
-        .def(self *= double())
-        .def(self < self)
-        .def(self == self)
-        .def(self_ns::str(self))
-        ;
-
-      //Quat class
-      class_< Geometry::Quat >("Quat", init<>("Construct a default Quat that will perform no transformation."))
-        .def(init<double, double, double, double>("Constructor with values"))
-        .def(init<V3D, V3D>("Construct a Quat between two vectors"))
-        .def(init<V3D, V3D, V3D>("Construct a Quaternion that performs a reference frame rotation.\nThe initial X,Y,Z vectors are aligned as expected: X=(1,0,0), Y=(0,1,0), Z=(0,0,1)"))
-        .def(init<double,V3D>("Constructor from an angle(degrees) and an axis."))
-        .def("rotate", &Geometry::Quat::rotate)
-        .def("real", &Geometry::Quat::real)
-        .def("imagI", &Geometry::Quat::imagI)
-        .def("imagJ", &Geometry::Quat::imagJ)
-        .def("imagK", &Geometry::Quat::imagK)
-        .def(self + self)
-        .def(self += self)
-        .def(self - self)
-        .def(self -= self)
-        .def(self * self)
-        .def(self *= self)
-        .def(self == self)
-        .def(self != self)
-        .def(self_ns::str(self))
-        ;
-    }
-
 
     // Default parameter function overloads
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterNames,Geometry::Component::getParameterNames,0,1);
@@ -331,7 +272,6 @@ namespace Mantid
     }
     void export_geometry_namespace()
     {
-      export_utils();
       export_components();
       export_instrument();
       export_unit_cell();

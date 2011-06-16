@@ -55,7 +55,7 @@ namespace Mantid
       /// shape
       int add(IComponent* comp);
       /// Is the point given a valid point within the environment
-      bool isValid(const Geometry::V3D & point) const;
+      bool isValid(const Kernel::V3D & point) const;
       /// Update the given track with intersections within the environment
       void interceptSurfaces(Geometry::Track & track) const;
 

@@ -205,7 +205,7 @@ namespace Mantid
   
           double col = peak.getCol();
           double row = peak.getRow();
-          Geometry::V3D pos = peak.getDetPos();
+          Kernel::V3D pos = peak.getDetPos();
   
           //Average integer postion; subtract 1 because ISAW starts at 1 not 0
           int XPeak = int(col+0.5)-2;

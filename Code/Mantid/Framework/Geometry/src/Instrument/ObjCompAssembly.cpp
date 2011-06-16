@@ -12,6 +12,9 @@ namespace Mantid
 {
 namespace Geometry
 {
+  using Kernel::V3D;
+  using Kernel::Quat;
+  using Kernel::DblMatrix;
 
 /// Void deleter for shared pointers
 class NoDeleting
@@ -346,7 +349,7 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline()
   // Get information about the shape and size of a detector
   std::string type;
   int otype;
-  std::vector<Geometry::V3D> vectors;
+  std::vector<Kernel::V3D> vectors;
   double radius, height;
   boost::shared_ptr<const Object> obj = group.front()->shape();
   if (!obj)
@@ -414,7 +417,7 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline()
     // Either the detectors are not perfectrly aligned or 
     // vz is parallel to neither of the 3 axis x,y,z
     // This code is unfinished
-    Matrix<double> II(3,3),Vec(3,3),D(3,3);
+    DblMatrix II(3,3),Vec(3,3),D(3,3);
     II[0][0] = Ixx;
     II[0][1] = Ixy;
     II[0][2] = Ixz;

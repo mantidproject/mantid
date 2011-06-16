@@ -1,8 +1,8 @@
 #ifndef UNWRAPPEDSURFACE_H
 #define UNWRAPPEDSURFACE_H
 
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quat.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Quat.h"
 #include "MantidGeometry/IComponent.h"
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
@@ -47,7 +47,7 @@ public:
   double uscale; ///< scaling factor in u direction
   double vscale; ///< scaling factor in v direction
   boost::shared_ptr<const Mantid::Geometry::IDetector> detector;
-//  Mantid::Geometry::V3D minPoint,maxPoint;
+//  Mantid::Kernel::V3D minPoint,maxPoint;
 };
 
 /**
@@ -62,7 +62,7 @@ class UnwrappedSurface: /*public DetectorCallback,*/ public ProjectionSurface
 {
   //Q_OBJECT
 public:
-  UnwrappedSurface(const InstrumentActor* rootActor,const Mantid::Geometry::V3D& origin,const Mantid::Geometry::V3D& axis);
+  UnwrappedSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
   ~UnwrappedSurface();
   void componentSelected(Mantid::Geometry::ComponentID = NULL);
   void getSelectedDetectors(QList<int>& dets);
@@ -80,12 +80,12 @@ protected:
   /// calculate and assign udet.u and udet.v
   virtual void calcUV(UnwrappedDetector& udet) = 0;
   /// calculate rotation R for a udet
-  virtual void calcRot(const UnwrappedDetector& udet, Mantid::Geometry::Quat& R)const = 0;
+  virtual void calcRot(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const = 0;
   virtual double uPeriod()const{return 0.0;}
 
   void init();
-  void calcSize(UnwrappedDetector& udet,const Mantid::Geometry::V3D& X,
-                const Mantid::Geometry::V3D& Y);
+  void calcSize(UnwrappedDetector& udet,const Mantid::Kernel::V3D& X,
+                const Mantid::Kernel::V3D& Y);
   //void callback(boost::shared_ptr<const Mantid::Geometry::IDetector> det,const DetectorCallbackData& data);
   void setColor(int index,bool picking)const;
   void showPickedDetector();

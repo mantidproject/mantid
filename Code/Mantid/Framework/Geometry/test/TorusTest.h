@@ -6,7 +6,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Torus.h"
 

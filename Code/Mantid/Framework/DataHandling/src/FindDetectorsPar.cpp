@@ -122,7 +122,7 @@ FindDetectorsPar::exec()
     if (spDet->isMonitor())continue;   
      det_ID[ic] = spDet->getID();
 
-     Geometry::V3D groupCentre;  
+     Kernel::V3D groupCentre;  
      Geometry::det_topology group_shape= spDet->getTopology(groupCentre);
      if(group_shape == Geometry::cyl){  // we have a ring;
             calc_cylDetPar(spDet,sample,groupCentre,azimuthal[ic], polar[ic], 
@@ -179,7 +179,7 @@ FindDetectorsPar::set_output_table()
 
 void 
 FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_sptr spDet,const Geometry::IObjComponent_const_sptr sample,
-                                 const Geometry::V3D &GroupCenter,
+                                 const Kernel::V3D &GroupCenter,
                                  double &azim, double &polar, double &azim_width, double &polar_width,double &dist)
 {
         // polar values are constants for ring;
@@ -194,10 +194,10 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_sptr spDet,const Geom
         double d_azim(0);
        
 
-        std::vector<Geometry::V3D> coord(3);
+        std::vector<Kernel::V3D> coord(3);
 
         // get vector leading from the sample to the ring centre 
-        Geometry::V3D Observer      = sample->getPos();
+        Kernel::V3D Observer      = sample->getPos();
         coord[1]  = (GroupCenter-Observer);
         double d0 = coord[1].norm();
         coord[1] /= d0;
@@ -212,7 +212,7 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_sptr spDet,const Geom
 
         // loop through all detectors in the group 
         for(size_t i=0;i<pDets.size();i++){
-            Geometry::V3D center= pDets[i]->getPos();
+            Kernel::V3D center= pDets[i]->getPos();
             coord[0]  = center-GroupCenter;
             double d1 = coord[0].norm();
             coord[0] /= d1;
@@ -243,7 +243,7 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_sptr spDet,const Geom
 void 
 FindDetectorsPar::calc_rectDetPar(const API::MatrixWorkspace_sptr inputWS, 
                                  const Geometry::IDetector_sptr spDet,const Geometry::IObjComponent_const_sptr sample,
-                                 const Geometry::V3D &GroupCentre,
+                                 const Kernel::V3D &GroupCentre,
                                  double &azim, double &polar, double &azim_width, double &polar_width,double &dist)
 {
     // Get Sample->Detector distance
@@ -251,11 +251,11 @@ FindDetectorsPar::calc_rectDetPar(const API::MatrixWorkspace_sptr inputWS,
      polar    =  inputWS->detectorTwoTheta(spDet)*rad2deg;
      azim     =  spDet->getPhi()*rad2deg;    
     // Now let's work out the detector widths on basis of bounding box tangential to the 2Theta=const ring;
-     Geometry::V3D beamDetVector(GroupCentre.X(),GroupCentre.Y(),0);  // group centre minus the projection of this centre to the beamline
+     Kernel::V3D beamDetVector(GroupCentre.X(),GroupCentre.Y(),0);  // group centre minus the projection of this centre to the beamline
      beamDetVector.normalize();
-     std::vector<Geometry::V3D> coord(3);
+     std::vector<Kernel::V3D> coord(3);
      coord[0]  = beamDetVector;
-     coord[1]  = Geometry::V3D(0,0,1); // along beamline, which is always oz; (can be amended)
+     coord[1]  = Kernel::V3D(0,0,1); // along beamline, which is always oz; (can be amended)
      coord[2]  = coord[0].cross_prod(coord[1]);  // tangential to the ring and anticloakwise;
   
 

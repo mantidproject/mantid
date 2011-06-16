@@ -85,7 +85,7 @@ namespace DataHandling
     // Get a pointer to the instrument contained in the workspace
     IInstrument_const_sptr instrument = offsetsWS->getInstrument();
     double l1;
-    Geometry::V3D beamline,samplePos;
+    Kernel::V3D beamline,samplePos;
     double beamline_norm;
     instrument->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
 

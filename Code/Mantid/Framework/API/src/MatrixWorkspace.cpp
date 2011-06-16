@@ -29,6 +29,7 @@ namespace Mantid
   {
     using std::size_t;
     using namespace Geometry;
+    using Kernel::V3D;
 
     Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("MatrixWorkspace");
     const std::string MatrixWorkspace::xDimensionId = "xDimension";
@@ -531,8 +532,8 @@ namespace Mantid
         throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
       }
 
-      const Geometry::V3D samplePos = sample->getPos();
-      const Geometry::V3D beamLine  = samplePos - source->getPos();
+      const Kernel::V3D samplePos = sample->getPos();
+      const Kernel::V3D beamLine  = samplePos - source->getPos();
 
       return det->getTwoTheta(samplePos,beamLine);
     }
@@ -1173,8 +1174,8 @@ namespace Mantid
       ///  Get coordinate for index;
       virtual double getX(size_t ind)const {return m_axis(ind);}
       // Mess; TODO: clear
-      virtual Geometry::V3D getDirection(void)const {throw std::runtime_error("Not implemented");}
-      virtual Geometry::V3D getDirectionCryst(void)const {throw std::runtime_error("Not implemented");}
+      virtual Kernel::V3D getDirection(void)const {throw std::runtime_error("Not implemented");}
+      virtual Kernel::V3D getDirectionCryst(void)const {throw std::runtime_error("Not implemented");}
 
       /// the function returns the center points of the axis bins; There are nBins of such points 
       /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)

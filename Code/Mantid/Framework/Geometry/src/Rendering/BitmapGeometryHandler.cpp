@@ -7,7 +7,7 @@ namespace Mantid
 {
 namespace Geometry
 {
-
+  using Kernel::V3D;
 
   BitmapGeometryHandler::BitmapGeometryHandler(RectangularDetector *comp)
   : GeometryHandler(dynamic_cast<IObjComponent*>(comp))

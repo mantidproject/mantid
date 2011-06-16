@@ -13,14 +13,11 @@ namespace Mantid
   namespace Kernel
   {
     class Logger;
+    template<typename T> class Matrix;
   }
 
   namespace Geometry
   {
-
-
-    template<typename T> class Matrix;
-
 
     /**
     \class Acomp
@@ -140,7 +137,7 @@ namespace Mantid
       std::string displayDepth(int const =0) const;       ///< Really pretty print statment of tree
 
       void printImplicates(const std::vector<BnId>&,
-      const Geometry::Matrix<int>&) const;
+      const Kernel::Matrix<int>&) const;
     };
 
     std::ostream& operator<<(std::ostream&,const Acomp&); 

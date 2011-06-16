@@ -2,7 +2,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Math/RotCounter.h"
 #include <algorithm>
 #include <iterator>
@@ -12,6 +12,8 @@ namespace Mantid
 
   namespace Geometry 
   {
+
+    using Kernel::Matrix;
 
     Kernel::Logger& Acomp::PLog( Kernel::Logger::get("Acomp"));
     // Friend function
@@ -1040,7 +1042,7 @@ namespace Mantid
 
       std::vector<int> EPIvalue;
       // Make zeroed matrix.
-      Geometry::Matrix<int> Grid(PIform.size(),DNFobj.size()); 
+      Kernel::Matrix<int> Grid(PIform.size(),DNFobj.size()); 
       std::vector<int> DNFactive(DNFobj.size());       // DNF that active
       std::vector<int> PIactive(PIform.size());        // PI that are active
       std::vector<int> DNFscore(DNFobj.size());        // Number in each channel
@@ -1124,7 +1126,7 @@ namespace Mantid
       // the remaining table.
 
       // First Make a new matrix for speed.  Useful ???
-      Geometry::Matrix<int> Cmat(PIactive.size(),DNFactive.size());  // corrolation matrix
+      Kernel::Matrix<int> Cmat(PIactive.size(),DNFactive.size());  // corrolation matrix
       int cm(0);
       for(px=PIactive.begin();px!=PIactive.end();px++)
       {
@@ -1846,7 +1848,7 @@ namespace Mantid
 
     void
       Acomp::printImplicates(const std::vector<BnId>& PIform,
-      const Geometry::Matrix<int>& Grid) const
+      const Kernel::Matrix<int>& Grid) const
       /**
       Debug function to print out 
       PI and Grid :

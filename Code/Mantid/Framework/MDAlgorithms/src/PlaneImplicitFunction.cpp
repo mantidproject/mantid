@@ -1,6 +1,6 @@
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidAPI/Point3D.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include <cmath>
 #include <vector>
 #include <boost/algorithm/string.hpp>
@@ -20,9 +20,9 @@ PlaneImplicitFunction::PlaneImplicitFunction(NormalParameter& normal, OriginPara
 
 }
 
-inline double PlaneImplicitFunction::calculateNormContributionAlongAxisComponent(const Mantid::Geometry::V3D& axis) const
+inline double PlaneImplicitFunction::calculateNormContributionAlongAxisComponent(const Mantid::Kernel::V3D& axis) const
 {
-  using Mantid::Geometry::V3D;
+  using Mantid::Kernel::V3D;
 
   NormalParameter normalUnit =m_normal.asUnitVector();
   const V3D normal(normalUnit.getX(), normalUnit.getY(), normalUnit.getZ());
@@ -58,7 +58,7 @@ inline bool PlaneImplicitFunction::isBoundedByPlane(const OriginParameter& origi
 
 bool PlaneImplicitFunction::evaluate(const Mantid::API::Point3D* pPoint) const
 {
-  using Mantid::Geometry::V3D;
+  using Mantid::Kernel::V3D;
   //TODO: consider caching calculation parameters that share lifetime with object.
 
   //Create virtual planes separated by (absolute) width from from actual origin. Origins are key.

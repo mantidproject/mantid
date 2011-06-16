@@ -235,7 +235,7 @@ bool SpatialGrouping::expandNet(std::map<specid_t,double> & nearest, specid_t sp
     if ( inclIt != m_included.end() ) { continue; }
 
     // If we get this far, we need to determine if the detector is of a suitable distance
-    Mantid::Geometry::V3D pos = m_detectors[potIt->first]->getPos();
+    Mantid::Kernel::V3D pos = m_detectors[potIt->first]->getPos();
     if ( ! bbox.isPointInside(pos) ) { continue; }
     
     // Elsewise, it's all good.

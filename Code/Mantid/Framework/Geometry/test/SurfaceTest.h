@@ -11,7 +11,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidGeometry/Surfaces/Cone.h"
@@ -35,7 +35,7 @@ public:
     std::vector<std::string> ConeStr;
     ConeStr.push_back("kx 0 1");          // cone at origin
     ConeStr.push_back("k/x 0 0 0 1");     // also cone at origin
-    Geometry::V3D P(-1,-1.2,0);
+    Kernel::V3D P(-1,-1.2,0);
     const double results[]={sin(atan(1.2)-M_PI/4)*sqrt(2.44),
       sin(atan(1.2)-M_PI/4)*sqrt(2.44)};
 

@@ -2,7 +2,7 @@
 #define ICOMPASSEMBLY_ACTOR__H_
 #include "ComponentActor.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -38,12 +38,15 @@
 */
 namespace Mantid
 {
+namespace Kernel
+{
+  class V3D;
+}
 
 namespace Geometry
 {
   class ICompAssembly;
   class Object;
-  class V3D;
   class IInstrument;
 }
 
@@ -55,15 +58,15 @@ class ICompAssemblyActor : public ComponentActor
 {
 public:
   ICompAssemblyActor(const InstrumentActor& instrActor,const Mantid::Geometry::ComponentID& compID); ///< Constructor
-  void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const;
+  void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const;
 
   virtual std::string type()const {return "ICompAssemblyActor";} ///< Type of the GL object
   int getNumberOfDetectors() const { return mNumberOfDetectors;}
 
 protected:
   int mNumberOfDetectors;
-  Mantid::Geometry::V3D minBoundBox;
-  Mantid::Geometry::V3D maxBoundBox;
+  Mantid::Kernel::V3D minBoundBox;
+  Mantid::Kernel::V3D maxBoundBox;
 };
 
 #endif /*GLTRIANGLE_H_*/

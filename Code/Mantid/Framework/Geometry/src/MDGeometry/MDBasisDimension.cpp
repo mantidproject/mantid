@@ -6,6 +6,8 @@ namespace Mantid
 namespace Geometry
 {
 
+  using Kernel::V3D;
+
 MDBasisDimension::MDBasisDimension(std::string id, bool isReciprocal, int columnNumber,const std::string &UnitID,const V3D &inDirection) :
 m_id(id), m_isReciprocal(isReciprocal), m_columnNumber(columnNumber),
 direction(inDirection)

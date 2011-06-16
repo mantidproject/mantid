@@ -3,7 +3,7 @@
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
@@ -61,17 +61,17 @@ namespace MDEvents
     /// Primary flight path (source to sample)
     double l1;
     /// Beam direction and length
-    Geometry::V3D beamline;
+    Kernel::V3D beamline;
     /// Path length between source and sample
     double beamline_norm;
     /// Beam direction (unit vector)
-    Geometry::V3D beamDir;
+    Kernel::V3D beamDir;
     /// Sample position
-    Geometry::V3D samplePos;
+    Kernel::V3D samplePos;
     /// Progress reporter (shared)
     Kernel::ProgressBase * prog;
     /// Matrix. Multiply this by the lab frame Qx, Qy, Qz to get the desired Q or HKL.
-    Geometry::Matrix<double> mat;
+    Kernel::Matrix<double> mat;
 
 
   };

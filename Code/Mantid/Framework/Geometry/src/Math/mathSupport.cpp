@@ -10,33 +10,6 @@
 
 namespace Mantid
 {
-template<typename T>
-void
-indexSort(const std::vector<T>& pVec,std::vector<int>& Index)
-  /**
-    Function to take a vector and sort the vector 
-    so as to produce an index.
-    Leaves the vector unchanged.
-  */
-{
-  Index.resize(pVec.size());
-  std::vector<typename std::pair<T,int> > PartList;
-  PartList.resize(pVec.size());
-
-  transform(pVec.begin(),pVec.end(),PartList.begin(),mathSupport::PIndex<T>());
-  sort(PartList.begin(),PartList.end());
-  transform(PartList.begin(),PartList.end(),Index.begin(),mathSupport::PSep<T>());
-  
-  /*
-    typename std::vector<typename std::pair<T,int> >::const_iterator vc;
-    
-    for(vc=PartList.begin();vc!=PartList.end();vc++)
-      {
-        std::cout<<"Part == "<<vc->first<<" "<<vc->second<<std::endl;
-      }
-  */
-  return;
-}
 
 template<typename InputIter>
 int

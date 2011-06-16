@@ -170,19 +170,19 @@ void InstrumentWindow::setSurfaceType(int type)
     if (!m_instrumentActor) return;
     boost::shared_ptr<Mantid::Geometry::IInstrument> instr = m_workspace->getInstrument();
     Mantid::Geometry::IObjComponent_sptr sample = instr->getSample();
-    Mantid::Geometry::V3D sample_pos = sample->getPos();
-    Mantid::Geometry::V3D axis;
+    Mantid::Kernel::V3D sample_pos = sample->getPos();
+    Mantid::Kernel::V3D axis;
     if (m_surfaceType == SPHERICAL_Y || m_surfaceType == CYLINDRICAL_Y)
     {
-      axis = Mantid::Geometry::V3D(0,1,0);
+      axis = Mantid::Kernel::V3D(0,1,0);
     }
     else if (m_surfaceType == SPHERICAL_Z || m_surfaceType == CYLINDRICAL_Z)
     {
-      axis = Mantid::Geometry::V3D(0,0,1);
+      axis = Mantid::Kernel::V3D(0,0,1);
     }
     else // SPHERICAL_X || CYLINDRICAL_X
     {
-      axis = Mantid::Geometry::V3D(1,0,0);
+      axis = Mantid::Kernel::V3D(1,0,0);
     }
 
     ProjectionSurface* surface;

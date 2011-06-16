@@ -1,7 +1,7 @@
 #include "InstrumentActor.h"
 #include "CompAssemblyActor.h"
 
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
@@ -278,13 +278,13 @@ bool InstrumentActor::wholeRange()const
   * @param R :: The output rotation as a quaternion
   * @param out :: Debug printout flag
   */
-void InstrumentActor::BasisRotation(const Mantid::Geometry::V3D& Xfrom,
-                const Mantid::Geometry::V3D& Yfrom,
-                const Mantid::Geometry::V3D& Zfrom,
-                const Mantid::Geometry::V3D& Xto,
-                const Mantid::Geometry::V3D& Yto,
-                const Mantid::Geometry::V3D& Zto,
-                Mantid::Geometry::Quat& R,
+void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D& Xfrom,
+                const Mantid::Kernel::V3D& Yfrom,
+                const Mantid::Kernel::V3D& Zfrom,
+                const Mantid::Kernel::V3D& Xto,
+                const Mantid::Kernel::V3D& Yto,
+                const Mantid::Kernel::V3D& Zto,
+                Mantid::Kernel::Quat& R,
                 bool out
                 )
 {
@@ -301,37 +301,37 @@ void InstrumentActor::BasisRotation(const Mantid::Geometry::V3D& Xfrom,
     double sX = Xfrom.scalar_prod(Xto);
     if (fabs(sX - 1) < m_tolerance)
     {
-      R = Mantid::Geometry::Quat();
+      R = Mantid::Kernel::Quat();
     }
     else if (fabs(sX + 1) < m_tolerance)
     {
-      R = Mantid::Geometry::Quat(180,Zfrom);
+      R = Mantid::Kernel::Quat(180,Zfrom);
     }
     else
     {
-      R = Mantid::Geometry::Quat(Xfrom,Xto);
+      R = Mantid::Kernel::Quat(Xfrom,Xto);
     }
   }
   else if(fabs(sZ + 1) < m_tolerance) // rotated by 180 degrees
   {
     if (fabs(Xfrom.scalar_prod(Xto)-1) < m_tolerance)
     {
-      R = Mantid::Geometry::Quat(180.,Xfrom);
+      R = Mantid::Kernel::Quat(180.,Xfrom);
     }
     else if (fabs(Yfrom.scalar_prod(Yto)-1) < m_tolerance)
     {
-      R = Mantid::Geometry::Quat(180.,Yfrom);
+      R = Mantid::Kernel::Quat(180.,Yfrom);
     }
     else
     {
-      R = Mantid::Geometry::Quat(180.,Xto)*Mantid::Geometry::Quat(Xfrom,Xto);
+      R = Mantid::Kernel::Quat(180.,Xto)*Mantid::Kernel::Quat(Xfrom,Xto);
     }
   }
   else
   {
     // Rotation R1 of system (X,Y,Z) around Z by alpha
-    Mantid::Geometry::V3D X1;
-    Mantid::Geometry::Quat R1;
+    Mantid::Kernel::V3D X1;
+    Mantid::Kernel::Quat R1;
 
     X1 = Zfrom.cross_prod(Zto);
     X1.normalize();
@@ -339,45 +339,45 @@ void InstrumentActor::BasisRotation(const Mantid::Geometry::V3D& Xfrom,
     double sX = Xfrom.scalar_prod(Xto);
     if (fabs(sX - 1) < m_tolerance)
     {
-      R = Mantid::Geometry::Quat(Zfrom,Zto);
+      R = Mantid::Kernel::Quat(Zfrom,Zto);
       return;
     }
 
     sX = Xfrom.scalar_prod(X1);
     if (fabs(sX - 1) < m_tolerance)
     {
-      R1 = Mantid::Geometry::Quat();
+      R1 = Mantid::Kernel::Quat();
     }
     else if (fabs(sX + 1) < m_tolerance) // 180 degree rotation
     {
-      R1 = Mantid::Geometry::Quat(180.,Zfrom);
+      R1 = Mantid::Kernel::Quat(180.,Zfrom);
     }
     else
     {
-      R1 = Mantid::Geometry::Quat(Xfrom,X1);
+      R1 = Mantid::Kernel::Quat(Xfrom,X1);
     }
     if (out)
     std::cerr<<"R1="<<R1<<'\n';
 
     // Rotation R2 around X1 by beta
-    Mantid::Geometry::Quat R2(Zfrom,Zto); // vectors are different
+    Mantid::Kernel::Quat R2(Zfrom,Zto); // vectors are different
     if (out)
     std::cerr<<"R2="<<R2<<'\n';
 
     // Rotation R3 around ZZ by gamma
-    Mantid::Geometry::Quat R3;
+    Mantid::Kernel::Quat R3;
     sX = Xto.scalar_prod(X1);
     if (fabs(sX - 1) < m_tolerance)
     {
-      R3 = Mantid::Geometry::Quat();
+      R3 = Mantid::Kernel::Quat();
     }
     else if (fabs(sX + 1) < m_tolerance) // 180 degree rotation
     {
-      R3 = Mantid::Geometry::Quat(180.,Zto);
+      R3 = Mantid::Kernel::Quat(180.,Zto);
     }
     else
     {
-      R3 = Mantid::Geometry::Quat(X1,Xto);
+      R3 = Mantid::Kernel::Quat(X1,Xto);
     }
     if (out)
     std::cerr<<"R3="<<R3<<'\n';

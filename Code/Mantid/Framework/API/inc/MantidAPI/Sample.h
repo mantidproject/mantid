@@ -5,7 +5,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Material.h"
 #include <MantidGeometry/Crystal/OrientedLattice.h>

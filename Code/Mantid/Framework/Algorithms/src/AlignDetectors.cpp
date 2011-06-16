@@ -7,7 +7,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include <fstream>
@@ -51,7 +51,7 @@ std::map<detid_t, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API
   IInstrument_const_sptr instrument = inputWS->getInstrument();
 
   double l1;
-  Geometry::V3D beamline,samplePos;
+  Kernel::V3D beamline,samplePos;
   double beamline_norm;
 
   instrument->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);

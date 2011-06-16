@@ -6,9 +6,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid
 {
@@ -53,9 +53,9 @@ class MANTID_GEOMETRY_DLL IndexingUtils
   public:
 
   /// Find the UB matrix that best fits 3 or more indexed peaks
-  static double BestFit_UB(      Matrix<double>    & UB,
-                           const std::vector<V3D>  & hkl_vectors, 
-                           const std::vector<V3D>  & q_vectors   );
+  static double BestFit_UB(Kernel::DblMatrix    & UB,
+                           const std::vector<Kernel::V3D>  & hkl_vectors, 
+                           const std::vector<Kernel::V3D>  & q_vectors   );
 };
 
 } // namespace Geometry

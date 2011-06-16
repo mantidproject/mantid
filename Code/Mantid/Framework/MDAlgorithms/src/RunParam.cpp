@@ -4,9 +4,9 @@
 #include "MantidMDAlgorithms/RunParam.h"
 #include "MantidAPI/IMDWorkspace.h"
 
-#include "MantidGeometry/Tolerance.h"
+#include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid
 {

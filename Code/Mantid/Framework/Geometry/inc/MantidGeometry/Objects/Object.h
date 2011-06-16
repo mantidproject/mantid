@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quat.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Quat.h"
 #include "BoundingBox.h"
 #include <map>
 #include <string>
@@ -99,10 +99,10 @@ namespace Mantid
       virtual void print() const;
       void printTree() const;
 
-      bool isValid(const Geometry::V3D&) const;    ///< Check if a point is valid
+      bool isValid(const Kernel::V3D&) const;    ///< Check if a point is valid
       bool isValid(const std::map<int,int>&) const;  ///< Check if a set of surfaces are valid.
-      bool isOnSide(const Geometry::V3D&) const;
-      int calcValidType(const Geometry::V3D& Pt,const Geometry::V3D& uVec) const;
+      bool isOnSide(const Kernel::V3D&) const;
+      int calcValidType(const Kernel::V3D& Pt,const Kernel::V3D& uVec) const;
 
       std::vector<int> getSurfaceIndex() const;
       /// Get the list of surfaces (const version)
@@ -120,15 +120,15 @@ namespace Mantid
       int interceptSurface(Geometry::Track&) const;
 
       // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
-      double solidAngle(const Geometry::V3D& observer) const;
+      double solidAngle(const Kernel::V3D& observer) const;
       // Solid angle with a scaling of the object
-      double solidAngle(const Geometry::V3D& observer, const Geometry::V3D& scaleFactor) const;
+      double solidAngle(const Kernel::V3D& observer, const Kernel::V3D& scaleFactor) const;
       // solid angle via triangulation
-      double triangleSolidAngle(const Geometry::V3D& observer) const;
+      double triangleSolidAngle(const Kernel::V3D& observer) const;
       // Solid angle via triangulation with scaling factor for object size
-      double triangleSolidAngle(const V3D& observer, const V3D& scaleFactor) const;
+      double triangleSolidAngle(const Kernel::V3D& observer, const Kernel::V3D& scaleFactor) const;
       // solid angle via ray tracing
-      double rayTraceSolidAngle(const Geometry::V3D& observer) const;
+      double rayTraceSolidAngle(const Kernel::V3D& observer) const;
 
       /// Calculate (or return cached value of) Axis Aligned Bounding box (DEPRECATED)
       void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin) const;
@@ -140,7 +140,7 @@ namespace Mantid
       /// Set a null bounding box for this object 
       void setNullBoundingBox();
       // find internal point to object
-      int getPointInObject(Geometry::V3D& point) const;
+      int getPointInObject(Kernel::V3D& point) const;
 
       //Rendering member functions
       void draw() const;
@@ -155,7 +155,7 @@ namespace Mantid
       void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
       ///set vtkGeometryCache reader
       void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
-      void GetObjectGeom(int& type, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight) const;
+      void GetObjectGeom(int& type, std::vector<Kernel::V3D>& vectors, double& myradius, double & myheight) const;
     private:
       static Kernel::Logger& PLog;           ///< The official logger
       int ObjName;       ///< Creation number
@@ -163,7 +163,7 @@ namespace Mantid
 
       int procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const;
       CompGrp* procComp(Rule*) const;
-      int checkSurfaceValid(const Geometry::V3D&,const Geometry::V3D&) const;
+      int checkSurfaceValid(const Kernel::V3D&,const Kernel::V3D&) const;
       BoundingBox m_boundingBox; ///< Object's bounding box
 
       // -- DEPRECATED --
@@ -176,15 +176,15 @@ namespace Mantid
       mutable bool  boolBounded; ///< flag true if a bounding box exists, either by getBoundingBox or defineBoundingBox
       // -- --
 
-      int searchForObject(Geometry::V3D&) const;
-      double getTriangleSolidAngle(const V3D& a, const V3D& b, const V3D& c, const V3D& observer) const;
-      double CuboidSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors) const;
-      double SphereSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors, const double radius) const;
-      double CylinderSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre, 
-        const Mantid::Geometry::V3D & axis, 
+      int searchForObject(Kernel::V3D&) const;
+      double getTriangleSolidAngle(const Kernel::V3D& a, const Kernel::V3D& b, const Kernel::V3D& c, const Kernel::V3D& observer) const;
+      double CuboidSolidAngle(const Kernel::V3D observer, const std::vector<Kernel::V3D> vectors) const;
+      double SphereSolidAngle(const Kernel::V3D observer, const std::vector<Kernel::V3D> vectors, const double radius) const;
+      double CylinderSolidAngle(const Kernel::V3D & observer, const Mantid::Kernel::V3D & centre, 
+        const Mantid::Kernel::V3D & axis, 
         const double radius, const double height) const;
-      double ConeSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre, 
-        const Mantid::Geometry::V3D & axis, 
+      double ConeSolidAngle(const Kernel::V3D & observer, const Mantid::Kernel::V3D & centre, 
+        const Mantid::Kernel::V3D & axis, 
         const double radius, const double height) const;
 
       /// Geometry Handle for rendering

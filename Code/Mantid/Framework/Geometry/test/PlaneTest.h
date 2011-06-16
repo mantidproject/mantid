@@ -2,12 +2,14 @@
 #define MANTID_PLANETEST__
 
 #include <cxxtest/TestSuite.h>
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 
 using namespace Mantid;
 using namespace Geometry;
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::Matrix;
 
 class PlaneTest: public CxxTest::TestSuite
 {

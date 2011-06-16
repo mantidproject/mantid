@@ -5,7 +5,7 @@
 #include "ICompAssemblyActor.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 /**
   \class  RectangularDetectorActor
   \brief  This class wraps a RectangularDetector into Actor.
@@ -36,12 +36,14 @@
 */
 namespace Mantid
 {
-
+namespace Kernel
+{
+  class V3D;
+}
 namespace Geometry
 {
   class ICompAssembly;
   class Object;
-  class V3D;
 }
 namespace API
 {
@@ -61,7 +63,7 @@ public:
   virtual ~RectangularDetectorActor();
 
 private:
-  void AppendBoundingBox(const Mantid::Geometry::V3D& minBound,const Mantid::Geometry::V3D& maxBound);
+  void AppendBoundingBox(const Mantid::Kernel::V3D& minBound,const Mantid::Kernel::V3D& maxBound);
 
 protected:
   /// The rectangular detector
@@ -76,7 +78,7 @@ public:
   virtual std::string type()const {return "RectangularDetectorActor";} ///< Type of the GL object
 
   void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-  void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const;
+  void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const;
   virtual void setColors();
 
   int genTexture(char * & image_data, std::vector<GLColor>& list, bool useDetectorIDs);

@@ -91,7 +91,7 @@ public:
   ///Size in Y of the detector
   double ysize() const;
 
-  V3D getRelativePosAtXY(int x, int y) const;
+  Kernel::V3D getRelativePosAtXY(int x, int y) const;
   void getTextureSize(int & xsize, int & ysize) const;
 
   unsigned int getTextureID() const;
@@ -110,21 +110,21 @@ public:
   // ------------ IObjComponent methods ----------------
 
   /// Does the point given lie within this object component?
-  bool isValid(const V3D& point) const ;
+  bool isValid(const Kernel::V3D& point) const ;
 
   /// Does the point given lie on the surface of this object component?
-  bool isOnSide(const V3D& point) const ;
+  bool isOnSide(const Kernel::V3D& point) const ;
 
   ///Checks whether the track given will pass through this Component.
   int interceptSurface(Track& track) const ;
 
   /// Finds the approximate solid angle covered by the component when viewed from the point given
-  double solidAngle(const V3D& observer) const;
+  double solidAngle(const Kernel::V3D& observer) const;
   /// Retrieve the cached bounding box
   void getBoundingBox(BoundingBox & assemblyBox) const;
 
   ///Try to find a point that lies within (or on) the object
-  int getPointInObject(V3D& point) const;
+  int getPointInObject(Kernel::V3D& point) const;
 
   //Rendering member functions
   ///Draws the objcomponent.

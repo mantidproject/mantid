@@ -6,10 +6,12 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 
 using namespace Mantid;
 using namespace Geometry;
+using Mantid::Kernel::V3D;
+
 class TrackTest : public CxxTest::TestSuite
 {
 public:

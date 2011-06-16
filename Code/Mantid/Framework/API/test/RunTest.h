@@ -5,10 +5,10 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Property.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

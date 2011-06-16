@@ -8,8 +8,8 @@
 #include <cxxtest/TestSuite.h>
 
 using Mantid::API::MatrixProperty;
-using Mantid::Geometry::DblMatrix;
-using Mantid::Geometry::IntMatrix;
+using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::IntMatrix;
 
 class MatrixPropertyTest : public CxxTest::TestSuite
 {

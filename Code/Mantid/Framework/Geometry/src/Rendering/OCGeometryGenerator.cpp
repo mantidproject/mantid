@@ -3,8 +3,8 @@
 #include <vector>
 #include <cmath>
 #include <climits> // Needed for g++4.4 on Mac with OpenCASCADE 6.3.0
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
@@ -51,6 +51,8 @@
 
 namespace Mantid
 {
+    using Kernel::V3D;
+    using Kernel::Quat;
 
   namespace Geometry
   {

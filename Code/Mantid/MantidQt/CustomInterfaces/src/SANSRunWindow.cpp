@@ -16,7 +16,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
 
 #include <QLineEdit>

@@ -5,11 +5,13 @@
 #include "MantidKernel/Logger.h"
 namespace Mantid
 {
-
+  namespace Kernel
+  {
+    class V3D;
+  }
   namespace Geometry
   {
     class IObjComponent;
-    class V3D;
     /**
        \class CacheGeometryRenderer
        \brief rendering geometry using opengl from the geometry cache.

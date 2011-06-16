@@ -38,7 +38,7 @@ class TableVector;
     "double" for double
     "bool"   for Boolean
     "str"    for std::string
-    "V3D"    for Mantid::Geometry::V3D
+    "V3D"    for Mantid::Kernel::V3D
 
     Boolean is used instead of bool because of bool's non-standard treatmemt in std::vector.
 

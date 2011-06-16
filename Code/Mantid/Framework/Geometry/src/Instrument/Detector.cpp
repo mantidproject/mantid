@@ -6,6 +6,9 @@ namespace Mantid
 namespace Geometry
 {
 
+  using Kernel::V3D;
+  using Kernel::Quat;
+
 // Get a reference to the logger
 Kernel::Logger& Detector::g_log = Kernel::Logger::get("Detector");
 

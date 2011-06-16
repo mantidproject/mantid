@@ -3,7 +3,7 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include <vector>
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
@@ -12,6 +12,8 @@
 
 using namespace Mantid;
 using namespace Geometry;
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::Matrix;
 
 
 class LineTest: public CxxTest::TestSuite

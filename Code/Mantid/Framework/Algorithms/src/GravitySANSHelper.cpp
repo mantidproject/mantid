@@ -5,7 +5,8 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    using namespace Geometry;
+    using Kernel::V3D;
+
     /** sets up the object with workspace data and calculates cached values ready to calculate gravitional
     *  effects across a spectrum
     *  @param ws :: the workspace that contains the neutron counts

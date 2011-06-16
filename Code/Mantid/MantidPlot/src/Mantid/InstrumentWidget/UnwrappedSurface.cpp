@@ -27,7 +27,7 @@ detector(det)
 }
 
 
-UnwrappedSurface::UnwrappedSurface(const InstrumentActor* rootActor,const Mantid::Geometry::V3D& origin,const Mantid::Geometry::V3D& axis):
+UnwrappedSurface::UnwrappedSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis):
     ProjectionSurface(rootActor,origin,axis),
     m_instrActor(rootActor),
     m_u_min(DBL_MAX),
@@ -66,7 +66,7 @@ void UnwrappedSurface::init()
     // first detector defines the surface's x axis
     if (m_xaxis.nullVector())
     {
-      Mantid::Geometry::V3D pos = det->getPos() - m_pos;
+      Mantid::Kernel::V3D pos = det->getPos() - m_pos;
       double z = pos.scalar_prod(m_zaxis);
       m_xaxis = pos - m_zaxis * z;
       m_xaxis.normalize();
@@ -209,13 +209,13 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
       glTranslated(udet.u,udet.v,0.);
       glScaled(udet.uscale,udet.vscale,1);
 
-      Mantid::Geometry::Quat rot;
+      Mantid::Kernel::Quat rot;
       this->calcRot(udet,rot);
       double deg,ax0,ax1,ax2;
       rot.getAngleAxis(deg,ax0,ax1,ax2);
       glRotated(deg,ax0,ax1,ax2);
 
-      Mantid::Geometry::V3D scaleFactor = udet.detector->getScaleFactor();
+      Mantid::Kernel::V3D scaleFactor = udet.detector->getScaleFactor();
       glScaled(scaleFactor[0],scaleFactor[1],scaleFactor[2]);
 
       udet.detector->shape()->draw();
@@ -237,23 +237,23 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
 
 }
 
-void UnwrappedSurface::calcSize(UnwrappedDetector& udet,const Mantid::Geometry::V3D& X,
-              const Mantid::Geometry::V3D& Y)
+void UnwrappedSurface::calcSize(UnwrappedDetector& udet,const Mantid::Kernel::V3D& X,
+              const Mantid::Kernel::V3D& Y)
 {
-  Mantid::Geometry::Quat R;
+  Mantid::Kernel::Quat R;
   this->calcRot(udet,R);
 
   Mantid::Geometry::BoundingBox bbox = udet.detector->shape()->getBoundingBox();
-  Mantid::Geometry::V3D scale = udet.detector->getScaleFactor();
+  Mantid::Kernel::V3D scale = udet.detector->getScaleFactor();
 
 //  udet.minPoint = bbox.minPoint();
 //  udet.maxPoint = bbox.maxPoint();
 
-  Mantid::Geometry::V3D size = bbox.maxPoint() - bbox.minPoint();
+  Mantid::Kernel::V3D size = bbox.maxPoint() - bbox.minPoint();
   size *= scale;
-  Mantid::Geometry::V3D s1(size);
-  Mantid::Geometry::V3D s2 = size + Mantid::Geometry::V3D(-size.X(),0,0) - Mantid::Geometry::V3D(size.X(),0,0);
-  Mantid::Geometry::V3D s3 = size + Mantid::Geometry::V3D(0,-size.Y(),0) - Mantid::Geometry::V3D(0,size.Y(),0);
+  Mantid::Kernel::V3D s1(size);
+  Mantid::Kernel::V3D s2 = size + Mantid::Kernel::V3D(-size.X(),0,0) - Mantid::Kernel::V3D(size.X(),0,0);
+  Mantid::Kernel::V3D s3 = size + Mantid::Kernel::V3D(0,-size.Y(),0) - Mantid::Kernel::V3D(0,size.Y(),0);
   R.rotate(s1);
   R.rotate(s2);
   R.rotate(s3);

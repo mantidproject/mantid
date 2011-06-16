@@ -7,7 +7,7 @@
 #include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/System.h"
 #include <MantidGeometry/Crystal/OrientedLattice.h>
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid
 {
@@ -63,7 +63,7 @@ namespace Crystal
     /// Min D spacing to apply.
     double minD;
     /// Rotation matrix
-    Mantid::Geometry::Matrix<double> mat;
+    Mantid::Kernel::DblMatrix mat;
 
   };
 

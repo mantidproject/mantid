@@ -9,6 +9,8 @@ namespace Mantid
 {
   namespace Geometry
   {
+    using Kernel::V3D;
+
     //---------------------------------------------------------
     // Public member functions
     //---------------------------------------------------------
@@ -23,9 +25,9 @@ namespace Mantid
           throw(Kernel::Exception::NotImplementedError("this function has not been modified properly"));
       }
 
-      if(point.X() <= xMax() + Tolerance && point.X() >= xMin() - Tolerance &&
-         point.Y() <= yMax() + Tolerance && point.Y() >= yMin() - Tolerance && 
-        point.Z() <= zMax() + Tolerance && point.Z() >= zMin() - Tolerance)
+      if(point.X() <= xMax() + Kernel::Tolerance && point.X() >= xMin() - Kernel::Tolerance &&
+         point.Y() <= yMax() + Kernel::Tolerance && point.Y() >= yMin() - Kernel::Tolerance && 
+        point.Z() <= zMax() + Kernel::Tolerance && point.Z() >= zMin() - Kernel::Tolerance)
       {
         return true;
       }
@@ -59,7 +61,7 @@ namespace Mantid
       }
       // Method - Loop through planes looking for ones that are visible and check intercept
       // Assume that orig is outside of BoundingBox.
-      const double tol = Mantid::Geometry::Tolerance;
+      const double tol = Mantid::Kernel::Tolerance;
       double lambda(0.0);
       if (startPoint.X() > xMax())
       {
@@ -130,13 +132,13 @@ namespace Mantid
      * @param observer :: Viewing point
      * @returns The value of the angular half-width
     */
-    double BoundingBox::angularWidth(const Geometry::V3D& observer) const
+    double BoundingBox::angularWidth(const Kernel::V3D& observer) const
     {
-      Geometry::V3D centre = centrePoint() - observer;
-      std::vector<Geometry::V3D> pts;
+      Kernel::V3D centre = centrePoint() - observer;
+      std::vector<Kernel::V3D> pts;
       this->getFullBox(pts,observer);
 
-      std::vector<Geometry::V3D>::const_iterator ip;
+      std::vector<Kernel::V3D>::const_iterator ip;
       double centre_norm_inv = 1.0 / centre.norm();
       double thetaMax(-1.0);
       for (ip = pts.begin(); ip != pts.end(); ip++)
@@ -151,14 +153,14 @@ namespace Mantid
     void BoundingBox::getFullBox(std::vector<V3D> &box,const V3D &observer)const
     {
       box.resize(8);
-      box[0] = Geometry::V3D(xMin(), yMin(), zMin())-observer;
-      box[1] = Geometry::V3D(xMax(), yMin(), zMin())-observer;
-      box[2] = Geometry::V3D(xMax(), yMax(), zMin())-observer;
-      box[3] = Geometry::V3D(xMin(), yMax(), zMin())-observer;
-      box[4] = Geometry::V3D(xMin(), yMax(), zMax())-observer;
-      box[5] = Geometry::V3D(xMin(), yMin(), zMax())-observer;
-      box[6] = Geometry::V3D(xMax(), yMin(), zMax())-observer;
-      box[7] = Geometry::V3D(xMax(), yMax(), zMax())-observer;
+      box[0] = Kernel::V3D(xMin(), yMin(), zMin())-observer;
+      box[1] = Kernel::V3D(xMax(), yMin(), zMin())-observer;
+      box[2] = Kernel::V3D(xMax(), yMax(), zMin())-observer;
+      box[3] = Kernel::V3D(xMin(), yMax(), zMin())-observer;
+      box[4] = Kernel::V3D(xMin(), yMax(), zMax())-observer;
+      box[5] = Kernel::V3D(xMin(), yMin(), zMax())-observer;
+      box[6] = Kernel::V3D(xMax(), yMin(), zMax())-observer;
+      box[7] = Kernel::V3D(xMax(), yMax(), zMax())-observer;
 
     }
     void BoundingBox::setBoxAlignment(const V3D &R0,const std::vector<V3D> &orts)

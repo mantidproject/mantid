@@ -3,7 +3,7 @@
     
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidMDEvents/CoordTransform.h"
 
 

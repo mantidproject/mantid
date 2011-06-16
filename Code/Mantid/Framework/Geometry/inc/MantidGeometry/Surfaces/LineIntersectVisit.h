@@ -3,7 +3,7 @@
 
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Line.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include <vector>
 
 namespace Mantid
@@ -58,15 +58,15 @@ namespace Mantid
       static Kernel::Logger& PLog;           ///< The official logger
 
       Line ATrack;                         ///< The line
-      std::vector<Geometry::V3D> PtOut;  ///< The intersection point
+      std::vector<Kernel::V3D> PtOut;  ///< The intersection point
       std::vector<double> DOut;            ///< The distance
 
       void procTrack();
 
     public:
 
-      LineIntersectVisit(const Geometry::V3D&,
-        const Geometry::V3D&);
+      LineIntersectVisit(const Kernel::V3D&,
+        const Kernel::V3D&);
       /// Destructor
       virtual ~LineIntersectVisit() {};
 
@@ -83,13 +83,13 @@ namespace Mantid
       const std::vector<double>& getDistance() const 
       { return DOut; }
       /// Get the intersection points
-      const std::vector<Geometry::V3D>& getPoints() const 
+      const std::vector<Kernel::V3D>& getPoints() const 
       { return PtOut; }
       /// Get the number of intersection points
       unsigned long getNPoints() const { return (unsigned long)PtOut.size(); }
 
       /// Re-set the line
-      void setLine(const Geometry::V3D&,const Geometry::V3D&);
+      void setLine(const Kernel::V3D&,const Kernel::V3D&);
 
     };
 

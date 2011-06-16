@@ -46,7 +46,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include <boost/shared_ptr.hpp>
 
 
@@ -70,7 +70,7 @@ namespace Mantid
           * @param UnitID        -- the units for this direction. A reciprocal dimension always have a "MomentumTransfer" unit, which overrides the value, specified in 
           *                         the constructor. An orthogonal dimention can have any unit, known by the unit factory. The default is enerty transfer. 
           */
-      explicit MDBasisDimension(std::string id, bool isReciprocal, int columnNumber,const std::string &UnitID="",const V3D &inDirection=V3D());
+      explicit MDBasisDimension(std::string id, bool isReciprocal, int columnNumber,const std::string &UnitID="",const Kernel::V3D &inDirection=Kernel::V3D());
       
       bool operator==(const MDBasisDimension &other) const;
       bool operator!=(const MDBasisDimension &other) const;
@@ -79,7 +79,7 @@ namespace Mantid
       std::string getId() const;
       bool getIsReciprocal() const;
       int getColumnNumber() const;
-          V3D getDirection()const{return direction;}
+          Kernel::V3D getDirection()const{return direction;}
           Kernel::Unit & getUnits()const{return *spUnit;}
    private:
           std::string m_id; //Equivalent to tag in older definitions.
@@ -90,8 +90,8 @@ namespace Mantid
           boost::shared_ptr<Kernel::Unit> spUnit;
       /** the direction of the lattice vector. The length of this vector is equal to lattice 
             * parameter for a reciprocal axis in this direction expressed in units above or 0 if this is an orthogonal direction like T or DE
-                (as orthogonal directions are ortogonal to the 3D space, represented by V3D )*/
-          V3D direction;
+                (as orthogonal directions are ortogonal to the 3D space, represented by Kernel::V3D )*/
+          Kernel::V3D direction;
     };
 
   }

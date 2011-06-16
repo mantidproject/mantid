@@ -1,13 +1,15 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
-#include "MantidGeometry/Tolerance.h"
+#include "MantidKernel/Tolerance.h"
 
 namespace Mantid
 {
 
   namespace Geometry
   {
+    using Kernel::Tolerance;
+    using Kernel::V3D;
 
     Kernel::Logger& Sphere::PLog(Kernel::Logger::get("Sphere"));
 
@@ -112,7 +114,7 @@ namespace Mantid
       if (!Mantid::Kernel::Strings::section(Line,R))
         return -7;
 
-      Centre=Geometry::V3D(cent);
+      Centre=Kernel::V3D(cent);
       Radius=R;
       setBaseEqn();
       return 0;
@@ -120,7 +122,7 @@ namespace Mantid
 
 
     int
-      Sphere::side(const Geometry::V3D& Pt) const
+      Sphere::side(const Kernel::V3D& Pt) const
       /**
       Calculate where the point Pt is relative to the 
       sphere.
@@ -141,7 +143,7 @@ namespace Mantid
     }
 
     int
-      Sphere::onSurface(const Geometry::V3D& Pt) const
+      Sphere::onSurface(const Kernel::V3D& Pt) const
       /**
       Calculate if the point Pt on the surface of the sphere
       (within tolerance CTolerance)
@@ -157,7 +159,7 @@ namespace Mantid
     }
 
     double
-      Sphere::distance(const Geometry::V3D& Pt) const
+      Sphere::distance(const Kernel::V3D& Pt) const
       /** 
       Determine the shortest distance from the Surface 
       to the Point. 
@@ -165,13 +167,13 @@ namespace Mantid
       @return distance (Positive only)
       */
     {
-      const Geometry::V3D disp_vec = Pt - Centre;
+      const Kernel::V3D disp_vec = Pt - Centre;
       return std::abs(disp_vec.norm() - Radius);
     }
 
 
     void
-      Sphere::displace(const Geometry::V3D& Pt) 
+      Sphere::displace(const Kernel::V3D& Pt) 
       /**
       Apply a shift of the centre
       @param Pt :: distance to add to the centre
@@ -183,7 +185,7 @@ namespace Mantid
     }
 
     void
-      Sphere::rotate(const Geometry::Matrix<double>& MA) 
+      Sphere::rotate(const Kernel::Matrix<double>& MA) 
       /**
       Apply a Rotation matrix
       @param MA :: matrix to rotate by
@@ -200,12 +202,12 @@ namespace Mantid
       Compute the distance between the given point and the centre of the sphere
       @param pt :: The chosen point 
       */
-      const Geometry::V3D displace_vec = pt - Centre;
+      const Kernel::V3D displace_vec = pt - Centre;
       return displace_vec.norm();
     }
 
     void 
-      Sphere::setCentre(const Geometry::V3D& A)
+      Sphere::setCentre(const Kernel::V3D& A)
       /**
       Set the centre point
       @param A :: New Centre Point
@@ -248,7 +250,7 @@ namespace Mantid
       std::ostringstream cx;
       Quadratic::writeHeader(cx);
       cx.precision(Surface::Nprecision);
-      if (Centre.distance(Geometry::V3D(0,0,0))<Tolerance)
+      if (Centre.distance(Kernel::V3D(0,0,0))<Tolerance)
       {
         cx<<"so "<<Radius;
       }

@@ -1,6 +1,6 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -15,8 +15,9 @@ namespace Mantid
 namespace Geometry
 {
 
-
-
+    using Kernel::V3D;
+    using Kernel::Quat;
+    using Kernel::Matrix;
 
 /** Empty constructor
  */

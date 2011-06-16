@@ -32,7 +32,7 @@ PyObject* UnitCellWrapper::getB(UnitCell& self)
 
 void UnitCellWrapper::recalculateFromGstar(UnitCell& self,PyObject* p)
 {
-  Geometry::Matrix<double> m=MantidVecHelper::getMatrixFromArray(p);
+  Kernel::DblMatrix m=MantidVecHelper::getMatrixFromArray(p);
   if ((m.numRows()!=3) || (m.numCols()!=3)) throw std::invalid_argument("Not 3x3 matrix"); 
   self.recalculateFromGstar(m); 
 }
@@ -83,7 +83,7 @@ PyObject* OrientedLatticeWrapper::getUB(OrientedLattice& self)
 
 void OrientedLatticeWrapper::recalculateFromGstar(OrientedLattice& self,PyObject* p)
 {
-  Geometry::Matrix<double> m=MantidVecHelper::getMatrixFromArray(p),unity(3,3,true);
+  Kernel::DblMatrix m=MantidVecHelper::getMatrixFromArray(p),unity(3,3,true);
   if ((m.numRows()!=3) || (m.numCols()!=3)) throw std::invalid_argument("Not 3x3 matrix"); 
   self.recalculateFromGstar(m); 
   self.setU(unity);
@@ -91,14 +91,14 @@ void OrientedLatticeWrapper::recalculateFromGstar(OrientedLattice& self,PyObject
 
 void OrientedLatticeWrapper::setU(OrientedLattice& self,PyObject* p)
 {
-  Geometry::Matrix<double> m=MantidVecHelper::getMatrixFromArray(p);
+  Kernel::DblMatrix m=MantidVecHelper::getMatrixFromArray(p);
   if ((m.numRows()!=3) || (m.numCols()!=3)) throw std::invalid_argument("Not 3x3 matrix"); 
   self.setU(m); 
 }
 
 void OrientedLatticeWrapper::setUB(OrientedLattice& self,PyObject* p)
 {
-  Geometry::Matrix<double> m=MantidVecHelper::getMatrixFromArray(p);
+  Kernel::DblMatrix m=MantidVecHelper::getMatrixFromArray(p);
   if ((m.numRows()!=3) || (m.numCols()!=3)) throw std::invalid_argument("Not 3x3 matrix"); 
   self.setUB(m); 
 }

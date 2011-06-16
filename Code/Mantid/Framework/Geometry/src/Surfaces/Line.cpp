@@ -2,18 +2,20 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/mathSupport.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidGeometry/Tolerance.h"
+#include "MantidKernel/Tolerance.h"
 
 namespace Mantid
 {
 
   namespace Geometry
   {
+    using Kernel::Tolerance;
+    using Kernel::V3D;
 
     Kernel::Logger& Line::PLog(Kernel::Logger::get("Line"));
 
@@ -23,7 +25,7 @@ namespace Mantid
       */
     {}
 
-    Line::Line(const Geometry::V3D& O,const Geometry::V3D& D) 
+    Line::Line(const Kernel::V3D& O,const Kernel::V3D& D) 
       : Origin(O),Direct(D)
       /**
       Constructor
@@ -72,7 +74,7 @@ namespace Mantid
       */
     {}
 
-    Geometry::V3D
+    Kernel::V3D
       Line::getPoint(const double lambda) const
       /**
       Return the point on the line given lambda*direction
@@ -84,7 +86,7 @@ namespace Mantid
     }
 
     double
-      Line::distance(const Geometry::V3D& A) const
+      Line::distance(const Kernel::V3D& A) const
       /**
       Distance of a point from the line
       @param A :: test Point
@@ -92,13 +94,13 @@ namespace Mantid
       */
     {
       const double lambda=Direct.scalar_prod(A-Origin);
-      Geometry::V3D L=getPoint(lambda);
+      Kernel::V3D L=getPoint(lambda);
       L-=A;
       return L.norm();
     }
 
     int 
-      Line::isValid(const Geometry::V3D& A) const
+      Line::isValid(const Kernel::V3D& A) const
       /** 
       Calculate is point is on line by using distance to determine
       if the point is within Tolerance of the line
@@ -111,7 +113,7 @@ namespace Mantid
     }
 
     void
-      Line::rotate(const Geometry::Matrix<double>& MA) 
+      Line::rotate(const Kernel::Matrix<double>& MA) 
       /**
       Applies the rotation matrix to the 
       object.
@@ -125,7 +127,7 @@ namespace Mantid
     }
 
     void 
-      Line::displace(const Geometry::V3D& Pt)
+      Line::displace(const Kernel::V3D& Pt)
       /** 
       Apply a displacement Pt 
       @param Pt :: Point value of the displacement
@@ -138,7 +140,7 @@ namespace Mantid
     int
       Line::lambdaPair(const int ix,const std::pair<
       std::complex<double>,std::complex<double> >& SQ,
-      std::vector<Geometry::V3D>& PntOut) const
+      std::vector<Kernel::V3D>& PntOut) const
       /** 
       Helper function to decide which roots to take.
       The assumption is that lambda has been solved by quadratic
@@ -160,11 +162,11 @@ namespace Mantid
 
       int nCnt(0);          // number of good points
 
-      Geometry::V3D Ans;
+      Kernel::V3D Ans;
       if (SQ.first.imag()==0.0 && SQ.first.real()>=0.0) // +ve roots only
       {
         const double lambda=SQ.first.real();
-        Geometry::V3D Ans=getPoint(lambda);
+        Kernel::V3D Ans=getPoint(lambda);
         PntOut.push_back(Ans);
         if (ix<2)        // only one unique root.
           return 1;
@@ -178,7 +180,7 @@ namespace Mantid
           PntOut.push_back(getPoint(lambda));
           return 1;
         }
-        Geometry::V3D Ans2=getPoint(lambda);
+        Kernel::V3D Ans2=getPoint(lambda);
         // If points too close return only 1 item.
         if (Ans.distance(Ans2)<Tolerance)
           return 1;
@@ -190,7 +192,7 @@ namespace Mantid
     }
 
     int
-      Line::intersect(std::vector<Geometry::V3D>& VecOut,
+      Line::intersect(std::vector<Kernel::V3D>& VecOut,
       const Quadratic& Sur) const
       /**
       For the line that intersects the surfaces 
@@ -220,7 +222,7 @@ namespace Mantid
     }  
 
     int 
-      Line::intersect(std::vector<Geometry::V3D>& PntOut ,const Plane& Pln) const
+      Line::intersect(std::vector<Kernel::V3D>& PntOut ,const Plane& Pln) const
       /** 
       For the line that intersects the cylinder generate 
       add the point to the VecOut, return number of points
@@ -244,7 +246,7 @@ namespace Mantid
     }
 
     int 
-      Line::intersect(std::vector<Geometry::V3D>& PntOut ,const Cylinder& Cyl) const
+      Line::intersect(std::vector<Kernel::V3D>& PntOut ,const Cylinder& Cyl) const
       /** 
       For the line that intersects the cylinder generate 
       add the point to the VecOut, return number of points
@@ -255,9 +257,9 @@ namespace Mantid
       @return Number of points found by intersection
       */
     {
-      const Geometry::V3D Cent=Cyl.getCentre();
-      const Geometry::V3D Ax=Origin-Cent;
-      const Geometry::V3D N= Cyl.getNormal();
+      const Kernel::V3D Cent=Cyl.getCentre();
+      const Kernel::V3D Ax=Origin-Cent;
+      const Kernel::V3D N= Cyl.getNormal();
       const double R=Cyl.getRadius();
       const double vDn = N.scalar_prod(Direct);
       const double vDA = N.scalar_prod(Ax);
@@ -273,7 +275,7 @@ namespace Mantid
     }
 
     int 
-      Line::intersect(std::vector<Geometry::V3D>& PntOut ,const Sphere& Sph) const
+      Line::intersect(std::vector<Kernel::V3D>& PntOut ,const Sphere& Sph) const
       /** 
       For the line that intersects the cylinder generate 
       add the point to the VecOut, return number of points
@@ -285,7 +287,7 @@ namespace Mantid
       */
     {
       // Nasty stripping of useful stuff from sphere
-      const Geometry::V3D Ax=Origin-Sph.getCentre();
+      const Kernel::V3D Ax=Origin-Sph.getCentre();
       const double R=Sph.getRadius();
       // First solve the equation of intersection
       double C[3];
@@ -300,7 +302,7 @@ namespace Mantid
     //SETING
 
     int 
-      Line::setLine(const Geometry::V3D& O,const Geometry::V3D& D) 
+      Line::setLine(const Kernel::V3D& O,const Kernel::V3D& D) 
       /**
       sets the line given the Origne and direction
       @param O :: origin

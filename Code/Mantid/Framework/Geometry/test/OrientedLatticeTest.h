@@ -4,10 +4,13 @@
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 #include <iomanip>
-#include <MantidGeometry/Math/Matrix.h>
+#include <MantidKernel/Matrix.h>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 
 using namespace Mantid::Geometry;
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::Matrix;
 
 class OrientedLatticeTest : public CxxTest::TestSuite
 {

@@ -5,9 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidKernel/Tolerance.h"
 #include <list>
 
 namespace Mantid
@@ -61,12 +60,12 @@ namespace Mantid
 
       /**
       * Constuctor
-      * @param entry :: V3D point to start
-      * @param exit :: V3D point to end track
+      * @param entry :: Kernel::V3D point to start
+      * @param exit :: Kernel::V3D point to end track
       * @param totalDistance :: Total distance from start of track
       * @param compID :: An optional component identifier for the physical object hit. (Default=NULL)
       */
-      inline Link(const V3D& entry,const V3D& exit, const double totalDistance, const ComponentID compID = NULL) :
+      inline Link(const Kernel::V3D& entry,const Kernel::V3D& exit, const double totalDistance, const ComponentID compID = NULL) :
         entryPoint(entry),exitPoint(exit),distFromStart(totalDistance), distInsideObject(entryPoint.distance(exitPoint)), 
         componentID(compID)
       {}
@@ -77,8 +76,8 @@ namespace Mantid
 
       /** @name Attributes. */
       //@{
-      V3D entryPoint;             ///< Entry point
-      V3D exitPoint;              ///< Exit point
+      Kernel::V3D entryPoint;             ///< Entry point
+      Kernel::V3D exitPoint;              ///< Exit point
       double distFromStart;       ///< Total distance from track beginning
       double distInsideObject;    ///< Total distance covered inside object
       ComponentID componentID;    ///< ComponentID of the intersected component
@@ -104,7 +103,7 @@ namespace Mantid
       * @param distFromStartOfTrack :: Total distance from start of track
       * @param compID :: An optional unique ID marking the component intersected. (Default=NULL)
       */
-      inline IntersectionPoint(const int flag, const Geometry::V3D& end,
+      inline IntersectionPoint(const int flag, const Kernel::V3D& end,
                                const double distFromStartOfTrack, const ComponentID compID = NULL) :
         directionFlag(flag),endPoint(end),distFromStart(distFromStartOfTrack), componentID(compID)
       {}
@@ -120,13 +119,13 @@ namespace Mantid
       inline bool operator<(const IntersectionPoint& other) const
       {
         const double diff = fabs(distFromStart - other.distFromStart);
-        return (diff > Tolerance) ? distFromStart < other.distFromStart : directionFlag < other.directionFlag;
+        return (diff > Kernel::Tolerance) ? distFromStart < other.distFromStart : directionFlag < other.directionFlag;
       }
 
       /** @name Attributes. */
       //@{
       int directionFlag;         ///< Directional flag
-      V3D endPoint;              ///< Point
+      Kernel::V3D endPoint;              ///< Point
       double distFromStart;      ///< Total distance from track begin
       ComponentID componentID;   ///< Unique component ID
       //@}
@@ -148,7 +147,7 @@ namespace Mantid
       /// Default constructor
       Track();
       /// Constructor
-      Track(const V3D& startPt, const V3D& unitVector);
+      Track(const Kernel::V3D& startPt, const Kernel::V3D& unitVector);
       /// Copy constructor
       Track(const Track&);
       /// Assignment operator
@@ -156,9 +155,9 @@ namespace Mantid
       /// Destructor
       ~Track();
       /// Adds a point of intersection to the track
-      void addPoint(const int directionFlag, const V3D& endPoint, const ComponentID compID = NULL);
+      void addPoint(const int directionFlag, const Kernel::V3D& endPoint, const ComponentID compID = NULL);
       /// Adds a link to the track
-      int addLink(const V3D& firstPoint,const V3D& secondPoint, 
+      int addLink(const Kernel::V3D& firstPoint,const Kernel::V3D& secondPoint, 
                   const double distanceAlongTrack, const ComponentID compID = NULL);
       /// Remove touching Links that have identical components
       void removeCojoins();
@@ -166,13 +165,13 @@ namespace Mantid
       void buildLink();
 
       /// Set a starting point and direction
-      void reset(const Geometry::V3D& startPoint,const Geometry::V3D& direction);
+      void reset(const Kernel::V3D& startPoint,const Kernel::V3D& direction);
       /// Clear the current set of intersection results
       void clearIntersectionResults();
       /// Returns the starting point
-      const V3D& startPoint() const { return m_startPoint; }
+      const Kernel::V3D& startPoint() const { return m_startPoint; }
       /// Returns the direction as a unit vector
-      const V3D& direction() const { return m_unitVector; }
+      const Kernel::V3D& direction() const { return m_unitVector; }
       /// Returns an interator to the start of the set of links
       LType::const_iterator begin() const { return m_links.begin(); }
       /// Returns an interator to one-past-the-end of the set of links
@@ -183,8 +182,8 @@ namespace Mantid
       int nonComplete() const;
 
     private:
-      V3D m_startPoint;   ///< Start Point
-      V3D m_unitVector;  ///< unit vector to direction
+      Kernel::V3D m_startPoint;   ///< Start Point
+      Kernel::V3D m_unitVector;  ///< unit vector to direction
       LType m_links;          ///< Track units
       PType m_surfPoints;    ///< Intersection points
     };

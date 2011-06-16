@@ -15,8 +15,8 @@ namespace { \
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quat.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Quat.h"
 #include "MantidKernel/DynamicFactory.h" // For RegistrationHelper
 #include <boost/shared_ptr.hpp>
 #include <string>
@@ -233,9 +233,9 @@ namespace Mantid
     /// Parameter of type std::string
     typedef MANTID_GEOMETRY_DLL ParameterType<std::string> ParameterString;
     /// Parameter of type V3D
-    typedef MANTID_GEOMETRY_DLL ParameterType<V3D> ParameterV3D;
+    typedef MANTID_GEOMETRY_DLL ParameterType<Kernel::V3D> ParameterV3D;
     /// Parameter of type Quat
-    typedef MANTID_GEOMETRY_DLL ParameterType<Quat> ParameterQuat;
+    typedef MANTID_GEOMETRY_DLL ParameterType<Kernel::Quat> ParameterQuat;
 
   } // namespace Geometry
 } // namespace Mantid

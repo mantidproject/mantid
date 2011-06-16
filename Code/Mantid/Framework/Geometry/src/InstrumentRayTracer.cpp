@@ -4,7 +4,7 @@
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
 #include <deque>
 #include <iterator>
@@ -13,6 +13,8 @@ namespace Mantid
 {
   namespace Geometry
   {
+
+    using Kernel::V3D;
 
     // Initialize logger
     Kernel::Logger & InstrumentRayTracer::g_log = Kernel::Logger::get("InstrumentRayTracer");

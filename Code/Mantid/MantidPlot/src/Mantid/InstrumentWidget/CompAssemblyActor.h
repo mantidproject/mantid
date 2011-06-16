@@ -5,7 +5,7 @@
 #include "GLActor.h"
 
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 /**
   \class  CompAssemblyActor
   \brief  This class wraps the ICompAssembly into Actor.
@@ -37,13 +37,15 @@
 */
 namespace Mantid
 {
-
+namespace Kernel
+{
+  class V3D;
+}
 namespace Geometry
 {
   class IInstrument;
   class ICompAssembly;
   class Object;
-  class V3D;
 }
 
 }
@@ -63,7 +65,7 @@ protected:
   mutable std::vector<ObjComponentActor*> mChildObjCompActors;     ///< List of ObjComponent Actors
   mutable std::vector<ICompAssemblyActor*> mChildCompAssemActors;   ///< List of CompAssembly Actors
 private:
-  void AppendBoundingBox(const Mantid::Geometry::V3D& minBound,const Mantid::Geometry::V3D& maxBound);
+  void AppendBoundingBox(const Mantid::Kernel::V3D& minBound,const Mantid::Kernel::V3D& maxBound);
 };
 
 #endif /*GLTRIANGLE_H_*/

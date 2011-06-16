@@ -2,7 +2,7 @@
 #include "MantidGeometry/IDetector.h"
 #include <cmath>
 
-UnwrappedSphere::UnwrappedSphere(const InstrumentActor* rootActor, const Mantid::Geometry::V3D &origin, const Mantid::Geometry::V3D &axis):
+UnwrappedSphere::UnwrappedSphere(const InstrumentActor* rootActor, const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis):
     UnwrappedSurface(rootActor,origin,axis)
 {
   init();
@@ -11,7 +11,7 @@ UnwrappedSphere::UnwrappedSphere(const InstrumentActor* rootActor, const Mantid:
 void UnwrappedSphere::calcUV(UnwrappedDetector& udet)
 {
   //static const double pi2 = 2*acos(-1.);
-  Mantid::Geometry::V3D pos = udet.detector->getPos() - m_pos;
+  Mantid::Kernel::V3D pos = udet.detector->getPos() - m_pos;
 
   // projection to cylinder axis
   udet.v = pos.scalar_prod(m_zaxis);
@@ -25,20 +25,20 @@ void UnwrappedSphere::calcUV(UnwrappedDetector& udet)
   udet.u = -atan2(y,x);
   udet.v = -acos(udet.v/r);
 
-  calcSize(udet,Mantid::Geometry::V3D(-1,0,0),Mantid::Geometry::V3D(0,1,0));
+  calcSize(udet,Mantid::Kernel::V3D(-1,0,0),Mantid::Kernel::V3D(0,1,0));
 
 }
 
-void UnwrappedSphere::calcRot(const UnwrappedDetector& udet, Mantid::Geometry::Quat& R)const
+void UnwrappedSphere::calcRot(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const
 {
   // Basis vectors for a detector image on the screen
-  const Mantid::Geometry::V3D X(-1,0,0);
-  const Mantid::Geometry::V3D Y(0,1,0);
-  const Mantid::Geometry::V3D Z(0,0,-1);
+  const Mantid::Kernel::V3D X(-1,0,0);
+  const Mantid::Kernel::V3D Y(0,1,0);
+  const Mantid::Kernel::V3D Z(0,0,-1);
 
   // Find basis with x axis pointing to the detector from the sample,
   // z axis is coplanar with x and m_zaxis, and y making the basis right handed
-  Mantid::Geometry::V3D x,y,z;
+  Mantid::Kernel::V3D x,y,z;
   z = udet.detector->getPos() - m_pos;
   z.normalize();
   y = m_zaxis;
@@ -49,7 +49,7 @@ void UnwrappedSphere::calcRot(const UnwrappedDetector& udet, Mantid::Geometry::Q
   }
   x.normalize();
   y = z.cross_prod(x);
-  Mantid::Geometry::Quat R1;
+  Mantid::Kernel::Quat R1;
   InstrumentActor::BasisRotation(x,y,z,X,Y,Z,R1);
 
   R = R1 * udet.detector->getRotation();

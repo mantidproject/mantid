@@ -17,6 +17,7 @@
 namespace Mantid{
     namespace Geometry{
 
+       using Kernel::V3D;
 
 MDDimensionRes::MDDimensionRes(const MDBasisDimension &Dim):
 MDDimension(Dim.getId()),

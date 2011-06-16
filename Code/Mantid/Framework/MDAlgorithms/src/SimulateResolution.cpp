@@ -11,9 +11,9 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_roots.h>
 
-#include "MantidGeometry/Tolerance.h"
+#include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -191,8 +191,8 @@ namespace Mantid
         */
         void SimulateResolution::bMatrix(const double wi, const double wf, const double x0, const double xa, const double x1,
             const double x2, const double thetam, const double angvel,
-            const Geometry::Matrix<double> & sMat, const Geometry::Matrix<double> & dMat,
-            Geometry::Matrix<double> & bMat)
+            const Kernel::Matrix<double> & sMat, const Kernel::Matrix<double> & dMat,
+            Kernel::Matrix<double> & bMat)
         {
             //double precision wi, wf, x0, xa, x1, x2, thetam, angvel, sMat(3,3), dMat(3,3), bMat(6,11)
             /*
@@ -324,8 +324,8 @@ namespace Mantid
         * d_matrix function from tobyfit
         */
 
-        void SimulateResolution::dMatrix(const double phi, const double beta, Geometry::Matrix<double> & dMat,
-             Geometry::Matrix<double> & dinvMat)
+        void SimulateResolution::dMatrix(const double phi, const double beta, Kernel::Matrix<double> & dMat,
+             Kernel::Matrix<double> & dinvMat)
         {
 
             /*
@@ -602,7 +602,7 @@ namespace Mantid
         */
         int SimulateResolution::rlatt(const std::vector<double> & a, const std::vector<double> & ang,
             std::vector<double> & arlu, std::vector<double> & angrlu,
-            Geometry::Matrix<double> & dMat )
+            Kernel::Matrix<double> & dMat )
         {
             UNUSED_ARG(ang);
             UNUSED_ARG(arlu);

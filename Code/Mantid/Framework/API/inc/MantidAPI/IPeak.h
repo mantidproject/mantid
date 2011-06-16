@@ -3,8 +3,8 @@
     
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/IInstrument.h"
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
 //#include "MantidKernel/System.h"
 
@@ -38,18 +38,18 @@ namespace API
     virtual double getH() const = 0;
     virtual double getK() const = 0;
     virtual double getL() const = 0;
-    virtual Mantid::Geometry::V3D getHKL() = 0;
+    virtual Mantid::Kernel::V3D getHKL() = 0;
     virtual void setH(double m_H) = 0;
     virtual void setK(double m_K) = 0;
     virtual void setL(double m_L) = 0;
     virtual void setHKL(double H, double K, double L) = 0;
-    virtual void setHKL(Mantid::Geometry::V3D HKL) = 0;
+    virtual void setHKL(Mantid::Kernel::V3D HKL) = 0;
 
-    virtual Mantid::Geometry::V3D getQLabFrame() const = 0;
-    virtual Mantid::Geometry::V3D getQSampleFrame() const = 0;
+    virtual Mantid::Kernel::V3D getQLabFrame() const = 0;
+    virtual Mantid::Kernel::V3D getQSampleFrame() const = 0;
 
-    virtual void setQSampleFrame(Mantid::Geometry::V3D QSampleFrame, double detectorDistance=1.0) = 0;
-    virtual void setQLabFrame(Mantid::Geometry::V3D QLabFrame, double detectorDistance=1.0) = 0;
+    virtual void setQSampleFrame(Mantid::Kernel::V3D QSampleFrame, double detectorDistance=1.0) = 0;
+    virtual void setQLabFrame(Mantid::Kernel::V3D QLabFrame, double detectorDistance=1.0) = 0;
 
     virtual void setWavelength(double wavelength) = 0;
     virtual double getWavelength() const = 0;
@@ -70,14 +70,14 @@ namespace API
     virtual double getBinCount() const = 0;
     virtual void setBinCount(double m_BinCount) = 0;
 
-    virtual Mantid::Geometry::Matrix<double> getGoniometerMatrix() const = 0;
-    virtual void setGoniometerMatrix(Mantid::Geometry::Matrix<double> m_GoniometerMatrix) = 0;
+    virtual Mantid::Kernel::Matrix<double> getGoniometerMatrix() const = 0;
+    virtual void setGoniometerMatrix(Mantid::Kernel::Matrix<double> m_GoniometerMatrix) = 0;
 
     virtual std::string getBankName() const = 0;
     virtual int getRow() const = 0;
     virtual int getCol() const = 0;
 
-    virtual Mantid::Geometry::V3D getDetPos() const = 0;
+    virtual Mantid::Kernel::V3D getDetPos() const = 0;
     virtual double getL1() const = 0;
     virtual double getL2() const = 0;
 

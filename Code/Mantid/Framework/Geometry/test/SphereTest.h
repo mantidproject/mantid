@@ -9,12 +9,13 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 
 using namespace Mantid;
 using namespace Geometry;
+using Mantid::Kernel::V3D;
 
 class SphereTest: public CxxTest::TestSuite
 {
@@ -221,8 +222,8 @@ public:
     std::vector<std::string> SphStr;
     SphStr.push_back("so 1");                // sphere origin
     SphStr.push_back("s 1.5 -2.5 1.8 1");     // sphere 
-    Geometry::V3D P(3,7,4);
-    Geometry::V3D Q(0,0,4);
+    Kernel::V3D P(3,7,4);
+    Kernel::V3D Q(0,0,4);
     std::vector<std::string>::const_iterator vc;
     Sphere A;
 

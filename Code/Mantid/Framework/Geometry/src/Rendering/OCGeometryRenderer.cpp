@@ -1,8 +1,8 @@
 #include "MantidGeometry/Rendering/OCGeometryRenderer.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quat.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Quat.h"
 #include <climits>
 
 // Squash a warning coming out of an OpenCascade header
@@ -29,6 +29,8 @@ namespace Mantid
 {
   namespace Geometry
   {
+    using Kernel::V3D;
+    using Kernel::Quat;
 
     /**
      * Constructor

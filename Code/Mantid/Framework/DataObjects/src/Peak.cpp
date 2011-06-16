@@ -21,7 +21,7 @@ namespace DataObjects
    * @param detectorDistance :: distance between the sample and the detector.
    *        Used to give a valid TOF. Default 1.0 meters.
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, Mantid::Geometry::V3D QLabFrame, double detectorDistance)
+  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, Mantid::Kernel::V3D QLabFrame, double detectorDistance)
   : m_H(0), m_K(0), m_L(0),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
@@ -44,8 +44,8 @@ namespace DataObjects
    * @param detectorDistance :: distance between the sample and the detector.
    *        Used to give a valid TOF. Default 1.0 meters.
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, Mantid::Geometry::V3D QSampleFrame,
-      Mantid::Geometry::Matrix<double> goniometer, double detectorDistance)
+  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, Mantid::Kernel::V3D QSampleFrame,
+      Mantid::Kernel::Matrix<double> goniometer, double detectorDistance)
   : m_H(0), m_K(0), m_L(0),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(goniometer),
@@ -89,7 +89,7 @@ namespace DataObjects
    * @param HKL :: vector with H,K,L position of the peak
    * @return
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL)
+  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Kernel::V3D HKL)
   : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
@@ -111,7 +111,7 @@ namespace DataObjects
    * @param goniometer :: a 3x3 rotation matrix
    * @return
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL, Mantid::Geometry::Matrix<double> goniometer) :
+  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Kernel::V3D HKL, Mantid::Kernel::Matrix<double> goniometer) :
     m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(goniometer),
@@ -321,7 +321,7 @@ namespace DataObjects
    *
    * Note: There is no 2*pi factor used, so |Q| = 1/wavelength.
    * */
-  Mantid::Geometry::V3D Peak::getQLabFrame() const
+  Mantid::Kernel::V3D Peak::getQLabFrame() const
   {
     // Normalized beam direction
     V3D beamDir = samplePos - sourcePos;
@@ -349,7 +349,7 @@ namespace DataObjects
   //----------------------------------------------------------------------------------------------
   /** Return the Q change (of the lattice, k_i - k_f) for this peak.
    * The Q is in the Sample frame: the goniometer rotation WAS taken out. */
-  Mantid::Geometry::V3D Peak::getQSampleFrame() const
+  Mantid::Kernel::V3D Peak::getQSampleFrame() const
   {
     V3D Qlab = this->getQLabFrame();
     // Multiply by the inverse of the goniometer matrix to get the sample frame
@@ -368,7 +368,7 @@ namespace DataObjects
    * @param detectorDistance :: distance between the sample and the detector.
    *        Used to give a valid TOF. Default 1.0 meters.
    */
-  void Peak::setQSampleFrame(Mantid::Geometry::V3D QSampleFrame, double detectorDistance)
+  void Peak::setQSampleFrame(Mantid::Kernel::V3D QSampleFrame, double detectorDistance)
   {
     V3D Qlab = m_GoniometerMatrix * QSampleFrame;
     this->setQLabFrame(Qlab, detectorDistance);
@@ -386,7 +386,7 @@ namespace DataObjects
    * @param detectorDistance :: distance between the sample and the detector.
    *        Used to give a valid TOF. Default 1.0 meters.
    */
-  void Peak::setQLabFrame(Mantid::Geometry::V3D QLabFrame, double detectorDistance)
+  void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame, double detectorDistance)
   {
     // Clear out the detector = we can't know them
     m_DetectorID = -1;
@@ -476,7 +476,7 @@ namespace DataObjects
   {    return m_L;  }
 
   /** Return the HKL vector */
-  Mantid::Geometry::V3D Peak::getHKL()
+  Mantid::Kernel::V3D Peak::getHKL()
   {
     return V3D(m_H, m_K, m_L);
   }
@@ -509,7 +509,7 @@ namespace DataObjects
    *
    * @param HKL :: vector with x,y,z -> h,k,l
    */
-  void Peak::setHKL(Mantid::Geometry::V3D HKL)
+  void Peak::setHKL(Mantid::Kernel::V3D HKL)
   {
     m_H = HKL.X();
     m_K = HKL.Y();
@@ -557,7 +557,7 @@ namespace DataObjects
 
   // -------------------------------------------------------------------------------------
   /** Get the goniometer rotation matrix at which this peak was measured. */
-  Mantid::Geometry::Matrix<double> Peak::getGoniometerMatrix() const
+  Mantid::Kernel::Matrix<double> Peak::getGoniometerMatrix() const
   {
     return this->m_GoniometerMatrix;
   }
@@ -565,7 +565,7 @@ namespace DataObjects
   /** Set the goniometer rotation matrix at which this peak was measured.
    * @param goniometerMatrix :: 3x3 matrix that represents the rotation matrix of the goniometer
    * @throw std::invalid_argument if matrix is not 3x3*/
-  void Peak::setGoniometerMatrix(Mantid::Geometry::Matrix<double> goniometerMatrix)
+  void Peak::setGoniometerMatrix(Mantid::Kernel::Matrix<double> goniometerMatrix)
   {
     if ((goniometerMatrix.numCols() != 3) || (goniometerMatrix.numRows() != 3))
       throw std::invalid_argument("Goniometer matrix must be 3x3.");
@@ -600,7 +600,7 @@ namespace DataObjects
 
   // -------------------------------------------------------------------------------------
   /** Return the detector position vector */
-  Mantid::Geometry::V3D Peak::getDetPos() const
+  Mantid::Kernel::V3D Peak::getDetPos() const
   {
     return detPos;
   }

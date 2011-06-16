@@ -4,9 +4,9 @@
 #include "MantidMDAlgorithms/CobaltSpinWaveDSHO.h"
 #include <math.h>
 
-#include "MantidGeometry/Tolerance.h"
+#include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid
 {
@@ -32,7 +32,7 @@ namespace Mantid
         * sqw_broad model 601 from tobyfit
         */
         double CobaltSpinWaveDSHO::sqwBroad(const std::vector<double> & point, const std::vector<double> & fgParams,
-            const double temp, const Geometry::Matrix<double> & ubinv) const
+            const double temp, const Kernel::Matrix<double> & ubinv) const
         {
             double qx = point[0]; double qy = point[1]; double qz = point[2]; double eps = point[3];
             double qsqr = qx*qx+qy*qy+qz*qz;

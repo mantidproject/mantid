@@ -292,15 +292,15 @@ public:
       int count = 0;
       for(MatrixWorkspace::const_iterator ti(*workspace,loopCount,LoopOrientation::Vertical); ti != ti.end(); ++ti)
       {
-        TS_ASSERT_THROWS_NOTHING
-        (
-          //LocatedDataRef tr = *ti;
-          //int datablock = count/(size*loopCount);
-          //int blockindex = count/loopCount;
-          //TS_ASSERT_EQUALS(tr.X(),workspace->dataX(datablock)[blockindex]);
-          //TS_ASSERT_EQUALS(tr.Y(),workspace->dataY(datablock)[blockindex]);
-          //TS_ASSERT_EQUALS(tr.E(),workspace->dataE(datablock)[blockindex]);
-        )
+        //TS_ASSERT_THROWS_NOTHING
+        //(
+        //  //LocatedDataRef tr = *ti;
+        //  //int datablock = count/(size*loopCount);
+        //  //int blockindex = count/loopCount;
+        //  //TS_ASSERT_EQUALS(tr.X(),workspace->dataX(datablock)[blockindex]);
+        //  //TS_ASSERT_EQUALS(tr.Y(),workspace->dataY(datablock)[blockindex]);
+        //  //TS_ASSERT_EQUALS(tr.E(),workspace->dataE(datablock)[blockindex]);
+        //)
           count++;
       }
       TS_ASSERT_EQUALS(count,size*histogramCount*loopCount);

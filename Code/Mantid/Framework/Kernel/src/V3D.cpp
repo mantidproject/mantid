@@ -4,13 +4,13 @@
 #include <vector>
 #include <cstdlib>
 
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Tolerance.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid
 {
-namespace Geometry
+namespace Kernel
 {
 
 /// Constructor [Null]
@@ -555,7 +555,7 @@ V3D::reBase(const V3D& A,const V3D&B,const V3D& C)
 }
 
 void
-V3D::rotate(const Geometry::Matrix<double>& A)
+V3D::rotate(const Kernel::Matrix<double>& A)
   /**
     Rotate a point by a matrix
     @param A :: Rotation matrix (needs to be >3x3)
@@ -731,5 +731,5 @@ operator>>(std::istream& IX,V3D& A)
   return IX;
 }
 
-} // Namespace Geometry
+} // Namespace Kernel
 } // Namespace Mantid

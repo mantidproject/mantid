@@ -7,7 +7,7 @@
 #include <QGLWidget>
 #include <boost/shared_ptr.hpp>
 
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 
 //-----------------------------------------
 // Forward Declarations

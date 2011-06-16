@@ -71,7 +71,7 @@ public:
   virtual Geometry::IObjComponent_sptr getSample() const = 0;
 
   /// Returns a unit vector pointing in the direction of the beam
-  Geometry::V3D getBeamDirection() const;
+  Kernel::V3D getBeamDirection() const;
 
   /// Returns a pointer to the geometrical object for the detector with the given ID
   virtual Geometry::IDetector_sptr getDetector(const detid_t &detector_id) const = 0;
@@ -126,8 +126,8 @@ public:
   /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
   virtual std::string getDefaultAxis() const=0;
 
-  virtual void getInstrumentParameters(double & l1, Geometry::V3D & beamline,
-      double & beamline_norm, Geometry::V3D & samplePos) const = 0;
+  virtual void getInstrumentParameters(double & l1, Kernel::V3D & beamline,
+      double & beamline_norm, Kernel::V3D & samplePos) const = 0;
 
   /// @return the date from which the instrument definition begins to be valid.
   Kernel::DateAndTime getValidFromDate() const

@@ -7,13 +7,14 @@
 #include <vector>
 #include <algorithm>
 
-#include "MantidGeometry/Math/Matrix.h" 
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/Matrix.h" 
+#include "MantidKernel/V3D.h"
 
 #include <boost/lexical_cast.hpp>
 
-using namespace Mantid;
-using namespace Geometry;
+using Mantid::Kernel::Matrix;
+using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::V3D;
 
 class MatrixTest: public CxxTest::TestSuite
 {

@@ -106,7 +106,7 @@ namespace Mantid
         throw std::logic_error(
           "Sample location not found, aborting algorithm SoildAngle");
       }
-      Geometry::V3D samplePos = sample->getPos();
+      Kernel::V3D samplePos = sample->getPos();
       g_log.debug() << "Sample position is " << samplePos << std::endl;
 
       int loopIterations = m_MaxSpec-m_MinSpec;

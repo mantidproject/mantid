@@ -1,14 +1,9 @@
-#include "MantidGeometry/Math/mathSupport.h"
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <iomanip>
 #include <iostream>
-
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/regex.hpp>
 
 using Mantid::Kernel::TimeSeriesProperty;
 
@@ -16,10 +11,70 @@ using Mantid::Kernel::TimeSeriesProperty;
 namespace Mantid
 {
 
-namespace Geometry
+namespace Kernel
 {
   // 
   #define fabs(x) std::fabs((x)*1.0)
+
+  namespace
+  {
+    //-------------------------------------------------------------------------
+    // Utility methods and function objects in anonymous namespace
+    //-------------------------------------------------------------------------
+    /**
+    \class PIndex
+    \author S. Ansell
+    \date Aug 2005
+    \version 1.0
+    \brief Class  to fill an index with a progressive count
+    */
+    template<typename T>
+    struct PIndex
+    {
+    private:
+      int count;    ///< counter
+    public:
+      /// Constructor
+      PIndex() : count(0) { }
+      /// functional
+      std::pair<T,int> operator()(const T& A) {  return std::pair<T,int>(A,count++); }
+    };
+
+    /**
+    \class PSep
+    \author S. Ansell
+    \date Aug 2005
+    \version 1.0
+    \brief Class to access the second object in index pair.
+    */
+    template<typename T>
+    struct PSep
+    {
+      /// Functional to the second object
+      int operator()(const std::pair<T,int>& A) {  return A.second; }
+    };
+
+    /**
+    * Function to take a vector and sort the vector 
+    * so as to produce an index. Leaves the vector unchanged.
+    * @param pVec :: Input vector
+    * @param Index :: Output vector
+    */
+    template<typename T>
+    void
+      indexSort(const std::vector<T>& pVec,std::vector<int>& Index)
+    {
+      Index.resize(pVec.size());
+      std::vector<typename std::pair<T,int> > PartList;
+      PartList.resize(pVec.size());
+
+      transform(pVec.begin(),pVec.end(),PartList.begin(),PIndex<T>());
+      sort(PartList.begin(),PartList.end());
+      transform(PartList.begin(),PartList.end(),Index.begin(),PSep<T>());
+      return;
+    }
+
+  }
 
   /**
    * Write an object to a stream. Format should be Matrix(nrows,ncols)x_00,x_01...,x_10,x_11
@@ -50,7 +105,7 @@ std::ostream& operator<<(std::ostream& os,const Matrix<T>& matrix)
  * @returns A reference to the stream
  */
 template<typename T>
-std::istream& operator>>(std::istream& is, Geometry::Matrix<T>& in)
+std::istream& operator>>(std::istream& is, Kernel::Matrix<T>& in)
 {
   // Stream should start with Matrix(
   char dump;
@@ -955,7 +1010,7 @@ Matrix<T>::Transpose()
 
 template<>
 int
-Matrix<int>::GaussJordan(Geometry::Matrix<int>&)
+Matrix<int>::GaussJordan(Kernel::Matrix<int>&)
   /**
     Not valid for Integer
     @return zero
@@ -1748,18 +1803,18 @@ Matrix<T>::str() const
 ///\cond TEMPLATE
 
 // Symbol definitions for common types
-template class MANTID_GEOMETRY_DLL Matrix<double>;
-template class MANTID_GEOMETRY_DLL Matrix<int>;
-template class MANTID_GEOMETRY_DLL Matrix<float>;
+template class MANTID_KERNEL_DLL Matrix<double>;
+template class MANTID_KERNEL_DLL Matrix<int>;
+template class MANTID_KERNEL_DLL Matrix<float>;
 
-template MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const DblMatrix&);
-template MANTID_GEOMETRY_DLL std::istream& operator>>(std::istream&, DblMatrix&);
-template MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const Matrix<float>&);
-template MANTID_GEOMETRY_DLL std::istream& operator>>(std::istream&, Matrix<float>&);
-template MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const IntMatrix&);
-template MANTID_GEOMETRY_DLL std::istream& operator>>(std::istream&, IntMatrix&);
-
+template MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const DblMatrix&);
+template MANTID_KERNEL_DLL std::istream& operator>>(std::istream&, DblMatrix&);
+template MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const Matrix<float>&);
+template MANTID_KERNEL_DLL std::istream& operator>>(std::istream&, Matrix<float>&);
+template MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const IntMatrix&);
+template MANTID_KERNEL_DLL std::istream& operator>>(std::istream&, IntMatrix&);
 ///\endcond TEMPLATE
-} // namespace Geometry
+
+} // namespace Kernel
 } // namespace
 

@@ -91,11 +91,11 @@ namespace Geometry
     /** virtual: function returns a direction of the dimension in the system of coordinates described by the MDBasis; 
        *  Orthogonal dimensions always have direction 1 (e.g. V3D={1,0,0})according to their direction in the coordinate 
            * system. Norm of the vector, returned by this function has to be 1    */
-        V3D getDirection(void)const{return direction;}
+        Kernel::V3D getDirection(void)const{return direction;}
           /** virtual: Return direction in the crystallogrpahical sence, e.g. output V3D is normalized in such a way that the size of
            smallest (by module) non-0 component of the vector is 1; In this case, all vectors representing valid crystallographical axis would 
            have integer values; */
-         V3D getDirectionCryst(void)const{return direction;}
+         Kernel::V3D getDirectionCryst(void)const{return direction;}
 
         /// get Axis data; 
     std::vector<double> const &  getAxis(void)const{return Axis;}
@@ -134,7 +134,7 @@ virtual void  setRange(double rMin=-1,double rMax=1,size_t nBins=1);
     // set all non-inter-dimension-dependent values on the dimesion from the dimension description
     virtual void initialize(const DimensionDescription &descr); //, const std::vector<double> &rotation_mat=std::vector<double>Rot(9) );
     // function sets the coordinates of the dimension; An orthogonal dimension does nothing with it; Part of initialisation routine if rotations are present
-        virtual void setDirection(const V3D &){};
+        virtual void setDirection(const Kernel::V3D &){};
 
     //********  SET. -> geometry should set it properly as any set operation here is also rebinning operation on MDImage; 
     /** Set the scale of a particular dimension
@@ -164,7 +164,7 @@ virtual void  setRange(double rMin=-1,double rMax=1,size_t nBins=1);
     void ApplySerialization(Poco::XML::Document* pDoc, Poco::XML::Element* pDimensionElement) const;
         // direction of a vector in the basis system of coordinates;
    /// the coordinate of a dimension in an WorkspaceGeometry system of coordinates (always 0 here and |1| triplet for reciprocals) 
-        V3D   direction;
+        Kernel::V3D   direction;
   private:
     /// name of the axis;
     std::string AxisName;

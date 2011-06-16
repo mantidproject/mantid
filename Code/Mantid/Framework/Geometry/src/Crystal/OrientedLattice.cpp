@@ -4,6 +4,9 @@ namespace Mantid
 {
 namespace Geometry
 {
+  using Mantid::Kernel::DblMatrix;
+  using Mantid::Kernel::V3D;
+
   /** Default constructor
   @param Umatrix :: orientation matrix U. By default this will be identity matrix
   */

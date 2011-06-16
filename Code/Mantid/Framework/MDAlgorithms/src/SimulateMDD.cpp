@@ -10,9 +10,9 @@
 #include <gsl/gsl_roots.h>
 #include <algorithm>
 
-#include "MantidGeometry/Tolerance.h"
+#include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

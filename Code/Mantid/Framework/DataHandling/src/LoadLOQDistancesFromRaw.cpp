@@ -5,7 +5,7 @@
 
 #include "MantidAPI/FileProperty.h"
 
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/IComponent.h"
 
 // The isis RAW data structure

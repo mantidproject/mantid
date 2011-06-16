@@ -51,9 +51,9 @@ namespace Mantid
  * IPropertyManager::getValue definitions so that algorithm.getProperty will work
  */
 ///@cond
-DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Geometry::DblMatrix);
-DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Geometry::IntMatrix);
-DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Geometry::Matrix<float>);
+DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Kernel::DblMatrix);
+DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Kernel::IntMatrix);
+DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Kernel::Matrix<float>);
 
 ///@endcond
 

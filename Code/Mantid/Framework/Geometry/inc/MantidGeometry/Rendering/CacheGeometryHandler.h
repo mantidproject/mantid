@@ -7,6 +7,10 @@
 
 namespace Mantid
 {
+  namespace Kernel
+  {
+    class V3D;
+  }
 
   namespace Geometry
   {
@@ -15,7 +19,7 @@ namespace Mantid
     class CacheGeometryGenerator;
     class IObjComponent;
     class Object;
-    class V3D;
+
     /**
        \class CacheGeometryHandler
        \brief Place holder for geometry triangulation and rendering with caching triangles.

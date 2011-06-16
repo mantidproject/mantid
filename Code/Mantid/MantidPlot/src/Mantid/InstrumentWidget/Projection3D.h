@@ -11,7 +11,7 @@
 //#include "DetSelector.h"
 
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 

@@ -87,7 +87,7 @@ namespace Mantid{
           size_t getGeometryExtend()const{return nGeometrySize;}
           /** function returns the rotations matrix, used to transform reciprocal MDDimensions of the MDImage 
              from MDGeometryBasis to whaterver position it currently occupies */
-          DblMatrix getRotations()const;
+          Kernel::DblMatrix getRotations()const;
  
       /// return the numbers of dimensions in current geometry; 
       size_t getNumDims()const{return m_basis.getNumDims();}

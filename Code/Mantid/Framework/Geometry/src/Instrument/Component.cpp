@@ -8,6 +8,9 @@ namespace Mantid
 namespace Geometry
 {
 
+  using Kernel::V3D;
+  using Kernel::Quat;
+
   /** Constructor for a parametrized Component.
    * @param base :: a Component that is the base (un-parametrized) component
    * @param map :: a ParameterMap to parameterize the component

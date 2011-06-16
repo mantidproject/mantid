@@ -6,7 +6,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSplitter.h"
 #include <vector>
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 
 
 namespace Mantid
@@ -112,7 +112,7 @@ namespace Mantid
       { return m_goniometer; }
 
       // Retrieve the goniometer rotation matrix
-      Mantid::Geometry::DblMatrix getGoniometerMatrix();
+      Mantid::Kernel::DblMatrix getGoniometerMatrix();
 
       /**
        * Add a log entry

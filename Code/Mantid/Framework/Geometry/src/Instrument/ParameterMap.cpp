@@ -11,6 +11,9 @@ namespace Mantid
 {
   namespace Geometry
   {
+    using Kernel::V3D;
+    using Kernel::Quat;
+
     // Get a reference to the logger
     Kernel::Logger& ParameterMap::g_log = Kernel::Logger::get("ParameterMap");
 

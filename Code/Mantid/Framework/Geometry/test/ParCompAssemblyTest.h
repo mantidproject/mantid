@@ -7,10 +7,12 @@
 #include <string>
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quat.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Quat.h"
 
 using namespace Mantid::Geometry;
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::Quat;
 
 class ParCompAssemblyTest : public CxxTest::TestSuite
 {

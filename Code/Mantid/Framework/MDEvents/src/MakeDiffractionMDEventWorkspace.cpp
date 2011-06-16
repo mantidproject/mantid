@@ -255,7 +255,7 @@ namespace MDEvents
     ws = boost::dynamic_pointer_cast<MDEventWorkspace3>( i_out );
 
     // Initalize the matrix to 3x3 identity
-    mat = Geometry::Matrix<double>(3,3, true);
+    mat = Kernel::Matrix<double>(3,3, true);
 
     // ----------------- Handle the type of output -------------------------------------
 
@@ -271,8 +271,8 @@ namespace MDEvents
     else if (OutputDimensions == "HKL")
     {
       // Set the matrix based on UB etc.
-      Geometry::Matrix<double> ub = in_ws->mutableSample().getOrientedLattice().getUB();
-      Geometry::Matrix<double> gon = in_ws->mutableRun().getGoniometerMatrix();
+      Kernel::Matrix<double> ub = in_ws->mutableSample().getOrientedLattice().getUB();
+      Kernel::Matrix<double> gon = in_ws->mutableRun().getGoniometerMatrix();
       // As per Busing and Levy 1967, HKL = Goniometer * UB * q_lab_frame
       mat = gon * ub;
       dimensionNames[0] = "H";

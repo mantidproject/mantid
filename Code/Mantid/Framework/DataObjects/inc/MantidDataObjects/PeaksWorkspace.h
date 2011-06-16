@@ -10,8 +10,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakColumn.h"
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
@@ -137,7 +137,7 @@ namespace DataObjects
      * @param detectorDistance :: distance between the sample and the detector.
      * @return a pointer to a new Peak object.
      */
-    IPeak* createPeak(Mantid::Geometry::V3D QLabFrame, double detectorDistance=1.0)
+    IPeak* createPeak(Mantid::Kernel::V3D QLabFrame, double detectorDistance=1.0)
     {
       return new Peak(getInstrument(),QLabFrame,detectorDistance);
     }
@@ -243,8 +243,8 @@ namespace DataObjects
     /// find method to get the index of cellstd::string  value in a table workspace
     virtual void find(std::string /*value*/,int& /*row*/,const int & /*col*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented."); }
-    /// find method to get the index of  Mantid::Geometry::V3D cell value in a table workspace
-    virtual void find(Mantid::Geometry::V3D /*value*/,int& /*row*/,const int & /*col*/)
+    /// find method to get the index of  Mantid::Kernel::V3D cell value in a table workspace
+    virtual void find(Mantid::Kernel::V3D /*value*/,int& /*row*/,const int & /*col*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented."); }
 
   };

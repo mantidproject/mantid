@@ -28,6 +28,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::detid_t;
 using Mantid::specid_t;
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::Quat;
 
 namespace ComponentCreationHelper
 {

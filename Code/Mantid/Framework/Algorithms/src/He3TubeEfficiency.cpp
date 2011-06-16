@@ -189,7 +189,7 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
       "tube_temperature", det);
 
   double detRadius(0.0);
-  Geometry::V3D detAxis;
+  Kernel::V3D detAxis;
   this->getDetectorGeometry(det, detRadius, detAxis);
   double detDiameter = 2.0 * detRadius;
   double twiceTubeThickness = 2.0 * tubethickness;
@@ -197,9 +197,9 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
   // now get the sin of the angle, it's the magnitude of the cross product of
   // unit vector along the detector tube axis and a unit vector directed from
   // the sample to the detector center
-  Geometry::V3D vectorFromSample = det->getPos() - this->samplePos;
+  Kernel::V3D vectorFromSample = det->getPos() - this->samplePos;
   vectorFromSample.normalize();
-  Geometry::Quat rot = det->getRotation();
+  Kernel::Quat rot = det->getRotation();
   // rotate the original cylinder object axis to get the detector axis in the
   // actual instrument
   rot.rotate(detAxis);
@@ -247,43 +247,43 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
  */
 void He3TubeEfficiency::getDetectorGeometry(\
     boost::shared_ptr<Geometry::IDetector> det,
-    double & detRadius, Geometry::V3D & detAxis)
+    double & detRadius, Kernel::V3D & detAxis)
 {
   boost::shared_ptr<const Geometry::Object> shape_sptr = det->shape();
-  std::map<const Geometry::Object *, std::pair<double, Geometry::V3D> >::const_iterator it =
+  std::map<const Geometry::Object *, std::pair<double, Kernel::V3D> >::const_iterator it =
     this->shapeCache.find(shape_sptr.get());
   if( it == this->shapeCache.end() )
   {
-    double xDist = distToSurface( Geometry::V3D(DIST_TO_UNIVERSE_EDGE, 0, 0),
+    double xDist = distToSurface( Kernel::V3D(DIST_TO_UNIVERSE_EDGE, 0, 0),
         shape_sptr.get() );
-    double zDist = distToSurface( Geometry::V3D(0, 0, DIST_TO_UNIVERSE_EDGE),
+    double zDist = distToSurface( Kernel::V3D(0, 0, DIST_TO_UNIVERSE_EDGE),
         shape_sptr.get() );
     if ( std::abs(zDist - xDist) < 1e-8 )
     {
       detRadius = zDist / 2.0;
-      detAxis = Geometry::V3D(0, 1, 0);
+      detAxis = Kernel::V3D(0, 1, 0);
       // assume radii in z and x and the axis is in the y
       PARALLEL_CRITICAL(deteff_shapecachea)
       {
         this->shapeCache.insert(std::pair<const Geometry::Object *,
-            std::pair<double, Geometry::V3D> >(shape_sptr.get(),
-                std::pair<double, Geometry::V3D>(detRadius, detAxis)));
+            std::pair<double, Kernel::V3D> >(shape_sptr.get(),
+                std::pair<double, Kernel::V3D>(detRadius, detAxis)));
       }
       return;
     }
-    double yDist = distToSurface( Geometry::V3D(0, DIST_TO_UNIVERSE_EDGE, 0),
+    double yDist = distToSurface( Kernel::V3D(0, DIST_TO_UNIVERSE_EDGE, 0),
         shape_sptr.get() );
     if ( std::abs(yDist - zDist) < 1e-8 )
     {
       detRadius = yDist / 2.0;
-      detAxis = Geometry::V3D(1, 0, 0);
+      detAxis = Kernel::V3D(1, 0, 0);
       // assume that y and z are radii of the cylinder's circular cross-section
       // and the axis is perpendicular, in the x direction
       PARALLEL_CRITICAL(deteff_shapecacheb)
       {
         this->shapeCache.insert(std::pair<const Geometry::Object *,
-            std::pair<double, Geometry::V3D> >(shape_sptr.get(),
-                std::pair<double, Geometry::V3D>(detRadius, detAxis)));
+            std::pair<double, Kernel::V3D> >(shape_sptr.get(),
+                std::pair<double, Kernel::V3D>(detRadius, detAxis)));
       }
       return;
     }
@@ -291,19 +291,19 @@ void He3TubeEfficiency::getDetectorGeometry(\
     if ( std::abs(xDist - yDist) < 1e-8 )
     {
       detRadius = xDist / 2.0;
-      detAxis = Geometry::V3D(0, 0, 1);
+      detAxis = Kernel::V3D(0, 0, 1);
       PARALLEL_CRITICAL(deteff_shapecachec)
       {
         this->shapeCache.insert(std::pair<const Geometry::Object *,
-            std::pair<double, Geometry::V3D> >(shape_sptr.get(),
-                std::pair<double, Geometry::V3D>(detRadius, detAxis)));
+            std::pair<double, Kernel::V3D> >(shape_sptr.get(),
+                std::pair<double, Kernel::V3D>(detRadius, detAxis)));
       }
       return;
     }
   }
   else
   {
-    std::pair<double, Geometry::V3D> geometry = it->second;
+    std::pair<double, Kernel::V3D> geometry = it->second;
     detRadius = it->second.first;
     detAxis = it->second.second;
   }
@@ -319,11 +319,11 @@ void He3TubeEfficiency::getDetectorGeometry(\
  *  @throw invalid_argument if there is any error finding the distance
  * @returns The distance to the surface in metres
  */
-double He3TubeEfficiency::distToSurface(const Geometry::V3D start,
+double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
     const Geometry::Object *shape) const
 {
   // get a vector from the point that was passed to the origin
-  Geometry::V3D direction = Geometry::V3D(0.0, 0.0, 0.0) - start;
+  Kernel::V3D direction = Kernel::V3D(0.0, 0.0, 0.0) - start;
   // it needs to be a unit vector
   direction.normalize();
   // put the point and the vector (direction) together to get a line,

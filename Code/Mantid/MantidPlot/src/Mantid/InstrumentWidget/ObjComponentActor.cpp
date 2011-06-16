@@ -2,8 +2,8 @@
 #include "InstrumentActor.h"
 #include "OpenGLError.h"
 
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quat.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Quat.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/IDetector.h"
@@ -78,7 +78,7 @@ void ObjComponentActor::setColors()
  * @param minBound :: min point of the bounding box
  * @param maxBound :: max point of the bounding box
  */
-void ObjComponentActor::getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const
+void ObjComponentActor::getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const
 {
   Mantid::Geometry::BoundingBox boundBox;
   getComponent()->getBoundingBox(boundBox);

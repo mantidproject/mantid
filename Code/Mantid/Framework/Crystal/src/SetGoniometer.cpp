@@ -4,7 +4,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include <boost/algorithm/string/detail/classification.hpp>
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 
 using Mantid::Geometry::Goniometer;
 using namespace Mantid::Geometry;

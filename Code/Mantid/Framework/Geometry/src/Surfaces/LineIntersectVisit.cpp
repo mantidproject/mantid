@@ -21,7 +21,7 @@ namespace Geometry
 Kernel::Logger& LineIntersectVisit::PLog(Kernel::Logger::get("LineIntersectVisit"));
 
 LineIntersectVisit::LineIntersectVisit
-  (const Geometry::V3D& Pt,const Geometry::V3D& uVec) :
+  (const Kernel::V3D& Pt,const Kernel::V3D& uVec) :
     ATrack(Pt,uVec)
   /**
     Constructor
@@ -122,7 +122,7 @@ LineIntersectVisit::procTrack()
   // Calculate the distances to the points
   DOut.resize(PtOut.size());
   std::transform(PtOut.begin(),PtOut.end(),DOut.begin(),
-	    boost::bind(&Geometry::V3D::distance,ATrack.getOrigin(),_1));
+	    boost::bind(&Kernel::V3D::distance,ATrack.getOrigin(),_1));
   return;
 }
 

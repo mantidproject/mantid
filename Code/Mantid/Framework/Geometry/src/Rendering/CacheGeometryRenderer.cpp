@@ -1,13 +1,15 @@
 #include "MantidGeometry/Rendering/CacheGeometryRenderer.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Quat.h"
+#include "MantidKernel/Quat.h"
 #include <climits>
 
 namespace Mantid
 {
   namespace Geometry
   {
+    using Kernel::V3D;
+    using Kernel::Quat;
 
     Kernel::Logger& CacheGeometryRenderer::PLog(Kernel::Logger::get("CacheGeometryRenderer"));
 

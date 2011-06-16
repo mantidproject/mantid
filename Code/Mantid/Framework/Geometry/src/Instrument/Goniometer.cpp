@@ -2,7 +2,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include "MantidGeometry/Quat.h" 
+#include "MantidKernel/Quat.h" 
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>
@@ -11,6 +11,9 @@ namespace Mantid
 {
 namespace Geometry
 {
+  using Kernel::DblMatrix;
+  using Kernel::V3D;
+  using Kernel::Quat;
 
 /// Default constructor
 /// The rotation matrix is initialized to identity
@@ -47,7 +50,7 @@ Goniometer::~Goniometer()
 
 /// Return global rotation matrix
 /// @return R :: 3x3 rotation matrix 
-const Geometry::DblMatrix& Goniometer::getR() const
+const Kernel::DblMatrix& Goniometer::getR() const
 {
   return R;
 }

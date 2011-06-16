@@ -9,7 +9,7 @@
 #include <sstream>
 
 #include "MantidGeometry/Math/PolyVar.h" 
-#include "MantidGeometry/Math/Matrix.h" 
+#include "MantidKernel/Matrix.h" 
 
 using namespace Mantid;
 using namespace Geometry;

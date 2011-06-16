@@ -127,7 +127,7 @@ void LoadInstrumentFromRaw::exec()
   {
     // Create a new detector. Instrument will take ownership of pointer so no need to delete.
     Geometry::Detector *detector = new Geometry::Detector("det",detID[i],samplepos);
-    Geometry::V3D pos;
+    Kernel::V3D pos;
 
     if(phiPresent)
        pos.spherical(r[i], angle[i], phi[i]);

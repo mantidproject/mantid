@@ -8,6 +8,8 @@ namespace Mantid
 {
   namespace Geometry
   {
+    using Kernel::V3D;
+
     GluGeometryHandler::GluGeometryHandler(IObjComponent *comp):GeometryHandler(comp)
     {
       Renderer    = new GluGeometryRenderer();
@@ -69,7 +71,7 @@ namespace Mantid
       }
     }
 
-    void GluGeometryHandler::GetObjectGeom(int& mytype, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight)
+    void GluGeometryHandler::GetObjectGeom(int& mytype, std::vector<Kernel::V3D>& vectors, double& myradius, double & myheight)
     {
       mytype=0;
       if(Obj!=NULL)

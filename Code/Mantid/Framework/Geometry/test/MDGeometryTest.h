@@ -16,8 +16,10 @@
 #include <Poco/Path.h>
 #include <cfloat>
 
-
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::DblMatrix;
 using namespace Mantid::Geometry;
+
 class testMDGeometry: public MDGeometry
 {
 public:

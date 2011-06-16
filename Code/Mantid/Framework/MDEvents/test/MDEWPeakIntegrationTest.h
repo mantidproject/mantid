@@ -30,6 +30,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::MDEvents;
+using Mantid::Kernel::V3D;
 
 
 class MDEWPeakIntegrationTest : public CxxTest::TestSuite

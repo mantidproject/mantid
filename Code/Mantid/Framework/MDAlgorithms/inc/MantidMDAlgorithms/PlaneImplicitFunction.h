@@ -8,7 +8,7 @@
 #include <gsl/gsl_blas.h>
 #include "MantidKernel/System.h"
 #include "MantidAPI/ImplicitFunction.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidMDAlgorithms/OriginParameter.h"
 #include "MantidMDAlgorithms/NormalParameter.h"
 #include "MantidMDAlgorithms/WidthParameter.h"
@@ -80,7 +80,7 @@ namespace Mantid
             WidthParameter m_width;
 
             /// Calculate the width applied to the normal direction resolved into the specified axis.
-            inline double calculateNormContributionAlongAxisComponent(const Mantid::Geometry::V3D& axis) const;
+            inline double calculateNormContributionAlongAxisComponent(const Mantid::Kernel::V3D& axis) const;
             /// Determine whether the point is bounded by the plane described by the parameters.
             inline bool isBoundedByPlane(const OriginParameter& origin, const NormalParameter& normal, const Mantid::API::Point3D* pPoint) const;
             /// Get the effective normal vector to use in calculation.

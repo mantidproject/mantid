@@ -87,7 +87,7 @@ public:
   double maxBinValue()const{return m_BinMaxValue;}
   bool wholeRange()const;
   void draw(bool picking = false)const;
-  void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const{m_scene.getBoundingBox(minBound,maxBound);}
+  void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const{m_scene.getBoundingBox(minBound,maxBound);}
   size_t ndetectors()const{return m_detIDs.size();}
   boost::shared_ptr<Mantid::Geometry::IDetector> getDetector(size_t pickID)const;
   Mantid::detid_t getDetID(size_t pickID)const{return m_detIDs.at(pickID);}
@@ -96,13 +96,13 @@ public:
   size_t getWorkspaceIndex(Mantid::detid_t id)const{return (*m_id2wi_map)[id];}
   void invalidateDisplayLists()const{m_scene.invalidateDisplayList();}
   QString getCurrentColorMap()const{return m_currentColorMap;}
-  static void BasisRotation(const Mantid::Geometry::V3D& Xfrom,
-                  const Mantid::Geometry::V3D& Yfrom,
-                  const Mantid::Geometry::V3D& Zfrom,
-                  const Mantid::Geometry::V3D& Xto,
-                  const Mantid::Geometry::V3D& Yto,
-                  const Mantid::Geometry::V3D& Zto,
-                  Mantid::Geometry::Quat& R,
+  static void BasisRotation(const Mantid::Kernel::V3D& Xfrom,
+                  const Mantid::Kernel::V3D& Yfrom,
+                  const Mantid::Kernel::V3D& Zfrom,
+                  const Mantid::Kernel::V3D& Xto,
+                  const Mantid::Kernel::V3D& Yto,
+                  const Mantid::Kernel::V3D& Zto,
+                  Mantid::Kernel::Quat& R,
                   bool out = false
                   );
 signals:

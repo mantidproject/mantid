@@ -3,7 +3,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidGeometry/IInstrument.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"

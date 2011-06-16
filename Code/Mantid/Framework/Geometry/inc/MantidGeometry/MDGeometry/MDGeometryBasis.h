@@ -87,7 +87,7 @@ namespace Mantid
 
                    TODO: what to return in 1D mode (powder) (rather how to interpret this mode)
                 */
-          std::vector<V3D>  get_constRecBasis(void)const;
+          std::vector<Kernel::V3D>  get_constRecBasis(void)const;
 
     /// Returns reference to the unit cell, which used in basis; Will throw through dereference of sp if unit cell is not defined;
     OrientedLattice const & get_constOrientedLattice()const{return *spSample;}

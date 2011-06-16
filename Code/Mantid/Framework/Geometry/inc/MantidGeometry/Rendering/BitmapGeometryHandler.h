@@ -90,7 +90,7 @@ namespace Mantid
                                 (void) noPts; (void) noFaces; (void) pts; (void) faces; //Avoid compiler warning
                         };
                         /// return the actual type and points of one of the "standard" objects, cuboid/cone/cyl/sphere
-                        virtual void GetObjectGeom(int& mytype, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight)
+                        virtual void GetObjectGeom(int& mytype, std::vector<Kernel::V3D>& vectors, double& myradius, double & myheight)
                         {
                                 (void) mytype; (void) vectors; (void) myradius; (void) myheight; //Avoid compiler warning
                         };

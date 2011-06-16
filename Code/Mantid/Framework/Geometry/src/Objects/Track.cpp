@@ -1,7 +1,7 @@
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Tolerance.h"
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/Tolerance.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 
 #include <cmath>
@@ -12,6 +12,9 @@ namespace Mantid
 {
   namespace Geometry
   {
+    using Kernel::V3D;
+    using Kernel::Tolerance;
+
     /**
      * Default constructor
      */

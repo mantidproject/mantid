@@ -1,6 +1,6 @@
-#include "MantidGeometry/Quat.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Tolerance.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Tolerance.h"
 #include <cmath>
 #include <stdexcept>
 #include <cstdlib>
@@ -9,10 +9,11 @@
 
 namespace Mantid
 {
-namespace Geometry
+namespace Kernel
 {
 
-  Kernel::Logger& Quat::quatG_log = Kernel::Logger::get("Geometry:Quat");
+  Kernel::Logger& Quat::quat_log = Kernel::Logger::get("Kernel:Quat");
+
 /** Null Constructor
  * Initialize the quaternion with the identity q=1.0+0i+0j+0k;
  */
@@ -62,7 +63,7 @@ Quat::Quat(const V3D& src,const V3D& des)
 	}
   }
 }
-Quat::Quat(const Geometry::DblMatrix &RotMat)
+Quat::Quat(const Kernel::DblMatrix &RotMat)
 {
 	this->setQuat(RotMat);
 }
@@ -541,10 +542,10 @@ Quat::getRotation(bool check_normalisation,bool throw_on_errors)const
 		double normSq=aa+bb+cc+w*w;
 		if(fabs(normSq-1)>FLT_EPSILON){
 			if(throw_on_errors){
-				quatG_log.error()<<" A non-unit quaternion used to obtain a rotation matrix; need to notmalize it first\n";
+				quat_log.error()<<" A non-unit quaternion used to obtain a rotation matrix; need to notmalize it first\n";
 				throw(std::invalid_argument("Attempt to use non-normalized quaternion to define rotation matrix; need to notmalize it first"));
 			}else{
-				quatG_log.information()<<" Warning; a non-unit quaternion used to obtain the rotation matrix; using normalized quat\n";
+				quat_log.information()<<" Warning; a non-unit quaternion used to obtain the rotation matrix; using normalized quat\n";
 				aa/=normSq;
 				ab/=normSq;
 				ac/=normSq;
@@ -610,7 +611,7 @@ void Quat::setQuat(double mat[16])
 }
 /// Using the convention at http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
 void 
-Quat::setQuat(const Geometry::DblMatrix &rMat)
+Quat::setQuat(const Kernel::DblMatrix &rMat)
 {
 	int i=0,j,k;
 	if (rMat[1][1]>rMat[0][0]) i=1;
@@ -736,7 +737,7 @@ void Quat::rotateBB(double& xmin, double& ymin, double& zmin, double& xmax, doub
 	if (ymin>ymax) std::swap(ymin,ymax);
 	if (zmin>zmax) std::swap(zmin,zmax);
 	// Get the min and max of the cube, and remove centring offset
-	Mantid::Geometry::V3D minT(xmin,ymin,zmin), maxT(xmax,ymax,zmax);
+	Mantid::Kernel::V3D minT(xmin,ymin,zmin), maxT(xmax,ymax,zmax);
 	// Get the rotation matrix
 	double rotMatr[16];
 	GLMatrix(&rotMatr[0]);
@@ -744,7 +745,7 @@ void Quat::rotateBB(double& xmin, double& ymin, double& zmin, double& xmax, doub
 	// Much faster than creating 8 points and rotate them. The new min (max)
 	// can only be obtained by summing the smallest (largest) components
 	//
-	Mantid::Geometry::V3D minV, maxV;
+	Mantid::Kernel::V3D minV, maxV;
 	// Looping on rows of matrix
 	int index;
 	for (int i=0;i<3;i++)
@@ -763,6 +764,6 @@ void Quat::rotateBB(double& xmin, double& ymin, double& zmin, double& xmax, doub
 	return;
 }
 
-} // Namespace Geometry
+} // Namespace Kernel
 
 } // Namespce Mantid

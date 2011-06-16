@@ -1,7 +1,7 @@
-#ifndef MANTID_GEOMETRY_MATRIX_H_
-#define MANTID_GEOMETRY_MATRIX_H_
+#ifndef MANTID_KERNEL_MATRIX_H_
+#define MANTID_KERNEL_MATRIX_H_
 
-#include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/DllConfig.h"
 #include <vector>
 #include <cfloat>
 #include <ostream>
@@ -9,7 +9,7 @@
 namespace Mantid
 {
 
-  namespace Geometry
+  namespace Kernel
   {
     //-------------------------------------------------------------------------
     // Forward declarations
@@ -153,19 +153,26 @@ namespace Mantid
       // Transform to a rotation matrix
       std::vector<T> toRotation();
     private:
-      template<typename TYPE> friend std::ostream& operator<<(std::ostream&,const Geometry::Matrix<TYPE>&);
-      template<typename TYPE> friend std::istream& operator>>(std::istream&, Geometry::Matrix<TYPE>&);
+      template<typename TYPE> friend std::ostream& operator<<(std::ostream&,const Kernel::Matrix<TYPE>&);
+      template<typename TYPE> friend std::istream& operator>>(std::istream&, Kernel::Matrix<TYPE>&);
     };
 
-    template<typename T>
-    DLLExport std::ostream& operator<<(std::ostream&,const Geometry::Matrix<T>&);
-    template<typename T>
-    DLLExport std::istream& operator>>(std::istream&, Geometry::Matrix<T>&);
-
+    //-------------------------------------------------------------------------
+    // Typedefs
+    //-------------------------------------------------------------------------
     /// A matrix of doubles
-    typedef Mantid::Geometry::Matrix<double> DblMatrix;
+    typedef Mantid::Kernel::Matrix<double> DblMatrix;
     /// A matrix of ints
-    typedef Mantid::Geometry::Matrix<int> IntMatrix;
+    typedef Mantid::Kernel::Matrix<int> IntMatrix;
+
+    //-------------------------------------------------------------------------
+    // Utility methods
+    //-------------------------------------------------------------------------
+    template<typename T>
+    DLLExport std::ostream& operator<<(std::ostream&,const Kernel::Matrix<T>&);
+    template<typename T>
+    DLLExport std::istream& operator>>(std::istream&, Kernel::Matrix<T>&);
+
   }
 }  
-#endif //MANTID_GEOMETRY_MATRIX_H_
+#endif //MANTID_KERNEL_MATRIX_H_

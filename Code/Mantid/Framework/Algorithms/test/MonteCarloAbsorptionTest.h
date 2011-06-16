@@ -18,6 +18,7 @@ using namespace Mantid::Geometry;
 using Mantid::Algorithms::MonteCarloAbsorption;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::Geometry::ShapeFactory;
+using Mantid::Kernel::V3D;
 
 class MonteCarloAbsorptionTest : public CxxTest::TestSuite
 {

@@ -9,6 +9,7 @@
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::V3D;
 
 /** 
 * BoundingBox Unit test
@@ -275,7 +276,7 @@ private:
     // Origin
     TS_ASSERT_EQUALS(bbox.isPointInside(V3D(0.0,0.0,0.0)), true);
 
-    const double tol = Mantid::Geometry::Tolerance;
+    const double tol = Mantid::Kernel::Tolerance;
     /// The test is a strictly less-than test so when outside we need slighly more than the tolerance to be truely outside
     double singleDimValue = insideTest ? unit-tol : unit+tol+0.01*tol;
     // Near, but inside, +X-edge

@@ -3,8 +3,8 @@
 
 #include <deque>
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quat.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Quat.h"
 #include <boost/shared_ptr.hpp>
 
 /** class describes slicing and rebinning matrix and the geometry of the MD workspace. 
@@ -96,9 +96,9 @@ public:
    *  into MDImage system of coordinates  As there are no info about 
       MDDPoints system of coodinates in this class, the matrix has to be calculated externaly (except when building from geomerty,
           which provides example of retrieving this matrix        */
-  void setRotationMatrix(const DblMatrix &rotMatrix){this->Rotations = rotMatrix;}
+  void setRotationMatrix(const Kernel::DblMatrix &rotMatrix){this->Rotations = rotMatrix;}
 /// return the rotations, which transform old coordinate system into the new one, set by the projection axis;
-  DblMatrix const & getRotations()const;
+  Kernel::DblMatrix const & getRotations()const;
 
   /// obtain number of dimensions in the geometry
   size_t getNumDims(void)const{return nDimensions;}
@@ -118,7 +118,7 @@ public:
     return true;
   }
   // Looks like unnesessary here -> we are not setting this for each dimension description any more;
- // Geometry::V3D getDirection(size_t i)const;
+ // Kernel::V3D getDirection(size_t i)const;
 
   bool isAxisNamePresent(size_t i)const;
 
@@ -171,7 +171,7 @@ private:
   size_t nReciprocalDimensions;
   /** the matrix which would allow to thransform a vector, expressed in MDGeomBasis (MDDPoints) system of coordinates into 
       MDImage system of coordinates. */
-   DblMatrix  Rotations;
+   Kernel::DblMatrix  Rotations;
 
  
   /** auxiliary function which check if the index requested is allowed. ErrinFuncName allows to add to the error message the name of the calling function*/

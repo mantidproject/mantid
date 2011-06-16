@@ -4,8 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Quat.h"
 #include <string>
 #include <vector>
 #include <set>
@@ -18,8 +19,6 @@ namespace Mantid
     //---------------------------------------------------------
     // Forward declarations
     //---------------------------------------------------------
-    class V3D;
-    class Quat;
     class IComponent;
     class BoundingBox;
 
@@ -37,7 +36,7 @@ namespace Mantid
     structure and are defined with respect to a
     parent IComponent. The IComponent position and orientation
     are relatives, i.e. defined with respect to the parent
-    IComponent. The orientation is stored as a quaternion.
+    IComponent. The orientation is stored as a Kernel::Quaternion.
     Each IComponent has a defined bounding box which at the moment
     is cuboid.
 
@@ -93,27 +92,27 @@ namespace Mantid
       /** Set the position of the component
       *  The position is with respect to the parent component
       */
-      virtual void setPos(const V3D&) = 0;
-      //! Set the orientation quaternion relative to parent (if present) otherwise absolute
-      virtual void setRot(const Quat&) = 0;
+      virtual void setPos(const Kernel::V3D&) = 0;
+      //! Set the orientation Kernel::Quaternion relative to parent (if present) otherwise absolute
+      virtual void setRot(const Kernel::Quat&) = 0;
       //! Copy the Rotation from another IComponent
       //virtual void copyRot(const IComponent&) = 0;
       //! Translate the IComponent (vector form). This is relative to parent if present.
-      virtual void translate(const V3D&) = 0;
+      virtual void translate(const Kernel::V3D&) = 0;
       //! Translate the IComponent (x,y,z form). This is relative to parent if present.
       virtual void translate(double, double, double) = 0;
       //! Rotate the IComponent. This is relative to parent.
-      virtual void rotate(const Quat&) = 0;
+      virtual void rotate(const Kernel::Quat&) = 0;
       //! Rotate the IComponent by an angle in degrees with respect to an axis.
-      virtual void rotate(double,const V3D&) = 0;
+      virtual void rotate(double,const Kernel::V3D&) = 0;
       //! Get the position relative to the parent IComponent (absolute if no parent)
-      virtual const V3D & getRelativePos() const = 0;
+      virtual const Kernel::V3D & getRelativePos() const = 0;
       //! Get the position of the IComponent. Tree structure is traverse through the parent chain
-      virtual V3D getPos() const = 0;
+      virtual Kernel::V3D getPos() const = 0;
       //! Get the relative Orientation
-      virtual const Quat& getRelativeRot() const = 0;
+      virtual const Kernel::Quat& getRelativeRot() const = 0;
       //! Get the absolute orientation of the IComponent
-      virtual const Quat getRotation() const = 0;
+      virtual const Kernel::Quat getRotation() const = 0;
       //! Get the distance to another IComponent
       virtual double getDistance(const IComponent&) const = 0;
       /// Get the bounding box for this component and store it in the given argument
@@ -122,7 +121,7 @@ namespace Mantid
      /** Gets the scaling factor of the object for the Object Component.
        * @return a vector with 1 in all 3 directions.
        */
-      virtual V3D getScaleFactor()const{ return V3D(1.0, 1.0, 1.0);}
+      virtual Kernel::V3D getScaleFactor()const{ return Kernel::V3D(1.0, 1.0, 1.0);}
 
       /** @name ParameterMap access */
       //@{
@@ -134,10 +133,10 @@ namespace Mantid
       // one for each type, luckily there won't be too many
       /// Get a parameter defined as a double
       virtual std::vector<double> getNumberParameter(const std::string& pname, bool recursive = true) const = 0;
-      /// Get a parameter defined as a V3D
-      virtual std::vector<V3D> getPositionParameter(const std::string& pname, bool recursive = true) const = 0;
-      /// Get a parameter defined as a Quaternion
-      virtual std::vector<Quat> getRotationParameter(const std::string& pname, bool recursive = true) const = 0;
+      /// Get a parameter defined as a Kernel::V3D
+      virtual std::vector<Kernel::V3D> getPositionParameter(const std::string& pname, bool recursive = true) const = 0;
+      /// Get a parameter defined as a Kernel::Quaternion
+      virtual std::vector<Kernel::Quat> getRotationParameter(const std::string& pname, bool recursive = true) const = 0;
       /// Get a parameter defined as a string
       virtual std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const = 0;
       //@}

@@ -3,7 +3,7 @@
     
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 
 namespace Mantid
@@ -30,8 +30,8 @@ namespace MDEvents
     virtual ~CoordTransform();
 
     void addTranslation(const coord_t * translationVector);
-    Mantid::Geometry::Matrix<coord_t> getMatrix() const;
-    void setMatrix(const Mantid::Geometry::Matrix<coord_t> newMatrix);
+    Mantid::Kernel::Matrix<coord_t> getMatrix() const;
+    void setMatrix(const Mantid::Kernel::Matrix<coord_t> newMatrix);
 
     //----------------------------------------------------------------------------------------------
     /** Apply the coordinate transformation
@@ -71,7 +71,7 @@ namespace MDEvents
      * By using an affine, translations and rotations (or other linear transforms) can be
      * combined by simply multiplying the matrices.
      */
-    Mantid::Geometry::Matrix<coord_t> affineMatrix;
+    Mantid::Kernel::Matrix<coord_t> affineMatrix;
 
     /// Raw pointer to the same underlying matrix as affineMatrix.
     coord_t ** rawMatrix;

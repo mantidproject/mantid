@@ -37,6 +37,7 @@ namespace Mantid
     using API::WorkspaceFactory;
     using API::Progress;
     using namespace Geometry;
+    using Kernel::V3D;
     using Kernel::Direction;
 
     //------------------------------------------------------------------------------

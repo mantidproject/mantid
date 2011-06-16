@@ -6,7 +6,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include <boost/scoped_ptr.hpp>
 
 class MDPointTest :    public CxxTest::TestSuite

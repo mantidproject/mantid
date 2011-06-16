@@ -8,6 +8,8 @@
 namespace Mantid{
     namespace Geometry{
 
+       using Kernel::DblMatrix;
+
  // get reference to logger for MD workspaces
     Kernel::Logger& MDGeometryDescription::g_log=Kernel::Logger::get("MDWorkspaces");
 

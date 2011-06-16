@@ -78,7 +78,7 @@ class CPRebinKeepPixTest :    public CxxTest::TestSuite
         pSlicing->pDimDescription("qyt")->nBins   = 1;
 	// and set a rotation
 		//Geometry::UnitCell rotator(1,1,1);
-		//Geometry::DblMatrix Rot = rotator.getUmatrix(Geometry::V3D(1,1,0),Geometry::V3D(1,-1,0));
+		//Kernel::DblMatrix Rot = rotator.getUmatrix(Kernel::V3D(1,1,0),Kernel::V3D(1,-1,0));
 		//pSlicing->setRotationMatrix(Rot);
   
 

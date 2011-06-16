@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHM_DETECTEFFICIENCYCOR_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include <climits>
 #include <string>
 #include <vector>
@@ -103,9 +103,9 @@ class DLLExport DetectorEfficiencyCor : public API::Algorithm
   /// Calculate one over the wave vector for 2 bin bounds
   double calculateOneOverK(double loBinBound, double uppBinBound) const;
   /// Sets the detector geometry cache if necessary
-  void getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det, double & detRadius, Geometry::V3D & detAxis);
+  void getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det, double & detRadius, Kernel::V3D & detAxis);
   /// Computes the distance to the given shape from a starting point
-  double distToSurface(const Geometry::V3D start, const Geometry::Object *shape) const;
+  double distToSurface(const Kernel::V3D start, const Geometry::Object *shape) const;
   /// Computes the detector efficiency for a given paramater
   double detectorEfficiency(const double alpha) const;
   /// Computes an approximate expansion of a Chebysev polynomial
@@ -128,9 +128,9 @@ private:
   double m_ki;
 
   /// A lookup of previously seen shape objects used to save calculation time as most detectors have the same shape
-  std::map<const Geometry::Object *, std::pair<double, Geometry::V3D> > m_shapeCache;
+  std::map<const Geometry::Object *, std::pair<double, Kernel::V3D> > m_shapeCache;
   /// Sample position
-  Geometry::V3D m_samplePos;
+  Kernel::V3D m_samplePos;
   /// The spectra numbers that were skipped
   std::vector<int64_t> m_spectraSkipped;
 

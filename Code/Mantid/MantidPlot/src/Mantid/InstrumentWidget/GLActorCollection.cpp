@@ -88,8 +88,8 @@ void GLActorCollection::addActor(GLActor* a)
 	  return;
 	}
 	mActorsList.push_back(a);
-  Mantid::Geometry::V3D minBound;
-  Mantid::Geometry::V3D maxBound;
+  Mantid::Kernel::V3D minBound;
+  Mantid::Kernel::V3D maxBound;
   a->getBoundingBox(minBound,maxBound);
   if(m_minBound[0]>minBound[0]) m_minBound[0]=minBound[0];
   if(m_minBound[1]>minBound[1]) m_minBound[1]=minBound[1];
@@ -128,7 +128,7 @@ GLActor* GLActorCollection::getActor(int index)
 	return mActorsList.at(index);
 }
 
-void GLActorCollection::getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const
+void GLActorCollection::getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const
 {
   minBound = m_minBound;
   maxBound = m_maxBound;

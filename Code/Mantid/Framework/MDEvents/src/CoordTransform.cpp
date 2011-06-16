@@ -72,7 +72,7 @@ namespace MDEvents
    * @param newMatrix :: (outD+1 * inD+1) matrix to set.
    * @throw runtime_error if the matrix dimensions are incompatible.
    */
-  void CoordTransform::setMatrix(const Mantid::Geometry::Matrix<coord_t> newMatrix)
+  void CoordTransform::setMatrix(const Mantid::Kernel::Matrix<coord_t> newMatrix)
   {
     if (newMatrix.numRows() != outD+1)
       throw std::runtime_error("setMatrix(): Number of rows must match!");
@@ -87,7 +87,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Return the affine matrix in the transform.
    */
-  Mantid::Geometry::Matrix<coord_t> CoordTransform::getMatrix() const
+  Mantid::Kernel::Matrix<coord_t> CoordTransform::getMatrix() const
   {
     return affineMatrix;
   }

@@ -13,14 +13,18 @@
 
 namespace Mantid
 {
+  namespace Kernel
+  {
+    class V3D;
+    class Quat;
+  }
+
   namespace Geometry
   {
 
     //----------------------------------------------------------------------
     // Forward declarations
     //----------------------------------------------------------------------
-    class V3D;
-    class Quat;
     template<typename T> class ComponentPool;
 
     /** @class Component Component.h Geometry/Component.h
@@ -62,9 +66,9 @@ namespace Mantid
       //! Create a named component with a parent component (optional)
       explicit Component(const std::string& name, IComponent* parent=0);
       //! Create a named component with positioning vector, and parent component (optional)
-      Component(const std::string& name, const V3D& position, IComponent* parent=0);
+      Component(const std::string& name, const Kernel::V3D& position, IComponent* parent=0);
       //! Create a named component with positioning vector, orientation and parent component
-      Component(const std::string& name, const V3D& position, const Quat& rotation, IComponent* parent=0);
+      Component(const std::string& name, const Kernel::V3D& position, const Kernel::Quat& rotation, IComponent* parent=0);
 
       ///  destructor
       ~Component();
@@ -94,35 +98,35 @@ namespace Mantid
 
       //! Set the IComponent position, x, y, z respective to parent (if present) otherwise absolute
       void setPos(double, double, double);
-      void setPos(const V3D&);
+      void setPos(const Kernel::V3D&);
 
-      //! Set the orientation quaternion relative to parent (if present) otherwise absolute
-      void setRot(const Quat&);
+      //! Set the orientation Kernel::Quaternion relative to parent (if present) otherwise absolute
+      void setRot(const Kernel::Quat&);
 
 
       //! Translate the IComponent (vector form). This is relative to parent if present.
-      void translate(const V3D&);
+      void translate(const Kernel::V3D&);
 
       //! Translate the IComponent (x,y,z form). This is relative to parent if present.
       void translate(double, double, double);
 
       //! Rotate the IComponent. This is relative to parent.
-      void rotate(const Quat&);
+      void rotate(const Kernel::Quat&);
 
       //! Rotate the IComponent by an angle in degrees with respect to an axis.
-      void rotate(double,const V3D&);
+      void rotate(double,const Kernel::V3D&);
 
       //! Get the position relative to the parent IComponent (absolute if no parent)
-      const V3D & getRelativePos() const;
+      const Kernel::V3D & getRelativePos() const;
 
       //! Get the position of the IComponent. Tree structure is traverse through the parent chain
-      virtual V3D getPos() const;
+      virtual Kernel::V3D getPos() const;
 
       //! Get the relative Orientation
-      const Quat& getRelativeRot() const;
+      const Kernel::Quat& getRelativeRot() const;
 
       //! Get the absolute orientation of the IComponent
-      virtual const Quat getRotation() const;
+      virtual const Kernel::Quat getRotation() const;
 
       //! Get the distance to another IComponent
       double getDistance(const IComponent&) const;
@@ -151,25 +155,25 @@ namespace Mantid
       }
 
       /**
-      * Get a parameter defined as a V3D
+      * Get a parameter defined as a Kernel::V3D
       * @param pname :: The name of the parameter
       * @param recursive :: If true the search will walk up through the parent components
       * @returns A list of values
       */
-      std::vector<V3D> getPositionParameter(const std::string& pname, bool recursive = true) const
+      std::vector<Kernel::V3D> getPositionParameter(const std::string& pname, bool recursive = true) const
       {
-        return getParameter<V3D>(pname, recursive);
+        return getParameter<Kernel::V3D>(pname, recursive);
       }
 
       /**
-      * Get a parameter defined as a Quaternion
+      * Get a parameter defined as a Kernel::Quaternion
       * @param pname :: The name of the parameter
       * @param recursive :: If true the search will walk up through the parent components
       * @returns A list of values
       */
-      std::vector<Quat> getRotationParameter(const std::string& pname, bool recursive = true) const
+      std::vector<Kernel::Quat> getRotationParameter(const std::string& pname, bool recursive = true) const
       {
-        return getParameter<Quat>(pname, recursive);
+        return getParameter<Kernel::Quat>(pname, recursive);
       }
 
       /**
@@ -190,7 +194,7 @@ namespace Mantid
       const IComponent* base()const { return m_base;}
 
       /// Returns the ScaleFactor
-      virtual V3D getScaleFactor() const;
+      virtual Kernel::V3D getScaleFactor() const;
 
       /** Returns the bare pointer to the IComponent parent */
       const IComponent* getBareParent() const { return m_parent; }
@@ -209,9 +213,9 @@ namespace Mantid
       //! Name of the component
       std::string m_name;
       //! Position w
-      V3D m_pos;
+      Kernel::V3D m_pos;
       //! Orientation
-      Quat m_rot;
+      Kernel::Quat m_rot;
 
       /**
       *  Get a parameter from the parameter map

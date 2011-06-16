@@ -1,7 +1,8 @@
 #ifndef MANTID_GEOMETRY_LINE_H
 #define MANTID_GEOMETRY_LINE_H
 
-#include "MantidGeometry/V3D.h"
+#include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid
 {
@@ -9,6 +10,7 @@ namespace Mantid
   namespace Kernel
   {
     class Logger;
+    template<typename T> class Matrix;
   }
 
   namespace Geometry
@@ -16,7 +18,6 @@ namespace Mantid
     //--------------------------------------
     // Forward declarations
     //--------------------------------------
-    template<typename T> class Matrix;
     class Quadratic;
     class Cylinder;
     class Plane;
@@ -61,38 +62,38 @@ namespace Mantid
       static Kernel::Logger& PLog;           ///< The official logger
 
 
-      Geometry::V3D Origin;   ///< Orign point (on plane)
-      Geometry::V3D Direct;   ///< Direction of outer surface (Unit Vector) 
+      Kernel::V3D Origin;   ///< Orign point (on plane)
+      Kernel::V3D Direct;   ///< Direction of outer surface (Unit Vector) 
 
       int lambdaPair(const int ix,const std::pair<std::complex<double>,
-        std::complex<double> >& SQ,std::vector<Geometry::V3D>& PntOut) const;
+        std::complex<double> >& SQ,std::vector<Kernel::V3D>& PntOut) const;
 
     public: 
 
       Line();
-      Line(const Geometry::V3D&,const Geometry::V3D&);
+      Line(const Kernel::V3D&,const Kernel::V3D&);
       Line(const Line&);
       Line& operator=(const Line&);
       Line* clone() const;
 
       ~Line();
 
-      Geometry::V3D getPoint(const double lambda) const;   ///< gets the point O+lam*N
-      Geometry::V3D getOrigin() const { return Origin; }   ///< returns the origin
-      Geometry::V3D getDirect() const { return Direct; }   ///< returns the direction
-      double distance(const Geometry::V3D&) const;  ///< distance from line
-      int isValid(const Geometry::V3D&) const;     ///< Is the point on the line
+      Kernel::V3D getPoint(const double lambda) const;   ///< gets the point O+lam*N
+      Kernel::V3D getOrigin() const { return Origin; }   ///< returns the origin
+      Kernel::V3D getDirect() const { return Direct; }   ///< returns the direction
+      double distance(const Kernel::V3D&) const;  ///< distance from line
+      int isValid(const Kernel::V3D&) const;     ///< Is the point on the line
       void print() const;
 
-      void rotate(const Geometry::Matrix<double>&);
-      void displace(const Geometry::V3D&);
+      void rotate(const Kernel::Matrix<double>&);
+      void displace(const Kernel::V3D&);
 
-      int setLine(const Geometry::V3D&,const Geometry::V3D&);     ///< input Origin + direction
+      int setLine(const Kernel::V3D&,const Kernel::V3D&);     ///< input Origin + direction
 
-      int intersect(std::vector<Geometry::V3D>&,const Quadratic&) const;
-      int intersect(std::vector<Geometry::V3D>&,const Cylinder&) const;
-      int intersect(std::vector<Geometry::V3D>&,const Plane&) const;
-      int intersect(std::vector<Geometry::V3D>&,const Sphere&) const;
+      int intersect(std::vector<Kernel::V3D>&,const Quadratic&) const;
+      int intersect(std::vector<Kernel::V3D>&,const Cylinder&) const;
+      int intersect(std::vector<Kernel::V3D>&,const Plane&) const;
+      int intersect(std::vector<Kernel::V3D>&,const Sphere&) const;
 
     };
 

@@ -60,7 +60,7 @@ public:
   detid_t getID() const;
   std::size_t nDets() const { return 1; } ///< A Detector object represents a single physical detector
   double getDistance(const IComponent& comp) const;
-  double getTwoTheta(const V3D& observer, const V3D& axis) const;
+  double getTwoTheta(const Kernel::V3D& observer, const Kernel::V3D& axis) const;
   double getPhi() const;
   bool isMasked() const;
   bool isMonitor() const;
@@ -71,7 +71,7 @@ public:
   void markAsMonitor(const bool flag = true);
   /** returns the detector's topology, namely, the meaning of the detector's angular measurements.
       It is different in cartesian and cylindrical (surrounding the beam) coordinate system */
-  det_topology getTopology(V3D &center)const;
+  det_topology getTopology(Kernel::V3D &center)const;
  
 private:
   /// The detector id

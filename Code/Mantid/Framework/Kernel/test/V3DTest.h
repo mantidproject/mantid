@@ -6,15 +6,15 @@
 #include <ostream>
 #include <vector>
 
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 
-using namespace Mantid::Geometry;
+using Mantid::Kernel::V3D;
 
 class V3DTest : public CxxTest::TestSuite
 {
 private:
 
-  Mantid::Geometry::V3D a,b,c,d;
+  Mantid::Kernel::V3D a,b,c,d;
 
 public:
 	void testEmptyConstructor()
@@ -26,7 +26,7 @@ public:
 	}
 	void testDefaultConstructor()
 	{
-		Mantid::Geometry::V3D d(1.0,2.0,3.0);
+		Mantid::Kernel::V3D d(1.0,2.0,3.0);
 		TS_ASSERT_EQUALS(d.X(),1.0);
 		TS_ASSERT_EQUALS(d.Y(),2.0);
 		TS_ASSERT_EQUALS(d.Z(),3.0);
@@ -41,7 +41,7 @@ public:
 	void testcopyConstructor()
 	{
 		a(2.0,2.0,2.0);
-		Mantid::Geometry::V3D d(a);
+		Mantid::Kernel::V3D d(a);
 		TS_ASSERT_EQUALS(d.X(),2.0);
 		TS_ASSERT_EQUALS(d.Y(),2.0);
 		TS_ASSERT_EQUALS(d.Z(),2.0);
@@ -58,7 +58,7 @@ public:
 	{
 		double* t=new double[3];
 		t[0]=1.0;t[1]=2.0;t[2]=3.0;
-		Mantid::Geometry::V3D d(t);
+		Mantid::Kernel::V3D d(t);
 		TS_ASSERT_EQUALS(d.X(),1.0);
 		TS_ASSERT_EQUALS(d.Y(),2.0);
 		TS_ASSERT_EQUALS(d.Z(),3.0);
@@ -220,7 +220,7 @@ public:
 	}
 	void testOperatorBracketConst()
 	{
-		const Mantid::Geometry::V3D d(1.0,2.0,3.0);
+		const Mantid::Kernel::V3D d(1.0,2.0,3.0);
 		TS_ASSERT_EQUALS(d[0],1.0);
 		TS_ASSERT_EQUALS(d[1],2.0);
 		TS_ASSERT_EQUALS(d[2],3.0);
@@ -232,7 +232,7 @@ public:
 	}
 	void testOperatorBracketConstThrows()
 	{
-		const Mantid::Geometry::V3D d(1.0,2.0,3.0);
+		const Mantid::Kernel::V3D d(1.0,2.0,3.0);
 		TS_ASSERT_THROWS(d[-1],std::runtime_error&);
 		TS_ASSERT_THROWS(d[3],std::runtime_error&);
 	}

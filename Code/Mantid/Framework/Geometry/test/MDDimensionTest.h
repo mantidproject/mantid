@@ -8,6 +8,8 @@
 
 using namespace Mantid;
 using namespace Geometry;
+using Mantid::Kernel::V3D;
+
 // test class for dimension; The dimensions are internal classes for MD geometry;
 class tDimension: public MDDimension
 {

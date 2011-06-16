@@ -18,6 +18,7 @@ using Mantid::DataHandling::LoadEmptyInstrument;
 using Mantid::DataObjects::Workspace2D;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::Kernel::ConfigService;
+using Mantid::Kernel::V3D;
 
 class SetScalingPSDTest : public CxxTest::TestSuite
 {

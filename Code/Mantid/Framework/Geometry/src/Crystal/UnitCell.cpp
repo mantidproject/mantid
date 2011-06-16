@@ -1,5 +1,5 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/System.h"
 #include <stdexcept>
 #include <cfloat>
@@ -8,7 +8,8 @@ namespace Mantid
 {
 namespace Geometry
 {
-
+  using Mantid::Kernel::V3D;
+  using Mantid::Kernel::DblMatrix;
 
   /** Default constructor. 
   \f$ a = b = c =  1 \mbox{\AA, } \alpha = \beta = \gamma = 90^\circ \f$ */
@@ -409,7 +410,7 @@ namespace Geometry
 
   /// Get the metric tensor
   /// @return G :: metric tensor
-  const Geometry::DblMatrix& UnitCell::getG() const
+  const Kernel::DblMatrix& UnitCell::getG() const
   {
     return G;
   }
@@ -417,21 +418,21 @@ namespace Geometry
 
 	/// Get the reciprocal metric tensor
 	/// @return Gstar :: metric tensor of the reciprocal lattice
-  const Geometry::DblMatrix& UnitCell::getGstar() const
+  const Kernel::DblMatrix& UnitCell::getGstar() const
   {
     return Gstar;
   }
 
   /// Get the B-matrix
   /// @return B :: B matrix in Busing-Levy convention
-  const Geometry::DblMatrix& UnitCell::getB() const
+  const Kernel::DblMatrix& UnitCell::getB() const
   {
     return B;
   }
 
   /// Get the inverse of the B-matrix
   /// @return Binv :: inverse of the B matrix in Busing-Levy convention
-  const Geometry::DblMatrix& UnitCell::getBinv() const
+  const Kernel::DblMatrix& UnitCell::getBinv() const
   {
     return Binv;
   }

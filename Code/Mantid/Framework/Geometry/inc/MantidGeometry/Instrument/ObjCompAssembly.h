@@ -81,8 +81,8 @@ public:
   void printChildren(std::ostream&) const;
   void printTree(std::ostream&) const;
 
-  const Quat getRotation() const;
-  V3D getPos() const;
+  const Kernel::Quat getRotation() const;
+   Kernel::V3D getPos() const;
 
   //! Set the outline of the assembly
   boost::shared_ptr<Object> createOutline();

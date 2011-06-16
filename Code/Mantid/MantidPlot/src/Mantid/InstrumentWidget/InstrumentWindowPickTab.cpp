@@ -160,7 +160,7 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
     QString text = "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
     text += "Detector ID: " + QString::number(detid) + '\n';
     text += "Workspace index: " + QString::number(wi) + '\n';
-    Mantid::Geometry::V3D pos = det->getPos();
+    Mantid::Kernel::V3D pos = det->getPos();
     text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) + "," + QString::number(pos.Z())  + '\n';
     double r,t,p;
     pos.getSpherical(r,t,p);
@@ -426,8 +426,8 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
       return;
     }
   }
-  const Mantid::Geometry::V3D samplePos = sample->getPos();
-  const Mantid::Geometry::V3D beamLine = samplePos - source->getPos();
+  const Mantid::Kernel::V3D samplePos = sample->getPos();
+  const Mantid::Kernel::V3D beamLine = samplePos - source->getPos();
   double theta2 = det->getTwoTheta(samplePos,beamLine);
   double phi = det->getPhi();
 
@@ -441,7 +441,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   Qy *= knorm;
   Qz *= knorm;
 
-  Mantid::API::IPeak* peak = tw->createPeak(Mantid::Geometry::V3D(Qx,Qy,Qz),l2);
+  Mantid::API::IPeak* peak = tw->createPeak(Mantid::Kernel::V3D(Qx,Qy,Qz),l2);
   peak->setDetectorID(m_currentDetID);
   tw->addPeak(*peak);
   delete peak;

@@ -57,13 +57,13 @@ public:
     ///virtual Implementation of toXMLString providing additional fields over parent MDDimension relating to reciprocal nature.
      std::string toXMLString() const;
     /// virtual 
-        V3D getDirectionCryst(void)const;
+        Kernel::V3D getDirectionCryst(void)const;
         /**Main constructor for a reciprocal dimension Initial direction should be set as in MDGeometryBasis, correspondent direction */
-    MDDimensionRes(const std::string &ID,const rec_dim nDim, const V3D *pDir=NULL);
+    MDDimensionRes(const std::string &ID,const rec_dim nDim, const Kernel::V3D *pDir=NULL);
         MDDimensionRes(const MDBasisDimension &Dim);
 protected:
     // function sets the coordinates of the dimension;
-    virtual void setDirection(const V3D &theDirection);
+    virtual void setDirection(const Kernel::V3D &theDirection);
 private:
     /// helper method for converting between qtypes as enums to strings.
     std::string getQTypeAsString() const;

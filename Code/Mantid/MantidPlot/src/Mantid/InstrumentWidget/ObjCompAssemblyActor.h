@@ -4,7 +4,7 @@
 
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 
 class TexObject;
 namespace Mantid{
@@ -50,7 +50,7 @@ public:
   virtual ~ObjCompAssemblyActor();								   ///< Destructor
   virtual std::string type()const {return "ObjCompAssemblyActor";} ///< Type of the GL object
   virtual void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-  //virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const;
+  //virtual void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const;
   virtual void setColors();
 private:
   void setDetectorColor(unsigned char* data, size_t i,GLColor c); ///< set colour to a detector

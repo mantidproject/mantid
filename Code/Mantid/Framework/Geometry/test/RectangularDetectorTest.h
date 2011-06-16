@@ -6,15 +6,17 @@
 #include <iostream>
 #include <string>
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Quat.h"
+#include "MantidKernel/Quat.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::Quat;
 
 class RectangularDetectorTest : public CxxTest::TestSuite
 {

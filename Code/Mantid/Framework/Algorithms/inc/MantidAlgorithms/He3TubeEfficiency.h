@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHM_HE3TUBEEFFICIENCY_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include <map>
 #include <vector>
 
@@ -75,9 +75,9 @@ private:
   void correctForEfficiency(int spectraIndex);
   /// Sets the detector geometry cache if necessary
   void getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det,
-      double & detRadius, Geometry::V3D & detAxis);
+      double & detRadius, Kernel::V3D & detAxis);
   /// Computes the distance to the given shape from a starting point
-  double distToSurface(const Geometry::V3D start,
+  double distToSurface(const Kernel::V3D start,
       const Geometry::Object *shape) const;
   /// Calculate the detector efficiency
   double detectorEfficiency(const double alpha,
@@ -95,9 +95,9 @@ private:
   /// Map that stores additional properties for detectors
   const Geometry::ParameterMap *paraMap;
   /// A lookup of previously seen shape objects used to save calculation time as most detectors have the same shape
-  std::map<const Geometry::Object *, std::pair<double, Geometry::V3D> > shapeCache;
+  std::map<const Geometry::Object *, std::pair<double, Kernel::V3D> > shapeCache;
   /// Sample position
-  Geometry::V3D samplePos;
+  Kernel::V3D samplePos;
   /// The spectra numbers that were skipped
   std::vector<int> spectraSkipped;
   /// Algorithm progress keeper

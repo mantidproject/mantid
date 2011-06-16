@@ -6,6 +6,8 @@
 
 using namespace Mantid;
 using namespace Geometry;
+using Mantid::Kernel::DblMatrix;
+
 class MDGeometryDescriptionTest: public CxxTest::TestSuite
 {
   MDGeometryDescription *pSlice;

@@ -18,6 +18,10 @@ namespace XML {
 
 namespace Mantid
 {
+  namespace Kernel
+  {
+    class V3D;
+  }
   namespace API
   {
     class MatrixWorkspace;
@@ -29,7 +33,6 @@ namespace Mantid
     class Component;
     class Object;
     class ObjComponent;
-    class V3D;
     class Instrument;
   }
 
@@ -163,7 +166,7 @@ namespace Mantid
       std::vector< Geometry::ObjComponent* > m_facingComponent;
 
       /// Parse position of facing element to V3D
-      Geometry::V3D parseFacingElementToV3D(Poco::XML::Element* pElem);
+      Kernel::V3D parseFacingElementToV3D(Poco::XML::Element* pElem);
 
       /// Set facing of comp as specified in XML facing element
       void setFacing(Geometry::IComponent* comp, Poco::XML::Element* pElem);
@@ -172,13 +175,13 @@ namespace Mantid
       bool m_haveDefaultFacing;
 
       /// Hold default facing position
-      Geometry::V3D m_defaultFacing;
+      Kernel::V3D m_defaultFacing;
 
       /// Make the shape defined in 1st argument face the component in the second argument
       void makeXYplaneFaceComponent(Geometry::IComponent* &in, const Geometry::ObjComponent* facing);
 
       /// Make the shape defined in 1st argument face the position in the second argument
-      void makeXYplaneFaceComponent(Geometry::IComponent* &in, const Geometry::V3D& facingPoint);
+      void makeXYplaneFaceComponent(Geometry::IComponent* &in, const Kernel::V3D& facingPoint);
 
       /// Return true if assembly, false if not assembly and throws exception if string not in assembly
       bool isAssembly(std::string);
@@ -218,7 +221,7 @@ namespace Mantid
       std::string getNameOfLocationElement(Poco::XML::Element* pElem);
 
       /// Calculate the position of comp relative to its parent from info provided by \<location\> element
-      Geometry::V3D getRelativeTranslation(const Geometry::IComponent* comp, const Poco::XML::Element* pElem);
+      Kernel::V3D getRelativeTranslation(const Geometry::IComponent* comp, const Poco::XML::Element* pElem);
 
       /// when this const equals 1 it means that angle=degree (default) is set in IDF
       /// otherwise if this const equals 180/pi it means that angle=radian is set in IDF 

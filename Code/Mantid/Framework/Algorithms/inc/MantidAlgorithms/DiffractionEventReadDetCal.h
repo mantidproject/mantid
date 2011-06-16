@@ -40,7 +40,7 @@ namespace Algorithms
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport DiffractionEventReadDetCal: public API::Algorithm, public Geometry::Quat
+class DLLExport DiffractionEventReadDetCal: public API::Algorithm, public Kernel::Quat
 {
 public:
   /// Default constructor

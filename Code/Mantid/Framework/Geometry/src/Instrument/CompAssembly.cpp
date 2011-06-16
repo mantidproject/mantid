@@ -11,7 +11,10 @@ namespace Mantid
 namespace Geometry
 {
 
-/// Void deleter for shared pointers
+  using Kernel::V3D;
+  using Kernel::Quat;
+
+  /// Void deleter for shared pointers
 class NoDeleting
 {
 public:
@@ -21,7 +24,6 @@ public:
       (void) p; //Avoid compiler warnings
     }
 };
-
 
 
 /** Empty constructor

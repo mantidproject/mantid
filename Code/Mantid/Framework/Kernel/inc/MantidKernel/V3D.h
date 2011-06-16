@@ -1,18 +1,18 @@
-#ifndef MANTIDGEOMETRY_V3D_H_
-#define MANTIDGEOMETRY_V3D_H_
+#ifndef MANTID_KERNEL_V3D_H_
+#define MANTID_KERNEL_V3D_H_
 
 #include <cmath>
 #include <cfloat>
 #include <complex>
 #include <vector>
-#include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/DllConfig.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid
 {
-  namespace Geometry
+  namespace Kernel
   {
-    /** @class V3D V3D.h Geometry\V3D.h
+    /** @class V3D V3D.h Kernel\V3D.h
 
     Class for 3D vectors.
 
@@ -39,7 +39,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class MANTID_GEOMETRY_DLL V3D
+    class MANTID_KERNEL_DLL V3D
     {
     public:
 
@@ -54,8 +54,8 @@ namespace Mantid
       V3D operator+(const V3D& v) const;
       V3D& operator+=(const V3D& v);
 
-          // explicit conversion into vector
-          operator std::vector<double>()const{std::vector<double> tmp(3); tmp[0]=x;tmp[1]=y; tmp[2]=z;return  tmp;}
+      // explicit conversion into vector
+      operator std::vector<double>()const{std::vector<double> tmp(3); tmp[0]=x;tmp[1]=y; tmp[2]=z;return  tmp;}
 
       V3D operator-(const V3D& v) const;
       V3D& operator-=(const V3D& v);
@@ -134,10 +134,10 @@ namespace Mantid
     };
 
     // Overload operator <<
-    MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream&, const V3D&);
-    MANTID_GEOMETRY_DLL std::istream& operator>>(std::istream&,V3D&);
+    MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const V3D&);
+    MANTID_KERNEL_DLL std::istream& operator>>(std::istream&,V3D&);
 
-  } // Namespace Geometry
+  } // Namespace Kernel
 } // Namespace Mantid
 
-#endif /*MANTIDGEOMETRY_V3D_H_*/
+#endif /*MANTID_KERNEL_V3D_H_*/

@@ -110,7 +110,7 @@ void LoadInstrumentFromNexus::exec()
   {
     // Create a new detector. Instrument will take ownership of pointer so no need to delete.
     Geometry::Detector *detector = new Geometry::Detector("det",samplepos);
-    Geometry::V3D pos;
+    Kernel::V3D pos;
     pos.spherical(r[i], angle[i], 0.0);
     detector->setPos(pos);
 

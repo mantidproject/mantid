@@ -1,7 +1,7 @@
 #ifndef VECTOR_MATHEMATICS_TEST_H_
 #define VECTOR_MATHEMATICS_TEST_H_
 
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidMDAlgorithms/VectorMathematics.h"
 
 using namespace Mantid::MDAlgorithms;
@@ -39,7 +39,7 @@ public:
 
 	void testCrossProductOrthogonal(void)
 	{
-	  using Mantid::Geometry::V3D;
+	  using Mantid::Kernel::V3D;
 	  double a1 = 1;
 	  double a2 = 0;
 	  double a3 = 0;
@@ -54,7 +54,7 @@ public:
 	
   void testCrossProductParallel(void)
   {
-    using Mantid::Geometry::V3D;
+    using Mantid::Kernel::V3D;
     double a1 = 1;
     double a2 = 0;
     double a3 = 0;

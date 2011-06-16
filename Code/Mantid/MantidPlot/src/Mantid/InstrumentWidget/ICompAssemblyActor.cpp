@@ -1,5 +1,5 @@
 #include "MantidGeometry/IInstrument.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
@@ -30,7 +30,7 @@ ICompAssemblyActor::ICompAssemblyActor(const InstrumentActor& instrActor,const M
  * @param minBound :: min point of the bounding box
  * @param maxBound :: max point of the bounding box
  */
-void ICompAssemblyActor::getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const
+void ICompAssemblyActor::getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const
 {
   minBound=minBoundBox;
   maxBound=maxBoundBox;

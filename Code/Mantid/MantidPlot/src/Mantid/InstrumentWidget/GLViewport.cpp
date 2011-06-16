@@ -2,7 +2,7 @@
 #include <math.h>
 #include <iostream>
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "OpenGLError.h"
 
 GLViewport::GLViewport(int w, int h):mWidth(w),mHeight(h)
@@ -105,9 +105,9 @@ void GLViewport::getProjection(double& xmin,double& xmax,double& ymin,double& ym
 
 void GLViewport::getInstantProjection(double& xmin,double& xmax,double& ymin,double& ymax,double& zmin,double& zmax)const
 {
-  Mantid::Geometry::V3D center((mRight+mLeft)/2.0,(mTop+mBottom)/2.0,(mNear+mFar)/2.0);
+  Mantid::Kernel::V3D center((mRight+mLeft)/2.0,(mTop+mBottom)/2.0,(mNear+mFar)/2.0);
 
-  Mantid::Geometry::V3D distance(mRight-mLeft,mTop-mBottom,mNear-mFar);
+  Mantid::Kernel::V3D distance(mRight-mLeft,mTop-mBottom,mNear-mFar);
   //Window Aspect ratio
   GLdouble windowAspect= mHeight > 0 ? (GLdouble)mWidth/(GLdouble)mHeight : 1.0;
   //Adjust width and height to show the dimensions correct
@@ -185,9 +185,9 @@ void GLViewport::getTranslation(double& xval,double& yval)
 /** Issue the OpenGL commands that define the viewport and projection. */
 void GLViewport::issueGL() const
 {
-  //Mantid::Geometry::V3D center((mRight+mLeft)/2.0,(mTop+mBottom)/2.0,(mNear+mFar)/2.0);
+  //Mantid::Kernel::V3D center((mRight+mLeft)/2.0,(mTop+mBottom)/2.0,(mNear+mFar)/2.0);
 
-  //Mantid::Geometry::V3D distance(mRight-mLeft,mTop-mBottom,mNear-mFar);
+  //Mantid::Kernel::V3D distance(mRight-mLeft,mTop-mBottom,mNear-mFar);
   ////Window Aspect ratio
   //GLdouble windowAspect= mHeight > 0 ? (GLdouble)mWidth/(GLdouble)mHeight : 1.0;
   ////Adjust width and height to show the dimensions correct

@@ -5,7 +5,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/NullValidator.h"
 
@@ -35,10 +35,10 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     template<class TYPE = double>
-    class DLLExport MatrixProperty : public Kernel::PropertyWithValue<Geometry::Matrix<TYPE> >
+    class DLLExport MatrixProperty : public Kernel::PropertyWithValue<Kernel::Matrix<TYPE> >
     {
       /// Typedef the held type
-      typedef Geometry::Matrix<TYPE> HeldType;
+      typedef Kernel::Matrix<TYPE> HeldType;
 
     public:
       /// Constructor

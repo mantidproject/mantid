@@ -1,5 +1,5 @@
 #include "MantidGeometry/Instrument/Instrument.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
@@ -588,9 +588,9 @@ namespace Mantid
      * @return conversion factor for pixel
      */
     double Instrument::calcConversion(const double l1,
-                          const Geometry::V3D &beamline,
+                          const Kernel::V3D &beamline,
                           const double beamline_norm,
-                          const Geometry::V3D &samplePos,
+                          const Kernel::V3D &samplePos,
                           const Geometry::IDetector_const_sptr &det,
                           const double offset,
                           bool vulcancorrection)
@@ -598,7 +598,7 @@ namespace Mantid
       // Get the sample-detector distance for this detector (in metres)
 
       // The scattering angle for this detector (in radians).
-      Geometry::V3D detPos;
+      Kernel::V3D detPos;
       if (vulcancorrection)
       {
         detPos = det->getParent()->getPos();
@@ -626,9 +626,9 @@ namespace Mantid
      * for a LIST of detectors assigned to a single spectrum.
      */
     double Instrument::calcConversion(const double l1,
-                          const Geometry::V3D &beamline,
+                          const Kernel::V3D &beamline,
                           const double beamline_norm,
-                          const Geometry::V3D &samplePos,
+                          const Kernel::V3D &samplePos,
                           const IInstrument_const_sptr &instrument,
                           const std::vector<detid_t> &detectors,
                           const std::map<detid_t,double> &offsets,
@@ -663,8 +663,8 @@ namespace Mantid
      * @param beamline_norm :: 2 * the length of beamline
      * @param samplePos :: vector of the position of the sample
      */
-    void Instrument::getInstrumentParameters(double & l1, Geometry::V3D & beamline,
-        double & beamline_norm, Geometry::V3D & samplePos) const
+    void Instrument::getInstrumentParameters(double & l1, Kernel::V3D & beamline,
+        double & beamline_norm, Kernel::V3D & samplePos) const
     {
       // Get some positions
       const Geometry::IObjComponent_sptr sourceObj = this->getSource();
@@ -672,7 +672,7 @@ namespace Mantid
       {
         throw Exception::InstrumentDefinitionError("Failed to get source component from instrument");
       }
-      const Geometry::V3D sourcePos = sourceObj->getPos();
+      const Kernel::V3D sourcePos = sourceObj->getPos();
       samplePos = this->getSample()->getPos();
       beamline = samplePos-sourcePos;
       beamline_norm=2.0*beamline.norm();

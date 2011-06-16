@@ -10,9 +10,9 @@
 #include "MantidKernel/RandomNumberGenerator.h"
 #include "MantidMDAlgorithms/RunParam.h"
 
-#include "MantidGeometry/Tolerance.h"
+#include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid
 {
@@ -78,7 +78,7 @@ namespace Mantid
       Kernel::RandomNumberGenerator *m_randGen;
       /// Sample S(Q,eps) function from tobyfit
       double sqwBroad601(const std::vector<double> &, const std::vector<double> & ,
-                  const double, const Geometry::Matrix<double> & );
+                  const double, const Kernel::Matrix<double> & );
       /// function to evaluate y/(1-exp(-y)) including y=0 and large -ve y
       double pop(double);
       /// function to bose factor
@@ -95,11 +95,11 @@ namespace Mantid
       /// function to build bmatrix
       void bMatrix(const double, const double, const double, const double, const double,
             const double, const double, const double,
-            const Geometry::Matrix<double> & , const Geometry::Matrix<double> & ,
-            Geometry::Matrix<double> & );
+            const Kernel::Matrix<double> & , const Kernel::Matrix<double> & ,
+            Kernel::Matrix<double> & );
       /// function to build matrices dMat and dinvMat
-      void dMatrix(const double , const double , Geometry::Matrix<double> & ,
-                                  Geometry::Matrix<double> & );
+      void dMatrix(const double , const double , Kernel::Matrix<double> & ,
+                                  Kernel::Matrix<double> & );
       /// Energy resoultion function for moderator and chopper from TF
       double enResModChop(const double , const double , const double , const double ,
             const double , const double , const double );
@@ -109,7 +109,7 @@ namespace Mantid
       /// get transform matrices, vectors for reciprocal space
       int rlatt(const std::vector<double> & a, const std::vector<double> & ang,
                  std::vector<double> & arlu, std::vector<double> & angrlu,
-                 Geometry::Matrix<double> & dMat );
+                 Kernel::Matrix<double> & dMat );
       /// The default seed for MT random numbers
       int m_randSeed;
       /// Flag for random number method - may change to enum to allow for several methods

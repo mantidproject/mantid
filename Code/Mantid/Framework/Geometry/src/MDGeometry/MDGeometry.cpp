@@ -1,7 +1,7 @@
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Matrix.h"
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 
 

@@ -6,11 +6,13 @@
 #include <iostream>
 #include <string>
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quat.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Quat.h"
 #include "MantidKernel/Exception.h"
 
 using namespace Mantid::Geometry;
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::Quat;
 
 class ComponentTest : public CxxTest::TestSuite
 {

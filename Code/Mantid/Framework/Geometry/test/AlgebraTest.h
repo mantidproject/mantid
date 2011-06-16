@@ -7,7 +7,7 @@
 #include <vector>
 #include <algorithm>
 
-//#include "MantidGeometry/Math/Matrix.h" 
+//#include "MantidKernel/Matrix.h" 
 #include "MantidGeometry/Math/Algebra.h" 
 
 using namespace Mantid::Geometry;

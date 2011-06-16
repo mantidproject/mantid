@@ -147,12 +147,12 @@ namespace Geometry
     void addBool(const IComponent* comp,const std::string& name, bool value);
     /// Adds a std::string value to the parameter map.
     void addString(const IComponent* comp,const std::string& name, const std::string& value);
-    /// Adds a V3D value to the parameter map.
+    /// Adds a Kernel::V3D value to the parameter map.
     void addV3D(const IComponent* comp,const std::string& name, const std::string& value);
-    /// @param value :: Parameter value as a V3D
-    void addV3D(const IComponent* comp,const std::string& name, const V3D& value);
-    /// Adds a Quat value to the parameter map.
-    void addQuat(const IComponent* comp,const std::string& name, const Quat& value);
+    /// @param value :: Parameter value as a Kernel::V3D
+    void addV3D(const IComponent* comp,const std::string& name, const Kernel::V3D& value);
+    /// Adds a Kernel::Quat value to the parameter map.
+    void addQuat(const IComponent* comp,const std::string& name, const Kernel::Quat& value);
     //@}
 
     /// Does the named parameter exist for the given component for any type.
@@ -212,14 +212,14 @@ namespace Geometry
       return getType<double>(compName,name);
     }
     /**  
-     * Returns a V3D parameter as vector's first element if exists and an empty vector if it doesn't
+     * Returns a Kernel::V3D parameter as vector's first element if exists and an empty vector if it doesn't
      * @param compName :: Component name
      * @param name :: Parameter name
-     * @return a V3D parameter from component with the requested name
+     * @return a Kernel::V3D parameter from component with the requested name
      */
-    std::vector<V3D> getV3D(const std::string& compName,const std::string& name)const
+    std::vector<Kernel::V3D> getV3D(const std::string& compName,const std::string& name)const
     {
-      return getType<V3D>(compName,name);
+      return getType<Kernel::V3D>(compName,name);
     }
 
     /// Returns a set with all parameter names for component
@@ -230,13 +230,13 @@ namespace Geometry
     ///Clears the location and roatation caches
     void clearCache();
     ///Sets a cached location on the location cache
-    void setCachedLocation(const IComponent* comp, const V3D& location) const;
+    void setCachedLocation(const IComponent* comp, const Kernel::V3D& location) const;
     ///Attempts to retreive a location from the location cache
-    bool getCachedLocation(const IComponent* comp, V3D& location) const;
+    bool getCachedLocation(const IComponent* comp, Kernel::V3D& location) const;
     ///Sets a cached rotation on the rotation cache
-    void setCachedRotation(const IComponent* comp, const Quat& rotation) const;
+    void setCachedRotation(const IComponent* comp, const Kernel::Quat& rotation) const;
     ///Attempts to retreive a rotation from the rotation cache
-    bool getCachedRotation(const IComponent* comp, Quat& rotation) const;
+    bool getCachedRotation(const IComponent* comp, Kernel::Quat& rotation) const;
     ///Sets a cached bounding box
     void setCachedBoundingBox(const IComponent *comp, const BoundingBox & box) const;
     ///Attempts to retrieve a bounding box from the cache
@@ -272,9 +272,9 @@ namespace Geometry
     /// shared pointer to NearestNeighbours object
     mutable boost::shared_ptr<NearestNeighbours> m_nearestNeighbours;
     /// internal cache map instance for cached postition values
-    mutable Kernel::Cache<const ComponentID,V3D > m_cacheLocMap;
+    mutable Kernel::Cache<const ComponentID, Kernel::V3D > m_cacheLocMap;
     /// internal cache map instance for cached rotation values
-    mutable Kernel::Cache<const ComponentID,Quat > m_cacheRotMap;
+    mutable Kernel::Cache<const ComponentID, Kernel::Quat > m_cacheRotMap;
     ///internal cache map for cached bounding boxes
     mutable Kernel::Cache<const ComponentID,BoundingBox> m_boundingBoxMap;
     /// Static reference to the logger class

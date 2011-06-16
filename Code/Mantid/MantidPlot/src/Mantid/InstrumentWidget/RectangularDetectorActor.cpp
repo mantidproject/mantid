@@ -4,7 +4,7 @@
 #include "InstrumentActor.h"
 
 #include "MantidGeometry/IInstrument.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/ICompAssembly.h"
@@ -15,6 +15,8 @@
 #include <cfloat>
 using namespace Mantid;
 using namespace Geometry;
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::Quat;
 
 static const bool VERBOSE = false;
 
@@ -242,7 +244,7 @@ void RectangularDetectorActor::uploadTexture(char * & image_data)const
  * @param minBound :: min point of the bounding box
  * @param maxBound :: max point of the bounding box
  */
-void RectangularDetectorActor::getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const
+void RectangularDetectorActor::getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const
 {
   minBound=minBoundBox;
   maxBound=maxBoundBox;
@@ -254,7 +256,7 @@ void RectangularDetectorActor::getBoundingBox(Mantid::Geometry::V3D& minBound,Ma
  * @param minBound :: min point of the bounding box
  * @param maxBound :: max point of the bounding box
  */
-void RectangularDetectorActor::AppendBoundingBox(const Mantid::Geometry::V3D& minBound,const Mantid::Geometry::V3D& maxBound)
+void RectangularDetectorActor::AppendBoundingBox(const Mantid::Kernel::V3D& minBound,const Mantid::Kernel::V3D& maxBound)
 {
   if(minBoundBox[0]>minBound[0]) minBoundBox[0]=minBound[0];
   if(minBoundBox[1]>minBound[1]) minBoundBox[1]=minBound[1];

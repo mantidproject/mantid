@@ -19,7 +19,7 @@ public:
   InstrumentTreeWidget(QWidget *w);
   void setInstrument(boost::shared_ptr<const Mantid::Geometry::IInstrument>);
   void getSelectedBoundingBox(const QModelIndex& index,double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin);
-  Mantid::Geometry::V3D getSamplePos()const;
+  Mantid::Kernel::V3D getSamplePos()const;
   QModelIndex findComponentByName(const QString & name) const;
 protected slots:
   void sendComponentSelectedSignal(const QModelIndex);

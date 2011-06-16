@@ -46,7 +46,6 @@
   #pragma warning disable 181
 #endif
 
-#define  _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <iostream>
 #include <stdlib.h>

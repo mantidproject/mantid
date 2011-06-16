@@ -35,7 +35,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 Projection3D::Projection3D(const InstrumentActor* rootActor,int winWidth,int winHeight)
-  :ProjectionSurface(rootActor,Mantid::Geometry::V3D(),Mantid::Geometry::V3D(0,0,1)),
+  :ProjectionSurface(rootActor,Mantid::Kernel::V3D(),Mantid::Kernel::V3D(0,0,1)),
   //m_instrActor(*rootActor),
   m_viewport(new GLViewport),
   m_drawAxes(true),

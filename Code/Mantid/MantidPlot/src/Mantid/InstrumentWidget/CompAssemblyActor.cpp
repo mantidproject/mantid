@@ -5,7 +5,7 @@
 #include "OpenGLError.h"
 
 #include "MantidGeometry/IInstrument.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
@@ -52,8 +52,8 @@ CompAssemblyActor::CompAssemblyActor(const InstrumentActor& instrActor,const Man
   boost::shared_ptr<const IComponent> CompPtr = getComponent();
 
   //bounding box of the overall instrument
-  Mantid::Geometry::V3D minBound;
-  Mantid::Geometry::V3D maxBound;
+  Mantid::Kernel::V3D minBound;
+  Mantid::Kernel::V3D maxBound;
   //Iterate through CompAssembly children
   boost::shared_ptr<const ICompAssembly> CompAssemPtr=boost::dynamic_pointer_cast<const ICompAssembly>(CompPtr);
   if(CompAssemPtr!=boost::shared_ptr<ICompAssembly>())
@@ -168,7 +168,7 @@ void CompAssemblyActor::draw(bool picking)const
  * @param minBound :: min point of the bounding box
  * @param maxBound :: max point of the bounding box
  */
-void CompAssemblyActor::AppendBoundingBox(const Mantid::Geometry::V3D& minBound,const Mantid::Geometry::V3D& maxBound)
+void CompAssemblyActor::AppendBoundingBox(const Mantid::Kernel::V3D& minBound,const Mantid::Kernel::V3D& maxBound)
 {
   if(minBoundBox[0]>minBound[0]) minBoundBox[0]=minBound[0];
   if(minBoundBox[1]>minBound[1]) minBoundBox[1]=minBound[1];

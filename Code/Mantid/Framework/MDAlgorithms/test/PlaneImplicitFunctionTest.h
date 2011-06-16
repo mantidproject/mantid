@@ -6,7 +6,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <vector>
-#include <MantidGeometry/Math/Matrix.h>
+#include <MantidKernel/Matrix.h>
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 
 class PlaneImplicitFunctionTest: public CxxTest::TestSuite

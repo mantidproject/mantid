@@ -5,17 +5,17 @@
 #include <cmath>
 #include <ostream>
 #include <float.h>
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quat.h" 
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Quat.h" 
+#include "MantidKernel/Matrix.h"
 
-using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 class QuatTest : public CxxTest::TestSuite
 {
 private:
 
-  Mantid::Geometry::Quat q,p;
+  Mantid::Kernel::Quat q,p;
 
 public:
   void testoperatorbracket()
@@ -40,7 +40,7 @@ public:
 
   void testValueConstructor()
   {
-    Mantid::Geometry::Quat q1(1,2,3,4);
+    Mantid::Kernel::Quat q1(1,2,3,4);
     TS_ASSERT_EQUALS(q1[0],1.0);
     TS_ASSERT_EQUALS(q1[1],2.0);
     TS_ASSERT_EQUALS(q1[2],3.0);
@@ -49,10 +49,10 @@ public:
 
   void testAngleAxisConstructor()
   {
-    Mantid::Geometry::V3D v(1,1,1);
+    Mantid::Kernel::V3D v(1,1,1);
     // Construct quaternion to represent rotation
     // of 45 degrees around the 111 axis.
-    Mantid::Geometry::Quat q1(90.0,v);
+    Mantid::Kernel::Quat q1(90.0,v);
     double c=1.0/sqrt(2.0);
     double s=c/sqrt(3.0);
     TS_ASSERT_DELTA(q1[0],c,0.000001);
@@ -72,7 +72,7 @@ public:
 
   void testoperatorassignmentfromangleaxis()
   {
-    Mantid::Geometry::V3D v(1,1,1);
+    Mantid::Kernel::V3D v(1,1,1);
     q(90.0,v);
     double c=1.0/sqrt(2.0);
     double s=c/sqrt(3.0);
@@ -147,7 +147,7 @@ public:
   void testinversemethod()
   {
     q(2,3,4,5);
-    Mantid::Geometry::Quat qinv(q);
+    Mantid::Kernel::Quat qinv(q);
     qinv.inverse();
     q*=qinv;
     TS_ASSERT_DELTA(q[0],1,0.000001);
@@ -160,7 +160,7 @@ public:
   {
     q(1,1,1,1);
     p(-1,2,1,3);
-    Mantid::Geometry::Quat res;
+    Mantid::Kernel::Quat res;
     res=p+q;
     TS_ASSERT_EQUALS(res[0],0);
     TS_ASSERT_EQUALS(res[1],3);
@@ -172,7 +172,7 @@ public:
   {
     q(1,1,1,1);
     p(-1,2,1,3);
-    Mantid::Geometry::Quat res;
+    Mantid::Kernel::Quat res;
     res=p-q;
     TS_ASSERT_EQUALS(res[0],-2);
     TS_ASSERT_EQUALS(res[1],1);
@@ -184,7 +184,7 @@ public:
   {
     q(1,1,1,1);
     p(-1,2,1,3);
-    Mantid::Geometry::Quat res;
+    Mantid::Kernel::Quat res;
     res=p*q;
     TS_ASSERT_EQUALS(res[0],-7);
     TS_ASSERT_EQUALS(res[1],-1);
@@ -379,9 +379,9 @@ public:
 
  void testSetFromDirectionCosineMatrix_trival()
   {
-    Mantid::Geometry::V3D rX(1,0,0);
-    Mantid::Geometry::V3D rY(0,1,0);
-    Mantid::Geometry::V3D rZ(0,0,1);
+    Mantid::Kernel::V3D rX(1,0,0);
+    Mantid::Kernel::V3D rY(0,1,0);
+    Mantid::Kernel::V3D rZ(0,0,1);
     q(rX,rY,rZ);
     p(1,0,0,0); //Identity quaternion
     TS_ASSERT(p==q); //Trivial rotation

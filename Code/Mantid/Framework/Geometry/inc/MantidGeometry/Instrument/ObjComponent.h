@@ -71,10 +71,10 @@ public:
    */
   virtual IComponent* clone() const {return new ObjComponent(*this);}
 
-  bool isValid(const V3D& point) const;
-  bool isOnSide(const V3D& point) const;
+  bool isValid(const Kernel::V3D& point) const;
+  bool isOnSide(const Kernel::V3D& point) const;
   int interceptSurface(Track& track) const;
-  double solidAngle(const V3D& observer) const;
+  double solidAngle(const Kernel::V3D& observer) const;
   ///@todo This should go in favour of just the class related one.
   void boundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
   /// get bounding box, which may or may not be axis aligned;
@@ -86,7 +86,7 @@ public:
   /// get Depth (Z-dimension) value for component
   virtual double getDepth() const;
   
-  int getPointInObject(V3D& point) const;
+  int getPointInObject(Kernel::V3D& point) const;
   //Rendering member functions
   void draw() const;
   void drawObject() const;
@@ -105,8 +105,8 @@ protected:
   /// The material this object is made of
   Material_const_sptr m_material;
 
-  const V3D factorOutComponentPosition(const V3D& point) const;
-  const V3D takeOutRotation(V3D point) const;
+  const Kernel::V3D factorOutComponentPosition(const Kernel::V3D& point) const;
+  const Kernel::V3D takeOutRotation(Kernel::V3D point) const;
 private:
 /// common part of the two Bounding box functions above;
   void getRelativeBoundingBox(BoundingBox& RelativeBB) const;

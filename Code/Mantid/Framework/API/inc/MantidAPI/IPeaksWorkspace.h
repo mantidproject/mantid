@@ -85,7 +85,7 @@ namespace API
      * @param detectorDistance :: distance between the sample and the detector.
      * @return a pointer to a new Peak object.
      */
-    virtual IPeak* createPeak(Mantid::Geometry::V3D QLabFrame, double detectorDistance=1.0) = 0;
+    virtual IPeak* createPeak(Mantid::Kernel::V3D QLabFrame, double detectorDistance=1.0) = 0;
 
   };
 

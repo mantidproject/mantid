@@ -30,7 +30,7 @@ namespace Mantid
     using namespace API;
     using Geometry::Instrument_sptr;
     using Geometry::IDetector_sptr;
-    using Geometry::V3D;
+    using Kernel::V3D;
 
     /// Empty default constructor
     UpdateInstrumentFromFile::UpdateInstrumentFromFile()
@@ -181,7 +181,7 @@ namespace Mantid
             if( ignoreMonitors && det->isMonitor() ) continue;
             V3D parentPos;
             if( det->getParent() ) parentPos = det->getParent()->getPos();
-            Geometry::V3D pos;
+            Kernel::V3D pos;
             pos.spherical(l2[i], theta[i], phi[i]);
             // Set new relative position
             det->setPos(pos-parentPos);

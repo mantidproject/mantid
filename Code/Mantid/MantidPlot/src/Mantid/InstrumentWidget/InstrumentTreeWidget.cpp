@@ -70,13 +70,13 @@ void InstrumentTreeWidget::getSelectedBoundingBox(const QModelIndex& index,doubl
   }
 }
 
-Mantid::Geometry::V3D InstrumentTreeWidget::getSamplePos()const
+Mantid::Kernel::V3D InstrumentTreeWidget::getSamplePos()const
 {
   boost::shared_ptr<const Mantid::Geometry::IComponent> sample = mInstrument->getSample();
   if(sample!=NULL)
     return sample->getPos();
   else
-    return Mantid::Geometry::V3D(0.0,0.0,0.0);
+    return Mantid::Kernel::V3D(0.0,0.0,0.0);
 }
 
 QModelIndex InstrumentTreeWidget::findComponentByName(const QString & name) const

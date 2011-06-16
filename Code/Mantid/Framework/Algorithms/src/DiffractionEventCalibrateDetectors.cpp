@@ -503,9 +503,9 @@ namespace Algorithms
       g_log.information() << "Rotate (Z) = " << gsl_vector_get (s->x, 5) << "  \n";
 
 
-      Geometry::V3D CalCenter=V3D(gsl_vector_get (s->x, 0)*0.01,
+      Kernel::V3D CalCenter=V3D(gsl_vector_get (s->x, 0)*0.01,
         gsl_vector_get (s->x, 1)*0.01, gsl_vector_get (s->x, 2)*0.01);
-      Geometry::V3D Center=detList[det]->getPos()+CalCenter;
+      Kernel::V3D Center=detList[det]->getPos()+CalCenter;
       int pixmax = detList[det]->xpixels()-1;
       int pixmid = (detList[det]->ypixels()-1)/2;
       BoundingBox box;
@@ -513,14 +513,14 @@ namespace Algorithms
       baseX = box.xMax();
       baseY = box.yMax();
       baseZ = box.zMax();
-      Geometry::V3D Base=V3D(baseX,baseY,baseZ)+CalCenter;
+      Kernel::V3D Base=V3D(baseX,baseY,baseZ)+CalCenter;
       pixmid = (detList[det]->xpixels()-1)/2;
       pixmax = detList[det]->ypixels()-1;
       detList[det]->getAtXY(pixmid, pixmax)->getBoundingBox(box);
       upX = box.xMax();
       upY = box.yMax();
       upZ = box.zMax();
-      Geometry::V3D Up=V3D(upX,upY,upZ)+CalCenter;
+      Kernel::V3D Up=V3D(upX,upY,upZ)+CalCenter;
       Base-=Center;
       Up-=Center;
       //Rotate around x

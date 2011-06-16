@@ -9,7 +9,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 
 #include <fstream>
 

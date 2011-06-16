@@ -106,11 +106,11 @@ public:
     Detector det("det",0,0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    pmap->add("V3D", &det, "testparam", Mantid::Geometry::V3D(0.5, 1.0, 1.5));
+    pmap->add("V3D", &det, "testparam", Mantid::Kernel::V3D(0.5, 1.0, 1.5));
     Detector pdet(&det,pmap.get());
     IDetector *idet = static_cast<IDetector*>(&pdet);
 
-    std::vector<Mantid::Geometry::V3D> pos = idet->getPositionParameter("testparam");
+    std::vector<Mantid::Kernel::V3D> pos = idet->getPositionParameter("testparam");
 
     TS_ASSERT_EQUALS(pos.size(), 1);
     TS_ASSERT_DELTA(pos[0].X(), 0.5, 1e-08);
@@ -124,11 +124,11 @@ public:
     Detector det("det",0,0);
 
     ParameterMap_sptr pmap( new ParameterMap() );
-    pmap->add("Quat", &det, "testparam", Mantid::Geometry::Quat(1.0, 0.25, 0.5, 0.75));
+    pmap->add("Quat", &det, "testparam", Mantid::Kernel::Quat(1.0, 0.25, 0.5, 0.75));
     Detector pdet(&det,pmap.get());
     IDetector *idet = static_cast<IDetector*>(&pdet);
 
-    std::vector<Mantid::Geometry::Quat> rot = idet->getRotationParameter("testparam");
+    std::vector<Mantid::Kernel::Quat> rot = idet->getRotationParameter("testparam");
 
     TS_ASSERT_EQUALS(rot.size(), 1);
     TS_ASSERT_DELTA(rot[0].real(), 1.0, 1e-08);

@@ -15,8 +15,8 @@
 #include "MantidKernel/Logger.h"
 
 #include "MantidGeometry/Math/Triple.h"
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Objects/Rules.h"

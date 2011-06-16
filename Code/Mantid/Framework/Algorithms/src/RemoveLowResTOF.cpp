@@ -221,9 +221,9 @@ void RemoveLowResTOF::execEvent()
 
 double RemoveLowResTOF::calcTofMin(const size_t workspaceIndex)
 {
-  const Geometry::V3D& sourcePos = m_instrument->getSource()->getPos();
-  const Geometry::V3D& samplePos = m_instrument->getSample()->getPos();
-  const Geometry::V3D& beamline = samplePos - sourcePos;
+  const Kernel::V3D& sourcePos = m_instrument->getSource()->getPos();
+  const Kernel::V3D& samplePos = m_instrument->getSample()->getPos();
+  const Kernel::V3D& beamline = samplePos - sourcePos;
   double beamline_norm = 2. * beamline.norm();
 
   const specid_t spec = m_inputWS->getAxis(1)->spectraNo(workspaceIndex);

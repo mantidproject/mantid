@@ -9,6 +9,7 @@
 
 using namespace Mantid::Geometry;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::Kernel::V3D;
 
 class HRPDSlabCanAbsorptionTest : public CxxTest::TestSuite
 {

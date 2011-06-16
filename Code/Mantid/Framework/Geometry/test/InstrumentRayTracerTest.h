@@ -5,7 +5,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -16,6 +16,7 @@
 using namespace Mantid::Geometry;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::API::AnalysisDataService;
+using Mantid::Kernel::V3D;
 
 //-------------------------------------------------------------
 // Test suite

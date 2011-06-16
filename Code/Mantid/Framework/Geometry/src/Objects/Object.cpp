@@ -16,7 +16,7 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/RegexStrings.h"
-#include "MantidGeometry/Tolerance.h"
+#include "MantidKernel/Tolerance.h"
 #include <deque>
 #include <stack>
 
@@ -24,6 +24,9 @@ namespace Mantid
 {
   namespace Geometry
   {
+
+    using Kernel::V3D;
+    using Kernel::Quat;
 
     Kernel::Logger& Object::PLog(Kernel::Logger::get("Object"));
 
@@ -408,9 +411,9 @@ namespace Mantid
     * @param Pt :: Point to check
     * @returns 1 if the point is on the surface
     */
-    bool Object::isOnSide(const Geometry::V3D& Pt) const
+    bool Object::isOnSide(const Kernel::V3D& Pt) const
     {
-      std::list<Geometry::V3D> Snorms; // Normals from the constact surface.
+      std::list<Kernel::V3D> Snorms; // Normals from the constact surface.
 
       std::vector<const Surface*>::const_iterator vc;
       for (vc = SurList.begin(); vc != SurList.end(); vc++)
@@ -424,8 +427,8 @@ namespace Mantid
             return true;
         }
       }
-      std::list<Geometry::V3D>::const_iterator xs, ys;
-      Geometry::V3D NormPair;
+      std::list<Kernel::V3D>::const_iterator xs, ys;
+      Kernel::V3D NormPair;
       for (xs = Snorms.begin(); xs != Snorms.end(); xs++)
         for (ys = xs, ys++; ys != Snorms.end(); ys++)
         {
@@ -448,12 +451,12 @@ namespace Mantid
     * @retval -1 :: Point included (e.g at convex intersection)
     * @retval 0 :: success
     */
-    int Object::checkSurfaceValid(const Geometry::V3D& C, const Geometry::V3D& Nm) const
+    int Object::checkSurfaceValid(const Kernel::V3D& C, const Kernel::V3D& Nm) const
     {
       int status(0);
-      Geometry::V3D tmp = C + Nm * (Tolerance * 5.0);
+      Kernel::V3D tmp = C + Nm * (Kernel::Tolerance * 5.0);
       status = (!isValid(tmp)) ? 1 : -1;
-      tmp -= Nm * (Tolerance * 10.0);
+      tmp -= Nm * (Kernel::Tolerance * 10.0);
       status += (!isValid(tmp)) ? 1 : -1;
       return status / 2;
     }
@@ -463,7 +466,7 @@ namespace Mantid
     * @param Pt :: Point to be tested
     * @returns 1 if true and 0 if false
     */
-    bool Object::isValid(const Geometry::V3D& Pt) const
+    bool Object::isValid(const Kernel::V3D& Pt) const
     {
       if (!TopRule)
         return false;
@@ -792,7 +795,7 @@ namespace Mantid
       {
         (*vc)->acceptVisitor(LI);
       }
-      const std::vector<Geometry::V3D>& IPts(LI.getPoints());
+      const std::vector<Kernel::V3D>& IPts(LI.getPoints());
       const std::vector<double>& dPts(LI.getDistance());
 
       for (unsigned int i = 0; i < IPts.size(); i++)
@@ -817,11 +820,11 @@ namespace Mantid
     * @retval 1 :: Entry point
     * @retval -1 :: Exit Point
     */
-    int Object::calcValidType(const Geometry::V3D& Pt, const Geometry::V3D& uVec) const
+    int Object::calcValidType(const Kernel::V3D& Pt, const Kernel::V3D& uVec) const
     {
-      const Geometry::V3D shift(uVec * Tolerance * 25.0);
-      const Geometry::V3D testA(Pt - shift);
-      const Geometry::V3D testB(Pt + shift);
+      const Kernel::V3D shift(uVec * Kernel::Tolerance * 25.0);
+      const Kernel::V3D testA(Pt - shift);
+      const Kernel::V3D testB(Pt + shift);
       const int flagA = isValid(testA);
       const int flagB = isValid(testB);
       if (!(flagA ^ flagB))
@@ -836,7 +839,7 @@ namespace Mantid
     * @param observer :: point to measure solid angle from
     * @return :: estimate of solid angle of object. Accuracy depends on object shape.
     */
-    double Object::solidAngle(const Geometry::V3D& observer) const
+    double Object::solidAngle(const Kernel::V3D& observer) const
     {
       if (this->NumberOfTriangles() > 30000)
         return rayTraceSolidAngle(observer);
@@ -849,7 +852,7 @@ namespace Mantid
      * @param scaleFactor :: V3D giving scaling of the object
      * @return :: estimate of solid angle of object. Accuracy depends on triangulation quality.
      */
-    double Object::solidAngle(const Geometry::V3D& observer, const Geometry::V3D& scaleFactor) const
+    double Object::solidAngle(const Kernel::V3D& observer, const Kernel::V3D& scaleFactor) const
       
     {
       return triangleSolidAngle(observer, scaleFactor);
@@ -860,7 +863,7 @@ namespace Mantid
     * @param observer :: position of the observer (V3D)
     * @return Solid angle in steradians (+/- 1% if accurate bounding box available)
     */
-    double Object::rayTraceSolidAngle(const Geometry::V3D& observer) const
+    double Object::rayTraceSolidAngle(const Kernel::V3D& observer) const
     {
       // Calculation of solid angle as numerical double integral over all
       // angles. This could be optimised further e.g. by
@@ -882,7 +885,7 @@ namespace Mantid
       const BoundingBox & boundingBox = getBoundingBox();
       double thetaMax = M_PI;
       bool useBB = false, usePt = false;
-      Geometry::V3D ptInObject, axis;
+      Kernel::V3D ptInObject, axis;
       Quat zToPt;
 
       // Is the bounding box a reasonable one?
@@ -903,10 +906,10 @@ namespace Mantid
         // found point in object, now get rotation that maps z axis to this direction from observer
         ptInObject -= observer;
         double theta0 = -180.0 / M_PI * acos(ptInObject.Z() / ptInObject.norm());
-        Geometry::V3D zDir(0.0, 0.0, 1.0);
+        Kernel::V3D zDir(0.0, 0.0, 1.0);
         axis = ptInObject.cross_prod(zDir);
         if (axis.nullVector())
-          axis = Geometry::V3D(1.0, 0.0, 0.0);
+          axis = Kernel::V3D(1.0, 0.0, 0.0);
         zToPt(theta0, axis);
       }
       dtheta = thetaMax / res;
@@ -925,7 +928,7 @@ namespace Mantid
         {
           // integrate phi from 0 to 2*PI
           phi = 2.0 * M_PI * (jphi - 0.5) / resPhi;
-          Geometry::V3D dir(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
+          Kernel::V3D dir(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
           if (usePt)
             zToPt.rotate(dir);
           if (!useBB || boundingBox.doesLineIntersect(observer, dir))
@@ -961,7 +964,7 @@ namespace Mantid
           for (jphi = 1; jphi <= resPhi; jphi++)
           {
             phi = 2.0 * M_PI * (jphi - 0.5) / resPhi;
-            Geometry::V3D dir(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
+            Kernel::V3D dir(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
             if (usePt)
               zToPt.rotate(dir);
             Track tr(observer, dir);
@@ -1037,7 +1040,7 @@ namespace Mantid
       // If the object is a simple shape use the special methods
       double height(0.0), radius(0.0);
       int type(0);
-      std::vector<Mantid::Geometry::V3D> geometry_vectors;
+      std::vector<Mantid::Kernel::V3D> geometry_vectors;
       // Maximum of 4 vectors depending on the type
       geometry_vectors.reserve(4);
       this->GetObjectGeom(type, geometry_vectors, radius, height);
@@ -1119,7 +1122,7 @@ namespace Mantid
       {
         double height = 0.0, radius(0.0);
         int type;
-        std::vector<Geometry::V3D> vectors;
+        std::vector<Kernel::V3D> vectors;
         this->GetObjectGeom(type, vectors, radius, height);
         if (type == 1)
         {
@@ -1160,11 +1163,11 @@ namespace Mantid
     * @param radius :: sphere radius
     * @return :: solid angle of sphere
     */
-    double Object::SphereSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors,
+    double Object::SphereSolidAngle(const V3D observer, const std::vector<Kernel::V3D> vectors,
       const double radius) const
     {
       const double distance = (observer - vectors[0]).norm();
-      const double tol = Tolerance;
+      const double tol = Kernel::Tolerance;
       if (distance > radius + tol)
       {
         const double sa = 2.0 * M_PI * (1.0 - cos(asin(radius / distance)));
@@ -1183,7 +1186,7 @@ namespace Mantid
     * @param vectors :: vector of V3D - the values are the 4 points used to defined the cuboid
     * @return :: solid angle of cuboid - good accuracy
     */
-    double Object::CuboidSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors) const
+    double Object::CuboidSolidAngle(const V3D observer, const std::vector<Kernel::V3D> vectors) const
     {
       // Build bounding points, then set up map of 12 bounding
       // triangles defining the 6 surfaces of the bounding box. Using a consistent
@@ -1191,8 +1194,8 @@ namespace Mantid
       // solid angle and hence are ignored.
       std::vector<V3D> pts;
       pts.reserve(8);
-      Geometry::V3D dx = vectors[1] - vectors[0];
-      Geometry::V3D dz = vectors[3] - vectors[0];
+      Kernel::V3D dx = vectors[1] - vectors[0];
+      Kernel::V3D dz = vectors[3] - vectors[0];
       pts.push_back(vectors[2]);
       pts.push_back(vectors[2] + dx);
       pts.push_back(vectors[1]);
@@ -1260,8 +1263,8 @@ namespace Mantid
     * @param height :: The height
     * @returns The solid angle value
     */
-    double Object::CylinderSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre,
-      const Mantid::Geometry::V3D & axis, const double radius, const double height) const
+    double Object::CylinderSolidAngle(const V3D & observer, const Mantid::Kernel::V3D & centre,
+      const Mantid::Kernel::V3D & axis, const double radius, const double height) const
     {
       // The cylinder is triangulated along its axis EXCLUDING the end caps so that stacked cylinders 
       // give the correct value of solid angle (i.e shadowing is losely taken into account by this 
@@ -1270,12 +1273,12 @@ namespace Mantid
       //angle and is excluded
       // For simplicity the triangulation points are constructed such that the cone axis 
       // points up the +Z axis and then rotated into their final position
-      Geometry::V3D axis_direction = axis;
+      Kernel::V3D axis_direction = axis;
       axis_direction.normalize();
       // Required rotation
-      Geometry::V3D initial_axis = Geometry::V3D(0., 0., 1.0);
-      Geometry::V3D final_axis = axis_direction;
-      Geometry::Quat transform(initial_axis, final_axis);
+      Kernel::V3D initial_axis = Kernel::V3D(0., 0., 1.0);
+      Kernel::V3D final_axis = axis_direction;
+      Kernel::Quat transform(initial_axis, final_axis);
 
       // Do the base cap which is a point at the centre and nslices points around it
       const int nslices(Mantid::Geometry::Cylinder::g_nslices);
@@ -1295,13 +1298,13 @@ namespace Mantid
         {
 	  double x = radius * std::cos(angle_step * sl);
 	  double y = radius * std::sin(angle_step * sl);
-	  Geometry::V3D pt1 = Geometry::V3D(x,y,z0);
-          Geometry::V3D pt2 = Geometry::V3D(x,y,z1);
+	  Kernel::V3D pt1 = Kernel::V3D(x,y,z0);
+          Kernel::V3D pt2 = Kernel::V3D(x,y,z1);
 	  int vertex = (sl+1) % nslices;
 	  x = radius * std::cos(angle_step * vertex);
 	  y = radius * std::sin(angle_step * vertex);
-          Geometry::V3D pt3 = Geometry::V3D(x,y,z0);
-          Geometry::V3D pt4 = Geometry::V3D(x,y,z1);
+          Kernel::V3D pt3 = Kernel::V3D(x,y,z0);
+          Kernel::V3D pt4 = Kernel::V3D(x,y,z1);
           // Rotations
           transform.rotate(pt1);
           transform.rotate(pt3);
@@ -1341,20 +1344,20 @@ namespace Mantid
     * @param height :: The height
     * @returns The solid angle value
     */
-    double Object::ConeSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre,
-      const Mantid::Geometry::V3D & axis, const double radius, const double height) const
+    double Object::ConeSolidAngle(const V3D & observer, const Mantid::Kernel::V3D & centre,
+      const Mantid::Kernel::V3D & axis, const double radius, const double height) const
     {
       // The cone is broken down into three pieces and then in turn broken down into triangles. Any triangle
       // that has a normal facing away from the observer gives a negative solid angle and is excluded
       // For simplicity the triangulation points are constructed such that the cone axis points up the +Z axis
       // and then rotated into their final position
 
-      Geometry::V3D axis_direction = axis;
+      Kernel::V3D axis_direction = axis;
       axis_direction.normalize();
       // Required rotation
-      Geometry::V3D initial_axis = Geometry::V3D(0., 0., 1.0);
-      Geometry::V3D final_axis = axis_direction;
-      Geometry::Quat transform(initial_axis, final_axis);
+      Kernel::V3D initial_axis = Kernel::V3D(0., 0., 1.0);
+      Kernel::V3D final_axis = axis_direction;
+      Kernel::Quat transform(initial_axis, final_axis);
 
       // Do the base cap which is a point at the centre and nslices points around it
       const int nslices(Mantid::Geometry::Cone::g_nslices);
@@ -1369,7 +1372,7 @@ namespace Mantid
         int vertex = sl;
         cos_table[vertex] = std::cos(angle_step * vertex);
         sin_table[vertex] = std::sin(angle_step * vertex);
-        Geometry::V3D pt2 = Geometry::V3D(radius * cos_table[vertex], radius * sin_table[vertex], 0.0);
+        Kernel::V3D pt2 = Kernel::V3D(radius * cos_table[vertex], radius * sin_table[vertex], 0.0);
 
         if (sl < nslices - 1)
         {
@@ -1380,7 +1383,7 @@ namespace Mantid
         else
           vertex = 0;
 
-        Geometry::V3D pt3 = Geometry::V3D(radius * cos_table[vertex], radius * sin_table[vertex], 0.0);
+        Kernel::V3D pt3 = Kernel::V3D(radius * cos_table[vertex], radius * sin_table[vertex], 0.0);
 
         transform.rotate(pt2);
         transform.rotate(pt3);
@@ -1409,20 +1412,20 @@ namespace Mantid
         for (int sl = 0; sl < nslices; ++sl)
         {
           int vertex = sl;
-          Geometry::V3D pt1 = Geometry::V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], z0);
+          Kernel::V3D pt1 = Kernel::V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], z0);
           if (sl < nslices - 1)
             vertex = sl + 1;
           else
             vertex = 0;
-          Geometry::V3D pt3 = Geometry::V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], z0);
+          Kernel::V3D pt3 = Kernel::V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], z0);
 
           vertex = sl;
-          Geometry::V3D pt2 = Geometry::V3D(r1 * cos_table[vertex], r1 * sin_table[vertex], z1);
+          Kernel::V3D pt2 = Kernel::V3D(r1 * cos_table[vertex], r1 * sin_table[vertex], z1);
           if (sl < nslices - 1)
             vertex = sl + 1;
           else
             vertex = 0;
-          Geometry::V3D pt4 = Geometry::V3D(r1 * cos_table[vertex], r1 * sin_table[vertex], z1);
+          Kernel::V3D pt4 = Kernel::V3D(r1 * cos_table[vertex], r1 * sin_table[vertex], z1);
           // Rotations
           transform.rotate(pt1);
           transform.rotate(pt3);
@@ -1452,20 +1455,20 @@ namespace Mantid
       }
 
       // Top section
-      Geometry::V3D top_centre = Geometry::V3D(0.0, 0.0, height) + centre;
+      Kernel::V3D top_centre = Kernel::V3D(0.0, 0.0, height) + centre;
       transform.rotate(top_centre);
       top_centre += centre;
 
       for (int sl = 0; sl < nslices; ++sl)
       {
         int vertex = sl;
-        Geometry::V3D pt2 = Geometry::V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], height);
+        Kernel::V3D pt2 = Kernel::V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], height);
 
         if (sl < nslices - 1)
           vertex = sl + 1;
         else
           vertex = 0;
-        Geometry::V3D pt3 = Geometry::V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], height);
+        Kernel::V3D pt3 = Kernel::V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], height);
 
         // Rotate them to the correct axis orientation
         transform.rotate(pt2);
@@ -1606,13 +1609,13 @@ namespace Mantid
     @param[out] point :: on exit set to the point value, if found
     @return 1 if point found, 0 otherwise
     */
-    int Object::getPointInObject(Geometry::V3D& point) const
+    int Object::getPointInObject(Kernel::V3D& point) const
     {
       //
       // Simple method - check if origin in object, if not search directions along
       // axes. If that fails, try centre of boundingBox, and paths about there
       //
-      Geometry::V3D testPt(0, 0, 0);
+      Kernel::V3D testPt(0, 0, 0);
       if (searchForObject(testPt))
       {
         point = testPt;
@@ -1638,24 +1641,24 @@ namespace Mantid
     * @param point :: on entry the seed point, on exit point in object, if found
     * @return 1 if point found, 0 otherwise
     */
-    int Object::searchForObject(Geometry::V3D& point) const
+    int Object::searchForObject(Kernel::V3D& point) const
     {
       //
       // Method - check if point in object, if not search directions along
       // principle axes using interceptSurface
       //
-      Geometry::V3D testPt;
+      Kernel::V3D testPt;
       if (isValid(point))
         return 1;
-      std::vector<Geometry::V3D> axes;
+      std::vector<Kernel::V3D> axes;
       axes.reserve(6);
-      axes.push_back(Geometry::V3D(1, 0, 0));
-      axes.push_back(Geometry::V3D(-1, 0, 0));
-      axes.push_back(Geometry::V3D(0, 1, 0));
-      axes.push_back(Geometry::V3D(0, -1, 0));
-      axes.push_back(Geometry::V3D(0, 0, 1));
-      axes.push_back(Geometry::V3D(0, 0, -1));
-      std::vector<Geometry::V3D>::const_iterator dir;
+      axes.push_back(Kernel::V3D(1, 0, 0));
+      axes.push_back(Kernel::V3D(-1, 0, 0));
+      axes.push_back(Kernel::V3D(0, 1, 0));
+      axes.push_back(Kernel::V3D(0, -1, 0));
+      axes.push_back(Kernel::V3D(0, 0, 1));
+      axes.push_back(Kernel::V3D(0, 0, -1));
+      std::vector<Kernel::V3D>::const_iterator dir;
       for (dir = axes.begin(); dir != axes.end(); dir++)
       {
         Geometry::Track tr(point, (*dir));
@@ -1800,7 +1803,7 @@ namespace Mantid
     /**
     * get info on standard shapes
     */
-    void Object::GetObjectGeom(int& type, std::vector<Geometry::V3D>& vectors, double& myradius,
+    void Object::GetObjectGeom(int& type, std::vector<Kernel::V3D>& vectors, double& myradius,
       double & myheight) const
     {
       type = 0;

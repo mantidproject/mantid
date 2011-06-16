@@ -1337,14 +1337,14 @@ using namespace DataObjects;
       Mantid::Geometry::IObjComponent_const_sptr sample = localWorkspace->getInstrument()->getSample();
       if (sample)
       {
-        Mantid::Geometry::V3D sample_pos = sample->getPos();
+        Mantid::Kernel::V3D sample_pos = sample->getPos();
         for(int i=0;i<ndet;i++)
         {
           double R,Theta,Phi;
           try
           {
             boost::shared_ptr<Mantid::Geometry::IDetector> det = localWorkspace->getInstrument()->getDetector(detector_list[i]);
-            Mantid::Geometry::V3D pos = det->getPos() - sample_pos;
+            Mantid::Kernel::V3D pos = det->getPos() - sample_pos;
             pos.getSpherical(R,Theta,Phi);
             R = det->getDistance(*sample);
             Theta = localWorkspace->detectorTwoTheta(det)*180.0/M_PI;

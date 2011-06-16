@@ -2,7 +2,7 @@
 #define MANTID_LINEINTERSECTVISITTEST__
 
 #include <cxxtest/TestSuite.h>
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidGeometry/Surfaces/LineIntersectVisit.h"
@@ -13,13 +13,14 @@
 
 using namespace Mantid;
 using namespace Geometry;
+using Mantid::Kernel::V3D;
 
 class LineIntersectVisitTest: public CxxTest::TestSuite{
 public:
 	void testConstructor(){
 		LineIntersectVisit A(V3D(-1.0,-1.0,-1.0),V3D(1.0,0.0,0.0));
 		TS_ASSERT_EQUALS(A.getNPoints(),0);
-		TS_ASSERT_EQUALS(A.getPoints(),std::vector<Geometry::V3D>());
+		TS_ASSERT_EQUALS(A.getPoints(),std::vector<Kernel::V3D>());
 		TS_ASSERT_EQUALS(A.getDistance(),std::vector<double>());
 	}
 
@@ -30,7 +31,7 @@ public:
 		TS_ASSERT_EQUALS(extractString(B),"-1 px 0\n");
 		A.Accept(B);
 		TS_ASSERT_EQUALS(A.getNPoints(),1);
-		std::vector<Geometry::V3D> Pnts;
+		std::vector<Kernel::V3D> Pnts;
 		Pnts.push_back(V3D(0.0,-1.0,-1.0));
 		TS_ASSERT_EQUALS(A.getPoints(),Pnts);
 		std::vector<double> Dist;

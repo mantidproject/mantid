@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include <vector>
 #include <cmath>
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid
 {
@@ -44,13 +44,13 @@ namespace MDAlgorithms
 //TODO: consider replacing with something more Mantid generic.
 
 
-DLLExport double dotProduct(Mantid::Geometry::V3D a, Mantid::Geometry::V3D b);
+DLLExport double dotProduct(Mantid::Kernel::V3D a, Mantid::Kernel::V3D b);
 
 DLLExport double dotProduct(double a1, double a2, double a3, double b1, double b2, double b3);
 
-DLLExport Mantid::Geometry::V3D crossProduct(Mantid::Geometry::V3D a, Mantid::Geometry::V3D b);
+DLLExport Mantid::Kernel::V3D crossProduct(Mantid::Kernel::V3D a, Mantid::Kernel::V3D b);
 
-DLLExport Mantid::Geometry::V3D crossProduct(double a1, double a2, double a3, double b1, double b2,
+DLLExport Mantid::Kernel::V3D crossProduct(double a1, double a2, double a3, double b1, double b2,
     double b3);
 
 DLLExport double absolute(double a1, double a2, double a3);

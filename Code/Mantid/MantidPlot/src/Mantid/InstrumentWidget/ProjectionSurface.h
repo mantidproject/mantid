@@ -1,8 +1,8 @@
 #ifndef PROJECTIONSURFACE_H
 #define PROJECTIONSURFACE_H
 
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quat.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Quat.h"
 #include "MantidGeometry/IComponent.h"
 #include "InstrumentActor.h"
 #include <boost/shared_ptr.hpp>
@@ -41,7 +41,7 @@ class ProjectionSurface: public QObject
 public:
   enum InteractionMode {MoveMode = 0, PickMode = 1}; ///< Move around or select things
 
-  ProjectionSurface(const InstrumentActor* rootActor,const Mantid::Geometry::V3D& origin,const Mantid::Geometry::V3D& axis);
+  ProjectionSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
   virtual ~ProjectionSurface();
   /// draw the surface onto a GL widget
   virtual void draw(MantidGLWidget* widget)const;
@@ -117,10 +117,10 @@ protected:
   QString getPickInfoText()const;
 
   const InstrumentActor* m_instrActor;
-  const Mantid::Geometry::V3D m_pos;   ///< Origin (sample position)
-  const Mantid::Geometry::V3D m_zaxis; ///< The z axis of the surface specific coord system
-  Mantid::Geometry::V3D m_xaxis;       ///< The x axis
-  Mantid::Geometry::V3D m_yaxis;       ///< The y axis
+  const Mantid::Kernel::V3D m_pos;   ///< Origin (sample position)
+  const Mantid::Kernel::V3D m_zaxis; ///< The z axis of the surface specific coord system
+  Mantid::Kernel::V3D m_xaxis;       ///< The x axis
+  Mantid::Kernel::V3D m_yaxis;       ///< The y axis
   mutable QImage* m_viewImage;      ///< storage for view image
   mutable QImage* m_pickImage;      ///< storage for picking image
   mutable bool m_viewChanged;       ///< set when the image must be redrawn

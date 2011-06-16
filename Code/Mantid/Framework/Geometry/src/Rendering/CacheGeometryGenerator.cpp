@@ -1,8 +1,8 @@
 #include "MantidKernel/Logger.h"
 #include <vector>
 #include <cmath>
-#include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Rendering/CacheGeometryGenerator.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"

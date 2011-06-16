@@ -148,21 +148,21 @@ namespace Mantid
       boost::shared_ptr<ParameterMap> getParameterMap() const;
 
       // ----- Useful static functions ------
-      static double calcConversion(const double l1, const Geometry::V3D &beamline, const double beamline_norm,
-          const Geometry::V3D &samplePos, const Geometry::IDetector_const_sptr &det, const double offset,
+      static double calcConversion(const double l1, const Kernel::V3D &beamline, const double beamline_norm,
+          const Kernel::V3D &samplePos, const Geometry::IDetector_const_sptr &det, const double offset,
           bool vulcancorrection);
 
       static double calcConversion(const double l1,
-                            const Geometry::V3D &beamline,
+                            const Kernel::V3D &beamline,
                             const double beamline_norm,
-                            const Geometry::V3D &samplePos,
+                            const Kernel::V3D &samplePos,
                             const Geometry::IInstrument_const_sptr &instrument,
                             const std::vector<detid_t> &detectors,
                             const std::map<detid_t,double> &offsets,
                             bool vulcancorrection);
 
-      void getInstrumentParameters(double & l1, Geometry::V3D & beamline,
-          double & beamline_norm, Geometry::V3D & samplePos) const;
+      void getInstrumentParameters(double & l1, Kernel::V3D & beamline,
+          double & beamline_norm, Kernel::V3D & samplePos) const;
 
     private:
       /// Private copy assignment operator

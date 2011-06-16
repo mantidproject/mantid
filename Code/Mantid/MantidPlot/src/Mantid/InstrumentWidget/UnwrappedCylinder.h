@@ -9,10 +9,10 @@
 class UnwrappedCylinder: public UnwrappedSurface
 {
 public:
-  UnwrappedCylinder(const InstrumentActor* rootActor,const Mantid::Geometry::V3D& origin,const Mantid::Geometry::V3D& axis);
+  UnwrappedCylinder(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
 protected:
   void calcUV(UnwrappedDetector& udet);
-  void calcRot(const UnwrappedDetector& udet, Mantid::Geometry::Quat& R)const;
+  void calcRot(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const;
   double uPeriod()const;
 };
 

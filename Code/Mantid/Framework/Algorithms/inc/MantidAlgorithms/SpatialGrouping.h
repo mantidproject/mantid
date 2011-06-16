@@ -8,14 +8,16 @@
 
 namespace Mantid
 {
-
+namespace Kernel
+{
+  class V3D;
+}
 namespace Geometry
 {
 /// Forward Declarations
 class IDetector;
 class IInstrument;
 class BoundingBox;
-class V3D;
 }
 
 namespace Algorithms

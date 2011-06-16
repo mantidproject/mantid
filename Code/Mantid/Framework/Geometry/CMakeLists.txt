@@ -40,7 +40,6 @@ set ( SRC_FILES
         src/Math/Acomp.cpp
         src/Math/Algebra.cpp
         src/Math/BnId.cpp
-        src/Math/Matrix.cpp
         src/Math/PolyBase.cpp
         src/Math/RotCounter.cpp
         src/Math/Triple.cpp
@@ -52,7 +51,6 @@ set ( SRC_FILES
         src/Objects/Rules.cpp
         src/Objects/ShapeFactory.cpp
         src/Objects/Track.cpp
-        src/Quat.cpp
         src/Rendering/BitmapGeometryHandler.cpp
         src/Rendering/CacheGeometryGenerator.cpp
         src/Rendering/CacheGeometryHandler.cpp
@@ -76,7 +74,6 @@ set ( SRC_FILES
         src/Surfaces/Surface.cpp
         src/Surfaces/SurfaceFactory.cpp
         src/Surfaces/Torus.cpp
-        src/V3D.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
@@ -134,7 +131,6 @@ set ( INC_FILES
         inc/MantidGeometry/Math/Algebra.h
         inc/MantidGeometry/Math/BnId.h
         inc/MantidGeometry/Math/MapSupport.h
-        inc/MantidGeometry/Math/Matrix.h
         inc/MantidGeometry/Math/PolyBase.h
         inc/MantidGeometry/Math/RotCounter.h
         inc/MantidGeometry/Math/Triple.h
@@ -146,7 +142,6 @@ set ( INC_FILES
         inc/MantidGeometry/Objects/Rules.h
         inc/MantidGeometry/Objects/ShapeFactory.h
         inc/MantidGeometry/Objects/Track.h
-        inc/MantidGeometry/Quat.h
         inc/MantidGeometry/Rendering/BitmapGeometryHandler.h
         inc/MantidGeometry/Rendering/CacheGeometryGenerator.h
         inc/MantidGeometry/Rendering/CacheGeometryHandler.h
@@ -163,8 +158,6 @@ set ( INC_FILES
         inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h
         inc/MantidGeometry/ISpectraDetectorMap.h
         inc/MantidGeometry/Surfaces/BaseVisit.h
-        inc/MantidGeometry/Tolerance.h
-        inc/MantidGeometry/V3D.h
 )
 
 set ( TEST_FILES
@@ -199,7 +192,6 @@ set ( TEST_FILES
         test/MapSupportTest.h
         test/MaterialTest.h
         test/MathSupportTest.h
-        test/MatrixTest.h
         test/NearestNeighboursTest.h
         test/ObjCompAssemblyTest.h
         test/ObjComponentTest.h
@@ -214,7 +206,6 @@ set ( TEST_FILES
         test/ParObjComponentTest.h
         test/ParametrizedComponentTest.h
         test/PlaneTest.h
-        test/QuatTest.h
         test/RectangularDetectorTest.h
         test/ReflectionConditionTest.h
         test/RotCounterTest.h
@@ -234,7 +225,6 @@ set ( TEST_FILES
         test/TripleTest.h
         test/UnitCellTest.h
         test/IndexingUtilsTest.h
-        test/V3DTest.h
 )
 
 set ( GMOCK_TEST_FILES

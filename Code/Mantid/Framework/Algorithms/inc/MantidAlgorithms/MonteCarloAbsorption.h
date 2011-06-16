@@ -72,13 +72,13 @@ namespace Mantid
 			const double lambda, double & attenFactor, double & error);
       /// Randomly select the location initial point within the beam from a square
       /// distribution
-      Geometry::V3D sampleBeamProfile() const;
+      Kernel::V3D sampleBeamProfile() const;
       /// Select a random location within the sample + container environment
-      Geometry::V3D selectScatterPoint() const;
+      Kernel::V3D selectScatterPoint() const;
       /// Calculate the attenuation factor for the given single scatter setup
-      double attenuationFactor(const Geometry::V3D & startPos, 
-			       const Geometry::V3D & scatterPoint,
-			       const Geometry::V3D & finalPos, const double lambda);
+      double attenuationFactor(const Kernel::V3D & startPos, 
+			       const Kernel::V3D & scatterPoint,
+			       const Kernel::V3D & finalPos, const double lambda);
       /// Calculate the attenuation for a given length, material and wavelength
       double attenuation(const double length, const Geometry::Material& material,
 			 const double lambda) const;
@@ -108,9 +108,9 @@ namespace Mantid
       /** @name Cached values */
       //@{
       /// The sample position
-      Geometry::V3D m_samplePos;
+      Kernel::V3D m_samplePos;
       /// The source position
-      Geometry::V3D m_sourcePos;
+      Kernel::V3D m_sourcePos;
       /// Bounding box length
       double m_bbox_length;
       /// Half the bounding box length

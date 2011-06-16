@@ -11,6 +11,10 @@
 
 namespace Mantid
 {
+  namespace Kernel
+  {
+    class Kernel::V3D;
+  }
   namespace Geometry
   {
     //-------------------------------------------------------------
@@ -18,8 +22,6 @@ namespace Mantid
     //-------------------------------------------------------------
     struct Link;
     class Track;
-    class V3D;
-
     /// Typedef for object intersections
     typedef Track::LType Links;
 
@@ -58,8 +60,8 @@ namespace Mantid
       InstrumentRayTracer(IInstrument_sptr instrument);      
       /// Trace a given track from the instrument source in the given direction 
       /// and compile a list of results that this track intersects.
-      void trace(const V3D & direction) const;
-      void traceFromSample(const V3D & direction) const;
+      void trace(const Kernel::V3D & direction) const;
+      void traceFromSample(const Kernel::V3D & direction) const;
       /// Get the results of the intersection tests that have been updated 
       /// since the previous call to trace
       Links getResults() const;

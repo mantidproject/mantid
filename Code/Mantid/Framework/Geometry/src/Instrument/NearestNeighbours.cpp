@@ -14,6 +14,7 @@ namespace Mantid
   namespace Geometry
   {
     using Mantid::detid_t;
+    using Kernel::V3D;
 
     /**
      * Constructor

@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <cmath>
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"

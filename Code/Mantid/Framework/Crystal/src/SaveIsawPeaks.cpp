@@ -4,7 +4,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include <fstream>

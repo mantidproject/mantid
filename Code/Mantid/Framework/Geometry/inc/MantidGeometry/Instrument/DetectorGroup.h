@@ -58,19 +58,19 @@ namespace Mantid
       // IDetector methods
       detid_t getID() const;
       std::size_t nDets() const;
-      V3D getPos() const;
+      Kernel::V3D getPos() const;
       double getDistance(const IComponent& comp) const;
-      double getTwoTheta(const V3D& observer, const V3D& axis) const;
+      double getTwoTheta(const Kernel::V3D& observer, const Kernel::V3D& axis) const;
       double getPhi() const;
-      double solidAngle(const V3D& observer) const; 
+      double solidAngle(const Kernel::V3D& observer) const; 
       bool isParametrized() const;
       bool isMasked() const;
       bool isMonitor() const;
       std::map<detid_t, double> getNeighbours(double radius);
-      bool isValid(const V3D& point) const;
-      virtual bool isOnSide(const V3D& point) const;
+      bool isValid(const Kernel::V3D& point) const;
+      virtual bool isOnSide(const Kernel::V3D& point) const;
       ///Try to find a point that lies within (or on) the object
-      int getPointInObject(V3D& point) const;
+      int getPointInObject(Kernel::V3D& point) const;
       /// Get the bounding box for this component and store it in the given argument
       virtual void getBoundingBox(BoundingBox& boundingBox) const;
  
@@ -95,19 +95,19 @@ namespace Mantid
        */
       std::vector<double> getNumberParameter(const std::string& pname, bool recursive = true) const;
       /**
-       * Get a parameter defined as a V3D
+       * Get a parameter defined as a Kernel::V3D
        * @param pname :: The name of the parameter
        * @param recursive :: If true the search will walk up through the parent components
        * @returns A list of size 0 as this is not a parameterized component
        */
-      std::vector<V3D> getPositionParameter(const std::string& pname, bool recursive = true) const;
+      std::vector<Kernel::V3D> getPositionParameter(const std::string& pname, bool recursive = true) const;
       /**
-       * Get a parameter defined as a Quaternion
+       * Get a parameter defined as a Kernel::Quaternion
        * @param pname :: The name of the parameter
        * @param recursive :: If true the search will walk up through the parent components
        * @returns A list of size 0 as this is not a parameterized component
        */
-      std::vector<Quat> getRotationParameter(const std::string& pname, bool recursive = true) const;
+      std::vector<Kernel::Quat> getRotationParameter(const std::string& pname, bool recursive = true) const;
 
       /**
        * Get a parameter defined as a string
@@ -118,7 +118,7 @@ namespace Mantid
       std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const;
   /** returns the detector's group topology if it has been calculated before or invokes the procedure of 
       calculating such topology if it was not */
-     det_topology getTopology(V3D &center)const;
+     det_topology getTopology(Kernel::V3D &center)const;
         protected:
       /// The ID of this effective detector
       int m_id;
@@ -132,7 +132,7 @@ namespace Mantid
       *  the topology is undefined on construction and caclulated on first request   */
       mutable det_topology group_topology;
       /// group centre is the geometrical centre of the detectors group calculated when the calculate group topology is invoked
-      mutable V3D  groupCentre; 
+      mutable Kernel::V3D  groupCentre; 
    
       // functions inherited from IComponent
       Component* clone() const{ return NULL; }
@@ -151,17 +151,17 @@ namespace Mantid
       void setName(const std::string&){}
 
       void setPos(double, double, double){}
-      void setPos(const V3D&){}
-      void setRot(const Quat&){}
+      void setPos(const Kernel::V3D&){}
+      void setRot(const Kernel::Quat&){}
       void copyRot(const IComponent&){}
       int interceptSurface(Track&) const{ return -10; }
-      void translate(const V3D&){}
+      void translate(const Kernel::V3D&){}
       void translate(double, double, double){}
-      void rotate(const Quat&){}
-      void rotate(double,const V3D&){}
-      const V3D& getRelativePos() const { throw std::runtime_error("Cannot call getRelativePos on a DetectorGroup");  }
-      const Quat& getRelativeRot() const{ throw std::runtime_error("Cannot call getRelativeRot on a DetectorGroup"); }
-      const Quat getRotation() const{ return Quat(); }
+      void rotate(const Kernel::Quat&){}
+      void rotate(double,const Kernel::V3D&){}
+      const Kernel::V3D& getRelativePos() const { throw std::runtime_error("Cannot call getRelativePos on a DetectorGroup");  }
+      const Kernel::Quat& getRelativeRot() const{ throw std::runtime_error("Cannot call getRelativeRot on a DetectorGroup"); }
+      const Kernel::Quat getRotation() const{ return Kernel::Quat(); }
       void printSelf(std::ostream&) const{}
 
       // functions inherited from IObjComponent

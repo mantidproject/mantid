@@ -12,7 +12,7 @@
 */
 #ifndef GLACTOR_H_
 #define GLACTOR_H_
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 #include "GLObject.h"
 #include "GLColor.h"
 #include <boost/shared_ptr.hpp>
@@ -69,7 +69,7 @@ public:
   void setVisibility(bool);
   bool getVisibility();
   virtual void draw(bool picking = false)const = 0;
-  virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)const = 0;
+  virtual void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const = 0;
   static GLColor makePickColor(size_t pickID);
   static size_t decodePickColor(const GLColor& c);
   static size_t decodePickColor(unsigned char r,unsigned char g,unsigned char b);

@@ -13,7 +13,7 @@ namespace Mantid
     
     using Geometry::IComponent;
     using Geometry::IObjComponent;
-    using Geometry::V3D;
+    using Kernel::V3D;
     using Geometry::Track;
 
     //------------------------------------------------------------------------------

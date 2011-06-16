@@ -3,7 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid
 {
@@ -52,13 +52,13 @@ namespace Mantid
 
       static Kernel::Logger& PLog;           ///< The official logger
 
-      Geometry::V3D Centre;        ///< Geometry::V3D for centre
-      Geometry::V3D Normal;        ///< Direction of centre line
+      Kernel::V3D Centre;        ///< Kernel::V3D for centre
+      Kernel::V3D Normal;        ///< Direction of centre line
       int Nvec;            ///< Normal vector is x,y or z :: (1-3) (0 if general)
       double Radius;       ///< Radius of cylinder
 
-      void rotate(const Geometry::Matrix<double>&);
-      void displace(const Geometry::V3D&);
+      void rotate(const Kernel::Matrix<double>&);
+      void displace(const Kernel::V3D&);
       void setNvec();      ///< check to obtain orientation
 
     public:
@@ -76,18 +76,18 @@ namespace Mantid
       virtual void acceptVisitor(BaseVisit& A) const
       {  A.Accept(*this); }
 
-      virtual double lineIntersect(const Geometry::V3D&,
-        const Geometry::V3D&) const;
+      virtual double lineIntersect(const Kernel::V3D&,
+        const Kernel::V3D&) const;
 
-      int side(const Geometry::V3D&) const;
-      int onSurface(const Geometry::V3D&) const;
-      double distance(const Geometry::V3D&) const;
+      int side(const Kernel::V3D&) const;
+      int onSurface(const Kernel::V3D&) const;
+      double distance(const Kernel::V3D&) const;
 
       int setSurface(const std::string&);
-      void setCentre(const Geometry::V3D&);              
-      void setNorm(const Geometry::V3D&);       
-      Geometry::V3D getCentre() const { return Centre; }   ///< Return centre point       
-      Geometry::V3D getNormal() const { return Normal; }   ///< Return Central line
+      void setCentre(const Kernel::V3D&);              
+      void setNorm(const Kernel::V3D&);       
+      Kernel::V3D getCentre() const { return Centre; }   ///< Return centre point       
+      Kernel::V3D getNormal() const { return Normal; }   ///< Return Central line
       double getRadius() const { return Radius; }  ///< Get Radius  
       /// Set Radius
       void setRadius(const double& r) { Radius=r; setBaseEqn();}  

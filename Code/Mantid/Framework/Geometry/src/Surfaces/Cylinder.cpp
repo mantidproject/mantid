@@ -1,8 +1,8 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
-#include "MantidGeometry/Tolerance.h"
-#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Tolerance.h"
+#include "MantidKernel/Matrix.h"
 #include <cfloat>
 
 namespace Mantid
@@ -10,6 +10,9 @@ namespace Mantid
 
 namespace Geometry
 {
+
+  using Kernel::Tolerance;
+  using Kernel::V3D;
 
 Kernel::Logger& Cylinder::PLog(Kernel::Logger::get("Cylinder"));
 
@@ -123,8 +126,8 @@ Cylinder::setSurface(const std::string& Pstr)
   if (!Mantid::Kernel::Strings::section(Line,R) || R<=0.0)
     return errRadius;
 
-  Centre=Geometry::V3D(cent);
-  Normal=Geometry::V3D(norm);
+  Centre=Kernel::V3D(cent);
+  Normal=Kernel::V3D(norm);
   Nvec=ptype+1;
   Radius=R;
   setBaseEqn();
@@ -132,7 +135,7 @@ Cylinder::setSurface(const std::string& Pstr)
 } 
 
 int 
-Cylinder::side(const Geometry::V3D& Pt) const 
+Cylinder::side(const Kernel::V3D& Pt) const 
   /**
     Calculate if the point PT within the middle
     of the cylinder 
@@ -164,10 +167,10 @@ Cylinder::side(const Geometry::V3D& Pt) const
 }
 
 int 
-Cylinder::onSurface(const Geometry::V3D& Pt) const 
+Cylinder::onSurface(const Kernel::V3D& Pt) const 
   /**
     Calculate if the point PT on the cylinder 
-    @param Pt :: Geometry::V3D to test
+    @param Pt :: Kernel::V3D to test
     @retval 1 :: on the surface 
     @retval 0 :: not on the surface
   */
@@ -204,7 +207,7 @@ Cylinder::setNvec()
 }
 
 void
-Cylinder::rotate(const Geometry::Matrix<double>& MA)
+Cylinder::rotate(const Kernel::Matrix<double>& MA)
 /**
   Apply a rotation to the cylinder and re-check the
   status of the main axis.
@@ -220,7 +223,7 @@ Cylinder::rotate(const Geometry::Matrix<double>& MA)
 }
 
 void 
-Cylinder::displace(const Geometry::V3D& Pt)
+Cylinder::displace(const Kernel::V3D& Pt)
   /**
     Apply a displacement Pt 
     @param Pt :: Displacement to add to the centre
@@ -238,9 +241,9 @@ Cylinder::displace(const Geometry::V3D& Pt)
 }
 
 void
-Cylinder::setCentre(const Geometry::V3D& A)
+Cylinder::setCentre(const Kernel::V3D& A)
   /**
-    Sets the centre Geometry::V3D
+    Sets the centre Kernel::V3D
     @param A :: centre point 
   */
 {
@@ -250,7 +253,7 @@ Cylinder::setCentre(const Geometry::V3D& A)
 }
 
 void
-Cylinder::setNorm(const Geometry::V3D& A)
+Cylinder::setNorm(const Kernel::V3D& A)
   /** 
     Sets the centre line unit vector 
     A does not need to be a unit vector
@@ -286,7 +289,7 @@ Cylinder::setBaseEqn()
 }
 
 double
-Cylinder::distance(const Geometry::V3D& A) const
+Cylinder::distance(const Kernel::V3D& A) const
   /**
     Calculates the distance of point A from 
     the surface of the  cylinder.
@@ -298,9 +301,9 @@ Cylinder::distance(const Geometry::V3D& A) const
   */
 {
   // First find the normal going to the point
-  const Geometry::V3D Amov=A-Centre;
+  const Kernel::V3D Amov=A-Centre;
   double lambda=Amov.scalar_prod(Normal);
-  const Geometry::V3D Ccut= Normal*lambda;
+  const Kernel::V3D Ccut= Normal*lambda;
   // The distance is from the centre line to the 
   return  fabs(Ccut.distance(Amov)-Radius);
 }
@@ -355,8 +358,8 @@ Cylinder::write(std::ostream& OX) const
 }
 
 double 
-Cylinder::lineIntersect(const Geometry::V3D& Pt,
-			const Geometry::V3D& uVec) const
+Cylinder::lineIntersect(const Kernel::V3D& Pt,
+			const Kernel::V3D& uVec) const
   /**
     Given a track starting from Pt and traveling along
     uVec determine the intersection point (distance)

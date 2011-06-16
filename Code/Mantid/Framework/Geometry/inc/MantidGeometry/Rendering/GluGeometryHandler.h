@@ -7,14 +7,16 @@
 
 namespace Mantid
 {
-
+  namespace Kernel
+  {
+    class V3D;
+  }
   namespace Geometry
   {
     class GeometryHandler;
     class GluGeometryRenderer;
     class IObjComponent;
     class Object;
-    class V3D;
     /**
        \class GluGeometryHandler
        \brief Place holder for geometry triangulation and rendering with special cases of cube, sphere, cone and cylinder.
@@ -59,14 +61,14 @@ namespace Mantid
       static Kernel::Logger& PLog;           ///< The official logger
       GluGeometryRenderer* Renderer;         ///< Geometry renderer variable used for rendering Object/ObjComponent
 
-      V3D center; ///<Center for sphere,cone and cylinder
-      V3D Point1; ///<cube coordinates
-      V3D Point2; ///<cube coordinates
-      V3D Point3; ///<cube coordinates
-      V3D Point4; ///<cube coordinates
+      Kernel::V3D center; ///<Center for sphere,cone and cylinder
+      Kernel::V3D Point1; ///<cube coordinates
+      Kernel::V3D Point2; ///<cube coordinates
+      Kernel::V3D Point3; ///<cube coordinates
+      Kernel::V3D Point4; ///<cube coordinates
       double radius; ///<Radius for the sphere, cone and cylinder
       double height; ///<height for cone and cylinder;
-      V3D axis; ///<  Axis
+      Kernel::V3D axis; ///<  Axis
       GEOMETRY_TYPE type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
     public:
       GluGeometryHandler(IObjComponent* obj); ///< Constructor
@@ -76,19 +78,19 @@ namespace Mantid
       GeometryHandler* createInstance(IObjComponent *comp);
       GeometryHandler* createInstance(boost::shared_ptr<Object> obj);
       ///sets the geometry handler for a cuboid
-      void setCuboid(V3D,V3D,V3D,V3D);
+      void setCuboid(Kernel::V3D,Kernel::V3D,Kernel::V3D,Kernel::V3D);
       ///sets the geometry handler for a cone
-      void setSphere(V3D,double);
+      void setSphere(Kernel::V3D,double);
       ///sets the geometry handler for a cylinder
-      void setCylinder(V3D,V3D,double,double);
+      void setCylinder(Kernel::V3D,Kernel::V3D,double,double);
       ///sets the geometry handler for a cone
-      void setCone(V3D,V3D,double,double);
+      void setCone(Kernel::V3D,Kernel::V3D,double,double);
       ///sets the geometry handler for a segmented cylinder
-      void setSegmentedCylinder(V3D,V3D,double,double);
+      void setSegmentedCylinder(Kernel::V3D,Kernel::V3D,double,double);
       void Triangulate();
       void Render();
       void Initialize();
-      void GetObjectGeom(int& mytype, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight);
+      void GetObjectGeom(int& mytype, std::vector<Kernel::V3D>& vectors, double& myradius, double & myheight);
     };
 
   }   // NAMESPACE Geometry

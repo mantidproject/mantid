@@ -14,10 +14,10 @@
 #include <boost/multi_array.hpp>
 #include <gsl/gsl_poly.h>
 
-#include "MantidGeometry/Tolerance.h"
+#include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Math/PolyBase.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
@@ -31,11 +31,11 @@ namespace Mantid
 
 namespace Geometry
 {
+   using Kernel::Tolerance;
+   using Kernel::V3D;
 
 Kernel::Logger& Quadratic::PLog(Kernel::Logger::get("Quadratic"));
 
-/// Numerical tolerance
-//const double QTolerance(1e-6);
 
 Quadratic::Quadratic() : Surface(),
   BaseEqn(10)
@@ -77,7 +77,7 @@ Quadratic::~Quadratic()
 
 
 double 
-Quadratic::eqnValue(const Geometry::V3D& Pt) const
+Quadratic::eqnValue(const Kernel::V3D& Pt) const
   /**
     Helper function to calcuate the value
     of the equation at a fixed point 
@@ -101,7 +101,7 @@ Quadratic::eqnValue(const Geometry::V3D& Pt) const
 }
 
 int
-Quadratic::side(const Geometry::V3D& Pt) const
+Quadratic::side(const Kernel::V3D& Pt) const
   /**
     Determine if the the Point is true to the surface or
     on the other side
@@ -118,8 +118,8 @@ Quadratic::side(const Geometry::V3D& Pt) const
 }
 
 
-Geometry::V3D
-Quadratic::surfaceNormal(const Geometry::V3D& Pt) const
+Kernel::V3D
+Quadratic::surfaceNormal(const Kernel::V3D& Pt) const
   /**
     Given a point on the surface 
     Calculate the normal at the point 
@@ -129,7 +129,7 @@ Quadratic::surfaceNormal(const Geometry::V3D& Pt) const
     @return normal unit vector
   */
 {
-   Geometry::V3D N(2*BaseEqn[0]*Pt[0]+BaseEqn[3]*Pt[1]+BaseEqn[4]*Pt[2]+BaseEqn[6],
+   Kernel::V3D N(2*BaseEqn[0]*Pt[0]+BaseEqn[3]*Pt[1]+BaseEqn[4]*Pt[2]+BaseEqn[6],
 	   2*BaseEqn[1]*Pt[1]+BaseEqn[3]*Pt[0]+BaseEqn[5]*Pt[2]+BaseEqn[7],
 	   2*BaseEqn[2]*Pt[2]+BaseEqn[4]*Pt[0]+BaseEqn[5]*Pt[1]+BaseEqn[8]);
    N.normalize();
@@ -137,8 +137,8 @@ Quadratic::surfaceNormal(const Geometry::V3D& Pt) const
 }
 
 void
-Quadratic::matrixForm(Geometry::Matrix<double>& A,
-		      Geometry::V3D& B,double& C) const
+Quadratic::matrixForm(Kernel::Matrix<double>& A,
+		      Kernel::V3D& B,double& C) const
   /**
     Converts the baseEqn into the matrix form such that
     \f[ x^T A x + B^T x + C =0 \f]
@@ -162,7 +162,7 @@ Quadratic::matrixForm(Geometry::Matrix<double>& A,
 }
 
 double
-Quadratic::distance(const Geometry::V3D& Pt) const
+Quadratic::distance(const Kernel::V3D& Pt) const
   /**
     Proper calcuation of a point to a general surface 
     @param Pt :: Point to calculate distance from surace
@@ -170,22 +170,22 @@ Quadratic::distance(const Geometry::V3D& Pt) const
   */
 {
   // Job 1 :: Create matrix and vector representation
-  Geometry::Matrix<double> A(3,3);
-  Geometry::V3D B;
+  Kernel::Matrix<double> A(3,3);
+  Kernel::V3D B;
   double cc;
   matrixForm(A,B,cc);
   
   //Job 2 :: calculate the diagonal matrix
-  Geometry::Matrix<double> D(3,3);
-  Geometry::Matrix<double> R(3,3);
+  Kernel::Matrix<double> D(3,3);
+  Kernel::Matrix<double> R(3,3);
   if (!A.Diagonalise(R,D))
     {
       std::cerr<<"Problem with matrix :: distance now guessed at"<<std::endl;
       return distance(Pt);
     }
 
-  Geometry::V3D alpha=R.Tprime()*Pt;
-  Geometry::V3D beta=R.Tprime()*B;
+  Kernel::V3D alpha=R.Tprime()*Pt;
+  Kernel::V3D beta=R.Tprime()*B;
     
   // Calculate fundermental equation:
   const double aa(alpha[0]);  const double aa2(aa*aa);
@@ -258,7 +258,7 @@ Quadratic::distance(const Geometry::V3D& Pt) const
     return -1.0;
 
   double Out= -1;
-  Geometry::V3D xvec;
+  Kernel::V3D xvec;
   std::vector<double>::const_iterator vc;
   for(vc=TRange.begin();vc!=TRange.end();vc++)
   {
@@ -267,7 +267,7 @@ Quadratic::distance(const Geometry::V3D& Pt) const
     const double dcI=1.0+2* (*vc) *dc;
     if ((daI*daI)>Tolerance || ((dbI*dbI)>Tolerance  && (dcI*dcI)<Tolerance) )
     {
-      Geometry::Matrix<double> DI(3,3);
+      Kernel::Matrix<double> DI(3,3);
       DI[0][0]=1.0/daI;
       DI[1][1]=1.0/dbI;
       DI[2][2]=1.0/dcI;
@@ -281,7 +281,7 @@ Quadratic::distance(const Geometry::V3D& Pt) const
 }
 
 int
-Quadratic::onSurface(const Geometry::V3D& Pt) const
+Quadratic::onSurface(const Kernel::V3D& Pt) const
   /**
     Test to see if a point is on the surface 
     @param Pt :: Point to test
@@ -294,7 +294,7 @@ Quadratic::onSurface(const Geometry::V3D& Pt) const
 
 
 void
-Quadratic::displace(const Geometry::V3D& Pt)
+Quadratic::displace(const Kernel::V3D& Pt)
   /**
     Apply a general displacement to the surface
     @param Pt :: Point to add to surface coordinate
@@ -313,13 +313,13 @@ Quadratic::displace(const Geometry::V3D& Pt)
 }
 
 void 
-Quadratic::rotate(const Geometry::Matrix<double>& MX) 
+Quadratic::rotate(const Kernel::Matrix<double>& MX) 
   /**
     Rotate the surface by matrix MX
     @param MX :: Matrix for rotation (not inverted like MCNPX)
    */
 {
-  Geometry::Matrix<double> MA=MX;
+  Kernel::Matrix<double> MA=MX;
   MA.Invert();
   const double a(MA[0][0]),b(MA[0][1]),c(MA[0][2]);
   const double d(MA[1][0]),e(MA[1][1]),f(MA[1][2]);

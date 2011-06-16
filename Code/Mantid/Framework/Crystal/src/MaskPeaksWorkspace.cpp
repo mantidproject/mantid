@@ -95,7 +95,7 @@ namespace Mantid
         l1 = peak.getL1();
         col = peak.getCol();
         row = peak.getRow();
-        Geometry::V3D pos = peak.getDetPos();
+        Kernel::V3D pos = peak.getDetPos();
         l2 = pos.norm();
         wl = peak.getWavelength();
 

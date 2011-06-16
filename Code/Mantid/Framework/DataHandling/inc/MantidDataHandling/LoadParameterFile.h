@@ -18,14 +18,16 @@ namespace XML {
 
 namespace Mantid
 {
-
+  namespace Kernel
+  {
+    class V3D;
+  }
   namespace Geometry
   {
     class CompAssembly;
     class Component;
     class Object;
     class ObjComponent;
-    class V3D;
     class Instrument;
   }
 

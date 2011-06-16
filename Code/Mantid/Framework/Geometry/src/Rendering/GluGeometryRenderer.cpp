@@ -1,7 +1,7 @@
 #include "MantidGeometry/Rendering/GluGeometryRenderer.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Quat.h"
+#include "MantidKernel/Quat.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
@@ -11,6 +11,8 @@ namespace Mantid
 {
   namespace Geometry
   {
+    using Kernel::V3D;
+    using Kernel::Quat;
 
     Kernel::Logger& GluGeometryRenderer::PLog(Kernel::Logger::get("GluGeometryRenderer"));
 

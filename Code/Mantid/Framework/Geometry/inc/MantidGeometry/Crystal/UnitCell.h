@@ -3,9 +3,9 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidGeometry/Quat.h"
-#include "MantidGeometry/V3D.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 #include <cmath>
 #include <vector>
 
@@ -111,21 +111,21 @@ namespace Geometry
       void setgamma(double _gamma,const int angleunit=angDegrees);
 
       // Access private variables
-      const Geometry::DblMatrix& getG() const;
-      const Geometry::DblMatrix& getGstar() const;
-      const Geometry::DblMatrix& getB() const;
-      const Geometry::DblMatrix& getBinv() const;
+      const Kernel::DblMatrix& getG() const;
+      const Kernel::DblMatrix& getGstar() const;
+      const Kernel::DblMatrix& getB() const;
+      const Kernel::DblMatrix& getBinv() const;
 
       // Calculate things about lattice and vectors      
       double d(double h, double k, double l) const;
       double dstar(double h,double k, double l) const; 
-      double d(const V3D & hkl) const;
-      double dstar(const V3D & hkl) const;
-      V3D hklFromQ(V3D Q) const;
+      double d(const Kernel::V3D & hkl) const;
+      double dstar(const Kernel::V3D & hkl) const;
+      Kernel::V3D hklFromQ(Kernel::V3D Q) const;
       double recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int angleunit=angDegrees) const;
       double volume()const;
       double recVolume() const; 
-      void recalculateFromGstar(Geometry::Matrix<double>& NewGstar);
+      void recalculateFromGstar(Kernel::Matrix<double>& NewGstar);
 
     private:        
       /// Lattice parameter a,b,c,alpha,beta,gamma (in \f$ \mbox{ \AA } \f$ and radians)
@@ -138,25 +138,25 @@ namespace Geometry
         ab\cos(\gamma) & bb & bc\cos(\alpha) \\
         ac\cos(\beta) & bc\cos(\alpha) & cc \end{array} \right) \f]
        */
-      DblMatrix G;
+      Kernel::DblMatrix G;
       /** Reciprocal lattice tensor
        *\f[ \left( \begin{array}{ccc}
         a^*a^* & a^*b^*\cos(\gamma^*) & a^*c^*\cos(\beta^*) \\
         a^*b^*\cos(\gamma^*) & b^*b^* & b^*c^*\cos(\alpha^*) \\
         a^*c^*\cos(\beta^*) & b^*c^*\cos(\alpha^*) & c^*c^* \end{array} \right) \f]
        */
-      DblMatrix Gstar; 
+      Kernel::DblMatrix Gstar; 
       /** B matrix for a right-handed coordinate system, in Busing-Levy convention
        \f[ \left( \begin{array}{ccc}
         a^* & b^*\cos(\gamma^*) & c^*\cos(\beta^*) \\
         0 & b^*\sin(\gamma^*) & -c^*\sin(\beta^*)\cos(\alpha) \\
         0 & 0 & 1/c \end{array} \right) \f]
        */
-      DblMatrix B;  
+      Kernel::DblMatrix B;  
 
       /** Inverse of the B matrix.
        */
-      DblMatrix Binv;
+      Kernel::DblMatrix Binv;
 
       // Private functions
       void recalculate();

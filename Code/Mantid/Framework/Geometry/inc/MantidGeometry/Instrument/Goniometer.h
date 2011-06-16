@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_GONIOMETER_H_
 #define MANTID_GEOMETRY_GONIOMETER_H_
 
-#include <MantidGeometry/Math/Matrix.h>
-#include <MantidGeometry/V3D.h>
+#include <MantidKernel/Matrix.h>
+#include <MantidKernel/V3D.h>
 #include <MantidGeometry/Crystal/UnitCell.h> //for angle units
 #include <string>
 
@@ -49,12 +49,12 @@ namespace Geometry
   struct GoniometerAxis
   {
     std::string name; /// GoniometerAxis name
-    V3D rotationaxis; /// GoniometerAxis direction
+    Kernel::V3D rotationaxis; /// GoniometerAxis direction
     double angle; /// Rotation angle
     int sense;  /// Rotation sense (1 for CCW, -1 for CW)
     int angleunit; ///angle units are angDegrees or angRadians (see UnitCell.h)
     /// Constructor
-    GoniometerAxis(std::string initname,V3D initrotationaxis,double initangle,int initsense,int initangleunit):name(initname),rotationaxis(initrotationaxis),angle(initangle),sense(initsense),angleunit(initangleunit){}
+    GoniometerAxis(std::string initname, Kernel::V3D initrotationaxis,double initangle,int initsense,int initangleunit):name(initname),rotationaxis(initrotationaxis),angle(initangle),sense(initsense),angleunit(initangleunit){}
   };
 
   class MANTID_GEOMETRY_DLL Goniometer
@@ -65,11 +65,11 @@ namespace Geometry
       // Copy constructor
       Goniometer(const Goniometer& other);
       // Constructor from a rotation matrix
-      Goniometer(DblMatrix rot);
+      Goniometer(Kernel::DblMatrix rot);
       // Default destructor
       virtual ~Goniometer();
       // Return rotation matrix
-      const Geometry::DblMatrix& getR() const;
+      const Kernel::DblMatrix& getR() const;
       // Return information about axes  
       std::string axesInfo();
       // Add axis to goniometer
@@ -92,7 +92,7 @@ namespace Geometry
 
     private:
       /// Global rotation matrix of the goniometer
-      DblMatrix R;
+      Kernel::DblMatrix R;
       /// Motors vector contains #GoniometerAxis objects, the last one is the closest to the sample
       std::vector<GoniometerAxis> motors;
       /// Flag to specify if the goniometer is initialized from a rotation matrix

@@ -7,6 +7,8 @@
 #include "MantidGeometry/Instrument/Component.h"
 
 using namespace Mantid::Geometry;
+using Mantid::Kernel::V3D;
+using Mantid::Kernel::Quat;
 
 class DetectorTest : public CxxTest::TestSuite
 {

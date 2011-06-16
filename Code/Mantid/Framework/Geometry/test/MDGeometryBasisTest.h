@@ -10,7 +10,7 @@
 
 using namespace Mantid;
 using namespace Geometry;
-
+using Mantid::Kernel::V3D;
 
 class MDGeometryBasisTest :   public CxxTest::TestSuite
 {
