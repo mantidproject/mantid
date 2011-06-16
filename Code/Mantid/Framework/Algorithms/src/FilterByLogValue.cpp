@@ -84,7 +84,7 @@ void FilterByLogValue::init()
   types.push_back("Centre");
   types.push_back("Left");
   declareProperty("LogBoundary", "Centre", new Mantid::Kernel::ListValidator(types),
-                  "How to treat log values as being measured in the centre of the time, or begining (left) boundary");
+                  "How to treat log values as being measured in the centre of the time, or beginning (left) boundary");
 }
 
 
