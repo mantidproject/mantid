@@ -9,7 +9,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidNexus/LoadMuonLog.h"
+#include "MantidDataHandling/LoadMuonLog.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -25,7 +25,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
-using Mantid::NeXus::LoadMuonLog;
+using Mantid::DataHandling::LoadMuonLog;
 
 class LoadMuonLogTest : public CxxTest::TestSuite
 {

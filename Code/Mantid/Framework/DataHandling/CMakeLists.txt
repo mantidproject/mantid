@@ -34,6 +34,7 @@ set ( SRC_FILES
 	src/LoadLog.cpp
 	src/LoadLogsFromSNSNexus.cpp
 	src/LoadMappingTable.cpp
+	src/LoadMuonLog.cpp
 	src/LoadMuonNexus.cpp
     src/LoadMuonNexus2.cpp
     src/LoadNeXus.cpp
@@ -128,6 +129,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadLogsFromSNSNexus.h
 	inc/MantidDataHandling/LoadMappingTable.h
+	inc/MantidDataHandling/LoadMuonLog.h
 	inc/MantidDataHandling/LoadMuonNexus.h
     inc/MantidDataHandling/LoadMuonNexus2.h
     inc/MantidDataHandling/LoadNeXus.h
@@ -210,6 +212,7 @@ set ( TEST_FILES
 	test/LoadLogTest.h
 	test/LoadLogsFromSNSNexusTest.h
 	test/LoadMappingTableTest.h
+	test/LoadMuonLogTest.h
 	test/LoadMuonNexus2Test.h
     test/LoadMuonNexusTest.h
     test/LoadNeXusTest.h

@@ -1,5 +1,5 @@
-#ifndef MANTID_NEXUS_LOADMUONLOG_H_
-#define MANTID_NEXUS_LOADMUONLOG_H_
+#ifndef MANTID_DATAHANDLING_LOADMUONLOG_H_
+#define MANTID_DATAHANDLING_LOADMUONLOG_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -9,25 +9,25 @@
 namespace Mantid
 {
 
-  namespace NeXus
+  namespace DataHandling
   {
-    /** @class LoadMuonLog LoadMuonLog.h Nexus/LoadMuonLog.h
+    /** @class LoadMuonLog LoadMuonLog.h DataHandling/LoadMuonLog.h
 
-    Load ISIS Muon log data from a Nexus file. Sections of NXlog values within the
+    Load ISIS Muon log data from a NeXus file. Sections of NXlog values within the
     first run will be loaded.
 
-    The algoritm requires an input filename. If this filename is the name of a
-    Nexus file the algorithm will attempt to read in all the log data (NXlog)
+    The algorithm requires an input filename. If this filename is the name of a
+    NeXus file the algorithm will attempt to read in all the log data (NXlog)
     within the first run section of that file.
 
     LoadMuonLog is an algorithm and as such inherits from the Algorithm class,
-    via Nexus, and overrides the init() & exec() methods.
+    via NeXus, and overrides the init() & exec() methods.
     LoadMuonLog is intended to be used as a child algorithm of
     other Loadxxx algorithms, rather than being used directly.
 
     Required Properties:
     <UL>
-    <LI> Filename - The full name of and path of the input ISIS Nexus file </LI>
+    <LI> Filename - The full name of and path of the input ISIS NeXus file </LI>
     <LI> Workspace - The workspace to which to append the log data </LI>
     </UL>
 
@@ -90,7 +90,7 @@ namespace Mantid
       bool isDateTimeString(const std::string& str);
     };
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_NEXUS_LOADMUONLOG_H_*/
+#endif /*MANTID_DATAHANDLING_LOADMUONLOG_H_*/

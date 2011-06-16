@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadMuonLog.h"
+#include "MantidDataHandling/LoadMuonLog.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
@@ -12,7 +12,7 @@
 
 namespace Mantid
 {
-namespace NeXus
+namespace DataHandling
 {
 
 // Register the algorithm into the algorithm factory
@@ -158,5 +158,5 @@ bool LoadMuonLog::isDateTimeString(const std::string& str)
   return false;
 }
 
-} // namespace NeXus
+} // namespace DataHandling
 } // namespace Mantid
