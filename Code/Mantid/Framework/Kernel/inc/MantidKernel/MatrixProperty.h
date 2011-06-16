@@ -1,17 +1,16 @@
-#ifndef MANTID_API_MATRIXPROPERTY_H_
-#define MANTID_API_MATRIXPROPERTY_H_
+#ifndef MANTID_KERNEL_MATRIXPROPERTY_H_
+#define MANTID_KERNEL_MATRIXPROPERTY_H_
 
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/NullValidator.h"
 
 namespace Mantid
 {
-  namespace API
+  namespace Kernel
   {
     /*
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -35,7 +34,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     template<class TYPE = double>
-    class DLLExport MatrixProperty : public Kernel::PropertyWithValue<Kernel::Matrix<TYPE> >
+    class DLLExport MatrixProperty : public PropertyWithValue<Matrix<TYPE> >
     {
       /// Typedef the held type
       typedef Kernel::Matrix<TYPE> HeldType;
@@ -43,12 +42,12 @@ namespace Mantid
     public:
       /// Constructor
       MatrixProperty(const std::string & propName,
-                        Kernel::IValidator<HeldType> *validator = new Kernel::NullValidator<HeldType>(), 
-                        unsigned int direction = Kernel::Direction::Input);
+                     IValidator<HeldType> *validator = new NullValidator<HeldType>(), 
+                     unsigned int direction = Direction::Input);
       /// Copy constructor
       MatrixProperty(const MatrixProperty & rhs);
       // Unhide base class members (at minimum, avoids Intel compiler warning)
-      using Kernel::PropertyWithValue<HeldType>::operator=;
+      using PropertyWithValue<HeldType>::operator=;
       /// 'Virtual copy constructor'
       inline Kernel::Property* clone() { return new MatrixProperty(*this); }
       /// Destructor
@@ -57,7 +56,7 @@ namespace Mantid
       ///Add the value of another property. Doesn't make sense here.
       virtual MatrixProperty& operator+=( Kernel::Property const *)
       {
-        throw Kernel::Exception::NotImplementedError("+= operator is not implemented for MatrixProperty.");
+        throw Exception::NotImplementedError("+= operator is not implemented for MatrixProperty.");
         return *this;
       }
 
@@ -70,4 +69,4 @@ namespace Mantid
   }
 }
 
-#endif //MANTID_API_MATRIXPROPERTY_H_
+#endif //MANTID_KERNEL_MATRIXPROPERTY_H_

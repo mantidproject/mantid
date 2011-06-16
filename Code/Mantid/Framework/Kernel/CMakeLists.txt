@@ -31,6 +31,7 @@ set ( SRC_FILES
         src/MantidVersion.cpp
         src/MaskedProperty.cpp
         src/Matrix.cpp
+        src/MatrixProperty.cpp
         src/Memory.cpp
         src/MersenneTwister.cpp
         src/NeutronAtom.cpp
@@ -121,6 +122,7 @@ set ( INC_FILES
         inc/MantidKernel/MantidVersion.h
         inc/MantidKernel/MaskedProperty.h
         inc/MantidKernel/Matrix.h
+        inc/MantidKernel/MatrixProperty.h       
         inc/MantidKernel/Memory.h
         inc/MantidKernel/MersenneTwister.h
         inc/MantidKernel/MultiThreaded.h
@@ -189,6 +191,7 @@ set ( TEST_FILES
         test/MandatoryValidatorTest.h
         test/MaskedPropertyTest.h
         test/MatrixTest.h
+        test/MatrixPropertyTest.h
         test/MemoryTest.h
         test/MersenneTwisterTest.h
         test/NeutronAtomTest.h

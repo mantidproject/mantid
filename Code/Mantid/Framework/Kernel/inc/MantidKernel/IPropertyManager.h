@@ -8,6 +8,7 @@
 #include <map>
 
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid
 {
@@ -265,14 +266,15 @@ protected:
     /// explicit specialization for Property*()
     operator Property* ();
 
-    // We can have some partial specialisation for Array and Workspace properties
-
     /// explicit specialization for std::vector
     template<typename T>
     operator std::vector<T> () { return pm.getValue<std::vector<T> >(prop);}
     /// explicit specialization for boost::shared_ptr
     template<typename T>
     operator boost::shared_ptr<T> () { return pm.getValue<boost::shared_ptr<T> >(prop); }
+    /// explicit version for Matrices
+    template<typename T>
+    operator Matrix<T> () { return pm.getValue<Matrix<T> >(prop); }
   };
 
 public:

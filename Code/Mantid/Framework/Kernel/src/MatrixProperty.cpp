@@ -1,12 +1,12 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidAPI/MatrixProperty.h"
+#include "MantidKernel/MatrixProperty.h"
 #include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid
 {
-  namespace API
+  namespace Kernel
   {
     /**
      * Constructor
@@ -17,8 +17,8 @@ namespace Mantid
      */
     template<typename TYPE>
     MatrixProperty<TYPE>::MatrixProperty(const std::string & propName,
-      Kernel::IValidator<HeldType> *validator, unsigned int direction) 
-      : Kernel::PropertyWithValue<HeldType>(propName, HeldType(), validator, direction)
+      IValidator<HeldType> *validator, unsigned int direction) 
+      : PropertyWithValue<HeldType>(propName, HeldType(), validator, direction)
     {
     }
 
@@ -28,7 +28,7 @@ namespace Mantid
     */
     template<typename TYPE>
     MatrixProperty<TYPE>::MatrixProperty(const MatrixProperty & rhs)
-      : Kernel::PropertyWithValue<HeldType>(rhs)
+      : PropertyWithValue<HeldType>(rhs)
     {
     }
 
@@ -40,20 +40,19 @@ namespace Mantid
 
     ///@cond
     // Symbol definitions
-    template class MANTID_API_DLL MatrixProperty<double>;
-    template class MANTID_API_DLL MatrixProperty<int>;
-    template class MANTID_API_DLL MatrixProperty<float>;
+    template class MANTID_KERNEL_DLL MatrixProperty<double>;
+    template class MANTID_KERNEL_DLL MatrixProperty<int>;
+    template class MANTID_KERNEL_DLL MatrixProperty<float>;
     ///@endcond
   }
 }
 
-/**
- * IPropertyManager::getValue definitions so that algorithm.getProperty will work
- */
 ///@cond
+/**
+ * IPropertyManager::getValue definitions
+ */
 DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Kernel::DblMatrix);
 DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Kernel::IntMatrix);
 DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Kernel::Matrix<float>);
-
 ///@endcond
 

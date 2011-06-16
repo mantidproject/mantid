@@ -3,13 +3,14 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidAPI/MatrixProperty.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidKernel/MatrixProperty.h"
+#include "MantidKernel/PropertyManager.h"
 #include <cxxtest/TestSuite.h>
 
-using Mantid::API::MatrixProperty;
+using Mantid::Kernel::MatrixProperty;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::IntMatrix;
+using Mantid::Kernel::PropertyManager;
 
 class MatrixPropertyTest : public CxxTest::TestSuite
 {
@@ -78,59 +79,22 @@ public:
     }
   }
 
-  class AlgorithmWithMatrixProperty : public Mantid::API::Algorithm
-  {
-  public:
-    const std::string name() const { return "AlgorithmWithMatrixProperty";}
-    int version() const  { return 1;}
-    const std::string category() const { return "Cat";} 
 
-    void init()
-    { 
-      declareProperty(new MatrixProperty<>("Rotation"));// Defaults to double type
-    }
-    void exec() 
+//      declareProperty(new MatrixProperty<>("Rotation"));// Defaults to double type
+
+    void test_Extracting_From_PropertyManager_Succeeds()
     {
-      // Cannot figure out a way to do the direct assignment while keeping
-      // Visual Studio happy
-      Mantid::Kernel::Property * base = getProperty("Rotation");
-      MatrixProperty<> * p = dynamic_cast<MatrixProperty<> *>(base);
-      if( p )
-      {
-        DblMatrix R = (*p)(); 
-      }
-      else
-      {
-        throw std::runtime_error("Cannot retrieve MatrixProperty");
-      }
-    }
-
-  };
-
-    void test_Input_To_Algorithm()
-    {
-      boost::shared_ptr<Mantid::API::IAlgorithm> testAlg(new AlgorithmWithMatrixProperty);
-      TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
-      TS_ASSERT_THROWS_NOTHING(testAlg->execute()); 
-      TS_ASSERT(testAlg->isExecuted()); //Default should be okay
-
-      //Is that what we get back ?
-      Mantid::Kernel::Property * base = testAlg->getProperty("Rotation");
-      MatrixProperty<> * p = dynamic_cast<MatrixProperty<> *>(base);
-      DblMatrix propValue = (*p)();
-      TS_ASSERT_EQUALS(propValue.numRows(), 0);
-      TS_ASSERT_EQUALS(propValue.numCols(), 0);
-
-      DblMatrix ubMatrix(3,3,true); //Identity
-      testAlg->setProperty("Rotation", ubMatrix);
-      TS_ASSERT_THROWS_NOTHING(testAlg->execute()); 
-      TS_ASSERT(testAlg->isExecuted()); 
-      base = testAlg->getProperty("Rotation");
-      p = dynamic_cast<MatrixProperty<> *>(base);
-      propValue = (*p)();
-      TS_ASSERT_EQUALS(propValue.numRows(), 3);
-      TS_ASSERT_EQUALS(propValue.numCols(), 3);
-      if( propValue.numCols() == 3 )
+      boost::shared_ptr<PropertyManager> manager(new PropertyManager);
+      manager->declareProperty(new MatrixProperty<>("Rotation"), "Rotation matrix"); //Default is null
+      DblMatrix null = manager->getProperty("Rotation");
+      TS_ASSERT_EQUALS(null.numRows(), 0);
+      TS_ASSERT_EQUALS(null.numCols(), 0);
+      // Set something else and test it comes back okay
+      DblMatrix identity(3,3,true); //Identity
+      TS_ASSERT_THROWS_NOTHING(manager->setProperty("Rotation", identity));
+      TS_ASSERT_EQUALS(identity.numRows(), 3);
+      TS_ASSERT_EQUALS(identity.numCols(), 3);
+      if( identity.numCols() == 3 )
       {
         for( size_t i = 0; i < 3; ++i )
         {
@@ -138,16 +102,15 @@ public:
           {
             if( i == j )
             {
-              TS_ASSERT_EQUALS(propValue[i][j], 1.0);
+              TS_ASSERT_EQUALS(identity[i][j], 1.0);
             }
             else
             {
-              TS_ASSERT_EQUALS(propValue[i][j], 0.0);
+              TS_ASSERT_EQUALS(identity[i][j], 0.0);
             }
           }
         }
       }
-
   }
 
 
