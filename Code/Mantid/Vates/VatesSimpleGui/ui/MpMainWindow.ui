@@ -154,14 +154,7 @@
     <addaction name="separator"/>
     <addaction name="action_Exit"/>
    </widget>
-   <widget class="QMenu" name="menu_Edit">
-    <property name="title">
-     <string>&amp;Edit</string>
-    </property>
-    <addaction name="action_Undo"/>
-   </widget>
    <addaction name="menu_File"/>
-   <addaction name="menu_Edit"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_Open">

@@ -43,9 +43,6 @@ mpMainWindow::mpMainWindow(QWidget *parent) : QMainWindow(parent)
 		  SIGNAL(executeSwitchViews(ModeControlWidget::Views)),
 		  this, SLOT(switchViews(ModeControlWidget::Views)));
 
-  //pqUndoReaction
-  //QObject::connect()
-
   // Commented this out to only use Mantid supplied readers
   // Initialize all readers available to ParaView. Now our application can load
   // all types of datasets supported by ParaView.
