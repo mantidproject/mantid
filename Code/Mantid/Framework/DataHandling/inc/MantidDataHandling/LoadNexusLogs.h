@@ -21,7 +21,7 @@ namespace Mantid
     class MatrixWorkspace;
   }
 
-  namespace NeXus
+  namespace DataHandling
   {
 
     /** 
@@ -30,7 +30,7 @@ namespace Mantid
 
     Required Properties:
     <UL>
-    <LI> Filename - The name of and path to the input Nexus file </LI>
+    <LI> Filename - The name of and path to the input NeXus file </LI>
     <LI> Workspace - The name of the workspace in which to store the imported data.</LI>
     </UL>
 
@@ -95,7 +95,7 @@ namespace Mantid
       boost::shared_ptr<API::Progress> m_progress;
     };
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid
 
 #endif /*MANTID_DATAHANDLING_LOADNEXUSLOGS_H_*/

@@ -1,7 +1,7 @@
 #ifndef LOADNEXUSLOGSTEST_H_
 #define LOADNEXUSLOGSTEST_H_
 
-#include "MantidNexus/LoadNexusLogs.h"
+#include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -13,7 +13,7 @@ using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::NeXus;
+using namespace Mantid::DataHandling;
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceGroup.h"

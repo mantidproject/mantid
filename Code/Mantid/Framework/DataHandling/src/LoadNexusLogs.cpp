@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/LoadNexusLogs.h"
+#include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidNexus/NeXusException.hpp"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
@@ -16,7 +16,7 @@
 
 namespace Mantid
 {
-  namespace NeXus
+  namespace DataHandling
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadNexusLogs)

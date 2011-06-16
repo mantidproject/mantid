@@ -5,7 +5,6 @@ set ( SRC_FILES
         src/LoadRaw/isisraw2.cpp
         src/LoadRaw/item_struct.cpp
         src/LoadRaw/vms_convert.cpp
-        src/LoadNexusLogs.cpp
         src/MuonNexusReader.cpp
         src/NeXusException.cpp
         src/NeXusFile.cpp
@@ -19,7 +18,6 @@ set ( SRC_UNITY_IGNORE_FILES src/NeXusFile.cpp)
 set ( INC_FILES
         inc/MantidNexus/DllConfig.h
         inc/MantidNexus/LoadMuonLog.h
-        inc/MantidNexus/LoadNexusLogs.h
         inc/MantidNexus/MuonNexusReader.h
         inc/MantidNexus/NexusClasses.h
         inc/MantidNexus/NexusFileIO.h
@@ -27,7 +25,6 @@ set ( INC_FILES
 
 set ( TEST_FILES
         test/LoadMuonLogTest.h
-        test/LoadNexusLogsTest.h
         test/NexusAPITest.h
 )
 
