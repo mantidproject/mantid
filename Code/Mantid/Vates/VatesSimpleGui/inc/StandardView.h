@@ -67,6 +67,8 @@ signals:
    * @param max the maximum value of the data
    */
   void dataRange(double min, double max);
+  /// Signal to tell program to enable multi slice view mode button.
+  void enableMultiSliceViewButton();
 
 protected slots:
   /// Set the color scale back to the original bounds.

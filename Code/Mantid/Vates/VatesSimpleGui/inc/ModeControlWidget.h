@@ -55,9 +55,13 @@ signals:
 
 protected slots:
   /**
-   * Enable on the threeslice and multislice view buttons.
+   * Enable on the multislice view button.
    */
-	void enableModeButtons();
+  void enableMultiSliceViewButton();
+  /**
+   * Enable on the threeslice view button.
+   */
+  void enableThreeSliceViewButton();
 	/**
 	 * Execute switch to multislice view, disable multislice button and
 	 * enable other view buttons.

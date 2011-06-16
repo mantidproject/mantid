@@ -5,8 +5,10 @@ ModeControlWidget::ModeControlWidget(QWidget *parent)
 {
 	this->ui.setupUi(this);
 
-	QObject::connect(parent->parent(), SIGNAL(enableModeButtons()), this,
-			SLOT(enableModeButtons()));
+  QObject::connect(parent->parent(), SIGNAL(enableMultiSliceViewButton()), this,
+      SLOT(enableMultiSliceViewButton()));
+  QObject::connect(parent->parent(), SIGNAL(enableThreeSliceViewButton()), this,
+      SLOT(enableThreeSliceViewButton()));
 	QObject::connect(this->ui.multiSliceButton, SIGNAL(clicked()),
 			this, SLOT(onMultiSliceViewButtonClicked()));
 	QObject::connect(this->ui.standardButton, SIGNAL(clicked()),
@@ -20,10 +22,14 @@ ModeControlWidget::~ModeControlWidget()
 
 }
 
-void ModeControlWidget::enableModeButtons()
+void ModeControlWidget::enableThreeSliceViewButton()
 {
-	this->ui.multiSliceButton->setEnabled(true);
 	this->ui.threeSliceButton->setEnabled(true);
+}
+
+void ModeControlWidget::enableMultiSliceViewButton()
+{
+  this->ui.multiSliceButton->setEnabled(true);
 }
 
 void ModeControlWidget::onMultiSliceViewButtonClicked()

@@ -65,8 +65,10 @@ protected slots:
 signals:
   /// Signal to disable all view modes but standard.
 	void disableViewModes();
-	/// Signal to enable the other view mode buttons.
-	void enableModeButtons();
+  /// Signal to enable the threeslice view mode button.
+  void enableThreeSliceViewButton();
+  /// Signal to enable the multislice view mode button.
+  void enableMultiSliceViewButton();
 
 private:
     Q_DISABLE_COPY(mpMainWindow);

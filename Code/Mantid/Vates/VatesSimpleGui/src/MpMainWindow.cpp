@@ -14,6 +14,7 @@
 #include <pqParaViewBehaviors.h>
 #include <pqPipelineSource.h>
 #include <pqRenderView.h>
+#include <vtkSMPropertyHelper.h>
 #include <vtkSMProxyManager.h>
 #include <vtkSMReaderFactory.h>
 
@@ -120,6 +121,12 @@ void mpMainWindow::setMainWindowComponentsForView()
       static_cast<MultiSliceView *>(this->currentView),
       SLOT(updateSelectedIndicator()));
 	}
+  if (this->currentView->inherits("StandardView"))
+  {
+    QObject::connect(static_cast<StandardView *>(this->currentView),
+    SIGNAL(enableMultiSliceViewButton()),
+    this, SIGNAL(enableMultiSliceViewButton()));
+  }
   QObject::connect(this->colorSelectionWidget, SIGNAL(colorMapChanged(const pqColorMapModel *)),
     this->currentView, SLOT(onColorMapChange(const pqColorMapModel *)));
   QObject::connect(this->colorSelectionWidget, SIGNAL(colorScaleChanged(double, double)),
@@ -140,7 +147,14 @@ void mpMainWindow::onDataLoaded(pqPipelineSource* source)
 
   this->currentView->render();
   this->proxyTabWidget->getObjectInspector()->accept();
-  emit this->enableModeButtons();
+
+  const unsigned int val = vtkSMPropertyHelper(this->originSource->getProxy(),
+      "InputGeometryXML", true).GetNumberOfElements();
+  if (val > 0)
+  {
+    emit this->enableMultiSliceViewButton();
+  }
+  emit this->enableThreeSliceViewButton();
 }
 
 void mpMainWindow::switchViews(ModeControlWidget::Views v)
@@ -156,8 +170,8 @@ void mpMainWindow::switchViews(ModeControlWidget::Views v)
 	this->setMainWindowComponentsForView();
 	this->hiddenView->close();
 	delete this->hiddenView;
-	this->currentView->render();
-	if (this->currentView->inherits("ThreeSliceView") ||
+  this->currentView->render();
+  if (this->currentView->inherits("ThreeSliceView") ||
 			this->currentView->inherits("StandardView"))
 	{
 		this->proxyTabWidget->getObjectInspector()->accept();
