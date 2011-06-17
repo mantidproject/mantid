@@ -2,6 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidGeometry/Math/ConvexPolygon.h"
+#include "MantidKernel/Exception.h"
 #include <sstream>
 
 namespace Mantid
