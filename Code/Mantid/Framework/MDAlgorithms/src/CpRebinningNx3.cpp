@@ -269,7 +269,7 @@ CpRebinningNx3::rebin_Nx3dataset()
           out = true;
           continue;
         }else{
-          indE=(size_t)floor(Et-cut_min[j]);
+          indE=(int)floor(Et-cut_min[j]);
         }
         indl+=indE*strides[j];
         rN[j]=Et;

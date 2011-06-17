@@ -7,8 +7,9 @@ namespace MDDataTestHelper{
 
 MDDensityHomogeneous::MDDensityHomogeneous(const Geometry::MDGeometryDescription &geomDescr):
 nContributedPixels(geomDescr.nContributedPixels),
-MDDPixel_size(-1),
-nIndexes(0)
+nIndexes(0),
+MDDPixel_size(-1)
+
 {
     unsigned int i;
 
@@ -17,10 +18,10 @@ nIndexes(0)
         throw(std::invalid_argument("needs to have at least 2 dimensions"));
     }
  
-    unsigned int nRecDim = geomDescr.getNumRecDims();
-    unsigned int indLeft = nDims - nRecDim; // can not be negative as nDims>=nRecDims
+    size_t nRecDim = geomDescr.getNumRecDims();
+    size_t indLeft = nDims - nRecDim; // can not be negative as nDims>=nRecDims
     nIndexes     = 2+indLeft;  
-    MDDPixel_size = (nDims+2+nIndexes)*sizeof(MDDPoint_t);
+    MDDPixel_size = (int)(nDims+2+nIndexes)*sizeof(MDDPoint_t);
 
   
     this->nFullDims = nDims;
@@ -50,12 +51,12 @@ nIndexes(0)
 
     r_min[0]         = geomDescr.pDimDescription(0)->cut_min;
     r_max[0]         = geomDescr.pDimDescription(0)->cut_max;
-    fine_bin_size[0] = (r_max[0]-r_min[0])/fine_nbin[0];
+    fine_bin_size[0] = (r_max[0]-r_min[0])/double(fine_nbin[0]);
     for(i=1;i<this->nDims;i++){
         fine_bin_stride[i]=fine_bin_stride[i-1]*fine_nbin[i-1];
         r_min[i]          = geomDescr.pDimDescription(i)->cut_min;
         r_max[i]          = geomDescr.pDimDescription(i)->cut_max;
-        fine_bin_size[i]  = (r_max[i]-r_min[i])/fine_nbin[i];
+        fine_bin_size[i]  = (r_max[i]-r_min[i])/double(fine_nbin[i]);
 
     }
     fine_grid_size = fine_bin_stride[nDims-1]*fine_nbin[i-1];
@@ -73,7 +74,7 @@ nIndexes(0)
             nResolvedDim++;
         }
    }
-    unsigned int ii(0),ir(0);
+   
     size_t nBins;
 
     for(i=0;i<nDims;i++){
