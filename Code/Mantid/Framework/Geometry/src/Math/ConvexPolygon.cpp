@@ -5,6 +5,8 @@
 #include "MantidKernel/Exception.h"
 #include <sstream>
 
+#include <iostream>
+
 namespace Mantid
 {
   namespace Geometry
@@ -32,6 +34,46 @@ namespace Mantid
            << vertices.size() << " supplied";
         throw std::invalid_argument(os.str());
       }
+    }
+
+    /**
+     * Compute the area of the polygon using triangulation. As this is a 
+     * convex polygon the calculation is exact. The algorithm uses one vertex
+     * as a common vertex and sums the areas of the triangles formed by this
+     * and two other vertices, moving in an anti-clockwise direction.
+     * @returns The area of the polygon
+     */
+    double ConvexPolygon::area() const
+    {
+      Vertex2DList::const_iterator itr = m_vertices.begin();
+      Vertex2DList::const_iterator iend = m_vertices.end();
+      const Vertex2D & vertex_0 = *itr;
+      // Skip vertex 1 has we need a min of 3 points
+      itr += 2;
+      double area(0.0);
+      while( itr != iend )
+      {
+        const Vertex2D & vertex_j = *itr;
+        const Vertex2D & vertex_i = *(itr-1);
+        area += triangleArea(vertex_0, vertex_i, vertex_j);
+        ++itr;
+      }
+      return area;
+    }
+
+    /**
+     * Compute the area of a triangle given by 3 vertices (a,b,c) using the
+     * convention in "Computational Geometry in C" by J. O'Rourke
+     * @param a :: The first vertex in the set
+     * @param b :: The second vertex in the set
+     * @param c :: The third vertex in the set
+     */
+    double ConvexPolygon::triangleArea(const Vertex2D & a, 
+                                       const Vertex2D & b, 
+                                       const Vertex2D & c) const
+    {
+      return 0.5*(b.X() - a.X())*(c.Y() - a.Y()) - 
+        (c.X() - a.X())*(b.Y() - a.Y());
     }
 
   } //namespace Geometry

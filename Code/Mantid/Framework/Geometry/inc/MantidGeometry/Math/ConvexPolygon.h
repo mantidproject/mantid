@@ -59,11 +59,17 @@ namespace Mantid
     public:
       /// Construct a polygon with a collection of vertices
       ConvexPolygon(const Vertex2DList & vertices, const bool check = true);
+      
+      /// Compute the area of the polygon using triangulation
+      double area() const;
 
     private:
       /// Default constructor
       ConvexPolygon();
-
+      /// Compute the area of a triangle given by 3 vertices
+      double triangleArea(const Vertex2D & a, const Vertex2D & b, 
+                          const Vertex2D & c) const;
+      
       /// The collection of vertices
       const Vertex2DList m_vertices;
     };
