@@ -46,6 +46,7 @@ set( SOURCE_FILES
 qt4_wrap_cpp( MOC_SRCS
   inc/AxisInteractor.h
   inc/ColorSelectionWidget.h
+  inc/Indicator.h
   inc/ModeControlWidget.h
   inc/MpMainWindow.h
   inc/MultisliceView.h

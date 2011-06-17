@@ -99,6 +99,7 @@ protected slots:
   void onColorScaleChange(double min, double max);
 	/// Select the appropriate indicator on the correct axis interactor widget.
 	void selectIndicator();
+  void updateCutPosition(double position);
 	/// Move the selected indicator to a given position.
 	void updateSelectedIndicator();
 

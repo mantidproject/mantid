@@ -4,6 +4,7 @@
 #include "AxisInteractor.h"
 
 #include <QGraphicsItem>
+#include <QObject>
 
 class QColor;
 class QGraphicsSceneMouseEvent;
@@ -42,8 +43,10 @@ class QRect;
  */
 const int IndicatorItemType = QGraphicsItem::UserType + 1;
 
-class Indicator: public QGraphicsPolygonItem
+class Indicator: public QObject, public QGraphicsPolygonItem
 {
+  Q_OBJECT
+
 public:
   /// Enumeration for a graphicsitem type
 	enum {Type = IndicatorItemType};
@@ -78,6 +81,9 @@ public:
 	 * @param pos location to move the indicator to
 	 */
 	void updatePos(const QPoint &pos);
+
+signals:
+  void indicatorMoved(const QPoint &pos, int coord);
 
 protected:
 	/**

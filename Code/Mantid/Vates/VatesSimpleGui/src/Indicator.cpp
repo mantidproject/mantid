@@ -143,17 +143,21 @@ void Indicator::updatePos(const QPoint &pos)
 void Indicator::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
 	QPointF pos = this->mapToScene(event->pos());
+  int coord = -1;
   switch (this->orientation)
   {
   case AxisInteractor::LeftScale:
   case AxisInteractor::RightScale:
     this->setPos(this->tip_edge, this->fixPosition(static_cast<int>(pos.y())));
+    coord = 0;
     break;
   case AxisInteractor::TopScale:
   case AxisInteractor::BottomScale:
     this->setPos(this->fixPosition(static_cast<int>(pos.x())), this->tip_edge);
+    coord = 1;
     break;
   }
+ emit this->indicatorMoved(this->pos().toPoint(), coord);
 }
 
 void Indicator::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)

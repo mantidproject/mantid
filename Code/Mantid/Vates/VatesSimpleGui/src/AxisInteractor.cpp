@@ -138,6 +138,8 @@ void AxisInteractor::createIndicator(const QPoint &point)
 		this->isSceneGeomInit = true;
 	}
 	Indicator *tri = new Indicator();
+  QObject::connect(tri, SIGNAL(indicatorMoved(const QPoint &, int)),
+        this->scalePicker, SLOT(determinePosition(const QPoint &, int)));
 	tri->setOrientation(this->scalePos);
 	tri->setPoints(point, gv_rect);
 	this->scene->addItem(tri);

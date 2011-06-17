@@ -75,6 +75,10 @@ public:
    * @param point the x,y coordinates to set the indicator at
    */
   void makeIndicator(const QPoint &point);
+  void moved(double value);
+
+public slots:
+  void determinePosition(const QPoint &pos, int coord);
 
 private:
   /**
@@ -83,7 +87,8 @@ private:
    * @param scale the associated QwtScaleWidget
    * @param pos the x,y coordinates of the mouse click event
    */
-  void mouseClicked(const QwtScaleWidget *scale, const QPoint &pos);
+  void mouseClicked(const QwtScaleWidget *scale, const QPoint &pos,
+                    bool createIndicator = true);
   /**
    * A function that returns the bounding box of the QwtScaleWidget without
    * the axis title.

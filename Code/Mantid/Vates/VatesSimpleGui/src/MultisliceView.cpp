@@ -46,6 +46,13 @@ MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
 	QObject::connect(this->ui.zAxisWidget->getScalePicker(),
 			SIGNAL(clicked(double)), this, SLOT(makeZcut(double)));
 
+  QObject::connect(this->ui.xAxisWidget->getScalePicker(),
+      SIGNAL(moved(double)), this, SLOT(updateCutPosition(double)));
+  QObject::connect(this->ui.yAxisWidget->getScalePicker(),
+      SIGNAL(moved(double)), this, SLOT(updateCutPosition(double)));
+  QObject::connect(this->ui.zAxisWidget->getScalePicker(),
+      SIGNAL(moved(double)), this, SLOT(updateCutPosition(double)));
+
   QObject::connect(this->ui.xAxisWidget,
     SIGNAL(indicatorSelected(const QString &)), this,
     SLOT(indicatorSelected(const QString &)));
@@ -177,7 +184,7 @@ void MultiSliceView::makeCut(double origin[], double orient[])
 			cut->getOutputPort(0),this->mainView);
 	pqPipelineRepresentation *repr = qobject_cast<pqPipelineRepresentation *>(trepr);
 	vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
-			"CutFunction").GetAsProxy();
+      "CutFunction").GetAsProxy();
 
 	repr->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
@@ -293,4 +300,29 @@ void MultiSliceView::clearPbwSelections(const QString &name)
       smsModel->setCurrentItem(source, pqServerManagerSelectionModel::Deselect);
     }
   }
+}
+
+void MultiSliceView::updateCutPosition(double position)
+{
+  pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
+  const pqServerManagerSelection *list = smsModel->selectedItems();
+  pqPipelineSource *cut = qobject_cast<pqPipelineSource *>(list->at(0));
+
+  vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
+      "CutFunction").GetAsProxy();
+  double origin[3] = {0.0, 0.0, 0.0};
+  if (this->ui.xAxisWidget->hasIndicator())
+  {
+    origin[0] = position;
+  }
+  if (this->ui.yAxisWidget->hasIndicator())
+  {
+    origin[1] = position;
+  }
+  if (this->ui.zAxisWidget->hasIndicator())
+  {
+    origin[2] = position;
+  }
+  vtkSMPropertyHelper(plane, "Origin").Set(origin, 3);
+  cut->getProxy()->UpdateVTKObjects();
 }
