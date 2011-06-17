@@ -195,7 +195,9 @@ void AnvredCorrection::execEvent()
       API::WorkspaceFactory::Instance().create("EventWorkspace",numHists,2,1) );
   //Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, correctionFactors, true);
-
+  bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
+  if (inPlace)
+    g_log.debug("Correcting EventWorkspace in-place.");
 
   // If sample not at origin, shift cached positions.
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
@@ -231,25 +233,37 @@ void AnvredCorrection::execEvent()
     // Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
     double scattering = dir.angle( V3D(0.0, 0.0, 1.0) );
 
-      EventWorkspace_const_sptr event_correctionFactors = boost::dynamic_pointer_cast<const EventWorkspace>( correctionFactors);
-      EventList el = eventW->getEventList(i);
-      el.switchTo(WEIGHTED_NOTIME);
-      std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
+    EventWorkspace_const_sptr event_correctionFactors = boost::dynamic_pointer_cast<const EventWorkspace>( correctionFactors);
+    EventList el = eventW->getEventList(i);
+    el.switchTo(WEIGHTED_NOTIME);
+    std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
 
-      std::vector<WeightedEventNoTime>::iterator itev;
-      std::vector<WeightedEventNoTime>::iterator itev_end = events.end();
+    std::vector<WeightedEventNoTime>::iterator itev;
+    std::vector<WeightedEventNoTime>::iterator itev_end = events.end();
 
-      // multiplying an event list by a scalar value
-      for (itev = events.begin(); itev != itev_end; itev++)
-      {
-        const double lambda = itev->tof();
-        double value = this->getEventWeight(lambda, scattering);
-        itev->m_errorSquared = static_cast<float>(itev->m_errorSquared * value*value);
-        itev->m_weight *= static_cast<float>(value);
-      }
-      EventList elOut;
-      elOut += events;
-      correctionFactors->getOrAddEventList(i) +=elOut;
+    // multiplying an event list by a scalar value
+    for (itev = events.begin(); itev != itev_end; itev++)
+    {
+      const double lambda = itev->tof();
+      double value = this->getEventWeight(lambda, scattering);
+      itev->m_errorSquared = static_cast<float>(itev->m_errorSquared * value*value);
+      itev->m_weight *= static_cast<float>(value);
+    }
+    EventList elOut;
+    elOut += events;
+    correctionFactors->getOrAddEventList(i) +=elOut;
+    
+    std::set<detid_t>& dets = eventW->getEventList(i).getDetectorIDs();
+    std::set<detid_t>::iterator j;
+    for (j = dets.begin(); j != dets.end(); ++j)
+      correctionFactors->getOrAddEventList(i).addDetectorID(*j);
+    // When focussing in place, you can clear out old memory from the input one!
+    if (inPlace)
+    {
+      eventW->getEventList(i).clear();
+      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+    }
+
 
     prog.report();
 
