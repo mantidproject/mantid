@@ -60,6 +60,7 @@ set ( SRC_FILES
         src/UnitFactory.cpp
         src/UserStringParser.cpp
         src/Utils.cpp
+        src/V2D.cpp
         src/V3D.cpp
         src/VectorHelper.cpp
 )
@@ -158,6 +159,7 @@ set ( INC_FILES
         inc/MantidKernel/UnitFactory.h
         inc/MantidKernel/UserStringParser.h
         inc/MantidKernel/Utils.h
+        inc/MantidKernel/V2D.h
         inc/MantidKernel/V3D.h
         inc/MantidKernel/VectorHelper.h
 )
@@ -222,6 +224,7 @@ set ( TEST_FILES
         test/UnitTest.h
         test/UserStringParserTest.h
         test/UtilsTest.h
+        test/V2DTest.h
         test/V3DTest.h
 )
 

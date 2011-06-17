@@ -41,6 +41,7 @@ set ( SRC_FILES
         src/Math/Algebra.cpp
         src/Math/BnId.cpp
         src/Math/PolyBase.cpp
+        src/Math/ConvexPolygon.cpp
         src/Math/RotCounter.cpp
         src/Math/Triple.cpp
         src/Math/mathSupport.cpp
@@ -131,6 +132,7 @@ set ( INC_FILES
         inc/MantidGeometry/Math/Algebra.h
         inc/MantidGeometry/Math/BnId.h
         inc/MantidGeometry/Math/MapSupport.h
+        inc/MantidGeometry/Math/ConvexPolygon.h
         inc/MantidGeometry/Math/PolyBase.h
         inc/MantidGeometry/Math/RotCounter.h
         inc/MantidGeometry/Math/Triple.h
@@ -168,6 +170,7 @@ set ( TEST_FILES
         test/CompAssemblyTest.h
         test/ComponentTest.h
         test/ConeTest.h
+        test/ConvexPolygonTest.h
         test/CoordinateTest.h
         test/CylinderTest.h
         test/DetectorGroupTest.h
