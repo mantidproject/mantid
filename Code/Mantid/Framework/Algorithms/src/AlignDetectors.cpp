@@ -31,6 +31,18 @@ void AlignDetectors::initDocs()
 {
   this->setWikiSummary("Performs a unit change from TOF to dSpacing, correcting the X values to account for small errors in the detector positions. ");
   this->setOptionalMessage("Performs a unit change from TOF to dSpacing, correcting the X values to account for small errors in the detector positions.");
+  this->setWikiDescription(""
+      "The offsets are a correction to the dSpacing values and are applied during the conversion from time-of-flight to dSpacing as follows:"
+      "\n\n"
+      ":<math> d = \\frac{h}{m_N} \\frac{t.o.f.}{L_{tot} sin \\theta} (1+ \\rm{offset})</math>"
+      "\n\n"
+      "The detector offsets can be obtained from either: an [[OffsetsWorkspace]] where each pixel has one value, the offset; or a .cal file (in the form created by the ARIEL software). "
+      "\n\n"
+      "'''Note:''' the workspace that this algorithms outputs is a [[ragged workspace]]."
+      "\n\n"
+      "==== Restrictions on the input workspace ====\n"
+      "The input workspace must contain histogram or event data where the X unit is time-of-flight and the Y data is raw counts. The [[instrument]] associated with the workspace must be fully defined because detector, source & sample position are needed."
+"");
 }
 
 
@@ -146,13 +158,13 @@ void AlignDetectors::init()
     "The name to use for the output workspace" );
 
   declareProperty(new FileProperty("CalibrationFile", "", FileProperty::OptionalLoad, ".cal"),
-     "Optional: The .cal file containing the position correction factors");
+     "Optional: The .cal file containing the position correction factors. Either this or OffsetsWorkspace needs to be specified.");
 
   declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace", "", Direction::Input, true),
-     "Optional: A OffsetsWorkspace containing the calibration offsets.");
+     "Optional: A OffsetsWorkspace containing the calibration offsets. Either this or CalibrationFile needs to be specified.");
 
   declareProperty( new PropertyWithValue<bool>("VULCANDspacemapFile", false, Direction::Input),
-    "Optional: Only applies if you ran DspacemaptoCal file for VULCAN corrections.\n");
+    "Optional: Only applies if you ran DspacemaptoCal file for VULCAN corrections. This will then use the position of the CENTER of the bank as the reference, rather than individual pixels.\n");
 }
 
 
