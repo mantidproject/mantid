@@ -5,7 +5,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
 #include "MDDataObjects/MD_FileFormatFactory.h"
-#include "MDDataObjects/MDTestWorkspace.h"
+#include "MDDataObjectsTestHelpers/MDTestWorkspace.h"
 #include <boost/shared_ptr.hpp>
 
 
