@@ -4,6 +4,7 @@
 #include "MantidGeometry/Math/ConvexPolygon.h"
 #include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cfloat>
 
 using Mantid::Geometry::ConvexPolygon;
 using Mantid::Geometry::Vertex2D;
