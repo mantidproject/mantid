@@ -36,7 +36,7 @@ class Load_MDWorkspaceTest :    public CxxTest::TestSuite
 		// does not load actual file and use test data instead
         Geometry::MDGeometryDescription DefaultGeom(4,3);
         DefaultGeom.nContributedPixels=100000000; // number selected to prohibit the loading of the test dataset in memory
-        DefaultGeom.pDimDescription(0)->nBins=10;
+        DefaultGeom.pDimDescription(0)->nBins=10; // number of bins selected to reduce test excecution time;
         DefaultGeom.pDimDescription(1)->nBins=10;
         DefaultGeom.pDimDescription(2)->nBins=10;
         DefaultGeom.pDimDescription(3)->nBins=10;

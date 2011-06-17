@@ -153,7 +153,7 @@ public:
       // random cell, all cells are equal at the moment, but randomisation errors lead 
       //to various number of contribution of subsells into each cell.
       pHomDens->getMDImageCellData(38,S,Err,nPix);
-      TS_ASSERT_DELTA(double(nPix),S,1e-5);
+      TS_ASSERT_DELTA(1,S,1e-5);
       TS_ASSERT_DELTA(0.5/double(nPix),Err,1e-5);
       TS_ASSERT_EQUALS(nPix,pHomDens->coarseCellCapacity(38));
 
@@ -216,7 +216,7 @@ public:
      // random cell, all cells are equal at the moment, but randomisation errors lead 
      //to various number of contribution of subsells into each cell.
      pHomDens->getMDImageCellData(950,S,Err,nPix);
-     TS_ASSERT_DELTA(double(nPix),S,1e-5);
+     TS_ASSERT_DELTA(1,S,1e-5);
      TS_ASSERT_DELTA(1./double(nPix),Err,1e-5);
      TS_ASSERT_EQUALS(nPix,pHomDens->coarseCellCapacity(950));
 
