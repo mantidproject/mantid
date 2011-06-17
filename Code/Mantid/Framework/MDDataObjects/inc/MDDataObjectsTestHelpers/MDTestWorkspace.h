@@ -81,7 +81,7 @@ public:
     MDTestWorkspace() {
 		std::auto_ptr<Geometry::MDGeometryDescription> pDs = std::auto_ptr<Geometry::MDGeometryDescription>(new Geometry::MDGeometryDescription(4,3));
       // reduce default number of contribured pixels as test will run for ages otherwise;
-        pDs->nContributedPixels = 100*100*100*100; 
+        pDs->nContributedPixels = 100000000; 
         // decrease the number of bins in the image to accelerate test WS initiation
         pDs->pDimDescription(0)->nBins = 10;
         pDs->pDimDescription(1)->nBins = 10;

@@ -31,18 +31,22 @@ bool load_existing_workspace(const std::string &workspace_name){
     loader.setPropertyValue("MDWorkspace",workspace_name);
     // describe test workspace;
     Geometry::MDGeometryDescription DefaultDescr(4,3);
+    DefaultDescr.pDimDescription(0)->nBins  = 10;
     DefaultDescr.pDimDescription(0)->cut_min = -6.6;
     DefaultDescr.pDimDescription(0)->cut_max =  6.6;
     DefaultDescr.pDimDescription(0)->Tag     = "qx";
  
+    DefaultDescr.pDimDescription(1)->nBins  = 10;
     DefaultDescr.pDimDescription(1)->cut_min = -6.6;
     DefaultDescr.pDimDescription(1)->cut_max =  6.6;
     DefaultDescr.pDimDescription(1)->Tag     = "qy";
 
+    DefaultDescr.pDimDescription(2)->nBins  = 10;
     DefaultDescr.pDimDescription(2)->cut_min = -6.6;
     DefaultDescr.pDimDescription(2)->cut_max =  6.6;
     DefaultDescr.pDimDescription(2)->Tag     = "qz";
 
+    DefaultDescr.pDimDescription(3)->nBins  = 10;
     DefaultDescr.pDimDescription(3)->cut_min =  0;
     DefaultDescr.pDimDescription(3)->cut_max =  150;
     DefaultDescr.pDimDescription(3)->Tag     = "en";

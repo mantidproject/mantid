@@ -288,7 +288,7 @@ void
 MDDensityHomogeneous::getMDImageCellData(size_t index,double &Signal,double &Error,uint64_t &nPixels)const
 {
     nPixels=this->coarseCellCapacity(index);
-    Signal =double(nPixels);
+    Signal =1;
     Error = 0.5/double(nPixels);
   
 }
