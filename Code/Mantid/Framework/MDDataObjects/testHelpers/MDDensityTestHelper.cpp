@@ -1,4 +1,5 @@
 #include "MDDataObjectsTestHelpers/MDDensityTestHelper.h"
+#include <string.h>
 
 namespace Mantid{
 namespace MDDataTestHelper{
@@ -119,8 +120,8 @@ MDDensityHomogeneous::getMDDPointData(size_t cell_index,char *pBuffer,size_t Buf
 
     size_t field_width = sizeof(MDDPoint_t);
     for(size_t i=0;i<nDataPoints;i++){
-      std::memcpy(pBuffer+i*pix_size,&r[i],field_width*this->nDims);
-      std::memcpy(pBuffer+i*pix_size+field_width*this->nDims,&patch[0],field_width*(this->nIndexes+2));
+      memcpy(pBuffer+i*pix_size,&r[i],field_width*this->nDims);
+      memcpy(pBuffer+i*pix_size+field_width*this->nDims,&patch[0],field_width*(this->nIndexes+2));
     }
 
 }
