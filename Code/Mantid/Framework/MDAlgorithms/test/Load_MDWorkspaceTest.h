@@ -35,7 +35,7 @@ class Load_MDWorkspaceTest :    public CxxTest::TestSuite
         TSM_ASSERT_THROWS_NOTHING("The test file should exist",loader.setPropertyValue("inFilename","test_horace_reader.sqw"));
 		// does not load actual file and use test data instead
         Geometry::MDGeometryDescription DefaultGeom(4,3);
-        DefaultGeom.nContributedPixels=1000000;
+        DefaultGeom.nContributedPixels=100000000; // number selected to prohibit the loading of the test dataset in memory
         DefaultGeom.pDimDescription(0)->nBins=10;
         DefaultGeom.pDimDescription(1)->nBins=10;
         DefaultGeom.pDimDescription(2)->nBins=10;
@@ -64,7 +64,7 @@ class Load_MDWorkspaceTest :    public CxxTest::TestSuite
          //
          TSM_ASSERT_EQUALS("The workspace should be 4D",4,pLoadedWS->getNumDims());
 
-   //      TSM_ASSERT_EQUALS("The number of pixels contributed into test workspace should be ",1000000,pLoadedWS->getNPoints());
+         TSM_ASSERT_EQUALS("The number of pixels contributed into test workspace should be ",100000000,pLoadedWS->getNPoints());
 
          TSM_ASSERT_EQUALS("The MD image in this workspace has to had 10000 data cells",10*10*10*10,pLoadedWS->get_const_MDImage().getDataSize());
      }
