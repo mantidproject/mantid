@@ -41,9 +41,10 @@ namespace DataHandling
   */
   void LoadGSS::init()
   {
-
-
-    declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load), "The input filename of the stored data");
+    std::vector<std::string> exts;
+    exts.push_back(".gsa");
+    exts.push_back(".txt");
+    declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, exts), "The input filename of the stored data");
     declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output));
   }
 
@@ -53,7 +54,7 @@ namespace DataHandling
   void LoadGSS::exec()
   {
     using namespace Mantid::API;
-    std::string filename = getProperty("Filename");
+    std::string filename = getPropertyValue("Filename");
 
     std::vector<MantidVec*> gsasDataX;
     std::vector<MantidVec*> gsasDataY;
@@ -262,17 +263,24 @@ namespace DataHandling
    */
       bool LoadGSS::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
       {
+        // check the file extension
         std::string extn=extension(filePath);
-        bool bascii(false);
-        (!extn.compare("txt"))?bascii=true:bascii=false;
+        bool bascii;
+        if (extn.compare("gsa"))
+          bascii = true;
+        else if (extn.compare("txt"))
+          bascii = true;
+        else
+          bascii = false;
 
+        // check the bit of header
         bool is_ascii (true);
         for(size_t i=0; i<nread; i++)
         {
           if (!isascii(header.full_hdr[i]))
             is_ascii =false;
         }
-        return(is_ascii|| bascii?true:false);
+        return(is_ascii|| bascii);
       }
 
   /**checks the file by opening it and reading few lines
