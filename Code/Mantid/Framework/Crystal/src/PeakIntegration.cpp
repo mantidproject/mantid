@@ -191,7 +191,7 @@ namespace Mantid
           }
         }
         bool haveMask = false;
-        bool haveFit = false;
+        //bool haveFit = false;
   
         std::vector <std::pair<double, int> >::iterator Iter1;
         for ( Iter1 = v1.begin() ; Iter1 != v1.end() ; Iter1++ )
