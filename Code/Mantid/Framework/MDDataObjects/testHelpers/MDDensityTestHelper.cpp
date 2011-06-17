@@ -135,7 +135,7 @@ MDDensityHomogeneous::get_rCoarseCell(size_t ind, std::vector<float> &r_cell)con
     r_cell.resize(this->nDims);
     this->findCoarseIndexes(ind,indexes);
     for(unsigned int i=0;i<nFullDims;i++){
-        r_cell[i]=float(r_min[i]+this->coarse_bin_size[i]*indexes[i]);
+        r_cell[i]=float(double(r_min[i])+this->coarse_bin_size[i]*indexes[i]);
     }
 }
 
@@ -196,11 +196,11 @@ MDDensityHomogeneous::getCellPixCoordinates(size_t ind, std::vector<MDDPoint_t> 
     uint64_t fs,fe;
     for(unsigned int i=0;i<nDims;i++){
         // indexes of large cell:
-        rMinCell=float(this->r_min[i]+(coarse_ind[i]  )*this->coarse_bin_size[i]);
-        rMaxCell=float(this->r_min[i]+(coarse_ind[i]+1)*this->coarse_bin_size[i]);        
+        rMinCell=float(double(this->r_min[i])+(coarse_ind[i]  )*this->coarse_bin_size[i]);
+        rMaxCell=float(double(this->r_min[i])+(coarse_ind[i]+1)*this->coarse_bin_size[i]);        
 
-        fs=uint64_t((rMinCell-r_min[i])/fine_bin_size[i]); if(float(r_min[i]+fs*fine_bin_size[i])< rMinCell)fs++;
-        fe=uint64_t((rMaxCell-r_min[i])/fine_bin_size[i]); if(float(r_min[i]+fe*fine_bin_size[i])>=rMaxCell)fe--;
+        fs=uint64_t((rMinCell-r_min[i])/fine_bin_size[i]); if(float(double(r_min[i])+double(fs)*fine_bin_size[i])< rMinCell)fs++;
+        fe=uint64_t((rMaxCell-r_min[i])/fine_bin_size[i]); if(float(double(r_min[i])+double(fe)*fine_bin_size[i])>=rMaxCell)fe--;
               
         // loop used below goes to the last index which is one smaller then final index fine_ind_end;
         fe++;
@@ -223,7 +223,7 @@ MDDensityHomogeneous::getCellPixCoordinates(size_t ind, std::vector<MDDPoint_t> 
     while(index_correct){
         // MD vector filled in loop over dimensions; 
         for(id=0;id<nDims;id++){
-            float r_id = float(this->r_min[id]+(fine_ind[id]*fine_bin_size[id])*(1-FLT_EPSILON));
+            float r_id = float(double(this->r_min[id])+(double(fine_ind[id])*fine_bin_size[id])*(1-FLT_EPSILON));
             if(r_id>=rMax[id]){ // leftmost boundary point does not belong to this cell;
                 if(nCells>0)nCells--; // clear this cell
                 continue;
@@ -250,13 +250,13 @@ MDDensityHomogeneous::coarseCellCapacity(const std::vector<size_t> &coarse_ind)c
      uint64_t csCapacity = 1;
      for(unsigned int i=0;i<this->nDims;i++){
         // indexes of large cell:
-          rMinCell=float(this->r_min[i]+(coarse_ind[i]  )*this->coarse_bin_size[i]);
-          rMaxCell=float(this->r_min[i]+(coarse_ind[i]+1)*this->coarse_bin_size[i]);
+        rMinCell=float(double(this->r_min[i])+(coarse_ind[i]  )*this->coarse_bin_size[i]);
+        rMaxCell=float(double(this->r_min[i])+(coarse_ind[i]+1)*this->coarse_bin_size[i]);        
 
-          fs=uint64_t((rMinCell-r_min[i])/fine_bin_size[i]);  if(float(r_min[i]+fs*fine_bin_size[i])< rMinCell)fs++;
-          fe=uint64_t((rMaxCell-r_min[i])/fine_bin_size[i]);  if(float(r_min[i]+fe*fine_bin_size[i])>=rMaxCell)fe--;
-        
-           csCapacity*=(fe-fs+1); // start and end belong to the cell, so +1
+        fs=uint64_t((rMinCell-r_min[i])/fine_bin_size[i]); if(float(double(r_min[i])+double(fs)*fine_bin_size[i])< rMinCell)fs++;
+        fe=uint64_t((rMaxCell-r_min[i])/fine_bin_size[i]); if(float(double(r_min[i])+double(fe)*fine_bin_size[i])>=rMaxCell)fe--;
+
+        csCapacity*=(fe-fs+1); // start and end belong to the cell, so +1
      }
       
     return csCapacity;
