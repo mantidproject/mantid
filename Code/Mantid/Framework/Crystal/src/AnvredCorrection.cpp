@@ -62,10 +62,8 @@ using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
 
-AnvredCorrection::AnvredCorrection() : API::Algorithm(), m_inputWS(),
-  n_lambda(0), x_step(0)
-{
-}
+AnvredCorrection::AnvredCorrection() : API::Algorithm()
+{}
 
 void AnvredCorrection::init()
 {
@@ -80,7 +78,7 @@ void AnvredCorrection::init()
     "Output workspace name");
    declareProperty("PreserveEvents", true, "Keep the output workspace as an EventWorkspace, if the input has events (default).\n"
       "If false, then the workspace gets converted to a Workspace2D histogram.");
-   declareProperty("VanadiumSubtracted", false, "All corrections done if false (default).\n"
+   declareProperty("OnlySphericalAbsorption", false, "All corrections done if false (default).\n"
       "If true, only the spherical absorption correction.");
 
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
@@ -91,7 +89,7 @@ void AnvredCorrection::init()
     "Linear absorption coefficient at 1.8 Angstroms in 1/cm");
   declareProperty("Radius", -1.0, mustBePositive->clone(),
     "Radius of the sample in centimeters");
-  declareProperty("PowerLambda", 3.0,
+  declareProperty("PowerLambda", 4.0,
     "Power of lamda ");
 
   defineProperties();
@@ -99,12 +97,13 @@ void AnvredCorrection::init()
 
 void AnvredCorrection::exec()
 {
-  BuildLamdaWeights("");
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
 
   // Get the input parameters
   retrieveBaseProperties();
+
+  BuildLamdaWeights();
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>( m_inputWS );
   if ((getProperty("PreserveEvents")) && (eventW != NULL))
@@ -119,18 +118,6 @@ void AnvredCorrection::exec()
 
   const int64_t numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
-
-  // If the number of wavelength points has not been given, use them all
-  if ( n_lambda == 0 ) n_lambda = specSize;
-  x_step = specSize / n_lambda; // Bin step between points to calculate
-
-  if (x_step == 0) //Number of wavelength points >number of histogram points
-    x_step = 1;
-
-  std::ostringstream message;
-  message << "Correction every " << x_step << " wavelength points" << std::endl;
-  g_log.information(message.str());
-  message.str("");
 
   const bool isHist = m_inputWS->isHistogramData();
 
@@ -172,24 +159,15 @@ void AnvredCorrection::exec()
     // Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
     double scattering = dir.angle( V3D(0.0, 0.0, 1.0) );
 
-    // Loop through the bins in the current spectrum every x_step
-    for (int64_t j = 0; j < specSize; j = j + x_step)
+    // Loop through the bins in the current spectrum
+    for (int64_t j = 0; j < specSize; j++)
     {
       const double lambda = (isHist ? (0.5 * (Xin[j] + Xin[j + 1])) : Xin[j]);
 
       Y[j] = Yin[j]*this->getEventWeight(lambda, scattering);
 
-      // Make certain that last point is calculates
-      if ( x_step > 1 && j+x_step >= specSize && j+1 != specSize)
-      {
-        j = specSize - x_step - 1;
-      }
     }
 
-    if (x_step > 1) // Interpolate linearly between points separated by x_step, last point required
-    {
-      VectorHelper::linearlyInterpolateY(Xin, Y, static_cast<double>(x_step));
-    }
 
     prog.report();
 
@@ -312,8 +290,8 @@ double AnvredCorrection::getEventWeight( double lamda, double two_theta )
     double transinv = 1;
     if ( radius > 0 )
        transinv = absor_sphere(two_theta, lamda);
-    // Only Spherical absorption correction if vanadium subtracted
-    if (getProperty("VanadiumSubtracted")) return transinv;
+    // Only Spherical absorption correction 
+    if (getProperty("OnlySphericalAbsorption")) return transinv;
 
     // Resolution of the lambda table
     size_t lamda_index = static_cast<size_t>( STEPS_PER_ANGSTROM * lamda );
@@ -403,7 +381,7 @@ double AnvredCorrection::absor_sphere(double& twoth, double& wl)
    *  in 3D.  The power is currently 3 if an incident spectrum is present
    *  and 2.4 if no incident spectrum is used.
    */
-  void AnvredCorrection::BuildLamdaWeights( std::string spectrum_file_name )
+  void AnvredCorrection::BuildLamdaWeights()
   {
                                              // Theoretically correct value 3.0;
                                              // if we have an incident spectrum
@@ -434,11 +412,6 @@ double AnvredCorrection::absor_sphere(double& twoth, double& wl)
       lamda_weight[i] *= (double)(1/std::pow(lamda,power));
     }
 
-    if ( use_incident_spectrum )
-      std::cout << "Built weights using incident spectrum from " <<
-                          spectrum_file_name << " with wl power " << power ;
-    else
-      std::cout << "Built APPROXIMATE weights with wl power " << power ;
   }
 
 
