@@ -3,7 +3,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidMDAlgorithms/DynamicCPRRebinning.h"
-#include "MDDataObjects/MDTestWorkspace.h"
+#include "MDDataObjectsTestHelpers/MDTestWorkspace.h"
 using namespace Mantid;
 using namespace API;
 using namespace Kernel;
@@ -58,7 +58,7 @@ class CPR_preselectCellsTest :    public CxxTest::TestSuite
 
 
      void testINIT_WS(){
-         std::auto_ptr<MDTestWorkspace> tw = std::auto_ptr<MDTestWorkspace>(new MDTestWorkspace());
+         std::auto_ptr<MDDataTestHelper::MDTestWorkspace> tw = std::auto_ptr<MDDataTestHelper::MDTestWorkspace>(new MDDataTestHelper::MDTestWorkspace());
 		 // get usual workspace from the test workspace
          pOrigin = tw->get_spWS();
 

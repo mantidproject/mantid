@@ -30,7 +30,7 @@ class CPRebinKeepPixTest :    public CxxTest::TestSuite
 
     void testRebinInit(void){
 	// build test workspace
-      std::auto_ptr<MDTestWorkspace> tw = std::auto_ptr<MDTestWorkspace>(new MDTestWorkspace());
+      std::auto_ptr<MDDataTestHelper::MDTestWorkspace> tw = std::auto_ptr<MDDataTestHelper::MDTestWorkspace>(new MDDataTestHelper::MDTestWorkspace());
     // get usual workspace from the test workspace
       spInputWS = tw->get_spWS();
 
