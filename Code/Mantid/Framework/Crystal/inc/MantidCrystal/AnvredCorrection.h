@@ -117,7 +117,7 @@ private:
   void retrieveBaseProperties();
   void constructSample(API::Sample& sample);
   double getEventWeight( double lamda, double two_theta);
-  void BuildLamdaWeights(std::string spectrum_file_name);
+  void BuildLamdaWeights();
   double absor_sphere(double& twoth, double& wl) ;
   void GetSpectrumWeights(std::string spectrum_file_name, std::vector<double> lamda_weight);
   
@@ -126,9 +126,6 @@ private:
   double radius; // in cm
   double power_th;  //Power of lamda in BuildLamdaWeights
   std::vector<double> lamda_weight;
-
-  int64_t n_lambda;         ///< The number of points in wavelength, the rest is interpolated linearly
-  int64_t x_step;           ///< The step in bin number between adjacent points
 
 };
 
