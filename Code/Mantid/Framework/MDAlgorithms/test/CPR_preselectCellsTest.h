@@ -58,7 +58,27 @@ class CPR_preselectCellsTest :    public CxxTest::TestSuite
 
 
      void testINIT_WS(){
-         std::auto_ptr<MDDataTestHelper::MDTestWorkspace> tw = std::auto_ptr<MDDataTestHelper::MDTestWorkspace>(new MDDataTestHelper::MDTestWorkspace());
+         // redefine geometry description
+         Geometry::MDGeometryDescription geomDescr(4,3);
+         // define convenient values for dimensions
+         geomDescr.nContributedPixels = 100000000; // 100*100*100*100
+         geomDescr.pDimDescription(0)->nBins = 10;
+         geomDescr.pDimDescription(0)->cut_min=0;
+         geomDescr.pDimDescription(0)->cut_max=10;
+
+         geomDescr.pDimDescription(1)->nBins = 10;
+         geomDescr.pDimDescription(1)->cut_min=0;
+         geomDescr.pDimDescription(1)->cut_max=10;
+
+         geomDescr.pDimDescription(2)->nBins = 10;
+         geomDescr.pDimDescription(2)->cut_min=0;
+         geomDescr.pDimDescription(2)->cut_max=10;
+
+         geomDescr.pDimDescription(3)->nBins = 10;
+         geomDescr.pDimDescription(3)->cut_min=0;
+         geomDescr.pDimDescription(3)->cut_max=10;
+
+         std::auto_ptr<MDDataTestHelper::MDTestWorkspace> tw = std::auto_ptr<MDDataTestHelper::MDTestWorkspace>(new MDDataTestHelper::MDTestWorkspace(geomDescr));
 		 // get usual workspace from the test workspace
          pOrigin = tw->get_spWS();
 
@@ -94,41 +114,36 @@ class CPR_preselectCellsTest :    public CxxTest::TestSuite
      }
      void testPreselect3DWorks(){
 		 size_t nCells(0);
-		 pTargDescr->pDimDescription(3)->cut_max = 0;  
+		 pTargDescr->pDimDescription(3)->cut_max = 0.999;  
 		 // modify description: The numbers have to be known from the source workspace and the workpsace range is from -1 to 49
-		 pTargDescr->pDimDescription(2)->cut_max = 0.99;
+		 pTargDescr->pDimDescription(2)->cut_max = 0.999;
 
 
 		 TSM_ASSERT_THROWS_NOTHING("Preselect cells should not normaly throw",nCells=pRebin->preselect_cells());
 		 // check if the generic properties of the preselection are correct:
-		 TSM_ASSERT_EQUALS("The selection above should describe 800 geometry",800,nCells);
+		 TSM_ASSERT_EQUALS("The selection above should describe 10*10*1*1 geometry",100,nCells);
 
 		 const std::vector<size_t> psCells = pRebin->getPreselectedCells();
 		 TSM_ASSERT_EQUALS("All selected cells have to be unique but found non-unique numbers:",false,check_cell_unique(psCells));
 
 		 //
-		 TSM_ASSERT_EQUALS("The selection should refer to 100000000 pixels (specified in test dataset) but it is not",8000000,pRebin->getNumPreselectedPixels());
+		 TSM_ASSERT_EQUALS("The selection should refer to 100*100*10*10  pixels (specified in test dataset) but it is not",1000000,pRebin->getNumPreselectedPixels());
 
      }
     void testPreselect3Dx2Works(){
 		 size_t nCells(0);
+         pTargDescr->pDimDescription(2)->cut_max = 10;
 		 pTargDescr->pDimDescription(3)->cut_max = 1;  
 
 		 TSM_ASSERT_THROWS_NOTHING("Preselect cells should not normaly throw",nCells=pRebin->preselect_cells());
 		 // check if the generic properties of the preselection are correct:
-		 TSM_ASSERT_EQUALS("The selection above should describe 1600 geometry",1600,nCells);
+		 TSM_ASSERT_EQUALS("The selection above should describe 10*10*10*1 geometry",1000,nCells);
 
 		 const std::vector<size_t> psCells = pRebin->getPreselectedCells();
 		 TSM_ASSERT_EQUALS("All selected cells have to be unique but found non-unique numbers:",false,check_cell_unique(psCells));
 
-		 ////
-		 //size_t nHalfCells = nCells/2;
-		 //// number of pixels in the first half of the selection; verified above
-		 //uint64_t nPix   = nHalfCells*(nHalfCells+1)/2;
-		 //// other half of the selection:
-		 //nPix          += pOrigin->get_const_MDGeometry().get_constDimension(3)->getStride()*nHalfCells+(nHalfCells+1)*nHalfCells/2;
-
-		 //TSM_ASSERT_EQUALS("The selection should refer to proper number of pixels but it is not",nPix,pRebin->getNumPreselectedPixels());
+		 // the selection should refer to proper number of pixels (each cell keeps approximately 10 pixels)	
+		 TSM_ASSERT_EQUALS("The selection should refer to proper number of pixels (100*100*100*10) but it is not",10000000,pRebin->getNumPreselectedPixels());
 
      }
 	 void testClearWorkspaces(){
