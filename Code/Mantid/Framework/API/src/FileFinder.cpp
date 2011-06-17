@@ -280,6 +280,7 @@ namespace Mantid
 
     std::string FileFinderImpl::findRun(const std::string& hint,const std::vector<std::string> &exts)const
     {
+      g_log.debug() << "findRun(\'" << hint << "\', exts[" << exts.size() << "])\n";
       if (hint.empty())
         return "";
 
