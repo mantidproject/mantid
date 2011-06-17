@@ -63,6 +63,11 @@ public:
   void render();
 
 protected slots:
+  /**
+   * Make the slice interactor appear on the view when an indicator is
+   * selected.
+   * @param name the server manager name of the selected slice
+   */
   void indicatorSelected(const QString &name);
   /// Set the color scale back to the original bounds.
   void onAutoScale();
