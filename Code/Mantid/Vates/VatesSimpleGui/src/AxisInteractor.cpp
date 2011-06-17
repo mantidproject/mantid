@@ -48,6 +48,9 @@ AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
 	this->scalePicker = new ScalePicker(this->scaleWidget);
 	QObject::connect(this->scalePicker, SIGNAL(makeIndicator(const QPoint &)),
 			this, SLOT(createIndicator(const QPoint &)));
+
+  QObject::connect(this->scene, SIGNAL(selectionChanged()), this,
+                   SLOT(getIndicator()));
 }
 
 void AxisInteractor::widgetLayout()
@@ -263,4 +266,17 @@ void AxisInteractor::setScalePosition(ScalePos scalePos)
     {
         this->setOrientation(Qt::Vertical, scalePos);
     }
+}
+
+void AxisInteractor::getIndicator()
+{
+  QList<QGraphicsItem *> list = this->scene->selectedItems();
+  if (1 == list.size())
+  {
+    QGraphicsItem *item = list.at(0);
+    if (item->type() == IndicatorItemType)
+    {
+      emit this->indicatorSelected(item->toolTip());
+    }
+  }
 }

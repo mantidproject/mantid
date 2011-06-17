@@ -46,6 +46,16 @@ MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
 	QObject::connect(this->ui.zAxisWidget->getScalePicker(),
 			SIGNAL(clicked(double)), this, SLOT(makeZcut(double)));
 
+  QObject::connect(this->ui.xAxisWidget,
+    SIGNAL(indicatorSelected(const QString &)), this,
+    SLOT(indicatorSelected(const QString &)));
+  QObject::connect(this->ui.yAxisWidget,
+    SIGNAL(indicatorSelected(const QString &)), this,
+    SLOT(indicatorSelected(const QString &)));
+  QObject::connect(this->ui.zAxisWidget,
+    SIGNAL(indicatorSelected(const QString &)), this,
+    SLOT(indicatorSelected(const QString &)));
+
 	QObject::connect(this, SIGNAL(sliceNamed(const QString &)),
 			this->ui.xAxisWidget, SLOT(setIndicatorName(const QString &)));
 	QObject::connect(this, SIGNAL(sliceNamed(const QString &)),
@@ -260,4 +270,27 @@ void MultiSliceView::onColorMapChange(const pqColorMapModel *model)
 
   lutProxy->UpdateVTKObjects();
   this->mainView->render();
+}
+
+void MultiSliceView::indicatorSelected(const QString &name)
+{
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
+  pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
+  smsModel->setCurrentItem(cut, pqServerManagerSelectionModel::Select);
+  this->clearPbwSelections(cut->getSMName());
+}
+
+void MultiSliceView::clearPbwSelections(const QString &name)
+{
+  pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
+  const pqServerManagerSelection *list = smsModel->selectedItems();
+  for (int i = 0; i < list->size(); ++i)
+  {
+    pqPipelineSource *source = qobject_cast<pqPipelineSource *>(list->at(i));
+    if (name != source->getSMName())
+    {
+      smsModel->setCurrentItem(source, pqServerManagerSelectionModel::Deselect);
+    }
+  }
 }

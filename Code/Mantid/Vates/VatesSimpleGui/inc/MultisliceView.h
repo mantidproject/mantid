@@ -63,6 +63,7 @@ public:
   void render();
 
 protected slots:
+  void indicatorSelected(const QString &name);
   /// Set the color scale back to the original bounds.
   void onAutoScale();
   /**
@@ -113,6 +114,12 @@ private:
     Q_DISABLE_COPY(MultiSliceView);
     /// Clear all axis indicator highlighting.
     void clearIndicatorSelections();
+    /**
+     * Clear the selections from the pipeline browser that do not correspond
+     * to the currently selected slice.
+     * @param name the name of the currently selected slice
+     */
+    void clearPbwSelections(const QString &name);
     /**
      * Function that creates a slice in the appropriate plane at the
      * requested axis location.

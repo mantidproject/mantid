@@ -114,6 +114,13 @@ public:
 	 */
 	void updateIndicator(double value);
 
+signals:
+  /**
+   * Signal to pass along the name of the indicator being selected.
+   * @param name the name of the selected indicator
+   */
+  void indicatorSelected(const QString &name);
+
 protected slots:
   /**
    * Create an indicator at the requested location that is associated with
@@ -121,11 +128,13 @@ protected slots:
    * @param point the (x,y) location for the indicator
    */
 	void createIndicator(const QPoint &point);
+  /// Determine the indicator being selected and pass along that information.
+  void getIndicator();
 	/**
 	 * Associate a ParaView slice object name with the new indicator.
 	 * @param name the ParaView name of the slice
 	 */
-	void setIndicatorName(const QString &name);
+  void setIndicatorName(const QString &name);
 
 protected:
 	/**
