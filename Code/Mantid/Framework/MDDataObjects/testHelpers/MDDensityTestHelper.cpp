@@ -9,7 +9,6 @@ MDDensityHomogeneous::MDDensityHomogeneous(const Geometry::MDGeometryDescription
 nContributedPixels(geomDescr.nContributedPixels),
 nIndexes(0),
 MDDPixel_size(-1)
-
 {
     unsigned int i;
 
@@ -20,8 +19,8 @@ MDDPixel_size(-1)
  
     size_t nRecDim = geomDescr.getNumRecDims();
     size_t indLeft = nDims - nRecDim; // can not be negative as nDims>=nRecDims
-    nIndexes     = 2+indLeft;  
-    MDDPixel_size = (int)(nDims+2+nIndexes)*sizeof(MDDPoint_t);
+    nIndexes     = (unsigned int)(2+indLeft);  
+    MDDPixel_size = (int)((nDims+2+nIndexes)*sizeof(MDDPoint_t));
 
   
     this->nFullDims = nDims;
@@ -136,7 +135,7 @@ MDDensityHomogeneous::get_rCoarseCell(size_t ind, std::vector<float> &r_cell)con
     r_cell.resize(this->nDims);
     this->findCoarseIndexes(ind,indexes);
     for(unsigned int i=0;i<nFullDims;i++){
-        r_cell[i]=(float)(r_min[i]+this->coarse_bin_size[i]*indexes[i]);
+        r_cell[i]=float(r_min[i]+this->coarse_bin_size[i]*indexes[i]);
     }
 }
 
@@ -197,11 +196,11 @@ MDDensityHomogeneous::getCellPixCoordinates(size_t ind, std::vector<MDDPoint_t> 
     uint64_t fs,fe;
     for(unsigned int i=0;i<nDims;i++){
         // indexes of large cell:
-        rMinCell=(float)(this->r_min[i]+(coarse_ind[i]  )*this->coarse_bin_size[i]);
-        rMaxCell=(float)(this->r_min[i]+(coarse_ind[i]+1)*this->coarse_bin_size[i]);        
+        rMinCell=float(this->r_min[i]+(coarse_ind[i]  )*this->coarse_bin_size[i]);
+        rMaxCell=float(this->r_min[i]+(coarse_ind[i]+1)*this->coarse_bin_size[i]);        
 
-        fs=(uint64_t)((rMinCell-r_min[i])/fine_bin_size[i]); if(float(r_min[i]+fs*fine_bin_size[i])< rMinCell)fs++;
-        fe=(uint64_t)((rMaxCell-r_min[i])/fine_bin_size[i]); if(float(r_min[i]+fe*fine_bin_size[i])>=rMaxCell)fe--;
+        fs=uint64_t((rMinCell-r_min[i])/fine_bin_size[i]); if(float(r_min[i]+fs*fine_bin_size[i])< rMinCell)fs++;
+        fe=uint64_t((rMaxCell-r_min[i])/fine_bin_size[i]); if(float(r_min[i]+fe*fine_bin_size[i])>=rMaxCell)fe--;
               
         // loop used below goes to the last index which is one smaller then final index fine_ind_end;
         fe++;
@@ -224,7 +223,7 @@ MDDensityHomogeneous::getCellPixCoordinates(size_t ind, std::vector<MDDPoint_t> 
     while(index_correct){
         // MD vector filled in loop over dimensions; 
         for(id=0;id<nDims;id++){
-            float r_id = (float)(this->r_min[id]+(fine_ind[id]*fine_bin_size[id])*(1-FLT_EPSILON));
+            float r_id = float(this->r_min[id]+(fine_ind[id]*fine_bin_size[id])*(1-FLT_EPSILON));
             if(r_id>=rMax[id]){ // leftmost boundary point does not belong to this cell;
                 if(nCells>0)nCells--; // clear this cell
                 continue;
@@ -251,11 +250,11 @@ MDDensityHomogeneous::coarseCellCapacity(const std::vector<size_t> &coarse_ind)c
      uint64_t csCapacity = 1;
      for(unsigned int i=0;i<this->nDims;i++){
         // indexes of large cell:
-          rMinCell=(float)(this->r_min[i]+(coarse_ind[i]  )*this->coarse_bin_size[i]);
-          rMaxCell=(float)(this->r_min[i]+(coarse_ind[i]+1)*this->coarse_bin_size[i]);
+          rMinCell=float(this->r_min[i]+(coarse_ind[i]  )*this->coarse_bin_size[i]);
+          rMaxCell=float(this->r_min[i]+(coarse_ind[i]+1)*this->coarse_bin_size[i]);
 
-          fs=(uint64_t)((rMinCell-r_min[i])/fine_bin_size[i]);  if(float(r_min[i]+fs*fine_bin_size[i])< rMinCell)fs++;
-          fe=(uint64_t)((rMaxCell-r_min[i])/fine_bin_size[i]);  if(float(r_min[i]+fe*fine_bin_size[i])>=rMaxCell)fe--;
+          fs=uint64_t((rMinCell-r_min[i])/fine_bin_size[i]);  if(float(r_min[i]+fs*fine_bin_size[i])< rMinCell)fs++;
+          fe=uint64_t((rMaxCell-r_min[i])/fine_bin_size[i]);  if(float(r_min[i]+fe*fine_bin_size[i])>=rMaxCell)fe--;
         
            csCapacity*=(fe-fs+1); // start and end belong to the cell, so +1
      }
@@ -274,7 +273,7 @@ MDDensityHomogeneous::coarseCellCapacity(size_t cell_num)const
 bool 
 MDDensityHomogeneous::ind_plus(const std::vector<uint64_t> &ind_min,const std::vector<uint64_t> &ind_max, std::vector<uint64_t> &ind)const
 {
-    int id;
+    unsigned int id;
     for(id=0;id<this->nDims;id++){
         if(ind[id]< ind_max[id]-1){
             ind[id]++;
@@ -302,7 +301,7 @@ MDDensityHomogeneous(geomDescr),
 SigmaSq(sigmaSq)
 {
 
-    this->nRecDim = geomDescr.getNumRecDims();
+    this->nRecDim = (unsigned int)(geomDescr.getNumRecDims());
 }
 //
 //void 
