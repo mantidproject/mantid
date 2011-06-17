@@ -83,7 +83,7 @@ class CPRebinKeepPixTest :    public CxxTest::TestSuite
   
 
     
-       // TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
+       TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
     }
 	void testClearWorkspaces(){
 		 //  not entirely according to standarts, but does not test anything but deletes workpsaces to free memory when running in suite
