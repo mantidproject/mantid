@@ -188,13 +188,7 @@ DynamicCPRRebinning::preselect_cells()
     // we should know the limits the dummy dimensions have
     cut_min[i] = rec_dim[i]->getMinimum();
     cut_max[i] = rec_dim[i]->getMaximum()*(1+FLT_EPSILON);
-
-    //TODO: deal with rotations in case they have not been dealt with before;
-    //  for(j=nReciprocal;j<3;j++){
-    //    rotations[3*i+j]=0;
-    //    rotations[3*j+i]=0;
-    // }
-    // rotations[3*i+i] = 1;
+   
   }
 
   std::vector<double> rx,ry,rz,xx,yy,zz;

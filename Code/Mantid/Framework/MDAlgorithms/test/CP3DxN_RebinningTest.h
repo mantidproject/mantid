@@ -46,12 +46,12 @@ bool load_existing_workspace(const std::string &workspace_name){
     DefaultDescr.pDimDescription(2)->cut_max =  6.6;
     DefaultDescr.pDimDescription(2)->Tag     = "qz";
 
-    DefaultDescr.pDimDescription(3)->nBins  = 10;
+    DefaultDescr.pDimDescription(3)->nBins  =   10;
     DefaultDescr.pDimDescription(3)->cut_min =  0;
     DefaultDescr.pDimDescription(3)->cut_max =  150;
     DefaultDescr.pDimDescription(3)->Tag     = "en";
 
-    DefaultDescr.nContributedPixels          = 10000000;
+    DefaultDescr.nContributedPixels          = 160000;
     loader.set_test_mode(DefaultDescr);
 
     loader.execute();
@@ -122,13 +122,13 @@ class CP3DxN_RebinningTest :  public CxxTest::TestSuite
          
         const MDImage &OldIMG = inputWS->get_const_MDImage();
         const MDImage &NewIMG = outWS->get_const_MDImage();
-
-      /*  for(size_t i=0;i<OldIMG.getDataSize();i++){
+        size_t dataSize =OldIMG.getDataSize(); 
+        for(size_t i=0;i<dataSize;i++){
             TSM_ASSERT_DELTA("Old and new images points in this case have to be equal",OldIMG.getSignal(i),NewIMG.getSignal(i),1.e-4);
-			if(abs(OldIMG.getSignal(i)-NewIMG.getSignal(i))>1.e-4){
+		/*	if(abs(OldIMG.getSignal(i)-NewIMG.getSignal(i))>1.e-4){
 				continue;
-			}
-        }*/
+			}*/
+        }
     }
 
     void testCPRRebinAgainSmaller(){

@@ -172,7 +172,7 @@ size_t
 MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
 {
  
-    size_t nSeelectedCells; 
+    size_t nSeelectedCells,nPix(0); 
     size_t buf_size = pix_buf.size();
 
     const Geometry::MDGeometry &CurrentGeom = dnd.get_const_MDGeometry();
@@ -198,8 +198,8 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
             }
         }
         // otherwise, get the next cell
-        this->pTestDataSource->getMDDPointData(cell_ind,(&pix_buf[0]+prev_cells_sizes),buf_size-prev_cells_sizes,s_cell_size);
-        prev_cells_sizes+=s_cell_size*pix_size;
+        this->pTestDataSource->getMDDPointData(cell_ind,(&pix_buf[0]+prev_cells_sizes),buf_size-prev_cells_sizes,nPix);
+        prev_cells_sizes+=nPix*pix_size;
         nSeelectedCells  = i+1;
     }
     n_pix_in_buffer = prev_cells_sizes/pix_size;

@@ -96,6 +96,7 @@ nIndexes(0)
     coarse_grid_size=non_zero_stride*non_zero_nBin;
 }
 //
+static std::vector<MDDPoint_t> r;
 void
 MDDensityHomogeneous::getMDDPointData(size_t cell_index,char *pBuffer,size_t BufSize,size_t &nDataPoints)const
 {
@@ -115,14 +116,15 @@ MDDensityHomogeneous::getMDDPointData(size_t cell_index,char *pBuffer,size_t Buf
         patch[2+i]=MDDPoint_t(2+i);
     }
 
-    std::vector<MDDPoint_t> r;
+   
     nDataPoints = (size_t)this->getCellPixCoordinates(cell_index,r);
 
     size_t field_width = sizeof(MDDPoint_t);
     for(size_t i=0;i<nDataPoints;i++){
-      memcpy(pBuffer+i*pix_size,&r[i],field_width*this->nDims);
+      memcpy(pBuffer+i*pix_size,&r[i*4],field_width*this->nDims);
       memcpy(pBuffer+i*pix_size+field_width*this->nDims,&patch[0],field_width*(this->nIndexes+2));
     }
+
 
 }
 //
@@ -221,7 +223,7 @@ MDDensityHomogeneous::getCellPixCoordinates(size_t ind, std::vector<MDDPoint_t> 
     while(index_correct){
         // MD vector filled in loop over dimensions; 
         for(id=0;id<nDims;id++){
-            float r_id = (float)(this->r_min[id]+fine_ind[id]*fine_bin_size[id]);
+            float r_id = (float)(this->r_min[id]+(fine_ind[id]*fine_bin_size[id])*(1-FLT_EPSILON));
             if(r_id>=rMax[id]){ // leftmost boundary point does not belong to this cell;
                 if(nCells>0)nCells--; // clear this cell
                 continue;
