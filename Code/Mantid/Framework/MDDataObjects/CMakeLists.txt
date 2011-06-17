@@ -11,10 +11,12 @@ set ( SRC_FILES
 	src/MDImage.cpp
 	src/MDIndexCalculator.cpp
 	src/MDWorkspace.cpp
-        src/MDWorkspaceIterator.cpp
+    src/MDWorkspaceIterator.cpp
 	src/MD_FileFormatFactory.cpp
 	src/MD_FileHoraceReader.cpp
-	src/MD_FileTestDataGenerator.cpp
+# test helpers
+	testHelpers/MD_FileTestDataGenerator.cpp
+    testHelpers/MDDensityTestHelper.cpp 
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -31,23 +33,27 @@ set ( INC_FILES
 	inc/MDDataObjects/MDImage.h
 	inc/MDDataObjects/MDImageDatatypes.h
 	inc/MDDataObjects/MDIndexCalculator.h
-	inc/MDDataObjects/MDTestWorkspace.h
 	inc/MDDataObjects/MDWorkspace.h
-        inc/MDDataObjects/MDWorkspaceIterator.h
+    inc/MDDataObjects/MDWorkspaceIterator.h
 	inc/MDDataObjects/MD_FileFormatFactory.h
 	inc/MDDataObjects/MD_FileHoraceReader.h
-	inc/MDDataObjects/MD_FileTestDataGenerator.h
 	inc/MDDataObjects/stdafx.h
+# test helpers
+	inc/MDDataObjectsTestHelpers/MDTestWorkspace.h 	
+	inc/MDDataObjectsTestHelpers/MD_FileTestDataGenerator.h 	
+	inc/MDDataObjectsTestHelpers/MDDensityTestHelper.h 
 )
 
 # Test files. Other source files required.
 set ( TEST_FILES
-	#test/HoraceReaderTest.h
+	test/HoraceReaderTest.h
 	#test/MDDPoints_MemManagerTest.h #TODO fix. This currently brings the test suite down.
 	test/MDDataPointDescriptionTest.h
-	test/MDFileTestDataGeneratorTest.h
 	test/MDFitWorkspaceTest.h
 	test/MD_FileFactoryTest.h
+# test some complex test helpers
+	test/MDDensityTestHelperTest.h 
+    test/MDFileTestDataGeneratorTest.h 
 )
 
 set ( GMOCK_TEST_FILES
@@ -57,8 +63,6 @@ test/MDImageTest.h
 test/MDPixelsTest.h
 test/MDWorkspaceTest.h
 test/MDWorkspaceIteratorTest.h
-#test/MDPointTest.h  
-#test/MDBoxTest.h  
 )
 
 

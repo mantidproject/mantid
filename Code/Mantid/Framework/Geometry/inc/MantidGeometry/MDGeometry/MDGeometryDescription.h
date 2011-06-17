@@ -106,7 +106,7 @@ public:
   /// obtain number of reciprocal dimensions in the geometry
   size_t getNumRecDims(void)const{return nReciprocalDimensions;}
 
-  /// returns the size of the image, described by this class
+  /// returns the size (number of cells) for the image, described by this class
   size_t getImageSize()const;
 
  

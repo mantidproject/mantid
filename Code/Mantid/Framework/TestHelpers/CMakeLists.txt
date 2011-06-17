@@ -12,7 +12,6 @@ set ( INC_FILES
 	inc/MantidTestHelpers/ComponentCreationHelper.h 
 	inc/MantidTestHelpers/MDEventsTestHelper.h 
 )
-
 # Requires DataHandling for a load call
 include_directories ( inc)
 include_directories ( ../DataHandling/inc )

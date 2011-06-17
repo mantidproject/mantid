@@ -64,14 +64,15 @@ public:
      /** The function sets load algorithm into test mode, namely it conects the algorithm to the test file reader,
 	     which provides test workspace (generated and not from a data file)* The test mode is dropped immidiately after
 		 the algorithm has been executed, so if you need a test mode for next load operation, you should set it again */
-	  void set_test_mode(){test_mode=true;}
+      void set_test_mode(const Geometry::MDGeometryDescription &);
 private:
     // Overridden Algorithm methods
       void init();
       void exec();
 
+      // the variables used for smooth switch to a test mode;
 	  bool test_mode;
-
+      std::auto_ptr<Geometry::MDGeometryDescription > pTestGeometryDescription;
 protected:
    /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& ldmdws_log;

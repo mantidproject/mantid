@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include "MDDataObjects/IMD_FileFormat.h"
-#include "MantidTestHelpers/MDDensityTestHelper.h"
+#include "MDDataObjectsTestHelpers/MDDensityTestHelper.h"
 
 
 

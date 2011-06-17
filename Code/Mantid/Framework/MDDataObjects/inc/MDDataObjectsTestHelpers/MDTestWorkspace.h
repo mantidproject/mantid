@@ -2,10 +2,10 @@
 #define MD_TEST_WORKSPACE_H
 
 #include "MDDataObjects/MDWorkspace.h"
-#include "MDDataObjects/MD_FileTestDataGenerator.h"
+#include "MDDataObjectsTestHelpers/MD_FileTestDataGenerator.h"
 
 /**  Class builds a workspace filled with test data points. It repeats the logic of an load algorithm, but separated 
-     here for fast data access;
+     here for fast data access and not to deal with workspace-dataservice;
      The class intended to test use an algorithm on a huge datasets without caring about an IO operations
 
     @author Alex Buts, RAL ISIS
@@ -36,19 +36,19 @@
 
 namespace Mantid
 {
-namespace MDDataObjects
+namespace MDDataTestHelper
 {
 
 class MDTestWorkspace
 {
    // auxiliary variables extracted from workspace;
-    IMD_FileFormat           * pReader;
-    MDDataPoints             * pMDDPoints;
-    MDImage                  * pMDImg;
+    MDDataObjects::IMD_FileFormat           * pReader;
+    MDDataObjects::MDDataPoints             * pMDDPoints;
+    MDDataObjects::MDImage                  * pMDImg;
   // workspace itself
-    MDWorkspace_sptr spMDWs;
+    MDDataObjects::MDWorkspace_sptr spMDWs;
 
-    void createTestWorkspace(IMD_FileFormat *pReader){
+    void createTestWorkspace(MDDataObjects::IMD_FileFormat *pReader){
     // shared pointers are related to the objects, which are referenced within another objects, and auto-pointers -- to the single 
         std::auto_ptr<Geometry::MDGeometryBasis> pBasis;
   
@@ -64,11 +64,11 @@ class MDTestWorkspace
 
         // read test point description 
         //TODO: The test point description is correlated with rebinning algorithm. Decorrelate
-        MDPointDescription pd = pReader->read_pointDescriptions();
+        MDDataObjects::MDPointDescription pd = pReader->read_pointDescriptions();
 
         // create and initate new workspace with data above .
-        spMDWs = MDWorkspace_sptr(new MDWorkspace());
-        spMDWs->init(std::auto_ptr<IMD_FileFormat>(pReader),pBasis,geomDescr,pd);
+        spMDWs = MDDataObjects::MDWorkspace_sptr(new MDDataObjects::MDWorkspace());
+        spMDWs->init(std::auto_ptr<MDDataObjects::IMD_FileFormat>(pReader),pBasis,geomDescr,pd);
 
          pMDImg                    = spMDWs->get_spMDImage().get();
          pMDDPoints                = spMDWs->get_spMDDPoints().get();
@@ -80,13 +80,25 @@ class MDTestWorkspace
 public:
     MDTestWorkspace() {
 		std::auto_ptr<Geometry::MDGeometryDescription> pDs = std::auto_ptr<Geometry::MDGeometryDescription>(new Geometry::MDGeometryDescription(4,3));
-		pReader=new MD_FileTestDataGenerator(pDs.get());
+      // reduce default number of contribured pixels as test will run for ages otherwise;
+        pDs->nContributedPixels = 100*100*100*100; 
+        // decrease the number of bins in the image to accelerate test WS initiation
+        pDs->pDimDescription(0)->nBins = 10;
+        pDs->pDimDescription(1)->nBins = 10;
+        pDs->pDimDescription(2)->nBins = 10;
+        pDs->pDimDescription(3)->nBins = 10;
+		pReader=new MDDataObjects::MD_FileTestDataGenerator(pDs.get());
+
+        createTestWorkspace(pReader);
+    }
+    MDTestWorkspace(const Geometry::MDGeometryDescription &descr) {		
+		pReader=new MDDataObjects::MD_FileTestDataGenerator(&descr);
         createTestWorkspace(pReader);
     }
 
     ~MDTestWorkspace(){
      }
-    MDWorkspace_sptr get_spWS(){return spMDWs;}
+    MDDataObjects::MDWorkspace_sptr get_spWS(){return spMDWs;}
 };
 
 } // end namespaces;

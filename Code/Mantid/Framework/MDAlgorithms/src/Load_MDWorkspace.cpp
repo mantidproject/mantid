@@ -41,6 +41,13 @@ Load_MDWorkspace::init()
 }
 //
 void 
+Load_MDWorkspace::set_test_mode(const Geometry::MDGeometryDescription &testDatasetDescription)
+{
+    test_mode = true;
+    pTestGeometryDescription = std::auto_ptr<Geometry::MDGeometryDescription>(new Geometry::MDGeometryDescription(testDatasetDescription));
+
+}
+void 
 Load_MDWorkspace::exec()
 {
 
@@ -59,7 +66,7 @@ std::string workspaceFileName;
 
    std::auto_ptr<IMD_FileFormat> pFileReader;
    if(test_mode){
-		pFileReader = MD_FileFormatFactory::getFileReader(workspaceFileName.c_str(),test_data);
+		pFileReader = MD_FileFormatFactory::getFileReader(workspaceFileName.c_str(),test_data,pTestGeometryDescription.get());
    }else{
 		if(existsProperty("inFilename")){
 			workspaceFileName = this->getPropertyValue("inFilename");
@@ -105,6 +112,7 @@ std::string workspaceFileName;
 	}
 	// clear test mode if it was eventually set-up above
 	test_mode=false;
+    pTestGeometryDescription.reset();
 }
 } // end namespaces
 }

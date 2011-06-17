@@ -20,6 +20,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
 
@@ -57,7 +58,26 @@ private:
 
     Load_MDWorkspace loader;
     // this will set loader to work with thest file format rather then with real file on HDD
-    // loader.set_test_mode();
+    MDGeometryDescription Descr(4,3);
+    Descr.pDimDescription(0)->Tag="qx";
+    Descr.pDimDescription(0)->cut_min=-6.6;
+    Descr.pDimDescription(0)->cut_max= 6.6;
+    Descr.pDimDescription(1)->Tag="qy";
+    Descr.pDimDescription(1)->cut_min=-6.6;
+    Descr.pDimDescription(1)->cut_max= 6.6;
+
+    Descr.pDimDescription(2)->Tag="qz";
+    Descr.pDimDescription(2)->cut_min=-6.6;
+    Descr.pDimDescription(2)->cut_max= 6.6;
+
+    Descr.pDimDescription(3)->Tag="en";
+    Descr.pDimDescription(3)->cut_min=0;
+    Descr.pDimDescription(3)->cut_max=150;
+
+
+    Descr.nContributedPixels = (1000000);
+    loader.set_test_mode(Descr);
+    // 
     loader.initialize();
     loader.setPropertyValue("inFilename","test_horace_reader.sqw");
     

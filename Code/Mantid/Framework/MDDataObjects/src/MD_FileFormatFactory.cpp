@@ -1,7 +1,7 @@
 #include "MDDataObjects/MD_FileFormatFactory.h"
 // existing file formats
 #include "MDDataObjects/MD_FileHoraceReader.h"
-#include "MDDataObjects/MD_FileTestDataGenerator.h"
+#include "MDDataObjectsTestHelpers/MD_FileTestDataGenerator.h"
 
 #include "MantidKernel/System.h"
 #include <iostream>

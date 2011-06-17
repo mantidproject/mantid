@@ -151,7 +151,7 @@ class MDDPoints_MemManagerTest :    public CxxTest::TestSuite
     size_t ic(0);
     size_t ic_retained(0);
     for(size_t i=0;i<nCells;i++){
-      size_t n_pix = pData[i].npix/2;
+      size_t n_pix =(size_t)(pData[i].npix/2);
       for(size_t j=0;j<n_pix;j++){
         // rebinned pixel
         pPix[ic*9+0]=1;

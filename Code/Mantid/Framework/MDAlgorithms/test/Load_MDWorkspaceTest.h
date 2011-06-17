@@ -34,7 +34,8 @@ class Load_MDWorkspaceTest :    public CxxTest::TestSuite
         // and so this, but file has to be there
         TSM_ASSERT_THROWS_NOTHING("The test file should exist",loader.setPropertyValue("inFilename","test_horace_reader.sqw"));
 		// does not load actual file and use test data instead
-		loader.set_test_mode();
+        Geometry::MDGeometryDescription DefaultGeom(4,3);
+		loader.set_test_mode(DefaultGeom);
       //  TSM_ASSERT_THROWS_NOTHING("The test file should exist",loader.setPropertyValue("inFilename","fe_demo.sqw"));
 		 TSM_ASSERT_THROWS_NOTHING("Requesting loading all pixels in memory should not throw",loader.setPropertyValue("LoadPixels","1"));
      }
