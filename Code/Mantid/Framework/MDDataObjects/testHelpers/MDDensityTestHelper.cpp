@@ -121,7 +121,7 @@ MDDensityHomogeneous::getMDDPointData(size_t cell_index,char *pBuffer,size_t Buf
 
     size_t field_width = sizeof(MDDPoint_t);
     for(size_t i=0;i<nDataPoints;i++){
-      memcpy(pBuffer+i*pix_size,&r[i*4],field_width*this->nDims);
+      memcpy(pBuffer+i*pix_size,&r[i*this->nDims],field_width*this->nDims);
       memcpy(pBuffer+i*pix_size+field_width*this->nDims,&patch[0],field_width*(this->nIndexes+2));
     }
 
