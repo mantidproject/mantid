@@ -56,6 +56,11 @@ class MANTID_GEOMETRY_DLL IndexingUtils
   static double BestFit_UB(Kernel::DblMatrix    & UB,
                            const std::vector<Kernel::V3D>  & hkl_vectors, 
                            const std::vector<Kernel::V3D>  & q_vectors   );
+
+  /// Calculate the number of Q vectors that are mapped to integer indices by UB
+  static int NumberIndexed( const Matrix<double>    & UB,
+                            const std::vector<V3D>  & q_vectors,
+                                  double              tolerance   );
 };
 
 } // namespace Geometry

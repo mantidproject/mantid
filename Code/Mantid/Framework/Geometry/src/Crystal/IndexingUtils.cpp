@@ -137,3 +137,64 @@ double IndexingUtils::BestFit_UB(    DblMatrix & UB,
 
   return sum_sq_error;
 }
+
+/**
+   Calculate the number of Q vectors that are mapped to integer h,k,l 
+   values by UB.  Each of the Miller indexes, h, k and l must be within
+   the specified tolerance of an integer, in order to count the peak
+   as indexed.  Also, if (h,k,l) = (0,0,0) the peak will NOT be counted
+   as indexed, since (0,0,0) is not a valid index of any peak.
+  
+   @param UB           A 3x3 matrix of doubles holding the UB matrix
+   @param q_vectors    std::vector of V3D objects that contains the list of 
+                       q_vectors that are indexed by the corresponding hkl
+                       vectors.
+   @param tolerance    The maximum allowed distance between each component
+                       of UB*Q and the nearest integer value, required to
+                       to count the peak as indexed by UB.
+   @return A non-negative integer giving the number of peaks indexed by UB. 
+  
+   @throws 
+ */
+int IndexingUtils::NumberIndexed( const Matrix<double>    & UB,
+                                  const std::vector<V3D>  & q_vectors,
+                                        double              tolerance )
+{
+  int count = 0;
+
+  if ( UB != 0 || UB.numRows() != 3 || UB.numCols() != 3 )
+  {
+   throw std::invalid_argument("UB matrix NULL or not 3X3");
+  }
+
+  Matrix<double> UB_inverse( UB );
+  double determinant = UB_inverse.Invert();
+  if ( fabs( determinant ) < 1.0e-10 )
+  {
+   throw std::invalid_argument("UB is singular (det < 1e-10)");
+  } 
+
+  V3D hkl;
+  int h,k,l;
+  for ( size_t i = 0; i < q_vectors.size(); i++ )
+  {
+    hkl = UB_inverse * q_vectors[i];
+                                        // since C++ lacks a round() we need
+                                        // to do it ourselves!
+    h = (int)(hkl[0] + (hkl[0] < 0? -0.5 : +0.5)); 
+    k = (int)(hkl[1] + (hkl[1] < 0? -0.5 : +0.5)); 
+    l = (int)(hkl[2] + (hkl[2] < 0? -0.5 : +0.5)); 
+
+    if ( h != 0 || k != 0 || l != 0 )   // check if indexed, but not as (0,0,0)
+    {
+      if ( (fabs( hkl[0] - h ) <= tolerance) &&
+           (fabs( hkl[1] - k ) <= tolerance) &&
+           (fabs( hkl[2] - l ) <= tolerance) )
+      {
+        count++;
+      }
+    }
+  }
+
+  return count;
+}
