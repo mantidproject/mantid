@@ -43,9 +43,9 @@ using Mantid::Kernel::DblMatrix;
                                    the UB matrix can't be calculated or if 
                                    UB is a singular matrix.
 */  
-double IndexingUtils::BestFit_UB(    DblMatrix & UB,
-                                 const std::vector<V3D>    & hkl_vectors, 
-                                 const std::vector<V3D>    & q_vectors )
+double IndexingUtils::BestFit_UB(      DblMatrix         & UB,
+                                 const std::vector<V3D>  & hkl_vectors, 
+                                 const std::vector<V3D>  & q_vectors )
 {
   if ( hkl_vectors.size() < 3 ) 
   {
@@ -156,7 +156,7 @@ double IndexingUtils::BestFit_UB(    DblMatrix & UB,
   
    @throws 
  */
-int IndexingUtils::NumberIndexed( const Matrix<double>    & UB,
+int IndexingUtils::NumberIndexed( const DblMatrix         & UB,
                                   const std::vector<V3D>  & q_vectors,
                                         double              tolerance )
 {
@@ -167,7 +167,7 @@ int IndexingUtils::NumberIndexed( const Matrix<double>    & UB,
    throw std::invalid_argument("UB matrix NULL or not 3X3");
   }
 
-  Matrix<double> UB_inverse( UB );
+  DblMatrix UB_inverse( UB );
   double determinant = UB_inverse.Invert();
   if ( fabs( determinant ) < 1.0e-10 )
   {
