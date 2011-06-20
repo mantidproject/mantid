@@ -99,6 +99,10 @@ protected slots:
   void onColorScaleChange(double min, double max);
 	/// Select the appropriate indicator on the correct axis interactor widget.
 	void selectIndicator();
+  /**
+   * Update the origin position of the currently selected cut.
+   * @param position the origin coordinate to move the emitting slice to
+   */
   void updateCutPosition(double position);
 	/// Move the selected indicator to a given position.
 	void updateSelectedIndicator();

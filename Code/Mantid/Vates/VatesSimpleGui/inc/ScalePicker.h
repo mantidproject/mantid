@@ -75,9 +75,20 @@ public:
    * @param point the x,y coordinates to set the indicator at
    */
   void makeIndicator(const QPoint &point);
+  /**
+   * Signal emitted to make the axis interactor move a slice indicator to
+   * the requested location.
+   * @param value the axis location found by the picker
+   */
   void moved(double value);
 
 public slots:
+  /**
+   * Determine the position on the scale widget of the given scene position.
+   * @param pos the scene position of the emitting indicator
+   * @param coord the coordinate (x or y) to adjust via the scale
+   *              widget bounding rectangle coordinate
+   */
   void determinePosition(const QPoint &pos, int coord);
 
 private:

@@ -260,14 +260,14 @@ void AxisInteractor::setOrientation(Qt::Orientation orient, ScalePos scalePos)
 
 void AxisInteractor::setScalePosition(ScalePos scalePos)
 {
-    if ((scalePos == BottomScale) || (scalePos == TopScale))
-    {
-        this->setOrientation(Qt::Horizontal, scalePos);
-    }
-    else if ((scalePos == LeftScale) || (scalePos == RightScale))
-    {
-        this->setOrientation(Qt::Vertical, scalePos);
-    }
+  if ((scalePos == BottomScale) || (scalePos == TopScale))
+  {
+    this->setOrientation(Qt::Horizontal, scalePos);
+  }
+  else if ((scalePos == LeftScale) || (scalePos == RightScale))
+  {
+    this->setOrientation(Qt::Vertical, scalePos);
+  }
 }
 
 void AxisInteractor::getIndicator()

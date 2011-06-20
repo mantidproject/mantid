@@ -63,7 +63,7 @@ public:
 	/**
 	 * Create the triangle's vertex coordinates.
 	 * @param eloc x,y position of the creation event
-	 * @parm rect location rectangle from the axis widget scale picker
+   * @param rect location rectangle from the axis widget scale picker
 	 */
 	void setPoints(const QPoint &eloc, const QRect &rect);
 	/**
@@ -83,6 +83,13 @@ public:
 	void updatePos(const QPoint &pos);
 
 signals:
+  /**
+   * Signal to pass along scene coordinate for indicator to an associated
+   * axis interactor widget.
+   * @param pos the current scene coordinate of the indicator
+   * @param coord the coordinate (x or y) that is not relevant for the
+   *              axis widget and may be adjusted
+   */
   void indicatorMoved(const QPoint &pos, int coord);
 
 protected:
