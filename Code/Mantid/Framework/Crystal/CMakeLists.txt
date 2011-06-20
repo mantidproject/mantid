@@ -24,6 +24,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	test/AnvredCorrectionTest.h
 	test/LoadIsawUBTest.h
 	test/LoadPeaksFileTest.h
 	test/MaskPeaksWorkspaceTest.h
