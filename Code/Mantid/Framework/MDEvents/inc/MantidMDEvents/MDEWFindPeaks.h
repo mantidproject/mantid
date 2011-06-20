@@ -1,8 +1,11 @@
 #ifndef MANTID_MDEVENTS_MDEWFINDPEAKS_H_
 #define MANTID_MDEVENTS_MDEWFINDPEAKS_H_
     
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h" 
+#include "MantidMDEvents/MDEventWorkspace.h"
 
 namespace Mantid
 {
@@ -35,6 +38,11 @@ namespace MDEvents
     /// Run the algorithm
     void exec();
 
+    template<typename MDE, size_t nd>
+    void findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
+    /// Output PeaksWorkspace
+    Mantid::DataObjects::PeaksWorkspace_sptr peakWS;
 
   };
 

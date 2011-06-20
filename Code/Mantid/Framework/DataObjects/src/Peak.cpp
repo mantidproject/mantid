@@ -39,7 +39,7 @@ namespace DataObjects
    * No detector ID is set.
    *
    * @param m_inst :: Shared pointer to the instrument for this peak detection
-   * @param QLabFrame :: Q of the center of the peak, in reciprocal space
+   * @param QSampleFrame :: Q of the center of the peak, in reciprocal space, in the sample frame (goniometer rotation accounted for).
    * @param goniometer :: a 3x3 rotation matrix
    * @param detectorDistance :: distance between the sample and the detector.
    *        Used to give a valid TOF. Default 1.0 meters.
