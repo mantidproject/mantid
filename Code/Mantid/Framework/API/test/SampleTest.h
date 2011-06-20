@@ -82,6 +82,37 @@ public:
     TS_ASSERT_EQUALS(retLatt.c(), 3.0);
   }
 
+
+  void test_OrientedLattice_and_theCopyconstructor()
+  {
+    Sample sample;
+    const std::string envName("TestKit");
+    OrientedLattice *latt = new OrientedLattice(1.0,2.0,3.0, 90, 90, 90);
+
+    TS_ASSERT_THROWS_NOTHING(sample.setOrientedLattice(latt));
+
+    // Copy constructor
+    Sample sample2(sample);
+
+    // Equals operator
+    Sample sample3;
+    sample3 = sample;
+    TS_ASSERT_EQUALS(sample3.getOrientedLattice().c(), 3.0);
+
+    // Change the lattice in the original (this won't change the copy)
+    sample.getOrientedLattice().seta(4.0);
+    sample.getOrientedLattice().setb(5.0);
+
+    const OrientedLattice & retLatt = sample2.getOrientedLattice();
+    // The copy does NOT refer to the same object
+    TS_ASSERT_DIFFERS(&retLatt, latt);
+    TS_ASSERT_EQUALS(retLatt.a(), 1.0);
+    TS_ASSERT_EQUALS(retLatt.b(), 2.0);
+    TS_ASSERT_EQUALS(retLatt.c(), 3.0);
+
+  }
+
+
   void test_Material_Returns_The_Correct_Value()
   {
     Material *vanBlock = new Material("vanBlock", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072);

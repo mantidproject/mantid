@@ -330,13 +330,15 @@ namespace MDEvents
 
     ws->splitBox();
 
-
     if (!ws)
       throw std::runtime_error("Error creating a 3D MDEventWorkspace!");
 
     BoxController_sptr bc = ws->getBoxController();
     if (!bc)
       throw std::runtime_error("Output MDEventWorkspace does not have a BoxController!");
+
+    // Copy ExperimentInfo (instrument, run, sample) to the output WS
+    ws->copyExperimentInfoFrom(in_ws.get());
 
 
     // ------------------- Cache values that are common for all ---------------------------

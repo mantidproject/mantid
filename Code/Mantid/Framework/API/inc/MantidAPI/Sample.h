@@ -130,8 +130,8 @@ namespace Mantid
       Geometry::Material m_material;
       /// An owned pointer to the SampleEnvironment object
       boost::shared_ptr<SampleEnvironment> m_environment;
-      /// An owned pointer to the OrientedLattice object
-      boost::shared_ptr<OrientedLattice> m_lattice;
+      /// Pointer to the OrientedLattice of the sample, NULL if not set.
+      OrientedLattice * m_lattice;
 
       /// The sample geometry flag
       int m_geom_id;

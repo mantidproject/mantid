@@ -60,7 +60,7 @@ public:
         "OutputDimensions", "HKL");
     TS_ASSERT( !alg->isExecuted() );
 
-    // Let's try again - it will work.
+    // Let's remove the old workspace and try again - it will work.
     AnalysisDataService::Instance().remove("testOutMD");
     alg = AlgorithmHelper::runAlgorithm("MakeDiffractionMDEventWorkspace", 6,
         "InputWorkspace", "testInEW",

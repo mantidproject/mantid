@@ -26,7 +26,6 @@ namespace API
     m_parmap(new ParameterMap()),
     sptr_instrument(new Instrument())
   {
-    // TODO Auto-generated constructor stub
   }
     
   //----------------------------------------------------------------------------------------------
@@ -34,7 +33,19 @@ namespace API
    */
   ExperimentInfo::~ExperimentInfo()
   {
-    // TODO Auto-generated destructor stub
+  }
+
+
+  //---------------------------------------------------------------------------------------
+  /** Copy the experiment info data from another ExperimentInfo instance,
+   * e.g. a MatrixWorkspace.
+   * @param other :: the source from which to copy ExperimentInfo
+   */
+  void ExperimentInfo::copyExperimentInfoFrom(ExperimentInfo * other)
+  {
+    m_sample = other->m_sample;
+    m_run = other->m_run;
+    this->setInstrument(other->getInstrument());
   }
 
 

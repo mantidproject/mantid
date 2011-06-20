@@ -20,6 +20,7 @@ namespace Mantid
      */
     Sample::Sample() : 
       m_name(), m_shape(), m_material(), m_environment(),
+      m_lattice(NULL),
       m_geom_id(0), m_thick(0.0), m_height(0.0), m_width(0.0)
     {
     }
@@ -30,9 +31,13 @@ namespace Mantid
      */
     Sample::Sample(const Sample& copy) :
       m_name(copy.m_name), m_shape(copy.m_shape), m_material(copy.m_material), 
-      m_environment(copy.m_environment), m_geom_id(copy.m_geom_id), m_thick(copy.m_thick), 
+      m_environment(copy.m_environment),
+      m_lattice(NULL),
+      m_geom_id(copy.m_geom_id), m_thick(copy.m_thick),
       m_height(copy.m_height), m_width(copy.m_width)
     {
+      if (copy.m_lattice)
+        m_lattice = new OrientedLattice(copy.getOrientedLattice());
     }
 
     /** Assignment operator 
@@ -51,6 +56,11 @@ namespace Mantid
       m_thick = rhs.m_thick;
       m_height = rhs.m_height;
       m_width = rhs.m_width;
+      if (rhs.m_lattice)
+        m_lattice = new OrientedLattice(rhs.getOrientedLattice());
+      else
+        m_lattice = NULL;
+
       return *this;
     }
   
@@ -169,12 +179,11 @@ namespace Mantid
 
     /** Attach an OrientedLattice onto this sample
      *
-     * @param env :: A pointer to a OrientedLattice. This takes
-     * ownership of the object.
+     * @param env :: A pointer to a OrientedLattice.
      */
     void Sample::setOrientedLattice(OrientedLattice * latt)
     {
-      m_lattice = boost::shared_ptr<OrientedLattice>(latt);
+      m_lattice = latt;
     }
 
     /**

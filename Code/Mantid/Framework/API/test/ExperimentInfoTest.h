@@ -57,6 +57,40 @@ public:
     TS_ASSERT_DELTA( ws.run().getProtonCharge(), 1.234, 0.001);
   }
 
+  void test_copyExperimentInfoFrom()
+  {
+    ExperimentInfo ws;
+    ws.mutableRun().setProtonCharge(1.234);
+    ws.mutableSample().setName("test");
+    ws.mutableSample().setOrientedLattice( new OrientedLattice(1,2,3,90,90,90) );
+    boost::shared_ptr<IInstrument> inst1(new Instrument());
+    inst1->setName("MyTestInst");
+    ws.setInstrument(inst1);
+
+    ExperimentInfo ws2;
+    ws2.copyExperimentInfoFrom( &ws );
+    TS_ASSERT_EQUALS( ws2.sample().getName(), "test" );
+    TS_ASSERT_DELTA( ws2.sample().getOrientedLattice().a(), 1.0, 1e-4);
+    TS_ASSERT_DELTA( ws2.sample().getOrientedLattice().b(), 2.0, 1e-4);
+    TS_ASSERT_DELTA( ws2.sample().getOrientedLattice().c(), 3.0, 1e-4);
+    TS_ASSERT_DELTA( ws2.run().getProtonCharge(), 1.234, 0.001);
+    TS_ASSERT_EQUALS( ws2.getInstrument()->getName(), "MyTestInst");
+
+    // Changing stuff in the original workspace...
+    ws.mutableSample().setName("test1");
+    ws.mutableRun().setProtonCharge(2.345);
+
+    // ... does not change the copied one.
+    TS_ASSERT_EQUALS( ws2.sample().getName(), "test" );
+    TS_ASSERT_DELTA( ws2.run().getProtonCharge(), 1.234, 0.001);
+
+    // The original oriented lattice is ok
+    TS_ASSERT_DELTA( ws.sample().getOrientedLattice().a(), 1.0, 1e-4);
+    TS_ASSERT_DELTA( ws.sample().getOrientedLattice().b(), 2.0, 1e-4);
+    TS_ASSERT_DELTA( ws.sample().getOrientedLattice().c(), 3.0, 1e-4);
+
+  }
+
 
 };
 

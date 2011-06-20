@@ -1,12 +1,13 @@
 #ifndef IMDEVENTWORKSPACE_H_
 #define IMDEVENTWORKSPACE_H_
 
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/ProgressBase.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/ProgressBase.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -23,7 +24,7 @@ namespace API
    * @date Dec 3, 2010
    *
    * */
-  class MANTID_API_DLL IMDEventWorkspace  : public API::Workspace
+  class MANTID_API_DLL IMDEventWorkspace  : public API::Workspace, public API::ExperimentInfo
   {
   public:
 
