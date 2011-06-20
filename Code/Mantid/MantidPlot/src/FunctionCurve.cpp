@@ -63,7 +63,8 @@ FunctionCurve::FunctionCurve(const Mantid::API::IFitFunction* fun,
 	d_function_type(FunctionCurve::Normal),
   d_variable(""), // This indicates that mu::Parser is not used
   d_from(0),
-  d_to(0)
+  d_to(0),
+  m_identifier(fun)
 {
 	setType(Graph::Function);
 

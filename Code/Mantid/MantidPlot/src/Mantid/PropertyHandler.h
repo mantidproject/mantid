@@ -64,6 +64,8 @@ public:
   Mantid::API::CompositeFunction* cfun()const{return m_cf;}
   // Return peak function
   Mantid::API::IPeakFunction* pfun()const{return m_pf;}
+  // Return IFitFunction
+  Mantid::API::IFitFunction* ifun()const{return m_if;}
   // Return the browser item
   QtBrowserItem* item()const{return m_item;}
   // Return the parent handler
@@ -162,7 +164,7 @@ public:
 
   // Plot the function on a graph
   void plot(Graph* g)const;
-  bool hasPlot()const{return m_curve != NULL;}
+  bool& hasPlot() {return m_hasPlot;}
   void replot()const;
   void removePlot();
   void removeAllPlots();
@@ -189,6 +191,7 @@ private:
   double m_base; //< the baseline for a peak
   int m_ci; //< approximate index in the workspace at the peak centre
   mutable FunctionCurve* m_curve;//< the curve to plot the handled function
+  mutable bool m_hasPlot;
 };
 
 #endif /* PROPERTY_HANDLER_H */

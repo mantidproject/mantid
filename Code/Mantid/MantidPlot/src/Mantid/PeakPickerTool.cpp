@@ -841,27 +841,106 @@ void PeakPickerTool::setToolTip(const QString& txt)
  */
 void PeakPickerTool::plotGuess()
 {
-  fitBrowser()->getHandler()->plot(d_graph);
+  PropertyHandler* h = fitBrowser()->getHandler();
+  plotFitFunction(h);
+  h->hasPlot() = true;
   d_graph->replot();
 }
 
 void PeakPickerTool::plotCurrentGuess()
 {
   PropertyHandler* h = fitBrowser()->currentHandler();
+  plotFitFunction(h);
+  h->hasPlot() = true;
+  d_graph->replot();
+  
+}
+
+/**
+ * Plot function
+ */
+void PeakPickerTool::plotFitFunction(PropertyHandler* h)
+{
   if (h)
   {
-    h->plot(d_graph);
-    d_graph->replot();
+    Mantid::API::IFitFunction* iff = h->ifun();
+
+    // check to see if function is already plotted?
+    bool alreadyPlotted = false;
+    FunctionCurve* fc;
+    for (int i = 0; i < d_graph->curves(); i++)
+    {
+      QwtPlotCurve* qwt = d_graph->curve(i);
+      fc = dynamic_cast<FunctionCurve*>(d_graph->curve(i));
+      if (fc)
+        if (fc->getIFitFunctionIdentifier() == h->ifun())
+        {
+          alreadyPlotted = true;
+          break;
+        }
+    }
+  
+    // plot current function guess
+    if (!alreadyPlotted)
+    {
+      fc = new FunctionCurve(
+        h->ifun(),
+        QString::fromStdString(fitBrowser()->groupMember()),//m_browser->workspaceName()),
+        fitBrowser()->workspaceIndex(),
+        h->functionName());
+      fc->setRange(fitBrowser()->startX(),fitBrowser()->endX());
+      fc->loadData();
+      // Graph now owns m_curve. Use m_curve->removeMe() to remove (and delete) from Graph
+      d_graph->insertCurve(fc);
+      connect(fc,SIGNAL(forgetMe(PlotCurve*)),this,SLOT(plotRemoved(PlotCurve*)));
+      if (h == fitBrowser()->getHandler())
+      {
+        fitBrowser()->setTextPlotGuess("Remove guess");
+      }
+    }
   }
 }
+
+
 
 /**
  * Slot. Remove the plot of the i-th function
  */
 void PeakPickerTool::removeGuess()
 {
-  fitBrowser()->getHandler()->removePlot();
+  PropertyHandler* h = fitBrowser()->getHandler();
+  removePlot(h);
+  h->hasPlot() = false;
   d_graph->replot();
+}
+
+void PeakPickerTool::removePlot(PropertyHandler* h)
+{
+  // check to see if function is already plotted?
+  FunctionCurve* fc = 0;
+  int indexForFC = -1;
+  for (int i = 0; i < d_graph->curves(); i++)
+  {
+    QwtPlotCurve* qwt = d_graph->curve(i);
+    fc = dynamic_cast<FunctionCurve*>(d_graph->curve(i));
+    if (fc)
+    {
+      if (fc->getIFitFunctionIdentifier() == h->ifun())
+      {
+        indexForFC = i;
+        break;
+      }
+    }
+  }
+
+  if (indexForFC >= 0)
+  {
+    fc->removeMe();
+    if (h == fitBrowser()->getHandler())
+    {
+      fitBrowser()->setTextPlotGuess("Plot guess");
+    }
+  }
 }
 
 /**
@@ -872,7 +951,8 @@ void PeakPickerTool::removeCurrentGuess()
   PropertyHandler* h = fitBrowser()->currentHandler();
   if (h)
   {
-    h->removePlot();
+    removePlot(h);
+    h->hasPlot() = false;
     d_graph->replot();
   }
 }

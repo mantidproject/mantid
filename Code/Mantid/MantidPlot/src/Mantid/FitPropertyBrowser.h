@@ -153,6 +153,11 @@ public:
   /// Display a tip
   void setTip(const QString& txt);
 
+  /// return groupMember
+  const std::string groupMember() const {return m_groupMember;};
+  /// alter text of Plot Guess 
+  void setTextPlotGuess(const QString text);
+
   /// Creates the "Ties" property value for the Fit algorithm
   QString getTieString()const;
 

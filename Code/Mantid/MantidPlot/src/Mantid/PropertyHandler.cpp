@@ -44,7 +44,8 @@ PropertyHandler::PropertyHandler(Mantid::API::IFitFunction* fun,
                 m_item(item),
                 m_base(0),
                 m_ci(0),
-                m_curve(NULL)
+                m_curve(NULL),
+                m_hasPlot(false)
 {}
 
 /// Destructor

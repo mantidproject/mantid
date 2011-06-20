@@ -123,6 +123,9 @@ private slots:
   void resetRange();
 
 private:
+  void plotFitFunction(PropertyHandler* h);
+  void removePlot(PropertyHandler* h);
+
   virtual void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const;
   // Add a new peak with centre c and height h. 
   void addPeak(double c,double h);

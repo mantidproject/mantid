@@ -2374,3 +2374,7 @@ bool FitPropertyBrowser::plotDiff()const
   return m_boolManager->value(m_plotDiff);
 }
 
+void FitPropertyBrowser::setTextPlotGuess(const QString text) 
+{
+  m_displayActionPlotGuess->setText(text);
+}
