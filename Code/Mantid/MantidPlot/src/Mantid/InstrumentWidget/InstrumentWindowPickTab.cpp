@@ -3,6 +3,7 @@
 #include "OneCurvePlot.h"
 #include "CollapsiblePanel.h"
 #include "InstrumentActor.h"
+#include "ProjectionSurface.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -451,4 +452,14 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   //std::cerr << "x=" << x << std::endl;
   //std::cerr << "l1=" << source->getDistance(*sample) << " l2=" << det->getDistance(*sample) << std::endl;
   //std::cerr << "2th=" << theta2/M_PI*180 << " phi=" << phi/M_PI*180 << std::endl;
+}
+
+void InstrumentWindowPickTab::showEvent (QShowEvent *)
+{
+  ProjectionSurface* surface = mInstrumentDisplay->getSurface();
+  if (surface)
+  {
+    surface->setInteractionModePick();
+  }
+  mInstrumentDisplay->setMouseTracking(true);
 }

@@ -33,6 +33,7 @@ class OneCurvePlot;
 class CollapsiblePanel;
 class InstrumentWindowRenderTab;
 class InstrumentWindowPickTab;
+class InstrumentWindowMaskTab;
 class XIntegrationControl;
 
 // Qt forward declarations
@@ -154,7 +155,7 @@ private slots:
 
 private:
 
-  QFrame * createPickTab(QTabWidget* ControlsTab);
+  //QFrame * createPickTab(QTabWidget* ControlsTab);
   QFrame * createInstrumentTreeTab(QTabWidget* ControlsTab);
 
   void loadSettings();
@@ -188,6 +189,7 @@ private:
 
   InstrumentWindowRenderTab * m_renderTab;
   InstrumentWindowPickTab * m_pickTab;
+  InstrumentWindowMaskTab * m_maskTab;
   XIntegrationControl * m_xIntegration;
 
   bool mViewChanged;                ///< stores whether the user changed the view (so don't automatically change it)

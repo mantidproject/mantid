@@ -48,6 +48,7 @@ protected:
   void keyReleaseEvent(QKeyEvent *);
   void draw();
   void checkGLError(const QString& funName);
+  void leaveEvent (QEvent*);
   
 private:
   void setRenderingOptions();

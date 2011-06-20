@@ -1,4 +1,5 @@
 #include "InstrumentWindowRenderTab.h"
+#include "ProjectionSurface.h"
 
 #include <QMenu>
 #include <QVBoxLayout>
@@ -206,4 +207,13 @@ void InstrumentWindowRenderTab::showAxes(bool on)
   m_displayAxes->blockSignals(true);
   m_displayAxes->setChecked(on);
   m_displayAxes->blockSignals(false);
+}
+
+void InstrumentWindowRenderTab::showEvent (QShowEvent *)
+{
+  ProjectionSurface* surface = m_InstrumentDisplay->getSurface();
+  if (surface)
+  {
+    surface->setInteractionModeMove();
+  }
 }

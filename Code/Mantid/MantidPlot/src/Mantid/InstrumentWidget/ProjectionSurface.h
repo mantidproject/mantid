@@ -4,14 +4,14 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 #include "MantidGeometry/IComponent.h"
+
 #include "InstrumentActor.h"
-#include <boost/shared_ptr.hpp>
+#include "Shape2DCollection.h"
 
 #include <QImage>
 #include <QList>
 #include <QStack>
-#include <QSet>
-#include <QMap>
+#include <QColor>
 
 namespace Mantid{
   namespace Geometry{
@@ -39,7 +39,7 @@ class ProjectionSurface: public QObject
 {
   Q_OBJECT
 public:
-  enum InteractionMode {MoveMode = 0, PickMode = 1}; ///< Move around or select things
+  enum InteractionMode {MoveMode = 0, PickMode = 1, DrawMode}; ///< Move around or select things
 
   ProjectionSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
   virtual ~ProjectionSurface();
@@ -51,14 +51,18 @@ public:
   virtual void updateView();
   /// full update and redraw of the surface
   virtual void updateDetectors();
+  /// returns the bounding rectangle in the real coordinates
+  virtual QRectF getSurfaceBounds()const{return m_viewRect;} 
 
-  virtual void mousePressEvent(QMouseEvent* event);
+  virtual void mousePressEvent(QMouseEvent*);
   virtual void mouseMoveEvent(QMouseEvent*);
   virtual void mouseReleaseEvent(QMouseEvent*);
   virtual void wheelEvent(QWheelEvent *);
+  virtual void keyPressEvent(QKeyEvent*);
 
   void setInteractionModeMove();
   void setInteractionModePick();
+  void setInteractionModeDraw();
   InteractionMode getInteractionMode()const{return m_interactionMode;}
 
   /// start selection at a point on the screen
@@ -83,21 +87,29 @@ public:
   /// Unzoom view to the previous zoom area or to full view
   virtual void unzoom();
 
+  // --- Shape2D manipulation --- //
+
+  void startCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor = QColor());
+
 signals:
 
   void singleDetectorTouched(int);
   void singleDetectorPicked(int);
   void multipleDetectorsSelected(QList<int>&);
 
+  void shapeCreated();
+
 protected slots:
 
   void colorMapChanged();
+  void catchShapeCreated();
 
 protected:
   virtual void init() = 0;
   virtual void drawSurface(MantidGLWidget* widget,bool picking = false)const = 0;
   /// Respond to a change of color map in m_instrActor
   virtual void changeColorMap() = 0;
+
   virtual void mousePressEventMove(QMouseEvent*){}
   virtual void mouseMoveEventMove(QMouseEvent*){}
   virtual void mouseReleaseEventMove(QMouseEvent*){}
@@ -107,6 +119,12 @@ protected:
   virtual void mouseMoveEventPick(QMouseEvent*);
   virtual void mouseReleaseEventPick(QMouseEvent*);
   virtual void wheelEventPick(QWheelEvent*);
+
+  virtual void mousePressEventDraw(QMouseEvent*);
+  virtual void mouseMoveEventDraw(QMouseEvent*);
+  virtual void mouseReleaseEventDraw(QMouseEvent*);
+  virtual void wheelEventDraw(QWheelEvent*);
+  virtual void keyPressEventDraw(QKeyEvent*);
 
   void draw(MantidGLWidget* widget,bool picking)const;
   void clear();
@@ -129,6 +147,8 @@ protected:
   QStack<QRectF> m_zoomStack;
   InteractionMode m_interactionMode;
   bool m_leftButtonDown;
+
+  Shape2DCollection m_maskShapes;
 };
 
 #endif // PROJECTIONSURFACE_H

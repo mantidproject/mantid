@@ -571,3 +571,8 @@ QString UnwrappedSurface::getInfoText()const
   QString text = "Left mouse click and drag to zoom in.\nRight mouse click to zoom out.";
   return text;
 }
+
+QRectF UnwrappedSurface::getSurfaceBounds()const
+{
+  return QRectF(m_viewRect.left(),m_viewRect.bottom(),m_viewRect.width(),-m_viewRect.height());
+}

@@ -36,6 +36,7 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
     m_leftButtonDown(false)
 {
   connect(rootActor,SIGNAL(colorMapChanged()),this,SLOT(colorMapChanged()));
+  connect(&m_maskShapes,SIGNAL(shapeCreated()),this,SLOT(catchShapeCreated()));
 }
 
 ProjectionSurface::~ProjectionSurface()
@@ -111,14 +112,24 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
 
     if (!picking)
     {
-      widget->swapBuffers();
+      QPainter painter(widget);
+      QRectF windowRect = getSurfaceBounds();
+      m_maskShapes.setWindow(windowRect,painter.viewport());
+      m_maskShapes.draw(painter);
+      painter.end();
     }
     m_viewChanged = false;
+
   }
   else if (!picking)
   {
     QPainter painter(widget);
     painter.drawImage(0,0,**image);
+
+    QRectF windowRect = getSurfaceBounds();
+    m_maskShapes.setWindow(windowRect,painter.viewport());
+    m_maskShapes.draw(painter);
+
     // draw the selection rectangle
     if (!m_selectRect.isNull())
     {
@@ -132,49 +143,51 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
 
 void ProjectionSurface::mousePressEvent(QMouseEvent* e)
 {
-  if (m_interactionMode == MoveMode)
+  switch(m_interactionMode)
   {
-    this->mousePressEventMove(e);
-  }
-  else
-  {
-    this->mousePressEventPick(e);
+  case MoveMode: this->mousePressEventMove(e); break;
+  case PickMode: this->mousePressEventPick(e); break;
+  case DrawMode: this->mousePressEventDraw(e); break;
   }
 }
 
 void ProjectionSurface::mouseMoveEvent(QMouseEvent* e)
 {
-  if (m_interactionMode == MoveMode)
+  switch(m_interactionMode)
   {
-    this->mouseMoveEventMove(e);
-  }
-  else
-  {
-    this->mouseMoveEventPick(e);
+  case MoveMode: this->mouseMoveEventMove(e); break;
+  case PickMode: this->mouseMoveEventPick(e); break;
+  case DrawMode: this->mouseMoveEventDraw(e); break;
   }
 }
 
 void ProjectionSurface::mouseReleaseEvent(QMouseEvent* e)
 {
-  if (m_interactionMode == MoveMode)
+  switch(m_interactionMode)
   {
-    this->mouseReleaseEventMove(e);
-  }
-  else
-  {
-    this->mouseReleaseEventPick(e);
+  case MoveMode: this->mouseReleaseEventMove(e); break;
+  case PickMode: this->mouseReleaseEventPick(e); break;
+  case DrawMode: this->mouseReleaseEventDraw(e); break;
   }
 }
 
 void ProjectionSurface::wheelEvent(QWheelEvent* e)
 {
-  if (m_interactionMode == MoveMode)
+  switch(m_interactionMode)
   {
-    this->wheelEventMove(e);
+  case MoveMode: this->wheelEventMove(e); break;
+  case PickMode: this->wheelEventPick(e); break;
+  case DrawMode: this->wheelEventDraw(e); break;
   }
-  else
+}
+
+void ProjectionSurface::keyPressEvent(QKeyEvent* e)
+{
+  switch(m_interactionMode)
   {
-    this->wheelEventPick(e);
+  case MoveMode: break;
+  case PickMode: break;
+  case DrawMode: this->keyPressEventDraw(e); break;
   }
 }
 
@@ -217,6 +230,32 @@ void ProjectionSurface::mouseReleaseEventPick(QMouseEvent* e)
 void ProjectionSurface::wheelEventPick(QWheelEvent*)
 {
 }
+
+void ProjectionSurface::mousePressEventDraw(QMouseEvent* e)
+{
+  m_maskShapes.mousePressEvent(e);
+}
+
+void ProjectionSurface::mouseMoveEventDraw(QMouseEvent* e)
+{
+  m_maskShapes.mouseMoveEvent(e);
+}
+
+void ProjectionSurface::mouseReleaseEventDraw(QMouseEvent* e)
+{
+  m_maskShapes.mouseReleaseEvent(e);
+}
+
+void ProjectionSurface::wheelEventDraw(QWheelEvent* e)
+{
+  m_maskShapes.wheelEvent(e);
+}
+
+void ProjectionSurface::keyPressEventDraw(QKeyEvent* e)
+{
+  m_maskShapes.keyPressEvent(e);
+}
+
 
 void ProjectionSurface::startSelection(int x,int y)
 {
@@ -365,11 +404,18 @@ void ProjectionSurface::colorMapChanged()
 void ProjectionSurface::setInteractionModePick()
 {
   m_interactionMode = PickMode;
+  m_maskShapes.deselectAll();
 }
 
 void ProjectionSurface::setInteractionModeMove()
 {
   m_interactionMode = MoveMode;
+  m_maskShapes.deselectAll();
+}
+
+void ProjectionSurface::setInteractionModeDraw()
+{
+  m_interactionMode = DrawMode;
 }
 
 /**
@@ -407,4 +453,16 @@ QString ProjectionSurface::getPickInfoText()const
 {
   return "Move cursor over instrument to see detector information.\n"
     "Left click and drag to select multiple detectors.";
+}
+
+  // --- Shape2D manipulation --- //
+
+void ProjectionSurface::startCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor)
+{
+  m_maskShapes.startCreatingShape2D(type,borderColor,fillColor);
+}
+
+void ProjectionSurface::catchShapeCreated()
+{
+  emit shapeCreated();
 }

@@ -385,3 +385,10 @@ QString Projection3D::getInfoText()const
   }
   return text;
 }
+
+QRectF Projection3D::getSurfaceBounds()const
+{
+  double xmin,xmax,ymin,ymax,zmin,zmax;
+  m_viewport->getInstantProjection(xmin,xmax,ymin,ymax,zmin,zmax);
+  return QRectF(QPointF(xmin,ymin),QPointF(xmax,ymax));
+}

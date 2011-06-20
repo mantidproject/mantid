@@ -67,6 +67,7 @@ public:
   void componentSelected(Mantid::Geometry::ComponentID = NULL);
   void getSelectedDetectors(QList<int>& dets);
   virtual QString getInfoText()const;
+  virtual QRectF getSurfaceBounds()const;
 
 protected:
   virtual void drawSurface(MantidGLWidget* widget,bool picking = false)const;

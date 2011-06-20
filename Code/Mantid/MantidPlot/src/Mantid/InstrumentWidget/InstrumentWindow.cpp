@@ -1,6 +1,7 @@
 #include "InstrumentWindow.h"
 #include "InstrumentWindowRenderTab.h"
 #include "InstrumentWindowPickTab.h"
+#include "InstrumentWindowMaskTab.h"
 #include "XIntegrationControl.h"
 #include "InstrumentActor.h"
 #include "UnwrappedCylinder.h"
@@ -61,7 +62,6 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
   // Create the display widget
-  //mInstrumentDisplay = new Instrument3DWidget(this);
   m_InstrumentDisplay = new MantidGLWidget(this);
   controlPanelLayout->addWidget(m_InstrumentDisplay);
   mainLayout->addWidget(controlPanelLayout);
@@ -84,6 +84,10 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   // Pick controls
   m_pickTab = new InstrumentWindowPickTab(this);
   mControlsTab->addTab( m_pickTab, QString("Pick"));
+
+  // Mask controls
+  m_maskTab = new InstrumentWindowMaskTab(this);
+  mControlsTab->addTab( m_maskTab, QString("Mask"));
 
   // Instrument tree controls
   QFrame* instrumentTree=createInstrumentTreeTab(mControlsTab);
@@ -202,8 +206,9 @@ void InstrumentWindow::setSurfaceType(int type)
       surface = new UnwrappedSphere(m_instrumentActor,sample_pos,axis);
     }
     m_InstrumentDisplay->setSurface(surface);
-    //set3DAxesState(m_renderTab->areAxesOn());
     m_InstrumentDisplay->update();
+    m_maskTab->init();
+
     connect(surface,SIGNAL(singleDetectorTouched(int)),this,SLOT(singleDetectorTouched(int)));
     connect(surface,SIGNAL(singleDetectorPicked(int)),this,SLOT(singleDetectorPicked(int)));
     connect(surface,SIGNAL(multipleDetectorsSelected(QList<int>&)),this,SLOT(multipleDetectorsSelected(QList<int>&)));
@@ -248,23 +253,23 @@ void InstrumentWindow::tabChanged(int i)
   QString text;
   if (i == 1) // picking
   {
-    if (surface)
-    {
-      surface->setInteractionModePick();
-    }
-    m_InstrumentDisplay->setMouseTracking(true);
+    //if (surface)
+    //{
+    //  surface->setInteractionModePick();
+    //}
+    //m_InstrumentDisplay->setMouseTracking(true);
   }
   else // no picking
   {
     if (surface)
     {
-      surface->setInteractionModeMove();
+      //surface->setInteractionModeMove();
       if (i == 0)
       {
         surface->componentSelected();
       }
     }
-    m_InstrumentDisplay->setMouseTracking(false);
+    //m_InstrumentDisplay->setMouseTracking(false);
   }
   if (surface)
   {

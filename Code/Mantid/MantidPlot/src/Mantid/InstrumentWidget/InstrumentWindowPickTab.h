@@ -36,6 +36,7 @@ private slots:
   void setSelectionType();
   void addPeak(double,double);
 private:
+  void showEvent (QShowEvent *);
   void updatePlot(int detid);
   void updateSelectionInfo(int detid);
   void plotSingle(int detid);

@@ -26,6 +26,7 @@
 //1) if the sample buffers are not available then the paint of image on the mdi windows
 //   seems to not work on intel chipset
 
+const Qt::CursorShape cursorShape = Qt::ArrowCursor;
 
 MantidGLWidget::MantidGLWidget(QWidget* parent):
   QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel|QGL::SampleBuffers),parent),
@@ -69,7 +70,7 @@ void MantidGLWidget::setSurface(ProjectionSurface* surface)
  */
 void MantidGLWidget::initializeGL()
 {
-  setCursor(Qt::PointingHandCursor); // This is to set the initial window mouse cursor to Hand icon
+  setCursor(cursorShape); // This is to set the initial window mouse cursor to Hand icon
   
   // Set the relevant OpenGL rendering options
   setRenderingOptions();
@@ -260,7 +261,11 @@ void MantidGLWidget::wheelEvent(QWheelEvent* event)
  */
 void MantidGLWidget::keyPressEvent(QKeyEvent *event)
 {
-  UNUSED_ARG(event)
+  if (m_surface)
+  {
+    m_surface->keyPressEvent(event);
+  }
+  update();
 }
 
 /**
@@ -270,7 +275,7 @@ void MantidGLWidget::keyPressEvent(QKeyEvent *event)
 void MantidGLWidget::keyReleaseEvent(QKeyEvent *event)
 {
   releaseKeyboard();
-  setCursor(Qt::PointingHandCursor);
+  setCursor(cursorShape);
   m_isKeyPressed=false;
   if(!event->isAutoRepeat())
   {
@@ -365,10 +370,15 @@ void MantidGLWidget::componentSelected(Mantid::Geometry::ComponentID id)
 
 void MantidGLWidget::refreshView()
 {
-  //if( m_interactionMode == PickMode) //This is when in picking mode and the window is resized so update the image
-  //{
-    //mPickingDraw=true;
-  //}
   m_surface->updateView();
   update();
+}
+
+void MantidGLWidget::leaveEvent (QEvent*)
+{
+  // Restore possible override cursor
+  while(QApplication::overrideCursor())
+  {
+    QApplication::restoreOverrideCursor();
+  }
 }

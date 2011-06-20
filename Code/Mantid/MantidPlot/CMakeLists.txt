@@ -195,6 +195,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindow.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowPickTab.cpp
+                   src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.cpp
                    src/Mantid/InstrumentWidget/MantidColorMap.cpp
                    src/Mantid/InstrumentWidget/MantidGLWidget.cpp
                    src/Mantid/InstrumentWidget/ColorMapWidget.cpp
@@ -211,6 +212,8 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/CollapsiblePanel.cpp
                    src/Mantid/InstrumentWidget/DetSelector.cpp
                    src/Mantid/InstrumentWidget/XIntegrationControl.cpp
+                   src/Mantid/InstrumentWidget/Shape2D.cpp
+                   src/Mantid/InstrumentWidget/Shape2DCollection.cpp
 )
 
 ###########################################################################
@@ -406,6 +409,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/InstrumentWindow.h
                    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
                    src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
+                   src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h
                    src/Mantid/InstrumentWidget/MantidColorMap.h
                    src/Mantid/InstrumentWidget/MantidGLWidget.h
                    src/Mantid/InstrumentWidget/ColorMapWidget.h
@@ -422,6 +426,8 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/CollapsiblePanel.h
                    src/Mantid/InstrumentWidget/DetSelector.h
                    src/Mantid/InstrumentWidget/XIntegrationControl.h
+                   src/Mantid/InstrumentWidget/Shape2D.h
+                   src/Mantid/InstrumentWidget/Shape2DCollection.h
 )
 
 ###########################################################################
@@ -656,12 +662,14 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
                        src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
                        src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
+                       src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h
                        src/Mantid/InstrumentWidget/ColorMapWidget.h
                        src/Mantid/InstrumentWidget/MantidGLWidget.h
                        src/Mantid/InstrumentWidget/OneCurvePlot.h
                        src/Mantid/InstrumentWidget/CollapsiblePanel.h
                        src/Mantid/InstrumentWidget/InstrumentActor.h
                        src/Mantid/InstrumentWidget/ProjectionSurface.h
+                       src/Mantid/InstrumentWidget/Shape2DCollection.h
 )
 
 set ( UI_FILES src/Mantid/FirstTimeSetup.ui

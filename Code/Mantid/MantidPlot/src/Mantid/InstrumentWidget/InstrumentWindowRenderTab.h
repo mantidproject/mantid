@@ -41,6 +41,8 @@ private slots:
   void changeColormap(const QString & filename = "");
   void showResetView(int);
 private:
+  void showEvent (QShowEvent *);
+
   QFrame * setupAxisFrame();
 
   InstrumentWindow* m_instrWindow;
