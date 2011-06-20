@@ -519,8 +519,6 @@ namespace Mantid
       m_cacheLocMap.clear();
       m_cacheRotMap.clear();
       m_boundingBoxMap.clear();
-      //TODO: How to re-enable this??? m_nearestNeighbours.reset();
-#warning It might be needed to re-enable a m_nearestNeighbours.reset() call here, somehow! Janik
     }
  
     ///Sets a cached location on the location cache
