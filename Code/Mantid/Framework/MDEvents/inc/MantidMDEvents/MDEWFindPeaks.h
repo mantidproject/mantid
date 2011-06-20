@@ -44,6 +44,12 @@ namespace MDEvents
     /// Output PeaksWorkspace
     Mantid::DataObjects::PeaksWorkspace_sptr peakWS;
 
+    /// Estimated radius of peaks. Boxes closer than this are rejected
+    coord_t peakRadiusSquared;
+
+    /// Thresholding factor
+    double DensityThresholdFactor;
+
   };
 
 

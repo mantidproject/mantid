@@ -287,9 +287,17 @@ namespace MDEvents
     /** Return the centroid of the box.
      * @param d :: index of the dimension to return.
      */
-    coord_t getCentroid(size_t d)
+    coord_t getCentroid(size_t d) const
     {
       return m_centroid[d];
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Return the centroid array of the box.
+     */
+    const coord_t * getCentroid() const
+    {
+      return m_centroid;
     }
 
   protected:

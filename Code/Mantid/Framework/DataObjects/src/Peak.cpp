@@ -52,7 +52,7 @@ namespace DataObjects
     m_InverseGoniometerMatrix(goniometer),
     m_RunNumber(0)
   {
-    if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Goniometer matrix must non-singular.");
+    if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Peak::ctor(): Goniometer matrix must non-singular.");
     this->setInstrument(m_inst);
     this->setQSampleFrame(QSampleFrame, detectorDistance);
   }
@@ -118,7 +118,7 @@ namespace DataObjects
     m_InverseGoniometerMatrix(goniometer),
     m_RunNumber(0)
   {
-    if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Goniometer matrix must non-singular.");
+    if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Peak::ctor(): Goniometer matrix must non-singular.");
     this->setInstrument(m_inst);
     this->setDetectorID(m_DetectorID);
     this->setWavelength(m_Wavelength);
@@ -173,7 +173,7 @@ namespace DataObjects
   m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
   m_RunNumber(ipeak.getRunNumber())
   {
-    if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Goniometer matrix must non-singular.");
+    if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Peak::ctor(): Goniometer matrix must non-singular.");
     setInstrument(ipeak.getInstrument());
     detid_t id = ipeak.getDetectorID();
     if (id >= 0)
@@ -217,15 +217,15 @@ namespace DataObjects
   void Peak::setInstrument(Mantid::Geometry::IInstrument_const_sptr inst)
   {
     m_inst = inst;
-    if (!inst) throw std::runtime_error("No instrument is set!");
+    if (!inst) throw std::runtime_error("Peak::setInstrument(): No instrument is set!");
 
     // Cache some positions
     const Geometry::IObjComponent_sptr sourceObj = m_inst->getSource();
     if (sourceObj == NULL)
-      throw Exception::InstrumentDefinitionError("Failed to get source component from instrument");
+      throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed to get source component from instrument");
     const Geometry::IObjComponent_sptr sampleObj = m_inst->getSample();
     if (sampleObj == NULL)
-      throw Exception::InstrumentDefinitionError("Failed to get sample component from instrument");
+      throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed to get sample component from instrument");
 
     sourcePos = sourceObj->getPos();
     samplePos = sampleObj->getPos();
@@ -239,9 +239,9 @@ namespace DataObjects
   void Peak::setDetectorID(int m_DetectorID)
   {
     this->m_DetectorID = m_DetectorID;
-    if (!m_inst) throw std::runtime_error("No instrument is set!");
+    if (!m_inst) throw std::runtime_error("Peak::setInstrument(): No instrument is set!");
     this->m_det = m_inst->getDetector(this->m_DetectorID);
-    if (!m_det) throw std::runtime_error("No detector was found!");
+    if (!m_det) throw std::runtime_error("Peak::setInstrument(): No detector was found!");
 
     detPos = m_det->getPos();
 
@@ -568,11 +568,11 @@ namespace DataObjects
   void Peak::setGoniometerMatrix(Mantid::Kernel::Matrix<double> goniometerMatrix)
   {
     if ((goniometerMatrix.numCols() != 3) || (goniometerMatrix.numRows() != 3))
-      throw std::invalid_argument("Goniometer matrix must be 3x3.");
+      throw std::invalid_argument("Peak::setGoniometerMatrix(): Goniometer matrix must be 3x3.");
     this->m_GoniometerMatrix = goniometerMatrix;
     // Calc the inverse rotation matrix
     m_InverseGoniometerMatrix = m_GoniometerMatrix;
-    if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Goniometer matrix must non-singular.");
+    if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Peak::setGoniometerMatrix(): Goniometer matrix must non-singular.");
   }
 
 

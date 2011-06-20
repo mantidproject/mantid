@@ -89,7 +89,6 @@ public:
     mess << num << ", " << x << ", " << y << ", " << z << ", " << radius;
     AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
         "InputWorkspace", "MDEWPeakIntegrationTest_MDEWS", "PeakParams", mess.str().c_str());
-
   }
 
 
