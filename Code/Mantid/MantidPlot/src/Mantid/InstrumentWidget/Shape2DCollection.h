@@ -39,8 +39,8 @@ signals:
   void shapeCreated();
 
 protected:
-  virtual void drawShape(QPainter& painter) const{} // never called
-  virtual void addToPath(QPainterPath& path) const{}
+  virtual void drawShape(QPainter& ) const{} // never called
+  virtual void addToPath(QPainterPath& ) const{}
   virtual void refit();
   virtual void adjustBoundingRect();
 

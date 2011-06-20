@@ -7,6 +7,8 @@
 
 #include <iostream>
 #include <algorithm>
+#include <stdexcept>
+#include <cmath>
 
 // number of control points common for all shapes
 const size_t Shape2D::NCommonCP = 4;

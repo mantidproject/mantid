@@ -42,8 +42,8 @@ public:
   void setFillColor(const QColor& color){m_fill_color = color;}
   void edit(bool on){m_editing = on;}
   bool isEditing()const{return m_editing;}
-  virtual bool selectAt(const QPointF& p)const{return false;}
-  virtual bool contains(const QPointF& p)const{return false;}
+  virtual bool selectAt(const QPointF& )const{return false;}
+  virtual bool contains(const QPointF& )const{return false;}
 
 protected:
   virtual void drawShape(QPainter& painter) const = 0;
@@ -51,9 +51,9 @@ protected:
   // return number of control points specific to this shape
   virtual size_t getShapeNControlPoints() const{return 0;}
   // returns position of a shape specific control point, 0 < i < getShapeNControlPoints()
-  virtual QPointF getShapeControlPoint(size_t i) const{return QPointF();}
+  virtual QPointF getShapeControlPoint(size_t ) const{return QPointF();}
   // sets position of a shape specific control point, 0 < i < getShapeNControlPoints()
-  virtual void setShapeControlPoint(size_t i,const QPointF& pos){}
+  virtual void setShapeControlPoint(size_t ,const QPointF& ){}
   // make sure the bounding box is correct
   virtual void adjustBoundingRect() {}
 
@@ -104,7 +104,7 @@ public:
   virtual bool contains(const QPointF& p)const;
 protected:
   virtual void drawShape(QPainter& painter) const;
-  virtual void addToPath(QPainterPath& path) const {}
+  virtual void addToPath(QPainterPath& ) const {}
   virtual void refit();
   virtual void adjustBoundingRect();
   virtual size_t getShapeNControlPoints() const{return 4;}

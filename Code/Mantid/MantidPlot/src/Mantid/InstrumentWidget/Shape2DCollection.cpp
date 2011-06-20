@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <cmath>
 
 Shape2DCollection::Shape2DCollection():
 Shape2D(),
@@ -207,7 +208,7 @@ Shape2D* Shape2DCollection::createShape(const QString& type,int x,int y) const
     return new Shape2DRing(child);
   }
 
-  throw std::invalid_argument("Shape " + type + " cannot be created");
+  throw std::invalid_argument("Shape " + type.toStdString() + " cannot be created");
 
 }
 
@@ -262,7 +263,8 @@ bool Shape2DCollection::selectControlPointAt(int x,int y)
   for(size_t i = 0; i < m_currentShape->getNControlPoints(); ++i)
   {
     QPointF cp = m_currentShape->getControlPoint(i) - p;
-    if (cp.manhattanLength() <= sizeCP + 2)
+    if (fabs(cp.x()) + fabs(cp.y()) <= sizeCP + 2)
+    //if (cp.manhattanLength() <= sizeCP + 2)
     {
       m_currentCP = i;
       return true;
