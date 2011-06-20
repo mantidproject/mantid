@@ -17,8 +17,11 @@
 #include <sstream>
 
 using namespace Mantid::API;
-
-
+namespace Mantid
+{
+  namespace CurveFitting
+  {
+DECLARE_FUNCTION(BivariateNormal)
 //Indicies into the Attrib array
 int StartRow = 0;
 int StartCol = 1;
@@ -116,12 +119,13 @@ void BivariateNormal::function(double *out, const double *xValues, const size_t 
 
 void BivariateNormal::setParameter(const std::string& name, const double& value, bool explicitlySet )
 {
-
+  std::cout<<"Set Param "<<name<<"="<<value<<std::endl;
   API::ParamFunction::setParameter( name, value, explicitlySet);
   initCommon();
 }
 void BivariateNormal::setParameter(int i , const double& value, bool explicitlySet )
      {
+       std::cout<<"set Param i="<<i<<std::endl;
        API::ParamFunction::setParameter( i, value, explicitlySet);
        initCommon();
      }
@@ -381,9 +385,11 @@ void BivariateNormal::setAttribute(const std::string &attName,
   }
 
   SIxx = -1;
+   std::cout<<"Attr set "<<attName<<","<<I<<std::endl;
   if (I >= 0)
   {
     Attrib[I] = att.asDouble();
+    initCommon();
     return;
   }
 
@@ -404,4 +410,5 @@ bool BivariateNormal::hasAttribute(const std::string &attName) const
 
   return false;
 }
-
+}//namespace curveFitting
+}//namespaceMantid

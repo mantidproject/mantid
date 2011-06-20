@@ -8,9 +8,11 @@
 //#include "MantidCurveFitting/UserFunction.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
-using namespace Mantid::CurveFitting;
-using namespace Mantid; 
-  
+ namespace Mantid
+{
+  namespace CurveFitting
+{
+   
     /**
     Provide peak shape function interface a Peak shape on one time slice of a
     RectangularDetector.
@@ -76,7 +78,7 @@ using namespace Mantid;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    
+
     
    class  DLLExport  BivariateNormal: public API::ParamFunction, public API::IFunctionMW
     {
@@ -158,7 +160,7 @@ using namespace Mantid;
       BoundaryConstraint *IntensityConstraint;
 
     };
-
-
+}
+}
 
 #endif
