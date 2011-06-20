@@ -59,6 +59,10 @@ namespace MDEvents
         "This should be some multiple of the radius of a peak."
         );
 
+    declareProperty(new PropertyWithValue<int64_t>("MaxPeaks",1000,Direction::Input),
+        "Maximum number of peaks to find."
+        );
+
     declareProperty(new PropertyWithValue<double>("DensityThresholdFactor", 1.0, Direction::Input),
         "The overall signal density of the workspace will be multiplied by this factor "
         "to get a threshold signal density below which boxes are NOT considered to be peaks. See the help."
@@ -76,6 +80,8 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void MDEWFindPeaks::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
+    prog->report("Refreshing Centroids");
+
     // TODO: This might be slow, progress report?
     // Make sure all centroids are fresh
     ws->getBox()->refreshCentroid();
@@ -88,11 +94,13 @@ namespace MDEvents
     // Calculate a threshold below which a box is too diffuse to be considered a peak.
     signal_t thresholdDensity = 0.0;
     thresholdDensity = ws->getBox()->getSignalNormalized() * DensityThresholdFactor;
-    g_log.information() << "Threshold signal density: " << thresholdDensity << std::endl;
+    g_log.notice() << "Threshold signal density: " << thresholdDensity << std::endl;
 
     // We will fill this vector with pointers to all the boxes (up to a given depth)
     typename std::vector<boxPtr> boxes;
+
     // TODO: Don't go to unlimited depth maybe in the future?
+    prog->report("Getting Boxes");
     ws->getBox()->getBoxes(boxes, 1000);
 
     // TODO: Here keep only the boxes > e.g. 3 * mean.
@@ -101,29 +109,30 @@ namespace MDEvents
     // Map that will sort the boxes by increasing density. The key = density; value = box *.
     typename std::multimap<double, boxPtr> sortedBoxes;
 
+    prog->report("Sorting Boxes by Density");
     typename std::vector<boxPtr>::iterator it1;
     typename std::vector<boxPtr>::iterator it1_end = boxes.end();
     for (it1 = boxes.begin(); it1 != it1_end; it1++)
     {
       boxPtr box = *it1;
       double density = box->getSignalNormalized();
-      sortedBoxes.insert(dens_box(density,box));
+      // Skip any boxes with too small a signal density.
+      if (density > thresholdDensity)
+        sortedBoxes.insert(dens_box(density,box));
     }
 
     // List of chosen possible peak boxes.
     std::vector<boxPtr> peakBoxes;
 
+    prog->report("Evaluating Strong Boxes");
+    int64_t numBoxesFound = 0;
     // Now we go (backwards) through the map
     // e.g. from highest density down to lowest density.
     typename std::multimap<double, boxPtr>::reverse_iterator it2;
     typename std::multimap<double, boxPtr>::reverse_iterator it2_end = sortedBoxes.rend();
     for (it2 = sortedBoxes.rbegin(); it2 != it2_end; it2++)
     {
-      // Stop as soon as you hight the first box with too small a signal density.
       signal_t density = it2->first;
-      if (density <= thresholdDensity)
-        break;
-
       boxPtr box = it2->second;
       const coord_t * boxCenter = box->getCentroid();
 
@@ -151,11 +160,18 @@ namespace MDEvents
       // The box was not rejected for another reason.
       if (!badBox)
       {
+        if (numBoxesFound++ > MaxPeaks)
+        {
+          g_log.notice() << "Number of peaks found exceeded the limit of " << MaxPeaks << ". Stopping peak finding." << std::endl;
+          break;
+        }
+
         peakBoxes.push_back(box);
         g_log.information() << "Found box at " << boxCenter[0] << "," << boxCenter[1] << "," << boxCenter[2] << "; Density = " << density << std::endl;
       }
     }
 
+    prog->report("Making PeaksWorkspace");
     // --- Convert the "boxes" to peaks ----
     for (typename std::vector<boxPtr>::iterator it3=peakBoxes.begin(); it3 != peakBoxes.end(); it3++)
     {
@@ -164,17 +180,17 @@ namespace MDEvents
       V3D Q(box->getCentroid(0), box->getCentroid(1), box->getCentroid(2));
 
       // Create a peak and add it
-      Peak p(inst, Q);
-      // The "bin count" used will be the box density.
-      p.setBinCount( box->getSignalNormalized() );
       try
       {
+        Peak p(inst, Q);
+        // The "bin count" used will be the box density.
+        p.setBinCount( box->getSignalNormalized() );
         // TODO: Goniometer matrix and other stuff?
         peakWS->addPeak(p);
       }
-      catch (std::runtime_error &e)
+      catch (std::exception &e)
       {
-        g_log.warning() << "Error adding peak at " << Q << " because of '" << e.what() << "'. Peak will be skipped." << std::endl;
+        g_log.notice() << "Error adding peak at " << Q << " because of '" << e.what() << "'. Peak will be skipped." << std::endl;
       }
 
     }
@@ -199,10 +215,15 @@ namespace MDEvents
     peakRadiusSquared = PeakDistanceThreshold*PeakDistanceThreshold;
 
     DensityThresholdFactor = getProperty("DensityThresholdFactor");
+    MaxPeaks = getProperty("MaxPeaks");
 
     // TODO: Check that the workspace dimensions are in Q-sample-frame or Q-lab-frame.
 
+    prog = new Progress(this, 0.0, 1.0, 10);
+
     CALL_MDEVENT_FUNCTION(this->findPeaks, inWS);
+
+    delete prog;
   }
 
 

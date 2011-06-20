@@ -35,7 +35,7 @@ public:
         "BinarySplit", "0",
         "SplitInto", "5",
         "SplitThreshold", "20",
-        "MaxRecursionDepth", "10",
+        "MaxRecursionDepth", "15",
         "OutputWorkspace", "MDEWS");
 
     // Give it an instrument
@@ -79,6 +79,8 @@ public:
     createMDEW();
     addPeak(100, 1,2,3, 0.1);
     addPeak(300, 4,5,6, 0.2);
+    addPeak(500, -5,-5,5, 0.2);
+    // This peak will be rejected as non-physical
     addPeak(500, -5,-5,-5, 0.2);
   
     MDEWFindPeaks alg;
@@ -99,6 +101,20 @@ public:
     
     // Should find 3 peaks.
     TS_ASSERT_EQUALS( ws->getNumberPeaks(), 3);
+    if (ws->getNumberPeaks() != 3) return;
+
+    // The order of the peaks found is a little random because it depends on the way the boxes were sorted...
+    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[0], -5.0, 0.1);
+    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[1], -5.0, 0.1);
+    TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[2],  5.0, 0.1);
+
+    TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[0], 4.0, 0.1);
+    TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[1], 5.0, 0.1);
+    TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[2], 6.0, 0.1);
+
+    TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[0], 1.0, 0.1);
+    TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[1], 2.0, 0.1);
+    TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[2], 3.0, 0.1);
     
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);

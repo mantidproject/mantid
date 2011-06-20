@@ -413,6 +413,12 @@ namespace DataObjects
 
     double one_over_wl = (norm_q*norm_q) / (2.0 * q.Z());
     double wl = 1.0/one_over_wl;
+    if (wl < 0.0)
+    {
+      std::ostringstream mess;
+      mess << "Peak::setQLabFrame(): Wavelength found was negative (" << wl << " Ang)! This Q is not physical.";
+      throw std::invalid_argument(mess.str());
+    }
 
     // This is the scattered direction, kf = (-qx, -qy, 1/wl-qz)
     V3D beam = q * -1.0;

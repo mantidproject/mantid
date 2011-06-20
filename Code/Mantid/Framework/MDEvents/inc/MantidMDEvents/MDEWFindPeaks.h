@@ -3,6 +3,7 @@
     
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -50,6 +51,11 @@ namespace MDEvents
     /// Thresholding factor
     double DensityThresholdFactor;
 
+    /// Max # of peaks
+    int64_t MaxPeaks;
+
+    /// Progress reporter.
+    Mantid::API::Progress * prog;
   };
 
 
