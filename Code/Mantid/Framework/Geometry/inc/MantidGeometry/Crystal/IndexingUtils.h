@@ -61,7 +61,12 @@ class MANTID_GEOMETRY_DLL IndexingUtils
   static int NumberIndexed( const Kernel::DblMatrix & UB,
                             const std::vector<Kernel::V3D>  & q_vectors,
                                   double                      tolerance   );
+
+  /// Check is hkl is within tolerance of integer (h,k,l) non-zero values
+  static bool ValidIndex( const Kernel::V3D  & hkl,
+                                double         tolerance );
 };
+
 
 } // namespace Geometry
 } // namespace Mantid

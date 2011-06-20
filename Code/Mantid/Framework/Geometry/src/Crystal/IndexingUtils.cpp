@@ -175,26 +175,50 @@ int IndexingUtils::NumberIndexed( const DblMatrix         & UB,
   } 
 
   V3D hkl;
-  int h,k,l;
   for ( size_t i = 0; i < q_vectors.size(); i++ )
   {
     hkl = UB_inverse * q_vectors[i];
-                                        // since C++ lacks a round() we need
-                                        // to do it ourselves!
-    h = (int)(hkl[0] + (hkl[0] < 0? -0.5 : +0.5)); 
-    k = (int)(hkl[1] + (hkl[1] < 0? -0.5 : +0.5)); 
-    l = (int)(hkl[2] + (hkl[2] < 0? -0.5 : +0.5)); 
-
-    if ( h != 0 || k != 0 || l != 0 )   // check if indexed, but not as (0,0,0)
+    if ( ValidIndex( hkl, tolerance ) )
     {
-      if ( (fabs( hkl[0] - h ) <= tolerance) &&
-           (fabs( hkl[1] - k ) <= tolerance) &&
-           (fabs( hkl[2] - l ) <= tolerance) )
-      {
-        count++;
-      }
+      count++;
     }
   }
 
   return count;
 }
+
+/**
+  Check whether or not the components of the specified vector are within
+  the specified tolerance of integer values, other than (0,0,0).
+  @param hkl        A V3D object containing what may be valid Miller indices
+                    for a peak.
+  @param tolerance  The maximum acceptable deviation from integer values for
+                    the Miller indices.
+  @return true if all components of the vector are within the tolerance of
+               integer values (h,k,l) and (h,k,l) is NOT (0,0,0)
+ */
+
+bool IndexingUtils::ValidIndex( const V3D & hkl, double tolerance )
+{
+  bool valid_index = false;
+
+  int h,k,l;
+                                        // since C++ lacks a round() we need
+                                        // to do it ourselves!
+  h = (int)(hkl[0] + (hkl[0] < 0? -0.5 : +0.5));
+  k = (int)(hkl[1] + (hkl[1] < 0? -0.5 : +0.5));
+  l = (int)(hkl[2] + (hkl[2] < 0? -0.5 : +0.5));
+
+  if ( h != 0 || k != 0 || l != 0 )   // check if indexed, but not as (0,0,0)
+  {
+    if ( (fabs( hkl[0] - h ) <= tolerance) &&
+         (fabs( hkl[1] - k ) <= tolerance) &&
+         (fabs( hkl[2] - l ) <= tolerance) )
+    {
+      valid_index = true; 
+    }
+  }
+
+  return valid_index;
+}
+

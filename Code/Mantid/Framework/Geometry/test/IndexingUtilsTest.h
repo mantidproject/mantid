@@ -59,6 +59,59 @@ public:
      TS_ASSERT_DELTA( sum_sq_error, 0.390147, 1e-5 );
   }
 
+
+  void test_NumberIndexed()
+  {
+    Matrix<double> UB(3,3,false);
+
+    V3D row_values( -0.141251, 0.3042650, -0.147160 );
+    UB.setRow( 0, row_values );    
+
+    row_values( 0.120633,  0.0907082,  0.106323 );
+    UB.setRow( 1, row_values );    
+
+    row_values( 0.258332, -0.0062807, -0.261151 );
+    UB.setRow( 2, row_values );    
+
+    std::vector<V3D> q_list( 5 );
+
+    V3D qxyz( -1.02753, 0.47106, -0.25957 );
+    q_list[0] = qxyz;
+
+    qxyz( -2.05753, 0.93893, -0.51988 );
+    q_list[1] = qxyz;
+
+    qxyz( -2.19878, 1.05926, -0.27486 );
+    q_list[2] = qxyz;
+
+    qxyz( -2.63576, 1.39119, -0.53007 );
+    q_list[3] = qxyz;
+
+    qxyz( -1.75324, 1.02999, -0.52537 );
+    q_list[4] = qxyz;
+
+    TS_ASSERT_EQUALS( IndexingUtils::NumberIndexed( UB, q_list, 0.017 ), 4 );
+  }
+
+
+  void test_ValidIndex()
+  {
+    V3D hkl(0,0,0);
+    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), false ); 
+
+    hkl( 2.09, -3.09, -2.91 );
+    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), true ); 
+
+    hkl( 2.11, -3.09, -2.91 );
+    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), false ); 
+
+    hkl( 2.09, -3.11, -2.91 );
+    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), false ); 
+
+    hkl( 2.09, -3.09, -2.89 );
+    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), false ); 
+  }
+
 };
 
 #endif  /* MANTID_GEOMETRY_INDEXING_UTILS_TEST_H_ */
