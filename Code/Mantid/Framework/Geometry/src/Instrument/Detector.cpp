@@ -120,14 +120,6 @@ bool Detector::isMonitor() const
     return m_isMonitor;
 }
 
-/**
- *
- */
-std::map<int32_t, double> Detector::getNeighbours(double radius)
-{
-  return m_map->getNeighbours(this, radius);
-}
-
 /** Sets the flag for whether this detector object is a monitor
  *  @param flag :: True to mark the detector a monitor (default), false otherwise
  */

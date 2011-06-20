@@ -2,15 +2,14 @@
 #define PARAMETERMAP_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/Cache.h"
-#include "MantidGeometry/Instrument/Parameter.h"
-#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IDTypes.h" //For specid_t
+#include "MantidGeometry/Instrument/Parameter.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-
+#include "MantidKernel/Cache.h"
+#include "MantidKernel/Logger.h"
 
 #ifndef HAS_UNORDERED_MAP_H
 #include <map>
@@ -31,7 +30,6 @@ namespace Geometry
   //---------------------------------------------------------------------------
   class BoundingBox;
   class NearestNeighbours;
-  class ISpectraDetectorMap;
 
   /** @class ParameterMap ParameterMap.h
 
@@ -82,8 +80,6 @@ namespace Geometry
 #endif
     /// Default constructor
     ParameterMap();
-    /// Constructor taking a pointer to a spectra map
-    ParameterMap(const ISpectraDetectorMap *const);
     /// Returns true if the map is empty, false otherwise
     inline bool empty() const { return m_map.empty(); }
     /// Return the size of the map
@@ -241,22 +237,6 @@ namespace Geometry
     void setCachedBoundingBox(const IComponent *comp, const BoundingBox & box) const;
     ///Attempts to retrieve a bounding box from the cache
     bool getCachedBoundingBox(const IComponent *comp, BoundingBox & box) const;
-    
-    /** @name Nearest neighbours */
-    // MG
-    // This is here for the moment because a detector doesn't have access to anything else.
-    // Should this be on the instrument with a reference passed to the detectors?
-    //@{
-    /// Update the spectra map reference
-    void resetSpectraMap(const ISpectraDetectorMap *const);
-    /// Build and populate the NearestNeighbours object
-    void buildNearestNeighbours(const IComponent *comp) const;
-    /// Query the NearestNeighbours object for a detector
-    std::map<specid_t, double> getNeighbours(const IDetector *comp, const double radius = 0.0) const;
-  private:
-    /// Requires a spectra map to give the correct neighbours
-    const ISpectraDetectorMap *m_spectraMap;
-    //@}
 
   private:
     ///Assignment operator
@@ -269,8 +249,6 @@ namespace Geometry
 
     /// internal parameter map instance
     pmap m_map;
-    /// shared pointer to NearestNeighbours object
-    mutable boost::shared_ptr<NearestNeighbours> m_nearestNeighbours;
     /// internal cache map instance for cached postition values
     mutable Kernel::Cache<const ComponentID, Kernel::V3D > m_cacheLocMap;
     /// internal cache map instance for cached rotation values

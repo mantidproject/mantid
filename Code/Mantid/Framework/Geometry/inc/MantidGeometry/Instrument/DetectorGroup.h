@@ -66,7 +66,6 @@ namespace Mantid
       bool isParametrized() const;
       bool isMasked() const;
       bool isMonitor() const;
-      std::map<detid_t, double> getNeighbours(double radius);
       bool isValid(const Kernel::V3D& point) const;
       virtual bool isOnSide(const Kernel::V3D& point) const;
       ///Try to find a point that lies within (or on) the object

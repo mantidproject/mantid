@@ -64,7 +64,6 @@ public:
   double getPhi() const;
   bool isMasked() const;
   bool isMonitor() const;
-  std::map<int32_t, double> getNeighbours(double radius = 0.0);
   /// Returns a reference to itself
   IComponent* getComponent(){return static_cast<IComponent*>(this);}
   // end IDetector methods 

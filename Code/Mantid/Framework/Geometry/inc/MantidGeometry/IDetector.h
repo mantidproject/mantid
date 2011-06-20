@@ -90,9 +90,6 @@ public:
    /// Indicates whether this is a monitor detector
   virtual bool isMonitor() const = 0;
 
-  /// Get Nearest Neighbours
-  virtual std::map<int32_t, double> getNeighbours(double radius = 0.0) = 0;
-
   /// Must return a pointer to itself if derived from IComponent
   virtual IComponent* getComponent();
  /// returns the geometry of detectors, meaningful for groups, rectangular for single; returns the centre of a detector

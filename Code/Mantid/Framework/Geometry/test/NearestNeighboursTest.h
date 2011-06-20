@@ -3,10 +3,10 @@
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IInstrument.h"
-#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
+#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -31,8 +31,14 @@ public:
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
     boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(1, 18));
     TS_ASSERT_EQUALS(spectramap->nElements(), 18);
-    ParameterMap_sptr pmap(new ParameterMap(&(*spectramap)));
+    // Default parameter map.
+    ParameterMap_sptr pmap(new ParameterMap());
+    // Parameterized instrument
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
+
+    // Create the NearestNeighbours object directly.
+    NearestNeighbours nn(m_instrument, *spectramap);
+
     detid2det_map m_detectors;
     m_instrument->getDetectors(m_detectors);
 
@@ -49,7 +55,7 @@ public:
     TS_ASSERT_EQUALS(m_detectors.size(), 18);
 
     // Check distances calculated in NearestNeighbours compare with those using getDistance on component
-    std::map<specid_t, double> distances = m_detectors[5]->getNeighbours();
+    std::map<specid_t, double> distances = nn.neighbours(5);
     std::map<specid_t, double>::iterator distIt;
 
     // We should have 8 neighbours when not specifying a range.
@@ -65,11 +71,11 @@ public:
 
     // Check that the 'radius' option works as expected
     // Lower radius
-    distances = m_detectors[14]->getNeighbours(0.008);
+    distances = nn.neighbours(14, 0.008);
     TS_ASSERT_EQUALS(distances.size(), 4);
 
     // Higher than currently computed
-    distances = m_detectors[14]->getNeighbours(6);
+    distances = nn.neighbours(14, 6.0);
     TS_ASSERT_EQUALS(distances.size(), 17);
 
     
@@ -83,8 +89,13 @@ public:
 
     // Test fails without a parameter map.
     boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(256, 767));
-    ParameterMap_sptr pmap(new ParameterMap(&(*spectramap)));
+    // Default parameter map.
+    ParameterMap_sptr pmap(new ParameterMap());
+    // Parameterized instrument
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
+
+    // Create the NearestNeighbours object directly.
+    NearestNeighbours nn(m_instrument, *spectramap);
 
     // Correct # of detectors
     TS_ASSERT_EQUALS( m_instrument->getDetectorIDs().size(), 512);
@@ -93,14 +104,15 @@ public:
     RectangularDetector_sptr bank1 = boost::dynamic_pointer_cast<RectangularDetector>(m_instrument->getComponentByName("bank1"));
     boost::shared_ptr<Detector> det = bank1->getAtXY(2,3);
     TS_ASSERT( det );
-   std::map<specid_t, double> nb;
+    std::map<specid_t, double> nb;
 
     // Too close!
-    nb = det->getNeighbours(0.003);
+    specid_t spec = 256 + 2*16+3; // This gives the spectrum number for this detector
+    nb = nn.neighbours(spec, 0.003);
     TS_ASSERT_EQUALS( nb.size(), 0 );
 
     // The ones above below and next to it
-    nb = det->getNeighbours(0.016);
+    nb = nn.neighbours(spec, 0.016);
     TS_ASSERT_EQUALS( nb.size(), 4 );
 
   }

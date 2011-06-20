@@ -190,12 +190,6 @@ public:
     ws->setComment("");
   }
 
-  void testGetInstrument()
-  {
-    boost::shared_ptr<IInstrument> i = ws->getInstrument();
-    TS_ASSERT_EQUALS( ws->getInstrument()->type(), "Instrument" );
-  }
-
   void test_That_A_Workspace_Gets_SpectraMap_When_Initialized_With_NVector_Elements()
   {
     MatrixWorkspace_sptr testWS(new Mantid::DataObjects::WorkspaceTester);
@@ -234,14 +228,6 @@ public:
     TS_ASSERT_EQUALS(parent->spectraMap().nElements(), 10);
     MatrixWorkspace_sptr copied = WorkspaceFactory::Instance().create(parent,1,1,1);
     TS_ASSERT_EQUALS(copied->spectraMap().nElements(), 10);
-  }
-
-  void testGetSetSample()
-  {
-    TS_ASSERT( &ws->sample() );
-
-    ws->mutableSample().setName("test");
-    TS_ASSERT_EQUALS( ws->sample().getName(), "test" );
   }
 
   void testGetMemorySize()

@@ -23,7 +23,7 @@ class BoundingBox;
 namespace Algorithms
 {
 /**
-    This algorithm creates an XML Grouping File for use in the GroupDetectos (v2) or
+    This algorithm creates an XML Grouping File for use in the GroupDetectors (v2) or
     ReadGroupsFromFile algorithms. It does this by querying the NearestNeighbours in
     Geometry through the detector's parameter map.
 
@@ -90,6 +90,9 @@ private:
   std::vector<std::vector<int> > m_groups;
   /// number of pixels to search through for finding group
   double m_pix;
+
+  /// Source workspace
+  Mantid::API::MatrixWorkspace_const_sptr inputWorkspace;
 };
 
 } // namespace Algorithms

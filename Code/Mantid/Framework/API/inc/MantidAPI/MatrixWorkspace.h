@@ -4,20 +4,22 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/WorkspaceHistory.h"
-#include "MantidAPI/MatrixWSIndexCalculator.h"
-#include "MantidAPI/Sample.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/MatrixWSIndexCalculator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAPI/WorkspaceIterator.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument/NearestNeighbours.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/cow_ptr.h"
-
 #include <set>
 
 namespace Mantid
@@ -67,7 +69,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class MANTID_API_DLL MatrixWorkspace : public IMDWorkspace
+    class MANTID_API_DLL MatrixWorkspace : public IMDWorkspace, public ExperimentInfo
     {
     public:
 
@@ -85,14 +87,20 @@ namespace Mantid
       
       /**@name Instrument queries */
       //@{
-      void setInstrument(const Geometry::IInstrument_sptr&);
-      Geometry::IInstrument_sptr getInstrument() const;
-      boost::shared_ptr<Geometry::Instrument> getBaseInstrument()const;
       Geometry::IDetector_sptr getDetector(const size_t workspaceIndex) const;
       Geometry::IDetector_sptr getDetector(const int workspaceIndex) const;
       Geometry::IDetector_sptr getDetector(const int64_t workspaceIndex) const;
       double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
       double gravitationalDrop(Geometry::IDetector_const_sptr det, const double waveLength) const;
+      //@}
+
+      void populateInstrumentParameters();
+
+      /** @name Nearest neighbours */
+      /// Build and populate the NearestNeighbours object
+      void buildNearestNeighbours(const Mantid::Geometry::IComponent *comp) const;
+      /// Query the NearestNeighbours object for a detector
+      std::map<specid_t, double> getNeighbours(const Mantid::Geometry::IDetector *comp, const double radius = 0.0) const;
       //@}
 
       /// Const access to the spectra-detector map
@@ -108,25 +116,10 @@ namespace Mantid
       index2detid_map * getWorkspaceIndexToDetectorIDMap() const;
       detid2index_map * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const;
       void getIndicesFromSpectra(const std::vector<specid_t>& spectraList, std::vector<size_t>& indexList) const;
-      /// Sample accessors
-      const Sample& sample() const;
-      Sample& mutableSample();
-      /// Run details object access
-      const Run & run() const;
-      /// Writable version of the run object
-      Run& mutableRun();
 
       /// Get the footprint in memory in bytes.
       virtual size_t getMemorySize() const;
       virtual size_t getMemorySizeForXAxes() const;
-
-      /// Returns the set of parameters modifying the base instrument
-      const Geometry::ParameterMap& instrumentParameters() const;
-      Geometry::ParameterMap& instrumentParameters();
-      /// Const version
-      const Geometry::ParameterMap& constInstrumentParameters() const;
-      // Add parameters to the instrument parameter map
-      void populateInstrumentParameters();
 
       // Section required for iteration
       /// Returns the number of single indexable items in the workspace
@@ -279,7 +272,6 @@ namespace Mantid
       std::vector<Axis*> m_axes;
 
     private:
-
       /// Implementation of getMDPointImp taking two arguments for histogram and bin.
       const Mantid::Geometry::SignalAggregate& getPointImp(size_t histogram, size_t bin) const;
 
@@ -294,16 +286,9 @@ namespace Mantid
       /// Has this workspace been initialised?
       bool m_isInitialized;
 
-      /// The base instrument
-      boost::shared_ptr<Geometry::Instrument> sptr_instrument;
-
     protected:
       /// A shared pointer to the spectra-detector map
       boost::shared_ptr<const Geometry::ISpectraDetectorMap> m_spectraMap;
-      /// The information on the sample environment
-      Kernel::cow_ptr<Sample> m_sample;
-      /// The run information
-      Kernel::cow_ptr<Run> m_run;
 
     private:
       /// The unit for the data values (e.g. Counts)
@@ -312,15 +297,15 @@ namespace Mantid
       std::string m_YUnitLabel;
       /// Flag indicating whether the Y-values are dimensioned. False by default
       bool m_isDistribution;
-
-      /// Parameters modifying the base instrument
-      boost::shared_ptr<Geometry::ParameterMap> m_parmap;
       /// The set of masked bins in a map keyed on spectrum index
       std::map< int64_t, MaskList > m_masks;
       /// Associates indexes to MDPoints. Dynamic cache.
       mutable MatrixMDPointMap m_mdPointMap;
       /// Assists conversions to and from 2D histogram indexing to 1D indexing.
       MatrixWSIndexCalculator m_indexCalculator;
+
+      /// Shared pointer to NearestNeighbours object
+      mutable boost::shared_ptr<Mantid::Geometry::NearestNeighbours> m_nearestNeighbours;
 
       /// Used for storing info about "r-position", "t-position" and "p-position" parameters
       /// as all parameters are processed  

@@ -67,7 +67,7 @@ void SpatialGrouping::init()
 */
 void SpatialGrouping::exec()
 {
-  Mantid::API::MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  inputWorkspace = getProperty("InputWorkspace");
   double searchDist = getProperty("SearchDistance");
   m_pix = searchDist;
   int gridSize = getProperty("GridSize");
@@ -206,14 +206,14 @@ bool SpatialGrouping::expandNet(std::map<specid_t,double> & nearest, specid_t sp
   // Special case for first run for this detector
   if ( incoming == 0 )
   {
-    potentials = det->getNeighbours();
+    potentials = inputWorkspace->getNeighbours(det.get());
   }
   else
   {
     for ( std::map<specid_t,double>::iterator nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt )
     {
       std::map<specid_t, double> results;
-      results = m_detectors[nrsIt->first]->getNeighbours();
+      results = inputWorkspace->getNeighbours(m_detectors[nrsIt->first].get());
       for ( std::map<specid_t, double>::iterator resIt = results.begin(); resIt != results.end(); ++resIt )
       {
         potentials[resIt->first] = resIt->second;

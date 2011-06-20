@@ -37,10 +37,12 @@ namespace Mantid
 
     /// Default constructor
     MatrixWorkspace::MatrixWorkspace() : 
-      IMDWorkspace(), m_axes(), m_isInitialized(false),
-      sptr_instrument(new Instrument), m_spectraMap(new Geometry::OneToOneSpectraDetectorMap),
-      m_sample(), m_run(), m_YUnit(), m_YUnitLabel(), m_isDistribution(false), 
-      m_parmap(new ParameterMap(&(*m_spectraMap))), m_masks(), m_indexCalculator()
+      IMDWorkspace(), ExperimentInfo(),
+      m_axes(), m_isInitialized(false),
+      m_spectraMap(new Geometry::OneToOneSpectraDetectorMap),
+      m_YUnit(), m_YUnitLabel(), m_isDistribution(false),
+      m_masks(), m_indexCalculator(),
+      m_nearestNeighbours()
     {}
 
     /// Destructor
@@ -89,26 +91,6 @@ namespace Mantid
       m_indexCalculator =  MatrixWSIndexCalculator(this->blocksize());
       // Indicate that this Algorithm has been initialized to prevent duplicate attempts.
       m_isInitialized = true;
-    }
-
-
-    //---------------------------------------------------------------------------------------
-    /** Set the instrument
-    *
-    * @param instr :: Shared pointer to an instrument.
-    */
-    void MatrixWorkspace::setInstrument(const IInstrument_sptr& instr)
-    {
-      boost::shared_ptr<Instrument> tmp = boost::dynamic_pointer_cast<Instrument>(instr);
-      if (tmp->isParametrized())
-      {
-        sptr_instrument = tmp->baseInstrument();
-        m_parmap = tmp->getParameterMap();
-      }
-      else
-      {
-        sptr_instrument=tmp;
-      }
     }
 
 
@@ -163,14 +145,17 @@ namespace Mantid
     void MatrixWorkspace::replaceSpectraMap(const Geometry::ISpectraDetectorMap * spectraMap)
     {
       m_spectraMap.reset(spectraMap);
-      m_parmap->resetSpectraMap(spectraMap);
+      // The neighbour map needs to be rebuilt
+      m_nearestNeighbours.reset();
     }
 
+
+    //---------------------------------------------------------------------------------------
     /**
-     * Rebuild the default spectra mapping for a workspace. If a non-empty 
-     * instrument is set then the default maps each detector to a spectra with 
+     * Rebuild the default spectra mapping for a workspace. If a non-empty
+     * instrument is set then the default maps each detector to a spectra with
      * the same ID. If an empty instrument is set then a 1:1 map from 1->NHistograms
-     * is created. If axis one contains a spectra axis then this method also 
+     * is created. If axis one contains a spectra axis then this method also
      * rebuilds this axis to match the generated mapping.
      * @param includeMonitors :: If false the monitors are not included
      */
@@ -189,13 +174,88 @@ namespace Mantid
       {
         const specid_t specNo = specid_t(*it);
         spectramap->addSpectrumEntries(specNo, std::vector<detid_t>(1, specNo));
-      }    
+      }
       if( m_axes.size() > 1 && m_axes[1]->isSpectra() )
       {
         delete m_axes[1];
         m_axes[1] = new SpectraAxis(pixelIDs.size(), this->spectraMap());
       }
     }
+
+
+
+
+
+
+
+
+
+
+    //---------------------------------------------------------------------------------------
+    /**
+     * Handles the building of the NearestNeighbours object, if it has not already been
+     * populated for this parameter map.
+     * @param comp :: Object used for determining the Instrument
+     */
+    void MatrixWorkspace::buildNearestNeighbours(const IComponent *comp) const
+    {
+      if( !m_spectraMap )
+      {
+        throw Kernel::Exception::NullPointerException("MatrixWorkspace::buildNearestNeighbours",
+                  "SpectraDetectorMap");
+      }
+
+      if ( !m_nearestNeighbours )
+      {
+        // Get pointer to Instrument
+        boost::shared_ptr<const IComponent> parent(comp, NoDeleting());
+        while ( parent->getParent() )
+        {
+          parent = parent->getParent();
+        }
+        boost::shared_ptr<const Instrument> inst = boost::dynamic_pointer_cast<const Instrument>(parent);
+        if ( inst )
+        {
+          m_nearestNeighbours.reset(new NearestNeighbours(inst, *m_spectraMap));
+        }
+        else
+        {
+          throw Mantid::Kernel::Exception::NullPointerException("ParameterMap: buildNearestNeighbours",
+                parent->getName());
+        }
+      }
+    }
+
+    //---------------------------------------------------------------------------------------
+    /**
+     * Queries the NearestNeighbours object for the selected detector.
+     * @param comp :: pointer to the querying detector
+     * @param radius :: distance from detector on which to filter results
+     * @return map of DetectorID to distance for the nearest neighbours
+     */
+    std::map<specid_t, double> MatrixWorkspace::getNeighbours(const IDetector *comp, const double radius) const
+    {
+      if ( !m_nearestNeighbours )
+      {
+        buildNearestNeighbours(comp);
+      }
+      // Find the spectrum number
+      std::vector<specid_t> spectra = m_spectraMap->getSpectra(std::vector<detid_t>(1, comp->getID()));
+      if(spectra.empty())
+      {
+        throw Kernel::Exception::NotFoundError("MatrixWorkspace::getNeighbours - Cannot find spectrum number for detector", comp->getID());
+      }
+      std::map<specid_t, double> neighbours = m_nearestNeighbours->neighbours(spectra[0], radius);
+      return neighbours;
+    }
+
+
+
+
+
+
+
+
 
     //---------------------------------------------------------------------------------------
     /** Return a map where:
@@ -251,6 +311,7 @@ namespace Mantid
     *         if there is more than one detector for a specific workspace index.
     *  @throw runtime_error if there is more than one detector per spectrum (if throwIfMultipleDets is true)
     *  @return Index to Index Map object
+
     */
     detid2index_map * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const
     {
@@ -431,45 +492,6 @@ namespace Mantid
       }
     }
 
-    //---------------------------------------------------------------------------------------
-    /** Get a constant reference to the Sample associated with this workspace.
-    * @return const reference to Sample object
-    */
-    const  Sample& MatrixWorkspace::sample() const
-    {
-      return *m_sample;
-    }
-
-    /** Get a reference to the Sample associated with this workspace.
-    *  This non-const method will copy the sample if it is shared between 
-    *  more than one workspace, and the reference returned will be to the copy.
-    *  Can ONLY be taken by reference!
-    * @return reference to sample object
-    */
-    Sample& MatrixWorkspace::mutableSample()
-    {
-      return m_sample.access();
-    }
-
-    /** Get a constant reference to the Run object associated with this workspace.
-    * @return const reference to run object
-    */
-    const Run& MatrixWorkspace::run() const
-    {
-      return *m_run;
-    }
-
-    /** Get a reference to the Run object associated with this workspace.
-    *  This non-const method will copy the Run object if it is shared between 
-    *  more than one workspace, and the reference returned will be to the copy.
-    *  Can ONLY be taken by reference!
-    * @return reference to Run object
-    */
-    Run& MatrixWorkspace::mutableRun()
-    {
-      return m_run.access();
-    }
-
     /** Get the effective detector for the given spectrum
     *  @param  index The workspace index for which the detector is required
     *  @return A single detector object representing the detector(s) contributing
@@ -561,74 +583,184 @@ namespace Mantid
       return waveLength*waveLength*L2;
     }
 
-    /** Get a shared pointer to the instrument associated with this workspace
-    *
-    *  @return The instrument class
+
+
+    //---------------------------------------------------------------------------------------
+    /** Add parameters to the instrument parameter map that are defined in instrument
+    *   definition file and for which logfile data are available. Logs must be loaded
+    *   before running this method.
     */
-    IInstrument_sptr MatrixWorkspace::getInstrument()const
+    void MatrixWorkspace::populateInstrumentParameters()
     {
-      return Geometry::ParComponentFactory::createInstrument(sptr_instrument, m_parmap);
-    }
+      // Get instrument and sample
 
-    /** Get a shared pointer to the instrument associated with this workspace
-    *
-    *  @return The instrument class
-    */
-    boost::shared_ptr<Instrument> MatrixWorkspace::getBaseInstrument() const
-    {
-      return sptr_instrument;
-    }
+      boost::shared_ptr<const Instrument> instrument = getBaseInstrument();
+      Instrument* inst = const_cast<Instrument*>(instrument.get());
 
-    /**  Returns a const reference to the instrument parameters.
-    *    @return a const reference to the instrument ParameterMap.
-    */
-    const Geometry::ParameterMap& MatrixWorkspace::instrumentParameters() const
-    {
-      return *m_parmap.get();
-    }
+      // Get the data in the logfiles associated with the raw data
+
+      const std::vector<Kernel::Property*>& logfileProp = run().getLogData();
 
 
-    /**  Returns a new copy of the instrument parameters
-    *    @return a (new) copy of the instruments parameter map
-    */
-    Geometry::ParameterMap& MatrixWorkspace::instrumentParameters()
-    {
-      //TODO: Here duplicates cow_ptr. Figure out if there's a better way
+      // Get pointer to parameter map that we may add parameters to and information about
+      // the parameters that my be specified in the instrument definition file (IDF)
 
-      // Use a double-check for sharing so that we only
-      // enter the critical region if absolutely necessary
-      if (!m_parmap.unique())
+      Geometry::ParameterMap& paramMap = instrumentParameters();
+      std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& paramInfoFromIDF = inst->getLogfileCache();
+
+
+      // iterator to browse through the multimap: paramInfoFromIDF
+
+      std::multimap<std::string, boost::shared_ptr<XMLlogfile> > :: const_iterator it;
+      std::pair<std::multimap<std::string, boost::shared_ptr<XMLlogfile> >::iterator,
+        std::multimap<std::string, boost::shared_ptr<XMLlogfile> >::iterator> ret;
+
+      // In order to allow positions to be set with r-position, t-position and p-position parameters
+      // The idea is here to simply first check if parameters with names "r-position", "t-position"
+      // and "p-position" are encounted then at the end of this method act on this
+      std::set<const IComponent*> rtp_positionComp;
+      std::multimap<const IComponent*, m_PositionEntry > rtp_positionEntry;
+
+      // loop over all logfiles and see if any of these are associated with parameters in the
+      // IDF
+
+      size_t N = logfileProp.size();
+      for (size_t i = 0; i < N; i++)
       {
-        PARALLEL_CRITICAL(cow_ptr_access)
+        // Get the name of the timeseries property
+
+        std::string logName = logfileProp[i]->name();
+
+        // See if filenamePart matches any logfile-IDs in IDF. If this add parameter to parameter map
+
+        ret = paramInfoFromIDF.equal_range(logName);
+        for (it=ret.first; it!=ret.second; ++it)
         {
-          // Check again because another thread may have taken copy
-          // and dropped reference count since previous check
-          if (!m_parmap.unique())
+          double value = ((*it).second)->createParamValue(static_cast<Kernel::TimeSeriesProperty<double>*>(logfileProp[i]));
+
+          // special cases of parameter names
+
+          std::string paramN = ((*it).second)->m_paramName;
+          if ( paramN.compare("x")==0 || paramN.compare("y")==0 || paramN.compare("z")==0 )
+            paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
+          else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )
           {
-            ParameterMap_sptr oldData=m_parmap;
-            m_parmap.reset();
-            m_parmap = ParameterMap_sptr(new ParameterMap(*oldData));
+            paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
           }
+          else if ( paramN.compare("r-position")==0 || paramN.compare("t-position")==0 || paramN.compare("p-position")==0 )
+          {
+            rtp_positionComp.insert(((*it).second)->m_component);
+            rtp_positionEntry.insert(
+              std::pair<const IComponent*, m_PositionEntry >(
+                ((*it).second)->m_component, m_PositionEntry(paramN, value)));
+          }
+          else
+            paramMap.addDouble(((*it).second)->m_component, paramN, value);
         }
       }
 
-      return *m_parmap;
-      //return m_parmap.access(); //old cow_ptr thing
+      // Check if parameters have been specified using the 'value' attribute rather than the 'logfile-id' attribute
+      // All such parameters have been stored using the key = "".
+      ret = paramInfoFromIDF.equal_range("");
+      Kernel::TimeSeriesProperty<double>* dummy = NULL;
+      for (it = ret.first; it != ret.second; ++it)
+      {
+        std::string paramN = ((*it).second)->m_paramName;
+        std::string category = ((*it).second)->m_type;
+
+        // if category is sting no point in trying to generate a double from parameter
+        double value = 0.0;
+        if ( category.compare("string") != 0 )
+          value = ((*it).second)->createParamValue(dummy);
+
+        if ( category.compare("fitting") == 0 )
+        {
+          std::ostringstream str;
+          str << value << " , " << ((*it).second)->m_fittingFunction << " , " << paramN << " , " << ((*it).second)->m_constraint[0] << " , "
+            << ((*it).second)->m_constraint[1] << " , " << ((*it).second)->m_penaltyFactor << " , "
+            << ((*it).second)->m_tie << " , " << ((*it).second)->m_formula << " , "
+            << ((*it).second)->m_formulaUnit << " , " << ((*it).second)->m_resultUnit << " , " << (*(((*it).second)->m_interpolation));
+          paramMap.add("fitting",((*it).second)->m_component, paramN, str.str());
+        }
+        else if ( category.compare("string") == 0 )
+        {
+          paramMap.addString(((*it).second)->m_component, paramN, ((*it).second)->m_value);
+        }
+        else
+        {
+          if (paramN.compare("x") == 0 || paramN.compare("y") == 0 || paramN.compare("z") == 0)
+            paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
+          else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )
+            paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
+          else if ( paramN.compare("r-position")==0 || paramN.compare("t-position")==0 || paramN.compare("p-position")==0 )
+          {
+            rtp_positionComp.insert(((*it).second)->m_component);
+            rtp_positionEntry.insert(
+              std::pair<const IComponent*, m_PositionEntry >(
+                ((*it).second)->m_component, m_PositionEntry(paramN, value)));
+          }
+          else
+            paramMap.addDouble(((*it).second)->m_component, paramN, value);
+        }
+      }
+
+      // check if parameters with names "r-position", "t-position"
+      // and "p-position" were encounted
+      std::pair<std::multimap<const IComponent*, m_PositionEntry >::iterator,
+        std::multimap<const IComponent*, m_PositionEntry >::iterator> retComp;
+      double deg2rad = (M_PI/180.0);
+      std::set<const IComponent*>::iterator itComp;
+      std::multimap<const IComponent*, m_PositionEntry > :: const_iterator itRTP;
+      for (itComp=rtp_positionComp.begin(); itComp!=rtp_positionComp.end(); itComp++)
+      {
+        retComp = rtp_positionEntry.equal_range(*itComp);
+        bool rSet = false;
+        double rVal=0.0;
+        double tVal=0.0;
+        double pVal=0.0;
+        for (itRTP = retComp.first; itRTP!=retComp.second; ++itRTP)
+        {
+          std::string paramN = ((*itRTP).second).paramName;
+          if ( paramN.compare("r-position")==0 )
+          {
+            rSet = true;
+            rVal = ((*itRTP).second).value;
+          }
+          if ( paramN.compare("t-position")==0 )
+          {
+            tVal = deg2rad*((*itRTP).second).value;
+          }
+          if ( paramN.compare("p-position")==0 )
+          {
+            pVal = deg2rad*((*itRTP).second).value;
+          }
+        }
+        if ( rSet )
+        {
+          // convert spherical coordinates to cartesian coordinate values
+          double x = rVal*sin(tVal)*cos(pVal);
+          double y = rVal*sin(tVal)*sin(pVal);
+          double z = rVal*cos(tVal);
+
+          paramMap.addPositionCoordinate(*itComp, "x", x);
+          paramMap.addPositionCoordinate(*itComp, "y", y);
+          paramMap.addPositionCoordinate(*itComp, "z", z);
+        }
+      }
+
+      // Clear out the nearestNeighbors so that it gets recalculated
+      this->m_nearestNeighbours.reset();
     }
 
 
-
-    const Geometry::ParameterMap& MatrixWorkspace::constInstrumentParameters() const
-    {
-      return *m_parmap;
-    }
-
-    /// The number of axes which this workspace has
+    //----------------------------------------------------------------------------------------------------
+    /// @return The number of axes which this workspace has
     int MatrixWorkspace::axes() const
     {
       return static_cast<int>(m_axes.size());
     }
 
+    //----------------------------------------------------------------------------------------------------
     /** Get a pointer to a workspace axis
     *  @param axisIndex :: The index of the axis required
     *  @throw IndexError If the argument given is outside the range of axes held by this workspace
@@ -664,15 +796,8 @@ namespace Mantid
       m_axes[axisIndex] = newAxis;
     }
 
-    /**
-    *  Whether the workspace contains histogram data
-    *  @return whether the worksapace contains histogram data
-    */
-    bool MatrixWorkspace::isHistogramData() const
-    {
-      return ( readX(0).size()==readY(0).size() ? false : true );
-    }
 
+    //----------------------------------------------------------------------------------------------------
     /// Returns the units of the data in the workspace
     std::string MatrixWorkspace::YUnit() const
     {
@@ -710,6 +835,7 @@ namespace Mantid
       m_YUnitLabel = newLabel;
     }
 
+    //----------------------------------------------------------------------------------------------------
     /** Are the Y-values in this workspace dimensioned?
     * TODO: For example: ????
     * @return whether workspace is a distribution or not
@@ -728,6 +854,17 @@ namespace Mantid
       return m_isDistribution;
     }
 
+    /**
+    *  Whether the workspace contains histogram data
+    *  @return whether the worksapace contains histogram data
+    */
+    bool MatrixWorkspace::isHistogramData() const
+    {
+      return ( readX(0).size()==readY(0).size() ? false : true );
+    }
+
+
+    //----------------------------------------------------------------------------------------------------
     /**
      * Mask a given workspace index, setting the data and error values to the given value
      * @param index :: The index within the workspace to mask
@@ -772,6 +909,7 @@ namespace Mantid
       }
     }
 
+    //----------------------------------------------------------------------------------------------------
     /** Masks a single bin. It's value (and error) will be scaled by (1-weight).
     *  @param workspaceIndex :: The workspace spectrum index of the bin
     *  @param binIndex ::      The index of the bin in the spectrum
@@ -859,169 +997,8 @@ namespace Mantid
     }
 
 
-    /** Add parameters to the instrument parameter map that are defined in instrument
-    *   definition file and for which logfile data are available. Logs must be loaded 
-    *   before running this method.
-    */
-    void MatrixWorkspace::populateInstrumentParameters()
-    {
-      // Get instrument and sample
 
-      boost::shared_ptr<const Instrument> instrument = getBaseInstrument();
-      Instrument* inst = const_cast<Instrument*>(instrument.get());
-
-      // Get the data in the logfiles associated with the raw data
-
-      const std::vector<Kernel::Property*>& logfileProp = run().getLogData();
-
-
-      // Get pointer to parameter map that we may add parameters to and information about
-      // the parameters that my be specified in the instrument definition file (IDF)
-
-      Geometry::ParameterMap& paramMap = instrumentParameters();
-      std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& paramInfoFromIDF = inst->getLogfileCache();
-
-
-      // iterator to browse through the multimap: paramInfoFromIDF
-
-      std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> > :: const_iterator it;
-      std::pair<std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >::iterator,
-        std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >::iterator> ret;
-
-      // In order to allow positions to be set with r-position, t-position and p-position parameters
-      // The idea is here to simply first check if parameters with names "r-position", "t-position"
-      // and "p-position" are encounted then at the end of this method act on this
-      std::set<const IComponent*> rtp_positionComp;
-      std::multimap<const IComponent*, m_PositionEntry > rtp_positionEntry;
-
-      // loop over all logfiles and see if any of these are associated with parameters in the
-      // IDF
-
-      size_t N = logfileProp.size();
-      for (size_t i = 0; i < N; i++)
-      {
-        // Get the name of the timeseries property
-
-        std::string logName = logfileProp[i]->name();
-
-        // See if filenamePart matches any logfile-IDs in IDF. If this add parameter to parameter map
-
-        ret = paramInfoFromIDF.equal_range(logName);
-        for (it=ret.first; it!=ret.second; ++it)
-        {
-          double value = ((*it).second)->createParamValue(static_cast<Kernel::TimeSeriesProperty<double>*>(logfileProp[i]));
-
-          // special cases of parameter names
-
-          std::string paramN = ((*it).second)->m_paramName;
-          if ( paramN.compare("x")==0 || paramN.compare("y")==0 || paramN.compare("z")==0 )
-            paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
-          else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )
-          {
-            paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
-          }
-          else if ( paramN.compare("r-position")==0 || paramN.compare("t-position")==0 || paramN.compare("p-position")==0 )
-          {
-            rtp_positionComp.insert(((*it).second)->m_component);
-            rtp_positionEntry.insert( 
-              std::pair<const IComponent*, m_PositionEntry >(
-                ((*it).second)->m_component, m_PositionEntry(paramN, value)));
-          }
-          else
-            paramMap.addDouble(((*it).second)->m_component, paramN, value);
-        }
-      }
-
-      // Check if parameters have been specified using the 'value' attribute rather than the 'logfile-id' attribute
-      // All such parameters have been stored using the key = "".
-      ret = paramInfoFromIDF.equal_range("");
-      Kernel::TimeSeriesProperty<double>* dummy = NULL;
-      for (it = ret.first; it != ret.second; ++it)
-      {
-        std::string paramN = ((*it).second)->m_paramName;
-        std::string category = ((*it).second)->m_type;  
-
-        // if category is sting no point in trying to generate a double from parameter
-        double value = 0.0;
-        if ( category.compare("string") != 0 )
-          value = ((*it).second)->createParamValue(dummy);
-
-        if ( category.compare("fitting") == 0 )
-        {
-          std::ostringstream str;
-          str << value << " , " << ((*it).second)->m_fittingFunction << " , " << paramN << " , " << ((*it).second)->m_constraint[0] << " , " 
-            << ((*it).second)->m_constraint[1] << " , " << ((*it).second)->m_penaltyFactor << " , " 
-            << ((*it).second)->m_tie << " , " << ((*it).second)->m_formula << " , " 
-            << ((*it).second)->m_formulaUnit << " , " << ((*it).second)->m_resultUnit << " , " << (*(((*it).second)->m_interpolation));
-          paramMap.add("fitting",((*it).second)->m_component, paramN, str.str());
-        }
-        else if ( category.compare("string") == 0 )
-        {
-          paramMap.addString(((*it).second)->m_component, paramN, ((*it).second)->m_value);
-        }
-        else
-        {
-          if (paramN.compare("x") == 0 || paramN.compare("y") == 0 || paramN.compare("z") == 0)
-            paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
-          else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )        
-            paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
-          else if ( paramN.compare("r-position")==0 || paramN.compare("t-position")==0 || paramN.compare("p-position")==0 )
-          {
-            rtp_positionComp.insert(((*it).second)->m_component);
-            rtp_positionEntry.insert( 
-              std::pair<const IComponent*, m_PositionEntry >(
-                ((*it).second)->m_component, m_PositionEntry(paramN, value)));
-          }
-          else
-            paramMap.addDouble(((*it).second)->m_component, paramN, value);
-        }
-      }
-
-      // check if parameters with names "r-position", "t-position"
-      // and "p-position" were encounted
-      std::pair<std::multimap<const IComponent*, m_PositionEntry >::iterator,
-        std::multimap<const IComponent*, m_PositionEntry >::iterator> retComp;
-      double deg2rad = (M_PI/180.0);
-      std::set<const IComponent*>::iterator itComp;
-      std::multimap<const IComponent*, m_PositionEntry > :: const_iterator itRTP;
-      for (itComp=rtp_positionComp.begin(); itComp!=rtp_positionComp.end(); itComp++)
-      {
-        retComp = rtp_positionEntry.equal_range(*itComp);
-        bool rSet = false;
-        double rVal=0.0;
-        double tVal=0.0;
-        double pVal=0.0;
-        for (itRTP = retComp.first; itRTP!=retComp.second; ++itRTP)
-        {
-          std::string paramN = ((*itRTP).second).paramName;  
-          if ( paramN.compare("r-position")==0 )
-          {
-            rSet = true;
-            rVal = ((*itRTP).second).value;
-          }
-          if ( paramN.compare("t-position")==0 )
-          {
-            tVal = deg2rad*((*itRTP).second).value;
-          }
-          if ( paramN.compare("p-position")==0 )
-          {
-            pVal = deg2rad*((*itRTP).second).value;
-          }
-        }
-        if ( rSet )
-        {
-          // convert spherical coordinates to cartesian coordinate values
-          double x = rVal*sin(tVal)*cos(pVal);
-          double y = rVal*sin(tVal)*sin(pVal);
-          double z = rVal*cos(tVal);
-          
-          paramMap.addPositionCoordinate(*itComp, "x", x);
-          paramMap.addPositionCoordinate(*itComp, "y", y);
-          paramMap.addPositionCoordinate(*itComp, "z", z);
-        }
-      }
-    }
-
+    //----------------------------------------------------------------------------------------------------
     /**
     * Returns the bin index of the given X value
     * @param xValue :: The X value to search for
