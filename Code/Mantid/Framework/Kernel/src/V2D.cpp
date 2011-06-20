@@ -31,6 +31,36 @@ namespace Mantid
     }
 
     /**
+     * Sum this and the rhs
+     * @param rhs :: The other V2D
+     * @returns The sum of this and the given V2D
+     */
+    V2D V2D::operator+(const V2D &rhs) const
+    {
+      return V2D(m_x + rhs.m_x, m_y + rhs.m_y);
+    }
+    
+    /// Increment this vector by rhs
+    V2D & V2D::operator+=(const V2D &rhs)
+    {
+      m_x += rhs.m_x;
+      m_y += rhs.m_y;
+      return *this;
+    }
+    /// Subtract this and the rhs
+    V2D V2D::operator-(const V2D &rhs) const
+    {
+      return V2D(m_x - rhs.m_x, m_y - rhs.m_y);
+    }
+    /// Decrement this by rhs
+    V2D & V2D::operator-=(const V2D &rhs)
+    {
+      m_x -= rhs.m_x;
+      m_y -= rhs.m_y;
+      return *this;
+    }
+
+    /**
      * Equality operator including a tolerance
      * @param rhs :: The rhs object
      * @returns True if they are considered equal false otherwise
@@ -115,6 +145,21 @@ namespace Mantid
     {
       return std::acos(this->scalar_prod(other)/this->norm()/other.norm());
     }
+
+    //--------------------------------------------------------------------------
+    // Non-member, non-friend functions
+    //--------------------------------------------------------------------------
+    /**
+     * Output stream operator 
+     * @param os :: An output stream
+     * @param point :: The V2D to send to the stream
+     */
+    std::ostream& operator<<(std::ostream& os, const V2D& point)
+    {
+      os << "[" << point.X() << "," << point.Y() << "]";
+      return os;
+    }
+
 
   } // namespace Kernel
 } // namespace Mantid

@@ -69,6 +69,43 @@ public:
     TS_ASSERT_EQUALS(point[1], 10.0);
   }
 
+  void test_Sum_Gives_Correct_Vector()
+  {
+    V2D p1(3,4);
+    V2D p2(4,5);
+    TS_ASSERT_EQUALS(p1 + p2, V2D(7.0,9.0));
+    //Symmetry
+    TS_ASSERT_EQUALS(p2 + p1, V2D(7.0,9.0));
+  }
+
+  void test_Inplace_Sum_Updates_LHS()
+  {
+    V2D p1(3,4);
+    V2D p2(4,5);
+    p1 += p2;
+    TS_ASSERT_EQUALS(p1, V2D(7.0,9.0));
+    // p2 unchanged
+    TS_ASSERT_EQUALS(p2, V2D(4.0,5.0));
+  }
+
+  void test_Subtract_Gives_Correct_Vector()
+  {
+    V2D p1(3,9);
+    V2D p2(4,5);
+    TS_ASSERT_EQUALS(p1 - p2, V2D(-1.0,4.0));
+    //Anti-symmetry
+    TS_ASSERT_EQUALS(p2 - p1, V2D(1.0,-4.0));
+  }
+
+  void test_Inplace_Subtract_Updates_LHS()
+  {
+    V2D p1(3,9);
+    V2D p2(4,5);
+    p1 -= p2;
+    TS_ASSERT_EQUALS(p1, V2D(-1.0,4.0));
+    // p2 unchanged
+    TS_ASSERT_EQUALS(p2, V2D(4.0,5.0));
+  }
 
 
   void test_Equality_Gives_True_When_Diff_Less_Than_Tolerance()

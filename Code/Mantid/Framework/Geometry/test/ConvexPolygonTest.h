@@ -43,6 +43,12 @@ public:
     ConvexPolygon rectangle = makeRectangle();
     TS_ASSERT_DELTA(rectangle.area(), 2.0, DBL_EPSILON);
   }
+  
+  void test_Area_Of_A_Parallelogram()
+  {
+    ConvexPolygon parallelogram = makeParallelogram();
+    TS_ASSERT_DELTA(parallelogram.area(), std::sqrt(2.0), DBL_EPSILON);
+  }
 
 private:
   /// Side length 2
@@ -66,6 +72,17 @@ private:
     return ConvexPolygon(vertices);
   }
 
+  /// Short side 2-1-2-1
+  ConvexPolygon makeParallelogram()
+  {
+    Vertex2DList vertices;
+    vertices.insert(vertices.end(),Vertex2D());
+    vertices.insert(vertices.end(),Vertex2D(2.0, 0.0));
+    vertices.insert(vertices.end(),Vertex2D(2.0 + 0.5*std::sqrt(2.0), 0.5*std::sqrt(2.0)));
+    vertices.insert(vertices.end(),Vertex2D(0.5*std::sqrt(2.0), 0.5*std::sqrt(2.0)));
+    return ConvexPolygon(vertices);
+  }
+
   // If a class has no accessible default constructor we cannot use
   // TS_ASSERT_THROWS()
   template <typename ExceptionType>
@@ -77,11 +94,14 @@ private:
     }
     catch(ExceptionType &)
     {
+      return;
     }
     catch(...)
     {
       TS_FAIL("Unexpected exception type thrown");
+      return;
     }
+    TS_FAIL("Expecting an exception but non was thrown.");
   }
   
   

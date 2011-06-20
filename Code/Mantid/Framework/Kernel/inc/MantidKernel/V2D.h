@@ -5,6 +5,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include <ostream>
 
 namespace Mantid
 {
@@ -65,13 +66,20 @@ namespace Mantid
        * @returns The Y position
        */
       inline const double& Y() const { return m_y; }
-      /**
-       * Index access.
-       * @param index :: Index value
-       * @returns Value at the given index
-       * @throws if out of range
-       */
+      /// Index access.
       const double& operator[](const size_t index) const;
+
+      ///@name Arithmetic operations
+      ///@{
+      /// Sum this and the rhs
+      V2D operator+(const V2D &rhs) const;
+      /// Increment this vector by rhs
+      V2D & operator+=(const V2D &rhs);
+      /// Subtract this and the rhs
+      V2D operator-(const V2D &rhs) const;
+      /// Decrement this by rhs
+      V2D & operator-=(const V2D &rhs);
+      ///@}
 
       ///@name Comparison operators
       ///@{
@@ -103,6 +111,9 @@ namespace Mantid
       double m_y;
     };
 
+    // Overload operator <<
+    MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const V2D&);
+    
   } //namespace Kernel
 } //namespace Mantid
 
