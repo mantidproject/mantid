@@ -22,7 +22,7 @@ public:
     start_str = "2011-07-14T12:00Z";
   }
 
-  void xtestCopyHist()
+  void testCopyHist()
   {
     this->verify("ChangeLogTime_in", "ChangeLogTime_out");
   }

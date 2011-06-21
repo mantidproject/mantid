@@ -91,22 +91,19 @@ void ChangeLogTime::exec()
   }
 
   // Just overwrite if the change is in place
-  API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  if (outputWS == inputWS) {
-    inputWS->mutableRun().addProperty(newlog, true);
-    return;
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  if (outputWS != inputWS)
+  {
+    IAlgorithm_sptr duplicate = createSubAlgorithm("CloneWorkspace");
+    duplicate->initialize();
+    duplicate->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
+    duplicate->execute();
+    outputWS = duplicate->getProperty("OutputWorkspace");
+
+    setProperty("OutputWorkspace", outputWS);
   }
 
-  // see if input workspace is event
-  EventWorkspace_const_sptr eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventWS != NULL)
-  {
-    // TODO
-  }
-  else
-  {
-    // TODO
-  }
+  outputWS->mutableRun().addProperty(newlog, true);
 }
 
 } // namespace Mantid
