@@ -33,6 +33,13 @@ class EQSANSConfig(object):
         
         ## TOF band to discard at the end of the frame
         self.high_TOF_cut = 0
+        
+        # Beam center
+        self.center_x = None
+        self.center_y = None
+        
+        # Sample-detector distance
+        self.sample_detector_dist = 0
     
     def _process_file(self):
         """
@@ -45,7 +52,7 @@ class EQSANSConfig(object):
             # Looking for rectangular mask
             # Rectangular mask         = 7, 0; 7, 255
             #FIXME: Elliptical masks are treat as rectangular masks until implemented
-            if not line.strip().startswith("#") and  (line.find("Rectangular mask")>=0 \
+            if not line.strip().startswith("#") and  (line.lower().find("rectangular mask")>=0 \
                 or line.find("Elliptical mask")>=0):
                 coord = re.search("=[ ]*([0-9]+)[ ]*[ ,][ ]*([0-9]+)[ ]*[ ;,][ ]*([0-9]+)[ ]*[ ,][ ]*([0-9]+)", line)
                 if coord is not None:
@@ -60,8 +67,23 @@ class EQSANSConfig(object):
                         pass
                     
             # Looking for TOF band to cut from each side of the frame
-            if not line.strip().startswith("#") and line.find("TOF edge discard")>=0:
+            if not line.strip().startswith("#") and line.lower().find("tof edge discard")>=0:
                 cut = re.search("=[ ]*([0-9]+)[ ]*[ ,][ ]*([0-9]+)", line)
                 if cut is not None:
                     self.low_TOF_cut = float(cut.group(1))
                     self.high_TOF_cut = float(cut.group(2))
+
+            # Looking for beam center
+            #Spectrum center            = 89.6749, 129.693 [pixel]
+            if line.lower().find("spectrum center")>=0:
+                ctr = re.search("=[ ]*([0-9]+.[0-9]*)[ ]*[ ,][ ]*([0-9]+.[0-9]+)", line)
+                if ctr is not None:
+                    self.center_x = float(ctr.group(1))
+                    self.center_y = float(ctr.group(2))
+
+            # Sample-detector distance
+            #Sample to detector        = 4000 [mm]
+            if line.lower().find("sample to detector")>=0:
+                dist = re.search("=[ ]*([0-9]+.?[0-9]*)", line)
+                if dist is not None:
+                    self.sample_detector_dist = dist.group(1)
