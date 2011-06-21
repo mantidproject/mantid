@@ -2,6 +2,13 @@ from MantidFramework import *
 
 class MergeCalFiles(PythonAlgorithm):
 
+  def category(self):
+    return "General"
+
+  def name(self):
+    return "MergeCalFiles"
+
+
   def PyInit(self):
     self.declareFileProperty("UpdateFile","", FileAction.Load, ['cal'],Description="The file containing changes to apply to the master file")
     self.declareFileProperty("MasterFile","", FileAction.Load, ['cal'],Description="The master file to be altered, the file must be sorted by UDET")

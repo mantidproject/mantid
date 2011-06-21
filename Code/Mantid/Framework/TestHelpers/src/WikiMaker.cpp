@@ -95,7 +95,11 @@ std::string makeWikiText(IAlgorithm * alg)
     out << desc << "\n";
   out << "\n";
   out << "[[Category:Algorithms]]\n";
-  out << "[[Category:" << alg->category() << "]]\n";
+  std::vector<std::string> categories = alg->categories();
+  for(std::vector<std::string>::const_iterator itCategories = categories.begin(); itCategories!=categories.end(); itCategories++)
+  {
+    out << "[[Category:" << *itCategories << "]]\n";
+  }
   out << "{{AlgorithmLinks|" << alg->name() << "}}\n";
 
   return out.str();

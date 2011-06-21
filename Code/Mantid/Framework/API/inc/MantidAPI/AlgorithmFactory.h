@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
+#include <set>
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -123,6 +124,8 @@ public:
   virtual ~AlgorithmFactoryImpl();
   /// creates an algorithm name convolved from an name and version
   std::string createName(const std::string&, const int&)const;
+  /// fills a set with the hidden categories
+  void fillHiddenCategories(std::set<std::string> *categorySet) const;
   ///static reference to the logger class
   Kernel::Logger& g_log;
 
