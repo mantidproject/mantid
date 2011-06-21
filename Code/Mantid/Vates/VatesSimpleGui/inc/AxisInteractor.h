@@ -6,6 +6,7 @@
 class QGraphicsScene;
 class QGraphicsView;
 class QGridLayout;
+class QMenu;
 class QMouseEvent;
 class QString;
 class QwtScaleEngine;
@@ -116,6 +117,11 @@ public:
 
 signals:
   /**
+   * Signal to pass along the name of the indicator to delete.
+   * @param name the name of the indicator to be deleted
+   */
+  void deleteIndicator(const QString &name);
+  /**
    * Signal to pass along the name of the indicator being selected.
    * @param name the name of the selected indicator
    */
@@ -135,6 +141,12 @@ protected slots:
 	 * @param name the ParaView name of the slice
 	 */
   void setIndicatorName(const QString &name);
+  /**
+   * Show a context menu for the indicator that will allow it to be
+   * deleted or hidden/shown.
+   * @param pos location to show the context menu
+   */
+  void showContextMenu(const QPoint &pos);
 
 protected:
 	/**
@@ -146,9 +158,12 @@ protected:
 	bool eventFilter(QObject *obj, QEvent *event);
 
 private:
+  /// Create the context menu of the indicators
+  void createContextMenu();
 	/// Handle the setup of the widget based on orientation requests.
 	void widgetLayout();
 
+  QMenu *indicatorContextMenu; ///< The indicator context menu
 	QwtScaleEngine *engine; ///< The scale type for the axis widget
 	QGraphicsView *graphicsView; ///< The holder for the slice indicators
 	QGridLayout *gridLayout; ///< Layout manager for widgets

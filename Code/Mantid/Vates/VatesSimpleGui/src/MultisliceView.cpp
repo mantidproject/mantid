@@ -69,6 +69,16 @@ MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
 			this->ui.yAxisWidget, SLOT(setIndicatorName(const QString &)));
 	QObject::connect(this, SIGNAL(sliceNamed(const QString &)),
 			this->ui.zAxisWidget, SLOT(setIndicatorName(const QString &)));
+
+  QObject::connect(this->ui.xAxisWidget,
+                   SIGNAL(deleteIndicator(const QString &)), this,
+                   SLOT(deleteCut(const QString &)));
+  QObject::connect(this->ui.yAxisWidget,
+                   SIGNAL(deleteIndicator(const QString &)), this,
+                   SLOT(deleteCut(const QString &)));
+  QObject::connect(this->ui.zAxisWidget,
+                   SIGNAL(deleteIndicator(const QString &)), this,
+                   SLOT(deleteCut(const QString &)));
 }
 
 MultiSliceView::~MultiSliceView()
@@ -325,4 +335,13 @@ void MultiSliceView::updateCutPosition(double position)
   }
   vtkSMPropertyHelper(plane, "Origin").Set(origin, 3);
   cut->getProxy()->UpdateVTKObjects();
+}
+
+void MultiSliceView::deleteCut(const QString &name)
+{
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  builder->destroy(cut);
+  this->originSourceRepr->setVisible(false);
 }

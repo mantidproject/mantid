@@ -7,12 +7,14 @@
 #include <qwt_scale_map.h>
 #include <qwt_scale_widget.h>
 
+#include <QAction>
 #include <QGraphicsItem>
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
 #include <QGridLayout>
 #include <QList>
+#include <QMenu>
 #include <QMouseEvent>
 #include <QString>
 
@@ -20,6 +22,7 @@
 #include <iostream>
 AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
 {
+  this->indicatorContextMenu = NULL;
   this->orientation = Qt::Vertical;
   this->scalePos = AxisInteractor::RightScale;
 
@@ -41,7 +44,7 @@ AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
 	//this->widgetLayout();
 
 	this->graphicsView->setScene(this->scene);
-	this->graphicsView->installEventFilter(this);
+  //this->graphicsView->installEventFilter(this);
 
 	this->engine = new QwtLinearScaleEngine;
 	this->transform = new QwtScaleTransformation(QwtScaleTransformation::Linear);
@@ -51,6 +54,10 @@ AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
 
   QObject::connect(this->scene, SIGNAL(selectionChanged()), this,
                    SLOT(getIndicator()));
+
+  this->setContextMenuPolicy(Qt::CustomContextMenu);
+  QObject::connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+                   this, SLOT(showContextMenu(const QPoint &)));
 }
 
 void AxisInteractor::widgetLayout()
@@ -281,4 +288,48 @@ void AxisInteractor::getIndicator()
       emit this->indicatorSelected(item->toolTip());
     }
   }
+}
+
+void AxisInteractor::showContextMenu(const QPoint &pos)
+{
+  QPoint globalPos = this->mapToGlobal(pos);
+  QList<QGraphicsItem *> list = this->scene->items();
+  for (int i = 0; i < list.count(); ++i)
+  {
+    QGraphicsItem *item = list.at(i);
+    if (item->type() == IndicatorItemType)
+    {
+      if (item->isUnderMouse())
+      {
+        item->setSelected(false);
+        this->createContextMenu();
+        QAction *selectedItem = this->indicatorContextMenu->exec(globalPos);
+        if (selectedItem)
+        {
+          if (QString("Delete") == selectedItem->text())
+          {
+            emit this->deleteIndicator(item->toolTip());
+            this->scene->removeItem(item);
+          }
+          if (QString("Hide") == selectedItem->text())
+          {
+
+          }
+        }
+      }
+    }
+  }
+}
+
+void AxisInteractor::createContextMenu()
+{
+  if (this->indicatorContextMenu)
+  {
+    return;
+  }
+
+  this->indicatorContextMenu = new QMenu();
+  QAction *hideAction = this->indicatorContextMenu->addAction("Hide");
+  hideAction->setCheckable(true);
+  this->indicatorContextMenu->addAction("Delete");
 }

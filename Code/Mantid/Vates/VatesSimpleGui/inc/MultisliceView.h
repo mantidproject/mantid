@@ -64,6 +64,11 @@ public:
 
 protected slots:
   /**
+   * Delete a slice from the view.
+   * @param name the name of the slice to be deleted
+   */
+  void deleteCut(const QString &name);
+  /**
    * Make the slice interactor appear on the view when an indicator is
    * selected.
    * @param name the server manager name of the selected slice
