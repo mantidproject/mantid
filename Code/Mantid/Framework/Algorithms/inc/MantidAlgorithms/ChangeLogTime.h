@@ -8,7 +8,7 @@ namespace Mantid
 namespace Algorithms
 {
 
-class MANTID_API_DLL ChangeLogTime : public API::Algorithm
+class DLLExport ChangeLogTime : public API::Algorithm
 {
 public:
     ChangeLogTime();
