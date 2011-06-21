@@ -38,13 +38,11 @@ PropertyHandler::PropertyHandler(Mantid::API::IFitFunction* fun,
                 :FitFunctionHandler(fun),m_browser(browser),
                 m_cf(dynamic_cast<Mantid::API::CompositeFunction*>(fun)),
                 m_pf(dynamic_cast<Mantid::API::IPeakFunction*>(fun)),
-                m_if(fun),
                 m_parent(parent),
                 m_type(NULL),
                 m_item(item),
                 m_base(0),
                 m_ci(0),
-                m_curve(NULL),
                 m_hasPlot(false)
 {}
 
@@ -413,7 +411,7 @@ void PropertyHandler::removeFunction()
     {
       if (cf->getFunction(i) == function())
       {
-        removePlot();
+        emit m_browser->removePlotSignal(this);
         cf->removeFunction(i);
         break;
       }
@@ -580,7 +578,7 @@ bool PropertyHandler::setParameter(QtProperty* prop)
     std::string parName = prop->propertyName().toStdString();
     double parValue = m_browser->m_doubleManager->value(prop);
     m_fun->setParameter(parName,parValue);
-    m_browser->sendParameterChanged(m_if);
+    m_browser->sendParameterChanged(m_fun);
     return true;
   }
   if (m_cf)
@@ -844,7 +842,7 @@ Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
 
     m_browser->m_changeSlotsEnabled = true;
 
-    removePlot();
+    emit m_browser->removePlotSignal(this);
 
     const Mantid::API::IFitFunction* f_old = static_cast<const Mantid::API::IFitFunction*>(function());
     PropertyHandler* h = new PropertyHandler(f,m_parent,m_browser,m_item);
@@ -1007,7 +1005,7 @@ void PropertyHandler::removeTie(const QString& parName)
 void PropertyHandler::calcBase()
 {
   if (!m_browser->m_autoBackground) return;
-  Mantid::API::IFunctionMW* fMW = dynamic_cast<Mantid::API::IFunctionMW*>(m_if);
+  Mantid::API::IFunctionMW* fMW = dynamic_cast<Mantid::API::IFunctionMW*>(m_fun);
   if (!fMW) return;
   Mantid::API::MatrixWorkspace_const_sptr ws = fMW->getMatrixWorkspace();
   if (ws)
@@ -1255,6 +1253,7 @@ QList<PropertyHandler*> PropertyHandler::getPeakList()
  * Plot this function on a graph
  * @param g :: The graph to plot on
  */
+/*
 void PropertyHandler::plot(Graph* g)const
 {
   if (!m_curve)
@@ -1274,12 +1273,12 @@ void PropertyHandler::plot(Graph* g)const
       m_browser->m_displayActionPlotGuess->setText("Remove guess");
     }
   }
-}
+}*/
 
 /**
  * Remove this function curve from its graph
  */
-void PropertyHandler::removePlot()
+/*void PropertyHandler::removePlot()
 {
   if (m_curve)
   {
@@ -1290,23 +1289,25 @@ void PropertyHandler::removePlot()
       m_browser->m_displayActionPlotGuess->setText("Plot guess");
     }
   }
-}
+}*/
 
 /**
  * Remove the reference to the function curve as it has been deleted
  */
-void PropertyHandler::plotRemoved(PlotCurve* c)
+/*void PropertyHandler::plotRemoved(PlotCurve* c)
 {
   if (c == dynamic_cast<PlotCurve*>(m_curve))
   {
     m_curve = NULL;
   }
-}
+}*/
 
 /**
  * Replot function curve when parameters have been changed
  */
-void PropertyHandler::replot()const
+
+
+/*void PropertyHandler::replot()const
 {
   if (m_curve)
   {
@@ -1315,14 +1316,14 @@ void PropertyHandler::replot()const
     m_curve->setFormulas(formulas);
     m_curve->loadData();
   }
-}
+}*/
 
 /**
  * Remove all plots including children's
  */
 void PropertyHandler::removeAllPlots()
 {
-  removePlot();
+  emit m_browser->removePlotSignal(this);
   if (m_cf)
   {
     for(size_t i=0;i<m_cf->nFunctions();++i)

@@ -67,6 +67,7 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
   connect(fitBrowser(),SIGNAL(plotCurrentGuess()),this,SLOT(plotCurrentGuess()));
   connect(fitBrowser(),SIGNAL(removeGuess()),this,SLOT(removeGuess()));
   connect(fitBrowser(),SIGNAL(removeCurrentGuess()),this,SLOT(removeCurrentGuess()));
+  connect(fitBrowser(),SIGNAL(removePlotSignal(PropertyHandler*)),this,SLOT(removePlot(PropertyHandler*)));
 
   m_mantidUI->showFitPropertyBrowser();
   connect(this,SIGNAL(isOn(bool)),fitBrowser(),SLOT(setPeakToolOn(bool)));
@@ -623,13 +624,44 @@ void PeakPickerTool::parameterChanged(const Mantid::API::IFitFunction* f)
   PropertyHandler* theHandler = fitBrowser()->getHandler();
   PropertyHandler* h = theHandler->findHandler(f);
   if (!h) return;
-  h->replot();
+  replot(h);
   if (h != theHandler && theHandler->hasPlot())
   {
-    theHandler->replot();
+    replot(theHandler);
   }
   graph()->replot();
 }
+
+void PeakPickerTool::replot(PropertyHandler* h) const
+{
+  if (h->hasPlot())
+  {
+    FunctionCurve* fc = 0;
+    int indexForFC = -1;
+    for (int i = 0; i < d_graph->curves(); i++)
+    {
+      QwtPlotCurve* qwt = d_graph->curve(i);
+      fc = dynamic_cast<FunctionCurve*>(d_graph->curve(i));
+      if (fc)
+      {
+        if (fc->getIFitFunctionIdentifier() == h->ifun())
+        {
+          indexForFC = i;
+          break;
+        }
+      }
+    }
+
+    if (indexForFC >= 0)
+    {
+      QStringList formulas = fc->formulas();
+      formulas[1] = QString::fromStdString(*h->ifun());
+      fc->setFormulas(formulas);
+      fc->loadData();
+    }
+  }
+}
+
 
 /**
  * Adds commands specific to the tool to a context menu

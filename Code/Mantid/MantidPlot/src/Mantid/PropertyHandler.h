@@ -65,7 +65,7 @@ public:
   // Return peak function
   Mantid::API::IPeakFunction* pfun()const{return m_pf;}
   // Return IFitFunction
-  Mantid::API::IFitFunction* ifun()const{return m_if;}
+  Mantid::API::IFitFunction* ifun()const{return m_fun;}
   // Return the browser item
   QtBrowserItem* item()const{return m_item;}
   // Return the parent handler
@@ -163,10 +163,10 @@ public:
   QList<PropertyHandler*> getPeakList();
 
   // Plot the function on a graph
-  void plot(Graph* g)const;
+  //void plot(Graph* g)const;
   bool& hasPlot() {return m_hasPlot;}
-  void replot()const;
-  void removePlot();
+  //void replot()const;
+  //void removePlot();
   void removeAllPlots();
 
   void fit();
@@ -174,13 +174,13 @@ public:
 protected slots:
 
   // 
-  void plotRemoved(PlotCurve*);
+  //void plotRemoved(PlotCurve*);
 
 private:
   FitPropertyBrowser* m_browser;
   Mantid::API::CompositeFunction* m_cf;//< if the function is composite holds pointer to it
   Mantid::API::IPeakFunction* m_pf;//< if the function is peak holds pointer to it
-  Mantid::API::IFitFunction* m_if;//< pointer to IFitFunction
+  //Mantid::API::IFitFunction* m_if;//< pointer to IFitFunction
   Mantid::API::CompositeFunction* m_parent; //< if the function has parent holds pointer to it
   QtProperty* m_type;
   QtBrowserItem* m_item;//< the browser item
@@ -190,7 +190,7 @@ private:
   QMap<QString,std::pair<QtProperty*,QtProperty*> > m_constraints;//< constraints
   double m_base; //< the baseline for a peak
   int m_ci; //< approximate index in the workspace at the peak centre
-  mutable FunctionCurve* m_curve;//< the curve to plot the handled function
+  //mutable FunctionCurve* m_curve;//< the curve to plot the handled function
   mutable bool m_hasPlot;
 };
 

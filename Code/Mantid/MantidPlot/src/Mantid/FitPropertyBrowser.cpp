@@ -759,7 +759,8 @@ void FitPropertyBrowser::deleteFunction()
   PropertyHandler* h = getHandler()->findHandler(ci->property());
   if (h)
   {
-    getHandler()->removePlot();
+    //getHandler()->removePlot();
+    emit removePlotSignal(getHandler());
     h->removeFunction();
     compositeFunction()->checkFunction();
     emit functionRemoved();
