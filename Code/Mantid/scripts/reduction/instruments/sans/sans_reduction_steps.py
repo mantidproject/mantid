@@ -1089,8 +1089,8 @@ class CalculateNorm(object):
         distribution/non-distribution flag set correctly as they maybe converted
     """
     TMP_WORKSPACE_NAME = '__CalculateNorm_loaded_temp'
-    TMP_WAVE_CORR_NAME = '__Q_WAVE_conversion_temp'
-    TMP_PIXEL_CORR_NAME = '__Q_pixel_conversion_temp'
+    WAVE_CORR_NAME = '__Q_WAVE_conversion_temp'
+    PIXEL_CORR_NAME = '__Q_pixel_conversion_temp'
     
     def  __init__(self, wavelength_deps=[]):
         super(CalculateNorm, self).__init__()
@@ -1102,13 +1102,6 @@ class CalculateNorm(object):
         self._load='Load'
         #a parameters string to add as the last argument to the above algorithm
         self._load_params=''
-
-    def addWavelengthCorr(self, wksp):
-        """
-            Adds another scaling with wavelength to the multiplication of
-            workspaces that will happen at execution
-        """
-        self._wave_adjs.append(wksp)
 
     def setPixelCorrFile(self, filename):
         """
@@ -1136,13 +1129,14 @@ class CalculateNorm(object):
         else:
             return False 
 
-    def calculate(self, reducer):
+    def calculate(self, reducer, wave_wksps=[]):
         """
             Multiplies all the wavelength scalings into one workspace and all the detector
             dependent scalings into another workspace that can be used by ConvertToQ. It is important
             that the wavelength correction workspaces have a know distribution/non-distribution state
+            @param reducer: settings used for this reduction
+            @param wave_wksps: additional wavelength dependent correction workspaces to include   
         """
-        wave_wksps = self._wave_adjs
         for step in self._wave_steps:
             if step.output_wksp:
                 wave_wksps.append(step.output_wksp)
@@ -1154,7 +1148,7 @@ class CalculateNorm(object):
 
             if not wave_adj:
                 #first time around this loop
-                wave_adj = self.TMP_WAVE_CORR_NAME
+                wave_adj = self.WAVE_CORR_NAME
                 RenameWorkspace(self.TMP_WORKSPACE_NAME, wave_adj)
             else:
                 #multiplying two raw counts workspaces gives a dependence on the bin width^2 which Mantid isn't set up to handle (dependence on the bin width = is distribution = is handled)
@@ -1165,7 +1159,7 @@ class CalculateNorm(object):
 
         pixel_adj = None
         if self._pixel_file:
-            pixel_adj = self.TMP_PIXEL_CORR_NAME
+            pixel_adj = self.PIXEL_CORR_NAME
             load_com = self._load+'("'+self._pixel_file+'","'+pixel_adj+'"'
             if self._load_params:
                 load_com  += ','+self._load_params
@@ -1247,18 +1241,17 @@ class ConvertToQ(ReductionStep):
             Calculate the normalization workspaces and then call the chosen Q conversion algorithm
         """
         #create normalization workspaces
-        
         if self._norms:
-            wave_adj, pixel_adj = self._norms.calculate(reducer)
+            wave_adj, pixel_adj = self._norms.calculate(reducer, [])
         else:
             raise RuntimeError('Normalization workspaces must be created by CalculateNorm() and passed to this step')
 
         try:         
             if self._Q_alg == 'Q1D':
                 if pixel_adj:
-                    Q1D(workspace, workspace, OutputBinning=reducer.Q_REBIN, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity)
+                    Q1D(workspace, workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity)
                 else:
-                    Q1D(workspace, workspace, OutputBinning=reducer.Q_REBIN, WavelengthAdj=wave_adj, AccountForGravity=self._use_gravity)
+                    Q1D(workspace, workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, AccountForGravity=self._use_gravity)
     
             elif self._Q_alg == 'Qxy':
                 Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, AccountForGravity=self._use_gravity)
@@ -1600,6 +1593,53 @@ class StripEndZeros(ReductionStep):
         length -= 1
         for j in range(length, 0,-1):
             if ( y_vals[j] != self._flag_value ):
+                stop = j
+                break
+        # Find the appropriate X values and call CropWorkspace
+        x_vals = result_ws.readX(0)
+        startX = x_vals[start]
+        # Make sure we're inside the bin that we want to crop
+        endX = 1.001*x_vals[stop + 1]
+        CropWorkspace(workspace,workspace,startX,endX)
+
+class StripEndNans(ReductionStep):
+    def __init__(self):
+        super(StripEndNans, self).__init__()
+        
+    def _isNan(self, val):
+        """
+            Can replaced by isNaN in Python 2.6
+            @param val: float to check
+        """
+        if val != val:
+            return True
+        else:
+            return False
+        
+    def execute(self, reducer, workspace):
+        """
+            Trips leading and trailing Nan values from workspace
+            @param reducer: unused
+            @param workspace: the workspace to convert
+        """
+        result_ws = mantid.getMatrixWorkspace(workspace)
+        if result_ws.getNumberHistograms() != 1:
+            #Strip zeros is only possible on 1D workspaces
+            return
+
+        y_vals = result_ws.readY(0)
+        length = len(y_vals)
+        # Find the first non-zero value
+        start = 0
+        for i in range(0, length):
+            if not self._isNan(y_vals[i]):
+                start = i
+                break
+        # Now find the last non-zero value
+        stop = 0
+        length -= 1
+        for j in range(length, 0,-1):
+            if not self._isNan(y_vals[j]):
                 stop = j
                 break
         # Find the appropriate X values and call CropWorkspace
