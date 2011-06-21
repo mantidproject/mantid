@@ -173,6 +173,10 @@ void mpMainWindow::switchViews(ModeControlWidget::Views v)
 	{
 		this->proxyTabWidget->getObjectInspector()->accept();
 	}
+  if (this->currentView->inherits("ThreeSliceView"))
+  {
+    static_cast<ThreeSliceView *>(this->currentView)->correctVisibility(this->pipelineBrowser);
+  }
 }
 
 void mpMainWindow::swapViews()

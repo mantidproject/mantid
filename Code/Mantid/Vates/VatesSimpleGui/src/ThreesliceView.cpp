@@ -14,6 +14,7 @@
 #include <pqScalarsToColors.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
+#include <pqServerManagerSelectionModel.h>
 #include <pqSMAdaptor.h>
 #include <vtkDataObject.h>
 #include <vtkProperty.h>
@@ -76,20 +77,11 @@ void ThreeSliceView::render()
 	this->makeThreeSlice();
 	this->mainView->resetViewDirection(-1, -1, -1, 0, 1, 0);
 	this->renderAll();
-
-  QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
-  emit this->dataRange(range.first, range.second);
 }
 
 void ThreeSliceView::makeSlice(ViewBase::Direction i, pqRenderView *view,
 		pqPipelineSource *cut, pqPipelineRepresentation *repr)
 {
-	pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-
-	cut = builder->createFilter("filters", "Cut", this->origSource);
-	pqDataRepresentation *trepr = builder->createDataRepresentation(
-			cut->getOutputPort(0), view);
-	repr = qobject_cast<pqPipelineRepresentation *>(trepr);
 	vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
 			"CutFunction").GetAsProxy();
 
@@ -124,7 +116,7 @@ void ThreeSliceView::makeSlice(ViewBase::Direction i, pqRenderView *view,
 		break;
 	}
 	vtkSMPropertyHelper(plane, "Normal").Set(orient, 3);
-	trepr->getProxy()->UpdateVTKObjects();
+  repr->getProxy()->UpdateVTKObjects();
 
 	view->resetViewDirection(orient[0], orient[1], orient[2],
 			up[0], up[1], up[2]);
@@ -143,8 +135,25 @@ void ThreeSliceView::makeThreeSlice()
 	this->originSourceRepr->colorByArray("signal",
 			vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
+  // Have to create the cuts and cut representations up here to keep
+  // them around
+
+  this->xCut = builder->createFilter("filters", "Cut", this->origSource);
+  pqDataRepresentation *trepr = builder->createDataRepresentation(
+      this->xCut->getOutputPort(0), this->xView);
+  this->xCutRepr = qobject_cast<pqPipelineRepresentation *>(trepr);
 	this->makeSlice(ViewBase::X, this->xView, this->xCut, this->xCutRepr);
+
+  this->yCut = builder->createFilter("filters", "Cut", this->origSource);
+  trepr = builder->createDataRepresentation(this->yCut->getOutputPort(0),
+                                            this->yView);
+  this->yCutRepr = qobject_cast<pqPipelineRepresentation *>(trepr);
 	this->makeSlice(ViewBase::Y, this->yView, this->yCut, this->yCutRepr);
+
+  this->zCut = builder->createFilter("filters", "Cut", this->origSource);
+  trepr = builder->createDataRepresentation(this->zCut->getOutputPort(0),
+                                            this->zView);
+  this->zCutRepr = qobject_cast<pqPipelineRepresentation *>(trepr);
 	this->makeSlice(ViewBase::Z, this->zView, this->zCut, this->zCutRepr);
 }
 
@@ -216,4 +225,24 @@ void ThreeSliceView::onColorMapChange(const pqColorMapModel *model)
 
   lutProxy->UpdateVTKObjects();
   this->renderAll(false);
+}
+
+void ThreeSliceView::correctVisibility(pqPipelineBrowserWidget *pbw)
+{
+  pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
+  smsModel->setCurrentItem(this->xCut, pqServerManagerSelectionModel::ClearAndSelect);
+  smsModel->setCurrentItem(this->yCut, pqServerManagerSelectionModel::Select);
+  smsModel->setCurrentItem(this->zCut, pqServerManagerSelectionModel::Select);
+  pbw->setSelectionVisibility(true);
+  smsModel->setCurrentItem(this->xCut, pqServerManagerSelectionModel::Clear);
+  smsModel->setCurrentItem(this->yCut, pqServerManagerSelectionModel::Clear);
+  smsModel->setCurrentItem(this->zCut, pqServerManagerSelectionModel::Clear);
+  this->originSourceRepr->setVisible(false);
+  this->correctColorScaleRange();
+}
+
+void ThreeSliceView::correctColorScaleRange()
+{
+  QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
+  emit this->dataRange(range.first, range.second);
 }

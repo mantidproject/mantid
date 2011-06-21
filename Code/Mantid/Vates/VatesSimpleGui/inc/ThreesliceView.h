@@ -7,6 +7,7 @@
 #include "ui_ThreesliceView.h"
 
 class pqColorMapModel;
+class pqPipelineBrowserWidget;
 class pqPipelineRepresentation;
 class pqPipelineSource;
 class pqRenderView;
@@ -51,7 +52,14 @@ public:
     ThreeSliceView(QWidget *parent = 0);
     /// Default destructor.
     virtual ~ThreeSliceView();
-
+    /**
+     * Correct an oddity in the creation of the view so that the cuts
+     * are visibile.
+     * @param pbw the main program's handle to the pqPipelineBrowserWidget
+     */
+    void correctVisibility(pqPipelineBrowserWidget *pbw);
+    /// Correct the color scale range if not in automatic mode.
+    void correctColorScaleRange();
     /**
      * ViewBase::getView
      */
@@ -126,7 +134,6 @@ private:
     QPointer<pqPipelineSource> zCut; ///< The slice for the XY plane
     QPointer<pqPipelineRepresentation> zCutRepr; ///< The XY slice representation
     QPointer<pqRenderView> zView; ///< The XY plane view
-
 };
 
 #endif // THREESLICEVIEW_H_
