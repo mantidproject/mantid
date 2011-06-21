@@ -45,7 +45,27 @@ public:
 
   const std::string name() const { return "ToyAlgorithm";} ///< Algorithm's name for identification
   int version() const  { return 2;} ///< Algorithm's version for identification
-  const std::string category() const { return "Cat";} 
+  const std::string category() const { return "Cat,Leopard,Mink";} 
+  const std::string alias() const { return "Dog";}
+  void init()
+  { 
+    declareProperty("prop1","value");
+    declareProperty("prop2",1);   
+    declareProperty("prop3",10.5);   
+  }
+  void exec() {}
+};
+
+class ToyAlgorithmThree : public Algorithm
+{
+public:
+  ToyAlgorithmThree() : Algorithm() {}
+  virtual ~ToyAlgorithmThree() {}
+
+  const std::string name() const { return "ToyAlgorithm";} ///< Algorithm's name for identification
+  int version() const  { return 2;} ///< Algorithm's version for identification
+  const std::string category() const { return "Cat;Leopard;Mink";} 
+  const std::string categorySeperator() const { return ";";} 
   const std::string alias() const { return "Dog";}
   void init()
   { 
@@ -102,6 +122,18 @@ public:
   void testCategory()
   {
     TS_ASSERT_EQUALS( alg.category(),"Cat" );
+    TS_ASSERT_EQUALS( algv2.category(),"Cat,Leopard,Mink" );
+  }
+
+  void testCategories()
+  {
+    std::vector<std::string> result;
+    result.push_back("Cat");
+    TS_ASSERT_EQUALS( alg.categories(),result );
+    result.push_back("Leopard");
+    result.push_back("Mink");
+    TS_ASSERT_EQUALS( algv2.categories(),result );
+    TS_ASSERT_EQUALS( algv3.categories(),result );
   }
 
   void testAlias()
@@ -289,6 +321,7 @@ private:
 
   ToyAlgorithm alg;
   ToyAlgorithmTwo algv2;
+  ToyAlgorithmThree algv3;
 };
 
  

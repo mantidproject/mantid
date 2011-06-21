@@ -15,6 +15,8 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
+#include <Poco/StringTokenizer.h>
+
 #include <iomanip>
 
 using namespace Mantid::Kernel;
@@ -1217,6 +1219,22 @@ namespace Mantid
     {
       double p = m_startChildProgress + (m_endChildProgress - m_startChildProgress)*pNf->progress;
       progress(p,pNf->message);
+    }
+
+    /// Function to return all of the categories that contain this algorithm
+    const std::vector<std::string> Algorithm::categories() const
+    {
+      std::vector < std::string > res;
+      Poco::StringTokenizer tokenizer(category(), categorySeperator(),
+          Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+      Poco::StringTokenizer::Iterator h = tokenizer.begin();
+
+      for (; h != tokenizer.end(); ++h)
+      {
+        res.push_back(*h);
+      }
+
+      return res;
     }
 
 
