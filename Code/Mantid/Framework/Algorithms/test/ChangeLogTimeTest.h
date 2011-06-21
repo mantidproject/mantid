@@ -15,11 +15,12 @@ using namespace Mantid::Kernel;
 class ChangeLogTimeTest : public CxxTest::TestSuite
 {
 public:
+  /// Set up the parameters for what the tests do.
   ChangeLogTimeTest()
   {
     length = 10;
     logname = "fakelog";
-    start_str = "2011-07-14T12:00Z";
+    start_str = "2011-07-14T12:00Z"; // Noon on Bastille day 2011.
   }
 
   void testCopyHist()
@@ -32,10 +33,19 @@ public:
   }
 
 private:
+  /// Name of the log to create/modify.
   std::string logname;
+  /// Number of log elements.
   int length;
+  /// The string version of the start date/time for the log.
   std::string start_str;
 
+  /**
+   * Run the actual test including checking the results and cleanup.
+   *
+   * @param in_name Name of the input workspace.
+   * @param out_name Name of the output workspace.
+   */
   void verify(const std::string in_name, const std::string out_name)
   {
     DateAndTime start(start_str);

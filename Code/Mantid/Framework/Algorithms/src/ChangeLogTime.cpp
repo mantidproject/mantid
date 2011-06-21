@@ -18,10 +18,12 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
+/// Empty constructor allocates no resources.
 ChangeLogTime::ChangeLogTime()
 {
 }
 
+/// Empty destructor deallocates no resources.
 ChangeLogTime::~ChangeLogTime()
 {
 }
@@ -46,9 +48,12 @@ const std::string ChangeLogTime::category() const
 
 void ChangeLogTime::initDocs()
 {
-
+  string summary = "Adds a constant to the times for the requested log.";
+  this->setWikiSummary(summary);
+  this->setOptionalMessage(summary);
 }
 
+/// Declares the parameters for running the algorithm.
 void ChangeLogTime::init()
 {
   declareProperty( new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input),
@@ -60,6 +65,7 @@ void ChangeLogTime::init()
         "Number of seconds (a float) to add to the time of each log value. Required.");
 }
 
+/// Do the actual work of modifying the log in the workspace.
 void ChangeLogTime::exec()
 {
   // check that a log was specified
