@@ -337,7 +337,7 @@ public slots:
     // Execute selected algorithm
     void executeAlgorithm();
     // Execute algorithm given name and version
-    void executeAlgorithm(QString algName, int version = -1);
+    bool executeAlgorithm(QString algName, int version = -1);
     //Execute an algorithm with the given parameter list
     void executeAlgorithm(const QString & algName, const QString & paramList,Mantid::API::AlgorithmObserver* obs = NULL);
     // Find the name of the first input workspace for an algorithm

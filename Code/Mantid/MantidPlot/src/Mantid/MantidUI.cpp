@@ -759,12 +759,15 @@ void MantidUI::getSelectedAlgorithm(QString& algName, int& version)
   QList<QTreeWidgetItem*> items = m_exploreAlgorithms->m_tree->selectedItems();
   if ( items.size() == 0 )
   {
-    int i = m_exploreAlgorithms->m_findAlg->currentIndex();
-    QString itemText = m_exploreAlgorithms->m_findAlg->itemText(i);
-    if (i < 0 || itemText != m_exploreAlgorithms->m_findAlg->currentText())
+    //typed selection
+    int i = m_exploreAlgorithms->m_findAlg->currentIndex(); //selected index in the combobox, could be from an old selection
+    QString itemText = m_exploreAlgorithms->m_findAlg->itemText(i); //text in the combobox at the selected index
+    QString typedText = m_exploreAlgorithms->m_findAlg->currentText(); //text as typed in the combobox
+    if (i < 0 || itemText != typedText)
     {
+      executeAlgorithm(typedText, -1);
       algName = "";
-      version = 0;
+      version = -99;
     }
     else
     {
@@ -791,12 +794,15 @@ void MantidUI::executeAlgorithm()
   QString algName;
   int version;
   getSelectedAlgorithm(algName,version);
-  if (algName.isEmpty())
+  if (version != -99) //already executed
   {
-    QMessageBox::warning(appWindow(),"Mantid","Please select an algorithm");
-    return;
+    if (algName.isEmpty())
+    {
+      QMessageBox::warning(appWindow(),"Mantid","Please select an algorithm");
+      return;
+    }
+    executeAlgorithm(algName, version);
   }
-  executeAlgorithm(algName, version);
 }
 
 /** 
@@ -889,13 +895,13 @@ void MantidUI::executeSaveNexus(QString algName,int version)
 
 
 }
-void MantidUI::executeAlgorithm(QString algName, int version)
+bool MantidUI::executeAlgorithm(QString algName, int version)
 {
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
-  if( !alg ) return;
+  if( !alg ) return false;
   MantidQt::API::AlgorithmDialog* dlg=createAlgorithmDialog(alg);
   executeAlgorithm(dlg,alg);
-
+  return true;
 }
 
 /** This method is to execute loadraw from ICat Interface
@@ -1234,8 +1240,12 @@ Mantid::API::IAlgorithm_sptr MantidUI::createAlgorithm(const QString& algName, i
   }
   catch(...)
   {
-    QMessageBox::critical(appWindow(),"MantidPlot",
-        "Cannot create algorithm \""+ algName + "\" version "+QString::number(version));
+    QString message= "Cannot create algorithm \""+ algName + "\"";
+    if (version != -1)
+    {
+      message+= " version "+QString::number(version);
+    }
+    QMessageBox::warning(appWindow(),"MantidPlot",message);
     alg = Mantid::API::IAlgorithm_sptr();
   }
   return alg;

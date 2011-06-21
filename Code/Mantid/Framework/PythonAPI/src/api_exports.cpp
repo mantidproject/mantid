@@ -42,6 +42,7 @@ using namespace boost::python;
   // Overloads for create*Algorithms function which has 1 optional argument
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(FM_createManagedAlgorithmOverloader, PythonAPI::FrameworkManagerProxy::createManagedAlgorithm, 1, 2)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(FM_createUnmanagedAlgorithmOverloader, PythonAPI::FrameworkManagerProxy::createUnmanagedAlgorithm, 1, 2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(FM_getRegisteredAlgorithmOverloader, PythonAPI::FrameworkManagerProxy::getRegisteredAlgorithms, 0, 1)
 
   void export_frameworkmanager()
   {
@@ -64,7 +65,8 @@ using namespace boost::python;
       .def("_getPropertyOrder", &FrameworkManagerProxy::getPropertyOrder, return_internal_reference<>())
       .def("createAlgorithmDocs", &FrameworkManagerProxy::createAlgorithmDocs)
       .def("registerPyAlgorithm", &FrameworkManagerProxy::registerPyAlgorithm)
-      .def("_getRegisteredAlgorithms", &FrameworkManagerProxy::getRegisteredAlgorithms)
+      .def("_getRegisteredAlgorithms", &FrameworkManagerProxy::getRegisteredAlgorithms, 
+	   FM_getRegisteredAlgorithmOverloader())
       .def("_observeAlgFactoryUpdates", &FrameworkManagerProxy::observeAlgFactoryUpdates)
       .def("deleteWorkspace", &FrameworkManagerProxy::deleteWorkspace)
       .def("getWorkspaceNames", &FrameworkManagerProxy::getWorkspaceNames)

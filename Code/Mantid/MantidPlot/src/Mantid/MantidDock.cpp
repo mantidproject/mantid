@@ -1086,7 +1086,7 @@ void FindAlgComboBox::keyPressEvent(QKeyEvent *e)
 {
   if (e->key() == Qt::Key_Return)
   {
-    if (currentIndex() >= 0) emit enterPressed();
+    emit enterPressed();
     return;
   }
   QComboBox::keyPressEvent(e);

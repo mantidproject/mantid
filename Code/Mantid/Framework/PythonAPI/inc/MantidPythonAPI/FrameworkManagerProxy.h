@@ -126,7 +126,7 @@ public:
   std::vector<std::string> * getPropertyOrder(const API::IAlgorithm * alg);
   /// Create the doc string for the supplied algorithm.
   std::string createAlgorithmDocs(const std::string& algName, const int version = -1);
-  std::vector<std::string> getRegisteredAlgorithms();
+  std::vector<std::string> getRegisteredAlgorithms(bool includeHidden =false);
   //@}
   
   /** @name Workspace related functions */ 

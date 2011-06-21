@@ -83,9 +83,9 @@ void FrameworkManagerProxy::clearAlgorithms()
   API::FrameworkManager::Instance().clearAlgorithms();
 }
 
-std::vector<std::string> FrameworkManagerProxy::getRegisteredAlgorithms()
+std::vector<std::string> FrameworkManagerProxy::getRegisteredAlgorithms(bool includeHidden)
 {
-  return API::AlgorithmFactory::Instance().getKeys();
+  return API::AlgorithmFactory::Instance().getKeys(includeHidden);
 }
 
 /**

@@ -96,9 +96,12 @@ public:
   }
 
   ///Get the algorithm keys
-  const std::vector<std::string> getKeys() const;
+  const std::vector<std::string> getKeys(bool includeHidden=false) const;
   /// Returns algorithm descriptors.
   std::vector<Algorithm_descriptor> getDescriptors() const;
+
+  ///unmangles the names used as keys into the name and version
+  std::pair<std::string,int> decodeName(const std::string& mangledName)const;
           
   /// Store a pointer to an algorithm that has alread been constructed; for instance an algorithm created in Python
   bool storeCloneableAlgorithm(CloneableAlgorithm* algorithm);

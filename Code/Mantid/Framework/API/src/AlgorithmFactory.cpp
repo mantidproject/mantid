@@ -42,6 +42,22 @@ namespace Mantid
     return(oss.str());
   }
 
+  /** Decodes a mangled name for interal storage
+  * @param mangledName :: the mangled name of the Algrorithm 
+  * @returns a pair of the name and version
+  */
+  std::pair<std::string,int> AlgorithmFactoryImpl::decodeName(const std::string& mangledName)const
+  {
+    std::string::size_type seperatorPosition = mangledName.find("|");
+    std::string name = mangledName.substr(0,seperatorPosition);
+    int version;
+    std::istringstream ss(mangledName.substr(seperatorPosition+1));
+    ss >> version;
+    
+    g_log.debug() << "mangled string:" << mangledName << " name:" << name << " version:" << version << std::endl;
+    return std::pair<std::string,int>(name,version);
+  }
+
   /** Creates an instance of an algorithm
   * @param name :: the name of the Algrorithm to create
   * @param version :: the version of the algroithm to create
@@ -87,9 +103,10 @@ namespace Mantid
   /**
   * Return the keys used for identifying algorithms. This includes those within the Factory itself and 
   * any cleanly constructed algorithms stored here.
+  * @param includeHidden true includes the hidden algorithm names and is faster, the default is false
   * @returns The strings used to identify individual algorithms
   */
-  const std::vector<std::string> AlgorithmFactoryImpl::getKeys() const
+  const std::vector<std::string> AlgorithmFactoryImpl::getKeys(bool includeHidden) const
   {
     //Start with those subscribed with the factory and add the cleanly constructed algorithm keys
     std::vector<std::string> names = Kernel::DynamicFactory<Algorithm>::getKeys();
@@ -101,7 +118,49 @@ namespace Mantid
     {
       names.push_back(itr->first);
     }
-    return names;
+
+    if (includeHidden)
+    {
+      return names;
+    }
+    else
+    {
+      //hidden categories
+      std::set<std::string> hiddenCategories;
+      fillHiddenCategories(&hiddenCategories);
+
+      //strip out any algorithms names where all of the categories are hidden
+      std::vector<std::string> validNames;
+      std::vector<std::string>::const_iterator itr_end = names.end();
+      for(std::vector<std::string>::const_iterator itr = names.begin(); 
+      itr!= itr_end; ++itr )
+      {
+        std::string name = *itr;
+        //check the categories
+        std::pair<std::string,int> namePair = decodeName(name);
+        boost::shared_ptr<IAlgorithm> alg = create(namePair.first,namePair.second);
+        std::vector<std::string> categories = alg->categories();
+        bool toBeRemoved=true;
+
+        //for each category
+        std::vector<std::string>::const_iterator itCategoriesEnd = categories.end();
+        for(std::vector<std::string>::const_iterator itCategories = categories.begin(); itCategories!=itCategoriesEnd; itCategories++)
+        {
+          //if the entry is not in the set of hidden categories
+          if (hiddenCategories.find(*itCategories) == hiddenCategories.end())
+          {
+            toBeRemoved=false;
+          }
+        }
+
+        if (!toBeRemoved)
+        {
+          //just mark them to be removed as we are iterating around the vector at the moment
+          validNames.push_back(name);
+        }
+      }
+      return validNames;
+    }
   }
 
   /**
@@ -114,7 +173,7 @@ namespace Mantid
   {
     //algorithm names
     std::vector<std::string> sv;
-    sv = getKeys();
+    sv = getKeys(true);
 
     //hidden categories
     std::set<std::string> hiddenCategories;
@@ -144,7 +203,8 @@ namespace Mantid
       boost::shared_ptr<IAlgorithm> alg = create(desc.name,desc.version);
       std::vector<std::string> categories = alg->categories();
       //for each category
-      for(std::vector<std::string>::const_iterator itCategories = categories.begin(); itCategories!=categories.end(); itCategories++)
+      std::vector<std::string>::const_iterator itCategoriesEnd = categories.end();
+      for(std::vector<std::string>::const_iterator itCategories = categories.begin(); itCategories!=itCategoriesEnd; itCategories++)
       {
         desc.category = *itCategories;
         //if the entry is not in the set of hidden categories
