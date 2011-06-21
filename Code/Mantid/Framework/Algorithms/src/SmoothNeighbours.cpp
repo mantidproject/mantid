@@ -175,8 +175,8 @@ void SmoothNeighbours::exec()
           for (int ix=-AdjX; ix <= AdjX; ix++)
             for (int iy=-AdjY; iy <= AdjY; iy++)
             {
-              //Cut corners
-              if(std::abs(ix) == AdjX && std::abs(iy) == AdjY)continue;
+              //Weights for corners=1; higher for center and adjacent pixels
+              const double smweight = static_cast<double>(AdjX - std::abs(ix) + AdjY - std::abs(iy) + 1);
               //Find the pixel ID at that XY position on the rectangular detector
               if(j+ix >= det->xpixels() || j+ix < 0)continue;
               if(k+iy >= det->ypixels() || k+iy < 0)continue;
@@ -187,14 +187,23 @@ void SmoothNeighbours::exec()
               {
                 size_t wi = (*pixel_to_wi)[pixelID];
                 //Get the event list on the input and add it
-                outEL += inWS->getEventList(wi);
-                count++;
+                EventList tmpEL = inWS->getEventList(wi);
+                tmpEL *= smweight;
+                outEL += tmpEL;
+                count += static_cast<int>(smweight);
 
               }
             }
             //Add all these events to the (empty) list returned by this
             outEL /= count;
             outWS->getOrAddEventList(outWI) += outEL;
+
+            //Set detectorID of center pixel only
+            outWS->getOrAddEventList(outWI).clearDetectorIDs();
+            const std::set<detid_t>& dets = inWS->getEventList(outWI).getDetectorIDs();
+            std::set<detid_t>::iterator j;
+            for (j = dets.begin(); j != dets.end(); ++j)
+              outWS->getOrAddEventList(outWI).addDetectorID(*j);
             outWI++;
         }
       }

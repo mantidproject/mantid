@@ -179,6 +179,8 @@ public:
   std::set<detid_t>& getDetectorIDs();
   const std::set<detid_t>& getDetectorIDs() const;
 
+  void clearDetectorIDs();
+
   void clear(const bool removeDetIDs=true);
   void clearUnused();
 

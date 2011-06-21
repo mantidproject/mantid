@@ -506,6 +506,15 @@ namespace DataObjects
     return this->detectorIDs;
   }
 
+  // --------------------------------------------------------------------------
+  /** Clear the detector IDs set.
+   */
+  void EventList::clearDetectorIDs()
+  {
+    this->detectorIDs.clear();
+    return;
+  }
+
   /** Get a mutable reference to the detector IDs set.
    */
   std::set<detid_t>& EventList::getDetectorIDs()
