@@ -10,6 +10,7 @@ set ( SRC_FILES
 	src/CalculateTransmissionBeamSpreader.cpp
 	src/CaltoDspacemap.cpp
 	src/ChangeBinOffset.cpp
+	src/ChangeLogTime.cpp
 	src/ChangePulsetime.cpp
 	src/CheckWorkspacesMatch.cpp
 	src/ChopData.cpp
@@ -161,6 +162,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
 	inc/MantidAlgorithms/CaltoDspacemap.h
 	inc/MantidAlgorithms/ChangeBinOffset.h
+	inc/MantidAlgorithms/ChangeLogTime.h
 	inc/MantidAlgorithms/ChangePulsetime.h
 	inc/MantidAlgorithms/CheckWorkspacesMatch.h
 	inc/MantidAlgorithms/ChopData.h
@@ -312,6 +314,7 @@ set ( TEST_FILES
 	test/CalculateTransmissionTest.h
 	test/ChainedOperatorTest.h
 	test/ChangeBinOffsetTest.h
+	test/ChangeLogTimeTest.h
 	test/ChangePulsetimeTest.h
 	test/CheckWorkspacesMatchTest.h
 	test/ChopDataTest.h
