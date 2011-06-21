@@ -22,8 +22,8 @@ namespace Mantid
     /// Constructor
     AlgorithmProxy::AlgorithmProxy(Algorithm_sptr alg) :
     PropertyManagerOwner(),_executeAsync(this,&AlgorithmProxy::executeAsyncImpl),
-      m_name(alg->name()),m_category(alg->category()), m_alias(alg->alias()),
-      m_version(alg->version()), m_alg(alg),
+      m_name(alg->name()),m_category(alg->category()), m_categorySeperator(alg->categorySeperator()),
+      m_alias(alg->alias()), m_version(alg->version()), m_alg(alg),
       m_isExecuted(),m_isLoggingEnabled(true), m_rethrow(false)
     {
       if (!alg)
@@ -236,6 +236,22 @@ namespace Mantid
       std::string serialized = m_alg->toString();
       m_alg.reset();
       return serialized;
+    }
+
+    /// Function to return all of the categories that contain this algorithm
+    const std::vector<std::string> AlgorithmProxy::categories() const
+    {
+      std::vector < std::string > res;
+      Poco::StringTokenizer tokenizer(category(), categorySeperator(),
+          Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+      Poco::StringTokenizer::Iterator h = tokenizer.begin();
+
+      for (; h != tokenizer.end(); ++h)
+      {
+        res.push_back(*h);
+      }
+
+      return res;
     }
 
 

@@ -48,7 +48,43 @@ public:
   
 };
 
+class ToyAlgorithmProxyMultipleCategory : public Algorithm
+{
+public:
+  ToyAlgorithmProxyMultipleCategory() : Algorithm() {}
+  virtual ~ToyAlgorithmProxyMultipleCategory() {}
+  const std::string name() const { return "ToyAlgorithmProxyMultipleCategory";} ///< Algorithm's name for identification
+  int version() const  { return 1;}                        ///< Algorithm's version for identification
+  const std::string category() const { return "ProxyCat,ProxyLeopard";}           ///< Algorithm's category for identification
+  const std::string alias() const { return "Dog";}            ///< Algorithm's alias
+
+  void init()
+  { 
+      declareProperty("prop1","value");
+      declareProperty("prop2",1);   
+      declareProperty("out",8,Direction::Output);
+  }
+  void exec() 
+  {
+      std::string p1 = getProperty("prop1");
+      int p2 = getProperty("prop2");
+
+      Poco::Thread::current()->sleep(500);
+      progress(0.333,"Running");
+      interruption_point();
+      Algorithm* alg = dynamic_cast<Algorithm*>( this );
+      TS_ASSERT( alg );
+      
+      TS_ASSERT_EQUALS( p1, "stuff" );
+      TS_ASSERT_EQUALS( p2, 17 );
+
+      setProperty("out",28);
+  }
+  
+};
+
 DECLARE_ALGORITHM(ToyAlgorithmProxy)
+DECLARE_ALGORITHM(ToyAlgorithmProxyMultipleCategory)
 
 class TestProxyObserver: public AlgorithmObserver
 {
@@ -97,6 +133,22 @@ public:
         int out = alg->getProperty("out");
         TS_ASSERT_EQUALS(out,28);
     }
+
+    void testMultipleCategory()
+    {
+        IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ToyAlgorithmProxyMultipleCategory");
+        TS_ASSERT( dynamic_cast<AlgorithmProxy*>(alg.get()) );
+        TS_ASSERT_EQUALS( alg->name() , "ToyAlgorithmProxyMultipleCategory" );
+        TS_ASSERT_EQUALS( alg->version() , 1 );
+        TS_ASSERT_EQUALS( alg->category() , "ProxyCat,ProxyLeopard" );
+        std::vector<std::string> result;
+        result.push_back("ProxyCat");
+        result.push_back("ProxyLeopard");
+        TS_ASSERT_EQUALS( alg->categories() , result );
+        TS_ASSERT_EQUALS( alg->alias(), "Dog");
+        TS_ASSERT( alg->isInitialized() );
+    }
+
     void testRunning()
     {
         IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ToyAlgorithmProxy");

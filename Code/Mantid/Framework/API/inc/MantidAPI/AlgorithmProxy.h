@@ -71,6 +71,10 @@ namespace Mantid
       int version() const  {return m_version;}
       /// The category of the algorithm
       const std::string category() const {return m_category;}
+      /// Function to return all of the categories that contain this algorithm
+      const std::vector<std::string> categories() const;
+      /// Function to return the sperator token for the category string. A default implementation ',' is provided
+      const std::string categorySeperator() const {return m_categorySeperator;}
       /// Aliases to the algorithm
       const std::string alias() const {return m_alias;}
 
@@ -140,6 +144,7 @@ namespace Mantid
 
       const std::string m_name;     ///< name of the real algorithm
       const std::string m_category; ///< category of the real algorithm
+      const std::string m_categorySeperator; ///< category seperator of the real algorithm
       const std::string m_alias;    ///< alias to the algorithm
       std::string m_OptionalMessage; ///<Message to display in GUI
       std::string m_WikiSummary; ///< A summary line for the wiki page.

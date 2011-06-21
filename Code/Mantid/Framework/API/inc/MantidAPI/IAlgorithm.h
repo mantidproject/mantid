@@ -70,6 +70,12 @@ public:
   /// function to return a category of the algorithm.
   virtual const std::string category() const = 0;
 
+  /// Function to return all of the categories that contain this algorithm
+  virtual const std::vector<std::string> categories() const =0;
+
+  /// Function to return the sperator token for the category string
+  virtual const std::string categorySeperator() const =0;
+
   /// function to return any aliases of the algorithm.
   virtual const std::string alias() const = 0;
 
