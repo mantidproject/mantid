@@ -4,7 +4,8 @@
  *  Created on: May 5, 2011
  *      Author: ruth
  */
-
+//TODO get rid of Algorithm inheritance
+// virtual on destructor had to go
 #ifndef INTEGRATEPEAKTIMESLICES_H_
 #define INTEGRATEPEAKTIMESLICES_H_
 #include "MantidAPI/Algorithm.h"
@@ -41,27 +42,32 @@ namespace Algorithms
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport IntegratePeakTimeSlices: public API::Algorithm
+class DLLExport IntegratePeakTimeSlices:  public API::Algorithm
 {
 public:
   /// Default constructor
   IntegratePeakTimeSlices();
   /// Destructor
-  virtual ~IntegratePeakTimeSlices();
+ ~IntegratePeakTimeSlices();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "IntegratePeakTimeSlices"; }
+ virtual const std::string name() const { return "IntegratePeakTimeSlices"; }
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction"; }
 
 private:
+
+
+  void init();
+  void exec();
+
   MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace, the data set
   TableWorkspace_sptr outputW; ///< A pointer to the output workspace
 
   // Overridden Algorithm methods
-  void init();
-  void exec();
+
+
 
 
 
