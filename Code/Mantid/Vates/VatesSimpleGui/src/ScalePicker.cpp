@@ -11,16 +11,16 @@
 #include <iostream>
 ScalePicker::ScalePicker(QwtScaleWidget *scale) : QObject(scale)
 {
-	((QwtScaleWidget *)this->parent())->installEventFilter(this);
+  static_cast<QwtScaleWidget *>(this->parent())->installEventFilter(this);
 }
 
 bool ScalePicker::eventFilter(QObject *object, QEvent *e)
 {
-  if ( object->inherits("QwtScaleWidget") &&
-  e->type() == QEvent::MouseButtonPress )
+  if (object->inherits("QwtScaleWidget") &&
+      e->type() == QEvent::MouseButtonPress)
   {
-    mouseClicked((const QwtScaleWidget *)object,
-    ((QMouseEvent *)e)->pos());
+    mouseClicked(static_cast<const QwtScaleWidget *>(object),
+                 static_cast<QMouseEvent *>(e)->pos());
     return true;
   }
 
@@ -36,7 +36,7 @@ bool createIndicator)
   rect.setRect(rect.x() - margin, rect.y() - margin,
   rect.width() + 2 * margin, rect.height() +  2 * margin);
 
-  if ( rect.contains(pos) ) // No click on the title
+  if (rect.contains(pos)) // No click on the title
   {
     // translate the position in a value on the scale
 
