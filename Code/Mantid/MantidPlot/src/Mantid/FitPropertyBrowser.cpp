@@ -518,7 +518,7 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
 {
   QtBrowserItem * ci = m_browser->currentItem();
   if (!ci) return;
-  QMenu *menu = new QMenu(m_appWindow);
+  QMenu *menu = new QMenu(this);
   QAction *action;
 
   bool isFunctionsGroup = ci == m_functionsGroup;
@@ -759,7 +759,6 @@ void FitPropertyBrowser::deleteFunction()
   PropertyHandler* h = getHandler()->findHandler(ci->property());
   if (h)
   {
-    //getHandler()->removePlot();
     emit removePlotSignal(getHandler());
     h->removeFunction();
     compositeFunction()->checkFunction();
@@ -1361,6 +1360,24 @@ void FitPropertyBrowser::init()
   connect(m_appWindow->mantidUI,SIGNAL(workspace_removed(const QString &)),
     this,SLOT(workspace_removed(const QString &)));
 }
+
+/// workspace was removed
+void FitPropertyBrowser::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+{
+/*  QString oldName = QString::fromStdString(workspaceName());
+  int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
+  if (i >= 0)
+  {
+    m_workspaceNames.removeAt(i);
+  }
+  m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
+  i = m_workspaceNames.indexOf(oldName);
+  if (i >= 0)
+  {
+    m_enumManager->setValue(m_workspace,i);
+  } */
+}
+
 
 /** Check if the workspace can be used in the fit. The accepted types are
   * MatrixWorkspaces same size

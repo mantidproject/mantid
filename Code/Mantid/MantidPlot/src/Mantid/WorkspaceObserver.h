@@ -35,12 +35,15 @@ public:
 signals:
   /// Delete signal handler
   void deleteRequested(const std::string &name, Mantid::API::Workspace_sptr workspace);
+  void addRequested(const std::string &name, Mantid::API::Workspace_sptr workspace);
   void afterReplaced(const std::string &name, Mantid::API::Workspace_sptr workspace);
   void adsCleared();
   
 private slots:
   /// Delete slot
   void handleDelete(const std::string &name,  Mantid::API::Workspace_sptr workspace);
+  /// Add slot
+  void handleAdd(const std::string &name,  Mantid::API::Workspace_sptr workspace);
   /// Replace slot
   void handleAfterReplace(const std::string &name,  Mantid::API::Workspace_sptr workspace);
   ///Clear slot
@@ -89,9 +92,10 @@ public:
   /// Default constructor
   WorkspaceObserver() :
     m_deleteObserver(*this,&WorkspaceObserver::_deleteHandle),
+    m_addObserver(*this,&WorkspaceObserver::_addHandle),
     m_afterReplaceObserver(*this,&WorkspaceObserver::_afterReplaceHandle),
     m_clearADSObserver(*this,&WorkspaceObserver::_clearADSHandle),
-    m_del_observed(false), m_repl_observed(false), m_clr_observed(false)
+    m_del_observed(false), m_add_observed(false), m_repl_observed(false), m_clr_observed(false)
   {
     m_proxy = new ObserverCallback(this);
   }
@@ -103,6 +107,7 @@ public:
     delete m_proxy;
 
     if( m_del_observed ) Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
+    if( m_add_observed ) Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
     if( m_repl_observed ) Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_afterReplaceObserver);
     if( m_clr_observed ) Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearADSObserver);
  
@@ -141,6 +146,18 @@ public:
 		     );
   }
 
+
+  void observeAdd()
+  {
+    m_add_observed = true;
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
+    m_proxy->connect(m_proxy, 
+		     SIGNAL(addRequest(const std::string &,Mantid::API::Workspace_sptr)),
+		     SLOT(handleAdd(const std::string &, Mantid::API::Workspace_sptr)),
+		     Qt::QueuedConnection
+		     );
+  }
+
   void observeADSClear()
   {
     m_clr_observed = true;
@@ -155,6 +172,15 @@ protected:
         @param ws :: The shared pointer to the workspace to be deleted.
     */
   virtual void deleteHandle(const std::string& IGNORE_WORKSPACE_OBSERVER_ARGUMENT(wsName),
+                            const boost::shared_ptr<Mantid::API::Workspace> IGNORE_WORKSPACE_OBSERVER_ARGUMENT(ws))
+  {
+  }
+    /** Handler of the add notifications. Could be overriden in inherited classes.
+        The default handler is provided (doing nothing).
+        @param wsName :: The name of the added workspace.
+        @param ws :: The shared pointer to the workspace to be added.
+    */
+  virtual void addHandle(const std::string& IGNORE_WORKSPACE_OBSERVER_ARGUMENT(wsName),
                             const boost::shared_ptr<Mantid::API::Workspace> IGNORE_WORKSPACE_OBSERVER_ARGUMENT(ws))
   {
   }
@@ -186,6 +212,16 @@ protected:
   /// Poco::NObserver for DataServise::DeleteNotification.
   Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceDeleteNotification> m_deleteObserver;
 
+  /** Poco notification handler for DataService::DeleteNotification.
+  @param pNf :: The pointer to the notification.
+  */
+  void _addHandle(Mantid::API::WorkspaceAddNotification_ptr pNf)
+  {
+    m_proxy->addRequested(pNf->object_name(), pNf->object());
+  }
+  /// Poco::NObserver for DataServise::DeleteNotification.
+  Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceAddNotification> m_addObserver;
+
   /** Poco notification handler for DataService::AfterReplaceNotification.
   @param pNf :: The pointer to the notification.
   */
@@ -208,7 +244,7 @@ private:
   friend class ObserverCallback;
   ObserverCallback *m_proxy;
 
-  bool m_del_observed, m_repl_observed, m_clr_observed;
+  bool m_del_observed, m_add_observed, m_repl_observed, m_clr_observed;
 };
 
 

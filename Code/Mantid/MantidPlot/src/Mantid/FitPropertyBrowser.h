@@ -7,6 +7,8 @@
 #include <QDockWidget>
 #include <QMap>
 
+#include "WorkspaceObserver.h"
+
     /* Forward declarations */
 
 class QtTreePropertyBrowser;
@@ -50,7 +52,8 @@ class PropertyHandler;
  * @date 13/11/2009
  */
 
-class FitPropertyBrowser: public QDockWidget, public Mantid::API::AlgorithmObserver
+class FitPropertyBrowser: public QDockWidget, public Mantid::API::AlgorithmObserver,
+                          public WorkspaceObserver
 {
   Q_OBJECT
 public:
@@ -182,6 +185,10 @@ public:
 
   /// Returns true if the difference plot should be drawn
   bool plotDiff()const;
+
+  //void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  //void clearADSHandle();
 
 public slots:
   void fit();

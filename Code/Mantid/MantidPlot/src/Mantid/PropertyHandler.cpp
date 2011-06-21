@@ -14,8 +14,6 @@
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
 
-#include "../ApplicationWindow.h"
-#include "../Graph.h"
 #include <QMessageBox>
 #include <QMenu>
 
@@ -686,7 +684,7 @@ bool PropertyHandler::setAttribute(QtProperty* prop)
     }
     catch(std::exception& e)
     {
-      QMessageBox::critical(m_browser->m_appWindow,"Mantid - Error",e.what());
+      QMessageBox::critical(m_browser,"Mantid - Error",e.what());
       return false;
     }
     return true;
