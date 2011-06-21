@@ -31,8 +31,7 @@ void SavePHX::init() {
 }
 
 void SavePHX::exec() {
-  const double rad2deg = 180.0 / M_PI;
-
+ 
   // Get the input workspace
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
@@ -42,9 +41,6 @@ void SavePHX::exec() {
 
   // Retrieve the filename from the properties
   const std::string filename = getProperty("Filename");
-
-  // Get the number of spectra
-  const int nHist = static_cast<int>(inputWorkspace->getNumberHistograms());
 
   // Get a pointer to the sample
   IObjComponent_const_sptr sample =

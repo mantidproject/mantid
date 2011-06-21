@@ -166,6 +166,7 @@ CpRebinningNx3::build_scaled_transformation_matrix(const Geometry::MDGeometry &S
       rotations[ic+j]=rot[ic+j]*axis_step_inv[i];
     }
   }
+  //TODO: modify the rotation matrix to suppress non-existing reciprocal dimensions
 
 
 }

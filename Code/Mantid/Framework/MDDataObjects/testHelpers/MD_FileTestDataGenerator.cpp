@@ -89,9 +89,9 @@ MD_FileTestDataGenerator::read_pointDescriptions(void)const
     //TODO: there are currently no place, where this information is provided, except here. This place should be created.
     // nothing at the moment uses the colum indexes but when they would used -- something should be changed here
     unsigned int nResDimTags =2; //number of reciprocal dimension indexes are always 2, regadless of the number of reciprocal dimensions in dataset      
-    unsigned int nIndexes    =this->GeomDescription.getNumDims()-this->GeomDescription.getNumRecDims()+nResDimTags;
+    unsigned int nIndexes    =unsigned int(this->GeomDescription.getNumDims()-this->GeomDescription.getNumRecDims()+nResDimTags);
     // full rec-dim data, signal and error + number of indexes
-    unsigned int nHorDataTags=this->GeomDescription.getNumDims()+2+nIndexes;    
+    unsigned int nHorDataTags=unsigned int(this->GeomDescription.getNumDims()+2+nIndexes);    
 
     std::vector<std::string> DataID(nHorDataTags);
     // first tags coinside with dimension tags;
@@ -172,10 +172,10 @@ size_t
 MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
 {
  
-    size_t nSeelectedCells,nPix(0); 
+    size_t nSeelectedCells(0),nPix(0); 
     size_t buf_size = pix_buf.size();
 
-    const Geometry::MDGeometry &CurrentGeom = dnd.get_const_MDGeometry();
+    //const Geometry::MDGeometry &CurrentGeom = dnd.get_const_MDGeometry();
 
     size_t pix_size= this->pTestDataSource->sizeofMDDataPoint();
     size_t prev_cells_sizes(0);

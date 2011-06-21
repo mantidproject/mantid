@@ -135,7 +135,7 @@ MDDensityHomogeneous::get_rCoarseCell(size_t ind, std::vector<float> &r_cell)con
     r_cell.resize(this->nDims);
     this->findCoarseIndexes(ind,indexes);
     for(unsigned int i=0;i<nFullDims;i++){
-        r_cell[i]=float(double(r_min[i])+this->coarse_bin_size[i]*indexes[i]);
+        r_cell[i]=float(double(r_min[i])+double(this->coarse_bin_size[i]*indexes[i]));
     }
 }
 
@@ -196,8 +196,8 @@ MDDensityHomogeneous::getCellPixCoordinates(size_t ind, std::vector<MDDPoint_t> 
     uint64_t fs,fe;
     for(unsigned int i=0;i<nDims;i++){
         // indexes of large cell:
-        rMinCell=float(double(this->r_min[i])+(coarse_ind[i]  )*this->coarse_bin_size[i]);
-        rMaxCell=float(double(this->r_min[i])+(coarse_ind[i]+1)*this->coarse_bin_size[i]);        
+        rMinCell=float(double(this->r_min[i])+double(coarse_ind[i]  )*this->coarse_bin_size[i]);
+        rMaxCell=float(double(this->r_min[i])+double(coarse_ind[i]+1)*this->coarse_bin_size[i]);        
 
         fs=uint64_t((rMinCell-r_min[i])/fine_bin_size[i]); if(float(double(r_min[i])+double(fs)*fine_bin_size[i])< rMinCell)fs++;
         fe=uint64_t((rMaxCell-r_min[i])/fine_bin_size[i]); if(float(double(r_min[i])+double(fe)*fine_bin_size[i])>=rMaxCell)fe--;
@@ -250,8 +250,8 @@ MDDensityHomogeneous::coarseCellCapacity(const std::vector<size_t> &coarse_ind)c
      uint64_t csCapacity = 1;
      for(unsigned int i=0;i<this->nDims;i++){
         // indexes of large cell:
-        rMinCell=float(double(this->r_min[i])+(coarse_ind[i]  )*this->coarse_bin_size[i]);
-        rMaxCell=float(double(this->r_min[i])+(coarse_ind[i]+1)*this->coarse_bin_size[i]);        
+        rMinCell=float(double(this->r_min[i])+double(coarse_ind[i]  )*this->coarse_bin_size[i]);
+        rMaxCell=float(double(this->r_min[i])+double(coarse_ind[i]+1)*this->coarse_bin_size[i]);        
 
         fs=uint64_t((rMinCell-r_min[i])/fine_bin_size[i]); if(float(double(r_min[i])+double(fs)*fine_bin_size[i])< rMinCell)fs++;
         fe=uint64_t((rMaxCell-r_min[i])/fine_bin_size[i]); if(float(double(r_min[i])+double(fe)*fine_bin_size[i])>=rMaxCell)fe--;
