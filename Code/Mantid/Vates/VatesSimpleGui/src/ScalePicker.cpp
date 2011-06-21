@@ -19,9 +19,13 @@ bool ScalePicker::eventFilter(QObject *object, QEvent *e)
   if (object->inherits("QwtScaleWidget") &&
       e->type() == QEvent::MouseButtonPress)
   {
-    this->mouseClicked(static_cast<const QwtScaleWidget *>(object),
-                       static_cast<QMouseEvent *>(e)->pos());
-    return true;
+    QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(e);
+    if (Qt::LeftButton == mouseEvent->button())
+    {
+      this->mouseClicked(static_cast<const QwtScaleWidget *>(object),
+                         mouseEvent->pos());
+      return true;
+    }
   }
 
   return QObject::eventFilter(object, e);
