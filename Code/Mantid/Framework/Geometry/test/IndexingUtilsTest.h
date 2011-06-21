@@ -112,6 +112,31 @@ public:
     TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), false ); 
   }
 
+
+  void test_MakeHemisphereDirections()
+  {
+    std::vector<V3D> direction_list=IndexingUtils::MakeHemisphereDirections(5);
+
+    TS_ASSERT_EQUALS( direction_list.size(), 64 );
+
+    // check some random entries
+    TS_ASSERT_DELTA( direction_list[0].X(), 0, 1e-5 );
+    TS_ASSERT_DELTA( direction_list[0].Y(), 1, 1e-5 );
+    TS_ASSERT_DELTA( direction_list[0].Z(), 0, 1e-5 );
+
+    TS_ASSERT_DELTA( direction_list[5].X(), -0.154508, 1e-5 );
+    TS_ASSERT_DELTA( direction_list[5].Y(),  0.951057, 1e-5 );
+    TS_ASSERT_DELTA( direction_list[5].Z(), -0.267617, 1e-5 );
+  
+    TS_ASSERT_DELTA( direction_list[10].X(), 0, 1e-5 );
+    TS_ASSERT_DELTA( direction_list[10].Y(), 0.809017, 1e-5 );
+    TS_ASSERT_DELTA( direction_list[10].Z(), 0.587785, 1e-5 );
+
+    TS_ASSERT_DELTA( direction_list[63].X(), -0.951057, 1e-5 );
+    TS_ASSERT_DELTA( direction_list[63].Y(),  0, 1e-5 );
+    TS_ASSERT_DELTA( direction_list[63].Z(),  0.309017, 1e-5 );
+  }
+
 };
 
 #endif  /* MANTID_GEOMETRY_INDEXING_UTILS_TEST_H_ */

@@ -222,3 +222,57 @@ bool IndexingUtils::ValidIndex( const V3D & hkl, double tolerance )
   return valid_index;
 }
 
+
+/**
+  Make a list of directions, approximately uniformly distributed over a
+  hemisphere, with the angular separation between direction vectors 
+  approximately 90 degrees/n_steps.
+  NOTE: This method provides a list of possible directions for plane 
+        normals for reciprocal lattice planes.  This facilitates a 
+        brute force search for lattice planes with a specific spacing
+        between planes.  This will be used for finding the UB matrix, 
+        given the lattice parameters.
+  @param n_steps   The number of subdivisions in latitude in the upper
+                   hemisphere.
+  @retrun A std::vector containing directions distributed over the hemisphere
+          with y-coordinate at least zero.
+ */
+std::vector<V3D> IndexingUtils::MakeHemisphereDirections( int n_steps )
+{
+  std::vector<V3D> direction_list;
+
+  double PI = 3.14159265358979323846;
+  double angle_step = PI / (2*n_steps);
+
+  for ( double phi = 0; phi <= (1.0001)*PI/2; phi += angle_step )
+  {
+    double r = sin(phi);
+
+    int n_theta = (int)( 2 * PI * r / angle_step + 0.5 );
+     
+    double theta_step;
+      
+    if ( n_theta == 0 )                     // n = ( 0, 1, 0 ).  Just
+      theta_step = 2 * PI + 1;              // use one vector at the pole
+
+    else
+      theta_step = 2 * PI / n_theta;
+      
+    double last_theta = 2 * PI - theta_step / 2;
+
+    if ( fabs(phi - PI/2) < angle_step/2 )  // use half the equator to avoid
+     last_theta = PI - theta_step/2;        // vectors that are the negatives
+                                            // of other vectors in the list.
+
+    for ( double theta = 0; theta < last_theta; theta += theta_step )
+    {
+      V3D direction( r*cos(theta), cos(phi), r*sin(theta) );
+      direction_list.push_back( direction );
+    }
+  }
+
+  return direction_list;
+}
+
+
+

@@ -65,6 +65,9 @@ class MANTID_GEOMETRY_DLL IndexingUtils
   /// Check is hkl is within tolerance of integer (h,k,l) non-zero values
   static bool ValidIndex( const Kernel::V3D  & hkl,
                                 double         tolerance );
+
+  /// Make list of direction vectors uniformly distributed over a hemisphere
+  static std::vector<Kernel::V3D> MakeHemisphereDirections( int n_steps );
 };
 
 
