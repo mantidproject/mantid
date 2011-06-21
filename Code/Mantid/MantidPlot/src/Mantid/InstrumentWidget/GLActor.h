@@ -65,6 +65,7 @@ namespace Mantid
 class GLActor
 {
 public:
+  GLActor():mVisible(true){}
   virtual ~GLActor();             ///< Virtual destructor
   void setVisibility(bool);
   bool getVisibility();
