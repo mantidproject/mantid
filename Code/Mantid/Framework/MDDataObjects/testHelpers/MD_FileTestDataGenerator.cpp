@@ -89,9 +89,9 @@ MD_FileTestDataGenerator::read_pointDescriptions(void)const
     //TODO: there are currently no place, where this information is provided, except here. This place should be created.
     // nothing at the moment uses the colum indexes but when they would used -- something should be changed here
     unsigned int nResDimTags =2; //number of reciprocal dimension indexes are always 2, regadless of the number of reciprocal dimensions in dataset      
-    unsigned int nIndexes    =unsigned int(this->GeomDescription.getNumDims()-this->GeomDescription.getNumRecDims()+nResDimTags);
+    unsigned int nIndexes    =(unsigned int)(this->GeomDescription.getNumDims()-this->GeomDescription.getNumRecDims()+nResDimTags);
     // full rec-dim data, signal and error + number of indexes
-    unsigned int nHorDataTags=unsigned int(this->GeomDescription.getNumDims()+2+nIndexes);    
+    unsigned int nHorDataTags=(unsigned int)(this->GeomDescription.getNumDims()+2+nIndexes);    
 
     std::vector<std::string> DataID(nHorDataTags);
     // first tags coinside with dimension tags;
