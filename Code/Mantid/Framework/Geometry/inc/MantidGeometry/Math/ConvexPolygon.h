@@ -5,8 +5,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/V2D.h"
-#include <vector>
+#include "MantidGeometry/Math/Vertex2DList.h"
 
 namespace Mantid
 {
@@ -16,10 +15,6 @@ namespace Mantid
 
   namespace Geometry
   {
-    /// A vertex is simply a 2D point 
-    typedef Kernel::V2D Vertex2D;
-    /// A collection of vertices
-    typedef std::vector<Vertex2D> Vertex2DList;
 
     /** 
     An implementation of a convex polygon. It contains a list of vertices that
@@ -59,10 +54,17 @@ namespace Mantid
     public:
       /// Construct a polygon with a collection of vertices
       ConvexPolygon(const Vertex2DList & vertices);
+      /// Index access.
+      const Kernel::V2D& operator[](const size_t index) const;
+
       /// Return the number of vertices
       inline size_t numVertices() const { return m_vertices.size(); }
       /// Compute the area of the polygon using triangulation
       double area() const;
+      /// Compute the 'determinant' of the points
+      double determinant() const;
+      /// Compute the orientation
+      int orientation() const;
 
     private:
       /// Default constructor
@@ -70,11 +72,11 @@ namespace Mantid
       /// Test if the set of vertices set is valid
       void validate() const;
       /// Compute the area of a triangle given by 3 vertices
-      double triangleArea(const Vertex2D & a, const Vertex2D & b, 
-                          const Vertex2D & c) const;
+      double triangleArea(const Kernel::V2D & a, const Kernel::V2D & b, 
+                          const Kernel::V2D & c) const;
       
       /// The collection of vertices
-      const Vertex2DList m_vertices;
+      Vertex2DList m_vertices;
     };
 
   } //namespace Geometry
