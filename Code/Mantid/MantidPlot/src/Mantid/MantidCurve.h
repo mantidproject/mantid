@@ -2,7 +2,7 @@
 #define MANTID_CURVE_H
 
 #include "../PlotCurve.h"
-#include "WorkspaceObserver.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -42,7 +42,7 @@ class MantidUI;
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
 
-class MantidCurve:public PlotCurve, public WorkspaceObserver
+class MantidCurve:public PlotCurve, public MantidQt::API::WorkspaceObserver
 {
   Q_OBJECT
 public:

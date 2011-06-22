@@ -7,7 +7,7 @@
 #include "../../MdiSubWindow.h"
 #include "../../GraphOptions.h"
 #include "BinDialog.h"
-#include "../WorkspaceObserver.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 
 #include <string>
 #include <vector>
@@ -77,7 +77,7 @@ class QShowEvent;
 
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  */
-class InstrumentWindow : public MdiSubWindow, public WorkspaceObserver, public Mantid::API::AlgorithmObserver
+class InstrumentWindow : public MdiSubWindow, public MantidQt::API::WorkspaceObserver, public Mantid::API::AlgorithmObserver
 {
   Q_OBJECT
 

@@ -17,7 +17,7 @@
 #include "../UserFunction.h"
 #include "../MdiSubWindow.h"
 #include "../Graph.h"
-#include "WorkspaceObserver.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 
 #include <qwt_double_rect.h>
 #include <qwt_color_map.h>
@@ -92,7 +92,7 @@ private:
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 */
-class MantidMatrix : public MdiSubWindow, WorkspaceObserver
+class MantidMatrix : public MdiSubWindow, MantidQt::API::WorkspaceObserver
 {
   Q_OBJECT
 

@@ -178,7 +178,6 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/SelectWorkspacesDialog.cpp
                    src/Mantid/SequentialFitDialog.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
-                   src/Mantid/WorkspaceObserver.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
                    src/Mantid/InstrumentWidget/CompAssemblyActor.cpp
                    src/Mantid/InstrumentWidget/ComponentActor.cpp
@@ -392,7 +391,6 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/SelectWorkspacesDialog.h
                    src/Mantid/SequentialFitDialog.h
                    src/Mantid/UserFitFunctionDialog.h
-                   src/Mantid/WorkspaceObserver.h
                    src/Mantid/InstrumentWidget/BinDialog.h
                    src/Mantid/InstrumentWidget/CompAssemblyActor.h
                    src/Mantid/InstrumentWidget/ComponentActor.h
@@ -654,7 +652,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/SelectWorkspacesDialog.h
                        src/Mantid/SequentialFitDialog.h
                        src/Mantid/UserFitFunctionDialog.h
-                       src/Mantid/WorkspaceObserver.h
                        src/Mantid/InstrumentWidget/XIntegrationControl.h
                        src/Mantid/InstrumentWidget/BinDialog.h
                        src/Mantid/InstrumentWidget/InstrumentTreeModel.h

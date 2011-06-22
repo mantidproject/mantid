@@ -7,7 +7,7 @@
 #include <QDockWidget>
 #include <QMap>
 
-#include "WorkspaceObserver.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 
     /* Forward declarations */
 
@@ -53,7 +53,7 @@ class PropertyHandler;
  */
 
 class FitPropertyBrowser: public QDockWidget, public Mantid::API::AlgorithmObserver,
-                          public WorkspaceObserver
+                          public MantidQt::API::WorkspaceObserver
 {
   Q_OBJECT
 public:

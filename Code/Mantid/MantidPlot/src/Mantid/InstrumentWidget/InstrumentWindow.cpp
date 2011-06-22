@@ -39,6 +39,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace MantidQt::API;
 
 /**
  * Constructor.

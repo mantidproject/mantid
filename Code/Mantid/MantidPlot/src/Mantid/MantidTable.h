@@ -2,7 +2,7 @@
 #define MANTIDTABLE_H
 
 #include "../Table.h"
-#include "WorkspaceObserver.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/ITableWorkspace.h"
 
 
@@ -10,7 +10,7 @@
  * that shows the data from an ITableWorkspace.
  *
  */
-class MantidTable: public Table, public WorkspaceObserver
+class MantidTable: public Table, public MantidQt::API::WorkspaceObserver
 {
   Q_OBJECT
 public:

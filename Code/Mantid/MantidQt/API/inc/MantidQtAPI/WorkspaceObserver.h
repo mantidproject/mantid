@@ -4,15 +4,17 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include <Poco/NObserver.h>
 #include <QObject>
+#include "DllOption.h"
 
+namespace MantidQt
+{
+namespace API
+{
 //------------------------------------------------
 // Forward declaration
 //------------------------------------------------
 class WorkspaceObserver;
 
-#ifndef IGNORE_WORKSPACE_OBSERVER_ARGUMENT
-#define IGNORE_WORKSPACE_OBSERVER_ARGUMENT(x)
-#endif
 /**
  * A simple callback class so that we avoid multiple inheritance issues with QObject.
  * 
@@ -23,7 +25,7 @@ class WorkspaceObserver;
  * Multiple inheritance is not used in WorkspaceObserver as their seems to be some problem using it and QObject
  * 
  */
-class ObserverCallback : public QObject
+class EXPORT_OPT_MANTIDQT_API ObserverCallback : public QObject
 {
   Q_OBJECT
   
@@ -85,7 +87,7 @@ private:
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class WorkspaceObserver
+class EXPORT_OPT_MANTIDQT_API WorkspaceObserver
 {
 
 public:
@@ -171,27 +173,33 @@ protected:
         @param wsName :: The name of the deleted workspace.
         @param ws :: The shared pointer to the workspace to be deleted.
     */
-  virtual void deleteHandle(const std::string& IGNORE_WORKSPACE_OBSERVER_ARGUMENT(wsName),
-                            const boost::shared_ptr<Mantid::API::Workspace> IGNORE_WORKSPACE_OBSERVER_ARGUMENT(ws))
+  virtual void deleteHandle(const std::string& wsName,
+                            const boost::shared_ptr<Mantid::API::Workspace> ws)
   {
+    (void)wsName;
+    (void)ws;
   }
     /** Handler of the add notifications. Could be overriden in inherited classes.
         The default handler is provided (doing nothing).
         @param wsName :: The name of the added workspace.
         @param ws :: The shared pointer to the workspace to be added.
     */
-  virtual void addHandle(const std::string& IGNORE_WORKSPACE_OBSERVER_ARGUMENT(wsName),
-                            const boost::shared_ptr<Mantid::API::Workspace> IGNORE_WORKSPACE_OBSERVER_ARGUMENT(ws))
+  virtual void addHandle(const std::string& wsName,
+                            const boost::shared_ptr<Mantid::API::Workspace> ws)
   {
+    (void)wsName;
+    (void)ws;
   }
     /** Handler of the AfterReplace notifications. Could be overriden in inherited classes.
         The default handler is provided (doing nothing).
         @param wsName :: The name of the deleted workspace.
         @param ws :: The shared pointer to the workspace to be deleted.
     */
-  virtual void afterReplaceHandle(const std::string& IGNORE_WORKSPACE_OBSERVER_ARGUMENT(wsName),
-                                  const boost::shared_ptr<Mantid::API::Workspace> IGNORE_WORKSPACE_OBSERVER_ARGUMENT(ws))
+  virtual void afterReplaceHandle(const std::string& wsName,
+                                  const boost::shared_ptr<Mantid::API::Workspace> ws)
   {
+    (void)wsName;
+    (void)ws;
   }
 
   /** Handle an ADS clear notification
@@ -247,5 +255,8 @@ private:
   bool m_del_observed, m_add_observed, m_repl_observed, m_clr_observed;
 };
 
+
+} // MantidQt
+} // API
 
 #endif

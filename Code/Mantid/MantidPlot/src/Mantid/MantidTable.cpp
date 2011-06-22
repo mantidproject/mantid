@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <iostream>
 
+using namespace MantidQt::API;
 
 //------------------------------------------------------------------------------------------------
 /** Create MantidTable out of a ITableWorkspace

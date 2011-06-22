@@ -44,6 +44,8 @@
 
 #include <algorithm>
 
+using namespace MantidQt::API;
+
 class FormulaDialogEditor: public StringDialogEditor
 {
 public:

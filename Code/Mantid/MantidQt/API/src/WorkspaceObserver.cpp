@@ -1,7 +1,12 @@
 //-----------------------------------
 // Includes
 //-----------------------------------
-#include "WorkspaceObserver.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
+
+namespace MantidQt
+{
+namespace API
+{
 
 //------------------------------------ ObserverCallback class -------------------------------
 
@@ -24,3 +29,6 @@ void ObserverCallback::handleClearADS()
 {
   m_observer->clearADSHandle();
 }
+
+} // MantidQt
+} // API

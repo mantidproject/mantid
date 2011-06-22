@@ -11,6 +11,7 @@
 #include "../MultiLayer.h"
 
 using namespace Mantid::API;
+using namespace MantidQt::API;
 
 /**
  *  @param name :: The curve's name - shown in the legend
