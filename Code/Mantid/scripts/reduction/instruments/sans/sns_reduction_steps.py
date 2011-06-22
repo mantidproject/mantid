@@ -244,7 +244,9 @@ class LoadRun(ReductionStep):
                 mapping_file = os.path.join(data_dir, mapping_file)
                 
                 mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
-                nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
+                nxs_file = event_file.replace("_neutron_event.dat", "_histo.nxs")
+                if not os.path.isfile(nxs_file):
+                    nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
                 LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace+'_evt', PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
                 LoadNexusLogs(Workspace=workspace+'_evt', Filename=nxs_file)
             
@@ -278,31 +280,6 @@ class LoadRun(ReductionStep):
         
         # Move the detector to its correct position
         MoveInstrumentComponent(workspace+'_evt', "detector1", Z=sdd/1000.0, RelativePosition=0)
-
-        # Move detector array to correct position
-        [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
-        if pixel_ctr_x is not None and pixel_ctr_y is not None:
-            [beam_ctr_x, beam_ctr_y] = reducer.instrument.get_coordinate_from_pixel(pixel_ctr_x, pixel_ctr_y)
-            [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
-            [default_x, default_y] = reducer.instrument.get_coordinate_from_pixel(default_pixel_x, default_pixel_y)
-            MoveInstrumentComponent(workspace+'_evt', "detector1", 
-                                    X = default_x-beam_ctr_x,
-                                    Y = default_y-beam_ctr_y,
-                                    RelativePosition="1")
-            mtd[workspace+'_evt'].getRun().addProperty_dbl("beam_center_x", pixel_ctr_x, 'pixel', True)            
-            mtd[workspace+'_evt'].getRun().addProperty_dbl("beam_center_y", pixel_ctr_y, 'pixel', True)   
-            mantid.sendLogMessage("Beam center: %-6.1f, %-6.1f" % (pixel_ctr_x, pixel_ctr_y))                             
-        else:
-            # Don't move the detector and use the default beam center
-            [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
-            mantid[workspace+'_evt'].getRun().addProperty_dbl("beam_center_x", default_pixel_x, 'pixel', True)            
-            mantid[workspace+'_evt'].getRun().addProperty_dbl("beam_center_y", default_pixel_y, 'pixel', True)            
-            if type(reducer._beam_finder) is BaseBeamFinder:
-                reducer.set_beam_finder(BaseBeamFinder(default_pixel_x, default_pixel_y))
-                mantid.sendLogMessage("No beam finding method: setting to default [%-6.1f, %-6.1f]" % (default_pixel_x, 
-                                                                                                       default_pixel_y))
-            
-            mantid.sendLogMessage("Beam center isn't defined: skipping beam center alignment for %s" % workspace+'_evt')
 
         # Choose and process configuration file
         if len(config_files)>0:
@@ -340,10 +317,39 @@ class LoadRun(ReductionStep):
             if self._use_config_mask:
                 mtd[workspace+'_evt'].getRun().addProperty_str("rectangular_masks", pickle.dumps(conf.rectangular_masks), "pixels", True)
                 output_str +=  "  Using mask information found in configuration file\n"
+                
+            if type(reducer._beam_finder) is BaseBeamFinder:
+                if reducer.get_beam_center() == [0.0,0.0]:
+                    reducer.set_beam_finder(BaseBeamFinder(conf.center_x, conf.center_y))                            
         else:
             mantid.sendLogMessage("Could not find configuration file for %s" % workspace)
             output_str += "  Could not find configuration file for %s\n" % workspace
+
+        # Move detector array to correct position
+        [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
+        if pixel_ctr_x is not None and pixel_ctr_y is not None:
+            [beam_ctr_x, beam_ctr_y] = reducer.instrument.get_coordinate_from_pixel(pixel_ctr_x, pixel_ctr_y)
+            [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
+            [default_x, default_y] = reducer.instrument.get_coordinate_from_pixel(default_pixel_x, default_pixel_y)
+            MoveInstrumentComponent(workspace+'_evt', "detector1", 
+                                    X = default_x-beam_ctr_x,
+                                    Y = default_y-beam_ctr_y,
+                                    RelativePosition="1")
+            mtd[workspace+'_evt'].getRun().addProperty_dbl("beam_center_x", pixel_ctr_x, 'pixel', True)            
+            mtd[workspace+'_evt'].getRun().addProperty_dbl("beam_center_y", pixel_ctr_y, 'pixel', True)   
+            mantid.sendLogMessage("Beam center: %-6.1f, %-6.1f" % (pixel_ctr_x, pixel_ctr_y))                             
+        else:
+            # Don't move the detector and use the default beam center
+            [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
+            mantid[workspace+'_evt'].getRun().addProperty_dbl("beam_center_x", default_pixel_x, 'pixel', True)            
+            mantid[workspace+'_evt'].getRun().addProperty_dbl("beam_center_y", default_pixel_y, 'pixel', True)            
+            if type(reducer._beam_finder) is BaseBeamFinder:
+                reducer.set_beam_finder(BaseBeamFinder(default_pixel_x, default_pixel_y))
+                mantid.sendLogMessage("No beam finding method: setting to default [%-6.1f, %-6.1f]" % (default_pixel_x, 
+                                                                                                       default_pixel_y))
             
+            mantid.sendLogMessage("Beam center isn't defined: skipping beam center alignment for %s" % workspace+'_evt')
+
         # Modify TOF
         #declareProperty("FlightPathCorrection", false, Kernel::Direction::Input);
         output_str += "  Discarding low %6.1f and high %6.1f microsec\n" % (low_TOF_cut, high_TOF_cut)
@@ -365,6 +371,8 @@ class LoadRun(ReductionStep):
         x_step = 100
         x_min = offset-offset%x_step
         x_max = 2*1e6/60.0+offset
+        if frame_skipping:
+            x_max += 1e6/60.0
         x_max -= x_max%x_step
         Rebin(workspace+'_evt', workspace, "%6.0f, %6.0f, %6.0f" % (x_min, x_step, x_max), False )
         ConvertUnits(workspace, workspace, "Wavelength")
@@ -378,7 +386,7 @@ class LoadRun(ReductionStep):
         # using the beam stop hole. Since it's quick we do it now. We should split
         # the computing part from the applying part of the transmission correction
         if pixel_ctr_x is not None and pixel_ctr_y is not None:
-            transmission_ws = "transmission_"+workspace
+            transmission_ws = "__transmission_"+workspace
     
             # Calculate the transmission as a function of wavelength
             EQSANSTransmission(InputWorkspace=workspace,
@@ -413,6 +421,9 @@ class Normalize(ReductionStep):
     """
         Normalize the data to the accelerator current
     """
+    def get_normalization_spectrum(self):
+        return -1
+    
     def execute(self, reducer, workspace):
         # Flag the workspace as dirty
         reducer.dirty(workspace)
@@ -447,7 +458,7 @@ class Normalize(ReductionStep):
         acc_current = 1.0e-12 * proton_charge * duration * frequency
         Scale(InputWorkspace=workspace, OutputWorkspace=workspace, Factor=1.0/acc_current, Operation="Multiply")
         
-        return "Data normalized to accelerator current\n  Beam flux file: %s" % flux_data_path 
+        return "Data [%s] normalized to accelerator current\n  Beam flux file: %s" % (workspace, flux_data_path) 
     
     
 class BeamStopTransmission(BaseTransmission):
@@ -553,7 +564,7 @@ class SubtractDarkCurrent(ReductionStep):
         if self._dark_current_ws is None:
             filepath = find_data(file_name, instrument=reducer.instrument.name())
             self._dark_current_ws = extract_workspace_name(filepath)
-            reducer._data_loader.__class__(datafile=filepath).execute(reducer, self._dark_current_ws)
+            reducer._data_loader.clone(datafile=filepath).execute(reducer, self._dark_current_ws)
             RebinToWorkspace(WorkspaceToRebin=self._dark_current_ws, WorkspaceToMatch=workspace, OutputWorkspace=self._dark_current_ws)
         # Normalize the dark current data to counting time
         dark_duration = mtd[self._dark_current_ws].getRun()["proton_charge"].getStatistics().duration
@@ -582,7 +593,7 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
     def get_output_workspace(self, workspace):
         if not self._is_frame_skipping:
             return workspace+str(self._suffix)
-        return [workspace+str(self._suffix)+'_frame1', workspace+str(self._suffix)+'_frame2']
+        return [workspace+'_frame1'+str(self._suffix), workspace+'_frame2'+str(self._suffix)]
         
     def execute(self, reducer, workspace):
         if mtd[workspace].getRun().hasProperty("is_frame_skipping") \
