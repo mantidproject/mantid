@@ -74,7 +74,7 @@ void SmoothNeighbours::exec()
     throw std::invalid_argument("InputWorkspace should be an EventWorkspace.");
 
   //Get some stuff from the input workspace
-  //const size_t numberOfSpectra = inWS->getNumberHistograms();
+  const size_t numberOfSpectra = inWS->getNumberHistograms();
   const int YLength = static_cast<int>(inWS->blocksize());
   IInstrument_sptr inst = inWS->getInstrument();
   if (!inst)
@@ -83,9 +83,11 @@ void SmoothNeighbours::exec()
   API::MatrixWorkspace_sptr matrixOutputWS = this->getProperty("OutputWorkspace");
   EventWorkspace_sptr outWS;
   //Make a brand new EventWorkspace
-  outWS = boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", 1, YLength, 1));
+  outWS = boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", numberOfSpectra, YLength+1, YLength));
   //Copy geometry over.
   API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, false);
+  inWS->sortAll(TOF_SORT, NULL);
+  outWS->sortAll(TOF_SORT, NULL);
 
   //Cast to the matrixOutputWS and save it
   matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS);
@@ -98,7 +100,6 @@ void SmoothNeighbours::exec()
   //To get the workspace index from the detector ID
   detid2index_map * pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true);
 
-  int outWI = 0;
   //std::cout << " inst->nelements() " << inst->nelements() << "\n";
   Progress prog(this,0.0,1.0,inst->nelements());
 
@@ -157,17 +158,19 @@ void SmoothNeighbours::exec()
     throw std::runtime_error("This instrument does not have any RectangularDetector's. SmoothNeighbours cannot operate on this instrument at this time.");
 
   //Loop through the RectangularDetector's we listed before.
+  PARALLEL_FOR2(inWS, outWS)
   for (int i=0; i < static_cast<int>(detList.size()); i++)
   {
-    std::string det_name("");
-    boost::shared_ptr<RectangularDetector> det;
-    det = detList[i];
-    for (int j=0; j < det->xpixels(); j++)
-      for (int k=0; k < det->ypixels(); k++)
+    PARALLEL_START_INTERUPT_REGION
+    boost::shared_ptr<RectangularDetector> det = detList[i];
+    std::string det_name = det->getName();
+    if (det)
+    {
+      int outWI = 0 + i * det->xpixels() * det->ypixels();
+      for (int j=0; j < det->xpixels(); j++)
       {
-        if (det)
+        for (int k=0; k < det->ypixels(); k++)
         {
-          det_name = det->getName();
 
           int count = 0;
           //Initialize the output event list
@@ -207,8 +210,11 @@ void SmoothNeighbours::exec()
             outWI++;
         }
       }
+    }
     prog.report(det_name);
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   //Finalize the data
   outWS->doneAddingEventLists();
