@@ -135,7 +135,7 @@ MDDensityHomogeneous::get_rCoarseCell(size_t ind, std::vector<float> &r_cell)con
     r_cell.resize(this->nDims);
     this->findCoarseIndexes(ind,indexes);
     for(unsigned int i=0;i<nFullDims;i++){
-        r_cell[i]=float(double(r_min[i])+double(this->coarse_bin_size[i]*indexes[i]));
+        r_cell[i]=float(double(r_min[i])+this->coarse_bin_size[i]*double(indexes[i]));
     }
 }
 

@@ -5,12 +5,12 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include <fstream>
-/** An algorithm to calculate workspace detectors angular coordinates, as they can be viewed from a sample (par or phx data)
+/** An algorithm to calculate the angular coordinates of the workspace's detectors, as they can be viewed from a sample (par or phx data)
 
-    Required Properties:
+    Properties:
     <UL>
     <LI> Workspace - The name of the input Workspace2D on which to perform the algorithm. 
-       Detectors or detectors groups have to be loaded into workspace </LI>
+         Detectors or detectors groups have to be loaded into this workspace </LI>
     <LI> OutputTable workspace name - if present, identify the name of the output table workspace with provided detectors parameters </LI>
     <LI> Par or phx file name - if present, used to define the detectors parameters from the file instead of the parameters 
          calculated from the instrument description</LI>
@@ -18,7 +18,7 @@
 
     Output Properties:
     <UL>Optional: OutputTableWorkspace - the workspace which contains five columns with the following values:</UL>
-  <UL><LI> azimuthal             -   A columnt  containing the detectors azimutal angles</LI> </UL>
+    <UL><LI> azimuthal             -   A columnt  containing the detectors azimutal angles</LI> </UL>
     <UL><LI> polar                 - A column  containing the detectors polar angles</LI>    </UL>
     <UL><LI> secondary_flightpath  - A column containing the distance from detectors to the sample center</LI></UL>
     <UL><LI> azimuthal_width       - A column  containing the detectors azimuthal angular width</LI></UL>
