@@ -320,7 +320,8 @@ class LoadRun(ReductionStep):
                 
             if type(reducer._beam_finder) is BaseBeamFinder:
                 if reducer.get_beam_center() == [0.0,0.0]:
-                    reducer.set_beam_finder(BaseBeamFinder(conf.center_x, conf.center_y))                            
+                    reducer.set_beam_finder(BaseBeamFinder(conf.center_x, conf.center_y))   
+                    output_str += "  Beam center set from config file: %-6.1f, %-6.1f" % (conf.center_x, conf.center_y)                             
         else:
             mantid.sendLogMessage("Could not find configuration file for %s" % workspace)
             output_str += "  Could not find configuration file for %s\n" % workspace
@@ -332,8 +333,8 @@ class LoadRun(ReductionStep):
             [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
             [default_x, default_y] = reducer.instrument.get_coordinate_from_pixel(default_pixel_x, default_pixel_y)
             MoveInstrumentComponent(workspace+'_evt', "detector1", 
-                                    X = default_x-beam_ctr_x,
-                                    Y = default_y-beam_ctr_y,
+                                    X = -default_x+beam_ctr_x,
+                                    Y = -default_y+beam_ctr_y,
                                     RelativePosition="1")
             mtd[workspace+'_evt'].getRun().addProperty_dbl("beam_center_x", pixel_ctr_x, 'pixel', True)            
             mtd[workspace+'_evt'].getRun().addProperty_dbl("beam_center_y", pixel_ctr_y, 'pixel', True)   
