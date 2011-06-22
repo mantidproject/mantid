@@ -1,5 +1,6 @@
 from MantidFramework import *
 from mantidsimple import *
+import os
 
 class ConjoinFiles(PythonAlgorithm):
     def category(self):
@@ -8,27 +9,35 @@ class ConjoinFiles(PythonAlgorithm):
     def name(self):
         return "ConjoinFiles"
 
-    def __load(self, instr, run, loader, exts, wksp):
+    def __load(self, directory, instr, run, loader, exts, wksp):
         for ext in exts:
             filename = "%s_%s%s" % (instr, str(run), ext)
+            if len(directory) > 0:
+                filename = os.path.join(directory, filename)
+                if not os.path.exists(filename):
+                    continue
             try:
+                self.log().information("Trying to load '%s'" % filename)
                 loader(filename, wksp)
                 return
-            except:
-                pass                
+            except Exception, e:
+                pass
+        raise RuntimeError("Failed to load run %s" % str(run))              
 
     def PyInit(self):
         self.declareListProperty("RunNumbers",[0], Validator=ArrayBoundedValidator(Lower=0))
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction=Direction.Output)
+        self.declareProperty("Directory", "")
 
     def PyExec(self):
         # generic stuff for running
         wksp = self.getPropertyValue("OutputWorkspace")
         runs = self.getProperty("RunNumbers")
         instr = mtd.getSettings().facility().instrument().shortName()
+        directory = self.getPropertyValue("Directory").strip()
 
         # change here if you want something other than gsas files
-        exts = ['.gsa', '.txt']
+        exts = ['.txt', '.gsa']
         loader = LoadGSS
 
         # load things and conjoin them
@@ -36,10 +45,10 @@ class ConjoinFiles(PythonAlgorithm):
         for run in runs:
             run = str(run)
             if first:
-                self.__load(instr, run, loader, exts, wksp)
+                self.__load(directory, instr, run, loader, exts, wksp)
                 first = False
             else:
-                self.__load(instr, run, loader, exts, run)
+                self.__load(directory, instr, run, loader, exts, run)
                 ConjoinWorkspaces(wksp, run, CheckOverlapping=False)
                 mtd.deleteWorkspace(run)
 
