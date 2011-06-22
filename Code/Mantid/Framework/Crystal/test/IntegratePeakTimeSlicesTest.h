@@ -150,22 +150,23 @@ public:
 
     pks->addPeak(peak);
 
-    Mantid::Algorithms::IntegratePeakTimeSlices algP;
+    boost::shared_ptr<Mantid::API::Algorithm> algP =
+          Mantid::API::AlgorithmFactory::Instance().create("IntegratePeakTimeSlices");
 
-    algP.initialize();
-    algP.setProperty("PeakIndex", 0);
-    algP.setProperty("PeakQspan", dQ);
+    algP->initialize();
+    algP->setProperty("PeakIndex", 0);
+    algP->setProperty("PeakQspan", dQ);
 
-    algP.setProperty<MatrixWorkspace_sptr> ("InputWorkspace", wsPtr);
+    algP->setProperty<MatrixWorkspace_sptr> ("InputWorkspace", wsPtr);
 
-    algP.setProperty<PeaksWorkspace_sptr> ("Peaks", pks);
+    algP->setProperty<PeaksWorkspace_sptr> ("Peaks", pks);
 
     try
     {
       //TableWorkspace_sptr twks(new Mantid::DataObjects::TableWorkspace());
       //algP.setProperty<TableWorkspace_sptr>("OutputWorkspace", twks);
 
-      algP.execute();
+      algP->execute();
 
     } catch (char * s)
     {
@@ -241,36 +242,16 @@ public:
    PeaksWorkspace_sptr pks(new PeaksWorkspace());
 
    pks->addPeak(peak);
-
-    Mantid::Algorithms::IntegratePeakTimeSlices algP;
-
-    algP.initialize();
-
-    algP.setProperty("PeakIndex", 0);
-    algP.setProperty("PeakQspan", .003);
-
-    algP.setProperty<MatrixWorkspace_sptr> ("InputWorkspace", wsPtr);
-
-    algP.setProperty<PeaksWorkspace_sptr> ("Peaks", pks);
-
-      try
-      {
-        //TableWorkspace_sptr twks(new Mantid::DataObjects::TableWorkspace());
-        //algP.setProperty<TableWorkspace_sptr>("OutputWorkspace", twks);
-
-        algP.execute();
-
-      } catch (char * s)
-      {
-        std::cout << "Error= " << s << std::endl;
-      } catch (std::exception &es)
-      {
-        std::cout << "Error1=" << es.what() << std::endl;
-      } catch (...)
-      {
-        std::cout << "Some Error Happened" << std::endl;
-      }
-
+   IntegratePeakTimeSlices algP;
+   algP.initialize();
+   algP.setProperty("PeakIndex",0);
+   algP.setProperty("PeakQspan",.003);
+   algP.setProperty<MatrixWorkspace_sptr>("InputWorkspace",wsPtr);
+   algP.setPropertyValue("OutputWorkspace","table");
+   algP.setProperty<PeaksWorkspace_sptr>("Peaks",pks);
+   algP.execute();
+   
+   
   }catch( std::exception &s)
   {
     std::cout<<"error ="<< s.what()<<std::endl;
