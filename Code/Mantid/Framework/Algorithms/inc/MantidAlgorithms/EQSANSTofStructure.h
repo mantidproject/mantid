@@ -21,8 +21,6 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-// Source repetition rate (Hz)
-const double REP_RATE = 60.0;
 // Pulse widge (micro sec per angstrom)
 const double PULSEWIDTH = 20.0;
 // Chopper phase offset (micro sec)
@@ -55,9 +53,7 @@ private:
   void exec();
   //void execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS, bool frame_skipping);
   void execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS, double threshold, double frame_offset,
-      double tof_frame_width, double tmp_frame_width);
-  void execHisto(API::MatrixWorkspace_sptr inputWS, double threshold, double frame_offset,
-      double tmp_frame_width, double frequency);
+      double tof_frame_width, double tmp_frame_width, bool frame_skipping);
 
   /// Compute TOF offset
   double getTofOffset(API::MatrixWorkspace_const_sptr inputWS, bool frame_skipping);
