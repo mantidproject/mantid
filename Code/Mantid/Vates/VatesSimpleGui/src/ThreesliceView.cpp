@@ -87,7 +87,8 @@ void ThreeSliceView::makeSlice(ViewBase::Direction i, pqRenderView *view,
 
 	repr->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
-	double orient[3], up[3];
+  double orient[3] = {0.0, 0.0, 0.0};
+  double up[3] = {0.0, 0.0, 0.0};
 	switch(i)
 	{
 	case ViewBase::X:

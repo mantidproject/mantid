@@ -37,7 +37,8 @@ AxisInformation *GeometryParser::getAxisInfo(const std::string dimension)
 	}
 
 	Poco::XML::NodeList *cNodes = pNode->childNodes();
-	double min, max;
+  double min = -99.0;
+  double max = 99.0;
 	std::string title;
 	// Using ID for now. Remove if we go back to using axis name
 	title = label;
