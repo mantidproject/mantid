@@ -1157,7 +1157,7 @@ class CalculateNorm(object):
                         ConvertToDistribution(self.TMP_WORKSPACE_NAME)
                 Multiply(self.TMP_WORKSPACE_NAME, wave_adj, wave_adj)
 
-        pixel_adj = None
+        pixel_adj = ''
         if self._pixel_file:
             pixel_adj = self.PIXEL_CORR_NAME
             load_com = self._load+'("'+self._pixel_file+'","'+pixel_adj+'"'
@@ -1201,6 +1201,8 @@ class ConvertToQ(ReductionStep):
         self._grav_set = False
         #this should contain the rebin parameters
         self.binning = None
+        #if set to true the normalization is done out side of the convert to Q algorithm
+        self.prenorm = False
     
     def set_output_type(self, descript):
         """
@@ -1246,12 +1248,19 @@ class ConvertToQ(ReductionStep):
         else:
             raise RuntimeError('Normalization workspaces must be created by CalculateNorm() and passed to this step')
 
-        try:         
+        #the last term maintains compatibility with the original Qxy, remove when it is fixed
+        if self.prenorm or (self._Q_alg == 'Qxy'):
+            data = mtd[workspace]
+            if wave_adj:
+                data /= mtd[wave_adj]
+            if pixel_adj:
+                data /= mtd[pixel_adj]
+            self._deleteWorkspaces([wave_adj, pixel_adj])
+            wave_adj, pixel_adj = '', ''
+
+        try:
             if self._Q_alg == 'Q1D':
-                if pixel_adj:
-                    Q1D(workspace, workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity)
-                else:
-                    Q1D(workspace, workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, AccountForGravity=self._use_gravity)
+                Q1D(workspace, workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity)
     
             elif self._Q_alg == 'Qxy':
                 Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, AccountForGravity=self._use_gravity)
