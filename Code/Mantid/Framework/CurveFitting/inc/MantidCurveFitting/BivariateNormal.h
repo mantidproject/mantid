@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionMW.h"
-//#include "MantidCurveFitting/UserFunction.h"
-#include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/BackgroundFunction.h"
+//#include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
  namespace Mantid
 {
@@ -80,7 +80,8 @@
     */
 
     
-   class  DLLExport  BivariateNormal: public API::ParamFunction, public API::IFunctionMW
+   class  DLLExport  BivariateNormal:public BackgroundFunction 
+                                   //public API::ParamFunction, public API::IFunctionMW
     {
     
     public:
@@ -97,8 +98,8 @@
       std::string name()const
           {return "BivariateNormal";}
 
-      void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
-      void setParameter(int , const double& value, bool explicitlySet = true);
+      //void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
+      //void setParameter(int , const double& value, bool explicitlySet = true);
 
       void 	function  (double *out, const double *xValues, const size_t nData)const ;
           
@@ -117,13 +118,18 @@
  	  void 	setAttribute (const std::string &attName, const  Mantid::API::IFitFunction::Attribute &att);
  	  
       bool   hasAttribute (const std::string &attName) const;
- 	 
+ 
+      void  fit( std::vector<double> , std::vector<double>);	 
     protected:
    
       void init();
       
       void initCommon();//Check for changes in parameters, etc. Calculates common values
       
+      void initCommon( double *Attrib, double* LastParams,double* expVals,double &uu,
+                     double &coefNorm,double &expCoeffx2,double  &expCoeffy2,double  &expCoeffxy,
+		      bool &isNaNs) const;
+
       double* Attrib;//Saves Attribute values
       
       double* LastParams;//Saves previous/this set of parameters
