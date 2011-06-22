@@ -97,7 +97,7 @@ private:
 
   void checkData(const MatrixWorkspace_sptr work_in1,const MatrixWorkspace_sptr work_in2, const MatrixWorkspace_sptr work_out1)
   {
-    size_t ws2LoopCount;
+    size_t ws2LoopCount=0;
     if (work_in2->size() > 0)
     {
       ws2LoopCount = work_in1->size()/work_in2->size();
