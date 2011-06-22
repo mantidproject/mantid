@@ -962,7 +962,6 @@ void PropertyHandler::fix(const QString& parName)
     m_browser->m_stringManager->setValue(tieProp,parValue);
     m_browser->m_changeSlotsEnabled = true;
     parProp->addSubProperty(tieProp);
-    parProp->setEnabled(false);
     tieProp->setEnabled(false);
   }
   catch(...){}
