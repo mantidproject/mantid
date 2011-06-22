@@ -3,13 +3,17 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidGeometry/ISpectraDetectorMap.h"
 
 namespace Mantid
 {
 namespace Algorithms
 {
 
+using std::size_t;
+using Geometry::ISpectraDetectorMap;
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -152,6 +156,8 @@ void ConjoinWorkspaces::exec()
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+  this->fixSpecDetMap(ws1,ws2, output);
+
   // Delete the second input workspace from the ADS
   AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
   // Set the result workspace to the first input
@@ -209,6 +215,8 @@ void ConjoinWorkspaces::execEvent()
 
   //Set the same bins for all output pixels
   output->setAllX(XValues);
+
+  this->fixSpecDetMap(event_ws1, event_ws2, output);
 
   // Delete the input workspaces from the ADS
   AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace1"));
@@ -328,6 +336,87 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
       }
     }
   }
+}
+
+/**
+ * Determine the minimum and maximum spectra ids.
+ *
+ * @param axis The axis to search through.
+ * @param min The minimum id (output).
+ * @param max The maximum id (output).
+ */
+void getMinMax(const SpectraAxis* axis, specid_t& min, specid_t& max)
+{
+  min = max = axis->spectraNo(0);
+  specid_t temp;
+  size_t length = axis->length();
+  for (size_t i = 1; i < length; i++)
+  {
+    temp = axis->spectraNo(i);
+    if (temp < min)
+      min = temp;
+    if (temp > max)
+      max = temp;
+  }
+}
+
+/***
+ * This will add the maximum spectrum number from ws1 to the data coming from ws2.
+ *
+ * @param ws1 The first workspace supplied to the algorithm.
+ * @param ws2 The second workspace supplied to the algorithm.
+ * @param output The workspace that is going to be returned by the algorithm.
+ */
+void ConjoinWorkspaces::fixSpecDetMap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2,
+                                      API::MatrixWorkspace_sptr output)
+{
+  // make sure we should bother
+  if (this->getProperty("CheckOverlapping"))
+    return;
+
+  // better be axis=1 for the spectra
+  if (!(ws1->getAxis(1)->isSpectra() && ws2->getAxis(1)->isSpectra() && output->getAxis(1)->isSpectra()))
+  {
+    g_log.information() << "Only know how to work with axis=1 being spectrum axis\n";
+    return;
+  }
+
+  // is everything possibly ok?
+  specid_t min;
+  specid_t max;
+  SpectraAxis* outputAxis = dynamic_cast<SpectraAxis *>(output->getAxis(1));
+  getMinMax(outputAxis, min, max);
+  if (max - min >= static_cast<specid_t>(outputAxis->length())) // nothing to do then
+  {
+    return;
+  }
+
+  // information for remapping the spectra numbers
+  specid_t ws1min;
+  specid_t ws1max;
+  const SpectraAxis* ws1Axis = dynamic_cast<SpectraAxis *>(ws1->getAxis(1));
+  getMinMax(ws1Axis, ws1min, ws1max);
+
+  // prepare for messing with the spectra to detector map
+  specid_t origid;
+  const ISpectraDetectorMap& origSpecDetMap = output->spectraMap();
+  SpectraDetectorMap* newSpecDetMap = new SpectraDetectorMap();
+
+  // copy the old information into the new SpectraDetectorMap
+  for (size_t i = 0; i < ws1Axis->length(); i++)
+  {
+    origid = outputAxis->spectraNo(i);
+    newSpecDetMap->addSpectrumEntries(origid, origSpecDetMap.getDetectors(origid));
+  }
+  // change the axis by adding the maximum existing spectrum number to the current value
+  for (size_t i = ws1Axis->length(); i < outputAxis->length(); i++)
+  {
+    origid = outputAxis->spectraNo(i);
+    outputAxis->setValue(i, static_cast<double>(origid + ws1max));
+    newSpecDetMap->addSpectrumEntries(origid + ws1max, origSpecDetMap.getDetectors(origid));
+  }
+
+  output->replaceSpectraMap(newSpecDetMap);
 }
 
 /// Appends the removal of the empty group after execution to the PairedGroupAlgorithm::processGroups method
