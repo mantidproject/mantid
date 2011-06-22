@@ -68,6 +68,15 @@ class MANTID_GEOMETRY_DLL IndexingUtils
 
   /// Make list of direction vectors uniformly distributed over a hemisphere
   static std::vector<Kernel::V3D> MakeHemisphereDirections( int n_steps );
+
+  /// Find the direction most nearly perpendicular to planes with the specified
+  /// spacing in reciprocal space.
+  static size_t BestFit_Direction(      Kernel::V3D & best_direction,
+                                 const  std::vector<Kernel::V3D> qxyz_vals,
+                                 const  std::vector<Kernel::V3D> direction_list,
+                                 double plane_spacing,
+                                 double required_tolerance );
+
 };
 
 

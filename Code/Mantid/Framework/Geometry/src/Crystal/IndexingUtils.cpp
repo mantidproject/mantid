@@ -274,5 +274,78 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections( int n_steps )
   return direction_list;
 }
 
+/**
+  Choose the direction vector that most nearly corresponds to a family of
+  planes in the list of qxyz vectors, with spacing equal to the specified
+  plane_spacing.  The direction is chosen from the direction_list.
 
+  @param  best_direction      This will be set to the direction that minimizes
+                              the sum squared distances of projections of peaks
+                              from integer multiples of the specified plane
+                              spacing.
+  @param  qxyz_vals           List of peak positions, specified according to
+                              the convention that |q| = 1/d.  (i.e. Q/2PI)
+  @param  direction_list      List of possible directions for plane normals.
+                              Initially, this will be a long list of possible
+                              directions from MakeHemisphereDirections().
+  @param  plane_spacing       The required spacing between planes in reciprocal
+                              space.
+  @param  required_tolerance  The maximum deviation of the component of a
+                              peak qxyz in the direction of the best_direction
+                              vector for that peak to count as being indexed. 
+                              NOTE: The tolerance is specified in terms of
+                              Miller Index.  That is, the distance between 
+                              adjacent planes is normalized one for computing
+                              the error.
+  @return The number of peaks that lie within the specified tolerance of the
+          family of planes with normal direction = best_direction and with 
+          spacing given by plane_spacing.
+ */
+size_t IndexingUtils::BestFit_Direction(       V3D & best_direction,
+                                        const  std::vector<V3D> qxyz_vals,
+                                        const  std::vector<V3D> direction_list,
+                                        double plane_spacing,
+                                        double required_tolerance )
+{
+    double dot_product;
+    int    nearest_int;
+    double error;
+    double sum_sq_error;
+    double min_sum_sq_error = 1.0e100;
+
+    for ( size_t dir_num = 0; dir_num < direction_list.size(); dir_num++ )
+    {
+      sum_sq_error = 0;
+      V3D direction = direction_list[ dir_num ];
+      direction/=plane_spacing;
+      for ( size_t q_num = 0; q_num < qxyz_vals.size(); q_num++ )
+      {
+        dot_product = direction.scalar_prod( qxyz_vals[ q_num ] );
+        nearest_int = (int)(dot_product + (dot_product < 0? -0.5 : +0.5));
+        error = fabs( dot_product - nearest_int );
+        sum_sq_error += error * error;
+      }
+
+      if ( sum_sq_error < min_sum_sq_error )
+      {
+        min_sum_sq_error = sum_sq_error;
+        best_direction = direction;
+      }
+    }
+
+    double proj_value  = 0;
+    size_t num_indexed = 0;
+    for ( size_t q_num = 0; q_num < qxyz_vals.size(); q_num++ )
+    {
+      proj_value = best_direction.scalar_prod( qxyz_vals[ q_num ] );
+      nearest_int = (int)(proj_value + (proj_value < 0? -0.5 : +0.5));
+      error = fabs( proj_value - nearest_int );
+      if ( error < required_tolerance )
+        num_indexed++;
+    }
+
+  best_direction.normalize();
+
+  return num_indexed;
+}
 
