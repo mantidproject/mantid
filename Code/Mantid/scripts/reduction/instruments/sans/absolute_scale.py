@@ -38,6 +38,8 @@ class BaseAbsoluteScale(ReductionStep):
         """
             Do nothing since the scaling factor was set by hand
         """
+        if workspace is not None:
+            Scale(workspace, workspace, self._scaling_factor, 'Multiply')
         return "Absolute scale factor: %6.4g" % self._scaling_factor
     
     
