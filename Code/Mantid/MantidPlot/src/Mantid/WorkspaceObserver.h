@@ -152,7 +152,7 @@ public:
     m_add_observed = true;
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
     m_proxy->connect(m_proxy, 
-		     SIGNAL(addRequest(const std::string &,Mantid::API::Workspace_sptr)),
+		     SIGNAL(addRequested(const std::string &,Mantid::API::Workspace_sptr)),
 		     SLOT(handleAdd(const std::string &, Mantid::API::Workspace_sptr)),
 		     Qt::QueuedConnection
 		     );

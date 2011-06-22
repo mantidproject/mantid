@@ -186,9 +186,8 @@ public:
   /// Returns true if the difference plot should be drawn
   bool plotDiff()const;
 
-  //void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
-  //void clearADSHandle();
+  void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
 public slots:
   void fit();

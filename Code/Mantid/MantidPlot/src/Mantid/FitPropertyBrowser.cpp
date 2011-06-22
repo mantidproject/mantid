@@ -337,6 +337,9 @@ m_decimals(-1)
   createCompositeFunction();
 
   m_changeSlotsEnabled = true;
+
+  observeDelete();
+  observeAdd();
 }
 
 /// Update setup menus according to how these are set in
@@ -932,10 +935,17 @@ void FitPropertyBrowser::intChanged(QtProperty* prop)
 
   if (prop == m_workspaceIndex)
   {
+ //     Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
+ // WorkspaceGroup_sptr wsPeriods = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace_ptr);
+ // MatrixWorkspace_sptr matrix_workspace;
+
+  //  Mantid::API::MatrixWorkspace_sptr ws = 
+  //    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+ //     m_appWindow->mantidUI->getWorkspace(QString::fromStdString(workspaceName()))
+  //    );
     Mantid::API::MatrixWorkspace_sptr ws = 
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-      m_appWindow->mantidUI->getWorkspace(QString::fromStdString(workspaceName()))
-      );
+      Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()));
     if (!ws)
     {
       setWorkspaceIndex(0);
@@ -1214,7 +1224,7 @@ void FitPropertyBrowser::fit()
   std::string wsName = workspaceName();
   if (wsName.empty())
   {
-    m_appWindow->mantidUI->showCritical("Workspace name is not set");
+    QMessageBox::critical(this,"Mantid - Error", "Workspace name is not set");
     return;
   }
   try
@@ -1274,7 +1284,7 @@ void FitPropertyBrowser::fit()
   catch(std::exception& e)
   {
     QString msg = "Fit algorithm failed.\n\n"+QString(e.what())+"\n";
-    m_appWindow->mantidUI->showCritical(msg);
+    QMessageBox::critical(this,"Mantid - Error", msg);
   }
 }
 
@@ -1305,10 +1315,16 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
 void FitPropertyBrowser::populateWorkspaceNames()
 {
   m_workspaceNames.clear();
-  QStringList tmp = m_appWindow->mantidUI->getWorkspaceNames();
+  //QStringList tmp = m_appWindow->mantidUI->getWorkspaceNames();
+
+  QStringList tmp;
+  std::set<std::string> sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+  for (std::set<std::string>::const_iterator it = sv.begin(); it != sv.end(); ++it)
+    tmp<<QString::fromStdString(*it);
+
   for(int i=0;i<tmp.size();i++)
   {
-    Mantid::API::Workspace_sptr ws = m_appWindow->mantidUI->getWorkspace(tmp[i]);
+    Mantid::API::Workspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(tmp[i].toStdString());
     if (isWorkspaceValid(ws))
     {
       m_workspaceNames.append(tmp[i]);
@@ -1355,16 +1371,31 @@ void FitPropertyBrowser::init()
 {
   populateFunctionNames();
   populateWorkspaceNames();
-  connect(m_appWindow->mantidUI,SIGNAL(workspace_added(const QString &, Mantid::API::Workspace_sptr)),
-    this,SLOT(workspace_added(const QString &, Mantid::API::Workspace_sptr)));
-  connect(m_appWindow->mantidUI,SIGNAL(workspace_removed(const QString &)),
-    this,SLOT(workspace_removed(const QString &)));
+}
+
+/// workspace was added
+void FitPropertyBrowser::addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+{
+  if ( !isWorkspaceValid(ws) ) return;
+  QString oldName = QString::fromStdString(workspaceName());
+  int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
+  if (i < 0)
+  {
+    m_workspaceNames.append(QString(wsName.c_str()));
+    m_workspaceNames.sort();
+  }
+  m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
+  i = m_workspaceNames.indexOf(oldName);
+  if (i >= 0)
+  {
+    m_enumManager->setValue(m_workspace,i);
+  }
 }
 
 /// workspace was removed
 void FitPropertyBrowser::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-/*  QString oldName = QString::fromStdString(workspaceName());
+  QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
   if (i >= 0)
   {
@@ -1375,7 +1406,7 @@ void FitPropertyBrowser::deleteHandle(const std::string& wsName,const boost::sha
   if (i >= 0)
   {
     m_enumManager->setValue(m_workspace,i);
-  } */
+  } 
 }
 
 
@@ -1660,7 +1691,7 @@ void FitPropertyBrowser::addTieToFunction()
   }
   if (fnNames.empty() || iPar < 0)
   {
-    QMessageBox::information(m_appWindow,"Mantid - information","Cannot tie this parameter to any function");
+    QMessageBox::information(this,"Mantid - information","Cannot tie this parameter to any function");
     return;
   }
 
@@ -2296,7 +2327,7 @@ void FitPropertyBrowser::findPeaks()
   std::string wsName = workspaceName();
   if (wsName.empty())
   {
-    m_appWindow->mantidUI->showCritical("Workspace name is not set");
+    QMessageBox::critical(this,"Mantid - Error", "Workspace name is not set");
     return;
   }
 
