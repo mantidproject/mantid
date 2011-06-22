@@ -146,8 +146,9 @@ void AxisInteractor::createIndicator(const QPoint &point)
 	}
 	Indicator *tri = new Indicator();
   QObject::connect(tri, SIGNAL(indicatorMoved(const QPoint &, int)),
-        this->scalePicker, SLOT(determinePosition(const QPoint &, int)));
-	tri->setOrientation(this->scalePos);
+                   this->scalePicker,
+                   SLOT(determinePosition(const QPoint &, int)));
+  tri->setOrientation(this->scalePos);
 	tri->setPoints(point, gv_rect);
 	this->scene->addItem(tri);
 }
@@ -313,7 +314,9 @@ void AxisInteractor::showContextMenu(const QPoint &pos)
           }
           if (QString("Hide") == selectedItem->text())
           {
-
+            bool isVisible = !selectedItem->isChecked();
+            emit this->showOrHideIndicator(isVisible, item->toolTip());
+            static_cast<Indicator *>(item)->changeIndicatorColor(isVisible);
           }
         }
       }
@@ -327,7 +330,6 @@ void AxisInteractor::createContextMenu()
   {
     return;
   }
-
   this->indicatorContextMenu = new QMenu();
   QAction *hideAction = this->indicatorContextMenu->addAction("Hide");
   hideAction->setCheckable(true);

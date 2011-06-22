@@ -126,6 +126,12 @@ signals:
    * @param name the name of the selected indicator
    */
   void indicatorSelected(const QString &name);
+  /**
+   * Signal to show or hide the given indicator.
+   * @param isVisible flag the determines showing or hiding the indicator
+   * @param name the name of the indicator to show or hide
+   */
+  void showOrHideIndicator(bool isVisible, const QString &name);
 
 protected slots:
   /**

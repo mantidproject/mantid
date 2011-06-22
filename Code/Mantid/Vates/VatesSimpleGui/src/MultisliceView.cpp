@@ -10,6 +10,7 @@
 #include <pqChartValue.h>
 #include <pqColorMapModel.h>
 #include <pqDataRepresentation.h>
+#include <pqDisplayPolicy.h>
 #include <pqObjectBuilder.h>
 #include <pqPipelineBrowserWidget.h>
 #include <pqPipelineRepresentation.h>
@@ -79,6 +80,16 @@ MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
   QObject::connect(this->ui.zAxisWidget,
                    SIGNAL(deleteIndicator(const QString &)), this,
                    SLOT(deleteCut(const QString &)));
+
+  QObject::connect(this->ui.xAxisWidget,
+                   SIGNAL(showOrHideIndicator(bool, const QString &)),
+                   this, SLOT(cutVisibility(bool, const QString &)));
+  QObject::connect(this->ui.yAxisWidget,
+                   SIGNAL(showOrHideIndicator(bool, const QString &)),
+                   this, SLOT(cutVisibility(bool, const QString &)));
+  QObject::connect(this->ui.zAxisWidget,
+                   SIGNAL(showOrHideIndicator(bool, const QString &)),
+                   this, SLOT(cutVisibility(bool, const QString &)));
 }
 
 MultiSliceView::~MultiSliceView()
@@ -344,4 +355,14 @@ void MultiSliceView::deleteCut(const QString &name)
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->destroy(cut);
   this->originSourceRepr->setVisible(false);
+}
+
+void MultiSliceView::cutVisibility(bool isVisible, const QString &name)
+{
+  pqDisplayPolicy* display_policy = pqApplicationCore::instance()->getDisplayPolicy();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
+  pqOutputPort *port = cut->getOutputPort(0);
+  display_policy->setRepresentationVisibility(port, this->mainView, isVisible);
+  this->mainView->render();
 }

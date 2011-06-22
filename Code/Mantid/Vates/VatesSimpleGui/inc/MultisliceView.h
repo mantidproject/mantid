@@ -64,6 +64,12 @@ public:
 
 protected slots:
   /**
+   * Show or hide a given slice from the view.
+   * @param isVisible flag to show/hide associated cut
+   * @param name the slice to show/hide from the view
+   */
+  void cutVisibility(bool isVisible, const QString &name);
+  /**
    * Delete a slice from the view.
    * @param name the name of the slice to be deleted
    */

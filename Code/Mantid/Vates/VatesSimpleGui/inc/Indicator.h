@@ -58,6 +58,11 @@ public:
 	Indicator(QGraphicsItem *parent = 0);
 	/// Default destructor.
 	virtual ~Indicator() {}
+  /**
+   * Update the indicators fill color based on visibility.
+   * @param isVisible flag to determine the fill color of the indicator
+   */
+  void changeIndicatorColor(bool isVisible);
 	/// Print the triangle's vertex coordinates.
 	void printSelf();
 	/**
@@ -113,7 +118,8 @@ private:
 	 */
 	int fixPosition(int level);
 
-	QColor fillColor; ///< The fill color for the triangle
+  QColor hiddenFillColor; ///< The fill color for the triangle if cut is hidden
+  QColor visibleFillColor; ///< The fill color for the triangle if cut is visible
 	QColor outlineColor; ///< The outline color for the triangle
 	QPolygonF path; ///< The holder for the triangle's shape coordinates
 	int half_base; ///< Half the size of the triangle's base

@@ -13,15 +13,16 @@
 
 Indicator::Indicator(QGraphicsItem *parent) : QGraphicsPolygonItem(parent)
 {
-	this->fillColor = Qt::blue;
+  this->visibleFillColor = Qt::blue;
+  this->hiddenFillColor = Qt::black;
 	this->outlineColor = Qt::black;
 	this->half_base = 8;
 	this->orientation = AxisInteractor::LeftScale;
 	this->setOpacity(1.0);
-	this->setBrush(QBrush(this->fillColor));
+  this->setBrush(QBrush(this->visibleFillColor));
 	this->setPen(QPen(this->outlineColor));
 	this->setFlags(QGraphicsItem::ItemIsMovable |
-			QGraphicsItem::ItemIsSelectable);
+                 QGraphicsItem::ItemIsSelectable);
 }
 
 void Indicator::setOrientation(AxisInteractor::ScalePos orient)
@@ -173,4 +174,16 @@ void Indicator::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 		QGraphicsPolygonItem::mouseReleaseEvent(event);
 		break;
 	}
+}
+
+void Indicator::changeIndicatorColor(bool isVisible)
+{
+  if (isVisible)
+  {
+    this->setBrush(this->visibleFillColor);
+  }
+  else
+  {
+    this->setBrush(this->hiddenFillColor);
+  }
 }
