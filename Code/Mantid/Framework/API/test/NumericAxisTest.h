@@ -7,6 +7,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Exception.h"
+#include <cfloat>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -120,6 +121,27 @@ public:
       TS_ASSERT_THROWS( nAxis.spectraNo(i) = 2*i, std::domain_error);
       TS_ASSERT_EQUALS( nAxis(i), 0 );
     }    
+  }
+
+  void testConversionToBins()
+  {
+    const size_t npoints(5);
+    NumericAxis axis(npoints);
+    for(size_t i = 0; i < npoints; ++i)
+    {
+      axis.setValue(i, static_cast<double>(i));
+    }
+    
+    std::vector<double> boundaries = axis.createBinBoundaries();
+    const size_t nvalues(boundaries.size());
+    TS_ASSERT_EQUALS(nvalues, npoints + 1);
+    // Easier to read the expected values with static sized array so
+    // live with the hard-coded size
+    double expectedValues[6] = {-0.5, 0.5, 1.5, 2.5, 3.5, 4.5};
+    for( size_t i = 0; i < nvalues; ++i )
+    {
+      TS_ASSERT_DELTA(boundaries[i],expectedValues[i], DBL_EPSILON);
+    }
   }
 
 private:

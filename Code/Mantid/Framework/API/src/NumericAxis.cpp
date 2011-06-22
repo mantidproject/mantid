@@ -88,5 +88,24 @@ std::string NumericAxis::label(const size_t& index)const
   return boost::lexical_cast<std::string>((*this)(index));
 }
 
+/**
+ * Create a set of bin boundaries from the centre point values
+ * @param returns A vector of bin boundaries
+ */
+std::vector<double> NumericAxis::createBinBoundaries() const
+{
+  const size_t npoints = length();
+  if( npoints < 2 ) throw std::runtime_error("Fewer than two points on axis, cannot create bins.");
+  std::vector<double> boundaries(npoints + 1);
+  const NumericAxis & thisObject(*this);
+  for( size_t i = 0; i < npoints - 1; ++i )
+  {
+    boundaries[i+1] = 0.5*(thisObject(i) + thisObject(i+1));
+  }
+  boundaries[0] = m_values.front() - (boundaries[1] - m_values.front());
+  boundaries[npoints] = m_values.back() + (m_values.back() - boundaries[npoints - 1]);
+  return boundaries;
+}
+
 } // namespace API
 } // namespace Mantid
