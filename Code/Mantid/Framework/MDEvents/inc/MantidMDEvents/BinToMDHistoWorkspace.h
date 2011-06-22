@@ -1,8 +1,8 @@
 #ifndef MANTID_MDEVENTS_BINTOMDHISTOWORKSPACE_H_
 #define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACE_H_
-    
+
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h" 
+#include "MantidAPI/Algorithm.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/Strings.h"
@@ -10,15 +10,20 @@
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 
 namespace Mantid
 {
 namespace MDEvents
 {
 
-  /** BinToMDHistoWorkspace : TODO: DESCRIPTION
+  /** Take a MDEventWorkspace and bin it to a dense histogram
+   * in a MDHistoWorkspace. This is principally used for visualization.
    * 
-   * @author
+   * The output workspace may have fewer
+   * dimensions than the input MDEventWorkspace.
+   *
+   * @author Janik Zikovsky
    * @date 2011-03-29 11:28:06.048254
    */
   class DLLExport BinToMDHistoWorkspace  : public API::Algorithm
@@ -26,14 +31,14 @@ namespace MDEvents
   public:
     BinToMDHistoWorkspace();
     ~BinToMDHistoWorkspace();
-    
-    /// Algorithm's name for identification 
+
+    /// Algorithm's name for identification
     virtual const std::string name() const { return "BinToMDHistoWorkspace";};
-    /// Algorithm's version for identification 
+    /// Algorithm's version for identification
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDEvents";}
-    
+
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
@@ -46,14 +51,14 @@ namespace MDEvents
     template<typename MDE, size_t nd>
     void do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
-    /// Arguments passed to do_centerpointBin()
-    std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
+    /// Input binning dimensions
+    std::vector<Mantid::Geometry::MDHistoDimension_sptr> binDimensionsIn;
     /// The output MDHistoWorkspace
-    Mantid::API::IMDWorkspace_sptr out;
+    Mantid::MDEvents::MDHistoWorkspace_sptr outWS;
     /// Progress reporting
     Mantid::API::Progress * prog;
     /// ImplicitFunction used
-    Mantid::API::ImplicitFunction * implicitFunc;
+    Mantid::API::ImplicitFunction * implicitFunction;
 
 
 

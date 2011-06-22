@@ -87,7 +87,16 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void do_test_exec(std::string functionXML)
+
+  /** Test the algo
+  * @param nameX : name of the axis
+  * @param expected_signal :: how many events in each resulting bin
+  * @param expected_numBins :: how many points/bins in the output
+  */
+  void do_test_exec(std::string functionXML,
+      std::string name1, std::string name2, std::string name3, std::string name4,
+      double expected_signal,
+      size_t expected_numBins)
   {
     BinToMDHistoWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -99,10 +108,10 @@ public:
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinToMDHistoWorkspaceTest_ws") );
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimX", "Axis0,2.0,8.0, 6"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimY", "Axis1,2.0,8.0, 6"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimZ", "Axis2,2.0,8.0, 6"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimX", name1));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimY", name2));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimZ", name3));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", name4));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML",functionXML));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws"));
 
@@ -117,15 +126,15 @@ public:
     if(!out) return;
 
     // Took 6x6x6 bins in the middle of the box
-    TS_ASSERT_EQUALS(out->getNPoints(), 6*6*6);
+    TS_ASSERT_EQUALS(out->getNPoints(), expected_numBins);
     // Every box has a single event summed into it, so 1.0 weight
     for (size_t i=0; i < out->getNPoints(); i++)
     {
       if (functionXML == "")
       {
         // Nothing rejected
-        TS_ASSERT_DELTA(out->getSignalAt(i), 1.0, 1e-5);
-        TS_ASSERT_DELTA(out->getErrorAt(i), 1.0, 1e-5);
+        TS_ASSERT_DELTA(out->getSignalAt(i), expected_signal, 1e-5);
+        TS_ASSERT_DELTA(out->getErrorAt(i), expected_signal, 1e-5);
       }
       else
       {
@@ -136,9 +145,19 @@ public:
     AnalysisDataService::Instance().remove("BinToMDHistoWorkspaceTest_ws");
   }
 
-  void test_exec()
+  void test_exec_3D()
   {
-    do_test_exec("");
+    do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/, 6*6*6 /*# of bins*/ );
+  }
+
+  void test_exec_3D_scrambled_order()
+  {
+    do_test_exec("", "Axis1,2.0,8.0, 6", "Axis0,2.0,8.0, 6", "", "Axis2,2.0,8.0, 6", 1.0 /*signal*/, 6*6*6 /*# of bins*/ );
+  }
+
+  void test_exec_3D_unevenSizes()
+  {
+    do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 3", "Axis2,2.0,8.0, 6", "", 2.0 /*signal*/, 6*6*3 /*# of bins*/ );
   }
 
   void test_exec_with_impfunction()
@@ -149,7 +168,30 @@ public:
         "<ParameterList>"+
         "</ParameterList>"+
         "</Function>";
-    do_test_exec(functionXML);
+    do_test_exec(functionXML,  "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/, 6*6*6 /*# of bins*/ );
+  }
+
+
+  void test_exec_2D()
+  {
+    // Integrate over the 3rd dimension
+    do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "", "", 1.0*10.0 /*signal*/, 6*6 /*# of bins*/ );
+  }
+
+  void test_exec_2D_largeBins()
+  {
+    do_test_exec("", "Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 3", "", "", 4.0*10.0 /*signal*/, 3*3 /*# of bins*/ );
+  }
+
+  void test_exec_2D_scrambledAndUnevent()
+  {
+    do_test_exec("", "Axis0,2.0,8.0, 3", "", "Axis2,2.0,8.0, 6", "", 2.0*10.0 /*signal*/, 3*6 /*# of bins*/ );
+  }
+
+  void test_exec_1D()
+  {
+    // Integrate over 2 dimensions
+    do_test_exec("", "Axis2,2.0,8.0, 6", "", "", "", 1.0*100.0 /*signal*/, 6 /*# of bins*/ );
   }
 
 
