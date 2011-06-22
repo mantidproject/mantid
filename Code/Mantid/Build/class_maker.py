@@ -58,10 +58,30 @@ namespace %s
 {
 
   /** %s : TODO: DESCRIPTION
-   * 
-   * @author
-   * @date %s
-   */
+    
+    @author
+    @date %s
+
+    Copyright &copy; %s ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+  */
   class DLLExport %s %s
   {
   public:
@@ -71,11 +91,11 @@ namespace %s
   };
 
 
-} // namespace Mantid
 } // namespace %s
+} // namespace Mantid
 
 #endif  /* %s */
-""" % (guard, guard, alg_include, subproject, classname, datetime.datetime.now().date(), classname, alg_class_declare, classname, classname, algorithm_header, subproject, guard)
+""" % (guard, guard, alg_include, subproject, classname, datetime.datetime.now().date(), datetime.datetime.now().date().year, classname, alg_class_declare, classname, classname, algorithm_header, subproject, guard)
     f.write(s)
     f.close()
 
