@@ -128,6 +128,7 @@ void Shape2DCollection::mouseMoveEvent(QMouseEvent* e)
     {
       QPointF p = m_transform.inverted().map(QPointF(e->x(),e->y()));
       m_currentShape->setControlPoint(m_currentCP,p);
+      emit shapeChanged();
     }
   }
   else if (m_moving && m_leftButtonPressed && m_currentShape)
@@ -135,6 +136,7 @@ void Shape2DCollection::mouseMoveEvent(QMouseEvent* e)
     QPointF p1 = m_transform.inverted().map(QPointF( e->x(),e->y() ));
     QPointF p2 = m_transform.inverted().map(QPointF( m_x, m_y ));
     m_currentShape->moveBy(p1 - p2);
+    emit shapeChanged();
     m_x = e->x();
     m_y = e->y();
   }
@@ -176,11 +178,16 @@ void Shape2DCollection::keyPressEvent(QKeyEvent* e)
 void Shape2DCollection::addShape(const QString& type,int x,int y)
 {
   m_currentShape = createShape(type,x,y);
-  if ( ! m_currentShape ) return;
+  if ( ! m_currentShape )
+  {
+    emit shapeSelected();
+    return;
+  }
   m_currentShape->setColor(m_borderColor);
   m_currentShape->setFillColor(m_fillColor);
   m_creating = true;
   addShape( m_currentShape);
+  emit shapeSelected();
 }
 
 Shape2D* Shape2DCollection::createShape(const QString& type,int x,int y) const
@@ -227,6 +234,7 @@ void Shape2DCollection::deselectAll()
     shape->edit(false);
   }
   m_currentShape = NULL;
+  emit shapesDeselected();
 }
 
 bool Shape2DCollection::selectAt(int x,int y)
@@ -243,6 +251,7 @@ bool Shape2DCollection::selectAt(int x,int y)
       }
       m_currentShape = shape;
       m_currentShape->edit(true);
+      emit shapeSelected();
       return true;
     }
   }
@@ -278,5 +287,80 @@ void Shape2DCollection::removeCurrentShape()
   if (m_currentShape)
   {
     m_shapes.removeOne(m_currentShape);
+    m_currentShape = NULL;
+    emit shapesDeselected();
+  }
+}
+
+QStringList Shape2DCollection::getCurrentDoubleNames()const
+{
+  if (m_currentShape)
+  {
+    return m_currentShape->getDoubleNames();
+  }
+  return QStringList();
+}
+
+double Shape2DCollection::getCurrentDouble(const QString& prop) const
+{
+  if (m_currentShape)
+  {
+    return m_currentShape->getDouble(prop);
+  }
+  return 0.0;
+}
+
+void Shape2DCollection::setCurrentDouble(const QString& prop, double value)
+{
+  if (m_currentShape)
+  {
+    return m_currentShape->setDouble(prop,value);
+  }
+}
+
+QStringList Shape2DCollection::getCurrentPointNames()const
+{
+  if (m_currentShape)
+  {
+    return m_currentShape->getPointNames();
+  }
+  return QStringList();
+}
+
+QPointF Shape2DCollection::getCurrentPoint(const QString& prop) const
+{
+  if (m_currentShape)
+  {
+    //return m_transform.map(m_currentShape->getPoint(prop));
+    return m_currentShape->getPoint(prop);
+  }
+  return QPointF();
+}
+
+void Shape2DCollection::setCurrentPoint(const QString& prop, const QPointF& value)
+{
+  if (m_currentShape)
+  {
+    //return m_currentShape->setPoint(prop,m_transform.inverted().map(value));
+    return m_currentShape->setPoint(prop,value);
+  }
+}
+
+QRectF Shape2DCollection::getCurrentBoundingRect()const
+{
+  if (m_currentShape)
+  {
+    //return m_transform.mapRect(m_currentShape->getBoundingRect());
+    return m_currentShape->getBoundingRect();
+  }
+  return QRectF();
+}
+
+void Shape2DCollection::setCurrentBoundingRect(const QRectF& rect)
+{
+  if (m_currentShape)
+  {
+    //m_currentShape->setBoundingRect(m_transform.inverted().mapRect(rect));
+    m_currentShape->setBoundingRect(rect);
   }
 }

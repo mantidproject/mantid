@@ -33,10 +33,25 @@ public:
   void deselectAll();
   bool selectAt(int x,int y);
   void removeCurrentShape();
+  //Shape2D* getCurrentShape()const{return m_currentShape;}
+
+  QRectF getCurrentBoundingRect()const;
+  void setCurrentBoundingRect(const QRectF& rect);
+  // double properties
+  QStringList getCurrentDoubleNames()const;
+  double getCurrentDouble(const QString& prop) const;
+  void setCurrentDouble(const QString& prop, double value);
+  // QPointF properties
+  QStringList getCurrentPointNames()const;
+  QPointF getCurrentPoint(const QString& prop) const;
+  void setCurrentPoint(const QString& prop, const QPointF& value);
 
 signals:
 
   void shapeCreated();
+  void shapeSelected();
+  void shapesDeselected();
+  void shapeChanged();
 
 protected:
   virtual void drawShape(QPainter& ) const{} // never called

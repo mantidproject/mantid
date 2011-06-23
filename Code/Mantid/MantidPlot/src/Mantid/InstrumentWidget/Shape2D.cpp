@@ -134,6 +134,7 @@ void Shape2D::adjustBoundingRect(qreal dx1,qreal dy1,qreal dx2,qreal dy2)
 void Shape2D::setBoundingRect(const QRectF& rect)
 {
   m_boundingRect = rect;
+  correctBoundingRect();
   refit();
 }
 
@@ -199,6 +200,60 @@ bool Shape2DEllipse::contains(const QPointF& p)const
 
   return f <= 1.0;
 }
+
+QStringList Shape2DEllipse::getDoubleNames()const
+{
+  QStringList res;
+  res << "radius1" << "radius2";
+  return res;
+}
+
+double Shape2DEllipse::getDouble(const QString& prop) const
+{
+  if (prop == "radius1")
+  {
+    return m_boundingRect.width() / 2;
+  }
+  else if (prop == "radius2")
+  {
+    return m_boundingRect.height() / 2;
+  }
+  return 0.0;
+}
+
+void Shape2DEllipse::setDouble(const QString& prop, double value)
+{
+  if (prop == "radius1")
+  {
+    if (value <= 0.0) value = 1.0;
+    qreal d = value - m_boundingRect.width() / 2;
+    adjustBoundingRect(-d,0,d,0);
+  }
+  else if (prop == "radius2")
+  {
+    if (value <= 0.0) value = 1.0;
+    qreal d = value - m_boundingRect.height() / 2;
+    adjustBoundingRect(0,-d,0,d);
+  }
+}
+
+QPointF Shape2DEllipse::getPoint(const QString& prop) const
+{
+  if (prop == "center" || prop == "centre")
+  {
+    return m_boundingRect.center();
+  }
+  return QPointF();
+}
+
+void Shape2DEllipse::setPoint(const QString& prop, const QPointF& value)
+{
+  if (prop == "center" || prop == "centre")
+  {
+    m_boundingRect.moveCenter(value);
+  }
+}
+
 
 // --- Shape2DRectangle --- //
 
@@ -334,3 +389,46 @@ void Shape2DRing::setShapeControlPoint(size_t i,const QPointF& pos)
   }
 
 }
+
+QStringList Shape2DRing::getDoubleNames()const
+{
+  QStringList res;
+  res << "width";
+  return res;
+}
+
+double Shape2DRing::getDouble(const QString& prop) const
+{
+  if (prop == "width")
+  {
+    return m_stored_width;
+  }
+  return 0.0;
+}
+
+void Shape2DRing::setDouble(const QString& prop, double value)
+{
+  if (prop == "width")
+  {
+    m_stored_width = value;
+    refit();
+  }
+}
+
+QPointF Shape2DRing::getPoint(const QString& prop) const
+{
+  if (prop == "center" || prop == "centre")
+  {
+    return m_boundingRect.center();
+  }
+  return QPointF();
+}
+
+void Shape2DRing::setPoint(const QString& prop, const QPointF& value)
+{
+  if (prop == "center" || prop == "centre")
+  {
+    m_boundingRect.moveCenter(value);
+  }
+}
+

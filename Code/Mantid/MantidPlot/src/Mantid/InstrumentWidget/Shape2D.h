@@ -22,7 +22,10 @@ public:
   Shape2D();
   virtual ~Shape2D(){}
 
+  // --- Public pure virtual methods --- //
+
   virtual Shape2D* clone()const = 0;
+  // modify path so painter.drawPath(path) could be used to draw the shape. needed for filling in complex shapes
   virtual void addToPath(QPainterPath& path) const = 0;
   // make sure the shape is withing the bounding box
   virtual void refit() = 0;
@@ -42,10 +45,26 @@ public:
   void setFillColor(const QColor& color){m_fill_color = color;}
   void edit(bool on){m_editing = on;}
   bool isEditing()const{return m_editing;}
+  // will the shape be selected if clicked at a point
   virtual bool selectAt(const QPointF& )const{return false;}
+  // is a point inside the shape (closed line)
   virtual bool contains(const QPointF& )const{return false;}
 
+  // --- Properties. for gui interaction --- //
+
+  // double properties
+  virtual QStringList getDoubleNames()const{return QStringList();}
+  virtual double getDouble(const QString& prop) const{(void)prop; return 0.0;}
+  virtual void setDouble(const QString& prop, double value){(void)prop; (void)value;}
+
+  // QPointF properties
+  virtual QStringList getPointNames()const{return QStringList();}
+  virtual QPointF getPoint(const QString& prop) const{(void)prop; return QPointF();}
+  virtual void setPoint(const QString& prop, const QPointF& value){(void)prop; (void)value;}
+
 protected:
+  // --- Protected pure virtual methods --- //
+
   virtual void drawShape(QPainter& painter) const = 0;
 
   // return number of control points specific to this shape
@@ -57,6 +76,7 @@ protected:
   // make sure the bounding box is correct
   virtual void adjustBoundingRect() {}
 
+  // make sure that width and heigth are positive
   void correctBoundingRect();
 
   static const size_t NCommonCP;
@@ -75,6 +95,15 @@ public:
   virtual bool selectAt(const QPointF& p)const;
   virtual bool contains(const QPointF& p)const;
   virtual void addToPath(QPainterPath& path) const;
+  // double properties
+  virtual QStringList getDoubleNames()const;
+  virtual double getDouble(const QString& prop) const;
+  virtual void setDouble(const QString& prop, double value);
+  // QPointF properties
+  virtual QStringList getPointNames()const{return QStringList("center");}
+  virtual QPointF getPoint(const QString& prop) const;
+  virtual void setPoint(const QString& prop, const QPointF& value);
+
 protected:
   virtual void drawShape(QPainter& painter) const;
   virtual void refit(){}
@@ -102,6 +131,14 @@ public:
   virtual Shape2D* clone()const{return new Shape2DRing(*this);}
   virtual bool selectAt(const QPointF& p)const;
   virtual bool contains(const QPointF& p)const;
+  // double properties
+  virtual QStringList getDoubleNames()const;
+  virtual double getDouble(const QString& prop) const;
+  virtual void setDouble(const QString& prop, double value);
+  // QPointF properties
+  virtual QStringList getPointNames()const{return QStringList("center");}
+  virtual QPointF getPoint(const QString& prop) const;
+  virtual void setPoint(const QString& prop, const QPointF& value);
 protected:
   virtual void drawShape(QPainter& painter) const;
   virtual void addToPath(QPainterPath& ) const {}

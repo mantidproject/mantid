@@ -89,7 +89,18 @@ public:
 
   // --- Shape2D manipulation --- //
 
+  QRectF getCurrentBoundingRect()const{return m_maskShapes.getCurrentBoundingRect();}
+  void setCurrentBoundingRect(const QRectF& rect){m_maskShapes.setCurrentBoundingRect(rect);}
+
   void startCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor = QColor());
+  // double properties
+  QStringList getCurrentDoubleNames()const{return m_maskShapes.getCurrentDoubleNames();}
+  double getCurrentDouble(const QString& prop) const{return m_maskShapes.getCurrentDouble(prop);}
+  void setCurrentDouble(const QString& prop, double value){m_maskShapes.setCurrentDouble(prop, value);}
+  // QPointF properties
+  QStringList getCurrentPointNames()const{return m_maskShapes.getCurrentPointNames();}
+  QPointF getCurrentPoint(const QString& prop) const{return m_maskShapes.getCurrentPoint(prop);}
+  void setCurrentPoint(const QString& prop, const QPointF& value){m_maskShapes.setCurrentPoint(prop,value);}
 
 signals:
 
@@ -98,11 +109,17 @@ signals:
   void multipleDetectorsSelected(QList<int>&);
 
   void shapeCreated();
+  void shapeSelected();
+  void shapesDeselected();
+  void shapeChanged();
 
 protected slots:
 
   void colorMapChanged();
   void catchShapeCreated();
+  void catchShapeSelected();
+  void catchShapesDeselected();
+  void catchShapeChanged();
 
 protected:
   virtual void init() = 0;

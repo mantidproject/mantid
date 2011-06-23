@@ -18,9 +18,9 @@
 #include <cfloat>
 #include <typeinfo>
 
-#ifndef GL_MULTISAMPLE
-#define GL_MULTISAMPLE  0x809D
-#endif
+//#ifndef GL_MULTISAMPLE
+//#define GL_MULTISAMPLE  0x809D
+//#endif
 
 //NOTES:
 //1) if the sample buffers are not available then the paint of image on the mdi windows
@@ -29,7 +29,8 @@
 const Qt::CursorShape cursorShape = Qt::ArrowCursor;
 
 MantidGLWidget::MantidGLWidget(QWidget* parent):
-  QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel|QGL::SampleBuffers),parent),
+  //QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel|QGL::SampleBuffers),parent),
+  QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel),parent),
   m_bgColor(QColor(0,0,0,1)),
   //m_polygonMode(SOLID),
   m_lightingState(0),

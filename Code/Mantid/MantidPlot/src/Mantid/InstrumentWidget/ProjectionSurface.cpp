@@ -37,6 +37,9 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
 {
   connect(rootActor,SIGNAL(colorMapChanged()),this,SLOT(colorMapChanged()));
   connect(&m_maskShapes,SIGNAL(shapeCreated()),this,SLOT(catchShapeCreated()));
+  connect(&m_maskShapes,SIGNAL(shapeSelected()),this,SLOT(catchShapeSelected()));
+  connect(&m_maskShapes,SIGNAL(shapesDeselected()),this,SLOT(catchShapesDeselected()));
+  connect(&m_maskShapes,SIGNAL(shapeChanged()),this,SLOT(catchShapeChanged()));
 }
 
 ProjectionSurface::~ProjectionSurface()
@@ -465,4 +468,19 @@ void ProjectionSurface::startCreatingShape2D(const QString& type,const QColor& b
 void ProjectionSurface::catchShapeCreated()
 {
   emit shapeCreated();
+}
+
+void ProjectionSurface::catchShapeSelected()
+{
+  emit shapeSelected();
+}
+
+void ProjectionSurface::catchShapesDeselected()
+{
+  emit shapesDeselected();
+}
+
+void ProjectionSurface::catchShapeChanged()
+{
+  emit shapeChanged();
 }
