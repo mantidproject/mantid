@@ -49,6 +49,7 @@ class DoubleSpinBox;
 class QMouseEvent;
 class QTreeWidget;
 class QTreeWidgetItem;
+class QStringList;
 
 namespace MantidQt
 {
@@ -141,7 +142,7 @@ private:
   void updateDirSearchSettings();
   void updateCurveFitSettings();
   void updateMantidOptionsTab();
-  QString buildHiddenCategoryString(QTreeWidgetItem *parent = 0);
+  QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = 0);
   void initMantidOptionsTab();
   void refreshTreeCategories();
   QTreeWidgetItem* createCheckedTreeItem(QString name,bool checkBoxState);

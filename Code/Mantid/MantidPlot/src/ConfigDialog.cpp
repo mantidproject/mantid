@@ -67,6 +67,7 @@
 #include <QFileDialog>
 #include <QRegExp>
 #include <QMouseEvent>
+#include <QStringList>
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -1864,12 +1865,7 @@ void ConfigDialog::updateMantidOptionsTab()
   mantid_config.setString("MantidOptions.InvisibleWorkspaces",showinvisible_ws.toStdString());
 
   //Hidden categories
-  QString hiddenCategories = buildHiddenCategoryString();
-  //remove the final ;
-  if (hiddenCategories.length() > 0)
-  {
-    hiddenCategories.chop(1);
-  }
+  QString hiddenCategories = buildHiddenCategoryString().join(";");
 
   //store it if it has changed
   std::string hiddenCategoryString = hiddenCategories.toStdString();
@@ -1883,9 +1879,9 @@ void ConfigDialog::updateMantidOptionsTab()
   }
 }
 
-QString ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent)
+QStringList ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent)
 {
-  QString resultString;
+  QStringList results;
   //how many children at this level
   int count = parent ? parent->childCount() : treeCategories->topLevelItemCount();
 
@@ -1896,12 +1892,16 @@ QString ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent)
 	
     if (item->checkState(0) == Qt::Unchecked)
     {
-      resultString.append(item->text(0).append(";"));
+      results.append(item->text(0));
     }
-
-    resultString.append(buildHiddenCategoryString(item));
+    
+    QStringList childResults = buildHiddenCategoryString(item);
+    for (QStringList::ConstIterator it = childResults.begin();it!=childResults.end();++it)
+    {
+      results.append(item->text(0) + "\\" + *it);
+    }
   }
-  return resultString;
+  return results;
 }
 
 int ConfigDialog::curveStyle()
