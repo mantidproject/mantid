@@ -108,6 +108,11 @@ protected slots:
    * @param max the maximum value for the color scale
    */
   void onColorScaleChange(double min, double max);
+  /**
+   * Set logarithmic color scaling on the data.
+   * @param state flag to determine whether or not to use log color scaling
+   */
+  void onLogScale(int state);
 	/// Select the appropriate indicator on the correct axis interactor widget.
 	void selectIndicator();
   /**

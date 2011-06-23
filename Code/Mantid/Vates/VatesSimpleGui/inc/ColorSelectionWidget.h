@@ -65,6 +65,11 @@ signals:
    * @param max the maximum value of the color scale
    */
   void colorScaleChanged(double min, double max);
+  /**
+   * Signal to pass on use of log color scaling.
+   * @param state flag for whether or not to use log color scaling
+   */
+  void logScale(int state);
 
 protected slots:
   /**
@@ -90,6 +95,12 @@ protected slots:
    * result from the user.
    */
   void loadPreset();
+  /**
+   * Function that sets the flag for using log color scaling based on the
+   * associated checkbox.
+   * @param state flag for whether or not to use log color scaling
+   */
+  void useLogScaling(int state);
 
 private:
   /**

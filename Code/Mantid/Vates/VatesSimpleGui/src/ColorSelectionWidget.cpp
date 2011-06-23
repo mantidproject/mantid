@@ -30,6 +30,8 @@ ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent)
   this, SLOT(getColorScaleRange()));
   QObject::connect(this->ui.maxValLineEdit, SIGNAL(editingFinished()),
   this, SLOT(getColorScaleRange()));
+  QObject::connect(this->ui.useLogScaleCheckBox, SIGNAL(stateChanged(int)),
+                   this, SLOT(useLogScaling(int)));
 }
 
 void ColorSelectionWidget::setEditorStatus(bool status)
@@ -145,4 +147,14 @@ void ColorSelectionWidget::setColorScaleRange(double min, double max)
   {
     this->getColorScaleRange();
   }
+}
+
+void ColorSelectionWidget::useLogScaling(int state)
+{
+  // Qt::Checked is 2, need it to be 1 for boolean true conversion
+  if (Qt::Checked == state)
+  {
+    state -= 1;
+  }
+  emit this->logScale(state);
 }

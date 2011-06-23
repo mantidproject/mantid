@@ -132,6 +132,8 @@ void mpMainWindow::setMainWindowComponentsForView()
     this->colorSelectionWidget, SLOT(setColorScaleRange(double, double)));
   QObject::connect(this->colorSelectionWidget, SIGNAL(autoScale()),
     this->currentView, SLOT(onAutoScale()));
+  QObject::connect(this->colorSelectionWidget, SIGNAL(logScale(int)),
+                   this->currentView, SLOT(onLogScale(int)));
 }
 
 void mpMainWindow::onDataLoaded(pqPipelineSource* source)

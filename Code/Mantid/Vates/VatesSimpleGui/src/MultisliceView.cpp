@@ -366,3 +366,12 @@ void MultiSliceView::cutVisibility(bool isVisible, const QString &name)
   display_policy->setRepresentationVisibility(port, this->mainView, isVisible);
   this->mainView->render();
 }
+
+void MultiSliceView::onLogScale(int state)
+{
+  pqScalarsToColors *lut = this->originSourceRepr->getLookupTable();
+  pqSMAdaptor::setElementProperty(lut->getProxy()->GetProperty("UseLogScale"),
+                                  state);
+  lut->getProxy()->UpdateVTKObjects();
+  this->mainView->render();
+}

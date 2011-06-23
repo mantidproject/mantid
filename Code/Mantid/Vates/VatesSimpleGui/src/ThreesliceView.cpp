@@ -247,3 +247,12 @@ void ThreeSliceView::correctColorScaleRange()
   QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
   emit this->dataRange(range.first, range.second);
 }
+
+void ThreeSliceView::onLogScale(int state)
+{
+  pqScalarsToColors *lut = this->originSourceRepr->getLookupTable();
+  pqSMAdaptor::setElementProperty(lut->getProxy()->GetProperty("UseLogScale"),
+                                  state);
+  lut->getProxy()->UpdateVTKObjects();
+  this->renderAll(false);
+}

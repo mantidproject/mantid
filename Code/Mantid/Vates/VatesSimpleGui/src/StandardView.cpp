@@ -57,7 +57,7 @@ void StandardView::render()
 	drep->getProxy()->UpdateVTKObjects();
 	this->originSourceRepr = qobject_cast<pqPipelineRepresentation*>(drep);
 	this->originSourceRepr->colorByArray("signal",
-  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+                                       vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
 	this->view->resetDisplay();
 	this->view->render();
@@ -137,4 +137,13 @@ void StandardView::onAutoScale()
   this->originSourceRepr->getProxy()->UpdateVTKObjects();
   this->view->render();
   emit this->dataRange(min, max);
+}
+
+void StandardView::onLogScale(int state)
+{
+  pqScalarsToColors *lut = this->originSourceRepr->getLookupTable();
+  pqSMAdaptor::setElementProperty(lut->getProxy()->GetProperty("UseLogScale"),
+                                  state);
+  lut->getProxy()->UpdateVTKObjects();
+  this->view->render();
 }
