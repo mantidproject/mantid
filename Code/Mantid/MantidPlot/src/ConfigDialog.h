@@ -141,7 +141,7 @@ private:
   void updateDirSearchSettings();
   void updateCurveFitSettings();
   void updateMantidOptionsTab();
-  QString ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent = 0);
+  QString buildHiddenCategoryString(QTreeWidgetItem *parent = 0);
   void initMantidOptionsTab();
   void refreshTreeCategories();
   QTreeWidgetItem* createCheckedTreeItem(QString name,bool checkBoxState);
