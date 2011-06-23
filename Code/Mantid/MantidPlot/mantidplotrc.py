@@ -33,8 +33,20 @@ if __name__ == '__main__':
             if name.startswith('_') : continue
             if inspect.isclass(obj) or inspect.ismodule(obj):
                 continue
+            #see if this is an algorithm
+            #This is Slow
+            algname = name
+            if algname.endswith('Dialog'):
+                algname = algname[:-6] #strip the dialog of the algorithm
+            try:
+                alg=mantid.createUnmanagedAlgorithm(algname)
+                keywords.append(name + _ScopeInspector_GetAlgorithmSpec(alg))
+                continue
+            except: #this was not an algorithm name
+                pass
+            #no not an algothim continue as before
             if inspect.isfunction(obj) or inspect.isbuiltin(obj):
-                keywords.append(name + ScopeInspector_GetFunctionSpec(obj))
+                keywords.append(name + _ScopeInspector_GetFunctionSpec(obj))
                 continue
             # Object could be a proxy so check and use underlying object
             if hasattr(obj,"_getHeldObject"):
@@ -46,11 +58,21 @@ if __name__ == '__main__':
                     continue
                 if inspect.isfunction(fattr) or inspect.ismethod(fattr) or \
                         hasattr(fattr,'im_func'):
-                    keywords.append(name + '.' + att + ScopeInspector_GetFunctionSpec(fattr))
+                    keywords.append(name + '.' + att + _ScopeInspector_GetFunctionSpec(fattr))
 
         return keywords;
 
-    def ScopeInspector_GetFunctionSpec(func):
+    def _ScopeInspector_GetAlgorithmSpec(alg):
+        props = alg.getProperties()
+        calltip = "("
+        for prop in props:
+            calltip += prop.name + ','
+        #strip off the final ,
+        calltip = calltip.rstrip(',')
+        calltip += ")"
+        return calltip
+        
+    def _ScopeInspector_GetFunctionSpec(func):
         try:
             argspec = inspect.getargspec(func)
         except TypeError:
