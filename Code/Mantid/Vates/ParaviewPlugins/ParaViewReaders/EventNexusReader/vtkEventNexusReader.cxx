@@ -31,11 +31,17 @@
 
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
+#include "MantidGeometry/MDGeometry/MDDimension.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 vtkCxxRevisionMacro(vtkEventNexusReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkEventNexusReader);
 
 using namespace Mantid::VATES;
+using Mantid::Geometry::IMDDimension_sptr;
+using Mantid::Geometry::IMDDimension_sptr;
+using Mantid::Geometry::MDHistoDimension;
+using Mantid::Geometry::MDHistoDimension_sptr;
 
 vtkEventNexusReader::vtkEventNexusReader() : 
   m_presenter(), 
@@ -337,28 +343,45 @@ int vtkEventNexusReader::RequestInformation(
     Workspace_sptr result=AnalysisDataService::Instance().retrieve(m_mdEventWsId);
     Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
 
+    // Now, we get the minimum extents in order to get nice default sizes
+    std::vector<Mantid::Geometry::MDDimensionExtents> ext = eventWs->getMinimumExtents(5);
+    std::vector<IMDDimension_sptr> defaultDimensions;
     size_t nDimensions = eventWs->getNumDims();
+    for (size_t d=0; d<nDimensions; d++)
+    {
+      IMDDimension_sptr inDim = eventWs->getDimension(d);
+      double min = (ext[d].min);
+      double max = (ext[d].max);
+      if (min > max)
+      {
+        min = 0.0;
+        max = 1.0;
+      }
+      //std::cout << "dim " << d << min << " to " <<  max << std::endl;
+      MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getUnits(), min, max, size_t(10)));
+      defaultDimensions.push_back(dim);
+    }
     
     //Configuring the geometry xml builder allows the object panel associated with this reader to later
     //determine how to display all geometry related properties.
     if(nDimensions > 0)
     {
-      m_appliedXDimension = eventWs->getDimension(0);
+      m_appliedXDimension = defaultDimensions[0];
       m_geometryXmlBuilder.addXDimension( m_appliedXDimension );
     }
     if(nDimensions > 1)
     {
-      m_appliedYDimension = eventWs->getDimension(1); 
+      m_appliedYDimension = defaultDimensions[1];
       m_geometryXmlBuilder.addYDimension( m_appliedYDimension );
     }
     if(nDimensions > 2)
     {
-      m_appliedZDimension = eventWs->getDimension(2);
+      m_appliedZDimension = defaultDimensions[2];
       m_geometryXmlBuilder.addZDimension( m_appliedZDimension );
     }
     if(nDimensions > 3)
     {
-      m_appliedTDimension = eventWs->getDimension(3);
+      m_appliedTDimension = defaultDimensions[3];
       m_geometryXmlBuilder.addTDimension( m_appliedTDimension );
     }
 

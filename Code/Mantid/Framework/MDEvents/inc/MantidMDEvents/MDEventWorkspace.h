@@ -76,6 +76,8 @@ namespace MDEvents
 
     void addManyEvents(const std::vector<MDE> & events, Mantid::Kernel::ProgressBase * prog);
 
+    std::vector<Mantid::Geometry::MDDimensionExtents> getMinimumExtents(size_t depth=2);
+
     /// Return true if the underlying box is a MDGridBox.
     bool isGridBox()
     {

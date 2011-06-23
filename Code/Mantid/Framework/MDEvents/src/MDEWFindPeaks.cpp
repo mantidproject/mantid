@@ -101,7 +101,7 @@ namespace MDEvents
 
     // TODO: Don't go to unlimited depth maybe in the future?
     prog->report("Getting Boxes");
-    ws->getBox()->getBoxes(boxes, 1000);
+    ws->getBox()->getBoxes(boxes, 1000, false); //TODO: Do we want only the leaves?
 
     // TODO: Here keep only the boxes > e.g. 3 * mean.
     typedef std::pair<double, boxPtr> dens_box;

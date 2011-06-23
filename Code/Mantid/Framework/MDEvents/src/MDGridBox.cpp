@@ -302,20 +302,31 @@ namespace MDEvents
    *
    * @param outBoxes :: vector to fill
    * @param maxDepth :: max depth value of the returned boxes.
+   * @param leafOnly :: if true, only add the boxes that are no more subdivided (leaves on the tree)
    */
   TMDE(
-  void MDGridBox)::getBoxes(std::vector<IMDBox<MDE,nd> *> & outBoxes, size_t maxDepth)
+  void MDGridBox)::getBoxes(std::vector<IMDBox<MDE,nd> *> & outBoxes, size_t maxDepth, bool leafOnly)
   {
-    // Add this box
-    outBoxes.push_back(this);
+    // Add this box, unless we only want the leaves
+    if (!leafOnly)
+      outBoxes.push_back(this);
+
     if (this->getDepth() + 1 <= maxDepth)
     {
       for (size_t i=0; i<numBoxes; i++)
       {
         // Recursively go deeper, if needed
-        boxes[i]->getBoxes(outBoxes, maxDepth);
+        boxes[i]->getBoxes(outBoxes, maxDepth, leafOnly);
       }
     }
+    else
+    {
+      // Oh, we reached the max depth and want only leaves.
+      // ... so we consider this box to be a leaf too.
+      if (leafOnly)
+        outBoxes.push_back(this);
+    }
+
   }
 
 

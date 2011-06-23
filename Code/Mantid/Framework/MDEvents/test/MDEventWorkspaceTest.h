@@ -1,6 +1,7 @@
 #ifndef MDEVENTWORKSPACETEST_H
 #define MDEVENTWORKSPACETEST_H
 
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/Timer.h"
@@ -162,6 +163,58 @@ public:
     if (prog) delete prog;
   }
 
+
+  void checkExtents( std::vector<Mantid::Geometry::MDDimensionExtents> & ext, coord_t xmin, coord_t xmax, coord_t ymin, coord_t ymax)
+  {
+    TS_ASSERT_DELTA( ext[0].min, xmin, 1e-4);
+    TS_ASSERT_DELTA( ext[0].max, xmax, 1e-4);
+    TS_ASSERT_DELTA( ext[1].min, ymin, 1e-4);
+    TS_ASSERT_DELTA( ext[1].max, ymax, 1e-4);
+  }
+
+  void addEvent(MDEventWorkspace2::sptr b, coord_t x, coord_t y)
+  {
+    coord_t centers[2] = {x, y};
+    b->addEvent(MDEvent<2>(2.0, 2.0, centers));
+  }
+
+  void test_getMinimumExtents()
+  {
+    MDEventWorkspace2::sptr b = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
+    std::vector<Mantid::Geometry::MDDimensionExtents> ext;
+
+    // If nothing in the workspace, the extents given are invalid.
+    ext = b->getMinimumExtents(2);
+    TS_ASSERT( ext[0].min > ext[0].max )
+
+    std::vector< MDEvent<2> > events;
+    // Make an event in the middle of each box
+    for (double x=4.0005; x < 7; x += 1.0)
+      for (double y=4.0005; y < 7; y += 1.0)
+      {
+        coord_t centers[2] = {x, y};
+        events.push_back( MDEvent<2>(2.0, 2.0, centers) );
+      }
+    b->addManyEvents( events, NULL );
+
+    // Base extents
+    ext = b->getMinimumExtents(2);
+    checkExtents(ext, 4, 7,  4, 7);
+
+    // Start adding events to make the extents bigger
+    addEvent(b, 3.5, 5.0);
+    ext = b->getMinimumExtents(2);
+    checkExtents(ext, 3, 7,  4, 7);
+
+    addEvent(b, 8.5, 7.9);
+    ext = b->getMinimumExtents(2);
+    checkExtents(ext, 3, 9,  4, 8);
+
+    addEvent(b, 0.5, 0.9);
+    ext = b->getMinimumExtents(2);
+    checkExtents(ext, 0, 9,  0, 8);
+
+  }
 
 //
 //  //-------------------------------------------------------------------------------------

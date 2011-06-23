@@ -446,26 +446,40 @@ public:
     std::vector<IMDBox<MDEvent<1>,1> *> boxes;
 
     boxes.clear();
-    parent->getBoxes(boxes, 0);
+    parent->getBoxes(boxes, 0, false);
     TS_ASSERT_EQUALS( boxes.size(), 1);
     TS_ASSERT_EQUALS( boxes[0], parent);
 
     boxes.clear();
-    parent->getBoxes(boxes, 1);
+    parent->getBoxes(boxes, 1, false);
     TS_ASSERT_EQUALS( boxes.size(), 4);
     TS_ASSERT_EQUALS( boxes[0], parent);
     TS_ASSERT_EQUALS( boxes[1]->getDepth(), 1);
 
     boxes.clear();
-    parent->getBoxes(boxes, 2);
+    parent->getBoxes(boxes, 2, false);
     TS_ASSERT_EQUALS( boxes.size(), 4+9);
     TS_ASSERT_EQUALS( boxes[0], parent);
     TS_ASSERT_EQUALS( boxes[1]->getDepth(), 1);
     TS_ASSERT_EQUALS( boxes[2]->getDepth(), 2);
 
     boxes.clear();
-    parent->getBoxes(boxes, 3);
+    parent->getBoxes(boxes, 3, false);
     TS_ASSERT_EQUALS( boxes.size(), 4+9+27);
+
+    // Leaves only = only report the deepest boxes.
+    boxes.clear();
+    parent->getBoxes(boxes, 3, true);
+    TS_ASSERT_EQUALS( boxes.size(), 27);
+    TS_ASSERT_EQUALS( boxes[0]->getDepth(), 3);
+
+    // Leaves only, with limited depth = report the max depth if that is the effective 'leaf'
+    boxes.clear();
+    parent->getBoxes(boxes, 2, true);
+    TS_ASSERT_EQUALS( boxes.size(), 9);
+    TS_ASSERT_EQUALS( boxes[0]->getDepth(), 2);
+
+
   }
 
   //-------------------------------------------------------------------------------------
@@ -1267,7 +1281,7 @@ public:
     {
       boxes.clear();
       boxes.reserve(1111111);
-      recursiveParent->getBoxes(boxes, 6);
+      recursiveParent->getBoxes(boxes, 6, false);
       TS_ASSERT_EQUALS( boxes.size(), 1111111);
       TS_ASSERT_EQUALS( boxes[0], recursiveParent);
     }

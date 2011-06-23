@@ -7,7 +7,7 @@
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/CoordTransform.h"
 #include "MantidMDEvents/MDBin.h"
-#include "MantidMDEvents/MDDimensionExtents.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidMDEvents/MDEvent.h"
 #include <iosfwd>
 
@@ -64,7 +64,7 @@ namespace MDEvents
     virtual std::vector< MDE > * getEventsCopy() = 0;
 
     /// Fill a vector with all the boxes up to a certain depth
-    virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth) = 0;
+    virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly) = 0;
 
     virtual std::vector<Mantid::Geometry::Coordinate> getVertexes() const;
 
@@ -149,7 +149,7 @@ namespace MDEvents
 
     //-----------------------------------------------------------------------------------------------
     /** Get the extents for this box */
-    MDDimensionExtents & getExtents(size_t dim)
+    Mantid::Geometry::MDDimensionExtents & getExtents(size_t dim)
     {
       return extents[dim];
     }
@@ -305,7 +305,7 @@ namespace MDEvents
     /** Array of MDDimensionStats giving the extents and
      * other stats on the box dimensions.
      */
-    MDDimensionExtents extents[nd];
+    Mantid::Geometry::MDDimensionExtents extents[nd];
 
     /** Cached total signal from all points within.
      * Set when refreshCache() is called. */

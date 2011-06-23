@@ -121,6 +121,9 @@ namespace VATES
       const int nPointsZ = nBinsZ;
       PointMap pointMap(nPointsX);
 
+      double minSig=1e32;
+      double maxSig=-1e32;
+
       //Loop through dimensions
       for (int i = 0; i < nPointsX; i++)
       {
@@ -136,6 +139,10 @@ namespace VATES
 
             posZ = minZ + (k * incrementZ); //Calculate increment in z;
             signalScalar = m_workspace->getSignalNormalizedAt(i, j, k);
+
+            // Track max/min
+            if (signalScalar > maxSig) maxSig = signalScalar;
+            if (signalScalar < minSig) minSig = signalScalar;
 
             if (boost::math::isnan( signalScalar ) || (signalScalar < m_minThreshold) || (signalScalar > m_maxThreshold))
             {
@@ -157,6 +164,8 @@ namespace VATES
         }
         pointMap[i] = plane;
       }
+
+      std::cout << "Min signal was " << minSig << ". Max was " << maxSig << std::endl;
 
       points->Squeeze();
       signal->Squeeze();

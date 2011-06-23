@@ -38,7 +38,7 @@ namespace MDEvents
     size_t getNumMDBoxes() const;
 
     /// Fill a vector with all the boxes up to a certain depth
-    void getBoxes(std::vector<IMDBox<MDE,nd> *> & /*boxes*/, size_t /*maxDepth*/)
+    void getBoxes(std::vector<IMDBox<MDE,nd> *> & /*boxes*/, size_t /*maxDepth*/, bool)
     { throw std::runtime_error("Not implemented."); }
 
     void addEvent(const MDE & point);

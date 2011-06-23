@@ -43,7 +43,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDBox.h
 	inc/MantidMDEvents/MDBoxIterator.h
 	inc/MantidMDEvents/MDCentroidPeaks.h
-	inc/MantidMDEvents/MDDimensionExtents.h
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEWFindPeaks.h
 	inc/MantidMDEvents/MDEWPeakIntegration.h

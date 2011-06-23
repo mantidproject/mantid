@@ -86,6 +86,40 @@ namespace MDEvents
     return data->getNPoints();
   }
 
+
+  //-----------------------------------------------------------------------------------------------
+  /** Get a vector of the minimum extents that still contain all the events in the workspace.
+   *
+   * @param depth :: recursion depth to which to search. This will determine the resolution
+   *        to which the extents will be found.
+   * @return a vector of the minimum extents that still contain all the events in the workspace.
+   */
+  TMDE(
+  std::vector<Mantid::Geometry::MDDimensionExtents> MDEventWorkspace)::getMinimumExtents(size_t depth)
+  {
+    std::vector<Mantid::Geometry::MDDimensionExtents> out(nd);
+    std::vector<IMDBox<MDE,nd>*> boxes;
+    // Get all the end (leaf) boxes
+    this->data->getBoxes(boxes, depth, true);
+    typename std::vector<IMDBox<MDE,nd>*>::iterator it;
+    typename std::vector<IMDBox<MDE,nd>*>::iterator it_end = boxes.end();
+    for (it = boxes.begin(); it != boxes.end(); it++)
+    {
+      IMDBox<MDE,nd>* box = *it;
+      if (box->getSignal() > 0)
+      {
+        for (size_t d=0; d<nd; d++)
+        {
+          Mantid::Geometry::MDDimensionExtents & x = box->getExtents(d);
+          if (x.max > out[d].max) out[d].max = x.max;
+          if (x.min < out[d].min) out[d].min = x.min;
+        }
+      }
+    }
+    return out;
+  }
+
+
   //-----------------------------------------------------------------------------------------------
   /** Set the box controller that the contained GridBoxes will use
    *

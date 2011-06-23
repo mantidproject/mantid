@@ -92,7 +92,7 @@ namespace MDEvents
     right = new MDBox<MDE,nd>(box->getBoxController(), box->getDepth() + 1);
     for (size_t d=0; d<nd; d++)
     {
-      MDDimensionExtents ext = box->getExtents(d);
+      Mantid::Geometry::MDDimensionExtents ext = box->getExtents(d);
       if (d == dimSplit)
       {
         // Split this dimension down along splitPoint

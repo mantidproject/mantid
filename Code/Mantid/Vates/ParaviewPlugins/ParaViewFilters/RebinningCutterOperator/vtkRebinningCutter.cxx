@@ -135,7 +135,7 @@ m_presenter(new NullRebinningPresenter()),
   m_originalExtents(IgnoreOriginal),
   m_setup(Pending),
   m_timestep(0),
-  m_thresholdMax(10000),
+  m_thresholdMax(1e9),
   m_thresholdMin(0)
 {
   this->SetNumberOfInputPorts(1);

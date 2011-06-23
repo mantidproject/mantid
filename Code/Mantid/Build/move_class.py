@@ -25,6 +25,7 @@ def move_one(subproject, classname, newproject, oldfilename, newfilename, args):
     
     # Delete original?
     if args.delete:
+        print "Deleting ", oldfilename
         os.remove(oldfilename)
     
 
@@ -102,6 +103,9 @@ if __name__ == "__main__":
     parser.add_argument('--delete', dest='delete', action='store_const',
                         const=True, default=False,
                         help="Delete the original files (default False)")
+    parser.add_argument('--subfolder', dest='subfolder', 
+                        default="",
+                        help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
      
     args = parser.parse_args()
     subproject = args.subproject

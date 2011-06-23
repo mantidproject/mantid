@@ -9,6 +9,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ProgressBase.h"
 #include <boost/shared_ptr.hpp>
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 
 namespace Mantid
 {
@@ -42,6 +43,9 @@ namespace API
 
     /// Get that dimension
     virtual Mantid::Geometry::IMDDimension_sptr getDimension(size_t dim) const;
+
+    /// Get the minimum extents that hold the data
+    virtual std::vector<Mantid::Geometry::MDDimensionExtents> getMinimumExtents(size_t depth=2) = 0;
 
     /// Returns some information about the box controller, to be displayed in the GUI, for example
     virtual std::vector<std::string> getBoxControllerStats() const = 0;

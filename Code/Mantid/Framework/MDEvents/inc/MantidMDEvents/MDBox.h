@@ -6,7 +6,7 @@
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
-#include "MantidMDEvents/MDDimensionExtents.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidMDEvents/MDDimensionStats.h"
 #include "MantidMDEvents/MDEvent.h"
 
@@ -75,7 +75,7 @@ namespace MDEvents
     void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL);
 
     /// Fill a vector with all the boxes up to a certain depth
-    void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t /*maxDepth*/)
+    void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/)
     {
       boxes.push_back(this);
     }

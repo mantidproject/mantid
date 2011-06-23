@@ -7,7 +7,7 @@
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDDimensionExtents.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Task.h"
@@ -50,7 +50,7 @@ namespace MDEvents
 
     std::vector< MDE > * getEventsCopy();
 
-    virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth);
+    virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly);
 
     void addEvent(const MDE & point);
 
