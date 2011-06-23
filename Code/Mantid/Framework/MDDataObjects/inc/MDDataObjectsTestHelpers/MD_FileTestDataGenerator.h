@@ -79,7 +79,7 @@ public:
     
 	virtual ~MD_FileTestDataGenerator(void);
     // function specific for test data generator: to compare what was in test data source and what has been generated;
-    MDDataTestHelper::MDDensityHomogeneous const *const get_pTestDataSource()const{return pTestDataSource.get();}
+    MDDataTestHelper::MDDensityHomogeneous const * get_pTestDataSource()const{return pTestDataSource.get();}
 
 	// private, but protected for test purposes;
 private:

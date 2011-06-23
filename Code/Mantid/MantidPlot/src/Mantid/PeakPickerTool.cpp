@@ -640,7 +640,6 @@ void PeakPickerTool::replot(PropertyHandler* h) const
     int indexForFC = -1;
     for (int i = 0; i < d_graph->curves(); i++)
     {
-      QwtPlotCurve* qwt = d_graph->curve(i);
       fc = dynamic_cast<FunctionCurve*>(d_graph->curve(i));
       if (fc)
       {
@@ -895,14 +894,11 @@ void PeakPickerTool::plotFitFunction(PropertyHandler* h)
 {
   if (h)
   {
-    Mantid::API::IFitFunction* iff = h->ifun();
-
     // check to see if function is already plotted?
     bool alreadyPlotted = false;
     FunctionCurve* fc;
     for (int i = 0; i < d_graph->curves(); i++)
     {
-      QwtPlotCurve* qwt = d_graph->curve(i);
       fc = dynamic_cast<FunctionCurve*>(d_graph->curve(i));
       if (fc)
         if (fc->getIFitFunctionIdentifier() == h->ifun())
@@ -953,7 +949,6 @@ void PeakPickerTool::removePlot(PropertyHandler* h)
   int indexForFC = -1;
   for (int i = 0; i < d_graph->curves(); i++)
   {
-    QwtPlotCurve* qwt = d_graph->curve(i);
     fc = dynamic_cast<FunctionCurve*>(d_graph->curve(i));
     if (fc)
     {

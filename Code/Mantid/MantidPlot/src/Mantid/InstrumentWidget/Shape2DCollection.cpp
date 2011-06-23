@@ -160,7 +160,7 @@ void Shape2DCollection::mouseReleaseEvent(QMouseEvent* e)
   m_moving = false;
 }
 
-void Shape2DCollection::wheelEvent(QWheelEvent* e)
+void Shape2DCollection::wheelEvent(QWheelEvent*)
 {
 }
 

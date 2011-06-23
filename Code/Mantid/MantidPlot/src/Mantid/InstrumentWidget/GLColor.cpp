@@ -22,9 +22,9 @@ GLColor::GLColor(float red, float green, float blue, float alpha)
 
 GLColor::GLColor(int r, int g, int b)
 {
-  m_rgba[0] = r;
-  m_rgba[1] = g;
-  m_rgba[2] = b;
+  m_rgba[0] = (unsigned char)r;
+  m_rgba[1] = (unsigned char)g;
+  m_rgba[2] = (unsigned char)b;
   m_rgba[3] = 255;
 }
 
