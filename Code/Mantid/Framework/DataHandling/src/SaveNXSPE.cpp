@@ -9,6 +9,7 @@
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <limits>
 
 namespace Mantid
 {
@@ -59,11 +60,12 @@ namespace Mantid
       BoundedValidator<double> *mustBePositive =
           new BoundedValidator<double> ();
       mustBePositive->setLower(0.0);
-      declareProperty("Efixed", EMPTY_DBL(),
+      // if the value is not set, one should better have it invalid, e.g. NaN
+      declareProperty("Efixed",SaveNXSPE::MASK_FLAG,
           "Value of the fixed energy to write into NXSPE file.");
-
+      // if the value is not set, one should better have it invalid, e.g. NaN
       NullValidator<double> *numberValidator = new NullValidator<double> ();
-      declareProperty("psi", EMPTY_DBL(), numberValidator,
+      declareProperty("psi", SaveNXSPE::MASK_FLAG, numberValidator,
           "Value of PSI to write into NXSPE file.");
 
       declareProperty("ki_over_kf_scaling", true,
