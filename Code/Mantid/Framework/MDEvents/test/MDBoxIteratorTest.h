@@ -44,7 +44,7 @@ public:
                   D210 D211 D212 D213
 
    */
-  void test_iterator()
+  void xtest_iterator()
   {
     // Top level grid box
     gbox_t * A = MDEventsTestHelper::makeMDGridBox<1>(4, 1, 0.0, 64.0);
@@ -115,30 +115,58 @@ public:
 //class MDBoxIteratorTestPerformace : public CxxTest::TestSuite
 //{
 //public:
-//  MDGridBox<MDEvent<3>,3> top;
+//  MDGridBox<MDEvent<3>,3> * top;
 //
 //  void setUp()
 //  {
-//    // About
+//    // About 2 mi1968876
 //    top = MDEventsTestHelper::makeRecursiveMDGridBox<3>(5, 2);
 //  }
 //
-////  void test_getBoxes()
-////  {
-////  }
+//  void tearDown()
+//  {
+//    delete top;
+//  }
 //
+//  /** Make a simple iterator that will go through all the boxes */
 //  void test_iterator()
 //  {
-//    size_t counter = 0;
+//    // Count the top level box.
+//    size_t counter = 1;
 //    IMDBox<MDEvent<3>,3> * box;
 //    MDBoxIterator<MDEvent<3>,3> it(top, 20, false);
+//
+//    // Count all of them
 //    while (it.next())
 //    {
 //      box = it.getBox();
 //      counter++;
 //    }
 //    TS_ASSERT( box );
-//    TS_ASSERT_EQUALS( counter, 125*125 + 125);
+//    TS_ASSERT_EQUALS( counter, 125*125*125 + 125*125 + 125 + 1);
+//  }
+//
+//  // ---------------------------------------------------------------
+//  /** For comparison, let's use getBoxes() that fills a vector
+//   */
+//  void test_getBoxes()
+//  {
+//    std::vector< IMDBox<MDEvent<3>,3> * > boxes;
+//    top->getBoxes(boxes, 20, false);
+//    TS_ASSERT_EQUALS( boxes.size(), 125*125*125 + 125*125 + 125 + 1);
+//
+//    // Now we still need to iterate through the vector to do anything, so this is a more fair comparison
+//    size_t counter = 0;
+//    IMDBox<MDEvent<3>,3> * box;
+//    std::vector< IMDBox<MDEvent<3>,3> * >::iterator it;
+//    std::vector< IMDBox<MDEvent<3>,3> * >::iterator it_end = boxes.end();
+//    for (it = boxes.begin(); it != it_end; it++)
+//    {
+//      box = *it;
+//      counter++;
+//    }
+//
+//    TS_ASSERT_EQUALS( counter, 125*125*125 + 125*125 + 125 + 1);
 //  }
 //
 //};
