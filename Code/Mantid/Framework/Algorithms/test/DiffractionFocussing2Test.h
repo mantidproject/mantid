@@ -200,7 +200,11 @@ public:
 
     TS_ASSERT_EQUALS( output->getAxis(1)->length(), numgroups);
     if (preserveEvents)
-      {TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(0), 0);}
+    {
+      specid_t bank_pixels = bankWidthInPixels*bankWidthInPixels;
+      specid_t total_pixels = bank_pixels*3;
+      TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(0), total_pixels - (numgroups-1)*bank_pixels);
+    }
     else
       // Groups are counted starting at 1, so spectrum number of workspace index 0 is 1
       {TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(0), 1);}

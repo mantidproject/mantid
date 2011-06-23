@@ -137,17 +137,17 @@ public:
     //Is the length good?
     TS_ASSERT_EQUALS( ew->getAxis(1)->length(), numpixels_with_events);
 
-    //WorkspaceIndex to spectrum number is simple 1:1
-    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(1), 1);
-    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(122), 122);
+    //WorkspaceIndex to spectrum number
+    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(1), 12085);
+    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(122), 14694);
 
     //First pixel with events.
-    std::vector<detid_t> dets = ew->spectraMap().getDetectors(1);
+    std::vector<detid_t> dets = ew->spectraMap().getDetectors(12085);
     TS_ASSERT_EQUALS( dets.size(), 1);
     TS_ASSERT_EQUALS( dets[0], 12085); //This is the pixel ID of the first spectrum
 
     //And the pixel IDs grow monotonically
-    dets = ew->spectraMap().getDetectors(2);
+    dets = ew->spectraMap().getDetectors(12090);
     TS_ASSERT_EQUALS( dets.size(), 1);
     TS_ASSERT( dets[0] > 12085);
 
@@ -338,16 +338,16 @@ public:
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels);
 
     //Mapping between workspace index and spectrum number; simple
-    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(0), 0);
-    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(1), 1);
+    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(0), 45);
+    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(1), 110);
     TS_ASSERT_EQUALS( ew->getAxis(1)->length(), 2);
 
     //Are the pixel IDs ok?
-    std::vector<detid_t> dets = ew->spectraMap().getDetectors(0);
+    std::vector<detid_t> dets = ew->spectraMap().getDetectors(45);
     TS_ASSERT_EQUALS( dets.size(), 1);
     TS_ASSERT_EQUALS( dets[0], 45);
 
-    dets = ew->spectraMap().getDetectors(1);
+    dets = ew->spectraMap().getDetectors(110);
     TS_ASSERT_EQUALS( dets.size(), 1);
     TS_ASSERT_EQUALS( dets[0], 110);
   }

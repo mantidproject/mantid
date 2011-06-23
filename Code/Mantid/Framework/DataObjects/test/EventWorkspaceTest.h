@@ -319,14 +319,16 @@ public:
     TS_ASSERT_EQUALS( uneven->size(), (NUMBINS-1)*NUMPIXELS/10);
 
     //Axis 1 is the map between spectrum # and the workspace index.
-    //  It should be a dumb 1-1 map
-    TS_ASSERT_EQUALS( uneven->getAxis(1)->spectraNo(0), 0 );
-    TS_ASSERT_EQUALS( uneven->getAxis(1)->spectraNo(5), 5 );
+    TS_ASSERT_EQUALS( uneven->getAxis(1)->spectraNo(0), 5 );
+    TS_ASSERT_EQUALS( uneven->getAxis(1)->spectraNo(5), 55 );
     TS_ASSERT_EQUALS( uneven->getAxis(1)->length(), NUMPIXELS/10 );
 
     //The spectra map should take each workspace index and point to the right pixel id: 5,15,25, etc.
-    for (int i=0; i<static_cast<int>(uneven->getNumberHistograms()); i++)
-      TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(i)[0], 5 + i*10);
+    for (int wi=0; wi<static_cast<int>(uneven->getNumberHistograms()); wi++)
+    {
+      specid_t specNo = uneven->getAxis(1)->spectraNo(wi);
+      TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(specNo)[0], 5 + wi*10);
+    }
 
     //Workspace index 0 is at pixelid 5 and has 5 events
     const EventList el0(uneven->getEventList(0));

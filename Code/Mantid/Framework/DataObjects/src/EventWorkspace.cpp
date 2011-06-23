@@ -584,12 +584,23 @@ namespace DataObjects
    */
   void EventWorkspace::makeSpectraMap()
   {
+    API::Axis *ax1 = getAxis(1);
+    if( !ax1 )
+    {
+      throw std::runtime_error("EventWorkspace::makeSpectraMap - NULL axis 1");
+    }
+    if( !ax1->isSpectra() )
+    {
+      throw std::runtime_error("EventWorkspace::makeSpectraMap - Axis 1 is not a SpectraAxis");
+    }
+    
     API::SpectraDetectorMap *newMap = new API::SpectraDetectorMap;
 
     //Go through all the spectra
     for (size_t wi=0; wi<this->m_noVectors; wi++)
     {
-      newMap->addSpectrumEntries(specid_t(wi), this->data[wi]->getDetectorIDs() );
+      const std::set<detid_t> ids = this->data[wi]->getDetectorIDs();
+      newMap->addSpectrumEntries(*(ids.begin()), ids);
     }
     this->replaceSpectraMap(newMap);
   }
