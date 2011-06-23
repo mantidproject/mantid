@@ -140,7 +140,7 @@ public:
         TS_ASSERT( dynamic_cast<AlgorithmProxy*>(alg.get()) );
         TS_ASSERT_EQUALS( alg->name() , "ToyAlgorithmProxyMultipleCategory" );
         TS_ASSERT_EQUALS( alg->version() , 1 );
-        TS_ASSERT_EQUALS( alg->category() , "ProxyCat,ProxyLeopard" );
+        TS_ASSERT_EQUALS( alg->category() , "ProxyCat;ProxyLeopard" );
         std::vector<std::string> result;
         result.push_back("ProxyCat");
         result.push_back("ProxyLeopard");
