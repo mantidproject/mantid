@@ -138,6 +138,134 @@ double IndexingUtils::BestFit_UB(      DblMatrix         & UB,
   return sum_sq_error;
 }
 
+/** 
+    STATIC method BestFit_Direction: Calculates the vector for which the
+    dot product of the the vector with each of the specified Qxyz vectors 
+    is most nearly the corresponding integer index.  The calculated best_vec
+    minimizes the sum squared differences between best_vec dot (qx,qy,z) 
+    and the corresponding index for all of the specified Q vectors and 
+    indices.  The sum of the squares of the residual errors is returned.
+    NOTE: This method is similar the BestFit_UB method, but this method only
+          optimizes the plane normal in one direction.  Also, this optimizes
+          the mapping from (qx,qy,qz) to one index (Q to index), while the 
+          BestFit_UB method optimizes the mapping from three (h,k,l) to
+          (qx,qy,qz) (3 indices to Q).
+  
+    @param  best_vec     V3D vector that will be set to a vector whose 
+                         direction most nearly corresponds to the plane
+                         normal direction and whose magnitude is d.  The 
+                         corresponding plane spacing in reciprocal space 
+                         is 1/d.
+    @param  index_values std::vector of ints that contains the list of indices 
+    @param  q_vectors    std::vector of V3D objects that contains the list of 
+                         q_vectors that are indexed in one direction by the 
+                         corresponding index values.
+    NOTE: The number of index_values and q_vectors must be the same, and must
+          be at least 3.
+  
+    @return  This will return the sum of the squares of the residual errors.
+  
+    @throws  std::invalid_argument exception if there are not at least 3
+                                   indices and q vectors, or if the numbers of
+                                   indices and q vectors are not the same.
+   
+    @throws  std::runtime_error    exception if the QR factorization fails or
+                                   the best direction can't be calculated.
+*/
+
+double IndexingUtils::BestFit_Direction(           V3D          & best_vec,
+                                        const std::vector<int>  & index_values,
+                                        const std::vector<V3D>  & q_vectors )
+{
+  if ( index_values.size() < 3 )
+  {
+   throw std::invalid_argument("Three or more indexed values needed");
+  }
+
+  if ( index_values.size() != q_vectors.size() )
+  {
+   throw std::invalid_argument("Number of index_values != number of q_vectors");
+  }
+
+  gsl_matrix *H_transpose = gsl_matrix_alloc( q_vectors.size(), 3 );
+  gsl_vector *tau         = gsl_vector_alloc( 3 );
+
+  double sum_sq_error = 0;
+                                     // Make the H-transpose matrix from the
+                                     // q vectors and form QR factorization
+
+  for ( size_t row = 0; row < q_vectors.size(); row++ )
+  {
+    for ( size_t col = 0; col < 3; col++ )
+    {
+      gsl_matrix_set( H_transpose, row, col, (q_vectors[row])[col] );
+    }
+  }
+  int returned_flag = gsl_linalg_QR_decomp( H_transpose, tau );
+
+  if ( returned_flag != 0 )
+  {
+    gsl_matrix_free( H_transpose );
+    gsl_vector_free( tau );
+    throw std::runtime_error("gsl QR_decomp failed, invalid hkl values");
+  }
+                                      // solve for the best_vec, using the
+                                      // QR factorization and accumulate the 
+                                      // sum of the squares of the residuals
+  gsl_vector *x        = gsl_vector_alloc( 3 );
+  gsl_vector *indices  = gsl_vector_alloc( index_values.size() );
+  gsl_vector *residual = gsl_vector_alloc( index_values.size() );
+
+  bool found_best_vec = true;
+
+  for ( size_t i = 0; i < index_values.size(); i++ )
+  {
+    gsl_vector_set( indices, i, index_values[i] );
+  }
+
+  returned_flag = gsl_linalg_QR_lssolve( H_transpose,
+                                         tau,
+                                         indices,
+                                         x,
+                                         residual);
+  if ( returned_flag != 0 )
+  {
+    found_best_vec = false;
+  }
+
+  for ( size_t i = 0; i < 3; i++ )
+  {
+    double value = gsl_vector_get( x, i );
+    if ( gsl_isnan( value ) || gsl_isinf( value) )
+      found_best_vec = false;
+  }
+
+  best_vec( gsl_vector_get( x, 0 ),
+            gsl_vector_get( x, 1 ),
+            gsl_vector_get( x, 2 ) );
+
+  for ( size_t i = 0; i < index_values.size(); i++ )
+  {
+    sum_sq_error += gsl_vector_get(residual, i) * gsl_vector_get(residual, i);
+  }
+
+  gsl_matrix_free( H_transpose );
+  gsl_vector_free( tau );
+  gsl_vector_free( x );
+  gsl_vector_free( indices );
+  gsl_vector_free( residual );
+
+  if ( !found_best_vec )
+  {
+    throw std::runtime_error(
+                      "Failed to find best_vec, invalid indexes or Q values");
+  }
+
+  return sum_sq_error;
+}
+
+
+
 /**
    Calculate the number of Q vectors that are mapped to integer h,k,l 
    values by UB.  Each of the Miller indexes, h, k and l must be within
@@ -277,7 +405,7 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections( int n_steps )
 /**
   Choose the direction vector that most nearly corresponds to a family of
   planes in the list of qxyz vectors, with spacing equal to the specified
-  plane_spacing.  The direction is chosen from the direction_list.
+  plane_spacing.  The direction is chosen from the specified direction_list.
 
   @param  best_direction      This will be set to the direction that minimizes
                               the sum squared distances of projections of peaks
@@ -295,17 +423,17 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections( int n_steps )
                               vector for that peak to count as being indexed. 
                               NOTE: The tolerance is specified in terms of
                               Miller Index.  That is, the distance between 
-                              adjacent planes is normalized one for computing
-                              the error.
+                              adjacent planes is effectively normalized to one
+                              for measuring the error in the computed index.
   @return The number of peaks that lie within the specified tolerance of the
           family of planes with normal direction = best_direction and with 
           spacing given by plane_spacing.
  */
-size_t IndexingUtils::BestFit_Direction(       V3D & best_direction,
-                                        const  std::vector<V3D> qxyz_vals,
-                                        const  std::vector<V3D> direction_list,
-                                        double plane_spacing,
-                                        double required_tolerance )
+size_t IndexingUtils::SelectDirection(       V3D & best_direction,
+                                      const  std::vector<V3D> qxyz_vals,
+                                      const  std::vector<V3D> direction_list,
+                                      double plane_spacing,
+                                      double required_tolerance )
 {
     double dot_product;
     int    nearest_int;

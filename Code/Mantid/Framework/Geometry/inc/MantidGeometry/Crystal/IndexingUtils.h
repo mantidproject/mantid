@@ -52,10 +52,15 @@ class MANTID_GEOMETRY_DLL IndexingUtils
 {
   public:
 
-  /// Find the UB matrix that best fits 3 or more indexed peaks
+  /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
   static double BestFit_UB(Kernel::DblMatrix               & UB,
                            const std::vector<Kernel::V3D>  & hkl_vectors, 
                            const std::vector<Kernel::V3D>  & q_vectors   );
+
+  /// Find the vector that best corresponds to plane normal, given 1-D indices
+  static double BestFit_Direction(     Kernel::V3D       & best_vec,
+                                 const std::vector<int>  & index_values,
+                                 const std::vector<Kernel::V3D>  & q_vectors );
 
   /// Calculate the number of Q vectors that are mapped to integer indices by UB
   static int NumberIndexed( const Kernel::DblMatrix & UB,
@@ -69,9 +74,9 @@ class MANTID_GEOMETRY_DLL IndexingUtils
   /// Make list of direction vectors uniformly distributed over a hemisphere
   static std::vector<Kernel::V3D> MakeHemisphereDirections( int n_steps );
 
-  /// Find the direction most nearly perpendicular to planes with the specified
-  /// spacing in reciprocal space.
-  static size_t BestFit_Direction(      Kernel::V3D & best_direction,
+  /// Choose the direction in a list of directions, that is most nearly 
+  //  perpendicular to planes with the specified spacing in reciprocal space.
+  static size_t SelectDirection(        Kernel::V3D & best_direction,
                                  const  std::vector<Kernel::V3D> qxyz_vals,
                                  const  std::vector<Kernel::V3D> direction_list,
                                  double plane_spacing,
