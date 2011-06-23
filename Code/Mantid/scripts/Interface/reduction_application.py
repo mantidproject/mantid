@@ -402,8 +402,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         if len(fname)>0:
             if not fname.endswith('.xml'):
                 fname += ".xml"
-            if file_path in self._recent_files:
-                self._recent_files.removeAll(file_path)
+            if fname in self._recent_files:
+                self._recent_files.removeAll(fname)
             self._recent_files.prepend(fname)
             while self._recent_files.count() > 10:
                 self._recent_files.takeLast()                
