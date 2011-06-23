@@ -35,7 +35,18 @@ class MantidDockWidget;
 class AlgorithmDockWidget;
 class AlgorithmMonitor;
 class InstrumentWindow;
+namespace MantidQt
+{
+namespace MantidWidgets
+{
 class FitPropertyBrowser;
+}}
+
+namespace Ui
+{
+class SequentialFitDialog;
+}
+
 namespace Mantid
 {
   namespace API
@@ -221,7 +232,7 @@ public slots:
 public:
 
   // Return pointer to the fit function property browser
-  FitPropertyBrowser* fitFunctionBrowser(){return m_fitFunction;}
+  MantidQt::MantidWidgets::FitPropertyBrowser* fitFunctionBrowser(){return m_fitFunction;}
 
   /** ---------------------------------
    * Commands purely for python interaction
@@ -304,6 +315,8 @@ public slots:
 
     // Display a message in QtiPlot's results window. Used by MantidLog class to display Mantid log information.
     void logMessage(const Poco::Message& msg);
+
+   void showSequentialPlot(Ui::SequentialFitDialog& ui, MantidQt::MantidWidgets::FitPropertyBrowser* fitbrowser);
 
     // Import the workspace selected in the Workspace dock window
     void importWorkspace();
@@ -457,7 +470,7 @@ private:
     ApplicationWindow *m_appWindow;             // QtiPlot main ApplicationWindow
     MantidDockWidget *m_exploreMantid;          // Dock window for manipulating workspaces
     AlgorithmDockWidget *m_exploreAlgorithms;   // Dock window for using algorithms
-    FitPropertyBrowser *m_fitFunction;        // Dock window to set fit function properties
+    MantidQt::MantidWidgets::FitPropertyBrowser *m_fitFunction;        // Dock window to set fit function properties
 
     QAction *actionCopyRowToTable;
     QAction *actionCopyRowToGraph;

@@ -8,12 +8,12 @@
 #include "ui_SequentialFitDialog.h"
 #include "MantidAPI/AlgorithmObserver.h"
 
-//----------------------------
-//   Forward declarations
-//----------------------------
 
-class FitPropertyBrowser;
-
+namespace MantidQt
+{
+namespace MantidWidgets
+{
+  class FitPropertyBrowser;
 /** 
     This is a dialog for doing sequential fit.
     (Calls algorithm PlotPeakByLogValue)
@@ -48,7 +48,7 @@ class SequentialFitDialog : public QDialog, public Mantid::API::AlgorithmObserve
 public:
   
   /// Default constructor
-  SequentialFitDialog(FitPropertyBrowser* fitBrowser);
+  SequentialFitDialog(FitPropertyBrowser* fitBrowser, QObject* mantidui);
 
   /// Add a list of workspace names to the data list
   /// Returns false if neither of the workspaces can be loaded
@@ -66,7 +66,7 @@ signals:
 
   /// This signal is fired from finishHandle running in the algorithm's thread
   /// and caught by showPlot slot in the GUI thread
-  void needShowPlot();
+  void needShowPlot(Ui::SequentialFitDialog& ui, FitPropertyBrowser* fitbrowser);
 
 private slots:
 
@@ -83,7 +83,7 @@ private slots:
   void accept();
 
   /// Show the result plot
-  void showPlot();
+  //void showPlot();
   /// Display the help page for PlotPeakByLogValue algorithm
   void helpClicked();
 
@@ -121,5 +121,7 @@ private:
 };
 
 
+}
+}
 
 #endif /* SEQUENTIALFITDIALOG_H */

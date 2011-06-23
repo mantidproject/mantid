@@ -1,6 +1,6 @@
-#include "PropertyHandler.h"
-#include "FitPropertyBrowser.h"
-#include "../FunctionCurve.h"
+#include "MantidQtMantidWidgets/PropertyHandler.h"
+#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+//#include "../FunctionCurve.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -27,6 +27,11 @@
 #endif
 
 using std::size_t;
+
+namespace MantidQt
+{
+namespace MantidWidgets
+{
 
 // Constructor
 PropertyHandler::PropertyHandler(Mantid::API::IFitFunction* fun,
@@ -1358,3 +1363,6 @@ void PropertyHandler::fit()
   {
   }
 }
+
+} // MantidQt
+} // API

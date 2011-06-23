@@ -2,28 +2,36 @@
 // Includes
 //---------------------------------------
 
-#include "SequentialFitDialog.h"
-#include "FitPropertyBrowser.h"
-#include "MantidUI.h"
-#include "SelectWorkspacesDialog.h"
-#include "../ApplicationWindow.h"
+#include "MantidQtMantidWidgets/SequentialFitDialog.h"
+#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+//#include "MantidUI.h"
+#include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
+//#include "../ApplicationWindow.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 
 #include <QInputDialog>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDesktopServices>
+#include <QUrl>
 
 //---------------------------------------
 // Public member functions
 //---------------------------------------
 
+namespace MantidQt
+{
+namespace MantidWidgets
+{
+
 /// Constructor
-SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser* fitBrowser) :
-QDialog(fitBrowser->m_appWindow),m_fitBrowser(fitBrowser)
+SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser* fitBrowser, QObject* mantidui) :
+QDialog(fitBrowser),m_fitBrowser(fitBrowser)
 {
   ui.setupUi(this);
 
@@ -43,14 +51,15 @@ QDialog(fitBrowser->m_appWindow),m_fitBrowser(fitBrowser)
   populateParameters();
 
   connect(fitBrowser,SIGNAL(functionChanged()),this,SLOT(functionChanged()));
-  connect(this,SIGNAL(needShowPlot()),this,SLOT(showPlot()));
+  connect(this,SIGNAL(needShowPlot(Ui::SequentialFitDialog&, MantidQt::MantidWidgets::FitPropertyBrowser*)),
+          mantidui,SLOT(showSequentialPlot(Ui::SequentialFitDialog&, MantidQt::MantidWidgets::FitPropertyBrowser*)));
   connect(ui.tWorkspaces,SIGNAL(cellChanged(int,int)),this,SLOT(spectraChanged(int,int)));
 
 }
 
 void SequentialFitDialog::addWorkspace()
 {
-  SelectWorkspacesDialog* dlg = new SelectWorkspacesDialog(m_fitBrowser->m_appWindow);
+  SelectWorkspacesDialog* dlg = new SelectWorkspacesDialog(this);
   if (dlg->exec() == QDialog::Accepted)
   {
     addWorkspaces(dlg->getSelectedNames());
@@ -221,7 +230,7 @@ bool SequentialFitDialog::validateLogs(const QString wsName)
       }
       if (ui.cbLogValue->count() == 0)
       {
-        QMessageBox::warning(m_fitBrowser->m_appWindow,"MantidPlot - Warning","The list of the log names is empty:\n"
+        QMessageBox::warning(m_fitBrowser,"MantidPlot - Warning","The list of the log names is empty:\n"
           "The selected workspaces do not have common logs");
         return false;
       }
@@ -323,9 +332,10 @@ void SequentialFitDialog::functionChanged()
 void SequentialFitDialog::finishHandle(const Mantid::API::IAlgorithm* alg)
 {
   (void) alg; //Avoid unused warning
-  emit needShowPlot();
+  emit needShowPlot(ui, m_fitBrowser);
 }
 
+/*
 void SequentialFitDialog::showPlot()
 {
   std::string wsName = m_fitBrowser->outputName();
@@ -365,7 +375,7 @@ void SequentialFitDialog::showPlot()
       g->setTitle("");
     }
   }
-}
+}*/
 
 void SequentialFitDialog::helpClicked()
 {
@@ -521,4 +531,7 @@ void SequentialFitDialog::plotAgainstLog(bool yes)
       setRange(row,(*y)(0),(*y)(y->length()-1));
     }
   }
+}
+
+}
 }

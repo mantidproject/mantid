@@ -2,6 +2,7 @@
 #define PROPERTY_HANDLER_H
 
 #include "MantidAPI/IFitFunction.h"
+#include "WidgetDllOption.h"
 
 /* Forward declarations */
 namespace Mantid
@@ -12,10 +13,10 @@ namespace Mantid
     class CompositeFunction;
   }
 }
-class FitPropertyBrowser;
-class FunctionCurve;
-class PlotCurve;
-class Graph;
+
+//class FunctionCurve;
+//class PlotCurve;
+//class Graph;
 class QtBrowserItem;
 class QtProperty;
 
@@ -25,10 +26,16 @@ class QtProperty;
 #include <QMap>
 #include <QObject>
 
+namespace MantidQt
+{
+namespace MantidWidgets
+{
+class FitPropertyBrowser;
+
 /**
  * Helps display and edit functions in FitPropertyBrowser
  */
-class PropertyHandler:public QObject, public Mantid::API::FitFunctionHandler
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PropertyHandler:public QObject, public Mantid::API::FitFunctionHandler
 {
   Q_OBJECT
 public:
@@ -193,5 +200,8 @@ private:
   //mutable FunctionCurve* m_curve;//< the curve to plot the handled function
   mutable bool m_hasPlot;
 };
+
+} // MantidQt
+} // API
 
 #endif /* PROPERTY_HANDLER_H */

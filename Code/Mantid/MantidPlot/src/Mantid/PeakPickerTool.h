@@ -23,9 +23,15 @@ class QwtPlotCurve;
 class QPoint;
 class QToolBar;
 class PeakRangeMarker;
-class FitPropertyBrowser;
 class FunctionCurve;
+
+namespace MantidQt
+{
+namespace MantidWidgets
+{
+class FitPropertyBrowser;
 class PropertyHandler;
+}}
 
 namespace Mantid
 {
@@ -123,9 +129,9 @@ private slots:
   void resetRange();
 
 private:
-  void plotFitFunction(PropertyHandler* h);
-  void removePlot(PropertyHandler* h);
-  void replot(PropertyHandler* h) const;
+  void plotFitFunction(MantidQt::MantidWidgets::PropertyHandler* h);
+  void removePlot(MantidQt::MantidWidgets::PropertyHandler* h);
+  void replot(MantidQt::MantidWidgets::PropertyHandler* h) const;
 
   virtual void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const;
   // Add a new peak with centre c and height h. 
@@ -152,7 +158,7 @@ private:
   // Check if x is near a width marker (+-dx)
   bool clickedOnWidthMarker(double x,double dx);
   // Return valid handler if x is within +- dx around peak's centre
-  PropertyHandler* clickedOnCentreMarker(double x,double dx)const;
+  MantidQt::MantidWidgets::PropertyHandler* clickedOnCentreMarker(double x,double dx)const;
 
   // Give new centre and height to the current peak
   void setPeak(double c,double h);
@@ -174,7 +180,7 @@ private:
   // Set the tool tip text
   void setToolTip(const QString& txt);
 
-  FitPropertyBrowser* fitBrowser()const;
+  MantidQt::MantidWidgets::FitPropertyBrowser* fitBrowser()const;
   /// The parent application window
   MantidUI* m_mantidUI;
   /// Workspace name

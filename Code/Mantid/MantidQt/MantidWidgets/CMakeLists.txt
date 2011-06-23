@@ -13,6 +13,10 @@ set ( SRC_FILES src/DiagResults.cpp
                 src/SaveWorkspaces.cpp
                 src/UserFunctionDialog.cpp
                 src/WorkspaceSelector.cpp
+                src/FitPropertyBrowser.cpp
+                src/SequentialFitDialog.cpp
+                src/SelectWorkspacesDialog.cpp
+                src/PropertyHandler.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/ICatAdvancedSearch.cpp
@@ -36,6 +40,10 @@ set ( INC_FILES inc/MantidQtMantidWidgets/DiagResults.h
                 inc/MantidQtMantidWidgets/UserFunctionDialog.h
                 inc/MantidQtMantidWidgets/WidgetDllOption.h
                 inc/MantidQtMantidWidgets/WorkspaceSelector.h
+                inc/MantidQtMantidWidgets/FitPropertyBrowser.h
+                inc/MantidQtMantidWidgets/SequentialFitDialog.h
+                inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
+                inc/MantidQtMantidWidgets/PropertyHandler.h
 )
 
 set ( MOC_FILES inc/MantidQtMantidWidgets/DiagResults.h
@@ -53,6 +61,10 @@ set ( MOC_FILES inc/MantidQtMantidWidgets/DiagResults.h
                 inc/MantidQtMantidWidgets/SaveWorkspaces.h
                 inc/MantidQtMantidWidgets/UserFunctionDialog.h
                 inc/MantidQtMantidWidgets/WorkspaceSelector.h
+                inc/MantidQtMantidWidgets/FitPropertyBrowser.h
+                inc/MantidQtMantidWidgets/SequentialFitDialog.h
+                inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
+                inc/MantidQtMantidWidgets/PropertyHandler.h
 )
 
 set ( UI_FILES inc/MantidQtMantidWidgets/ICatAdvancedSearch.ui
@@ -63,10 +75,12 @@ set ( UI_FILES inc/MantidQtMantidWidgets/ICatAdvancedSearch.ui
                inc/MantidQtMantidWidgets/MWRunFiles.ui
                inc/MantidQtMantidWidgets/RenameParDialog.ui
                inc/MantidQtMantidWidgets/UserFunctionDialog.ui
+               inc/MantidQtMantidWidgets/SequentialFitDialog.ui
 )
 
 include_directories ( inc )
 include_directories ( ${QWT_INCLUDE_DIR} )
+include_directories ( ../../QtPropertyBrowser/src )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
@@ -78,7 +92,7 @@ add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS )
 
 add_library ( MantidWidgets ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} ${UI_HDRS} )
 
-target_link_libraries ( MantidWidgets MantidQtAPI ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+target_link_libraries ( MantidWidgets MantidQtAPI QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
 # Installation settings

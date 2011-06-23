@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_USERFUNCTIONDIALOG_H_
 #define MANTIDQTMANTIDWIDGETS_USERFUNCTIONDIALOG_H_
 
-#include "ui_UserFunctionDialog.h"
+#include "../MantidWidgets/ui_UserFunctionDialog.h"
 #include "WidgetDllOption.h"
 
 #include <QMap>

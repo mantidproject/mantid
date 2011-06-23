@@ -9,11 +9,11 @@
 #include <QListWidget>
 #include <QStringList>
 
-//----------------------------
-//   Forward declarations
-//----------------------------
 
-class ApplicationWindow;
+namespace MantidQt
+{
+namespace MantidWidgets
+{
 
 /** 
     This is a dialog for selecting workspaces.
@@ -48,7 +48,7 @@ class SelectWorkspacesDialog : public QDialog
 public:
   
   /// Constructor
-  SelectWorkspacesDialog (ApplicationWindow* appWindow);
+  SelectWorkspacesDialog (QDialog* parent);
 
   /// Return the selected names
   QStringList getSelectedNames()const;
@@ -60,6 +60,7 @@ private:
 
 };
 
-
+}
+}
 
 #endif /* SELECTWORKSPACESDIALOG_H */

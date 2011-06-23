@@ -154,7 +154,6 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/ExecuteAlgorithm.cpp
                    src/Mantid/FirstTimeSetup.cpp
                    src/Mantid/FitParameterTie.cpp
-                   src/Mantid/FitPropertyBrowser.cpp
                    src/Mantid/IFunctionWrapper.cpp
                    src/Mantid/ImportWorkspaceDlg.cpp
                    src/Mantid/InputHistory.cpp
@@ -173,10 +172,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/MantidTable.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
-                   src/Mantid/PropertyHandler.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
-                   src/Mantid/SelectWorkspacesDialog.cpp
-                   src/Mantid/SequentialFitDialog.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
                    src/Mantid/InstrumentWidget/CompAssemblyActor.cpp
@@ -367,7 +363,6 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/ExecuteAlgorithm.h
                    src/Mantid/FirstTimeSetup.h
                    src/Mantid/FitParameterTie.h
-                   src/Mantid/FitPropertyBrowser.h
                    src/Mantid/IFunctionWrapper.h
                    src/Mantid/ImportWorkspaceDlg.h
                    src/Mantid/InputHistory.h
@@ -386,10 +381,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/MantidTable.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
-                   src/Mantid/PropertyHandler.h
                    src/Mantid/RemoveErrorsDialog.h
-                   src/Mantid/SelectWorkspacesDialog.h
-                   src/Mantid/SequentialFitDialog.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/InstrumentWidget/BinDialog.h
                    src/Mantid/InstrumentWidget/CompAssemblyActor.h
@@ -630,7 +622,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/AlgorithmHistoryWindow.h
                        src/Mantid/ExecuteAlgorithm.h
                        src/Mantid/FirstTimeSetup.h
-                       src/Mantid/FitPropertyBrowser.h
                        src/Mantid/IFunctionWrapper.h
                        src/Mantid/ImportWorkspaceDlg.h
                        src/Mantid/LoadDAEDlg.h
@@ -647,10 +638,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/MantidUI.h
                        src/Mantid/MantidTable.h
                        src/Mantid/PeakPickerTool.h
-                       src/Mantid/PropertyHandler.h
                        src/Mantid/RemoveErrorsDialog.h
-                       src/Mantid/SelectWorkspacesDialog.h
-                       src/Mantid/SequentialFitDialog.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/InstrumentWidget/XIntegrationControl.h
                        src/Mantid/InstrumentWidget/BinDialog.h
@@ -673,7 +661,6 @@ set ( UI_FILES src/Mantid/FirstTimeSetup.ui
                src/Mantid/UserFitFunctionDialog.ui
                src/Mantid/MantidAbout.ui
                src/Mantid/RemoveErrorsDialog.ui
-               src/Mantid/SequentialFitDialog.ui
                src/Mantid/ManageCustomMenus.ui
 )
 

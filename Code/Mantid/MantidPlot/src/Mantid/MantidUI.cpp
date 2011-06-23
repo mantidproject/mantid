@@ -7,8 +7,9 @@
 #include "MantidSampleLogDialog.h"
 #include "AlgorithmHistoryWindow.h"
 #include "MantidCurve.h"
-#include "FitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidTable.h"
+#include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"
 
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
@@ -27,6 +28,8 @@
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+
+#include "MantidAPI/CompositeFunction.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -161,9 +164,13 @@ void MantidUI::init()
   m_exploreAlgorithms->update();
   try
   {
-    m_fitFunction = new FitPropertyBrowser(m_appWindow);
+    //QDockWidget* dock = new QDockWidget(m_appWindow);
+    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow->mantidUI);
     m_fitFunction->init();
     m_fitFunction->hide();
+    //dock->setWidget(m_fitFunction);
+    m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, m_fitFunction );
+
   }
   catch(...)
   {
@@ -2470,7 +2477,53 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 
   setUpSpectrumGraph(ml,firstWorkspace);
   return ml;
+}
 
+/**
+ * Draw a color fill plot for each of the listed workspaces. Unfortunately the plotting is 
+ * initimately linked to MantidMatrix so that one of these needs to be created first
+ * @param wsNames :: For each workspace listed create a 2D colorfill plot 
+ * @param curveType :: The curve type for each of the plots
+ */
+void MantidUI::showSequentialPlot(Ui::SequentialFitDialog& ui, MantidQt::MantidWidgets::FitPropertyBrowser* fitbrowser)
+{
+  std::string wsName = fitbrowser->outputName();
+  Mantid::API::ITableWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+    Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
+  if (ws)
+  {
+    if ((ws->columnCount() - 1)/2 != fitbrowser->compositeFunction()->nParams()) return;
+    Table *t = importTableWorkspace(QString::fromStdString(wsName));
+    if (!t) return;
+    QString parName;
+    if (fitbrowser->compositeFunction()->nFunctions() == 1)
+    {
+      int i = fitbrowser->compositeFunction()->parameterIndex(ui.cbParameter->currentText().toStdString());
+      parName = QString::fromStdString(fitbrowser->compositeFunction()->getFunction(0)->parameterName(i));
+    }
+    else
+    {
+      parName = ui.cbParameter->currentText();
+    }
+    QStringList colNames;
+    colNames << t->name() + "_" + parName << t->name() + "_" + parName + "_Err";
+    MultiLayer* ml = appWindow()->multilayerPlot(t,colNames,ui.cbCurveType->currentIndex());
+    // set plot titles
+    Graph* g = ml->activeGraph();
+    if (g)
+    {
+      if (ui.ckbLogPlot->isChecked())
+      {
+        g->setXAxisTitle(ui.cbLogValue->currentText());
+      }
+      else
+      {
+        g->setXAxisTitle("Spectra");
+      }
+      g->setYAxisTitle(parName);
+      g->setTitle("");
+    }
+  }
 }
 
 /**

@@ -2,26 +2,37 @@
 // Includes
 //---------------------------------------
 
-#include "SelectWorkspacesDialog.h"
-#include "../ApplicationWindow.h"
-#include "MantidUI.h"
+#include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 
 #include <QListWidget>
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QDialogButtonBox>
+#include <set>
+#include "MantidAPI/AnalysisDataService.h"
+
+namespace MantidQt
+{
+namespace MantidWidgets
+{
 
 //---------------------------------------
 // Public member functions
 //---------------------------------------
 
 /// Constructor
-SelectWorkspacesDialog::SelectWorkspacesDialog(ApplicationWindow* appWindow) :
-QDialog(appWindow)
+SelectWorkspacesDialog::SelectWorkspacesDialog(QDialog* parent) :
+QDialog(parent)
 {
   setWindowTitle("MantidPlot - Select workspace");
-  m_wsList = new QListWidget(appWindow);
-  m_wsList->addItems(appWindow->mantidUI->getWorkspaceNames());
+  m_wsList = new QListWidget(parent);
+
+  QStringList tmp;
+  std::set<std::string> sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+  for (std::set<std::string>::const_iterator it = sv.begin(); it != sv.end(); ++it)
+    tmp<<QString::fromStdString(*it);
+
+  m_wsList->addItems(tmp);
   m_wsList->setSelectionMode(QAbstractItemView::MultiSelection);
 
   QPushButton* okButton = new QPushButton("Select");
@@ -49,4 +60,7 @@ QStringList SelectWorkspacesDialog::getSelectedNames()const
     res << item->text();
   }
   return res;
+}
+
+}
 }

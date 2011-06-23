@@ -1,9 +1,9 @@
 #include "PeakPickerTool.h"
 #include "MantidCurve.h"
 #include "MantidUI.h"
-#include "FitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "../FunctionCurve.h"
-#include "PropertyHandler.h"
+#include "MantidQtMantidWidgets/PropertyHandler.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -246,7 +246,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
             widthIsSet();
             double x = d_graph->plotWidget()->invTransform(2,p.x());
             double x1 = d_graph->plotWidget()->invTransform(2,p.x()+3);
-            PropertyHandler* handler = clickedOnCentreMarker(x,fabs(x1-x));
+            MantidQt::MantidWidgets::PropertyHandler* handler = clickedOnCentreMarker(x,fabs(x1-x));
             if (clickedOnXMax(x,fabs(x1-x)))
             {// begin changing xMax
               changingXMax(true);
@@ -320,7 +320,7 @@ void PeakPickerTool::functionCleared()
   d_graph->plotWidget()->replot();
 }
 
-FitPropertyBrowser* PeakPickerTool::fitBrowser()const
+MantidQt::MantidWidgets::FitPropertyBrowser* PeakPickerTool::fitBrowser()const
 {
   return m_mantidUI->fitFunctionBrowser();
 }
@@ -329,10 +329,10 @@ void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMa
 {
   try
   {
-    PropertyHandler* h = fitBrowser()->getHandler();
+    MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->getHandler();
     if ( !h ) return;
-    QList<PropertyHandler*> peaks = h->getPeakList();
-    foreach(PropertyHandler* peak,peaks)
+    QList<MantidQt::MantidWidgets::PropertyHandler*> peaks = h->getPeakList();
+    foreach(MantidQt::MantidWidgets::PropertyHandler* peak,peaks)
     {
       double c = peak->centre();
       if (c >= xMap.s1() && c <= xMap.s2())
@@ -393,7 +393,7 @@ void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMa
 void PeakPickerTool::addPeak(double c,double h)
 {
   std::string fnName = fitBrowser()->defaultPeakType();
-  PropertyHandler* handler = fitBrowser()->addFunction(fnName);
+  MantidQt::MantidWidgets::PropertyHandler* handler = fitBrowser()->addFunction(fnName);
   if (!handler || !handler->pfun()) return;
   handler->setCentre(c);
   double width = handler->width();
@@ -411,7 +411,7 @@ void PeakPickerTool::addPeak(double c,double h)
 // Give new centre and height to the current peak
 void PeakPickerTool::setPeak(double c,double h)
 {
-  PropertyHandler* handler = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* handler = fitBrowser()->currentHandler();
   if ( ! handler ) return;
   handler->setCentre(c);
   handler->calcBase();
@@ -421,28 +421,28 @@ void PeakPickerTool::setPeak(double c,double h)
 // Return the centre of the currently selected peak
 double PeakPickerTool::centre()const
 {
-  PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
   return h? h->centre(): 0;
 }
 
 // Return the width of the currently selected peak
 double PeakPickerTool::width()const
 {
-  PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
   return h? h->width(): 0;
 }
 
 // Return the height of the currently selected peak
 double PeakPickerTool::height()const
 {
-  PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
   return h? h->width(): 0;
 }
 
 // Change the width of the currently selected peak
 void PeakPickerTool::setWidth(double x)
 {
-  PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
   if (!h || !h->pfun()) return;
   m_width = x;
   h->setWidth(x);
@@ -469,7 +469,7 @@ bool PeakPickerTool::clickedOnXMax(double x,double dx)
 // Check if x is near a width marker (+-dx)
 bool PeakPickerTool::clickedOnWidthMarker(double x,double dx)
 {
-  PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
   if (!h) return false;
   double c = h->centre();
   double w = h->width()/2;
@@ -477,10 +477,10 @@ bool PeakPickerTool::clickedOnWidthMarker(double x,double dx)
 }
 
 // Check if x is near a peak centre marker (+-dx). If true returns the peak's address or 0 otherwise.
-PropertyHandler* PeakPickerTool::clickedOnCentreMarker(double x,double dx)const
+MantidQt::MantidWidgets::PropertyHandler* PeakPickerTool::clickedOnCentreMarker(double x,double dx)const
 {
-  QList<PropertyHandler*> peaks = fitBrowser()->getHandler()->getPeakList();
-  foreach(PropertyHandler* peak,peaks)
+  QList<MantidQt::MantidWidgets::PropertyHandler*> peaks = fitBrowser()->getHandler()->getPeakList();
+  foreach(MantidQt::MantidWidgets::PropertyHandler* peak,peaks)
   {
     if (fabs(x - peak->centre()) <= dx)
     {
@@ -621,8 +621,8 @@ void PeakPickerTool::endXChanged(double eX)
  */
 void PeakPickerTool::parameterChanged(const Mantid::API::IFitFunction* f)
 {
-  PropertyHandler* theHandler = fitBrowser()->getHandler();
-  PropertyHandler* h = theHandler->findHandler(f);
+  MantidQt::MantidWidgets::PropertyHandler* theHandler = fitBrowser()->getHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = theHandler->findHandler(f);
   if (!h) return;
   replot(h);
   if (h != theHandler && theHandler->hasPlot())
@@ -632,7 +632,7 @@ void PeakPickerTool::parameterChanged(const Mantid::API::IFitFunction* f)
   graph()->replot();
 }
 
-void PeakPickerTool::replot(PropertyHandler* h) const
+void PeakPickerTool::replot(MantidQt::MantidWidgets::PropertyHandler* h) const
 {
   if (h->hasPlot())
   {
@@ -697,7 +697,7 @@ void PeakPickerTool::prepareContextMenu(QMenu& menu)
       menu.addAction(action);
     }
 
-    PropertyHandler* h = fitBrowser()->currentHandler();
+    MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
     if (h && h->pfun())
     {
       if (h->hasPlot())
@@ -785,7 +785,7 @@ void PeakPickerTool::addPeakAt(int x,int y)
  */
 void PeakPickerTool::deletePeak()
 {
-  PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
   if (!h) return;
   h->removeFunction();
   functionRemoved();
@@ -872,7 +872,7 @@ void PeakPickerTool::setToolTip(const QString& txt)
  */
 void PeakPickerTool::plotGuess()
 {
-  PropertyHandler* h = fitBrowser()->getHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->getHandler();
   plotFitFunction(h);
   h->hasPlot() = true;
   d_graph->replot();
@@ -880,7 +880,7 @@ void PeakPickerTool::plotGuess()
 
 void PeakPickerTool::plotCurrentGuess()
 {
-  PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
   plotFitFunction(h);
   h->hasPlot() = true;
   d_graph->replot();
@@ -890,7 +890,7 @@ void PeakPickerTool::plotCurrentGuess()
 /**
  * Plot function
  */
-void PeakPickerTool::plotFitFunction(PropertyHandler* h)
+void PeakPickerTool::plotFitFunction(MantidQt::MantidWidgets::PropertyHandler* h)
 {
   if (h)
   {
@@ -936,13 +936,13 @@ void PeakPickerTool::plotFitFunction(PropertyHandler* h)
  */
 void PeakPickerTool::removeGuess()
 {
-  PropertyHandler* h = fitBrowser()->getHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->getHandler();
   removePlot(h);
   h->hasPlot() = false;
   d_graph->replot();
 }
 
-void PeakPickerTool::removePlot(PropertyHandler* h)
+void PeakPickerTool::removePlot(MantidQt::MantidWidgets::PropertyHandler* h)
 {
   // check to see if function is already plotted?
   FunctionCurve* fc = 0;
@@ -975,7 +975,7 @@ void PeakPickerTool::removePlot(PropertyHandler* h)
  */
 void PeakPickerTool::removeCurrentGuess()
 {
-  PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
   if (h)
   {
     removePlot(h);

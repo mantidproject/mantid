@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AlgorithmObserver.h"
+#include "WidgetDllOption.h"
 
 #include <QDockWidget>
 #include <QMap>
@@ -29,8 +30,6 @@ class QSignalMapper;
 class QMenu;
 class QAction;
 
-class ApplicationWindow;
-
 namespace Mantid
 {
   namespace API
@@ -43,6 +42,11 @@ namespace Mantid
   }
 }
 
+namespace MantidQt
+{
+namespace MantidWidgets
+{
+
 class PropertyHandler;
 /**
  * Class FitPropertyBrowser implements QtPropertyBrowser to display 
@@ -52,13 +56,13 @@ class PropertyHandler;
  * @date 13/11/2009
  */
 
-class FitPropertyBrowser: public QDockWidget, public Mantid::API::AlgorithmObserver,
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FitPropertyBrowser: public QDockWidget, public Mantid::API::AlgorithmObserver,
                           public MantidQt::API::WorkspaceObserver
 {
   Q_OBJECT
 public:
   /// Constructor
-  FitPropertyBrowser(QWidget* parent);
+  FitPropertyBrowser(QObject* mantidui);
   /// Destructor
   ~FitPropertyBrowser();
   /// Get handler to the root composite function
@@ -344,9 +348,6 @@ private:
   /// <attribute_name,string_manager>
   QMap<QString,QtStringPropertyManager*> m_stringManagers;
 
-  // The main application window
-  ApplicationWindow* m_appWindow;
-
   mutable PropertyHandler* m_currentHandler;
 
   /// Group for functions
@@ -424,6 +425,9 @@ private:
   /// Number of decimal places in double properties
   int m_decimals;
 
+  /// holds effectively a MantidUI for connecting
+  QObject* m_mantidui;
+
   friend class PropertyHandler;
   friend class CreateAttributeProperty;
   friend class SetAttribute;
@@ -433,6 +437,7 @@ private:
 };
 
 
-
+} // MantidQt
+} // API
 
 #endif /*FITPROPERTYBROWSER_H_*/

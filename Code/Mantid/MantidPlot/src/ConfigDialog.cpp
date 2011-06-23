@@ -36,7 +36,7 @@
 #include "pixmaps.h"
 #include "DoubleSpinBox.h"
 #include "Mantid/MantidUI.h"
-#include "Mantid/FitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 
 #include <QLocale>
 #include <QPushButton>

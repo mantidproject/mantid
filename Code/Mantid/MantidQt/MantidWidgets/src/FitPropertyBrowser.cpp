@@ -1,6 +1,6 @@
-#include "FitPropertyBrowser.h"
-#include "PropertyHandler.h"
-#include "SequentialFitDialog.h"
+#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/PropertyHandler.h"
+#include "MantidQtMantidWidgets/SequentialFitDialog.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -28,8 +28,8 @@
 #include "qtpropertymanager.h"
 #include "qteditorfactory.h"
 
-#include "../ApplicationWindow.h"
-#include "MantidUI.h"
+//#include "../ApplicationWindow.h"
+//#include "MantidUI.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGridLayout>
@@ -41,10 +41,14 @@
 #include <QFileInfo>
 #include <QApplication>
 #include <QClipboard>
+#include <QSignalMapper>
 
 #include <algorithm>
 
-using namespace MantidQt::API;
+namespace MantidQt
+{
+namespace MantidWidgets
+{
 
 class FormulaDialogEditor: public StringDialogEditor
 {
@@ -79,9 +83,8 @@ protected:
  * Constructor
  * @param parent :: The parent widget - must be an ApplicationWindow
  */
-FitPropertyBrowser::FitPropertyBrowser(QWidget* parent)
-:QDockWidget("Fit Function",parent),
-m_appWindow((ApplicationWindow*)parent),
+FitPropertyBrowser::FitPropertyBrowser(QObject* mantidui)
+:QDockWidget("Fit Function"),
 m_currentHandler(0),
 m_logValue(NULL),
 m_compositeFunction(0),
@@ -94,7 +97,8 @@ m_peakToolOn(false),
 m_auto_back(false),
 m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"))),
 m_autoBackground(NULL),
-m_decimals(-1)
+m_decimals(-1),
+m_mantidui(mantidui)
 {
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser");
@@ -134,9 +138,8 @@ m_decimals(-1)
   setObjectName("FitFunction"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
   setMinimumWidth(200);
-  m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, this );
 
-  QWidget* w = new QWidget(parent);
+  QWidget* w = new QWidget(this);
 
     /* Create property managers: they create, own properties, get and set values  */
 
@@ -1217,7 +1220,7 @@ void FitPropertyBrowser::setCurrentFunction(const Mantid::API::IFitFunction* f)c
   setCurrentFunction(getHandler()->findHandler(f));
 }
 
-#include "../FitDialog.h"
+//#include "../FitDialog.h"
 /**
  * Creates an instance of Fit algorithm, sets its properties and launches it.
  */
@@ -1397,7 +1400,6 @@ void FitPropertyBrowser::addHandle(const std::string& wsName,const boost::shared
 /// workspace was removed
 void FitPropertyBrowser::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-  Q_UNUSED(ws);
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
   if (i >= 0)
@@ -2316,7 +2318,7 @@ void FitPropertyBrowser::sequentialFit()
   {
     setOutputName(outputName() + "_res");
   }
-  SequentialFitDialog* dlg = new SequentialFitDialog(this);
+  SequentialFitDialog* dlg = new SequentialFitDialog(this, m_mantidui);
   std::string wsName = workspaceName();
   if (!wsName.empty() && dlg->addWorkspaces(QStringList(QString::fromStdString(wsName))))
   {
@@ -2430,3 +2432,6 @@ void FitPropertyBrowser::setTextPlotGuess(const QString text)
 {
   m_displayActionPlotGuess->setText(text);
 }
+
+} // MantidQt
+} // API

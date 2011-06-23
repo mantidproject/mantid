@@ -37,7 +37,13 @@ set ( MOC_FILES inc/MantidQtAPI/AlgorithmDialog.h
                 inc/MantidQtAPI/WorkspaceObserver.h
 )
 
-set ( UI_FILES inc/MantidQtAPI/ManageUserDirectories.ui )
+set ( UI_FILES inc/MantidQtAPI/ManageUserDirectories.ui 
+)
+
+include_directories ( inc )
+include_directories ( ${QWT_INCLUDE_DIR} )
+include_directories ( ../MantidWidgets/inc )
+include_directories ( ../MantidWidgets )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
@@ -49,7 +55,7 @@ add_definitions ( -DIN_MANTIDQT_API )
 
 add_library ( MantidQtAPI ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} ${UI_HDRS} )
 
-target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} )
+target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
 # Installation settings
