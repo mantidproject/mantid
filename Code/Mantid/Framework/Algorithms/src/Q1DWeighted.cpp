@@ -82,6 +82,7 @@ void Q1DWeighted::exec()
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS,1,sizeOut,sizeOut-1);
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
   outputWS->setYUnitLabel("1/cm");
+  outputWS->isDistribution(true);
   setProperty("OutputWorkspace",outputWS);
 
   // Set the X vector for the output workspace

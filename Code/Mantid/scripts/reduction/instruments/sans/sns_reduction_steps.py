@@ -6,6 +6,7 @@
 import os
 import sys
 import pickle
+import math
 from reduction import ReductionStep
 from sans_reduction_steps import BaseTransmission, BaseBeamFinder, WeightedAzimuthalAverage
 from reduction import extract_workspace_name, find_file, find_data
@@ -150,7 +151,7 @@ class LoadRun(ReductionStep):
 
     def use_config_mask(self, use_config=False):
         """
-            Set the flag to use the mask defined in teh
+            Set the flag to use the mask defined in the
             configuration file.
             @param use_config: if True, the configuration file will be used
         """
@@ -288,10 +289,21 @@ class LoadRun(ReductionStep):
                 try:
                     run_as_int = int(run_prop.value)
                     def _compare(item, compare_with):
-                         if item.run < compare_with.run and compare_with.run <= run_as_int:
-                             return compare_with
-                         else:
-                             return item 
+                        # If both configurations have their run number below our run,
+                        # use the configuration with the highest run number
+                        if item.run<=run_as_int and compare_with.run<=run_as_int:
+                            if item.run>compare_with.run:
+                                return item
+                            else:
+                                return compare_with
+                        # If both configurations have their run number above our run,
+                        # use the configuration with the lowest run number
+                        # If one is above and one is below, use the lowest run number too
+                        else:
+                            if item.run<compare_with.run:
+                                return item
+                            else:
+                                return compare_with                         
                     config_file = reduce(_compare, config_files).path
                 except:
                     # Could not read in the run number
@@ -321,7 +333,7 @@ class LoadRun(ReductionStep):
             if type(reducer._beam_finder) is BaseBeamFinder:
                 if reducer.get_beam_center() == [0.0,0.0]:
                     reducer.set_beam_finder(BaseBeamFinder(conf.center_x, conf.center_y))   
-                    output_str += "  Beam center set from config file: %-6.1f, %-6.1f" % (conf.center_x, conf.center_y)                             
+                    output_str += "  Beam center set from config file: %-6.1f, %-6.1f\n" % (conf.center_x, conf.center_y)                             
         else:
             mantid.sendLogMessage("Could not find configuration file for %s" % workspace)
             output_str += "  Could not find configuration file for %s\n" % workspace
@@ -362,24 +374,28 @@ class LoadRun(ReductionStep):
         offset = float(a.getPropertyValue("TofOffset"))
         wl_min = float(a.getPropertyValue("WavelengthMin"))
         wl_max = float(a.getPropertyValue("WavelengthMax"))
-        frame_skipping = a.getPropertyValue("FrameSkipping")
+        wl_combined_max = wl_max
+        frame_skipping = a.getProperty("FrameSkipping").value
         mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_min", wl_min, "Angstrom", True)
         mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_max", wl_max, "Angstrom", True)
         mtd[workspace+'_evt'].getRun().addProperty_int("is_frame_skipping", int(frame_skipping), True)
-        mantid.sendLogMessage("Frame-skipping option: %s" % str(frame_skipping))
         output_str += "  Wavelength range: %6.1f - %-6.1f Angstrom  [Frame skipping = %s]" % (wl_min, wl_max, str(frame_skipping))
-        
-        x_step = 100
-        x_min = offset-offset%x_step
-        x_max = 2*1e6/60.0+offset
         if frame_skipping:
-            x_max += 1e6/60.0
-        x_max -= x_max%x_step
-        Rebin(workspace+'_evt', workspace, "%6.0f, %6.0f, %6.0f" % (x_min, x_step, x_max), False )
-        ConvertUnits(workspace, workspace, "Wavelength")
+            wl_min2 = float(a.getPropertyValue("WavelengthMinFrame2"))
+            wl_max2 = float(a.getPropertyValue("WavelengthMaxFrame2"))
+            mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_min_frame2", wl_min2, "Angstrom", True)
+            mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_max_frame2", wl_max2, "Angstrom", True)
+            wl_combined_max = wl_max2
+            output_str += "  Second frame: %6.1f - %-6.1f Angstrom" % (wl_min2, wl_max2)
         
-        # Rebin so all the wavelength bins are aligned
-        Rebin(workspace, workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_max))
+        #ConvertUnits(workspace+'_evt', workspace+'_evt_wl', "Wavelength")
+        source_to_sample = math.fabs(mtd[workspace+'_evt'].getInstrument().getSource().getPos().getZ())*1000.0
+        conversion_factor = 3.9560346 / (sdd+source_to_sample);
+        ScaleX(workspace+'_evt', workspace+'_evt_wl', conversion_factor)
+        mtd[workspace+'_evt_wl'].getAxis(0).setUnit("Wavelength")
+        
+        # Rebin so all the wavelength bins are aligned        
+        Rebin(workspace+'_evt_wl', workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_combined_max), False)
         
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [frame-skipping: %s]" %(workspace, sdd, str(frame_skipping)))
         
@@ -387,14 +403,14 @@ class LoadRun(ReductionStep):
         # using the beam stop hole. Since it's quick we do it now. We should split
         # the computing part from the applying part of the transmission correction
         if pixel_ctr_x is not None and pixel_ctr_y is not None:
-            transmission_ws = "__transmission_"+workspace
+            transmission_ws = "__beam_hole_transmission_"+workspace
     
             # Calculate the transmission as a function of wavelength
             EQSANSTransmission(InputWorkspace=workspace,
                                OutputWorkspace=transmission_ws,
                                XCenter=pixel_ctr_x,
                                YCenter=pixel_ctr_y,
-                               NormalizeToUnity = False)
+                               NormalizeToUnity = True)
             
             mantid[workspace].getRun().addProperty_str("transmission_ws", transmission_ws, True)
             
@@ -606,9 +622,33 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         wl_min = min(mtd[workspace].readX(0))
         wl_max = max(mtd[workspace].readX(0))
         frame_cutoff = (wl_max+wl_min)/2.0
-        CropWorkspace(workspace, workspace+'_frame1', XMin=wl_min, XMax=frame_cutoff)
-        CropWorkspace(workspace, workspace+'_frame2', XMin=frame_cutoff, XMax=wl_max)
         
+        # First frame
+        wl_min = None
+        wl_max = None
+        if mtd[workspace].getRun().hasProperty("wavelength_min"):
+            wl_min = mtd[workspace].getRun().getProperty("wavelength_min").value
+        if mtd[workspace].getRun().hasProperty("wavelength_max"):
+            wl_max = mtd[workspace].getRun().getProperty("wavelength_max").value
+        if wl_min is None and wl_max is None:
+            raise RuntimeError, "Could not get the wavelength band for frame 1"
+        CropWorkspace(workspace, workspace+'_frame1', XMin=wl_min, XMax=wl_max)
+        
+        output_str = "Performed radial averaging: frame 1 = [%g, %g], " % (wl_min, wl_max)
+        
+        # Second frame
+        wl_min = None
+        wl_max = None
+        if mtd[workspace].getRun().hasProperty("wavelength_min_frame2"):
+            wl_min = mtd[workspace].getRun().getProperty("wavelength_min_frame2").value
+        if mtd[workspace].getRun().hasProperty("wavelength_max_frame2"):
+            wl_max = mtd[workspace].getRun().getProperty("wavelength_max_frame2").value
+        if wl_min is None and wl_max is None:
+            raise RuntimeError, "Could not get the wavelength band for frame 2"
+        CropWorkspace(workspace, workspace+'_frame2', XMin=wl_min, XMax=wl_max)
+        
+        output_str += "frame 2 = [%g, %g]," % (wl_min, wl_max)
+
         iq_frame1 = WeightedAzimuthalAverage(binning=self._binning, suffix=self._suffix, error_weighting=self._error_weighting, 
                                              n_bins=self._nbins, n_subpix=self._nsubpix, log_binning=self._log_binning)
         iq_frame1.execute(reducer, workspace+'_frame1')
@@ -617,7 +657,7 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
                                              n_bins=self._nbins, n_subpix=self._nsubpix, log_binning=self._log_binning)
         iq_frame2.execute(reducer, workspace+'_frame2')
         
-        return "Performed radial averaging: frame 1 = [%g, %g], frame 2 = [%g, %g]" % (wl_min, frame_cutoff, frame_cutoff, wl_max)
+        return output_str
         
     def get_data(self, workspace):
         if not self._is_frame_skipping:

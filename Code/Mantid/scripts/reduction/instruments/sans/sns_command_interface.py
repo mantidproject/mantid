@@ -6,11 +6,11 @@ from reduction.command_interface import *
 from hfir_command_interface import SetBeamCenter, DirectBeamCenter, ScatteringBeamCenter
 from hfir_command_interface import NoDarkCurrent, NoNormalization, Mask, MaskDetectors, MaskRectangle
 from hfir_command_interface import SensitivityCorrection, NoSensitivityCorrection
-from hfir_command_interface import SolidAngle, NoSolidAngle, NoTransmission, SetTransmission
-from hfir_command_interface import Background, NoBackground, AzimuthalAverage, IQxQy, NoIQxQy
+from hfir_command_interface import SolidAngle, NoSolidAngle, NoTransmission, SetTransmission, DirectBeamTransmission
+from hfir_command_interface import Background, NoBackground, IQxQy, NoIQxQy#, AzimuthalAverage
 from hfir_command_interface import SaveIqAscii, NoSaveIq
 from hfir_command_interface import ThetaDependentTransmission, BckThetaDependentTransmission, SetBckTransmission
-from hfir_command_interface import TransmissionDarkCurrent, BckTransmissionDarkCurrent
+from hfir_command_interface import TransmissionDarkCurrent, BckTransmissionDarkCurrent, BckDirectBeamTransmission
 from hfir_command_interface import SetDirectBeamAbsoluteScale, SetAbsoluteScale
 from hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance
 from hfir_command_interface import SensitivityDirectBeamCenter, SetSensitivityBeamCenter, SensitivityScatteringBeamCenter
@@ -57,7 +57,7 @@ def UseConfigTOFTailsCutoff(use_config=True):
 def UseConfigMask(use_config=True):
     ReductionSingleton().get_data_loader().use_config_mask(use_config)
     
-def AzimuthalAverageByFrame(suffix="_Iq", n_bins=100, n_subpix=1, log_binning=False):
+def AzimuthalAverage(suffix="_Iq", n_bins=100, n_subpix=1, log_binning=False):
     ReductionSingleton().set_azimuthal_averager(sns_reduction_steps.AzimuthalAverageByFrame(binning=None,
                                                                                             suffix=suffix,
                                                                                             n_bins=n_bins,

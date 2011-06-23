@@ -391,14 +391,17 @@ double EQSANSTofStructure::getTofOffset(MatrixWorkspace_const_sptr inputWS, bool
   for ( int i=0; i<4; i++)
       g_log.information() << i << "    " << chopper_actual_phase[i] << "  " << chopper_wl_1[i] << "  " << chopper_wl_2[i] << std::endl;
 
+  double low_wl_discard = 3.9560346 * low_tof_cut / source_to_detector;
+  double high_wl_discard = 3.9560346 * high_tof_cut / source_to_detector;
+
   setProperty("FrameSkipping", frame_skipping);
   setProperty("TofOffset", frame_tof0);
-  setProperty("WavelengthMin", frame_wl_1);
-  setProperty("WavelengthMax", frame_wl_2);
+  setProperty("WavelengthMin", frame_wl_1+low_wl_discard);
+  setProperty("WavelengthMax", frame_wl_2-high_wl_discard);
   if (frame_skipping)
   {
-      setProperty("WavelengthMinFrame2", frameskip_wl_1);
-      setProperty("WavelengthMaxFrame2", frameskip_wl_2);
+      setProperty("WavelengthMinFrame2", frameskip_wl_1+low_wl_discard);
+      setProperty("WavelengthMaxFrame2", frameskip_wl_2-high_wl_discard);
   }
 
   return frame_tof0;
