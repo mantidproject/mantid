@@ -127,6 +127,7 @@ set ( SRC_FILES
 	src/SANSDirectBeamScaling.cpp
 	src/SANSSolidAngleCorrection.cpp
 	src/Scale.cpp
+	src/ScaleX.cpp
 	src/SetUncertaintiesToZero.cpp
 	src/SmoothData.cpp
 	src/SmoothNeighbours.cpp
@@ -280,6 +281,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
 	inc/MantidAlgorithms/SANSSolidAngleCorrection.h
 	inc/MantidAlgorithms/Scale.h
+	inc/MantidAlgorithms/ScaleX.h
 	inc/MantidAlgorithms/SetUncertaintiesToZero.h
 	inc/MantidAlgorithms/SmoothData.h
 	inc/MantidAlgorithms/SmoothNeighbours.h
