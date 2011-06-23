@@ -41,21 +41,23 @@ class DLLExport Q1DTOF : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  Q1DTOF() : API::Algorithm(), m_numInBins(0) {}
+  Q1DTOF() : API::Algorithm(), m_RCut(0.0), m_WCutOver(0.0) {}
   /// Virtual destructor
   virtual ~Q1DTOF() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "Q1DTOF"; }
+  virtual const std::string name() const { return "Q1D"; }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  virtual int version() const { return (2); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "SANS"; }
 
 private:
   /// the experimental workspace with counts across the detector
   API::MatrixWorkspace_const_sptr m_dataWS;
-  /// number of bin boundies in the input workspace
-  size_t m_numInBins;
+  ///The radius cut off, should be value of the property RadiusCut. A value of zero here will disable the cut off and all wavelengths are used
+  double m_RCut;
+  ///The wavelength cut off divided by the radius cut is used in the calculation of the first wavelength to include, it's value is only used if RadiusCut > 0
+  double m_WCutOver;
 
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
@@ -64,14 +66,19 @@ private:
   /// Execution code
   void exec();
 
+  void initizeCutOffs(const double RCut, const double WCut);
   void examineInput(API::MatrixWorkspace_const_sptr binAdj, API::MatrixWorkspace_const_sptr detectAdj);
   API::MatrixWorkspace_sptr setUpOutputWorkspace(const std::vector<double> & binParams,  const API::SpectraDetectorMap * const specMap) const;
   //these are the steps that are run on each individual spectrum
-  void convertWavetoQ(const size_t specIndex, const bool doGravity, MantidVec & Qs) const;
+  size_t waveLengthCutOff(const size_t specInd) const;
+  void calculateNormalization(const size_t wavStart, const size_t specInd, API::MatrixWorkspace_const_sptr pixelAdj, double const * const binNorms, double const * const binNormEs, MantidVec & norm, MantidVec & normETo2) const;
   void pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj, const size_t specIndex, double & weight, double & error) const;
-  void addWaveAdj(API::MatrixWorkspace_const_sptr pixelAdj, const MantidVec * const binNorms, const MantidVec * const binNormEs, MantidVec & outNorms, MantidVec & outETo2) const;
-  void normToBinWidth(const size_t specIndex, const MantidVec & QIns, MantidVec & theNorms, MantidVec & errorSquared) const;
+  void addWaveAdj(const double * const binNorms, const double * const binNormEs, MantidVec & outNorms, MantidVec & outETo2) const;
+  void normToBinWidth(const size_t offSet, const size_t specIndex, MantidVec & theNorms, MantidVec & errorSquared) const;
+  void getInputDataIterators(const size_t offset, const size_t specInd, MantidVec & QVec, MantidVec::const_iterator & Qs, MantidVec::const_iterator & YData, MantidVec::const_iterator & EData) const;
+  void convertWavetoQ(const size_t specIndex, const bool doGravity, MantidVec::const_iterator waves, MantidVec & QVec) const;
   void updateSpecMap(const size_t specIndex, API::SpectraDetectorMap * const specMap, const Geometry::ISpectraDetectorMap & inSpecMap, API::MatrixWorkspace_sptr outputWS) const;
+  void normalize(const MantidVec & normSum, const MantidVec & normError2, MantidVec & YOut, MantidVec & errors) const;
 };
 
 } // namespace Algorithms
