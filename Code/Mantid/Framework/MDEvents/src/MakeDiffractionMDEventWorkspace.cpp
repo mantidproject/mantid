@@ -105,8 +105,6 @@ namespace MDEvents
     declareProperty(new PropertyWithValue<bool>("LorentzCorrection", false, Direction::Input),
         "Correct the weights of events with by multiplying by the Lorentz formula: sin(theta)^2 / lambda^4");
 
-    declareProperty(new PropertyWithValue<bool>("BinarySplit", false, Direction::Input),
-        "Should the MDEventWorkspace use binary splitting (use grid splitting otherwise).");
   }
 
 
@@ -309,20 +307,9 @@ namespace MDEvents
 
       // Build up the box controller
       BoxController_sptr newbc(new BoxController(3));
-      bool BinarySplit = this->getProperty("BinarySplit");
-      if (BinarySplit)
-      {
-        newbc->setBinarySplit(true);
-        newbc->setSplitThreshold(20);
-        newbc->setMaxDepth(30);
-      }
-      else
-      {
-        newbc->setBinarySplit(false);
-        newbc->setSplitInto(5);
-        newbc->setSplitThreshold(1500);
-        newbc->setMaxDepth(20);
-      }
+      newbc->setSplitInto(5);
+      newbc->setSplitThreshold(1500);
+      newbc->setMaxDepth(20);
       ws->setBoxController(newbc);
       // We always want the box to be split (it will reject bad ones)
       ws->splitBox();

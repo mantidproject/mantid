@@ -28,7 +28,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  void do_test_exec(bool binarySplit)
+  void do_test_exec()
   {
     std::string wsName = "CreateMDEventWorkspaceTest_out";
     CreateMDEventWorkspace alg;
@@ -39,7 +39,6 @@ public:
     alg.setPropertyValue("Names", "x,y,z");
     alg.setPropertyValue("Units", "m,mm,um");
     alg.setPropertyValue("SplitInto", "6");
-    alg.setProperty("BinarySplit", binarySplit);
     alg.setPropertyValue("SplitThreshold", "500");
     alg.setPropertyValue("MaxRecursionDepth", "7");
     alg.setPropertyValue("OutputWorkspace",wsName);
@@ -77,26 +76,14 @@ public:
     BoxController_sptr bc = ews->getBoxController();
     TS_ASSERT( bc );
     if (!bc) return;
-    if (binarySplit)
-    {
-      TS_ASSERT_EQUALS(bc->getBinarySplit(), true );
-    }
-    else
-    {
-      TS_ASSERT_EQUALS(bc->getSplitInto(0), 6 );
-      TS_ASSERT_EQUALS(bc->getSplitThreshold(), 500 );
-      TS_ASSERT_EQUALS(bc->getMaxDepth(), 7 );
-    }
+    TS_ASSERT_EQUALS(bc->getSplitInto(0), 6 );
+    TS_ASSERT_EQUALS(bc->getSplitThreshold(), 500 );
+    TS_ASSERT_EQUALS(bc->getMaxDepth(), 7 );
   }
 
   void test_exec()
   {
-    do_test_exec(false);
-  }
-
-  void test_exec_binary_split()
-  {
-    do_test_exec(true);
+    do_test_exec();
   }
 
 

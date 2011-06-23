@@ -46,7 +46,7 @@ if not mtd["mdew"] is None:
 # Create the MDEW once
 CreateMDEventWorkspace(Dimensions="3",Extents="-6,6,-6,6,-6,6",Names="Qx,Qy,Qz",Units="Ang-1,Ang-1,Ang-1", 
                        SplitInto="5",SplitThreshold="1500",
-                       BinarySplit="0", MaxRecursionDepth="10", OutputWorkspace="mdew")
+                       MaxRecursionDepth="10", OutputWorkspace="mdew")
 
 for numTimes in xrange(1,11):
         par = Params()

@@ -16,7 +16,7 @@ set ( SRC_FILES
 	src/MDEventWorkspace.cpp
 	src/MDGridBox.cpp
 	src/MDHistoWorkspace.cpp
-	src/MDSplitBox.cpp
+#	src/MDSplitBox.cpp
 	src/MakeDiffractionMDEventWorkspace.cpp
 	src/OneStepMDEW.cpp
 )
@@ -27,7 +27,7 @@ set ( SRC_UNITY_IGNORE_FILES
     src/MDBox.cpp
     src/MDEventWorkspace.cpp
     src/MDGridBox.cpp
-    src/MDSplitBox.cpp
+    #src/MDSplitBox.cpp
 )
 
 # Header files
@@ -51,7 +51,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDEventWorkspace.h
 	inc/MantidMDEvents/MDGridBox.h
 	inc/MantidMDEvents/MDHistoWorkspace.h
-	inc/MantidMDEvents/MDSplitBox.h
+	#inc/MantidMDEvents/MDSplitBox.h
 	inc/MantidMDEvents/MakeDiffractionMDEventWorkspace.h
 	inc/MantidMDEvents/OneStepMDEW.h
 )
@@ -76,7 +76,7 @@ set ( TEST_FILES
 	test/MDEventWorkspaceTest.h
 	test/MDGridBoxTest.h
 	test/MDHistoWorkspaceTest.h
-	test/MDSplitBoxTest.h
+	#test/MDSplitBoxTest.h
 	test/MakeDiffractionMDEventWorkspaceTest.h
 	test/OneStepMDEWTest.h
 )

@@ -10,7 +10,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  TMDE(MDBoxIterator)::MDBoxIterator()
+  TMDE(MDBoxIterator)::MDBoxIterator(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly)
   {
   }
     

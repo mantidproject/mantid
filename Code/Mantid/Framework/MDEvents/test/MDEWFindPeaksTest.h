@@ -27,12 +27,11 @@ public:
   static void createMDEW()
   {
     // ---- Start with empty MDEW ----
-    AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 18,
+    AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 16,
         "Dimensions", "3",
         "Extents", "-10,10,-10,10,-10,10",
         "Names", "h,k,l",
         "Units", "-,-,-",
-        "BinarySplit", "0",
         "SplitInto", "5",
         "SplitThreshold", "20",
         "MaxRecursionDepth", "15",

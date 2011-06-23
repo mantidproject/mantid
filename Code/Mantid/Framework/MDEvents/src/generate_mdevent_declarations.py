@@ -147,7 +147,7 @@ def generate():
     print "Generating MDEventFactory.cpp"
 
     # Classes that have a .cpp file (and will get an Include line)
-    classes_cpp = ["IMDBox", "MDBox", "MDEventWorkspace", "MDGridBox", "MDBin", "MDSplitBox"]
+    classes_cpp = ["IMDBox", "MDBox", "MDEventWorkspace", "MDGridBox", "MDBin"]
     # All of the classes to instantiate
     classes = classes_cpp + ["MDEvent"]
     

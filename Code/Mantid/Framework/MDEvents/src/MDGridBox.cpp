@@ -155,7 +155,7 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
-  /** Returns the number of un-split MDBoxes in this box (including all children)
+  /** Returns the number of un-split MDBoxes in this box (recursively including all children)
    * @return :: the total # of MDBoxes in all children */
   TMDE(
   size_t MDGridBox)::getNumMDBoxes() const

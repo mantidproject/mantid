@@ -177,10 +177,7 @@ namespace MDEvents
     // Add up the events and the MDBoxes contained.
     size_t total = this->getNPoints() * sizeof(MDE);
     total += this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE,nd>);
-    if (this->m_BoxController->getBinarySplit())
-      total += this->m_BoxController->getTotalNumMDGridBoxes() * sizeof(MDSplitBox<MDE,nd>);
-    else
-      total += this->m_BoxController->getTotalNumMDGridBoxes() * sizeof(MDGridBox<MDE,nd>);
+    total += this->m_BoxController->getTotalNumMDGridBoxes() * sizeof(MDGridBox<MDE,nd>);
     return total;
   }
 
@@ -217,37 +214,18 @@ namespace MDEvents
   TMDE(
   void MDEventWorkspace)::splitBox()
   {
-    if (this->m_BoxController->getBinarySplit())
+    // Want MDGridBox
+    MDGridBox<MDE,nd> * gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
+    if (!gridBox)
     {
-      // Want to split into MDSplitBox
-      MDSplitBox<MDE,nd> * splitBox = dynamic_cast<MDSplitBox<MDE,nd> *>(data);
-      if (!splitBox)
-      {
-        // Track how many MDBoxes there are in the overall workspace
-        this->m_BoxController->trackNumBoxes(data->getDepth());
-        MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(data);
-        if (!box) throw
-            std::runtime_error("MDEventWorkspace::splitBox() expected its data to be a MDBox* to split to MDSplitBox.");
-        splitBox = new MDSplitBox<MDE,nd>(box);
-        data = splitBox;
-      }
+      // Track how many MDBoxes there are in the overall workspace
+      this->m_BoxController->trackNumBoxes(data->getDepth());
+      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(data);
+      if (!box) throw
+          std::runtime_error("MDEventWorkspace::splitBox() expected its data to be a MDBox* to split to MDGridBox.");
+      gridBox = new MDGridBox<MDE,nd>(box);
+      data = gridBox;
     }
-    else
-    {
-      // Want MDGridBox
-      MDGridBox<MDE,nd> * gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
-      if (!gridBox)
-      {
-        // Track how many MDBoxes there are in the overall workspace
-        this->m_BoxController->trackNumBoxes(data->getDepth());
-        MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(data);
-        if (!box) throw
-            std::runtime_error("MDEventWorkspace::splitBox() expected its data to be a MDBox* to split to MDGridBox.");
-        gridBox = new MDGridBox<MDE,nd>(box);
-        data = gridBox;
-      }
-    }
-
   }
 
   //-----------------------------------------------------------------------------------------------

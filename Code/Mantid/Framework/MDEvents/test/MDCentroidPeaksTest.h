@@ -52,12 +52,11 @@ public:
   static void createMDEW()
   {
     // ---- Start with empty MDEW ----
-    AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 16,
+    AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 14,
         "Dimensions", "3",
         "Extents", "-10,10,-10,10,-10,10",
         "Names", "h,k,l",
         "Units", "-,-,-",
-        "BinarySplit", "0",
         "SplitInto", "5",
         "MaxRecursionDepth", "2",
         "OutputWorkspace", "MDCentroidPeaksTest_MDEWS");

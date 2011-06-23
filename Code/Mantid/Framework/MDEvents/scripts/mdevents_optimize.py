@@ -76,7 +76,6 @@ for SplitInto in SplitInto_list:
         
         CreateMDEventWorkspace(Dimensions="3",Extents="-6,6,-6,6,-6,6",Names="Qx,Qy,Qz",Units="Ang-1,Ang-1,Ang-1", 
                                SplitInto=str(SplitInto),SplitThreshold=str(SplitThreshold),
-                               BinarySplit="1",
                                MaxRecursionDepth="80",OutputWorkspace="mdew")
         
         start = time.time()

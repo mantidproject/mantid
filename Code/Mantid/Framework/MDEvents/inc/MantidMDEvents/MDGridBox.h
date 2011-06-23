@@ -48,6 +48,10 @@ namespace MDEvents
 
     size_t getNumMDBoxes() const;
 
+    size_t getNumChildren() const;
+
+    IMDBox<MDE,nd> * getChild(size_t index);
+
     std::vector< MDE > * getEventsCopy();
 
     virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly);
