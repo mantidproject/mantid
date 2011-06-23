@@ -196,7 +196,7 @@ if ( ENABLE_CPACK )
       ENDIF ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
 
       # let people know what is coming out the other end
-      message ( status " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
+      message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
     ENDIF ()
 
     # rhel requirements
@@ -211,7 +211,7 @@ if ( ENABLE_CPACK )
 
     # soft requirement of tcmalloc - if built with it, then require it
     IF ( USE_TCMALLOC AND TCMALLOC_FOUND )
-      message ( status " Adding google-perftools to the package requirements" )
+      message ( STATUS " Adding google-perftools to the package requirements" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},google-perftools" )
       set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},google-perftools" )
     ENDIF ( )
