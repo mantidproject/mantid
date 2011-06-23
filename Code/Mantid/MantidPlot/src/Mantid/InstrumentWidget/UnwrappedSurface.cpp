@@ -390,7 +390,7 @@ void UnwrappedSurface::getSelectedDetectors(QList<int>& dets)
   double uleft = m_u_min;
   double uright = m_u_min;
 
-  // find the first picking colours different form black (0,0,0) to get the top-left
+  // find the first picking colours different from black (0,0,0) to get the top-left
   // and bottom-right detectors
   int rwidth = rect.width();
   int rheight = rect.height();
@@ -444,6 +444,20 @@ void UnwrappedSurface::getSelectedDetectors(QList<int>& dets)
     }
   }
 
+}
+
+void UnwrappedSurface::getMaskedDetectors(QList<int>& dets)const
+{
+  dets.clear();
+  if (m_maskShapes.isEmpty()) return;
+  for(int i = 0; i < m_unwrappedDetectors.size(); ++i)
+  {
+    const UnwrappedDetector& udet = m_unwrappedDetectors[i];
+    if (m_maskShapes.isMasked(udet.u, udet.v))
+    {
+      dets.append(udet.detector->getID());
+    }
+  }
 }
 
 void UnwrappedSurface::findAndCorrectUGap()

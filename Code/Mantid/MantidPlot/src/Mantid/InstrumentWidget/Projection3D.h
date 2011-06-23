@@ -66,6 +66,7 @@ public:
 
   virtual void componentSelected(Mantid::Geometry::ComponentID = NULL);
   virtual void getSelectedDetectors(QList<int>& dets);
+  virtual void getMaskedDetectors(QList<int>& dets)const;
   virtual void resize(int, int);
   virtual QString getInfoText()const;
 protected:

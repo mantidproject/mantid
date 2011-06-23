@@ -315,6 +315,60 @@ void Projection3D::getSelectedDetectors(QList<int>& dets)
   }
 }
 
+void Projection3D::getMaskedDetectors(QList<int>& dets)const
+{
+  Quat rot = m_trackball->getRotation();
+
+  // find the layer of visible detectors
+  QList<QPoint> pixels;
+  m_maskShapes.getMaskedPixels(pixels);
+  double zmin = 1.0;
+  double zmax = 0.0;
+  QSet<int> ids;
+  foreach(const QPoint& p,pixels)
+  {
+    int id = getDetectorID(p.x(),p.y());
+    if (ids.contains(id)) continue;
+    ids.insert(id);
+    boost::shared_ptr<IDetector> det = getDetector(p.x(),p.y());
+    if (det)
+    {
+      V3D pos = det->getPos();
+      rot.rotate(pos);
+      double z = pos.Z();
+      if (zmin > zmax)
+      {
+        zmin = zmax = z;
+      }
+      else
+      {
+        if (zmin > z) zmin = z;
+        if (zmax < z) zmax = z;
+      }
+    }
+  }
+
+  // find masked detector in that layer
+  dets.clear();
+  if (m_maskShapes.isEmpty()) return;
+  size_t ndet = m_instrActor->ndetectors();
+  for(size_t i = 0; i < ndet; ++i)
+  {
+    boost::shared_ptr<IDetector> det = m_instrActor->getDetector(i);
+    V3D pos = det->getPos();
+    rot.rotate(pos);
+    if (pos.Z() < zmin || pos.Z() > zmax) continue;
+    if (m_maskShapes.isMasked(pos.X(),pos.Y()))
+    {
+      BoundingBox bb;
+      det->getBoundingBox(bb);
+      V3D width = bb.width();
+      double radius = width.norm();
+      dets.push_back(int(det->getID()));
+    }
+  }
+}
+
 void Projection3D::componentSelected(Mantid::Geometry::ComponentID id)
 {
 

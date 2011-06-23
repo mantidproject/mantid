@@ -87,6 +87,7 @@ public:
   InstrumentWindow(const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
   ~InstrumentWindow();
   void setWorkspaceName(std::string wsName);
+  QString getWorkspaceName()const{return QString::fromStdString(mWorkspaceName);}
   void updateWindow();
 
   SurfaceType getSurfaceType()const{return m_surfaceType;}
@@ -121,6 +122,7 @@ public slots:
   void showDetectorTable();
   void groupDetectors();
   void maskDetectors();
+  void executeAlgorithm(const QString&, const QString&);
 
   void extractDetsToWorkspace();
   void sumDetsToWorkspace();
@@ -148,6 +150,7 @@ signals:
   void plotSpectra(const QString&,const std::set<int>&);
   void createDetectorTable(const QString&,const std::vector<int>&,bool);
   void execMantidAlgorithm(const QString&,const QString&,Mantid::API::AlgorithmObserver*);
+  void needSetIntegrationRange(double,double);
 
 private slots:
   void block();

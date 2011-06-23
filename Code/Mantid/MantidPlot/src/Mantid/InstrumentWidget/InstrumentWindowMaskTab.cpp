@@ -9,6 +9,8 @@
 #include "DoubleEditorFactory.h"
 
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QGridLayout>
 #include <QPushButton>
 #include <QTextEdit>
 #include <QMenu>
@@ -105,6 +107,23 @@ m_userEditing(true)
   m_browser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
   
   layout->addWidget(m_browser);
+
+  // Algorithm buttons
+
+  m_apply = new QPushButton("Apply");
+  connect(m_apply,SIGNAL(clicked()),this,SLOT(applyMask()));
+
+  m_clear_all = new QPushButton("Clear All");
+  connect(m_clear_all,SIGNAL(clicked()),this,SLOT(clearMask()));
+
+  m_save_as_workspace = new QPushButton("Save As Workspace");
+
+  QGridLayout* buttons = new QGridLayout();
+  buttons->addWidget(m_apply,0,0);
+  buttons->addWidget(m_clear_all,0,1);
+  buttons->addWidget(m_save_as_workspace,1,0,1,2);
+  
+  layout->addLayout(buttons);
 }
 
 void InstrumentWindowMaskTab::init()
@@ -286,5 +305,33 @@ void InstrumentWindowMaskTab::doubleChanged(QtProperty* prop)
       }
     }
   }
+  m_instrumentDisplay->update();
+}
+
+void InstrumentWindowMaskTab::applyMask()
+{
+  m_pointer->setChecked(true);
+  setActivity();
+  m_instrumentDisplay->repaint(); // to refresh the pick image
+
+  QList<int> dets;
+  m_instrumentDisplay->getSurface()->getMaskedDetectors(dets);
+  if (!dets.isEmpty())
+  {
+    QStringList detList;
+    foreach(int id,dets)
+    {
+      detList << QString::number(m_instrumentWindow->getInstrumentActor()->getWorkspaceIndex(id));
+    }
+    QString param_list = "Workspace=%1;WorkspaceIndexList=%2";
+    param_list = param_list.arg(m_instrumentWindow->getWorkspaceName(),detList.join(","));
+    emit executeAlgorithm("MaskDetectors",param_list);
+  }
+  clearMask();
+}
+
+void InstrumentWindowMaskTab::clearMask()
+{
+  m_instrumentDisplay->getSurface()->clearMask();
   m_instrumentDisplay->update();
 }

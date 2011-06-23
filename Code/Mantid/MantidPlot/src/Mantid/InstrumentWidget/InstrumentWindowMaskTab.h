@@ -39,12 +39,16 @@ public:
   enum Activity {Move = 0, Select = 1, DrawEllipse};
   InstrumentWindowMaskTab(InstrumentWindow* instrWindow);
   void init();
+signals:
+  void executeAlgorithm(const QString&, const QString&);
 protected slots:
   void setActivity();
   void shapeCreated();
   void shapeSelected();
   void shapesDeselected();
   void shapeChanged();
+  void applyMask();
+  void clearMask();
 
   void doubleChanged(QtProperty*);
 protected:
@@ -65,6 +69,10 @@ protected:
   QPushButton* m_rectangle;
   QPushButton* m_ring_ellipse;
   QPushButton* m_ring_rectangle;
+
+  QPushButton* m_apply;
+  QPushButton* m_clear_all;
+  QPushButton* m_save_as_workspace;
 
   // properties
   bool m_userEditing;

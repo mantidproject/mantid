@@ -158,6 +158,12 @@ void InstrumentActor::resetColors()
   emit colorMapChanged();
 }
 
+void InstrumentActor::update()
+{
+  setIntegrationRange(m_BinMinValue,m_BinMaxValue);
+  resetColors();
+}
+
 GLColor InstrumentActor::getColor(Mantid::detid_t id)const
 {
   size_t i = (*m_id2wi_map)[id];

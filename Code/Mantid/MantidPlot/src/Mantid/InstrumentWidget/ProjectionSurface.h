@@ -74,10 +74,14 @@ public:
   /// return true if any of the detectors have been selected
   virtual bool hasSelection()const;
 
-  virtual int getDetectorID(int x, int y);
+  virtual int getDetectorID(int x, int y)const;
+  virtual boost::shared_ptr<Mantid::Geometry::IDetector> getDetector(int x, int y)const;
   /// NULL deselects components and selects the whole instrument
   virtual void componentSelected(Mantid::Geometry::ComponentID = NULL) = 0;
+  /// fill in a list of detector ids which were selected by the selction tool
   virtual void getSelectedDetectors(QList<int>& dets) = 0;
+  /// fill in a list of detector ids which were masked by the mask shapes
+  virtual void getMaskedDetectors(QList<int>& dets)const = 0;
 
   virtual QString getInfoText()const{return "";}
 
@@ -101,6 +105,9 @@ public:
   QStringList getCurrentPointNames()const{return m_maskShapes.getCurrentPointNames();}
   QPointF getCurrentPoint(const QString& prop) const{return m_maskShapes.getCurrentPoint(prop);}
   void setCurrentPoint(const QString& prop, const QPointF& value){m_maskShapes.setCurrentPoint(prop,value);}
+
+  bool isMasked(double x,double y)const{return m_maskShapes.isMasked(x,y);}
+  void clearMask(){m_maskShapes.clear();}
 
 signals:
 

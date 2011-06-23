@@ -86,6 +86,7 @@ void ProjectionSurface::draw(MantidGLWidget *widget)const
   }
   else
   {
+    //std::cerr << "picking\n";
     bool changed = m_viewChanged;
     draw(widget,true);
     m_viewChanged = changed;
@@ -424,12 +425,21 @@ void ProjectionSurface::setInteractionModeDraw()
 /**
   * Return detector id at image coordinats x,y if in pick mode. -1 otherwise
   */
-int ProjectionSurface::getDetectorID(int x, int y)
+int ProjectionSurface::getDetectorID(int x, int y)const
 {
   if (!m_pickImage) return -7;
   if (!m_pickImage->valid(x,y)) return -1;
   QRgb pixel = m_pickImage->pixel(x,y);
   return getDetectorID((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
+}
+
+boost::shared_ptr<Mantid::Geometry::IDetector> ProjectionSurface::getDetector(int x, int y)const
+{
+  if (!m_pickImage || !m_pickImage->valid(x,y)) return boost::shared_ptr<Mantid::Geometry::IDetector>();
+  QRgb pixel = m_pickImage->pixel(x,y);
+  int index = getDetectorIndex((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
+  if ( index >= 0 ) return m_instrActor->getDetector(index);
+  return boost::shared_ptr<Mantid::Geometry::IDetector>();
 }
 
 int ProjectionSurface::getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const
@@ -484,3 +494,4 @@ void ProjectionSurface::catchShapeChanged()
 {
   emit shapeChanged();
 }
+

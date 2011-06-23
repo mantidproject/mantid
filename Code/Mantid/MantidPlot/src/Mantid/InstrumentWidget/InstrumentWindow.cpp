@@ -89,6 +89,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   // Mask controls
   m_maskTab = new InstrumentWindowMaskTab(this);
   mControlsTab->addTab( m_maskTab, QString("Mask"));
+  connect(m_maskTab,SIGNAL(executeAlgorithm(const QString&, const QString&)),this,SLOT(executeAlgorithm(const QString&, const QString&)));
 
   // Instrument tree controls
   QFrame* instrumentTree=createInstrumentTreeTab(mControlsTab);
@@ -151,6 +152,8 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   resize(windowWidth,650);
 
   tabChanged(0);
+
+  connect(this,SIGNAL(needSetIntegrationRange(double,double)),this,SLOT(setIntegrationRange(double,double)));
 }
 
 /**
@@ -702,8 +705,10 @@ void InstrumentWindow::set3DAxesState(bool on)
 
 void InstrumentWindow::finishHandle(const Mantid::API::IAlgorithm* alg)
 {
-  UNUSED_ARG(alg)
-  m_InstrumentDisplay->refreshView();
+  UNUSED_ARG(alg);
+  emit needSetIntegrationRange(m_instrumentActor->minBinValue(),m_instrumentActor->maxBinValue());
+  //m_instrumentActor->update();
+  //m_InstrumentDisplay->refreshView();
 }
 
 void InstrumentWindow::changeScaleType(int type)
@@ -935,3 +940,7 @@ void InstrumentWindow::createExcludeGroupingFile()
   }
 }
 
+void InstrumentWindow::executeAlgorithm(const QString& alg_name, const QString& param_list)
+{
+  emit execMantidAlgorithm(alg_name,param_list,this);
+}

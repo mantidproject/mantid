@@ -53,6 +53,7 @@ void Shape2DCollection::addShape(Shape2D* shape)
 void Shape2DCollection::setWindow(const QRectF& rect,const QRect& viewport) const
 {
   m_transform.reset();
+  m_viewport = viewport;
   if ( m_windowRect.isNull() )
   {
     m_windowRect = rect;
@@ -292,6 +293,13 @@ void Shape2DCollection::removeCurrentShape()
   }
 }
 
+void Shape2DCollection::clear()
+{
+  m_shapes.clear();
+  m_currentShape = NULL;
+  emit shapesDeselected();
+}
+
 QStringList Shape2DCollection::getCurrentDoubleNames()const
 {
   if (m_currentShape)
@@ -362,5 +370,41 @@ void Shape2DCollection::setCurrentBoundingRect(const QRectF& rect)
   {
     //m_currentShape->setBoundingRect(m_transform.inverted().mapRect(rect));
     m_currentShape->setBoundingRect(rect);
+  }
+}
+
+bool Shape2DCollection::isMasked(double x,double y)const
+{
+  QPointF p;
+  p.rx() = (x - m_windowRect.left()) * m_wx;
+  p.ry() = m_h - (y - m_windowRect.top()) * m_wy;
+  foreach(Shape2D* shape,m_shapes)
+  {
+    if (shape->isMasked(p))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+void Shape2DCollection::getMaskedPixels(QList<QPoint>& pixels)const
+{
+  pixels.clear();
+  QTransform inv = m_transform.inverted();
+  for(int i = m_viewport.left(); i <= m_viewport.right(); ++i)
+  {
+    for(int j = m_viewport.top(); j <= m_viewport.bottom(); ++j)
+    {
+      QPoint p = QPoint(i,j);
+      QPointF p0 = inv.map(p);
+      foreach(Shape2D* shape,m_shapes)
+      {
+        if (shape->isMasked(p0))
+        {
+          pixels.append(p);
+        }
+      }
+    }
   }
 }

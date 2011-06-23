@@ -66,6 +66,7 @@ public:
   ~UnwrappedSurface();
   void componentSelected(Mantid::Geometry::ComponentID = NULL);
   void getSelectedDetectors(QList<int>& dets);
+  void getMaskedDetectors(QList<int>& dets)const;
   virtual QString getInfoText()const;
   virtual QRectF getSurfaceBounds()const;
 

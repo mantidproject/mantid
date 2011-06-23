@@ -33,6 +33,8 @@ public:
   void deselectAll();
   bool selectAt(int x,int y);
   void removeCurrentShape();
+  void clear();
+  bool isEmpty()const{return m_shapes.isEmpty();}
   //Shape2D* getCurrentShape()const{return m_currentShape;}
 
   QRectF getCurrentBoundingRect()const;
@@ -45,6 +47,11 @@ public:
   QStringList getCurrentPointNames()const;
   QPointF getCurrentPoint(const QString& prop) const;
   void setCurrentPoint(const QString& prop, const QPointF& value);
+
+  // is a point in real space masked by any of the shapes
+  bool isMasked(double x,double y)const;
+  // collect all screen pixels that are masked by the shapes
+  void getMaskedPixels(QList<QPoint>& pixels)const;
 
 signals:
 
@@ -64,10 +71,11 @@ protected:
   bool isOverCurrentAt(int x,int y);
 
   QList<Shape2D*> m_shapes;
-  mutable QRectF m_windowRect;
+  mutable QRectF m_windowRect; // original surface window in "real" cooerdinates
   mutable double m_wx,m_wy;
-  mutable int m_h;
-  mutable QTransform m_transform;
+  mutable int m_h; // original screen viewport height
+  mutable QRect m_viewport;  // current screen viewport
+  mutable QTransform m_transform; // current transform
 
   bool m_creating;
   bool m_editing;

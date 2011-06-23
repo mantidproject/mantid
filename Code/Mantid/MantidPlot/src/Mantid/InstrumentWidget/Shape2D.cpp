@@ -138,6 +138,11 @@ void Shape2D::setBoundingRect(const QRectF& rect)
   refit();
 }
 
+bool Shape2D::isMasked(const QPointF& p)const
+{
+  return m_fill_color != QColor() && contains(p);
+}
+
 // --- Shape2DEllipse --- //
 
 Shape2DEllipse::Shape2DEllipse(const QPointF& center,double radius1,double radius2)
