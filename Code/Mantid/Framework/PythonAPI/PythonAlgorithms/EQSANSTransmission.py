@@ -267,6 +267,9 @@ class EQSANSTransmission(PythonAlgorithm):
         if normalize:
             self.log().information("Normalizing the translation to average 1")
             factor = transmission_counts/acc_current/(nTOF-1)
+            if factor == 0:
+                self.log().error("No count near the beam center! Could not compute transmission.")
+                return
             for itof in range(nTOF-1):
                 dataY[itof] /= factor
                 dataE[itof] /= factor
