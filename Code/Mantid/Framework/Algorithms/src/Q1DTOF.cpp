@@ -151,6 +151,7 @@ void Q1DTOF::exec()
     for( ; YIn != end; ++YIn, ++EIn, ++QIn, ++norms, ++normETo2s)
     {
       //Q goes from a high value to a low one in the QIn array (high Q particles arrive at low TOF) so we know loc will go downwards
+//TODO need to remove this binary search to speed things up
       loc = std::upper_bound(QOut.begin(), loc, *QIn);
       // ignore counts that are out of the output range
       if ( (loc != QOut.begin()) && (loc != QOut.end()) )
