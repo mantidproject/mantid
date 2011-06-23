@@ -55,7 +55,7 @@ public:
   virtual ~ToyAlgorithmProxyMultipleCategory() {}
   const std::string name() const { return "ToyAlgorithmProxyMultipleCategory";} ///< Algorithm's name for identification
   int version() const  { return 1;}                        ///< Algorithm's version for identification
-  const std::string category() const { return "ProxyCat,ProxyLeopard";}           ///< Algorithm's category for identification
+  const std::string category() const { return "ProxyCat;ProxyLeopard";}           ///< Algorithm's category for identification
   const std::string alias() const { return "Dog";}            ///< Algorithm's alias
 
   void init()
