@@ -10,9 +10,14 @@
 #include "MantidDataHandling/LoadRKH.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
+
+static double flat_cell061Ys [] = {1.002863E+00, 1.032594E+00, 1.017332E+00, 1.062325E+00, 1.004316E+00, 1.041249E+00, 1.023080E+00,1.011716E+00, 1.012046E+00,  1.066157E+00, 9.934810E-01,1.087497E+00, 9.593894E-01, 1.060872E+00, 1.022618E+00, 1.054595E+00, 1.042901E+00, 1.064241E+00, 1.035699E+00, 1.048186E+00, 1.020834E+00, 1.063712E+00, 1.034774E+00, 1.025458E+00, 9.860153E-01, 1.044222E+00, 9.872045E-01, 1.046006E+00, 9.772280E-01, 1.011782E+00};
+static double flat_cell061Es [] = {8.140295E-03, 8.260089E-03, 8.198814E-03, 8.378171E-03, 8.146192E-03, 8.294637E-03, 8.221945E-03,8.176151E-03, 8.177485E-03,  8.393270E-03, 8.102125E-03,8.476863E-03, 7.961886E-03, 8.372437E-03, 8.220086E-03, 8.347631E-03, 8.301214E-03, 8.385724E-03, 8.272501E-03, 8.322226E-03, 8.212913E-03, 8.383642E-03, 8.268805E-03, 8.231497E-03, 8.071622E-03, 8.306473E-03, 8.076489E-03, 8.313566E-03, 8.035571E-03, 8.176417E-03};
 
 class Q1D2Test : public CxxTest::TestSuite
 {
@@ -26,7 +31,7 @@ public:
   }
 
   ///Test that we can run without the optional workspacespace
-  void xtestNoPixelAdj()
+  void testNoPixelAdj()
   {
     Mantid::Algorithms::Q1D2 Q1D2;
     Q1D2.initialize();
@@ -40,8 +45,6 @@ public:
       // property PixelAdj is undefined but that shouldn't cause this to throw
       Q1D2.execute()
     )
-        /*std::string s;
-    std::getline(std::cin, s);*/
 
     TS_ASSERT( Q1D2.isExecuted() )
     
@@ -59,20 +62,19 @@ public:
 
     //values below taken from running the algorithm in the state it was excepted by the ISIS SANS in
     //empty bins are 0/0
-    TS_ASSERT( boost::math::isnan(result->readY(0).front()) )
-    TS_ASSERT_DELTA( result->readY(0)[8], 0.30320397, 1e-7 )
-    TS_ASSERT_DELTA( result->readY(0)[12], 3.65424898, 1e-7 )
+    TS_ASSERT_DELTA( result->readY(0).front(), 2226533, 1 )
+    TS_ASSERT_DELTA( result->readY(0)[4], 946570.8, 0.1 )
+    TS_ASSERT( boost::math::isnan(result->readY(0)[18]) )
     TS_ASSERT( boost::math::isnan(result->readY(0).back()) )
 
-    TS_ASSERT( boost::math::isnan(result->readE(0).front()) )
-    TS_ASSERT_DELTA( result->readE(0)[10], 8.626009e-005, 1e-9 )
-    TS_ASSERT_DELTA( result->readE(0)[12], 0.0039833458, 1e-7 )
+    TS_ASSERT_DELTA( result->readE(0)[1], 57964.04, 0.01 )
+    TS_ASSERT_DELTA( result->readE(0)[5], 166712.6, 0.1 )
     TS_ASSERT( boost::math::isnan(result->readE(0).back()) )
     
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
     
-  void xtestPixelAdj()
+  void testPixelAdj()
   {
     Mantid::Algorithms::Q1D2 Q1D;
     Q1D.initialize();
@@ -100,22 +102,20 @@ public:
     TS_ASSERT_DELTA( result->readX(0)[56], 0.3031165, 1e-5 )
     TS_ASSERT_EQUALS( result->readX(0).back(), 0.5 )
 
-    TS_ASSERT_DELTA( result->readY(0).front(), 0.0, 1e-5 )
-    TS_ASSERT_DELTA( result->readY(0)[3], 0.38593102, 1e-5 )
-    TS_ASSERT_DELTA( result->readY(0)[13], 0.29659477, 1e-5 )
-    TS_ASSERT_DELTA( result->readY(0)[16], 1.48662636, 1e-5 )
-    TS_ASSERT_DELTA( result->readY(0)[20], 0.0, 1 )
+    TS_ASSERT_DELTA( result->readY(0).front(), 944237.8, 0.1 )
+    TS_ASSERT_DELTA( result->readY(0)[3], 1009296, 1 )
+    TS_ASSERT_DELTA( result->readY(0)[12], 620952.6, 0.1)
+    TS_ASSERT( boost::math::isnan(result->readY(0).back()) )
 
     //empty bins are 0/0
-    std::cout << result->readE(0).front();
-    TS_ASSERT_DELTA( result->readE(0).front(), 0.0, 1e-5 )
-    TS_ASSERT_DELTA( result->readE(0)[10], 0.00046423408, 1e-8 )
-    TS_ASSERT( boost::math::isnan(result->readE(0).back()) )
+    TS_ASSERT_DELTA( result->readE(0)[2], 4847257060, 10 )
+    TS_ASSERT_DELTA( result->readE(0)[10], 4921866100, 100 )
+    TS_ASSERT( boost::math::isnan(result->readE(0)[7]) )
     
     Mantid::API::AnalysisDataService::Instance().remove(m_noGrav);
   }
     
-  void xtestGravity()
+  void testGravity()
   {
     Mantid::Algorithms::Q1D2 Q1D;
     TS_ASSERT_THROWS_NOTHING( Q1D.initialize() );
@@ -147,20 +147,18 @@ public:
     TS_ASSERT_EQUALS( gravity->readX(0).size(), refNoGrav->readX(0).size() )
     TS_ASSERT_EQUALS( gravity->readX(0)[55], refNoGrav->readX(0)[55] )
 
-    TS_ASSERT_DELTA( gravity->readY(0)[3], 0.38593103, 1e-6 )
-    TS_ASSERT_DELTA( gravity->readY(0)[13], 0.29659477, 1e-6 )
-    TS_ASSERT_DELTA( gravity->readY(0)[16], 1.4866264, 1e-6 )
-    TS_ASSERT_DELTA( gravity->readY(0)[43], 0.076000849, 1e-8 )
-    TS_ASSERT( boost::math::isnan(gravity->readY(0).back()) )
+    TS_ASSERT_DELTA( gravity->readY(0)[3], 1009296.4, 0.8 )
+    TS_ASSERT_DELTA( gravity->readY(0)[10], 891346.9, 0.1 )
+    TS_ASSERT( boost::math::isnan(gravity->readY(0)[78]) )
 
-    TS_ASSERT_DELTA( gravity->readE(0).front(), 0.0, 1e-8 )
-    TS_ASSERT_DELTA( gravity->readE(0)[10], 0.000464234078, 1e-8  )
+    TS_ASSERT_DELTA( gravity->readE(0).front(), 3741978390, 10 )
+    TS_ASSERT_DELTA( gravity->readE(0)[10], 4921866100, 100  )
     TS_ASSERT( boost::math::isnan(gravity->readE(0)[77]) )
     
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
     
-  void xtestInvalidInput()
+  void testInvalidInput()
   {
     Mantid::Algorithms::Q1D2 Q1D;
     Q1D.initialize();
@@ -227,18 +225,13 @@ void createInputWorkspaces()
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
     m_wavNorm = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(wavNorm));
-
-    LoadRKH loadRkh;
-    loadRkh.initialize();
-    loadRkh.setPropertyValue("Filename", "FLAT_CELL.061");
-    loadRkh.setPropertyValue("OutputWorkspace", m_pixel);
-    loadRkh.setPropertyValue("FirstColumnValue","SpectrumNumber");
-    loadRkh.execute();
-    crop.setPropertyValue("InputWorkspace",m_pixel);
-    crop.setPropertyValue("OutputWorkspace",m_pixel);
-    crop.setPropertyValue("StartWorkspaceIndex","8603");
-    crop.setPropertyValue("EndWorkspaceIndex","8632");
-    crop.execute();
+    MatrixWorkspace_sptr pixels = WorkspaceCreationHelper::Create2DWorkspaceBinned(29, 1);
+    for ( int i = 0; i < 29; ++i)
+    {
+      pixels->dataY(i)[0] = flat_cell061Ys[i];
+      pixels->dataE(i)[0] = flat_cell061Es[i];
+    }
+    AnalysisDataService::Instance().add("Q1DTest_flat_file", pixels);
     
   }
   
@@ -247,13 +240,13 @@ void createInputWorkspaces()
   static void destroySuite(Q1D2Test *suite) { delete suite; }
   Q1D2Test() : m_noGrav("Q1D2Test_no_gravity_result"), m_pixel("Q1DTest_flat_file")
   {
-//need another file in the repository for this
-//    createInputWorkspaces();
+    createInputWorkspaces();
   }
 
 private:
   Mantid::API::MatrixWorkspace_sptr m_inputWS, m_wavNorm;
   std::string m_noGrav, m_pixel;
 };
+
 
 #endif /*Q1D2Test_H_*/
