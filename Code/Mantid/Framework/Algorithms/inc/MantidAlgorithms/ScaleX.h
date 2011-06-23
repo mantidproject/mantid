@@ -76,9 +76,9 @@ namespace Mantid
       /// Scaling factor
       double factor;
       /// Start workspace index
-      size_t wi_min;
+      int wi_min;
       /// Stop workspace index
-      size_t wi_max;
+      int wi_max;
        
     };
 

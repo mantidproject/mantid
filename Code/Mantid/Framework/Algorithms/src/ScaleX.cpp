@@ -77,7 +77,7 @@ namespace Mantid
 	    API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);	    
 	    
 	    //Get number of histograms
-      size_t histnumber = inputW->getNumberHistograms();
+      int histnumber = static_cast<int>(inputW->getNumberHistograms());
 	    
 	    m_progress = new API::Progress(this, 0.0, 1.0, histnumber);
 
@@ -88,9 +88,7 @@ namespace Mantid
       int tempwi_max = getProperty("IndexMax");
       if ( tempwi_max != Mantid::EMPTY_INT() )
       {
-        if ((wi_min <= static_cast<size_t>(tempwi_min)) &&
-            (tempwi_min <= tempwi_max) &&
-            (static_cast<size_t>(tempwi_max) <= wi_max))
+        if ((wi_min <= tempwi_min) && (tempwi_min <= tempwi_max) && (tempwi_max <= wi_max))
         {
           wi_min = tempwi_min;
           wi_max = tempwi_max;
@@ -113,11 +111,11 @@ namespace Mantid
 
       // do the shift in X
 	    PARALLEL_FOR2(inputW, outputW)
-      for (size_t i=0; i < histnumber; ++i)
+      for (int i=0; i < histnumber; ++i)
 	    {		    
 				PARALLEL_START_INTERUPT_REGION
 		    //Do the offsetting
-		    for (size_t j=0; j <  inputW->readX(i).size(); ++j)
+		    for (int j=0; j <  static_cast<int>(inputW->readX(i).size()); ++j)
 		    {
 			    //Change bin value by offset
 			    if ((i >= wi_min) && (i <= wi_max)) outputW->dataX(i)[j] = inputW->readX(i)[j] * factor;
@@ -192,9 +190,9 @@ namespace Mantid
         this->setProperty("OutputWorkspace", matrixOutputWS);
       }
 
-      size_t numHistograms = inputWS->getNumberHistograms();
+      int numHistograms = static_cast<int>(inputWS->getNumberHistograms());
       PARALLEL_FOR1(outputWS)
-      for (size_t i=0; i < numHistograms; ++i)
+      for (int i=0; i < numHistograms; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
         //Do the offsetting
