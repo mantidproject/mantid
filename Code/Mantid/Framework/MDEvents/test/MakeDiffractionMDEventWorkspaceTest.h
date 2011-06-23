@@ -37,7 +37,7 @@ public:
   /** Test various combinations of OutputDimensions parameter */
   void test_OutputDimensions_Parameter()
   {
-    EventWorkspace_sptr in_ws = MDEventsTestHelper::createDiffractionEventWorkspace(10);
+    EventWorkspace_sptr in_ws = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(10);
     AnalysisDataService::Instance().addOrReplace("testInEW", in_ws);
     Algorithm_sptr alg;
 
@@ -81,7 +81,7 @@ public:
   {
 
     int numEventsPer = 100;
-    EventWorkspace_sptr in_ws = MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer);
+    EventWorkspace_sptr in_ws = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer);
     if (type == WEIGHTED)
       in_ws *= 2.0;
     if (type == WEIGHTED_NOTIME)

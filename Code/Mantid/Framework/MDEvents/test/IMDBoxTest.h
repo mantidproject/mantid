@@ -35,6 +35,12 @@ class IMDBoxTester : public IMDBox<MDE,nd>
   virtual size_t getNumMDBoxes() const
   {return 0;}
 
+  virtual size_t getNumChildren() const
+  {return 0;}
+
+  IMDBox<MDE,nd> * getChild(size_t /*index*/)
+  { throw std::runtime_error("MDBox does not have children."); }
+
   /// Return a copy of contained events
   virtual std::vector< MDE > * getEventsCopy()
   {return NULL;}

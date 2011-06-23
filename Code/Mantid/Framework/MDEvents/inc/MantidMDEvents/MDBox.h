@@ -49,6 +49,14 @@ namespace MDEvents
 
     size_t getNumMDBoxes() const;
 
+    /// Get the # of children IMDBox'es (non-recursive)
+    size_t getNumChildren() const
+    { return 0; }
+
+    /// Return the indexth child IMDBox.
+    IMDBox<MDE,nd> * getChild(size_t /*index*/)
+    { throw std::runtime_error("MDBox does not have children."); }
+
     std::vector< MDE > & getEvents();
 
     std::vector< MDE > * getEventsCopy();

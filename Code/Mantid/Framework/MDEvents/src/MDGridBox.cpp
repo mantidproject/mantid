@@ -33,8 +33,6 @@ namespace Mantid
 namespace MDEvents
 {
 
-
-
   //===============================================================================================
   //===============================================================================================
   //-----------------------------------------------------------------------------------------------
@@ -169,6 +167,26 @@ namespace MDEvents
     return total;
   }
 
+
+  //-----------------------------------------------------------------------------------------------
+  /** @return The number of children of the MDGridBox, not recursively
+   */
+  TMDE(
+  size_t MDGridBox)::getNumChildren() const
+  {
+    return numBoxes;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Get a child box
+   * @param index :: index into the array, within range 0..getNumChildren()-1
+   * @return the child IMDBox pointer.
+   */
+  template <typename MDE, size_t nd>
+  IMDBox<MDE,nd> * MDGridBox<MDE,nd>::getChild(size_t index)
+  {
+    return boxes[index];
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Helper function to get the index into the linear array given

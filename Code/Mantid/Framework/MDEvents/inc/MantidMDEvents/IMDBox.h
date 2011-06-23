@@ -60,6 +60,12 @@ namespace MDEvents
     /// Get the total # of unsplit MDBoxes contained.
     virtual size_t getNumMDBoxes() const = 0;
 
+    /// Get the # of children IMDBox'es (non-recursive)
+    virtual size_t getNumChildren() const = 0;
+
+    /// Return the indexth child IMDBox.
+    virtual IMDBox<MDE,nd> * getChild(size_t index) = 0;
+
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
 

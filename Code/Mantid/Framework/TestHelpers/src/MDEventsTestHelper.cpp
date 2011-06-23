@@ -10,12 +10,18 @@
 #include "MantidTestHelpers/DLLExport.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 
 using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::Kernel::DateAndTime;
 using Mantid::DataHandling::LoadInstrument;
 using Mantid::DataObjects::EventWorkspace;
+
+namespace Mantid
+{
+namespace MDEvents
+{
 
 
 /** Set of helper methods for testing MDEventWorkspace things
@@ -95,5 +101,8 @@ namespace MDEventsTestHelper
   }
 
 
-} // namespace
 
+
+} // namespace
+}
+}
