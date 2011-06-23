@@ -137,6 +137,37 @@ public:
     TS_ASSERT_DELTA( direction_list[63].Z(),  0.309017, 1e-5 );
   }
 
+  void test_MakeCircleDirections()
+  {
+    int num_steps = 8;
+    V3D axis( 1, 1, 1 );
+    double angle_degrees = 90;
+
+    std::vector<V3D> direction_list
+        = IndexingUtils::MakeCircleDirections( num_steps, axis, angle_degrees);
+
+    TS_ASSERT_EQUALS( direction_list.size(), 8 );
+
+    TS_ASSERT_DELTA( direction_list[0].X(), -0.816497, 1e-5 );
+    TS_ASSERT_DELTA( direction_list[0].Y(),  0.408248, 1e-5 );
+    TS_ASSERT_DELTA( direction_list[0].Z(),  0.408248, 1e-5 );
+
+    TS_ASSERT_DELTA( direction_list[1].X(), -0.577350, 1e-5 );
+    TS_ASSERT_DELTA( direction_list[1].Y(), -0.211325, 1e-5 );
+    TS_ASSERT_DELTA( direction_list[1].Z(),  0.788675, 1e-5 );
+
+    TS_ASSERT_DELTA( direction_list[7].X(), -0.577350, 1e-5 );
+    TS_ASSERT_DELTA( direction_list[7].Y(),  0.788675, 1e-5 );
+    TS_ASSERT_DELTA( direction_list[7].Z(), -0.211325, 1e-5 );
+
+    double dot_prod;
+    for ( size_t i = 0; i < direction_list.size(); i++ )
+    {
+      dot_prod = axis.scalar_prod( direction_list[i] );
+      TS_ASSERT_DELTA( dot_prod, 0, 1e-10 );
+    }
+  }
+
 };
 
 #endif  /* MANTID_GEOMETRY_INDEXING_UTILS_TEST_H_ */

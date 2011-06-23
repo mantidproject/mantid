@@ -1,6 +1,8 @@
 /* File: IndexingUtils.cpp */
 
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidKernel/Quat.h"
+
 
 #include <iostream>
 #include <stdexcept>
@@ -16,6 +18,7 @@ extern "C"
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::Quat;
 
 /** 
     STATIC method BestFit_UB: Calculates the matrix that most nearly maps
@@ -367,6 +370,11 @@ bool IndexingUtils::ValidIndex( const V3D & hkl, double tolerance )
  */
 std::vector<V3D> IndexingUtils::MakeHemisphereDirections( int n_steps )
 {
+  if ( n_steps <= 0 )
+  {
+    throw std::invalid_argument("n_steps must be greater than 0");
+  }
+
   std::vector<V3D> direction_list;
 
   double PI = 3.14159265358979323846;
@@ -401,6 +409,77 @@ std::vector<V3D> IndexingUtils::MakeHemisphereDirections( int n_steps )
 
   return direction_list;
 }
+
+
+/**
+  Make a list of directions, uniformly distributed around a circle, all of
+  which form the specified angle with the specified axis. 
+
+  @param n_steps   The number of vectors to generate around the circle. 
+
+  @retrun A std::vector containing direction vectors forming the same angle
+          with the axis.
+ */
+std::vector<V3D> IndexingUtils::MakeCircleDirections(        int    n_steps,
+                                                       const V3D    axis,
+                                                       double angle_degrees )
+{
+  if ( n_steps <= 0 )
+  {
+    throw std::invalid_argument("n_steps must be greater than 0");
+  }
+                               // first get a vector perpendicular to axis
+  double max_component = fabs( axis[0] );
+  double min_component = fabs( axis[0] );
+  size_t min_index = 0;
+  for ( size_t i = 1; i < 3; i++ )
+  {
+    if ( fabs( axis[i] ) < min_component )
+    {
+      min_component = fabs( axis[i] );
+      min_index = i;
+    }
+    if ( fabs( axis[i] ) > max_component )
+    {
+      max_component = fabs( axis[i] );
+    }
+  }
+
+  if ( max_component == 0 )
+  {
+    throw std::invalid_argument("Axis vector must be non-zero!");
+  }
+
+  V3D second_vec( 0, 0, 0 );
+  second_vec[min_index] = 1;
+
+  V3D perp_vec = second_vec.cross_prod( axis );
+  perp_vec.normalize();
+
+                                // next get a vector that is the specified 
+                                // number of degrees away from the axis
+  Quat rotation_1( angle_degrees, perp_vec );
+  V3D  vector_at_angle( axis );
+  rotation_1.rotate( vector_at_angle );
+  vector_at_angle.normalize();
+
+                                // finally, form the circle of directions 
+                                // consisting of vectors that are at the 
+                                // specified angle from the original axis
+  double angle_step = 360.0 / n_steps;
+  Quat rotation_2( 0, axis );
+  std::vector<V3D> directions;
+  for ( int i = 0; i < n_steps; i++ )
+  {
+    V3D vec( vector_at_angle );
+    rotation_2.setAngleAxis( i*angle_step, axis );
+    rotation_2.rotate( vec );
+    directions.push_back( vec );
+  }
+
+  return directions;
+}
+
 
 /**
   Choose the direction vector that most nearly corresponds to a family of
