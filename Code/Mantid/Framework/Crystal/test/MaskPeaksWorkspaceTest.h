@@ -39,7 +39,7 @@ public:
   {
 
     int numEventsPer = 100;
-    MatrixWorkspace_sptr inputW = MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer);
+    MatrixWorkspace_sptr inputW = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer);
     EventWorkspace_sptr in_ws = boost::dynamic_pointer_cast<EventWorkspace>( inputW );
     AnalysisDataService::Instance().addOrReplace("testInEW", in_ws);
     if (type == WEIGHTED)

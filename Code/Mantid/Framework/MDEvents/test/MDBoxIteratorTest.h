@@ -26,7 +26,7 @@ public:
   /** Increment the iterator and return true if the next box is the expected one*/
   bool nextIs(MDBoxIterator<MDEvent<1>,1> * it, ibox_t * expected)
   {
-    std::cout << it->getBox()->getExtentsStr() << std::endl;
+    //std::cout << it->getBox()->getExtentsStr() << std::endl;
     if (!it->next()) return false;
     if (it->getBox() != expected) return false;
     return true;
@@ -110,6 +110,38 @@ public:
 
 
 };
+
+//
+//class MDBoxIteratorTestPerformace : public CxxTest::TestSuite
+//{
+//public:
+//  MDGridBox<MDEvent<3>,3> top;
+//
+//  void setUp()
+//  {
+//    // About
+//    top = MDEventsTestHelper::makeRecursiveMDGridBox<3>(5, 2);
+//  }
+//
+////  void test_getBoxes()
+////  {
+////  }
+//
+//  void test_iterator()
+//  {
+//    size_t counter = 0;
+//    IMDBox<MDEvent<3>,3> * box;
+//    MDBoxIterator<MDEvent<3>,3> it(top, 20, false);
+//    while (it.next())
+//    {
+//      box = it.getBox();
+//      counter++;
+//    }
+//    TS_ASSERT( box );
+//    TS_ASSERT_EQUALS( counter, 125*125 + 125);
+//  }
+//
+//};
 
 
 #endif /* MANTID_MDEVENTS_MDBOXITERATORTEST_H_ */
