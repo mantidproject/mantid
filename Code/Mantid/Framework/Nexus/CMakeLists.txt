@@ -1,15 +1,10 @@
 set ( SRC_FILES
-        src/LoadRaw/byte_rel_comp.cpp
-        src/LoadRaw/isisraw.cpp
-        src/LoadRaw/isisraw2.cpp
-        src/LoadRaw/item_struct.cpp
-        src/LoadRaw/vms_convert.cpp
         src/MuonNexusReader.cpp
+        src/NexusClasses.cpp
         src/NeXusException.cpp
         src/NeXusFile.cpp
-        src/NeXusStream.cpp
-        src/NexusClasses.cpp
         src/NexusFileIO.cpp
+        src/NeXusStream.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/NeXusFile.cpp)

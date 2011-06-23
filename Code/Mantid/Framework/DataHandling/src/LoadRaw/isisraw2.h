@@ -29,7 +29,9 @@ public:
 private:
 	char* outbuff;  ///<output buffer
   int m_bufferSize;
-  static Mantid::Kernel::Logger & g_log;
+
+  /// Static reference to the logger class
+  Mantid::Kernel::Logger & g_log;
 };
 
 

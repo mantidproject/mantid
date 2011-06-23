@@ -46,11 +46,11 @@ set ( SRC_FILES
 	src/LoadRKH.cpp
 	src/LoadRaw.cpp
 	src/LoadRaw/byte_rel_comp.cpp
-	src/LoadRaw/isisraw.cpp
-	src/LoadRaw/isisraw2.cpp
-	src/LoadRaw/item_struct.cpp
-	src/LoadRaw/vms_convert.cpp
-	src/LoadRaw2.cpp
+    src/LoadRaw/isisraw.cpp
+    src/LoadRaw/isisraw2.cpp
+    src/LoadRaw/item_struct.cpp
+    src/LoadRaw/vms_convert.cpp
+    src/LoadRaw2.cpp
 	src/LoadRaw3.cpp
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
@@ -182,6 +182,11 @@ set ( INC_FILES
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
 	inc/MantidDataHandling/FindDetectorsPar.h 
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
+	src/LoadRaw/byte_rel_comp.h
+    src/LoadRaw/isisraw.h
+    src/LoadRaw/isisraw2.h
+    src/LoadRaw/item_struct.h
+    src/LoadRaw/vms_convert.h
 )
 
 set ( TEST_FILES
