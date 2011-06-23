@@ -189,7 +189,6 @@ namespace Mantid
       boost::shared_ptr<IAlgorithm> alg = create(namePair.first,namePair.second);
       //extract out the categories
       std::vector<std::string> categories = alg->categories();
-      bool toBeRemoved=true;
 
       //for each category of the algorithm
       std::vector<std::string>::const_iterator itCategoriesEnd = categories.end();

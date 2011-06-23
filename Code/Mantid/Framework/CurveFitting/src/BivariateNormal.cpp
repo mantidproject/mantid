@@ -51,7 +51,6 @@ int IVXY = 6;
 
 BivariateNormal::BivariateNormal()
 {
-  std::cout<<"In Constructor"<<std::endl;
   LastParams = 0;
   SIxx = SIyy = SIxy = Sxx = Syy = Sxy = -1; //Var and CoVar calc from parameters
   expVals = 0;
@@ -74,7 +73,6 @@ BivariateNormal::BivariateNormal()
   AttNames.push_back(std::string("SSyy"));
   AttNames.push_back(std::string("SSxy"));
   AttNames.push_back(std::string("NCells")); //Not Set
-  std::cout<<"end constructor"<<std::endl;
 }
 
 BivariateNormal::~BivariateNormal()
