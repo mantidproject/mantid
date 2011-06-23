@@ -51,6 +51,8 @@ void EQSANSTofStructure::init()
   declareProperty("TofOffset", 0.0, Kernel::Direction::Output);
   declareProperty("WavelengthMin", 0.0, Kernel::Direction::Output);
   declareProperty("WavelengthMax", 0.0, Kernel::Direction::Output);
+  declareProperty("WavelengthMinFrame2", 0.0, Kernel::Direction::Output);
+  declareProperty("WavelengthMaxFrame2", 0.0, Kernel::Direction::Output);
 }
 
 void EQSANSTofStructure::exec()
@@ -392,8 +394,12 @@ double EQSANSTofStructure::getTofOffset(MatrixWorkspace_const_sptr inputWS, bool
   setProperty("FrameSkipping", frame_skipping);
   setProperty("TofOffset", frame_tof0);
   setProperty("WavelengthMin", frame_wl_1);
-  if (frame_skipping) setProperty("WavelengthMax", frameskip_wl_2);
-  else setProperty("WavelengthMax", frame_wl_2);
+  setProperty("WavelengthMax", frame_wl_2);
+  if (frame_skipping)
+  {
+      setProperty("WavelengthMinFrame2", frameskip_wl_1);
+      setProperty("WavelengthMaxFrame2", frameskip_wl_2);
+  }
 
   return frame_tof0;
 }
