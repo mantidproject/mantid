@@ -177,6 +177,12 @@ void MantidUI::init()
 
 }
 
+/// Updates the algorithms tree as this may have changed
+void MantidUI::updateAlgorithms()
+{
+  m_exploreAlgorithms->update();
+}
+
 void MantidUI::addMenuItems(QMenu *menu)
 {
   actionToggleMantid = m_exploreMantid->toggleViewAction();

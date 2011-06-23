@@ -47,6 +47,8 @@ class ColorButton;
 class ColorBox;
 class DoubleSpinBox;
 class QMouseEvent;
+class QTreeWidget;
+class QTreeWidgetItem;
 
 namespace MantidQt
 {
@@ -138,7 +140,11 @@ private:
 
   void updateDirSearchSettings();
   void updateCurveFitSettings();
+  void updateMantidOptionsTab();
+  QString ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent = 0);
   void initMantidOptionsTab();
+  void refreshTreeCategories();
+  QTreeWidgetItem* createCheckedTreeItem(QString name,bool checkBoxState);
 
 	QFont textFont, headerFont, axesFont, numbersFont, legendFont, titleFont, appFont;
 	QFont plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
@@ -157,7 +163,6 @@ private:
   //Mantid
   QWidget *instrumentPage;
   QComboBox *facility;
-  QCheckBox *m_invisibleWorkspaces;
   MantidQt::MantidWidgets::InstrumentSelector  *defInstr;
 
   /// Mantid tab for setting directories
@@ -174,7 +179,11 @@ private:
   QSpinBox  *findPeaksFWHM,*findPeaksTolerance;
   QSpinBox  *peakRadius;
   QSpinBox  *decimals;
+  /// mantid options page
   QWidget*  mantidOptionsPage;
+  QCheckBox *m_invisibleWorkspaces;
+  QTreeWidget *treeCategories;
+
   
 	QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
 	QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;

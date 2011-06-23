@@ -172,8 +172,9 @@ public:
   void executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<long long>& fileIds);
 
   AlgorithmMonitor* getAlgMonitor(){return m_algMonitor;}
+  //updates the algorithms tree
+  void updateAlgorithms();
 
-  
   bool runAlgorithmAsync_PyCallback(const QString & algName);
 
 public slots:

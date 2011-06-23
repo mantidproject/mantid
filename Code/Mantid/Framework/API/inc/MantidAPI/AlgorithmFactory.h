@@ -95,8 +95,15 @@ public:
     }
   }
 
-  ///Get the algorithm keys
+  ///Get the algorithm names and version - mangled use decodeName to seperate
   const std::vector<std::string> getKeys(bool includeHidden=false) const;
+  
+  ///Get the algorithm categories
+  const std::set<std::string> getCategories(bool includeHidden=false) const;
+
+  ///Get the algorithm categories
+  const std::map<std::string,bool> getCategoriesWithState() const;
+
   /// Returns algorithm descriptors.
   std::vector<Algorithm_descriptor> getDescriptors() const;
 

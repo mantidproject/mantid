@@ -132,8 +132,7 @@ namespace Mantid
       //strip out any algorithms names where all of the categories are hidden
       std::vector<std::string> validNames;
       std::vector<std::string>::const_iterator itr_end = names.end();
-      for(std::vector<std::string>::const_iterator itr = names.begin(); 
-      itr!= itr_end; ++itr )
+      for(std::vector<std::string>::const_iterator itr = names.begin(); itr!= itr_end; ++itr )
       {
         std::string name = *itr;
         //check the categories
@@ -162,6 +161,80 @@ namespace Mantid
       return validNames;
     }
   }
+
+/**
+  * Return the categories of the algorithms. This includes those within the Factory itself and 
+  * any cleanly constructed algorithms stored here.
+  * @param includeHidden true includes the hidden algorithm names and is faster, the default is false
+  * @returns The map of the categories, together with a true false value difining if they are hidden
+  */
+  const std::map<std::string,bool> AlgorithmFactoryImpl::getCategoriesWithState() const
+  {
+    std::map<std::string,bool> resultCategories;
+
+    //hidden categories - empty initially
+    std::set<std::string> hiddenCategories;
+    fillHiddenCategories(&hiddenCategories);
+
+    //get all of the alroithm keys, including the hidden ones for speed purposes we will filter later if required
+    std::vector<std::string> names = getKeys(true);
+    
+    std::vector<std::string>::const_iterator itr_end = names.end();
+    //for each algorithm
+    for(std::vector<std::string>::const_iterator itr = names.begin(); itr!= itr_end; ++itr )
+    {
+      std::string name = *itr;
+      //decode the name and create an instance
+      std::pair<std::string,int> namePair = decodeName(name);
+      boost::shared_ptr<IAlgorithm> alg = create(namePair.first,namePair.second);
+      //extract out the categories
+      std::vector<std::string> categories = alg->categories();
+      bool toBeRemoved=true;
+
+      //for each category of the algorithm
+      std::vector<std::string>::const_iterator itCategoriesEnd = categories.end();
+      for(std::vector<std::string>::const_iterator itCategories = categories.begin(); itCategories!=itCategoriesEnd; itCategories++)
+      {
+        bool isHidden = true;
+        //check if the category is hidden
+        if (hiddenCategories.find(*itCategories) == hiddenCategories.end())
+        {
+          isHidden = false;
+        }
+        resultCategories[*itCategories] = isHidden;
+      }
+
+    }
+    return resultCategories;
+  }
+
+  /**
+  * Return the categories of the algorithms. This includes those within the Factory itself and 
+  * any cleanly constructed algorithms stored here.
+  * @param includeHidden true includes the hidden algorithm names and is faster, the default is false
+  * @returns The caetgory strings
+  */
+  const std::set<std::string> AlgorithmFactoryImpl::getCategories(bool includeHidden) const
+  {
+    std::set<std::string> validCategories;
+    
+    //get all of the information we need
+    std::map<std::string,bool> categoryMap = getCategoriesWithState();
+
+    //iterate around the map
+    std::map<std::string,bool>::const_iterator it_end = categoryMap.begin();
+    for (std::map<std::string,bool>::const_iterator it = categoryMap.begin(); it!= it_end; ++it)
+    {
+      bool isHidden = (*it).second;
+      if(includeHidden || (!isHidden))
+      {
+        validCategories.insert((*it).first);
+      }
+    }
+    
+    return validCategories;
+  }
+
 
   /**
   * Get a list of descriptor objects used to order the algorithms in the stored map 
@@ -220,7 +293,7 @@ namespace Mantid
   void AlgorithmFactoryImpl::fillHiddenCategories(std::set<std::string> *categorySet) const
   {
     std::string categoryString = Kernel::ConfigService::Instance().getString("algorithms.categories.hidden");
-    Poco::StringTokenizer tokenizer(categoryString, ",",
+    Poco::StringTokenizer tokenizer(categoryString, ";",
       Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
     Poco::StringTokenizer::Iterator h = tokenizer.begin();
 

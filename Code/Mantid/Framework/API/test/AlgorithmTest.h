@@ -46,6 +46,7 @@ public:
   const std::string name() const { return "ToyAlgorithm";} ///< Algorithm's name for identification
   int version() const  { return 2;} ///< Algorithm's version for identification
   const std::string category() const { return "Cat,Leopard,Mink";} 
+  const std::string categorySeperator() const { return ",";} ///< testing the ability to change the seperator
   const std::string alias() const { return "Dog";}
   void init()
   { 
@@ -65,7 +66,6 @@ public:
   const std::string name() const { return "ToyAlgorithm";} ///< Algorithm's name for identification
   int version() const  { return 2;} ///< Algorithm's version for identification
   const std::string category() const { return "Cat;Leopard;Mink";} 
-  const std::string categorySeperator() const { return ";";} 
   const std::string alias() const { return "Dog";}
   void init()
   { 

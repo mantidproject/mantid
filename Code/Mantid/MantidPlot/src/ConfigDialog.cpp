@@ -47,6 +47,7 @@
 #include <QFont>
 #include <QFontDialog>
 #include <QTabWidget>
+#include <QTreeWidget>
 #include <QStackedWidget>
 #include <QWidget>
 #include <QComboBox>
@@ -71,6 +72,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtMantidWidgets/InstrumentSelector.h"
 
@@ -648,14 +650,18 @@ void ConfigDialog::initMantidPage()
 void ConfigDialog::initMantidOptionsTab()
 {
   mantidOptionsPage = new QWidget();
-  QGroupBox *frame = new QGroupBox(mantidOptionsPage);
-  QGridLayout *grid = new QGridLayout(mantidOptionsPage);
-  //create a checkbox for invisible workspaces options
-  m_invisibleWorkspaces = new QCheckBox("Show Invisible Workspaces",frame);
-  m_invisibleWorkspaces->setChecked(false);
-  m_invisibleWorkspaces->setGeometry(QRect(10, 10, 150, 18));
-  grid->addWidget(frame,0,0);
   mtdTabWidget->addTab(mantidOptionsPage,"Options");
+  QVBoxLayout *widgetLayout = new QVBoxLayout(mantidOptionsPage);
+  QGroupBox *frame = new QGroupBox();
+  widgetLayout->addWidget(frame);
+  QGridLayout *grid = new QGridLayout(frame);
+
+  //create a checkbox for invisible workspaces options
+  m_invisibleWorkspaces = new QCheckBox("Show Invisible Workspaces");
+  m_invisibleWorkspaces->setChecked(false);
+  //m_invisibleWorkspaces->setGeometry(QRect(10, 10, 150, 18));
+  //grid->addWidget(frame,0,0);
+  grid->addWidget(m_invisibleWorkspaces,0,0);
 
   QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InvisibleWorkspaces"));
   if(!setting.compare("1"))
@@ -666,6 +672,81 @@ void ConfigDialog::initMantidOptionsTab()
   {
     m_invisibleWorkspaces->setChecked(false);
   }
+
+  //categories tree widget
+  treeCategories = new QTreeWidget(frame);
+  treeCategories->setColumnCount(1);
+  treeCategories->setSortingEnabled(false);
+  treeCategories->setHeaderLabel("Show Algorithm Categories");
+  
+  grid->addWidget(treeCategories,1,0);
+  refreshTreeCategories();
+}
+
+void ConfigDialog::refreshTreeCategories()
+{
+  treeCategories->clear();
+
+  typedef std::map<std::string,bool> categoriesType;
+  categoriesType categoryMap = Mantid::API::AlgorithmFactory::Instance().getCategoriesWithState();
+
+  QMap<QString,QTreeWidgetItem*> categories;// keeps track of categories added to the tree
+
+  for(categoriesType::const_iterator i=categoryMap.begin();i!=categoryMap.end();i++)
+  {
+    QString catName = QString::fromStdString(i->first);
+    bool isHidden = i->second;
+    QStringList subCats = catName.split('\\');
+    if (subCats.size() == 1)
+    {
+      QTreeWidgetItem *catItem = createCheckedTreeItem(catName,isHidden);
+      categories.insert(catName,catItem);
+      treeCategories->addTopLevelItem(catItem);
+    }
+    else
+    {
+      QString cn = subCats[0];
+      QTreeWidgetItem *catItem = 0;
+      int n = subCats.size();
+      for(int j=0;j<n;j++)
+      {
+        if (categories.contains(cn))
+        {
+          catItem = categories[cn];
+        }
+        else
+        {
+          QTreeWidgetItem *newCatItem = createCheckedTreeItem(subCats[j],isHidden);
+          categories.insert(cn,newCatItem);
+          if (!catItem)
+          {
+            treeCategories->addTopLevelItem(newCatItem);
+          }
+          else
+          {
+            catItem->addChild(newCatItem);
+          }
+          catItem = newCatItem;
+        }
+        if (j != n-1) cn += "\\" + subCats[j+1];
+      }
+    }
+  }
+}
+
+QTreeWidgetItem* ConfigDialog::createCheckedTreeItem(QString name,bool checkBoxState)
+{
+  QTreeWidgetItem *item = new QTreeWidgetItem(QStringList(name));
+  item->setFlags(item->flags()|Qt::ItemIsUserCheckable);
+  if (checkBoxState)
+  {
+      item->setCheckState(0,Qt::Unchecked);
+  }
+  else
+  {
+      item->setCheckState(0,Qt::Checked);
+  }
+  return item;
 }
 
 void ConfigDialog::initDirSearchTab()
@@ -1694,6 +1775,7 @@ void ConfigDialog::apply()
 
   updateDirSearchSettings();
   updateCurveFitSettings();
+  updateMantidOptionsTab();
 
 	try
 	{
@@ -1763,6 +1845,12 @@ void ConfigDialog::updateCurveFitSettings()
 
   app->mantidUI->fitFunctionBrowser()->setDecimals(decimals->value());
 
+}
+
+void ConfigDialog::updateMantidOptionsTab()
+{
+  Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+
   //invisible workspaces options
   QString showinvisible_ws;
   if(m_invisibleWorkspaces->isChecked())
@@ -1774,8 +1862,47 @@ void ConfigDialog::updateCurveFitSettings()
     showinvisible_ws="0";
   }
   mantid_config.setString("MantidOptions.InvisibleWorkspaces",showinvisible_ws.toStdString());
+
+  //Hidden categories
+  QString hiddenCategories = buildHiddenCategoryString();
+  //remove the final ;
+  if (hiddenCategories.length() > 0)
+  {
+    hiddenCategories.chop(1);
+  }
+
+  //store it if it has changed
+  std::string hiddenCategoryString = hiddenCategories.toStdString();
+  if (hiddenCategoryString != mantid_config.getString("algorithms.categories.hidden"))
+  {
+    mantid_config.setString("algorithms.categories.hidden",hiddenCategoryString);
+  
+    //update the algorithm tree
+    ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+    app->mantidUI->updateAlgorithms();
+  }
 }
 
+QString ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent)
+{
+  QString resultString;
+  //how many children at this level
+  int count = parent ? parent->childCount() : treeCategories->topLevelItemCount();
+
+  for (int i = 0; i < count; i++)
+  {
+    //get the child
+    QTreeWidgetItem *item = parent ? parent->child(i) : treeCategories->topLevelItem(i);
+	
+    if (item->checkState(0) == Qt::Unchecked)
+    {
+      resultString.append(item->text(0).append(";"));
+    }
+
+    resultString.append(buildHiddenCategoryString(item));
+  }
+  return resultString;
+}
 
 int ConfigDialog::curveStyle()
 {
