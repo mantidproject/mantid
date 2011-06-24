@@ -23,12 +23,12 @@ namespace MDEvents
       throw std::invalid_argument("MDBoxIterator::ctor(): NULL top-level box given.");
 
     // Allocate an array of indices
-    m_indices = new size_t[m_maxDepth];
+    m_indices = new size_t[m_maxDepth+1];
     // Allocate an array of parents pointers
-    m_parents = new IMDBox<MDE,nd> *[m_maxDepth];
+    m_parents = new IMDBox<MDE,nd> *[m_maxDepth+1];
 
     // Indices start at -1 (meaning do the parent)
-    for (size_t i=0; i<m_maxDepth; i++)
+    for (size_t i=0; i<m_maxDepth+1; i++)
     {
       m_indices[i] = 0;
       m_parents[i] = NULL;
@@ -40,6 +40,14 @@ namespace MDEvents
 
     m_current = m_topBox;
     m_currentDepth = m_current->getDepth();
+
+    if (m_currentDepth > m_maxDepth)
+      throw std::invalid_argument("MDBoxIterator::ctor(): The maxDepth parameter must be >= the depth of the topBox.");
+
+    // Starting with leafs only? You need to skip ahead
+    if (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth)
+      next();
+
 
 //
 ////    // We start with the top box as the parent
@@ -114,7 +122,11 @@ namespace MDEvents
       // Take the first child of it
       m_current = m_parent->getChild(0);
 
-      return true;
+      // For leaves-only, you need to keep looking this way until you reach a leaf (no children)
+      if (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth)
+        return next();
+      else
+        return true;
     }
 
     // If you reach here, then it is a leaf node that we've already returned.
@@ -153,7 +165,13 @@ namespace MDEvents
 
     // This is now the current box
     m_current = m_parent->getChild(m_indices[m_currentDepth]);
-    return true;
+
+    // For leaves-only, you need to keep looking this way until you reach a leaf (no children)
+    if (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth)
+      return next();
+    else
+      return true;
+
   }
 
 
