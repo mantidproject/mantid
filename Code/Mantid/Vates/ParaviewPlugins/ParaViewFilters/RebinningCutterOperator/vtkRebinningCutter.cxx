@@ -250,7 +250,7 @@ void vtkRebinningCutter::SetApplyClip(int applyClip)
   if(temp != m_clip)
   {
     m_clip = temp;
-    m_presenter->updateModel();
+    //m_presenter->updateModel();
     this->Modified();
   }
 }
@@ -262,7 +262,7 @@ void vtkRebinningCutter::SetClipFunction(vtkImplicitFunction * func)
   if (box != m_clipFunction)
   {
     this->m_clipFunction = box;
-    m_presenter->updateModel();
+    //m_presenter->updateModel();
     this->Modified();
   }
 }
@@ -272,7 +272,7 @@ void vtkRebinningCutter::SetMaxThreshold(double maxThreshold)
   if (maxThreshold != m_thresholdMax)
   {
     this->m_thresholdMax = maxThreshold;
-    m_presenter->updateModel();
+    //m_presenter->updateModel();
     this->Modified();
   }
 }
@@ -282,7 +282,7 @@ void vtkRebinningCutter::SetMinThreshold(double minThreshold)
   if (minThreshold != m_thresholdMin)
   {
     this->m_thresholdMin = minThreshold;
-    m_presenter->updateModel();
+    //m_presenter->updateModel();
     this->Modified();
   }
 }
@@ -293,7 +293,7 @@ void vtkRebinningCutter::SetAppliedGeometryXML(std::string appliedGeometryXML)
   if(SetupDone == m_setup)
   {
     m_appliedGeometryXML = appliedGeometryXML;
-    m_presenter->updateModel();
+    //m_presenter->updateModel();
     this->Modified(); 
   }
 }
