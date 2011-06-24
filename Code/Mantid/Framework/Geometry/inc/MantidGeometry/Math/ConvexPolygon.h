@@ -54,7 +54,7 @@ namespace Mantid
     public:
       /// Construct a polygon with a collection of vertices
       ConvexPolygon(const Vertex2DList & vertices);
-      /// Construct a 4 vertex polygon as these will be quite common
+      /// Construct a rectangle as these will be quite common
       ConvexPolygon(const double x_lower, const double x_upper, 
                     const double y_lower, const double y_upper);
 
