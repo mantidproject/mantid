@@ -97,7 +97,7 @@ public:
   }
 
 
-  void xtest_LoadPreNeXus_REFL()
+  void test_LoadPreNeXus_REFL()
   {
     std::string eventfile( "REF_L_32035_neutron_event.dat" );
     std::string pulsefile( "REF_L_32035_pulseid.dat" );
@@ -111,56 +111,12 @@ public:
     eventfile = eventLoader->getPropertyValue("EventFilename");
     stat(eventfile.c_str(), &filestatus);
 
-    //std::cout << "***** executing *****" << std::endl;
-    TS_ASSERT( eventLoader->execute() );
-
-    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>
-            (AnalysisDataService::Instance().retrieve("refl"));
-
-    //The # of events = size of the file / 8 bytes (per event)
-    TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
-
-    //Only some of the pixels weretof loaded, because of lot of them are empty
-    int numpixels_with_events = 4753;
-    TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
-
-    //--- DAS Pixel ID to our PixelID mapping ---
-    //Directly look at the DAS pixel map to check THAT (values taken from the read-out).
-    TS_ASSERT_EQUALS( eventLoader->pixelmap[0], 77568);
-    TS_ASSERT_EQUALS( eventLoader->pixelmap[1], 77569);
-    TS_ASSERT_EQUALS( eventLoader->pixelmap[255], 77823);
-    TS_ASSERT_EQUALS( eventLoader->pixelmap[256], 77312);
-    TS_ASSERT_EQUALS( eventLoader->pixelmap[304*256-1], 255);
-    TS_ASSERT_EQUALS( eventLoader->pixelmap[304*255], 464);
-
-    //Mapping between workspace index and spectrum number
-    //Is the length good?
-    TS_ASSERT_EQUALS( ew->getAxis(1)->length(), numpixels_with_events);
-
-    //WorkspaceIndex to spectrum number
-    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(1), 12085);
-    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(122), 14694);
-
-    //First pixel with events.
-    std::vector<detid_t> dets = ew->spectraMap().getDetectors(12085);
-    TS_ASSERT_EQUALS( dets.size(), 1);
-    TS_ASSERT_EQUALS( dets[0], 12085); //This is the pixel ID of the first spectrum
-
-    //And the pixel IDs grow monotonically
-    dets = ew->spectraMap().getDetectors(12090);
-    TS_ASSERT_EQUALS( dets.size(), 1);
-    TS_ASSERT( dets[0] > 12085);
-
-    //The detector has 304x256 pixels
-    TS_ASSERT_LESS_THAN( ew->getAxis(1)->spectraNo(numpixels_with_events-1), 304*256);
-   
-    //And the spectramap length matches the # of pixels with events
-    TS_ASSERT_EQUALS( ew->spectraMap().nElements(), numpixels_with_events);
-
+    // no instrument definition - should fail
+    TS_ASSERT( !(eventLoader->execute()) );
+    TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieve("refl"), Mantid::Kernel::Exception::NotFoundError);
   }
 
-
-  void xtest_LoadPreNeXus_CNCS_7860()
+  void test_LoadPreNeXus_CNCS_7860()
   {
     std::string eventfile( "CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
@@ -192,8 +148,7 @@ public:
     }
   }
 
-
-  void xtest_LoadPreNeXus_CNCS()
+  void test_LoadPreNeXus_CNCS()
   {
     std::string eventfile( "CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
@@ -215,7 +170,7 @@ public:
     //TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
 
     //Only some of the pixels weretof loaded, because of lot of them are empty
-    int numpixels_with_events = 39733;
+    int numpixels_with_events = 51200;
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
 
     //This seems to be the size of the spectra map.
@@ -252,10 +207,12 @@ public:
     TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), inputWS->getNumberHistograms() );
     TS_ASSERT_EQUALS( outputWS->getInstrument()->getName(), "CNCS");
 
-    TS_ASSERT_EQUALS( outputWS->getEventList(0).getEvents()[0].tof(), inputWS->getEventList(0).getEvents()[0].tof() );
+    std::size_t wkspIndex = 4348; // a good workspace index (with events)
+
+    TS_ASSERT_EQUALS( outputWS->getEventList(wkspIndex).getEvents()[0].tof(), inputWS->getEventList(wkspIndex).getEvents()[0].tof() );
     //It should be possible to change an event list and not affect the other one
-    outputWS->getEventList(0).convertTof(1.5, 0.2);
-    TS_ASSERT_DIFFERS( outputWS->getEventList(0).getEvents()[0].tof(), inputWS->getEventList(0).getEvents()[0].tof() );
+    outputWS->getEventList(wkspIndex).convertTof(1.5, 0.2);
+    TS_ASSERT_DIFFERS( outputWS->getEventList(wkspIndex).getEvents()[0].tof(), inputWS->getEventList(wkspIndex).getEvents()[0].tof() );
 
     //Setting X should still be possible
     Kernel::cow_ptr<MantidVec> x;
@@ -273,7 +230,6 @@ public:
       TS_ASSERT_EQUALS( p->value(), "2010-03-25T16:08:37") ;
     }
   }
-
 
   void test_LoadPreNeXus_CNCS_PadPixels()
   {
@@ -315,7 +271,7 @@ public:
   }
 
 
-  void xtest_LoadPreNeXus_CNCS_SkipPixels()
+  void test_LoadPreNeXus_CNCS_SkipPixels()
   {
     std::string eventfile( "CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);

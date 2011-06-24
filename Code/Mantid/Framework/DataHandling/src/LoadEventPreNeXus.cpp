@@ -345,38 +345,12 @@ void LoadEventPreNeXus::runLoadInstrument(const std::string &eventfilename, Matr
   IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
 
   // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-  bool executionSuccessful(true);
-  try
-  {
-    loadInst->setPropertyValue("InstrumentName", instrument);
-    loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
-    loadInst->execute();
+  loadInst->setPropertyValue("InstrumentName", instrument);
+  loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+  loadInst->executeAsSubAlg();
 
-    // Populate the instrument parameters in this workspace - this works around a bug
-    localWorkspace->populateInstrumentParameters();
-  } catch (std::invalid_argument& e)
-  {
-    stringstream msg;
-    msg << "Invalid argument to LoadInstrument sub-algorithm : " << e.what();
-    g_log.information(msg.str());
-    executionSuccessful = false;
-  } catch (std::runtime_error& e)
-  {
-    g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
-    g_log.information(e.what());
-    executionSuccessful = false;
-  }
-
-  // If loading instrument definition file fails
-  if (!executionSuccessful)
-  {
-    throw std::runtime_error("Error loading Instrument definition file");
-    //TODO: Load some other way???
-  }
-  else
-  {
-    this->instrument_loaded_correctly = true;
-  }
+  // Populate the instrument parameters in this workspace - this works around a bug
+  localWorkspace->populateInstrumentParameters();
 }
 
 
@@ -432,34 +406,26 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   DasEvent * event_buffer = new DasEvent[loadBlockSize];
 
   // We want to pad out empty pixels.
-  if (!this->instrument_loaded_correctly)
-  { // TODO should this throw an error?
-    g_log.warning() << "Warning! Cannot pad empty pixels, since the instrument geometry did not load correctly or was not specified. Sorry!\n";
-    this->pixel_to_wkspindex.clear();
-  }
-  else
+  detid2det_map detector_map;
+  workspace->getInstrument()->getDetectors(detector_map);
+
+  // determine maximum pixel id
+  detid2det_map::iterator it;
+  detid_t detid_max = 0; // seems like a safe lower bound
+  for (it = detector_map.begin(); it != detector_map.end(); it++)
+    if (it->first > detid_max)
+      detid_max = it->first;
+
+  this->pixel_to_wkspindex.reserve(detid_max);
+  this->pixel_to_wkspindex.assign(detid_max, 0);
+  size_t workspaceIndex = 0;
+  for (it = detector_map.begin(); it != detector_map.end(); it++)
   {
-    detid2det_map detector_map;
-    workspace->getInstrument()->getDetectors(detector_map);
-
-    // determine maximum pixel id
-    detid2det_map::iterator it;
-    detid_t detid_max = 0; // seems like a safe lower bound
-    for (it = detector_map.begin(); it != detector_map.end(); it++)
-      if (it->first > detid_max)
-        detid_max = it->first;
-
-    this->pixel_to_wkspindex.reserve(detid_max);
-    this->pixel_to_wkspindex.assign(detid_max, 0);
-    size_t workspaceIndex = 0;
-    for (it = detector_map.begin(); it != detector_map.end(); it++)
+    if (!it->second->isMonitor())
     {
-      if (!it->second->isMonitor())
-      {
-        this->pixel_to_wkspindex[it->first] = workspaceIndex;
-        workspace->getOrAddEventList(workspaceIndex).addDetectorID(it->first);
-        workspaceIndex += 1;
-      }
+      this->pixel_to_wkspindex[it->first] = workspaceIndex;
+      workspace->getOrAddEventList(workspaceIndex).addDetectorID(it->first);
+      workspaceIndex += 1;
     }
   }
 
@@ -498,6 +464,8 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 
   //finalize loading
   workspace->doneAddingEventLists();
+  if(loadOnlySomeSpectra)
+    workspace->deleteEmptyLists();
 
   this->setProtonCharge(workspace);
 

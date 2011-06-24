@@ -162,9 +162,6 @@ private:
   /// Set to true if a valid Mapping file was provided.
   bool using_mapping_file;
 
-  /// Set to true when instrument geometry was loaded.
-  bool instrument_loaded_correctly;
-
   /// For loading only some spectra
   bool loadOnlySomeSpectra;
   /// Handle to the loaded spectra map
