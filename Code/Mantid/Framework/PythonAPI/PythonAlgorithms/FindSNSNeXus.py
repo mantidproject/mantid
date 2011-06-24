@@ -1,4 +1,4 @@
-from MantidFramework import *
+om MantidFramework import *
 from mantidsimple import *
 
 class FindSNSNeXus(PythonAlgorithm):
@@ -21,7 +21,7 @@ class FindSNSNeXus(PythonAlgorithm):
         except ImportError, e:
             self.declareProperty("Instrument", "")
         self.declareProperty("RunNumber", 0)
-        extensions = [".nxs", "_event.nxs", "_neutron_event.dat",
+        extensions = [".nxs", "_histo.nxs", "_event.nxs", "_neutron_event.dat",
                       "_neutron0_event.dat", "_neutron1_event.dat",
                       "_cvinfo.xml", "_runinfo.xml"]
         self.declareProperty("Extension", "",
