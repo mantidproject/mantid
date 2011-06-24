@@ -54,9 +54,12 @@ namespace Mantid
     public:
       /// Construct a polygon with a collection of vertices
       ConvexPolygon(const Vertex2DList & vertices);
+      /// Construct a 4 vertex polygon as these will be quite common
+      ConvexPolygon(const double x_lower, const double x_upper, 
+                    const double y_lower, const double y_upper);
+
       /// Index access.
       const Kernel::V2D& operator[](const size_t index) const;
-
       /// Return the number of vertices
       inline size_t numVertices() const { return m_vertices.size(); }
       /// Compute the area of the polygon using triangulation

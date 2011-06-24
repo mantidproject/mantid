@@ -33,6 +33,23 @@ namespace Mantid
     }
 
     /**
+     * Construct a rectange
+     * @param x_lower :: Lower x coordinate
+     * @param x_upper :: Upper x coordinate
+     * @param y_lower :: Lower y coordinate
+     * @param y_upper :: Upper y coordinate
+     */
+    ConvexPolygon::ConvexPolygon(const double x_lower, const double x_upper, 
+                                 const double y_lower, const double y_upper)
+      : m_vertices(4)
+    {
+      m_vertices[0] = V2D(x_lower, y_lower); // Bottom left
+      m_vertices[1] = V2D(x_upper, y_lower); // Bottom right
+      m_vertices[2] = V2D(x_upper, y_upper); // Top right
+      m_vertices[3] = V2D(x_lower, y_upper); // Top left
+    }    
+
+    /**
      * Return the vertex at the given index
      * @param index :: An index, starting at 0
      * @returns A reference to the polygon at that index
