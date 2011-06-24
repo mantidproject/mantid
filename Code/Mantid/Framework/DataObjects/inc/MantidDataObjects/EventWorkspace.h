@@ -216,6 +216,8 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   void padPixels(bool parallel);
   // Pad pixels in the workspace using the loaded spectra. Requires a non-empty spectra-detector map
   void padSpectra();
+  // Remove pixels in the workspace that do not contain events.
+  void deleteEmptyLists();
 
   // Make all the mapping stuff
   void makeSpectraMap();

@@ -577,6 +577,40 @@ namespace DataObjects
     done_loading_data = true;
   }
 
+  void EventWorkspace::deleteEmptyLists()
+  {
+    // figure out how much data to copy
+    size_t orig_length = this->data.size();
+    size_t new_length = 0;
+    for (size_t i = 0; i < orig_length; i++)
+    {
+      if (!(this->data[i]->empty()))
+        new_length++;
+    }
+
+    // copy over the data
+    EventListVector notEmpty;
+    notEmpty.reserve(new_length);
+    for (size_t i = 0; i < orig_length; i++)
+    {
+      if (!(this->data[i]->empty()))
+        notEmpty.push_back(this->data[i]);
+      else
+        delete this->data[i];
+    }
+
+    // replace the old vector
+    this->data.swap(notEmpty);
+
+    // fix spectra map
+    this->m_noVectors = this->data.size();
+    this->makeSpectraMap();
+    this->makeAxis1();
+
+    //Clearing the MRU list is a good idea too.
+    this->clearMRU();
+  }
+
   //-----------------------------------------------------------------------------
   /** Generate the spectra map (map between spectrum # and detector IDs)
    * by using the info in each EventList.
