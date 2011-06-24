@@ -671,7 +671,7 @@ bool SANSRunWindow::loadUserFile()
                         m_uiForm.wav_dw_opt);
   //Q
   QString text = runReduceScriptFunction(
-      "print i.ReductionSingleton().Q_REBIN");
+      "print i.ReductionSingleton().to_Q.binning");
   QStringList values = text.split(",");
   if( values.count() == 3 )
   {
@@ -733,7 +733,7 @@ bool SANSRunWindow::loadUserFile()
     "print i.ReductionSingleton().instrument.detector_file('front')"));
 
   QString file = runReduceScriptFunction(
-    "print i.ReductionSingleton().flood_file.get_filename()");
+    "print i.ReductionSingleton().prep_normalize.getPixelCorrFile()");
   file = file.trimmed();
   //Check if the file name is set to Python's None object and then adjust the controls if there is an empty entry
   m_uiForm.floodFile->setFileText(file == "None" ? "" : file);
@@ -1630,7 +1630,7 @@ bool SANSRunWindow::handleLoadButtonClick()
   try
   {//preliminarly error checking is over try to load that data
     is_loaded &= assignDetBankRun(*(m_uiForm.scatterSample), "AssignSample", sample_logs);
-    readNumberOfEntries("data_loader", m_uiForm.scatterSample);
+    readNumberOfEntries("get_sample().loader", m_uiForm.scatterSample);
     if ( ! m_uiForm.scatCan->isEmpty() )
     {
       is_loaded &= assignDetBankRun(*(m_uiForm.scatCan), "AssignCan", can_logs);
@@ -1842,16 +1842,16 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
 ///Reads the sample geometry, these settings will override what is stored in the run file
 QString SANSRunWindow::readSampleObjectGUIChanges()
 {
-  QString exec_reduce("\ni.ReductionSingleton().geometry.height = ");
+  QString exec_reduce("\ni.ReductionSingleton().get_sample().geometry.height = ");
   exec_reduce += m_uiForm.sample_height->text();
 
-  exec_reduce += "\ni.ReductionSingleton().geometry.width = ";
+  exec_reduce += "\ni.ReductionSingleton().get_sample().geometry.width = ";
   exec_reduce += m_uiForm.sample_width->text();
 
-  exec_reduce += "\ni.ReductionSingleton().geometry.thickness = ";
+  exec_reduce += "\ni.ReductionSingleton().get_sample().geometry.thickness = ";
   exec_reduce += m_uiForm.sample_thick->text();
 
-  exec_reduce += "\ni.ReductionSingleton().geometry.shape = ";
+  exec_reduce += "\ni.ReductionSingleton().get_sample().geometry.shape = ";
   exec_reduce += m_uiForm.sample_geomid->currentText().at(0);
   exec_reduce += "\n";
  

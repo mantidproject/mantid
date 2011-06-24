@@ -47,6 +47,10 @@ def issueWarning(msg):
         @param msg: message to be issued
     """
     isis_reduction_steps._issueWarning(msg)
+
+def _refresh_singleton():
+    ReductionSingleton.clean(isis_reducer.ISISReducer)
+    ReductionSingleton().remove_settings()
                 
 def UserPath(path):
     _printMessage('UserPath("' + path + '") #Will look for mask file here')
@@ -134,12 +138,23 @@ def TransWorkspace(sample, can = None):
     ReductionSingleton().transmission_calculator.calculated_samp = sample 
     ReductionSingleton().transmission_calculator.calculated_can = can 
 
-def AssignCan(can_run, reload = True, period = -1):
-    _printMessage('AssignCan("' + can_run + '")')
-    ReductionSingleton().set_background(can_run, reload = reload, period = period)
+def AssignCan(can_run, reload = True, period = isis_reduction_steps.LoadRun.UNSET_PERIOD):
+    mes = 'AssignCan("' + can_run + '"'
+    if period != isis_reduction_steps.LoadRun.UNSET_PERIOD:
+        mes += ', ' + str(period)
+    mes += ')'
+    _printMessage(mes)
 
+    if (not can_run) or can_run.startswith('.'):
+        ReductionSingleton().background_subtracter = None
+        return '', None
+
+    ReductionSingleton().background_subtracter = \
+        isis_reduction_steps.CanSubtraction(
+                                can_run, reload=reload, period=period)
+    #ideally this code should live in a separate load can object 
     logs = ReductionSingleton().background_subtracter.assign_can(
-          ReductionSingleton())
+        ReductionSingleton())
     return ReductionSingleton().background_subtracter.workspace.wksp_name, logs
 
 def TransmissionSample(sample, direct, reload = True, period_t = -1, period_d = -1):
@@ -170,18 +185,19 @@ def TransmissionCan(can, direct, reload = True, period_t = -1, period_d = -1):
     return ReductionSingleton().can_trans_load.execute(
                                             ReductionSingleton(), None)
     
-def AssignSample(sample_run, reload = True, period = -1):
-    _printMessage('AssignSample("' + sample_run + '")')
+def AssignSample(sample_run, reload = True, period = isis_reduction_steps.LoadRun.UNSET_PERIOD):
+    mes = 'AssignSample("' + sample_run + '"'
+    if period != isis_reduction_steps.LoadRun.UNSET_PERIOD:
+        mes += ', ' + str(period)
+    mes += ')'
+    _printMessage(mes)
 
-    ReductionSingleton().data_loader = isis_reduction_steps.LoadSample(
-                                    sample_run, reload, period)
-
-    logs = ReductionSingleton().data_loader.execute(
-                                            ReductionSingleton(), None)
+    ReductionSingleton().set_sample(sample_run, reload, period)
     
     global LAST_SAMPLE
-    LAST_SAMPLE = ReductionSingleton().sample_wksp 
-    return ReductionSingleton().sample_wksp, logs
+    LAST_SAMPLE = ReductionSingleton().get_sample().wksp_name
+    return ReductionSingleton().get_sample().wksp_name, \
+        ReductionSingleton().get_sample().log
 
 def SetCentre(xcoord, ycoord):
     _printMessage('SetCentre(' + str(xcoord) + ', ' + str(ycoord) + ')')
@@ -194,6 +210,33 @@ def GetMismatchedDetList():
         Return the list of mismatched detector names
     """
     return ReductionSingleton().instrument.get_marked_dets()
+
+def _setUpPeriod(i):
+    trans_samp = ReductionSingleton().samp_trans_load
+    can = ReductionSingleton().background_subtracter
+    trans_can = ReductionSingleton().can_trans_load
+    AssignSample(ReductionSingleton().get_sample().loader._data_file, period=i)
+    if can:
+        #replace one thing that gets overwritten
+        spec = can.workspace._period
+        AssignCan(can.workspace._data_file, period=can.getCorrospondingPeriod(i))
+        can.workspace._period = spec
+    if trans_samp:
+        trans = trans_samp.trans
+        t = trans_samp.trans._period
+        direct = trans_samp.direct
+        d = trans_samp.direct._period
+        TransmissionSample(trans._data_file, direct._data_file, period_t=trans.getCorrospondingPeriod(i),period_d=direct.getCorrospondingPeriod(i))  
+        trans_samp.trans._period = t 
+        trans_samp.direct._period = d
+    if trans_can:
+        trans = trans_can.trans
+        t = trans_samp.trans._period
+        direct = trans_can.direct
+        d = trans_samp.direct._period
+        TransmissionCan(trans._data_file, direct._data_file, period_t=trans.getCorrospondingPeriod(i),period_d=direct.getCorrospondingPeriod(i))  
+        trans_samp.trans._period = t 
+        trans_samp.direct._period = d
 
 def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None):
     """
@@ -211,7 +254,20 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
     _printMessage('Running reduction for ' + str(ReductionSingleton().to_wavelen))
 
-    result = Reduce()
+    calculated = [ReductionSingleton()._reduce()]
+
+    periods = ReductionSingleton().get_sample().entries    
+    for i in periods[1:len(periods)]:
+        _setUpPeriod(i)            
+        calculated.append(ReductionSingleton()._reduce())
+        ReductionSingleton().replace(ReductionSingleton().settings())
+
+    if len(calculated) == 1:
+        result = calculated[0]
+    else:
+        result = ReductionSingleton().get_sample().loader.get_group_name()
+        GroupWorkspaces(OutputWorkspace=result, InputWorkspaces=calculated)
+
     if name_suffix:
         old = result
         result += name_suffix
@@ -242,16 +298,15 @@ def CompWavRanges(wavelens, plot=True):
     try:
         ReductionSingleton().to_wavelen.set_rebin(w_low=wavelens[0],
             w_high=wavelens[len(wavelens)-1])
-        #run the reduction calculated will be an array with the names of all the workspaces produced
+        #run the reductions, calculated will be an array with the names of all the workspaces produced
         calculated = [ReductionSingleton()._reduce()]
         for i in range(0, len(wavelens)-1):
-            settings = copy.deepcopy(ReductionSingleton().reference())
+            ReductionSingleton().replace(ReductionSingleton().settings())
             ReductionSingleton().to_wavelen.set_rebin(
                             w_low=wavelens[i], w_high=wavelens[i+1])
-            calculated.append(ReductionSingleton().run_from_raw())
-            ReductionSingleton().replace(settings)
+            calculated.append(ReductionSingleton()._reduce())
     finally:
-        ReductionSingleton.clean(isis_reducer.ISISReducer)
+        _refresh_singleton()
 
     if plot:
         mantidplot.plotSpectrum(calculated, 0)
@@ -263,7 +318,7 @@ def Reduce():
     try:
         result = ReductionSingleton()._reduce()
     finally:
-        ReductionSingleton.clean(isis_reducer.ISISReducer)
+        _refresh_singleton()
 
     return result
             
@@ -288,7 +343,7 @@ def SetFrontEfficiencyFile(filename):
     front_det.correction_file = filename
 
 def SetDetectorFloodFile(filename):
-    ReductionSingleton().flood_file.set_filename(filename)
+    ReductionSingleton().prep_normalize.setPixelCorrFile(filename)
 
 def displayUserFile():
     print '-- Mask file defaults --'
@@ -307,7 +362,7 @@ def displayMaskFile():
 def displayGeometry():
     [x, y] = ReductionSingleton()._beam_finder.get_beam_center()
     print 'Beam centre: [' + str(x) + ',' + str(y) + ']'
-    print ReductionSingleton().geometry
+    print ReductionSingleton().get_sample().geometry
 
 def SetPhiLimit(phimin,phimax, phimirror=True):
     maskStep = ReductionSingleton().get_mask()
@@ -428,8 +483,6 @@ def DisplayMask(mask_worksp=None):
     
     if not mask_worksp:
         mask_worksp = '__CurrentMask'
-        samp = ReductionSingleton().sample_wksp
-        global LAST_SAMPLE
         samp = LAST_SAMPLE 
         
         if samp:
@@ -529,19 +582,16 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     mantid.sendLogMessage("::SANS:: xstart,ystart="+str(XNEW*1000.)+" "+str(YNEW*1000.)) 
     _printMessage("Starting centre finding routine ...")
 
-    #remove this if we know running the Reducer() doesn't change it i.e. all execute() methods are const
+    #remove this if we know running the Reducer() doesn't change i.e. all execute() methods are const
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
 
-    centre_reduction.sample_wksp = ReductionSingleton().sample_wksp
-
-    if centre_reduction.background_subtracter:
-        can = centre_reduction.background_subtracter.workspace.wksp_name
-        centre_reduction.background_subtracter.workspace.wksp_name = can
-
-    centre = CentreFinder(centre_reduction, original)
+    centre = CentreFinder(original)
     #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center  
-    resX_old, resY_old = centre.SeekCentre([XNEW, YNEW])
+    resX_old, resY_old = centre.SeekCentre(centre_reduction, [XNEW, YNEW])
+    centre_reduction = copy.deepcopy(ReductionSingleton().reference())
+    LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
+
     mantid.sendLogMessage(centre.status_str(0, resX_old, resY_old))
     
     # take first trial step
@@ -554,7 +604,10 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         centre_reduction.set_beam_finder(
             sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
 
-        resX, resY = centre.SeekCentre([XNEW, YNEW])
+        resX, resY = centre.SeekCentre(centre_reduction, [XNEW, YNEW])
+        centre_reduction = copy.deepcopy(ReductionSingleton().reference())
+        LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
+
         mantid.sendLogMessage(centre.status_str(it, resX, resY))
         
         try :
@@ -582,9 +635,6 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         resY_old = resY
         XNEW += XSTEP
         YNEW += YSTEP
-
-        #remove this 	  
-        centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     
     if it == MaxIter:
         mantid.sendLogMessage("::SANS:: Out of iterations, new coordinates may not be the best!")
@@ -601,8 +651,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
 DefaultTrans = 'True'
 NewTrans = 'False'
 
-ReductionSingleton.clean(isis_reducer.ISISReducer)
-
+_refresh_singleton()
 
 #if __name__ != '__main__':
 #    AssignSample('c:\\mantid\\test\\data\\SANS2D\\SANS2D000992.raw')

@@ -1244,6 +1244,7 @@ class ConvertToQ(ReductionStep):
         """
         #create normalization workspaces
         if self._norms:
+            # the empty list at the end appears to be needed (the system test SANS2DWaveloops) is this a bug in Python?
             wave_adj, pixel_adj = self._norms.calculate(reducer, [])
         else:
             raise RuntimeError('Normalization workspaces must be created by CalculateNorm() and passed to this step')
