@@ -40,7 +40,7 @@ using namespace Mantid;
 using namespace DataObjects;
 using namespace Geometry;
 using namespace API;
-
+using namespace Crystal;
 using namespace std;
 
 class IntegratePeakTimeSlicesTest: public CxxTest::TestSuite
@@ -68,7 +68,7 @@ public:
     for (int i = 0; i < NTimes; i++)
       x_vals.access().push_back(1000.0 + i * 50);
 
-    for (int k = 0; k < wsPtr->getNumberHistograms(); k++)
+    for (size_t k = 0; k < wsPtr->getNumberHistograms(); k++)
       wsPtr->setX(k, x_vals);
 
     Geometry::IInstrument_sptr instP = wsPtr->getInstrument();
@@ -217,7 +217,7 @@ public:
     Rebin->setProperty<bool>("PreserveEvents", false);
 
     Rebin->setPropertyValue(std::string("OutputWorkspace"),std::string("RebinResult"));
-    Rebin->setPropertyValue(std::string("Params"),std::string("17200,-.004,33500"));
+    Rebin->setPropertyValue(std::string("Params"),std::string("17258.2,-.004,33500"));
 
     Rebin->execute();
 
@@ -234,10 +234,10 @@ public:
    boost::shared_ptr<Geometry::RectangularDetector> bankR = boost::dynamic_pointer_cast<
                                           Geometry::RectangularDetector>(bankC);
 
-   boost::shared_ptr<Geometry::Detector> pixelp = bankR->getAtXY(55,216);
+   boost::shared_ptr<Geometry::Detector> pixelp = bankR->getAtXY(57,214);
 
-
-   Peak peak(instP, 1718232, 6.947);
+   //std::cout<<"pixel ID="<<pixelp->getID()<<std::endl;
+   Peak peak(instP, pixelp->getID(), 6.955836);
 
    PeaksWorkspace_sptr pks(new PeaksWorkspace());
 
@@ -247,7 +247,7 @@ public:
    algP.setProperty("PeakIndex",0);
    algP.setProperty("PeakQspan",.003);
    algP.setProperty<MatrixWorkspace_sptr>("InputWorkspace",wsPtr);
-   algP.setPropertyValue("OutputWorkspace","table");
+   //algP.setPropertyValue("OutputWorkspace","table");
    algP.setProperty<PeaksWorkspace_sptr>("Peaks",pks);
    algP.execute();
    

@@ -17,10 +17,11 @@
 
 //namespace Mantid
 //{
-//namespace Crystal
-//{
+namespace Crystal
+{
 /**
- Integrates each time slice using the BivariateNormal formula, adding the results
+ Integrates each time slice using the BivariateNormal formula, adding the results to the
+ peak object
 
  @author Ruth Mikkelson, SNS, ORNL
  @date 06/06/2011
@@ -64,7 +65,7 @@ public:
   
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const
-        { return "Diffraction"; }
+        { return "Crystal"; }
 
 private:
 
@@ -75,14 +76,12 @@ private:
   Mantid::API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace, the data set
   Mantid::DataObjects::TableWorkspace_sptr outputW; ///< A pointer to the output workspace
 
-  // Overridden Algorithm methods
-
 
 
 
 };
 
-//} // namespace Algorithm
+} // namespace Crystal
 //} // namespace Mantid
 
 #endif /* INTEGRATEPEAKTIMESLICES_H_ */
