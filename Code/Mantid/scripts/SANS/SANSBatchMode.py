@@ -202,7 +202,7 @@ def parse_run(run_num, ext):
     if len(parts) == 2:
         period = parts[1]
     else:
-        period = 1
+        period = -1
 
     return run_spec, period 
 

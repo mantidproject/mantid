@@ -256,17 +256,16 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
     calculated = [ReductionSingleton()._reduce()]
 
-    periods = ReductionSingleton().get_sample().entries    
-    for i in periods[1:len(periods)]:
-        _setUpPeriod(i)            
-        calculated.append(ReductionSingleton()._reduce())
-        ReductionSingleton().replace(ReductionSingleton().settings())
-
-    if len(calculated) == 1:
-        result = calculated[0]
+    periods = ReductionSingleton().get_sample().loader.entries    
+    if len(periods) > 1:
+        for i in periods[1:len(periods)]:
+            _setUpPeriod(i)            
+            calculated.append(ReductionSingleton()._reduce())
+            ReductionSingleton().replace(ReductionSingleton().settings())
+            result = ReductionSingleton().get_sample().loader.get_group_name()
+            GroupWorkspaces(OutputWorkspace=result, InputWorkspaces=calculated)
     else:
-        result = ReductionSingleton().get_sample().loader.get_group_name()
-        GroupWorkspaces(OutputWorkspace=result, InputWorkspaces=calculated)
+        result = calculated[0]
 
     if name_suffix:
         old = result

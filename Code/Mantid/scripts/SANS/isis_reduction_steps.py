@@ -72,6 +72,10 @@ class LoadRun(object):
         else:
             workspace = self._get_workspace_name()
 
+        period = self._period
+        if period == self.UNSET_PERIOD:
+            period = 1
+
         if os.path.splitext(self._data_file)[1].lower().startswith('.r'):
             try:
                 alg = LoadRaw(self._data_file, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
@@ -83,16 +87,12 @@ class LoadRun(object):
                 self._data_file = alg.getPropertyValue("Filename")
     
             LoadSampleDetailsFromRaw(workspace, self._data_file)
-            workspace = self._leaveSinglePeriod(workspace)
+
+            workspace = self._leaveSinglePeriod(workspace, period)
         else:
-            #a particular entry was selected just load that one
-            if self._period != self.UNSET_PERIOD:
-                alg = LoadNexus(self._data_file, workspace,
-                  SpectrumMin=self._spec_min, SpectrumMax=self._spec_max, EntryNumber=self._period)
-            else:
-                #no specific period was requested
-                alg = LoadNexus(self._data_file, workspace,
-                  SpectrumMin=self._spec_min, SpectrumMax=self._spec_max, EntryNumber=1)
+            alg = LoadNexus(self._data_file, workspace,
+                SpectrumMin=self._spec_min, SpectrumMax=self._spec_max, EntryNumber=period)
+            self._data_file = alg.getPropertyValue("Filename")
 
         SANS2D_log_file = mtd[workspace]
        
@@ -189,15 +189,15 @@ class LoadRun(object):
         
         return logs
 
-    def _leaveSinglePeriod(self, workspace):
+    def _leaveSinglePeriod(self, workspace, period):
         groupW = mantid[workspace]
         if groupW.isGroup():
             num_periods = groupW.getNames()
         else:
             num_periods = 1
 
-        if (self._period > num_periods) or (self._period < 1):
-            raise ValueError('_loadRawData: Period number ' + str(self._period) + ' doesn\'t exist in workspace ' + groupW.getName())
+        if period > num_periods or period < 1:
+            raise ValueError('Period number ' + str(period) + ' doesn\'t exist in workspace ' + groupW.getName())
         
         if num_periods == 1:
             return workspace
@@ -306,7 +306,6 @@ class LoadRun(object):
             @return: depends on the number of entries in the workspace, could be the same number as passed or 1
             @raise RuntimeError: if there is ambiguity
         """
-this is not working
         if self.periods_in_file == 1:
             #this is a single entry file, don't consider entries
             return 1
@@ -395,8 +394,6 @@ class CanSubtraction(ReductionStep):
             raise RuntimeError('User settings must be loaded before the can can be loaded, run UserFile() first')
     
         logs = self.workspace._assignHelper(reducer)
-        #refactor this so that CanSubtraction doesn't inherit from LoadRun
-        self.workspace.wksp_name = self.wksp_name
 
         if self.workspace.wksp_name == '':
             mantid.sendLogMessage('::SANS::Warning: Unable to load SANS can run, cannot continue.')
@@ -440,6 +437,11 @@ class CanSubtraction(ReductionStep):
             rem_zeros = sans_reduction_steps.StripEndZeros()
             rem_zeros.execute(reducer, tmp_smp)
             rem_zeros.execute(reducer, tmp_can)
+
+    def get_wksp_name(self):
+        return self.workspace.wksp_name
+    
+    wksp_name = property(get_wksp_name, None, None, None)
 
 class Mask_ISIS(sans_reduction_steps.Mask):
     """
@@ -819,6 +821,8 @@ class LoadSample(LoadRun, ReductionStep):
         self._SAMPLE_RUN = None
         
         self.maskpt_rmin = None
+        #is set to the entry (period) number in the sample to be run
+        self.entries = []
     
     def execute(self, reducer, workspace):
         if not reducer.user_settings.executed:
@@ -834,9 +838,9 @@ class LoadSample(LoadRun, ReductionStep):
 
         logs = self._assignHelper(reducer)
         if self._period != self.UNSET_PERIOD:
-            reducer.sample_entries  = [self._period]
+            self.entries  = [self._period]
         else:
-            reducer.sample_entries  = range(0, self.periods_in_file)
+            self.entries  = range(0, self.periods_in_file)
 
         if self.wksp_name == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
