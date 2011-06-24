@@ -74,6 +74,8 @@ private:
   void init();
   void exec();
   void execEvent();
+  template<class T>
+    bool correctKiKfEventHelper(std::vector<T>& events, double efixed,const std::string emodeStr);
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr inputWS;
   /// The output workspace, maybe the same as the input one
