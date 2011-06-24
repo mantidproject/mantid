@@ -745,6 +745,7 @@ void Spectrogram::updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtSc
   for (int l = 0; l < numLevels; l++){
     const double level = levels[l];
     const QPolygonF &lines = contourLines[level];
+    if (lines.isEmpty()) continue;
     int i = (int)lines.size()/2;
 
     PlotMarker *mrk = d_labels_list[l];
