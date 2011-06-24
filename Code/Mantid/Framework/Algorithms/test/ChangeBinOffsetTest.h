@@ -168,7 +168,7 @@ public:
     TS_ASSERT (loader.isExecuted() );
   }
 
-	void xtestExecEvents()
+	void testExecEvents()
 	{
 	  this->setup_Event();
 	  std::string outputSpace = "eventWS_out";
@@ -190,25 +190,26 @@ public:
     EventWorkspace_sptr WSO = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
     TS_ASSERT(WSO);
 
-    TS_ASSERT_DELTA(WSI->getEventList(0).getEvents()[0].tof()+100,
-        WSO->getEventList(0).getEvents()[0].tof(),0.001);
-    TS_ASSERT_DELTA(WSI->getEventList(0).dataX()[1]+100.,
-        WSO->getEventList(0).dataX()[1],0.001);
+    std::size_t wkspIndex = 4348; // a good workspace index (with events)
+    TS_ASSERT_DELTA(WSI->getEventList(wkspIndex).getEvents()[0].tof()+100,
+        WSO->getEventList(wkspIndex).getEvents()[0].tof(),0.001);
+    TS_ASSERT_DELTA(WSI->getEventList(wkspIndex).dataX()[1]+100.,
+        WSO->getEventList(wkspIndex).dataX()[1],0.001);
 
-    alg.setPropertyValue("IndexMin", "2");
-    alg.setPropertyValue("IndexMax", "3");
+    alg.setPropertyValue("IndexMin", "4349");
+    alg.setPropertyValue("IndexMax", "4350");
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
     WSO = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
     TS_ASSERT(WSO);
-    TS_ASSERT_DELTA(WSI->getEventList(0).getEvents()[0].tof(),
-        WSO->getEventList(0).getEvents()[0].tof(),0.001); //should be unchanged
-    TS_ASSERT_DELTA(WSI->getEventList(0).dataX()[1],
-        WSO->getEventList(0).dataX()[1],0.001);//should be unchanged
-    TS_ASSERT_DELTA(WSI->getEventList(2).getEvents()[0].tof()+100,
-        WSO->getEventList(2).getEvents()[0].tof(),0.001);//should change
-    TS_ASSERT_DELTA(WSI->getEventList(2).dataX()[1]+100.,
-        WSO->getEventList(2).dataX()[1],0.001);//should change
+    TS_ASSERT_DELTA(WSI->getEventList(wkspIndex).getEvents()[0].tof(),
+        WSO->getEventList(wkspIndex).getEvents()[0].tof(),0.001); //should be unchanged
+    TS_ASSERT_DELTA(WSI->getEventList(wkspIndex).dataX()[1],
+        WSO->getEventList(wkspIndex).dataX()[1],0.001);//should be unchanged
+    TS_ASSERT_DELTA(WSI->getEventList(wkspIndex+1).getEvents()[0].tof()+100,
+        WSO->getEventList(wkspIndex+1).getEvents()[0].tof(),0.001);//should change
+    TS_ASSERT_DELTA(WSI->getEventList(wkspIndex+1).dataX()[1]+100.,
+        WSO->getEventList(wkspIndex+1).dataX()[1],0.001);//should change
 	}
 
 private:
