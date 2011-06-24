@@ -228,7 +228,7 @@ void MultiSliceView::updateSelectedIndicator()
 {
 	pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
 	pqPipelineSource *cut = qobject_cast<pqPipelineSource *>(smsModel->currentItem());
-  if (!cut->getSMName().contains("MantidRebinningCutter"))
+  if (cut->getSMName().contains("Slice"))
   {
     vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
                                             "CutFunction").GetAsProxy();
