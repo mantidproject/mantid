@@ -40,11 +40,13 @@ set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PRE
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh  "#!/bin/sh\n"
                                                     "MANTIDPATH=${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
+                                                    "PV_PLUGIN_PATH=${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}\n"
                                                     "PATH=$PATH:$MANTIDPATH\n"
-                                                    "export MANTIDPATH PATH"
+                                                    "export MANTIDPATH PV_PLUGIN_PATH PATH"
 )
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh  "#!/bin/csh\n"
                                                     "setenv MANTIDPATH \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
+                                                    "setenv PV_PLUGIN_PATH \"${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}\"\n"
                                                     "setenv PATH \"\${PATH}:\${MANTIDPATH}\"\n"
 )
 
