@@ -32,8 +32,7 @@ namespace MDEvents
 namespace MDEventsTestHelper
 {
 
-
-
+  //-------------------------------------------------------------------------------------
   /** Create an EventWorkspace containing fake data
    * of single-crystal diffraction.
    * Instrument is MINITOPAZ
@@ -100,6 +99,55 @@ namespace MDEventsTestHelper
     return retVal;
   }
 
+
+
+  //-------------------------------------------------------------------------------------
+  /** Generate an empty MDBox */
+  MDBox<MDEvent<1>,1> * makeMDBox1(size_t splitInto)
+  {
+    // Split at 5 events
+    BoxController_sptr splitter(new BoxController(1));
+    splitter->setSplitThreshold(5);
+    // Splits into 10 boxes
+    splitter->setSplitInto(splitInto);
+    // Set the size
+    MDBox<MDEvent<1>,1> * out = new MDBox<MDEvent<1>,1>(splitter);
+    out->setExtents(0, 0.0, 10.0);
+    out->calcVolume();
+    return out;
+  }
+
+  //-------------------------------------------------------------------------------------
+  /** Generate an empty MDBox with 3 dimensions, split 10x5x2 */
+  MDBox<MDEvent<3>,3> * makeMDBox3()
+  {
+    // Split at 5 events
+    BoxController_sptr splitter(new BoxController(3));
+    splitter->setSplitThreshold(5);
+    // Splits into 10x5x2 boxes
+    splitter->setSplitInto(10);
+    splitter->setSplitInto(1,5);
+    splitter->setSplitInto(2,2);
+    // Set the size to 10.0 in all directions
+    MDBox<MDEvent<3>,3> * out = new MDBox<MDEvent<3>,3>(splitter);
+    for (size_t d=0; d<3; d++)
+      out->setExtents(d, 0.0, 10.0);
+    return out;
+  }
+
+
+  //-------------------------------------------------------------------------------------
+  /** Return a vector with this many MDEvents, spaced evenly from 0.5, 1.5, etc. */
+  std::vector<MDEvent<1> > makeMDEvents1(size_t num)
+  {
+    std::vector<MDEvent<1> > out;
+    for (double i=0; i<num; i++)
+    {
+      coord_t coords[1] = {i*1.0+0.5};
+      out.push_back( MDEvent<1>(1.0, 1.0, coords) );
+    }
+    return out;
+  }
 
 
 

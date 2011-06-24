@@ -48,33 +48,6 @@ namespace MDEvents
     if (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth)
       next();
 
-
-//
-////    // We start with the top box as the parent
-////    m_parent = m_topBox;
-////    m_parents[m_parent->getDepth()] = m_parent;
-////
-////    // This is how deep we currently are
-////    m_currentDepth = m_parent->getDepth()+1;
-////    m_parentNumChildren = m_parent->getNumChildren();
-//
-//    if (m_parentNumChildren > 0)
-//    {
-//      // The first box is the first child
-//      m_current = m_parent->getChild(0);
-//      if (m_leafOnly && (m_currentDepth < m_maxDepth) && (m_current->getNumChildren() > 0))
-//      {
-//        // We are looking only for leaves and this isn't one. Use the next() method to go to the next one
-//        next();
-//      }
-//    }
-//    else
-//    {
-//      // Special case with no children at all.
-//      m_current = m_topBox;
-//      m_parent = NULL;
-//      m_currentDepth = m_current->getDepth();
-//    }
   }
     
   //----------------------------------------------------------------------------------------------
@@ -126,6 +99,7 @@ namespace MDEvents
       if (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth)
         return next();
       else
+        // If not leaves-only, then you return each successive child you encounter.
         return true;
     }
 
@@ -171,7 +145,6 @@ namespace MDEvents
       return next();
     else
       return true;
-
   }
 
 
