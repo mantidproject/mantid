@@ -163,8 +163,9 @@ void LoadEventPreNeXus::init()
   this->declareProperty(new ArrayProperty<int64_t>(PID_PARAM),
                         "A list of individual spectra (pixel IDs) to read. Only used if set.");
 
-  // Pad out empty pixels?
-  this->declareProperty(new PropertyWithValue<bool>(PAD_PIXELS_PARAM, false, Direction::Input) );
+  // how many events to process
+  this->declareProperty(new PropertyWithValue<int>("NumberOfEvents", 0, Direction::Input),
+          "Number of events to read from the file.");
 
 #ifdef LOADEVENTPRENEXUS_ALLOW_PARALLEL
   //Parallel processing
@@ -412,8 +413,6 @@ void LoadEventPreNeXus::setMaxEventsToLoad(std::size_t max_events_to_load)
  */
 void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 {
-  bool padPixels = (this->getProperty(PAD_PIXELS_PARAM));
-
   // do the actual loading
   this->num_error_events = 0;
   this->num_good_events = 0;
@@ -432,44 +431,36 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   //Allocate the buffer
   DasEvent * event_buffer = new DasEvent[loadBlockSize];
 
-  //--------- Pad Empty Pixels -----------
-  if (padPixels)
-  {
-    //We want to pad out empty pixels.
-    if (!this->instrument_loaded_correctly)
-    {
-      g_log.warning() << "Warning! Cannot pad empty pixels, since the instrument geometry did not load correctly or was not specified. Sorry!\n";
-      this->pixel_to_wkspindex.clear();
-    }
-    else
-    {
-      detid2det_map detector_map;
-      workspace->getInstrument()->getDetectors(detector_map);
-
-      // determine maximum pixel id
-      detid2det_map::iterator it;
-      detid_t detid_max = 0; // seems like a safe lower bound
-      for (it = detector_map.begin(); it != detector_map.end(); it++)
-        if (it->first > detid_max)
-          detid_max = it->first;
-
-      this->pixel_to_wkspindex.reserve(detid_max);
-      this->pixel_to_wkspindex.assign(detid_max, 0);
-      size_t workspaceIndex = 0;
-      for (it = detector_map.begin(); it != detector_map.end(); it++)
-      {
-        if (!it->second->isMonitor())
-        {
-          this->pixel_to_wkspindex[it->first] = workspaceIndex;
-          workspace->getOrAddEventList(workspaceIndex).addDetectorID(it->first);
-          workspaceIndex += 1;
-        }
-      }
-    }
+  // We want to pad out empty pixels.
+  if (!this->instrument_loaded_correctly)
+  { // TODO should this throw an error?
+    g_log.warning() << "Warning! Cannot pad empty pixels, since the instrument geometry did not load correctly or was not specified. Sorry!\n";
+    this->pixel_to_wkspindex.clear();
   }
   else
   {
-    this->pixel_to_wkspindex.clear();
+    detid2det_map detector_map;
+    workspace->getInstrument()->getDetectors(detector_map);
+
+    // determine maximum pixel id
+    detid2det_map::iterator it;
+    detid_t detid_max = 0; // seems like a safe lower bound
+    for (it = detector_map.begin(); it != detector_map.end(); it++)
+      if (it->first > detid_max)
+        detid_max = it->first;
+
+    this->pixel_to_wkspindex.reserve(detid_max);
+    this->pixel_to_wkspindex.assign(detid_max, 0);
+    size_t workspaceIndex = 0;
+    for (it = detector_map.begin(); it != detector_map.end(); it++)
+    {
+      if (!it->second->isMonitor())
+      {
+        this->pixel_to_wkspindex[it->first] = workspaceIndex;
+        workspace->getOrAddEventList(workspaceIndex).addDetectorID(it->first);
+        workspaceIndex += 1;
+      }
+    }
   }
 
   //For slight speed up
@@ -505,11 +496,8 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   //if (parallelProcessing)
   //  delete [] intermediate_buffer;
 
-  //finalize loading; this condenses the pixels into a 0-based, dense vector.
-  if (padPixels)
-    workspace->doneAddingEventLists();
-  else
-    workspace->doneLoadingData();
+  //finalize loading
+  workspace->doneAddingEventLists();
 
   this->setProtonCharge(workspace);
 
@@ -542,8 +530,6 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, DasEvent * event_buffer,
     size_t current_event_buffer_size, size_t fileOffset)
 {
-  bool padPixels = (this->getProperty(PAD_PIXELS_PARAM));
-
   DasEvent temp;
   uint32_t period;
 
@@ -617,11 +603,7 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
       longest_tof = tof;
 
     //The addEventQuickly method does not clear the cache, making things slightly faster.
-    if (padPixels)
-      workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
-    else
-      workspace->getEventListAtPixelID(pid).addEventQuickly(event);
-
+    workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
 
     // TODO work with period
     this->num_good_events++;
@@ -635,9 +617,6 @@ bool intermediatePixelIDComp(IntermediateEvent x, IntermediateEvent y)
 {
   return (x.pid < y.pid);
 }
-
-
-
 
 //-----------------------------------------------------------------------------
 /**
@@ -670,8 +649,6 @@ void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & works
   this->g_log.information() << "Total proton charge of " << integ << " microAmp*hours found by integrating.\n";
 
 }
-
-
 
 //-----------------------------------------------------------------------------
 /** Load a pixel mapping file
@@ -724,13 +701,19 @@ void LoadEventPreNeXus::openEventFile(const std::string &filename)
   //Open the file
   this->eventfile = new BinaryFile<DasEvent>(filename);
   this->num_events = eventfile->getNumElements();
+
+  // determine if we should truncate the event list by the parameter list
+  int numeventsparam = this->getProperty("NumberOfEvents");
+  if (numeventsparam > 0)
+    this->setMaxEventsToLoad(static_cast<size_t>(numeventsparam));
+
   //Limit the # of events to load?
   if (this->max_events > 0)
     this->num_events = this->max_events;
+
   this->g_log.information()<< "Reading " <<  this->num_events << " event records\n";
 
 }
-
 
 //-----------------------------------------------------------------------------
 /** Read a pulse ID file
