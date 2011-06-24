@@ -30,6 +30,7 @@ endif ()
 set ( BIN_DIR bin )
 set ( LIB_DIR lib )
 set ( PLUGINS_DIR plugins )
+set ( PVPLUGINS_DIR pvplugins )
 
 if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
   set ( CMAKE_INSTALL_PREFIX /opt/${CMAKE_PROJECT_NAME} CACHE PATH "Install path" FORCE )

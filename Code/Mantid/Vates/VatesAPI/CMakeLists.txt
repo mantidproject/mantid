@@ -125,7 +125,4 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   add_dependencies( FrameworkTests VatesAPITest )
 endif()
 
-# Windows-only at the moment.
-if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
-  install ( TARGETS VatesAPI RUNTIME DESTINATION ${LIB_DIR} )
-endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+install( TARGETS VatesAPI ${TARGET_TYPE} DESTINATION ${LIB_DIR} )

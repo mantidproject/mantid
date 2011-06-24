@@ -17,12 +17,7 @@ if( PARAVIEW_BUILD_QT_GUI )
 
 # Put library into subfolder.
 #output_binary_to( MantidParaViewRebinningCutterToolBarActions PVPlugins)	
-				   
- # Windows-only at the moment.
- if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
-   install(TARGETS MantidParaViewRebinningCutterToolBarActions RUNTIME DESTINATION ${LIB_DIR}/PVPlugins)
- endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
- 
 
+  install( TARGETS MantidParaViewRebinningCutterToolBarActions ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
 
 endif( PARAVIEW_BUILD_QT_GUI )

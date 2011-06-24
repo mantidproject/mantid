@@ -14,8 +14,5 @@ ${MANTID_SUBPROJECT_LIBS} )
 # Put library into subfolder.
 #output_binary_to(MantidParaViewRebinningCutterSMPlugin PVPlugins)
 
-# Windows-only at the moment.
-if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
-  install(TARGETS MantidParaViewRebinningCutterSMPlugin RUNTIME DESTINATION ${LIB_DIR}/PVPlugins)
-endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+install( TARGETS MantidParaViewRebinningCutterSMPlugin ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
 

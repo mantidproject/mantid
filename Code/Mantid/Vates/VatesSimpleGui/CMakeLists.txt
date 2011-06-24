@@ -75,6 +75,4 @@ target_link_libraries( ${PROJECT_NAME}
 pqCore pqComponents pqApplicationComponents
 ${QT_LIBRARIES} ${QWT_LIBRARIES} ${POCO_LIBRARIES} )
 
-if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
-  install(TARGETS VatesSimpleGui RUNTIME DESTINATION ${BIN_DIR})
-endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+install( TARGETS VatesSimpleGui RUNTIME DESTINATION ${BIN_DIR} )
