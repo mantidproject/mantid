@@ -225,7 +225,7 @@ def read_run(runs, run_role, format):
             return
 
     run_file, period = parse_run(run_file, format)
-    run_ws = eval(COMMAND[run_role] + 'run_file, period)[0]')
+    run_ws = eval(COMMAND[run_role] + 'run_file, period=period)[0]')
     if not run_ws:
         raise SkipReduction('Cannot load ' + run_role + ' run "' + run_file + '"')
     return run_ws
@@ -249,7 +249,7 @@ def read_trans_runs(runs, sample_or_can, format):
         #it is OK for transmission files not to be present
         return []
 
-    ws1, ws2 = eval(COMMAND[role1] + 'run_file1, run_file2, p1, p2)')
+    ws1, ws2 = eval(COMMAND[role1] + 'run_file1, run_file2, period_t=p1, period_d=p2)')
     if len(run_file1) > 0 and len(ws1) == 0:
         raise SkipReduction('Cannot load ' + role1 + ' run "' + run_file1 + '"')
     if len(run_file2) > 0 and len(ws2) == 0: 
