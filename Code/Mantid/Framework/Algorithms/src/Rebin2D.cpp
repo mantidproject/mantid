@@ -113,6 +113,7 @@ namespace Mantid
       }
       PARALLEL_CHECK_INTERUPT_REGION
 
+      outputWS->isDistribution(inputWS->isDistribution());
       setProperty("OutputWorkspace", outputWS);
     }
 
@@ -121,6 +122,7 @@ namespace Mantid
      * @param inputWS :: A pointer to the inputWS
      * @param oldYBins :: A reference to the set of Y bin boundaries on the input WS
      * @param newBin :: A reference to a polygon to test for overlap
+     * @returns A pair of Y and E values
      */
     std::pair<double,double> 
     Rebin2D::calculateYE(API::MatrixWorkspace_const_sptr inputWS,
@@ -130,17 +132,70 @@ namespace Mantid
       // Build a list intersection locations in terms of workspace indices
       // along with corresponding weights from that location
       std::vector<BinWithWeight> overlaps = findIntersections(oldXBins, oldYBins, newBin);
+      std::pair<double,double> binValues(0,0);
+      if( inputWS->isDistribution() )
+      {
+        const double newWidth = newBin[1].X() - newBin[0].X(); // For distribution
+        binValues = calculateDistYE(inputWS, overlaps, newWidth);
+      }
+      else
+      {
+        binValues = calculateYE(inputWS, overlaps);
+      }
+      return binValues;
+    }
+
+    /**
+     * Calculate the Y and E values from the given overlaps
+     * @param inputWS :: A pointer to the inputWS
+     * @param overlaps :: A list of overlap locations and weights
+     * @returns A pair of Y and E values
+     */
+    std::pair<double,double> Rebin2D::calculateYE(API::MatrixWorkspace_const_sptr inputWS,
+                                                  const std::vector<BinWithWeight> & overlaps) const
+    {
       double totalY(0.0), totalE(0.0);
       std::vector<BinWithWeight>::const_iterator iend = overlaps.end();
       for(std::vector<BinWithWeight>::const_iterator itr = overlaps.begin();
           itr != iend; ++itr)
       {
-        totalY += inputWS->readY(itr->yIndex)[itr->xIndex] * itr->weight;
-        totalE += std::pow(inputWS->readE(itr->yIndex)[itr->xIndex] * itr->weight, 2);
+        const size_t yIndex = itr->yIndex;
+        const size_t xIndex = itr->xIndex;
+        const MantidVec & inputY = inputWS->readY(yIndex);
+        const MantidVec & inputE = inputWS->readE(yIndex);
+        totalY += inputY[xIndex] * itr->weight;
+        totalE += std::pow(inputE[xIndex] * itr->weight, 2);
       }
       return std::make_pair(totalY,std::sqrt(totalE));
     }
 
+    /**
+     * Calculate the Y and E values from the given intersections for an input distribution
+     * @param inputWS :: A pointer to the inputWS
+     * @param overlaps :: A list of overlap locations and weights
+     * @param newBinWidth :: The width of the new bin
+     * @returns A pair of Y and E values
+     */
+    std::pair<double,double> Rebin2D::calculateDistYE(API::MatrixWorkspace_const_sptr inputWS,
+                                                      const std::vector<BinWithWeight> & overlaps,
+                                                      const double newBinWidth) const
+    {
+      const MantidVec & oldXBins = inputWS->readX(0);
+      double totalY(0.0), totalE(0.0);
+      std::vector<BinWithWeight>::const_iterator iend = overlaps.end();
+      for(std::vector<BinWithWeight>::const_iterator itr = overlaps.begin();
+          itr != iend; ++itr)
+      {
+        const size_t yIndex = itr->yIndex;
+        const size_t xIndex = itr->xIndex;
+        const MantidVec & inputY = inputWS->readY(yIndex);
+        const MantidVec & inputE = inputWS->readE(yIndex);
+        double oldWidth = oldXBins[xIndex+1] - oldXBins[xIndex];
+        totalY += inputY[xIndex] * oldWidth * itr->weight;
+        totalE += std::pow(inputE[xIndex]*oldWidth*itr->weight,2);
+      }
+      return std::make_pair(totalY/newBinWidth,std::sqrt(totalE)/newBinWidth);
+    }
 
     /**
      * Find the overlap of the inputWS with the given polygon

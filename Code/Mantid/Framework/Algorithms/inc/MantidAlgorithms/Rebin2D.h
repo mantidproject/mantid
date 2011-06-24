@@ -87,6 +87,13 @@ namespace Mantid
       std::pair<double,double> calculateYE(API::MatrixWorkspace_const_sptr inputWS,
                                            const MantidVec & oldYBins,
                                            const Geometry::ConvexPolygon & outputPoly) const;
+      /// Calculate the Y and E values from the given overlaps
+      std::pair<double,double> calculateYE(API::MatrixWorkspace_const_sptr inputWS,
+                                           const std::vector<BinWithWeight> & overlaps) const;
+      /// Calculate the Y and E values from the given overlaps for a distribution
+      std::pair<double,double> calculateDistYE(API::MatrixWorkspace_const_sptr inputWS,
+                                               const std::vector<BinWithWeight> & overlaps,
+                                               const double newBinWidth) const;
       /// Find the overlap of the inputWS with the given polygon
       std::vector<BinWithWeight> findIntersections(const MantidVec & oldAxis1, 
                                                    const MantidVec & oldAxis2,
