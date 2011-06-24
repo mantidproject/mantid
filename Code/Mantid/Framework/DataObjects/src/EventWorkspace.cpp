@@ -32,8 +32,7 @@ namespace DataObjects
                  = Kernel::Logger::get("EventWorkspace");
 
   //---- Constructors -------------------------------------------------------------------
-  EventWorkspace::EventWorkspace() : m_bufferedDataY(), m_bufferedDataE(),
-      m_cachedNumberOfEvents(0)
+  EventWorkspace::EventWorkspace() : m_bufferedDataY(), m_bufferedDataE()
   {
   }
 
@@ -684,9 +683,6 @@ namespace DataObjects
 
     //Now clear the data_map. We don't need it anymore
     this->data_map.clear();
-
-    //Cache the # of events (for getMemorySize)
-    this->m_cachedNumberOfEvents = this->getNumberEvents();
 
     //Set the flag for raising errors later
     this->done_loading_data = true;

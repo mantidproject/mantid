@@ -286,10 +286,6 @@ private:
   /// The most-recently-used list of dataE histograms
   mutable mru_lists m_bufferedDataE;
 
-  /// Cached copy of the # of events in the list, cached at the end of doneLoadingData()
-  mutable std::size_t m_cachedNumberOfEvents;
-
-
 };
 
 ///shared pointer to the EventWorkspace class
