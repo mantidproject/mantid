@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/CorrectKiKf.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAlgorithms/ConvertUnits.h"
@@ -140,11 +141,22 @@ public:
 
     alg.setPropertyValue("InputWorkspace", inputEvWSname);
     alg.setPropertyValue("OutputWorkspace", outputEvWSname);
-    alg.setPropertyValue("EMode","Indirect");
-    alg.setPropertyValue("EFixed","100.");
-    // Should blow up, but it doesn't. It seems that the error is caught by Mantid 
-    // TS_ASSERT_THROWS( alg.execute(), std::runtime_error );
+    alg.setPropertyValue("EMode","Direct");
+    alg.setPropertyValue("EFixed","3.");
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
+
+    EventWorkspace_sptr in_ws,out_ws;
+    TS_ASSERT_THROWS_NOTHING( out_ws = boost::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve(outputEvWSname) ));
+
+
+    TS_ASSERT_DELTA(out_ws->getEventList(0).getEvent(0).m_weight,std::sqrt(3./(3.-out_ws->getEventList(0).getEvent(0).m_tof)),1e-7);
+    TS_ASSERT_DELTA(out_ws->getEventList(0).getEvent(3).m_weight,std::sqrt(3./(3.-out_ws->getEventList(0).getEvent(3).m_tof)),1e-7);
+    TS_ASSERT_DELTA(out_ws->getEventList(0).getEvent(9).m_weight,0,1e-7); //Ef<0
+
+    TS_ASSERT( out_ws );
+    if (!out_ws) return;
+
     AnalysisDataService::Instance().remove(outputEvWSname);
     AnalysisDataService::Instance().remove(inputEvWSname);
   }
@@ -250,9 +262,12 @@ private:
 
   void createEventWorkspace()
   {
-    EventWorkspace_sptr event = EventWorkspace_sptr(new EventWorkspace());
-    event->initialize(1, 1, 1);
-    event->doneLoadingData();
+    EventWorkspace_sptr event = WorkspaceCreationHelper::CreateEventWorkspace(1,10,10,0,0.9,2,0);  
+
+//std::cout<<event->getEventList(0).getEvent(0).m_tof<<" ";
+//std::cout<<event->getEventList(0).getEvent(1).m_tof<<" "<<std::endl;
+
+
     event->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE"); 
     AnalysisDataService::Instance().add(inputEvWSname, event);
   }

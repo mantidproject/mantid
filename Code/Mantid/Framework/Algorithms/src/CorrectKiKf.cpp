@@ -78,15 +78,15 @@ void CorrectKiKf::exec()
   EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventW != NULL)
   {
-    g_log.information() << "Executing CorrectKiKf for event workspace" << std::endl;
     this->execEvent();
+    return;
   }  
   
 
   const size_t size = this->inputWS->blocksize();
   // Calculate the number of spectra in this workspace
   const int numberOfSpectra = static_cast<int>(this->inputWS->size() / size);
-  Progress prog(this,0.0,1.0,numberOfSpectra);
+  API::Progress prog(this,0.0,1.0,numberOfSpectra);
   const bool histogram = this->inputWS->isHistogramData();
   bool negativeEnergyWarning = false;
     
@@ -201,10 +201,159 @@ void CorrectKiKf::exec()
 
 void CorrectKiKf::execEvent()
 {
-  g_log.information("You should not apply this algorithm to an event workspace. I will exit now, with a not implemented error.");
-  throw Kernel::Exception::NotImplementedError("EventWorkspaces are not supported!");
+  g_log.information("Processing event workspace");
+
+  const MatrixWorkspace_const_sptr matrixInputWS = this->getProperty("InputWorkspace");
+  EventWorkspace_const_sptr inputWS= boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
+
+  // generate the output workspace pointer
+  API::MatrixWorkspace_sptr matrixOutputWS = this->getProperty("OutputWorkspace");
+  EventWorkspace_sptr outputWS;
+  if (matrixOutputWS == matrixInputWS)
+    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
+  else
+  {
+    //Make a brand new EventWorkspace
+    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
+            API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
+    //Copy geometry over.
+    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+    //You need to copy over the data as well.
+    outputWS->copyDataFrom( (*inputWS) );
+
+    //Cast to the matrixOutputWS and save it
+    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+    this->setProperty("OutputWorkspace", matrixOutputWS);
+  }
+
+  const std::string emodeStr = getProperty("EMode");
+  double efixedProp = getProperty("EFixed"),efixed;
+
+  if( efixedProp == EMPTY_DBL() )
+  {
+    if (emodeStr == "Direct")
+    {
+      // Check if it has been store on the run object for this workspace
+      if( this->inputWS->run().hasProperty("Ei"))
+      {
+        Kernel::Property* eiprop = this->inputWS->run().getProperty("Ei");
+        efixedProp = boost::lexical_cast<double>(eiprop->value());
+        g_log.debug() << "Using stored Ei value " << efixedProp << "\n";
+      }
+      else
+      {
+        throw std::invalid_argument("No Ei value has been set or stored within the run information.");
+      }
+    }
+    else
+    {
+      // If not specified, will try to get Ef from the parameter file for indirect geometry, 
+      // but it will be done for each spectrum separately, in case of different analyzer crystals
+    }
+  }
+
+  int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
+  API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
+  bool negativeEnergyWarning;
+  PARALLEL_FOR1(outputWS)
+  for (int64_t i=0; i < numHistograms; ++i)
+  {
+    PARALLEL_START_INTERUPT_REGION
+    
+    double Efi = 0;
+    // Now get the detector object for this histogram to check if monitor
+    // or to get Ef for indirect geometry
+    if (emodeStr == "Indirect") 
+    {
+      if ( efixedProp != EMPTY_DBL()) Efi = efixedProp;
+      else try 
+      {
+        IDetector_sptr det = inputWS->getDetector(i);  
+        if (!det->isMonitor())
+        {
+          std::vector< double >  wsProp=det->getNumberParameter("Efixed");
+          if ( wsProp.size() > 0 )
+          {
+            Efi=wsProp.at(0);
+            g_log.debug() << i << " Ef: "<< Efi<<" (from parameter file)\n";     
+          }
+          else
+          { 
+            g_log.information() <<"Ef not found for spectrum "<< i << std::endl;
+            throw std::invalid_argument("No Ef value has been set or found.");
+          }
+        }
+
+      }
+      catch(std::runtime_error&) { g_log.information() << "Spectrum " << i << ": cannot find detector" << "\n"; }
+    }
+
+    if (emodeStr == "Indirect") efixed=Efi;
+    else efixed=efixedProp;
+
+    //Do the correction
+		EventList *evlist=outputWS->getEventListPtr(i);
+    switch (evlist->getEventType())
+    {
+      case TOF:
+        //Switch to weights if needed.
+        evlist->switchTo(WEIGHTED);
+        // Fall through
+  
+      case WEIGHTED:
+        negativeEnergyWarning=correctKiKfEventHelper(evlist->getWeightedEvents(), efixed,emodeStr);
+        break;
+  
+      case WEIGHTED_NOTIME:
+        negativeEnergyWarning=correctKiKfEventHelper(evlist->getWeightedEventsNoTime(), efixed,emodeStr);
+        break;
+    }
+
+
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+
+  outputWS->clearMRU();
+  if (negativeEnergyWarning) g_log.information() <<"Ef <= 0 or Ei <= 0 in at least one spectrum!!!!"<<std::endl;
+  if ((negativeEnergyWarning) && ( efixedProp == EMPTY_DBL())) g_log.information()<<"Try to set fixed energy"<<std::endl ;
 }
 
+/**
+ * Execute CorrectKiKf for event lists
+ *
+ */
+template<class T>
+    bool CorrectKiKf::correctKiKfEventHelper(std::vector<T>& wevector, double efixed,const std::string emodeStr)
+{
+  double Ei,Ef;
+  float kioverkf;
+  bool negativeEnergyWarning=false;
+  typename std::vector<T>::iterator it;
+  for (it=wevector.begin(); it<wevector.end(); it++)
+  {
+    if (emodeStr == "Direct")  //Ei=Efixed
+    {
+      Ei = efixed;
+      Ef = Ei - it->m_tof;
+    } else                     //Ef=Efixed
+    { 
+      Ef = efixed;
+      Ei = Ef + it->m_tof;
+    }
+    // if Ei or Ef is negative, it gives a warning warning and the events will have 0 weight
+    if ((Ei <= 0)||(Ef <= 0))
+    {
+      kioverkf=0.;
+      negativeEnergyWarning=true;
+    } 
+    else kioverkf = static_cast<float>(std::sqrt( Ei / Ef ));
+    it->m_weight*=kioverkf;
+    it->m_errorSquared*=kioverkf;
+  }
+  return negativeEnergyWarning;
+}
 
 } // namespace Algorithm
 } // namespace Mantid
