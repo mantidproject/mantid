@@ -148,6 +148,8 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString&)
     return;
   }
 
+  m_uiForm.logBox->clear();
+
   Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmFactory::Instance().create("LoadNexus",-1);
   alg->initialize();
   try
