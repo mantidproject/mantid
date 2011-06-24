@@ -228,22 +228,25 @@ void MultiSliceView::updateSelectedIndicator()
 {
 	pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
 	pqPipelineSource *cut = qobject_cast<pqPipelineSource *>(smsModel->currentItem());
-	vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
-			"CutFunction").GetAsProxy();
-	double origin[3];
-	vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
-	if (this->ui.xAxisWidget->hasIndicator())
-	{
-		this->ui.xAxisWidget->updateIndicator(origin[0]);
-	}
-	if (this->ui.yAxisWidget->hasIndicator())
-	{
-		this->ui.yAxisWidget->updateIndicator(origin[1]);
-	}
-	if (this->ui.zAxisWidget->hasIndicator())
-	{
-		this->ui.zAxisWidget->updateIndicator(origin[2]);
-	}
+  if (!cut->getSMName().contains("MantidRebinningCutter"))
+  {
+    vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
+                                            "CutFunction").GetAsProxy();
+    double origin[3];
+    vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
+    if (this->ui.xAxisWidget->hasIndicator())
+    {
+      this->ui.xAxisWidget->updateIndicator(origin[0]);
+    }
+    if (this->ui.yAxisWidget->hasIndicator())
+    {
+      this->ui.yAxisWidget->updateIndicator(origin[1]);
+    }
+    if (this->ui.zAxisWidget->hasIndicator())
+    {
+      this->ui.zAxisWidget->updateIndicator(origin[2]);
+    }
+  }
 }
 
 void MultiSliceView::onColorScaleChange(double min, double max)
