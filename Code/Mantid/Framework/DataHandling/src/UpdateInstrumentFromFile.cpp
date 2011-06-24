@@ -54,6 +54,8 @@ namespace Mantid
       declareProperty("MoveMonitors", false, 
                       "If true the positions of any detectors marked as monitors "
                       "in the IDF will be moved also");
+      declareProperty("IgnorePhi", false, 
+                      "If true the phi values form the file will be ignored ");
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -169,6 +171,7 @@ namespace Mantid
       const std::vector<int32_t> & detID, const std::vector<float> & l2, 
       const std::vector<float> & theta, const std::vector<float> & phi)
       {
+        const bool ignorePhi = getProperty("IgnorePhi");
         const bool moveMonitors = getProperty("MoveMonitors");
         const bool ignoreMonitors(!moveMonitors);
         const int numDetector = static_cast<int>(detID.size());
@@ -182,7 +185,16 @@ namespace Mantid
             V3D parentPos;
             if( det->getParent() ) parentPos = det->getParent()->getPos();
             Kernel::V3D pos;
-            pos.spherical(l2[i], theta[i], phi[i]);
+            if (!ignorePhi)
+            {
+              pos.spherical(l2[i], theta[i], phi[i]);
+            }
+            else
+            {
+              double r,t,p;
+              det->getPos().getSpherical(r,t,p);
+              pos.spherical(l2[i], theta[i], p);
+            }
             // Set new relative position
             det->setPos(pos-parentPos);
           }

@@ -596,11 +596,16 @@ namespace Mantid
         if( pmap.contains(localWorkspace->getBaseInstrument().get(),"det-pos-source") )
         {
           boost::shared_ptr<Geometry::Parameter> updateDets = pmap.get(localWorkspace->getBaseInstrument().get(),"det-pos-source");
-          if( updateDets->value<std::string>() == "datafile" )
+          std::string value = updateDets->value<std::string>();
+          if(value.substr(0,8)  == "datafile" )
           {
             IAlgorithm_sptr updateInst = createSubAlgorithm("UpdateInstrumentFromFile");
             updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
             updateInst->setPropertyValue("Filename", fileName);
+            if(value  == "datafile-ignore-phi" )
+            {
+              updateInst->setProperty("IgnorePhi", true);
+            }
             // We want this to throw if it fails to warn the user that the information is not correct.
             updateInst->execute();
           }
