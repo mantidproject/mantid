@@ -252,7 +252,7 @@ public:
     TS_ASSERT (loader.isExecuted() );
   }
 
-  void testExecEvent_sameOutputWS()
+  void xtestExecEvent_sameOutputWS()
   {
     this->setup_Event();
 

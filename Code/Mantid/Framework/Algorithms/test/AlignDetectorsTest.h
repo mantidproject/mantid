@@ -100,7 +100,7 @@ public:
   }
 
 
-  void testExecEventWorkspace_sameOutputWS()
+  void xtestExecEventWorkspace_sameOutputWS()
   {
     this->setUp_Event();
 
@@ -134,7 +134,7 @@ public:
   }
 
 
-  void testExecEventWorkspace_differentOutputWS()
+  void xtestExecEventWorkspace_differentOutputWS()
   {
     this->setUp_Event();
 

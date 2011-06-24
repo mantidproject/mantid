@@ -168,7 +168,7 @@ public:
     TS_ASSERT (loader.isExecuted() );
   }
 
-	void testExecEvents()
+	void xtestExecEvents()
 	{
 	  this->setup_Event();
 	  std::string outputSpace = "eventWS_out";
