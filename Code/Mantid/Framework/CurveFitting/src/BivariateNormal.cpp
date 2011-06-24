@@ -111,12 +111,12 @@ void BivariateNormal::function(double *out, const double *xValues, const size_t 
   UNUSED_ARG(xValues);
   int Nrows = (int) getAttribute("NRows").asDouble();
   int Ncols = (int) getAttribute("NCols").asDouble();
-  double *Attrib = new double[nAttributes()];
+//  double *Attrib = new double[nAttributes()];
   double *LastParams = new double[7];
   double *expVals = new double[Nrows*Ncols];
   double uu,coefNorm,expCoeffx2,expCoeffy2,expCoeffxy;
   bool isNaNs;
- initCommon(Attrib,  LastParams,expVals, uu,coefNorm,expCoeffx2,
+ initCommon(  LastParams,expVals, uu,coefNorm,expCoeffx2,
                          expCoeffy2,expCoeffxy,isNaNs);
 
   for (size_t i = 0; i < nData; i++)
@@ -134,7 +134,7 @@ void BivariateNormal::function(double *out, const double *xValues, const size_t 
       }
 
   }
-  delete[] Attrib;
+  //delete[] Attrib;
   delete[] LastParams;
   delete[] expVals;
 }
@@ -246,7 +246,7 @@ void BivariateNormal::init()
 
 void BivariateNormal::initCommon()
  {
-  std::cout<<"in INIt Common"<< std::endl;
+  //std::cout<<"in INIt Common"<< std::endl;
   bool ParamsOK = true;
   bool CommonsOK = true;
   if (!expVals)
@@ -280,11 +280,11 @@ void BivariateNormal::initCommon()
     addConstraint( IntensityConstraint);
 
     double minMeany = Attrib[StartRow] + Attrib[NRows] / 10;
-    if (minMeany < Attrib[StartRow] + 3)
-      minMeany = Attrib[StartRow] + 3;
+    if (minMeany < Attrib[StartRow] + 2)
+      minMeany = Attrib[StartRow] + 2;
     double maxMeany = Attrib[NRows] * .9;
-    if (maxMeany > Attrib[NRows] - 3)
-      maxMeany = Attrib[NRows] - 3;
+    if (maxMeany > Attrib[NRows] - 2)
+      maxMeany = Attrib[NRows] - 2;
     maxMeany += Attrib[StartRow];
     MeanyConstraint = new BoundaryConstraint(this, "Mrow", minMeany, maxMeany);
 
@@ -294,8 +294,8 @@ void BivariateNormal::initCommon()
     if (minMeanx < 3)
       minMeanx = 3;
     double maxMeanx = Attrib[NCols] * .9;
-    if (maxMeanx > Attrib[NCols] - 3)
-      maxMeanx = Attrib[NCols] - 3;
+    if (maxMeanx > Attrib[NCols] - 2)
+      maxMeanx = Attrib[NCols] - 2;
     maxMeanx += Attrib[StartCol];
     minMeanx += Attrib[StartCol];
     MeanxConstraint = new BoundaryConstraint(this, "Mcol", minMeanx, maxMeanx);
@@ -388,11 +388,11 @@ void BivariateNormal::initCommon()
   }
 }
 
-void BivariateNormal::initCommon(double *Attrib, double* LastParams,double* expVals,
+void BivariateNormal::initCommon( double* LastParams,double* expVals,
               double &uu,double &coefNorm,double &expCoeffx2,double &expCoeffy2,double &expCoeffxy,
 	       bool &isNaNs)const
  {
-  std::cout<<"in INIt Common1"<< std::endl;
+  //std::cout<<"in INIt Common1"<< std::endl;
     isNaNs= false;
    double mIx,mIy,mx,my,SIxx,SIyy,SIxy,Sxx,Syy,Sxy;
   
@@ -412,76 +412,11 @@ void BivariateNormal::initCommon(double *Attrib, double* LastParams,double* expV
     Sxy = Attrib[S_xy] - (Attrib[S_x]) * (Attrib[S_y]) / Attrib[S_1];
 
 
-/*    BackConstraint = (new BoundaryConstraint(this, "Background", 0, Attrib[S_int] / Attrib[S_1]));
-//    addConstraint( BackConstraint);
-//    double maxIntensity = Attrib[S_int] + 3 * sqrt(Attrib[S_int]);
-//    if (maxIntensity < 100)
-//      maxIntensity = 100;
-//    IntensityConstraint = new BoundaryConstraint(this, "Intensity", 0, maxIntensity);
-//    addConstraint( IntensityConstraint);
 
-//    double minMeany = Attrib[StartRow] + Attrib[NRows] / 10;
-//    if (minMeany < Attrib[StartRow] + 3)
-//      minMeany = Attrib[StartRow] + 3;
-//    double maxMeany = Attrib[NRows] * .9;
-//    if (maxMeany > Attrib[NRows] - 3)
-//      maxMeany = Attrib[NRows] - 3;
-//    maxMeany += Attrib[StartRow];
-//    MeanyConstraint = new BoundaryConstraint(this, "Mrow", minMeany, maxMeany);
-
-//    addConstraint( MeanyConstraint);
-
-//    double minMeanx = Attrib[NCols] / 10;
-//    if (minMeanx < 3)
-      minMeanx = 3;
-    double maxMeanx = Attrib[NCols] * .9;
-    if (maxMeanx > Attrib[NCols] - 3)
-      maxMeanx = Attrib[NCols] - 3;
-    maxMeanx += Attrib[StartCol];
-    minMeanx += Attrib[StartCol];
-    MeanxConstraint = new BoundaryConstraint(this, "Mcol", minMeanx, maxMeanx);
-    addConstraint( MeanxConstraint);
-*/
   }
 
     for (int i = 0; i < nParams(); i++)
       LastParams[i] = getParameter(i);
-
-/*    std::ostringstream ssxx, ssyy, ssxy;
-
-    ssyy << std::string("(") << (SIyy) << "+(Mrow-" << (mIy) << ")*(Mrow-" << (mIy) << ")*"
-        << Attrib[S_int] << "-Background*" << (Syy) << "-Background*(Mrow-" << (my) << ")*(Mrow-"
-        << (my) << ")*" << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*" << (Attrib[S_1])
-        << ")";
-
-    // std::cout<<"row formula="<< ssyy.str()<<std::endl;
-    //API::ParameterTie* pt =
-        tie("SSrow", ssyy.str());
-    //  std::cout << "  ddK" <<pt->eval()<< std::endl;
-
-    ssxx << std::string("(") << (SIxx) << "+(Mcol-" << (mIx) << ")*(Mcol-" << (mIx) << ")*"
-        << Attrib[S_int] << "-Background*" << (Sxx) << "-Background*(Mcol-" << (mx) << ")*(Mcol-"
-        << (mx) << ")*" << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*" << (Attrib[S_1])
-        << ")";
-
-    // std::cout<<"col formula="<< ssxx.str()<<std::endl;
-    //API::ParameterTie* ptx =
-    tie("SScol", ssxx.str());
-    // std::cout << "  ddK" <<ptx->eval()<< std::endl;
-
-    ssxy << std::string("(") << (SIxy) << "+(Mcol-" << (mIx) << ")*(Mrow-" << (mIy) << ")*"
-        << Attrib[S_int] << "-Background*" << (Sxy) << "-Background*(Mcol-" << (mx) << ")*(Mrow-"
-        << (my) << ")*" << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*" << (Attrib[S_1])
-        << ")";
-
-    //std::cout<<"cov formula="<< ssxy.str()<<std::endl;
-   // API::ParameterTie* ptxy =
-    tie("SSrc", ssxy.str());
-    //std::cout << "   ddK" <<ptxy->eval()<< std::endl;
-
-*/
-   
-
     uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
 
     coefNorm = .5 / M_PI / sqrt(uu);
@@ -495,7 +430,7 @@ void BivariateNormal::initCommon(double *Attrib, double* LastParams,double* expV
     int startCol = (int) getAttribute("StartCol").asDouble();
     int Nrows = (int) getAttribute("NRows").asDouble();
     int Ncols = (int) getAttribute("NCols").asDouble();
-    expVals = new double[Nrows * Ncols];
+    //expVals = new double[Nrows * Ncols];
 
     for (int r = startRow; r < startRow + Nrows; r++)
       for (int c = startCol; c < startCol + Ncols; c++)

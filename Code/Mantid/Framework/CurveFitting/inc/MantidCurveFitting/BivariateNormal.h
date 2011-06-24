@@ -1,13 +1,15 @@
 #ifndef MANTID_CURVEFITTING_BIVARIATENORMAL_H_
 #define MANTID_CURVEFITTING_BIVARIATENORMAL_H_
-
+ 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
+#include "MantidAPI/IFitFunction.h"
 //#include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
+using namespace Mantid::API;
  namespace Mantid
 {
   namespace CurveFitting
@@ -101,6 +103,25 @@
       //void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
       //void setParameter(int , const double& value, bool explicitlySet = true);
 
+       void 	addPenalty  (double *out) const 
+       {
+             double out0=out[0];
+             IFitFunction::addPenalty( out);
+              double pen = out[0]-out0;
+              if( pen ==0)
+                   return;
+              if( BackConstraint->check()>0)
+               std::cout<<"Background Bad "<< BackConstraint->lower()<<","<<BackConstraint->upper()<<std::endl;
+             
+             if( MeanxConstraint->check()>0)
+               std::cout<<"Col OOB"<<MeanxConstraint->lower()<<","<<MeanxConstraint->upper()<<std::endl;
+             if( MeanyConstraint->check()>0)
+               std::cout<<"Row OOB"<<MeanyConstraint->lower()<<","<<MeanyConstraint->upper()<<std::endl;
+
+            if( IntensityConstraint->check()>0)
+              std::cout<<"Inten OOB"<<IntensityConstraint->lower()<<","<<IntensityConstraint->upper()<<std::endl;
+       }
+      
       void 	function  (double *out, const double *xValues, const size_t nData)const ;
           
     
@@ -126,7 +147,7 @@
       
       void initCommon();//Check for changes in parameters, etc. Calculates common values
       
-      void initCommon( double *Attrib, double* LastParams,double* expVals,double &uu,
+      void initCommon(  double* LastParams,double* expVals,double &uu,
                      double &coefNorm,double &expCoeffx2,double  &expCoeffy2,double  &expCoeffxy,
 		      bool &isNaNs) const;
 
