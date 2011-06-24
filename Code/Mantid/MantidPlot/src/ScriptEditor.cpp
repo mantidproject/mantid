@@ -22,6 +22,7 @@
 #include <Qsci/qsciapis.h>
 #include <Qsci/qscilexerpython.h> 
 
+
 // std
 #include <cmath>
 #include <iostream>
@@ -711,6 +712,7 @@ void ScriptEditor::paste()
   }
 }
 
+
 //------------------------------------------------
 // Private member functions
 //------------------------------------------------
@@ -803,6 +805,22 @@ void ScriptEditor::remapWindowEditingKeys()
 void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event)
 {
    // Handle event
+
+  //dodgy hack to get around a bug in QScitilla
+  //If you pressed ( after typing in a autocomplete command the calltip does not appear, you have to delete the ( and type it again
+  //This does that for you!
+  if (event->text()=="(")
+  {
+    QKeyEvent * backspEvent = new QKeyEvent(QEvent::KeyPress, Qt::Key_Backspace, Qt::NoModifier);
+    QKeyEvent * bracketEvent = new QKeyEvent(*event);
+    QsciScintilla::keyPressEvent(bracketEvent);
+    QsciScintilla::keyPressEvent(backspEvent);
+
+    delete (backspEvent);
+    delete (bracketEvent);
+  }
+  
+
   QsciScintilla::keyPressEvent(event);
   
   // Only need to do this for Unix and for QScintilla version < 2.4.2. Moreover, only Gnome but I don't think we can detect that
