@@ -66,7 +66,12 @@ if __name__ == '__main__':
         props = alg.getProperties()
         calltip = "("
         for prop in props:
-            calltip += prop.name + ','
+            if (len(prop.isValid)>0):
+                #not valid by default, thus input is mandatory
+                calltip += prop.name + ','
+            else:
+                #valid by default, therefore optional
+                calltip += "[" + prop.name + '],'
         #strip off the final ,
         calltip = calltip.rstrip(',')
         calltip += ")"
