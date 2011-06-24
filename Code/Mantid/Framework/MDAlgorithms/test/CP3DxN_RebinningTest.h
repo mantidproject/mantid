@@ -64,6 +64,48 @@ bool load_existing_workspace(const std::string &workspace_name){
     return true;
 
 }
+bool fake_load2D_workspace(const std::string &workspace_name){
+// helper function to generate ("load") a 2D test workpsace -- something a user should do before rebinning
+
+  std::string dataFileName("test_horace_reader2D.sqw");
+
+    Load_MDWorkspace loader;
+    if(!loader.isInitialized()){
+        loader.initialize();
+    }
+    // as we are setting file property, file has to exist despite being absolutely unnecessary; we need to create it to avoid errors
+    std::ofstream dummyFile(dataFileName);
+    loader.setPropertyValue("inFilename",dataFileName);
+  
+    loader.setPropertyValue("MDWorkspace",workspace_name);
+    // describe test workspace;
+    Geometry::MDGeometryDescription Descr2D(2,1);
+    Descr2D.pDimDescription(0)->nBins  = 100;
+    Descr2D.pDimDescription(0)->cut_min = -6.6;
+    Descr2D.pDimDescription(0)->cut_max =  6.6;
+    Descr2D.pDimDescription(0)->Tag     = "qx";
+ 
+    Descr2D.pDimDescription(1)->nBins  = 100;
+    Descr2D.pDimDescription(1)->cut_min = -1;
+    Descr2D.pDimDescription(1)->cut_max =  99;
+    Descr2D.pDimDescription(1)->Tag     = "En";
+
+    Descr2D.nContributedPixels          = 1000000;
+    loader.set_test_mode(Descr2D);
+
+    loader.execute();
+
+    dummyFile.close();
+    unlink(dataFileName.c_str());
+
+    Workspace_sptr result=AnalysisDataService::Instance().retrieve(workspace_name);
+    MDWorkspace*  pOrigin = dynamic_cast<MDWorkspace *>(result.get());
+    // no workspace loaded -- no point to continue
+    if(!pOrigin)return false;
+
+    return true;
+
+}
 
 class CP3DxN_RebinningTest :  public CxxTest::TestSuite
 {
@@ -192,6 +234,28 @@ class CP3DxN_RebinningTest :  public CxxTest::TestSuite
 
 
         TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
+    }
+
+    void testRebinWS2D(){
+        if(!fake_load2D_workspace(InputWorkspaceName))throw("unable to generate 2D workspace");
+
+
+        cpr.setPropertyValue("Input", InputWorkspaceName);      
+        cpr.setPropertyValue("Result",OutWorkspaceName);
+        cpr.setProperty("KeepPixels",false);
+      // set slicing property for the target workspace to the size and shape of the current workspace
+        cpr.setTargetGeomDescrEqSource();
+
+        Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
+        TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
+
+       // now modify it as we need/want;
+
+         pSlicing->pDimDescription("qx")->cut_min = 0;
+         pSlicing->pDimDescription("qx")->cut_max = 3;
+
+
+         TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
     }
 	 void testClearWorkspaces(){
 		 //  not entirely according to standarts, but does not test anything but deletes workpsaces to free memory when running in suite

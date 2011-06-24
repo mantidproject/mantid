@@ -173,6 +173,7 @@ DynamicCPRRebinning::preselect_cells()
   size_t size3D(1);
   std::vector<double> cut_min(3,0);
   std::vector<double> cut_max(3,0);
+
   for(i=0;i<nReciprocal;i++){
     size3D    *= (pReciprocal[i]->getNBins()+1);
     rec_dim[i] = pReciprocal[i];
@@ -188,6 +189,8 @@ DynamicCPRRebinning::preselect_cells()
     // we should know the limits the dummy dimensions have
     cut_min[i] = rec_dim[i]->getMinimum();
     cut_max[i] = rec_dim[i]->getMaximum()*(1+FLT_EPSILON);
+    // each dummy rec dim here have one bin, so 2 edges
+    size3D    *= 2;
    
   }
 
@@ -199,9 +202,9 @@ DynamicCPRRebinning::preselect_cells()
   // lattice points transformed into new coordinate system.
   // needed modifications for nRecDim<3
   ic = 0;
-  for(k=0;k<=rec_dim[2]->getNBins();k++){
-    for(j=0;j<=rec_dim[1]->getNBins();j++){
-      for(i=0;i<=rec_dim[0]->getNBins();i++){
+  for(k=0;k<rec_dim[2]->getNBins()+1;k++){
+    for(j=0;j<rec_dim[1]->getNBins()+1;j++){
+      for(i=0;i<rec_dim[0]->getNBins()+1;i++){
         rx[ic]=rec_dim[0]->getX(i);
         ry[ic]=rec_dim[1]->getX(j);
         rz[ic]=rec_dim[2]->getX(k);

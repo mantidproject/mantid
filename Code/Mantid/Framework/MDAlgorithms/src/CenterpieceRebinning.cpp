@@ -99,7 +99,7 @@ CenterpieceRebinning::exec()
             throw(std::runtime_error("input workspace has to exist"));
         }
    }else{
-      bin_log.error()<<"Input workspace has not been defined in properties\n";
+       bin_log.error()<<"Input workspace has not been defined in properties\n";
        throw(std::runtime_error("input workspace has to be availible through properties"));
    }
 

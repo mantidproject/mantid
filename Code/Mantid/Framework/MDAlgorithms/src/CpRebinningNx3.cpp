@@ -15,7 +15,7 @@ CpRebinningNx3::CpRebinningNx3(const MDDataObjects::MDWorkspace_const_sptr &sour
                  Geometry::MDGeometryDescription const * const pTargetDescr,
                  const MDDataObjects::MDWorkspace_sptr  & targetWS,bool in_keep_pixels):
 DynamicCPRRebinning(sourceWS,pTargetDescr,targetWS),
-nRecDims(3), // can not do anything else here
+nRecDims(3), // should be 3 but we would redefine it as stun
 keep_pixels(in_keep_pixels),
 n_starting_cell(0),
 n_pixels_read(0),
@@ -23,6 +23,8 @@ n_pixels_selected(0),
 n_pix_in_buffer(0),
 pTargetDataPoints(targetWS->get_spMDDPoints().get())
 {
+    //TODO: it is stub as should be only 3 here, but it would work. 
+    this->nRecDims = sourceWS->get_const_MDGeometry().getNumReciprocalDims();
 
 	this->build_scaled_transformation_matrix(sourceWS->get_const_MDGeometry(),*pTargetDescr);
  
@@ -128,13 +130,19 @@ CpRebinningNx3::build_scaled_transformation_matrix(const Geometry::MDGeometry &S
   this->n_pix_in_buffer  = 0;
   // number of dimensions can not be higher then 2^32 anyway
   this->nDimensions     = (unsigned int)Source.getNumDims();
-  this->shifts.resize(this->nDimensions);
-  this->cut_min.resize(this->nDimensions);
-  this->cut_max.resize(this->nDimensions);
-  this->axis_step.resize(this->nDimensions);
-  this->axis_step_inv.resize(this->nDimensions);
-  this->strides.resize(this->nDimensions);
-  this->rec_dim_indexes.assign(3,-1);
+  // this is to run this algorithm on dataset with less then 3 dimensions. Inefficient but may be convenient;
+  size_t d_size = nDimensions;
+  if(this->nRecDims<3){
+      d_size = 3+nDimensions-this->nRecDims;
+  }
+
+  this->shifts.assign(d_size,0);
+  this->cut_min.assign(d_size,0);
+  this->cut_max.assign(d_size,1);
+  this->axis_step.assign(d_size,0);
+  this->axis_step_inv.assign(d_size,0);
+  this->strides.assign(d_size,0);
+  this->rec_dim_indexes.assign(3,0);
 
 
   // reduction dimensions; if stride = 0, the dimension is reduced;
@@ -157,16 +165,38 @@ CpRebinningNx3::build_scaled_transformation_matrix(const Geometry::MDGeometry &S
       }
  
   }
+  DblMatrix rotMat = target.getRotations();
 
-  std::vector<double> rot = target.getRotations().get_vector();
-
-  for(i=0;i<3;i++){
-    ic = i*3;
-    for(j=0;j<3;j++){
-      rotations[ic+j]=rot[ic+j]*axis_step_inv[i];
-    }
+  //TODO: this class should not do other then 3-rec-dimensions, but we can do it as a stub for the time being
+  if(this->nRecDims < 3){
+     for(i=this->nRecDims;i<3;i++){         
+          for(j=this->nRecDims;j<3;j++){
+              rotMat[i][j]=0;
+              rotMat[j][i]=0;
+          }
+          ic = i*3;
+          for(j=0;j<3;j++){
+              rotations[ic+j]=0;
+          }
+      }
+     // make strides of missing reciprocal dimensions equal to 0
+     ic= this->nDimensions;
+     for(i=this->nRecDims;i<3;i++){
+         rec_dim_indexes[i]=ic;
+         strides[ic]        =0;
+         ic++;
+     }
+     
   }
-  //TODO: modify the rotation matrix to suppress non-existing reciprocal dimensions
+  std::vector<double>  rot    = rotMat.get_vector();
+
+  for(i=0;i<this->nRecDims;i++){
+       ic = i*3;
+       for(j=0;j<3;j++){
+           rotations[ic+j]=rot[ic+j]*axis_step_inv[i];
+       }
+   }
+
 
 
 }
@@ -179,10 +209,10 @@ CpRebinningNx3::rebin_Nx3dataset()
       pix_Xmin,pix_Ymin,pix_Zmin,pix_Emin,pix_Xmax,pix_Ymax,pix_Zmax,pix_Emax;
   size_t nPixel_retained(0);
 
-
+  size_t d_size = ((this->nDimensions>3)?nDimensions:3);
  
-  std::vector<double> boxMin(this->nDimensions,FLT_MAX);
-  std::vector<double> boxMax(this->nDimensions,-FLT_MAX);
+  std::vector<double> boxMin(d_size,FLT_MAX);
+  std::vector<double> boxMax(d_size,-FLT_MAX);
   std::vector<double> rN(this->nDimensions,0);
   
   bool  ignore_something,ignote_all;
@@ -205,9 +235,10 @@ CpRebinningNx3::rebin_Nx3dataset()
   // this one should coinside with the description, obtained from the MDDataPoints and readers;
   float *MDDataPoint =(float *)(&(pix_buf->operator[](0)));
   unsigned int signal_shift = nDimensions;
+  //TODO: this should be a method on MDDPoints class
   unsigned int data_stride  = this->pSourceDataPoints->sizeofMDDataPoint()/sizeof(float);
-  // min-max value initialization
 
+  // min-max value initialization
   pix_Xmin=pix_Ymin=pix_Zmin=pix_Emin=  std::numeric_limits<double>::max();
   pix_Xmax=pix_Ymax=pix_Zmax=pix_Emax=- std::numeric_limits<double>::max();
   //size_t nCells  = this->n_target_cells;

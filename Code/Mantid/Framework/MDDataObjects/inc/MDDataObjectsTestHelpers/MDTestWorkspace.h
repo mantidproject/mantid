@@ -60,10 +60,8 @@ class MDTestWorkspace
         Geometry::MDGeometryDescription geomDescr(pBasis->getNumDims(),pBasis->getNumReciprocalDims());
         pReader->read_MDGeomDescription(geomDescr);
 
-//		pReader->read_MDImg_data(
 
-        // read test point description 
-        //TODO: The test point description is correlated with rebinning algorithm. Decorrelate
+        // read test point description     
         MDDataObjects::MDPointDescription pd = pReader->read_pointDescriptions();
 
         // create and initate new workspace with data above .
@@ -98,6 +96,7 @@ public:
 
     ~MDTestWorkspace(){
      }
+    // obtain test workspace like the one you would from analysis data service but without fiddling with it. 
     MDDataObjects::MDWorkspace_sptr get_spWS(){return spMDWs;}
 };
 

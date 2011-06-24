@@ -112,6 +112,8 @@ MD_FileTestDataGenerator::read_pointDescriptions(void)const
     MDPointStructure  aPointDescr;
 
     //TODO: This information has to correlate with what rebinning expects. Decorrelate!!!
+    aPointDescr.NumDimensions     = this->GeomDescription.getNumDims();
+    aPointDescr.NumRecDimensions = this->GeomDescription.getNumRecDims();
     // let's make signals and errors float;
     aPointDescr.SignalLength = 4;
     // and indexes incompressed;
