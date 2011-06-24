@@ -173,8 +173,11 @@ namespace Mantid
       if ( fitStatus.compare("success") ) return (0.);
 
       std::vector<double> params = fit_alg->getProperty("Parameters");
-      const double offset = params[3]; // f1.PeakCentre
-      return (-1.*offset*step/(dreference+offset*step));
+      double offset = params[3]; // f1.PeakCentre
+      offset = -1.*offset*step/(dreference+offset*step);
+      //factor := factor * (1+offset) for d-spacemap conversion so factor cannot be negative
+      if (offset < -1.) offset = -1.;
+      return offset;
     }
 
 
