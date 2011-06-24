@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	#	src/Q1DTOF.cpp
 	src/AbsorptionCorrection.cpp
 	src/AddSampleLog.cpp
 	src/AlignDetectors.cpp
@@ -111,12 +112,12 @@ set ( SRC_FILES
 	src/PowerLawCorrection.cpp
 	src/Q1D.cpp
 	src/Q1D2.cpp
-#	src/Q1DTOF.cpp
 	src/Q1DWeighted.cpp
 	src/Qxy.cpp
 	src/ReadGroupsFromFile.cpp
 	src/RealFFT.cpp
 	src/Rebin.cpp
+	src/Rebin2D.cpp
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/Regroup.cpp
@@ -152,6 +153,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
+	#	inc/MantidAlgorithms/Q1DTOF.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddSampleLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
@@ -265,12 +267,12 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PowerLawCorrection.h
 	inc/MantidAlgorithms/Q1D.h
 	inc/MantidAlgorithms/Q1D2.h
-#	inc/MantidAlgorithms/Q1DTOF.h
 	inc/MantidAlgorithms/Q1DWeighted.h
 	inc/MantidAlgorithms/Qxy.h
 	inc/MantidAlgorithms/ReadGroupsFromFile.h
 	inc/MantidAlgorithms/RealFFT.h
 	inc/MantidAlgorithms/Rebin.h
+	inc/MantidAlgorithms/Rebin2D.h
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/Regroup.h
@@ -405,12 +407,13 @@ set ( TEST_FILES
 	test/PolynomialCorrectionTest.h
 	test/PowerLawCorrectionTest.h
 	test/PowerTest.h
-	test/Q1DTest.h
 	test/Q1D2Test.h
+	test/Q1DTest.h
 	test/Q1DWeightedTest.h
 	test/QxyTest.h
 	test/ReadGroupsFromFileTest.h
 	test/RealFFTTest.h
+	test/Rebin2DTest.h
 	test/RebinTest.h
 	test/RebinToWorkspaceTest.h
 	test/RebunchTest.h

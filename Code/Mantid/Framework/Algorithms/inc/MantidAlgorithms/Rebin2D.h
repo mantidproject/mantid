@@ -9,6 +9,14 @@
 
 namespace Mantid
 {
+  //------------------------------------------------------------------------------
+  // Forward declarations
+  //------------------------------------------------------------------------------    
+  namespace Geometry
+  {
+    class ConvexPolygon;
+  }
+
   namespace Algorithms
   {
 
@@ -48,12 +56,46 @@ namespace Mantid
       virtual const std::string category() const { return "Rebin";}
       
     private:
+      /// A struct to store information about an intersection
+      struct BinWithWeight
+      {
+        /** Constructor
+         * @param i :: The index in the Y direction of the data bin
+         * @param j :: The index in the X direction of the data bin
+         * @param pointWeight :: The weight this point carries
+         */
+        BinWithWeight(const size_t i, const size_t j, const double pointWeight)
+          : yIndex(i), xIndex(j), weight(pointWeight) {}
+        /// The index in the Y direction of the data bin
+        size_t yIndex;
+        /// The index in the X direction of the data bin
+        size_t xIndex;
+        /// The weight this point carries
+        double weight;            
+      };
+
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
       /// Initialise the properties
       void init();
       /// Run the algorithm
       void exec();
+      /// Create a polygon
+      Geometry::ConvexPolygon createPolygon(const double x_i, const double x_ip1, 
+                                            const double y_i, const double y_ip1) const;
+      /// Calculate the Y and E values for the given possible overlap
+      std::pair<double,double> calculateYE(API::MatrixWorkspace_const_sptr inputWS,
+                                           const MantidVec & oldYBins,
+                                           const Geometry::ConvexPolygon & outputPoly) const;
+      /// Find the overlap of the inputWS with the given polygon
+      std::vector<BinWithWeight> findIntersections(const MantidVec & oldAxis1, 
+                                                   const MantidVec & oldAxis2,
+                                                   const Geometry::ConvexPolygon & poly) const;
+      /// Setup the output workspace 
+      API::MatrixWorkspace_sptr createOutputWorkspace(API::MatrixWorkspace_const_sptr parent,
+                                                      MantidVec &newXBins, 
+                                                      MantidVec &newYBins) const;
+
     };
 
   } // namespace Algorithms
