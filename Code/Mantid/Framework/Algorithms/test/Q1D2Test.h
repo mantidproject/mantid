@@ -114,7 +114,7 @@ public:
     
     Mantid::API::AnalysisDataService::Instance().remove(m_noGrav);
   }
-    
+
   void testGravity()
   {
     Mantid::Algorithms::Q1D2 Q1D;
@@ -156,6 +156,48 @@ public:
     TS_ASSERT( boost::math::isnan(gravity->readE(0)[77]) )
     
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+  }
+  
+  void testCuts()
+  {
+    Mantid::Algorithms::Q1D2 Q1D;
+    Q1D.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(
+      Q1D.setProperty("DetBankWorkspace", m_inputWS);
+      Q1D.setProperty("WavelengthAdj", m_wavNorm);
+      Q1D.setPropertyValue("PixelAdj", m_pixel);
+      Q1D.setPropertyValue("OutputWorkspace", m_noGrav);
+      Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
+      Q1D.setProperty("RadiusCut", 0.22);
+      Q1D.setProperty("WaveCut", 8.0);
+    )
+    //#default is don't correct for gravity
+    TS_ASSERT_THROWS_NOTHING( Q1D.execute() )
+    TS_ASSERT( Q1D.isExecuted() )
+    
+    Mantid::API::MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+                                (Mantid::API::AnalysisDataService::Instance().retrieve(m_noGrav)) )
+    TS_ASSERT(result)
+    TS_ASSERT_EQUALS( result->getNumberHistograms(), 1 )
+    
+    TS_ASSERT_EQUALS( result->readX(0).size(), 83 )
+    TS_ASSERT_EQUALS( result->readX(0).front(), 0.1 )
+    TS_ASSERT_DELTA( result->readX(0)[3], 0.1061208, 1e-6 )
+    TS_ASSERT_DELTA( result->readX(0)[56], 0.3031165, 1e-5 )
+    TS_ASSERT_EQUALS( result->readX(0).back(), 0.5 )
+
+    TS_ASSERT_DELTA( result->readY(0).front(), 1192471.95, 0.1 )
+    TS_ASSERT( boost::math::isnan(result->readY(0)[3]))
+    TS_ASSERT_DELTA( result->readY(0)[12], 503242.79, 0.1)
+    TS_ASSERT( boost::math::isnan(result->readY(0).back()) )
+
+    TS_ASSERT_DELTA( result->readE(0)[2], 4847257060, 10 )
+    TS_ASSERT_DELTA( result->readE(0)[10], 4921866100, 100 )
+    TS_ASSERT( boost::math::isnan(result->readE(0)[7]) )
+    
+    Mantid::API::AnalysisDataService::Instance().remove(m_noGrav);
   }
     
   void testInvalidInput()
