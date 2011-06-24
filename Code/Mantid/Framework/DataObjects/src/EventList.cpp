@@ -1215,6 +1215,23 @@ namespace DataObjects
     throw std::runtime_error("EventList: invalid event type value was found.");
   }
 
+  /**
+   * Much like stl containers, returns true if there is nothing in the event list.
+   */
+  bool EventList::empty() const
+  {
+    switch (eventType)
+    {
+    case TOF:
+      return this->events.empty();
+    case WEIGHTED:
+      return this->weightedEvents.empty();
+    case WEIGHTED_NOTIME:
+      return this->weightedEventsNoTime.empty();
+    }
+    throw std::runtime_error("EventList: invalid event type value was found.");
+  }
+
 
   // --------------------------------------------------------------------------
   /** Memory used by this event list. Note: It reports the CAPACITY of the

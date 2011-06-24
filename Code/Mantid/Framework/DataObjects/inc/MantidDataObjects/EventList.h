@@ -228,6 +228,7 @@ public:
   Kernel::cow_ptr<MantidVec> getRefX() const;
 
   virtual std::size_t getNumberEvents() const;
+  bool empty() const;
 
   size_t getMemorySize() const;
 
