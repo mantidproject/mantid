@@ -100,16 +100,17 @@ public:
   }
 
 
-  void xtestExecEventWorkspace_sameOutputWS()
+  void testExecEventWorkspace_sameOutputWS()
   {
     this->setUp_Event();
+    std::size_t wkspIndex = 4348; // a good workspace index (with events)
 
     //Retrieve Workspace
     WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
     TS_ASSERT( WS ); //workspace is loaded
     size_t start_blocksize = WS->blocksize();
     size_t num_events = WS->getNumberEvents();
-    double a_tof = WS->getEventList(0).getEvents()[0].tof();
+    double a_tof = WS->getEventList(wkspIndex).getEvents()[0].tof();
 
     //Start by init'ing the algorithm
     TS_ASSERT_THROWS_NOTHING( align.initialize() );
@@ -130,13 +131,14 @@ public:
     TS_ASSERT_EQUALS( start_blocksize, WS->blocksize());
     TS_ASSERT_EQUALS( num_events, WS->getNumberEvents() );
     //But a TOF changed.
-    TS_ASSERT_DIFFERS(a_tof, WS->getEventList(0).getEvents()[0].tof());
+    TS_ASSERT_DIFFERS(a_tof, WS->getEventList(wkspIndex).getEvents()[0].tof());
   }
 
 
-  void xtestExecEventWorkspace_differentOutputWS()
+  void testExecEventWorkspace_differentOutputWS()
   {
     this->setUp_Event();
+    std::size_t wkspIndex = 4348; // a good workspace index (with events)
 
     //Retrieve Workspace
     WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
@@ -164,7 +166,7 @@ public:
     TS_ASSERT_EQUALS( outWS->blocksize(), WS->blocksize());
     TS_ASSERT_EQUALS( outWS->getNumberEvents(), WS->getNumberEvents() );
     //But a TOF changed.
-    TS_ASSERT_DIFFERS( outWS->getEventList(0).getEvents()[0].tof(), WS->getEventList(0).getEvents()[0].tof());
+    TS_ASSERT_DIFFERS( outWS->getEventList(wkspIndex).getEvents()[0].tof(), WS->getEventList(wkspIndex).getEvents()[0].tof());
   }
 
 private:
