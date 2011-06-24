@@ -66,7 +66,7 @@ signals:
 
   /// This signal is fired from finishHandle running in the algorithm's thread
   /// and caught by showPlot slot in the GUI thread
-  void needShowPlot(Ui::SequentialFitDialog& ui, FitPropertyBrowser* fitbrowser);
+  void needShowPlot(Ui::SequentialFitDialog*, MantidQt::MantidWidgets::FitPropertyBrowser*);
 
 private slots:
 

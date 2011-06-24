@@ -51,8 +51,8 @@ QDialog(fitBrowser),m_fitBrowser(fitBrowser)
   populateParameters();
 
   connect(fitBrowser,SIGNAL(functionChanged()),this,SLOT(functionChanged()));
-  connect(this,SIGNAL(needShowPlot(Ui::SequentialFitDialog&, MantidQt::MantidWidgets::FitPropertyBrowser*)),
-          mantidui,SLOT(showSequentialPlot(Ui::SequentialFitDialog&, MantidQt::MantidWidgets::FitPropertyBrowser*)));
+  connect(this,SIGNAL(needShowPlot(Ui::SequentialFitDialog*, MantidQt::MantidWidgets::FitPropertyBrowser*)),
+          mantidui,SLOT(showSequentialPlot(Ui::SequentialFitDialog*, MantidQt::MantidWidgets::FitPropertyBrowser*)));
   connect(ui.tWorkspaces,SIGNAL(cellChanged(int,int)),this,SLOT(spectraChanged(int,int)));
 
 }
@@ -332,7 +332,7 @@ void SequentialFitDialog::functionChanged()
 void SequentialFitDialog::finishHandle(const Mantid::API::IAlgorithm* alg)
 {
   (void) alg; //Avoid unused warning
-  emit needShowPlot(ui, m_fitBrowser);
+  emit needShowPlot(&ui, m_fitBrowser);
 }
 
 /*

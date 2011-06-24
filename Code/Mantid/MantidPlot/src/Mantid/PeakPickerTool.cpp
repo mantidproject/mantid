@@ -67,7 +67,8 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
   connect(fitBrowser(),SIGNAL(plotCurrentGuess()),this,SLOT(plotCurrentGuess()));
   connect(fitBrowser(),SIGNAL(removeGuess()),this,SLOT(removeGuess()));
   connect(fitBrowser(),SIGNAL(removeCurrentGuess()),this,SLOT(removeCurrentGuess()));
-  connect(fitBrowser(),SIGNAL(removePlotSignal(PropertyHandler*)),this,SLOT(removePlot(PropertyHandler*)));
+  connect(fitBrowser(),SIGNAL(removePlotSignal(MantidQt::MantidWidgets::PropertyHandler*)),
+          this,SLOT(removePlot(MantidQt::MantidWidgets::PropertyHandler*)));
 
   m_mantidUI->showFitPropertyBrowser();
   connect(this,SIGNAL(isOn(bool)),fitBrowser(),SLOT(setPeakToolOn(bool)));
@@ -920,7 +921,7 @@ void PeakPickerTool::plotFitFunction(MantidQt::MantidWidgets::PropertyHandler* h
       fc->loadData();
       // Graph now owns m_curve. Use m_curve->removeMe() to remove (and delete) from Graph
       d_graph->insertCurve(fc);
-      connect(fc,SIGNAL(forgetMe(PlotCurve*)),this,SLOT(plotRemoved(PlotCurve*)));
+      connect(fc,SIGNAL(forgetMe()),h,SLOT(plotRemoved()));
       if (h == fitBrowser()->getHandler())
       {
         fitBrowser()->setTextPlotGuess("Remove guess");
@@ -928,7 +929,6 @@ void PeakPickerTool::plotFitFunction(MantidQt::MantidWidgets::PropertyHandler* h
     }
   }
 }
-
 
 
 /**

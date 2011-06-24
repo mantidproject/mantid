@@ -122,6 +122,7 @@ private slots:
   void removeGuess();
   void plotCurrentGuess();
   void removeCurrentGuess();
+  void removePlot(MantidQt::MantidWidgets::PropertyHandler* h);
 
   void curveRemoved();
   void modifiedGraph();
@@ -130,7 +131,6 @@ private slots:
 
 private:
   void plotFitFunction(MantidQt::MantidWidgets::PropertyHandler* h);
-  void removePlot(MantidQt::MantidWidgets::PropertyHandler* h);
   void replot(MantidQt::MantidWidgets::PropertyHandler* h) const;
 
   virtual void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const;

@@ -177,6 +177,7 @@ void PlotCurve::restoreCurveLayout(const QStringList& lst)
 void PlotCurve::aboutToBeDeleted()
 {
   emit forgetMe(this);
+  emit forgetMe();
 }
 
 void PlotCurve::drawCurve(QPainter *p, int style, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const

@@ -2485,7 +2485,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
  * @param wsNames :: For each workspace listed create a 2D colorfill plot 
  * @param curveType :: The curve type for each of the plots
  */
-void MantidUI::showSequentialPlot(Ui::SequentialFitDialog& ui, MantidQt::MantidWidgets::FitPropertyBrowser* fitbrowser)
+void MantidUI::showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidWidgets::FitPropertyBrowser* fitbrowser)
 {
   std::string wsName = fitbrowser->outputName();
   Mantid::API::ITableWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
@@ -2498,23 +2498,23 @@ void MantidUI::showSequentialPlot(Ui::SequentialFitDialog& ui, MantidQt::MantidW
     QString parName;
     if (fitbrowser->compositeFunction()->nFunctions() == 1)
     {
-      int i = fitbrowser->compositeFunction()->parameterIndex(ui.cbParameter->currentText().toStdString());
+      int i = fitbrowser->compositeFunction()->parameterIndex(ui->cbParameter->currentText().toStdString());
       parName = QString::fromStdString(fitbrowser->compositeFunction()->getFunction(0)->parameterName(i));
     }
     else
     {
-      parName = ui.cbParameter->currentText();
+      parName = ui->cbParameter->currentText();
     }
     QStringList colNames;
     colNames << t->name() + "_" + parName << t->name() + "_" + parName + "_Err";
-    MultiLayer* ml = appWindow()->multilayerPlot(t,colNames,ui.cbCurveType->currentIndex());
+    MultiLayer* ml = appWindow()->multilayerPlot(t,colNames,ui->cbCurveType->currentIndex());
     // set plot titles
     Graph* g = ml->activeGraph();
     if (g)
     {
-      if (ui.ckbLogPlot->isChecked())
+      if (ui->ckbLogPlot->isChecked())
       {
-        g->setXAxisTitle(ui.cbLogValue->currentText());
+        g->setXAxisTitle(ui->cbLogValue->currentText());
       }
       else
       {

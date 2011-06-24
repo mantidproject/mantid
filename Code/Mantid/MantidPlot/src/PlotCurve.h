@@ -74,6 +74,7 @@ signals:
   // fired to indicate that this curve is about to be deleted from memory
   // and any reference to it must be invalidated
   void forgetMe(PlotCurve*);
+  void forgetMe();
 
 protected:
   virtual void drawCurve(QPainter *p, int style, const QwtScaleMap &xMap, const QwtScaleMap &yMap, int from, int to) const;

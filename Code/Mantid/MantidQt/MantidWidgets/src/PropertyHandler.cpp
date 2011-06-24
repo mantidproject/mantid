@@ -1251,74 +1251,15 @@ QList<PropertyHandler*> PropertyHandler::getPeakList()
   return res;
 }
 
-/**
- * Plot this function on a graph
- * @param g :: The graph to plot on
- */
-/*
-void PropertyHandler::plot(Graph* g)const
-{
-  if (!m_curve)
-  {
-    m_curve = new FunctionCurve(
-      m_if,
-      QString::fromStdString(m_browser->m_groupMember),//m_browser->workspaceName()),
-      m_browser->workspaceIndex(),
-      functionName());
-    m_curve->setRange(m_browser->startX(),m_browser->endX());
-    m_curve->loadData();
-    // Graph now owns m_curve. Use m_curve->removeMe() to remove (and delete) from Graph
-    g->insertCurve(m_curve);
-    connect(m_curve,SIGNAL(forgetMe(PlotCurve*)),this,SLOT(plotRemoved(PlotCurve*)));
-    if (this == m_browser->getHandler())
-    {
-      m_browser->m_displayActionPlotGuess->setText("Remove guess");
-    }
-  }
-}*/
-
-/**
- * Remove this function curve from its graph
- */
-/*void PropertyHandler::removePlot()
-{
-  if (m_curve)
-  {
-    m_curve->removeMe();
-    m_curve = NULL;
-    if (this == m_browser->getHandler())
-    {
-      m_browser->m_displayActionPlotGuess->setText("Plot guess");
-    }
-  }
-}*/
 
 /**
  * Remove the reference to the function curve as it has been deleted
  */
-/*void PropertyHandler::plotRemoved(PlotCurve* c)
+void PropertyHandler::plotRemoved()
 {
-  if (c == dynamic_cast<PlotCurve*>(m_curve))
-  {
-    m_curve = NULL;
-  }
-}*/
+  m_hasPlot = false;
+}
 
-/**
- * Replot function curve when parameters have been changed
- */
-
-
-/*void PropertyHandler::replot()const
-{
-  if (m_curve)
-  {
-    QStringList formulas = m_curve->formulas();
-    formulas[1] = QString::fromStdString(*m_fun);
-    m_curve->setFormulas(formulas);
-    m_curve->loadData();
-  }
-}*/
 
 /**
  * Remove all plots including children's

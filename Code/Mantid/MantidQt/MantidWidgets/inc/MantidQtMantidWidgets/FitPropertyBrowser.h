@@ -222,7 +222,7 @@ signals:
   void removeGuess();
   void removeCurrentGuess();
   void changeWindowTitle(const QString&);
-  void removePlotSignal(PropertyHandler*);
+  void removePlotSignal(MantidQt::MantidWidgets::PropertyHandler*);
 
 private slots:
 

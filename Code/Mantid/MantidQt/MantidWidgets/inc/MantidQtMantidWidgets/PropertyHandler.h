@@ -181,7 +181,7 @@ public:
 protected slots:
 
   // 
-  //void plotRemoved(PlotCurve*);
+  void plotRemoved();
 
 private:
   FitPropertyBrowser* m_browser;

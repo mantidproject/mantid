@@ -316,7 +316,7 @@ public slots:
     // Display a message in QtiPlot's results window. Used by MantidLog class to display Mantid log information.
     void logMessage(const Poco::Message& msg);
 
-   void showSequentialPlot(Ui::SequentialFitDialog& ui, MantidQt::MantidWidgets::FitPropertyBrowser* fitbrowser);
+   void showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidWidgets::FitPropertyBrowser* fitbrowser);
 
     // Import the workspace selected in the Workspace dock window
     void importWorkspace();
