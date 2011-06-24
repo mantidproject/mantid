@@ -477,7 +477,7 @@ addTo(Product, 'Binary', {'Id':'wixca', 'src':'wixca.dll'})
 
 #------------- Environment settings ---------------------- 
 # MantidPATH to point to the bin directory
-addTo(MantidDlls,'Environment',{'Id':'SetMtdPath','Name':'MANTIDPATH','Action':'set','Part':'all','Value':'[INSTALLDIR]\\bin'})
+addTo(MantidDlls,'Environment',{'Id':'SetMtdPath','Name':'MANTIDPATH','Action':'set','Part':'all','Value':'[INSTALLDIR]bin'})
 # Also add binary directory to the path
 addTo(MantidDlls,'Environment',{'Id':'AddMtdPath','Name':'PATH','Action':'set','Part':'last','Value':'%MANTIDPATH%'})
 
