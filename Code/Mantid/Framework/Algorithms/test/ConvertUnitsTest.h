@@ -252,8 +252,9 @@ public:
     TS_ASSERT (loader.isExecuted() );
   }
 
-  void xtestExecEvent_sameOutputWS()
+  void testExecEvent_sameOutputWS()
   {
+    std::size_t wkspIndex = 4348; // a good workspace index (with events)
     this->setup_Event();
 
     //Retrieve Workspace
@@ -261,8 +262,8 @@ public:
     TS_ASSERT( WS ); //workspace is loaded
     size_t start_blocksize = WS->blocksize();
     size_t num_events = WS->getNumberEvents();
-    double a_tof = WS->getEventList(0).getEvents()[0].tof();
-    double a_x = WS->getEventList(0).dataX()[1];
+    double a_tof = WS->getEventList(wkspIndex).getEvents()[0].tof();
+    double a_x = WS->getEventList(wkspIndex).dataX()[1];
 
     if ( !alg.isInitialized() ) alg.initialize();
     TS_ASSERT( alg.isInitialized() );
@@ -282,9 +283,9 @@ public:
     TS_ASSERT_EQUALS( start_blocksize, WS->blocksize());
     TS_ASSERT_EQUALS( num_events, WS->getNumberEvents() );
     //But a TOF changed.
-    TS_ASSERT_DIFFERS(a_tof, WS->getEventList(0).getEvents()[0].tof());
+    TS_ASSERT_DIFFERS(a_tof, WS->getEventList(wkspIndex).getEvents()[0].tof());
     //and a X changed
-    TS_ASSERT_DIFFERS(a_x, WS->getEventList(0).dataX()[1]);
+    TS_ASSERT_DIFFERS(a_x, WS->getEventList(wkspIndex).dataX()[1]);
   }
 
   void testExecEvent_TwoStepConversionWithDeltaE()
