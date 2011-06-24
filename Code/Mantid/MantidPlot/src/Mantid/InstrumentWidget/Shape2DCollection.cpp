@@ -268,11 +268,13 @@ bool Shape2DCollection::isOverCurrentAt(int x,int y)
 
 bool Shape2DCollection::selectControlPointAt(int x,int y)
 {
-  QPointF p = m_transform.inverted().map(QPointF(x,y));
+  //QPointF p = m_transform.inverted().map(QPointF(x,y));
+  QPointF p = QPointF(x,y);
   if (!m_currentShape) return false;
   for(size_t i = 0; i < m_currentShape->getNControlPoints(); ++i)
   {
-    QPointF cp = m_currentShape->getControlPoint(i) - p;
+    //QPointF cp = m_currentShape->getControlPoint(i) - p;
+    QPointF cp = m_transform.map(m_currentShape->getControlPoint(i)) - p;
     if (fabs(cp.x()) + fabs(cp.y()) <= sizeCP + 2)
     //if (cp.manhattanLength() <= sizeCP + 2)
     {

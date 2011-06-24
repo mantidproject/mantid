@@ -17,6 +17,7 @@
 #include <QAction>
 #include <QLabel>
 #include <QMessageBox>
+#include <QApplication>
 
 #include <numeric>
 #include <cfloat>
@@ -310,6 +311,7 @@ void InstrumentWindowMaskTab::doubleChanged(QtProperty* prop)
 
 void InstrumentWindowMaskTab::applyMask()
 {
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   m_pointer->setChecked(true);
   setActivity();
   m_instrumentDisplay->repaint(); // to refresh the pick image
@@ -328,6 +330,7 @@ void InstrumentWindowMaskTab::applyMask()
     emit executeAlgorithm("MaskDetectors",param_list);
   }
   clearMask();
+  QApplication::restoreOverrideCursor();
 }
 
 void InstrumentWindowMaskTab::clearMask()
