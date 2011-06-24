@@ -143,6 +143,8 @@ private:
   std::vector<double> proton_charge;
   /// The total proton charge for the run.
   double proton_charge_tot;
+  /// The value of the vector is the workspace index.
+  std::vector<std::size_t> pixel_to_wkspindex;
 
   /// Handles loading from the event file
   Mantid::Kernel::BinaryFile<DasEvent> * eventfile;

@@ -412,6 +412,8 @@ void LoadEventPreNeXus::setMaxEventsToLoad(std::size_t max_events_to_load)
  */
 void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 {
+  bool padPixels = (this->getProperty(PAD_PIXELS_PARAM));
+
   // do the actual loading
   this->num_error_events = 0;
   this->num_good_events = 0;
@@ -429,6 +431,46 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 
   //Allocate the buffer
   DasEvent * event_buffer = new DasEvent[loadBlockSize];
+
+  //--------- Pad Empty Pixels -----------
+  if (padPixels)
+  {
+    //We want to pad out empty pixels.
+    if (!this->instrument_loaded_correctly)
+    {
+      g_log.warning() << "Warning! Cannot pad empty pixels, since the instrument geometry did not load correctly or was not specified. Sorry!\n";
+      this->pixel_to_wkspindex.clear();
+    }
+    else
+    {
+      detid2det_map detector_map;
+      workspace->getInstrument()->getDetectors(detector_map);
+
+      // determine maximum pixel id
+      detid2det_map::iterator it;
+      detid_t detid_max = 0; // seems like a safe lower bound
+      for (it = detector_map.begin(); it != detector_map.end(); it++)
+        if (it->first > detid_max)
+          detid_max = it->first;
+
+      this->pixel_to_wkspindex.reserve(detid_max);
+      this->pixel_to_wkspindex.assign(detid_max, 0);
+      size_t workspaceIndex = 0;
+      for (it = detector_map.begin(); it != detector_map.end(); it++)
+      {
+        if (!it->second->isMonitor())
+        {
+          this->pixel_to_wkspindex[it->first] = workspaceIndex;
+          workspace->getOrAddEventList(workspaceIndex).addDetectorID(it->first);
+          workspaceIndex += 1;
+        }
+      }
+    }
+  }
+  else
+  {
+    this->pixel_to_wkspindex.clear();
+  }
 
   //For slight speed up
   loadOnlySomeSpectra = (this->spectra_list.size() > 0);
@@ -463,37 +505,13 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   //if (parallelProcessing)
   //  delete [] intermediate_buffer;
 
-  //--------- Pad Empty Pixels -----------
-  if (this->getProperty(PAD_PIXELS_PARAM))
-  {
-    //We want to pad out empty pixels.
-    if (!this->instrument_loaded_correctly)
-    {
-      g_log.warning() << "Warning! Cannot pad empty pixels, since the instrument geometry did not load correctly or was not specified. Sorry!\n";
-    }
-    else
-    {
-      detid2det_map detector_map;
-      workspace->getInstrument()->getDetectors(detector_map);
-      detid2det_map::iterator it;
-      for (it = detector_map.begin(); it != detector_map.end(); it++)
-      {
-        //Go through each pixel in the map, but forget monitors.
-        if (!it->second->isMonitor())
-        {
-          // and simply get the event list. It will be created if it was not there already.
-          workspace->getEventListAtPixelID(it->first); //it->first is detector ID #
-        }
-      }
-    }
-  }
-
   //finalize loading; this condenses the pixels into a 0-based, dense vector.
-  workspace->doneLoadingData();
-
+  if (padPixels)
+    workspace->doneAddingEventLists();
+  else
+    workspace->doneLoadingData();
 
   this->setProtonCharge(workspace);
-
 
   //Make sure the MRU is cleared
   workspace->clearMRU();
@@ -505,6 +523,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   xRef[0] = shortest_tof - 1; //Just to make sure the bins hold it all
   xRef[1] = longest_tof + 1;
   workspace->setAllX(axis);
+  this->pixel_to_wkspindex.clear();
 
   g_log.information() << "Read " << this->num_good_events << " events + "
       << this->num_error_events << " errors"
@@ -523,6 +542,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, DasEvent * event_buffer,
     size_t current_event_buffer_size, size_t fileOffset)
 {
+  bool padPixels = (this->getProperty(PAD_PIXELS_PARAM));
 
   DasEvent temp;
   uint32_t period;
@@ -597,7 +617,10 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
       longest_tof = tof;
 
     //The addEventQuickly method does not clear the cache, making things slightly faster.
-    workspace->getEventListAtPixelID(pid).addEventQuickly(event);
+    if (padPixels)
+      workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
+    else
+      workspace->getEventListAtPixelID(pid).addEventQuickly(event);
 
 
     // TODO work with period
