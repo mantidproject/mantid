@@ -186,6 +186,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             if y_s[midBin] > ymax:
                     refpixel = s
                     ymax = y_s[midBin]
+        detector = temp.getDetector(refpixel)
+        detIDs = detector.getDetectorIDs()
+        refpixel = detIDs[0]
         print "Reference spectra=",refpixel
         # Remove old calibration files
         cmd = "rm "+self._outDir+str(wksp)+".cal*"
@@ -213,6 +216,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 if y_s[midBin] > ymax:
                         refpixel = s
                         ymax = y_s[midBin]
+            detector = temp.getDetector(refpixel)
+            detIDs = detector.getDetectorIDs()
+            refpixel = detIDs[0]
             print "Reference spectra=",refpixel
             CrossCorrelate(InputWorkspace=temp, OutputWorkspace=str(wksp)+"cc2", ReferenceSpectra=refpixel,
                 WorkspaceIndexMin=self._lastpixel+1, WorkspaceIndexMax=temp.getNumberHistograms()-1, XMin=self._peakmin2, XMax=self._peakmax2)
