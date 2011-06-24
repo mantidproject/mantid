@@ -85,6 +85,8 @@ namespace MDEvents
      */
     size_t getSplitInto(size_t dim) const
     {
+//      if (dim >= nd)
+//        throw std::invalid_argument("BoxController::setSplitInto() called with too high of a dimension index.");
       return m_splitInto[dim];
     }
 
@@ -113,6 +115,8 @@ namespace MDEvents
      */
     void setSplitInto(size_t dim, size_t num)
     {
+      if (dim >= nd)
+        throw std::invalid_argument("BoxController::setSplitInto() called with too high of a dimension index.");
       m_splitInto[dim] = num;
       calcNumSplit();
     }

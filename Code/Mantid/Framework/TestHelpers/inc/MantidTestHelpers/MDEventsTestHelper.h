@@ -119,7 +119,7 @@ namespace MDEventsTestHelper
     // Splits into 10x10x.. boxes
     splitter->setSplitInto(split0);
     splitter->setSplitInto(0, split0);
-    splitter->setSplitInto(1, split1);
+    if (nd > 1) splitter->setSplitInto(1, split1);
     // Set the size to 10.0 in all directions
     MDBox<MDEvent<nd>,nd> * box = new MDBox<MDEvent<nd>,nd>(splitter);
     for (size_t d=0; d<nd; d++)
