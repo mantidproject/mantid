@@ -1,4 +1,4 @@
-om MantidFramework import *
+from MantidFramework import *
 from mantidsimple import *
 
 class FindSNSNeXus(PythonAlgorithm):
