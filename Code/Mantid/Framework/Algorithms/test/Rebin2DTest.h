@@ -25,10 +25,10 @@ namespace
 
     if( large )
     {
-      nhist = 200;
-      nbins = 200;
+      nhist = 500;
+      nbins = 400;
       x0 = 100.;
-      deltax = 200.;
+      deltax = 100.;
     }
     else
     {
@@ -162,8 +162,8 @@ public:
   
   void test_On_Large_Workspace()
   {
-    MatrixWorkspace_sptr inputWS = makeInputWS();
-    runAlgorithm(inputWS, "200,250,40000", "-0.5,5,199.5");
+    MatrixWorkspace_sptr inputWS = makeInputWS(true);
+    runAlgorithm(inputWS, "100,200,41000", "-0.5,2,499.5");
   }
   
 

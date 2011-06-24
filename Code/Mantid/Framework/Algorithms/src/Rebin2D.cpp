@@ -160,9 +160,15 @@ namespace Mantid
       Vertex2DList vertices(4);
       for(size_t i = 0; i < nypoints; ++i)
       {
+        const double yo_lo(oldAxis2[i]), yo_hi(oldAxis2[i+1]);
+        // Check if there is a possibility of overlap
+        if( yo_hi < newPoly[0].Y() || yo_lo > newPoly[2].Y() ) continue;
         for(size_t j = 0; j < nxpoints; ++j)
         {
-          ConvexPolygon oldPoly(oldAxis1[j], oldAxis1[j+1], oldAxis2[i], oldAxis2[i+1]);
+          const double xo_lo(oldAxis1[j]), xo_hi(oldAxis1[j+1]);
+          // Check if there is a possibility of overlap
+          if( xo_hi < newPoly[0].X() || xo_lo > newPoly[1].X() ) continue;
+          ConvexPolygon oldPoly(xo_lo, xo_hi, yo_lo, yo_hi);
           try
           {
             ConvexPolygon overlap = chasingEdgeIntersect(newPoly, oldPoly);
