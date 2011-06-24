@@ -35,6 +35,6 @@ add_definitions( -DIN_MANTIDPARAVIEWQT_MANTIDPARAVIEWWIDGETS )
 
 # Windows-only at the moment.
 if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
-  install(TARGETS MantidParaViewQtWidgets RUNTIME DESTINATION ${LIB_DIR}/PVPlugins)
+  install(TARGETS MantidParaViewQtWidgets RUNTIME DESTINATION ${LIB_DIR})
 endif( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
 
