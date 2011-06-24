@@ -409,7 +409,7 @@ namespace Mantid
         {
           m_box = constructBoxFromInput();
         }
-        m_request->ask(RecalculateAll);
+        //m_request->ask(RecalculateAll);
 
         m_applyClip = m_view->getApplyClip();
       }
