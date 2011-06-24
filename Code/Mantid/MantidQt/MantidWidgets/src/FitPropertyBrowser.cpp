@@ -1398,7 +1398,7 @@ void FitPropertyBrowser::addHandle(const std::string& wsName,const boost::shared
 }
 
 /// workspace was removed
-void FitPropertyBrowser::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+void FitPropertyBrowser::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace>)
 {
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(QString(wsName.c_str()));

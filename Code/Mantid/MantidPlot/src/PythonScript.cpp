@@ -248,7 +248,7 @@ QVariant PythonScript::eval()
   if(!qret.isValid()) {
     PyObject *pystring = PyObject_Unicode(pyret);
     if (pystring) {
-      PyObject *asUTF8 = PyUnicode_EncodeUTF8(PyUnicode_AS_UNICODE(pystring), PyUnicode_GET_DATA_SIZE(pystring), 0);
+      PyObject *asUTF8 = PyUnicode_EncodeUTF8(PyUnicode_AS_UNICODE(pystring), (int)PyUnicode_GET_DATA_SIZE(pystring), NULL);
       Py_DECREF(pystring);
       if (asUTF8) {
 	qret = QVariant(QString::fromUtf8(PyString_AS_STRING(asUTF8)));

@@ -363,7 +363,6 @@ void Projection3D::getMaskedDetectors(QList<int>& dets)const
       BoundingBox bb;
       det->getBoundingBox(bb);
       V3D width = bb.width();
-      double radius = width.norm();
       dets.push_back(int(det->getID()));
     }
   }
