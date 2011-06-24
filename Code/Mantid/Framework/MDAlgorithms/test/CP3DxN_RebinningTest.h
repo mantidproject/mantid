@@ -6,7 +6,7 @@
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
 #include <boost/shared_ptr.hpp>
-
+#include <fstream>
 
 using namespace Mantid;
 using namespace API;
@@ -74,7 +74,7 @@ bool fake_load2D_workspace(const std::string &workspace_name){
         loader.initialize();
     }
     // as we are setting file property, file has to exist despite being absolutely unnecessary; we need to create it to avoid errors
-    std::ofstream dummyFile(dataFileName);
+    std::ofstream dummyFile(dataFileName.c_str());
     loader.setPropertyValue("inFilename",dataFileName);
   
     loader.setPropertyValue("MDWorkspace",workspace_name);
