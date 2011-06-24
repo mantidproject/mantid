@@ -86,173 +86,173 @@ public:
     if (it->getBox() != expected) return false;
     return true;
   }
-
-  void test_iterator_basic()
-  {
-    // Create an iterator
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, false);
-
-    // Start with the top one
-    TS_ASSERT_EQUALS( it->getBox(), A);
-    TS_ASSERT( nextIs(it, B0) );
-    TS_ASSERT( nextIs(it, C00) );
-    TS_ASSERT( nextIs(it, C01) );
-    TS_ASSERT( nextIs(it, C02) );
-    TS_ASSERT( nextIs(it, C03) );
-    TS_ASSERT( nextIs(it, B1) );
-    TS_ASSERT( nextIs(it, B2) );
-    TS_ASSERT( nextIs(it, C20) );
-    TS_ASSERT( nextIs(it, C21) );
-    TS_ASSERT( nextIs(it, D210) );
-    TS_ASSERT( nextIs(it, D211) );
-    TS_ASSERT( nextIs(it, D212) );
-    TS_ASSERT( nextIs(it, D213) );
-    TS_ASSERT( nextIs(it, C22) );
-    TS_ASSERT( nextIs(it, C23) );
-    TS_ASSERT( nextIs(it, B3) );
-    // No more!
-    TS_ASSERT( !it->next() );
-    // Calling next again does not cause problems.
-    TS_ASSERT( !it->next() );
-    TS_ASSERT( !it->next() );
-  }
-
-  void test_depth_limit_1()
-  {
-    // Limit depth to 1 (the B level)
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 1, false);
-    TS_ASSERT_EQUALS( it->getBox(), A);
-    TS_ASSERT( nextIs(it, B0) );
-    TS_ASSERT( nextIs(it, B1) );
-    TS_ASSERT( nextIs(it, B2) );
-    TS_ASSERT( nextIs(it, B3) );
-    TS_ASSERT( !it->next() );
-    TS_ASSERT( !it->next() );
-  }
-
-  void test_depth_limit_0()
-  {
-    // Limit depth to 0 (the A level)
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 0, false);
-    TS_ASSERT_EQUALS( it->getBox(), A);
-    TS_ASSERT( !it->next() );
-    TS_ASSERT( !it->next() );
-  }
-
-  void test_starting_deeper_fails_for_wrong_maxDepth()
-  {
-    // Typedef for the iterator (for macros)
-    typedef MDBoxIterator<MDEvent<1>,1> boxit_t;
-    // Start at a depth of 1 (on B0): you need to give a valid maxDepth
-    TS_ASSERT_THROWS_ANYTHING( it = new boxit_t(B0, 0, false); );
-  }
-
-  void test_starting_deeper()
-  {
-    // Start at a depth of 1 (on B0)
-    it = new MDBoxIterator<MDEvent<1>,1>(B0, 20, false);
-    TS_ASSERT_EQUALS( it->getBox(), B0);
-    TS_ASSERT( nextIs(it, C00) );
-    TS_ASSERT( nextIs(it, C01) );
-    TS_ASSERT( nextIs(it, C02) );
-    TS_ASSERT( nextIs(it, C03) );
-    TS_ASSERT( !it->next() );
-    TS_ASSERT( !it->next() );
-  }
-
-  void test_leaf_only()
-  {
-    // Leaf-only iterator = skips anything with children
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, true);
-
-    // This is the first leaf node
-    TS_ASSERT_EQUALS( it->getBox(), C00);
-    TS_ASSERT( nextIs(it, C01) );
-    TS_ASSERT( nextIs(it, C02) );
-    TS_ASSERT( nextIs(it, C03) );
-    TS_ASSERT( nextIs(it, B1) );
-    TS_ASSERT( nextIs(it, C20) );
-    TS_ASSERT( nextIs(it, D210) );
-    TS_ASSERT( nextIs(it, D211) );
-    TS_ASSERT( nextIs(it, D212) );
-    TS_ASSERT( nextIs(it, D213) );
-    TS_ASSERT( nextIs(it, C22) );
-    TS_ASSERT( nextIs(it, C23) );
-    TS_ASSERT( nextIs(it, B3) );
-    // No more!
-    TS_ASSERT( !it->next() );
-    TS_ASSERT( !it->next() );
-  }
-
-  void test_leaf_only_depth_2()
-  {
-    // A node is considered a 'leaf' if it is at maxDepth
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 2, true);
-
-    // This is the first leaf node
-    TS_ASSERT_EQUALS( it->getBox(), C00);
-    TS_ASSERT( nextIs(it, C01) );
-    TS_ASSERT( nextIs(it, C02) );
-    TS_ASSERT( nextIs(it, C03) );
-    TS_ASSERT( nextIs(it, B1) );
-    TS_ASSERT( nextIs(it, C20) );
-    TS_ASSERT( nextIs(it, C21) ); // This is now a 'leaf' due to the maxDepth
-    TS_ASSERT( nextIs(it, C22) );
-    TS_ASSERT( nextIs(it, C23) );
-    TS_ASSERT( nextIs(it, B3) );
-    TS_ASSERT( !it->next() );
-    TS_ASSERT( !it->next() );
-  }
-
-  void test_leaf_only_depth_1()
-  {
-    // A node is considered a 'leaf' if it is at maxDepth
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 1, true);
-    // This is the first leaf node
-    TS_ASSERT_EQUALS( it->getBox(), B0);
-    TS_ASSERT( nextIs(it, B1) );
-    TS_ASSERT( nextIs(it, B2) );
-    TS_ASSERT( nextIs(it, B3) );
-    TS_ASSERT( !it->next() );
-    TS_ASSERT( !it->next() );
-  }
-
-  void test_leaf_only_depth_0()
-  {
-    // A node is considered a 'leaf' if it is at maxDepth
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 0, true);
-    // This is the ONLY leaf node
-    TS_ASSERT_EQUALS( it->getBox(), A);
-    TS_ASSERT( !it->next() );
-    TS_ASSERT( !it->next() );
-  }
-
-  void test_leaf_only_starting_deeper()
-  {
-    //Now we start at B2 and look at only leaves
-    it = new MDBoxIterator<MDEvent<1>,1>(B2, 10, true);
-    TS_ASSERT_EQUALS( it->getBox(), C20);
-    TS_ASSERT( nextIs(it, D210) );
-    TS_ASSERT( nextIs(it, D211) );
-    TS_ASSERT( nextIs(it, D212) );
-    TS_ASSERT( nextIs(it, D213) );
-    TS_ASSERT( nextIs(it, C22) );
-    TS_ASSERT( nextIs(it, C23) );
-    TS_ASSERT( !it->next() );
-    TS_ASSERT( !it->next() );
-  }
-
-  void test_leaf_only_starting_deeper_depth_limited()
-  {
-    //Now we start at B2 and look at only leaves up to depth 2
-    it = new MDBoxIterator<MDEvent<1>,1>(B2, 2, true);
-    TS_ASSERT_EQUALS( it->getBox(), C20);
-    TS_ASSERT( nextIs(it, C21) );
-    TS_ASSERT( nextIs(it, C22) );
-    TS_ASSERT( nextIs(it, C23) );
-    TS_ASSERT( !it->next() );
-    TS_ASSERT( !it->next() );
-  }
+//
+//  void test_iterator_basic()
+//  {
+//    // Create an iterator
+//    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, false);
+//
+//    // Start with the top one
+//    TS_ASSERT_EQUALS( it->getBox(), A);
+//    TS_ASSERT( nextIs(it, B0) );
+//    TS_ASSERT( nextIs(it, C00) );
+//    TS_ASSERT( nextIs(it, C01) );
+//    TS_ASSERT( nextIs(it, C02) );
+//    TS_ASSERT( nextIs(it, C03) );
+//    TS_ASSERT( nextIs(it, B1) );
+//    TS_ASSERT( nextIs(it, B2) );
+//    TS_ASSERT( nextIs(it, C20) );
+//    TS_ASSERT( nextIs(it, C21) );
+//    TS_ASSERT( nextIs(it, D210) );
+//    TS_ASSERT( nextIs(it, D211) );
+//    TS_ASSERT( nextIs(it, D212) );
+//    TS_ASSERT( nextIs(it, D213) );
+//    TS_ASSERT( nextIs(it, C22) );
+//    TS_ASSERT( nextIs(it, C23) );
+//    TS_ASSERT( nextIs(it, B3) );
+//    // No more!
+//    TS_ASSERT( !it->next() );
+//    // Calling next again does not cause problems.
+//    TS_ASSERT( !it->next() );
+//    TS_ASSERT( !it->next() );
+//  }
+//
+//  void test_depth_limit_1()
+//  {
+//    // Limit depth to 1 (the B level)
+//    it = new MDBoxIterator<MDEvent<1>,1>(A, 1, false);
+//    TS_ASSERT_EQUALS( it->getBox(), A);
+//    TS_ASSERT( nextIs(it, B0) );
+//    TS_ASSERT( nextIs(it, B1) );
+//    TS_ASSERT( nextIs(it, B2) );
+//    TS_ASSERT( nextIs(it, B3) );
+//    TS_ASSERT( !it->next() );
+//    TS_ASSERT( !it->next() );
+//  }
+//
+//  void test_depth_limit_0()
+//  {
+//    // Limit depth to 0 (the A level)
+//    it = new MDBoxIterator<MDEvent<1>,1>(A, 0, false);
+//    TS_ASSERT_EQUALS( it->getBox(), A);
+//    TS_ASSERT( !it->next() );
+//    TS_ASSERT( !it->next() );
+//  }
+//
+//  void test_starting_deeper_fails_for_wrong_maxDepth()
+//  {
+//    // Typedef for the iterator (for macros)
+//    typedef MDBoxIterator<MDEvent<1>,1> boxit_t;
+//    // Start at a depth of 1 (on B0): you need to give a valid maxDepth
+//    TS_ASSERT_THROWS_ANYTHING( it = new boxit_t(B0, 0, false); );
+//  }
+//
+//  void test_starting_deeper()
+//  {
+//    // Start at a depth of 1 (on B0)
+//    it = new MDBoxIterator<MDEvent<1>,1>(B0, 20, false);
+//    TS_ASSERT_EQUALS( it->getBox(), B0);
+//    TS_ASSERT( nextIs(it, C00) );
+//    TS_ASSERT( nextIs(it, C01) );
+//    TS_ASSERT( nextIs(it, C02) );
+//    TS_ASSERT( nextIs(it, C03) );
+//    TS_ASSERT( !it->next() );
+//    TS_ASSERT( !it->next() );
+//  }
+//
+//  void test_leaf_only()
+//  {
+//    // Leaf-only iterator = skips anything with children
+//    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, true);
+//
+//    // This is the first leaf node
+//    TS_ASSERT_EQUALS( it->getBox(), C00);
+//    TS_ASSERT( nextIs(it, C01) );
+//    TS_ASSERT( nextIs(it, C02) );
+//    TS_ASSERT( nextIs(it, C03) );
+//    TS_ASSERT( nextIs(it, B1) );
+//    TS_ASSERT( nextIs(it, C20) );
+//    TS_ASSERT( nextIs(it, D210) );
+//    TS_ASSERT( nextIs(it, D211) );
+//    TS_ASSERT( nextIs(it, D212) );
+//    TS_ASSERT( nextIs(it, D213) );
+//    TS_ASSERT( nextIs(it, C22) );
+//    TS_ASSERT( nextIs(it, C23) );
+//    TS_ASSERT( nextIs(it, B3) );
+//    // No more!
+//    TS_ASSERT( !it->next() );
+//    TS_ASSERT( !it->next() );
+//  }
+//
+//  void test_leaf_only_depth_2()
+//  {
+//    // A node is considered a 'leaf' if it is at maxDepth
+//    it = new MDBoxIterator<MDEvent<1>,1>(A, 2, true);
+//
+//    // This is the first leaf node
+//    TS_ASSERT_EQUALS( it->getBox(), C00);
+//    TS_ASSERT( nextIs(it, C01) );
+//    TS_ASSERT( nextIs(it, C02) );
+//    TS_ASSERT( nextIs(it, C03) );
+//    TS_ASSERT( nextIs(it, B1) );
+//    TS_ASSERT( nextIs(it, C20) );
+//    TS_ASSERT( nextIs(it, C21) ); // This is now a 'leaf' due to the maxDepth
+//    TS_ASSERT( nextIs(it, C22) );
+//    TS_ASSERT( nextIs(it, C23) );
+//    TS_ASSERT( nextIs(it, B3) );
+//    TS_ASSERT( !it->next() );
+//    TS_ASSERT( !it->next() );
+//  }
+//
+//  void test_leaf_only_depth_1()
+//  {
+//    // A node is considered a 'leaf' if it is at maxDepth
+//    it = new MDBoxIterator<MDEvent<1>,1>(A, 1, true);
+//    // This is the first leaf node
+//    TS_ASSERT_EQUALS( it->getBox(), B0);
+//    TS_ASSERT( nextIs(it, B1) );
+//    TS_ASSERT( nextIs(it, B2) );
+//    TS_ASSERT( nextIs(it, B3) );
+//    TS_ASSERT( !it->next() );
+//    TS_ASSERT( !it->next() );
+//  }
+//
+//  void test_leaf_only_depth_0()
+//  {
+//    // A node is considered a 'leaf' if it is at maxDepth
+//    it = new MDBoxIterator<MDEvent<1>,1>(A, 0, true);
+//    // This is the ONLY leaf node
+//    TS_ASSERT_EQUALS( it->getBox(), A);
+//    TS_ASSERT( !it->next() );
+//    TS_ASSERT( !it->next() );
+//  }
+//
+//  void test_leaf_only_starting_deeper()
+//  {
+//    //Now we start at B2 and look at only leaves
+//    it = new MDBoxIterator<MDEvent<1>,1>(B2, 10, true);
+//    TS_ASSERT_EQUALS( it->getBox(), C20);
+//    TS_ASSERT( nextIs(it, D210) );
+//    TS_ASSERT( nextIs(it, D211) );
+//    TS_ASSERT( nextIs(it, D212) );
+//    TS_ASSERT( nextIs(it, D213) );
+//    TS_ASSERT( nextIs(it, C22) );
+//    TS_ASSERT( nextIs(it, C23) );
+//    TS_ASSERT( !it->next() );
+//    TS_ASSERT( !it->next() );
+//  }
+//
+//  void test_leaf_only_starting_deeper_depth_limited()
+//  {
+//    //Now we start at B2 and look at only leaves up to depth 2
+//    it = new MDBoxIterator<MDEvent<1>,1>(B2, 2, true);
+//    TS_ASSERT_EQUALS( it->getBox(), C20);
+//    TS_ASSERT( nextIs(it, C21) );
+//    TS_ASSERT( nextIs(it, C22) );
+//    TS_ASSERT( nextIs(it, C23) );
+//    TS_ASSERT( !it->next() );
+//    TS_ASSERT( !it->next() );
+//  }
 
   //--------------------------------------------------------------------------------------
   /** If you have just a MD Box, there is only one return from the iterator,
