@@ -43,34 +43,49 @@ if sys.version_info[0] == 2 and sys.version_info[1] == 6:
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 ################################################################################
 
+ALLOWED_NUM_ENTRIES = set([20,14,8,6,4])
+
+# Build a dictionary of possible input data  keys
+IN_FORMAT = {}
+IN_FORMAT['sample_sans'] = ''
+IN_FORMAT['sample_trans'] = ''
+IN_FORMAT['sample_direct_beam'] = ''
+IN_FORMAT['can_sans'] = ''
+IN_FORMAT['can_trans'] = ''
+IN_FORMAT['can_direct_beam'] = ''
+# Backgrounds not yet implemented
+#    IN_FORMAT['background_sans'] = 0
+#    IN_FORMAT['background_trans'] = 0
+#    IN_FORMAT['background_direct_beam'] = 0
+IN_FORMAT['output_as'] = ''
+#maps the run types above to the Python interface command to use to load it
+COMMAND = {}
+COMMAND['sample_sans'] = 'AssignSample(' 
+COMMAND['can_sans'] = 'AssignCan('
+COMMAND['sample_trans'] = 'TransmissionSample(' 
+COMMAND['can_trans'] = 'TransmissionCan('
+
+class SkipEntry(RuntimeError):
+    pass
+class SkipReduction(RuntimeError):
+    pass
+
 # Add a CSV line to the input data store
 def addRunToStore(parts, run_store):
     # Check logical structure of line
-    allowednparts = set([20,14,8,6,4])
     nparts = len(parts) 
-    if nparts not in allowednparts:
+    if nparts not in ALLOWED_NUM_ENTRIES:
         return 1
 
-    # Build a dictionary of input data  keys
-    inputdata = {}
-    inputdata['sample_sans'] = ''
-    inputdata['sample_trans'] = ''
-    inputdata['sample_direct_beam'] = ''
-    inputdata['can_sans'] = ''
-    inputdata['can_trans'] = ''
-    inputdata['can_direct_beam'] = ''
-    # Backgrounds not yet implemented
-#    inputdata['background_sans'] = 0
-#    inputdata['background_trans'] = 0
-#    inputdata['background_direct_beam'] = 0
-    inputdata['output_as'] = ''
+    inputdata = copy.deepcopy(IN_FORMAT)
     nparts -= 1
-    for i in range(0,nparts):
-        type = parts[i]
-        if type in inputdata.keys():
+    #move through the file like sample_sans,99630,output_as,99630, ...
+    for i in range(0, nparts, 2):
+        role = parts[i]
+        if role in inputdata.keys():
             inputdata[parts[i]] = parts[i+1]
-        if 'background' in type:
-            issueWarning('Background runs are not yet implemented in SANSReduction.py! Will process Sample & Can only')
+        if 'background' in role:
+            issueWarning('Background runs are not yet implemented in Mantid! Will process Sample & Can only')
         
     run_store.append(inputdata)
     return 0
@@ -105,56 +120,21 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
     #first copy the user settings incase running the reductionsteps can change it
     settings = copy.deepcopy(ReductionSingleton().reference())
 
-    # Now loop over run information and process
+    # Now loop over all the lines and do a reduction (hopefully) for each
     for run in runinfo:
         raw_workspaces = []
         try:
-            # Sample run
-            run_file = run['sample_sans']
-            if len(run_file) == 0:
-                issueWarning('No sample run given, skipping entry.')
-                continue
-            run_file += format
-            sample_ws = AssignSample(run_file)[0]
-            if (not sample_ws) or (len(sample_ws) == 0):
-                issueWarning('Cannot load sample run "' + run_file + '", skipping reduction')
-                continue
-            raw_workspaces.append(sample_ws)
+            # Load in the runs specified in the csv file
+            raw_workspaces.append(read_run(run, 'sample_sans', format))
             
-            #Sample trans
-            run_file = run['sample_trans']
-            run_file2 = run['sample_direct_beam']
-            ws1, ws2 = TransmissionSample(run_file + format, run_file2 + format)
-            if len(run_file) > 0 and len(ws1) == 0:
-                issueWarning('Cannot load trans sample run "' + run_file + '", skipping reduction')
-                continue
-            if len(run_file2) > 0 and len(ws2) == 0: 
-                issueWarning('Cannot load trans direct run "' + run_file2 + '", skipping reduction')
-                continue
-            raw_workspaces.append(ws1)
-            raw_workspaces.append(ws2)
+            #Transmission runs to be applied to the sample
+            raw_workspaces += read_trans_runs(run, 'sample', format)
             
-            # Sans Can 
-            run_file = run['can_sans']
-            can_ws = AssignCan(run_file + format)[0]
-            if run_file != '' and len(can_ws) == 0:
-                issueWarning('Cannot load can run "' + run_file + '", skipping reduction')
-                continue
-            raw_workspaces.append(can_ws)
+            # Can run 
+            raw_workspaces.append(read_run(run, 'can_sans', format))
     
-            #Can trans
-            run_file = run['can_trans']
-            run_file2 = run['can_direct_beam']
-            tran_can_1, tran_can_2 = TransmissionCan(
-                                        run_file + format, run_file2 + format)
-            if len(run_file) > 0 and len(tran_can_1) == 0:
-                issueWarning('Cannot load trans can run "' + run_file + '", skipping reduction')
-                continue
-            if len(run_file2) > 0 and len(tran_can_2) == 0: 
-                issueWarning('Cannot load trans can direct run "' + run_file2 + '", skipping reduction')
-                continue
-            raw_workspaces.append(tran_can_1)
-            raw_workspaces.append(tran_can_2)
+            #Transmission runs for the can
+            raw_workspaces += read_trans_runs(run, 'can', format)
     
             if centreit == 1:
                 if verbose == 1:
@@ -164,6 +144,14 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
             # WavRangeReduction runs the reduction for the specified wavelength range where the final argument can either be DefaultTrans or CalcTrans:
             reduced = WavRangeReduction(full_trans_wav=full_trans_wav)
 
+        except SkipEntry, reason:
+            #this means that a load step failed, the warning and the fact that the results aren't there is enough for the user
+            issueWarning(str(reason)+ ', skipping entry')
+            continue
+        except SkipReduction, reason:
+            #this means that a load step failed, the warning and the fact that the results aren't there is enough for the user
+            issueWarning(str(reason)+ ', skipping reduction')
+            continue
         except ValueError, reason:
             issueWarning('Cannot load file :'+str(reason))
 #when we are all up to Python 2.5 replace the duplicated code below with one finally:
@@ -195,6 +183,78 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
 
         #the call to WaveRang... killed the reducer so copy back over the settings
         ReductionSingleton().replace(copy.deepcopy(settings))
+
+def parse_run(run_num, ext):
+    """
+        Extracts an (optional) period specification from the run_num
+        and then adds the extension
+        @param run_num: run number with optional period specified a after the letter 'p'
+        @param ext: file extension
+        @return: run specification (number.extension), period
+    """
+    if not run_num:
+        return '', -1
+    parts = run_num.split('p')
+    if len(parts) > 2:
+        raise RuntimeError('Problem reading run number "'+run_num+'"')
+    run_spec = parts[0]+ext
+
+    if len(parts) == 2:
+        period = parts[1]
+    else:
+        period = 1
+
+    return run_spec, period 
+
+def read_run(runs, run_role, format):
+    """
+        Load a run specified in the CSV file
+        @param runs: a line from a CSV file
+        @param run_role: type of run, e.g. sample
+        @param format: extension to add to the end of the run number specification
+        @return: name of the workspace that was loaded
+        @throw SkipReduction: if there is a problem with the line that means a reduction is impossible
+        @throw SkipEntry: if the sample is entry is empty
+    """
+    run_file = runs[run_role]
+    if len(run_file) == 0:
+        if run_role == 'sample_sans':
+            raise SkipEntry('Empty ' + run_role + ' run given')
+        else:
+            #only the sample is a required run
+            return
+
+    run_file, period = parse_run(run_file, format)
+    run_ws = eval(COMMAND[run_role] + 'run_file, period)[0]')
+    if not run_ws:
+        raise SkipReduction('Cannot load ' + run_role + ' run "' + run_file + '"')
+    return run_ws
+
+def read_trans_runs(runs, sample_or_can, format):
+    """
+        Loads the transmission runs to either be applied to the sample or the can.
+        There must be two runs
+        @param runs: a line from a CSV file
+        @param sample_or_can: a string with the name of the set of transmission runs to use, e.g. can 
+        @param format: extension to add to the end of the run number specifications
+        @return: names of the two workspaces that were loaded
+        @throw SkipReduction: if there is a problem with the line that means a reduction is impossible
+    """
+    role1 = sample_or_can+'_trans'
+    role2 = sample_or_can+'_direct_beam'
+
+    run_file1, p1 = parse_run(runs[role1], format)
+    run_file2, p2 = parse_run(runs[role2], format)
+    if (not run_file1) and (not run_file2):
+        #it is OK for transmission files not to be present
+        return []
+
+    ws1, ws2 = eval(COMMAND[role1] + 'run_file1, run_file2, p1, p2)')
+    if len(run_file1) > 0 and len(ws1) == 0:
+        raise SkipReduction('Cannot load ' + role1 + ' run "' + run_file1 + '"')
+    if len(run_file2) > 0 and len(ws2) == 0: 
+        raise SkipReduction('Cannot load ' + role2 + ' run "' + run_file2 + '"')
+    return [ws1, ws2]
 
 def delete_workspaces(workspaces):
     """
