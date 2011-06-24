@@ -370,7 +370,7 @@ void LoadEventPreNeXus::runLoadInstrument(const std::string &eventfilename, Matr
   // If loading instrument definition file fails
   if (!executionSuccessful)
   {
-    g_log.error() << "Error loading Instrument definition file\n";
+    throw std::runtime_error("Error loading Instrument definition file");
     //TODO: Load some other way???
   }
   else

@@ -97,7 +97,7 @@ public:
   }
 
 
-  void test_LoadPreNeXus_REFL()
+  void xtest_LoadPreNeXus_REFL()
   {
     std::string eventfile( "REF_L_32035_neutron_event.dat" );
     std::string pulsefile( "REF_L_32035_pulseid.dat" );
@@ -166,7 +166,6 @@ public:
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
-    eventLoader->setProperty<bool>("PadEmptyPixels", true);
 
     //Get the event file size
     struct stat filestatus;
@@ -194,13 +193,12 @@ public:
   }
 
 
-  void test_LoadPreNeXus_CNCS()
+  void xtest_LoadPreNeXus_CNCS()
   {
     std::string eventfile( "CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
-    eventLoader->setProperty<bool>("PadEmptyPixels", false);
 
     //Get the event file size
     struct stat filestatus;
@@ -283,7 +281,6 @@ public:
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
-    eventLoader->setProperty("PadEmptyPixels", true);
 
     //Get the event file size
     struct stat filestatus;
@@ -318,7 +315,7 @@ public:
   }
 
 
-  void test_LoadPreNeXus_CNCS_SkipPixels()
+  void xtest_LoadPreNeXus_CNCS_SkipPixels()
   {
     std::string eventfile( "CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
@@ -326,7 +323,6 @@ public:
     eventLoader->setPropertyValue("OutputWorkspace", "cncs_skipped");
     //Load just 2 pixels
     eventLoader->setProperty("SpectrumList", "45, 110");
-    eventLoader->setProperty("PadEmptyPixels", false);
 
     TS_ASSERT( eventLoader->execute() );
 
