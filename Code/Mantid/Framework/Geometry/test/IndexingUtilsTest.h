@@ -59,6 +59,59 @@ public:
      TS_ASSERT_DELTA( sum_sq_error, 0.390147, 1e-5 );
   }
 
+  
+  void test_BestFit_Direction()
+  {
+    std::vector<int> index_values;
+    int correct_indices[] = { 1, 4, 2, 0, 1, 3, 0, -1, 0, -1, -2, -3 };
+    for ( size_t i = 0; i < 12; i++ )
+    {
+      index_values.push_back( correct_indices[i] );
+    }
+
+    std::vector<V3D> q_vectors;
+    q_vectors.push_back( V3D(-0.57582, -0.35322, -0.19974 ));
+    q_vectors.push_back( V3D(-1.41754, -0.78704, -0.75974 ));
+    q_vectors.push_back( V3D(-1.12030, -0.53578, -0.27559 ));
+    q_vectors.push_back( V3D(-0.68911, -0.59397, -0.12716 ));
+    q_vectors.push_back( V3D(-1.06863, -0.43255,  0.01688 ));
+    q_vectors.push_back( V3D(-1.82007, -0.49671, -0.06266 ));
+    q_vectors.push_back( V3D(-1.10465, -0.73708, -0.01939 ));
+    q_vectors.push_back( V3D(-0.12747, -0.32380,  0.00821 ));
+    q_vectors.push_back( V3D(-0.84210, -0.37038,  0.15403 ));
+    q_vectors.push_back( V3D(-0.54099, -0.46900,  0.11535 ));
+    q_vectors.push_back( V3D(-0.90478, -0.50667,  0.51072 ));
+    q_vectors.push_back( V3D(-0.50387, -0.58561,  0.43502 ));
+
+    V3D best_vec;
+    double error = IndexingUtils::BestFit_Direction( best_vec, 
+                                                     index_values, 
+                                                     q_vectors );
+    TS_ASSERT_DELTA( error, 0.00218606, 1e-5 );
+    TS_ASSERT_DELTA( best_vec[0], -2.58222, 1e-4 );
+    TS_ASSERT_DELTA( best_vec[1],  3.97345, 1e-4 );
+    TS_ASSERT_DELTA( best_vec[2], -4.55145, 1e-4 );
+  }
+
+
+  void test_ValidIndex()
+  {
+    V3D hkl(0,0,0);
+    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), false );
+
+    hkl( 2.09, -3.09, -2.91 );
+    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), true );
+
+    hkl( 2.11, -3.09, -2.91 );
+    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), false );
+
+    hkl( 2.09, -3.11, -2.91 );
+    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), false );
+
+    hkl( 2.09, -3.09, -2.89 );
+    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), false );
+  }
+
 
   void test_NumberIndexed()
   {
@@ -93,23 +146,113 @@ public:
     TS_ASSERT_EQUALS( IndexingUtils::NumberIndexed( UB, q_list, 0.017 ), 4 );
   }
 
-
-  void test_ValidIndex()
+  
+  void test_GetIndexedPeaks_1D()
   {
-    V3D hkl(0,0,0);
-    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), false ); 
 
-    hkl( 2.09, -3.09, -2.91 );
-    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), true ); 
+    int correct_indices[] = { 1, 4, 2, 0, 1, 3, 0, -1, 0, -1, -2, -3 };
 
-    hkl( 2.11, -3.09, -2.91 );
-    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), false ); 
+    std::vector<V3D> q_vectors;
+    q_vectors.push_back( V3D(-0.57582, -0.35322, -0.19974 ));
+    q_vectors.push_back( V3D(-1.41754, -0.78704, -0.75974 ));
+    q_vectors.push_back( V3D(-1.12030, -0.53578, -0.27559 ));
+    q_vectors.push_back( V3D(-0.68911, -0.59397, -0.12716 ));
+    q_vectors.push_back( V3D(-1.06863, -0.43255,  0.01688 ));
+    q_vectors.push_back( V3D(-1.82007, -0.49671, -0.06266 ));
+    q_vectors.push_back( V3D(-1.10465, -0.73708, -0.01939 ));
+    q_vectors.push_back( V3D(-0.12747, -0.32380,  0.00821 ));
+    q_vectors.push_back( V3D(-0.84210, -0.37038,  0.15403 ));
+    q_vectors.push_back( V3D(-0.54099, -0.46900,  0.11535 ));
+    q_vectors.push_back( V3D(-0.90478, -0.50667,  0.51072 ));
+    q_vectors.push_back( V3D(-0.50387, -0.58561,  0.43502 ));
 
-    hkl( 2.09, -3.11, -2.91 );
-    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), false ); 
+    V3D direction(-2.62484,4.04988,-4.46991);
+    double required_tolerance = 0.1;
+    double fit_error = 0;
 
-    hkl( 2.09, -3.09, -2.89 );
-    TS_ASSERT_EQUALS( IndexingUtils::ValidIndex(hkl,0.1), false ); 
+    std::vector<int> index_vals;
+    std::vector<V3D> indexed_qs;
+
+    int num_indexed = IndexingUtils::GetIndexedPeaks_1D( q_vectors,
+                                                         direction,
+                                                         required_tolerance,
+                                                         index_vals,
+                                                         indexed_qs,
+                                                         fit_error );
+
+    TS_ASSERT_EQUALS( num_indexed, 12 );
+    TS_ASSERT_EQUALS( index_vals.size(), 12 );
+    TS_ASSERT_EQUALS( indexed_qs.size(), 12 );
+    TS_ASSERT_DELTA( fit_error, 0.011419, 1e-5 );
+
+    for ( size_t i = 0; i < index_vals.size(); i++ )
+    {
+      TS_ASSERT_EQUALS( index_vals[i], correct_indices[i] );
+    }
+  }
+
+
+  void test_GetIndexedPeaks_3D()
+  {
+    std::vector<V3D> correct_indices;
+    correct_indices.push_back( V3D( 1,  9, -9) );
+    correct_indices.push_back( V3D( 4, 20,-24) );
+    correct_indices.push_back( V3D( 2, 18,-14) );
+    correct_indices.push_back( V3D( 0, 12,-12) );
+    correct_indices.push_back( V3D( 1, 19, -9) );
+    correct_indices.push_back( V3D( 3, 31,-13) );
+    correct_indices.push_back( V3D( 0, 20,-14) );
+    correct_indices.push_back( V3D(-1,  3, -5) );
+    correct_indices.push_back( V3D( 0, 16, -6) );
+    correct_indices.push_back( V3D(-1, 11, -7) );
+    correct_indices.push_back( V3D(-2, 20, -4) );
+    correct_indices.push_back( V3D(-3, 13, -5) );
+
+    std::vector<V3D> q_vectors;
+    q_vectors.push_back( V3D(-0.57582, -0.35322, -0.19974 ));
+    q_vectors.push_back( V3D(-1.41754, -0.78704, -0.75974 ));
+    q_vectors.push_back( V3D(-1.12030, -0.53578, -0.27559 ));
+    q_vectors.push_back( V3D(-0.68911, -0.59397, -0.12716 ));
+    q_vectors.push_back( V3D(-1.06863, -0.43255,  0.01688 ));
+    q_vectors.push_back( V3D(-1.82007, -0.49671, -0.06266 ));
+    q_vectors.push_back( V3D(-1.10465, -0.73708, -0.01939 ));
+    q_vectors.push_back( V3D(-0.12747, -0.32380,  0.00821 ));
+    q_vectors.push_back( V3D(-0.84210, -0.37038,  0.15403 ));
+    q_vectors.push_back( V3D(-0.54099, -0.46900,  0.11535 ));
+    q_vectors.push_back( V3D(-0.90478, -0.50667,  0.51072 ));
+    q_vectors.push_back( V3D(-0.50387, -0.58561,  0.43502 ));
+
+    V3D direction_1(-2.58222,3.97345,-4.55145);
+    V3D direction_2(-16.6082,-2.50165,7.24628);
+    V3D direction_3(2.7609,14.5661,11.3343);
+
+    double required_tolerance = 0.1;
+    double fit_error = 0;
+
+    std::vector<V3D> index_vals;
+    std::vector<V3D> indexed_qs;
+
+    int num_indexed = IndexingUtils::GetIndexedPeaks_3D( q_vectors,
+                                                         direction_1,
+                                                         direction_2,
+                                                         direction_3,
+                                                         required_tolerance,
+                                                         index_vals,
+                                                         indexed_qs,
+                                                         fit_error );
+    TS_ASSERT_EQUALS( num_indexed, 12 );
+    TS_ASSERT_EQUALS( index_vals.size(), 12 );
+    TS_ASSERT_EQUALS( indexed_qs.size(), 12 );
+    TS_ASSERT_DELTA( fit_error, 0.0258739, 1e-5 );
+
+    for ( size_t i = 0; i < index_vals.size(); i++ )
+    {
+      for ( size_t j = 0; j < 3; j++ )
+      {
+        TS_ASSERT_EQUALS( (index_vals[i])[j], (correct_indices[i])[j] );
+      }
+    }
+
   }
 
 
@@ -136,6 +279,7 @@ public:
     TS_ASSERT_DELTA( direction_list[63].Y(),  0, 1e-5 );
     TS_ASSERT_DELTA( direction_list[63].Z(),  0.309017, 1e-5 );
   }
+
 
   void test_MakeCircleDirections()
   {
@@ -167,6 +311,44 @@ public:
       TS_ASSERT_DELTA( dot_prod, 0, 1e-10 );
     }
   }
+
+
+  void test_SelectDirection()
+  {
+    V3D best_direction;
+
+    std::vector<V3D> q_vectors;
+    q_vectors.push_back( V3D(-0.57582, -0.35322, -0.19974 ));
+    q_vectors.push_back( V3D(-1.41754, -0.78704, -0.75974 ));
+    q_vectors.push_back( V3D(-1.12030, -0.53578, -0.27559 ));
+    q_vectors.push_back( V3D(-0.68911, -0.59397, -0.12716 ));
+    q_vectors.push_back( V3D(-1.06863, -0.43255,  0.01688 ));
+    q_vectors.push_back( V3D(-1.82007, -0.49671, -0.06266 ));
+    q_vectors.push_back( V3D(-1.10465, -0.73708, -0.01939 ));
+    q_vectors.push_back( V3D(-0.12747, -0.32380,  0.00821 ));
+    q_vectors.push_back( V3D(-0.84210, -0.37038,  0.15403 ));
+    q_vectors.push_back( V3D(-0.54099, -0.46900,  0.11535 ));
+    q_vectors.push_back( V3D(-0.90478, -0.50667,  0.51072 ));
+    q_vectors.push_back( V3D(-0.50387, -0.58561,  0.43502 ));
+
+    std::vector<V3D> directions = IndexingUtils::MakeHemisphereDirections(90);
+
+    double plane_spacing = 1.0/6.5781;
+    double required_tolerance = 0.1;
+
+    int num_indexed = IndexingUtils::SelectDirection( best_direction,
+                                                      q_vectors,
+                                                      directions,
+                                                      plane_spacing,
+                                                      required_tolerance );
+
+    TS_ASSERT_DELTA( best_direction[0], -0.399027, 1e-5 );
+    TS_ASSERT_DELTA( best_direction[1],  0.615661, 1e-5 );
+    TS_ASSERT_DELTA( best_direction[2], -0.679513, 1e-5 );
+
+    TS_ASSERT_EQUALS( num_indexed, 12 );
+  }
+
 
 };
 

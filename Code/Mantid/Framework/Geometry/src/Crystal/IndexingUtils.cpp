@@ -20,6 +20,10 @@ using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::Quat;
 
+
+#define round(x) ((x)>=0?(int)((x)+0.5):(int)((x)-0.5))
+
+
 /** 
     STATIC method BestFit_UB: Calculates the matrix that most nearly maps
     the specified hkl_vectors to the specified q_vectors.  The calculated
@@ -268,6 +272,41 @@ double IndexingUtils::BestFit_Direction(           V3D          & best_vec,
 }
 
 
+/**
+  Check whether or not the components of the specified vector are within
+  the specified tolerance of integer values, other than (0,0,0).
+  @param hkl        A V3D object containing what may be valid Miller indices
+                    for a peak.
+  @param tolerance  The maximum acceptable deviation from integer values for
+                    the Miller indices.
+  @return true if all components of the vector are within the tolerance of
+               integer values (h,k,l) and (h,k,l) is NOT (0,0,0)
+ */
+
+bool IndexingUtils::ValidIndex( const V3D & hkl, double tolerance )
+{
+  bool valid_index = false;
+
+  int h,k,l;
+                                        // since C++ lacks a round() we need
+                                        // to do it ourselves!
+  h = round( hkl[0] );
+  k = round( hkl[1] );
+  l = round( hkl[2] );
+
+  if ( h != 0 || k != 0 || l != 0 )   // check if indexed, but not as (0,0,0)
+  {
+    if ( (fabs( hkl[0] - h ) <= tolerance) &&
+         (fabs( hkl[1] - k ) <= tolerance) &&
+         (fabs( hkl[2] - l ) <= tolerance) )
+    {
+      valid_index = true;
+    }
+  }
+
+  return valid_index;
+}
+
 
 /**
    Calculate the number of Q vectors that are mapped to integer h,k,l 
@@ -318,39 +357,157 @@ int IndexingUtils::NumberIndexed( const DblMatrix         & UB,
   return count;
 }
 
+
 /**
-  Check whether or not the components of the specified vector are within
-  the specified tolerance of integer values, other than (0,0,0).
-  @param hkl        A V3D object containing what may be valid Miller indices
-                    for a peak.
-  @param tolerance  The maximum acceptable deviation from integer values for
-                    the Miller indices.
-  @return true if all components of the vector are within the tolerance of
-               integer values (h,k,l) and (h,k,l) is NOT (0,0,0)
+  Given one plane normal direction for a family of parallel planes in 
+  reciprocal space, find the peaks that lie on these planes to within the 
+  specified tolerance.  The direction is specified as a vector with length 
+  "a" if the plane spacing in reciprocal space is 1/a.  In that way, the 
+  dot product of a peak Qxyz with the direction vector will be an integer 
+  if the peak lies on one of the planes.   
+
+  @param q_vectors           List of V3D peaks in reciprocal space
+  @param direction           Direction vector in the direction of the 
+                             normal vector for a family of parallel planes
+                             in reciprocal space.  The length of this vector 
+                             must be the reciprocal of the plane spacing.
+  @param required_tolerance  The maximum allowed error (as a faction of
+                             the corresponding Miller index) for a peak
+                             q_vector to be counted as indexed.
+  @param index_vals          List of the one-dimensional Miller indices peaks
+                             that were indexed in the specified direction.
+  @param indexed_qs          List of Qxyz value for the peaks that were
+                             indexed indexed in the specified direction.
+  @param fit_error           The sum of the squares of the distances from
+                             integer values for the projections of the 
+                             indexed q_vectors on the specified direction.
+
+  @return The number of q_vectors that are indexed to within the specified
+          tolerance, in the specified direction.
+
  */
-
-bool IndexingUtils::ValidIndex( const V3D & hkl, double tolerance )
+int IndexingUtils::GetIndexedPeaks_1D( const std::vector<V3D> & q_vectors,
+                                       const V3D         & direction,
+                                             double        required_tolerance,
+                                             std::vector<int> & index_vals,
+                                             std::vector<V3D> & indexed_qs,
+                                             double      & fit_error )
 {
-  bool valid_index = false;
+  int     nearest_int;
+  double  proj_value;
+  double  error;
+  int     num_indexed = 0;
+  index_vals.clear();
+  indexed_qs.clear();
+  fit_error = 0;
 
-  int h,k,l;
-                                        // since C++ lacks a round() we need
-                                        // to do it ourselves!
-  h = (int)(hkl[0] + (hkl[0] < 0? -0.5 : +0.5));
-  k = (int)(hkl[1] + (hkl[1] < 0? -0.5 : +0.5));
-  l = (int)(hkl[2] + (hkl[2] < 0? -0.5 : +0.5));
-
-  if ( h != 0 || k != 0 || l != 0 )   // check if indexed, but not as (0,0,0)
+  for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
   {
-    if ( (fabs( hkl[0] - h ) <= tolerance) &&
-         (fabs( hkl[1] - k ) <= tolerance) &&
-         (fabs( hkl[2] - l ) <= tolerance) )
+    proj_value = direction.scalar_prod( q_vectors[ q_num ] );
+    nearest_int = round( proj_value );
+    error = fabs( proj_value - nearest_int );
+    if ( error < required_tolerance )
     {
-      valid_index = true; 
+      fit_error += error * error;
+      indexed_qs.push_back( q_vectors[q_num] );
+      index_vals.push_back( nearest_int );
+      num_indexed++;
     }
   }
 
-  return valid_index;
+  return num_indexed;
+}
+
+
+/**
+  Given three plane normal directions for three families of parallel planes in 
+  reciprocal space, find the peaks that lie on these planes to within the 
+  specified tolerance.  The three directions are specified as vectors with
+  lengths that are the reciprocals of the corresponding plane spacings.  In
+  that way, the dot product of a peak Qxyz with one of the direction vectors
+  will be an integer if the peak lies on one of the planes corresponding to
+  that direction.  If the three directions are properly chosen to correspond
+  to the unit cell edges, then the resulting indices will be proper Miller
+  indices for the peaks.  This method is similar to GetIndexedPeaks_3D, but
+  checks three directions simultaneously and requires that the peak lies
+  on all three families of planes simultaneously and does NOT index as (0,0,0).
+
+  @param q_vectors           List of V3D peaks in reciprocal space
+  @param direction_1         Direction vector in the direction of the normal
+                             vector for the first family of parallel planes.
+  @param direction_2         Direction vector in the direction of the normal
+                             vector for the second family of parallel planes.
+  @param direction_3         Direction vector in the direction of the normal
+                             vector for the third family of parallel planes.
+  @param required_tolerance  The maximum allowed error (as a faction of
+                             the corresponding Miller index) for a peak
+                             q_vector to be counted as indexed.
+  @param index_vals          List of the Miller indices (h,k,l) of peaks
+                             that were indexed in all specified directions.
+  @param indexed_qs          List of Qxyz value for the peaks that were
+                             indexed indexed in all specified directions.
+  @param fit_error           The sum of the squares of the distances from
+                             integer values for the projections of the 
+                             indexed q_vectors on the specified directions.
+
+  @return The number of q_vectors that are indexed to within the specified
+          tolerance, in the specified direction.
+
+ */
+int IndexingUtils::GetIndexedPeaks_3D( const std::vector<V3D> & q_vectors,
+                                       const V3D         & direction_1,
+                                       const V3D         & direction_2,
+                                       const V3D         & direction_3,
+                                             double        required_tolerance,
+                                             std::vector<V3D> & miller_indices,
+                                             std::vector<V3D> & indexed_qs,
+                                             double      & fit_error )
+{
+    double  projected_h;
+    double  projected_k;
+    double  projected_l;
+    double  h_error;
+    double  k_error;
+    double  l_error;
+    int     h_int;
+    int     k_int;
+    int     l_int;
+    V3D     hkl;
+    int     num_indexed = 0;
+    miller_indices.clear();
+    indexed_qs.clear();
+    fit_error = 0;
+
+    for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
+    {
+      projected_h = direction_1.scalar_prod( q_vectors[ q_num ] );
+      projected_k = direction_2.scalar_prod( q_vectors[ q_num ] );
+      projected_l = direction_3.scalar_prod( q_vectors[ q_num ] );
+
+      hkl( projected_h, projected_k, projected_l );
+
+      if ( IndexingUtils::ValidIndex( hkl, required_tolerance ) )
+      {
+        h_int = round( projected_h );
+        k_int = round( projected_k );
+        l_int = round( projected_l );
+
+        h_error = fabs( projected_h - h_int );
+        k_error = fabs( projected_k - k_int );
+        l_error = fabs( projected_l - l_int );
+
+        fit_error += h_error*h_error + k_error*k_error + l_error*l_error;
+
+        indexed_qs.push_back( q_vectors[q_num] );
+
+        V3D miller_ind( h_int, k_int, l_int );
+        miller_indices.push_back( miller_ind );
+
+        num_indexed++;
+      }
+    }
+
+  return num_indexed;
 }
 
 
@@ -483,14 +640,14 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(        int    n_steps,
 
 /**
   Choose the direction vector that most nearly corresponds to a family of
-  planes in the list of qxyz vectors, with spacing equal to the specified
+  planes in the list of q_vectors, with spacing equal to the specified
   plane_spacing.  The direction is chosen from the specified direction_list.
 
   @param  best_direction      This will be set to the direction that minimizes
                               the sum squared distances of projections of peaks
                               from integer multiples of the specified plane
                               spacing.
-  @param  qxyz_vals           List of peak positions, specified according to
+  @param  q_vectors           List of peak positions, specified according to
                               the convention that |q| = 1/d.  (i.e. Q/2PI)
   @param  direction_list      List of possible directions for plane normals.
                               Initially, this will be a long list of possible
@@ -498,7 +655,7 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(        int    n_steps,
   @param  plane_spacing       The required spacing between planes in reciprocal
                               space.
   @param  required_tolerance  The maximum deviation of the component of a
-                              peak qxyz in the direction of the best_direction
+                              peak Qxyz in the direction of the best_direction
                               vector for that peak to count as being indexed. 
                               NOTE: The tolerance is specified in terms of
                               Miller Index.  That is, the distance between 
@@ -508,11 +665,11 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(        int    n_steps,
           family of planes with normal direction = best_direction and with 
           spacing given by plane_spacing.
  */
-size_t IndexingUtils::SelectDirection(       V3D & best_direction,
-                                      const  std::vector<V3D> qxyz_vals,
-                                      const  std::vector<V3D> direction_list,
-                                      double plane_spacing,
-                                      double required_tolerance )
+int IndexingUtils::SelectDirection(       V3D & best_direction,
+                                   const  std::vector<V3D> q_vectors,
+                                   const  std::vector<V3D> direction_list,
+                                   double plane_spacing,
+                                   double required_tolerance )
 {
     double dot_product;
     int    nearest_int;
@@ -525,10 +682,10 @@ size_t IndexingUtils::SelectDirection(       V3D & best_direction,
       sum_sq_error = 0;
       V3D direction = direction_list[ dir_num ];
       direction/=plane_spacing;
-      for ( size_t q_num = 0; q_num < qxyz_vals.size(); q_num++ )
+      for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
       {
-        dot_product = direction.scalar_prod( qxyz_vals[ q_num ] );
-        nearest_int = (int)(dot_product + (dot_product < 0? -0.5 : +0.5));
+        dot_product = direction.scalar_prod( q_vectors[ q_num ] );
+        nearest_int = round( dot_product );
         error = fabs( dot_product - nearest_int );
         sum_sq_error += error * error;
       }
@@ -541,11 +698,11 @@ size_t IndexingUtils::SelectDirection(       V3D & best_direction,
     }
 
     double proj_value  = 0;
-    size_t num_indexed = 0;
-    for ( size_t q_num = 0; q_num < qxyz_vals.size(); q_num++ )
+    int    num_indexed = 0;
+    for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
     {
-      proj_value = best_direction.scalar_prod( qxyz_vals[ q_num ] );
-      nearest_int = (int)(proj_value + (proj_value < 0? -0.5 : +0.5));
+      proj_value = best_direction.scalar_prod( q_vectors[ q_num ] );
+      nearest_int = round( proj_value );
       error = fabs( proj_value - nearest_int );
       if ( error < required_tolerance )
         num_indexed++;

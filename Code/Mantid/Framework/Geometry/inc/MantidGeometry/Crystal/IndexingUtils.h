@@ -62,14 +62,35 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                  const std::vector<int>  & index_values,
                                  const std::vector<Kernel::V3D>  & q_vectors );
 
+  /// Check is hkl is within tolerance of integer (h,k,l) non-zero values
+  static bool ValidIndex( const Kernel::V3D  & hkl,
+                                double         tolerance );
+
   /// Calculate the number of Q vectors that are mapped to integer indices by UB
   static int NumberIndexed( const Kernel::DblMatrix & UB,
                             const std::vector<Kernel::V3D>  & q_vectors,
                                   double                      tolerance   );
 
-  /// Check is hkl is within tolerance of integer (h,k,l) non-zero values
-  static bool ValidIndex( const Kernel::V3D  & hkl,
-                                double         tolerance );
+
+  /// Get list of indices and Qs for peaks indexed in the specified direction 
+  static int GetIndexedPeaks_1D( 
+                          const std::vector<Kernel::V3D> & q_vectors,
+                          const Kernel::V3D              & direction,
+                                double                     required_tolerance,
+                                std::vector<int>         & index_vals,
+                                std::vector<Kernel::V3D> & indexed_qs,
+                                double      & fit_error );
+
+  /// Get list of indices and Qs for peaks indexed in three specified directions
+  static int GetIndexedPeaks_3D( 
+                          const std::vector<Kernel::V3D> & q_vectors,
+                          const Kernel::V3D              & direction_1,
+                          const Kernel::V3D              & direction_2,
+                          const Kernel::V3D              & direction_3,
+                                double                     required_tolerance,
+                                std::vector<Kernel::V3D> & miller_indices,
+                                std::vector<Kernel::V3D> & indexed_qs,
+                                double                   & fit_error );
 
   /// Make list of direction vectors uniformly distributed over a hemisphere
   static std::vector<Kernel::V3D> MakeHemisphereDirections( int n_steps );
@@ -83,12 +104,11 @@ class MANTID_GEOMETRY_DLL IndexingUtils
 
   /// Choose the direction in a list of directions, that is most nearly 
   //  perpendicular to planes with the specified spacing in reciprocal space.
-  static size_t SelectDirection(        Kernel::V3D & best_direction,
-                                 const  std::vector<Kernel::V3D> qxyz_vals,
-                                 const  std::vector<Kernel::V3D> direction_list,
-                                        double plane_spacing,
-                                        double required_tolerance );
-
+  static int SelectDirection(        Kernel::V3D & best_direction,
+                              const  std::vector<Kernel::V3D> q_vectors,
+                              const  std::vector<Kernel::V3D> direction_list,
+                                     double plane_spacing,
+                                     double required_tolerance );
 };
 
 
