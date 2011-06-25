@@ -26,24 +26,6 @@
          number_of_elements="1"
 	     default_values="1">
 	    </DoubleVectorProperty>
-      	<IntVectorProperty
-         name="X Bins"
-         command="SetXBins"
-         number_of_elements="1"
-         default_values="50">
-        </IntVectorProperty>
-	    <IntVectorProperty
-         name="Y Bins"
-         command="SetYBins"
-         number_of_elements="1"
-         default_values="50">
-        </IntVectorProperty>
-	    <IntVectorProperty
-         name="Z Bins"
-         command="SetZBins"
-         number_of_elements="1"
-         default_values="50">
-        </IntVectorProperty>
         <DoubleVectorProperty
          name="Min Signal"
          command="SetMinThreshold"
