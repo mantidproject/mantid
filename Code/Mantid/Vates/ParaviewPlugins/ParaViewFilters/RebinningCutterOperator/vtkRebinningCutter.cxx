@@ -220,9 +220,10 @@ int vtkRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(request), 
       vtkErrorMacro("Rebinning operations require Rebinning Metadata. Have you provided a rebinning source?");
       status = Bad;
     }
+    setTimeRange(outputVector);
   }
 
-  setTimeRange(outputVector);
+  
   return status;
 }
 
