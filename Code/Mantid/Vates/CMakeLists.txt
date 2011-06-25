@@ -44,7 +44,6 @@ if( ParaView_FOUND AND USE_PARAVIEW )
 	  #3) Append the installdir/bin directory onto path as it contains libs MantidVatesAPI etc (required for advanced Paraview plugin loading).
 	  #4) Point to the location of the plubin libs. Paraview will then autoload these.
 	  set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
-	    messagebox mb_ok 'ddd $INSTDIR'
 	    ClearErrors 
 	    ReadEnvStr $R0 'MANTIDPATH'
 	    IfErrors 0 +2
