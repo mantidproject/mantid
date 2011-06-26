@@ -103,7 +103,7 @@ using namespace Mantid::API;
       //void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
       //void setParameter(int , const double& value, bool explicitlySet = true);
 
-       void 	addPenalty  (double *out) const 
+       /*void 	addPenalty  (double *out) const 
        {
              double out0=out[0];
              IFitFunction::addPenalty( out);
@@ -121,7 +121,7 @@ using namespace Mantid::API;
             if( IntensityConstraint->check()>0)
               std::cout<<"Inten OOB"<<IntensityConstraint->lower()<<","<<IntensityConstraint->upper()<<std::endl;
        }
-      
+      */
       void 	function  (double *out, const double *xValues, const size_t nData)const ;
           
     
