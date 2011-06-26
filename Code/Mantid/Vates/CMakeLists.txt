@@ -30,7 +30,7 @@ if( ParaView_FOUND AND USE_PARAVIEW )
       message( STATUS "Linux installer available for Mantid-Vates")
     endif()
 
-    if( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+    if( WIN32 )
       # Windows needs to have this for shared libraries install targets
       set( TARGET_TYPE RUNTIME)
       # This is a bug in NSIS itself, so it's not CPack's fault
