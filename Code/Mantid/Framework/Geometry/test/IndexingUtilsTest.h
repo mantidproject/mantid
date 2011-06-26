@@ -18,6 +18,57 @@ using Mantid::Kernel::Matrix;
 class IndexingUtilsTest : public CxxTest::TestSuite
 {
 public:
+  void test_BestFit_UB_given_lattice_parameters()
+  {
+    Matrix<double> UB(3,3,false);
+
+    double correct_UB[] = { -0.0596604,  0.04964820, -0.00775391,
+                             0.0930100,  0.00751049, -0.04198350,
+                            -0.1046440, -0.02161340, -0.03225860 };
+
+    std::vector<V3D> q_vectors;
+    q_vectors.push_back( V3D(-0.57582, -0.35322, -0.19974 ));
+    q_vectors.push_back( V3D(-1.41754, -0.78704, -0.75974 ));
+    q_vectors.push_back( V3D(-1.12030, -0.53578, -0.27559 ));
+    q_vectors.push_back( V3D(-0.68911, -0.59397, -0.12716 ));
+    q_vectors.push_back( V3D(-1.06863, -0.43255,  0.01688 ));
+    q_vectors.push_back( V3D(-1.82007, -0.49671, -0.06266 ));
+    q_vectors.push_back( V3D(-1.10465, -0.73708, -0.01939 ));
+    q_vectors.push_back( V3D(-0.12747, -0.32380,  0.00821 ));
+    q_vectors.push_back( V3D(-0.84210, -0.37038,  0.15403 ));
+    q_vectors.push_back( V3D(-0.54099, -0.46900,  0.11535 ));
+    q_vectors.push_back( V3D(-0.90478, -0.50667,  0.51072 ));
+    q_vectors.push_back( V3D(-0.50387, -0.58561,  0.43502 ));
+
+    double a =  6.5781;
+    double b = 18.2995;
+    double c = 18.6664;
+    double alpha = 90;
+    double beta  = 90;
+    double gamma = 90;
+
+    double required_tolerance = 0.10;
+
+    double error = IndexingUtils::BestFit_UB( UB, 
+                                              q_vectors, 
+                                              required_tolerance,
+                                              a, b, c, 
+                                              alpha, beta, gamma );
+    TS_ASSERT_DELTA( error, 0.000111616, 1e-5 );
+
+    std::vector<double> UB_returned = UB.get_vector();
+    for ( size_t i = 0; i < 9; i++ )
+    {
+      TS_ASSERT_DELTA( UB_returned[i], correct_UB[i], 1e-5 );
+    }
+
+    int num_indexed = IndexingUtils::NumberIndexed( UB, 
+                                                    q_vectors, 
+                                                    required_tolerance );
+    TS_ASSERT_EQUALS( num_indexed, 12 ); 
+  }
+
+
   void test_BestFit_UB() 
   {  
      double h_vals[]  = {  1,  0,  0, -1,  0,  0, 1, 1 };

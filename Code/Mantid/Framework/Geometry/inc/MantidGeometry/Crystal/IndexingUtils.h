@@ -52,6 +52,14 @@ class MANTID_GEOMETRY_DLL IndexingUtils
 {
   public:
 
+  /// Find the UB matrix that most nearly indexes the specified qxyz values 
+  /// given the lattice parameters 
+  static double BestFit_UB(       Kernel::DblMatrix        & UB,
+                            const std::vector<Kernel::V3D> & q_vectors,
+                                  double                     required_tolerance,
+                                  double a, double b, double c,
+                                  double alpha, double beta, double gamma );
+
   /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
   static double BestFit_UB(Kernel::DblMatrix               & UB,
                            const std::vector<Kernel::V3D>  & hkl_vectors, 
@@ -70,7 +78,6 @@ class MANTID_GEOMETRY_DLL IndexingUtils
   static int NumberIndexed( const Kernel::DblMatrix & UB,
                             const std::vector<Kernel::V3D>  & q_vectors,
                                   double                      tolerance   );
-
 
   /// Get list of indices and Qs for peaks indexed in the specified direction 
   static int GetIndexedPeaks_1D( 
