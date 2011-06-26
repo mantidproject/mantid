@@ -146,16 +146,19 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
 
     EventWorkspace_sptr in_ws,out_ws;
+    TS_ASSERT_THROWS_NOTHING( in_ws = boost::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve(inputEvWSname) ));
     TS_ASSERT_THROWS_NOTHING( out_ws = boost::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve(outputEvWSname) ));
 
+    TS_ASSERT( out_ws );
+    if (!out_ws) return;
 
     TS_ASSERT_DELTA(out_ws->getEventList(0).getEvent(0).m_weight,std::sqrt(3./(3.-out_ws->getEventList(0).getEvent(0).m_tof)),1e-7);
     TS_ASSERT_DELTA(out_ws->getEventList(0).getEvent(3).m_weight,std::sqrt(3./(3.-out_ws->getEventList(0).getEvent(3).m_tof)),1e-7);
-    TS_ASSERT_DELTA(out_ws->getEventList(0).getEvent(9).m_weight,0,1e-7); //Ef<0
+    TS_ASSERT_LESS_THAN(out_ws->getNumberEvents( ),in_ws->getNumberEvents( )); //Check that events with Ef<0 are dropped
 
-    TS_ASSERT( out_ws );
-    if (!out_ws) return;
+
 
     AnalysisDataService::Instance().remove(outputEvWSname);
     AnalysisDataService::Instance().remove(inputEvWSname);
@@ -262,7 +265,7 @@ private:
 
   void createEventWorkspace()
   {
-    EventWorkspace_sptr event = WorkspaceCreationHelper::CreateEventWorkspace(1,10,10,0,0.9,2,0);  
+    EventWorkspace_sptr event = WorkspaceCreationHelper::CreateEventWorkspace(1,5,5,0,0.9,2,0);  
 
 //std::cout<<event->getEventList(0).getEvent(0).m_tof<<" ";
 //std::cout<<event->getEventList(0).getEvent(1).m_tof<<" "<<std::endl;

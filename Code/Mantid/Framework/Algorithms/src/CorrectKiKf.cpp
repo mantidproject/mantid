@@ -254,7 +254,6 @@ void CorrectKiKf::execEvent()
 
   int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
-  bool negativeEnergyWarning;
   PARALLEL_FOR1(outputWS)
   for (int64_t i=0; i < numHistograms; ++i)
   {
@@ -301,11 +300,11 @@ void CorrectKiKf::execEvent()
         // Fall through
   
       case WEIGHTED:
-        negativeEnergyWarning=correctKiKfEventHelper(evlist->getWeightedEvents(), efixed,emodeStr);
+        correctKiKfEventHelper(evlist->getWeightedEvents(), efixed,emodeStr);
         break;
   
       case WEIGHTED_NOTIME:
-        negativeEnergyWarning=correctKiKfEventHelper(evlist->getWeightedEventsNoTime(), efixed,emodeStr);
+        correctKiKfEventHelper(evlist->getWeightedEventsNoTime(), efixed,emodeStr);
         break;
     }
 
@@ -316,8 +315,11 @@ void CorrectKiKf::execEvent()
   PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS->clearMRU();
-  if (negativeEnergyWarning) g_log.information() <<"Ef <= 0 or Ei <= 0 in at least one spectrum!!!!"<<std::endl;
-  if ((negativeEnergyWarning) && ( efixedProp == EMPTY_DBL())) g_log.information()<<"Try to set fixed energy"<<std::endl ;
+  if (inputWS->getNumberEvents( ) != outputWS->getNumberEvents( ))
+  {
+    g_log.information() <<"Ef <= 0 or Ei <= 0 for "<<inputWS->getNumberEvents( )-outputWS->getNumberEvents( )<<" events, out of "<<inputWS->getNumberEvents( )<<std::endl;
+    if ( efixedProp == EMPTY_DBL()) g_log.information()<<"Try to set fixed energy"<<std::endl ;
+  }
 }
 
 /**
@@ -325,13 +327,12 @@ void CorrectKiKf::execEvent()
  *
  */
 template<class T>
-    bool CorrectKiKf::correctKiKfEventHelper(std::vector<T>& wevector, double efixed,const std::string emodeStr)
+    void CorrectKiKf::correctKiKfEventHelper(std::vector<T>& wevector, double efixed,const std::string emodeStr)
 {
   double Ei,Ef;
   float kioverkf;
-  bool negativeEnergyWarning=false;
   typename std::vector<T>::iterator it;
-  for (it=wevector.begin(); it<wevector.end(); it++)
+  for (it=wevector.begin(); it<wevector.end();)
   {
     if (emodeStr == "Direct")  //Ei=Efixed
     {
@@ -342,17 +343,19 @@ template<class T>
       Ef = efixed;
       Ei = Ef + it->m_tof;
     }
-    // if Ei or Ef is negative, it gives a warning warning and the events will have 0 weight
+    // if Ei or Ef is negative, delete the event
     if ((Ei <= 0)||(Ef <= 0))
     {
-      kioverkf=0.;
-      negativeEnergyWarning=true;
+      it=wevector.erase(it);
     } 
-    else kioverkf = static_cast<float>(std::sqrt( Ei / Ef ));
-    it->m_weight*=kioverkf;
-    it->m_errorSquared*=kioverkf;
+    else 
+    {
+      kioverkf = static_cast<float>(std::sqrt( Ei / Ef ));
+      it->m_weight*=kioverkf;
+      it->m_errorSquared*=kioverkf;
+      ++it;
+    }
   }
-  return negativeEnergyWarning;
 }
 
 } // namespace Algorithm
