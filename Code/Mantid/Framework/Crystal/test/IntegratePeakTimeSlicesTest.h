@@ -34,6 +34,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Unit.h"
+#include "MantidAPI/IPeak.h"
 
 #include <map>
 using namespace Mantid;
@@ -229,7 +230,7 @@ public:
     boost::shared_ptr<Geometry::IComponent> bankC = instP->getComponentByName(std::string("bank26"));
 
     if (bankC->type().compare("RectangularDetector") != 0)
-         throw std::runtime_error(" No Rect bank named bank 1");
+         throw std::runtime_error(" No Rect bank named bank 26");
 
    boost::shared_ptr<Geometry::RectangularDetector> bankR = boost::dynamic_pointer_cast<
                                           Geometry::RectangularDetector>(bankC);
@@ -238,26 +239,55 @@ public:
 
    //std::cout<<"pixel ID="<<pixelp->getID()<<std::endl;
    Peak peak(instP, pixelp->getID(), 6.955836);
-
+   
    PeaksWorkspace_sptr pks(new PeaksWorkspace());
-
+   pks->setName("Peaks3");
    pks->addPeak(peak);
    IntegratePeakTimeSlices algP;
    algP.initialize();
    algP.setProperty("PeakIndex",0);
    algP.setProperty("PeakQspan",.003);
    algP.setProperty<MatrixWorkspace_sptr>("InputWorkspace",wsPtr);
-   //algP.setPropertyValue("OutputWorkspace","table");
+ 
+ 
    algP.setProperty<PeaksWorkspace_sptr>("Peaks",pks);
    algP.execute();
-   
+   std::cout<<"After execute"<<std::endl;
+   algP.setPropertyValue("OutputWorkspace","OutputWorkspace");
+   TableWorkspace_sptr Table=(algP.getProperty("OutputWorkspace"));
+   if( !Table)
+   {
+        std::cout<<"No table retrieved"<<std::endl;
+        Table = boost::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("OutputWorkspace"));
+        if( !Table)
+           std::cout<<"Could Not retrieve frome Analysys data service"<<std::endl;
+    }
+
+   std::cout<<"After execute1"<<std::endl;
+
+   if( Table) std::cout<<"Num rows in table="<<Table->rowCount()<<std::endl;
+
+   std::cout<<"After execute2"<<std::endl;
+   algP.setProperty("PeaksResult","PeaksResult");
+   PeaksWorkspace_sptr ResPeaks= algP.getProperty("PeaksResult");
+
+   if( !ResPeaks)
+   {
+     std::cout<<"Could Not retrieve Peaks with getProperty"<<std::endl;
+     ResPeaks = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("PeaksResult"));
+     
+    }
+
+   std::cout<<"After execute3"<<std::endl;
+ 
+    if( ResPeaks)
+     std::cout<<"new peak info="<<ResPeaks->getPeak(0).getIntensity()<<","<<ResPeaks->getPeak(0).getSigmaIntensity()<<std::endl;
    
   }catch( std::exception &s)
   {
     std::cout<<"error ="<< s.what()<<std::endl;
   }
     std::cout<<"F"<<std::endl;
-
   }
 
 private:
