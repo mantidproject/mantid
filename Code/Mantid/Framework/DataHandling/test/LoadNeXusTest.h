@@ -8,7 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidDataHandling/LoadNeXus.h"
+#include "MantidDataHandling/LoadNexus.h"
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this test case.
 #include "MantidDataObjects/WorkspaceSingleValue.h" 
@@ -25,7 +25,7 @@ using namespace Mantid::DataObjects;
 //          load workspace from Muon(1) file emu..73.nxs using LoadNexus
 //          load workspace from Muon(1) file emu..75.nxs using LoadNexus
 //
-class LoadNeXusTest : public CxxTest::TestSuite
+class LoadNexusTest : public CxxTest::TestSuite
 {
 public: 
   
