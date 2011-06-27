@@ -253,7 +253,7 @@ public:
     // No changes yet, so no file
     TS_ASSERT_EQUALS(prop_file.exists(), false);
 
-    runSaveTest(filename);
+    runSaveTest(filename,"11");
   }
 
   void testSaveConfigExistingSettings()
@@ -266,7 +266,7 @@ public:
     writer << "mantid.legs = 6";
     writer.close();
 
-    runSaveTest(filename);
+    runSaveTest(filename,"13");
   }
 
   void testSaveConfigWithLineContinuation()
@@ -285,7 +285,7 @@ public:
       "/test4\n";
     writer.close();
 
-    TS_ASSERT_THROWS_NOTHING(settings.setString("mantid.legs", "10"));
+    TS_ASSERT_THROWS_NOTHING(settings.setString("mantid.legs", "15"));
 
     TS_ASSERT_THROWS_NOTHING(settings.saveConfig(filename));
     // Should exist
@@ -308,7 +308,7 @@ public:
     reader.close();
 
     TS_ASSERT_EQUALS(prop_lines.size(), 5);
-    TS_ASSERT_EQUALS(prop_lines[0], "mantid.legs=10");
+    TS_ASSERT_EQUALS(prop_lines[0], "mantid.legs=15");
     TS_ASSERT_EQUALS(prop_lines[1], "");
     TS_ASSERT_EQUALS(prop_lines[2], "search.directories=/test1;\\");
     TS_ASSERT_EQUALS(prop_lines[3], "/test2;/test3;\\");
@@ -351,12 +351,12 @@ protected:
   }
 
 private:
-  void runSaveTest(const std::string& filename)
+  void runSaveTest(const std::string& filename, const std::string& legs)
   {
     ConfigServiceImpl& settings = ConfigService::Instance();
     // Make a change and save again
     std::string key("mantid.legs");
-    std::string value("10");
+    std::string value(legs);
     TS_ASSERT_THROWS_NOTHING(settings.setString(key, value));
     TS_ASSERT_THROWS_NOTHING(settings.saveConfig(filename));
 
