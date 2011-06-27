@@ -27,7 +27,7 @@ class ConjoinFiles(PythonAlgorithm):
     def PyInit(self):
         self.declareListProperty("RunNumbers",[0], Validator=ArrayBoundedValidator(Lower=0))
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction=Direction.Output)
-        self.declareProperty("Directory", "")
+        self.declareFileProperty("Directory", "", FileAction.OptionalDirectory)
 
     def PyExec(self):
         # generic stuff for running
