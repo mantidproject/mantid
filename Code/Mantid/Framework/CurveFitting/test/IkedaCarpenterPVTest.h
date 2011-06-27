@@ -19,7 +19,7 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/Exception.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadNeXus.h"
+#include "MantidDataHandling/LoadNexus.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/cow_ptr.h"
 #include <limits>

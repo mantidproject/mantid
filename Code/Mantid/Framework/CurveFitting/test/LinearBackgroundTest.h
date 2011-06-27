@@ -13,7 +13,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidKernel/Exception.h"
-#include "MantidDataHandling/LoadNeXus.h"
+#include "MantidDataHandling/LoadNexus.h"
 #include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::Kernel;
