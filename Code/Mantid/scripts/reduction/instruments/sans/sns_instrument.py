@@ -74,9 +74,9 @@ class EQSANS(Instrument):
         
         masked_pts = []
         for y in masked_y:
-            masked_pts.extend([ [y,x] for x in range(self.nx_pixels) ])
+            masked_pts.extend([ [x,y] for x in range(self.nx_pixels) ])
         for x in masked_x:
-            masked_pts.extend([ [y,x] for y in range(ny_low, self.ny_pixels-ny_high) ])
+            masked_pts.extend([ [x,y] for y in range(ny_low, self.ny_pixels-ny_high) ])
         
         return masked_pts
         
