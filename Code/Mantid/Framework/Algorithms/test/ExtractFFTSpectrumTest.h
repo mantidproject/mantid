@@ -5,7 +5,7 @@
 
 #include "MantidAlgorithms/ExtractFFTSpectrum.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataHandling/LoadNeXus.h"
+#include "MantidDataHandling/LoadNexus.h"
 #include "MantidAlgorithms/Rebin.h"
 
 using namespace Mantid::Kernel;
