@@ -391,11 +391,11 @@ class LoadRun(ReductionStep):
         #ConvertUnits(workspace+'_evt', workspace+'_evt_wl', "Wavelength")
         source_to_sample = math.fabs(mtd[workspace+'_evt'].getInstrument().getSource().getPos().getZ())*1000.0
         conversion_factor = 3.9560346 / (sdd+source_to_sample);
-        ScaleX(workspace+'_evt', workspace+'_evt_wl', conversion_factor)
-        mtd[workspace+'_evt_wl'].getAxis(0).setUnit("Wavelength")
+        ScaleX(workspace+'_evt', workspace+'_evt', conversion_factor)
+        mtd[workspace+'_evt'].getAxis(0).setUnit("Wavelength")
         
         # Rebin so all the wavelength bins are aligned        
-        Rebin(workspace+'_evt_wl', workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_combined_max), False)
+        Rebin(workspace+'_evt', workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_combined_max), False)
         
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [frame-skipping: %s]" %(workspace, sdd, str(frame_skipping)))
         
@@ -634,7 +634,7 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
             raise RuntimeError, "Could not get the wavelength band for frame 1"
         CropWorkspace(workspace, workspace+'_frame1', XMin=wl_min, XMax=wl_max)
         
-        output_str = "Performed radial averaging: frame 1 = [%g, %g], " % (wl_min, wl_max)
+        output_str = "Performed radial averaging: frame 1 = [%6.1f, %-6.1f], " % (wl_min, wl_max)
         
         # Second frame
         wl_min = None
@@ -647,7 +647,7 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
             raise RuntimeError, "Could not get the wavelength band for frame 2"
         CropWorkspace(workspace, workspace+'_frame2', XMin=wl_min, XMax=wl_max)
         
-        output_str += "frame 2 = [%g, %g]," % (wl_min, wl_max)
+        output_str += "frame 2 = [%6.1f, %-6.1f]," % (wl_min, wl_max)
 
         iq_frame1 = WeightedAzimuthalAverage(binning=self._binning, suffix=self._suffix, error_weighting=self._error_weighting, 
                                              n_bins=self._nbins, n_subpix=self._nsubpix, log_binning=self._log_binning)

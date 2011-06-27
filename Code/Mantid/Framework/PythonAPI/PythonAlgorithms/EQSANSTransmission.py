@@ -80,8 +80,8 @@ class EQSANSTransmission(PythonAlgorithm):
         
 
         # Sum up all TOF bins
-        Integration(input_ws, input_ws.getName()+'_int')
-        integrated_ws = mantid.getMatrixWorkspace(input_ws.getName()+'_int')
+        a = self.executeSubAlg(Integration, input_ws, OutputWorkspace=input_ws.getName()+'_int')
+        integrated_ws = a._getWorkspaceProperty("OutputWorkspace")
         
         # Find pixel with highest and lowest signal
         counts_2D = numpy.zeros([2*self.NY_TRANS_PIX+1, 2*self.NX_TRANS_PIX+1])

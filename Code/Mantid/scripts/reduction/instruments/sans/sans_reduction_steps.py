@@ -323,12 +323,12 @@ class DirectBeamTransmission(BaseTransmission):
             # 1- Compute zero-angle transmission correction (Note: CalcTransCoef)
             self._transmission_ws = "transmission_fit_"+workspace
 
-            sample_ws = "_transmission_sample"
+            sample_ws = "__transmission_sample"
             filepath = find_data(self._sample_file, instrument=reducer.instrument.name())
             reducer._data_loader.clone(data_file=filepath).execute(reducer, sample_ws)
             #Load(filepath, sample_ws)
             
-            empty_ws = "_transmission_empty"
+            empty_ws = "__transmission_empty"
             filepath = find_data(self._empty_file, instrument=reducer.instrument.name())
             reducer._data_loader.clone(data_file=filepath).execute(reducer, empty_ws)
             #Load(filepath, empty_ws)
@@ -354,8 +354,10 @@ class DirectBeamTransmission(BaseTransmission):
             
             first_det = int(det_list.split(',')[0])
             
-            GroupDetectors(InputWorkspace=empty_ws,  OutputWorkspace="empty_mon",  DetectorList=det_list, KeepUngroupedSpectra="1")
-            GroupDetectors(InputWorkspace=sample_ws, OutputWorkspace="sample_mon", DetectorList=det_list, KeepUngroupedSpectra="1")
+            empty_mon_ws = "__empty_mon"
+            sample_mon_ws = "__sample_mon"
+            GroupDetectors(InputWorkspace=empty_ws,  OutputWorkspace=empty_mon_ws,  DetectorList=det_list, KeepUngroupedSpectra="1")
+            GroupDetectors(InputWorkspace=sample_ws, OutputWorkspace=sample_mon_ws, DetectorList=det_list, KeepUngroupedSpectra="1")
             
             #TODO: check that both workspaces have the same masked spectra
             
@@ -365,29 +367,33 @@ class DirectBeamTransmission(BaseTransmission):
             if reducer._normalizer is not None:
                 norm_spectrum = reducer._normalizer.get_normalization_spectrum()
                 if norm_spectrum<0:
-                    reducer._normalizer.execute(reducer, "empty_mon")
-                    reducer._normalizer.execute(reducer, "sample_mon")
+                    reducer._normalizer.execute(reducer, empty_mon_ws)
+                    reducer._normalizer.execute(reducer, sample_mon_ws)
                     normalise_to_monitor = False
             
             # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
             # as the monitor channel.
-            RebinToWorkspace("empty_mon", "sample_mon", OutputWorkspace="empty_mon")
+            RebinToWorkspace(empty_mon_ws, sample_mon_ws, OutputWorkspace=empty_mon_ws)
             if normalise_to_monitor:
-                CalculateTransmission(DirectRunWorkspace="empty_mon", SampleRunWorkspace="sample_mon", 
+                CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
                                       OutputWorkspace=self._transmission_ws,
                                       IncidentBeamMonitor=str(norm_spectrum), 
                                       TransmissionMonitor=str(first_det),
-                                      OutputUnfittedData=False)
+                                      OutputUnfittedData=True)
             else:
-                CalculateTransmission(DirectRunWorkspace="empty_mon", SampleRunWorkspace="sample_mon", 
+                CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
                                       OutputWorkspace=self._transmission_ws,
                                       TransmissionMonitor=str(first_det),
-                                      OutputUnfittedData=False)
+                                      OutputUnfittedData=True)
             
             if mtd.workspaceExists(empty_ws):
                 mtd.deleteWorkspace(empty_ws)
             if mtd.workspaceExists(sample_ws):
                 mtd.deleteWorkspace(sample_ws)          
+            if mtd.workspaceExists(empty_mon_ws):
+                mtd.deleteWorkspace(empty_mon_ws)          
+            if mtd.workspaceExists(sample_mon_ws):
+                mtd.deleteWorkspace(sample_mon_ws)          
             
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission
@@ -915,8 +921,8 @@ class SensitivityCorrection(ReductionStep):
         
             # Create efficiency profile: 
             # Divide each pixel by average signal, and mask high and low pixels.
-            CalculateEfficiency(flood_ws, "efficiency", self._min_sensitivity, self._max_sensitivity)
-            self._efficiency_ws = "efficiency"
+            CalculateEfficiency(flood_ws, "__efficiency", self._min_sensitivity, self._max_sensitivity)
+            self._efficiency_ws = "__efficiency"
             
         # Divide by detector efficiency
         Divide(workspace, self._efficiency_ws, workspace)

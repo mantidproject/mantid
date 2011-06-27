@@ -79,7 +79,8 @@ namespace Mantid
 	    //Get number of histograms
       int histnumber = static_cast<int>(inputW->getNumberHistograms());
 	    
-	    m_progress = new API::Progress(this, 0.0, 1.0, histnumber);
+	    m_progress = new API::Progress(this, 0.0, 1.0, histnumber+1);
+	    m_progress->report("Scaling X");
 
 	    wi_min = 0;
       wi_max = histnumber-1;
