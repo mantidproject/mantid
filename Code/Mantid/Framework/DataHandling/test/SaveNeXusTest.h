@@ -16,7 +16,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveNeXus.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
-#include "MantidDataHandling/LoadNeXus.h"
+#include "MantidDataHandling/LoadNexus.h"
 #include <Poco/Path.h>
 
 using namespace Mantid::API;
