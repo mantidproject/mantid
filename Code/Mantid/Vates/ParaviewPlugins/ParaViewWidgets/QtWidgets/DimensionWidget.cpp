@@ -189,7 +189,17 @@ void DimensionWidget::maxBoxListener()
 
 void DimensionWidget::integratedChanged(bool)
 {
-  m_pDimensionPresenter->updateModel();
+  try
+  {
+    m_pDimensionPresenter->updateModel();
+  }
+  catch(std::invalid_argument& ex)
+  {
+    m_ckIntegrated->setChecked(false);
+    QMessageBox msgBox;
+    msgBox.setText(ex.what());
+    msgBox.exec();
+  }
 }
 
 DimensionWidget::~DimensionWidget()

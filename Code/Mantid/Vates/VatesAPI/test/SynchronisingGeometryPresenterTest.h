@@ -21,7 +21,7 @@ class SynchronisingGeometryPresenterTest: public CxxTest::TestSuite
 
 private:
 
-static std::string constructXML()
+static std::string constructXML(std::string nbinsA, std::string nbinsB, std::string nbinsC, std::string nbinsD, std::string nbinsE)
 {
     return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
   "<DimensionSet>" +
@@ -29,31 +29,31 @@ static std::string constructXML()
       "<Name>Energy</Name>" +
       "<UpperBounds>150</UpperBounds>" +
       "<LowerBounds>0</LowerBounds>" +
-      "<NumberOfBins>1</NumberOfBins>" +
+      "<NumberOfBins>" + nbinsA + "</NumberOfBins>" +
     "</Dimension>" +
     "<Dimension ID=\"qx\">" +
       "<Name>Qx</Name>" +
       "<UpperBounds>5</UpperBounds>" +
       "<LowerBounds>-1.5</LowerBounds>" +
-      "<NumberOfBins>5</NumberOfBins>" +
+      "<NumberOfBins>" + nbinsB + "</NumberOfBins>" +
     "</Dimension>" +
     "<Dimension ID=\"qy\">" +
       "<Name>Qy</Name>" +
       "<UpperBounds>6.6</UpperBounds>" +
       "<LowerBounds>-6.6</LowerBounds>" +
-      "<NumberOfBins>5</NumberOfBins>" +
+      "<NumberOfBins>" + nbinsC + "</NumberOfBins>" +
     "</Dimension>" +
     "<Dimension ID=\"qz\">" +
       "<Name>Qz</Name>" +
       "<UpperBounds>6.6</UpperBounds>" +
       "<LowerBounds>-6.6</LowerBounds>" +
-      "<NumberOfBins>5</NumberOfBins>" +
+      "<NumberOfBins>" + nbinsD + "</NumberOfBins>" +
     "</Dimension>" +
     "<Dimension ID=\"other\">" +
       "<Name>Other</Name>" +
       "<UpperBounds>6.6</UpperBounds>" +
       "<LowerBounds>-6.6</LowerBounds>" +
-      "<NumberOfBins>1</NumberOfBins>" +
+      "<NumberOfBins>" + nbinsE + "</NumberOfBins>" +
     "</Dimension>" +
     "<XDimension>" +
       "<RefDimensionId>qx</RefDimensionId>" +
@@ -68,6 +68,11 @@ static std::string constructXML()
       "<RefDimensionId>en</RefDimensionId>" +
     "</TDimension>" +
   "</DimensionSet>";
+  }
+
+  static std::string constructXML()
+  {
+    return constructXML("1", "5", "5", "5", "1");
   }
 
   class MockGeometryView : public GeometryView
@@ -113,6 +118,11 @@ static std::string constructXML()
     {
       return m_dimPresenters[index];
     }
+  
+    void dimensionCollapsed(DimensionPresenter* pDimensionPresenter)
+    {
+      return Mantid::VATES::SynchronisingGeometryPresenter::dimensionCollapsed(pDimensionPresenter);
+    }
   };
 
 public:
@@ -149,6 +159,20 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&gView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&dView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
+  }
+
+  void testCollapsingThrows()
+  {
+    //In this test schenario there is a only one non-integrated dimension.
+    MDGeometryXMLParser parser(constructXML("2", "1", "1", "1", "1"));
+    parser.execute();
+    ExposedSynchronisingGeometryPresenter geometryPresenter(parser);
+
+    MockDimensionView dView;
+    DimensionPresenter dimensionPresenter(&dView, &geometryPresenter);
+    
+    //Should not be able to make a collapse request to the geometry presenter, when there is only one non-collapsed dimension.
+    TSM_ASSERT_THROWS("Should not be able to collapse the only-exising non-collapsed dimension.", geometryPresenter.dimensionCollapsed(&dimensionPresenter), std::invalid_argument);
   }
 
   void testGetGeometryXML()

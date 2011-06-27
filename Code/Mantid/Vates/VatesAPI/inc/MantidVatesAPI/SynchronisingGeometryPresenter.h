@@ -92,8 +92,6 @@ namespace Mantid
 
       void dimensionExpanded(DimensionPresenter* pDimensionPresenter);
 
-      void dimensionCollapsed(DimensionPresenter* pDimensionPresenter);
-
       /// Disabled copy constructor
       SynchronisingGeometryPresenter(const SynchronisingGeometryPresenter&);
       /// Disabled assignement operator
@@ -115,6 +113,9 @@ namespace Mantid
       /// The View with which the presenter will be bound.
       GeometryView* m_view;
     protected:
+
+      virtual void dimensionCollapsed(DimensionPresenter* pDimensionPresenter);
+
       /// Collection of individual dimension presenters owned by this geometry presenter.
       VecDimPresenter_sptr m_dimPresenters;
     };

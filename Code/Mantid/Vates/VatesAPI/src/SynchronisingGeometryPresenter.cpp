@@ -165,7 +165,13 @@ namespace Mantid
     @parameter pDimensionPresenter : dimension which is now collapsed.
     */
     void SynchronisingGeometryPresenter::dimensionCollapsed(DimensionPresenter* pDimensionPresenter)
-    {
+    { 
+      //Effectively end the transactino if it will result in zero non-integrated dimensions
+      if(1 == m_notIntegrated.size())
+      {
+        throw std::invalid_argument("Cannot have all dimensions integrated!");
+      }
+
       Mantid::Geometry::VecIMDDimension_sptr::iterator it = std::find_if(m_integrated.begin(), m_integrated.end(), FindModelId(pDimensionPresenter->getDimensionId()));
       if(it == m_integrated.end())
       {
@@ -177,6 +183,7 @@ namespace Mantid
         eraseMappedPresenter((*location));
         shuffleMappedPresenters();
       }
+
     }
 
     /**
