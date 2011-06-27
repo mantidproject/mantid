@@ -18,17 +18,19 @@ public:
     ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
 signals:
   void needToClose();
+  void needToUpdate();
 public slots:
   void deleteRows(int startRow, int endRow);
   void cellEdited(int,int col);
 protected slots:
   void closeTable();
-protected:
   void fillTable();
+protected:
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 private:
   Mantid::API::ITableWorkspace_sptr m_ws;
+  const std::string m_wsName;
 
 };
 

@@ -23,15 +23,17 @@ using namespace MantidQt::API;
 MantidTable::MantidTable(ScriptingEnv *env, Mantid::API::ITableWorkspace_sptr ws, const QString &label, 
     ApplicationWindow* parent, const QString& name, Qt::WFlags f):
 Table(env,ws->rowCount(),ws->columnCount(),label,parent,"",f),
-m_ws(ws)
+m_ws(ws),
+m_wsName(ws->getName())
 {
   // Set name and stuff
-  parent->initTable(this, parent->generateUniqueName(name+"-"));
+  parent->initTable(this, parent->generateUniqueName("Table-"));
   //  askOnCloseEvent(false);
   // Fill up the view
   this->fillTable();
 
   connect(this,SIGNAL(needToClose()),this,SLOT(closeTable()));
+  connect(this,SIGNAL(needToUpdate()),this,SLOT(fillTable()));
   observeDelete();
   observeAfterReplace();
 }
@@ -79,8 +81,9 @@ void MantidTable::closeTable()
 //------------------------------------------------------------------------------------------------
 void MantidTable::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-  UNUSED_ARG(wsName)
-  if (dynamic_cast<Mantid::API::ITableWorkspace*>(ws.get()) == m_ws.get())
+  Mantid::API::ITableWorkspace* ws_ptr = dynamic_cast<Mantid::API::ITableWorkspace*>(ws.get());
+  if (!ws_ptr) return;
+  if (ws_ptr == m_ws.get() || wsName == m_wsName)
   {
     emit needToClose();
   }
@@ -89,10 +92,12 @@ void MantidTable::deleteHandle(const std::string& wsName,const boost::shared_ptr
 //------------------------------------------------------------------------------------------------
 void MantidTable::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-  UNUSED_ARG(wsName)
-  if (dynamic_cast<Mantid::API::ITableWorkspace*>(ws.get()) == m_ws.get())
+  Mantid::API::ITableWorkspace_sptr new_ws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
+  if (!new_ws) return;
+  if (new_ws.get() == m_ws.get() || wsName == m_wsName)
   {
-    fillTable();
+    m_ws = new_ws;
+    emit needToUpdate();
   }
 }
 
