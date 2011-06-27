@@ -50,6 +50,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( trans.setProperty("SampleRunWorkspace",inputWS) )
     TS_ASSERT_THROWS_NOTHING( trans.setProperty("DirectRunWorkspace",inputWS) )
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("IncidentBeamMonitor",2) )
     std::string outputWS("CalculateTransmissionTest_outputWS");
     TS_ASSERT_THROWS_NOTHING( trans.setPropertyValue("OutputWorkspace",outputWS) )
     TS_ASSERT_THROWS_NOTHING( trans.setProperty("OutputUnfittedData", true) )
@@ -75,6 +76,43 @@ public:
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS+"_unfitted");
+  }
+
+
+  void testFittedNoBeamMonitor()
+  {
+
+    Mantid::API::MatrixWorkspace_sptr inputWS =
+      WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(4,50,true); // Make sure this has a spectrum 3
+    inputWS->getAxis(0)->unit() =
+      Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+
+    Mantid::Algorithms::CalculateTransmission trans;
+
+    TS_ASSERT_THROWS_NOTHING( trans.initialize() );
+    TS_ASSERT( trans.isInitialized() );
+
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("SampleRunWorkspace",inputWS) )
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("DirectRunWorkspace",inputWS) )
+    std::string outputWS("CalculateTransmissionTest_outputWS");
+    TS_ASSERT_THROWS_NOTHING( trans.setPropertyValue("OutputWorkspace",outputWS) )
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("OutputUnfittedData", false) )
+
+    TS_ASSERT_THROWS_NOTHING( trans.execute() );
+    TS_ASSERT( trans.isExecuted() );
+
+    Mantid::API::MatrixWorkspace_const_sptr fitted, unfitted;
+    TS_ASSERT_THROWS_NOTHING(fitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) );
+
+    const Mantid::MantidVec &fit = fitted->readY(0);
+    for (unsigned int i = 0; i < fit.size(); ++i)
+    {
+      // Should all be 1 because I used the same workspace twice as the input
+      TS_ASSERT_DELTA( fit[i], 1.0, 0.0005 )
+    }
+
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 
 

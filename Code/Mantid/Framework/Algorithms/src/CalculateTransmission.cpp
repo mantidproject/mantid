@@ -46,7 +46,7 @@ void CalculateTransmission::init()
   BoundedValidator<int> *zeroOrMore = new BoundedValidator<int>();
   zeroOrMore->setLower(0);
   // The defaults here are the correct detector numbers for LOQ
-  declareProperty("IncidentBeamMonitor",2,zeroOrMore,"The UDET of the incident beam monitor");
+  declareProperty("IncidentBeamMonitor",EMPTY_INT(),"The UDET of the incident beam monitor");
   declareProperty("TransmissionMonitor",3,zeroOrMore->clone(),"The UDET of the transmission monitor");
 
   declareProperty(new ArrayProperty<double>("RebinParams"),
@@ -68,6 +68,16 @@ void CalculateTransmission::exec()
   MatrixWorkspace_sptr sampleWS = getProperty("SampleRunWorkspace");
   MatrixWorkspace_sptr directWS = getProperty("DirectRunWorkspace");
 
+  // Check whether we need to normalise by the beam monitor
+  int beamMonitorID = getProperty("IncidentBeamMonitor");
+  bool normaliseToMonitor = true;
+  if ( isEmpty(beamMonitorID) ) normaliseToMonitor = false;
+  else if (beamMonitorID<0)
+  {
+    g_log.error("The beam monitor UDET should be greater or equal to zero");
+    throw std::invalid_argument("The beam monitor UDET should be greater or equal to zero");
+  }
+
   // Check that the two input workspaces are from the same instrument
   if ( sampleWS->getBaseInstrument() != directWS->getBaseInstrument() )
   {
@@ -85,12 +95,12 @@ void CalculateTransmission::exec()
   std::vector<detid_t> udets;
   std::vector<size_t> indices;
   // For LOQ at least, the incident beam monitor's UDET is 2 and the transmission monitor is 3
-  udets.push_back(getProperty("IncidentBeamMonitor"));
   udets.push_back(getProperty("TransmissionMonitor"));
+  if (normaliseToMonitor) udets.push_back(getProperty("IncidentBeamMonitor"));
   // Convert UDETs to workspace indices via spectrum numbers
   const std::vector<specid_t> sampleSpectra = sampleWS->spectraMap().getSpectra(udets);
   sampleWS->getIndicesFromSpectra(sampleSpectra,indices);
-  if (indices.size() < 2)
+  if ( (indices.size() < 2 && normaliseToMonitor) || (indices.size() < 1 && !normaliseToMonitor))
   {
     if (indices.size() == 1)
     {
@@ -103,34 +113,38 @@ void CalculateTransmission::exec()
     throw std::invalid_argument("Could not find the incident and transmission monitor spectra\n");
   }
   // Check that given spectra are monitors
-  if ( !sampleWS->getDetector(indices.front())->isMonitor() )
+  if ( normaliseToMonitor && !sampleWS->getDetector(indices.back())->isMonitor() )
   {
     g_log.information("The Incident Beam Monitor UDET provided is not marked as a monitor");
   }
-  if ( !sampleWS->getDetector(indices.back())->isMonitor() )
+  if ( !sampleWS->getDetector(indices.front())->isMonitor() )
   {
     g_log.information("The Transmission Monitor UDET provided is not marked as a monitor");
   }
-  MatrixWorkspace_sptr M2_sample = this->extractSpectrum(sampleWS,indices[0]);
-  MatrixWorkspace_sptr M3_sample = this->extractSpectrum(sampleWS,indices[1]);
+  MatrixWorkspace_sptr M2_sample;
+  if (normaliseToMonitor) M2_sample = this->extractSpectrum(sampleWS,indices[1]);
+  MatrixWorkspace_sptr M3_sample = this->extractSpectrum(sampleWS,indices[0]);
   const std::vector<specid_t> directSpectra = directWS->spectraMap().getSpectra(udets);
   sampleWS->getIndicesFromSpectra(directSpectra,indices);
   // Check that given spectra are monitors
-  if ( !directWS->getDetector(indices.front())->isMonitor() )
+  if ( !directWS->getDetector(indices.back())->isMonitor() )
   {
     g_log.information("The Incident Beam Monitor UDET provided is not marked as a monitor");
   }
-  if ( !directWS->getDetector(indices.back())->isMonitor() )
+  if ( !directWS->getDetector(indices.front())->isMonitor() )
   {
     g_log.information("The Transmission Monitor UDET provided is not marked as a monitor");
   }
-  MatrixWorkspace_sptr M2_direct = this->extractSpectrum(directWS,indices[0]);
-  MatrixWorkspace_sptr M3_direct = this->extractSpectrum(directWS,indices[1]);
+  MatrixWorkspace_sptr M2_direct;
+  if (normaliseToMonitor) M2_direct = this->extractSpectrum(directWS,indices[1]);
+  MatrixWorkspace_sptr M3_direct = this->extractSpectrum(directWS,indices[0]);
   
   Progress progress(this, m_done, m_done += 0.2, 2);
   progress.report("CalculateTransmission: Dividing transmission by incident");
   // The main calculation
-  MatrixWorkspace_sptr transmission = (M3_sample/M3_direct)*(M2_direct/M2_sample);
+  MatrixWorkspace_sptr transmission = M3_sample/M3_direct;
+  if (normaliseToMonitor)  transmission = transmission*(M2_direct/M2_sample);
+
   // This workspace is now a distribution
   progress.report("CalculateTransmission: Dividing transmission by incident");
 
