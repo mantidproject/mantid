@@ -1,11 +1,11 @@
-// LoadNeXus
+// LoadNexus
 // @author Freddie Akeroyd, STFC ISIS Faility
 // @author Ronald Fowler, e_Science  - updated to be wrapper to either LoadMuonNeuxs or LoadNexusProcessed
 // Dropped the upper case X from Algorithm name (still in filenames)
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/LoadNeXus.h"
+#include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
