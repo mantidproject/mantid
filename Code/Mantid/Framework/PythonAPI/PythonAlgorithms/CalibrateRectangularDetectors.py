@@ -188,7 +188,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                     ymax = y_s[midBin]
         print "Reference spectra=",refpixel
         # Remove old calibration files
-        cmd = "rm "+self._outDir+str(wksp)+".cal*"
+        cmd = "rm "+calib
         os.system(cmd)
         # Cross correlate spectra using interval around peak at peakpos (d-Spacing)
         if self._lastpixel == 0:
@@ -199,9 +199,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             WorkspaceIndexMin=0, WorkspaceIndexMax=self._lastpixel, XMin=self._peakmin, XMax=self._peakmax)
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
         GetDetectorOffsets(InputWorkspace=str(wksp)+"cc", OutputWorkspace=str(wksp)+"offset", Step=self._binning[1],
-            DReference=self._peakpos, XMin=-self._ccnumber, XMax=self._ccnumber, GroupingFileName=self._outDir+str(wksp)+".cal")
+            DReference=self._peakpos, XMin=-self._ccnumber, XMax=self._ccnumber)
         mtd.deleteWorkspace(str(wksp)+"cc")
-        mtd.deleteWorkspace(str(wksp)+"offset")
         mtd.releaseFreeMemory()
         Rebin(InputWorkspace=temp, OutputWorkspace=temp,Params=str(self._peakmin2)+","+str(self._binning[1])+","+str(self._peakmax2))
         if self._peakpos2 > 0.0:
@@ -218,46 +217,31 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 WorkspaceIndexMin=self._lastpixel+1, WorkspaceIndexMax=temp.getNumberHistograms()-1, XMin=self._peakmin2, XMax=self._peakmax2)
             # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
             GetDetectorOffsets(InputWorkspace=str(wksp)+"cc2", OutputWorkspace=str(wksp)+"offset2", Step=self._binning[1],
-                DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber, GroupingFileName=self._outDir+str(wksp)+".cal")
+                DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber)
+            Plus(LHSWorkspace=str(wksp)+"offset", RHSWorkspace=str(wksp)+"offset2",OutputWorkspace=str(wksp)+"offset")
             mtd.deleteWorkspace(str(wksp)+"cc2")
             mtd.deleteWorkspace(str(wksp)+"offset2")
             mtd.releaseFreeMemory()
-            cmd = "mv "+self._outDir+str(wksp)+".cal "+self._outDir+str(wksp)+".cal1"
-            os.system(cmd)
-            cmd = "sed 1d "+self._outDir+str(wksp)+".cal >"+self._outDir+str(wksp)+".cal2"
-            os.system(cmd)
-            cmd = "cat "+self._outDir+str(wksp)+".cal1 "+self._outDir+str(wksp)+".cal2 > "+self._outDir+str(wksp)+".cal"
-            os.system(cmd)
-            cmd = "rm "+self._outDir+str(wksp)+".cal?"
-            os.system(cmd)
-        CreateCalFileByNames(InstrumentWorkspace=temp, GroupingFileName=self._outDir+str(wksp)+".cal",
-            GroupNames=groups)
-        #Move new calibration file to replace old calibration file without detector groups
-        cmd = "mv "+self._outDir+str(wksp)+".cal2 "+self._outDir+str(wksp)+".cal"
-        os.system(cmd)
+        CreateGroupingWorkspace(InputWorkspace=temp, GroupNames=groups, OutputWorkspace=str(wksp)+"group")
         lcinst = str(self._instrument)
-        if lcinst == "PG3":
-            lcinst == "powgen"
         
-        filename = os.path.join(self._outDir, str(wksp))
         if "dspacemap" in self._outTypes:
             #write Dspacemap file
-            CaltoDspacemap(InputWorkspace=temp, CalibrationFile=self._outDir+str(wksp)+".cal", 
+            SaveDspacemap(InputWorkspace=str(wksp)+"offset",
                 DspacemapFile=self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat"))
         if "calibration" in self._outTypes:
-            cmd = "cp "+self._outDir+str(wksp)+".cal "+calib
-            os.system(cmd) 
+            SaveCalFile(OffsetsWorkspace=str(wksp)+"offset",GroupingWorkspace=str(wksp)+"group",Filename=calib)
         mtd.deleteWorkspace(str(temp))
         return wksp
 
     def _focus(self, wksp, calib, filterLogs=None):
         if wksp is None:
             return None
-        AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
+        AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=str(wksp)+"offset")
         # Diffraction focusing using new calibration file with offsets
         if self._diffractionfocus:
             DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
-                GroupingFileName=calib)
+                GroupingWorkspace=str(wksp)+"group")
         SortEvents(InputWorkspace=wksp, SortBy="X Value")
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning)
         return wksp
@@ -304,8 +288,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self._outTypes = self.getProperty("SaveAs")
         samRuns = self.getProperty("RunNumber")
         lcinst = str(self._instrument)
-        if lcinst == "PG3":
-            lcinst == "powgen"
         calib = self._outDir+lcinst+"_calibrate_d"+str(samRuns[0])+strftime("_%Y_%m_%d.cal")
         filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
 
