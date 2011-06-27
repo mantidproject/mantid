@@ -977,8 +977,6 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot,ApplicationWindow* app,Gr
   Spectrogram *spgrm = plot->plotSpectrogram(&m_funct, m_spectrogramRows, m_spectrogramCols, boundingRect(), minz, maxz, type);
   if( spgrm )
   {
-    spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
-    spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
     if(project)
     {
       spgrm->mutableColorMap().loadMap(prjData->getColormapFile());

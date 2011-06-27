@@ -442,11 +442,18 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   Qy *= knorm;
   Qz *= knorm;
 
-  Mantid::API::IPeak* peak = tw->createPeak(Mantid::Kernel::V3D(Qx,Qy,Qz),l2);
-  peak->setDetectorID(m_currentDetID);
-  tw->addPeak(*peak);
-  delete peak;
-  tw->modified();
+  try
+  {
+    Mantid::API::IPeak* peak = tw->createPeak(Mantid::Kernel::V3D(Qx,Qy,Qz),l2);
+    peak->setDetectorID(m_currentDetID);
+    tw->addPeak(*peak);
+    delete peak;
+    tw->modified();
+  }
+  catch(std::exception& e)
+  {
+    std::cerr << "Error here " << e.what() << std::endl;
+  }
 
   //std::cerr << "id=" << det->getID() << std::endl;
   //std::cerr << "x=" << x << std::endl;

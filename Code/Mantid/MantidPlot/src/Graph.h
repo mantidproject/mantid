@@ -150,7 +150,7 @@ public:
   enum MarkerType{None = -1, Text = 0, Arrow = 1, Image = 2};
   enum CurveType{Line, Scatter, LineSymbols, VerticalBars, Area, Pie, VerticalDropLines,
                  Spline, HorizontalSteps, Histogram, HorizontalBars, VectXYXY, ErrorBars,
-                 Box, VectXYAM, VerticalSteps, ColorMap, GrayScale, Contour, Function, ImagePlot,User};
+                 Box, VectXYAM, VerticalSteps, ColorMap, GrayScale, ColorMapContour, Contour, Function, ImagePlot,User};
 
   //! Returns a pointer to the parent MultiLayer object.
   MultiLayer *multiLayer(){return (MultiLayer *)(this->parent()->parent()->parent());};

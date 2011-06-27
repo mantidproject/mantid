@@ -734,6 +734,8 @@ void Spectrogram::updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtSc
   (void) xMap; //Avoid compiler warning
   (void) yMap; //Avoid compiler warning
 
+  if (d_labels_list.isEmpty()) return;
+
   QwtPlot *d_plot = plot();
   if (!d_plot)
     return;

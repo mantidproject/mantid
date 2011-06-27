@@ -13496,14 +13496,14 @@ MultiLayer* ApplicationWindow::plotColorMap(Matrix *m)
 {
   if (!m) {
     //Mantid
-    MultiLayer* plot = mantidUI->plotSpectrogram(Graph::ColorMap);
+    MultiLayer* plot = mantidUI->plotSpectrogram(Graph::ColorMapContour);
     if (plot) return plot;
     m = (Matrix*)activeWindow(MatrixWindow);
     if (!m)
       return 0;
   }
 
-  return plotSpectrogram(m, Graph::ColorMap);
+  return plotSpectrogram(m, Graph::ColorMapContour);
 }
 
 MultiLayer* ApplicationWindow::plotNoContourColorMap(Matrix *m)
@@ -13527,13 +13527,13 @@ MultiLayer* ApplicationWindow::plotNoContourColorMap(Matrix *m)
     return 0;
   }
 
-  Spectrogram *spgrm = dynamic_cast<Spectrogram*>(ml->activeGraph()->plotItem(0));
-  if( spgrm )
-  {
-    //1 = ImageMode
-    spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
-    spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
-  }
+  //Spectrogram *spgrm = dynamic_cast<Spectrogram*>(ml->activeGraph()->plotItem(0));
+  //if( spgrm )
+  //{
+  //  //1 = ImageMode
+  //  spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
+  //  spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
+  //}
   return ml;
 }
 

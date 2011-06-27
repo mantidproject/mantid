@@ -4920,7 +4920,7 @@ Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,d
 
 Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type)
 {
-  if (type != GrayScale && type != ColorMap && type != Contour)
+  if (type != GrayScale && type != ColorMap && type != Contour && type != ColorMapContour)
     return 0;
 
   Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz);
@@ -4942,7 +4942,15 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
   {
     d_spectrogram->mutableColorMap().changeScaleType(GraphOptions::Linear);
     d_spectrogram->setDefaultColorMap();
+    d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
     d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
+  }
+  else if (type == ColorMapContour)
+  {
+    d_spectrogram->mutableColorMap().changeScaleType(GraphOptions::Linear);
+    d_spectrogram->setDefaultColorMap();
+    d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
+    d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);
   }
   c_keys.resize(++n_curves);
   c_keys[n_curves-1] = d_plot->insertCurve(d_spectrogram);
