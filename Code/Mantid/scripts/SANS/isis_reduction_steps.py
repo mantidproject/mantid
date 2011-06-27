@@ -127,6 +127,8 @@ class LoadRun(object):
         """  
         run = str(self.shortrun_no)
         if entry_num:
+            if entry_num == self.UNSET_PERIOD:
+                entry_num = 1
             run += 'p'+str(int(entry_num))
         
         if self._is_trans:
@@ -312,9 +314,9 @@ class LoadRun(object):
         elif self._period != self.UNSET_PERIOD:
             #the user specified a definite period, use it
             return self._period
-        elif self.periods_in_file == reducer.set_sample().loader.periods_in_file:
+        elif self.periods_in_file == reducer.get_sample().loader.periods_in_file:
             #use corresponding periods, the same entry as the sample in each case
-            return period
+            return sample_period
         else:
             raise RuntimeError('There is a mismatch in the number of periods (entries) in the file between the sample and another run')
 
@@ -442,6 +444,11 @@ class CanSubtraction(ReductionStep):
         return self.workspace.wksp_name
     
     wksp_name = property(get_wksp_name, None, None, None)
+    
+    def get_periods_in_file(self):
+        return self.workspace.periods_in_file
+
+    periods_in_file = property(get_periods_in_file, None, None, None)
 
 class Mask_ISIS(sans_reduction_steps.Mask):
     """
@@ -840,7 +847,7 @@ class LoadSample(LoadRun, ReductionStep):
         if self._period != self.UNSET_PERIOD:
             self.entries  = [self._period]
         else:
-            self.entries  = range(0, self.periods_in_file)
+            self.entries  = range(1, self.periods_in_file+1)
 
         if self.wksp_name == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
@@ -1567,6 +1574,21 @@ class UserFile(ReductionStep):
         if limits.startswith('SP '):
             # We don't use the L/SP line
             _issueWarning("L/SP lines are ignored")
+            return
+
+        if limits.startswith('Q/RCut'):
+            limits = limits.split('RCut')
+            if len(limits) != 2:
+                _issueWarning("Badly formed L/Q/RCut line")
+            else:
+                reducer.to_Q.r_cut = float(limits[1])
+            return
+        if limits.startswith('Q/WCut'):
+            limits = limits.split('WCut')
+            if len(limits) != 2:
+                _issueWarning("Badly formed L/Q/WCut line")
+            else:
+                reducer.to_Q.w_cut = float(limits[1])
             return
 
         rebin_str = None

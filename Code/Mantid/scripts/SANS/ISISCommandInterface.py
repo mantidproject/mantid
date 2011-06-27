@@ -219,22 +219,22 @@ def _setUpPeriod(i):
     if can:
         #replace one thing that gets overwritten
         spec = can.workspace._period
-        AssignCan(can.workspace._data_file, period=can.getCorrospondingPeriod(i))
+        AssignCan(can.workspace._data_file, period=can.workspace.getCorrospondingPeriod(i, ReductionSingleton()))
         can.workspace._period = spec
     if trans_samp:
         trans = trans_samp.trans
         t = trans_samp.trans._period
         direct = trans_samp.direct
         d = trans_samp.direct._period
-        TransmissionSample(trans._data_file, direct._data_file, period_t=trans.getCorrospondingPeriod(i),period_d=direct.getCorrospondingPeriod(i))  
+        TransmissionSample(trans._data_file, direct._data_file, period_t=trans.getCorrospondingPeriod(i, ReductionSingleton()),period_d=direct.getCorrospondingPeriod(i, ReductionSingleton()))  
         trans_samp.trans._period = t 
         trans_samp.direct._period = d
     if trans_can:
         trans = trans_can.trans
-        t = trans_samp.trans._period
+        t = trans_can.trans._period
         direct = trans_can.direct
-        d = trans_samp.direct._period
-        TransmissionCan(trans._data_file, direct._data_file, period_t=trans.getCorrospondingPeriod(i),period_d=direct.getCorrospondingPeriod(i))  
+        d = trans_can.direct._period
+        TransmissionCan(trans._data_file, direct._data_file, period_t=trans.getCorrospondingPeriod(i, ReductionSingleton()),period_d=direct.getCorrospondingPeriod(i, ReductionSingleton()))  
         trans_samp.trans._period = t 
         trans_samp.direct._period = d
 
@@ -254,18 +254,25 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
     _printMessage('Running reduction for ' + str(ReductionSingleton().to_wavelen))
 
-    calculated = [ReductionSingleton()._reduce()]
+    try:
+        calculated = [ReductionSingleton()._reduce()]
 
-    periods = ReductionSingleton().get_sample().loader.entries    
-    if len(periods) > 1:
-        for i in periods[1:len(periods)]:
-            _setUpPeriod(i)            
-            calculated.append(ReductionSingleton()._reduce())
-            ReductionSingleton().replace(ReductionSingleton().settings())
+        periods = ReductionSingleton().get_sample().loader.entries    
+        if len(periods) > 1:
+            for i in periods[1:len(periods)]:
+                _setUpPeriod(i)            
+                calculated.append(ReductionSingleton()._reduce())
+                ReductionSingleton().replace(ReductionSingleton().settings())
             result = ReductionSingleton().get_sample().loader.get_group_name()
-            GroupWorkspaces(OutputWorkspace=result, InputWorkspaces=calculated)
-    else:
-        result = calculated[0]
+            all_results = calculated[0]
+            for name in calculated[1:len(calculated)]:
+                all_results = ',' + name
+            GroupWorkspaces(OutputWorkspace=result, InputWorkspaces=all_results)
+        else:
+            result = calculated[0] 
+               
+    finally:
+        _refresh_singleton()
 
     if name_suffix:
         old = result
