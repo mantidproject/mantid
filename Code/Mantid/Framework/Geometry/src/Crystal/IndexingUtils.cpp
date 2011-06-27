@@ -885,7 +885,7 @@ int IndexingUtils::SelectDirection(       V3D & best_direction,
       sum_sq_error += error * error;
     }
 
-    if ( sum_sq_error < min_sum_sq_error )
+    if ( sum_sq_error < min_sum_sq_error + DBL_EPSILON )
     {
       min_sum_sq_error = sum_sq_error;
       best_direction = direction;
