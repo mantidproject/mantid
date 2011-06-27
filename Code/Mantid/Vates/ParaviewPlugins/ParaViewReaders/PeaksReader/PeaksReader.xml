@@ -1,0 +1,37 @@
+<ServerManagerConfiguration>
+  <!-- Begin PeaksReader -->
+  <ProxyGroup name="sources">
+    <SourceProxy name="PeaksReader" class="vtkPeaksReader">
+		<DoubleVectorProperty
+         name="Peak Width"
+         command="SetWidth"
+         number_of_elements="1"
+	     default_values="1">
+	    </DoubleVectorProperty>
+<!--
+      	<IntVectorProperty
+         name="X Bins"
+         command="SetXBins"
+         number_of_elements="1"
+         default_values="50">
+        </IntVectorProperty>
+	   <StringVectorProperty
+         name="InputGeometryXML"
+         command="GetInputGeometryXML"
+         number_of_elements="1"
+         information_only="1">
+        <SimpleStringInformationHelper /> 
+       </StringVectorProperty>
+   -->
+       
+       <StringVectorProperty
+        name="FileName"
+        command="SetFileName"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+      </StringVectorProperty>
+	  
+    </SourceProxy>
+  </ProxyGroup>
+  <!-- End PeaksReader -->
+</ServerManagerConfiguration>
