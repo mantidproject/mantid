@@ -61,25 +61,8 @@ void CrossCorrelate::exec()
 {
   	MatrixWorkspace_const_sptr inputWS=getProperty("InputWorkspace");
 
-  	//Get the map between spectra number and index
-  	try{
-      const SpectraAxis* axis = dynamic_cast<const SpectraAxis*>(inputWS->getAxis(1));
-      if (!axis)
-      {
-        throw std::runtime_error("Input workspace has non-spectra axis.");
-      }
-      axis->getSpectraIndexMap(index_map);
-  	}catch(std::runtime_error& error)
-  	{
-  		g_log.error(error.what());
-  		throw;
-  	}
-  	// Check whether the reference spectra is valid
-   	int reference=getProperty("ReferenceSpectra");
-   	index_map_it=index_map.find(reference);
-   	if (index_map_it==index_map.end()) // Not in the map
-   		throw std::runtime_error("Can't find reference spectra");
-   	const size_t index_ref=index_map_it->second;
+   	int reference = getProperty("ReferenceSpectra");
+   	const size_t index_ref=static_cast<size_t>(reference);
 
    	// check that the data range specified makes sense
     double xmin=getProperty("XMin");
@@ -111,10 +94,7 @@ void CrossCorrelate::exec()
     indexes.reserve(specmax-specmin); //reserve at leat enough space
    	for (int i=specmin;i<=specmax;++i)
    	{
-   		index_map_it=index_map.find(i);
-   		if (index_map_it==index_map.end()) // Not in the map
-   			continue; // Continue
-   		indexes.push_back(index_map_it->second); // If spectrum found then add its index to a vector.
+   		indexes.push_back(i); // If spectrum found then add its index to a vector.
    		++nspecs;
    	}
 
