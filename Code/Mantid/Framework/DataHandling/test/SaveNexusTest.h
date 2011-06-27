@@ -25,7 +25,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
 
-class SaveNeXusTest : public CxxTest::TestSuite
+class SaveNexusTest : public CxxTest::TestSuite
 {
 public: 
   
