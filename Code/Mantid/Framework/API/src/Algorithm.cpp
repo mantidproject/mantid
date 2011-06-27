@@ -488,7 +488,7 @@ namespace Mantid
       int retVal = ConfigService::Instance().getValue("MultiThreaded.MaxCores", MaxCores);
       if (MaxCores && retVal)
       {
-        PARALLEL_SET_NUM_THREADS
+        PARALLEL_SET_NUM_THREADS(MaxCores)
       }
       //g_log.information() << "OpenMP Max Cores = " << PARALLEL_GET_MAX_THREADS << std::endl;
     
