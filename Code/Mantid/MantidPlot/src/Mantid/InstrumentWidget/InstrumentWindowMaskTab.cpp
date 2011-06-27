@@ -64,13 +64,13 @@ m_userEditing(true)
   m_ring_ellipse->setCheckable(true);
   m_ring_ellipse->setAutoExclusive(true);
   m_ring_ellipse->setIcon(QIcon(":/MaskTools/selection-circle.png"));
-  m_ring_ellipse->setToolTip("Draw an ellipse");
+  m_ring_ellipse->setToolTip("Draw an elliptical ring");
 
   m_ring_rectangle = new QPushButton();
   m_ring_rectangle->setCheckable(true);
   m_ring_rectangle->setAutoExclusive(true);
   m_ring_rectangle->setIcon(QIcon(":/MaskTools/selection-box.png"));
-  m_ring_rectangle->setToolTip("Draw a rectangle");
+  m_ring_rectangle->setToolTip("Draw a rectangular ring ");
 
   QHBoxLayout* toolBox = new QHBoxLayout();
   toolBox->addWidget(m_move);
@@ -122,7 +122,7 @@ m_userEditing(true)
   QGridLayout* buttons = new QGridLayout();
   buttons->addWidget(m_apply,0,0);
   buttons->addWidget(m_clear_all,0,1);
-  buttons->addWidget(m_save_as_workspace,1,0,1,2);
+  //buttons->addWidget(m_save_as_workspace,1,0,1,2);
   
   layout->addLayout(buttons);
 }

@@ -35,6 +35,7 @@ public:
   void setScaleType(GraphOptions::ScaleType type);
   void setAxis(const QString& axisName);
   bool areAxesOn()const;
+  void init();
 public slots:
   void showAxes(bool on);
 private slots:

@@ -141,6 +141,12 @@ void InstrumentActor::setIntegrationRange(const double& xmin,const double& xmax)
   resetColors();
 }
 
+double InstrumentActor::getIntegratedCounts(Mantid::detid_t id)const
+{
+  size_t i = (*m_id2wi_map)[id];
+  return m_specIntegrs.at(i);
+}
+
 void InstrumentActor::resetColors()
 {
   QwtDoubleInterval qwtInterval(m_DataMinValue,m_DataMaxValue);

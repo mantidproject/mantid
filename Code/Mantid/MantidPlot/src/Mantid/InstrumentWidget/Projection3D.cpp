@@ -243,27 +243,27 @@ void Projection3D::changeColorMap()
 
 void Projection3D::setViewDirection(const QString& input)
 {
-	if(input.compare("X+")==0)
+	if(input.toUpper().compare("X+")==0)
 	{
 		m_trackball->setViewToXPositive();
 	}
-	else if(input.compare("X-")==0)
+	else if(input.toUpper().compare("X-")==0)
 	{
 		m_trackball->setViewToXNegative();
 	}
-	else if(input.compare("Y+")==0)
+	else if(input.toUpper().compare("Y+")==0)
 	{
 		m_trackball->setViewToYPositive();
 	}
-	else if(input.compare("Y-")==0)
+	else if(input.toUpper().compare("Y-")==0)
 	{
 		m_trackball->setViewToYNegative();
 	}
-	else if(input.compare("Z+")==0)
+	else if(input.toUpper().compare("Z+")==0)
 	{
 		m_trackball->setViewToZPositive();
 	}
-	else if(input.compare("Z-")==0)
+	else if(input.toUpper().compare("Z-")==0)
 	{
 		m_trackball->setViewToZNegative();
 	}

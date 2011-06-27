@@ -116,6 +116,10 @@ QFrame * InstrumentWindowRenderTab::setupAxisFrame()
   loadSettings("Mantid/InstrumentWindow");
   return m_resetViewFrame;
 }
+void InstrumentWindowRenderTab::init()
+{
+  setAxis(QString::fromStdString(m_instrWindow->getInstrumentActor()->getInstrument()->getDefaultAxis()));
+}
 
 /**
  *

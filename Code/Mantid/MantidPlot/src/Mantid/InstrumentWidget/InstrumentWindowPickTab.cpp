@@ -171,6 +171,7 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
     {
       text += "Parent assembly: " + QString::fromStdString(parent->getName()) + '\n';
     }
+    text += "Counts: " + QString::number(instrActor->getIntegratedCounts(detid)) + '\n';
     m_selectionInfoDisplay->setText(text);
   }
   else

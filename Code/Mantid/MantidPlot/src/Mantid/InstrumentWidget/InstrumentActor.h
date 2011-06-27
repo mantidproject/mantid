@@ -94,6 +94,7 @@ public:
   const std::vector<Mantid::detid_t>& getAllDetIDs()const{return m_detIDs;}
   GLColor getColor(Mantid::detid_t id)const;
   size_t getWorkspaceIndex(Mantid::detid_t id)const{return (*m_id2wi_map)[id];}
+  double getIntegratedCounts(Mantid::detid_t id)const;
   void update();
   void invalidateDisplayLists()const{m_scene.invalidateDisplayList();}
   QString getCurrentColorMap()const{return m_currentColorMap;}
