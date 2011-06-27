@@ -14,7 +14,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidDataHandling/SaveNeXus.h"
+#include "MantidDataHandling/SaveNexus.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include <Poco/Path.h>

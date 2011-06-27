@@ -79,7 +79,7 @@ set ( SRC_FILES
 	src/SaveFocusedXYE.cpp
 	src/SaveGSS.cpp
 	src/SaveISISNeXus.cpp
-	src/SaveNeXus.cpp
+	src/SaveNexus.cpp
 	src/SaveNexusProcessed.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
@@ -169,7 +169,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveISISNeXus.h
-	inc/MantidDataHandling/SaveNeXus.h
+	inc/MantidDataHandling/SaveNexus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
@@ -253,7 +253,7 @@ set ( TEST_FILES
 	test/SaveDASCTest.h
 	test/SaveDspacemapTest.h
 	test/SaveFocussedXYETest.h
-	test/SaveNeXusTest.h
+	test/SaveNexusTest.h
 	test/SaveNexusProcessedTest.h
 	test/SaveNISTDATTest.h
 	test/SaveNXSPETest.h
