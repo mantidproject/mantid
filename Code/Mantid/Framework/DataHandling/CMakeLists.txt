@@ -29,28 +29,28 @@ set ( SRC_FILES
 	src/LoadInstrumentFromRaw.cpp
 	src/LoadInstrumentHelper.cpp
 	src/LoadISISNexus.cpp
-    src/LoadISISNexus2.cpp
+        src/LoadISISNexus2.cpp
 	src/LoadLOQDistancesFromRaw.cpp
 	src/LoadLog.cpp
 	src/LoadLogsFromSNSNexus.cpp
 	src/LoadMappingTable.cpp
 	src/LoadMuonLog.cpp
 	src/LoadMuonNexus.cpp
-    src/LoadMuonNexus2.cpp
-    src/LoadNeXus.cpp
-    src/LoadNexusLogs.cpp
-    src/LoadNexusMonitors.cpp
-    src/LoadNexusProcessed.cpp
+        src/LoadMuonNexus2.cpp
+        src/LoadNexus.cpp
+        src/LoadNexusLogs.cpp
+        src/LoadNexusMonitors.cpp
+        src/LoadNexusProcessed.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNeXusMonitors.cpp
 	src/LoadRKH.cpp
 	src/LoadRaw.cpp
 	src/LoadRaw/byte_rel_comp.cpp
-    src/LoadRaw/isisraw.cpp
-    src/LoadRaw/isisraw2.cpp
-    src/LoadRaw/item_struct.cpp
-    src/LoadRaw/vms_convert.cpp
-    src/LoadRaw2.cpp
+        src/LoadRaw/isisraw.cpp
+        src/LoadRaw/isisraw2.cpp
+        src/LoadRaw/item_struct.cpp
+        src/LoadRaw/vms_convert.cpp
+        src/LoadRaw2.cpp
 	src/LoadRaw3.cpp
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
@@ -124,18 +124,18 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadInstrumentFromRaw.h
 	inc/MantidDataHandling/LoadInstrumentHelper.h
 	inc/MantidDataHandling/LoadISISNexus.h
-    inc/MantidDataHandling/LoadISISNexus2.h
+        inc/MantidDataHandling/LoadISISNexus2.h
 	inc/MantidDataHandling/LoadLOQDistancesFromRaw.h
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadLogsFromSNSNexus.h
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMuonLog.h
 	inc/MantidDataHandling/LoadMuonNexus.h
-    inc/MantidDataHandling/LoadMuonNexus2.h
-    inc/MantidDataHandling/LoadNeXus.h
-    inc/MantidDataHandling/LoadNexusLogs.h
-    inc/MantidDataHandling/LoadNexusMonitors.h
-    inc/MantidDataHandling/LoadNexusProcessed.h
+        inc/MantidDataHandling/LoadMuonNexus2.h
+        inc/MantidDataHandling/LoadNexus.h
+        inc/MantidDataHandling/LoadNexusLogs.h
+        inc/MantidDataHandling/LoadNexusMonitors.h
+        inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNeXusMonitors.h
 	inc/MantidDataHandling/LoadRKH.h
@@ -183,10 +183,10 @@ set ( INC_FILES
 	inc/MantidDataHandling/FindDetectorsPar.h 
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
 	src/LoadRaw/byte_rel_comp.h
-    src/LoadRaw/isisraw.h
-    src/LoadRaw/isisraw2.h
-    src/LoadRaw/item_struct.h
-    src/LoadRaw/vms_convert.h
+        src/LoadRaw/isisraw.h
+        src/LoadRaw/isisraw2.h
+        src/LoadRaw/item_struct.h
+        src/LoadRaw/vms_convert.h
 )
 
 set ( TEST_FILES
@@ -219,11 +219,11 @@ set ( TEST_FILES
 	test/LoadMappingTableTest.h
 	test/LoadMuonLogTest.h
 	test/LoadMuonNexus2Test.h
-    test/LoadMuonNexusTest.h
-    test/LoadNeXusTest.h
-    test/LoadNexusLogsTest.h
-    test/LoadNexusMonitorsTest.h
-    test/LoadNexusProcessedTest.h
+        test/LoadMuonNexusTest.h
+        test/LoadNexusTest.h
+        test/LoadNexusLogsTest.h
+        test/LoadNexusMonitorsTest.h
+        test/LoadNexusProcessedTest.h
 	test/LoadParameterFileTest.h
 	test/LoadPreNeXusMonitorsTest.h
 	test/LoadRKHTest.h
