@@ -33,7 +33,7 @@ public:
     }
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("DeleteTableRows");
     alg->setPropertyValue("TableWorkspace",wsName);
-    alg->setPropertyValue("Rows","1,3,5,7,9");
+    alg->setPropertyValue("Rows","1,3,5,7,9,-2");
     alg->execute();
 
     TS_ASSERT_EQUALS(tw->rowCount(),5);

@@ -33,7 +33,7 @@ namespace Mantid
     {
       declareProperty(new WorkspaceProperty<API::ITableWorkspace>("TableWorkspace", "",Direction::InOut), 
         "The name of the workspace that will be modified.");
-      declareProperty(new ArrayProperty<size_t> ("Rows"),"The rows to delete.");
+      declareProperty(new ArrayProperty<size_t> ("Rows"),"The rows to delete. Numbering starts with 0.");
     }
 
     /** 
@@ -50,6 +50,7 @@ namespace Mantid
       for(; it != sortedRows.end(); ++it)
       {
         int i = static_cast<int>(*it);
+        if (i < 0 || i >= tw->rowCount()) continue;
         if (pw)
         {
           pw->removePeak(i);

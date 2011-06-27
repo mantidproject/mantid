@@ -66,6 +66,7 @@ void MantidTable::fillTable()
       // This is the method on the Column object to convert to a string.
       c->print(ostr,j);
       setText(j,i,QString::fromStdString(ostr.str()));
+      d_table->verticalHeader()->setLabel(j,QString::number(j));
     }
   }
 
