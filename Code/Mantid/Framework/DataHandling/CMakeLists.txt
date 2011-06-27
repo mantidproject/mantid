@@ -78,7 +78,7 @@ set ( SRC_FILES
 	src/SaveDspacemap.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveGSS.cpp
-	src/SaveISISNeXus.cpp
+	src/SaveISISNexus.cpp
 	src/SaveNexus.cpp
 	src/SaveNexusProcessed.cpp
 	src/SaveNISTDAT.cpp
@@ -168,7 +168,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveDspacemap.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveGSS.h
-	inc/MantidDataHandling/SaveISISNeXus.h
+	inc/MantidDataHandling/SaveISISNexus.h
 	inc/MantidDataHandling/SaveNexus.h
 	inc/MantidDataHandling/SaveNexusProcessed.h
 	inc/MantidDataHandling/SaveNISTDAT.h

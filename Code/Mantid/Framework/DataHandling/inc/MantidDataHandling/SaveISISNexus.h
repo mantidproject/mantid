@@ -19,7 +19,7 @@ namespace Mantid
   namespace DataHandling
   {
     /**
-    The SaveISISNexus algorithm will convert a RAW file to a Nexus file.
+    The SaveISISNexus algorithm will convert a RAW file to a NeXus file.
 
     Required Properties:
     <UL>

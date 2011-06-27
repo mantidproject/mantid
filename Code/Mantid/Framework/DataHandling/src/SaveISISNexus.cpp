@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/SaveISISNeXus.h"
+#include "MantidDataHandling/SaveISISNexus.h"
 #include "MantidAPI/FileProperty.h"
 
 #include "LoadRaw/isisraw2.h"
@@ -37,8 +37,8 @@ DECLARE_ALGORITHM(SaveISISNexus)
 /// Sets documentation strings for this algorithm
 void SaveISISNexus::initDocs()
 {
-  this->setWikiSummary("The SaveISISNexus algorithm will convert a RAW file to a Nexus file.");
-  this->setOptionalMessage("The SaveISISNexus algorithm will convert a RAW file to a Nexus file.");
+  this->setWikiSummary("The SaveISISNexus algorithm will convert a RAW file to a NeXus file.");
+  this->setOptionalMessage("The SaveISISNexus algorithm will convert a RAW file to a NeXus file.");
 }
 
 using namespace Kernel;
