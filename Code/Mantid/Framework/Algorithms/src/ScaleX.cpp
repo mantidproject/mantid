@@ -56,10 +56,10 @@ namespace Mantid
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
       declareProperty("IndexMin", 0, mustBePositive,
-        "The workspace index of the first spectrum to shift. Only used if\n"
+        "The workspace index of the first spectrum to scale. Only used if\n"
         "IndexMax is set.");
       declareProperty("IndexMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
-        "The workspace index of the last spectrum to shift. Only used if\n"
+        "The workspace index of the last spectrum to scale. Only used if\n"
         "explicitly set.");
 
     }

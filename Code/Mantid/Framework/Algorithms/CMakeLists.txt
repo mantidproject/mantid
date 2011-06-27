@@ -424,6 +424,7 @@ set ( TEST_FILES
 	test/ReplaceSpecialValuesTest.h
 	test/SANSSolidAngleCorrectionTest.h
 	test/ScaleTest.h
+	test/ScaleXTest.h
 	test/SmoothDataTest.h
 	test/SmoothNeighboursTest.h
 	test/SofQWTest.h
