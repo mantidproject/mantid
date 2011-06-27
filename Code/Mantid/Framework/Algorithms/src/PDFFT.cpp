@@ -230,6 +230,20 @@ double PDFFT::CalculateGrFromQ(double r, double& egr, double qmin, double qmax) 
 		}
 	}
 
+	// Extrapolate to zero
+	double dq = fabs(vq[1]-vq[0]);
+	size_t num = size_t(qmin/dq);
+	g_log.information() << "Extrapolate:  qmin = " << qmin << "  num = " << num << "  dq = " << dq << std::endl;
+	for (size_t i = 0; i < num; i ++){
+    q = double(i)*dq;
+    s = 0.0;
+    deltaq = dq;
+    temp = q * (s - 1) * sin(q * r) * deltaq;
+    gr += temp;
+    error += 0;
+	}
+
+	// Summarize
 	gr = gr * 2 / PI;
 	egr = sqrt(error); //TODO: Wrong!
 

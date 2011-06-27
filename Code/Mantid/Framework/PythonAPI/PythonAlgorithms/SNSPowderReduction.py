@@ -263,6 +263,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 binning = self._binning
             else:
                 binning = [info.dmin, self._binning[0], info.dmax]
+            print "d-Spacing Binning: " , binning
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         else:
             preserveEvents = True
@@ -313,6 +314,8 @@ class SNSPowderReduction(PythonAlgorithm):
         # temporary hack for getting python algorithms working
         import mantidsimple
         globals()["FindSNSNeXus"] = mantidsimple.FindSNSNeXus
+
+        print "This is VZ Debug Version +1"
 
         # get generic information
         SUFFIX = "_event.nxs"

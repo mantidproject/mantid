@@ -378,13 +378,18 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth, std::
 void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth, std::ostream& out,
                             const MantidVec& X, const MantidVec& Y, const MantidVec& E) const 
 {
+
+  g_log.information() << "SaveGSS(): MultipyByBinwidth = " << MultiplyByBinWidth << std::endl;
+
   const size_t datasize = Y.size();
   double bc1 = *(X.begin()); // minimum TOF in microseconds
   if (bc1 <= 0.) {
-    throw std::runtime_error("Cannot write out logorithmic data starting at zero");
+    throw std::runtime_error("Cannot write out logarithmic data starting at zero");
   }
   double bc2 = *(X.rbegin()+1); // maximum TOF (in microseconds?)
   double bc3 = (*(X.begin()+1)-bc1)/bc1; // deltaT/T
+
+  g_log.information() << "SaveGSS(): Min TOF = " << bc1 << std::endl;
 
   writeBankLine(out, "SLOG", bank, datasize);
   out << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc1

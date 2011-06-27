@@ -75,6 +75,9 @@ namespace DataHandling
     char currentLine[256];
     char filetype = 'x';
 
+    bool calslogx0 = true;
+    double bc3 = 0;
+
     // Gather data
     if ( input.is_open() )
     {
@@ -92,7 +95,6 @@ namespace DataHandling
         }
         double bc1 = 0;
         double bc2 = 0;
-        double bc3 = 0;
         double bc4 = 0;
         if (  currentLine[0] == '\n' || currentLine[0] == '#' )
         {
@@ -173,12 +175,12 @@ namespace DataHandling
           double x0 = 0;
           if (filetype == 'r'){
         	  x0 = bc1 / 32;
+            g_log.information() << "RALF: x0 = " << x0 << std::endl;
+            X->push_back(x0);
           } else {
-        	  x0 = bc1;
+            // Cannot calculate x0, turn on the flag
+            calslogx0 = true;
           }
-          g_log.information() << "x0 = " << x0 << std::endl;
-          X->push_back(x0);
-
         }
         else
         {
@@ -194,7 +196,11 @@ namespace DataHandling
           }
           else
           {
-            throw Mantid::Kernel::Exception::NotImplementedError("LoadGSS: File was not in expected format.");
+            if (filetype == 'r'){
+              throw Mantid::Kernel::Exception::NotImplementedError("LoadGSS: File was not in expected format.");
+            } else {
+              xPrev = -0.0;
+            }
           }
 
           std::istringstream inputLine(currentLine, std::ios::in);
@@ -206,6 +212,17 @@ namespace DataHandling
         	  yValue = yValue / ( xPrev * bc4 );
         	  eValue = eValue / ( xPrev * bc4 );
           } else if (filetype == 's'){
+            if (calslogx0){
+              // calculation of x0 must use the x'[0]
+              g_log.information() << "x'_0 = " << xValue << "  bc3 = " << bc3 << std::endl;
+
+              double x0 = 2*xValue/(bc3+2.0);
+              X->push_back(x0);
+              xPrev = x0;
+              g_log.information() << "SLOG: x0 = " << x0 << std::endl;
+              calslogx0 = false;
+            }
+
         	  xValue = (2 * xValue) - xPrev;
         	  yValue = yValue/(xValue-xPrev);
         	  eValue = eValue/(xValue-xPrev);
