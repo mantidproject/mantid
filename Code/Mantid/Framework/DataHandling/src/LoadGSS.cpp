@@ -60,8 +60,6 @@ namespace DataHandling
     std::vector<MantidVec*> gsasDataY;
     std::vector<MantidVec*> gsasDataE;
 
-    std::string wsTitle;
-
     std::ifstream input(filename.c_str(), std::ios_base::in);
 
     MantidVec* X = new MantidVec();
@@ -73,17 +71,23 @@ namespace DataHandling
     Progress* prog = NULL;
 
     char currentLine[256];
+    std::string wsTitle;
+    std::string slogTitle;
+    bool slogtitleset = false;
     char filetype = 'x';
 
     bool calslogx0 = true;
+    double bc4 = 0;
     double bc3 = 0;
+
+    bool db1 = true;
 
     // Gather data
     if ( input.is_open() )
     {
       if ( ! input.eof() )
       {
-        // Get workspace title (should be first line)
+        // Get workspace title (should be first line or 2nd line for SLOG)
         input.getline(currentLine, 256);
         wsTitle = currentLine;
       }
@@ -93,9 +97,12 @@ namespace DataHandling
         {
           prog = new Progress(this, 0.0, 1.0, nSpec);
         }
+        if (!slogtitleset){
+          slogTitle = currentLine;
+          slogtitleset = true;
+        }
         double bc1 = 0;
         double bc2 = 0;
-        double bc4 = 0;
         if (  currentLine[0] == '\n' || currentLine[0] == '#' )
         {
           if ( nSpec == 0 )
@@ -155,7 +162,7 @@ namespace DataHandling
           std::string filetypestring;
 
           inputLine >> specno >> nbin1 >> nbin2 >> filetypestring;
-          g_log.information() << "filetypestring = " << filetypestring << std::endl;
+          g_log.debug() << "filetypestring = " << filetypestring << std::endl;
 
           if (filetypestring[0] == 'S'){
             // SLOG
@@ -175,7 +182,7 @@ namespace DataHandling
           double x0 = 0;
           if (filetype == 'r'){
         	  x0 = bc1 / 32;
-            g_log.information() << "RALF: x0 = " << x0 << std::endl;
+            g_log.debug() << "RALF: x0 = " << x0 << "  bc4 = " << bc4 << std::endl;
             X->push_back(x0);
           } else {
             // Cannot calculate x0, turn on the flag
@@ -190,17 +197,16 @@ namespace DataHandling
 
           double xPrev;
 
+          // * Get previous X value
           if ( X->size() != 0 )
           {
             xPrev = X->back();
           }
-          else
-          {
-            if (filetype == 'r'){
-              throw Mantid::Kernel::Exception::NotImplementedError("LoadGSS: File was not in expected format.");
-            } else {
+          else if (filetype == 'r'){
+            // Except if RALF
+            throw Mantid::Kernel::Exception::NotImplementedError("LoadGSS: File was not in expected format.");
+          } else {
               xPrev = -0.0;
-            }
           }
 
           std::istringstream inputLine(currentLine, std::ios::in);
@@ -208,18 +214,29 @@ namespace DataHandling
 
           // It is different for the definition of X, Y, Z in SLOG and RALF format
           if (filetype == 'r'){
+            // RALF
+            double tempy = yValue;
+
         	  xValue = (2 * xValue) - xPrev;
         	  yValue = yValue / ( xPrev * bc4 );
         	  eValue = eValue / ( xPrev * bc4 );
+
+            if (db1){
+              g_log.debug() << "Type: " << filetype << "  xPrev = " << xPrev << " bc4 =" << bc4 << std::endl;
+              g_log.debug() << "yValue = " << yValue << tempy << std::endl;
+              db1 = false;
+            }
+
           } else if (filetype == 's'){
+            // SLOG
             if (calslogx0){
               // calculation of x0 must use the x'[0]
-              g_log.information() << "x'_0 = " << xValue << "  bc3 = " << bc3 << std::endl;
+              g_log.debug() << "x'_0 = " << xValue << "  bc3 = " << bc3 << std::endl;
 
               double x0 = 2*xValue/(bc3+2.0);
               X->push_back(x0);
               xPrev = x0;
-              g_log.information() << "SLOG: x0 = " << x0 << std::endl;
+              g_log.debug() << "SLOG: x0 = " << x0 << std::endl;
               calslogx0 = false;
             }
 
@@ -250,7 +267,11 @@ namespace DataHandling
     // GSS Files data is always in TOF
     outputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     // Set workspace title
-    outputWorkspace->setTitle(wsTitle);
+    if (filetype == 'r'){
+      outputWorkspace->setTitle(wsTitle);
+    } else {
+      outputWorkspace->setTitle(slogTitle);
+    }
     // Put data from MatidVec's into outputWorkspace
     for ( int i = 0; i < nHist; ++i )
     {
