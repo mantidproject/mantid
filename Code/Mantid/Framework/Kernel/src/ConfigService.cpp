@@ -851,17 +851,13 @@ void ConfigServiceImpl::setString(const std::string & key, const std::string & v
     appendDataSearchDir(m_AbsolutePaths[key]);
   }
 
-  // If this key exists within the loaded configuration then mark that its value will have
-  // changed from the default
-  if (m_pConf->hasProperty(key))
-  {
-    m_changed_keys.insert(key);
-  }
-
   m_pConf->setString(key, value);
 
   if (value != old)
+  {
     m_notificationCenter.postNotification(new ValueChanged(key, value, old));
+    m_changed_keys.insert(key);
+  }
 }
 
 /** Searches for a string within the currently loaded configuaration values and

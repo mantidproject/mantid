@@ -744,6 +744,7 @@ bool MantidUI::drop(QDropEvent* e)
 
 void MantidUI::getSelectedAlgorithm(QString& algName, int& version)
 {
+
   QList<QTreeWidgetItem*> items = m_exploreAlgorithms->m_tree->selectedItems();
   if ( items.size() == 0 )
   {
@@ -753,9 +754,17 @@ void MantidUI::getSelectedAlgorithm(QString& algName, int& version)
     QString typedText = m_exploreAlgorithms->m_findAlg->currentText(); //text as typed in the combobox
     if (i < 0 || itemText != typedText)
     {
-      executeAlgorithm(typedText, -1);
-      algName = "";
-      version = -99;
+      try
+      {
+        Mantid::API::IAlgorithm_sptr alg =Mantid::API::AlgorithmManager::Instance().createUnmanaged(typedText.toStdString(), -1);
+        algName = QString::fromStdString(alg->name());
+        version = alg->version();
+      }
+      catch ( std::runtime_error ) // not found
+      {
+        algName = "";
+        version = -99;
+      } 
     }
     else
     {
@@ -782,7 +791,7 @@ void MantidUI::executeAlgorithm()
   QString algName;
   int version;
   getSelectedAlgorithm(algName,version);
-  if (version != -99) //already executed
+  if (version != -99) //not found, but we have already checked and we're fine with that
   {
     if (algName.isEmpty())
     {
@@ -891,6 +900,8 @@ bool MantidUI::executeAlgorithm(QString algName, int version)
   executeAlgorithm(dlg,alg);
   return true;
 }
+
+
 
 /** This method is to execute loadraw from ICat Interface
  *@param fileName :: name of the file

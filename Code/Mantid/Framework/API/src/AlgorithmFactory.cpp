@@ -79,7 +79,7 @@ namespace Mantid
             local_version = it->second;
         }
         else
-          throw;
+          throw std::runtime_error("Algorithm not registered (empty algorithm name)");
       }
     }
     try
