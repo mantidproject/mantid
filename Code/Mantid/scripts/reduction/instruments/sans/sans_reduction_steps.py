@@ -71,7 +71,7 @@ class BaseBeamFinder(ReductionStep):
                 if reducer._data_files[k]==filepath:
                     workspace = k                    
                    
-        reducer._data_loader.__class__(datafile=filepath).execute(reducer, workspace)
+        reducer._data_loader.clone(filepath).execute(reducer, workspace)
 
         # Integrate over all wavelength bins so that we process a single detector image
         Integration(workspace, workspace+'_int')
@@ -240,19 +240,23 @@ class BeamSpreaderTransmission(BaseTransmission):
             
             sample_spreader_ws = "_trans_sample_spreader"
             filepath = find_data(self._sample_spreader, instrument=reducer.instrument.name())
-            Load(filepath, sample_spreader_ws)
+            reducer._data_loader.clone(filepath).execute(reducer, sample_spreader_ws)
+            #Load(filepath, sample_spreader_ws)
             
             direct_spreader_ws = "_trans_direct_spreader"
             filepath = find_data(self._direct_spreader, instrument=reducer.instrument.name())
-            Load(filepath, direct_spreader_ws)
+            reducer._data_loader.clone(filepath).execute(reducer, direct_spreader_ws)
+            #Load(filepath, direct_spreader_ws)
             
             sample_scatt_ws = "_trans_sample_scatt"
             filepath = find_data(self._sample_scattering, instrument=reducer.instrument.name())
-            Load(filepath, sample_scatt_ws)
+            reducer._data_loader.clone(filepath).execute(reducer, sample_scatt_ws)
+            #Load(filepath, sample_scatt_ws)
             
             direct_scatt_ws = "_trans_direct_scatt"
             filepath = find_data(self._direct_scattering, instrument=reducer.instrument.name())
-            Load(filepath, direct_scatt_ws)
+            reducer._data_loader.clone(filepath).execute(reducer, direct_scatt_ws)
+            #Load(filepath, direct_scatt_ws)
             
             # Subtract dark current
             if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
@@ -321,11 +325,13 @@ class DirectBeamTransmission(BaseTransmission):
 
             sample_ws = "_transmission_sample"
             filepath = find_data(self._sample_file, instrument=reducer.instrument.name())
-            Load(filepath, sample_ws)
+            reducer._data_loader.clone(data_file=filepath).execute(reducer, sample_ws)
+            #Load(filepath, sample_ws)
             
             empty_ws = "_transmission_empty"
             filepath = find_data(self._empty_file, instrument=reducer.instrument.name())
-            Load(filepath, empty_ws)
+            reducer._data_loader.clone(data_file=filepath).execute(reducer, empty_ws)
+            #Load(filepath, empty_ws)
             
             # Subtract dark current
             if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
@@ -355,15 +361,28 @@ class DirectBeamTransmission(BaseTransmission):
             
             # Get normalization for transmission calculation
             norm_spectrum = reducer.NORMALIZATION_TIME
+            normalise_to_monitor = True
             if reducer._normalizer is not None:
                 norm_spectrum = reducer._normalizer.get_normalization_spectrum()
+                if norm_spectrum<0:
+                    reducer._normalizer.execute(reducer, "empty_mon")
+                    reducer._normalizer.execute(reducer, "sample_mon")
+                    normalise_to_monitor = False
             
             # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
             # as the monitor channel.
-            CalculateTransmission(DirectRunWorkspace="empty_mon", SampleRunWorkspace="sample_mon", 
-                                  OutputWorkspace=self._transmission_ws,
-                                  IncidentBeamMonitor=str(norm_spectrum), 
-                                  TransmissionMonitor=str(first_det))
+            RebinToWorkspace("empty_mon", "sample_mon", OutputWorkspace="empty_mon")
+            if normalise_to_monitor:
+                CalculateTransmission(DirectRunWorkspace="empty_mon", SampleRunWorkspace="sample_mon", 
+                                      OutputWorkspace=self._transmission_ws,
+                                      IncidentBeamMonitor=str(norm_spectrum), 
+                                      TransmissionMonitor=str(first_det),
+                                      OutputUnfittedData=False)
+            else:
+                CalculateTransmission(DirectRunWorkspace="empty_mon", SampleRunWorkspace="sample_mon", 
+                                      OutputWorkspace=self._transmission_ws,
+                                      TransmissionMonitor=str(first_det),
+                                      OutputUnfittedData=False)
             
             if mtd.workspaceExists(empty_ws):
                 mtd.deleteWorkspace(empty_ws)
@@ -419,7 +438,8 @@ class SubtractDarkCurrent(ReductionStep):
         if self._dark_current_ws is None:
             filepath = find_data(self._dark_current_file, instrument=reducer.instrument.name())
             self._dark_current_ws = "_dark_"+extract_workspace_name(filepath)
-            Load(filepath, self._dark_current_ws)
+            reducer._data_loader.clone(filepath).execute(reducer, self._dark_current_ws)
+            #Load(filepath, self._dark_current_ws)
             
             # Normalize the dark current data to counting time
             darktimer_ws = self._dark_current_ws+"_timer"
