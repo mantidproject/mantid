@@ -416,8 +416,8 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     if (it->first > detid_max)
       detid_max = it->first;
 
-  this->pixel_to_wkspindex.reserve(detid_max);
-  this->pixel_to_wkspindex.assign(detid_max, 0);
+  this->pixel_to_wkspindex.reserve(detid_max+1); //starting at zero up to and including detid_max
+  this->pixel_to_wkspindex.assign(detid_max+1, 0);
   size_t workspaceIndex = 0;
   for (it = detector_map.begin(); it != detector_map.end(); it++)
   {
