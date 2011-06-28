@@ -69,7 +69,7 @@ std::string makeWikiText(IAlgorithm * alg)
       // Default?
       if (p->isValid()=="") //Nothing was set, but it's still valid = NOT mandatory
       {
-        out << "|" << p->getDefault() << "\n";
+        out << "| " << p->getDefault() << "\n";
       }
       else
       {
