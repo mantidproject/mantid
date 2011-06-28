@@ -65,7 +65,7 @@ def resolution(files, iconOpt, rebinParam, bground,
     parfile += instrument +"_"+ analyser +"_"+ reflection +"_Parameters.xml"
     reducer.set_parameter_file(parfile)
     reducer.set_grouping_policy('All')
-    reducer.set_sum(True)
+    reducer.set_sum_files(True)
     reducer.reduce()
     iconWS = reducer.get_result_workspaces()[0]
     if Res:
