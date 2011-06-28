@@ -157,6 +157,28 @@ class ISISReducer(SANSReducer):
             return self._sample_run
         else:
             return self.background_subtracter
+        
+    def get_out_ws_name(self, show_period=True):
+        """
+            Returns name of the workspace that will be created by this reduction
+            which is based on the settings passed to the chain
+            @param show_period: if True (default) the period (entry) number of the run is included in the name after a p
+            @return: the workspace name to create
+        """
+        sample_obj = self.get_sample().loader
+        name = str(sample_obj.shortrun_no)
+        if show_period and sample_obj.periods_in_file > 1:
+            if sample_obj._period == sample_obj.UNSET_PERIOD:
+                period = 1
+            else:
+                period = sample_obj._period
+            name += 'p'+str(period)
+        
+        name += self.instrument.cur_detector().name('short')
+        name += '_' + self.to_Q.output_type
+        name += '_' + self.to_wavelen.get_range()
+
+        return name
 
     def deep_copy(self):
         """

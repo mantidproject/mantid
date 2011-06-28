@@ -1879,12 +1879,7 @@ class GetOutputName(ReductionStep):
             @param reducer the reducer object that called this step
             @param workspace un-used
         """
-        name = reducer.get_sample().wksp_name.split('_')[0]
-        
-        name += reducer.instrument.cur_detector().name('short')
-        name += '_' + reducer.to_Q.output_type
-        name += '_' + reducer.to_wavelen.get_range()
-        reducer.output_wksp = name
+        reducer.output_wksp = reducer.get_out_ws_name()
 
 class ReplaceErrors(ReductionStep):
     def __init__(self):
