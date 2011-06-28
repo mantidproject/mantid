@@ -166,7 +166,7 @@ void SmoothNeighbours::exec()
     std::string det_name = det->getName();
     if (det)
     {
-      int outWI = 0 + i * det->xpixels() * det->ypixels();
+      size_t outWI = 0;
       for (int j=0; j < det->xpixels(); j++)
       {
         for (int k=0; k < det->ypixels(); k++)
@@ -189,6 +189,7 @@ void SmoothNeighbours::exec()
               if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
               {
                 size_t wi = (*pixel_to_wi)[pixelID];
+                if( ix==0 && iy==0)outWI = wi;
                 //Get the event list on the input and add it
                 EventList tmpEL = inWS->getEventList(wi);
                 tmpEL *= smweight;
@@ -207,7 +208,6 @@ void SmoothNeighbours::exec()
             std::set<detid_t>::iterator j;
             for (j = dets.begin(); j != dets.end(); ++j)
               outWS->getOrAddEventList(outWI).addDetectorID(*j);
-            outWI++;
         }
       }
     }

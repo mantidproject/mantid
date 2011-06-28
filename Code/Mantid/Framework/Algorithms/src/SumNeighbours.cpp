@@ -170,9 +170,20 @@ void SumNeighbours::exec()
   if (detList.size() == 0)
     throw std::runtime_error("This instrument does not have any RectangularDetector's. SumNeighbours cannot operate on this instrument at this time.");
 
+  // Build a map to sort by the detectorID
+  std::vector <std::pair<int, int> > v1;
+  for (int i = 0; i<static_cast<int>(detList.size()); i++)
+    v1.push_back(std::pair<int, int>(detList[i]->getAtXY(0,0)->getID(), i));
+
+  // To sort in descending order
+  stable_sort(v1.begin(), v1.end() );
+
+  std::vector <std::pair<int, int> >::iterator Iter1;
+
   //Loop through the RectangularDetector's we listed before.
-  for (int i=0; i < static_cast<int>(detList.size()); i++)
+  for ( Iter1 = v1.begin() ; Iter1 != v1.end() ; Iter1++ )
   {
+    int i = (*Iter1).second;
     std::string det_name("");
     boost::shared_ptr<RectangularDetector> det;
     det = detList[i];
@@ -200,7 +211,6 @@ void SumNeighbours::exec()
       }
       int x, y;
       det_name = det->getName();
-      //TODO: Check validity of the parameters
 
       //det->getAtXY()
       for (x=x0; x<xend; x += SumX)
