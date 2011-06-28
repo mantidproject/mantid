@@ -106,10 +106,6 @@ if __name__ == "__main__":
     parser.add_argument('--subfolder', dest='subfolder', 
                         default="",
                         help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
-    
-    parser.add_argument('--vates', dest='vates', action='store_const',
-                   const=True, default=False,
-                   help='If moving files under the Vates/ subfolder')
 
     args = parser.parse_args()
     subproject = args.subproject

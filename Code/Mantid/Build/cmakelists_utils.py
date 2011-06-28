@@ -100,10 +100,7 @@ def fix_all_cmakes():
 #======================================================================
 def add_to_cmake(subproject, classname, args):
     """ Add the class to the cmake list of the given class """
-    if args.vates:
-        cmake_path = os.path.join(os.path.curdir, "Vates/" + subproject + "/CMakeLists.txt")
-    else:
-        cmake_path = os.path.join(os.path.curdir, "Framework/" + subproject + "/CMakeLists.txt")
+    cmake_path = os.path.join(os.path.curdir, "Framework/" + subproject + "/CMakeLists.txt")
         
     source = open(cmake_path).read()
     lines = source.split("\n");
@@ -123,10 +120,7 @@ def add_to_cmake(subproject, classname, args):
 #======================================================================
 def remove_from_cmake(subproject, classname, args):
     """ Removes the class from the cmake list of the given project """
-    if args.vates:
-        cmake_path = os.path.join(os.path.curdir, "Vates/" + subproject + "/CMakeLists.txt")
-    else:
-        cmake_path = os.path.join(os.path.curdir, "Framework/" + subproject + "/CMakeLists.txt")
+    cmake_path = os.path.join(os.path.curdir, "Framework/" + subproject + "/CMakeLists.txt")
         
     source = open(cmake_path).read()
     lines = source.split("\n");
