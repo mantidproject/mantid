@@ -477,7 +477,7 @@ namespace Mantid
 
       runDetails.addProperty("run_title", localWorkspace->getTitle(), true);
  
-      size_t numSpectra = localWorkspace->getNumberHistograms();
+      int numSpectra = static_cast<int>(localWorkspace->getNumberHistograms());
       runDetails.addProperty("nspectra", numSpectra);
 
       NXRoot root(m_filename);
@@ -597,18 +597,25 @@ namespace Mantid
       std::string start_time = root.getString("run/start_time");
     
       NXChar orientation = root.openNXChar("run/instrument/detector/orientation");
-      orientation.load();
+      try
+      {// some files have no data there
+        orientation.load();
 
-      // dump various Nexus numbers to outputs 
+        // dump various Nexus numbers to outputs 
 
-      if (orientation[0] == 't')
-      {
-        Kernel::TimeSeriesProperty<double>* p = new Kernel::TimeSeriesProperty<double>("fromNexus");
-        p->addValue(start_time,-90.0);
-        localWorkspace->mutableRun().addLogData(p);
-        setProperty("MainFieldDirection", "Transverse");
+        if (orientation[0] == 't')
+        {
+          Kernel::TimeSeriesProperty<double>* p = new Kernel::TimeSeriesProperty<double>("fromNexus");
+          p->addValue(start_time,-90.0);
+          localWorkspace->mutableRun().addLogData(p);
+          setProperty("MainFieldDirection", "Transverse");
+        }
+        else
+        {
+          setProperty("MainFieldDirection", "Longitudinal");
+        }
       }
-      else
+      catch(...)
       {
         setProperty("MainFieldDirection", "Longitudinal");
       }

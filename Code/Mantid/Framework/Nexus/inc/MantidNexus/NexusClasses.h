@@ -406,6 +406,10 @@ namespace Mantid
       */
       void alloc(int n)
       {
+        if (n <= 0)
+        {
+          throw std::runtime_error("Attempt to load from an empty dataset "+path());
+        }
         try
         {
           if (m_n != n)
@@ -413,7 +417,7 @@ namespace Mantid
             m_data.reset(new T[n]);
             m_n = n;
           }
-	}
+        }
         catch(...)
         {
           std::ostringstream ostr;
