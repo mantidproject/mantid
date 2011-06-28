@@ -557,6 +557,14 @@ class ReductionStep(object):
     """
         Base class for reduction steps
     """ 
+    def delete_workspaces(self, workspace):
+        """
+            Delete all workspace created by this reduction step related
+            to the given workspace
+            @param workspace: workspace to delete 
+        """
+        return
+    
     def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
         """
             Implemented the reduction step.

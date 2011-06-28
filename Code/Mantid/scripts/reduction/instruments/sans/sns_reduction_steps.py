@@ -164,6 +164,22 @@ class LoadRun(ReductionStep):
         """
         pass
              
+    @classmethod
+    def delete_workspaces(self, workspace):
+        """
+            Delete all workspaces related to the loading of the given workspace
+            @param workspace: workspace to clean
+        """
+        # Delete the beam hole transmission workspace if it exists
+        if mtd[workspace].getRun().hasProperty("transmission_ws"):
+            trans_ws = mtd[workspace].getRun().getProperty("transmission_ws").value
+            if mtd.workspaceExists(trans_ws):
+                mtd.deleteWorkspace(trans_ws)
+        if mtd.workspaceExists(workspace):
+            mtd.deleteWorkspace(workspace)
+        if mtd.workspaceExists(workspace+'_evt'):
+            mtd.deleteWorkspace(workspace+'_evt')
+        
     def execute(self, reducer, workspace, force=False):
         output_str = ""      
         # If we don't have a data file, look up the workspace handle
@@ -341,12 +357,23 @@ class LoadRun(ReductionStep):
         # Move detector array to correct position
         [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
         if pixel_ctr_x is not None and pixel_ctr_y is not None:
+            
+            # Check that the center of the detector really is at (0,0)
+            nx_pixels = int(mtd[workspace+'_evt'].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+            ny_pixels = int(mtd[workspace+'_evt'].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+            
+            pixel_first = mtd[workspace+'_evt'].getInstrument().getDetector(0).getPos()
+            pixel_last_x = mtd[workspace+'_evt'].getInstrument().getDetector(reducer.instrument.get_detector_from_pixel([[nx_pixels-1,0]])[0]).getPos()
+            pixel_last_y = mtd[workspace+'_evt'].getInstrument().getDetector(reducer.instrument.get_detector_from_pixel([[0,ny_pixels-1]])[0]).getPos()
+            x_offset = (pixel_first.getX()+pixel_last_x.getX())/2.0
+            y_offset = (pixel_first.getY()+pixel_last_y.getY())/2.0
+            
             [beam_ctr_x, beam_ctr_y] = reducer.instrument.get_coordinate_from_pixel(pixel_ctr_x, pixel_ctr_y)
             [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
             [default_x, default_y] = reducer.instrument.get_coordinate_from_pixel(default_pixel_x, default_pixel_y)
             MoveInstrumentComponent(workspace+'_evt', "detector1", 
-                                    X = -default_x+beam_ctr_x,
-                                    Y = -default_y+beam_ctr_y,
+                                    X = default_x-x_offset-beam_ctr_x,
+                                    Y = default_y-y_offset-beam_ctr_y,
                                     RelativePosition="1")
             mtd[workspace+'_evt'].getRun().addProperty_dbl("beam_center_x", pixel_ctr_x, 'pixel', True)            
             mtd[workspace+'_evt'].getRun().addProperty_dbl("beam_center_y", pixel_ctr_y, 'pixel', True)   

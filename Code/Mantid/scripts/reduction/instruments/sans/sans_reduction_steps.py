@@ -386,10 +386,8 @@ class DirectBeamTransmission(BaseTransmission):
                                       TransmissionMonitor=str(first_det),
                                       OutputUnfittedData=True)
             
-            if mtd.workspaceExists(empty_ws):
-                mtd.deleteWorkspace(empty_ws)
-            if mtd.workspaceExists(sample_ws):
-                mtd.deleteWorkspace(sample_ws)          
+            reducer._data_loader.__class__.delete_workspaces(empty_ws)
+            reducer._data_loader.__class__.delete_workspaces(sample_ws)
             if mtd.workspaceExists(empty_mon_ws):
                 mtd.deleteWorkspace(empty_mon_ws)          
             if mtd.workspaceExists(sample_mon_ws):
