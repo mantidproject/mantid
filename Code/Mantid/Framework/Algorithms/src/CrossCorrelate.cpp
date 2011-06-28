@@ -136,7 +136,7 @@ void CrossCorrelate::exec()
 	double refMeanE2=std::accumulate(refE.begin(),refE.end(),0.0,VectorHelper::SumSquares<double>());
 	refMean/=static_cast<double>(nY);
 	refMeanE2/=static_cast<double>(nY*nY);
-  std::vector<double>::iterator itY=refY.begin();
+        std::vector<double>::iterator itY=refY.begin();
 	std::vector<double>::iterator itE=refE.begin();
 
 	double refVar=0.0, refVarE=0.0;
@@ -155,15 +155,15 @@ void CrossCorrelate::exec()
 	// Now copy the other spectra
 	bool is_distrib=inputWS->isDistribution();
 
-	std::vector<double> tempY(nY);
-	std::vector<double> tempE(nY);
 	std::vector<double> XX(npoints);
-  for (int i=0;i<npoints;++i)
+        for (int i=0;i<npoints;++i)
    		XX[i]=static_cast<double>(i-nY+2);
-   // Initialise the progress reporting object
-  m_progress = new Progress(this,0.0,1.0,nspecs);
-  for (int i=0;i<nspecs;++i) // Now loop on all spectra
+        // Initialise the progress reporting object
+        m_progress = new Progress(this,0.0,1.0,nspecs);
+        PARALLEL_FOR2(inputWS, out)
+        for (int i=0;i<nspecs;++i) // Now loop on all spectra
 	{
+                PARALLEL_START_INTERUPT_REGION
 		size_t spec_index=indexes[i]; // Get the spectrum index from the table
 		//Copy spectra info from input Workspace
 		out->getAxis(1)->spectraNo(i)=inputWS->getAxis(1)->spectraNo(spec_index);
@@ -174,6 +174,8 @@ void CrossCorrelate::exec()
 		const MantidVec&  iE=inputWS->dataE(spec_index);
 		// Copy Y,E data of spec(i) to temp vector
 		// Now rebin on the grid of reference spectrum
+	        std::vector<double> tempY(nY);
+	        std::vector<double> tempE(nY);
 		VectorHelper::rebin(iX,iY,iE,refX,tempY,tempE,is_distrib);
 		// Calculate the mean value of tempY
 		double tempMean=std::accumulate(tempY.begin(),tempY.end(),0.0);
@@ -181,6 +183,8 @@ void CrossCorrelate::exec()
 		double tempMeanE2=std::accumulate(tempE.begin(),tempE.end(),0.0,VectorHelper::SumSquares<double>());
 		tempMeanE2/=static_cast<double>(nY*nY);
 		//
+                std::vector<double>::iterator itY;
+ 	        std::vector<double>::iterator itE;
 		itY=tempY.begin();
 		itE=tempE.begin();
 		double tempVar=0.0, tempVarE=0.0;
@@ -233,7 +237,9 @@ void CrossCorrelate::exec()
 		//progress(prog);
 		m_progress->report();
 		//interruption_point();
+                PARALLEL_END_INTERUPT_REGION
 	}
+        PARALLEL_CHECK_INTERUPT_REGION
    	setProperty("OutputWorkspace",out);
    	return;
 }
