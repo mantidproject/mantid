@@ -307,8 +307,12 @@ def save_lines_to(lines, fullpath):
 
 #======================================================================
 def generate(subproject, classname, overwrite, args):
+    
     # Directory at base of subproject
-    basedir = os.path.join(os.path.curdir, "Framework/" + subproject)
+    if args.vates:
+        basedir = os.path.join(os.path.curdir, "Vates/" + subproject)
+    else:
+        basedir = os.path.join(os.path.curdir, "Framework/" + subproject)
     
     headerfile = os.path.join(basedir, "inc/Mantid" + subproject + "/" + args.subfolder + classname + ".h")
     sourcefile = os.path.join(basedir, "src/" + args.subfolder + classname + ".cpp")
@@ -335,7 +339,7 @@ def generate(subproject, classname, overwrite, args):
     # Insert into the cmake list
     add_to_cmake(subproject, classname, args)
     
-    print "\n   Files were added to Framework/%s/CMakeLists.txt !" % subproject
+    print "\n   Files were added to %s/%s/CMakeLists.txt !" % (["Framework","Vates"][args.vates], subproject)
     print 
 #    if not test_only:
 #        print "\tsrc/%s.cpp" % (classname)
@@ -370,6 +374,9 @@ if __name__ == "__main__":
     parser.add_argument('--subfolder', dest='subfolder', 
                         default="",
                         help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
+    parser.add_argument('--vates', dest='vates', action='store_const',
+                        const=True, default=False,
+                        help='Create the files under the Vates base folder (Framework is the default).')
      
     args = parser.parse_args()
     subproject = args.subproject
