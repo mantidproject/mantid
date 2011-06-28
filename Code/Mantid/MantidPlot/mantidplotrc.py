@@ -63,16 +63,21 @@ if __name__ == '__main__':
         return keywords;
 
     def _ScopeInspector_GetAlgorithmSpec(alg):
-        props = alg.getProperties()
+        props = mtd._getPropertyOrder(alg)
         calltip = "("
-        for prop in props:
-            if (len(prop.isValid)>0):
-                #not valid by default, thus input is mandatory
+        for prop_name in props:
+            prop = alg.getProperty(prop_name)
+            if prop.direction == Direction.Output and \
+               not issubclass(type(prop), WorkspaceProperty):
+                # Output properties should not appear as input arguments
+                continue
+            if len(prop.isValid) > 0:
+                # Not valid by default, thus input is mandatory
                 calltip += prop.name + ','
             else:
-                #valid by default, therefore optional
+                # Valid by default, therefore optional
                 calltip += "[" + prop.name + '],'
-        #strip off the final ,
+        # Strip off the final ,
         calltip = calltip.rstrip(',')
         calltip += ")"
         return calltip
