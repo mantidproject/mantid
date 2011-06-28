@@ -329,7 +329,7 @@ def in_callstack(fn_name, frame):
 #-------------------------------------------------------------------------------
 def mtdGlobalHelp():
     # first part is algorithm name, second is version
-    orig_algs = mtd._getRegisteredAlgorithms()
+    orig_algs = mtd._getRegisteredAlgorithms(include_hidden=False)
 
     # do the final formatting
     algs = []
@@ -1089,9 +1089,9 @@ class MantidPyFramework(FrameworkManager):
         return IAlgorithmProxy(ialg, self)
 
     # make what comes out of C++ a little friendlier to use
-    def _getRegisteredAlgorithms(self):
+    def _getRegisteredAlgorithms(self, include_hidden = False):
         # get the full list from C++
-        algs = super(MantidPyFramework, self)._getRegisteredAlgorithms()
+        algs = super(MantidPyFramework, self)._getRegisteredAlgorithms(include_hidden)
         # split the string into name and version
         algs = [item.split('|') for item in algs]
         # convert the version into an integer

@@ -227,7 +227,7 @@ def translate():
         Loop through the algorithms and register a function call 
         for each of them
     """
-    for algorithm in mtd._getRegisteredAlgorithms():
+    for algorithm in mtd._getRegisteredAlgorithms(include_hidden=True):
         if algorithm[0] == "Load":
             continue
         globals()[algorithm[0]] = create_algorithm(algorithm[0], max(algorithm[1]))

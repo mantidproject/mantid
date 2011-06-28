@@ -47,7 +47,7 @@ def translate():
         Loop through the algorithms and register the simple algorithm wrapper 
         for each of them.
     """
-    for algorithm in MantidFramework.mtd._getRegisteredAlgorithms():
+    for algorithm in MantidFramework.mtd._getRegisteredAlgorithms(True):
         algorithm = algorithm[0]
         f = functools.partial(simple_algorithm, algorithm)
         f.__doc__ = MantidFramework.mtd.createAlgorithmDocs(algorithm)
