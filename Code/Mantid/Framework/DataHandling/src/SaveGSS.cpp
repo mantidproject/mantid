@@ -98,6 +98,12 @@ void SaveGSS::exec()
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   const int nHist=static_cast<int>(inputWS->getNumberHistograms());
 
+  // Check the number of histogram/spectra < 99
+  if (nHist > 99){
+    g_log.error() << "Spectra number cannot be larger than 99 for GSAS file" << std::endl;
+    throw new std::invalid_argument("Workspace has more than 99 spectra, and not allowed by GSAS");
+  }
+
   std::string filename = getProperty("Filename");
   std::string inputWSName = getProperty("InputWorkspace");
  
@@ -379,7 +385,7 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth, std::
                             const MantidVec& X, const MantidVec& Y, const MantidVec& E) const 
 {
 
-  g_log.information() << "SaveGSS(): MultipyByBinwidth = " << MultiplyByBinWidth << std::endl;
+  g_log.debug() << "SaveGSS(): MultipyByBinwidth = " << MultiplyByBinWidth << std::endl;
 
   const size_t datasize = Y.size();
   double bc1 = *(X.begin()); // minimum TOF in microseconds
@@ -389,7 +395,7 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth, std::
   double bc2 = *(X.rbegin()+1); // maximum TOF (in microseconds?)
   double bc3 = (*(X.begin()+1)-bc1)/bc1; // deltaT/T
 
-  g_log.information() << "SaveGSS(): Min TOF = " << bc1 << std::endl;
+  g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << std::endl;
 
   writeBankLine(out, "SLOG", bank, datasize);
   out << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc1
@@ -403,6 +409,7 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth, std::
     y = Y[i];
     e = E[i];
     if (MultiplyByBinWidth) {
+      // Multiple by bin width as
       delta = X[i+1] - X[i];
       y *= delta;
       e *= delta;
