@@ -8,7 +8,7 @@
 #include "MantidAlgorithms/GhostCorrection.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/LoadEventPreNeXus.h"
+#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"

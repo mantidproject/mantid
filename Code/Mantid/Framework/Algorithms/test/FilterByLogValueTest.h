@@ -11,7 +11,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/FilterByLogValue.h"
-#include "MantidDataHandling/LoadEventPreNeXus.h"
+#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"

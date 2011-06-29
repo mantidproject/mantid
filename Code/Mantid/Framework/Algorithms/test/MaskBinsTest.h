@@ -5,7 +5,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/MaskBins.h"
-#include "MantidDataHandling/LoadEventPreNeXus.h"
+#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 

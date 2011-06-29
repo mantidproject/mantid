@@ -10,7 +10,7 @@
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataHandling/LoadEventPreNeXus.h"
+#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAlgorithms/ChangeBinOffset.h"
 
@@ -156,7 +156,7 @@ public:
   void setup_Event()
   {
     this->inputSpace = "eventWS";
-    Mantid::DataHandling::LoadEventPreNeXus loader;
+    Mantid::DataHandling::LoadEventPreNexus loader;
     loader.initialize();
     std::string eventfile( "CNCS_7860_neutron_event.dat" );
     std::string pulsefile( "CNCS_7860_pulseid.dat" );

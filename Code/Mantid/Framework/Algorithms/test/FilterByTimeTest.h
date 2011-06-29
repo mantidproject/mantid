@@ -11,7 +11,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/FilterByTime.h"
-#include "MantidDataHandling/LoadEventPreNeXus.h"
+#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
@@ -33,7 +33,7 @@ public:
   void setUp_Event()
   {
     inputWS = "eventWS";
-    LoadEventPreNeXus loader;
+    LoadEventPreNexus loader;
     loader.initialize();
     std::string eventfile( "CNCS_7860_neutron_event.dat" );
     std::string pulsefile( "CNCS_7860_pulseid.dat" );

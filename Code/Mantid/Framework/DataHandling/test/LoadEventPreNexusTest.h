@@ -1,5 +1,5 @@
 /*
- * LoadEventPreNeXusTest.h
+ * LoadEventPreNexusTest.h
  *
  *  Created on: Jun 23, 2010
  *      Author: janik zikovsky
@@ -17,7 +17,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataHandling/LoadEventPreNeXus.h"
+#include "MantidDataHandling/LoadEventPreNexus.h"
 #include <sys/stat.h>
 
 using namespace Mantid;
@@ -38,15 +38,15 @@ using std::endl;
 
 
 //==========================================================================================
-class LoadEventPreNeXusTest : public CxxTest::TestSuite
+class LoadEventPreNexusTest : public CxxTest::TestSuite
 {
 public:
-  LoadEventPreNeXus * eventLoader;
+  LoadEventPreNexus * eventLoader;
 
-  static LoadEventPreNeXusTest *createSuite() { return new LoadEventPreNeXusTest(); }
-  static void destroySuite(LoadEventPreNeXusTest *suite) { delete suite; }
+  static LoadEventPreNexusTest *createSuite() { return new LoadEventPreNexusTest(); }
+  static void destroySuite(LoadEventPreNexusTest *suite) { delete suite; }
 
-  LoadEventPreNeXusTest()
+  LoadEventPreNexusTest()
   {
 
   }
@@ -55,7 +55,7 @@ public:
 
   void setUp()
   {
-    eventLoader = new LoadEventPreNeXus();
+    eventLoader = new LoadEventPreNexus();
     eventLoader->initialize();
   }
 

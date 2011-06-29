@@ -10,7 +10,7 @@
 #include <boost/timer.hpp>
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
-#include "MantidDataHandling/LoadEventPreNeXus.h"
+#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -32,11 +32,11 @@ namespace Mantid
 namespace DataHandling
 {
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadEventPreNeXus)
-DECLARE_LOADALGORITHM(LoadEventPreNeXus)
+DECLARE_ALGORITHM(LoadEventPreNexus)
+DECLARE_LOADALGORITHM(LoadEventPreNexus)
 
 /// Sets documentation strings for this algorithm
-void LoadEventPreNeXus::initDocs()
+void LoadEventPreNexus::initDocs()
 {
   this->setWikiSummary("Loads SNS raw neutron event data format and stores it in a [[workspace]] ([[EventWorkspace]] class). ");
   this->setOptionalMessage("Loads SNS raw neutron event data format and stores it in a workspace (EventWorkspace class).");
@@ -85,13 +85,13 @@ static const double TOF_CONVERSION = .1;
 /// Conversion factor between picoColumbs and microAmp*hours
 static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 
-LoadEventPreNeXus::LoadEventPreNeXus() : Mantid::API::IDataFileChecker()
+LoadEventPreNexus::LoadEventPreNexus() : Mantid::API::IDataFileChecker()
 {
   this->eventfile = NULL;
   this->max_events = 0;
 }
 
-LoadEventPreNeXus::~LoadEventPreNeXus()
+LoadEventPreNexus::~LoadEventPreNexus()
 {
   if (this->eventfile)
     delete this->eventfile;
@@ -101,7 +101,7 @@ LoadEventPreNeXus::~LoadEventPreNeXus()
  * Returns the name of the property to be considered as the Filename for Load
  * @returns A character string containing the file property's name
  */
-const char * LoadEventPreNeXus::filePropertyName() const
+const char * LoadEventPreNexus::filePropertyName() const
 {
   return EVENT_PARAM.c_str();
 }
@@ -113,7 +113,7 @@ const char * LoadEventPreNeXus::filePropertyName() const
  *  @param header :: The first 100 bytes of the file as a union
  *  @return true if the given file is of type which can be loaded by this algorithm
  */
-bool LoadEventPreNeXus::quickFileCheck(const std::string& filePath,size_t,const file_header&)
+bool LoadEventPreNexus::quickFileCheck(const std::string& filePath,size_t,const file_header&)
 {
   std::string ext = extension(filePath);
   return (ext.rfind("dat") != std::string::npos);
@@ -124,7 +124,7 @@ bool LoadEventPreNeXus::quickFileCheck(const std::string& filePath,size_t,const 
  *  @param filePath :: name of the file inluding its path
  *  @return an integer value how much this algorithm can load the file 
  */
-int LoadEventPreNeXus::fileCheck(const std::string& filePath)
+int LoadEventPreNexus::fileCheck(const std::string& filePath)
 {
   int confidence(0);
   try
@@ -149,7 +149,7 @@ int LoadEventPreNeXus::fileCheck(const std::string& filePath)
 
 //-----------------------------------------------------------------------------
 /** Initialize the algorithm */
-void LoadEventPreNeXus::init()
+void LoadEventPreNexus::init()
 {
   // which files to use
   this->declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, EVENT_EXT),
@@ -248,7 +248,7 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp)
 
 //-----------------------------------------------------------------------------
 /** Execute the algorithm */
-void LoadEventPreNeXus::exec()
+void LoadEventPreNexus::exec()
 {
   // what spectra (pixel ID's) to load
   this->spectra_list = this->getProperty(PID_PARAM);
@@ -332,7 +332,7 @@ void LoadEventPreNeXus::exec()
  *  @param eventfilename :: Used to pick the instrument.
  *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
  */
-void LoadEventPreNeXus::runLoadInstrument(const std::string &eventfilename, MatrixWorkspace_sptr localWorkspace)
+void LoadEventPreNexus::runLoadInstrument(const std::string &eventfilename, MatrixWorkspace_sptr localWorkspace)
 {
   // determine the instrument parameter file
   string instrument = Poco::Path(eventfilename).getFileName();
@@ -359,7 +359,7 @@ void LoadEventPreNeXus::runLoadInstrument(const std::string &eventfilename, Matr
 /** Turn a pixel id into a "corrected" pixelid and period.
  *
  */
-void LoadEventPreNeXus::fixPixelId(PixelType &pixel, uint32_t &period) const
+void LoadEventPreNexus::fixPixelId(PixelType &pixel, uint32_t &period) const
 {
   if (!this->using_mapping_file) { // nothing to do here
     period = 0;
@@ -375,7 +375,7 @@ void LoadEventPreNeXus::fixPixelId(PixelType &pixel, uint32_t &period) const
 /** Special function to reduce the number of loaded events.
  *
  */
-void LoadEventPreNeXus::setMaxEventsToLoad(std::size_t max_events_to_load)
+void LoadEventPreNexus::setMaxEventsToLoad(std::size_t max_events_to_load)
 {
   this->max_events = max_events_to_load;
 }
@@ -385,7 +385,7 @@ void LoadEventPreNeXus::setMaxEventsToLoad(std::size_t max_events_to_load)
 /** Process the event file properly.
  * @param workspace :: EventWorkspace to write to.
  */
-void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
+void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 {
   // do the actual loading
   this->num_error_events = 0;
@@ -495,7 +495,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
  * @param current_event_buffer_size :: The length of the given DAS buffer
  * @param fileOffset :: Value for an offset into the binary file
  */
-void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, DasEvent * event_buffer,
+void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, DasEvent * event_buffer,
     size_t current_event_buffer_size, size_t fileOffset)
 {
   DasEvent temp;
@@ -593,7 +593,7 @@ bool intermediatePixelIDComp(IntermediateEvent x, IntermediateEvent y)
  *
  * @param workspace :: Event workspace to set the proton charge on
  */
-void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & workspace)
+void LoadEventPreNexus::setProtonCharge(DataObjects::EventWorkspace_sptr & workspace)
 {
   if (this->proton_charge.empty()) // nothing to do
     return;
@@ -622,7 +622,7 @@ void LoadEventPreNeXus::setProtonCharge(DataObjects::EventWorkspace_sptr & works
 /** Load a pixel mapping file
  * @param filename :: Path to file.
  */
-void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
+void LoadEventPreNexus::loadPixelMap(const std::string &filename)
 {
   this->using_mapping_file = false;
   this->pixelmap.clear();
@@ -664,7 +664,7 @@ void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
 /** Open an event file
  * @param filename :: file to open.
  */
-void LoadEventPreNeXus::openEventFile(const std::string &filename)
+void LoadEventPreNexus::openEventFile(const std::string &filename)
 {
   //Open the file
   this->eventfile = new BinaryFile<DasEvent>(filename);
@@ -688,7 +688,7 @@ void LoadEventPreNeXus::openEventFile(const std::string &filename)
  * @param filename :: file to load.
  * @param throwError :: Flag to trigger error throwing instead of just logging
  */
-void LoadEventPreNeXus::readPulseidFile(const std::string &filename, const bool throwError)
+void LoadEventPreNexus::readPulseidFile(const std::string &filename, const bool throwError)
 {
   this->proton_charge_tot = 0.;
   this->num_pulses = 0;

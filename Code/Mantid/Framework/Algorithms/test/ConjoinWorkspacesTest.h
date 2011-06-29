@@ -5,7 +5,7 @@
 
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidDataHandling/LoadEventPreNeXus.h"
+#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
@@ -46,7 +46,7 @@ public:
     delete loader;
 
     //Now some event workspaces
-    loader = new Mantid::DataHandling::LoadEventPreNeXus;
+    loader = new Mantid::DataHandling::LoadEventPreNexus;
     loader->initialize();
     loader->setPropertyValue("EventFilename", "VULCAN_2916_neutron0_event.dat");
     loader->setPropertyValue("OutputWorkspace", "vulcan0");
@@ -54,7 +54,7 @@ public:
     TS_ASSERT( loader->isExecuted() );
     delete loader;
 
-    loader = new Mantid::DataHandling::LoadEventPreNeXus;
+    loader = new Mantid::DataHandling::LoadEventPreNexus;
     loader->initialize();
     loader->setPropertyValue("EventFilename", "VULCAN_2916_neutron1_event.dat");
     loader->setPropertyValue("OutputWorkspace", "vulcan1");

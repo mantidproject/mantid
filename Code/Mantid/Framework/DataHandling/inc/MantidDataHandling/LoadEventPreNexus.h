@@ -13,7 +13,7 @@ namespace Mantid
 {
   namespace DataHandling
   {
-/** @class Mantid::DataHandling::LoadEventPreNeXus
+/** @class Mantid::DataHandling::LoadEventPreNexus
 
     A data loading routine for SNS pre-nexus event files
     
@@ -98,13 +98,13 @@ struct Pulse
 #pragma pack(pop)
 
 
-class DLLExport LoadEventPreNeXus : public API::IDataFileChecker
+class DLLExport LoadEventPreNexus : public API::IDataFileChecker
 {
 public:
   /// Constructor
-  LoadEventPreNeXus();
+  LoadEventPreNexus();
   /// Virtual destructor
-  virtual ~LoadEventPreNeXus();
+  virtual ~LoadEventPreNexus();
   /// Algorithm's name
   virtual const std::string name() const { return "LoadEventPreNeXus"; }
   /// Algorithm's version

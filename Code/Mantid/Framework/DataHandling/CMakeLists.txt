@@ -22,7 +22,7 @@ set ( SRC_FILES
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEventNexus.cpp
-	src/LoadEventPreNeXus.cpp
+	src/LoadEventPreNexus.cpp
 	src/LoadGSS.cpp
 	src/LoadInstrument.cpp
 	src/LoadInstrumentFromNexus.cpp
@@ -117,7 +117,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEventNexus.h
-	inc/MantidDataHandling/LoadEventPreNeXus.h
+	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadInstrument.h
 	inc/MantidDataHandling/LoadInstrumentFromNexus.h
@@ -209,7 +209,7 @@ set ( TEST_FILES
 	test/LoadDspacemapTest.h
 	test/LoadEmptyInstrumentTest.h
 	test/LoadEventNexusTest.h
-	test/LoadEventPreNeXusTest.h
+	test/LoadEventPreNexusTest.h
 	test/LoadInstrumentFromRawTest.h
 	test/LoadInstrumentHelperTest.h
 	test/LoadInstrumentTest.h

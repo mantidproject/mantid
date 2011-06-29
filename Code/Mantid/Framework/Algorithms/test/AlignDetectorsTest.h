@@ -5,7 +5,7 @@
 
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidDataHandling/LoadEventPreNeXus.h"
+#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
@@ -87,7 +87,7 @@ public:
   void setUp_Event()
   {
     inputWS = "eventWS";
-    LoadEventPreNeXus loader;
+    LoadEventPreNexus loader;
     loader.initialize();
     std::string eventfile( "CNCS_7860_neutron_event.dat" );
     std::string pulsefile( "CNCS_7860_pulseid.dat" );
