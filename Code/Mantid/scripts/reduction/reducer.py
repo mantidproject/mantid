@@ -557,7 +557,8 @@ class ReductionStep(object):
     """
         Base class for reduction steps
     """ 
-    def delete_workspaces(self, workspace):
+    @classmethod
+    def delete_workspaces(cls, workspace):
         """
             Delete all workspace created by this reduction step related
             to the given workspace
