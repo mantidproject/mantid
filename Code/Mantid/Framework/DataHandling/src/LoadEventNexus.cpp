@@ -1099,6 +1099,7 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
   }
   if( !spectramap )
   {
+    g_log.debug() << "No custom spectra mapping found, continuing with default 1:1 mapping of spectrum:detectorID\n";
     // The default 1:1 will suffice but exclude the monitors as they are always in a separate workspace
     workspace->rebuildSpectraMapping(false);
     g_log.debug() << "Populated 1:1 spectra map for the whole instrument \n";
@@ -1154,7 +1155,8 @@ Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::st
   ::NeXus::File file(filename);
   try
   {
-    file.openPath("entry/isis_vms_compat");
+    g_log.debug() << "Attempting to load custom spectra mapping from '" << m_top_entry_name << "/isis_vms_compat'.\n";
+    file.openPath(m_top_entry_name + "/isis_vms_compat");
   }
   catch(::NeXus::Exception&)
   {
