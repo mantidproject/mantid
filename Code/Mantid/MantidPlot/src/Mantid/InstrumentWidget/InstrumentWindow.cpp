@@ -212,6 +212,7 @@ void InstrumentWindow::setSurfaceType(int type)
     m_InstrumentDisplay->setSurface(surface);
     m_InstrumentDisplay->update();
     m_renderTab->init();
+    m_pickTab->init();
     m_maskTab->init();
 
     connect(surface,SIGNAL(singleDetectorTouched(int)),this,SLOT(singleDetectorTouched(int)));

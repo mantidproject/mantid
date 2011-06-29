@@ -28,6 +28,7 @@ public:
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
   void updatePick(int detid);
   bool canUpdateTouchedDetector()const;
+  void init();
 private slots:
   void plotContextMenu();
   void sumDetectors();
@@ -65,6 +66,9 @@ private:
   CollapsiblePanel* m_infoPanel;
   DetSelectionType m_selectionType;
   int m_currentDetID;
+  int m_emode;
+  double m_efixed;
+  double m_delta;
 };
 
 

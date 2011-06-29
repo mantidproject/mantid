@@ -23,10 +23,83 @@
 #include <QAction>
 #include <QLabel>
 #include <QMessageBox>
+#include <QDialog>
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QComboBox>
+#include <QLineEdit>
 
 #include <numeric>
 #include <cfloat>
 #include <algorithm>
+
+class InputConvertUnitsParametersDialog : public QDialog
+{
+public:
+  InputConvertUnitsParametersDialog(QWidget* parent);
+  int getEMode()const;
+  double getEFixed()const;
+  double getDelta()const;
+private:
+  QComboBox* m_emode;
+  QLineEdit* m_efixed;
+  QLineEdit* m_delta;
+};
+
+InputConvertUnitsParametersDialog::InputConvertUnitsParametersDialog(QWidget* parent):QDialog(parent)
+{
+  QGridLayout* input_layout = new QGridLayout();
+  QLabel* label = new QLabel("Units have to be converted to TOF.\nPlease specify additional information.");
+  m_emode = new QComboBox();
+  QStringList emodeOptions;
+  emodeOptions << "Elastic" << "Direct" << "Indirect";
+  m_emode->insertItems(0,emodeOptions);
+  QLabel* emode_label = new QLabel("EMode");
+  
+  m_efixed = new QLineEdit();
+  m_efixed->setText("0.0");
+  QLabel* efixed_label = new QLabel("EFixed");
+
+  m_delta = new QLineEdit();
+  m_delta->setText("0.0");
+  QLabel* delta_label = new QLabel("Delta");
+
+  input_layout->addWidget(label,0,0,1,2);
+  input_layout->addWidget(emode_label,1,0);
+  input_layout->addWidget(m_emode,1,1);
+  input_layout->addWidget(efixed_label,2,0);
+  input_layout->addWidget(m_efixed,2,1);
+  input_layout->addWidget(delta_label,3,0);
+  input_layout->addWidget(m_delta,3,1);
+
+  QHBoxLayout* button_layout = new QHBoxLayout();
+  QPushButton* ok_button = new QPushButton("OK");
+  button_layout->addStretch();
+  button_layout->addWidget(ok_button);
+  connect(ok_button,SIGNAL(clicked()),this,SLOT(close()));
+
+  QVBoxLayout* main_layout = new QVBoxLayout(this);
+  main_layout->addLayout(input_layout);
+  main_layout->addStretch();
+  main_layout->addLayout(button_layout);
+}
+
+int InputConvertUnitsParametersDialog::getEMode()const
+{
+  return m_emode->currentIndex();
+}
+
+double InputConvertUnitsParametersDialog::getEFixed()const
+{
+  return m_efixed->text().toDouble();
+}
+
+double InputConvertUnitsParametersDialog::getDelta()const
+{
+  return m_delta->text().toDouble();
+}
+
+// --- InstrumentWindowPickTab --- //
 
 InstrumentWindowPickTab::InstrumentWindowPickTab(InstrumentWindow* instrWindow):
 QFrame(instrWindow),m_instrWindow(instrWindow),m_currentDetID(-1)
@@ -106,6 +179,11 @@ QFrame(instrWindow),m_instrWindow(instrWindow),m_currentDetID(-1)
   layout->addWidget(panelStack);
 
   setPlotCaption();
+}
+
+void InstrumentWindowPickTab::init()
+{
+  m_emode = -1;
 }
 
 /**
@@ -408,6 +486,8 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
   Mantid::Geometry::IDetector_const_sptr det = instr->getDetector(m_currentDetID);
 
+  Mantid::Kernel::Unit_sptr unit = ws->getAxis(0)->unit();
+
   std::string peakTableName = "SingleCrystalPeakTable";
   Mantid::API::IPeaksWorkspace_sptr tw;
   if (! Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName))
@@ -439,7 +519,25 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   double Qz=1.0-cos(theta2);
   double l1 = source->getDistance(*sample);
   double l2 = det->getDistance(*sample);
-  double knorm=mN*(l1 + l2)/(hbar*x*1e-6)/1e10;
+
+  double tof = x;
+  if (unit->unitID() != "TOF")
+  {
+    if (m_emode < 0)
+    {
+      InputConvertUnitsParametersDialog* dlg = new InputConvertUnitsParametersDialog(this);
+      dlg->exec();
+      m_emode = dlg->getEMode();
+      m_efixed = dlg->getEFixed();
+      m_delta = dlg->getDelta();
+    }
+    std::vector<double> xdata(1,x);
+    std::vector<double> ydata;
+    unit->toTOF(xdata, ydata, l1, l2, theta2, m_emode, m_efixed, m_delta);
+    tof = xdata[0];
+  }
+
+  double knorm=mN*(l1 + l2)/(hbar*tof*1e-6)/1e10;
   Qx *= knorm;
   Qy *= knorm;
   Qz *= knorm;
