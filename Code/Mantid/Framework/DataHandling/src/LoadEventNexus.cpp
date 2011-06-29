@@ -279,16 +279,17 @@ public:
   //---------------------------------------------------------------------------------------------------
   /** Constructor
    *
+   * @param top_entry_name :: The pathname of the top level NXentry to use
    * @param entry_name :: The pathname of the bank to load
    * @param pixelID_to_wi_map :: a map where key = pixelID and value = the workpsace index to use.
    * @param prog :: an optional Progress object
    * @param ioMutex :: a mutex shared for all Disk I-O tasks
    * @param scheduler :: the ThreadScheduler that runs this task.
    */
-  LoadBankFromDiskTask(LoadEventNexus * alg, std::string entry_name, detid2index_map * pixelID_to_wi_map,
+  LoadBankFromDiskTask(LoadEventNexus * alg, const std::string& top_entry_name, const std::string& entry_name, detid2index_map * pixelID_to_wi_map,
       Progress * prog, Mutex * ioMutex, ThreadScheduler * scheduler)
   : Task(),
-    alg(alg), entry_name(entry_name), pixelID_to_wi_map(pixelID_to_wi_map), prog(prog), scheduler(scheduler)
+    alg(alg), top_entry_name(top_entry_name), entry_name(entry_name), pixelID_to_wi_map(pixelID_to_wi_map), prog(prog), scheduler(scheduler)
   {
     setMutex(ioMutex);
   }
@@ -319,7 +320,7 @@ public:
     ::NeXus::File file(alg->m_filename);
     try
     {
-    file.openGroup("entry", "NXentry");
+    file.openGroup(top_entry_name, "NXentry");
 
     //Open the bankN_event group
     file.openGroup(entry_name, "NXevent_data");
@@ -519,6 +520,8 @@ public:
 private:
   /// Algorithm being run
   LoadEventNexus * alg;
+  /// NXS name for top level NXentry
+  std::string top_entry_name;
   /// NXS path to bank
   std::string entry_name;
   /// Map of pixel ID to Workspace Index
@@ -568,14 +571,22 @@ bool LoadEventNexus::quickFileCheck(const std::string& filePath,size_t nread, co
 int LoadEventNexus::fileCheck(const std::string& filePath)
 {
   int confidence(0);
+  typedef std::map<std::string,std::string> string_map_t; 
   try
   {
-        // FIXME: We need a better test
+    string_map_t::const_iterator it;
     ::NeXus::File file = ::NeXus::File(filePath);
-    // Open the base group called 'entry'
-    file.openGroup("entry", "NXentry");
-    // If all this succeeded then we'll assume this is an SNS Event NeXus file
-    confidence = 80;
+    string_map_t entries = file.getEntries();
+	if ( ((it = entries.find("entry")) != entries.end()) && (it->second == "NXentry") )
+	{
+        // If all this succeeded then we'll assume this is an SNS Event NeXus file
+        confidence = 80;
+	}
+	if ( ((it = entries.find("raw_data_1")) != entries.end()) && (it->second == "NXentry") )
+	{
+        // If all this succeeded then we'll assume this is an ISIS Event NeXus file
+        confidence = 80;
+	}
   }
   catch(::NeXus::Exception&)
   {
@@ -640,6 +651,30 @@ void LoadEventNexus::init()
 }
 
 
+/// set the name of the top level NXentry m_top_entry_name
+void LoadEventNexus::setTopEntryName()
+{
+	typedef std::map<std::string,std::string> string_map_t; 
+	try
+	{
+		string_map_t::const_iterator it;
+		::NeXus::File file = ::NeXus::File(m_filename);
+		string_map_t entries = file.getEntries();
+		for (it = entries.begin(); it != entries.end(); ++it)
+		{
+			if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") )
+			{
+				m_top_entry_name = it->first;
+				break;
+			}
+		}
+	}
+	catch(const std::exception&)
+	{
+		g_log.error() << "Unable to determine name of top level NXentry - assuming \"entry\"." << std::endl;
+		m_top_entry_name = "entry";
+	}
+}
 
 //------------------------------------------------------------------------------------------------
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -673,6 +708,8 @@ void LoadEventNexus::exec()
 
   // Check to see if the monitors need to be loaded later
   bool load_monitors = this->getProperty("LoadMonitors");
+
+  setTopEntryName();
 
   // Create the output workspace
   WS = EventWorkspace_sptr(new EventWorkspace());
@@ -759,7 +796,7 @@ void LoadEventNexus::exec()
   ::NeXus::File file(m_filename);
 
   //Start with the base entry
-  file.openGroup("entry", "NXentry");
+  file.openGroup(m_top_entry_name, "NXentry");
 
   //Now we want to go through all the bankN_event entries
   vector<string> bankNames;
@@ -876,7 +913,7 @@ void LoadEventNexus::exec()
   for (int i=0; i < static_cast<int>(bankNames.size()); i++)
   {
     // We make tasks for loading
-    pool.schedule( new LoadBankFromDiskTask(this,bankNames[i],pixelID_to_wi_map, prog2, diskIOMutex, scheduler) );
+    pool.schedule( new LoadBankFromDiskTask(this,m_top_entry_name,bankNames[i],pixelID_to_wi_map, prog2, diskIOMutex, scheduler) );
   }
   // Start and end all threads
   pool.joinAll();
@@ -909,7 +946,7 @@ void LoadEventNexus::exec()
   WS->setAllX(axis);
 
   // set more properties on the workspace
-  this->loadEntryMetadata("entry");
+  this->loadEntryMetadata(m_top_entry_name);
 
   //Save output
   this->setProperty<IEventWorkspace_sptr>("OutputWorkspace", WS);
@@ -969,7 +1006,7 @@ void LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
   // Get the instrument name
   ::NeXus::File nxfile(nexusfilename);
   //Start with the base entry
-  nxfile.openGroup("entry", "NXentry");
+  nxfile.openGroup(m_top_entry_name, "NXentry");
   // Open the instrument
   nxfile.openGroup("instrument", "NXinstrument");
   nxfile.openData("name");

@@ -64,20 +64,28 @@ void LoadNexusMonitors::exec()
   // top level file information
   ::NeXus::File file(this->filename);
 
-  // FIXME: This is a SNS specific NXentry. In order to make this reader
-  // more generic, this must be changed.
   //Start with the base entry
-  file.openGroup("entry", "NXentry");
+  typedef std::map<std::string,std::string> string_map_t; 
+  string_map_t::const_iterator it;
+  string_map_t entries = file.getEntries();
+  for (it = entries.begin(); it != entries.end(); ++it)
+  {
+	if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") )
+	{
+		file.openGroup(it->first, it->second);
+		break;
+	}
+  }
   prog1.report();
 
   //Now we want to go through and find the monitors
-  std::map<std::string, std::string> entries = file.getEntries();
+  entries = file.getEntries();
   std::vector<std::string> monitorNames;
   prog1.report();
 
   API::Progress prog2(this, 0.2, 0.6, entries.size());
 
-  std::map<std::string,std::string>::const_iterator it = entries.begin();
+  it = entries.begin();
   for (; it != entries.end(); it++)
   {
     std::string entry_name(it->first);

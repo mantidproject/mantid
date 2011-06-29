@@ -136,6 +136,10 @@ namespace Mantid
     private:
       /// Load a spectra mapping from the given file
       Geometry::ISpectraDetectorMap * loadSpectraMapping(const std::string & filename) const;
+	  /// name of top level NXentry to use
+	  std::string m_top_entry_name;
+
+	  void setTopEntryName();
 
     };
 
