@@ -21,7 +21,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="FirstRunLayout">
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
@@ -42,7 +42,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QHBoxLayout" name="LastRunLayout">
         <item>
          <widget class="QLabel" name="label_2">
           <property name="text">
@@ -84,7 +84,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <layout class="QHBoxLayout" name="OutputWSLayout">
         <item>
          <widget class="QLabel" name="label_3">
           <property name="text">
@@ -152,8 +152,6 @@
        </layout>
       </item>
      </layout>
-     <zorder>layoutWidget_3</zorder>
-     <zorder>groupBox</zorder>
     </widget>
    </item>
    <item>

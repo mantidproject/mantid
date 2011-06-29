@@ -56,6 +56,9 @@ PlotAsymmetryByLogValueDialog::~PlotAsymmetryByLogValueDialog()
 void PlotAsymmetryByLogValueDialog::initLayout()
 {
   m_uiForm.setupUi(this);
+  tie(m_uiForm.firstRunBox, "FirstRun", m_uiForm.FirstRunLayout);
+  tie(m_uiForm.lastRunBox, "LastRun", m_uiForm.LastRunLayout);
+  tie( m_uiForm.outWSBox, "OutputWorkspace", m_uiForm.OutputWSLayout);
   connect( m_uiForm.browseFirstButton, SIGNAL(clicked()), this, SLOT(browseFirstClicked()) );
   connect( m_uiForm.browseLastButton, SIGNAL(clicked()), this, SLOT(browseLastClicked()) );
   connect( m_uiForm.firstRunBox, SIGNAL(textChanged(const QString&)), this, SLOT(fillLogBox(const QString&)) );
