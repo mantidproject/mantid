@@ -34,16 +34,16 @@ namespace DataHandling
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-class DLLExport LoadPreNeXusMonitors: public Mantid::API::Algorithm
+class DLLExport LoadPreNexusMonitors: public Mantid::API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  LoadPreNeXusMonitors() :
+  LoadPreNexusMonitors() :
     Mantid::API::Algorithm()
   {
   }
   /// Virtual destructor
-  virtual ~LoadPreNeXusMonitors()
+  virtual ~LoadPreNexusMonitors()
   {
   }
   /// Algorithm's name

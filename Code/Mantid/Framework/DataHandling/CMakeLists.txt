@@ -42,7 +42,7 @@ set ( SRC_FILES
         src/LoadNexusMonitors.cpp
         src/LoadNexusProcessed.cpp
 	src/LoadParameterFile.cpp
-	src/LoadPreNeXusMonitors.cpp
+	src/LoadPreNexusMonitors.cpp
 	src/LoadRKH.cpp
 	src/LoadRaw.cpp
 	src/LoadRaw/byte_rel_comp.cpp
@@ -137,7 +137,7 @@ set ( INC_FILES
         inc/MantidDataHandling/LoadNexusMonitors.h
         inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadParameterFile.h
-	inc/MantidDataHandling/LoadPreNeXusMonitors.h
+	inc/MantidDataHandling/LoadPreNexusMonitors.h
 	inc/MantidDataHandling/LoadRKH.h
 	inc/MantidDataHandling/LoadRaw.h
 	inc/MantidDataHandling/LoadRaw2.h
@@ -225,7 +225,7 @@ set ( TEST_FILES
         test/LoadNexusMonitorsTest.h
         test/LoadNexusProcessedTest.h
 	test/LoadParameterFileTest.h
-	test/LoadPreNeXusMonitorsTest.h
+	test/LoadPreNexusMonitorsTest.h
 	test/LoadRKHTest.h
 	test/LoadRaw2Test.h
 	test/LoadRaw3Test.h

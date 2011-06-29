@@ -1,4 +1,4 @@
-#include "MantidDataHandling/LoadPreNeXusMonitors.h"
+#include "MantidDataHandling/LoadPreNexusMonitors.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/UnitFactory.h"
@@ -31,7 +31,7 @@ namespace DataHandling
 {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM( LoadPreNeXusMonitors)
+DECLARE_ALGORITHM( LoadPreNexusMonitors)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -44,7 +44,7 @@ static const std::string WORKSPACE_OUT("OutputWorkspace");
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
-void LoadPreNeXusMonitors::init()
+void LoadPreNexusMonitors::init()
 {
   // Filename for the runinfo file.
   declareProperty(new FileProperty(RUNINFO_FILENAME, "", FileProperty::Load, "_runinfo.xml"));
@@ -57,7 +57,7 @@ void LoadPreNeXusMonitors::init()
 
 }
 
-void LoadPreNeXusMonitors::exec()
+void LoadPreNexusMonitors::exec()
 {
   // time of flight channel parameters
   double tmin = 0.0;
@@ -241,7 +241,7 @@ void LoadPreNeXusMonitors::exec()
  *  @param instrument :: instrument name.
  *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
  */
-void LoadPreNeXusMonitors::runLoadInstrument(const std::string &instrument,
+void LoadPreNexusMonitors::runLoadInstrument(const std::string &instrument,
     MatrixWorkspace_sptr localWorkspace)
 {
 

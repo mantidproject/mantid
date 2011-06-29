@@ -3,19 +3,19 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadPreNeXusMonitors.h"
+#include "MantidDataHandling/LoadPreNexusMonitors.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <Poco/Path.h>
 
-class LoadPreNeXusMonitorsTest: public CxxTest::TestSuite
+class LoadPreNexusMonitorsTest: public CxxTest::TestSuite
 {
 public:
-  static LoadPreNeXusMonitorsTest *createSuite() { return new LoadPreNeXusMonitorsTest(); }
-  static void destroySuite(LoadPreNeXusMonitorsTest *suite) { delete suite; }
+  static LoadPreNexusMonitorsTest *createSuite() { return new LoadPreNexusMonitorsTest(); }
+  static void destroySuite(LoadPreNexusMonitorsTest *suite) { delete suite; }
 
-  LoadPreNeXusMonitorsTest()
+  LoadPreNexusMonitorsTest()
   {
     // Path to test input file assumes Test directory checked out from SVN
 	// You will need to make sure the bmon* files are in the same directory
@@ -63,7 +63,7 @@ public:
   }
 
 private:
-  Mantid::DataHandling::LoadPreNeXusMonitors loader;
+  Mantid::DataHandling::LoadPreNexusMonitors loader;
   std::string runinfoFile;
 };
 
