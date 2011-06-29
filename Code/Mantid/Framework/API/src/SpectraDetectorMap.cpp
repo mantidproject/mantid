@@ -116,7 +116,6 @@ namespace Mantid
         g_log.error("Populate : number of entries should be > 0");
         throw std::invalid_argument("Populate : number of entries should be > 0");
       }
-      nentries -= ignore.size();
       for (int64_t i=0; i<nentries; ++i)
       {
         // Uncomment the line below to get a print out of the mapping as it's loaded

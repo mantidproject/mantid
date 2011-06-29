@@ -1193,6 +1193,7 @@ Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::st
   spectramap->populate(spec.data(), udet.data(), ndets, 
                        std::set<detid_t>(monitors.begin(), monitors.end()));
   g_log.debug() << "Loaded spectra map from " << filename << "\n";
+  g_log.debug() << "Found " << spectramap->nSpectra() << " unique spectra and a total of " << spectramap->nElements() << " elements\n"; 
   return spectramap;
 }
 

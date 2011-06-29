@@ -187,25 +187,16 @@ void LoadNexusMonitors::exec()
   {
   }
 
-
   // Need to get the instrument name from the file
-  // FIXME: System uses short name for now
   std::string instrumentName;
   file.openGroup("instrument", "NXinstrument");
-  file.openPath("name");
-  std::vector< ::NeXus::AttrInfo > attrs = file.getAttrInfos();
-  std::vector< ::NeXus::AttrInfo >::const_iterator ait = attrs.begin();
-
-  while(ait != attrs.end()) {
-    if(ait->name == std::string("short_name")) {
-      instrumentName = file.getStrAttr(*ait);
-      break;
-    }
-    ait++;
-  }
-
-  file.closeGroup(); // Close the NXinstrument
-
+  file.openData("name");
+  instrumentName = file.getStrData();
+  g_log.debug() << "Instrument name read from NeXus file is " << instrumentName << std::endl;
+  if (instrumentName.compare("POWGEN3") == 0) // hack for powgen b/c of bad long name
+          instrumentName = "POWGEN";
+  // Now let's close the file as we don't need it anymore to load the instrument.
+  file.closeData();
   file.closeGroup(); // Close the NXentry
   file.close();
 
