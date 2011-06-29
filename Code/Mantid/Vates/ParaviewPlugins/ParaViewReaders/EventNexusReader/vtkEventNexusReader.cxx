@@ -200,7 +200,13 @@ void vtkEventNexusReader::SetAppliedGeometryXML(std::string appliedGeometryXML)
       this->m_appliedYDimension = xmlParser.getYDimension();
       this->m_appliedZDimension = xmlParser.getZDimension();
       this->m_appliedTDimension = xmlParser.getTDimension();
-	  m_geometryXmlBuilder.overWriteWith(xmlBuilder);
+	  //TODO: This needs to be reworked. 
+	  MDGeometryBuilderXML<StrictDimensionPolicy> temp;
+	  temp.addXDimension(m_appliedXDimension);
+	  temp.addYDimension(m_appliedYDimension);
+	  temp.addZDimension(m_appliedZDimension);
+	  temp.addTDimension(m_appliedTDimension);
+	  m_geometryXmlBuilder.overWriteWith(temp);
 
       m_actionManager.ask(RecalculateAll);
       this->Modified();
