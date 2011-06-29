@@ -38,7 +38,7 @@ public:
 /**
  Add an ordinary dimension.
  @param dimensionToAdd :: The dimension to add to the geometry.
- @return true if addition was successful.
+ @return true if addition does not cause an overwrite successful.
  */
 template <typename CheckDimensionPolicy>
 bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(IMDDimension_const_sptr dimensionToAdd) const
@@ -48,12 +48,14 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(IMDDimensi
   {
     CompareIMDDimension_const_sptr comparitor(dimensionToAdd);
     DimensionContainerType::iterator location = std::find_if(m_vecDimensions.begin(), m_vecDimensions.end(), comparitor);
-    if(location == m_vecDimensions.end())
+    if(location != m_vecDimensions.end())
     {
-      m_vecDimensions.push_back(dimensionToAdd);
-      bAdded = true;
-      m_changed = true;
+		m_vecDimensions.erase(location);
     }
+
+	m_vecDimensions.push_back(dimensionToAdd);
+    bAdded = true;
+    m_changed = true;
   }
   return bAdded;
 }

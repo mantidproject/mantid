@@ -197,9 +197,13 @@ void vtkEventNexusReader::SetAppliedGeometryXML(std::string appliedGeometryXML)
       xmlParser.execute();
 
       this->m_appliedXDimension = xmlParser.getXDimension();
+	  m_geometryXmlBuilder.addXDimension(m_appliedXDimension);
       this->m_appliedYDimension = xmlParser.getYDimension();
+	  m_geometryXmlBuilder.addYDimension(m_appliedYDimension);
       this->m_appliedZDimension = xmlParser.getZDimension();
+	  m_geometryXmlBuilder.addZDimension(m_appliedZDimension);
       this->m_appliedTDimension = xmlParser.getTDimension();
+	  m_geometryXmlBuilder.addTDimension(m_appliedTDimension);
 
       m_actionManager.ask(RecalculateAll);
       this->Modified();
