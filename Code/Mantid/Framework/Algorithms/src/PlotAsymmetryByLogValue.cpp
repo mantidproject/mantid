@@ -183,7 +183,8 @@ namespace Mantid
             // Do only one period
             if (green == EMPTY_INT() && period == red)
             {
-              ws_red = loadNexus->getProperty(wsProp);
+              Workspace_sptr tmpff = loadNexus->getProperty(wsProp);
+              ws_red = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmpff);
               TimeSeriesProperty<double>* logp = 
                 dynamic_cast<TimeSeriesProperty<double>*>(ws_red->run().getLogData(logName));
               if (!logp)
