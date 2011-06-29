@@ -570,28 +570,34 @@ bool LoadEventNexus::quickFileCheck(const std::string& filePath,size_t nread, co
  */
 int LoadEventNexus::fileCheck(const std::string& filePath)
 {
-  int confidence(0);
-  typedef std::map<std::string,std::string> string_map_t; 
-  try
-  {
-    string_map_t::const_iterator it;
-    ::NeXus::File file = ::NeXus::File(filePath);
-    string_map_t entries = file.getEntries();
-	if ( ((it = entries.find("entry")) != entries.end()) && (it->second == "NXentry") )
+	int confidence(0);
+	typedef std::map<std::string,std::string> string_map_t; 
+	try
 	{
-        // If all this succeeded then we'll assume this is an SNS Event NeXus file
-        confidence = 80;
+		string_map_t::const_iterator it;
+		::NeXus::File file = ::NeXus::File(filePath);
+		string_map_t entries = file.getEntries();
+		for(string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)
+		{
+			if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") ) 
+			{
+				file.openGroup(it->first, it->second);
+				string_map_t entries2 = file.getEntries();
+				for(string_map_t::const_iterator it2 = entries2.begin(); it2 != entries2.end(); ++it2)
+				{
+					if (it2->second == "NXevent_data")
+					{
+						confidence = 80;
+					}
+				}
+				file.closeGroup();
+			}
+		}
 	}
-	if ( ((it = entries.find("raw_data_1")) != entries.end()) && (it->second == "NXentry") )
+	catch(::NeXus::Exception&)
 	{
-        // If all this succeeded then we'll assume this is an ISIS Event NeXus file
-        confidence = 80;
 	}
-  }
-  catch(::NeXus::Exception&)
-  {
-  }
-  return confidence;
+	return confidence;
 }
 
 /// Initialisation method.
