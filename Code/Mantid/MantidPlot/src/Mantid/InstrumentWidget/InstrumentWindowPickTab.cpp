@@ -31,6 +31,7 @@
 
 #include <numeric>
 #include <cfloat>
+#include <cmath>
 #include <algorithm>
 
 class InputConvertUnitsParametersDialog : public QDialog
@@ -538,6 +539,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   }
 
   double knorm=mN*(l1 + l2)/(hbar*tof*1e-6)/1e10;
+  knorm/=(2.*M_PI); //Peak constructor uses Q/(2*Pi)
   Qx *= knorm;
   Qy *= knorm;
   Qz *= knorm;
