@@ -433,9 +433,10 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   double theta2 = det->getTwoTheta(samplePos,beamLine);
   double phi = det->getPhi();
 
-  double Qx=sin(theta2)*cos(phi);
-  double Qy=sin(theta2)*sin(phi);
-  double Qz=cos(theta2)-1.0;
+  // In the inelastic convention, Q = ki - kf.
+  double Qx=-sin(theta2)*cos(phi);
+  double Qy=-sin(theta2)*sin(phi);
+  double Qz=1.0-cos(theta2);
   double l1 = source->getDistance(*sample);
   double l2 = det->getDistance(*sample);
   double knorm=mN*(l1 + l2)/(hbar*x*1e-6)/1e10;
@@ -453,13 +454,10 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   }
   catch(std::exception& e)
   {
-    std::cerr << "Error here " << e.what() << std::endl;
+    QMessageBox::critical(this,"MantidPlot -Error",
+      "Cannot create a Peak object because of the error:\n"+QString(e.what()));
   }
 
-  //std::cerr << "id=" << det->getID() << std::endl;
-  //std::cerr << "x=" << x << std::endl;
-  //std::cerr << "l1=" << source->getDistance(*sample) << " l2=" << det->getDistance(*sample) << std::endl;
-  //std::cerr << "2th=" << theta2/M_PI*180 << " phi=" << phi/M_PI*180 << std::endl;
 }
 
 void InstrumentWindowPickTab::showEvent (QShowEvent *)
