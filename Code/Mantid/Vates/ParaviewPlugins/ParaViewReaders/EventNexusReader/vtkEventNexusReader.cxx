@@ -197,13 +197,10 @@ void vtkEventNexusReader::SetAppliedGeometryXML(std::string appliedGeometryXML)
       xmlParser.execute();
 
       this->m_appliedXDimension = xmlParser.getXDimension();
-	  m_geometryXmlBuilder.addXDimension(m_appliedXDimension);
       this->m_appliedYDimension = xmlParser.getYDimension();
-	  m_geometryXmlBuilder.addYDimension(m_appliedYDimension);
       this->m_appliedZDimension = xmlParser.getZDimension();
-	  m_geometryXmlBuilder.addZDimension(m_appliedZDimension);
       this->m_appliedTDimension = xmlParser.getTDimension();
-	  m_geometryXmlBuilder.addTDimension(m_appliedTDimension);
+	  m_geometryXmlBuilder.overWriteWith(xmlBuilder);
 
       m_actionManager.ask(RecalculateAll);
       this->Modified();
@@ -287,6 +284,8 @@ void vtkEventNexusReader::doRebinning()
 
 int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
+	try
+	{
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
@@ -322,6 +321,11 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   // Reset the action manager fresh for next cycle.
   m_actionManager.reset();
   return 1;
+	}
+	catch(std::exception& ex)
+	{
+		std::string message = ex.what();
+	}
 }
 
 int vtkEventNexusReader::RequestInformation(

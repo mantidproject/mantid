@@ -48,16 +48,27 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(IMDDimensi
   {
     CompareIMDDimension_const_sptr comparitor(dimensionToAdd);
     DimensionContainerType::iterator location = std::find_if(m_vecDimensions.begin(), m_vecDimensions.end(), comparitor);
-    if(location != m_vecDimensions.end())
-    {
-		m_vecDimensions.erase(location);
-    }
-
-	m_vecDimensions.push_back(dimensionToAdd);
-    bAdded = true;
-    m_changed = true;
+	if(location == m_vecDimensions.end())
+	{
+		m_vecDimensions.push_back(dimensionToAdd);
+		bAdded = true;
+		m_changed = true;
+	}
   }
   return bAdded;
+}
+
+template <typename CheckDimensionPolicy>
+void MDGeometryBuilderXML<CheckDimensionPolicy>::overWriteWith(MDGeometryBuilderXML<CheckDimensionPolicy>& other)
+{
+  //TODO: replace with proper assignment operator.
+  m_vecDimensions = other.m_vecDimensions;
+  m_spXDimension = other.m_spXDimension;
+  m_spYDimension = other.m_spYDimension;
+  m_spZDimension = other.m_spZDimension;
+  m_spTDimension = other.m_spTDimension;
+  m_changed = other.m_changed;
+  m_lastResult = other.m_lastResult;
 }
 
 /**

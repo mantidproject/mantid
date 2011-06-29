@@ -66,7 +66,7 @@ static std::string createDimensionXMLString(unsigned int nbins, int min, int max
 
 public:
 
-void testCanAddMultipleTimes()
+void testCannotAddSameDimensionMultipleTimes()
 {
   MockIMDDimension* pDimensionX = new MockIMDDimension;
   EXPECT_CALL(*pDimensionX, getDimensionId()).WillRepeatedly(Return("a"));
@@ -74,7 +74,7 @@ void testCanAddMultipleTimes()
 
   MDGeometryBuilderXML<NoDimensionPolicy> builder;
   TSM_ASSERT("Addition of dimension to empty set should have succeeded.", builder.addOrdinaryDimension(dimension));
-  TSM_ASSERT("Addition of same dimension to set should have have succeeded.", builder.addOrdinaryDimension(dimension)); //Test can re-Add/overwrite.
+  TSM_ASSERT("Addition of same dimension to set should have failed.", !builder.addOrdinaryDimension(dimension)); //Test can re-Add/overwrite.
 }
 
 void testAddingNullDimensionReturnsFalse()
