@@ -141,7 +141,7 @@ class SNSPowderReduction(PythonAlgorithm):
         num = num.replace('_event', '') # TODO should do something with this
 
         # load the prenexus file
-        alg = LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=name)
+        alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
         wksp = alg['OutputWorkspace']
 
         # add the logs to it

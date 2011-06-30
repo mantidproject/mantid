@@ -205,7 +205,7 @@ class DirectEnergyConversion(object):
                 loader=LoadNexusMonitors(Filename=mono_run, OutputWorkspace="monitor_ws")    
             elif mono_run.endswith("_event.dat"):
                 InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
-                loader=LoadPreNeXusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
+                loader=LoadPreNexusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
             
             monitor_ws = loader.workspace()
             
