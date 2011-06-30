@@ -40,8 +40,8 @@ namespace Mantid
     {
 
       std::string baseURL(
-          "https://orbiter.sns.gov/orbiter/service/webservice/OrbiterFindFileService.php");
-      std::string findFileWS("/operation/findFile/format/space/filename/");
+          "https://orbiter.sns.gov/orbiter/taurus/service/webservice/OrbiterFindFileService.php");
+      std::string findFileWS("/operation/findFile/format/space/fileName/");
       std::string URL(baseURL + findFileWS + fName);
       g_log.debug() << "URL = \'" << URL << "\'\n";
 
