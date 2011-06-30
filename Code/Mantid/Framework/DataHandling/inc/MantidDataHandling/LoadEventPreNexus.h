@@ -106,11 +106,14 @@ public:
   /// Virtual destructor
   virtual ~LoadEventPreNexus();
   /// Algorithm's name
-  virtual const std::string name() const { return "LoadEventPreNeXus"; }
+  virtual const std::string name() const { return "LoadEventPreNexus"; }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling"; }
+  /// Algorithm's aliases
+  virtual const std::string alias() const { return "LoadEventPreNeXus"; }
+
   /// Returns the name of the property to be considered as the Filename for Load
   virtual const char * filePropertyName() const;
   /// do a quick check that this file can be loaded 

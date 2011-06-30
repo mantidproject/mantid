@@ -49,7 +49,7 @@ public:
   /// Algorithm's name
   virtual const std::string name() const
   {
-    return "LoadPreNeXusMonitors";
+    return "LoadPreNexusMonitors";
   }
   /// Algorithm's version
   virtual int version() const
@@ -61,6 +61,12 @@ public:
   {
     return "DataHandling";
   }
+  /// Algorithm's aliases
+  virtual const std::string alias() const
+  {
+      return "LoadPreNeXusMonitors";
+  }
+
 
 private:
   /// Initialisation code
