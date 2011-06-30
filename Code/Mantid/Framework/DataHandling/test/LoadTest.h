@@ -307,7 +307,7 @@ public:
     loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "CNCS_7860_neutron_event.dat"));
     TS_ASSERT_EQUALS(loader.existsProperty("EventFilename"), false);
-    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadEventPreNeXus");
+    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadEventPreNexus");
   }
 
   void test_SNSEventNeXus_WithNoExecute()
