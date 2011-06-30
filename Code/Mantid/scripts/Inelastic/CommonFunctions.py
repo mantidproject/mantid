@@ -140,7 +140,7 @@ def load_run(run_number, force=False):
         LoadNexus(filename, output_name)
     elif filename.endswith("_event.dat"):
         #load the events
-        LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=output_name, PadEmptyPixels=True)       
+        LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=output_name)       
     else:
         LoadRaw(filename, output_name)
         #LoadDetectorInfo(output_name, filename)

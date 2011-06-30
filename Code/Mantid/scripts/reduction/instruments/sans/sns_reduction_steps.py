@@ -68,7 +68,7 @@ class QuickLoad(ReductionStep):
             
             mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
             nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
-            LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace, PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
+            LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace, PulseidFilename=pulseid_file, MappingFilename=mapping_file)
             LoadNexusLogs(Workspace=workspace, Filename=nxs_file)
 
         return "Quick-load of data file: %s" % (workspace)
