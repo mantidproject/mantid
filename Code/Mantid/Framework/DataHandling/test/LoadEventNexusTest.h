@@ -100,7 +100,6 @@ public:
       load->setPropertyValue("EventFilename","CNCS_7860_neutron_event.dat");
       load->setPropertyValue("PulseidFilename","CNCS_7860_pulseid.dat");
       load->setPropertyValue("MappingFilename","CNCS_TS_2008_08_18.dat");
-      load->setPropertyValue("PadEmptyPixels","1");
       load->execute();
       TS_ASSERT( load->isExecuted() );
       DataObjects::EventWorkspace_sptr WS2 = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs_pre"));

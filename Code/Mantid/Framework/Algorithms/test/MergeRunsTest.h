@@ -91,7 +91,6 @@ public:
     eventLoader->setPropertyValue("EventFilename", eventfile1);
     eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs1");
-    eventLoader->setProperty("PadEmptyPixels", true);
     TS_ASSERT( eventLoader->execute() );
     delete eventLoader;
 
@@ -100,7 +99,6 @@ public:
     eventLoader->setPropertyValue("EventFilename", eventfile2);
     eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs2");
-    eventLoader->setProperty("PadEmptyPixels", false);
     TS_ASSERT( eventLoader->execute() );
     delete eventLoader;
 
