@@ -264,7 +264,7 @@ class LoadRun(ReductionStep):
                 nxs_file = event_file.replace("_neutron_event.dat", "_histo.nxs")
                 if not os.path.isfile(nxs_file):
                     nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
-                LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace+'_evt', PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
+                LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace+'_evt', PulseidFilename=pulseid_file, MappingFilename=mapping_file)
                 LoadNexusLogs(Workspace=workspace+'_evt', Filename=nxs_file)
             
             return "  Data directory: %s\n" % data_dir
