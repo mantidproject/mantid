@@ -316,10 +316,13 @@ namespace Mantid
         if (arch)
         {
           std::string path = arch->getPath(hint);
-          Poco::File file(path);
-          if (file.exists())
+          if (!path.empty())
           {
-            return file.path();
+            Poco::File file(path);
+            if (file.exists())
+            {
+              return file.path();
+            }
           }
         }
       }
