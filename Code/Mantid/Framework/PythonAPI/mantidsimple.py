@@ -76,7 +76,13 @@ def create_algorithm(algorithm, version):
     # Replace the code object of the wrapper function
     algorithm_wrapper.func_code = c  
     
-    return algorithm_wrapper
+    globals()[algorithm] = algorithm_wrapper
+    
+    # Register aliases
+    for alias in _algm_object.alias().strip().split(' '):
+        alias = alias.strip()
+        if len(alias)>0:
+            globals()[alias] = algorithm_wrapper
     
 def create_algorithm_dialog(algorithm, version):
     """
@@ -114,7 +120,13 @@ def create_algorithm_dialog(algorithm, version):
        f.co_filename, f.co_name, f.co_firstlineno, f.co_lnotab, f.co_freevars)
     algorithm_wrapper.func_code = c  
     
-    return algorithm_wrapper
+    globals()["%sDialog" % algorithm] = algorithm_wrapper
+    
+    # Register aliases
+    for alias in _algm_object.alias().strip().split(' '):
+        alias = alias.strip()
+        if len(alias)>0:
+            globals()["%sDialog" % alias] = algorithm_wrapper
 
 def Load(*args, **kwargs):
     """
@@ -230,8 +242,8 @@ def translate():
     for algorithm in mtd._getRegisteredAlgorithms(include_hidden=True):
         if algorithm[0] == "Load":
             continue
-        globals()[algorithm[0]] = create_algorithm(algorithm[0], max(algorithm[1]))
-        globals()["%sDialog" % algorithm[0]] = create_algorithm_dialog(algorithm[0], max(algorithm[1]))
+        create_algorithm(algorithm[0], max(algorithm[1]))
+        create_algorithm_dialog(algorithm[0], max(algorithm[1]))
             
 translate()
 
