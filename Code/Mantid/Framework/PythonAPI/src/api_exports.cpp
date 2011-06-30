@@ -131,6 +131,7 @@ using namespace boost::python;
       .def("name", &API::IAlgorithm::name)
       .def("version", &API::IAlgorithm::version)
       .def("category", &API::IAlgorithm::category)
+      .def("alias", &API::IAlgorithm::alias)
       .def("getOptionalMessage", &API::IAlgorithm::getOptionalMessage)
       .def("initialize", &API::IAlgorithm::initialize)
       .def("execute", &API::IAlgorithm::execute)
