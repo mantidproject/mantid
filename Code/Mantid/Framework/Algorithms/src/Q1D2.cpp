@@ -90,7 +90,7 @@ void Q1D2::exec()
   const Geometry::ISpectraDetectorMap & inSpecMap = m_dataWS->spectraMap();
 
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
-  Progress progress(this, 0.1, 1.0, numSpec+1);
+  Progress progress(this, 0.05, 1.0, numSpec+1);
 
   PARALLEL_FOR3(m_dataWS, outputWS, pixelAdj)
   for (int i = 0; i < numSpec; ++i)
@@ -113,15 +113,11 @@ void Q1D2::exec()
     }
 
     //get the bins that are included inside the RadiusCut/WaveCutcut off, those to calculate for
-    size_t wavStart(0);
-    if (m_RCut > 1e-200)
+    const size_t wavStart = waveLengthCutOff(i);
+    if (wavStart >=  m_dataWS->readY(i).size())
     {
-      wavStart = waveLengthCutOff(i);
-      if (wavStart >=  m_dataWS->readY(i).size())
-      {
-        // all the spectra in this detector is out of range
-        continue;
-      }
+      // all the spectra in this detector are out of range
+      continue;
     }
     
     const size_t numWavbins = m_dataWS->readY(i).size()-wavStart;
@@ -278,12 +274,16 @@ API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> &
   return outputWS;
 }
 /** Finds the first index number of the first wavelength bin that should included based on the
-*  the calculation: W = Wcut (Rcut-R)/Rcut. Must only be called if m_RCut > 0.0
+*  the calculation: W = Wcut (Rcut-R)/Rcut
 *  @param specInd spectrum that is being analysed
 *  @return index number of the first bin to include in the calculation
 */
 size_t Q1D2::waveLengthCutOff(const size_t specInd) const
 {
+  if ( !(m_RCut > 0) )
+  {
+    return 0;
+  }
   //get the distance of between this detector and the origin, which should be the along the beam center
   const V3D posOnBank = m_dataWS->getDetector(specInd)->getPos();
   double R = (posOnBank.X()*posOnBank.X())+(posOnBank.Y()*posOnBank.Y());
@@ -341,7 +341,7 @@ void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,  const size_t s
   if (pixelAdj)
   {
     weight *= pixelAdj->readY(specIndex)[0];
-    error = pixelAdj->readE(specIndex)[0];
+    error = weight*pixelAdj->readE(specIndex)[0];
   }
   else
   {
@@ -476,7 +476,7 @@ void Q1D2::getQBinPlus1(const MantidVec & OutQs, const double QToFind, MantidVec
     }
     if ( QToFind < *loc )
     {
-      //QToFind was outside the array
+      //QToFind is outside the array leave loc == OutQs.begin()
       return;
     }
   }
@@ -484,6 +484,7 @@ void Q1D2::getQBinPlus1(const MantidVec & OutQs, const double QToFind, MantidVec
   {
     if ( OutQs.empty() || QToFind > *(loc-1) )
     {
+      //outside the array leave loc == OutQs.end()
       return;
     }
   }

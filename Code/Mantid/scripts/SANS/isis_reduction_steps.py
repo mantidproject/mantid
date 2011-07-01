@@ -1135,25 +1135,21 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             or estimates the proportion of neutrons that are transmitted
             through the sample
         """
+        self.output_wksp = None
         #look for run files that contain transmission data
         test1, test2 = self._get_run_wksps(reducer)
         if test1 or test2:
+            #we can calculate the transmission from some experimental runs
             if self.calculated_samp:
                 raise RuntimeError('Cannot use TransWorkspace() and TransmissionSample() together')
             
-            trans_ws = self.calculate(reducer)
+            self.output_wksp = self.calculate(reducer)
         else:
-            trans_ws = None
+            #they have supplied a transmission file use it
             if reducer.is_can():
-                trans_ws = self.calculated_can
+                self.output_wksp = self.calculated_can
             else:
-                trans_ws = self.calculated_samp
-            if not trans_ws:
-                #if no transmission files were specified this isn't an error, we just do nothing
-                return None
-
-        self.output_wksp = trans_ws+'_rebinned'
-        RebinToWorkspace(trans_ws, workspace, self.output_wksp)
+                self.output_wksp = self.calculated_samp
         
     def _get_run_wksps(self, reducer):
         """
@@ -1576,17 +1572,17 @@ class UserFile(ReductionStep):
             _issueWarning("L/SP lines are ignored")
             return
 
-        if limits.startswith('Q/RCut'):
-            limits = limits.split('RCut')
+        if limits.upper().startswith('Q/RCUT'):
+            limits = limits.upper().split('RCUT')
             if len(limits) != 2:
-                _issueWarning("Badly formed L/Q/RCut line")
+                _issueWarning("Badly formed L/Q/RCUT line")
             else:
                 reducer.to_Q.r_cut = float(limits[1])
             return
-        if limits.startswith('Q/WCut'):
-            limits = limits.split('WCut')
+        if limits.upper().startswith('Q/WCUT'):
+            limits = limits.upper().split('WCUT')
             if len(limits) != 2:
-                _issueWarning("Badly formed L/Q/WCut line")
+                _issueWarning("Badly formed L/Q/WCUT line")
             else:
                 reducer.to_Q.w_cut = float(limits[1])
             return

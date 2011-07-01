@@ -194,7 +194,7 @@ def parse_run(run_num, ext):
     """
     if not run_num:
         return '', -1
-    parts = run_num.split('p')
+    parts = run_num.upper().split('P')
     if len(parts) > 2:
         raise RuntimeError('Problem reading run number "'+run_num+'"')
     run_spec = parts[0]+ext

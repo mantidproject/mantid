@@ -437,11 +437,11 @@ def PlotResult(workspace, canvas=None):
         @param canvas: optional handle to an existing graph to write the plot to
         @return: a handle to the graph that was written to
     """ 
-    try:
-        numSpecs = workspace.getNumberHistograms()
-    except AttributeError:
-        #ensure that we are dealing with a workspace handle rather than its name
-        workspace = MantidFramework.mtd[workspace]
+    #ensure that we are dealing with a workspace handle rather than its name
+    workspace = mtd[str(workspace)]
+    if workspace.isGroup():
+        numSpecs = workspace[0].getNumberHistograms()
+    else:
         numSpecs = workspace.getNumberHistograms()
 
     try:

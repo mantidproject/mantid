@@ -108,11 +108,10 @@ public:
     TS_ASSERT( boost::math::isnan(result->readY(0).back()) )
 
     //empty bins are 0/0
-    TS_ASSERT_DELTA( result->readE(0)[2], 4847257060, 10 )
-    TS_ASSERT_DELTA( result->readE(0)[10], 4921866100, 100 )
+    TS_ASSERT_DELTA( result->readE(0)[2], 404981, 10 )
+    TS_ASSERT_DELTA( result->readE(0)[10], 489710.39, 100 )
     TS_ASSERT( boost::math::isnan(result->readE(0)[7]) )
     
-    Mantid::API::AnalysisDataService::Instance().remove(m_noGrav);
   }
 
   void testGravity()
@@ -136,7 +135,7 @@ public:
     
     Mantid::API::MatrixWorkspace_sptr gravity, refNoGrav = 
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-      (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS));
+      (Mantid::API::AnalysisDataService::Instance().retrieve(m_noGrav));
     TS_ASSERT_THROWS_NOTHING(
       gravity = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
         (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) )
@@ -151,8 +150,8 @@ public:
     TS_ASSERT_DELTA( gravity->readY(0)[10], 891346.9, 0.1 )
     TS_ASSERT( boost::math::isnan(gravity->readY(0)[78]) )
 
-    TS_ASSERT_DELTA( gravity->readE(0).front(), 3741978390, 10 )
-    TS_ASSERT_DELTA( gravity->readE(0)[10], 4921866100, 100  )
+    TS_ASSERT_DELTA( gravity->readE(0).front(), 329383, 1 )
+    TS_ASSERT_DELTA( gravity->readE(0)[10], 489710, 1 )
     TS_ASSERT( boost::math::isnan(gravity->readE(0)[77]) )
     
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
@@ -163,11 +162,12 @@ public:
     Mantid::Algorithms::Q1D2 Q1D;
     Q1D.initialize();
 
+    const std::string outputWS("Q1D2Test_result");
     TS_ASSERT_THROWS_NOTHING(
       Q1D.setProperty("DetBankWorkspace", m_inputWS);
       Q1D.setProperty("WavelengthAdj", m_wavNorm);
       Q1D.setPropertyValue("PixelAdj", m_pixel);
-      Q1D.setPropertyValue("OutputWorkspace", m_noGrav);
+      Q1D.setPropertyValue("OutputWorkspace", outputWS);
       Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
       Q1D.setProperty("RadiusCut", 0.22);
       Q1D.setProperty("WaveCut", 8.0);
@@ -178,7 +178,7 @@ public:
     
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-                                (Mantid::API::AnalysisDataService::Instance().retrieve(m_noGrav)) )
+                                (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) )
     TS_ASSERT(result)
     TS_ASSERT_EQUALS( result->getNumberHistograms(), 1 )
     
@@ -193,10 +193,52 @@ public:
     TS_ASSERT_DELTA( result->readY(0)[12], 503242.79, 0.1)
     TS_ASSERT( boost::math::isnan(result->readY(0).back()) )
 
-    TS_ASSERT_DELTA( result->readE(0)[2], 4847257060, 10 )
-    TS_ASSERT_DELTA( result->readE(0)[10], 4921866100, 100 )
+    TS_ASSERT_DELTA( result->readE(0)[2], 404981, 1 )
+    TS_ASSERT_DELTA( result->readE(0)[10], 489710, 100 )
     TS_ASSERT( boost::math::isnan(result->readE(0)[7]) )
+  }  
+  
+  // here the cut parameters are set but should only affect detectors with lower R
+  void testNoCuts()
+  {
+    Mantid::Algorithms::Q1D2 Q1D;
+    Q1D.initialize();
+
+    const std::string outputWS("Q1D2Test_result");
+    TS_ASSERT_THROWS_NOTHING(
+      Q1D.setProperty("DetBankWorkspace", m_inputWS);
+      Q1D.setProperty("WavelengthAdj", m_wavNorm);
+      Q1D.setPropertyValue("PixelAdj", m_pixel);
+      Q1D.setPropertyValue("OutputWorkspace", outputWS);
+      Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
+      //this raduis is too small to exclude anything
+      Q1D.setProperty("RadiusCut", 0.05);
+      //this is the entire wavelength range
+      Q1D.setProperty("WaveCut", 30.0);
+    )
+    TS_ASSERT_THROWS_NOTHING( Q1D.execute() )
+    TS_ASSERT( Q1D.isExecuted() )
     
+    Mantid::API::MatrixWorkspace_sptr nocuts, noGrav = 
+      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+      (Mantid::API::AnalysisDataService::Instance().retrieve(m_noGrav));
+    TS_ASSERT_THROWS_NOTHING(
+      nocuts = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+        (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) )
+        
+    TS_ASSERT(nocuts)
+    TS_ASSERT_EQUALS( nocuts->getNumberHistograms(), 1 )
+    
+    for ( int i = 0; i < nocuts->readY(0).size(); ++i )
+    {
+      TS_ASSERT_EQUALS( nocuts->readX(0)[i], noGrav->readX(0)[i] )
+      if ( ! boost::math::isnan(nocuts->readY(0)[i]) )
+      {
+        TS_ASSERT_EQUALS( nocuts->readY(0)[i], noGrav->readY(0)[i] )
+        TS_ASSERT_EQUALS( nocuts->readE(0)[i], noGrav->readE(0)[i] )
+      }
+    }
+
     Mantid::API::AnalysisDataService::Instance().remove(m_noGrav);
   }
     
