@@ -152,6 +152,14 @@ void CalculateTransmission::exec()
   const bool outputRaw = getProperty("OutputUnfittedData");
   if ( outputRaw )
   {
+    IAlgorithm_sptr childAlg = createSubAlgorithm("ReplaceSpecialValues");
+    childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", transmission);
+    childAlg->setProperty<double>("NaNValue", 0.0);
+    childAlg->setProperty<double>("NaNError", 0.0);
+    childAlg->setProperty<double>("InfinityValue", 0.0);
+    childAlg->setProperty<double>("InfinityError", 0.0);
+    childAlg->executeAsSubAlg();
+    transmission = childAlg->getProperty("OutputWorkspace");
     std::string outputWSName = getPropertyValue("OutputWorkspace");
     outputWSName += "_unfitted";
     declareProperty(new WorkspaceProperty<>("UnfittedData",outputWSName,Direction::Output));
