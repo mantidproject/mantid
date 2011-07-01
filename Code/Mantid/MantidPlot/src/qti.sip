@@ -1739,7 +1739,7 @@ public:
   bool runAlgorithmAsync_PyCallback(const QString &);  	
   bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QString&);
   QString getSelectedWorkspaceName();
-  InstrumentWindow* getInstrumentView(const QString &);
+  InstrumentWindow* getInstrumentView(const QString &, int tab = -1);
   
 private:
   MantidUI(const MantidUI &);

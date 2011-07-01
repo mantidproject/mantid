@@ -367,7 +367,7 @@ public slots:
 
 
   //Python related functions
-  InstrumentWindow* getInstrumentView(const QString & wsName);
+  InstrumentWindow* getInstrumentView(const QString & wsName, int tab = -1);
 
 	void showMantidInstrument();
 

@@ -103,6 +103,7 @@ public:
   MantidGLWidget* getInstrumentDisplay(){return m_InstrumentDisplay;}
   InstrumentActor* getInstrumentActor(){return m_instrumentActor;}
   bool blocked()const{return m_blocked;}
+  void selectTab(int tab);
 //  const MantidColorMap & getColorMap() const{return m_instrumentActor->getColorMap();}
 
 protected:

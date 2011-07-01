@@ -169,6 +169,14 @@ InstrumentWindow::~InstrumentWindow()
   }
 }
 
+/**
+ * Select the tab to be displayed
+ */
+void InstrumentWindow::selectTab(int tab)
+{
+  mControlsTab->setCurrentIndex(tab);
+}
+
 void InstrumentWindow::setSurfaceType(int type)
 {
   if (type < RENDERMODE_SIZE)

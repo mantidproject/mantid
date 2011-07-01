@@ -1461,7 +1461,7 @@ void MantidUI::manageMantidWorkspaces()
  * Create an instrument window from a named workspace or simply return the window if
  * it already exists
  */
-InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName)
+InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 {
 
   if( !Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()) ) return NULL;
@@ -1477,6 +1477,8 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName)
   InstrumentWindow *insWin = new InstrumentWindow(QString("Instrument"),appWindow());
   insWin->setName(QString("InstrumentWindow:") + wsName);
   insWin->setWindowTitle(QString("Instrument - ") + wsName);
+  insWin->selectTab(tab);
+
   appWindow()->d_workspace->addSubWindow(insWin);
   appWindow()->addListViewItem(insWin);
 
