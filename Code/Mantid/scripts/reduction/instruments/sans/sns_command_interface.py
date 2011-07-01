@@ -37,11 +37,11 @@ def TotalChargeNormalization():
 def MonitorNormalization():
     TotalChargeNormalization()
       
-def BeamStopTransmission(normalize_to_unity=False, theta_dependent=False):
+def BeamStopTransmission(normalize_to_unity=True, theta_dependent=False):
     ReductionSingleton().set_transmission(sns_reduction_steps.BeamStopTransmission(normalize_to_unity=normalize_to_unity,
                                                                            theta_dependent=theta_dependent))
     
-def BckBeamStopTransmission(normalize_to_unity=False, theta_dependent=False):
+def BckBeamStopTransmission(normalize_to_unity=True, theta_dependent=False):
     ReductionSingleton().set_bck_transmission(sns_reduction_steps.BeamStopTransmission(normalize_to_unity=normalize_to_unity,
                                                                                theta_dependent=theta_dependent))
 
@@ -64,4 +64,11 @@ def AzimuthalAverage(suffix="_Iq", n_bins=100, n_subpix=1, log_binning=False):
                                                                                             n_subpix=n_subpix,
                                                                                             error_weighting=False,
                                                                                             log_binning=log_binning))
+    
+def DirectBeamTransmission_(sample_file, empty_file, beam_radius=3.0, theta_dependent=True, combine_frames=True):
+    ReductionSingleton().set_transmission(sns_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
+                                                                                     empty_file=empty_file,
+                                                                                     beam_radius=beam_radius,
+                                                                                     theta_dependent=theta_dependent,
+                                                                                     combine_frames=combine_frames))
     

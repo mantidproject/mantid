@@ -312,8 +312,92 @@ class DirectBeamTransmission(BaseTransmission):
         self._beam_radius = beam_radius
         ## Transmission workspace (output of transmission calculation)
         self._transmission_ws = None
+        ## Flag to tell us whether we should normalise to the monitor channel
+        self._monitor_det_ID = None
         
-    def execute(self, reducer, workspace=None):
+    def _load_monitors(self, reducer, workspace):
+        """
+            Load files necessary to compute transmission.
+            Return their names.
+        """
+        sample_ws = "__transmission_sample"
+        filepath = find_data(self._sample_file, instrument=reducer.instrument.name())
+        reducer._data_loader.clone(data_file=filepath).execute(reducer, sample_ws)
+        
+        empty_ws = "__transmission_empty"
+        filepath = find_data(self._empty_file, instrument=reducer.instrument.name())
+        reducer._data_loader.clone(data_file=filepath).execute(reducer, empty_ws)
+        
+        # Subtract dark current
+        if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
+            dc = SubtractDarkCurrent(self._dark_current_data)
+            dc.execute(reducer, sample_ws)
+            dc.execute(reducer, empty_ws)       
+            
+        # Find which pixels to sum up as our "monitor". At this point we have moved the detector
+        # so that the beam is at (0,0), so all we need is to sum the area around that point.
+        #TODO: in IGOR, the error-weighted average is computed instead of simply summing up the pixels
+        pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
+        cylXML = '<infinite-cylinder id="transmission_monitor">' + \
+                   '<centre x="0.0" y="0.0" z="0.0" />' + \
+                   '<axis x="0.0" y="0.0" z="1.0" />' + \
+                   '<radius val="%12.10f" />' % (self._beam_radius*pixel_size_x/1000.0) + \
+                 '</infinite-cylinder>\n'
+                 
+        det_finder = FindDetectorsInShape(Workspace=workspace, ShapeXML=cylXML)
+        det_list = det_finder.getPropertyValue("DetectorList")
+        
+        first_det_str = det_list.split(',')[0]
+        if len(first_det_str.strip())==0:
+            raise RuntimeError, "Could not find detector pixels near the beam center: check that the beam center is placed at (0,0)."
+        first_det = int(first_det_str)
+        
+        empty_mon_ws = "__empty_mon"
+        sample_mon_ws = "__sample_mon"
+        GroupDetectors(InputWorkspace=empty_ws,  OutputWorkspace=empty_mon_ws,  DetectorList=det_list, KeepUngroupedSpectra="1")
+        GroupDetectors(InputWorkspace=sample_ws, OutputWorkspace=sample_mon_ws, DetectorList=det_list, KeepUngroupedSpectra="1")
+        
+        #TODO: check that both workspaces have the same masked spectra
+        
+        # Get normalization for transmission calculation
+        self._monitor_det_ID = reducer.NORMALIZATION_TIME
+        if reducer._normalizer is not None:
+            self._monitor_det_ID = reducer._normalizer.get_normalization_spectrum()
+            if self._monitor_det_ID<0:
+                reducer._normalizer.execute(reducer, empty_mon_ws)
+                reducer._normalizer.execute(reducer, sample_mon_ws)
+        
+        # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
+        # as the monitor channel.
+        RebinToWorkspace(empty_mon_ws, sample_mon_ws, OutputWorkspace=empty_mon_ws)
+
+        # Clean up
+        reducer._data_loader.__class__.delete_workspaces(empty_ws)
+        reducer._data_loader.__class__.delete_workspaces(sample_ws)
+            
+        return sample_mon_ws, empty_mon_ws, first_det
+        
+    def _calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det, trans_output_workspace):
+        """
+            Compute zero-angle transmission
+        """
+        if self._monitor_det_ID is not None and self._monitor_det_ID>=0:
+            CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
+                                  OutputWorkspace=trans_output_workspace,
+                                  IncidentBeamMonitor=str(self._monitor_det_ID), 
+                                  TransmissionMonitor=str(first_det),
+                                  OutputUnfittedData=True)
+        else:
+            CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
+                                  OutputWorkspace=trans_output_workspace,
+                                  TransmissionMonitor=str(first_det),
+                                  OutputUnfittedData=True)
+        
+        for ws in [empty_mon_ws, sample_mon_ws]:
+            if mtd.workspaceExists(ws):
+                mtd.deleteWorkspace(ws)          
+                
+    def execute(self,reducer, workspace=None):
         """
             Calculate transmission and apply correction
             @param reducer: Reducer object for which this step is executed
@@ -322,76 +406,9 @@ class DirectBeamTransmission(BaseTransmission):
         if self._transmission_ws is None:
             # 1- Compute zero-angle transmission correction (Note: CalcTransCoef)
             self._transmission_ws = "transmission_fit_"+workspace
-
-            sample_ws = "__transmission_sample"
-            filepath = find_data(self._sample_file, instrument=reducer.instrument.name())
-            reducer._data_loader.clone(data_file=filepath).execute(reducer, sample_ws)
-            #Load(filepath, sample_ws)
-            
-            empty_ws = "__transmission_empty"
-            filepath = find_data(self._empty_file, instrument=reducer.instrument.name())
-            reducer._data_loader.clone(data_file=filepath).execute(reducer, empty_ws)
-            #Load(filepath, empty_ws)
-            
-            # Subtract dark current
-            if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
-                dc = SubtractDarkCurrent(self._dark_current_data)
-                dc.execute(reducer, sample_ws)
-                dc.execute(reducer, empty_ws)        
-            
-            # Find which pixels to sum up as our "monitor". At this point we have moved the detector
-            # so that the beam is at (0,0), so all we need is to sum the area around that point.
-            #TODO: in IGOR, the error-weighted average is computed instead of simply summing up the pixels
-            pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
-            cylXML = '<infinite-cylinder id="transmission_monitor">' + \
-                       '<centre x="0.0" y="0.0" z="0.0" />' + \
-                       '<axis x="0.0" y="0.0" z="1.0" />' + \
-                       '<radius val="%12.10f" />' % (self._beam_radius*pixel_size_x/1000.0) + \
-                     '</infinite-cylinder>\n'
-                     
-            det_finder = FindDetectorsInShape(Workspace=workspace, ShapeXML=cylXML)
-            det_list = det_finder.getPropertyValue("DetectorList")
-            
-            first_det = int(det_list.split(',')[0])
-            
-            empty_mon_ws = "__empty_mon"
-            sample_mon_ws = "__sample_mon"
-            GroupDetectors(InputWorkspace=empty_ws,  OutputWorkspace=empty_mon_ws,  DetectorList=det_list, KeepUngroupedSpectra="1")
-            GroupDetectors(InputWorkspace=sample_ws, OutputWorkspace=sample_mon_ws, DetectorList=det_list, KeepUngroupedSpectra="1")
-            
-            #TODO: check that both workspaces have the same masked spectra
-            
-            # Get normalization for transmission calculation
-            norm_spectrum = reducer.NORMALIZATION_TIME
-            normalise_to_monitor = True
-            if reducer._normalizer is not None:
-                norm_spectrum = reducer._normalizer.get_normalization_spectrum()
-                if norm_spectrum<0:
-                    reducer._normalizer.execute(reducer, empty_mon_ws)
-                    reducer._normalizer.execute(reducer, sample_mon_ws)
-                    normalise_to_monitor = False
-            
-            # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
-            # as the monitor channel.
-            RebinToWorkspace(empty_mon_ws, sample_mon_ws, OutputWorkspace=empty_mon_ws)
-            if normalise_to_monitor:
-                CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
-                                      OutputWorkspace=self._transmission_ws,
-                                      IncidentBeamMonitor=str(norm_spectrum), 
-                                      TransmissionMonitor=str(first_det),
-                                      OutputUnfittedData=True)
-            else:
-                CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
-                                      OutputWorkspace=self._transmission_ws,
-                                      TransmissionMonitor=str(first_det),
-                                      OutputUnfittedData=True)
-            
-            reducer._data_loader.__class__.delete_workspaces(empty_ws)
-            reducer._data_loader.__class__.delete_workspaces(sample_ws)
-            if mtd.workspaceExists(empty_mon_ws):
-                mtd.deleteWorkspace(empty_mon_ws)          
-            if mtd.workspaceExists(sample_mon_ws):
-                mtd.deleteWorkspace(sample_mon_ws)          
+            # Load data files
+            sample_mon_ws, empty_mon_ws, first_det = self._load_monitors(reducer, workspace)
+            self._calculate_transmission(sample_mon_ws, empty_mon_ws, first_det, self._transmission_ws)
             
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission
@@ -921,6 +938,9 @@ class SensitivityCorrection(ReductionStep):
             # Divide each pixel by average signal, and mask high and low pixels.
             CalculateEfficiency(flood_ws, "__efficiency", self._min_sensitivity, self._max_sensitivity)
             self._efficiency_ws = "__efficiency"
+            
+            # Clean up
+            reducer._data_loader.__class__.delete_workspaces(flood_ws)
             
         # Divide by detector efficiency
         Divide(workspace, self._efficiency_ws, workspace)

@@ -9,6 +9,7 @@ import pickle
 import math
 from reduction import ReductionStep
 from sans_reduction_steps import BaseTransmission, BaseBeamFinder, WeightedAzimuthalAverage
+from sans_reduction_steps import DirectBeamTransmission as SingleFrameDirectBeamTransmission
 from reduction import extract_workspace_name, find_file, find_data
 from eqsans_config import EQSANSConfig
 
@@ -68,7 +69,7 @@ class QuickLoad(ReductionStep):
             
             mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
             nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
-            LoadEventPreNexus(EventFilename=event_file, OutputWorkspace=workspace, PulseidFilename=pulseid_file, MappingFilename=mapping_file)
+            LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace, PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
             LoadNexusLogs(Workspace=workspace, Filename=nxs_file)
 
         return "Quick-load of data file: %s" % (workspace)
@@ -163,9 +164,49 @@ class LoadRun(ReductionStep):
             @param beam_center: [pixel_x, pixel_y]
         """
         pass
+    
+    def _process_existing_event_ws(self, reducer, event_ws, workspace):
+        """
+            Prepare a histogram workspace out of an event workspace
+            @param event_ws: event workspace to process
+            @param workspace: histrogram workspace
+        """
+        # Get wavelength bands
+        if mtd[event_ws].getRun().hasProperty("wavelength_min"):
+            wl_min = mtd[event_ws].getRun().getProperty("wavelength_min").value
+        else:
+            raise RuntimeError, "LoadRun could not get minimum wavelength for %s" % workspace
+
+        if mtd[event_ws].getRun().hasProperty("wavelength_max_frame2"):
+            wl_max = mtd[event_ws].getRun().getProperty("wavelength_max_frame2").value
+        elif mtd[event_ws].getRun().hasProperty("wavelength_max"):
+            wl_max = mtd[event_ws].getRun().getProperty("wavelength_max").value
+        else:
+            raise RuntimeError, "LoadRun could not get maximum wavelength for %s" % workspace
+
+        Rebin(event_ws, workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_max), False)
+        
+        # Add the name of the event workspace as a property in case we need it later (used by the beam stop transmission)
+        mantid[workspace].getRun().addProperty_str("event_ws", event_ws, True)
+            
+        if self._separate_corrections:
+            # If we pick up the data file from the workspace, it's because we 
+            # are going through the reduction chain, otherwise we are just loading
+            # the file to compute a correction
+            if self._data_file is None:    
+                data_ws = "%s_data" % workspace
+                mantid[workspace].getRun().addProperty_str("data_ws", data_ws, True)
+        
+                CloneWorkspace(workspace, data_ws)
+                Divide(workspace, workspace, workspace)
+                reducer.clean(data_ws)
+                    
+        # Remove the dirty flag if it existed
+        reducer.clean(workspace)
+        mtd[workspace].getRun().addProperty_int("loaded_by_eqsans_reduction", 1, True)
              
     @classmethod
-    def delete_workspaces(self, workspace):
+    def delete_workspaces(cls, workspace):
         """
             Delete all workspaces related to the loading of the given workspace
             @param workspace: workspace to clean
@@ -180,6 +221,19 @@ class LoadRun(ReductionStep):
         if mtd.workspaceExists(workspace+'_evt'):
             mtd.deleteWorkspace(workspace+'_evt')
         
+    def _look_for_loaded_data(self, reducer, file_path):
+        if not type(file_path) == list:
+            file_path = [file_path] 
+        for item in reducer._data_files.keys():
+            if reducer._data_files[item] == file_path and \
+                mtd.workspaceExists(item):
+                if reducer.is_clean(item):
+                    return item, None
+                elif mtd[item].getRun().hasProperty("event_ws") and \
+                    mtd.workspaceExists(mtd[item].getRun().getProperty("event_ws").value):
+                    return None, mtd[item].getRun().getProperty("event_ws").value
+        return None, None
+                
     def execute(self, reducer, workspace, force=False):
         output_str = ""      
         # If we don't have a data file, look up the workspace handle
@@ -233,7 +287,6 @@ class LoadRun(ReductionStep):
                 pulseid_file = filepath
                 event_file = filepath.replace("_pulseid", "_neutron_event")
             else:
-                #raise RuntimeError, "SNSReductionSteps.LoadRun couldn't find the event and pulseid files"
                 # Doesn't look like event pre-nexus, try event nexus
                 is_event_nxs = True
             
@@ -252,7 +305,7 @@ class LoadRun(ReductionStep):
                            
             if is_event_nxs:
                 mantid.sendLogMessage("Loading %s as event Nexus" % (filepath))
-                LoadEventNexus(Filename=filepath, OutputWorkspace=workspace+'_evt')
+                LoadEventNexus(Filename=filepath, OutputWorkspace=wks_name)
             else:
                 # Mapping file
                 default_instrument = reducer.instrument.get_default_instrument()
@@ -264,25 +317,44 @@ class LoadRun(ReductionStep):
                 nxs_file = event_file.replace("_neutron_event.dat", "_histo.nxs")
                 if not os.path.isfile(nxs_file):
                     nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
-                LoadEventPreNexus(EventFilename=event_file, OutputWorkspace=workspace+'_evt', PulseidFilename=pulseid_file, MappingFilename=mapping_file)
-                LoadNexusLogs(Workspace=workspace+'_evt', Filename=nxs_file)
+                LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=wks_name, PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
+                LoadNexusLogs(Workspace=wks_name, Filename=nxs_file)
             
-            return "  Data directory: %s\n" % data_dir
+            return "  Loaded %s\n" % wks_name
+        
+        # If the event workspace exists, don't reload it
+        if mtd.workspaceExists(workspace+'_evt'):
+            self._process_existing_event_ws(reducer, workspace+'_evt', workspace)
+            mantid.sendLogMessage("WARNING: %s already loaded" % workspace+'_evt')
+            return "WARNING: %s_evt already loaded" % workspace
+        
+        # Check whether there is an equivalent event workspace
+        eq_histo_ws, eq_event_ws = self._look_for_loaded_data(reducer, data_file)
+        if eq_histo_ws is not None:
+            # The data is loaded and clean. We don't know what is going to happen to it so clone it
+            CloneWorkspace(eq_histo_ws, OutputWorkspace=workspace)
+            mantid.sendLogMessage("WARNING: %s already loaded as %s" % (workspace, eq_histo_ws))
+            return "WARNING: %s already loaded as %s" % (workspace, eq_histo_ws)
+        elif eq_event_ws is not None:
+            # The data is available as an event workspace. We just need to process it.
+            self._process_existing_event_ws(reducer, eq_event_ws, workspace)
+            mantid.sendLogMessage("WARNING: %s already loaded as %s" % (workspace+'_evt', eq_event_ws))
+            return "WARNING: %s already loaded as %s" % (workspace+'_evt', eq_event_ws)
         
         # Check whether we have a list of files that need merging
         if type(data_file)==list:
             for i in range(len(data_file)):
                 if i==0:
-                    output_str += _load_data_file(data_file[i], workspace)
+                    output_str += _load_data_file(data_file[i], workspace+'_evt')
                 else:
                     output_str += _load_data_file(data_file[i], '__tmp_wksp')
-                    Plus(LHSWorkspace=workspace,
+                    Plus(LHSWorkspace=workspace+'_evt',
                          RHSWorkspace='__tmp_wksp',
-                         OutputWorkspace=workspace)
+                         OutputWorkspace=workspace+'_evt')
             if mtd.workspaceExists('__tmp_wksp'):
                 mtd.deleteWorkspace('__tmp_wksp')
         else:
-            output_str += _load_data_file(data_file, workspace)
+            output_str += _load_data_file(data_file, workspace+'_evt')
         
         
         # Store the sample-detector distance.
@@ -391,7 +463,6 @@ class LoadRun(ReductionStep):
             mantid.sendLogMessage("Beam center isn't defined: skipping beam center alignment for %s" % workspace+'_evt')
 
         # Modify TOF
-        #declareProperty("FlightPathCorrection", false, Kernel::Direction::Input);
         output_str += "  Discarding low %6.1f and high %6.1f microsec\n" % (low_TOF_cut, high_TOF_cut)
         if self._correct_for_flight_path:
             output_str += "  Correcting TOF for flight path\n"
@@ -415,7 +486,7 @@ class LoadRun(ReductionStep):
             wl_combined_max = wl_max2
             output_str += "  Second frame: %6.1f - %-6.1f Angstrom" % (wl_min2, wl_max2)
         
-        #ConvertUnits(workspace+'_evt', workspace+'_evt_wl', "Wavelength")
+        # Convert TOF to wavelength
         source_to_sample = math.fabs(mtd[workspace+'_evt'].getInstrument().getSource().getPos().getZ())*1000.0
         conversion_factor = 3.9560346 / (sdd+source_to_sample);
         ScaleX(workspace+'_evt', workspace+'_evt', conversion_factor)
@@ -426,20 +497,8 @@ class LoadRun(ReductionStep):
         
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [frame-skipping: %s]" %(workspace, sdd, str(frame_skipping)))
         
-        #FIXME: We need an unmodified data set to compute the transmission
-        # using the beam stop hole. Since it's quick we do it now. We should split
-        # the computing part from the applying part of the transmission correction
-        if pixel_ctr_x is not None and pixel_ctr_y is not None:
-            transmission_ws = "__beam_hole_transmission_"+workspace
-    
-            # Calculate the transmission as a function of wavelength
-            EQSANSTransmission(InputWorkspace=workspace,
-                               OutputWorkspace=transmission_ws,
-                               XCenter=pixel_ctr_x,
-                               YCenter=pixel_ctr_y,
-                               NormalizeToUnity = True)
-            
-            mantid[workspace].getRun().addProperty_str("transmission_ws", transmission_ws, True)
+        # Add the name of the event workspace as a property in case we need it later (used by the beam stop transmission)
+        mantid[workspace].getRun().addProperty_str("event_ws", workspace+'_evt', True)
             
         if self._separate_corrections:
             # If we pick up the data file from the workspace, it's because we 
@@ -516,6 +575,8 @@ class BeamStopTransmission(BaseTransmission):
         self._transmission_ws = None
     
     def execute(self, reducer, workspace):
+        # Keep track of workspaces to delete when we clean up
+        ws_for_deletion = []
         if self._transmission_ws is not None and mtd.workspaceExists(self._transmission_ws):
             # We have everything we need to apply the transmission correction
             pass
@@ -524,22 +585,50 @@ class BeamStopTransmission(BaseTransmission):
             if mtd.workspaceExists(trans_prop.value):
                 self._transmission_ws = trans_prop.value
             else:
-                raise RuntimeError, "The transmission workspace for %s is no longer available" % trans_prop.value
+                raise RuntimeError, "The transmission workspace %s is no longer available" % trans_prop.value
         else:
+            raw_ws = workspace
+            if mtd[workspace].getRun().hasProperty("event_ws"):
+                raw_ws_prop = mtd[workspace].getRun().getProperty("event_ws")
+                if mtd.workspaceExists(raw_ws_prop.value):
+                    if mtd[workspace].getRun().hasProperty("wavelength_min"):
+                        wl_min = mtd[workspace].getRun().getProperty("wavelength_min").value
+                    else:
+                        raise RuntimeError, "Beam-hole transmission correction could not get minimum wavelength"
+                    if mtd[workspace].getRun().hasProperty("wavelength_max_frame2"):
+                        wl_max = mtd[workspace].getRun().getProperty("wavelength_max_frame2").value
+                    elif mtd[workspace].getRun().hasProperty("wavelength_max"):
+                        wl_max = mtd[workspace].getRun().getProperty("wavelength_max").value
+                    else:
+                        raise RuntimeError, "Beam-hole transmission correction could not get maximum wavelength"
+                    raw_ws = '__'+raw_ws_prop.value+'_histo'
+                    # Need to convert to workspace until somebody fixes Integration. Ticket #3277
+                    Rebin(raw_ws_prop.value, raw_ws, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_max), False)
+                    ws_for_deletion.append(raw_ws)
+                else:
+                    raise RuntimeError, "The event workspace %s is no longer available" % raw_ws_prop.value
+
             # The transmission calculation only works on the original un-normalized counts
-            if not reducer.is_clean(workspace):
+            if not reducer.is_clean(raw_ws):
                 raise RuntimeError, "The transmission can only be calculated using un-modified data"
 
-            beam_center = reducer.get_beam_center()
+            if mtd[workspace].getRun().hasProperty("beam_center_x"):
+                beam_center_x = mtd[workspace].getRun().getProperty("beam_center_x").value
+            else:
+                raise RuntimeError, "Transmission correction algorithm could not get beam center x position"
+            if mtd[workspace].getRun().hasProperty("beam_center_y"):
+                beam_center_y = mtd[workspace].getRun().getProperty("beam_center_y").value
+            else:
+                raise RuntimeError, "Transmission correction algorithm could not get beam center y position"
     
             if self._transmission_ws is None:
-                self._transmission_ws = "transmission_"+workspace
+                self._transmission_ws = "beam_hole_transmission_"+workspace
     
             # Calculate the transmission as a function of wavelength
-            EQSANSTransmission(InputWorkspace=workspace,
+            EQSANSTransmission(InputWorkspace=raw_ws,
                                OutputWorkspace=self._transmission_ws,
-                               XCenter=beam_center[0],
-                               YCenter=beam_center[1],
+                               XCenter=beam_center_x,
+                               YCenter=beam_center_y,
                                NormalizeToUnity = self._normalize)
             
             mantid[workspace].getRun().addProperty_str("transmission_ws", self._transmission_ws, True)
@@ -557,6 +646,7 @@ class BeamStopTransmission(BaseTransmission):
             if mtd.workspaceExists(beam_flux_ws_name):
                 beam_flux_ws = mtd[beam_flux_ws_name]
                 transmission_ws = "__transmission_tmp"
+                ws_for_deletion.append(transmission_ws)
                 Divide(self._transmission_ws, beam_flux_ws, transmission_ws)
                 output_str += "\n  Transmission corrected for beam spectrum"
             else:
@@ -574,8 +664,9 @@ class BeamStopTransmission(BaseTransmission):
         ReplaceSpecialValues(workspace, workspace, NaNValue=0.0,NaNError=0.0)
         
         # Clean up 
-        if mtd.workspaceExists('__transmission_tmp'):
-            mtd.deleteWorkspace('__transmission_tmp')
+        for ws in ws_for_deletion:
+            if mtd.workspaceExists(ws):
+                mtd.deleteWorkspace(ws)
                 
         return output_str
     
@@ -646,9 +737,6 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
             return super(AzimuthalAverageByFrame, self).execute(reducer, workspace)
         
         self._is_frame_skipping = True
-        wl_min = min(mtd[workspace].readX(0))
-        wl_max = max(mtd[workspace].readX(0))
-        frame_cutoff = (wl_max+wl_min)/2.0
         
         # First frame
         wl_min = None
@@ -701,5 +789,75 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         d.dx = mtd[self.get_output_workspace(workspace)[0]].dataE(0)
         return d
         
+class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
+    """
+        Calculate transmission using the direct beam method
+    """
+    def __init__(self, sample_file, empty_file, beam_radius=3.0, theta_dependent=True, dark_current=None, combine_frames=True):
+        super(DirectBeamTransmission, self).__init__(sample_file, empty_file, beam_radius, theta_dependent, dark_current)
+        ## Whether of not we need to combine the two frames in frame-skipping mode when performing the fit
+        self._combine_frames = combine_frames
         
+    def get_transmission(self):
+        #mtd.sendLogMessage("TOF SANS doesn't have a single zero-angle transmission. DirectBeamTransmission.get_transmission() should not be called.")
+        return [0, 0]
         
+    def execute(self, reducer, workspace):
+        if self._combine_frames or \
+            (mtd[workspace].getRun().hasProperty("is_frame_skipping") \
+             and mtd[workspace].getRun().getProperty("is_frame_skipping").value==0):
+            super(DirectBeamTransmission, self).execute(reducer, workspace)
+            return "Transmission correction applied"
+    
+        if self._transmission_ws is None:
+            self._transmission_ws = "transmission_fit_"+workspace
+            # Load data files
+            sample_mon_ws, empty_mon_ws, first_det = self._load_monitors(reducer, workspace)
+            
+            def _crop_and_compute(wl_min_prop, wl_max_prop, suffix):
+                # Get the wavelength band from the run properties
+                if mtd[workspace].getRun().hasProperty(wl_min_prop):
+                    wl_min = mtd[workspace].getRun().getProperty(wl_min_prop).value
+                else:
+                    raise RuntimeError, "DirectBeamTransmission could not retrieve the %s property" % wl_min_prop
+                
+                if mtd[workspace].getRun().hasProperty(wl_max_prop):
+                    wl_max = mtd[workspace].getRun().getProperty(wl_max_prop).value
+                else:
+                    raise RuntimeError, "DirectBeamTransmission could not retrieve the %s property" % wl_max_prop
+                
+                CropWorkspace(workspace, workspace+suffix, XMin=wl_min, XMax=wl_max)
+                CropWorkspace(sample_mon_ws, sample_mon_ws+suffix, XMin=wl_min, XMax=wl_max)
+                CropWorkspace(empty_mon_ws, empty_mon_ws+suffix, XMin=wl_min, XMax=wl_max)
+                self._calculate_transmission(sample_mon_ws+suffix, empty_mon_ws+suffix, first_det, self._transmission_ws+suffix)
+                RebinToWorkspace(self._transmission_ws+suffix, workspace, OutputWorkspace=self._transmission_ws+suffix)
+                RebinToWorkspace(self._transmission_ws+suffix+'_unfitted', workspace, OutputWorkspace=self._transmission_ws+suffix+'_unfitted')
+                return self._transmission_ws+suffix
+                
+            # First frame
+            trans_frame_1 = _crop_and_compute("wavelength_min", "wavelength_max", "_frame1")
+            
+            # Second frame
+            trans_frame_2 = _crop_and_compute("wavelength_min_frame2", "wavelength_max_frame2", "_frame2")
+            
+            Plus(trans_frame_1, trans_frame_2, self._transmission_ws)
+            Plus(trans_frame_1+'_unfitted', trans_frame_2+'_unfitted', self._transmission_ws+'_unfitted')
+
+            # Clean up            
+            for ws in [trans_frame_1, trans_frame_2, 
+                       trans_frame_1+'_unfitted', trans_frame_2+'_unfitted',
+                       sample_mon_ws, empty_mon_ws]:
+                if mtd.workspaceExists(ws):
+                    mtd.deleteWorkspace(ws)
+            
+        # 2- Apply correction (Note: Apply2DTransCorr)
+        #Apply angle-dependent transmission correction using the zero-angle transmission
+        if self._theta_dependent:
+            ApplyTransmissionCorrection(InputWorkspace=workspace, 
+                                        TransmissionWorkspace=self._transmission_ws, 
+                                        OutputWorkspace=workspace)          
+        else:
+            Divide(workspace, self._transmission_ws, workspace)  
+        
+        return "Transmission correction applied for both frame independently"
+    
