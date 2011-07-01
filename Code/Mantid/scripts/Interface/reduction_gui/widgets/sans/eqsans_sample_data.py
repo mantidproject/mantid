@@ -64,20 +64,29 @@ class SampleDataWidget(BaseWidget):
         self.connect(self._content.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._data_file_browse)
         self.connect(self._content.calculate_chk, QtCore.SIGNAL("clicked(bool)"), self._calculate_clicked)
         
-        self.connect(self._content.direct_beam_chk, QtCore.SIGNAL("clicked()"), self._direct_beam)
-        self.connect(self._content.beamstop_chk, QtCore.SIGNAL("clicked()"), self._beam_hole)
-        
         self.connect(self._content.dark_current_button, QtCore.SIGNAL("clicked()"), self._dark_current_browse)
+        self.connect(self._content.empty_button, QtCore.SIGNAL("clicked()"), self._empty_browse)
+        self.connect(self._content.sample_button, QtCore.SIGNAL("clicked()"), self._sample_browse)
         
         self.connect(self._content.data_file_plot_button, QtCore.SIGNAL("clicked()"), self._data_file_plot)
-        self.connect(self._content.dark_current_plot_button, QtCore.SIGNAL("clicked()"), self._dark_plot_clicked)
+        self.connect(self._content.dark_current_plot_button, QtCore.SIGNAL("clicked()"), self._dark_plot)
+        self.connect(self._content.empty_plot_button, QtCore.SIGNAL("clicked()"), self._empty_plot)
+        self.connect(self._content.sample_plot_button, QtCore.SIGNAL("clicked()"), self._sample_plot)
 
         if not self._in_mantidplot:
             self._content.dark_current_plot_button.hide()
             self._content.data_file_plot_button.hide()
+            self._content.empty_plot_button.hide()
+            self._content.sample_plot_button.hide()
 
-    def _dark_plot_clicked(self):
+    def _dark_plot(self):
         self.show_instrument(file_name=self._content.dark_current_edit.text)
+    
+    def _empty_plot(self):
+        self.show_instrument(file_name=self._content.empty_edit.text)
+
+    def _sample_plot(self):
+        self.show_instrument(file_name=self._content.sample_edit.text)
 
     def set_state(self, state):
         """
@@ -87,12 +96,9 @@ class SampleDataWidget(BaseWidget):
         self._content.transmission_edit.setText(QtCore.QString("%6.4f" % state.transmission))
         self._content.dtransmission_edit.setText(QtCore.QString("%6.4f" % state.transmission_spread))
         
-        if isinstance(state.calculation_method, state.DirectBeam):
-            self._content.direct_beam_chk.setChecked(True)
-            self._direct_beam(state=state.calculation_method)
-        else:
-            self._content.beamstop_chk.setChecked(True)
-            self._beam_hole(state=state.calculation_method)
+        self._content.beam_radius_edit.setText(QtCore.QString(str(state.calculation_method.beam_radius)))
+        self._content.sample_edit.setText(QtCore.QString(state.calculation_method.sample_file))
+        self._content.empty_edit.setText(QtCore.QString(state.calculation_method.direct_beam))
 
         self._content.calculate_chk.setChecked(state.calculate_transmission)
         self._content.theta_dep_chk.setChecked(state.theta_dependent)
@@ -134,7 +140,12 @@ class SampleDataWidget(BaseWidget):
         m.theta_dependent = self._content.theta_dep_chk.isChecked()
         m.dark_current = self._content.dark_current_edit.text()
         
-        m.calculation_method=self._method_box.get_state()    
+        d = SampleData.DirectBeam()
+        d.beam_radius = util._check_and_get_float_line_edit(self._content.beam_radius_edit)
+        d.sample_file = unicode(self._content.sample_edit.text())
+        d.direct_beam = unicode(self._content.empty_edit.text())
+
+        m.calculation_method=d
         
         # Data file
         m.data_files = self._get_data_files()
@@ -156,6 +167,16 @@ class SampleDataWidget(BaseWidget):
             if current_file != str(fname[0]).strip():
                 self.get_data_info()
 
+    def _sample_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.sample_edit.setText(fname)      
+        
+    def _empty_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.empty_edit.setText(fname)      
+
     def _data_file_plot(self):
         data_files = self._get_data_files()
         if len(data_files)>0:
@@ -165,56 +186,28 @@ class SampleDataWidget(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._content.dark_current_edit.setText(fname)      
-            
-    def _direct_beam(self, state=None):
-        if state is None:
-            state = self._last_direct_state
-        self._replace_method(DirectBeam(self, state=state, settings=self._settings, 
-                                        data_type=self._data_type, data_proxy=self._data_proxy))
-
-        self._content.dark_current_label.setEnabled(True)
-        self._content.dark_current_edit.setEnabled(True)
-        self._content.dark_current_button.setEnabled(True)
-        
-    def _beam_hole(self, state=None):
-        if state is None:
-            state = self._last_direct_state
-        self._replace_method(EQSANSBeamHole(self, state=state, settings=self._settings, 
-                                            data_type=self._data_type, data_proxy=self._data_proxy))
-        
-        self._content.dark_current_label.setEnabled(False)
-        self._content.dark_current_edit.setEnabled(False)
-        self._content.dark_current_button.setEnabled(False)
-        
-    def _replace_method(self, widget):
-        if self._method_box is not None:
-            for i in range(0, self._content.widget_placeholder.count()):
-                item = self._content.widget_placeholder.itemAt(i)
-                self._content.widget_placeholder.removeItem(self._content.widget_placeholder.itemAt(i))
-                item.widget().deleteLater()
-        self._method_box = widget
-        if self._method_box is not None:
-            self._content.widget_placeholder.addWidget(self._method_box)
-        
+                    
     def _calculate_clicked(self, is_checked):
-        self._content.direct_beam_chk.setEnabled(is_checked)
-        self._content.beamstop_chk.setEnabled(is_checked)
-        if self._method_box is not None:
-            self._method_box.setEnabled(is_checked)
-            
         self._content.transmission_edit.setEnabled(not is_checked)
         self._content.dtransmission_edit.setEnabled(not is_checked)
         
         self._content.dark_current_label.setEnabled(is_checked)
         self._content.dark_current_edit.setEnabled(is_checked)
         self._content.dark_current_button.setEnabled(is_checked)
-        self._content.dark_current_plot_button.setEnabled(is_checked)
-        
-        is_beamstop = self._content.beamstop_chk.isChecked()
-        self._content.dark_current_label.setEnabled(is_checked and not is_beamstop)
-        self._content.dark_current_edit.setEnabled(is_checked and not is_beamstop)
-        self._content.dark_current_button.setEnabled(is_checked and not is_beamstop)
-        
+        self._content.dark_current_plot_button.setEnabled(is_checked)        
+
+        self._content.sample_label.setEnabled(is_checked)
+        self._content.sample_edit.setEnabled(is_checked)
+        self._content.sample_button.setEnabled(is_checked)
+        self._content.sample_plot_button.setEnabled(is_checked)        
+
+        self._content.empty_label.setEnabled(is_checked)
+        self._content.empty_edit.setEnabled(is_checked)
+        self._content.empty_button.setEnabled(is_checked)
+        self._content.empty_plot_button.setEnabled(is_checked)        
+
+        self._content.beam_radius_label.setEnabled(is_checked)
+        self._content.beam_radius_edit.setEnabled(is_checked)
 
     def _get_data_files(self):
         """

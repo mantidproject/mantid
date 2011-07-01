@@ -35,9 +35,9 @@ class Background(BaseBackground):
             """
             return "BckBeamStopTransmission()\n"
             
-    trans_calculation_method = BeamHole()
+    trans_calculation_method = DirectBeam()
     # Option list
-    option_list = [DirectBeam, BeamHole]
+    option_list = [DirectBeam]
 
     def reset(self):
         """

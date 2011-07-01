@@ -4,7 +4,6 @@ import os
 from reduction_gui.reduction.sans.eqsans_background_script import Background
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
-from eqsans_sample_data import EQSANSBeamHole
 from hfir_sample_data import DirectBeam
 import ui.sans.ui_eqsans_background
 
@@ -57,9 +56,6 @@ class BackgroundWidget(BaseWidget):
         self._content = BckFrame(self)
         self._layout.addWidget(self._content)
         
-        # Flag to show transmission options or not
-        self.show_transmission = show_transmission
-
         self.initialize_content()
         
         if state is not None:
@@ -81,39 +77,45 @@ class BackgroundWidget(BaseWidget):
         
         # Connections
         self.connect(self._content.calculate_trans_chk, QtCore.SIGNAL("clicked(bool)"), self._calculate_clicked)
-        self.connect(self._content.trans_direct_chk, QtCore.SIGNAL("clicked()"), self._direct_beam)
-        self.connect(self._content.beamstop_chk, QtCore.SIGNAL("clicked()"), self._beam_hole)
 
         self.connect(self._content.background_chk, QtCore.SIGNAL("clicked(bool)"), self._background_clicked)
         self.connect(self._content.background_browse, QtCore.SIGNAL("clicked()"), self._background_browse)
         self.connect(self._content.trans_dark_current_button, QtCore.SIGNAL("clicked()"), self._trans_dark_current_browse)
+        self.connect(self._content.empty_button, QtCore.SIGNAL("clicked()"), self._empty_browse)
+        self.connect(self._content.sample_button, QtCore.SIGNAL("clicked()"), self._sample_browse)
 
         self.connect(self._content.background_plot_button, QtCore.SIGNAL("clicked()"), self._background_plot_clicked)
         self.connect(self._content.trans_dark_current_plot_button, QtCore.SIGNAL("clicked()"), self._trans_dark_current_plot_clicked)
+        self.connect(self._content.empty_plot_button, QtCore.SIGNAL("clicked()"), self._empty_plot)
+        self.connect(self._content.sample_plot_button, QtCore.SIGNAL("clicked()"), self._sample_plot)
         
-        # Process transmission option
-        if not self.show_transmission:
-            self._content.calculate_trans_chk.hide()
-            self._content.bck_trans_label.hide()
-            self._content.bck_trans_err_label.hide()
-            self._content.transmission_edit.hide()
-            self._content.dtransmission_edit.hide()
-            self._content.calculate_trans_chk.hide()
-            self._content.theta_dep_chk.hide()
-            self._content.trans_direct_chk.hide()
-            self._content.trans_dark_current_label.hide()
-            self._content.trans_dark_current_edit.hide()
-            self._content.trans_dark_current_button.hide()
-
         if not self._in_mantidplot:
             self._content.background_plot_button.hide()
             self._content.trans_dark_current_plot_button.hide()
+            self._content.empty_plot_button.hide()
+            self._content.sample_plot_button.hide()
+
+    def _sample_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.sample_edit.setText(fname)      
+        
+    def _empty_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.empty_edit.setText(fname)      
 
     def _background_plot_clicked(self):
         self.show_instrument(file_name=self._content.background_edit.text)
 
     def _trans_dark_current_plot_clicked(self):
         self.show_instrument(file_name=self._content.trans_dark_current_edit.text)
+
+    def _empty_plot(self):
+        self.show_instrument(file_name=self._content.empty_edit.text)
+
+    def _sample_plot(self):
+        self.show_instrument(file_name=self._content.sample_edit.text)
 
     def set_state(self, state):
         """
@@ -127,22 +129,18 @@ class BackgroundWidget(BaseWidget):
             self.get_data_info()
         self._background_clicked(state.background_corr)
 
-        if self.show_transmission:
-            self._content.transmission_edit.setText(QtCore.QString("%6.4f" % state.bck_transmission))
-            self._content.dtransmission_edit.setText(QtCore.QString("%6.4f" % state.bck_transmission_spread))
-                    
-            if isinstance(state.trans_calculation_method, state.DirectBeam):
-                self._content.trans_direct_chk.setChecked(True)
-                self._direct_beam(state=state.trans_calculation_method)
-            else:
-                self._content.beamstop_chk.setChecked(True)
-                self._beam_hole(state=state.trans_calculation_method)
+        self._content.transmission_edit.setText(QtCore.QString("%6.4f" % state.bck_transmission))
+        self._content.dtransmission_edit.setText(QtCore.QString("%6.4f" % state.bck_transmission_spread))
+                
+        self._content.beam_radius_edit.setText(QtCore.QString(str(state.trans_calculation_method.beam_radius)))
+        self._content.sample_edit.setText(QtCore.QString(state.trans_calculation_method.sample_file))
+        self._content.empty_edit.setText(QtCore.QString(state.trans_calculation_method.direct_beam))
+
+        self._content.calculate_trans_chk.setChecked(state.calculate_transmission)
+        self._content.theta_dep_chk.setChecked(state.theta_dependent)
+        self._content.trans_dark_current_edit.setText(QtCore.QString(str(state.trans_dark_current)))
+        self._calculate_clicked(state.calculate_transmission)
     
-            self._content.calculate_trans_chk.setChecked(state.calculate_transmission)
-            self._content.theta_dep_chk.setChecked(state.theta_dependent)
-            self._content.trans_dark_current_edit.setText(QtCore.QString(str(state.trans_dark_current)))
-            self._calculate_clicked(state.calculate_transmission)
-        
         
     def get_state(self):
         """
@@ -150,59 +148,28 @@ class BackgroundWidget(BaseWidget):
         """
         m = Background()
         
-        #m.dark_current_corr = self._content.dark_current_chk.isChecked()
-        #m.dark_current_file = unicode(self._content.dark_current_edit.text())
-        
         m.background_corr = self._content.background_chk.isChecked()
         m.background_file = str(self._content.background_edit.text())
         
-        m.bck_transmission_enabled = self.show_transmission
-        if self.show_transmission:
-            m.bck_transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
-            m.bck_transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
-            m.calculate_transmission = self._content.calculate_trans_chk.isChecked()
-            m.theta_dependent = self._content.theta_dep_chk.isChecked()
-            m.trans_dark_current = self._content.trans_dark_current_edit.text()
-        
-            if self._method_box is not None:
-                m.trans_calculation_method=self._method_box.get_state()   
+        m.bck_transmission_enabled = True
+        m.bck_transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
+        m.bck_transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
+        m.calculate_transmission = self._content.calculate_trans_chk.isChecked()
+        m.theta_dependent = self._content.theta_dep_chk.isChecked()
+        m.trans_dark_current = self._content.trans_dark_current_edit.text()
+    
+        d = Background.DirectBeam()
+        d.beam_radius = util._check_and_get_float_line_edit(self._content.beam_radius_edit)
+        d.sample_file = unicode(self._content.sample_edit.text())
+        d.direct_beam = unicode(self._content.empty_edit.text())
+        m.trans_calculation_method = d
+
         return m
 
     def _trans_dark_current_browse(self):
         fname = self.data_browse_dialog()
         if fname:
             self._content.trans_dark_current_edit.setText(fname)      
-        
-    def _direct_beam(self, state=None):
-        if state is None:
-            state = self._last_direct_state
-        if self.show_transmission:
-            self._replace_method(BckDirectBeam(self, state=state, settings=self._settings, 
-                                               data_type=self._data_type, data_proxy=self._data_proxy))
-        
-        self._content.trans_dark_current_label.setEnabled(True)
-        self._content.trans_dark_current_edit.setEnabled(True)
-        self._content.trans_dark_current_button.setEnabled(True)
-        
-    def _beam_hole(self, state=None):
-        if state is None:
-            state = self._last_direct_state
-        self._replace_method(BckBeamHole(self, state=state, settings=self._settings, 
-                                            data_type=self._data_type, data_proxy=self._data_proxy))
-
-        self._content.trans_dark_current_label.setEnabled(False)
-        self._content.trans_dark_current_edit.setEnabled(False)
-        self._content.trans_dark_current_button.setEnabled(False)
-
-
-    def _replace_method(self, widget):
-        if self._method_box is not None:
-            for i in range(0, self._content.widget_placeholder.count()):
-                item = self._content.widget_placeholder.itemAt(i)
-                self._content.widget_placeholder.removeItem(self._content.widget_placeholder.itemAt(i))
-                item.widget().deleteLater()
-        self._method_box = widget
-        self._content.widget_placeholder.addWidget(self._method_box)
         
     def _background_clicked(self, is_checked):
         self._content.background_edit.setEnabled(is_checked)
@@ -225,12 +192,7 @@ class BackgroundWidget(BaseWidget):
                 #self.get_data_info()
                 pass
                
-    def _calculate_clicked(self, is_checked):
-        self._content.trans_direct_chk.setEnabled(is_checked)
-        self._content.beamstop_chk.setEnabled(is_checked)
-        if self._method_box is not None:
-            self._method_box.setEnabled(is_checked)
-            
+    def _calculate_clicked(self, is_checked):            
         self._content.transmission_edit.setEnabled(not is_checked and self._content.background_chk.isChecked())
         self._content.dtransmission_edit.setEnabled(not is_checked and self._content.background_chk.isChecked())
         
@@ -238,11 +200,19 @@ class BackgroundWidget(BaseWidget):
         self._content.trans_dark_current_edit.setEnabled(is_checked)
         self._content.trans_dark_current_button.setEnabled(is_checked)
         self._content.trans_dark_current_plot_button.setEnabled(is_checked)
-        
-        is_beamstop = self._content.beamstop_chk.isChecked()
-        self._content.trans_dark_current_label.setEnabled(is_checked and not is_beamstop)
-        self._content.trans_dark_current_edit.setEnabled(is_checked and not is_beamstop)
-        self._content.trans_dark_current_button.setEnabled(is_checked and not is_beamstop)
+
+        self._content.sample_label.setEnabled(is_checked)
+        self._content.sample_edit.setEnabled(is_checked)
+        self._content.sample_button.setEnabled(is_checked)
+        self._content.sample_plot_button.setEnabled(is_checked)        
+
+        self._content.empty_label.setEnabled(is_checked)
+        self._content.empty_edit.setEnabled(is_checked)
+        self._content.empty_button.setEnabled(is_checked)
+        self._content.empty_plot_button.setEnabled(is_checked)        
+
+        self._content.beam_radius_label.setEnabled(is_checked)
+        self._content.beam_radius_edit.setEnabled(is_checked)
         
     def get_data_info(self):
         """

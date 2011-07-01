@@ -27,9 +27,9 @@ class SampleData(BaseSampleData):
             element_list = dom.getElementsByTagName("BeamHole")
             return len(element_list)>0
         
-    calculation_method = BeamHole()
+    calculation_method = BaseSampleData.DirectBeam()
     # Option list
-    option_list = [BaseSampleData.DirectBeam, BeamHole]
+    option_list = [BaseSampleData.DirectBeam]
 
     def reset(self):
         """
