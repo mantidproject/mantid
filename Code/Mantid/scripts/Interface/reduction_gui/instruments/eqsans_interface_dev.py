@@ -12,6 +12,7 @@ from reduction_gui.widgets.sans.eqsans_background import BackgroundWidget
 from reduction_gui.widgets.output import OutputWidget
 from reduction_gui.reduction.eqsans_reduction import EQSANSReductionScripter
 
+from reduction_gui.reduction.sans.eqsans_data_proxy import DataProxy
 
 class EQSANSInterface(InstrumentInterface):
     """
@@ -26,7 +27,7 @@ class EQSANSInterface(InstrumentInterface):
         self.scripter = EQSANSReductionScripter(name=name)        
 
         # Instrument description
-        self.attach(SANSInstrumentWidget(settings = self._settings, data_type = self.data_type))
+        self.attach(SANSInstrumentWidget(settings = self._settings, data_proxy=DataProxy, data_type = self.data_type))
         
         # Detector
         self.attach(DetectorWidget(settings = self._settings, data_proxy=None, data_type = self.data_type))

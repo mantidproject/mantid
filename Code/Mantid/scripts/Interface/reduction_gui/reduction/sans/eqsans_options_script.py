@@ -21,6 +21,9 @@ class ReductionOptions(BaseOptions):
 
     # Use the mask defined in the configuration file
     use_config_mask = True
+    
+    # Don't use data directory because it's not writable
+    use_data_directory = False
 
 
     def __init__(self):
@@ -42,6 +45,7 @@ class ReductionOptions(BaseOptions):
         self.normalization = ReductionOptions.NORMALIZATION_MONITOR
         
         self.use_config_mask = ReductionOptions.use_config_mask
+        self.use_data_directory = ReductionOptions.use_data_directory
 
     def to_script(self):
         """

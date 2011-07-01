@@ -171,7 +171,9 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.low_tof_label.hide()
             self._summary.high_tof_label.hide()
             
-        if not self._in_mantidplot:
+        # We need the EQSANS data proxy for a quick load of a file for masking purposes, but
+        # we don't want to show the plot button. Turn this off for the moment.
+        if True or not self._in_mantidplot:
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
 
@@ -277,6 +279,8 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.dark_file_edit.setText(fname)      
 
     def _add_rectangle(self):
+        #self.show_instrument(self._summary.dark_file_edit.text, 2)
+        
         # Read in the parameters
         x_min = util._check_and_get_int_line_edit(self._summary.x_min_edit)
         x_max = util._check_and_get_int_line_edit(self._summary.x_max_edit)
@@ -390,7 +394,10 @@ class SANSInstrumentWidget(BaseWidget):
         # Output directory
         self._summary.select_output_dir_radio.setChecked(not state.use_data_directory)
         self._summary.use_data_dir_radio.setChecked(state.use_data_directory)
-        self._summary.output_dir_edit.setText(QtCore.QString(str(state.output_directory)))
+        if len(state.output_directory.strip())>0:
+            self._summary.output_dir_edit.setText(QtCore.QString(str(state.output_directory)))
+        else:
+            self._summary.output_dir_edit.setText(QtCore.QString(str(os.path.expanduser('~'))))
         self._output_dir_clicked()        
 
     def _prepare_field(self, is_enabled, stored_value, chk_widget, edit_widget, suppl_value=None, suppl_edit=None):
@@ -444,7 +451,6 @@ class SANSInstrumentWidget(BaseWidget):
         m.top = util._check_and_get_int_line_edit(self._summary.top_edit)
         m.bottom = util._check_and_get_int_line_edit(self._summary.bottom_edit)
         m.left = util._check_and_get_int_line_edit(self._summary.left_edit)
-        m.right = util._check_and_get_int_line_edit(self._summary.right_edit)
         
         # Mask Rectangles
         for i in range(self._summary.listWidget.count()):

@@ -15,11 +15,11 @@ def process_file_parameter(f):
         Decorator that allows a function parameter to either be
         a string or a function returning a string
     """
-    def processed_function(self, file_name): 
+    def processed_function(self, file_name, *args): 
         if isinstance(file_name, types.StringType):
-            return f(self, file_name)
+            return f(self, file_name, *args)
         else:
-            return f(self, str(file_name()))
+            return f(self, str(file_name()), *args)
     return processed_function
     
 class BaseWidget(QtGui.QWidget):    
@@ -109,10 +109,11 @@ class BaseWidget(QtGui.QWidget):
             return str(fname)     
     
     @process_file_parameter
-    def show_instrument(self, file_name=''):
+    def show_instrument(self, file_name='', tab=-1):
         """
             Show instrument for the given data file.
             @param file_name: Data file path
+            @param tab: Tab to open the instrument window in
         """
         file_name = unicode(file_name)
         if not IS_IN_MANTIDPLOT:
@@ -128,8 +129,10 @@ class BaseWidget(QtGui.QWidget):
         if self._data_proxy is not None:
             ws_name = '_'+os.path.split(file_name)[1]
             proxy = self._data_proxy(file_name, ws_name)
-            
-        self._instrument_view = qti.app.mantidUI.getInstrumentView(proxy.data_ws)
-        self._instrument_view.show()
-        self._data_set_viewed = file_name
+            if proxy.data_ws is not None:
+                self._instrument_view = qti.app.mantidUI.getInstrumentView(proxy.data_ws, tab)
+                self._instrument_view.show()
+                self._data_set_viewed = file_name
+            else:
+                raise RuntimeError, '\n'.join(proxy.errors)
 
