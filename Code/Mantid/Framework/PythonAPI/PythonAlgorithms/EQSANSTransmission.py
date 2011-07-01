@@ -62,6 +62,14 @@ class EQSANSTransmission(PythonAlgorithm):
         ycenter = int(math.floor(self.getProperty("YCenter")))
         normalize = self.getProperty("NormalizeToUnity")
 
+        # Check that the given beam center is within the detector boundaries
+        if xcenter<0 or xcenter>=self.NX_PIX or ycenter<0 or ycenter>=self.NY_PIX:
+            self.log().error("Beam center is not within the detector boundaries: (%6.1f, %-6.1f)" % (xcenter, ycenter))
+            if xcenter<0: xcenter = 0
+            if xcenter>=self.NX_PIX: xcenter = self.NX_PIX-1
+            if ycenter<0: ycenter = 0
+            if ycenter>=self.NY_PIX: ycenter = self.NY_PIX-1
+        
         nx_min = xcenter - self.NX_TRANS_PIX
         nx_max = xcenter + self.NX_TRANS_PIX
         ny_min = ycenter - self.NY_TRANS_PIX
@@ -69,14 +77,14 @@ class EQSANSTransmission(PythonAlgorithm):
 
         # Check that pixels are on the detector
         if nx_min<0: nx_min = 0
-        if nx_min>self.NX_PIX: nx_min = self.NX_PIX
+        if nx_min>=self.NX_PIX: nx_min = self.NX_PIX-1
         if nx_max<0: nx_max = 0
-        if nx_max>self.NX_PIX: nx_max = self.NX_PIX
+        if nx_max>=self.NX_PIX: nx_max = self.NX_PIX-1
         
         if ny_min<0: ny_min = 0
-        if ny_min>self.NY_PIX: ny_min = self.NY_PIX
+        if ny_min>=self.NY_PIX: ny_min = self.NY_PIX-1
         if ny_max<0: ny_max = 0
-        if ny_max>self.NY_PIX: ny_max = self.NY_PIX
+        if ny_max>=self.NY_PIX: ny_max = self.NY_PIX-1
         
 
         # Sum up all TOF bins
@@ -267,12 +275,13 @@ class EQSANSTransmission(PythonAlgorithm):
         if normalize:
             self.log().information("Normalizing the translation to average 1")
             factor = transmission_counts/acc_current/(nTOF-1)
-            if factor == 0:
+            
+            if factor > 0:
+                for itof in range(nTOF-1):
+                    dataY[itof] /= factor
+                    dataE[itof] /= factor
+            else:
                 self.log().error("No count near the beam center! Could not compute transmission.")
-                return
-            for itof in range(nTOF-1):
-                dataY[itof] /= factor
-                dataE[itof] /= factor
         
         unitX = input_ws.getAxis(0).getUnit().name()
         CreateWorkspace(output_ws, dataX, dataY, dataE, NSpec=1, UnitX=unitX)
