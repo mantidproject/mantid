@@ -7,12 +7,11 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Strings.h"
 #include <set>
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::Geometry;
-using namespace Mantid::DataObjects;
 
 /* Application to make a wiki page text from an algorithm */
 
