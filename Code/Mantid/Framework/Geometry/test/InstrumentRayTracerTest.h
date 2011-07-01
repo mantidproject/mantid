@@ -276,7 +276,7 @@ public:
   {
     // Directly in Z+ = towards the detector center
     V3D testDir(0.0, 0.0, 1.0);
-    for (size_t i=0; i < 100; i++)
+    for (size_t i=0; i < 1000; i++)
     {
       InstrumentRayTracer tracker(m_inst);
       tracker.traceFromSample(testDir);
