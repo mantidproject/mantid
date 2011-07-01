@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/Rebunch.h"
@@ -20,7 +19,7 @@ class RebunchTest : public CxxTest::TestSuite
 public:
   void testworkspace1D_pnt_flush()
   {
-    Workspace1D_sptr test_in1D = Create1DWorkspacePnt(50);
+    Workspace2D_sptr test_in1D = Create1DWorkspacePnt(50);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
     Rebunch rebunch;
@@ -50,7 +49,7 @@ public:
 
   void testworkspace1D_nondist()
   {
-    Workspace1D_sptr test_in1D = Create1DWorkspaceHist(50);
+    Workspace2D_sptr test_in1D = Create1DWorkspaceHist(50);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
     Rebunch rebunch;
@@ -74,7 +73,7 @@ public:
     TS_ASSERT_DELTA(outX[6],32  ,0.000001);
     TS_ASSERT_DELTA(outY[6],322.0 ,0.000001);
     TS_ASSERT_DELTA(outE[6],sqrt(322.0)  ,0.000001);
-	bool dist=rebunchdata->isDistribution();
+    bool dist=rebunchdata->isDistribution();
     TS_ASSERT(!dist);
 
     AnalysisDataService::Instance().remove("test_in1D");
@@ -99,9 +98,9 @@ public:
     const Mantid::MantidVec outY=rebunchdata->dataY(5);
     const Mantid::MantidVec outE=rebunchdata->dataE(5);
 
-	TS_ASSERT_DELTA(outX[0],0.5  ,0.000001);
+    TS_ASSERT_DELTA(outX[0],0.5  ,0.000001);
     TS_ASSERT_DELTA(outY[0],3 ,0.000001);
-	TS_ASSERT_DELTA(outE[0],sqrt(8.4375)/3.75  ,0.000001);
+    TS_ASSERT_DELTA(outE[0],sqrt(8.4375)/3.75  ,0.000001);
     TS_ASSERT_DELTA(outX[4],15.5  ,0.000001);
     TS_ASSERT_DELTA(outY[4],23,0.000001);
     TS_ASSERT_DELTA(outE[4], sqrt(64.6875)/3.75  ,0.000001);
@@ -146,37 +145,37 @@ public:
   }
 
 private:
-  Workspace1D_sptr Create1DWorkspaceHist(int size)
+  Workspace2D_sptr Create1DWorkspaceHist(int size)
   {
-    Workspace1D_sptr retVal(new Workspace1D);
+    Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1,size,size-1);
     double j=1.0;
     for (int i=0; i<size; i++)
     {
-      retVal->dataX()[i]=j*0.5;
+      retVal->dataX(0)[i]=j*0.5;
       j+=1.5;
     }
     j=1.0;
     for (int i=0; i<size-1; i++)
     {
-      retVal->dataY()[i]=j;
-      retVal->dataE()[i]=sqrt(j);
+      retVal->dataY(0)[i]=j;
+      retVal->dataE(0)[i]=sqrt(j);
       j+=1;
     }
 
     return retVal;
   }
   
-  Workspace1D_sptr Create1DWorkspacePnt(int size)
+  Workspace2D_sptr Create1DWorkspacePnt(int size)
   {
-    Workspace1D_sptr retVal(new Workspace1D);
+    Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1,size,size);
     double j=1.0;
     for (int i=0; i<size; i++)
     {
-      retVal->dataX()[i]=j*0.5;
-      retVal->dataY()[i]=j;
-      retVal->dataE()[i]=sqrt(j);
+      retVal->dataX(0)[i]=j*0.5;
+      retVal->dataY(0)[i]=j;
+      retVal->dataE(0)[i]=sqrt(j);
       j+=1.0;
     }
 

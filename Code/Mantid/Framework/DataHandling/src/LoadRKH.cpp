@@ -5,7 +5,7 @@
 #include "MantidDataHandling/SaveRKH.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/Workspace1D.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/VectorHelper.h"
@@ -201,7 +201,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D()
   if( colIsUnit )
   {
     MatrixWorkspace_sptr localworkspace = 
-      WorkspaceFactory::Instance().create("Workspace1D", 1, pointsToRead, pointsToRead);
+      WorkspaceFactory::Instance().create("Workspace2D", 1, pointsToRead, pointsToRead);
     localworkspace->getAxis(0)->unit() = UnitFactory::Instance().create(firstColVal);
     localworkspace->dataX(0) = columnOne;
     localworkspace->dataY(0) = ydata;

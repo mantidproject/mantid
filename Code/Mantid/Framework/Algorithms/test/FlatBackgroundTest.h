@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/FlatBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidCurveFitting/Linear.h"
 #include <boost/lexical_cast.hpp>
 #include <cmath>
@@ -24,7 +23,7 @@ public:
   FlatBackgroundTest()
   {
     bg = 100.0;
-    Mantid::DataObjects::Workspace1D_sptr WS(new Mantid::DataObjects::Workspace1D);
+    Mantid::DataObjects::Workspace2D_sptr WS(new Mantid::DataObjects::Workspace2D);
     WS->initialize(1,NUMBINS+1,NUMBINS);
     
     for (int i = 0; i < NUMBINS; ++i)
@@ -210,7 +209,7 @@ public:
   void testVariedWidths()
   {
     const double YVALUE = 100.0;
-    Mantid::DataObjects::Workspace1D_sptr WS(new Mantid::DataObjects::Workspace1D);
+    Mantid::DataObjects::Workspace2D_sptr WS(new Mantid::DataObjects::Workspace2D);
     WS->initialize(1,NUMBINS+1,NUMBINS);
     
     for (int i = 0; i < NUMBINS; ++i)

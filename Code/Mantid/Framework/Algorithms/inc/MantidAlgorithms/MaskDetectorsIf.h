@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidKernel/System.h"
 #include <boost/function.hpp>
 

@@ -8,7 +8,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadCanSAS1D.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <Poco/Path.h>
 

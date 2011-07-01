@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/Regroup.h"
@@ -22,7 +21,7 @@ class RegroupTest : public CxxTest::TestSuite
 public:
   void testworkspace1D_dist()
   {
-    Workspace1D_sptr test_in1D = Create1DWorkspace(50);
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
     test_in1D->isDistribution(true);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
@@ -71,19 +70,19 @@ public:
   }
 
 private:
-  Workspace1D_sptr Create1DWorkspace(int size)
+  Workspace2D_sptr Create1DWorkspace(int size)
   {
     boost::shared_ptr<Mantid::MantidVec> y1(new Mantid::MantidVec(size-1,3.0));
     boost::shared_ptr<Mantid::MantidVec> e1(new Mantid::MantidVec(size-1,sqrt(3.0)));
-    Workspace1D_sptr retVal(new Workspace1D);
+    Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1,size,size-1);
     double j=1.0;
     for (int i=0; i<size; i++)
     {
-      retVal->dataX()[i]=j*0.5;
+      retVal->dataX(0)[i]=j*0.5;
       j+=1.5;
     }
-    retVal->setData(y1,e1);
+    retVal->setData(0,y1,e1);
     return retVal;
   }
   

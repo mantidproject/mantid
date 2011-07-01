@@ -1,81 +1,79 @@
 set ( SRC_FILES
-        src/AbsManagedWorkspace2D.cpp
-        src/CompressedWorkspace2D.cpp
-        src/EventList.cpp
-        src/EventWorkspace.cpp
-        src/EventWorkspaceHelpers.cpp
-        src/Events.cpp
-        src/GroupingWorkspace.cpp
-        src/Histogram1D.cpp
-        src/ManagedDataBlock2D.cpp
-        src/ManagedWorkspace2D.cpp
-        src/OffsetsWorkspace.cpp
-        src/Peak.cpp
-        src/PeakColumn.cpp
-        src/PeaksWorkspace.cpp
-        src/SpecialWorkspace2D.cpp
-        src/TableColumn.cpp
-        src/TableWorkspace.cpp
-        src/Workspace1D.cpp
-        src/Workspace2D.cpp
-        src/WorkspaceSingleValue.cpp
+	src/AbsManagedWorkspace2D.cpp
+	src/CompressedWorkspace2D.cpp
+	src/EventList.cpp
+	src/EventWorkspace.cpp
+	src/EventWorkspaceHelpers.cpp
+	src/Events.cpp
+	src/GroupingWorkspace.cpp
+	src/Histogram1D.cpp
+	src/ManagedDataBlock2D.cpp
+	src/ManagedWorkspace2D.cpp
+	src/OffsetsWorkspace.cpp
+	src/Peak.cpp
+	src/PeakColumn.cpp
+	src/PeaksWorkspace.cpp
+	src/SpecialWorkspace2D.cpp
+	src/TableColumn.cpp
+	src/TableWorkspace.cpp
+	src/Workspace2D.cpp
+	src/WorkspaceSingleValue.cpp
 )
 
-set ( SRC_UNITY_IGNORE_FILES src/Workspace1D.cpp
-                src/Workspace2D.cpp
-                src/WorkspaceSingleValue.cpp
-                src/EventWorkspace.cpp
+set ( SRC_UNITY_IGNORE_FILES 
+	src/Workspace2D.cpp
+	src/WorkspaceSingleValue.cpp
+	src/EventWorkspace.cpp
 )
 
 set ( INC_FILES
-        inc/MantidDataObjects/AbsManagedWorkspace2D.h
-        inc/MantidDataObjects/CompressedWorkspace2D.h
-        inc/MantidDataObjects/DllConfig.h
-        inc/MantidDataObjects/EventList.h
-        inc/MantidDataObjects/EventWorkspace.h
-        inc/MantidDataObjects/EventWorkspaceHelpers.h
-        inc/MantidDataObjects/Events.h
-        inc/MantidDataObjects/GroupingWorkspace.h
-        inc/MantidDataObjects/Histogram1D.h
-        inc/MantidDataObjects/ManagedDataBlock2D.h
-        inc/MantidDataObjects/ManagedWorkspace2D.h
-        inc/MantidDataObjects/OffsetsWorkspace.h
-        inc/MantidDataObjects/Peak.h
-        inc/MantidDataObjects/PeakColumn.h
-        inc/MantidDataObjects/PeaksWorkspace.h
-        inc/MantidDataObjects/SpecialWorkspace2D.h
-        inc/MantidDataObjects/TableColumn.h
-        inc/MantidDataObjects/TablePointerColumn.h
-        inc/MantidDataObjects/TableWorkspace.h
-        inc/MantidDataObjects/Workspace1D.h
-        inc/MantidDataObjects/Workspace2D.h
-        inc/MantidDataObjects/WorkspaceSingleValue.h
+	inc/MantidDataObjects/AbsManagedWorkspace2D.h
+	inc/MantidDataObjects/CompressedWorkspace2D.h
+	inc/MantidDataObjects/DllConfig.h
+	inc/MantidDataObjects/EventList.h
+	inc/MantidDataObjects/EventWorkspace.h
+	inc/MantidDataObjects/EventWorkspaceHelpers.h
+	inc/MantidDataObjects/Events.h
+	inc/MantidDataObjects/GroupingWorkspace.h
+	inc/MantidDataObjects/Histogram1D.h
+	inc/MantidDataObjects/ManagedDataBlock2D.h
+	inc/MantidDataObjects/ManagedWorkspace2D.h
+	inc/MantidDataObjects/OffsetsWorkspace.h
+	inc/MantidDataObjects/Peak.h
+	inc/MantidDataObjects/PeakColumn.h
+	inc/MantidDataObjects/PeaksWorkspace.h
+	inc/MantidDataObjects/SpecialWorkspace2D.h
+	inc/MantidDataObjects/TableColumn.h
+	inc/MantidDataObjects/TablePointerColumn.h
+	inc/MantidDataObjects/TableWorkspace.h
+	inc/MantidDataObjects/Workspace2D.h
+	inc/MantidDataObjects/WorkspaceSingleValue.h
 )
 
 set ( TEST_FILES
-        test/CompressedWorkspace2DTest.h
-        test/EventListTest.h
-        test/EventWorkspaceTest.h
-        test/GroupingWorkspaceTest.h
-        test/Histogram1DTest.h
-        test/LibraryManagerTest.h
-        test/ManagedDataBlock2DTest.h
-        test/ManagedWorkspace2DTest.h
-        test/OffsetsWorkspaceTest.h
-        test/PeakColumnTest.h
-        test/PeakTest.h
-        test/PeaksWorkspaceTest.h
-        test/RefAxisTest.h
-        test/SpecialWorkspace2DTest.h
-        test/TableWorkspacePropertyTest.h
-        test/TableWorkspaceTest.h
-        test/TofEventTest.h
-        test/WeightedEventNoTimeTest.h
-        test/WeightedEventTest.h
-        test/Workspace2DTest.h
-        test/WorkspaceIteratorTest.h
-        test/WorkspaceSingleValueTest.h
-        test/WorkspaceValidatorsTest.h
+	test/CompressedWorkspace2DTest.h
+	test/EventListTest.h
+	test/EventWorkspaceTest.h
+	test/GroupingWorkspaceTest.h
+	test/Histogram1DTest.h
+	test/LibraryManagerTest.h
+	test/ManagedDataBlock2DTest.h
+	test/ManagedWorkspace2DTest.h
+	test/OffsetsWorkspaceTest.h
+	test/PeakColumnTest.h
+	test/PeakTest.h
+	test/PeaksWorkspaceTest.h
+	test/RefAxisTest.h
+	test/SpecialWorkspace2DTest.h
+	test/TableWorkspacePropertyTest.h
+	test/TableWorkspaceTest.h
+	test/TofEventTest.h
+	test/WeightedEventNoTimeTest.h
+	test/WeightedEventTest.h
+	test/Workspace2DTest.h
+	test/WorkspaceIteratorTest.h
+	test/WorkspaceSingleValueTest.h
+	test/WorkspaceValidatorsTest.h
 )
 
 if(UNITY_BUILD)

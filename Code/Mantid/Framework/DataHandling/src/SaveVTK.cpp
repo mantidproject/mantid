@@ -4,7 +4,6 @@
 #include "MantidDataHandling/SaveVTK.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <Poco/File.h>
 #include <string>

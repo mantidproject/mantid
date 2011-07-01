@@ -11,14 +11,12 @@
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidKernel/Timer.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::DataObjects::Workspace1D_sptr;
 using Mantid::Geometry::IDetector_sptr;
 
 class BinaryOpHelper : public Mantid::Algorithms::BinaryOperation
@@ -61,12 +59,12 @@ public:
   void testcheckSizeCompatibility1D1D()
   {
     // Register the workspace in the data service
-    Workspace1D_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
-    Workspace1D_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(20);
-    Workspace1D_sptr work_in3 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
-    Workspace1D_sptr work_in4 = WorkspaceCreationHelper::Create1DWorkspaceFib(5);
-    Workspace1D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
-    Workspace1D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
+    Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
+    Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(20);
+    Workspace2D_sptr work_in3 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
+    Workspace2D_sptr work_in4 = WorkspaceCreationHelper::Create1DWorkspaceFib(5);
+    Workspace2D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
+    Workspace2D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
     BinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
     TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3));
@@ -79,11 +77,11 @@ public:
   {
     // Register the workspace in the data service
     Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(10,10);
-    Workspace1D_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(20);
-    Workspace1D_sptr work_in3 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
-    Workspace1D_sptr work_in4 = WorkspaceCreationHelper::Create1DWorkspaceFib(5);
-    Workspace1D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
-    Workspace1D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
+    Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(20);
+    Workspace2D_sptr work_in3 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
+    Workspace2D_sptr work_in4 = WorkspaceCreationHelper::Create1DWorkspaceFib(5);
+    Workspace2D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
+    Workspace2D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
     MatrixWorkspace_sptr work_inEvent1 = WorkspaceCreationHelper::CreateEventWorkspace(10,1);
     //will not pass x array does not match
     MatrixWorkspace_sptr work_inEvent2 = WorkspaceCreationHelper::CreateEventWorkspace(1,10);

@@ -7,7 +7,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadRKH.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <Poco/Path.h>
 
@@ -57,7 +56,7 @@ public:
     //Now need to test the resultant workspace, first retrieve it
     Workspace_sptr rkhspace;
     TS_ASSERT_THROWS_NOTHING( rkhspace = AnalysisDataService::Instance().retrieve(outputSpace) );
-    Workspace1D_sptr data = boost::dynamic_pointer_cast<Workspace1D>(rkhspace);
+    Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(rkhspace);
     
     //The data in the 2D workspace does not match the file data directly because the
     //file contains bin-centered values and the algorithm adjusts the x values so that 

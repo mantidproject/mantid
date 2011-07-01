@@ -23,7 +23,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveCSV.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
 
@@ -57,9 +56,7 @@ using namespace API;
 using API::WorkspaceProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
-using DataObjects::Workspace1D;
 using DataObjects::Workspace2D;
-using DataObjects::Workspace1D_sptr;
 using DataObjects::Workspace2D_sptr;
 
 /// Empty default constructor
@@ -120,48 +117,19 @@ void SaveCSV::exec()
   // Get the input workspace
   const MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
-  // get workspace ID string. Used to differentiate between
-  // workspace1D and workspace2D in the if statement below
+  // get workspace ID string. to check the data type
 
   const std::string workspaceID = inputWorkspace->id();
-
   // seperating out code depending on the workspace ID
 
-
-  if (workspaceID == "Workspace1D")
+  if ( workspaceID.find("Workspace2D") != std::string::npos )
   {
-
-    const Workspace1D_sptr localworkspace = boost::dynamic_pointer_cast<Workspace1D>(inputWorkspace);
-
-    // Get info from 1D workspace
-
-    const MantidVec& xValue = localworkspace->dataX();
-    const MantidVec& yValue = localworkspace->dataY();
-    const MantidVec& eValue = localworkspace->dataE();
-    Progress p(this, 0, 1, static_cast<int>(xValue.size()));
-    // write to file
-    
-    for (int i = 0; i < (int)xValue.size(); i++)
-    {
-      outCSV_File << std::setw(15) << xValue[i] << m_separator << std::setw(15)
-          << yValue[i] << m_separator << std::setw(15) << eValue[i]
-          << m_lineSeparator;
-		  p.report();
-    }
-  }
-  else if ( workspaceID.find("Workspace2D") != std::string::npos )
-  {
-	 
-   
     const Workspace2D_sptr localworkspace = boost::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
 
     // Get info from 2D workspace
-
     const size_t numberOfHist = localworkspace->getNumberHistograms();
     
-	
     // Add first x-axis line to output file
-
     {
       const MantidVec& xValue = localworkspace->dataX(0);
 
@@ -234,7 +202,7 @@ void SaveCSV::exec()
   else
   {
     outCSV_File.close(); // and should probably delete file from disk as well
-    throw Exception::NotImplementedError("SaveCSV currently only works for 1D and 2D workspaces.");
+    throw Exception::NotImplementedError("SaveCSV currently only works for 2D workspaces.");
   }
   outCSV_File.close();
   //only gets here if everything happened normally

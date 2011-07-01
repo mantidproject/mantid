@@ -143,7 +143,7 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
 }
 
 /** Creates a new instance of the class with the given name, and allocates memory for the arrays
- *  where it creates and initialises either a Workspace1D, Workspace2D or a ManagedWorkspace2D
+ *  where it creates and initialises either a Workspace2D or a ManagedWorkspace2D
  *  according to the size requested and the value of the configuration parameter
  *  ManagedWorkspace.LowerMemoryLimit (default 40% of available physical memory) Workspace2D only.
  *  @param  className The name of the class you wish to create

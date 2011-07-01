@@ -22,7 +22,7 @@ namespace WorkspaceCreationHelper
   using Mantid::MantidVec;
   using Mantid::MantidVecPtr;
 
-  Workspace1D_sptr Create1DWorkspaceRand(int size)
+  Workspace2D_sptr Create1DWorkspaceRand(int size)
   {
     MantidVecPtr x1,y1,e1;
     x1.access().resize(size,1);
@@ -30,14 +30,14 @@ namespace WorkspaceCreationHelper
     std::generate(y1.access().begin(),y1.access().end(),rand);
     e1.access().resize(size);
     std::generate(e1.access().begin(),e1.access().end(),rand);
-    Workspace1D_sptr retVal(new Workspace1D);
+    Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1,size,size);
-    retVal->setX(x1);
-    retVal->setData(y1,e1);
+    retVal->setX(0,x1);
+    retVal->setData(0,y1,e1);
     return retVal;
   }
 
-  Workspace1D_sptr Create1DWorkspaceConstant(int size, double value, double error)
+  Workspace2D_sptr Create1DWorkspaceConstant(int size, double value, double error)
   {
     MantidVecPtr x1,y1,e1;
     x1.access().resize(size,1);
@@ -45,24 +45,24 @@ namespace WorkspaceCreationHelper
     std::fill(y1.access().begin(), y1.access().end(), value);
     e1.access().resize(size);
     std::fill(y1.access().begin(), y1.access().end(), error);
-    Workspace1D_sptr retVal(new Workspace1D);
+    Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1,size,size);
-    retVal->setX(x1);
-    retVal->setData(y1,e1);
+    retVal->setX(0,x1);
+    retVal->setData(0,y1,e1);
     return retVal;
   }
 
-  Workspace1D_sptr Create1DWorkspaceFib(int size)
+  Workspace2D_sptr Create1DWorkspaceFib(int size)
   {
     MantidVecPtr x1,y1,e1;
     x1.access().resize(size,1);
     y1.access().resize(size);
     std::generate(y1.access().begin(),y1.access().end(),FibSeries<double>());
     e1.access().resize(size);
-    Workspace1D_sptr retVal(new Workspace1D);
+    Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1,size,size);
-    retVal->setX(x1);
-    retVal->setData(y1,e1);
+    retVal->setX(0,x1);
+    retVal->setData(0,y1,e1);
     return retVal;
   }
 

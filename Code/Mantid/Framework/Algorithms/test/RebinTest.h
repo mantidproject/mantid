@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -34,7 +33,7 @@ public:
 
   void testworkspace1D_dist()
   {
-    Workspace1D_sptr test_in1D = Create1DWorkspace(50);
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
     test_in1D->isDistribution(true);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
@@ -72,31 +71,9 @@ public:
   }
 
 
-
-//  void testworkspace1D_dist_stupid_bins()
-//  {
-//    Workspace1D_sptr test_in1D = Create1DWorkspace(50);
-//    test_in1D->isDistribution(true);
-//    AnalysisDataService::Instance().add("test_in1D", test_in1D);
-//
-//    Rebin rebin;
-//    rebin.initialize();
-//    rebin.setPropertyValue("InputWorkspace","test_in1D");
-//    rebin.setPropertyValue("OutputWorkspace","test_out");
-//    // Check it fails if "Params" property not set
-//    TS_ASSERT_THROWS( rebin.execute(), std::runtime_error );
-//    TS_ASSERT( ! rebin.isExecuted() );
-//    // Way too many bins
-//    rebin.setPropertyValue("Params", "0.0,1e-8,10");
-//    // Fails to execute
-//    TS_ASSERT(!rebin.execute());
-//    TS_ASSERT(!rebin.isExecuted());
-//    AnalysisDataService::Instance().remove("test_in1D");
-//  }
-
   void testworkspace1D_nondist()
   {
-    Workspace1D_sptr test_in1D = Create1DWorkspace(50);
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
     Rebin rebin;
@@ -130,7 +107,7 @@ public:
 
   void testworkspace1D_logarithmic_binning()
   {
-    Workspace1D_sptr test_in1D = Create1DWorkspace(50);
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
     test_in1D->isDistribution(true);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
@@ -328,7 +305,7 @@ public:
 
   void testRebinPointData()
   {
-    Workspace1D_sptr input = Create1DWorkspace(51);
+    Workspace2D_sptr input = Create1DWorkspace(51);
     AnalysisDataService::Instance().add("test_RebinPointDataInput", input);
 
     Mantid::API::Algorithm_sptr ctpd = Mantid::API::AlgorithmFactory::Instance().create("ConvertToPointData", 1);
@@ -362,19 +339,19 @@ public:
 private:
 
 
-  Workspace1D_sptr Create1DWorkspace(int size)
+  Workspace2D_sptr Create1DWorkspace(int size)
   {
     boost::shared_ptr<Mantid::MantidVec> y1(new Mantid::MantidVec(size-1,3.0));
     boost::shared_ptr<Mantid::MantidVec> e1(new Mantid::MantidVec(size-1,sqrt(3.0)));
-    Workspace1D_sptr retVal(new Workspace1D);
+    Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(1,size,size-1);
     double j=1.0;
     for (int i=0; i<size; i++)
     {
-      retVal->dataX()[i]=j*0.5;
+      retVal->dataX(0)[i]=j*0.5;
       j+=1.5;
     }
-    retVal->setData(y1,e1);
+    retVal->setData(0, y1,e1);
     return retVal;
   }
   

@@ -173,7 +173,7 @@ public:
     outputSpace = "LoadLogTest-rawdatafile_so_type";
     TS_ASSERT_THROWS( loaderRawFile.setPropertyValue("Workspace", outputSpace), std::invalid_argument)
     // Create an empty workspace and put it in the AnalysisDataService
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace1D",1,1,1);
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
 

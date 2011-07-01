@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <fstream>
@@ -27,7 +26,6 @@ void MaskDetectorsIf::initDocs()
 
 
 using namespace Kernel;
-using DataObjects::Workspace1D;
 
 /// Constructor
 MaskDetectorsIf::MaskDetectorsIf() :

@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Linear.h"
-#include "MantidDataObjects/Workspace1D.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -16,7 +16,7 @@ public:
     c0 = 10.0;
     c1 = 1.0;
     const int numBins = 30;
-    Mantid::DataObjects::Workspace1D_sptr WS(new Mantid::DataObjects::Workspace1D);
+    Mantid::DataObjects::Workspace2D_sptr WS(new Mantid::DataObjects::Workspace2D);
     WS->initialize(1,numBins+1,numBins);
     
     for (int i = 0; i < numBins; ++i)

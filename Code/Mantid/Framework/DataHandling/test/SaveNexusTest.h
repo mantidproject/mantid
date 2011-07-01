@@ -12,7 +12,6 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveNexus.h"
 #include "MantidDataHandling/LoadMuonNexus.h"

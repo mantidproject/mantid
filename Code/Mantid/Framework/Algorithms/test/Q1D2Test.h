@@ -231,7 +231,7 @@ public:
     TS_ASSERT(nocuts)
     TS_ASSERT_EQUALS( nocuts->getNumberHistograms(), 1 )
     
-    for ( int i = 0; i < nocuts->readY(0).size(); ++i )
+    for ( size_t i = 0; i < nocuts->readY(0).size(); ++i )
     {
       TS_ASSERT_EQUALS( nocuts->readX(0)[i], noGrav->readX(0)[i] )
       if ( ! boost::math::isnan(nocuts->readY(0)[i]) )

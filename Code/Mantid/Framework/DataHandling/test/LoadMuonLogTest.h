@@ -58,7 +58,7 @@ public:
     outputSpace = "LoadMuonLogTest-nexusdatafile";
     TS_ASSERT_THROWS( loaderNexusFile.setPropertyValue("Workspace", outputSpace), std::invalid_argument )
     // Create an empty workspace and put it in the AnalysisDataService
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace1D",1,1,1);
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));
 

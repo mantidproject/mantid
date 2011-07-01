@@ -10,7 +10,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
@@ -116,14 +115,6 @@ public:
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
     performTest(work_in1,work_in2, false /*not event*/,
         DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.0 : 4.0, false, false, true /*in place*/);
-  }
-
-  void test_2D_1D()
-  {
-    int nHist = 20,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
-    performTest(work_in1,work_in2);
   }
 
   void test_2D_1DColumn()

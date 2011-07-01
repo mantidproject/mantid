@@ -7,7 +7,6 @@
 
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraDetectorMap.h"
@@ -26,9 +25,9 @@ namespace WorkspaceCreationHelper
     inline T operator()() { const T out(x1+x2); x1=x2; x2=out;  return out; }
   };
 
-  DLL_TESTHELPERS Mantid::DataObjects::Workspace1D_sptr Create1DWorkspaceRand(int size);
-  DLL_TESTHELPERS Mantid::DataObjects::Workspace1D_sptr Create1DWorkspaceConstant(int size, double value, double error);
-  DLL_TESTHELPERS Mantid::DataObjects::Workspace1D_sptr Create1DWorkspaceFib(int size);
+  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceRand(int size);
+  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceConstant(int size, double value, double error);
+  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceFib(int size);
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(int nHist, int nBins);
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(int64_t nHist, int64_t nBin, bool isHist=false, const std::set<int64_t> &

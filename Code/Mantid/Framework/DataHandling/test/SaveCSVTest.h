@@ -1,13 +1,13 @@
 #ifndef SAVECSVTEST_H_
 #define SAVECSVTEST_H_
 
-#include <fstream>
-#include <cxxtest/TestSuite.h>
-
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveCSV.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 #include <Poco/File.h>
 
 using namespace Mantid::API;
@@ -32,16 +32,16 @@ public:
   
   SaveCSVTest()
   {
-    // create dummy 1D-workspace
-    Workspace_sptr localWorkspace = WorkspaceFactory::Instance().create("Workspace1D",1,10,10);
-    Workspace1D_sptr localWorkspace1D = boost::dynamic_pointer_cast<Workspace1D>(localWorkspace);
+    // create dummy 2D-workspace with one pixel
+    Workspace_sptr localWorkspace = WorkspaceFactory::Instance().create("Workspace2D",1,10,10);
+    Workspace2D_sptr localWorkspace2D_onePixel = boost::dynamic_pointer_cast<Workspace2D>(localWorkspace);
 
     double d = 0.0;
     for (int i=0; i<10; ++i,d+=0.1)
     {
-      localWorkspace1D->dataX()[i] = d;
-      localWorkspace1D->dataY()[i] = d;
-      localWorkspace1D->dataE()[i] = d;
+      localWorkspace2D_onePixel->dataX(0)[i] = d;
+      localWorkspace2D_onePixel->dataY(0)[i] = d+1.0;
+      localWorkspace2D_onePixel->dataE(0)[i] = d+2.0;
     }
     
     AnalysisDataService::Instance().add("SAVECSVTEST-testSpace", localWorkspace);
@@ -90,21 +90,26 @@ public:
      
     std::ifstream in(outputFile.c_str());
     
+    std::string Amarker;
     double d1, d2, d3;
     std::string separator;
     std::string number_plus_comma;
     
-    in >> d1 >> separator >> d2 >> separator >> d3 >> number_plus_comma;
+    in >> Amarker >> d1 >> separator >> d2 >> separator >> d3 >> separator >> number_plus_comma;
     
     in.close();
     
+    TS_ASSERT_EQUALS(Amarker,"A" );
     TS_ASSERT_EQUALS(separator,"," );
-    TS_ASSERT( ! number_plus_comma.compare("0.1,") );
+    TS_ASSERT_DELTA(d1, 0.0, 1e-5);
+    TS_ASSERT_DELTA(d2, 0.1, 1e-5);
+    TS_ASSERT_DELTA(d3, 0.2, 1e-5);
+    TS_ASSERT_EQUALS( number_plus_comma, "0.3," );
     
     
     // remove file created by this algorithm
-    Poco::File(outputFile).remove(); 
-	AnalysisDataService::Instance().remove("SAVECSVTEST-testSpace");
+    Poco::File(outputFile).remove();
+    AnalysisDataService::Instance().remove("SAVECSVTEST-testSpace");
   
   }
 

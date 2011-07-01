@@ -6,7 +6,6 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/LoadNexus.h"
 // These includes seem to make the difference between initialization of the

@@ -8,7 +8,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadSpice2D.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
