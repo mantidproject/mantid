@@ -1,5 +1,13 @@
 #include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
 #include <boost/math/special_functions/fpclassify.hpp>
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/CPUTimer.h"
+#include <vtkStructuredGrid.h>
+#include <vtkRectilinearGrid.h>
+#include <vtkImageData.h>
+
+using Mantid::API::IMDWorkspace;
+using Mantid::Kernel::CPUTimer;
 
 namespace Mantid
 {
@@ -40,9 +48,9 @@ namespace VATES
    this->m_workspace = other.m_workspace;
   }
 
-  void vtkThresholdingHexahedronFactory::initialize(Mantid::API::IMDWorkspace_sptr workspace)
+  void vtkThresholdingHexahedronFactory::initialize(Mantid::API::Workspace_sptr workspace)
   {
-    m_workspace = workspace;
+    m_workspace = boost::dynamic_pointer_cast<IMDWorkspace>(workspace);
     // Check that a workspace has been provided.
     validateWsNotNull();
     // When the workspace can not be handled by this type, take action in the form of delegation.
@@ -124,6 +132,9 @@ namespace VATES
       double minSig=1e32;
       double maxSig=-1e32;
 
+
+      CPUTimer tim;
+
       //Loop through dimensions
       for (int i = 0; i < nPointsX; i++)
       {
@@ -166,6 +177,7 @@ namespace VATES
       }
 
       std::cout << "Min signal was " << minSig << ". Max was " << maxSig << std::endl;
+      std::cout << tim << " to create all the points in the map." << std::endl;
 
       points->Squeeze();
       signal->Squeeze();
@@ -175,6 +187,7 @@ namespace VATES
       visualDataSet->SetPoints(points);
       visualDataSet->GetCellData()->SetScalars(signal);
 
+      // ------ Hexahedron creation ----------------
       for (int i = 0; i < nBinsX - 1; i++)
       {
         for (int j = 0; j < nBinsY -1; j++)
@@ -192,6 +205,101 @@ namespace VATES
           }
         }
       }
+
+
+      // NOTE: The following chunks of code are attempts to speed up vtkDataSet creation.
+
+/*
+      // ------------- vtkImageData ---------------
+      vtkImageData *visualDataSet = vtkImageData ::New();
+      visualDataSet->SetDimensions( nBinsX, nBinsY, nBinsZ );
+      visualDataSet->SetScalarTypeToDouble();
+      visualDataSet->SetOrigin( minX, minY, minZ);
+      visualDataSet->SetSpacing(incrementX, incrementY, incrementZ );
+      visualDataSet->AllocateScalars();
+
+      for (int i = 0; i < nPointsX; i++)
+      {
+        posX = minX + (i * incrementX); //Calculate increment in x;
+        for (int j = 0; j < nPointsY; j++)
+        {
+          posY = minY + (j * incrementY); //Calculate increment in y;
+          for (int k = 0; k < nPointsZ; k++)
+          {
+            visualDataSet->SetScalarComponentFromDouble(i,j,k, 0, m_workspace->getSignalNormalizedAt(i,j,k) );
+          }
+        }
+      }
+*/
+
+      /*
+      // ----------- vtkRectilinearGrid ---------------------------
+
+      // Array with the number of entries in each dimension
+      vtkRectilinearGrid  *visualDataSet = vtkRectilinearGrid ::New();
+      visualDataSet->SetDimensions( nBinsX, nBinsY, nBinsZ );
+
+      vtkFloatArray *xCoords = vtkFloatArray::New();
+      for (int i=0; i<nBinsX; i++) xCoords->InsertNextValue( m_workspace->getXDimension()->getX(i));
+      vtkFloatArray *yCoords = vtkFloatArray::New();
+      for (int i=0; i<nBinsY; i++) yCoords->InsertNextValue( m_workspace->getYDimension()->getX(i));
+      vtkFloatArray *zCoords = vtkFloatArray::New();
+      for (int i=0; i<nBinsZ; i++) zCoords->InsertNextValue( m_workspace->getZDimension()->getX(i));
+
+      visualDataSet->SetDimensions( nBinsX, nBinsY, nBinsZ );
+      visualDataSet->SetXCoordinates(xCoords);
+      visualDataSet->SetYCoordinates(yCoords);
+      visualDataSet->SetZCoordinates(zCoords);
+
+      visualDataSet->GetCellData()->SetScalars(signal);
+  */
+
+/*
+      PRAGMA_OMP( parallel for schedule(dynamic,1) )
+      for (int i = 0; i < nBinsX - 1; i++)
+      {
+        // Blank vector of the hexahedrons to start with
+        std::vector<vtkHexahedron*> hexas(nBinsY * nBinsZ, NULL);
+
+        for (int j = 0; j < nBinsY -1; j++)
+        {
+          for (int k = 0; k < nBinsZ -1; k++)
+          {
+            //Only create topologies for those cells which are not sparse.
+            if (!pointMap[i][j][k].isSparse)
+            {
+              // create a hexahedron topology. This = 63 % of the function's runtime.
+              vtkHexahedron* hexahedron = createHexahedron(pointMap, i, j, k);
+              // Save it for later. Thread safe since no push_back()
+              hexas[k*nBinsZ + j] = hexahedron;
+            }
+          }
+        }
+
+        // Now insert all the hexahedrons. This is probably not thread safe operation
+        PARALLEL_CRITICAL( vtkThresholdingHexahedronFactory_create )
+        {
+          std::vector<vtkHexahedron*>::iterator it;
+          std::vector<vtkHexahedron*>::iterator it_end = hexas.end();
+          for (it = hexas.begin(); it != it_end; it++)
+          {
+            if (*it)
+              visualDataSet->InsertNextCell(VTK_HEXAHEDRON, (*it)->GetPointIds());
+          }
+        }
+
+        // Now delete all these hexahedrons. This = 23% of the functions run time.
+        std::vector<vtkHexahedron*>::iterator it;
+        std::vector<vtkHexahedron*>::iterator it_end = hexas.end();
+        for (it = hexas.begin(); it != it_end; it++)
+        {
+          if (*it)
+          (*it)->Delete();
+        }
+      } // (for each X bin)
+*/
+      std::cout << tim << " to create and add the hexadrons." << std::endl;
+
 
       points->Delete();
       signal->Delete();

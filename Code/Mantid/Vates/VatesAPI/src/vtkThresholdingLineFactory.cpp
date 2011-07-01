@@ -8,6 +8,9 @@
 #include "MDDataObjects/MDIndexCalculator.h"
 #include <vector>
 #include <boost/math/special_functions/fpclassify.hpp> 
+#include "MantidAPI/IMDWorkspace.h"
+
+using Mantid::API::IMDWorkspace;
 
 namespace Mantid
 {
@@ -146,9 +149,9 @@ namespace Mantid
       throw std::runtime_error("::createScalarArray() does not apply for this type of factory.");
     }
 
-    void vtkThresholdingLineFactory::initialize(Mantid::API::IMDWorkspace_sptr wspace_sptr)
+    void vtkThresholdingLineFactory::initialize(Mantid::API::Workspace_sptr wspace_sptr)
     {
-      m_workspace = wspace_sptr;
+      m_workspace = boost::dynamic_pointer_cast<IMDWorkspace>(wspace_sptr);
       validate();
       // When the workspace can not be handled by this type, take action in the form of delegation.
       size_t nonIntegratedSize = m_workspace->getNonIntegratedDimensions().size();

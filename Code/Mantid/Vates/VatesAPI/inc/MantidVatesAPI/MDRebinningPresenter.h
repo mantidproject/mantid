@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include <vector>
 #include <string>
+#include "vtkDataSet.h"
 
 class vtkUnstructuredGrid;
 namespace Mantid
@@ -41,7 +42,7 @@ namespace Mantid
     {
     public:
       virtual void updateModel() = 0;
-      virtual vtkUnstructuredGrid* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler) = 0;
+      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler) = 0;
       virtual const std::string& getAppliedGeometryXML() const = 0;
       virtual bool hasTDimensionAvailable() const = 0;
       virtual std::vector<double> getTimeStepValues() const = 0;

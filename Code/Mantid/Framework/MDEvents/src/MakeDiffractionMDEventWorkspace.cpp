@@ -151,8 +151,9 @@ namespace MDEvents
       // Detector direction normalized to 1
       V3D detDir = detPos / detPos.norm();
 
-      // The direction of momentum transfer = the output beam direction - input beam direction (normalized)
-      V3D Q_dir_lab_frame = detDir - beamDir;
+      // The direction of momentum transfer in the inelastic convention ki-kf
+      //  = input beam direction (normalized to 1) - output beam direction (normalized to 1)
+      V3D Q_dir_lab_frame = beamDir - detDir;
 
       // Multiply by the rotation matrix to convert to Q in the sample frame (take out goniometer rotation)
       // (or to HKL, if that's what the matrix is)
@@ -174,11 +175,12 @@ namespace MDEvents
       }
 
       /** Constant that you divide by tof (in usec) to get wavenumber in ang^-1 :
-       * Wavenumber (in ang^-1) =  (PhysicalConstants::NeutronMass * distance) / ((tof (in usec) * 1e-6) * PhysicalConstants::h_bar) * 1e-10; */
+       * Wavenumber (in ang^-1) =  (PhysicalConstants::NeutronMass * distance) / ((tof (in usec) * 1e-6) * PhysicalConstants::h) * 1e-10; */
       const double wavenumber_in_angstrom_times_tof_in_microsec =
-          (PhysicalConstants::NeutronMass * distance * 1e-10) / (1e-6 * PhysicalConstants::h_bar);
+          (PhysicalConstants::NeutronMass * distance * 1e-10) / (1e-6 * PhysicalConstants::h);
 
       //std::cout << wi << " : " << el.getNumberEvents() << " events. Pos is " << detPos << std::endl;
+      //std::cout << Q_dir.norm() << " Qdir norm" << std::endl;
 
       // This little dance makes the getting vector of events more general (since you can't overload by return type).
       typename std::vector<T> * events_ptr;
@@ -188,6 +190,7 @@ namespace MDEvents
       // Iterators to start/end
       typename std::vector<T>::iterator it = events.begin();
       typename std::vector<T>::iterator it_end = events.end();
+
       for (; it != it_end; it++)
       {
         // Get the wavenumber in ang^-1 using the previously calculated constant.
@@ -214,7 +217,6 @@ namespace MDEvents
       // Clear out the EventList to save memory
       if (ClearInputWorkspace)
       {
-
         // Track how much memory you cleared
         size_t memoryCleared = el.getMemorySize();
         // Clear it now
@@ -247,6 +249,10 @@ namespace MDEvents
     in_ws = getProperty("InputWorkspace");
     if (!in_ws)
       throw std::invalid_argument("No input event workspace was passed to algorithm.");
+
+    // check the input units
+    if (in_ws->getAxis(0)->unit()->unitID() != "TOF")
+      throw std::invalid_argument("Input event workspace's X axis must be in TOF units.");
 
     // Try to get the output workspace
     IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");

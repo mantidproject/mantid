@@ -8,13 +8,12 @@
 #include <gtest/gtest.h>
 #include "vtkDataSet.h"
 #include "vtkFloatArray.h"
+#include "MantidAPI/Workspace.h"
 
 class vtkDataSetFactoryTest : public CxxTest::TestSuite
 {
-
 private:
-
-  class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory 
+  class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory
   {
   public:
     MOCK_CONST_METHOD0(create,
@@ -24,7 +23,7 @@ private:
     MOCK_CONST_METHOD0(createScalarArray,
       vtkFloatArray*());
     MOCK_METHOD1(initialize,
-      void(boost::shared_ptr<Mantid::API::IMDWorkspace>));
+      void(boost::shared_ptr<Mantid::API::Workspace>));
     MOCK_CONST_METHOD0(validate,
       void());
     MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
@@ -37,7 +36,6 @@ private:
       return vtkDataSetFactory::hasSuccessor();
     }
   };
-
 
 public:
 

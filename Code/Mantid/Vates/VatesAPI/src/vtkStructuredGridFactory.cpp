@@ -1,6 +1,9 @@
 #include "MantidVatesAPI/vtkStructuredGridFactory.h"
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
+#include "MantidAPI/IMDWorkspace.h"
+
+using Mantid::API::IMDWorkspace;
 
 namespace Mantid
 {
@@ -49,9 +52,9 @@ namespace VATES
   }
 
   template<typename TimeMapper>
-  void vtkStructuredGridFactory<TimeMapper>::initialize(Mantid::API::IMDWorkspace_sptr workspace)
+  void vtkStructuredGridFactory<TimeMapper>::initialize(Mantid::API::Workspace_sptr workspace)
   {
-    m_workspace = workspace;
+    m_workspace = boost::dynamic_pointer_cast<IMDWorkspace>(workspace);
     validate();
 
     double tMax = m_workspace->getTDimension()->getMaximum();

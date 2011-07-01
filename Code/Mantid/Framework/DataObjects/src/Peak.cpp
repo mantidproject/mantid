@@ -266,7 +266,8 @@ namespace DataObjects
 
 
   // -------------------------------------------------------------------------------------
-  /** Calculate the neutron wavelength (in angstroms) at the peak (Note for inelastic scattering - it is the wavelength corresponding to the final energy)*/
+  /** Calculate the neutron wavelength (in angstroms) at the peak
+   * (Note for inelastic scattering - it is the wavelength corresponding to the final energy)*/
   double Peak::getWavelength() const
   {
     // Energy in J of the neutron

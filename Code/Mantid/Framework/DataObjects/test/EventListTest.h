@@ -1774,47 +1774,52 @@ public:
 class EventListTestPerformance : public CxxTest::TestSuite
 {
 public:
-  EventList el_random, el_sorted, el_sorted_weighted, el4, el5;
-  MantidVec fineX;
-  MantidVec coarseX;
-  void setUp()
-  {
-    std::cout << "setup called";
-    PARALLEL_SECTIONS
-    {
-      PARALLEL_SECTION
-      {
-        // Random events up to 1e5 tof
-        el_random.clear();
-        for (size_t i=0; i < 2e6; i++)
-          el_random += TofEvent( (rand()%200000)*0.05, rand()%1000);
-      }
-      PARALLEL_SECTION
-      {
-        // 10 million events, up to 1e5 tof
-        el_sorted.clear();
-        for (size_t i=0; i < 10e6; i++)
-          el_sorted += TofEvent( static_cast<double>(i)/100.0, rand()%1000);
-        el_sorted.setSortOrder(TOF_SORT);
-      }
-      PARALLEL_SECTION
-      {
-        el_sorted_weighted.clear();
-        for (size_t i=0; i < 10e6; i++)
-          el_sorted_weighted += WeightedEvent( static_cast<double>(i)/100.0, rand()%1000, 2.34, 4.56);
-        el_sorted_weighted.setSortOrder(TOF_SORT);
-      }
-      PARALLEL_SECTION
-      {
-        // A vector for histogramming, 100,000 steps of 1.0
-        for (double i=0; i < 100000; i += 1.0)
-          fineX.push_back(i);
-      }
-    }
 
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static EventListTestPerformance *createSuite() { return new EventListTestPerformance(); }
+  static void destroySuite( EventListTestPerformance *suite ) { delete suite; }
+
+  /** Constructor */
+  EventListTestPerformance()
+  {
+    // Source for a randome event list
+    el_random_source.clear();
+    for (size_t i=0; i < 2e6; i++)
+      el_random_source += TofEvent( (rand()%200000)*0.05, rand()%1000);
+
+    // 10 million events, up to 1e5 tof
+    el_sorted_original.clear();
+    for (size_t i=0; i < 10e6; i++)
+      el_sorted_original += TofEvent( static_cast<double>(i)/100.0, rand()%1000);
+    el_sorted_original.setSortOrder(TOF_SORT);
+
+    el_sorted_weighted.clear();
+    for (size_t i=0; i < 10e6; i++)
+      el_sorted_weighted += WeightedEvent( static_cast<double>(i)/100.0, rand()%1000, 2.34, 4.56);
+    el_sorted_weighted.setSortOrder(TOF_SORT);
+
+    // A vector for histogramming, 100,000 steps of 1.0
+    for (double i=0; i < 100000; i += 1.0)
+      fineX.push_back(i);
     // Coarse vector, 1000 bins.
     for (double i=0; i < 100000; i += 100)
       coarseX.push_back(i);
+  }
+
+  EventList el_random, el_random_source, el_sorted, el_sorted_original, el_sorted_weighted, el4, el5;
+  MantidVec fineX;
+  MantidVec coarseX;
+
+  void setUp()
+  {
+    // Reset the random event list
+    el_random.clear();
+    el_random += el_random_source;
+    // And the sorted one
+    el_sorted.clear();
+    el_sorted += el_sorted_original;
+    el_sorted.setSortOrder(TOF_SORT);
   }
 
   void tearDown()

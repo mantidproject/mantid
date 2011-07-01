@@ -59,7 +59,7 @@ namespace Mantid
 
       virtual vtkFloatArray* createScalarArray() const;
 
-      virtual void initialize(Mantid::API::IMDWorkspace_sptr);
+      virtual void initialize(Mantid::API::Workspace_sptr);
 
       typedef std::vector<UnstructuredPoint> Column;
 

@@ -82,7 +82,7 @@ namespace Mantid
 
       virtual void updateModel();
 
-      virtual vtkUnstructuredGrid* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler);
+      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler);
 
       virtual const std::string& getAppliedGeometryXML() const;
 
@@ -474,7 +474,7 @@ namespace Mantid
     @parameter eventHandler : observer/listenter 
     */
     template<typename ViewType>
-    vtkUnstructuredGrid* MDHistogramRebinningPresenter<ViewType>::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
+    vtkDataSet* MDHistogramRebinningPresenter<ViewType>::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
     {
       using namespace Mantid::API;
       const std::string outputWorkspace = XMLDefinitions::RebinnedWSName();
@@ -527,7 +527,8 @@ namespace Mantid
       {
         factory->initialize(outputWs);
       }
-      vtkUnstructuredGrid* temp = static_cast<vtkUnstructuredGrid*>(factory->create());
+      //vtkUnstructuredGrid* temp = static_cast<vtkUnstructuredGrid*>(factory->create());
+      vtkDataSet* temp = factory->create();
 
       persistReductionKnowledge(temp, this->m_serializer, XMLDefinitions::metaDataId().c_str());
       m_request->reset();

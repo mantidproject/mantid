@@ -7,6 +7,7 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <vtkDataSet.h>
 #include <vtkFloatArray.h>
+#include "MantidAPI/Workspace.h"
 
 using namespace Mantid::VATES;
 
@@ -28,7 +29,7 @@ private:
     virtual vtkDataSet* create() const{ throw std::runtime_error("Not implemented on test type");}
     virtual vtkDataSet* createMeshOnly() const{ throw std::runtime_error("Not implemented on test type");}
     virtual vtkFloatArray* createScalarArray() const{ throw std::runtime_error("Not implemented on test type");}
-    virtual void initialize(boost::shared_ptr<Mantid::API::IMDWorkspace>){throw std::runtime_error("Not implemented on test type");}
+    virtual void initialize(boost::shared_ptr<Mantid::API::Workspace>){throw std::runtime_error("Not implemented on test type");}
     virtual void SetSuccessor(vtkDataSetFactory* pSuccessor){ throw std::runtime_error("Not implemented on test type");}
     virtual bool hasSuccessor() const{ throw std::runtime_error("Not implemented on test type");}
     virtual std::string getFactoryTypeName() const{ throw std::runtime_error("Not implemented on test type");}

@@ -2,6 +2,9 @@
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include <boost/math/special_functions/fpclassify.hpp>
+#include "MantidAPI/IMDWorkspace.h"
+
+using Mantid::API::IMDWorkspace;
 
 namespace Mantid
 {
@@ -47,9 +50,9 @@ namespace VATES
 
 
   template<typename TimeMapper>
-  void vtkThresholdingUnstructuredGridFactory<TimeMapper>::initialize(Mantid::API::IMDWorkspace_sptr workspace)
+  void vtkThresholdingUnstructuredGridFactory<TimeMapper>::initialize(Mantid::API::Workspace_sptr workspace)
   {
-    m_workspace = workspace;
+    m_workspace = boost::dynamic_pointer_cast<IMDWorkspace>(workspace);
     // Check that a workspace has been provided.
     validateWsNotNull();
     // When the workspace can not be handled by this type, take action in the form of delegation.

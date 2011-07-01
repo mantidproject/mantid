@@ -20,6 +20,7 @@
 #include <vtkFieldData.h>
 #include <vtkPoints.h>
 #include <vtkCellData.h>
+#include "MantidAPI/Workspace.h"
 
 using namespace Mantid::VATES;
 using namespace testing;
@@ -73,7 +74,7 @@ private:
     MOCK_CONST_METHOD0(createScalarArray,
       vtkFloatArray*());
     MOCK_METHOD1(initialize,
-      void(boost::shared_ptr<Mantid::API::IMDWorkspace>));
+      void(boost::shared_ptr<Mantid::API::Workspace>));
     MOCK_CONST_METHOD0(validate,
       void());
     MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
@@ -485,7 +486,7 @@ public:
 
     MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper);
     presenter.updateModel();
-    vtkUnstructuredGrid* product = presenter.execute(pDataSetFactory, progressAction);
+    vtkDataSet* product = presenter.execute(pDataSetFactory, progressAction);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));

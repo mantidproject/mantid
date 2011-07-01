@@ -250,7 +250,12 @@ public:
   IInstrument_sptr m_inst;
   Workspace2D_sptr topazWS;
 
-  void setUp()
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static InstrumentRayTracerTestPerformance *createSuite() { return new InstrumentRayTracerTestPerformance(); }
+  static void destroySuite( InstrumentRayTracerTestPerformance *suite ) { delete suite; }
+
+  InstrumentRayTracerTestPerformance()
   {
     m_inst = ComponentCreationHelper::createTestInstrumentRectangular(2, 100);
 
@@ -262,7 +267,7 @@ public:
         "Workspace", "TOPAZ_2010");
   }
 
-  void tearDown()
+  ~InstrumentRayTracerTestPerformance()
   {
     AnalysisDataService::Instance().remove("TOPAZ_2010");
   }
@@ -286,8 +291,8 @@ public:
     bool verbose=false;
     IInstrument_sptr inst = topazWS->getInstrument();
     // Directly in Z+ = towards the detector center
-    for (int azimuth=0; azimuth < 360; azimuth += 2)
-      for (int elev=-89; elev < 89; elev += 2)
+    for (int azimuth=0; azimuth < 360; azimuth += 3)
+      for (int elev=-89; elev < 89; elev += 3)
       {
         // Make a vector pointing in every direction
         V3D testDir;

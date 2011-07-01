@@ -56,7 +56,7 @@ public:
   virtual vtkDataSet* create() const;
 
   /// Initialize the current instance with a workspace.
-  virtual void initialize(Mantid::API::IMDWorkspace_sptr workspace);
+  virtual void initialize(Mantid::API::Workspace_sptr workspace);
 
   vtkDataSet* createMeshOnly() const;
 

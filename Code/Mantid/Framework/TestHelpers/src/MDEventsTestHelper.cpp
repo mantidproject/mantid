@@ -82,6 +82,8 @@ namespace MDEventsTestHelper
 
     //Set all the histograms at once.
     retVal->setAllX(x1);
+    // Default unit: TOF.
+    retVal->getAxis(0)->setUnit("TOF");
 
     // Give it a crystal and goniometer
     WorkspaceCreationHelper::SetGoniometer(retVal, 0., 0., 0.);

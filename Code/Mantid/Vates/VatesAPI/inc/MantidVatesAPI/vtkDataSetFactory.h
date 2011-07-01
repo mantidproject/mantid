@@ -3,10 +3,11 @@
 #ifndef MANTID_VATES_VTKDATASETFACTORY_H_
 #define MANTID_VATES_VTKDATASETFACTORY_H_
 
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/System.h"
+#include "vtkDataSet.h"
 #include <boost/shared_ptr.hpp>
 #include <string>
-#include "vtkDataSet.h"
 
 class vtkFloatArray;
 namespace Mantid
@@ -76,7 +77,7 @@ public:
   virtual vtkFloatArray* createScalarArray() const=0;
 
   /// Initalize with a target workspace.
-  virtual void initialize(boost::shared_ptr<Mantid::API::IMDWorkspace>)=0;
+  virtual void initialize(Mantid::API::Workspace_sptr)=0;
 
   /// Add a chain-of-responsibility successor to this factory. Handle case where the factory cannot render the MDWorkspace owing to its dimensionality.
   virtual void SetSuccessor(vtkDataSetFactory* pSuccessor);

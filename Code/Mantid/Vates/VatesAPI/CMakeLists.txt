@@ -24,6 +24,7 @@ src/TimeToTimeStep.cpp
 src/vtkDataSetFactory.cpp
 src/vtkDataSetToGeometry.cpp
 src/vtkClipperDataSetFactory.cpp
+src/vtkPeakMarkerFactory.cpp
 src/vtkProxyFactory.cpp
 src/vtkStructuredGridFactory.cpp
 src/vtkThresholdingHexahedronFactory.cpp
@@ -61,6 +62,7 @@ inc/MantidVatesAPI/TimeToTimeStep.h
 inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkClipperDataSetFactory.h
+inc/MantidVatesAPI/vtkPeakMarkerFactory.h
 inc/MantidVatesAPI/vtkProxyFactory.h
 inc/MantidVatesAPI/vtkStructuredGridFactory.h
 inc/MantidVatesAPI/vtkThresholdingHexahedronFactory.h
@@ -75,6 +77,7 @@ test/EscalatingRebinningActionManagerTest.h
 test/vtkDataSetFactoryTest.h
 test/vtkClipperDataSetFactoryTest.h
 test/vtkDataSetToGeometryTest.h
+test/vtkPeakMarkerFactoryTest.h
 test/vtkProxyFactoryTest.h
 test/vtkStructuredGridFactoryTest.h
 test/vtkThresholdingUnstructuredGridFactoryTest.h
@@ -115,6 +118,7 @@ target_link_libraries( VatesAPI
 ${MANTID_SUBPROJECT_LIBS} 
 vtkCommon 
 vtkFiltering
+Crystal
 )
 
 # Create test file projects

@@ -182,7 +182,7 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
     p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
     p_3dSuccessorFactory->SetSuccessor(p_4dSuccessorFactory);
 
-    vtkUnstructuredGrid* outData = m_presenter->execute(vtkGridFactory, updatehandler);
+    vtkDataSet* outData = m_presenter->execute(vtkGridFactory, updatehandler);
     delete vtkGridFactory;
 
     output->ShallowCopy(outData);

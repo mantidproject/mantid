@@ -59,7 +59,7 @@ public:
   ~vtkThresholdingUnstructuredGridFactory();
 
   /// Initialize the object with a workspace.
-  virtual void initialize(Mantid::API::IMDWorkspace_sptr workspace);
+  virtual void initialize(Mantid::API::Workspace_sptr workspace);
 
   /// Factory method
   vtkDataSet* create() const;

@@ -292,7 +292,7 @@ public:
   {
     // Count the top level box.
     size_t counter = 1;
-    IMDBox<MDEvent<3>,3> * box;
+    IMDBox<MDEvent<3>,3> * box = NULL;
     MDBoxIterator<MDEvent<3>,3> it(top, 20, leafOnly);
 
     // Count all of them

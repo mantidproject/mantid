@@ -14,7 +14,7 @@ namespace Mantid
     {
     }
 
-    vtkUnstructuredGrid* NullRebinningPresenter::execute(vtkDataSetFactory*, ProgressAction&)
+    vtkDataSet* NullRebinningPresenter::execute(vtkDataSetFactory*, ProgressAction&)
     {
       throw std::runtime_error("NullRebinningPresenter does not implement this method. Misused");
     }

@@ -53,7 +53,7 @@ public:
   virtual vtkDataSet* create() const;
 
   /// Initialize the factory.
-  virtual void initialize(Mantid::API::IMDWorkspace_sptr workspace);
+  virtual void initialize(Mantid::API::Workspace_sptr workspace);
 
   vtkDataSet* createMeshOnly() const;
 

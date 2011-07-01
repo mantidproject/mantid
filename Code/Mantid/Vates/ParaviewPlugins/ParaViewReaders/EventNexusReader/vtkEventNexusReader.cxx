@@ -295,8 +295,13 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-  vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
-    outInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+  //  vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
+  //    outInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+  vtkDataSet *output = vtkDataSet::SafeDownCast(
+      outInfo->Get(vtkDataObject::DATA_OBJECT()));
+
 
   int time = 0;
   if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
@@ -320,8 +325,9 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
   
   RebinningKnowledgeSerializer serializer(LocationNotRequired); //Object handles serialization of meta data.
-  vtkUnstructuredGrid* structuredMesh = vtkUnstructuredGrid::SafeDownCast(m_presenter.getMesh(serializer, vtkGridFactory));
 
+//  vtkUnstructuredGrid* structuredMesh = vtkUnstructuredGrid::SafeDownCast(m_presenter.getMesh(serializer, vtkGridFactory));
+  vtkDataSet * structuredMesh = vtkDataSet::SafeDownCast(m_presenter.getMesh(serializer, vtkGridFactory));
   output->ShallowCopy(structuredMesh);
 
   // Reset the action manager fresh for next cycle.
