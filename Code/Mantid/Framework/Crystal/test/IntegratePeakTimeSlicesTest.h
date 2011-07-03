@@ -10,6 +10,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
 #include "MantidGeometry/IComponent.h"
@@ -41,7 +42,7 @@ using namespace Mantid;
 using namespace DataObjects;
 using namespace Geometry;
 using namespace API;
-using namespace Crystal;
+using namespace Mantid::Crystal;
 using namespace std;
 
 class IntegratePeakTimeSlicesTest: public CxxTest::TestSuite
@@ -49,9 +50,10 @@ class IntegratePeakTimeSlicesTest: public CxxTest::TestSuite
 public:
   IntegratePeakTimeSlicesTest()
   {
+
   }
 
-  void est_abc()
+  void test_abc()
   {
     int NRC = 30;
     int NTimes = 40;
@@ -60,14 +62,15 @@ public:
     int PeakChan = 15;
     double MaxPeakIntensity = 600;
     double MaxPeakRCSpan = 5;
-    double MaxPeakTimeSpan = 8;
-
-    Workspace2D_sptr wsPtr;// create2DWorkspaceWithRectangularInstrument(1, NRC,        NTimes);
-    // wsPtr->getAxis(0)->setUnit("TOF");
+    double MaxPeakTimeSpan = 4;
+    Workspace2D_sptr wsPtr = create2DWorkspaceWithRectangularInstrument(1, NRC, .05,  NTimes);
+  
+    wsPtr->getAxis(0)->setUnit("TOF");
+  
     //Set times;
     MantidVecPtr x_vals;
     for (int i = 0; i < NTimes; i++)
-      x_vals.access().push_back(1000.0 + i * 50);
+      x_vals.access().push_back(18000.0 + i *100);
 
     for (size_t k = 0; k < wsPtr->getNumberHistograms(); k++)
       wsPtr->setX(k, x_vals);
@@ -80,23 +83,11 @@ public:
 
     boost::shared_ptr<Geometry::RectangularDetector> bankR = boost::dynamic_pointer_cast<
                                                  Geometry::RectangularDetector>(bankC);
-    try
-    {
-      Kernel::V3D pp(2.5, 0.0, 3);
-      bankR->setPos(pp);
-      Kernel::Quat Q;
-      Kernel::V3D pq(0.0, 1.0, 0.0);
-      Q.setAngleAxis(20.0, pq);
-
-    } catch (std::exception &ss1)
-    {
-      std::cout << "Cannot move/rot detector err=" << ss1.what() << std::endl;
-    }
-
+  
     boost::shared_ptr<Geometry::Detector> pixelp = bankR->getAtXY(PeakCol, PeakRow);
 
     //Now get Peak.
-    double PeakTime = 2500;
+    double PeakTime = 18000+(PeakChan+.5)*100;
     Mantid::Kernel::Units::Wavelength wl;
     Kernel::V3D pos = Kernel::V3D(instP->getSource()->getPos());
     pos -= instP->getSample()->getPos();
@@ -125,6 +116,7 @@ public:
         double MaxRC = max<double> (0.0, MaxR * (1 - abs(col - PeakCol) / MaxPeakRCSpan));
         MantidVecPtr dataY;
         MantidVecPtr dataE;
+         
         for (int chan = 0; chan < NTimes; chan++)
         {
           double val = max<double> (0.0, MaxRC * (1 - abs(chan - PeakChan) / MaxPeakTimeSpan));
@@ -132,7 +124,7 @@ public:
           val += 1.4;
        
           dataY.access().push_back(val);
-          dataE.access().push_back(sqrt(val));
+          dataE.access().push_back(1.0);
           if ((val - 1.4) > MaxPeakIntensity * .1)
           {
             double Q = calcQ(bankR, instP, row, col, 1000.0 + chan * 50);
@@ -143,32 +135,79 @@ public:
         detid2index_map * map = wsPtr->getDetectorIDToWorkspaceIndexMap(true);
         detid2index_map::iterator it = map->find(detP->getID());
         size_t wsIndex = (*it).second;
+       
         wsPtr->setData(wsIndex, dataY, dataE);
       }
 
-    cout << "dQ=" << dQ << endl;
+    //cout << "dQ=" << dQ<<", Tot Peak Int="<<TotIntensity << endl;
     PeaksWorkspace_sptr pks(new PeaksWorkspace());
 
     pks->addPeak(peak);
 
-    boost::shared_ptr<Mantid::API::Algorithm> algP =
-          Mantid::API::AlgorithmFactory::Instance().create("IntegratePeakTimeSlices");
-
-    algP->initialize();
-    algP->setProperty("PeakIndex", 0);
-    algP->setProperty("PeakQspan", dQ);
-
-    algP->setProperty<MatrixWorkspace_sptr> ("InputWorkspace", wsPtr);
-
-    algP->setProperty<PeaksWorkspace_sptr> ("Peaks", pks);
-
+    IntegratePeakTimeSlices algP;
+    wsPtr->setName("InputWorkspace");
+    pks->setName("PeaksWorkspace");
     try
     {
-      //TableWorkspace_sptr twks(new Mantid::DataObjects::TableWorkspace());
-      //algP.setProperty<TableWorkspace_sptr>("OutputWorkspace", twks);
+    algP.initialize();
+    algP.setProperty("PeakIndex", 0);
+    algP.setProperty("PeakQspan", dQ);
 
-      algP->execute();
+    algP.setProperty<MatrixWorkspace_sptr> ("InputWorkspace", wsPtr);
 
+    algP.setProperty<PeaksWorkspace_sptr> ("Peaks", pks);
+    algP.setPropertyValue("OutputWorkspace","aaa");
+    algP.setPropertyValue("PeaksResult","bbb");
+    algP.execute();
+    algP.setPropertyValue("OutputWorkspace","aaa");
+    algP.setPropertyValue("PeaksResult","bbb");
+    //std::cout<<"Peak results="<< peak.getIntensity()<<","<<peak.getSigmaIntensity()<<std::endl;
+    PeaksWorkspace_sptr Pks = algP.getProperty("PeaksResult");
+    TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
+
+     TS_ASSERT_LESS_THAN( fabs(Pks->getPeak(0).getIntensity()-60000),100.0);
+     TS_ASSERT_LESS_THAN( fabs(Pks->getPeak(0).getSigmaIntensity()-375.5),1.0);
+     TS_ASSERT_LESS_THAN( fabs(Twk->getRef<double>("Time",0) -19250),20);
+     TS_ASSERT_LESS_THAN( fabs(Twk->getRef<double>("Background",1) -1.4),.2);
+     TS_ASSERT_LESS_THAN( fabs(Twk->getRef<double>("Intensity",2) -11206),20);
+     TS_ASSERT_LESS_THAN( fabs(Twk->getRef<double>("NCells",3) -420),5);
+     TS_ASSERT_LESS_THAN( fabs(Twk->getRef<double>("ChiSqrOverDOF",4) -134.464),1.5);
+     TS_ASSERT_LESS_THAN( fabs(Twk->getRef<double>("TotIntensity",0) -4338),10);
+    //std::cout<< Pks->getPeak(0).getIntensity()<<","<< Pks->getPeak(0).getSigmaIntensity()<<std::endl;
+    std::vector<std::string> names = Twk->getColumnNames();
+    /*
+    for( int i=0; i<Twk->columnCount();i++)
+    {
+       std::cout<<std::setw(15)<<names[i];
+       for( int j=0; j< Twk->rowCount();j++)
+           std::cout<< setw(12)<<Twk->cell<double>(j,i);
+       std::cout<<std::endl;
+
+     }
+    
+Intensitty=59985.5,  sigma= 375.476
+slice Info
+           Time       19250       19350       19450       19550       19650       19750       19850
+        Channel          12          13          14          15          16          17          18
+     Background     1.40207     1.40485     1.40621     1.40828     1.40728     1.40414     1.40243
+      Intensity     3735.37     7469.21     11206.2     14941.6     11203.8     7470.79     3734.57
+           Mcol          17          17          17          17          17          17          17
+           Mrow          12          12          12          12          12          12          12
+          SScol     3.99188     3.99281     3.99224     3.99229     3.99239     3.99216     3.99223
+          SSrow     3.99316     3.99376     3.99351     3.99343     3.99403     3.99369     3.99316
+           SSrc           0-0.000266736           0           0 0.000124477           0-0.000106694
+         NCells         420         399         420         420         399         420         399
+  ChiSqrOverDOF     14.2131     59.7547      127.85     227.296     134.464     56.8184     14.9517
+   TotIntensity        4338      8058.6       11838       15588     11808.6        8088      4308.6
+BackgroundError     0.19604    0.413891    0.587967    0.783968    0.620871    0.391965    0.207033
+FitIntensityError     28.4576     58.5656     85.3544     113.807     87.8525     56.9013     29.2931
+  ISAWIntensity     3749.13     7498.06     11247.4     14996.5     11247.1     7498.26     3749.03
+ISAWIntensityError     99.2641     133.555      160.85     184.072     160.865     133.653     98.9773
+      Start Row           3           3           3           3           3           3           3
+        End Row          22          21          22          22          21          22          21
+      Start Col           7           7           7           7           7           7           7
+        End Col          27          27          27          27          27    
+  */
     } catch (char * s)
     {
       std::cout << "Error= " << s << std::endl;
@@ -180,7 +219,7 @@ public:
       std::cout << "Some Error Happened" << std::endl;
     }
   }
-  void test_abc()
+  void SampleProgram()
   {
 
     boost::shared_ptr<Mantid::API::Algorithm> loadSNSNexus;
@@ -247,48 +286,59 @@ public:
    algP.initialize();
    algP.setProperty("PeakIndex",0);
    algP.setProperty("PeakQspan",.003);
-   algP.setProperty<MatrixWorkspace_sptr>("InputWorkspace",wsPtr);
- 
- 
+   algP.setPropertyValue("OutputWorkspace","ccc");
+   algP.setPropertyValue("PeaksResult","ddd");
+   algP.setProperty<MatrixWorkspace_sptr>("InputWorkspace",wsPtr); 
    algP.setProperty<PeaksWorkspace_sptr>("Peaks",pks);
    algP.execute();
-   std::cout<<"After execute"<<std::endl;
-   algP.setPropertyValue("OutputWorkspace","OutputWorkspace");
+   algP.setPropertyValue("OutputWorkspace","ccc");
+   algP.setPropertyValue("PeaksResult","ddd");
+   //std::cout<<"After execute"<<std::endl;
+   //algP.setPropertyValue("OutputWorkspace","OutputWorkspace1");
    TableWorkspace_sptr Table=(algP.getProperty("OutputWorkspace"));
+  
    if( !Table)
    {
-        std::cout<<"No table retrieved"<<std::endl;
-        Table = boost::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("OutputWorkspace"));
+        //std::cout<<"No table retrieved"<<std::endl;
+        Table = boost::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("ccc"));
         if( !Table)
            std::cout<<"Could Not retrieve frome Analysys data service"<<std::endl;
     }
 
-   std::cout<<"After execute1"<<std::endl;
+   //if( Table) std::cout<<"Num rows in table="<<Table->rowCount()<<std::endl;
 
-   if( Table) std::cout<<"Num rows in table="<<Table->rowCount()<<std::endl;
 
-   std::cout<<"After execute2"<<std::endl;
-   algP.setProperty("PeaksResult","PeaksResult");
+   //algP.setProperty("PeaksResult","PeaksResult");
+
    PeaksWorkspace_sptr ResPeaks= algP.getProperty("PeaksResult");
-
+   
    if( !ResPeaks)
    {
      std::cout<<"Could Not retrieve Peaks with getProperty"<<std::endl;
-     ResPeaks = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("PeaksResult"));
+     ResPeaks = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("ddd"));
      
     }
 
-   std::cout<<"After execute3"<<std::endl;
+
  
-    if( ResPeaks)
-     std::cout<<"new peak info="<<ResPeaks->getPeak(0).getIntensity()<<","<<ResPeaks->getPeak(0).getSigmaIntensity()<<std::endl;
-   
+   // if( ResPeaks)
+   //  std::cout<<"new peak info="<<ResPeaks->getPeak(0).getIntensity()<<","<<ResPeaks->getPeak(0).getSigmaIntensity()<<std::endl;
+    std::vector<std::string> names = Table->getColumnNames();
+    /*for( int i=0; i<Table->columnCount();i++)
+    {
+       std::cout<<std::setw(15)<<names[i];
+       for( int j=0; j< Table->rowCount();j++)
+           std::cout<< setw(12)<<Table->cell<double>(j,i);
+       std::cout<<std::endl;
+
+     }
+    */
   }catch( std::exception &s)
   {
     std::cout<<"error ="<< s.what()<<std::endl;
   }
-    std::cout<<"F"<<std::endl;
-  }
+ // std::cout<<"F"<<std::endl;
+}
 
 private:
   double calcQ(RectangularDetector_sptr bankP, boost::shared_ptr<IInstrument> instPtr, int row, int col,
@@ -301,52 +351,30 @@ private:
     x.push_back(time);
     double L1 = instPtr->getSample()->getDistance(*(instPtr->getSource()));
     Kernel::V3D pos = detP->getPos();
-    double ScatAng = acos(pos.Y() / pos.norm());
+    double ScatAng = fabs(asin(pos.Z() / pos.norm()));
+    
     Q.fromTOF(x, x, L1, L2, ScatAng, 0, 0, 0.0);
-    return x[0];
+    return x[0]/2/M_PI;
 
   }
   Workspace2D_sptr create2DWorkspaceWithRectangularInstrument(int Npanels, int NRC, double sideLength,
       int NTimes)
-  {
-    Workspace2D_sptr wsPtr;
-    size_t NVectors = (size_t)(Npanels * NRC * NRC);
-    size_t ntimes = (size_t) NTimes;
-    size_t nvals = (size_t) NTimes;
-    wsPtr->initialize(NVectors, ntimes, nvals);
-    boost::shared_ptr<RectangularDetector> RectDet;
-    boost::shared_ptr<Object> oo;
-    RectDet->initialize(oo, NRC, -sideLength / 2, sideLength / NRC, NRC, -sideLength / 2, sideLength
-        / NRC, 20, true, NRC, 1);
-    RectDet->setPos(3, 0, 3);
-
-    Kernel::Quat Q;
-
-    Q.setAngleAxis(20.0, Kernel::V3D(0.0, 1.0, 0.0));
-    RectDet->rotate(Q);
-    boost::shared_ptr<Instrument> inst;
-    boost::shared_ptr<IComponent> RCompP = boost::dynamic_pointer_cast<IComponent>(RectDet);
-
-    inst->add(&(*RCompP));
-    for (int r = 0; r < NRC; r++)
-      for (int c = 0; c < NRC; c++)
-      {
-        boost::shared_ptr<Detector> detP = RectDet->getAtXY(c, r);
-        boost::shared_ptr<IComponent> detPC = boost::dynamic_pointer_cast<IComponent>(detP);
-        //NO don't do this ---inst->add(&(*detPC));
-        inst->markAsDetector(&(*detP));
-      }
-    //linking problem  Why?? Cannot recast??
-    /*boost::shared_ptr<Detector> sample("Sample", 2, inst);
-    boost::shared_ptr<Detector> source("Source", 1, inst);
-    sample->setPos(0, 0, 0);
-    source->setPos(-10, 0, 0);
-    inst->add(&(*sample));
-    inst->markAsSamplePos(&(*sample));
-    inst->markAsSource(&(*source));
-    */
+ {   
+    // Workspace2D_sptr wsPtr = WorkspaceFactory::Instance().create("Workspace2D", NPanels;
+    
+    const size_t &NVectors = (size_t)(Npanels * NRC * NRC);
+    const size_t &ntimes = (size_t) NTimes;
+    const size_t &nvals = (size_t) NTimes;
+ 
+    Workspace2D_sptr wsPtr = boost::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D", NVectors, ntimes, nvals));
+    //wsPtr->initialize(NVectors, ntimes, nvals);
+  
+    IInstrument_sptr inst= ComponentCreationHelper::createTestInstrumentRectangular2(Npanels, NRC, sideLength);
+   
     wsPtr->setInstrument(boost::dynamic_pointer_cast<Geometry::IInstrument>(inst));
+   
     wsPtr->rebuildSpectraMapping(false);
+   
     return wsPtr;
   }
 

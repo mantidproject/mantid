@@ -17,11 +17,13 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidAPI/Progress.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/PropertyManagerOwner.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
+
 //
 #include <vector>
 #include "MantidAPI/Algorithm.h"
@@ -32,9 +34,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-//using namespace Mantid::CurveFitting;
-//namespace Mantid
-//{
+using namespace std;
+namespace Mantid
+{
 namespace Crystal
 {
 
@@ -105,6 +107,7 @@ IntegratePeakTimeSlices::IntegratePeakTimeSlices():Algorithm()
     ParamNames.push_back("SSrow");
     ParamNames.push_back("SSrc");
   }
+   g_log.setLevel(7);
 
  }
      /// Destructor
@@ -119,21 +122,24 @@ void IntegratePeakTimeSlices::init()
      declareProperty(new WorkspaceProperty< MatrixWorkspace >("InputWorkspace", "", Direction::Input)
           , "A 2D workspace with X values of time of flight");
 
-     // declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace","",Direction::Output), 
-      //                                                       "Name of the output workspace with Log info");
+      declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace","",Direction::Output), 
+                                                       "Name of the output workspace with Log info");
      
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("Peaks","",Direction::Input), "Workspace of Peaks");
+      
+      declareProperty( new WorkspaceProperty<PeaksWorkspace>("PeaksResult","",Direction::Output), 
+                        "Workspace of the resultant Peaks");
 
       declareProperty("PeakIndex",0,"Index of peak in PeaksWorkspace to integrate");
 
-      declareProperty("PeakQspan", .03, "Max magnitude of Q of Peak to Q of Peak Center. |Q|=1/d");
+      declareProperty("PeakQspan", .03, "Max magnitude of Q of Peak to Q of Peak Center, where |Q|=1/d");
 }
 
 
 //----------------------- Declaration of methods used in exec method ---------------------------
 
 void getnPanelRowsCols(Peak peak,  int &nPanelRows, int & nPanelCols, double & CellHeight,
-                                            double & CellWidth);
+                                            double & CellWidth, Mantid::Kernel::Logger &g_log);
 
 int  getdChanSpan(Peak peak, double dQ, Mantid::MantidVec X, int specNum, int& Centerchan);
 
@@ -149,14 +155,15 @@ std::vector<int> getStartNRowCol( double CentRow,double CentCol, int dRow, int d
                                  int nPanelRows, int nPanelCols);
 
 std::vector<std::vector<double> >  SetUpData(MatrixWorkspace_sptr Data,MatrixWorkspace_sptr inpWkSpace,
-                boost::shared_ptr<const RectangularDetector> panel,int chan,std::vector<int>Attr);
+                boost::shared_ptr<const RectangularDetector> panel,int chan,std::vector<int>Attr,
+                                              Logger&                              g_log);
 
 std::string CalcFunctionProperty( std::vector<std::vector<double> > ParamAttr);
 
 bool GoodFit1(std::vector<double >params,std::vector<double >errs,std::vector<std::string >names,
                                         double chisq, std::vector<std::vector<double > >ParamAttr ); 
 
-void UpdateOutputWS( TableWorkspace_sptr &TabWS,int dir,std::vector<double >params,std::vector<double >errs,
+void UpdateOutputWS( TableWorkspace_sptr &TabWS,int dir, int chan,std::vector<double >params,std::vector<double >errs,
     std::vector<std::string>names, double chisq, std::vector<std::vector<double > >ParamAttr, double time);
 
 
@@ -177,16 +184,35 @@ void IntegratePeakTimeSlices::exec()
         nPanelCols;
     double CellHeight, 
           CellWidth;
-
+  
     double dQ = getProperty("PeakQspan");
-
+    g_log.debug("A");
+     if( dQ <=0)
+     {
+        g_log.error("Negative PeakQspans are not allowed. Use .17/G where G is the max unit cell length");
+        throw;
+     }
     MatrixWorkspace_sptr inpWkSpace = getProperty("InputWorkspace");
+    if( !inpWkSpace)
+    {
+       g_log.error("Improper Input Workspace");
+       throw ;
+    }
+    
+    g_log.debug("B");
     PeaksWorkspace_sptr peaksW;
     peaksW =getProperty("Peaks");
+    if( !peaksW)
+     {
+       g_log.error("Improper Peaks Input");
+       throw;
+     }
 
     int indx = getProperty("PeakIndex");
+    
     IPeak &peak =peaksW->getPeak(indx);
     
+    g_log.debug("C");
 
     double TotVariance=0;
     double TotIntensity = 0;
@@ -196,21 +222,26 @@ void IntegratePeakTimeSlices::exec()
     int Col0 =lastCol;
 
     TableWorkspace_sptr TabWS =boost::shared_ptr<TableWorkspace>( new TableWorkspace(0));
-
+    // std::cout<<"A"<<std::endl;
     try{
    
     int detID= peak.getDetectorID();
     int specNum= getSpectra(detID, inpWkSpace);
 
-    getnPanelRowsCols( peak, nPanelRows, nPanelCols, CellHeight, CellWidth);
+    getnPanelRowsCols( peak, nPanelRows, nPanelCols, CellHeight, CellWidth, g_log);
     double dRow = getdRowSpan( peak,dQ, CellHeight, CellWidth);
     
     int Chan;
-
+    //std::cout<<"B,nPanelRows,nPanelColls,CellHeight,CellWidth="<<nPanelRows<<","<<nPanelCols<<","<<CellHeight<<","<<CellWidth<<std::endl;
     Mantid::MantidVec X = inpWkSpace->dataX( specNum);
     int dChan = getdChanSpan( peak,dQ,X, specNum,Chan);
-
     
+    if( dRow <2 || dChan <3)
+    {
+       g_log.error("Not enough rows and cols or time channels ");
+       throw;
+    }
+    //std::cout<<"C, dChan, dRow="<<dChan<<","<<dRow<<std::endl;      
     SetUpOutputWSCols( TabWS);
 
 
@@ -218,7 +249,8 @@ void IntegratePeakTimeSlices::exec()
     IAlgorithm_sptr  fit_alg;
     double time;
     int ncells;
-    //std::cout<<"Time/chan middle="<<peak.getTOF()<<","<<Chan<<","<<dChan<<std::endl;
+  
+    Mantid::API::Progress prog( this, 0.0,100.0, (int)dChan);
     for( int dir= 1; dir >=-1; dir -=2)
     {
       bool done = false;
@@ -230,38 +262,51 @@ void IntegratePeakTimeSlices::exec()
           lastCol = Col0;
         }else
          {
+           g_log.debug("C");
            int nchan = chan;
            int xchan = Chan+dir*chan;
            if( nchan <=1)
              nchan =1;
-
+          
            size_t topIndex = xchan+1;
            if( topIndex >=X.size())
               topIndex = X.size()-1;
            time = (X[xchan]+X[ topIndex ])/2.0;   
-         
+
            std::vector<std::vector<double> > ParamAttr;
      
-           std::vector<int> Attr= getStartNRowCol( lastRow,//Row0+(lastRow-Row0)/nchan*(chan+1.0),
-                             lastCol,//Col0+(lastCol-Col0)/nchan*(chan+1.0), 
-                              2*(int)dRow, 2*(int) dRow, 
-                              nPanelRows,nPanelCols);
+           std::vector<int> Attr= getStartNRowCol( lastRow,
+                                                   lastCol,
+                                                   2*(int)dRow, 
+                                                   2*(int) dRow, 
+                                                   nPanelRows,
+                                                   nPanelCols);
 
-           
+           //std::cout<<"    Attr="<<Attr[0]<<","<<Attr[1]<<","<<Attr[2]<<","<<Attr[3]<<std::endl;
            MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
                               std::string("Workspace2D"), 2,  Attr[2]*Attr[3]+1, Attr[2]*Attr[3] );
-          
-           ParamAttr = SetUpData(Data,inpWkSpace,panel,xchan,Attr);
-           
+
+           ParamAttr = SetUpData(Data,inpWkSpace,panel,xchan,Attr, g_log);
+           /*
+           std::cout<<"Params and Attributes"<<std::endl;
+           for( size_t kk=0; kk<2;kk++)
+             for( size_t ii=0; ii<ParamAttr[kk].size() ; ii++)
+               {
+                   std::cout<<ParamAttr[kk][ii] <<","; 
+                   if( ii+1>= ParamAttr[kk].size())
+                        std::cout<<std::endl;
+                }
+           */
            ncells = (int)(Attr[INRows]*Attr[INCol]);
 
            std::vector<double> params;
            std::vector<double> errs;
            std::vector<std::string> names;
            if( EnoughData( ParamAttr))
-           {
+           {  
+              //std::cout<<"Enuf data"<<std::endl;
               fit_alg = createSubAlgorithm("Fit");
-             
+            
               fit_alg->setProperty("InputWorkspace", Data);
               fit_alg->setProperty("WorkspaceIndex", 0);
               fit_alg->setProperty("StartX", 0.0);
@@ -273,7 +318,9 @@ void IntegratePeakTimeSlices::exec()
 
               fit_alg->setProperty("Function", fun_str);
               //std::cout<<"function string ="<<fun_str<<std::endl;
+
               fit_alg->executeAsSubAlg();
+
               //std::cout<<"Through fit execution"<<std::endl;
 
              /*    TableWorkspace_sptr ParamsR = boost::dynamic_pointer_cast<TableWorkspace>
@@ -296,18 +343,20 @@ void IntegratePeakTimeSlices::exec()
               params = fit_alg->getProperty("Parameters");
               errs = fit_alg->getProperty("Errors");
               names = fit_alg->getProperty("ParameterNames");
-              //std::cout<<"Params"<<std::endl;
-              //for( size_t kk=0;kk<params.size();kk++)
-              //    std::cout<<params[kk]<<"  ,  " ;
+             /*
+              std::cout<<"Params"<<std::endl;
+              for( size_t kk=0;kk<params.size();kk++)
+                  std::cout<<params[kk]<<"  ,  " ;
 
-              //std::cout<<std::endl;
-
+              std::cout<<std::endl;
+              */
               if( GoodFit1( params,errs,names, chisq, ParamAttr))
-              {
-                 UpdateOutputWS( TabWS, dir, params,errs,names, chisq, ParamAttr, time);
+              {  //std::cout<<"In GoodFit"<<std::endl;
+                 UpdateOutputWS( TabWS, dir, xchan,params,errs,names, chisq, ParamAttr, time);
                  double TotSliceIntensity = ParamAttr[1][IIntensities];
                  updatepeakInf( params,errs,names, TotVariance, TotIntensity,
-	                     TotSliceIntensity,chisq, ncells);
+                	                     TotSliceIntensity,chisq, ncells);
+                
 
               }else
            
@@ -322,16 +371,28 @@ void IntegratePeakTimeSlices::exec()
 
            if( !done)
            {
-              
+
              //Now set up the center for this peak
               int i = find( "Mrow", names);
               lastRow = (int)params[i];
               i = find("Mcol", names);
               lastCol= (int)params[i];
+              prog.report();
+              //std::cout<<"incr progr by 1 step"<<std::endl;
             
-            }
-
-
+            }else
+              {
+                   if( dir >0)
+                   {
+                      prog.report( dChan/2);
+                      //std::cout<<"Prog set to step="<<(dChan/2)<<std::endl;
+            
+                   }else
+                   {
+                      prog.report( dChan);
+                      //std::cout<<"Prog set to step="<<(dChan)<<std::endl;
+                   }
+               }
 
     }
     }
@@ -341,31 +402,29 @@ void IntegratePeakTimeSlices::exec()
         std::cout<<"Error in main reaspm="<< EE1.what()<<std::endl;
         throw;
     }
-    
+
+
+    try{
     peak.setIntensity( TotIntensity);
     peak.setSigmaIntensity( sqrt(TotVariance));
-    std::cout<<"Result TotIntensity, stdDev="<<TotIntensity<<","<<sqrt(TotVariance)<<std::endl;  
-    std::cout<<"Set in pksworkspc "<<peaksW->getPeak(indx).getIntensity()<<std::endl;
-   declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace","",Direction::Output), 
-                             "Name of the output workspace with Log info");
-    AnalysisDataService::Instance().add("OutputWorkspace", TabWS);
-    setPropertyValue("OutputWorkspace","OutputWorkspace");
-    //setProperty<TableWorkspace_sptr>( "OutputWorkspace", TabWS);
-     
+    
 
-     
-
- declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksResult","",Direction::Output), "Resultant Workspace of Peaks");
-
+    setProperty("OutputWorkspace",TabWS);//Guess what this does the Analysis data service
+    
+   
 
     PeaksWorkspace_sptr pks = peaksW;
-    AnalysisDataService::Instance().add("PeaksResult", pks);
+ 
     
-    this->setPropertyValue("PeaksResult","PeaksResult");
-   // this->setProperty<PeaksWorkspace_sptr>("PeaksResult",pks);
-  show( "ResTable",TabWS,-1);
-   // set output workspace property
+    this->setProperty("PeaksResult",pks);
+   
+    //show( "ResTable",TabWS,-1);
 
+
+}catch(std::exception &ss)
+  {
+std::cout<<"Error occurred XX "<<ss.what()<<std::endl;
+   }
 
 }
 
@@ -392,16 +451,27 @@ boost::shared_ptr<const RectangularDetector> getPanel( Peak peak)
 
 // first element of )NrowsCols in the # of rows,the second is the # of columns
 void getnPanelRowsCols(Peak peak, int &nPanelRows, int &nPanelCols,
-                                  double &CellHeight, double &CellWidth  )
+                                  double &CellHeight, double &CellWidth, Mantid::Kernel::Logger &g_log  )
 {
 
   boost::shared_ptr<const RectangularDetector>RDet = getPanel( peak);
 
+   if( !RDet)
+   {
+     g_log.error("No Rectangular detector associated with the peak");
+     throw;
+    }
 
    nPanelRows = ( RDet->ypixels());
    nPanelCols = ( RDet->xpixels());
    CellHeight = (RDet->ystep());
-   CellWidth = RDet->xstep();//TODO why not int
+   CellWidth = RDet->xstep();
+   if( nPanelRows <4 || nPanelCols <4|| CellHeight<=0 || CellWidth <=0)
+    {
+ //      .error("Odd Rectangular Detector Panel #rows, cols, Cellwidth, Cellheights="+ 
+ //                        nPanelRows+", "+nPanelCols+", "+Cellwidth+", "+CellHeight);
+       throw;
+    }
 
  }
 
@@ -470,23 +540,23 @@ double getdRowSpan( Peak peak, double dQ, double ystep, double xstep)
 
   if( nrows > ncols)
   {  
-    if( nrows < 5)
+    if( nrows < 8)
      {
-       return 5;
+       return 8+2;
      }
     else
-      return nrows;
+      return nrows+2;
 
   }
 
-  if( ncols < 5)
+  if( ncols < 8)
   {
-    return 5;
+    return 8+2;
    }
 
   else
 
-    return ncols;
+    return ncols +2;
 
   }catch( std::exception &s)
   {
@@ -528,12 +598,12 @@ int  getdChanSpan(Peak peak, double dQ, Mantid::MantidVec X,int spectra, int &Ce
   V3D pos = peak.getDetPos();
   double time = peak.getTOF();
   double dtime = dQ/Q*time;
-
+ //std::cout<<"Time="<<time<<std::endl;
   
-//std::cout<<"XScale:";
- // for( size_t i=0; i < X.size(); i++)
+// std::cout<<"XScale:";
+//  for( size_t i=0; i < X.size(); i++)
 //      std::cout<<X[i]<<",";
-//  std::cout<<std::endl;
+//   std::cout<<std::endl;
   int chanCenter = find( X, time);
 
   Centerchan = chanCenter;
@@ -544,14 +614,17 @@ int  getdChanSpan(Peak peak, double dQ, Mantid::MantidVec X,int spectra, int &Ce
 
   if( abs(chanRight-chanCenter) >dchan)
      dchan = abs(chanRight-chanCenter);
-
-  return 2*dchan+6;//heuristic should be a lot more
+  
+  dchan = max<int>(3, 2*dchan + 1 );
+  return 2*dchan+7;//heuristic should be a lot more
 }
 
 
 void SetUpOutputWSCols( TableWorkspace_sptr &TabWS)
 {
+     TabWS->setName("Log Table");
      TabWS->addColumn("double","Time");
+     TabWS->addColumn("double", "Channel");
      TabWS->addColumn("double","Background");
      TabWS->addColumn("double","Intensity");
      TabWS->addColumn("double","Mcol");
@@ -560,7 +633,7 @@ void SetUpOutputWSCols( TableWorkspace_sptr &TabWS)
      TabWS->addColumn("double","SSrow");
      TabWS->addColumn("double","SSrc");
      TabWS->addColumn("double","NCells");
-     TabWS->addColumn("double","ChiSqr");
+     TabWS->addColumn("double","ChiSqrOverDOF");
      TabWS->addColumn("double","TotIntensity");
      TabWS->addColumn("double","BackgroundError");
      TabWS->addColumn("double","FitIntensityError");
@@ -668,7 +741,7 @@ std::vector<double> getInitParamValues(std::vector<double> StatBase, double TotB
 
   std::vector<double> Res;
   Res.push_back(b);
-  Res.push_back(StatBase[IIntensities]);
+  Res.push_back(StatBase[IIntensities] -b*nCells);
   Res.push_back( Mx/Den);
   Res.push_back(My/Den);
   Res.push_back( Sxx);
@@ -678,10 +751,16 @@ std::vector<double> getInitParamValues(std::vector<double> StatBase, double TotB
 }
 
 //Data is the slice subdate, inpWkSpace is ALl the data,
-std::vector<std::vector<double> >  SetUpData(MatrixWorkspace_sptr Data,MatrixWorkspace_sptr inpWkSpace,
-                  boost::shared_ptr<const RectangularDetector> panel,int chan,std::vector<int>Attr)
+std::vector<std::vector<double> >  SetUpData( MatrixWorkspace_sptr                         Data, 
+                                              MatrixWorkspace_sptr                         inpWkSpace,
+                                              boost::shared_ptr<const RectangularDetector> panel,
+                                              int                                          chan,
+                                              std::vector<int>                             Attr,
+                                              Logger&                                      g_log)
     {
+        UNUSED_ARG(g_log);
         boost::shared_ptr<Workspace2D> ws = boost::shared_dynamic_cast<Workspace2D>( Data);
+      
         std::vector<double>  StatBase;
         for( int i=0; i<15+2; i++ )
           StatBase.push_back(0);
@@ -694,25 +773,27 @@ std::vector<std::vector<double> >  SetUpData(MatrixWorkspace_sptr Data,MatrixWor
           xRef.push_back(j);
         }
 
+       
         Data->setX(0, pX );
         Data->setX(1,pX);
 
+      
         Mantid::MantidVecPtr yvals;
         Mantid::MantidVecPtr errs;
 
         Mantid::MantidVec&yvalB = yvals.access();
         Mantid::MantidVec &errB= errs.access();
         
-//         std::cout<<"Data for chan "<< chan <<std::endl;
         double TotBoundaryIntensities =0;
         int nBoundaryCells =0;
         for( int row= Attr[0]; row < Attr[0]+Attr[2]; row++)
           for( int col=Attr[1];col< Attr[1]+Attr[3]; col++)
           {
+      
             boost::shared_ptr<  Detector  >   pixel =panel->getAtXY( col,row);
             int spectra = getSpectra( pixel->getID(),inpWkSpace);
             Mantid::MantidVec histogram =inpWkSpace->dataY(spectra);
-
+         
             double intensity = histogram[ chan ];
 //            std::cout<<intensity<<",";
             yvalB.push_back(intensity);
@@ -731,7 +812,7 @@ std::vector<std::vector<double> >  SetUpData(MatrixWorkspace_sptr Data,MatrixWor
               nBoundaryCells++;
             }
           }
-//        std::cout<<std::endl;
+
         ws->setData(0,yvals, errs);
         StatBase[ IStartRow]=Attr[0];
         StatBase[   IStartCol]= Attr[1];
@@ -740,18 +821,13 @@ std::vector<std::vector<double> >  SetUpData(MatrixWorkspace_sptr Data,MatrixWor
 
         std::vector<double> InitParams= getInitParamValues( StatBase,
                                         TotBoundaryIntensities,nBoundaryCells);
-
+        
+       
         std::vector<std::vector<double> > Res;
         Res.push_back(InitParams);
         Res.push_back(StatBase);
 
-       // for( int k=0; k<InitParams.size();k++)
-      //      std::cout<< InitParams[k]<<std::endl;
-       // std::cout<<std::endl;
-       // std::cout<<"Stats from setup"<< std::endl;
-       // for( int k1=0; k1<StatBase.size();k1++)
-       //     std::cout<<StatBase[k1]<<std::endl;;
-       // std::cout<<std::endl;
+     
         return Res;
     }
 
@@ -826,7 +902,7 @@ bool GoodFit1(std::vector<double >params,
     //Assume will use Intensity parameter
     //double Err = errs[ITINTENS]*sqrt(chisq/ncells*4);//Use this error .
     if( errs[ITINTENS]*sqrt(chisq)/params[ITINTENS] >.1)
-      {//std::cout<<"C"<<( errs[ITINTENS]*sqrt(chisq)/params[ITINTENS] )<<std::endl;
+      {
         return false;
        }
     
@@ -838,7 +914,7 @@ bool GoodFit1(std::vector<double >params,
     
     
     if(maxPeakHeightTheoretical < 1.5)
-      {  //std::cout<<"D"<<maxPeakHeightTheoretical<<std::endl;
+      { 
          return false;
       }
      
@@ -859,6 +935,7 @@ bool GoodFit1(std::vector<double >params,
 
   void UpdateOutputWS( TableWorkspace_sptr &TabWS,
                        int dir,
+                       int chan,
                        std::vector<double >params,
                        std::vector<double >errs,
                        std::vector<std::string>names, 
@@ -881,6 +958,7 @@ bool GoodFit1(std::vector<double >params,
        
     int ncells =(int)(ParamAttr[1][INRows]*ParamAttr[1][INCol]);
     TabWS->getRef<double>(std::string("Background"), TableRow)=params[Ibk];
+    TabWS->getRef<double>(std::string("Channel"), TableRow)= chan;
     TabWS->getRef<double>(std::string("Intensity"),TableRow)=params[IIntensity];
     TabWS->getRef<double>(std::string("FitIntensityError"),TableRow)=errs[IIntensity]*sqrt(chisq);
     TabWS->getRef<double>(std::string("Mcol"),TableRow)=params[Icol];
@@ -890,11 +968,11 @@ bool GoodFit1(std::vector<double >params,
     TabWS->getRef<double>(std::string("SSrow"),TableRow)=params[IVy];
     TabWS->getRef<double>(std::string("SSrc"),TableRow)=params[IVxy];
     TabWS->getRef<double>(std::string("NCells"),TableRow)=ncells;
-    TabWS->getRef<double>(std::string("ChiSqr"),TableRow)=chisq;
+    TabWS->getRef<double>(std::string("ChiSqrOverDOF"),TableRow)=chisq;
 
-    TabWS->getRef<double>(std::string("TotIntensity"),TableRow)=ParamAttr[1][IIntensities];
+    TabWS->getRef<double>(std::string("TotIntensity"),TableRow)=ParamAttr[1][IIntensities] ;
     TabWS->getRef<double>(std::string("BackgroundError"),TableRow)=errs[Ibk]*sqrt(chisq);
-    TabWS->getRef<double>(std::string("ISAWIntensity"),TableRow)=ParamAttr[1][IIntensities] ;
+    TabWS->getRef<double>(std::string("ISAWIntensity"),TableRow)=ParamAttr[1][IIntensities]-params[Ibk]*ncells ;
     TabWS->getRef<double>(std::string("ISAWIntensityError"),TableRow)=CalcIsawIntError( params[Ibk], 
                                                                                       errs[Ibk], 
 										      chisq, 
@@ -982,29 +1060,5 @@ bool EnoughData( std::vector<std::vector<double > >ParamAttr )
    
 }
 }//namespace Crystal
-//}//namespace Mantid
+}//namespace Mantid
 //Attr indicies
-int IStartRow=0;
-int IStartCol=1;
-int INRows=2;
-int INCol=3;
-int ISSIxx=4;
-int ISSIyy=5;
-int ISSIxy=6;
-int ISSxx=7;
-int ISSyy=8;
-int ISSxy=9;
-int ISSIx=10;
-int ISSIy=11;
-int ISSx=12;
-int ISSy=13;
-int IIntensities=14;
-
-//Parameter indicies
-int IBACK = 0;
-int ITINTENS = 1;
-int IXMEAN = 2;
-int IYMEAN = 3;
-int IVXX = 4;
-int IVYY = 5;
-int IVXY = 6;

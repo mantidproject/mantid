@@ -15,8 +15,8 @@
 //using namespace Mantid::Crystal;
 
 
-//namespace Mantid
-//{
+namespace Mantid
+{
 namespace Crystal
 {
 /**
@@ -82,6 +82,6 @@ private:
 };
 
 } // namespace Crystal
-//} // namespace Mantid
+} // namespace Mantid
 
 #endif /* INTEGRATEPEAKTIMESLICES_H_ */

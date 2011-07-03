@@ -1,5 +1,6 @@
 set ( SRC_FILES
 	src/AnvredCorrection.cpp
+        src/IntegratePeakTimeSlices.cpp
 	src/LoadIsawUB.cpp
 	src/LoadPeaksFile.cpp
 	src/MaskPeaksWorkspace.cpp
@@ -13,6 +14,7 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
 	inc/MantidCrystal/AnvredCorrection.h
+	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/LoadIsawUB.h
 	inc/MantidCrystal/LoadPeaksFile.h
 	inc/MantidCrystal/MaskPeaksWorkspace.h
@@ -25,6 +27,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	test/AnvredCorrectionTest.h
+        test/IntegratePeakTimeSlicesTest.h
 	test/LoadIsawUBTest.h
 	test/LoadPeaksFileTest.h
 	test/MaskPeaksWorkspaceTest.h
@@ -55,7 +58,7 @@ target_link_libraries ( Crystal ${MANTIDLIBS} ${GSL_LIBRARIES} DataObjects)
 if ( CXXTEST_FOUND )
   include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc ../Kernel/inc ../DataObjects/inc)
   cxxtest_add_test ( CrystalTest ${TEST_FILES} )
-  target_link_libraries ( CrystalTest Kernel API DataHandling Crystal DataObjects TestHelpers)
+  target_link_libraries ( CrystalTest Kernel API DataHandling Crystal DataObjects TestHelpers TestHelpers CurveFitting Algorithms)
   add_dependencies ( FrameworkTests CrystalTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET CrystalTest PROPERTY FOLDER "UnitTests" )

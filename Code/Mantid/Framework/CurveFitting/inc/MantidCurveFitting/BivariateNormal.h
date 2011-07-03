@@ -7,6 +7,7 @@
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
 #include "MantidAPI/IFitFunction.h"
+#include "MantidKernel/Logger.h"
 //#include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 using namespace Mantid::API;
@@ -185,6 +186,8 @@ using namespace Mantid::API;
       BoundaryConstraint *MeanyConstraint;
 
       BoundaryConstraint *IntensityConstraint;
+
+     static Kernel::Logger & g_log;
 
     };
 }

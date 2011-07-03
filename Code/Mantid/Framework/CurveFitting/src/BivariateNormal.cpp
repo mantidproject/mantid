@@ -11,6 +11,7 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
+#include <fstream>
 #include <algorithm>
 #include <math.h>
 #include <iostream>
@@ -49,7 +50,9 @@ int IVXX = 4;
 int IVYY = 5;
 int IVXY = 6;
 
-BivariateNormal::BivariateNormal()
+Kernel::Logger& BivariateNormal::g_log= Kernel::Logger::get("BivariateNormal");
+
+BivariateNormal::BivariateNormal():BackgroundFunction()
 {
   LastParams = 0;
   SIxx = SIyy = SIxy = Sxx = Syy = Sxy = -1; //Var and CoVar calc from parameters
@@ -73,6 +76,8 @@ BivariateNormal::BivariateNormal()
   AttNames.push_back(std::string("SSyy"));
   AttNames.push_back(std::string("SSxy"));
   AttNames.push_back(std::string("NCells")); //Not Set
+
+ // g_log.setLevel(7);//debug level
 }
 
 BivariateNormal::~BivariateNormal()
@@ -116,9 +121,14 @@ void BivariateNormal::function(double *out, const double *xValues, const size_t 
   double *expVals = new double[Nrows*Ncols];
   double uu,coefNorm,expCoeffx2,expCoeffy2,expCoeffxy;
   bool isNaNs;
+  
+
  initCommon(  LastParams,expVals, uu,coefNorm,expCoeffx2,
                          expCoeffy2,expCoeffxy,isNaNs);
-
+  std::ostringstream str;
+   str<<"Params="<<LastParams[0]<<","<<LastParams[1]<<","<<LastParams[2]<<","
+          <<LastParams[3]<<","<<LastParams[4]<<","<<LastParams[5]<<","<<LastParams[6] <<std::endl;
+  g_log.debug(str.str());
   for (size_t i = 0; i < nData; i++)
   {
      if( isNaNs)
