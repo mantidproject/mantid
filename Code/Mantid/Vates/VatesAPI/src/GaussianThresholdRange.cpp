@@ -14,7 +14,7 @@ namespace Mantid
     @preferred_nStd : number of standard deviations to use when extracting upper and lower signal values.
     @skipN : of n-cells, how many to skip before using the next as part of the anaysis (for speed-up).
     */
-    GaussianThresholdRange::GaussianThresholdRange(Mantid::API::IMDWorkspace_sptr workspace, signal_t preferred_nStd, unsigned int skipN) : m_min(0), m_max(0), m_workspace(workspace), m_preferred_nStd(preferred_nStd), m_skipN(skipN), m_isCalculated(false)
+    GaussianThresholdRange::GaussianThresholdRange(Mantid::API::IMDWorkspace_sptr workspace, signal_t preferred_nStd, unsigned int skipN) : m_workspace(workspace), m_min(0), m_max(0), m_isCalculated(false), m_preferred_nStd(preferred_nStd), m_skipN(skipN)
     {
     }
 
