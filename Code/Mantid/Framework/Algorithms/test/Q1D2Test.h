@@ -282,7 +282,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_inputWS, m_wavNorm, m_pixel;
   std::string m_noGrav;
 };
-
+/*
 class Q1D2TestPerformance : public CxxTest::TestSuite
 {
 public:
@@ -315,7 +315,7 @@ public:
     Q1D.execute();
 	}
 };
-
+*/
 void createInputWorkspaces(int start, int end, Mantid::API::MatrixWorkspace_sptr & input, Mantid::API::MatrixWorkspace_sptr & wave, Mantid::API::MatrixWorkspace_sptr & pixels)
 {
   std::string wsName("Q1D2Test_inputworkspace"), wavNorm("Q1D2Test_wave");
