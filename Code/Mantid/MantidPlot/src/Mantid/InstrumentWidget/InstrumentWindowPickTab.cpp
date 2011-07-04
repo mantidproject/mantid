@@ -524,13 +524,27 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   double tof = x;
   if (unit->unitID() != "TOF")
   {
+    std::cerr << "emode=" << m_emode << std::endl;
     if (m_emode < 0)
     {
-      InputConvertUnitsParametersDialog* dlg = new InputConvertUnitsParametersDialog(this);
-      dlg->exec();
-      m_emode = dlg->getEMode();
-      m_efixed = dlg->getEFixed();
-      m_delta = dlg->getDelta();
+      const Mantid::API::Run & run = ws->run();
+      if (run.hasProperty("Ei"))
+      {
+        m_emode = 1; // direct
+      }
+      else if (det->hasParameter("Efixed"))
+      {
+        m_emode = 2; // indirect
+      }
+      else
+      {
+        //m_emode = 0; // Elastic
+        InputConvertUnitsParametersDialog* dlg = new InputConvertUnitsParametersDialog(this);
+        dlg->exec();
+        m_emode = dlg->getEMode();
+        m_efixed = dlg->getEFixed();
+        m_delta = dlg->getDelta();
+      }
     }
     std::vector<double> xdata(1,x);
     std::vector<double> ydata;
