@@ -308,7 +308,6 @@ public:
 
     Q1D.setProperty("DetBankWorkspace", m_inputWS);
     Q1D.setProperty("WavelengthAdj", m_wavNorm);
-    Q1D.setProperty("PixelAdj", m_pixel);
     Q1D.setPropertyValue("OutputWorkspace", m_outputWS);
     Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
     Q1D.setPropertyValue("AccountForGravity", "1");
