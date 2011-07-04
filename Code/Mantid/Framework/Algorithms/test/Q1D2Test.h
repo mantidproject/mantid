@@ -16,8 +16,12 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 
+/// data for the pixel (flood file) correction
 static double flat_cell061Ys [] = {1.002863E+00, 1.032594E+00, 1.017332E+00, 1.062325E+00, 1.004316E+00, 1.041249E+00, 1.023080E+00,1.011716E+00, 1.012046E+00,  1.066157E+00, 9.934810E-01,1.087497E+00, 9.593894E-01, 1.060872E+00, 1.022618E+00, 1.054595E+00, 1.042901E+00, 1.064241E+00, 1.035699E+00, 1.048186E+00, 1.020834E+00, 1.063712E+00, 1.034774E+00, 1.025458E+00, 9.860153E-01, 1.044222E+00, 9.872045E-01, 1.046006E+00, 9.772280E-01, 1.011782E+00};
 static double flat_cell061Es [] = {8.140295E-03, 8.260089E-03, 8.198814E-03, 8.378171E-03, 8.146192E-03, 8.294637E-03, 8.221945E-03,8.176151E-03, 8.177485E-03,  8.393270E-03, 8.102125E-03,8.476863E-03, 7.961886E-03, 8.372437E-03, 8.220086E-03, 8.347631E-03, 8.301214E-03, 8.385724E-03, 8.272501E-03, 8.322226E-03, 8.212913E-03, 8.383642E-03, 8.268805E-03, 8.231497E-03, 8.071622E-03, 8.306473E-03, 8.076489E-03, 8.313566E-03, 8.035571E-03, 8.176417E-03};
+
+/// defined below this creates some input data
+void createInputWorkspaces(int start, int end, Mantid::API::MatrixWorkspace_sptr & input, Mantid::API::MatrixWorkspace_sptr & wave, Mantid::API::MatrixWorkspace_sptr & pixels);
 
 class Q1D2Test : public CxxTest::TestSuite
 {
@@ -30,7 +34,7 @@ public:
     TS_ASSERT_EQUALS( Q1D2.category(), "SANS" )
   }
 
-  ///Test that we can run without the optional workspacespace
+  ///Test that we can run without the an optional workspace
   void testNoPixelAdj()
   {
     Mantid::Algorithms::Q1D2 Q1D2;
@@ -42,7 +46,7 @@ public:
       Q1D2.setProperty("WavelengthAdj", m_wavNorm);
       Q1D2.setPropertyValue("OutputWorkspace",outputWS);
       Q1D2.setPropertyValue("OutputBinning","0,0.02,0.5");
-      // property PixelAdj is undefined but that shouldn't cause this to throw
+      // WavelengthAdj and PixelAdj are undefined but that shouldn't cause this to throw
       Q1D2.execute()
     )
 
@@ -82,7 +86,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
       Q1D.setProperty("DetBankWorkspace", m_inputWS);
       Q1D.setProperty("WavelengthAdj", m_wavNorm);
-      Q1D.setPropertyValue("PixelAdj", m_pixel);
+      Q1D.setProperty("PixelAdj", m_pixel);
       Q1D.setPropertyValue("OutputWorkspace", m_noGrav);
       Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
     )
@@ -124,7 +128,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
       Q1D.setProperty("DetBankWorkspace", m_inputWS);
       Q1D.setProperty("WavelengthAdj", m_wavNorm);
-      Q1D.setPropertyValue("PixelAdj", m_pixel);
+      Q1D.setProperty("PixelAdj", m_pixel);
       Q1D.setPropertyValue("OutputWorkspace", outputWS);
       Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
       Q1D.setPropertyValue("AccountForGravity", "1");
@@ -168,7 +172,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
       Q1D.setProperty("DetBankWorkspace", m_inputWS);
       Q1D.setProperty("WavelengthAdj", m_wavNorm);
-      Q1D.setPropertyValue("PixelAdj", m_pixel);
+      Q1D.setProperty("PixelAdj", m_pixel);
       Q1D.setPropertyValue("OutputWorkspace", outputWS);
       Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
       Q1D.setProperty("RadiusCut", 0.22);
@@ -210,7 +214,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
       Q1D.setProperty("DetBankWorkspace", m_inputWS);
       Q1D.setProperty("WavelengthAdj", m_wavNorm);
-      Q1D.setPropertyValue("PixelAdj", m_pixel);
+      Q1D.setProperty("PixelAdj", m_pixel);
       Q1D.setPropertyValue("OutputWorkspace", outputWS);
       Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
       //this raduis is too small to exclude anything
@@ -264,75 +268,107 @@ public:
 
     TS_ASSERT( ! Q1D.isExecuted() )
   }
-    
-
-void createInputWorkspaces()
-  {
-    std::string wsName("Q1D2Test_inputworkspace"), wavNorm("Q1D2Test_wave");
-
-    LoadRaw3 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","LOQ48097.raw");
-
-    loader.setPropertyValue("OutputWorkspace", wavNorm);
-    loader.setProperty("LoadLogFiles", false);
-    loader.setPropertyValue("SpectrumMin","8603");
-    loader.setPropertyValue("SpectrumMax","8632");
-    loader.execute();
-
-    Mantid::Algorithms::ConvertUnits convert;
-    convert.initialize();
-    convert.setPropertyValue("InputWorkspace",wavNorm);
-    convert.setPropertyValue("OutputWorkspace",wavNorm);
-    convert.setPropertyValue("Target","Wavelength");
-    convert.execute();
-
-    Mantid::Algorithms::Rebin rebin;
-    rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace", wavNorm);
-    rebin.setPropertyValue("OutputWorkspace", wavNorm);
-    rebin.setPropertyValue("Params","0,0.5,30");
-    rebin.execute();
-    
-    Mantid::Algorithms::CropWorkspace crop;
-    crop.initialize();
-    crop.setPropertyValue("InputWorkspace", wavNorm);
-    crop.setPropertyValue("OutputWorkspace",wsName);
-    crop.setPropertyValue("StartWorkspaceIndex","1");
-    crop.execute();
-    
-    crop.setPropertyValue("InputWorkspace", wavNorm);
-    crop.setPropertyValue("OutputWorkspace", wavNorm);
-    crop.setPropertyValue("StartWorkspaceIndex","0");
-    crop.setPropertyValue("EndWorkspaceIndex","0");
-    crop.execute();
-
-    m_inputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
-    m_wavNorm = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(wavNorm));
-    MatrixWorkspace_sptr pixels = WorkspaceCreationHelper::Create2DWorkspaceBinned(29, 1);
-    for ( int i = 0; i < 29; ++i)
-    {
-      pixels->dataY(i)[0] = flat_cell061Ys[i];
-      pixels->dataE(i)[0] = flat_cell061Es[i];
-    }
-    AnalysisDataService::Instance().add("Q1DTest_flat_file", pixels);
-    
-  }
   
   ///stop the constructor from being run every time algorithms test suit is initialised
   static Q1D2Test *createSuite() { return new Q1D2Test(); }
   static void destroySuite(Q1D2Test *suite) { delete suite; }
-  Q1D2Test() : m_noGrav("Q1D2Test_no_gravity_result"), m_pixel("Q1DTest_flat_file")
+  Q1D2Test() : m_noGrav("Q1D2Test_no_gravity_result")
   {
-    createInputWorkspaces();
+    // create the input workspaces with a few spectra
+    createInputWorkspaces(8603, 8632, m_inputWS, m_wavNorm, m_pixel);
   }
 
 private:
-  Mantid::API::MatrixWorkspace_sptr m_inputWS, m_wavNorm;
-  std::string m_noGrav, m_pixel;
+  Mantid::API::MatrixWorkspace_sptr m_inputWS, m_wavNorm, m_pixel;
+  std::string m_noGrav;
 };
 
+class Q1D2TestPerformance : public CxxTest::TestSuite
+{
+public:
+  Mantid::API::MatrixWorkspace_sptr m_inputWS, m_wavNorm, m_pixel;
+  std::string m_outputWS;
+	
+	void setUp()
+	{
+		//load all the spectra from the LOQ workspace
+    createInputWorkspaces(0, 17792-1, m_inputWS, m_wavNorm, m_pixel);
+    m_outputWS = "Q1D2Test_result";
+	}
+  	
+	void tearDown()
+	{
+    Mantid::API::AnalysisDataService::Instance().remove(m_outputWS);
+	}
+	
+	void test_slow_performance()
+	{
+		Mantid::Algorithms::Q1D2 Q1D;
+    Q1D.initialize();
 
+    Q1D.setProperty("DetBankWorkspace", m_inputWS);
+    Q1D.setProperty("WavelengthAdj", m_wavNorm);
+    Q1D.setProperty("PixelAdj", m_pixel);
+    Q1D.setPropertyValue("OutputWorkspace", m_outputWS);
+    Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
+    Q1D.setPropertyValue("AccountForGravity", "1");
+      
+    Q1D.execute();
+	}
+};
+
+void createInputWorkspaces(int start, int end, Mantid::API::MatrixWorkspace_sptr & input, Mantid::API::MatrixWorkspace_sptr & wave, Mantid::API::MatrixWorkspace_sptr & pixels)
+{
+  std::string wsName("Q1D2Test_inputworkspace"), wavNorm("Q1D2Test_wave");
+
+  LoadRaw3 loader;
+  loader.initialize();
+  loader.setPropertyValue("Filename","LOQ48097.raw");
+
+  loader.setPropertyValue("OutputWorkspace", wavNorm);
+  loader.setProperty("LoadLogFiles", false);
+  loader.setProperty("SpectrumMin", start);
+  loader.setProperty("SpectrumMax", end);
+  loader.execute();
+
+  Mantid::Algorithms::ConvertUnits convert;
+  convert.initialize();
+  convert.setPropertyValue("InputWorkspace",wavNorm);
+  convert.setPropertyValue("OutputWorkspace",wavNorm);
+  convert.setPropertyValue("Target","Wavelength");
+  convert.execute();
+
+  Mantid::Algorithms::Rebin rebin;
+  rebin.initialize();
+  rebin.setPropertyValue("InputWorkspace", wavNorm);
+  rebin.setPropertyValue("OutputWorkspace", wavNorm);
+  rebin.setPropertyValue("Params","0,0.5,30");
+  rebin.execute();
+    
+  Mantid::Algorithms::CropWorkspace crop;
+  crop.initialize();
+  crop.setPropertyValue("InputWorkspace", wavNorm);
+  crop.setPropertyValue("OutputWorkspace",wsName);
+  crop.setPropertyValue("StartWorkspaceIndex","1");
+  crop.execute();
+    
+  crop.setPropertyValue("InputWorkspace", wavNorm);
+  crop.setPropertyValue("OutputWorkspace", wavNorm);
+  crop.setPropertyValue("StartWorkspaceIndex","0");
+  crop.setPropertyValue("EndWorkspaceIndex","0");
+  crop.execute();
+
+  input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
+  wave = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    Mantid::API::AnalysisDataService::Instance().retrieve(wavNorm));
+  pixels = WorkspaceCreationHelper::Create2DWorkspaceBinned(29, 1);
+  for ( int i = 0; i < 29; ++i)
+  {
+    pixels->dataY(i)[0] = flat_cell061Ys[i];
+    pixels->dataE(i)[0] = flat_cell061Es[i];
+  }
+  AnalysisDataService::Instance().add("Q1DTest_flat_file", pixels);
+    
+}
 #endif /*Q1D2Test_H_*/
