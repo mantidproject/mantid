@@ -9,6 +9,7 @@ src/Common.cpp
 src/DimensionPresenter.cpp
 src/EscalatingRebinningActionManager.cpp
 src/FieldDataToMetadata.cpp
+src/GaussianThresholdRange.cpp
 src/IMDDimensionComparitor.cpp
 src/IMDWorkspaceProxy.cpp
 src/MDHistogramRebinningPresenter.cpp
@@ -21,6 +22,7 @@ src/RebinningKnowledgeSerializer.cpp
 src/SynchronisingGeometryPresenter.cpp
 src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
+src/UserDefinedThresholdRange.cpp
 src/vtkDataSetFactory.cpp
 src/vtkDataSetToGeometry.cpp
 src/vtkClipperDataSetFactory.cpp
@@ -42,6 +44,7 @@ inc/MantidVatesAPI/DimensionViewFactory.h
 inc/MantidVatesAPI/EscalatingRebinningActionManager.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/FilteringUpdateProgressAction.h
+inc/MantidVatesAPI/GaussianThresholdRange.h
 inc/MantidVatesAPI/GeometryPresenter.h
 inc/MantidVatesAPI/GeometryView.h
 inc/MantidVatesAPI/MDHistogramRebinningPresenter.h
@@ -57,8 +60,10 @@ inc/MantidVatesAPI/RebinningActionManager.h
 inc/MantidVatesAPI/RebinningCutterXMLDefinitions.h 
 inc/MantidVatesAPI/RebinningKnowledgeSerializer.h
 inc/MantidVatesAPI/SynchronisingGeometryPresenter.h
+inc/MantidVatesAPI/ThresholdRange.h
 inc/MantidVatesAPI/TimeStepToTimeStep.h
 inc/MantidVatesAPI/TimeToTimeStep.h
+inc/MantidVatesAPI/UserDefinedThresholdRange.h
 inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkClipperDataSetFactory.h
@@ -95,6 +100,8 @@ test/RebinningKnowledgeSerializerTest.h
 test/SynchronisingGeometryPresenterTest.h
 test/TimeStepToTimeStepTest.h
 test/TimeToTimeStepTest.h
+test/UserDefinedThresholdRangeTest.h
+test/GaussianThresholdRangeTest.h
 )
 
 include_directories( inc )
