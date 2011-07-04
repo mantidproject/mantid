@@ -503,7 +503,6 @@ public:
     EXPECT_CALL(*pRequest, action()).WillRepeatedly(Return(RecalculateAll)); //Request is preset to RecalculateAll.
 
     MockClipper* pClipper = new MockClipper;
-    MockvtkDataSetFactory* pDataSetFactory = new MockvtkDataSetFactory;
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     //NO FIELD DATA ADDED TO DATASET!

@@ -291,8 +291,6 @@ void vtkEventNexusReader::doRebinning()
 
 int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
-	try
-	{
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
@@ -335,11 +333,6 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   // Reset the action manager fresh for next cycle.
   m_actionManager.reset();
   return 1;
-	}
-	catch(std::exception& ex)
-	{
-		std::string message = ex.what();
-	}
 }
 
 int vtkEventNexusReader::RequestInformation(

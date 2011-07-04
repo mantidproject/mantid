@@ -151,7 +151,7 @@ vtkRebinningCutter::~vtkRebinningCutter()
 }
 
 
-int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInformationVector **inputVector,
+int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInformationVector**,
   vtkInformationVector *outputVector)
 {
   using namespace Mantid::VATES;
@@ -171,7 +171,7 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
     if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
     {
       // usually only one actual step requested
-      m_timestep = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
+      m_timestep = static_cast<int>( outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0] );
     }
 
     //Create chain-of-responsibility for translating imdworkspaces.

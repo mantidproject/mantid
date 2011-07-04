@@ -34,13 +34,13 @@ namespace Mantid
     void GaussianThresholdRange::calculateAsNormalDistrib(std::vector<signal_t>& raw_values, size_t size, signal_t max_signal, signal_t min_signal, signal_t accumulated_signal)
     {
 
-      signal_t mean = accumulated_signal / size;
+      signal_t mean = accumulated_signal / static_cast<signal_t>( size );
       signal_t sum_sq_diff = 0;
-      for(int i = 0; i < size; i++)
+      for(size_t i = 0; i < size; i++)
       {
         sum_sq_diff += (raw_values[i] - mean) * (raw_values[i] - mean);
       }
-      signal_t sdev = std::sqrt(sum_sq_diff/ size );
+      signal_t sdev = std::sqrt(sum_sq_diff/ static_cast<signal_t>( size ));
       signal_t distribution_center = (max_signal - min_signal) / 2;
       signal_t proposed_max = distribution_center + min_signal + (sdev * m_preferred_nStd);
       signal_t proposed_min = distribution_center + min_signal - (sdev * m_preferred_nStd);

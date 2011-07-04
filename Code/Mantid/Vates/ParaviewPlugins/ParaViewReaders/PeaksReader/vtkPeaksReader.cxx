@@ -76,6 +76,7 @@ void vtkPeaksReader::SetWidth(double width)
 */
 void vtkPeaksReader::SetAppliedGeometryXML(std::string appliedGeometryXML)
 {
+  UNUSED_ARG(appliedGeometryXML);
   if(m_isSetup)
   {
     // DO some set up here???
