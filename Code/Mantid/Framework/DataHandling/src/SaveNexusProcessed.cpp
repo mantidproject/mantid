@@ -110,6 +110,11 @@ namespace DataHandling
     //m_entryname = getPropertyValue("EntryName");
     m_title = getPropertyValue("Title");
     MatrixWorkspace_const_sptr matrixWorkspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
+    // check if inputWorkspace is something we know how to save
+    if (!matrixWorkspace) 
+    {
+      return;
+    }
     m_eventWorkspace = boost::dynamic_pointer_cast<const EventWorkspace>(matrixWorkspace);
     // If no title's been given, use the workspace title field
     if (m_title.empty()) m_title = matrixWorkspace->getTitle();
