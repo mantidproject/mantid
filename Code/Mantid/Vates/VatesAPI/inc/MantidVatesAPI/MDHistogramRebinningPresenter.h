@@ -422,7 +422,7 @@ namespace Mantid
         {
           boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> boxA = boost::dynamic_pointer_cast<Mantid::MDAlgorithms::BoxImplicitFunction>(constructBoxFromVTKBox(box));
           boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> boxB = boost::dynamic_pointer_cast<Mantid::MDAlgorithms::BoxImplicitFunction>(m_box);
-          if(boxA != boxB)
+          if(boxA->operator!=(*boxB.get()))
           {
             m_box = boxA;
             m_request->ask(RecalculateAll);

@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "vtkUnstructuredGrid.h"
 
@@ -42,7 +43,7 @@ however, some visualisation frameworks won't be able to treat these factories in
     public:
 
       /// Constructor
-      vtkThresholdingQuadFactory(const std::string& scalarName, double minThreshold = -10000, double maxThreshold  = -10000);
+      vtkThresholdingQuadFactory(ThresholdRange* thresholdRange, const std::string& scalarName);
 
       /// Assignment operator
       vtkThresholdingQuadFactory& operator=(const vtkThresholdingQuadFactory& other);
@@ -81,9 +82,7 @@ however, some visualisation frameworks won't be able to treat these factories in
 
       std::string m_scalarName;
 
-      double m_minThreshold;
-      
-      double m_maxThreshold;
+      mutable ThresholdRange_scptr m_thresholdRange;
     
     };
     

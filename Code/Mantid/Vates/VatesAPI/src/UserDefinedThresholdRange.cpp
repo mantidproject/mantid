@@ -20,6 +20,15 @@ namespace Mantid
     }
 
     /**
+    Indicates wheter execution has occured or not.
+    return : true always.
+    */
+    bool UserDefinedThresholdRange::hasCalculated() const
+    {
+      return true;
+    }
+
+    /**
     Destructor.
     */
     UserDefinedThresholdRange::~UserDefinedThresholdRange()
@@ -31,7 +40,6 @@ namespace Mantid
     */
     void UserDefinedThresholdRange::calculate()
     {
-      //DO NOTHING!
     }
 
     /**
@@ -50,6 +58,16 @@ namespace Mantid
     double UserDefinedThresholdRange::getMaximum() const
     {
       return m_max;
+    }
+
+
+    /**
+    Virtual constructor clone method.
+    @return clone of original.
+    */
+    UserDefinedThresholdRange* UserDefinedThresholdRange::clone() const
+    {
+      return new UserDefinedThresholdRange(this->m_min, this->m_max);
     }
   }
 }

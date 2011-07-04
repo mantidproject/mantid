@@ -12,8 +12,8 @@ namespace VATES
 {
 
   template<typename TimeMapper>
-  vtkThresholdingUnstructuredGridFactory<TimeMapper>::vtkThresholdingUnstructuredGridFactory(const std::string& scalarName, const double timestep, double minThreshold, double maxThreshold) :
-  m_timestep(timestep), m_scalarName(scalarName), m_minThreshold(minThreshold), m_maxThreshold(maxThreshold) 
+  vtkThresholdingUnstructuredGridFactory<TimeMapper>::vtkThresholdingUnstructuredGridFactory(ThresholdRange* thresholdRange, const std::string& scalarName, const double timestep) :
+  m_timestep(timestep), m_scalarName(scalarName), m_thresholdRange(thresholdRange)
   {
   }
 
@@ -28,8 +28,7 @@ namespace VATES
     if(this != &other)
     {
       this->m_scalarName = other.m_scalarName;
-      this->m_minThreshold = other.m_minThreshold;
-      this->m_maxThreshold = other.m_maxThreshold;
+      this->m_thresholdRange.swap(other.m_thresholdRange);
       this->m_workspace = other.m_workspace;
       this->m_timestep = other.m_timestep;
       this->m_timeMapper = other.m_timeMapper;
@@ -43,9 +42,9 @@ namespace VATES
   */
   template<typename TimeMapper>
   vtkThresholdingUnstructuredGridFactory<TimeMapper>::vtkThresholdingUnstructuredGridFactory(const vtkThresholdingUnstructuredGridFactory<TimeMapper>& other)
-    : m_workspace(other.m_workspace), m_timestep(other.m_timestep), m_scalarName( other.m_scalarName), m_timeMapper(other.m_timeMapper), m_minThreshold(other.m_minThreshold), m_maxThreshold(other.m_maxThreshold)
+    : m_workspace(other.m_workspace), m_timestep(other.m_timestep), m_scalarName( other.m_scalarName), m_timeMapper(other.m_timeMapper)
   {
-
+    m_thresholdRange.swap(other.m_thresholdRange);
   }
 
 
@@ -141,6 +140,9 @@ namespace VATES
       const int nPointsZ = nBinsZ;
       PointMap pointMap(nPointsX);
 
+      signal_t maxThreshold = m_thresholdRange->getMaximum();
+      signal_t minThreshold = m_thresholdRange->getMinimum();
+
       //Loop through dimensions
       for (int i = 0; i < nPointsX; i++)
       {
@@ -157,7 +159,7 @@ namespace VATES
             posZ = minZ + (k * incrementZ); //Calculate increment in z;
             signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i, j, k, m_timeMapper(m_timestep)));
 
-            if (boost::math::isnan( signalScalar ) || (signalScalar < m_minThreshold) || (signalScalar > m_maxThreshold))
+            if (boost::math::isnan( signalScalar ) || (signalScalar < minThreshold) || (signalScalar > maxThreshold))
             {
               //Flagged so that topological and scalar data is not applied.
               unstructPoint.isSparse = true;

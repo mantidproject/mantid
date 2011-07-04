@@ -27,6 +27,23 @@ public :
     TSM_ASSERT_EQUALS("::getMinimum not wired-up correctly.", 1, userRangeCalculator.getMinimum());
   }
 
+  void testHasCalculated()
+  {
+    Mantid::VATES::UserDefinedThresholdRange userRangeCalculator(1, 2);
+    TS_ASSERT(userRangeCalculator.hasCalculated()); //Should return true no matter what!
+  }
+
+  void testClone()
+  {
+    Mantid::VATES::UserDefinedThresholdRange original(1, 2);
+    Mantid::VATES::UserDefinedThresholdRange* cloned = original.clone();
+
+    TS_ASSERT_EQUALS(original.getMaximum(), cloned->getMaximum());
+    TS_ASSERT_EQUALS(original.getMinimum(), cloned->getMinimum());
+
+    delete cloned;
+  }
+
 };
 
 #endif

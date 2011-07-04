@@ -11,8 +11,8 @@ namespace Mantid
     /**
     Constructor
     @parameter workspace : Input workspace to analyse
-    @preferred_nStd : number of standard deviations to use when extracting upper and lower signal values.
-    @skipN : of n-cells, how many to skip before using the next as part of the anaysis (for speed-up).
+    @parameter preferred_nStd : number of standard deviations to use when extracting upper and lower signal values.
+    @parameter skipN : of n-cells, how many to skip before using the next as part of the anaysis (for speed-up).
     */
     GaussianThresholdRange::GaussianThresholdRange(Mantid::API::IMDWorkspace_sptr workspace, signal_t preferred_nStd, unsigned int skipN) : m_workspace(workspace), m_min(0), m_max(0), m_isCalculated(false), m_preferred_nStd(preferred_nStd), m_skipN(skipN)
     {
@@ -25,13 +25,13 @@ namespace Mantid
 
     /**
     Assumes a normal, completely symetrical distribution and calculates max and min values based on this.
-    @raw_values : collection of cell/signal values to analyse.
-    @size : Number of cells/signals being analysed.
-    @max_signal : Maximum signal value.
-    @min_signal : Minimum signal value
-    @accumulated_signal : sum of all signal values.
+    @parameter raw_values : collection of cell/signal values to analyse.
+    @parameter size : Number of cells/signals being analysed.
+    @parameter max_signal : Maximum signal value.
+    @parameter min_signal : Minimum signal value
+    @parameter accumulated_signal : sum of all signal values.
     */
-    void GaussianThresholdRange::calculateAsNormalDistrib(std::vector<signal_t>& raw_values, unsigned int size, signal_t max_signal, signal_t min_signal, signal_t accumulated_signal)
+    void GaussianThresholdRange::calculateAsNormalDistrib(std::vector<signal_t>& raw_values, size_t size, signal_t max_signal, signal_t min_signal, signal_t accumulated_signal)
     {
 
       signal_t mean = accumulated_signal / size;
@@ -51,7 +51,7 @@ namespace Mantid
       
     }
 
-     /**
+    /**
     Overriden calculate method. Directs calculation of max and min values based on a normal distribution.
     */
     void GaussianThresholdRange::calculate()
@@ -62,7 +62,7 @@ namespace Mantid
       signal_t accumulated_signal = 0;
       signal_t max_signal = m_workspace->getCell(0).getSignal();
       signal_t min_signal = m_workspace->getCell(0).getSignal();
-      unsigned int size = 0;
+      size_t size = 0;
       for(int i =0; ;i++)
       {
         if(it->next())
@@ -88,8 +88,17 @@ namespace Mantid
         }
       }
       calculateAsNormalDistrib(raw_values, size, max_signal, min_signal, accumulated_signal);
-      
       m_isCalculated = true;
+
+    }
+
+    /**
+    Indicates wheter execution has occured or not.
+    @return : true if ::calculate() has been called previously, otherwise false.
+    */
+    bool GaussianThresholdRange::hasCalculated() const
+    {
+      return m_isCalculated;
     }
 
     /**
@@ -114,6 +123,15 @@ namespace Mantid
         throw std::runtime_error("Cannot call ::getMaximum() without first calling ::calculate()");
       }
       return m_max;
+    }
+
+    /**
+    Virtual constructor clone method.
+    @return clone as GaussianThresholdRange*.
+    */
+    GaussianThresholdRange* GaussianThresholdRange::clone() const
+    {
+      return new GaussianThresholdRange(this->m_workspace, m_preferred_nStd, m_skipN);
     }
   }
 }

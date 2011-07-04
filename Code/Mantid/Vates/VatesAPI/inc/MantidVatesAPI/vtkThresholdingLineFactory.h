@@ -5,6 +5,7 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "vtkUnstructuredGrid.h"
+#include "MantidVatesAPI/ThresholdRange.h"
 
 namespace Mantid
 {
@@ -41,7 +42,7 @@ namespace Mantid
     public:
 
       /// Constructor
-      vtkThresholdingLineFactory(const std::string& scalarName, double minThreshold = -10000, double maxThreshold  = -10000);
+      vtkThresholdingLineFactory(ThresholdRange* thresholdRange, const std::string& scalarName);
 
       /// Assignment operator
       vtkThresholdingLineFactory& operator=(const vtkThresholdingLineFactory& other);
@@ -78,9 +79,7 @@ namespace Mantid
 
       std::string m_scalarName;
 
-      double m_minThreshold;
-      
-      double m_maxThreshold;
+      mutable ThresholdRange_scptr m_thresholdRange;
     
     };
     

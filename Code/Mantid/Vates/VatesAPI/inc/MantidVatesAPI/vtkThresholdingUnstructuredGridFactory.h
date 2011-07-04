@@ -29,6 +29,7 @@
  */
 
 #include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include <vtkUnstructuredGrid.h>
 #include <vtkFloatArray.h>
@@ -46,8 +47,8 @@ class DLLExport vtkThresholdingUnstructuredGridFactory: public vtkDataSetFactory
 public:
 
   /// Constructor
-  vtkThresholdingUnstructuredGridFactory(const std::string& scalarname,
-      const double timestep, double minThreshold = -10000, double maxThreshold = 10000);
+  vtkThresholdingUnstructuredGridFactory(ThresholdRange* thresholdRange, const std::string& scalarname,
+      const double timestep);
 
   /// Assignment operator
   vtkThresholdingUnstructuredGridFactory& operator=(const vtkThresholdingUnstructuredGridFactory<TimeMapper>& other);
@@ -102,11 +103,7 @@ private:
   /// Time mapper.
   TimeMapper m_timeMapper;
 
-  /// Threshold for signal value. below which, we do not provide unstructured topologies for.
-  double m_minThreshold;
-
-  /// Threshold for signal value, above which, we do not provide unstructured topologies for.
-  double m_maxThreshold;
+  mutable ThresholdRange_scptr m_thresholdRange;
 
 };
 

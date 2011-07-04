@@ -18,8 +18,8 @@ namespace Mantid
   namespace VATES
   {
 
-    vtkThresholdingLineFactory::vtkThresholdingLineFactory(const std::string& scalarName, double minThreshold, double maxThreshold) : m_scalarName(scalarName),
-      m_minThreshold(minThreshold), m_maxThreshold(maxThreshold)
+    vtkThresholdingLineFactory::vtkThresholdingLineFactory(ThresholdRange* thresholdRange, const std::string& scalarName) : m_scalarName(scalarName),
+      m_thresholdRange(thresholdRange)
     {
     }
 
@@ -33,8 +33,7 @@ namespace Mantid
     if(this != &other)
     {
       this->m_scalarName = other.m_scalarName;
-      this->m_minThreshold = other.m_minThreshold;
-      this->m_maxThreshold = other.m_maxThreshold;
+      this->m_thresholdRange.swap(other.m_thresholdRange);
       this->m_workspace = other.m_workspace;
     }
     return *this;
@@ -47,8 +46,7 @@ namespace Mantid
   vtkThresholdingLineFactory::vtkThresholdingLineFactory(const vtkThresholdingLineFactory& other)
   {
    this->m_scalarName = other.m_scalarName;
-   this->m_minThreshold = other.m_minThreshold;
-   this->m_maxThreshold = other.m_maxThreshold;
+   this->m_thresholdRange.swap(other.m_thresholdRange);
    this->m_workspace = other.m_workspace;
   }
 
@@ -87,6 +85,9 @@ namespace Mantid
         const int nPointsX = nBinsX;
         Column column(nPointsX);
 
+        signal_t maxThreshold = m_thresholdRange->getMaximum();
+        signal_t minThreshold = m_thresholdRange->getMinimum();
+
         //Loop through dimensions
         for (int i = 0; i < nPointsX; i++)
         {
@@ -94,7 +95,7 @@ namespace Mantid
           
           signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
 
-            if (boost::math::isnan( signalScalar ) || (signalScalar < m_minThreshold) || (signalScalar > m_maxThreshold))
+            if (boost::math::isnan( signalScalar ) || (signalScalar < minThreshold) || (signalScalar > maxThreshold))
             {
               //Flagged so that topological and scalar data is not applied.
               unstructPoint.isSparse = true;

@@ -168,6 +168,8 @@ public :
 
     Mantid::VATES::GaussianThresholdRange gaussianCalculator(sptrWs, 1, 0); //1stdDev, 0 skips
     gaussianCalculator.calculate();
+
+    TS_ASSERT(gaussianCalculator.hasCalculated());
     TSM_ASSERT_EQUALS("Should be 1*sigma standard deviations from central value.", 3.5 + 2 + 2, gaussianCalculator.getMaximum());
     TSM_ASSERT_EQUALS("Should be 1*sigma standard deviations from central value.", 3.5 + 2 - 2, gaussianCalculator.getMinimum());
     TSM_ASSERT("Has not used the IMDWorkspace as expected.", Mock::VerifyAndClearExpectations(pWs));
@@ -220,6 +222,7 @@ public :
     Mantid::API::IMDWorkspace_sptr sptrWs(pWs);
     Mantid::VATES::GaussianThresholdRange gaussianCalculator(sptrWs, 1, 1);
 
+    TSM_ASSERT("Should indicate not calculated.", !gaussianCalculator.hasCalculated());
     TSM_ASSERT_THROWS("Should throw if :getMaximum() is requested without first calculating.", gaussianCalculator.getMaximum(), std::runtime_error);
   }
 
@@ -229,6 +232,7 @@ public :
     Mantid::API::IMDWorkspace_sptr sptrWs(pWs);
     Mantid::VATES::GaussianThresholdRange gaussianCalculator(sptrWs, 1, 1);
 
+    TSM_ASSERT("Should indicate not calculated.", !gaussianCalculator.hasCalculated());
     TSM_ASSERT_THROWS("Should throw if :getMaximum() is requested without first calculating.", gaussianCalculator.getMinimum(), std::runtime_error);
   }
 

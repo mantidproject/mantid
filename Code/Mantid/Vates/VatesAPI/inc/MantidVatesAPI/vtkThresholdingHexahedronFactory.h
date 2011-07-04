@@ -30,6 +30,7 @@
 
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidVatesAPI/ThresholdRange.h"
 #include <vtkUnstructuredGrid.h>
 #include <vtkFloatArray.h>
 #include <vtkCellData.h>
@@ -45,7 +46,7 @@ class DLLExport vtkThresholdingHexahedronFactory: public vtkDataSetFactory
 public:
 
   /// Constructor
-  vtkThresholdingHexahedronFactory(const std::string& scalarname, double minThreshold = -10000, double maxThreshold = 10000);
+  vtkThresholdingHexahedronFactory(ThresholdRange* thresholdRange, const std::string& scalarname);
 
   /// Assignment operator
   vtkThresholdingHexahedronFactory& operator=(const vtkThresholdingHexahedronFactory& other);
@@ -96,11 +97,8 @@ private:
   /// Name of the scalar to provide on mesh.
   std::string m_scalarName;
 
-  /// Threshold for signal value. below which, we do not provide unstructured topologies for.
-  double m_minThreshold;
-
-  /// Threshold for signal value, above which, we do not provide unstructured topologies for.
-  double m_maxThreshold;
+  /// Threshold range.
+  mutable ThresholdRange_scptr m_thresholdRange;
 
 };
 

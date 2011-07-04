@@ -59,9 +59,8 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(IMDDimensi
 }
 
 template <typename CheckDimensionPolicy>
-void MDGeometryBuilderXML<CheckDimensionPolicy>::overWriteWith(MDGeometryBuilderXML<CheckDimensionPolicy>& other)
+MDGeometryBuilderXML<CheckDimensionPolicy>::MDGeometryBuilderXML(const MDGeometryBuilderXML<CheckDimensionPolicy>& other)
 {
-  //TODO: replace with proper assignment operator.
   m_vecDimensions = other.m_vecDimensions;
   m_spXDimension = other.m_spXDimension;
   m_spYDimension = other.m_spYDimension;
@@ -69,6 +68,22 @@ void MDGeometryBuilderXML<CheckDimensionPolicy>::overWriteWith(MDGeometryBuilder
   m_spTDimension = other.m_spTDimension;
   m_changed = other.m_changed;
   m_lastResult = other.m_lastResult;
+}
+
+template <typename CheckDimensionPolicy>
+MDGeometryBuilderXML<CheckDimensionPolicy>& MDGeometryBuilderXML<CheckDimensionPolicy>::operator=(const MDGeometryBuilderXML<CheckDimensionPolicy>& other)
+{
+	if(this != &other)
+	{
+		m_vecDimensions = other.m_vecDimensions;
+		m_spXDimension = other.m_spXDimension;
+		m_spYDimension = other.m_spYDimension;
+		m_spZDimension = other.m_spZDimension;
+		m_spTDimension = other.m_spTDimension;
+		m_changed = other.m_changed;
+		m_lastResult = other.m_lastResult;
+	}
+	return *this;
 }
 
 /**

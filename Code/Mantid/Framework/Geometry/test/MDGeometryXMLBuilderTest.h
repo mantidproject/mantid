@@ -66,6 +66,68 @@ static std::string createDimensionXMLString(unsigned int nbins, int min, int max
 
 public:
 
+void testCopyConstruction()
+{
+	MockIMDDimension* pDimensionX = new MockIMDDimension;
+    EXPECT_CALL(*pDimensionX, getDimensionId()).WillRepeatedly(Return("_a"));
+	EXPECT_CALL(*pDimensionX, toXMLString()).WillRepeatedly(Return("_a_xml"));
+
+	MockIMDDimension* pDimensionY = new MockIMDDimension;
+    EXPECT_CALL(*pDimensionY, getDimensionId()).WillRepeatedly(Return("_b"));
+	EXPECT_CALL(*pDimensionY, toXMLString()).WillRepeatedly(Return("_b_xml"));
+
+	MockIMDDimension* pDimensionZ = new MockIMDDimension;
+    EXPECT_CALL(*pDimensionZ, getDimensionId()).WillRepeatedly(Return("_c"));
+	EXPECT_CALL(*pDimensionZ, toXMLString()).WillRepeatedly(Return("_c_xml"));
+
+	MockIMDDimension* pDimensionT = new MockIMDDimension;
+    EXPECT_CALL(*pDimensionT, getDimensionId()).WillRepeatedly(Return("_d"));
+	EXPECT_CALL(*pDimensionT, toXMLString()).WillRepeatedly(Return("_d_xml"));
+
+	MDGeometryBuilderXML<NoDimensionPolicy> original;
+	original.addXDimension(IMDDimension_const_sptr(pDimensionX));
+	original.addYDimension(IMDDimension_const_sptr(pDimensionY));
+	original.addZDimension(IMDDimension_const_sptr(pDimensionZ));
+	original.addTDimension(IMDDimension_const_sptr(pDimensionT));
+
+	//Copy the original object.
+	MDGeometryBuilderXML<NoDimensionPolicy> copy(original);
+
+	//Test that the outputs of the original and copy are the same.
+	TSM_ASSERT_EQUALS("Copy construction has failed to generate a genuine copy.", original.create(), copy.create());
+}
+
+void testAssignment()
+{
+	MockIMDDimension* pDimensionX = new MockIMDDimension;
+    EXPECT_CALL(*pDimensionX, getDimensionId()).WillRepeatedly(Return("_a"));
+	EXPECT_CALL(*pDimensionX, toXMLString()).WillRepeatedly(Return("_a_xml"));
+
+	MockIMDDimension* pDimensionY = new MockIMDDimension;
+    EXPECT_CALL(*pDimensionY, getDimensionId()).WillRepeatedly(Return("_b"));
+	EXPECT_CALL(*pDimensionY, toXMLString()).WillRepeatedly(Return("_b_xml"));
+
+	MockIMDDimension* pDimensionZ = new MockIMDDimension;
+    EXPECT_CALL(*pDimensionZ, getDimensionId()).WillRepeatedly(Return("_c"));
+	EXPECT_CALL(*pDimensionZ, toXMLString()).WillRepeatedly(Return("_c_xml"));
+
+	MockIMDDimension* pDimensionT = new MockIMDDimension;
+    EXPECT_CALL(*pDimensionT, getDimensionId()).WillRepeatedly(Return("_d"));
+	EXPECT_CALL(*pDimensionT, toXMLString()).WillRepeatedly(Return("_d_xml"));
+
+	MDGeometryBuilderXML<NoDimensionPolicy> A;
+	A.addXDimension(IMDDimension_const_sptr(pDimensionX));
+	A.addYDimension(IMDDimension_const_sptr(pDimensionY));
+	A.addZDimension(IMDDimension_const_sptr(pDimensionZ));
+	A.addTDimension(IMDDimension_const_sptr(pDimensionT));
+
+	MDGeometryBuilderXML<NoDimensionPolicy>B;
+	B = A;
+
+	//Test that the outputs of the original and the one ovewritten are the same.
+	TSM_ASSERT_EQUALS("Assignment has failed to clone the original.", A.create(), B.create());
+}
+
 void testCannotAddSameDimensionMultipleTimes()
 {
   MockIMDDimension* pDimensionX = new MockIMDDimension;

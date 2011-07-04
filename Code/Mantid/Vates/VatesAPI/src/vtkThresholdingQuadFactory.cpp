@@ -18,8 +18,7 @@ namespace Mantid
   namespace VATES
   {
 
-    vtkThresholdingQuadFactory::vtkThresholdingQuadFactory(const std::string& scalarName, double minThreshold, double maxThreshold) : m_scalarName(scalarName),
-      m_minThreshold(minThreshold), m_maxThreshold(maxThreshold)
+    vtkThresholdingQuadFactory::vtkThresholdingQuadFactory(ThresholdRange* thresholdRange, const std::string& scalarName) : m_scalarName(scalarName), m_thresholdRange(thresholdRange)
     {
     }
 
@@ -33,8 +32,7 @@ namespace Mantid
     if(this != &other)
     {
       this->m_scalarName = other.m_scalarName;
-      this->m_minThreshold = other.m_minThreshold;
-      this->m_maxThreshold = other.m_maxThreshold;
+      this->m_thresholdRange.swap(other.m_thresholdRange);
       this->m_workspace = other.m_workspace;
     }
     return *this;
@@ -47,8 +45,7 @@ namespace Mantid
   vtkThresholdingQuadFactory::vtkThresholdingQuadFactory(const vtkThresholdingQuadFactory& other)
   {
    this->m_scalarName = other.m_scalarName;
-   this->m_minThreshold = other.m_minThreshold;
-   this->m_maxThreshold = other.m_maxThreshold;
+   this->m_thresholdRange.swap(other.m_thresholdRange);
    this->m_workspace = other.m_workspace;
   }
 
@@ -85,6 +82,8 @@ namespace Mantid
 
         //The following represent actual calculated positions.
         double posX, posY;
+        signal_t maxThreshold = m_thresholdRange->getMaximum();
+        signal_t minThreshold = m_thresholdRange->getMinimum();
 
         UnstructuredPoint unstructPoint;
         float signalScalar;
@@ -103,7 +102,7 @@ namespace Mantid
 
             signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i, j));
 
-            if (boost::math::isnan( signalScalar ) || (signalScalar < m_minThreshold) || (signalScalar > m_maxThreshold))
+            if (boost::math::isnan( signalScalar ) || (signalScalar < minThreshold) || (signalScalar > maxThreshold))
             {
               //Flagged so that topological and scalar data is not applied.
               unstructPoint.isSparse = true;

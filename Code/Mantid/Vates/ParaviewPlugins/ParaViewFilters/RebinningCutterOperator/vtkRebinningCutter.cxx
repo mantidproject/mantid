@@ -31,6 +31,8 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/vtkDataSetToGeometry.h" 
+#include "MantidVatesAPI/GaussianThresholdRange.h"
+#include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
@@ -174,10 +176,11 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
 
     //Create chain-of-responsibility for translating imdworkspaces.
     std::string scalarName = XMLDefinitions::signalName();
-    vtkThresholdingLineFactory* vtkGridFactory = new vtkThresholdingLineFactory(scalarName, m_thresholdMin, m_thresholdMax);
-    vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(scalarName, m_thresholdMin, m_thresholdMax);
-    vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(scalarName, m_thresholdMin, m_thresholdMax);
-    vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(scalarName, m_timestep, m_thresholdMin, m_thresholdMax);
+    ThresholdRange* range = new UserDefinedThresholdRange(m_thresholdMin, m_thresholdMax); //HACK
+    vtkThresholdingLineFactory* vtkGridFactory = new vtkThresholdingLineFactory(range->clone(), scalarName);
+    vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(range->clone(),scalarName);
+    vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(range->clone(),scalarName);
+    vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(range->clone(),scalarName, m_timestep);
     vtkGridFactory->SetSuccessor(p_2dSuccessorFactory);
     p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
     p_3dSuccessorFactory->SetSuccessor(p_4dSuccessorFactory);

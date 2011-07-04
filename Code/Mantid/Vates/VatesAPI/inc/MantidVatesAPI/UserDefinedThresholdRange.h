@@ -48,6 +48,10 @@ public:
 
   ~UserDefinedThresholdRange();
 
+  virtual bool hasCalculated() const;
+
+  virtual UserDefinedThresholdRange* clone() const;
+
 private:
 
   const signal_t m_min;

@@ -14,8 +14,8 @@ namespace Mantid
 namespace VATES 
 {
 
-  vtkThresholdingHexahedronFactory::vtkThresholdingHexahedronFactory(const std::string& scalarName, double minThreshold, double maxThreshold) :
-  m_scalarName(scalarName), m_minThreshold(minThreshold), m_maxThreshold(maxThreshold)
+  vtkThresholdingHexahedronFactory::vtkThresholdingHexahedronFactory(ThresholdRange* thresholdRange, const std::string& scalarName) :
+  m_scalarName(scalarName), m_thresholdRange(thresholdRange)
   {
   }
 
@@ -29,8 +29,7 @@ namespace VATES
     if(this != &other)
     {
       this->m_scalarName = other.m_scalarName;
-      this->m_minThreshold = other.m_minThreshold;
-      this->m_maxThreshold = other.m_maxThreshold;
+      this->m_thresholdRange.swap(other.m_thresholdRange);
       this->m_workspace = other.m_workspace;
     }
     return *this;
@@ -43,8 +42,7 @@ namespace VATES
   vtkThresholdingHexahedronFactory::vtkThresholdingHexahedronFactory(const vtkThresholdingHexahedronFactory& other)
   {
    this->m_scalarName = other.m_scalarName;
-   this->m_minThreshold = other.m_minThreshold;
-   this->m_maxThreshold = other.m_maxThreshold;
+   this->m_thresholdRange.swap(other.m_thresholdRange);
    this->m_workspace = other.m_workspace;
   }
 
@@ -132,6 +130,8 @@ namespace VATES
       double minSig=1e32;
       double maxSig=-1e32;
 
+      signal_t maxThreshold = m_thresholdRange->getMaximum();
+      signal_t minThreshold = m_thresholdRange->getMinimum();
 
       CPUTimer tim;
 
@@ -155,7 +155,7 @@ namespace VATES
             if (signalScalar > maxSig) maxSig = signalScalar;
             if (signalScalar < minSig) minSig = signalScalar;
 
-            if (boost::math::isnan( signalScalar ) || (signalScalar < m_minThreshold) || (signalScalar > m_maxThreshold))
+            if (boost::math::isnan( signalScalar ) || (signalScalar < minThreshold) || (signalScalar > maxThreshold))
             {
               //Flagged so that topological and scalar data is not applied.
               unstructPoint.isSparse = true;

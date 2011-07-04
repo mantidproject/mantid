@@ -19,6 +19,7 @@
 #include "MantidVatesAPI/vtkThresholdingLineFactory.h"
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 
 #include "MantidDataHandling/LoadEventNexus.h"
@@ -206,7 +207,7 @@ void vtkEventNexusReader::SetAppliedGeometryXML(std::string appliedGeometryXML)
 	  temp.addYDimension(m_appliedYDimension);
 	  temp.addZDimension(m_appliedZDimension);
 	  temp.addTDimension(m_appliedTDimension);
-	  m_geometryXmlBuilder.overWriteWith(temp);
+	  m_geometryXmlBuilder = temp;
 
       m_actionManager.ask(RecalculateAll);
       this->Modified();
@@ -318,9 +319,10 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
 
   // Chain of resposibility setup for visualisation. Encapsulates decision making on how workspace will be rendered.
   std::string scalarName = "signal";
-  vtkThresholdingLineFactory vtkGridFactory(scalarName, m_minThreshold, m_maxThreshold);
-  vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(scalarName, m_minThreshold, m_maxThreshold);
-  vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(scalarName, m_minThreshold, m_maxThreshold);
+  ThresholdRange* range = new UserDefinedThresholdRange(m_minThreshold, m_maxThreshold); //HACK
+  vtkThresholdingLineFactory vtkGridFactory(range->clone(), scalarName);
+  vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(range->clone(), scalarName);
+  vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(range->clone(), scalarName);
   vtkGridFactory.SetSuccessor(p_2dSuccessorFactory);
   p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
   

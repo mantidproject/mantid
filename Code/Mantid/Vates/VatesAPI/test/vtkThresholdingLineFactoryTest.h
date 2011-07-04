@@ -6,12 +6,13 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/IMDIterator.h"
 #include "MantidVatesAPI/vtkThresholdingLineFactory.h"
+#include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MDDataObjects/MDIndexCalculator.h"
 #include "MockObjects.h"
 
 using namespace Mantid;
-using Mantid::VATES::vtkThresholdingLineFactory;
+using namespace Mantid::VATES;
 
 
 //=====================================================================================
@@ -24,13 +25,13 @@ public:
 
   void testCreateMeshOnlyThrows()
   {
-    vtkThresholdingLineFactory factory("signal");
+    vtkThresholdingLineFactory factory(new UserDefinedThresholdRange(0, 10000), "signal");
     TS_ASSERT_THROWS(factory.createMeshOnly() , std::runtime_error);
   }
 
   void testCreateScalarArrayThrows()
   {
-    vtkThresholdingLineFactory factory("signal");
+    vtkThresholdingLineFactory factory(new UserDefinedThresholdRange(0, 10000), "signal");
     TS_ASSERT_THROWS(factory.createScalarArray() , std::runtime_error);
   }
 
@@ -42,14 +43,14 @@ public:
     IMDWorkspace* nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
 
-    vtkThresholdingLineFactory factory("signal");
+    vtkThresholdingLineFactory factory(new UserDefinedThresholdRange(0, 10000), "signal");
 
     TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
   }
 
   void testCreateWithoutInitializeThrows()
   {
-    vtkThresholdingLineFactory factory("signal");
+    vtkThresholdingLineFactory factory(new UserDefinedThresholdRange(0, 10000), "signal");
     TS_ASSERT_THROWS(factory.create(), std::runtime_error);
   }
 
@@ -69,7 +70,7 @@ public:
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
-    vtkThresholdingLineFactory inside("signal", 0, 2);
+    vtkThresholdingLineFactory inside(new UserDefinedThresholdRange(0, 2), "signal");
     inside.initialize(ws_sptr);
     vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create());
 
@@ -93,7 +94,7 @@ public:
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall above and outside the minimum 0 and maximum 0.5.
-    vtkThresholdingLineFactory above("signal", 0, 0.5);
+    vtkThresholdingLineFactory above(new UserDefinedThresholdRange(0, 0.5), "signal");
     above.initialize(ws_sptr);
     vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create());
 
@@ -117,7 +118,7 @@ public:
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall below and outside the minimum 1.5 and maximum 2.
-    vtkThresholdingLineFactory below("signal", 1.5, 2);
+    vtkThresholdingLineFactory below(new UserDefinedThresholdRange(1.5, 2), "signal");
     below.initialize(ws_sptr);
     vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create());
 
@@ -142,7 +143,7 @@ public:
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingLineFactory factory("signal");
+    vtkThresholdingLineFactory factory(new UserDefinedThresholdRange(0, 10000), "signal");
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
@@ -166,7 +167,7 @@ public:
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingLineFactory factory("signal");
+    vtkThresholdingLineFactory factory(new UserDefinedThresholdRange(0, 10000),"signal");
 
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor was available.", factory.initialize(ws_sptr), std::runtime_error);
   }
@@ -189,7 +190,7 @@ public:
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingLineFactory factory("signal");
+    vtkThresholdingLineFactory factory(new UserDefinedThresholdRange(0, 10000),"signal");
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
@@ -204,7 +205,7 @@ public:
   void testTypeName()
   {
     using namespace Mantid::VATES;
-    vtkThresholdingLineFactory factory ("signal");
+    vtkThresholdingLineFactory factory (new UserDefinedThresholdRange(0, 10000),"signal");
     TS_ASSERT_EQUALS("vtkThresholdingLineFactory", factory.getFactoryTypeName());
   }
 
@@ -231,7 +232,7 @@ public:
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
-    vtkThresholdingLineFactory factory("signal", 0, 2);
+    vtkThresholdingLineFactory factory(new UserDefinedThresholdRange(0, 2),"signal");
     factory.initialize(ws_sptr);
     TS_ASSERT_THROWS_NOTHING(factory.create());
 	}

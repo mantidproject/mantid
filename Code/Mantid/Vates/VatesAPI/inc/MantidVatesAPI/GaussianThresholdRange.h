@@ -44,15 +44,19 @@ public:
 
   virtual void calculate();
 
+  virtual bool hasCalculated() const;
+
   virtual signal_t getMinimum() const;
 
   virtual signal_t getMaximum() const;
+
+  virtual GaussianThresholdRange* clone() const;
 
   virtual ~GaussianThresholdRange();
 
 private:
   
-  void calculateAsNormalDistrib(std::vector<signal_t>& raw_values, unsigned int size, signal_t max_signal, signal_t min_signal, signal_t accumulated_signal);
+  void calculateAsNormalDistrib(std::vector<signal_t>& raw_values, size_t size, signal_t max_signal, signal_t min_signal, signal_t accumulated_signal);
 
   Mantid::API::IMDWorkspace_sptr m_workspace;
 

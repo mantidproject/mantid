@@ -1,6 +1,7 @@
 #ifndef MANTID_PARAVIEW_THRESHOLD_RANGE
 #define MANTID_PARAVIEW_THRESHOLD_RANGE
 
+#include <boost/scoped_ptr.hpp>
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 
@@ -42,17 +43,26 @@ public:
   /// Calculate the threshold range.
   virtual void calculate() = 0;
 
+  /// Getter for the has executed status.
+  virtual bool hasCalculated() const = 0;
+
   /// Fetch the threshold range.
   virtual signal_t getMinimum() const = 0;
 
   /// Fetch the threshold range minimum.
   virtual signal_t getMaximum() const = 0;
 
+  /// Virtual constructor method.
+  virtual ThresholdRange* clone() const = 0;
+
   /// Destructor
   virtual ~ThresholdRange()
   {
   }
 };
+
+/// ThresholdRange as a scoped pointer.
+typedef boost::scoped_ptr<ThresholdRange> ThresholdRange_scptr;
 }
 }
 

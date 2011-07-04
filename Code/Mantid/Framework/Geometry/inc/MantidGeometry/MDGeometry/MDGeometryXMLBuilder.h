@@ -70,8 +70,11 @@ public:
   /// Add t dimension.
   bool addTDimension(IMDDimension_const_sptr dimension) const;
 
-  /// Over write stored dimensions.
-  void overWriteWith(MDGeometryBuilderXML<CheckDimensionPolicy>& other);
+  /// Copy constructor
+  MDGeometryBuilderXML(const MDGeometryBuilderXML&);
+
+  /// Assignment Operator
+  MDGeometryBuilderXML& operator=(const MDGeometryBuilderXML&);
 
   /// Create the xml.
   const std::string& create() const;
@@ -89,10 +92,6 @@ private:
   mutable IMDDimension_const_sptr m_spZDimension;
 
   mutable IMDDimension_const_sptr m_spTDimension;
-
-  MDGeometryBuilderXML(const MDGeometryBuilderXML&);
-
-  MDGeometryBuilderXML& operator=(const MDGeometryBuilderXML&);
 
   /// Determine whetether a valid x dimension has been provided.
   bool hasXDimension() const;

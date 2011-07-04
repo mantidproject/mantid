@@ -6,6 +6,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
+#include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MockObjects.h"
 
 using namespace Mantid;
@@ -40,18 +41,15 @@ public:
 
     //Set up so that only cells with signal values == 1 should not be filtered out by thresholding.
 
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> inside("signal", 0,
-      0, 2);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> inside(new UserDefinedThresholdRange(0, 2), "signal", 0);
     inside.initialize(ws_sptr);
     vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create());
 
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> below("signal", 0, 
-      0, 0.5);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> below(new UserDefinedThresholdRange(0, 0.5),"signal", 0);
     below.initialize(ws_sptr);
     vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create());
 
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> above("signal", 0,
-      2, 3);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> above(new UserDefinedThresholdRange(2, 3), "signal", 0);
     above.initialize(ws_sptr);
     vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create());
 
@@ -79,10 +77,11 @@ public:
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(2).WillRepeatedly(Return(VecIMDDimension_const_sptr(4)));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> ("signal", 0);
+      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (pRange, "signal", 0);
     factory.initialize(ws_sptr);
 
     vtkDataSet* product = factory.create();
@@ -101,8 +100,8 @@ public:
 
     IMDWorkspace* nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
-
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory("signal", 1);
+    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(pRange, "signal", 1);
 
     TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
   }
@@ -110,21 +109,24 @@ public:
   void testCreateMeshOnlyThrows()
   {
     using namespace Mantid::VATES;
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory("signal", 1);
+    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(pRange, "signal", 1);
     TS_ASSERT_THROWS(factory.createMeshOnly() , std::runtime_error);
   }
 
   void testCreateScalarArrayThrows()
   {
     using namespace Mantid::VATES;
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory("signal", 1);
+    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(pRange, "signal", 1);
     TS_ASSERT_THROWS(factory.createScalarArray() , std::runtime_error);
   }
 
   void testCreateWithoutInitializeThrows()
   {
     using namespace Mantid::VATES;
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory("signal", 1);
+    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(pRange, "signal", 1);
     TS_ASSERT_THROWS(factory.create(), std::runtime_error);
   }
 
@@ -143,10 +145,11 @@ public:
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> ("signal", (double)0);
+      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (pRange, "signal", (double)0);
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
@@ -168,10 +171,11 @@ public:
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(1).WillOnce(Return(VecIMDDimension_const_sptr(2))); //2 dimensions on the workspace.
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> ("signal", (double)0);
+      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (pRange, "signal", (double)0);
 
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor was available.", factory.initialize(ws_sptr), std::runtime_error);
   }
@@ -192,10 +196,11 @@ public:
     EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> ("signal", (double)0);
+      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (pRange, "signal", (double)0);
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
@@ -210,8 +215,11 @@ public:
   void testTypeName()
   {
     using namespace Mantid::VATES;
+
+    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
+
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> ("signal", (double)0);
+      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (pRange, "signal", (double)0);
     TS_ASSERT_EQUALS("vtkThresholdingUnstructuredGridFactory", factory.getFactoryTypeName());
   }
 
@@ -240,7 +248,9 @@ public:
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(4)));
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory("signal", 0);
+    UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
+
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(pRange, "signal", 0);
     factory.initialize(ws_sptr);
     TS_ASSERT_THROWS_NOTHING(factory.create());
   }
