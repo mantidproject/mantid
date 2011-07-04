@@ -52,6 +52,8 @@ private:
   void init();
   ///Execution code
   void exec();
+  void execRealFFT();
+  void execComplexFFT();
 
 };
 

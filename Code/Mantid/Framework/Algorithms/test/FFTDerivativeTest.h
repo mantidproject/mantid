@@ -40,7 +40,7 @@ public:
     const MantidVec& X = fWS->readX(0);
     const MantidVec& Y = fWS->readY(0);
 
-    TS_ASSERT_EQUALS(Y.size(),101);
+    TS_ASSERT_EQUALS(Y.size(),100);
 
     for(size_t i=0; i < Y.size(); ++i)
     {
@@ -77,7 +77,6 @@ public:
     {
       double xx = X[i] - 5.1;
       double ex = exp(-(xx*xx)*2);
-      //TS_ASSERT_DELTA( Y[i],((16 * xx*xx - 4.0) * ex),0.000001);
       TS_ASSERT_DELTA( Y[i],(16 * xx*xx * ex - 4*ex),0.000001);
     }
 
