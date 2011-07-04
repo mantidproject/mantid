@@ -46,7 +46,7 @@ public:
       Q1D2.setProperty("WavelengthAdj", m_wavNorm);
       Q1D2.setPropertyValue("OutputWorkspace",outputWS);
       Q1D2.setPropertyValue("OutputBinning","0,0.02,0.5");
-      // WavelengthAdj and PixelAdj are undefined but that shouldn't cause this to throw
+      // The property PixelAdj is undefined but that shouldn't cause this to throw
       Q1D2.execute()
     )
 
@@ -292,7 +292,7 @@ public:
 	void setUp()
 	{
 		//load all the spectra from the LOQ workspace
-    createInputWorkspaces(0, 17792-1, m_inputWS, m_wavNorm, m_pixel);
+    createInputWorkspaces(1, 17792, m_inputWS, m_wavNorm, m_pixel);
     m_outputWS = "Q1D2Test_result";
 	}
   	
