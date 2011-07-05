@@ -69,7 +69,7 @@ namespace Mantid
 			      const char * group_name, bool write2Ddata) const;
 
       /// write table workspace
-      int NexusFileIO::writeNexusTableWorkspace( const API::ITableWorkspace_const_sptr& localworkspace,
+      int writeNexusTableWorkspace( const API::ITableWorkspace_const_sptr& localworkspace,
         const char * group_name) const;
 
       int writeNexusProcessedDataEvent( const DataObjects::EventWorkspace_const_sptr& localworkspace);
