@@ -323,7 +323,27 @@ void RangeSelector::setVisible(bool state)
   m_plot->replot();
   m_visible = state;
 }
-
+/** Changes the start and end of the x-axis range
+*  @param min the start of the range
+*  @param max the end of the range
+*/
+void RangeSelector::setMaxMin(const double min, const double max)
+{
+  if ( min == m_min && max == m_max )
+  {
+    //this is just to save work, the comparison above may fail if min or max are represented differently in the machine but that wont cause bad result
+    return;
+  }
+  m_min = min;
+  m_max = max;
+  emit selectionChanged(m_min, m_max);
+  emit minValueChanged(m_min);
+  emit maxValueChanged(m_max);
+}
+/** Changes only the minium of the x range, the current range maximium
+*  must be valid
+*  @param val the start of the range
+*/
 void RangeSelector::setMin(double val)
 {
   if ( val != m_min )
@@ -333,7 +353,10 @@ void RangeSelector::setMin(double val)
     emit selectionChanged(val, m_max);
   }
 }
-
+/** Changes only the maximium of the x range, the current range minimum
+*  must be valid
+*  @param val the end of the range
+*/
 void RangeSelector::setMax(double val)
 {
   if ( val != m_max )
@@ -356,21 +379,24 @@ bool RangeSelector::changingMax(double x, double dx)
 
 void RangeSelector::verify()
 {
+  double min(m_min);
+  double max(m_max);
   if ( m_min < m_lower || m_min > m_higher )
   {
-    setMin(m_lower);
+    min = m_lower;
   }
-  if ( m_max < m_lower || m_max > m_higher )
+  if ( max < m_lower || m_max > m_higher )
   {
-    setMax(m_higher);
+    max = m_higher;
   }
 
-  if ( m_min > m_max )
+  if ( min > max )
   {
-    double tmp = m_min;
-    setMin(m_max);
-    setMax(tmp);
+    double tmp = min;
+    min = max;
+    max = tmp;
   }
+  setMaxMin(min, max);
 }
 
 bool RangeSelector::inRange(double x)

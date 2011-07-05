@@ -56,6 +56,7 @@ namespace MantidWidgets
   private:
     void setMin(double val);
     void setMax(double val);
+    void setMaxMin(const double min, const double max);
     void verify();
     bool inRange(double);
 
