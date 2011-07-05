@@ -279,34 +279,6 @@ class SANSInstrumentWidget(BaseWidget):
         if fname:
             self._summary.dark_file_edit.setText(fname)      
 
-    def _add_rectangle(self):
-        # Read in the parameters
-        x_min = util._check_and_get_int_line_edit(self._summary.x_min_edit)
-        x_max = util._check_and_get_int_line_edit(self._summary.x_max_edit)
-        y_min = util._check_and_get_int_line_edit(self._summary.y_min_edit)
-        y_max = util._check_and_get_int_line_edit(self._summary.y_max_edit)
-        
-        # Check that a rectangle was defined. We don't care whether 
-        # the min/max values were inverted
-        if (self._summary.x_min_edit.hasAcceptableInput() and
-            self._summary.x_max_edit.hasAcceptableInput() and
-            self._summary.y_min_edit.hasAcceptableInput() and
-            self._summary.y_max_edit.hasAcceptableInput()):
-            rect = ReductionOptions.RectangleMask(x_min, x_max, y_min, y_max)
-            self._append_rectangle(rect)
-    
-    def _remove_rectangle(self):
-        selected = self._summary.listWidget.selectedItems()
-        for item in selected:
-            self._summary.listWidget.takeItem( self._summary.listWidget.row(item) )
-    
-    def _append_rectangle(self, rect):
-        class _ItemWrapper(QtGui.QListWidgetItem):
-            def __init__(self, value):
-                QtGui.QListWidgetItem.__init__(self, value)
-                self.value = rect
-        self._summary.listWidget.addItem(_ItemWrapper("Rect: %g < x < %g; %g < y < %g" % (rect.x_min, rect.x_max, rect.y_min, rect.y_max)))    
-
     def set_state(self, state):
         """
             Populate the UI elements with the data from the given state.
@@ -462,7 +434,7 @@ class SANSInstrumentWidget(BaseWidget):
         # Mask detector IDs
         m.use_mask_file = self._summary.mask_check.isChecked()
         m.mask_file = unicode(self._summary.mask_edit.text())
-        m.detector_ids = []
+        m.detector_ids = self._masked_detectors
         if self._in_mantidplot:
             if mtd.workspaceExists(self.mask_ws):
                 masked_detectors = GetMaskedDetectors(self.mask_ws)

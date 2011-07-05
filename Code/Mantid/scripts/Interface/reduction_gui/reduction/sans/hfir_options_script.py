@@ -8,23 +8,6 @@ import copy
 import os
 from reduction_gui.reduction.scripter import BaseScriptElement
 
-# Check whether Mantid is available
-try:
-    from MantidFramework import *
-    mtd.initialise(False)
-    from reduction.instruments.sans.hfir_command_interface import *
-    HAS_MANTID = True
-except:
-    HAS_MANTID = False  
-
-# Check whether we are running in MantidPlot
-IS_IN_MANTIDPLOT = False
-try:
-    import mantidplot
-    IS_IN_MANTIDPLOT = True
-except:
-    pass
-   
 class ReductionOptions(BaseScriptElement):
     instrument_name = "BIOSANS"
     nx_pixels = 192
