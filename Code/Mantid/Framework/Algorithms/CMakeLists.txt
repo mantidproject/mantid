@@ -407,7 +407,7 @@ set ( TEST_FILES
 	test/PolynomialCorrectionTest.h
 	test/PowerLawCorrectionTest.h
 	test/PowerTest.h
-#	test/Q1D2Test.h
+	test/Q1D2Test.h
 	test/Q1DTest.h
 	test/Q1DWeightedTest.h
 	test/QxyTest.h
