@@ -96,6 +96,14 @@ class BaseScriptElement(object):
             return default
 
     @classmethod
+    def getIntList(cls, dom, tag, default=[]):
+        value = BaseScriptElement.getContent(dom, tag)
+        if value is not None and len(value.strip())>0:
+            return map(int, value.split(','))
+        else:
+            return default
+
+    @classmethod
     def getFloatElement(cls, dom, tag, default=None):
         value = BaseScriptElement.getContent(dom, tag)
         if value is not None:

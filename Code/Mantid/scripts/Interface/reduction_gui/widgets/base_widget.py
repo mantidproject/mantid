@@ -6,6 +6,9 @@ from reduction_gui.settings.application_settings import GeneralSettings
 IS_IN_MANTIDPLOT = False
 try:
     import qti
+    from MantidFramework import *
+    mtd.initialise(False)
+    from mantidsimple import *
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -15,11 +18,11 @@ def process_file_parameter(f):
         Decorator that allows a function parameter to either be
         a string or a function returning a string
     """
-    def processed_function(self, file_name, *args): 
+    def processed_function(self, file_name, *args, **kwargs): 
         if isinstance(file_name, types.StringType):
             return f(self, file_name, *args)
         else:
-            return f(self, str(file_name()), *args)
+            return f(self, str(file_name()), *args, **kwargs)
     return processed_function
     
 class BaseWidget(QtGui.QWidget):    
@@ -109,30 +112,65 @@ class BaseWidget(QtGui.QWidget):
             return str(fname)     
     
     @process_file_parameter
-    def show_instrument(self, file_name='', tab=-1):
+    def show_instrument(self, file_name=None, workspace=None, tab=-1, reload=False, mask=None):
         """
             Show instrument for the given data file.
+            If both file_name and workspace are given, the file will be loaded in 
+            a workspace with the given name.
+            
             @param file_name: Data file path
+            @param workspace: Workspace to create
             @param tab: Tab to open the instrument window in
         """
-        file_name = unicode(file_name)
-        if not IS_IN_MANTIDPLOT:
-            return
-        if not os.path.exists(file_name):
-            return
+        file_name = str(file_name)
         
-        # Do nothing if the instrument view is already displayed
-        if self._instrument_view is not None and self._data_set_viewed == file_name \
-            and self._instrument_view.isVisible():
-            return
-
-        if self._data_proxy is not None:
-            ws_name = '_'+os.path.split(file_name)[1]
-            proxy = self._data_proxy(file_name, ws_name)
-            if proxy.data_ws is not None:
-                self._instrument_view = qti.app.mantidUI.getInstrumentView(proxy.data_ws, tab)
+        def _show_ws_instrument(ws):
+            if self._instrument_view is not None:
+                print self._instrument_view.isVisible()
+            # Do nothing if the instrument view is already displayed
+            if self._instrument_view is not None and \
+                self._data_set_viewed == file_name \
+                and self._instrument_view.isVisible():
+                
+                # If we want a reload, close the instrument window currently shown
+                if reload:
+                    self._instrument_view.close()
+                else:
+                    return True
+            
+            self._instrument_view = qti.app.mantidUI.getInstrumentView(ws, tab)
+            if self._instrument_view is not None:
                 self._instrument_view.show()
                 self._data_set_viewed = file_name
+                return True
+            
+            return False
+        
+        # Sanity check
+        if not IS_IN_MANTIDPLOT:
+            return
+
+        # Set up workspace name
+        if workspace is None:
+            workspace = '_'+os.path.split(file_name)[1]
+
+        # See if the file is already loaded
+        if not reload and _show_ws_instrument(workspace):
+            return
+        
+        # Check that the file exists.
+        if not os.path.exists(file_name):
+            QtGui.QMessageBox.warning(self.widgets[0], "File Not Found", "The supplied mask file can't be found on the file system")
+            
+        if self._data_proxy is not None:
+            proxy = self._data_proxy(file_name, workspace)
+            if proxy.data_ws is not None:
+                if mask is not None:
+                    MaskDetectors(proxy.data_ws, DetectorList=mask)
+                _show_ws_instrument(proxy.data_ws)
             else:
-                raise RuntimeError, '\n'.join(proxy.errors)
+                QtGui.QMessageBox.warning(self.widgets[0], "Mask Error", "Mantid doesn't know how to load this file")
+        else:
+            QtGui.QMessageBox.warning(self.widgets[0], "Mask Error", "Mantid doesn't know how to load this file")
+        
 

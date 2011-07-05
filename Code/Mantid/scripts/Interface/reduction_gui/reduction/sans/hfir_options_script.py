@@ -74,11 +74,15 @@ class ReductionOptions(BaseScriptElement):
     left = 0
     right = 0
     
-    # MAsked shapes
+    # Masked shapes
     shapes = []
     
     # Masked detector IDs
-    detector_ids = ''
+    detector_ids = []
+    
+    # Mask file
+    mask_file = ''
+    use_mask_file = False
     
     # Output directory
     use_data_directory = True
@@ -150,8 +154,8 @@ class ReductionOptions(BaseScriptElement):
         for item in self.shapes:
             script += "MaskRectangle(x_min=%g, x_max=%g, y_min=%g, y_max=%g)\n" % (item.x_min, item.x_max, item.y_min, item.y_max)
         #   Detector IDs
-        if len(self.detector_ids)>0:
-            script += "MaskDetectors([%s])\n" % self.detector_ids
+        if len(self.detector_ids)>0 and self.use_mask_file:
+            script += "MaskDetectors(%s)\n" % str(self.detector_ids)
         # Output directory
         if not self.use_data_directory:
             script += "OutputPath(\"%s\")\n" % self.output_directory
@@ -203,9 +207,10 @@ class ReductionOptions(BaseScriptElement):
             xml += "    <rect x_min='%g' x_max='%g' y_min='%g' y_max='%g' />\n" % (item.x_min, item.x_max, item.y_min, item.y_max)
         xml += "  </Shapes>\n"
         
-        xml += "  <DetectorIDs>\n"
-        xml += "    %s\n" % self.detector_ids
-        xml += "  </DetectorIDs>\n"
+        ids_str = ','.join(map(str, self.detector_ids))
+        xml += "  <DetectorIDs>%s</DetectorIDs>\n" % ids_str
+        xml += "  <mask_file>%s</mask_file>\n" % self.mask_file
+        xml += "  <use_mask_file>%s</use_mask_file>\n" % self.use_mask_file
         
         xml += "</Mask>\n"
         
@@ -308,8 +313,10 @@ class ReductionOptions(BaseScriptElement):
                         y_max =  float(item.getAttribute("y_max"))
                         self.shapes.append(ReductionOptions.RectangleMask(x_min, x_max, y_min, y_max))
                                 
-                self.detector_ids = ''
-                self.detector_ids = BaseScriptElement.getStringElement(mask_dom, "DetectorIDs", default='').strip()
+                self.detector_ids = BaseScriptElement.getIntList(mask_dom, "DetectorIDs", default=[])
+                self.mask_file = BaseScriptElement.getStringElement(mask_dom, "mask_file")
+                self.use_mask_file = BaseScriptElement.getBoolElement(mask_dom, "use_mask_file",
+                                                                      default = ReductionOptions.use_mask_file)
 
         # Absolute scaling
         element_list = dom.getElementsByTagName("AbsScale")
@@ -371,7 +378,9 @@ class ReductionOptions(BaseScriptElement):
         self.right = ReductionOptions.right
         
         self.shapes = []
-        self.detector_ids = ''
+        self.detector_ids = []
+        self.mask_file = ''
+        self.use_mask_file = ReductionOptions.use_mask_file
 
         self.use_data_directory = ReductionOptions.use_data_directory
         self.output_directory = ReductionOptions.output_directory

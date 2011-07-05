@@ -7,6 +7,16 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_hfir_instrument
 
+IS_IN_MANTIDPLOT = False
+try:
+    import qti
+    from MantidFramework import *
+    mtd.initialise(False)
+    from mantidsimple import *
+    IS_IN_MANTIDPLOT = True
+except:
+    pass
+
 class SANSInstrumentWidget(BaseWidget):    
     """
         Widget that present instrument details to the user
@@ -24,6 +34,11 @@ class SANSInstrumentWidget(BaseWidget):
     _wavelength = None
     _wavelength_supplied = True
     _wavelength_spread = None
+    
+    # Internal data members for mask editor logic
+    mask_file = ''
+    mask_reload = False
+    mask_ws = "__hfir_mask"
     
     def __init__(self, parent=None, state=None, settings=None, name="BIOSANS", data_proxy=None):      
         super(SANSInstrumentWidget, self).__init__(parent, state, settings, data_proxy=data_proxy) 
@@ -119,20 +134,10 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.instr_name_label.hide()    
         self._dark_clicked(self._summary.dark_current_check.isChecked())  
         
-        # Mask Validators
-        self._summary.x_min_edit.setValidator(QtGui.QIntValidator(self._summary.x_min_edit))
-        self._summary.x_max_edit.setValidator(QtGui.QIntValidator(self._summary.x_max_edit))
-        self._summary.y_min_edit.setValidator(QtGui.QIntValidator(self._summary.y_min_edit))
-        self._summary.y_max_edit.setValidator(QtGui.QIntValidator(self._summary.y_max_edit))
-        
-        self._summary.top_edit.setValidator(QtGui.QIntValidator(self._summary.top_edit))
-        self._summary.bottom_edit.setValidator(QtGui.QIntValidator(self._summary.bottom_edit))
-        self._summary.left_edit.setValidator(QtGui.QIntValidator(self._summary.left_edit))
-        self._summary.right_edit.setValidator(QtGui.QIntValidator(self._summary.right_edit))
-        
         # Mask Connections
-        self.connect(self._summary.add_rectangle_button, QtCore.SIGNAL("clicked()"), self._add_rectangle)
-        self.connect(self._summary.remove_button, QtCore.SIGNAL("clicked()"), self._remove_rectangle)
+        self.connect(self._summary.mask_browse_button, QtCore.SIGNAL("clicked()"), self._mask_browse_clicked)
+        self.connect(self._summary.mask_plot_button, QtCore.SIGNAL("clicked()"), self._mask_plot_clicked)
+        self.connect(self._summary.mask_check, QtCore.SIGNAL("clicked(bool)"), self._mask_checked)
   
         # Absolute scale connections and validators
         self._summary.scale_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_edit))
@@ -149,6 +154,22 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
             
+    def _mask_plot_clicked(self):        
+        self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2, reload=self.mask_reload, mask=self._masked_detectors)
+        self._masked_detectors = []
+        self.mask_reload = False
+        
+    def _mask_browse_clicked(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._summary.mask_edit.setText(fname)
+            self.mask_reload = True              
+        
+    def _mask_checked(self, is_checked):
+        self._summary.mask_edit.setEnabled(is_checked)
+        self._summary.mask_browse_button.setEnabled(is_checked)
+        self._summary.mask_plot_button.setEnabled(is_checked)
+        
     def _scale_data_plot_clicked(self):
         self.show_instrument(file_name=self._summary.scale_data_edit.text)
         
@@ -370,16 +391,12 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.n_sub_pix_edit.setText(QtCore.QString(str(state.n_sub_pix)))
         self._summary.log_binning_radio.setChecked(state.log_binning)
         
-        self._summary.top_edit.setText(QtCore.QString(str(state.top)))
-        self._summary.bottom_edit.setText(QtCore.QString(str(state.bottom)))
-        self._summary.left_edit.setText(QtCore.QString(str(state.left)))
-        self._summary.right_edit.setText(QtCore.QString(str(state.right)))
-            
-        self._summary.listWidget.clear()
-        for item in state.shapes:
-            self._append_rectangle(item)
-            
+        # Mask
+        self._summary.mask_edit.setText(QtCore.QString(str(state.mask_file)))
+        self._summary.mask_check.setChecked(state.use_mask_file)
+        self._mask_checked(state.use_mask_file)
         self._masked_detectors = state.detector_ids
+        self.mask_reload = True
 
     def _prepare_field(self, is_enabled, stored_value, chk_widget, edit_widget, suppl_value=None, suppl_edit=None):
         #to_display = str(stored_value) if is_enabled else ''
@@ -442,17 +459,14 @@ class SANSInstrumentWidget(BaseWidget):
         m.n_sub_pix = util._check_and_get_int_line_edit(self._summary.n_sub_pix_edit)
         m.log_binning = self._summary.log_binning_radio.isChecked()
         
-        # Mask Edges
-        m.top = util._check_and_get_int_line_edit(self._summary.top_edit)
-        m.bottom = util._check_and_get_int_line_edit(self._summary.bottom_edit)
-        m.left = util._check_and_get_int_line_edit(self._summary.left_edit)
-        m.right = util._check_and_get_int_line_edit(self._summary.right_edit)
-        
-        # Mask Rectangles
-        for i in range(self._summary.listWidget.count()):
-            m.shapes.append(self._summary.listWidget.item(i).value)
-        
         # Mask detector IDs
-        m.detector_ids = self._masked_detectors
-
+        m.use_mask_file = self._summary.mask_check.isChecked()
+        m.mask_file = unicode(self._summary.mask_edit.text())
+        m.detector_ids = []
+        if self._in_mantidplot:
+            if mtd.workspaceExists(self.mask_ws):
+                masked_detectors = GetMaskedDetectors(self.mask_ws)
+                ids_str = masked_detectors.getPropertyValue("DetectorList")
+                m.detector_ids = map(int, ids_str.split(','))
+        
         return m

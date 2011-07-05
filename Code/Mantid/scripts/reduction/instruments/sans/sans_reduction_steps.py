@@ -1083,7 +1083,7 @@ class Mask(ReductionStep):
                                                                    workspace))
 
         if len(self.spec_list)>0:
-            MaskDetectors(workspace, SpectraList = self.spec_list)
+            MaskDetectors(workspace, DetectorList = self.spec_list)
             
         # Mask out internal list of pixels
         if len(self.masked_pixels)>0:
