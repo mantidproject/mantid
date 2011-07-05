@@ -38,39 +38,7 @@ class QuickLoad(ReductionStep):
         # Load data
         filepath = find_data(file_name, instrument=reducer.instrument.name())
 
-        # Find all the necessary files
-        event_file = ""
-        pulseid_file = ""
-        nxs_file = ""
-        
-        # Check if we have an event file or a pulseid file.
-        is_event_nxs = False
-        
-        if filepath.find("_neutron_event")>0:
-            event_file = filepath
-            pulseid_file = filepath.replace("_neutron_event", "_pulseid")
-        elif filepath.find("_pulseid")>0:
-            pulseid_file = filepath
-            event_file = filepath.replace("_pulseid", "_neutron_event")
-        else:
-            #raise RuntimeError, "SNSReductionSteps.LoadRun couldn't find the event and pulseid files"
-            # Doesn't look like event pre-nexus, try event nexus
-            is_event_nxs = True
-        
-        if is_event_nxs:
-            mantid.sendLogMessage("Loading %s as event Nexus" % (filepath))
-            LoadEventNexus(Filename=filepath, OutputWorkspace=workspace)
-        else:
-            # Mapping file
-            default_instrument = reducer.instrument.get_default_instrument()
-            mapping_file = default_instrument.getStringParameter("TS_mapping_file")[0]
-            directory,_ = os.path.split(event_file)
-            mapping_file = os.path.join(directory, mapping_file)
-            
-            mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
-            nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
-            LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace, PulseidFilename=pulseid_file, MappingFilename=mapping_file)
-            LoadNexusLogs(Workspace=workspace, Filename=nxs_file)
+        LoadEventNexus(Filename=filepath, OutputWorkspace=workspace)
 
         return "Quick-load of data file: %s" % (workspace)
     

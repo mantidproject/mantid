@@ -8,6 +8,16 @@ from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_eqsans_instrument
 import ui.sans.ui_eqsans_info
 
+IS_IN_MANTIDPLOT = False
+try:
+    import qti
+    from MantidFramework import *
+    mtd.initialise(False)
+    from mantidsimple import *
+    IS_IN_MANTIDPLOT = True
+except:
+    pass
+
 class SANSInstrumentWidget(BaseWidget):    
     """
         Widget that present instrument details to the user
@@ -22,7 +32,12 @@ class SANSInstrumentWidget(BaseWidget):
     _sample_detector_distance_supplied = True
     _beam_diameter = None
     _beam_diameter_supplied = True
-    
+
+    # Internal data members for mask editor logic
+    mask_file = ''
+    mask_reload = False
+    mask_ws = "__eqsans_mask"
+        
     def __init__(self, parent=None, state=None, settings=None, name="EQSANS", data_type=None, data_proxy=None):      
         super(SANSInstrumentWidget, self).__init__(parent, state, settings, data_type=data_type, data_proxy=data_proxy) 
 
@@ -113,20 +128,10 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.instr_name_label.hide()    
         self._dark_clicked(self._summary.dark_current_check.isChecked())  
         
-        # Mask Validators
-        self._summary.x_min_edit.setValidator(QtGui.QIntValidator(self._summary.x_min_edit))
-        self._summary.x_max_edit.setValidator(QtGui.QIntValidator(self._summary.x_max_edit))
-        self._summary.y_min_edit.setValidator(QtGui.QIntValidator(self._summary.y_min_edit))
-        self._summary.y_max_edit.setValidator(QtGui.QIntValidator(self._summary.y_max_edit))
-        
-        self._summary.top_edit.setValidator(QtGui.QIntValidator(self._summary.top_edit))
-        self._summary.bottom_edit.setValidator(QtGui.QIntValidator(self._summary.bottom_edit))
-        self._summary.left_edit.setValidator(QtGui.QIntValidator(self._summary.left_edit))
-        self._summary.right_edit.setValidator(QtGui.QIntValidator(self._summary.right_edit))
-        
         # Mask Connections
-        self.connect(self._summary.add_rectangle_button, QtCore.SIGNAL("clicked()"), self._add_rectangle)
-        self.connect(self._summary.remove_button, QtCore.SIGNAL("clicked()"), self._remove_rectangle)
+        self.connect(self._summary.mask_browse_button, QtCore.SIGNAL("clicked()"), self._mask_browse_clicked)
+        self.connect(self._summary.mask_plot_button, QtCore.SIGNAL("clicked()"), self._mask_plot_clicked)
+        self.connect(self._summary.mask_check, QtCore.SIGNAL("clicked(bool)"), self._mask_checked)
   
         # Absolute scale connections and validators
         self._summary.scale_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_edit))
@@ -177,6 +182,22 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
 
+    def _mask_plot_clicked(self):        
+        self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2, reload=self.mask_reload, mask=self._masked_detectors)
+        self._masked_detectors = []
+        self.mask_reload = False
+        
+    def _mask_browse_clicked(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._summary.mask_edit.setText(fname)
+            self.mask_reload = True              
+        
+    def _mask_checked(self, is_checked):
+        self._summary.mask_edit.setEnabled(is_checked)
+        self._summary.mask_browse_button.setEnabled(is_checked)
+        self._summary.mask_plot_button.setEnabled(is_checked)
+        
     def _scale_data_plot_clicked(self):
         self.show_instrument(file_name=self._summary.scale_data_edit.text)
         
@@ -278,36 +299,6 @@ class SANSInstrumentWidget(BaseWidget):
         if fname:
             self._summary.dark_file_edit.setText(fname)      
 
-    def _add_rectangle(self):
-        #self.show_instrument(self._summary.dark_file_edit.text, 2)
-        
-        # Read in the parameters
-        x_min = util._check_and_get_int_line_edit(self._summary.x_min_edit)
-        x_max = util._check_and_get_int_line_edit(self._summary.x_max_edit)
-        y_min = util._check_and_get_int_line_edit(self._summary.y_min_edit)
-        y_max = util._check_and_get_int_line_edit(self._summary.y_max_edit)
-        
-        # Check that a rectangle was defined. We don't care whether 
-        # the min/max values were inverted
-        if (self._summary.x_min_edit.hasAcceptableInput() and
-            self._summary.x_max_edit.hasAcceptableInput() and
-            self._summary.y_min_edit.hasAcceptableInput() and
-            self._summary.y_max_edit.hasAcceptableInput()):
-            rect = ReductionOptions.RectangleMask(x_min, x_max, y_min, y_max)
-            self._append_rectangle(rect)
-    
-    def _remove_rectangle(self):
-        selected = self._summary.listWidget.selectedItems()
-        for item in selected:
-            self._summary.listWidget.takeItem( self._summary.listWidget.row(item) )
-    
-    def _append_rectangle(self, rect):
-        class _ItemWrapper(QtGui.QListWidgetItem):
-            def __init__(self, value):
-                QtGui.QListWidgetItem.__init__(self, value)
-                self.value = rect
-        self._summary.listWidget.addItem(_ItemWrapper("Rect: %g < x < %g; %g < y < %g" % (rect.x_min, rect.x_max, rect.y_min, rect.y_max)))    
-
     def set_state(self, state):
         """
             Populate the UI elements with the data from the given state.
@@ -371,11 +362,6 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.n_sub_pix_edit.setText(QtCore.QString(str(state.n_sub_pix)))
         self._summary.log_binning_radio.setChecked(state.log_binning)
         
-        self._summary.top_edit.setText(QtCore.QString(str(state.top)))
-        self._summary.bottom_edit.setText(QtCore.QString(str(state.bottom)))
-        self._summary.left_edit.setText(QtCore.QString(str(state.left)))
-        self._summary.right_edit.setText(QtCore.QString(str(state.right)))
-            
         # TOF cuts
         self._summary.tof_cut_chk.setChecked(state.use_config_cutoff)
         self._tof_clicked(self._summary.tof_cut_chk.isChecked())  
@@ -385,11 +371,12 @@ class SANSInstrumentWidget(BaseWidget):
         # Config Mask
         self._summary.config_mask_chk.setChecked(state.use_config_mask)
         
-        self._summary.listWidget.clear()
-        for item in state.shapes:
-            self._append_rectangle(item)
-            
+        # Mask
+        self._summary.mask_edit.setText(QtCore.QString(str(state.mask_file)))
+        self._summary.mask_check.setChecked(state.use_mask_file)
+        self._mask_checked(state.use_mask_file)
         self._masked_detectors = state.detector_ids
+        self.mask_reload = True
         
         # Output directory
         self._summary.select_output_dir_radio.setChecked(not state.use_data_directory)
@@ -447,18 +434,6 @@ class SANSInstrumentWidget(BaseWidget):
         m.n_sub_pix = util._check_and_get_int_line_edit(self._summary.n_sub_pix_edit)
         m.log_binning = self._summary.log_binning_radio.isChecked()
         
-        # Mask Edges
-        m.top = util._check_and_get_int_line_edit(self._summary.top_edit)
-        m.bottom = util._check_and_get_int_line_edit(self._summary.bottom_edit)
-        m.left = util._check_and_get_int_line_edit(self._summary.left_edit)
-        
-        # Mask Rectangles
-        for i in range(self._summary.listWidget.count()):
-            m.shapes.append(self._summary.listWidget.item(i).value)
-        
-        # Mask detector IDs
-        m.detector_ids = self._masked_detectors
-
         # TOF cuts
         m.use_config_cutoff = self._summary.tof_cut_chk.isChecked()
         m.low_TOF_cut = util._check_and_get_float_line_edit(self._summary.low_tof_edit)
@@ -466,6 +441,16 @@ class SANSInstrumentWidget(BaseWidget):
         
         # Config Mask
         m.use_config_mask = self._summary.config_mask_chk.isChecked()
+
+       # Mask detector IDs
+        m.use_mask_file = self._summary.mask_check.isChecked()
+        m.mask_file = unicode(self._summary.mask_edit.text())
+        m.detector_ids = self._masked_detectors
+        if self._in_mantidplot:
+            if mtd.workspaceExists(self.mask_ws):
+                masked_detectors = GetMaskedDetectors(self.mask_ws)
+                ids_str = masked_detectors.getPropertyValue("DetectorList")
+                m.detector_ids = map(int, ids_str.split(','))
 
         # Output directory
         m.use_data_directory = self._summary.use_data_dir_radio.isChecked()
