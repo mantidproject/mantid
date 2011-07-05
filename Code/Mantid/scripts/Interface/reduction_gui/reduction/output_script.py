@@ -31,6 +31,7 @@ class Output(BaseScriptElement):
     
             if IS_IN_MANTIDPLOT:
                 try:
-                    mantidplot.plotSpectrum(ReductionSingleton()._data_files.keys()[0]+ReductionSingleton()._azimuthal_averager._suffix, 0, True)
+                    for item in ReductionSingleton().output_workspaces:
+                        mantidplot.plotSpectrum(item, 0, True)
                 except:
-                    raise RuntimeError, "Could not plot resulting I(Q)\n  %s" % sys.exc_value
+                    raise RuntimeError, "Could not plot resulting output\n  %s" % sys.exc_value

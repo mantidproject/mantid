@@ -366,6 +366,8 @@ class Reducer(object):
     _reduction_steps = []
     ## Log
     log_text = ''
+    ## Output workspaces
+    output_workspaces = []
         
     def __init__(self):
         self._data_files = {}
@@ -513,6 +515,7 @@ class Reducer(object):
         """
         t_0 = time.time()
         instrument_name = ''
+        self.output_workspaces = []
         
         # Check that an instrument was specified
         if self.instrument is not None:

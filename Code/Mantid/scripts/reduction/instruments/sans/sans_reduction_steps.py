@@ -801,6 +801,8 @@ class WeightedAzimuthalAverage(ReductionStep):
         if reducer._resolution_calculator is not None:
             reducer._resolution_calculator(output_ws, output_ws)
             
+        # Add output workspace to the list of important output workspaces
+        reducer.output_workspaces.append(output_ws)
         return "Performed radial averaging between Q=%g and Q=%g" % (qmin, qmax)
         
     def get_output_workspace(self, workspace):

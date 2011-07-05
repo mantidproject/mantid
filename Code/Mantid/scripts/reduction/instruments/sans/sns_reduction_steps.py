@@ -740,6 +740,11 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
                                              n_bins=self._nbins, n_subpix=self._nsubpix, log_binning=self._log_binning)
         iq_frame2.execute(reducer, workspace+'_frame2')
         
+        # Add output workspaces to the list of important output workspaces
+        for item in self.get_output_workspace(workspace):
+            if item not in reducer.output_workspaces:
+                reducer.output_workspaces.append(item)
+        
         return output_str
         
     def get_data(self, workspace):
