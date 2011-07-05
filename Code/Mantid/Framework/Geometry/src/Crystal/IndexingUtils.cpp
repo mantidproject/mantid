@@ -711,7 +711,7 @@ int IndexingUtils::GetIndexedPeaks_3D( const std::vector<V3D> & q_vectors,
           tolerance, in the specified direction.
  */
 int IndexingUtils::GetIndexedPeaks( const std::vector<V3D>  & q_vectors,
-                                    const Kernel::DblMatrix & UB,
+                                    const DblMatrix         & UB,
                                           double            required_tolerance,
                                           std::vector<V3D>  & miller_indices,
                                           std::vector<V3D>  & indexed_qs,
@@ -725,7 +725,7 @@ int IndexingUtils::GetIndexedPeaks( const std::vector<V3D>  & q_vectors,
   indexed_qs.clear();
   fit_error = 0;
 
-  Kernel::DblMatrix UB_inverse( UB );
+  DblMatrix UB_inverse( UB );
   UB_inverse.Invert();
 
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
