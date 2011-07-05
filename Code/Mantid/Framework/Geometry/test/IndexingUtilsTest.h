@@ -18,14 +18,9 @@ using Mantid::Kernel::Matrix;
 class IndexingUtilsTest : public CxxTest::TestSuite
 {
 public:
-  void test_BestFit_UB_given_lattice_parameters()
+
+  static std::vector<V3D> getNatroliteQs()
   {
-    Matrix<double> UB(3,3,false);
-
-    double correct_UB[] = { -0.0596604,  0.04964820, -0.00775391,
-                             0.0930100,  0.00751049, -0.04198350,
-                            -0.1046440, -0.02161340, -0.03225860 };
-
     std::vector<V3D> q_vectors;
     q_vectors.push_back( V3D(-0.57582, -0.35322, -0.19974 ));
     q_vectors.push_back( V3D(-1.41754, -0.78704, -0.75974 ));
@@ -39,6 +34,19 @@ public:
     q_vectors.push_back( V3D(-0.54099, -0.46900,  0.11535 ));
     q_vectors.push_back( V3D(-0.90478, -0.50667,  0.51072 ));
     q_vectors.push_back( V3D(-0.50387, -0.58561,  0.43502 ));
+
+    return q_vectors;
+  } 
+
+  void test_BestFit_UB_given_lattice_parameters()
+  {
+    Matrix<double> UB(3,3,false);
+
+    double correct_UB[] = { -0.0596604,  0.04964820, -0.00775391,
+                             0.0930100,  0.00751049, -0.04198350,
+                            -0.1046440, -0.02161340, -0.03225860 };
+
+    std::vector<V3D> q_vectors = getNatroliteQs();
 
     double a =  6.5781;
     double b = 18.2995;
@@ -120,19 +128,7 @@ public:
       index_values.push_back( correct_indices[i] );
     }
 
-    std::vector<V3D> q_vectors;
-    q_vectors.push_back( V3D(-0.57582, -0.35322, -0.19974 ));
-    q_vectors.push_back( V3D(-1.41754, -0.78704, -0.75974 ));
-    q_vectors.push_back( V3D(-1.12030, -0.53578, -0.27559 ));
-    q_vectors.push_back( V3D(-0.68911, -0.59397, -0.12716 ));
-    q_vectors.push_back( V3D(-1.06863, -0.43255,  0.01688 ));
-    q_vectors.push_back( V3D(-1.82007, -0.49671, -0.06266 ));
-    q_vectors.push_back( V3D(-1.10465, -0.73708, -0.01939 ));
-    q_vectors.push_back( V3D(-0.12747, -0.32380,  0.00821 ));
-    q_vectors.push_back( V3D(-0.84210, -0.37038,  0.15403 ));
-    q_vectors.push_back( V3D(-0.54099, -0.46900,  0.11535 ));
-    q_vectors.push_back( V3D(-0.90478, -0.50667,  0.51072 ));
-    q_vectors.push_back( V3D(-0.50387, -0.58561,  0.43502 ));
+    std::vector<V3D> q_vectors = getNatroliteQs();
 
     V3D best_vec;
     double error = IndexingUtils::BestFit_Direction( best_vec, 
@@ -203,19 +199,7 @@ public:
 
     int correct_indices[] = { 1, 4, 2, 0, 1, 3, 0, -1, 0, -1, -2, -3 };
 
-    std::vector<V3D> q_vectors;
-    q_vectors.push_back( V3D(-0.57582, -0.35322, -0.19974 ));
-    q_vectors.push_back( V3D(-1.41754, -0.78704, -0.75974 ));
-    q_vectors.push_back( V3D(-1.12030, -0.53578, -0.27559 ));
-    q_vectors.push_back( V3D(-0.68911, -0.59397, -0.12716 ));
-    q_vectors.push_back( V3D(-1.06863, -0.43255,  0.01688 ));
-    q_vectors.push_back( V3D(-1.82007, -0.49671, -0.06266 ));
-    q_vectors.push_back( V3D(-1.10465, -0.73708, -0.01939 ));
-    q_vectors.push_back( V3D(-0.12747, -0.32380,  0.00821 ));
-    q_vectors.push_back( V3D(-0.84210, -0.37038,  0.15403 ));
-    q_vectors.push_back( V3D(-0.54099, -0.46900,  0.11535 ));
-    q_vectors.push_back( V3D(-0.90478, -0.50667,  0.51072 ));
-    q_vectors.push_back( V3D(-0.50387, -0.58561,  0.43502 ));
+    std::vector<V3D> q_vectors = getNatroliteQs();
 
     V3D direction(-2.62484,4.04988,-4.46991);
     double required_tolerance = 0.1;
@@ -259,19 +243,7 @@ public:
     correct_indices.push_back( V3D(-2, 20, -4) );
     correct_indices.push_back( V3D(-3, 13, -5) );
 
-    std::vector<V3D> q_vectors;
-    q_vectors.push_back( V3D(-0.57582, -0.35322, -0.19974 ));
-    q_vectors.push_back( V3D(-1.41754, -0.78704, -0.75974 ));
-    q_vectors.push_back( V3D(-1.12030, -0.53578, -0.27559 ));
-    q_vectors.push_back( V3D(-0.68911, -0.59397, -0.12716 ));
-    q_vectors.push_back( V3D(-1.06863, -0.43255,  0.01688 ));
-    q_vectors.push_back( V3D(-1.82007, -0.49671, -0.06266 ));
-    q_vectors.push_back( V3D(-1.10465, -0.73708, -0.01939 ));
-    q_vectors.push_back( V3D(-0.12747, -0.32380,  0.00821 ));
-    q_vectors.push_back( V3D(-0.84210, -0.37038,  0.15403 ));
-    q_vectors.push_back( V3D(-0.54099, -0.46900,  0.11535 ));
-    q_vectors.push_back( V3D(-0.90478, -0.50667,  0.51072 ));
-    q_vectors.push_back( V3D(-0.50387, -0.58561,  0.43502 ));
+    std::vector<V3D> q_vectors = getNatroliteQs();
 
     V3D direction_1(-2.58222,3.97345,-4.55145);
     V3D direction_2(-16.6082,-2.50165,7.24628);
@@ -368,19 +340,7 @@ public:
   {
     V3D best_direction;
 
-    std::vector<V3D> q_vectors;
-    q_vectors.push_back( V3D(-0.57582, -0.35322, -0.19974 ));
-    q_vectors.push_back( V3D(-1.41754, -0.78704, -0.75974 ));
-    q_vectors.push_back( V3D(-1.12030, -0.53578, -0.27559 ));
-    q_vectors.push_back( V3D(-0.68911, -0.59397, -0.12716 ));
-    q_vectors.push_back( V3D(-1.06863, -0.43255,  0.01688 ));
-    q_vectors.push_back( V3D(-1.82007, -0.49671, -0.06266 ));
-    q_vectors.push_back( V3D(-1.10465, -0.73708, -0.01939 ));
-    q_vectors.push_back( V3D(-0.12747, -0.32380,  0.00821 ));
-    q_vectors.push_back( V3D(-0.84210, -0.37038,  0.15403 ));
-    q_vectors.push_back( V3D(-0.54099, -0.46900,  0.11535 ));
-    q_vectors.push_back( V3D(-0.90478, -0.50667,  0.51072 ));
-    q_vectors.push_back( V3D(-0.50387, -0.58561,  0.43502 ));
+    std::vector<V3D> q_vectors = getNatroliteQs();
 
     std::vector<V3D> directions = IndexingUtils::MakeHemisphereDirections(90);
 
