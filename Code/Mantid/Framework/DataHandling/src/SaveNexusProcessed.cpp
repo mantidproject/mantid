@@ -110,14 +110,18 @@ namespace DataHandling
     //m_entryname = getPropertyValue("EntryName");
     m_title = getPropertyValue("Title");
     MatrixWorkspace_const_sptr matrixWorkspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
+    ITableWorkspace_const_sptr tableWorkspace = boost::dynamic_pointer_cast<const ITableWorkspace>(inputWorkspace);
     // check if inputWorkspace is something we know how to save
-    if (!matrixWorkspace) 
+    if (!matrixWorkspace && !tableWorkspace) 
     {
       return;
     }
     m_eventWorkspace = boost::dynamic_pointer_cast<const EventWorkspace>(matrixWorkspace);
     // If no title's been given, use the workspace title field
-    if (m_title.empty()) m_title = matrixWorkspace->getTitle();
+    if (m_title.empty()) 
+    {
+      m_title = inputWorkspace->getTitle();
+    }
     // If we don't want to append then remove the file if it already exists
     bool append_to_file = getProperty("Append");
     if( !append_to_file )
@@ -130,8 +134,6 @@ namespace DataHandling
     }
 
 
-
-
     std::vector<int> spec_list = getProperty("WorkspaceIndexList");
     int spec_min = getProperty("WorkspaceIndexMin");
     int spec_max = getProperty("WorkspaceIndexMax");
@@ -139,10 +141,10 @@ namespace DataHandling
     const bool interval = (spec_max != Mantid::EMPTY_INT());
     if ( spec_max == Mantid::EMPTY_INT() ) spec_max = 0;
 
-    const std::string workspaceID = matrixWorkspace->id();
+    const std::string workspaceID = inputWorkspace->id();
     if ((workspaceID.find("Workspace2D") == std::string::npos) &&
-        !m_eventWorkspace)
-      throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D or EventWorkspace.");
+        !m_eventWorkspace && !tableWorkspace)
+      throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, EventWorkspace or ITableWorkspace.");
 
 
     Mantid::NeXus::NexusFileIO *nexusFile= new Mantid::NeXus::NexusFileIO();
@@ -160,107 +162,117 @@ namespace DataHandling
     prog_init.reportIncrement(1, "Writing header");
 
     // write instrument data, if present and writer enabled
-    IInstrument_const_sptr instrument = matrixWorkspace->getInstrument();
-    nexusFile->writeNexusInstrument(instrument);
-    prog_init.reportIncrement(1, "Writing instrument");
+    if (matrixWorkspace) 
+    { 
+      IInstrument_const_sptr instrument = matrixWorkspace->getInstrument();
+      nexusFile->writeNexusInstrument(instrument);
+      prog_init.reportIncrement(1, "Writing instrument");
 
-    nexusFile->writeNexusParameterMap(matrixWorkspace);
-    prog_init.reportIncrement(1, "Writing parameter map");
+      nexusFile->writeNexusParameterMap(matrixWorkspace);
+      prog_init.reportIncrement(1, "Writing parameter map");
 
-    // write XML source file name, if it exists - otherwise write "NoNameAvailable"
-    std::string instrumentName=instrument->getName();
-    if(instrumentName != "")
-    { //TODO: NO ONE SHOULD ASSUME THIS STRUCTURE IN THE INSTRUMENT FILENAME! Fix this and any other such hard-coded instrument file names.
-      // force ID to upper case
-      std::transform(instrumentName.begin(), instrumentName.end(), instrumentName.begin(), toupper);
-      std::string instrumentXml(instrumentName+"_Definition.xml");
-      // Determine the search directory for XML instrument definition files (IDFs)
-      std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
+      // write XML source file name, if it exists - otherwise write "NoNameAvailable"
+      std::string instrumentName=instrument->getName();
+      if(instrumentName != "")
+      { //TODO: NO ONE SHOULD ASSUME THIS STRUCTURE IN THE INSTRUMENT FILENAME! Fix this and any other such hard-coded instrument file names.
+        // force ID to upper case
+        std::transform(instrumentName.begin(), instrumentName.end(), instrumentName.begin(), toupper);
+        std::string instrumentXml(instrumentName+"_Definition.xml");
+        // Determine the search directory for XML instrument definition files (IDFs)
+        std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
 
-      Poco::File file(directoryName+"/"+instrumentXml);
-      if(!file.exists())
-        instrumentXml="NoXmlFileFound";
-      std::string version("1"); // these should be read from xml file
-      std::string date("20081031");
-      nexusFile->writeNexusInstrumentXmlName(instrumentXml,date,version);
-    }
-    else
-      nexusFile->writeNexusInstrumentXmlName("NoNameAvailable","","");
-
-    if( nexusFile->writeNexusProcessedSample(matrixWorkspace->sample().getName(), matrixWorkspace->sample(),
-        matrixWorkspace->run()) != 0 )
-    {
-      g_log.error("Failed to write NXsample");
-      throw Exception::FileError("Failed to write NXsample", m_filename);
-    }
-    prog_init.reportIncrement(1, "Writing sample");
-
-
-    const int numberOfHist = static_cast<int>(matrixWorkspace->getNumberHistograms());
-    std::vector<int> spec;
-    // check if all X() are in fact the same array
-    const bool uniformSpectra = API::WorkspaceHelpers::commonBoundaries(matrixWorkspace);
-    if( interval )
-    {
-      if ( spec_max < spec_min || spec_max > numberOfHist-1 )
-      {
-        g_log.error("Invalid WorkspaceIndex min/max properties");
-        throw std::invalid_argument("Inconsistent properties defined");
+        Poco::File file(directoryName+"/"+instrumentXml);
+        if(!file.exists())
+          instrumentXml="NoXmlFileFound";
+        std::string version("1"); // these should be read from xml file
+        std::string date("20081031");
+        nexusFile->writeNexusInstrumentXmlName(instrumentXml,date,version);
       }
-      spec.reserve(1+spec_max-spec_min);
-      for(int i=spec_min;i<=spec_max;i++)
-        spec.push_back(i);
-      if (list)
+      else
+        nexusFile->writeNexusInstrumentXmlName("NoNameAvailable","","");
+
+      if( nexusFile->writeNexusProcessedSample(matrixWorkspace->sample().getName(), matrixWorkspace->sample(),
+          matrixWorkspace->run()) != 0 )
       {
+        g_log.error("Failed to write NXsample");
+        throw Exception::FileError("Failed to write NXsample", m_filename);
+      }
+      prog_init.reportIncrement(1, "Writing sample");
+
+      const int numberOfHist = static_cast<int>(matrixWorkspace->getNumberHistograms());
+      std::vector<int> spec;
+      // check if all X() are in fact the same array
+      const bool uniformSpectra = API::WorkspaceHelpers::commonBoundaries(matrixWorkspace);
+      if( interval )
+      {
+        if ( spec_max < spec_min || spec_max > numberOfHist-1 )
+        {
+          g_log.error("Invalid WorkspaceIndex min/max properties");
+          throw std::invalid_argument("Inconsistent properties defined");
+        }
+        spec.reserve(1+spec_max-spec_min);
+        for(int i=spec_min;i<=spec_max;i++)
+          spec.push_back(i);
+        if (list)
+        {
+          for(size_t i=0;i<spec_list.size();i++)
+          {
+            int s = spec_list[i];
+            if ( s < 0 ) continue;
+            if (s < spec_min || s > spec_max)
+              spec.push_back(s);
+          }
+        } 
+      }
+      else if (list)
+      {
+        spec_max=0;
+        spec_min=numberOfHist-1;
         for(size_t i=0;i<spec_list.size();i++)
         {
           int s = spec_list[i];
           if ( s < 0 ) continue;
-          if (s < spec_min || s > spec_max)
-            spec.push_back(s);
+          spec.push_back(s);
+          if (s > spec_max) spec_max = s;
+          if (s < spec_min) spec_min = s;
         }
       }
-    }
-    else if (list)
-    {
-      spec_max=0;
-      spec_min=numberOfHist-1;
-      for(size_t i=0;i<spec_list.size();i++)
+      else
       {
-        int s = spec_list[i];
-        if ( s < 0 ) continue;
-        spec.push_back(s);
-        if (s > spec_max) spec_max = s;
-        if (s < spec_min) spec_min = s;
+        spec_min=0;
+        spec_max=numberOfHist-1;
+        spec.reserve(1+spec_max-spec_min);
+        for(int i=spec_min;i<=spec_max;i++)
+          spec.push_back(i);
       }
-    }
-    else
-    {
-      spec_min=0;
-      spec_max=numberOfHist-1;
-      spec.reserve(1+spec_max-spec_min);
-      for(int i=spec_min;i<=spec_max;i++)
-        spec.push_back(i);
-    }
 
-    // Write out the data (2D or event)
-    if (m_eventWorkspace)
-    {
-      //nexusFile->writeNexusProcessedDataEvent(m_eventWorkspace);
-      this->execEvent(nexusFile,uniformSpectra,spec);
-      //g_log.warning() << "Saving EventWorkspace " << m_eventWorkspace->getName() << " as a histogram.\n";
-    }
-    else
-    {
-      nexusFile->writeNexusProcessedData2D(matrixWorkspace,uniformSpectra,spec, "workspace", true);
-    }
+      // Write out the data (2D or event)
+      if (m_eventWorkspace)
+      {
+        //nexusFile->writeNexusProcessedDataEvent(m_eventWorkspace);
+        this->execEvent(nexusFile,uniformSpectra,spec);
+        //g_log.warning() << "Saving EventWorkspace " << m_eventWorkspace->getName() << " as a histogram.\n";
+      }
+      else
+      {
+        nexusFile->writeNexusProcessedData2D(matrixWorkspace,uniformSpectra,spec, "workspace", true);
+      }
 
-    nexusFile->writeNexusProcessedProcess(matrixWorkspace);
-    // MW 27/10/10 - don't try and save the spectra-detector map if there isn't one
-    if ( matrixWorkspace->getAxis(1)->isSpectra() )
+      // MW 27/10/10 - don't try and save the spectra-detector map if there isn't one
+      if ( matrixWorkspace->getAxis(1)->isSpectra() )
+      {
+        nexusFile->writeNexusProcessedSpectraMap(matrixWorkspace, spec);
+      }
+
+    }  // finish matrix workspace specifics 
+    
+    if (tableWorkspace)
     {
-      nexusFile->writeNexusProcessedSpectraMap(matrixWorkspace, spec);
+      nexusFile->writeNexusTableWorkspace(tableWorkspace,"table_workspace");
     }
+ 
+
+    nexusFile->writeNexusProcessedProcess(inputWorkspace);
     nexusFile->closeNexusFile();
 
     delete nexusFile;

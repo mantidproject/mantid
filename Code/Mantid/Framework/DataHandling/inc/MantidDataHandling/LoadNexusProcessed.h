@@ -84,8 +84,10 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
       /// Load a single entry
-      API::MatrixWorkspace_sptr loadEntry(Mantid::NeXus::NXRoot & root, const std::string & entry_name,
+      API::Workspace_sptr loadEntry(Mantid::NeXus::NXRoot & root, const std::string & entry_name,
                                               const double& progressStart, const double& progressRange);
+
+      API::Workspace_sptr loadTableEntry(Mantid::NeXus::NXEntry& entry);
 
       API::MatrixWorkspace_sptr loadEventEntry(Mantid::NeXus::NXData & wksp_cls,Mantid::NeXus::NXDouble & xbins,
           const double& progressStart, const double& progressRange);

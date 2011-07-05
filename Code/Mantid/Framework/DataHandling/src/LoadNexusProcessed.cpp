@@ -128,8 +128,8 @@ void LoadNexusProcessed::exec()
     if( entrynumber == 0 ) ++entrynumber;
     std::ostringstream os;
     os << entrynumber;
-    API::MatrixWorkspace_sptr local_workspace = loadEntry(root, basename + os.str(), 0, 1);
-    API::Workspace_sptr workspace = boost::static_pointer_cast<API::Workspace>(local_workspace);
+    API::Workspace_sptr workspace = loadEntry(root, basename + os.str(), 0, 1);
+    //API::Workspace_sptr workspace = boost::static_pointer_cast<API::Workspace>(local_workspace);
     setProperty("OutputWorkspace", workspace);
   }
   else
@@ -288,6 +288,21 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
 }
 
 
+//-------------------------------------------------------------------------------------------------
+/**
+ * Load a table
+ */
+API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
+{
+  // Get workspace characteristics
+  //NXData wksp_cls = mtd_entry.openNXData("table_workspace");
+
+  API::ITableWorkspace_sptr workspace;
+  workspace = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+
+  return boost::static_pointer_cast<API::Workspace>(workspace);
+}
+
 
 //-------------------------------------------------------------------------------------------------
 /**
@@ -298,12 +313,17 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
  * @param progressRange :: The percentage range that the progress reporting should cover
  * @returns A 2D workspace containing the loaded data
  */
-API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::string & entry_name,
+API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::string & entry_name,
     const double& progressStart, const double& progressRange)
 {
   progress(progressStart,"Opening entry " + entry_name + "...");
 
   NXEntry mtd_entry = root.openEntry(entry_name);
+
+  if (mtd_entry.containsGroup("table_workspace"))
+  {
+    return loadTableEntry(mtd_entry);
+  }  
 
   bool isEvent = false;
   std::string group_name = "workspace";
@@ -601,7 +621,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
   progress(progressStart+0.2*progressRange,"Reading the workspace history...");
   readParameterMap(mtd_entry, local_workspace);
 
-  return local_workspace;
+  return boost::static_pointer_cast<API::Workspace>(local_workspace);
 }
 
 

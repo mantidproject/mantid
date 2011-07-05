@@ -695,6 +695,28 @@ using namespace DataObjects;
     return((status==NX_ERROR)?3:0);
   }
 
+
+  //-------------------------------------------------------------------------------------
+  /** Write out a table Workspace's 
+   */
+  int NexusFileIO::writeNexusTableWorkspace( const API::ITableWorkspace_const_sptr& localworkspace,
+      const char * group_name) const
+  {
+    NXstatus status;
+
+    //write data entry
+    status=NXmakegroup(fileID,group_name,"NXdata");
+    if(status==NX_ERROR)
+      return(2);
+    status=NXopengroup(fileID,group_name,"NXdata");
+
+    status=NXclosegroup(fileID);
+    return((status==NX_ERROR)?3:0);
+  }
+
+
+
+
   //-------------------------------------------------------------------------------------
   /** Write out a combined chunk of event data
    *
@@ -1108,7 +1130,7 @@ using namespace DataObjects;
    *  @param localworkspace :: The workspace
    *  @return 0 on success
    */
-  int NexusFileIO::writeNexusProcessedProcess(const API::MatrixWorkspace_const_sptr& localworkspace) const
+  int NexusFileIO::writeNexusProcessedProcess(const API::Workspace_const_sptr& localworkspace) const
   {
     // Write Process section
     NXstatus status;

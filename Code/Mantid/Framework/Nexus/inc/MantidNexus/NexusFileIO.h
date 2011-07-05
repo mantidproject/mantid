@@ -2,6 +2,7 @@
 #define NEXUSFILEIO_H
 #include <napi.h>
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -67,6 +68,10 @@ namespace Mantid
 				   const bool& uniformSpectra, const std::vector<int>& spec,
 			      const char * group_name, bool write2Ddata) const;
 
+      /// write table workspace
+      int NexusFileIO::writeNexusTableWorkspace( const API::ITableWorkspace_const_sptr& localworkspace,
+        const char * group_name) const;
+
       int writeNexusProcessedDataEvent( const DataObjects::EventWorkspace_const_sptr& localworkspace);
 
       int writeNexusProcessedDataEventCombined( const DataObjects::EventWorkspace_const_sptr& ws,
@@ -88,7 +93,7 @@ namespace Mantid
       int getSpectra(MantidVec& values, MantidVec& errors, const int& spectra) const;
 
       /// write the algorithm and environment information
-      int writeNexusProcessedProcess(const API::MatrixWorkspace_const_sptr& localworkspace) const;
+      int writeNexusProcessedProcess(const API::Workspace_const_sptr& localworkspace) const;
       /// write the source XML file used, if it exists
       bool writeNexusInstrumentXmlName(const std::string& instrumentXml,const std::string& date,
                             const std::string& version) const;
