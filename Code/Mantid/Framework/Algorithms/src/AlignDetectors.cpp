@@ -34,7 +34,7 @@ void AlignDetectors::initDocs()
   this->setWikiDescription(""
       "The offsets are a correction to the dSpacing values and are applied during the conversion from time-of-flight to dSpacing as follows:"
       "\n\n"
-      ":<math> d = \\frac{h}{m_N} \\frac{t.o.f.}{L_{tot} sin \\theta} (1+ \\rm{offset})</math>"
+      ":<math> d = \\frac{h}{2m_N} \\frac{t.o.f.}{L_{tot} sin \\theta} (1+ \\rm{offset})</math>"
       "\n\n"
       "The detector offsets can be obtained from either: an [[OffsetsWorkspace]] where each pixel has one value, the offset; or a .cal file (in the form created by the ARIEL software). "
       "\n\n"
