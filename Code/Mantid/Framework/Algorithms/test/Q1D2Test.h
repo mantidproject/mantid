@@ -282,40 +282,6 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_inputWS, m_wavNorm, m_pixel;
   std::string m_noGrav;
 };
-/*
-class Q1D2TestPerformance : public CxxTest::TestSuite
-{
-public:
-  Mantid::API::MatrixWorkspace_sptr m_inputWS, m_wavNorm, m_pixel;
-  std::string m_outputWS;
-	
-	void setUp()
-	{
-		//load all the spectra from the LOQ workspace
-    createInputWorkspaces(1, 17792, m_inputWS, m_wavNorm, m_pixel);
-    m_outputWS = "Q1D2Test_result";
-	}
-  	
-	void tearDown()
-	{
-    Mantid::API::AnalysisDataService::Instance().remove(m_outputWS);
-	}
-	
-	void test_slow_performance()
-	{
-		Mantid::Algorithms::Q1D2 Q1D;
-    Q1D.initialize();
-
-    Q1D.setProperty("DetBankWorkspace", m_inputWS);
-    Q1D.setProperty("WavelengthAdj", m_wavNorm);
-    Q1D.setPropertyValue("OutputWorkspace", m_outputWS);
-    Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
-    Q1D.setPropertyValue("AccountForGravity", "1");
-      
-    Q1D.execute();
-	}
-};
-*/
 void createInputWorkspaces(int start, int end, Mantid::API::MatrixWorkspace_sptr & input, Mantid::API::MatrixWorkspace_sptr & wave, Mantid::API::MatrixWorkspace_sptr & pixels)
 {
   std::string wsName("Q1D2Test_inputworkspace"), wavNorm("Q1D2Test_wave");
