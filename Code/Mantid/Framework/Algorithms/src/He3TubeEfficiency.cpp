@@ -171,32 +171,63 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
     return;
   }
 
+  const double exp_constant = this->calculateExponential(spectraIndex, det);
+  const double scale = this->getProperty("ScaleFactor");
+
   Mantid::MantidVec &yout = this->outputWS->dataY(spectraIndex);
   Mantid::MantidVec &eout = this->outputWS->dataE(spectraIndex);
   // Need the original values so this is not a reference
   const Mantid::MantidVec yValues = this->inputWS->readY(spectraIndex);
   const Mantid::MantidVec eValues = this->inputWS->readE(spectraIndex);
 
+  std::vector<double>::const_iterator yinItr = yValues.begin();
+  std::vector<double>::const_iterator einItr = eValues.begin();
+  Mantid::MantidVec::const_iterator xItr = this->inputWS->readX(spectraIndex).begin();
+  Mantid::MantidVec::iterator youtItr = yout.begin();
+  Mantid::MantidVec::iterator eoutItr = eout.begin();
+
+  for( ; youtItr != yout.end(); ++youtItr, ++eoutItr)
+  {
+    const double wavelength = (*xItr + *(xItr + 1)) / 2.0;
+    const double effcorr = this->detectorEfficiency(exp_constant * wavelength, scale);
+    *youtItr = (*yinItr) * effcorr;
+    *eoutItr = (*einItr) * effcorr;
+    ++yinItr; ++einItr;
+    ++xItr;
+  }
+
+  return;
+}
+
+/**
+ * This function calculates the exponential contribution to the He3 tube
+ * efficiency.
+ * @param spectraIndex :: the current index to calculate
+ * @param idet :: the current detector pointer
+ * @return the exponential contribution for the given detector
+ */
+double He3TubeEfficiency::calculateExponential(int spectraIndex, boost::shared_ptr<Geometry::IDetector> idet)
+{
   // Get the parameters for the current associated tube
   double pressure = this->getParameter("TubePressure", spectraIndex,
-      "tube_pressure", det);
+      "tube_pressure", idet);
   double tubethickness = this->getParameter("TubeThickness", spectraIndex,
-      "tube_thickness", det);
+      "tube_thickness", idet);
   double temperature = this->getParameter("TubeTemperature", spectraIndex,
-      "tube_temperature", det);
+      "tube_temperature", idet);
 
   double detRadius(0.0);
   Kernel::V3D detAxis;
-  this->getDetectorGeometry(det, detRadius, detAxis);
+  this->getDetectorGeometry(idet, detRadius, detAxis);
   double detDiameter = 2.0 * detRadius;
   double twiceTubeThickness = 2.0 * tubethickness;
 
   // now get the sin of the angle, it's the magnitude of the cross product of
   // unit vector along the detector tube axis and a unit vector directed from
   // the sample to the detector center
-  Kernel::V3D vectorFromSample = det->getPos() - this->samplePos;
+  Kernel::V3D vectorFromSample = idet->getPos() - this->samplePos;
   vectorFromSample.normalize();
-  Kernel::Quat rot = det->getRotation();
+  Kernel::Quat rot = idet->getRotation();
   // rotate the original cylinder object axis to get the detector axis in the
   // actual instrument
   rot.rotate(detAxis);
@@ -213,27 +244,7 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
   }
 
   const double pathlength = straight_path / sinTheta;
-  const double exp_constant = EXP_SCALAR_CONST * (pressure / temperature) * pathlength;
-
-  std::vector<double>::const_iterator yinItr = yValues.begin();
-  std::vector<double>::const_iterator einItr = eValues.begin();
-  Mantid::MantidVec::const_iterator xItr = this->inputWS->readX(spectraIndex).begin();
-  Mantid::MantidVec::iterator youtItr = yout.begin();
-  Mantid::MantidVec::iterator eoutItr = eout.begin();
-
-  const double scale = this->getProperty("ScaleFactor");
-
-  for( ; youtItr != yout.end(); ++youtItr, ++eoutItr)
-  {
-    const double wavelength = (*xItr + *(xItr + 1)) / 2.0;
-    const double effcorr = detectorEfficiency(exp_constant * wavelength, scale);
-    *youtItr = (*yinItr) * effcorr;
-    *eoutItr = (*einItr) * effcorr;
-    ++yinItr; ++einItr;
-    ++xItr;
-  }
-
-  return;
+  return EXP_SCALAR_CONST * (pressure / temperature) * pathlength;
 }
 
 /**
@@ -475,6 +486,10 @@ void He3TubeEfficiency::execEvent()
   outputWS->clearMRU();
 }
 
+/**
+ * Private function for doing the event correction.
+ * @param events :: the list of events to correct
+ */
 template<class T>
 void He3TubeEfficiency::eventHelper(std::vector<T> &events)
 {

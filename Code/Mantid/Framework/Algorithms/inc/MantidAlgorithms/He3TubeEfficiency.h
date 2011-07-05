@@ -90,6 +90,8 @@ private:
       std::string detPropName, boost::shared_ptr<Geometry::IDetector> idet);
   /// Helper for event handling
   template<class T> void eventHelper(std::vector<T>& events);
+  /// Function to calculate exponential contribution
+  double calculateExponential(int spectraIndex, boost::shared_ptr<Geometry::IDetector> idet);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr inputWS;
