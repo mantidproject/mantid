@@ -10,6 +10,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Exception;
@@ -63,7 +64,10 @@ public:
     alg.setPropertyValue("OutputWorkspace", inputEvWS);
 
     alg.execute();
-    TS_ASSERT( !alg.isExecuted() );
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputEvWS));
+    EventWorkspace_sptr ev_result = boost::dynamic_pointer_cast<EventWorkspace>(result);
 
     AnalysisDataService::Instance().remove(inputEvWS);
   }
@@ -162,8 +166,7 @@ private:
 
   void createEventWorkspace()
   {
-    EventWorkspace_sptr event = EventWorkspace_sptr(new EventWorkspace());
-    event->initialize(1, 1, 1);
+    EventWorkspace_sptr event = WorkspaceCreationHelper::CreateEventWorkspace(3,5,5,0,0.9,2,0);
     event->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
     AnalysisDataService::Instance().add(inputEvWS, event);
 

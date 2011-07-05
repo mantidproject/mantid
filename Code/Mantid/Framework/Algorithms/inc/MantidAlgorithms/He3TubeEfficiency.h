@@ -70,6 +70,7 @@ private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
+  void execEvent();
 
   /// Correct the given spectra index for efficiency
   void correctForEfficiency(int spectraIndex);
@@ -87,6 +88,8 @@ private:
   /// Retrieve the detector parameters from workspace or detector properties
   double getParameter(std::string wsPropName, int currentIndex,
       std::string detPropName, boost::shared_ptr<Geometry::IDetector> idet);
+  /// Helper for event handling
+  template<class T> void eventHelper(std::vector<T>& events);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr inputWS;

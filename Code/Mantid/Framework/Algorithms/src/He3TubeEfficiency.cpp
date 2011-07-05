@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/He3TubeEfficiency.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/cow_ptr.h"
@@ -83,26 +84,11 @@ void He3TubeEfficiency::init()
 
 /**
  * Executes the algorithm
- *
- * @throw NotImplementedError if the input workspace is an EventWorkspace
  */
 void He3TubeEfficiency::exec()
 {
   // Get the workspaces
   this->inputWS = this->getProperty("InputWorkspace");
-
-  // Check if its an event workspace
-  DataObjects::EventWorkspace_const_sptr eventWS = \
-      boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(this->inputWS);
-  if (eventWS != NULL)
-  {
-    //this->g_log.error() << "EventWorkspaces are not supported!" << std::endl;
-    throw Kernel::Exception::NotImplementedError("EventWorkspaces are not supported!");
-  }
-
-  // Get the detector parameters
-  this->paraMap = &(this->inputWS->instrumentParameters());
-
   this->outputWS = this->getProperty("OutputWorkspace");
 
   if (this->outputWS != this->inputWS)
@@ -110,8 +96,19 @@ void He3TubeEfficiency::exec()
     this->outputWS = API::WorkspaceFactory::Instance().create(this->inputWS);
   }
 
+  // Get the detector parameters
+  this->paraMap = &(this->inputWS->instrumentParameters());
+
   // Store some information about the instrument setup that will not change
   this->samplePos = this->inputWS->getInstrument()->getSample()->getPos();
+
+  // Check if it is an event workspace
+  DataObjects::EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
+  if (eventW != NULL)
+  {
+    this->execEvent();
+    return;
+  }
 
   int numHists = static_cast<int>(this->inputWS->getNumberHistograms());
   this->progress = new API::Progress(this, 0.0, 1.0, numHists);
@@ -407,5 +404,86 @@ double He3TubeEfficiency::getParameter(std::string wsPropName, int currentIndex,
   }
 
 }
+
+/**
+ * Execute for events
+ */
+void He3TubeEfficiency::execEvent()
+{
+  g_log.information("Processing event workspace");
+
+  const API::MatrixWorkspace_const_sptr matrixInputWS = this->getProperty("InputWorkspace");
+  DataObjects::EventWorkspace_const_sptr inputWS = boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(matrixInputWS);
+
+  // generate the output workspace pointer
+  API::MatrixWorkspace_sptr matrixOutputWS = this->getProperty("OutputWorkspace");
+  DataObjects::EventWorkspace_sptr outputWS;
+  if (matrixOutputWS == matrixInputWS)
+  {
+    outputWS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(matrixOutputWS);
+  }
+  else
+  {
+    // Make a brand new EventWorkspace
+    outputWS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+            API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
+    // Copy geometry over.
+    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+    // You need to copy over the data as well.
+    outputWS->copyDataFrom( (*inputWS) );
+
+    // Cast to the matrixOutputWS and save it
+    matrixOutputWS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(outputWS);
+    this->setProperty("OutputWorkspace", matrixOutputWS);
+  }
+
+  int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
+  this->progress = new API::Progress(this, 0.0, 1.0, numHistograms);
+  PARALLEL_FOR1(outputWS)
+  for (int64_t i=0; i < numHistograms; ++i)
+  {
+    PARALLEL_START_INTERUPT_REGION
+
+    // Do the correction
+    DataObjects::EventList *evlist = outputWS->getEventListPtr(i);
+    switch (evlist->getEventType())
+    {
+    case API::TOF:
+      // Switch to weights if needed.
+      evlist->switchTo(API::WEIGHTED);
+      // Fall through
+    case API::WEIGHTED:
+      eventHelper(evlist->getWeightedEvents());
+      break;
+    case API::WEIGHTED_NOTIME:
+      eventHelper(evlist->getWeightedEventsNoTime());
+      break;
+    }
+
+    this->progress->report();
+
+    // check for canceling the algorithm
+    if ( i % 1000 == 0 )
+    {
+      interruption_point();
+    }
+
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+
+  outputWS->clearMRU();
+}
+
+template<class T>
+void He3TubeEfficiency::eventHelper(std::vector<T> &events)
+{
+  typename std::vector<T>::iterator it;
+  for (it = events.begin(); it != events.end(); ++it)
+  {
+
+  }
+}
+
 } // namespace Algorithms
 } // namespace Mantid
