@@ -201,7 +201,7 @@ public:
 
     std::vector<V3D> q_vectors = getNatroliteQs();
 
-    V3D direction(-2.62484,4.04988,-4.46991);
+    V3D direction( -2.5825930,  3.9741700, -4.5514810 );
     double required_tolerance = 0.1;
     double fit_error = 0;
 
@@ -214,11 +214,10 @@ public:
                                                          index_vals,
                                                          indexed_qs,
                                                          fit_error );
-
     TS_ASSERT_EQUALS( num_indexed, 12 );
     TS_ASSERT_EQUALS( index_vals.size(), 12 );
     TS_ASSERT_EQUALS( indexed_qs.size(), 12 );
-    TS_ASSERT_DELTA( fit_error, 0.011419, 1e-5 );
+    TS_ASSERT_DELTA( fit_error, 0.00218634, 1e-5 );
 
     for ( size_t i = 0; i < index_vals.size(); i++ )
     {
@@ -245,9 +244,9 @@ public:
 
     std::vector<V3D> q_vectors = getNatroliteQs();
 
-    V3D direction_1(-2.58222,3.97345,-4.55145);
-    V3D direction_2(-16.6082,-2.50165,7.24628);
-    V3D direction_3(2.7609,14.5661,11.3343);
+    V3D direction_1(  -2.5825930,  3.9741700, -4.5514810 );
+    V3D direction_2( -16.6087800, -2.5005515,  7.2465878 );
+    V3D direction_3(   2.7502847, 14.5671910, 11.3796620 );
 
     double required_tolerance = 0.1;
     double fit_error = 0;
@@ -266,7 +265,61 @@ public:
     TS_ASSERT_EQUALS( num_indexed, 12 );
     TS_ASSERT_EQUALS( index_vals.size(), 12 );
     TS_ASSERT_EQUALS( indexed_qs.size(), 12 );
-    TS_ASSERT_DELTA( fit_error, 0.0258739, 1e-5 );
+    TS_ASSERT_DELTA( fit_error, 0.023007052, 1e-5 );
+
+    for ( size_t i = 0; i < index_vals.size(); i++ )
+    {
+      for ( size_t j = 0; j < 3; j++ )
+      {
+        TS_ASSERT_EQUALS( (index_vals[i])[j], (correct_indices[i])[j] );
+      }
+    }
+  }
+
+
+  void test_GetIndexedPeaks()
+  {
+    std::vector<V3D> correct_indices;
+    correct_indices.push_back( V3D( 1,  9, -9) );
+    correct_indices.push_back( V3D( 4, 20,-24) );
+    correct_indices.push_back( V3D( 2, 18,-14) );
+    correct_indices.push_back( V3D( 0, 12,-12) );
+    correct_indices.push_back( V3D( 1, 19, -9) );
+    correct_indices.push_back( V3D( 3, 31,-13) );
+    correct_indices.push_back( V3D( 0, 20,-14) );
+    correct_indices.push_back( V3D(-1,  3, -5) );
+    correct_indices.push_back( V3D( 0, 16, -6) );
+    correct_indices.push_back( V3D(-1, 11, -7) );
+    correct_indices.push_back( V3D(-2, 20, -4) );
+    correct_indices.push_back( V3D(-3, 13, -5) );
+
+    std::vector<V3D> q_vectors = getNatroliteQs();
+
+    V3D row_0( -0.059660400, -0.049648200, 0.0077539105 );
+    V3D row_1(  0.093009956, -0.007510495, 0.0419835400 );
+    V3D row_2( -0.104643770 , 0.021613428, 0.0322586300 );
+
+    Matrix<double> UB(3,3,false);
+    UB.setRow( 0, row_0 );    
+    UB.setRow( 1, row_1 );    
+    UB.setRow( 2, row_2 );    
+
+    double required_tolerance = 0.1;
+    double fit_error = 0;
+
+    std::vector<V3D> index_vals;
+    std::vector<V3D> indexed_qs;
+
+    int num_indexed = IndexingUtils::GetIndexedPeaks( q_vectors,
+                                                      UB,
+                                                      required_tolerance,
+                                                      index_vals,
+                                                      indexed_qs,
+                                                      fit_error );
+    TS_ASSERT_EQUALS( num_indexed, 12 );
+    TS_ASSERT_EQUALS( index_vals.size(), 12 );
+    TS_ASSERT_EQUALS( indexed_qs.size(), 12 );
+    TS_ASSERT_DELTA( fit_error, 0.023007052, 1e-5 );
 
     for ( size_t i = 0; i < index_vals.size(); i++ )
     {
@@ -277,6 +330,7 @@ public:
     }
 
   }
+
 
 
   void test_MakeHemisphereDirections()

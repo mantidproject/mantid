@@ -604,7 +604,7 @@ int IndexingUtils::GetIndexedPeaks_1D( const std::vector<V3D> & q_vectors,
   will be an integer if the peak lies on one of the planes corresponding to
   that direction.  If the three directions are properly chosen to correspond
   to the unit cell edges, then the resulting indices will be proper Miller
-  indices for the peaks.  This method is similar to GetIndexedPeaks_3D, but
+  indices for the peaks.  This method is similar to GetIndexedPeaks_1D, but
   checks three directions simultaneously and requires that the peak lies
   on all three families of planes simultaneously and does NOT index as (0,0,0).
 
@@ -676,6 +676,73 @@ int IndexingUtils::GetIndexedPeaks_3D( const std::vector<V3D> & q_vectors,
       indexed_qs.push_back( q_vectors[q_num] );
 
       V3D miller_ind( h_int, k_int, l_int );
+      miller_indices.push_back( miller_ind );
+
+      num_indexed++;
+    }
+  }
+
+  return num_indexed;
+}
+
+
+/**
+  Given a list of peak positions and a UB matrix, get the list of Miller
+  indices and corresponding peak positions for the peaks that are indexed
+  to within a specified tolerance, by the UB matrix.  This method is similar
+  to GetIndexedPeaks_3D, but directly uses the inverse of the UB matrix to
+  map Q -> hkl.
+
+  @param q_vectors           List of V3D peaks in reciprocal space
+  @param UB                  The UB matrix that determines the indexing of
+                             the peaks.
+  @param required_tolerance  The maximum allowed error (as a faction of
+                             the corresponding Miller index) for a peak
+                             q_vector to be counted as indexed.
+  @param index_vals          List of the Miller indices (h,k,l) of peaks
+                             that were indexed in all specified directions.
+  @param indexed_qs          List of Qxyz value for the peaks that were
+                             indexed indexed in all specified directions.
+  @param fit_error           The sum of the squares of the distances from
+                             integer values for the projections of the 
+                             indexed q_vectors on the specified directions.
+
+  @return The number of q_vectors that are indexed to within the specified
+          tolerance, in the specified direction.
+ */
+int IndexingUtils::GetIndexedPeaks( const std::vector<V3D>  & q_vectors,
+                                    const Kernel::DblMatrix & UB,
+                                          double            required_tolerance,
+                                          std::vector<V3D>  & miller_indices,
+                                          std::vector<V3D>  & indexed_qs,
+                                          double            & fit_error )
+{
+  double  error;
+  int     num_indexed = 0;
+  V3D     hkl;
+
+  miller_indices.clear();
+  indexed_qs.clear();
+  fit_error = 0;
+
+  Kernel::DblMatrix UB_inverse( UB );
+  UB_inverse.Invert();
+
+  for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
+  {
+    hkl = UB_inverse * q_vectors[q_num];
+
+    if ( ValidIndex( hkl, required_tolerance ) )
+    {
+      for ( int i = 0; i < 3; i++ )
+      {
+        error = hkl[i] - round(hkl[i]);
+        fit_error += error * error; 
+      }
+
+      indexed_qs.push_back( q_vectors[q_num] );
+
+      V3D miller_ind( round(hkl[0]), round(hkl[1]), round(hkl[2]) );
       miller_indices.push_back( miller_ind );
 
       num_indexed++;

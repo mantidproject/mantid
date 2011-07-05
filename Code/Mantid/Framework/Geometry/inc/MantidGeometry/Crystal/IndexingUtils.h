@@ -79,7 +79,7 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                             const std::vector<Kernel::V3D>  & q_vectors,
                                   double                      tolerance   );
 
-  /// Get list of indices and Qs for peaks indexed in the specified direction 
+  /// Get lists of indices and Qs for peaks indexed in the specified direction 
   static int GetIndexedPeaks_1D( 
                           const std::vector<Kernel::V3D> & q_vectors,
                           const Kernel::V3D              & direction,
@@ -88,12 +88,21 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                 std::vector<Kernel::V3D> & indexed_qs,
                                 double      & fit_error );
 
-  /// Get list of indices and Qs for peaks indexed in three specified directions
+  /// Get lists of indices and Qs for peaks indexed in three given directions
   static int GetIndexedPeaks_3D( 
                           const std::vector<Kernel::V3D> & q_vectors,
                           const Kernel::V3D              & direction_1,
                           const Kernel::V3D              & direction_2,
                           const Kernel::V3D              & direction_3,
+                                double                     required_tolerance,
+                                std::vector<Kernel::V3D> & miller_indices,
+                                std::vector<Kernel::V3D> & indexed_qs,
+                                double                   & fit_error );
+
+  /// Get lists of indices and Qs for peaks indexed by the specified UB matrix 
+  static int GetIndexedPeaks( 
+                          const std::vector<Kernel::V3D> & q_vectors,
+                          const Kernel::DblMatrix        & UB,
                                 double                     required_tolerance,
                                 std::vector<Kernel::V3D> & miller_indices,
                                 std::vector<Kernel::V3D> & indexed_qs,
