@@ -22,8 +22,8 @@ DECLARE_ALGORITHM(Q1D2)
 /// Sets documentation strings for this algorithm
 void Q1D2::initDocs()
 {
-  this->setWikiSummary("Part of the 1D data reduction chain for SANS instruments. ");
-  this->setOptionalMessage("Part of the 1D data reduction chain for SANS instruments.");
+  this->setWikiSummary("Converts a workspace of counts in wavelength bins into a workspace of counts verses momentum transfer, Q, assuming completely elastic scattering");
+  this->setOptionalMessage("Converts a workspace of counts in wavelength bins into a workspace of counts verses momentum transfer, Q, assuming completely elastic scattering");
 }
 
 
@@ -38,22 +38,33 @@ void Q1D2::init()
   dataVal->add(new HistogramValidator<>);
   dataVal->add(new InstrumentValidator<>);
   dataVal->add(new CommonBinsValidator<>);
-  declareProperty(new WorkspaceProperty<>("DetBankWorkspace", "", Direction::Input, dataVal));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
-  declareProperty(new ArrayProperty<double>("OutputBinning", new RebinParamsValidator));
-  
-  declareProperty(new WorkspaceProperty<>("PixelAdj","", Direction::Input, true));
+  declareProperty(new WorkspaceProperty<>("DetBankWorkspace", "", Direction::Input, dataVal),
+    "Particle counts as a function of wavelength");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+    "Name of the workspace that will contain the result of the calculation");
+  declareProperty(new ArrayProperty<double>("OutputBinning", new RebinParamsValidator),
+        "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
+        "this can be followed by a comma and more widths and last boundary pairs.\n"
+        "Negative width values indicate logarithmic binning.");
+  declareProperty(new WorkspaceProperty<>("PixelAdj","", Direction::Input, true),
+    "The scaling to apply to each spectrum e.g. for detector efficiency, must have\n"
+    "the same number of spectra as the DetBankWorkspace");
   CompositeValidator<> *wavVal = new CompositeValidator<>;
   wavVal->add(new WorkspaceUnitValidator<>("Wavelength"));
   wavVal->add(new HistogramValidator<>);
-  declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input, true, wavVal));
-  
-  declareProperty("AccountForGravity",false);
-  
+  declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input, true, wavVal),
+    "The scaling to apply to each bin to account for monitor counts, transmission\n"
+    "fraction, etc");
+  declareProperty("AccountForGravity",false,
+    "Whether to correct for the effects of gravity");
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0.0);
-  declareProperty("RadiusCut", 0.0, mustBePositive);
-  declareProperty("WaveCut", 0.0, mustBePositive->clone());
+  declareProperty("RadiusCut", 0.0, mustBePositive,
+    "To increase resolution some wavelengths are excluded within this distance from\n"
+    "the beam center (m)");
+  declareProperty("WaveCut", 0.0, mustBePositive->clone(),
+    "To increase resolution by starting to remove some wavelengths below this"
+    "freshold (angstrom)");
 }
 /**
   @ throw invalid_argument if the workspaces are not mututially compatible
@@ -164,10 +175,10 @@ void Q1D2::exec()
     
     PARALLEL_CRITICAL(q1d_spectra_map)
     {
+      progress.report("Computing I(Q)");
       updateSpecMap(i, specMap, inSpecMap, outputWS);
     }
 
-    progress.report("Computing I(Q)");
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
