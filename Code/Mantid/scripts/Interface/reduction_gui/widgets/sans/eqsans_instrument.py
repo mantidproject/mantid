@@ -461,7 +461,7 @@ class SANSInstrumentWidget(BaseWidget):
     def _show_help(self):
         class HelpDialog(QtGui.QDialog, ui.sans.ui_eqsans_info.Ui_Dialog): 
             def __init__(self, parent=None):
-                QtGui.QDialog.__init__(self, parent=parent)
+                QtGui.QDialog.__init__(self, parent)
                 self.setupUi(self)
         dialog = HelpDialog(self)
         dialog.exec_()
