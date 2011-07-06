@@ -690,6 +690,12 @@
               </item>
               <item>
                <widget class="QLabel" name="beam_radius_label">
+                <property name="minimumSize">
+                 <size>
+                  <width>203</width>
+                  <height>0</height>
+                 </size>
+                </property>
                 <property name="text">
                  <string>Beam radius (pixels)</string>
                 </property>
@@ -729,6 +735,36 @@
                  </size>
                 </property>
                </spacer>
+              </item>
+             </layout>
+            </item>
+            <item row="10" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <item>
+               <spacer name="horizontalSpacer_13">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="fit_together_check">
+                <property name="toolTip">
+                 <string>Select to fit the two frames together when in frame-skipping mode.</string>
+                </property>
+                <property name="text">
+                 <string>Fit frames together</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>

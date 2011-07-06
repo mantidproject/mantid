@@ -138,6 +138,7 @@ class BackgroundWidget(BaseWidget):
 
         self._content.calculate_trans_chk.setChecked(state.calculate_transmission)
         self._content.theta_dep_chk.setChecked(state.theta_dependent)
+        self._content.fit_together_check.setChecked(state.combine_transmission_frames)        
         self._content.trans_dark_current_edit.setText(QtCore.QString(str(state.trans_dark_current)))
         self._calculate_clicked(state.calculate_transmission)
     
@@ -156,6 +157,7 @@ class BackgroundWidget(BaseWidget):
         m.bck_transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
         m.calculate_transmission = self._content.calculate_trans_chk.isChecked()
         m.theta_dependent = self._content.theta_dep_chk.isChecked()
+        m.combine_transmission_frames = self._content.fit_together_check.isChecked()
         m.trans_dark_current = self._content.trans_dark_current_edit.text()
     
         d = Background.DirectBeam()
@@ -196,6 +198,8 @@ class BackgroundWidget(BaseWidget):
         self._content.transmission_edit.setEnabled(not is_checked and self._content.background_chk.isChecked())
         self._content.dtransmission_edit.setEnabled(not is_checked and self._content.background_chk.isChecked())
         
+        self._content.fit_together_check.setEnabled(is_checked)
+
         self._content.trans_dark_current_label.setEnabled(is_checked)
         self._content.trans_dark_current_edit.setEnabled(is_checked)
         self._content.trans_dark_current_button.setEnabled(is_checked)

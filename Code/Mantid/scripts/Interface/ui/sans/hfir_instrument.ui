@@ -1107,6 +1107,9 @@ The mask information is saved separately so that your data file will NOT be modi
                   <height>0</height>
                  </size>
                 </property>
+                <property name="toolTip">
+                 <string>Select to apply the mask built from the specified data file.</string>
+                </property>
                 <property name="text">
                  <string>Mask file</string>
                 </property>
@@ -1120,6 +1123,9 @@ The mask information is saved separately so that your data file will NOT be modi
                   <height>0</height>
                  </size>
                 </property>
+                <property name="toolTip">
+                 <string>Enter a file to be used to create your mask.</string>
+                </property>
                </widget>
               </item>
               <item>
@@ -1130,6 +1136,9 @@ The mask information is saved separately so that your data file will NOT be modi
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="toolTip">
+                 <string>Click to browse.</string>
+                </property>
                 <property name="text">
                  <string>Browse...</string>
                 </property>
@@ -1137,8 +1146,11 @@ The mask information is saved separately so that your data file will NOT be modi
               </item>
               <item>
                <widget class="QPushButton" name="mask_plot_button">
+                <property name="toolTip">
+                 <string>Click to plot data 2D data.</string>
+                </property>
                 <property name="text">
-                 <string>Plot</string>
+                 <string>Edit Mask</string>
                 </property>
                </widget>
               </item>

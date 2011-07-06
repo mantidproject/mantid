@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_sample_data.ui'
 #
-# Created: Fri Jul  1 11:50:17 2011
+# Created: Wed Jul  6 11:51:15 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -251,6 +251,7 @@ class Ui_Frame(object):
         spacerItem11 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem11)
         self.beam_radius_label = QtGui.QLabel(self.groupBox)
+        self.beam_radius_label.setMinimumSize(QtCore.QSize(203, 0))
         self.beam_radius_label.setObjectName("beam_radius_label")
         self.horizontalLayout_6.addWidget(self.beam_radius_label)
         self.beam_radius_edit = QtGui.QLineEdit(self.groupBox)
@@ -266,10 +267,18 @@ class Ui_Frame(object):
         spacerItem12 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem12)
         self.gridLayout.addLayout(self.horizontalLayout_6, 9, 0, 1, 1)
+        self.horizontalLayout_8 = QtGui.QHBoxLayout()
+        self.horizontalLayout_8.setObjectName("horizontalLayout_8")
+        spacerItem13 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_8.addItem(spacerItem13)
+        self.fit_together_check = QtGui.QCheckBox(self.groupBox)
+        self.fit_together_check.setObjectName("fit_together_check")
+        self.horizontalLayout_8.addWidget(self.fit_together_check)
+        self.gridLayout.addLayout(self.horizontalLayout_8, 10, 0, 1, 1)
         self.verticalLayout_3.addLayout(self.gridLayout)
         self.verticalLayout_2.addWidget(self.groupBox)
-        spacerItem13 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_2.addItem(spacerItem13)
+        spacerItem14 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_2.addItem(spacerItem14)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents_2)
         self.verticalLayout.addWidget(self.scrollArea)
 
@@ -306,4 +315,6 @@ class Ui_Frame(object):
         self.empty_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
         self.empty_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_radius_label.setText(QtGui.QApplication.translate("Frame", "Beam radius (pixels)", None, QtGui.QApplication.UnicodeUTF8))
+        self.fit_together_check.setToolTip(QtGui.QApplication.translate("Frame", "Select to fit the two frames together when in frame-skipping mode.", None, QtGui.QApplication.UnicodeUTF8))
+        self.fit_together_check.setText(QtGui.QApplication.translate("Frame", "Fit frames together", None, QtGui.QApplication.UnicodeUTF8))
 

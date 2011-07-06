@@ -102,6 +102,7 @@ class SampleDataWidget(BaseWidget):
 
         self._content.calculate_chk.setChecked(state.calculate_transmission)
         self._content.theta_dep_chk.setChecked(state.theta_dependent)
+        self._content.fit_together_check.setChecked(state.combine_transmission_frames)
         self._content.dark_current_edit.setText(QtCore.QString(str(state.dark_current)))
         self._calculate_clicked(state.calculate_transmission)
         
@@ -138,6 +139,7 @@ class SampleDataWidget(BaseWidget):
         
         m.calculate_transmission = self._content.calculate_chk.isChecked()
         m.theta_dependent = self._content.theta_dep_chk.isChecked()
+        m.combine_transmission_frames = self._content.fit_together_check.isChecked()
         m.dark_current = self._content.dark_current_edit.text()
         
         d = SampleData.DirectBeam()
@@ -190,6 +192,8 @@ class SampleDataWidget(BaseWidget):
     def _calculate_clicked(self, is_checked):
         self._content.transmission_edit.setEnabled(not is_checked)
         self._content.dtransmission_edit.setEnabled(not is_checked)
+
+        self._content.fit_together_check.setEnabled(is_checked)
         
         self._content.dark_current_label.setEnabled(is_checked)
         self._content.dark_current_edit.setEnabled(is_checked)

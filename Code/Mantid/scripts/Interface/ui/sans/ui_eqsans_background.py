@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_background.ui'
 #
-# Created: Fri Jul  1 11:50:17 2011
+# Created: Wed Jul  6 11:51:15 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -252,8 +252,16 @@ class Ui_Frame(object):
         spacerItem12 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem12)
         self.verticalLayout_3.addLayout(self.horizontalLayout_6)
-        spacerItem13 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_3.addItem(spacerItem13)
+        self.horizontalLayout_7 = QtGui.QHBoxLayout()
+        self.horizontalLayout_7.setObjectName("horizontalLayout_7")
+        spacerItem13 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_7.addItem(spacerItem13)
+        self.fit_together_check = QtGui.QCheckBox(self.transmission_grpbox)
+        self.fit_together_check.setObjectName("fit_together_check")
+        self.horizontalLayout_7.addWidget(self.fit_together_check)
+        self.verticalLayout_3.addLayout(self.horizontalLayout_7)
+        spacerItem14 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_3.addItem(spacerItem14)
         self.verticalLayout_2.addWidget(self.transmission_grpbox)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
@@ -292,4 +300,6 @@ class Ui_Frame(object):
         self.trans_dark_current_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.trans_dark_current_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_radius_label.setText(QtGui.QApplication.translate("Frame", "Beam radius (pixels)", None, QtGui.QApplication.UnicodeUTF8))
+        self.fit_together_check.setToolTip(QtGui.QApplication.translate("Frame", "Select to fit the two frames together when in frame-skipping mode.", None, QtGui.QApplication.UnicodeUTF8))
+        self.fit_together_check.setText(QtGui.QApplication.translate("Frame", "Fit frames together", None, QtGui.QApplication.UnicodeUTF8))
 

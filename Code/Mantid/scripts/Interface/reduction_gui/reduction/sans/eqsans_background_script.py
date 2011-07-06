@@ -1,6 +1,7 @@
 """
     Sample data options for EQSANS reduction
 """
+import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 from reduction_gui.reduction.sans.hfir_background_script import Background as BaseBackground
 from reduction_gui.reduction.sans.eqsans_sample_script import SampleData
@@ -38,6 +39,8 @@ class Background(BaseBackground):
     trans_calculation_method = DirectBeam()
     # Option list
     option_list = [DirectBeam]
+    # Option to fit the two frame separately when in frame-skipping mode
+    combine_transmission_frames = True
 
     def reset(self):
         """
@@ -45,6 +48,44 @@ class Background(BaseBackground):
         """
         super(Background, self).reset()
         self.trans_calculation_method = Background.trans_calculation_method
+        self.combine_transmission_frames = SampleData.combine_transmission_frames
     
+    def __init__(self):
+        super(Background, self).__init__()
+        self.reset()
+
+    def to_script(self):
+        """
+            Generate reduction script
+            @param execute: if true, the script will be executed
+        """
+        script = super(Background, self).to_script()
+        if self.background_corr and self.bck_transmission_enabled and self.calculate_transmission:
+            script += "BckCombineTransmissionFits(%s)\n" % self.combine_transmission_frames
+        return script
+            
+    def to_xml(self):
+        """
+            Create XML from the current data.
+        """
+        xml_str = super(Background, self).to_xml()
+        return BaseScriptElement.addElementToSection(xml_str, "Background", "combine_transmission_frames", 
+                                                     str(self.combine_transmission_frames))
+    
+    def from_xml(self, xml_str):
+        """
+            Read in data from XML
+            @param xml_str: text to read the data from
+        """    
+        self.reset()   
+        super(Background, self).from_xml(xml_str)
+        
+        dom = xml.dom.minidom.parseString(xml_str)
+        element_list = dom.getElementsByTagName("Background")
+        if len(element_list)>0:
+            instrument_dom = element_list[0]      
+            self.combine_transmission_frames = BaseScriptElement.getBoolElement(dom, "combine_transmission_frames",
+                                                                                default = SampleData.combine_transmission_frames)
+
 
     

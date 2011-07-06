@@ -14,6 +14,7 @@ import xml.dom.minidom
 import sys
 import time
 import platform
+import re
 
 class BaseScriptElement(object):
     """
@@ -151,6 +152,38 @@ class BaseScriptElement(object):
                 return change_set
         return -1
 
+    @classmethod
+    def addElementToSection(cls, xml_str, parent_name, tag, content=None):
+        """
+            Adds a child element to a given parent element of an XML string.
+            @param xml_str: string representation of an XML block [str]
+            @param parent_name: parent element to add the child under [str]
+            @param tag: element name [str]
+            @param content: content of the new child element [str]
+        """
+        # Encapsulate the xml in case the input is not properly nested
+        xml_str = "<tmp>%s</tmp>" % xml_str
+        dom = xml.dom.minidom.parseString(xml_str)
+        element_list = dom.getElementsByTagName(parent_name)
+        if len(element_list)>0:
+            instrument_dom = element_list[0]
+            child = dom.createElement(tag)
+            if content is not None:
+                content_node = dom.createTextNode(content)
+                child.appendChild(content_node)
+            instrument_dom.appendChild(child) 
+        
+        # Loop over the child elements on tmp in case there is more than one
+        # Clean up the resulting XML string since toprettyxml() is not pretty enough
+        output_str = ""
+        for item in dom.getElementsByTagName("tmp")[0].childNodes:
+            uglyxml = item.toprettyxml(indent='  ', newl='\n')
+            text_re = re.compile('>\n\s+([^<>\s].*?)\n\s+</', re.DOTALL)
+            prettierxml = text_re.sub('>\g<1></', uglyxml)
+            
+            text_re = re.compile('((?:^)|(?:</[^<>\s].*?>)|(?:<[^<>\s].*?>)|(?:<[^<>\s].*?/>))\s*\n+', re.DOTALL)
+            output_str += text_re.sub('\g<1>\n', prettierxml)
+        return output_str
 
 class BaseReductionScripter(object):
     """

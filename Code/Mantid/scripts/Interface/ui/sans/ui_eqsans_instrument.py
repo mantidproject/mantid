@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_instrument.ui'
 #
-# Created: Tue Jul  5 16:08:50 2011
+# Created: Wed Jul  6 11:51:15 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -465,6 +465,7 @@ class Ui_Frame(object):
 
     def retranslateUi(self, Frame):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
+        Frame.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.instr_name_label.setText(QtGui.QApplication.translate("Frame", "EQSANS", None, QtGui.QApplication.UnicodeUTF8))
         self.help_button.setText(QtGui.QApplication.translate("Frame", "Help", None, QtGui.QApplication.UnicodeUTF8))
         self.reduction_options_group.setTitle(QtGui.QApplication.translate("Frame", "Reduction Options", None, QtGui.QApplication.UnicodeUTF8))
@@ -509,8 +510,12 @@ class Ui_Frame(object):
         self.log_binning_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to use logarithmic binning for I(Q).", None, QtGui.QApplication.UnicodeUTF8))
         self.log_binning_radio.setText(QtGui.QApplication.translate("Frame", "Log binning", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("Frame", "Output directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.use_data_dir_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to write the output files in the data directory.", None, QtGui.QApplication.UnicodeUTF8))
         self.use_data_dir_radio.setText(QtGui.QApplication.translate("Frame", "Use data directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.select_output_dir_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to choose where to write the output files.", None, QtGui.QApplication.UnicodeUTF8))
         self.select_output_dir_radio.setText(QtGui.QApplication.translate("Frame", "Select", None, QtGui.QApplication.UnicodeUTF8))
+        self.output_dir_edit.setToolTip(QtGui.QApplication.translate("Frame", "Output directory for reduced data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.output_dir_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.output_dir_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
         self.geometry_options_groupbox.setTitle(QtGui.QApplication.translate("Frame", "Experiment Parameters", None, QtGui.QApplication.UnicodeUTF8))
         self.experiment_parameter_help.setText(QtGui.QApplication.translate("Frame", "The sample-detector distance is updated automatically when a sample data file is selected.\n"
@@ -527,7 +532,11 @@ class Ui_Frame(object):
         self.label_4.setText(QtGui.QApplication.translate("Frame", "Choose a file to set your mask. Note that only the mask information, not the data, will be used in the reduction.\n"
 "The data is only used to help you setting the mask.\n"
 "The mask information is saved separately so that your data file will NOT be modified.", None, QtGui.QApplication.UnicodeUTF8))
+        self.mask_check.setToolTip(QtGui.QApplication.translate("Frame", "Select to apply the mask built from the specified data file.", None, QtGui.QApplication.UnicodeUTF8))
         self.mask_check.setText(QtGui.QApplication.translate("Frame", "Mask file", None, QtGui.QApplication.UnicodeUTF8))
+        self.mask_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a file to be used to create your mask.", None, QtGui.QApplication.UnicodeUTF8))
+        self.mask_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.mask_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
-        self.mask_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
+        self.mask_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.mask_plot_button.setText(QtGui.QApplication.translate("Frame", "Edit Mask", None, QtGui.QApplication.UnicodeUTF8))
 
