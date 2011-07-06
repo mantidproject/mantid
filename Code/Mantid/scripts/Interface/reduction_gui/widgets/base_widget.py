@@ -160,7 +160,7 @@ class BaseWidget(QtGui.QWidget):
         
         # Check that the file exists.
         if not os.path.exists(file_name):
-            QtGui.QMessageBox.warning(self.widgets[0], "File Not Found", "The supplied mask file can't be found on the file system")
+            QtGui.QMessageBox.warning(self, "File Not Found", "The supplied mask file can't be found on the file system")
             
         if self._data_proxy is not None:
             proxy = self._data_proxy(file_name, workspace)
@@ -169,8 +169,8 @@ class BaseWidget(QtGui.QWidget):
                     MaskDetectors(proxy.data_ws, DetectorList=mask)
                 _show_ws_instrument(proxy.data_ws)
             else:
-                QtGui.QMessageBox.warning(self.widgets[0], "Mask Error", "Mantid doesn't know how to load this file")
+                QtGui.QMessageBox.warning(self, "Mask Error", "Mantid doesn't know how to load this file")
         else:
-            QtGui.QMessageBox.warning(self.widgets[0], "Mask Error", "Mantid doesn't know how to load this file")
+            QtGui.QMessageBox.warning(self, "Mask Error", "Mantid doesn't know how to load this file")
         
 

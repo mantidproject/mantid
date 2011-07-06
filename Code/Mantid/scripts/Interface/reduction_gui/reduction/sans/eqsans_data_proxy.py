@@ -19,13 +19,17 @@ class DataProxy(object):
     def __init__(self, data_file, workspace_name=None):
         self.errors = []
         if HAS_MANTID:
-            print "loading", data_file
             try:
                 if workspace_name is None:
                     self.data_ws = "__raw_data_file"
                 else:
                     self.data_ws = str(workspace_name)
-                LoadEventNexus(Filename=data_file, OutputWorkspace=workspace_name)
+                try:
+                    LoadEventNexus(Filename=data_file, OutputWorkspace=workspace_name)
+                except:
+                    self.errors.append("Error loading data file as Nexus event file:\n%s" % sys.exc_value)
+                    LoadNexus(Filename=data_file, OutputWorkspace=workspace_name)
+                    self.errors = []
             except:
                 self.data_ws = None
                 self.errors.append("Error loading data file:\n%s" % sys.exc_value)
