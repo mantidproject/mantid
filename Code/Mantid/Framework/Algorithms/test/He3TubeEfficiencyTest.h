@@ -123,6 +123,35 @@ public:
     AnalysisDataService::Instance().remove(inputWS);
   }
 
+  void testBadTubeThicknessEvents()
+  {
+    createEventWorkspace();
+    He3TubeEfficiency alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+
+    alg.setPropertyValue("InputWorkspace", inputEvWS);
+    alg.setPropertyValue("OutputWorkspace", inputEvWS);
+    alg.setPropertyValue("TubeThickness", "0.0127");
+
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputEvWS));
+    EventWorkspace_sptr ev_result = boost::dynamic_pointer_cast<EventWorkspace>(result);
+
+    // Monitor should be untouched
+    EventList mon_ev = ev_result->getEventList(0);
+    TS_ASSERT_DELTA(mon_ev.getEvent(1).m_weight, 1.0, 1e-6);
+    // Check that detectors have no events
+    EventList det1_ev = ev_result->getEventList(1);
+    TS_ASSERT_EQUALS(det1_ev.getNumberEvents(), 0);
+    // Check that the total number of events is just the monitor
+    TS_ASSERT_EQUALS(ev_result->getNumberEvents(), 5);
+
+    AnalysisDataService::Instance().remove(inputWS);
+  }
+
 private:
   const std::string inputWS;
   const std::string inputEvWS;

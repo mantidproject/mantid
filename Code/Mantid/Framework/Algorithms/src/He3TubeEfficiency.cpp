@@ -469,7 +469,7 @@ void He3TubeEfficiency::execEvent()
     }
     catch (std::out_of_range &)
     {
-      // Parameters are bad, skip correction and mask pixel
+      // Parameters are bad so skip correction
       PARALLEL_CRITICAL(deteff_invalid)
       {
         this->spectraSkipped.push_back(inputWS->getAxis(1)->spectraNo(i));
@@ -480,6 +480,10 @@ void He3TubeEfficiency::execEvent()
 
     if (!is_good)
     {
+      // Clear out events so that they don't bother anything else until
+      // true masking is available.
+      DataObjects::EventList *evlist = outputWS->getEventListPtr(i);
+      evlist->clear();
       continue;
     }
 
