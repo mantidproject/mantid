@@ -7,7 +7,10 @@ endif ()
 if ( NOT CMAKE_CONFIGURATION_TYPES )
   if ( NOT CMAKE_BUILD_TYPE )
     message ( STATUS "No build type selected, default to Release." )
-    set ( CMAKE_BUILD_TYPE "Release" )
+    set( CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE )
+    # Set the possible values of build type for cmake-gui
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+      "MinSizeRel" "RelWithDebInfo")
   else ()
     message ( STATUS "Build type is " ${CMAKE_BUILD_TYPE} )
   endif ()
