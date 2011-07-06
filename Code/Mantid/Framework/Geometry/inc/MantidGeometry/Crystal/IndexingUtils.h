@@ -70,6 +70,14 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                  const std::vector<int>  & index_values,
                                  const std::vector<Kernel::V3D>  & q_vectors );
 
+  /// Scan rotations to find UB that indexes peaks given lattice parameters
+  static double ScanFor_UB(       Kernel::DblMatrix         & UB,
+                            const std::vector<Kernel::V3D>  & q_vectors,
+                                  double a, double b, double c,
+                                  double alpha, double beta, double gamma,
+                                  double degrees_per_step,
+                                  double required_tolerance );
+
   /// Get the vector in the direction of "c" given other unit cell information
   static Kernel::V3D Make_c_dir( const Kernel::V3D  & a_dir,
                                  const Kernel::V3D  & b_dir,
@@ -81,14 +89,14 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                 double         tolerance );
 
   /// Calculate the number of Q vectors that are mapped to integer indices by UB
-  static int NumberIndexed( const Kernel::DblMatrix & UB,
+  static int NumberIndexed( const Kernel::DblMatrix         & UB,
                             const std::vector<Kernel::V3D>  & q_vectors,
                                   double                      tolerance   );
 
   /// Get lists of indices and Qs for peaks indexed in the specified direction 
   static int GetIndexedPeaks_1D( 
-                          const std::vector<Kernel::V3D> & q_vectors,
                           const Kernel::V3D              & direction,
+                          const std::vector<Kernel::V3D> & q_vectors,
                                 double                     required_tolerance,
                                 std::vector<int>         & index_vals,
                                 std::vector<Kernel::V3D> & indexed_qs,
@@ -96,10 +104,10 @@ class MANTID_GEOMETRY_DLL IndexingUtils
 
   /// Get lists of indices and Qs for peaks indexed in three given directions
   static int GetIndexedPeaks_3D( 
-                          const std::vector<Kernel::V3D> & q_vectors,
                           const Kernel::V3D              & direction_1,
                           const Kernel::V3D              & direction_2,
                           const Kernel::V3D              & direction_3,
+                          const std::vector<Kernel::V3D> & q_vectors,
                                 double                     required_tolerance,
                                 std::vector<Kernel::V3D> & miller_indices,
                                 std::vector<Kernel::V3D> & indexed_qs,
@@ -107,8 +115,8 @@ class MANTID_GEOMETRY_DLL IndexingUtils
 
   /// Get lists of indices and Qs for peaks indexed by the specified UB matrix 
   static int GetIndexedPeaks( 
-                          const std::vector<Kernel::V3D> & q_vectors,
                           const Kernel::DblMatrix        & UB,
+                          const std::vector<Kernel::V3D> & q_vectors,
                                 double                     required_tolerance,
                                 std::vector<Kernel::V3D> & miller_indices,
                                 std::vector<Kernel::V3D> & indexed_qs,

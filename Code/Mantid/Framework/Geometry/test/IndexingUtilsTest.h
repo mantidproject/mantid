@@ -143,6 +143,40 @@ public:
   }
 
 
+  void test_ScanFor_UB()
+  {
+    double correct_UB[] = { -0.102577,  0.0999725, -0.0136353,
+                             0.123290,  0.0146148, -0.0851386,
+                            -0.055154, -0.0427632, -0.0630785 };
+
+    Matrix<double> UB(3,3,false);
+    int     degrees_per_step   = 3;
+    double  required_tolerance = 0.2;
+    double  a     = 6.6f;
+    double  b     = 9.7f;
+    double  c     = 9.9f;
+    double  alpha = 84;
+    double  beta  = 71;
+    double  gamma = 70;
+
+    std::vector<V3D> q_vectors = getNatroliteQs();
+
+    double error = IndexingUtils::ScanFor_UB( UB,
+                                              q_vectors,
+                                              a, b, c, alpha, beta, gamma,
+                                              degrees_per_step,
+                                              required_tolerance );
+
+    TS_ASSERT_DELTA( error, 0.147397, 1.e-5 );
+
+    std::vector<double> UB_returned = UB.get_vector();
+    for ( size_t i = 0; i < 9; i++ )
+    {
+      TS_ASSERT_DELTA( UB_returned[i], correct_UB[i], 1e-5 );
+    }
+  }
+
+
   void test_Make_c_dir()
   {
     V3D a_dir(  1, 2, 3 );
@@ -231,8 +265,8 @@ public:
     std::vector<int> index_vals;
     std::vector<V3D> indexed_qs;
 
-    int num_indexed = IndexingUtils::GetIndexedPeaks_1D( q_vectors,
-                                                         direction,
+    int num_indexed = IndexingUtils::GetIndexedPeaks_1D( direction,
+                                                         q_vectors,
                                                          required_tolerance,
                                                          index_vals,
                                                          indexed_qs,
@@ -277,10 +311,10 @@ public:
     std::vector<V3D> index_vals;
     std::vector<V3D> indexed_qs;
 
-    int num_indexed = IndexingUtils::GetIndexedPeaks_3D( q_vectors,
-                                                         direction_1,
+    int num_indexed = IndexingUtils::GetIndexedPeaks_3D( direction_1,
                                                          direction_2,
                                                          direction_3,
+                                                         q_vectors,
                                                          required_tolerance,
                                                          index_vals,
                                                          indexed_qs,
@@ -333,8 +367,8 @@ public:
     std::vector<V3D> index_vals;
     std::vector<V3D> indexed_qs;
 
-    int num_indexed = IndexingUtils::GetIndexedPeaks( q_vectors,
-                                                      UB,
+    int num_indexed = IndexingUtils::GetIndexedPeaks( UB,
+                                                      q_vectors,
                                                       required_tolerance,
                                                       index_vals,
                                                       indexed_qs,

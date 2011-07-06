@@ -93,8 +93,8 @@ double IndexingUtils::BestFit_UB(       DblMatrix        & UB,
   double fit_error = 0;
   std::vector<int> index_vals;
   std::vector<V3D> indexed_qs;
-  num_indexed = GetIndexedPeaks_1D( q_vectors,
-                                    a_dir,
+  num_indexed = GetIndexedPeaks_1D( a_dir,
+                                    q_vectors,
                                     required_tolerance,
                                     index_vals,
                                     indexed_qs,
@@ -122,8 +122,8 @@ double IndexingUtils::BestFit_UB(       DblMatrix        & UB,
                                  required_tolerance );
 
   b_dir *= b;
-  num_indexed = GetIndexedPeaks_1D( q_vectors,
-                                    b_dir,
+  num_indexed = GetIndexedPeaks_1D( b_dir,
+                                    q_vectors,
                                     required_tolerance,
                                     index_vals,
                                     indexed_qs,
@@ -163,8 +163,8 @@ double IndexingUtils::BestFit_UB(       DblMatrix        & UB,
 
                             // Optimize the c_dir vector as before
 
-  num_indexed = GetIndexedPeaks_1D( q_vectors,
-                                    c_dir,
+  num_indexed = GetIndexedPeaks_1D( c_dir,
+                                    q_vectors,
                                     required_tolerance,
                                     index_vals,
                                     indexed_qs,
@@ -177,8 +177,8 @@ double IndexingUtils::BestFit_UB(       DblMatrix        & UB,
                             // discarding any peaks that are not indexed in 
                             // all three directions.
   std::vector<V3D> miller_ind;
-  num_indexed = GetIndexedPeaks_3D( q_vectors,
-                                    a_dir, b_dir, c_dir,
+  num_indexed = GetIndexedPeaks_3D( a_dir, b_dir, c_dir,
+                                    q_vectors,
                                     required_tolerance,
                                     miller_ind,
                                     indexed_qs,
@@ -319,6 +319,7 @@ double IndexingUtils::BestFit_UB(      DblMatrix         & UB,
   return sum_sq_error;
 }
 
+
 /** 
   STATIC method BestFit_Direction: Calculates the vector for which the
   dot product of the the vector with each of the specified Qxyz vectors 
@@ -447,9 +448,186 @@ double IndexingUtils::BestFit_Direction(           V3D          & best_vec,
 
 
 /**
+ *  The method uses two passes to scan across all possible directions and 
+ *  orientations to find the direction and orientation for the unit cell
+ *  that best fits the specified list of peaks.  
+ *  On the first pass, only those sets of directions that index the 
+ *  most peaks are kept.  On the second pass, the directions that minimize 
+ *  the sum-squared deviations from integer indices are selected from that 
+ *  smaller set of directions.  This method should be most useful if number 
+ *  of peaks is on the order of 10-20, and most of the peaks belong to the 
+ *  same crystallite.
+ *  @param UB                 This will be set to the UB matrix that best
+ *                            indexes the supplied list of q_vectors.
+ *  @param q_vectors          List of locations of peaks in "Q".
+ *  @param a                  Lattice parameter "a".
+ *  @param b                  Lattice parameter "b".
+ *  @param c                  Lattice parameter "c".
+ *  @param alpha              Lattice parameter alpha.
+ *  @param beta               Lattice parameter beta.
+ *  @param gamma              Lattice parameter gamma.
+ *  @param degrees_per_step   The number of degrees per step used when 
+ *                            scanning through all possible directions and
+ *                            orientations for the unit cell. NOTE: The
+ *                            work required rises very rapidly as the number
+ *                            of degrees per step decreases. A value of 1
+ *                            degree leads to about 10 seconds of compute time.
+ *                            while a value of 2 only requires a bit more than
+ *                            1 sec.  The required time is O(n^3) where 
+ *                            n = 1/degrees_per_step.
+ *                             
+ *  @param required_tolerance The maximum distance from an integer that the
+ *                            calculated h,k,l values can have if a peak 
+ *                            is to be considered indexed.
+ */
+double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
+                                 const std::vector<V3D>  & q_vectors,
+                                       double a, double b, double c,
+                                       double alpha, double beta, double gamma,
+                                       double degrees_per_step,
+                                       double required_tolerance )
+{
+  V3D a_dir;
+  V3D b_dir;
+  V3D c_dir;
+
+  int    num_a_steps   = round( 90.0 / degrees_per_step );
+  double gamma_radians = gamma * PI / 180.0;
+
+  int num_b_steps = round( 4 * sin( gamma_radians ) * num_a_steps );
+
+  std::vector<V3D> a_dir_list = MakeHemisphereDirections( num_a_steps );
+
+  std::vector<V3D> b_dir_list;
+
+  V3D a_dir_temp;
+  V3D b_dir_temp;
+  V3D c_dir_temp;
+
+  double error;
+  double dot_prod;
+  int    nearest_int;
+  int    max_indexed = 0;
+  V3D    q_vec;
+                                              // first select those directions
+                                              // that index the most peaks
+  std::vector<V3D> selected_a_dirs;
+  std::vector<V3D> selected_b_dirs;
+  std::vector<V3D> selected_c_dirs;
+
+  for ( size_t a_dir_num = 0; a_dir_num < a_dir_list.size(); a_dir_num++ )
+  {
+    a_dir_temp = a_dir_list[ a_dir_num ]; 
+    a_dir_temp = V3D( a_dir_temp );
+    a_dir_temp *= a;
+
+    b_dir_list = MakeCircleDirections( num_b_steps, a_dir_temp, gamma );
+
+    for ( size_t b_dir_num = 0; b_dir_num < b_dir_list.size(); b_dir_num++ )
+    {
+      b_dir_temp = b_dir_list[ b_dir_num ];
+      b_dir_temp = V3D( b_dir_temp );
+      b_dir_temp *= b;
+      c_dir_temp = Make_c_dir( a_dir_temp, b_dir_temp,
+                               c, alpha, beta, gamma );
+      int num_indexed = 0;
+      for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
+      {
+        bool indexes_peak = true;
+        q_vec = q_vectors[ q_num ];
+        dot_prod = a_dir_temp.scalar_prod( q_vec );
+        nearest_int = round( dot_prod );
+        error = fabs( dot_prod - nearest_int );
+        if ( error > required_tolerance )
+          indexes_peak = false;
+        else
+        {
+          dot_prod = b_dir_temp.scalar_prod( q_vec );
+          nearest_int = round( dot_prod );
+          error = fabs( dot_prod - nearest_int );
+          if ( error > required_tolerance )
+            indexes_peak = false;
+          else
+          {
+            dot_prod = c_dir_temp.scalar_prod( q_vec );
+            nearest_int = round( dot_prod );
+            error = fabs( dot_prod - nearest_int );
+            if ( error > required_tolerance )
+              indexes_peak = false;
+          }
+        }
+        if ( indexes_peak )
+          num_indexed++;
+      }
+
+      if ( num_indexed > max_indexed )     // only keep those directions that
+      {                                    // index the max number of peaks
+        selected_a_dirs.clear();
+        selected_b_dirs.clear();
+        selected_c_dirs.clear();
+        max_indexed = num_indexed;
+      }
+      if ( num_indexed == max_indexed )
+      {
+        selected_a_dirs.push_back( a_dir_temp );
+        selected_b_dirs.push_back( b_dir_temp );
+        selected_c_dirs.push_back( c_dir_temp );
+      }
+    }
+  }
+                                          // now, for each such direction, find
+                                          // the one that indexes closes to
+                                          // integer values
+  double min_error = 1e50;
+  for ( size_t dir_num = 0; dir_num < selected_a_dirs.size(); dir_num++ )
+  {
+    a_dir_temp = selected_a_dirs[ dir_num ];
+    b_dir_temp = selected_b_dirs[ dir_num ];
+    c_dir_temp = selected_c_dirs[ dir_num ];
+
+    double sum_sq_error = 0;
+    for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
+    {
+      q_vec = q_vectors[ q_num ];
+      dot_prod = a_dir_temp.scalar_prod( q_vec );
+      nearest_int = round( dot_prod );
+      error = dot_prod - nearest_int;
+      sum_sq_error += error * error;
+
+      dot_prod = b_dir_temp.scalar_prod( q_vec );
+      nearest_int = round( dot_prod );
+      error = dot_prod - nearest_int;
+      sum_sq_error += error * error;
+
+      dot_prod = c_dir_temp.scalar_prod( q_vec );
+      nearest_int = round( dot_prod );
+      error = dot_prod - nearest_int;
+      sum_sq_error += error * error;
+    }
+
+    if ( sum_sq_error < min_error )
+    {
+      min_error = sum_sq_error;
+      a_dir = a_dir_temp;
+      b_dir = b_dir_temp;
+      c_dir = c_dir_temp;
+    }
+  }
+
+  UB.setRow( 0, a_dir );
+  UB.setRow( 1, b_dir );
+  UB.setRow( 2, c_dir );
+  UB.Invert();
+
+  return min_error;
+}
+
+/**
     For a rotated unit cell, calculate the vector in the direction of edge
     "c" given two vectors a_dir and b_dir in the directions of edges "a" 
-    and "b", with lengths a and b, and the cell angles.
+    and "b", with lengths a and b, and the cell angles.  The calculation is
+    explained in the Mantid document UBMatriximplementationnotes.pdf, pg 3, 
+    Andre Savici.
     @param  a_dir   V3D object with length "a" in the direction of the rotated 
                     cell edge "a"
     @param  b_dir   V3D object with length "b" in the direction of the rotated 
@@ -594,11 +772,11 @@ int IndexingUtils::NumberIndexed( const DblMatrix         & UB,
   dot product of a peak Qxyz with the direction vector will be an integer 
   if the peak lies on one of the planes.   
 
-  @param q_vectors           List of V3D peaks in reciprocal space
   @param direction           Direction vector in the direction of the 
                              normal vector for a family of parallel planes
                              in reciprocal space.  The length of this vector 
                              must be the reciprocal of the plane spacing.
+  @param q_vectors           List of V3D peaks in reciprocal space
   @param required_tolerance  The maximum allowed error (as a faction of
                              the corresponding Miller index) for a peak
                              q_vector to be counted as indexed.
@@ -613,8 +791,8 @@ int IndexingUtils::NumberIndexed( const DblMatrix         & UB,
   @return The number of q_vectors that are indexed to within the specified
           tolerance, in the specified direction.
  */
-int IndexingUtils::GetIndexedPeaks_1D( const std::vector<V3D> & q_vectors,
-                                       const V3D              & direction,
+int IndexingUtils::GetIndexedPeaks_1D( const V3D              & direction,
+                                       const std::vector<V3D> & q_vectors,
                                              double        required_tolerance,
                                              std::vector<int> & index_vals,
                                              std::vector<V3D> & indexed_qs,
@@ -659,13 +837,13 @@ int IndexingUtils::GetIndexedPeaks_1D( const std::vector<V3D> & q_vectors,
   checks three directions simultaneously and requires that the peak lies
   on all three families of planes simultaneously and does NOT index as (0,0,0).
 
-  @param q_vectors           List of V3D peaks in reciprocal space
   @param direction_1         Direction vector in the direction of the normal
                              vector for the first family of parallel planes.
   @param direction_2         Direction vector in the direction of the normal
                              vector for the second family of parallel planes.
   @param direction_3         Direction vector in the direction of the normal
                              vector for the third family of parallel planes.
+  @param q_vectors           List of V3D peaks in reciprocal space
   @param required_tolerance  The maximum allowed error (as a faction of
                              the corresponding Miller index) for a peak
                              q_vector to be counted as indexed.
@@ -680,10 +858,10 @@ int IndexingUtils::GetIndexedPeaks_1D( const std::vector<V3D> & q_vectors,
   @return The number of q_vectors that are indexed to within the specified
           tolerance, in the specified direction.
  */
-int IndexingUtils::GetIndexedPeaks_3D( const std::vector<V3D> & q_vectors,
-                                       const V3D              & direction_1,
+int IndexingUtils::GetIndexedPeaks_3D( const V3D              & direction_1,
                                        const V3D              & direction_2,
                                        const V3D              & direction_3,
+                                       const std::vector<V3D> & q_vectors,
                                              double        required_tolerance,
                                              std::vector<V3D> & miller_indices,
                                              std::vector<V3D> & indexed_qs,
@@ -744,9 +922,9 @@ int IndexingUtils::GetIndexedPeaks_3D( const std::vector<V3D> & q_vectors,
   to GetIndexedPeaks_3D, but directly uses the inverse of the UB matrix to
   map Q -> hkl.
 
-  @param q_vectors           List of V3D peaks in reciprocal space
   @param UB                  The UB matrix that determines the indexing of
                              the peaks.
+  @param q_vectors           List of V3D peaks in reciprocal space
   @param required_tolerance  The maximum allowed error (as a faction of
                              the corresponding Miller index) for a peak
                              q_vector to be counted as indexed.
@@ -761,8 +939,8 @@ int IndexingUtils::GetIndexedPeaks_3D( const std::vector<V3D> & q_vectors,
   @return The number of q_vectors that are indexed to within the specified
           tolerance, in the specified direction.
  */
-int IndexingUtils::GetIndexedPeaks( const std::vector<V3D>  & q_vectors,
-                                    const DblMatrix         & UB,
+int IndexingUtils::GetIndexedPeaks( const DblMatrix         & UB,
+                                    const std::vector<V3D>  & q_vectors,
                                           double            required_tolerance,
                                           std::vector<V3D>  & miller_indices,
                                           std::vector<V3D>  & indexed_qs,
