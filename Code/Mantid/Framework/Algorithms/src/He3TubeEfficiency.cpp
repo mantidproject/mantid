@@ -421,7 +421,7 @@ double He3TubeEfficiency::getParameter(std::string wsPropName, std::size_t curre
  */
 void He3TubeEfficiency::execEvent()
 {
-  g_log.information("Processing event workspace");
+  this->g_log.information("Processing event workspace");
 
   const API::MatrixWorkspace_const_sptr matrixInputWS = this->getProperty("InputWorkspace");
   DataObjects::EventWorkspace_const_sptr inputWS = boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(matrixInputWS);
@@ -462,6 +462,7 @@ void He3TubeEfficiency::execEvent()
     }
 
     double exp_constant;
+    bool is_good = true;
     try
     {
       exp_constant = this->calculateExponential(i, det);
@@ -472,8 +473,14 @@ void He3TubeEfficiency::execEvent()
       PARALLEL_CRITICAL(deteff_invalid)
       {
         this->spectraSkipped.push_back(inputWS->getAxis(1)->spectraNo(i));
+        is_good = false;
+        //outputWS->maskWorkspaceIndex(i);
       }
-      //continue;
+    }
+
+    if (!is_good)
+    {
+      continue;
     }
 
     // Do the correction
