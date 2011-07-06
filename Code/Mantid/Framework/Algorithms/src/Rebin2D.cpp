@@ -84,7 +84,7 @@ namespace Mantid
       Axis* newAxis2 = outputWS->getAxis(1);
 
       Progress progress(this,0.0,1.0, numHist);
-      // For each box on the output workspace find the overlapping boxes on the input workspac
+      // Find the intersection of the each new 'spectra' with the old
       PARALLEL_FOR2(inputWS,outputWS)
       for(int64_t i = 0; i < numHist; ++i)
       {

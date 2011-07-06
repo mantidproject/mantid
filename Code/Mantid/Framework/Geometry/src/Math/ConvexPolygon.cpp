@@ -114,6 +114,7 @@ namespace Mantid
     int ConvexPolygon::orientation() const
     {
       const double determinant = this->determinant();
+      std::cerr << "determinant " << determinant << "\n";
       if( determinant > 0.5 ) return 1;
       else if( determinant < -0.5 ) return -1;
       else return 0;
@@ -146,6 +147,29 @@ namespace Mantid
     {
       return 0.5*(b.X() - a.X())*(c.Y() - a.Y()) - 
         (c.X() - a.X())*(b.Y() - a.Y());
+    }
+
+    //-----------------------------------------------------------------------------
+    // Non-member non-friend functions
+    //-----------------------------------------------------------------------------
+    /**
+     * Print a polygon to a stream. The vertices are output in the order defined by
+     * the object
+     * @param os :: A reference to an output stream
+     * @param polygon :: A reference to the polygon to output to the stream
+     * @returns A reference to the input stream
+     */
+    std::ostream & operator<<(std::ostream & os, const ConvexPolygon & polygon)
+    {
+      os << "ConvexPolygon(";
+      const size_t nvert(polygon.numVertices());
+      for(size_t i = 0; i < nvert; ++i)
+      {
+        os << polygon[i];
+        if( i < nvert - 1 ) os << ",";
+      }
+      os << ")";
+      return os;
     }
 
   } //namespace Geometry

@@ -4,8 +4,8 @@
 #include "MantidGeometry/Math/PolygonIntersection.h"
 #include "MantidGeometry/Math/ConvexPolygon.h"
 #include "MantidKernel/V2D.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
-
 #include <iostream>
 
 namespace Mantid
@@ -76,15 +76,15 @@ namespace Mantid
         // Orientations
         originAB[1] = edge_p;
         originAB[2] = edge_q;
-        int cross = ConvexPolygon(originAB).orientation();
+        double cross = edge_p.cross_prod(edge_q).Z();
         aHB[0] = Q[qim1];
         aHB[1] = Q[qi];
         aHB[2] = P[pi];
-        int aHB_dir = ConvexPolygon(aHB).orientation();
+        double aHB_dir = ConvexPolygon(aHB).determinant();
         bHA[0] = P[pim1];
         bHA[1] = P[pi];
         bHA[2] = Q[qi];
-        int bHA_dir = ConvexPolygon(bHA).orientation();
+        double bHA_dir = ConvexPolygon(bHA).determinant();
         // Test for line intersection
         V2D intersect;
         unsigned int type = intersection(P[pim1],P[pi], Q[qim1],Q[qi], intersect);
@@ -95,25 +95,25 @@ namespace Mantid
             count_p = count_q = 0;
             firstPoint = false;
           }
-          if( aHB_dir > 0 ) inflag = Pin;
-          else if( bHA_dir > 0 ) inflag = Qin;
+          if( aHB_dir > 0.0 ) inflag = Pin;
+          else if( bHA_dir > 0.0 ) inflag = Qin;
           else {};
           intersectList.insert(intersect);
         }
 
         // Deal with advance of indices
         /* Special case: A & B overlap and oppositely oriented. */
-        if ( type == 'e' && edge_p.scalar_prod(edge_q) < 0 )
+        if ( type == 3 && edge_p.scalar_prod(edge_q) < 0 )
         {
           throw std::runtime_error("Single segment intersection");
         }
         /* Special case: A & B parallel and separated. */
-        else if ( cross == 0 && (aHB_dir < 0) && (bHA_dir < 0) )
+        else if ( cross == 0 && (aHB_dir < 0.0) && (bHA_dir < 0.0) )
         {
           throw std::runtime_error("AxB=0 and both are left-hand oriented so no intersection");
         }
         /* Special case: A & B collinear. */
-        else if ( cross == 0 && (aHB_dir == 0) && (bHA_dir == 0) ) 
+        else if ( cross == 0 && (aHB_dir == 0.0) && (bHA_dir == 0.0) ) 
         {
           /* Advance but do not output point. */
           if ( inflag == Pin )
@@ -124,14 +124,14 @@ namespace Mantid
         /* Generic cases. */
         else if ( cross >= 0 ) 
         {
-          if ( bHA_dir > 0)
+          if ( bHA_dir > 0.0)
             pi = advanceVertex(pi, count_p, nverts_p, inflag == Pin, P[pi], intersectList);
           else
             qi = advanceVertex(qi, count_q, nverts_q, inflag == Qin, Q[qi], intersectList);
         }
         else /* if ( cross < 0 ) */
         {
-          if ( aHB_dir > 0)
+          if ( aHB_dir > 0.0)
             qi = advanceVertex(qi, count_q, nverts_q, inflag == Qin, Q[qi], intersectList);
           else
             pi = advanceVertex(pi, count_p, nverts_p,inflag == Pin, P[pi], intersectList);
@@ -177,7 +177,6 @@ namespace Mantid
         {
           return parallelIntersect(a,b,c,d,crossPoint);
         }
-      
         double numerator = (a[0]*( d[1] - c[1] ) +
                             c[0]*( a[1] - d[1] ) +
                             d[0]*( c[1] - a[1] ));
@@ -218,33 +217,38 @@ namespace Mantid
                                      const V2D & c, const V2D & d,
                                      V2D & crossPoint)
       {
-        if( !collinear(a,b,c) ) return 0;
-
-        if( isBetween(a, b, c) && isBetween(a, b, d) ) 
+        unsigned int type(0);
+        if( !collinear(a,b,c) ) type = 0;
+        else
         {
-          crossPoint = c;
+          type = 3;
+          if( isBetween(a, b, c) && isBetween(a, b, d) ) 
+          {
+            crossPoint = c;
+          }
+          else if( isBetween(c, d, a) && isBetween(c, d, b) ) 
+          {
+            crossPoint = a;
+          }
+          else if( isBetween(a, b, c) && isBetween(c, d, b) ) 
+          {
+            crossPoint = c;
+          }
+          else if( isBetween(a, b, c) && isBetween(c, d, a) ) 
+          {
+            crossPoint = c;
+          }
+          else if( isBetween(a, b, d) && isBetween(c, d, b) ) 
+          {
+            crossPoint = d;
+          }
+          else if( isBetween(a, b, d) && isBetween(c, d, a) ) 
+          {
+            crossPoint = d;
+          }
+          else type = 0;
         }
-        if( isBetween(c, d, a) && isBetween(c, d, b) ) 
-        {
-          crossPoint = a;
-        }
-        if( isBetween(a, b, c) && isBetween(c, d, b) ) 
-        {
-          crossPoint = c;
-        }
-        if( isBetween(a, b, c) && isBetween(c, d, a) ) 
-        {
-          crossPoint = c;
-        }
-        if( isBetween(a, b, d) && isBetween(c, d, b) ) 
-        {
-          crossPoint = d;
-        }
-        if( isBetween(a, b, d) && isBetween(c, d, a) ) 
-        {
-          crossPoint = d;
-        }      
-        return 3;
+        return type;
       }
 
       /**

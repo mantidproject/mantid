@@ -6,7 +6,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidGeometry/Math/PolygonIntersection.h"
 #include "MantidGeometry/Math/ConvexPolygon.h"
-
+#include <cfloat>
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Kernel::V2D;
@@ -77,6 +77,32 @@ public:
     TS_ASSERT_EQUALS(overlap[1], V2D(100,50));
     TS_ASSERT_EQUALS(overlap[2], V2D(175,50));
     TS_ASSERT_EQUALS(overlap[3], V2D(175,100));
+  }
+
+  void test_Squares_With_Side_Length_Less_Than_One()
+  {
+    Vertex2DList vertices;
+    vertices.insert(V2D());
+    vertices.insert(V2D(1,0));
+    vertices.insert(V2D(1,1));
+    vertices.insert(V2D(0,1));
+    ConvexPolygon squareOne(vertices);
+
+    vertices = Vertex2DList();
+    vertices.insert(V2D(0,0.1));
+    vertices.insert(V2D(0.2,0.1));
+    vertices.insert(V2D(0.2,0.2));
+    vertices.insert(V2D(0,0.2));
+    ConvexPolygon squareTwo(vertices);
+
+    ConvexPolygon overlap = chasingEdgeIntersect(squareOne,squareTwo);
+    TS_ASSERT_EQUALS(overlap.numVertices(), 4);
+    // Are they correct
+    TS_ASSERT_EQUALS(overlap[0], V2D(0,0.2));
+    TS_ASSERT_EQUALS(overlap[1], V2D(0,0.1));
+    TS_ASSERT_EQUALS(overlap[2], V2D(0.2,0.1));
+    TS_ASSERT_EQUALS(overlap[3], V2D(0.2,0.2));
+    TS_ASSERT_DELTA(overlap.area(), squareTwo.area(), DBL_EPSILON);   
   }
 
 };

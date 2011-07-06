@@ -82,6 +82,9 @@ namespace Mantid
       Vertex2DList m_vertices;
     };
 
+    /// Print a polygon to a stream
+    std::ostream & operator<<(std::ostream & os, const ConvexPolygon & polygon);
+
   } //namespace Geometry
 } //namespace Mantid
 
