@@ -69,6 +69,15 @@ public:
     MatrixWorkspace_sptr result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputEvWS));
     EventWorkspace_sptr ev_result = boost::dynamic_pointer_cast<EventWorkspace>(result);
 
+    // Monitor events should be untouched
+    EventList mon_ev = ev_result->getEventList(0);
+    TS_ASSERT_DELTA(mon_ev.getEvent(1).m_weight, 1.0, 1e-6);
+    // Check some detector events
+    EventList det1_ev = ev_result->getEventList(1);
+    TS_ASSERT_DELTA(det1_ev.getEvent(1).m_weight, 1.098646, 1e-6);
+    EventList det3_ev = ev_result->getEventList(3);
+    TS_ASSERT_DELTA(det3_ev.getEvent(4).m_weight, 1.000036, 1e-6);
+
     AnalysisDataService::Instance().remove(inputEvWS);
   }
 
@@ -166,7 +175,7 @@ private:
 
   void createEventWorkspace()
   {
-    EventWorkspace_sptr event = WorkspaceCreationHelper::CreateEventWorkspace(3,5,5,0,0.9,2,0);
+    EventWorkspace_sptr event = WorkspaceCreationHelper::CreateEventWorkspace(4,5,5,0,0.9,3,0);
     event->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
     AnalysisDataService::Instance().add(inputEvWS, event);
 
