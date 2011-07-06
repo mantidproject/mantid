@@ -3,7 +3,21 @@
 
 #include <QAbstractItemModel>
 #include <QModelIndex>
-#include "MantidGeometry/IInstrument.h"
+
+#include <boost/shared_ptr.hpp>
+
+namespace Mantid
+{
+  namespace Geometry
+  {
+    class IInstrument;
+  }
+  namespace API
+  {
+    class Sample;
+    class MatrixWorkspace;
+  }
+}
 
 /**
  * The InstrumentTreeModel is a class used by a QTreeView
@@ -19,7 +33,7 @@ class InstrumentTreeModel:public QAbstractItemModel
 {
   Q_OBJECT
 public:
-  InstrumentTreeModel(const  boost::shared_ptr<const Mantid::Geometry::IInstrument>&, QObject *parent=0);
+  InstrumentTreeModel(boost::shared_ptr<const Mantid::API::MatrixWorkspace>, QObject *parent=0);
   ~InstrumentTreeModel();
 
   QVariant data(const QModelIndex &index, int role) const;
@@ -31,7 +45,8 @@ public:
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 private:
-  boost::shared_ptr<const Mantid::Geometry::IInstrument> mInstrument; ///< instrument to which the model corresponds to
+  boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
+  boost::shared_ptr<const Mantid::Geometry::IInstrument> m_instrument; ///< instrument to which the model corresponds to
 };
 
 #endif

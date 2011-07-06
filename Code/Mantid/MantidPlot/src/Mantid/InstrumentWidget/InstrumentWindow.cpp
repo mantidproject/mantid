@@ -247,7 +247,7 @@ void InstrumentWindow::setWorkspaceName(std::string wsName)
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),m_instrumentActor->maxBinValue());
   setSurfaceType(m_surfaceType);
   setupColorMap();
-  mInstrumentTree->setInstrument(m_instrumentActor->getInstrument());
+  mInstrumentTree->setInstrumentActor(m_instrumentActor);
   setInfoText(m_InstrumentDisplay->getSurface()->getInfoText());
 }
 
@@ -265,25 +265,16 @@ void InstrumentWindow::tabChanged(int i)
 {
   ProjectionSurface* surface = m_InstrumentDisplay->getSurface();
   QString text;
-  if (i == 1) // picking
-  {
-    //if (surface)
-    //{
-    //  surface->setInteractionModePick();
-    //}
-    //m_InstrumentDisplay->setMouseTracking(true);
-  }
-  else // no picking
+  if(i != 1) // no picking
   {
     if (surface)
     {
-      //surface->setInteractionModeMove();
       if (i == 0)
       {
         surface->componentSelected();
+        m_instrumentActor->accept(SetAllVisibleVisitor());
       }
     }
-    //m_InstrumentDisplay->setMouseTracking(false);
   }
   if (surface)
   {

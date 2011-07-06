@@ -37,6 +37,7 @@ GLActorCollection::~GLActorCollection()
  */
 void GLActorCollection::draw(bool picking)const
 {
+  if (!isVisible()) return;
   OpenGLError::check("GLActorCollection::draw(0)");
   if (picking)
   {
@@ -75,6 +76,36 @@ void GLActorCollection::drawGL(bool picking )const
   {
     (**it).draw(picking);
   }
+}
+
+bool GLActorCollection::accept(const GLActorVisitor& visitor)
+{
+  const SetVisibilityVisitor* svv = dynamic_cast<const SetVisibilityVisitor*>(&visitor);
+  // accepting a set visibility visitor. 
+  if (svv)
+  {
+    if (visitor.visit(this)) return true;
+    bool ok = false;
+    for(std::vector<GLActor*>::const_iterator it = mActorsList.begin();it != mActorsList.end();++it)
+    {
+      if ((**it).accept(visitor))
+      {
+        ok = true;
+      }
+    }
+    if (ok)
+    {
+      m_visible = true;
+    }
+    return ok;
+  }
+
+  // default visitor
+  for(std::vector<GLActor*>::const_iterator it = mActorsList.begin();it != mActorsList.end();++it)
+  {
+    if ((**it).accept(visitor)) return true;
+  }
+  return visitor.visit(this);
 }
 
 /**
@@ -141,5 +172,13 @@ void GLActorCollection::invalidateDisplayList()const
 		glDeleteLists(m_displayListId,1);
     m_displayListId = 0;
     m_useDisplayList = false;
+  }
+}
+
+void GLActorCollection::setVisibility(bool on)
+{
+  for(std::vector<GLActor*>::const_iterator it = mActorsList.begin();it != mActorsList.end();++it)
+  {
+    (**it).setVisibility(on);
   }
 }

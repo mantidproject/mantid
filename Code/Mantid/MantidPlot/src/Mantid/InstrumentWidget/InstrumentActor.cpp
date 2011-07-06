@@ -1,5 +1,7 @@
 #include "InstrumentActor.h"
 #include "CompAssemblyActor.h"
+#include "ObjComponentActor.h"
+#include "SampleActor.h"
 
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -19,7 +21,8 @@ double InstrumentActor::m_tolerance = 0.00001;
  * @param workspace :: Workspace
  */
 InstrumentActor::InstrumentActor(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace)
-  :m_workspace(workspace)
+  :m_workspace(workspace),
+  m_sampleActor(NULL)
 {
   const size_t nHist = workspace->getNumberHistograms();
   m_WkspBinMin = DBL_MAX;
@@ -66,6 +69,13 @@ InstrumentActor::InstrumentActor(boost::shared_ptr<Mantid::API::MatrixWorkspace>
   m_id2wi_map.reset(m_workspace->getDetectorIDToWorkspaceIndexMap(false));
   // this adds actors for all instrument components to the scene and fills in m_detIDs
   m_scene.addActor(new CompAssemblyActor(*this,getInstrument()->getComponentID()));
+
+  FindComponentVisitor findVisitor(getInstrument()->getSample()->getComponentID());
+  accept(findVisitor);
+  const ObjComponentActor* samplePosActor = dynamic_cast<const ObjComponentActor*>(findVisitor.getActor());
+
+  m_sampleActor = new SampleActor(*this,workspace->sample(),samplePosActor);
+  m_scene.addActor(m_sampleActor);
 }
 
 /**
@@ -74,6 +84,18 @@ InstrumentActor::InstrumentActor(boost::shared_ptr<Mantid::API::MatrixWorkspace>
 InstrumentActor::~InstrumentActor()
 {
   saveSettings();
+}
+
+bool InstrumentActor::accept(const GLActorVisitor& visitor)
+{
+  bool ok = m_scene.accept(visitor);
+  const SetVisibilityVisitor* vv = dynamic_cast<const SetVisibilityVisitor*>(&visitor);
+  if (vv && m_sampleActor)
+  {
+    m_sampleActor->setVisibility(m_sampleActor->getSamplePosActor()->isVisible());
+  }
+  invalidateDisplayLists();
+  return ok;
 }
 
 boost::shared_ptr<const Mantid::Geometry::IInstrument> InstrumentActor::getInstrument()const
@@ -397,4 +419,30 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D& Xfrom,
     // Combined rotation
     R = R3*R2*R1;
   }
+}
+
+bool SetVisibleComponentVisitor::visit(GLActor* actor)const
+{
+  ComponentActor* comp = dynamic_cast<ComponentActor*>(actor);
+  if (comp)
+  {
+    bool on = comp->getComponent()->getComponentID() == m_id;
+    actor->setVisibility(on);
+    return on;
+  }
+  return false;
+}
+
+bool FindComponentVisitor::visit(GLActor* actor)const
+{
+  ComponentActor* comp = dynamic_cast<ComponentActor*>(actor);
+  if (comp)
+  {
+    if (comp->getComponent()->getComponentID() == m_id)
+    {
+      m_actor = comp;
+      return true;
+    }
+  }
+  return false;
 }

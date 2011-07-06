@@ -177,6 +177,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
                    src/Mantid/InstrumentWidget/CompAssemblyActor.cpp
                    src/Mantid/InstrumentWidget/ComponentActor.cpp
+                   src/Mantid/InstrumentWidget/SampleActor.cpp
                    src/Mantid/InstrumentWidget/GLActorCollection.cpp
                    src/Mantid/InstrumentWidget/GLActor.cpp
                    src/Mantid/InstrumentWidget/GLColor.cpp
@@ -386,6 +387,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/BinDialog.h
                    src/Mantid/InstrumentWidget/CompAssemblyActor.h
                    src/Mantid/InstrumentWidget/ComponentActor.h
+                   src/Mantid/InstrumentWidget/SampleActor.h
                    src/Mantid/InstrumentWidget/GLActorCollection.h
                    src/Mantid/InstrumentWidget/GLActor.h
                    src/Mantid/InstrumentWidget/GLColor.h

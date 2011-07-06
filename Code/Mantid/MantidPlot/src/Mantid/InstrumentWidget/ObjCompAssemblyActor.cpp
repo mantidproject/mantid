@@ -64,25 +64,21 @@ ObjCompAssemblyActor::~ObjCompAssemblyActor()
 */
 void ObjCompAssemblyActor::draw(bool picking)const
 {
-  //Only draw the CompAssembly Children only if they are visible
-  if(mVisible)
-  {
-    OpenGLError::check("ObjCompAssemblyActor::draw(0)");
-    ObjCompAssembly_const_sptr objAss = getObjCompAssembly();
-    glPushMatrix();
+  OpenGLError::check("ObjCompAssemblyActor::draw(0)");
+  ObjCompAssembly_const_sptr objAss = getObjCompAssembly();
+  glPushMatrix();
 
-    unsigned int texID = picking? m_idPick : m_idData;
-    // Because texture colours are combined with the geometry colour
-    // make sure the current colour is white
-    glColor3f(1.0f,1.0f,1.0f);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texID);
-    objAss->draw();
-    glBindTexture(GL_TEXTURE_2D, 0);
-    OpenGLError::check("ObjCompAssemblyActor::draw()");
+  unsigned int texID = picking? m_idPick : m_idData;
+  // Because texture colours are combined with the geometry colour
+  // make sure the current colour is white
+  glColor3f(1.0f,1.0f,1.0f);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, texID);
+  objAss->draw();
+  glBindTexture(GL_TEXTURE_2D, 0);
+  OpenGLError::check("ObjCompAssemblyActor::draw()");
 
-    glPopMatrix();
-  }
+  glPopMatrix();
 }
 
 void ObjCompAssemblyActor::generateTexture(unsigned char* data, unsigned int& id)

@@ -400,15 +400,25 @@ void Projection3D::componentSelected(Mantid::Geometry::ComponentID id)
   InstrumentActor::BasisRotation(x,up,compDir,V3D(-1,0,0),V3D(0,1,0),V3D(0,0,-1),rot);
 
   BoundingBox bbox;
-  comp->getBoundingBox(bbox);
+  if (comp->getComponentID() == instr->getSample()->getComponentID())
+  {
+    bbox = m_instrActor->getWorkspace()->sample().getShape().getBoundingBox();
+    bbox.moveBy(comp->getPos());
+  }
+  else
+  {
+    comp->getBoundingBox(bbox);
+  }
   V3D minBounds = bbox.minPoint() + pos;
   V3D maxBounds = bbox.maxPoint() + pos;
   rot.rotate(minBounds);
   rot.rotate(maxBounds);
 
+  //std::cerr << minBounds << maxBounds << std::endl;
+
   // cannot get it right
-  //double znear = - minBounds.Z();
-  //double zfar = - maxBounds.Z();
+  double znear = minBounds.Z();
+  double zfar = maxBounds.Z();
   //if (znear > zfar)
   //{
   //  std::swap(znear,zfar);
@@ -416,13 +426,15 @@ void Projection3D::componentSelected(Mantid::Geometry::ComponentID id)
 
   m_viewport->setOrtho(minBounds.X(),maxBounds.X(),
                        minBounds.Y(),maxBounds.Y(),
-                       0,1000.);
+                       -1000.,1000);
+                       //0,1000.);
                        //znear,zfar);
 
 
   m_trackball->reset();
   m_trackball->setRotation(rot);
   //m_trackball->setModelCenter(comp->getPos());
+
 }
 
 QString Projection3D::getInfoText()const

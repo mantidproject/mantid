@@ -48,12 +48,7 @@ void ObjComponentActor::draw(bool picking)const
   {
     m_dataColor.paint();
   }
-  OpenGLError::check("ObjComponentActor::draw(1)");
   getObjComponent()->draw();
-  if (OpenGLError::hasError("ObjComponentActor::draw(2)"))
-  {
-    std::cerr << "Here" << std::endl;
-  }
   glPopMatrix();
   OpenGLError::check("ObjComponentActor::draw()");
 }

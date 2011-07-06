@@ -146,6 +146,8 @@ namespace Mantid
       void nullify();
       /// reallign the BB according to new coordinate system, provided earlier or specified as parameter;
       void realign(std::vector<Kernel::V3D> const* const pCS=NULL);
+      /// move the BB by a vector
+      void moveBy(const Kernel::V3D& v){ m_minPoint += v; m_maxPoint += v; }
       //@}
     
     private:

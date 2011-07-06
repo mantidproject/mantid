@@ -131,13 +131,13 @@ void CompAssemblyActor::draw(bool picking)const
 {
   OpenGLError::check("CompAssemblyActor::draw(0)");
   //Only draw the CompAssembly Children only if they are visible
-  if(mVisible)
+  if(isVisible())
   {
     //Iterate through the ObjCompActor children and draw them
     for(std::vector<ObjComponentActor*>::iterator itrObjComp=mChildObjCompActors.begin();itrObjComp!=mChildObjCompActors.end();itrObjComp++)
     {
       //Only draw the ObjCompActor if its visible
-      if((*itrObjComp)->getVisibility())
+      if((*itrObjComp)->isVisible())
       {
         //std::cout << (*itrObjComp)->getName() << " is gonna draw. From define()\n";
         (*itrObjComp)->draw(picking);
@@ -151,8 +151,11 @@ void CompAssemblyActor::draw(bool picking)const
     //Iterate through the CompAssemblyActor children and draw them
     for(std::vector<ICompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
     {
-      //std::cout << (*itrObjAssem)->getName() << " is gonna draw. From define()\n";
-      (*itrObjAssem)->draw(picking);
+      if ((*itrObjAssem)->isVisible())
+      {
+        //std::cout << (*itrObjAssem)->getName() << " is gonna draw. From define()\n";
+        (*itrObjAssem)->draw(picking);
+      }
     }
   }
   else
@@ -160,6 +163,49 @@ void CompAssemblyActor::draw(bool picking)const
     //std::cout << this->getName() << " is not visible\n";
   }
   OpenGLError::check("CompAssemblyActor::draw()");
+}
+
+bool CompAssemblyActor::accept(const GLActorVisitor& visitor)
+{
+  const SetVisibilityVisitor* svv = dynamic_cast<const SetVisibilityVisitor*>(&visitor);
+  // accepting a set visibility visitor. 
+  if (svv)
+  {
+    if (visitor.visit(this)) return true;
+    bool ok = false;
+    for(std::vector<ObjComponentActor*>::iterator itrObjComp=mChildObjCompActors.begin();itrObjComp!=mChildObjCompActors.end();itrObjComp++)
+    {
+      if ((**itrObjComp).accept(visitor))
+      {
+        ok = true;
+      }
+    }
+    for(std::vector<ICompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
+    {
+      if ( (**itrObjAssem).accept(visitor))
+      {
+        ok = true;
+      }
+    }
+    if (ok)
+    {
+      m_visible = true;
+    }
+    return ok;
+  }
+
+  // default visitor treatment
+  for(std::vector<ObjComponentActor*>::iterator itrObjComp=mChildObjCompActors.begin();itrObjComp!=mChildObjCompActors.end();itrObjComp++)
+  {
+    bool ok = (**itrObjComp).accept(visitor);
+    if (ok) return true;
+  }
+  for(std::vector<ICompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
+  {
+    bool ok = (**itrObjAssem).accept(visitor);
+    if (ok) return true;
+  }
+  return visitor.visit(this);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -187,5 +233,17 @@ void CompAssemblyActor::setColors()
   for(std::vector<ObjComponentActor*>::iterator iObjComp=mChildObjCompActors.begin();iObjComp!=mChildObjCompActors.end();iObjComp++)
   {
     (**iObjComp).setColors();
+  }
+}
+
+void CompAssemblyActor::setVisibility(bool on)
+{
+  for(std::vector<ObjComponentActor*>::iterator itrObjComp=mChildObjCompActors.begin();itrObjComp!=mChildObjCompActors.end();itrObjComp++)
+  {
+    (**itrObjComp).setVisibility(on);
+  }
+  for(std::vector<ICompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();itrObjAssem++)
+  {
+    (**itrObjAssem).setVisibility(on);
   }
 }

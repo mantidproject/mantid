@@ -24,6 +24,7 @@
 
 class UnwrappedCylinder;
 class UnwrappedDetectorCyl;
+class GLActorVisitor;
 
 namespace Mantid
 {
@@ -65,18 +66,43 @@ namespace Mantid
 class GLActor
 {
 public:
-  GLActor():mVisible(true){}
+  GLActor():m_visible(true){}
   virtual ~GLActor();             ///< Virtual destructor
-  void setVisibility(bool);
-  bool getVisibility();
+  virtual void setVisibility(bool on){m_visible = on;}
+  bool isVisible()const{return m_visible;}
   virtual void draw(bool picking = false)const = 0;
   virtual void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const = 0;
+  virtual bool accept(const GLActorVisitor& visitor);
   static GLColor makePickColor(size_t pickID);
   static size_t decodePickColor(const GLColor& c);
   static size_t decodePickColor(unsigned char r,unsigned char g,unsigned char b);
   static GLColor defaultDetectorColor();
 protected:
-  bool  mVisible;					 ///< Flag whether the actor is visible or not
+  bool  m_visible;					 ///< Flag whether the actor is visible or not
+};
+
+class GLActorVisitor
+{
+public:
+  ~GLActorVisitor(){}
+  virtual bool visit(GLActor*)const = 0;
+};
+
+/*
+ * The accept() method must return true if an actor is set visible and false otherwise
+ */
+class SetVisibilityVisitor: public GLActorVisitor
+{
+};
+
+class SetAllVisibleVisitor: public SetVisibilityVisitor
+{
+public:
+  bool visit(GLActor* actor)const
+  {
+    actor->setVisibility(true);
+    return true;
+  }
 };
 
 #endif /*GLACTOR_H_*/

@@ -33,24 +33,25 @@ namespace Mantid
     GluGeometryRenderer::~GluGeometryRenderer()
     {
       if(boolDisplaylistCreated && iDisplaylistId!=0 && glIsList(iDisplaylistId)==GL_TRUE)
-	glDeleteLists(iDisplaylistId,1);
+        glDeleteLists(iDisplaylistId,1);
     }
 
     void GluGeometryRenderer::RenderSphere(const V3D& center,double radius)
     {
       if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
       {
-	while(glGetError() != GL_NO_ERROR);
-	iDisplaylistId=glGenLists(1);
-	glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
-	CreateSphere(center,radius);
-	glEndList();
-	boolDisplaylistCreated=true;
-	mErrorCode=glGetError();
+        while(glGetError() != GL_NO_ERROR);
+        iDisplaylistId=glGenLists(1);
+        glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
+        CreateSphere(center,radius);
+        glEndList();
+        boolDisplaylistCreated=true;
+        mErrorCode=glGetError();
+        glCallList(iDisplaylistId);
       }else if(mErrorCode == GL_NO_ERROR){
-	glCallList(iDisplaylistId);
+        glCallList(iDisplaylistId);
       }else{
-	CreateSphere(center,radius);
+        CreateSphere(center,radius);
       }
     }
 
@@ -59,17 +60,18 @@ namespace Mantid
     {
       if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
       {
-	while(glGetError() != GL_NO_ERROR );
-	iDisplaylistId=glGenLists(1);
-	glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
-	CreateCube(Point1,Point2,Point3,Point4);
-	glEndList();
-	mErrorCode=glGetError();
-	boolDisplaylistCreated=true;
+        while(glGetError() != GL_NO_ERROR );
+        iDisplaylistId=glGenLists(1);
+        glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
+        CreateCube(Point1,Point2,Point3,Point4);
+        glEndList();
+        mErrorCode=glGetError();
+        boolDisplaylistCreated=true;
+        glCallList(iDisplaylistId);
       }else if(mErrorCode == GL_NO_ERROR){
-	glCallList(iDisplaylistId);
+        glCallList(iDisplaylistId);
       }else{
-	CreateCube(Point1,Point2,Point3,Point4);
+        CreateCube(Point1,Point2,Point3,Point4);
       }
     }
 
@@ -85,6 +87,7 @@ namespace Mantid
         glEndList();
         mErrorCode=glGetError();
         boolDisplaylistCreated=true;
+        glCallList(iDisplaylistId);
       }else if(mErrorCode == GL_NO_ERROR){
         glCallList(iDisplaylistId);
       }else {
@@ -112,6 +115,7 @@ namespace Mantid
         glEndList();
         mErrorCode=glGetError();
         boolDisplaylistCreated=true;
+        glCallList(iDisplaylistId);
       }else if(mErrorCode == GL_NO_ERROR){
         glCallList(iDisplaylistId);
       }else{
@@ -130,6 +134,7 @@ namespace Mantid
         glEndList();
         mErrorCode=glGetError();
         boolDisplaylistCreated=true;
+        glCallList(iDisplaylistId);
       }else if(mErrorCode == GL_NO_ERROR){
         glCallList(iDisplaylistId);
       }else {

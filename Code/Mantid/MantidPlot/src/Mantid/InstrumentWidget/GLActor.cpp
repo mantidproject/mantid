@@ -5,22 +5,9 @@ GLActor::~GLActor()
 {
 }
 
-/**
- * This method sets the visiblity of the actor
- * @param visible :: input visibility ( true for visible and false for hidden
- */
-void GLActor::setVisibility(bool visible)
+bool GLActor::accept(const GLActorVisitor& visitor)
 {
-	mVisible=visible;
-}
-
-/**
- * This method gets the visibility of the actor
- * @return true for actor visible and false for hidden
- */
-bool GLActor::getVisibility()
-{
-	return mVisible;
+  return visitor.visit(this);
 }
 
 GLColor GLActor::makePickColor(size_t pickID)

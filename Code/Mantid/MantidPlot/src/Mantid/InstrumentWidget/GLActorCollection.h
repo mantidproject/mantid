@@ -50,8 +50,10 @@ class GLActorCollection: public GLActor
 public:
   GLActorCollection(); ///< Default Constructor
   virtual ~GLActorCollection(); ///< Destructor
+  void setVisibility(bool);
   void draw(bool picking = false)const;
   void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const;
+  bool accept(const GLActorVisitor& visitor);
 
   void addActor(GLActor*);
   void removeActor(GLActor*);

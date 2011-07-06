@@ -4,6 +4,7 @@
 #include "GLColor.h"
 #include "GLActor.h"
 #include "GLActorCollection.h"
+#include "SampleActor.h"
 #include "MantidColorMap.h"
 
 #include "MantidGeometry/IInstrument.h"
@@ -71,6 +72,10 @@ public:
 	InstrumentActor(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace); ///< Constructor
 	~InstrumentActor();								   ///< Destructor
 	virtual std::string type()const {return "InstrumentActor";} ///< Type of the GL object
+  void draw(bool picking = false)const;
+  void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const{m_scene.getBoundingBox(minBound,maxBound);}
+  bool accept(const GLActorVisitor& visitor);
+
   boost::shared_ptr<const Mantid::Geometry::IInstrument> getInstrument()const;
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace()const{return m_workspace;}
   const MantidColorMap & getColorMap() const;
@@ -86,8 +91,6 @@ public:
   double minBinValue()const{return m_BinMinValue;}
   double maxBinValue()const{return m_BinMaxValue;}
   bool wholeRange()const;
-  void draw(bool picking = false)const;
-  void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const{m_scene.getBoundingBox(minBound,maxBound);}
   size_t ndetectors()const{return m_detIDs.size();}
   boost::shared_ptr<Mantid::Geometry::IDetector> getDetector(size_t pickID)const;
   Mantid::detid_t getDetID(size_t pickID)const{return m_detIDs.at(pickID);}
@@ -132,11 +135,36 @@ protected:
   QString m_currentColorMap;
 
   GLActorCollection m_scene;
+  SampleActor* m_sampleActor;
+
   static double m_tolerance;
 
   friend class ObjComponentActor;
   friend class ObjCompAssemblyActor;
   friend class RectangularDetectorActor;
+};
+
+/// Sets visibility of an actor with a particular ComponentID
+class SetVisibleComponentVisitor: public SetVisibilityVisitor
+{
+public:
+  SetVisibleComponentVisitor(const Mantid::Geometry::ComponentID id):m_id(id){}
+  bool visit(GLActor*)const;
+  Mantid::Geometry::ComponentID getID()const{return m_id;}
+private:
+  Mantid::Geometry::ComponentID m_id;
+};
+
+/// Finds an actor with a particular ComponentID
+class FindComponentVisitor: public SetVisibilityVisitor
+{
+public:
+  FindComponentVisitor(const Mantid::Geometry::ComponentID id):m_id(id),m_actor(NULL){}
+  bool visit(GLActor*)const;
+  ComponentActor* getActor()const{return m_actor;}
+private:
+  Mantid::Geometry::ComponentID m_id;
+  mutable ComponentActor* m_actor;
 };
 
 #endif /*InstrumentActor_H_*/

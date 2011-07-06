@@ -99,13 +99,17 @@ void MantidGLWidget::setRenderingOptions()
   //enablewriting into the depth buffer
   glDepthMask(GL_TRUE);
 
+  setLightingModel(1);
+
   OpenGLError::check("setRenderingOptions");
 }
 
 /**
  * Toggles the use of high resolution lighting
- * @param state :: An integer indicating lighting state. (Note that this is not a boolean because Qt's CheckBox emits an integer signal)
- * Unchecked = 0, ,PartiallyChecked = 1, Checked = 2
+ * @param state :: An integer indicating lighting state.
+ * 0 - no light
+ * 1 - GL_LIGHT0 is defined but lighting is off. Can be set on for individual actors.
+ * 2 - GL_LIGHT0 is always on.
  */
 void MantidGLWidget::setLightingModel(int state)
 {
@@ -117,11 +121,9 @@ void MantidGLWidget::setLightingModel(int state)
     glDisable(GL_LIGHT0);
     glDisable(GL_LINE_SMOOTH);
   }
-  // High end shading and lighting
-  else if( state == 2 )
+  else// High end shading and lighting
   {
     glShadeModel(GL_SMOOTH);           // Shade model is smooth (expensive but looks pleasing)
-    glEnable (GL_LIGHTING);            // Enable light
     glEnable(GL_LIGHT0);               // Enable opengl first light
     glEnable(GL_LINE_SMOOTH);          // Set line should be drawn smoothly
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);  // This model lits both sides of the triangle
@@ -135,8 +137,11 @@ void MantidGLWidget::setLightingModel(int state)
     glLightfv(GL_LIGHT0, GL_SPECULAR, lamp_specular);
     float lamp_pos[4]={0.0,0.0,1.0,0.0};
     glLightfv(GL_LIGHT0, GL_POSITION, lamp_pos);
+    if (state == 2)
+    {
+      glEnable (GL_LIGHTING);            // Enable light
+    }
   }
-  else return;
 }
 
 
@@ -157,8 +162,8 @@ void MantidGLWidget::paintEvent(QPaintEvent *event)
 
   if (m_firstFrame)
   {
-    update();
     m_firstFrame = false;
+    //update();
     //saveToFile("C:/Users/hqs74821/Work/Mantid_stuff/InstrumentView/firstframe.png");
     //std::cerr <<"Saved\n";
   }

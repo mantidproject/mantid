@@ -524,7 +524,6 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   double tof = x;
   if (unit->unitID() != "TOF")
   {
-    std::cerr << "emode=" << m_emode << std::endl;
     if (m_emode < 0)
     {
       const Mantid::API::Run & run = ws->run();
