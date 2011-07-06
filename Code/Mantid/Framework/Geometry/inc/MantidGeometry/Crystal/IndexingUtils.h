@@ -70,6 +70,12 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                  const std::vector<int>  & index_values,
                                  const std::vector<Kernel::V3D>  & q_vectors );
 
+  /// Get the vector in the direction of "c" given other unit cell information
+  static Kernel::V3D Make_c_dir( const Kernel::V3D  & a_dir,
+                                 const Kernel::V3D  & b_dir,
+                                       double c,
+                                       double alpha, double beta, double gamma);
+
   /// Check is hkl is within tolerance of integer (h,k,l) non-zero values
   static bool ValidIndex( const Kernel::V3D  & hkl,
                                 double         tolerance );

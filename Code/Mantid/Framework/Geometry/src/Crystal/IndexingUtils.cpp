@@ -447,6 +447,57 @@ double IndexingUtils::BestFit_Direction(           V3D          & best_vec,
 
 
 /**
+    For a rotated unit cell, calculate the vector in the direction of edge
+    "c" given two vectors a_dir and b_dir in the directions of edges "a" 
+    and "b", with lengths a and b, and the cell angles.
+    @param  a_dir   V3D object with length "a" in the direction of the rotated 
+                    cell edge "a"
+    @param  b_dir   V3D object with length "b" in the direction of the rotated 
+                    cell edge "b"
+    @param  c       The length of the third cell edge, c.
+    @param  alpha   angle between edges b and c. 
+    @param  beta    angle between edges c and a. 
+    @param  gamma   angle between edges a and b. 
+
+    @return A new V3D object with length "c", in the direction of the third
+            rotated unit cell edge, "c".
+ */
+V3D IndexingUtils::Make_c_dir( const V3D  & a_dir,
+                               const V3D  & b_dir,
+                                     double c,
+                                     double alpha, double beta, double gamma )
+{
+  double cos_alpha = cos( PI/180.0 * alpha );
+  double cos_beta  = cos( PI/180.0 * beta  );
+  double cos_gamma = cos( PI/180.0 * gamma );
+  double sin_gamma = sin( PI/180.0 * gamma );
+
+  double c1 = c * cos_beta;
+  double c2 = c * ( cos_alpha - cos_gamma * cos_beta )/sin_gamma;
+  double V  = sqrt( 1 - cos_alpha * cos_alpha
+                      - cos_beta  * cos_beta
+                      - cos_gamma * cos_gamma
+                      + 2 * cos_alpha * cos_beta * cos_gamma );
+  double c3 = c * V / sin_gamma;
+
+  V3D basis_1(a_dir);
+  basis_1.normalize();
+
+  V3D basis_3(a_dir);
+  basis_3 = basis_3.cross_prod(b_dir);
+  basis_3.normalize();
+
+  V3D basis_2( basis_3 );
+  basis_2 = basis_2.cross_prod(basis_1);
+  basis_2.normalize();
+
+  V3D c_dir = basis_1 * c1 + basis_2 * c2 + basis_3 * c3;
+
+  return c_dir;
+}
+
+
+/**
   Check whether or not the components of the specified vector are within
   the specified tolerance of integer values, other than (0,0,0).
 

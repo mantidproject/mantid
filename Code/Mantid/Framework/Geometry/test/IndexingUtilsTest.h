@@ -19,6 +19,8 @@ class IndexingUtilsTest : public CxxTest::TestSuite
 {
 public:
 
+#define PI 3.141592653589793238
+
   static std::vector<V3D> getNatroliteQs()
   {
     std::vector<V3D> q_vectors;
@@ -138,6 +140,27 @@ public:
     TS_ASSERT_DELTA( best_vec[0], -2.58222, 1e-4 );
     TS_ASSERT_DELTA( best_vec[1],  3.97345, 1e-4 );
     TS_ASSERT_DELTA( best_vec[2], -4.55145, 1e-4 );
+  }
+
+
+  void test_Make_c_dir()
+  {
+    V3D a_dir(  1, 2, 3 );
+    V3D b_dir( -3, 2, 1 );
+
+    double gamma    = a_dir.angle( b_dir ) * 180.0 / PI;
+    double alpha    = 123;
+    double beta     = 74;
+    double c_length = 10;
+    V3D result = IndexingUtils::Make_c_dir( a_dir, b_dir, c_length,
+                                            alpha, beta, gamma );
+
+    double alpha_calc = result.angle( b_dir ) * 180 / PI;
+    double beta_calc  = result.angle( a_dir ) * 180 / PI;
+
+    TS_ASSERT_DELTA( result.norm(), c_length, 1e-5 );
+    TS_ASSERT_DELTA( alpha_calc, alpha, 1e-5 );
+    TS_ASSERT_DELTA( beta_calc, beta, 1e-5 );
   }
 
 
