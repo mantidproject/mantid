@@ -73,7 +73,7 @@ private:
   void execEvent();
 
   /// Correct the given spectra index for efficiency
-  void correctForEfficiency(int spectraIndex);
+  void correctForEfficiency(std::size_t spectraIndex);
   /// Sets the detector geometry cache if necessary
   void getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det,
       double & detRadius, Kernel::V3D & detAxis);
@@ -86,12 +86,12 @@ private:
   /// Log any errors with spectra that occurred
   void logErrors() const;
   /// Retrieve the detector parameters from workspace or detector properties
-  double getParameter(std::string wsPropName, int currentIndex,
+  double getParameter(std::string wsPropName, std::size_t currentIndex,
       std::string detPropName, boost::shared_ptr<Geometry::IDetector> idet);
   /// Helper for event handling
-  template<class T> void eventHelper(std::vector<T>& events);
+  template<class T> void eventHelper(std::vector<T>& events, double expval);
   /// Function to calculate exponential contribution
-  double calculateExponential(int spectraIndex, boost::shared_ptr<Geometry::IDetector> idet);
+  double calculateExponential(std::size_t spectraIndex, boost::shared_ptr<Geometry::IDetector> idet);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr inputWS;
@@ -104,7 +104,7 @@ private:
   /// Sample position
   Kernel::V3D samplePos;
   /// The spectra numbers that were skipped
-  std::vector<int> spectraSkipped;
+  std::vector<specid_t> spectraSkipped;
   /// Algorithm progress keeper
   API::Progress *progress;
 };

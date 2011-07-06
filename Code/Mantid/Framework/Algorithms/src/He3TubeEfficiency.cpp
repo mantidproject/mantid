@@ -110,11 +110,11 @@ void He3TubeEfficiency::exec()
     return;
   }
 
-  int numHists = static_cast<int>(this->inputWS->getNumberHistograms());
+  std::size_t numHists = this->inputWS->getNumberHistograms();
   this->progress = new API::Progress(this, 0.0, 1.0, numHists);
 
   PARALLEL_FOR2(inputWS, outputWS)
-  for (int i = 0; i < numHists; ++i )
+  for (std::size_t i = 0; i < numHists; ++i )
   {
     PARALLEL_START_INTERUPT_REGION
 
@@ -163,7 +163,7 @@ void He3TubeEfficiency::exec()
  *  @throw NotFoundError if the detector or its gas pressure or wall thickness
  *  were not found
  */
-void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
+void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex)
 {
   Geometry::IDetector_sptr det = this->inputWS->getDetector(spectraIndex);
   if( det->isMonitor() || det->isMasked() )
@@ -206,7 +206,7 @@ void He3TubeEfficiency::correctForEfficiency(int spectraIndex)
  * @param idet :: the current detector pointer
  * @return the exponential contribution for the given detector
  */
-double He3TubeEfficiency::calculateExponential(int spectraIndex, boost::shared_ptr<Geometry::IDetector> idet)
+double He3TubeEfficiency::calculateExponential(std::size_t spectraIndex, boost::shared_ptr<Geometry::IDetector> idet)
 {
   // Get the parameters for the current associated tube
   double pressure = this->getParameter("TubePressure", spectraIndex,
@@ -393,7 +393,7 @@ void He3TubeEfficiency::logErrors() const
  * @param idet :: the current detector
  * @return the value of the detector property
  */
-double He3TubeEfficiency::getParameter(std::string wsPropName, int currentIndex,
+double He3TubeEfficiency::getParameter(std::string wsPropName, std::size_t currentIndex,
     std::string detPropName, boost::shared_ptr<Geometry::IDetector> idet)
 {
   std::vector<double> wsProp = this->getProperty(wsPropName);
@@ -448,12 +448,33 @@ void He3TubeEfficiency::execEvent()
     this->setProperty("OutputWorkspace", matrixOutputWS);
   }
 
-  int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
+  std::size_t numHistograms = inputWS->getNumberHistograms();
   this->progress = new API::Progress(this, 0.0, 1.0, numHistograms);
   PARALLEL_FOR1(outputWS)
-  for (int64_t i=0; i < numHistograms; ++i)
+  for (std::size_t i=0; i < numHistograms; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
+
+    Geometry::IDetector_sptr det = inputWS->getDetector(i);
+    if( det->isMonitor() || det->isMasked() )
+    {
+      continue;
+    }
+
+    double exp_constant;
+    try
+    {
+      exp_constant = this->calculateExponential(i, det);
+    }
+    catch (std::out_of_range &)
+    {
+      // Parameters are bad, skip correction and mask pixel
+      PARALLEL_CRITICAL(deteff_invalid)
+      {
+        this->spectraSkipped.push_back(inputWS->getAxis(1)->spectraNo(i));
+      }
+      continue;
+    }
 
     // Do the correction
     DataObjects::EventList *evlist = outputWS->getEventListPtr(i);
@@ -464,10 +485,10 @@ void He3TubeEfficiency::execEvent()
       evlist->switchTo(API::WEIGHTED);
       // Fall through
     case API::WEIGHTED:
-      eventHelper(evlist->getWeightedEvents());
+      eventHelper(evlist->getWeightedEvents(), exp_constant);
       break;
     case API::WEIGHTED_NOTIME:
-      eventHelper(evlist->getWeightedEventsNoTime());
+      eventHelper(evlist->getWeightedEventsNoTime(), exp_constant);
       break;
     }
 
@@ -484,6 +505,8 @@ void He3TubeEfficiency::execEvent()
   PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS->clearMRU();
+
+  this->logErrors();
 }
 
 /**
@@ -491,12 +514,16 @@ void He3TubeEfficiency::execEvent()
  * @param events :: the list of events to correct
  */
 template<class T>
-void He3TubeEfficiency::eventHelper(std::vector<T> &events)
+void He3TubeEfficiency::eventHelper(std::vector<T> &events, double expval)
 {
+  const double scale = this->getProperty("ScaleFactor");
   typename std::vector<T>::iterator it;
   for (it = events.begin(); it != events.end(); ++it)
   {
-
+    float de = static_cast<float>(this->detectorEfficiency(expval * it->m_tof,
+                                                           scale));
+    it->m_weight *= de;
+    it->m_errorSquared *= de;
   }
 }
 
