@@ -32,7 +32,6 @@ void He3TubeEfficiency::initDocs()
   this->setOptionalMessage("He3 tube efficiency correction.");
 }
 
-
 /// Default constructor
 He3TubeEfficiency::He3TubeEfficiency() : Algorithm(), inputWS(),
 outputWS(), paraMap(NULL), shapeCache(), samplePos(), spectraSkipped(),
@@ -114,7 +113,7 @@ void He3TubeEfficiency::exec()
   this->progress = new API::Progress(this, 0.0, 1.0, numHists);
 
   PARALLEL_FOR2(inputWS, outputWS)
-  for (std::size_t i = 0; i < numHists; ++i )
+  for (int i = 0; i < static_cast<int>(numHists); ++i )
   {
     PARALLEL_START_INTERUPT_REGION
 
@@ -204,6 +203,7 @@ void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex)
  * efficiency.
  * @param spectraIndex :: the current index to calculate
  * @param idet :: the current detector pointer
+ * @throw out_of_range if twice tube thickness is greater than tube diameter
  * @return the exponential contribution for the given detector
  */
 double He3TubeEfficiency::calculateExponential(std::size_t spectraIndex, boost::shared_ptr<Geometry::IDetector> idet)
@@ -451,7 +451,7 @@ void He3TubeEfficiency::execEvent()
   std::size_t numHistograms = inputWS->getNumberHistograms();
   this->progress = new API::Progress(this, 0.0, 1.0, numHistograms);
   PARALLEL_FOR1(outputWS)
-  for (std::size_t i=0; i < numHistograms; ++i)
+  for (int i=0; i < static_cast<int>(numHistograms); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
 
@@ -473,7 +473,7 @@ void He3TubeEfficiency::execEvent()
       {
         this->spectraSkipped.push_back(inputWS->getAxis(1)->spectraNo(i));
       }
-      continue;
+      //continue;
     }
 
     // Do the correction
@@ -512,6 +512,7 @@ void He3TubeEfficiency::execEvent()
 /**
  * Private function for doing the event correction.
  * @param events :: the list of events to correct
+ * @param expval :: the value of the exponent for the detector efficiency
  */
 template<class T>
 void He3TubeEfficiency::eventHelper(std::vector<T> &events, double expval)
