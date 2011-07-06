@@ -410,6 +410,9 @@ class DirectBeamTransmission(BaseTransmission):
             sample_mon_ws, empty_mon_ws, first_det = self._load_monitors(reducer, workspace)
             self._calculate_transmission(sample_mon_ws, empty_mon_ws, first_det, self._transmission_ws)
             
+        # Add output workspace to the list of important output workspaces
+        reducer.output_workspaces.append([self._transmission_ws, self._transmission_ws+'_unfitted'])
+
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission
         if self._theta_dependent:

@@ -742,8 +742,9 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         
         # Add output workspaces to the list of important output workspaces
         for item in self.get_output_workspace(workspace):
-            if item not in reducer.output_workspaces:
-                reducer.output_workspaces.append(item)
+            if item in reducer.output_workspaces:
+                reducer.output_workspaces.remove(item)
+        reducer.output_workspaces.append(self.get_output_workspace(workspace))                
         
         return output_str
         
@@ -769,6 +770,9 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
     def __init__(self, sample_file, empty_file, beam_radius=3.0, theta_dependent=True, dark_current=None, combine_frames=True):
         super(DirectBeamTransmission, self).__init__(sample_file, empty_file, beam_radius, theta_dependent, dark_current)
         ## Whether of not we need to combine the two frames in frame-skipping mode when performing the fit
+        self._combine_frames = combine_frames
+        
+    def set_combine_frames(self, combine_frames=True):
         self._combine_frames = combine_frames
         
     def get_transmission(self):
@@ -822,6 +826,9 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
                        sample_mon_ws, empty_mon_ws]:
                 if mtd.workspaceExists(ws):
                     mtd.deleteWorkspace(ws)
+            
+        # Add output workspace to the list of important output workspaces
+        reducer.output_workspaces.append([self._transmission_ws, self._transmission_ws+'_unfitted'])
             
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission

@@ -6,7 +6,7 @@ from reduction.command_interface import *
 from hfir_command_interface import SetBeamCenter, DirectBeamCenter, ScatteringBeamCenter
 from hfir_command_interface import NoDarkCurrent, NoNormalization, Mask, MaskDetectors, MaskRectangle
 from hfir_command_interface import SensitivityCorrection, NoSensitivityCorrection
-from hfir_command_interface import SolidAngle, NoSolidAngle, NoTransmission, SetTransmission, DirectBeamTransmission
+from hfir_command_interface import SolidAngle, NoSolidAngle, NoTransmission, SetTransmission#, DirectBeamTransmission
 from hfir_command_interface import Background, NoBackground, IQxQy, NoIQxQy#, AzimuthalAverage
 from hfir_command_interface import SaveIqAscii, NoSaveIq
 from hfir_command_interface import ThetaDependentTransmission, BckThetaDependentTransmission, SetBckTransmission
@@ -65,10 +65,22 @@ def AzimuthalAverage(suffix="_Iq", n_bins=100, n_subpix=1, log_binning=False):
                                                                                             error_weighting=False,
                                                                                             log_binning=log_binning))
     
-def DirectBeamTransmission_(sample_file, empty_file, beam_radius=3.0, theta_dependent=True, combine_frames=True):
+def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True, combine_frames=True):
     ReductionSingleton().set_transmission(sns_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
                                                                                      empty_file=empty_file,
                                                                                      beam_radius=beam_radius,
                                                                                      theta_dependent=theta_dependent,
                                                                                      combine_frames=combine_frames))
+    
+def CombineTransmissionFits(combine_frames):
+    if not isinstance(ReductionSingleton().get_transmission(), sns_reduction_steps.DirectBeamTransmission):
+        raise RuntimeError, "Trying to see transmission fitting option when the transmission calculation method hasn't been set correctly."
+    ReductionSingleton().get_transmission().set_combine_frames(combine_frames)
+
+def BckCombineTransmissionFits(combine_frames):
+    if ReductionSingleton().get_background() is None:
+        raise RuntimeError, "A background hasn't been defined."
+    if not isinstance(ReductionSingleton().get_background().get_transmission(), sns_reduction_steps.DirectBeamTransmission):
+        raise RuntimeError, "Trying to see transmission fitting option when the transmission calculation method hasn't been set correctly."
+    ReductionSingleton().get_background().get_transmission().set_combine_frames(combine_frames)
     
