@@ -172,6 +172,21 @@ public :
     TS_ASSERT(gaussianCalculator.hasCalculated());
     TSM_ASSERT_EQUALS("Should be 1*sigma standard deviations from central value.", 3.5 + 2 + 2, gaussianCalculator.getMaximum());
     TSM_ASSERT_EQUALS("Should be 1*sigma standard deviations from central value.", 3.5 + 2 - 2, gaussianCalculator.getMinimum());
+
+    //Boundary Value Analysis
+    signal_t just_above_upper_boundary = 7.5001;
+    signal_t just_below_lower_boundary = 3.4999;
+    signal_t on_lower_boundary = 3.5;
+    signal_t on_upper_boundary = 7.5;
+    signal_t just_below_upper_boundary = 7.4999;
+    signal_t just_above_lower_boundary = 3.5001;
+    TS_ASSERT_EQUALS(false, gaussianCalculator.inRange(just_above_upper_boundary));
+    TS_ASSERT_EQUALS(false, gaussianCalculator.inRange(just_below_lower_boundary));
+    TS_ASSERT_EQUALS(true, gaussianCalculator.inRange(on_lower_boundary));
+    TS_ASSERT_EQUALS(true, gaussianCalculator.inRange(on_upper_boundary));
+    TS_ASSERT_EQUALS(true, gaussianCalculator.inRange(just_below_upper_boundary));
+    TS_ASSERT_EQUALS(true, gaussianCalculator.inRange(just_above_lower_boundary));
+
     TSM_ASSERT("Has not used the IMDWorkspace as expected.", Mock::VerifyAndClearExpectations(pWs));
   }
 

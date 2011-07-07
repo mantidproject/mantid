@@ -85,9 +85,6 @@ namespace Mantid
         const int nPointsX = nBinsX;
         Column column(nPointsX);
 
-        signal_t maxThreshold = m_thresholdRange->getMaximum();
-        signal_t minThreshold = m_thresholdRange->getMinimum();
-
         //Loop through dimensions
         for (int i = 0; i < nPointsX; i++)
         {
@@ -95,7 +92,7 @@ namespace Mantid
           
           signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
 
-            if (boost::math::isnan( signalScalar ) || (signalScalar < minThreshold) || (signalScalar > maxThreshold))
+            if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
             {
               //Flagged so that topological and scalar data is not applied.
               unstructPoint.isSparse = true;

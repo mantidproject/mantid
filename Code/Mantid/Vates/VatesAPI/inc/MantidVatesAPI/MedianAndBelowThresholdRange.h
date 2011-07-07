@@ -1,14 +1,14 @@
-#ifndef MANTID_PARAVIEW_GAUSSIAN_THRESHOLD_RANGE
-#define MANTID_PARAVIEW_GAUSSIAN_THRESHOLD_RANGE
+#ifndef MANTID_PARAVIEW_MEDIAN_AND_BELOW_THRESHOLD_RANGE
+#define MANTID_PARAVIEW_MEDIAN_AND_BELOW_THRESHOLD_RANGE
 
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidAPI/IMDWorkspace.h"
 
-/** Caclulates range values based on the distribution of signal values in the workspace.
+/** Set range selection to cut-out zeros and provide an upper limit equal to the median value in the workspace.
 
  @author Owen Arnold, Tessella plc
- @date 30/06/2011
+ @date 07/07/2011
 
  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -35,36 +35,32 @@ namespace Mantid
 {
 namespace VATES
 {
-class DLLExport GaussianThresholdRange : public ThresholdRange
+class DLLExport MedianAndBelowThresholdRange : public ThresholdRange
 {
 
 public:
 
-  GaussianThresholdRange(Mantid::API::IMDWorkspace_sptr workspace, double preferred_nStd = 1, size_t sampleSize = 100);
-
-  GaussianThresholdRange(double preferred_nStd = 1, size_t sampleSize = 100);
-
-  virtual void setWorkspace(Mantid::API::IMDWorkspace_sptr workspace);
+  MedianAndBelowThresholdRange();
 
   virtual void calculate();
-
-  virtual bool hasCalculated() const;
 
   virtual signal_t getMinimum() const;
 
   virtual signal_t getMaximum() const;
 
-  virtual GaussianThresholdRange* clone() const;
+  ~MedianAndBelowThresholdRange();
 
-  virtual ~GaussianThresholdRange();
+  virtual bool hasCalculated() const;
+
+  virtual MedianAndBelowThresholdRange* clone() const;
 
   virtual bool inRange(const signal_t& signal);
 
+  virtual void setWorkspace(Mantid::API::IMDWorkspace_sptr workspace);
+
 private:
   
-  void calculateAsNormalDistrib(std::vector<signal_t>& raw_values, size_t size, signal_t max_signal, signal_t min_signal, signal_t accumulated_signal);
-
-  Mantid::API::IMDWorkspace_sptr m_workspace;
+  MedianAndBelowThresholdRange(signal_t min, signal_t max, bool isCalculated, Mantid::API::IMDWorkspace_sptr m_workspace);
 
   signal_t m_min;
   
@@ -72,10 +68,7 @@ private:
 
   bool m_isCalculated;
 
-  signal_t m_preferred_nStd;
-
-  size_t m_sampleSize; 
-
+  Mantid::API::IMDWorkspace_sptr m_workspace;
 };
 }
 }

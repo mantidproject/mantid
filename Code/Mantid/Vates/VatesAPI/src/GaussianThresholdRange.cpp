@@ -111,7 +111,7 @@ namespace Mantid
       }
       calculateAsNormalDistrib(raw_values, size, max_signal, min_signal, accumulated_signal);
       m_isCalculated = true;
-
+      delete it;
     }
 
     /**
@@ -164,6 +164,16 @@ namespace Mantid
     {
       m_isCalculated = false;
       m_workspace = workspace;
+    }
+
+    /**
+    Determine whether the signal is withing range.
+    @parameter signal value
+    @return true if the signal is in the range defined by this object.
+    */
+    bool GaussianThresholdRange::inRange(const signal_t& signal)
+    {
+      return signal >= m_min && signal <= m_max;
     }
   }
 }

@@ -144,9 +144,6 @@ namespace VATES
       const int nPointsZ = nBinsZ;
       PointMap pointMap(nPointsX);
 
-      signal_t maxThreshold = m_thresholdRange->getMaximum();
-      signal_t minThreshold = m_thresholdRange->getMinimum();
-
       //Loop through dimensions
       for (int i = 0; i < nPointsX; i++)
       {
@@ -163,7 +160,7 @@ namespace VATES
             posZ = minZ + (k * incrementZ); //Calculate increment in z;
             signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i, j, k, m_timeMapper(m_timestep)));
 
-            if (boost::math::isnan( signalScalar ) || (signalScalar < minThreshold) || (signalScalar > maxThreshold))
+            if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
             {
               //Flagged so that topological and scalar data is not applied.
               unstructPoint.isSparse = true;

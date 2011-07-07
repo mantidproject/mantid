@@ -5,6 +5,7 @@
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
 
 using namespace Mantid::VATES;
+using namespace Mantid;
 
 class UserDefinedThresholdRangeTest: public CxxTest::TestSuite
 {
@@ -42,6 +43,24 @@ public :
     TS_ASSERT_EQUALS(original.getMinimum(), cloned->getMinimum());
 
     delete cloned;
+  }
+
+  void testInRange()
+  {
+    Mantid::VATES::UserDefinedThresholdRange userRangeCalculator(1, 2);
+    //Boundary Value Analysis
+    signal_t just_above_upper_boundary = 2.001;
+    signal_t just_below_lower_boundary = 0.999;
+    signal_t on_lower_boundary = 1;
+    signal_t on_upper_boundary = 2;
+    signal_t just_below_upper_boundary =1.999;
+    signal_t just_above_lower_boundary = 1.001;
+    TS_ASSERT_EQUALS(false, userRangeCalculator.inRange(just_above_upper_boundary));
+    TS_ASSERT_EQUALS(false, userRangeCalculator.inRange(just_below_lower_boundary));
+    TS_ASSERT_EQUALS(true, userRangeCalculator.inRange(on_lower_boundary));
+    TS_ASSERT_EQUALS(true, userRangeCalculator.inRange(on_upper_boundary));
+    TS_ASSERT_EQUALS(true, userRangeCalculator.inRange(just_below_upper_boundary));
+    TS_ASSERT_EQUALS(true, userRangeCalculator.inRange(just_above_lower_boundary));
   }
 
 };

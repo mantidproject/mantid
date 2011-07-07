@@ -52,6 +52,8 @@ public:
 
   virtual UserDefinedThresholdRange* clone() const;
 
+  virtual bool inRange(const signal_t& signal);
+
 private:
 
   const signal_t m_min;

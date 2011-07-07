@@ -82,8 +82,6 @@ namespace Mantid
 
         //The following represent actual calculated positions.
         double posX, posY;
-        signal_t maxThreshold = m_thresholdRange->getMaximum();
-        signal_t minThreshold = m_thresholdRange->getMinimum();
 
         UnstructuredPoint unstructPoint;
         float signalScalar;
@@ -102,7 +100,7 @@ namespace Mantid
 
             signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i, j));
 
-            if (boost::math::isnan( signalScalar ) || (signalScalar < minThreshold) || (signalScalar > maxThreshold))
+            if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
             {
               //Flagged so that topological and scalar data is not applied.
               unstructPoint.isSparse = true;

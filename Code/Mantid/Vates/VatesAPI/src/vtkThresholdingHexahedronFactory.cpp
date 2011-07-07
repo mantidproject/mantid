@@ -134,9 +134,6 @@ namespace VATES
       double minSig=1e32;
       double maxSig=-1e32;
 
-      signal_t maxThreshold = m_thresholdRange->getMaximum();
-      signal_t minThreshold = m_thresholdRange->getMinimum();
-
       CPUTimer tim;
 
       //Loop through dimensions
@@ -159,7 +156,7 @@ namespace VATES
             if (signalScalar > maxSig) maxSig = signalScalar;
             if (signalScalar < minSig) minSig = signalScalar;
 
-            if (boost::math::isnan( signalScalar ) || (signalScalar < minThreshold) || (signalScalar > maxThreshold))
+            if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
             {
               //Flagged so that topological and scalar data is not applied.
               unstructPoint.isSparse = true;

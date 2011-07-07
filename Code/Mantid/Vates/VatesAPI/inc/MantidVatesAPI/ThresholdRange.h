@@ -56,6 +56,9 @@ public:
   /// Virtual constructor method.
   virtual ThresholdRange* clone() const = 0;
 
+  /// Determine wheter the given value is within the range.
+  virtual bool inRange(const signal_t& signal) = 0;
+
   /// Destructor
   virtual ~ThresholdRange()
   {

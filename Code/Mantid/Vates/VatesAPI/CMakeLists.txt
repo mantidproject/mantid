@@ -10,11 +10,14 @@ src/DimensionPresenter.cpp
 src/EscalatingRebinningActionManager.cpp
 src/FieldDataToMetadata.cpp
 src/GaussianThresholdRange.cpp
+src/IgnoreZerosThresholdRange.cpp
 src/IMDDimensionComparitor.cpp
 src/IMDWorkspaceProxy.cpp
 src/MDHistogramRebinningPresenter.cpp
+src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
 src/MultiDimensionalDbPresenter.cpp
+src/NoThresholdRange.cpp
 src/NullRebinningPresenter.cpp
 src/ProgressAction.cpp
 src/RebinningCutterXMLDefinitions.cpp
@@ -50,10 +53,13 @@ inc/MantidVatesAPI/GeometryView.h
 inc/MantidVatesAPI/MDHistogramRebinningPresenter.h
 inc/MantidVatesAPI/MDRebinningPresenter.h
 inc/MantidVatesAPI/MDRebinningView.h
+inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
+inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/IMDWorkspaceProxy.h
 inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/MultiDimensionalDbPresenter.h
+inc/MantidVatesAPI/NoThresholdRange.h
 inc/MantidVatesAPI/NullRebinningPresenter.h
 inc/MantidVatesAPI/ProgressAction.h
 inc/MantidVatesAPI/RebinningActionManager.h
@@ -102,6 +108,9 @@ test/TimeStepToTimeStepTest.h
 test/TimeToTimeStepTest.h
 test/UserDefinedThresholdRangeTest.h
 test/GaussianThresholdRangeTest.h
+test/MedianAndBelowThresholdRangeTest.h
+test/NoThresholdRangeTest.h
+test/IgnoreZerosThresholdRangeTest.h
 )
 
 include_directories( inc )

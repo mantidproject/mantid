@@ -69,5 +69,15 @@ namespace Mantid
     {
       return new UserDefinedThresholdRange(this->m_min, this->m_max);
     }
+
+    /**
+    Determine whether the signal is withing range.
+    @parameter signal value
+    @return true if the signal is in the range defined by this object.
+    */
+    bool UserDefinedThresholdRange::inRange(const signal_t& signal)
+    {
+      return signal >= m_min && signal <= m_max;
+    }
   }
 }
