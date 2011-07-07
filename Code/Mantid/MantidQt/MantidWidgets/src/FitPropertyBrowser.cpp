@@ -264,14 +264,18 @@ m_mantidui(mantidui)
   m_displayActionQuality = new QAction("Quality",this);
   m_displayActionQuality->setCheckable(true);
   m_displayActionQuality->setChecked(true);
+  m_displayActionClearAll = new QAction("Clear fit curves",this);
   QSignalMapper* displayMapper = new QSignalMapper(this);
 
   displayMapper->setMapping(m_displayActionPlotGuess,"PlotGuess");
   displayMapper->setMapping(m_displayActionQuality,"Quality");
+  displayMapper->setMapping(m_displayActionClearAll,"ClearAll");
   connect(m_displayActionPlotGuess,SIGNAL(activated()), displayMapper, SLOT(map()));
   connect(m_displayActionQuality,SIGNAL(activated()), displayMapper, SLOT(map()));
+  connect(m_displayActionClearAll,SIGNAL(activated()), displayMapper, SLOT(map()));
   connect(displayMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeDisplayMenu(const QString&)));
   displayMenu->addAction(m_displayActionPlotGuess);
+  displayMenu->addAction(m_displayActionClearAll);
   displayMenu->addAction(m_displayActionQuality);
   btnDisplay->setMenu(displayMenu);
 
@@ -410,7 +414,13 @@ void FitPropertyBrowser::executeFitMenu(const QString& item)
 void FitPropertyBrowser::executeDisplayMenu(const QString& item)
 {
   if (item == "PlotGuess")
+  {
     plotOrRemoveGuessAll();
+  }
+  else if (item == "ClearAll")
+  {
+    clearAllPlots();
+  }
 }
 
 void FitPropertyBrowser::executeSetupMenu(const QString& item)
@@ -1941,6 +1951,11 @@ void FitPropertyBrowser::plotOrRemoveGuessAll()
   {
     plotGuessAll();
   }
+}
+
+void FitPropertyBrowser::clearAllPlots()
+{
+  emit removeFitCurves();
 }
 
 /** Create a double property and set some settings

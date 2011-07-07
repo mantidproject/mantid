@@ -223,6 +223,7 @@ signals:
   void removeCurrentGuess();
   void changeWindowTitle(const QString&);
   void removePlotSignal(MantidQt::MantidWidgets::PropertyHandler*);
+  void removeFitCurves();
 
 private slots:
 
@@ -255,6 +256,7 @@ private slots:
   void removeGuessCurrent();
   void removeGuessAll();
   void plotOrRemoveGuessAll();
+  void clearAllPlots();
   void saveFunction();
   void loadFunction();
   void loadFunctionFromString();
@@ -324,6 +326,7 @@ private:
   QAction* m_fitActionFit;
   QAction* m_displayActionPlotGuess;
   QAction* m_displayActionQuality;
+  QAction* m_displayActionClearAll;
   QString m_windowBaseString;
 
   /// Setup menu

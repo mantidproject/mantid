@@ -123,6 +123,7 @@ private slots:
   void plotCurrentGuess();
   void removeCurrentGuess();
   void removePlot(MantidQt::MantidWidgets::PropertyHandler* h);
+  void removeFitCurves();
 
   void curveRemoved();
   void modifiedGraph();
@@ -200,6 +201,9 @@ private:
   bool m_changingXMin; // Flag indicating that changing of xMin is in progress
   bool m_changingXMax; // Flag indicating that changing of xMax is in progress
   //std::string m_defaultPeakName; // The default peak function name
+
+  QString m_curveFitName; // Name of the fit result curve
+  QString m_curveDifName; // Name of the obs-calc difference curve
 };
 
 

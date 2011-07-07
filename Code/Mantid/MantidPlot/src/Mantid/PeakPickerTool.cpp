@@ -69,6 +69,7 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
   connect(fitBrowser(),SIGNAL(removeCurrentGuess()),this,SLOT(removeCurrentGuess()));
   connect(fitBrowser(),SIGNAL(removePlotSignal(MantidQt::MantidWidgets::PropertyHandler*)),
           this,SLOT(removePlot(MantidQt::MantidWidgets::PropertyHandler*)));
+  connect(fitBrowser(),SIGNAL(removeFitCurves()),this,SLOT(removeFitCurves()));
 
   m_mantidUI->showFitPropertyBrowser();
   connect(this,SIGNAL(isOn(bool)),fitBrowser(),SLOT(setPeakToolOn(bool)));
@@ -536,16 +537,16 @@ void PeakPickerTool::functionRemoved()
 void PeakPickerTool::algorithmFinished(const QString& out)
 {
   QString axisLabel = QString::fromStdString(m_ws->getAxis(1)->label(spec()));
-  QString curveFitName = workspaceName()+"-"+axisLabel+QString("-Calc");
-  QString curveResName = workspaceName()+"-"+axisLabel+QString("-Diff");
+  m_curveFitName = workspaceName()+"-"+axisLabel+QString("-Calc");
+  m_curveDifName = workspaceName()+"-"+axisLabel+QString("-Diff");
 
-  graph()->removeCurve(curveFitName);
-  graph()->removeCurve(curveResName);
+  graph()->removeCurve(m_curveFitName);
+  graph()->removeCurve(m_curveDifName);
 
-  new MantidCurve(curveFitName,out,graph(),"spectra",1,false);
+  new MantidCurve(m_curveFitName,out,graph(),"spectra",1,false);
   if (fitBrowser()->plotDiff())
   {
-    new MantidCurve(curveResName,out,graph(),"spectra",2,false);
+    new MantidCurve(m_curveDifName,out,graph(),"spectra",2,false);
   }
 
   graph()->replot();
@@ -1009,3 +1010,8 @@ void PeakPickerTool::modifiedGraph()
 {
 }
 
+void PeakPickerTool::removeFitCurves()
+{
+  graph()->removeCurve(m_curveFitName);
+  graph()->removeCurve(m_curveDifName);
+}
