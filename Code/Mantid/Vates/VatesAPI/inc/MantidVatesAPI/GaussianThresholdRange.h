@@ -40,7 +40,11 @@ class DLLExport GaussianThresholdRange : public ThresholdRange
 
 public:
 
-  GaussianThresholdRange(Mantid::API::IMDWorkspace_sptr workspace, double preferred_nStd = 1, unsigned int skipN = 0);
+  GaussianThresholdRange(Mantid::API::IMDWorkspace_sptr workspace, double preferred_nStd = 1, size_t sampleSize = 100);
+
+  GaussianThresholdRange(double preferred_nStd = 1, size_t sampleSize = 100);
+
+  virtual void setWorkspace(Mantid::API::IMDWorkspace_sptr workspace);
 
   virtual void calculate();
 
@@ -68,7 +72,7 @@ private:
 
   signal_t m_preferred_nStd;
 
-  unsigned int m_skipN; 
+  size_t m_sampleSize; 
 
 };
 }

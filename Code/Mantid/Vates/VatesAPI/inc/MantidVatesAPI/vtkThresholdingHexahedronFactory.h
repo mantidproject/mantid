@@ -46,7 +46,7 @@ class DLLExport vtkThresholdingHexahedronFactory: public vtkDataSetFactory
 public:
 
   /// Constructor
-  vtkThresholdingHexahedronFactory(ThresholdRange* thresholdRange, const std::string& scalarname);
+  vtkThresholdingHexahedronFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarname);
 
   /// Assignment operator
   vtkThresholdingHexahedronFactory& operator=(const vtkThresholdingHexahedronFactory& other);

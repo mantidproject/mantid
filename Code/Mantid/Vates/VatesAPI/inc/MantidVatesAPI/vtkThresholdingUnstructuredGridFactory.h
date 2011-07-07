@@ -47,7 +47,7 @@ class DLLExport vtkThresholdingUnstructuredGridFactory: public vtkDataSetFactory
 public:
 
   /// Constructor
-  vtkThresholdingUnstructuredGridFactory(ThresholdRange* thresholdRange, const std::string& scalarname,
+  vtkThresholdingUnstructuredGridFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarname,
       const double timestep);
 
   /// Assignment operator

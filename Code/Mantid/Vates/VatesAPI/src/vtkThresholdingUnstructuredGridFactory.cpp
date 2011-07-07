@@ -12,7 +12,7 @@ namespace VATES
 {
 
   template<typename TimeMapper>
-  vtkThresholdingUnstructuredGridFactory<TimeMapper>::vtkThresholdingUnstructuredGridFactory(ThresholdRange* thresholdRange, const std::string& scalarName, const double timestep) :
+  vtkThresholdingUnstructuredGridFactory<TimeMapper>::vtkThresholdingUnstructuredGridFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const double timestep) :
   m_timestep(timestep), m_scalarName(scalarName), m_thresholdRange(thresholdRange)
   {
   }
@@ -28,7 +28,7 @@ namespace VATES
     if(this != &other)
     {
       this->m_scalarName = other.m_scalarName;
-      this->m_thresholdRange.swap(other.m_thresholdRange);
+      this->m_thresholdRange = other.m_thresholdRange;
       this->m_workspace = other.m_workspace;
       this->m_timestep = other.m_timestep;
       this->m_timeMapper = other.m_timeMapper;
@@ -42,9 +42,9 @@ namespace VATES
   */
   template<typename TimeMapper>
   vtkThresholdingUnstructuredGridFactory<TimeMapper>::vtkThresholdingUnstructuredGridFactory(const vtkThresholdingUnstructuredGridFactory<TimeMapper>& other)
-    : m_workspace(other.m_workspace), m_timestep(other.m_timestep), m_scalarName( other.m_scalarName), m_timeMapper(other.m_timeMapper)
+    : m_workspace(other.m_workspace), m_timestep(other.m_timestep), m_scalarName( other.m_scalarName), m_timeMapper(other.m_timeMapper), m_thresholdRange(other.m_thresholdRange)
   {
-    m_thresholdRange.swap(other.m_thresholdRange);
+    
   }
 
 
@@ -74,6 +74,10 @@ namespace VATES
     size_t nbins = m_workspace->getTDimension()->getNBins();
 
     m_timeMapper = TimeMapper::construct(tMin, tMax, nbins);
+
+    //Setup range values according to whatever strategy object has been injected.
+    m_thresholdRange->setWorkspace(m_workspace);
+    m_thresholdRange->calculate();
   }
 
   template<typename TimeMapper>

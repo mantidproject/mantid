@@ -159,6 +159,14 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
   //Setup is not complete until metadata has been correctly provided.
   if(SetupDone == m_setup)
   {
+    if(true == m_userDefinedRange)
+    {
+      m_ThresholdRange = ThresholdRange_scptr(new UserDefinedThresholdRange(m_thresholdMin, m_thresholdMax));
+    }
+    else
+    {
+      m_ThresholdRange = ThresholdRange_scptr(new GaussianThresholdRange(2, 10000)); //2 sigma, 10000 attempted samples
+    }
     //Updating again at this point is the only way to pick-up changes to clipping.
     m_presenter->updateModel();
     
@@ -174,21 +182,29 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
       m_timestep = static_cast<int>( outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0] );
     }
 
+    try
+    {
     //Create chain-of-responsibility for translating imdworkspaces.
     std::string scalarName = XMLDefinitions::signalName();
-    ThresholdRange* range = new UserDefinedThresholdRange(m_thresholdMin, m_thresholdMax); //HACK
-    vtkThresholdingLineFactory* vtkGridFactory = new vtkThresholdingLineFactory(range->clone(), scalarName);
-    vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(range->clone(),scalarName);
-    vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(range->clone(),scalarName);
-    vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(range->clone(),scalarName, m_timestep);
+    vtkThresholdingLineFactory* vtkGridFactory = new vtkThresholdingLineFactory(m_ThresholdRange, scalarName);
+    vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(m_ThresholdRange,scalarName);
+    vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(m_ThresholdRange,scalarName);
+    vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(m_ThresholdRange,scalarName, m_timestep);
     vtkGridFactory->SetSuccessor(p_2dSuccessorFactory);
     p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
     p_3dSuccessorFactory->SetSuccessor(p_4dSuccessorFactory);
-
+    
     vtkDataSet* outData = m_presenter->execute(vtkGridFactory, updatehandler);
+    m_thresholdMax = m_ThresholdRange->getMaximum();
+    m_thresholdMin = m_ThresholdRange->getMinimum();
     delete vtkGridFactory;
 
     output->ShallowCopy(outData);
+    }
+    catch(std::exception& ex)
+    {
+      std::string msg = ex.what();
+    }
   }
   return 1;
 }
@@ -254,7 +270,15 @@ void vtkRebinningCutter::SetApplyClip(int applyClip)
   if(temp != m_clip)
   {
     m_clip = temp;
-    //m_presenter->updateModel();
+    this->Modified();
+  }
+}
+
+void vtkRebinningCutter::SetUserDefinedRange(int userDefinedRange)
+{
+  if(m_userDefinedRange != userDefinedRange)
+  {
+    m_userDefinedRange = userDefinedRange;
     this->Modified();
   }
 }
@@ -266,7 +290,6 @@ void vtkRebinningCutter::SetClipFunction(vtkImplicitFunction * func)
   if (box != m_clipFunction)
   {
     this->m_clipFunction = box;
-    //m_presenter->updateModel();
     this->Modified();
   }
 }
@@ -276,7 +299,6 @@ void vtkRebinningCutter::SetMaxThreshold(double maxThreshold)
   if (maxThreshold != m_thresholdMax)
   {
     this->m_thresholdMax = maxThreshold;
-    //m_presenter->updateModel();
     this->Modified();
   }
 }
@@ -286,7 +308,6 @@ void vtkRebinningCutter::SetMinThreshold(double minThreshold)
   if (minThreshold != m_thresholdMin)
   {
     this->m_thresholdMin = minThreshold;
-    //m_presenter->updateModel();
     this->Modified();
   }
 }
@@ -297,7 +318,6 @@ void vtkRebinningCutter::SetAppliedGeometryXML(std::string appliedGeometryXML)
   if(SetupDone == m_setup)
   {
     m_appliedGeometryXML = appliedGeometryXML;
-    //m_presenter->updateModel();
     this->Modified(); 
   }
 }
@@ -312,6 +332,16 @@ const char* vtkRebinningCutter::GetInputGeometryXML()
   {
     return "";
   }
+}
+
+double vtkRebinningCutter::GetInputMinThreshold()
+{
+  return m_thresholdMin;
+}
+
+double vtkRebinningCutter::GetInputMaxThreshold()
+{
+  return m_thresholdMax;
 }
 
 unsigned long vtkRebinningCutter::GetMTime()

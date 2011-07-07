@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 #include <boost/scoped_ptr.hpp>
 #include <map>
 
@@ -112,6 +113,11 @@ public:
   virtual signal_t getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const;
 
   virtual Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const;
+
+  virtual Mantid::API::IMDIterator* createIterator() const
+  {
+    return m_workspace->createIterator();
+  }
 
 private:
 

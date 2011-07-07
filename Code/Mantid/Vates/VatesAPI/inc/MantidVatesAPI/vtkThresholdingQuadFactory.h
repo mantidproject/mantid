@@ -43,7 +43,7 @@ however, some visualisation frameworks won't be able to treat these factories in
     public:
 
       /// Constructor
-      vtkThresholdingQuadFactory(ThresholdRange* thresholdRange, const std::string& scalarName);
+      vtkThresholdingQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName);
 
       /// Assignment operator
       vtkThresholdingQuadFactory& operator=(const vtkThresholdingQuadFactory& other);

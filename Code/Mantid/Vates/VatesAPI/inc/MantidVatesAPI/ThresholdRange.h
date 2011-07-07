@@ -1,9 +1,10 @@
 #ifndef MANTID_PARAVIEW_THRESHOLD_RANGE
 #define MANTID_PARAVIEW_THRESHOLD_RANGE
 
-#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 /** Abstract type promises to supply a minimum and maximum set of threshold range values.
 
@@ -59,10 +60,15 @@ public:
   virtual ~ThresholdRange()
   {
   }
+
+  /// Interface allows the threshold range to accept a workspace.
+  virtual void setWorkspace(Mantid::API::IMDWorkspace_sptr)
+  {
+  }
 };
 
 /// ThresholdRange as a scoped pointer.
-typedef boost::scoped_ptr<ThresholdRange> ThresholdRange_scptr;
+typedef boost::shared_ptr<ThresholdRange> ThresholdRange_scptr;
 }
 }
 

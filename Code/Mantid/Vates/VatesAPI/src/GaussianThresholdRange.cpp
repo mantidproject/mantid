@@ -12,9 +12,18 @@ namespace Mantid
     Constructor
     @parameter workspace : Input workspace to analyse
     @parameter preferred_nStd : number of standard deviations to use when extracting upper and lower signal values.
-    @parameter skipN : of n-cells, how many to skip before using the next as part of the anaysis (for speed-up).
+    @parameter sampleSize : How many cells to consider in the analysis.
     */
-    GaussianThresholdRange::GaussianThresholdRange(Mantid::API::IMDWorkspace_sptr workspace, signal_t preferred_nStd, unsigned int skipN) : m_workspace(workspace), m_min(0), m_max(0), m_isCalculated(false), m_preferred_nStd(preferred_nStd), m_skipN(skipN)
+    GaussianThresholdRange::GaussianThresholdRange(Mantid::API::IMDWorkspace_sptr workspace, signal_t preferred_nStd, size_t sampleSize) : m_workspace(workspace), m_min(0), m_max(0), m_isCalculated(false), m_preferred_nStd(preferred_nStd), m_sampleSize(sampleSize)
+    {
+    }
+
+    /**
+    Constructor
+    @parameter preferred_nStd : number of standard deviations to use when extracting upper and lower signal values.
+    @parameter sampleSize : How many cells to consider in the analysis.
+    */
+    GaussianThresholdRange::GaussianThresholdRange(signal_t preferred_nStd, size_t sampleSize) :  m_min(0), m_max(0), m_isCalculated(false), m_preferred_nStd(preferred_nStd), m_sampleSize(sampleSize)
     {
     }
 
@@ -56,6 +65,10 @@ namespace Mantid
     */
     void GaussianThresholdRange::calculate()
     {
+      if(NULL == m_workspace.get())
+      {
+        throw std::logic_error("The workspace has not been set.");
+      }
       Mantid::API::IMDIterator* it = m_workspace->createIterator();
       std::vector<signal_t> raw_values;
       signal_t signal = 0;
@@ -63,25 +76,34 @@ namespace Mantid
       signal_t max_signal = m_workspace->getCell(0).getSignal();
       signal_t min_signal = m_workspace->getCell(0).getSignal();
       size_t size = 0;
+      size_t nSkips = 0;
+      if(m_sampleSize > 0)
+      {
+        size_t interval = it->getDataSize()/m_sampleSize; //Integer division
+        nSkips = interval > 0 ? interval - 1 : 0; //nSkips = interval - 1, unless integer division gives zero.
+      }
       for(int i =0; ;i++)
       {
         if(it->next())
         {
           size_t pos = it->getPointer();
           signal = m_workspace->getCell(pos).getSignal();
-          accumulated_signal += signal;
-          raw_values.push_back(signal);
-          max_signal = signal > max_signal  ? signal : max_signal;
-          min_signal = signal < min_signal ? signal : min_signal;
-          size++;
+          if(signal != 0) //Cells with zero signal values are not considered in the analysis.
+          {
+            accumulated_signal += signal;
+            raw_values.push_back(signal);
+            max_signal = signal > max_signal  ? signal : max_signal;
+            min_signal = signal < min_signal ? signal : min_signal;
+            size++;
+          }
         }
         else
         {
           break;
         }
-        for(unsigned int j = 0; j < m_skipN; j++)
+        for(unsigned int j = 0; j < nSkips; j++)
         {
-          if(j < m_skipN)
+          if(j < nSkips)
           {
             it->next();
           }
@@ -131,7 +153,17 @@ namespace Mantid
     */
     GaussianThresholdRange* GaussianThresholdRange::clone() const
     {
-      return new GaussianThresholdRange(this->m_workspace, m_preferred_nStd, m_skipN);
+      return new GaussianThresholdRange(this->m_workspace, m_preferred_nStd, m_sampleSize);
+    }
+
+    /**
+    Setter for IMDWorkspace.
+    @parameter: workspace : The workspace to extract ranges from.
+    */
+    void GaussianThresholdRange::setWorkspace(Mantid::API::IMDWorkspace_sptr workspace)
+    {
+      m_isCalculated = false;
+      m_workspace = workspace;
     }
   }
 }

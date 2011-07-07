@@ -317,10 +317,10 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
 
   // Chain of resposibility setup for visualisation. Encapsulates decision making on how workspace will be rendered.
   std::string scalarName = "signal";
-  ThresholdRange* range = new UserDefinedThresholdRange(m_minThreshold, m_maxThreshold); //HACK
-  vtkThresholdingLineFactory vtkGridFactory(range->clone(), scalarName);
-  vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(range->clone(), scalarName);
-  vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(range->clone(), scalarName);
+  ThresholdRange_scptr range(new UserDefinedThresholdRange(m_minThreshold, m_maxThreshold));
+  vtkThresholdingLineFactory vtkGridFactory(range, scalarName);
+  vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(range, scalarName);
+  vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(range, scalarName);
   vtkGridFactory.SetSuccessor(p_2dSuccessorFactory);
   p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
   

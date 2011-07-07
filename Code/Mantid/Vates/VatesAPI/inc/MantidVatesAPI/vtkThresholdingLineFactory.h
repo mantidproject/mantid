@@ -42,7 +42,7 @@ namespace Mantid
     public:
 
       /// Constructor
-      vtkThresholdingLineFactory(ThresholdRange* thresholdRange, const std::string& scalarName);
+      vtkThresholdingLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName);
 
       /// Assignment operator
       vtkThresholdingLineFactory& operator=(const vtkThresholdingLineFactory& other);

@@ -41,15 +41,15 @@ public:
 
     //Set up so that only cells with signal values == 1 should not be filtered out by thresholding.
 
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> inside(new UserDefinedThresholdRange(0, 2), "signal", 0);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal", 0);
     inside.initialize(ws_sptr);
     vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create());
 
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> below(new UserDefinedThresholdRange(0, 0.5),"signal", 0);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> below(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)),"signal", 0);
     below.initialize(ws_sptr);
     vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create());
 
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> above(new UserDefinedThresholdRange(2, 3), "signal", 0);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> above(ThresholdRange_scptr(new UserDefinedThresholdRange(2, 3)), "signal", 0);
     above.initialize(ws_sptr);
     vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create());
 
@@ -81,7 +81,7 @@ public:
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (pRange, "signal", 0);
+      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", 0);
     factory.initialize(ws_sptr);
 
     vtkDataSet* product = factory.create();
@@ -101,7 +101,7 @@ public:
     IMDWorkspace* nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(pRange, "signal", 1);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 1);
 
     TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
   }
@@ -110,7 +110,7 @@ public:
   {
     using namespace Mantid::VATES;
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(pRange, "signal", 1);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 1);
     TS_ASSERT_THROWS(factory.createMeshOnly() , std::runtime_error);
   }
 
@@ -118,7 +118,7 @@ public:
   {
     using namespace Mantid::VATES;
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(pRange, "signal", 1);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 1);
     TS_ASSERT_THROWS(factory.createScalarArray() , std::runtime_error);
   }
 
@@ -126,7 +126,7 @@ public:
   {
     using namespace Mantid::VATES;
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(pRange, "signal", 1);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 1);
     TS_ASSERT_THROWS(factory.create(), std::runtime_error);
   }
 
@@ -149,7 +149,7 @@ public:
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (pRange, "signal", (double)0);
+      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", (double)0);
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
@@ -175,7 +175,7 @@ public:
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (pRange, "signal", (double)0);
+      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", (double)0);
 
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor was available.", factory.initialize(ws_sptr), std::runtime_error);
   }
@@ -200,7 +200,7 @@ public:
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (pRange, "signal", (double)0);
+      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", (double)0);
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
@@ -219,7 +219,7 @@ public:
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
 
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (pRange, "signal", (double)0);
+      vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", (double)0);
     TS_ASSERT_EQUALS("vtkThresholdingUnstructuredGridFactory", factory.getFactoryTypeName());
   }
 
@@ -250,7 +250,7 @@ public:
 
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
 
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(pRange, "signal", 0);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 0);
     factory.initialize(ws_sptr);
     TS_ASSERT_THROWS_NOTHING(factory.create());
   }

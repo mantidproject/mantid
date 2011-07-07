@@ -2,6 +2,8 @@
 #define _vtkRebinningCutter_h
 #include <boost/scoped_ptr.hpp>
 #include "vtkUnstructuredGridAlgorithm.h"
+#include "MantidVatesAPI/ThresholdRange.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <string>
 
 /**
@@ -69,12 +71,14 @@ public:
   void SetAppliedGeometryXML(std::string xml);
   void SetApplyClip(int applyClip);
   const char* GetInputGeometryXML();
+  void SetUserDefinedRange(int userDefinedRange);
   /// Paraview Related Commands. See *.xml proxy/property file --------------------------------
 
   /// Called by presenter to force progress information updating.
   void UpdateAlgorithmProgress(double progress);
 
-
+  double GetInputMinThreshold();
+  double GetInputMaxThreshold();
 
   virtual vtkImplicitFunction* getImplicitFunction() const;
   virtual double getMaxThreshold() const;
@@ -132,10 +136,11 @@ private:
   SetupStatus m_setup;
   /// Flag containing the timestep.
   int m_timestep;
-  /// Threshold maximum for signal values to be rendered as cells.
-  double m_thresholdMax;
-  /// Threshold minimum for signal values to be rendered as cells.
-  double m_thresholdMin;
+  Mantid::signal_t m_thresholdMax;
+  Mantid::signal_t m_thresholdMin;
+  bool m_userDefinedRange;
+  /// Threshold range calculator.
+  Mantid::VATES::ThresholdRange_scptr m_ThresholdRange;
 
 };
 #endif

@@ -14,7 +14,7 @@ namespace Mantid
 namespace VATES 
 {
 
-  vtkThresholdingHexahedronFactory::vtkThresholdingHexahedronFactory(ThresholdRange* thresholdRange, const std::string& scalarName) :
+  vtkThresholdingHexahedronFactory::vtkThresholdingHexahedronFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) :
   m_scalarName(scalarName), m_thresholdRange(thresholdRange)
   {
   }
@@ -29,7 +29,7 @@ namespace VATES
     if(this != &other)
     {
       this->m_scalarName = other.m_scalarName;
-      this->m_thresholdRange.swap(other.m_thresholdRange);
+      this->m_thresholdRange = other.m_thresholdRange;
       this->m_workspace = other.m_workspace;
     }
     return *this;
@@ -42,7 +42,7 @@ namespace VATES
   vtkThresholdingHexahedronFactory::vtkThresholdingHexahedronFactory(const vtkThresholdingHexahedronFactory& other)
   {
    this->m_scalarName = other.m_scalarName;
-   this->m_thresholdRange.swap(other.m_thresholdRange);
+   this->m_thresholdRange = other.m_thresholdRange;
    this->m_workspace = other.m_workspace;
   }
 
@@ -65,6 +65,10 @@ namespace VATES
         throw std::runtime_error("There is no successor factory set for this vtkThresholdingHexahedronFactory type");
       }
     }
+
+    //Setup range values according to whatever strategy object has been injected.
+    m_thresholdRange->setWorkspace(m_workspace);
+    m_thresholdRange->calculate();
   }
 
   void vtkThresholdingHexahedronFactory::validateWsNotNull() const

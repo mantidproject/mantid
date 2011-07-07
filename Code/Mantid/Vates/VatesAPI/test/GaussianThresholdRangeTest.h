@@ -211,7 +211,7 @@ public :
     EXPECT_CALL(*pWs, getCell(6)).WillOnce(ReturnRef(cellSeven));
     EXPECT_CALL(*pWs, getCell(7)).Times(0); //Should be skipped.
 
-    Mantid::VATES::GaussianThresholdRange gaussianCalculator(sptrWs, 1, 1); //1stdDev, skip every other cell.
+    Mantid::VATES::GaussianThresholdRange gaussianCalculator(sptrWs, 1, 4); //1stdDev, skip every other cell.
     gaussianCalculator.calculate();
     TSM_ASSERT("Has not used the IMDWorkspace as expected.", Mock::VerifyAndClearExpectations(pWs));
   }
@@ -255,6 +255,80 @@ public :
 
     TSM_ASSERT_EQUALS("Should have saturated to min signal.", 9, gaussianCalculator.getMaximum());
     TSM_ASSERT_EQUALS("Should have saturated to max signal.", 2, gaussianCalculator.getMinimum());
+  }
+
+  void testSettWorkspaceOnObject()
+  {
+    MockIMDWorkspace* pWs = new MockIMDWorkspace(8);
+    Mantid::API::IMDWorkspace_sptr sptrWs(pWs);
+
+    EXPECT_CALL(*pWs, getCell(0)).Times(3).WillRepeatedly(ReturnRef(cellOne));
+    EXPECT_CALL(*pWs, getCell(1)).WillOnce(ReturnRef(cellTwo));
+    EXPECT_CALL(*pWs, getCell(2)).WillOnce(ReturnRef(cellThree));
+    EXPECT_CALL(*pWs, getCell(3)).WillOnce(ReturnRef(cellFour));
+    EXPECT_CALL(*pWs, getCell(4)).WillOnce(ReturnRef(cellFive));
+    EXPECT_CALL(*pWs, getCell(5)).WillOnce(ReturnRef(cellSix));
+    EXPECT_CALL(*pWs, getCell(6)).WillOnce(ReturnRef(cellSeven));
+    EXPECT_CALL(*pWs, getCell(7)).WillOnce(ReturnRef(cellEight));
+
+    Mantid::VATES::GaussianThresholdRange gaussianCalculator(1, 0); //1stdDev, 0 skips
+    gaussianCalculator.setWorkspace(sptrWs);
+    gaussianCalculator.calculate();
+
+    TS_ASSERT(gaussianCalculator.hasCalculated());
+    TSM_ASSERT_EQUALS("Should be 1*sigma standard deviations from central value.", 3.5 + 2 + 2, gaussianCalculator.getMaximum());
+    TSM_ASSERT_EQUALS("Should be 1*sigma standard deviations from central value.", 3.5 + 2 - 2, gaussianCalculator.getMinimum());
+    TSM_ASSERT("Has not used the IMDWorkspace as expected.", Mock::VerifyAndClearExpectations(pWs));
+  }
+
+  void testCalculateWithoutWorkspaceThrows()
+  {
+    Mantid::VATES::GaussianThresholdRange gaussianCalculator; //No workspace provided!
+    TSM_ASSERT_THROWS("Calling calculate without a workspace should throw", gaussianCalculator.calculate(), std::logic_error);
+  }
+
+  void testSetWorkspaceResetsCalculation()
+  {
+    MockIMDWorkspace* pWs = new MockIMDWorkspace(8);
+    Mantid::API::IMDWorkspace_sptr sptrWs(pWs);
+
+    EXPECT_CALL(*pWs, getCell(0)).Times(3).WillRepeatedly(ReturnRef(cellOne));
+    EXPECT_CALL(*pWs, getCell(1)).WillOnce(ReturnRef(cellTwo));
+    EXPECT_CALL(*pWs, getCell(2)).WillOnce(ReturnRef(cellThree));
+    EXPECT_CALL(*pWs, getCell(3)).WillOnce(ReturnRef(cellFour));
+    EXPECT_CALL(*pWs, getCell(4)).WillOnce(ReturnRef(cellFive));
+    EXPECT_CALL(*pWs, getCell(5)).WillOnce(ReturnRef(cellSix));
+    EXPECT_CALL(*pWs, getCell(6)).WillOnce(ReturnRef(cellSeven));
+    EXPECT_CALL(*pWs, getCell(7)).WillOnce(ReturnRef(cellEight));
+
+    Mantid::VATES::GaussianThresholdRange gaussianCalculator(sptrWs, 1, 0); //1stdDev, 0 skips
+    gaussianCalculator.calculate();
+    gaussianCalculator.setWorkspace(sptrWs);
+    TSM_ASSERT("Setting a workspace should mark object as uncalculated.", !gaussianCalculator.hasCalculated());
+  }
+
+  void testIgnoreEmptyCells()
+  {
+    MockIMDWorkspace* pWs = new MockIMDWorkspace(9);
+    Mantid::API::IMDWorkspace_sptr sptrWs(pWs);
+
+    FakeCell empty(0); //Empty cell
+    EXPECT_CALL(*pWs, getCell(0)).Times(3).WillRepeatedly(ReturnRef(cellOne));
+    EXPECT_CALL(*pWs, getCell(1)).WillOnce(ReturnRef(cellTwo));
+    EXPECT_CALL(*pWs, getCell(2)).WillOnce(ReturnRef(cellThree));
+    EXPECT_CALL(*pWs, getCell(3)).WillOnce(ReturnRef(cellFour));
+    EXPECT_CALL(*pWs, getCell(4)).WillOnce(ReturnRef(cellFive));
+    EXPECT_CALL(*pWs, getCell(5)).WillOnce(ReturnRef(cellSix));
+    EXPECT_CALL(*pWs, getCell(6)).WillOnce(ReturnRef(cellSeven));
+    EXPECT_CALL(*pWs, getCell(7)).WillOnce(ReturnRef(cellEight));
+    EXPECT_CALL(*pWs, getCell(8)).WillOnce(ReturnRef(empty)); //Empty cell added.
+
+    Mantid::VATES::GaussianThresholdRange gaussianCalculator(sptrWs);
+    gaussianCalculator.calculate();
+
+    TSM_ASSERT_EQUALS("Should be 1*sigma standard deviations from central value.", 3.5 + 2 + 2, gaussianCalculator.getMaximum());
+    TSM_ASSERT_EQUALS("Should be 1*sigma standard deviations from central value.", 3.5 + 2 - 2, gaussianCalculator.getMinimum());
+    TSM_ASSERT("Has not used the IMDWorkspace as expected.", Mock::VerifyAndClearExpectations(pWs));
   }
 
 };

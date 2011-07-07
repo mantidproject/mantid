@@ -1,10 +1,18 @@
 #include "GeometryWidget.h"
 #include "DimensionWidget.h"
 #include "MantidVatesAPI/GeometryPresenter.h"
+#include <QLabel>
+#include <QGridLayout>
 
 GeometryWidget::GeometryWidget(Mantid::VATES::GeometryPresenter* pPresenter, bool readOnlyLimits) : m_widgetFactory(readOnlyLimits), m_pPresenter(pPresenter) 
 {
-  this->setLayout(new QVBoxLayout()); 
+  QGridLayout* headerLayout = new QGridLayout();
+  QVBoxLayout* bodyLayout = new QVBoxLayout();
+  
+  headerLayout->addWidget(new QLabel("Geometry"), 0, 0, 1, 2, Qt::AlignCenter); 
+  bodyLayout->addLayout(headerLayout);
+  
+  this->setLayout(bodyLayout);
   m_pPresenter->acceptView(this);
 }
 

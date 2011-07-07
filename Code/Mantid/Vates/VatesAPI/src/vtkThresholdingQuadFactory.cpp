@@ -18,7 +18,7 @@ namespace Mantid
   namespace VATES
   {
 
-    vtkThresholdingQuadFactory::vtkThresholdingQuadFactory(ThresholdRange* thresholdRange, const std::string& scalarName) : m_scalarName(scalarName), m_thresholdRange(thresholdRange)
+    vtkThresholdingQuadFactory::vtkThresholdingQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName), m_thresholdRange(thresholdRange)
     {
     }
 
@@ -32,7 +32,7 @@ namespace Mantid
     if(this != &other)
     {
       this->m_scalarName = other.m_scalarName;
-      this->m_thresholdRange.swap(other.m_thresholdRange);
+      this->m_thresholdRange = other.m_thresholdRange;
       this->m_workspace = other.m_workspace;
     }
     return *this;
@@ -45,7 +45,7 @@ namespace Mantid
   vtkThresholdingQuadFactory::vtkThresholdingQuadFactory(const vtkThresholdingQuadFactory& other)
   {
    this->m_scalarName = other.m_scalarName;
-   this->m_thresholdRange.swap(other.m_thresholdRange);
+   this->m_thresholdRange = other.m_thresholdRange;
    this->m_workspace = other.m_workspace;
   }
 
@@ -183,6 +183,10 @@ namespace Mantid
           throw std::runtime_error("There is no successor factory set for this vtkThresholdingQuadFactory type");
         }
       }
+
+      //Setup range values according to whatever strategy object has been injected.
+      m_thresholdRange->setWorkspace(m_workspace);
+      m_thresholdRange->calculate();
     }
 
     void vtkThresholdingQuadFactory::validate() const
