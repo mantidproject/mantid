@@ -70,7 +70,15 @@ namespace DataHandling
                       "attempt to load the PulseID. The file extension must either be\n"
                       ".dat or .DAT" );
 
+    declareProperty(new PropertyWithValue<bool>("OldFormat", false, Direction::Input),
+        "Delay time file have an old format");
+
+    declareProperty(new PropertyWithValue<int64_t>("NumberOfChoppers", 4,  Direction::Input),
+        "Number of choppers used in data acquisition.  It is not required for new format Delay time file.");
+
     m_numpulses = 0;
+    m_numchoppers = 4;
+    m_delayfileinoldformat = false;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -83,6 +91,14 @@ namespace DataHandling
     // 1. Retrieve the information from input data file (binary)
     m_delaytimefilename = getPropertyValue("DelayTimeFileName");
     m_pulseidfilename = getPropertyValue("PulseIDFileName");
+    m_delayfileinoldformat = getProperty("OldFormat");
+    if (m_delayfileinoldformat)
+      m_numchoppers = getProperty("NumberOfChoppers");
+
+    // 1 b) check input
+    if (m_numchoppers < 1){
+      throw std::invalid_argument("Number of choppers cannot be smaller than 1. ");
+    }
 
     WS = getProperty("Workspace");
 
@@ -103,7 +119,6 @@ namespace DataHandling
 
   void LoadLogsForSNSPulsedMagnet::ParseDelayTimeLogFile()
   {
-
     char* logfilename = &m_delaytimefilename[0];
 
     // 1. Determine length of file
@@ -111,7 +126,7 @@ namespace DataHandling
     size_t filesize = -1;
     if (stat(logfilename, &results) == 0){
         filesize = static_cast<size_t>(results.st_size);
-        g_log.information() << "File Size = " << filesize << "\n";
+        g_log.debug() << "File Size = " << filesize << "\n";
     }
     else{
         g_log.error() << "File Error!  Cannot Read File Size" << "\n";
@@ -119,28 +134,43 @@ namespace DataHandling
     }
 
     // 2. Determine number of magnetic pulses
-    size_t numpulses = filesize/4/8;
-    g_log.information() << "Number of Pulses = " << numpulses << "\n";
+    size_t numpulses = -1;
+    if (m_delayfileinoldformat){
+      numpulses = filesize/sizeof(double)/m_numchoppers;
+    } else{
+      numpulses = filesize/(4+4)/m_numchoppers;
+    }
+    g_log.debug() << "Number of Pulses = " << numpulses << " Old format = " << m_delayfileinoldformat << std::endl;
 
-    // 3. Parse
-    std::ifstream logFile(logfilename, std::ios::in|std::ios::binary);
+    // 3. Build data structure
     unsigned int **delaytimes = new unsigned int*[numpulses];
     for (unsigned int i = 0; i < numpulses; i ++)
-      delaytimes[i] = new unsigned int[4];
-    // char buffer[4];
+      delaytimes[i] = new unsigned int[m_numchoppers];
+
+    // 4. Parse
+    std::ifstream logFile(logfilename, std::ios::in|std::ios::binary);
     size_t index = 0;
     unsigned int chopperindices[4];
     unsigned int localdelaytimes[4];
     for (size_t p = 0; p < numpulses; p ++){
-        // logFile.read(buffer, 4);
-        for (int i = 0; i < 4; i ++){
+        for (size_t i = 0; i < m_numchoppers; i ++){
             unsigned int chopperindex;
             unsigned int delaytime;
-            logFile.read((char*)&chopperindex, sizeof(unsigned int));
-            logFile.read((char*)&delaytime, sizeof(unsigned int));
+            double dtime;
+            if (m_delayfileinoldformat){
+              // Old format
+              logFile.read((char*)&dtime, sizeof(double));
+
+              chopperindex = (unsigned int)(i+1);
+              delaytime = (unsigned int)(dtime*1000);
+
+            }else{
+              // New format
+              logFile.read((char*)&chopperindex, sizeof(unsigned int));
+              logFile.read((char*)&delaytime, sizeof(unsigned int));
+            }
             if (delaytime != 0){
-                g_log.information() << "Pulse Index =  " << index << "  Chopper = " << chopperindex << "   Delay Time = " << delaytime << "\n";
-                std::cout << "Pulse Index =  " << index << "  Chopper = " << chopperindex << "   Delay Time = " << delaytime << "\n";
+                g_log.debug() << "Pulse Index =  " << index << "  Chopper = " << chopperindex << "   Delay Time = " << delaytime << std::endl;
             }
             chopperindices[i] = chopperindex;
             localdelaytimes[i] = delaytime;
@@ -218,7 +248,7 @@ struct Pulse
     for (int i = 0; i < 4; i ++)
       WS->mutableRun().addProperty(property[i], false);
 
-    g_log.information() << "Integration is Over!\n";
+    g_log.debug() << "Integration is Over!\n";
 
     return;
   }
