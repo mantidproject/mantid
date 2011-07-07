@@ -356,6 +356,23 @@
 		<location y="0.1404" />
 		<location y="0.1416" />
 		<location y="0.1428" />
+		<!--  Now add the weird junk channels from the detector table 2501-2516-->
+		<location y="0.1440" />
+		<location y="0.1440" />
+		<location y="0.1440" />
+		<location y="0.1440" />
+		<location y="0.1440" />
+		<location y="0.1440" />
+		<location y="0.1440" />
+		<location y="0.1440" />
+		<location y="0.1440" />
+		<location y="0.1440" />
+		<location y="0.1440" />
+		<location y="0.1440" />
+		<location y="0.1440" />
+		<location y="0.1440" />
+		<location y="0.1440" />
+		<location y="0.1440" />
     </component>
   </type>
   
@@ -390,6 +407,7 @@
   <idlist idname="DetectorBench">
     <id val="4" />
     <id start="2001" end="2240" />
+    <id start="2501" end="2516" />
   </idlist>
  
 </instrument>
