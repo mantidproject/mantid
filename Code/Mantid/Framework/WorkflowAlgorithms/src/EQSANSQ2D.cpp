@@ -67,7 +67,7 @@ void EQSANSQ2D::exec()
   {
     Mantid::Kernel::Property* prop = inputWS->run().getProperty("is_frame_skipping");
     Mantid::Kernel::PropertyWithValue<int>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<int>* >(prop);
-    frame_skipping = *dp;
+    frame_skipping = (*dp==1);
   }
 
   // Get run properties necessary to calculate the input parameters to Qxy
