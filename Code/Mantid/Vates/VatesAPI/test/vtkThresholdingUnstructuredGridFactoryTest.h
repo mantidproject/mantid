@@ -230,9 +230,13 @@ public:
 //=====================================================================================
 class vtkThresholdingUnstructuredGridFactoryTestPerformance : public CxxTest::TestSuite
 {
+private:
+
+  Mantid::API::IMDWorkspace_sptr m_ws_sptr;
+
 public:
 
-  void testGenerateVTKDataSet()
+  void setUp()
   {
     using namespace Mantid::VATES;
     using namespace Mantid::Geometry;
@@ -246,12 +250,15 @@ public:
     EXPECT_CALL(*pMockWs, getZDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("z", 20))));
     EXPECT_CALL(*pMockWs, getTDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("t", 20))));
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(4)));
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    m_ws_sptr = Mantid::API::IMDWorkspace_sptr(pMockWs);
+  }
 
+  void testGenerateVTKDataSet()
+  {
+    using namespace Mantid::VATES;
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 0);
-    factory.initialize(ws_sptr);
+    factory.initialize(m_ws_sptr);
     TS_ASSERT_THROWS_NOTHING(factory.create());
   }
 

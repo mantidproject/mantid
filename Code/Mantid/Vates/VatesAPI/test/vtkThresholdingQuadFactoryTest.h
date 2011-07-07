@@ -227,10 +227,13 @@ public:
 //=====================================================================================
 class vtkThresholdingQuadFactoryTestPerformance : public CxxTest::TestSuite
 {
+private:
+  Mantid::API::IMDWorkspace_sptr m_ws_sptr;
+
 public:
 
-	void testGenerateVTKDataSet()
-	{
+  void setUp()
+  {
     using namespace Mantid::Geometry;
     using namespace testing;
 
@@ -240,12 +243,15 @@ public:
     EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_,_)).WillRepeatedly(Return(1));
     EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(2)));
 
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    m_ws_sptr = Mantid::API::IMDWorkspace_sptr(pMockWs);
+  }
 
+	void testGenerateVTKDataSet()
+	{
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 1);
     vtkThresholdingQuadFactory factory(ThresholdRange_scptr(pRange), "signal");
-    factory.initialize(ws_sptr);
+    factory.initialize(m_ws_sptr);
     TS_ASSERT_THROWS_NOTHING(factory.create());
 	}
 };
