@@ -113,6 +113,18 @@ namespace Mantid
         return m_columns[index];
     }
 
+    /// Gets the shared pointer to a column.
+    API::Column_const_sptr TableWorkspace::getColumn(int index) const
+    {
+        if (index >= columnCount())
+        {
+            std::string str = "Column index is out of range";
+            g_log.error()<<str<<": "<<index<<"("<<columnCount()<<")\n";
+            throw std::range_error(str);
+        }
+        return m_columns[index];
+    }
+
     void TableWorkspace::removeColumn( const std::string& name)
     {
         column_it ci = std::find_if(m_columns.begin(),m_columns.end(),FindName(name));

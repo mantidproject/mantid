@@ -169,11 +169,13 @@ namespace DataObjects
     { return getColumn(getColumnIndex(name)); }
 
     /// @return the index of the column with the given name.
-    virtual int getColumnIndex(const std::string& name);
+    virtual const int getColumnIndex(const std::string& name) const;
 
     /// Gets the shared pointer to a column by index.
     virtual boost::shared_ptr<Mantid::API::Column> getColumn(int index);
 
+    /// Gets the shared pointer to a column by index - return none-modifyable column.
+    API::Column_const_sptr getColumn(int index) const;
 
     //---------------------------------------------------------------------------------------------
     /// Returns a vector of all column names.

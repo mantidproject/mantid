@@ -100,6 +100,7 @@ protected:
          @return Pointer to the element
       */  
     void* void_pointer(int index){return &(*m_data[index]);}
+    const void* void_pointer(int index)const {return &(*m_data[index]);}
 private:
     std::vector< boost::shared_ptr<Type> > m_data; ///< Vector holding the data
     friend class TableWorkspace;

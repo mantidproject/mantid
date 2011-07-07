@@ -184,6 +184,12 @@ namespace DataObjects
     throw std::runtime_error("void_pointer() not implemented. Looks to be unused?");
   }
 
+  /// Pointer to a data element
+  const void* PeakColumn::void_pointer(int /*index*/) const
+  {
+    throw std::runtime_error("const version of void_pointer() not implemented. Looks to be unused?");
+  }
+
 } // namespace Mantid
 } // namespace DataObjects
 

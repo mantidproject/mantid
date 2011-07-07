@@ -22,6 +22,10 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/TableColumn.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 #include <boost/tokenizer.hpp>
 #include <boost/shared_ptr.hpp>
@@ -699,16 +703,55 @@ using namespace DataObjects;
   //-------------------------------------------------------------------------------------
   /** Write out a table Workspace's 
    */
-  int NexusFileIO::writeNexusTableWorkspace( const API::ITableWorkspace_const_sptr& localworkspace,
+  int NexusFileIO::writeNexusTableWorkspace( const API::ITableWorkspace_const_sptr& itableworkspace,
       const char * group_name) const
   {
     NXstatus status;
+
+    boost::shared_ptr<const TableWorkspace> tableworkspace =
+                boost::dynamic_pointer_cast<const TableWorkspace>(itableworkspace);
+    boost::shared_ptr<const PeaksWorkspace> peakworkspace =
+                boost::dynamic_pointer_cast<const PeaksWorkspace>(itableworkspace);
+
+    if ( !tableworkspace && !peakworkspace )
+      return((status==NX_ERROR)?3:0);
+
+    if ( !tableworkspace )
+      return((status==NX_ERROR)?3:0);
 
     //write data entry
     status=NXmakegroup(fileID,group_name,"NXdata");
     if(status==NX_ERROR)
       return(2);
     status=NXopengroup(fileID,group_name,"NXdata");
+
+    int nRows = itableworkspace->rowCount();
+
+    int dims_array[1] = { nRows };
+
+    for (int i = 0; i < itableworkspace->columnCount(); i++)
+    {
+      boost::shared_ptr<const API::Column> col = itableworkspace->getColumn(i);
+
+      std::string str = "column_" + boost::lexical_cast<std::string>(i+1);
+  
+      std::string bob = col->get_type_info().name();
+      if ( col->get_type_info().name() == "double" )
+      {
+        double * toNexus = new double[nRows];
+        for (int ii = 0; ii < nRows; ii++)
+          toNexus[ii] = col->cell<double>(ii);
+        NXwritedata(str.c_str(), NX_FLOAT64, 1, dims_array, (void *)(toNexus), false);
+        delete[] toNexus;
+      }
+    
+
+
+      //status=NXmakedata(fileID, str.c_str(), nxType, 1, dims_array);
+/*      status=NXopendata(fileID, str.c_str());
+      status=NXputdata(fileID, (void*)&(localworkspace->readX(0)[0])); */
+
+    }
 
     status=NXclosegroup(fileID);
     return((status==NX_ERROR)?3:0);

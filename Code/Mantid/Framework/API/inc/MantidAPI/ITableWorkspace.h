@@ -154,6 +154,9 @@ public:
   /// Gets the shared pointer to a column by index.
   virtual boost::shared_ptr<Mantid::API::Column> getColumn(int index) = 0;
 
+  /// Gets the shared pointer to a column by index - return none-modifyable column.
+  virtual boost::shared_ptr<const Mantid::API::Column> getColumn(int index) const = 0;
+
   /// Returns a vector of all column names.
   virtual std::vector<std::string> getColumnNames() = 0;
 

@@ -60,6 +60,8 @@ namespace DataObjects
     virtual void remove(int index);
     /// Pointer to a data element
     virtual void* void_pointer(int index);
+    /// Pointer to a data element
+    virtual const void* void_pointer(int index) const;
 
   private:
     /// Reference to the peaks object saved in the PeaksWorkspace.

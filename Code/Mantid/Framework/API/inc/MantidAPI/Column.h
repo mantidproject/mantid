@@ -115,7 +115,7 @@ public:
     template<class T>
     const T& cell(int index)const
     {
-        return *static_cast<T*>(void_pointer(index));
+        return *static_cast<const T*>(void_pointer(index));
     }
 
     /// Type check.
@@ -134,6 +134,8 @@ protected:
     virtual void remove(int index) = 0;
     /// Pointer to a data element
     virtual void* void_pointer(int index) = 0;
+    /// Pointer to a data element
+    virtual const void* void_pointer(int index) const = 0;
 
     std::string m_name;///< name
     std::string m_type;///< type
@@ -167,6 +169,7 @@ struct Column_DllExport Boolean
 Column_DllExport std::ostream& operator<<(std::ostream& ,const API::Boolean& );
 
 typedef boost::shared_ptr<Column> Column_sptr;
+typedef boost::shared_ptr<const Column> Column_const_sptr;
 
 } // namespace API
 } // Namespace Mantid
