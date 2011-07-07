@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "EQSANSQ2D.h"
+#include "MantidWorkflowAlgorithms/EQSANSQ2D.h"
 #include "MantidAPI/WorkspaceValidators.h"
 
 namespace Mantid

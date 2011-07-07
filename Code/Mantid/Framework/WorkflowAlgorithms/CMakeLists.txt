@@ -6,7 +6,7 @@ set ( SRC_UNITY_IGNORE_FILES
 )
 
 set ( INC_FILES
-        inc/EQSANSQ2D.h
+        inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
 )
               
 set ( TEST_FILES
