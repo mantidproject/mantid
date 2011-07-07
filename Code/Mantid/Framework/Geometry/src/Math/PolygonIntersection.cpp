@@ -76,15 +76,15 @@ namespace Mantid
         // Orientations
         originAB[1] = edge_p;
         originAB[2] = edge_q;
-        double cross = edge_p.cross_prod(edge_q).Z();
+        int cross = ConvexPolygon(originAB).orientation();
         aHB[0] = Q[qim1];
         aHB[1] = Q[qi];
         aHB[2] = P[pi];
-        double aHB_dir = ConvexPolygon(aHB).determinant();
+        int aHB_dir = ConvexPolygon(aHB).orientation();
         bHA[0] = P[pim1];
         bHA[1] = P[pi];
         bHA[2] = Q[qi];
-        double bHA_dir = ConvexPolygon(bHA).determinant();
+        int bHA_dir = ConvexPolygon(bHA).orientation();
         // Test for line intersection
         V2D intersect;
         unsigned int type = intersection(P[pim1],P[pi], Q[qim1],Q[qi], intersect);
@@ -95,25 +95,25 @@ namespace Mantid
             count_p = count_q = 0;
             firstPoint = false;
           }
-          if( aHB_dir > 0.0 ) inflag = Pin;
-          else if( bHA_dir > 0.0 ) inflag = Qin;
+          if( aHB_dir > 0 ) inflag = Pin;
+          else if( bHA_dir > 0 ) inflag = Qin;
           else {};
           intersectList.insert(intersect);
         }
 
         // Deal with advance of indices
         /* Special case: A & B overlap and oppositely oriented. */
-        if ( type == 3 && edge_p.scalar_prod(edge_q) < 0 )
+        if ( type == 3 && edge_p.scalar_prod(edge_q) < 0.0 )
         {
           throw std::runtime_error("Single segment intersection");
         }
         /* Special case: A & B parallel and separated. */
-        else if ( cross == 0 && (aHB_dir < 0.0) && (bHA_dir < 0.0) )
+        else if ( cross == 0 && (aHB_dir < 0) && (bHA_dir < 0) )
         {
           throw std::runtime_error("AxB=0 and both are left-hand oriented so no intersection");
         }
         /* Special case: A & B collinear. */
-        else if ( cross == 0 && (aHB_dir == 0.0) && (bHA_dir == 0.0) ) 
+        else if ( cross == 0 && (aHB_dir == 0) && (bHA_dir == 0) ) 
         {
           /* Advance but do not output point. */
           if ( inflag == Pin )
@@ -124,17 +124,17 @@ namespace Mantid
         /* Generic cases. */
         else if ( cross >= 0 ) 
         {
-          if ( bHA_dir > 0.0)
+          if ( bHA_dir > 0)
             pi = advanceVertex(pi, count_p, nverts_p, inflag == Pin, P[pi], intersectList);
           else
             qi = advanceVertex(qi, count_q, nverts_q, inflag == Qin, Q[qi], intersectList);
         }
         else /* if ( cross < 0 ) */
         {
-          if ( aHB_dir > 0.0)
+          if ( aHB_dir > 0)
             qi = advanceVertex(qi, count_q, nverts_q, inflag == Qin, Q[qi], intersectList);
           else
-            pi = advanceVertex(pi, count_p, nverts_p,inflag == Pin, P[pi], intersectList);
+            pi = advanceVertex(pi, count_p, nverts_p, inflag == Pin, P[pi], intersectList);
         }
       }
       while( (count_p < nverts_p || count_q < nverts_q) && 

@@ -114,7 +114,6 @@ namespace Mantid
     int ConvexPolygon::orientation() const
     {
       const double determinant = this->determinant();
-      std::cerr << "determinant " << determinant << "\n";
       if( determinant > 0.5 ) return 1;
       else if( determinant < -0.5 ) return -1;
       else return 0;
