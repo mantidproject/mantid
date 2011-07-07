@@ -230,7 +230,7 @@ def ResetWavelength():
     ReductionSingleton().get_data_loader().set_wavelength()
     
 def IQxQy(nbins=100):
-    ReductionSingleton().set_IQxQy(sans_reduction_steps.IQxQy(nbins=nbins))
+    ReductionSingleton().set_IQxQy(mantidsimple.EQSANSQ2D, None, NumberOfBins=nbins)
     
 def NoIQxQy(nbins=100):
     ReductionSingleton().set_IQxQy(None)

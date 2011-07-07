@@ -18,6 +18,8 @@ from sns_reducer import EqSansReducer
 import sns_instrument
 import sns_reduction_steps
 
+import mantidsimple
+
 def EQSANS():
     Clear(EqSansReducer)
     ReductionSingleton().set_instrument(sns_instrument.EQSANS())
@@ -83,4 +85,7 @@ def BckCombineTransmissionFits(combine_frames):
     if not isinstance(ReductionSingleton().get_background().get_transmission(), sns_reduction_steps.DirectBeamTransmission):
         raise RuntimeError, "Trying to see transmission fitting option when the transmission calculation method hasn't been set correctly."
     ReductionSingleton().get_background().get_transmission().set_combine_frames(combine_frames)
+    
+def IQxQy(nbins=100):
+    ReductionSingleton().set_IQxQy(mantidsimple.EQSANSQ2D, None, NumberOfBins=nbins)
     

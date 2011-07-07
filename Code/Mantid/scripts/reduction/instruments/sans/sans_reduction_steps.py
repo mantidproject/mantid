@@ -832,48 +832,6 @@ class SolidAngle(ReductionStep):
         
         return "Solid angle correction applied" 
             
-class IQxQy(ReductionStep):
-    """
-        ReductionStep class that performs I(Qx,Qy) calculation
-    """
-    def __init__(self, nbins=100, suffix="_Iq"):
-        super(IQxQy, self).__init__()
-        self._nbins = nbins
-        self._suffix = suffix
-    
-    def get_output_workspace(self, workspace):
-        return workspace+str(self._suffix)+'xy'
-    
-    def execute(self, reducer, workspace):
-        beam_ctr = reducer._beam_finder.get_beam_center()
-        if beam_ctr[0] is None or beam_ctr[1] is None:
-            raise RuntimeError, "I(Qx,Qy) computation could not proceed: beam center not set"
-        
-        # Wavelength. Read in the wavelength bins. Skip the first one which is not set up properly for EQ-SANS
-        x = mtd[workspace].dataX(1)
-        x_length = len(x)
-        if x_length < 2:
-            raise RuntimeError, "I(Qx,Qy) computation expects at least one wavelength bin"
-        wavelength_min = (x[0]+x[1])/2.0
-        if wavelength_min==0:
-            raise RuntimeError, "I(Qx,Qy) computation needs positive wavelengths"
-        sample_detector_distance = mtd[workspace].getRun().getProperty("sample_detector_distance").value
-        nx_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
-        ny_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
-        pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
-        pixel_size_y = mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
-        dxmax = pixel_size_x*max(beam_ctr[0],nx_pixels-beam_ctr[0])
-        dymax = pixel_size_y*max(beam_ctr[1],ny_pixels-beam_ctr[1])
-        maxdist = max(dxmax, dymax)
-        qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
-        
-        output_ws = self.get_output_workspace(workspace)
-        
-        Qxy(InputWorkspace=workspace, OutputWorkspace=output_ws,
-            MaxQxy=qmax, DeltaQ=qmax/self._nbins, SolidAngleWeighting=False)
-        
-        return "Computed I(Qx,Qy)" 
-            
 class SensitivityCorrection(ReductionStep):
     """
         Compute the sensitivity correction and apply it to the input workspace.
@@ -1370,14 +1328,15 @@ class SaveIqAscii(ReductionStep):
                     log_text = "I(Q) saved in %s" % (filename)
         
         if reducer._two_dim_calculator is not None:
-            output_ws = reducer._two_dim_calculator.get_output_workspace(workspace)
-            if mtd.workspaceExists(output_ws):
-                filename = os.path.join(output_dir, output_ws+'.dat')
-                SaveNISTDAT(InputWorkspace=output_ws, Filename=filename)
-                
-                if len(log_text)>0:
-                    log_text += '\n'
-                log_text += "I(Qx,Qy) saved in %s" % (filename)
+            if hasattr(reducer._two_dim_calculator, "get_output_workspace"):
+                output_ws = reducer._two_dim_calculator.get_output_workspace(workspace)
+                if mtd.workspaceExists(output_ws):
+                    filename = os.path.join(output_dir, output_ws+'.dat')
+                    SaveNISTDAT(InputWorkspace=output_ws, Filename=filename)
+                    
+                    if len(log_text)>0:
+                        log_text += '\n'
+                    log_text += "I(Qx,Qy) saved in %s" % (filename)
             
         return log_text
             
