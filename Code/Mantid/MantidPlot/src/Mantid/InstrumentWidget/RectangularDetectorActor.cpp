@@ -117,6 +117,35 @@ void RectangularDetectorActor::draw(bool picking)const
   glPopMatrix();
 }
 
+//------------------------------------------------------------------------------------------------
+/**
+ * Accept a visitor.
+ *
+ * @param visitor :: A visitor.
+ *
+ */
+bool RectangularDetectorActor::accept(const GLActorVisitor& visitor)
+{
+  if (visitor.visit(this)) return true;
+
+  const SetVisibleComponentVisitor* svv = dynamic_cast<const SetVisibleComponentVisitor*>(&visitor);
+  if (svv)
+  {
+    Mantid::Geometry::ComponentID id = svv->getID();
+    for (int y=0; y < mDet->ypixels(); y++)
+    {
+      for (int x=0; x < mDet->xpixels() ; x++)
+      {
+        if (id == mDet->getAtXY(x,y)->getComponentID())
+        {
+          setVisibility(true);
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
 
 //------------------------------------------------------------------------------------------------
 /**

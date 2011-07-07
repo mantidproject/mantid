@@ -6,6 +6,8 @@
 #include <QHBoxLayout>
 #include <QComboBox>
 #include <QLineEdit>
+#include <QMouseEvent>
+#include <QApplication>
 #include <qwt_scale_widget.h>
 #include <qwt_scale_engine.h>
 
@@ -16,13 +18,14 @@
   * @param minPositiveValue A minimum positive value for the Log10 scale
   */
 ColorMapWidget::ColorMapWidget(int type,QWidget* parent,const double& minPositiveValue):
-QFrame(parent),m_minPositiveValue(minPositiveValue)
+QFrame(parent),m_minPositiveValue(minPositiveValue),m_dragging(false)
 {
   m_scaleWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
   m_scaleWidget->setColorBarEnabled(true);
   m_scaleWidget->setColorBarWidth(20);
   m_scaleWidget->setAlignment(QwtScaleDraw::RightScale);
   m_scaleWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
+  m_scaleWidget->setCursor(Qt::OpenHandCursor);
 
   m_minValueBox = new QLineEdit();
   m_maxValueBox = new QLineEdit();
@@ -37,8 +40,6 @@ QFrame(parent),m_minPositiveValue(minPositiveValue)
   m_maxValueBox->setText("");
   connect(m_minValueBox,SIGNAL(editingFinished()),this,SLOT(minValueChanged()));
   connect(m_maxValueBox,SIGNAL(editingFinished()),this,SLOT(maxValueChanged()));
-
-  //QFrame* lColormapFrame = new QFrame();
 
   QVBoxLayout* lColormapLayout = new QVBoxLayout;
   lColormapLayout->addWidget(m_maxValueBox);
@@ -138,4 +139,68 @@ int ColorMapWidget::getScaleType()const
 void ColorMapWidget::setScaleType(int type)
 {
   m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
+}
+
+void ColorMapWidget::mousePressEvent(QMouseEvent* e)
+{
+  QRect rect = m_scaleWidget->rect();
+  if (e->x() > rect.left() && e->x() < rect.right())
+  {
+    m_dragging = true;
+    m_y = e->y();
+    m_dtype = m_y > height()/2 ? Bottom : Top;
+    QApplication::setOverrideCursor(Qt::ClosedHandCursor);
+  }
+}
+
+void ColorMapWidget::mouseMoveEvent(QMouseEvent* e)
+{
+  if (!m_dragging) return;
+ 
+  double minValue = m_minValueBox->displayText().toDouble();
+  double maxValue = m_maxValueBox->displayText().toDouble();
+
+  if (m_dtype == Bottom)
+  {
+    minValue += double(e->y() - m_y)/height()*(maxValue - minValue);
+    setMinValue(minValue);
+  }
+  else
+  {
+    maxValue += double(e->y() - m_y)/height()*(maxValue - minValue);
+    setMaxValue(maxValue);
+  }
+  m_y = e->y();
+
+  GraphOptions::ScaleType type = (GraphOptions::ScaleType)m_scaleOptions->itemData(m_scaleOptions->currentIndex()).toUInt();
+  if( type == GraphOptions::Linear )
+  {
+    QwtLinearScaleEngine linScaler;
+    m_scaleWidget->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue,  20, 5));
+  }
+  else
+ {
+    QwtLog10ScaleEngine logScaler;    
+    double logmin(minValue);
+    if( logmin <= 0.0 )
+    {
+      logmin = m_minPositiveValue;
+    }
+    m_scaleWidget->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, 20, 5));
+  }
+}
+
+void ColorMapWidget::mouseReleaseEvent(QMouseEvent* e)
+{
+  if (!m_dragging) return;
+  if (m_dtype == Bottom)
+  {
+    minValueChanged();
+  }
+  else
+  {
+    maxValueChanged();
+  }
+  QApplication::restoreOverrideCursor();
+  m_dragging = false;
 }

@@ -79,6 +79,7 @@ public:
 
   void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
   void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const;
+  bool accept(const GLActorVisitor& visitor);
   virtual void setColors();
 
   int genTexture(char * & image_data, std::vector<GLColor>& list, bool useDetectorIDs);
