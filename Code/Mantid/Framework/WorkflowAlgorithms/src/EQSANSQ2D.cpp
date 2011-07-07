@@ -86,13 +86,25 @@ void EQSANSQ2D::exec()
   double maxdist = std::max(dxmax, dymax);
 
   // Wavelength bandwidths
-  const double wavelength_min = getRunProperty(inputWS, "wavelength_min");
-  const double wavelength_max = getRunProperty(inputWS, "wavelength_max");
+  double wavelength_min = 0.0;
+  if (inputWS->run().hasProperty("wavelength_min"))
+    wavelength_min = getRunProperty(inputWS, "wavelength_min");
+  else if (inputWS->dataX(0).size()>1)
+    wavelength_min = (inputWS->dataX(1)[0]+inputWS->dataX(1)[1])/2.0;
+  else if (inputWS->dataX(0).size()==1)
+    wavelength_min = inputWS->dataX(1)[0];
+  else
+  {
+    g_log.error("Can't determine the minimum wavelength for the input workspace.");
+    throw std::invalid_argument("Can't determine the minimum wavelength for the input workspace.");
+  }
+
   double qmax = 4*M_PI/wavelength_min*std::sin(0.5*std::atan(maxdist/sample_detector_distance));
 
   if (frame_skipping)
   {
     // In frame skipping mode, treat each frame separately
+    const double wavelength_max = getRunProperty(inputWS, "wavelength_max");
     const double wavelength_min_f2 = getRunProperty(inputWS, "wavelength_min_frame2");
     const double wavelength_max_f2 = getRunProperty(inputWS, "wavelength_max_frame2");
 
