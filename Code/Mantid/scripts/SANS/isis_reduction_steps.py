@@ -470,6 +470,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         self.phi_min = -90.0
         self.phi_max = 90.0
         self._readonly_phi = False
+        self.spec_list = []
 
         ########################## Masking  ################################################
         # Mask the corners and beam stop if radius parameters are given
@@ -713,13 +714,16 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         #now do the masking
         sans_reduction_steps.Mask.execute(self, reducer, workspace, instrument)
 
+        if len(self.spec_list)>0:
+            MaskDetectors(workspace, SpectraList = self.spec_list)
+            
         if self._lim_phi_xml != '' and self.mask_phi:
             MaskDetectorsInShape(workspace, self._lim_phi_xml)
 
     def view(self, instrum):
         """
-            Display the masked detectors in the bank in a different color
-            in instrument view
+            In MantidPlot this opens InstrumentView to display the masked
+            detectors in the bank in a different colour
             @param instrum: a reference an instrument object to view
         """
         wksp_name = 'CurrentMask'

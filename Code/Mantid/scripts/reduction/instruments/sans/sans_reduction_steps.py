@@ -974,7 +974,7 @@ class Mask(ReductionStep):
         self._xml = []
 
         #these spectra will be masked by the algorithm MaskDetectors
-        self.spec_list = []
+        self.detect_list = []
         
         # List of pixels to mask
         self.masked_pixels = []
@@ -1061,7 +1061,7 @@ class Mask(ReductionStep):
             Mask the given detectors
             @param det_list: list of detector IDs
         """
-        self.spec_list.extend(det_list) 
+        self.detect_list.extend(det_list) 
 
     def execute(self, reducer, workspace, instrument=None):
         
@@ -1087,8 +1087,8 @@ class Mask(ReductionStep):
                                                                    self._ny_high,
                                                                    workspace))
 
-        if len(self.spec_list)>0:
-            MaskDetectors(workspace, DetectorList = self.spec_list)
+        if len(self.detect_list)>0:
+            MaskDetectors(workspace, DetectorList = self.detect_list)
             
         # Mask out internal list of pixels
         if len(self.masked_pixels)>0:
