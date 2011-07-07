@@ -32,6 +32,7 @@ void EQSANSQ2D::init()
   declareProperty("OutputWorkspace","",Direction::Input);
   declareProperty("NumberOfBins", 100,
       "Number of bins in each dimension of the 2D output", Kernel::Direction::Input);
+  declareProperty("OutputMessage","",Direction::Output);
 }
 
 /// Returns the value of a run property from a given workspace
@@ -145,6 +146,7 @@ void EQSANSQ2D::exec()
     declareProperty(new WorkspaceProperty<>("OutputWorkspaceFrame2", outputWSName_frame, Direction::Output));
     result = qxyAlg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspaceFrame2", result);
+    setProperty("OutputMessage", "I(Qx,Qy) computed for each frame");
   } else {
     // When not in frame skipping mode, simply run Qxy
     IAlgorithm_sptr qxyAlg = createSubAlgorithm("Qxy", .3, 1.0);
@@ -158,6 +160,7 @@ void EQSANSQ2D::exec()
     declareProperty(new WorkspaceProperty<>("OutputWorkspaceFrame1", outputWSName, Direction::Output));
     MatrixWorkspace_sptr result = qxyAlg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspaceFrame1", result);
+    setProperty("OutputMessage", "I(Qx,Qy) computed for each frame");
   }
 }
 

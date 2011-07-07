@@ -110,6 +110,7 @@ def validate_loader(f):
                         ialg.setPropertyValue(key, MantidFramework._makeString(kwargs[key]).lstrip('? '))
                         
                     proxy.execute()
+                    return "%s applied" % proxy.name()
             return f(reducer, _AlgorithmStep())
         
         elif isinstance(algorithm, MantidFramework.IAlgorithm) \
@@ -159,6 +160,7 @@ def validate_loader(f):
                         algorithm.setPropertyValue(kwargs["AlternateName"], data_file)
 
                     algorithm.execute()
+                    return "%s applied" % algorithm.name()
             return f(reducer, _AlgorithmStep())
 
         else:
@@ -249,6 +251,9 @@ def validate_step(f):
                         ialg.setPropertyValue(key, MantidFramework._makeString(kwargs[key]).lstrip('? '))
                         
                     proxy.execute()
+                    if "OutputMessage" in propertyOrder:
+                        return proxy.getPropertyValue("OutputMessage")
+                    return "%s applied" % proxy.name()
             return f(reducer, _AlgorithmStep())
                     
         elif isinstance(algorithm, MantidFramework.IAlgorithm) \
@@ -282,6 +287,9 @@ def validate_step(f):
                         algorithm.setPropertyValue("OutputWorkspace", MantidFramework._makeString(outputworkspace).lstrip('? '))
 
                     algorithm.execute()
+                    if "OutputMessage" in propertyOrder:
+                        return algorithm.getPropertyValue("OutputMessage")
+                    return "%s applied" % algorithm.name()
             return f(reducer, _AlgorithmStep())
                     
         elif False and isinstance(algorithm, types.FunctionType):

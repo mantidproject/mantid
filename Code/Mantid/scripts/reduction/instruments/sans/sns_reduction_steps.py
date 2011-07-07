@@ -1,7 +1,5 @@
 """
-    Implementation of reduction steps for SNS EQSANS
-    
-    TODO:   - Allow use of FindNexus when we are on an analysis computer  
+    Implementation of reduction steps for SNS EQSANS    
 """
 import os
 import sys
