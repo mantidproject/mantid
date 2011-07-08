@@ -133,7 +133,7 @@ namespace DataObjects
   MantidVecWithMarker * EventWorkspaceMRU::findE(size_t thread_num, size_t index)
   {
     MantidVecWithMarker * out;
-    PARALLEL_CRITICAL(EventWorkspace_MRUY_access)
+    PARALLEL_CRITICAL(EventWorkspace_MRUE_access)
     {
       out = m_bufferedDataE[thread_num]->find(index);
     }
