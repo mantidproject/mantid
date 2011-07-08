@@ -114,8 +114,8 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
    throw std::invalid_argument("degrees_per_step must be positive");
   }
 
+                                      // get list of peaks, sorted on |Q|
   std::vector<V3D> sorted_qs( q_vectors );
-
   std::sort( sorted_qs.begin(), sorted_qs.end(), CompareMagnitude );
 
   if ( num_initial > sorted_qs.size() )
@@ -139,17 +139,17 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                                      // peaks and re-optimize the UB to index
                                      // them as well
   size_t count = 0;
-  while ( num_initial < q_vectors.size() )
+  while ( num_initial < sorted_qs.size() )
   {
     count++;
     num_initial = round(1.5 * (double)(num_initial + 3));
                                              // add 3, in case we started with
                                              // a very small number of peaks!
-    if ( num_initial >= q_vectors.size() )
-      num_initial = q_vectors.size();
+    if ( num_initial >= sorted_qs.size() )
+      num_initial = sorted_qs.size();
 
     for ( size_t i = some_qs.size(); i < num_initial; i++ )
-      some_qs.push_back( q_vectors[i] );
+      some_qs.push_back( sorted_qs[i] );
 
     try
     {
@@ -165,7 +165,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
     }
   }
 
-  if ( q_vectors.size() >= 3 )    // do one last refinement using all peaks
+  if ( q_vectors.size() >= 3 )    // try one last refinement using all peaks
   {
     try 
     {

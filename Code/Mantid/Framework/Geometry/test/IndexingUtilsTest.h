@@ -50,9 +50,9 @@ public:
 
     std::vector<V3D> q_vectors = getNatroliteQs();
 
-    double  a     = 6.6f;
-    double  b     = 9.7f;
-    double  c     = 9.9f;
+    double  a     = 6.6;
+    double  b     = 9.7;
+    double  c     = 9.9;
     double  alpha = 84;
     double  beta  = 71;
     double  gamma = 70;
