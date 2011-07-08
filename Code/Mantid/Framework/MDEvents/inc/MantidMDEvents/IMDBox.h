@@ -12,8 +12,6 @@
 #include "MantidNexus/NeXusFile.hpp"
 #include <iosfwd>
 
-using NeXus::File;
-
 namespace Mantid
 {
 namespace MDEvents

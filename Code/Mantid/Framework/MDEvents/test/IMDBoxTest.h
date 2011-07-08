@@ -13,7 +13,6 @@
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
-using namespace NeXus;
 using Mantid::Kernel::ConfigService;
 
 /** Tester class that implements the minimum IMDBox to
@@ -197,7 +196,7 @@ public:
     b.setDepth(4);
     b.calcVolume();
 
-    NeXus::File * file = new NeXus::File(filename, NXACC_CREATE5);
+    ::NeXus::File * file = new NeXus::File(filename, NXACC_CREATE5);
 
     std::string groupName("IMDBoxTester");
     std::string className("NXIMDBoxTester");
@@ -208,7 +207,7 @@ public:
 
     // Now we load it back
     IMDBoxTester<MDEvent<2>,2> c;
-    NeXus::File * fileIn = new NeXus::File(filename, NXACC_READ);
+    ::NeXus::File * fileIn = new NeXus::File(filename, NXACC_READ);
     fileIn->openGroup(groupName, className);
     c.loadNexus(fileIn);
     fileIn->closeGroup();
