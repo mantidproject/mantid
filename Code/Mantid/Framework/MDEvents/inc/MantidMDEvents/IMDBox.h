@@ -99,10 +99,10 @@ namespace MDEvents
     virtual size_t addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
 
     /// Save the box and contents to an open nexus file.
-    virtual void saveNexus(NeXus::File * file);
+    virtual void saveNexus(::NeXus::File * file);
 
     /// Load the box and contents from an open nexus file.
-    virtual void loadNexus(NeXus::File * file);
+    virtual void loadNexus(::NeXus::File * file);
 
     /** Perform centerpoint binning of events
      * @param bin :: MDBin object giving the limits of events to accept.
