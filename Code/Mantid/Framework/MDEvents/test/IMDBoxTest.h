@@ -185,6 +185,7 @@ public:
   {
     // Clean up if it exists
     std::string filename(ConfigService::Instance().getString("defaultsave.directory") + "/IMDBoxTest.nxs");
+    std::cout << "Writing to " << filename << std::endl;
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();
 
