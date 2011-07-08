@@ -180,24 +180,13 @@ public:
   }
 
   /** Open a nexus file for this and save it */
-  void xtest_saveNexus_loadNexus()
+  void test_saveNexus_loadNexus()
   {
-    std::string filename = "notset";
-    try
-    {
-      // Clean up if it exists
-      filename = (ConfigService::Instance().getString("defaultsave.directory") + "IMDBoxTest.nxs");
+    // Clean up if it exists
+    std::string filename = (ConfigService::Instance().getString("defaultsave.directory") + "IMDBoxTest.nxs");
 
-      Poco::File(filename).createFile();
-      if (Poco::File(filename).exists())
-        Poco::File(filename).remove();
-    }
-    catch (...)
-    {
-      std::cout << "Error! Could not write to " + filename << std::endl;
-      std::cout << "Skipping test.\n";
-      return;
-    }
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
 
     IMDBoxTester<MDEvent<2>,2> b;
     b.setExtents(0, -10.0, 10.0);
@@ -222,6 +211,7 @@ public:
     fileIn->openGroup(groupName, className);
     c.loadNexus(fileIn);
     fileIn->closeGroup();
+    fileIn->close();
 
     TS_ASSERT_DELTA( c.getExtents(0).min, -10, 1e-5);
     TS_ASSERT_DELTA( c.getExtents(0).max, +10, 1e-5);
@@ -231,6 +221,7 @@ public:
     TS_ASSERT_DELTA( c.getErrorSquared(), 456.789, 1e-5);
     TS_ASSERT_DELTA( c.getVolume(), b.getVolume(), 1e-5);
     TS_ASSERT_DELTA( c.getDepth(), b.getDepth(), 1e-5);
+
 
     // Clean up
     if (Poco::File(filename).exists())
