@@ -190,7 +190,7 @@ void ColorMapWidget::mouseMoveEvent(QMouseEvent* e)
   }
 }
 
-void ColorMapWidget::mouseReleaseEvent(QMouseEvent* e)
+void ColorMapWidget::mouseReleaseEvent(QMouseEvent* /*e*/)
 {
   if (!m_dragging) return;
   if (m_dtype == Bottom)

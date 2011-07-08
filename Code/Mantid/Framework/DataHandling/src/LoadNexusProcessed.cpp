@@ -292,7 +292,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
 /**
  * Load a table
  */
-API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
+API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & /*entry*/)
 {
   // Get workspace characteristics
   //NXData wksp_cls = mtd_entry.openNXData("table_workspace");

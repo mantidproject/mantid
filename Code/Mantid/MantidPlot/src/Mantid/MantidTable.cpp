@@ -21,7 +21,7 @@ using namespace MantidQt::API;
  * @return the MantidTable created
  */
 MantidTable::MantidTable(ScriptingEnv *env, Mantid::API::ITableWorkspace_sptr ws, const QString &label, 
-    ApplicationWindow* parent, const QString& name, Qt::WFlags f):
+    ApplicationWindow* parent, const QString& /*name*/, Qt::WFlags f):
 Table(env,ws->rowCount(),ws->columnCount(),label,parent,"",f),
 m_ws(ws),
 m_wsName(ws->getName())

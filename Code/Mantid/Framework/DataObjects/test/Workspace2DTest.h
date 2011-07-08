@@ -204,7 +204,7 @@ public:
   {
     boost::shared_ptr<MatrixWorkspace> ws(new Workspace2D());
     ws->initialize(4,1,1);
-    ISpectrum * spec;
+    ISpectrum * spec = NULL;
     TS_ASSERT_THROWS_NOTHING( spec = ws->getSpectrum(0) );
     TS_ASSERT(spec);
     TS_ASSERT_THROWS_NOTHING( spec = ws->getSpectrum(3) );

@@ -706,7 +706,7 @@ using namespace DataObjects;
   int NexusFileIO::writeNexusTableWorkspace( const API::ITableWorkspace_const_sptr& itableworkspace,
       const char * group_name) const
   {
-    NXstatus status;
+    NXstatus status = 0;
 
     boost::shared_ptr<const TableWorkspace> tableworkspace =
                 boost::dynamic_pointer_cast<const TableWorkspace>(itableworkspace);
@@ -736,7 +736,7 @@ using namespace DataObjects;
       std::string str = "column_" + boost::lexical_cast<std::string>(i+1);
   
       std::string bob = col->get_type_info().name();
-      if ( col->get_type_info().name() == "double" )
+      if ( col->get_type_info().name() == std::string("double") )
       {
         double * toNexus = new double[nRows];
         for (int ii = 0; ii < nRows; ii++)

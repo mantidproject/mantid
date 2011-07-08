@@ -249,7 +249,7 @@ void Integration::execEvent()
     outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
         API::WorkspaceFactory::Instance().create("EventWorkspace", m_MaxSpec-m_MinSpec+1, 2, 1));
     //Copy geometry over.
-    bool differentSize = (m_MaxSpec-m_MinSpec+1) != inputEventWS->getNumberHistograms();
+    bool differentSize = (m_MaxSpec-m_MinSpec+1) != static_cast<int>(inputEventWS->getNumberHistograms());
     API::WorkspaceFactory::Instance().initializeFromParent(inputEventWS, outputWS, differentSize);
     //You need to copy over the data as well.
     // -- we copy only a range, if specified.

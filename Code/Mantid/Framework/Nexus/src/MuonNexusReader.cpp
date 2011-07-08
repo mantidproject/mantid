@@ -352,7 +352,7 @@ void MuonNexusReader::getLogStringValues(const int& logNumber, const int& logSeq
   double time=logTimes[logNumber][logSequence];
   logTime=static_cast<std::time_t>(time)+startTime_time_t;
   std::vector<std::string>& strings = logStringValues[logNumber];
-  if (logSequence < strings.size())
+  if (logSequence < int(strings.size()))
   {
     value = strings[logSequence];
   }

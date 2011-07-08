@@ -417,8 +417,8 @@ void Projection3D::componentSelected(Mantid::Geometry::ComponentID id)
   //std::cerr << minBounds << maxBounds << std::endl;
 
   // cannot get it right
-  double znear = minBounds.Z();
-  double zfar = maxBounds.Z();
+//  double znear = minBounds.Z();
+//  double zfar = maxBounds.Z();
   //if (znear > zfar)
   //{
   //  std::swap(znear,zfar);
