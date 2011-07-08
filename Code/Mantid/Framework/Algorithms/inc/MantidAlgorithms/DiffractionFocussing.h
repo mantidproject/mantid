@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include <Poco/NObserver.h>
+#include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAlgorithms/DiffractionFocussing2.h"
 
 namespace Mantid
 {
@@ -59,11 +61,15 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport DiffractionFocussing : public API::Algorithm
+    class DLLExport DiffractionFocussing : public DiffractionFocussing2, public API::DeprecatedAlgorithm
     {
     public:
       /// Default constructor
-      DiffractionFocussing() : API::Algorithm() {};
+      DiffractionFocussing() : API::DeprecatedAlgorithm()
+      {
+        this->useAlgorithm("DiffractionFocussing");
+        this->deprecatedDate("2011-07-08");
+      };
       /// Destructor
       virtual ~DiffractionFocussing() {};
       /// Algorithm's name for identification overriding a virtual method
@@ -74,15 +80,6 @@ namespace Mantid
       virtual const std::string category() const { return "Diffraction";}
     
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
-      // Overridden Algorithm methods
-      void init();
-      void exec();
-      API::MatrixWorkspace_sptr convertUnitsToDSpacing(const API::MatrixWorkspace_sptr& workspace);
-      void RebinWorkspace(API::MatrixWorkspace_sptr& workspace);
-      void calculateRebinParams(const API::MatrixWorkspace_const_sptr& workspace,double& min,double& max,double& step);
-      bool readGroupingFile(std::string groupingFileName, std::multimap<int64_t,int64_t>& detectorGroups);
 
     };
 

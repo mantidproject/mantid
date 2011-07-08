@@ -267,7 +267,7 @@ void Q1D2::initizeCutOffs(const double RCut, const double WCut)
 *  @param specMap a spectra map that the new workspace should use and take owner ship of
 *  @return A pointer to the newly-created workspace
 */
-API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> & binParams,  const API::SpectraDetectorMap * const specMap) const
+API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> & binParams,  const API::SpectraDetectorMap * const /*specMap*/) const
 {
   // Calculate the output binning
   MantidVecPtr XOut;

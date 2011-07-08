@@ -140,7 +140,6 @@ void MaskDetectors::exec()
   }
   
   // Get a reference to the spectra-detector map to get hold of detector ID's
-  const Geometry::ISpectraDetectorMap& specMap = WS->spectraMap();
   double prog=0.0;
   std::vector<size_t>::const_iterator wit;
   for (wit = indexList.begin(); wit != indexList.end(); ++wit)
@@ -175,8 +174,6 @@ void MaskDetectors::fillIndexListFromSpectra(std::vector<size_t>& indexList, con
   // Next line means that anything in Clear the index list first
   indexList.clear();
   indexList.reserve(WS->getNumberHistograms());
-  //get the spectra axis
-  Axis *spectraAxis = WS->getAxis(1);
 
   for (int i = 0; i < static_cast<int>(WS->getNumberHistograms()); ++i)
   {

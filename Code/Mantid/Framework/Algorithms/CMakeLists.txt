@@ -352,7 +352,6 @@ set ( TEST_FILES
 	test/DiffractionEventCalibrateDetectorsTest.h
 	test/DiffractionEventReadDetCalTest.h
 	test/DiffractionFocussing2Test.h
-	test/DiffractionFocussingTest.h
 	test/DivideTest.h
 	test/DspacemaptoCalTest.h
 	test/ExponentialCorrectionTest.h

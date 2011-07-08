@@ -428,7 +428,7 @@ namespace DataObjects
       for (size_t wi = old_size; wi <= workspace_index; wi++)
       {
         //Need to make a new one!
-        EventList * newel = new EventList(mru, wi);
+        EventList * newel = new EventList(mru, specid_t(wi) );
         //Add to list
         this->data.push_back(newel);
       }

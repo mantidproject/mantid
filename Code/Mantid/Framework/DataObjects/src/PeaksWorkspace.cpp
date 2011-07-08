@@ -126,7 +126,7 @@ namespace DataObjects
 
   //---------------------------------------------------------------------------------------------
   /// @return the index of the column with the given name.
-  const int PeaksWorkspace::getColumnIndex(const std::string& name) const
+  int PeaksWorkspace::getColumnIndex(const std::string& name) const
   {
     for (int i=0; i < int(columns.size()); i++)
       if (columns[i]->name() == name)

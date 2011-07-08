@@ -50,7 +50,7 @@ namespace DataObjects
     {
       if (m_bufferedDataE.size() <= thread_num)
       {
-        m_bufferedDataE.resize(thread_num+1);
+        m_bufferedDataE.resize(thread_num+1, NULL);
         for (size_t i=0; i < m_bufferedDataE.size(); i++)
         {
           if (!m_bufferedDataE[i])
@@ -71,7 +71,7 @@ namespace DataObjects
     {
       if (m_bufferedDataY.size() <= thread_num)
       {
-        m_bufferedDataY.resize(thread_num+1);
+        m_bufferedDataY.resize(thread_num+1, NULL);
         for (size_t i=0; i < m_bufferedDataY.size(); i++)
         {
           if (!m_bufferedDataY[i])

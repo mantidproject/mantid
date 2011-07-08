@@ -91,7 +91,7 @@ namespace DataObjects
 
   /// Constructor (empty)
   EventList::EventList() :
-        eventType(TOF), order(UNSORTED)
+        eventType(TOF), order(UNSORTED), mru(NULL)
   {
   }
 
@@ -1352,6 +1352,8 @@ namespace DataObjects
    */
   const MantidVec& EventList::constDataY() const
   {
+    if (!mru) throw std::runtime_error("EventList::constDataY() called with no MRU set. This is not allowed.");
+
     // This is the thread number from which this function was called.
     int thread = PARALLEL_THREAD_NUMBER;
     mru->ensureEnoughBuffersY(thread);
@@ -1383,6 +1385,8 @@ namespace DataObjects
 
   const MantidVec& EventList::constDataE() const
   {
+    if (!mru) throw std::runtime_error("EventList::constDataE() called with no MRU set. This is not allowed.");
+
     // This is the thread number from which this function was called.
     int thread = PARALLEL_THREAD_NUMBER;
     mru->ensureEnoughBuffersE(thread);
