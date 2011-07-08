@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <algorithm>
 
 extern "C"
 {
@@ -17,15 +18,179 @@ extern "C"
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
+using Mantid::Kernel::Matrix;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::Quat;
-
 
 #define round(x) ((x)>=0?(int)((x)+0.5):(int)((x)-0.5))
 #define PI 3.141592653589793238
 
+/**
+   Comparator function for sorting list of 3D vectors based on their magnitude,
+ */
+static bool CompareMagnitude( const V3D & v1, const V3D & v2 )
+{
+  double mag_sq_1 = v1[0]*v1[0] + v1[1]*v1[1] + v1[2]*v1[2];
+  double mag_sq_2 = v2[0]*v2[0] + v2[1]*v2[1] + v2[2]*v2[2];
+  return (mag_sq_1 < mag_sq_2);
+}
+
+
 /** 
-  STATIC method BestFit_UB: Calculates the matrix that most nearly indexes 
+  STATIC method Find_UB: Calculates the matrix that most nearly indexes 
+  the specified q_vectors, given the lattice parameters.  The sum of the 
+  squares of the residual errors is returned.  This method first sorts the
+  specified q_vectors in order of increasing magnitude.  It then searches 
+  through all possible orientations to find an initial UB that indexes the
+  lowest magnitude peaks.  i
+     The resolution of the search through possible orientations is specified
+  by the degrees_per_step parameter.  Approximately 2-4 degrees_per_step is
+  usually adequate.  NOTE: This is an expensive calculation which takes 
+  approximately 1 second using 2 degrees_per_step.  However, the execution 
+  time is O(n^3) so decreasing the resolution to 1 degree per step will take 
+  about 8 seconds, etc.  It should not be necessary to decrease this value 
+  below 1 degree per step, and users will have to be VERY patient, if it is
+  decreased much below 1 degree per step.
+    The number of peaks used to obtain an initial indexing is specified by
+  the "num_initial" parameter.  Good values for this are typically around 
+  10-15, though with accurate peak positions, and good values for the lattice 
+  paramters, as few as 2 can be used.  Using substantially more than 15 peaks
+  initially typically has no benefit and increases execution time.
+  
+  @param  UB                  3x3 matrix that will be set to the UB matrix
+  @param  q_vectors           std::vector of V3D objects that contains the 
+                              list of q_vectors that are to be indexed
+                              NOTE: There must be at least 3 q_vectors.
+  @param  a                   First unit cell edge length in Angstroms.  
+  @param  b                   Second unit cell edge length in Angstroms.  
+  @param  c                   Third unit cell edge length in Angstroms.  
+  @param  alpha               First unit cell angle in degrees.
+  @param  beta                second unit cell angle in degrees.
+  @param  gamma               third unit cell angle in degrees.
+  @param  required_tolerance  The maximum allowed deviation of Miller indices
+                              from integer values for a peak to be indexed.
+  @param  num_initial         The number of low |Q| peaks that should be
+                              used to scan for an initial orientation matrix.
+  @param  degrees_per_step    The number of degrees between different
+                              orientations used during the initial scan.
+
+  @return  This will return the sum of the squares of the residual errors.
+  
+  @throws  std::invalid_argument exception if there are not at least 2
+                                 q vectors, if num_initial is < 2, or if 
+                                 required_tolerance or degrees_per_step
+                                 is <= 0. 
+*/
+double IndexingUtils::Find_UB(       DblMatrix        & UB,
+                               const std::vector<V3D> & q_vectors,
+                                     double a, double b, double c,
+                                     double alpha, double beta, double gamma,
+                                     double             required_tolerance,
+                                     size_t             num_initial,
+                                     double             degrees_per_step )
+{
+  if ( UB.numRows() != 3 || UB.numCols() != 3 )
+  {
+   throw std::invalid_argument("UB matrix NULL or not 3X3");
+  }
+
+  if ( q_vectors.size() < 2 )
+  {
+   throw std::invalid_argument("Two or more indexed peaks needed to find UB");
+  }
+
+  if ( required_tolerance <= 0 )
+  {
+   throw std::invalid_argument("required_tolerance must be positive");
+  }
+
+  if ( num_initial < 2 )
+  {
+   throw std::invalid_argument("number of peaks for inital scan must be > 2");
+  }
+
+  if ( degrees_per_step <= 0 )
+  {
+   throw std::invalid_argument("degrees_per_step must be positive");
+  }
+
+  std::vector<V3D> sorted_qs( q_vectors );
+
+  std::sort( sorted_qs.begin(), sorted_qs.end(), CompareMagnitude );
+
+  if ( num_initial > sorted_qs.size() )
+    num_initial = sorted_qs.size();
+
+  std::vector<V3D> some_qs;
+  for ( size_t i = 0; i < num_initial; i++ )
+    some_qs.push_back( sorted_qs[i] );
+
+  ScanFor_UB( UB, some_qs,
+              a, b, c, alpha, beta, gamma,
+              degrees_per_step,
+              required_tolerance );
+
+  double  fit_error = 0;
+  int     num_indexed;
+  std::vector<V3D> miller_ind;
+  std::vector<V3D> indexed_qs;
+
+                                     // now gradually bring in the remaining
+                                     // peaks and re-optimize the UB to index
+                                     // them as well
+  size_t count = 0;
+  while ( num_initial < q_vectors.size() )
+  {
+    count++;
+    num_initial = round(1.5 * (double)(num_initial + 3));
+                                             // add 3, in case we started with
+                                             // a very small number of peaks!
+    if ( num_initial >= q_vectors.size() )
+      num_initial = q_vectors.size();
+
+    for ( size_t i = some_qs.size(); i < num_initial; i++ )
+      some_qs.push_back( q_vectors[i] );
+
+    try
+    {
+      num_indexed = GetIndexedPeaks( UB, some_qs, required_tolerance,
+                                     miller_ind, indexed_qs, fit_error );
+      Matrix<double> temp_UB(3,3,false);
+      fit_error = Find_UB( temp_UB, miller_ind, indexed_qs );
+      UB = temp_UB;
+    }
+    catch (...)
+    {
+      // failed to fit using these peaks, so add some more and try again
+    }
+  }
+
+  if ( q_vectors.size() >= 3 )    // do one last refinement using all peaks
+  {
+    try 
+    {
+      num_indexed = GetIndexedPeaks( UB, q_vectors, required_tolerance,
+                                     miller_ind, indexed_qs, fit_error );
+      Matrix<double> temp_UB(3,3,false);
+      fit_error = Find_UB( temp_UB, miller_ind, indexed_qs );
+      UB = temp_UB;
+    }
+    catch (...)
+    {
+      // failed to improve UB using these peaks, so just return the current UB 
+    }
+  }
+                                 // Regardless of how we got the UB, find the
+                                 // sum-squared errors for the indexing in 
+                                 // HKL space.
+  num_indexed = GetIndexedPeaks( UB, q_vectors, required_tolerance,
+                                 miller_ind, indexed_qs, fit_error );
+  return fit_error;
+}
+
+
+/** 
+  STATIC method Find_UB: Calculates the matrix that most nearly indexes 
   the specified q_vectors, given the lattice parameters.  
   The sum of the squares of the residual errors is returned.
   
@@ -53,11 +218,11 @@ using Mantid::Kernel::Quat;
                                  cell, or if they cannot be indexed within
                                  the required tolerance.
 */
-double IndexingUtils::BestFit_UB(       DblMatrix        & UB,
-                                  const std::vector<V3D> & q_vectors,
-                                        double             required_tolerance,
-                                        double a, double b, double c,
-                                        double alpha, double beta, double gamma)
+double IndexingUtils::Find_UB(       DblMatrix        & UB,
+                               const std::vector<V3D> & q_vectors,
+                                     double             required_tolerance,
+                                     double a, double b, double c,
+                                     double alpha, double beta, double gamma)
 {
   if ( UB.numRows() != 3 || UB.numCols() != 3 )
   {
@@ -102,7 +267,7 @@ double IndexingUtils::BestFit_UB(       DblMatrix        & UB,
 
                             // Use the 1D indices and qs to optimize the 
                             // plane normal, a_dir.
-  fit_error = BestFit_Direction( a_dir, index_vals, indexed_qs );
+  fit_error = Find_Direction( a_dir, index_vals, indexed_qs );
 
                             // Now do a similar process for the planes with
                             // normals in the direction of "b" in the unit cell
@@ -129,7 +294,7 @@ double IndexingUtils::BestFit_UB(       DblMatrix        & UB,
                                     indexed_qs,
                                     fit_error  );
 
-  fit_error = BestFit_Direction( b_dir, index_vals, indexed_qs );
+  fit_error = Find_Direction( b_dir, index_vals, indexed_qs );
 
   // Now calculate the third direction, for plane normals in the c direction,
   // using the results in UBMatriximplementationnotes.pdf, pg 3, Andre Savici.
@@ -170,7 +335,7 @@ double IndexingUtils::BestFit_UB(       DblMatrix        & UB,
                                     indexed_qs,
                                     fit_error  );
 
-  fit_error = BestFit_Direction( c_dir, index_vals, indexed_qs );
+  fit_error = Find_Direction( c_dir, index_vals, indexed_qs );
 
                             // Now, using the plane normals for all three
                             // families of planes, get a consistent indexing
@@ -186,14 +351,14 @@ double IndexingUtils::BestFit_UB(       DblMatrix        & UB,
 
                             // Finally, use the indexed peaks to get an 
                             // optimized UB that matches the indexing
-  fit_error = BestFit_UB( UB, miller_ind, indexed_qs );
+  fit_error = Find_UB( UB, miller_ind, indexed_qs );
 
   return fit_error;
 }
 
 
 /** 
-  STATIC method BestFit_UB: Calculates the matrix that most nearly maps
+  STATIC method Find_UB: Calculates the matrix that most nearly maps
   the specified hkl_vectors to the specified q_vectors.  The calculated
   UB minimizes the sum squared differences between UB*(h,k,l) and the
   corresponding (qx,qy,qz) for all of the specified hkl and Q vectors.
@@ -208,7 +373,9 @@ double IndexingUtils::BestFit_UB(       DblMatrix        & UB,
   NOTE: The number of hkl_vectors and q_vectors must be the same, and must
         be at least 3.
   
-  @return  This will return the sum of the squares of the residual errors.
+  @return  This will return the sum of the squares of the residual differences 
+           between the Q vectors provided and the UB*hkl values, in 
+           reciprocal space. 
  
   @throws  std::invalid_argument exception if there are not at least 3
                                  hkl and q vectors, or if the numbers of
@@ -219,9 +386,9 @@ double IndexingUtils::BestFit_UB(       DblMatrix        & UB,
                                  the UB matrix can't be calculated or if 
                                  UB is a singular matrix.
 */  
-double IndexingUtils::BestFit_UB(      DblMatrix         & UB,
-                                 const std::vector<V3D>  & hkl_vectors, 
-                                 const std::vector<V3D>  & q_vectors )
+double IndexingUtils::Find_UB(      DblMatrix         & UB,
+                              const std::vector<V3D>  & hkl_vectors, 
+                              const std::vector<V3D>  & q_vectors )
 {
   if ( UB.numRows() != 3 || UB.numCols() != 3 )
   {
@@ -321,16 +488,16 @@ double IndexingUtils::BestFit_UB(      DblMatrix         & UB,
 
 
 /** 
-  STATIC method BestFit_Direction: Calculates the vector for which the
+  STATIC method Find_Direction: Calculates the vector for which the
   dot product of the the vector with each of the specified Qxyz vectors 
   is most nearly the corresponding integer index.  The calculated best_vec
   minimizes the sum squared differences between best_vec dot (qx,qy,z) 
   and the corresponding index for all of the specified Q vectors and 
   indices.  The sum of the squares of the residual errors is returned.
-  NOTE: This method is similar the BestFit_UB method, but this method only
+  NOTE: This method is similar the Find_UB method, but this method only
         optimizes the plane normal in one direction.  Also, this optimizes
         the mapping from (qx,qy,qz) to one index (Q to index), while the 
-        BestFit_UB method optimizes the mapping from three (h,k,l) to
+        Find_UB method optimizes the mapping from three (h,k,l) to
         (qx,qy,qz) (3 indices to Q).
   
   @param  best_vec     V3D vector that will be set to a vector whose 
@@ -355,9 +522,9 @@ double IndexingUtils::BestFit_UB(      DblMatrix         & UB,
                                  the best direction can't be calculated.
 */
 
-double IndexingUtils::BestFit_Direction(           V3D          & best_vec,
-                                        const std::vector<int>  & index_values,
-                                        const std::vector<V3D>  & q_vectors )
+double IndexingUtils::Find_Direction(           V3D          & best_vec,
+                                     const std::vector<int>  & index_values,
+                                     const std::vector<V3D>  & q_vectors )
 {
   if ( index_values.size() < 3 )
   {
@@ -622,6 +789,7 @@ double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
   return min_error;
 }
 
+
 /**
     For a rotated unit cell, calculate the vector in the direction of edge
     "c" given two vectors a_dir and b_dir in the directions of edges "a" 
@@ -787,6 +955,7 @@ int IndexingUtils::NumberIndexed( const DblMatrix         & UB,
   @param fit_error           The sum of the squares of the distances from
                              integer values for the projections of the 
                              indexed q_vectors on the specified direction.
+                             This is a measure of the error in HKL space.
 
   @return The number of q_vectors that are indexed to within the specified
           tolerance, in the specified direction.
@@ -854,6 +1023,7 @@ int IndexingUtils::GetIndexedPeaks_1D( const V3D              & direction,
   @param fit_error           The sum of the squares of the distances from
                              integer values for the projections of the 
                              indexed q_vectors on the specified directions.
+                             This is a measure of the error in HKL space.
 
   @return The number of q_vectors that are indexed to within the specified
           tolerance, in the specified direction.
@@ -933,8 +1103,9 @@ int IndexingUtils::GetIndexedPeaks_3D( const V3D              & direction_1,
   @param indexed_qs          List of Qxyz value for the peaks that were
                              indexed indexed in all specified directions.
   @param fit_error           The sum of the squares of the distances from
-                             integer values for the projections of the 
-                             indexed q_vectors on the specified directions.
+                             integer values for the UB*Q for the specified
+                             UB matrix and the specified q_vectors. 
+                             This is a measure of the error in HKL space.
 
   @return The number of q_vectors that are indexed to within the specified
           tolerance, in the specified direction.

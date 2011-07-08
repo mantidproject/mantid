@@ -40,31 +40,36 @@ public:
     return q_vectors;
   } 
 
-  void test_BestFit_UB_given_lattice_parameters()
+  void test_Find_UB_given_lattice_parameters()
   {
     Matrix<double> UB(3,3,false);
 
-    double correct_UB[] = { -0.0596604,  0.04964820, -0.00775391,
-                             0.0930100,  0.00751049, -0.04198350,
-                            -0.1046440, -0.02161340, -0.03225860 };
+    double correct_UB[] = { -0.1015550,  0.0992964, -0.0155078,
+                             0.1274830,  0.0150210, -0.0839671,
+                            -0.0507717, -0.0432269, -0.0645173 };
 
     std::vector<V3D> q_vectors = getNatroliteQs();
 
-    double a =  6.5781;
-    double b = 18.2995;
-    double c = 18.6664;
-    double alpha = 90;
-    double beta  = 90;
-    double gamma = 90;
+    double  a     = 6.6f;
+    double  b     = 9.7f;
+    double  c     = 9.9f;
+    double  alpha = 84;
+    double  beta  = 71;
+    double  gamma = 70;
 
-    double required_tolerance = 0.10;
+    double required_tolerance = 0.2;
+    size_t num_initial = 3;
+    double degrees_per_step = 3;
+    
+    double error = IndexingUtils::Find_UB( UB, 
+                                           q_vectors, 
+                                           a, b, c, 
+                                           alpha, beta, gamma,
+                                           required_tolerance,
+                                           num_initial,
+                                           degrees_per_step );
 
-    double error = IndexingUtils::BestFit_UB( UB, 
-                                              q_vectors, 
-                                              required_tolerance,
-                                              a, b, c, 
-                                              alpha, beta, gamma );
-    TS_ASSERT_DELTA( error, 0.000111616, 1e-5 );
+    TS_ASSERT_DELTA( error, 0.00671575, 1e-5 );
 
     std::vector<double> UB_returned = UB.get_vector();
     for ( size_t i = 0; i < 9; i++ )
@@ -79,7 +84,7 @@ public:
   }
 
 
-  void test_BestFit_UB() 
+  void test_Find_UB_given_indexing() 
   {  
      double h_vals[]  = {  1,  0,  0, -1,  0,  0, 1, 1 };
      double k_vals[]  = { .1,  1,  0,  0, -1,  0, 1, 2 };
@@ -110,7 +115,7 @@ public:
        hkl_list[row] = hkl;
      }
 
-     double sum_sq_error = IndexingUtils::BestFit_UB( UB, hkl_list, q_list );
+     double sum_sq_error = IndexingUtils::Find_UB( UB, hkl_list, q_list );
 
      std::vector<double> UB_returned = UB.get_vector();
 
@@ -121,7 +126,7 @@ public:
   }
 
   
-  void test_BestFit_Direction()
+  void test_Find_Direction()
   {
     std::vector<int> index_values;
     int correct_indices[] = { 1, 4, 2, 0, 1, 3, 0, -1, 0, -1, -2, -3 };
@@ -133,7 +138,7 @@ public:
     std::vector<V3D> q_vectors = getNatroliteQs();
 
     V3D best_vec;
-    double error = IndexingUtils::BestFit_Direction( best_vec, 
+    double error = IndexingUtils::Find_Direction( best_vec, 
                                                      index_values, 
                                                      q_vectors );
     TS_ASSERT_DELTA( error, 0.00218606, 1e-5 );

@@ -54,21 +54,31 @@ class MANTID_GEOMETRY_DLL IndexingUtils
 
   /// Find the UB matrix that most nearly indexes the specified qxyz values 
   /// given the lattice parameters 
-  static double BestFit_UB(       Kernel::DblMatrix        & UB,
-                            const std::vector<Kernel::V3D> & q_vectors,
-                                  double                     required_tolerance,
-                                  double a, double b, double c,
-                                  double alpha, double beta, double gamma );
+  static double Find_UB(       Kernel::DblMatrix        & UB,
+                         const std::vector<Kernel::V3D> & q_vectors,
+                               double a, double b, double c,
+                               double alpha, double beta, double gamma,
+                               double                     required_tolerance,
+                               size_t                     num_initial,
+                               double                     degrees_per_step );
+
+  /// Find the UB matrix that most nearly indexes the specified qxyz values 
+  /// given the lattice parameters 
+  static double Find_UB(       Kernel::DblMatrix        & UB,
+                         const std::vector<Kernel::V3D> & q_vectors,
+                               double                     required_tolerance,
+                               double a, double b, double c,
+                               double alpha, double beta, double gamma );
 
   /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
-  static double BestFit_UB(Kernel::DblMatrix               & UB,
-                           const std::vector<Kernel::V3D>  & hkl_vectors, 
-                           const std::vector<Kernel::V3D>  & q_vectors   );
+  static double Find_UB(Kernel::DblMatrix               & UB,
+                        const std::vector<Kernel::V3D>  & hkl_vectors, 
+                        const std::vector<Kernel::V3D>  & q_vectors   );
 
   /// Find the vector that best corresponds to plane normal, given 1-D indices
-  static double BestFit_Direction(     Kernel::V3D       & best_vec,
-                                 const std::vector<int>  & index_values,
-                                 const std::vector<Kernel::V3D>  & q_vectors );
+  static double Find_Direction(      Kernel::V3D       & best_vec,
+                               const std::vector<int>  & index_values,
+                               const std::vector<Kernel::V3D>  & q_vectors );
 
   /// Scan rotations to find UB that indexes peaks given lattice parameters
   static double ScanFor_UB(       Kernel::DblMatrix         & UB,
