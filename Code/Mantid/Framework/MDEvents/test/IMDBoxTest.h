@@ -180,7 +180,7 @@ public:
   }
 
   /** Open a nexus file for this and save it */
-  void test_saveNexus_loadNexus()
+  void xtest_saveNexus_loadNexus()
   {
     std::string filename = "notset";
     try
