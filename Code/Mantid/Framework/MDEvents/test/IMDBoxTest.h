@@ -183,10 +183,20 @@ public:
   void test_saveNexus_loadNexus()
   {
     // Clean up if it exists
-    std::string filename(ConfigService::Instance().getString("defaultsave.directory") + "/IMDBoxTest.nxs");
-    std::cout << "Writing to " << filename << std::endl;
+    std::string filename(ConfigService::Instance().getString("defaultsave.directory") + "IMDBoxTest.nxs");
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();
+
+    try
+    {
+      Poco::File(filename).createFile();
+    }
+    catch (...)
+    {
+      std::cout << "Error! Could not write to " + filename << std::endl;
+      std::cout << "Skipping test.\n";
+      return;
+    }
 
     IMDBoxTester<MDEvent<2>,2> b;
     b.setExtents(0, -10.0, 10.0);
