@@ -17,6 +17,12 @@ class InelasticReducer(Reducer):
     ## Data loader
     _data_loader = None
     
+    ## Incident energy calculator
+    _ei_calculator = None
+    
+    ## Detector vanadium correction
+    _detector_vanadium = None
+    
     ## Apply Ki/Kf correction
     _kikf_corrector = None
     
@@ -33,10 +39,10 @@ class InelasticReducer(Reducer):
     _nxspe_saver = None
     
     ## Save Mantid NeXus file
-    _save_mantid_nexus = None
+    _nexus_saver = None
     
     ## Save SPE file 
-    _save_spe = None
+    _spe_saver = None
     
     
     
@@ -50,6 +56,18 @@ class InelasticReducer(Reducer):
             @param loader: Workflow algorithm object
         """ 
         self._data_loader = loader
+        
+    def set_ei_calculator(self, calculator):
+        """
+            Set the algorithm to calculate (or fix) the incident energy
+        """
+        self._ei_calculator = calculator
+
+    def set_detector_vandium(self, normaliser):
+        """
+            Set the step to perform the detector vanadium normalisation
+        """
+        self._detector_vanadium = normaliser
 
     def set_kikf_correction(self, corrector):
         """
@@ -67,7 +85,7 @@ class InelasticReducer(Reducer):
 
     def set_background_subtractor(self, subtractor):
         """
-            Set the step that will apply the Ki/Kf scaling correction
+            Set the step that will remove a background
         """
         self._background_subtractor = subtractor
 
@@ -75,7 +93,27 @@ class InelasticReducer(Reducer):
         """
             Set the step that will apply the mask
         """
+        self._masker = masker
 
+    def set_nxspe_saver(self, saver):
+        """
+            Set the algorithm that will save the NXSPE file
+        """
+        self._nxspe_saver = saver
+        
+    def set_spe_saver(self, saver):
+        """
+            Set the algorithm that will save the SPE file
+        """
+        self._spe_saver = saver
+        
+    def set_nexus_saver(self, saver):
+        """
+            Set the algorithm that will save the (Processed) NeXus file
+        """
+        self._nexus_saver = saver
+        
+        
         
     def pre_process(self): 
         """
