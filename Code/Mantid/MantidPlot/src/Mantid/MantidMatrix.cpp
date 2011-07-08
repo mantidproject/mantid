@@ -929,6 +929,12 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
 */
 MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 {
+  if (numRows() == 1)
+  {
+    QMessageBox::critical(0,"MantidPlot - Error","Cannot plot a workspace with only one spectrum.");
+    return NULL;
+  }
+
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   ApplicationWindow *a = applicationWindow();
