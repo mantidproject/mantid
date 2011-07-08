@@ -326,7 +326,8 @@ public:
     AnalysisDataService::Instance().remove("multiperiod");
   }
 
-  void testWithManagedWorkspace()
+  //TODO: Re-enable this test if needed. Disabled Jul 8, 2011, Janik Zikovsky
+  void xtestWithManagedWorkspace()
   {
     ConfigServiceImpl& conf = ConfigService::Instance();
     const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
