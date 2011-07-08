@@ -55,16 +55,21 @@ void ConvertToMatrixWorkspace::exec()
     for (int64_t i = 0; i < (int64_t)numHists; ++i)
     {
       PARALLEL_START_INTERUPT_REGION
-	  
-      outputWorkspace->setX(i,inputWorkspace->refX(i));
-      outputWorkspace->dataY(i) = inputWorkspace->readY(i);
-      outputWorkspace->dataE(i) = inputWorkspace->readE(i);
+      const ISpectrum * inSpec = inputWorkspace->getSpectrum(i);
+      ISpectrum * outSpec = outputWorkspace->getSpectrum(i);
+
+      outSpec->copyInfoFrom(*inSpec);
+      outSpec->setX(inSpec->ptrX());
+      outSpec->dataY() = inSpec->dataY();
+      outSpec->dataE() = inSpec->dataE();
       
       prog.report("Binning");
 
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
+
+    outputWorkspace->generateSpectraMap();
   }
   else
   {

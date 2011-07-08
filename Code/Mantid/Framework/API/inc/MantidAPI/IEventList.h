@@ -3,6 +3,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ISpectrum.h"
 
 namespace Mantid
 {
@@ -18,13 +19,20 @@ namespace API
    * @author Janik Zikovsky
    * @date 2011-04-12 11:48:38.252379
    */
-  class MANTID_API_DLL IEventList 
+  class MANTID_API_DLL IEventList : public ISpectrum
   {
   public:
+    /// Empty constructor
+    IEventList()
+    { }
+
+    /// Constructor
+    IEventList(specid_t specNo)
+    : ISpectrum(specNo)
+    {}
+
     virtual Mantid::API::EventType getEventType() const = 0;
     virtual void switchTo(Mantid::API::EventType newType) = 0;
-    virtual void addDetectorID(const detid_t detID) = 0;
-    virtual bool hasDetectorID(const detid_t detID) const = 0;
     virtual void clear(const bool removeDetIDs) = 0;
     virtual void reserve(size_t num) = 0;
     virtual bool isSortedByTof() const = 0;

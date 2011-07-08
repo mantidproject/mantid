@@ -22,6 +22,9 @@
 #include <Poco/Path.h>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
+#include "MantidGeometry/ISpectraDetectorMap.h"
+
+using Mantid::Geometry::ISpectraDetectorMap;
 
 namespace Mantid
 {
@@ -213,10 +216,10 @@ void LoadRaw3::exec()
   {
     if (period > 0)
     {
-     	if(localWorkspace)
-		{
-			localWorkspace=createWorkspace(localWorkspace);
-		}
+      if(localWorkspace)
+      {
+        localWorkspace=createWorkspace(localWorkspace);
+      }
 
       if (bLoadlogFiles)
       {
@@ -224,70 +227,77 @@ void LoadRaw3::exec()
         std::stringstream prevPeriod;
         prevPeriod << "PERIOD " << (period);
         //std::string prevPeriod="PERIOD "+suffix.str();
-		if(localWorkspace)
-		{
-			Run& runObj = localWorkspace->mutableRun();
-			runObj.removeLogData(prevPeriod.str());
-			//add current period data
-			Property* log = createPeriodLog(period+1);
-			if (log) runObj.addLogData(log);
-		}
-		if(monitorWorkspace)
-		{
-			Run& runObj = monitorWorkspace->mutableRun();
-			runObj.removeLogData(prevPeriod.str());
-			//add current period data
-			Property* log = createPeriodLog(period+1);
-			if (log) runObj.addLogData(log);
-		}
+        if(localWorkspace)
+        {
+          Run& runObj = localWorkspace->mutableRun();
+          runObj.removeLogData(prevPeriod.str());
+          //add current period data
+          Property* log = createPeriodLog(period+1);
+          if (log) runObj.addLogData(log);
+        }
+        if(monitorWorkspace)
+        {
+          Run& runObj = monitorWorkspace->mutableRun();
+          runObj.removeLogData(prevPeriod.str());
+          //add current period data
+          Property* log = createPeriodLog(period+1);
+          if (log) runObj.addLogData(log);
+        }
       }//end of if loop for loadlogfiles
       if (bseparateMonitors)
       {
-       	  try
-		  {
-			  monitorWorkspace=createWorkspace(monitorWorkspace,monitorwsSpecs,m_lengthIn,m_lengthIn-1);
-		  }
-		  catch(std::out_of_range& )
-		  {
-			  g_log.information()<<"Separate Monitors option is selected and no monitors in the selected specra range."<<std::endl;
-			  g_log.information()<<"Error in creating one of the output workspaces"<<std::endl;
-		  }
-		  catch(std::runtime_error& )
-		  {
-			  g_log.information()<<"Separate Monitors option is selected,Error in creating one of the output workspaces"<<std::endl;
-		  }
+        try
+        {
+          monitorWorkspace=createWorkspace(monitorWorkspace,monitorwsSpecs,m_lengthIn,m_lengthIn-1);
+        }
+        catch(std::out_of_range& )
+        {
+          g_log.information()<<"Separate Monitors option is selected and no monitors in the selected specra range."<<std::endl;
+          g_log.information()<<"Error in creating one of the output workspaces"<<std::endl;
+        }
+        catch(std::runtime_error& )
+        {
+          g_log.information()<<"Separate Monitors option is selected,Error in creating one of the output workspaces"<<std::endl;
+        }
       }//end of separate Monitors
     }
-	//skipping the first spectra in each period
-	skipData(file, static_cast<int>(period * (m_numberOfSpectra + 1)));
-    
-	if (bexcludeMonitors)
-	{
-		excludeMonitors(file,period,monitorSpecList,localWorkspace);
-	}
-	if (bincludeMonitors)
-	{
-		includeMonitors(file,period,localWorkspace);
-	}
-	if (bseparateMonitors)
-	{
-		separateMonitors(file,period,monitorSpecList,localWorkspace,monitorWorkspace);
-	}
+    //skipping the first spectra in each period
+    skipData(file, static_cast<int>(period * (m_numberOfSpectra + 1)));
+
+    if (bexcludeMonitors)
+    {
+      excludeMonitors(file,period,monitorSpecList,localWorkspace);
+    }
+    if (bincludeMonitors)
+    {
+      includeMonitors(file,period,localWorkspace);
+    }
+    if (bseparateMonitors)
+    {
+      separateMonitors(file,period,monitorSpecList,localWorkspace,monitorWorkspace);
+    }
+
+    // Re-update spectra etc.
+    if (localWorkspace)
+      localWorkspace->updateSpectraUsingMap();
+
+    if (monitorWorkspace)
+      monitorWorkspace->updateSpectraUsingMap();
 
     // Assign the result to the output workspace property
     if (m_numberOfPeriods > 1)
     {
-		if (bseparateMonitors)
-		{
-			// declare and set monitor workspace for each period
-			setWorkspaceProperty(monitorWorkspace, monitorws_grp, period, true);
-			// declare and set output workspace for each period
-			setWorkspaceProperty(localWorkspace, ws_grp, period, false);
-		}
-		else
-		{
-			setWorkspaceProperty(localWorkspace, ws_grp, period, false);
-		}
+      if (bseparateMonitors)
+      {
+        // declare and set monitor workspace for each period
+        setWorkspaceProperty(monitorWorkspace, monitorws_grp, period, true);
+        // declare and set output workspace for each period
+        setWorkspaceProperty(localWorkspace, ws_grp, period, false);
+      }
+      else
+      {
+        setWorkspaceProperty(localWorkspace, ws_grp, period, false);
+      }
       // progress for workspace groups 
       m_prog = static_cast<double>(period) / static_cast<double>(m_numberOfPeriods - 1);
     }

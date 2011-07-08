@@ -73,38 +73,25 @@ namespace Mantid
       // Get detectors stored in instrument and create dummy c-arrays for the purpose
       // of calling method of SpectraDetectorMap 
       std::map<detid_t, IDetector_sptr> detCache;
+
       //FIXME: Use GetDetectorID's here since it'll be way faster.
       instrument->getDetectors(detCache);
       const int64_t number_spectra = static_cast<int64_t>(detCache.size());
       
       bool MakeEventWorkspace = getProperty("MakeEventWorkspace");
       
+      MatrixWorkspace_sptr outWS;
+
       if (MakeEventWorkspace)
       {
         //Make a brand new EventWorkspace
         EventWorkspace_sptr localWorkspace = boost::dynamic_pointer_cast<EventWorkspace>(
-            API::WorkspaceFactory::Instance().create("EventWorkspace", ws->getNumberHistograms(), 2, 1));
+            API::WorkspaceFactory::Instance().create("EventWorkspace", number_spectra, 2, 1));
         //Copy geometry over.
-        API::WorkspaceFactory::Instance().initializeFromParent(ws, localWorkspace, false);
+        API::WorkspaceFactory::Instance().initializeFromParent(ws, localWorkspace, true);
 
-        // Make one pixel per detector
-        size_t wi=0;
-        detid2det_map::const_iterator it;
-        for ( it = detCache.begin(); it != detCache.end(); ++it )
-        {
-          localWorkspace->getOrAddEventList(wi).clear(true);
-          localWorkspace->getEventList(wi).addDetectorID(it->first);
-          wi++;
-        }
-        localWorkspace->doneAddingEventLists();
-        MantidVecPtr X;
-        X.access().push_back(0.0);
-        X.access().push_back(1.0);
-        localWorkspace->setAllX(X);
-
-        //Cast to the matrixOutputWS and save it
-        MatrixWorkspace_sptr matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(localWorkspace);
-        this->setProperty("OutputWorkspace", matrixOutputWS);
+        // Cast to matrix WS
+        outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(localWorkspace);
       }
       else
       {
@@ -112,45 +99,32 @@ namespace Mantid
         DataObjects::Workspace2D_sptr localWorkspace =
           boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(ws,number_spectra,2,1));
 
-        specid_t *spec = new specid_t[number_spectra];
-        detid_t *udet = new detid_t[number_spectra];
+        outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(localWorkspace);
+      }
 
-        detid2det_map::const_iterator it;
-        specid_t counter = 0;
-        for ( it = detCache.begin(); it != detCache.end(); ++it )
-        {
-          counter++;
-          spec[counter-1] = counter;    // have no feeling of how best to number these spectra
-                                        // and sure whether the way it is done here is the best way...
-          udet[counter-1] = it->first;
-        }
+      outWS->rebuildSpectraMapping( true /* include monitors */);
 
-	localWorkspace->replaceSpectraMap(new SpectraDetectorMap(spec,udet,number_spectra));
 
-        counter = 0;
+      // ---- Set the values ----------
+      if (!MakeEventWorkspace)
+      {
         MantidVecPtr x,v,v_monitor;
         x.access().resize(2); x.access()[0]=1.0; x.access()[1]=2.0;
         v.access().resize(1); v.access()[0]=detector_value;
         v_monitor.access().resize(1); v_monitor.access()[0]=monitor_value;
 
-        for ( it = detCache.begin(); it != detCache.end(); ++it )
+        for (size_t i=0; i < outWS->getNumberHistograms(); i++)
         {
-          if ( (it->second)->isMonitor() )
-            localWorkspace->setData(counter, v_monitor, v_monitor);
+          IDetector_sptr det = outWS->getDetector(i);
+          if ( det->isMonitor() )
+            outWS->setData(i, v_monitor, v_monitor);
           else
-            localWorkspace->setData(counter, v, v);
-          localWorkspace->setX(counter, x);
-          localWorkspace->getAxis(1)->spectraNo(counter)= counter+1;  // Not entirely sure if this 100% ok
-          ++counter;
+            outWS->setData(i, v, v);
         }
-
-        MatrixWorkspace_sptr matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(localWorkspace);
-        this->setProperty("OutputWorkspace", matrixOutputWS);
-
-        // Clean up
-        delete[] spec;
-        delete[] udet;
       }
+      // Save in output
+      this->setProperty("OutputWorkspace", outWS);
+
     }
     
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)

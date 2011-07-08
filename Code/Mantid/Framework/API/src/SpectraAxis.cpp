@@ -54,6 +54,7 @@ SpectraAxis::SpectraAxis(const size_t length, const Geometry::ISpectraDetectorMa
       m_values.resize(0);
       return;
   }
+  // it->first = the spectrum number
   specid_t previous = itr->first;
   m_values[0] = previous;
   ++itr;
@@ -64,8 +65,11 @@ SpectraAxis::SpectraAxis(const size_t length, const Geometry::ISpectraDetectorMa
     const specid_t current = itr->first;
     if( current != previous )
     {
+      // the spectrum number (in the iterator) just changed.
+      // save this new spectrum number in the SpectraAxis
       m_values[index] = current;
       previous = current;
+      // go to the next workspace index
       ++index;
     }
   }

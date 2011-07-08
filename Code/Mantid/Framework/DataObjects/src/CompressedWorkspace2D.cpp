@@ -141,19 +141,19 @@ CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(Ma
   size_t j = 0;
   for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
-    MantidVec& X = block->dataX(startIndex + i);
+    MantidVec& X = block->getSpectrum(startIndex + i)->dataX();
     MantidVec::iterator it = std::copy(X.begin(),X.end(),m_inBuffer.begin() + j);
     j += m_XLength;
   }
   for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
-    MantidVec& Y = block->dataY(startIndex + i);
+    MantidVec& Y = block->getSpectrum(startIndex + i)->dataY();
     MantidVec::iterator it = std::copy(Y.begin(),Y.end(),m_inBuffer.begin() + j);
     j += m_YLength;
   }
   for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
-    MantidVec& E = block->dataE(startIndex + i);
+    MantidVec& E = block->getSpectrum(startIndex + i)->dataE();
     MantidVec::iterator it = std::copy(E.begin(),E.end(),m_inBuffer.begin() + j);
     j += m_YLength;
   }
@@ -213,19 +213,19 @@ void CompressedWorkspace2D::uncompressBlock(ManagedDataBlock2D* block,size_t sta
   size_t j = 0;
   for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
-    MantidVec& X = block->dataX(startIndex + i);
+    MantidVec& X = block->getSpectrum(startIndex + i)->dataX();
     X.assign(out + j,out + j + m_XLength);
     j += m_XLength;
   }
   for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
-    MantidVec& Y = block->dataY(startIndex + i);
+    MantidVec& Y = block->getSpectrum(startIndex + i)->dataY();
     Y.assign(out + j,out + j + m_YLength);
     j += m_YLength;
   }
   for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
-    MantidVec& E = block->dataE(startIndex + i);
+    MantidVec& E = block->getSpectrum(startIndex + i)->dataE();
     E.assign(out + j,out + j + m_YLength);
     j += m_YLength;
   }

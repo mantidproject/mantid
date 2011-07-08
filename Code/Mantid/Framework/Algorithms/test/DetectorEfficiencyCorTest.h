@@ -75,6 +75,9 @@ public:
     
   }
 
+  /** Test disabled by JZ Jul 7, 2011. As of revision 12947, the
+   * ConvertUnits step fails and the results seem to be compared to the old workspace
+   */
   void testFromRaw()
   {
     // a smallish raw file that contains the detailed detector information stored by the excitations group 

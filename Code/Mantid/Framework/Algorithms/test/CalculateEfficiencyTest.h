@@ -44,14 +44,12 @@ public:
         X[1] = 2;
         Y[0] = 2.0;
         E[0] = 1;
-        ws->getAxis(1)->spectraNo(i) = i;
       }
     }
     // Change one of the bins so that it will be excluded for having a high signal
     Mantid::MantidVec& Y = ws->dataY(SANSInstrumentCreationHelper::nMonitors+5);
     Y[0] = 202.0;
-
-  }
+ }
 
   void testName()
   {

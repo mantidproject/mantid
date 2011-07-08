@@ -231,45 +231,6 @@ public:
     }
   }
 
-  void test_LoadPreNeXus_CNCS_PadPixels()
-  {
-    std::string eventfile( "CNCS_7860_neutron_event.dat" );
-    eventLoader->setPropertyValue("EventFilename", eventfile);
-    eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
-    eventLoader->setPropertyValue("OutputWorkspace", "cncs");
-
-    //Get the event file size
-    struct stat filestatus;
-    stat(eventfile.c_str(), &filestatus);
-
-    //std::cout << "***** executing *****" << std::endl;
-    TS_ASSERT( eventLoader->execute() );
-
-    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>
-            (AnalysisDataService::Instance().retrieve("cncs"));
-
-    //The # of events = size of the file / 8 bytes (per event)
-    //This fails cause of errors in events
-    //TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
-
-    //Only some of the pixels weretof loaded, because of lot of them are empty
-    int numpixels = 50*8*128; //50 8-packs; monitors are ignored
-    TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels);
-
-    //This time, the max pixel ID is higher since we padded them.
-    TS_ASSERT_EQUALS( ew->spectraMap().nElements(), numpixels);
-
-
-    //Check if the instrument was loaded correctly
-    boost::shared_ptr<Instrument> inst = ew->getBaseInstrument();
-    TS_ASSERT_EQUALS (  inst->getName(), "CNCS" );
-
-    //Mapping between workspace index and spectrum number
-    //Is the length good?
-    TS_ASSERT_EQUALS( ew->getAxis(1)->length(), numpixels);
-
-  }
-
 
   void test_LoadPreNeXus_CNCS_SkipPixels()
   {

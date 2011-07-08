@@ -118,23 +118,19 @@ void SumSpectra::exec()
 
     Progress progress(this,0,1, indices.size());
 
+    // This is the (only) output spectrum
+    ISpectrum * outSpec = outputWorkspace->getSpectrum(0);
+
     // Copy over the bin boundaries
-    outputWorkspace->dataX(0) = localworkspace->readX(0);
+    outSpec->dataX() = localworkspace->readX(0);
     // Get references to the output workspaces's data vectors
-    MantidVec& YSum = outputWorkspace->dataY(0);
-    MantidVec& YError = outputWorkspace->dataE(0);
+    MantidVec& YSum = outSpec->dataY();
+    MantidVec& YError = outSpec->dataE();
 
     //Build a new spectra map
-    API::SpectraDetectorMap * specMap = new SpectraDetectorMap;
-    outputWorkspace->replaceSpectraMap(specMap);
-    const Geometry::ISpectraDetectorMap & inputSpecMap = localworkspace->spectraMap();
-    const Axis* const spectraAxis = localworkspace->getAxis(1);
-    int newSpectrumNo = 0;
-    if ( spectraAxis->isSpectra() )
-    {
-      newSpectrumNo = spectraAxis->spectraNo(m_MinSpec);
-      outputWorkspace->getAxis(1)->spectraNo(0) = newSpectrumNo;
-    }
+    specid_t newSpectrumNo = m_MinSpec;
+    outSpec->setSpectrumNo(newSpectrumNo);
+    outSpec->clearDetectorIDs();
     g_log.information() << "Spectra remapping gives single spectra with spectra number: " << newSpectrumNo << "\n";
 
     // Loop over spectra
@@ -175,10 +171,7 @@ void SumSpectra::exec()
       }
 
       // Map all the detectors onto the spectrum of the output
-      if (spectraAxis->isSpectra())
-      {
-        specMap->addSpectrumEntries(newSpectrumNo,inputSpecMap.getDetectors(spectraAxis->spectraNo(i)));
-      }
+      outSpec->addDetectorIDs( localworkspace->getSpectrum(i)->getDetectorIDs() );
 
       progress.report();
     }
@@ -188,6 +181,8 @@ void SumSpectra::exec()
     uf rs=std::sqrt;
     //take the square root of all the accumulated squared errors - Assumes Gaussian errors
     std::transform(YError.begin(), YError.end(), YError.begin(), rs);
+
+    outputWorkspace->generateSpectraMap();
 
     // Assign it to the output workspace property
     setProperty("OutputWorkspace",outputWorkspace);
@@ -206,12 +201,14 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<in
   EventWorkspace_sptr outputWorkspace = boost::dynamic_pointer_cast<EventWorkspace>(
       API::WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1));
   //Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(localworkspace, outputWorkspace, false);
+  API::WorkspaceFactory::Instance().initializeFromParent(localworkspace, outputWorkspace, true);
 
   Progress progress(this,0,1, indices.size());
 
   //Get the pointer to the output event list
   EventList & outEL = outputWorkspace->getEventList(0);
+  outEL.setSpectrumNo(m_MinSpec);
+  outEL.clearDetectorIDs();
 
   // Loop over spectra
   std::set<int>::iterator it;

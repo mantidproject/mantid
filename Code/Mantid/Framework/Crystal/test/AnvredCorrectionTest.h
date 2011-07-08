@@ -80,24 +80,27 @@ public:
 
     for (int pix = 0; pix < numPixels; pix++)
     {
+      EventList & el = retVal->getEventList(pix);
+      el.setSpectrumNo(pix);
+      el.addDetectorID(pix);
       //Background
       for (int i=0; i<numBins; i++)
       {
         //Two events per bin
-        retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
-        retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
+        el += TofEvent((i+0.5)*binDelta, run_start+double(i));
+        el += TofEvent((i+0.5)*binDelta, run_start+double(i));
       }
 
       //Peak
       int r = static_cast<int>(numEvents/std::sqrt((pix/100-50.5)*(pix/100-50.5) + (pix%100-50.5)*(pix%100-50.5)));
       for (int i=0; i<r; i++)
       {
-        retVal->getEventListAtPixelID(pix) += TofEvent(75.+10.*(((*gens[0])()+(*gens[0])()+(*gens[0])())*2.-3.), run_start+double(i));
+        el += TofEvent(75.+10.*(((*gens[0])()+(*gens[0])()+(*gens[0])())*2.-3.), run_start+double(i));
       }
 
     }
 
-    retVal->doneLoadingData();
+    retVal->doneAddingEventLists();
     /// Clean up the generators
     for (size_t d=0; d<nd; ++d)
       delete gens[d];

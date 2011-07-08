@@ -135,6 +135,7 @@ void CropWorkspace::exec()
     }
     prog.report();
   }
+  outputWorkspace->updateSpectraUsingMap();
 
   setProperty("OutputWorkspace", outputWorkspace);
 }

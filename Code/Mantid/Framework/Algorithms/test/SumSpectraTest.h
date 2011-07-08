@@ -85,19 +85,11 @@ public:
     }
 
     // Check the detectors mapped to the single spectra
-    const Geometry::ISpectraDetectorMap & specMap_out = output2D->spectraMap();
-    const int newSpectrumNo = 2;
-    TS_ASSERT_EQUALS( specMap_out.ndet(newSpectrumNo), nspecEntries);
-
-    // And their values
-    std::vector<detid_t> dets = specMap_out.getDetectors(newSpectrumNo);
-    if( dets.size() == 0 ) 
-    {
-      TS_FAIL("SpectraMap has been remapped incorrectly");
-      return;
-    }
-    TS_ASSERT_EQUALS(dets[0],3);
-    TS_ASSERT_EQUALS(dets[1],4);
+    const ISpectrum * spec = output2D->getSpectrum(0);
+    TS_ASSERT_EQUALS( spec->getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS( spec->getDetectorIDs().size(), nspecEntries);
+    TS_ASSERT( spec->hasDetectorID(3) );
+    TS_ASSERT( spec->hasDetectorID(4) );
   }
 
   void testExecWithoutLimits()
@@ -152,24 +144,18 @@ public:
     TS_ASSERT_DELTA( e[47], std::sqrt(y[47]), 0.00001 );
     TS_ASSERT_DELTA( e[99], std::sqrt(y[99]), 0.00001 );
 
-    // Check the detectors mapped to the single spectra
-    const Geometry::ISpectraDetectorMap & specMap_out = output2D->spectraMap();
-    const int newSpectrumNo(1);
-    TS_ASSERT_EQUALS( specMap_out.ndet(newSpectrumNo), nspecEntries);
 
-    // And their values
-    std::vector<detid_t> dets = specMap_out.getDetectors(newSpectrumNo);
-    if( dets.size() == 0 ) 
-    {
-      TS_FAIL("SpectraMap has been remapped incorrectly");
-      return;
-    }
-    TS_ASSERT_EQUALS(dets[0], 1);
-    TS_ASSERT_EQUALS(dets[1], 3);
-    TS_ASSERT_EQUALS(dets[2], 4);
-    TS_ASSERT_EQUALS(dets[3], 5);
-    TS_ASSERT_EQUALS(dets[4], 6);
-    TS_ASSERT_EQUALS(dets[5], 7);
+    // Check the detectors mapped to the single spectra
+    const ISpectrum * spec = output2D->getSpectrum(0);
+    TS_ASSERT_EQUALS( spec->getSpectrumNo(), 0);
+    TS_ASSERT_EQUALS( spec->getDetectorIDs().size(), nspecEntries);
+    TS_ASSERT( spec->hasDetectorID(1) );
+    TS_ASSERT( spec->hasDetectorID(3) );
+    TS_ASSERT( spec->hasDetectorID(4) );
+    TS_ASSERT( spec->hasDetectorID(5) );
+    TS_ASSERT( spec->hasDetectorID(6) );
+    TS_ASSERT( spec->hasDetectorID(7) );
+
   }
 
   void testExecEvent_inplace()
@@ -206,7 +192,6 @@ public:
     alg2.setPropertyValue("ListOfWorkspaceIndices", indices_list);
     alg2.setPropertyValue("StartWorkspaceIndex","4") ;
     alg2.setPropertyValue("EndWorkspaceIndex","6") ;
-    //This list has 9 entries: 4,5,6, 10,11,12,13,14,15
 
     alg2.execute();
     TS_ASSERT(alg2.isExecuted());

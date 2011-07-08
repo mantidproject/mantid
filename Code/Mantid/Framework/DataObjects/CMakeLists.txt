@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/CompressedWorkspace2D.cpp
 	src/EventList.cpp
 	src/EventWorkspace.cpp
+	src/EventWorkspaceMRU.cpp
 	src/EventWorkspaceHelpers.cpp
 	src/Events.cpp
 	src/GroupingWorkspace.cpp
@@ -32,6 +33,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/DllConfig.h
 	inc/MantidDataObjects/EventList.h
 	inc/MantidDataObjects/EventWorkspace.h
+	inc/MantidDataObjects/EventWorkspaceMRU.h
 	inc/MantidDataObjects/EventWorkspaceHelpers.h
 	inc/MantidDataObjects/Events.h
 	inc/MantidDataObjects/GroupingWorkspace.h
@@ -54,6 +56,7 @@ set ( TEST_FILES
 	test/CompressedWorkspace2DTest.h
 	test/EventListTest.h
 	test/EventWorkspaceTest.h
+	test/EventWorkspaceMRUTest.h
 	test/GroupingWorkspaceTest.h
 	test/Histogram1DTest.h
 	test/LibraryManagerTest.h

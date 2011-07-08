@@ -7,6 +7,9 @@
 #include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/ISpectrum.h"
+
+using Mantid::API::ISpectrum;
 
 namespace Mantid
 {
@@ -46,150 +49,25 @@ namespace Mantid
       t2.access().resize(YLength);
       for (size_t i=0;i<m_noVectors;i++)
       {
-        this->setX(i,t1);
-        data[i].setDx(t1);
+        ISpectrum * spec = this->getSpectrum(i);
+        spec->setX(t1);
+        spec->setDx(t1);
         // Y,E arrays populated
-        this->setData(i,t2,t2);
+        spec->setData(t2,t2);
+        // Default spectrum number = starts at 1, for workspace index 0.
+        spec->setSpectrumNo(specid_t(i+1));
+        spec->setDetectorID(detid_t(i+1));
       }
+      this->generateSpectraMap();
     }
 
-    /**
-    Set the x values
-    @param histnumber :: Index to the histogram
-    @param Vec :: Shared ptr base object
-    */
-    void Workspace2D::setX(const size_t histnumber, const MantidVecPtr::ptr_type& Vec)
-    {
     
-      if (histnumber>=m_noVectors)
-        throw std::range_error("Workspace2D::setX, histogram number out of range");
-     
-      data[histnumber].setX(Vec);
-      
-      return;
-    }
-
-    /**
-    Set the x values
-    @param histnumber :: Index to the histogram
-    @param PA :: Reference counted histogram
-    */
-    void Workspace2D::setX(const size_t histnumber, const MantidVecPtr& PA)
-    {
-      if (histnumber>=m_noVectors)
-        throw std::range_error("Workspace2D::setX, histogram number out of range");
-      
-      data[histnumber].setX(PA);
-
-      return;
-    }
-
-    /**
-    Sets the data in the workspace
-    @param histnumber :: The histogram to be set
-    @param PY :: A reference counted data range
-    */
-    void Workspace2D::setData(const size_t histnumber, const MantidVecPtr& PY)
-    {
-      if (histnumber>=m_noVectors)
-        throw std::range_error("Workspace2D::setData, histogram number out of range");
-
-      data[histnumber].setData(PY);
-    }
-
-    /**
-    Sets the data in the workspace
-    @param histnumber :: The histogram to be set
-    @param PY :: A reference counted data range
-    @param PE :: A reference containing the corresponding errors
-    */
-    void Workspace2D::setData(const size_t histnumber, const MantidVecPtr& PY,
-      const MantidVecPtr& PE)
-    {
-      if (histnumber>=m_noVectors)
-        throw std::range_error("Workspace2D::setData, histogram number out of range");
-
-      data[histnumber].setData(PY,PE);
-      return;
-    }
-
-    /**
-    Sets the data in the workspace
-    @param histnumber :: The histogram to be set
-    @param PY :: A reference counted data range
-    @param PE :: A reference containing the corresponding errors
-    */
-    void Workspace2D::setData(const size_t histnumber, const MantidVecPtr::ptr_type& PY,
-      const MantidVecPtr::ptr_type& PE)
-    {
-      if (histnumber>=m_noVectors)
-        throw std::range_error("Workspace2D::setData, histogram number out of range");
-
-      data[histnumber].setData(PY,PE);
-      return;
-    }
-
     /** Gets the number of histograms
     @return Integer
     */
     size_t Workspace2D::getNumberHistograms() const
     {
       return getHistogramNumberHelper();
-    }
-
-    /**
-    Get the x data of a specified histogram
-    @param index :: The number of the histogram
-    @return A vector of doubles containing the x data
-    */
-    const MantidVec& Workspace2D::dataX(const size_t index) const
-    {
-      if (index>=m_noVectors)
-        throw std::range_error("Workspace2D::dataX, histogram number out of range");
-
-      return data[index].dataX();
-    }
-
-    /**
-    Get the y data of a specified histogram
-    @param index :: The number of the histogram
-    @return A vector of doubles containing the y data
-    */
-    const MantidVec& Workspace2D::dataY(const size_t index) const
-    {
-      if (index>=m_noVectors)
-      {
-        std::stringstream msg;
-        msg << "Workspace2D::dataY, histogram number " << index << " out of range.";
-        throw std::range_error(msg.str());
-      }
-      return data[index].dataY();
-    }
-
-    /**
-    Get the error data for a specified histogram
-    @param index :: The number of the histogram
-    @return A vector of doubles containing the error data
-    */
-    const MantidVec& Workspace2D::dataE(const size_t index) const
-    {
-      if (index>=m_noVectors)
-        throw std::range_error("Workspace2D::dataE, histogram number out of range");
-
-      return data[index].dataE();
-    }
-
-    /**
-    Get the error x data for a specified histogram
-    @param index :: The number of the histogram
-    @return A vector of doubles containing the error x data
-    */
-    const MantidVec& Workspace2D::dataDx(const size_t index) const
-    {
-      if (index>=m_noVectors)
-        throw std::range_error("Workspace2D::dataDx, histogram number out of range");
-
-      return data[index].dataDx();
     }
 
     /// get pseudo size
@@ -204,54 +82,25 @@ namespace Mantid
       return (data.size() > 0) ? data[0].size() : 0;
     }
 
-    ///Returns the x data
-    MantidVec& Workspace2D::dataX(const size_t index)
+
+    //--------------------------------------------------------------------------------------------
+    /// Return the underlying ISpectrum ptr at the given workspace index.
+    ISpectrum * Workspace2D::getSpectrum(const size_t index)
     {
       if (index>=m_noVectors)
-        throw std::range_error("Workspace2D::dataX, histogram number out of range");
-
-      return data[index].dataX();
+        throw std::range_error("Workspace2D::getSpectrum, histogram number out of range");
+      return &data[index];
     }
 
-    ///Returns the y data
-    MantidVec& Workspace2D::dataY(const size_t index)
+    const ISpectrum * Workspace2D::getSpectrum(const size_t index) const
     {
       if (index>=m_noVectors)
-      {
-        std::stringstream msg;
-        msg << "Workspace2D::dataY, histogram number " << index << " out of range.";
-        throw std::range_error(msg.str());
-      }
-      return data[index].dataY();
+        throw std::range_error("Workspace2D::getSpectrum, histogram number out of range");
+      return &data[index];
     }
 
-    ///Returns the error data
-    MantidVec& Workspace2D::dataE(const size_t index)
-    {
-      if (index>=m_noVectors)
-        throw std::range_error("Workspace2D::dataE, histogram number out of range");
 
-      return data[index].dataE();
-    }
-    
-    ///Returns the error x data
-    MantidVec& Workspace2D::dataDx(const size_t index)
-    {
-      if (index>=m_noVectors)
-        throw std::range_error("Workspace2D::dataDx, histogram number out of range");
-
-      return data[index].dataDx();
-    }
-
-    /// Returns a pointer to the x data
-    Kernel::cow_ptr<MantidVec> Workspace2D::refX(const size_t index) const
-    {
-      if (index>=m_noVectors)
-        throw std::range_error("Workspace2D::refX, histogram number out of range");
-
-      return data[index].ptrX();      
-    }
-
+    //--------------------------------------------------------------------------------------------
     /** Returns the number of histograms.
      *  For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
      *  being virtual so it now just calls this private (and virtual) method which does the work.

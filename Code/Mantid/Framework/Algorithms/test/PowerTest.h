@@ -111,7 +111,7 @@ void testPowerCalculation()
   WorkspaceSingleValue_sptr output = boost::dynamic_pointer_cast<WorkspaceSingleValue>(AnalysisDataService::Instance().retrieve("WSCor"));
 
   Mantid::MantidVec expectedValue(1,4);
-  TSM_ASSERT_EQUALS("Power has not been determined correctly", expectedValue, output->dataY());
+  TSM_ASSERT_EQUALS("Power has not been determined correctly", expectedValue, output->dataY(0));
 
   AnalysisDataService::Instance().remove("InputWS");
   AnalysisDataService::Instance().remove("WSCor");
@@ -135,10 +135,10 @@ void testPowerCalculationWithNegativeExponent()
   WorkspaceSingleValue_sptr output = boost::dynamic_pointer_cast<WorkspaceSingleValue>(AnalysisDataService::Instance().retrieve("WSCor"));
 
   Mantid::MantidVec expectedValue(1, 0.25);
-  TSM_ASSERT_EQUALS("Power has not been determined correctly", expectedValue, output->dataY());
+  TSM_ASSERT_EQUALS("Power has not been determined correctly", expectedValue, output->dataY(0));
 
   Mantid::MantidVec expectedError(1, 0.35355);
-  TS_ASSERT_DELTA(0.353553391, output->dataE()[0], 0.001);
+  TS_ASSERT_DELTA(0.353553391, output->dataE(0)[0], 0.001);
 
   AnalysisDataService::Instance().remove("InputWS");
   AnalysisDataService::Instance().remove("WSCor");
@@ -165,7 +165,7 @@ void testPowerErrorCalculation()
   WorkspaceSingleValue_sptr output = boost::dynamic_pointer_cast<WorkspaceSingleValue>(AnalysisDataService::Instance().retrieve("WSCor"));
 
   Mantid::MantidVec expectedError(1,16);
-  TSM_ASSERT_EQUALS("Error has not been determined correctly", expectedError, output->dataE());
+  TSM_ASSERT_EQUALS("Error has not been determined correctly", expectedError, output->dataE(0));
 
   AnalysisDataService::Instance().remove("InputWS");
   AnalysisDataService::Instance().remove("WSCor");

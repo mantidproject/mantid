@@ -19,9 +19,14 @@ namespace Mantid
 
     /// Constructor
     WorkspaceSingleValue::WorkspaceSingleValue(double value,double error) :
-        API::MatrixWorkspace(),
-        _X(1,0),_Y(1,value),_E(1,error),_Dx(1,0)
-    { }
+        API::MatrixWorkspace()
+    {
+      // Set the "histogram" to the single value
+      data.dataX().resize(1, 0.0);
+      data.dataY().resize(1, value);
+      data.dataE().resize(1, error);
+      data.dataDx().resize(1, 0.0);
+    }
 
     /// Destructor
     WorkspaceSingleValue::~WorkspaceSingleValue()
@@ -37,14 +42,20 @@ namespace Mantid
       (void) NVectors; (void) XLength; (void) YLength; //Avoid compiler warning
     }
 
-    Kernel::cow_ptr<MantidVec> WorkspaceSingleValue::refX(const size_t index) const
+    //--------------------------------------------------------------------------------------------
+    /// Return the underlying ISpectrum ptr at the given workspace index.
+    Mantid::API::ISpectrum * WorkspaceSingleValue::getSpectrum(const size_t /*index*/)
     {
-      (void) index; //Avoid compiler warning
-      Kernel::cow_ptr<MantidVec> ret;
-      ret.access() = _X;
-      return ret;
+      return &data;
+    }
+
+    /// Return the underlying ISpectrum ptr at the given workspace index.
+    const Mantid::API::ISpectrum * WorkspaceSingleValue::getSpectrum(const size_t /*index*/) const
+    {
+      return &data;
     }
     
+
   } // namespace DataObjects
 } // namespace Mantid
 

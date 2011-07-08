@@ -166,7 +166,7 @@ namespace Mantid
       const int YLength = static_cast<int>(inputW->blocksize());
       outputW =API::WorkspaceFactory::Instance().create(inputW,detList.size(),YLength+1,YLength);
       //Copy geometry over.
-      API::WorkspaceFactory::Instance().initializeFromParent(inputW, outputW, false);
+      API::WorkspaceFactory::Instance().initializeFromParent(inputW, outputW, true);
       Progress prog(this, 0.0, 1.0, detList.size());
       PARALLEL_FOR3(inputW, peaksW, outputW)
       for (int det = 0; det < static_cast<int>(detList.size()); det++)

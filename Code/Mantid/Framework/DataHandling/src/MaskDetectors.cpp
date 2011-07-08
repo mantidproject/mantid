@@ -122,6 +122,7 @@ void MaskDetectors::exec()
         if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(*it).get()) )
         {
           pmap.addBool(det,"masked",true);
+          //std::cout << "Manually masking det " << det->getID() << std::endl;
         }
       }
       catch(Kernel::Exception::NotFoundError &e)
@@ -144,38 +145,8 @@ void MaskDetectors::exec()
   std::vector<size_t>::const_iterator wit;
   for (wit = indexList.begin(); wit != indexList.end(); ++wit)
   {
-    if (!detsMasked)
-    {
-      // In this case, mask all detectors contributing to spectrum
-      int spectrum_number = WS->getAxis(1)->spectraNo(*wit);
-      const std::vector<detid_t> dets = specMap.getDetectors(spectrum_number);
-      for (std::vector<detid_t>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
-      {
-        try
-        {
-          if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(*iter).get()) )
-          {
-            pmap.addBool(det,"masked",true);
-          }
-        }
-        catch(Kernel::Exception::NotFoundError &e)
-        {
-          g_log.warning() << e.what() << " Found while running MaskDetectors" << std::endl;
-        }
-      }
-    }
-    
-    if (eventWS)
-    {
-      //Valid event workspace - clear the event list.
-      eventWS->getEventList(*wit).clear();
-    }
-    else
-    {
-      // Zero the workspace spectra (data and errors, not X values)
-      WS->dataY(*wit).assign(vectorSize,0.0);
-      WS->dataE(*wit).assign(vectorSize,0.0);
-    }
+    //std::cout << "Masking wi " << *wit << std::endl;
+    WS->maskWorkspaceIndex(*wit);
 
     //Progress
     prog+= (1.0/static_cast<int>(indexList.size()));
@@ -209,7 +180,7 @@ void MaskDetectors::fillIndexListFromSpectra(std::vector<size_t>& indexList, con
 
   for (int i = 0; i < static_cast<int>(WS->getNumberHistograms()); ++i)
   {
-    int currentSpec = spectraAxis->spectraNo(i);
+    const specid_t currentSpec = WS->getSpectrum(i)->getSpectrumNo();
     if ( spectraSet.find(currentSpec) != spectraSet.end() )
     {
       indexList.push_back(i);

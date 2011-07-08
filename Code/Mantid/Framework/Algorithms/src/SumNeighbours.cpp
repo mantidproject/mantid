@@ -96,7 +96,7 @@ void SumNeighbours::exec()
   //Make a brand new EventWorkspace
   outWS = boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", 1, YLength, 1));
   //Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, false);
+  API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, true);
 
   //Cast to the matrixOutputWS and save it
   matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS);

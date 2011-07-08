@@ -22,6 +22,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <numeric>
+#include "MantidAPI/NumericAxis.h"
 
 namespace Mantid
 {
@@ -73,9 +74,9 @@ namespace Mantid
       // Bypass the initialization if the workspace has already been initialized.
       if (m_isInitialized) return;
 
-      // Setup a default 1:1 spectra map that goes from 1->NVectors
-      // Do this before derived init so that it can be replaced if necessary
-      this->replaceSpectraMap(new Geometry::OneToOneSpectraDetectorMap(1,static_cast<specid_t>(NVectors)));
+//      // Setup a default 1:1 spectra map that goes from 1->NVectors
+//      // Do this before derived init so that it can be replaced if necessary
+//      this->replaceSpectraMap(new Geometry::OneToOneSpectraDetectorMap(1,static_cast<specid_t>(NVectors)));
 
       // Invoke init() method of the derived class inside a try/catch clause
       try
@@ -138,15 +139,47 @@ namespace Mantid
     }
 
     //---------------------------------------------------------------------------------------
-    /**
-     * Replace the current spectra map with a new one. This object takes ownership
+    /** Replace the current spectra map with a new one. This object takes ownership.
+     * This will fill in the detector ID lists in each spectrum of the workspace
+     * for backwards compatibility.
+     *
      * @param spectraMap :: A pointer to a new SpectraDetectorMap.
      */
     void MatrixWorkspace::replaceSpectraMap(const Geometry::ISpectraDetectorMap * spectraMap)
     {
+      g_log.notice() << "MatrixWorkspace::replaceSpectraMap() is being deprecated." << std::endl;
       m_spectraMap.reset(spectraMap);
       // The neighbour map needs to be rebuilt
       m_nearestNeighbours.reset();
+
+      this->updateSpectraUsingMap();
+    }
+
+    /** Using the current spectraDetectorMap,
+     * this will fill in the detector ID lists in each spectrum of the workspace
+    * for backwards compatibility.
+    */
+    void MatrixWorkspace::updateSpectraUsingMap()
+    {
+      // The Axis1 needs to be set correctly for the ISpectraDetectorMap to make any sense
+      if (m_axes.size() < 2) throw std::runtime_error("MatrixWorkspace::updateSpectraUsingMap() needs a SpectraAxis at index 1 to work.");
+      SpectraAxis * ax1 = dynamic_cast<SpectraAxis *>(m_axes[1]);
+      if (!ax1)
+        throw std::runtime_error("MatrixWorkspace::updateSpectraUsingMap() needs a SpectraAxis at index 1 to work.");
+      if (ax1->length() < this->getNumberHistograms())
+        throw std::runtime_error("MatrixWorkspace::updateSpectraUsingMap(): the SpectraAxis is shorter than the number of histograms! Cannot run.");
+
+      for (size_t wi=0; wi < this->getNumberHistograms(); wi++)
+      {
+        specid_t specNo = ax1->spectraNo(wi);
+
+        ISpectrum * spec = getSpectrum(wi);
+        spec->setSpectrumNo(specNo);
+
+        std::vector<detid_t> dets = m_spectraMap->getDetectors(specNo);
+        spec->clearDetectorIDs();
+        spec->addDetectorIDs(dets);
+      }
     }
 
 
@@ -165,29 +198,102 @@ namespace Mantid
       {
         return;
       }
+
       SpectraDetectorMap *spectramap = new SpectraDetectorMap;
-      replaceSpectraMap(spectramap);
       std::vector<detid_t> pixelIDs = this->getInstrument()->getDetectorIDs(!includeMonitors);
-      std::vector<detid_t>::const_iterator iend = pixelIDs.end();
-      for( std::vector<detid_t>::const_iterator it = pixelIDs.begin();
-           it != iend; ++it )
-      {
-        const specid_t specNo = specid_t(*it);
-        spectramap->addSpectrumEntries(specNo, std::vector<detid_t>(1, specNo));
-      }
+
       if( m_axes.size() > 1 && m_axes[1]->isSpectra() )
       {
         delete m_axes[1];
-        m_axes[1] = new SpectraAxis(pixelIDs.size(), this->spectraMap());
+        m_axes[1] = new SpectraAxis(pixelIDs.size(), false);
       }
+      else
+      {
+        if (m_axes.size() == 0) m_axes.push_back( new NumericAxis(this->blocksize()) );
+        m_axes.push_back(  new SpectraAxis(pixelIDs.size(), false) );
+      }
+
+      try
+      {
+        size_t index = 0;
+        std::vector<detid_t>::const_iterator iend = pixelIDs.end();
+        for( std::vector<detid_t>::const_iterator it = pixelIDs.begin();
+             it != iend; ++it )
+        {
+          // The detector ID
+          const detid_t detId = *it;
+          // By default: Spectrum number = detector ID #
+          const specid_t specNo = specid_t(detId);
+          // We keep the entry in the spectraDetectorMap. TODO: Deprecate spectraDetectorMap entirely.
+          spectramap->addSpectrumEntries(specNo, std::vector<detid_t>(1, detId));
+
+          // Also set the spectrum number in the axis(1). TODO: Remove this, it is redundant (but it is stuck everywhere)
+          m_axes[1]->setValue(index, specNo);
+//          if (index < 300) std::cout << "rebuildSpectraMapping index " << index << " specNo " << specNo << std::endl;
+
+          if (index < this->getNumberHistograms())
+          {
+            ISpectrum * spec = getSpectrum(index);
+            spec->setSpectrumNo(specNo);
+            spec->setDetectorID(detId);
+          }
+
+          index++;
+        }
+
+        // equivalent of replaceSpectraMap TODO: DEPRECATE
+        m_spectraMap.reset(spectramap);
+        m_nearestNeighbours.reset();
+
+      }
+      catch (std::runtime_error & e)
+      {
+        g_log.error() << "MatrixWorkspace::rebuildSpectraMapping() error:" << std::endl;
+        throw e;
+      }
+
     }
 
 
 
 
+    //---------------------------------------------------------------------------------------
+    /** Working off the spectrum numbers and
+     * lists of detector IDs in each spectrum,
+     * create the SpectraDetectorMap, and the axis(1).
+     *
+     * For BACKWARDS-COMPATIBILITY.
+     *
+     */
+    void MatrixWorkspace::generateSpectraMap()
+    {
+      // We create a spectra-type axis that holds the spectrum # at each workspace index.
 
+      if( m_axes.size() > 1 )
+      {
+        delete m_axes[1];
+        m_axes[1] = new SpectraAxis(this->getNumberHistograms(), false);
+      }
+      else
+        m_axes.push_back(  new SpectraAxis(this->getNumberHistograms(), false) );
 
+      API::Axis *ax1 = getAxis(1);
+      API::SpectraDetectorMap *newMap = new API::SpectraDetectorMap;
 
+      //Go through all the spectra
+      for (size_t wi=0; wi<this->getNumberHistograms(); wi++)
+      {
+        ISpectrum * spec = getSpectrum(wi);
+        specid_t specNo = spec->getSpectrumNo();
+        newMap->addSpectrumEntries(specNo, spec->getDetectorIDs());
+        ax1->setValue(wi, specNo);
+        //std::cout << "generateSpectraMap : wi " << wi << " specNo " << specNo << " detID " << *spec->getDetectorIDs().begin() << std::endl;
+      }
+
+      // Equivalent of replaceSpectraMap(newMap);
+      m_spectraMap.reset(newMap);
+      m_nearestNeighbours.reset();
+    }
 
 
 
@@ -406,6 +512,7 @@ namespace Mantid
       // Clear the output index list
       indexList.clear();
       indexList.reserve(this->getNumberHistograms());
+
       // get the spectra axis
       SpectraAxis *spectraAxis;
       if (this->axes() == 2)
@@ -503,28 +610,29 @@ namespace Mantid
     */
     Geometry::IDetector_sptr MatrixWorkspace::getDetector(const size_t workspaceIndex) const
     {
-      if ( ! m_spectraMap->nElements() )
-      {
-        throw std::runtime_error("SpectraDetectorMap has not been populated.");
-      }
+      const ISpectrum * spec = this->getSpectrum(workspaceIndex);
+      if (!spec)
+        throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): NULL spectrum found at the given workspace index.", "");
 
-      const specid_t spectrum_number = getAxis(1)->spectraNo(workspaceIndex);
-      const std::vector<detid_t> dets = m_spectraMap->getDetectors(spectrum_number);
-      if ( dets.empty() )
-      {
-        throw Kernel::Exception::NotFoundError("Spectrum number not found", spectrum_number);
-      }
+      const std::set<detid_t> dets = spec->getDetectorIDs();
       IInstrument_sptr localInstrument = getInstrument();
       if( !localInstrument )
       {
         g_log.debug() << "No instrument defined.\n";
         throw Kernel::Exception::NotFoundError("Instrument not found", "");
       }
+
       const size_t ndets = dets.size();
-      if ( ndets == 1 ) 
+      //std::cout << "MatrixWorkspace::getDetector() has " << ndets << std::endl;
+
+      if ( ndets == 1 )
       {
         // If only 1 detector for the spectrum number, just return it
-        return localInstrument->getDetector(dets[0]);
+        return localInstrument->getDetector(*dets.begin());
+      }
+      else if (ndets==0)
+      {
+        throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): No detectors for this workspace index.", "");
       }
       // Else need to construct a DetectorGroup and return that
       std::vector<Geometry::IDetector_sptr> dets_ptr = localInstrument->getDetectors(dets);
@@ -876,11 +984,6 @@ namespace Mantid
         throw Kernel::Exception::IndexError(index,this->getNumberHistograms(),
             "MatrixWorkspace::maskWorkspaceIndex,index");
 
-      // Assign the value to the data and error arrays
-      MantidVec & yValues = this->dataY(index);
-      std::fill(yValues.begin(), yValues.end(), maskValue);
-      MantidVec & eValues = this->dataE(index);
-      std::fill(eValues.begin(), eValues.end(), maskValue);
 
       IDetector_sptr det;
       try
@@ -892,15 +995,21 @@ namespace Mantid
         return;
       }
       
-      specid_t spectrum_number = getAxis(1)->spectraNo(index);
-      const std::vector<detid_t> dets = m_spectraMap->getDetectors(spectrum_number);
-      for (std::vector<detid_t>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
+      ISpectrum * spec = this->getSpectrum(index);
+      if (!spec) throw std::invalid_argument("MatrixWorkspace::maskWorkspaceIndex() got a null Spectrum.");
+
+      // Virtual method clears the spectrum as appropriate
+      spec->maskSpectrum(maskValue);
+
+      const std::set<detid_t> dets = spec->getDetectorIDs();
+      for (std::set<detid_t>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
       {
         try
         {
           if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(sptr_instrument->getDetector(*iter).get()) )
           {
             m_parmap->addBool(det,"masked",true);  // Thread-safe method
+            //std::cout << "MatrixWorkspace::maskWorkspaceIndex() masking det " << det->getID() << std::endl;
           }
         }
         catch(Kernel::Exception::NotFoundError &)
@@ -1084,7 +1193,8 @@ namespace Mantid
       }
 
       IDetector_sptr detector;
-      if(m_spectraMap->nElements() > 0)
+      const ISpectrum * spec = this->getSpectrum(histogram);
+      if(spec->getDetectorIDs().size() > 0)
       {
         try
         {

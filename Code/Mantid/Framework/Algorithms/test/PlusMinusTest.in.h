@@ -409,7 +409,8 @@ public:
     int nHist = 10,nBins=20;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
-    MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, false, true /*outputIsEvent*/);
+    MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, false /*inPlace*/, true /*outputIsEvent*/,
+        DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
   }
 
   void test_Event_Event_inPlace()
@@ -675,6 +676,7 @@ public:
         TSM_ASSERT( message, ews_out);
         // The # of events is equal to the sum of the original amount
         TSM_ASSERT_EQUALS( message, ews_out->getNumberEvents(), numEvents1 + numEvents2 );
+        std::cout << ews_out->readY(0)[0] << " after adding (Y\n";
       }
       else
       {
@@ -780,7 +782,10 @@ public:
           }
         }
         if (!checkDataItem(work_in1,work_in2,work_out1,i,ws2Index))
+        {
+          std::cout << "Failure at ws2Index " << ws2Index << std::endl;
           break;
+        }
       }
     }
     else
@@ -907,6 +912,7 @@ public:
     case 2: wsNameOut = "MinusTest_rhs"; break;
     }
 
+	// Sanity check, the inputs were set to have 2.0 in each bin (2 events) 
     TS_ASSERT_DELTA(  rhs->readY(0)[0], 2.00, 1e-5);
     TS_ASSERT_DELTA(  rhs->readE(0)[0], sqrt(2.00), 1e-5);
 
@@ -981,42 +987,45 @@ public:
   }
 
 
-  void test_EventWorkspace_minus_EventWorkspace()
+  void test_EventWorkspace_EventWorkspace()
   {
     EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
-    performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false);
+    performTest_withClearRHS(lhs,rhs, false /*clearRHS*/,
+        true /*expectEventOutput*/,
+        lhs->getNumberEvents() + rhs->getNumberEvents(),
+        false /*rhsShouldBeCleared*/);
   }
 
-  void test_EventWorkspace_minus_EventWorkspace_clearRHS()
+  void test_EventWorkspace_EventWorkspace_clearRHS()
   {
     EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     performTest_withClearRHS(lhs,rhs, true, true, lhs->getNumberEvents() + rhs->getNumberEvents(), true);
   }
 
-  void test_Workspace2D_minus_EventWorkspace()
+  void test_Workspace2D_EventWorkspace()
   {
     MatrixWorkspace_sptr lhs = WorkspaceCreationHelper::Create2DWorkspace(numPixels, numBins);
     EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     performTest_withClearRHS(lhs,rhs, false, false, 0, false);
   }
 
-  void test_Workspace2D_minus_EventWorkspace_clearRHS()
+  void test_Workspace2D_EventWorkspace_clearRHS()
   {
     MatrixWorkspace_sptr lhs = WorkspaceCreationHelper::Create2DWorkspace(numPixels, numBins);
     EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     performTest_withClearRHS(lhs,rhs, true, false, 0, true);
   }
 
-  void test_EventWorkspace_minus_Workspace2D()
+  void test_EventWorkspace_Workspace2D()
   {
     EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     MatrixWorkspace_sptr rhs = WorkspaceCreationHelper::Create2DWorkspace(numPixels, numBins);
     performTest_withClearRHS(lhs,rhs, false, false, 0, false);
   }
 
-  void test_EventWorkspace_minus_Workspace2D_clearRHS()
+  void test_EventWorkspace_Workspace2D_clearRHS()
   {
     EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     MatrixWorkspace_sptr rhs = WorkspaceCreationHelper::Create2DWorkspace(numPixels, numBins);
@@ -1024,42 +1033,42 @@ public:
   }
 
 
-  void test_EventWorkspace_minus_EventWorkspace_inPlace_of_lhs()
+  void test_EventWorkspace_EventWorkspace_inPlace_of_lhs()
   {
     EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 1);
   }
 
-  void test_EventWorkspace_minus_EventWorkspace_inPlace_of_rhs()
+  void test_EventWorkspace_EventWorkspace_inPlace_of_rhs()
   {
     EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 2);
   }
 
-  void test_EventWorkspace_minus_EventWorkspace_inPlace_AND_lhs_is_rhs()
+  void test_EventWorkspace_EventWorkspace_inPlace_AND_lhs_is_rhs()
   {
     EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     EventWorkspace_sptr rhs = lhs;
     performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 1);
   }
 
-  void test_EventWorkspace_minus_EventWorkspace_lhs_is_rhs()
+  void test_EventWorkspace_EventWorkspace_lhs_is_rhs()
   {
     EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     EventWorkspace_sptr rhs = lhs;
     performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false);
   }
 
-  void test_EventWorkspace_minus_EventWorkspace_lhs_is_rhs_with_clearRHS_set_doesnt_clearRHS()
+  void test_EventWorkspace_EventWorkspace_lhs_is_rhs_with_clearRHS_set_doesnt_clearRHS()
   {
     EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     EventWorkspace_sptr rhs = lhs;
     performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false);
   }
 
-  void test_EventWorkspace_minus_EventWorkspace_inPlace_of_rhs_with_clearRHS_set_doesnt_clearRHS()
+  void test_EventWorkspace_EventWorkspace_inPlace_of_rhs_with_clearRHS_set_doesnt_clearRHS()
   {
     EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);

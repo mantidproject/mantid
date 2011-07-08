@@ -51,25 +51,15 @@ namespace DataObjects
 
     virtual const std::string id() const {return "AbsManagedWorkspace2D";}
 
-    virtual void setX(const std::size_t histnumber, const MantidVecPtr&);
-    virtual void setX(const std::size_t histnumber, const MantidVecPtr::ptr_type&);
-    virtual void setData(std::size_t const histnumber, const MantidVecPtr&);
-    virtual void setData(std::size_t const histnumber, const MantidVecPtr&, const MantidVecPtr&);
-    virtual void setData(std::size_t const histnumber, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
+    /// Return the underlying ISpectrum ptr at the given workspace index.
+    virtual Mantid::API::ISpectrum * getSpectrum(const size_t index);
+
+    /// Return the underlying ISpectrum ptr (const version) at the given workspace index.
+    virtual const Mantid::API::ISpectrum * getSpectrum(const size_t index) const;
 
     //section required for iteration
     virtual std::size_t size() const;
     virtual std::size_t blocksize() const;
-
-    virtual MantidVec& dataX(const std::size_t index);
-    virtual MantidVec& dataY(const std::size_t index);
-    virtual MantidVec& dataE(const std::size_t index);
-    virtual MantidVec& dataDx(std::size_t const index);
-    virtual const MantidVec& dataX(std::size_t const index) const;
-    virtual const MantidVec& dataY(std::size_t const index) const;
-    virtual const MantidVec& dataE(std::size_t const index) const;
-    virtual const MantidVec& dataDx(std::size_t const index) const;
-    virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const;
 
     /// Returns the size of physical memory the workspace takes
     virtual size_t getMemorySize() const = 0;

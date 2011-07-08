@@ -92,6 +92,7 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
   child->setTitle(parent->getTitle());
   child->setComment(parent->getComment());
   child->setInstrument(parent->getInstrument());  // This call also copies the parameter map
+  // TODO: Deprecate this
   child->m_spectraMap = parent->m_spectraMap;
   child->m_sample = parent->m_sample;
   child->m_run = parent->m_run;
@@ -104,6 +105,18 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
   {
     // Only copy mask map if same size for now. Later will need to check continued validity.
     child->m_masks = parent->m_masks;
+  }
+
+  // Same number of histograms = copy over the spectra data
+  if (parent->getNumberHistograms() == child->getNumberHistograms())
+  {
+    for (size_t wi=0; wi<parent->getNumberHistograms(); wi++)
+    {
+      ISpectrum * childSpec = child->getSpectrum(wi);
+      const ISpectrum * parentSpec = parent->getSpectrum(wi);
+      // Copy spectrum number and detector IDs
+      childSpec->copyInfoFrom(*parentSpec);
+    }
   }
 
   // deal with axis

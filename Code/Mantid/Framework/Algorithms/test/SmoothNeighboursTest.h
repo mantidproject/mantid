@@ -56,11 +56,11 @@ public:
     {
       for (int i=0; i<numEvents; i++)
       {
-        retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
+        retVal->getEventList(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
       }
-
+      retVal->getEventList(pix).addDetectorID(pix);
     }
-    retVal->doneLoadingData();
+    retVal->doneAddingEventLists();
 
     //Create the x-axis for histogramming.
     MantidVecPtr x1;

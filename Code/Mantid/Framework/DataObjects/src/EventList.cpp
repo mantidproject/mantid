@@ -1,11 +1,12 @@
-#include <stdexcept>
-#include "MantidDataObjects/EventList.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspaceMRU.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Exception.h"
 #include <functional>
 #include <limits>
 #include <math.h>
+#include <stdexcept>
 
 using std::ostream;
 using std::runtime_error;
@@ -90,13 +91,24 @@ namespace DataObjects
 
   /// Constructor (empty)
   EventList::EventList() :
-    eventType(TOF), order(UNSORTED), detectorIDs()
+        eventType(TOF), order(UNSORTED)
   {
   }
+
+  /** Constructor with a MRU list
+   * @param mru :: pointer to the MRU of the parent EventWorkspace
+   */
+  EventList::EventList(EventWorkspaceMRU * mru, specid_t specNo)
+   : IEventList(specNo),
+     eventType(TOF), order(UNSORTED), mru(mru)
+  {
+  }
+
 
   /** Constructor copying from an existing event list
    * @param rhs :: EventList object to copy*/
   EventList::EventList(const EventList& rhs)
+  : IEventList(rhs), mru(rhs.mru)
   {
     //Call the copy operator to do the job,
     this->operator=(rhs);
@@ -106,7 +118,6 @@ namespace DataObjects
    * @param events :: Vector of TofEvent's */
   EventList::EventList(const std::vector<TofEvent> &events)
   {
-
     this->events.assign(events.begin(), events.end());
     this->eventType = TOF;
     this->order = UNSORTED;
@@ -480,48 +491,6 @@ namespace DataObjects
 
 
 
-
-  // --------------------------------------------------------------------------
-  /** Add a detector ID to the set of detector IDs
-   *
-   * @param detID :: detector ID to insert in set.
-   */
-  void EventList::addDetectorID(const detid_t detID)
-  {
-    this->detectorIDs.insert( detID );
-  }
-
-  // --------------------------------------------------------------------------
-  /** Return true if the given detector ID is in the list for this eventlist */
-  bool EventList::hasDetectorID(const detid_t detID) const
-  {
-    return ( detectorIDs.find(detID) != detectorIDs.end() );
-  }
-
-  // --------------------------------------------------------------------------
-  /** Get a const reference to the detector IDs set.
-   */
-  const std::set<detid_t>& EventList::getDetectorIDs() const
-  {
-    return this->detectorIDs;
-  }
-
-  // --------------------------------------------------------------------------
-  /** Clear the detector IDs set.
-   */
-  void EventList::clearDetectorIDs()
-  {
-    this->detectorIDs.clear();
-    return;
-  }
-
-  /** Get a mutable reference to the detector IDs set.
-   */
-  std::set<detid_t>& EventList::getDetectorIDs()
-  {
-    return this->detectorIDs;
-  }
-
   // -----------------------------------------------------------------------------------------------
   /** Return the type of Event vector contained within.
    * @return :: a EventType value.
@@ -741,6 +710,7 @@ namespace DataObjects
   }
 
 
+
   /** Clear the list of events and any
    * associated detector ID's.
    * */
@@ -777,6 +747,29 @@ namespace DataObjects
       this->weightedEventsNoTime.clear();
       std::vector<WeightedEventNoTime>().swap(this->weightedEventsNoTime); //STL Trick to release memory
     }
+  }
+
+
+  /// Mask the spectrum to this value. Removes all events.
+  void EventList::maskSpectrum(const double /*maskValue*/)
+  {
+    this->clear(false);
+  }
+
+
+  /** Sets the MRU list for this event list
+   *
+   * @param newMRU :: new MRU for the workspace containing this EventList
+   */
+  void EventList::setMRU(EventWorkspaceMRU * newMRU)
+  {
+    mru = newMRU;
+  }
+
+  /** Return the MRU list for this event list */
+  EventWorkspaceMRU * EventList::getMRU()
+  {
+    return mru;
   }
 
   /** Reserve a certain number of entries in the (NOT-WEIGHTED) event list. Do NOT call
@@ -1279,6 +1272,7 @@ namespace DataObjects
   void EventList::setX(const MantidVecPtr::ptr_type& X)
   {
     this->refX = X;
+    if (mru) mru->deleteIndex(this->m_specNo);
   }
 
   /** Set the x-component for the histogram view. This will NOT cause the histogram to be calculated.
@@ -1287,6 +1281,7 @@ namespace DataObjects
   void EventList::setX(const MantidVecPtr& X)
   {
     this->refX = X;
+    if (mru) mru->deleteIndex(this->m_specNo);
   }
 
   /** Set the x-component for the histogram view. This will NOT cause the histogram to be calculated.
@@ -1295,30 +1290,7 @@ namespace DataObjects
   void EventList::setX(const MantidVec& X)
   {
     this->refX.access()=X;
-  }
-
-  /** Set the x error-component for the histogram view. This will NOT cause the histogram to be calculated.
-   * @param dX :: The vector of doubles to set as the histogram x-errors.
-   */
-  void EventList::setDx(const MantidVecPtr::ptr_type& dX)
-  {
-    this->refX = dX;
-  }
-
-  /** Set the x error-component for the histogram view. This will NOT cause the histogram to be calculated.
-   * @param dX :: The vector of doubles to set as the histogram x-errors.
-   */
-  void EventList::setDx(const MantidVecPtr& dX)
-  {
-    this->refDx = dX;
-  }
-
-  /** Set the x error-component for the histogram view. This will NOT cause the histogram to be calculated.
-   * @param dX :: The vector of doubles to set as the histogram x-errors.
-   */
-  void EventList::setDx(const MantidVec& dX)
-  {
-    this->refDx.access()=dX;
+    if (mru) mru->deleteIndex(this->m_specNo);
   }
 
   /** Returns a reference to the x data.
@@ -1327,57 +1299,27 @@ namespace DataObjects
   MantidVec& EventList::dataX()
   {
     return this->refX.access();
+    if (mru) mru->deleteIndex(this->m_specNo);
   }
 
-  /** Returns a reference to the x error data.
-   *  @return a reference to the X (bin) error vector.
+  /** Returns a reference to the x data.
+   *  @return a reference to the X (bin) vector.
    */
-  MantidVec& EventList::dataDx()
+  const MantidVec& EventList::constDataX() const
   {
-    return this->refDx.access();
+    return *this->refX;
   }
 
   // ==============================================================================================
   // --- Return Data Vectors --------------------------------------------------
   // ==============================================================================================
 
-  // Note: these will only be called from a const class; e.g
-  // const EventList el;
-  // el.dataX(); <<<<< this works
-  // EventList el2;
-  // el2.dataX(); <<<<< this throws an error.
-
-  /** Returns the x data.
-   * @return a const reference to the X (bin) vector.
-   *  */
-  const MantidVec& EventList::dataX() const
-  {
-    return *(this->refX);
-  }
-
-  /** Returns the x error data.
-   * @return a const reference to the X (bin) error vector.
-   *  */
-  const MantidVec& EventList::dataDx() const
-  {
-    return *(this->refDx);
-  }
-
-  /** Returns a reference to the X data
-   * @return a cow_ptr to the X (bin) vector.
-   * */
-  Kernel::cow_ptr<MantidVec> EventList::getRefX() const
-  {
-    return refX;
-  }
-
-
   /** Calculates and returns a pointer to the Y histogrammed data.
    * Remember to delete your pointer after use!
    *
    * @return a pointer to a MantidVec
    */
-  MantidVec * EventList::dataY() const
+  MantidVec * EventList::makeDataY() const
   {
     MantidVec * Y = new MantidVec();
     MantidVec E;
@@ -1392,7 +1334,7 @@ namespace DataObjects
    *
    * @return a pointer to a MantidVec
    */
-  MantidVec * EventList::dataE() const
+  MantidVec * EventList::makeDataE() const
   {
     MantidVec Y;
     MantidVec * E = new MantidVec();
@@ -1400,6 +1342,76 @@ namespace DataObjects
     //Y is unused.
     return E;
   }
+
+
+
+  /** Look in the MRU to see if the Y histogram has been generated before.
+   * If so, return that. If not, calculate, cache and return it.
+   *
+   * @return reference to the Y vector.
+   */
+  const MantidVec& EventList::constDataY() const
+  {
+    // This is the thread number from which this function was called.
+    int thread = PARALLEL_THREAD_NUMBER;
+    mru->ensureEnoughBuffersY(thread);
+
+    //Is the data in the mrulist?
+    MantidVecWithMarker * data;
+    data = mru->findY(thread, this->m_specNo);
+
+    if (data == NULL)
+    {
+      //Create the MRU object
+      data = new MantidVecWithMarker(this->m_specNo);
+
+      //Set the Y data in it
+      MantidVec E_ignored;
+      this->generateHistogram( *refX, data->m_data, E_ignored, true);
+
+      //Lets save it in the MRU
+      MantidVecWithMarker * oldData;
+      oldData = mru->insertY(thread, data);
+
+      //And clear up the memory of the old one, if it is dropping out.
+      if (oldData)
+        delete oldData;
+    }
+    return data->m_data;
+  }
+
+
+  const MantidVec& EventList::constDataE() const
+  {
+    // This is the thread number from which this function was called.
+    int thread = PARALLEL_THREAD_NUMBER;
+    mru->ensureEnoughBuffersE(thread);
+
+    //Is the data in the mrulist?
+    MantidVecWithMarker * data;
+    data = mru->findE(thread, this->m_specNo);
+
+    if (data == NULL)
+    {
+      //Create the MRU object
+      data = new MantidVecWithMarker(this->m_specNo);
+
+      //Now use that to get E -- Y values are generated from another function
+      MantidVec Y;
+      this->generateHistogram(*refX, Y, data->m_data);
+
+      //Lets save it in the MRU
+      MantidVecWithMarker * oldData;
+      oldData = mru->insertE(thread, data);
+
+      //And clear up the memory of the old one, if it is dropping out.
+      if (oldData)
+        delete oldData;
+    }
+    return data->m_data;
+  }
+
+
 
 
   // --------------------------------------------------------------------------

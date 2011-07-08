@@ -187,6 +187,8 @@ void Q1D2::exec()
   //finally divide the number of counts in each output Q bin by its weighting
   normalize(normSum, normError2, YOut, EOutTo2);
 
+  outputWS->updateSpectraUsingMap();
+
   setProperty("OutputWorkspace",outputWS);
 }
 /** If the distribution/raw counts status and binning on all the input workspaces
@@ -281,7 +283,6 @@ API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> &
   outputWS->setX(0, XOut);
   outputWS->isDistribution(true);
 
-  outputWS->replaceSpectraMap(specMap);
   return outputWS;
 }
 /** Finds the first index number of the first wavelength bin that should included based on the

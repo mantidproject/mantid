@@ -58,8 +58,10 @@ namespace Mantid
     void Plus::performEventBinaryOperation(DataObjects::EventList & lhs,
         const DataObjects::EventList & rhs)
     {
+      std::cout << "lhs has     " << lhs.getNumberEvents() << std::endl;
       //Easy, no? :) - This appends the event lists.
       lhs += rhs;
+      std::cout << "lhs now has " << lhs.getNumberEvents() << std::endl;
     }
 
     /** Carries out the binary operation IN-PLACE on a single EventList,

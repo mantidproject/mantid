@@ -1106,8 +1106,8 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
   }
   else
   {
-    workspace->replaceSpectraMap(spectramap);
     workspace->replaceAxis(1, new API::SpectraAxis(spectramap->nSpectra(), *spectramap));
+    workspace->replaceSpectraMap(spectramap);
   }    
 }
 

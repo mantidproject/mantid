@@ -199,26 +199,17 @@ public:
     TS_ASSERT_EQUALS( output->blocksize(), 4);
 
     TS_ASSERT_EQUALS( output->getAxis(1)->length(), numgroups);
-    if (preserveEvents)
-    {
-      specid_t bank_pixels = bankWidthInPixels*bankWidthInPixels;
-      specid_t total_pixels = bank_pixels*3;
-      TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(0), total_pixels - (numgroups-1)*bank_pixels);
-    }
-    else
-      // Groups are counted starting at 1, so spectrum number of workspace index 0 is 1
-      {TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(0), 1);}
+    TS_ASSERT_EQUALS( output->getSpectrum(0)->getSpectrumNo(), 1);
 
     //Events in these two banks alone
     if (preserveEvents)
       TS_ASSERT_EQUALS(outputEvent->getNumberEvents(), (numgroups==2) ? (bankWidthInPixels * bankWidthInPixels *2) : bankWidthInPixels*bankWidthInPixels);
 
     //Now let's test the grouping of detector UDETS to groups
-    for (size_t group=1; group<=numgroups; group++)
+    for (size_t wi=0; wi< output->getNumberHistograms(); wi++)
     {
-      specid_t spectrumnumber_in_output = output->getAxis(1)->spectraNo(group-1);
       //This is the list of the detectors (grouped)
-      std::vector<detid_t> mylist = output->spectraMap().getDetectors(spectrumnumber_in_output);
+      std::set<detid_t> mylist = output->getSpectrum(wi)->getDetectorIDs();
       //1024 pixels in a bank
       TS_ASSERT_EQUALS(mylist.size(), bankWidthInPixels * bankWidthInPixels);
     }
@@ -298,6 +289,13 @@ public:
       }
     }
     ws->getAxis(0)->setUnit("dSpacing");
+    //Create the x-axis for histogramming.
+    MantidVecPtr x1;
+    MantidVec& xRef = x1.access();
+    xRef.clear();
+    xRef.push_back(0.0);
+    xRef.push_back(1e6);
+    ws->setAllX(x1);
 
     alg = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
     alg->initialize();

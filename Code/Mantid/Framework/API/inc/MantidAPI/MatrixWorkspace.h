@@ -21,6 +21,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 #include <set>
+#include "MantidAPI/ISpectrum.h"
 
 namespace Mantid
 {
@@ -107,9 +108,12 @@ namespace Mantid
       const Geometry::ISpectraDetectorMap& spectraMap() const;
       /// Replace the current spectra map with a new one
       void replaceSpectraMap(const Geometry::ISpectraDetectorMap* spectramap);
+      void updateSpectraUsingMap();
       /// Build the default spectra mapping, most likely wanted after an instrument update
       void rebuildSpectraMapping(const bool includeMonitors = true);
       
+      void generateSpectraMap();
+
       // More mapping
       index2spec_map * getWorkspaceIndexToSpectrumMap() const;
       spec2index_map * getSpectrumToWorkspaceIndexMap() const;
@@ -140,54 +144,77 @@ namespace Mantid
       //----------------------------------------------------------------------
       // DATA ACCESSORS
       //----------------------------------------------------------------------
+
+      /// Return the underlying ISpectrum ptr at the given workspace index.
+      virtual ISpectrum * getSpectrum(const size_t index) = 0;
+
+      /// Return the underlying ISpectrum ptr (const version) at the given workspace index.
+      virtual const ISpectrum * getSpectrum(const size_t index) const = 0;
+
       // Methods for getting read-only access to the data.
       // Just passes through to the virtual dataX/Y/E function (const version)
       /// Returns a read-only (i.e. const) reference to the specified X array
       /// @param index :: workspace index to retrieve.
-      const MantidVec& readX(std::size_t const index) const { return dataX(index); }
+      const MantidVec& readX(std::size_t const index) const { return getSpectrum(index)->dataX(); }
       /// Returns a read-only (i.e. const) reference to the specified Y array
       /// @param index :: workspace index to retrieve.
-      const MantidVec& readY(std::size_t const index) const { return dataY(index); }
+      const MantidVec& readY(std::size_t const index) const { return getSpectrum(index)->dataY(); }
       /// Returns a read-only (i.e. const) reference to the specified E array
       /// @param index :: workspace index to retrieve.
-      const MantidVec& readE(std::size_t const index) const { return dataE(index); }
+      const MantidVec& readE(std::size_t const index) const { return getSpectrum(index)->dataE(); }
       /// Returns a read-only (i.e. const) reference to the specified X error array
       /// @param index :: workspace index to retrieve.
-      const MantidVec& readDx(size_t const index) const { return dataDx(index); }
-
-      /** Returns a read-only (i.e. const) reference to both the Y
-       * and E arrays
-       * @param index :: workspace index to retrieve.
-       * @param[out] Y :: reference to the pointer to the const data vector
-       * @param[out] E :: reference to the pointer to the const error vector
-       */
-      virtual void readYE(std::size_t const index, MantidVec const*& Y, MantidVec const*& E) const
-      {
-        Y = &dataY(index);
-        E = &dataE(index);
-      }
+      const MantidVec& readDx(size_t const index) const { return getSpectrum(index)->dataDx(); }
 
       /// Returns the x data
-      virtual MantidVec& dataX(const std::size_t index) = 0;
+      virtual MantidVec& dataX(const std::size_t index) { return getSpectrum(index)->dataX(); }
       /// Returns the y data
-      virtual MantidVec& dataY(const std::size_t index) = 0;
+      virtual MantidVec& dataY(const std::size_t index) { return getSpectrum(index)->dataY(); }
       /// Returns the error data
-      virtual MantidVec& dataE(const std::size_t index) = 0;
+      virtual MantidVec& dataE(const std::size_t index) { return getSpectrum(index)->dataE(); }
       /// Returns the x error data
-      virtual MantidVec& dataDx(const std::size_t index) = 0;
+      virtual MantidVec& dataDx(const std::size_t index) { return getSpectrum(index)->dataDx(); }
+
       /// Returns the x data const
-      virtual const MantidVec& dataX(const std::size_t index) const = 0;
+      virtual const MantidVec& dataX(const std::size_t index) const { return getSpectrum(index)->dataX(); }
       /// Returns the y data const
-      virtual const MantidVec& dataY(const std::size_t index) const = 0;
+      virtual const MantidVec& dataY(const std::size_t index) const { return getSpectrum(index)->dataY(); }
       /// Returns the error const
-      virtual const MantidVec& dataE(const std::size_t index) const = 0;
+      virtual const MantidVec& dataE(const std::size_t index) const { return getSpectrum(index)->dataE(); }
       /// Returns the error const
-      virtual const MantidVec& dataDx(const std::size_t index) const = 0;
+      virtual const MantidVec& dataDx(const std::size_t index) const { return getSpectrum(index)->dataDx(); }
 
       /// Returns a pointer to the x data
-      virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const = 0;
+      virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const { return getSpectrum(index)->ptrX(); }
+
       /// Set the specified X array to point to the given existing array
-      virtual void setX(const std::size_t index, const Kernel::cow_ptr<MantidVec>& X) = 0;
+      virtual void setX(const std::size_t index, const MantidVecPtr& X) { getSpectrum(index)->setX(X); }
+
+      /// Set the specified X array to point to the given existing array
+      virtual void setX(const std::size_t index, const MantidVecPtr::ptr_type& X)  { getSpectrum(index)->setX(X); }
+
+      /** Sets the data in the workspace
+      @param index :: the workspace index to set.
+      @param Y :: Y vector  */
+      virtual void setData(const std::size_t index, const MantidVecPtr& Y)
+      { getSpectrum(index)->setData(Y); }
+
+      /** Sets the data in the workspace
+      @param index :: the workspace index to set.
+      @param Y :: Y vector
+      @param E :: Error vector   */
+      virtual void setData(const std::size_t index, const MantidVecPtr& Y, const MantidVecPtr& E)
+      { getSpectrum(index)->setData(Y,E); }
+
+      /** Sets the data in the workspace
+      @param index :: the workspace index to set.
+      @param Y :: Y vector
+      @param E :: Error vector   */
+      virtual void setData(const std::size_t index, const MantidVecPtr::ptr_type& Y, const MantidVecPtr::ptr_type& E)
+      { getSpectrum(index)->setData(Y,E); }
+
+
+
 
       /// Return a vector with the integrated counts for all spectra withing the given range
       virtual void getIntegratedSpectra(std::vector<double> & out, const double minX, const double maxX, const bool entireRange) const;
@@ -219,6 +246,9 @@ namespace Mantid
       /// Masked bins for each spectrum are stored as a set of pairs containing <bin index, weight>
       typedef std::set< std::pair<size_t,double> > MaskList;
       const MaskList& maskedBins(const size_t& spectrumIndex) const;
+
+
+      // ---------------- IMDWorkspace Methods --------------------------------
 
       /// Gets the number of points available on the workspace.
       virtual uint64_t getNPoints() const;
@@ -301,6 +331,8 @@ namespace Mantid
       std::map< int64_t, MaskList > m_masks;
       /// Associates indexes to MDPoints. Dynamic cache.
       mutable MatrixMDPointMap m_mdPointMap;
+
+    protected:
       /// Assists conversions to and from 2D histogram indexing to 1D indexing.
       MatrixWSIndexCalculator m_indexCalculator;
 

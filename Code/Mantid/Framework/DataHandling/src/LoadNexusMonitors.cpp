@@ -145,7 +145,9 @@ void LoadNexusMonitors::exec()
 
     spectra_numbers[i] = spectrumNo;
     detector_numbers[i] = monIndex;
-    this->WS->getAxis(1)->spectraNo(i) = spectrumNo;
+    // Default values, might change later.
+    this->WS->getSpectrum(i)->setSpectrumNo(spectrumNo);
+    this->WS->getSpectrum(i)->setDetectorID(monIndex);
 
     // Now, actually retrieve the necessary data
     file.openData("data");
@@ -206,9 +208,14 @@ void LoadNexusMonitors::exec()
   // Load the instrument
   this->runLoadInstrument(instrumentName, this->WS);
 
-  // Populate the Spectra Map
-  this->WS->replaceSpectraMap(new API::SpectraDetectorMap(spectra_numbers.get(),detector_numbers.get(), 
-                                                          static_cast<int64_t> (nMonitors)));
+  // Fix the detector IDs/spectrum numbers
+  for (size_t i=0; i < WS->getNumberHistograms(); i++)
+  {
+    WS->getSpectrum(i)->setSpectrumNo(spectra_numbers[i]);
+    WS->getSpectrum(i)->setDetectorID(detector_numbers[i]);
+  }
+  WS->generateSpectraMap();
+
 
   this->setProperty("OutputWorkspace", this->WS);
 }

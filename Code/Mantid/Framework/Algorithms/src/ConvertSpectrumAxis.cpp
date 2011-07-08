@@ -187,6 +187,8 @@ namespace Algorithms
       outputWS->dataX(currentIndex) = inputWS->dataX(it->second);
       outputWS->dataY(currentIndex) = inputWS->dataY(it->second);
       outputWS->dataE(currentIndex) = inputWS->dataE(it->second);
+      // We can keep the spectrum numbers etc.
+      outputWS->getSpectrum(currentIndex)->copyInfoFrom(*inputWS->getSpectrum(it->second));
       ++currentIndex;
     }
     setProperty("OutputWorkspace",outputWS);

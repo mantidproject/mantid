@@ -485,10 +485,6 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
   AnalysisDataService::Instance().addOrReplace(workspace, ws);
   ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
   ws->setYUnit("");
-  for (std::size_t i = 0; i < ws->getNumberHistograms(); ++i)
-  {
-    ws->getAxis(1)->spectraNo(i) = static_cast<int>(i);
-  }
   
   // Load instrument geometry
   runLoadInstrument("SANSTEST", ws);
@@ -559,22 +555,18 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
         throw std::invalid_argument("number of y-bins < 0");
     }
 
-
-    size_t ndet = nxbins*nybins + nMonitors;
-    boost::shared_array<detid_t> udet(new detid_t[ndet]);
-    boost::shared_array<specid_t> spec(new specid_t[ndet]);
-
     // Generate mapping of detector/channel IDs to spectrum ID
 
     // Detector/channel counter
-    size_t icount = 0;
+    size_t wi = 0;
 
     // Monitor: IDs start at 1 and increment by 1
     for(size_t i=0; i<nMonitors; i++)
     {
-      spec[icount] = specid_t(icount);
-      udet[icount] = detid_t(icount+1);
-      icount++;
+      //std::cout << "SANS instrument monitor number " << i << std::endl;
+      workspace->getSpectrum(wi)->setSpectrumNo(specid_t(wi));
+      workspace->getSpectrum(wi)->setDetectorID(detid_t(wi+1));
+      wi++;
     }
 
     // Detector pixels
@@ -582,13 +574,11 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
     {
       for(size_t iy=0; iy<nYbins; iy++)
       {
-        spec[icount] = specid_t(icount);
-        udet[icount] = detid_t(1000000 + iy*1000 + ix);
-        icount++;
+        workspace->getSpectrum(wi)->setSpectrumNo(specid_t(wi));
+        workspace->getSpectrum(wi)->setDetectorID(detid_t(1000000 + iy*1000 + ix));
+        wi++;
       }
     }
 
-    // Populate the Spectra Map with parameters
-    workspace->replaceSpectraMap(new SpectraDetectorMap(spec.get(), udet.get(), ndet));
-    workspace->replaceAxis(1, new SpectraAxis(ndet, workspace->spectraMap()));
+    workspace->generateSpectraMap();
   }

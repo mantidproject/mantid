@@ -9,6 +9,7 @@
 #include "MantidKernel/cow_ptr.h"
 #include <fstream>
 #include <vector>
+#include "MantidAPI/ISpectrum.h"
 
 namespace Mantid
 {
@@ -67,20 +68,12 @@ public:
   bool hasChanges() const;
   void hasChanges(bool has);
 
-  // Must be a case for having an interface for these accessor methods, which are the same as Workspace2D
-  void setX(const std::size_t histnumber, const MantidVecPtr&);
-  void setX(const std::size_t histnumber, const MantidVecPtr::ptr_type&);
-  void setData(const std::size_t histnumber, const MantidVecPtr&);
-  void setData(const std::size_t histnumber, const MantidVecPtr&, const MantidVecPtr&);
-  void setData(const std::size_t histnumber, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
-        
-  MantidVec& dataX(const std::size_t index);
-  MantidVec& dataY(const std::size_t index);
-  MantidVec& dataE(const std::size_t index);
-  const MantidVec& dataX(const std::size_t index) const;
-  const MantidVec& dataY(const std::size_t index) const;
-  const MantidVec& dataE(const std::size_t index) const;
-  MantidVecPtr refX(const std::size_t index) const;
+  /// Return the underlying ISpectrum ptr at the given workspace index.
+  virtual Mantid::API::ISpectrum * getSpectrum(const size_t index);
+
+  /// Return the underlying ISpectrum ptr (const version) at the given workspace index.
+  virtual const Mantid::API::ISpectrum * getSpectrum(const size_t index) const;
+
   
 private:
   // Make copy constructor and copy assignment operator private (and without definition) unless they're needed

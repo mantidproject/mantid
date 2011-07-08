@@ -293,6 +293,23 @@ namespace Mantid
       return dets_ptr;
     } 
 
+    /**
+     * Returns a list of Detectors for the given detectors ids
+     *
+     */
+    std::vector<IDetector_sptr> Instrument::getDetectors(const std::set<detid_t> &det_ids) const
+    {
+      std::vector<Geometry::IDetector_sptr> dets_ptr;
+      dets_ptr.reserve(det_ids.size());
+      std::set<detid_t>::const_iterator it;
+      for ( it = det_ids.begin(); it != det_ids.end(); ++it )
+      {
+        dets_ptr.push_back(this->getDetector(*it));
+      }
+      return dets_ptr;
+    }
+
+
     /**	Gets a pointer to the monitor from its ID
     *  @param   detector_id The requested detector ID
     *  @return A pointer to the detector object

@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid
 {
@@ -51,17 +52,14 @@ public:
   /// Typedef for the const workspace_iterator to use with a WorkspaceSingleValue
   typedef API::workspace_iterator<const API::LocatedDataRef, const WorkspaceSingleValue> const_iterator;
 
-  /**
-  	Gets the name of the workspace type
-  	@return Standard string name
-  */
+  /**	Gets the name of the workspace type
+   * @return Standard string name  */
   virtual const std::string id() const {return "WorkspaceSingleValue";}
 
   WorkspaceSingleValue(double value=0.0,double error=0.0);
 
   virtual ~WorkspaceSingleValue();
 
-  //section required for iteration
   ///Returns the number of single indexable items in the workspace
   virtual std::size_t size() const
   { return 1; }
@@ -70,51 +68,17 @@ public:
   virtual std::size_t blocksize() const
   { return 1; }
 
+  /// @return the number of histograms (spectra)
   std::size_t getNumberHistograms() const
   { return 1; }
 
-  //inheritance redirections
-  ///Returns the x data
-  virtual MantidVec& dataX(const std::size_t index) { (void) index; return _X; }
-  ///Returns the y data
-  virtual MantidVec& dataY(const std::size_t index) { (void) index; return _Y; }
-  ///Returns the error data
-  virtual MantidVec& dataE(const std::size_t index) { (void) index; return _E; }
-  ///Returns the x error data
-  virtual MantidVec& dataDx(const std::size_t index) { (void) index; return _Dx; }
-  /// Returns the x data const
-  virtual const MantidVec& dataX(const std::size_t index) const { (void) index; return _X;}
-  /// Returns the y data const
-  virtual const MantidVec& dataY(const std::size_t index) const { (void) index; return _Y;}
-  /// Returns the error const
-  virtual const MantidVec& dataE(const std::size_t index) const { (void) index; return _E;}
-  /// Returns the x error const
-  virtual const MantidVec& dataDx(const std::size_t index) const { (void) index; return _Dx;}
-  
-  /// Returns a pointer to the x data
-  virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const;
-  /// Set the specified X array to point to the given existing array
-  virtual void setX(const std::size_t index, const Kernel::cow_ptr<MantidVec>& X) { (void) index; _X = *X; }
-  /// Set the specified X array to point to the given existing array, with error
-  virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X,
-      const Kernel::cow_ptr<MantidVec>& dX) { (void) index; _X = *X; _Dx = *dX;}
+  //------------------------------------------------------------
+  // Return the underlying ISpectrum ptr at the given workspace index.
+  virtual Mantid::API::ISpectrum * getSpectrum(const size_t index);
 
-  ///Returns non-const vector of the x data
-  virtual MantidVec& dataX() { return _X; }
-  ///Returns non-const vector of the y data
-  virtual MantidVec& dataY() { return _Y; }
-  ///Returns non-const vector of the error data
-  virtual MantidVec& dataE() { return _E; }
-  ///Returns non-const vector of the x error data
-  virtual MantidVec& dataDx() { return _Dx; }
-  /// Returns the x data const
-  virtual const MantidVec& dataX() const { return _X; }
-  /// Returns the y data const
-  virtual const MantidVec& dataY() const { return _Y; }
-  /// Returns the error data const
-  virtual const MantidVec& dataE() const { return _E; }
-  /// Returns the x error data const
-  virtual const MantidVec& dataDx() const { return _Dx; }
+  // Return the underlying ISpectrum ptr (const version) at the given workspace index.
+  virtual const Mantid::API::ISpectrum * getSpectrum(const size_t index) const;
+
 
 private:
   /// Private copy constructor. NO COPY ALLOWED
@@ -125,14 +89,8 @@ private:
   // allocates space in a new workspace - does nothing in this case
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
 
-  ///Internal cache of X data
-  MantidVec _X;
-  ///Internal cache of Y data
-  MantidVec _Y;
-  ///Internal cache of E data
-  MantidVec _E;
-  ///Internal cache of x error data
-  MantidVec _Dx;
+  /// Instance of Histogram1D that holds the "spectrum" (AKA the single value);
+  Histogram1D data;
 
   /// Static reference to the logger class
   static Kernel::Logger &g_log;

@@ -337,8 +337,8 @@ public:
         //Put a single big bin with all events
         lhs.setX(one_big_bin() );
         //But the total neutrons is 0.0! They've been cancelled out :)
-        TS_ASSERT_DELTA( (*lhs.dataY())[0], 0.0, 1e-6);
-        TS_ASSERT_DELTA( (*lhs.dataE())[0], sqrt((double)lhs.getNumberEvents()), 1e-6);
+        TS_ASSERT_DELTA( (*lhs.makeDataY())[0], 0.0, 1e-6);
+        TS_ASSERT_DELTA( (*lhs.makeDataE())[0], sqrt((double)lhs.getNumberEvents()), 1e-6);
       }
     }
   }
@@ -364,8 +364,8 @@ public:
       //Put a single big bin with all events
       lhs.setX(one_big_bin() );
       //But the total neutrons is 0.0! They've been cancelled out :)
-      TS_ASSERT_DELTA( (*lhs.dataY())[0], 0.0, 1e-6);
-      TS_ASSERT_DELTA( (*lhs.dataE())[0], sqrt((double)lhs.getNumberEvents()), 1e-6);
+      TS_ASSERT_DELTA( (*lhs.makeDataY())[0], 0.0, 1e-6);
+      TS_ASSERT_DELTA( (*lhs.makeDataE())[0], sqrt((double)lhs.getNumberEvents()), 1e-6);
     }
   }
 
@@ -823,7 +823,7 @@ public:
     el.setX(shared_x);
     //Do we have the same data in X?
     const EventList el2(el);
-    TS_ASSERT(el2.dataX()==shared_x);
+    TS_ASSERT(el2.constDataX()==shared_x);
   }
 
 
@@ -850,7 +850,7 @@ public:
     el.setX(shared_x);
     //Do we have the same data in X?
     const EventList el2(el);
-    TS_ASSERT(el2.dataX()==shared_x);
+    TS_ASSERT(el2.constDataX()==shared_x);
   }
 
   void test_empty_histogram()
@@ -860,14 +860,14 @@ public:
     const EventList el2(el);
 
     //Getting data before setting X returns empty vector
-    TS_ASSERT_EQUALS(el2.dataY()->size(), 0);
+    TS_ASSERT_EQUALS(el2.makeDataY()->size(), 0);
 
     //Now do set up an X axis.
     this->test_setX();
     MantidVec X, Y;
     const EventList el3(el);
-    X = el3.dataX();
-    Y = *el3.dataY();
+    X = el3.constDataX();
+    Y = *el3.makeDataY();
     //Histogram is 0, since I cleared all the events
     for (std::size_t i=0; i<X.size()-1; i++)
     {
@@ -882,7 +882,7 @@ public:
     //Now give it some fake data, with NUMEVENTS events in it.
     this->fake_data();
     const EventList el4(el);
-    TS_ASSERT_EQUALS(el4.dataY()->size(), 0);
+    TS_ASSERT_EQUALS(el4.makeDataY()->size(), 0);
   }
 
   void test_histogram_all_types()
@@ -896,9 +896,9 @@ public:
       this->test_setX(); //Set it up
       MantidVec X, Y, E;
       const EventList el3(el); //need to copy to a const method in order to access the data directly.
-      X = el3.dataX();
-      Y = *el3.dataY();
-      E = *el3.dataE();
+      X = el3.constDataX();
+      Y = *el3.makeDataY();
+      E = *el3.makeDataE();
       TS_ASSERT_EQUALS(Y.size(), X.size()-1);
       //The data was created so that there should be exactly 2 events per bin
       // The last bin entry will be 0 since we use it as the top boundary of i-1.
@@ -923,9 +923,9 @@ public:
 
     MantidVec X, Y, E;
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
-    X = el3.dataX();
-    Y = *el3.dataY();
-    E = *el3.dataE();
+    X = el3.constDataX();
+    Y = *el3.makeDataY();
+    E = *el3.makeDataE();
     TS_ASSERT_EQUALS(Y.size(), X.size()-1);
     for (std::size_t i=0; i<Y.size(); i++)
     {
@@ -944,9 +944,9 @@ public:
     this->test_setX(); //Set it up
     MantidVec X, Y, E;
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
-    X = el3.dataX();
-    Y = *el3.dataY();
-    E = *el3.dataE();
+    X = el3.constDataX();
+    Y = *el3.makeDataY();
+    E = *el3.makeDataE();
     TS_ASSERT_EQUALS(Y.size(), X.size()-1);
     //The data was created so that there should be exactly 2 events per bin
     // The last bin entry will be 0 since we use it as the top boundary of i-1.
@@ -974,8 +974,8 @@ public:
     //Get them back
     MantidVec X, Y;
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
-    X = el3.dataX();
-    Y = *el3.dataY();
+    X = el3.constDataX();
+    Y = *el3.makeDataY();
     TS_ASSERT_EQUALS(Y.size(), X.size()-1);
 
     //The data was created so that there should be exactly 2 events per bin. The first 10 bins (20 events) are empty.
@@ -996,8 +996,8 @@ public:
     el.setX(shared_x);
     MantidVec X, Y;
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
-    X = el3.dataX();
-    Y = *el3.dataY();
+    X = el3.constDataX();
+    Y = *el3.makeDataY();
     TS_ASSERT_EQUALS(Y.size(), X.size()-1);
     for (std::size_t i=0; i<Y.size(); i++)
     {
@@ -1011,8 +1011,8 @@ public:
     this->test_setX();
     MantidVec X, Y;
     const EventList el3(el);
-    X = el3.dataX();
-    Y = *el3.dataY();
+    X = el3.constDataX();
+    Y = *el3.makeDataY();
     TS_ASSERT_EQUALS(Y.size(), X.size()-1);
     for (std::size_t i=0; i<X.size()-1; i++)
     {
@@ -1028,7 +1028,7 @@ public:
     this->fake_uniform_data();
     this->test_setX(); //Set it up WITH THE default binning
     //Ok, we have this many bins
-    TS_ASSERT_EQUALS(this->el.getRefX()->size(), NUMBINS+1);
+    TS_ASSERT_EQUALS(this->el.ptrX()->size(), NUMBINS+1);
 
     //Make one with half the bins
     MantidVec some_other_x;
@@ -1046,7 +1046,7 @@ public:
       TS_ASSERT_EQUALS(Y[i], 4.0);
 
     //With all this jazz, the original element is unchanged
-    TS_ASSERT_EQUALS(this->el.getRefX()->size(), NUMBINS+1);
+    TS_ASSERT_EQUALS(this->el.ptrX()->size(), NUMBINS+1);
   }
 
 //  void test_histogram_static_function()

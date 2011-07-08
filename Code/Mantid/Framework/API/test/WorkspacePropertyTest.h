@@ -6,6 +6,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/WorkspaceFactory.h"
+#include "FakeObjects.h"
 
 using Mantid::MantidVec;
 using namespace Mantid::Kernel;
@@ -15,83 +16,30 @@ using std::size_t;
 class WorkspacePropertyTest : public CxxTest::TestSuite
 {
 
-  //private test class - using this removes the dependency on the DataObjects library
-  class WorkspaceTest: public MatrixWorkspace
+
+  class WorkspaceTester1 : public WorkspaceTester
   {
   public:
-    virtual size_t getNumberHistograms() const { return 1;}
-
     const std::string id() const {return "WorkspacePropTest";}
-    //section required to support iteration
-    virtual size_t size() const {return 0;}
-    virtual size_t blocksize() const  {return 1000000;}
-    virtual MantidVec& dataX(size_t const) {return data;}
-    ///Returns the y data
-    virtual MantidVec& dataY(size_t const) {return data;}
-    ///Returns the error data
-    virtual MantidVec& dataE(size_t const) {return data;}
-    ///Returns the x error data
-    virtual MantidVec& dataDx(size_t const) {return data;}
-
-    virtual const MantidVec& dataX(size_t const)const {return data;}
-    ///Returns the y data
-    virtual const MantidVec& dataY(size_t const )const {return data;}
-    ///Returns the error data
-    virtual const MantidVec& dataE(size_t const)const {return data;}
-    ///Returns the x error data
-    virtual const MantidVec& dataDx(size_t const)const {return data;}
-    cow_ptr<MantidVec> refX(const size_t) const {return cow_ptr<MantidVec>();}
-    void setX(const size_t, const cow_ptr<MantidVec>&) {}
-    virtual void init(const size_t &, const size_t &, const size_t &){};
-
-  private:
-    MantidVec data;
-    int dummy;
   };
 
   // Second, identical private test class - used for testing check on workspace type in isValid()
-  class WorkspaceTest2 : public MatrixWorkspace
+  class WorkspaceTester2 : public WorkspaceTester
   {
   public:
-    virtual size_t getNumberHistograms() const { return 1;}
-
     const std::string id() const {return "WorkspacePropTest";}
-    //section required to support iteration
-    virtual size_t size() const {return 0;}
-    virtual size_t blocksize() const  {return 1000000;}
-    virtual MantidVec& dataX(size_t const) {return data;}
-    ///Returns the y data
-    virtual MantidVec& dataY(size_t const) {return data;}
-    ///Returns the error data
-    virtual MantidVec& dataE(size_t const) {return data;}
-    ///Returns the x error data
-    virtual MantidVec& dataDx(size_t const) {return data;}
-
-    virtual const MantidVec& dataX(size_t const)const {return data;}
-    ///Returns the y data
-    virtual const MantidVec& dataY(size_t const)const {return data;}
-    ///Returns the error data
-    virtual const MantidVec& dataE(size_t const)const {return data;}
-    ///Returns the x error data
-    virtual const MantidVec& dataDx(size_t const)const {return data;}
-    cow_ptr<MantidVec> refX(const size_t) const {return cow_ptr<MantidVec>();}
-    void setX(const size_t, const cow_ptr<MantidVec>&) {}
-    virtual void init(const size_t &, const size_t &, const size_t &){};
-
-  private:
-    MantidVec data;
-    int dummy;
   };
+
 
 public:
   WorkspacePropertyTest()
   {
     wsp1 = new WorkspaceProperty<Workspace>("workspace1","ws1",Direction::Input);
     wsp2 = new WorkspaceProperty<Workspace>("workspace2","",Direction::Output);
-    wsp3 = new WorkspaceProperty<WorkspaceTest2>("workspace3","ws3",Direction::InOut);
+    wsp3 = new WorkspaceProperty<WorkspaceTester2>("workspace3","ws3",Direction::InOut);
     // Two optional properties of different types
     wsp4 = new WorkspaceProperty<Workspace>("workspace4","",Direction::Input, true);
-    wsp5 = new WorkspaceProperty<WorkspaceTest2>("workspace5","",Direction::Input, true);
+    wsp5 = new WorkspaceProperty<WorkspaceTester2>("workspace5","",Direction::Input, true);
   }
 
   ~WorkspacePropertyTest()
@@ -148,8 +96,8 @@ public:
     TS_ASSERT_EQUALS( wsp2->setValue("ws2"), "" );
     TS_ASSERT_EQUALS( wsp2->isValid(), "" );
 
-    WorkspaceFactory::Instance().subscribe<WorkspaceTest>("WorkspacePropertyTest");
-    WorkspaceFactory::Instance().subscribe<WorkspaceTest2>("WorkspacePropertyTest2");
+    WorkspaceFactory::Instance().subscribe<WorkspaceTester1>("WorkspacePropertyTest");
+    WorkspaceFactory::Instance().subscribe<WorkspaceTester2>("WorkspacePropertyTest2");
 
     // The other three need the input workspace to exist in the ADS
     Workspace_sptr space;
@@ -252,7 +200,7 @@ public:
     // Check it really has been stored in the ADS
     Workspace_sptr storedspace;
     TS_ASSERT_THROWS_NOTHING( storedspace = AnalysisDataService::Instance().retrieve("ws2") )
-    TS_ASSERT( ! storedspace->id().compare("WorkspacePropTest") )
+    TS_ASSERT_EQUALS( storedspace->id(), "WorkspacePropTest" )
 
     // This one should pass
     TS_ASSERT( wsp3->store() )
@@ -275,9 +223,9 @@ public:
 private:
   WorkspaceProperty<Workspace> *wsp1;
   WorkspaceProperty<Workspace> *wsp2;
-  WorkspaceProperty<WorkspaceTest2> *wsp3;
+  WorkspaceProperty<WorkspaceTester2> *wsp3;
   WorkspaceProperty<Workspace> *wsp4;
-  WorkspaceProperty<WorkspaceTest2> *wsp5;
+  WorkspaceProperty<WorkspaceTester2> *wsp5;
 };
 
 #endif /*WORKSPACEPROPERTYTEST_H_*/

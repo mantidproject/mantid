@@ -15,6 +15,9 @@
 #include <boost/multi_index/sequenced_index.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
+#include "MantidAPI/ISpectrum.h"
+
+using Mantid::API::ISpectrum;
 
 namespace Mantid
 {
@@ -71,184 +74,200 @@ size_t AbsManagedWorkspace2D::blocksize() const
 {
   return (m_noVectors > 0) ? m_YLength : 0;
 }
+//
+///** Set the x values
+//*  @param histnumber :: Index of the histogram to be set
+//*  @param PA :: The data to enter
+//*/
+//void AbsManagedWorkspace2D::setX(const size_t histnumber, const MantidVecPtr& PA)
+//{
+//  if ( histnumber>=m_noVectors )
+//    throw std::range_error("AbsManagedWorkspace2D::setX, histogram number out of range");
+//
+//  getDataBlock(histnumber)->setX(histnumber, PA);
+//  return;
+//}
+//
+///** Set the x valuesMantid
+//*  @param histnumber :: Index of the histogram to be set
+//*  @param Vec :: The data to enter
+//*/
+//void AbsManagedWorkspace2D::setX(const size_t histnumber, const MantidVecPtr::ptr_type& Vec)
+//{
+//  if ( histnumber>=m_noVectors )
+//    throw std::range_error("AbsManagedWorkspace2D::setX, histogram number out of range");
+//
+//  getDataBlock(histnumber)->setX(histnumber, Vec);
+//  return;
+//}
+//
+///** Set the data values
+//*  @param histnumber :: Index of the histogram to be set
+//*  @param PY :: The data to enter
+//*/
+//void AbsManagedWorkspace2D::setData(const size_t histnumber, const MantidVecPtr& PY)
+//{
+//  if ( histnumber>=m_noVectors )
+//    throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
+//
+//  getDataBlock(histnumber)->setData(histnumber, PY);
+//  return;
+//}
+//
+///** Set the data values
+//*  @param histnumber :: Index of the histogram to be set
+//*  @param PY :: The data to enter
+//*  @param PE :: The corresponding errors
+//*/
+//void AbsManagedWorkspace2D::setData(const size_t histnumber, const MantidVecPtr& PY,
+//                                    const MantidVecPtr& PE)
+//{
+//  if ( histnumber>=m_noVectors )
+//    throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
+//
+//  getDataBlock(histnumber)->setData(histnumber, PY, PE);
+//  return;
+//}
+//
+///** Set the data values
+//*  @param histnumber :: Index of the histogram to be set
+//*  @param PY :: The data to enter
+//*  @param PE :: The corresponding errors
+//*/
+//void AbsManagedWorkspace2D::setData(const size_t histnumber, const MantidVecPtr::ptr_type& PY,
+//                                    const MantidVecPtr::ptr_type& PE)
+//{
+//  if ( histnumber>=m_noVectors )
+//    throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
+//
+//  getDataBlock(histnumber)->setData(histnumber, PY, PE);
+//  return;
+//}
+//
+///** Get the x data of a specified histogram
+//*  @param index :: The number of the histogram
+//*  @return A vector of doubles containing the x data
+//*/
+//MantidVec& AbsManagedWorkspace2D::dataX(const size_t index)
+//{
+//  if ( index>=m_noVectors )
+//    throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
+//
+//  return getDataBlock(index)->dataX(index);
+//}
+//
+///** Get the y data of a specified hMRUList<ManagedDataBlock2D>istogram
+//*  @param index :: The number of the histogram
+//*  @return A vector of doubles containing the y data
+//*/
+//MantidVec& AbsManagedWorkspace2D::dataY(const size_t index)
+//{
+//  if ( index>=m_noVectors )
+//    throw std::range_error("AbsManagedWorkspace2D::dataY, histogram number out of range");
+//
+//  return getDataBlock(index)->dataY(index);
+//}
+//
+///** Get the error data of a specified histogram
+//*  @param index :: The number of the histogram
+//*  @return A vector of doubles containing the error data
+//*/
+//MantidVec& AbsManagedWorkspace2D::dataE(const size_t index)
+//{
+//  if ( index>=m_noVectors )
+//    throw std::range_error("AbsManagedWorkspace2D::dataE, histogram number out of range");
+//
+//  return getDataBlock(index)->dataE(index);
+//}
+//
+///** Get the error x data for a specified histogram
+// *  @param index :: The number of the histogram
+// *  @return A vector of doubles containing the error x data
+// */
+//MantidVec& AbsManagedWorkspace2D::dataDx(const size_t index)
+//{
+//  if (index>=m_noVectors)
+//    throw std::range_error("AbsManagedWorkspace2D::dataDx, histogram number out of range");
+//
+//  // Need to create the storage for the X errors (in memory) the first time they are accessed
+//  if (data.empty()) this->lazyDxFill();
+//
+//  return data[index].dataDx();
+//}
+//
+///** Get the x data of a specified histogram
+//*  @param index :: The number of the histogram
+//*  @return A vector of doubles containing the x data
+//*/
+//const MantidVec& AbsManagedWorkspace2D::dataX(const size_t index) const
+//{
+//  if ( index>=m_noVectors )
+//    throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
+//
+//  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataX(index);
+//}
+//
+///** Get the y data of a specified histogram
+//*  @param index :: The number of the histogram
+//*  @return A vector of doubles containing the y data
+//*/
+//const MantidVec& AbsManagedWorkspace2D::dataY(const size_t index) const
+//{
+//  if ( index>=m_noVectors )
+//    throw std::range_error("AbsManagedWorkspace2D::dataY, histogram number out of range");
+//
+//  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataY(index);
+//}
+//
+///** Get the error data of a specified histogram
+//*  @param index :: The number of the histogram
+//*  @return A vector of doubles containing the error data
+//*/
+//const MantidVec& AbsManagedWorkspace2D::dataE(const size_t index) const
+//{
+//  if ( index>=m_noVectors )
+//    throw std::range_error("AbsManagedWorkspace2D::dataE, histogram number out of range");
+//
+//  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE(index);
+//}
+//
+///** Get the error x data for a specified histogram
+// *  @param index :: The number of the histogram
+// *  @return A vector of doubles containing the error x data
+// */
+//const MantidVec& AbsManagedWorkspace2D::dataDx(const size_t index) const
+//{
+//  if (index>=m_noVectors)
+//    throw std::range_error("AbsManagedWorkspace2D::dataDx, histogram number out of range");
+//
+//  // Need to create the storage for the X errors (in memory) the first time they are accessed
+//  if (data.empty()) const_cast<AbsManagedWorkspace2D*>(this)->lazyDxFill();
+//
+//  return data[index].dataDx();
+//}
+//
+//Kernel::cow_ptr<MantidVec> AbsManagedWorkspace2D::refX(const size_t index) const
+//{
+//  if ( index>=m_noVectors )
+//    throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
+//
+//  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->refX(index);
+//}
 
-/** Set the x values
-*  @param histnumber :: Index of the histogram to be set
-*  @param PA :: The data to enter
-*/
-void AbsManagedWorkspace2D::setX(const size_t histnumber, const MantidVecPtr& PA)
-{
-  if ( histnumber>=m_noVectors )
-    throw std::range_error("AbsManagedWorkspace2D::setX, histogram number out of range");
-
-  getDataBlock(histnumber)->setX(histnumber, PA);
-  return;
-}
-
-/** Set the x valuesMantid
-*  @param histnumber :: Index of the histogram to be set
-*  @param Vec :: The data to enter
-*/
-void AbsManagedWorkspace2D::setX(const size_t histnumber, const MantidVecPtr::ptr_type& Vec)
-{
-  if ( histnumber>=m_noVectors )
-    throw std::range_error("AbsManagedWorkspace2D::setX, histogram number out of range");
-
-  getDataBlock(histnumber)->setX(histnumber, Vec);
-  return;
-}
-
-/** Set the data values
-*  @param histnumber :: Index of the histogram to be set
-*  @param PY :: The data to enter
-*/
-void AbsManagedWorkspace2D::setData(const size_t histnumber, const MantidVecPtr& PY)
-{
-  if ( histnumber>=m_noVectors )
-    throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
-
-  getDataBlock(histnumber)->setData(histnumber, PY);
-  return;
-}
-
-/** Set the data values
-*  @param histnumber :: Index of the histogram to be set
-*  @param PY :: The data to enter
-*  @param PE :: The corresponding errors
-*/
-void AbsManagedWorkspace2D::setData(const size_t histnumber, const MantidVecPtr& PY,
-                                    const MantidVecPtr& PE)
-{
-  if ( histnumber>=m_noVectors )
-    throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
-
-  getDataBlock(histnumber)->setData(histnumber, PY, PE);
-  return;
-}
-
-/** Set the data values
-*  @param histnumber :: Index of the histogram to be set
-*  @param PY :: The data to enter
-*  @param PE :: The corresponding errors
-*/
-void AbsManagedWorkspace2D::setData(const size_t histnumber, const MantidVecPtr::ptr_type& PY,
-                                    const MantidVecPtr::ptr_type& PE)
-{
-  if ( histnumber>=m_noVectors )
-    throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
-
-  getDataBlock(histnumber)->setData(histnumber, PY, PE);
-  return;
-}
-
-/** Get the x data of a specified histogram
-*  @param index :: The number of the histogram
-*  @return A vector of doubles containing the x data
-*/
-MantidVec& AbsManagedWorkspace2D::dataX(const size_t index)
-{
-  if ( index>=m_noVectors )
-    throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
-
-  return getDataBlock(index)->dataX(index);
-}
-
-/** Get the y data of a specified hMRUList<ManagedDataBlock2D>istogram
-*  @param index :: The number of the histogram
-*  @return A vector of doubles containing the y data
-*/
-MantidVec& AbsManagedWorkspace2D::dataY(const size_t index)
-{
-  if ( index>=m_noVectors )
-    throw std::range_error("AbsManagedWorkspace2D::dataY, histogram number out of range");
-
-  return getDataBlock(index)->dataY(index);
-}
-
-/** Get the error data of a specified histogram
-*  @param index :: The number of the histogram
-*  @return A vector of doubles containing the error data
-*/
-MantidVec& AbsManagedWorkspace2D::dataE(const size_t index)
-{
-  if ( index>=m_noVectors )
-    throw std::range_error("AbsManagedWorkspace2D::dataE, histogram number out of range");
-
-  return getDataBlock(index)->dataE(index);
-}
-
-/** Get the error x data for a specified histogram
- *  @param index :: The number of the histogram
- *  @return A vector of doubles containing the error x data
- */
-MantidVec& AbsManagedWorkspace2D::dataDx(const size_t index)
+//--------------------------------------------------------------------------------------------
+/// Return the underlying ISpectrum ptr at the given workspace index.
+ISpectrum * AbsManagedWorkspace2D::getSpectrum(const size_t index)
 {
   if (index>=m_noVectors)
-    throw std::range_error("AbsManagedWorkspace2D::dataDx, histogram number out of range");
-
-  // Need to create the storage for the X errors (in memory) the first time they are accessed
-  if (data.empty()) this->lazyDxFill();
-
-  return data[index].dataDx();
+    throw std::range_error("AbsManagedWorkspace2D::getSpectrum, histogram number out of range");
+  return getDataBlock(index)->getSpectrum(index);
 }
 
-/** Get the x data of a specified histogram
-*  @param index :: The number of the histogram
-*  @return A vector of doubles containing the x data
-*/
-const MantidVec& AbsManagedWorkspace2D::dataX(const size_t index) const
-{
-  if ( index>=m_noVectors )
-    throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
-
-  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataX(index);
-}
-
-/** Get the y data of a specified histogram
-*  @param index :: The number of the histogram
-*  @return A vector of doubles containing the y data
-*/
-const MantidVec& AbsManagedWorkspace2D::dataY(const size_t index) const
-{
-  if ( index>=m_noVectors )
-    throw std::range_error("AbsManagedWorkspace2D::dataY, histogram number out of range");
-
-  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataY(index);
-}
-
-/** Get the error data of a specified histogram
-*  @param index :: The number of the histogram
-*  @return A vector of doubles containing the error data
-*/
-const MantidVec& AbsManagedWorkspace2D::dataE(const size_t index) const
-{
-  if ( index>=m_noVectors )
-    throw std::range_error("AbsManagedWorkspace2D::dataE, histogram number out of range");
-
-  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE(index);
-}
-
-/** Get the error x data for a specified histogram
- *  @param index :: The number of the histogram
- *  @return A vector of doubles containing the error x data
- */
-const MantidVec& AbsManagedWorkspace2D::dataDx(const size_t index) const
+const ISpectrum * AbsManagedWorkspace2D::getSpectrum(const size_t index) const
 {
   if (index>=m_noVectors)
-    throw std::range_error("AbsManagedWorkspace2D::dataDx, histogram number out of range");
-
-  // Need to create the storage for the X errors (in memory) the first time they are accessed
-  if (data.empty()) const_cast<AbsManagedWorkspace2D*>(this)->lazyDxFill();
-
-  return data[index].dataDx();
-}
-
-Kernel::cow_ptr<MantidVec> AbsManagedWorkspace2D::refX(const size_t index) const
-{
-  if ( index>=m_noVectors )
-    throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
-
-  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->refX(index);
+    throw std::range_error("AbsManagedWorkspace2D::getSpectrum, histogram number out of range");
+  return getDataBlock(index)->getSpectrum(index);
 }
 
 /** Returns the number of histograms.

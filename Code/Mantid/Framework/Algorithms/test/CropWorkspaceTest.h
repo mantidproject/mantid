@@ -37,6 +37,7 @@ public:
           boost::shared_ptr<Mantid::MantidVec>(new std::vector<double>(e+(5*j), e+(5*j)+5)));
       space2D->getAxis(1)->spectraNo(j) = j;
     }
+    space2D->updateSpectraUsingMap();
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("toCrop", space);
   }

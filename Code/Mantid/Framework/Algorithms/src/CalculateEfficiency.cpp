@@ -140,6 +140,7 @@ void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
 
     for (size_t i = 0; i < numberOfSpectra; i++)
     {
+      //std::cout << "getDetector" << i << std::endl;
       // Get the detector object for this spectrum
       IDetector_const_sptr det = rebinnedWS->getDetector(i);
       // If this detector is masked, skip to the next one

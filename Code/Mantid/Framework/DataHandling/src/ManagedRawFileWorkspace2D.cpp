@@ -192,13 +192,13 @@ namespace Mantid
             //g_log.error()<<"readData called for spectrum index"<<m_readIndex<< " and wsIndex is "<<index<< std::endl;
             if( m_readIndex == static_cast<int64_t>(m_noVectors+m_monitorList.size()) )
               break;
-            MantidVec& y = newBlock->dataY(index);
+            MantidVec& y = newBlock->getSpectrum(index)->dataY();
             y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);  
             //g_log.error()<<"readData called for m_readIndex"<<m_readIndex<< " and wsIndex is "<<index<< "Y value at 0  column is "<<y[0]<<std::endl;
-            MantidVec& e = newBlock->dataE(index);
+            MantidVec& e = newBlock->getSpectrum(index)->dataE();
             std::transform(y.begin(), y.end(), e.begin(), dblSqrt);
             if (m_timeChannels.size() == 1)
-              newBlock->setX(index,m_timeChannels[0]);
+              newBlock->getSpectrum(index)->setX(m_timeChannels[0]);
             else
             {
               // std::map<int,int>::const_iterator regime = m_specTimeRegimes.find(index+1);
@@ -209,7 +209,7 @@ namespace Mantid
                 g_log.error(" Assuming time regime of spectrum 1");
                 regime = m_specTimeRegimes.begin();
               }
-              newBlock->setX(index,m_timeChannels[(*regime).second-1]);
+              newBlock->getSpectrum(index)->setX(m_timeChannels[(*regime).second-1]);
             }
             ++index;
             ++m_readIndex;
@@ -249,12 +249,12 @@ namespace Mantid
         {
           isisRaw->readData(m_fileRaw,m_readIndex+1);
           // g_log.error()<<"counter is "<<counter<<std::endl;
-          MantidVec& y = newBlock->dataY(index);
+          MantidVec& y = newBlock->getSpectrum(index)->dataY();
           y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);   
-          MantidVec& e = newBlock->dataE(index);
+          MantidVec& e = newBlock->getSpectrum(index)->dataE();
           std::transform(y.begin(), y.end(), e.begin(), dblSqrt);
           if (m_timeChannels.size() == 1)
-            newBlock->setX(index,m_timeChannels[0]);
+            newBlock->getSpectrum(index)->setX(m_timeChannels[0]);
           else
           {
             std::map<int64_t,int64_t>::const_iterator regime = m_specTimeRegimes.find(index+1);
@@ -264,7 +264,7 @@ namespace Mantid
               g_log.error(" Assuming time regime of spectrum 1");
               regime = m_specTimeRegimes.begin();
             }
-            newBlock->setX(index,m_timeChannels[(*regime).second-1]);
+            newBlock->getSpectrum(index)->setX(m_timeChannels[(*regime).second-1]);
           }
 
         }

@@ -20,7 +20,8 @@ private:
   typedef boost::shared_ptr<MantidVec > parray;
   parray pa, pb; // Shared_ptr to vectors
 public:
-  Histogram1DTest()
+
+  void setUp()
   {
     nel=100;
     x1.resize(nel);
@@ -33,6 +34,7 @@ public:
     pb=parray(new MantidVec(nel));
     std::fill(pa->begin(),pa->end(),rand());
   }
+
   void testsetgetXvector()
   {
     h.setX(x1);
@@ -54,6 +56,15 @@ public:
     h.setData(y1,e1);
     TS_ASSERT_EQUALS(h.dataY(),y1);
     TS_ASSERT_EQUALS(h.dataE(),e1);
+  }
+  void testmaskSpectrum()
+  {
+    h.maskSpectrum(0.0);
+    TS_ASSERT_EQUALS( h.dataY()[5],  0.0);
+    TS_ASSERT_EQUALS( h.dataE()[12], 0.0);
+    h.maskSpectrum(5.0);
+    TS_ASSERT_EQUALS( h.dataY()[9],  5.0);
+    TS_ASSERT_EQUALS( h.dataE()[56], 5.0);
   }
   void testsetgetXPointer()
   {

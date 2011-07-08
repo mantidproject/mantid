@@ -319,11 +319,10 @@ namespace DataHandling
 
         if (doBoth)
         {
-          MantidVec const * Y;
-          MantidVec const * E;
-          inputWorkspace->readYE(wi,Y,E);
-          std::copy(Y->begin(), Y->end(), data+index);
-          std::copy(E->begin(), E->end(), errors+index);
+          const MantidVec & Y = inputWorkspace->readY(wi);
+          const MantidVec & E = inputWorkspace->readE(wi);
+          std::copy(Y.begin(), Y.end(), data+index);
+          std::copy(E.begin(), E.end(), errors+index);
         }
         else
         {

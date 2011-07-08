@@ -12,12 +12,6 @@
 class ConvertSpectrumAxisTest : public CxxTest::TestSuite
 {
 public:
-  //ConvertToDistributionTest() : dist("notDist")
-  //{
-  //  Workspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,10,0,0.5);
-  //  AnalysisDataService::Instance().add(dist,WS);
-  //}
-
 	void testName()
 	{
     TS_ASSERT_EQUALS( conv.name(), "ConvertSpectrumAxis" );

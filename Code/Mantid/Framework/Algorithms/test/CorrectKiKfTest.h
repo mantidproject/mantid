@@ -256,8 +256,9 @@ private:
     {
       ws2D->setX(i,xv);
       ws2D->setData(i,yv,ev);
-      ws2D->getAxis(1)->spectraNo(i) = i;
+      ws2D->getSpectrum(i)->setSpectrumNo(i);
     }
+    ws2D->generateSpectraMap();
 
     AnalysisDataService::Instance().add(inputWSname, ws2D);
 

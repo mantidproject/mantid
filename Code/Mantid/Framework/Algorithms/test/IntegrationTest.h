@@ -9,12 +9,14 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/IDTypes.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::MantidVec;
+using Mantid::specid_t;
 
 class IntegrationTest : public CxxTest::TestSuite
 {
@@ -237,6 +239,10 @@ public:
       TS_ASSERT_EQUALS( Y.size(), 1);
       TS_ASSERT_DELTA( Y[0], 20.0, 1e-6);
       TS_ASSERT_DELTA( E[0], sqrt(20.0), 1e-6);
+      // Correct spectra etc?
+      specid_t specNo = output->getSpectrum(i)->getSpectrumNo();
+      TS_ASSERT_EQUALS( specNo, StartWorkspaceIndex+i);
+      TS_ASSERT( output->getSpectrum(i)->hasDetectorID(specNo));
     }
 
     AnalysisDataService::Instance().remove(inName);

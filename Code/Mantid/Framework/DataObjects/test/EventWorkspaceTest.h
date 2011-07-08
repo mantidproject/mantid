@@ -60,7 +60,7 @@ public:
    * 500 pixels
    * 1000 histogrammed bins.
    */
-  EventWorkspace_sptr createEventWorkspace(int initialize_pixels, int setX)
+  EventWorkspace_sptr createEventWorkspace(int initialize_pixels, int setX, bool evenTOFs=false)
   {
 
     EventWorkspace_sptr retVal(new EventWorkspace);
@@ -72,14 +72,24 @@ public:
     //Make fake events
     for (int pix=0; pix<NUMPIXELS; pix++)
     {
-      for (int i=0; i<NUMEVENTS; i++)
+      for (int i=0; i<NUMBINS-1; i++)
       {
-        //Two events per bin
-        retVal->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
-        retVal->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
+        if (evenTOFs)
+        {
+          retVal->getEventList(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
+          retVal->getEventList(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
+        }
+        else
+        {
+          //Two events per bin
+          retVal->getEventList(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
+          retVal->getEventList(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
+        }
       }
+      retVal->getEventList(pix).addDetectorID(pix);
+      retVal->getEventList(pix).setSpectrumNo(pix);
     }
-    retVal->doneLoadingData();
+    retVal->doneAddingEventLists();
 
     if (setX)
     {
@@ -108,30 +118,32 @@ public:
    */
   EventWorkspace_sptr createFlatEventWorkspace()
   {
-    EventWorkspace_sptr retVal(new EventWorkspace);
-    retVal->initialize(NUMPIXELS,1,1);
-
-    //Make fake events
-    for (int pix=0; pix<NUMPIXELS; pix++)
-    {
-      for (int i=0; i<NUMBINS-1; i++)
-      {
-        //Two events per bin
-        retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
-        retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
-      }
-    }
-    retVal->doneLoadingData();
-
-    //Create the x-axis for histogramming.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec& xRef = axis.access();
-    xRef.resize(NUMBINS);
-    for (int i = 0; i < NUMBINS; ++i)
-      xRef[i] = i*BIN_DELTA;
-    //Set all the histograms at once.
-    retVal->setAllX(axis);
-    return retVal;
+    return createEventWorkspace(1,1, true);
+//    EventWorkspace_sptr retVal(new EventWorkspace);
+//    retVal->initialize(NUMPIXELS,1,1);
+//    //Make fake eventscreateEventWorkspace
+//    for (int pix=0; pix<NUMPIXELS; pix++)
+//    {
+//      for (int i=0; i<NUMBINS-1; i++)
+//      {
+//        //Two events per bin
+//        retVal->getEventList(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
+//        retVal->getEventList(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
+//      }
+//      retVal->getEventList(pix).addDetectorID(pix);
+//      retVal->getEventList(pix).setSpectrumNo(pix);
+//    }
+//    retVal->doneAddingEventLists();
+//
+//    //Create the x-axis for histogramming.
+//    Kernel::cow_ptr<MantidVec> axis;
+//    MantidVec& xRef = axis.access();
+//    xRef.resize(NUMBINS);
+//    for (int i = 0; i < NUMBINS; ++i)
+//      xRef[i] = i*BIN_DELTA;
+//    //Set all the histograms at once.
+//    retVal->setAllX(axis);
+//    return retVal;
   }
 
 
@@ -153,13 +165,36 @@ public:
 
     //Are the returned arrays the right size?
     const EventList el(ew->getEventList(1));
-    TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS);
-    TS_ASSERT_EQUALS( el.dataY()->size(), NUMBINS-1);
-    TS_ASSERT_EQUALS( el.dataE()->size(), NUMBINS-1);
+    TS_ASSERT_EQUALS( el.constDataX().size(), NUMBINS);
+    TS_ASSERT_EQUALS( el.makeDataY()->size(), NUMBINS-1);
+    TS_ASSERT_EQUALS( el.makeDataE()->size(), NUMBINS-1);
     TS_ASSERT( el.hasDetectorID(1) );
+  }
 
-    //Don't access data after doneLoadingData
-    TS_ASSERT_THROWS( ew->getEventListAtPixelID(12), std::runtime_error);
+  void test_copyDataFrom()
+  {
+    EventWorkspace_sptr ew1 = createFlatEventWorkspace();
+    TS_ASSERT_DELTA( ew1->readY(0)[0], 2.0, 1e-5);
+    TS_ASSERT_DELTA( ew1->readY(1)[0], 2.0, 1e-5);
+
+    EventWorkspace_sptr ew2(new EventWorkspace);
+    ew2->initialize(2, 2, 2);
+    ew2->copyDataFrom(*ew1);
+    TS_ASSERT_EQUALS( ew2->getNumberHistograms(), ew1->getNumberHistograms() );
+    TS_ASSERT_EQUALS( ew2->getNumberEvents(), ew1->getNumberEvents() );
+
+    // Double # of events in the copied workspace
+    ew2->getEventList(0) += ew2->getEventList(0);
+    ew2->getEventList(1) += ew2->getEventList(1);
+
+    // Original is still 2.0
+    TS_ASSERT_DELTA( ew1->readY(0)[0], 2.0, 1e-5);
+    TS_ASSERT_DELTA( ew1->readY(1)[0], 2.0, 1e-5);
+    // New one is 4.0
+    TSM_ASSERT_DELTA("Copied workspace's Y values are properly refreshed thanks to a correct MRU.", ew2->readY(0)[0], 4.0, 1e-5);
+    TSM_ASSERT_DELTA("Copied workspace's Y values are properly refreshed thanks to a correct MRU.", ew2->readY(1)[0], 4.0, 1e-5);
+
+
   }
 
   //------------------------------------------------------------------------------
@@ -175,8 +210,6 @@ public:
 
     ew->doneAddingEventLists();
     TS_ASSERT_EQUALS( ew->getAxis(1)->length(), 1023+1);
-    //but there are still only 500 entries in the spectra map, since only 500 of them have detectors
-    TS_ASSERT_EQUALS( ew->spectraMap().nElements(), NUMPIXELS);
 
   }
 
@@ -207,9 +240,9 @@ public:
 
     //Didn't set X? well all the histograms are size 0
     const EventList el(ew->getEventList(1));
-    TS_ASSERT_EQUALS( el.dataX().size(), 0);
-    TS_ASSERT_EQUALS( el.dataY()->size(), 0);
-    TS_ASSERT_EQUALS( el.dataE()->size(), 0);
+    TS_ASSERT_EQUALS( el.constDataX().size(), 0);
+    TS_ASSERT_EQUALS( el.makeDataY()->size(), 0);
+    TS_ASSERT_EQUALS( el.makeDataE()->size(), 0);
 
   }
 
@@ -235,8 +268,10 @@ public:
     int badcount = 0;
     for (int i=0; i < numpixels; i++)
     {
-      bool b = ew->getEventList(i).hasDetectorID(i+1);
-      TSM_ASSERT("ew->getEventList(i).hasDetectorID(i+1)", b);
+      ISpectrum * spec = ew->getSpectrum(i);
+      bool b = spec->hasDetectorID(i+1);
+      TSM_ASSERT("Workspace i has the given detector id i+1", b);
+      TSM_ASSERT_EQUALS("Matching detector ID and spectrum number.", spec->getSpectrumNo(), i+1);
       if (b)
         if (badcount++ > 40) break;
     }
@@ -246,46 +281,7 @@ public:
     TS_ASSERT_EQUALS((*map)[50], 51); //for example
     delete map;
 
-    if (timing)
-    {
-      ew->clearData();
-      Timer timer2;
-      ew->padSpectra();
-      std::cout << "\n" << timer2.elapsed() << " seconds for padSpectra().\n";
-
-      padPixels_manually_timing(numpixels);
-    }
-
   }
-
-  //------------------------------------------------------------------------------
-  void padPixels_manually_timing(int numpixels)
-  {
-    EventWorkspace_sptr ew(new EventWorkspace);
-    ew->initialize(NUMPIXELS,1,1);
-    //Make an instrument with lots of pixels
-    ew->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(numpixels/9));
-
-    Timer timer;
-
-    detid2det_map detector_map;
-    ew->getInstrument()->getDetectors(detector_map);
-    detid2det_map::iterator it;
-    for (it = detector_map.begin(); it != detector_map.end(); it++)
-    {
-      //Go through each pixel in the map, but forget monitors.
-      if (!it->second->isMonitor())
-      {
-        // and simply get the event list. It will be created if it was not there already.
-        ew->getEventListAtPixelID(it->first); //it->first is detector ID #
-      }
-    }
-    ew->doneLoadingData();
-
-    std::cout << "\n" << timer.elapsed() << " seconds for padPixels done manually.\n";
-    TS_ASSERT_EQUALS(ew->getNumberHistograms(), numpixels);
-  }
-
 
 
 
@@ -293,17 +289,21 @@ public:
   void test_uneven_pixel_ids()
   {
     EventWorkspace_sptr uneven(new EventWorkspace);
-    uneven->initialize(1,1,1);
+    uneven->initialize(NUMPIXELS/10,1,1);
 
     //Make fake events. Pixel IDs start at 5 increment by 10
+    size_t wi = 0;
     for (int pix=5; pix<NUMPIXELS; pix += 10)
     {
       for (int i=0; i<pix; i++)
       {
-        uneven->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
+        uneven->getEventList(wi) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
       }
+      uneven->getEventList(wi).addDetectorID(pix);
+      uneven->getEventList(wi).setSpectrumNo(pix);
+      wi++;
     }
-    uneven->doneLoadingData();
+    uneven->doneAddingEventLists();
 
     //Create the x-axis for histogramming.
     Kernel::cow_ptr<MantidVec> axis;
@@ -345,25 +345,6 @@ public:
   }
 
   //------------------------------------------------------------------------------
-  void test_getEventListAtPixelID()
-  {
-    //Get pixel 1
-    const EventList el(ew->getEventList(1));
-    TS_ASSERT_EQUALS( el.dataX()[0], 0);
-    TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
-    //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
-    TS_ASSERT_EQUALS( (*el.dataY())[0], 0);
-    TS_ASSERT_EQUALS( (*el.dataY())[1], 2);
-    TS_ASSERT_EQUALS( (*el.dataY())[2], 2);
-    TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS], 2);
-    TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS+1], 0);
-    //And some errors
-    TS_ASSERT_DELTA( (*el.dataE())[0], 0, 1e-6);
-    TS_ASSERT_DELTA( (*el.dataE())[1], sqrt(2.0), 1e-6);
-    TS_ASSERT_DELTA( (*el.dataE())[2], sqrt(2.0), 1e-6);
-  }
-
-  //------------------------------------------------------------------------------
   void test_data_access()
   {
     //Non-const access throws errors for Y & E - not for X
@@ -379,31 +360,6 @@ public:
     //Can't try the const access; copy constructors are not allowed.
   }
 
-  void test_readYE()
-  {
-    MantidVec const * Y=NULL;
-    MantidVec const * E=NULL;
-    ew->readYE(0, Y, E);
-    TS_ASSERT( Y );
-    TS_ASSERT( E );
-    TS_ASSERT_EQUALS( (*Y)[0], 2.0 );
-    TS_ASSERT_EQUALS( (*E)[0], sqrt(2.0) );
-  }
-
-  //------------------------------------------------------------------------------
-  void test_data_access_not_setting_num_vectors()
-  {
-    ew = createEventWorkspace(0, 1);
-    TS_ASSERT_EQUALS( ew->getNumberHistograms(), NUMPIXELS);
-    TS_ASSERT_EQUALS( ew->blocksize(), (NUMBINS-1));
-    TS_ASSERT_EQUALS( ew->size(), (NUMBINS-1)*NUMPIXELS);
-    TS_ASSERT_THROWS( ew->dataX(-123), std::range_error );
-    TS_ASSERT_THROWS( ew->dataX(5123), std::range_error );
-    //Non-const access throws errors, but not RANGE errors!
-    TS_ASSERT_EQUALS( ew->dataX(1).size(), NUMBINS );
-    TS_ASSERT_THROWS( ew->dataY(2), NotImplementedError );
-    TS_ASSERT_THROWS( ew->dataE(3), NotImplementedError );
-  }
 
   //------------------------------------------------------------------------------
   void test_setX_individually()
@@ -417,23 +373,25 @@ public:
 
     ew->setX(0, axis);
     const EventList el(ew->getEventList(0));
-    TS_ASSERT_EQUALS( el.dataX()[0], 0);
-    TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA*2);
+    TS_ASSERT_EQUALS( el.constDataX()[0], 0);
+    TS_ASSERT_EQUALS( el.constDataX()[1], BIN_DELTA*2);
 
     //Are the returned arrays the right size?
-    TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS/2);
-    TS_ASSERT_EQUALS( el.dataY()->size(), NUMBINS/2-1);
-    TS_ASSERT_EQUALS( el.dataE()->size(), NUMBINS/2-1);
+    TS_ASSERT_EQUALS( el.constDataX().size(), NUMBINS/2);
+
+    MantidVec & Y = (*el.makeDataY());
+    MantidVec & E = (*el.makeDataE());
+    TS_ASSERT_EQUALS( Y.size(), NUMBINS/2-1);
+    TS_ASSERT_EQUALS( E.size(), NUMBINS/2-1);
 
     //Now there are 4 events in each bin
-    TS_ASSERT_EQUALS( (*el.dataY())[0], 4);
-    TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS/2-1], 4);
-    TS_ASSERT_EQUALS( (*el.dataY())[NUMEVENTS/2], 0);
+    TS_ASSERT_EQUALS( Y[0], 4);
+    TS_ASSERT_EQUALS( Y[NUMBINS/2-2], 4);
 
     //But pixel 1 is the same, 2 events in the bin
     const EventList el1(ew->getEventList(1));
-    TS_ASSERT_EQUALS( el1.dataX()[1], BIN_DELTA*1);
-    TS_ASSERT_EQUALS( (*el1.dataY())[1], 2);
+    TS_ASSERT_EQUALS( el1.constDataX()[1], BIN_DELTA*1);
+    TS_ASSERT_EQUALS( (*el1.makeDataY())[1], 2);
   }
 
 

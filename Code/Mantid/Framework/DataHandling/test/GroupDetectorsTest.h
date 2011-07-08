@@ -38,30 +38,23 @@ public:
     MantidVecPtr x,vec;
     x.access().resize(6,10.0);
     vec.access().resize(5,1.0);
-    int forSpecDetMap[5];
     for (int j = 0; j < 5; ++j)
     {
       space2D->setX(j,x);
       space2D->setData(j,vec,vec);
-      space2D->getAxis(1)->spectraNo(j) = j;
-      forSpecDetMap[j] = j;
+      space2D->getSpectrum(j)->setSpectrumNo(j);
+      space2D->getSpectrum(j)->setDetectorID(j);
     }
-
     Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(space->getBaseInstrument());
+    for (detid_t i=0; i<5;i++)
+    {
+      Detector *d = new Detector("det",i,0);
+      instr->markAsDetector(d);
+    }
+    space->setInstrument(instr);
 
-    Detector *d = new Detector("det",0,0);
-    instr->markAsDetector(d);
-    Detector *d1 = new Detector("det",1,0);
-    instr->markAsDetector(d1);
-    Detector *d2 = new Detector("det",2,0);
-    instr->markAsDetector(d2);
-    Detector *d3 = new Detector("det",3,0);
-    instr->markAsDetector(d3);
-    Detector *d4 = new Detector("det",4,0);
-    instr->markAsDetector(d4);
-
-    // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 5));
+    // spectrum number = detector id = workspace index
+    space->generateSpectraMap();
 
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("GroupTestWS", space);
@@ -142,23 +135,23 @@ public:
     {
       TS_ASSERT_DELTA( outputWS->dataE(0)[i], 1.7321, 0.0001 );
     }
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(0), 0 );
+    TS_ASSERT_EQUALS( outputWS->getSpectrum(0)->getSpectrumNo(), 0 );
     TS_ASSERT_EQUALS( outputWS->dataX(1), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(1), ones );
     TS_ASSERT_EQUALS( outputWS->dataE(1), ones );
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 1 );
+    TS_ASSERT_EQUALS( outputWS->getSpectrum(1)->getSpectrumNo(), 1 );
     TS_ASSERT_EQUALS( outputWS->dataX(2), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(2), zeroes );
     TS_ASSERT_EQUALS( outputWS->dataE(2), zeroes );
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(2), -1 );
+    TS_ASSERT_EQUALS( outputWS->getSpectrum(2)->getSpectrumNo(), -1 );
     TS_ASSERT_EQUALS( outputWS->dataX(3), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(3), zeroes );
     TS_ASSERT_EQUALS( outputWS->dataE(3), zeroes );
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(3), -1 );
+    TS_ASSERT_EQUALS( outputWS->getSpectrum(3)->getSpectrumNo(), -1 );
     TS_ASSERT_EQUALS( outputWS->dataX(4), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(4), ones );
     TS_ASSERT_EQUALS( outputWS->dataE(4), ones );
-    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(4), 4 );
+    TS_ASSERT_EQUALS( outputWS->getSpectrum(4)->getSpectrumNo(), 4 );
 
     boost::shared_ptr<IDetector> det;
     TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) );

@@ -34,6 +34,7 @@ namespace WorkspaceCreationHelper
     retVal->initialize(1,size,size);
     retVal->setX(0,x1);
     retVal->setData(0,y1,e1);
+    retVal->generateSpectraMap();
     return retVal;
   }
 
@@ -49,6 +50,7 @@ namespace WorkspaceCreationHelper
     retVal->initialize(1,size,size);
     retVal->setX(0,x1);
     retVal->setData(0,y1,e1);
+    retVal->generateSpectraMap();
     return retVal;
   }
 
@@ -63,6 +65,7 @@ namespace WorkspaceCreationHelper
     retVal->initialize(1,size,size);
     retVal->setX(0,x1);
     retVal->setData(0,y1,e1);
+    retVal->generateSpectraMap();
     return retVal;
   }
 
@@ -83,48 +86,43 @@ namespace WorkspaceCreationHelper
     for (int wi=0; wi < nhist; wi++)
       for (int x=0; x<numBoundaries; x++)
         out->dataY(wi)[x] = wi*1.0;
+    out->generateSpectraMap();
     return out;
   }
 
 
-
-  Workspace2D_sptr Create2DWorkspace123(int64_t nHist, int64_t nBins,bool isHist,
-                                        const std::set<int64_t> & maskedWorkspaceIndices)
+  Workspace2D_sptr Create2DWorkspaceWithValues(int64_t nHist, int64_t nBins,bool isHist,
+                                        const std::set<int64_t> & maskedWorkspaceIndices,
+                                        double xVal, double yVal, double eVal)
   {
     MantidVecPtr x1,y1,e1;
-    x1.access().resize(isHist?nBins+1:nBins,1);
-    y1.access().resize(nBins,2);
-    e1.access().resize(nBins,3);
+    x1.access().resize(isHist?nBins+1:nBins,xVal);
+    y1.access().resize(nBins,yVal);
+    e1.access().resize(nBins,eVal);
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(nHist,isHist?nBins+1:nBins,nBins);
     for (int i=0; i< nHist; i++)
     {
       retVal->setX(i,x1);
       retVal->setData(i,y1,e1);
+      retVal->getSpectrum(i)->setDetectorID(i);
+      retVal->getSpectrum(i)->setSpectrumNo(i);
     }
+    retVal->generateSpectraMap();
     retVal = maskSpectra(retVal, maskedWorkspaceIndices);
-
     return retVal;
+  }
+
+  Workspace2D_sptr Create2DWorkspace123(int64_t nHist, int64_t nBins,bool isHist,
+                                        const std::set<int64_t> & maskedWorkspaceIndices)
+  {
+    return Create2DWorkspaceWithValues(nHist, nBins, isHist, maskedWorkspaceIndices, 1.0, 2.0, 3.0);
   }
 
   Workspace2D_sptr Create2DWorkspace154(int64_t nHist, int64_t nBins,bool isHist,
                                         const std::set<int64_t> & maskedWorkspaceIndices)
   {
-    MantidVecPtr x1,y1,e1;
-    x1.access().resize(isHist?nBins+1:nBins,1);
-    y1.access().resize(nBins,5);
-    e1.access().resize(nBins,4);
-    Workspace2D_sptr retVal(new Workspace2D);
-    retVal->initialize(nHist,isHist?nBins+1:nBins,nBins);
-    for (int i=0; i< nHist; i++)
-    {
-      retVal->setX(i,x1);
-      retVal->setData(i,y1,e1);
-    }
-
-    retVal = maskSpectra(retVal, maskedWorkspaceIndices);
-
-    return retVal;
+    return Create2DWorkspaceWithValues(nHist, nBins, isHist, maskedWorkspaceIndices, 1.0, 5.0, 4.0);
   }
 
   Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace, const std::set<int64_t> & maskedWorkspaceIndices)
@@ -146,18 +144,21 @@ namespace WorkspaceCreationHelper
       boost::shared_ptr<Object> shape = sFactory.createShape(xmlShape);
       for( int i = 0; i < nhist; ++i )
       {
-        Detector *det = new Detector("det",specid_t(workspace->getAxis(1)->spectraNo(i)),shape, NULL);
+        Detector *det = new Detector("det", detid_t(i), shape, NULL);
         det->setPos(i,i+1,1);
         instrument->add(det);
         instrument->markAsDetector(det);
       }
+      workspace->setInstrument(instrument);
+      workspace->generateSpectraMap();
     }
+
     ParameterMap& pmap = workspace->instrumentParameters();
     for( int i = 0; i < nhist; ++i )
     {
-      IDetector_sptr det = workspace->getDetector(i);
       if ( maskedWorkspaceIndices.find(i) != maskedWorkspaceIndices.end() )
       {
+        IDetector_sptr det = workspace->getDetector(i);
         pmap.addBool(det.get(),"masked",true);
       }
     }
@@ -184,7 +185,7 @@ namespace WorkspaceCreationHelper
       retVal->setX(i,x);
       retVal->setData(i,y,e);
     }
-
+    retVal->generateSpectraMap();
     return retVal;
   }
 
@@ -209,7 +210,7 @@ namespace WorkspaceCreationHelper
       retVal->setX(i,x);
       retVal->setData(i,y,e);
     }
-
+    retVal->generateSpectraMap();
     return retVal;
   }
 
@@ -248,6 +249,7 @@ namespace WorkspaceCreationHelper
       physicalPixel->setPos(detXPos, ypos,0.0);
       testInst->add(physicalPixel);
       testInst->markAsDetector(physicalPixel);
+      space->getSpectrum(i)->addDetectorID(physicalPixel->getID());
     }
 
     // Monitors last
@@ -280,6 +282,7 @@ namespace WorkspaceCreationHelper
     testInst->add(sample);
     testInst->markAsSamplePos(sample);
 
+    space->generateSpectraMap();
 
     return space;
   }
@@ -300,17 +303,13 @@ namespace WorkspaceCreationHelper
     Workspace2D_sptr ws = Create2DWorkspaceBinned(numBanks*numPixels*numPixels, numBins);
     ws->setInstrument(inst);
     ws->getAxis(0)->setUnit("dSpacing");
-    // Set the spectra-detector map
-    SpectraDetectorMap * specMap = new SpectraDetectorMap();
     for (size_t wi=0; wi<ws->getNumberHistograms(); wi++)
     {
-      // Set the spectrum number
-      ws->getAxis(1)->setValue(wi, double(wi));
-      std::vector<detid_t> dets;
-      dets.push_back(detid_t(numPixels*numPixels + wi)); // detector IDs start at numPixels*numPixels
-      specMap->addSpectrumEntries(specid_t(wi), dets);
+      ws->getSpectrum(wi)->setDetectorID(detid_t(numPixels*numPixels + wi));
+      ws->getSpectrum(wi)->setSpectrumNo(specid_t(wi));
     }
-    ws->replaceSpectraMap(specMap);
+    ws->generateSpectraMap();
+
     return ws;
   }
 
@@ -332,7 +331,7 @@ namespace WorkspaceCreationHelper
     for (int wi=0; wi< static_cast<int>(ws->getNumberHistograms()); wi++)
     {
       ws->getEventList(wi).clear(true);
-      ws->getEventList(wi).addDetectorID(detID);
+      ws->getEventList(wi).setDetectorID(detID);
       detID++;
     }
     ws->doneAddingEventLists();
@@ -397,33 +396,38 @@ namespace WorkspaceCreationHelper
     retVal->initialize(numPixels,1,1);
 
     //Make fake events
+    size_t workspaceIndex = 0;
     if (eventPattern) // 0 == no events
     {
       for (int pix= start_at_pixelID+0; pix < start_at_pixelID+numPixels; pix++)
       {
+        EventList & el = retVal->getEventList(workspaceIndex);
+        el.setSpectrumNo(pix);
+        el.setDetectorID(pix);
+
         for (int i=0; i<numEvents; i++)
         {
           if (eventPattern == 1) // 0, 1 diagonal pattern
-            retVal->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*binDelta, run_start+double(i));
+            el += TofEvent((pix+i+0.5)*binDelta, run_start+double(i));
           else if (eventPattern == 2) // solid 2
           {
-            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
-            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
+            el += TofEvent((i+0.5)*binDelta, run_start+double(i));
+            el += TofEvent((i+0.5)*binDelta, run_start+double(i));
           }
           else if (eventPattern == 3) // solid 1
           {
-            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
+            el += TofEvent((i+0.5)*binDelta, run_start+double(i));
           }
           else if (eventPattern == 4) // Number of events per bin = pixelId (aka workspace index in most cases)
           {
-            retVal->getEventListAtPixelID(pix);
             for (int q=0; q<pix;q++)
-              retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
+              el += TofEvent((i+0.5)*binDelta, run_start+double(i));
           }
         }
+        workspaceIndex++;
       }
     }
-    retVal->doneLoadingData();
+    retVal->doneAddingEventLists();
 
     //Create the x-axis for histogramming.
     MantidVecPtr x1;
@@ -505,14 +509,15 @@ namespace WorkspaceCreationHelper
     for (size_t i=0; i< numpixels; i++)
     {
       //Create one event for each bin
-      EventList& events = retVal->getEventListAtPixelID(static_cast<detid_t>(i));
+      EventList& events = retVal->getEventList(static_cast<detid_t>(i));
       for (double ie=0; ie<numbins; ie++)
       {
         //Create a list of events, randomize
         events += TofEvent( std::rand() , std::rand());
       }
+      events.addDetectorID( detid_t(i) );
     }
-    retVal->doneLoadingData();
+    retVal->doneAddingEventLists();
     retVal->setAllX(axis);
 
 
@@ -526,45 +531,33 @@ namespace WorkspaceCreationHelper
    */
   MatrixWorkspace_sptr CreateGroupedWorkspace2D(size_t numHist, int numBins, double binDelta)
   {
-
     Workspace2D_sptr retVal = Create2DWorkspaceBinned(static_cast<int>(numHist), numBins, 0.0, binDelta);
     retVal->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(static_cast<int>(numHist)) );
 
-    API::SpectraDetectorMap * groupedMap = new SpectraDetectorMap;
-    // Set the detector IDs
     for (int g=0; g < static_cast<int>(numHist); g++)
     {
-      std::vector<int> dets;
+      ISpectrum * spec = retVal->getSpectrum(g);
       for (int i=1; i<=9; i++)
-      {
-        dets.push_back(g*9+i);
-      }
-      groupedMap->addSpectrumEntries(g,dets);
+        spec->addDetectorID(g*9+i);
+      spec->setSpectrumNo(g+1); // Match detector ID and spec NO
     }
-    retVal->replaceSpectraMap(groupedMap);
-
+    retVal->generateSpectraMap();
     return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
   }
 
   MatrixWorkspace_sptr CreateGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins, double binDelta)
   {
-     size_t numHist=RootOfNumHist*RootOfNumHist;
-     Workspace2D_sptr retVal = Create2DWorkspaceBinned(static_cast<int>(numHist), numBins, 0.0, binDelta);
-     retVal->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(static_cast<int>(numHist)) );
-
-    // Set the detector IDs
-     API::SpectraDetectorMap * groupedMap = new SpectraDetectorMap;
+    size_t numHist=RootOfNumHist*RootOfNumHist;
+    Workspace2D_sptr retVal = Create2DWorkspaceBinned(static_cast<int>(numHist), numBins, 0.0, binDelta);
+    retVal->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(static_cast<int>(numHist)) );
     for (int g=0; g < static_cast<int>(numHist); g++)
     {
-      std::vector<int> dets;
+      ISpectrum * spec = retVal->getSpectrum(g);
       for (int i=1; i<=9; i++)
-      {
-        dets.push_back(g*9+i);
-      }
-      groupedMap->addSpectrumEntries(g,dets);
+        spec->addDetectorID(g*9+i);
+      spec->setSpectrumNo(g+1); // Match detector ID and spec NO
     }
-    retVal->replaceSpectraMap(groupedMap);
-
+    retVal->generateSpectraMap();
     return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
 
   }

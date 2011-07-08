@@ -33,24 +33,30 @@ namespace DataObjects
   SpecialWorkspace2D::SpecialWorkspace2D(Mantid::Geometry::IInstrument_sptr inst)
   {
     // Get all the detectors IDs
-    detectorIDs = inst->getDetectorIDs(true);
+    detectorIDs = inst->getDetectorIDs(true /*no monitors*/);
 
     // Init the Workspace2D with one spectrum per detector, in the same order.
     this->init(int(detectorIDs.size()), 1, 1);
-
-    // Make the mapping, which will be used for speed later.
-    detID_to_WI.clear();
-    for (size_t wi=0; wi<detectorIDs.size(); wi++)
-      detID_to_WI[detectorIDs[wi]] = int(wi);
 
     // Copy the instrument
     this->setInstrument( inst );
     
     // Initialize the spectra-det-map, 1:1 between spectrum number and det ID
-    this->MatrixWorkspace::replaceSpectraMap(new API::SpectraDetectorMap(detectorIDs));
-    // Build the spectra axis to represent this
-    delete m_axes[1];
-    m_axes[1] = new API::SpectraAxis(detectorIDs.size(), this->spectraMap());
+    this->MatrixWorkspace::rebuildSpectraMapping(false /*no monitors*/);
+
+    // Make the mapping, which will be used for speed later.
+    detID_to_WI.clear();
+    for (size_t wi=0; wi<m_noVectors; wi++)
+    {
+      std::set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
+      if (dets.size() > 0)
+      {
+        detid_t detID = *dets.begin();
+        detID_to_WI[detID] = int(wi);
+      }
+    }
+
+
   }
 
   //----------------------------------------------------------------------------------------------

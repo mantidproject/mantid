@@ -12,6 +12,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <fstream>
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -165,7 +166,9 @@ public:
   {
     // Make a workspace with 50 pixels, 200 events per pixel.
     EventWorkspace_sptr work_in = WorkspaceCreationHelper::CreateEventWorkspace2();
-    // Add ten more at #10
+    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(10);
+    work_in->setInstrument(inst);
+    // Add ten more at #10 so that it fails
     for (int i=300; i<310; i++)
       work_in->getEventList(10).addEventQuickly( TofEvent( i, 10) );
 

@@ -348,8 +348,9 @@ using namespace boost::python;
     class_< IEventList, boost::noncopyable >("IEventList", no_init)
         .def("getEventType", &IEventList::getEventType)
         .def("switchTo", &IEventList::switchTo)
-        .def("addDetectorID", &IEventList::addDetectorID)
-        .def("hasDetectorID", &IEventList::hasDetectorID)
+        //TODO: Expose ISpectrum
+//        .def("addDetectorID", &IEventList::addDetectorID)
+//        .def("hasDetectorID", &IEventList::hasDetectorID)
         .def("clear", &IEventList::clear)
 //        .def("reserve", &IEventList::reserve)
 //        .def("sort", &IEventList::sort)

@@ -35,7 +35,8 @@ public:
 	  TS_ASSERT( focus.isInitialized() );
 	}
 
-	void testExec()
+	/** Disabled due to deprecation */
+	void xtestExec()
 	{
     IAlgorithm* loader = new Mantid::DataHandling::LoadRaw;
     loader->initialize();

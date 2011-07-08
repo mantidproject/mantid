@@ -76,7 +76,10 @@ namespace Mantid
 
       /// Returns a list of Detectors for the given detectors ids
       std::vector<IDetector_sptr> getDetectors(const std::vector<detid_t> &det_ids) const;
-  
+
+      /// Returns a list of Detectors for the given detectors ids
+      std::vector<IDetector_sptr> getDetectors(const std::set<detid_t> &det_ids) const;
+
       /// Returns a pointer to the geometrical object representing the monitor with the given ID
       IDetector_sptr getMonitor(const int &detector_id) const;
 

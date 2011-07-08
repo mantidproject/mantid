@@ -5,6 +5,9 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include <iostream>
+#include "MantidAPI/ISpectrum.h"
+
+using Mantid::API::ISpectrum;
 
 namespace Mantid
 {
@@ -26,12 +29,16 @@ ManagedDataBlock2D::ManagedDataBlock2D(const size_t &minIndex, const size_t &NVe
     const size_t &XLength, const size_t &YLength) :
   m_data(NVectors), m_XLength(XLength), m_YLength(YLength), m_minIndex(minIndex), m_hasChanges(false)
 {
+  MantidVecPtr t1;
+  t1.access().resize(XLength); //this call initializes array to zero
+
   // Set all the internal vectors to the right size
   for (std::vector<Histogram1D>::iterator it = m_data.begin(); it != m_data.end(); ++it)
   {
     it->dataX().resize(m_XLength);
     it->dataY().resize(m_YLength);
     it->dataE().resize(m_YLength);
+    it->setDx(t1);
   }
 }
 
@@ -70,190 +77,29 @@ void ManagedDataBlock2D::hasChanges(bool has)
   m_hasChanges = has;
 }
 
-/**
- Set the x values
- @param index :: Index to the histogram
- @param vec :: Shared ptr base object
- */
-void ManagedDataBlock2D::setX(const size_t index, const MantidVecPtr::ptr_type& vec)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= m_minIndex + m_data.size() ) )
-    throw std::range_error("ManagedDataBlock2D::setX, histogram number out of range");
 
-  m_data[index-m_minIndex].setX(vec);
-  m_hasChanges = true;
-  return;
-}
 
-/**
- Set the x values
- @param index :: Index to the histogram
- @param PA :: Reference counted histogram
- */
-void ManagedDataBlock2D::setX(const size_t index, const MantidVecPtr& PA)
+//--------------------------------------------------------------------------------------------
+/// Return the underlying ISpectrum ptr at the given workspace index.
+ISpectrum * ManagedDataBlock2D::getSpectrum(const size_t index)
 {
   if ( ( index < m_minIndex )
-      || ( index >= (m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::setX, histogram number out of range");
-
-  m_data[index-m_minIndex].setX(PA);
+      || ( index >= m_minIndex + m_data.size() ) )
+    throw std::range_error("ManagedDataBlock2D::getSpectrum, histogram number out of range");
+  // Any non-const access: we assume means there are changes
   m_hasChanges = true;
-  return;
+  return &m_data[index-m_minIndex];
 }
 
-/**
- Sets the data in the workspace
- @param index :: The histogram to be set
- @param PY :: A reference counted data range  
- */
-void ManagedDataBlock2D::setData(const size_t index, const MantidVecPtr& PY)
+const ISpectrum * ManagedDataBlock2D::getSpectrum(const size_t index) const
 {
-  if ( ( index < m_minIndex ) 
-      || ( index >= (m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
-
-  m_data[index-m_minIndex].setData(PY);
-  m_hasChanges = true;
-  return;
+  if ( ( index < m_minIndex )
+      || ( index >= m_minIndex + m_data.size() ) )
+    throw std::range_error("ManagedDataBlock2D::getSpectrum, histogram number out of range");
+  return &m_data[index-m_minIndex];
 }
 
-/**
- Sets the data in the workspace
- @param index :: The histogram to be set
- @param PY :: A reference counted data range  
- @param PE :: A reference containing the corresponding errors
- */
-void ManagedDataBlock2D::setData(const size_t index, const MantidVecPtr& PY,
-    const MantidVecPtr& PE)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= (m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
 
-  m_data[index-m_minIndex].setData(PY, PE);
-  m_hasChanges = true;
-  return;
-}
-
-/**
- Sets the data in the workspace
- @param index :: The histogram to be set
- @param PY :: A reference counted data range  
- @param PE :: A reference containing the corresponding errors
- */
-void ManagedDataBlock2D::setData(const size_t index, const MantidVecPtr::ptr_type& PY,
-    const MantidVecPtr::ptr_type& PE)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= (m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
-
-  m_data[index-m_minIndex].setData(PY, PE);
-  m_hasChanges = true;
-  return;
-}
-
-/**
-  Get the x data of a specified histogram
-  @param index :: The number of the histogram
-  @return A vector of doubles containing the x data
-*/
-MantidVec& ManagedDataBlock2D::dataX(const size_t index)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= (m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::dataX, histogram number out of range");
-
-  m_hasChanges = true;  
-  return m_data[index-m_minIndex].dataX();
-}
-
-/**
-  Get the y data of a specified histogram
-  @param index :: The number of the histogram
-  @return A vector of doubles containing the y data
-*/
-MantidVec& ManagedDataBlock2D::dataY(const size_t index)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= (m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::dataY, histogram number out of range");
-
-  m_hasChanges = true;
-  return m_data[index-m_minIndex].dataY();
-}
-
-/**
-  Get the error data for a specified histogram
-  @param index :: The number of the histogram
-  @return A vector of doubles containing the error data
-*/
-MantidVec& ManagedDataBlock2D::dataE(const size_t index)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= (m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::dataE, histogram number out of range");
-
-  m_hasChanges = true;
-  return m_data[index-m_minIndex].dataE();
-}
-
-/**
-  Get the x data of a specified histogram
-  @param index :: The number of the histogram
-  @return A vector of doubles containing the x data
-*/
-const MantidVec& ManagedDataBlock2D::dataX(const size_t index) const
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= (m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::dataX, histogram number out of range");
-
-  return m_data[index-m_minIndex].dataX();
-}
-
-/**
-  Get the y data of a specified histogram
-  @param index :: The number of the histogram
-  @return A vector of doubles containing the y data
-*/
-const MantidVec& ManagedDataBlock2D::dataY(const size_t index) const
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= (m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::dataY, histogram number out of range");
-
-  return m_data[index-m_minIndex].dataY();
-}
-
-/**
-  Get the error data for a specified histogram
-  @param index :: The number of the histogram
-  @return A vector of doubles containing the error data
-*/
-const MantidVec& ManagedDataBlock2D::dataE(const size_t index) const
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= (m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::dataE, histogram number out of range");
-
-  return m_data[index-m_minIndex].dataE();
-}
-
-/**
-  Gets reference to the X vector of the specified histogram
-  @param index :: The number of the histogram
-  @return A reference to the X vector of the specified histogram
-*/
-MantidVecPtr ManagedDataBlock2D::refX(const size_t index) const
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= (m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::refX, histogram number out of range");
-
-  return m_data[index-m_minIndex].ptrX();
-}
 
 /** Output file stream operator.
  *  @param fs :: The stream to write to

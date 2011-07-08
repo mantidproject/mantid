@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/MemoryManager.h"
+#include "FakeObjects.h"
 
 using Mantid::MantidVec;
 using std::size_t;
@@ -17,63 +18,25 @@ using namespace Mantid::API;
 
 class WorkspaceFactoryTest : public CxxTest::TestSuite
 {
-  //private test classes - using this removes the dependency on the DataObjects library
-  class WorkspaceTest: public MatrixWorkspace
+
+
+  class Workspace1DTest: public WorkspaceTester
   {
   public:
-    virtual size_t getNumberHistograms() const { return 1;}
-
-    WorkspaceTest() : data(MantidVec(1,1)) {}
-   	//  static std::string WSTYPE;
-	virtual const std::string id() const {return "WorkspaceTest";}
-    //section required to support iteration
-    virtual size_t size() const {return 1000000;}
-    virtual size_t blocksize() const  {return 10000;}
-    virtual MantidVec& dataX(const size_t) {return data;}
-    ///Returns the y data
-    virtual MantidVec& dataY(const size_t) {return data;}
-    ///Returns the error data
-    virtual MantidVec& dataE(const size_t) {return data;}
-    ///Returns the x error data
-    virtual MantidVec& dataDx(size_t const) {return data;}
-
-    virtual const MantidVec& dataX(const size_t)const {return data;}
-    ///Returns the y data
-    virtual const MantidVec& dataY(const size_t)const {return data;}
-    ///Returns the error data
-    virtual const MantidVec& dataE(size_t const)const {return data;}
-    ///Returns the x error data
-    virtual const MantidVec& dataDx(size_t const)const {return data;}
-    cow_ptr<MantidVec> refX(const size_t) const {return cow_ptr<MantidVec>();}
-    void setX(const size_t, const cow_ptr<MantidVec>& ) {}
-    
-    virtual void init(const size_t &, const size_t &, const size_t &){};
-
-  private:
-    MantidVec data;
-    int dummy;
-  };
-
-  class Workspace1DTest: public WorkspaceTest
-  {
-  public:
-    size_t getNumberHistograms() const { return 1;}
-    //  static std::string WSTYPE;
     const std::string id() const {return "Workspace1DTest";}
   };
 
-  class Workspace2DTest: public WorkspaceTest
+  class Workspace2DTest: public WorkspaceTester
   {
   public:
-  	//  static std::string WSTYPE;
     const std::string id() const {return "Workspace2DTest";}
-    size_t getNumberHistograms() const { return 2;}
 
     void init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
     {
       size.push_back(NVectors);
       size.push_back(XLength);
       size.push_back(YLength);
+      WorkspaceTester::init(NVectors, XLength, YLength);
     }
     std::vector<size_t> size;
   };
@@ -81,15 +44,13 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   class ManagedWorkspace2DTest: public Workspace2DTest
   {
   public:
-  	//  static std::string WSTYPE;
     const std::string id() const {return "ManagedWorkspace2DTest";}
     size_t getNumberHistograms() const { return 2;}
   };
 
-  class NotInFactory : public WorkspaceTest
+  class NotInFactory : public WorkspaceTester
   {
   public:
-	//  static std::string WSTYPE;
     const std::string id() const {return "NotInFactory";}
   };
 
@@ -112,28 +73,37 @@ public:
 
   void testReturnType()
   {
-    WorkspaceFactory::Instance().subscribe<WorkspaceTest>("work");
+    WorkspaceFactory::Instance().subscribe<WorkspaceTester>("work");
     MatrixWorkspace_sptr space;
     TS_ASSERT_THROWS_NOTHING( space = WorkspaceFactory::Instance().create("work",1,1,1) );
-    TS_ASSERT_THROWS_NOTHING( dynamic_cast<WorkspaceTest*>(space.get()) );
+    TS_ASSERT_THROWS_NOTHING( dynamic_cast<WorkspaceTester*>(space.get()) );
   }
 
+  /** Make a parent, have the child be created with the same sizes */
   void testCreateFromParent()
   {
-    MatrixWorkspace_sptr ws1D(new Workspace1DTest);
+    MatrixWorkspace_sptr ws_child(new Workspace1DTest);
+    ws_child->initialize(3,1,1);
+    ws_child->getSpectrum(0)->setSpectrumNo(123);
+    ws_child->getSpectrum(1)->setDetectorID(456);
+    ws_child->getSpectrum(2)->dataY()[0]=789;
     MatrixWorkspace_sptr child;
-    TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(ws1D) );
-    TS_ASSERT( ! child->id().compare("Workspace1DTest") );
+    TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(ws_child) );
+    TS_ASSERT_EQUALS( child->id(), "Workspace1DTest");
+    TS_ASSERT_EQUALS( child->getSpectrum(0)->getSpectrumNo(), 123);
+    TS_ASSERT_EQUALS( *child->getSpectrum(1)->getDetectorIDs().begin(), 456);
+    TS_ASSERT_DIFFERS( child->getSpectrum(2)->dataY()[0], 789)
 
     MatrixWorkspace_sptr ws2D(new Workspace2DTest);
-    TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(ws2D) );
-        TS_ASSERT( child->id().find("2D") != std::string::npos );
+    ws2D->initialize(3,1,1);
+    MatrixWorkspace_sptr child2;
+    TS_ASSERT_THROWS_NOTHING( child2 = WorkspaceFactory::Instance().create(ws2D) );
+    TS_ASSERT(child2);
+    TS_ASSERT_EQUALS( child2->id(), "Workspace2DTest");
 
-    //Workspace_sptr mws2D(new ManagedWorkspace2DTest);
-    //TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(mws2D) );
-    //TS_ASSERT_EQUALS( child->id(), "ManagedWorkspace2D");
 
     MatrixWorkspace_sptr nif(new NotInFactory);
+    nif->initialize(1,1,1);
     TS_ASSERT_THROWS( child = WorkspaceFactory::Instance().create(nif), std::runtime_error );
   }
 

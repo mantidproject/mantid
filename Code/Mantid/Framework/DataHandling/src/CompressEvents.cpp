@@ -90,7 +90,7 @@ void CompressEvents::exec()
       // And on the output side
       EventList & output_el = outputWS->getOrAddEventList(index);
       // Copy other settings into output
-      output_el.setX( input_el.getRefX() );
+      output_el.setX( input_el.ptrX() );
 
       // The EventList method does the work.
       input_el.compressEvents(tolerance, &output_el);

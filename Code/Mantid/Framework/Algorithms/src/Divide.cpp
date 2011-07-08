@@ -101,8 +101,8 @@ namespace Mantid
     {
       // We must histogram the rhs event list to divide.
       MantidVec rhsY, rhsE;
-      rhs.generateHistogram( rhs.dataX(), rhsY, rhsE);
-      lhs.divide(rhs.dataX(), rhsY, rhsE);
+      rhs.generateHistogram( rhs.constDataX(), rhsY, rhsE);
+      lhs.divide(rhs.constDataX(), rhsY, rhsE);
     }
 
     /** Carries out the binary operation IN-PLACE on a single EventList,

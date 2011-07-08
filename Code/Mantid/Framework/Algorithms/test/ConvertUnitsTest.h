@@ -199,6 +199,10 @@ public:
     TS_ASSERT_THROWS_NOTHING( loader.execute() );
     TS_ASSERT( loader.isExecuted() );
 
+    MatrixWorkspace_const_sptr input;
+    TS_ASSERT_THROWS_NOTHING( input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws)) );
+    TS_ASSERT( input->getSpectrum(0)->hasDetectorID(3810));
+
     ConvertUnits conv;
     conv.initialize();
     conv.setPropertyValue("InputWorkspace",ws);
@@ -213,6 +217,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) );
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE");
     TS_ASSERT_EQUALS( output->blocksize(), 475 );  // Value from IDF
+
+    TS_ASSERT( output->getSpectrum(0)->hasDetectorID(3810));
 //    TS_ASSERT_EQUALS( output->blocksize(), 472 );  // Value from RAW geometry
 
     AnalysisDataService::Instance().remove(outputSpace);

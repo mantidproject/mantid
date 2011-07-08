@@ -18,8 +18,9 @@ Histogram1D::Histogram1D()
  Copy constructor
  @param A :: Histogram to copy
  */
-Histogram1D::Histogram1D(const Histogram1D& A) :
-  refX(A.refX), refY(A.refY), refE(A.refE), refDx(A.refDx)
+Histogram1D::Histogram1D(const Histogram1D& A)
+: ISpectrum(A),
+  refY(A.refY), refE(A.refE)
 {}
 
 /**

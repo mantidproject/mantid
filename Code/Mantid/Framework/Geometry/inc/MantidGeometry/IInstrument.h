@@ -81,6 +81,9 @@ public:
   /// Returns a list of Detectors for the given detectors ids
   virtual std::vector<IDetector_sptr> getDetectors(const std::vector<detid_t> &det_ids) const = 0;
 
+  /// Returns a list of Detectors for the given detectors ids
+  virtual std::vector<IDetector_sptr> getDetectors(const std::set<detid_t> &det_ids) const = 0;
+
   /// Fill a vector with all the detectors contained in a named component
   virtual void getDetectorsInBank(std::vector<Geometry::IDetector_sptr> & dets, const std::string & bankName) = 0;
 

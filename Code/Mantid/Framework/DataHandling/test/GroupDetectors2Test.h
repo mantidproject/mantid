@@ -48,36 +48,25 @@ public:
     Mantid::MantidVecPtr xs, errors, data[NHIST];
     xs.access().resize(NBINS+1, 10.0);
     errors.access().resize(NBINS, 1.0);
-    int detIDs[NHIST];
-    int specNums[NHIST];
     for (int j = 0; j < NHIST; ++j)
     {
       space2D->setX(j,xs);
       data[j].access().resize(NBINS, j + 1);  // the y values will be different for each spectra (1+index_number) but the same for each bin
       space2D->setData(j, data[j], errors);
-      space2D->getAxis(1)->spectraNo(j) = j+1;  // spectra numbers are also 1 + index_numbers because this is the tradition
-      detIDs[j] = j;
-      specNums[j] = j+1;
+      space2D->getSpectrum(j)->setSpectrumNo(j+1);  // spectra numbers are also 1 + index_numbers because this is the tradition
+      space2D->getSpectrum(j)->setDetectorID(j);
     }
 
     Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(space->getBaseInstrument());
-
-    Detector *d = new Detector("det",0,0);
-    instr->markAsDetector(d);
-    Detector *d1 = new Detector("det",1,0);
-    instr->markAsDetector(d1);
-    Detector *d2 = new Detector("det",2,0);
-    instr->markAsDetector(d2);
-    Detector *d3 = new Detector("det",3,0);
-    instr->markAsDetector(d3);
-    Detector *d4 = new Detector("det",4,0);
-    instr->markAsDetector(d4);
-    Detector *d5 = new Detector("det",5,0);
-    instr->markAsDetector(d5);
+    for (detid_t i=0; i<6; i++)
+    {
+      Detector *d = new Detector("det", i,0);
+      instr->markAsDetector(d);
+    }
+    space->setInstrument(instr);
 
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    //space->mutableSpectraMap().populate(specNums, detIDs, NHIST );
-    space->replaceSpectraMap(new SpectraDetectorMap(specNums, detIDs, NHIST));
+    space->generateSpectraMap();
 
     // Register the workspace in the data service
     AnalysisDataService::Instance().add(inputWS, space);
@@ -230,27 +219,29 @@ public:
     std::vector<double> ones(NBINS, 1.0);
     // check the two grouped spectra
     TS_ASSERT_EQUALS( outputWS->dataX(0), tens );
-    TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(NBINS, 1+3) );
+    TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(NBINS, 1+3) ); // 1+3 = 4
     for (int i = 0; i < NBINS; ++i)
     {
       TS_ASSERT_DELTA(outputWS->dataE(0)[i], std::sqrt(static_cast<double>(2)), 1e-6);
     }
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(0), 1 );
-    TS_ASSERT_EQUALS( outputWS->dataX(1), tens );
-    TS_ASSERT_EQUALS( outputWS->dataY(1), std::vector<double>(NBINS, 4 ) );
-    
-    TS_ASSERT_EQUALS( outputWS->dataE(1), ones );
 
-      TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 4 );
+    TS_ASSERT_EQUALS( outputWS->dataX(1), tens );
+    TS_ASSERT_EQUALS( outputWS->dataY(1), std::vector<double>(NBINS, 4 ) ); // Directly # 4
+    TS_ASSERT_EQUALS( outputWS->dataE(1), ones );
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 4 );
+    
     //check the unmoved spectra
     TS_ASSERT_EQUALS( outputWS->dataX(2), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(2), std::vector<double>(NBINS, 2) );
     TS_ASSERT_EQUALS( outputWS->dataE(2), ones );
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(2), 2 );
+
     TS_ASSERT_EQUALS( outputWS->dataX(3), tens );
     TS_ASSERT_EQUALS( outputWS->dataY(3), std::vector<double>(NBINS, 5) );
     TS_ASSERT_EQUALS( outputWS->dataE(3), ones );
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(3), 5 );
+
     TS_ASSERT_EQUALS( outputWS->dataY(4), std::vector<double>(NBINS, 6) );
     TS_ASSERT_EQUALS( outputWS->dataE(4), ones );
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(4), 6 );
@@ -447,9 +438,9 @@ public:
     TS_ASSERT_EQUALS( specDet[1], 4);
     TS_ASSERT_EQUALS( specDet[2], 5);
     specDet = specDetecMap.getDetectors(8);
-    TS_ASSERT_EQUALS( specDet[0], 8);
-    TS_ASSERT_EQUALS( specDet[1], 9);
-    TS_ASSERT_EQUALS( specDet[2], 2);
+    TS_ASSERT_EQUALS( specDet[0], 2);
+    TS_ASSERT_EQUALS( specDet[1], 8);
+    TS_ASSERT_EQUALS( specDet[2], 9);
     TS_ASSERT_EQUALS( specDet[3], 11);
     TS_ASSERT_EQUALS( specDet[4], 12);
     TS_ASSERT_EQUALS( specDet[5], 13);
@@ -484,13 +475,14 @@ public:
     {
       std::ofstream file(inputFile.c_str());
       file << " 2		#file format is in http://svn.mantidproject.org/mantid/trunk/Code/Mantid/Framework/DataHandling/inc/MantidDataHandling/GroupDetectors2.h \n"
-        << "888 "            << std::endl
-        << "2"              << std::endl
-        << "1   3"          << std::endl
-        << "  888"             << std::endl
+        << "888 "            << std::endl // unused number 2
+        << "2"              << std::endl // number of spectra
+        << "1   3"          << std::endl // the list of spectra
+
+        << "  888"             << std::endl // unused number 2
         << std::endl
-        << "1"              << std::endl
-        << "4";
+        << "1"              << std::endl // 1 spectrum
+        << "4"; // spectrum 4 is in the group
       file.close();
     }
     void writeFileRanges()

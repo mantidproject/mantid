@@ -239,6 +239,11 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 6);
+    TS_ASSERT_EQUALS( output2D->getSpectrum(0)->getSpectrumNo(), 5);
+    TS_ASSERT_EQUALS( output2D->getSpectrum(1)->getSpectrumNo(), 6);
+    TS_ASSERT(        output2D->getSpectrum(1)->hasDetectorID(4103));
+    TS_ASSERT_EQUALS( output2D->getSpectrum(5)->getSpectrumNo(), 10);
+    TS_ASSERT(        output2D->getSpectrum(5)->hasDetectorID(4107));
     AnalysisDataService::Instance().remove(outWS);
   }
 
@@ -426,7 +431,7 @@ public:
     loader5.setPropertyValue("Filename", "IRS38633.raw");
     loader5.setPropertyValue("OutputWorkspace", "twoRegimes");
     loader5.setPropertyValue("SpectrumList", "2,3");
-	loader.setPropertyValue("LoadMonitors", "Include");
+    loader5.setPropertyValue("LoadMonitors", "Include");
     TS_ASSERT_THROWS_NOTHING( loader5.execute() )
     TS_ASSERT( loader5.isExecuted() )
 
@@ -441,15 +446,15 @@ public:
   }
   void testSeparateMonitors()
   {
- 	 LoadRaw3 loader6;
-	 if ( !loader6.isInitialized() ) loader6.initialize();
+    LoadRaw3 loader6;
+    if ( !loader6.isInitialized() ) loader6.initialize();
 
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(loader6.execute(),std::runtime_error);
 
     // Now set it...
     loader6.setPropertyValue("Filename", inputFile);
-	loader6.setPropertyValue("LoadMonitors", "Separate");
+    loader6.setPropertyValue("LoadMonitors", "Separate");
 
     outputSpace = "outer1";
     loader6.setPropertyValue("OutputWorkspace", outputSpace);
@@ -462,14 +467,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 
-	Workspace_sptr monitoroutput;
+    Workspace_sptr monitoroutput;
     TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve(outputSpace+"_Monitors"));
     Workspace2D_sptr monitoroutput2D = boost::dynamic_pointer_cast<Workspace2D>(monitoroutput);
     // Should be 2584 for file HET15869.RAW
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 2580);
 
-	TS_ASSERT_EQUALS( monitoroutput2D->getNumberHistograms(), 4);
-     //Check two X vectors are the same
+    TS_ASSERT_EQUALS( monitoroutput2D->getNumberHistograms(), 4);
+
+    TS_ASSERT( monitoroutput2D->getSpectrum(0)->hasDetectorID(601));
+    TS_ASSERT( monitoroutput2D->getSpectrum(1)->hasDetectorID(602));
+
+    //Check two X vectors are the same
     TS_ASSERT( (output2D->dataX(95)) == (output2D->dataX(1730)) );
     // Check two Y arrays have the same number of elements
     TS_ASSERT_EQUALS( output2D->dataY(669).size(), output2D->dataY(2107).size() );
@@ -735,7 +744,7 @@ public:
   // start and end spectra contains  monitors only  
   void testSeparateMonitorswithMaxMinLimits1()
   {	 
-	 LoadRaw3 loader9;
+    LoadRaw3 loader9;
     if ( !loader9.isInitialized() ) loader9.initialize();
 
     loader9.setPropertyValue("Filename", inputFile);
@@ -743,7 +752,7 @@ public:
     //loader9.setPropertyValue("SpectrumList", "998,999,1000");
     loader9.setPropertyValue("SpectrumMin", "2");
     loader9.setPropertyValue("SpectrumMax", "4");
-	loader9.setPropertyValue("LoadMonitors", "Separate");
+    loader9.setPropertyValue("LoadMonitors", "Separate");
 
     TS_ASSERT_THROWS_NOTHING(loader9.execute());
     TS_ASSERT( loader9.isExecuted() );
@@ -752,6 +761,8 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("outWS"));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    TS_ASSERT(output2D);
+    if (!output2D) return;
 
     // Should be 6 for selected input
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 3);
@@ -764,7 +775,7 @@ public:
 
     // Check one particular value
     TS_ASSERT_EQUALS( output2D->dataY(1)[1], 192);
-	AnalysisDataService::Instance().remove("outWS");
+    AnalysisDataService::Instance().remove("outWS");
     }
 
   //select start and end spectra a mix of monitors and normal workspace

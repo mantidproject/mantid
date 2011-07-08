@@ -207,11 +207,10 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn)
   const MantidVec eValues = m_inputWS->readE(spectraIn);
 
   // get a pointer to the detectors that created the spectrum
-  const specid_t specNum = m_inputWS->getAxis(1)->spectraNo(spectraIn);
-  const std::vector<detid_t> dets = m_inputWS->spectraMap().getDetectors(specNum);
+  const std::set<detid_t> dets = m_inputWS->getSpectrum(spectraIn)->getDetectorIDs();
 
-  std::vector<detid_t>::const_iterator it = dets.begin();
-  std::vector<detid_t>::const_iterator iend = dets.end();
+  std::set<detid_t>::const_iterator it = dets.begin();
+  std::set<detid_t>::const_iterator iend = dets.end();
   if ( it == iend )
   {
     throw Exception::NotFoundError("No detectors found", spectraIn);

@@ -16,16 +16,16 @@ public:
   {
     for (int i = 0; i < 4; ++i)
     {
-      data.dataX(0)[i] = i;
-      data.dataX(1)[i] = i+4;
+      data.getSpectrum(0)->dataX()[i] = i;
+      data.getSpectrum(1)->dataX()[i] = i+4;
     }
     
     for (int i = 0; i < 3; ++i)
     {
-      data.dataY(0)[i] = i*10;
-      data.dataE(0)[i] = sqrt(data.dataY(0)[i]);
-      data.dataY(1)[i] = i*100;
-      data.dataE(1)[i] = sqrt(data.dataY(1)[i]);     
+      data.getSpectrum(0)->dataY()[i] = i*10;
+      data.getSpectrum(0)->dataE()[i] = sqrt(data.getSpectrum(0)->dataY()[i]);
+      data.getSpectrum(1)->dataY()[i] = i*100;
+      data.getSpectrum(1)->dataE()[i] = sqrt(data.getSpectrum(1)->dataY()[i]);
     }
   }
   
@@ -34,12 +34,12 @@ public:
     ManagedDataBlock2D aBlock(0,2,2,2);
     TS_ASSERT_EQUALS( aBlock.minIndex(), 0 );
     TS_ASSERT( ! aBlock.hasChanges() );
-    TS_ASSERT_EQUALS( aBlock.dataX(0).size(), 2 );
-    TS_ASSERT_EQUALS( aBlock.dataY(0).size(), 2 );
-    TS_ASSERT_EQUALS( aBlock.dataE(0).size(), 2 );
-    TS_ASSERT_EQUALS( aBlock.dataX(1).size(), 2 );
-    TS_ASSERT_EQUALS( aBlock.dataY(1).size(), 2 );
-    TS_ASSERT_EQUALS( aBlock.dataE(1).size(), 2 );
+    TS_ASSERT_EQUALS( aBlock.getSpectrum(0)->dataX().size(), 2 );
+    TS_ASSERT_EQUALS( aBlock.getSpectrum(0)->dataY().size(), 2 );
+    TS_ASSERT_EQUALS( aBlock.getSpectrum(0)->dataE().size(), 2 );
+    TS_ASSERT_EQUALS( aBlock.getSpectrum(1)->dataX().size(), 2 );
+    TS_ASSERT_EQUALS( aBlock.getSpectrum(1)->dataY().size(), 2 );
+    TS_ASSERT_EQUALS( aBlock.getSpectrum(1)->dataE().size(), 2 );
   }
     
   void testSetX()
@@ -47,13 +47,27 @@ public:
     ManagedDataBlock2D aBlock(0,1,1,1);
     double aNumber = 5.5;
     boost::shared_ptr<MantidVec > v( new MantidVec(1, aNumber) );
-    TS_ASSERT_THROWS_NOTHING( aBlock.setX(0,v) );
-    TS_ASSERT_EQUALS( aBlock.dataX(0)[0], aNumber );
-    TS_ASSERT_THROWS( aBlock.setX(-1,v), std::range_error );
-    TS_ASSERT_THROWS( aBlock.setX(1,v), std::range_error );
+    TS_ASSERT_THROWS_NOTHING( aBlock.getSpectrum(0)->setX(v) );
+    TS_ASSERT_EQUALS( aBlock.getSpectrum(0)->dataX()[0], aNumber );
+    TS_ASSERT_THROWS( aBlock.getSpectrum(-1)->setX(v), std::range_error );
+    TS_ASSERT_THROWS( aBlock.getSpectrum(1)->setX(v), std::range_error );
     TS_ASSERT( aBlock.hasChanges() );
   }
   
+  void testSpectrumNo()
+  {
+    ManagedDataBlock2D aBlock(0,1,1,1);
+    TS_ASSERT_THROWS_NOTHING( aBlock.getSpectrum(0)->setSpectrumNo(1234) );
+    TS_ASSERT( aBlock.hasChanges() );
+  }
+
+  void testDetectorIDs()
+  {
+    ManagedDataBlock2D aBlock(0,1,1,1);
+    TS_ASSERT_THROWS_NOTHING( aBlock.getSpectrum(0)->addDetectorID(1234) );
+    TS_ASSERT( aBlock.hasChanges() );
+  }
+
   void testSetData()
   {
     ManagedDataBlock2D aBlock(0,1,1,1);
@@ -61,18 +75,18 @@ public:
     boost::shared_ptr<MantidVec > v( new MantidVec(1, aNumber) );
     double anotherNumber = 3.3;
     boost::shared_ptr<MantidVec > w( new MantidVec(1, anotherNumber) );
-    TS_ASSERT_THROWS_NOTHING( aBlock.setData(0,v,v) );
-    TS_ASSERT_EQUALS( aBlock.dataY(0)[0], aNumber )    ;
-    TS_ASSERT_THROWS( aBlock.setData(-1,v,v), std::range_error );
-    TS_ASSERT_THROWS( aBlock.setData(1,v,v), std::range_error );
+    TS_ASSERT_THROWS_NOTHING( aBlock.getSpectrum(0)->setData(v,v) );
+    TS_ASSERT_EQUALS( aBlock.getSpectrum(0)->dataY()[0], aNumber )    ;
+    TS_ASSERT_THROWS( aBlock.getSpectrum(-1)->setData(v,v), std::range_error );
+    TS_ASSERT_THROWS( aBlock.getSpectrum(1)->setData(v,v), std::range_error );
     
     double yetAnotherNumber = 2.25;
     (*v)[0] = yetAnotherNumber;
-    TS_ASSERT_THROWS_NOTHING( aBlock.setData(0,v,w) );
-    TS_ASSERT_EQUALS( aBlock.dataY(0)[0], yetAnotherNumber );
-    TS_ASSERT_EQUALS( aBlock.dataE(0)[0], anotherNumber );
-    TS_ASSERT_THROWS( aBlock.setData(-1,v,w), std::range_error );
-    TS_ASSERT_THROWS( aBlock.setData(1,v,w), std::range_error );
+    TS_ASSERT_THROWS_NOTHING( aBlock.getSpectrum(0)->setData(v,w) );
+    TS_ASSERT_EQUALS( aBlock.getSpectrum(0)->dataY()[0], yetAnotherNumber );
+    TS_ASSERT_EQUALS( aBlock.getSpectrum(0)->dataE()[0], anotherNumber );
+    TS_ASSERT_THROWS( aBlock.getSpectrum(-1)->setData(v,w), std::range_error );
+    TS_ASSERT_THROWS( aBlock.getSpectrum(1)->setData(v,w), std::range_error );
     TS_ASSERT( aBlock.hasChanges() );
   }
   
@@ -118,11 +132,11 @@ private:
     void dataXTester(ManagedDataBlock2D &dataToTest)
     {
       MantidVec x;
-      TS_ASSERT_THROWS( dataToTest.dataX(-1), std::range_error );
-      TS_ASSERT_THROWS_NOTHING( x = dataToTest.dataX(0) );
+      TS_ASSERT_THROWS( dataToTest.getSpectrum(-1)->dataX(), std::range_error );
+      TS_ASSERT_THROWS_NOTHING( x = dataToTest.getSpectrum(0)->dataX() );
       MantidVec xx;
-      TS_ASSERT_THROWS_NOTHING( xx = dataToTest.dataX(1) );
-      TS_ASSERT_THROWS( dataToTest.dataX(2), std::range_error );
+      TS_ASSERT_THROWS_NOTHING( xx = dataToTest.getSpectrum(1)->dataX() );
+      TS_ASSERT_THROWS( dataToTest.getSpectrum(2)->dataX(), std::range_error );
       TS_ASSERT_EQUALS( x.size(), 4 );
       TS_ASSERT_EQUALS( xx.size(), 4 );
       for (unsigned int i = 0; i < x.size(); ++i)
@@ -133,10 +147,10 @@ private:
       
       // test const version
       const ManagedDataBlock2D &constRefToData = dataToTest;
-      TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataX(-1), std::range_error );
-      const MantidVec xc = constRefToData.dataX(0);
-      const MantidVec xxc = constRefToData.dataX(1);
-      TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataX(2), std::range_error );
+      TS_ASSERT_THROWS( const MantidVec v = constRefToData.getSpectrum(-1)->dataX(), std::range_error );
+      const MantidVec xc = constRefToData.getSpectrum(0)->dataX();
+      const MantidVec xxc = constRefToData.getSpectrum(1)->dataX();
+      TS_ASSERT_THROWS( const MantidVec v = constRefToData.getSpectrum(2)->dataX(), std::range_error );
       TS_ASSERT_EQUALS( xc.size(), 4 );
       TS_ASSERT_EQUALS( xxc.size(), 4 );
       for (unsigned int i = 0; i < xc.size(); ++i)
@@ -149,11 +163,11 @@ private:
     void dataYTester(ManagedDataBlock2D &dataToTest)
     {
       MantidVec y;
-      TS_ASSERT_THROWS( dataToTest.dataY(-1), std::range_error );
-      TS_ASSERT_THROWS_NOTHING( y = dataToTest.dataY(0) );
+      TS_ASSERT_THROWS( dataToTest.getSpectrum(-1)->dataY(), std::range_error );
+      TS_ASSERT_THROWS_NOTHING( y = dataToTest.getSpectrum(0)->dataY() );
       MantidVec yy;
-      TS_ASSERT_THROWS_NOTHING( yy = dataToTest.dataY(1) );
-      TS_ASSERT_THROWS( dataToTest.dataY(2), std::range_error );
+      TS_ASSERT_THROWS_NOTHING( yy = dataToTest.getSpectrum(1)->dataY() );
+      TS_ASSERT_THROWS( dataToTest.getSpectrum(2)->dataY(), std::range_error );
       TS_ASSERT_EQUALS( y.size(), 3 );
       TS_ASSERT_EQUALS( yy.size(), 3 );
       for (unsigned int i = 0; i < y.size(); ++i)
@@ -164,10 +178,10 @@ private:
 
       // test const version
       const ManagedDataBlock2D &constRefToData = dataToTest;
-      TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataY(-1), std::range_error );
-      const MantidVec yc = constRefToData.dataY(0);
-      const MantidVec yyc = constRefToData.dataY(1);
-      TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataY(2), std::range_error );
+      TS_ASSERT_THROWS( const MantidVec v = constRefToData.getSpectrum(-1)->dataY(), std::range_error );
+      const MantidVec yc = constRefToData.getSpectrum(0)->dataY();
+      const MantidVec yyc = constRefToData.getSpectrum(1)->dataY();
+      TS_ASSERT_THROWS( const MantidVec v = constRefToData.getSpectrum(2)->dataY(), std::range_error );
       TS_ASSERT_EQUALS( yc.size(), 3 );
       TS_ASSERT_EQUALS( yyc.size(), 3 );
       for (unsigned int i = 0; i < yc.size(); ++i)
@@ -180,11 +194,11 @@ private:
     void dataETester(ManagedDataBlock2D &dataToTest)
     {
       MantidVec e;
-      TS_ASSERT_THROWS( dataToTest.dataE(-1), std::range_error );
-      TS_ASSERT_THROWS_NOTHING( e = dataToTest.dataE(0) );
+      TS_ASSERT_THROWS( dataToTest.getSpectrum(-1)->dataE(), std::range_error );
+      TS_ASSERT_THROWS_NOTHING( e = dataToTest.getSpectrum(0)->dataE() );
       MantidVec ee;
-      TS_ASSERT_THROWS_NOTHING( ee = dataToTest.dataE(1) );
-      TS_ASSERT_THROWS( dataToTest.dataE(2), std::range_error );
+      TS_ASSERT_THROWS_NOTHING( ee = dataToTest.getSpectrum(1)->dataE() );
+      TS_ASSERT_THROWS( dataToTest.getSpectrum(2)->dataE(), std::range_error );
       TS_ASSERT_EQUALS( e.size(), 3 );
       TS_ASSERT_EQUALS( ee.size(), 3 );
       for (unsigned int i = 0; i < e.size(); ++i)
@@ -195,10 +209,10 @@ private:
       
       // test const version
       const ManagedDataBlock2D &constRefToData = dataToTest;
-      TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataE(-1), std::range_error );
-      const MantidVec ec = constRefToData.dataE(0);
-      const MantidVec eec = constRefToData.dataE(1);
-      TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataE(2), std::range_error );
+      TS_ASSERT_THROWS( const MantidVec v = constRefToData.getSpectrum(-1)->dataE(), std::range_error );
+      const MantidVec ec = constRefToData.getSpectrum(0)->dataE();
+      const MantidVec eec = constRefToData.getSpectrum(1)->dataE();
+      TS_ASSERT_THROWS( const MantidVec v = constRefToData.getSpectrum(2)->dataE(), std::range_error );
       TS_ASSERT_EQUALS( ec.size(), 3 );
       TS_ASSERT_EQUALS( eec.size(), 3 );
       for (unsigned int i = 0; i < ec.size(); ++i)

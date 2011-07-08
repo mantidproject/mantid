@@ -205,7 +205,7 @@ namespace Mantid
       setOutputUnits(m_lhs,m_rhs,m_out);
 
       //For EventWorkspaces, redo the spectra to detector ID to make sure it is up-to-date. This may only be necessary for the Plus algorithm!
-      if (m_eout) m_eout->makeSpectraMap();
+      if (m_eout) m_eout->generateSpectraMap();
 
 
       // Assign the result to the output workspace property

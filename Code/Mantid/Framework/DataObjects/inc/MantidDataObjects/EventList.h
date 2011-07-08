@@ -4,18 +4,19 @@
 #ifdef _WIN32 /* _WIN32 */
 #include <time.h>
 #endif
+#include "MantidAPI/IEventList.h"
+#include "MantidAPI/IEventWorkspace.h" // get EventType declaration
+#include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
+#include "MantidDataObjects/Events.h"
+#include "MantidKernel/cow_ptr.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/TimeSplitter.h"
 #include <cstddef>
 #include <iostream>
-#include <vector>
-#include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
-#include "MantidAPI/IEventWorkspace.h" // get EventType declaration
-#include "MantidAPI/IEventList.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/TimeSplitter.h"
-#include "MantidDataObjects/Events.h"
 #include <set>
+#include <vector>
+#include "MantidDataObjects/EventWorkspaceMRU.h"
 
 namespace Mantid
 {
@@ -63,7 +64,7 @@ enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT};
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 
-class DLLExport EventList : public Mantid::API::IEventList
+class DLLExport EventList :  public Mantid::API::IEventList
 {
 private:
 
@@ -116,8 +117,9 @@ private:
 
 
 public:
-
   EventList();
+
+  EventList(EventWorkspaceMRU * mru, specid_t specNo);
 
   EventList(const EventList&rhs);
 
@@ -172,17 +174,14 @@ public:
   std::vector<WeightedEventNoTime>& getWeightedEventsNoTime();
   const std::vector<WeightedEventNoTime>& getWeightedEventsNoTime() const;
 
-  void addDetectorID(const detid_t detID);
-
-  bool hasDetectorID(const detid_t detID) const;
-
-  std::set<detid_t>& getDetectorIDs();
-  const std::set<detid_t>& getDetectorIDs() const;
-
-  void clearDetectorIDs();
-
   void clear(const bool removeDetIDs=true);
   void clearUnused();
+
+  void setMRU(EventWorkspaceMRU * newMRU);
+
+  EventWorkspaceMRU * getMRU();
+
+  void maskSpectrum(const double maskValue);
 
   void reserve(size_t num);
 
@@ -200,34 +199,43 @@ public:
 
   EventSortType getSortType() const;
 
-
+  // X-vector accessors. These reset the MRU for this spectrum
   void setX(const MantidVecPtr::ptr_type& X);
 
   void setX(const MantidVecPtr& X);
 
   void setX(const MantidVec& X);
 
-  void setDx(const MantidVecPtr::ptr_type& dX);
+  MantidVec& dataX();
+  const MantidVec& constDataX() const;
 
-  void setDx(const MantidVecPtr& dX);
+  // Disallowed data accessors - can't modify Y/E on a EventList
+  void setData(const MantidVec& /*Y*/)  { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
 
-  void setDx(const MantidVec& dX);
+  void setData(const MantidVec& /*Y*/, const MantidVec& /*E*/)  { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
 
-  virtual MantidVec& dataX();
+  void setData(const MantidVecPtr& /*Y*/)  { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
 
-  virtual MantidVec& dataDx();
+  void setData(const MantidVecPtr& /*Y*/, const MantidVecPtr& /*E*/)  { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
 
-  virtual const MantidVec& dataX() const;
+  void setData(const MantidVecPtr::ptr_type& /*Y*/)  { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
 
-  virtual const MantidVec& dataDx() const;
+  void setData(const MantidVecPtr::ptr_type& /*Y*/, const MantidVecPtr::ptr_type& /*E*/)   { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
 
-  virtual MantidVec * dataY() const;
+  MantidVec& dataY() { throw std::runtime_error("EventList: non-const access to Y data is not possible."); }
+  MantidVec& dataE() { throw std::runtime_error("EventList: non-const access to E data is not possible."); }
 
-  virtual MantidVec * dataE() const;
+  // Allowed data accessors - read-only Y/E histogram VIEWS of an event list
+  const MantidVec& dataY() const { return constDataY(); }
+  const MantidVec& dataE() const { return constDataE(); }
 
-  Kernel::cow_ptr<MantidVec> getRefX() const;
+  const MantidVec& constDataY() const;
+  const MantidVec& constDataE() const;
 
-  virtual std::size_t getNumberEvents() const;
+  MantidVec * makeDataY() const;
+  MantidVec * makeDataE() const;
+
+  std::size_t getNumberEvents() const;
   bool empty() const;
 
   size_t getMemorySize() const;
@@ -318,13 +326,8 @@ private:
   /// Last sorting order
   mutable EventSortType order;
 
-  /// Cached version of the x axis.
-  mutable MantidVecPtr refX;
-  /// Cached version of the error on X axis.
-  mutable MantidVecPtr refDx;
-
-  /// Set of the detector IDs associated with this EventList
-  std::set<detid_t> detectorIDs;
+  /// MRU lists of the parent EventWorkspace
+  mutable EventWorkspaceMRU * mru;
 
   template<class T>
   static typename std::vector<T>::const_iterator findFirstEvent(const std::vector<T> & events, const double seek_tof);

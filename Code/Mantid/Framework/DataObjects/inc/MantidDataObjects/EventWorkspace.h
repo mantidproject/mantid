@@ -5,16 +5,17 @@
 // Includes
 //----------------------------------------------------------------------
 
-#include <string>
-#include "MantidKernel/MRUList.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/IEventWorkspace.h"
-#include "MantidDataObjects/EventList.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/Progress.h"
-
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspaceMRU.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/MRUList.h"
+#include "MantidKernel/System.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <string>
+#include "MantidAPI/ISpectrum.h"
 
 namespace Mantid
 {
@@ -29,77 +30,10 @@ namespace Kernel
 namespace DataObjects
 {
 
-//============================================================================
-//============================================================================
-/**
- * This little class holds a MantidVec of data and an index marker that
- * is used for uniqueness.
- * This is used in the MRUList.
- *
- */
-class MantidVecWithMarker {
-public:
-  /**
-   * Constructor.
-   * @param the_index :: unique index into the workspace of this data
-   */
-  MantidVecWithMarker(const size_t the_index)
-  : m_index(the_index)
-  {
-  }
-
-  /// Destructor
-  ~MantidVecWithMarker()
-  {
-    m_data.clear();
-    //Trick to release the allocated memory
-    // MantidVec().swap(m_data);
-  }
-
-
-private:
-  /// Copy constructor
-  MantidVecWithMarker(const MantidVecWithMarker &other)
-  {
-    (void) other; //Avoid compiler warning
-    throw Kernel::Exception::NotImplementedError("Cannot copy MantidVecWithMarker.");
-  }
-
-  /// Assignment operator
-  MantidVecWithMarker& operator=(const MantidVecWithMarker &other)
-  {
-    (void) other; //Avoid compiler warning
-    throw Kernel::Exception::NotImplementedError("Cannot assign to MantidVecWithMarker.");
-//    m_index = other.m_index;
-//    m_data.assign(other.m_data.begin(), other.m_data.end());
-    return *this;
-  }
-
-public:
-  /// Unique index value.
-  size_t m_index;
-
-  /// Pointer to a vector of data
-  MantidVec m_data;
-
-  /// Function returns a unique index, used for hashing for MRU list
-  int hashIndexFunction() const
-  {
-    return int(m_index);
-  }
-
-  /// Set the unique index value.
-  void setIndex(const size_t the_index)
-  {
-    m_index = the_index;
-  }
-};
-
 
 ///Map to EventList objects, with the detector ID as the index.
 typedef std::map<detid_t, EventList*> EventListMap;
 typedef std::vector<EventList*> EventListVector;
-
 
 
 //============================================================================
@@ -114,11 +48,6 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 {
 
  public:
-  // Typedef for a Most-Recently-Used list of Data objects.
-  typedef Mantid::Kernel::MRUList<MantidVecWithMarker> mru_list;
-  // Typedef for a vector of MRUlists.
-  typedef std::vector< mru_list * > mru_lists;
-
   // The name of the workspace type.
   virtual const std::string id() const {return "EventWorkspace";}
 
@@ -131,6 +60,9 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   // Initialize the pixels
   void init(const std::size_t&, const std::size_t&, const std::size_t&);
 
+  void copyDataFrom(const EventWorkspace& source,
+                    std::size_t sourceStartWorkspaceIndex=0, std::size_t sourceEndWorkspaceIndex=size_t(-1));
+
   virtual bool threadSafe() const;
 
   //------------------------------------------------------------
@@ -141,22 +73,25 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   // Get the blocksize, aka the number of bins in the histogram
   std::size_t blocksize() const;
 
+  size_t getMemorySize() const;
+
   // Get the number of histograms. aka the number of pixels or detectors.
   std::size_t getNumberHistograms() const;
 
-  size_t getMemorySize() const;
+  //------------------------------------------------------------
+  // Return the underlying ISpectrum ptr at the given workspace index.
+  virtual Mantid::API::ISpectrum * getSpectrum(const size_t index);
 
-  void copyDataFrom(const EventWorkspace& source,
-                    std::size_t sourceStartWorkspaceIndex=0, std::size_t sourceEndWorkspaceIndex=size_t(-1));
+  // Return the underlying ISpectrum ptr (const version) at the given workspace index.
+  virtual const Mantid::API::ISpectrum * getSpectrum(const size_t index) const;
+
+  //------------------------------------------------------------
 
   double getTofMin() const;
 
   double getTofMax() const;
 
   //------------------------------------------------------------
-  void ensureEnoughBuffersY(std::size_t thread_num) const;
-  void ensureEnoughBuffersE(std::size_t thread_num) const;
-
   // Return the data X vector at a given workspace index
   MantidVec& dataX(const std::size_t);
 
@@ -185,8 +120,6 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   // Get a pointer to the x data at the given workspace index
   Kernel::cow_ptr<MantidVec> refX(const std::size_t) const;
 
-  void readYE(std::size_t const index, MantidVec const*& Y, MantidVec const*& E) const;
-
   //------------------------------------------------------------
 
   // Set the x-axis data for the given pixel via cow_ptr.
@@ -196,9 +129,6 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
   // Set the x-axis data (histogram bins) for all pixels
   void setAllX(Kernel::cow_ptr<MantidVec> &x);
-
-  // Get an EventList object at the given pixelid/spectrum number
-  EventList& getEventListAtPixelID(const detid_t pixelid);
 
   // Get an EventList object at the given workspace index number
   EventList& getEventList(const std::size_t workspace_index);
@@ -212,20 +142,13 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   // Get or add an EventList
   EventList& getOrAddEventList(const std::size_t workspace_index);
 
-  // Pad pixels in the workspace using the detectors in the instrument.
-  void padPixels(bool parallel);
   // Pad pixels in the workspace using the loaded spectra. Requires a non-empty spectra-detector map
   void padSpectra();
   // Remove pixels in the workspace that do not contain events.
   void deleteEmptyLists();
 
   // Make all the mapping stuff
-  void makeSpectraMap();
-  void makeAxis1();
   void doneAddingEventLists();
-
-  // Call this method when loading event data is complete.
-  void doneLoadingData();
 
 
   //------------------------------------------------------------
@@ -262,15 +185,6 @@ private:
   /// NO ASSIGNMENT ALLOWED
   EventWorkspace& operator=(const EventWorkspace&);
 
-  /** A map that holds the event list for each pixel; the key is the pixelid;
-   * this is used when loading data;
-   * this is NOT guaranteed to be ok after DoneLoadingData; Don't use it!
-   */
-  EventListMap data_map;
-
-  /// Set to true when loading data is finished.
-  bool done_loading_data;
-
   /** A vector that holds the event list for each spectrum; the key is
    * the workspace index, which is not necessarily the pixelid.
    */
@@ -282,12 +196,8 @@ private:
   /// The number of vectors in the workspace
   std::size_t m_noVectors;
 
-  /// The most-recently-used list of dataY histograms
-  mutable mru_lists m_bufferedDataY;
-
-  /// The most-recently-used list of dataE histograms
-  mutable mru_lists m_bufferedDataE;
-
+  /// Container for the MRU lists of the event lists contained.
+  mutable EventWorkspaceMRU * mru;
 };
 
 ///shared pointer to the EventWorkspace class

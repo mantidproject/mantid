@@ -37,6 +37,7 @@ set ( SRC_FILES
 	src/IPeak.cpp
 	src/IPeakFunction.cpp
 	src/IPeaksWorkspace.cpp
+	src/ISpectrum.cpp
 	src/ITableWorkspace.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
@@ -134,6 +135,7 @@ set ( INC_FILES
 	inc/MantidAPI/IPeak.h
 	inc/MantidAPI/IPeakFunction.h
 	inc/MantidAPI/IPeaksWorkspace.h
+	inc/MantidAPI/ISpectrum.h
 	inc/MantidAPI/ITableWorkspace.h
 	inc/MantidAPI/IWorkspaceProperty.h
 	inc/MantidAPI/ImplicitFunction.h
@@ -201,6 +203,7 @@ set ( TEST_FILES
 	test/IEventListTest.h
 	test/IFunctionMDTest.h
 	test/IMDWorkspaceTest.h
+	test/ISpectrumTest.h
 	test/ImplicitFunctionParserFactoryTest.h
 	test/InstrumentDataServiceTest.h
 	test/MDPropertyGeometryTest.h

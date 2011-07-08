@@ -95,7 +95,7 @@ void Integration::exec()
     return;
   }
 
-  // Create the 1D workspace for the output
+  // Create the 2D workspace (with 1 bin) for the output
   MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
 
   bool is_distrib=outputWorkspace->isDistribution();
@@ -108,31 +108,36 @@ void Integration::exec()
   for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
-    const int j = i - m_MinSpec;
+    // Workspace index on the output
+    const int outWI = i - m_MinSpec;
     
     // Copy Axis values from previous workspace
     if ( axisIsText )
     {
       Mantid::API::TextAxis* newAxis = dynamic_cast<Mantid::API::TextAxis*>(outputWorkspace->getAxis(1));
-      newAxis->setLabel(j, localworkspace->getAxis(1)->label(i));
-    }
-    else
-    {
-      outputWorkspace->getAxis(1)->setValue(j, localworkspace->getAxis(1)->operator()(i));
+      newAxis->setLabel(outWI, localworkspace->getAxis(1)->label(i));
     }
 
+    // This is the output
+    ISpectrum * outSpec = outputWorkspace->getSpectrum(outWI);
+    // This is the input
+    const ISpectrum * inSpec = localworkspace->getSpectrum(i);
+
+    // Copy spectrum number, detector IDs
+    outSpec->copyInfoFrom(*inSpec);
+
     // Retrieve the spectrum into a vector
-    const MantidVec& X = localworkspace->readX(i);
-    const MantidVec& Y = localworkspace->readY(i);
-    const MantidVec& E = localworkspace->readE(i);
+    const MantidVec& X = inSpec->dataX();
+    const MantidVec& Y = inSpec->dataY();
+    const MantidVec& E = inSpec->dataE();
 
     // If doing partial bins, we want to set the bin boundaries to the specified values
     // regardless of whether they're 'in range' for this spectrum
     // Have to do this here, ahead of the 'continue' a bit down from here.
     if ( incPartBins )
     {
-      outputWorkspace->dataX(j)[0] = m_MinRange;
-      outputWorkspace->dataX(j)[1] = m_MaxRange;
+      outSpec->dataX()[0] = m_MinRange;
+      outSpec->dataX()[1] = m_MaxRange;
     }
 
     // Find the range [min,max]
@@ -199,17 +204,19 @@ void Integration::exec()
     }
     else
     {
-      outputWorkspace->dataX(j)[0] = lowit==X.end() ? *(lowit-1) : *(lowit);
-      outputWorkspace->dataX(j)[1] = *highit;
+      outSpec->dataX()[0] = lowit==X.end() ? *(lowit-1) : *(lowit);
+      outSpec->dataX()[1] = *highit;
     }
 
-    outputWorkspace->dataY(j)[0] = sumY;
-    outputWorkspace->dataE(j)[0] = sqrt(sumE); // Propagate Gaussian error
+    outSpec->dataY()[0] = sumY;
+    outSpec->dataE()[0] = sqrt(sumE); // Propagate Gaussian error
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  outputWorkspace->generateSpectraMap();
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace",outputWorkspace);
@@ -242,7 +249,8 @@ void Integration::execEvent()
     outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
         API::WorkspaceFactory::Instance().create("EventWorkspace", m_MaxSpec-m_MinSpec+1, 2, 1));
     //Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputEventWS, outputWS, false);
+    bool differentSize = (m_MaxSpec-m_MinSpec+1) != inputEventWS->getNumberHistograms();
+    API::WorkspaceFactory::Instance().initializeFromParent(inputEventWS, outputWS, differentSize);
     //You need to copy over the data as well.
     // -- we copy only a range, if specified.
     outputWS->copyDataFrom( (*inputEventWS), m_MinSpec, m_MaxSpec );
@@ -259,6 +267,8 @@ void Integration::execEvent()
     outputWS->getEventListPtr(i)->maskTof( -std::numeric_limits<double>::max(), m_MinRange);
     // Remove events after maxRange
     outputWS->getEventListPtr(i)->maskTof(  m_MaxRange, std::numeric_limits<double>::max());
+    // Copy spectrum #, etc.
+    outputWS->getSpectrum(i)->copyInfoFrom( *inputEventWS->getSpectrum(i+m_MinSpec) );
     // Progress report
     progress->report("Filtering");
   }
@@ -270,6 +280,7 @@ void Integration::execEvent()
 
   // And set it for all workspaces
   outputWS->setAllX(X);
+  outputWS->generateSpectraMap();
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS));

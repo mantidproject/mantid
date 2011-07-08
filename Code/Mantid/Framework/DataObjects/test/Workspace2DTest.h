@@ -6,6 +6,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/ISpectrum.h"
 
 using namespace std;
 using namespace Mantid;
@@ -13,6 +14,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using Mantid::MantidVec;
 using Mantid::Geometry::IDetector_sptr;
+using Mantid::API::MatrixWorkspace;
+using Mantid::API::ISpectrum;
 
 class Workspace2DTest : public CxxTest::TestSuite
 {
@@ -166,18 +169,6 @@ public:
     TS_ASSERT_EQUALS( ws->readDx(6)[3], 9.9 );
   }
 
-  void testReadYE()
-  {
-    ws = Create2DWorkspaceBinned(nhist, nbins);
-    MantidVec const * Y=NULL;
-    MantidVec const * E=NULL;
-    ws->readYE(0, Y, E);
-    TS_ASSERT( Y );
-    TS_ASSERT( E );
-    TS_ASSERT_EQUALS( (*Y)[0], 2.0 );
-    TS_ASSERT_EQUALS( (*E)[0], sqrt(2.0) );
-  }
-
   void test_getMemorySizeForXAxes()
   {
     ws = Create2DWorkspaceBinned(nhist, nbins);
@@ -207,6 +198,19 @@ public:
     }
   }
 
+
+  /** Get spectrum() */
+  void testGetSpectrum()
+  {
+    boost::shared_ptr<MatrixWorkspace> ws(new Workspace2D());
+    ws->initialize(4,1,1);
+    ISpectrum * spec;
+    TS_ASSERT_THROWS_NOTHING( spec = ws->getSpectrum(0) );
+    TS_ASSERT(spec);
+    TS_ASSERT_THROWS_NOTHING( spec = ws->getSpectrum(3) );
+    TS_ASSERT(spec);
+    TS_ASSERT_THROWS_ANYTHING( spec = ws->getSpectrum(4) );
+  }
 
 };
 

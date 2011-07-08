@@ -13,67 +13,19 @@
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
+#include "FakeObjects.h"
 
 using std::size_t;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-namespace Mantid { namespace DataObjects {
-  
-  class MatrixWorkspaceTester : public MatrixWorkspace
-  {
-  public:
-    MatrixWorkspaceTester() : MatrixWorkspace() {}
-    virtual ~MatrixWorkspaceTester() {}
-
-    // Empty overrides of virtual methods
-    virtual size_t getNumberHistograms() const { return 1;}
-    const std::string id() const {return "MatrixWorkspaceTester";}
-    void init(const size_t&, const size_t& j, const size_t&)
-    {
-      vec.resize(j,1.0);
-      m_dataX.resize(j, vec);
-      m_dataY.resize(j, vec);
-      m_dataE.resize(j, vec);
-      
-      // Put an 'empty' axis in to test the getAxis method
-      m_axes.push_back(new NumericAxis(1));
-      m_axes[0]->title() = "1";
-      m_axes.push_back(new NumericAxis(1));
-      m_axes[1]->title() = "2";
-    }
-    bool isHistogramData() const {return true;}
-    size_t size() const {return vec.size();}
-    size_t blocksize() const {return vec.size();}
-    MantidVec& dataX(size_t const i) {return m_dataX.at(i);}
-    MantidVec& dataY(size_t const i) {return m_dataY.at(i);}
-    MantidVec& dataE(size_t const i) {return m_dataE.at(i);}
-    MantidVec& dataDx(size_t const i) {return m_dataE.at(i);}
-    const MantidVec& dataX(size_t const i) const {return m_dataX.at(i);}
-    const MantidVec& dataY(size_t const i) const {return m_dataY.at(i);}
-    const MantidVec& dataE(size_t const i) const {return m_dataE.at(i);}
-    const MantidVec& dataDx(size_t const i) const {return m_dataE.at(i);}
-    Kernel::cow_ptr<MantidVec> refX(const size_t) const {return Kernel::cow_ptr<MantidVec>();}
-    void setX(const size_t, const Kernel::cow_ptr<MantidVec>&) {}
-
-  private:
-    std::vector<MantidVec> m_dataX;
-    std::vector<MantidVec> m_dataY;
-    std::vector<MantidVec> m_dataE;
-    MantidVec vec;
-    int spec;
-  };
-}}// namespace
-
-using Mantid::DataObjects::MatrixWorkspaceTester;
-
 //Test the MatrixWorkspace as an IMDWorkspace.
 class IMDWorkspaceTest : public CxxTest::TestSuite
 {
 private:
 
-  Mantid::DataObjects::MatrixWorkspaceTester workspace;
+  WorkspaceTester workspace;
 
 public:
 
@@ -81,6 +33,8 @@ public:
   {
     workspace.setTitle("workspace");
     workspace.initialize(2,4,3);
+    workspace.getSpectrum(0)->setSpectrumNo(1);
+    workspace.getSpectrum(1)->setSpectrumNo(2);
     for (int i = 0; i < 4; ++i)
     {
       workspace.dataX(0)[i] = i;
@@ -92,13 +46,13 @@ public:
       workspace.dataY(0)[i] = i*10;
       workspace.dataE(0)[i] = sqrt(workspace.dataY(0)[i]);
       workspace.dataY(1)[i] = i*100;
-      workspace.dataE(1)[i] = sqrt(workspace.dataY(1)[i]);     
+      workspace.dataE(1)[i] = sqrt(workspace.dataY(1)[i]);
     }
   }
 
   void testGetXDimension() 
   { 
-    MatrixWorkspaceTester matrixWS;
+    WorkspaceTester matrixWS;
     matrixWS.init(1, 1, 1);
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> dimension = matrixWS.getXDimension();
     std::string id = dimension->getDimensionId();
@@ -108,7 +62,7 @@ public:
 
   void testGetYDimension()
   {
-    MatrixWorkspaceTester matrixWS;
+    WorkspaceTester matrixWS;
     matrixWS.init(1, 1, 1);
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> dimension = matrixWS.getYDimension();
     std::string id = dimension->getDimensionId();
@@ -117,26 +71,26 @@ public:
 
   void testGetZDimension()
   {
-    MatrixWorkspaceTester matrixWS;
+    WorkspaceTester matrixWS;
     TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getZDimension(), std::logic_error);
   }
 
   void testGettDimension()
   {
-    MatrixWorkspaceTester matrixWS;
+    WorkspaceTester matrixWS;
     TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getTDimension(), std::logic_error);
   }
 
   void testGetDimensionThrows()
   {
-    MatrixWorkspaceTester matrixWS;
+    WorkspaceTester matrixWS;
     matrixWS.init(1,1,1);
     TSM_ASSERT_THROWS("Id doesn't exist. Should throw during find routine.", matrixWS.getDimension("3"), std::overflow_error);
   }
 
   void testGetDimension()
   {
-    MatrixWorkspaceTester matrixWS;
+    WorkspaceTester matrixWS;
     matrixWS.init(1,1,1);
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> dim = matrixWS.getDimension("yDimension");
     TSM_ASSERT_EQUALS("The dimension id found is not the same as that searched for.", "yDimension", dim->getDimensionId());
@@ -144,21 +98,21 @@ public:
 
   void testGetDimensionOverflow()
   {
-    MatrixWorkspaceTester matrixWS;
+    WorkspaceTester matrixWS;
     matrixWS.init(1,1,1);
     TSM_ASSERT_THROWS("The dimension does not exist. Attempting to get it should throw", matrixWS.getDimension("1"), std::overflow_error);
   }
 
   void testGetNPoints()
   {
-    MatrixWorkspaceTester matrixWS;
+    WorkspaceTester matrixWS;
     matrixWS.init(5, 5, 5);
-    TSM_ASSERT_EQUALS("The expected number of points have not been returned.", 5, matrixWS.getNPoints());
+    TSM_ASSERT_EQUALS("The expected number of points have not been returned.", 25, matrixWS.getNPoints());
   }
 
   void testGetCellElipsisParameterVersion()
   {
-    MatrixWorkspaceTester matrixWS;
+    WorkspaceTester matrixWS;
     TSM_ASSERT_THROWS("Cannot access higher dimensions should throw logic error.", matrixWS.getCell(1, 1, 1), std::logic_error);
     TSM_ASSERT_THROWS("Cannot access higher dimensions should throw logic error.", matrixWS.getCell(1, 1, 1, 1), std::logic_error);
     TSM_ASSERT_THROWS("Cannot access higher dimensions should throw logic error.", matrixWS.getCell(1, 1, 1, 1, 1, 1, 1, 1, 1), std::logic_error);
@@ -196,14 +150,14 @@ public:
 
   void testGetPoint()
   {
-    const Mantid::Geometry::SignalAggregate& pointA = workspace.getPoint(5);
+    const Mantid::Geometry::SignalAggregate& pointA = workspace.getPoint(4);
     TSM_ASSERT_EQUALS("The expected mdpoint has not been returned on the basis of signal.", 100, pointA.getSignal());
     TSM_ASSERT_EQUALS("The expected mdpoint has not been returned on the basis of error.", 10, pointA.getError());
   }
 
   void testGetPointVertexes()
   {
-    const Mantid::Geometry::SignalAggregate& pointA = workspace.getPoint(4);
+    const Mantid::Geometry::SignalAggregate& pointA = workspace.getPoint(3);
     std::vector<Coordinate> vertexes = pointA.getVertexes();
     TSM_ASSERT_EQUALS("Wrong number of vertexes returned", 4, vertexes.size());
 

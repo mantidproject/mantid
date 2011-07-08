@@ -154,15 +154,17 @@ public:
       {
       }
 
-      TS_ASSERT(det);
-      if( !det ) TS_FAIL("No detector found");
-      if( masking.count(i) == 0 )
+      TSM_ASSERT("Detector was found", det);
+      if( det )
       {
-        TS_ASSERT_EQUALS(det->isMasked(), false);
-      }
-      else
-      {
-        TS_ASSERT_EQUALS(det->isMasked(), true);
+        if( masking.count(i) == 0 )
+        {
+          TS_ASSERT_EQUALS(det->isMasked(), false);
+        }
+        else
+        {
+          TS_ASSERT_EQUALS(det->isMasked(), true);
+        }
       }
     }
 

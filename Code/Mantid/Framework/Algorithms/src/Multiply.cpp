@@ -81,8 +81,8 @@ namespace Mantid
     {
       // We must histogram the rhs event list to multiply.
       MantidVec rhsY, rhsE;
-      rhs.generateHistogram( rhs.dataX(), rhsY, rhsE);
-      lhs.multiply(rhs.dataX(), rhsY, rhsE);
+      rhs.generateHistogram( rhs.constDataX(), rhsY, rhsE);
+      lhs.multiply(rhs.constDataX(), rhsY, rhsE);
     }
 
     /** Carries out the binary operation IN-PLACE on a single EventList,

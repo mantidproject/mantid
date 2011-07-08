@@ -298,7 +298,6 @@ void LoadEventPreNexus::exec()
     localWorkspace->mutableRun().addProperty("run_start", pulsetimes[0].to_ISO8601_string(), true );
   }
 
-
   //Get the instrument!
   this->runLoadInstrument(event_filename, localWorkspace);
 
@@ -415,6 +414,7 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     if (it->first > detid_max)
       detid_max = it->first;
 
+  // Pad all the pixels
   this->pixel_to_wkspindex.reserve(detid_max+1); //starting at zero up to and including detid_max
   this->pixel_to_wkspindex.assign(detid_max+1, 0);
   size_t workspaceIndex = 0;
@@ -423,10 +423,14 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     if (!it->second->isMonitor())
     {
       this->pixel_to_wkspindex[it->first] = workspaceIndex;
-      workspace->getOrAddEventList(workspaceIndex).addDetectorID(it->first);
+      EventList & spec = workspace->getOrAddEventList(workspaceIndex);
+      spec.addDetectorID(it->first);
+      // Match the spectrum number and detector ID
+      spec.setSpectrumNo(it->first);
       workspaceIndex += 1;
     }
   }
+  workspace->doneAddingEventLists();
 
   //For slight speed up
   loadOnlySomeSpectra = (this->spectra_list.size() > 0);
@@ -434,11 +438,6 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   //Turn the spectra list into a map, for speed of access
   for (std::vector<int64_t>::iterator it = spectra_list.begin(); it != spectra_list.end(); it++)
     spectraLoadMap[*it] = true;
-
-  //Allocate the intermediate buffer, if it will be used in parallel processing
-  //IntermediateEvent * intermediate_buffer;
-  //if (parallelProcessing)
-  //  intermediate_buffer = new IntermediateEvent[loadBlockSize];
 
 
   while (eventfile->getOffset() < this->num_events)
@@ -458,8 +457,6 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 
   //Clean up the buffers
   delete [] event_buffer;
-  //if (parallelProcessing)
-  //  delete [] intermediate_buffer;
 
   //finalize loading
   workspace->doneAddingEventLists();

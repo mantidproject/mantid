@@ -67,6 +67,10 @@ public:
     //TOF limits found. There is a pad of +-1 given around the actual TOF founds.
     TS_ASSERT_DELTA( (*WS->refX(0))[0],  44162.6, 0.05);
     TS_ASSERT_DELTA( (*WS->refX(0))[1],  60830.2, 0.05);
+    // Valid spectrum info
+    TS_ASSERT_EQUALS( WS->getSpectrum(0)->getSpectrumNo(), 0);
+    TS_ASSERT_EQUALS( WS->getSpectrum(0)->getDetectorIDs().size(), 1);
+    TS_ASSERT_EQUALS( *WS->getSpectrum(0)->getDetectorIDs().begin(), 0);
 
     //Check one event from one pixel - does it have a reasonable pulse time
     TS_ASSERT( WS->getEventListPtr(1000)->getEvents()[0].pulseTime() > DateAndTime(int64_t(1e9*365*10)) );

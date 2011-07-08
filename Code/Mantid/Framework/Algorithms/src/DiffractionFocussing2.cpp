@@ -16,6 +16,7 @@
 #include <fstream>
 #include <iterator>
 #include <numeric>
+#include "MantidAPI/ISpectrum.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -159,13 +160,8 @@ void DiffractionFocussing2::exec()
   std::vector<bool> flags(nGroups,true); //Flag to determine whether the X for a group has been set
   MantidVec limits(2), weights_default(1,1.0), emptyVec(1,0.0), EOutDummy(nPoints);  // Vectors for use with the masking stuff
 
-  // The spectaDetectorMap will have been copied from the input, but we want a new one
-  API::SpectraDetectorMap * newSpecMap = new SpectraDetectorMap;
-  // Replace the old copied spectra map with a new one
-  out->replaceSpectraMap(newSpecMap);
-  const Geometry::ISpectraDetectorMap& inSpecMap = matrixInputW->spectraMap();
-
-  const API::Axis* const inSpecAxis = matrixInputW->getAxis(1);
+  // The output spectrum, will be set at the first group
+  ISpectrum * outSpec = NULL;
   
   Progress * prog;
   prog = new API::Progress(this,0.2,1.0,nHist+nGroups);
@@ -173,19 +169,26 @@ void DiffractionFocussing2::exec()
   {
     prog->report();
 
+    // This is the input spectrum
+    const ISpectrum * inSpec = matrixInputW->getSpectrum(i);
+
     //Check whether this spectra is in a valid group
     const int group=groupAtWorkspaceIndex[i];
     //std::cout << "Wi " << i << " is at group " << group << "\n";
     if (group<=0) // Not in a group
       continue;
     //Get reference to its old X,Y,and E.
-    const MantidVec& Xin=matrixInputW->readX(i);
-    const MantidVec& Yin=matrixInputW->readY(i);
-    const MantidVec& Ein=matrixInputW->readE(i);
+    const MantidVec& Xin=inSpec->dataX();
+    const MantidVec& Yin=inSpec->dataY();
+    const MantidVec& Ein=inSpec->dataE();
     // Get the group
     group2vectormap::iterator it=group2xvector.find(group);
     group2vectormap::difference_type dif=std::distance(group2xvector.begin(),it);
     const MantidVec& Xout = *((*it).second);
+
+    // Workspace index in the output
+    const size_t outWI = static_cast<size_t>(dif);
+
     // Assign the new X axis only once (i.e when this group is encountered the first time)
     if (flags[dif])
     {
@@ -193,14 +196,19 @@ void DiffractionFocussing2::exec()
       flags[dif]=false;
       // Initialize the group's weight vector here too
       group2wgtvector[group] = boost::shared_ptr<MantidVec>(new MantidVec(nPoints,0.0));
+      // This is the output spectrum
+      outSpec = out->getSpectrum(outWI);
       // Also set the spectrum number to the group number
-      out->getAxis(1)->spectraNo(static_cast<int64_t>(dif)) = group;
+      outSpec->setSpectrumNo(group);
+      outSpec->clearDetectorIDs();
     }
+
     // Add the detectors for this spectrum to the output workspace's spectra-detector map
-    newSpecMap->addSpectrumEntries(group,inSpecMap.getDetectors(inSpecAxis->spectraNo(i)));
+    outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+
     // Get the references to Y and E output and rebin
-    MantidVec& Yout=out->dataY(static_cast<int64_t>(dif));
-    MantidVec& Eout=out->dataE(static_cast<int64_t>(dif));
+    MantidVec& Yout=outSpec->dataY();
+    MantidVec& Eout=outSpec->dataE();
     try
     {
       VectorHelper::rebinHistogram(Xin,Yin,Ein,Xout,Yout,Eout,true);
@@ -298,6 +306,9 @@ void DiffractionFocussing2::exec()
     prog->report();
   }
   
+  // For backwards-compatibility
+  out->generateSpectraMap();
+
   setProperty("OutputWorkspace",out);
 
   delete prog;
@@ -333,6 +344,11 @@ void DiffractionFocussing2::execEvent()
     g_log.information() << "Performing focussing on a single group\n";
     // Special case of a single group - parallelize differently
     EventList & groupEL = out->getOrAddEventList(0);
+
+    // Only one group, spec # is = 1
+    groupEL.setSpectrumNo(1);
+    // Make sure you start with no detector IDs.
+    groupEL.clearDetectorIDs();
 
     int chunkSize = 200;
 
@@ -409,6 +425,8 @@ void DiffractionFocussing2::execEvent()
     for (int group=1; group<nGroups+1; group++)
     {
       out->getOrAddEventList(group-1).reserve(size_required[group]);
+      out->getOrAddEventList(group-1).clearDetectorIDs();
+      out->getOrAddEventList(group-1).setSpectrumNo(group);
       prog->reportIncrement(1, "Allocating");
     }
 
@@ -425,6 +443,7 @@ void DiffractionFocussing2::execEvent()
 
         //In workspace index group-1, put what was in the OLD workspace index wi
         out->getOrAddEventList(group-1) += eventW->getEventList(wi);
+
         prog->reportIncrement(1, "Appending Lists");
 
         // When focussing in place, you can clear out old memory from the input one!
@@ -470,6 +489,7 @@ void DiffractionFocussing2::execEvent()
     else
       g_log.warning() << "Warning! No X histogram bins were found for any groups. Histogram will be empty.\n";
   }
+  out->generateSpectraMap();
   out->clearMRU();
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(out));
   return;

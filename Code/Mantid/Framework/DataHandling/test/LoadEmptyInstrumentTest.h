@@ -716,6 +716,9 @@ public:
     // get parameter map
     ParameterMap& paramMap = ws->instrumentParameters();
 
+    TS_ASSERT_EQUALS( ws->getNumberHistograms(), 4);
+    if (ws->getNumberHistograms() < 4) return;
+
     IDetector_sptr det = ws->getDetector(1);  
     TS_ASSERT_EQUALS( det->getID(), 1);
     TS_ASSERT_EQUALS( det->getName(), "pixel");
@@ -753,12 +756,6 @@ public:
 
     AnalysisDataService::Instance().remove(wsName);
   }
-
-
-  void test_loadIntoEventWorkspace_DUM()
-  {
-  }
-
 
 
   void test_BIOSANS_Instrument()
