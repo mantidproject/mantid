@@ -149,10 +149,10 @@ namespace MDEvents
   void IMDBox)::saveNexus(::NeXus::File * file)
   {
     // Use attributes for some of the members.
-    file->putAttr("signal", this->m_signal);
-    file->putAttr("errorSquared", this->m_errorSquared);
-    file->putAttr("depth", this->m_depth);
-    file->putAttr("inverseVolume", this->m_inverseVolume);
+    file->putAttr("signal", double(this->m_signal));
+    file->putAttr("errorSquared", double(this->m_errorSquared));
+    file->putAttr("inverseVolume", double(this->m_inverseVolume));
+    file->putAttr("depth", int(this->m_depth));
 
     // Two vectors for the min/max extents
     std::vector<coord_t> extents_min, extents_max;
@@ -179,8 +179,8 @@ namespace MDEvents
     int ival;
     file->getAttr("signal", dval); this->m_signal = signal_t(dval);
     file->getAttr("errorSquared", dval); this->m_errorSquared = signal_t(dval);
-    file->getAttr("depth", ival); this->m_depth = size_t(ival);
     file->getAttr("inverseVolume", dval); this->m_inverseVolume = coord_t(dval);
+    file->getAttr("depth", ival); this->m_depth = size_t(ival);
 
     // Two vectors for the min/max extents
     std::vector<coord_t> extents_min, extents_max;
