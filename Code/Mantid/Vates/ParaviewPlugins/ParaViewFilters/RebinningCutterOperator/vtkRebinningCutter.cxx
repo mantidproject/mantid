@@ -173,16 +173,6 @@ void vtkRebinningCutter::configureThresholdRangeMethod()
   }
 }
 
-void vtkRebinningCutter::SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex)
-{
-  int index = atoi(selectedStrategyIndex.c_str());
-  if(index != m_thresholdMethodIndex)
-  {
-    m_thresholdMethodIndex = index;
-    this->Modified();
-  }
-}
-
 int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInformationVector**,
   vtkInformationVector *outputVector)
 {
@@ -300,16 +290,6 @@ void vtkRebinningCutter::SetApplyClip(int applyClip)
   }
 }
 
-void vtkRebinningCutter::SetUserDefinedRange(int userDefinedRange)
-{
-  bool b_userDefinedRange = userDefinedRange == 1 ? true : false;
-  if(m_userDefinedRange != b_userDefinedRange)
-  {
-    m_userDefinedRange = b_userDefinedRange;
-    this->Modified();
-  }
-}
-
 void vtkRebinningCutter::SetClipFunction(vtkImplicitFunction * func)
 {
   vtkBox* box = dynamic_cast<vtkBox*>(func);
@@ -346,6 +326,16 @@ void vtkRebinningCutter::SetAppliedGeometryXML(std::string appliedGeometryXML)
   {
     m_appliedGeometryXML = appliedGeometryXML;
     this->Modified(); 
+  }
+}
+
+void vtkRebinningCutter::SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex)
+{
+  int index = atoi(selectedStrategyIndex.c_str());
+  if(index != m_thresholdMethodIndex)
+  {
+    m_thresholdMethodIndex = index;
+    this->Modified();
   }
 }
 

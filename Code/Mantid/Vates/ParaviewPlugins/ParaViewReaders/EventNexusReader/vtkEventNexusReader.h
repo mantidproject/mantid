@@ -5,6 +5,7 @@
 #include "MantidMDAlgorithms/WidthParameter.h"
 #include "MantidVatesAPI/EscalatingRebinningActionManager.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidVatesAPI/ThresholdRange.h"
 
 class vtkImplicitFunction;
 class VTK_EXPORT vtkEventNexusReader : public vtkUnstructuredGridAlgorithm
@@ -24,6 +25,9 @@ public:
   void SetWidth(double width);
   void SetApplyClip(bool applyClip);
   void SetClipFunction( vtkImplicitFunction * func);
+  void SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex);  
+  double GetInputMinThreshold();
+  double GetInputMaxThreshold();
   /// Called by presenter to force progress information updating.
   void UpdateAlgorithmProgress(double progress);
 
@@ -49,6 +53,9 @@ private:
   std::string extractFormattedPropertyFromDimension(Mantid::Geometry::IMDDimension_sptr dimension) const;
 
   void doRebinning();
+
+  /// Set-up a strategy for thresholding.
+  void configureThresholdRangeMethod();
 
   /**
    Detect wheter x dimension is available.
@@ -145,5 +152,9 @@ private:
 
   /// the dimension information applied to the tDimension Mapping.
   Mantid::VATES::Dimension_sptr m_appliedTDimension;
+
+  int m_thresholdMethodIndex;
+
+  Mantid::VATES::ThresholdRange_scptr m_ThresholdRange;
 };
 #endif

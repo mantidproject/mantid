@@ -71,15 +71,15 @@ public:
   void SetAppliedGeometryXML(std::string xml);
   void SetApplyClip(int applyClip);
   const char* GetInputGeometryXML();
-  void SetUserDefinedRange(int userDefinedRange);
-  void SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex);
+  void SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex);  
+  double GetInputMinThreshold();
+  double GetInputMaxThreshold();
   /// Paraview Related Commands. See *.xml proxy/property file --------------------------------
 
   /// Called by presenter to force progress information updating.
   void UpdateAlgorithmProgress(double progress);
 
-  double GetInputMinThreshold();
-  double GetInputMaxThreshold();
+
 
   virtual vtkImplicitFunction* getImplicitFunction() const;
   virtual double getMaxThreshold() const;
@@ -87,8 +87,6 @@ public:
   virtual bool getApplyClip() const;
   virtual double getTimeStep() const;
   virtual const char* getAppliedGeometryXML() const;
-
-
 
 protected:
 
@@ -141,7 +139,6 @@ private:
   int m_timestep;
   Mantid::signal_t m_thresholdMax;
   Mantid::signal_t m_thresholdMin;
-  bool m_userDefinedRange;
   /// Threshold range calculator.
   Mantid::VATES::ThresholdRange_scptr m_ThresholdRange;
   

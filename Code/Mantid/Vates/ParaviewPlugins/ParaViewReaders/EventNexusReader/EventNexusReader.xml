@@ -27,14 +27,14 @@
 	     default_values="1">
 	    </DoubleVectorProperty>
         <DoubleVectorProperty
-         name="Min Signal"
+         name="MinThreshold"
          command="SetMinThreshold"
          number_of_elements="1"
 	     default_values="0.1"
 	    >
 	   </DoubleVectorProperty>
 	   <DoubleVectorProperty
-         name="Max Signal"
+         name="MaxThreshold"
          command="SetMaxThreshold"
          number_of_elements="1"
 	     default_values="10000">
@@ -58,7 +58,28 @@
         number_of_elements="1">
         <FileListDomain name="files"/>
       </StringVectorProperty>
-	  
+	     <StringVectorProperty
+         name="ThresholdRangeStrategyIndex"
+         command="SetThresholdRangeStrategyIndex"
+         number_of_elements="1"
+	     default_values="0">
+	   </StringVectorProperty>
+	  <DoubleVectorProperty
+         name="InputMinThreshold"
+         command="GetInputMinThreshold"
+         number_of_elements="1"
+		 default_values="0.1"
+         information_only="1">
+        <SimpleDoubleInformationHelper /> 
+      </DoubleVectorProperty>
+	  <DoubleVectorProperty
+         name="InputMaxThreshold"
+         command="GetInputMaxThreshold"
+         number_of_elements="1"
+		 default_values="1000000"
+         information_only="1">
+       <SimpleDoubleInformationHelper /> 
+      </DoubleVectorProperty>
     </SourceProxy>
   </ProxyGroup>
   <!-- End EventNexusReader -->

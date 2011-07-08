@@ -57,9 +57,7 @@ void RebinningCutterObjectPanel::constructGeometry(QGridLayout* gLayout)
     if(m_geometryWidget != NULL)
     {
       this->layout()->removeWidget(m_geometryWidget);
-      //this->layout()->removeWidget(m_thresholdWidget);
       delete m_geometryWidget;
-      //delete m_thresholdWidget;
     }
 
     // Construct custom widget instance.

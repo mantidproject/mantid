@@ -20,6 +20,11 @@
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
+#include "MantidVatesAPI/GaussianThresholdRange.h"
+#include "MantidVatesAPI/UserDefinedThresholdRange.h"
+#include "MantidVatesAPI/NoThresholdRange.h"
+#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
+#include "MantidVatesAPI/MedianAndBelowThresholdRange.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 
 #include "MantidDataHandling/LoadEventNexus.h"
@@ -61,6 +66,26 @@ vtkEventNexusReader::vtkEventNexusReader() :
 vtkEventNexusReader::~vtkEventNexusReader()
 {
   this->SetFileName(0);
+}
+
+
+void vtkEventNexusReader::configureThresholdRangeMethod()
+{
+  switch(m_thresholdMethodIndex)
+  {
+  case 0:
+    m_ThresholdRange = ThresholdRange_scptr(new IgnoreZerosThresholdRange());
+    break;
+  case 1:
+    m_ThresholdRange = ThresholdRange_scptr(new NoThresholdRange());
+    break;
+  case 2:
+    m_ThresholdRange = ThresholdRange_scptr(new MedianAndBelowThresholdRange());
+    break;
+  case 3:
+    m_ThresholdRange = ThresholdRange_scptr(new UserDefinedThresholdRange(m_minThreshold, m_maxThreshold));
+    break;
+  }
 }
 
 /**
@@ -216,12 +241,45 @@ void vtkEventNexusReader::SetAppliedGeometryXML(std::string appliedGeometryXML)
 }
 
 /**
+  Sets the selected index for the thresholding method.
+  @parameter selectedStrategyIndex : index as a string.
+*/
+void vtkEventNexusReader::SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex)
+{
+  int index = atoi(selectedStrategyIndex.c_str());
+  if(index != m_thresholdMethodIndex)
+  {
+    m_thresholdMethodIndex = index;
+    this->Modified();
+  }
+}
+
+
+/**
   Gets the geometry xml from the workspace. Allows object panels to configure themeselves.
   @return geometry xml const * char reference.
 */
 const char* vtkEventNexusReader::GetInputGeometryXML()
 {
   return this->m_geometryXmlBuilder.create().c_str();
+}
+
+/**
+  Getter for the minimum threshold.
+  @return geometry xml const * char reference.
+*/
+double vtkEventNexusReader::GetInputMinThreshold()
+{
+  return m_minThreshold;
+}
+
+/**
+  Getter for the maximum threshold.
+  @return geometry xml const * char reference.
+*/
+double vtkEventNexusReader::GetInputMaxThreshold()
+{
+  return m_maxThreshold;
 }
 
 /**
@@ -294,9 +352,7 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-
-  //  vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
-  //    outInfo->Get(vtkDataObject::DATA_OBJECT()));
+  configureThresholdRangeMethod();
 
   vtkDataSet *output = vtkDataSet::SafeDownCast(
       outInfo->Get(vtkDataObject::DATA_OBJECT()));
@@ -317,17 +373,18 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
 
   // Chain of resposibility setup for visualisation. Encapsulates decision making on how workspace will be rendered.
   std::string scalarName = "signal";
-  ThresholdRange_scptr range(new UserDefinedThresholdRange(m_minThreshold, m_maxThreshold));
-  vtkThresholdingLineFactory vtkGridFactory(range, scalarName);
-  vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(range, scalarName);
-  vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(range, scalarName);
+  vtkThresholdingLineFactory vtkGridFactory(m_ThresholdRange, scalarName);
+  vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(m_ThresholdRange, scalarName);
+  vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(m_ThresholdRange, scalarName);
   vtkGridFactory.SetSuccessor(p_2dSuccessorFactory);
   p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
-  
+
   RebinningKnowledgeSerializer serializer(LocationNotRequired); //Object handles serialization of meta data.
 
-//  vtkUnstructuredGrid* structuredMesh = vtkUnstructuredGrid::SafeDownCast(m_presenter.getMesh(serializer, vtkGridFactory));
   vtkDataSet * structuredMesh = vtkDataSet::SafeDownCast(m_presenter.getMesh(serializer, vtkGridFactory));
+  
+  m_minThreshold = m_ThresholdRange->getMinimum();
+  m_maxThreshold = m_ThresholdRange->getMaximum();
   output->ShallowCopy(structuredMesh);
 
   // Reset the action manager fresh for next cycle.
