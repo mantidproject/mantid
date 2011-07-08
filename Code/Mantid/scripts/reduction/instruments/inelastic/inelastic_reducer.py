@@ -1,13 +1,15 @@
 """
-    Simple Reducer example
+    Inelastic specific implementation of the Reducer.
 """
-from MantidFramework import *
-from reduction import Reducer
 
+from reduction import Reducer
 # Validate_step is a decorator that allows both Python algorithms and ReductionStep objects to be passed to the Reducer.
 # It also does minimal type checking to ensure that the object that is passed is valid
 from reduction import validate_step
 from mantidsimple import *
+
+## Version number
+__version__ = '0.0'
 
 class InelasticReducer(Reducer):
     """
