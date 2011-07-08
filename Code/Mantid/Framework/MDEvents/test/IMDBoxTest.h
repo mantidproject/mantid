@@ -182,18 +182,20 @@ public:
   /** Open a nexus file for this and save it */
   void test_saveNexus_loadNexus()
   {
-    // Clean up if it exists
-    std::string filename(ConfigService::Instance().getString("defaultsave.directory") + "IMDBoxTest.nxs");
-
+    std::string filename;
     try
     {
+      // Clean up if it exists
+      filename = (ConfigService::Instance().getString("defaultsave.directory") + "IMDBoxTest.nxs");
+
       Poco::File(filename).createFile();
       if (Poco::File(filename).exists())
         Poco::File(filename).remove();
     }
-    catch (...)
+    catch (std::exception &e)
     {
       std::cout << "Error! Could not write to " + filename << std::endl;
+      std::cout << e.what() << std::endl;
       std::cout << "Skipping test.\n";
       return;
     }

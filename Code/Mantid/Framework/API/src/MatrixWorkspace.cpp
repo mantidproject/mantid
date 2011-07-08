@@ -151,8 +151,14 @@ namespace Mantid
       m_spectraMap.reset(spectraMap);
       // The neighbour map needs to be rebuilt
       m_nearestNeighbours.reset();
-
-      this->updateSpectraUsingMap();
+      try
+      {
+        this->updateSpectraUsingMap();
+      }
+      catch (std::exception &e)
+      {
+        g_log.error() << "Error in MatrixWorkspace::replaceSpectraMap(): " << e.what() << std::endl;
+      }
     }
 
     /** Using the current spectraDetectorMap,

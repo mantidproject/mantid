@@ -189,11 +189,11 @@ namespace Mantid
           runLoadInstrument(localWorkspace );
           runLoadMappingTable(localWorkspace );
           runLoadLog(localWorkspace );
-                Property* log=createPeriodLog(1);
-                if(log)localWorkspace->mutableRun().addLogData(log);
+          Property* log=createPeriodLog(1);
+          if(log)localWorkspace->mutableRun().addLogData(log);
           // Set the total proton charge for this run
           // (not sure how this works for multi_period files)
-                localWorkspace->mutableRun().setProtonCharge(iraw.rpb.r_gd_prtn_chrg);
+          localWorkspace->mutableRun().setProtonCharge(iraw.rpb.r_gd_prtn_chrg);
         }
         else   // We are working on a higher period of a multiperiod raw file
         {
@@ -207,6 +207,9 @@ namespace Mantid
           declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
           g_log.information() << "Workspace " << WSName << " created. \n";
         }
+
+        if (localWorkspace)
+          localWorkspace->updateSpectraUsingMap();
 
         // Assign the result to the output workspace property
         setProperty(outputWorkspace,localWorkspace);
