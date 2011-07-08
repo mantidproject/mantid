@@ -34,6 +34,7 @@ Shape2DCollection::~Shape2DCollection()
 
 void Shape2DCollection::draw(QPainter& painter) const
 {
+  if (m_shapes.isEmpty()) return;
   painter.save();
   painter.setTransform(m_transform);
   foreach(const Shape2D* shape,m_shapes)

@@ -4,9 +4,6 @@
 #include <QColor>
 #include <QPointF>
 #include <QRectF>
-#include <QPolygonF>
-#include <QList>
-#include <QTransform>
 
 class QPainter;
 class QPainterPath;

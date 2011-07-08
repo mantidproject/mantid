@@ -185,76 +185,32 @@ void GLViewport::getTranslation(double& xval,double& yval)
 /** Issue the OpenGL commands that define the viewport and projection. */
 void GLViewport::issueGL() const
 {
-  //Mantid::Kernel::V3D center((mRight+mLeft)/2.0,(mTop+mBottom)/2.0,(mNear+mFar)/2.0);
-
-  //Mantid::Kernel::V3D distance(mRight-mLeft,mTop-mBottom,mNear-mFar);
-  ////Window Aspect ratio
-  //GLdouble windowAspect= mHeight > 0 ? (GLdouble)mWidth/(GLdouble)mHeight : 1.0;
-  ////Adjust width and height to show the dimensions correct
-  ////Adjust window aspect ratio
-  //if(windowAspect<1.0) //window height is higher than width (x<y)
-  //{
-  //  if(distance[0]<distance[1]&&distance[0]/windowAspect<distance[1])///TESTING
-  //  {
-  //    distance[0]=distance[1];
-  //    distance[0]*=windowAspect;
-  //  }
-  //  else
-  //  {
-  //    distance[1]=distance[0];
-  //    distance[1]/=windowAspect;
-  //  }
-  //}
-  //else
-  //{
-  //  if(distance[0]<distance[1])
-  //  {
-  //    distance[0]=distance[1];
-  //    distance[0]*=windowAspect;
-  //  }
-  //  else if(distance[0]/windowAspect<distance[1])
-  //  {
-  //    distance[0]=distance[1];
-  //    distance[0]*=windowAspect;
-  //  }
-  //  else
-  //  {
-  //    distance[1]=distance[0];
-  //    distance[1]/=windowAspect;
-  //  }
-  //}
-  ////use zoom now
-  //distance*=mZoomFactor/2.0;
-
   double xmin,xmax,ymin,ymax,zmin,zmax;
   getInstantProjection(xmin,xmax,ymin,ymax,zmin,zmax);
+  if (xmin == xmax)
+  {
+    xmin -= 0.001;
+    xmax += 0.001;
+  }
+  if (ymin == ymax)
+  {
+    ymin -= 0.001;
+    ymax += 0.001;
+  }
+
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glViewport(0, 0, mWidth, mHeight);
-
-
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   OpenGLError::check("GLViewport::issueGL()");
+
   if(mProjection==GLViewport::PERSPECTIVE)
   {
-    //glFrustum(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans,
-    //          center[1]-distance[1]-mYTrans, center[1]+distance[1]-mYTrans,
-    //          center[2]+distance[2], mFar);
     glFrustum(xmin,xmax,ymin,ymax,zmin,zmax);
   }
   else
   {
-    //    glOrtho(mLeft*mZoomFactor-mXTrans, mRight*mZoomFactor-mXTrans, mBottom*mZoomFactor-mYTrans, mTop*mZoomFactor-mYTrans, mNear*mZoomFactor, mFar);
-
-    //double tmpNear = center[2]+distance[2];
-    //double nearVal = tmpNear < mNear ? tmpNear : mNear;//center[2]+distance[2];
-    //double farVal = mFar;
-
-    //glOrtho(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans,
-    //        center[1]-distance[1]-mYTrans, center[1]+distance[1]-mYTrans,
-    //        nearVal, farVal);
-
     glOrtho(xmin,xmax,ymin,ymax,zmin,zmax);
 
     if (OpenGLError::hasError("GLViewport::issueGL()"))
