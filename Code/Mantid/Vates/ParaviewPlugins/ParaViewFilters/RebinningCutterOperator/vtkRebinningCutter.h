@@ -72,6 +72,7 @@ public:
   void SetApplyClip(int applyClip);
   const char* GetInputGeometryXML();
   void SetUserDefinedRange(int userDefinedRange);
+  void SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex);
   /// Paraview Related Commands. See *.xml proxy/property file --------------------------------
 
   /// Called by presenter to force progress information updating.
@@ -121,6 +122,8 @@ private:
   vtkRebinningCutter(const vtkRebinningCutter&);
   void operator = (const vtkRebinningCutter&);
 
+  void configureThresholdRangeMethod();
+
   /// handles overwriting of time ranges.
   void setTimeRange(vtkInformationVector* outputVector);
 
@@ -141,6 +144,8 @@ private:
   bool m_userDefinedRange;
   /// Threshold range calculator.
   Mantid::VATES::ThresholdRange_scptr m_ThresholdRange;
+  
+  int m_thresholdMethodIndex;
 
 };
 #endif

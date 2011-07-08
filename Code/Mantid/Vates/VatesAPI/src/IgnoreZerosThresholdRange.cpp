@@ -9,7 +9,7 @@ namespace Mantid
     /**
     Constructor.
     */
-    IgnoreZerosThresholdRange::IgnoreZerosThresholdRange() : m_min(0), m_max(0)
+    IgnoreZerosThresholdRange::IgnoreZerosThresholdRange() : m_min(1), m_max(1)
     {
     }
 
@@ -79,7 +79,10 @@ namespace Mantid
     bool IgnoreZerosThresholdRange::inRange(const signal_t& signal)
     {
       m_max = signal > m_max ? signal : m_max; //cache min and max values.
-      m_min = signal < m_min ? signal : m_min;
+      if(signal < m_min && 0 != signal)
+      {
+        m_min = signal < m_min ? signal : m_min;
+      }
       return signal != 0;
     }
   }

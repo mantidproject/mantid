@@ -36,7 +36,7 @@
 class QLabel;
 class QLayout;
 class QLineEdit;
-class QCheckBox;
+class QComboBox;
 
 class EXPORT_OPT_MANTIDPARVIEW ThresholdRangeWidget: public QWidget
 {
@@ -45,7 +45,7 @@ Q_OBJECT
 public:
 Q_PROPERTY(QString MinSignal READ getMinSignal WRITE setMinSignal NOTIFY minChanged)
 Q_PROPERTY(QString MaxSignal READ getMaxSignal WRITE setMaxSignal NOTIFY maxChanged)
-Q_PROPERTY(bool UserDefinedRange READ getUserDefinedRange WRITE setUserDefinedRange NOTIFY userDefinedChanged USER true)
+Q_PROPERTY(QString ChosenStrategy READ getChosenStrategy WRITE setChosenStrategy NOTIFY chosenStrategyChanged)
 
 ThresholdRangeWidget(double min, double max);
 
@@ -53,7 +53,7 @@ ThresholdRangeWidget(double min, double max);
 
 QString getMaxSignal() const;
 QString getMinSignal() const;
-bool getUserDefinedRange() const;
+QString getChosenStrategy() const;
 
 void setMaximum(double value);
 void setMinimum(double value);
@@ -70,31 +70,30 @@ void setMaxSignal(QString value)
   UNUSED_ARG(value);
 }
 
-void setUserDefinedRange(bool value)
+void setChosenStrategy(QString value)
 {
   //Do nothing.
   UNUSED_ARG(value);
 }
 
+
 Q_SIGNALS:
         void minChanged();
         void maxChanged();
-        void userDefinedChanged(bool checked);
+        void chosenStrategyChanged();
 
-    private:
+private:
 
-  QLabel* m_minLabel;
-  QLabel* m_maxLabel;
   QLineEdit* m_maxEditBox;
   QLineEdit* m_minEditBox;
-  QCheckBox* m_ckUserDefined;
+  QComboBox* m_thresholdStrategyComboBox;
 
   private slots:
   void maxThresholdListener(const QString &);
 
   void minThresholdListener(const QString &);
 
-  void methodChanged(bool);
+  void strategySelectedListener(const QString &);
 };
 
 #endif

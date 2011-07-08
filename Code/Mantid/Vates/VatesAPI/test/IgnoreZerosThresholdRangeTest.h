@@ -37,6 +37,16 @@ public :
     TSM_ASSERT_EQUALS("Wrong min found", -2, range.getMinimum());
   }
 
+  void testMinIsNeverZero()
+  {
+    IgnoreZerosThresholdRange range;
+
+    range.inRange(0);
+    range.inRange(0.5);
+    range.inRange(2);
+    TSM_ASSERT_EQUALS("Wrong min found", 0.5, range.getMinimum());
+  }
+
 };
 
 #endif

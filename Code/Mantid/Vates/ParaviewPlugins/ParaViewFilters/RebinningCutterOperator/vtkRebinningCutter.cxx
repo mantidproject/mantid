@@ -33,6 +33,9 @@
 #include "MantidVatesAPI/vtkDataSetToGeometry.h" 
 #include "MantidVatesAPI/GaussianThresholdRange.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
+#include "MantidVatesAPI/NoThresholdRange.h"
+#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
+#include "MantidVatesAPI/MedianAndBelowThresholdRange.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
@@ -138,7 +141,8 @@ m_presenter(new NullRebinningPresenter()),
   m_setup(Pending),
   m_timestep(0),
   m_thresholdMax(1e9),
-  m_thresholdMin(0)
+  m_thresholdMin(0),
+  m_thresholdMethodIndex(0)
 {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);
@@ -150,6 +154,34 @@ vtkRebinningCutter::~vtkRebinningCutter()
   delete m_presenter;
 }
 
+void vtkRebinningCutter::configureThresholdRangeMethod()
+{
+  switch(m_thresholdMethodIndex)
+  {
+  case 0:
+    m_ThresholdRange = ThresholdRange_scptr(new IgnoreZerosThresholdRange());
+    break;
+  case 1:
+    m_ThresholdRange = ThresholdRange_scptr(new NoThresholdRange());
+    break;
+  case 2:
+    m_ThresholdRange = ThresholdRange_scptr(new MedianAndBelowThresholdRange());
+    break;
+  case 3:
+    m_ThresholdRange = ThresholdRange_scptr(new UserDefinedThresholdRange(m_thresholdMin, m_thresholdMax));
+    break;
+  }
+}
+
+void vtkRebinningCutter::SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex)
+{
+  int index = atoi(selectedStrategyIndex.c_str());
+  if(index != m_thresholdMethodIndex)
+  {
+    m_thresholdMethodIndex = index;
+    this->Modified();
+  }
+}
 
 int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInformationVector**,
   vtkInformationVector *outputVector)
@@ -159,14 +191,8 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
   //Setup is not complete until metadata has been correctly provided.
   if(SetupDone == m_setup)
   {
-    if(true == m_userDefinedRange)
-    {
-      m_ThresholdRange = ThresholdRange_scptr(new UserDefinedThresholdRange(m_thresholdMin, m_thresholdMax));
-    }
-    else
-    {
-      m_ThresholdRange = ThresholdRange_scptr(new GaussianThresholdRange(2, 10000)); //2 sigma, 10000 attempted samples
-    }
+    configureThresholdRangeMethod();
+
     //Updating again at this point is the only way to pick-up changes to clipping.
     m_presenter->updateModel();
     
@@ -276,9 +302,10 @@ void vtkRebinningCutter::SetApplyClip(int applyClip)
 
 void vtkRebinningCutter::SetUserDefinedRange(int userDefinedRange)
 {
-  if(m_userDefinedRange != userDefinedRange)
+  bool b_userDefinedRange = userDefinedRange == 1 ? true : false;
+  if(m_userDefinedRange != b_userDefinedRange)
   {
-    m_userDefinedRange = userDefinedRange;
+    m_userDefinedRange = b_userDefinedRange;
     this->Modified();
   }
 }

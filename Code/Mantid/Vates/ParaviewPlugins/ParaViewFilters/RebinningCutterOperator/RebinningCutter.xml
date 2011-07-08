@@ -76,19 +76,18 @@
          information_only="1">
         <SimpleStringInformationHelper /> 
        </StringVectorProperty>
+	   <StringVectorProperty
+         name="ThresholdRangeStrategyIndex"
+         command="SetThresholdRangeStrategyIndex"
+         number_of_elements="1"
+	     default_values="0">
+	   </StringVectorProperty>
        <StringVectorProperty
          name="AppliedGeometryXML"
          command="SetAppliedGeometryXML"
          number_of_elements="1"
          default_values="--">
        </StringVectorProperty>
-	   <IntVectorProperty
-         name="User Defined Range"
-         command="SetUserDefinedRange"
-         number_of_elements="1"
-         default_values="0">
-         <BooleanDomain name="bool"/>
-       </IntVectorProperty>
     </SourceProxy>
   </ProxyGroup>
   <!-- End RebinningCutter -->

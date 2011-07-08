@@ -2,8 +2,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QGridLayout>
-//#include <QBoxLayout>
-#include <QCheckBox>
+#include <QComboBox>
 #include <QPalette>
 #include <QFont>
 #include <boost/algorithm/string.hpp>
@@ -11,35 +10,51 @@
 
 ThresholdRangeWidget::ThresholdRangeWidget(double min, double max) 
 {
+  QGridLayout* headerLayout = new QGridLayout();
+  headerLayout->addWidget(new QLabel("Thresholds"), 0, 0, 1, 2, Qt::AlignCenter); 
+  
+  QGridLayout* layout = new QGridLayout;
+  layout->addLayout(headerLayout, 0, 1);
 
-  QGridLayout* layout = new QGridLayout();
-  layout->addWidget(new QLabel("Threshold Ranges"), 0 , 0 , 1, 2, Qt::AlignCenter);
-  QLabel* thresholdMethodLabel = new QLabel("User Defined");
-  layout->addWidget(thresholdMethodLabel, 1, 0, Qt::AlignLeft);
-  m_ckUserDefined = new QCheckBox();
-  m_ckUserDefined->setChecked(false); //Automatic selection by default.
-  connect(m_ckUserDefined, SIGNAL(clicked(bool)), this, SLOT(methodChanged(bool)));
-  layout->addWidget(m_ckUserDefined, 1, 1, Qt::AlignLeft);
+  m_thresholdStrategyComboBox = new QComboBox;
+  m_thresholdStrategyComboBox->addItem("Ignore Zeros");
+  m_thresholdStrategyComboBox->addItem("No Threshold Range");
+  m_thresholdStrategyComboBox->addItem("Median and Below");
+  m_thresholdStrategyComboBox->addItem("User Defined");
 
-  m_minLabel = new QLabel("Min signal");
+  connect(m_thresholdStrategyComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(strategySelectedListener(const QString &)));
+  layout->addWidget(m_thresholdStrategyComboBox, 1, 0, Qt::AlignLeft);
+
   m_minEditBox = new QLineEdit();
   std::string minValueString = boost::str(boost::format("%0.2f") % min);
   m_minEditBox->setText(minValueString.c_str());
-  layout->addWidget(m_minLabel, 2, 0, Qt::AlignLeft);
-  layout->addWidget(m_minEditBox, 2, 1, Qt::AlignLeft);
+  layout->addWidget(new QLabel("Min"), 1, 1, Qt::AlignLeft);
+  layout->addWidget(m_minEditBox, 1, 2, Qt::AlignLeft);
   m_minEditBox->setDisabled(true); //Disabled by default.
   connect(m_minEditBox, SIGNAL(textEdited(const QString &)), this, SLOT(minThresholdListener(const QString &)));
-
-  m_maxLabel = new QLabel("Max signal");
+ 
   m_maxEditBox = new QLineEdit();
   std::string maxValueString = boost::str(boost::format("%0.2f") % max);
   m_maxEditBox->setText(maxValueString.c_str());
   m_maxEditBox->setDisabled(true); //Disabled by default
-  layout->addWidget(m_maxLabel, 3, 0, Qt::AlignLeft);
-  layout->addWidget(m_maxEditBox, 3, 1, Qt::AlignLeft);
+  layout->addWidget(new QLabel("Max"), 1, 3, Qt::AlignLeft);
+  layout->addWidget(m_maxEditBox, 1, 4, Qt::AlignLeft);
   connect(m_maxEditBox, SIGNAL(textEdited(const QString &)), this, SLOT(maxThresholdListener(const QString &)));
 
   this->setLayout(layout);
+}
+
+void ThresholdRangeWidget::strategySelectedListener(const QString&)
+{
+  bool disableUserControls = true;
+  if(m_thresholdStrategyComboBox->currentText() == "User Defined")
+  {
+    disableUserControls = false;
+  }
+  m_maxEditBox->setDisabled(disableUserControls);
+  m_minEditBox->setDisabled(disableUserControls);
+
+  emit chosenStrategyChanged();
 }
 
 void ThresholdRangeWidget::maxThresholdListener(const QString &)
@@ -78,23 +93,9 @@ QString ThresholdRangeWidget::getMinSignal() const
   return m_minEditBox->text();
 }
 
-bool ThresholdRangeWidget::getUserDefinedRange() const
+QString ThresholdRangeWidget::getChosenStrategy() const
 {
-  return m_ckUserDefined->isChecked();
+  std::string minValueString = boost::str(boost::format("%i") % m_thresholdStrategyComboBox->currentIndex());
+  return QString(minValueString.c_str());
 }
 
-void ThresholdRangeWidget::methodChanged(bool)
-{
-  bool disableUserControls;
-  if(m_ckUserDefined->isChecked())
-  {
-    disableUserControls = false;
-  }
-  else
-  {
-    disableUserControls = true;
-  } 
-  m_maxEditBox->setDisabled(disableUserControls);
-  m_minEditBox->setDisabled(disableUserControls);
-  emit userDefinedChanged(true);
-}

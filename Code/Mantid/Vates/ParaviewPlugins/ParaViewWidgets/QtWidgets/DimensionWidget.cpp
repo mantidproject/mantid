@@ -19,12 +19,20 @@ DimensionWidget::DimensionWidget(bool readOnlyLimits)
   using namespace Mantid::Geometry;
   QGridLayout* m_layout = new QGridLayout();
 
-  QLabel* integratedLabel = new QLabel("Integrated");
+  QLabel* integratedLabel = new QLabel("Int");
+  integratedLabel->setToolTip("Collapse/Expand dimension");
   m_layout->addWidget(integratedLabel, 0, 0, Qt::AlignLeft);
 
   m_ckIntegrated = new QCheckBox();
+  m_ckIntegrated->setToolTip("Collapse/Expand dimension");
   connect(m_ckIntegrated, SIGNAL(clicked(bool)), this, SLOT(integratedChanged(bool)));
   m_layout->addWidget(m_ckIntegrated, 0, 1, Qt::AlignLeft);
+  
+  m_nBinsLabel = new QLabel("Bins");
+  m_layout->addWidget(m_nBinsLabel, 0, 2, Qt::AlignLeft);
+  m_nBinsBox = new QLineEdit();
+  connect(m_nBinsBox, SIGNAL(editingFinished()), this, SLOT(nBinsListener()));
+  m_layout->addWidget(m_nBinsBox, 0, 3, Qt::AlignLeft);
 
   m_dimensionLabel = new QLabel();
   m_layout->addWidget(m_dimensionLabel, 1, 0, Qt::AlignLeft);
@@ -33,28 +41,18 @@ DimensionWidget::DimensionWidget(bool readOnlyLimits)
   connect(m_dimensionCombo,SIGNAL(activated(int)),this ,SLOT(dimensionSelectedListener()));
   m_layout->addWidget(m_dimensionCombo, 1, 1, Qt::AlignLeft);
 
-  m_nBinsLabel = new QLabel("Number of Bins");
-  m_layout->addWidget(m_nBinsLabel, 2, 0, Qt::AlignLeft);
-  m_nBinsBox = new QLineEdit();
-  connect(m_nBinsBox, SIGNAL(editingFinished()), this, SLOT(nBinsListener()));
-  m_layout->addWidget(m_nBinsBox, 2, 1, Qt::AlignLeft);
-  
-  QLabel* maxLabel = new QLabel("Maximum");
-  maxLabel->setText("Maximum");
-  m_layout->addWidget(maxLabel, 3, 0, Qt::AlignLeft);
-  m_maxBox = new QLineEdit();
-
-  connect(m_maxBox, SIGNAL(editingFinished()), this, SLOT(maxBoxListener()));
-  m_layout->addWidget(m_maxBox, 3, 1, Qt::AlignLeft);
-
-  QLabel* minLabel = new QLabel();
-  minLabel->setText("Minimum");
-  m_layout->addWidget(minLabel, 4, 0, Qt::AlignLeft);
+  m_layout->addWidget(new QLabel("Min"), 1, 2, Qt::AlignLeft);
   m_minBox = new QLineEdit();
-  
-  connect(m_minBox, SIGNAL(editingFinished()), this, SLOT(minBoxListener()));
-  m_layout->addWidget(m_minBox, 4, 1, Qt::AlignLeft);
 
+  connect(m_minBox, SIGNAL(editingFinished()), this, SLOT(minBoxListener()));
+  m_layout->addWidget(m_minBox, 1, 3, Qt::AlignLeft);
+  
+  m_layout->addWidget(new QLabel("Max"), 1, 4, Qt::AlignLeft);
+  m_maxBox = new QLineEdit();
+  
+  connect(m_maxBox, SIGNAL(editingFinished()), this, SLOT(maxBoxListener()));
+  m_layout->addWidget(m_maxBox, 1, 5, Qt::AlignLeft);
+  
   m_maxBox->setEnabled(!readOnlyLimits);
   m_minBox->setEnabled(!readOnlyLimits);
 
