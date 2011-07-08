@@ -4,13 +4,15 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/IMDBox.h"
+#include "MantidNexus/NeXusFile.hpp"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
-
+using namespace NeXus;
 
 /** Tester class that implements the minimum IMDBox to
  * allow testing
@@ -88,6 +90,13 @@ public:
     TS_ASSERT_EQUALS( box.getSignal(), 123.0);
     TS_ASSERT_EQUALS( box.getErrorSquared(), 456.0);
     TS_ASSERT_DELTA( box.getError(), sqrt(456.0), 1e-4);
+  }
+
+  void test_get_and_set_depth()
+  {
+    IMDBoxTester<MDEvent<3>,3> b;
+    b.setDepth(123);
+    TS_ASSERT_EQUALS( b.getDepth(), 123);
   }
 
   /** Setting and getting the extents;
@@ -169,6 +178,51 @@ public:
     TS_ASSERT_EQUALS( v[3].getY(), 6.0);
   }
 
+  /** Open a nexus file for this and save it */
+  void test_saveNexus_loadNexus()
+  {
+    // Clean up if it exists
+    std::string filename("IMDBoxTest.nxs");
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+
+    IMDBoxTester<MDEvent<2>,2> b;
+    b.setExtents(0, -10.0, 10.0);
+    b.setExtents(1, -4.0, 6.0);
+    b.setSignal(123.456);
+    b.setErrorSquared(456.789);
+    b.setDepth(4);
+    b.calcVolume();
+
+    NeXus::File * file = new NeXus::File(filename, NXACC_CREATE5);
+
+    std::string groupName("IMDBoxTester");
+    std::string className("NXIMDBoxTester");
+
+    file->makeGroup(groupName, className, 1);
+    b.saveNexus(file);
+    file->close();
+
+    // Now we load it back
+    IMDBoxTester<MDEvent<2>,2> c;
+    NeXus::File * fileIn = new NeXus::File(filename, NXACC_READ);
+    fileIn->openGroup(groupName, className);
+    c.loadNexus(fileIn);
+    fileIn->closeGroup();
+
+    TS_ASSERT_DELTA( c.getExtents(0).min, -10, 1e-5);
+    TS_ASSERT_DELTA( c.getExtents(0).max, +10, 1e-5);
+    TS_ASSERT_DELTA( c.getExtents(1).min, -4, 1e-5);
+    TS_ASSERT_DELTA( c.getExtents(1).max, +6, 1e-5);
+    TS_ASSERT_DELTA( c.getSignal(), 123.456, 1e-5);
+    TS_ASSERT_DELTA( c.getErrorSquared(), 456.789, 1e-5);
+    TS_ASSERT_DELTA( c.getVolume(), b.getVolume(), 1e-5);
+    TS_ASSERT_DELTA( c.getDepth(), b.getDepth(), 1e-5);
+
+    // Clean up
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+  }
 
 };
 

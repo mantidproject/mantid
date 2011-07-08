@@ -1,5 +1,8 @@
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidKernel/System.h"
+#include "MantidNexus/NeXusFile.hpp"
+
+using NeXus::File;
 
 namespace Mantid
 {
@@ -133,6 +136,67 @@ namespace MDEvents
     }
 
     return out;
+  }
+
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Save the box and contents to an open nexus file.
+   *
+   * @param file :: Nexus File object
+   */
+  TMDE(
+  void IMDBox)::saveNexus(::NeXus::File * file)
+  {
+    // Use attributes for some of the members.
+    file->putAttr("signal", this->m_signal);
+    file->putAttr("errorSquared", this->m_errorSquared);
+    file->putAttr("depth", this->m_depth);
+    file->putAttr("inverseVolume", this->m_inverseVolume);
+
+    // Two vectors for the min/max extents
+    std::vector<coord_t> extents_min, extents_max;
+    for (size_t d=0; d<nd; d++)
+    {
+      extents_min.push_back( extents[d].min );
+      extents_max.push_back( extents[d].max );
+    }
+    file->writeData("extents_min", extents_min);
+    file->writeData("extents_max", extents_max);
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Load the box and contents from an open nexus file.
+   *
+   * @param file :: Nexus File object
+   */
+  TMDE(
+  void IMDBox)::loadNexus(::NeXus::File * file)
+  {
+    // Retrieve attributes
+    double dval;
+    int ival;
+    file->getAttr("signal", dval); this->m_signal = signal_t(dval);
+    file->getAttr("errorSquared", dval); this->m_errorSquared = signal_t(dval);
+    file->getAttr("depth", ival); this->m_depth = size_t(ival);
+    file->getAttr("inverseVolume", dval); this->m_inverseVolume = coord_t(dval);
+
+    // Two vectors for the min/max extents
+    std::vector<coord_t> extents_min, extents_max;
+    file->openData("extents_min");
+    file->getData(extents_min);
+    file->closeData();
+    file->openData("extents_max");
+    file->getData(extents_max);
+    file->closeData();
+    //std::cout << "extents_min " << extents_min << std::endl;
+
+    if ((extents_min.size() != nd) ||
+        (extents_max.size() != nd)) throw std::runtime_error("Error loading NXS file. Extents read from file do not match the number of dimensions.");
+    // Save them in the object
+    for (size_t d=0; d<nd; d++)
+      this->setExtents(d, extents_min[d], extents_max[d]);
   }
 
 

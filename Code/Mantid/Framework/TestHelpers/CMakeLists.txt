@@ -16,6 +16,7 @@ set ( INC_FILES
 include_directories ( inc)
 include_directories ( ../DataHandling/inc )
 include_directories ( ../MDEvents/inc )
+include_directories ( ../Nexus/inc )
 
 # For Windows:
 add_definitions ( -DIN_MANTID_TESTHELPERS )

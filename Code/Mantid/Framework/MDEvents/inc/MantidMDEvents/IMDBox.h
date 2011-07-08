@@ -2,14 +2,17 @@
 #define IMDBOX_H_
 
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/CoordTransform.h"
 #include "MantidMDEvents/MDBin.h"
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidMDEvents/MDEvent.h"
+#include "MantidNexus/NeXusFile.hpp"
 #include <iosfwd>
+
+using NeXus::File;
 
 namespace Mantid
 {
@@ -94,6 +97,12 @@ namespace MDEvents
 
     /// Add several events, within a given range
     virtual size_t addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
+
+    /// Save the box and contents to an open nexus file.
+    virtual void saveNexus(NeXus::File * file);
+
+    /// Load the box and contents from an open nexus file.
+    virtual void loadNexus(NeXus::File * file);
 
     /** Perform centerpoint binning of events
      * @param bin :: MDBin object giving the limits of events to accept.
@@ -259,12 +268,19 @@ namespace MDEvents
 
     //-----------------------------------------------------------------------------------------------
     /** For testing, mostly: return the recursion depth of this box.
-     * e.g. 1: means this box is in a MDGridBox, which is the top level.
-     *      2: this box's parent MDGridBox is itself a MDGridBox.
+     * 0 is the top-level box, 1 is one deeper, etc.
      * @return split recursion depth*/
     size_t getDepth() const
     {
       return m_depth;
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** For testing, mostly: set the recursion depth of this box. SHOULD NOT BE CALLED OUTSIDE OF TESTS!
+     * @param depth :: split recursion depth */
+    void setDepth(size_t depth)
+    {
+      m_depth = depth;
     }
 
     //-----------------------------------------------------------------------------------------------
