@@ -1,6 +1,7 @@
 #ifndef MANTID_MDEVENTS_IMDBOXTEST_H_
 #define MANTID_MDEVENTS_IMDBOXTEST_H_
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/IMDBox.h"
@@ -13,6 +14,7 @@
 using namespace Mantid;
 using namespace Mantid::MDEvents;
 using namespace NeXus;
+using Mantid::Kernel::ConfigService;
 
 /** Tester class that implements the minimum IMDBox to
  * allow testing
@@ -182,7 +184,7 @@ public:
   void test_saveNexus_loadNexus()
   {
     // Clean up if it exists
-    std::string filename("IMDBoxTest.nxs");
+    std::string filename(ConfigService::Instance().getString("defaultsave.directory") + "/IMDBoxTest.nxs");
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();
 
