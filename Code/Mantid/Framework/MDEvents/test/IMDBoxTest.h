@@ -182,7 +182,7 @@ public:
   /** Open a nexus file for this and save it */
   void test_saveNexus_loadNexus()
   {
-    std::string filename;
+    std::string filename = "notset";
     try
     {
       // Clean up if it exists
@@ -192,10 +192,9 @@ public:
       if (Poco::File(filename).exists())
         Poco::File(filename).remove();
     }
-    catch (std::exception &e)
+    catch (...)
     {
       std::cout << "Error! Could not write to " + filename << std::endl;
-      std::cout << e.what() << std::endl;
       std::cout << "Skipping test.\n";
       return;
     }
