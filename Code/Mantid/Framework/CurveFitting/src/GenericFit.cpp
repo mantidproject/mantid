@@ -61,7 +61,7 @@ namespace CurveFitting
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
     declareProperty("MaxIterations", 500, mustBePositive,
-      "Stop after this number of iterations if a good GenericFit is not found" );
+      "Stop after this number of iterations if a good fit is not found" );
     declareProperty("OutputStatus","", Direction::Output);
     declareProperty("OutputChi2overDoF",0.0, Direction::Output);
 
@@ -73,11 +73,11 @@ namespace CurveFitting
     std::vector<std::string> minimizerOptions = FuncMinimizerFactory::Instance().getKeys();
 
     declareProperty("Minimizer","Levenberg-Marquardt",new ListValidator(minimizerOptions),
-      "The minimizer method applied to do the GenericFit, default is Levenberg-Marquardt", Direction::InOut);
+      "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::InOut);
 
     std::vector<std::string> costFuncOptions = API::CostFunctionFactory::Instance().getKeys();
     declareProperty("CostFunction","Least squares",new ListValidator(costFuncOptions),
-      "The cost function to be used for the GenericFit, default is Least squares", Direction::InOut);
+      "The cost function to be used for the fit, default is Least squares", Direction::InOut);
   }
 
 
@@ -121,13 +121,13 @@ namespace CurveFitting
     if ( !isDerivDefined && methodUsed.compare("Simplex") != 0 )
     {
       methodUsed = "Simplex";
-      g_log.information() << "No derivatives available for this GenericFitting function"
-                          << " therefore Simplex method used for GenericFitting\n";
+      g_log.information() << "No derivatives available for this fitting function"
+                          << " therefore Simplex method used for fitting\n";
     }
 
     // create and populate data containers. Warn user if nData < nParam 
     // since as a rule of thumb this is required as a minimum to obtained 'accurate'
-    // GenericFitting parameter values.
+    // fitting parameter values.
 
     const int nParam = m_function->nActive();
     const int nData = m_function->dataSize();
@@ -143,8 +143,8 @@ namespace CurveFitting
     }
     if (nData < nParam)
     {
-      g_log.error("Number of data points less than number of parameters to be GenericFitted.");
-      throw std::runtime_error("Number of data points less than number of parameters to be GenericFitted.");
+      g_log.error("Number of data points less than number of parameters to be fitted.");
+      throw std::runtime_error("Number of data points less than number of parameters to be fitted.");
     }
 
     // set-up minimizer
@@ -153,7 +153,7 @@ namespace CurveFitting
     IFuncMinimizer* minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
     minimizer->initialize(m_function.get(), costFunction);
 
-    // finally do the GenericFitting
+    // finally do the fitting
 
     int iter = 0;
     int status = 0;
@@ -171,10 +171,10 @@ namespace CurveFitting
         status = minimizer->iterate();
         if (status != GSL_SUCCESS && minimizer->hasConverged() != GSL_SUCCESS)
         { 
-          // From experience it is found that gsl_multiGenericFit_fdfsolver_iterate occasionally get
-          // stock - even after having achieved a sensible GenericFit. This seem in particular to be a
+          // From experience it is found that gsl_multifit_fdfsolver_iterate occasionally get
+          // stock - even after having achieved a sensible fit. This seem in particular to be a
           // problem on Linux. For now only fall back to Simplex if iter = 1 or 2, i.e.   
-          // gsl_multiGenericFit_fdfsolver_iterate has failed on the first or second hurdle
+          // gsl_multifit_fdfsolver_iterate has failed on the first or second hurdle
           if (iter < 3)
           {
             g_log.warning() << "GenericFit algorithm using " << methodUsed << " failed "
@@ -231,17 +231,17 @@ namespace CurveFitting
 
     // Output summary to log file
 
-    std::string reportOfGenericFit = gsl_strerror(status);
+    std::string reportOfFit = gsl_strerror(status);
 
     g_log.information() << "Method used = " << methodUsed << "\n" <<
       "Iteration = " << iter << "\n";
     Mantid::API::ICostFunction* costfun 
      = Mantid::API::CostFunctionFactory::Instance().createUnwrapped(costFunction);
-    if ( reportOfGenericFit == "success" )
-      g_log.notice() << reportOfGenericFit << "  " << costfun->shortName() << 
+    if ( reportOfFit == "success" )
+      g_log.notice() << reportOfFit << "  " << costfun->shortName() << 
          " (" << costfun->name() << ") = " << finalCostFuncVal << "\n";
     else
-      g_log.warning() << reportOfGenericFit << "  " << costfun->shortName() << 
+      g_log.warning() << reportOfFit << "  " << costfun->shortName() << 
          " (" << costfun->name() << ") = " << finalCostFuncVal << "\n";
     for (int i = 0; i < m_function->nParams(); i++)
     {
@@ -251,7 +251,7 @@ namespace CurveFitting
 
     // also output summary to properties
 
-    setProperty("OutputStatus", reportOfGenericFit);
+    setProperty("OutputStatus", reportOfFit);
     setProperty("OutputChi2overDoF", finalCostFuncVal);
     setProperty("Minimizer", methodUsed);
     setPropertyValue("Function",*m_function);
@@ -263,7 +263,7 @@ namespace CurveFitting
     std::string output = getProperty("Output");
     gsl_matrix *covar(NULL);
 
-    // only if derivative is defined for GenericFitting function create covariance matrix output workspace
+    // only if derivative is defined for fitting function create covariance matrix output workspace
     if ( isDerivDefined )    
     {
       // calculate covariance matrix
@@ -290,7 +290,7 @@ namespace CurveFitting
 
     if (!output.empty())
     {
-      // only if derivative is defined for GenericFitting function create covariance matrix output workspace
+      // only if derivative is defined for fitting function create covariance matrix output workspace
       if ( isDerivDefined )    
       {
         // Create covariance matrix output workspace
@@ -301,20 +301,20 @@ namespace CurveFitting
 
         Mantid::API::ITableWorkspace_sptr m_covariance = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
         m_covariance->addColumn("str","Name");
-        std::vector<std::string> paramThatAreGenericFitted; // used for populating 1st "name" column
+        std::vector<std::string> paramThatAreFitted; // used for populating 1st "name" column
         for(int i=0; i < m_function->nParams(); i++) 
         {
           if (m_function->isActive(i)) 
           {
             m_covariance->addColumn("double",m_function->parameterName(i));
-            paramThatAreGenericFitted.push_back(m_function->parameterName(i));
+            paramThatAreFitted.push_back(m_function->parameterName(i));
           }
         }
 
         for(int i=0; i<nParam; i++)
         {
           Mantid::API::TableRow row = m_covariance->appendRow();
-          row << paramThatAreGenericFitted[i];
+          row << paramThatAreFitted[i];
           for(int j=0; j<nParam; j++)
           {
             if (j == i)
@@ -329,12 +329,12 @@ namespace CurveFitting
         setProperty("OutputNormalisedCovarianceMatrix",m_covariance);
       }
 
-      // create output parameter table workspace to store final GenericFit parameters 
-      // including error estimates if derivative of GenericFitting function defined
+      // create output parameter table workspace to store final fit parameters 
+      // including error estimates if derivative of fitting function defined
 
       declareProperty(
         new WorkspaceProperty<API::ITableWorkspace>("OutputParameters","",Direction::Output),
-        "The name of the TableWorkspace in which to store the final GenericFit parameters" );
+        "The name of the TableWorkspace in which to store the final fit parameters" );
 
       setPropertyValue("OutputParameters",output+"_Parameters");
 

@@ -3,6 +3,8 @@
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
 
+#include "MantidAPI/AlgorithmManager.h"
+
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
 #include "qteditorfactory.h"
@@ -18,6 +20,7 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QApplication>
+#include <QFileDialog>
 
 #include <numeric>
 #include <cfloat>
@@ -117,12 +120,30 @@ m_userEditing(true)
   m_clear_all = new QPushButton("Clear All");
   connect(m_clear_all,SIGNAL(clicked()),this,SLOT(clearMask()));
 
-  m_save_as_workspace = new QPushButton("Save As Workspace");
+  m_save_as_workspace_include = new QAction("Save As Workspace (include)",this);
+  connect(m_save_as_workspace_include,SIGNAL(activated()),this,SLOT(saveMaskToWorkspaceInclude()));
+
+  m_save_as_workspace_exclude = new QAction("Save As Workspace (exclude)",this);
+  connect(m_save_as_workspace_exclude,SIGNAL(activated()),this,SLOT(saveMaskToWorkspaceExclude()));
+
+  m_save_as_file_include = new QAction("Save As File (include)",this);
+  connect(m_save_as_file_include,SIGNAL(activated()),this,SLOT(saveMaskToFileInclude()));
+
+  m_save_as_file_exclude = new QAction("Save As File (exclude)",this);
+  connect(m_save_as_file_exclude,SIGNAL(activated()),this,SLOT(saveMaskToFileExclude()));
+
+  QPushButton* saveButton = new QPushButton("Save");
+  QMenu* saveMenu = new QMenu(this);
+  saveMenu->addAction(m_save_as_workspace_include);
+  saveMenu->addAction(m_save_as_workspace_exclude);
+  saveMenu->addAction(m_save_as_file_include);
+  saveMenu->addAction(m_save_as_file_exclude);
+  saveButton->setMenu(saveMenu);
 
   QGridLayout* buttons = new QGridLayout();
   buttons->addWidget(m_apply,0,0);
   buttons->addWidget(m_clear_all,0,1);
-  //buttons->addWidget(m_save_as_workspace,1,0,1,2);
+  buttons->addWidget(saveButton,1,0,1,2);
   
   layout->addLayout(buttons);
 }
@@ -337,4 +358,107 @@ void InstrumentWindowMaskTab::clearMask()
 {
   m_instrumentDisplay->getSurface()->clearMask();
   m_instrumentDisplay->update();
+}
+
+Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(bool exclude)
+{
+  m_instrumentDisplay->repaint(); // to refresh the pick image
+  Mantid::API::MatrixWorkspace_const_sptr inputWS = m_instrumentWindow->getInstrumentActor()->getWorkspace();
+  Mantid::API::MatrixWorkspace_sptr outputWS = Mantid::API::WorkspaceFactory::Instance().create(
+    inputWS, inputWS->getNumberHistograms(), 1, 1);
+  if (!outputWS) return outputWS;
+
+  size_t wsSize = outputWS->getNumberHistograms();
+
+  QList<int> dets;
+  m_instrumentDisplay->getSurface()->getMaskedDetectors(dets);
+  if (!dets.isEmpty())
+  {
+    if (exclude)
+    {
+      Mantid::index2detid_map * i2d = outputWS->getWorkspaceIndexToDetectorIDMap();
+      for(size_t i = 0; i < wsSize; ++i)
+      {
+        int id = (*i2d)[i];
+        if (dets.contains(id))
+        {
+          outputWS->dataY(i)[0] = 1.0;
+        }
+        else
+        {
+          outputWS->maskWorkspaceIndex(i);
+        }
+      }
+    }
+    else
+    {
+      for(size_t i = 0; i < wsSize; ++i)
+      {
+        outputWS->dataY(i)[0] = 1.0;
+      }
+      foreach(int id,dets)
+      {
+        size_t wi = m_instrumentWindow->getInstrumentActor()->getWorkspaceIndex(id);
+        outputWS->maskWorkspaceIndex(wi);
+      }
+    }
+  }
+  return outputWS;
+}
+
+void InstrumentWindowMaskTab::saveMaskToWorkspaceInclude()
+{
+  saveMaskToWorkspace(false);
+}
+
+void InstrumentWindowMaskTab::saveMaskToWorkspaceExclude()
+{
+  saveMaskToWorkspace(true);
+}
+
+void InstrumentWindowMaskTab::saveMaskToFileInclude()
+{
+  saveMaskToFile(false);
+}
+
+void InstrumentWindowMaskTab::saveMaskToFileExclude()
+{
+  saveMaskToFile(true);
+}
+
+void InstrumentWindowMaskTab::saveMaskToWorkspace(bool exclude)
+{
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  m_pointer->setChecked(true);
+  setActivity();
+  Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(exclude);
+  if (outputWS)
+  {
+    clearMask();
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("MaskWorkspace",outputWS);
+  }
+  QApplication::restoreOverrideCursor();
+}
+
+void InstrumentWindowMaskTab::saveMaskToFile(bool exclude)
+{
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  m_pointer->setChecked(true);
+  setActivity();
+  Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(exclude);
+  if (outputWS)
+  {
+    clearMask();
+    QString saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+    QString fileName = QFileDialog::getSaveFileName(m_instrumentWindow,"Select location for the mas file",saveDir);
+
+    if (!fileName.isEmpty())
+    {
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveNexusProcessed",-1);
+      alg->setProperty("InputWorkspace",boost::dynamic_pointer_cast<Mantid::API::Workspace>(outputWS));
+      alg->setPropertyValue("Filename",fileName.toStdString());
+      alg->execute();
+    }
+}
+  QApplication::restoreOverrideCursor();
 }

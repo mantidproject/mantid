@@ -7,6 +7,8 @@
 #include <QFrame>
 #include <QMap>
 
+#include <boost/shared_ptr.hpp>
+
 class InstrumentWindow;
 class Instrument3DWidget;
 class CollapsiblePanel;
@@ -18,6 +20,7 @@ class QTextEdit;
 class QComboBox;
 class QCheckBox;
 class QLabel;
+class QAction;
 
 class QtTreePropertyBrowser;
 class QtGroupPropertyManager;
@@ -28,6 +31,14 @@ class QtStringPropertyManager;
 class QtEnumPropertyManager;
 class QtProperty;
 class QtBrowserItem;
+
+namespace Mantid
+{
+  namespace API
+  {
+    class MatrixWorkspace;
+  }
+}
 
 /**
   * Implements the Mask tab in InstrumentWindow
@@ -49,6 +60,10 @@ protected slots:
   void shapeChanged();
   void applyMask();
   void clearMask();
+  void saveMaskToWorkspaceInclude();
+  void saveMaskToFileInclude();
+  void saveMaskToWorkspaceExclude();
+  void saveMaskToFileExclude();
 
   void doubleChanged(QtProperty*);
 protected:
@@ -56,6 +71,9 @@ protected:
 
   void clearProperties();
   void setProperties();
+  boost::shared_ptr<Mantid::API::MatrixWorkspace> createMaskWorkspace(bool exclude = false);
+  void saveMaskToWorkspace(bool exclude = false);
+  void saveMaskToFile(bool exclude = false);
 
   InstrumentWindow* m_instrumentWindow;
   MantidGLWidget *m_instrumentDisplay;
@@ -72,7 +90,11 @@ protected:
 
   QPushButton* m_apply;
   QPushButton* m_clear_all;
-  QPushButton* m_save_as_workspace;
+
+  QAction* m_save_as_workspace_include;
+  QAction* m_save_as_workspace_exclude;
+  QAction* m_save_as_file_include;
+  QAction* m_save_as_file_exclude;
 
   // properties
   bool m_userEditing;
