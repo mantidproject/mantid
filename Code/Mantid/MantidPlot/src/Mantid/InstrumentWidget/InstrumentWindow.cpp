@@ -209,7 +209,7 @@ void InstrumentWindow::setSurfaceType(int type)
       p3d->set3DAxesState(m_renderTab->areAxesOn());
       surface = p3d;
     }
-    else if (m_surfaceType <= CYLINDRICAL_X)
+    else if (m_surfaceType <= CYLINDRICAL_Z)
     {
       surface = new UnwrappedCylinder(m_instrumentActor,sample_pos,axis);
     }
