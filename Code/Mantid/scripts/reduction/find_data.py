@@ -58,6 +58,8 @@ def find_data(file, instrument=''):
         @param instrument: if supplied, FindNeXus will be tried as a last resort
     """
     # First, assume a file name
+    file = str(file)
+    instrument = str(instrument)
     file_path = FileFinder.getFullPath(file)
     if file_path is not None and len(file_path)>0:
         return file_path

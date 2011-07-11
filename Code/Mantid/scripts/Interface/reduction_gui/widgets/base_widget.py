@@ -2,6 +2,7 @@ from PyQt4 import QtGui, uic, QtCore
 import os
 import types
 from reduction_gui.settings.application_settings import GeneralSettings
+from reduction import find_data
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -159,11 +160,13 @@ class BaseWidget(QtGui.QWidget):
             return
         
         # Check that the file exists.
-        if not os.path.exists(file_name):
+        try:
+            filepath = find_data(file_name, instrument=self._settings.instrument_name)
+        except:
             QtGui.QMessageBox.warning(self, "File Not Found", "The supplied mask file can't be found on the file system")
-            
+            return
         if self._data_proxy is not None:
-            proxy = self._data_proxy(file_name, workspace)
+            proxy = self._data_proxy(filepath, workspace)
             if proxy.data_ws is not None:
                 if mask is not None:
                     MaskDetectors(proxy.data_ws, DetectorList=mask)
