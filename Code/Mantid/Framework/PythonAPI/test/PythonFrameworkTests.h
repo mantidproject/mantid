@@ -2,10 +2,8 @@
 #define  MANTID_PYTHONFRAMEWORKTESTS_H_
 
 #include <vector>
-
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
 #include "MantidPythonAPI/FrameworkManagerProxy.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
