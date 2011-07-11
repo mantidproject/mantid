@@ -329,27 +329,27 @@ QString AlgorithmHistoryWindow::generateScript()
       bool outputWkspace(false);
       if( ialg_Sptr->existsProperty(name) && direction == Mantid::Kernel::Direction::Output )
       {
-	Property *p = ialg_Sptr->getProperty(name);
-	if( dynamic_cast<IWorkspaceProperty*>(p) ) outputWkspace = true;
+        Property *p = ialg_Sptr->getProperty(name);
+        if( dynamic_cast<IWorkspaceProperty*>(p) ) outputWkspace = true;
       }
 
       //if it's not a default property  add it to 
       //algorithm parameters to form the script
       if(!bdefault)
       {
-	//if the property name obtained by unmanaged instance of the algorithm
-	//is same as the algorithm history property add it to algParam string
-	//to generate script
-	if( (algName == "Load" || ialg_Sptr->existsProperty(name) ) &&
-	    (direction == Direction::Input || direction == Direction::InOut || outputWkspace) 
-	  )
-	{
-	  std::string sanitisedname=sanitizePropertyName(name);
-	  algParam+=sanitisedname;
-	  algParam+="=\"";
-	  algParam+=value;
-	  algParam+="\",";
-	}
+        //if the property name obtained by unmanaged instance of the algorithm
+        //is same as the algorithm history property add it to algParam string
+        //to generate script
+        if( (algName == "Load" || ialg_Sptr->existsProperty(name) ) &&
+          (direction == Direction::Input || direction == Direction::InOut || outputWkspace) 
+          )
+        {
+          std::string sanitisedname=sanitizePropertyName(name);
+          algParam+=sanitisedname;
+          algParam+="'";//"=\"";
+          algParam+=value;
+          algParam+="',";//"\",";
+        }
       }
 
     } //end of properties loop
