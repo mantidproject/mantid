@@ -1,5 +1,6 @@
 # Source files
 set ( SRC_FILES
+	#	src/MDSplitBox.cpp
 	src/BinToMDHistoWorkspace.cpp
 	src/CoordTransform.cpp
 	src/CoordTransformDistance.cpp
@@ -16,9 +17,9 @@ set ( SRC_FILES
 	src/MDEventWorkspace.cpp
 	src/MDGridBox.cpp
 	src/MDHistoWorkspace.cpp
-#	src/MDSplitBox.cpp
 	src/MakeDiffractionMDEventWorkspace.cpp
 	src/OneStepMDEW.cpp
+	src/SaveMDEW.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES 
@@ -32,6 +33,7 @@ set ( SRC_UNITY_IGNORE_FILES
 
 # Header files
 set ( INC_FILES
+	#inc/MantidMDEvents/MDSplitBox.h
 	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/BoxController.h
 	inc/MantidMDEvents/CoordTransform.h
@@ -51,13 +53,14 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDEventWorkspace.h
 	inc/MantidMDEvents/MDGridBox.h
 	inc/MantidMDEvents/MDHistoWorkspace.h
-	#inc/MantidMDEvents/MDSplitBox.h
 	inc/MantidMDEvents/MakeDiffractionMDEventWorkspace.h
 	inc/MantidMDEvents/OneStepMDEW.h
+	inc/MantidMDEvents/SaveMDEW.h
 )
 
 # Test files. Other source files required.
 set ( TEST_FILES
+	#test/MDSplitBoxTest.h
 	test/BoxControllerTest.h
 	test/CoordTransformDistanceTest.h
 	test/CoordTransformTest.h
@@ -76,9 +79,9 @@ set ( TEST_FILES
 	test/MDEventWorkspaceTest.h
 	test/MDGridBoxTest.h
 	test/MDHistoWorkspaceTest.h
-	#test/MDSplitBoxTest.h
 	test/MakeDiffractionMDEventWorkspaceTest.h
 	test/OneStepMDEWTest.h
+	test/SaveMDEWTest.h
 )
 
 set ( GMOCK_TEST_FILES

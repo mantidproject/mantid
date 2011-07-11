@@ -891,15 +891,22 @@ public:
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();
 
+    CPUTimer tim;
+
     // 2D box split into 10x10
     MDGridBox<MDEvent<2>,2> * b = MDEventsTestHelper::makeMDGridBox<2>();
     MDEventsTestHelper::feedMDBox<2>(b, 1);
+
     // Sub-split one of the boxes into 100 more boxes.
-    b->splitContents(01, NULL);
+    for (size_t i=1; i<10; i++)
+      b->splitContents(i, NULL);
 
     ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
     b->saveNexus("box0", file);
     file->close();
+
+    std::cout << tim << " to save 1000 boxes." << std::endl;
+    return;
 
     // ------ LoadNexus --------
 
@@ -920,7 +927,7 @@ public:
     TS_ASSERT_DELTA( c->getVolume(), b->getVolume(), 1e-3);
 
     // Compare the grid-specific stuff
-//    TS_ASSERT_EQUALS( c->getNPoints(), 100);
+    TS_ASSERT_EQUALS( c->getNPoints(), 100);
     TS_ASSERT_EQUALS( c->getNumChildren(), 100);
     IMDBox<MDEvent<2>,2> * ibox = c->getChild(11);
     TS_ASSERT(ibox);
@@ -1158,6 +1165,7 @@ public:
    * Gets about 11 million boxes */
   void test_getBoxes()
   {
+    CPUTimer tim;
     std::vector<IMDBox<MDEvent<1>,1> *> boxes;
     for (size_t i=0; i<10; i++)
     {
@@ -1167,6 +1175,7 @@ public:
       TS_ASSERT_EQUALS( boxes.size(), 1111111);
       TS_ASSERT_EQUALS( boxes[0], recursiveParent);
     }
+    std::cout << tim << " to getBoxes() 10 x 1.1 million boxes." << std::endl;
   }
 
 
@@ -1178,7 +1187,19 @@ public:
     recursiveParent2->saveNexus("box0", file);
     file->close();
 
-    std::cout << tim << " to save a MDGridBox with 1111111 subboxes." << std::endl;
+    // took 355 seconds on my system = way too slow.
+    std::cout << tim << " to save a MDGridBox with 111111 subboxes." << std::endl;
+  }
+
+  void xtest_saveNexus_XML()
+  {
+    CPUTimer tim;
+    std::string filename = "MDGridBoxTestPerformance.xml";
+    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATEXML);
+    recursiveParent2->saveNexus("box0", file);
+    file->close();
+
+    std::cout << tim << " to save a MDGridBox with 111111 subboxes." << std::endl;
   }
 
 //  /** Recursive getting of a list of IMDBox.

@@ -527,7 +527,7 @@ namespace MDEvents
 
     // More attributes
     file->putAttr("numBoxes", int(this->numBoxes));
-//    file->putAttr("nPoints", int(this->nPoints)); // TODO: should be a long
+    file->putAttr("nPoints", int(this->nPoints)); // TODO: should be a long
 
     // The splitting, as a vector
     std::vector<int> splitVec;
@@ -574,9 +574,9 @@ namespace MDEvents
     if (ival < 0) throw std::runtime_error("MDGridBox::loadNexus: Error loading NXS file. numBoxs must be >= 0. Found at path " + file->getPath());
     this->numBoxes = size_t(ival);
 
-//    file->getAttr("nPoints", ival);
-//    if (ival < 0) throw std::runtime_error("MDGridBox::loadNexus: Error loading NXS file. nPoints must be >= 0. Found at path " + file->getPath());
-//    this->nPoints = size_t(ival);
+    file->getAttr("nPoints", ival);
+    if (ival < 0) throw std::runtime_error("MDGridBox::loadNexus: Error loading NXS file. nPoints must be >= 0. Found at path " + file->getPath());
+    this->nPoints = size_t(ival);
 
     // Load the splitting info
     std::vector<int> splitVec;
