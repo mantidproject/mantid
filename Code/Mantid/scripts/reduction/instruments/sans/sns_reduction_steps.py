@@ -8,6 +8,7 @@ import math
 from reduction import ReductionStep
 from sans_reduction_steps import BaseTransmission, BaseBeamFinder, WeightedAzimuthalAverage
 from sans_reduction_steps import DirectBeamTransmission as SingleFrameDirectBeamTransmission
+from sans_reduction_steps import SaveIqAscii as BaseSaveIqAscii
 from reduction import extract_workspace_name, find_file, find_data
 from eqsans_config import EQSANSConfig
 
@@ -837,3 +838,35 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
         
         return "Transmission correction applied for both frame independently"
     
+class SaveIqAscii(BaseSaveIqAscii):
+    """
+        Save the reduced data to ASCII files
+    """
+    def __init__(self):
+        super(SaveIqAscii, self).__init__()
+        
+    def execute(self, reducer, workspace):
+        log_text = super(SaveIqAscii, self).execute(reducer, workspace)
+        
+        # Determine which directory to use
+        output_dir = reducer._data_path
+        if reducer._output_path is not None:
+            if os.path.isdir(reducer._output_path):
+                output_dir = reducer._output_path
+            else:
+                raise RuntimeError, "SaveIqAscii could not save in the following directory: %s" % reducer._output_path
+            
+        if reducer._two_dim_calculator is not None:
+            if not hasattr(reducer._two_dim_calculator, "get_output_workspace"):
+                
+                for output_ws in [workspace+'_Iqxy', workspace+'_Iqxy_frame1', workspace+'_Iqxy_frame2']:
+                    if mtd.workspaceExists(output_ws):
+                        filename = os.path.join(output_dir, output_ws+'.dat')
+                        SaveNISTDAT(InputWorkspace=output_ws, Filename=filename)
+                        
+                        if len(log_text)>0:
+                            log_text += '\n'
+                        log_text += "I(Qx,Qy) for %s saved in %s" % (output_ws, filename)
+            
+        return log_text
+            

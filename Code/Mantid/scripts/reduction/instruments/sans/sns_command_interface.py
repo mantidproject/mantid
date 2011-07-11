@@ -8,7 +8,7 @@ from hfir_command_interface import NoDarkCurrent, NoNormalization, Mask, MaskDet
 from hfir_command_interface import SensitivityCorrection, NoSensitivityCorrection
 from hfir_command_interface import SolidAngle, NoSolidAngle, NoTransmission, SetTransmission#, DirectBeamTransmission
 from hfir_command_interface import Background, NoBackground, IQxQy, NoIQxQy#, AzimuthalAverage
-from hfir_command_interface import SaveIqAscii, NoSaveIq
+from hfir_command_interface import NoSaveIq#, SaveIqAscii 
 from hfir_command_interface import ThetaDependentTransmission, BckThetaDependentTransmission, SetBckTransmission
 from hfir_command_interface import TransmissionDarkCurrent, BckTransmissionDarkCurrent, BckDirectBeamTransmission
 from hfir_command_interface import SetDirectBeamAbsoluteScale, SetAbsoluteScale
@@ -88,4 +88,7 @@ def BckCombineTransmissionFits(combine_frames):
     
 def IQxQy(nbins=100):
     ReductionSingleton().set_IQxQy(mantidsimple.EQSANSQ2D, None, NumberOfBins=nbins)
+    
+def SaveIqAscii():
+    ReductionSingleton().set_save_Iq(sns_reduction_steps.SaveIqAscii())
     
