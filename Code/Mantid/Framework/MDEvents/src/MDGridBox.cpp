@@ -55,6 +55,9 @@ namespace MDEvents
     if (!bc)
       throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
 
+    // Steal the ID from the parent box that is being split.
+    this->setId( box->getId() );
+
     // How many is it split?
     for (size_t d=0; d<nd; d++)
       split[d] = bc->getSplitInto(d);
@@ -82,6 +85,7 @@ namespace MDEvents
       // Create the box
       // (Increase the depth of this box to one more than the parent (this))
       MDBox<MDE,nd> * myBox = new MDBox<MDE,nd>(bc, this->m_depth + 1);
+
       // Set the extents of this box.
       for (size_t d=0; d<nd; d++)
       {

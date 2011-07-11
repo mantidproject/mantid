@@ -31,7 +31,7 @@ namespace MDEvents
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd)
+    :nd(nd), m_maxId(0)
     {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
@@ -48,6 +48,21 @@ namespace MDEvents
     size_t getNDims() const
     {
       return nd;
+    }
+
+    //-----------------------------------------------------------------------------------
+    /** @return the next available box Id.
+     * Call when creating a MDBox to give it an ID. */
+    size_t getNextId()
+    {
+      return m_maxId++;
+    }
+
+    //-----------------------------------------------------------------------------------
+    /** @return the maximum (not-inclusive) ID number anywhere in the workspace. */
+    size_t getMaxId()
+    {
+      return m_maxId;
     }
 
     //-----------------------------------------------------------------------------------
@@ -317,6 +332,10 @@ namespace MDEvents
 
     /// Number of dimensions
     size_t nd;
+
+    /** The maximum ID number of any boxes in the workspace (not inclusive,
+     * i.e. maxId = 100 means there the highest ID number is 99.  */
+    size_t m_maxId;
 
     /// Splitting threshold
     size_t m_SplitThreshold;

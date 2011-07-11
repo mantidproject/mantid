@@ -52,6 +52,8 @@ public:
     TS_ASSERT_DELTA( b->getExtents(0).min, 0.0,  1e-5);
     TS_ASSERT_DELTA( b->getExtents(0).max, 10.0, 1e-5);
     TS_ASSERT_DELTA( b->getVolume(), 10.0, 1e-5);
+    // Start at ID 0.
+    TS_ASSERT_EQUALS( b->getId(), 0);
     delete b;
   }
 
@@ -60,6 +62,8 @@ public:
   void test_MDGridBox_Construction()
   {
     MDBox<MDEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1();
+    // Start at ID 0.
+    TS_ASSERT_EQUALS( b->getId(), 0);
     // Give it 10 events
     const std::vector<MDEvent<1> > events = MDEventsTestHelper::makeMDEvents1(10);
     b->addEvents( events );
@@ -68,6 +72,9 @@ public:
 
     // Build the grid box out of it
     MDGridBox<MDEvent<1>,1> * g = new MDGridBox<MDEvent<1>,1>(b);
+
+    // The grid box stole the ID of the box it replaces.
+    TS_ASSERT_EQUALS( g->getId(), 0);
 
     // Look overall; it has 10 points
     TS_ASSERT_EQUALS(g->getNumDims(), 1);
@@ -92,6 +99,10 @@ public:
       // The get child method is equivalent
       TS_ASSERT_EQUALS( boxes[i], g->getChild(i));
       MDBox<MDEvent<1>,1> * box = dynamic_cast<MDBox<MDEvent<1>,1> *>(boxes[i]);
+
+      // Sequential ID, starting at 1 since 0 was used by the parent.
+      TS_ASSERT_EQUALS( box->getId(), i+1);
+      // At the right place?
       TS_ASSERT_DELTA(box->getExtents(0).min, double(i)*1.0, 1e-6);
       TS_ASSERT_DELTA(box->getExtents(0).max, double(i+1)*1.0, 1e-6);
       // Look at the single event in there
@@ -162,12 +173,19 @@ public:
 
     // Start with 100 boxes
     TS_ASSERT_EQUALS( superbox->getNumMDBoxes(), 100);
+    // And ID 0
+    TS_ASSERT_EQUALS( superbox->getId(), 0 );
 
     // The box is a MDBox at first
     boxes = superbox->getBoxes();
     b = dynamic_cast<MDBox<MDEvent<2>,2> *>(boxes[0]);
     TS_ASSERT( b );
     TS_ASSERT_DELTA( b->getVolume(), 1.0, 1e-5 );
+
+    // It is the first child, so ID is 1
+    TS_ASSERT_EQUALS( b->getId(), 1 );
+    // There were 101 assigned IDs
+    TS_ASSERT_EQUALS( b->getBoxController()->getMaxId(), 100+1);
 
     TS_ASSERT_THROWS_NOTHING(superbox->splitContents(0));
 
@@ -176,6 +194,13 @@ public:
     gb = dynamic_cast<MDGridBox<MDEvent<2>,2> *>(boxes[0]);
     TS_ASSERT( gb );
     TS_ASSERT_DELTA( gb->getVolume(), 1.0, 1e-5 );
+
+    // ID of first child remains unchanged at 1
+    TS_ASSERT_EQUALS( gb->getId(), 1 );
+    // There were 101 assigned IDs
+    TS_ASSERT_EQUALS( b->getBoxController()->getMaxId(), 200+1);
+    // The first child of the sub-divided box got 101 as its id
+    TS_ASSERT_EQUALS( gb->getBoxes()[0]->getId(), 101 );
 
     // There are now 199 MDBoxes; the 99 at level 1, and 100 at level 2
     TS_ASSERT_EQUALS( superbox->getNumMDBoxes(), 199);

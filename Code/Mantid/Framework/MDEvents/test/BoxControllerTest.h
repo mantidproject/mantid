@@ -55,6 +55,23 @@ public:
     TS_ASSERT_EQUALS( sc.getMaxDepth(), 6);
   }
 
+  void test_IDs()
+  {
+    BoxController sc(3);
+    // No IDs given out yet
+    TS_ASSERT_EQUALS( sc.getMaxId(), 0 );
+    // Start handing some out
+    TS_ASSERT_EQUALS( sc.getNextId(), 0 );
+    TS_ASSERT_EQUALS( sc.getNextId(), 1 );
+    TS_ASSERT_EQUALS( sc.getNextId(), 2 );
+    // You've got 3 given.
+    TS_ASSERT_EQUALS( sc.getMaxId(), 3 );
+
+    sc.setSplitInto(10);
+    sc.setMaxDepth(6);
+    TS_ASSERT_EQUALS( sc.getMaxDepth(), 6);
+  }
+
   void test_maxNumBoxes()
   {
     BoxController sc(3);

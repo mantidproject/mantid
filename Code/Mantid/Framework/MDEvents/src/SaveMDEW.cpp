@@ -67,6 +67,8 @@ namespace MDEvents
     std::string filename = getPropertyValue("Filename");
     //ws->getBox();
     UNUSED_ARG(ws);
+
+    //size_t maxBoxes = 1;
   }
 
 

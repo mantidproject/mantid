@@ -211,6 +211,21 @@ namespace MDEvents
 
 
     //-----------------------------------------------------------------------------------------------
+    /** Returns the unique ID for this box     */
+    size_t getId() const
+    {
+      return m_id;
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Sets the unique ID for this box
+     * @param newId :: new ID value. */
+    void setId(size_t newId)
+    {
+      m_id = newId;
+    }
+
+    //-----------------------------------------------------------------------------------------------
     /** Returns the integrated signal from all points within.
      */
     virtual signal_t getSignal() const
@@ -325,6 +340,8 @@ namespace MDEvents
     }
 
   protected:
+    /// Unique, sequential ID of the IMDBox within the containing workspace.
+    size_t m_id;
 
     /** Array of MDDimensionStats giving the extents and
      * other stats on the box dimensions.

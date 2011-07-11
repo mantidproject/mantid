@@ -15,7 +15,7 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
-  /** ctor
+  /** Constructor
    * @param controller :: BoxController that controls how boxes split
    * @param depth :: splitting depth of the new box.
    */
@@ -25,6 +25,8 @@ namespace MDEvents
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
     this->m_BoxController = controller;
     this->m_depth = depth;
+    // Give it a fresh ID from the controller.
+    this->setId( controller->getNextId() );
   }
 
   //-----------------------------------------------------------------------------------------------
