@@ -30,11 +30,9 @@ class QuickLoad(ReductionStep):
         # are simply found in reducer._data_files 
         if self._data_file is None:
             raise RuntimeError, "File not found: " % self._data_file
-        else:
-            data_file = self._data_file
         
         # Load data
-        filepath = find_data(file_name, instrument=reducer.instrument.name())
+        filepath = find_data(self._data_file, instrument=reducer.instrument.name())
 
         LoadEventNexus(Filename=filepath, OutputWorkspace=workspace)
 
@@ -663,7 +661,7 @@ class SubtractDarkCurrent(ReductionStep):
         # Check whether the dark current was already loaded, otherwise load it
         # Load dark current, which will be used repeatedly
         if self._dark_current_ws is None:
-            filepath = find_data(file_name, instrument=reducer.instrument.name())
+            filepath = find_data(self._dark_current_file, instrument=reducer.instrument.name())
             self._dark_current_ws = extract_workspace_name(filepath)
             reducer._data_loader.clone(datafile=filepath).execute(reducer, self._dark_current_ws)
             RebinToWorkspace(WorkspaceToRebin=self._dark_current_ws, WorkspaceToMatch=workspace, OutputWorkspace=self._dark_current_ws)
