@@ -190,6 +190,19 @@ void MantidUI::updateAlgorithms()
   m_exploreAlgorithms->update();
 }
 
+/// Show / hide the AlgorithmDockWidget
+void MantidUI::showAlgWidget(bool on)
+{
+  if (on)
+  {
+    m_exploreAlgorithms->show();
+  }
+  else
+  {
+    m_exploreAlgorithms->hide();
+  }
+}
+
 void MantidUI::addMenuItems(QMenu *menu)
 {
   actionToggleMantid = m_exploreMantid->toggleViewAction();

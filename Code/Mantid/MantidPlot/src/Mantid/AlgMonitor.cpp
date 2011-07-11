@@ -50,6 +50,7 @@ void AlgorithmMonitor::add(IAlgorithm_sptr alg)
     emit algorithmStarted(alg->getAlgorithmID());
     emit countChanged();
     unlock();
+    m_mantidUI->showAlgWidget();
 }
 
 void AlgorithmMonitor::remove(const IAlgorithm* alg)

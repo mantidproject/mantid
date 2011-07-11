@@ -223,7 +223,7 @@ public:
 
   /// Raises the cancel flag. interuption_point() method if called inside exec() checks this flag
   /// and if true terminates the algorithm.
-  void cancel()const;
+  virtual void cancel()const;
   /// True if the algorithm is running asynchronously.
   bool isRunningAsync(){return m_runningAsync;}
   /// True if the algorithm is running.

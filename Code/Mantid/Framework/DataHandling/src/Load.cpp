@@ -226,20 +226,20 @@ namespace Mantid
     void Load::exec()
     {
       std::string loaderName = getPropertyValue("LoaderName");
-      IDataFileChecker_sptr loader;
+      //IDataFileChecker_sptr loader;
       if( loaderName.empty() )
       {
-        loader = getFileLoader(getPropertyValue("Filename"));
-        loaderName = loader->name();
+        m_loader = getFileLoader(getPropertyValue("Filename"));
+        loaderName = m_loader->name();
         setPropertyValue("LoaderName",loaderName);
       }
       else
       {
-	loader = createLoader(loaderName,0,1);
+        m_loader = createLoader(loaderName,0,1);
       }
-      g_log.information() << "Using " << loaderName << " version " << loader->version() << ".\n";
+      g_log.information() << "Using " << loaderName << " version " << m_loader->version() << ".\n";
       ///get the list properties for the concrete loader load algorithm
-      const std::vector<Kernel::Property*> & loader_props = loader->getProperties();
+      const std::vector<Kernel::Property*> & loader_props = m_loader->getProperties();
 
       // Loop through and set the properties on the sub algorithm
       std::vector<Kernel::Property*>::const_iterator itr;
@@ -248,18 +248,18 @@ namespace Mantid
         const std::string propName = (*itr)->name();
         if( this->existsProperty(propName) )
         {
-          loader->setPropertyValue(propName, getPropertyValue(propName));
+          m_loader->setPropertyValue(propName, getPropertyValue(propName));
         }
-        else if( propName == loader->filePropertyName() )
+        else if( propName == m_loader->filePropertyName() )
         {
-          loader->setPropertyValue(propName, getPropertyValue("Filename"));
+          m_loader->setPropertyValue(propName, getPropertyValue("Filename"));
         }
       }
 
       // Execute the concrete loader
-      loader->execute();
+      m_loader->execute();
       // Set the workspace. Deals with possible multiple periods
-      setOutputWorkspace(loader);
+      setOutputWorkspace(m_loader);
     }
 
     /** 
@@ -380,6 +380,17 @@ namespace Mantid
       {
       }
       return Workspace_sptr();
+    }
+
+    /*
+     * Overrides the default cancel() method. Calls cancel() on the actual loader.
+     */
+    void Load::cancel()const
+    {
+      if (m_loader)
+      {
+        m_loader->cancel();
+      }
     }
 
   } // namespace DataHandling
