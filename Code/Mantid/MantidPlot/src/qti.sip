@@ -1712,6 +1712,7 @@ public:
   void setIntegrationRange(double, double) /PyName = setBinRange/;
   void selectComponent(const QString &);
   void setScaleType(GraphOptions::ScaleType);
+  void setViewType(const QString &);
 private:
 InstrumentWindow(const InstrumentWindow &);
 };

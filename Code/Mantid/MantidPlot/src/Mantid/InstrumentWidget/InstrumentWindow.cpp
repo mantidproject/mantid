@@ -481,20 +481,23 @@ QString InstrumentWindow::asString(const std::vector<int>& numbers) const
 /// Set a maximum and minimum for the colour map range
 void InstrumentWindow::setColorMapRange(double minValue, double maxValue)
 {
-  setColorMapMinValue(minValue);
-  setColorMapMaxValue(maxValue);
+  m_renderTab->setMinValue(minValue);
+  m_renderTab->setMaxValue(maxValue);
+  update();
 }
 
 /// Set the minimum value of the colour map
 void InstrumentWindow::setColorMapMinValue(double minValue)
 {
   m_renderTab->setMinValue(minValue);
+  update();
 }
 
 /// Set the maximumu value of the colour map
 void InstrumentWindow::setColorMapMaxValue(double maxValue)
 {
   m_renderTab->setMaxValue(maxValue);
+  update();
 }
 
 /**
@@ -944,4 +947,45 @@ void InstrumentWindow::createExcludeGroupingFile()
 void InstrumentWindow::executeAlgorithm(const QString& alg_name, const QString& param_list)
 {
   emit execMantidAlgorithm(alg_name,param_list,this);
+}
+
+/**
+ * Set the type of the view (SurfaceType).
+ * @param type :: String code for the type. One of: 
+ * FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z
+ */
+void InstrumentWindow::setViewType(const QString& type)
+{
+  QString type_upper = type.toUpper();
+  SurfaceType itype = FULL3D;
+  if (type_upper == "FULL3D")
+  {
+    itype = FULL3D;
+  }
+  else if (type_upper == "CYLINDRICAL_X")
+  {
+    itype = CYLINDRICAL_X;
+  }
+  else if (type_upper == "CYLINDRICAL_Y")
+  {
+    itype = CYLINDRICAL_Y;
+  }
+  else if (type_upper == "CYLINDRICAL_Z")
+  {
+    itype = CYLINDRICAL_Z;
+  }
+  else if (type_upper == "SPHERICAL_X")
+  {
+    itype = SPHERICAL_X;
+  }
+  else if (type_upper == "SPHERICAL_Y")
+  {
+    itype = SPHERICAL_Y;
+  }
+  else if (type_upper == "SPHERICAL_Z")
+  {
+    itype = SPHERICAL_Z;
+  }
+  setSurfaceType(itype);
+  m_renderTab->updateSurfaceTypeControl(itype);
 }

@@ -98,6 +98,7 @@ public:
   void setColorMapRange(double minValue, double maxValue);
   void selectComponent(const QString & name);
   void setScaleType(GraphOptions::ScaleType type);
+  void setViewType(const QString& type);
   /// for saving the instrument window  to mantid project
   QString saveToString(const QString& geometry, bool saveAsTemplate= false);
   MantidGLWidget* getInstrumentDisplay(){return m_InstrumentDisplay;}

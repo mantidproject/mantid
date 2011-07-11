@@ -28,13 +28,13 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   QVBoxLayout* renderControlsLayout=new QVBoxLayout(this);
 
   // Render Mode control
-  QComboBox* renderMode = new QComboBox(this);
-  renderMode->setToolTip("Set render mode");
+  m_renderMode = new QComboBox(this);
+  m_renderMode->setToolTip("Set render mode");
   QStringList modeList;
   modeList << "Full 3D" << "Cylindrical X"  << "Cylindrical Y" << "Cylindrical Z" << "Spherical X" << "Spherical Y" << "Spherical Z";
-  renderMode->insertItems(0,modeList);
-  connect(renderMode,SIGNAL(currentIndexChanged(int)),m_instrWindow,SLOT(setSurfaceType(int)));
-  connect(renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(showResetView(int)));
+  m_renderMode->insertItems(0,modeList);
+  connect(m_renderMode,SIGNAL(currentIndexChanged(int)),m_instrWindow,SLOT(setSurfaceType(int)));
+  connect(m_renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(showResetView(int)));
 
   // Save image control
   mSaveImage = new QPushButton(tr("Save image"));
@@ -76,7 +76,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   connect(m_colorMapWidget,SIGNAL(maxValueChanged(double)),m_instrWindow, SLOT(changeColorMapMaxValue(double)));
 
   // layout
-  renderControlsLayout->addWidget(renderMode);
+  renderControlsLayout->addWidget(m_renderMode);
   renderControlsLayout->addWidget(axisViewFrame);
   renderControlsLayout->addWidget(displaySettings);
   renderControlsLayout->addWidget(mSaveImage);
@@ -220,4 +220,15 @@ void InstrumentWindowRenderTab::showEvent (QShowEvent *)
   {
     surface->setInteractionModeMove();
   }
+}
+
+/**
+ * Update the surface type control to show type without emiting the signal.
+ * @param type :: InstrumentWindow::SurfaceType.
+ */
+void InstrumentWindowRenderTab::updateSurfaceTypeControl(int type)
+{
+  m_renderMode->blockSignals(true);
+  m_renderMode->setCurrentIndex(type);
+  m_renderMode->blockSignals(false);
 }

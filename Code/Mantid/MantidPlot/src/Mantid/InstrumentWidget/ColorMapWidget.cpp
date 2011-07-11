@@ -69,7 +69,8 @@ void ColorMapWidget::scaleOptionsChanged(int i)
 }
 
 /**
- *
+ * Set up a new colour map.
+ * @param colorMap :: Reference to the new colour map.
  */
 void ColorMapWidget::setupColorBarScaling(const MantidColorMap& colorMap)
 {
@@ -102,22 +103,54 @@ void ColorMapWidget::setupColorBarScaling(const MantidColorMap& colorMap)
   m_scaleOptions->blockSignals(false);
 }
 
+/// Send the minValueChanged signal
 void ColorMapWidget::minValueChanged()
 {
   emit minValueChanged(m_minValueBox->text().toDouble());
 }
 
+/// Send the maxValueChanged signal
 void ColorMapWidget::maxValueChanged()
 {
   emit maxValueChanged(m_maxValueBox->text().toDouble());
 }
 
+/**
+ * Set a new min value and update the widget.
+ * @param value :: The new value
+ */
 void ColorMapWidget::setMinValue(double value)
+{
+  setMinValueText(value);
+  updateScale();
+  minValueChanged();
+}
+
+/**
+ * Set a new max value and update the widget.
+ * @param value :: The new value
+ */
+void ColorMapWidget::setMaxValue(double value)
+{
+  setMaxValueText(value);
+  updateScale();
+  maxValueChanged();
+}
+
+/**
+ * Update the min value text box.
+ * @param value :: Value to be displayed in the text box.
+ */
+void ColorMapWidget::setMinValueText(double value)
 {
   m_minValueBox->setText(QString::number(value));
 }
 
-void ColorMapWidget::setMaxValue(double value)
+/**
+ * Update the max value text box.
+ * @param value :: Value to be displayed in the text box.
+ */
+void ColorMapWidget::setMaxValueText(double value)
 {
   m_maxValueBox->setText(QString::number(value));
 }
@@ -131,47 +164,29 @@ void ColorMapWidget::setMinPositiveValue(double value)
   m_minPositiveValue = value;
 }
 
+/**
+ * Return the scale type: Log10 or Linear.
+ */
 int ColorMapWidget::getScaleType()const
 {
   return m_scaleOptions->itemData(m_scaleOptions->currentIndex()).toUInt();
 }
 
+/**
+ * Set the scale type: Log10 or Linear.
+ */
 void ColorMapWidget::setScaleType(int type)
 {
   m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
 }
 
-void ColorMapWidget::mousePressEvent(QMouseEvent* e)
+/**
+ * Update the colour scale after the range changes.
+ */
+void ColorMapWidget::updateScale()
 {
-  QRect rect = m_scaleWidget->rect();
-  if (e->x() > rect.left() && e->x() < rect.right())
-  {
-    m_dragging = true;
-    m_y = e->y();
-    m_dtype = m_y > height()/2 ? Bottom : Top;
-    QApplication::setOverrideCursor(Qt::ClosedHandCursor);
-  }
-}
-
-void ColorMapWidget::mouseMoveEvent(QMouseEvent* e)
-{
-  if (!m_dragging) return;
- 
   double minValue = m_minValueBox->displayText().toDouble();
   double maxValue = m_maxValueBox->displayText().toDouble();
-
-  if (m_dtype == Bottom)
-  {
-    minValue += double(e->y() - m_y)/height()*(maxValue - minValue);
-    setMinValue(minValue);
-  }
-  else
-  {
-    maxValue += double(e->y() - m_y)/height()*(maxValue - minValue);
-    setMaxValue(maxValue);
-  }
-  m_y = e->y();
-
   GraphOptions::ScaleType type = (GraphOptions::ScaleType)m_scaleOptions->itemData(m_scaleOptions->currentIndex()).toUInt();
   if( type == GraphOptions::Linear )
   {
@@ -190,6 +205,48 @@ void ColorMapWidget::mouseMoveEvent(QMouseEvent* e)
   }
 }
 
+/**
+ * Respond to a mouse press event. Start dragging to modify the range (min or max value).
+ */
+void ColorMapWidget::mousePressEvent(QMouseEvent* e)
+{
+  QRect rect = m_scaleWidget->rect();
+  if (e->x() > rect.left() && e->x() < rect.right())
+  {
+    m_dragging = true;
+    m_y = e->y();
+    m_dtype = m_y > height()/2 ? Bottom : Top;
+    QApplication::setOverrideCursor(Qt::ClosedHandCursor);
+  }
+}
+
+/**
+ * Respond to mouse move event. If the left button is down change the min or max.
+ */
+void ColorMapWidget::mouseMoveEvent(QMouseEvent* e)
+{
+  if (!m_dragging) return;
+ 
+  double minValue = m_minValueBox->displayText().toDouble();
+  double maxValue = m_maxValueBox->displayText().toDouble();
+
+  if (m_dtype == Bottom)
+  {
+    minValue += double(e->y() - m_y)/height()*(maxValue - minValue);
+    setMinValueText(minValue);
+  }
+  else
+  {
+    maxValue += double(e->y() - m_y)/height()*(maxValue - minValue);
+    setMaxValueText(maxValue);
+  }
+  m_y = e->y();
+  updateScale();
+}
+
+/**
+ * Respond to a mouse release event. Finish all dragging.
+ */
 void ColorMapWidget::mouseReleaseEvent(QMouseEvent* /*e*/)
 {
   if (!m_dragging) return;

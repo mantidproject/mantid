@@ -33,6 +33,9 @@ protected:
   void mousePressEvent(QMouseEvent*);
   void mouseMoveEvent(QMouseEvent*);
   void mouseReleaseEvent(QMouseEvent*);
+  void updateScale();
+  void setMinValueText(double);
+  void setMaxValueText(double);
 private slots:
   void scaleOptionsChanged(int);
   void minValueChanged();

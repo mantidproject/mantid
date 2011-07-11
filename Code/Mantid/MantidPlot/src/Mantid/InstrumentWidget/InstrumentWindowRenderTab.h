@@ -36,6 +36,7 @@ public:
   void setAxis(const QString& axisName);
   bool areAxesOn()const;
   void init();
+  void updateSurfaceTypeControl(int);
 public slots:
   void showAxes(bool on);
 private slots:
@@ -48,6 +49,7 @@ private:
 
   InstrumentWindow* m_instrWindow;
   MantidGLWidget *m_InstrumentDisplay;
+  QComboBox* m_renderMode;
   QPushButton *mSaveImage;
   ColorMapWidget* m_colorMapWidget;
   QFrame* m_resetViewFrame;
