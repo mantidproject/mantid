@@ -222,7 +222,7 @@ namespace MDEvents
       size_t numEvents = events.size();
       std::vector<coord_t> centers;
       centers.reserve(numEvents*nd);
-      std::vector<signal_t> signal_error;
+      std::vector<float> signal_error;
       signal_error.reserve(numEvents*2);
 
       typename std::vector<MDEvent<nd> >::const_iterator it = events.begin();
@@ -244,8 +244,59 @@ namespace MDEvents
       file->writeData("center", centers, dims);
 
       dims[1] = 2;
-      file->writeData("signal_error", signal_error, dims);
+      file->writeData("signal_errorsquared", signal_error, dims);
     }
+
+
+    //---------------------------------------------------------------------------------------------
+    /** Static method to load a vector of MDEvents of this type from a nexus file
+     * open to the right group.
+     * This will be re-implemented by any other MDEvent-like type
+     *
+     * @param events :: reference to the vector of events to load.
+     * @param file :: open NXS file. */
+    static void loadVectorFromNexus(std::vector<MDEvent<nd> > & events, ::NeXus::File * file)
+    {
+      // Load both data vectors
+      std::vector<coord_t> centers;
+      std::vector<float> signal_error;
+
+      file->openData("center");
+      file->getData(centers);
+      file->closeData();
+
+      file->openData("signal_errorsquared");
+      file->getData(signal_error);
+      file->closeData();
+
+      if (centers.size()/nd != signal_error.size()/2)
+        throw std::runtime_error("Error loading MDEvent data from NXS file. The signal_error and center are of incompatible sizes");
+
+      size_t numEvents = signal_error.size()/2;
+      events.clear();
+      events.reserve(numEvents);
+
+      size_t center_index = 0;
+      size_t signal_index = 0;
+      for (size_t i=0; i<numEvents; i++)
+      {
+        // Get the centers
+        coord_t event_center[nd];
+        // TODO: memcpy might be faster?
+        for(size_t d=0; d<nd; d++)
+        {
+          event_center[d] = centers[center_index];
+          center_index++;
+        }
+        // Get the signal/error
+        float signal = signal_error[signal_index++];
+        float errorSquared = signal_error[signal_index++];
+        // Make the event and push it into the vector
+        events.push_back( MDEvent(signal, errorSquared, event_center) );
+      }
+    }
+
+
   };
 
 

@@ -374,11 +374,10 @@ public:
       Poco::File(filename).remove();
 
     // Make a box with 1000 events
-    MDBox<MDEvent<3>,3> * box = MDEventsTestHelper::makeMDBox3();
-    MDEventsTestHelper::feedMDBox(box, 1, 10, 0.5, 1.0);
+    MDBox<MDEvent<3>,3> * b = MDEventsTestHelper::makeMDBox3();
+    MDEventsTestHelper::feedMDBox(b, 1, 10, 0.5, 1.0);
 
-    TS_ASSERT_EQUALS( box->getNPoints(), 1000);
-
+    TS_ASSERT_EQUALS( b->getNPoints(), 1000);
 
     ::NeXus::File * file = new NeXus::File(filename, NXACC_CREATE5);
 
@@ -387,11 +386,42 @@ public:
       std::ostringstream mess;
       mess << "box" << i;
       std::string name = mess.str();
-      box->saveNexus(name, file);
+      b->saveNexus(name, file);
     }
     file->close();
 
-    //TODO: LoadNexus
+    // ------ LoadNexus --------
+
+    // Now we load it back
+    MDBox<MDEvent<3>,3> * c = new MDBox<MDEvent<3>,3>();
+
+    ::NeXus::File * fileIn = new NeXus::File(filename, NXACC_READ);
+    fileIn->openGroup("box0", "NXMDBox");
+    c->loadNexus(fileIn);
+    fileIn->closeGroup();
+    fileIn->close();
+
+    // (This is actually in IMDBox so full re-testing of that is not needed)
+    TS_ASSERT_DELTA( c->getExtents(0).max, 10.0, 1e-4);
+    TS_ASSERT_DELTA( c->getExtents(1).max, 10.0, 1e-4);
+
+    // Now the actual events were re-loaded.
+    TS_ASSERT_EQUALS( c->getNPoints(), 1000);
+
+    MDEvent<3> ev = c->getEvents()[0];
+    TS_ASSERT_DELTA( ev.getCenter(0), 0.5, 1e-5);
+    TS_ASSERT_DELTA( ev.getCenter(1), 0.5, 1e-5);
+    TS_ASSERT_DELTA( ev.getCenter(2), 0.5, 1e-5);
+    TS_ASSERT_DELTA( ev.getSignal(), 1.0, 1e-5);
+    TS_ASSERT_DELTA( ev.getErrorSquared(), 1.0, 1e-5);
+
+    ev = c->getEvents()[1];
+    TS_ASSERT_DELTA( ev.getCenter(0), 1.5, 1e-5);
+    TS_ASSERT_DELTA( ev.getCenter(1), 0.5, 1e-5);
+    TS_ASSERT_DELTA( ev.getCenter(2), 0.5, 1e-5);
+    TS_ASSERT_DELTA( ev.getSignal(), 1.0, 1e-5);
+    TS_ASSERT_DELTA( ev.getErrorSquared(), 1.0, 1e-5);
+
 
 //    // Clean up
 //    if (Poco::File(filename).exists())

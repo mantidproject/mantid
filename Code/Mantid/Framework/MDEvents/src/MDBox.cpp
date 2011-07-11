@@ -383,8 +383,13 @@ namespace MDEvents
    * @param file :: Nexus File object
    */
   TMDE(
-  void MDBox)::loadNexus(::NeXus::File * /*file*/)
+  void MDBox)::loadNexus(::NeXus::File * file)
   {
+    // First, load the data common to all IMDBoxes.
+    IMDBox<MDE,nd>::loadNexus(file);
+
+    // Now get the events
+    MDE::loadVectorFromNexus( this->data, file);
   }
 
 
