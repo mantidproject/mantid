@@ -292,13 +292,55 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
 /**
  * Load a table
  */
-API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & /*entry*/)
+API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
 {
-  // Get workspace characteristics
-  //NXData wksp_cls = mtd_entry.openNXData("table_workspace");
-
   API::ITableWorkspace_sptr workspace;
   workspace = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+
+  NXData nx_tw = entry.openNXData("table_workspace");
+
+  std::vector<double> values;
+
+  int columnNumber = 1;
+  do
+  {
+    std::string str = "column_" + boost::lexical_cast<std::string>(columnNumber);
+    columnNumber++;
+
+    NXInfo info = nx_tw.getDataSetInfo(str.c_str());
+    if (info.stat == NX_ERROR)
+    {
+      break;
+    }
+
+    if ( info.type == NX_FLOAT64 )
+    {
+      NXDouble nx_crap = nx_tw.openNXDouble(str.c_str());
+      nx_crap.load();
+      int length = nx_crap.dim0();
+      for (int i = 0; i < length; i++)
+        values.push_back(*(nx_crap() + i));
+    }
+    else if ( info.type == NX_CHAR )
+    {
+      NXChar data = nx_tw.openNXChar(str.c_str());
+      int nRows = info.dims[0];
+      int maxStr = info.dims[1];
+
+      std::string fromCrap(maxStr,' ');
+
+      data.load();
+      for (int iR = 0; iR < nRows; iR++)
+      {
+        for (int i = 0; i < maxStr; i++)
+          fromCrap[i] = *(data()+i+maxStr*iR);
+        std::cout << fromCrap << std::endl;
+      }
+      
+    }
+   // nx_crap.
+  
+  } while ( 1 );
 
   return boost::static_pointer_cast<API::Workspace>(workspace);
 }

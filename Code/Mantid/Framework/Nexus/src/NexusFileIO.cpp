@@ -735,8 +735,7 @@ using namespace DataObjects;
 
       std::string str = "column_" + boost::lexical_cast<std::string>(i+1);
   
-      std::string bob = col->get_type_info().name();
-      if ( col->get_type_info().name() == std::string("double") )
+      if ( col->isType<double>() )
       {
         double * toNexus = new double[nRows];
         for (int ii = 0; ii < nRows; ii++)
@@ -744,12 +743,39 @@ using namespace DataObjects;
         NXwritedata(str.c_str(), NX_FLOAT64, 1, dims_array, (void *)(toNexus), false);
         delete[] toNexus;
       }
-    
+      else if ( col->isType<std::string>() )
+      {
+        // determine max string size
+        size_t maxStr = 0;
+        for (int ii = 0; ii < nRows; ii++)
+        {
+          if ( col->cell<std::string>(ii).size() > maxStr)
+            maxStr = col->cell<std::string>(ii).size();
+        }
+        int dims_array[2] = { nRows, static_cast<int>(maxStr) };
+        int start[2]={0,0};
+        int asize[2]={1,dims_array[1]};
 
+        status=NXcompmakedata(fileID, str.c_str(), NX_CHAR, 2, dims_array,false,asize);
+        status=NXopendata(fileID, str.c_str());
+        char* toNexus = new char[maxStr*nRows];
+        for(int ii = 0; ii < nRows; ii++)
+        {
+          std::string rowStr = col->cell<std::string>(ii);
+          for (size_t ic = 0; ic < rowStr.size(); ic++)
+            toNexus[ii*maxStr+ic] = rowStr[ic];
+          for (size_t ic = rowStr.size(); ic < static_cast<size_t>(maxStr); ic++)
+            toNexus[ii*maxStr+ic] = ' ';
+        }
+        
+        status = NXputdata(fileID, (void *)(toNexus));
+        delete[] toNexus;
 
-      //status=NXmakedata(fileID, str.c_str(), nxType, 1, dims_array);
-/*      status=NXopendata(fileID, str.c_str());
-      status=NXputdata(fileID, (void*)&(localworkspace->readX(0)[0])); */
+        // write out title and other stuff
+        NXputattr(fileID, "name", (void*)col->name().c_str(), static_cast<int>(col->name().size()), NX_CHAR);
+        status = NXclosedata(fileID);
+      }
+
 
     }
 
