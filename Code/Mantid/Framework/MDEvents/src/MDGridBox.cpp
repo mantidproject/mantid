@@ -588,6 +588,200 @@ namespace MDEvents
   }
 
 
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** General (non-axis-aligned) centerpoint binning method.
+   * TODO: TEST THIS!
+   *
+   * @param bin :: a MDBin object giving the limits, aligned with the axes of the workspace,
+   *        of where the non-aligned bin MIGHT be present.
+   * @param function :: a ImplicitFunction that will evaluate true for any coordinate that is
+   *        contained within the (non-axis-aligned) bin.
+   */
+  TMDE(
+  void MDGridBox)::generalBin(MDBin<MDE,nd> & bin, Mantid::API::ImplicitFunction & function) const
+  {
+    // The MDBin ranges from index_min to index_max (inclusively) if each dimension. So
+    // we'll need to make nested loops from index_min[0] to index_max[0]; from index_min[1] to index_max[1]; etc.
+    int index_min[nd];
+    int index_max[nd];
+    // For running the nested loop, counters of each dimension. These are bounded by 0..split[d]
+    size_t counters_min[nd];
+    size_t counters_max[nd];
+
+    for (size_t d=0; d<nd; d++)
+    {
+      int min,max;
+
+      // The min index in this dimension (we round down - we'll include this edge)
+      if (bin.m_min[d] >= this->extents[d].min)
+      {
+        min = int((bin.m_min[d] - this->extents[d].min) / boxSize[d]);
+        counters_min[d] = min;
+      }
+      else
+      {
+        min = -1; // Goes past the edge
+        counters_min[d] = 0;
+      }
+
+      // If the minimum is bigger than the number of blocks in that dimension, then the bin is off completely in
+      //  that dimension. There is nothing to integrate.
+      if (min >= static_cast<int>(split[d]))
+        return;
+      index_min[d] = min;
+
+      // The max index in this dimension (we round UP, but when we iterate we'll NOT include this edge)
+      if (bin.m_max[d] < this->extents[d].max)
+      {
+        max = int(ceil((bin.m_max[d] - this->extents[d].min) / boxSize[d])) - 1;
+        counters_max[d] = max+1; // (the counter looping will NOT include counters_max[d])
+      }
+      else
+      {
+        max = int(split[d]); // Goes past THAT edge
+        counters_max[d] = max; // (the counter looping will NOT include max)
+      }
+
+      // If the max value is before the min, that means NOTHING is in the bin, and we can return
+      if ((max < min) || (max < 0))
+        return;
+      index_max[d] = max;
+
+      //std::cout << d << " from " << std::setw(5) << index_min[d] << " to " << std::setw(5)  << index_max[d] << "inc" << std::endl;
+    }
+
+    // If you reach here, than at least some of bin is overlapping this box
+
+
+    // We start by looking at the vertices at every corner of every box contained,
+    // to see which boxes are partially contained/fully contained.
+
+    // One entry with the # of vertices in this box contained; start at 0.
+    size_t * verticesContained = new size_t[numBoxes];
+    memset( verticesContained, 0, numBoxes * sizeof(size_t) );
+
+    // Set to true if there is a possibility of the box at least partly touching the integration volume.
+    bool * boxMightTouch = new bool[numBoxes];
+    memset( boxMightTouch, 0, numBoxes * sizeof(bool) );
+
+    // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd bits
+    size_t maxVertices = 1 << nd;
+
+    // The index to the vertex in each dimension
+    size_t * vertexIndex = Utils::nestedForLoopSetUp(nd, 0);
+
+    // This is the index in each dimension at which we start looking at vertices
+    size_t * vertices_min = Utils::nestedForLoopSetUp(nd, 0);
+    for (size_t d=0; d<nd; ++d)
+    {
+      vertices_min[d] = counters_min[d];
+      vertexIndex[d] = vertices_min[d]; // This is where we start
+    }
+
+    // There is one more vertex in each dimension than there are boxes we are considering
+    size_t * vertices_max = Utils::nestedForLoopSetUp(nd, 0);
+    for (size_t d=0; d<nd; ++d)
+      vertices_max[d] = counters_max[d]+1;
+
+    size_t * boxIndex = Utils::nestedForLoopSetUp(nd, 0);
+    size_t * indexMaker = Utils::nestedForLoopSetUpIndexMaker(nd, split);
+
+    bool allDone = false;
+    while (!allDone)
+    {
+      // Coordinates of this vertex
+      coord_t vertexCoord[nd];
+      for (size_t d=0; d<nd; ++d)
+        vertexCoord[d] = double(vertexIndex[d]) * boxSize[d] + this->extents[d].min;
+
+      // Is this vertex contained?
+      if (function.evaluate(vertexCoord))
+      {
+        // Yes, this vertex is contained within the integration volume!
+//        std::cout << "vertex at " << vertexCoord[0] << ", " << vertexCoord[1] << ", " << vertexCoord[2] << " is contained\n";
+
+        // This vertex is shared by up to 2^nd adjacent boxes (left-right along each dimension).
+        for (size_t neighb=0; neighb<maxVertices; ++neighb)
+        {
+          // The index of the box is the same as the vertex, but maybe - 1 in each possible combination of dimensions
+          bool badIndex = false;
+          // Build the index of the neighbor
+          for (size_t d=0; d<nd;d++)
+          {
+            boxIndex[d] = vertexIndex[d] - ((neighb & (1 << d)) >> d); //(this does a bitwise and mask, shifted back to 1 to subtract 1 to the dimension)
+            // Taking advantage of the fact that unsigned(0)-1 = some large POSITIVE number.
+            if (boxIndex[d] >= split[d])
+            {
+              badIndex = true;
+              break;
+            }
+          }
+          if (!badIndex)
+          {
+            // Convert to linear index
+            size_t linearIndex = Utils::nestedForLoopGetLinearIndex(nd, boxIndex, indexMaker);
+            // So we have one more vertex touching this box that is contained in the integration volume. Whew!
+            verticesContained[linearIndex]++;
+//            std::cout << "... added 1 vertex to box " << boxes[linearIndex]->getExtentsStr() << "\n";
+          }
+        }
+      }
+
+      // Increment the counter(s) in the nested for loops.
+      allDone = Utils::nestedForLoopIncrement(nd, vertexIndex, vertices_max, vertices_min);
+    }
+
+    // OK, we've done all the vertices. Now we go through and check each box.
+    size_t numFullyContained = 0;
+    //size_t numPartiallyContained = 0;
+
+    // We'll iterate only through the boxes with (bin)
+    size_t counters[nd];
+    for (size_t d=0; d<nd; d++)
+      counters[d] = counters_min[d];
+
+    allDone = false;
+    while (!allDone)
+    {
+      size_t index = getLinearIndex(counters);
+      IMDBox<MDE,nd> * box = boxes[index];
+
+      // Is this box fully contained?
+      if (verticesContained[index] >= maxVertices)
+      {
+        // Use the integrated sum of signal in the box
+        bin.m_signal += box->getSignal();
+        bin.m_errorSquared += box->getErrorSquared();
+        numFullyContained++;
+      }
+      else
+      {
+        // The box MAY be contained. Need to evaluate every event
+
+        // box->generalBin(bin,function);
+      }
+
+      // Increment the counter(s) in the nested for loops.
+      allDone = Utils::nestedForLoopIncrement(nd, counters, counters_max, counters_min);
+    }
+
+//    std::cout << "Depth " << this->getDepth() << " with " << numFullyContained << " fully contained; " << numPartiallyContained << " partial. Signal = " << signal <<"\n";
+
+    delete [] verticesContained;
+    delete [] boxMightTouch;
+    delete [] vertexIndex;
+    delete [] vertices_max;
+    delete [] boxIndex;
+    delete [] indexMaker;
+
+  }
+
+
+
+
+
   //-----------------------------------------------------------------------------------------------
   /** Integrate the signal within a sphere; for example, to perform single-crystal
    * peak integration.

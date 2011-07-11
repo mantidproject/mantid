@@ -16,17 +16,18 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <Poco/DOM/DOMParser.h>
+#include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidAPI/Point3D.h"
+#include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h> 
-#include <Poco/DOM/DOMWriter.h>
 #include <Poco/XML/XMLWriter.h>
 #include <sstream>
 #include <vector>
-#include "MantidAPI/DllConfig.h"
-#include "Point3D.h"
 
 namespace Mantid
 {
@@ -65,12 +66,20 @@ namespace Mantid
         class MANTID_API_DLL ImplicitFunction
         {
         public:
-            virtual bool evaluate(const Point3D* pPoint3D) const = 0;
-            virtual std::string getName() const = 0; 
-            virtual std::string toXMLString() const = 0;
-            virtual ~ImplicitFunction()
-            {
-            }
+          virtual bool evaluate(const Point3D* pPoint3D) const = 0;
+          virtual std::string getName() const = 0;
+          virtual std::string toXMLString() const = 0;
+          virtual ~ImplicitFunction()
+          {
+          }
+
+          virtual bool evaluate(const coord_t * coords) const
+          {
+            //TODO: Make pure-virtual and implement for nd dimensions
+            UNUSED_ARG(coords);
+            return false;
+          }
+
 
         };
 
