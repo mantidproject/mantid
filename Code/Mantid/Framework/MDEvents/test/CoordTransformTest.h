@@ -14,6 +14,52 @@ using namespace Mantid::MDEvents;
 
 class CoordTransformTest : public CxxTest::TestSuite
 {
+
+private:  
+  
+  /** Helper to compare two "vectors" (bare float array and V3D) */
+  void compare(size_t numdims, coord_t * value, const Mantid::Kernel::V3D& expected)
+  {
+    for (size_t i=0; i< numdims; i++)
+      TS_ASSERT_DELTA( value[i], expected[i], 1e-5);
+  }
+
+  /** Helper to compare two "vectors" (bare float arrays) */
+  void compare(size_t numdims, coord_t * value, const coord_t * expected)
+  {
+    for (size_t i=0; i< numdims; i++)
+      TS_ASSERT_DELTA( value[i], expected[i], 1e-5);
+  }
+
+  /** Helper to create a rotation tranformation*/
+  Mantid::Kernel::Matrix<coord_t> createRotationTransform(
+    const Mantid::Kernel::V3D& ax,
+    const Mantid::Kernel::V3D& ay, 
+    const Mantid::Kernel::V3D& az, 
+    const Mantid::Kernel::V3D& bx, 
+    const Mantid::Kernel::V3D& by, 
+    const Mantid::Kernel::V3D& bz)
+  {
+    Mantid::Kernel::Matrix<coord_t> transform(4, 4);
+    transform[0][0] = ax.scalar_prod(bx);
+    transform[0][1] = ax.scalar_prod(by);
+    transform[0][2] = ax.scalar_prod(bz);
+    transform[0][3] = 0;
+    transform[1][0] = ay.scalar_prod(bx);
+    transform[1][1] = ay.scalar_prod(by);
+    transform[1][2] = ay.scalar_prod(bz);
+    transform[1][3] = 0;
+    transform[2][0] = az.scalar_prod(bx);
+    transform[2][1] = az.scalar_prod(by);
+    transform[2][2] = az.scalar_prod(bz);
+    transform[2][3] = 0;
+    transform[3][0] = 0;
+    transform[3][1] = 0;
+    transform[3][2] = 0;
+    transform[3][3] = 1;
+    return transform;
+  }
+
 public:
 
   void test_initialization()
@@ -23,13 +69,6 @@ public:
         CoordTransform ct(2,1);
     TS_ASSERT_EQUALS( ct.getMatrix().numRows(), 2);
     TS_ASSERT_EQUALS( ct.getMatrix().numCols(), 3);
-  }
-
-  /** Helper to compare two "vectors" (bare float arrays) */
-  void compare(size_t numdims, coord_t * value, const coord_t * expected)
-  {
-    for (size_t i=0; i< numdims; i++)
-      TS_ASSERT_DELTA( value[i], expected[i], 1e-5);
   }
 
   /** Simple identity transform */
@@ -55,6 +94,44 @@ public:
     compare(2, out, expected);
   }
 
+  /** Test rotation in isolation */
+  void test_rotation()
+  {
+    using Mantid::Kernel::V3D;
+    
+    CoordTransform ct(3, 3);
+
+    const V3D ax(1, 0, 0);
+    const V3D ay(0, 1, 0);
+    const V3D az(0, 0, 1);
+
+    //Following denotes 90 degree rotation about z-axis (clockwise)
+    const V3D bx(0, -1, 0);
+    const V3D by(1, 0, 0);
+    const V3D bz(0, 0, 1);
+
+    Mantid::Kernel::Matrix<coord_t> transform = createRotationTransform(ax, ay, az, bx, by, bz);
+    ct.setMatrix(transform);
+    
+    coord_t out[3];
+    
+    coord_t in_ax[3] = {1, 0, 0};  //Vector along x-axis ax
+    ct.apply(in_ax, out);
+    compare(3, out, bx);
+    
+    coord_t in_ay[3] = {0, 1, 0};  //Vector along y-axis ay
+    ct.apply(in_ay, out);
+    compare(3, out, by);
+
+    coord_t in_az[3] = {0, 0, 1};  //Vector along z-axis az
+    ct.apply(in_az, out);
+    compare(3, out, az);
+ 
+    coord_t in_axyz[3] = {1, 1, 1};  //Vector (1 1 1)
+    ct.apply(in_axyz, out);
+    coord_t expected[3] = {1, -1, 1};
+    compare(3, out, expected);
+  }
 
 };
 
