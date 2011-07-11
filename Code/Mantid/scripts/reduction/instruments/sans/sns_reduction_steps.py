@@ -859,7 +859,7 @@ class SaveIqAscii(BaseSaveIqAscii):
         if reducer._two_dim_calculator is not None:
             if not hasattr(reducer._two_dim_calculator, "get_output_workspace"):
                 
-                for output_ws in [workspace+'_Iqxy', workspace+'_Iqxy_frame1', workspace+'_Iqxy_frame2']:
+                for output_ws in [workspace+'_Iqxy', workspace+'_frame1_Iqxy', workspace+'_frame2_Iqxy']:
                     if mtd.workspaceExists(output_ws):
                         filename = os.path.join(output_dir, output_ws+'.dat')
                         SaveNISTDAT(InputWorkspace=output_ws, Filename=filename)

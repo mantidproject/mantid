@@ -123,7 +123,7 @@ void EQSANSQ2D::exec()
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);
     qxyAlg->executeAsSubAlg();
 
-    std::string outputWSName_frame = outputWSName+"_Iqxy_frame1";
+    std::string outputWSName_frame = outputWSName+"_frame1_Iqxy";
     declareProperty(new WorkspaceProperty<>("OutputWorkspaceFrame1", outputWSName_frame, Direction::Output));
     MatrixWorkspace_sptr result = qxyAlg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspaceFrame1", result);
@@ -142,7 +142,7 @@ void EQSANSQ2D::exec()
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);
     qxyAlg->executeAsSubAlg();
 
-    outputWSName_frame = outputWSName+"_Iqxy_frame2";
+    outputWSName_frame = outputWSName+"_frame2_Iqxy";
     declareProperty(new WorkspaceProperty<>("OutputWorkspaceFrame2", outputWSName_frame, Direction::Output));
     result = qxyAlg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspaceFrame2", result);
