@@ -201,6 +201,8 @@ public:
     std::string groupName("IMDBoxTester");
     std::string className("NXIMDBoxTester");
 
+    // IMDBox doesn't make a group since this is handled by the other subclasses
+    //  so we need to make a fake one
     file->makeGroup(groupName, className, 1);
     b.saveNexus(file);
     file->close();

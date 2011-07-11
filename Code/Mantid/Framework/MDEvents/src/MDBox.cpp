@@ -53,6 +53,13 @@ namespace MDEvents
     return 1;
   }
 
+  /// Fill a vector with all the boxes up to a certain depth
+  TMDE(
+  void MDBox):: getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/)
+  {
+    boxes.push_back(this);
+  }
+
   //-----------------------------------------------------------------------------------------------
   /** Returns the total number of points (events) in this box */
   TMDE(size_t MDBox)::getNPoints() const
@@ -287,6 +294,7 @@ namespace MDEvents
     }
   }
 
+  //-----------------------------------------------------------------------------------------------
   /** Find the centroid of all events contained within by doing a weighted average
    * of their coordinates.
    *
@@ -315,6 +323,37 @@ namespace MDEvents
           centroid[d] += it->getCenter(d) * eventSignal;
       }
     }
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Save the box and contents to an open nexus file.
+   *
+   * @param file :: Nexus File object
+   */
+  TMDE(
+  void MDBox)::saveNexus(std::string groupName, ::NeXus::File * file)
+  {
+    // Create the group. TODO: fix the classname?
+    file->makeGroup(groupName, "NXMDBox", 1);
+
+    // First, save the data common to all IMDBoxes.
+    IMDBox<MDE,nd>::saveNexus(file);
+    // Now save the vector using the method in MDEvent
+    MDE::saveVectorToNexus( this->data, file );
+
+    file->closeGroup();
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Load the box and contents from an open nexus file.
+   *
+   * @param file :: Nexus File object
+   */
+  TMDE(
+  void MDBox)::loadNexus(::NeXus::File * /*file*/)
+  {
   }
 
 

@@ -134,6 +134,7 @@ namespace MDEventsTestHelper
     MDBox<MDEvent<3>,3> * out = new MDBox<MDEvent<3>,3>(splitter);
     for (size_t d=0; d<3; d++)
       out->setExtents(d, 0.0, 10.0);
+    out->calcVolume();
     return out;
   }
 

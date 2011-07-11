@@ -1,18 +1,22 @@
 #ifndef MDBOXTEST_H
 #define MDBOXTEST_H
 
-#include <cxxtest/TestSuite.h>
-
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/BoxController.h"
-#include <memory>
-#include <map>
 #include "MantidMDEvents/CoordTransformDistance.h"
+#include "MantidMDEvents/MDBox.h"
+#include "MantidMDEvents/MDEvent.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include <cxxtest/TestSuite.h>
+#include <map>
+#include <memory>
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidKernel/ConfigService.h"
+#include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
+using Mantid::Kernel::ConfigService;
 
 class MDBoxTest :    public CxxTest::TestSuite
 {
@@ -360,6 +364,40 @@ public:
     TS_ASSERT_DELTA( centroid[1], 3.000, 0.001);
 
   }
+
+
+  void test_saveNexus_loadNexus()
+  {
+    // Clean up if it exists
+    std::string filename = (ConfigService::Instance().getString("defaultsave.directory") + "MDBoxTest.nxs");
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+
+    // Make a box with 1000 events
+    MDBox<MDEvent<3>,3> * box = MDEventsTestHelper::makeMDBox3();
+    MDEventsTestHelper::feedMDBox(box, 1, 10, 0.5, 1.0);
+
+    TS_ASSERT_EQUALS( box->getNPoints(), 1000);
+
+
+    ::NeXus::File * file = new NeXus::File(filename, NXACC_CREATE5);
+
+    for (size_t i=0; i<1; i++)
+    {
+      std::ostringstream mess;
+      mess << "box" << i;
+      std::string name = mess.str();
+      box->saveNexus(name, file);
+    }
+    file->close();
+
+    //TODO: LoadNexus
+
+//    // Clean up
+//    if (Poco::File(filename).exists())
+//      Poco::File(filename).remove();
+  }
+
 
 };
 

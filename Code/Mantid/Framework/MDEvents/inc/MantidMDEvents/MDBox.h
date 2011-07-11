@@ -82,11 +82,11 @@ namespace MDEvents
 
     void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL);
 
-    /// Fill a vector with all the boxes up to a certain depth
-    void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/)
-    {
-      boxes.push_back(this);
-    }
+    void saveNexus(std::string groupName, ::NeXus::File * file);
+
+    void loadNexus(::NeXus::File * file);
+
+    void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
 
   protected:
 

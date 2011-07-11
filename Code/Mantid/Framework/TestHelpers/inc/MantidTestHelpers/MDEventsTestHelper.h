@@ -141,7 +141,7 @@ namespace MDEventsTestHelper
    * @param step :: x-coordinate increases by this much.
    */
   template <size_t nd>
-  static void feedMDBox(MDGridBox<MDEvent<nd>,nd> * box, size_t repeat=1, size_t numPerSide=10, coord_t start=0.5, coord_t step=1.0)
+  static void feedMDBox(IMDBox<MDEvent<nd>,nd> * box, size_t repeat=1, size_t numPerSide=10, coord_t start=0.5, coord_t step=1.0)
   {
     size_t * counters = Mantid::Kernel::Utils::nestedForLoopSetUp(nd,0);
     size_t * index_max = Mantid::Kernel::Utils::nestedForLoopSetUp(nd,numPerSide);

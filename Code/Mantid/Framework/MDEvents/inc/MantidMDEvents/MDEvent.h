@@ -2,6 +2,7 @@
 #define MDEVENT_H_
 
 #include "MantidKernel/System.h"
+#include "MantidNexus/NeXusFile.hpp"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <numeric>
@@ -207,6 +208,44 @@ namespace MDEvents
       return float(sqrt(errorSquared));
     }
 
+
+    //---------------------------------------------------------------------------------------------
+    /** Static method to save a vector of MDEvents of this type to a nexus file
+     * open to the right group.
+     * This will be re-implemented by any other MDEvent-like type
+     *
+     * @param events :: reference to the vector of events to save.
+     * @param file :: open NXS file. */
+    static void saveVectorToNexus(const std::vector<MDEvent<nd> > & events, ::NeXus::File * file)
+    {
+      //TODO: Use bare C arrays maybe?
+      size_t numEvents = events.size();
+      std::vector<coord_t> centers;
+      centers.reserve(numEvents*nd);
+      std::vector<signal_t> signal_error;
+      signal_error.reserve(numEvents*2);
+
+      typename std::vector<MDEvent<nd> >::const_iterator it = events.begin();
+      typename std::vector<MDEvent<nd> >::const_iterator it_end = events.end();
+      for (; it != it_end; ++it)
+      {
+        const MDEvent<nd> & event = *it;
+        for(size_t d=0; d<nd; d++)
+          centers.push_back( event.center[d] );
+        signal_error.push_back( event.signal );
+        signal_error.push_back( event.errorSquared );
+      }
+
+      // Specify the dimensions
+      std::vector<int> dims;
+      dims.push_back(int(numEvents));
+      dims.push_back(int(nd));
+
+      file->writeData("center", centers, dims);
+
+      dims[1] = 2;
+      file->writeData("signal_error", signal_error, dims);
+    }
   };
 
 
