@@ -258,8 +258,6 @@ class SANSReducer(Reducer):
         if data_file is None:
             self._background_subtracter = None
         else:
-            # Check that the file exists
-            self._full_file_path(data_file)
             self._background_subtracter = sans_reduction_steps.SubtractBackground(data_file)
     
     def get_background(self):

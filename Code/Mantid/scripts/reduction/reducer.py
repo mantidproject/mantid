@@ -25,6 +25,9 @@ import inspect
 from instrument import Instrument
 import MantidFramework
 import mantidsimple
+import warnings
+import inspect
+from reduction import find_data
 
 
 ## Version number
@@ -448,22 +451,14 @@ class Reducer(object):
             Raises an exception if the file doesn't exist.
             @param filename: name of the file to create the full path for
         """
-        filepath = os.path.join(self._data_path, filename)
-
-        # Check that the file exists
-        if os.path.isfile(filepath):
-            return filepath
-        elif os.path.isfile(filename):
-            # If not, check in the working directory
-            return filename
-
-        system_path = MantidFramework.FileFinder.getFullPath(filename).strip()
+        lineno = inspect.currentframe().f_code.co_firstlineno
+        warnings.warn_explicit("Reducer._full_file_path is deprecated: use find_data instead", DeprecationWarning, __file__, lineno)
         
-        if system_path :
-            return system_path
-        else:
-            # If not, raise an exception
-            raise RuntimeError, 'Could not load file "%s"' % filename
+        instrument_name = ''
+        if self.instrument is not None:
+            instrument_name = self.instrument.name()
+        
+        return find_data(filename, instrument=instrument_name)
         
     @validate_step
     def append_step(self, reduction_step):
