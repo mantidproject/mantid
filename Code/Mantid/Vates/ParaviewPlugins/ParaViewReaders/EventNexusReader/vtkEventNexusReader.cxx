@@ -336,6 +336,16 @@ void vtkEventNexusReader::doRebinning()
       double* pOrigin = plane->GetOrigin();
       NormalParameter normal(pNormal[0], pNormal[1], pNormal[2]);
       OriginParameter origin(pOrigin[0], pOrigin[1], pOrigin[2]);
+      UpParameter up(normal.getY(), -normal.getX(), normal.getZ());
+      Mantid::Kernel::V3D ax(normal.getX(), normal.getY(), normal.getZ());
+      Mantid::Kernel::V3D ay(up.getX(), up.getY(), up.getZ());
+      Mantid::Kernel::V3D az = ax.cross_prod(ay);
+      PerpendicularParameter perpendicular(az[0], az[1], az[2]);
+      if(ax.scalar_prod(ay) != 0)
+      {
+        throw std::logic_error("Normal and Up Vectors must be perpendicular");
+      }
+
       PlaneImplicitFunction func(normal, origin, m_width);
       hist_alg.setPropertyValue("ImplicitFunctionXML", func.toXMLString());
     }
@@ -458,8 +468,8 @@ int vtkEventNexusReader::RequestInformation(
     }
 
     m_isSetup = true;
+   
   }
-
   std::vector<double> timeStepValues(1); //TODO set time-step information.
   outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0], static_cast<int>(timeStepValues.size()));
   double timeRange[2];
@@ -467,7 +477,7 @@ int vtkEventNexusReader::RequestInformation(
   timeRange[1] = timeStepValues.back();
 
   outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
-  return 1;
+  return 1; 
 }
 
 void vtkEventNexusReader::PrintSelf(ostream& os, vtkIndent indent)

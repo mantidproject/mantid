@@ -12,6 +12,8 @@
 #include "MantidMDAlgorithms/OriginParameter.h"
 #include "MantidMDAlgorithms/NormalParameter.h"
 #include "MantidMDAlgorithms/WidthParameter.h"
+#include "MantidMDAlgorithms/UpParameter.h"
+#include "MantidMDAlgorithms/PerpendicularParameter.h"
 #include "MantidMDAlgorithms/VectorMathematics.h"
 
 namespace Mantid
