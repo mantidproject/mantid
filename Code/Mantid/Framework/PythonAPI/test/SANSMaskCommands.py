@@ -31,8 +31,8 @@ class SANSMaskCommands(unittest.TestCase):
         ISIS.ReductionSingleton().mask.execute(ISIS.ReductionSingleton(), self.test_ws_name)
         self.assertEqual(self.test_ws.readY(spec_nums1-1)[0], 0)
         #debuging tests that work on my computer but not the servers
-        self.assertTrue(True)
-        self.assertEqual(self.test_ws.readY(spec_nums1-1)[0], 0)
+#        self.assertTrue(True)
+#        self.assertEqual(self.test_ws.readY(spec_nums1-1)[0], 0)
 
 if __name__ == '__main__':
     unittest.main()
