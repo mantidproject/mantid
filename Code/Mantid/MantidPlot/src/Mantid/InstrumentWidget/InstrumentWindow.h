@@ -160,8 +160,8 @@ private slots:
 
 private:
 
-  //QFrame * createPickTab(QTabWidget* ControlsTab);
-  QFrame * createInstrumentTreeTab(QTabWidget* ControlsTab);
+  //QWidget * createPickTab(QTabWidget* ControlsTab);
+  QWidget * createInstrumentTreeTab(QTabWidget* ControlsTab);
 
   void loadSettings();
   void saveSettings();

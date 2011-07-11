@@ -15,7 +15,7 @@
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QFrame>
+#include <QWidget>
 #include <QMenu>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -53,7 +53,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 
   setFocusPolicy(Qt::StrongFocus);
   setFocus();
-  QFrame *frame = new QFrame();
+  QWidget *frame = new QWidget();
   QVBoxLayout* mainLayout = new QVBoxLayout;
   QSplitter* controlPanelLayout = new QSplitter(Qt::Horizontal);
 
@@ -92,7 +92,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   connect(m_maskTab,SIGNAL(executeAlgorithm(const QString&, const QString&)),this,SLOT(executeAlgorithm(const QString&, const QString&)));
 
   // Instrument tree controls
-  QFrame* instrumentTree=createInstrumentTreeTab(mControlsTab);
+  QWidget* instrumentTree=createInstrumentTreeTab(mControlsTab);
   mControlsTab->addTab( instrumentTree, QString("Instrument Tree"));
 
   connect(mControlsTab,SIGNAL(currentChanged(int)),this,SLOT(tabChanged(int)));
@@ -674,9 +674,9 @@ void InstrumentWindow::showEvent(QShowEvent*)
 
 
 
-QFrame * InstrumentWindow::createInstrumentTreeTab(QTabWidget* ControlsTab)
+QWidget * InstrumentWindow::createInstrumentTreeTab(QTabWidget* ControlsTab)
 {
-  QFrame* instrumentTree=new QFrame(ControlsTab);
+  QWidget* instrumentTree=new QWidget(ControlsTab);
   QVBoxLayout* instrumentTreeLayout=new QVBoxLayout(instrumentTree);
   //Tree Controls
   mInstrumentTree = new InstrumentTreeWidget(0);
