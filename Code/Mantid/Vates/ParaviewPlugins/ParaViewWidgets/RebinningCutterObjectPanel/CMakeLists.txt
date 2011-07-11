@@ -17,7 +17,7 @@ target_link_libraries( MantidParaViewRebinningCutterObjectPanel
 MantidParaViewQtWidgets )
 
 # Put library into subfolder.
-#output_binary_to( MantidParaViewRebinningCutterObjectPanel PVPlugins)
+output_binary_to( MantidParaViewRebinningCutterObjectPanel  ${PVPLUGINS_DIR})
 
 install( TARGETS MantidParaViewRebinningCutterObjectPanel ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
 

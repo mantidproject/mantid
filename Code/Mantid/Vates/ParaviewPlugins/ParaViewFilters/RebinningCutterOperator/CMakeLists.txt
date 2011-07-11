@@ -12,7 +12,7 @@ target_link_libraries( MantidParaViewRebinningCutterSMPlugin
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.
-#output_binary_to(MantidParaViewRebinningCutterSMPlugin PVPlugins)
+output_binary_to(MantidParaViewRebinningCutterSMPlugin  ${PVPLUGINS_DIR})
 
 install( TARGETS MantidParaViewRebinningCutterSMPlugin ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
 

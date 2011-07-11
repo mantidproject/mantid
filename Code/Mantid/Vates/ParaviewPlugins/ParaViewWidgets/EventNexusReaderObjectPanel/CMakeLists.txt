@@ -17,7 +17,7 @@ target_link_libraries( MantidParaViewEventNexusReaderObjectPanel
 MantidParaViewQtWidgets )
 
 # Put library into subfolder.
-#output_binary_to( MantidParaViewEventNexusReaderObjectPanel PVPlugins)
+output_binary_to( MantidParaViewEventNexusReaderObjectPanel  ${PVPLUGINS_DIR})
 
 install( TARGETS MantidParaViewEventNexusReaderObjectPanel ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
 

@@ -10,7 +10,7 @@ target_link_libraries( MantidParaViewSQWReaderSMPlugin
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.
-#output_binary_to( MantidParaViewSQWReaderSMPlugin PVPlugins)
+output_binary_to( MantidParaViewSQWReaderSMPlugin ${PVPLUGINS_DIR})
 
 install( TARGETS MantidParaViewSQWReaderSMPlugin ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
 

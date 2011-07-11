@@ -15,7 +15,7 @@ function(output_binary_to LIB_NAME SUB_DIR_NAME)
         add_custom_command ( TARGET ${LIB_NAME} POST_BUILD
                              COMMAND ${CMAKE_COMMAND} ARGS -E echo 
                              "Moving \"${LIB_NAME}${LIB_EXT}\" to ${SUB_DIR_NAME} directory."
-                             COMMAND ${CMAKE_COMMAND} ARGS -E rename
+                             COMMAND ${CMAKE_COMMAND} ARGS -E copy
                              ${SRC_DIR}/${LIB_NAME}${LIB_EXT}
                              ${DEST_DIR}/${LIB_NAME}${LIB_EXT} )
       endforeach ( LIB_EXT )

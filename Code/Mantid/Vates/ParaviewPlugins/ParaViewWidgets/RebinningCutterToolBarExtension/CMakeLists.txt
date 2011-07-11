@@ -16,7 +16,7 @@ if( PARAVIEW_BUILD_QT_GUI )
 					   
 
 # Put library into subfolder.
-#output_binary_to( MantidParaViewRebinningCutterToolBarActions PVPlugins)	
+output_binary_to( MantidParaViewRebinningCutterToolBarActions  ${PVPLUGINS_DIR})	
 
   install( TARGETS MantidParaViewRebinningCutterToolBarActions ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
 

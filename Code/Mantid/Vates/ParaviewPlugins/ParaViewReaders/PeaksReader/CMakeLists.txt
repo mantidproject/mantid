@@ -10,7 +10,7 @@ target_link_libraries( MantidParaViewPeaksReaderSMPlugin
 ${MANTID_SUBPROJECT_LIBS} )
 
 # Put library into subfolder.
-#output_binary_to(MantidParaViewEventNexusReaderSMPlugin PVPlugins)
+output_binary_to(MantidParaViewPeaksReaderSMPlugin ${PVPLUGINS_DIR})
 
 install( TARGETS MantidParaViewPeaksReaderSMPlugin ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
 
