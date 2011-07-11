@@ -94,10 +94,12 @@ class ISISReducer(SANSReducer):
         """
             Initialises the steps that are not initialised by (ISIS)CommandInterface.
         """       
+        #these steps are not executed by reduce
         self.user_settings =   None
         self.place_det_sam =   isis_reduction_steps.MoveComponents()
-        self.out_name =       isis_reduction_steps.GetOutputName()
+        self._out_name =       isis_reduction_steps.GetOutputName()
 
+        #except self.prep_normalize all the steps below are used by the reducer
         self.crop_detector =   isis_reduction_steps.CropDetBank(crop_sample=True)
         self.samp_trans_load = None
         self.can_trans_load =  None
@@ -259,7 +261,7 @@ class ISISReducer(SANSReducer):
             Assumes the reducer is copied from a running one
             Executes all the steps after moving the components
         """
-        self.out_name.execute(self)
+        self._out_name.execute(self)
         return self._reduce(init=False, post=True)
 
     def set_Q_output_type(self, out_type):
@@ -267,7 +269,7 @@ class ISISReducer(SANSReducer):
 
     def pre_process(self):
         super(ISISReducer, self).pre_process()
-        self.out_name.execute(self)
+        self._out_name.execute(self)
         global current_settings
         current_settings = copy.deepcopy(self)
 
@@ -354,6 +356,10 @@ class ISISReducer(SANSReducer):
         return '    Q range: ' + self.to_Q.binning +'\n    QXY range: ' + self.QXY2+'-'+self.DQXY
 
     def ViewCurrentMask(self):
+        """
+            In MantidPlot this opens InstrumentView to display the masked
+            detectors in the bank in a different colour
+        """
         self._mask.view(self.instrument)
 
     def reference(self):

@@ -92,6 +92,10 @@ def Detector(det_name):
     ReductionSingleton().instrument.setDetector(det_name)
     
 def Mask(details):
+    """
+        Specify regions of the detector to mask using the same syntax
+        as used in the user file
+    """ 
     _printMessage('Mask("' + details + '")')
     ReductionSingleton().mask.parse_instruction(details)
     
@@ -322,7 +326,6 @@ def Reduce():
 def _SetWavelengthRange(start, end):
     ReductionSingleton().to_wavelen.set_range(start, end)
 
-
 def Set1D():
     _printMessage('Set1D()')
     ReductionSingleton().set_Q_output_type('1D')
@@ -422,6 +425,13 @@ def LimitsQ(*args):
         issueWarning("LimitsQ called with " + str(len(args)) + " arguments, 1 or 4 expected.")
 
 def LimitsQXY(qmin, qmax, step, type):
+    """
+        To set the bin parameters for the algorithm Qxy()
+        @param qmin: the first Q value to include
+        @param qmaz: the last Q value to include
+        @param step: bin width
+        @param type: pass LOG for logarithmic binning
+    """
     _printMessage('LimitsQXY(' + str(qmin) + ', ' + str(qmax) +', ' + str(step) + ', ' + str(type) + ')')
     settings = ReductionSingleton().user_settings
     if settings is None:
@@ -463,6 +473,10 @@ def PlotResult(workspace, canvas=None):
 ##################### View mask details #####################################################
 
 def ViewCurrentMask():
+    """
+        In MantidPlot this opens InstrumentView to display the masked
+        detectors in the bank in a different colour
+    """
     ReductionSingleton().ViewCurrentMask()
 
 def DisplayMask(mask_worksp=None):
@@ -557,8 +571,8 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         @param rlow: mask around the (estimated) centre to this radius (in millimetres)
         @param rupp: don't include further out than this distance (mm) from the centre point
         @param MaxInter: don't calculate more than this number of iterations (default = 10)
-        @param xstart: x-coordinate of the initial guess for the centre point (default the values in the mask file)
-        @param ystart: y-coordinate of the initial guess for the centre point (default the values in the mask file)
+        @param xstart: initial guess for the horizontal distance of the beam centre from the detector centre in meters (default the values in the mask file)
+        @param ystart: initial guess for the distance of the beam centre from the detector centre vertically in metres (default the values in the mask file)
         @return: the best guess for the beam centre point
     """
     XSTEP = ReductionSingleton().inst.cen_find_step
