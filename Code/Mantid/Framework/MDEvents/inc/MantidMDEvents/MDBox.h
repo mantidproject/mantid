@@ -9,6 +9,7 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidMDEvents/MDDimensionStats.h"
 #include "MantidMDEvents/MDEvent.h"
+#include "MantidAPI/ImplicitFunction.h"
 
 namespace Mantid
 {
@@ -71,6 +72,8 @@ namespace MDEvents
     size_t addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
 
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
+
+    void generalBin(MDBin<MDE,nd> & bin, Mantid::API::ImplicitFunction & function) const;
 
     void calculateDimensionStats(MDDimensionStats * stats) const;
 

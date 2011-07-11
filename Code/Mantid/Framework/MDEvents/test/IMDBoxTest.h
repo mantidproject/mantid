@@ -1,6 +1,7 @@
 #ifndef MANTID_MDEVENTS_IMDBOXTEST_H_
 #define MANTID_MDEVENTS_IMDBOXTEST_H_
 
+#include "MantidAPI/ImplicitFunction.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -65,7 +66,7 @@ class IMDBoxTester : public IMDBox<MDE,nd>
   virtual void integrateSphere(CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, signal_t & /*signal*/, signal_t & /*errorSquared*/) const {};
   virtual void centroidSphere(CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, coord_t *, signal_t & ) const {};
   virtual void getBoxes(std::vector<IMDBox<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool) {};
-
+  virtual void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::API::ImplicitFunction & /*function*/) const {}
 
 };
 

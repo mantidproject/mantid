@@ -1,5 +1,6 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
+#include "MantidAPI/ImplicitFunction.h"
 
 namespace Mantid
 {
@@ -255,6 +256,36 @@ namespace MDEvents
       }
       // If the loop reached the end, then it was all within bounds.
       if (d == nd)
+      {
+        // Accumulate error and signal
+        bin.m_signal += it->getSignal();
+        bin.m_errorSquared += it->getErrorSquared();
+      }
+    }
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** General (non-axis-aligned) centerpoint binning method.
+   * TODO: TEST THIS!
+   *
+   * @param bin :: a MDBin object giving the limits, aligned with the axes of the workspace,
+   *        of where the non-aligned bin MIGHT be present.
+   * @param function :: a ImplicitFunction that will evaluate true for any coordinate that is
+   *        contained within the (non-axis-aligned) bin.
+   */
+  TMDE(
+  void MDBox)::generalBin(MDBin<MDE,nd> & bin, Mantid::API::ImplicitFunction & function) const
+  {
+    UNUSED_ARG(bin);
+
+    typename std::vector<MDE>::const_iterator it = data.begin();
+    typename std::vector<MDE>::const_iterator it_end = data.end();
+
+    // For each MDEvent
+    for (; it != it_end; ++it)
+    {
+      if (function.evaluate(it->getCenter()))
       {
         // Accumulate error and signal
         bin.m_signal += it->getSignal();

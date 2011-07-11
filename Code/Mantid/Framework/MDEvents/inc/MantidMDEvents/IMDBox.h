@@ -11,6 +11,7 @@
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidNexus/NeXusFile.hpp"
 #include <iosfwd>
+#include "MantidAPI/ImplicitFunction.h"
 
 namespace Mantid
 {
@@ -107,6 +108,9 @@ namespace MDEvents
      * @param fullyContained :: optional bool array sized [nd] of which dimensions are known to be fully contained (for MDSplitBox)
      */
     virtual void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const = 0;
+
+    /// General binning method for any shape.
+    virtual void generalBin(MDBin<MDE,nd> & bin, Mantid::API::ImplicitFunction & function) const = 0;
 
     /** Sphere (peak) integration */
     virtual void integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const = 0;
