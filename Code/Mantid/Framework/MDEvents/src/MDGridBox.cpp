@@ -527,7 +527,7 @@ namespace MDEvents
 
     // More attributes
     file->putAttr("numBoxes", int(this->numBoxes));
-    file->putAttr("nPoints", long(this->nPoints));
+    file->putAttr("nPoints", int(this->nPoints)); // TODO: should be a long
 
     // The splitting, as a vector
     std::vector<int> splitVec;
