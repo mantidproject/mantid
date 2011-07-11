@@ -56,8 +56,17 @@ void ExtractSingleSpectrum::exec()
   const Axis * axisOne = inputWorkspace->getAxis(1);
   if( axisOne->isSpectra() )
   {
-    outputWorkspace->getAxis(1)->spectraNo(0) = inputWorkspace->getAxis(1)->spectraNo(desiredSpectrum);
+    const specid_t outSpecNo = inputWorkspace->getAxis(1)->spectraNo(desiredSpectrum);
+    outputWorkspace->getAxis(1)->spectraNo(0) = outSpecNo;
+    ISpectrum* outSpec = outputWorkspace->getSpectrum(0);
+    // Also set the spectrum number to the group number
+    outSpec->setSpectrumNo(outSpecNo);
+    outSpec->clearDetectorIDs();
+    const ISpectrum* inSpec = inputWorkspace->getSpectrum(desiredSpectrum);
+    // Add the detectors for this spectrum to the output workspace's spectra-detector map
+    outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
   }
+
   setProperty("OutputWorkspace",outputWorkspace);
   progress(1.0);
 }
