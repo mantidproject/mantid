@@ -208,6 +208,22 @@ namespace MDEvents
       return float(sqrt(errorSquared));
     }
 
+    //---------------------------------------------------------------------------------------------
+    /** Set the signal of the event
+     * @param newSignal :: the signal value  */
+    void setSignal(const float newSignal)
+    {
+      signal = newSignal;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Set the squared error  of the event
+     * @param newerrorSquaredl :: the error squared value  */
+    void setErrorSquared(const float newerrorSquared)
+    {
+      errorSquared = newerrorSquared;
+    }
+
 
     //---------------------------------------------------------------------------------------------
     /** Static method to save a vector of MDEvents of this type to a nexus file

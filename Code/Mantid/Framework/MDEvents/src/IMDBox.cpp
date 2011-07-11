@@ -143,10 +143,11 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Save the box and contents to an open nexus file.
    *
+   * @param groupName :: name of the group to save in.
    * @param file :: Nexus File object
    */
   TMDE(
-  void IMDBox)::saveNexus(::NeXus::File * file)
+  void IMDBox)::saveNexus(const std::string & /*groupName*/, ::NeXus::File * file)
   {
     // Use attributes for some of the members.
     file->putAttr("signal", double(this->m_signal));

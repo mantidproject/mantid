@@ -1,7 +1,7 @@
 #ifndef MDGRIDBOXTEST_H
 #define MDGRIDBOXTEST_H
 
-
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
@@ -12,6 +12,7 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
+#include "MantidNexus/NeXusFile.hpp"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -22,6 +23,7 @@
 #include <iomanip>
 #include <map>
 #include <memory>
+#include <Poco/File.h>
 #include <vector>
 
 using namespace Mantid;
@@ -880,9 +882,76 @@ public:
   }
 
 
+  //-----------------------------------------------------------------------------------------------------------
+  void test_saveNexus_loadNexus()
+  {
+    // Clean up if it exists
+    std::string filename = (ConfigService::Instance().getString("defaultsave.directory") + "MDGridBoxTest.nxs");
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+
+    // 2D box split into 10x10
+    MDGridBox<MDEvent<2>,2> * b = MDEventsTestHelper::makeMDGridBox<2>();
+    MDEventsTestHelper::feedMDBox<2>(b, 1);
+    // Sub-split one of the boxes into 100 more boxes.
+    b->splitContents(01, NULL);
+
+    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
+    b->saveNexus("box0", file);
+    file->close();
+
+    // ------ LoadNexus --------
+
+    // Now we load it back
+    MDGridBox<MDEvent<2>,2> * c = new MDGridBox<MDEvent<2>,2>();
+
+    ::NeXus::File * fileIn = new NeXus::File(filename, NXACC_READ);
+    fileIn->openGroup("box0", "NXMDGridBox");
+    TS_ASSERT_THROWS_NOTHING( c->loadNexus(fileIn); )
+    fileIn->closeGroup();
+    fileIn->close();
+
+    // Compare common things
+    TS_ASSERT_DELTA( c->getExtents(0).min, b->getExtents(0).min, 1e-4);
+    TS_ASSERT_DELTA( c->getExtents(0).max, b->getExtents(0).max, 1e-4);
+    TS_ASSERT_DELTA( c->getExtents(1).min, b->getExtents(1).min, 1e-4);
+    TS_ASSERT_DELTA( c->getExtents(1).max, b->getExtents(1).max, 1e-4);
+    TS_ASSERT_DELTA( c->getVolume(), b->getVolume(), 1e-3);
+
+    // Compare the grid-specific stuff
+    TS_ASSERT_EQUALS( c->getNPoints(), 100);
+    TS_ASSERT_EQUALS( c->getNumChildren(), 100);
+    IMDBox<MDEvent<2>,2> * ibox = c->getChild(11);
+    TS_ASSERT(ibox);
+    MDBox<MDEvent<2>,2> * box = dynamic_cast<MDBox<MDEvent<2>,2> *>(ibox);
+    TS_ASSERT(box);
+    if (!box) return;
+
+    TS_ASSERT_EQUALS( box->getNPoints(), 1);
+    TS_ASSERT_DELTA( box->getEvents()[0].getCenter(0), 1.5, 1e-4);
+    TS_ASSERT_DELTA( box->getEvents()[0].getCenter(1), 1.5, 1e-4);
+
+    // Also the box that was sub-split was properly loaded as a MDGridBox.
+    MDGridBox<MDEvent<2>,2> * box2 = dynamic_cast<MDGridBox<MDEvent<2>,2> *>(c->getChild(1));
+    TS_ASSERT(box2);
+    if (!box2) return;
+    TS_ASSERT_EQUALS( box2->getNumChildren(), 100);
+
+//    // Clean up
+//    if (Poco::File(filename).exists())
+//      Poco::File(filename).remove();
+  }
+
+
+
 private:
   std::string message;
 };
+
+
+
+
+
 
 
 
@@ -1016,8 +1085,6 @@ public:
     coord_t center[3] = {11., 5., 5.};
     do_test_sphereIntegrate(center, 1.0, 0.0, 1e-3);
   }
-
-
 
 
 

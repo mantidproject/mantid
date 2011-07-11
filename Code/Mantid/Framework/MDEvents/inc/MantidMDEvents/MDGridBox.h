@@ -13,6 +13,7 @@
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
+#include "MantidNexus/NeXusFile.hpp"
 
 namespace Mantid
 {
@@ -37,6 +38,8 @@ namespace MDEvents
   class DLLExport MDGridBox : public IMDBox<MDE, nd>
   {
   public:
+    MDGridBox();
+
     MDGridBox(MDBox<MDE, nd> * box);
 
     virtual ~MDGridBox();
@@ -75,6 +78,10 @@ namespace MDEvents
 
     void refreshCentroid(Kernel::ThreadScheduler * ts = NULL);
 
+    void saveNexus(const std::string & groupName, ::NeXus::File * file);
+
+    void loadNexus(::NeXus::File * file);
+
 
     // ======================= Testing/Debugging Methods =================
     /** For testing: get (a copy of) the vector of boxes */
@@ -91,6 +98,8 @@ namespace MDEvents
 
 
   private:
+
+    size_t computeFromSplit();
 
     /// Each dimension is split into this many equally-sized boxes
     size_t split[nd];

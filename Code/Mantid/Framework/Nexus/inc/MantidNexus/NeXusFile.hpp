@@ -113,6 +113,8 @@ namespace NeXus {
     NXhandle m_file_id;
     /** should be close handle on exit */
     bool m_close_handle;
+
+  public: //JZ
     /**
      * @return A pair of the next entry available in a listing.
      */

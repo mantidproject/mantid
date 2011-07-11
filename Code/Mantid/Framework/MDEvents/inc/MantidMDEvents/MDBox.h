@@ -85,7 +85,7 @@ namespace MDEvents
 
     void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL);
 
-    void saveNexus(std::string groupName, ::NeXus::File * file);
+    void saveNexus(const std::string & groupName, ::NeXus::File * file);
 
     void loadNexus(::NeXus::File * file);
 

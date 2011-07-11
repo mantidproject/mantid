@@ -9,6 +9,7 @@
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include <ostream>
+#include "MantidKernel/Strings.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -36,6 +37,14 @@ namespace MDEvents
   //===============================================================================================
   //===============================================================================================
   //-----------------------------------------------------------------------------------------------
+  /** Empty constructor. Used when loading from NXS files.
+   * */
+  TMDE(MDGridBox)::MDGridBox()
+   : IMDBox<MDE, nd>(), numBoxes(0), nPoints(0)
+  {
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Constructor
    * @param box :: MDBox containing the events to split */
   TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> * box)
@@ -46,30 +55,20 @@ namespace MDEvents
     if (!bc)
       throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
 
-    // Do some computation based on how many splits per each dim.
-    size_t tot = 1;
-    double volume = 1;
-    diagonalSquared = 0;
+    // How many is it split?
     for (size_t d=0; d<nd; d++)
-    {
-      // Cumulative multiplier, for indexing
-      splitCumul[d] = tot;
-      // How many is it split?
       split[d] = bc->getSplitInto(d);
-      tot *= split[d];
-      // Length of the side of a box in this dimension
-      boxSize[d] = (this->extents[d].max - this->extents[d].min) / double(split[d]);
-      // Accumulate the squared diagonal length.
-      diagonalSquared += boxSize[d] * boxSize[d];
-      // Calculate the volume
-      volume *= boxSize[d];
-    }
 
-    //Cache the inverse volume
-    double inverseVolume = 1.0 / volume;
-
+    // Compute sizes etc.
+    size_t tot = computeFromSplit();
     if (tot == 0)
       throw std::runtime_error("MDGridBox::ctor(): Invalid splitting criterion (one was zero).");
+
+    // Calculate the volume
+    double volume = 1;
+    for (size_t d=0; d<nd; d++)
+      volume *= boxSize[d];
+    double inverseVolume = 1.0 / volume;
 
     // Create the array of MDBox contents.
     boxes.clear();
@@ -108,6 +107,32 @@ namespace MDEvents
     this->addEvents(box->getEvents());
     // Copy the cached numbers from the incoming box. This is quick - don't need to refresh cache
     this->nPoints = box->getNPoints();
+  }
+
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Compute some data from the split[] array and the extents.
+   * @return :: the total number of boxes */
+  TMDE(
+  size_t MDGridBox)::computeFromSplit()
+  {
+    // Do some computation based on how many splits per each dim.
+    size_t tot = 1;
+    diagonalSquared = 0;
+    for (size_t d=0; d<nd; d++)
+    {
+      // Cumulative multiplier, for indexing
+      splitCumul[d] = tot;
+      tot *= split[d];
+      // Length of the side of a box in this dimension
+      boxSize[d] = (this->extents[d].max - this->extents[d].min) / double(split[d]);
+      // Accumulate the squared diagonal length.
+      diagonalSquared += boxSize[d] * boxSize[d];
+    }
+
+    return tot;
+
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -479,6 +504,154 @@ namespace MDEvents
     this->m_errorSquared += event.getErrorSquared();
     statsMutex.unlock();
 #endif
+  }
+
+
+
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Save the box and contents to an open nexus file.
+   *
+   * @param groupName :: name of the group to save in.
+   * @param file :: Nexus File object
+   */
+  TMDE(
+  void MDGridBox)::saveNexus(const std::string & groupName, ::NeXus::File * file)
+  {
+    // Create the group.
+    file->makeGroup(groupName, "NXMDGridBox", 1);
+
+    // First, save the data common to all IMDBoxes.
+    IMDBox<MDE,nd>::saveNexus(groupName, file);
+
+    // More attributes
+    file->putAttr("numBoxes", int(this->numBoxes));
+    file->putAttr("nPoints", long(this->nPoints));
+
+    // The splitting, as a vector
+    std::vector<int> splitVec;
+    for (size_t d=0; d<nd; d++)
+      splitVec.push_back( int(split[d]) );
+    file->writeData("split", splitVec);
+
+    // The rest can be calculated when loading.
+
+    // Now save each box contained within
+    for (size_t i=0; i<numBoxes; i++)
+    {
+      IMDBox<MDE,nd> * ibox = boxes[i];
+
+      // Name sub-boxes "box0, box1", etc
+      std::ostringstream mess;
+      mess << "box" << i;
+      std::string subGroupName = mess.str();
+
+      ibox->saveNexus(subGroupName, file);
+    }
+
+    file->closeGroup();
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Load the box and contents from an open nexus file.
+   *
+   * @param file :: Nexus File object
+   */
+  TMDE(
+  void MDGridBox)::loadNexus(::NeXus::File * file)
+  {
+    // The group is already open
+    file->initGroupDir();
+
+    // Load common stuff
+    IMDBox<MDE,nd>::loadNexus(file);
+
+    // Some attributes
+    int ival; //TODO: Use long; nexus needs to support it.
+    file->getAttr("numBoxes", ival);
+    if (ival < 0) throw std::runtime_error("MDGridBox::loadNexus: Error loading NXS file. numBoxs must be >= 0. Found at path " + file->getPath());
+    this->numBoxes = size_t(ival);
+
+    file->getAttr("nPoints", ival);
+    if (ival < 0) throw std::runtime_error("MDGridBox::loadNexus: Error loading NXS file. nPoints must be >= 0. Found at path " + file->getPath());
+    this->nPoints = size_t(ival);
+
+    // Load the splitting info
+    std::vector<int> splitVec;
+    file->openData("split");
+    file->getData(splitVec);
+    file->closeData();
+
+    if (splitVec.size() != nd)
+      throw std::runtime_error("MDGridBox::loadNexus: Invalid splitting criterion (does not match number of dimensions). Found at path " + file->getPath());
+
+    for (size_t d=0; d<nd; d++)
+      split[d] = splitVec[d];
+
+    // This computes the common stuff from it
+    size_t tot = computeFromSplit();
+    if (tot == 0)
+      throw std::runtime_error("MDGridBox::loadNexus: Invalid splitting criterion (one was zero). Found at path " + file->getPath());
+    if (tot != numBoxes)
+      throw std::runtime_error("MDGridBox::loadNexus: Invalid splitting criterion (total number of boxes does not match numBoxes). Found at path " + file->getPath());
+
+    // Clear all the boxes
+    boxes.resize(numBoxes, NULL);
+
+    // Iterate through all sub groups
+    std::pair<std::string, std::string> name_class;
+    name_class = file->getNextEntry();
+    while (name_class.first != "NULL")
+    {
+      std::string name = name_class.first;
+
+      // Find the index using the name of the group
+      if (name.size() > 3)
+      {
+        // Take out the "box" part of the name
+        std::string indexStr = name.substr(3, name.size()-3);
+        // Extract the index number
+        size_t index;
+        Kernel::Strings::convert(indexStr, index);
+
+        if (index >= numBoxes)
+          throw std::runtime_error("MDGridBox::loadNexus: Invalid index found when parsing group " + name + ". Found at path " + file->getPath());
+
+        if (name_class.second == "NXMDBox")
+        {
+          file->openGroup(name_class.first, name_class.second);
+          MDBox<MDE,nd> * box = new MDBox<MDE,nd>();
+          box->loadNexus(file);
+          file->closeGroup();
+          boxes[index] = box;
+        }
+        else if (name_class.second == "NXMDGridBox")
+        {
+          file->openGroup(name_class.first, name_class.second);
+          MDGridBox<MDE,nd> * box = new MDGridBox<MDE,nd>();
+          box->loadNexus(file);
+          file->closeGroup();
+          boxes[index] = box;
+        }
+        else
+        {
+          // std::cout << name_class.first << ", " << name_class.second << std::endl;
+          if (name_class.second != "SDS")
+            throw std::runtime_error("MDGridBox::loadNexus: Unexpected sub-group class (" + name_class.second + "). Found at path " + file->getPath());
+        }
+      }
+      // Next one
+      name_class = file->getNextEntry();
+    }
+
+    // Check that all boxes were created
+    for (size_t i=0; i<numBoxes; i++)
+    {
+      if (!boxes[i])
+        throw std::runtime_error("MDGridBox::loadNexus: A sub-box was not loaded and is NULL. Found at path " + file->getPath());
+    }
   }
 
 

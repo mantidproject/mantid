@@ -366,6 +366,34 @@ public:
   }
 
 
+  void test_saveNexus_emptyBox()
+  {
+    // Clean up if it exists
+    std::string filename = (ConfigService::Instance().getString("defaultsave.directory") + "MDBoxTestEmpty.nxs");
+    if (Poco::File(filename).exists())  Poco::File(filename).remove();
+    // Box with no events
+    MDBox<MDEvent<3>,3> * b = MDEventsTestHelper::makeMDBox3();
+    TS_ASSERT_EQUALS( b->getNPoints(), 0);
+
+    // Save it
+    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
+    b->saveNexus("box0", file);
+    file->close();
+
+    // Load it
+    MDBox<MDEvent<3>,3> * c = new MDBox<MDEvent<3>,3>();
+    ::NeXus::File * fileIn = new ::NeXus::File(filename, NXACC_READ);
+    fileIn->openGroup("box0", "NXMDBox");
+    TS_ASSERT_THROWS_NOTHING( c->loadNexus(fileIn); )
+    fileIn->closeGroup();
+    fileIn->close();
+
+    TS_ASSERT_EQUALS( c->getNPoints(), 0);
+
+  }
+
+
+
   void test_saveNexus_loadNexus()
   {
     // Clean up if it exists
@@ -376,10 +404,12 @@ public:
     // Make a box with 1000 events
     MDBox<MDEvent<3>,3> * b = MDEventsTestHelper::makeMDBox3();
     MDEventsTestHelper::feedMDBox(b, 1, 10, 0.5, 1.0);
+    b->getEvents()[1].setSignal( float(1.23) );
+    b->getEvents()[1].setErrorSquared( float(4.56) );
 
     TS_ASSERT_EQUALS( b->getNPoints(), 1000);
 
-    ::NeXus::File * file = new NeXus::File(filename, NXACC_CREATE5);
+    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
 
     for (size_t i=0; i<1; i++)
     {
@@ -395,9 +425,9 @@ public:
     // Now we load it back
     MDBox<MDEvent<3>,3> * c = new MDBox<MDEvent<3>,3>();
 
-    ::NeXus::File * fileIn = new NeXus::File(filename, NXACC_READ);
+    ::NeXus::File * fileIn = new ::NeXus::File(filename, NXACC_READ);
     fileIn->openGroup("box0", "NXMDBox");
-    c->loadNexus(fileIn);
+    TS_ASSERT_THROWS_NOTHING( c->loadNexus(fileIn); )
     fileIn->closeGroup();
     fileIn->close();
 
@@ -412,15 +442,15 @@ public:
     TS_ASSERT_DELTA( ev.getCenter(0), 0.5, 1e-5);
     TS_ASSERT_DELTA( ev.getCenter(1), 0.5, 1e-5);
     TS_ASSERT_DELTA( ev.getCenter(2), 0.5, 1e-5);
-    TS_ASSERT_DELTA( ev.getSignal(), 1.0, 1e-5);
+    TS_ASSERT_DELTA( ev.getSignal(),       1.0, 1e-5);
     TS_ASSERT_DELTA( ev.getErrorSquared(), 1.0, 1e-5);
 
     ev = c->getEvents()[1];
     TS_ASSERT_DELTA( ev.getCenter(0), 1.5, 1e-5);
     TS_ASSERT_DELTA( ev.getCenter(1), 0.5, 1e-5);
     TS_ASSERT_DELTA( ev.getCenter(2), 0.5, 1e-5);
-    TS_ASSERT_DELTA( ev.getSignal(), 1.0, 1e-5);
-    TS_ASSERT_DELTA( ev.getErrorSquared(), 1.0, 1e-5);
+    TS_ASSERT_DELTA( ev.getSignal(),       1.23, 1e-5);
+    TS_ASSERT_DELTA( ev.getErrorSquared(), 4.56, 1e-5);
 
 
 //    // Clean up

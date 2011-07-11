@@ -205,14 +205,14 @@ public:
     // IMDBox doesn't make a group since this is handled by the other subclasses
     //  so we need to make a fake one
     file->makeGroup(groupName, className, 1);
-    b.saveNexus(file);
+    b.saveNexus(groupName, file);
     file->close();
 
     // Now we load it back
     IMDBoxTester<MDEvent<2>,2> c;
     ::NeXus::File * fileIn = new NeXus::File(filename, NXACC_READ);
     fileIn->openGroup(groupName, className);
-    c.loadNexus(fileIn);
+    TS_ASSERT_THROWS_NOTHING( c.loadNexus(fileIn); )
     fileIn->closeGroup();
     fileIn->close();
 

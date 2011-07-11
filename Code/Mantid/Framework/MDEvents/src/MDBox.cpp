@@ -360,18 +360,27 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Save the box and contents to an open nexus file.
    *
+   * @param groupName :: name of the group to save in.
    * @param file :: Nexus File object
    */
   TMDE(
-  void MDBox)::saveNexus(std::string groupName, ::NeXus::File * file)
+  void MDBox)::saveNexus(const std::string & groupName, ::NeXus::File * file)
   {
     // Create the group. TODO: fix the classname?
     file->makeGroup(groupName, "NXMDBox", 1);
 
     // First, save the data common to all IMDBoxes.
-    IMDBox<MDE,nd>::saveNexus(file);
-    // Now save the vector using the method in MDEvent
-    MDE::saveVectorToNexus( this->data, file );
+    IMDBox<MDE,nd>::saveNexus(groupName, file);
+
+    // Mark with attribute if there are no events
+    int numEvents = int(data.size());
+    file->putAttr("num_events", numEvents);
+
+    if (numEvents > 0)
+    {
+      // Now save the vector using the method in MDEvent
+      MDE::saveVectorToNexus( this->data, file );
+    }
 
     file->closeGroup();
   }
@@ -388,8 +397,17 @@ namespace MDEvents
     // First, load the data common to all IMDBoxes.
     IMDBox<MDE,nd>::loadNexus(file);
 
-    // Now get the events
-    MDE::loadVectorFromNexus( this->data, file);
+    // Check if there is anything to load at all.
+    int numEvents;
+    file->getAttr("num_events", numEvents);
+
+    if (numEvents > 0)
+    {
+      // Now get the events
+      MDE::loadVectorFromNexus( this->data, file);
+    }
+    else
+      data.clear();
   }
 
 
