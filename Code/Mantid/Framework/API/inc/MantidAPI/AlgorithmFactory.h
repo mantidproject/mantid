@@ -39,7 +39,7 @@ class CloneableAlgorithm;
     @author Russell Taylor, Tessella Support Services plc
     @date 21/09/2007
     
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -95,8 +95,9 @@ public:
     }
   }
 
-  ///Get the algorithm names and version - mangled use decodeName to seperate
-  const std::vector<std::string> getKeys(bool includeHidden=false) const;
+  /// Get the algorithm names and version - mangled use decodeName to separate
+  const std::vector<std::string> getKeys() const;
+  const std::vector<std::string> getKeys(bool includeHidden) const;
   
   ///Get the algorithm categories
   const std::set<std::string> getCategories(bool includeHidden=false) const;

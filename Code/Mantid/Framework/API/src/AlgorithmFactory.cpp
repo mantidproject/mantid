@@ -100,6 +100,20 @@ namespace Mantid
     }
   }
 
+  /** Return the keys used for identifying algorithms. This includes those within the Factory itself and 
+   * any cleanly constructed algorithms stored here.
+   * Hidden algorithms are excluded.
+   * @returns The strings used to identify individual algorithms
+   */
+  const std::vector<std::string> AlgorithmFactoryImpl::getKeys() const
+  {
+    /* We have a separate method rather than just a default argument value
+       to the getKeys(bool) methods so as to avoid an intel compiler warning. */
+
+    // Just call the 'other' getKeys method with the flag set to false
+    return getKeys(false);
+  }
+
   /**
   * Return the keys used for identifying algorithms. This includes those within the Factory itself and 
   * any cleanly constructed algorithms stored here.
