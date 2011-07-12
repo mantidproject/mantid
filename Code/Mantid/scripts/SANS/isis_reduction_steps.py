@@ -1555,6 +1555,8 @@ class UserFile(ReductionStep):
        
         reducer.QXY = None
         reducer.DQY = None
+        reducer.to_Q.r_cut = 0
+        reducer.to_Q.w_cut = 0
          
         reducer._corr_and_scale.rescale = 100.0
 
