@@ -85,11 +85,25 @@ public:
   bool isUnitVector() const;
 
   std::string toXMLString() const;
+  /*
+  Treat the origin parameter as an array of scalar values.
+  @param index : the index to fetch (index is one of x=0, y, z)
+  @return the origin value at the specified index.
+  */
+  double& operator[] (int index)
+  {
+    return m_normal[index];
+  }
 
+  /*
+  Getter for the parameter name associated with this type.
+  @return the parameter name.
+  */
   static std::string parameterName()
   {
     return "NormalParameter";
   }
+
 };
 }
 }

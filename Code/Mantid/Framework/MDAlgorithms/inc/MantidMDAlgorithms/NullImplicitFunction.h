@@ -53,7 +53,7 @@ namespace Mantid
             virtual std::string getName() const;
             virtual std::string toXMLString() const;
             virtual bool evaluate(const API::Point3D* pPoint) const;
-
+            virtual bool evaluate(const Mantid::coord_t*, const bool *, const size_t) const;
             static std::string functionName()
             {
                 return "NullImplicitFunction";

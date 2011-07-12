@@ -77,7 +77,21 @@ namespace Mantid
             std::string toXMLString() const;
 
             ~OriginParameter();
+            
+            /*
+            Treat the origin parameter as an array of scalar values.
+            @param index : the index to fetch (index is one of x=0, y, z)
+            @return the origin value at the specified index.
+            */
+            double& operator[] (int index)
+            {
+              return m_origin[index];
+            }
 
+            /*
+            Getter for the parameter name associated with this type.
+            @return the parameter name.
+            */
             static std::string parameterName()
             {
                 return "OriginParameter";

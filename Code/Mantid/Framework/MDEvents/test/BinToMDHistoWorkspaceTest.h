@@ -35,7 +35,15 @@ private:
   class MockImplicitFunction : public Mantid::API::ImplicitFunction
   {
   public:
+    bool evaluate(const Mantid::coord_t*, const bool *, const size_t) const
+    {
+      return false;
+    }
     bool evaluate(const Mantid::API::Point3D* /*pPoint3D*/) const
+    {
+      return false; //Always reject points.
+    }
+    bool evaluate(const Mantid::coord_t*, const bool *)
     {
       return false; //Always reject points.
     }

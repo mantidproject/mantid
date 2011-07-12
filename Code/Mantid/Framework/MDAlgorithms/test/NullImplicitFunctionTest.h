@@ -39,6 +39,15 @@ void testEvaluateThrows()
   TSM_ASSERT_THROWS("Not logically correct to evaluate a NullImplicitFunction", function.evaluate(&mockPoint), std::logic_error);
 }
 
+void testEvaluateCoordsThrows()
+{
+  using namespace Mantid::MDAlgorithms;
+  NullImplicitFunction function;
+  Mantid::coord_t coords[3];
+  bool masks[3];
+  TSM_ASSERT_THROWS("Not logically correct to evaluate a NullImplicitFunction", function.evaluate(coords, masks, 3), std::logic_error);
+}
+
 void testToXMLEmpty()
 {
   using namespace Mantid::MDAlgorithms;

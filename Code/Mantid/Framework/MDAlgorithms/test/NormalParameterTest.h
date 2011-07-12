@@ -131,7 +131,14 @@ void testAsUnitVector()
   TSM_ASSERT_EQUALS("x component incorrect", 1, B.getX());
   TSM_ASSERT_EQUALS("y component incorrect", 0, B.getY());
   TSM_ASSERT_EQUALS("z component incorrect", 0, B.getZ());
+}
 
+void testArrayTypeAccess()
+{
+  Mantid::MDAlgorithms::NormalParameter normal(1, 2, 3);
+  TSM_ASSERT("Wrong componenet returned", 1, normal[0]);
+  TSM_ASSERT("Wrong componenet returned", 2, normal[1]);
+  TSM_ASSERT("Wrong componenet returned", 3, normal[2]);
 }
 
 };

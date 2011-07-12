@@ -67,19 +67,12 @@ namespace Mantid
         {
         public:
           virtual bool evaluate(const Point3D* pPoint3D) const = 0;
+          virtual bool evaluate(const coord_t * coords, const bool * dimensionsUsed, const size_t nDims) const = 0;
           virtual std::string getName() const = 0;
           virtual std::string toXMLString() const = 0;
           virtual ~ImplicitFunction()
           {
           }
-
-          virtual bool evaluate(const coord_t * coords) const
-          {
-            //TODO: Make pure-virtual and implement for nd dimensions
-            UNUSED_ARG(coords);
-            return false;
-          }
-
 
         };
 

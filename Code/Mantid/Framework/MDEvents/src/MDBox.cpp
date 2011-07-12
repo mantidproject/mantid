@@ -283,11 +283,11 @@ namespace MDEvents
 
     typename std::vector<MDE>::const_iterator it = data.begin();
     typename std::vector<MDE>::const_iterator it_end = data.end();
-
+    bool mask[3] = {false, false, false}; //HACK
     // For each MDEvent
     for (; it != it_end; ++it)
     {
-      if (function.evaluate(it->getCenter()))
+      if (function.evaluate(it->getCenter(), mask, 3)) //HACK
       {
         // Accumulate error and signal
         bin.m_signal += it->getSignal();

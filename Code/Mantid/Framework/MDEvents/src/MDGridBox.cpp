@@ -870,11 +870,14 @@ namespace MDEvents
     {
       // Coordinates of this vertex
       coord_t vertexCoord[nd];
+      bool masks[nd];
       for (size_t d=0; d<nd; ++d)
+      {
         vertexCoord[d] = double(vertexIndex[d]) * boxSize[d] + this->extents[d].min;
-
+        masks[d] = false; //HACK ... assumes that all vertexes are used.
+      }
       // Is this vertex contained?
-      if (function.evaluate(vertexCoord))
+      if (function.evaluate(vertexCoord, masks, nd))
       {
         // Yes, this vertex is contained within the integration volume!
 //        std::cout << "vertex at " << vertexCoord[0] << ", " << vertexCoord[1] << ", " << vertexCoord[2] << " is contained\n";

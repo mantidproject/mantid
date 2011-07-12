@@ -23,6 +23,7 @@ public:
      class FakeImplicitFunction : public Mantid::API::ImplicitFunction
      {
        virtual bool evaluate(const Mantid::API::Point3D*) const { return true;}
+       virtual bool evaluate(const Mantid::coord_t*, const bool *, const size_t) const { return true;}
        virtual std::string getName() const {return "FakeImplicitFunction";}
        virtual std::string toXMLString() const {return "";}
      };

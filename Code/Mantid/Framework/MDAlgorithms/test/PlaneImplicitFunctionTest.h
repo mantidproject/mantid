@@ -8,18 +8,29 @@
 #include <vector>
 #include <MantidKernel/Matrix.h>
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
+#include <boost/shared_ptr.hpp>
 
-class PlaneImplicitFunctionTest: public CxxTest::TestSuite
+//=====================================================================================
+// Helper Types
+//=====================================================================================
+namespace
 {
-private:
-
   class MockPoint3D: public Mantid::API::Point3D
   {
   public:
     MOCK_CONST_METHOD0 (getX, double());
     MOCK_CONST_METHOD0(getY, double());
     MOCK_CONST_METHOD0(getZ, double());
+    virtual ~MockPoint3D(){}
   };
+}
+
+//=====================================================================================
+// Functional Tests
+//=====================================================================================
+class PlaneImplicitFunctionTest: public CxxTest::TestSuite
+{
+private:
 
   Mantid::MDAlgorithms::NormalParameter normal;
   Mantid::MDAlgorithms::OriginParameter origin;
@@ -51,7 +62,6 @@ public:
 
   void testEvaluateInsidePointOnForwardSurface()
   {
-    using namespace Mantid::MDDataObjects;
     using namespace Mantid::MDAlgorithms;
 
     MockPoint3D point;
@@ -62,15 +72,19 @@ public:
     NormalParameter tNormal(1, 2, 3);
     OriginParameter tOrigin(0, 0, 0);
     WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
-
     PlaneImplicitFunction plane(tNormal, tOrigin, tWidth);
-    bool isInside = plane.evaluate(&point);
-    TSM_ASSERT("The point should have been found to be inside the region bounded by the plane.", isInside);
+
+    //Test using point3D API.
+    TSM_ASSERT("The point should have been found to be inside the region bounded by the plane.", plane.evaluate(&point));
+    
+    //Test exactly same schenario using coordinate API.
+    Mantid::coord_t coords[3] = {1,2,3};
+    bool masks[3] = {false, false, false};
+    TSM_ASSERT("The point should have been found to be inside the region bounded by the plane.", plane.evaluate(coords, masks, 3));
   }
 
   void testEvaluateInsidePointOnBackwardSurface()
   {
-    using namespace Mantid::MDDataObjects;
     using namespace Mantid::MDAlgorithms;
 
     MockPoint3D point;
@@ -83,13 +97,18 @@ public:
     WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     PlaneImplicitFunction plane(tNormal, tOrigin, tWidth);
-    bool isInside = plane.evaluate(&point);
-    TSM_ASSERT("The point should have been found to be inside the region bounded by the plane.", isInside);
+    
+    //Test using point3D API.
+    TSM_ASSERT("The point should have been found to be inside the region bounded by the plane.", plane.evaluate(&point));
+    
+    //Test exactly same schenario using coordinate API.
+    Mantid::coord_t coords[3] = {-1,-2,-3};
+    bool masks[3] = {false, false, false};
+    TSM_ASSERT("The point should have been found to be inside the region bounded by the plane.", plane.evaluate(coords, masks, 3));
   }
 
   void testEvaluateInsidePointReflectNormal() //Test that plane automatically relects normals where necessary.
   {
-    using namespace Mantid::MDDataObjects;
     using namespace Mantid::MDAlgorithms;
 
     MockPoint3D point;
@@ -103,13 +122,17 @@ public:
     WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     PlaneImplicitFunction plane(rNormal, tOrigin, tWidth);
-    bool isInside = plane.evaluate(&point);
-    TSM_ASSERT("The point should have been found to be inside the region bounded by the plane after the normal was reflected.", isInside);
+
+    TSM_ASSERT("The point should have been found to be inside the region bounded by the plane after the normal was reflected.", plane.evaluate(&point));
+
+    //Test exactly same schenario using coordinate API.
+    Mantid::coord_t coords[3] = {1,2,3};
+    bool masks[3] = {false, false, false};
+    TSM_ASSERT("The point should have been found to be inside the region bounded by the plane after the normal was reflected.", plane.evaluate(coords, masks, 3));
   }
 
   void testEvaluatePointOutsideForwardPlane()
   {
-    using namespace Mantid::MDDataObjects;
     using namespace Mantid::MDAlgorithms;
 
     MockPoint3D point;
@@ -122,13 +145,16 @@ public:
     WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     PlaneImplicitFunction plane(tNormal, tOrigin, tWidth);
-    bool isInside = plane.evaluate(&point);
-    TSM_ASSERT("The point should have been found to be outside the region bounded by the plane.", !isInside);
+    TSM_ASSERT("The point should have been found to be outside the region bounded by the plane.", !plane.evaluate(&point));
+
+     //Test exactly same schenario using coordinate API.
+    Mantid::coord_t coords[3] = {1.001,2.001,3.001};
+    bool masks[3] = {false, false, false};
+    TSM_ASSERT("The point should have been found to be outside the region bounded by the plane.", !plane.evaluate(coords, masks, 3));
   }
 
   void testEvaluatePointOutsideBackwardPlane()
   {
-    using namespace Mantid::MDDataObjects;
     using namespace Mantid::MDAlgorithms;
 
     MockPoint3D point;
@@ -141,13 +167,17 @@ public:
     WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
 
     PlaneImplicitFunction plane(tNormal, tOrigin, tWidth);
-    bool isInside = plane.evaluate(&point);
-    TSM_ASSERT("The point should have been found to be outside the region bounded by the plane.", !isInside);
+
+    TSM_ASSERT("The point should have been found to be outside the region bounded by the plane.", !plane.evaluate(&point));
+
+     //Test exactly same schenario using coordinate API.
+    Mantid::coord_t coords[3] = {-1.001,-2.001,-3.001};
+    bool masks[3] = {false, false, false};
+    TSM_ASSERT("The point should have been found to be outside the region bounded by the plane.", !plane.evaluate(coords, masks, 3));
   }
 
   void testEvaluateOnPlanePointDecreaseX()
   {
-    using namespace Mantid::MDDataObjects;
     using namespace Mantid::MDAlgorithms;
 
     MockPoint3D point;
@@ -161,13 +191,16 @@ public:
 
     PlaneImplicitFunction plane(tNormal, tOrigin, tWidth);
 
-    bool isInside = plane.evaluate(&point);
-    TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point x-value.", isInside);
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point x-value.", plane.evaluate(&point));
+
+    //Test exactly same schenario using coordinate API.
+    Mantid::coord_t coords[3] = {0.999,2,3};
+    bool masks[3] = {false, false, false};
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point x-value.", plane.evaluate(coords, masks, 3));
   }
 
   void testEvaluateOnPlanePointIncreaseX()
   {
-    using namespace Mantid::MDDataObjects;
     using namespace Mantid::MDAlgorithms;
 
     MockPoint3D point;
@@ -181,13 +214,17 @@ public:
 
     PlaneImplicitFunction plane(tNormal, tOrigin, tWidth);
 
-    bool isInside = plane.evaluate(&point);
-    TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point x-value.", !isInside);
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point x-value.", !plane.evaluate(&point));
+    
+    //Test exactly same schenario using coordinate API.
+    Mantid::coord_t coords[3] = {1.001,2,3};
+    bool masks[3] = {false, false, false};
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point x-value.", !plane.evaluate(coords, masks, 3));
+ 
   }
 
   void testEvaluateOnPlanePointDecreaseY()
   {
-    using namespace Mantid::MDDataObjects;
     using namespace Mantid::MDAlgorithms;
 
     MockPoint3D point;
@@ -201,13 +238,17 @@ public:
 
     PlaneImplicitFunction plane(tNormal, tOrigin, tWidth);
 
-    bool isInside = plane.evaluate(&point);
-    TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point y-value.", isInside);
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point y-value.", plane.evaluate(&point));
+  
+    //Test exactly same schenario using coordinate API.
+    Mantid::coord_t coords[3] = {1, 1.999,3};
+    bool masks[3] = {false, false, false};
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point y-value.", plane.evaluate(coords, masks, 3));
+ 
   }
 
   void testEvaluateOnPlanePointIncreaseY()
   {
-    using namespace Mantid::MDDataObjects;
     using namespace Mantid::MDAlgorithms;
 
     MockPoint3D point;
@@ -221,13 +262,17 @@ public:
 
     PlaneImplicitFunction plane(tNormal, tOrigin, tWidth);
 
-    bool isInside = plane.evaluate(&point);
-    TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point y-value.", !isInside);
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point y-value.", !plane.evaluate(&point));
+  
+    //Test exactly same schenario using coordinate API.
+    Mantid::coord_t coords[3] = {1,2.001,3};
+    bool masks[3] = {false, false, false};
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point y-value.", !plane.evaluate(coords, masks, 3));
+ 
   }
 
   void testEvaluateOnPlanePointDecreaseZ()
   {
-    using namespace Mantid::MDDataObjects;
     using namespace Mantid::MDAlgorithms;
 
     MockPoint3D point;
@@ -241,13 +286,17 @@ public:
 
     PlaneImplicitFunction plane(tNormal, tOrigin, tWidth);
 
-    bool isInside = plane.evaluate(&point);
-    TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point z-value.", isInside);
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point z-value.", plane.evaluate(&point));
+  
+    //Test exactly same schenario using coordinate API.
+    Mantid::coord_t coords[3] = {1, 2, 2.999};
+    bool masks[3] = {false, false, false};
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be inside the region bounded by the plane after an incremental decrease in the point z-value.", plane.evaluate(coords, masks, 3));
+ 
   }
 
   void testEvaluateOnPlanePointIncreaseZ()
   {
-    using namespace Mantid::MDDataObjects;
     using namespace Mantid::MDAlgorithms;
 
     MockPoint3D point;
@@ -261,8 +310,12 @@ public:
 
     PlaneImplicitFunction plane(tNormal, tOrigin, tWidth);
 
-    bool isInside = plane.evaluate(&point);
-    TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point z-value.", !isInside);
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point z-value.", !plane.evaluate(&point));
+  
+    //Test exactly same schenario using coordinate API.
+    Mantid::coord_t coords[3] = {1, 2, 3.001};
+    bool masks[3] = {false, false, false};
+    TSM_ASSERT("The point (while on the plane origin) should have been found to be outside the region bounded by the plane after an incremental increase in the point z-value.", !plane.evaluate(coords, masks, 3));
   }
 
   void testToXML()
@@ -304,6 +357,91 @@ public:
     TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, D);
   }
 
+  void testTooFewCoords()
+  {
+    using namespace Mantid::MDAlgorithms;
+
+    NormalParameter tNormal(1, 2, 3);
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth(1); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+
+    PlaneImplicitFunction plane(tNormal, tOrigin, tWidth);
+
+    Mantid::coord_t coords[4] = {1, 1, 1, 1};
+    bool masks[4] = {true, true, false, false}; // only leaves two dimensions unmasked.
+
+    TSM_ASSERT_THROWS("Should throw because it must have 3 unmasked coords to work.", plane.evaluate(coords, masks, 4), std::runtime_error);
+  }
+
+  void testTooManyCoords()
+  {
+    using namespace Mantid::MDAlgorithms;
+
+    NormalParameter tNormal(1, 2, 3);
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth(1); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+
+    PlaneImplicitFunction plane(tNormal, tOrigin, tWidth);
+
+    Mantid::coord_t coords[4] = {1, 1, 1, 1};
+    bool masks[4] = {false, false, false, false}; // 4 unmasked dimensions
+
+    TSM_ASSERT_THROWS("Should throw because it must have 3 unmasked coords to work.", plane.evaluate(coords, masks, 4), std::runtime_error);
+  }
+
 };
 
+//=====================================================================================
+// Performance Tests
+//=====================================================================================
+class PlaneImplicitFunctionTestPerformance : public CxxTest::TestSuite
+{
+private:
+
+  boost::shared_ptr<Mantid::MDAlgorithms::PlaneImplicitFunction> m_plane;
+
+public:
+
+  void setUp()
+  {
+    using namespace Mantid::MDAlgorithms;
+
+    NormalParameter tNormal(1, 2, 3);
+    OriginParameter tOrigin(0, 0, 0);
+    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
+    m_plane = boost::shared_ptr<Mantid::MDAlgorithms::PlaneImplicitFunction>(new PlaneImplicitFunction(tNormal, tOrigin, tWidth));
+  }
+
+  /// Test using point3D API.
+  void testMultipleExecutionFromPoint3D()
+  {
+    MockPoint3D point;
+    EXPECT_CALL(point, getX()).WillRepeatedly(testing::Return(1));
+    EXPECT_CALL(point, getY()).WillRepeatedly(testing::Return(2));
+    EXPECT_CALL(point, getZ()).WillRepeatedly(testing::Return(3));
+
+    bool bIsInside = true;
+    //Ten thousand runs should give a good benchmark.
+    for(size_t i = 0; i < 10000; i++)
+    {
+      bIsInside = m_plane->evaluate(&point);
+    }
+    TS_ASSERT(bIsInside);
+  }
+
+  void testMultipleExecutionFromCoords()
+  {
+    //Test exactly same schenario using coordinate API.
+    Mantid::coord_t coords[3] = {1,2,3};
+    bool masks[3] = {false, false, false};
+    bool bIsInside = true;
+    //Ten thousand runs should give a good benchmark.
+    for(size_t i = 0; i < 10000; i++)
+    {
+      bIsInside = m_plane->evaluate(coords, masks, 3);
+    }
+    TS_ASSERT(bIsInside);
+  }
+
+};
 #endif

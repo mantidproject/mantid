@@ -53,6 +53,7 @@ class MockClipper: public Mantid::VATES::Clipper
   {
   public:
     MOCK_CONST_METHOD1(evaluate, bool(const Mantid::API::Point3D* pPoint3D));
+    MOCK_CONST_METHOD3(evaluate, bool(const Mantid::coord_t*, const bool *, const size_t));
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_CONST_METHOD0(toXMLString, std::string());
     MOCK_METHOD0(die, void());

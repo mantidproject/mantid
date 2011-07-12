@@ -19,6 +19,7 @@ private:
   {
   public:
     MOCK_CONST_METHOD1(evaluate, bool(const Mantid::API::Point3D* pPoint));
+    MOCK_CONST_METHOD3(evaluate, bool(const Mantid::coord_t*, const bool *, const size_t));
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_CONST_METHOD0(toXMLString, std::string());
     ~MockImplicitFunction(){}
@@ -47,7 +48,7 @@ public:
   }
 
 
-  void testEvaluateNestedFunctions()
+  void testEvaluateNestedFunctionsViaPoint3D()
   {
     using namespace Mantid::MDAlgorithms;
 
@@ -68,7 +69,26 @@ public:
     delete point;
   }
 
+  void testEvaluateNestedFunctionsViaCoordinates()
+  {
+    using namespace Mantid::MDAlgorithms;
+    using namespace testing;
 
+    CompositeImplicitFunction composite;
+    MockImplicitFunction* a = new MockImplicitFunction;
+    MockImplicitFunction* b = new MockImplicitFunction;
+    EXPECT_CALL(*a, evaluate(_, _, _)).Times(1).WillOnce(testing::Return(true));
+    EXPECT_CALL(*b, evaluate(_, _, _)).Times(1);
+
+    composite.addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(a));
+    composite.addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(b));
+
+    Mantid::coord_t coord[3];
+    bool masks[3];
+    composite.evaluate(coord, masks, 3);
+    TSM_ASSERT("This nested function should have been executed", testing::Mock::VerifyAndClearExpectations(a));
+    TSM_ASSERT("This nested function should have been executed", testing::Mock::VerifyAndClearExpectations(b));
+  }
 
 
   void testRecursiveToXML()

@@ -61,6 +61,7 @@ namespace Mantid
             std::string getName() const;
             std::string toXMLString() const;
             bool evaluate(const API::Point3D* pPoint) const;
+            bool evaluate(const Mantid::coord_t* coords, const bool * masks, const size_t nDims) const;
             double getOriginX() const;
             double getOriginY() const;
             double getOriginZ() const;
@@ -77,14 +78,28 @@ namespace Mantid
 
         private:
 
+            /// Plane Origin
             OriginParameter m_origin;
+            /// Plane Normal
             NormalParameter m_normal;
+            /// Plane Width
             WidthParameter m_width;
+
+            /// Cached calculation forward origin
+            OriginParameter m_calculationForwardOrigin;
+            /// Cached calculation backward origin
+            OriginParameter m_calculationBackwardOrigin;
+            /// Cached calculation Normal.
+            NormalParameter m_calculationNormal;
+            /// Cached calculation Normal reflected about the plane.
+            NormalParameter m_calculation_r_Normal;
 
             /// Calculate the width applied to the normal direction resolved into the specified axis.
             inline double calculateNormContributionAlongAxisComponent(const Mantid::Kernel::V3D& axis) const;
             /// Determine whether the point is bounded by the plane described by the parameters.
             inline bool isBoundedByPlane(const OriginParameter& origin, const NormalParameter& normal, const Mantid::API::Point3D* pPoint) const;
+            /// Determine whether the point is bounded by the plane described by the parameters.
+            inline bool PlaneImplicitFunction::isBoundedByPlane(const OriginParameter& origin, const NormalParameter& normal, const signal_t& x, const signal_t& y, const signal_t& z) const;
             /// Get the effective normal vector to use in calculation.
             inline NormalParameter calculateEffectiveNormal(const OriginParameter& forwardOrigin) const;
 

@@ -99,6 +99,14 @@ public:
     TSM_ASSERT_DIFFERS("The two origin instances are considered equal, but should not be.", A, D);
   }
 
+  void testArrayTypeAccess()
+  {
+    Mantid::MDAlgorithms::OriginParameter origin(1, 2, 3);
+    TSM_ASSERT("Wrong componenet returned", 1, origin[0]);
+    TSM_ASSERT("Wrong componenet returned", 2, origin[1]);
+    TSM_ASSERT("Wrong componenet returned", 3, origin[2]);
+  }
+
 };
 
 #endif

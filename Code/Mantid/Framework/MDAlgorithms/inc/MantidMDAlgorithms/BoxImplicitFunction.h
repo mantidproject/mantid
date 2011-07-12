@@ -56,6 +56,7 @@ namespace Mantid
             std::string getName() const;
             std::string toXMLString() const;
             bool evaluate(const API::Point3D* pPoint) const;
+            bool evaluate(const Mantid::coord_t* coords, const bool * masks, const size_t nDims) const;
             double getUpperX() const;
             double getLowerX() const;
             double getUpperY() const;
@@ -70,7 +71,16 @@ namespace Mantid
                 return "BoxImplicitFunction";
             }
 
-        private:
+        private:            
+          
+            /*
+            Helper type for organising upper and lower bounds of a dimension.
+            */
+            struct DimensionBounds
+            {
+              signal_t lower;
+              signal_t upper;
+            };
 
             //from raw inputs.
             OriginParameter m_origin;
@@ -79,12 +89,7 @@ namespace Mantid
             DepthParameter m_depth;
 
             //calculated and cached.
-            double m_upperX;
-            double m_lowerX;
-            double m_upperY;
-            double m_lowerY;
-            double m_upperZ;
-            double m_lowerZ;
+            std::vector<DimensionBounds> m_bounds;
 
         };
     }

@@ -94,6 +94,31 @@ namespace Mantid
             return evalResult;
         }
 
+        /** Evaluate a composite of several Implicit functions.
+         *
+         * This returns true if all ImplicitFunctions evaluate as true
+         * (basically an AND operation on the evaluate() of each function).
+         *
+         * @param coords :: point to evaluate
+         * @param masks :: masks to reduce nDims down to 3
+         * @param nDims :: number of dimensions masked + unmasked
+         * @return true if all nested implicit functions evaluate to true, otherwise false.
+         */
+        bool CompositeImplicitFunction::evaluate(const Mantid::coord_t* coords, const bool * masks, const size_t nDims) const
+        {
+          bool evalResult = false;
+          std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> >::const_iterator it;
+          for(it = this->m_Functions.begin(); it != this->m_Functions.end(); ++it)
+          {
+            evalResult = (*it)->evaluate(coords, masks, nDims);
+            if(!evalResult)
+            {
+              break;
+            }
+          }
+          return evalResult;
+        }
+
         /** Comparison operator */
         bool CompositeImplicitFunction::operator==(const CompositeImplicitFunction &other) const
         {
