@@ -24,7 +24,7 @@ n_pix_in_buffer(0),
 pTargetDataPoints(targetWS->get_spMDDPoints().get())
 {
     //TODO: it is stub as should be only 3 here, but it would work. 
-    this->nRecDims = sourceWS->get_const_MDGeometry().getNumReciprocalDims();
+    this->nRecDims = static_cast<unsigned int>(sourceWS->get_const_MDGeometry().getNumReciprocalDims());
 
 	this->build_scaled_transformation_matrix(sourceWS->get_const_MDGeometry(),*pTargetDescr);
  
