@@ -123,7 +123,7 @@ namespace DataHandling
 
     // 1. Determine length of file
     struct stat results;
-    size_t filesize = -1;
+    size_t filesize;
     if (stat(logfilename, &results) == 0){
         filesize = static_cast<size_t>(results.st_size);
         g_log.debug() << "File Size = " << filesize << "\n";
@@ -134,7 +134,7 @@ namespace DataHandling
     }
 
     // 2. Determine number of magnetic pulses
-    size_t numpulses = -1;
+    size_t numpulses;
     if (m_delayfileinoldformat){
       numpulses = filesize/sizeof(double)/m_numchoppers;
     } else{
