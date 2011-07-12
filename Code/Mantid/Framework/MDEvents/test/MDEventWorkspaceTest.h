@@ -45,6 +45,11 @@ public:
     TS_ASSERT_EQUALS( ew3.getNumDims(), 3);
     TS_ASSERT_EQUALS( ew3.getNPoints(), 0);
     TS_ASSERT_EQUALS( ew3.id(), "MDEventWorkspace<MDEvent,3>");
+    // Box controller MUST always be present
+    TS_ASSERT(ew3.getBoxController() );
+    TS_ASSERT(ew3.getBox());
+    TS_ASSERT(ew3.getBox()->getBoxController());
+    TS_ASSERT_EQUALS(ew3.getBox()->getId(), 0);
   }
 
   void test_Constructor_IMDEventWorkspace()
@@ -79,9 +84,8 @@ public:
   void test_splitBox()
   {
     MDEventWorkspace3 * ew = new MDEventWorkspace3();
-    BoxController_sptr bc(new BoxController(3));
+    BoxController_sptr bc = ew->getBoxController();
     bc->setSplitInto(4);
-    ew->setBoxController(bc);
     TS_ASSERT( !ew->isGridBox() );
     TS_ASSERT_THROWS_NOTHING( ew->splitBox(); )
     TS_ASSERT( ew->isGridBox() );

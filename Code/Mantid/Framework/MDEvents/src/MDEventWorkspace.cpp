@@ -30,9 +30,10 @@ namespace MDEvents
    */
   TMDE(
   MDEventWorkspace)::MDEventWorkspace()
+  : m_BoxController(new BoxController(nd))
   {
-    data = new MDBox<MDE, nd>();
-    data->setId(0);
+    // First box is at depth 0, and has this default boxController
+    data = new MDBox<MDE, nd>(m_BoxController, 0);
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -118,20 +119,6 @@ namespace MDEvents
       }
     }
     return out;
-  }
-
-
-  //-----------------------------------------------------------------------------------------------
-  /** Set the box controller that the contained GridBoxes will use
-   *
-   * @param controller :: BoxController_sptr
-   */
-  TMDE(
-  void MDEventWorkspace)::setBoxController(BoxController_sptr controller)
-  {
-    m_BoxController = controller;
-    data->setBoxController(m_BoxController);
-    data->setId(m_BoxController->getNextId());
   }
 
 

@@ -48,10 +48,9 @@ namespace MDEventsTestHelper
   {
     boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<nd>,nd> >
             out(new Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<nd>,nd>());
-    Mantid::MDEvents::BoxController_sptr bc(new Mantid::MDEvents::BoxController(nd));
+    Mantid::MDEvents::BoxController_sptr bc = out->getBoxController();
     bc->setSplitThreshold(100);
     bc->setSplitInto(splitInto);
-    out->setBoxController(bc);
 
     for (size_t d=0; d<nd;d++)
     {

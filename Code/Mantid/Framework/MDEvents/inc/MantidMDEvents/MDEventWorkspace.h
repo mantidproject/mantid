@@ -54,8 +54,6 @@ namespace MDEvents
     /** @returns the number of bytes of memory used by the workspace. */
     virtual size_t getMemorySize() const;
 
-    void setBoxController(BoxController_sptr controller);
-
     /// Returns the BoxController used in this workspace
     BoxController_sptr getBoxController()
     {

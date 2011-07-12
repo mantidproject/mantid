@@ -312,11 +312,10 @@ namespace MDEvents
       ws->initialize();
 
       // Build up the box controller
-      BoxController_sptr newbc(new BoxController(3));
-      newbc->setSplitInto(5);
-      newbc->setSplitThreshold(1500);
-      newbc->setMaxDepth(20);
-      ws->setBoxController(newbc);
+      BoxController_sptr bc = ws->getBoxController();
+      bc->setSplitInto(5);
+      bc->setSplitThreshold(1500);
+      bc->setMaxDepth(20);
       // We always want the box to be split (it will reject bad ones)
       ws->splitBox();
     }

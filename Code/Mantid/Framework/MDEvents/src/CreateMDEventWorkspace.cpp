@@ -87,7 +87,7 @@ namespace MDEvents
   void CreateMDEventWorkspace::finish(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     // ------------ Set up the box controller ----------------------------------
-    BoxController_sptr bc(new BoxController(nd) );
+    BoxController_sptr bc = ws->getBoxController();
     int val;
     val = this->getProperty("SplitThreshold");
     bc->setSplitThreshold( val );
@@ -109,7 +109,6 @@ namespace MDEvents
       throw std::invalid_argument("SplitInto parameter must have 1 or ndims arguments.");
     bc->resetNumBoxes();
 
-    ws->setBoxController(bc);
     ws->splitBox();
 
   }
