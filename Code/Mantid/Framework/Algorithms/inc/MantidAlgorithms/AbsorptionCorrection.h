@@ -102,11 +102,11 @@ private:
   inline double doIntegration(const double& lambda,const std::vector<double>& L2s) const;
   inline double doIntegration(const double& lambda_i,const double& lambda_f,const std::vector<double>& L2s) const;
   
-  double m_refAtten;    ///< The attenuation cross-section in barns at 1.8A
-  double m_scattering;  ///< The scattering cross-section in barns
-  int64_t n_lambda;         ///< The number of points in wavelength, the rest is interpolated linearly
-  int64_t x_step;           ///< The step in bin number between adjacent points
-  int64_t m_emode;          ///< The energy mode: 0 - elastic, 1 - direct, 2 - indirect
+  double m_refAtten;    ///< The attenuation cross-section in 1/m at 1.8A
+  double m_scattering;  ///< The scattering cross-section in 1/m
+  int64_t n_lambda;     ///< The number of points in wavelength, the rest is interpolated linearly
+  int64_t x_step;       ///< The step in bin number between adjacent points
+  int64_t m_emode;      ///< The energy mode: 0 - elastic, 1 - direct, 2 - indirect
   double m_lambdaFixed; ///< The wavelength corresponding to the fixed energy, if provided
 
   typedef double (*expfunction)(double); ///< Typedef pointer to exponential function
