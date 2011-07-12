@@ -93,10 +93,12 @@ public:
       NormalParameterParser parser;
 
       parser.setSuccessorParser(successor);
-
-      TSM_ASSERT("Chain of responsiblity did not execute as expected for NormalParameter type.", testing::Mock::VerifyAndClearExpectations(successor))
+      Mantid::API::ImplicitFunctionParameter* iparam = parser.createParameter(pRootElem);
+      UNUSED_ARG(iparam);
+      TSM_ASSERT("Chain of responsiblity did not execute as expected for NormalParameter type.", testing::Mock::VerifyAndClearExpectations(successor));
+      delete iparam;
     }
-
+	
 	void testCanParseXMLOutput()
 	{ 
 	  //Circular check that xml given by an normal parameter can be used to create a new one using the parser.
