@@ -32,6 +32,7 @@ namespace MDEvents
   MDEventWorkspace)::MDEventWorkspace()
   {
     data = new MDBox<MDE, nd>();
+    data->setId(0);
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -130,6 +131,7 @@ namespace MDEvents
   {
     m_BoxController = controller;
     data->setBoxController(m_BoxController);
+    data->setId(m_BoxController->getNextId());
   }
 
 

@@ -226,6 +226,66 @@ namespace MDEvents
 
 
     //---------------------------------------------------------------------------------------------
+    /** When first creating a NXS file containing the data, the proper
+     * data blocks need to be created.
+     * @param file :: open NXS file.
+     */
+    static void prepareNexusData(::NeXus::File * file, size_t numPoints)
+    {
+      std::vector<int> dims(2,0);
+      dims[0] = int(numPoints);
+      dims[1] = (nd);
+      file->makeData("event_center", ::NeXus::FLOAT64, dims, 0);
+      dims[1]=2;
+      file->makeData("event_signal_errorsquared", ::NeXus::FLOAT32, dims, 0);
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Static method to save a vector of MDEvents of this type to a nexus file
+     * open to the right group.
+     * This method plops the events as a slab at a particular point in an already created array.
+     * This will be re-implemented by any other MDEvent-like type
+     *
+     * @param events :: reference to the vector of events to save.
+     * @param file :: open NXS file.
+     * @param start :: point
+     * */
+    static void saveVectorToNexusSlab(const std::vector<MDEvent<nd> > & events, ::NeXus::File * file, std::vector<int> & start)
+    {
+      size_t numEvents = events.size();
+      std::vector<coord_t> centers;
+      centers.reserve(numEvents*nd);
+      std::vector<float> signal_error;
+      signal_error.reserve(numEvents*2);
+
+      typename std::vector<MDEvent<nd> >::const_iterator it = events.begin();
+      typename std::vector<MDEvent<nd> >::const_iterator it_end = events.end();
+      for (; it != it_end; ++it)
+      {
+        const MDEvent<nd> & event = *it;
+        for(size_t d=0; d<nd; d++)
+          centers.push_back( event.center[d] );
+        signal_error.push_back( event.signal );
+        signal_error.push_back( event.errorSquared );
+      }
+
+      // Specify the dimensions
+      std::vector<int> dims;
+      dims.push_back(int(numEvents));
+      dims.push_back(int(nd));
+
+      file->openData("event_center");
+      file->putSlab(centers, start, dims);
+      file->closeData();
+
+      dims[1] = 2;
+      file->openData("event_signal_errorsquared");
+      file->putSlab(signal_error, start, dims);
+      file->closeData();
+    }
+
+
+    //---------------------------------------------------------------------------------------------
     /** Static method to save a vector of MDEvents of this type to a nexus file
      * open to the right group.
      * This will be re-implemented by any other MDEvent-like type

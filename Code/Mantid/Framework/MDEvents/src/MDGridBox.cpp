@@ -499,7 +499,8 @@ namespace MDEvents
     }
 
     // Add it to the contained box
-    boxes[index]->addEvent(event);
+    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
+      boxes[index]->addEvent(event);
 
     // Track the total signal
 #ifdef MDEVENTS_MDGRIDBOX_ONGOING_SIGNAL_CACHE
