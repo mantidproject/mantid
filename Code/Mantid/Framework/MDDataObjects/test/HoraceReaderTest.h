@@ -67,7 +67,7 @@ public:
 private:
   // correct data positions in the file test_horace_reader.sqw;
   HoraceReader::data_positions cdp;
-  int nTestDim,nTestFiles,nTestPixels;
+  unsigned int nTestDim,nTestFiles,nTestPixels;
 };
 
 class HoraceReaderTest :    public CxxTest::TestSuite
@@ -169,7 +169,7 @@ public:
     MDDataPointsDescription pd(horPointDescr);
     MDDataPoints points(pd);
 	points.initialize(spImg,spReader);
-	bool pix_placed_in_memory;
+	bool pix_placed_in_memory = true;
     TSM_ASSERT_THROWS_NOTHING("Horace all pix reader should not throw",pix_placed_in_memory=spReader->read_pix(points,true));
 	if(pix_placed_in_memory){
 		//TSM_ASSERT_EQUALS(" All data are in memory so these values have to be equal",points.getNumPointsInMemory(),spReader->getNPix());
@@ -180,14 +180,14 @@ public:
   }
   void testReadPixelsSelectionAll(){
     // read all 
-    int nCells = this->spImg->get_const_MDGeometry().getGeometryExtend();
+    size_t nCells = this->spImg->get_const_MDGeometry().getGeometryExtend();
 
     selected_cells.resize(nCells);
     pix_buf.resize(spReader->getNConributedPixels()*9*8);
 
-    size_t starting_cell(0),n_cell_read;
+    size_t starting_cell(0),n_cell_read(0);
     size_t n_pix_in_buffer(0);
-    for(int i=0;i<nCells;i++){
+    for(size_t i=0;i<nCells;i++){
       selected_cells[i]=i;
     }
 
@@ -201,7 +201,7 @@ public:
   void testReadFirst2Selection(){
     // read first two (buffer is already allocated above)
 
-    size_t starting_cell(0),n_cell_read;
+    size_t starting_cell(0),n_cell_read(0);
     size_t n_pix_in_buffer(0);
 
     selected_cells.resize(2);
@@ -219,7 +219,7 @@ public:
   void testReadOneSelection(){
     // read one (buffer is already allocated above)
 
-    size_t starting_cell(0),n_cell_read;
+    size_t starting_cell(0),n_cell_read(0);
     size_t n_pix_in_buffer(0);
 
     selected_cells.resize(1);
@@ -235,7 +235,7 @@ public:
   }
   void testRead2Selection(){
     // read random two (buffer is already allocated above)
-    size_t starting_cell(0),n_cell_read;
+    size_t starting_cell(0),n_cell_read(0);
     size_t n_pix_in_buffer(0);
 
     selected_cells.resize(2);
@@ -253,7 +253,7 @@ public:
   }
 
   void testReadFirstLastSelection(){
-    size_t starting_cell(0),n_cell_read;
+    size_t starting_cell(0),n_cell_read(0);
     size_t n_pix_in_buffer(0);
 
     selected_cells[0]=0;
@@ -269,7 +269,7 @@ public:
 
   void testReadSmallBufferSelectionResized(){
     // read random two (buffer is already allocated above)
-    size_t starting_cell(0),n_cell_read;
+    size_t starting_cell(0),n_cell_read(0);
     size_t n_pix_in_buffer(0);
 
     selected_cells[0]=3;
