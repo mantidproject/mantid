@@ -38,7 +38,20 @@
   
   <!-- Tank - a point 3 meters from the sample-->
   <component type="Tank" idlist="Tank">
-    <location r="3.0" t="0.0" p="0.0"/>
+    <location>
+			<parameter name="r-position">
+				<value val="3"/>
+			</parameter>				
+			<parameter name="t-position">
+				<logfile id="S2"/>
+			</parameter>			
+			<parameter name="p-position">
+				<value val="0"/>
+			</parameter>
+			<parameter name="roty">
+				<logfile id="S2"/>
+			</parameter>
+		</location>
   </component>
   <type name="Tank">
     <component type="B1">
