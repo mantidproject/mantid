@@ -106,7 +106,7 @@ public:
         TSM_ASSERT_EQUALS("Number of pixels in cell has to be equal to the number of pixels returned ",pImgData[SelectedCells[0]].npix,n_pix_in_buffer);
     }
 private:
-  void retrieveNDPix(const char *pData,float &S,float &Err,std::vector<int> &ind,unsigned int nDims,unsigned int nInd){
+  void retrieveNDPix(const char *pData,float &S,float &Err,std::vector<int> &ind, size_t nDims, size_t nInd){
   // the function is complementary to MDDensityTestHelper, as it 
       float *pPoint = (float *)(pData);
 
