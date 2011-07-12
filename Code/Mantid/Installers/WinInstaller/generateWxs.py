@@ -502,13 +502,14 @@ else:
 QTIPlot = addComponent('QTIPlot',comp_guid['QTIPlot'],binDir)
 QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe',MANTIDRELEASE + '/MantidPlot.exe',QTIPlot)
 # TODO: Currently the MantidLauncher only works for the 32-bit system since the registry access seems more of a pain on a 64 bit system
-if ARCH== '32':
-    MantidLauncher = addFileV('MantidLauncher','SMPlot.exe','StartMantidPlot.exe','MantidLauncher/Release/MantidLauncher.exe',QTIPlot)
-    startmenuQTIPlot = addTo(MantidLauncher,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe'})
-    desktopQTIPlot = addTo(MantidLauncher,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe','IconIndex':'0'})
-else:
-    startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe'})
-    desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe','IconIndex':'0'})
+# MantidLauncher is not used
+#if ARCH== '32':
+#    MantidLauncher = addFileV('MantidLauncher','SMPlot.exe','StartMantidPlot.exe','MantidLauncher/Release/MantidLauncher.exe',QTIPlot)
+#    startmenuQTIPlot = addTo(MantidLauncher,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe'})
+#    desktopQTIPlot = addTo(MantidLauncher,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe','IconIndex':'0'})
+#else:
+startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe'})
+desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe','IconIndex':'0'})
     
 addFileV('qtiplotrc', 'qtirc.py', 'qtiplotrc.py', CODEDIR + '/Mantid/MantidPlot/qtiplotrc.py', MantidDlls)
 addFileV('qtiplotutil', 'qtiUtil.py', 'qtiUtil.py', CODEDIR + '/Mantid/MantidPlot/qtiUtil.py', MantidDlls)
