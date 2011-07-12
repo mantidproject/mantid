@@ -464,6 +464,22 @@ namespace NeXus {
     void getData(std::vector<NumT>& data);
 
 
+    //JZ
+    /** Put data into the supplied vector. The vector does not need to
+     * be the correct size, just the correct type as it is resized to
+     * the appropriate value.
+     *
+     * The named data object is opened, loaded, then closed.
+     *
+     * @param dataName :: name of the data to open.
+     * @param data :: Where to put the data.
+     * \tparam NumT numeric data type of \a data
+     */
+    template <typename NumT>
+    void readData(const std::string & dataName, std::vector<NumT>& data);
+    //JZ
+
+
     /** Get data and coerce into an int vector.
      *
      * @throw Exception if the data is actually a float or

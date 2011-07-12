@@ -68,14 +68,27 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void SaveMDEW::doSave(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
-    UNUSED_ARG(ws);
     std::string filename = getPropertyValue("Filename");
 
     // Open/create the file
     ::NeXus::File * file;
     file = new ::NeXus::File(filename, NXACC_CREATE5);
 
-    // TODO: Write out some general information like # of dimensions
+    // Write out some general information like # of dimensions
+    file->makeGroup("workspace", "NXworkspace", 1);
+    file->putAttr("dimensions", int(nd));
+    file->putAttr("event_type", MDE::getTypeName());
+
+    // Save each dimension, as their XML representation
+    for (size_t d=0; d<nd; d++)
+    {
+      std::ostringstream mess;
+      mess << "dimension" << d;
+      file->putAttr( mess.str(), ws->getDimension(d)->toXMLString() );
+    }
+
+    // TODO: Add box controller info.
+    file->closeGroup();
 
     // Start the main data group
     file->makeGroup("data", "NXdata", 1);
@@ -92,6 +105,8 @@ namespace MDEvents
     std::vector<int> boxType(maxBoxes, 0);
     // Recursion depth
     std::vector<int> depth(maxBoxes, -1);
+    // Start/end indices into the list of events
+    std::vector<int64_t> box_event_index(maxBoxes*2, 0);
     // Min/Max extents in each dimension
     std::vector<double> extents(maxBoxes*nd*2, 0);
     // Inverse of the volume of the cell
@@ -108,7 +123,7 @@ namespace MDEvents
     // Get a starting iterator
     MDBoxIterator<MDE,nd> it(ws->getBox(), 1000, false);
 
-    Progress * prog = new Progress(this, 0, 1.0, maxBoxes);
+    Progress * prog = new Progress(this, 0, 0.9, maxBoxes);
 
     IMDBox<MDE,nd> * box;
     while (true)
@@ -149,6 +164,10 @@ namespace MDEvents
           if (events.size() > 0)
           {
             MDE::saveVectorToNexusSlab( events, file, start);
+            // std::cout << id << " starts at " << start[0] << std::endl;
+            // Save the index
+            box_event_index[id*2] = start[0];
+            box_event_index[id*2+1] = start[0] + int64_t(events.size());
             // Move forward in the file.
             start[0] += int(events.size());
           }
@@ -166,14 +185,13 @@ namespace MDEvents
       }
     }
 
-    delete prog;
-
 //    for (size_t i=0; i<20; i++)
 //    {
-//      std::cout << i << " : " << box_children[i] << std::endl;
+//      std::cout << i << " : " << box_event_index[i] << std::endl;
 //    }
 
     // OK, we've filled these big arrays of data. Save them.
+    prog->report("Writing Box Data");
 
     file->writeData("boxType", boxType);
     file->writeData("depth", depth);
@@ -190,10 +208,15 @@ namespace MDEvents
 
     file->writeData("box_signal_errorsquared", box_signal_errorsquared, dims);
 
+    file->writeData("box_event_index", box_event_index, dims);
+
 //    dims.clear();
 //    file->writeData("children", children);
 
     file->close();
+
+    delete prog;
+
   }
 
 

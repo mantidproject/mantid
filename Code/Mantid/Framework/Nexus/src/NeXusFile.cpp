@@ -681,6 +681,15 @@ void File::getData(vector<NumT>& data) {
 }
 
 
+//JZ
+template <typename NumT>
+void File::readData(const std::string & dataName, std::vector<NumT>& data)
+{
+  this->openData(dataName);
+  this->getData(data);
+  this->closeData();
+}
+//JZ
 
 void File::getDataCoerce(vector<int> &data)
 {
@@ -1441,6 +1450,31 @@ template
 NXDLL_EXPORT void File::getData(vector<uint64_t>& data);
 template
 NXDLL_EXPORT void File::getData(vector<char>& data);
+
+//JZ
+template
+NXDLL_EXPORT void File::readData(const std::string & dataName, vector<float>& data);
+template
+NXDLL_EXPORT void File::readData(const std::string & dataName, vector<double>& data);
+template
+NXDLL_EXPORT void File::readData(const std::string & dataName, vector<int8_t>& data);
+template
+NXDLL_EXPORT void File::readData(const std::string & dataName, vector<uint8_t>& data);
+template
+NXDLL_EXPORT void File::readData(const std::string & dataName, vector<int16_t>& data);
+template
+NXDLL_EXPORT void File::readData(const std::string & dataName, vector<uint16_t>& data);
+template
+NXDLL_EXPORT void File::readData(const std::string & dataName, vector<int32_t>& data);
+template
+NXDLL_EXPORT void File::readData(const std::string & dataName, vector<uint32_t>& data);
+template
+NXDLL_EXPORT void File::readData(const std::string & dataName, vector<int64_t>& data);
+template
+NXDLL_EXPORT void File::readData(const std::string & dataName, vector<uint64_t>& data);
+template
+NXDLL_EXPORT void File::readData(const std::string & dataName, vector<char>& data);
+//JZ
 
 template
 NXDLL_EXPORT void File::putSlab(std::vector<float>& data, std::vector<int>& start, std::vector<int>& size);

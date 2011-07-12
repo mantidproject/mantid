@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <iostream>
 #include "MantidKernel/CPUTimer.h"
+#include "MantidTestHelpers/AlgorithmHelper.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
@@ -38,9 +39,19 @@ public:
     // Add some points
     MDEventsTestHelper::feedMDBox(ws->getBox(), 1, 9e3, 1e-3);
 
+    AnalysisDataService::Instance().addOrReplace("SaveMDEWTest_ws", ws);
+
+//    std::ostringstream mess;
+//    mess << num << ", " << x << ", " << y << ", " << z << ", " << radius;
+//    AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
+//        "InputWorkspace", "SaveMDEWTest_ws", "UniformParams", "1000000");
+
+
     ws->refreshCache();
 
-    //TS_ASSERT_EQUALS( ws->getBoxController()->getMaxId(), 111110);
+    // There are this many boxes, so this is the max ID.
+    TS_ASSERT_EQUALS( ws->getBoxController()->getMaxId(), 111111);
+
     IMDEventWorkspace_sptr iws = ws;
 
     CPUTimer tim;
@@ -48,7 +59,7 @@ public:
     SaveMDEW alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", iws) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "SaveMDEWTest_ws") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "SaveMDEWTest.nxs") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );

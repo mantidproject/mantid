@@ -226,6 +226,13 @@ namespace MDEvents
 
 
     //---------------------------------------------------------------------------------------------
+    /** @returns a string identifying the type of event this is. */
+    static std::string getTypeName()
+    {
+      return "MDEvent";
+    }
+
+    //---------------------------------------------------------------------------------------------
     /** When first creating a NXS file containing the data, the proper
      * data blocks need to be created.
      * @param file :: open NXS file.
