@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidGeometry/Math/PolygonEdge.h"
 #include "MantidKernel/FloatingPointComparison.h"
+#include <limits>
 
 namespace Mantid
 {
