@@ -1315,15 +1315,15 @@
  </cylinder>
  <algebra val="some-shape" />
  </type>
- 
- <type name="pixel" is="detector">
- <cylinder id="cyl-approx">
-   <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
-   <axis x="0.0" y="0.2" z="0.0" />
-   <radius val="0.0127" />
-  <height val="   0.0096" />
- </cylinder>
- <algebra val="cyl-approx" />
+
+  <type name="pixel" is="detector">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.2" z="0.0" />
+      <radius val="0.004" />
+      <height val="   0.203320E-02" />
+    </cylinder>
+    <algebra val="cyl-approx" />
   </type>
  
   <!-- MONITOR ID LISTS -->
