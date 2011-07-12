@@ -6,6 +6,7 @@ from reduction_gui.reduction.sans.hfir_options_script import ReductionOptions
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_hfir_instrument
+from reduction import extract_workspace_name
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -155,6 +156,7 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.scale_data_plot_button.hide()
             
     def _mask_plot_clicked(self):        
+        self.mask_ws = "__mask_%s" % extract_workspace_name(str(self._summary.mask_edit.text()))
         self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2, reload=self.mask_reload, mask=self._masked_detectors)
         self._masked_detectors = []
         self.mask_reload = False

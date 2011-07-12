@@ -126,10 +126,9 @@ class BaseWidget(QtGui.QWidget):
         file_name = str(file_name)
         
         def _show_ws_instrument(ws):
-            if self._instrument_view is not None:
-                print self._instrument_view.isVisible()
             # Do nothing if the instrument view is already displayed
-            if self._instrument_view is not None and \
+            #FIXME: this doesn't seem to work 100% yet
+            if False and self._instrument_view is not None and \
                 self._data_set_viewed == file_name \
                 and self._instrument_view.isVisible():
                 
