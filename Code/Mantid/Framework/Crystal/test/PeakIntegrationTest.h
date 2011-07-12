@@ -193,7 +193,7 @@ public:
     // TS_ASSERT_DELTA( peak.getIntensity(), 660.846, 10.0);
 
     // TODO: Note JZ: For some reasone the ISpectrum change #3203 changed the result of this test.
-    TS_ASSERT_DELTA( peak.getIntensity(), 591, 10.0);
+    TS_ASSERT_DELTA( peak.getIntensity(), 660.846, 10.0);
 
     TS_ASSERT_DELTA( peak.getSigmaIntensity(), 35.5412, 1.0);
     AnalysisDataService::Instance().remove("TOPAZ");

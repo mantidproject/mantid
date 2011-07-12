@@ -512,6 +512,7 @@ void PeakIntegration::sumneighbours(std::string det_name, int x0, int y0, int Su
           for (int i = 0; i < SumX; ++i) smtmp[i] = new double[SumY];
           int **tmpmask = new int*[SumX];
           for (int i = 0; i < SumX; ++i) tmpmask[i] = new int[SumY];
+          outputW->getSpectrum(idet)->clearDetectorIDs();
           for (int ix=0; ix < SumX; ix++)
             for (int iy=0; iy < SumY; iy++)
             {
@@ -522,6 +523,8 @@ void PeakIntegration::sumneighbours(std::string det_name, int x0, int y0, int Su
               if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
               {
                 size_t wi = (*pixel_to_wi)[pixelID];
+                //Set detectorIDs
+                outputW->getSpectrum(idet)->addDetectorIDs( inputW->getSpectrum(wi)->getDetectorIDs() );
                 MantidVec& X = inputW->dataX(wi);
                 const MantidVec& Y = inputW->readY(wi);
                 const MantidVec& E = inputW->readE(wi);
