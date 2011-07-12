@@ -79,25 +79,24 @@ public:
     }
     void testChainOfResponsibility()
     {
-        using namespace Mantid::MDAlgorithms;
-        using namespace Poco::XML;
+      using namespace Mantid::MDAlgorithms;
+      using namespace Poco::XML;
 
-        DOMParser pParser;
-        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Parameter><Type>Unknown</Type><Value>1, 2, 3</Value></Parameter>";
-        Document* pDoc = pParser.parseString(xmlToParse);
-        Element* pRootElem = pDoc->documentElement();
-		
-		SuccessorParameterParser* successor = new SuccessorParameterParser;
-        EXPECT_CALL(*successor, createParameter(testing::_)).Times(1);
-        
-		NormalParameterParser parser;
-		
-        parser.setSuccessorParser(successor);
-        Mantid::API::ImplicitFunctionParameter* iparam = parser.createParameter(pRootElem);
+      DOMParser pParser;
+      std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Parameter><Type>Unknown</Type><Value>1, 2, 3</Value></Parameter>";
+      Document* pDoc = pParser.parseString(xmlToParse);
+      Element* pRootElem = pDoc->documentElement();
 
-        TSM_ASSERT("Chain of responsiblity did not execute as expected for NormalParameter type.", testing::Mock::VerifyAndClearExpectations(successor))
+      SuccessorParameterParser* successor = new SuccessorParameterParser;
+      EXPECT_CALL(*successor, createParameter(testing::_)).Times(1);
+
+      NormalParameterParser parser;
+
+      parser.setSuccessorParser(successor);
+
+      TSM_ASSERT("Chain of responsiblity did not execute as expected for NormalParameter type.", testing::Mock::VerifyAndClearExpectations(successor))
     }
-	
+
 	void testCanParseXMLOutput()
 	{ 
 	  //Circular check that xml given by an normal parameter can be used to create a new one using the parser.
