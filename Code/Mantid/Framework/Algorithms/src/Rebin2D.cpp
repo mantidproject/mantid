@@ -226,7 +226,7 @@ namespace Mantid
           ConvexPolygon oldPoly(xo_lo, xo_hi, yo_lo, yo_hi);
           try
           {
-            ConvexPolygon overlap = chasingEdgeIntersect(newPoly, oldPoly);
+            ConvexPolygon overlap = intersection(newPoly, oldPoly, Geometry::PolygonIntersection::ORourke);
             overlaps.push_back(BinWithWeight(i,j,overlap.area()/oldPoly.area()));
           }
           catch(std::runtime_error &)

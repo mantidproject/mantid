@@ -41,6 +41,8 @@ set ( SRC_FILES
 	src/Math/Algebra.cpp
 	src/Math/BnId.cpp
 	src/Math/ConvexPolygon.cpp
+	src/Math/PolygonEdge.cpp
+	src/Math/ORourkeIntersection.cpp
 	src/Math/PolyBase.cpp
 	src/Math/PolygonIntersection.cpp
 	src/Math/RotCounter.cpp
@@ -135,7 +137,9 @@ set ( INC_FILES
 	inc/MantidGeometry/Math/Algebra.h
 	inc/MantidGeometry/Math/BnId.h
 	inc/MantidGeometry/Math/ConvexPolygon.h
+	inc/MantidGeometry/Math/PolygonEdge.h
 	inc/MantidGeometry/Math/MapSupport.h
+	inc/MantidGeometry/Math/ORourkeIntersection.h
 	inc/MantidGeometry/Math/PolyBase.h
 	inc/MantidGeometry/Math/PolygonIntersection.h
 	inc/MantidGeometry/Math/RotCounter.h
@@ -179,6 +183,7 @@ set ( TEST_FILES
 	test/CylinderTest.h
 	test/DetectorGroupTest.h
 	test/DetectorTest.h
+	test/PolygonEdgeTest.h
 	test/FitParameterTest.h
 	test/GeneralTest.h
 	test/GoniometerTest.h
@@ -201,6 +206,7 @@ set ( TEST_FILES
 	test/MaterialTest.h
 	test/MathSupportTest.h
 	test/NearestNeighboursTest.h
+	test/ORourkeIntersectionTest.h
 	test/ObjCompAssemblyTest.h
 	test/ObjComponentTest.h
 	test/ObjectTest.h

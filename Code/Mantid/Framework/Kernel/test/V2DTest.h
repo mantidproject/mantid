@@ -107,6 +107,19 @@ public:
     TS_ASSERT_EQUALS(p2, V2D(4.0,5.0));
   }
 
+  void test_Multiply_By_Double_Gives_Correct_Vector()
+  {
+    V2D p1(3,9);
+    TS_ASSERT_EQUALS(p1 * 4.0, V2D(12.0,36.0));
+  }
+
+  void test_Inplace_Multiply_By_Double_Updates_LHS()
+  {
+    V2D p1(3,9);
+    p1 *= 3.0;
+    TS_ASSERT_EQUALS(p1, V2D(9.0,27.0));
+  }
+
 
   void test_Equality_Gives_True_When_Diff_Less_Than_Tolerance()
   {

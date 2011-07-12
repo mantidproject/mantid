@@ -79,6 +79,11 @@ namespace Mantid
       V2D operator-(const V2D &rhs) const;
       /// Decrement this by rhs
       V2D & operator-=(const V2D &rhs);
+      /// Scale and return
+      V2D operator*(const double factor) const;
+      /// Scale this
+      V2D& operator*=(const double factor);
+
       ///@}
 
       ///@name Comparison operators

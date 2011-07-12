@@ -1,5 +1,5 @@
-#ifndef MANTID_GEOMETRY_POLYGONINTERSECTION_H_
-#define MANTID_GEOMETRY_POLYGONINTERSECTION_H_
+#ifndef MANTID_GEOMETRY_OROURKEINTERSECTION_H_
+#define MANTID_GEOMETRY_OROURKEINTERSECTION_H_
 
 //-----------------------------------------------------------------------------
 // Includes
@@ -12,9 +12,11 @@ namespace Mantid
   namespace Geometry
   {
     /** 
-    This header defines various algorithms for defining polygon intersection
+    This header defines an implementation of the convex polygon intersection method
+    from "Computational Geometry in C" by Joseph O'Rourke.
 
-    @author Martyn Gigg, Tessella plc
+    @author Martyn Gigg
+    @date 2011-07-08
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -36,19 +38,11 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-
-    /// Define an enum for the intersection algorithm to use
-    namespace PolygonIntersection
-    {
-      enum Method{Laszlo, ORourke};
-    };
-
-    /// Compute the intersection of two polygons using a chosen method
+    /// Compute the intersection of two ConvexPolygons
     MANTID_GEOMETRY_DLL 
-    ConvexPolygon intersection(const ConvexPolygon &p, const ConvexPolygon &q, 
-      PolygonIntersection::Method method = PolygonIntersection::ORourke);
+    ConvexPolygon intersectionByORourke(const ConvexPolygon &p, const ConvexPolygon &q);
 
-  } //namespace Geometry
-} //namespace Mantid
+  } // namespace Geometry
+} // namespace Mantid
 
-#endif //MANTID_GEOMETRY_POLYGONINTERSECTION_H_
+#endif  /* MANTID_GEOMETRY_OROURKEINTERSECTION_H_ */

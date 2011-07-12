@@ -16,6 +16,7 @@ set ( SRC_FILES
         src/FacilityInfo.cpp
         src/FileValidator.cpp
         src/FilterChannel.cpp
+        src/FloatingPointComparison.cpp
         src/Glob.cpp
         src/IPropertyManager.cpp
         src/InstrumentInfo.cpp
@@ -105,6 +106,7 @@ set ( INC_FILES
         inc/MantidKernel/Fast_Exponential.h
         inc/MantidKernel/FileValidator.h
         inc/MantidKernel/FilterChannel.h
+        inc/MantidKernel/FloatingPointComparison.h
         inc/MantidKernel/Glob.h
         inc/MantidKernel/IPropertyManager.h
         inc/MantidKernel/IValidator.h
@@ -182,6 +184,7 @@ set ( TEST_FILES
         test/FacilitiesTest.h
         test/FileValidatorTest.h
         test/FilterChannelTest.h
+        test/FloatingPointComparisonTest.h
         test/FunctionTaskTest.h
         test/InterpolationTest.h
         test/ListValidatorTest.h
