@@ -148,9 +148,6 @@ namespace MDEvents
     file->readData("box_signal_errorsquared", box_signal_errorsquared);
     file->readData("box_event_index", box_event_index);
 
-    size_t numBoxes = boxType.size();
-
-
     file->closeGroup();
     file->close();
   }
