@@ -753,7 +753,6 @@ using namespace DataObjects;
             maxStr = col->cell<std::string>(ii).size();
         }
         int dims_array[2] = { nRows, static_cast<int>(maxStr) };
-        int start[2]={0,0};
         int asize[2]={1,dims_array[1]};
 
         status=NXcompmakedata(fileID, str.c_str(), NX_CHAR, 2, dims_array,false,asize);
