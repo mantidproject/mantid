@@ -431,14 +431,10 @@ class CanSubtraction(ReductionStep):
         Minus(tmp_smp, tmp_can, workspace)
     
         #clean up the workspaces ready users to see them if required
-        # Due to rounding errors, small shifts in detector encoders and poor stats in highest Q bins need "minus" the
-        # workspaces before removing nan & trailing zeros thus, beware,  _sc,  _sam_tmp and _can_tmp may NOT have same Q bins
-        ReplaceSpecialValues(InputWorkspace = tmp_smp,OutputWorkspace = tmp_smp, NaNValue="0", InfinityValue="0")
-        ReplaceSpecialValues(InputWorkspace = tmp_can,OutputWorkspace = tmp_can, NaNValue="0", InfinityValue="0")
         if reducer.to_Q.output_type == '1D':
-            rem_zeros = sans_reduction_steps.StripEndZeros()
-            rem_zeros.execute(reducer, tmp_smp)
-            rem_zeros.execute(reducer, tmp_can)
+            rem_nans = sans_reduction_steps.StripEndNans()
+            rem_nans.execute(reducer, tmp_smp)
+            rem_nans.execute(reducer, tmp_can)
 
     def get_wksp_name(self):
         return self.workspace.wksp_name
