@@ -188,6 +188,9 @@ namespace Mantid
       virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const { return getSpectrum(index)->ptrX(); }
 
       /// Set the specified X array to point to the given existing array
+      virtual void setX(const std::size_t index, const MantidVec& X) { getSpectrum(index)->setX(X); }
+
+      /// Set the specified X array to point to the given existing array
       virtual void setX(const std::size_t index, const MantidVecPtr& X) { getSpectrum(index)->setX(X); }
 
       /// Set the specified X array to point to the given existing array

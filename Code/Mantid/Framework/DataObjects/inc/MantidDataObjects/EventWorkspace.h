@@ -121,12 +121,6 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   Kernel::cow_ptr<MantidVec> refX(const std::size_t) const;
 
   //------------------------------------------------------------
-
-  // Set the x-axis data for the given pixel via cow_ptr.
-  void setX(const std::size_t, const  Kernel::cow_ptr<MantidVec> &);
-  // Set the x-axis data for the given pixel via MantidVec.
-  void setX(const std::size_t, const MantidVec &);
-
   // Set the x-axis data (histogram bins) for all pixels
   void setAllX(Kernel::cow_ptr<MantidVec> &x);
 

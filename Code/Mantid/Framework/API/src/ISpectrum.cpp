@@ -59,12 +59,6 @@ namespace API
   void ISpectrum::setX(const MantidVec& X)
   {  refX.access()=X; }
 
-  /// Sets the x data and errors.
-  /// @param X :: vector of X data
-  /// @param Dx :: vector of X error data
-  void ISpectrum::setX(const MantidVec& X, const MantidVec& Dx)
-  {  refX.access()=X; refDx.access()=Dx; }
-
   /// Sets the x error data.
   /// @param Dx :: vector of X error data
   void ISpectrum::setDx(const MantidVec& Dx)
@@ -76,12 +70,6 @@ namespace API
   void ISpectrum::setX(const MantidVecPtr& X)
   { refX=X; }
 
-  /// Sets the x data and errors.
-  /// @param X :: vector of X data
-  /// @param Dx :: vector of X error data
-  void ISpectrum::setX(const MantidVecPtr& X, const MantidVecPtr& Dx)
-  { refX=X; refDx=Dx; }
-
   /// Sets the x error data.
   /// @param Dx :: vector of X error data
   void ISpectrum::setDx(const MantidVecPtr& Dx)
@@ -91,12 +79,6 @@ namespace API
   /// Sets the x data
   void ISpectrum::setX(const MantidVecPtr::ptr_type& X)
   { refX=X; }
-
-  /// Sets the x data and errors
-  /// @param X :: vector of X data
-  /// @param Dx :: vector of X error data
-  void ISpectrum::setX(const MantidVecPtr::ptr_type& X, const MantidVecPtr::ptr_type& Dx)
-  { refX=X; refDx=Dx;}
 
   /// Sets the x data error
   /// @param X :: vector of X data

@@ -207,6 +207,7 @@ public:
   void setX(const MantidVec& X);
 
   MantidVec& dataX();
+  const MantidVec& dataX() const;
   const MantidVec& constDataX() const;
 
   // Disallowed data accessors - can't modify Y/E on a EventList

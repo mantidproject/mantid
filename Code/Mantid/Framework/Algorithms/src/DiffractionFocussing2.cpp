@@ -481,10 +481,10 @@ void DiffractionFocussing2::execEvent()
     {
       group2vectormap::iterator git = group2xvector.find(g);
       if (git != group2xvector.end())
-        out->setX(workspaceIndex, *(git->second) );
+        out->setX(workspaceIndex, (git->second) );
       else
         //Just use the 1st X vector it found, instead of nothin.
-        out->setX(workspaceIndex, *(group2xvector.begin()->second) );
+        out->setX(workspaceIndex, (group2xvector.begin()->second) );
     }
     else
       g_log.warning() << "Warning! No X histogram bins were found for any groups. Histogram will be empty.\n";

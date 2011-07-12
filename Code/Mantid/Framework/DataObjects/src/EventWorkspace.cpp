@@ -702,39 +702,6 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   // --- Histogramming ----
   //-----------------------------------------------------------------------------
-  /*** Set a histogram X vector.
-   * Performance note: use setAllX() if you are setting identical X for all pixels.
-   *
-   * @param index :: Workspace histogram index to set.
-   * @param x :: The X vector of histogram bins to use.
-   */
-  void EventWorkspace::setX(const size_t index, const Kernel::cow_ptr<MantidVec> &x)
-  {
-    if (index >= this->m_noVectors)
-      throw std::range_error("EventWorkspace::setX, histogram number out of range");
-    this->data[index]->setX(x);
-
-    //TOD: M<ove this inside EVentList::setX()
-    // Assume that any manual changing of X invalidates the MRU list entry for this index
-    // This deletes only the entry at this index.
-    this->mru->deleteIndex(this->data[index]->getSpectrumNo());
-  }
-
-
-  /*** Set a histogram X vector but create a COW pointer for it.
-   * Performance note: use setAllX() if you are setting identical X for all pixels.
-   *
-   * @param index :: Workspace histogram index to set.
-   * @param x :: The X vector of histogram bins to use.
-   */
-  void EventWorkspace::setX(const size_t index, const MantidVec &X)
-  {
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec& xRef = axis.access();
-    xRef.assign(X.begin(), X.end());
-    this->setX(index, axis);
-  }
-
 
   //-----------------------------------------------------------------------------
   /*** Set all histogram X vectors.

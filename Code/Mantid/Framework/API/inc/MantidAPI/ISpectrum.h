@@ -55,15 +55,12 @@ namespace API
     void copyInfoFrom(const ISpectrum& other);
 
     virtual void setX(const MantidVec& X);
-    virtual void setX(const MantidVec& X, const MantidVec& Dx);
     virtual void setDx(const MantidVec& Dx);
 
     virtual void setX(const MantidVecPtr& X);
-    virtual void setX(const MantidVecPtr& X, const MantidVecPtr& Dx);
     virtual void setDx(const MantidVecPtr& Dx);
 
     virtual void setX(const MantidVecPtr::ptr_type& X);
-    virtual void setX(const MantidVecPtr::ptr_type& X, const MantidVecPtr::ptr_type& Dx);
     virtual void setDx(const MantidVecPtr::ptr_type& Dx);
 
     virtual MantidVec& dataX();

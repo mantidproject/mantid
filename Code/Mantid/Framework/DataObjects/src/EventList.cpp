@@ -1302,6 +1302,13 @@ namespace DataObjects
     if (mru) mru->deleteIndex(this->m_specNo);
   }
 
+  /** Returns a const reference to the x data.
+   *  @return a reference to the X (bin) vector. */
+  const MantidVec& EventList::dataX() const
+  {
+    return *refX;
+  }
+
   /** Returns a reference to the x data.
    *  @return a reference to the X (bin) vector.
    */
