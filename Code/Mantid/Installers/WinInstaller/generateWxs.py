@@ -529,6 +529,7 @@ addTo(Product,'Icon',{'Id':'MantidPlot.exe','SourceFile':MANTIDRELEASE + '/Manti
 pluginsDir = addDirectory('PluginsDir','plugins','plugins',InstallDir)
 Plugins = addComponent('Plugins',comp_guid['Plugins'],pluginsDir)
 addFileV('MantidAlgorithms','MAlg.dll','MantidAlgorithms.dll',MANTIDRELEASE + '/MantidAlgorithms.dll',Plugins)
+addFileV('MantidWorkflowAlgorithms','MWAlg.dll','MantidWorkflowAlgorithms.dll',MANTIDRELEASE + '/MantidWorkflowAlgorithms.dll',Plugins)
 addFileV('MantidDataHandling','MDH.dll','MantidDataHandling.dll',MANTIDRELEASE + '/MantidDataHandling.dll',Plugins)
 addFileV('MantidDataObjects','MDO.dll','MantidDataObjects.dll',MANTIDRELEASE + '/MantidDataObjects.dll',Plugins)
 addFileV('MantidCurveFitting','MCF.dll','MantidCurveFitting.dll',MANTIDRELEASE + '/MantidCurveFitting.dll',Plugins)
