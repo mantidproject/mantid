@@ -118,6 +118,8 @@ namespace Mantid
       void saveConfig(const std::string &filename) const;
       /// Searches for a configuration property
       std::string getString(const std::string& keyName, bool use_cache=true) const;
+      /// Searches for a key in the configuration property
+      std::vector<std::string> getKeys(const std::string& keyName) const;
       /// Sets a configuration property
       void setString(const std::string & keyName, const std::string & keyValue);
       // Searches for a configuration property and returns its value

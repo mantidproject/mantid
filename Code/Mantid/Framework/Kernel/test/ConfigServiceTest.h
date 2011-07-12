@@ -337,6 +337,32 @@ public:
   }
 
 
+  void testGetKeysWithValidInput()
+  {
+    // Returns all subkeys with the given root key
+    std::vector<std::string> keyVector = ConfigService::Instance().getKeys("workspace.sendto");
+    TS_ASSERT_EQUALS(keyVector.size(), 4);
+    TS_ASSERT_EQUALS(keyVector[0], "1");
+    TS_ASSERT_EQUALS(keyVector[1], "2");
+    TS_ASSERT_EQUALS(keyVector[2], "3");
+    TS_ASSERT_EQUALS(keyVector[3], "4");
+  }
+
+  void testGetKeysWithZeroSubKeys()
+  {
+    std::vector<std::string> keyVector = ConfigService::Instance().getKeys("mantid.legs");
+    TS_ASSERT_EQUALS(keyVector.size(), 0);
+    std::vector<std::string> keyVector2 = ConfigService::Instance().getKeys("mantidlegs");
+    TS_ASSERT_EQUALS(keyVector2.size(), 0);
+  }
+
+  void testGetKeysWithEmptyPrefix()
+  {
+    //Returns all *root* keys, i.e. unique keys left of the first period
+    std::vector<std::string> keyVector = ConfigService::Instance().getKeys(""); 
+    TS_ASSERT_EQUALS(keyVector.size(), 5);
+  }
+
 protected:
   bool m_valueChangedSent;
   std::string m_key;

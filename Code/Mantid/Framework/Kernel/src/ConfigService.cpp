@@ -814,6 +814,28 @@ std::string ConfigServiceImpl::getString(const std::string& keyName, bool use_ca
   return retVal;
 }
 
+/** Searches for keys within the currently loaded configuaration values and
+ *  returns them as strings in a vector. 
+ *
+ *  @param keyName :: The case sensitive name of the property that you need the key for.
+ *  @returns The string value of each key within a vector, or an empty vector if there isn't
+ *  a key or it couldn't be found.
+ */
+std::vector<std::string> ConfigServiceImpl::getKeys(const std::string& keyName) const
+{
+  std::vector<std::string> keyVector;
+  try
+  {
+    m_pConf->keys(keyName,keyVector);
+  }
+  catch (Poco::NotFoundException&)
+  {
+    g_log.debug() << "Unable to find " << keyName << " in the properties file" << std::endl;
+    keyVector.clear();
+  }
+  return keyVector;
+}
+
 /**
  * Set a configuration property. An existing key will have its value updated.
  * @param key :: The key to refer to this property
