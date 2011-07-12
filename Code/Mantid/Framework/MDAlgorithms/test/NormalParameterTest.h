@@ -136,9 +136,9 @@ void testAsUnitVector()
 void testArrayTypeAccess()
 {
   Mantid::MDAlgorithms::NormalParameter normal(1, 2, 3);
-  TSM_ASSERT("Wrong componenet returned", 1, normal[0]);
-  TSM_ASSERT("Wrong componenet returned", 2, normal[1]);
-  TSM_ASSERT("Wrong componenet returned", 3, normal[2]);
+  TSM_ASSERT_EQUALS("Wrong componenet returned", 1, normal[0]);
+  TSM_ASSERT_EQUALS("Wrong componenet returned", 2, normal[1]);
+  TSM_ASSERT_EQUALS("Wrong componenet returned", 3, normal[2]);
 }
 
 };

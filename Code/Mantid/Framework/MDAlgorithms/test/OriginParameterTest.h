@@ -102,9 +102,9 @@ public:
   void testArrayTypeAccess()
   {
     Mantid::MDAlgorithms::OriginParameter origin(1, 2, 3);
-    TSM_ASSERT("Wrong componenet returned", 1, origin[0]);
-    TSM_ASSERT("Wrong componenet returned", 2, origin[1]);
-    TSM_ASSERT("Wrong componenet returned", 3, origin[2]);
+    TSM_ASSERT_EQUALS("Wrong componenet returned", 1, origin[0]);
+    TSM_ASSERT_EQUALS("Wrong componenet returned", 2, origin[1]);
+    TSM_ASSERT_EQUALS("Wrong componenet returned", 3, origin[2]);
   }
 
 };
