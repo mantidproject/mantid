@@ -99,7 +99,7 @@ namespace Mantid
             /// Determine whether the point is bounded by the plane described by the parameters.
             inline bool isBoundedByPlane(const OriginParameter& origin, const NormalParameter& normal, const Mantid::API::Point3D* pPoint) const;
             /// Determine whether the point is bounded by the plane described by the parameters.
-            inline bool PlaneImplicitFunction::isBoundedByPlane(const OriginParameter& origin, const NormalParameter& normal, const signal_t& x, const signal_t& y, const signal_t& z) const;
+            inline bool isBoundedByPlane(const OriginParameter& origin, const NormalParameter& normal, const signal_t& x, const signal_t& y, const signal_t& z) const;
             /// Get the effective normal vector to use in calculation.
             inline NormalParameter calculateEffectiveNormal(const OriginParameter& forwardOrigin) const;
 
