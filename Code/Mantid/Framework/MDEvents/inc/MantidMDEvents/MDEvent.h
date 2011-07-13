@@ -232,6 +232,11 @@ namespace MDEvents
       return "MDEvent";
     }
 
+
+
+
+
+
     //---------------------------------------------------------------------------------------------
     /** When first creating a NXS file containing the data, the proper
      * data block(s) need to be created.
@@ -248,6 +253,31 @@ namespace MDEvents
 //      dims[1]=2;
 //      file->makeData("event_signal_errorsquared", ::NeXus::FLOAT32, dims, 0);
     }
+
+    //---------------------------------------------------------------------------------------------
+    /** Open the NXS data blocks for loading.
+     *
+     * @param file :: open NXS file.
+     */
+    static void openNexusData(::NeXus::File * file)
+    {
+      // Open the data
+      file->openData("event_data");
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Do any final clean up of NXS event data blocks
+     *
+     * @param file :: open NXS file.
+     */
+    static void closeNexusData(::NeXus::File * file)
+    {
+      file->closeData();
+    }
+
+
+
+
 
     //---------------------------------------------------------------------------------------------
     /** Static method to save a vector of MDEvents of this type to a nexus file
@@ -287,13 +317,47 @@ namespace MDEvents
     }
 
     //---------------------------------------------------------------------------------------------
-    /** Do any final clean up of NXS event data blocks
+    /** Static method to load part of a HDF block into a vector of MDEvents.
+     * The data block MUST be already open.
      *
+     * This will be re-implemented by any other MDEvent-like type.
+     *
+     * @param events :: reference to the vector of events to load. This is NOT cleared by the method before loading.
      * @param file :: open NXS file.
-     */
-    static void closeNexusData(::NeXus::File * file)
+     * @param indexStart :: index (in events) in the data field to start at
+     * @param numEvents :: number of events to load.
+     * */
+    static void loadVectorFromNexusSlab(std::vector<MDEvent<nd> > & events, ::NeXus::File * file, size_t indexStart, size_t numEvents)
     {
-      file->closeData();
+      if (numEvents == 0)
+        return;
+
+      // Allocate the data
+      double * data = new double[numEvents*(nd+2)];
+
+      // Start/size descriptors
+      std::vector<int> start(2,0);
+      start[0] = indexStart;
+
+      std::vector<int> size(2,0);
+      size[0] = numEvents;
+      size[1] = nd+2;
+
+      // Get the slab into the allocated data
+      file->getSlab(data, start, size);
+
+      for (size_t i=0; i<numEvents; i++)
+      {
+        // Point directly into the data block for the centers.
+        // WARNING: coord_t type must be same as double for this to work!
+        coord_t * centers = data + i*(nd+2)+2;
+
+        // Create the event with signal, error squared, and the centers
+        events.push_back( MDEvent<nd>( data[i*(nd+2)], data[i*(nd+2) + 1], centers) );
+      }
+
+      // Release the memory (all has been COPIED into MDEvent's)
+      delete [] data;
     }
 
 //
@@ -330,6 +394,11 @@ namespace MDEvents
 //      file->putSlab(signal_error, start, dims);
 //      file->closeData();
 //    }
+
+
+
+
+
 
 
     //---------------------------------------------------------------------------------------------
@@ -369,6 +438,8 @@ namespace MDEvents
       dims[1] = 2;
       file->writeData("signal_errorsquared", signal_error, dims);
     }
+
+
 
 
     //---------------------------------------------------------------------------------------------

@@ -5,6 +5,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/CPUTimer.h"
 
 using Mantid::Geometry::IMDDimensionFactory;
 using Mantid::Geometry::IMDDimension_sptr;
@@ -105,6 +106,9 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void LoadMDEW::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
+    CPUTimer tim;
+    bool verbose=true;
+
     file->openGroup("workspace", "NXworkspace");
 
     // Load each dimension, as their XML representation
@@ -119,6 +123,8 @@ namespace MDEvents
       IMDDimension_sptr dim(factory.create());
       ws->addDimension(dim);
     }
+
+    if (verbose) std::cout << tim << " to load the dimensions, etc." << std::endl;
 
     file->closeGroup();
 
@@ -139,6 +145,8 @@ namespace MDEvents
     // Start/end children IDs
     std::vector<int> box_children;
 
+    if (verbose) std::cout << tim << " to initialize the box data vectors." << std::endl;
+
     // Read all the data blocks
     file->readData("boxType", boxType);
     file->readData("depth", depth);
@@ -147,6 +155,8 @@ namespace MDEvents
     file->readData("box_children", box_children);
     file->readData("box_signal_errorsquared", box_signal_errorsquared);
     file->readData("box_event_index", box_event_index);
+
+    if (verbose) std::cout << tim << " to read all the box data vectors." << std::endl;
 
     size_t numBoxes = boxType.size();
     // Check all vector lengths match
@@ -161,6 +171,9 @@ namespace MDEvents
     std::vector<IMDBox<MDE,nd> *> boxes(numBoxes, NULL);
     BoxController_sptr bc = ws->getBoxController();
 
+    // Get ready to read the slabs
+    MDE::openNexusData(file);
+
     for (size_t i=0; i<numBoxes; i++)
     {
       size_t box_type = boxType[i];
@@ -171,8 +184,19 @@ namespace MDEvents
         if (box_type == 1)
         {
           // --- Make a MDBox -----
-          ibox = new MDBox<MDE,nd>(bc, depth[i]);
-          // TODO: Load the events?
+          MDBox<MDE,nd> * box = new MDBox<MDE,nd>(bc, depth[i]);
+          ibox = box;
+
+          // Load the events now
+          size_t indexStart = box_event_index[i*2];
+          size_t indexEnd = box_event_index[i*2+1];
+          if (indexEnd > indexStart)
+          {
+            //std::cout << "box " << i << " from " << indexStart << " to " << indexEnd << std::endl;
+            std::vector<MDE> & events = box->getEvents();
+            events.clear();
+            MDE::loadVectorFromNexusSlab(events, file, indexStart, indexEnd-indexStart);
+          }
         }
         else if (box_type == 2)
         {
@@ -195,6 +219,12 @@ namespace MDEvents
       }
     }
 
+    // Done reading in all the events.
+    MDE::closeNexusData(file);
+
+    if (verbose) std::cout << tim << " to create all the boxes and fill them with events." << std::endl;
+
+
     // Go again, giving the children to the parents
     for (size_t i=0; i<numBoxes; i++)
     {
@@ -208,12 +238,16 @@ namespace MDEvents
 
     // Box of ID 0 is the head box.
     ws->setBox( boxes[0] );
-
-
+    // Make sure the max ID is ok for later ID generation
     bc->setMaxId(numBoxes);
+    // Refresh cache
+    ws->refreshCache();
 
     file->closeGroup();
     file->close();
+
+    if (verbose) std::cout << tim << " to finish up." << std::endl;
+
   }
 
 
