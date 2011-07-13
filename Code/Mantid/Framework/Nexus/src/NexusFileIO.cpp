@@ -770,12 +770,18 @@ using namespace DataObjects;
         status = NXputdata(fileID, (void *)(toNexus));
         delete[] toNexus;
 
-        // write out title and other stuff
-        NXputattr(fileID, "name", (void*)col->name().c_str(), static_cast<int>(col->name().size()), NX_CHAR);
         status = NXclosedata(fileID);
       }
 
+      // write out title and other stuff
+      status=NXopendata(fileID, str.c_str());
+      if (status != NX_OK)
+        std::cout << "Open : " << status << std::endl;
+      status=NXputattr(fileID, "name", (void*)col->name().c_str(), static_cast<int>(col->name().size()), NX_CHAR);
+      if (status != NX_OK)
+        std::cout << "Put att " << status << std::endl;
 
+      status=NXclosedata(fileID);
     }
 
     status=NXclosegroup(fileID);

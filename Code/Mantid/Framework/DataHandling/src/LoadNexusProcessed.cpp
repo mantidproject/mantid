@@ -301,11 +301,13 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
 
   std::vector<double> values;
 
+  bool hasNumberOfRowBeenSet = false;
+  //int numberOfRows = 0;
+
   int columnNumber = 1;
   do
   {
     std::string str = "column_" + boost::lexical_cast<std::string>(columnNumber);
-    columnNumber++;
 
     NXInfo info = nx_tw.getDataSetInfo(str.c_str());
     if (info.stat == NX_ERROR)
@@ -315,30 +317,50 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
 
     if ( info.type == NX_FLOAT64 )
     {
-      NXDouble nx_crap = nx_tw.openNXDouble(str.c_str());
-      nx_crap.load();
-      int length = nx_crap.dim0();
-      for (int i = 0; i < length; i++)
-        values.push_back(*(nx_crap() + i));
+      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      std::string columnTitle = nxDouble.attributes("name");
+      if (!columnTitle.empty())
+      {
+        workspace->addColumn("double", columnTitle);
+        nxDouble.load();
+        int length = nxDouble.dim0();
+        if ( !hasNumberOfRowBeenSet )
+        { 
+          workspace->setRowCount(length);
+          hasNumberOfRowBeenSet = true;
+        }
+        for (int i = 0; i < length; i++)
+          workspace->cell<double>(i,columnNumber-1) = *(nxDouble() + i);
+      }
     }
     else if ( info.type == NX_CHAR )
     {
       NXChar data = nx_tw.openNXChar(str.c_str());
-      int nRows = info.dims[0];
-      int maxStr = info.dims[1];
-
-      std::string fromCrap(maxStr,' ');
-
-      data.load();
-      for (int iR = 0; iR < nRows; iR++)
+      std::string columnTitle = data.attributes("name");
+      if (!columnTitle.empty())
       {
-        for (int i = 0; i < maxStr; i++)
-          fromCrap[i] = *(data()+i+maxStr*iR);
-        std::cout << fromCrap << std::endl;
+        workspace->addColumn("str", columnTitle);
+        int nRows = info.dims[0];
+        if ( !hasNumberOfRowBeenSet )
+        {
+          workspace->setRowCount(nRows);
+          hasNumberOfRowBeenSet = true;
+        }
+        int maxStr = info.dims[1];
+
+        std::string fromCrap(maxStr,' ');
+
+        data.load();
+        for (int iR = 0; iR < nRows; iR++)
+        {
+          for (int i = 0; i < maxStr; i++)
+            fromCrap[i] = *(data()+i+maxStr*iR);
+          workspace->cell<std::string>(iR,columnNumber-1) = fromCrap;
+        }
       }
-      
-    }
-   // nx_crap.
+    } 
+
+    columnNumber++;
   
   } while ( 1 );
 
