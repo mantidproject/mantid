@@ -220,14 +220,14 @@ public:
     fileIn->closeGroup();
     fileIn->close();
 
-    TS_ASSERT_DELTA( c.getExtents(0).min, -10, 1e-5);
-    TS_ASSERT_DELTA( c.getExtents(0).max, +10, 1e-5);
-    TS_ASSERT_DELTA( c.getExtents(1).min, -4, 1e-5);
-    TS_ASSERT_DELTA( c.getExtents(1).max, +6, 1e-5);
+    TS_ASSERT_DELTA( c.getExtents(0).min, -10.0, 1e-5);
+    TS_ASSERT_DELTA( c.getExtents(0).max, +10.0, 1e-5);
+    TS_ASSERT_DELTA( c.getExtents(1).min, -4.0, 1e-5);
+    TS_ASSERT_DELTA( c.getExtents(1).max, +6.0, 1e-5);
     TS_ASSERT_DELTA( c.getSignal(), 123.456, 1e-5);
     TS_ASSERT_DELTA( c.getErrorSquared(), 456.789, 1e-5);
     TS_ASSERT_DELTA( c.getVolume(), b.getVolume(), 1e-5);
-    TS_ASSERT_DELTA( c.getDepth(), b.getDepth(), 1e-5);
+    TS_ASSERT_EQUALS( c.getDepth(), b.getDepth());
 
 
     // Clean up

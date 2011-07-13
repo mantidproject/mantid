@@ -123,7 +123,7 @@ public:
     TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000.0, 1e-2);
     TS_ASSERT_DELTA( peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
     // Peak is of radius 2.0, but we get half that radius = ~1/8th the volume
-    TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(),  125.0, 10);
+    TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(),  125.0, 10.0);
 
     // Error is also calculated
     TS_ASSERT_DELTA( peakWS->getPeak(0).getSigmaIntensity(), sqrt(1000.0), 1e-2);
@@ -142,9 +142,9 @@ public:
     // ------------- Let's do it again with 0.5 radius ------------------------
     doRun(0.5,0.0);
 
-    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 125.0, 10);
+    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 125.0, 10.0);
     TS_ASSERT_DELTA( peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
-    TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(), 15.0, 10);
+    TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(), 15.0, 10.0);
 
     // ===============================================================================
     // ---- Now add a background signal over one peak--------------
@@ -153,7 +153,7 @@ public:
     // ------------- Integrate with 1.0 radius and 2.0 background------------------------
     doRun(1.0, 2.0);
     // Same 1000 since the background (~125) was subtracted, with some random variation of the BG around
-    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000.0, 10);
+    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000.0, 10.0);
     // Error on peak is the SUM of the error of peak and the subtracted background
     TS_ASSERT_DELTA( peakWS->getPeak(0).getSigmaIntensity(), sqrt(1125.0 + 125.0), 2.0);
 
@@ -162,7 +162,7 @@ public:
     TS_ASSERT_DELTA( peakWS->getPeak(1).getSigmaIntensity(), sqrt(1000.0), 1e-1);
 
     // This one is a 2.0 radius fake peak, so the background and peak have ~ the same density! So ~0 total intensity.
-    TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(), 0.0, 12);
+    TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(), 0.0, 12.0);
     // But the error is large since it is 125 - 125 (with errors)
     TS_ASSERT_DELTA( peakWS->getPeak(2).getSigmaIntensity(), sqrt(2*125.0), 2.);
 
@@ -171,11 +171,11 @@ public:
     doRun(1.0, 0.0);
 
     // +125 counts due to background
-    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1125.0, 10);
+    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1125.0, 10.0);
 
     // These had no bg, so they are the same
     TS_ASSERT_DELTA( peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
-    TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(), 125.0, 10);
+    TS_ASSERT_DELTA( peakWS->getPeak(2).getIntensity(), 125.0, 10.0);
 
     AnalysisDataService::Instance().remove("MDEWPeakIntegrationTest_MDEWS");
     AnalysisDataService::Instance().remove("MDEWPeakIntegrationTest_peaks");
