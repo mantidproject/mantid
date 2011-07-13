@@ -28,6 +28,7 @@ set ( SRC_UNITY_IGNORE_FILES
     src/IMDBox.cpp
 	src/MDBin.cpp
     src/MDBox.cpp
+    src/MDBoxIterator.cpp
     src/MDEventWorkspace.cpp
     src/MDGridBox.cpp
     #src/MDSplitBox.cpp
