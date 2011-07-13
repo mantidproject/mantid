@@ -96,7 +96,8 @@ private:
       TS_ASSERT_EQUALS(vertexTwo->previous(), &origin);
       TS_ASSERT_EQUALS(vertexTwo->next(), &origin);
 
-      //Vertex2D *removedTwo = vertexTwo->remove();
+      Vertex2D *removedTwo = vertexTwo->remove();
+      TS_ASSERT( removedTwo);
       TS_ASSERT_EQUALS(origin.next(), &origin);
       TS_ASSERT_EQUALS(origin.previous(), &origin);
     }
