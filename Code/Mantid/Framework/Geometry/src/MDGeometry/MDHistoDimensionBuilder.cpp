@@ -23,11 +23,11 @@ namespace Mantid
      m_name(other.m_name),
       m_id(other.m_id), 
       m_units(other.m_units), 
+      m_min(other.m_min),
       m_max(other.m_max),
-      m_min(other.m_min), 
-      m_nbins(other.m_nbins), 
-      m_maxSet(other.m_maxSet),
-      m_minSet(other.m_minSet)
+      m_nbins(other.m_nbins),  
+      m_minSet(other.m_minSet),
+      m_maxSet(other.m_maxSet)
     {
     }
     
