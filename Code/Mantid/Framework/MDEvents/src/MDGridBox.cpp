@@ -99,7 +99,7 @@ namespace MDEvents
     // Splitting an input MDBox requires creating a bunch of children
     // But the IDs of these children MUST be sequential. Hence the critical block
     // to avoid interleaved IDs when splitting boxes in parallel.
-    PARALLEL_CRITICAL(MDGridBox_splitting)
+    bc->getIdMutex().lock();
     {
       for (size_t i=0; i<tot; i++)
       {
@@ -128,6 +128,7 @@ namespace MDEvents
         }
       } // for each box
     }
+    bc->getIdMutex().unlock();
 
     // Now distribute the events that were in the box before
     this->addEvents(box->getEvents());

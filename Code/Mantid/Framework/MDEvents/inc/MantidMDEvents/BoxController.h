@@ -85,6 +85,13 @@ namespace MDEvents
     }
 
     //-----------------------------------------------------------------------------------
+    /** @return the mutex for avoiding simultaneous assignments of box Ids. */
+    inline Kernel::Mutex & getIdMutex()
+    {
+      return m_idMutex;
+    }
+
+    //-----------------------------------------------------------------------------------
     /** Return true if the MDBox should split, given :
      *
      * @param numPoints :: # of points in the box
@@ -388,6 +395,9 @@ namespace MDEvents
 
     /// This is the maximum number of MD boxes there could be at each recursion level (e.g. (splitInto ^ ndims) ^ depth )
     std::vector<double> m_maxNumMDBoxes;
+
+    /// Mutex for getting IDs
+    Mantid::Kernel::Mutex m_idMutex;
 
   };
 
