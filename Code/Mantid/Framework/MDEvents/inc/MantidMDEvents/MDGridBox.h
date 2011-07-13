@@ -40,6 +40,8 @@ namespace MDEvents
   public:
     MDGridBox();
 
+    MDGridBox(BoxController_sptr bc);
+
     MDGridBox(MDBox<MDE, nd> * box);
 
     virtual ~MDGridBox();
@@ -55,6 +57,8 @@ namespace MDEvents
     size_t getNumChildren() const;
 
     IMDBox<MDE,nd> * getChild(size_t index);
+
+    void setChildren(const std::vector<IMDBox<MDE,nd> *> & boxes, const size_t indexStart, const size_t indexEnd);
 
     std::vector< MDE > * getEventsCopy();
 

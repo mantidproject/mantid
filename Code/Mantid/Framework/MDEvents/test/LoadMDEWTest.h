@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <iostream>
 #include "MantidKernel/CPUTimer.h"
+#include "MantidMDEvents/MDEventFactory.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
@@ -43,10 +44,14 @@ public:
     
     std::cout << tim << " to load the MDEW." << std::endl;
     // Retrieve the workspace from data service.
-    IMDEventWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
-    TS_ASSERT(ws);
-    if (!ws) return;
+    IMDEventWorkspace_sptr iws;
+    TS_ASSERT_THROWS_NOTHING( iws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT(iws);
+    if (!iws) return;
+
+    MDEventWorkspace1::sptr ws = boost::dynamic_pointer_cast<MDEventWorkspace1>(iws);
+    TS_ASSERT(ws->getBox());
+    TS_ASSERT_EQUALS(ws->getBox()->getNumChildren(), 10);
     
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);

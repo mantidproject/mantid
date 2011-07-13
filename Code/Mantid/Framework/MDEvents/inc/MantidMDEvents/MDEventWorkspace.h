@@ -94,6 +94,13 @@ namespace MDEvents
       return data;
     }
 
+    /** Set the base-level box contained within.
+     * Used in file loading */
+    void setBox(IMDBox<MDE,nd> * box)
+    {
+      data = box;
+    }
+
 
   protected:
 

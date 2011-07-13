@@ -56,7 +56,11 @@ namespace MDEvents
 
     /// Return the indexth child IMDBox.
     IMDBox<MDE,nd> * getChild(size_t /*index*/)
-    { throw std::runtime_error("MDBox does not have children."); }
+        { throw std::runtime_error("MDBox does not have children."); }
+
+    /// Sets the children from a vector of children
+    void setChildren(const std::vector<IMDBox<MDE,nd> *> & /*boxes*/, const size_t /*indexStart*/, const size_t /*indexEnd*/)
+    { throw std::runtime_error("MDBox cannot have children."); }
 
     std::vector< MDE > & getEvents();
 

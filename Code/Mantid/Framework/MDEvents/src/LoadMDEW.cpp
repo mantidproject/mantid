@@ -148,6 +148,70 @@ namespace MDEvents
     file->readData("box_signal_errorsquared", box_signal_errorsquared);
     file->readData("box_event_index", box_event_index);
 
+    size_t numBoxes = boxType.size();
+    // Check all vector lengths match
+    if (depth.size() != numBoxes) throw std::runtime_error("Incompatible size for data: depth.");
+    if (inverseVolume.size() != numBoxes) throw std::runtime_error("Incompatible size for data: inverseVolume.");
+    if (boxType.size() != numBoxes) throw std::runtime_error("Incompatible size for data: boxType.");
+    if (extents.size() != numBoxes*nd*2) throw std::runtime_error("Incompatible size for data: extents.");
+    if (box_children.size() != numBoxes*2) throw std::runtime_error("Incompatible size for data: box_children.");
+    if (box_event_index.size() != numBoxes*2) throw std::runtime_error("Incompatible size for data: box_event_index.");
+    if (box_signal_errorsquared.size() != numBoxes*2) throw std::runtime_error("Incompatible size for data: box_signal_errorsquared.");
+
+    std::vector<IMDBox<MDE,nd> *> boxes(numBoxes, NULL);
+    BoxController_sptr bc = ws->getBoxController();
+
+    for (size_t i=0; i<numBoxes; i++)
+    {
+      size_t box_type = boxType[i];
+      if (box_type > 0)
+      {
+        IMDBox<MDE,nd> * ibox = NULL;
+
+        if (box_type == 1)
+        {
+          // --- Make a MDBox -----
+          ibox = new MDBox<MDE,nd>(bc, depth[i]);
+          // TODO: Load the events?
+        }
+        else if (box_type == 2)
+        {
+          // --- Make a MDGridBox -----
+          ibox = new MDGridBox<MDE,nd>(bc);
+        }
+        else
+          continue;
+
+        // Force correct ID
+        ibox->setId(i);
+
+        // Extents of the box
+        for (size_t d=0; d<nd; d++)
+          ibox->setExtents(d, extents[i*2+d*2], extents[i*2+d*2+1]);
+        ibox->calcVolume();
+
+        // Save the box at its index in the vector.
+        boxes[i] = ibox;
+      }
+    }
+
+    // Go again, giving the children to the parents
+    for (size_t i=0; i<numBoxes; i++)
+    {
+      if (boxType[i] == 2)
+      {
+        size_t indexStart = box_children[i*2];
+        size_t indexEnd = box_children[i*2+1] + 1;
+        boxes[i]->setChildren( boxes, indexStart, indexEnd);
+      }
+    }
+
+    // Box of ID 0 is the head box.
+    ws->setBox( boxes[0] );
+
+
+    bc->setMaxId(numBoxes);
+
     file->closeGroup();
     file->close();
   }

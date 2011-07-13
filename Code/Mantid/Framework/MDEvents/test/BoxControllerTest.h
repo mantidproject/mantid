@@ -80,7 +80,7 @@ public:
     sc.setMaxDepth(6);
     {
       const std::vector<double> & max = sc.getMaxNumMDBoxes();
-      TS_ASSERT_DELTA( max[0], 1, 1e-2);
+      TS_ASSERT_DELTA( max[0], 1.0, 1e-2);
       TS_ASSERT_DELTA( max[1], 1e3, 1e-2);
       TS_ASSERT_DELTA( max[2], 1e6, 1e-2);
       TS_ASSERT_DELTA( max[3], 1e9, 1e-2);
@@ -91,9 +91,9 @@ public:
       sc.setSplitInto(5);
       TS_ASSERT_EQUALS( sc.getNumSplit(), 125);
       const std::vector<double> & max = sc.getMaxNumMDBoxes();
-      TS_ASSERT_DELTA( max[0], 1, 1e-2);
-      TS_ASSERT_DELTA( max[1], 125, 1e-2);
-      TS_ASSERT_DELTA( max[2], 125*125, 1e-2);
+      TS_ASSERT_DELTA( max[0], 1.0, 1e-2);
+      TS_ASSERT_DELTA( max[1], 125.0, 1e-2);
+      TS_ASSERT_DELTA( max[2], 125*125.0, 1e-2);
     }
   }
 

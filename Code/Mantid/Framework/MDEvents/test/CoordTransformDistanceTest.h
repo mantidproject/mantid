@@ -50,11 +50,11 @@ public:
 
     coord_t in1[2] = {0, 3};
     TS_ASSERT_THROWS_NOTHING( ct.apply(in1, &out) );
-    TS_ASSERT_DELTA( out, 2, 1e-5);
+    TS_ASSERT_DELTA( out, 2.0, 1e-5);
 
     coord_t in2[2] = {-1, 5};
     TS_ASSERT_THROWS_NOTHING( ct.apply(in2, &out) );
-    TS_ASSERT_DELTA( out, 13, 1e-5);
+    TS_ASSERT_DELTA( out, 13.0, 1e-5);
   }
 
   /** Calculate the distance (squared)*/
@@ -69,11 +69,11 @@ public:
 
     coord_t in1[2] = {0, 3};
     TS_ASSERT_THROWS_NOTHING( ct.apply(in1, &out) );
-    TS_ASSERT_DELTA( out, 1, 1e-5);
+    TS_ASSERT_DELTA( out, 1.0, 1e-5);
 
     coord_t in2[2] = {-1, 5};
     TS_ASSERT_THROWS_NOTHING( ct.apply(in2, &out) );
-    TS_ASSERT_DELTA( out, 4, 1e-5);
+    TS_ASSERT_DELTA( out, 4.0, 1e-5);
   }
 
 };

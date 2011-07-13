@@ -56,14 +56,14 @@ namespace MDEventsTestHelper
     {
       std::ostringstream name;
       name << "Axis" << d;
-      Mantid::Geometry::MDHistoDimension_sptr dim(new Mantid::Geometry::MDHistoDimension( name.str(),name.str(), "m", min, max, 0));
+      Mantid::Geometry::MDHistoDimension_sptr dim(new Mantid::Geometry::MDHistoDimension( name.str(),name.str(), "m", min, max, 10));
       out->addDimension(dim);
     }
     out->initialize();
 
+    out->splitBox();
     if (numEventsPerBox > 0)
     {
-      out->splitBox();
       size_t * index = Mantid::Kernel::Utils::nestedForLoopSetUp(nd);
       size_t * index_max = Mantid::Kernel::Utils::nestedForLoopSetUp(nd, splitInto);
       bool allDone = false;

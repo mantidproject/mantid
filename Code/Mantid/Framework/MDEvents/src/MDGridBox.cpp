@@ -45,6 +45,26 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
+  /** Constructor with a box controller. Used when loading files.
+   * */
+  TMDE(MDGridBox)::MDGridBox(BoxController_sptr bc)
+   : IMDBox<MDE, nd>(), numBoxes(0), nPoints(0)
+  {
+    if (!bc)
+      throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
+
+    // How many is it split?
+    for (size_t d=0; d<nd; d++)
+      split[d] = bc->getSplitInto(d);
+
+    // Compute sizes etc.
+    size_t tot = computeFromSplit();
+    if (tot == 0)
+      throw std::runtime_error("MDGridBox::ctor(): Invalid splitting criterion (one was zero).");
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
   /** Constructor
    * @param box :: MDBox containing the events to split */
   TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> * box)
@@ -216,6 +236,23 @@ namespace MDEvents
   {
     return boxes[index];
   }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Directly set the children of the MDGridBox. Used in file loading.
+   * Should not be called on a box with children; the existing children are NOT deleted.
+   *
+   * @param otherBoxes:: reference to a vector of boxes containing the children
+   * @param indexStart :: start point in the vector
+   * @param indexEnd :: end point in the vector, not-inclusive
+   */
+  TMDE(
+  void MDGridBox)::setChildren(const std::vector<IMDBox<MDE,nd> *> & otherBoxes, const size_t indexStart, const size_t indexEnd)
+  {
+    boxes.clear();
+    boxes.assign( otherBoxes.begin()+indexStart, otherBoxes.begin()+indexEnd);
+    numBoxes = boxes.size();
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Helper function to get the index into the linear array given

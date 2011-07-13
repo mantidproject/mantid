@@ -68,6 +68,9 @@ namespace MDEvents
     /// Return the indexth child IMDBox.
     virtual IMDBox<MDE,nd> * getChild(size_t index) = 0;
 
+    /// Sets the children from a vector of children
+    virtual void setChildren(const std::vector<IMDBox<MDE,nd> *> & boxes, const size_t indexStart, const size_t indexEnd) = 0;
+
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
 

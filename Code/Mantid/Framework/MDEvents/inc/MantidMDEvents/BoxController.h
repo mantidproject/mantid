@@ -66,6 +66,14 @@ namespace MDEvents
     }
 
     //-----------------------------------------------------------------------------------
+    /** Set the new maximum ID number anywhere in the workspace.
+     * Should only be called when loading a file. */
+    void setMaxId(size_t newMaxId)
+    {
+      m_maxId = newMaxId;
+    }
+
+    //-----------------------------------------------------------------------------------
     /** Return true if the MDBox should split, given :
      *
      * @param numPoints :: # of points in the box

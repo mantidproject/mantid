@@ -26,7 +26,6 @@ namespace MDEvents
    */
   SaveMDEW::SaveMDEW()
   {
-    // TODO Auto-generated constructor stub
   }
     
   //----------------------------------------------------------------------------------------------
@@ -34,7 +33,6 @@ namespace MDEvents
    */
   SaveMDEW::~SaveMDEW()
   {
-    // TODO Auto-generated destructor stub
   }
   
 
@@ -94,7 +92,11 @@ namespace MDEvents
     file->makeGroup("data", "NXdata", 1);
 
     // Prepare the data chunk storage.
-    MDE::prepareNexusData(file, ws->getNPoints());
+    size_t numPoints = ws->getNPoints();
+
+    // Must have at least 1 point!
+    if (numPoints == 0) numPoints = 1;
+    MDE::prepareNexusData(file, numPoints);
 
     BoxController_sptr bc = ws->getBoxController();
     size_t maxBoxes = bc->getMaxId();
@@ -184,6 +186,10 @@ namespace MDEvents
         break;
       }
     }
+
+    // Done writing the event data
+    MDE::closeNexusData(file);
+
 
 //    for (size_t i=0; i<20; i++)
 //    {

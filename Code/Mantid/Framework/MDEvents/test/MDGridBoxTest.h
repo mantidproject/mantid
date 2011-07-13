@@ -127,6 +127,20 @@ public:
   }
 
 
+  void test_setChildren()
+  {
+    // Build the grid box
+    MDGridBox<MDEvent<1>,1> * g = MDEventsTestHelper::makeMDGridBox<1>(10,10,0.0, 10.0);
+    std::vector<IMDBox<MDEvent<1>,1>*> boxes;
+    for (size_t i=0; i<15; i++)
+      boxes.push_back( MDEventsTestHelper::makeMDBox1() );
+    TS_ASSERT_THROWS_NOTHING( g->setChildren(boxes, 2, 12) );
+
+    TS_ASSERT_EQUALS( g->getNumChildren(), 10);
+    for (size_t i=2; i<12; i++)
+      TS_ASSERT_EQUALS( g->getChild(i-2), boxes[i]);
+  }
+
 
   //-------------------------------------------------------------------------------------
   /** Build a 3D MDGridBox and check that the boxes created within are where you expect */
