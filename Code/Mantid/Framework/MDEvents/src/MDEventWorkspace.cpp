@@ -108,7 +108,7 @@ namespace MDEvents
     for (it = boxes.begin(); it != boxes.end(); it++)
     {
       IMDBox<MDE,nd>* box = *it;
-      if (box->getSignal() > 0)
+      if (box->getNPoints() > 0)
       {
         for (size_t d=0; d<nd; d++)
         {

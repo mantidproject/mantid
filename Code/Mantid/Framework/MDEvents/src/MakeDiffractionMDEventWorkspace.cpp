@@ -417,9 +417,7 @@ namespace MDEvents
 
     // Recount totals at the end.
     cputim.reset();
-#ifndef MDEVENTS_MDGRIDBOX_ONGOING_SIGNAL_CACHE
     ws->refreshCache();
-#endif
     if (DODEBUG) std::cout << cputim << ": Performing the refreshCache().\n";
 
     //TODO: Centroid in parallel, maybe?

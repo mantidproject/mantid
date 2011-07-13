@@ -97,6 +97,10 @@ public:
     // Compare the initial to the final workspace
     TS_ASSERT_EQUALS(ws->getBox()->getNumChildren(), ws1->getBox()->getNumChildren());
     TS_ASSERT_EQUALS(ws->getNPoints(), ws1->getNPoints());
+    std::cout << ws->getNPoints() << std::endl;
+    ws->refreshCache();
+    std::cout << ws->getNPoints() << std::endl;
+
     TS_ASSERT_EQUALS(ws->getBoxController()->getMaxId(), ws1->getBoxController()->getMaxId());
     // Compare all the details of the box controllers
     compareBoxControllers(*ws->getBoxController(), *ws1->getBoxController());
@@ -117,9 +121,14 @@ public:
       IMDBox<MDEvent<1>,1>* box = boxes[i];
       IMDBox<MDEvent<1>,1>* box1 = boxes1[i];
       TS_ASSERT_EQUALS( box->getId(), box1->getId() );
+      TS_ASSERT_EQUALS( box->getNumChildren(), box1->getNumChildren() );
+      TS_ASSERT_DELTA( box->getSignal(), box1->getSignal(), 1e-3);
+      TS_ASSERT_DELTA( box->getErrorSquared(), box1->getErrorSquared(), 1e-3);
       TS_ASSERT_DELTA( box->getExtents(0).min, box1->getExtents(0).min, 1e-5);
       TS_ASSERT_DELTA( box->getExtents(0).max, box1->getExtents(0).max, 1e-5);
       TS_ASSERT_EQUALS( box->getNPoints(), box1->getNPoints() );
+      TS_ASSERT( box->getBoxController() );
+      TS_ASSERT_EQUALS( box->getBoxController(), ws->getBoxController() );
     }
 
     // Remove workspace from the data service.

@@ -189,13 +189,6 @@ namespace MDEvents
       right->addEvent(event);
     }
 
-    // Track the total signal
-#ifdef MDEVENTS_MDGRIDBOX_ONGOING_SIGNAL_CACHE
-    statsMutex.lock();
-    this->m_signal += event.getSignal();
-    this->m_errorSquared += event.getErrorSquared();
-    statsMutex.unlock();
-#endif
   }
 
 

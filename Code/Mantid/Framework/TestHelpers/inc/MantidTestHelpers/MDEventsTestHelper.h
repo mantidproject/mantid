@@ -61,9 +61,9 @@ namespace MDEventsTestHelper
     }
     out->initialize();
 
-    out->splitBox();
     if (numEventsPerBox > 0)
     {
+      out->splitBox();
       size_t * index = Mantid::Kernel::Utils::nestedForLoopSetUp(nd);
       size_t * index_max = Mantid::Kernel::Utils::nestedForLoopSetUp(nd, splitInto);
       bool allDone = false;

@@ -99,6 +99,18 @@ namespace MDEvents
   TMDE(
   void MDBox)::refreshCache(Kernel::ThreadScheduler * /*ts*/)
   {
+#ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
+    this->m_signal = 0;
+    this->m_errorSquared = 0;
+
+    typename std::vector<MDE>::const_iterator it_end = data.end();
+    for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; it++)
+    {
+      const MDE & event = *it;
+      this->m_signal += event.getSignal();
+      this->m_errorSquared += event.getErrorSquared();
+    }
+#endif
   }
 
 
@@ -164,10 +176,12 @@ namespace MDEvents
     dataMutex.lock();
     this->data.push_back(event);
 
+#ifdef MDBOX_TRACK_SIGNAL_WHEN_ADDING
     // Keep the running total of signal and error
     double signal = event.getSignal();
     this->m_signal += signal;
     this->m_errorSquared += event.getErrorSquared();
+#endif
 
 #ifdef MDBOX_TRACKCENTROID_WHENADDING
     // Running total of the centroid
@@ -195,6 +209,7 @@ namespace MDEvents
     // Copy all the events
     this->data.insert(this->data.end(), start, end);
 
+#ifdef MDBOX_TRACK_SIGNAL_WHEN_ADDING
     //Running total of signal/error
     for(typename std::vector<MDE>::const_iterator it = start; it != end; it++)
     {
@@ -208,6 +223,7 @@ namespace MDEvents
       this->m_centroid[d] += it->getCenter(d) * signal;
 #endif
     }
+#endif
 
     dataMutex.unlock();
     return 0;

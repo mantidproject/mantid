@@ -184,11 +184,11 @@ public:
 
   void test_getMinimumExtents()
   {
-    MDEventWorkspace2::sptr b = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
+    MDEventWorkspace2::sptr ws = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
     std::vector<Mantid::Geometry::MDDimensionExtents> ext;
 
     // If nothing in the workspace, the extents given are invalid.
-    ext = b->getMinimumExtents(2);
+    ext = ws->getMinimumExtents(2);
     TS_ASSERT( ext[0].min > ext[0].max )
 
     std::vector< MDEvent<2> > events;
@@ -199,23 +199,26 @@ public:
         coord_t centers[2] = {x, y};
         events.push_back( MDEvent<2>(2.0, 2.0, centers) );
       }
-    b->addManyEvents( events, NULL );
+    // So it doesn't split
+    ws->getBoxController()->setSplitThreshold(1000);
+    ws->addManyEvents( events, NULL );
+    ws->refreshCache();
 
     // Base extents
-    ext = b->getMinimumExtents(2);
+    ext = ws->getMinimumExtents(2);
     checkExtents(ext, 4, 7,  4, 7);
 
     // Start adding events to make the extents bigger
-    addEvent(b, 3.5, 5.0);
-    ext = b->getMinimumExtents(2);
+    addEvent(ws, 3.5, 5.0);
+    ext = ws->getMinimumExtents(2);
     checkExtents(ext, 3, 7,  4, 7);
 
-    addEvent(b, 8.5, 7.9);
-    ext = b->getMinimumExtents(2);
+    addEvent(ws, 8.5, 7.9);
+    ext = ws->getMinimumExtents(2);
     checkExtents(ext, 3, 9,  4, 8);
 
-    addEvent(b, 0.5, 0.9);
-    ext = b->getMinimumExtents(2);
+    addEvent(ws, 0.5, 0.9);
+    ext = ws->getMinimumExtents(2);
     checkExtents(ext, 0, 9,  0, 8);
 
   }

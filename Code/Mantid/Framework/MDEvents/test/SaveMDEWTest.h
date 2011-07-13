@@ -42,7 +42,8 @@ public:
   {
     // Make a 1D MDEventWorkspace
     MDEventWorkspace1::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, numPerBox);
-
+    // Make sure it is split
+    if (numPerBox == 0) ws->splitBox();
     // Recurse split so that it has lots more boxes, recursively
     MDEventsTestHelper::recurseSplit<1>( dynamic_cast<MDGridBox<MDEvent<1>,1>*>(ws->getBox()), 0, 4);
 

@@ -250,6 +250,8 @@ namespace MDEvents
       dims[1] = (nd)+2;
       // Make and open the data
       file->makeData("event_data", ::NeXus::FLOAT64, dims, true);
+      // A little bit of description for humans to read later
+      file->putAttr("description", "signal, errorsquared, center (each dim.)");
 //      dims[1]=2;
 //      file->makeData("event_signal_errorsquared", ::NeXus::FLOAT32, dims, 0);
     }

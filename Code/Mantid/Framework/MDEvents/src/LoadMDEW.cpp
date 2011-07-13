@@ -190,6 +190,8 @@ namespace MDEvents
     // Get ready to read the slabs
     MDE::openNexusData(file);
 
+    size_t totalEvents=0;
+
     for (size_t i=0; i<numBoxes; i++)
     {
       prog->report();
@@ -213,6 +215,7 @@ namespace MDEvents
             std::vector<MDE> & events = box->getEvents();
             events.clear();
             MDE::loadVectorFromNexusSlab(events, file, indexStart, indexEnd-indexStart);
+            totalEvents += (indexEnd-indexStart);
           }
         }
         else if (box_type == 2)
@@ -225,6 +228,8 @@ namespace MDEvents
 
         // Force correct ID
         ibox->setId(i);
+        // Same box controller as everything else.
+        ibox->setBoxController(bc);
 
         // Extents of the box
         for (size_t d=0; d<nd; d++)
@@ -239,9 +244,10 @@ namespace MDEvents
     // Done reading in all the events.
     MDE::closeNexusData(file);
 
-    if (verbose) std::cout << tim << " to create all the boxes and fill them with events." << std::endl;
+    if (verbose) std::cout << tim << " to create all the boxes and fill them with " << totalEvents << " events." << std::endl;
 
 
+    totalEvents=0;
     // Go again, giving the children to the parents
     for (size_t i=0; i<numBoxes; i++)
     {
@@ -251,7 +257,12 @@ namespace MDEvents
         size_t indexEnd = box_children[i*2+1] + 1;
         boxes[i]->setChildren( boxes, indexStart, indexEnd);
       }
+      else
+        totalEvents += boxes[i]->getNPoints();
     }
+
+    if (verbose) std::cout << tim << " to give all the children to the boxes. They total " << totalEvents << " events." << std::endl;
+    std::cout << ws->getNPoints() << " points now." << std::endl;
 
     // Box of ID 0 is the head box.
     ws->setBox( boxes[0] );
@@ -259,6 +270,7 @@ namespace MDEvents
     bc->setMaxId(numBoxes);
     // Refresh cache
     ws->refreshCache();
+    std::cout << ws->getNPoints() << " points after refresh." << std::endl;
 
     file->closeGroup();
     file->close();

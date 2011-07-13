@@ -41,6 +41,7 @@ public:
     TS_ASSERT_EQUALS( b3.getNumMDBoxes(), 1);
   }
 
+
   /** Adding events tracks the total signal */
   void test_addEvent()
   {
@@ -50,9 +51,85 @@ public:
     ev.setCenter(1, 3.0);
     b.addEvent(ev);
     TS_ASSERT_EQUALS( b.getNPoints(), 1)
+#ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
+    b.refreshCache();
+#endif
     // Did it keep a running total of the signal and error?
     TS_ASSERT_DELTA( b.getSignal(), 1.2*1, 1e-5);
     TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*1, 1e-5);
+  }
+
+
+  /** Add a vector of events */
+  void test_addEvents()
+  {
+    MDBox<MDEvent<2>,2> b;
+    MDEvent<2> ev(1.2, 3.4);
+    std::vector< MDEvent<2> > vec;
+    ev.setCenter(0, 2.0);
+    ev.setCenter(1, 3.0);
+    vec.push_back(ev);
+    vec.push_back(ev);
+    vec.push_back(ev);
+    b.addEvents(vec);
+#ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
+    b.refreshCache();
+#endif
+    TS_ASSERT_EQUALS( b.getNPoints(), 3)
+    TS_ASSERT_DELTA( b.getEvents()[2].getSignal(), 1.2, 1e-5)
+    // Did it keep a running total of the signal and error?
+    TS_ASSERT_DELTA( b.getSignal(), 1.2*3, 1e-5);
+    TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*3, 1e-5);
+  }
+
+  /** Add a vector of events and give start/end spots*/
+  void test_addEvents_with_start_stop()
+  {
+    MDBox<MDEvent<2>,2> b;
+    MDEvent<2> ev(1.2, 3.4);
+    std::vector< MDEvent<2> > vec;
+    ev.setCenter(0, 2.0);
+    ev.setCenter(1, 3.0);
+    for (size_t i=0; i<10; i++)
+      vec.push_back(ev);
+
+    b.addEvents(vec, 5, 8);
+#ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
+    b.refreshCache();
+#endif
+    TS_ASSERT_EQUALS( b.getNPoints(), 3)
+    TS_ASSERT_DELTA( b.getEvents()[2].getSignal(), 1.2, 1e-5)
+    // Did it keep a running total of the signal and error?
+    TS_ASSERT_DELTA( b.getSignal(), 1.2*3, 1e-5);
+    TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*3, 1e-5);
+  }
+
+
+  /** Try to add a large number of events in parallel
+   * to the same MDBox, to make sure it is thread-safe.
+   */
+  void test_addEvent_inParallel()
+  {
+    MDBox<MDEvent<2>,2> b;
+    MDEvent<2> ev(1.2, 3.4);
+    ev.setCenter(0, 2.0);
+    ev.setCenter(1, 3.0);
+
+    int num = 5e5;
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i=0; i < num; i++)
+    {
+      b.addEvent(ev);
+    }
+#ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
+    b.refreshCache();
+#endif
+
+    TS_ASSERT_EQUALS( b.getNPoints(), num)
+    // Did it keep a running total of the signal and error?
+    TS_ASSERT_DELTA( b.getSignal(), 1.2*num, 1e-5*num);
+    TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*num, 1e-5*num);
+
   }
 
   void test_calculateDimensionStats()
@@ -79,6 +156,9 @@ public:
     MDEvent<2> ev(1.2, 3.4);
     b.addEvent(ev);
     b.addEvent(ev);
+#ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
+    b.refreshCache();
+#endif
     TS_ASSERT_EQUALS( b.getNPoints(), 2)
     TS_ASSERT_DELTA( b.getSignal(), 2.4, 1e-5)
     b.clear();
@@ -115,70 +195,6 @@ public:
   {
     typedef MDBox<MDEvent<3>,3> mdbox3;
     TS_ASSERT_THROWS_NOTHING( mdbox3::sptr a( new mdbox3()); )
-  }
-
-
-  /** Add a vector of events */
-  void test_addEvents()
-  {
-    MDBox<MDEvent<2>,2> b;
-    MDEvent<2> ev(1.2, 3.4);
-    std::vector< MDEvent<2> > vec;
-    ev.setCenter(0, 2.0);
-    ev.setCenter(1, 3.0);
-    vec.push_back(ev);
-    vec.push_back(ev);
-    vec.push_back(ev);
-    b.addEvents(vec);
-    TS_ASSERT_EQUALS( b.getNPoints(), 3)
-    TS_ASSERT_DELTA( b.getEvents()[2].getSignal(), 1.2, 1e-5)
-    // Did it keep a running total of the signal and error?
-    TS_ASSERT_DELTA( b.getSignal(), 1.2*3, 1e-5);
-    TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*3, 1e-5);
-  }
-
-  /** Add a vector of events and give start/end spots*/
-  void test_addEvents_with_start_stop()
-  {
-    MDBox<MDEvent<2>,2> b;
-    MDEvent<2> ev(1.2, 3.4);
-    std::vector< MDEvent<2> > vec;
-    ev.setCenter(0, 2.0);
-    ev.setCenter(1, 3.0);
-    for (size_t i=0; i<10; i++)
-      vec.push_back(ev);
-
-    b.addEvents(vec, 5, 8);
-    TS_ASSERT_EQUALS( b.getNPoints(), 3)
-    TS_ASSERT_DELTA( b.getEvents()[2].getSignal(), 1.2, 1e-5)
-    // Did it keep a running total of the signal and error?
-    TS_ASSERT_DELTA( b.getSignal(), 1.2*3, 1e-5);
-    TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*3, 1e-5);
-  }
-
-
-  /** Try to add a large number of events in parallel
-   * to the same MDBox, to make sure it is thread-safe.
-   */
-  void test_addEvent_inParallel()
-  {
-    MDBox<MDEvent<2>,2> b;
-    MDEvent<2> ev(1.2, 3.4);
-    ev.setCenter(0, 2.0);
-    ev.setCenter(1, 3.0);
-
-    int num = 5e5;
-    PARALLEL_FOR_NO_WSP_CHECK()
-    for (int i=0; i < num; i++)
-    {
-      b.addEvent(ev);
-    }
-
-    TS_ASSERT_EQUALS( b.getNPoints(), num)
-    // Did it keep a running total of the signal and error?
-    TS_ASSERT_DELTA( b.getSignal(), 1.2*num, 1e-5*num);
-    TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*num, 1e-5*num);
-
   }
 
   void test_bad_splitter()

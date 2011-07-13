@@ -11,6 +11,8 @@
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidAPI/ImplicitFunction.h"
 
+#undef MDBOX_TRACK_SIGNAL_WHEN_ADDING
+
 namespace Mantid
 {
 namespace MDEvents

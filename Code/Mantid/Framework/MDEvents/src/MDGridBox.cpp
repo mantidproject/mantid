@@ -24,11 +24,6 @@ using namespace Mantid::API;
 #endif
 
 
-/** If defined, then signal caching is performed as events are added. Otherwise,
- * refreshCache() has to be called.
- */
-#undef MDEVENTS_MDGRIDBOX_ONGOING_SIGNAL_CACHE
-
 namespace Mantid
 {
 namespace MDEvents
@@ -538,14 +533,6 @@ namespace MDEvents
     // Add it to the contained box
     if (index < numBoxes) // avoid segfaults for floating point round-off errors.
       boxes[index]->addEvent(event);
-
-    // Track the total signal
-#ifdef MDEVENTS_MDGRIDBOX_ONGOING_SIGNAL_CACHE
-    statsMutex.lock();
-    this->m_signal += event.getSignal();
-    this->m_errorSquared += event.getErrorSquared();
-    statsMutex.unlock();
-#endif
   }
 
 
