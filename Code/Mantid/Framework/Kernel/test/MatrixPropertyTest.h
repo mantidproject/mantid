@@ -19,7 +19,7 @@ public:
   void test_That_Default_Contruction_Gives_Empty_Matrix()
   {
     MatrixProperty<double> prop("Rot");
-    TS_ASSERT_EQUALS(prop.direction(), Mantid::Kernel::Direction::Input);
+    TS_ASSERT_EQUALS(int(prop.direction()), int(Mantid::Kernel::Direction::Input));
     DblMatrix R = prop();
     TS_ASSERT_EQUALS(R.numCols(), 0);
     TS_ASSERT_EQUALS(R.numRows(), 0);
