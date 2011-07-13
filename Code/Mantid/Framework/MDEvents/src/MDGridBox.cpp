@@ -95,32 +95,39 @@ namespace MDEvents
 
     size_t indices[nd];
     for (size_t d=0; d<nd; d++) indices[d] = 0;
-    for (size_t i=0; i<tot; i++)
+
+    // Splitting an input MDBox requires creating a bunch of children
+    // But the IDs of these children MUST be sequential. Hence the critical block
+    // to avoid interleaved IDs when splitting boxes in parallel.
+    PARALLEL_CRITICAL(MDGridBox_splitting)
     {
-      // Create the box
-      // (Increase the depth of this box to one more than the parent (this))
-      MDBox<MDE,nd> * myBox = new MDBox<MDE,nd>(bc, this->m_depth + 1);
-
-      // Set the extents of this box.
-      for (size_t d=0; d<nd; d++)
+      for (size_t i=0; i<tot; i++)
       {
-        coord_t min = this->extents[d].min + boxSize[d] * double(indices[d]);
-        myBox->setExtents(d, min, min + boxSize[d]);
-      }
-      myBox->setInverseVolume(inverseVolume); // Set the cached inverse volume
-      boxes.push_back(myBox);
+        // Create the box
+        // (Increase the depth of this box to one more than the parent (this))
+        MDBox<MDE,nd> * myBox = new MDBox<MDE,nd>(bc, this->m_depth + 1);
 
-      // Increment the indices, rolling back as needed
-      indices[0]++;
-      for (size_t d=0; d<nd-1; d++) //This is not run if nd=1; that's okay, you can ignore the warning
-      {
-        if (indices[d] >= split[d])
+        // Set the extents of this box.
+        for (size_t d=0; d<nd; d++)
         {
-          indices[d] = 0;
-          indices[d+1]++;
+          coord_t min = this->extents[d].min + boxSize[d] * double(indices[d]);
+          myBox->setExtents(d, min, min + boxSize[d]);
         }
-      }
-    } // for each box
+        myBox->setInverseVolume(inverseVolume); // Set the cached inverse volume
+        boxes.push_back(myBox);
+
+        // Increment the indices, rolling back as needed
+        indices[0]++;
+        for (size_t d=0; d<nd-1; d++) //This is not run if nd=1; that's okay, you can ignore the warning
+        {
+          if (indices[d] >= split[d])
+          {
+            indices[d] = 0;
+            indices[d+1]++;
+          }
+        }
+      } // for each box
+    }
 
     // Now distribute the events that were in the box before
     this->addEvents(box->getEvents());

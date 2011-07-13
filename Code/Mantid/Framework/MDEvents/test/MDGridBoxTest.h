@@ -617,8 +617,21 @@ public:
     TS_ASSERT_EQUALS(boxes.size(), 100);
     for (size_t i=0; i<boxes.size(); i++)
     {
-      TS_ASSERT_EQUALS( boxes[i]->getNPoints(), num_repeat );
-      TS_ASSERT( dynamic_cast<gbox_t *>(boxes[i]) );
+      ibox_t * box = boxes[i];
+      TS_ASSERT_EQUALS( box->getNPoints(), num_repeat );
+      TS_ASSERT( dynamic_cast<gbox_t *>(box) );
+
+      size_t numChildren = box->getNumChildren();
+      if (numChildren > 0)
+      {
+        size_t lastId = box->getChild(0)->getId();
+        for (size_t i = 1; i < numChildren; i++)
+        {
+          TSM_ASSERT_EQUALS("Children IDs need to be sequential!", box->getChild(i)->getId(), lastId+1);
+          lastId = box->getChild(i)->getId();
+        }
+      }
+
     }
 
   }

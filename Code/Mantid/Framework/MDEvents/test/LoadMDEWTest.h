@@ -136,6 +136,13 @@ public:
   }
   
 
+  void xtest_exec_from_file()
+  {
+    AlgorithmHelper::runAlgorithm("LoadMDEW", 4,
+        "Filename", "pg3.nxs",
+        "OutputWorkspace", "DontCare");
+  }
+
 };
 
 

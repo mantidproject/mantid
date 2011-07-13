@@ -76,7 +76,7 @@ namespace MDEvents
 
     file->openGroup("workspace", "NXworkspace");
 
-    std::vector<size_t> vecDims;
+    std::vector<int32_t> vecDims;
     file->readData("dimensions", vecDims);
     if (vecDims.empty())
       throw std::runtime_error("LoadMDEW:: Error loading number of dimensions.");
@@ -270,7 +270,7 @@ namespace MDEvents
     bc->setMaxId(numBoxes);
     // Refresh cache
     ws->refreshCache();
-    std::cout << ws->getNPoints() << " points after refresh." << std::endl;
+    if (verbose) std::cout << tim << " to refreshCache(). " << ws->getNPoints() << " points after refresh." << std::endl;
 
     file->closeGroup();
     file->close();

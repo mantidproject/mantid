@@ -74,7 +74,7 @@ namespace MDEvents
 
     // Write out some general information like # of dimensions
     file->makeGroup("workspace", "NXworkspace", 1);
-    file->writeData("dimensions", size_t(nd));
+    file->writeData("dimensions", int32_t(nd));
     file->writeData("event_type", MDE::getTypeName());
 
     // Save each dimension, as their XML representation
@@ -153,6 +153,17 @@ namespace MDEvents
         size_t numChildren = box->getNumChildren();
         if (numChildren > 0)
         {
+          size_t lastId = box->getChild(0)->getId();
+          for (size_t i = 1; i < numChildren; i++)
+          {
+            std::cout << "Child " << i << " : " << box->getChild(i)->getId() << std::endl;
+            if (box->getChild(i)->getId() != lastId+1)
+            {
+              throw std::runtime_error("Non-sequential child ID encountered!");
+            }
+            lastId = box->getChild(i)->getId();
+          }
+
           box_children[id*2] = int(box->getChild(0)->getId());
           box_children[id*2+1] = int(box->getChild(numChildren-1)->getId());
           boxType[id] = 2;
