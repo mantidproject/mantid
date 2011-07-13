@@ -36,6 +36,7 @@ set ( SRC_FILES
 	src/MDGeometry/MDGeometryXMLBuilder.cpp
 	src/MDGeometry/MDGeometryXMLParser.cpp
 	src/MDGeometry/MDHistoDimension.cpp
+	src/MDGeometry/MDHistoDimensionBuilder.cpp
 	src/MDGeometry/MDPoint.cpp
 	src/Math/Acomp.cpp
 	src/Math/Algebra.cpp
@@ -132,6 +133,7 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLParser.h
 	inc/MantidGeometry/MDGeometry/MDHistoDimension.h
+	inc/MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h
 	inc/MantidGeometry/MDGeometry/MDPoint.h
 	inc/MantidGeometry/MDGeometry/MDTypes.h
 	inc/MantidGeometry/MDGeometry/MDWorkspaceConstants.h
@@ -205,6 +207,7 @@ set ( TEST_FILES
 	test/MDGeometryTest.h
 	test/MDGeometryXMLParserTest.h
 	test/MDHistoDimensionTest.h
+	test/MDHistoDimensionBuilderTest.h
 	test/MDPointTest.h
 	test/MapSupportTest.h
 	test/MaterialTest.h
