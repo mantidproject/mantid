@@ -114,6 +114,8 @@ public:
   void applyTies();
   /// Remove all ties
   void clearTies();
+  // Unhide base class function: removeTie(string). Avoids Intel compiler warning
+  using IFitFunction::removeTie;
   /// Removes i-th parameter's tie
   bool removeTie(int i);
   /// Get the tie of i-th parameter
