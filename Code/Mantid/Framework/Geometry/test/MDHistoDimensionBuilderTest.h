@@ -22,8 +22,8 @@ public:
    builder.setMax(2);
    builder.setNumBins(1);
 
-   MDHistoDimension* product;
-   TS_ASSERT_THROWS_NOTHING(product = builder.createRaw());
+   MDHistoDimension* product = builder.createRaw();
+
    TS_ASSERT_EQUALS("testDimName", product->getName());
    TS_ASSERT_EQUALS("testDimId", product->getDimensionId());
    TS_ASSERT_EQUALS("A^-1", product->getUnits());
