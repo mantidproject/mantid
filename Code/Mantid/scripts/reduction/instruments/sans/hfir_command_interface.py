@@ -179,10 +179,14 @@ def GPSANS():
     
     
 def SetBckTransmission(trans, error, theta_dependent=True):
-    ReductionSingleton().set_bck_transmission(sans_reduction_steps.BaseTransmission(trans, error, theta_dependent=theta_dependent))
+    if ReductionSingleton().get_background() is None:
+        raise RuntimeError, "A background hasn't been defined."
+    ReductionSingleton().get_background().set_transmission(sans_reduction_steps.BaseTransmission(trans, error, theta_dependent=theta_dependent))
 
 def BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True):
-    ReductionSingleton().set_bck_transmission(sans_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
+    if ReductionSingleton().get_background() is None:
+        raise RuntimeError, "A background hasn't been defined."
+    ReductionSingleton().get_background().set_transmission(sans_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
                                                                                         empty_file=empty_file,
                                                                                         beam_radius=beam_radius,
                                                                                         theta_dependent=theta_dependent))
@@ -191,7 +195,9 @@ def BckBeamSpreaderTransmission(sample_spreader, direct_spreader,
                              sample_scattering, direct_scattering,
                              spreader_transmission=1.0, spreader_transmission_err=0.0,
                              theta_dependent=True ):
-    ReductionSingleton().set_bck_transmission(sans_reduction_steps.BeamSpreaderTransmission(sample_spreader=sample_spreader, 
+    if ReductionSingleton().get_background() is None:
+        raise RuntimeError, "A background hasn't been defined."
+    ReductionSingleton().get_background().set_transmission(sans_reduction_steps.BeamSpreaderTransmission(sample_spreader=sample_spreader, 
                                                                                           direct_spreader=direct_spreader,
                                                                                           sample_scattering=sample_scattering, 
                                                                                           direct_scattering=direct_scattering,

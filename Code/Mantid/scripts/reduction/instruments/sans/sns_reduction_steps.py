@@ -663,20 +663,24 @@ class SubtractDarkCurrent(ReductionStep):
         # Load dark current, which will be used repeatedly
         if self._dark_current_ws is None:
             filepath = find_data(self._dark_current_file, instrument=reducer.instrument.name())
-            self._dark_current_ws = extract_workspace_name(filepath)
-            reducer._data_loader.clone(datafile=filepath).execute(reducer, self._dark_current_ws)
-            RebinToWorkspace(WorkspaceToRebin=self._dark_current_ws, WorkspaceToMatch=workspace, OutputWorkspace=self._dark_current_ws)
+            self._dark_current_ws = "__dc_"+extract_workspace_name(filepath)
+            reducer._data_loader.clone(data_file=filepath).execute(reducer, self._dark_current_ws)
         # Normalize the dark current data to counting time
         dark_duration = mtd[self._dark_current_ws].getRun()["proton_charge"].getStatistics().duration
         duration = mtd[workspace].getRun()["proton_charge"].getStatistics().duration
         scaling_factor = duration/dark_duration
     
         # Scale the stored dark current by the counting time
-        scaled_dark_ws = "scaled_dark_current"
-        Scale(InputWorkspace=self._dark_current_ws, OutputWorkspace=scaled_dark_ws, Factor=scaling_factor, Operation="Multiply")
+        scaled_dark_ws = "__scaled_dark_current"
+        RebinToWorkspace(WorkspaceToRebin=self._dark_current_ws, WorkspaceToMatch=workspace, OutputWorkspace=scaled_dark_ws)
+        Scale(InputWorkspace=scaled_dark_ws, OutputWorkspace=scaled_dark_ws, Factor=scaling_factor, Operation="Multiply")
         
         # Perform subtraction
         Minus(workspace, scaled_dark_ws, workspace)  
+
+        # Clean up 
+        if mtd.workspaceExists(scaled_dark_ws):
+            mtd.deleteWorkspace(scaled_dark_ws)
         
         return "Dark current subtracted [%s]" % (scaled_dark_ws)
     

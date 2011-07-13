@@ -9,6 +9,8 @@ from reduction import validate_step
 import sans_reduction_steps
 import absolute_scale
 from mantidsimple import *
+import warnings
+import inspect
 
 ## Version number
 __version__ = '0.0'
@@ -268,6 +270,9 @@ class SANSReducer(Reducer):
              Set the reduction step that will apply the transmission correction
              @param trans: ReductionStep object
         """
+        lineno = inspect.currentframe().f_code.co_firstlineno
+        warnings.warn_explicit("SANSReducer.set_bck_transmission id deprecated: use get_background().set_transmission()", DeprecationWarning, __file__, lineno)
+
         if issubclass(trans.__class__, sans_reduction_steps.BaseTransmission) or trans is None:
             self._background_subtracter.set_transmission(trans)
         else:

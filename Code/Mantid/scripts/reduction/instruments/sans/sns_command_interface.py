@@ -10,7 +10,7 @@ from hfir_command_interface import SolidAngle, NoSolidAngle, NoTransmission, Set
 from hfir_command_interface import Background, NoBackground, IQxQy, NoIQxQy#, AzimuthalAverage
 from hfir_command_interface import NoSaveIq#, SaveIqAscii 
 from hfir_command_interface import ThetaDependentTransmission, BckThetaDependentTransmission, SetBckTransmission
-from hfir_command_interface import TransmissionDarkCurrent, BckTransmissionDarkCurrent, BckDirectBeamTransmission
+from hfir_command_interface import TransmissionDarkCurrent, BckTransmissionDarkCurrent
 from hfir_command_interface import SetDirectBeamAbsoluteScale, SetAbsoluteScale
 from hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance
 from hfir_command_interface import SensitivityDirectBeamCenter, SetSensitivityBeamCenter, SensitivityScatteringBeamCenter
@@ -73,7 +73,16 @@ def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_depen
                                                                                      beam_radius=beam_radius,
                                                                                      theta_dependent=theta_dependent,
                                                                                      combine_frames=combine_frames))
-    
+
+def BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True, combine_frames=True):
+    if ReductionSingleton().get_background() is None:
+        raise RuntimeError, "A background hasn't been defined."
+    ReductionSingleton().get_background().set_transmission(sns_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
+                                                                                                      empty_file=empty_file,
+                                                                                                      beam_radius=beam_radius,
+                                                                                                      theta_dependent=theta_dependent,
+                                                                                                      combine_frames=combine_frames))
+        
 def CombineTransmissionFits(combine_frames):
     if not isinstance(ReductionSingleton().get_transmission(), sns_reduction_steps.DirectBeamTransmission):
         raise RuntimeError, "Trying to see transmission fitting option when the transmission calculation method hasn't been set correctly."
@@ -82,9 +91,9 @@ def CombineTransmissionFits(combine_frames):
 def BckCombineTransmissionFits(combine_frames):
     if ReductionSingleton().get_background() is None:
         raise RuntimeError, "A background hasn't been defined."
-    if not isinstance(ReductionSingleton().get_background().get_transmission(), sns_reduction_steps.DirectBeamTransmission):
+    if not isinstance(ReductionSingleton().get_background().get_transmission_calculator(), sns_reduction_steps.DirectBeamTransmission):
         raise RuntimeError, "Trying to see transmission fitting option when the transmission calculation method hasn't been set correctly."
-    ReductionSingleton().get_background().get_transmission().set_combine_frames(combine_frames)
+    ReductionSingleton().get_background().get_transmission_calculator().set_combine_frames(combine_frames)
     
 def IQxQy(nbins=100):
     ReductionSingleton().set_IQxQy(mantidsimple.EQSANSQ2D, None, NumberOfBins=nbins)

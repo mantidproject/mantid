@@ -241,30 +241,25 @@ class BeamSpreaderTransmission(BaseTransmission):
             sample_spreader_ws = "_trans_sample_spreader"
             filepath = find_data(self._sample_spreader, instrument=reducer.instrument.name())
             reducer._data_loader.clone(filepath).execute(reducer, sample_spreader_ws)
-            #Load(filepath, sample_spreader_ws)
             
             direct_spreader_ws = "_trans_direct_spreader"
             filepath = find_data(self._direct_spreader, instrument=reducer.instrument.name())
             reducer._data_loader.clone(filepath).execute(reducer, direct_spreader_ws)
-            #Load(filepath, direct_spreader_ws)
             
             sample_scatt_ws = "_trans_sample_scatt"
             filepath = find_data(self._sample_scattering, instrument=reducer.instrument.name())
             reducer._data_loader.clone(filepath).execute(reducer, sample_scatt_ws)
-            #Load(filepath, sample_scatt_ws)
             
             direct_scatt_ws = "_trans_direct_scatt"
             filepath = find_data(self._direct_scattering, instrument=reducer.instrument.name())
             reducer._data_loader.clone(filepath).execute(reducer, direct_scatt_ws)
-            #Load(filepath, direct_scatt_ws)
             
             # Subtract dark current
             if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
-                dc = SubtractDarkCurrent(self._dark_current_data)
-                dc.execute(reducer, sample_spreader_ws)
-                dc.execute(reducer, direct_spreader_ws)
-                dc.execute(reducer, sample_scatt_ws)
-                dc.execute(reducer, direct_scatt_ws)
+                reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, sample_spreader_ws)
+                reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, direct_spreader_ws)
+                reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, sample_scatt_ws)
+                reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, direct_scatt_ws)
                         
             # Get normalization for transmission calculation
             norm_spectrum = reducer.NORMALIZATION_TIME
@@ -330,9 +325,8 @@ class DirectBeamTransmission(BaseTransmission):
         
         # Subtract dark current
         if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
-            dc = SubtractDarkCurrent(self._dark_current_data)
-            dc.execute(reducer, sample_ws)
-            dc.execute(reducer, empty_ws)       
+            reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, sample_ws)
+            reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, empty_ws)
             
         # Find which pixels to sum up as our "monitor". At this point we have moved the detector
         # so that the beam is at (0,0), so all we need is to sum the area around that point.
@@ -1365,6 +1359,9 @@ class SubtractBackground(ReductionStep):
         else:
             raise RuntimeError, "SubtractBackground.set_transmission expects an object of class ReductionStep"
         
+    def get_transmission_calculator(self):
+        return self._transmission
+    
     def get_transmission(self):
         if self._transmission is not None:
             return self._transmission.get_transmission()
