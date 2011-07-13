@@ -48,18 +48,20 @@ public:
   {
     //------ Start by creating the file ----------------------------------------------
     // Make a 1D MDEventWorkspace
-    MDEventWorkspace1::sptr ws1 = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 23);
-    // Recurse split so that it has lots more boxes
-    MDEventsTestHelper::recurseSplit<1>( dynamic_cast<MDGridBox<MDEvent<1>,1>*>(ws1->getBox()), 0, 4);
-    // Add more points
-    MDEventsTestHelper::feedMDBox(ws1->getBox(), 1, 9e3, 1e-3);
-    ws1->refreshCache();
+    MDEventWorkspace1::sptr ws1 = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 0);
+    ws1->getBoxController()->setSplitThreshold(100);
+    // Put in ADS so we can use fake data
+    AnalysisDataService::Instance().addOrReplace("LoadMDEWTest_ws", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
+    AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
+        "InputWorkspace", "LoadMDEWTest_ws", "UniformParams", "5000");
+    AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
+        "InputWorkspace", "LoadMDEWTest_ws", "PeakParams", "300000, 5.0, 0.01");
 
     // Save it
     SaveMDEW saver;
     TS_ASSERT_THROWS_NOTHING( saver.initialize() )
     TS_ASSERT( saver.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1) ) );
+    TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", "LoadMDEWTest_ws" ) );
     TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename", "LoadMDEWTest.nxs") );
     TS_ASSERT_THROWS_NOTHING( saver.execute(); );
     TS_ASSERT( saver.isExecuted() );
@@ -97,9 +99,6 @@ public:
     // Compare the initial to the final workspace
     TS_ASSERT_EQUALS(ws->getBox()->getNumChildren(), ws1->getBox()->getNumChildren());
     TS_ASSERT_EQUALS(ws->getNPoints(), ws1->getNPoints());
-    std::cout << ws->getNPoints() << std::endl;
-    ws->refreshCache();
-    std::cout << ws->getNPoints() << std::endl;
 
     TS_ASSERT_EQUALS(ws->getBoxController()->getMaxId(), ws1->getBoxController()->getMaxId());
     // Compare all the details of the box controllers
@@ -112,7 +111,6 @@ public:
     ws->getBox()->getBoxes(boxes, 1000, false);
     ws1->getBox()->getBoxes(boxes1, 1000, false);
 
-    TS_ASSERT_EQUALS( boxes.size(), 111111);
     TS_ASSERT_EQUALS( boxes.size(), boxes1.size());
     if (boxes.size() != boxes1.size()) return;
 
@@ -122,6 +120,10 @@ public:
       IMDBox<MDEvent<1>,1>* box1 = boxes1[i];
       TS_ASSERT_EQUALS( box->getId(), box1->getId() );
       TS_ASSERT_EQUALS( box->getNumChildren(), box1->getNumChildren() );
+      for (size_t i=0; i<box->getNumChildren(); i++)
+      {
+        TS_ASSERT_EQUALS( box->getChild(i)->getId(), box1->getChild(i)->getId() );
+      }
       TS_ASSERT_DELTA( box->getSignal(), box1->getSignal(), 1e-3);
       TS_ASSERT_DELTA( box->getErrorSquared(), box1->getErrorSquared(), 1e-3);
       TS_ASSERT_DELTA( box->getExtents(0).min, box1->getExtents(0).min, 1e-5);

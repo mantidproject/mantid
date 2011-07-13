@@ -93,7 +93,6 @@ public:
 
     AnalysisDataService::Instance().addOrReplace("SaveMDEWTestPerformance_ws", ws);
 
-    std::ostringstream mess;
     AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
         "InputWorkspace", "SaveMDEWTestPerformance_ws", "UniformParams", "10000000");
 

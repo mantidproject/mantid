@@ -170,9 +170,10 @@ namespace MDEvents
     file->readData("box_signal_errorsquared", box_signal_errorsquared);
     file->readData("box_event_index", box_event_index);
 
-    if (verbose) std::cout << tim << " to read all the box data vectors." << std::endl;
-
     size_t numBoxes = boxType.size();
+
+    if (verbose) std::cout << tim << " to read all the box data vectors. There are " << numBoxes << " boxes." << std::endl;
+
     // Check all vector lengths match
     if (depth.size() != numBoxes) throw std::runtime_error("Incompatible size for data: depth.");
     if (inverseVolume.size() != numBoxes) throw std::runtime_error("Incompatible size for data: inverseVolume.");
@@ -189,8 +190,6 @@ namespace MDEvents
 
     // Get ready to read the slabs
     MDE::openNexusData(file);
-
-    size_t totalEvents=0;
 
     for (size_t i=0; i<numBoxes; i++)
     {
@@ -215,7 +214,6 @@ namespace MDEvents
             std::vector<MDE> & events = box->getEvents();
             events.clear();
             MDE::loadVectorFromNexusSlab(events, file, indexStart, indexEnd-indexStart);
-            totalEvents += (indexEnd-indexStart);
           }
         }
         else if (box_type == 2)
@@ -244,10 +242,8 @@ namespace MDEvents
     // Done reading in all the events.
     MDE::closeNexusData(file);
 
-    if (verbose) std::cout << tim << " to create all the boxes and fill them with " << totalEvents << " events." << std::endl;
+    if (verbose) std::cout << tim << " to create all the boxes and fill them with events." << std::endl;
 
-
-    totalEvents=0;
     // Go again, giving the children to the parents
     for (size_t i=0; i<numBoxes; i++)
     {
@@ -257,12 +253,9 @@ namespace MDEvents
         size_t indexEnd = box_children[i*2+1] + 1;
         boxes[i]->setChildren( boxes, indexStart, indexEnd);
       }
-      else
-        totalEvents += boxes[i]->getNPoints();
     }
 
-    if (verbose) std::cout << tim << " to give all the children to the boxes. They total " << totalEvents << " events." << std::endl;
-    std::cout << ws->getNPoints() << " points now." << std::endl;
+    if (verbose) std::cout << tim << " to give all the children to the boxes." << std::endl;
 
     // Box of ID 0 is the head box.
     ws->setBox( boxes[0] );

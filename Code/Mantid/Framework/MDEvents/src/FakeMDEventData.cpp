@@ -12,6 +12,8 @@
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <math.h>
+#include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/ThreadPool.h"
 
 namespace Mantid
 {
@@ -110,7 +112,10 @@ namespace MDEvents
     }
 
     ws->splitBox();
-    ws->splitAllIfNeeded(NULL);
+    Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
+    ThreadPool tp(ts);
+    ws->splitAllIfNeeded(ts);
+    tp.joinAll();
     ws->refreshCache();
   }
 
@@ -173,7 +178,10 @@ namespace MDEvents
       delete gens[d];
 
     ws->splitBox();
-    ws->splitAllIfNeeded(NULL);
+    Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
+    ThreadPool tp(ts);
+    ws->splitAllIfNeeded(ts);
+    tp.joinAll();
     ws->refreshCache();
   }
 
