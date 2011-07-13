@@ -2454,11 +2454,11 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));
   appWindow()->setPreferences(g);
   g->newLegend("");
-  /* Unused code?
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {
     try {
       MantidCurve* mc = new MantidCurve(it.key(),g,it.value(),errs,distr);
+      UNUSED_ARG(mc)
     } 
     catch (Mantid::Kernel::Exception::NotFoundError&) 
     {
@@ -2470,7 +2470,6 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
       logMessage(Poco::Message("MantidPlot",ex.what(),Poco::Message::PRIO_WARNING));
     }
   }
-*/
   // If no spectra have been plotted, close the window (unfortunately it will flash up briefly)
   if ( g->curves() == 0 )
   {
