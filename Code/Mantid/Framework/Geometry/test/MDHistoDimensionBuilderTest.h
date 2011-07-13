@@ -53,6 +53,58 @@ public:
    TS_ASSERT_EQUALS(1, product->getNBins());
  }
 
+ void testCopy()
+ {
+   MDHistoDimensionBuilder builderA;
+   builderA.setName("testDimName");
+   builderA.setId("testDimId");
+   builderA.setUnits("A^-1");
+   builderA.setMin(0);
+   builderA.setMax(2);
+   builderA.setNumBins(1);
+
+   //Make copy
+   MDHistoDimensionBuilder builderB(builderA);
+
+   //Test copy constancy via products
+   IMDDimension_sptr productA = builderA.create();
+   IMDDimension_sptr productB = builderB.create();
+
+   TS_ASSERT_EQUALS(productA->getName(), productB->getName());
+   TS_ASSERT_EQUALS(productA->getDimensionId(), productB->getDimensionId());
+   TS_ASSERT_EQUALS(productA->getUnits(), productB->getUnits());
+   TS_ASSERT_EQUALS(productA->getMinimum(), productB->getMinimum());
+   TS_ASSERT_EQUALS(productA->getMaximum(), productB->getMaximum());
+   TS_ASSERT_EQUALS(productA->getNBins(), productB->getNBins());
+ }
+
+ void testAssignment()
+ {
+   MDHistoDimensionBuilder builderA;
+   builderA.setName("testDimName");
+   builderA.setId("testDimId");
+   builderA.setUnits("A^-1");
+   builderA.setMin(0);
+   builderA.setMax(2);
+   builderA.setNumBins(1);
+
+   //Make another
+   MDHistoDimensionBuilder builderB;
+   //Do assignement
+   builderB = builderA;
+
+   //Test assignment constancy via products
+   IMDDimension_sptr productA = builderA.create();
+   IMDDimension_sptr productB = builderB.create();
+
+   TS_ASSERT_EQUALS(productA->getName(), productB->getName());
+   TS_ASSERT_EQUALS(productA->getDimensionId(), productB->getDimensionId());
+   TS_ASSERT_EQUALS(productA->getUnits(), productB->getUnits());
+   TS_ASSERT_EQUALS(productA->getMinimum(), productB->getMinimum());
+   TS_ASSERT_EQUALS(productA->getMaximum(), productB->getMaximum());
+   TS_ASSERT_EQUALS(productA->getNBins(), productB->getNBins());
+ }
+
  void testNoNameThrows()
  {
    MDHistoDimensionBuilder builder;

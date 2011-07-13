@@ -31,12 +31,10 @@ namespace Mantid
       void setNumBins(size_t nbins);
       MDHistoDimension* createRaw();
       IMDDimension_sptr create();
-
-    private:
-
-      //Explicitly Prevent copy/assignement behaviour. Only because not required.
       MDHistoDimensionBuilder(const MDHistoDimensionBuilder&);
       MDHistoDimensionBuilder& operator=(const MDHistoDimensionBuilder&);
+
+    private:
 
       /// Cached name
       std::string m_name;
@@ -56,6 +54,9 @@ namespace Mantid
       bool m_maxSet;
 
     };
+
+    /// Handy typedef for collection of builders.
+    typedef std::vector<MDHistoDimensionBuilder> Vec_MDHistoDimensionBuilder;
   }
 }
 
