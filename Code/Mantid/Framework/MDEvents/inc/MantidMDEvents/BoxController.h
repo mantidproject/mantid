@@ -23,7 +23,7 @@ namespace MDEvents
    * @author Janik Zikovsky
    * @date Feb 21, 2011
    */
-  class BoxController
+  class DLLExport BoxController
   {
   public:
     //-----------------------------------------------------------------------------------
