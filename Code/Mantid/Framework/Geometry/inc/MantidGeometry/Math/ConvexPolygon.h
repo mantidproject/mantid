@@ -6,15 +6,16 @@
 //-----------------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Math/Vertex2DList.h"
+#include "MantidGeometry/Math/PolygonEdge.h"
 
 namespace Mantid
 {
-  //---------------------------------------------------------------------------
-  // Forward declarations
-  //---------------------------------------------------------------------------
-
   namespace Geometry
   {
+    //---------------------------------------------------------------------------
+    // Forward declarations
+    //---------------------------------------------------------------------------
+    class Vertex2D;
 
     /** 
     An implementation of a convex polygon. It contains a list of vertices that
@@ -52,16 +53,28 @@ namespace Mantid
     class MANTID_GEOMETRY_DLL ConvexPolygon
     {
     public:
+      /// Construct a polygon with a head vertex
+      ConvexPolygon(Vertex2D & head);
       /// Construct a polygon with a collection of vertices
       ConvexPolygon(const Vertex2DList & vertices);
       /// Construct a rectangle as these will be quite common
       ConvexPolygon(const double x_lower, const double x_upper, 
                     const double y_lower, const double y_upper);
-
+      /// Copy constructor
+      ConvexPolygon(const ConvexPolygon & rhs);
+      /// Destructor
+      ~ConvexPolygon();
+      /// Access the current point
+      const Kernel::V2D & point() const;
+      /// Returns an edge on the polygon between the current vertex and the next
+      PolygonEdge edge() const;
       /// Index access.
       const Kernel::V2D& operator[](const size_t index) const;
       /// Return the number of vertices
-      inline size_t numVertices() const { return m_vertices.size(); }
+      inline size_t numVertices() const { return m_numVertices; }
+      /// Advance the current vertex to the next in the chain
+      const Kernel::V2D& advance();
+
       /// Compute the area of the polygon using triangulation
       double area() const;
       /// Compute the 'determinant' of the points
@@ -72,18 +85,23 @@ namespace Mantid
     private:
       /// Default constructor
       ConvexPolygon();
-      /// Test if the set of vertices set is valid
-      void validate() const;
-      /// Compute the area of a triangle given by 3 vertices
+      /// Test if the set of points is valid
+      void validate(const Vertex2DList & points) const;
+      /// Test if a list of vertices is valid
+      void validate(const Vertex2D & head) const;
+      /// Compute the area of a triangle given by 3 points
       double triangleArea(const Kernel::V2D & a, const Kernel::V2D & b, 
                           const Kernel::V2D & c) const;
-      
-      /// The collection of vertices
-      Vertex2DList m_vertices;
+      /// The current vertex
+      Vertex2D *m_currentVertex;
+      /// The size of the polygon
+      size_t m_numVertices;
+      /// Head vertex (enables indexing)
+      Vertex2D *m_head;
     };
 
     /// Print a polygon to a stream
-    std::ostream & operator<<(std::ostream & os, const ConvexPolygon & polygon);
+    MANTID_GEOMETRY_DLL std::ostream & operator<<(std::ostream & os, const ConvexPolygon & polygon);
 
   } //namespace Geometry
 } //namespace Mantid

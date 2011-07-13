@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidGeometry/Math/PolygonIntersection.h"
 #include "MantidGeometry/Math/ORourkeIntersection.h"
+//#include "MantidGeometry/Math/LaszloIntersection.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid
