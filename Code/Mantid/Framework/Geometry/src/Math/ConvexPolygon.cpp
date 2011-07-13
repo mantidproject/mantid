@@ -84,7 +84,7 @@ namespace Mantid
         m_numVertices = rhs.m_numVertices;
         Vertex2D *rhsVertex = rhs.m_currentVertex;
         m_currentVertex = new Vertex2D(rhsVertex->X(), rhsVertex->Y());
-        for(int i = 1; i < m_numVertices; ++i)
+        for(size_t i = 1; i < m_numVertices; ++i)
         {
           rhsVertex = rhsVertex->next();
           m_currentVertex = m_currentVertex->insert(new Vertex2D(rhsVertex->X(), rhsVertex->Y()));
