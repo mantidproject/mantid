@@ -689,6 +689,12 @@ void File::readData(const std::string & dataName, std::vector<NumT>& data)
   this->getData(data);
   this->closeData();
 }
+void File::readData(const std::string & dataName, std::string& data)
+{
+  this->openData(dataName);
+  data = this->getStrData();
+  this->closeData();
+}
 //JZ
 
 void File::getDataCoerce(vector<int> &data)

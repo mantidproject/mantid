@@ -46,8 +46,8 @@ namespace MDEvents
     /// Serialize
     std::string toXMLString() const;
 
-    /// De-serializing constructor
-    static BoxController * fromXMLString(const std::string & xml);
+    /// De-serializing XML
+    void fromXMLString(const std::string & xml);
 
     /// Equality operator
     bool operator==(const BoxController & other) const;

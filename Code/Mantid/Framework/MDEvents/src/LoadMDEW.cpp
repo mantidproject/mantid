@@ -6,6 +6,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/CPUTimer.h"
+#include <vector>
 
 using Mantid::Geometry::IMDDimensionFactory;
 using Mantid::Geometry::IMDDimension_sptr;
@@ -75,20 +76,23 @@ namespace MDEvents
 
     file->openGroup("workspace", "NXworkspace");
 
-    int numDimensions = 0;
-    file->getAttr("dimensions", numDimensions);
-    if (numDimensions <= 0)
+    std::vector<size_t> vecDims;
+    file->readData("dimensions", vecDims);
+    if (vecDims.empty())
+      throw std::runtime_error("LoadMDEW:: Error loading number of dimensions.");
+    size_t numDims = vecDims[0];
+    if (numDims <= 0)
       throw std::runtime_error("LoadMDEW:: number of dimensions <= 0.");
 
     //The type of event
     std::string eventType;
-    file->getAttr("event_type", eventType);
+    file->readData("event_type", eventType);
 
     // Done loading that general data
     file->closeGroup();
 
     // Use the factory to make the workspace of the right type
-    IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDEventWorkspace(size_t(numDimensions), eventType);
+    IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDEventWorkspace(numDims, eventType);
 
     // Wrapper to cast to MDEventWorkspace then call the function
     CALL_MDEVENT_FUNCTION(this->doLoad, ws);
@@ -120,12 +124,16 @@ namespace MDEvents
       std::ostringstream mess;
       mess << "dimension" << d;
       std::string dimXML;
-      file->getAttr( mess.str(), dimXML );
+      file->readData(mess.str(), dimXML);
       // Use the dimension factory to read the XML
       IMDDimensionFactory factory = IMDDimensionFactory::createDimensionFactory(dimXML);
       IMDDimension_sptr dim(factory.create());
       ws->addDimension(dim);
     }
+    // Load the box controller
+    std::string bcXML;
+    file->readData("box_controller_xml", bcXML);
+    ws->getBoxController()->fromXMLString(bcXML);
 
     if (verbose) std::cout << tim << " to load the dimensions, etc." << std::endl;
 

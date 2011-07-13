@@ -477,6 +477,8 @@ namespace NeXus {
      */
     template <typename NumT>
     void readData(const std::string & dataName, std::vector<NumT>& data);
+
+    void readData(const std::string & dataName, std::string & data);
     //JZ
 
 

@@ -146,7 +146,7 @@ public:
   }
 
   /// Compare two box controllers and assert each part of them.
-  void compare(BoxController & a, BoxController & b)
+  void compareBoxControllers(BoxController & a, BoxController & b)
   {
     TS_ASSERT_EQUALS( a.getNDims(), b.getNDims());
     TS_ASSERT_EQUALS( a.getMaxDepth(), b.getMaxDepth());
@@ -159,7 +159,7 @@ public:
     {
       TS_ASSERT_EQUALS( a.getSplitInto(d), b.getSplitInto(d));
     }
-   }
+  }
 
   /// Generate XML and read it back
   void test_xml()
@@ -174,9 +174,10 @@ public:
     TS_ASSERT(!xml.empty());
 
     // Read it back
-    BoxController *b = BoxController::fromXMLString(xml);
+    BoxController b(1);
+    b.fromXMLString(xml);
     // Check that it is the same
-    compare(a, *b);
+    compareBoxControllers(a, b);
   }
 
 

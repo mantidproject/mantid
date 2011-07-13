@@ -27,6 +27,23 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
+
+  /// Compare two box controllers and assert each part of them.
+  void compareBoxControllers(BoxController & a, BoxController & b)
+  {
+    TS_ASSERT_EQUALS( a.getNDims(), b.getNDims());
+    TS_ASSERT_EQUALS( a.getMaxDepth(), b.getMaxDepth());
+    TS_ASSERT_EQUALS( a.getMaxId(), b.getMaxId());
+    TS_ASSERT_EQUALS( a.getSplitThreshold(), b.getSplitThreshold());
+    TS_ASSERT_EQUALS( a.getNumMDBoxes(), b.getNumMDBoxes());
+    TS_ASSERT_EQUALS( a.getNumSplit(), b.getNumSplit());
+    TS_ASSERT_EQUALS( a.getMaxNumMDBoxes(), b.getMaxNumMDBoxes());
+    for (size_t d=0; d< a.getNDims(); d++)
+    {
+      TS_ASSERT_EQUALS( a.getSplitInto(d), b.getSplitInto(d));
+    }
+  }
+
   void test_exec()
   {
     //------ Start by creating the file ----------------------------------------------
@@ -81,6 +98,8 @@ public:
     TS_ASSERT_EQUALS(ws->getBox()->getNumChildren(), ws1->getBox()->getNumChildren());
     TS_ASSERT_EQUALS(ws->getNPoints(), ws1->getNPoints());
     TS_ASSERT_EQUALS(ws->getBoxController()->getMaxId(), ws1->getBoxController()->getMaxId());
+    // Compare all the details of the box controllers
+    compareBoxControllers(*ws->getBoxController(), *ws1->getBoxController());
     
     // Compare every box
     std::vector<IMDBox<MDEvent<1>,1>*> boxes;

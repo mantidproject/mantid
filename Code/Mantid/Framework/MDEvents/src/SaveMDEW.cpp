@@ -74,16 +74,18 @@ namespace MDEvents
 
     // Write out some general information like # of dimensions
     file->makeGroup("workspace", "NXworkspace", 1);
-    file->putAttr("dimensions", int(nd));
-    file->putAttr("event_type", MDE::getTypeName());
+    file->writeData("dimensions", size_t(nd));
+    file->writeData("event_type", MDE::getTypeName());
 
     // Save each dimension, as their XML representation
     for (size_t d=0; d<nd; d++)
     {
       std::ostringstream mess;
       mess << "dimension" << d;
-      file->putAttr( mess.str(), ws->getDimension(d)->toXMLString() );
+      file->writeData( mess.str(), ws->getDimension(d)->toXMLString() );
     }
+
+    file->writeData("box_controller_xml", ws->getBoxController()->toXMLString());
 
     // TODO: Add box controller info.
     file->closeGroup();
