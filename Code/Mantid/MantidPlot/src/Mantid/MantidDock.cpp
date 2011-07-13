@@ -214,6 +214,9 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_plotSpec = new QAction(tr("Plot spectrum..."),this);
   connect(m_plotSpec,SIGNAL(triggered()),this,SLOT(plotSpectra()));
 
+  m_plotSpecDistr = new QAction(tr("Plot spectrum as distribution..."),this);
+  connect(m_plotSpecDistr,SIGNAL(triggered()),this,SLOT(plotSpectraDistribution()));
+
   m_colorFill = new QAction(tr("Color fill plot"), this);
   connect(m_colorFill, SIGNAL(triggered()), this, SLOT(drawColorFillPlot()));
 
@@ -681,6 +684,7 @@ void MantidDockWidget::addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::Matr
   menu->addAction(m_showData);
   menu->addAction(m_showInst);
   menu->addAction(m_plotSpec);
+  menu->addAction(m_plotSpecDistr);
   // Don't plot a spectrum if only one X value
   m_plotSpec->setEnabled ( matrixWS->blocksize() > 1 );
   menu->addAction(m_colorFill);
@@ -881,6 +885,15 @@ void MantidDockWidget::plotSpectra()
   // An empty map will be returned if the user clicks cancel in the spectrum selection
   if (toPlot.empty()) return;
   m_mantidUI->plotSpectraList( toPlot, false );
+}
+
+/// Plots a single spectrum from each selected workspace
+void MantidDockWidget::plotSpectraDistribution()
+{
+  const QMultiMap<QString,int> toPlot = m_tree->chooseSpectrumFromSelected();
+  // An empty map will be returned if the user clicks cancel in the spectrum selection
+  if (toPlot.empty()) return;
+  m_mantidUI->plotSpectraList( toPlot, false, true );
 }
 
 /**

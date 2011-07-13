@@ -49,18 +49,18 @@ public:
 
   /// More complex constructor setting some defaults for the curve
   MantidCurve(const QString& name,const QString& wsName,Graph* g,
-              const QString& type,int index,bool err=false);
+              int index,bool err=false,bool distr = false);
 
   /// More complex constructor setting some defaults for the curve
   MantidCurve(const QString& wsName,Graph* g,
-              const QString& type,int index,bool err=false);
+              int index,bool err=false,bool distr = false);
 
   /// Copy constructor 
   MantidCurve(const MantidCurve& c);
 
   ~MantidCurve();
 
-  PlotCurve* clone()const{return new MantidCurve(*this);}
+  PlotCurve* clone(const Graph*)const;
 
   /// Curve type. Used in the QtiPlot API.
   int rtti() const{return Rtti_PlotUserItem;}
@@ -84,6 +84,12 @@ public:
   /// Enables/disables drawing of error bars
   void setErrorBars(bool yes=true,bool drawAll = false){m_drawErrorBars = yes;m_drawAllErrorBars = drawAll;}
 
+  /// Enables/disables drawing as distribution, ie dividing each y-value by the bin width.
+  bool setDrawAsDistribution(bool on = true);
+
+  /// Returns whether the curve is plotted as a distribution
+  bool isDistribution() const;
+
   virtual void draw(QPainter *p, 
     const QwtScaleMap &xMap, const QwtScaleMap &yMap,
     const QRect &) const;
@@ -97,11 +103,15 @@ public:
   QString workspaceName()const{return m_wsName;}
   /// Returns the workspace index if a spectrum is plotted and -1 if it is a bin.
   int workspaceIndex()const;
+  /// Return the x units
+  Mantid::Kernel::Unit_sptr xUnits()const{return m_xUnits;}
+  /// Return the y units
+  Mantid::Kernel::Unit_sptr yUnits()const{return m_yUnits;}
 
 private:
   /// Init the curve
   void init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,
-              int index);
+              int index,bool distr);
 
   /// Handles delete notification
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
@@ -146,6 +156,10 @@ private:
   int  m_index;
   /// The bounding rect used by qwt to set the axes
   mutable QwtDoubleRect m_boundingRect;
+  /// x units
+  Mantid::Kernel::Unit_sptr m_xUnits;
+  /// y units
+  Mantid::Kernel::Unit_sptr m_yUnits;
 };
 
 
@@ -158,7 +172,7 @@ class MantidQwtData: public QObject, public QwtData
   Q_OBJECT
 public:
   /// Constructor
-  MantidQwtData(Mantid::API::MatrixWorkspace_const_sptr workspace, int specIndex, const bool logScale);
+  MantidQwtData(Mantid::API::MatrixWorkspace_const_sptr workspace, int specIndex, const bool logScale, bool distr = false);
 
   /// Copy constructor
   MantidQwtData(const MantidQwtData& data);
@@ -202,6 +216,7 @@ public:
   void setLogScale(bool on);
   bool logScale()const{return m_logScale;}
   void saveLowestPositiveValue(const double v);
+  bool setAsDistribution(bool on = true);
 
   void applyOffsets(const double xOffset, const double yOffset);
 
@@ -228,6 +243,8 @@ private:
   bool m_logScale;
   /// lowest positive y value
   mutable double m_minPositive;
+  /// Is plotting as distribution
+  bool m_isDistribution;
 
 };
 

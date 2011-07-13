@@ -50,6 +50,7 @@ private slots:
   void treeSelectionChanged();
   void groupingButtonClick();
   void plotSpectra();
+  void plotSpectraDistribution();
   void drawColorFillPlot();
   void showDetectorTable();
 
@@ -86,7 +87,7 @@ private:
   QSignalMapper *m_loadMapper;
 
   //Context-menu actions
-  QAction *m_showData, *m_showInst, *m_plotSpec, *m_showDetectors, *m_colorFill, *m_showLogs, *m_showHist, 
+  QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecDistr, *m_showDetectors, *m_colorFill, *m_showLogs, *m_showHist, 
     *m_saveNexus, *m_rename, *m_delete;
 
   static Mantid::Kernel::Logger& logObject;

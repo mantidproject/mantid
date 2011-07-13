@@ -76,6 +76,7 @@ class SelectionMoveResizer;
 class RangeSelectorTool;
 class DataCurve;
 class PlotCurve;
+class MantidCurve;
 class QwtErrorPlotCurve;
 class MultiLayer;
 class Spectrogram;
@@ -85,6 +86,14 @@ class BoxCurve;
 class QwtHistogram;
 class UserHelperFunction;
 class QMutex;
+
+namespace Mantid
+{
+  namespace Kernel
+  {
+    class Unit;
+  }
+}
 
 
 //! Structure containing curve layout parameters
@@ -179,8 +188,11 @@ public:
   ///seeting a boolean flag to when the intensity(start and end values) changed
   void changeIntensity(bool bIntensityChanged);
 
- // This method zooms the selected grpah
+  // This method zooms the selected grpah
   void enablePanningMagnifier(bool on = true);
+
+  // Are MantidCurves plotted as distributions in this Graph
+  bool isDistribution()const{return m_isDistribution;}
 	
 public slots:
   //! Accessor method for #d_plot.
@@ -828,6 +840,12 @@ private:
   QSet<int> m_fixed_axes;
 
   int d_waterfall_offset_x, d_waterfall_offset_y;
+
+  // True if MantidCurves are plotted as distributions
+  bool m_isDistribution;
+  // x and y units of MantidCurves
+  boost::shared_ptr<Mantid::Kernel::Unit> m_xUnits;
+  boost::shared_ptr<Mantid::Kernel::Unit> m_yUnits;
 
 };
 #endif // GRAPH_H

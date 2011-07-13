@@ -171,7 +171,7 @@ public:
     MultiLayer* createGraphFromTable(Table* t, int type = 0);
 
     // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
-    MultiLayer* plotSelectedRows(const MantidMatrix * const m, bool errs = true);
+    MultiLayer* plotSelectedRows(const MantidMatrix * const m, bool errs = true, bool distr = false);
 
   /// This method executes loadraw algorithm from  ICatInterface
   void loadrawfromICatInterface(const QString& fileName,const QString& wsName);
@@ -192,17 +192,17 @@ public:
 
 public slots:
     // Create a 1d graph form specified spectra in a MatrixWorkspace
-    MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false);
+    MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false, bool distr=false);
 
 public:
-    MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=false);
+    MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=false, bool distr=false);
     /// Draw a color fill plot for each of the listed workspaces
     void drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType = Graph::ColorMap);
     /// Draw a color fill plot for the named workspace
     MultiLayer* drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType = Graph::ColorMap);
 
     // Create a 1d graph form specified spectra in a MatrixWorkspace
-    MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, bool errs=true);
+    MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, bool errs=true, bool distr=false);
 
     // Set properties of a 1d graph which plots data from a workspace
     static void setUpSpectrumGraph(MultiLayer* ml, const QString& wsName);

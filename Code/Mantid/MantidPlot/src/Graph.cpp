@@ -3274,6 +3274,21 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
  */
 PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth, int curveType)
 {
+  MantidCurve* mc = dynamic_cast<MantidCurve*>(c);
+  if (mc)
+  {
+    if (curves() == 0)
+    {
+      m_xUnits = mc->xUnits();
+      m_yUnits = mc->yUnits();
+      m_isDistribution = mc->isDistribution();
+    }
+    if (m_xUnits != mc->xUnits() || m_yUnits != mc->yUnits() || m_isDistribution != mc->isDistribution())
+    {
+      return NULL;
+    }
+  }
+
   c_type.resize(++n_curves);
   c_type[n_curves - 1] = curveType;
   c_keys.resize(n_curves);
@@ -3296,7 +3311,15 @@ void Graph::insertCurve(Graph* g, int i)
   PlotCurve *plotCurve = dynamic_cast<PlotCurve*>(g->curve(i));
   if( !plotCurve ) return;
   int curveType = g->curveType(i);
-  this->insertCurve(plotCurve, -1, curveType);
+  MantidCurve *mantidCurve = dynamic_cast<MantidCurve*>(g->curve(i));
+  if (mantidCurve)
+  {
+    this->insertCurve(mantidCurve, -1, curveType);
+  }
+  else
+  {
+    this->insertCurve(plotCurve, -1, curveType);
+  }
 }
 
 

@@ -1274,7 +1274,7 @@ void MultiLayer::dropEvent( QDropEvent * event )
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {
     try {
-      new MantidCurve(it.key(),g,"spectra",it.value(),false); // Always without errors for now
+      new MantidCurve(it.key(),g,it.value(),false); // Always without errors for now
     } catch (Mantid::Kernel::Exception::NotFoundError) {
       // Get here if workspace name is invalid - shouldn't be possible, but just in case
     } catch (std::invalid_argument&) {

@@ -337,7 +337,7 @@ void CurvesDialog::init()
               available->addItem(c->title().text());
               // Store copies of the curves
               // Necessary because a curve is deleted when it's removed from a plot
-              d_plotCurves[c->title().text()] = c->clone();
+              d_plotCurves[c->title().text()] = c->clone(g);
               ml->setCloseOnEmpty(false);
             }
           }
@@ -448,7 +448,7 @@ bool CurvesDialog::addCurve(const QString& name)
 
   if (d_plotCurves.find(name) != d_plotCurves.end())
   {
-    d_graph->insertCurve(d_plotCurves[name]->clone());
+    d_graph->insertCurve(d_plotCurves[name]->clone(d_graph));
     return true;
   }
   return false;

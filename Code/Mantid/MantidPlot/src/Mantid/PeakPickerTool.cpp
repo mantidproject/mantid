@@ -543,10 +543,10 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   graph()->removeCurve(m_curveFitName);
   graph()->removeCurve(m_curveDifName);
 
-  new MantidCurve(m_curveFitName,out,graph(),"spectra",1,false);
+  new MantidCurve(m_curveFitName,out,graph(),1,false);
   if (fitBrowser()->plotDiff())
   {
-    new MantidCurve(m_curveDifName,out,graph(),"spectra",2,false);
+    new MantidCurve(m_curveDifName,out,graph(),2,false);
   }
 
   graph()->replot();

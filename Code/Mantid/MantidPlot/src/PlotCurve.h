@@ -34,6 +34,15 @@
 #include "Table.h"
 
 class PlotMarker;
+class Graph;
+
+namespace Mantid
+{
+  namespace Kernel
+  {
+    class Unit;
+  }
+}
 
 //! Abstract 2D plot curve class
 class PlotCurve: public QObject, public QwtPlotCurve
@@ -43,7 +52,7 @@ public:
   PlotCurve(const QString& name = QString());
   PlotCurve(const PlotCurve& c);
 
-  virtual PlotCurve* clone()const = 0;
+  virtual PlotCurve* clone(const Graph*)const = 0;
 
 	int type()const{return d_type;};
 	void setType(int t){d_type = t;};
@@ -84,6 +93,10 @@ protected:
 	int d_type;
 	double d_x_offset, d_y_offset;
   bool d_side_lines;
+  bool m_isDistribution;
+  // x and y units
+  boost::shared_ptr<Mantid::Kernel::Unit> m_xUnits;
+  boost::shared_ptr<Mantid::Kernel::Unit> m_yUnits;
 };
 
 class DataCurve: public PlotCurve
@@ -93,7 +106,7 @@ public:
   DataCurve(const DataCurve& c);
     void clone(DataCurve* c);
 
-    PlotCurve* clone()const;
+    PlotCurve* clone(const Graph*)const;
 
     QString saveToString();
 

@@ -417,7 +417,6 @@ void ApplicationWindow::init(bool factorySettings)
   {
     showFirstTimeSetup();
   }
-
 }
 
 void ApplicationWindow::showLogWindowContextMenu(const QPoint & p)
@@ -10794,7 +10793,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       if( !curvelst[1].isEmpty()&& !curvelst[2].isEmpty())
       {
         try {
-          new MantidCurve(curvelst[1],ag,curvelst[2],curvelst[3].toInt(),curvelst[4].toInt());
+          new MantidCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // Get here if workspace name is invalid - shouldn't be possible, but just in case
           closeWindow(plot);

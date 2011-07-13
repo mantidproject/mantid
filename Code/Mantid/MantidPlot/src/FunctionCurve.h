@@ -52,7 +52,7 @@ public:
 	FunctionCurve(const FunctionCurve& c);
   ~FunctionCurve();
 
-  PlotCurve* clone()const{return new FunctionCurve(*this);}
+  PlotCurve* clone(const Graph*)const{return new FunctionCurve(*this);}
 
 	double startRange(){return d_from;};
 	double endRange(){return d_to;};

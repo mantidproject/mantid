@@ -2421,7 +2421,7 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
     @param indexList :: A list of spectra indices to be shown in the graph
     @param errs :: If true include the errors on the graph
  */
-MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs)
+MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs, bool distr)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
@@ -2433,14 +2433,14 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
   }
 
   // Pass over to the overloaded method
-  return plotSpectraList(pairs,errs);
+  return plotSpectraList(pairs,errs,distr);
 }
 
 /** Create a 1d graph form a set of workspace-spectrum pairs
     @param toPlot :: A list of spectra indices to be shown in the graph
     @param errs :: If true include the errors to the graph
  */
-MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs)
+MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr)
 {
   const QString& firstWorkspace = toPlot.constBegin().key();
   MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(firstWorkspace+"-"));
@@ -2456,7 +2456,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {
     try {
-      new MantidCurve(it.key(),g,"spectra",it.value(),errs);
+      MantidCurve* mc = new MantidCurve(it.key(),g,it.value(),errs,distr);
     } 
     catch (Mantid::Kernel::Exception::NotFoundError&) 
     {
@@ -2476,7 +2476,44 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     return NULL;
   }
 
-  setUpSpectrumGraph(ml,firstWorkspace);
+  Mantid::API::MatrixWorkspace_sptr workspace =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(
+          AnalysisDataService::Instance().retrieve(firstWorkspace.toStdString())
+      );
+
+  g->setTitle(tr("Workspace ")+firstWorkspace);
+  Mantid::API::Axis* ax;
+  ax = workspace->getAxis(0);
+  std::string xTitle;
+  std::string xUnits;
+  if (ax->unit() && ax->unit()->unitID() != "Empty" )
+  {
+    xTitle = ax->unit()->caption();
+    if ( !ax->unit()->label().empty() )
+    {
+      xUnits = ax->unit()->label();
+      xTitle += " / " + xUnits;
+    }
+  }
+  else if (!ax->title().empty())
+  {
+    xTitle = ax->title();
+  }
+  else
+  {
+    xTitle = "X axis";
+  }
+  g->setXAxisTitle(tr(xTitle.c_str()));
+  
+  std::string yTitle = workspace->YUnitLabel();
+  if (distr)
+  {
+    yTitle += " / " + xUnits;
+  }
+  g->setYAxisTitle(tr(yTitle.c_str()));
+  g->setAntialiasing(false);
+  g->setAutoScale();
+  //setUpSpectrumGraph(ml,firstWorkspace);
   return ml;
 }
 
@@ -2567,7 +2604,7 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
          If true it is a line going through the bin centres. Otherwise it will be made of horizontal steps
     @param tableVisible :: Visibility flag for the Table with the plotted data.
  */
-MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bool errs)
+MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bool errs, bool distr)
 {
   if (i0 < 0 || i1 < 0) return 0;
   /** For instrument with one to many spectra-detector mapping,
@@ -2578,19 +2615,19 @@ MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bo
   for(int i=i0;i<=i1;i++)
     indexList.insert(i);
 
-  return plotSpectraList(wsName,indexList,errs);
+  return plotSpectraList(wsName,indexList,errs,distr);
 }
 
 /**  Create a graph and plot the selected rows of a MantidMatrix
      @param m :: Mantid matrix
      @param errs :: True if the errors to be plotted
  */
-MultiLayer* MantidUI::plotSelectedRows(const MantidMatrix * const m, bool errs)
+MultiLayer* MantidUI::plotSelectedRows(const MantidMatrix * const m, bool errs, bool distr)
 {
   const QList<int>& rows = m->getSelectedRows();
   std::set<int> rowSet(rows.constBegin(),rows.constEnd());
 
-  return plotSpectraList(m->workspaceName(),rowSet,errs);
+  return plotSpectraList(m->workspaceName(),rowSet,errs,distr);
 }
 
 Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, const QList<int>& bins, bool errs, int fromRow, int toRow)

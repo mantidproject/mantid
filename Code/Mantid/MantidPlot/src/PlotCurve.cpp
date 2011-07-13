@@ -252,6 +252,8 @@ void PlotCurve::computeWaterfallOffsets()
   }
 }
 
+// --- DataCurve --- //
+
 DataCurve::DataCurve(Table *t, const QString& xColName, const QString& name, int startRow, int endRow):
     PlotCurve(name),
 	d_table(t),
@@ -955,7 +957,7 @@ void DataCurve::moveLabels(const QPoint& pos)
 	d_click_pos_y = d_plot->invTransform(yAxis(), pos.y());
 }
 
-PlotCurve* DataCurve::clone()const
+PlotCurve* DataCurve::clone(const Graph*)const
 {
   return new DataCurve(*this);
 }
