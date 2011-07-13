@@ -105,7 +105,7 @@ void StripVanadiumPeaks::exec()
     if (inputWS->getAxis(0)->unit()->unitID() != "dSpacing")
       throw std::invalid_argument("Cannot strip using default Vanadium peak positions for an input workspace whose units are not d-spacing. Convert to d-spacing or specify your own alternative peak positions.");
   }
-  std::vector<double> centers = Kernel::VectorHelper::splitStringIntoVector(peakPositions);
+  std::vector<double> centers = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
 
   //Get the width percentage
   double widthPercent = getProperty(PARAM_WIDTH);

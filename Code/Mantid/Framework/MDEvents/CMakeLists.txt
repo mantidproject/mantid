@@ -2,6 +2,7 @@
 set ( SRC_FILES
 	#	src/MDSplitBox.cpp
 	src/BinToMDHistoWorkspace.cpp
+	src/BoxController.cpp
 	src/CoordTransform.cpp
 	src/CoordTransformDistance.cpp
 	src/CreateMDEventWorkspace.cpp

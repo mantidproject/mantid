@@ -145,6 +145,40 @@ public:
     doTest_numBoxes(bc, 11);
   }
 
+  /// Compare two box controllers and assert each part of them.
+  void compare(BoxController & a, BoxController & b)
+  {
+    TS_ASSERT_EQUALS( a.getNDims(), b.getNDims());
+    TS_ASSERT_EQUALS( a.getMaxDepth(), b.getMaxDepth());
+    TS_ASSERT_EQUALS( a.getMaxId(), b.getMaxId());
+    TS_ASSERT_EQUALS( a.getSplitThreshold(), b.getSplitThreshold());
+    TS_ASSERT_EQUALS( a.getNumMDBoxes(), b.getNumMDBoxes());
+    TS_ASSERT_EQUALS( a.getNumSplit(), b.getNumSplit());
+    TS_ASSERT_EQUALS( a.getMaxNumMDBoxes(), b.getMaxNumMDBoxes());
+    for (size_t d=0; d< a.getNDims(); d++)
+    {
+      TS_ASSERT_EQUALS( a.getSplitInto(d), b.getSplitInto(d));
+    }
+   }
+
+  /// Generate XML and read it back
+  void test_xml()
+  {
+    BoxController a(2);
+    a.setMaxDepth(4);
+    a.setSplitInto(10);
+    a.setMaxDepth(10);
+    a.setMaxId(123456);
+
+    std::string xml = a.toXMLString();
+    TS_ASSERT(!xml.empty());
+
+    // Read it back
+    BoxController *b = BoxController::fromXMLString(xml);
+    // Check that it is the same
+    compare(a, *b);
+  }
+
 
 
 

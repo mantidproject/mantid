@@ -12,6 +12,8 @@ namespace Mantid
 namespace MDEvents
 {
 
+
+
   /** This class is used by MDBox and MDGridBox in order to intelligently
    * determine optimal behavior. It informs:
    *  - When a MDBox needs to split into a MDGridBox.
@@ -41,6 +43,15 @@ namespace MDEvents
       resetNumBoxes();
     }
 
+    /// Serialize
+    std::string toXMLString() const;
+
+    /// De-serializing constructor
+    static BoxController * fromXMLString(const std::string & xml);
+
+    /// Equality operator
+    bool operator==(const BoxController & other) const;
+
     //-----------------------------------------------------------------------------------
     /** Get # of dimensions
      * @return # of dimensions
@@ -60,7 +71,7 @@ namespace MDEvents
 
     //-----------------------------------------------------------------------------------
     /** @return the maximum (not-inclusive) ID number anywhere in the workspace. */
-    size_t getMaxId()
+    size_t getMaxId() const
     {
       return m_maxId;
     }

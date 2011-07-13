@@ -372,11 +372,11 @@ bool isConstantValue(const std::vector<double> &arra)
  * @return a vector of doubles
  * @throw an error if there was a string that could not convert to a double.
  */
-std::vector<double> splitStringIntoVector(std::string listString)
+template<typename NumT>
+std::vector<NumT> splitStringIntoVector(std::string listString)
 {
   //Split the string and turn it into a vector.
-  std::vector<double> values;
-  //std::vector<std::string> strs;
+  std::vector<NumT> values;
 
   typedef std::vector<std::string> split_vector_type;
   split_vector_type strs;
@@ -384,10 +384,14 @@ std::vector<double> splitStringIntoVector(std::string listString)
   boost::split(strs, listString, boost::is_any_of(", "));
   for (std::vector<std::string>::iterator it= strs.begin(); it != strs.end(); it++)
   {
-    std::stringstream oneNumber(*it);
-    double num;
-    oneNumber >> num;
-    values.push_back(num);
+    if (it->size() > 0)
+    {
+      // String not empty
+      std::stringstream oneNumber(*it);
+      NumT num;
+      oneNumber >> num;
+      values.push_back(num);
+    }
   }
   return values;
 }
@@ -451,6 +455,14 @@ void linearlyInterpolateY(const std::vector<double> & x, std::vector<double> & y
   }
 
 }
+
+/// Declare all version of this
+template DLLExport std::vector<int32_t> splitStringIntoVector<int32_t>(std::string listString);
+template DLLExport std::vector<int64_t> splitStringIntoVector<int64_t>(std::string listString);
+template DLLExport std::vector<size_t> splitStringIntoVector<size_t>(std::string listString);
+template DLLExport std::vector<float> splitStringIntoVector<float>(std::string listString);
+template DLLExport std::vector<double> splitStringIntoVector<double>(std::string listString);
+template DLLExport std::vector<std::string> splitStringIntoVector<std::string>(std::string listString);
 
 
 } // End namespace VectorHelper

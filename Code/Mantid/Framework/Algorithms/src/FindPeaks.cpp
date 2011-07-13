@@ -107,7 +107,7 @@ void FindPeaks::exec()
   if (peakPositions.size() > 0)
   {
     //Split the string and turn it into a vector.
-    std::vector<double> centers = Kernel::VectorHelper::splitStringIntoVector(peakPositions);
+    std::vector<double> centers = Kernel::VectorHelper::splitStringIntoVector<double>(peakPositions);
 
     //Perform fit with fixed start positions.
     this->findPeaksGivenStartingPoints(centers);

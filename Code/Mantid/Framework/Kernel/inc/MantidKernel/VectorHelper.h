@@ -57,7 +57,8 @@ namespace VectorHelper
   void MANTID_KERNEL_DLL convertToBinCentre(const std::vector<double> & bin_edges, std::vector<double> & bin_centres);
   bool MANTID_KERNEL_DLL isConstantValue(const MantidVec &arra);
 
-  MANTID_KERNEL_DLL std::vector<double> splitStringIntoVector(std::string listString);
+  template <typename NumT>
+  MANTID_KERNEL_DLL std::vector<NumT> splitStringIntoVector(std::string listString);
 
   MANTID_KERNEL_DLL int getBinIndex(std::vector<double>& bins, const double X );
   // Linearly interpolate between a set of Y values. Assumes the values are set for the calculated nodes
