@@ -83,6 +83,8 @@ public:
   MDEventWorkspace3::sptr  ws;
   void setUp()
   {
+    CPUTimer tim;
+
     // Make a 1D MDEventWorkspace
     ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
     ws->getBoxController()->setSplitInto(5);
@@ -94,7 +96,9 @@ public:
     AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
         "InputWorkspace", "SaveMDEWTestPerformance_ws", "UniformParams", "10000000");
 
+    std::cout << tim << " to fake the data." << std::endl;
     ws->refreshCache();
+    std::cout << tim << " to refresh cache." << std::endl;
 
 //    // There are this many boxes, so this is the max ID.
 //    TS_ASSERT_EQUALS( ws->getBoxController()->getMaxId(), 11111);
@@ -103,7 +107,6 @@ public:
 
   void test_exec_3D()
   {
-
     CPUTimer tim;
 
     SaveMDEW alg;
@@ -114,7 +117,7 @@ public:
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
-    std::cout << tim << " to save " << ws->getBoxController()->getMaxId() << " boxes with 10 million events." << std::endl;
+    std::cout << tim << " to save " << ws->getBoxController()->getMaxId() << " boxes with " << double(ws->getNPoints())/1e6 << " million events." << std::endl;
   }
 
 
