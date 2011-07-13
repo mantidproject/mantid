@@ -204,24 +204,26 @@ void Projection3D::mousePressEventMove(QMouseEvent* event)
 
 void Projection3D::mouseMoveEventMove(QMouseEvent* event)
 {
+    m_viewChanged = false;
     if (event->buttons() & Qt::LeftButton)
     {
       m_trackball->generateRotationTo(event->x(),event->y());
       m_trackball->initRotationFrom(event->x(),event->y());
+      m_viewChanged = true;
     }
     else if(event->buttons() & Qt::RightButton)
     { //Translate
       m_trackball->generateTranslationTo(event->x(),event->y());
       m_trackball->initTranslateFrom(event->x(),event->y());
+      m_viewChanged = true;
     }
     else if(event->buttons() & Qt::MidButton)
     { //Zoom
       m_trackball->generateZoomTo(event->x(),event->y());
       m_trackball->initZoomFrom(event->x(),event->y());
+      m_viewChanged = true;
     }
-    m_viewChanged = true;
-//  }
-  OpenGLError::check("GL3DWidget::mouseMoveEvent");
+    OpenGLError::check("GL3DWidget::mouseMoveEvent");
 }
 
 void Projection3D::mouseReleaseEventMove(QMouseEvent*)

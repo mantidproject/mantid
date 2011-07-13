@@ -279,7 +279,7 @@ void InstrumentWindow::tabChanged(int i)
   if (surface)
   {
     setInfoText(surface->getInfoText());
-    m_InstrumentDisplay->refreshView();
+    //m_InstrumentDisplay->refreshView();
   }
 }
 
