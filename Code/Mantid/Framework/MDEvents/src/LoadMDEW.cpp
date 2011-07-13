@@ -108,6 +108,9 @@ namespace MDEvents
   {
     CPUTimer tim;
     bool verbose=true;
+    Progress * prog = new Progress(this, 0.0, 1.0, 100);
+
+    prog->report("Opening file.");
 
     file->openGroup("workspace", "NXworkspace");
 
@@ -130,6 +133,8 @@ namespace MDEvents
 
     file->openGroup("data", "NXdata");
 
+    prog->report("Creating Vectors");
+
     // Box type (0=None, 1=MDBox, 2=MDGridBox
     std::vector<int> boxType;
     // Recursion depth
@@ -146,6 +151,7 @@ namespace MDEvents
     std::vector<int> box_children;
 
     if (verbose) std::cout << tim << " to initialize the box data vectors." << std::endl;
+    prog->report("Reading Box Data");
 
     // Read all the data blocks
     file->readData("boxType", boxType);
@@ -171,11 +177,14 @@ namespace MDEvents
     std::vector<IMDBox<MDE,nd> *> boxes(numBoxes, NULL);
     BoxController_sptr bc = ws->getBoxController();
 
+    prog->setNumSteps(numBoxes);
+
     // Get ready to read the slabs
     MDE::openNexusData(file);
 
     for (size_t i=0; i<numBoxes; i++)
     {
+      prog->report();
       size_t box_type = boxType[i];
       if (box_type > 0)
       {
@@ -247,7 +256,7 @@ namespace MDEvents
     file->close();
 
     if (verbose) std::cout << tim << " to finish up." << std::endl;
-
+    delete prog;
   }
 
 

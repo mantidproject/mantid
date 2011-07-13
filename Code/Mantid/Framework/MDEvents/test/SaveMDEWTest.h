@@ -92,7 +92,7 @@ public:
 
     std::ostringstream mess;
     AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
-        "InputWorkspace", "SaveMDEWTestPerformance_ws", "UniformParams", "50000000");
+        "InputWorkspace", "SaveMDEWTestPerformance_ws", "UniformParams", "10000000");
 
     ws->refreshCache();
 
@@ -114,7 +114,7 @@ public:
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
-    std::cout << tim << " to save " << ws->getBoxController()->getMaxId() << " boxes with 50 million events." << std::endl;
+    std::cout << tim << " to save " << ws->getBoxController()->getMaxId() << " boxes with 10 million events." << std::endl;
   }
 
 

@@ -7,10 +7,10 @@
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/LoadMDEW.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "SaveMDEWTest.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
-#include "SaveMDEWTest.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
@@ -92,6 +92,7 @@ public:
     TS_ASSERT_EQUALS( boxes.size(), 111111);
     TS_ASSERT_EQUALS( boxes.size(), boxes1.size());
     if (boxes.size() != boxes1.size()) return;
+
     for (size_t i=0; i<boxes.size(); i++)
     {
       IMDBox<MDEvent<1>,1>* box = boxes[i];
@@ -111,4 +112,5 @@ public:
 
 
 #endif /* MANTID_MDEVENTS_LOADMDEWTEST_H_ */
+
 

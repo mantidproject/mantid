@@ -337,10 +337,10 @@ namespace MDEvents
 
       // Start/size descriptors
       std::vector<int> start(2,0);
-      start[0] = indexStart;
+      start[0] = int(indexStart); //TODO: What if # events > size of int32???
 
       std::vector<int> size(2,0);
-      size[0] = numEvents;
+      size[0] = int(numEvents);
       size[1] = nd+2;
 
       // Get the slab into the allocated data
@@ -353,7 +353,7 @@ namespace MDEvents
         coord_t * centers = data + i*(nd+2)+2;
 
         // Create the event with signal, error squared, and the centers
-        events.push_back( MDEvent<nd>( data[i*(nd+2)], data[i*(nd+2) + 1], centers) );
+        events.push_back( MDEvent<nd>( float(data[i*(nd+2)]), float(data[i*(nd+2) + 1]), centers) );
       }
 
       // Release the memory (all has been COPIED into MDEvent's)
