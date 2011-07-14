@@ -136,7 +136,7 @@ void tearDown()
     {
       x[i] = xStart + dx*i;
     }
-    res.function(y,x,n);
+    res.functionMW(y,x,n);
     for(int i=0;i<n;i++)
     {
       double xi = x[i];

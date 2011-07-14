@@ -70,7 +70,7 @@ IPeakFunction::IPeakFunction()
  * @param xValues :: X values for data points
  * @param nData :: Number of data points
  */
-void IPeakFunction::function(double* out, const double* xValues, const size_t nData)const
+void IPeakFunction::functionMW(double* out, const double* xValues, const size_t nData)const
 {
   double c = this->centre();
   double dx = fabs(s_peakRadius*this->width());
@@ -102,7 +102,7 @@ void IPeakFunction::function(double* out, const double* xValues, const size_t nD
  * @param xValues :: X values for data points
  * @param nData :: Number of data points
  */
-void IPeakFunction::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
+void IPeakFunction::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
 {
   double c = this->centre();
   double dx = fabs(s_peakRadius*this->width());

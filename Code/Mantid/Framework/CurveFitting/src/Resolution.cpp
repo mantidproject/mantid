@@ -18,7 +18,7 @@ using namespace API;
 
 DECLARE_FUNCTION(Resolution)
 
-void Resolution::function(double* out, const double* xValues, const size_t nData)const
+void Resolution::functionMW(double* out, const double* xValues, const size_t nData)const
 {
   if (nData == 0) return;
 

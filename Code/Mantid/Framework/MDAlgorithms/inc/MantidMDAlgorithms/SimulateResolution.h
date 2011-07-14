@@ -57,7 +57,7 @@ namespace Mantid
             std::string name()const{return "SimulateResolution";}
         protected:
             /// function to return the calculated signal at cell r, given the energy dependent model applied to points
-            virtual double function(Mantid::API::IMDIterator& r) const;
+            virtual double functionMD(Mantid::API::IMDIterator& r) const;
             /// This will be over ridden by the user's SQW function TODO argument list is not general enough
             virtual double sqwBroad(const std::vector<double> & point, const std::vector<double> & fgParams,
                     const double temp, const Kernel::DblMatrix & ubinv) const=0;

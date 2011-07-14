@@ -88,7 +88,7 @@ public:
     declareParameter("b");
   }
   std::string name()const{return "ParameterTieTest_Linear";}
-  void function(double* out, const double* xValues, const size_t nData)const
+  void functionMW(double* out, const double* xValues, const size_t nData)const
   {
     double a = getParameter("a");
     double b = getParameter("b");
@@ -97,7 +97,7 @@ public:
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
+  void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
   {
     //throw Mantid::Kernel::Exception::NotImplementedError("");
     for(size_t i=0;i<nData;i++)
@@ -118,7 +118,7 @@ public:
     declareParameter("B1e2Ta_");
   }
   std::string name()const{return "ParameterTieTest_Nothing";}
-  void function(double* , const double*, const size_t)const{}
+  void functionMW(double* , const double*, const size_t)const{}
 };
 
 class ParameterTieTest : public CxxTest::TestSuite

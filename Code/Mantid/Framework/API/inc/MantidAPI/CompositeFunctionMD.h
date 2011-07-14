@@ -68,7 +68,7 @@ public:
 
 protected:
 
-  double function(IMDIterator& r) const;
+  double functionMD(IMDIterator& r) const;
 
   /// to collect different workspaces found in child functions
   std::vector< boost::shared_ptr<const IMDWorkspace> > m_workspaces;

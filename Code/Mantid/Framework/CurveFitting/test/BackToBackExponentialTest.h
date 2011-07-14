@@ -254,7 +254,7 @@ public:
 
     const double* xx = &ws2D->readX(0)[0];
     double *yy = new double[timechannels]; 
-    pk->function(yy, xx, timechannels);
+    pk->functionMW(yy, xx, timechannels);
 
     // note that fitting a none-totally optimized IC to a Gaussian peak so 
     // not a perfect fit - but pretty ok result

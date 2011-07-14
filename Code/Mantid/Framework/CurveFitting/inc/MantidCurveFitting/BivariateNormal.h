@@ -123,11 +123,11 @@ using namespace Mantid::API;
               std::cout<<"Inten OOB"<<IntensityConstraint->lower()<<","<<IntensityConstraint->upper()<<std::endl;
        }
       */
-      void 	function  (double *out, const double *xValues, const size_t nData)const ;
+      void 	functionMW  (double *out, const double *xValues, const size_t nData)const ;
           
     
       
-      void 	functionDeriv  (API::Jacobian  *out, const double *xValues, const size_t nData);
+      void 	functionDerivMW  (API::Jacobian  *out, const double *xValues, const size_t nData);
       
       int 	nAttributes  () const
            { return 16;}

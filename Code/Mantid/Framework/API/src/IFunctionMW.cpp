@@ -209,7 +209,7 @@ namespace API
   void IFunctionMW::function(double* out)const
   {
     if (m_dataSize == 0) return;
-    function(out,m_xValues.get(),m_dataSize);
+    functionMW(out,m_xValues.get(),m_dataSize);
 
   }
 
@@ -218,11 +218,11 @@ namespace API
   {
     if (out == NULL) 
     {
-      functionDeriv(out,m_xValues.get(),0);
+      functionDerivMW(out,m_xValues.get(),0);
       return;
     }
     if (m_dataSize == 0) return;
-    functionDeriv(out,m_xValues.get(),m_dataSize);
+    functionDerivMW(out,m_xValues.get(),m_dataSize);
   }
 
 
@@ -235,7 +235,7 @@ namespace API
  * @param xValues :: X values for data points
  * @param nData :: Number of data points
  */
-void IFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
+void IFunctionMW::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
 {
   UNUSED_ARG(out); UNUSED_ARG(xValues); UNUSED_ARG(nData);
   throw Kernel::Exception::NotImplementedError("No derivative IFunctionMW provided");
@@ -523,7 +523,7 @@ void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& o
  */
 void IFunctionMW::calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData)
 {
-  this->functionDeriv(out,xValues,nData);
+  this->functionDerivMW(out,xValues,nData);
 }
 
 /// Called after setMatrixWorkspace if setWorkspace hadn't been called before
@@ -649,7 +649,7 @@ void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const 
       m_tmpFunctionOutputPlusStep.reset(new double[nData]);
     }
 
-    function(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
+    functionMW(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
 
     for (int iP = 0; iP < static_cast<int>(nParam); iP++)
     {
@@ -671,7 +671,7 @@ void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const 
 
         double paramPstep = val + step;
         setParameter(iP, paramPstep);
-        function(m_tmpFunctionOutputPlusStep.get(), xValues, nData);
+        functionMW(m_tmpFunctionOutputPlusStep.get(), xValues, nData);
 
         step = paramPstep - val;
         setParameter(iP, val);

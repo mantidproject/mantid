@@ -21,7 +21,7 @@ public:
     declareParameter("c");
   }
   std::string name()const{return "ParameterReferenceTest_Fun";}
-  void function(double*, const double*, const size_t)const
+  void functionMW(double*, const double*, const size_t)const
   {
   }
 };

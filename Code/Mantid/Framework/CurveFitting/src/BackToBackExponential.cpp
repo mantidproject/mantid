@@ -25,7 +25,7 @@ void BackToBackExponential::init()
 }
 
 
-void BackToBackExponential::function(double* out, const double* xValues, const size_t nData)const
+void BackToBackExponential::functionMW(double* out, const double* xValues, const size_t nData)const
 {
     const double& I = getParameter("I");
     const double& a = getParameter("A");
@@ -46,7 +46,7 @@ void BackToBackExponential::function(double* out, const double* xValues, const s
     }
 }
 
-void BackToBackExponential::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
+void BackToBackExponential::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
 {
     const double& I = getParameter("I");
     const double& a = getParameter("A");

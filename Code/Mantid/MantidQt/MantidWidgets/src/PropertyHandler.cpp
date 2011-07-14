@@ -1024,7 +1024,7 @@ void PropertyHandler::calcBase()
     {
       double x = X[m_ci];
       double y = 0;
-      dynamic_cast<const Mantid::API::IFunctionMW*>(m_browser->m_autoBackground->function())->function(&y,&x,1);
+      dynamic_cast<const Mantid::API::IFunctionMW*>(m_browser->m_autoBackground->function())->functionMW(&y,&x,1);
       m_base = y;
     }
   }

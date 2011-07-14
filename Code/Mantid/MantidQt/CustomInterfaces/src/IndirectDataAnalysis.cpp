@@ -1938,7 +1938,7 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
       inputXData[i] = XValues[binIndxLow+i];
   }
 
-  function->function(outputData, inputXData, nData);
+  function->functionMW(outputData, inputXData, nData);
 
   QVector<double> dataX;
   QVector<double> dataY;
@@ -2245,7 +2245,7 @@ void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
     }
   }
 
-  function->function(outputData, inputXData, nData);
+  function->functionMW(outputData, inputXData, nData);
 
   QVector<double> dataX, dataY;
 

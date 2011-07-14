@@ -110,7 +110,7 @@ BivariateNormal::~BivariateNormal()
 
 
 
-void BivariateNormal::function(double *out, const double *xValues, const size_t nData)const
+void BivariateNormal::functionMW(double *out, const double *xValues, const size_t nData)const
 {
 
   UNUSED_ARG(xValues);
@@ -168,7 +168,7 @@ void BivariateNormal::fit( std::vector<double>, std::vector<double>)
   std::cout<<"In fit"<<std::endl; 
   initCommon();
 }
-void BivariateNormal::functionDeriv(API::Jacobian *out, const double *xValues, const size_t nData)
+void BivariateNormal::functionDerivMW(API::Jacobian *out, const double *xValues, const size_t nData)
 {
   UNUSED_ARG(xValues);
   UNUSED_ARG(nData);

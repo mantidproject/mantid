@@ -48,9 +48,9 @@ public:
   virtual void setWidth(const double w) = 0;
 
   /// General implementation of the method for all peaks. 
-  void function(double* out, const double* xValues, const size_t nData)const;
+  void functionMW(double* out, const double* xValues, const size_t nData)const;
   /// General implementation of the method for all peaks. 
-  void functionDeriv(API::Jacobian* out, const double* xValues, const size_t nData);
+  void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
   /// Set new peak radius
   static void setPeakRadius(const int& r);
 

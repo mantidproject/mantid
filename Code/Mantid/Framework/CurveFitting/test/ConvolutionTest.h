@@ -119,7 +119,7 @@ public:
 
   std::string name()const{return "ConvolutionTest_Linear";}
 
-  void function(double* out, const double* xValues, const size_t nData)const
+  void functionMW(double* out, const double* xValues, const size_t nData)const
   {
     double a = getParameter("a");
     double b = getParameter("b");
@@ -128,7 +128,7 @@ public:
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
+  void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
   {
     //throw Mantid::Kernel::Exception::NotImplementedError("");
     for(size_t i=0;i<nData;i++)
@@ -268,10 +268,10 @@ public:
       xr[i] = x[i] - x0 - Dx/2;
     }
 
-    res->function(out,xr,N);
+    res->functionMW(out,xr,N);
 
     // When called with only 1 function attached returns its fourier transform
-    conv.function(out,x,N);
+    conv.functionMW(out,x,N);
 
     // Check that the transform is correct: F( exp(-a*x^2) ) == sqrt(pi/a)*exp(-(pi*x)^2/a)
     Convolution::HalfComplex hout(out,N);
@@ -327,7 +327,7 @@ public:
 
     conv.addFunction(fun);
 
-    conv.function(out,x,N);
+    conv.functionMW(out,x,N);
 
     // a convolution of two gaussians is a gaussian with h == hp and s == sp
     double sp = s1*s2/(s1+s2);

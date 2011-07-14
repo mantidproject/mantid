@@ -28,7 +28,8 @@ namespace API
 class Jacobian;
 class ParameterTie;
 class IConstraint;
-/** An interface to a function.
+/** Implements the part of IFitFunction interface dealing with parameters. This function has parameters of its own
+    as opposed to a CompositeFunction which list of parameters consists only of parameters of the member functions.
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 13/01/2011

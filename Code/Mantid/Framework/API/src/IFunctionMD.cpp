@@ -130,7 +130,7 @@ namespace API
     do
     {
       int i = static_cast<int>(r->getPointer());
-      out[i] = function(*r);
+      out[i] = functionMD(*r);
     }while(r->next());
     delete r;
   }
@@ -265,7 +265,7 @@ namespace Mantid
         * Calculate the function value at a point r in the MD workspace
         * @param r :: MD workspace iterator with a reference to the current point
         */
-      double function(IMDIterator& r) const
+      double functionMD(IMDIterator& r) const
       {
         double arg = 0.0;
         int n = static_cast<int>(m_dimensions.size());
@@ -351,7 +351,7 @@ namespace Mantid
         * Calculate the function value at a point r in the MD workspace
         * @param r :: MD workspace iterator with a reference to the current point
         */
-      double function(IMDIterator& r) const
+      double functionMD(IMDIterator& r) const
       {
         int n = static_cast<int>(m_dimensions.size());
         for(int i = 0; i < n; ++i)

@@ -104,7 +104,7 @@ public:
         x[i] = i;
       
       double* out = new double[nCells];
-      NormalFit.function(out, x, nCells);
+      NormalFit.functionMW(out, x, nCells);
       
       TS_ASSERT_LESS_THAN(fabs(out[0] - .0500), .00004);
       TS_ASSERT_LESS_THAN(fabs(out[(int) (nCells / 4)] - 0.38912475), .00004);
@@ -114,7 +114,7 @@ public:
 
       Jacob Jac(7, nCells);
 
-      NormalFit.functionDeriv(&Jac, x, nCells);
+      NormalFit.functionDerivMW(&Jac, x, nCells);
       delete[] x;
       size_t p = 0;
       {
@@ -237,7 +237,7 @@ public:
     NormalFit.setWorkspace( ws, std::string("StartX=0,EndX=857,WorkspaceIndex=0") );
 
     double* out = new double[nCells];
-    NormalFit.function(out, x, nCells);
+    NormalFit.functionMW(out, x, nCells);
 
     double sav = out[0];
     

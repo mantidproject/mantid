@@ -21,7 +21,7 @@ Chebyshev::Chebyshev():m_n(0),m_StartX(-1.),m_EndX(1.)
   declareParameter("A0");
 };
 
-void Chebyshev::function(double* out, const double* xValues, const size_t nData)const
+void Chebyshev::functionMW(double* out, const double* xValues, const size_t nData)const
 {
   if (m_StartX >= m_EndX)
   {
@@ -47,7 +47,7 @@ void Chebyshev::function(double* out, const double* xValues, const size_t nData)
   }
 }
 
-void Chebyshev::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
+void Chebyshev::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
 {
   if (m_n < 0)
   {

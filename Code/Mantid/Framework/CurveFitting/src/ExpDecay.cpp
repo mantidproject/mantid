@@ -21,7 +21,7 @@ ExpDecay::ExpDecay()
 }
 
 
-void ExpDecay::function(double* out, const double* xValues, const size_t nData)const
+void ExpDecay::functionMW(double* out, const double* xValues, const size_t nData)const
 {
     const double& h = getParameter("Height");
     const double& t = getParameter("Lifetime");
@@ -32,7 +32,7 @@ void ExpDecay::function(double* out, const double* xValues, const size_t nData)c
     }
 }
 
-void ExpDecay::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
+void ExpDecay::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
 {
     const double& h = getParameter("Height");
     const double& t = getParameter("Lifetime");

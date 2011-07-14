@@ -220,7 +220,7 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
   //std::for_each(&m_data[0],&m_data[0]+m_dataSize,std::cerr << _1 << '\n');
 }
 
-double CompositeFunctionMD::function(IMDIterator& r) const
+double CompositeFunctionMD::functionMD(IMDIterator& r) const
 {
   UNUSED_ARG(r)
   return 0;

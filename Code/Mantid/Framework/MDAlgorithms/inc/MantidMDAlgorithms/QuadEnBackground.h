@@ -58,7 +58,7 @@ namespace Mantid
             std::string name()const{return "QuadEnBackground";}
         protected:
             /// function to return the calculated signal at cell r, given the energy dependent model applied to points
-            virtual double function(Mantid::API::IMDIterator& r) const;
+            virtual double functionMD(Mantid::API::IMDIterator& r) const;
         };
 
     } // namespace MDAlgorithms

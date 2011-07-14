@@ -109,7 +109,7 @@ public:
 
   std::string name()const{return "ProductFunctionMWTest_Linear";}
 
-  void function(double* out, const double* xValues, const size_t nData)const
+  void functionMW(double* out, const double* xValues, const size_t nData)const
   {
     double a = getParameter("a");
     double b = getParameter("b");
@@ -118,7 +118,7 @@ public:
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
+  void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
   {
     for(size_t i=0;i<nData;i++)
     {
@@ -254,7 +254,7 @@ public:
 
     prodF.addFunction(f1);
 
-    prodF.function(out,x,N);
+    prodF.functionMW(out,x,N);
 
 
 

@@ -317,7 +317,7 @@ namespace Mantid
             //x[i] = X[TOFmin]+i*dx;
           }
           pk->setMatrixWorkspace(outputW, det, -1, -1);
-          pk->function(y,x,n);
+          pk->functionMW(y,x,n);
     
           //Calculate intensity
           I = 0.0;

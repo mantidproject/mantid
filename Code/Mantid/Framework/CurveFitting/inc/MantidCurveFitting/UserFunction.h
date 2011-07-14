@@ -55,9 +55,9 @@ namespace Mantid
       std::string name()const{return "UserFunction";}
 
       /// Function you want to fit to.
-      void function(double* out, const double* xValues, const size_t nData)const;
+      void functionMW(double* out, const double* xValues, const size_t nData)const;
       /// Derivatives of function with respect to active parameters
-      void functionDeriv(API::Jacobian* out, const double* xValues, const size_t nData);
+      void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
 
       /// Returns the number of attributes associated with the function
       int nAttributes()const{return 1;}

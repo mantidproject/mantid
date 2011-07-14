@@ -31,7 +31,7 @@ namespace Mantid
         {
             delete m_randGen;
         }
-        double SimulateResolution::function(Mantid::API::IMDIterator& it) const
+        double SimulateResolution::functionMD(Mantid::API::IMDIterator& it) const
         {
             getParams();
             double fgSignal = 0.;

@@ -92,7 +92,7 @@ std::string CompositeFunctionMW::asString()const
 }
 
 /// Function you want to fit to.
-void CompositeFunctionMW::function(double* out, const double* xValues, const size_t nData)const
+void CompositeFunctionMW::functionMW(double* out, const double* xValues, const size_t nData)const
 {
   if (nData == 0) return;
   boost::shared_array<double> tmpOut(new double[nData]);
@@ -100,24 +100,24 @@ void CompositeFunctionMW::function(double* out, const double* xValues, const siz
   {
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(i));
     if (i == 0)
-      fun->function(out,xValues,nData);
+      fun->functionMW(out,xValues,nData);
     else
     {
-      fun->function(tmpOut.get(),xValues,nData);
+      fun->functionMW(tmpOut.get(),xValues,nData);
       std::transform(out,out+nData,tmpOut.get(),out,std::plus<double>());
     }
   }
 }
 
 /// Derivatives of function with respect to active parameters
-void CompositeFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
+void CompositeFunctionMW::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
 {
   for(size_t i=0;i<nFunctions();i++)
   {
     int ii = static_cast<int>(i); // this is horrible
     PartialJacobian J(out,paramOffset(ii),activeOffset(ii));
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(i));
-    fun->functionDeriv(&J,xValues,nData);
+    fun->functionDerivMW(&J,xValues,nData);
   }
 }
 

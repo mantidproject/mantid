@@ -105,7 +105,7 @@ namespace Mantid
     *  @param xValues :: The array of nData x-values.
     *  @param nData :: The size of the fitted data.
     */
-    void UserFunction::function(double* out, const double* xValues, const size_t nData)const
+    void UserFunction::functionMW(double* out, const double* xValues, const size_t nData)const
     {
       for (size_t i = 0; i < nData; i++) 
       {
@@ -119,7 +119,7 @@ namespace Mantid
     * @param xValues :: X values for data points
     * @param nData :: Number of data points
     */
-    void UserFunction::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
+    void UserFunction::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
     {
       if (nData == 0) return;
       std::vector<double> dp(nParams());
@@ -143,13 +143,13 @@ namespace Mantid
         m_tmp1.reset(new double[nData]);
       }
 
-      function(m_tmp.get(),xValues, nData);
+      functionMW(m_tmp.get(),xValues, nData);
 
       for (int j = 0; j < nParams(); j++)
       {
         double p0 = getParameter(j);
         setParameter(j,p0 + dp[j],false);
-        function(m_tmp1.get(),xValues, nData);
+        functionMW(m_tmp1.get(),xValues, nData);
         for (size_t i = 0; i < nData; i++)
         {
           out->set(i,j, (m_tmp1[i] - m_tmp[i])/dp[j]);

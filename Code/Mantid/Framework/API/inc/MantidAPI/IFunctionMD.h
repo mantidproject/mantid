@@ -143,7 +143,7 @@ protected:
   /// Do finction initialization after useAllDimensions() was called
   virtual void initDimensions(){}
   /// Does the function evaluation. Must be implemented in derived classes.
-  virtual double function(IMDIterator& r) const = 0;
+  virtual double functionMD(IMDIterator& r) const = 0;
 
 
   //    fields for implementing IFitFunction interface

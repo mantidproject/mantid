@@ -43,7 +43,7 @@ void Convolution::init()
 /**
  * Calculates convolution of the two member functions. 
  */
-void Convolution::function(double* out, const double* xValues, const size_t nData)const
+void Convolution::functionMW(double* out, const double* xValues, const size_t nData)const
 {
   if (nFunctions() == 0)
   {
@@ -85,7 +85,7 @@ void Convolution::function(double* out, const double* xValues, const size_t nDat
     {
       throw std::runtime_error("Convolution can work only with IFunctionMW");
     }
-    fun->function(m_resolution,xr,nData);
+    fun->functionMW(m_resolution,xr,nData);
 
     // rotate the data to produce the right transform
     if (odd)
@@ -141,20 +141,20 @@ void Convolution::function(double* out, const double* xValues, const size_t nDat
     }
     if (dltFuns.size() == cf->nFunctions())
     {// all delta functions - return scaled reslution
-      resolution->function(out,xValues,nData);
+      resolution->functionMW(out,xValues,nData);
       std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),dltF));
       return;
     }
   }
   else if (dynamic_cast<DeltaFunction*>(getFunction(1)))
   {// single delta function - return scaled reslution
-    resolution->function(out,xValues,nData);
+    resolution->functionMW(out,xValues,nData);
     std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),getFunction(1)->getParameter("Height")));
     return;
   }
 
   API::IFunctionMW* funct = dynamic_cast<API::IFunctionMW*>(getFunction(1));
-  funct->function(out,xValues,nData);
+  funct->functionMW(out,xValues,nData);
   gsl_fft_real_transform (out, 1, nData, wavetable, workspace);
   gsl_fft_real_wavetable_free (wavetable);
 
@@ -190,7 +190,7 @@ void Convolution::function(double* out, const double* xValues, const size_t nDat
   if (dltF != 0.)
   {
     double* tmp = new double[nData];
-    resolution->function(tmp,xValues,nData);
+    resolution->functionMW(tmp,xValues,nData);
     std::transform(tmp,tmp+nData,tmp,std::bind2nd(std::multiplies<double>(),dltF));
     std::transform(out,out+nData,tmp,out,std::plus<double>());
     delete tmp;
@@ -198,7 +198,7 @@ void Convolution::function(double* out, const double* xValues, const size_t nDat
 
 }
 
-void Convolution::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
+void Convolution::functionDerivMW(Jacobian* out, const double* xValues, const size_t nData)
 {
   if (nData == 0) return;
   std::vector<double> dp(nParams());
@@ -222,13 +222,13 @@ void Convolution::functionDeriv(Jacobian* out, const double* xValues, const size
     m_tmp1.reset(new double[nData]);
   }
 
-  function(m_tmp.get(),xValues, nData);
+  functionMW(m_tmp.get(),xValues, nData);
 
   for (int j = 0; j < nParams(); j++) 
   {
     double p0 = getParameter(j);
     setParameter(j,p0 + dp[j],false);
-    function(m_tmp1.get(),xValues, nData);
+    functionMW(m_tmp1.get(),xValues, nData);
     for (size_t i = 0; i < nData; i++)
     {
       out->set(i,j, (m_tmp1[i] - m_tmp[i])/dp[j]);

@@ -53,14 +53,14 @@ public:
     {
       x[i] = 0.1*static_cast<double>(i);
     }
-    fun.function(&y[0],&x[0],nData);
+    fun.functionMW(&y[0],&x[0],nData);
     for(size_t i=0;i<nData;i++)
     {
       TS_ASSERT_DELTA(y[i],2.2*sin(2*x[i]-1.2),0.000001);
     }
 
     UserTestJacobian J(nData,nParams);
-    fun.functionDeriv(&J,&x[0],nData);
+    fun.functionDerivMW(&J,&x[0],nData);
     for(size_t i=0;i<nData;i++)
     for(size_t j=0;j<nParams;j++)
     {

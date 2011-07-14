@@ -33,7 +33,7 @@ public:
       {
         cheb.setParameter(n-1,0.);
       }
-      cheb.function(&y[0],&x[0],N);
+      cheb.functionMW(&y[0],&x[0],N);
       for(int i=0;i<N;++i)
       {
         TS_ASSERT_DELTA(y[i],cos(n*acos(x[i])),1e-12);

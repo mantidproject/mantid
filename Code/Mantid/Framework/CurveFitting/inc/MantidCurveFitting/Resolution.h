@@ -49,9 +49,9 @@ public:
 
   /// overwrite IFunction base class methods
   std::string name()const{return "Resolution";}
-  void function(double* out, const double* xValues, const size_t nData)const;
+  void functionMW(double* out, const double* xValues, const size_t nData)const;
   ///  function derivatives
-  void functionDeriv(API::Jacobian* out, const double* xValues, const size_t nData)const
+  void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData)const
   {
     (void) out; (void) xValues; (void) nData; //Avoid compiler warning
   }
