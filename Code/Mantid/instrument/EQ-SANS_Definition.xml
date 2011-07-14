@@ -2725,7 +2725,7 @@
       </location>
     </component>
   </type>
-  <type name="tube">
+  <type name="tube" outline="yes">
     <properties/>
     <component type="pixel">
       <location y="-0.5478515625" name="pixel1"/>
