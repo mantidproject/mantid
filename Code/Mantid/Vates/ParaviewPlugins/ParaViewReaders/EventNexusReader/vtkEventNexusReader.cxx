@@ -39,6 +39,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidNexus/NeXusFile.hpp"
 
 vtkCxxRevisionMacro(vtkEventNexusReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkEventNexusReader);
@@ -485,10 +486,37 @@ void vtkEventNexusReader::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os,indent);
 }
 
-int vtkEventNexusReader::CanReadFile(const char* vtkNotUsed(fname))
+int vtkEventNexusReader::CanReadFile(const char* fname)
 {
-  //this->FileName;
-  return 1; //TODO: Apply checks here.
+  ::NeXus::File * file = NULL;
+  try
+  {
+    file = new ::NeXus::File(fname);
+    // All SNS (event or histo) nxs files have entry
+    file->openGroup("entry", "NXentry");
+    // Only eventNexus files have bank123_events as a group name
+    std::map<std::string, std::string> entries = file->getEntries();
+    bool hasEvents = false;
+    std::map<std::string, std::string>::iterator it;
+    for (it = entries.begin(); it != entries.end(); it++)
+    {
+      if (it->first.find("_events") != std::string::npos)
+      {
+        hasEvents=true;
+        break;
+      }
+    }
+    file->close();
+    return hasEvents ? 1 : 0;
+  }
+  catch (std::exception & e)
+  {
+    std::cerr << "Could not open " << this->FileName << " as an EventNexus file because of exception: " << e.what() << std::endl;
+    // Clean up, if possible
+    if (file)
+      file->close();
+  }
+  return 0;
 }
 
 unsigned long vtkEventNexusReader::GetMTime()
