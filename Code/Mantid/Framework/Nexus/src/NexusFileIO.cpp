@@ -742,6 +742,15 @@ using namespace DataObjects;
           toNexus[ii] = col->cell<double>(ii);
         NXwritedata(str.c_str(), NX_FLOAT64, 1, dims_array, (void *)(toNexus), false);
         delete[] toNexus;
+
+        // attributes
+        status=NXopendata(fileID, str.c_str());
+        std::string units = "Not known";
+        std::string interpret_as = "A double";
+        status=NXputattr(fileID, "units", (void*)units.c_str(), static_cast<int>(units.size()), NX_CHAR);
+        status=NXputattr(fileID, "interpret_as", (void*)interpret_as.c_str(), 
+                         static_cast<int>(interpret_as.size()), NX_CHAR);
+        status=NXclosedata(fileID);
       }
       else if ( col->isType<std::string>() )
       {
@@ -770,17 +779,19 @@ using namespace DataObjects;
         status = NXputdata(fileID, (void *)(toNexus));
         delete[] toNexus;
 
+        // attributes
+        std::string units = "N/A";
+        std::string interpret_as = "A string";
+        status=NXputattr(fileID, "units", (void*)units.c_str(), static_cast<int>(units.size()), NX_CHAR);
+        status=NXputattr(fileID, "interpret_as", (void*)interpret_as.c_str(), 
+                         static_cast<int>(interpret_as.size()), NX_CHAR);
+
         status = NXclosedata(fileID);
       }
 
-      // write out title and other stuff
+      // write out title 
       status=NXopendata(fileID, str.c_str());
-      if (status != NX_OK)
-        std::cout << "Open : " << status << std::endl;
       status=NXputattr(fileID, "name", (void*)col->name().c_str(), static_cast<int>(col->name().size()), NX_CHAR);
-      if (status != NX_OK)
-        std::cout << "Put att " << status << std::endl;
-
       status=NXclosedata(fileID);
     }
 
