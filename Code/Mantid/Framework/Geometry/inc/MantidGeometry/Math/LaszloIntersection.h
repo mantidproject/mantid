@@ -1,20 +1,23 @@
-#ifndef MANTID_GEOMETRY_POLYGONINTERSECTION_H_
-#define MANTID_GEOMETRY_POLYGONINTERSECTION_H_
+#ifndef MANTID_GEOMETRY_LASZLOINTERSECTION_H_
+#define MANTID_GEOMETRY_LASZLOINTERSECTION_H_
 
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Math/ConvexPolygon.h"
+#include <stdexcept>
 
 namespace Mantid
 {
   namespace Geometry
   {
     /** 
-    This header defines various algorithms for defining polygon intersection
+    This header defines an implementation of the convex polygon intersection method
+    by Michael Laszlo
 
-    @author Martyn Gigg, Tessella plc
+    @author Martyn Gigg
+    @date 2011-07-12
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -37,18 +40,19 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-    /// Define an enum for the intersection algorithm to use
-    namespace PolygonIntersection
+    class MANTID_GEOMETRY_DLL NoIntersectionException : public std::runtime_error
     {
-      enum Method{Laszlo, ORourke};
+    public:
+      NoIntersectionException() : std::runtime_error("No intersections found that form a complete convex polygon.")
+      {
+      }
     };
 
-    /// Compute the intersection of two polygons using a chosen method
+    /// Compute the intersection of two ConvexPolygons
     MANTID_GEOMETRY_DLL 
-    ConvexPolygon intersection(const ConvexPolygon &p, const ConvexPolygon &q, 
-      PolygonIntersection::Method method = PolygonIntersection::ORourke);
+    ConvexPolygon intersectionByLaszlo(const ConvexPolygon &P, const ConvexPolygon &Q);
 
-  } //namespace Geometry
-} //namespace Mantid
+  } // namespace Geometry
+} // namespace Mantid
 
-#endif //MANTID_GEOMETRY_POLYGONINTERSECTION_H_
+#endif  /* MANTID_GEOMETRY_LASZLOINTERSECTION_H_ */

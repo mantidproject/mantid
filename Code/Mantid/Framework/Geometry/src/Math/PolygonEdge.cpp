@@ -161,6 +161,36 @@ namespace Mantid
       }
     }
 
+    /**
+     * Return if the edges aim at each other
+     * @param a :: First edge
+     * @param b :: Second edge
+     * @param pclass :: The point classification of a point on edge a
+     */
+    bool edgeAimsAt(const PolygonEdge &a, const PolygonEdge &b, PointClassification aclass, PolygonEdge::Orientation crossType)
+    {
+      V2D va = a.direction();
+      V2D vb = b.direction();
+      if (crossType != PolygonEdge::Collinear)
+      {
+        double ca = va.X() * vb.Y();
+        double cb = vb.X() * va.Y();
+        if( Kernel::gtEquals(ca, cb) )
+        {
+          return (aclass != Right);
+        }
+        else
+        {
+          return (aclass != Left);
+        }
+      }
+      else
+      {
+        return (aclass != Beyond);
+      }
+    }
+
+
 
   } // namespace Geometry
 } // namespace Mantid

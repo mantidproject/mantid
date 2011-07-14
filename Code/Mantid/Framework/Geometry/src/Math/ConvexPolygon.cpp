@@ -18,41 +18,22 @@ namespace Mantid
     // Public functions
     //-----------------------------------------------------------------------------
     /**
-     * Constructor with a head vertex. It must be linked to at least 2 others to be considered valid
-     * @param head :: A reference to the head vertex
+     * Constructor with a head vertex.
+     * @param head :: A pointer the head vertex
      * @throws std::invalid_argument If the vertex list is invalid
      */
-    ConvexPolygon::ConvexPolygon(Vertex2D & head)
+    ConvexPolygon::ConvexPolygon(Vertex2D * head)
     {
       validate(head);
-      m_currentVertex = m_head = &head;
+      m_head = head;
       m_numVertices = 1;
-      Vertex2D *nextVertex = m_currentVertex->next();
-      while( nextVertex != m_head)
+      Vertex2D *nextVertex = head->next();
+      // Count the vertices
+      while( nextVertex != head )
       {
         ++m_numVertices;
         nextVertex = nextVertex->next();
       }
-    }
-
-    /**
-     * Constructor with a collection of vertices
-     * @param points :: The points forming the polygon, must be at least 3
-     * @throws std::invalid_argument if the vertex list is does not meet
-     * the convex polygon requirement
-     */
-    ConvexPolygon::ConvexPolygon(const Vertex2DList & points)
-      : m_currentVertex(NULL), m_numVertices(0)
-    {
-      validate(points);
-      m_numVertices = points.size();
-      m_currentVertex = m_head = new Vertex2D(points[0]);
-      for( size_t i = 1; i < m_numVertices; ++i )
-      {
-        m_currentVertex = m_currentVertex->insert(new Vertex2D(points[i]));
-      }
-      // Point it to the first one
-      m_currentVertex = m_currentVertex->next();
     }
 
     /**
@@ -64,13 +45,13 @@ namespace Mantid
      */
     ConvexPolygon::ConvexPolygon(const double x_lower, const double x_upper, 
                                  const double y_lower, const double y_upper)
-      : m_currentVertex(new Vertex2D(x_lower, y_lower)), m_numVertices(4), m_head(m_currentVertex)
+      : m_numVertices(4), m_head(new Vertex2D(x_lower, y_lower))
     {
-      m_currentVertex = m_currentVertex->insert(new Vertex2D(x_upper, y_lower)); // Bottom right
-      m_currentVertex = m_currentVertex->insert(new Vertex2D(x_upper, y_upper)); // Top right
-      m_currentVertex = m_currentVertex->insert(new Vertex2D(x_lower, y_upper)); // Top left
-      // Point it to the first one
-      m_currentVertex = m_currentVertex->next();
+      // Iterating from the head now produces a clockwise pattern
+      m_head->insert(new Vertex2D(x_upper, y_lower)); // Bottom right
+      m_head->insert(new Vertex2D(x_upper, y_upper)); // Top right
+      m_head->insert(new Vertex2D(x_lower, y_upper)); // Top left
+      
     }
 
     /**
@@ -82,18 +63,16 @@ namespace Mantid
       if( this != &rhs )
       {
         m_numVertices = rhs.m_numVertices;
-        Vertex2D *rhsVertex = rhs.m_currentVertex;
-        m_currentVertex = new Vertex2D(rhsVertex->X(), rhsVertex->Y());
-        for(size_t i = 1; i < m_numVertices; ++i)
+        m_head = new Vertex2D(rhs.m_head->X(), rhs.m_head->Y());
+        /// Iterating next() around the other polygon produces the points in clockwise order
+        /// so we need to go backwards here to ensure that they remain in the same order
+        Vertex2D *rhsVertex = rhs.m_head->previous();
+        // Count the vertices
+        while( rhsVertex != rhs.m_head )
         {
-          rhsVertex = rhsVertex->next();
-          m_currentVertex = m_currentVertex->insert(new Vertex2D(rhsVertex->X(), rhsVertex->Y()));
-          if( rhsVertex == rhs.m_head )
-          {
-            m_head = m_currentVertex;
-          }
+          m_head->insert(new Vertex2D(rhsVertex->X(), rhsVertex->Y()));
+          rhsVertex = rhsVertex->previous();
         }
-        m_currentVertex = m_currentVertex->next();
       }
     }
 
@@ -103,33 +82,13 @@ namespace Mantid
     ConvexPolygon::~ConvexPolygon()
     {
       // Ensure we delete the vertices
-      if( m_currentVertex )
+      Vertex2D *nextVertex = m_head->next();
+      while(nextVertex != m_head)
       {
-        Vertex2D *nextVertex = m_currentVertex->next();
-        while(m_currentVertex != nextVertex)
-        {
-          delete nextVertex->remove();
-          nextVertex = m_currentVertex->next();
-        }
-        delete m_currentVertex;
+        delete nextVertex->remove();
+        nextVertex = m_head->next();
       }
-    }
-
-    /**
-     * Returns the current point
-     */
-    const Kernel::V2D & ConvexPolygon::point() const
-    {
-      return *m_currentVertex;
-    }
-
-    /**
-     * Returns an edge on the polygon between the current vertex and the next
-     * @returns A PolygonEdge object
-     */
-    PolygonEdge ConvexPolygon::edge() const
-    {
-      return PolygonEdge(*m_currentVertex, *(m_currentVertex->next()));
+      delete m_head;
     }
      
     /**
@@ -155,13 +114,20 @@ namespace Mantid
     }
 
     /**
-     * Advance the current vertex to the next in the chain and return it
-     * @returns The next point in the chain
+     * Is a point inside this polygon
+     * @param point :: The point to test
+     * @returns True if the point is inside the polygon
      */
-    const V2D & ConvexPolygon::advance()
+    bool ConvexPolygon::contains(const Kernel::V2D & point) const
     {
-      m_currentVertex = m_currentVertex->next();
-      return *m_currentVertex;
+      Vertex2D *v = m_head;
+      while( v != m_head )
+      {
+        PolygonEdge edge(v->point(), v->next()->point());
+        if( classify(point, edge) == Left ) return false;
+        v = v->next();
+      }
+      return true;
     }
 
     /**
@@ -191,67 +157,40 @@ namespace Mantid
       // square matrices. We could fool it by putting extra zeroes but this
       // would increase the workload for no gain
 
-      // Loop over all and compute the individual elements
-      // The ends are handled by the vertex pointer linkage
+      // Loop over all and compute the individual elements. We assume
+      // that calling next() on the vertex takes us clockwise within
+      // the polygon.
       double lhs(0.0), rhs(0.0);
-      const Vertex2D *start = m_currentVertex;
-      Vertex2D *v_i = m_currentVertex;
+      Vertex2D *v_i = m_head;
       Vertex2D *v_ip1 = v_i->next();
       do
       {
-        lhs += v_i->X()*v_ip1->Y();
-        rhs += v_ip1->X()*v_i->Y();
+        lhs += v_ip1->X()*v_i->Y();
+        rhs += v_i->X()*v_ip1->Y();
         v_i = v_i->next();
         v_ip1 = v_i->next();
       }
-      while( v_i != start );
+      while( v_i != m_head );
       return lhs - rhs;
     }
     
-    /**
-     * Compute the 'orientation' of the polygon. The possible values are:
-     *    1: 2*area > 0.5
-     *   -1: 2*area < -0.5 else
-     *    0.
-     * @returns An integer representing the orientation
-     */
-    int ConvexPolygon::orientation() const
-    {
-      const double determinant = this->determinant();
-      if( determinant > 0.5 ) return 1;
-      else if( determinant < -0.5 ) return -1;
-      else return 0;
-    }
-
-    /**
-     * Check this is a valid convex polygon
-     * @param points :: Validate a list of points
-     * @throws std::invalid_argument if it is not
-     */
-    void ConvexPolygon::validate(const Vertex2DList & points) const
-    {
-      if( points.size() < 3 ) 
-      {
-        std::ostringstream os;
-        os << "Expected greater than 2 vertices when constructing a convex polygon, found "
-           << points.size();
-        throw std::invalid_argument(os.str());
-      }
-    }
-
     /**
      * Check this is a valid polygon
      * @param head :: A pointer to the head vertex
      * @throws std::invalid_argument if it is not
      */
-    void ConvexPolygon::validate(const Vertex2D & head) const
+    void ConvexPolygon::validate(const Vertex2D * head) const
     {
+      if( !head )
+      {
+        throw std::invalid_argument("ConvexPolygon::validate - NULL pointer is an invalid head for a convex polygon");
+      }
       // Must have at least two neighbours
-      if( head.next() == head.previous() )
+      if( head->next() == head->previous() )
       {
         std::ostringstream os;
-        os << "Expected 3 or more vertices when constructing a convex polygon, found ";
-        if( head.next() == &head ) os << "1";
+        os << "ConvexPolygon::validate - Expected 3 or more vertices when constructing a convex polygon, found ";
+        if( head->next() == head ) os << "1";
         else os << "2";
         throw std::invalid_argument(os.str());
       }
@@ -284,11 +223,13 @@ namespace Mantid
     std::ostream & operator<<(std::ostream & os, const ConvexPolygon & polygon)
     {
       os << "ConvexPolygon(";
-      const size_t nverts(polygon.numVertices());
-      for( size_t i = 0; i < nverts; ++i )
+      const size_t numVertices(polygon.numVertices());
+      Vertex2DIterator pIter(polygon.head());
+      for( size_t i = 0 ; i < numVertices; ++i )
       {
-        os << polygon[i];
-        if( i < nverts - 1 ) os << ",";
+        os << pIter.point();
+        if( i < numVertices - 1 ) os << ",";
+        pIter.advance();
       }
       os << ")";
       return os;

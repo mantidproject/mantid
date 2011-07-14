@@ -56,6 +56,8 @@ namespace Geometry
     inline const Kernel::V2D & start() const { return m_start; }
     /// Access the end point
     inline const Kernel::V2D & end() const { return m_end; }
+    /// Return the direction
+    inline Kernel::V2D direction() const { return m_end - m_start; } 
     /// Create a point a given fraction along this edge
     Kernel::V2D point(const double fraction) const;
 
@@ -86,7 +88,8 @@ namespace Geometry
   MANTID_GEOMETRY_DLL PolygonEdge::Orientation orientation(const PolygonEdge & focusEdge, const PolygonEdge & refEdge, double & t);
   /// Calculate the crossing point of one edge with wrt another
   MANTID_GEOMETRY_DLL PolygonEdge::Orientation crossingPoint(const PolygonEdge & edgeOne, const PolygonEdge & edgeTwo, Kernel::V2D & crossPoint);
-
+  /// Return if the edges aim at each other
+  MANTID_GEOMETRY_DLL bool edgeAimsAt(const PolygonEdge &a, const PolygonEdge &b, PointClassification pclass, PolygonEdge::Orientation crossType);
 
 } // namespace Geometry
 } // namespace Mantid

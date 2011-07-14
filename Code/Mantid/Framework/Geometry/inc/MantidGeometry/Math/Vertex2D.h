@@ -5,6 +5,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Math/PolygonEdge.h"
 #include "MantidKernel/V2D.h"
 
 namespace Mantid
@@ -47,6 +48,8 @@ namespace Mantid
       Vertex2D(const double x, const double y);
       /// Constructor with a point
       Vertex2D(const Kernel::V2D & point);
+      /// Return the vertex as a point
+      inline const Kernel::V2D & point() const { return *this; }
       /// Insert a vertex so that it is next
       Vertex2D * insert(Vertex2D *vertex);
       /// Remove this node from the chain
@@ -72,6 +75,25 @@ namespace Mantid
       Vertex2D * m_prev;
     };
 
+    /**
+     * A small iterator type structure
+     */
+    class Vertex2DIterator
+    {
+    public:
+      /// Constructor
+      Vertex2DIterator(const Vertex2D * start)
+        : m_vertex(start) {}
+      /// Advance the iterator
+      void advance() { m_vertex = m_vertex->next(); }
+      /// Get the point
+      const Kernel::V2D & point() { return m_vertex->point(); }
+      /// Get an edge between this and the next
+      PolygonEdge edge() { return PolygonEdge(*m_vertex, *(m_vertex->next()));}
+    private:
+      /// A pointer to the current vertex
+      Vertex2D const * m_vertex;
+    };
 
   } // namespace Geometry
 } // namespace Mantid

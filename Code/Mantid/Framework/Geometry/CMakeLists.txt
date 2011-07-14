@@ -42,11 +42,9 @@ set ( SRC_FILES
 	src/Math/Algebra.cpp
 	src/Math/BnId.cpp
 	src/Math/ConvexPolygon.cpp
-#	src/Math/LaszloIntersection.cpp
-	src/Math/ORourkeIntersection.cpp
+	src/Math/LaszloIntersection.cpp
 	src/Math/PolyBase.cpp
 	src/Math/PolygonEdge.cpp
-	src/Math/PolygonIntersection.cpp
 	src/Math/RotCounter.cpp
 	src/Math/Triple.cpp
 	src/Math/Vertex2D.cpp
@@ -141,12 +139,10 @@ set ( INC_FILES
 	inc/MantidGeometry/Math/Algebra.h
 	inc/MantidGeometry/Math/BnId.h
 	inc/MantidGeometry/Math/ConvexPolygon.h
-#	inc/MantidGeometry/Math/LaszloIntersection.h
+	inc/MantidGeometry/Math/LaszloIntersection.h
 	inc/MantidGeometry/Math/MapSupport.h
-	inc/MantidGeometry/Math/ORourkeIntersection.h
 	inc/MantidGeometry/Math/PolyBase.h
 	inc/MantidGeometry/Math/PolygonEdge.h
-	inc/MantidGeometry/Math/PolygonIntersection.h
 	inc/MantidGeometry/Math/RotCounter.h
 	inc/MantidGeometry/Math/Triple.h
 	inc/MantidGeometry/Math/Vertex2D.h
@@ -197,7 +193,7 @@ set ( TEST_FILES
 	test/IndexingUtilsTest.h
 	test/InstrumentRayTracerTest.h
 	test/InstrumentTest.h
-#	test/LaszloIntersectionTest.h
+	test/LaszloIntersectionTest.h
 	test/LineIntersectVisitTest.h
 	test/LineTest.h
 	test/MDCellTest.h
@@ -213,7 +209,6 @@ set ( TEST_FILES
 	test/MaterialTest.h
 	test/MathSupportTest.h
 	test/NearestNeighboursTest.h
-	test/ORourkeIntersectionTest.h
 	test/ObjCompAssemblyTest.h
 	test/ObjComponentTest.h
 	test/ObjectTest.h
@@ -228,7 +223,6 @@ set ( TEST_FILES
 	test/ParametrizedComponentTest.h
 	test/PlaneTest.h
 	test/PolygonEdgeTest.h
-	test/PolygonIntersectionTest.h
 	test/RectangularDetectorTest.h
 	test/ReflectionConditionTest.h
 	test/RotCounterTest.h

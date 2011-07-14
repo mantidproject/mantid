@@ -8,7 +8,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidGeometry/Math/ConvexPolygon.h"
-#include "MantidGeometry/Math/PolygonIntersection.h"
+#include "MantidGeometry/Math/LaszloIntersection.h"
 
 namespace Mantid
 {
@@ -20,7 +20,6 @@ namespace Mantid
 
     using namespace API;
     using Geometry::ConvexPolygon;
-    using Geometry::Vertex2DList;
     using Kernel::V2D;
 
     //--------------------------------------------------------------------------
@@ -135,7 +134,7 @@ namespace Mantid
       std::pair<double,double> binValues(0,0);
       if( inputWS->isDistribution() )
       {
-        const double newWidth = newBin[1].X() - newBin[0].X(); // For distribution
+        const double newWidth = newBin[3].X() - newBin[0].X(); // For distribution
         binValues = calculateDistYE(inputWS, overlaps, newWidth);
       }
       else
@@ -212,24 +211,23 @@ namespace Mantid
       overlaps.reserve(5); // Have a guess at a posible limit
 
       const size_t nxpoints(oldAxis1.size()-1), nypoints(oldAxis2.size()-1);
-      Vertex2DList vertices(4);
       for(size_t i = 0; i < nypoints; ++i)
       {
         const double yo_lo(oldAxis2[i]), yo_hi(oldAxis2[i+1]);
         // Check if there is a possibility of overlap
-        if( yo_hi < newPoly[0].Y() || yo_lo > newPoly[2].Y() ) continue;
+        if( yo_hi < newPoly[0].Y() || yo_lo > newPoly[1].Y() ) continue;
         for(size_t j = 0; j < nxpoints; ++j)
         {
           const double xo_lo(oldAxis1[j]), xo_hi(oldAxis1[j+1]);
           // Check if there is a possibility of overlap
-          if( xo_hi < newPoly[0].X() || xo_lo > newPoly[1].X() ) continue;
+          if( xo_hi < newPoly[0].X() || xo_lo > newPoly[3].X() ) continue;
           ConvexPolygon oldPoly(xo_lo, xo_hi, yo_lo, yo_hi);
           try
           {
-            ConvexPolygon overlap = intersection(newPoly, oldPoly, Geometry::PolygonIntersection::ORourke);
+            ConvexPolygon overlap = intersectionByLaszlo(newPoly, oldPoly);
             overlaps.push_back(BinWithWeight(i,j,overlap.area()/oldPoly.area()));
           }
-          catch(std::runtime_error &)
+          catch(Geometry::NoIntersectionException &)
           {}            
         }
       }

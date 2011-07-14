@@ -5,6 +5,7 @@
 #include "MantidGeometry/Math/Vertex2D.h"
 
 using Mantid::Geometry::Vertex2D;
+using Mantid::Geometry::Vertex2DIterator;
 using Mantid::Kernel::V2D;
 
 class Vertex2DTest : public CxxTest::TestSuite
@@ -47,6 +48,15 @@ public:
     TS_ASSERT_EQUALS(vertexPt.previous(), &vertexPt);
   }
 
+  void test_Vertex_As_Pt_Returns_Correct_Value()
+  {
+    Vertex2D vertex(5.1, 10.9);
+    TS_ASSERT_EQUALS(vertex.point(), V2D(5.1,10.9));
+    Vertex2D *vertex2 = new Vertex2D(5.1, 10.9);
+    TS_ASSERT_EQUALS(vertex2->point(), V2D(5.1,10.9));
+    delete vertex2;
+  }
+
   void test_Insert_Yields_Next_As_Inserted_Vertex()
   {
     makeThreeVertexChain(true, false);
@@ -57,49 +67,66 @@ public:
      makeThreeVertexChain(false, true);
    }
 
+   void test_Iteration_Advances_Correctly()
+   {
+     Vertex2D * start = makeThreeVertexChain(false,false);
+     Vertex2DIterator pIter(start);
+     TS_ASSERT_EQUALS(pIter.point(), V2D());
+     pIter.advance();
+     TS_ASSERT_EQUALS(pIter.point(), V2D(0.0,1.0));
+     pIter.advance();
+     TS_ASSERT_EQUALS(pIter.point(), V2D(1.0,1.0));
+     pIter.advance(); //Back to the start
+     TS_ASSERT_EQUALS(pIter.point(), V2D()); 
+   }
+
 private:
-  void makeThreeVertexChain(const bool doInsertTests, const bool doRemoveTests)
+  Vertex2D * makeThreeVertexChain(const bool doInsertTests, const bool doRemoveTests)
   {
-    Vertex2D origin;
-    Vertex2D two(0.0,1.0);
-    Vertex2D *vertexTwo = origin.insert(&two);
+    Vertex2D *origin = new Vertex2D;
+    Vertex2D *two = new Vertex2D(0.0,1.0);
+    Vertex2D *vertexTwo = origin->insert(two);
     if( doInsertTests )
     {
-      TS_ASSERT_EQUALS(vertexTwo, &two);
+      TS_ASSERT_EQUALS(vertexTwo, two);
 
-      TS_ASSERT_EQUALS(origin.next(), &two);
-      TS_ASSERT_EQUALS(origin.previous(), &two);
-      TS_ASSERT_EQUALS(vertexTwo->previous(), &origin);
-      TS_ASSERT_EQUALS(vertexTwo->next(), &origin);
+      TS_ASSERT_EQUALS(origin->next(), two);
+      TS_ASSERT_EQUALS(origin->previous(), two);
+      TS_ASSERT_EQUALS(vertexTwo->previous(), origin);
+      TS_ASSERT_EQUALS(vertexTwo->next(), origin);
     }
     //and a third
-    Vertex2D third(1.0, 1.0);
-    Vertex2D *vertexThree = two.insert(&third);
+    Vertex2D *third = new Vertex2D(1.0, 1.0);
+    Vertex2D *vertexThree = two->insert(third);
     if( doInsertTests )
     {
-      TS_ASSERT_EQUALS(vertexThree, &third);
+      TS_ASSERT_EQUALS(vertexThree, third);
 
-      TS_ASSERT_EQUALS(origin.next(), &two);
-      TS_ASSERT_EQUALS(origin.previous(), &third);
-      TS_ASSERT_EQUALS(vertexTwo->previous(), &origin);
-      TS_ASSERT_EQUALS(vertexTwo->next(), &third);
-      TS_ASSERT_EQUALS(vertexThree->previous(), &two);
-      TS_ASSERT_EQUALS(vertexThree->next(), &origin);
+      TS_ASSERT_EQUALS(origin->next(), two);
+      TS_ASSERT_EQUALS(origin->previous(), third);
+      TS_ASSERT_EQUALS(vertexTwo->previous(), origin);
+      TS_ASSERT_EQUALS(vertexTwo->next(), third);
+      TS_ASSERT_EQUALS(vertexThree->previous(), two);
+      TS_ASSERT_EQUALS(vertexThree->next(), origin);
     }
 
     if( doRemoveTests )
     {
       Vertex2D *removedOne = vertexThree->remove();
       TS_ASSERT_EQUALS(removedOne, vertexThree);
-      TS_ASSERT_EQUALS(origin.next(), &two);
-      TS_ASSERT_EQUALS(origin.previous(), &two);
-      TS_ASSERT_EQUALS(vertexTwo->previous(), &origin);
-      TS_ASSERT_EQUALS(vertexTwo->next(), &origin);
+      TS_ASSERT_EQUALS(origin->next(), two);
+      TS_ASSERT_EQUALS(origin->previous(), two);
+      TS_ASSERT_EQUALS(vertexTwo->previous(), origin);
+      TS_ASSERT_EQUALS(vertexTwo->next(), origin);
 
       Vertex2D *removedTwo = vertexTwo->remove();
-      TS_ASSERT( removedTwo);
-      TS_ASSERT_EQUALS(origin.next(), &origin);
-      TS_ASSERT_EQUALS(origin.previous(), &origin);
+      TS_ASSERT_EQUALS(origin->next(), origin);
+      TS_ASSERT_EQUALS(origin->previous(), origin);
+      return NULL;
+    }
+    else
+    {
+      return origin;
     }
 
   }
