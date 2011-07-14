@@ -299,7 +299,7 @@ void SANSRunWindow::setupSaveBox()
 */
 void SANSRunWindow::saveWorkspacesDialog()
 {
-  //this dialog must have delete on close selected to aviod a memory leak
+  //Qt::WA_DeleteOnClose must be set for the dialog to aviod a memory leak
   m_saveWorkspaces =
     new SaveWorkspaces(this, m_uiForm.outfile_edit->text(), m_savFormats);
   //this dialog sometimes needs to run Python, pass this to Mantidplot via our runAsPythonScript() signal
@@ -1631,7 +1631,11 @@ bool SANSRunWindow::handleLoadButtonClick()
   {//preliminarly error checking is over try to load that data
     is_loaded &= assignDetBankRun(*(m_uiForm.scatterSample), "AssignSample", sample_logs);
     readNumberOfEntries("get_sample().loader", m_uiForm.scatterSample);
-    if ( ! m_uiForm.scatCan->isEmpty() )
+    if (m_uiForm.scatCan->isEmpty())
+    {
+      m_experCan = "";
+    }
+    else
     {
       is_loaded &= assignDetBankRun(*(m_uiForm.scatCan), "AssignCan", can_logs);
       readNumberOfEntries("background_subtracter", m_uiForm.scatCan);

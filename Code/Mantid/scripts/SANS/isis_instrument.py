@@ -241,9 +241,12 @@ class DetectorBank:
         if not output_name:
             output_name = input_name
 
-        CropWorkspace(input_name, output_name,
-            StartWorkspaceIndex = self.get_first_spec_num() - 1,
-            EndWorkspaceIndex = self.last_spec_num - 1)
+        try:
+            CropWorkspace(input_name, output_name,
+                StartWorkspaceIndex = self.get_first_spec_num() - 1,
+                EndWorkspaceIndex = self.last_spec_num - 1)
+        except SystemExit:
+            raise ValueError('Can not find spectra for %s in the workspace %s'%(self.name(), output_name))
 
 class ISISInstrument(instrument.Instrument):
     def __init__(self, filename=None):

@@ -35,11 +35,12 @@ using namespace Mantid::API;
 SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString & suggFname, QHash<const QCheckBox * const, QString> & defSavs) :
   API::MantidDialog(parent)
 {
+  setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle("Save Workspaces");
 
   //the form is split into 3 lines of controls in horizontal layouts
   QHBoxLayout *lineOne = new QHBoxLayout;
-  setupLine1(lineOne, suggFname);
+  setupLine1(lineOne);
   QHBoxLayout *lineTwo = new QHBoxLayout;
   setupLine2(lineTwo, defSavs);
 
@@ -48,9 +49,9 @@ SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString & suggFname, QHash
   dialogLayout->addLayout(lineTwo);
    
   setLayout(dialogLayout);
-  setAttribute(Qt::WA_DeleteOnClose);
 
-
+  readSettings();
+  setFileName(suggFname);
 }
 /// Set up the dialog layout
 void SaveWorkspaces::initLayout()
@@ -60,11 +61,10 @@ void SaveWorkspaces::initLayout()
 *  filename commands, on to the layout that's passed to it
 *  @param lineOne :: the layout on to which the controls will be placed
 */
-void SaveWorkspaces::setupLine1(QHBoxLayout * const lineOne, const QString defName)
+void SaveWorkspaces::setupLine1(QHBoxLayout * const lineOne)
 {
   QLabel* fNameLabel = new QLabel("Filename:");
   m_fNameEdit = new QLineEdit();
-  m_fNameEdit->setText(defName);
   QPushButton *fNameButton = new QPushButton("Browse");
   connect(fNameButton, SIGNAL(clicked()), this, SLOT(saveFileBrowse()));
 
@@ -79,6 +79,7 @@ void SaveWorkspaces::setupLine1(QHBoxLayout * const lineOne, const QString defNa
 /** Puts the controls that go on the second line, the workspace
 *  list and save commands, on to the layout that's passed to it
 *  @param lineTwo :: the layout on to which the controls will be placed
+*  @param defSavs the formats to save into, sets the check boxes to be checked
 */
 void SaveWorkspaces::setupLine2(QHBoxLayout * const lineTwo, const QHash<const QCheckBox * const, QString> & defSavs)
 {
@@ -145,8 +146,33 @@ void SaveWorkspaces::setupLine2(QHBoxLayout * const lineTwo, const QHash<const Q
   saveCSV->setToolTip(formatsTip);
   m_append->setToolTip(formatsTip);
 }
+/** Sets up some controls from what is in the QSettings
+*/
+void SaveWorkspaces::readSettings()
+{
+  QSettings prevValues;
+  prevValues.beginGroup("CustomInterfaces/SANSRunWindow/SaveWorkspaces");
+  m_lastName = prevValues.value("out_name", "").toString(); 
+  m_append->setChecked(prevValues.value("append", false).toBool());
+}
+/** Set the name of the output file
+*  @param newName filename to use
+*/
+void SaveWorkspaces::setFileName(const QString & newName)
+{
+  if ( ( ! m_append->isChecked() ) && (! newName.isEmpty() ) )
+  {
+    m_fNameEdit->setText(newName);
+    m_lastName = newName;
+  }
+  else
+  {
+    m_fNameEdit->setText(m_lastName);
+  }
+}
 /** For each save format tick box take the user setting from the
 * main form
+* @param defSavs the formats to save into
 */
 void SaveWorkspaces::setupFormatTicks(const QHash<const QCheckBox * const, QString> & defSavs)
 {
@@ -164,12 +190,22 @@ void SaveWorkspaces::setupFormatTicks(const QHash<const QCheckBox * const, QStri
     }
   }
 }
+/** Saves the state of some controls to the QSettings
+*/
+void SaveWorkspaces::saveSettings() const
+{
+  QSettings prevValues;
+  prevValues.beginGroup("CustomInterfaces/SANSRunWindow/SaveWorkspaces");
+  prevValues.setValue("out_name", m_lastName);
+  prevValues.setValue("append", m_append->isChecked());
+}
 /**
  * Called in response to a close event
  * @parma event The event object
  */
 void SaveWorkspaces::closeEvent(QCloseEvent* event)
 {
+  saveSettings();
   emit closing();
   event->accept();
 }
@@ -284,10 +320,11 @@ void SaveWorkspaces::saveSel()
   }
 }
 /** Sets the filename to the name of the selected workspace
+*  @param row number of the row that is selected
 */
 void SaveWorkspaces::setFileName(int row)
 {
-  m_fNameEdit->setText(m_workspaces->item(row)->text());
+  setFileName(m_workspaces->item(row)->text());
 }
 /** Raises a browse dialog and inserts the selected file into the
 *  save text edit box, outfile_edit
@@ -304,7 +341,7 @@ void SaveWorkspaces::saveFileBrowse()
 
   QString filter = ";;AllFiles (*.*)";
   QFileDialog::Option userCon = m_append->isChecked() ?
-    QFileDialog::DontConfirmOverwrite : QFileDialog::Option(0);
+    QFileDialog::DontConfirmOverwrite : static_cast<QFileDialog::Option>(0);
   QString oFile = API::FileDialogHandler::getSaveFileName(
       this, title, prevPath, filter, NULL, userCon);
 

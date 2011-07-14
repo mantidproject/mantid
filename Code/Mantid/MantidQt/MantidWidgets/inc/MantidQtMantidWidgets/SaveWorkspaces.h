@@ -60,17 +60,19 @@ namespace MantidQt
       QLineEdit *m_fNameEdit;
       QListWidget *m_workspaces;
       QCheckBox *m_append;
+      QString m_lastName;
 
       QHash<QCheckBox * const, QString> m_savFormats;
       typedef QHash<QCheckBox * const, QString>::const_iterator SavFormatsConstIt;
       
-      void setupLine1(QHBoxLayout * const lineOne, const QString defName);
+      void setupLine1(QHBoxLayout * const lineOne);
       void setupLine2(QHBoxLayout * const lineTwo, const QHash<const QCheckBox * const, QString> & defSavs);
+      void readSettings();
+      void setFileName(const QString & newName);
       void setupFormatTicks(const QHash<const QCheckBox * const, QString> & defSavs);
+      void saveSettings() const;
 
       void addButtonsDisab(int row);
-      void setupButtons(int row, QString test);
-      void updateRow(int row, QString firstColumn, int secondColumn);
       void closeEvent(QCloseEvent *event);
       QString saveList(const QList<QListWidgetItem*> & list, const QString & algorithm, QString fileBase, bool toAppend);
 
