@@ -89,7 +89,6 @@ void FindDetectorsInShape::initDocs()
       detid2det_map::const_iterator it_end = allDetectors.end();
       for (it = allDetectors.begin(); it != it_end; it++)
       {
-        detid_t detectorID = it->first;
         Geometry::IDetector_sptr det = it->second;
 
 				//attempt to dynamic cast up to an IDetector
