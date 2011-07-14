@@ -824,55 +824,6 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_3">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>150</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Number of sub-pixels</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="n_sub_pix_edit">
-              <property name="minimumSize">
-               <size>
-                <width>80</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>80</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>Enter the number of sub-pixels in each direction of a detector pixel to use for the
-radial averaging. For instance, entering 3 will sub-divide each detector pixel by 3
-in each direction and will create 9 sub-pixels.</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <spacer name="horizontalSpacer_17">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -889,7 +840,14 @@ in each direction and will create 9 sub-pixels.</string>
              </spacer>
             </item>
             <item>
-             <widget class="QCheckBox" name="log_binning_radio">
+             <widget class="QRadioButton" name="lin_binning_radio">
+              <property name="text">
+               <string>Linear Q binning</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="log_binning_radio">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -915,7 +873,7 @@ in each direction and will create 9 sub-pixels.</string>
                <enum>Qt::LeftToRight</enum>
               </property>
               <property name="text">
-               <string>Log binning</string>
+               <string>Log Q binning</string>
               </property>
              </widget>
             </item>

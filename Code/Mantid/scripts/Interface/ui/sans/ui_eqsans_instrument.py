@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_instrument.ui'
 #
-# Created: Wed Jul  6 11:51:15 2011
+# Created: Thu Jul 14 16:33:42 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -294,25 +294,12 @@ class Ui_Frame(object):
         self.n_q_bins_edit.setMaximumSize(QtCore.QSize(80, 16777215))
         self.n_q_bins_edit.setObjectName("n_q_bins_edit")
         self.horizontalLayout_9.addWidget(self.n_q_bins_edit)
-        self.label_3 = QtGui.QLabel(self.reduction_options_group)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_3.sizePolicy().hasHeightForWidth())
-        self.label_3.setSizePolicy(sizePolicy)
-        self.label_3.setMinimumSize(QtCore.QSize(0, 0))
-        self.label_3.setMaximumSize(QtCore.QSize(150, 16777215))
-        self.label_3.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.label_3.setObjectName("label_3")
-        self.horizontalLayout_9.addWidget(self.label_3)
-        self.n_sub_pix_edit = QtGui.QLineEdit(self.reduction_options_group)
-        self.n_sub_pix_edit.setMinimumSize(QtCore.QSize(80, 0))
-        self.n_sub_pix_edit.setMaximumSize(QtCore.QSize(80, 16777215))
-        self.n_sub_pix_edit.setObjectName("n_sub_pix_edit")
-        self.horizontalLayout_9.addWidget(self.n_sub_pix_edit)
         spacerItem11 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_9.addItem(spacerItem11)
-        self.log_binning_radio = QtGui.QCheckBox(self.reduction_options_group)
+        self.lin_binning_radio = QtGui.QRadioButton(self.reduction_options_group)
+        self.lin_binning_radio.setObjectName("lin_binning_radio")
+        self.horizontalLayout_9.addWidget(self.lin_binning_radio)
+        self.log_binning_radio = QtGui.QRadioButton(self.reduction_options_group)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -503,12 +490,9 @@ class Ui_Frame(object):
         self.label_2.setText(QtGui.QApplication.translate("Frame", "Radial averaging", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Frame", "Number of Q bins  ", None, QtGui.QApplication.UnicodeUTF8))
         self.n_q_bins_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the number of Q bins for the output I(Q) distribution.", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_3.setText(QtGui.QApplication.translate("Frame", "Number of sub-pixels", None, QtGui.QApplication.UnicodeUTF8))
-        self.n_sub_pix_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the number of sub-pixels in each direction of a detector pixel to use for the\n"
-"radial averaging. For instance, entering 3 will sub-divide each detector pixel by 3\n"
-"in each direction and will create 9 sub-pixels.", None, QtGui.QApplication.UnicodeUTF8))
+        self.lin_binning_radio.setText(QtGui.QApplication.translate("Frame", "Linear Q binning", None, QtGui.QApplication.UnicodeUTF8))
         self.log_binning_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to use logarithmic binning for I(Q).", None, QtGui.QApplication.UnicodeUTF8))
-        self.log_binning_radio.setText(QtGui.QApplication.translate("Frame", "Log binning", None, QtGui.QApplication.UnicodeUTF8))
+        self.log_binning_radio.setText(QtGui.QApplication.translate("Frame", "Log Q binning", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("Frame", "Output directory", None, QtGui.QApplication.UnicodeUTF8))
         self.use_data_dir_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to write the output files in the data directory.", None, QtGui.QApplication.UnicodeUTF8))
         self.use_data_dir_radio.setText(QtGui.QApplication.translate("Frame", "Use data directory", None, QtGui.QApplication.UnicodeUTF8))

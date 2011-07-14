@@ -98,7 +98,6 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
         self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
         self._summary.n_q_bins_edit.setValidator(QtGui.QIntValidator(self._summary.n_q_bins_edit))
-        self._summary.n_sub_pix_edit.setValidator(QtGui.QIntValidator(self._summary.n_sub_pix_edit))
         self._summary.thickness_edit.setValidator(QtGui.QDoubleValidator(self._summary.thickness_edit))
         
         # Event connections
@@ -114,15 +113,20 @@ class SANSInstrumentWidget(BaseWidget):
         g2 = QtGui.QButtonGroup(self)
         g2.addButton(self._summary.select_output_dir_radio)
         g2.addButton(self._summary.use_data_dir_radio)
-        g2.setExclusive(True)        
+        g2.setExclusive(True)
         self.connect(self._summary.select_output_dir_radio, QtCore.SIGNAL("clicked()"), self._output_dir_clicked)
         self.connect(self._summary.use_data_dir_radio, QtCore.SIGNAL("clicked()"), self._output_dir_clicked)
         self.connect(self._summary.output_dir_browse_button, QtCore.SIGNAL("clicked()"), self._output_dir_browse)
         self._output_dir_clicked()
         
+        # Lin/log option
+        g3 = QtGui.QButtonGroup(self)
+        g3.addButton(self._summary.log_binning_radio)
+        g3.addButton(self._summary.lin_binning_radio)
+        g3.setExclusive(True)
+        
         # Q range
         self._summary.n_q_bins_edit.setText(QtCore.QString("100"))
-        self._summary.n_sub_pix_edit.setText(QtCore.QString("1"))
             
         self._summary.scale_edit.setText(QtCore.QString("1"))
             
@@ -361,8 +365,8 @@ class SANSInstrumentWidget(BaseWidget):
         
         # Q range
         self._summary.n_q_bins_edit.setText(QtCore.QString(str(state.n_q_bins)))
-        self._summary.n_sub_pix_edit.setText(QtCore.QString(str(state.n_sub_pix)))
         self._summary.log_binning_radio.setChecked(state.log_binning)
+        self._summary.lin_binning_radio.setChecked(not state.log_binning)
         
         # TOF cuts
         self._summary.tof_cut_chk.setChecked(state.use_config_cutoff)
@@ -433,7 +437,6 @@ class SANSInstrumentWidget(BaseWidget):
         
         # Q range
         m.n_q_bins = util._check_and_get_int_line_edit(self._summary.n_q_bins_edit)
-        m.n_sub_pix = util._check_and_get_int_line_edit(self._summary.n_sub_pix_edit)
         m.log_binning = self._summary.log_binning_radio.isChecked()
         
         # TOF cuts
