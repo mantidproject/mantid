@@ -70,21 +70,31 @@ void FindDetectorsInShape::initDocs()
 
 			//get the instrument out of the workspace
 			IInstrument_sptr instrument_sptr = WS->getInstrument();
-            IInstrument::plottables_const_sptr objCmptList = instrument_sptr->getPlottable();
+
+      //To get all the detector ID's
+      detid2det_map allDetectors;
+      instrument_sptr->getDetectors(allDetectors);
 
 			std::vector<int> foundDets;
 
 			//progress
-			IInstrument::plottables::size_type objCmptCount = objCmptList->size();
+			detid2det_map::size_type objCmptCount = allDetectors.size();
 			int iprogress_step = static_cast<int>(objCmptCount / 100);
 			if (iprogress_step == 0) iprogress_step = 1;
+      int iprogress=0;
 
-			//for every plottable item
-			for (IInstrument::plottables::const_iterator it = objCmptList->begin(); it!=objCmptList->end(); ++it) 
-			{
+  
+      //Now go through all
+      detid2det_map::iterator it;
+      detid2det_map::const_iterator it_end = allDetectors.end();
+      for (it = allDetectors.begin(); it != it_end; it++)
+      {
+        detid_t detectorID = it->first;
+        Geometry::IDetector_sptr det = it->second;
+
 				//attempt to dynamic cast up to an IDetector
 				boost::shared_ptr<const Geometry::IDetector> detector_sptr =
-					boost::dynamic_pointer_cast<const Geometry::IDetector>((*it));
+					boost::dynamic_pointer_cast<const Geometry::IDetector>(it->second);
 
 				if (detector_sptr)
 				{
@@ -100,10 +110,10 @@ void FindDetectorsInShape::initDocs()
 					}
 				}
 
-				int i = static_cast<int>(objCmptList->end()-it);
-				if (i % iprogress_step == 0)
+				iprogress++;
+				if (iprogress % iprogress_step == 0)
 				{
-					progress(static_cast<double>(i)/static_cast<double>(objCmptCount));
+					progress(static_cast<double>(iprogress)/static_cast<double>(objCmptCount));
 					interruption_point();
 				}
 			}
