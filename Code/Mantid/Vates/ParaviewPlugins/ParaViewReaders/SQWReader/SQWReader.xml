@@ -1,11 +1,11 @@
 <ServerManagerConfiguration>
   <!-- Begin SQWReader -->
   <ProxyGroup name="sources">
-    <SourceProxy name="SQWReader" class="vtkSQWReader" label="SQW Reader">
+    <SourceProxy name="SQWReader" class="vtkSQWReader" label="Old SQW Reader">
 	<Documentation
-       short_help="Read a Multidimensional SQW file."
-       long_help="Read a Multidimensional SQW file.">
-       Read a Multidimensional SQW file
+       short_help="Read a Multidimensional SQW file, treat as old MDWorkspace."
+       long_help="Read a Multidimensional SQW file, treat as old MDWorkspace.">
+       Read a Multidimensional SQW file, treat as old MDWorkspace
      </Documentation>
       <StringVectorProperty
         name="FileName"
