@@ -8,6 +8,9 @@
 
 using namespace Mantid::MDEvents;
 
+//=====================================================================================
+// Functional Tests
+//=====================================================================================
 class LoadSQWTest : public CxxTest::TestSuite
 {
 private:
@@ -127,8 +130,31 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of points", 580, ws->getNPoints());
     TSM_ASSERT_EQUALS("Wrong number of dimensions", 4, ws->getNumDims());
   };
+};
 
+//=====================================================================================
+// Perfomance Tests
+//=====================================================================================
+class LoadSQWTestPerformance : public CxxTest::TestSuite
+{
+public:
 
+  //Simple benchmark test so that we can monitor changes to performance.
+  void testLoading()
+  {
+    LoadSQW alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename","test_horace_reader.sqw");
+    alg.setPropertyValue("OutputWorkspace", "benchmarkWS");
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+    TS_ASSERT( alg.isExecuted() );
+    boost::shared_ptr<MDEventWorkspace4>  ws = boost::dynamic_pointer_cast<MDEventWorkspace4>(Mantid::API::AnalysisDataService::Instance().retrieve("benchmarkWS"));
+
+    //Check the product
+    TSM_ASSERT_EQUALS("Wrong number of points", 580, ws->getNPoints());
+    TSM_ASSERT_EQUALS("Wrong number of dimensions", 4, ws->getNumDims());
+  };
 };
 
 #endif

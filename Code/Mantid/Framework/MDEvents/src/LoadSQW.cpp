@@ -256,7 +256,6 @@ namespace Mantid
       data_buffer.resize(3*4);
 
       m_fileStream.read(&data_buffer[0],2*4);
-      int isSQW = *((uint32_t*)(&data_buffer[0]));
       this->m_nDims = *((uint32_t*)(&data_buffer[4]));
 
       parse_sqw_main_header();
