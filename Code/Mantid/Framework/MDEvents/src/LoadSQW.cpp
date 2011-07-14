@@ -5,6 +5,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include <iostream>
+#include <boost/algorithm/string/erase.hpp>
 
 namespace Mantid
 {
@@ -147,10 +148,13 @@ namespace Mantid
         for(unsigned int j=0;j<nCols;j++)
         {
           symb   =buf[i+j*nRows]; 
-          name[j] =symb;  // should be trim here;
+          name[j] =symb;  
         }
+        //Trim string.
+        std::string sName(name);
+        boost::erase_all(sName, " ");
 
-        dimensionVec[i].setName(name);
+        dimensionVec[i].setName(sName);
       }
 
 
@@ -223,7 +227,7 @@ namespace Mantid
 
       this->m_fileStream.seekg(this->m_dataPositions.pix_start, std::ios::beg);
       this->m_fileStream.read(pData,data_buffer_size);
-
+      float error;
       for(size_t current_pix = 0; current_pix < data_buffer_size; current_pix+=pixel_width)
       {
         coord_t centers[4] = 
@@ -233,8 +237,8 @@ namespace Mantid
           *(reinterpret_cast<float*>(pData + current_pix + column_size_2)), 
           *(reinterpret_cast<float*>(pData + current_pix + column_size_3))
         };
-
-        ws->addEvent(MDEvent<4>(*reinterpret_cast<float*>(pData + current_pix + column_size_4), *reinterpret_cast<float*>(pData + current_pix + column_size_5), centers));
+        error = *reinterpret_cast<float*>(pData + current_pix + column_size_5);
+        ws->addEvent(MDEvent<4>(*reinterpret_cast<float*>(pData + current_pix + column_size_4), error*error , centers));
       }
 
     }
