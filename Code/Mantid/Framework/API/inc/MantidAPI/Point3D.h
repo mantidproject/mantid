@@ -38,13 +38,28 @@ namespace Mantid
         class MANTID_API_DLL Point3D
         {
         public:
+          /// Default constructor
+          Point3D() : x(0), y(0), z(0)
+          {}
+
+          /// Constructor with 3 points
+          Point3D(double x, double y, double z) : x(x), y(y), z(z)
+          { }
+
           /// Return the X value
-          virtual double getX() const = 0;
+          virtual double getX() const { return x; }
           /// Return the Y value
-          virtual double getY() const = 0;
+          virtual double getY() const { return y; }
           /// Return the Z value
-          virtual double getZ() const = 0;
+          virtual double getZ() const { return z; }
           virtual ~Point3D(){};
+        protected:
+          /// coordinate
+          double x;
+          /// coordinate
+          double y;
+          /// coordinate
+          double z;
         };
 
     }

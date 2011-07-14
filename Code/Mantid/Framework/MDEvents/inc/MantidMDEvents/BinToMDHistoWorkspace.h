@@ -12,6 +12,7 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 
+
 namespace Mantid
 {
 namespace MDEvents
@@ -51,6 +52,10 @@ namespace MDEvents
     template<typename MDE, size_t nd>
     void do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
+    /// Helper method
+    template<typename MDE, size_t nd>
+    void binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
     /// Input binning dimensions
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> binDimensionsIn;
     /// The output MDHistoWorkspace
@@ -60,6 +65,10 @@ namespace MDEvents
     /// ImplicitFunction used
     Mantid::API::ImplicitFunction * implicitFunction;
 
+    /// Bin dimensions to actually use
+    std::vector<Mantid::Geometry::MDHistoDimension_sptr> binDimensions;
+    /// Index of the dimension in the MDEW for the dimension in the output.
+    std::vector<size_t> dimensionToBinFrom;
 
 
   };

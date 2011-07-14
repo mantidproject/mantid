@@ -7,6 +7,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/ImplicitFunction.h"
 
 
 namespace Mantid
@@ -58,6 +59,33 @@ namespace MDEvents
       return numDimensions;
     }
 
+    // --------------------------------------------------------------------------------------------
+    /** @return a const reference to the indexMultiplier array.
+     * To find the index into the linear array, dim0 + indexMultiplier[0]*dim1 + ...
+     */
+    const size_t * getIndexMultiplier() const
+    {
+      return indexMultiplier;
+    }
+
+    /** @return the direct pointer to the signal array. For speed */
+    signal_t * getSignalArray()
+    {
+      return m_signals;
+    }
+
+    /** @return the direct pointer to the error squared array. For speed */
+    signal_t * getErrorSquaredArray()
+    {
+      return m_errors;
+    }
+
+    void setTo(signal_t signal, signal_t error);
+
+    void applyImplicitFunction(Mantid::API::ImplicitFunction * function, signal_t signal, signal_t error);
+
+
+    // --------------------------------------------------------------------------------------------
     /// Get the x-dimension mapping.
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const
     {
@@ -273,7 +301,8 @@ namespace MDEvents
     /// Get the cell at the specified index/increment.
     const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const
     {
-      (void) dim1Increment; (void) dim2Increment; (void) dim3Increment; (void) dim4Increment; // Avoid compiler warning
+      (void) dim1Increment; (void)    // --------------------------------------------------------------------------------------------
+ dim2Increment; (void) dim3Increment; (void) dim4Increment; // Avoid compiler warning
       throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 

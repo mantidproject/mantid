@@ -6,11 +6,12 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
+#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include <boost/algorithm/string.hpp>
-#include "MantidMDEvents/IMDBox.h"
 
 using Mantid::Kernel::CPUTimer;
 
@@ -76,6 +77,9 @@ namespace MDEvents
     declareProperty(new PropertyWithValue<std::string>("DimZ","",Direction::Input), "Binning parameters for the Z dimension.\n" + dimHelp);
     declareProperty(new PropertyWithValue<std::string>("DimT","",Direction::Input), "Binning parameters for the T dimension.\n" + dimHelp);
     declareProperty(new PropertyWithValue<std::string>("ImplicitFunctionXML","",Direction::Input), "XML string describing the implicit function determining which bins to use.");
+    declareProperty(new PropertyWithValue<bool>("IterateEvents",true,Direction::Input),
+        "Alternative binning method where you iterate through every event, placing them in the proper bin.\n"
+        "This may be faster for workspaces with few events and lots of output bins.");
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "A name for the output MDHistoWorkspace.");
   }
 
@@ -157,6 +161,112 @@ namespace MDEvents
 
 
   //----------------------------------------------------------------------------------------------
+  /** Perform binning by iterating through every event and placing them in the output workspace
+   *
+   * @param ws :: MDEventWorkspace of the given type.
+   */
+  template<typename MDE, size_t nd>
+  void BinToMDHistoWorkspace::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  {
+    /// Make a leaf-only iterator (returns only the MDBox'es)
+    /// TODO: Maybe an iterator that completely avoids areas outside the integration region?
+    MDBoxIterator<MDE,nd> boxIt(ws->getBox(), 1000, true);
+
+
+    // Number of output binning dimensions found
+    size_t numBD = binDimensions.size();
+
+    // Cache some data to speed up accessing them a bit
+    coord_t * min = new coord_t[numBD];
+    coord_t * max = new coord_t[numBD];
+    coord_t * step = new coord_t[numBD];
+    size_t * indexMultiplier = new size_t[numBD];
+    for (size_t d=0; d<numBD; d++)
+    {
+      min[d] = binDimensions[d]->getMinimum();
+      max[d] = binDimensions[d]->getMaximum();
+      step[d] = binDimensions[d]->getBinWidth();
+      if (d > 0)
+        indexMultiplier[d] = outWS->getIndexMultiplier()[d-1];
+      else
+        indexMultiplier[d] = 1;
+    }
+    signal_t * signals = outWS->getSignalArray();
+    signal_t * errors = outWS->getErrorSquaredArray();
+
+    // Start signal at 0.0
+    outWS->setTo(0.0, 0.0);
+
+    std::cout << Kernel::Strings::join(dimensionToBinFrom.begin(), dimensionToBinFrom.end(), ",") << std::endl;
+    std::cout << Kernel::Strings::join(indexMultiplier, indexMultiplier+numBD, ",") << std::endl;
+
+    // Loop through all boxes
+    while (true)
+    {
+      // Get the next box in the iterator
+      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxIt.getBox());
+      if (box)
+      {
+        std::vector<MDE> & events = box->getEvents();
+        typename std::vector<MDE>::iterator it = events.begin();
+        typename std::vector<MDE>::iterator it_end = events.end();
+        for (; it != it_end; it++)
+        {
+          // Cache the center of the event (again for speed)
+          const coord_t * center = it->getCenter();
+
+          // To build up the linear index
+          size_t linearIndex = 0;
+          // To mark events outside range
+          bool badEvent = false;
+
+          /// Loop through the dimensions on which we bin
+          for (size_t bd=0; bd<numBD; bd++)
+          {
+            // Dimension in the MDEventWorkspace
+            size_t d = dimensionToBinFrom[bd];
+            // Where the event is in that dimension?
+            coord_t x = center[d];
+            // Within range?
+            if ((x >= min[bd]) && (x < max[bd]))
+            {
+              // Build up the linear index
+              linearIndex += indexMultiplier[bd] * size_t((x - min[bd])/step[bd]);
+            }
+            else
+            {
+              // Outside the range
+              badEvent = true;
+              break;
+            }
+          } // (for each dim in MDHisto)
+
+          if (!badEvent)
+          {
+            signals[linearIndex] += it->getSignal();
+            errors[linearIndex] += it->getErrorSquared();
+          }
+        }
+
+      }
+
+      if (!boxIt.next())
+        break;
+    }
+
+    // Now the implicit function
+    if (implicitFunction)
+    {
+      signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
+      outWS->applyImplicitFunction(implicitFunction, nan, nan);
+    }
+
+    delete [] min;
+    delete [] max;
+    delete [] step;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Templated method to apply the binning operation to the particular
    * MDEventWorkspace passed in.
    *
@@ -165,43 +275,12 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void BinToMDHistoWorkspace::do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
-    bool DODEBUG = false;
+    bool DODEBUG = true;
+
     CPUTimer tim;
 
-    // Thin down the input dimensions for any invalid ones
-    std::vector<MDHistoDimension_sptr> binDimensions;
-    std::vector<size_t> dimensionToBinFrom;
-    for (size_t i = 0; i < binDimensionsIn.size(); ++i)
-    {
-      if (binDimensionsIn[i]) // (valid pointer?)
-      {
-        if (binDimensionsIn[i]->getNBins() == 0)
-          throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was set to have 0 bins. Cannot continue.");
-
-        try {
-          size_t dim_index = ws->getDimensionIndexByName(binDimensionsIn[i]->getName());
-          dimensionToBinFrom.push_back(dim_index);
-          binDimensions.push_back(binDimensionsIn[i]);
-        }
-        catch (std::runtime_error &)
-        {
-          // The dimension was not found, so we are not binning across it. TODO: Log message?
-          if (binDimensionsIn[i]->getNBins() > 1)
-            throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was not found in the MDEventWorkspace and has more than one bin! Cannot continue.");
-        }
-      }
-    }
     // Number of output binning dimensions found
     size_t numBD = binDimensions.size();
-
-    // Create the dense histogram. This allocates the memory
-    outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(binDimensions));
-    if (DODEBUG) std::cout << tim << " to create the MDHistoWorkspace.\n";
-
-    if (numBD == 0)
-      throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
-    if (numBD > nd)
-      throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace. Cannot bin!");
 
     //Since the costs are not known ahead of time, use a simple FIFO buffer.
     ThreadScheduler * ts = new ThreadSchedulerFIFO();
@@ -283,6 +362,8 @@ namespace MDEvents
     delete index_maker;
   }
 
+
+
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -306,12 +387,59 @@ namespace MDEvents
 
     prog = new Progress(this, 0, 1.0, 1); // This gets deleted by the thread pool; don't delete it in here.
 
+
+    // --------------- Create the output MDHistoWorkspace ------------------
+    CPUTimer tim;
+
+    // Thin down the input dimensions for any invalid ones
+    for (size_t i = 0; i < binDimensionsIn.size(); ++i)
+    {
+      if (binDimensionsIn[i]) // (valid pointer?)
+      {
+        if (binDimensionsIn[i]->getNBins() == 0)
+          throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was set to have 0 bins. Cannot continue.");
+
+        try {
+          size_t dim_index = in_ws->getDimensionIndexByName(binDimensionsIn[i]->getName());
+          dimensionToBinFrom.push_back(dim_index);
+          binDimensions.push_back(binDimensionsIn[i]);
+        }
+        catch (std::runtime_error &)
+        {
+          // The dimension was not found, so we are not binning across it. TODO: Log message?
+          if (binDimensionsIn[i]->getNBins() > 1)
+            throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was not found in the MDEventWorkspace and has more than one bin! Cannot continue.");
+        }
+      }
+    }
+    // Number of output binning dimensions found
+    size_t numBD = binDimensions.size();
+
+    // Create the dense histogram. This allocates the memory
+    outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(binDimensions));
+    //if (DODEBUG) std::cout << tim << " to create the MDHistoWorkspace.\n";
+
+    if (numBD == 0)
+      throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
+    if (numBD > in_ws->getNumDims())
+      throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace. Cannot bin!");
+
+
+
     // Wrapper to cast to MDEventWorkspace then call the function
-    CALL_MDEVENT_FUNCTION(this->do_centerpointBin, in_ws);
+    bool IterateEvents = getProperty("IterateEvents");
+    if (IterateEvents)
+    {
+      CALL_MDEVENT_FUNCTION(this->binByIterating, in_ws);
+    }
+    else
+    {
+      CALL_MDEVENT_FUNCTION(this->do_centerpointBin, in_ws);
+    }
+
 
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outWS));
-
   }
 
 

@@ -52,8 +52,8 @@ namespace Mantid
       addDimensions(pWs);
       
       // Set some reasonable values for the box controller
-      pWs->getBoxController()->setSplitInto(4);
-      pWs->getBoxController()->setSplitThreshold(2000);
+      pWs->getBoxController()->setSplitInto(3);
+      pWs->getBoxController()->setSplitThreshold(400);
 
       // Initialize the workspace.
       pWs->initialize();

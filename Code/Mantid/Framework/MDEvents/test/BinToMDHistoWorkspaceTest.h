@@ -104,7 +104,8 @@ public:
   void do_test_exec(std::string functionXML,
       std::string name1, std::string name2, std::string name3, std::string name4,
       double expected_signal,
-      size_t expected_numBins)
+      size_t expected_numBins,
+      bool IterateEvents=false)
   {
     BinToMDHistoWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -121,6 +122,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimZ", name3));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", name4));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML",functionXML));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws"));
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
@@ -154,18 +156,15 @@ public:
   }
 
   void test_exec_3D()
-  {
-    do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/, 6*6*6 /*# of bins*/ );
+  { do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/, 6*6*6 /*# of bins*/, false /*IterateEvents*/ );
   }
 
   void test_exec_3D_scrambled_order()
-  {
-    do_test_exec("", "Axis1,2.0,8.0, 6", "Axis0,2.0,8.0, 6", "", "Axis2,2.0,8.0, 6", 1.0 /*signal*/, 6*6*6 /*# of bins*/ );
+  { do_test_exec("", "Axis1,2.0,8.0, 6", "Axis0,2.0,8.0, 6", "", "Axis2,2.0,8.0, 6", 1.0 /*signal*/, 6*6*6 /*# of bins*/, false /*IterateEvents*/ );
   }
 
   void test_exec_3D_unevenSizes()
-  {
-    do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 3", "Axis2,2.0,8.0, 6", "", 2.0 /*signal*/, 6*6*3 /*# of bins*/ );
+  { do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 3", "Axis2,2.0,8.0, 6", "", 2.0 /*signal*/, 6*6*3 /*# of bins*/, false /*IterateEvents*/ );
   }
 
   void test_exec_with_impfunction()
@@ -176,30 +175,67 @@ public:
         "<ParameterList>"+
         "</ParameterList>"+
         "</Function>";
-    do_test_exec(functionXML,  "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/, 6*6*6 /*# of bins*/ );
+    do_test_exec(functionXML,  "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/, 6*6*6 /*# of bins*/, false /*IterateEvents*/ );
   }
 
-
   void test_exec_2D()
-  {
-    // Integrate over the 3rd dimension
-    do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "", "", 1.0*10.0 /*signal*/, 6*6 /*# of bins*/ );
+  { // Integrate over the 3rd dimension
+    do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "", "", 1.0*10.0 /*signal*/, 6*6 /*# of bins*/, false /*IterateEvents*/ );
   }
 
   void test_exec_2D_largeBins()
   {
-    do_test_exec("", "Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 3", "", "", 4.0*10.0 /*signal*/, 3*3 /*# of bins*/ );
+    do_test_exec("", "Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 3", "", "", 4.0*10.0 /*signal*/, 3*3 /*# of bins*/, false /*IterateEvents*/ );
   }
 
   void test_exec_2D_scrambledAndUnevent()
-  {
-    do_test_exec("", "Axis0,2.0,8.0, 3", "", "Axis2,2.0,8.0, 6", "", 2.0*10.0 /*signal*/, 3*6 /*# of bins*/ );
+  { do_test_exec("", "Axis0,2.0,8.0, 3", "", "Axis2,2.0,8.0, 6", "", 2.0*10.0 /*signal*/, 3*6 /*# of bins*/, false /*IterateEvents*/ );
   }
 
   void test_exec_1D()
-  {
-    // Integrate over 2 dimensions
-    do_test_exec("", "Axis2,2.0,8.0, 6", "", "", "", 1.0*100.0 /*signal*/, 6 /*# of bins*/ );
+  { // Integrate over 2 dimensions
+    do_test_exec("", "Axis2,2.0,8.0, 6", "", "", "", 1.0*100.0 /*signal*/, 6 /*# of bins*/, false /*IterateEvents*/ );
+  }
+
+
+
+
+  void test_exec_3D_IterateEvents()
+  { do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/, 6*6*6 /*# of bins*/, true /*IterateEvents*/ );
+  }
+
+  void test_exec_3D_scrambled_order_IterateEvents()
+  { do_test_exec("", "Axis1,2.0,8.0, 6", "Axis0,2.0,8.0, 6", "", "Axis2,2.0,8.0, 6", 1.0 /*signal*/, 6*6*6 /*# of bins*/, true /*IterateEvents*/ );
+  }
+
+  void test_exec_3D_unevenSizes_IterateEvents()
+  { do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 3", "Axis2,2.0,8.0, 6", "", 2.0 /*signal*/, 6*6*3 /*# of bins*/, true /*IterateEvents*/ );
+  }
+
+  void test_exec_with_impfunction_IterateEvents()
+  { //This describes the local implicit function that will always reject bins. so output workspace should have zero.
+    std::string functionXML = std::string("<Function>")+
+        "<Type>MockImplicitFunction</Type>"+
+        "<ParameterList>"+
+        "</ParameterList>"+
+        "</Function>";
+    do_test_exec(functionXML,  "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 1.0 /*signal*/, 6*6*6 /*# of bins*/, true /*IterateEvents*/ );
+  }
+
+  void test_exec_2D_IterateEvents()
+  { do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 6", "", "", 1.0*10.0 /*signal*/, 6*6 /*# of bins*/, true /*IterateEvents*/ );
+  }
+
+  void test_exec_2D_largeBins_IterateEvents()
+  { do_test_exec("", "Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 3", "", "", 4.0*10.0 /*signal*/, 3*3 /*# of bins*/, true /*IterateEvents*/ );
+  }
+
+  void test_exec_2D_scrambledAndUnevent_IterateEvents()
+  { do_test_exec("", "Axis0,2.0,8.0, 3", "", "Axis2,2.0,8.0, 6", "", 2.0*10.0 /*signal*/, 3*6 /*# of bins*/, true /*IterateEvents*/ );
+  }
+
+  void test_exec_1D_IterateEvents()
+  { do_test_exec("", "Axis2,2.0,8.0, 6", "", "", "", 1.0*100.0 /*signal*/, 6 /*# of bins*/, true /*IterateEvents*/ );
   }
 
 

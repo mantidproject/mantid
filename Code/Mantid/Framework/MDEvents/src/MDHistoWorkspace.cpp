@@ -1,6 +1,13 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidAPI/Point3D.h"
+#include "MantidKernel/Utils.h"
+#include "MantidAPI/ImplicitFunction.h"
+
+using Mantid::API::Point3D;
+using Mantid::Kernel::Utils::nestedForLoopSetUp;
+using namespace Mantid::Kernel;
 
 namespace Mantid
 {
@@ -73,19 +80,78 @@ namespace MDEvents
 
     // Initialize them to NAN (quickly)
     signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
-    for (size_t i=0; i < m_length; i++)
-    {
-      m_signals[i] = nan;
-      m_errors[i] = nan;
-    }
+    this->setTo(nan, nan);
 
     // Compute the volume of each cell.
     coord_t volume = 1.0;
-    for (size_t i=0; i < m_dimensions.size(); ++i)
+    for (size_t i=0; i < numDimensions; ++i)
       volume *= m_dimensions[i]->getBinWidth();
     m_inverseVolume = 1.0 / volume;
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Sets all signals/errors in the workspace to the given values
+   *
+   * @param signal :: signal value to set
+   * @param error :: error value to set
+   */
+  void MDHistoWorkspace::setTo(signal_t signal, signal_t error)
+  {
+    for (size_t i=0; i < m_length; i++)
+    {
+      m_signals[i] = signal;
+      m_errors[i] = error;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Apply an implicit function to each point; if false, set to the given value.
+   *
+  * @param signal :: signal value to set when function evaluates to false
+  * @param error :: error value to set when function evaluates to false
+  */
+  void MDHistoWorkspace::applyImplicitFunction(Mantid::API::ImplicitFunction * function, signal_t signal, signal_t error)
+  {
+    if (numDimensions<3) throw std::invalid_argument("Need 3 dimensions for ImplicitFunction.");
+
+    for (size_t x=0; x<m_dimensions[0]->getNBins(); x++)
+    {
+      double xPos = m_dimensions[0]->getX(x);
+      for (size_t y=0; y<m_dimensions[1]->getNBins(); y++)
+      {
+        double yPos = m_dimensions[1]->getX(y);
+        for (size_t z=0; z<m_dimensions[2]->getNBins(); z++)
+        {
+          double zPos = m_dimensions[2]->getX(z);
+          Point3D p(xPos,yPos,zPos);
+          if (!function->evaluate(&p))
+          {
+            m_signals[x + indexMultiplier[0]*y + indexMultiplier[1]*z] = signal;
+            m_errors[x + indexMultiplier[0]*y + indexMultiplier[1]*z] = error;
+          }
+        }
+      }
+    }
+
+
+//    size_t * index_max = Utils::nestedForLoopSetUp(numDimensions);
+//    size_t * index = Utils::nestedForLoopSetUp(numDimensions);
+//    for (size_t bd=0; bd<numDimensions; bd++) index_max[bd] = m_dimensions[bd]->getNBins();
+//    size_t * index_maker = Utils::nestedForLoopSetUpIndexMaker(numDimensions, index_max);
+//    for (size_t i=0; i < m_length; i++)
+//    {
+//
+//      // Get the index at each dimension for this bin.
+//      Utils::nestedForLoopGetIndicesFromLinearIndex(numBD, i, index_maker, index_max, index);
+//      x = index[0];
+//      double x,y,z;
+//      Point3D p(x,y,z);
+//      function->evaluate()
+//      m_signals[i] = signal;
+//      m_errors[i] = error;
+//    }
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Destructor
