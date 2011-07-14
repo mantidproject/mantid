@@ -684,7 +684,7 @@ void MantidDockWidget::addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::Matr
   menu->addAction(m_showData);
   menu->addAction(m_showInst);
   menu->addAction(m_plotSpec);
-  menu->addAction(m_plotSpecDistr);
+  //menu->addAction(m_plotSpecDistr);
   // Don't plot a spectrum if only one X value
   m_plotSpec->setEnabled ( matrixWS->blocksize() > 1 );
   menu->addAction(m_colorFill);
