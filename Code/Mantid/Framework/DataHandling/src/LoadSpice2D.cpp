@@ -342,10 +342,9 @@ namespace Mantid
       API::IAlgorithm_sptr mover = createSubAlgorithm("MoveInstrumentComponent");
 
       // Finding the name of the detector object.
-      // The detector bank is the parent of the first non-monitor detector.
-      Geometry::IDetector_const_sptr det_pixel = ws->getDetector(LoadSpice2D::nMonitors);
-      boost::shared_ptr<const Mantid::Geometry::IComponent> detector_bank = det_pixel->getParent();
-      std::string detID = detector_bank->getName();
+      std::string detID = ws->getInstrument()->getStringParameter("detector-name")[0];
+
+      g_log.information("Moving "+detID);
       try
       {
         mover->setProperty<API::MatrixWorkspace_sptr> ("Workspace", ws);
