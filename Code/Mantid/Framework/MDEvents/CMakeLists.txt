@@ -8,7 +8,7 @@ set ( SRC_FILES
 	src/CreateMDEventWorkspace.cpp
 	src/FakeMDEventData.cpp
 	src/IMDBox.cpp
-	src/LoadMDEW.cpp
+    src/LoadSQW.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
 	src/MDBoxIterator.cpp
@@ -36,7 +36,7 @@ set ( SRC_UNITY_IGNORE_FILES
 
 # Header files
 set ( INC_FILES
-	#inc/MantidMDEvents/MDSplitBox.h
+	inc/MantidMDEvents/MDSplitBox.h
 	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/BoxController.h
 	inc/MantidMDEvents/CoordTransform.h
@@ -44,7 +44,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/CreateMDEventWorkspace.h
 	inc/MantidMDEvents/FakeMDEventData.h
 	inc/MantidMDEvents/IMDBox.h
-	inc/MantidMDEvents/LoadMDEW.h
+    inc/MantidMDEvents/LoadSQW.h
 	inc/MantidMDEvents/MDBin.h
 	inc/MantidMDEvents/MDBox.h
 	inc/MantidMDEvents/MDBoxIterator.h
@@ -71,7 +71,7 @@ set ( TEST_FILES
 	test/CreateMDEventWorkspaceTest.h
 	test/FakeMDEventDataTest.h
 	test/IMDBoxTest.h
-	test/LoadMDEWTest.h
+    test/LoadSQWTest.h
 	test/MDBinTest.h
 	test/MDBoxIteratorTest.h
 	test/MDBoxTest.h
