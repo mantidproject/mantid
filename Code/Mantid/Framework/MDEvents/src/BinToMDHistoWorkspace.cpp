@@ -214,7 +214,7 @@ namespace MDEvents
 
     // For progress reporting, the approx  # of tasks
     if (prog)
-      prog->setNumSteps( int(outWS->getNPoints()/1000) );
+      prog->setNumSteps( int(outWS->getNPoints()/100) );
 
     // The root-level box.
     IMDBox<MDE,nd> * rootBox = ws->getBox();
@@ -274,7 +274,7 @@ namespace MDEvents
       }
 
       // Report progress but not too often.
-      if (((linear_index % 1000) == 0) && prog ) prog->report();
+      if (((linear_index % 100) == 0) && prog ) prog->report();
     } // (for each linear index)
 
     if (DODEBUG) std::cout << tim << " to run the openmp loop.\n";

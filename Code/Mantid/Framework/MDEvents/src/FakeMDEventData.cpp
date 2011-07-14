@@ -49,6 +49,32 @@ namespace MDEvents
     this->setOptionalMessage("Adds fake multi-dimensional event data to an existing MDEventWorkspace, for use in testing.\nYou can create a blank MDEventWorkspace with CreateMDEventWorkspace.");
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Initialize the algorithm's properties.
+   */
+  void FakeMDEventData::init()
+  {
+    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::InOut),
+        "An input workspace, that will get MDEvents added to it");
+
+    declareProperty(new ArrayProperty<double>("UniformParams", ""),
+        "Add a uniform, randomized distribution of events.\n"
+        "1 parameter: number_of_events; they will be distributed across the size of the workspace.\n"
+        "Multiple parameters: number_of_events, min,max (for each dimension); distribute the events inside the range given.\n");
+
+    declareProperty(new ArrayProperty<double>("PeakParams", ""),
+        "Add a peak with a normal distribution around a central point.\n"
+        "Parameters: number_of_events, x, y, z, ..., radius.\n");
+
+    declareProperty(new PropertyWithValue<int>("RandomSeed", 0),
+        "Seed int for the random number generator.");
+
+    declareProperty(new PropertyWithValue<bool>("RandomizeSignal", false),
+        "If true, the events' signal and error values will be randomized around 1.0+-0.5.");
+
+  }
+
+
 
   //----------------------------------------------------------------------------------------------
   /** Function makes up a fake single-crystal peak and adds it to the workspace.
@@ -59,6 +85,7 @@ namespace MDEvents
   void FakeMDEventData::addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     std::vector<double> params = getProperty("PeakParams");
+    bool RandomizeSignal = getProperty("RandomizeSignal");
     if (params.size() == 0)
       return;
 
@@ -107,8 +134,17 @@ namespace MDEvents
         centers[d] += params[d+1];
       }
 
+      // Default or randomized error/signal
+      float signal = 1.0;
+      float errorSquared = 1.0;
+      if (RandomizeSignal)
+      {
+        signal = float(0.5 + genUnit());
+        errorSquared = float(0.5 + genUnit());
+      }
+
       // Create and add the event.
-      ws->addEvent( MDE( 1.0, 1.0, centers) );
+      ws->addEvent( MDE( signal, errorSquared, centers) );
     }
 
     ws->splitBox();
@@ -128,6 +164,7 @@ namespace MDEvents
   void FakeMDEventData::addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     std::vector<double> params = getProperty("UniformParams");
+    bool RandomizeSignal = getProperty("RandomizeSignal");
     if (params.size() == 0)
       return;
 
@@ -150,8 +187,13 @@ namespace MDEvents
     int randomSeed = getProperty("RandomSeed");
     rng.seed((unsigned int)(randomSeed));
 
+    // Unit-size randomizer
+    boost::uniform_real<double> u2(0, 1.0); // Random from 0 to 1.0
+    boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > genUnit(rng, u2);
+
     // Make a random generator for each dimensions
     typedef boost::variate_generator<boost::mt19937&, boost::uniform_real<double> >   gen_t;
+
     gen_t * gens[nd];
     for (size_t d=0; d<nd; ++d)
     {
@@ -169,8 +211,18 @@ namespace MDEvents
       coord_t centers[nd];
       for (size_t d=0; d<nd; d++)
         centers[d] = (*gens[d])(); // use a different generator for each dimension
+
+      // Default or randomized error/signal
+      float signal = 1.0;
+      float errorSquared = 1.0;
+      if (RandomizeSignal)
+      {
+        signal = float(0.5 + genUnit());
+        errorSquared = float(0.5 + genUnit());
+      }
+
       // Create and add the event.
-      ws->addEvent( MDE( 1.0, 1.0, centers) );
+      ws->addEvent( MDE( signal, errorSquared, centers) );
     }
 
     /// Clean up the generators
@@ -185,36 +237,6 @@ namespace MDEvents
     ws->refreshCache();
   }
 
-
-  //----------------------------------------------------------------------------------------------
-  /** Initialize the algorithm's properties.
-   */
-  void FakeMDEventData::init()
-  {
-    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::InOut),
-        "An input workspace, that will get MDEvents added to it");
-
-    declareProperty(new ArrayProperty<double>("UniformParams", ""),
-        "Add a uniform, randomized distribution of events.\n"
-        "1 parameter: number_of_events; they will be distributed across the size of the workspace.\n"
-        "Multiple parameters: number_of_events, min,max (for each dimension); distribute the events inside the range given.\n");
-
-    declareProperty(new ArrayProperty<double>("PeakParams", ""),
-        "Add a peak with a normal distribution around a central point.\n"
-        "Parameters: number_of_events, x, y, z, ..., radius.\n");
-
-    declareProperty(new PropertyWithValue<int>("RandomSeed", 0),
-        "Seed int for the random number generator.");
-
-//    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::InOut),
-//        "An input workspace, that will get MDEvents added to it");
-
-//    std::vector<std::string> propOptions;
-//    propOptions.push_back("Uniform");
-//    propOptions.push_back("Peak");
-//    declareProperty("DataType", "Uniform",new ListValidator(propOptions),
-//      "Which underlying data type will event take (only one option is currently available).");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.

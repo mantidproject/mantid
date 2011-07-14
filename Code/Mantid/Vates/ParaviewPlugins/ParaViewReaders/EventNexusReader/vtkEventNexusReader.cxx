@@ -487,6 +487,7 @@ void vtkEventNexusReader::PrintSelf(ostream& os, vtkIndent indent)
 
 int vtkEventNexusReader::CanReadFile(const char* vtkNotUsed(fname))
 {
+  //this->FileName;
   return 1; //TODO: Apply checks here.
 }
 
