@@ -11,6 +11,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidMDEvents/MDBox.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
@@ -52,10 +53,10 @@ public:
     ws1->getBoxController()->setSplitThreshold(100);
     // Put in ADS so we can use fake data
     AnalysisDataService::Instance().addOrReplace("LoadMDEWTest_ws", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
-    AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
-        "InputWorkspace", "LoadMDEWTest_ws", "UniformParams", "5000");
-    AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
-        "InputWorkspace", "LoadMDEWTest_ws", "PeakParams", "300000, 5.0, 0.01");
+    AlgorithmHelper::runAlgorithm("FakeMDEventData", 6,
+        "InputWorkspace", "LoadMDEWTest_ws", "UniformParams", "5000", "RandomizeSignal", "1");
+    AlgorithmHelper::runAlgorithm("FakeMDEventData", 6,
+        "InputWorkspace", "LoadMDEWTest_ws", "PeakParams", "30000, 5.0, 0.01", "RandomizeSignal", "1");
 
     // Save it
     SaveMDEW saver;
@@ -114,10 +115,11 @@ public:
     TS_ASSERT_EQUALS( boxes.size(), boxes1.size());
     if (boxes.size() != boxes1.size()) return;
 
-    for (size_t i=0; i<boxes.size(); i++)
+    for (size_t j=0; j<boxes.size(); j++)
     {
-      IMDBox<MDEvent<1>,1>* box = boxes[i];
-      IMDBox<MDEvent<1>,1>* box1 = boxes1[i];
+      IMDBox<MDEvent<1>,1>* box = boxes[j];
+      IMDBox<MDEvent<1>,1>* box1 = boxes1[j];
+
       TS_ASSERT_EQUALS( box->getId(), box1->getId() );
       TS_ASSERT_EQUALS( box->getNumChildren(), box1->getNumChildren() );
       for (size_t i=0; i<box->getNumChildren(); i++)
@@ -131,6 +133,25 @@ public:
       TS_ASSERT_EQUALS( box->getNPoints(), box1->getNPoints() );
       TS_ASSERT( box->getBoxController() );
       TS_ASSERT_EQUALS( box->getBoxController(), ws->getBoxController() );
+
+      // Are both MDBoxes (with events)
+      MDBox<MDEvent<1>,1>* mdbox = dynamic_cast<MDBox<MDEvent<1>,1>*>(box);
+      MDBox<MDEvent<1>,1>* mdbox1 = dynamic_cast<MDBox<MDEvent<1>,1>*>(box1);
+      if (mdbox)
+      {
+        TS_ASSERT( mdbox1 );
+        std::vector<MDEvent<1> > & events = mdbox->getEvents();
+        std::vector<MDEvent<1> > & events1 = mdbox1->getEvents();
+        TS_ASSERT_EQUALS( events.size(), events1.size() );
+        // Check first and last event
+        for (size_t i=0; i<events.size(); i+=events.size()-1)
+        {
+          TS_ASSERT_DELTA( events[i].getCenter(0), events1[i].getCenter(0), 1e-4);
+          TS_ASSERT_DELTA( events[i].getSignal(), events1[i].getSignal(), 1e-4);
+          TS_ASSERT_DELTA( events[i].getErrorSquared(), events1[i].getErrorSquared(), 1e-4);
+        }
+
+      }
     }
 
     // Remove workspace from the data service.
