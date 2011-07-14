@@ -8,10 +8,12 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidAPI/Progress.h"
+#include "MantidKernel/CPUTimer.h"
 
 using Mantid::Kernel::ThreadSchedulerFIFO;
 using Mantid::Kernel::ThreadPool;
 using Mantid::API::Progress;
+using Mantid::Kernel::CPUTimer;
 
 namespace Mantid
 {
@@ -219,6 +221,8 @@ namespace Mantid
     /// Add events after reading pixels/datapoints from file.
     void LoadSQW::addEvents(Mantid::MDEvents::MDEventWorkspace4* ws)
     {
+      CPUTimer tim;
+
       size_t maxNPix = ~size_t(0);
       if(m_nDataPoints > maxNPix)
       {
@@ -237,10 +241,15 @@ namespace Mantid
       std::vector<char> vecBuffer = std::vector<char>(data_buffer_size);
       char* pData = &vecBuffer[0];
 
+      Progress * prog = new Progress(this, 0.0, 1.0, 5);
+
+      prog->report("Loading file");
+
       this->m_fileStream.seekg(this->m_dataPositions.pix_start, std::ios::beg);
       this->m_fileStream.read(pData,data_buffer_size);
       float error;
-      Progress * prog = new Progress(this, 0.0, 1.0, 4);
+
+      std::cout << tim << " to load the data from file." << std::endl;
 
       prog->report("Loading pixels");
 
@@ -257,6 +266,8 @@ namespace Mantid
         ws->addEvent(MDEvent<4>(*reinterpret_cast<float*>(pData + current_pix + column_size_4), error*error , centers));
       }
 
+      std::cout << tim << " to load make and add the events." << std::endl;
+
       prog->report("Splitting boxes");
 
       // This splits up all the boxes according to split thresholds and sizes.
@@ -265,6 +276,8 @@ namespace Mantid
       ThreadPool tp(ts);
       ws->splitAllIfNeeded(ts);
       tp.joinAll();
+
+      std::cout << tim << " to split the MDBoxes." << std::endl;
 
       prog->report("Refreshing cache");
       ws->refreshCache();
