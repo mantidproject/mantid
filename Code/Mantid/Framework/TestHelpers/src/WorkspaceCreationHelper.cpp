@@ -321,7 +321,7 @@ namespace WorkspaceCreationHelper
    * @param numPixels :: each bank will be numPixels*numPixels
    * @return The EventWorkspace
    */
-  Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithFullInstrument(int numBanks, int numPixels)
+  Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithFullInstrument(int numBanks, int numPixels, bool clearEvents)
   {
     IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(numBanks, numPixels);
     EventWorkspace_sptr ws = CreateEventWorkspace2(numBanks*numPixels*numPixels, 10);
@@ -330,7 +330,9 @@ namespace WorkspaceCreationHelper
     int detID = numPixels*numPixels;
     for (int wi=0; wi< static_cast<int>(ws->getNumberHistograms()); wi++)
     {
-      ws->getEventList(wi).clear(true);
+      ws->getEventList(wi).clearDetectorIDs();
+      if (clearEvents)
+        ws->getEventList(wi).clear(true);
       ws->getEventList(wi).setDetectorID(detID);
       detID++;
     }

@@ -243,7 +243,14 @@ public:
     TS_ASSERT_EQUALS( el.constDataX().size(), 0);
     TS_ASSERT_EQUALS( el.makeDataY()->size(), 0);
     TS_ASSERT_EQUALS( el.makeDataE()->size(), 0);
+  }
 
+  void test_maskWorkspaceIndex()
+  {
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10, false /*dont clear the events*/);
+    TS_ASSERT_EQUALS( ws->getEventList(2).getNumberEvents(), 200);
+    ws->maskWorkspaceIndex(2);
+    TS_ASSERT_EQUALS( ws->getEventList(2).getNumberEvents(), 0);
   }
 
 
