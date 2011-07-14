@@ -135,6 +135,12 @@ if ( WIN32 )
   add_definitions ( -DQT_QTPROPERTYBROWSER_EXPORT )
 endif ( WIN32 )
 
+# This is, for the most part, not our code so disable an Intel compiler
+# warning that crops up a lot in this package
+if ( ${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" )
+  add_definitions ( -wd1125 )
+endif ()
+
 ###########################################################################
 # Installation settings
 ###########################################################################

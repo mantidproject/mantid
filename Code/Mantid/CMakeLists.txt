@@ -60,10 +60,10 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/MantidWidgets )
 
 add_subdirectory ( MantidPlot )
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  #Experimental feature. Linux only at this point.
+if ( UNIX )
+  #Experimental feature. Unix only at this point.
   set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+endif ( UNIX )
 
 set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
 set ( REDUCER_TEST OFF CACHE BOOL "Switch for running flaky Reducer test")

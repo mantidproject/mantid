@@ -15,10 +15,17 @@
 #include <QInputDialog>
 #include <QLineEdit>
 
+// Suppress a warning coming out of code that isn't ours
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1125
+#endif
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
 #include "qteditorfactory.h"
 #include "DoubleEditorFactory.h"
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1125
+#endif
 #include <QtCheckBoxFactory>
 
 using namespace MantidQt::CustomInterfaces;

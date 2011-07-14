@@ -7,15 +7,17 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
-#include "qttreepropertybrowser.h"
-#include "qtpropertymanager.h"
-#include "qteditorfactory.h"
-
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 //-----------------------------------------------------
 // Forward declarations
 //-----------------------------------------------------
+
+class QtProperty;
+class QtBoolPropertyManager;
+class QtDoublePropertyManager;
+class QtGroupPropertyManager;
+class QtTreePropertyBrowser;
 
 namespace MantidQt
 {

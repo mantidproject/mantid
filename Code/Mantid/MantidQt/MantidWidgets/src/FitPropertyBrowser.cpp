@@ -21,15 +21,19 @@
 
 #include "MantidQtMantidWidgets/UserFunctionDialog.h"
 
-#include "StringDialogEditorFactory.h"
-#include "DoubleEditorFactory.h"
-
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
+// Suppress a warning coming out of code that isn't ours
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1125
+#endif
 #include "qteditorfactory.h"
+#include "StringDialogEditorFactory.h"
+#include "DoubleEditorFactory.h"
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1125
+#endif
 
-//#include "../ApplicationWindow.h"
-//#include "MantidUI.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGridLayout>
@@ -72,6 +76,7 @@ class FormulaDialogEditorFactory: public StringDialogEditorFactory
 public:
   FormulaDialogEditorFactory(QObject* parent):StringDialogEditorFactory(parent){}
 protected:
+  using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler warning
   QWidget *createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent)
   {
     (void) manager; //Avoid unused warning

@@ -19,7 +19,6 @@
 //----------------------------------------------------------------------
 #include <vector>
 #include <memory> //HACK
-#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
