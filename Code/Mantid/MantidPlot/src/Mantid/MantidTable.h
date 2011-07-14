@@ -16,6 +16,9 @@ class MantidTable: public Table, public MantidQt::API::WorkspaceObserver
 public:
   MantidTable(ScriptingEnv *env, Mantid::API::ITableWorkspace_sptr ws, const QString &label, 
     ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
+
+  /// returns the workspace name
+  const std::string & getWorkspaceName() {return m_wsName; }
 signals:
   void needToClose();
   void needToUpdate();

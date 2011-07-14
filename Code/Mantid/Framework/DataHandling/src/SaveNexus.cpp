@@ -49,7 +49,7 @@ void SaveNexus::init()
   declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
 		    "The name of the Nexus file to write, as a full or relative\n"
 		    "path");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InputWorkspace", "", Direction::Input),
+  declareProperty(new WorkspaceProperty<Workspace> ("InputWorkspace", "", Direction::Input),
       "Name of the workspace to be saved");
   //
   // Declare optional input parameters

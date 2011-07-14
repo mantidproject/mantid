@@ -119,6 +119,7 @@
 #include "RangeSelectorTool.h"
 #include "PlotToolInterface.h"
 #include "Mantid/MantidMatrix.h"
+#include "Mantid/MantidTable.h"
 #include "Mantid/MantidCurve.h"
 #include "ContourLinesEditor.h"
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
@@ -5711,6 +5712,10 @@ void ApplicationWindow::savetoNexusFile()
       if(w->isA("MantidMatrix"))
       {
         wsName=((MantidMatrix*)w)->getWorkspaceName();
+      }
+      if(w->isA("MantidTable"))
+      {
+        wsName=((MantidTable*)w)->getWorkspaceName();
       }
     }
     else
