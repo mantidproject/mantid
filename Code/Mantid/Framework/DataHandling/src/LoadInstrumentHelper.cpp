@@ -167,7 +167,7 @@ std::string LoadInstrumentHelper::getWorkspaceStartDate(const boost::shared_ptr<
 */
 std::string LoadInstrumentHelper::getInstrumentFilename(const std::string& instrumentName, const std::string& date)
 {
-
+  g_log.debug() << "Looking for instrment XML file for " << instrumentName << " that is valid on '" << date << "'\n";
   // Lookup the instrument (long) name
   std::string instrument(Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
 
@@ -184,12 +184,12 @@ std::string LoadInstrumentHelper::getInstrumentFilename(const std::string& instr
     if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
 
     std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
-
     if ( regex.match(l_filenamePart) )
     {
+      g_log.debug() << "Found file: '" << dir_itr->path() << "'\n";
       std::string validFrom, validTo;
       LoadInstrumentHelper::getValidFromTo(dir_itr->path(), validFrom, validTo);
-
+      g_log.debug() << "File '" << dir_itr->path() << " valid dates: from '" << validFrom << "' to '" << validTo << "'\n";
       DateAndTime from(validFrom);
       // Use a default valid-to date if none was found.
       DateAndTime to;
