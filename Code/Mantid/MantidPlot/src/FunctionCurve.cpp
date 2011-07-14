@@ -192,7 +192,7 @@ void FunctionCurve::loadData(int points)
       if (!fMW) return;
       fMW->setMatrixWorkspace(ws,wsIndex,-1,-1);
       fMW->applyTies();
-      fMW->function(Y.data(),X.constData(),nPoints);
+      fMW->functionMW(Y.data(),X.constData(),nPoints);
 
       setData(X.data(), Y.data(), nPoints);
     }
