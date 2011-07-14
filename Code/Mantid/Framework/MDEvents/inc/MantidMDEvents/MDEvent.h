@@ -348,6 +348,8 @@ namespace MDEvents
       // Get the slab into the allocated data
       file->getSlab(data, start, size);
 
+      // Reserve the amount of space needed. Significant speed up (~30% thanks to this)
+      events.reserve( events.size() + numEvents);
       for (size_t i=0; i<numEvents; i++)
       {
         // Point directly into the data block for the centers.

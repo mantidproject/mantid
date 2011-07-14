@@ -5,7 +5,13 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include <iostream>
-#include <boost/algorithm/string/erase.hpp>
+#include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/ThreadPool.h"
+#include "MantidAPI/Progress.h"
+
+using Mantid::Kernel::ThreadSchedulerFIFO;
+using Mantid::Kernel::ThreadPool;
+using Mantid::API::Progress;
 
 namespace Mantid
 {
@@ -45,8 +51,14 @@ namespace Mantid
       // Add dimensions onto workspace.
       addDimensions(pWs);
       
+      // Set some reasonable values for the box controller
+      pWs->getBoxController()->setSplitInto(4);
+      pWs->getBoxController()->setSplitThreshold(2000);
+
       // Initialize the workspace.
       pWs->initialize();
+      // Start with a MDGridBox.
+      pWs->splitBox();
 
       // Read events into the workspace.
       addEvents(pWs);
@@ -102,7 +114,7 @@ namespace Mantid
       // skip allat and adlngldef
       size_t i0 = 4*(3+3) ; 
       for(size_t i=0;i<this->m_nDims;i++){
-        double val = (double)*((float*)(&buf[i0+i*4]));
+        //double val = (double)*((float*)(&buf[i0+i*4]));
         //dscrptn.pDimDescription(i)->data_shift = val;
       }
 
@@ -228,6 +240,10 @@ namespace Mantid
       this->m_fileStream.seekg(this->m_dataPositions.pix_start, std::ios::beg);
       this->m_fileStream.read(pData,data_buffer_size);
       float error;
+      Progress * prog = new Progress(this, 0.0, 1.0, 4);
+
+      prog->report("Loading pixels");
+
       for(size_t current_pix = 0; current_pix < data_buffer_size; current_pix+=pixel_width)
       {
         coord_t centers[4] = 
@@ -240,6 +256,20 @@ namespace Mantid
         error = *reinterpret_cast<float*>(pData + current_pix + column_size_5);
         ws->addEvent(MDEvent<4>(*reinterpret_cast<float*>(pData + current_pix + column_size_4), error*error , centers));
       }
+
+      prog->report("Splitting boxes");
+
+      // This splits up all the boxes according to split thresholds and sizes.
+      // TODO: Would it be more efficient to do the splitting on regulare intervals? Not necessarily, should try it.
+      Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
+      ThreadPool tp(ts);
+      ws->splitAllIfNeeded(ts);
+      tp.joinAll();
+
+      prog->report("Refreshing cache");
+      ws->refreshCache();
+
+      delete prog;
 
     }
 

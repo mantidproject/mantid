@@ -1,4 +1,5 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid
 {
@@ -57,7 +58,8 @@ namespace Mantid
     */
     void MDHistoDimensionBuilder::setName(std::string name)
     {
-      m_name = name;
+      // String any spaces
+      m_name = Kernel::Strings::strip(name);
     }
 
     /*
