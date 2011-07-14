@@ -6,6 +6,7 @@
 #include "MantidVatesAPI/EscalatingRebinningActionManager.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidVatesAPI/ThresholdRange.h"
+#include "MantidKernel/MultiThreaded.h"
 
 class vtkImplicitFunction;
 class VTK_EXPORT vtkSQWEventReader : public vtkUnstructuredGridAlgorithm
@@ -156,5 +157,8 @@ private:
   int m_thresholdMethodIndex;
 
   Mantid::VATES::ThresholdRange_scptr m_ThresholdRange;
+
+  /// Mutex for progress updates
+  Mantid::Kernel::Mutex progressMutex;
 };
 #endif

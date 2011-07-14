@@ -515,6 +515,8 @@ unsigned long vtkSQWEventReader::GetMTime()
 */
 void vtkSQWEventReader::UpdateAlgorithmProgress(double progress)
 {
+  progressMutex.lock();
   this->SetProgressText("Executing Mantid MDEvent Rebinning Algorithm...");
   this->UpdateProgress(progress);
+  progressMutex.unlock();
 }
