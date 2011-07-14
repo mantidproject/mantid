@@ -32,7 +32,7 @@ namespace Mantid
     void LoadSQW::exec()
     {
       std::string filename = getProperty("Filename");
-      m_fileStream.open(filename, std::ios::binary);
+      m_fileStream.open(filename.c_str(), std::ios::binary);
 
       // Parse Extract metadata. Including data locations.
       parseMetadata();
