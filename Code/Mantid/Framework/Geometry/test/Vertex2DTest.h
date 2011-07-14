@@ -120,6 +120,7 @@ private:
       TS_ASSERT_EQUALS(vertexTwo->next(), origin);
 
       Vertex2D *removedTwo = vertexTwo->remove();
+      UNUSED_ARG(removedTwo);
       TS_ASSERT_EQUALS(origin->next(), origin);
       TS_ASSERT_EQUALS(origin->previous(), origin);
       return NULL;
