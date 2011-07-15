@@ -41,7 +41,7 @@
  <component type="panel04" idlist="panel04">
  <location />
  </component>
- <component type="panel05" idlist="panel05">
+ <component type="panel05" idlist="panel05"> 
  <location />
  </component>
  <!-- source and sample-position components -->
