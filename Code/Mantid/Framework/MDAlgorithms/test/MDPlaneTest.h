@@ -107,5 +107,59 @@ public:
 };
 
 
+
+class MDPlaneTestPerformance : public CxxTest::TestSuite
+{
+public:
+
+  void test_3D_point()
+  {
+    coord_t coeff[3] = {1.23, 2.34, 3.45};
+    coord_t pointA[3] = {0.111, 0.222, 0.333};
+
+    MDPlane p(3, coeff, 5.67);
+    bool res = false;
+    for (size_t i=0; i<5*1000000 /*5 million*/; i++)
+    {
+      res = p.isPointBounded(pointA);
+      (void) res;
+    }
+    TS_ASSERT(res);
+  }
+
+  void test_4D_point()
+  {
+    coord_t coeff[4] = {1.23, 2.34, 3.45, 4.56};
+    coord_t pointA[4] = {0.111, 0.222, 0.333, 0.444};
+
+    MDPlane p(4, coeff, 6.78);
+    bool res = false;
+    for (size_t i=0; i<5*1000000 /*5 million*/; i++)
+    {
+      res = p.isPointBounded(pointA);
+      (void) res;
+    }
+    TS_ASSERT(res);
+  }
+
+
+  void test_3D_line()
+  {
+    coord_t coeff[3] = {1.23, 2.34, 3.45};
+    coord_t pointA[3] = {0.111, 0.222, 0.333};
+    coord_t pointB[3] = {9.111, 9.222, 9.333};
+
+    MDPlane p(3, coeff, 5.67);
+    bool res = false;
+    for (size_t i=0; i<5*1000000 /*5 million*/; i++)
+    {
+      res = p.doesLineIntersect(pointA, pointB);
+      (void) res;
+    }
+    TS_ASSERT(res);
+  }
+
+};
+
 #endif /* MANTID_MDALGORITHMS_MDPLANETEST_H_ */
 
