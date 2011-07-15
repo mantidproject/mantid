@@ -46,7 +46,7 @@ public:
   }
 
   /// 2D test with some simple linear inequations
-  void test_2D_line()
+  void test_2D_point()
   {
     coord_t coeff1[2] = {1., 0};
     // Plane where x < 5
@@ -75,6 +75,33 @@ public:
     TS_ASSERT(  try2Dpoint(p4, 1., -5.) );
     TS_ASSERT( !try2Dpoint(p4, 1., 1.1) );
     TS_ASSERT( !try2Dpoint(p4, 0., 0.1) );
+  }
+
+
+  /// Helper function for the 2D case of a line intersecting the plane
+  bool try2Dline(MDPlane & p, coord_t x1, coord_t y1, coord_t x2, coord_t y2)
+  {
+    coord_t centers1[2] = {x1,y1};
+    coord_t centers2[2] = {x2,y2};
+    return p.doesLineIntersect(centers1, centers2);
+  }
+
+  void test_2D_line()
+  {
+    coord_t coeff1[2] = {1., 0};
+    // Plane where x < 5
+    MDPlane p1(2, coeff1, 5.0);
+    TS_ASSERT(  try2Dline(p1,   1,2,     6,2) );
+    TS_ASSERT(  try2Dline(p1, 10,12,   4.99,8) );
+    TS_ASSERT( !try2Dline(p1, 5.01,2,  5.02,2) );
+    TS_ASSERT( !try2Dline(p1, 4.99,2,  4.25,2) );
+
+    // Plane where y-x < 0 (below a 45 degree line)
+    coord_t coeff4[2] = {-1., 1.};
+    MDPlane p4(2, coeff4, 0.0);
+    TS_ASSERT(  try2Dline(p4,   0.1,0.0,   0.1,0.2));
+    TS_ASSERT( !try2Dline(p4,   0.1,0.0,   0.3,0.2));
+    TS_ASSERT(  try2Dline(p4,   0.1,0.2,   0.3,0.2));
   }
 
 };

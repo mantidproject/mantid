@@ -66,6 +66,25 @@ namespace MDAlgorithms
   }
 
 
+  //----------------------------------------------------------------------------------------------
+  /** Given two points defining the start and end point of a line,
+   * is there an intersection between the hyperplane and the line
+   * defined by the points?
+   *
+   * @param pointA :: first point/vertex; nd-sized array of coordinates
+   * @param pointB :: last point/vertex; nd-sized array of coordinates
+   * @return true if the line DOES intersect.
+   */
+  bool MDPlane::doesLineIntersect(const coord_t * pointA, const coord_t * pointB)
+  {
+    bool AisBounded = isPointBounded(pointA);
+    bool BisBounded = isPointBounded(pointB);
+    // The line crosses the plane if one point is bounded and not the other. Simple! :)
+    return (AisBounded != BisBounded);
+  }
+
+
+
 
 } // namespace Mantid
 } // namespace MDAlgorithms

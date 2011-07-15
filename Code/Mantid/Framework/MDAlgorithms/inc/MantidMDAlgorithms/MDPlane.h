@@ -55,6 +55,7 @@ namespace MDAlgorithms
 
     bool isPointBounded(const coord_t * coords);
 
+    bool doesLineIntersect(const coord_t * pointA, const coord_t * pointB);
     
     /// @return the number of dimensions
     size_t getNumDims() const { return m_nd; }
