@@ -28,7 +28,7 @@
    </properties>
    <component type="monitors" idlist="monitors">
      <location/>
-   </component>
+   </component> 
  <component type="panel01" idlist="panel01">
  <location />
  </component>
