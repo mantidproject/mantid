@@ -384,12 +384,22 @@ public:
         }
       }
 
-      for (size_t i=0; i < alg->pulseTimes.size(); i++)
+      if (start_event > static_cast<size_t>(id_info.dims[0]))
       {
-        if (alg->pulseTimes[i] > alg->filter_time_stop)
+        // For bad file around SEQ_7872, Jul 15, 2011, Janik Zikovsky
+        alg->getLogger().information() << this->entry_name << "'s field 'event_index' seem to be invalid (> than the number of events in the bank). Filtering by time ignored.\n";
+        start_event = 0;
+        stop_event =  static_cast<size_t>(id_info.dims[0]);
+      }
+      else
+      {
+        for (size_t i=0; i < alg->pulseTimes.size(); i++)
         {
-          stop_event = event_index[i];
-          break;
+          if (alg->pulseTimes[i] > alg->filter_time_stop)
+          {
+            stop_event = event_index[i];
+            break;
+          }
         }
       }
 
