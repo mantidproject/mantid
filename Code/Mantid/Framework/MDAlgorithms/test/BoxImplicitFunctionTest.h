@@ -265,9 +265,10 @@ public:
     bool masks[3] = {false, false, false};
     bool bIsInside = false;
     boost::scoped_ptr<BoxImplicitFunction> box(constructBoxImplicitFunction());
-    for(int i = 0; i < 10000 ; i++)
+    for(int i = 0; i < 1000000 ; i++)
     {
       bIsInside = box->evaluate(coords, masks, 3);
+      (void) bIsInside;
     }
     TS_ASSERT(bIsInside);
   }
