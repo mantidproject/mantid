@@ -231,6 +231,7 @@ void vtkSQWEventReader::SetAppliedGeometryXML(std::string appliedGeometryXML)
 	  temp.addYDimension(m_appliedYDimension);
 	  temp.addZDimension(m_appliedZDimension);
 	  temp.addTDimension(m_appliedTDimension);
+    temp.addManyOrdinaryDimensions(xmlParser.getNonMappedDimensions());
 	  m_geometryXmlBuilder = temp;
 
       m_actionManager.ask(RecalculateAll);
