@@ -8,6 +8,9 @@ set ( BOOST_INCLUDEDIR "${THIRD_PARTY}/include" )
 set ( CMAKE_LIBRARY_PATH "${THIRD_PARTY}/lib/mac64" )
 set ( BOOST_LIBRARYDIR  "${THIRD_PARTY}/lib/mac64" )
 
+# Enable the use of the -isystem flag to mark headers in Third_Party as system headers
+set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
+
 ###########################################################################
 # Use the system-installed version of Python.
 ###########################################################################
@@ -24,6 +27,9 @@ endif ()
 set ( CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -m64 )
 set ( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -m64 )
 
+###########################################################################
+# Mac-specific installation setup
+###########################################################################
 set ( CMAKE_INSTALL_NAME_DIR ${CMAKE_LIBRARY_PATH} )
 
 set ( CMAKE_INSTALL_PREFIX /Applications )

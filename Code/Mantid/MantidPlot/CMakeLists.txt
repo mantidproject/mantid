@@ -684,13 +684,13 @@ qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Images/images.qrc )
 # Add the dependencies
 ###########################################################################
 
-include_directories ( ${MUPARSER_INCLUDE_DIR} )
+include_directories ( SYSTEM ${MUPARSER_INCLUDE_DIR} )
 include_directories ( ${ZLIB_INCLUDE_DIRS} )
 
-include_directories ( ${QWT_INCLUDE_DIR} )
+include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 
 find_package ( QwtPlot3d REQUIRED )
-include_directories ( ${QWTPLOT3D_INCLUDE_DIR} )
+include_directories ( SYSTEM ${QWTPLOT3D_INCLUDE_DIR} )
 
 find_package ( QScintilla REQUIRED )
 include_directories ( ${QSCINTILLA_INCLUDE_DIR} )

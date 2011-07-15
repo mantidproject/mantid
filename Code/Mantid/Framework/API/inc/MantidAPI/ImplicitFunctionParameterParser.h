@@ -20,16 +20,7 @@
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
-
-// Suppress a warning coming out of the boost code when using Intel
-#if defined(__INTEL_COMPILER)
-  #pragma warning disable 2165
-#endif
 #include <boost/interprocess/smart_ptr/unique_ptr.hpp>
-#if defined(__INTEL_COMPILER)
-  #pragma warning enable 2165
-#endif
-
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>

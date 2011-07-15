@@ -44,13 +44,13 @@ include ( VersionNumber )
 ###########################################################################
 
 find_package ( Boost REQUIRED signals date_time regex )
-include_directories( ${Boost_INCLUDE_DIRS} )
+include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 add_definitions ( -DBOOST_ALL_DYN_LINK )
 # Need this defined globally for our log time values
 add_definitions ( -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG )
 
 find_package ( Poco REQUIRED )
-include_directories( ${POCO_INCLUDE_DIRS} )
+include_directories( SYSTEM ${POCO_INCLUDE_DIRS} )
 
 find_package ( MuParser REQUIRED )
 
