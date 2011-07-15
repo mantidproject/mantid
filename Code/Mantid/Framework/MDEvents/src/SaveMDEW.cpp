@@ -73,7 +73,7 @@ namespace MDEvents
     file = new ::NeXus::File(filename, NXACC_CREATE5);
 
     // Write out some general information like # of dimensions
-    file->makeGroup("workspace", "NXworkspace", 1);
+    file->makeGroup("workspace", "NXcollection", 1);
     file->writeData("dimensions", int32_t(nd));
     file->writeData("event_type", MDE::getTypeName());
 
@@ -210,7 +210,7 @@ namespace MDEvents
     // OK, we've filled these big arrays of data. Save them.
     prog->report("Writing Box Data");
 
-    file->writeData("boxType", boxType);
+    file->writeData("box_type", boxType);
     file->writeData("depth", depth);
     file->writeData("inverseVolume", inverseVolume);
 

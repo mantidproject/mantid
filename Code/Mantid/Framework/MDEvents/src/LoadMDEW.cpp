@@ -74,7 +74,7 @@ namespace MDEvents
     // Start loading
     file = new ::NeXus::File(filename);
 
-    file->openGroup("workspace", "NXworkspace");
+    file->openGroup("workspace", "NXcollection");
 
     std::vector<int32_t> vecDims;
     file->readData("dimensions", vecDims);
@@ -116,7 +116,7 @@ namespace MDEvents
 
     prog->report("Opening file.");
 
-    file->openGroup("workspace", "NXworkspace");
+    file->openGroup("workspace", "NXcollection");
 
     // Load each dimension, as their XML representation
     for (size_t d=0; d<nd; d++)
@@ -162,7 +162,7 @@ namespace MDEvents
     prog->report("Reading Box Data");
 
     // Read all the data blocks
-    file->readData("boxType", boxType);
+    file->readData("box_type", boxType);
     file->readData("depth", depth);
     file->readData("inverseVolume", inverseVolume);
     file->readData("extents", extents);
