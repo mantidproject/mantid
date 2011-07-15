@@ -52,6 +52,7 @@ inc/MantidVatesAPI/GeometryPresenter.h
 inc/MantidVatesAPI/GeometryView.h
 inc/MantidVatesAPI/MDHistogramRebinningPresenter.h
 inc/MantidVatesAPI/MDRebinningPresenter.h
+inc/MantidVatesAPI/MDLoadingRebinningPresenter.h
 inc/MantidVatesAPI/MDRebinningView.h
 inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
 inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
