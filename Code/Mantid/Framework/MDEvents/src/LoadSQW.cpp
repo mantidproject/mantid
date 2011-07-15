@@ -241,7 +241,7 @@ namespace Mantid
       std::vector<char> vecBuffer = std::vector<char>(data_buffer_size);
       char* pData = &vecBuffer[0];
 
-      Progress * prog = new Progress(this, 0.0, 1.0, 5);
+      Progress * prog = new Progress(this, 0.0, 1.0, 50);
 
       prog->report("Loading file");
 
@@ -253,31 +253,49 @@ namespace Mantid
 
       prog->report("Loading pixels");
 
-      for(size_t current_pix = 0; current_pix < data_buffer_size; current_pix+=pixel_width)
+      // Perform the loading/splitting in chunks
+      size_t startBlock = 0;
+      size_t lastChunkSize = 10000;
+      size_t endBlock = lastChunkSize*pixel_width;
+      // Don't go past the end
+      if (endBlock > data_buffer_size) endBlock = data_buffer_size;
+
+      while (startBlock < data_buffer_size)
       {
-        coord_t centers[4] = 
+        prog->report("Making Events");
+        for(size_t current_pix = startBlock; current_pix < endBlock; current_pix+=pixel_width)
         {
-          *(reinterpret_cast<float*>(pData + current_pix)), 
-          *(reinterpret_cast<float*>(pData + current_pix + column_size)), 
-          *(reinterpret_cast<float*>(pData + current_pix + column_size_2)), 
-          *(reinterpret_cast<float*>(pData + current_pix + column_size_3))
-        };
-        error = *reinterpret_cast<float*>(pData + current_pix + column_size_5);
-        ws->addEvent(MDEvent<4>(*reinterpret_cast<float*>(pData + current_pix + column_size_4), error*error , centers));
+          coord_t centers[4] =
+          {
+              *(reinterpret_cast<float*>(pData + current_pix)),
+              *(reinterpret_cast<float*>(pData + current_pix + column_size)),
+              *(reinterpret_cast<float*>(pData + current_pix + column_size_2)),
+              *(reinterpret_cast<float*>(pData + current_pix + column_size_3))
+          };
+          error = *reinterpret_cast<float*>(pData + current_pix + column_size_5);
+          ws->addEvent(MDEvent<4>(*reinterpret_cast<float*>(pData + current_pix + column_size_4), error*error , centers));
+        }
+
+        std::cout << tim << " to make and add the events." << std::endl;
+
+        prog->report("Splitting boxes");
+
+        // This splits up all the boxes according to split thresholds and sizes.
+        // TODO: Would it be more efficient to do the splitting on regulare intervals? Not necessarily, should try it.
+        Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
+        ThreadPool tp(ts);
+        ws->splitAllIfNeeded(ts);
+        tp.joinAll();
+
+        std::cout << tim << " to split the MDBoxes." << std::endl;
+
+        // Get ready for the next chunk. Grow them by a factor of 2 each time.
+        startBlock = endBlock;
+        lastChunkSize *= 2;
+        endBlock = startBlock + lastChunkSize*pixel_width;
+        // Don't go past the end
+        if (endBlock > data_buffer_size) endBlock = data_buffer_size;
       }
-
-      std::cout << tim << " to load make and add the events." << std::endl;
-
-      prog->report("Splitting boxes");
-
-      // This splits up all the boxes according to split thresholds and sizes.
-      // TODO: Would it be more efficient to do the splitting on regulare intervals? Not necessarily, should try it.
-      Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
-      ThreadPool tp(ts);
-      ws->splitAllIfNeeded(ts);
-      tp.joinAll();
-
-      std::cout << tim << " to split the MDBoxes." << std::endl;
 
       prog->report("Refreshing cache");
       ws->refreshCache();
