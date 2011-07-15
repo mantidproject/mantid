@@ -121,7 +121,7 @@ namespace Mantid
       /// Searches for a key in the configuration property
       std::vector<std::string> getKeys(const std::string& keyName) const;
       /// Launches a process i.e opening a program
-      void ConfigServiceImpl::launchProcess(const std::string& programFilePath, const std::vector<std::string>& programArguments) const;
+      void launchProcess(const std::string& programFilePath, const std::vector<std::string>& programArguments) const;
       /// Sets a configuration property
       void setString(const std::string & keyName, const std::string & keyValue);
       // Searches for a configuration property and returns its value
