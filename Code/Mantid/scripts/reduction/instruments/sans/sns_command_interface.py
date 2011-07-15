@@ -82,7 +82,8 @@ def BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_de
                                                                                                       empty_file=empty_file,
                                                                                                       beam_radius=beam_radius,
                                                                                                       theta_dependent=theta_dependent,
-                                                                                                      combine_frames=combine_frames))
+                                                                                                      combine_frames=combine_frames,
+                                                                                                      use_sample_dc=True))
         
 def CombineTransmissionFits(combine_frames):
     if not isinstance(ReductionSingleton().get_transmission(), sns_reduction_steps.DirectBeamTransmission):

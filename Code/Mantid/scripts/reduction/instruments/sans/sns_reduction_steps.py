@@ -285,41 +285,41 @@ class LoadRun(ReductionStep):
                 LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=wks_name, PulseidFilename=pulseid_file, MappingFilename=mapping_file)
                 LoadNexusLogs(Workspace=wks_name, Filename=nxs_file)
             
-            return "  Loaded %s\n" % wks_name
+            return "   Loaded %s\n" % wks_name
         
         # If the event workspace exists, don't reload it
         if mtd.workspaceExists(workspace+'_evt'):
             self._process_existing_event_ws(reducer, workspace+'_evt', workspace)
-            mantid.sendLogMessage("WARNING: %s already loaded" % workspace+'_evt')
-            return "WARNING: %s_evt already loaded" % workspace
+            mantid.sendLogMessage("INFO: %s already loaded" % workspace+'_evt')
+            return "INFO: %s_evt already loaded" % workspace
         
         # Check whether there is an equivalent event workspace
         eq_histo_ws, eq_event_ws = self._look_for_loaded_data(reducer, data_file)
         if eq_histo_ws is not None:
             # The data is loaded and clean. We don't know what is going to happen to it so clone it
             CloneWorkspace(eq_histo_ws, OutputWorkspace=workspace)
-            mantid.sendLogMessage("WARNING: %s already loaded as %s" % (workspace, eq_histo_ws))
-            return "WARNING: %s already loaded as %s" % (workspace, eq_histo_ws)
+            mantid.sendLogMessage("INFO: %s already loaded as %s" % (workspace, eq_histo_ws))
+            return "INFO: %s already loaded as %s" % (workspace, eq_histo_ws)
         elif eq_event_ws is not None:
             # The data is available as an event workspace. We just need to process it.
             self._process_existing_event_ws(reducer, eq_event_ws, workspace)
-            mantid.sendLogMessage("WARNING: %s already loaded as %s" % (workspace+'_evt', eq_event_ws))
-            return "WARNING: %s already loaded as %s" % (workspace+'_evt', eq_event_ws)
+            mantid.sendLogMessage("INFO: %s already loaded as %s" % (workspace+'_evt', eq_event_ws))
+            return "INFO: %s already loaded as %s" % (workspace+'_evt', eq_event_ws)
         
         # Check whether we have a list of files that need merging
         if type(data_file)==list:
             for i in range(len(data_file)):
                 if i==0:
-                    output_str += _load_data_file(data_file[i], workspace+'_evt')
+                    _load_data_file(data_file[i], workspace+'_evt')
                 else:
-                    output_str += _load_data_file(data_file[i], '__tmp_wksp')
+                    _load_data_file(data_file[i], '__tmp_wksp')
                     Plus(LHSWorkspace=workspace+'_evt',
                          RHSWorkspace='__tmp_wksp',
                          OutputWorkspace=workspace+'_evt')
             if mtd.workspaceExists('__tmp_wksp'):
                 mtd.deleteWorkspace('__tmp_wksp')
         else:
-            output_str += _load_data_file(data_file, workspace+'_evt')
+            _load_data_file(data_file, workspace+'_evt')
         
         
         # Store the sample-detector distance.
@@ -370,7 +370,7 @@ class LoadRun(ReductionStep):
         
         if config_file is not None:
             mantid.sendLogMessage("Using configuration file: %s\n" % config_file)
-            output_str +=  "  Using configuration file: %s\n" % config_file
+            output_str +=  "   Using configuration file: %s\n" % config_file
             conf = EQSANSConfig(config_file)
             mtd[workspace+'_evt'].getRun().addProperty_dbl("low_tof_cut", conf.low_TOF_cut, "microsecond", True)
             mtd[workspace+'_evt'].getRun().addProperty_dbl("high_tof_cut", conf.high_TOF_cut, "microsecond", True)
@@ -381,15 +381,15 @@ class LoadRun(ReductionStep):
             # Store mask information
             if self._use_config_mask:
                 mtd[workspace+'_evt'].getRun().addProperty_str("rectangular_masks", pickle.dumps(conf.rectangular_masks), "pixels", True)
-                output_str +=  "  Using mask information found in configuration file\n"
+                output_str +=  "   Using mask information found in configuration file\n"
                 
             if type(reducer._beam_finder) is BaseBeamFinder:
                 if reducer.get_beam_center() == [0.0,0.0]:
                     reducer.set_beam_finder(BaseBeamFinder(conf.center_x, conf.center_y))   
-                    output_str += "  Beam center set from config file: %-6.1f, %-6.1f\n" % (conf.center_x, conf.center_y)                             
+                    output_str += "   Beam center set from config file: %-6.1f, %-6.1f\n" % (conf.center_x, conf.center_y)                             
         else:
             mantid.sendLogMessage("Could not find configuration file for %s" % workspace)
-            output_str += "  Could not find configuration file for %s\n" % workspace
+            output_str += "   Could not find configuration file for %s\n" % workspace
 
         # Move detector array to correct position
         [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
@@ -428,9 +428,9 @@ class LoadRun(ReductionStep):
             mantid.sendLogMessage("Beam center isn't defined: skipping beam center alignment for %s" % workspace+'_evt')
 
         # Modify TOF
-        output_str += "  Discarding low %6.1f and high %6.1f microsec\n" % (low_TOF_cut, high_TOF_cut)
+        output_str += "   Discarding low %6.1f and high %6.1f microsec\n" % (low_TOF_cut, high_TOF_cut)
         if self._correct_for_flight_path:
-            output_str += "  Correcting TOF for flight path\n"
+            output_str += "   Correcting TOF for flight path\n"
         a = EQSANSTofStructure(InputWorkspace=workspace+'_evt', 
                                LowTOFCut=low_TOF_cut, HighTOFCut=high_TOF_cut,
                                FlightPathCorrection=self._correct_for_flight_path)
@@ -442,14 +442,14 @@ class LoadRun(ReductionStep):
         mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_min", wl_min, "Angstrom", True)
         mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_max", wl_max, "Angstrom", True)
         mtd[workspace+'_evt'].getRun().addProperty_int("is_frame_skipping", int(frame_skipping), True)
-        output_str += "  Wavelength range: %6.1f - %-6.1f Angstrom  [Frame skipping = %s]" % (wl_min, wl_max, str(frame_skipping))
+        output_str += "   Wavelength range: %6.1f - %-6.1f Angstrom  [Frame skipping = %s]" % (wl_min, wl_max, str(frame_skipping))
         if frame_skipping:
             wl_min2 = float(a.getPropertyValue("WavelengthMinFrame2"))
             wl_max2 = float(a.getPropertyValue("WavelengthMaxFrame2"))
             mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_min_frame2", wl_min2, "Angstrom", True)
             mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_max_frame2", wl_max2, "Angstrom", True)
             wl_combined_max = wl_max2
-            output_str += "  Second frame: %6.1f - %-6.1f Angstrom" % (wl_min2, wl_max2)
+            output_str += "   Second frame: %6.1f - %-6.1f Angstrom" % (wl_min2, wl_max2)
         
         # Convert TOF to wavelength
         source_to_sample = math.fabs(mtd[workspace+'_evt'].getInstrument().getSource().getPos().getZ())*1000.0

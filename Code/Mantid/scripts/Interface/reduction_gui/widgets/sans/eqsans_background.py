@@ -80,18 +80,15 @@ class BackgroundWidget(BaseWidget):
 
         self.connect(self._content.background_chk, QtCore.SIGNAL("clicked(bool)"), self._background_clicked)
         self.connect(self._content.background_browse, QtCore.SIGNAL("clicked()"), self._background_browse)
-        self.connect(self._content.trans_dark_current_button, QtCore.SIGNAL("clicked()"), self._trans_dark_current_browse)
         self.connect(self._content.empty_button, QtCore.SIGNAL("clicked()"), self._empty_browse)
         self.connect(self._content.sample_button, QtCore.SIGNAL("clicked()"), self._sample_browse)
 
         self.connect(self._content.background_plot_button, QtCore.SIGNAL("clicked()"), self._background_plot_clicked)
-        self.connect(self._content.trans_dark_current_plot_button, QtCore.SIGNAL("clicked()"), self._trans_dark_current_plot_clicked)
         self.connect(self._content.empty_plot_button, QtCore.SIGNAL("clicked()"), self._empty_plot)
         self.connect(self._content.sample_plot_button, QtCore.SIGNAL("clicked()"), self._sample_plot)
         
         if not self._in_mantidplot:
             self._content.background_plot_button.hide()
-            self._content.trans_dark_current_plot_button.hide()
             self._content.empty_plot_button.hide()
             self._content.sample_plot_button.hide()
 
@@ -107,9 +104,6 @@ class BackgroundWidget(BaseWidget):
 
     def _background_plot_clicked(self):
         self.show_instrument(file_name=self._content.background_edit.text)
-
-    def _trans_dark_current_plot_clicked(self):
-        self.show_instrument(file_name=self._content.trans_dark_current_edit.text)
 
     def _empty_plot(self):
         self.show_instrument(file_name=self._content.empty_edit.text)
@@ -139,9 +133,7 @@ class BackgroundWidget(BaseWidget):
         self._content.calculate_trans_chk.setChecked(state.calculate_transmission)
         self._content.theta_dep_chk.setChecked(state.theta_dependent)
         self._content.fit_together_check.setChecked(state.combine_transmission_frames)        
-        self._content.trans_dark_current_edit.setText(QtCore.QString(str(state.trans_dark_current)))
         self._calculate_clicked(state.calculate_transmission)
-    
         
     def get_state(self):
         """
@@ -158,7 +150,6 @@ class BackgroundWidget(BaseWidget):
         m.calculate_transmission = self._content.calculate_trans_chk.isChecked()
         m.theta_dependent = self._content.theta_dep_chk.isChecked()
         m.combine_transmission_frames = self._content.fit_together_check.isChecked()
-        m.trans_dark_current = self._content.trans_dark_current_edit.text()
     
         d = Background.DirectBeam()
         d.beam_radius = util._check_and_get_float_line_edit(self._content.beam_radius_edit)
@@ -168,11 +159,6 @@ class BackgroundWidget(BaseWidget):
 
         return m
 
-    def _trans_dark_current_browse(self):
-        fname = self.data_browse_dialog()
-        if fname:
-            self._content.trans_dark_current_edit.setText(fname)      
-        
     def _background_clicked(self, is_checked):
         self._content.background_edit.setEnabled(is_checked)
         self._content.background_browse.setEnabled(is_checked)
@@ -199,11 +185,6 @@ class BackgroundWidget(BaseWidget):
         self._content.dtransmission_edit.setEnabled(not is_checked and self._content.background_chk.isChecked())
         
         self._content.fit_together_check.setEnabled(is_checked)
-
-        self._content.trans_dark_current_label.setEnabled(is_checked)
-        self._content.trans_dark_current_edit.setEnabled(is_checked)
-        self._content.trans_dark_current_button.setEnabled(is_checked)
-        self._content.trans_dark_current_plot_button.setEnabled(is_checked)
 
         self._content.sample_label.setEnabled(is_checked)
         self._content.sample_edit.setEnabled(is_checked)

@@ -133,7 +133,6 @@ class SampleDataWidget(BaseWidget):
         m.calculate_transmission = self._content.calculate_chk.isChecked()
         m.theta_dependent = self._content.theta_dep_chk.isChecked()
         m.combine_transmission_frames = self._content.fit_together_check.isChecked()
-        m.use_sample_dark = True
         
         d = SampleData.DirectBeam()
         d.beam_radius = util._check_and_get_float_line_edit(self._content.beam_radius_edit)

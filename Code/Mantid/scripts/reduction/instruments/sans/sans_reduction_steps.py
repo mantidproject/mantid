@@ -331,7 +331,7 @@ class DirectBeamTransmission(BaseTransmission):
             if reducer._dark_current_subtracter is not None:
                 partial_out = reducer._dark_current_subtracter.execute(reducer, sample_ws)
                 partial_out2 = reducer._dark_current_subtracter.execute(reducer, empty_ws)
-                partial_out = "\n%s\n%s" % (partial_out, partial_out2)
+                partial_out = "\n   Sample: %s\n   Empty: %s" % (partial_out, partial_out2)
                 partial_out.replace('\n', '   \n')
                 output_str += partial_out
         
@@ -1415,18 +1415,24 @@ class SubtractBackground(ReductionStep):
             for item in reducer._2D_steps():
                 output = item.execute(reducer, self._background_ws)
                 if output is not None:
-                    log_text = log_text + '   ' + str(output) +'\n'
+                    output = output.replace('\n', '\n   |')
+                    log_text = "%s\n   %s" % (log_text, output)
         
             # The transmission correction is set separately
             if self._transmission is not None:
                 output = self._transmission.execute(reducer, self._background_ws)
                 if output is not None:
-                    log_text = log_text + '   ' + str(output) +'\n'
+                    output = output.replace('\n', '\n   |')
+                    log_text = "%s\n   %s" % (log_text, output)
         
-        Minus(workspace, self._background_ws, workspace)
+        # Make sure that we have the same binning
+        RebinToWorkspace(self._background_ws, workspace, OutputWorkspace="__tmp_bck")
+        Minus(workspace, "__tmp_bck", workspace)
+        if mtd.workspaceExists("__tmp_bck"):
+            mtd.deleteWorkspace("__tmp_bck")        
         
-        log_text.replace('\n','\n   ')
-        return "Background subtracted [%s]\n   %s" % (self._background_ws, log_text)
+        log_text = log_text.replace('\n','\n   |')
+        return "Background subtracted [%s]%s\n" % (self._background_ws, log_text)
         
  
 class GetSampleGeom(ReductionStep):
