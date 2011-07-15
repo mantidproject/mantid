@@ -42,7 +42,7 @@
  <location />
  </component>
  <component type="panel05" idlist="panel05">
- <location />
+ <location /> 
  </component>
  <!-- source and sample-position components -->
    <component type="undulator">
