@@ -340,10 +340,10 @@ void vtkSQWEventReader::doRebinning()
       Mantid::Kernel::V3D ay(up.getX(), up.getY(), up.getZ());
       Mantid::Kernel::V3D az = ax.cross_prod(ay);
       PerpendicularParameter perpendicular(az[0], az[1], az[2]);
-      if(ax.scalar_prod(ay) != 0)
-      {
-        throw std::logic_error("Normal and Up Vectors must be perpendicular");
-      }
+      //if(ax.scalar_prod(ay) != 0) //TODO fix.
+      //{
+      //  throw std::logic_error("Normal and Up Vectors must be perpendicular");
+      //}
 
       PlaneImplicitFunction func(normal, origin, m_width);
       hist_alg.setPropertyValue("ImplicitFunctionXML", func.toXMLString());
@@ -358,6 +358,8 @@ void vtkSQWEventReader::doRebinning()
 
 int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
+  try
+  {
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
@@ -401,6 +403,11 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
   // Reset the action manager fresh for next cycle.
   m_actionManager.reset();
   return 1;
+  }
+  catch(std::exception& ex)
+  {
+    std::string msg = ex.what();
+  }
 }
 
 int vtkSQWEventReader::RequestInformation(

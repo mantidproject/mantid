@@ -342,10 +342,10 @@ void vtkEventNexusReader::doRebinning()
       Mantid::Kernel::V3D ay(up.getX(), up.getY(), up.getZ());
       Mantid::Kernel::V3D az = ax.cross_prod(ay);
       PerpendicularParameter perpendicular(az[0], az[1], az[2]);
-      if(ax.scalar_prod(ay) != 0)
-      {
-        throw std::logic_error("Normal and Up Vectors must be perpendicular");
-      }
+      //if(ax.scalar_prod(ay) != 0) TODO: Fix
+      //{
+      //  throw std::logic_error("Normal and Up Vectors must be perpendicular");
+      //}
 
       PlaneImplicitFunction func(normal, origin, m_width);
       hist_alg.setPropertyValue("ImplicitFunctionXML", func.toXMLString());
