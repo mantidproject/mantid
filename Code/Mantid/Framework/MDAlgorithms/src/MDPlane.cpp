@@ -39,7 +39,38 @@ namespace MDAlgorithms
       m_coeff[d] = coeff[d];
   }
 
-    
+  //----------------------------------------------------------------------------------------------
+  /** Copy constructor
+   *
+   * @param other :: MDPlane to copy */
+  MDPlane::MDPlane(const MDPlane & other)
+  : m_nd(other.m_nd), m_inequality(other.m_inequality)
+  {
+    m_coeff = new coord_t[m_nd];
+    for (size_t d=0; d<m_nd; d++)
+      m_coeff[d] = other.m_coeff[d];
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Assignment operator
+   *
+   * @param other :: MDPlane to copy */
+  MDPlane & MDPlane::operator=(const MDPlane & other)
+  {
+    if (this != &other) // protect against invalid self-assignment
+    {
+      m_nd = other.m_nd;
+      m_inequality = other.m_inequality;
+      // Replace the array
+      delete [] m_coeff;
+      m_coeff = new coord_t[m_nd];
+      for (size_t d=0; d<m_nd; d++)
+        m_coeff[d] = other.m_coeff[d];
+    }
+    return *this;
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */

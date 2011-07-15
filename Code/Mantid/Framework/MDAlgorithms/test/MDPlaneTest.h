@@ -26,6 +26,7 @@ public:
     TS_ASSERT_EQUALS( p.getNumDims(), 2);
     TS_ASSERT_DELTA( p.getCoeff()[0], 1.234, 1e-5);
     TS_ASSERT_DELTA( p.getCoeff()[1], 4.56,  1e-5);
+    TS_ASSERT_DELTA( p.getInequality(), 2.5, 1e-5);
   }
 
   void test_constructor2()
@@ -36,6 +37,30 @@ public:
     TS_ASSERT_EQUALS( p.getNumDims(), 2);
     TS_ASSERT_DELTA( p.getCoeff()[0], 1.234, 1e-5);
     TS_ASSERT_DELTA( p.getCoeff()[1], 4.56,  1e-5);
+  }
+
+  void test_copy_ctor()
+  {
+    coord_t coeff[2] = {1.234, 4.56};
+    MDPlane p_orig(2, coeff, 2.5);
+    MDPlane p(p_orig);
+    TS_ASSERT_EQUALS( p.getNumDims(), 2);
+    TS_ASSERT_DELTA( p.getCoeff()[0], 1.234, 1e-5);
+    TS_ASSERT_DELTA( p.getCoeff()[1], 4.56,  1e-5);
+    TS_ASSERT_DELTA( p.getInequality(), 2.5, 1e-5);
+  }
+
+  void test_assignment_operator()
+  {
+    coord_t coeff[2] = {1.234, 4.56};
+    coord_t coeff3[3] = {434, 456, 789};
+    MDPlane p_orig(2, coeff, 2.5);
+    MDPlane p(3, coeff3, 454.66);
+    p = p_orig;
+    TS_ASSERT_EQUALS( p.getNumDims(), 2);
+    TS_ASSERT_DELTA( p.getCoeff()[0], 1.234, 1e-5);
+    TS_ASSERT_DELTA( p.getCoeff()[1], 4.56,  1e-5);
+    TS_ASSERT_DELTA( p.getInequality(), 2.5, 1e-5);
   }
 
   /// Helper function for the 2D case
@@ -108,6 +133,7 @@ public:
 
 
 
+//=========================================================================================
 class MDPlaneTestPerformance : public CxxTest::TestSuite
 {
 public:

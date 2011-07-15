@@ -51,6 +51,8 @@ namespace MDAlgorithms
   public:
     MDPlane(const std::vector<coord_t> & coeff, const coord_t inequality);
     MDPlane(const size_t nd, const coord_t * coeff, const coord_t inequality);
+    MDPlane(const MDPlane & other);
+    MDPlane & operator=(const MDPlane & other);
     virtual ~MDPlane();
 
     /// @return the number of dimensions
@@ -58,6 +60,9 @@ namespace MDAlgorithms
 
     /// @return the coefficients. For debugging mostly.
     const coord_t * getCoeff() const { return m_coeff; }
+
+    /// @return the RHS of the inequality equation. For debugging mostly.
+    const coord_t getInequality() const { return m_inequality; }
 
 
     // ==================== Methods that are inline for performance ================================
