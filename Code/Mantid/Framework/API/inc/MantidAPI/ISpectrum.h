@@ -80,7 +80,7 @@ namespace API
     virtual void setData(const MantidVecPtr::ptr_type& Y) = 0;
     virtual void setData(const MantidVecPtr::ptr_type& Y, const MantidVecPtr::ptr_type& E) = 0;
 
-    virtual void maskSpectrum(const double maskValue) = 0;
+    virtual void clearData() = 0;
 
     virtual MantidVec& dataY() = 0;
     virtual MantidVec& dataE() = 0;

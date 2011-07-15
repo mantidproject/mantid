@@ -49,7 +49,7 @@ public:
     groupWS->setValue(3, 45);
     offsetsWS->setValue(1, 0.123);
     offsetsWS->setValue(2, 0.456);
-    maskWS->maskWorkspaceIndex(0, 0.0);
+    maskWS->maskWorkspaceIndex(0);
 
     // Name of the output workspace.
     std::string outWSName("SaveCalFileTest_OutputWS");

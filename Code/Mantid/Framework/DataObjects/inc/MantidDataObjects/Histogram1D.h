@@ -73,16 +73,8 @@ public:
   /// Sets the data and errors
   void setData(const MantidVecPtr::ptr_type& Y, const MantidVecPtr::ptr_type& E) { refY=Y; refE=E;}
 
-  /// Mask the spectrum to this value
-  virtual void maskSpectrum(const double maskValue)
-  {
-    // Assign the value to the data and error arrays
-    MantidVec & yValues = this->dataY();
-    std::fill(yValues.begin(), yValues.end(), maskValue);
-    MantidVec & eValues = this->dataE();
-    std::fill(eValues.begin(), eValues.end(), maskValue);
-  }
-
+  /// Zero the data (Y&E) in this spectrum
+  void clearData();
 
   // Get the array data
   /// Returns the y data const

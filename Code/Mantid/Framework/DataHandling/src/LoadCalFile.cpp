@@ -268,7 +268,7 @@ namespace DataHandling
         {
           size_t wi = it->second;
           if (select <= 0)
-            maskWS->maskWorkspaceIndex(wi, 0.0);
+            maskWS->maskWorkspaceIndex(wi);
           else
             maskWS->dataY(wi)[0] = 1.0;
         }

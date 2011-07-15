@@ -26,6 +26,8 @@ namespace Mantid
       data.dataY().resize(1, value);
       data.dataE().resize(1, error);
       data.dataDx().resize(1, 0.0);
+
+      isDistribution(true);
     }
 
     /// Destructor

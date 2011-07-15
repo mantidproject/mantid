@@ -984,7 +984,7 @@ namespace Mantid
      * @param index :: The index within the workspace to mask
      * @param maskValue :: A value to assign to the data and error values of the spectra
      */
-    void MatrixWorkspace::maskWorkspaceIndex(const size_t index, const double maskValue)
+    void MatrixWorkspace::maskWorkspaceIndex(const size_t index)
     {
       if(index >= this->getNumberHistograms() )
         throw Kernel::Exception::IndexError(index,this->getNumberHistograms(),
@@ -1005,7 +1005,7 @@ namespace Mantid
       if (!spec) throw std::invalid_argument("MatrixWorkspace::maskWorkspaceIndex() got a null Spectrum.");
 
       // Virtual method clears the spectrum as appropriate
-      spec->maskSpectrum(maskValue);
+      spec->clearData();
 
       const std::set<detid_t> dets = spec->getDetectorIDs();
       for (std::set<detid_t>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)

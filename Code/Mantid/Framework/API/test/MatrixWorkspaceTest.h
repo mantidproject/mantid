@@ -385,9 +385,8 @@ public:
     }
 
     // Mask a spectra
-    const double maskValue(-10.0);
-    workspace->maskWorkspaceIndex(1,maskValue);
-    workspace->maskWorkspaceIndex(2,maskValue);
+    workspace->maskWorkspaceIndex(1);
+    workspace->maskWorkspaceIndex(2);
 
     for( int i = 0; i < numHist; ++i )
     {
@@ -400,7 +399,6 @@ public:
       }
       else
       {
-        expectedValue = maskValue;
         expectedMasked = true;
       }
       TS_ASSERT_EQUALS(workspace->readY(i)[0], expectedValue);

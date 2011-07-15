@@ -181,7 +181,7 @@ public:
 
   EventWorkspaceMRU * getMRU();
 
-  void maskSpectrum(const double maskValue);
+  void clearData();
 
   void reserve(size_t num);
 

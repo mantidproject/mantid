@@ -59,12 +59,9 @@ public:
   }
   void testmaskSpectrum()
   {
-    h.maskSpectrum(0.0);
+    h.clearData();
     TS_ASSERT_EQUALS( h.dataY()[5],  0.0);
     TS_ASSERT_EQUALS( h.dataE()[12], 0.0);
-    h.maskSpectrum(5.0);
-    TS_ASSERT_EQUALS( h.dataY()[9],  5.0);
-    TS_ASSERT_EQUALS( h.dataE()[56], 5.0);
   }
   void testsetgetXPointer()
   {

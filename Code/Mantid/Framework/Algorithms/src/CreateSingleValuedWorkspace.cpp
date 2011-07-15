@@ -44,9 +44,6 @@ void CreateSingleValuedWorkspace::exec()
   using namespace Mantid::Kernel;
   // Create the workspace
   MatrixWorkspace_sptr singleValued = WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
-  // The single data value does not have a unit by default
-  singleValued->setYUnit("");
-  singleValued->isDistribution(true);
   
   singleValued->dataX(0)[0] = 0.0;
   singleValued->dataY(0)[0] = dataValue;

@@ -751,7 +751,7 @@ namespace DataObjects
 
 
   /// Mask the spectrum to this value. Removes all events.
-  void EventList::maskSpectrum(const double /*maskValue*/)
+  void EventList::clearData()
   {
     this->clear(false);
   }

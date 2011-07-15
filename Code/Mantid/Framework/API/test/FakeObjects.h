@@ -44,13 +44,13 @@ public:
   virtual size_t getMemorySize() const { return data.size() * sizeof(double) * 2; }
 
   /// Mask the spectrum to this value
-  virtual void maskSpectrum(const double maskValue)
+  virtual void clearData()
   {
     // Assign the value to the data and error arrays
     MantidVec & yValues = this->dataY();
-    std::fill(yValues.begin(), yValues.end(), maskValue);
+    std::fill(yValues.begin(), yValues.end(), 0.0);
     MantidVec & eValues = this->dataE();
-    std::fill(eValues.begin(), eValues.end(), maskValue);
+    std::fill(eValues.begin(), eValues.end(), 0.0);
   }
 
 protected:
