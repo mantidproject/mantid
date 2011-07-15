@@ -807,7 +807,7 @@ void MantidDockWidget::saveToProgram(const QString & name)
   //Get a list of the program detail keys (mandatory - target, saveusing) (optional - arguments, save parameters, workspace type)
   std::vector<std::string> programKeys = (Mantid::Kernel::ConfigService::Instance().getKeys(("workspace.sendto." + programKeysAndDetails.find("name")->second)));
 
-  for (int i(0); i<programKeys.size(); i++)
+  for (size_t i=0; i<programKeys.size(); i++)
   {
     //Assign a key to its value using the map
     programKeysAndDetails[programKeys[i]] = (Mantid::Kernel::ConfigService::Instance().getString(("workspace.sendto." + programKeysAndDetails.find("name")->second + "." + programKeys[i])));
@@ -992,17 +992,17 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
 	    //Sub-menu for program list
 	    m_programMapper = new QSignalMapper(this);    
     
-      for (int i(0); i<programNames.size(); i++)
-        {
-          //Convert name from std string to QString for use with QAction menu entry
-          QString name = QString::fromStdString(programNames[i]);
-          //Setup new menu option for the program
-          m_program = new QAction(tr(name),this);
-          connect(m_program,SIGNAL(activated()),m_programMapper,SLOT(map()));
-          //Send name of program when clicked
-          m_programMapper->setMapping(m_program, name);
-          m_saveToProgram->addAction(m_program);		
-	      }
+	    for (size_t i=0; i<programNames.size(); i++)
+	    {
+	      //Convert name from std string to QString for use with QAction menu entry
+	      QString name = QString::fromStdString(programNames[i]);
+	      //Setup new menu option for the program
+	      m_program = new QAction(tr(name),this);
+	      connect(m_program,SIGNAL(activated()),m_programMapper,SLOT(map()));
+	      //Send name of program when clicked
+	      m_programMapper->setMapping(m_program, name);
+	      m_saveToProgram->addAction(m_program);
+	    }
    
       connect(m_programMapper, SIGNAL(mapped(const QString &)), this, SLOT(saveToProgram(const QString &)));
     }

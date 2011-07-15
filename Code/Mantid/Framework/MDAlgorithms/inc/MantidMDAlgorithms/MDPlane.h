@@ -62,7 +62,7 @@ namespace MDAlgorithms
     const coord_t * getCoeff() const { return m_coeff; }
 
     /// @return the RHS of the inequality equation. For debugging mostly.
-    const coord_t getInequality() const { return m_inequality; }
+    coord_t getInequality() const { return m_inequality; }
 
 
     // ==================== Methods that are inline for performance ================================
