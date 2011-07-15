@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_detector.ui'
 #
-# Created: Fri Apr 15 15:10:01 2011
+# Created: Thu Jul 14 17:44:59 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -218,8 +218,8 @@ class Ui_Frame(object):
         spacerItem5 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_9.addItem(spacerItem5)
         self.verticalLayout_8.addLayout(self.horizontalLayout_9)
-        self.horizontalLayout_10 = QtGui.QHBoxLayout()
-        self.horizontalLayout_10.setObjectName("horizontalLayout_10")
+        self.sensitivity_dark_layout = QtGui.QHBoxLayout()
+        self.sensitivity_dark_layout.setObjectName("sensitivity_dark_layout")
         self.sensitivity_dark_file_label = QtGui.QLabel(self.sensitivity_grpbox)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -231,7 +231,7 @@ class Ui_Frame(object):
         self.sensitivity_dark_file_label.setWordWrap(False)
         self.sensitivity_dark_file_label.setIndent(0)
         self.sensitivity_dark_file_label.setObjectName("sensitivity_dark_file_label")
-        self.horizontalLayout_10.addWidget(self.sensitivity_dark_file_label)
+        self.sensitivity_dark_layout.addWidget(self.sensitivity_dark_file_label)
         self.sensitivity_dark_file_edit = QtGui.QLineEdit(self.sensitivity_grpbox)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -241,7 +241,7 @@ class Ui_Frame(object):
         self.sensitivity_dark_file_edit.setMinimumSize(QtCore.QSize(300, 0))
         self.sensitivity_dark_file_edit.setBaseSize(QtCore.QSize(0, 0))
         self.sensitivity_dark_file_edit.setObjectName("sensitivity_dark_file_edit")
-        self.horizontalLayout_10.addWidget(self.sensitivity_dark_file_edit)
+        self.sensitivity_dark_layout.addWidget(self.sensitivity_dark_file_edit)
         self.sensitivity_dark_browse_button = QtGui.QPushButton(self.sensitivity_grpbox)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -249,7 +249,7 @@ class Ui_Frame(object):
         sizePolicy.setHeightForWidth(self.sensitivity_dark_browse_button.sizePolicy().hasHeightForWidth())
         self.sensitivity_dark_browse_button.setSizePolicy(sizePolicy)
         self.sensitivity_dark_browse_button.setObjectName("sensitivity_dark_browse_button")
-        self.horizontalLayout_10.addWidget(self.sensitivity_dark_browse_button)
+        self.sensitivity_dark_layout.addWidget(self.sensitivity_dark_browse_button)
         self.sensitivity_dark_plot_button = QtGui.QPushButton(self.sensitivity_grpbox)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -259,10 +259,10 @@ class Ui_Frame(object):
         self.sensitivity_dark_plot_button.setMinimumSize(QtCore.QSize(0, 0))
         self.sensitivity_dark_plot_button.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.sensitivity_dark_plot_button.setObjectName("sensitivity_dark_plot_button")
-        self.horizontalLayout_10.addWidget(self.sensitivity_dark_plot_button)
+        self.sensitivity_dark_layout.addWidget(self.sensitivity_dark_plot_button)
         spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_10.addItem(spacerItem6)
-        self.verticalLayout_8.addLayout(self.horizontalLayout_10)
+        self.sensitivity_dark_layout.addItem(spacerItem6)
+        self.verticalLayout_8.addLayout(self.sensitivity_dark_layout)
         self.horizontalLayout_11 = QtGui.QHBoxLayout()
         self.horizontalLayout_11.setObjectName("horizontalLayout_11")
         self.sensitivity_range_label = QtGui.QLabel(self.sensitivity_grpbox)

@@ -31,6 +31,7 @@ class Detector(BaseScriptElement):
     # Data file to be used to calculate sensitivity
     sensitivity_data = ''
     sensitivity_dark = ''
+    use_sample_dark = False
     # Minimum allowed relative sensitivity
     min_sensitivity = 0.5
     max_sensitivity = 1.5
@@ -74,11 +75,11 @@ class Detector(BaseScriptElement):
                 raise RuntimeError, "Sensitivity correction was selected but no sensitivity data file was entered."
             
             if len(str(self.sensitivity_dark).strip())>0:
-                script += "SensitivityCorrection('%s', min_sensitivity=%g, max_sensitivity=%g, dark_current='%s')\n" % \
-                    (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity, self.sensitivity_dark)
+                script += "SensitivityCorrection('%s', min_sensitivity=%g, max_sensitivity=%g, dark_current='%s', use_sample_dc=%s)\n" % \
+                    (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity, self.sensitivity_dark, self.use_sample_dark)
             else:
-                script += "SensitivityCorrection('%s', min_sensitivity=%g, max_sensitivity=%g)\n" % \
-                    (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity)
+                script += "SensitivityCorrection('%s', min_sensitivity=%g, max_sensitivity=%g, use_sample_dc=%s)\n" % \
+                    (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity, self.use_sample_dark)
 
             # Beam center
             if not self.use_sample_beam_center:
@@ -106,6 +107,7 @@ class Detector(BaseScriptElement):
         xml += "  <sensitivity_corr>%s</sensitivity_corr>\n" % str(self.sensitivity_corr)
         xml += "  <sensitivity_data>%s</sensitivity_data>\n" % self.sensitivity_data
         xml += "  <sensitivity_dark>%s</sensitivity_dark>\n" % self.sensitivity_dark
+        xml += "  <use_sample_dark>%s</use_sample_dark>\n" % str(self.use_sample_dark)
         xml += "  <sensitivity_min>%s</sensitivity_min>\n" % self.min_sensitivity
         xml += "  <sensitivity_max>%s</sensitivity_max>\n" % self.max_sensitivity
         xml += "  <use_sample_beam_center>%s</use_sample_beam_center>\n" % str(self.use_sample_beam_center)
@@ -168,6 +170,8 @@ class Detector(BaseScriptElement):
                                                                          default = Detector.sensitivity_corr)
                 self.sensitivity_data = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_data")
                 self.sensitivity_dark = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_dark")
+                self.use_sample_dark = BaseScriptElement.getBoolElement(instrument_dom, "use_sample_dark",
+                                                                         default = Detector.use_sample_dark)
                 self.min_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_min",
                                                                     default=Detector.min_sensitivity)
                 self.max_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_max",
@@ -213,6 +217,7 @@ class Detector(BaseScriptElement):
         self.sensitivity_corr = Detector.sensitivity_corr
         self.sensitivity_data = ''
         self.sensitivity_dark = ''
+        self.use_sample_dark = Detector.use_sample_dark
         self.min_sensitivity = Detector.min_sensitivity
         self.max_sensitivity = Detector.max_sensitivity
         self.flood_x_position = Detector.flood_x_position

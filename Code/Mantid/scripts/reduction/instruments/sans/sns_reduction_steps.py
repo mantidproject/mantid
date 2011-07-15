@@ -682,7 +682,7 @@ class SubtractDarkCurrent(ReductionStep):
         if mtd.workspaceExists(scaled_dark_ws):
             mtd.deleteWorkspace(scaled_dark_ws)
         
-        return "Dark current subtracted [%s]" % (scaled_dark_ws)
+        return "Dark current subtracted [%s]" % extract_workspace_name(self._dark_current_file)
     
 class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
     """

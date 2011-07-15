@@ -27,11 +27,12 @@ def MonitorNormalization():
 def NoNormalization():
     ReductionSingleton().set_normalizer(None)
     
-def SensitivityCorrection(flood_data, min_sensitivity=0.5, max_sensitivity=1.5, dark_current=None):
+def SensitivityCorrection(flood_data, min_sensitivity=0.5, max_sensitivity=1.5, dark_current=None, use_sample_dc=False):
     ReductionSingleton().set_sensitivity_correcter(sans_reduction_steps.SensitivityCorrection(flood_data, 
                                                                                               min_sensitivity, 
                                                                                               max_sensitivity,
-                                                                                              dark_current=dark_current))
+                                                                                              dark_current=dark_current,
+                                                                                              use_sample_dc=use_sample_dc))
 def SetSensitivityBeamCenter(x,y):
     corr = ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.BaseBeamFinder(x,y))
     

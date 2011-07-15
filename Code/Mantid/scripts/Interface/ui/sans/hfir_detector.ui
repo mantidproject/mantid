@@ -531,7 +531,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_10">
+           <layout class="QHBoxLayout" name="sensitivity_dark_layout">
             <item>
              <widget class="QLabel" name="sensitivity_dark_file_label">
               <property name="sizePolicy">
@@ -630,7 +630,7 @@
              </widget>
             </item>
             <item>
-             <spacer name="horizontalSpacer_9">
+             <spacer name="sensitivity_dark_spacer">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>

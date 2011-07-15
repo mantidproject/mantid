@@ -158,6 +158,9 @@ class SANSInstrumentWidget(BaseWidget):
         
         # Since EQSANS does not currently use the absolute scale calculation, expose it in debug mode only for now
         if not self._settings.debug:
+            self._summary.config_options_layout.deleteLater()
+            self._summary.abs_scale_options_layout.deleteLater()
+            self._summary.abs_scale_direct_beam_layout.deleteLater()
             self._summary.direct_beam_label.hide()
             self._summary.att_trans_label.hide()
             self._summary.beamstop_chk.hide()

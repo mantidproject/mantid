@@ -245,7 +245,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_10">
+           <layout class="QHBoxLayout" name="abs_scale_direct_beam_layout">
             <item>
              <spacer name="horizontalSpacer_10">
               <property name="orientation">
@@ -345,7 +345,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_11">
+           <layout class="QHBoxLayout" name="abs_scale_options_layout">
             <item>
              <spacer name="horizontalSpacer_11">
               <property name="orientation">
@@ -637,7 +637,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_12">
+           <layout class="QHBoxLayout" name="config_options_layout">
             <item>
              <widget class="QLabel" name="low_tof_label">
               <property name="minimumSize">

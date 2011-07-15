@@ -15,7 +15,8 @@ class DetectorWidget(BaseWidget):
     ## Widget name
     name = "Detector"      
     
-    def __init__(self, parent=None, state=None, settings=None, show_transmission=True, data_type=None, data_proxy=None):
+    def __init__(self, parent=None, state=None, settings=None, show_transmission=True, data_type=None, 
+                 data_proxy=None, use_sample_dc=False):
         super(DetectorWidget, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy) 
 
         class DetFrame(QtGui.QFrame, ui.sans.ui_hfir_detector.Ui_Frame): 
@@ -25,6 +26,9 @@ class DetectorWidget(BaseWidget):
                 
         self._content = DetFrame(self)
         self._layout.addWidget(self._content)
+        
+        # Option to use the sample dark current instead of choosing it separately
+        self._use_sample_dc = use_sample_dc
         
         self.initialize_content()
         
@@ -79,6 +83,13 @@ class DetectorWidget(BaseWidget):
             self._content.data_file_plot_button.hide()
             self._content.data_file_plot_button_2.hide()
 
+        if self._use_sample_dc:
+            self._content.sensitivity_dark_layout.deleteLater()
+            self._content.sensitivity_dark_file_label.deleteLater()
+            self._content.sensitivity_dark_file_edit.deleteLater()
+            self._content.sensitivity_dark_browse_button.deleteLater()
+            self._content.sensitivity_dark_plot_button.deleteLater()
+
     def _sensitivity_plot_clicked(self):
         self.show_instrument(file_name=self._content.sensitivity_file_edit.text)
 
@@ -111,11 +122,12 @@ class DetectorWidget(BaseWidget):
         
         # Sensitivity
         self._content.sensitivity_file_edit.setText(QtCore.QString(state.sensitivity_data))
-        self._content.sensitivity_dark_file_edit.setText(QtCore.QString(state.sensitivity_dark))
         self._content.sensitivity_chk.setChecked(state.sensitivity_corr)
         self._sensitivity_clicked(state.sensitivity_corr)
         self._content.min_sensitivity_edit.setText(QtCore.QString(str(state.min_sensitivity)))
         self._content.max_sensitivity_edit.setText(QtCore.QString(str(state.max_sensitivity)))
+        if not self._use_sample_dc:
+            self._content.sensitivity_dark_file_edit.setText(QtCore.QString(state.sensitivity_dark))
         
         self._content.use_sample_center_checkbox.setChecked(state.use_sample_beam_center)
         self._content.x_pos_edit_2.setText(QtCore.QString("%6.4f" % state.flood_x_position))
@@ -148,9 +160,11 @@ class DetectorWidget(BaseWidget):
         # Sensitivity
         m.sensitivity_corr = self._content.sensitivity_chk.isChecked() 
         m.sensitivity_data = unicode(self._content.sensitivity_file_edit.text())
-        m.sensitivity_dark = unicode(self._content.sensitivity_dark_file_edit.text())
         m.min_sensitivity = util._check_and_get_float_line_edit(self._content.min_sensitivity_edit)
         m.max_sensitivity = util._check_and_get_float_line_edit(self._content.max_sensitivity_edit)
+        if not self._use_sample_dc:
+            m.sensitivity_dark = unicode(self._content.sensitivity_dark_file_edit.text())
+        m.use_sample_dark = self._use_sample_dc
         
         m.use_sample_beam_center = self._content.use_sample_center_checkbox.isChecked() 
         m.flood_x_position = util._check_and_get_float_line_edit(self._content.x_pos_edit_2)
@@ -228,18 +242,20 @@ class DetectorWidget(BaseWidget):
         self._content.sensitivity_file_edit.setEnabled(is_checked)
         self._content.sensitivity_browse_button.setEnabled(is_checked)
         self._content.sensitivity_plot_button.setEnabled(is_checked)
-        self._content.sensitivity_dark_file_edit.setEnabled(is_checked)
-        self._content.sensitivity_dark_browse_button.setEnabled(is_checked)
         
-        self._content.sensitivity_dark_plot_button.setEnabled(is_checked)
         self._content.min_sensitivity_edit.setEnabled(is_checked)
         self._content.max_sensitivity_edit.setEnabled(is_checked)
         self._content.sensitivity_file_label.setEnabled(is_checked)
-        self._content.sensitivity_dark_file_label.setEnabled(is_checked)
         self._content.sensitivity_range_label.setEnabled(is_checked)
         self._content.sensitivity_min_label.setEnabled(is_checked)
         self._content.sensitivity_max_label.setEnabled(is_checked)
         self._content.flood_center_grpbox.setEnabled(is_checked)
+        
+        if not self._use_sample_dc:
+            self._content.sensitivity_dark_file_edit.setEnabled(is_checked)
+            self._content.sensitivity_dark_browse_button.setEnabled(is_checked)
+            self._content.sensitivity_dark_plot_button.setEnabled(is_checked)
+            self._content.sensitivity_dark_file_label.setEnabled(is_checked)
         
     def _sensitivity_browse(self):
         fname = self.data_browse_dialog()

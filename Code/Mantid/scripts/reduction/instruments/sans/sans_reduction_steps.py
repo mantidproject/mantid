@@ -490,7 +490,7 @@ class SubtractDarkCurrent(ReductionStep):
         if mtd.workspaceExists(scaled_dark_ws):
             mtd.deleteWorkspace(scaled_dark_ws)
         
-        return "Dark current subtracted [%s]" % (scaled_dark_ws)
+        return "Dark current subtracted [%s]" % extract_workspace_name(self._dark_current_file)
           
 class LoadRun(ReductionStep):
     """
@@ -834,13 +834,15 @@ class SensitivityCorrection(ReductionStep):
         be re-used on multiple data sets and the sensitivity will not be
         recalculated.
     """
-    def __init__(self, flood_data, min_sensitivity=0.5, max_sensitivity=1.5, dark_current=None, beam_center=None):
+    def __init__(self, flood_data, min_sensitivity=0.5, max_sensitivity=1.5, dark_current=None, 
+                 beam_center=None, use_sample_dc=False):
         super(SensitivityCorrection, self).__init__()
         self._flood_data = flood_data
         self._dark_current_data = dark_current
         self._efficiency_ws = None
         self._min_sensitivity = min_sensitivity
         self._max_sensitivity = max_sensitivity
+        self._use_sample_dc = use_sample_dc
         
         # Beam center for flood data
         self._beam_center = beam_center
@@ -866,6 +868,7 @@ class SensitivityCorrection(ReductionStep):
         # If the sensitivity correction workspace exists, just apply it.
         # Otherwise create it.      
         #TODO: check that the workspaces have the same binning!
+        output_str = "   Using data set: %s" % extract_workspace_name(self._flood_data)
         if self._efficiency_ws is None:
             # Load the flood data
             filepath = find_data(self._flood_data, instrument=reducer.instrument.name())
@@ -882,14 +885,21 @@ class SensitivityCorrection(ReductionStep):
             loader.execute(reducer, flood_ws)
 
             # Subtract dark current
-            if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0 \
+            if self._use_sample_dc:
+                if reducer._dark_current_subtracter is not None:
+                    partial_output = reducer._dark_current_subtracter.execute(reducer, flood_ws)
+                    output_str = "%s\n   %s" % (output_str, partial_output) 
+                    
+            elif self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0 \
                 and reducer._dark_current_subtracter_class is not None:
-                reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, flood_ws)
+                partial_output = reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, flood_ws)
+                output_str = "%s\n   %s" % (output_str, partial_output) 
             
             # Correct flood data for solid angle effects (Note: SA_Corr_2DSAS)
             # Note: Moving according to the beam center is done in LoadRun above
             if reducer._solid_angle_correcter is not None:
-                reducer._solid_angle_correcter.execute(reducer, flood_ws)
+                partial_output = reducer._solid_angle_correcter.execute(reducer, flood_ws)
+                output_str = "%s\n   %s" % (output_str, partial_output) 
         
             # Create efficiency profile: 
             # Divide each pixel by average signal, and mask high and low pixels.
@@ -907,7 +917,7 @@ class SensitivityCorrection(ReductionStep):
         masked_detectors = GetMaskedDetectors(self._efficiency_ws)
         MaskDetectors(workspace, None, masked_detectors.getPropertyValue("DetectorList"))        
     
-        return "Sensitivity correction applied [%s]" % (self._efficiency_ws)
+        return "Sensitivity correction applied\n%s\n" % output_str
 
 class Mask(ReductionStep):
     """
@@ -1399,7 +1409,8 @@ class SubtractBackground(ReductionStep):
         
         Minus(workspace, self._background_ws, workspace)
         
-        return "Background subtracted [%s]\n%s" % (self._background_ws, log_text)
+        log_text.replace('\n','\n   ')
+        return "Background subtracted [%s]\n   %s" % (self._background_ws, log_text)
         
  
 class GetSampleGeom(ReductionStep):
