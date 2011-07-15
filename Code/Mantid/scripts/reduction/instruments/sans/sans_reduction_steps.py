@@ -296,7 +296,7 @@ class DirectBeamTransmission(BaseTransmission):
     """
         Calculate transmission using the direct beam method
     """
-    def __init__(self, sample_file, empty_file, beam_radius=3.0, theta_dependent=True, dark_current=None):
+    def __init__(self, sample_file, empty_file, beam_radius=3.0, theta_dependent=True, dark_current=None, use_sample_dc=False):
         super(DirectBeamTransmission, self).__init__(theta_dependent=theta_dependent)
         ## Location of the data files used to calculate transmission
         self._sample_file = sample_file
@@ -309,6 +309,7 @@ class DirectBeamTransmission(BaseTransmission):
         self._transmission_ws = None
         ## Flag to tell us whether we should normalise to the monitor channel
         self._monitor_det_ID = None
+        self._use_sample_dc = use_sample_dc        
         
     def _load_monitors(self, reducer, workspace):
         """
@@ -318,15 +319,28 @@ class DirectBeamTransmission(BaseTransmission):
         sample_ws = "__transmission_sample"
         filepath = find_data(self._sample_file, instrument=reducer.instrument.name())
         reducer._data_loader.clone(data_file=filepath).execute(reducer, sample_ws)
+        output_str = "   Sample: %s\n" % extract_workspace_name(self._sample_file)
         
         empty_ws = "__transmission_empty"
         filepath = find_data(self._empty_file, instrument=reducer.instrument.name())
         reducer._data_loader.clone(data_file=filepath).execute(reducer, empty_ws)
+        output_str += "   Empty: %s" % extract_workspace_name(self._empty_file)
         
         # Subtract dark current
-        if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
-            reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, sample_ws)
-            reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, empty_ws)
+        if self._use_sample_dc:
+            if reducer._dark_current_subtracter is not None:
+                partial_out = reducer._dark_current_subtracter.execute(reducer, sample_ws)
+                partial_out2 = reducer._dark_current_subtracter.execute(reducer, empty_ws)
+                partial_out = "\n%s\n%s" % (partial_out, partial_out2)
+                partial_out.replace('\n', '   \n')
+                output_str += partial_out
+        
+        elif self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
+            partial_out = reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, sample_ws)
+            partial_out2 = reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, empty_ws)
+            partial_out = "\n%s\n%s" % (partial_out, partial_out2)
+            partial_out.replace('\n', '   \n')
+            output_str += partial_out
             
         # Find which pixels to sum up as our "monitor". At this point we have moved the detector
         # so that the beam is at (0,0), so all we need is to sum the area around that point.
@@ -369,7 +383,7 @@ class DirectBeamTransmission(BaseTransmission):
         reducer._data_loader.__class__.delete_workspaces(empty_ws)
         reducer._data_loader.__class__.delete_workspaces(sample_ws)
             
-        return sample_mon_ws, empty_mon_ws, first_det
+        return sample_mon_ws, empty_mon_ws, first_det, output_str
         
     def _calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det, trans_output_workspace):
         """
@@ -397,11 +411,12 @@ class DirectBeamTransmission(BaseTransmission):
             @param reducer: Reducer object for which this step is executed
             @param workspace: workspace to apply correction to
         """
+        output_str = ""
         if self._transmission_ws is None:
             # 1- Compute zero-angle transmission correction (Note: CalcTransCoef)
             self._transmission_ws = "transmission_fit_"+workspace
             # Load data files
-            sample_mon_ws, empty_mon_ws, first_det = self._load_monitors(reducer, workspace)
+            sample_mon_ws, empty_mon_ws, first_det, output_str = self._load_monitors(reducer, workspace)
             self._calculate_transmission(sample_mon_ws, empty_mon_ws, first_det, self._transmission_ws)
             
         # Add output workspace to the list of important output workspaces
@@ -419,8 +434,9 @@ class DirectBeamTransmission(BaseTransmission):
         trans_ws = mtd[self._transmission_ws]
         self._trans = trans_ws.dataY(0)[0]
         self._error = trans_ws.dataE(0)[0]
-
-        return "Transmission correction applied for T = %g +- %g" % (self._trans, self._error)
+        if len(trans_ws.dataY(0))==1:
+            output_str = "%s   T = %6.2g += %6.2g\n" % (output_str, self._trans, self._error)
+        return "Transmission correction applied [%s]\n%s\n" % (self._transmission_ws, output_str)
             
 
 class SubtractDarkCurrent(ReductionStep):

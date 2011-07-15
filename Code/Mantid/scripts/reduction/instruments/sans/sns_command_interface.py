@@ -72,7 +72,8 @@ def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_depen
                                                                                      empty_file=empty_file,
                                                                                      beam_radius=beam_radius,
                                                                                      theta_dependent=theta_dependent,
-                                                                                     combine_frames=combine_frames))
+                                                                                     combine_frames=combine_frames,
+                                                                                     use_sample_dc=True))
 
 def BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True, combine_frames=True):
     if ReductionSingleton().get_background() is None:

@@ -64,24 +64,18 @@ class SampleDataWidget(BaseWidget):
         self.connect(self._content.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._data_file_browse)
         self.connect(self._content.calculate_chk, QtCore.SIGNAL("clicked(bool)"), self._calculate_clicked)
         
-        self.connect(self._content.dark_current_button, QtCore.SIGNAL("clicked()"), self._dark_current_browse)
         self.connect(self._content.empty_button, QtCore.SIGNAL("clicked()"), self._empty_browse)
         self.connect(self._content.sample_button, QtCore.SIGNAL("clicked()"), self._sample_browse)
         
         self.connect(self._content.data_file_plot_button, QtCore.SIGNAL("clicked()"), self._data_file_plot)
-        self.connect(self._content.dark_current_plot_button, QtCore.SIGNAL("clicked()"), self._dark_plot)
         self.connect(self._content.empty_plot_button, QtCore.SIGNAL("clicked()"), self._empty_plot)
         self.connect(self._content.sample_plot_button, QtCore.SIGNAL("clicked()"), self._sample_plot)
 
         if not self._in_mantidplot:
-            self._content.dark_current_plot_button.hide()
             self._content.data_file_plot_button.hide()
             self._content.empty_plot_button.hide()
             self._content.sample_plot_button.hide()
 
-    def _dark_plot(self):
-        self.show_instrument(file_name=self._content.dark_current_edit.text)
-    
     def _empty_plot(self):
         self.show_instrument(file_name=self._content.empty_edit.text)
 
@@ -103,7 +97,6 @@ class SampleDataWidget(BaseWidget):
         self._content.calculate_chk.setChecked(state.calculate_transmission)
         self._content.theta_dep_chk.setChecked(state.theta_dependent)
         self._content.fit_together_check.setChecked(state.combine_transmission_frames)
-        self._content.dark_current_edit.setText(QtCore.QString(str(state.dark_current)))
         self._calculate_clicked(state.calculate_transmission)
         
         # Data file
@@ -140,7 +133,7 @@ class SampleDataWidget(BaseWidget):
         m.calculate_transmission = self._content.calculate_chk.isChecked()
         m.theta_dependent = self._content.theta_dep_chk.isChecked()
         m.combine_transmission_frames = self._content.fit_together_check.isChecked()
-        m.dark_current = self._content.dark_current_edit.text()
+        m.use_sample_dark = True
         
         d = SampleData.DirectBeam()
         d.beam_radius = util._check_and_get_float_line_edit(self._content.beam_radius_edit)
@@ -184,22 +177,12 @@ class SampleDataWidget(BaseWidget):
         if len(data_files)>0:
             self.show_instrument(data_files[0])
 
-    def _dark_current_browse(self):
-        fname = self.data_browse_dialog()
-        if fname:
-            self._content.dark_current_edit.setText(fname)      
-                    
     def _calculate_clicked(self, is_checked):
         self._content.transmission_edit.setEnabled(not is_checked)
         self._content.dtransmission_edit.setEnabled(not is_checked)
 
         self._content.fit_together_check.setEnabled(is_checked)
         
-        self._content.dark_current_label.setEnabled(is_checked)
-        self._content.dark_current_edit.setEnabled(is_checked)
-        self._content.dark_current_button.setEnabled(is_checked)
-        self._content.dark_current_plot_button.setEnabled(is_checked)        
-
         self._content.sample_label.setEnabled(is_checked)
         self._content.sample_edit.setEnabled(is_checked)
         self._content.sample_button.setEnabled(is_checked)

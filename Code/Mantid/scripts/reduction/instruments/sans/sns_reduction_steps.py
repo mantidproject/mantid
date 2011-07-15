@@ -768,8 +768,10 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
     """
         Calculate transmission using the direct beam method
     """
-    def __init__(self, sample_file, empty_file, beam_radius=3.0, theta_dependent=True, dark_current=None, combine_frames=True):
-        super(DirectBeamTransmission, self).__init__(sample_file, empty_file, beam_radius, theta_dependent, dark_current)
+    def __init__(self, sample_file, empty_file, beam_radius=3.0, theta_dependent=True, dark_current=None, 
+                 use_sample_dc=False, combine_frames=True):
+        super(DirectBeamTransmission, self).__init__(sample_file, empty_file, beam_radius, theta_dependent, 
+                                                     dark_current, use_sample_dc)
         ## Whether of not we need to combine the two frames in frame-skipping mode when performing the fit
         self._combine_frames = combine_frames
         
@@ -784,13 +786,13 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
         if self._combine_frames or \
             (mtd[workspace].getRun().hasProperty("is_frame_skipping") \
              and mtd[workspace].getRun().getProperty("is_frame_skipping").value==0):
-            super(DirectBeamTransmission, self).execute(reducer, workspace)
-            return "Transmission correction applied"
+            return super(DirectBeamTransmission, self).execute(reducer, workspace)
     
+        output_str = ""
         if self._transmission_ws is None:
             self._transmission_ws = "transmission_fit_"+workspace
             # Load data files
-            sample_mon_ws, empty_mon_ws, first_det = self._load_monitors(reducer, workspace)
+            sample_mon_ws, empty_mon_ws, first_det, output_str = self._load_monitors(reducer, workspace)
             
             def _crop_and_compute(wl_min_prop, wl_max_prop, suffix):
                 # Get the wavelength band from the run properties
@@ -840,7 +842,7 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
         else:
             Divide(workspace, self._transmission_ws, workspace)  
         
-        return "Transmission correction applied for both frame independently"
+        return "Transmission correction applied for both frame independently [%s]\n%s\n" % (self._transmission_ws, output_str)
     
 class SaveIqAscii(BaseSaveIqAscii):
     """
