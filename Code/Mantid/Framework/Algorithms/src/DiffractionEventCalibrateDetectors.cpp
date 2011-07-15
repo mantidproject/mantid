@@ -362,7 +362,7 @@ namespace Algorithms
     std::string inname = getProperty("InputWorkspace");
     std::string outname = inname+"2"; //getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr algS = createSubAlgorithm("Sort");
+    IAlgorithm_sptr algS = createSubAlgorithm("SortEvents");
     algS->setPropertyValue("InputWorkspace",inname);
     algS->setPropertyValue("SortBy", "X Value");
     algS->executeAsSubAlg();
@@ -397,12 +397,9 @@ namespace Algorithms
       outfile << "4 DETNUM  NROWS  NCOLS  WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ\n";
     }
 
-    Progress prog(this,0.0,1.0,detList.size()*(maxIterations+1));
-    //omp_set_nested(1);
-    //PARALLEL_FOR1(inputW)
+    Progress prog(this,0.0,1.0,detList.size());
     for (int det=0; det < static_cast<int>(detList.size()); det++)
     {
-//      PARALLEL_START_INTERUPT_REGION
       std::string par[6];
       par[0]=detList[det]->getName();
       par[1]=inname;
@@ -469,7 +466,6 @@ namespace Algorithms
         size = gsl_multimin_fminimizer_size (s);
         status = gsl_multimin_test_size (size, 1e-2);
 
-        prog.report(detList[det]->getName());
       }
       while (status == GSL_CONTINUE && iter < maxIterations && s->fval != -0.000 );
 
@@ -585,11 +581,9 @@ namespace Algorithms
       gsl_multimin_fminimizer_free (s);
 
       // Remove the now-unneeded grouping workspace
-      AnalysisDataService::Instance().remove("groupWSName");
-      prog.report();
-//      PARALLEL_END_INTERUPT_REGION
+      AnalysisDataService::Instance().remove(groupWSName);
+      prog.report(detList[det]->getName());
     }
-    //PARALLEL_CHECK_INTERUPT_REGION
 
     // Closing
     outfile.close();
