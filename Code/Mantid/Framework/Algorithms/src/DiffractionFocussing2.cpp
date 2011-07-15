@@ -498,27 +498,27 @@ void DiffractionFocussing2::execEvent()
 
 //=============================================================================
 /** Verify that all the contributing detectors to a spectrum belongs to the same group
- *  @param spectrum_number :: The spectrum number in the workspace
+ *  @param wi :: The workspace index in the workspace
  *  @return Group number if successful otherwise return -1
  */
-int DiffractionFocussing2::validateSpectrumInGroup(specid_t spectrum_number)
+int DiffractionFocussing2::validateSpectrumInGroup(size_t wi)
 {
   // Get the spectra to detector map
-  const Geometry::ISpectraDetectorMap& spectramap = matrixInputW->spectraMap();
-  const std::vector<detid_t> dets = spectramap.getDetectors(spectrum_number);
+  const std::set<detid_t> & dets = matrixInputW->getSpectrum(wi)->getDetectorIDs();
   if (dets.empty()) // Not in group
   {
 //    std::cout << spectrum_number << " <- this spectrum is empty!\n";
     return -1;
   }
 
-  std::vector<detid_t>::const_iterator it = dets.begin();
+  std::set<detid_t>::const_iterator it = dets.begin();
   udet2groupmap::const_iterator mapit = udet2group.find((*it)); //Find the first udet
   if (mapit == udet2group.end()) // The first udet that contributes to this spectra is not assigned to a group
     return -1;
   const int group = (*mapit).second;
   int new_group;
-  for (it + 1; it != dets.end(); it++) // Loop other all other udets
+  it++;
+  for (; it != dets.end(); it++) // Loop other all other udets
   {
     mapit = udet2group.find((*it));
     if (mapit == udet2group.end()) // Group not assigned
@@ -557,11 +557,10 @@ void DiffractionFocussing2::determineRebinParameters()
   group2minmaxmap::iterator gpit;
 
   groupAtWorkspaceIndex.resize(nHist);
-  const API::Axis* const spectra_Axis = matrixInputW->getAxis(1);
 
   for (int i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
   {
-    const int group = validateSpectrumInGroup(spectra_Axis->spectraNo(i));
+    const int group = validateSpectrumInGroup(size_t(i));
     groupAtWorkspaceIndex[i] = group;
     if (group == -1)
       continue;

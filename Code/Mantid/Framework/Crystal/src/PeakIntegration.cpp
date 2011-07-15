@@ -4,7 +4,6 @@
 #include "MantidCrystal/PeakIntegration.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"

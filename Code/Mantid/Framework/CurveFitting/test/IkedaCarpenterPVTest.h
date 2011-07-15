@@ -11,7 +11,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/Workspace2D.h"

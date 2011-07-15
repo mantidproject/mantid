@@ -107,7 +107,7 @@ private:
   /// Loop over the workspace and determine the rebin parameters (Xmin,Xmax,step) for each group.
   /// The result is stored in group2params
   void determineRebinParameters();
-  int validateSpectrumInGroup(specid_t spectrum_number);
+  int validateSpectrumInGroup(size_t wi);
   
   /// Shared pointer to a mutable input workspace
   API::MatrixWorkspace_sptr matrixInputW;

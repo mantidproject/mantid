@@ -105,11 +105,11 @@ std::map<detid_t, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API
  * @return
  */
 
-double calcConversionFromMap(std::map<detid_t, double> * tofToDmap, const std::vector<detid_t> &detectors)
+double calcConversionFromMap(std::map<detid_t, double> * tofToDmap, const std::set<detid_t> &detectors)
 {
   double factor = 0.;
   detid_t numDetectors = 0;
-  for (std::vector<detid_t>::const_iterator iter = detectors.begin(); iter != detectors.end(); ++iter)
+  for (std::set<detid_t>::const_iterator iter = detectors.begin(); iter != detectors.end(); ++iter)
   {
     detid_t detectorID = *iter;
     std::map<detid_t, double>::iterator it;
@@ -204,7 +204,6 @@ void AlignDetectors::exec()
   }
 
   // Ref. to the SpectraDetectorMap
-  const Geometry::ISpectraDetectorMap& specMap = inputWS->spectraMap();
   const int64_t numberOfSpectra = inputWS->getNumberHistograms();
 
   // generate map of the tof->d conversion factors
@@ -238,19 +237,20 @@ void AlignDetectors::exec()
   {
     PARALLEL_START_INTERUPT_REGION
     try {
-      // Get the spectrum number for this histogram
-      const specid_t spec = inputWS->getAxis(1)->spectraNo(i);
-      double factor = calcConversionFromMap(this->tofToDmap, specMap.getDetectors(spec));
+      // Get the input spectrum number at this workspace index
+      const ISpectrum * inSpec = inputWS->getSpectrum(size_t(i));
+      double factor = calcConversionFromMap(this->tofToDmap, inSpec->getDetectorIDs());
 
       // Get references to the x data
       MantidVec& xOut = outputWS->dataX(i);
+
       // Make sure reference to input X vector is obtained after output one because in the case
       // where the input & output workspaces are the same, it might move if the vectors were shared.
-      const MantidVec& xIn = inputWS->readX(i);
+      const MantidVec& xIn = inSpec->dataX();
       std::transform( xIn.begin(), xIn.end(), xOut.begin(), std::bind2nd(std::multiplies<double>(), factor) );
       // Copy the Y&E data
-      outputWS->dataY(i) = inputWS->dataY(i);
-      outputWS->dataE(i) = inputWS->dataE(i);
+      outputWS->dataY(i) = inSpec->dataY();
+      outputWS->dataE(i) = inSpec->dataE();
 
     } catch (Exception::NotFoundError &) {
       // Zero the data in this case
@@ -305,7 +305,6 @@ void AlignDetectors::execEvent()
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 
   // Ref. to the SpectraDetectorMap
-  const Geometry::ISpectraDetectorMap& specMap = inputWS->spectraMap();
   const int64_t numberOfSpectra = static_cast<int64_t>(inputWS->getNumberHistograms());
 
   // Initialise the progress reporting object
@@ -315,9 +314,8 @@ void AlignDetectors::execEvent()
   for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
-    // Get the spectrum number for this histogram
-    specid_t spec = inputWS->getAxis(1)->spectraNo(i);
-    double factor = calcConversionFromMap(this->tofToDmap, specMap.getDetectors(spec));
+    // Compute the conversion factor
+    double factor = calcConversionFromMap(this->tofToDmap, inputWS->getSpectrum(size_t(i))->getDetectorIDs());
 
     //Perform the multiplication on all events
     outputWS->getEventList(i).convertTof(factor);

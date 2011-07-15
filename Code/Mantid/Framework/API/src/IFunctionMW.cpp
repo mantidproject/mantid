@@ -6,7 +6,6 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -263,10 +262,10 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
 
     const Geometry::ParameterMap& paramMap = m_workspace->instrumentParameters();
 
-    // in some tests where workspace a created on the fly a spectra to detector map
-    // is for convenience not created. 
-    if ( !(m_workspace->spectraMap().nElements()) )  
-      return;
+//    // in some tests where workspace a created on the fly a spectra to detector map
+//    // is for convenience not created.
+//    if ( !(m_workspace->spectraMap().nElements()) )
+//      return;
 
     Geometry::IDetector_sptr det = m_workspace->getDetector(wi);
 
