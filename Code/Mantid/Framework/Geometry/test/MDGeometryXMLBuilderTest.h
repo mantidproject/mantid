@@ -206,6 +206,34 @@ void testWithOrinaryDimensionOnly()
   TSM_ASSERT_EQUALS("Should have no DimensionT mapping", "", dimensionSetElement->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
 }
 
+void testManyOrinaryDimensions()
+{
+  MockIMDDimension* pDimA = new MockIMDDimension;
+  MockIMDDimension* pDimB = new MockIMDDimension;
+  MockIMDDimension* pDimC = new MockIMDDimension;
+
+  EXPECT_CALL(*pDimA, getDimensionId()).WillRepeatedly(Return("a"));
+  EXPECT_CALL(*pDimB, getDimensionId()).WillRepeatedly(Return("b"));
+  EXPECT_CALL(*pDimC, getDimensionId()).WillRepeatedly(Return("c"));
+
+  EXPECT_CALL(*pDimA, toXMLString()).Times(1).WillOnce(Return(createDimensionXMLString(1, -1, 1, "A", "a")));
+  EXPECT_CALL(*pDimB, toXMLString()).Times(1).WillOnce(Return(createDimensionXMLString(1, -1, 1, "B", "b")));
+  EXPECT_CALL(*pDimC, toXMLString()).Times(1).WillOnce(Return(createDimensionXMLString(1, -1, 1, "C", "c")));
+
+  VecIMDDimension_sptr vecDims;
+  vecDims.push_back(IMDDimension_sptr(pDimA));
+  vecDims.push_back(IMDDimension_sptr(pDimB));
+  vecDims.push_back(IMDDimension_sptr(pDimC));
+
+  MDGeometryBuilderXML<NoDimensionPolicy> builder;
+  builder.addManyOrdinaryDimensions(vecDims);
+
+  TS_ASSERT_THROWS_NOTHING(builder.create()); //Serialize the geometry.
+  TS_ASSERT(testing::Mock::VerifyAndClear(pDimA));
+  TS_ASSERT(testing::Mock::VerifyAndClear(pDimB));
+  TS_ASSERT(testing::Mock::VerifyAndClear(pDimC));
+}
+
 
 void testWithXDimensionOnly()
 {

@@ -58,6 +58,9 @@ public:
   /// Add a dimension that is neither considered x, y, z or t.
   bool addOrdinaryDimension(IMDDimension_const_sptr dimension) const;
 
+  /// Add many ordinary dimensions. 
+  void addManyOrdinaryDimensions(VecIMDDimension_sptr manyDims) const;
+
   /// Add x dimension.
   bool addXDimension(IMDDimension_const_sptr dimension) const;
 
