@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include <fstream>
 #include <Poco/File.h>
 
 using namespace Mantid::Algorithms;
@@ -33,7 +34,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", eventWS);
 
     // Name of the output workspace.
-    std::string filename = "./DiffractionEventCalibrateDetectorsTest.cal";
+    std::string filename = "./DiffractionEventCalibrateDetectorsTest.DetCal";
 
     DiffractionEventCalibrateDetectors alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -49,12 +50,25 @@ public:
     
     filename = alg.getPropertyValue("DetCalFilename");
 
-    // Simple test that it at least runs.
-    // The algorithm is far too slow for real testing.
-    TS_ASSERT(Poco::File(filename).exists());
-
-//    if (Poco::File(filename).exists())
-//      Poco::File(filename).remove();
+    //DetCal output:  5  1  50  50  40  40  0.2000  500  0 0 500  0.899688 0.436438 0.00908776  0.00912458 0.894435 0.447104
+    std::fstream outFile(filename.c_str());
+    TS_ASSERT( outFile )
+    int num, banknum, xpix, ypix;
+    double xsize, ysize, zsize, cennorm, cenx, ceny, cenz, basex, basey, basez, upx, upy, upz;
+    outFile >> num >> banknum >> xpix >> ypix >> xsize >> ysize >> zsize >> cennorm
+            >> cenx >> ceny >> cenz >> basex >> basey >> basez >> upx >> upy >> upz;
+    TS_ASSERT_DELTA( cennorm, 500., 0.0001 )
+    TS_ASSERT_DELTA( cenx, 0., 0.0001 )
+    TS_ASSERT_DELTA( ceny, 0., 0.0001 )
+    TS_ASSERT_DELTA( cenz, 500., 0.0001 )
+    TS_ASSERT_DELTA( basex, 0.899688, 0.0001 )
+    TS_ASSERT_DELTA( basey, 0.436438, 0.0001 )
+    TS_ASSERT_DELTA( basez, 0.00908776, 0.0001 )
+    TS_ASSERT_DELTA( upx, 0.00912458, 0.0001 )
+    TS_ASSERT_DELTA( upy, 0.894435, 0.0001 )
+    TS_ASSERT_DELTA( upz, 0.447104, 0.0001 )
+    outFile.close();
+    Poco::File(filename).remove();
 
     AnalysisDataService::Instance().remove("temp_event_ws");
   }
