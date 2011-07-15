@@ -3958,8 +3958,8 @@ void ApplicationWindow::importASCII(const QStringList& files, int import_mode, c
   case ImportASCIIDialog::NewWorkspace:
   {
     try
-    {
-      Mantid::API::IAlgorithm_sptr alg =mantidUI->CreateAlgorithm("LoadAscii");
+    {/////////////////////////////////////////////////////////////////
+      Mantid::API::IAlgorithm_sptr alg =mantidUI->createAlgorithm("LoadAscii");
       QStringList sorted_files = files;
       sorted_files.sort();
       for (int i=0; i<sorted_files.size(); i++){
@@ -6160,8 +6160,8 @@ void ApplicationWindow::exportASCII(const QString& tableName, const QString& sep
     {
       //call save ascii
       try
-      {
-        Mantid::API::IAlgorithm_sptr alg =mantidUI->CreateAlgorithm("SaveAscii");
+      {////////////////////////////////////////////////////
+        Mantid::API::IAlgorithm_sptr alg =mantidUI->createAlgorithm("SaveAscii");
         alg->setPropertyValue("Filename",fname.toStdString());
         alg->setPropertyValue("Workspace",tableName.toStdString());
         alg->execute();

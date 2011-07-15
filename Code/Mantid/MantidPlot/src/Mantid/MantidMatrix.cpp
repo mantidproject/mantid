@@ -1106,7 +1106,7 @@ bool MantidMatrix::setSelectedColumns()
   QTableView *tv = activeView();
   QItemSelectionModel *selModel = tv->selectionModel();
   if( !selModel ||  !selModel->hasSelection()) return false;
-
+  
   m_selectedCols.clear();
   const QModelIndexList cols = selModel->selectedColumns();
   QModelIndexList::const_iterator it;

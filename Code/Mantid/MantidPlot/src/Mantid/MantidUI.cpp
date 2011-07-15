@@ -291,19 +291,6 @@ int MantidUI::runningAlgCount() const
 }
 
 /**
-    CreateAlgorithm
-
-    @param algName :: Algorithm's name
-    @return Pointer to the created algorithm
- */
-IAlgorithm_sptr MantidUI::CreateAlgorithm(const QString& algName)
-{
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(algName.toStdString());
-
-  return alg;
-}
-
-/**
  * Ticket #678
  */
 void MantidUI::saveNexusWorkspace()
@@ -821,30 +808,11 @@ void MantidUI::executeAlgorithm()
 bool MantidUI::runAlgorithmAsync_PyCallback(const QString & alg_name) 
 { 
   Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(alg_name); 
-  
   if( !alg ) 
   { 
     return false; 
   } 
-  if( m_algMonitor )  
-  { 
-    m_algMonitor->add(alg); 
-  } 
-  Poco::ActiveResult<bool> result(alg->executeAsync()); 
-  while( !result.available() ) 
-  { 
-    QCoreApplication::processEvents(); 
-  } 
-  result.wait(); 
-
-  try 
-  { 
-    return result.data(); 
-  } 
-  catch( Poco::NullPointerException& ) 
-  { 
-    return false; 
-  } 
+  return executeAlgorithmAsync(alg, true);
 }
 
 /**
@@ -1263,19 +1231,38 @@ Mantid::API::IAlgorithm_sptr MantidUI::createAlgorithm(const QString& algName, i
   return alg;
 }
 
-void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg)
+bool MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const bool wait)
 {
-  m_algMonitor->add(alg);
+  if( m_algMonitor )  
+  { 
+    m_algMonitor->add(alg); 
+  }
 
-  try
+  if( wait )
+  {
+    Poco::ActiveResult<bool> result(alg->executeAsync()); 
+    while( !result.available() ) 
+    { 
+      QCoreApplication::processEvents(); 
+    } 
+    result.wait(); 
+
+    try 
+    { 
+      return result.data(); 
+    } 
+    catch( Poco::NullPointerException& ) 
+    { 
+      return false; 
+    } 
+  }
+  else
   {
     alg->executeAsync();
-  }
-  catch(...)
-  {
-    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Exception is caught");
+    return true;
   }
 }
+
 bool MantidUI::executeICatLogout(int version)
 {
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("CatalogLogout", version);
@@ -1369,7 +1356,7 @@ void MantidUI::createLoadDAEMantidMatrix(const QString& wsQName)
   int updateInterval = m_DAE_map[wsName];
   if (updateInterval > 0)
   {
-    IAlgorithm_sptr updater = CreateAlgorithm("UpdateDAE");
+    IAlgorithm_sptr updater = createAlgorithm("UpdateDAE");
     updater->setPropertyValue("Workspace",wsName);
     updater->setPropertyValue("UpdateRate",QString::number(updateInterval).toStdString());
     executeAlgorithmAsync(updater);
@@ -2710,7 +2697,7 @@ void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::stri
 { 
   try
   {
-    Mantid::API::IAlgorithm_sptr alg =CreateAlgorithm("SaveNexusProcessed");
+    Mantid::API::IAlgorithm_sptr alg =createAlgorithm("SaveNexusProcessed");
     alg->setPropertyValue("Filename",fileName);
     alg->setPropertyValue("InputWorkspace",wsName);
     alg->execute();
@@ -2728,7 +2715,7 @@ void MantidUI::loaddataFromNexusFile(const std::string& wsName,const std::string
   if(fileName.empty()) return ;
   try
   {
-    Mantid::API::IAlgorithm_sptr alg =CreateAlgorithm("LoadNexus");
+    Mantid::API::IAlgorithm_sptr alg =createAlgorithm("LoadNexus");
     alg->setPropertyValue("Filename",fileName);
     alg->setPropertyValue("OutputWorkspace",wsName);
     if(project)alg->execute();
@@ -2747,7 +2734,7 @@ void MantidUI::loadadataFromRawFile(const std::string& wsName,const std::string&
   if(fileName.empty()) return ;
   try
   {
-    Mantid::API::IAlgorithm_sptr alg =CreateAlgorithm("LoadRaw");
+    Mantid::API::IAlgorithm_sptr alg =createAlgorithm("LoadRaw");
     alg->setPropertyValue("Filename",fileName);
     alg->setPropertyValue("OutputWorkspace",wsName);
     if(project)alg->execute();

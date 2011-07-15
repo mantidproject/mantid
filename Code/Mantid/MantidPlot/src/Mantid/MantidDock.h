@@ -37,6 +37,7 @@ public slots:
   void deleteWorkspaces();
   void renameWorkspace();
   void populateChildData(QTreeWidgetItem* item);
+  void saveToProgram(const QString & name);
 
 protected slots:
   void popupMenu(const QPoint & pos);
@@ -77,18 +78,20 @@ protected:
   friend class MantidUI;
 
 private:
+  QString selectedWsName;
+  
   MantidUI * const m_mantidUI;
   QSet<QString> m_known_groups;
 
   QPushButton *m_loadButton;
-  QMenu *m_loadMenu;
+  QMenu *m_loadMenu, *m_saveToProgram;
   QPushButton *m_deleteButton;
   QPushButton *m_groupButton;
-  QSignalMapper *m_loadMapper;
+  QSignalMapper *m_loadMapper, *m_programMapper;
 
   //Context-menu actions
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecDistr, *m_showDetectors, *m_colorFill, *m_showLogs, *m_showHist, 
-    *m_saveNexus, *m_rename, *m_delete;
+    *m_saveNexus, *m_rename, *m_delete, *m_program; 
 
   static Mantid::Kernel::Logger& logObject;
 };

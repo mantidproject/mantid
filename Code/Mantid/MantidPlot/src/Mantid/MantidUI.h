@@ -124,7 +124,11 @@ public:
     int runningAlgCount() const;  
 
     // Create an algorithm using Mantid FrameworkManager
-    Mantid::API::IAlgorithm_sptr CreateAlgorithm(const QString& algName);
+    // Create a pointer to the named algorithm and version
+    Mantid::API::IAlgorithm_sptr createAlgorithm(const QString& algName, int version = -1);
+
+    // Execute algorithm asinchronously
+    bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const bool wait = false);
 
     // Gets a pointer to workspace workspaceName
     Mantid::API::Workspace_sptr getWorkspace(const QString& workspaceName);
@@ -414,11 +418,6 @@ public:
 
 
 private:
-
-// Create a pointer to the named algorithm and version
-    Mantid::API::IAlgorithm_sptr createAlgorithm(const QString& algName, int version);
-    // Execute algorithm asinchronously
-    void executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg);
 
     // Notification handlers and corresponding observers.
     void handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf);

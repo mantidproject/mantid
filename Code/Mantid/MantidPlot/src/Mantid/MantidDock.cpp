@@ -7,6 +7,7 @@
 #include <MantidAPI/IEventWorkspace.h>
 #include <MantidAPI/IMDEventWorkspace.h>
 #include <MantidAPI/IMDWorkspace.h>
+#include <MantidAPI/FileProperty.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include "MantidMatrix.h"
 #include <QInputDialog>
@@ -25,6 +26,7 @@
 #include <QtGui>
 
 #include <map>
+#include <vector>
 #include <iostream>
 #include <sstream>
 
@@ -67,6 +69,7 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
   //
 
   m_loadMenu = new QMenu(this);
+  
   QAction* loadFileAction = new QAction("File",this);
   QAction *loadDAEAction = new QAction("from DAE",this);
   m_loadMapper = new QSignalMapper(this);
@@ -232,6 +235,16 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_saveNexus = new QAction(tr("Save Nexus"),this);
   connect(m_saveNexus,SIGNAL(activated()),m_mantidUI,SLOT(saveNexusWorkspace()));
 
+  //m_saveToProgram = new QMenu(tr("Save to program"),this);
+
+  ////Sub-menu of save to programs
+  //m_program1 = new QAction(tr("Program 1"),this);
+  //connect(m_program1,SIGNAL(activated()),this,SLOT(saveToProgram1()));
+  //m_program2 = new QAction(tr("Program 2"),this);
+  //connect(m_program2,SIGNAL(activated()),this,SLOT(saveToProgram2()));
+  //m_program3 = new QAction(tr("Program 3"),this);
+  //connect(m_program3,SIGNAL(activated()),this,SLOT(saveToProgram3()));
+ 
   m_rename = new QAction(tr("Rename"),this);
   connect(m_rename,SIGNAL(activated()),this,SLOT(renameWorkspace()));
 
@@ -779,6 +792,124 @@ void MantidDockWidget::deleteWorkspaces()
   }//end of for loop for selected items
 }
 
+/**
+* Saves a workspace based on the program the user chooses to save to.
+* @param programSave :: A string containing the name of the program
+*/
+
+void MantidDockWidget::saveToProgram(const QString & name)
+{
+  //Create a map for the keys and details to go into
+  std::map<std::string,std::string> programKeysAndDetails;
+  programKeysAndDetails["name"] = name.toStdString();
+
+  //Could use a standard vector but no #include <vector>
+  //Get a list of the program detail keys (mandatory - target, saveusing) (optional - arguments, save parameters, workspace type)
+  std::vector<std::string> programKeys = (Mantid::Kernel::ConfigService::Instance().getKeys(("workspace.sendto." + programKeysAndDetails.find("name")->second)));
+
+  for (int i(0); i<programKeys.size(); i++)
+  {
+    //Assign a key to its value using the map
+    programKeysAndDetails[programKeys[i]] = (Mantid::Kernel::ConfigService::Instance().getString(("workspace.sendto." + programKeysAndDetails.find("name")->second + "." + programKeys[i])));
+  }
+     
+  //Check to see if mandatory information is included
+  if ((programKeysAndDetails.count("name") != 0) && (programKeysAndDetails.count("target") != 0) && (programKeysAndDetails.count("saveusing") != 0))    
+  {
+    QFileInfo target = QString::fromStdString(programKeysAndDetails.find("target")->second);
+    if(target.exists())
+    {
+      //Setup a shared pointer for the algorithm using the appropriate save type
+      Mantid::API::IAlgorithm_sptr alg;
+
+      //Convert to QString and create Algorithm
+      QString saveUsing = QString::fromStdString(programKeysAndDetails.find("saveusing")->second);
+
+      //Create a new save based on what files the new program can open
+      alg = m_mantidUI->createAlgorithm(saveUsing);
+
+      //Get the file extention based on the workspace
+      Property* prop = alg->getProperty("Filename");
+      FileProperty *fileProp = dynamic_cast<FileProperty*>(prop);
+      std::string ext;
+      if(fileProp)
+      {
+        ext = fileProp->getDefaultExt();
+      }
+
+      //Save as.. default save + the file type i.e .nxs
+      alg->setPropertyValue("fileName", "auto_save_" + selectedWsName.toStdString() + ext);
+
+      //Save the workspace
+      alg->setPropertyValue("InputWorkspace", selectedWsName.toStdString());
+
+      //If there are any save parameters
+      if (programKeysAndDetails.count("saveparameters") != 0)
+      {
+        QString saveParametersGrouped = QString::fromStdString(programKeysAndDetails.find("saveparameters")->second);
+        QStringList saveParameters = saveParametersGrouped.split(',');
+
+        //For each one found split it up and assign the parameter
+        for (int i(0); i<saveParameters.size(); i++)
+        {
+          QStringList saveParameterDetails = saveParameters[i].split('=');
+          std::string saveParameterName = saveParameterDetails[0].toStdString();
+
+          if(saveParameterDetails[1] == "True")
+            alg->setProperty(saveParameterName, true);
+          else if(saveParameterDetails[1] == "False")
+            alg->setProperty(saveParameterName, false);
+          else  //if not true or false then must be a value
+          {
+            alg->setPropertyValue(saveParameterName, saveParameterDetails[1].toStdString());
+          }
+        }
+      }
+
+      //Execute the save
+      m_mantidUI->executeAlgorithmAsync(alg, true);
+      //alg->execute();
+
+      //Get the save location of the file (should be default Mantid folder)
+      //std::string savedFile = alg->getProperty("Filename");
+      QString savedFile = QString::fromStdString(alg->getProperty("Filename"));
+      QStringList arguments;
+
+      //Arguments for the program to take. Default will be the file anyway.
+      if (programKeysAndDetails.count("arguments") != 0)
+      {
+        QString temp = QString::fromStdString(programKeysAndDetails.find("arguments")->second);
+        temp.replace(QString("[File]"), savedFile);
+        //temp.replace(QString("[User]"), user;
+        arguments = temp.split(",");
+      }
+      else
+        arguments.insert(0, savedFile);
+  
+      //convert the list into a standard vector for compatibility with Poco
+      std::vector<std::string> argumentsV;
+
+      for (int i(0); i<arguments.size(); i++)
+      {
+        argumentsV.assign(1, (arguments[i].toStdString()));
+      }
+    
+      //Execute the program
+      try
+      {
+        Mantid::Kernel::ConfigService::Instance().launchProcess(programKeysAndDetails.find("target")->second, argumentsV);
+      }
+      catch(std::runtime_error&)
+      {
+        QMessageBox::information(this, "Error", "User tried to open program from: " + QString::fromStdString(programKeysAndDetails.find("target")->second) + " There was an error opening the program. Please check the target and arguments list to ensure that these are correct");
+      }
+    }
+    else
+      QMessageBox::information(this, "Target Path Error", "User tried to open program from: " + QString::fromStdString(programKeysAndDetails.find("target")->second) + "  The target file path for the program can't be found. Please check that the full path is correct");
+  }
+}
+
+	
 void MantidDockWidget::renameWorkspace()
 {
   //get selected workspace
@@ -806,7 +937,7 @@ void MantidDockWidget::showDetectorTable()
 void MantidDockWidget::popupMenu(const QPoint & pos)
 {
   QTreeWidgetItem* treeItem = m_tree->itemAt(pos);
-  QString selectedWsName("");
+  selectedWsName = "";
   if( treeItem ) selectedWsName = treeItem->text(0);
   else m_tree->selectionModel()->clear();
   QMenu *menu(NULL);
@@ -851,6 +982,30 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     }
     else {}
     
+    //Get the names of the programs for the send to option
+    std::vector<std::string> programNames = (Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto.name"));
+    if (programNames.size() > 0)
+    {
+	    m_saveToProgram = new QMenu(tr("Send to"),this);
+	    menu->addMenu(m_saveToProgram);
+
+	    //Sub-menu for program list
+	    m_programMapper = new QSignalMapper(this);    
+    
+      for (int i(0); i<programNames.size(); i++)
+        {
+          //Convert name from std string to QString for use with QAction menu entry
+          QString name = QString::fromStdString(programNames[i]);
+          //Setup new menu option for the program
+          m_program = new QAction(tr(name),this);
+          connect(m_program,SIGNAL(activated()),m_programMapper,SLOT(map()));
+          //Send name of program when clicked
+          m_programMapper->setMapping(m_program, name);
+          m_saveToProgram->addAction(m_program);		
+	      }
+   
+      connect(m_programMapper, SIGNAL(mapped(const QString &)), this, SLOT(saveToProgram(const QString &)));
+    }
     //Rename is valid for all workspace types
     menu->addAction(m_rename);
     //separate delete
@@ -1387,4 +1542,3 @@ void AlgorithmTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
 
   QTreeWidget::mouseDoubleClickEvent(e);
 }
-

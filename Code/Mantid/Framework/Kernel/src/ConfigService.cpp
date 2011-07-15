@@ -23,6 +23,7 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/Notification.h>
 #include <Poco/Environment.h>
+#include <Poco/Process.h>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -784,6 +785,8 @@ void ConfigServiceImpl::saveConfig(const std::string & filename) const
   writer.close();
 }
 
+
+
 /** Searches for a string within the currently loaded configuaration values and
  *  returns the value as a string. If the key is one of those that was a possible relative path
  *  then the local store is searched first.
@@ -834,6 +837,26 @@ std::vector<std::string> ConfigServiceImpl::getKeys(const std::string& keyName) 
     keyVector.clear();
   }
   return keyVector;
+}
+
+/** Runs a command line string to open a program. The function can take program arguments.
+ *  i.e it can load in a file to the program on startup.
+ *
+ *  @param programFilePath :: The directory where the program is located.
+ *  @param programArguments :: The arguments that the program can take on startup. For example,
+ *  the file to load up.
+ */
+
+void ConfigServiceImpl::launchProcess(const std::string& programFilePath, const std::vector<std::string>& programArguments) const
+{
+  try
+  {
+    Poco::Process::launch(programFilePath, programArguments);
+  }
+  catch(Poco::SystemException &e)
+  {
+    throw std::runtime_error(e.what());
+  }
 }
 
 /**
