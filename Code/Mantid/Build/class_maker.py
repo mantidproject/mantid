@@ -243,6 +243,7 @@ def write_test(subproject, classname, filename, args):
 
 #include "Mantid%s/%s%s.h"
 
+using namespace Mantid;
 using namespace Mantid::%s;
 using namespace Mantid::API;
 

@@ -1,9 +1,10 @@
 #ifndef MANTID_MDALGORITHMS_MDIMPLICITFUNCTION_H_
 #define MANTID_MDALGORITHMS_MDIMPLICITFUNCTION_H_
     
-#include "MantidKernel/System.h"
 #include "MantidAPI/ImplicitFunction.h"
-
+#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/MDPlane.h"
+#include <vector>
 
 namespace Mantid
 {
@@ -60,7 +61,12 @@ namespace MDAlgorithms
   public:
     MDImplicitFunction();
     ~MDImplicitFunction();
-    
+
+    void addPlane(const MDPlane & plane);
+
+  protected:
+    /// Vector of all the planes applying for this implict function
+    std::vector<MDPlane> m_planes;
   };
 
 
