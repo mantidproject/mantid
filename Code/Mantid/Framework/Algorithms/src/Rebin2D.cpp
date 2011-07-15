@@ -211,16 +211,18 @@ namespace Mantid
       overlaps.reserve(5); // Have a guess at a posible limit
 
       const size_t nxpoints(oldAxis1.size()-1), nypoints(oldAxis2.size()-1);
+      const double yn_lo(newPoly[0].Y()), yn_hi(newPoly[1].Y());
+      const double xn_lo(newPoly[0].X()), xn_hi(newPoly[2].X());
       for(size_t i = 0; i < nypoints; ++i)
       {
         const double yo_lo(oldAxis2[i]), yo_hi(oldAxis2[i+1]);
         // Check if there is a possibility of overlap
-        if( yo_hi < newPoly[0].Y() || yo_lo > newPoly[1].Y() ) continue;
+        if( yo_hi < yn_lo || yo_lo > yn_hi ) continue;
         for(size_t j = 0; j < nxpoints; ++j)
         {
           const double xo_lo(oldAxis1[j]), xo_hi(oldAxis1[j+1]);
           // Check if there is a possibility of overlap
-          if( xo_hi < newPoly[0].X() || xo_lo > newPoly[3].X() ) continue;
+          if( xo_hi < xn_lo || xo_lo > xn_hi ) continue;
           ConvexPolygon oldPoly(xo_lo, xo_hi, yo_lo, yo_hi);
           try
           {

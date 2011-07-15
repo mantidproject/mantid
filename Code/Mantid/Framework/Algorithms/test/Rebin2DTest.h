@@ -18,12 +18,12 @@ namespace
    */
 
   /// Return the input workspace. All Y values are 2 and E values sqrt(2)
-  MatrixWorkspace_sptr makeInputWS(const bool distribution, const bool large = false)
+  MatrixWorkspace_sptr makeInputWS(const bool distribution, const bool perf_test = false, const bool small_bins = false)
   {
     size_t nhist(0), nbins(0);
     double x0(0.0), deltax(0.0);
 
-    if( large )
+    if( perf_test )
     {
       nhist = 500;
       nbins = 400;
@@ -35,7 +35,14 @@ namespace
       nhist = 10;
       nbins = 10;
       x0 = 5.0;
-      deltax = distribution ? 2 : 1.0;
+      if( small_bins )
+      {
+        deltax = 0.1;
+      }
+      else
+      {
+        deltax = distribution ? 2.0 : 1.0;
+      }
     }
 
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(int(nhist), int(nbins), x0, deltax);
@@ -114,10 +121,18 @@ public:
     checkData(outputWS, 6, 10, true, true);
   }
 
+  void test_Rebin2D_With_Bin_Width_Less_Than_One_And_Not_Distribution()
+  {
+    MatrixWorkspace_sptr inputWS = makeInputWS(false, false, true); //10 histograms, 10 bins
+    MatrixWorkspace_sptr outputWS = runAlgorithm(inputWS, "5.,0.2,6.", "-0.5,1,9.5");
+    checkData(outputWS, 6, 10, false, true, true);
+  }
+  
+
 private:
   
   void checkData(MatrixWorkspace_const_sptr outputWS, const size_t nxvalues, const size_t nhist,
-                 const bool dist, const bool onAxis1)
+                 const bool dist, const bool onAxis1, const bool small_bins = false)
   {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), nhist);
     TS_ASSERT_EQUALS(outputWS->isDistribution(), dist);
@@ -128,55 +143,73 @@ private:
     TS_ASSERT_EQUALS(outputWS->readY(0).size(), nxvalues - 1);
 
     Mantid::API::Axis *newYAxis = outputWS->getAxis(1);
+    const double epsilon(1e-08);
     for(size_t i = 0; i < nhist; ++i)
     {
       for(size_t j = 0; j < nxvalues - 1; ++j)
       {
+        std::ostringstream os;
+        os << "Bin " << i << "," << j;
         if( onAxis1 )
         {
-          if( dist ) 
+          if( small_bins )
           {
-            TS_ASSERT_DELTA(outputWS->readX(i)[j], 5.0 + 4.0*static_cast<double>(j), DBL_EPSILON);
+            
+            TS_ASSERT_DELTA(outputWS->readX(i)[j], 5.0 + 0.2*static_cast<double>(j), epsilon);
           }
-          else 
+          else
           {
-            TS_ASSERT_DELTA(outputWS->readX(i)[j], 5.0 + 2.0*static_cast<double>(j), DBL_EPSILON);
+            if( dist ) 
+            {
+              TS_ASSERT_DELTA(outputWS->readX(i)[j], 5.0 + 4.0*static_cast<double>(j), epsilon);
+            }
+            else 
+            {
+              TS_ASSERT_DELTA(outputWS->readX(i)[j], 5.0 + 2.0*static_cast<double>(j), epsilon);
+            }
           }
         }
         else
         {
-          TS_ASSERT_DELTA(outputWS->readX(i)[j], 5.0 + static_cast<double>(j), DBL_EPSILON);
+          TS_ASSERT_DELTA(outputWS->readX(i)[j], 5.0 + static_cast<double>(j), epsilon);
         }
         if( dist )
         {
-          TS_ASSERT_DELTA(outputWS->readY(i)[j], 1.0, DBL_EPSILON);
-          TS_ASSERT_DELTA(outputWS->readE(i)[j], 0.5, DBL_EPSILON);
+          TS_ASSERT_DELTA(outputWS->readY(i)[j], 1.0, epsilon);
+          TS_ASSERT_DELTA(outputWS->readE(i)[j], 0.5, epsilon);
         }
         else
         {
-          TS_ASSERT_DELTA(outputWS->readY(i)[j], 4.0, DBL_EPSILON);
-          TS_ASSERT_DELTA(outputWS->readE(i)[j], 2.0, DBL_EPSILON);
+          TSM_ASSERT_DELTA(os.str(), outputWS->readY(i)[j], 4.0, epsilon);
+          TS_ASSERT_DELTA(outputWS->readE(i)[j], 2.0, epsilon);
         }
 
       }    
       // Final X boundary
-      if( dist ) 
+      if( small_bins )
       {
-        TS_ASSERT_DELTA(outputWS->readX(i)[nxvalues-1], 25.0, DBL_EPSILON);        
+        TS_ASSERT_DELTA(outputWS->readX(i)[nxvalues-1], 6.0, epsilon);
       }
       else
       {
-        TS_ASSERT_DELTA(outputWS->readX(i)[nxvalues-1], 15.0, DBL_EPSILON);        
+        if( dist ) 
+        {
+          TS_ASSERT_DELTA(outputWS->readX(i)[nxvalues-1], 25.0, epsilon);        
+        }
+        else
+        {
+          TS_ASSERT_DELTA(outputWS->readX(i)[nxvalues-1], 15.0, epsilon);        
+        }
       }
       if( onAxis1 )
       {
         // The new Y axis value should be the centre point bin values
-        TS_ASSERT_DELTA((*newYAxis)(i), static_cast<double>(i), DBL_EPSILON);
+        TS_ASSERT_DELTA((*newYAxis)(i), static_cast<double>(i), epsilon);
       }
       else
       {
         // The new Y axis value should be the centre point bin values
-        TS_ASSERT_DELTA((*newYAxis)(i), 0.5 + 2.0*static_cast<double>(i), DBL_EPSILON);
+        TS_ASSERT_DELTA((*newYAxis)(i), 0.5 + 2.0*static_cast<double>(i), epsilon);
       }
     }
     // Clean up
