@@ -51,8 +51,10 @@ namespace MDAlgorithms
   public:
     MDPlane(const std::vector<coord_t> & coeff, const coord_t inequality);
     MDPlane(const size_t nd, const coord_t * coeff, const coord_t inequality);
-
     virtual ~MDPlane();
+
+    bool isPointBounded(const coord_t * coords);
+
     
     /// @return the number of dimensions
     size_t getNumDims() const { return m_nd; }
