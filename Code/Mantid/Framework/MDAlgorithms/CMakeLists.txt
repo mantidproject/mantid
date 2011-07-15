@@ -19,6 +19,8 @@ set ( SRC_FILES
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
 	src/Load_MDWorkspace.cpp
+	src/MDImplicitFunction.cpp
+	src/MDPlane.cpp
 	src/NormalParameter.cpp
 	src/NullImplicitFunction.cpp
 	src/OriginParameter.cpp
@@ -60,10 +62,11 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/DynamicRebinFromXML.h
 	inc/MantidMDAlgorithms/HeightParameter.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
-	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/Load_MDWorkspace.h
+	inc/MantidMDAlgorithms/MDImplicitFunction.h
+	inc/MantidMDAlgorithms/MDPlane.h
 	inc/MantidMDAlgorithms/NormalParameter.h
 	inc/MantidMDAlgorithms/NullImplicitFunction.h
 	inc/MantidMDAlgorithms/OriginParameter.h
@@ -87,27 +90,29 @@ set ( INC_FILES
 
 # Test files. Other source files required.
 set ( TEST_FILES
+	# these tests are as they test verify different parts of the CPR algorithms
 	#test/CobaltSWDTest.h
 	#test/CreateMDFitWorkspaceTest.h
+	#test/QuadEnBackgroundTest.h
+	test/CP3DxN_RebinningTest.h
+	test/CPR_preselectCellsTest.h
+	test/CPRebinKeepPixTest.h
 	test/DepthParameterTest.h
-	test/DynamicRebinFromXMLAlgorithmTest.h 
+	test/DynamicRebinFromXMLAlgorithmTest.h
 	test/HeightParameterTest.h
 	test/InvalidParameterParserTest.h
 	test/InvalidParameterTest.h
 	test/Load_MDWorkspaceTest.h
+	test/MDImplicitFunctionTest.h
+	test/MDPlaneTest.h
 	test/NormalParameterTest.h
 	test/OriginParameterTest.h
 	test/PlaneFunctionBuilderTest.h
-	#test/QuadEnBackgroundTest.h 
 	test/RunParamTest.h
 	test/SimulateMDDataTest.h
 	test/TobyFitSimulateTest.h
 	test/VectorMathematicsTest.h
 	test/WidthParameterTest.h
-	# these tests are as they test verify different parts of the CPR algorithms
-	test/CPR_preselectCellsTest.h
-	test/CP3DxN_RebinningTest.h
-	test/CPRebinKeepPixTest.h	
 )
 
 set ( GMOCK_TEST_FILES

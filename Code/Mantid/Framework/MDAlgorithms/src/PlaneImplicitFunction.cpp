@@ -120,9 +120,9 @@ Evaluation overload.
 */
 bool PlaneImplicitFunction::evaluate(const Mantid::coord_t* coords, const bool * masks, const size_t nDims) const
 {
-  signal_t x = 0;
-  signal_t y = 0;
-  signal_t z = 0;
+  coord_t x = 0;
+  coord_t y = 0;
+  coord_t z = 0;
   size_t boxDimension = 0;
   for(size_t i = 0; i < nDims; i++)
   {
