@@ -147,8 +147,6 @@ double getdRowSpan(  Peak peak, double dQ, double ystep, double xstep);
 
 void SetUpOutputWSCols( TableWorkspace_sptr &TabWS);
 
-int getSpectra( int PixID,MatrixWorkspace_sptr &mwspc);
-
 boost::shared_ptr<const RectangularDetector> getPanel( Peak peak);
 
 std::vector<int> getStartNRowCol( double CentRow,double CentCol, int dRow, int dCol, 
@@ -221,29 +219,35 @@ void IntegratePeakTimeSlices::exec()
     int lastCol = peak.getCol();
     int Col0 =lastCol;
 
+    // For quickly looking up workspace index from det id
+    wi_to_detid_map = inpWkSpace->getDetectorIDToWorkspaceIndexMap(true);
+
     TableWorkspace_sptr TabWS =boost::shared_ptr<TableWorkspace>( new TableWorkspace(0));
     // std::cout<<"A"<<std::endl;
     try{
-   
+
     int detID= peak.getDetectorID();
-    int specNum= getSpectra(detID, inpWkSpace);
+
+    // Find the workspace index for this detector ID
+    Mantid::detid2index_map::iterator  it;
+    it = (*wi_to_detid_map).find(detID);
+    size_t specNum = (it->second);
 
     getnPanelRowsCols( peak, nPanelRows, nPanelCols, CellHeight, CellWidth, g_log);
     double dRow = getdRowSpan( peak,dQ, CellHeight, CellWidth);
-    
+
     int Chan;
     //std::cout<<"B,nPanelRows,nPanelColls,CellHeight,CellWidth="<<nPanelRows<<","<<nPanelCols<<","<<CellHeight<<","<<CellWidth<<std::endl;
     Mantid::MantidVec X = inpWkSpace->dataX( specNum);
-    int dChan = getdChanSpan( peak,dQ,X, specNum,Chan);
-    
+    int dChan = getdChanSpan( peak,dQ,X, int(specNum),Chan);
+
     if( dRow <2 || dChan <3)
     {
-       g_log.error("Not enough rows and cols or time channels ");
-       throw;
+      g_log.error("Not enough rows and cols or time channels ");
+      throw;
     }
-    //std::cout<<"C, dChan, dRow="<<dChan<<","<<dRow<<std::endl;      
+    //std::cout<<"C, dChan, dRow="<<dChan<<","<<dRow<<std::endl;
     SetUpOutputWSCols( TabWS);
-
 
     boost::shared_ptr<const RectangularDetector> panel = getPanel( peak );
     IAlgorithm_sptr  fit_alg;
@@ -286,7 +290,7 @@ void IntegratePeakTimeSlices::exec()
            MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
                               std::string("Workspace2D"), 2,  Attr[2]*Attr[3]+1, Attr[2]*Attr[3] );
 
-           ParamAttr = SetUpData(Data,inpWkSpace,panel,xchan,Attr, g_log);
+           ParamAttr = SetUpData(Data,inpWkSpace,panel,xchan,Attr);
            /*
            std::cout<<"Params and Attributes"<<std::endl;
            for( size_t kk=0; kk<2;kk++)
@@ -420,11 +424,15 @@ void IntegratePeakTimeSlices::exec()
    
     //show( "ResTable",TabWS,-1);
 
+    delete wi_to_detid_map;
+
 
 }catch(std::exception &ss)
   {
 std::cout<<"Error occurred XX "<<ss.what()<<std::endl;
    }
+
+
 
 }
 
@@ -491,22 +499,6 @@ double getQ( Peak peak)
   MT.fromTOF( x, y,peak.getL1(), peak.getL2(),twoTheta, 0,1.0,1.0);
 
   return x[0];
-
-  }
-
-//returns workspace index
-int getSpectra( int PixID,  MatrixWorkspace_sptr &mwspc)
-{
-   Mantid::detid2index_map *map = mwspc->getDetectorIDToWorkspaceIndexMap(true);
-   Mantid::detid_t  id = (Mantid::detid_t)PixID;
-
-   Mantid::detid2index_map::iterator  it;
-
-   it = (*map).find(id);
-
-   size_t Res = (*it).second;
-
-   return (int)Res;    
 
   }
 
@@ -751,12 +743,11 @@ std::vector<double> getInitParamValues(std::vector<double> StatBase, double TotB
 }
 
 //Data is the slice subdate, inpWkSpace is ALl the data,
-std::vector<std::vector<double> >  SetUpData( MatrixWorkspace_sptr                         Data, 
+std::vector<std::vector<double> >  IntegratePeakTimeSlices::SetUpData( MatrixWorkspace_sptr                         Data,
                                               MatrixWorkspace_sptr                         inpWkSpace,
                                               boost::shared_ptr<const RectangularDetector> panel,
                                               int                                          chan,
-                                              std::vector<int>                             Attr,
-                                              Logger&                                      g_log)
+                                              std::vector<int>                             Attr)
     {
         UNUSED_ARG(g_log);
         boost::shared_ptr<Workspace2D> ws = boost::shared_dynamic_cast<Workspace2D>( Data);
@@ -791,8 +782,13 @@ std::vector<std::vector<double> >  SetUpData( MatrixWorkspace_sptr              
           {
       
             boost::shared_ptr<  Detector  >   pixel =panel->getAtXY( col,row);
-            int spectra = getSpectra( pixel->getID(),inpWkSpace);
-            Mantid::MantidVec histogram =inpWkSpace->dataY(spectra);
+
+            // Find the workspace index for this detector ID
+            Mantid::detid2index_map::iterator  it;
+            it = (*wi_to_detid_map).find(pixel->getID());
+            size_t workspaceIndex = (it->second);
+
+            Mantid::MantidVec histogram =inpWkSpace->readY(workspaceIndex);
          
             double intensity = histogram[ chan ];
 //            std::cout<<intensity<<",";

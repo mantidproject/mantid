@@ -10,9 +10,9 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-//using namespace  Mantid::DataObjects;
-//using namespace Mantid::API;
-//using namespace Mantid::Crystal;
+#include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+
 
 
 namespace Mantid
@@ -76,9 +76,13 @@ private:
   Mantid::API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace, the data set
   Mantid::DataObjects::TableWorkspace_sptr outputW; ///< A pointer to the output workspace
 
+  /// Map wi to detid
+  Mantid::detid2index_map * wi_to_detid_map;
 
-
-
+  std::vector<std::vector<double> >  SetUpData( Mantid::API::MatrixWorkspace_sptr  Data,
+      Mantid::API::MatrixWorkspace_sptr  inpWkSpace,
+      Mantid::Geometry::RectangularDetector_const_sptr panel,
+      int  chan, std::vector<int> Attr);
 };
 
 } // namespace Crystal
