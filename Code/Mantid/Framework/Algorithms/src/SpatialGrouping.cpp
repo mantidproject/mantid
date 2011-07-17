@@ -17,6 +17,9 @@
 #include <iostream>
 
 #include <algorithm>
+#include "MantidAPI/ISpectrum.h"
+
+using Mantid::API::ISpectrum;
 
 namespace
 {
@@ -56,8 +59,10 @@ void SpatialGrouping::initDocs()
 */
 void SpatialGrouping::init()
 {
-  declareProperty(new Mantid::API::WorkspaceProperty<>("InputWorkspace","",Mantid::Kernel::Direction::Input),"The input workspace.");
-  declareProperty(new Mantid::API::FileProperty("Filename", "", Mantid::API::FileProperty::Save, ".xml"));
+  declareProperty(new Mantid::API::WorkspaceProperty<>("InputWorkspace","",Mantid::Kernel::Direction::Input),
+      "The input workspace.");
+  declareProperty(new Mantid::API::FileProperty("Filename", "", Mantid::API::FileProperty::Save, ".xml"),
+      "Path to the output .XML file");
   declareProperty("SearchDistance", 2.5, Mantid::Kernel::Direction::Input);
   declareProperty("GridSize", 3, Mantid::Kernel::Direction::Input);
 }
@@ -75,29 +80,37 @@ void SpatialGrouping::exec()
 
   const Mantid::Geometry::ISpectraDetectorMap & smap = inputWorkspace->spectraMap();
   
+  // Make a map key = spectrum number, value = detector at that spectrum
   m_detectors.clear();
-  Mantid::spec2index_map * specTOwi = inputWorkspace->getSpectrumToWorkspaceIndexMap();
-  for ( Mantid::spec2index_map::iterator itr = specTOwi->begin(); itr != specTOwi->end(); ++itr )
+  for (size_t i=0; i<inputWorkspace->getNumberHistograms(); i++)
   {
-    m_detectors[(*itr).first] = inputWorkspace->getDetector((*itr).second);
+    const ISpectrum * spec = inputWorkspace->getSpectrum(i);
+    m_detectors[spec->getSpectrumNo()] = inputWorkspace->getDetector(i);
   }
   
+  //TODO: There is a confusion in this algorithm between detector IDs and spectrum numbers!
+
   Mantid::API::Progress prog(this, 0.0, 1.0, m_detectors.size());
     
   for ( std::map<specid_t, Mantid::Geometry::IDetector_sptr>::iterator detIt = m_detectors.begin(); detIt != m_detectors.end(); ++detIt )
   {
     prog.report();
 
+    // The detector
+    Mantid::Geometry::IDetector_sptr det = detIt->second;
+    // The spectrum number of the detector
+    specid_t specNo = detIt->first;
+
     // We are not interested in Monitors and we don't want them to be included in
     // any of the other lists
-    if ( detIt->second->isMonitor() )
+    if ( det->isMonitor() )
     {
-      m_included.insert(detIt->first);
+      m_included.insert(specNo);
       continue;
     }
 
     // Or detectors already flagged as included in a group
-    std::set<specid_t>::iterator inclIt = m_included.find(detIt->first);
+    std::set<specid_t>::iterator inclIt = m_included.find(specNo);
     if ( inclIt != m_included.end() )
     {
       continue;
@@ -108,21 +121,23 @@ void SpatialGrouping::exec()
     const double empty = EMPTY_DBL();
     Mantid::Geometry::BoundingBox bbox(empty,empty,empty,empty,empty,empty);
 
-    createBox(detIt->second, bbox);
+    createBox(det, bbox);
 
     bool extend = true;
     while ( ( nNeighbours > nearest.size() ) && extend )
     {
-      extend = expandNet(nearest, detIt->first, nNeighbours, bbox);
+      extend = expandNet(nearest, specNo, nNeighbours, bbox);
     }
 
     if ( nearest.size() != nNeighbours ) continue;
 
     // if we've gotten to this point, we want to go and make the group list.
     std::vector<int> group;
-    m_included.insert(detIt->first);
-    group.push_back(detIt->first);
+    m_included.insert(specNo);
+    // Add the central spectrum
+    group.push_back(specNo);
 
+    // Add all the nearest neighbors
     std::map<specid_t, double>::iterator nrsIt;
     for ( nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt )
     {
