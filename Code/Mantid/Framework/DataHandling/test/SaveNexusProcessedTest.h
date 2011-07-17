@@ -302,13 +302,12 @@ public:
     groups[0].push_back(12);
     groups[1].push_back(20);
     groups[2].push_back(30);
-    groups[2].push_back(31);  // Switch the event type
-
+    groups[2].push_back(31);
     groups[3].push_back(40);
     groups[4].push_back(50);
 
     EventWorkspace_sptr WS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100, 1.0);
-    WS->getEventList(3).clear();
+    WS->getEventList(3).clear(false);
     // Switch the event type
     if (makeDifferentTypes)
     {

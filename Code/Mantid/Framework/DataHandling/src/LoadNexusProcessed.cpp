@@ -248,6 +248,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
 
       // Allocate all the required memory
       el.reserve(index_end - index_start);
+      el.clearDetectorIDs();
 
       for (long i=index_start; i<index_end; i++)
       switch (type)
@@ -656,21 +657,18 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
     loadNonSpectraAxis(local_workspace, wksp_cls);
   }
 
-  // Handle the detectors back from the spectra map for event workspaces
-  if (isEvent)
-  {
-    //TODO: This could be a method in EventWorkspace
-    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(local_workspace);
-    for (std::size_t wi=0; wi<local_workspace->getNumberHistograms(); wi++)
-    {
-      std::vector<detid_t> dets = local_workspace->spectraMap().getDetectors(static_cast<specid_t>(wi));
-      EventList & el = ew->getEventList(wi);
-      for (size_t i=0; i < dets.size(); i++)
-      {
-        el.addDetectorID(dets[i]);
-      }
-    }
-  }
+//  // Handle the detectors back from the spectra map for event workspaces
+//  if (isEvent)
+//  {
+//    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(local_workspace);
+//    for (std::size_t wi=0; wi<local_workspace->getNumberHistograms(); wi++)
+//    {
+//      std::vector<detid_t> dets = local_workspace->spectraMap().getDetectors(static_cast<specid_t>(wi));
+//      EventList & el = ew->getEventList(wi);
+//      el.clearDetectorIDs();
+//      el.addDetectorIDs(dets);
+//    }
+//  }
 
   progress(progressStart+0.15*progressRange,"Reading the workspace history...");
   try

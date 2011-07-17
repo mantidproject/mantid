@@ -459,6 +459,7 @@ namespace WorkspaceCreationHelper
 
     for (size_t g=0; g < groups.size(); g++)
     {
+      retVal->getOrAddEventList(g).clearDetectorIDs();
       std::vector<int> dets = groups[g];
       for (std::vector<int>::iterator it = dets.begin(); it != dets.end(); it++)
       {

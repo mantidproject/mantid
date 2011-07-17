@@ -129,9 +129,6 @@ namespace Algorithms
 
     // Get the instrument.
     const int64_t nHist=localWorkspace->getNumberHistograms();
-    API::Axis* specAxis=localWorkspace->getAxis(1);
-    // Get the spectra to detector map
-    const Geometry::ISpectraDetectorMap& spectramap=localWorkspace->spectraMap();
 
     // Determine whether the user wants to see unselected detectors or not
     const std::string su=getProperty("ShowUnselected");
@@ -140,28 +137,29 @@ namespace Algorithms
 
     for (int64_t i=0;i<nHist;i++)
     {
-      specid_t spec=specAxis->spectraNo(i);
-      std::vector<detid_t> dets=spectramap.getDetectors(spec);
+      ISpectrum * spec = localWorkspace->getSpectrum(i);
+      const std::set<detid_t> & dets = spec->getDetectorIDs();
       if (dets.empty()) // Nothing
       {
-        localWorkspace->dataY(i)[0]=0.0;
+        spec->dataY()[0]=0.0;
         continue;
       }
-      calmap::const_iterator it=calibration.find(dets[0]);
+      // Find the first detector ID in the list
+      calmap::const_iterator it=calibration.find(*dets.begin());
       if (it==calibration.end()) //Could not find the detector
       {
-        localWorkspace->dataY(i)[0]=0.0;
+        spec->dataY()[0]=0.0;
         continue;
       }
       if (showunselected)
       {
         if (((*it).second).second==0)
-          localWorkspace->dataY(i)[0]=0.0;
+          spec->dataY()[0]=0.0;
         else
-          localWorkspace->dataY(i)[0]=static_cast<double>(((*it).second).first);
+          spec->dataY()[0]=static_cast<double>(((*it).second).first);
       }
       else
-        localWorkspace->dataY(i)[0]=static_cast<double>(((*it).second).first);
+        spec->dataY()[0]=static_cast<double>(((*it).second).first);
       if (!success) success=true; //At least one detector is found in the cal file
 
     }

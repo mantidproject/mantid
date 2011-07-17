@@ -269,14 +269,20 @@ public:
     if ( !checker.isInitialized() ) checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
-    int spec[2] = {1,2};
-    int det[2] = {99,98};
-    ws2->replaceSpectraMap(new Mantid::API::SpectraDetectorMap(&spec[0],&det[0],2));
+    ws2->getSpectrum(0)->setSpectrumNo(1234);
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) );
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) );
-    
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "SpectraDetectorMap mismatch" );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Spectrum number mismatch" );
+
+    ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2,2);
+    ws2->getSpectrum(0)->setDetectorID(99);
+    ws2->getSpectrum(1)->setDetectorID(98);
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) );
+    TS_ASSERT( checker.execute() );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Detector IDs mismatch" );
+
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }

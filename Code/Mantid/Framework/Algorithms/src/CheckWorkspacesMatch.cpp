@@ -134,7 +134,7 @@ void CheckWorkspacesMatch::doComparison()
   prog->reportIncrement(numhist/5, "Axes");
   if ( static_cast<bool>(getProperty("CheckAxes")) && ! checkAxes(ws1,ws2) ) return;
   prog->reportIncrement(numhist/5, "SpectraMap");
-  if ( static_cast<bool>(getProperty("CheckSpectraMap")) && ! checkSpectraMap(ws1->spectraMap(),ws2->spectraMap()) ) return;
+  if ( static_cast<bool>(getProperty("CheckSpectraMap")) && ! checkSpectraMap(ws1,ws2) ) return;
   prog->reportIncrement(numhist/5, "Instrument");
   if ( static_cast<bool>(getProperty("CheckInstrument")) && ! checkInstrument(ws1,ws2) ) return;
   prog->reportIncrement(numhist/5, "Masking");
@@ -304,13 +304,40 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
 /// @param map2 :: the second sp det map
 /// @retval true The maps match
 /// @retval false The maps do not match
-bool CheckWorkspacesMatch::checkSpectraMap(const Geometry::ISpectraDetectorMap& map1, const Geometry::ISpectraDetectorMap& map2)
+bool CheckWorkspacesMatch::checkSpectraMap(MatrixWorkspace_const_sptr ws1, MatrixWorkspace_const_sptr ws2)
 {
-  // Use the SpectraDetectorMap::operator!= to check the maps
-  if ( map1 != map2 )
+  if (ws1->getNumberHistograms() != ws2->getNumberHistograms())
   {
-    result = "SpectraDetectorMap mismatch";
+    result = "Number of spectra mismatch";
     return false;
+  }
+
+  for (size_t i=0; i<ws1->getNumberHistograms(); i++)
+  {
+    const ISpectrum * spec1 = ws1->getSpectrum(i);
+    const ISpectrum * spec2 = ws2->getSpectrum(i);
+    if (spec1->getSpectrumNo() != spec2->getSpectrumNo())
+    {
+      result = "Spectrum number mismatch";
+      return false;
+    }
+    if (spec1->getDetectorIDs().size() != spec2->getDetectorIDs().size())
+    {
+      std::ostringstream out;
+      out << "Number of detector IDs mismatch: " << spec1->getDetectorIDs().size() << " vs " << spec2->getDetectorIDs().size() << " at workspace index " << i;
+      result = out.str();
+      return false;
+    }
+    std::set<detid_t>::const_iterator it1 = spec1->getDetectorIDs().begin();
+    std::set<detid_t>::const_iterator it2 = spec2->getDetectorIDs().begin();
+    for (; it1 != spec1->getDetectorIDs().end(); it1++, it2++)
+    {
+      if (*it1 != *it2)
+      {
+        result = "Detector IDs mismatch";
+        return false;
+      }
+    }
   }
   
   // Everything's OK if we get to here

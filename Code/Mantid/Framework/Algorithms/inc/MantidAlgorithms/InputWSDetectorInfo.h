@@ -51,7 +51,6 @@ namespace Mantid
       explicit InputWSDetectorInfo(API::MatrixWorkspace_sptr input);
       bool aDetecIsMaskedinSpec(specid_t SpecIndex) const;
       void maskAllDetectorsInSpec(specid_t SpecIndex);
-      std::vector<detid_t> getDetectors(specid_t SpecIndex) const;
     protected:
       /// a pointer the workspace with the detector information
       const API::MatrixWorkspace_sptr m_Input;

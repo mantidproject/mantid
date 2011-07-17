@@ -82,13 +82,9 @@ void Q1D::exec()
 
   const int numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
-  // Construct a new spectra map. This will be faster than remapping the old one
-  API::SpectraDetectorMap *specMap = new SpectraDetectorMap;
-  outputWS->replaceSpectraMap(specMap);
-  const Geometry::ISpectraDetectorMap& inSpecMap = inputWS->spectraMap();
-
-  const Axis* const spectraAxis = inputWS->getAxis(1);
-  int newSpectrumNo = -1;
+  // Start with no detectors in the single spectrum of the output worskpace
+  outputWS->getSpectrum(0)->clearDetectorIDs();
+  specid_t newSpectrumNo = -1;
 
   // Set the progress bar (1 update for every one percent increase in progress)
   Progress progress(this, 0.0, 1.0, numSpec);
@@ -119,23 +115,22 @@ void Q1D::exec()
     if ( !det || det->isMasked() ) continue;
 
     // Map all the detectors onto the spectrum of the output
-    if (spectraAxis->isSpectra()) 
+    if (newSpectrumNo == -1)
     {
-      if (newSpectrumNo == -1) 
+      PARALLEL_CRITICAL(q1d_a)
       {
-        PARALLEL_CRITICAL(q1d_a)
+        if( newSpectrumNo == -1 )
         {
-          if( newSpectrumNo == -1 )
-          { 
-            newSpectrumNo = outputWS->getAxis(1)->spectraNo(0) = spectraAxis->spectraNo(i);
-          }
-         }
+          // The first spectrum in the input WS = the spectrum number in the output ws
+          specid_t newSpectrumNo = inputWS->getSpectrum(i)->getSpectrumNo();
+          outputWS->getSpectrum(0)->setSpectrumNo(newSpectrumNo);
+        }
       }
-      PARALLEL_CRITICAL(q1d_b)
-      {
-	/* Write to shared memory - must protect */
-        specMap->addSpectrumEntries(newSpectrumNo,inSpecMap.getDetectors(spectraAxis->spectraNo(i)));
-      }
+    }
+    PARALLEL_CRITICAL(q1d_b)
+    {
+      /* Write to shared memory - must protect */
+      outputWS->getSpectrum(0)->addDetectorIDs( inputWS->getSpectrum(i)->getDetectorIDs() );
     }
 
     // Get the current spectrum for both input workspaces - not references, have to reverse below
