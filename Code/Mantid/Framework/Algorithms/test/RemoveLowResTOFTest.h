@@ -38,15 +38,10 @@ private:
     //Fake a TOF unit in the data.
     test_in->getAxis(0)->unit() =UnitFactory::Instance().create("TOF");
     test_in->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS/9, false) );
-    // fake a SpectraDetectorMap
-    SpectraDetectorMap* myMap = new SpectraDetectorMap;
-    test_in->replaceSpectraMap(myMap);
+    // Make sure the detector IDs are ok
     for (int i = 0; i < NUMPIXELS; i++)
-    {
-      std::set<detid_t> detids;
-      detids.insert(static_cast<int64_t>(i+1));
-      myMap->addSpectrumEntries(i, detids);
-    }
+      test_in->getSpectrum(i)->setDetectorID(i+1);
+
     //Add it to the workspace
     AnalysisDataService::Instance().add(wsName, test_in);
   }

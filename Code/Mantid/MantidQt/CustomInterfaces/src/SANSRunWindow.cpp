@@ -1278,9 +1278,21 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
   boost::shared_ptr<Mantid::Geometry::IComponent> source = instr->getSource();
 
   // Moderator-monitor distance is common to LOQ and S2D
-  int monitor_spectrum = m_uiForm.monitor_spec->text().toInt();
-  std::vector<detid_t> dets = sample_workspace->spectraMap().getDetectors(monitor_spectrum);
+  size_t monitorWorkspaceIndex=0;
+  specid_t monitor_spectrum = m_uiForm.monitor_spec->text().toInt();
+  try
+  {
+    monitorWorkspaceIndex = sample_workspace->getIndexFromSpectrumNumber(monitor_spectrum);
+  }
+  catch (...)
+  {
+    // Spectrum number not found. Return;
+    return;
+  }
+
+  const std::set<detid_t> & dets = sample_workspace->getSpectrum(monitorWorkspaceIndex)->getDetectorIDs();
   if( dets.empty() ) return;
+
   double dist_mm(0.0);
   QString colour("black");
   try

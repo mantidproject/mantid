@@ -535,6 +535,23 @@ namespace Mantid
       }
     }
 
+    //---------------------------------------------------------------------------------------
+    /** Given a spectrum number, find the corresponding workspace index
+    *
+    * @param specNo :: spectrum number wanted
+    * @return the workspace index
+    * @throw runtime_error if not found.
+    */
+    size_t MatrixWorkspace::getIndexFromSpectrumNumber(const specid_t specNo) const
+    {
+      for (size_t i = 0; i < this->getNumberHistograms(); ++i)
+      {
+        if ( this->getSpectrum(i)->getSpectrumNo() == specNo )
+          return i;
+      }
+      throw std::runtime_error("Could not find spectrum number in any spectrum.");
+    }
+
 
     //---------------------------------------------------------------------------------------
     /** Converts a list of detector IDs to the corresponding workspace indices.

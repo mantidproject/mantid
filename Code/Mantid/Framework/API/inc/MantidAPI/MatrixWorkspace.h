@@ -120,6 +120,7 @@ namespace Mantid
       index2detid_map * getWorkspaceIndexToDetectorIDMap() const;
       detid2index_map * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const;
       void getIndicesFromSpectra(const std::vector<specid_t>& spectraList, std::vector<size_t>& indexList) const;
+      size_t getIndexFromSpectrumNumber(const specid_t specNo) const;
       void getIndicesFromDetectorIDs(const std::vector<detid_t>& detIdList, std::vector<size_t>& indexList) const;
 
       /// Get the footprint in memory in bytes.

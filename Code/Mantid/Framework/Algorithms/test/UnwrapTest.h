@@ -72,10 +72,16 @@ public:
     boost::shared_ptr<MatrixWorkspace> outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("unwrappedWS"));
 
     TS_ASSERT_EQUALS( outWS->getAxis(0)->unit()->unitID(), "Wavelength" )
-    TS_ASSERT_EQUALS( &(outWS->spectraMap()), &(inWS->spectraMap()) )
     TS_ASSERT_DIFFERS( outWS->size(), inWS->size() )
     TS_ASSERT_DIFFERS( outWS->blocksize(), inWS->blocksize() )
     TS_ASSERT_EQUALS( outWS->blocksize(), 712 )
+
+    for (size_t i=0; i < outWS->getNumberHistograms(); i++)
+    {
+      TS_ASSERT_EQUALS( outWS->getSpectrum(i)->getSpectrumNo(), inWS->getSpectrum(i)->getSpectrumNo());
+      TS_ASSERT_EQUALS( outWS->getSpectrum(i)->getDetectorIDs().size(), inWS->getSpectrum(i)->getDetectorIDs().size());
+      TS_ASSERT_EQUALS( *outWS->getSpectrum(i)->getDetectorIDs().begin(), *inWS->getSpectrum(i)->getDetectorIDs().begin());
+    }
 
     TS_ASSERT_DELTA( outWS->dataX(0)[0], 12.956, 0.0001 )
     TS_ASSERT_DELTA( outWS->dataX(0)[350], 15.1168, 0.0001 )

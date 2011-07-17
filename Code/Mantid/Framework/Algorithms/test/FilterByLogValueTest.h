@@ -92,8 +92,6 @@ public:
     // But not 0
     TS_ASSERT_LESS_THAN( 0, outWS->run().getProtonCharge());
 
-    //Still has a spectraDetectorMap;
-    outWS->spectraMap();
 
   }
 
@@ -217,8 +215,6 @@ public:
       TS_ASSERT_EQUALS( outWS->run().getProtonCharge()/CURRENT_CONVERSION, seconds_kept * 1.0 );
     }
 
-    //Still has a spectraDetectorMap;
-    outWS->spectraMap();
 
     AnalysisDataService::Instance().remove(outputWS);
   }

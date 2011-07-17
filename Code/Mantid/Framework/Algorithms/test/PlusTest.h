@@ -543,11 +543,12 @@ public:
       //But two detector IDs in each one
       for (int i=0; i<3; i++)
       {
-        std::vector<detid_t> detList = work_out->spectraMap().getDetectors(work_out->getAxis(1)->spectraNo(i));
-        TS_ASSERT_EQUALS( detList[0], 0+i );
+        std::set<detid_t>::const_iterator detIT = work_out->getSpectrum(i)->getDetectorIDs().begin();
+        TS_ASSERT_EQUALS( *detIT, 0+i );
         if (DO_PLUS)
         {
-          TS_ASSERT_EQUALS( detList[1], 100+i );
+          detIT++;
+          TS_ASSERT_EQUALS( *detIT, 100+i );
         }
       }
     }

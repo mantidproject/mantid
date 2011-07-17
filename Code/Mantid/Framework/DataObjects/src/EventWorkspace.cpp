@@ -528,52 +528,6 @@ namespace DataObjects
     this->clearMRU();
   }
 
-//  //-----------------------------------------------------------------------------
-//  /** Generate the spectra map (map between spectrum # and detector IDs)
-//   * by using the info in each EventList.
-//   */
-//  void EventWorkspace::makeSpectraMap()
-//  {
-//    API::Axis *ax1 = getAxis(1);
-//    if( !ax1 )
-//    {
-//      throw std::runtime_error("EventWorkspace::makeSpectraMap - NULL axis 1");
-//    }
-//    if( !ax1->isSpectra() )
-//    {
-//      throw std::runtime_error("EventWorkspace::makeSpectraMap - Axis 1 is not a SpectraAxis");
-//    }
-//
-//    API::SpectraDetectorMap *newMap = new API::SpectraDetectorMap;
-//
-//    //Go through all the spectra
-//    for (size_t wi=0; wi<this->m_noVectors; wi++)
-//    {
-//      const std::set<detid_t> ids = this->data[wi]->getDetectorIDs();
-//      newMap->addSpectrumEntries(*(ids.begin()), ids);
-//    }
-//    this->replaceSpectraMap(newMap);
-//  }
-//
-//  //-----------------------------------------------------------------------------
-//  /** Generate the axes[1] (the mapping between workspace index and spectrum number)
-//   * as a stupid 1:1 map.
-//   */
-//  void EventWorkspace::makeAxis1()
-//  {
-//    // We create a spectra-type axis that holds the spectrum # at each workspace index.
-//    // based off the current spectra map if it has entries
-//    delete m_axes[1];
-//    if( this->spectraMap().nElements() > 0 )
-//    {
-//      m_axes[1] = new API::SpectraAxis(this->m_noVectors,this->spectraMap());
-//    }
-//    else
-//    {
-//      m_axes[1] = new API::SpectraAxis(m_noVectors);
-//    }
-//  }
-
 
   //-----------------------------------------------------------------------------
   /** Call this method when you are done manually adding event lists

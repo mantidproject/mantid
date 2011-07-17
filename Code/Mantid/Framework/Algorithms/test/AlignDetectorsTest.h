@@ -70,13 +70,20 @@ public:
     boost::shared_ptr<MatrixWorkspace> outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
 
     TS_ASSERT_EQUALS( outWS->getAxis(0)->unit()->unitID(), "dSpacing" );
-    TS_ASSERT_EQUALS( &(outWS->spectraMap()), &(inWS->spectraMap()) );
     TS_ASSERT_EQUALS( outWS->size(), inWS->size() );
     TS_ASSERT_EQUALS( outWS->blocksize(), inWS->blocksize() );
 
     TS_ASSERT_DELTA( outWS->dataX(2)[50], 0.7223, 0.0001 );
     TS_ASSERT_EQUALS( outWS->dataY(2)[50], inWS->dataY(1)[50] );
     TS_ASSERT_EQUALS( outWS->dataY(2)[50], inWS->dataY(1)[50] );
+
+    for (size_t i=0; i < outWS->getNumberHistograms(); i++)
+    {
+      TS_ASSERT_EQUALS( outWS->getSpectrum(i)->getSpectrumNo(), inWS->getSpectrum(i)->getSpectrumNo());
+      TS_ASSERT_EQUALS( outWS->getSpectrum(i)->getDetectorIDs().size(), inWS->getSpectrum(i)->getDetectorIDs().size());
+      TS_ASSERT_EQUALS( *outWS->getSpectrum(i)->getDetectorIDs().begin(), *inWS->getSpectrum(i)->getDetectorIDs().begin());
+    }
+
     AnalysisDataService::Instance().remove(outputWS);
   }
 

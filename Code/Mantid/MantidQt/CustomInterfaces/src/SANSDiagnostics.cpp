@@ -445,8 +445,12 @@ namespace MantidQt
       std::vector<detid_t> detIdList;
       detIdList.push_back(rectDet->getMinimumDetectorId());
       detIdList.push_back(rectDet->getMaximumDetectorId());
-      specList= mws_sptr->spectraMap().getSpectra(detIdList);
-     
+      // Convert from list of workspace indices to list of spectrum numbers
+      std::vector<size_t> indices;
+      mws_sptr->getIndicesFromDetectorIDs(detIdList,indices);
+      specList.clear();
+      for (size_t i=0; i<indices.size(); i++)
+        specList.push_back( mws_sptr->getSpectrum(indices[i])->getSpectrumNo());
     }
   /** This method returns the minimum and maximum spectrum ids
     * @param specList - list of spectra.
