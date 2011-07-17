@@ -228,7 +228,7 @@ double RemoveLowResTOF::calcTofMin(const size_t workspaceIndex)
 
   // Get a vector of detector IDs
   std::vector<detid_t> detNumbers;
-  const std::set<detid_t> * detSet = m_inputWS->getSpectrum(workspaceIndex)->getDetectorIDs();
+  const std::set<detid_t> & detSet = m_inputWS->getSpectrum(workspaceIndex)->getDetectorIDs();
   detNumbers.assign(detSet.begin(), detSet.end());
 
   std::map<detid_t,double> offsets; // just an empty offsets map
