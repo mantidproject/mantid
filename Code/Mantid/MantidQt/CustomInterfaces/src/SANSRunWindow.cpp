@@ -1297,7 +1297,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
   QString colour("black");
   try
   {
-    Mantid::Geometry::IDetector_sptr detector = instr->getDetector(dets[0]);  
+    Mantid::Geometry::IDetector_sptr detector = instr->getDetector(*dets.begin());
     dist_mm = detector->getDistance(*source) * unit_conv;
   }
   catch(std::runtime_error&)
