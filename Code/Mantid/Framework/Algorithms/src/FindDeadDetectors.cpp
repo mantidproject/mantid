@@ -81,12 +81,8 @@ namespace Mantid
       MatrixWorkspace_sptr integratedWorkspace = integrateWorkspace(getPropertyValue("OutputWorkspace"));
 
       // Get hold of the spectraDetectorMap and axis
-      const Geometry::ISpectraDetectorMap& specMap = integratedWorkspace->spectraMap();
-      Axis* specAxis = integratedWorkspace->getAxis(1);
-
       std::vector<detid_t> deadDets;
       int countSpec = 0, countDets = 0;
-
 
       // iterate over the data values setting the live and dead values
       g_log.information() << "Marking dead detectors" << std::endl;
@@ -96,21 +92,23 @@ namespace Mantid
       if (iprogress_step == 0) iprogress_step = 1;
       for (int64_t i = 0; i < int64_t(numSpec); ++i)
       {
-        double &y = integratedWorkspace->dataY(i)[0];
+        // Spectrum in the integratedWorkspace
+        ISpectrum * spec = integratedWorkspace->getSpectrum(i);
+        double &y = spec->dataY()[0];
         if ( y > deadThreshold )
         {
-        y = liveValue;
+          y = liveValue;
         }
         else
         {
           ++countSpec;
           y = deadValue;
-          const specid_t specNo = specAxis->spectraNo(i);
+          const specid_t specNo = spec->getSpectrumNo();
           // Write the spectrum number to file
           file << i << " " << specNo;
           // Get the list of detectors for this spectrum and iterate over
-          const std::vector<detid_t> dets = specMap.getDetectors(specNo);
-          std::vector<detid_t>::const_iterator it;
+          const std::set<detid_t> & dets = spec->getDetectorIDs();
+          std::set<detid_t>::const_iterator it;
           for (it = dets.begin(); it != dets.end(); ++it)
           {
             // Write the detector ID to file, log & the FoundDead output property

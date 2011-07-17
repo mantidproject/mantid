@@ -32,19 +32,6 @@ public:
     }
   }
 
-  void test_That_The_Algorithm_Throws_With_A_Workspace_That_Has_No_SpectraMap()
-  {
-    // Create a simple test workspace
-    const int nvectors(5), nbins(10);
-    Workspace2D_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspace(nvectors,nbins);
-    // Blank the default map
-    inputWS->replaceSpectraMap(new SpectraDetectorMap);
-    const std::string inputName("inputWS");
-    AnalysisDataService::Instance().add(inputName, inputWS);
-    TS_ASSERT_THROWS(runExtractMask(inputName), std::invalid_argument);
-    AnalysisDataService::Instance().remove(inputName);
-  }
-
   void test_That_Input_Masked_Spectra_Are_Assigned_Zero_And_Remain_Masked_On_Output()
   {
     // Create a simple test workspace

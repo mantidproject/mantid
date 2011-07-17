@@ -102,18 +102,20 @@ void ConjoinWorkspaces::exec()
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
 
   // Loop over the input workspaces in turn copying the data into the output one
-  Axis* outAxis = output->getAxis(1);
   const int64_t& nhist1 = ws1->getNumberHistograms();
-  const Axis* axis1 = ws1->getAxis(1);
   PARALLEL_FOR2(ws1, output)
   for (int64_t i = 0; i < nhist1; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
-    output->setX(i,XValues);
-    output->dataY(i) = ws1->readY(i);
-    output->dataE(i) = ws1->readE(i);
-    // Copy the spectrum number
-    outAxis->spectraNo(i) = axis1->spectraNo(i);
+    ISpectrum * outSpec = output->getSpectrum(i);
+    const ISpectrum * inSpec = ws1->getSpectrum(i);
+
+    // Copy X,Y,E
+    outSpec->setX(XValues);
+    outSpec->setData(inSpec->dataY(), inSpec->dataE());
+    // Copy the spectrum number/detector IDs
+    outSpec->copyInfoFrom(*inSpec);
+
     // Propagate masking, if needed
     if ( ws1->hasMaskedBins(i) )
     {
@@ -128,19 +130,26 @@ void ConjoinWorkspaces::exec()
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+
   //For second loop we use the offset from the first
   const int64_t& nhist2 = ws2->getNumberHistograms();
-  const Axis* axis2 = ws2->getAxis(1);
 
   PARALLEL_FOR2(ws2, output)
   for (int64_t j = 0; j < nhist2; ++j)
   {
     PARALLEL_START_INTERUPT_REGION
-    output->setX(nhist1 + j,XValues);
-    output->dataY(nhist1 + j) = ws2->readY(j);
-    output->dataE(nhist1 + j) = ws2->readE(j);
-    // Copy the spectrum number
-    outAxis->spectraNo(nhist1 + j) = axis2->spectraNo(j);
+    // The spectrum in the output workspace
+    ISpectrum * outSpec = output->getSpectrum(nhist1 + j);
+    // Spectrum in the second workspace
+    const ISpectrum * inSpec = ws2->getSpectrum(j);
+
+    // Copy X,Y,E
+    outSpec->setX(XValues);
+    outSpec->setData(inSpec->dataY(), inSpec->dataE());
+    // Copy the spectrum number/detector IDs
+    outSpec->copyInfoFrom(*inSpec);
+
     // Propagate masking, if needed
     if ( ws2->hasMaskedBins(j) )
     {
@@ -156,7 +165,7 @@ void ConjoinWorkspaces::exec()
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  this->fixSpecDetMap(ws1,ws2, output);
+  this->fixSpectrumNumbers(ws1,ws2, output);
 
   // Delete the second input workspace from the ADS
   AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
@@ -216,7 +225,7 @@ void ConjoinWorkspaces::execEvent()
   //Set the same bins for all output pixels
   output->setAllX(XValues);
 
-  this->fixSpecDetMap(event_ws1, event_ws2, output);
+  this->fixSpectrumNumbers(event_ws1, event_ws2, output);
 
   // Delete the input workspaces from the ADS
   AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace1"));
@@ -293,17 +302,16 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
   if (!this->getProperty("CheckOverlapping"))
     return;
   // Loop through the first workspace adding all the spectrum numbers & UDETS to a set
-  const Axis* axis1 = ws1->getAxis(1);
-  const Geometry::ISpectraDetectorMap& specmap1 = ws1->spectraMap();
   std::set<specid_t> spectra;
   std::set<detid_t> detectors;
   const size_t& nhist1 = ws1->getNumberHistograms();
   for (size_t i = 0; i < nhist1; ++i)
   {
-    const specid_t spectrum = axis1->spectraNo(i);
+    const ISpectrum * spec = ws1->getSpectrum(i);
+    const specid_t spectrum = spec->getSpectrumNo();
     spectra.insert(spectrum);
-    const std::vector<detid_t> dets = specmap1.getDetectors(spectrum);
-    std::vector<detid_t>::const_iterator it;
+    const std::set<detid_t> & dets = spec->getDetectorIDs();
+    std::set<detid_t>::const_iterator it;
     for (it = dets.begin(); it != dets.end(); ++it)
     {
       detectors.insert(*it);
@@ -311,12 +319,11 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
   }
 
   // Now go throught the spectrum numbers & UDETS in the 2nd workspace, making sure that there's no overlap
-  const Axis* axis2 = ws2->getAxis(1);
-  const Geometry::ISpectraDetectorMap& specmap2 = ws2->spectraMap();
   const size_t& nhist2 = ws2->getNumberHistograms();
   for (size_t j = 0; j < nhist2; ++j)
   {
-    const specid_t spectrum = axis2->spectraNo(j);
+    const ISpectrum * spec = ws2->getSpectrum(j);
+    const specid_t spectrum = spec->getSpectrumNo();
     if (checkSpectra)
     {
       if ( spectrum > 0 && spectra.find(spectrum) != spectra.end() )
@@ -325,8 +332,8 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
         throw std::invalid_argument("The input workspaces have overlapping spectrum numbers");
       }
     }
-    std::vector<detid_t> dets = specmap2.getDetectors(spectrum);
-    std::vector<detid_t>::const_iterator it;
+    const std::set<detid_t> & dets = spec->getDetectorIDs();
+    std::set<detid_t>::const_iterator it;
     for (it = dets.begin(); it != dets.end(); ++it)
     {
       if ( detectors.find(*it) != detectors.end() )
@@ -345,14 +352,16 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
  * @param min The minimum id (output).
  * @param max The maximum id (output).
  */
-void getMinMax(const SpectraAxis* axis, specid_t& min, specid_t& max)
+void getMinMax(MatrixWorkspace_const_sptr ws, specid_t& min, specid_t& max)
 {
-  min = max = axis->spectraNo(0);
   specid_t temp;
-  size_t length = axis->length();
-  for (size_t i = 1; i < length; i++)
+  size_t length = ws->getNumberHistograms();
+  // initial values
+  min = max = ws->getSpectrum(0)->getSpectrumNo();
+  for (size_t i = 0; i < length; i++)
   {
-    temp = axis->spectraNo(i);
+    temp = ws->getSpectrum(i)->getSpectrumNo();
+    // Adjust min/max
     if (temp < min)
       min = temp;
     if (temp > max)
@@ -367,56 +376,34 @@ void getMinMax(const SpectraAxis* axis, specid_t& min, specid_t& max)
  * @param ws2 The second workspace supplied to the algorithm.
  * @param output The workspace that is going to be returned by the algorithm.
  */
-void ConjoinWorkspaces::fixSpecDetMap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2,
+void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr /*ws2*/,
                                       API::MatrixWorkspace_sptr output)
 {
-  // make sure we should bother
+  // make sure we should bother. If you don't check for overlap, you don't need to
   if (this->getProperty("CheckOverlapping"))
     return;
-
-  // better be axis=1 for the spectra
-  if (!(ws1->getAxis(1)->isSpectra() && ws2->getAxis(1)->isSpectra() && output->getAxis(1)->isSpectra()))
-  {
-    g_log.information() << "Only know how to work with axis=1 being spectrum axis\n";
-    return;
-  }
 
   // is everything possibly ok?
   specid_t min;
   specid_t max;
-  SpectraAxis* outputAxis = dynamic_cast<SpectraAxis *>(output->getAxis(1));
-  getMinMax(outputAxis, min, max);
-  if (max - min >= static_cast<specid_t>(outputAxis->length())) // nothing to do then
-  {
+  getMinMax(output, min, max);
+  if (max - min >= static_cast<specid_t>(output->getNumberHistograms())) // nothing to do then
     return;
-  }
 
   // information for remapping the spectra numbers
   specid_t ws1min;
   specid_t ws1max;
-  const SpectraAxis* ws1Axis = dynamic_cast<SpectraAxis *>(ws1->getAxis(1));
-  getMinMax(ws1Axis, ws1min, ws1max);
+  getMinMax(ws1, ws1min, ws1max);
 
-  // prepare for messing with the spectra to detector map
-  specid_t origid;
-  const ISpectraDetectorMap& origSpecDetMap = output->spectraMap();
-  SpectraDetectorMap* newSpecDetMap = new SpectraDetectorMap();
-
-  // copy the old information into the new SpectraDetectorMap
-  for (size_t i = 0; i < ws1Axis->length(); i++)
-  {
-    origid = outputAxis->spectraNo(i);
-    newSpecDetMap->addSpectrumEntries(origid, origSpecDetMap.getDetectors(origid));
-  }
   // change the axis by adding the maximum existing spectrum number to the current value
-  for (size_t i = ws1Axis->length(); i < outputAxis->length(); i++)
+  for (size_t i = ws1->getNumberHistograms(); i < output->getNumberHistograms(); i++)
   {
-    origid = outputAxis->spectraNo(i);
-    outputAxis->setValue(i, static_cast<double>(origid + ws1max));
-    newSpecDetMap->addSpectrumEntries(origid + ws1max, origSpecDetMap.getDetectors(origid));
+    specid_t origid;
+    origid = output->getSpectrum(i)->getSpectrumNo();
+    output->getSpectrum(i)->setSpectrumNo(origid + ws1max);
   }
-
-  output->replaceSpectraMap(newSpecDetMap);
+  // To be deprecated:
+  output->generateSpectraMap();
 }
 
 /// Appends the removal of the empty group after execution to the PairedGroupAlgorithm::processGroups method

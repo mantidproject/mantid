@@ -18,6 +18,14 @@ namespace Mantid
     {
       this->setWikiSummary("Extracts the masking from a given workspace and places it in a new workspace. ");
       this->setOptionalMessage("Extracts the masking from a given workspace and places it in a new workspace.");
+      this->setWikiDescription(""
+          "The masking from the InputWorkspace property is extracted by creating a new MatrixWorkspace with a single X bin where:"
+          "\n\n"
+          "  0 = masked;"
+          "\n\n"
+          "  1 = unmasked."
+          "\n\n"
+          "The spectra containing 0 are also marked as masked and the instrument link is preserved so that the instrument view functions correctly. ");
     }
     
 
@@ -35,12 +43,12 @@ namespace Mantid
     void ExtractMasking::init()
     {
       declareProperty(
-	new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",
-					       Direction::Input)
-	);
+          new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","", Direction::Input),
+          "A workspace whose masking is to be extracted"
+      );
       declareProperty(
-	new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",
-					       Direction::Output));
+          new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","", Direction::Output),
+          "A workspace containing the masked spectra as zeroes and ones.");
     }
 
     /**
@@ -49,20 +57,12 @@ namespace Mantid
     void ExtractMasking::exec()
     {
       MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-      // First check that we have got a non-empty spectra-detector map. If not, getDetector will definitely fail
-      if( inputWS->spectraMap().nElements() == 0 )
-      {
-	throw std::invalid_argument("Invalid input workspace, the spectra map is not populated.");
-      }
 
       const int nHist = static_cast<int>(inputWS->getNumberHistograms());
       const int xLength(1), yLength(1);
       // Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
       MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS, nHist, xLength, yLength);
-      // The size has changed so the axes are not copied over by default. We need the spectra axis though.
-      // The X axis is irrelevant here.
-      outputWS->replaceAxis(1, inputWS->getAxis(1)->clone()); 
-     
+
       Progress prog(this,0.0,1.0,nHist);
       MantidVecPtr xValues;
       xValues.access() = MantidVec(1, 0.0);
@@ -70,9 +70,16 @@ namespace Mantid
       PARALLEL_FOR2(inputWS, outputWS)
       for( int i = 0; i < nHist; ++i )
       {
-	PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERUPT_REGION
+        // Spectrum in the output workspace
+        ISpectrum * outSpec = outputWS->getSpectrum(i);
+        // Spectrum in the input workspace
+        const ISpectrum * inSpec = inputWS->getSpectrum(i);
 
-      	outputWS->setX(i, xValues);
+        // Copy X, spectrum number and detector IDs
+      	outSpec->setX(xValues);
+      	outSpec->copyInfoFrom(*inSpec);
+
       	IDetector_sptr inputDet;
       	bool inputIsMasked(false);
       	try
@@ -90,17 +97,17 @@ namespace Mantid
 
       	if( inputIsMasked )
       	{
-      	  outputWS->dataY(i)[0] = 0.0;
-      	  outputWS->dataE(i)[0] = 0.0;
+      	  outSpec->dataY()[0] = 0.0;
+      	  outSpec->dataE()[0] = 0.0;
       	}
       	else
       	{
-      	  outputWS->dataY(i)[0] = 1.0;
-      	  outputWS->dataE(i)[0] = 1.0;
+      	  outSpec->dataY()[0] = 1.0;
+      	  outSpec->dataE()[0] = 1.0;
       	}
       	prog.report();
 
-	PARALLEL_END_INTERUPT_REGION
+      	PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
 

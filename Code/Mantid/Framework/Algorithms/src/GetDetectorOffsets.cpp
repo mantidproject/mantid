@@ -96,14 +96,13 @@ namespace Mantid
         double offset=fitSpectra(wi);
 
         // Get the list of detectors in this pixel
-        specid_t spec = inputW->getAxis(1)->spectraNo(wi);
-        std::vector<detid_t> dets = specMap.getDetectors(spec);
+        const std::set<detid_t> & dets = inputW->getSpectrum(wi)->getDetectorIDs();
 
         // Most of the exec time is in FitSpectra, so this critical block should not be a problem.
         PARALLEL_CRITICAL(GetDetectorOffsets_setValue)
         {
           // Use the same offset for all detectors from this pixel
-          std::vector<detid_t>::iterator it;
+          std::set<detid_t>::iterator it;
           for (it = dets.begin(); it != dets.end(); it++)
           {
             outputW->setValue(*it, offset);
