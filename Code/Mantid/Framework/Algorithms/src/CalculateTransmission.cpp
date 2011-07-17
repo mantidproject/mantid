@@ -97,9 +97,8 @@ void CalculateTransmission::exec()
   // For LOQ at least, the incident beam monitor's UDET is 2 and the transmission monitor is 3
   udets.push_back(getProperty("TransmissionMonitor"));
   if (normaliseToMonitor) udets.push_back(getProperty("IncidentBeamMonitor"));
-  // Convert UDETs to workspace indices via spectrum numbers
-  const std::vector<specid_t> sampleSpectra = sampleWS->spectraMap().getSpectra(udets);
-  sampleWS->getIndicesFromSpectra(sampleSpectra,indices);
+  // Convert UDETs to workspace indices
+  sampleWS->getIndicesFromDetectorIDs(udets, indices);
   if ( (indices.size() < 2 && normaliseToMonitor) || (indices.size() < 1 && !normaliseToMonitor))
   {
     if (indices.size() == 1)
@@ -108,7 +107,7 @@ void CalculateTransmission::exec()
     }
     else
     {
-      g_log.debug() << "sampleWS->getIndicesFromSpectra() returned empty\n";
+      g_log.debug() << "sampleWS->getIndicesFromDetectorIDs() returned empty\n";
     }
     throw std::invalid_argument("Could not find the incident and transmission monitor spectra\n");
   }
@@ -124,8 +123,7 @@ void CalculateTransmission::exec()
   MatrixWorkspace_sptr M2_sample;
   if (normaliseToMonitor) M2_sample = this->extractSpectrum(sampleWS,indices[1]);
   MatrixWorkspace_sptr M3_sample = this->extractSpectrum(sampleWS,indices[0]);
-  const std::vector<specid_t> directSpectra = directWS->spectraMap().getSpectra(udets);
-  sampleWS->getIndicesFromSpectra(directSpectra,indices);
+  sampleWS->getIndicesFromDetectorIDs(udets,indices);
   // Check that given spectra are monitors
   if ( !directWS->getDetector(indices.back())->isMonitor() )
   {

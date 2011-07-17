@@ -21,115 +21,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid;
 
-//
-//namespace Mantid
-//{
-//
-//namespace DataObjects
-//{
-//
-//
-////===================================================================================================================
-//class WorkspaceTesterWithMaps : public MatrixWorkspace
-//{
-//public:
-//  WorkspaceTesterWithMaps() : MatrixWorkspace() {}
-//  virtual ~WorkspaceTesterWithMaps() {}
-//
-//  // Empty overrides of virtual methods
-//  virtual size_t getNumberHistograms() const { return m_NVectors;}
-//  const std::string id() const {return "WorkspaceTester";}
-//  void init(const size_t& NVectors, const size_t& j, const size_t&)
-//  {
-//    m_NVectors = NVectors;
-//    vec.dataX().resize(j,1.0);
-//    vec.dataY().resize(j,1.0);
-//    // Put an 'empty' axis in to test the getAxis method
-//    m_axes.resize(2);
-//    m_axes[0] = new NumericAxis(1);
-//
-//    //Spectrum # = 20 + workspace index.
-//    SpectraAxis * ax =  new SpectraAxis(m_NVectors);
-//    for (size_t i=0; i<m_NVectors; i++)
-//      ax->setValue(i, static_cast<double>(i)+20);
-//    m_axes[1] = ax;
-//
-//    SpectraDetectorMap *newMap = new SpectraDetectorMap;
-//    this->replaceSpectraMap(newMap);
-//    //Detector id is 100 + workspace index = 80 + spectrum #
-//    for (size_t i=20; i<20+m_NVectors; i++)
-//    {
-//      std::vector<detid_t> vec;
-//      vec.push_back(static_cast<detid_t>(i)+80);
-//      newMap->addSpectrumEntries(static_cast<specid_t>(i), vec);
-//    }
-//  }
-//  size_t size() const {return vec.dataY().size();}
-//  size_t blocksize() const {return vec.dataY().size();}
-//  ISpectrum * getSpectrum(const size_t /*index*/) { return &vec; }
-//  const ISpectrum * getSpectrum(const size_t /*index*/) const { return &vec; }
-//
-//private:
-//  SpectrumTester vec;
-//  Mantid::specid_t spec;
-//  size_t m_NVectors;
-//};
-//
-//DECLARE_WORKSPACE(WorkspaceTester)
-//
-//class WorkspaceTesterWithDetectors : public MatrixWorkspace
-//{
-//public:
-//  WorkspaceTesterWithDetectors() : MatrixWorkspace() {}
-//  virtual ~WorkspaceTesterWithDetectors() {}
-//
-//  // Empty overrides of virtual methods
-//  virtual size_t getNumberHistograms() const { return m_NVectors;}
-//  const std::string id() const {return "WorkspaceTester";}
-//  void init(const size_t& NVectors, const size_t&, const size_t&)
-//  {
-//    m_NVectors = NVectors;
-//    vec.resize(NVectors, MantidVec(1, 1.0));
-//    // Put an 'empty' axis in to test the getAxis method
-//    m_axes.resize(2);
-//    m_axes[0] = new NumericAxis(1);
-//    m_axes[1] = new SpectraAxis(NVectors);
-//
-//    setInstrument(Instrument_sptr(new Instrument("TestInstrument")));
-//    Instrument_sptr inst = getBaseInstrument();
-//    // We get a 1:1 map by default so the detector ID should match the spectrum number
-//    for( size_t i = 0; i < NVectors; ++i )
-//    {
-//      // Create a detector for each spectra
-//      Detector * det = new Detector("pixel", static_cast<detid_t>(m_axes[1]->spectraNo(i)), inst.get());
-//      inst->add(det);
-//      inst->markAsDetector(det);
-//    }
-//
-//  }
-//  size_t size() const {return vec.size();}
-//  size_t blocksize() const {return vec[0].size();}
-//  MantidVec& dataX(size_t const i) {return vec[i];}
-//  MantidVec& dataY(size_t const i) {return vec[i];}
-//  MantidVec& dataE(size_t const i) {return vec[i];}
-//  MantidVec& dataDx(size_t const i) {return vec[i];}
-//  const MantidVec& dataX(size_t const i) const {return vec[i];}
-//  const MantidVec& dataY(size_t const i) const {return vec[i];}
-//  const MantidVec& dataE(size_t const i) const {return vec[i];}
-//  const MantidVec& dataDx(size_t const i) const {return vec[i];}
-//  Kernel::cow_ptr<MantidVec> refX(const size_t) const {return Kernel::cow_ptr<MantidVec>();}
-//  void setX(const size_t, const Kernel::cow_ptr<MantidVec>&) {}
-//
-//private:
-//  std::vector<MantidVec> vec;
-//  specid_t spec;
-//  size_t m_NVectors;
-//};
-//
-//}
-//}// namespace
-//
-
 
 // Declare into the factory.
 DECLARE_WORKSPACE(WorkspaceTester)
@@ -182,6 +73,24 @@ public:
     ws->setComment("commenting");
     TS_ASSERT_EQUALS( ws->getComment(), "commenting" );
     ws->setComment("");
+  }
+
+  void test_getIndicesFromDetectorIDs()
+  {
+    WorkspaceTester * ws = new WorkspaceTester;
+    ws->initialize(10, 1,1);
+    for (size_t i=0; i<10; i++)
+      ws->getSpectrum(i)->setDetectorID(detid_t(i*10));
+    std::vector<detid_t> dets;
+    dets.push_back(60);
+    dets.push_back(20);
+    dets.push_back(90);
+    std::vector<size_t> indices;
+    ws->getIndicesFromDetectorIDs(dets, indices);
+    TS_ASSERT_EQUALS( indices.size(), 3);
+    TS_ASSERT_EQUALS( indices[0], 6);
+    TS_ASSERT_EQUALS( indices[1], 2);
+    TS_ASSERT_EQUALS( indices[2], 9);
   }
 
   void test_That_A_Workspace_Gets_SpectraMap_When_Initialized_With_NVector_Elements()

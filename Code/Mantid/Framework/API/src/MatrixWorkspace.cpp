@@ -510,6 +510,7 @@ namespace Mantid
     //---------------------------------------------------------------------------------------
     /** Converts a list of spectrum numbers to the corresponding workspace indices.
     *  Not a very efficient operation, but unfortunately it's sometimes required.
+    *
     *  @param spectraList :: The list of spectrum numbers required
     *  @param indexList ::   Returns a reference to the vector of indices (empty if not a Workspace2D)
     */
@@ -519,28 +520,58 @@ namespace Mantid
       indexList.clear();
       indexList.reserve(this->getNumberHistograms());
 
-      // get the spectra axis
-      SpectraAxis *spectraAxis;
-      if (this->axes() == 2)
-      {
-        spectraAxis = dynamic_cast<SpectraAxis*>(this->getAxis(1));
-        if (!spectraAxis) return;
-      }
-      // Just return an empty list if this isn't a Workspace2D
-      else return;
-
       std::vector<specid_t>::const_iterator iter = spectraList.begin();
       while( iter != spectraList.end() )
       {
         for (size_t i = 0; i < this->getNumberHistograms(); ++i)
         {
-          if ( spectraAxis->spectraNo(i) == *iter )
+          if ( this->getSpectrum(i)->getSpectrumNo() == *iter )
           {
             indexList.push_back(i);
+            break;
           }
         }
         ++iter;
       }
+    }
+
+
+    //---------------------------------------------------------------------------------------
+    /** Converts a list of detector IDs to the corresponding workspace indices.
+     * Might be slow!
+     * This is optimized for few detectors in the list vs the number of histograms.
+     *
+     *  @param detIdList :: The list of detector IDs required
+     *  @param indexList :: Returns a reference to the vector of indices
+     */
+    void MatrixWorkspace::getIndicesFromDetectorIDs(const std::vector<detid_t>& detIdList, std::vector<size_t>& indexList) const
+    {
+      std::vector<detid_t>::const_iterator it_start = detIdList.begin();
+      std::vector<detid_t>::const_iterator it_end = detIdList.end();
+
+      indexList.clear();
+
+      // Try every detector in the list
+      std::vector<detid_t>::const_iterator it;
+      for (it = it_start; it != it_end; it++)
+      {
+        bool foundDet = false;
+        size_t foundWI = 0;
+
+        // Go through every histogram
+        for (size_t i=0; i<this->getNumberHistograms(); i++)
+        {
+          if (this->getSpectrum(i)->hasDetectorID(*it))
+          {
+            foundDet = true;
+            foundWI = i;
+            break;
+          }
+        }
+
+        if (foundDet)
+          indexList.push_back(foundWI);
+      } // for each detector ID in the list
     }
 
 
