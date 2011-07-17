@@ -2,6 +2,7 @@
 #define MANTID_MDALGORITHMS_MDIMPLICITFUNCTION_H_
     
 #include "MantidAPI/ImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/MDPlane.h"
 #include <vector>
@@ -64,9 +65,41 @@ namespace MDAlgorithms
 
     void addPlane(const MDPlane & plane);
 
+    /// @return the number of dimensions for which this object can be applied
+    size_t getNumDims() const { return m_nd; }
+
+
+
+    // ==================== Methods that are inline for performance ================================
+    //----------------------------------------------------------------------------------------------
+    /** Is a point in MDimensions contained by this ImplicitFunction?
+     * If the point is bounded by ALL planes contained, then this
+     * returns true.
+     *
+     * @param coords :: nd-sized array of coordinates
+     * @return true if it is contained in the implicit function.
+     */
+    bool isPointContained(const coord_t * coords)
+    {
+      for (size_t i=0; i<m_numPlanes; i++)
+      {
+        if (!m_planes[i].isPointBounded(coords))
+          return false;
+      }
+      return true;
+    }
+
+
   protected:
+    /// number of dimensions for which this object can be applied
+    size_t m_nd;
+
     /// Vector of all the planes applying for this implict function
     std::vector<MDPlane> m_planes;
+
+    /// Cached number of planes (for a sligh speed-up)
+    size_t m_numPlanes;
+
   };
 
 
