@@ -18,10 +18,19 @@ namespace MDAlgorithms
       nd : number of dimensions of space
 
     The general equation for a hyperplane is:
-      a1*x1 + a2*x2 + ... < b
+      a1*x1 + a2*x2 + ... > b
 
     where  x1, x2, .. are the n-th coordinate of the point.
            a1, a2, .. are coefficients (can be 0).
+
+    Any plane can be defined with:
+      - A vector that is normal to its surface. The components
+        of the vector becomes the coefficents in the equation
+      - A point that is on the plane, which gives the RHS
+        of the equation b = point . normal
+
+    Points that are in the direction of the normal of the plane
+    are considered to be bounded by it.
 
     @author Janik Zikovsky
     @date 2011-07-15
@@ -49,17 +58,17 @@ namespace MDAlgorithms
   class DLLExport MDPlane 
   {
   public:
-    MDPlane(const std::vector<coord_t> & coeff, const coord_t inequality);
-    MDPlane(const size_t nd, const coord_t * coeff, const coord_t inequality);
+    MDPlane(const std::vector<coord_t> & normal, const std::vector<coord_t> & point);
+    MDPlane(const size_t nd, const coord_t * normal, const coord_t * point);
     MDPlane(const MDPlane & other);
     MDPlane & operator=(const MDPlane & other);
     virtual ~MDPlane();
 
-    /// @return the number of dimensions
+    /// @return the number of dimensions for which this object can be applied
     size_t getNumDims() const { return m_nd; }
 
-    /// @return the coefficients. For debugging mostly.
-    const coord_t * getCoeff() const { return m_coeff; }
+    /// @return the normal to the plane. For debugging mostly.
+    const coord_t * getNormal() const { return m_normal; }
 
     /// @return the RHS of the inequality equation. For debugging mostly.
     coord_t getInequality() const { return m_inequality; }
@@ -78,9 +87,9 @@ namespace MDAlgorithms
       coord_t total = 0;
       for (size_t d=0; d<m_nd; d++)
       {
-        total += m_coeff[d] * coords[d];
+        total += m_normal[d] * coords[d];
       }
-      return (total < m_inequality);
+      return (total > m_inequality);
     }
 
 
@@ -103,12 +112,36 @@ namespace MDAlgorithms
 
 
 
+  private:
+    //----------------------------------------------------------------------------------------------
+    /** Templated method for constructing the MDPlane.
+     * m_nd must have been set before this call!
+     *
+     * @param normal :: vector giving the normal to the surface
+     * @param point :: vector giving one point on the surface
+     */
+    template <typename IterableType>
+    void construct(IterableType normal, IterableType point)
+    {
+      m_normal = new coord_t[m_nd];
+      m_inequality = 0;
+      for (size_t d=0; d<m_nd; d++)
+      {
+        m_normal[d] = normal[d];
+        m_inequality += point[d] * m_normal[d];
+      }
+    }
+
+
+
   protected:
     /// Number of dimensions in the MDEventWorkspace
     size_t m_nd;
 
-    /// Coefficients to multiply each coordinate. Of size nd;
-    coord_t * m_coeff;
+    /** Coefficients to multiply each coordinate, sized m_nd. This
+     * is the normal to the plane.
+     */
+    coord_t * m_normal;
 
     /// Right-hand side of the linear equation. aka b in : a1*x1 + a2*x2 + ... < b
     coord_t m_inequality;

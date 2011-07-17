@@ -21,10 +21,11 @@ public:
   {
     MDImplicitFunction f;
 
-    coord_t coeff[3] = {1.234, 4.56, 6.78};
-    MDPlane p1(3, coeff, 3.3);
-    MDPlane p2(2, coeff, 2.2);
-    MDPlane p3(3, coeff, 2.2);
+    coord_t normal[3] = {1.234, 4.56, 6.78};
+    coord_t point[3] = {1,2,3};
+    MDPlane p1(3, normal, point);
+    MDPlane p2(2, normal, point);
+    MDPlane p3(3, normal, point);
 
     TS_ASSERT_THROWS_NOTHING(f.addPlane(p1) );
     TS_ASSERT_THROWS_ANYTHING( f.addPlane(p2) );
