@@ -69,6 +69,14 @@ public:
     TS_ASSERT( !try2Dpoint(f, -1, -2) );
   }
 
+  void test_everythingIsContained_ifNoPlanes()
+  {
+    MDImplicitFunction f;
+    TS_ASSERT(  try2Dpoint(f, -1, -2) );
+    TS_ASSERT(  try2Dpoint(f, 0.2, -0.1) );
+    TS_ASSERT(  try2Dpoint(f, 12, 33) );
+  }
+
 };
 
 

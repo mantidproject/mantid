@@ -11,7 +11,7 @@ namespace MDAlgorithms
   /** Constructor
    */
   MDImplicitFunction::MDImplicitFunction()
-  : m_nd(0)
+  : m_nd(0), m_numPlanes(0)
   {
   }
     

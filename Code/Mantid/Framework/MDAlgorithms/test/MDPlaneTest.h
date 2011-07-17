@@ -199,17 +199,18 @@ public:
   void test_3D_line()
   {
     coord_t normal[3] = {1.23, 2.34, 3.45};
+    coord_t origin[3] = {3,0,0};
     coord_t pointA[3] = {0.111, 0.222, 0.333};
     coord_t pointB[3] = {9.111, 9.222, 9.333};
 
-//    MDPlane p(3, normal, 5.67);
-//    bool res = false;
-//    for (size_t i=0; i<5*1000000 /*5 million*/; i++)
-//    {
-//      res = p.doesLineIntersect(pointA, pointB);
-//      (void) res;
-//    }
-//    TS_ASSERT(res);
+    MDPlane p(3, normal, origin);
+    bool res = false;
+    for (size_t i=0; i<5*1000000 /*5 million*/; i++)
+    {
+      res = p.doesLineIntersect(pointA, pointB);
+      (void) res;
+    }
+    TS_ASSERT(res);
   }
 
 };
