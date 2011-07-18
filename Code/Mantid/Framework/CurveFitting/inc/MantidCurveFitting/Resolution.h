@@ -51,7 +51,7 @@ public:
   std::string name()const{return "Resolution";}
   void functionMW(double* out, const double* xValues, const size_t nData)const;
   ///  function derivatives
-  void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData)const
+  void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData)
   {
     (void) out; (void) xValues; (void) nData; //Avoid compiler warning
   }

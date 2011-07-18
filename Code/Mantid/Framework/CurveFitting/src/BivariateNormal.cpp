@@ -163,7 +163,7 @@ void BivariateNormal::setParameter(int i , const double& value, bool explicitlyS
      }
 
 */
-void BivariateNormal::fit( std::vector<double>, std::vector<double>)
+void BivariateNormal::fit(const std::vector<double>&,const std::vector<double>&)
 {
   std::cout<<"In fit"<<std::endl; 
   initCommon();

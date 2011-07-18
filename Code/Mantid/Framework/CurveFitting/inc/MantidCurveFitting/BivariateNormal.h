@@ -141,7 +141,7 @@ using namespace Mantid::API;
  	  
       bool   hasAttribute (const std::string &attName) const;
  
-      void  fit( std::vector<double> , std::vector<double>);	 
+      void  fit(const std::vector<double>& ,const std::vector<double>&);
     protected:
    
       void init();
