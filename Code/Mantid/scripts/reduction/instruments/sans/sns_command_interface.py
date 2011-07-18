@@ -3,19 +3,20 @@
 """
 # Import the specific commands that we need
 from reduction.command_interface import *
-from hfir_command_interface import SetBeamCenter, DirectBeamCenter, ScatteringBeamCenter
+from hfir_command_interface import SetBeamCenter, ScatteringBeamCenter
 from hfir_command_interface import NoDarkCurrent, NoNormalization, Mask, MaskDetectors, MaskRectangle
 from hfir_command_interface import SensitivityCorrection, NoSensitivityCorrection
-from hfir_command_interface import SolidAngle, NoSolidAngle, NoTransmission, SetTransmission#, DirectBeamTransmission
-from hfir_command_interface import Background, NoBackground, IQxQy, NoIQxQy#, AzimuthalAverage
-from hfir_command_interface import NoSaveIq#, SaveIqAscii 
+from hfir_command_interface import SolidAngle, NoSolidAngle, NoTransmission, SetTransmission
+from hfir_command_interface import Background, NoBackground, IQxQy, NoIQxQy
+from hfir_command_interface import NoSaveIq
 from hfir_command_interface import ThetaDependentTransmission, BckThetaDependentTransmission, SetBckTransmission
 from hfir_command_interface import TransmissionDarkCurrent, BckTransmissionDarkCurrent
 from hfir_command_interface import SetDirectBeamAbsoluteScale, SetAbsoluteScale
 from hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance
-from hfir_command_interface import SensitivityDirectBeamCenter, SetSensitivityBeamCenter, SensitivityScatteringBeamCenter
+from hfir_command_interface import SetSensitivityBeamCenter, SensitivityScatteringBeamCenter
 from sns_reducer import EqSansReducer
 import sns_instrument
+import sans_reduction_steps
 import sns_reduction_steps
 from reduction.find_data import find_data
 
@@ -108,4 +109,12 @@ def IQxQy(nbins=100):
     
 def SaveIqAscii():
     ReductionSingleton().set_save_Iq(sns_reduction_steps.SaveIqAscii())
+    
+def DirectBeamCenter(datafile):
+    find_data(datafile, instrument=ReductionSingleton().instrument.name())
+    ReductionSingleton().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile))
+
+def SensitivityDirectBeamCenter(datafile):
+    find_data(datafile, instrument=ReductionSingleton().instrument.name())
+    ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.DirectBeamCenter(datafile))
     

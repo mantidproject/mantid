@@ -77,10 +77,14 @@ class BaseBeamFinder(ReductionStep):
         Integration(workspace, workspace+'_int')
 
         # Mask edges of the detector
-        mantid.sendLogMessage("Masking beam data: %g %g %g %g" % (self._x_mask_low, self._x_mask_high, self._y_mask_low, self._y_mask_high))  
-        mask = Mask()
-        mask.mask_edges(self._x_mask_low, self._x_mask_high, self._y_mask_low, self._y_mask_high)
-        mask.execute(reducer, workspace+'_int')
+        # This is here mostly to allow a direct comparison with old HFIR code and 
+        # ensure that we reproduce the same results
+        if self._x_mask_low!=0 or self._x_mask_high!=0 or self._y_mask_low!=0 or self._y_mask_high!=0: 
+            mantid.sendLogMessage("Masking beam data: %g %g %g %g" % (self._x_mask_low, self._x_mask_high, self._y_mask_low, self._y_mask_high))  
+            mask = Mask()
+            mask.ignore_run_properties()
+            mask.mask_edges(self._x_mask_low, self._x_mask_high, self._y_mask_low, self._y_mask_high)
+            mask.execute(reducer, workspace+'_int')
                         
         # NOTE: Version 1 of this algorithm computer the center in pixel coordinates (as in the HFIR IGOR code)  
         #
@@ -957,6 +961,10 @@ class Mask(ReductionStep):
         # List of pixels to mask
         self.masked_pixels = []
         
+        # Only apply mask defined in the class and ignore additional
+        # information from the run properties
+        self._ignore_run_properties = False
+        
     def mask_edges(self, nx_low=0, nx_high=0, ny_low=0, ny_high=0):
         """
             Define a "picture frame" outside of which the spectra from all detectors are to be masked.
@@ -1041,10 +1049,18 @@ class Mask(ReductionStep):
         """
         self.detect_list.extend(det_list) 
 
+    def ignore_run_properties(self, ignore=True):
+        """
+            Only use the mask information set in the current object 
+            and ignore additional information that may have been
+            stored in the workspace properties.
+        """
+        self._ignore_run_properties = ignore
+        
     def execute(self, reducer, workspace, instrument=None):
         
         # Check whether the workspace has mask information
-        if mtd[workspace].getRun().hasProperty("rectangular_masks"):
+        if not self._ignore_run_properties and mtd[workspace].getRun().hasProperty("rectangular_masks"):
             rectangular_masks = pickle.loads(mtd[workspace].getRun().getProperty("rectangular_masks").value)
             for rec in rectangular_masks:
                 try:
