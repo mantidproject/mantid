@@ -51,7 +51,7 @@ class InelasticReducer(Reducer):
     def __init__(self):
         super(InelasticReducer, self).__init__()
     
-    
+    @validate_loader
     def set_data_loader(self, loader):
         """
             Set the algorithm to load the data files
@@ -59,59 +59,75 @@ class InelasticReducer(Reducer):
         """ 
         self._data_loader = loader
         
+    @validate_step
     def set_ei_calculator(self, calculator):
         """
             Set the algorithm to calculate (or fix) the incident energy
+            @param calculator: Workflow algorithm object 
         """
         self._ei_calculator = calculator
 
+    @validate_step
     def set_detector_vandium(self, normaliser):
         """
             Set the step to perform the detector vanadium normalisation
+            @param normaliser: Workflow algorithm object 
         """
         self._detector_vanadium = normaliser
 
+    @validate_step
     def set_kikf_correction(self, corrector):
         """
             Set the step that will apply the Ki/Kf scaling correction
+            @param corrector: Workflow algorithm object 
         """
         self._kikf_corrector = corrector
 
-
+    @validate_step
     def set_detector_efficiency(self, corrector):
         """
             Set the step that will apply the detector efficiency correction
+            @param corrector: Workflow algorithm object
         """
         self._detector_efficiency_corrector = corrector
 
-
+    @validate_step
     def set_background_subtractor(self, subtractor):
         """
             Set the step that will remove a background
+            @param subtractor: Workflow algorithm object
         """
         self._background_subtractor = subtractor
-
+    
+    @validate_step
     def set_masker(self, masker):
         """
             Set the step that will apply the mask
+            @param masker: Workflow algorithm object
         """
         self._masker = masker
 
+    @validate_step
     def set_nxspe_saver(self, saver):
         """
             Set the algorithm that will save the NXSPE file
+            @param saver: Workflow algorithm object
         """
         self._nxspe_saver = saver
         
+    @validate_step
     def set_spe_saver(self, saver):
         """
             Set the algorithm that will save the SPE file
+            @param saver: Workflow algorithm object
         """
         self._spe_saver = saver
         
+    @validate_step
     def set_nexus_saver(self, saver):
         """
             Set the algorithm that will save the (Processed) NeXus file
+            @param saver: Workflow algorithm object
         """
         self._nexus_saver = saver
         
