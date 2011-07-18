@@ -32,6 +32,7 @@ public:
     std::string expectedXML =std::string( 
       "<Dimension ID=\"id\">") +
       "<Name>name</Name>" +
+      "<Units>Furlongs</Units>" +
       "<UpperBounds>20.0000</UpperBounds>" +
       "<LowerBounds>-10.0000</LowerBounds>" +
       "<NumberOfBins>1</NumberOfBins>" +
@@ -51,6 +52,7 @@ public:
     std::string expectedXML =std::string( 
       "<Dimension ID=\"id\">") +
       "<Name>name</Name>" +
+      "<Units>Furlongs</Units>" +
       "<UpperBounds>20.0000</UpperBounds>" +
       "<LowerBounds>-10.0000</LowerBounds>" +
       "<NumberOfBins>15</NumberOfBins>" +

@@ -128,26 +128,30 @@ private:
     std::string body = std::string("<DimensionSet>") +
       "<Dimension ID=\"en\">" +
       "<Name>Energy</Name>" +
-      "<UpperBounds>150</UpperBounds>" +
-      "<LowerBounds>0</LowerBounds>" +
+      "<Units>None</Units>" +
+      "<UpperBounds>150.0000</UpperBounds>" +
+      "<LowerBounds>0.0000</LowerBounds>" +
       "<NumberOfBins>" + xBins + "</NumberOfBins>" +
       "</Dimension>" +
       "<Dimension ID=\"qx\">" +
       "<Name>Qx</Name>" +
-      "<UpperBounds>5</UpperBounds>" +
-      "<LowerBounds>-1.5</LowerBounds>" +
+      "<Units>None</Units>" +
+      "<UpperBounds>5.0000</UpperBounds>" +
+      "<LowerBounds>-1.5000</LowerBounds>" +
       "<NumberOfBins>" + yBins + "</NumberOfBins>" +
       "</Dimension>" +
       "<Dimension ID=\"qy\">" +
       "<Name>Qy</Name>" +
-      "<UpperBounds>6.6</UpperBounds>" +
-      "<LowerBounds>-6.6</LowerBounds>" +
+      "<Units>None</Units>" +
+      "<UpperBounds>6.6000</UpperBounds>" +
+      "<LowerBounds>-6.6000</LowerBounds>" +
       "<NumberOfBins>" + zBins  + "</NumberOfBins>" +
       "</Dimension>" +
       "<Dimension ID=\"qz\">" +
       "<Name>Qz</Name>" +
-      "<UpperBounds>6.6</UpperBounds>" +
-      "<LowerBounds>-6.6</LowerBounds>" +
+      "<Units>None</Units>" +
+      "<UpperBounds>6.6000</UpperBounds>" +
+      "<LowerBounds>-6.6000</LowerBounds>" +
       "<NumberOfBins>" + tBins + "</NumberOfBins>" +
       "</Dimension>" +
       "<XDimension>" +

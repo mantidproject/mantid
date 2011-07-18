@@ -6,6 +6,7 @@
 
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidGeometry/MDGeometry/MDDimension.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionRes.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 
@@ -53,6 +54,9 @@ IMDDimensionFactory::~IMDDimensionFactory()
 {
 }
 
+/**Set the xml string from which the dimension will be generated.
+ @param dimensionXMLString : xml string to generate the dimension from.
+*/
 void IMDDimensionFactory::setXMLString(const std::string& dimensionXMLString)
 {
   Poco::XML::DOMParser pParser;
@@ -63,7 +67,50 @@ void IMDDimensionFactory::setXMLString(const std::string& dimensionXMLString)
 
 Mantid::Geometry::IMDDimension* IMDDimensionFactory::create() const
 {
-  return createAsMDDimension();
+  return createAsMDHistogramDimension();
+}
+
+/** Create the dimension as a MDHistogram dimension.
+*/
+Mantid::Geometry::MDHistoDimension* IMDDimensionFactory::createAsMDHistogramDimension() const
+{
+  using namespace Mantid::Geometry;
+
+  if(m_dimensionXML == NULL)
+  {
+    throw std::runtime_error("Must provide dimension xml before creation");
+  }
+
+  Poco::XML::NamedNodeMap* attributes = m_dimensionXML->attributes();
+
+  //First and only attribute is the dimension id.
+  Poco::XML::Node* dimensionId = attributes->item(0);
+  std::string id = dimensionId->innerText();
+
+  std::string name = m_dimensionXML->getChildElement("Name")->innerText();
+  Poco::XML::Element* unitsElement = m_dimensionXML->getChildElement("Units");
+  std::string units = "None";
+  if(NULL != unitsElement)
+  {
+   //Set units if they exist.
+   units = unitsElement->innerText();
+  }
+  double upperBounds = atof(m_dimensionXML->getChildElement("UpperBounds")->innerText().c_str());
+  double lowerBounds = atof(m_dimensionXML->getChildElement("LowerBounds")->innerText().c_str());
+  unsigned int nBins = atoi(m_dimensionXML->getChildElement("NumberOfBins")->innerText().c_str());
+  Poco::XML::Element* integrationXML = m_dimensionXML->getChildElement("Integrated");
+
+  if (NULL != integrationXML)
+  {
+    double upperLimit = atof(integrationXML->getChildElement("UpperLimit")->innerText().c_str());
+    double lowerLimit = atof(integrationXML->getChildElement("LowerLimit")->innerText().c_str());
+
+    //As it is not currently possible to set integration ranges on a MDDimension or MDGeometryDescription, boundaries become integration ranges.
+    upperBounds = upperLimit;
+    lowerBounds = lowerLimit;
+  }
+
+  return new MDHistoDimension(name, id, units, lowerBounds, upperBounds, nBins);
 }
 
 Mantid::Geometry::MDDimension* IMDDimensionFactory::createAsMDDimension() const

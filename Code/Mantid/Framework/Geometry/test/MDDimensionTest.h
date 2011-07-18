@@ -236,6 +236,7 @@ public:
       std::string expectedXML =std::string( 
       "<Dimension ID=\"1\">") +
       "<Name>Qx</Name>" +
+      "<Units>None</Units>" +
       "<UpperBounds>3</UpperBounds>" +
       "<LowerBounds>1</LowerBounds>" +
       "<NumberOfBins>1</NumberOfBins>" +
@@ -259,6 +260,7 @@ public:
       std::string expectedXML =std::string( 
       "<Dimension ID=\"1\">") +
       "<Name>Qx</Name>" +
+      "<Units>None</Units>" +
       "<UpperBounds>3</UpperBounds>" +
       "<LowerBounds>1</LowerBounds>" +
       "<NumberOfBins>10</NumberOfBins>" +
@@ -279,6 +281,7 @@ public:
       std::string expectedXML =std::string( 
       "<Dimension ID=\"1\">") +
       "<Name>Qx</Name>" +
+      "<Units>None</Units>" +
       "<UpperBounds>3</UpperBounds>" +
       "<LowerBounds>1</LowerBounds>" +
       "<NumberOfBins>1</NumberOfBins>" +
@@ -304,6 +307,7 @@ public:
       std::string expectedXML =std::string( 
       "<Dimension ID=\"1\">") +
       "<Name>Qy</Name>" +
+      "<Units>None</Units>" +
       "<UpperBounds>3</UpperBounds>" +
       "<LowerBounds>1</LowerBounds>" +
       "<NumberOfBins>1</NumberOfBins>" +
@@ -329,6 +333,7 @@ public:
       std::string expectedXML =std::string( 
       "<Dimension ID=\"1\">") +
       "<Name>Qz</Name>" +
+      "<Units>None</Units>" +
       "<UpperBounds>3</UpperBounds>" +
       "<LowerBounds>1</LowerBounds>" +
       "<NumberOfBins>1</NumberOfBins>" +

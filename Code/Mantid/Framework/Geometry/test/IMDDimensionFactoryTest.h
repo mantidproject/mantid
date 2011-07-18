@@ -14,6 +14,31 @@ class IMDDimensionFactoryTest: public CxxTest::TestSuite
 {
 private:
 
+  static Poco::XML::Element* constructDimensionWithUnits()
+  {
+    std::string xmlToParse = std::string("<Dimension ID=\"qz\">") + "<Name>Qz</Name>"
+        + "<Units>Cubits</Units>"
+        + "<UpperBounds>3</UpperBounds>" + "<LowerBounds>-3</LowerBounds>"
+        + "<NumberOfBins>8</NumberOfBins>"
+        + "<ReciprocalDimensionMapping>q3</ReciprocalDimensionMapping>" + "</Dimension>";
+
+    Poco::XML::DOMParser pParser;
+    Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+    return pDoc->documentElement();
+  }
+
+  static Poco::XML::Element* constructDimensionWithoutUnits()
+  {
+    std::string xmlToParse = std::string("<Dimension ID=\"qz\">") + "<Name>Qz</Name>"
+        + "<UpperBounds>3</UpperBounds>" + "<LowerBounds>-3</LowerBounds>"
+        + "<NumberOfBins>8</NumberOfBins>"
+        + "<ReciprocalDimensionMapping>q3</ReciprocalDimensionMapping>" + "</Dimension>";
+
+    Poco::XML::DOMParser pParser;
+    Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+    return pDoc->documentElement();
+  }
+
   static Poco::XML::Element* constructReciprocalDimensionXML()
   {
     std::string xmlToParse = std::string("<Dimension ID=\"qz\">") + "<Name>Qz</Name>"
@@ -55,18 +80,46 @@ private:
 
 public:
 
+  void testCorrectGeneration()
+  {
+    using namespace Mantid::Geometry;
+    IMDDimensionFactory factory(constructDimensionWithUnits());
+    IMDDimension* dimension = factory.create();
+    TS_ASSERT_EQUALS("Cubits", dimension->getUnits());
+    TS_ASSERT_EQUALS("Qz", dimension->getName());
+    TS_ASSERT_EQUALS("qz", dimension->getDimensionId());
+    TS_ASSERT_EQUALS(-3, dimension->getMinimum());
+    TS_ASSERT_EQUALS(3, dimension->getMaximum());
+    TS_ASSERT_EQUALS(8, dimension->getNBins());
+    delete dimension;
+  }
+
+  void testCorrectGenerationWithoutUnits()
+  {
+    using namespace Mantid::Geometry;
+    IMDDimensionFactory factory(constructDimensionWithoutUnits());
+    IMDDimension* dimension = factory.create();
+    TS_ASSERT_EQUALS("None", dimension->getUnits());
+    TS_ASSERT_EQUALS("Qz", dimension->getName());
+    TS_ASSERT_EQUALS("qz", dimension->getDimensionId());
+    TS_ASSERT_EQUALS(-3, dimension->getMinimum());
+    TS_ASSERT_EQUALS(3, dimension->getMaximum());
+    TS_ASSERT_EQUALS(8, dimension->getNBins());
+    delete dimension;
+  }
+
   void testCreationOfReciprocalMDDimensionThrows()
   {
     using namespace Mantid::Geometry;
     IMDDimensionFactory factory(constructUnknownReciprocalDimensionXML());
-    TSM_ASSERT_THROWS("Uses tag/id 'unknown' which should not be possible to match to q1,q2,q3.", factory.create(),  std::runtime_error);
+    TSM_ASSERT_THROWS("Uses tag/id 'unknown' which should not be possible to match to q1,q2,q3.", factory.createAsMDDimension(),  std::runtime_error);
   }
 
   void testCreationOfReciprocalMDDimension()
   {
     using namespace Mantid::Geometry;
     IMDDimensionFactory factory(constructReciprocalDimensionXML());
-    IMDDimension* dimension = factory.create();
+    IMDDimension* dimension = factory.createAsMDDimension();
 
     MDDimensionRes* resDimension = dynamic_cast<MDDimensionRes*> (dimension);
     TSM_ASSERT("This should have been of type MDReciprocal dimension", NULL != resDimension);
@@ -79,7 +132,7 @@ public:
   {
     using namespace Mantid::Geometry;
     IMDDimensionFactory factory(constructNonReciprocalDimensionXML());
-    IMDDimension* dimension = factory.create();
+    IMDDimension* dimension = factory.createAsMDDimension();
 
     MDDimension* resDimension = dynamic_cast<MDDimension*> (dimension);
     TSM_ASSERT("This should have been of type MD dimension", NULL != resDimension);

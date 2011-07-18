@@ -45,6 +45,7 @@ namespace Mantid
 namespace Geometry
 {
 class MDDimension;
+class MDHistoDimension;
 class MANTID_GEOMETRY_DLL IMDDimensionFactory
 {
 
@@ -76,6 +77,8 @@ private:
   IMDDimensionFactory();
 
   void setXMLString(const std::string& xmlString);
+
+  Mantid::Geometry::MDHistoDimension* createAsMDHistogramDimension() const;
 
   /// Dimension xml to process.
   Poco::XML::Element* m_dimensionXML;

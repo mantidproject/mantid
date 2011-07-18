@@ -36,6 +36,12 @@ namespace Mantid
       nameElement->appendChild(nameText);
       pDimensionElement->appendChild(nameElement);
 
+      //Set the units.
+      AutoPtr<Element> unitsElement = pDoc->createElement("Units");
+      AutoPtr<Text> unitsText = pDoc->createTextNode(this->getUnits());
+      unitsElement->appendChild(unitsText);
+      pDimensionElement->appendChild(unitsElement);
+
       //Set the upper bounds
       AutoPtr<Element> upperBoundsElement = pDoc->createElement("UpperBounds");
       AutoPtr<Text> upperBoundsText = pDoc->createTextNode(boost::str(boost::format("%.4f") % this->getMaximum()));
