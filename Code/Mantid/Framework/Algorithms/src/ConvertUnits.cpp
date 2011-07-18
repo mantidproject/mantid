@@ -476,9 +476,14 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
    } catch (Exception::NotFoundError&) {
       // Get to here if exception thrown when calculating distance to detector
       failedDetectorCount++;
-      if ( m_inputEvents ) eventWS->getEventList(i).clear();
+      if ( m_inputEvents )
+      {
+    	  eventWS->maskWorkspaceIndex(i);
+    	  eventWS->getEventList(i).clear();
+      }
       else
       {
+        outputWS->maskWorkspaceIndex(i);
         outputWS->dataX(i).assign(outputWS->dataX(i).size(),0.0);
         outputWS->dataY(i).assign(outputWS->dataY(i).size(),0.0);
         outputWS->dataE(i).assign(outputWS->dataE(i).size(),0.0);
@@ -492,7 +497,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
 
   if (failedDetectorCount != 0)
   {
-    g_log.information() << "Unable to calculate sample-detector distance for " << failedDetectorCount << " spectra. Zeroing spectrum." << std::endl;
+    g_log.information() << "Unable to calculate sample-detector distance for " << failedDetectorCount << " spectra. Masking spectrum." << std::endl;
   }
 
 }
