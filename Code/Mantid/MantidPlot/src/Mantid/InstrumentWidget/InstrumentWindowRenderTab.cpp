@@ -45,7 +45,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   QMenu* displaySettingsMenu = new QMenu(this);
   m_colorMap = new QAction("Color Map",this);
   connect(m_colorMap,SIGNAL(triggered()),this,SLOT(changeColormap()));
-  m_backgroundColor = new QAction("Background Colour",this);
+  m_backgroundColor = new QAction("Background Color",this);
   connect(m_backgroundColor,SIGNAL(triggered()),m_instrWindow,SLOT(pickBackgroundColor()));
   m_lighting = new QAction("Lighting",this);
   m_lighting->setCheckable(true);
