@@ -1,8 +1,9 @@
 #ifndef READGROUPSFROMFILETEST_H_
 #define READGROUPSFROMFILETEST_H_
 
-#include "MantidAlgorithms/CreateCalFileByNames.h"
 #include "MantidAlgorithms/ReadGroupsFromFile.h"
+#include "MantidAlgorithms/CreateGroupingWorkspace.h"
+#include "MantidDataHandling/SaveCalFile.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -47,21 +48,32 @@ public:
     loaderCAL.execute();
     loaderCAL.isExecuted();
 
-    CreateCalFileByNames testerCAL;
+    CreateGroupingWorkspace testerCAL;
 
     TS_ASSERT_THROWS_NOTHING(testerCAL.initialize());
     TS_ASSERT_THROWS_NOTHING(testerCAL.isInitialized());
-    testerCAL.setPropertyValue("InstrumentWorkspace", wsName);
-    std::string outputFile;
-    outputFile = "./INES_ReadGroupsFromFileTest.cal";
-    testerCAL.setPropertyValue("GroupingFileName", outputFile);
-    outputFile = testerCAL.getPropertyValue("GroupingFileName");
+    testerCAL.setPropertyValue("InstrumentName", "INES");
+    testerCAL.setPropertyValue("OutputWorkspace", "grp");
     testerCAL.setPropertyValue("GroupNames", "bank1A,bank2B,bank3C,bank4D,bank5E,bank6F,bank7G,bank8H,bank9I");
 
     TS_ASSERT_THROWS_NOTHING(testerCAL.execute());
     TS_ASSERT(testerCAL.isExecuted());
 
     // has the algorithm written a file to disk?
+
+    GroupingWorkspace_sptr groupWS = boost::dynamic_pointer_cast<GroupingWorkspace>(AnalysisDataService::Instance().retrieve("grp"));
+    std::string outputFile = "./INES_DspacemaptoCalTest.cal";
+ 
+    SaveCalFile alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GroupingWorkspace", groupWS) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", outputFile) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+   
+    outputFile = alg.getPropertyValue("Filename");
+
     bool fileExists = false;
     TS_ASSERT( fileExists = Poco::File(outputFile).exists() );
 
