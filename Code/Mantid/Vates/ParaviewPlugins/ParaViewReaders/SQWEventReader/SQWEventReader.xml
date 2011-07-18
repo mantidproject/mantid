@@ -58,7 +58,15 @@
         number_of_elements="1">
         <FileListDomain name="files"/>
       </StringVectorProperty>
-	     <StringVectorProperty
+	  <DoubleVectorProperty 
+        name="TimestepValues"
+        information_only="1">
+        <TimeStepsInformationHelper/>
+        <Documentation>
+          Available timestep values.
+        </Documentation>
+      </DoubleVectorProperty>
+	   <StringVectorProperty
          name="ThresholdRangeStrategyIndex"
          command="SetThresholdRangeStrategyIndex"
          number_of_elements="1"

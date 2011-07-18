@@ -4,6 +4,7 @@
 #include <sstream>
 // Availble rebinning methods: Eventually will go to factory
 #include "MantidMDAlgorithms/CpRebinningNx3.h"
+#include "MantidKernel/CPUTimer.h"
 
 namespace Mantid{
     namespace MDAlgorithms{
@@ -89,7 +90,11 @@ unsigned int CenterpieceRebinning::reportOccurance(const unsigned int nSteps)
 void 
 CenterpieceRebinning::exec()
 {
- MDWorkspace_sptr inputWS;
+
+  //Timer to log rebinning performance.
+  CPUTimer timer;
+
+  MDWorkspace_sptr inputWS;
  MDWorkspace_sptr outputWS;
 
    if(existsProperty("Input")){
@@ -178,6 +183,7 @@ CenterpieceRebinning::exec()
     // calculate necessary statistical properties of the cut
     pRebin->finalize_rebinning();
 
+    std::cout << timer << ": To complete CPR of MDWorkspace"  << std::endl; 
 
 }
 //

@@ -373,9 +373,9 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
   int time = 0;
   if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
   {
-    // usually only one actual step requested
-    time = static_cast<int>(outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0]);
-  } 
+     // usually only one actual step requested
+     time = static_cast<int>(outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0]);
+  }
 
   //When RecalculateAll wins-out, configure and run the rebinning algorithm.
   if(RecalculateAll == m_actionManager.action())
@@ -388,7 +388,7 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
   vtkThresholdingLineFactory vtkGridFactory(m_ThresholdRange, scalarName);
   vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(m_ThresholdRange, scalarName);
   vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(m_ThresholdRange, scalarName);
-  vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(m_ThresholdRange,scalarName, 0);
+  vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(m_ThresholdRange,scalarName, time);
   vtkGridFactory.SetSuccessor(p_2dSuccessorFactory);
   p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
   p_3dSuccessorFactory->SetSuccessor(p_4dSuccessorFactory);
@@ -433,7 +433,7 @@ int vtkSQWEventReader::RequestInformation(
 
     Workspace_sptr result=AnalysisDataService::Instance().retrieve(m_mdEventWsId);
     Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
-
+    
     // Now, we get the minimum extents in order to get nice default sizes
     std::vector<Mantid::Geometry::MDDimensionExtents> ext = eventWs->getMinimumExtents(5);
     std::vector<IMDDimension_sptr> defaultDimensions;
@@ -475,17 +475,12 @@ int vtkSQWEventReader::RequestInformation(
       m_appliedTDimension = defaultDimensions[3];
       m_geometryXmlBuilder.addTDimension( m_appliedTDimension );
     }
-
+    
     m_isSetup = true;
    
   }
-  std::vector<double> timeStepValues(1); //TODO set time-step information.
-  outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0], static_cast<int>(timeStepValues.size()));
-  double timeRange[2];
-  timeRange[0] = timeStepValues.front();
-  timeRange[1] = timeStepValues.back();
 
-  outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
+  setTimeRange(outInfo);
   return 1; 
 }
 
@@ -527,4 +522,30 @@ void vtkSQWEventReader::UpdateAlgorithmProgress(double progress)
   this->SetProgressText("Executing Mantid MDEvent Rebinning Algorithm...");
   this->UpdateProgress(progress);
   progressMutex.unlock();
+}
+
+/**
+  Set the time ranges
+  @param outInfo : Information vector onto which the time ranges are set.
+*/
+void vtkSQWEventReader::setTimeRange(vtkInformation * outInfo)
+{
+  if(m_isSetup && NULL != m_appliedTDimension.get())
+  {
+    std::vector<double> timeStepValues(m_appliedTDimension->getNBins());
+    double min = m_appliedTDimension->getMaximum();
+    double max = m_appliedTDimension->getMinimum();
+    double stepSize = (max - min) / timeStepValues.size();
+    for(int i = 0; i < timeStepValues.size(); i++)
+    {
+      timeStepValues[i] = min + (stepSize * i);
+    }
+    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
+      static_cast<int> (timeStepValues.size()));
+    double timeRange[2];
+    timeRange[0] = timeStepValues.front();
+    timeRange[1] = timeStepValues.back();
+
+    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
+  }
 }

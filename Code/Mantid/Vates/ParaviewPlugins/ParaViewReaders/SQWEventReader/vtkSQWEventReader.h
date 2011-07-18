@@ -46,6 +46,8 @@ protected:
   unsigned long GetMTime();
   
 private:
+
+  void setTimeRange(vtkInformation* outputVector);
   
   vtkSQWEventReader(const vtkSQWEventReader&);
   
