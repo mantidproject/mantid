@@ -122,7 +122,7 @@ void CompositeFunctionMW::functionDerivMW(Jacobian* out, const double* xValues, 
 }
 
 /// Derivatives to be used in covariance matrix calculation. 
-void CompositeFunctionMW::calJacobianForCovariance(Jacobian* out, const double* xValues, const size_t& nData)
+void CompositeFunctionMW::calJacobianForCovariance(Jacobian* out, const double* xValues, const size_t nData)
 {
   for(size_t i=0;i<nFunctions();i++)
   {

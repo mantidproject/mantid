@@ -7,8 +7,15 @@
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
+// Suppress a warning coming out of code that isn't ours
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1125
+#endif
 #include "qteditorfactory.h"
 #include "DoubleEditorFactory.h"
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1125
+#endif
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>

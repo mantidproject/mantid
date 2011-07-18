@@ -520,7 +520,7 @@ void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& o
  * @param xValues :: The x-values
  * @param nData :: The number of data points (and x-values).
  */
-void IFunctionMW::calJacobianForCovariance(Jacobian* out, const double* xValues, const size_t& nData)
+void IFunctionMW::calJacobianForCovariance(Jacobian* out, const double* xValues, const size_t nData)
 {
   this->functionDerivMW(out,xValues,nData);
 }

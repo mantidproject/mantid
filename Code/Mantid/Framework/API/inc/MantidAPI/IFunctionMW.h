@@ -153,7 +153,7 @@ public:
   virtual void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData);
   /// Derivatives to be used in covariance matrix calculation. Override this method some of the fitted parameters
   /// are different form the declared ones.
-  virtual void calJacobianForCovariance(Jacobian* out, const double* xValues, const size_t& nData);
+  virtual void calJacobianForCovariance(Jacobian* out, const double* xValues, const size_t nData);
 
   /// To be used temporarily with the old Fit algorithm. 
   virtual void setUpNewStuff(boost::shared_array<double> xs = boost::shared_array<double>(),

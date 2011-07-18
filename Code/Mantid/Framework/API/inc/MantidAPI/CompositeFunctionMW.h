@@ -67,7 +67,7 @@ public:
   /// Derivatives of function with respect to active parameters
   void functionDerivMW(Jacobian* out, const double* xValues, const size_t nData);
   /// Derivatives to be used in covariance matrix calculation. 
-  void calJacobianForCovariance(Jacobian* out, const double* xValues, const size_t& nData);
+  void calJacobianForCovariance(Jacobian* out, const double* xValues, const size_t nData);
 
   void setUpNewStuff(boost::shared_array<double> xs = boost::shared_array<double>(),boost::shared_array<double> weights = boost::shared_array<double>());
 

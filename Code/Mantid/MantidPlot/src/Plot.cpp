@@ -153,7 +153,7 @@ void Plot::printFrame(QPainter *painter, const QRect &rect) const
 	painter->restore();
 }
 
-void Plot::printCanvas(QPainter *painter, const QRect &canvasRect,
+void Plot::printCanvas(QPainter *painter, const QRect&, const QRect &canvasRect,
    			 const QwtScaleMap map[axisCnt], const QwtPlotPrintFilter &pfilter) const
 {
 	painter->save();
@@ -851,7 +851,9 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
 
    // The canvas maps are already scaled.
     QwtPainter::setMetricsMap(painter->device(), painter->device());
-    printCanvas(painter, canvasRect, map, pfilter);
+    // 'Dummy' QRect argument inserted into printCanvas method to avoid Intel
+    // compiler warning (about printCanvas signature not matching that in base class)
+    printCanvas(painter, QRect(), canvasRect, map, pfilter);
     QwtPainter::resetMetricsMap();
 
 
