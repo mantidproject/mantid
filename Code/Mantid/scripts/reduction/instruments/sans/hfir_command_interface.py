@@ -6,13 +6,16 @@ from sans_reducer import SANSReducer
 import sans_reduction_steps
 import absolute_scale
 import hfir_instrument
+from reduction.find_data import find_data
 import mantidsimple
 
 ## List of user commands ######################################################
 def DirectBeamCenter(datafile):
+    find_data(datafile, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile).set_masked_edges(1,1,1,1))
 
 def ScatteringBeamCenter(datafile, beam_radius=3.0):
+    find_data(datafile, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_beam_finder(sans_reduction_steps.ScatteringBeamCenter(datafile, beam_radius=beam_radius).set_masked_edges(1,1,1,1))
 
 def SetBeamCenter(x,y):
@@ -28,6 +31,9 @@ def NoNormalization():
     ReductionSingleton().set_normalizer(None)
     
 def SensitivityCorrection(flood_data, min_sensitivity=0.5, max_sensitivity=1.5, dark_current=None, use_sample_dc=False):
+    find_data(flood_data, instrument=ReductionSingleton().instrument.name())
+    if dark_current is not None:
+        find_data(dark_current, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_sensitivity_correcter(sans_reduction_steps.SensitivityCorrection(flood_data, 
                                                                                               min_sensitivity, 
                                                                                               max_sensitivity,
@@ -37,15 +43,18 @@ def SetSensitivityBeamCenter(x,y):
     corr = ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.BaseBeamFinder(x,y))
     
 def SensitivityDirectBeamCenter(datafile):
+    find_data(datafile, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.DirectBeamCenter(datafile).set_masked_edges(1,1,1,1))
 
 def SensitivityScatteringBeamCenter(datafile, beam_radius=3.0):
+    find_data(datafile, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.ScatteringBeamCenter(datafile, beam_radius=beam_radius).set_masked_edges(1,1,1,1))
     
 def NoSensitivityCorrection():
     ReductionSingleton().set_sensitivity_correcter(None)
     
 def DarkCurrent(datafile):
+    find_data(datafile, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_dark_current_subtracter(sans_reduction_steps.SubtractDarkCurrent(datafile))
     
 def NoDarkCurrent():
@@ -73,12 +82,15 @@ def SetTransmission(trans, error, theta_dependent=True):
     ReductionSingleton().set_transmission(sans_reduction_steps.BaseTransmission(trans, error, theta_dependent=theta_dependent))
 
 def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True):
+    find_data(sample_file, instrument=ReductionSingleton().instrument.name())
+    find_data(empty_file, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_transmission(sans_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
                                                                                     empty_file=empty_file,
                                                                                     beam_radius=beam_radius,
                                                                                     theta_dependent=theta_dependent))
 
 def TransmissionDarkCurrent(dark_current=None):
+    find_data(dark_current, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().get_transmission().set_dark_current(dark_current)
 
 def ThetaDependentTransmission(theta_dependence=True):
@@ -90,6 +102,10 @@ def BeamSpreaderTransmission(sample_spreader, direct_spreader,
                              sample_scattering, direct_scattering,
                              spreader_transmission=1.0, spreader_transmission_err=0.0,
                              theta_dependent=True ):
+    find_data(sample_spreader, instrument=ReductionSingleton().instrument.name())
+    find_data(direct_spreader, instrument=ReductionSingleton().instrument.name())
+    find_data(sample_scattering, instrument=ReductionSingleton().instrument.name())
+    find_data(direct_scattering, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_transmission(sans_reduction_steps.BeamSpreaderTransmission(sample_spreader=sample_spreader, 
                                                                                       direct_spreader=direct_spreader,
                                                                                       sample_scattering=sample_scattering, 
@@ -108,6 +124,7 @@ def MaskDetectors(det_list):
     ReductionSingleton().get_mask().add_detector_list(det_list)
 
 def Background(datafile):
+    find_data(datafile, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_background(datafile) 
 
 def NoBackground():
@@ -187,6 +204,8 @@ def SetBckTransmission(trans, error, theta_dependent=True):
 def BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True):
     if ReductionSingleton().get_background() is None:
         raise RuntimeError, "A background hasn't been defined."
+    find_data(sample_file, instrument=ReductionSingleton().instrument.name())
+    find_data(empty_file, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().get_background().set_transmission(sans_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
                                                                                         empty_file=empty_file,
                                                                                         beam_radius=beam_radius,
@@ -198,6 +217,10 @@ def BckBeamSpreaderTransmission(sample_spreader, direct_spreader,
                              theta_dependent=True ):
     if ReductionSingleton().get_background() is None:
         raise RuntimeError, "A background hasn't been defined."
+    find_data(sample_spreader, instrument=ReductionSingleton().instrument.name())
+    find_data(direct_spreader, instrument=ReductionSingleton().instrument.name())
+    find_data(sample_scattering, instrument=ReductionSingleton().instrument.name())
+    find_data(direct_scattering, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().get_background().set_transmission(sans_reduction_steps.BeamSpreaderTransmission(sample_spreader=sample_spreader, 
                                                                                           direct_spreader=direct_spreader,
                                                                                           sample_scattering=sample_scattering, 
@@ -209,6 +232,7 @@ def BckBeamSpreaderTransmission(sample_spreader, direct_spreader,
 def BckTransmissionDarkCurrent(dark_current=None):
     if ReductionSingleton().get_background() is None:
         raise RuntimeError, "A background hasn't been defined."
+    find_data(dark_current, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().get_background().set_trans_dark_current(dark_current)
 
 def BckThetaDependentTransmission(theta_dependence=True):
@@ -246,6 +270,7 @@ def SetAbsoluteScale(factor):
     ReductionSingleton().set_absolute_scale(absolute_scale.BaseAbsoluteScale(factor))
     
 def SetDirectBeamAbsoluteScale(direct_beam, beamstop_diameter=None, attenuator_trans=1.0, sample_thickness=None, apply_sensitivity=False):
+    find_data(direct_beam, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_absolute_scale(absolute_scale.AbsoluteScale(data_file=direct_beam, 
                                                                          beamstop_diameter=beamstop_diameter, 
                                                                          attenuator_trans=attenuator_trans, 

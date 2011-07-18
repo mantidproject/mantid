@@ -348,9 +348,9 @@ class TestCommands(unittest.TestCase):
         Reduce1D()
                 
         data = mtd["BioSANS_test_data_Iq"].dataY(0)
-        self.assertEqual(data[0], 0.0)
-        self.assertEqual(data[10], 0.0)
-        self.assertEqual(data[20], 0.0)
+        self.assertAlmostEqual(data[0], 0.0,10)
+        self.assertAlmostEqual(data[10], 0.0,10)
+        self.assertAlmostEqual(data[20], 0.0,10)
             
     def test_bck_w_transmission(self):
         HFIRSANS()
@@ -366,9 +366,9 @@ class TestCommands(unittest.TestCase):
         Reduce1D()
                 
         data = mtd["test_data_Iq"].dataY(0)
-        self.assertEqual(data[0], 0.0)
-        self.assertEqual(data[10], 0.0)
-        self.assertEqual(data[20], 0.0)
+        self.assertAlmostEqual(data[0], 0.0,10)
+        self.assertAlmostEqual(data[10], 0.0,10)
+        self.assertAlmostEqual(data[20], 0.0,10)
             
     def test_transmission_by_hand_w_sensitivity(self):
         HFIRSANS()

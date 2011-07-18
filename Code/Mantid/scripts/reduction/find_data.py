@@ -61,7 +61,7 @@ def find_data(file, instrument=''):
     file = str(file)
     instrument = str(instrument)
     file_path = FileFinder.getFullPath(file)
-    if file_path is not None and len(file_path)>0:
+    if os.path.isfile(file_path):
         return file_path
 
     # Second, assume a run number    

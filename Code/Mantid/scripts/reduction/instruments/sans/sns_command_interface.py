@@ -17,6 +17,7 @@ from hfir_command_interface import SensitivityDirectBeamCenter, SetSensitivityBe
 from sns_reducer import EqSansReducer
 import sns_instrument
 import sns_reduction_steps
+from reduction.find_data import find_data
 
 import mantidsimple
 
@@ -31,6 +32,7 @@ def FrameSkipping(value=False):
     #ReductionSingleton().set_frame_skipping(value)
     
 def DarkCurrent(datafile):
+    find_data(datafile, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_dark_current_subtracter(sns_reduction_steps.SubtractDarkCurrent(datafile))
 
 def TotalChargeNormalization():
@@ -68,6 +70,8 @@ def AzimuthalAverage(suffix="_Iq", n_bins=100, n_subpix=1, log_binning=False):
                                                                                             log_binning=log_binning))
     
 def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True, combine_frames=True):
+    find_data(sample_file, instrument=ReductionSingleton().instrument.name())
+    find_data(empty_file, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_transmission(sns_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
                                                                                      empty_file=empty_file,
                                                                                      beam_radius=beam_radius,
@@ -78,6 +82,8 @@ def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_depen
 def BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True, combine_frames=True):
     if ReductionSingleton().get_background() is None:
         raise RuntimeError, "A background hasn't been defined."
+    find_data(sample_file, instrument=ReductionSingleton().instrument.name())
+    find_data(empty_file, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().get_background().set_transmission(sns_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
                                                                                                       empty_file=empty_file,
                                                                                                       beam_radius=beam_radius,
