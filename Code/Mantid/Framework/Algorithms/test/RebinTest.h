@@ -7,6 +7,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/Rebin.h"
+#include "MantidAlgorithms/MaskBins.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -336,6 +337,113 @@ public:
     AnalysisDataService::Instance().remove("test_RebinPointDataOutput");
   }
 
+  void testMaskedBinsDist()
+  {
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
+    AnalysisDataService::Instance().add("test_Rebin_mask_dist", test_in1D);
+    test_in1D->isDistribution(true);
+    maskFirstBins("test_Rebin_mask_dist", "test_Rebin_masked_ws", 10.0);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_Rebin_masked_ws");
+    rebin.setPropertyValue("OutputWorkspace","test_Rebin_masked_ws");
+    rebin.setPropertyValue("Params", "1.5,3.0,12,-0.1,30");
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_Rebin_masked_ws"));
+    const MantidVec & outX = rebindata->readX(0);
+    const MantidVec & outY = rebindata->readY(0);
+
+    MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_Rebin_mask_dist"));
+    const MantidVec & inX=input->readX(0);
+    const MantidVec & inY=input->readY(0);
+
+    const MatrixWorkspace::MaskList& mask = rebindata->maskedBins(0);
+
+    //turn the mask list into an array like the Y values
+    MantidVec weights(outY.size(), 0);
+    for (MatrixWorkspace::MaskList::const_iterator it = mask.begin(); it!= mask.end(); ++it)
+    {
+      weights[it->first] = it->second;
+    }
+
+    //the degree of masking must be the same as the reduction in the y-value, for distributions, this is the easy case
+    for (int i = 0; i < outY.size(); ++i)
+    {
+      size_t inBin = std::lower_bound(inX.begin(), inX.end(), outX[i]) - inX.begin();
+      if ( inBin < inX.size()-2 )
+      {
+        TS_ASSERT_DELTA(outY[i]/inY[inBin], 1-weights[i], 0.000001);
+      }
+    }
+    //the above formula tests the criterian that must be true for masking, however we need some more specific tests incase outY.empty() or something
+    TS_ASSERT_DELTA(outY[1], 0.0, 0.000001)
+    TS_ASSERT_DELTA(outY[2], 0.25, 0.000001)
+    TS_ASSERT_DELTA(outY[3], 3.0, 0.000001)
+    TS_ASSERT_DELTA(weights[2], 1-(0.25/3.0), 0.000001)
+
+    TS_ASSERT(rebindata->isDistribution());
+    AnalysisDataService::Instance().remove("test_Rebin_mask_dist");
+    AnalysisDataService::Instance().remove("test_Rebin_masked_ws");
+  }
+  
+  void testMaskedBinsIntegratedCounts()
+  {
+    Workspace2D_sptr test_in1D = Create1DWorkspace(51);
+    test_in1D->isDistribution(false);
+    AnalysisDataService::Instance().add("test_Rebin_mask_raw", test_in1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace","test_Rebin_mask_raw");
+    rebin.setPropertyValue("OutputWorkspace","test_Rebin_unmasked");
+    rebin.setPropertyValue("Params", "1.5,3.0,12,-0.1,30");
+    rebin.execute();
+
+    MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_Rebin_unmasked"));
+    const Mantid::MantidVec inX=input->readX(0);
+    const Mantid::MantidVec inY=input->readY(0);
+
+    maskFirstBins("test_Rebin_mask_raw", "test_Rebin_masked_ws", 10.0);
+
+    rebin.setPropertyValue("InputWorkspace","test_Rebin_masked_ws");
+    rebin.setPropertyValue("OutputWorkspace","test_Rebin_masked_ws");
+    rebin.setPropertyValue("Params", "1.5,3.0,12,-0.1,30");
+    rebin.execute();
+    MatrixWorkspace_sptr masked = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_Rebin_masked_ws"));
+    const Mantid::MantidVec outX=masked->readX(0);
+    const Mantid::MantidVec outY=masked->readY(0);
+
+    const MatrixWorkspace::MaskList& mask = masked->maskedBins(0);
+
+    //turn the mask list into an array like the Y values
+    MantidVec weights(outY.size(), 0);
+    for (MatrixWorkspace::MaskList::const_iterator it = mask.begin(); it!= mask.end(); ++it)
+    {
+      weights[it->first] = it->second;
+    }
+
+    //the degree of masking must be the same as the reduction in the y-value, for distributions, this is the easy case
+    for (int i = 0; i < outY.size(); ++i)
+    {
+      size_t inBin = std::lower_bound(inX.begin(), inX.end(), outX[i]) - inX.begin();
+      if ( inBin < inX.size()-2 )
+      {
+        TS_ASSERT_DELTA(outY[i]/inY[inBin], 1-weights[i], 0.000001);
+      }
+    }
+    //the above formula tests the criterian that must be true for masking, however we need some more specific tests incase outY.empty() or something
+    TS_ASSERT_DELTA(outY[1], 0.0, 0.000001)
+    TS_ASSERT_DELTA(outY[2], 1.0, 0.000001)
+    TS_ASSERT_DELTA(outY[3], 6.0, 0.000001)
+    TS_ASSERT_DELTA(weights[2], 1-(0.25/3.0), 0.000001)
+
+    AnalysisDataService::Instance().remove("test_Rebin_masked_ws");
+    AnalysisDataService::Instance().remove("test_Rebin_unmasked");
+    AnalysisDataService::Instance().remove("test_Rebin_mask_raw");
+  }
+
 private:
 
 
@@ -380,6 +488,16 @@ private:
     return retVal;
   }
 
+  void maskFirstBins(const std::string & in, const std::string & out, double maskBinsTo)
+  {
+    MaskBins mask;
+    mask.initialize();
+    mask.setPropertyValue("InputWorkspace", in);
+    mask.setPropertyValue("OutputWorkspace", out);
+    mask.setProperty("XMin", 0.0);
+    mask.setProperty("XMax", maskBinsTo);
+    mask.execute();
+  }
 
 };
 #endif /* REBINTEST */

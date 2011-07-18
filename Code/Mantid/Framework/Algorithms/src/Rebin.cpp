@@ -322,7 +322,7 @@ namespace Mantid
       // Now process the output vector and fill the new masking list
       for (size_t index = 0; index < newWeights.size(); ++index)
       {
-        if ( newWeights[index] > 0.0 ) outputWS->maskBin(hist,index,newWeights[index]);
+        if ( newWeights[index] > 0.0 ) outputWS->flagMasked(hist, index, newWeights[index]);
       }
     }
     

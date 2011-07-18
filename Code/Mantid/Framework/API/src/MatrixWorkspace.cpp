@@ -1073,7 +1073,11 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------------
-    /** Masks a single bin. It's value (and error) will be scaled by (1-weight).
+    /** Called by the algorithm MaskBins to mask a single bin for the first time, algorithms that later propagate the
+    *  the mask from an input to the output should call flagMasked. Here value (and error) will be scaled by (1-weight)
+    *  as well as the mask flags (m_masks) being updated. This function is not safe if called by multiple threads on
+    *  the same spectrum but writing to the mask set is marked parrallel critical so different spectra can be analysised
+    *  in parallel
     *  @param workspaceIndex :: The workspace spectrum index of the bin
     *  @param binIndex ::      The index of the bin in the spectrum
     *  @param weight ::        'How heavily' the bin is to be masked. =1 for full masking (the default).
@@ -1086,20 +1090,38 @@ namespace Mantid
       // Then check the bin index
       if (binIndex>= this->blocksize() )
         throw Kernel::Exception::IndexError(binIndex,this->blocksize(),"MatrixWorkspace::maskBin,binIndex");
+      // this function is marked parallel critical
+      flagMasked(workspaceIndex, binIndex, weight);
 
+      this->dataY(workspaceIndex)[binIndex] *= (1-weight);
+      this->dataE(workspaceIndex)[binIndex] *= (1-weight);
+    }
+
+    /** Writes the masking weight to m_masks (doesn't alter y-values). Contains a parrallel critical section
+    *  and so is thread safe
+    *  @param spectrumIndex :: The workspace spectrum index of the bin
+    *  @param binIndex ::      The index of the bin in the spectrum
+    *  @param weight ::        'How heavily' the bin is to be masked. =1 for full masking (the default).
+    */
+    void MatrixWorkspace::flagMasked(const size_t& spectrumIndex, const size_t& binIndex, const double& weight)
+    {
       // Writing to m_masks is not thread-safe, so put in some protection
       PARALLEL_CRITICAL(maskBin)
       {
-        // If a mask for this bin already exists, it would be replaced. But I think that is OK.
         // First get a reference to the list for this spectrum (or create a new list)
-        MatrixWorkspace::MaskList& specList = m_masks[workspaceIndex];
-        // Add the new value. Will automatically be put in the right place (ordered by binIndex)
-        specList.insert( std::make_pair(binIndex,weight) );
+        MaskList& binList = m_masks[spectrumIndex];
+        //see if the bin is already masked. Normally only a handfull of bins are masked, if it's 100s you might want to make this faster
+        for(MaskList::const_iterator it = binList.begin(); it != binList.end(); ++it)
+        {
+          if ( it->first == binIndex )
+          {
+            //calling erase will invalidate the iterator! So we must call break immediately after
+            binList.erase(it);
+            break;
+          }
+        }
+        binList.insert( std::make_pair(binIndex,weight) );
       }
-
-      this->dataY(workspaceIndex)[binIndex] *= (1-weight);
-      // Do we want to scale the error?
-      this->dataE(workspaceIndex)[binIndex] *= (1-weight);
     }
 
     /** Does this spectrum contain any masked bins 
