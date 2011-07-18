@@ -4,7 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/DspacemaptoCal.h"
-#include "MantidAlgorithms/CreateCalFileByNames.h"
+#include "MantidAlgorithms/CreateGroupingWorkspace.h"
+#include "MantidDataHandling/SaveCalFile.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/Instrument.h"
@@ -37,7 +38,7 @@ public:
   void testINES()
   {
     LoadEmptyInstrument loaderDSP;
-
+ 
     loaderDSP.initialize();
     loaderDSP.isInitialized();
     loaderDSP.setPropertyValue("Filename", ConfigService::Instance().getString(
@@ -47,17 +48,29 @@ public:
     loaderDSP.execute();
     loaderDSP.isExecuted();
 
-    CreateCalFileByNames createrDSP;
+    CreateGroupingWorkspace createrDSP;
 
     TS_ASSERT_THROWS_NOTHING(createrDSP.initialize());
     TS_ASSERT_THROWS_NOTHING(createrDSP.isInitialized());
-    createrDSP.setPropertyValue("InstrumentWorkspace", wsName);
-    std::string outputFile = "./INES_DspacemaptoCalTest.cal";
-    createrDSP.setPropertyValue("GroupingFileName", outputFile);
-    outputFile = createrDSP.getPropertyValue("GroupingFileName");
+    createrDSP.setPropertyValue("InstrumentName", "INES");
+    createrDSP.setPropertyValue("OutputWorkspace", "grp");
     createrDSP.setPropertyValue("GroupNames", "bank1A,bank2B,bank3C,bank4D,bank5E,bank6F,bank7G,bank8H,bank9I");
 
     TS_ASSERT_THROWS_NOTHING(createrDSP.execute());
+    GroupingWorkspace_sptr groupWS = boost::dynamic_pointer_cast<GroupingWorkspace>(AnalysisDataService::Instance().retrieve("grp"));
+    std::string outputFile = "./INES_DspacemaptoCalTest.cal";
+ 
+    SaveCalFile alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GroupingWorkspace", groupWS) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", outputFile) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+   
+    outputFile = alg.getPropertyValue("Filename");
+    TS_ASSERT( Poco::File(outputFile).exists() );
+
 
     DspacemaptoCal testerDSP;
 
@@ -124,7 +137,7 @@ public:
   void doTestVulcan(std::string dspaceFile, std::string fileType)
   {
     LoadEmptyInstrument loaderDSP;
-
+ 
     loaderDSP.initialize();
     loaderDSP.isInitialized();
     loaderDSP.setPropertyValue("Filename", ConfigService::Instance().getString(
@@ -136,15 +149,26 @@ public:
 
     std::string outputFile = "./VULCAN_dspacemaptocal_test.cal";
 
-    CreateCalFileByNames createrDSP;
+    CreateGroupingWorkspace createrDSP;
+
     TS_ASSERT_THROWS_NOTHING(createrDSP.initialize());
     TS_ASSERT_THROWS_NOTHING(createrDSP.isInitialized());
-    createrDSP.setPropertyValue("InstrumentWorkspace", wsName);
-    createrDSP.setPropertyValue("GroupingFileName", outputFile);
-    outputFile = createrDSP.getPropertyValue("GroupingFileName");
+    createrDSP.setPropertyValue("InstrumentName", "VULCAN");
+    createrDSP.setPropertyValue("OutputWorkspace", "grp");
     createrDSP.setPropertyValue("GroupNames", "");
-    createrDSP.execute();
-    TS_ASSERT( createrDSP.isExecuted() );
+
+    TS_ASSERT_THROWS_NOTHING(createrDSP.execute());
+    GroupingWorkspace_sptr groupWS = createrDSP.getProperty("OutputWorkspace");
+ 
+    SaveCalFile alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GroupingWorkspace", groupWS) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", outputFile) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+   
+    std::string filename = alg.getPropertyValue("Filename");
 
 
     DspacemaptoCal testerDSP;
