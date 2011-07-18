@@ -296,9 +296,11 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         nxsfile = str(wksp) + ".nxs"
 
         if not os.path.isfile(nxsfile):
-            name = str(wksp)
-            name = name.split('_')[1] # remove the instrument name
-            nxsfile = self._findData(int(name), ".nxs")
+            nxsfile = str(wksp) + "_histo.nxs"
+            if not os.path.isfile(nxsfile):
+                name = str(wksp)
+                name = name.split('_')[1] # remove the instrument name
+                nxsfile = self._findData(int(name), ".nxs")
         self.log().information(nxsfile)
         if "nxs" in self._outTypes:
             SaveToSNSHistogramNexus(InputFilename=nxsfile,InputWorkspace=wksp, OutputFilename=filename+"_mantid.nxs", Compress=True)
