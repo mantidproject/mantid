@@ -346,7 +346,7 @@ QString AlgorithmHistoryWindow::generateScript()
         {
           std::string sanitisedname=sanitizePropertyName(name);
           algParam+=sanitisedname;
-          algParam+="'";//"=\"";
+          algParam+="='";//"=\"";
           algParam+=value;
           algParam+="',";//"\",";
         }
