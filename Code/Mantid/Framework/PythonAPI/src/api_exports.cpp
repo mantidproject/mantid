@@ -13,6 +13,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IEventList.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Sample.h"
@@ -266,6 +267,7 @@ using namespace boost::python;
       .def("setDistribution", (bool& (API::MatrixWorkspace::*)(const bool))&API::MatrixWorkspace::isDistribution, 
          return_value_policy<return_by_value>() )
       .def("getInstrument", &API::MatrixWorkspace::getInstrument)
+      .def("getSpectrum", (ISpectrum * (MatrixWorkspace::*)(const size_t))&API::MatrixWorkspace::getSpectrum, return_internal_reference<>() )
       .def("getDetector", (Geometry::IDetector_sptr (API::MatrixWorkspace::*) (const size_t) const)&API::MatrixWorkspace::getDetector)
       .def("getRun", &API::MatrixWorkspace::run, return_internal_reference<>() )
       .def("getSampleInfo", &API::MatrixWorkspace::sample, return_internal_reference<>() )
@@ -339,6 +341,20 @@ using namespace boost::python;
         .def("getEventList", (IEventList*(IEventWorkspace::*)(const int) ) &IEventWorkspace::getEventListPtr, return_internal_reference<>())
         .def("clearMRU", &IEventWorkspace::clearMRU)
            ;
+  }
+
+  void export_ISpectrum()
+  {
+    register_ptr_to_python<ISpectrum*>();
+
+    class_<ISpectrum, boost::noncopyable>("ISpectrum", no_init)
+      .def("addDetectorID", &ISpectrum::addDetectorID)
+      .def("setDetectorID", &ISpectrum::setDetectorID)
+      .def("hasDetectorID", &ISpectrum::hasDetectorID)
+      .def("clearDetectorIDs", &ISpectrum::clearDetectorIDs)
+      .def("getSpectrumNo", &ISpectrum::getSpectrumNo)
+      .def("setSpectrumNo", &ISpectrum::setSpectrumNo)
+      ;
   }
 
   void export_EventList()
@@ -613,6 +629,7 @@ using namespace boost::python;
     export_workspace_history();
     export_file_finder();
     export_IMDDimension();
+    export_ISpectrum();
     export_EventList();
 //    export_PeaksWorkspace();
   }
