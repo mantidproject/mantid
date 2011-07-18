@@ -369,7 +369,7 @@ public:
     }
 
     //the degree of masking must be the same as the reduction in the y-value, for distributions, this is the easy case
-    for (int i = 0; i < outY.size(); ++i)
+    for (size_t i = 0; i < outY.size(); ++i)
     {
       size_t inBin = std::lower_bound(inX.begin(), inX.end(), outX[i]) - inX.begin();
       if ( inBin < inX.size()-2 )
@@ -425,7 +425,7 @@ public:
     }
 
     //the degree of masking must be the same as the reduction in the y-value, for distributions, this is the easy case
-    for (int i = 0; i < outY.size(); ++i)
+    for (size_t i = 0; i < outY.size(); ++i)
     {
       size_t inBin = std::lower_bound(inX.begin(), inX.end(), outX[i]) - inX.begin();
       if ( inBin < inX.size()-2 )
