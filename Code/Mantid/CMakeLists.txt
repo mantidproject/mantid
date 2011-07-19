@@ -66,7 +66,6 @@ if ( UNIX )
 endif ( UNIX )
 
 set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
-set ( REDUCER_TEST OFF CACHE BOOL "Switch for running flaky Reducer test")
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?") 
 
@@ -107,94 +106,20 @@ install ( DIRECTORY Installers/colormaps/ DESTINATION ${INBUNDLE}colormaps PATTE
 # Keep this in a defaulted-to-off option
 set ( ENABLE_CPACK CACHE BOOL "Switch to enable CPack package generation")
 if ( ENABLE_CPACK )
-  # generic package level information
   if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set ( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neutron Scattering Data Analysis" )
-    set ( CPACK_PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory and NScD Oak Ridge National Laboratory" )
-    set ( CPACK_PACKAGE_URL http://www.mantidproject.org/ )
-    set ( CPACK_PACKAGE_CONTACT mantid-help@mantidproject.org )
+  
+    include ( CPackCommon )
+    
     set ( CPACK_PACKAGE_ICON Images/MantidPlot_Icon_32offset.png )
     set ( CPACK_PACKAGE_NAME mantid )
-    set ( CPACK_PACKAGE_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${MtdVersion_WC_LAST_CHANGED_REV} )
-    set ( CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR} )
-    set ( CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR} )
-    set ( CPACK_PACKAGE_VERSION_PATCH ${MtdVersion_WC_LAST_CHANGED_REV} )
-    set ( CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
   
     # Mac Packagemaker settings
     set ( CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/MacOSX-README.rtf )
     set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/Installers/WinInstaller/License.rtf )
 
-    # RPM information - only used if generating a rpm
-    #set ( CPACK_RPM_PACKAGE_ARCHITECTURE x86_64 )
-    set ( CPACK_RPM_PACKAGE_LICENSE GPLv3+ )
-    set ( CPACK_RPM_PACKAGE_RELEASE 1 )
-    set ( CPACK_RPM_PACKAGE_GROUP Applications/Engineering )
-
-
-    # DEB information - only used if generating a deb
-    set ( CPACK_DEBIAN_PACKAGE_RELEASE 1 )
-
     IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
-      # define the source generators
-      set ( CPACK_SOURCE_GENERATOR TGZ )
-
-      FIND_PROGRAM (LSB_CMD lsb_release)
-      IF ( LSB_CMD )
-        # get the distribution
-        execute_process ( COMMAND ${LSB_CMD} -i
-                          OUTPUT_VARIABLE UNIX_DIST
-                          OUTPUT_STRIP_TRAILING_WHITESPACE )
-        string ( REGEX REPLACE "Distributor ID:" "" UNIX_DIST ${UNIX_DIST} )
-        string ( STRIP ${UNIX_DIST} UNIX_DIST )
-        string ( REGEX REPLACE "RedHatEnterpriseClient" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
-        string ( REGEX REPLACE "RedHatEnterpriseWorkstation" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
-        # get the codename
-        execute_process ( COMMAND ${LSB_CMD} -c
-                        OUTPUT_VARIABLE UNIX_CODENAME
-                        OUTPUT_STRIP_TRAILING_WHITESPACE )
-        string ( REGEX REPLACE "Codename:" "" UNIX_CODENAME ${UNIX_CODENAME} )
-        string ( STRIP ${UNIX_CODENAME} UNIX_CODENAME )
-      ELSE ( LSB_CMD )
-        set ( UNIX_DIST "" )
-        set ( UNIX_CODENAME "" )
-      ENDIF ( LSB_CMD )
-      message ( STATUS " DIST: ${UNIX_DIST} CODENAME: ${UNIX_CODENAME}" )
-
-      # define which binary generators to use
-      IF ( ${UNIX_DIST} MATCHES "Ubuntu" )
-        FIND_PROGRAM(DPKG_CMD dpkg)
-        IF ( DPKG_CMD )
-          set ( CPACK_GENERATOR "DEB" )
-          execute_process( COMMAND ${DPKG_CMD} --print-architecture
-                           OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
-                           OUTPUT_STRIP_TRAILING_WHITESPACE )
-          # acording to debian <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb 
-          set( CPACK_PACKAGE_FILE_NAME
-               "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")   
-        ENDIF( DPKG_CMD ) 
-      ENDIF ( ${UNIX_DIST} MATCHES "Ubuntu" )
-
-      #RedHatEnterpriseClient RedHatEnterpriseWorkstation
-      IF ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
-        FIND_PROGRAM ( RPMBUILD_CMD rpmbuild )
-        IF ( RPMBUILD_CMD )
-          set ( CPACK_GENERATOR "RPM" )
-	  set ( CPACK_RPM_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}" )
-          # reset the release name to include the RHEL version if known
-          IF ( ${UNIX_CODENAME} MATCHES "Tikanga" )
-            set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el5" )
-          ELSEIF ( ${UNIX_CODENAME} MATCHES "Santiago" )
-            set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el6" )
-          ENDIF ( ${UNIX_CODENAME} MATCHES "Tikanga" )
-        
-          # according to rpm.org: name-version-release.architecture.rpm
-          set ( CPACK_PACKAGE_FILE_NAME
-              "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}.${CPACK_RPM_PACKAGE_ARCHITECTURE}" )
-       
-      ENDIF ( RPMBUILD_CMD)
-      ENDIF ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
-
+      include ( CPackLinuxSetup )
+    
       # let people know what is coming out the other end
       message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
     ENDIF ()
