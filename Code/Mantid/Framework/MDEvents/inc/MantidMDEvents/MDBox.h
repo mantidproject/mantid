@@ -90,6 +90,9 @@ namespace MDEvents
 
     const std::vector< MDE > & getEvents() const;
 
+    void releaseEvents() const;
+
+
     std::vector< MDE > * getEventsCopy();
 
     void addEvent(const MDE & point);

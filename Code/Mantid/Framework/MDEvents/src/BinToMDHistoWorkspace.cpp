@@ -207,9 +207,9 @@ namespace MDEvents
       MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxIt.getBox());
       if (box)
       {
-        std::vector<MDE> & events = box->getEvents();
-        typename std::vector<MDE>::iterator it = events.begin();
-        typename std::vector<MDE>::iterator it_end = events.end();
+        const std::vector<MDE> & events = box->getEvents();
+        typename std::vector<MDE>::const_iterator it = events.begin();
+        typename std::vector<MDE>::const_iterator it_end = events.end();
         for (; it != it_end; it++)
         {
           // Cache the center of the event (again for speed)
@@ -247,7 +247,8 @@ namespace MDEvents
             errors[linearIndex] += it->getErrorSquared();
           }
         }
-
+        // Done with the events list
+        box->releaseEvents();
       }
 
       if (!boxIt.next())

@@ -556,6 +556,12 @@ public:
     TS_ASSERT_DELTA( c.getSignal(), 499500.0, 1e-2);
     TS_ASSERT_DELTA( c.getErrorSquared(), 500000.0, 1e-2);
 
+    // Pretend we're letting go of the events. This should clear the list
+    c.setOnDisk(true);
+    c.releaseEvents();
+    c.setOnDisk(false);
+    TS_ASSERT_EQUALS( c.getNPoints(), 0);
+
     file->close();
     if (Poco::File(filename).exists()) Poco::File(filename).remove();
   }

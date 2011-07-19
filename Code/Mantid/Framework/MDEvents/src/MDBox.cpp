@@ -128,6 +128,19 @@ namespace MDEvents
     return data;
   }
 
+  //-----------------------------------------------------------------------------------------------
+  TMDE(
+  void MDBox)::releaseEvents() const
+  {
+    //TODO: Check a dirty flag and save the data if required?
+    if (m_onDisk)
+    {
+      // Free up memory by clearing the events
+      data.clear();
+      vec_t().swap(data); // Linux trick to really free the memory
+    }
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Allocate and return a vector with a copy of all events contained
