@@ -7,8 +7,7 @@
 from interface import InstrumentInterface
 from reduction_gui.widgets.sans.hfir_detector import DetectorWidget
 from reduction_gui.widgets.sans.eqsans_instrument import SANSInstrumentWidget
-from reduction_gui.widgets.sans.eqsans_sample_data import SampleDataWidget
-from reduction_gui.widgets.sans.eqsans_background import BackgroundWidget
+from reduction_gui.widgets.sans.eqsans_data import DataSetsWidget
 from reduction_gui.widgets.output import OutputWidget
 from reduction_gui.reduction.eqsans_reduction import EQSANSReductionScripter
 
@@ -33,10 +32,7 @@ class EQSANSInterface(InstrumentInterface):
         self.attach(DetectorWidget(settings = self._settings, data_proxy=None, data_type = self.data_type, use_sample_dc=True))
 
         # Sample
-        self.attach(SampleDataWidget(settings = self._settings, data_proxy=None, data_type = self.data_type))
-        
-        # Background
-        self.attach(BackgroundWidget(settings = self._settings, data_proxy=None, data_type = self.data_type))
+        self.attach(DataSetsWidget(settings = self._settings, data_proxy=None, data_type = self.data_type))
         
         # Reduction output
         self.attach(OutputWidget(settings = self._settings))

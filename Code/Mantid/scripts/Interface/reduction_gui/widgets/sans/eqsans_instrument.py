@@ -7,7 +7,6 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_eqsans_instrument
 import ui.sans.ui_eqsans_info
-from reduction import extract_workspace_name
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -16,6 +15,7 @@ try:
     mtd.initialise(False)
     from mantidsimple import *
     IS_IN_MANTIDPLOT = True
+    from reduction import extract_workspace_name
 except:
     pass
 
@@ -320,11 +320,11 @@ class SANSInstrumentWidget(BaseWidget):
        
         # Absolute scaling
         self._summary.scale_chk.setChecked(state.calculate_scale)
-        self._summary.scale_edit.setText(QtCore.QString(str(state.scaling_factor)))
+        self._summary.scale_edit.setText(QtCore.QString("%-6.3g" % state.scaling_factor))
         self._summary.scale_data_edit.setText(QtCore.QString(state.scaling_direct_file))
         self._summary.scale_att_trans_edit.setText(QtCore.QString(str(state.scaling_att_trans)))
         
-        self._summary.scale_beam_radius_edit.setText(QtCore.QString("%-6.1f" % state.scaling_beam_diam))
+        self._summary.scale_beam_radius_edit.setText(QtCore.QString("%-6.3g" % state.scaling_beam_diam))
         if self._beam_diameter is None:
             self._beam_diameter = state.scaling_beam_diam
         self._beam_diameter_supplied = state.manual_beam_diam        

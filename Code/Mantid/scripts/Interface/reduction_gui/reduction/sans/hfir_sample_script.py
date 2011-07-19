@@ -213,8 +213,7 @@ class SampleData(BaseScriptElement):
         xml += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
         xml += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
         xml += "  <dark_current>%s</dark_current>\n" % str(self.dark_current)
-        if self.calculate_transmission:
-            xml += self.calculation_method.to_xml()
+        xml += self.calculation_method.to_xml()
         xml += "</Transmission>\n"
         xml += "<SampleData>\n"
         for item in self.data_files:
@@ -247,13 +246,12 @@ class SampleData(BaseScriptElement):
                                                                            default = SampleData.theta_dependent)
             self.dark_current = BaseScriptElement.getStringElement(instrument_dom, "dark_current")
             
-            if self.calculate_transmission:
-                for m in self.option_list:
-                    method = m()
-                    if method.find(instrument_dom):
-                        method.from_xml(instrument_dom)
-                        self.calculation_method = method
-                        break
+            for m in self.option_list:
+                method = m()
+                if method.find(instrument_dom):
+                    method.from_xml(instrument_dom)
+                    self.calculation_method = method
+                    break
                     
         # Data file section - take care of backward compatibility
         if mtd_version!=0 and mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:

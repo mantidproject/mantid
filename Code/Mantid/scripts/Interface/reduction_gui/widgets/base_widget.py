@@ -2,7 +2,6 @@ from PyQt4 import QtGui, uic, QtCore
 import os
 import types
 from reduction_gui.settings.application_settings import GeneralSettings
-from reduction import find_data
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -11,6 +10,7 @@ try:
     mtd.initialise(False)
     from mantidsimple import *
     IS_IN_MANTIDPLOT = True
+    from reduction import find_data
 except:
     pass
 

@@ -7,32 +7,12 @@ from reduction_gui.reduction.sans.hfir_sample_script import SampleData as BaseSa
 
 class SampleData(BaseSampleData):
 
-    class BeamHole(BaseScriptElement):        
-        def to_script(self):
-            """
-                Generate reduction script
-            """
-            return "BeamStopTransmission()\n"
-            
-        def to_xml(self):
-            """
-                Create XML from the current data.
-            """
-            return "  <BeamHole/>\n"
-
-        def find(self, dom):
-            """
-                Return True if we find a tag belonging 
-                to this class
-            """
-            element_list = dom.getElementsByTagName("BeamHole")
-            return len(element_list)>0
-        
     calculation_method = BaseSampleData.DirectBeam()
     # Option list
     option_list = [BaseSampleData.DirectBeam]
     # Option to fit the two frame separately when in frame-skipping mode
     combine_transmission_frames = True
+    calculate_transmission = True
 
     def __init__(self):
         super(SampleData, self).__init__()
@@ -43,8 +23,9 @@ class SampleData(BaseSampleData):
             Reset state
         """
         super(SampleData, self).reset()
-        self.calculation_method = SampleData.calculation_method
+        self.calculation_method.reset()
         self.combine_transmission_frames = SampleData.combine_transmission_frames
+        self.calculate_transmission = SampleData.calculate_transmission
     
     def to_script(self):
         """
@@ -76,7 +57,7 @@ class SampleData(BaseSampleData):
         element_list = dom.getElementsByTagName("Transmission")
         if len(element_list)>0:
             instrument_dom = element_list[0]      
-            self.combine_transmission_frames = BaseScriptElement.getBoolElement(dom, "combine_transmission_frames",
+            self.combine_transmission_frames = BaseScriptElement.getBoolElement(instrument_dom, "combine_transmission_frames",
                                                                                 default = SampleData.combine_transmission_frames)
 
     

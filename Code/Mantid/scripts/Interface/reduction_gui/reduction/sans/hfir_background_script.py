@@ -136,20 +136,17 @@ class Background(BaseScriptElement):
         """
         xml  = "<Background>\n"
         xml += "  <dark_current_corr>%s</dark_current_corr>\n" % str(self.dark_current_corr)
-        if self.dark_current_corr:
-            xml += "  <dark_current_file>%s</dark_current_file>\n" % self.dark_current_file
+        xml += "  <dark_current_file>%s</dark_current_file>\n" % self.dark_current_file
 
         xml += "  <background_corr>%s</background_corr>\n" % str(self.background_corr)
-        if self.background_corr:
-            xml += "  <background_file>%s</background_file>\n" % self.background_file
-            xml += "  <bck_trans_enabled>%s</bck_trans_enabled>\n" % str(self.bck_transmission_enabled)
-            xml += "  <bck_trans>%g</bck_trans>\n" % self.bck_transmission
-            xml += "  <bck_trans_spread>%g</bck_trans_spread>\n" % self.bck_transmission_spread
-            xml += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
-            xml += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
-            xml += "  <trans_dark_current>%s</trans_dark_current>\n" % str(self.trans_dark_current)
-            if self.calculate_transmission:
-                xml += self.trans_calculation_method.to_xml()
+        xml += "  <background_file>%s</background_file>\n" % self.background_file
+        xml += "  <bck_trans_enabled>%s</bck_trans_enabled>\n" % str(self.bck_transmission_enabled)
+        xml += "  <bck_trans>%g</bck_trans>\n" % self.bck_transmission
+        xml += "  <bck_trans_spread>%g</bck_trans_spread>\n" % self.bck_transmission_spread
+        xml += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
+        xml += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
+        xml += "  <trans_dark_current>%s</trans_dark_current>\n" % str(self.trans_dark_current)
+        xml += self.trans_calculation_method.to_xml()
         xml += "</Background>\n"
         return xml
 
@@ -184,13 +181,12 @@ class Background(BaseScriptElement):
                                                                            default = Background.theta_dependent)
             self.trans_dark_current = BaseScriptElement.getStringElement(instrument_dom, "trans_dark_current")
 
-            if self.calculate_transmission:
-                for m in [Background.DirectBeam, Background.BeamSpreader]:
-                    method = m()
-                    if method.find(instrument_dom):
-                        method.from_xml(instrument_dom)
-                        self.trans_calculation_method = method
-                        break
+            for m in [Background.DirectBeam, Background.BeamSpreader]:
+                method = m()
+                if method.find(instrument_dom):
+                    method.from_xml(instrument_dom)
+                    self.trans_calculation_method = method
+                    break
 
     def reset(self):
         """

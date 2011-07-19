@@ -6,7 +6,6 @@ from reduction_gui.reduction.sans.hfir_options_script import ReductionOptions
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_hfir_instrument
-from reduction import extract_workspace_name
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -15,6 +14,7 @@ try:
     mtd.initialise(False)
     from mantidsimple import *
     IS_IN_MANTIDPLOT = True
+    from reduction import extract_workspace_name
 except:
     pass
 

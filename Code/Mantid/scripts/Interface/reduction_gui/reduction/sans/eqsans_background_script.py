@@ -26,29 +26,21 @@ class Background(BaseBackground):
             return "BckDirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
             (self.sample_file, self.direct_beam, self.beam_radius)
 
-    class BeamHole(SampleData.BeamHole):        
-        def __init__(self, state=None):
-            SampleData.BeamHole.__init__(self)
-
-        def to_script(self):
-            """
-                Generate reduction script
-            """
-            return "BckBeamStopTransmission()\n"
-            
     trans_calculation_method = DirectBeam()
     # Option list
     option_list = [DirectBeam]
     # Option to fit the two frame separately when in frame-skipping mode
     combine_transmission_frames = True
+    calculate_transmission = True
 
     def reset(self):
         """
             Reset state
         """
         super(Background, self).reset()
-        self.trans_calculation_method = Background.trans_calculation_method
+        self.trans_calculation_method.reset()
         self.combine_transmission_frames = SampleData.combine_transmission_frames
+        self.calculate_transmission = Background.calculate_transmission
     
     def __init__(self):
         super(Background, self).__init__()
@@ -84,8 +76,7 @@ class Background(BaseBackground):
         element_list = dom.getElementsByTagName("Background")
         if len(element_list)>0:
             instrument_dom = element_list[0]      
-            self.combine_transmission_frames = BaseScriptElement.getBoolElement(dom, "combine_transmission_frames",
-                                                                                default = SampleData.combine_transmission_frames)
-
+            self.combine_transmission_frames = BaseScriptElement.getBoolElement(instrument_dom, "combine_transmission_frames",
+                                                                                default = Background.combine_transmission_frames)
 
     
