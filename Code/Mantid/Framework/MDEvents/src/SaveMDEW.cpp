@@ -85,9 +85,9 @@ namespace MDEvents
       file->writeData( mess.str(), ws->getDimension(d)->toXMLString() );
     }
 
+    // Add box controller info.
     file->writeData("box_controller_xml", ws->getBoxController()->toXMLString());
 
-    // TODO: Add box controller info.
     file->closeGroup();
 
     // Start the main data group
@@ -110,7 +110,7 @@ namespace MDEvents
     // Recursion depth
     std::vector<int> depth(maxBoxes, -1);
     // Start/end indices into the list of events
-    std::vector<int64_t> box_event_index(maxBoxes*2, 0);
+    std::vector<uint64_t> box_event_index(maxBoxes*2, 0);
     // Min/Max extents in each dimension
     std::vector<double> extents(maxBoxes*nd*2, 0);
     // Inverse of the volume of the cell

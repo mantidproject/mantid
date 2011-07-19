@@ -1,11 +1,12 @@
 #ifndef BOXCONTROLLER_H_
 #define BOXCONTROLLER_H_
 
-#include <boost/shared_ptr.hpp>
-#include <vector>
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/MultiThreaded.h"
+#include "MantidNexus/NeXusFile.hpp"
+#include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace Mantid
 {
@@ -33,7 +34,7 @@ namespace MDEvents
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0)
+    :nd(nd), m_maxId(0), m_file(NULL)
     {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
@@ -331,6 +332,17 @@ namespace MDEvents
     }
 
 
+    //-----------------------------------------------------------------------------------
+    /** @return the open NeXus file handle */
+    ::NeXus::File * getFile() const
+    { return m_file; }
+
+    /** Sets the open Nexus file to use with file-based back-end
+     * @param file :: file handle */
+    void setFile(::NeXus::File * file)
+    { m_file = file; }
+
+
 
     //-----------------------------------------------------------------------------------
   private:
@@ -378,7 +390,7 @@ namespace MDEvents
     /// When you split a MDBox, it becomes this many sub-boxes
     size_t m_numSplit;
 
-    /// For adding events tasks
+    /// For adding events tasksm_file
     size_t m_addingEvents_eventsPerTask;
 
     /// For adding events tasks
@@ -398,6 +410,12 @@ namespace MDEvents
 
     /// Mutex for getting IDs
     Mantid::Kernel::Mutex m_idMutex;
+
+    /// Filename of the file backend
+    std::string m_filename;
+
+    /// Open file handle to the file back-end
+    ::NeXus::File * m_file;
 
   };
 

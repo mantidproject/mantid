@@ -45,7 +45,7 @@ public:
     }
   }
 
-  void test_exec()
+  void do_test_exec(bool FileBackEnd)
   {
     //------ Start by creating the file ----------------------------------------------
     // Make a 1D MDEventWorkspace
@@ -82,6 +82,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("FileBackEnd", FileBackEnd) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
@@ -156,6 +157,19 @@ public:
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
+  }
+
+
+  /// Load directly to memory
+  void test_exec()
+  {
+    do_test_exec(false);
+  }
+
+  /// Run the loading but keep the events on file and load on demand
+  void test_exec_with_file_backEnd()
+  {
+    do_test_exec(true);
   }
   
 

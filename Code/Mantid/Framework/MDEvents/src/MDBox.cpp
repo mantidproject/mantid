@@ -1,6 +1,7 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidAPI/ImplicitFunction.h"
+#include "MantidNexus/NeXusFile.hpp"
 
 namespace Mantid
 {
@@ -20,6 +21,7 @@ namespace MDEvents
    * @param depth :: splitting depth of the new box.
    */
   TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth)
+    : m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
   {
     if (controller->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
@@ -36,6 +38,7 @@ namespace MDEvents
   {
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;
+    m_fileNumEvents = 0;
     data.clear();
   }
 
@@ -56,9 +59,10 @@ namespace MDEvents
     return 1;
   }
 
+  //-----------------------------------------------------------------------------------------------
   /// Fill a vector with all the boxes up to a certain depth
   TMDE(
-  void MDBox):: getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/)
+  void MDBox)::getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/)
   {
     boxes.push_back(this);
   }
@@ -67,7 +71,22 @@ namespace MDEvents
   /** Returns the total number of points (events) in this box */
   TMDE(size_t MDBox)::getNPoints() const
   {
-    return data.size();
+    if (m_onDisk)
+      return m_fileNumEvents;
+    else
+      return data.size();
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Set the start/end point in the file where the events are located
+   * @param start :: start point,
+   * @param numEvents :: number of events in the file   */
+  TMDE(
+  void MDBox)::setFileIndex(uint64_t start, uint64_t numEvents)
+  {
+    m_fileIndexStart = start;
+    m_fileNumEvents = numEvents;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -76,8 +95,38 @@ namespace MDEvents
   TMDE(
   std::vector< MDE > & MDBox)::getEvents()
   {
+    if (m_onDisk)
+    {
+      ::NeXus::File * file = this->m_BoxController->getFile();
+      if (file)
+      {
+        //if (m_BoxController->UseFile())
+        data.clear();
+        MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
+      }
+    }
     return data;
   }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Returns a reference to the events vector contained within.
+   */
+  TMDE(
+  const std::vector< MDE > & MDBox)::getEvents() const
+  {
+    if (m_onDisk)
+    {
+      ::NeXus::File * file = this->m_BoxController->getFile();
+      if (file)
+      {
+        //if (m_BoxController->UseFile())
+        data.clear();
+        MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
+      }
+    }
+    return data;
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Allocate and return a vector with a copy of all events contained
@@ -100,15 +149,19 @@ namespace MDEvents
   void MDBox)::refreshCache(Kernel::ThreadScheduler * /*ts*/)
   {
 #ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
-    this->m_signal = 0;
-    this->m_errorSquared = 0;
-
-    typename std::vector<MDE>::const_iterator it_end = data.end();
-    for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; it++)
+    // Use the cached value if it is on disk
+    if (!m_onDisk) // TODO: Dirty flag?
     {
-      const MDE & event = *it;
-      this->m_signal += event.getSignal();
-      this->m_errorSquared += event.getErrorSquared();
+      this->m_signal = 0;
+      this->m_errorSquared = 0;
+
+      typename std::vector<MDE>::const_iterator it_end = data.end();
+      for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; it++)
+      {
+        const MDE & event = *it;
+        this->m_signal += event.getSignal();
+        this->m_errorSquared += event.getErrorSquared();
+      }
     }
 #endif
   }

@@ -7,6 +7,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/CPUTimer.h"
 #include <vector>
+#include "MantidKernel/PropertyWithValue.h"
 
 using Mantid::Geometry::IMDDimensionFactory;
 using Mantid::Geometry::IMDDimension_sptr;
@@ -57,6 +58,9 @@ namespace MDEvents
     exts.push_back(".nxs");
     declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The name of the Nexus file to load, as a full or relative path");
+
+    declareProperty(new PropertyWithValue<bool>("FileBackEnd", false),
+        "Set to true to load the data only on demand.");
 
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output), "Name of the output MDEventWorkspace.");
   }
@@ -110,6 +114,9 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void LoadMDEW::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
+    // Are we using the file back end?
+    bool FileBackEnd = getProperty("FileBackEnd");
+
     CPUTimer tim;
     bool verbose=true;
     Progress * prog = new Progress(this, 0.0, 1.0, 100);
@@ -148,7 +155,7 @@ namespace MDEvents
     // Recursion depth
     std::vector<int> depth;
     // Start/end indices into the list of events
-    std::vector<int64_t> box_event_index;
+    std::vector<uint64_t> box_event_index;
     // Min/Max extents in each dimension
     std::vector<double> extents;
     // Inverse of the volume of the cell
@@ -206,15 +213,23 @@ namespace MDEvents
           ibox = box;
 
           // Load the events now
-          size_t indexStart = box_event_index[i*2];
-          size_t indexEnd = box_event_index[i*2+1];
+          uint64_t indexStart = box_event_index[i*2];
+          uint64_t indexEnd = box_event_index[i*2+1];
+          uint64_t numEvents = indexEnd-indexStart;
           if (indexEnd > indexStart)
           {
             //std::cout << "box " << i << " from " << indexStart << " to " << indexEnd << std::endl;
-            std::vector<MDE> & events = box->getEvents();
-            events.clear();
-            MDE::loadVectorFromNexusSlab(events, file, indexStart, indexEnd-indexStart);
+            if (!FileBackEnd)
+            {
+              std::vector<MDE> & events = box->getEvents();
+              events.clear();
+              MDE::loadVectorFromNexusSlab(events, file, indexStart, numEvents);
+            }
+            box->setFileIndex(uint64_t(indexStart), uint64_t(numEvents));
+            box->setOnDisk(FileBackEnd);
           }
+          else
+            box->setFileIndex(0, 0);
         }
         else if (box_type == 2)
         {
@@ -234,13 +249,30 @@ namespace MDEvents
           ibox->setExtents(d, extents[i*2+d*2], extents[i*2+d*2+1]);
         ibox->calcVolume();
 
+        // Set the cached values
+        ibox->setSignal(box_signal_errorsquared[i*2]);
+        ibox->setErrorSquared(box_signal_errorsquared[i*2+1]);
+
         // Save the box at its index in the vector.
         boxes[i] = ibox;
       }
     }
 
-    // Done reading in all the events.
-    MDE::closeNexusData(file);
+
+    if (FileBackEnd)
+    {
+      // Leave the file open in the box controller
+      bc->setFile(file);
+    }
+    else
+    {
+      // Done reading in all the events.
+      MDE::closeNexusData(file);
+      file->closeGroup();
+      file->close();
+      // Make sure no back-end is used
+      bc->setFile(NULL);
+    }
 
     if (verbose) std::cout << tim << " to create all the boxes and fill them with events." << std::endl;
 
@@ -261,12 +293,10 @@ namespace MDEvents
     ws->setBox( boxes[0] );
     // Make sure the max ID is ok for later ID generation
     bc->setMaxId(numBoxes);
+
     // Refresh cache
     ws->refreshCache();
     if (verbose) std::cout << tim << " to refreshCache(). " << ws->getNPoints() << " points after refresh." << std::endl;
-
-    file->closeGroup();
-    file->close();
 
     if (verbose) std::cout << tim << " to finish up." << std::endl;
     delete prog;

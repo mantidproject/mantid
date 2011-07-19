@@ -320,7 +320,7 @@ namespace MDEvents
 
     //---------------------------------------------------------------------------------------------
     /** Static method to load part of a HDF block into a vector of MDEvents.
-     * The data block MUST be already open.
+     * The data block MUST be already open, using e.g. openNexusData()
      *
      * This will be re-implemented by any other MDEvent-like type.
      *

@@ -64,7 +64,31 @@ namespace MDEvents
     void setChildren(const std::vector<IMDBox<MDE,nd> *> & /*boxes*/, const size_t /*indexStart*/, const size_t /*indexEnd*/)
     { throw std::runtime_error("MDBox cannot have children."); }
 
+
+
+    /// @return Start point in the NXS file where the events are located
+    uint64_t getFileIndexStart() const { return m_fileIndexStart; }
+
+    /// @return Number of events saved in the file, after the start index location
+    uint64_t getFileNumEvents() const { return m_fileNumEvents; }
+
+    void setFileIndex(uint64_t start, uint64_t numEvents);
+
+
+    /** Set whether the box is saved on disk (true) or in memory (false)
+     * @param onDisk :: true if it is on disk  */
+    void setOnDisk(const bool onDisk)
+    { m_onDisk = onDisk; }
+
+    /// @return whether the box is saved on disk (true) or in memory (false)
+    bool getOnDisk() const
+    { return m_onDisk; }
+
+
+
     std::vector< MDE > & getEvents();
+
+    const std::vector< MDE > & getEvents() const;
 
     std::vector< MDE > * getEventsCopy();
 
@@ -101,11 +125,19 @@ namespace MDEvents
 
     /** Vector of MDEvent's, in no particular order.
      * */
-    std::vector< MDE > data;
+    mutable std::vector< MDE > data;
 
     /// Mutex for modifying the event list
     Mantid::Kernel::Mutex dataMutex;
 
+    /// Start point in the NXS file where the events are located
+    uint64_t m_fileIndexStart;
+
+    /// Number of events saved in the file, after the start index location
+    uint64_t m_fileNumEvents;
+
+    /// True when the events are on disk and not in memory.
+    bool m_onDisk;
 
   public:
     /// Typedef for a shared pointer to a MDBox
@@ -113,6 +145,7 @@ namespace MDEvents
 
     /// Typedef for a vector of the conatined events
     typedef std::vector< MDE > vec_t;
+
 
   };
 

@@ -90,6 +90,38 @@ namespace MDAlgorithms
     }
 
 
+    //----------------------------------------------------------------------------------------------
+    /** Is there a chance that the box defined by these vertexes touches
+     * the implicit function volume?
+     *
+     * The algorithm operates by the idea that if any point in a volume
+     * is contained in the volume, then that means that at least one
+     * of the vertexes is within EACH one of the planes that define the
+     * volume.
+     *
+     * That means that if you find a plane for which NO vertex is contained,
+     * then the box defined by these vertexes CANNOT touch any part of the
+     * volume so it is safe to ignore. (I don't have a rigorous proof for
+     * this but it looks right :)
+     *
+     * There are situations where the condition can be satisfied but the box
+     * does not actually touch the volume (false positives) but these should be pretty
+     * rare.
+     *
+     *
+     * @param vertexes :: vector of n-dimensional coordinate vertexes.
+     * @return true if there is a chance of the box touching. Note that the
+     *    algorithm does not guarantee that it touches, but it should never
+     *    return false if the box does touch.
+     */
+    bool doesBoxTouch(const std::vector<std::vector<coord_t> > & vertexes)
+    {
+      //TODO: Everything
+      UNUSED_ARG(vertexes)
+      return true;
+    }
+
+
   protected:
     /// number of dimensions for which this object can be applied
     size_t m_nd;
