@@ -10,8 +10,9 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Empty constructor */
-  TMDE(MDBox)::MDBox() :
-    IMDBox<MDE, nd>()
+  TMDE(MDBox)::MDBox()
+   : IMDBox<MDE, nd>(),
+     m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
   {
   }
 
@@ -21,7 +22,7 @@ namespace MDEvents
    * @param depth :: splitting depth of the new box.
    */
   TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth)
-    : m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
+        : m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
   {
     if (controller->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
