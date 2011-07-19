@@ -388,7 +388,7 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
   vtkThresholdingLineFactory vtkGridFactory(m_ThresholdRange, scalarName);
   vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(m_ThresholdRange, scalarName);
   vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(m_ThresholdRange, scalarName);
-  vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(m_ThresholdRange,scalarName, time);
+  vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(m_ThresholdRange,scalarName, time-1);
   vtkGridFactory.SetSuccessor(p_2dSuccessorFactory);
   p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
   p_3dSuccessorFactory->SetSuccessor(p_4dSuccessorFactory);
