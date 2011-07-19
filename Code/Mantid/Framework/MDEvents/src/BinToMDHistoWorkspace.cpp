@@ -172,6 +172,9 @@ namespace MDEvents
     /// TODO: Maybe an iterator that completely avoids areas outside the integration region?
     MDBoxIterator<MDE,nd> boxIt(ws->getBox(), 1000, true);
 
+    // For progress reporting, the approx # of boxes
+    if (prog)
+      prog->setNumSteps( int(ws->getBoxController()->getMaxId()) );
 
     // Number of output binning dimensions found
     size_t numBD = binDimensions.size();
@@ -251,6 +254,9 @@ namespace MDEvents
         box->releaseEvents();
       }
 
+      // Progress reporting
+      if (prog) prog->report();
+
       if (!boxIt.next())
         break;
     }
@@ -258,6 +264,7 @@ namespace MDEvents
     // Now the implicit function
     if (implicitFunction)
     {
+      prog->report("Applying implicit function.");
       signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
       outWS->applyImplicitFunction(implicitFunction, nan, nan);
     }
