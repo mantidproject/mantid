@@ -50,7 +50,7 @@ namespace API
     ISpectrum();
     ISpectrum(const specid_t specNo);
     ISpectrum(const ISpectrum& other);
-    ~ISpectrum();
+    virtual ~ISpectrum();
 
     void copyInfoFrom(const ISpectrum& other);
 

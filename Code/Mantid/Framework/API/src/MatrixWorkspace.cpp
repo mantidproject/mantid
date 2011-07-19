@@ -1028,27 +1028,17 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------------
     /**
-     * Mask a given workspace index, setting the data and error values to the given value
+     * Mask a given workspace index, setting the data and error values to zero
      * @param index :: The index within the workspace to mask
-     * @param maskValue :: A value to assign to the data and error values of the spectra
      */
     void MatrixWorkspace::maskWorkspaceIndex(const size_t index)
     {
-      if(index >= this->getNumberHistograms() )
+      if( index >= this->getNumberHistograms() )
+      {
         throw Kernel::Exception::IndexError(index,this->getNumberHistograms(),
             "MatrixWorkspace::maskWorkspaceIndex,index");
-
-
-      IDetector_sptr det;
-      try
-      {
-        det = this->getDetector(index);
       }
-      catch(Kernel::Exception::NotFoundError &)
-      {
-        return;
-      }
-      
+
       ISpectrum * spec = this->getSpectrum(index);
       if (!spec) throw std::invalid_argument("MatrixWorkspace::maskWorkspaceIndex() got a null Spectrum.");
 
@@ -1063,7 +1053,6 @@ namespace Mantid
           if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(sptr_instrument->getDetector(*iter).get()) )
           {
             m_parmap->addBool(det,"masked",true);  // Thread-safe method
-            //std::cout << "MatrixWorkspace::maskWorkspaceIndex() masking det " << det->getID() << std::endl;
           }
         }
         catch(Kernel::Exception::NotFoundError &)
