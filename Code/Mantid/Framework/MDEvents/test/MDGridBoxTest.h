@@ -935,74 +935,6 @@ public:
   }
 
 
-  //-----------------------------------------------------------------------------------------------------------
-  void test_saveNexus_loadNexus()
-  {
-    // Clean up if it exists
-    std::string filename = (ConfigService::Instance().getString("defaultsave.directory") + "MDGridBoxTest.nxs");
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
-
-    CPUTimer tim;
-
-    // 2D box split into 10x10
-    MDGridBox<MDEvent<2>,2> * b = MDEventsTestHelper::makeMDGridBox<2>();
-    MDEventsTestHelper::feedMDBox<2>(b, 1);
-
-    // Sub-split one of the boxes into 100 more boxes.
-    for (size_t i=1; i<10; i++)
-      b->splitContents(i, NULL);
-
-    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
-    b->saveNexus("box0", file);
-    file->close();
-
-    std::cout << tim << " to save 1000 boxes." << std::endl;
-    return;
-
-    // ------ LoadNexus --------
-
-    // Now we load it back
-    MDGridBox<MDEvent<2>,2> * c = new MDGridBox<MDEvent<2>,2>();
-
-    ::NeXus::File * fileIn = new NeXus::File(filename, NXACC_READ);
-    fileIn->openGroup("box0", "NXMDGridBox");
-    TS_ASSERT_THROWS_NOTHING( c->loadNexus(fileIn); )
-    fileIn->closeGroup();
-    fileIn->close();
-
-    // Compare common things
-    TS_ASSERT_DELTA( c->getExtents(0).min, b->getExtents(0).min, 1e-4);
-    TS_ASSERT_DELTA( c->getExtents(0).max, b->getExtents(0).max, 1e-4);
-    TS_ASSERT_DELTA( c->getExtents(1).min, b->getExtents(1).min, 1e-4);
-    TS_ASSERT_DELTA( c->getExtents(1).max, b->getExtents(1).max, 1e-4);
-    TS_ASSERT_DELTA( c->getVolume(), b->getVolume(), 1e-3);
-
-    // Compare the grid-specific stuff
-    TS_ASSERT_EQUALS( c->getNPoints(), 100);
-    TS_ASSERT_EQUALS( c->getNumChildren(), 100);
-    IMDBox<MDEvent<2>,2> * ibox = c->getChild(11);
-    TS_ASSERT(ibox);
-    MDBox<MDEvent<2>,2> * box = dynamic_cast<MDBox<MDEvent<2>,2> *>(ibox);
-    TS_ASSERT(box);
-    if (!box) return;
-
-    TS_ASSERT_EQUALS( box->getNPoints(), 1);
-    TS_ASSERT_DELTA( box->getEvents()[0].getCenter(0), 1.5, 1e-4);
-    TS_ASSERT_DELTA( box->getEvents()[0].getCenter(1), 1.5, 1e-4);
-
-    // Also the box that was sub-split was properly loaded as a MDGridBox.
-    MDGridBox<MDEvent<2>,2> * box2 = dynamic_cast<MDGridBox<MDEvent<2>,2> *>(c->getChild(1));
-    TS_ASSERT(box2);
-    if (!box2) return;
-    TS_ASSERT_EQUALS( box2->getNumChildren(), 100);
-
-//    // Clean up
-//    if (Poco::File(filename).exists())
-//      Poco::File(filename).remove();
-  }
-
-
 
 private:
   std::string message;
@@ -1229,49 +1161,6 @@ public:
     }
     std::cout << tim << " to getBoxes() 10 x 1.1 million boxes." << std::endl;
   }
-
-
-  void xtest_saveNexus()
-  {
-    CPUTimer tim;
-    std::string filename = "MDGridBoxTestPerformance.nxs";
-    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
-    recursiveParent2->saveNexus("box0", file);
-    file->close();
-
-    // took 355 seconds on my system = way too slow.
-    std::cout << tim << " to save a MDGridBox with 111111 subboxes." << std::endl;
-  }
-
-  void xtest_saveNexus_XML()
-  {
-    CPUTimer tim;
-    std::string filename = "MDGridBoxTestPerformance.xml";
-    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATEXML);
-    recursiveParent2->saveNexus("box0", file);
-    file->close();
-
-    std::cout << tim << " to save a MDGridBox with 111111 subboxes." << std::endl;
-  }
-
-//  /** Recursive getting of a list of IMDBox.
-//   * Gets about 11 million boxes */
-//  void test_getBoxesParallel()
-//  {
-//    for (size_t j=0; j<10; j++)
-//    {
-//      std::vector<IMDBox<MDEvent<1>,1> *> boxes1;
-//      recursiveParent->getBoxes(boxes1, 1);
-//      PRAGMA_OMP(parallel for)
-//      for (int i=1; i<boxes1.size(); i++)
-//      {
-//        std::vector<IMDBox<MDEvent<1>,1> *> boxes;
-//        boxes.clear();
-//        boxes1[i]->getBoxes(boxes, 6);
-//        TS_ASSERT_EQUALS( boxes.size(), 111111);
-//      }
-//    }
-//  }
 
 
 };

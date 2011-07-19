@@ -219,17 +219,20 @@ namespace MDEvents
           if (indexEnd > indexStart)
           {
             //std::cout << "box " << i << " from " << indexStart << " to " << indexEnd << std::endl;
-            if (!FileBackEnd)
-            {
-              std::vector<MDE> & events = box->getEvents();
-              events.clear();
-              MDE::loadVectorFromNexusSlab(events, file, indexStart, numEvents);
-            }
             box->setFileIndex(uint64_t(indexStart), uint64_t(numEvents));
             box->setOnDisk(FileBackEnd);
+            if (!FileBackEnd)
+            {
+              // Don't load if using the file as the back-end
+              box->loadNexus(file);
+            }
           }
           else
+          {
+            // Nothing on disk, since there are no events.
             box->setFileIndex(0, 0);
+            box->setOnDisk(false);
+          }
         }
         else if (box_type == 2)
         {

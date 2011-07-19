@@ -82,11 +82,6 @@ namespace MDEvents
 
     void refreshCentroid(Kernel::ThreadScheduler * ts = NULL);
 
-    void saveNexus(const std::string & groupName, ::NeXus::File * file);
-
-    void loadNexus(::NeXus::File * file);
-
-
     // ======================= Testing/Debugging Methods =================
     /** For testing: get (a copy of) the vector of boxes */
     std::vector<IMDBox<MDE, nd>*> getBoxes()

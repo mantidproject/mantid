@@ -100,12 +100,6 @@ namespace MDEvents
     /// Add several events, within a given range
     virtual size_t addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
 
-    /// Save the box and contents to an open nexus file.
-    virtual void saveNexus(const std::string & groupName, ::NeXus::File * file);
-
-    /// Load the box and contents from an open nexus file.
-    virtual void loadNexus(::NeXus::File * file);
-
     /** Perform centerpoint binning of events
      * @param bin :: MDBin object giving the limits of events to accept.
      * @param fullyContained :: optional bool array sized [nd] of which dimensions are known to be fully contained (for MDSplitBox)

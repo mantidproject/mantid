@@ -122,7 +122,7 @@ namespace MDEvents
     std::vector<int> box_children(maxBoxes*2, 0);
 
     // The slab start for events, start at 0
-    std::vector<int> start(2,0);
+    uint64_t start = 0;
 
     // Get a starting iterator
     MDBoxIterator<MDE,nd> it(ws->getBox(), 1000, false);
@@ -176,13 +176,14 @@ namespace MDEvents
           const std::vector<MDE> & events = mdbox->getEvents();
           if (events.size() > 0)
           {
-            MDE::saveVectorToNexusSlab( events, file, start);
+            mdbox->setFileIndex(uint64_t(start), uint64_t(events.size()));
+            mdbox->saveNexus(file);
             // std::cout << id << " starts at " << start[0] << std::endl;
             // Save the index
-            box_event_index[id*2] = start[0];
-            box_event_index[id*2+1] = start[0] + int64_t(events.size());
+            box_event_index[id*2] = start;
+            box_event_index[id*2+1] = start + uint64_t(events.size());
             // Move forward in the file.
-            start[0] += int(events.size());
+            start += uint64_t(events.size());
           }
         }
 

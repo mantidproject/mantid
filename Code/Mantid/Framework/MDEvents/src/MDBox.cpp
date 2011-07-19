@@ -430,56 +430,28 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Save the box and contents to an open nexus file.
+  /** Save the box's Event data to an open nexus file.
    *
-   * @param groupName :: name of the group to save in.
-   * @param file :: Nexus File object
+   * @param file :: Nexus File object, must already by opened with MDE::prepareNexusData()
    */
   TMDE(
-  void MDBox)::saveNexus(const std::string & groupName, ::NeXus::File * file)
+  void MDBox)::saveNexus(::NeXus::File * file) const
   {
-    // Create the group. TODO: fix the classname?
-    file->makeGroup(groupName, "NXMDBox", 1);
-
-    // First, save the data common to all IMDBoxes.
-    IMDBox<MDE,nd>::saveNexus(groupName, file);
-
-    // Mark with attribute if there are no events
-    int numEvents = int(data.size());
-    file->putAttr("num_events", numEvents);
-
-    if (numEvents > 0)
-    {
-      // Now save the vector using the method in MDEvent
-      MDE::saveVectorToNexus( this->data, file );
-    }
-
-    file->closeGroup();
+    MDE::saveVectorToNexusSlab(this->data, file, m_fileIndexStart);
   }
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Load the box and contents from an open nexus file.
+  /** Load the box's Event data from an open nexus file.
+   * The FileIndex start and numEvents must be set correctly already.
    *
-   * @param file :: Nexus File object
+   * @param file :: Nexus File object, must already by opened with MDE::openNexusData()
    */
   TMDE(
   void MDBox)::loadNexus(::NeXus::File * file)
   {
-    // First, load the data common to all IMDBoxes.
-    IMDBox<MDE,nd>::loadNexus(file);
-
-    // Check if there is anything to load at all.
-    int numEvents;
-    file->getAttr("num_events", numEvents);
-
-    if (numEvents > 0)
-    {
-      // Now get the events
-      MDE::loadVectorFromNexus( this->data, file);
-    }
-    else
-      data.clear();
+    this->data.clear();
+    MDE::loadVectorFromNexusSlab(this->data, file, m_fileIndexStart, m_fileNumEvents);
   }
 
 
