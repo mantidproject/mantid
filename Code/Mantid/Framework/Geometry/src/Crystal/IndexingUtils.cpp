@@ -42,7 +42,7 @@ static bool CompareMagnitude( const V3D & v1, const V3D & v2 )
   squares of the residual errors is returned.  This method first sorts the
   specified q_vectors in order of increasing magnitude.  It then searches 
   through all possible orientations to find an initial UB that indexes the
-  lowest magnitude peaks.  i
+  lowest magnitude peaks.  
      The resolution of the search through possible orientations is specified
   by the degrees_per_step parameter.  Approximately 2-4 degrees_per_step is
   usually adequate.  NOTE: This is an expensive calculation which takes 
@@ -60,7 +60,7 @@ static bool CompareMagnitude( const V3D & v1, const V3D & v2 )
   @param  UB                  3x3 matrix that will be set to the UB matrix
   @param  q_vectors           std::vector of V3D objects that contains the 
                               list of q_vectors that are to be indexed
-                              NOTE: There must be at least 3 q_vectors.
+                              NOTE: There must be at least 2 q_vectors.
   @param  a                   First unit cell edge length in Angstroms.  
   @param  b                   Second unit cell edge length in Angstroms.  
   @param  c                   Third unit cell edge length in Angstroms.  
