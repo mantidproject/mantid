@@ -213,7 +213,7 @@ if ( ENABLE_CPACK )
     IF ( USE_TCMALLOC AND TCMALLOC_FOUND )
       message ( STATUS " Adding google-perftools to the package requirements" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},google-perftools" )
-      set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},google-perftools" )
+      set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgoogle-perftools0 (>= 1.7)" )
     ENDIF ( )
 
     # run cpack configuration
