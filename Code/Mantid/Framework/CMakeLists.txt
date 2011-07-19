@@ -41,24 +41,38 @@ endif ()
 # **EXPERIMENTAL** MPI setup
 ###########################################################################
 
-set ( MPI_BUILD OFF CACHE BOOL "Enable MPI options" )
-# Create the variable because it needs to exist later even if it's left empty
-set ( MPI_LIBRARIES )
-if ( MPI_BUILD )
-  # This finds OpenMPI on rhel6 (assuming it's installed, of course)
-  find_package ( MPI REQUIRED )
-  # Set things up to use the OpenMPI 'wrapper' compilers
-  INCLUDE(CMakeForceCompiler)
-  CMAKE_FORCE_C_COMPILER(mpicc "MPI C Compiler")
-  CMAKE_FORCE_CXX_COMPILER(mpicxx "MPI C++ Compiler")
-  include_directories ( SYSTEM ${MPI_INCLUDE_PATH} )
-
-  set ( BOOST_ROOT /usr/lib64/openmpi ) # This is where openmpi winds up on rhel6
-  find_package ( Boost REQUIRED mpi serialization )
-  include_directories( ${Boost_INCLUDE_DIRS} )
+# Only available on Linux (specifically RedHat), and for a framework-only build
+if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
+  set ( MPI_BUILD OFF CACHE BOOL "Enable MPI options" )
+  # Create the variable because it needs to exist later even if it's left empty
+  set ( MPI_LIBRARIES )
+  if ( MPI_BUILD )
+    # This finds OpenMPI on rhel6 (assuming it's installed, of course)
+    find_package ( MPI REQUIRED )
+    # Set things up to use the OpenMPI 'wrapper' compilers
+    INCLUDE(CMakeForceCompiler)
+    CMAKE_FORCE_C_COMPILER(mpicc "MPI C Compiler")
+    CMAKE_FORCE_CXX_COMPILER(mpicxx "MPI C++ Compiler")
+    include_directories ( SYSTEM ${MPI_INCLUDE_PATH} )
   
-  # Add a definition that's used to guard MPI-specific parts of the main code
-  add_definitions ( -DMPI_BUILD )
+    set ( BOOST_ROOT /usr/lib64/openmpi ) # This is where openmpi winds up on rhel6
+    find_package ( Boost REQUIRED mpi serialization )
+    include_directories( ${Boost_INCLUDE_DIRS} )
+    
+    # Add a definition that's used to guard MPI-specific parts of the main code
+    add_definitions ( -DMPI_BUILD )
+    
+    # Add the ability to build a 'mantid-mpi' rpm
+    set ( CPACK_PACKAGE_NAME mantid-mpi )
+    include ( CPackCommon )
+    include ( CPackLinuxSetup )
+    # Framework dependencies
+    set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,nexus,gsl,glibc,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
+    set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation" )
+    set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},google-perftools" )
+    set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},openmpi,boost-openmpi,boost-openmpi-python" )
+    include ( CPack )
+  endif ( MPI_BUILD )
 endif ()
 
 ###########################################################################
@@ -138,4 +152,20 @@ set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI DataObjects
 
 add_custom_target ( Framework DEPENDS ${FRAMEWORK_LIBS})
 
+###########################################################################
+# Installation settings
+# These need to be here so that a Framework only install will pick them up
+#
+# N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
+###########################################################################
 
+# Create instrument directory and make it writable so vtp files can go there
+install ( DIRECTORY DESTINATION ${INBUNDLE}instrument 
+          DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
+                                GROUP_READ GROUP_EXECUTE GROUP_WRITE
+                                WORLD_READ WORLD_EXECUTE WORLD_WRITE
+)
+file ( GLOB INSTRUMENT_FILES ../instrument/*.xml )
+install ( FILES ${INSTRUMENT_FILES} DESTINATION ${INBUNDLE}instrument )
+install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE 
+                                                 PATTERN "*.pyc" EXCLUDE )

@@ -82,21 +82,7 @@ endif ()
 # Installation settings
 ###########################################################################
 
-# Temp hack for mac
-if ( APPLE )
-  set ( INBUNDLE MantidPlot.app/ )
-endif ()
-
-# Create instrument directory and make it writable so vtp files can go there
-install ( DIRECTORY DESTINATION ${INBUNDLE}instrument 
-          DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
-                                GROUP_READ GROUP_EXECUTE GROUP_WRITE
-                                WORLD_READ WORLD_EXECUTE WORLD_WRITE
-)
-file ( GLOB INSTRUMENT_FILES instrument/*.xml )
-install ( FILES ${INSTRUMENT_FILES} DESTINATION ${INBUNDLE}instrument )
-install ( DIRECTORY scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE 
-                                                 PATTERN "*.pyc" EXCLUDE )
+# N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
 install ( DIRECTORY Installers/colormaps/ DESTINATION ${INBUNDLE}colormaps PATTERN ".svn" EXCLUDE )
 
 ###########################################################################

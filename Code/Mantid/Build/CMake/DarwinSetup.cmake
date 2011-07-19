@@ -33,6 +33,7 @@ set ( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -m64 )
 set ( CMAKE_INSTALL_NAME_DIR ${CMAKE_LIBRARY_PATH} )
 
 set ( CMAKE_INSTALL_PREFIX /Applications )
+set ( INBUNDLE MantidPlot.app/ )
 
 set ( BIN_DIR MantidPlot.app/Contents/MacOS )
 set ( LIB_DIR MantidPlot.app/Contents/MacOS )
