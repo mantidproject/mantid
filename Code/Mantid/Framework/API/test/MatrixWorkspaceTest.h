@@ -326,7 +326,30 @@ public:
     }
         
   }
+  
+  void testFlagMasked()
+  {
+    MatrixWorkspace *ws = makeWorkspaceWithDetectors(2,2);
+    // Now do a valid masking
+    TS_ASSERT_THROWS_NOTHING( ws->flagMasked(0,1,0.75) );
+    TS_ASSERT( ws->hasMaskedBins(0) );
+    TS_ASSERT_EQUALS( ws->maskedBins(0).size(), 1 );
+    TS_ASSERT_EQUALS( ws->maskedBins(0).begin()->first, 1 );
+    TS_ASSERT_EQUALS( ws->maskedBins(0).begin()->second, 0.75 );
+    //flagMasked() shouldn't change the y-value maskBins() tested below does that
+    TS_ASSERT_EQUALS( ws->dataY(0)[1], 1.0 );
 
+    // Now mask a bin earlier than above and check it's sorting properly
+    TS_ASSERT_THROWS_NOTHING( ws->flagMasked(1,1) )
+    TS_ASSERT_EQUALS( ws->maskedBins(1).size(), 1 )
+    TS_ASSERT_EQUALS( ws->maskedBins(1).begin()->first, 1 )
+    TS_ASSERT_EQUALS( ws->maskedBins(1).begin()->second, 1.0 )
+    // Check the previous masking is still OK
+    TS_ASSERT_EQUALS( ws->maskedBins(0).rbegin()->first, 1 )
+    TS_ASSERT_EQUALS( ws->maskedBins(0).rbegin()->second, 0.75 )
+
+    delete ws;
+  }
 
   void testMasking()
   {
@@ -356,11 +379,8 @@ public:
 
     // Now mask a bin earlier than above and check it's sorting properly
     TS_ASSERT_THROWS_NOTHING( ws2->maskBin(0,0) );
-    TS_ASSERT( ws2->hasMaskedBins(0) );
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).size(), 2 );
     TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->first, 0 );
     TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->second, 1.0 );
-    // This will be 0.25 (1*0.5*0.5) because in the test class the same vector is used for both E & Y
     TS_ASSERT_EQUALS( ws2->dataY(0)[0], 0.0 );
     // Check the previous masking is still OK
     TS_ASSERT_EQUALS( ws2->maskedBins(0).rbegin()->first, 1 );
