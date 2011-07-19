@@ -532,7 +532,7 @@ void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
     cm.addAction(actionCopyDetectorsToTable);
     cm.addSeparator();
 
-    if (areSpectraSelected)
+    if (areSpectraSelected && static_cast<MantidMatrix*>(w)->numCols() > 1)
     {
       cm.addAction(actionCopyRowToGraph);
       cm.addAction(actionCopyRowToGraphErr);
