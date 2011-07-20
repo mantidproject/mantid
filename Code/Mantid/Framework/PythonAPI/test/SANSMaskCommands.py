@@ -4,7 +4,8 @@ import ISISCommandInterface as ISIS
 
 class SANSMaskCommands(unittest.TestCase):
     """
-        Tests SANS workflow algorithms
+        The masking commands that are used in the ISIS SANS settings file
+        or on the Python command prompt
     """
     
     def setUp(self):
@@ -39,10 +40,8 @@ class SANSMaskCommands(unittest.TestCase):
         
     def test_masking_timebins(self):
         """
-            Checks the ISIS specfic mask command for spectra numbers
+            Time bin masking uses the MaskBins algorithm
         """
-        
-        #wsName = 
         ws=Load("LOQ48094.raw","testMaskingTimebins")[0]
        
 
@@ -51,11 +50,11 @@ class SANSMaskCommands(unittest.TestCase):
         ISIS.Mask('mask/time '+str(13500)+' '+str(13700))
 
         ISIS.ReductionSingleton().mask.execute(ISIS.ReductionSingleton(), "testMaskingTimebins")
-        # note spectrum index is one less than the spectrum number for the main detector
+        # 3500-3700 microseconds masks the first bins
         self.assertEqual(ws.readY(0)[0], 0)
         self.assertEqual(ws.readY(0)[1], 0)
         self.assertEqual(ws.readY(0)[3], 218284)       
-        # for the front detector (HAB) the offset is 5
+        # bin 54 is in the 13500-13700 microsecond range
         self.assertEqual(ws.readY(0)[54], 0)       
 
 if __name__ == '__main__':
