@@ -1,8 +1,6 @@
 ###############################################################################
 # Putting the Linux specific CPack stuff here
 ###############################################################################
-   
-set ( CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
 
 # Create a package file name for the Linux distributions
 string ( TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME )
