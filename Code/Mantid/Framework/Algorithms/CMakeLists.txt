@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/AnyShapeAbsorption.cpp
 	src/ApplyTransmissionCorrection.cpp
 	src/BinaryOperation.cpp
+	src/BlendSq.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
@@ -159,6 +160,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/BinaryOperation.h
+	inc/MantidAlgorithms/BlendSq.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
@@ -311,6 +313,7 @@ set ( TEST_FILES
 	test/AnyShapeAbsorptionTest.h
 	test/ApplyTransmissionCorrectionTest.h
 	test/BinaryOperationTest.h
+	test/BlendSqTest.h
 	test/CalculateEfficiencyTest.h
 	test/CalculateTransmissionBeamSpreaderTest.h
 	test/CalculateTransmissionTest.h
