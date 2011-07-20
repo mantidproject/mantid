@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
 #include "MantidDataObjects/ManagedWorkspace2D.h"
+#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 
 using Mantid::MantidVec;
 using std::size_t;
@@ -36,6 +37,8 @@ public:
     size_t nVec = 1250;
     size_t vecLength = 25;
     bigWorkspace.initialize(nVec, vecLength, vecLength);
+    // As of 20/7/2011, revision [13332], this call is required for the testSpectrumAndDetectorNumbers test to pass
+    bigWorkspace.replaceSpectraMap(new Mantid::Geometry::OneToOneSpectraDetectorMap(1,(int)nVec));
     for (size_t i=0; i< nVec; i++)
     {
       boost::shared_ptr<MantidVec > x1(new MantidVec(vecLength,1+i) );
@@ -43,6 +46,10 @@ public:
       boost::shared_ptr<MantidVec > e1(new MantidVec(vecLength,4+i) );
       bigWorkspace.setX(i,x1);     
       bigWorkspace.setData(i,y1,e1);
+      // As of 20/7/2011, revision [13332], these calls have no (lasting) effect.
+      // When they do, the testSpectrumAndDetectorNumbers test will start to fail
+      bigWorkspace.getSpectrum(i)->setSpectrumNo((int)i);
+      bigWorkspace.getSpectrum(i)->setDetectorID((int)i*100);
     }
   }
   
@@ -270,6 +277,16 @@ public:
     TS_ASSERT_EQUALS( bigWorkspace.dataE(249)[2], 253 );
     TS_ASSERT_THROWS_NOTHING( bigWorkspace.dataE(11)[11] = 4.44 );
     TS_ASSERT_EQUALS( bigWorkspace.dataE(11)[11], 4.44 );
+  }
+
+  void testSpectrumAndDetectorNumbers()
+  {
+    for (size_t i = 0; i < bigWorkspace.getNumberHistograms(); ++i)
+    {
+      TS_ASSERT_EQUALS( bigWorkspace.getAxis(1)->spectraNo(i), i+1 );
+      TS_ASSERT_EQUALS( bigWorkspace.getSpectrum(i)->getSpectrumNo(), i+1 );
+      TS_ASSERT( bigWorkspace.getSpectrum(i)->hasDetectorID((int)i+1) );
+    }
   }
 
   void testDestructor()
