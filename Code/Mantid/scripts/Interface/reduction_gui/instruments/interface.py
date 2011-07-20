@@ -119,9 +119,6 @@ class InstrumentInterface(object):
         
         try:
             self.scripter.apply()
-            
-            # Update widgets
-            self.scripter.push_state()
         except RuntimeError, e:
             if self._settings.debug:
                 msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
@@ -138,6 +135,8 @@ class InstrumentInterface(object):
             msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path            
             self._warning("Reduction failed", msg)
             self._error_report(traceback.format_exc())
+        # Update widgets
+        self.scripter.push_state()
         
     def _error_report(self, trace=''):
         """

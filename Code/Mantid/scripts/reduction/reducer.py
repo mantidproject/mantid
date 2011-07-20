@@ -533,9 +533,13 @@ class Reducer(object):
         # Go through the list of files to be reduced
         for file_ws in self._data_files:
             for item in self._reduction_steps:
-                result = item.execute(self, file_ws)
-                if result is not None and len(str(result))>0:
-                    self.log_text += "%s\n" % str(result)        
+                try:
+                    result = item.execute(self, file_ws)
+                    if result is not None and len(str(result))>0:
+                        self.log_text += "%s\n" % str(result)
+                except:
+                    self.log_text += "\n%s\n" % sys.exc_value
+                    raise        
 
         #any clean up, possibly removing workspaces 
         self.post_process()

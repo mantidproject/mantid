@@ -378,12 +378,16 @@ class BaseReductionScripter(object):
         """
         if HAS_MANTID:
             script = self.to_script(None)
-            exec script               
             
-            # Update scripter
-            for item in self._observers:
-                if item.state() is not None:
-                    item.state().update()
+            try:
+                exec script
+            except:
+                raise
+            finally:               
+                # Update scripter
+                for item in self._observers:
+                    if item.state() is not None:
+                        item.state().update()
         else:
             raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
 
