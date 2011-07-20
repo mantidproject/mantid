@@ -113,15 +113,13 @@ class SANSReducer(Reducer):
     def get_normalizer(self):
         return self._normalizer
     
+    @validate_step
     def set_geometry_correcter(self, correcter):    
         """
             Set the ReductionStep object that takes care of the geometry correction
             @param subtracter: ReductionStep object
         """
-        if issubclass(correcter.__class__, ReductionStep) or correcter is None:
-            self.geometry_correcter = correcter
-        else:
-            raise RuntimeError, "Reducer.set_geometry_correcter expects an object of class ReductionStep"
+        self.geometry_correcter = correcter
         
     def set_transmission(self, trans):
         """
@@ -136,15 +134,13 @@ class SANSReducer(Reducer):
     def get_transmission(self):
         return self._transmission_calculator
     
+    @validate_step
     def set_mask(self, mask):
         """
             Set the reduction step that will apply the mask
             @param mask: ReductionStep object
         """
-        if issubclass(mask.__class__, ReductionStep) or mask is None:
-            self._mask = mask
-        else:
-            raise RuntimeError, "Reducer.set_mask expects an object of class ReductionStep"
+        self._mask = mask
         
     def get_mask(self): return self._mask
 
@@ -193,10 +189,7 @@ class SANSReducer(Reducer):
             recalculated.
             @param correcter: ReductionStep object
         """
-        if issubclass(correcter.__class__, ReductionStep) or correcter is None:
-            self._sensitivity_correcter = correcter
-        else:
-            raise RuntimeError, "Reducer.set_sensitivity_correcter expects an object of class ReductionStep"
+        self._sensitivity_correcter = correcter
     
     def get_sensitivity_correcter(self):
         return self._sensitivity_correcter
@@ -208,6 +201,7 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Set the sensitivity correction before setting its beam center"
     
+    @validate_step
     def set_dark_current_subtracter(self, subtracter):
         """
             Set the ReductionStep object that subtracts the dark current from the data.
@@ -215,10 +209,7 @@ class SANSReducer(Reducer):
             subtraction can be applied to multiple data sets without reloading it.
             @param subtracter: ReductionStep object
         """
-        if issubclass(subtracter.__class__, ReductionStep) or subtracter is None:
-            self._dark_current_subtracter = subtracter
-        else:
-            raise RuntimeError, "Reducer.set_dark_current expects an object of class ReductionStep"
+        self._dark_current_subtracter = subtracter
     
     @validate_step
     def set_solid_angle_correcter(self, correcter):
@@ -231,26 +222,22 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_solid_angle_correcter expects an object of class ReductionStep"
     
+    @validate_step
     def set_azimuthal_averager(self, averager):
         """
             Set the ReductionStep object that performs azimuthal averaging
             and transforms the 2D reduced data set into I(Q).
             @param averager: ReductionStep object
         """
-        if issubclass(averager.__class__, ReductionStep) or averager is None:
-            self._azimuthal_averager = averager
-        else:
-            raise RuntimeError, "Reducer.set_azimuthal_averager expects an object of class ReductionStep"
+        self._azimuthal_averager = averager
     
+    @validate_step
     def set_save_Iq(self, save_iq):
         """
             Set the ReductionStep object that saves the I(q) output
             @param averager: ReductionStep object
         """
-        if issubclass(save_iq.__class__, ReductionStep) or save_iq is None:
-            self._save_iq = save_iq
-        else:
-            raise RuntimeError, "Reducer.set_save_Iq expects an object of class ReductionStep"
+        self._save_iq = save_iq
     
     def set_background(self, data_file=None):
         """

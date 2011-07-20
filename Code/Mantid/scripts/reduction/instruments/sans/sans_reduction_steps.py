@@ -837,15 +837,6 @@ class WeightedAzimuthalAverage(ReductionStep):
         d.dx = mtd[self.get_output_workspace(workspace)].dataE(0)
         return d
             
-class SolidAngle(ReductionStep):
-    """
-        ReductionStep class that performs the solid angle correction.
-    """
-    def execute(self, reducer, workspace):
-        SANSSolidAngleCorrection(workspace, workspace)
-        
-        return "Solid angle correction applied" 
-            
 class SensitivityCorrection(ReductionStep):
     """
         Compute the sensitivity correction and apply it to the input workspace.

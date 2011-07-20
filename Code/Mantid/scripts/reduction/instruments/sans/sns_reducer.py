@@ -1,18 +1,5 @@
 """
     Reducer class for EQSANS reduction
-    
-    Implemented steps:
-        _beam_finder  
-        _normalizer
-        _dark_current_subtracter
-        _sensitivity_correcter
-        _solid_angle_correcter 
-        _azimuthal_averager
-        _transmission_calculator
-        _mask - needs more shapes, such as ellipse
-        _data_loader
-        _background_subtracter
-
 """
 from sans_reducer import SANSReducer
 from reduction import ReductionStep
@@ -32,8 +19,6 @@ class EqSansReducer(SANSReducer):
         ## Transmission calculator
         self._transmission_calculator = sns_reduction_steps.BeamStopTransmission(True)
         
-        self._solid_angle_correcter = sans_reduction_steps.SolidAngle()
-        
         # Default dark current subtracter class
         self._dark_current_subtracter_class = sns_reduction_steps.SubtractDarkCurrent
         
@@ -42,13 +27,3 @@ class EqSansReducer(SANSReducer):
 
     def set_instrument(self, configuration):
         super(SANSReducer, self).set_instrument(configuration)
-
-    def set_normalizer(self, normalizer):
-        """
-            Set the ReductionStep object that takes care of normalization
-            @param normalizer: ReductionStep object
-        """
-        if issubclass(normalizer.__class__, ReductionStep) or normalizer is None:
-            self._normalizer = normalizer
-        else:
-            raise RuntimeError, "Reducer.set_normalizer expects an object of class ReductionStep"
