@@ -48,12 +48,15 @@ void PDFFT::init() {
 			Direction::Output), "An output workspace G(r)");
 	declareProperty(new WorkspaceProperty<> ("OutputWorkspace1", "",
 			Direction::Output), "An output workspace for Q(S(Q)-1))");
-	// declareProperty(new Kernel::PropertyWithValue<double>("RMax", 20));
-	declareProperty("RMax", 20.0);
-    declareProperty(new Kernel::PropertyWithValue<double>("DeltaR", 0.1));
-	declareProperty(new Kernel::PropertyWithValue<double>("Qmin", 0.0));
-	declareProperty(new Kernel::PropertyWithValue<double>("Qmax", 100.0));
-	declareProperty(new Kernel::PropertyWithValue<bool>("DebugMode", false));
+  declareProperty(new Kernel::PropertyWithValue<double>("RMax", 20, Direction::Input),
+      "Maximum r value of output G(r).");
+	// declareProperty("RMax", 20.0);
+  declareProperty(new Kernel::PropertyWithValue<double>("DeltaR", 0.1, Direction::Input),
+      "Step of r in G(r). ");
+	declareProperty(new Kernel::PropertyWithValue<double>("Qmin", 0.0, Direction::Input),
+	    "Staring value Q of S(Q) for Fourier Transform");
+	declareProperty(new Kernel::PropertyWithValue<double>("Qmax", 50.0, Direction::Input),
+	    "Ending value of Q of S(Q) for Fourier Transform");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -69,13 +72,11 @@ void PDFFT::exec() {
 	const double deltar = getProperty("DeltaR");
 	double qmax = getProperty("Qmax");
 	double qmin = getProperty("Qmin");
-	bool debugmode = getProperty("DebugMode");
-        int sizer = static_cast<int>(rmax/deltar);
+  int sizer = static_cast<int>(rmax/deltar);
 
 	// 2. Set up G(r)
 	Gspace
-			= WorkspaceFactory::Instance().create("Workspace2D", 1, sizer,
-					sizer);
+			= WorkspaceFactory::Instance().create("Workspace2D", 1, sizer, sizer);
 	MantidVec& vr = Gspace->dataX(0);
 	MantidVec& vg = Gspace->dataY(0);
 	MantidVec& vge = Gspace->dataE(0);
@@ -85,20 +86,17 @@ void PDFFT::exec() {
 
 	Sspace = getProperty("InputWorkspace");
 
-	// 3. Check input workgroup
+	// 3. Check input workgroup, esp. the UNIT
 	std::string unit;
-	if (!debugmode) {
-		Unit_sptr& iunit = Sspace->getAxis(0)->unit();
-		if (iunit->unitID() == "dSpacing") {
-			unit = "d";
-		} else if (iunit->unitID() == "MomentumTransfer") {
-			unit = "Q";
-		} else {
+	Unit_sptr& iunit = Sspace->getAxis(0)->unit();
+	if (iunit->unitID() == "dSpacing") {
+	  unit = "d";
+	} else if (iunit->unitID() == "MomentumTransfer") {
+	  unit = "Q";
+	} else {
 			g_log.error() << "Unit " << iunit->unitID() << " is not supported"
 					<< std::endl;
-		}
-	} else {
-		unit = "Q";
+			throw std::invalid_argument("Unit of input Workspace is not supported");
 	}
 
 	if (unit != "Q" && unit != "d") {
@@ -125,18 +123,11 @@ void PDFFT::exec() {
 	}
 
 	// 5. Calculate G(r)
-	// g_log.information() << "Unit = " << unit << "  Size = " << sizer << std::endl;
-#if 0
-	printout = true;
-#endif
+  g_log.debug() << "Unit = " << unit << "  Size = " << sizer << std::endl;
 	for (int i = 0; i < sizer; i++) {
 		double error;
 		if (unit == "Q") {
 			vg[i] = CalculateGrFromQ(vr[i], error, qmin, qmax);
-#if 0
-			if (printout)
-			printout = false;
-#endif
 			vge[i] = error;
 
 		} else if (unit == "d") {
