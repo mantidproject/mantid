@@ -11,28 +11,18 @@ namespace Mantid
 {
 namespace Crystal
 {
-/** A base class for absorption correction algorithms.
+/** Calculates anvred correction factors for attenuation due to absorption and scattering in a spherical sample. 
 
-    Common Properties:
+    Properties:
     <UL>
     <LI> InputWorkspace  - The name of the input workspace. </LI>
     <LI> OutputWorkspace - The name of the output workspace. Can be the same as the input one. </LI>
-    <LI> AttenuationXSection - The attenuation cross-section for the sample material in barns. </LI>
-    <LI> ScatteringXSection - The scattering cross-section for the sample material in barns. </LI>
-    <LI> SampleNumberDensity - The number density of the sample in Angstrom^-3.</LI>
-    <LI> NumberOfWavelengthPoints - The number of wavelength points for which numerical integral is calculated (default: all points). </LI>
-    <LI> ExpMethod - The method to calculate exponential function (Normal of Fast approximation). </LI>
+    <LI> PreserveEvents - Keep the output workspace as an EventWorkspace, if the input has events. 
+    <LI> OnlySphericalAbsorption - All corrections done if false (default). If true, only the spherical absorption correction. 
+    <LI> LinearScatteringCoef - Linear scattering coefficient in 1/cm 
+    <LI> LinearAbsorptionCoef - Linear absorption coefficient at 1.8 Angstroms in 1/cm. 
+    <LI> Radius - Radius of the sample in centimeters. 
     </UL>
-
-    This class, which must be overridden to provide the specific sample geometry and integration
-    elements, uses a numerical integration method to calculate attenuation factors resulting 
-    from absorption and single scattering in a sample. Factors are calculated for each spectrum
-    (i.e. detector position) and wavelength point, as defined by the input workspace.
-    Path lengths through the sample are then calculated for the centre-point of each element 
-    and a numerical integration is carried out using these path lengths over the volume elements.
-
-    This algorithm assumes that the beam comes along the Z axis, that Y is up
-    and that the sample is at the origin.
 
     @author Vickie Lynch, Dennis Mikkelson SNS
     @date 06/14/2011
