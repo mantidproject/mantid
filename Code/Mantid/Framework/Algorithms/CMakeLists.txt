@@ -126,7 +126,6 @@ set ( SRC_FILES
 	src/RenameWorkspace.cpp
 	src/ReplaceSpecialValues.cpp
 	src/SANSDirectBeamScaling.cpp
-	src/SANSSolidAngleCorrection.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
 	src/SetUncertaintiesToZero.cpp
@@ -281,7 +280,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RenameWorkspace.h
 	inc/MantidAlgorithms/ReplaceSpecialValues.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
-	inc/MantidAlgorithms/SANSSolidAngleCorrection.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
 	inc/MantidAlgorithms/SetUncertaintiesToZero.h
@@ -421,7 +419,6 @@ set ( TEST_FILES
 	test/RemoveLowResTOFTest.h
 	test/RenameWorkspaceTest.h
 	test/ReplaceSpecialValuesTest.h
-	test/SANSSolidAngleCorrectionTest.h
 	test/ScaleTest.h
 	test/ScaleXTest.h
 	test/SmoothDataTest.h

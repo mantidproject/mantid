@@ -8,7 +8,7 @@
 
 namespace Mantid
 {
-namespace Algorithms
+namespace WorkflowAlgorithms
 {
 /**
 

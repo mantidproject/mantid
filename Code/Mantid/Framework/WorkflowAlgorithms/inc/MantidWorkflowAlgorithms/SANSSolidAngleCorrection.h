@@ -8,12 +8,19 @@
 
 namespace Mantid
 {
-namespace Algorithms
+namespace WorkflowAlgorithms
 {
 /**
 
     Performs a solid angle correction on a 2D SANS data set to correct
     for the absence of curvature of the detector.
+
+    Note: one could use SolidAngle to perform this calculation. Solid Angle
+    returns the solid angle of each detector pixel. The correction is then
+    given by:
+      Omega(theta) = Omega(0) cos^3(theta)
+      where Omega is the solid angle.
+    This approach requires more un-necessary calculations so we simply apply the cos^3(theta).
 
     Brulet et al, J. Appl. Cryst. (2007) 40, 165-177.
     See equation 22.
@@ -39,7 +46,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "SANS"; }
+  virtual const std::string category() const { return "Workflow\\SANS"; }
 
 private:
   /// Sets documentation strings for this algorithm

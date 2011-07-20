@@ -2,7 +2,7 @@
 #define SANSSOLIDANGLECORRECTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SANSSolidAngleCorrection.h"
+#include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 
@@ -24,7 +24,7 @@ public:
 
   void testCategory()
   {
-    TS_ASSERT_EQUALS( correction.category(), "SANS" )
+    TS_ASSERT_EQUALS( correction.category(), "Workflow\\SANS" )
   }
 
   void testInit()
@@ -97,7 +97,7 @@ public:
   }
 
 private:
-  Mantid::Algorithms::SANSSolidAngleCorrection correction;
+  Mantid::WorkflowAlgorithms::SANSSolidAngleCorrection correction;
   std::string inputWS;
 };
 

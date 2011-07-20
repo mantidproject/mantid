@@ -6,7 +6,7 @@
 
 namespace Mantid
 {
-namespace Algorithms
+namespace WorkflowAlgorithms
 {
 
 // Register the algorithm into the AlgorithmFactory

@@ -1,21 +1,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/SANSSolidAngleCorrection.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidDataObjects/Histogram1D.h"
-#include <iostream>
-#include <vector>
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid
 {
-namespace Algorithms
+namespace WorkflowAlgorithms
 {
 
 // Register the algorithm into the AlgorithmFactory
@@ -24,15 +16,13 @@ DECLARE_ALGORITHM(SANSSolidAngleCorrection)
 /// Sets documentation strings for this algorithm
 void SANSSolidAngleCorrection::initDocs()
 {
-  this->setWikiSummary("Performs solid angle correction on SANS 2D data. ");
+  this->setWikiSummary("Performs solid angle correction on SANS 2D data.");
   this->setOptionalMessage("Performs solid angle correction on SANS 2D data.");
 }
-
 
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
-using namespace DataObjects;
 
 void SANSSolidAngleCorrection::init()
 {
@@ -41,6 +31,7 @@ void SANSSolidAngleCorrection::init()
   wsValidator->add(new HistogramValidator<>);
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty("OutputMessage","",Direction::Output);
 }
 
 void SANSSolidAngleCorrection::exec()
@@ -52,6 +43,9 @@ void SANSSolidAngleCorrection::exec()
   if ( outputWS != inputWS )
   {
     outputWS = WorkspaceFactory::Instance().create(inputWS);
+    outputWS->isDistribution(true);
+    outputWS->setYUnit("");
+    outputWS->setYUnitLabel("Steradian");
     setProperty("OutputWorkspace",outputWS);
   }
 
@@ -63,6 +57,8 @@ void SANSSolidAngleCorrection::exec()
 
   for (int i = 0; i < numHists; ++i)
   {
+    outputWS->dataX(i) = inputWS->readX(i);
+
     IDetector_const_sptr det;
     try {
       det = inputWS->getDetector(i);
@@ -93,9 +89,9 @@ void SANSSolidAngleCorrection::exec()
     }
     progress.report("Solid Angle Correction");
   }
-
+  setProperty("OutputMessage", "Solid angle correction applied");
 }
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 

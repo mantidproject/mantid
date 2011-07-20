@@ -1,5 +1,6 @@
 set ( SRC_FILES
         src/EQSANSQ2D.cpp
+        src/SANSSolidAngleCorrection.cpp
 )
                 
 set ( SRC_UNITY_IGNORE_FILES 
@@ -7,9 +8,11 @@ set ( SRC_UNITY_IGNORE_FILES
 
 set ( INC_FILES
         inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
+        inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
 )
               
 set ( TEST_FILES
+		test/SANSSolidAngleCorrectionTest.h
 )
 
 if(UNITY_BUILD)
@@ -31,15 +34,22 @@ include_directories ( inc )
 target_link_libraries ( WorkflowAlgorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
+  # Make the rest of the tests
+  include_directories ( ../DataHandling/inc ../TestHelpers/inc )
+  cxxtest_add_test ( WorkflowAlgorithmsTest ${TEST_FILES} )
+  target_link_libraries ( WorkflowAlgorithmsTest WorkflowAlgorithms Algorithms DataHandling Nexus TestHelpers )
+  add_dependencies ( FrameworkTests WorkflowAlgorithmsTest )
+  # Add to the 'FrameworkTests' group in VS
+  set_property ( TARGET WorkflowAlgorithmsTest PROPERTY FOLDER "UnitTests" )
 endif ()
 
 # python unit tests
 if (PYUNITTEST_FOUND)
-  pyunittest_add_test ( PythonEQSANSTest.py ${TEST_PY_FILES} )
-  add_dependencies ( PythonEQSANSTest.py PythonAPI )
-  add_dependencies ( FrameworkTests PythonEQSANSTest.py )
+  pyunittest_add_test ( PythonWorkflowAlgorithmsTest.py ${TEST_PY_FILES} )
+  add_dependencies ( PythonWorkflowAlgorithmsTest.py PythonAPI )
+  add_dependencies ( FrameworkTests PythonWorkflowAlgorithmsTest.py )
   # Add to the 'UnitTests' group in VS
-  set_property ( TARGET PythonEQSANSTest.py PROPERTY FOLDER "UnitTests" )
+  set_property ( TARGET PythonWorkflowAlgorithmsTest.py PROPERTY FOLDER "UnitTests" )
 endif ()
 
 
