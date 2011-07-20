@@ -343,7 +343,7 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const i
       for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
       {
         if ( static_cast<int>((*it).first) >= rangeBounds[2] )
-          tempWS->maskBin(spectrum,(*it).first-rangeBounds[2],(*it).second);
+          tempWS->flagMasked(spectrum,(*it).first-rangeBounds[2],(*it).second);
       }
     }
   }
@@ -369,7 +369,7 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const i
       {
         const int maskIndex = static_cast<int>((*it).first);
         if ( maskIndex >= rangeBounds[0] && maskIndex < rangeBounds[1] )
-          tempWS->maskBin(spectrum,maskIndex-rangeBounds[0],(*it).second);
+          tempWS->flagMasked(spectrum,maskIndex-rangeBounds[0],(*it).second);
       }
     }
   }

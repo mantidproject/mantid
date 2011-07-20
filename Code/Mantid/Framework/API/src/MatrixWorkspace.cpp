@@ -1063,10 +1063,10 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------------
     /** Called by the algorithm MaskBins to mask a single bin for the first time, algorithms that later propagate the
-    *  the mask from an input to the output should call flagMasked. Here value (and error) will be scaled by (1-weight)
-    *  as well as the mask flags (m_masks) being updated. This function is not safe if called by multiple threads on
-    *  the same spectrum but writing to the mask set is marked parrallel critical so different spectra can be analysised
-    *  in parallel
+    *  the mask from an input to the output should call flagMasked() instead. Here y-values and errors will be scaled
+    *  by (1-weight) as well as the mask flags (m_masks) being updated. This function doesn't protect the writes to the
+    *  y and e-value arrays and so is not safe if called by multiple threads working on the same spectrum. Writing to
+    *  the mask set is marked parrallel critical so different spectra can be analysised in parallel
     *  @param workspaceIndex :: The workspace spectrum index of the bin
     *  @param binIndex ::      The index of the bin in the spectrum
     *  @param weight ::        'How heavily' the bin is to be masked. =1 for full masking (the default).
@@ -1079,9 +1079,11 @@ namespace Mantid
       // Then check the bin index
       if (binIndex>= this->blocksize() )
         throw Kernel::Exception::IndexError(binIndex,this->blocksize(),"MatrixWorkspace::maskBin,binIndex");
+
       // this function is marked parallel critical
       flagMasked(workspaceIndex, binIndex, weight);
 
+      //this is the actual result of the masking that most algorithms and plotting implementations will see, the bin mask flags defined above are used by only some algorithms
       this->dataY(workspaceIndex)[binIndex] *= (1-weight);
       this->dataE(workspaceIndex)[binIndex] *= (1-weight);
     }

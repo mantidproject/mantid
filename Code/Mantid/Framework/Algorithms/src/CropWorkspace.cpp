@@ -130,7 +130,7 @@ void CropWorkspace::exec()
       {
         const size_t maskIndex = (*it).first;
         if ( maskIndex >= m_minX && maskIndex < m_maxX-m_histogram )
-          outputWorkspace->maskBin(j,maskIndex-m_minX,(*it).second);
+          outputWorkspace->flagMasked(j,maskIndex-m_minX,(*it).second);
       }
     }
     prog.report();

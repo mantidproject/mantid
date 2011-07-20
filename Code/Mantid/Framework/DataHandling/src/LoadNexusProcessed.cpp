@@ -1257,7 +1257,7 @@ void LoadNexusProcessed::readBinMasking(NXData & wksp_cls, API::MatrixWorkspace_
     int j1 = i < n1 ? spec(i+1,1) : bins.dim0();
     for(int j = j0; j < j1; ++j)
     {
-      local_workspace->maskBin(si,bins[j],weights[j]);
+      local_workspace->flagMasked(si,bins[j],weights[j]);
     }
   }
 }

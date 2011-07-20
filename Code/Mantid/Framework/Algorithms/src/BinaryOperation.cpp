@@ -751,7 +751,7 @@ namespace Mantid
           MatrixWorkspace::MaskList::const_iterator it;
           for (it = masks.begin(); it != masks.end(); ++it)
           {
-            out->maskBin(i,it->first,it->second);
+            out->flagMasked(i,it->first,it->second);
           }
         }
       }

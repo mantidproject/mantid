@@ -123,7 +123,7 @@ void ConjoinWorkspaces::exec()
       MatrixWorkspace::MaskList::const_iterator it;
       for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
       {
-        output->maskBin(i,(*it).first,(*it).second);
+        output->flagMasked(i,(*it).first,(*it).second);
       }
     }    
     m_progress->report();
@@ -157,7 +157,7 @@ void ConjoinWorkspaces::exec()
       MatrixWorkspace::MaskList::const_iterator it;
       for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
       {
-        output->maskBin(nhist1 + j,(*it).first,(*it).second);
+        output->flagMasked(nhist1 + j,(*it).first,(*it).second);
       }
     }
     m_progress->report();
