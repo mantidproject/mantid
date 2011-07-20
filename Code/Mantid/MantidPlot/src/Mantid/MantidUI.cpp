@@ -87,15 +87,15 @@ MantidUI::MantidUI(ApplicationWindow *aw):
   m_exploreMantid = new MantidDockWidget(this,aw);
   m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
 
-  actionCopyRowToTable = new QAction(tr("Copy spectra to table"), this);
+  actionCopyRowToTable = new QAction(this);
   actionCopyRowToTable->setIcon(QIcon(getQPixmap("table_xpm")));
   connect(actionCopyRowToTable, SIGNAL(activated()), this, SLOT(copyRowToTable()));
 
-  actionCopyRowToGraph = new QAction(tr("Plot spectra (values only)"), this);
+  actionCopyRowToGraph = new QAction(this);
   actionCopyRowToGraph->setIcon(QIcon(getQPixmap("graph_xpm")));
   connect(actionCopyRowToGraph, SIGNAL(activated()), this, SLOT(copyRowToGraph()));
 
-  actionCopyRowToGraphErr = new QAction(tr("Plot spectra (values + errors)"), this);
+  actionCopyRowToGraphErr = new QAction(this);
   actionCopyRowToGraphErr->setIcon(QIcon(getQPixmap("graph_xpm")));
   connect(actionCopyRowToGraphErr, SIGNAL(activated()), this, SLOT(copyRowToGraphErr()));
 
@@ -110,15 +110,15 @@ MantidUI::MantidUI(ApplicationWindow *aw):
   actionCopyValues->setIcon(QIcon(getQPixmap("copy_xpm")));
   connect(actionCopyValues, SIGNAL(activated()), this, SLOT(copyValues()));
 
-  actionCopyColumnToTable = new QAction(tr("Copy bin to table"), this);
+  actionCopyColumnToTable = new QAction(this);
   actionCopyColumnToTable->setIcon(QIcon(getQPixmap("table_xpm")));
   connect(actionCopyColumnToTable, SIGNAL(activated()), this, SLOT(copyColumnToTable()));
 
-  actionCopyColumnToGraph = new QAction(tr("Plot bin (values only)"), this);
+  actionCopyColumnToGraph = new QAction(this);
   actionCopyColumnToGraph->setIcon(QIcon(getQPixmap("graph_xpm")));
   connect(actionCopyColumnToGraph, SIGNAL(activated()), this, SLOT(copyColumnToGraph()));
 
-  actionCopyColumnToGraphErr = new QAction(tr("Plot bin (values + errors)"), this);
+  actionCopyColumnToGraphErr = new QAction(this);
   actionCopyColumnToGraphErr->setIcon(QIcon(getQPixmap("graph_xpm")));
   connect(actionCopyColumnToGraphErr, SIGNAL(activated()), this, SLOT(copyColumnToGraphErr()));
 
@@ -523,8 +523,10 @@ void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
 {
   if (w->isA("MantidMatrix"))
   {
-    bool areSpectraSelected = static_cast<MantidMatrix*>(w)->setSelectedRows();
-    bool areColumnsSelected = static_cast<MantidMatrix*>(w)->setSelectedColumns();
+    MantidMatrix * mm = dynamic_cast<MantidMatrix*>(w);
+
+    bool areSpectraSelected = mm->setSelectedRows();
+    bool areColumnsSelected = mm->setSelectedColumns();
     cm.addAction(actionCopyValues);
     if (areSpectraSelected) cm.addAction(actionCopyRowToTable);
     if (areColumnsSelected) cm.addAction(actionCopyColumnToTable);
@@ -532,18 +534,48 @@ void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
     cm.addAction(actionCopyDetectorsToTable);
     cm.addSeparator();
 
-    if (areSpectraSelected && static_cast<MantidMatrix*>(w)->numCols() > 1)
+    if (areSpectraSelected && mm->numCols() > 1)
     {
+      // Enable the appropriate options
       cm.addAction(actionCopyRowToGraph);
       cm.addAction(actionCopyRowToGraphErr);
-      if (static_cast<MantidMatrix*>(w)->getSelectedRows().size() > 1)
+      if (mm->getSelectedRows().size() > 1)
+      {
         cm.addAction(actionWaterfallPlot);
+      }
     }
-    if (areColumnsSelected)
+    if (areColumnsSelected && mm->numRows() > 1)
     {
       cm.addAction(actionCopyColumnToGraph);
       cm.addAction(actionCopyColumnToGraphErr);
     }
+
+    // Set the option texts to the correct plurality
+    if (mm->getSelectedRows().size() > 1)
+    {
+      actionCopyRowToTable->setText("Copy spectra to table");
+      actionCopyRowToGraph->setText("Plot spectra (values only)");
+      actionCopyRowToGraphErr->setText("Plot spectra (values + errors)");
+    }
+    else
+    {
+      actionCopyRowToTable->setText("Copy spectrum to table");
+      actionCopyRowToGraph->setText("Plot spectrum (values only)");
+      actionCopyRowToGraphErr->setText("Plot spectrum (values + errors)");
+    }
+    if (mm->getSelectedColumns().size() > 1)
+    {
+      actionCopyColumnToTable->setText("Copy bins to table");
+      actionCopyColumnToGraph->setText("Plot bins (values only)");
+      actionCopyColumnToGraphErr->setText("Plot bins (values + errors)");
+    }
+    else
+    {
+      actionCopyColumnToTable->setText("Copy bin to table");
+      actionCopyColumnToGraph->setText("Plot bin (values only)");
+      actionCopyColumnToGraphErr->setText("Plot bin (values + errors)");
+    }
+
   }
 }
 
