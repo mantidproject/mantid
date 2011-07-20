@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/CalculateEfficiency.h"
-#include "MantidAlgorithms/SANSSolidAngleCorrection.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -159,18 +158,10 @@ public:
     mover.setPropertyValue("Z","6");
     mover.execute();
 
-    // Solid angle correction
-    Mantid::Algorithms::SANSSolidAngleCorrection sa_corr;
-    const std::string sa_corrWS("sa_corrected");
-    sa_corr.initialize();
-    sa_corr.setPropertyValue("InputWorkspace", inputWS);
-    sa_corr.setPropertyValue("OutputWorkspace", sa_corrWS);
-    sa_corr.execute();
-
     if (!correction.isInitialized()) correction.initialize();
 
     const std::string outputWS("result");
-    TS_ASSERT_THROWS_NOTHING( correction.setPropertyValue("InputWorkspace",sa_corrWS) )
+    TS_ASSERT_THROWS_NOTHING( correction.setPropertyValue("InputWorkspace",inputWS) )
     TS_ASSERT_THROWS_NOTHING( correction.setPropertyValue("OutputWorkspace",outputWS) )
     TS_ASSERT_THROWS_NOTHING( correction.setProperty<double>("MinEfficiency",0.5) )
     TS_ASSERT_THROWS_NOTHING( correction.setProperty<double>("MaxEfficiency",1.50) )
