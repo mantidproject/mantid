@@ -16,6 +16,7 @@
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 #include "MantidAPI/ISpectrum.h"
+#include "MantidGeometry/ISpectraDetectorMap.h"
 
 using Mantid::API::ISpectrum;
 
@@ -260,14 +261,52 @@ ISpectrum * AbsManagedWorkspace2D::getSpectrum(const size_t index)
 {
   if (index>=m_noVectors)
     throw std::range_error("AbsManagedWorkspace2D::getSpectrum, histogram number out of range");
-  return getDataBlock(index)->getSpectrum(index);
+  ISpectrum * spec = getDataBlock(index)->getSpectrum(index);
+  if( spec->getDetectorIDs().empty() )
+  {
+    try
+    {
+      const specid_t spectrum_number = getAxis(1)->spectraNo(index);
+      const std::vector<detid_t> dets = m_spectraMap->getDetectors(spectrum_number);  
+      spec->addDetectorIDs(dets);
+      spec->setSpectrumNo(spectrum_number);
+    }
+    catch(std::domain_error&)
+    {
+    }  
+    catch(std::out_of_range&)
+    {
+    }
+  }
+
+  return spec;
 }
 
 const ISpectrum * AbsManagedWorkspace2D::getSpectrum(const size_t index) const
 {
   if (index>=m_noVectors)
     throw std::range_error("AbsManagedWorkspace2D::getSpectrum, histogram number out of range");
-  return getDataBlock(index)->getSpectrum(index);
+
+  // Temporary until a proper fix is found, i.e. including the det IDs in the written block
+  // or keep them around in some other way
+  ISpectrum * spec = const_cast<ISpectrum*>(getDataBlock(index)->getSpectrum(index));
+  if( spec->getDetectorIDs().empty() )
+  {
+    try
+    {
+      const specid_t spectrum_number = getAxis(1)->spectraNo(index);
+      const std::vector<detid_t> dets = m_spectraMap->getDetectors(spectrum_number);  
+      spec->addDetectorIDs(dets);
+      spec->setSpectrumNo(spectrum_number);
+    }
+    catch(std::domain_error&)
+    {
+    }  
+    catch(std::out_of_range&)
+    {
+    }
+  }
+  return spec;
 }
 
 /** Returns the number of histograms.
