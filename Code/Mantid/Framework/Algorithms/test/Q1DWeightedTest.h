@@ -5,7 +5,6 @@
 #include "MantidAlgorithms/Q1DWeighted.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
-#include "MantidAlgorithms/SANSSolidAngleCorrection.h"
 #include <iostream>
 
 using namespace Mantid::API;
@@ -57,13 +56,6 @@ public:
     mover.setPropertyValue("Y","0.002575");
     mover.execute();
 
-    // Perform solid angle correction
-    Mantid::Algorithms::SANSSolidAngleCorrection solidcorr;
-    solidcorr.initialize();
-    solidcorr.setPropertyValue("InputWorkspace",inputWS);
-    solidcorr.setPropertyValue("OutputWorkspace",inputWS);
-    solidcorr.execute();
-
     if (!radial_average.isInitialized()) radial_average.initialize();
 
     TS_ASSERT_THROWS_NOTHING( radial_average.setPropertyValue("InputWorkspace",inputWS) )
@@ -89,16 +81,11 @@ public:
     // For NPixelDivision = 1
     //   Y[1] = 0.0398848*3600; Y[2] = 0.0371762*3600; Y[30] = 0.030971*3600; Y[80] = 0.0275545*3600; Y[90] = 0.0270528*3600
     TS_ASSERT_EQUALS( result->dataX(0)[0], 0.01);
-    double iq = 0.0308929*3600;
-    TS_ASSERT_DELTA( result->dataY(0)[30], iq, tolerance);
-    iq = 0.0397903*3600;
-    TS_ASSERT_DELTA( result->dataY(0)[1], iq, tolerance);
-    iq = 0.0373098*3600;
-    TS_ASSERT_DELTA( result->dataY(0)[2], iq, tolerance);
-    iq = 0.0276372*3600;
-    TS_ASSERT_DELTA( result->dataY(0)[80], iq, tolerance);
-    iq = 0.0270194*3600;
-    TS_ASSERT_DELTA( result->dataY(0)[90], iq, tolerance);
+    TS_ASSERT_DELTA( result->dataY(0)[30], 110.9651, tolerance);
+    TS_ASSERT_DELTA( result->dataY(0)[1], 143.2190, tolerance);
+    TS_ASSERT_DELTA( result->dataY(0)[2], 134.2864, tolerance);
+    TS_ASSERT_DELTA( result->dataY(0)[80], 98.3834, tolerance);
+    TS_ASSERT_DELTA( result->dataY(0)[90], 95.9322, tolerance);
 
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
