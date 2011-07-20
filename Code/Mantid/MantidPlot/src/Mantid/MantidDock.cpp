@@ -696,6 +696,8 @@ void MantidDockWidget::addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::Matr
   // Add all options except plot of we only have 1 value
   menu->addAction(m_showData);
   menu->addAction(m_showInst);
+  // Disable the 'show instrument' option if a workspace doesn't have an instrument attached
+  m_showInst->setEnabled( matrixWS->getInstrument() && !matrixWS->getInstrument()->getName().empty() );
   menu->addAction(m_plotSpec);
   //menu->addAction(m_plotSpecDistr);
   // Don't plot a spectrum if only one X value
