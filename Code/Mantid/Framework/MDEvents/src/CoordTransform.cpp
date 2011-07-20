@@ -2,6 +2,16 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/AutoPtr.h> 
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/XML/XMLWriter.h>
+
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
+
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
@@ -19,7 +29,7 @@ namespace MDEvents
    * @throw std::runtime_error if outD > inD
    */
   CoordTransform::CoordTransform(const size_t inD, const size_t outD)
-  : inD(inD), outD(outD), affineMatrix(outD+1, inD+1), rawMatrix(NULL)
+  : inD(inD), outD(outD), affineMatrixParameter(outD, inD)
   {
     if (outD > inD)
       throw std::runtime_error("CoordTransform: Cannot have more output dimensions than input dimensions!");
@@ -27,17 +37,6 @@ namespace MDEvents
       throw std::runtime_error("CoordTransform: invalid number of output dimensions!");
     if (inD == 0)
       throw std::runtime_error("CoordTransform: invalid number of input dimensions!");
-    affineMatrix.identityMatrix();
-
-    // Allocate the raw matrix
-    size_t nx = affineMatrix.numRows();
-    size_t ny = affineMatrix.numCols();
-    coord_t * tmpX = new coord_t[nx*ny];
-    rawMatrix = new coord_t*[nx];
-    for (size_t i=0;i<nx;i++)
-      rawMatrix[i] = tmpX + (i*ny);
-    // Copy into the raw matrix (for speed)
-    copyRawMatrix();
   }
     
   //----------------------------------------------------------------------------------------------
@@ -45,26 +44,7 @@ namespace MDEvents
    */
   CoordTransform::~CoordTransform()
   {
-    if (rawMatrix)
-    {
-      delete [] *rawMatrix;
-      delete [] rawMatrix;
-    }
-    rawMatrix=NULL;
   }
-
-
-  //----------------------------------------------------------------------------------------------
-  /** Copies the affine matrix into a local raw pointer, for speed.
-   * Call this after any change to affineMatrix
-   */
-  void CoordTransform::copyRawMatrix()
-  {
-    for (size_t x=0; x < affineMatrix.numRows(); ++x)
-      for (size_t y=0; y < affineMatrix.numCols(); ++y)
-        rawMatrix[x][y] = affineMatrix[x][y];
-  }
-
 
   //----------------------------------------------------------------------------------------------
   /** Directly set the affine matrix to use.
@@ -74,13 +54,7 @@ namespace MDEvents
    */
   void CoordTransform::setMatrix(const Mantid::Kernel::Matrix<coord_t> newMatrix)
   {
-    if (newMatrix.numRows() != outD+1)
-      throw std::runtime_error("setMatrix(): Number of rows must match!");
-    if (newMatrix.numCols() != inD+1)
-      throw std::runtime_error("setMatrix(): Number of columns must match!");
-    affineMatrix = newMatrix;
-    // Copy into the raw matrix (for speed)
-    copyRawMatrix();
+    affineMatrixParameter.setMatrix(newMatrix);
   }
 
 
@@ -89,7 +63,7 @@ namespace MDEvents
    */
   Mantid::Kernel::Matrix<coord_t> CoordTransform::getMatrix() const
   {
-    return affineMatrix;
+    return affineMatrixParameter.getAffineMatrix();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -107,12 +81,52 @@ namespace MDEvents
       translationMatrix[i][inD] = translationVector[i];
 
     // Multiply the affine matrix by the translation affine matrix to combine them
-    affineMatrix *= translationMatrix;
+    Matrix<coord_t> currentAffine = affineMatrixParameter.getAffineMatrix();
+    currentAffine *= translationMatrix;
 
-    // Copy into the raw matrix (for speed)
-    copyRawMatrix();
+    affineMatrixParameter.setMatrix(currentAffine);
   }
-  
+
+  //----------------------------------------------------------------------------------------------
+  /** Serialize the coordinate transform
+  *
+  * @return The coordinate transform in its serialized form.
+  */
+  std::string CoordTransform::toXMLString() const
+  {
+    using namespace Poco::XML;
+    AutoPtr<Document> pDoc = new Document;
+    Element* coordTransformElement = pDoc->createElement("CoordTransform");
+
+    pDoc->appendChild(coordTransformElement);
+    Element* numInputDimsElement = pDoc->createElement("NumInputDims");
+    Element* numOutputDimsElement = pDoc->createElement("NumOutputDims");
+    Element* affineMatrixElement = pDoc->createElement("AffineMatrix");
+
+    std::stringstream input_stream;
+    input_stream << this->inD;
+    numInputDimsElement->appendChild(pDoc->createTextNode(input_stream.str()));
+
+    std::stringstream output_stream;
+    output_stream << this->outD;
+    numOutputDimsElement->appendChild(pDoc->createTextNode(output_stream.str()));
+
+    Text* affineMatrixText = pDoc->createTextNode("%s");
+    affineMatrixElement->appendChild(affineMatrixText);
+    
+    coordTransformElement->appendChild(numInputDimsElement);
+    coordTransformElement->appendChild(numOutputDimsElement);
+    coordTransformElement->appendChild(affineMatrixElement);
+
+    DOMWriter writer;
+    std::stringstream xml_stream;
+    writer.writeNode(xml_stream, pDoc);
+
+    std::string formattedXMLString = boost::str(boost::format(xml_stream.str().c_str())
+      % affineMatrixParameter.toXMLString().c_str());
+    
+    return formattedXMLString;
+  }
 
 //  //----------------------------------------------------------------------------------------------
 //  /** Set the transformation to be a simple rotation.

@@ -5,6 +5,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidMDEvents/AffineMatrixParameter.h"
 
 namespace Mantid
 {
@@ -28,7 +29,7 @@ namespace MDEvents
   public:
     CoordTransform(const size_t inD, const size_t outD);
     virtual ~CoordTransform();
-
+    std::string toXMLString() const;
     void addTranslation(const coord_t * translationVector);
     Mantid::Kernel::Matrix<coord_t> getMatrix() const;
     void setMatrix(const Mantid::Kernel::Matrix<coord_t> newMatrix);
@@ -45,7 +46,7 @@ namespace MDEvents
       for (size_t out = 0; out < outD; ++out)
       {
         //Cache the row pointer to make the matrix access a bit faster
-        coord_t * rawMatrixRow = rawMatrix[out];
+        coord_t * rawMatrixRow = affineMatrixParameter.getRawMatrix()[out];
         coord_t outVal = 0.0;
         size_t in;
         for (in = 0; in < inD; ++in)
@@ -71,12 +72,8 @@ namespace MDEvents
      * By using an affine, translations and rotations (or other linear transforms) can be
      * combined by simply multiplying the matrices.
      */
-    Mantid::Kernel::Matrix<coord_t> affineMatrix;
+     AffineMatrixParameter affineMatrixParameter;
 
-    /// Raw pointer to the same underlying matrix as affineMatrix.
-    coord_t ** rawMatrix;
-
-    void copyRawMatrix();
   };
 
 

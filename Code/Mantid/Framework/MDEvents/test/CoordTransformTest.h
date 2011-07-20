@@ -133,6 +133,30 @@ public:
     compare(3, out, expected);
   }
 
+  void testSerialization()
+  {
+    using Mantid::Kernel::V3D;
+    CoordTransform ct(3, 3);
+
+    //Generate a transformation matrix. NB. This is not composed of a well formed transformation or rotation matrix.
+    Mantid::Kernel::Matrix<coord_t> transform(4,4);
+    int count = 0;
+    for(int i = 0; i < 4; i++)
+    {
+      for(int j = 0; j < 4; j++)
+      {
+        transform[i][j] = count;
+        count++;
+      }
+    }
+
+    ct.setMatrix(transform);
+    std::string result = ct.toXMLString();
+    TSM_ASSERT_EQUALS("Serialization of CoordTransform has not worked correctly.", 
+      "<CoordTransform><NumInputDims>3</NumInputDims><NumOutputDims>3</NumOutputDims><AffineMatrix><Parameter><Type>AffineMatrixParameter</Type><Value>0,1,2,3;4,5,6,7;8,9,10,11;12,13,14,15;</Value></Parameter></AffineMatrix></CoordTransform>"
+      , ct.toXMLString());
+  }
+
 };
 
 
