@@ -507,15 +507,11 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
     std::string instrumentID = inst_name;
     // force ID to upper case
     std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
-    std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
-
-//    Mantid::DataHandling::LoadInstrumentHelper helper;
-//    std::string fullPathIDF = helper.getInstrumentFilename(instrumentID, Mantid::Kernel::DateAndTime::get_current_time().to_ISO8601_string());
     
     Mantid::DataHandling::LoadInstrument loadInst;
     loadInst.initialize();
     // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-    loadInst.setPropertyValue("Filename", fullPathIDF);
+    loadInst.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" + instrumentID + "_Definition.xml");
     loadInst.setProperty<MatrixWorkspace_sptr> ("Workspace", workspace);
     loadInst.execute();
 
