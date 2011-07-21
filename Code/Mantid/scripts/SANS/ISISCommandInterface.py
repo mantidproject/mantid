@@ -53,10 +53,19 @@ def _refresh_singleton():
     ReductionSingleton().remove_settings()
                 
 def UserPath(path):
+    """
+        Sets the directory in which Mantid should look for the mask file if a
+        full path was not specified
+        @param path: the full path to the directory
+    """
     _printMessage('UserPath("' + path + '") #Will look for mask file here')
     ReductionSingleton().user_file_path = path
 
 def DataPath(path):
+    """
+        Sets an extra directory for Mantid to look for run files
+        @param path: the full path to a directory containing the run files to analyse
+    """
     ReductionSingleton().set_data_path(path)
 
 def SANS2D():
@@ -88,6 +97,11 @@ def LOQ():
     return True
     
 def Detector(det_name):
+    """
+        Sets the detector bank to use for the reduction e.g. 'front-detector'. The
+        main detector is assumed if this line is not given
+        @param det_name: the detector's name
+    """
     _printMessage('Detector("' + det_name + '")')
     ReductionSingleton().instrument.setDetector(det_name)
     
@@ -95,6 +109,7 @@ def Mask(details):
     """
         Specify regions of the detector to mask using the same syntax
         as used in the user file
+        @param details: a string that specifies masking as it would appear in a mask file 
     """ 
     _printMessage('Mask("' + details + '")')
     ReductionSingleton().mask.parse_instruction(details)
@@ -125,6 +140,11 @@ def Gravity(flag):
     ReductionSingleton().to_Q.set_gravity(flag)
     
 def TransFit(mode,lambdamin=None,lambdamax=None):
+    """
+        Sets the fit method to calculate the transmission fit and the wavelength range
+        over which to do the fit. These arguments are passed to the algorithm
+        CalculateTransmission
+    """
     mode = str(mode).strip().upper()
     message = mode
     if lambdamin: message += ', ' + str(lambdamin)

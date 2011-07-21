@@ -631,16 +631,16 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         phimax = math.pi*phimax/180.0
         
         id = str(id)
-        self._lim_phi_xml = (
-            self._infinite_plane(id+'_plane1',centre, [math.cos(-phimin + math.pi/2.0),math.sin(-phimin + math.pi/2.0),0])
+        self._lim_phi_xml = \
+            self._infinite_plane(id+'_plane1',centre, [math.cos(-phimin + math.pi/2.0),math.sin(-phimin + math.pi/2.0),0]) \
             + self._infinite_plane(id+'_plane2',centre, [-math.cos(-phimax + math.pi/2.0),-math.sin(-phimax + math.pi/2.0),0])
-            + self._infinite_plane(id+'_plane3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0])
-            + self._infinite_plane(id+'_plane4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0]))
         
-        if use_mirror : 
-            self._lim_phi_xml += '<algebra val="#(('+id+'_plane1 '+id+'_plane2):('+id+'_plane3 '+id+'_plane4))" />'
+        if use_mirror:
+            self._lim_phi_xml += self._infinite_plane(id+'_plane3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0]) \
+            + self._infinite_plane(id+'_plane4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0]) \
+            + '<algebra val="#(('+id+'_plane1 '+id+'_plane2):('+id+'_plane3 '+id+'_plane4))" />'
         else:
-            #the formula is different for acute verses obstruse angles
+            #the formula is different for acute verses obtuse angles
             if phimax-phimin > math.pi :
               # to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
                 self._lim_phi_xml += '<algebra val="#('+id+'_plane1:'+id+'_plane2)" />'
