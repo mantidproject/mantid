@@ -50,14 +50,14 @@ namespace Mantid
       // Output workspace
       std::vector<double> newYBins;
       MatrixWorkspace_sptr outputWS = this->setUpOutputWorkspace(inputWS, newYBins);
-      const size_t nOutHist(outputWS->getNumberHistograms());
+      const int64_t nOutHist(static_cast<int64_t>(outputWS->getNumberHistograms()));
       const size_t nOutBins(outputWS->blocksize());
 
       m_progress = boost::shared_ptr<API::Progress>(new API::Progress(this, 0.0, 1.0, nOutHist*nOutBins+1));
       initCachedValues(inputWS);
 
       PARALLEL_FOR2(inputWS, outputWS)
-      for( size_t i = 0; i < nOutHist; ++i )
+      for(int64_t i = 0; i < nOutHist; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
 
