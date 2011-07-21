@@ -65,8 +65,8 @@ def move_all(subproject, classname, newproject, args):
         move_one(subproject, classname, newproject, testfile, newtestfile, args)
     
     # Insert into the cmake list
-    add_to_cmake(newproject, classname, args)
-    remove_from_cmake(subproject, classname, args)
+    add_to_cmake(newproject, classname, args, args.dest_subfolder)
+    remove_from_cmake(subproject, classname, args, args.source_subfolder)
     
     print "   Files were removed to Framework/%s/CMakeLists.txt !" % subproject
     print "   Files were added to Framework/%s/CMakeLists.txt !" % newproject
@@ -76,7 +76,6 @@ def move_all(subproject, classname, newproject, args):
 #        print "\tinc/Mantid%s/%s.h" % (subproject, classname)
 #    print "\ttest/%sTest.h" % (classname)
 #    print  
-
 
 
 #======================================================================
