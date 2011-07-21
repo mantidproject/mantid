@@ -1,6 +1,6 @@
 #ifndef MD_ALGORITHMS_MD_PARAMETER_PARSER_DECLARATIONS_H
 #define MD_ALGORITHMS_MD_PARAMETER_PARSER_DECLARATIONS_H
-#include "MantidMDAlgorithms/SingleValueParameterParser.h"
+#include "MantidAPI/SingleValueParameterParser.h"
 
 namespace Mantid
 {

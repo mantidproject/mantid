@@ -168,6 +168,7 @@ set ( INC_FILES
 	inc/MantidAPI/ScriptWriter.h
 	inc/MantidAPI/ScriptWriterFactory.h
 	inc/MantidAPI/SingleValueParameter.h
+	inc/MantidAPI/SingleValueParameterParser.h
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectraDetectorMap.h
 	inc/MantidAPI/TableRow.h

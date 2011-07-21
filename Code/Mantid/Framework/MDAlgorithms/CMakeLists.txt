@@ -73,7 +73,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/RunParam.h
 	inc/MantidMDAlgorithms/SimulateMDD.h
 	inc/MantidMDAlgorithms/SimulateResolution.h
-	inc/MantidMDAlgorithms/SingleValueParameterParser.h
 	inc/MantidMDAlgorithms/TobyFitSimulate.h
 	inc/MantidMDAlgorithms/UpParameter.h
 	inc/MantidMDAlgorithms/VectorMathematics.h
