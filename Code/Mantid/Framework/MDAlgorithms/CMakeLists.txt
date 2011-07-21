@@ -17,6 +17,7 @@ set ( SRC_FILES
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
 	src/Load_MDWorkspace.cpp
+	src/MDBoxImplicitFunction.cpp
 	src/MDImplicitFunction.cpp
 	src/MDParameterParserDeclarations.cpp
 	src/MDPlane.cpp
@@ -31,8 +32,8 @@ set ( SRC_FILES
 	src/SimulateMDD.cpp
 	src/SimulateResolution.cpp
 	src/TobyFitSimulate.cpp
-	src/VectorMathematics.cpp
 	src/Vector3DParameterParser.cpp
+	src/VectorMathematics.cpp
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
@@ -58,6 +59,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/Load_MDWorkspace.h
+	inc/MantidMDAlgorithms/MDBoxImplicitFunction.h
 	inc/MantidMDAlgorithms/MDImplicitFunction.h
 	inc/MantidMDAlgorithms/MDParameterParserDeclarations.h
 	inc/MantidMDAlgorithms/MDPlane.h
@@ -75,9 +77,9 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/SimulateResolution.h
 	inc/MantidMDAlgorithms/TobyFitSimulate.h
 	inc/MantidMDAlgorithms/UpParameter.h
-	inc/MantidMDAlgorithms/VectorMathematics.h
 	inc/MantidMDAlgorithms/Vector3DParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
+	inc/MantidMDAlgorithms/VectorMathematics.h
 	inc/MantidMDAlgorithms/WidthParameter.h
 )
 
@@ -96,6 +98,7 @@ set ( TEST_FILES
 	test/InvalidParameterParserTest.h
 	test/InvalidParameterTest.h
 	test/Load_MDWorkspaceTest.h
+	test/MDBoxImplicitFunctionTest.h
 	test/MDImplicitFunctionTest.h
 	test/MDPlaneTest.h
 	test/NormalParameterTest.h
