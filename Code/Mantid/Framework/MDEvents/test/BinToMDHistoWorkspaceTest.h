@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidTestHelpers/AlgorithmHelper.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
@@ -254,11 +255,16 @@ public:
 
   BinToMDHistoWorkspaceTestPerformance()
   {
-    in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1000);
-    // 1000 boxes with 1000 event each
-    TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000*1000);
+    in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
+    in_ws->getBoxController()->setSplitThreshold(2000);
     in_ws->splitAllIfNeeded(NULL);
     AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
+    AlgorithmHelper::runAlgorithm("FakeMDEventData", 4,
+        "InputWorkspace", "BinToMDHistoWorkspaceTest_ws",
+        "UniformParams", "1000000");
+    // 1 million random points
+    TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000*1000);
+    TS_ASSERT_EQUALS( in_ws->getBoxController()->getMaxId(), 1001 );
   }
 
   ~BinToMDHistoWorkspaceTestPerformance()

@@ -1,5 +1,6 @@
 #include "MantidAPI/ImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Strings.h"
@@ -168,9 +169,6 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void BinToMDHistoWorkspace::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
-    /// Make a leaf-only iterator (returns only the MDBox'es)
-    /// TODO: Maybe an iterator that completely avoids areas outside the integration region?
-    MDBoxIterator<MDE,nd> boxIt(ws->getBox(), 1000, true);
 
     // For progress reporting, the approx # of boxes
     if (prog)
@@ -197,8 +195,26 @@ namespace MDEvents
     signal_t * signals = outWS->getSignalArray();
     signal_t * errors = outWS->getErrorSquaredArray();
 
-    // Start signal at 0.0
+    // Start with signal at 0.0
     outWS->setTo(0.0, 0.0);
+
+    // Build an implicit function (it needs to be in the space of the MDEventWorkspace)
+    std::vector<coord_t> function_min(nd, -1e50); // default to all space if the dimension is not specified
+    std::vector<coord_t> function_max(nd, +1e50); // default to all space if the dimension is not specified
+    for (size_t bd=0; bd<numBD; bd++)
+    {
+      // Dimension in the MDEventWorkspace
+      size_t d = dimensionToBinFrom[bd];
+      function_min[d] = binDimensions[bd]->getMinimum();
+      function_max[d] = binDimensions[bd]->getMaximum();
+    }
+    MDBoxImplicitFunction * function = new MDBoxImplicitFunction(function_min, function_max);
+    //TODO: Remove
+    function = NULL;
+
+    // Make a leaf-only iterator (returns only the MDBox'es)
+    // (with an implicit function added on)
+    MDBoxIterator<MDE,nd> boxIt(ws->getBox(), 1000, true, function);
 
 //    std::cout << Kernel::Strings::join(dimensionToBinFrom.begin(), dimensionToBinFrom.end(), ",") << std::endl;
 //    std::cout << Kernel::Strings::join(indexMultiplier, indexMultiplier+numBD, ",") << std::endl;
