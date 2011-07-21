@@ -95,7 +95,10 @@ namespace Mantid
         sstream.clear();
         if(i%4 == 0)
         {
-          parameterValue.append(";");
+          if(i != size)
+          {
+            parameterValue.append(";");
+          }
         }
         else
         {

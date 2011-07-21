@@ -120,7 +120,7 @@ public:
     param.setMatrix(transform);
     std::string result = param.toXMLString();
     TSM_ASSERT_EQUALS("Serialization of CoordTransform has not worked correctly.", 
-      "<Parameter><Type>AffineMatrixParameter</Type><Value>0,1,2,3;4,5,6,7;8,9,10,11;12,13,14,15;</Value></Parameter>", param.toXMLString());
+      "<Parameter><Type>AffineMatrixParameter</Type><Value>0,1,2,3;4,5,6,7;8,9,10,11;12,13,14,15</Value></Parameter>", param.toXMLString());
  }
 
 };
