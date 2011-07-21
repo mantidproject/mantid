@@ -42,7 +42,7 @@ class EQSANSConfig(object):
         self.sample_detector_dist = 0
         
         # Prompt pulse width
-        self.prompt_pulse_width = 0
+        self.prompt_pulse_width = 20
     
     def _process_file(self):
         """
