@@ -156,11 +156,11 @@ if ( CXXTEST_FOUND )
   include_directories(../CurveFitting/inc ../MDEvents/inc ../Nexus/inc)	
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects CurveFitting MDEvents
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects CurveFitting MDEvents API
       ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
   else ()
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} )
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects CurveFitting MDEvents )
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects CurveFitting MDEvents API )
   endif ()
   add_dependencies ( FrameworkTests MDAlgorithmsTest )
   # Add to the 'FrameworkTests' group in VS
