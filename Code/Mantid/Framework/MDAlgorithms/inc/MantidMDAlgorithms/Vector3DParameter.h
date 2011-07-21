@@ -153,8 +153,8 @@ ElemType& Vector3DParameter<Derived,ElemType>::operator[] (int index)
 // Use of macro enables parameter names to be assigned to each type.
 // Most of the work is done in the VectorParamter base class, which utilises CRTP.
 //-----------------------------------------------------------------------------------------------------------------//
-#define DECLARE_VECTOR_PARAMETER(classname, type_) \
-    class classname : public Vector3DParameter<classname, double> \
+#define DECLARE_3D_VECTOR_PARAMETER(classname, type_) \
+    class classname : public Mantid::MDAlgorithms::Vector3DParameter<classname, double> \
     {  \
       public: \
       typedef Vector3DParameter<classname, type_> SuperType;  \

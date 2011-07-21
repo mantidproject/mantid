@@ -173,6 +173,8 @@ set ( INC_FILES
 	inc/MantidAPI/SpectraDetectorMap.h
 	inc/MantidAPI/TableRow.h
 	inc/MantidAPI/TextAxis.h
+	inc/MantidAPI/VectorParameter.h
+	inc/MantidAPI/VectorParameterParser.h
 	inc/MantidAPI/Workspace.h
 	inc/MantidAPI/WorkspaceFactory.h
 	inc/MantidAPI/WorkspaceGroup.h
@@ -221,6 +223,8 @@ set ( TEST_FILES
 	test/SpectraAxisTest.h
 	test/SpectraDetectorMapTest.h
 	test/TextAxisTest.h
+	test/VectorParameterTest.h
+	test/VectorParameterParserTest.h
 	test/WorkspaceFactoryTest.h
 	test/WorkspaceHistoryTest.h
 	test/WorkspacePropertyTest.h

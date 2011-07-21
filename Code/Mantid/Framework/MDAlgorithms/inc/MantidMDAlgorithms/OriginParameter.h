@@ -38,7 +38,7 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
       
-      DECLARE_VECTOR_PARAMETER(OriginParameter, double);
+      DECLARE_3D_VECTOR_PARAMETER(OriginParameter, double);
     }
 }
 

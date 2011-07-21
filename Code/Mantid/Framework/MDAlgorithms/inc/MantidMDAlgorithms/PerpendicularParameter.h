@@ -35,7 +35,7 @@ namespace MDAlgorithms
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-DECLARE_VECTOR_PARAMETER(PerpendicularParameter, double);
+DECLARE_3D_VECTOR_PARAMETER(PerpendicularParameter, double);
 
 }
 }

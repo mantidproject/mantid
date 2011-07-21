@@ -35,7 +35,7 @@ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Co
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-  DECLARE_VECTOR_PARAMETER(UpParameter, double);
+  DECLARE_3D_VECTOR_PARAMETER(UpParameter, double);
 
 }
 }
