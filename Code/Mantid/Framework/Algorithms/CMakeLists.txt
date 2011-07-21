@@ -124,6 +124,7 @@ set ( SRC_FILES
 	src/Regroup.cpp
 	src/RemoveBins.cpp
 	src/RemoveLowResTOF.cpp
+	src/RemovePromptPulse.cpp
 	src/RenameWorkspace.cpp
 	src/ReplaceSpecialValues.cpp
 	src/SANSDirectBeamScaling.cpp
@@ -280,6 +281,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Regroup.h
 	inc/MantidAlgorithms/RemoveBins.h
 	inc/MantidAlgorithms/RemoveLowResTOF.h
+	inc/MantidAlgorithms/RemovePromptPulse.h
 	inc/MantidAlgorithms/RenameWorkspace.h
 	inc/MantidAlgorithms/ReplaceSpecialValues.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
@@ -422,6 +424,7 @@ set ( TEST_FILES
 	test/RegroupTest.h
 	test/RemoveBinsTest.h
 	test/RemoveLowResTOFTest.h
+	test/RemovePromptPulseTest.h
 	test/RenameWorkspaceTest.h
 	test/ReplaceSpecialValuesTest.h
 	test/ScaleTest.h

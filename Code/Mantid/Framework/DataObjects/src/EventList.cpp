@@ -2051,7 +2051,7 @@ namespace DataObjects
     typename EventList::tofGreaterOrEqual<T> comparator(tofMin);
     //Find the index of the first tofMin
     typename std::vector<T>::iterator it_first = std::find_if(events.begin(), events.end(), comparator);
-    if (it_first != events.end())
+    if ((it_first != events.end()) && (it_first->tof() < tofMax))
     {
       //Something was found
       //Look for the first one > tofMax
@@ -2059,7 +2059,9 @@ namespace DataObjects
       typename std::vector<T>::iterator it_last = std::find_if(it_first, events.end(), comparator2);
 
       if (it_first >= it_last)
+      {
         throw std::runtime_error("Event filter is all messed up"); // TODO
+      }
 
       size_t tmp = (it_last - it_first);
       //it_last will either be at the end (if not found) or before it.
