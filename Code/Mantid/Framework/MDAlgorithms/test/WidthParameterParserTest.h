@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "MantidMDAlgorithms/SingleValueParameterParser.h"
+#include "MantidMDAlgorithms/MDParameterParserDeclarations.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>

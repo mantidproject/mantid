@@ -105,9 +105,6 @@ SingleValueParameterParser<SingleValueParameterType>::~SingleValueParameterParse
 {
 }
 
-typedef SingleValueParameterParser<WidthParameter> WidthParameterParser;
-typedef SingleValueParameterParser<HeightParameter> HeightParameterParser;
-typedef SingleValueParameterParser<DepthParameter> DepthParameterParser;
 }
 }
 

@@ -4,7 +4,7 @@
 //Abstract testing base class for function parsers.
 
 #include <boost/scoped_ptr.hpp>
-#include "MantidMDAlgorithms/SingleValueParameterParser.h"
+#include "MantidMDAlgorithms/MDParameterParserDeclarations.h"
 #include "MantidMDAlgorithms/Vector3DParameterParser.h"
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
 #include "MantidMDAlgorithms/PlaneFunctionBuilder.h"

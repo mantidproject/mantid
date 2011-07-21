@@ -18,6 +18,7 @@ set ( SRC_FILES
 	src/InvalidParameterParser.cpp
 	src/Load_MDWorkspace.cpp
 	src/MDImplicitFunction.cpp
+	src/MDParameterParserDeclarations.cpp
 	src/MDPlane.cpp
 	src/NormalParameter.cpp
 	src/NullImplicitFunction.cpp
@@ -59,6 +60,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/Load_MDWorkspace.h
 	inc/MantidMDAlgorithms/MDImplicitFunction.h
+	inc/MantidMDAlgorithms/MDParameterParserDeclarations.h
 	inc/MantidMDAlgorithms/MDPlane.h
 	inc/MantidMDAlgorithms/NormalParameter.h
 	inc/MantidMDAlgorithms/NullImplicitFunction.h
