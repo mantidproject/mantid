@@ -91,7 +91,7 @@ class SANSMaskCommands(unittest.TestCase):
         num_monitors = 4
         bank_square = 128
         centre_main_bank = num_monitors+(bank_square/2)*(bank_square+1)
-        end_main_bank = bank_width*bank_width
+        end_main_bank = bank_square*bank_square
         #test every tenth pixel in the line
 #enable these tests once the functionality has been added under ticket #3403
 #        for i in range(centre_main_bank, end_main_bank, 10*bank_width):
