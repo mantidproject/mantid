@@ -86,7 +86,7 @@ VectorValueParameterType* VectorParameterParser<VectorValueParameterType>::parse
   boost::split(strs, sValue, boost::is_any_of(","));
 
   VectorValueParameterType* product = new VectorValueParameterType();
-  VectorValueParameterType::ValueType value = 0;
+  double value = 0;
 
   for(size_t i = 0; i < strs.size(); i++)
   {
