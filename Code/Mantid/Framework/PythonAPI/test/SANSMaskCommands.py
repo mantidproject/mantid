@@ -103,7 +103,7 @@ class SANSMaskCommands(unittest.TestCase):
 
         ISIS.Mask('mask/line '+str(10)+' '+str(47))
 
-    def tearDown():
+    def tearDown(self):
         ISIS._refresh_singleton()
         
 if __name__ == '__main__':
