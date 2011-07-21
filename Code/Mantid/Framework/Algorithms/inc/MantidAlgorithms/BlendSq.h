@@ -3,6 +3,7 @@
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid
 {
@@ -35,7 +36,17 @@ namespace Algorithms
     /// Run the algorithm
     void exec();
 
+    void rebinData(API::MatrixWorkspace_const_sptr sourcews, API::MatrixWorkspace_sptr targetws, double qmin, double qmax, double dq);
 
+    // void RebinData(size_t sourcesize, double* sqs, double* sss, double* ses, size_t targetsize, double* tqs, double* tss, double* tes);
+
+    void fillArray(API::MatrixWorkspace_sptr ws);
+
+    void extendWorkspaceRange(API::MatrixWorkspace_sptr sourcews, API::MatrixWorkspace_sptr targetws, double qmin, double dq);
+
+    void blendBanks(std::vector<API::MatrixWorkspace_sptr> sqwspaces, API::MatrixWorkspace_sptr blendworkspace, std::vector<double> lowerbounds, std::vector<double> upperbounds);
+
+    void extendToZeroQ(API::MatrixWorkspace_sptr ws, double qmin);
   };
 
 
