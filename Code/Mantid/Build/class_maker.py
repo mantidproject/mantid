@@ -377,6 +377,10 @@ if __name__ == "__main__":
     subproject = args.subproject
     classname = args.classname
     overwrite = args.force
-    if args.subfolder != "": args.subfolder = args.subfolder + "/"
+
+    # Make sure the subfolders end with a /
+    if args.subfolder != "":
+        if args.subfolder[-1:] != "/":
+            args.subfolder += "/"
     
     generate(subproject, classname, overwrite, args)

@@ -26,8 +26,9 @@ def move_one(subproject, classname, newproject, oldfilename, newfilename, args):
     
     # Delete original?
     if args.delete:
-        print "Deleting ", oldfilename
-        os.remove(oldfilename)
+        cmd = "svn remove " + oldfilename
+        print "Running:", cmd
+        os.system(cmd)
     
 
 #======================================================================
@@ -102,7 +103,7 @@ if __name__ == "__main__":
                         help="Don't move the cpp file")
     parser.add_argument('--delete', dest='delete', action='store_const',
                         const=True, default=False,
-                        help="Delete the original files (default False)")
+                        help="Delete the original files (default False) using svn remove")
     parser.add_argument('--source-subfolder', dest='source_subfolder', 
                         default="",
                         help='The source is in a subfolder below the main part of the project, e.g. Geometry/Instrument.')
@@ -115,5 +116,14 @@ if __name__ == "__main__":
     newproject = args.newproject
     classname = args.classname
     overwrite = args.force
+    
+    # Make sure the subfolders end with a /
+    if args.source_subfolder != "":
+        if args.source_subfolder[-1:] != "/":
+            args.source_subfolder += "/"
+    
+    if args.dest_subfolder != "":
+        if args.dest_subfolder[-1:] != "/":
+            args.dest_subfolder += "/"
     
     move_all(subproject, classname, newproject, args)
