@@ -367,6 +367,8 @@ class LoadRun(ReductionStep):
         # Process the configuration file
         low_TOF_cut = self._low_TOF_cut
         high_TOF_cut = self._high_TOF_cut
+        # Width of the prompt pulse
+        prompt_pulse_width = 20
         
         if config_file is not None:
             mantid.sendLogMessage("Using configuration file: %s\n" % config_file)
@@ -374,6 +376,11 @@ class LoadRun(ReductionStep):
             conf = EQSANSConfig(config_file)
             mtd[workspace+'_evt'].getRun().addProperty_dbl("low_tof_cut", conf.low_TOF_cut, "microsecond", True)
             mtd[workspace+'_evt'].getRun().addProperty_dbl("high_tof_cut", conf.high_TOF_cut, "microsecond", True)
+            
+            if conf.prompt_pulse_width is not None and conf.prompt_pulse_width>0:
+                mtd[workspace+'_evt'].getRun().addProperty_dbl("prompt_pulse_width", conf.prompt_pulse_width, "microsecond", True)  
+                prompt_pulse_width = conf.prompt_pulse_width
+                
             if self._use_config_cutoff:
                 low_TOF_cut = conf.low_TOF_cut
                 high_TOF_cut = conf.high_TOF_cut
@@ -450,6 +457,9 @@ class LoadRun(ReductionStep):
             mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_max_frame2", wl_max2, "Angstrom", True)
             wl_combined_max = wl_max2
             output_str += "   Second frame: %6.1f - %-6.1f Angstrom" % (wl_min2, wl_max2)
+        
+        # Remove prompt pulses
+        #RemovePromptPulse(workspace+'_evt', workspace+'_evt', Width=prompt_pulse_width)
         
         # Convert TOF to wavelength
         source_to_sample = math.fabs(mtd[workspace+'_evt'].getInstrument().getSource().getPos().getZ())*1000.0

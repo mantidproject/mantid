@@ -42,7 +42,7 @@ class EQSANSConfig(object):
         self.sample_detector_dist = 0
         
         # Prompt pulse width
-        self.prompt_pulse_width = 20
+        self.prompt_pulse_width = None
     
     def _process_file(self):
         """
@@ -89,11 +89,11 @@ class EQSANSConfig(object):
             if line.lower().find("sample to detector")>=0:
                 dist = re.search("=[ ]*([0-9]+.?[0-9]*)", line)
                 if dist is not None:
-                    self.sample_detector_dist = dist.group(1)
+                    self.sample_detector_dist = float(dist.group(1))
 
             # Prompt pulse width
             #Prompt pulse halfwidth          = 20 [microseconds]
             if line.lower().find("prompt pulse")>=0:
                 width = re.search("=[ ]*([0-9]+.?[0-9]*)", line)
                 if width is not None:
-                    self.prompt_pulse_width = dist.group(1)
+                    self.prompt_pulse_width = float(width.group(1))
