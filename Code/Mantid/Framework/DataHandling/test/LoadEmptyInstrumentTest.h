@@ -918,7 +918,7 @@ void testCheckIfVariousInstrumentsLoad()
 
     AnalysisDataService::Instance().remove(wsName);
 
-/*    LoadEmptyInstrument loaderVESUVIO;
+    LoadEmptyInstrument loaderVESUVIO;
     loaderVESUVIO.initialize();
     loaderVESUVIO.setPropertyValue("Filename", "VESUVIO_Definition.xml");
     wsName = "LoadEmptyInstrumentVESUVIOTest";
@@ -927,7 +927,7 @@ void testCheckIfVariousInstrumentsLoad()
     TS_ASSERT_THROWS_NOTHING(loaderVESUVIO.execute());
     TS_ASSERT( loaderVESUVIO.isExecuted() );
 
-    AnalysisDataService::Instance().remove(wsName);*/
+    AnalysisDataService::Instance().remove(wsName);
   }
 
 

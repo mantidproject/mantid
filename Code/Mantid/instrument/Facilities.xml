@@ -96,6 +96,11 @@
     <technique>TOF Indirect Geometry Spectroscopy</technique>
   </instrument>
 
+  <instrument name="VESUVIO" shortname="EVS">
+    <technique>Neutron Compton Scattering</technique>
+    <technique>TOF Indirect Geometry Spectroscopy</technique>
+  </instrument>
+  
   <instrument name="LET" zeropadding="8">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
