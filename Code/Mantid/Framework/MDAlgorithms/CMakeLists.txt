@@ -30,7 +30,6 @@ set ( SRC_FILES
 	src/RunParam.cpp
 	src/SimulateMDD.cpp
 	src/SimulateResolution.cpp
-	src/SingleValueParameterParser.cpp
 	src/TobyFitSimulate.cpp
 	src/VectorMathematics.cpp
 	src/Vector3DParameterParser.cpp
