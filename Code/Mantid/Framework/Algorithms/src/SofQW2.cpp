@@ -52,8 +52,8 @@ namespace Mantid
       MatrixWorkspace_sptr outputWS = this->setUpOutputWorkspace(inputWS, newYBins);
       const int64_t nOutHist(static_cast<int64_t>(outputWS->getNumberHistograms()));
       const size_t nOutBins(outputWS->blocksize());
-
-      m_progress = boost::shared_ptr<API::Progress>(new API::Progress(this, 0.0, 1.0, nOutHist*nOutBins+1));
+      const size_t nreports(static_cast<size_t>(nOutHist*nOutBins+1));
+      m_progress = boost::shared_ptr<API::Progress>(new API::Progress(this, 0.0, 1.0, nreports));
       initCachedValues(inputWS);
 
       PARALLEL_FOR2(inputWS, outputWS)
