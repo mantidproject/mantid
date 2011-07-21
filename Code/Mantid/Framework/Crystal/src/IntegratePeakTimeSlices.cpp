@@ -740,7 +740,7 @@ std::vector<double> getInitParamValues(std::vector<double> StatBase, double TotB
     if (Sxx <= 0 || Syy <= 0 || Sxy * Sxy / Sxx / Syy > .8)
     {
 
-      if( ntimes < 2)
+      if( b !=0 )
           done = false;
       Den =StatBase[IIntensities];
       if( Den <=1)
@@ -1069,8 +1069,8 @@ bool EnoughData( std::vector<std::vector<double > >ParamAttr )
   if( fabs(Z)<.10)  //Not high enough of a peak
      return false;
 
-  if (Vx <= 0 || Vy <= 0 || Vxy * Vxy / Vx / Vy > .8)// All points close to one line
-     return false;
+ // if (Vx <= 0 || Vy <= 0 || Vxy * Vxy / Vx / Vy > .8)// All points close to one line
+ //    return false;
 
   return true;  
 
