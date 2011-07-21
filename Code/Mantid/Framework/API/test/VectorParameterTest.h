@@ -65,18 +65,6 @@ public:
 
   }
 
-  void testAssignementThrows()
-  {
-    ConcreteVectorParameter A;
-    A.addValue(1);
-    A.addValue(2); //Now has size == 2
-
-    ConcreteVectorParameter B;
-    B.addValue(1); //Now has size == 1
-
-    TSM_ASSERT_THROWS("Assignment when sizes are not equal should throw.", A = B, std::runtime_error);
-  }
-
   void testAssignement()
   {
     ConcreteVectorParameter A;
