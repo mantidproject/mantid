@@ -105,8 +105,6 @@ public:
     Document* pDoc = pParser.parseString(xmlToParse);
     Element* pRootElem = pDoc->documentElement();
 
-    SucessorVectorParameter* successor = new SucessorVectorParameter;
-
     ConcreteVectorParameterParser parser;
 
     parser.setSuccessorParser(new ConcreteSuccessorVectorParameterParser);
