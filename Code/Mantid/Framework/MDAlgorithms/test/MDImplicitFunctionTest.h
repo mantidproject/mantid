@@ -77,6 +77,24 @@ public:
     TS_ASSERT(  try2Dpoint(f, 12, 33) );
   }
 
+  void test_isPointContained_vectorVersion()
+  {
+    MDImplicitFunction f;
+    coord_t origin[2] = {0,0};
+
+    // Everything below a 45 degree line
+    coord_t normal1[2] = {1,-1};
+    f.addPlane( MDPlane(2, normal1, origin) );
+
+    // These points will be blocked by adding the second plane
+    std::vector<coord_t> point;
+    point.clear(); point.push_back(-1); point.push_back(-2);
+    TS_ASSERT( f.isPointContained(point) );
+
+    point.clear(); point.push_back(2.5); point.push_back(3.5);
+    TS_ASSERT( !f.isPointContained(point) );
+  }
+
 
   void add2DVertex(std::vector<std::vector<coord_t> > & vertexes, coord_t x, coord_t y)
   {
@@ -159,7 +177,7 @@ public:
     add2DVertex(vertexes, 4.0, -0.1);
     add2DVertex(vertexes, -0.1, 3.0);
     add2DVertex(vertexes, -0.1, 4.0);
-    TSM_ASSERT("Weird rhombus that intersects both the X and Y axes but does not actually overlap; reports a false positive.", f.isBoxTouching( vertexes) );
+    TSM_ASSERT("Weird trapezoid that intersects both the X and Y axes but does not actually overlap; reports a false positive.", f.isBoxTouching( vertexes) );
   }
 
 
