@@ -117,7 +117,7 @@ VectorParameter<Derived,ElemType>::VectorParameter(const VectorParameter<Derived
 }
 
 template<typename Derived, typename ElemType>
-VectorParameter<Derived,ElemType>::VectorParameter() : m_isValid(false)
+VectorParameter<Derived,ElemType>::VectorParameter() : m_vector(3, 0), m_isValid(false)
 {
 
 }
