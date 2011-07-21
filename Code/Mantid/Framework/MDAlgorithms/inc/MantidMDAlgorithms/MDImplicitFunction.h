@@ -6,6 +6,7 @@
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/MDPlane.h"
 #include <vector>
+#include "MantidMDEvents/IMDBox.h"
 
 namespace Mantid
 {
@@ -159,6 +160,62 @@ namespace MDAlgorithms
       }
 
       return true;
+    }
+
+    //----------------------------------------------------------------------------------------------
+    /** Same as isBoxTouching(vector), except that
+     * it takes a bare array of coordinates. This is for max. performance.
+     *
+     * The array is to be filled with numPoints sets of
+     * coordinates, each of m_nd in length.
+     *
+     * @param vertexes :: bare array of length numPoints * m_nd
+     * @param numPoints :: number of vertexes in the array.
+     * @return true if there is a chance of the box touching.
+     */
+    bool isBoxTouching(const coord_t * vertexes, const size_t numPoints)
+    {
+      // As the description states, the first plane with NO points inside it
+      // means the box does NOT touch. So iterate by planes
+      for (size_t i=0; i<m_numPlanes; i++)
+      {
+        size_t numBounded = 0;
+        for (size_t j=0; j<numPoints; j++)
+        {
+          if (m_planes[i].isPointBounded(vertexes + j*m_nd))
+          {
+            numBounded++;
+            // No need to evaluate any more points.
+            break;
+          }
+        }
+        // Not a single point is in this plane
+        if (numBounded == 0)
+          // That means the box CANNOT touch the implicit function
+          return false;
+      }
+      return true;
+    }
+
+    //----------------------------------------------------------------------------------------------
+    /** Same as isBoxTouching(), except that
+     * it uses a IMDBox instance in order to generate the
+     * vertexes for it.
+     *
+     * @param box :: pointer to a IMDBox
+     * @return true if there is a chance of the box touching.
+     */
+    template<typename MDE, size_t nd>
+    bool isBoxTouching(const Mantid::MDEvents::IMDBox<MDE,nd> * box)
+    {
+      // NULL box does not touch anything.
+      if (!box) return false;
+      // Get the vertexes of the box
+      size_t numVertices = 0;
+      coord_t * vertexes = box->getVertexesArray(numVertices);
+      bool retVal = isBoxTouching(vertexes, numVertices);
+      delete [] vertexes;
+      return retVal;
     }
 
 

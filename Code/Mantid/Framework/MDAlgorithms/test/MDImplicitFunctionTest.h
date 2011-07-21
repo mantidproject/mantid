@@ -5,6 +5,9 @@
 #include "MantidKernel/Timer.h"
 #include "MantidMDAlgorithms/MDImplicitFunction.h"
 #include "MantidMDAlgorithms/MDPlane.h"
+#include "MantidMDEvents/MDBox.h"
+#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDEventFactory.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -12,6 +15,8 @@
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid;
+using Mantid::MDEvents::MDBox;
+using Mantid::MDEvents::MDEvent;
 
 class MDImplicitFunctionTest : public CxxTest::TestSuite
 {
@@ -104,19 +109,32 @@ public:
     vertexes.push_back(vertex);
   }
 
-  /// Make the 4 points that define a square/rectangle
-  void make2DVertexSquare(std::vector<std::vector<coord_t> > & vertexes, coord_t x1, coord_t y1, coord_t x2, coord_t y2)
+  /** Make the 4 points that define a square/rectangle
+   *
+   * @param vertexes :: returns the vertex array
+   * @return also a bare-array version of the same thing
+   */
+  coord_t * make2DVertexSquare(std::vector<std::vector<coord_t> > & vertexes, MDBox<MDEvent<2>,2> & box, coord_t x1, coord_t y1, coord_t x2, coord_t y2)
   {
+    coord_t * out = new coord_t[8];
     vertexes.clear();
     add2DVertex(vertexes, x1,y1);
+    out[0] = x1; out[1] = y1;
     add2DVertex(vertexes, x2,y1);
+    out[2] = x2; out[3] = y1;
     add2DVertex(vertexes, x2,y2);
+    out[4] = x2; out[5] = y2;
     add2DVertex(vertexes, x1,y2);
+    out[6] = x1; out[7] = y2;
+    // Also make a MDBox
+    box.setExtents(0, x1, x2);
+    box.setExtents(1, y1, y2);
+
+    return out;
   }
 
-  void test_isBoxTouching()
+  MDImplicitFunction makeA2Dfunction()
   {
-    // Make an implicit function for a square from 0,0 to 1,1
     MDImplicitFunction f;
     coord_t normal1[2] = {1,0}; coord_t origin1[2] = {0,0};
     f.addPlane( MDPlane(2, normal1, origin1) );
@@ -126,6 +144,14 @@ public:
     f.addPlane( MDPlane(2, normal3, origin3) );
     coord_t normal4[2] = {0,-1}; coord_t origin4[2] = {0,1};
     f.addPlane( MDPlane(2, normal4, origin4) );
+    return f;
+  }
+
+  /** Test both the vector and bare array version of isBoxTouching() */
+  void test_isBoxTouching()
+  {
+    // Make an implicit function for a square from 0,0 to 1,1
+    MDImplicitFunction f = makeA2Dfunction();
 
     // Couple of checks that it is indeed what we said
     TS_ASSERT( try2Dpoint(f, 0.5, 0.5) );
@@ -134,43 +160,71 @@ public:
     TS_ASSERT(!try2Dpoint(f, -0.5, 0.5) );
     TS_ASSERT(!try2Dpoint(f, 0.5, -0.5) );
 
+    // 3 ways to do the same thing
     std::vector<std::vector<coord_t> > vertexes;
+    coord_t * bareVertexes;
+    // Make a bare IMDBox by using an empty MDBox
+    MDBox<MDEvent<2>, 2> box;
 
-    make2DVertexSquare(vertexes, 1.2, 0.2,  1.8, 0.8);
+    bareVertexes = make2DVertexSquare(vertexes, box, 1.2, 0.2,  1.8, 0.8);
     TSM_ASSERT("Box that is to the right; not touching", !f.isBoxTouching( vertexes) );
+    TSM_ASSERT("Box that is to the right; not touching", !f.isBoxTouching( bareVertexes, 4 ) );
+    TSM_ASSERT("Box that is to the right; not touching", !f.isBoxTouching( &box ) );
 
-    make2DVertexSquare(vertexes, 0.2, 1.2,  0.8, 1.8);
+    bareVertexes = make2DVertexSquare(vertexes, box, 0.2, 1.2,  0.8, 1.8);
     TSM_ASSERT("Box that is above; not touching", !f.isBoxTouching( vertexes) );
+    TSM_ASSERT("Box that is above; not touching", !f.isBoxTouching( &box) );
+    TSM_ASSERT("Box that is above; not touching", !f.isBoxTouching( bareVertexes, 4 ) );
 
-    make2DVertexSquare(vertexes, 0.8, 0.8,  1.8, 1.8);
+    bareVertexes = make2DVertexSquare(vertexes, box, 0.8, 0.8,  1.8, 1.8);
     TSM_ASSERT("Box with one corner touching in the upper right; touches", f.isBoxTouching( vertexes) );
+    TSM_ASSERT("Box with one corner touching in the upper right; touches", f.isBoxTouching( &box) );
+    TSM_ASSERT("Box with one corner touching in the upper right; touches", f.isBoxTouching( bareVertexes, 4 ) );
 
-    make2DVertexSquare(vertexes, 0.8, 0.2,  1.8, 0.8);
+    bareVertexes = make2DVertexSquare(vertexes, box, 0.8, 0.2,  1.8, 0.8);
     TSM_ASSERT("Box with both right-hand vertexes inside; touches", f.isBoxTouching( vertexes) );
+    TSM_ASSERT("Box with both right-hand vertexes inside; touches", f.isBoxTouching( &box) );
+    TSM_ASSERT("Box with both right-hand vertexes inside; touches", f.isBoxTouching( bareVertexes, 4 ) );
 
-    make2DVertexSquare(vertexes, 0.8, -1.0,  1.8, +3.0);
+    bareVertexes = make2DVertexSquare(vertexes, box, 0.8, -1.0,  1.8, +3.0);
     TSM_ASSERT("Box overlapping on the right side, no vertexes inside; touches", f.isBoxTouching( vertexes) );
+    TSM_ASSERT("Box overlapping on the right side, no vertexes inside; touches", f.isBoxTouching( &box) );
+    TSM_ASSERT("Box overlapping on the right side, no vertexes inside; touches", f.isBoxTouching( bareVertexes, 4 ) );
 
-    make2DVertexSquare(vertexes, -2.0, -1.0,  0.2, +3.0);
+    bareVertexes = make2DVertexSquare(vertexes, box, -2.0, -1.0,  0.2, +3.0);
     TSM_ASSERT("Box overlapping on the left side, no vertexes inside; touches", f.isBoxTouching( vertexes) );
+    TSM_ASSERT("Box overlapping on the left side, no vertexes inside; touches", f.isBoxTouching( &box) );
+    TSM_ASSERT("Box overlapping on the left side, no vertexes inside; touches", f.isBoxTouching( bareVertexes, 4 ) );
 
-    make2DVertexSquare(vertexes, -2.0, 0.9,  +3.0, +3.0);
+    bareVertexes = make2DVertexSquare(vertexes, box, -2.0, 0.9,  +3.0, +3.0);
     TSM_ASSERT("Box overlapping on the top side, no vertexes inside; touches", f.isBoxTouching( vertexes) );
+    TSM_ASSERT("Box overlapping on the top side, no vertexes inside; touches", f.isBoxTouching( &box) );
+    TSM_ASSERT("Box overlapping on the top side, no vertexes inside; touches", f.isBoxTouching( bareVertexes, 4 ) );
 
-    make2DVertexSquare(vertexes, -2.0, -3.0,  +3.0, +0.1);
+    bareVertexes = make2DVertexSquare(vertexes, box, -2.0, -3.0,  +3.0, +0.1);
     TSM_ASSERT("Box overlapping on the bottom side, no vertexes inside; touches", f.isBoxTouching( vertexes) );
+    TSM_ASSERT("Box overlapping on the bottom side, no vertexes inside; touches", f.isBoxTouching( &box) );
+    TSM_ASSERT("Box overlapping on the bottom side, no vertexes inside; touches", f.isBoxTouching( bareVertexes, 4 ) );
 
-    make2DVertexSquare(vertexes, -2.0, -2.0,  3.0, 3.0);
+    bareVertexes = make2DVertexSquare(vertexes, box, -2.0, -2.0,  3.0, 3.0);
     TSM_ASSERT("Box bigger than region on all directions, no vertexes inside; touches", f.isBoxTouching( vertexes) );
+    TSM_ASSERT("Box bigger than region on all directions, no vertexes inside; touches", f.isBoxTouching( &box) );
+    TSM_ASSERT("Box bigger than region on all directions, no vertexes inside; touches", f.isBoxTouching( bareVertexes, 4 ) );
 
-    make2DVertexSquare(vertexes, 0.5, -10.0,  0.55, +10.0);
+    bareVertexes = make2DVertexSquare(vertexes, box, 0.5, -10.0,  0.55, +10.0);
     TSM_ASSERT("Narrow box passing through the middle, no vertexes inside; touches", f.isBoxTouching( vertexes) );
+    TSM_ASSERT("Narrow box passing through the middle, no vertexes inside; touches", f.isBoxTouching( &box) );
+    TSM_ASSERT("Narrow box passing through the middle, no vertexes inside; touches", f.isBoxTouching( bareVertexes, 4 ) );
 
-    make2DVertexSquare(vertexes, 0.5, 1.1,  0.55, +10.0);
+    bareVertexes = make2DVertexSquare(vertexes, box, 0.5, 1.1,  0.55, +10.0);
     TSM_ASSERT("Narrow box but above; not touching", !f.isBoxTouching( vertexes) );
+    TSM_ASSERT("Narrow box but above; not touching", !f.isBoxTouching( &box) );
+    TSM_ASSERT("Narrow box but above; not touching", !f.isBoxTouching( bareVertexes, 4 ) );
 
-    make2DVertexSquare(vertexes, 0.1, 0.1,  0.9, 0.9);
+    bareVertexes = make2DVertexSquare(vertexes, box, 0.1, 0.1,  0.9, 0.9);
     TSM_ASSERT("Box that is completely within region; touches ", f.isBoxTouching( vertexes) );
+    TSM_ASSERT("Box that is completely within region; touches ", f.isBoxTouching( &box) );
+    TSM_ASSERT("Box that is completely within region; touches ", f.isBoxTouching( bareVertexes, 4 ) );
 
     vertexes.clear();
     add2DVertex(vertexes, 3.0, -0.1);

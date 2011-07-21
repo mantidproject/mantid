@@ -184,6 +184,25 @@ public:
     TS_ASSERT_EQUALS( v[3].getY(), 6.0);
   }
 
+  /** Get vertexes as a bare array */
+  void test_getVertexesArray()
+  {
+    IMDBoxTester<MDEvent<2>,2> b;
+    b.setExtents(0, -10.0, 10.0);
+    b.setExtents(1, -4.0, 6.0);
+    size_t numVertexes = 0;
+    coord_t * v = b.getVertexesArray(numVertexes);
+    TS_ASSERT_EQUALS( v[0], -10.0);
+    TS_ASSERT_EQUALS( v[0+1], -4.0);
+    TS_ASSERT_EQUALS( v[2], 10.0);
+    TS_ASSERT_EQUALS( v[2+1], -4.0);
+    TS_ASSERT_EQUALS( v[4], -10.0);
+    TS_ASSERT_EQUALS( v[4+1], 6.0);
+    TS_ASSERT_EQUALS( v[6], 10.0);
+    TS_ASSERT_EQUALS( v[6+1], 6.0);
+    delete [] v;
+  }
+
 };
 
 

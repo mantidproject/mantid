@@ -2,6 +2,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Utils.h"
@@ -10,7 +11,6 @@
 #include "MantidTestHelpers/DLLExport.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 
 using Mantid::DataObjects::EventWorkspace_sptr;

@@ -77,7 +77,9 @@ namespace MDEvents
     /// Fill a vector with all the boxes up to a certain depth
     virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly) = 0;
 
-    virtual std::vector<Mantid::Geometry::Coordinate> getVertexes() const;
+    std::vector<Mantid::Geometry::Coordinate> getVertexes() const;
+
+    coord_t * getVertexesArray(size_t & numVertices) const;
 
     /** @return the MDPoints contained. throws. */
     virtual std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > getContributingPoints() const

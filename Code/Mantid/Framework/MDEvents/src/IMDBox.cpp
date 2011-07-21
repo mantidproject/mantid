@@ -139,6 +139,48 @@ namespace MDEvents
   }
 
 
+  //-----------------------------------------------------------------------------------------------
+  /** Return the vertices of every corner of the box, but as
+   * a bare array of length numVertices * nd
+   *
+   * @param[out] numVertices :: returns the number of vertices in the array.
+   * @return the bare array. This should be deleted by the caller!
+   * */
+  TMDE(
+  coord_t * IMDBox)::getVertexesArray(size_t & numVertices) const
+  {
+    // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd bits
+    numVertices = 1 << nd;
+
+    // Allocate the array of the right size
+    coord_t * out = new coord_t[nd * numVertices];
+
+    // For each vertex, increase an integeer
+    for (size_t i=0; i<numVertices; ++i)
+    {
+      // Start point index in the output array;
+      size_t outIndex = i * nd;
+
+      // Coordinates of the vertex
+      for (size_t d=0; d<nd; d++)
+      {
+        // Use a bit mask to look at each bit of the integer we are iterating through.
+        size_t mask = 1 << d;
+        if ((i & mask) > 0)
+        {
+          // Bit is 1, use the max of the dimension
+          out[outIndex + d] = extents[d].max;
+        }
+        else
+        {
+          // Bit is 0, use the min of the dimension
+          out[outIndex + d] = extents[d].min;
+        }
+      } // (for each dimension)
+    }
+    return out;
+  }
+
 
 
 } // namespace Mantid
