@@ -1,7 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_PERPENDICULARPARAMETER
 #define MANTID_MDALGORITHMS_PERPENDICULARPARAMETER
 
-#include "MantidMDAlgorithms/VectorParameter.h"
+#include "MantidMDAlgorithms/Vector3DParameter.h"
 
 namespace Mantid
 {

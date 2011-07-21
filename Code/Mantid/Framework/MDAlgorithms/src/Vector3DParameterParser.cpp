@@ -1,4 +1,4 @@
-#include "MantidMDAlgorithms/VectorParameterParser.h"
+#include "MantidMDAlgorithms/Vector3DParameterParser.h"
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 
 namespace Mantid

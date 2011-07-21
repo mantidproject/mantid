@@ -34,7 +34,7 @@ set ( SRC_FILES
 	src/SingleValueParameterParser.cpp
 	src/TobyFitSimulate.cpp
 	src/VectorMathematics.cpp
-	src/VectorParameterParser.cpp
+	src/Vector3DParameterParser.cpp
 	src/WidthParameter.cpp
 )
 
@@ -79,8 +79,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/TobyFitSimulate.h
 	inc/MantidMDAlgorithms/UpParameter.h
 	inc/MantidMDAlgorithms/VectorMathematics.h
-	inc/MantidMDAlgorithms/VectorParameter.h
-	inc/MantidMDAlgorithms/VectorParameterParser.h
+	inc/MantidMDAlgorithms/Vector3DParameter.h
+	inc/MantidMDAlgorithms/Vector3DParameterParser.h
 	inc/MantidMDAlgorithms/WidthParameter.h
 )
 

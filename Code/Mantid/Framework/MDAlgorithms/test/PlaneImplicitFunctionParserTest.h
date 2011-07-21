@@ -7,7 +7,7 @@
 #include "FunctionParserTest.h"
 
 #include "MantidMDAlgorithms/PlaneImplicitFunctionParser.h"
-#include "MantidMDAlgorithms/VectorParameterParser.h"
+#include "MantidMDAlgorithms/Vector3DParameterParser.h"
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
 #include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
 #include <cxxtest/TestSuite.h>

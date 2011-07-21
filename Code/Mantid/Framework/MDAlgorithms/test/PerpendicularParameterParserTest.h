@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <boost/scoped_ptr.hpp>
-#include "MantidMDAlgorithms/VectorParameterParser.h"
+#include "MantidMDAlgorithms/Vector3DParameterParser.h"
 #include "MantidMDAlgorithms/PerpendicularParameter.h"
 
 #include <Poco/DOM/DOMParser.h>

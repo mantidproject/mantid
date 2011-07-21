@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/scoped_ptr.hpp>
 #include "MantidMDAlgorithms/UpParameter.h"
-#include "MantidMDAlgorithms/VectorParameter.h"
+#include "MantidMDAlgorithms/Vector3DParameter.h"
 
 class UpParameterTest: public CxxTest::TestSuite
 {

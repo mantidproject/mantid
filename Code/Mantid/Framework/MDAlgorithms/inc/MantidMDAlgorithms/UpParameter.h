@@ -1,7 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_UPPARAMETER_H_
 #define MANTID_MDALGORITHMS_UPPARAMETER_H_
 
-#include "MantidMDAlgorithms/VectorParameter.h"
+#include "MantidMDAlgorithms/Vector3DParameter.h"
 
 namespace Mantid
 {

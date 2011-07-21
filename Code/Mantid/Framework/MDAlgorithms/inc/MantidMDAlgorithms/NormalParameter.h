@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidMDAlgorithms/VectorParameter.h"
+#include "MantidMDAlgorithms/Vector3DParameter.h"
 
 namespace Mantid
 {

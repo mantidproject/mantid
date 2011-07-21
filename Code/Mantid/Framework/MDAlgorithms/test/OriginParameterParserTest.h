@@ -6,7 +6,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "MantidMDAlgorithms/VectorParameterParser.h"
+#include "MantidMDAlgorithms/Vector3DParameterParser.h"
 #include "MantidMDAlgorithms/OriginParameter.h"
 
 #include <Poco/DOM/DOMParser.h>
