@@ -16,15 +16,11 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
-#include "MantidMDAlgorithms/WidthParameter.h"
-#include "MantidMDAlgorithms/HeightParameter.h"
-#include "MantidMDAlgorithms/DepthParameter.h"
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace API
 {
 /**
 
@@ -70,11 +66,18 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////
 
+
+/// Default constructor
 template<class SingleValueParameterType>
 SingleValueParameterParser<SingleValueParameterType>::SingleValueParameterParser()
 {
 }
 
+//------------------------------------------------------------------------------
+/* Creates a parameter from an xml element, otherwise defers to a successor parser.
+@param parameterElement : xml Element
+@return A fully constructed ImplicitFunctionParameter.
+*/
 template<class SingleValueParameterType>
 Mantid::API::ImplicitFunctionParameter* SingleValueParameterParser<SingleValueParameterType>::createParameter(
     Poco::XML::Element* parameterElement)
@@ -92,6 +95,10 @@ Mantid::API::ImplicitFunctionParameter* SingleValueParameterParser<SingleValuePa
   }
 }
 
+//------------------------------------------------------------------------------
+/* Sets the successor parser
+@param parameterParser : the parser to defer to if the current instance can't handle the parameter type.
+*/
 template<class SingleValueParameterType>
 void SingleValueParameterParser<SingleValueParameterType>::setSuccessorParser(
     Mantid::API::ImplicitFunctionParameterParser* paramParser)
@@ -100,6 +107,7 @@ void SingleValueParameterParser<SingleValueParameterType>::setSuccessorParser(
   m_successor.swap(temp);
 }
 
+/// Destructor.
 template<class SingleValueParameterType>
 SingleValueParameterParser<SingleValueParameterType>::~SingleValueParameterParser()
 {
