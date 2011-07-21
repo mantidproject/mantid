@@ -92,6 +92,23 @@ namespace MDAlgorithms
       return (total > m_inequality);
     }
 
+    //----------------------------------------------------------------------------------------------
+    /** Is a point in MDimensions bounded by this hyperplane, that is,
+     * is (a1*x1 + a2*x2 + ... < b)?
+     *
+     * @param coords :: nd-sized vector of coordinates. No size check is made!
+     * @return true if it is bounded by the plane
+     */
+    bool isPointBounded(const std::vector<coord_t> & coords) const
+    {
+      coord_t total = 0;
+      for (size_t d=0; d<m_nd; d++)
+      {
+        total += m_normal[d] * coords[d];
+      }
+      return (total > m_inequality);
+    }
+
 
     //----------------------------------------------------------------------------------------------
     /** Given two points defining the start and end point of a line,

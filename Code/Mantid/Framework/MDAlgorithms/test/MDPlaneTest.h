@@ -152,6 +152,21 @@ public:
     TS_ASSERT(  try2Dline(p4,   0.1,0.2,   0.3,0.2));
   }
 
+
+  void test_isPointBounded_vectorversion()
+  {
+    // Plane where x < 5
+    coord_t normal1[2] = {-1., 0};
+    coord_t point1[2] = {5., 0};
+    MDPlane p1(2, normal1, point1);
+    std::vector<coord_t> point;
+    point.clear(); point.push_back(4.0); point.push_back(12.0);
+    TS_ASSERT(  p1.isPointBounded(point));
+
+    point.clear(); point.push_back(6.0); point.push_back(-5.0);
+    TS_ASSERT( !p1.isPointBounded(point));
+  }
+
 };
 
 
@@ -184,6 +199,28 @@ public:
     coord_t point[4] = {1};
 
     coord_t pointA[4] = {0.111, 0.222, 0.333, 0.444};
+
+    MDPlane p(4, normal, point);
+    bool res = false;
+    for (size_t i=0; i<5*1000000 /*5 million*/; i++)
+    {
+      res = p.isPointBounded(pointA);
+      (void) res;
+    }
+    TS_ASSERT(res);
+  }
+
+  /** Looks to be about 50% slower on linux in debug! */
+  void test_4D_point_vectorVersion()
+  {
+    coord_t normal[4] = {1.23, 2.34, 3.45, 4.56};
+    coord_t point[4] = {1};
+
+    std::vector<coord_t> pointA;
+    pointA.push_back(0.111);
+    pointA.push_back(0.222);
+    pointA.push_back(0.333);
+    pointA.push_back(0.444);
 
     MDPlane p(4, normal, point);
     bool res = false;

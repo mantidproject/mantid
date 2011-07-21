@@ -61,7 +61,7 @@ namespace MDAlgorithms
   {
   public:
     MDImplicitFunction();
-    ~MDImplicitFunction();
+    virtual ~MDImplicitFunction();
 
     void addPlane(const MDPlane & plane);
 
@@ -114,10 +114,30 @@ namespace MDAlgorithms
      *    algorithm does not guarantee that it touches, but it should never
      *    return false if the box does touch.
      */
-    bool doesBoxTouch(const std::vector<std::vector<coord_t> > & vertexes)
+    bool isBoxTouching(const std::vector<std::vector<coord_t> > & vertexes)
     {
-      //TODO: Everything
-      UNUSED_ARG(vertexes)
+      size_t numPoints = vertexes.size();
+
+      // As the description states, the first plane with NO points inside it
+      // means the box does NOT touch. So iterate by planes
+      for (size_t i=0; i<m_numPlanes; i++)
+      {
+        size_t numBounded = 0;
+        for (size_t j=0; j<numPoints; j++)
+        {
+          if (m_planes[i].isPointBounded(vertexes[j]))
+          {
+            numBounded++;
+            // No need to evaluate any more points.
+            break;
+          }
+        }
+        // Not a single point is in this plane
+        if (numBounded == 0)
+          // That means the box CANNOT touch the implicit function
+          return false;
+      }
+
       return true;
     }
 
