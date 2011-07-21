@@ -63,12 +63,22 @@ public:
 
   ElemType getZ() const;
 
+  virtual bool isValid() const;
+
+  ElemType& operator[] (int index);
+
 protected:
 
   std::vector<ElemType> m_vector;
 
   bool m_isValid;
 };
+
+template<typename Derived, typename ElemType>
+bool VectorParameter<Derived,ElemType>::isValid() const
+{
+  return m_isValid;
+}
 
 template<typename Derived, typename ElemType>
 Derived& VectorParameter<Derived,ElemType>::operator=(const Derived& other)
@@ -79,7 +89,7 @@ Derived& VectorParameter<Derived,ElemType>::operator=(const Derived& other)
     this->m_vector.swap(std::vector<ElemType>(3));
     std::copy(other.m_vector.begin(), other.m_vector.end(), this->m_vector.begin());
   }
-  return *this;
+  return *(dynamic_cast<Derived*>(this));
 }
 
 template<typename Derived, typename ElemType>
@@ -145,6 +155,30 @@ std::string VectorParameter<Derived,ElemType>::toXMLString() const
   std::string valueXMLtext = boost::str(boost::format("%.4f, %.4f, %.4f") % m_vector[0] %  m_vector[1] % m_vector[2]);
   return this->parameterXMLTemplate(valueXMLtext);
 }
+
+template<typename Derived, typename ElemType>
+ElemType& VectorParameter<Derived,ElemType>::operator[] (int index)
+{
+  return m_vector[index];
+}
+
+//-----------------------------------------------------------------------------------------------------------------//
+// Macro for generating concrete types of VectorParamters. 
+//
+// Use of macro enables parameter names to be assigned to each type.
+// Most of the work is done in the VectorParamter base class, which utilises CRTP.
+//-----------------------------------------------------------------------------------------------------------------//
+#define DECLARE_VECTOR_PARAMETER(classname, type_) \
+    class classname : public VectorParameter<classname, double> \
+    {  \
+      public: \
+      typedef VectorParameter<classname, type_> SuperType;  \
+      static std::string parameterName(){ return #classname;} \
+      classname(type_ a, type_ b, type_ c) : SuperType(a, b, c) {} \
+      classname() : SuperType() {} \
+      std::string getName() const { return #classname;} \
+      classname* clone() const {return new classname(m_vector[0], m_vector[1], m_vector[2]); } \
+    }; 
 
 }
 }

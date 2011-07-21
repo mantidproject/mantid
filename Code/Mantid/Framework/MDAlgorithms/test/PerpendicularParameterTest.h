@@ -49,10 +49,10 @@ public:
     using namespace Mantid::MDAlgorithms;
     PerpendicularParameter A(0, 1, 2);
     PerpendicularParameter B;
-    A = B;
-    TSM_ASSERT_EQUALS("Assigned PerpendicularParameter getX() is not correct.", 0, A.getX() );
-    TSM_ASSERT_EQUALS("Assigned PerpendicularParameter getY() is not correct.", 1, A.getY() );
-    TSM_ASSERT_EQUALS("Assigned PerpendicularParameter getZ() is not correct.", 2, A.getZ() );
+    B = A;
+    TSM_ASSERT_EQUALS("Assigned PerpendicularParameter getX() is not correct.", 0, B.getX() );
+    TSM_ASSERT_EQUALS("Assigned PerpendicularParameter getY() is not correct.", 1, B.getY() );
+    TSM_ASSERT_EQUALS("Assigned PerpendicularParameter getZ() is not correct.", 2, B.getZ() );
     TSM_ASSERT_EQUALS("Assigned PerpendicularParameter isValid() is not same as original.", B.isValid(), A.isValid() );
   }
 

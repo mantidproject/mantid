@@ -4,9 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
-#include "MantidKernel/System.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidMDAlgorithms/VectorParameter.h"
 
 namespace Mantid
 {
@@ -39,64 +37,8 @@ namespace Mantid
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
-
-        class DLLExport OriginParameter :public Mantid::API::ImplicitFunctionParameter
-        {
-        private:
-
-           std::vector<double> m_origin;
-
-        public:
-
-            OriginParameter(double o1, double o2, double o3);
-            
-            OriginParameter();
-            
-            OriginParameter(const OriginParameter & other);
-            
-            OriginParameter& operator=(const OriginParameter& other);
-
-            bool operator==(const OriginParameter &other) const;
-
-            bool operator!=(const OriginParameter &other) const;
-
-            bool isValid() const;
-
-            std::string getName() const;
-
-            void asVector(std::vector<double>& origin) const;
-
-            OriginParameter* clone() const;
-
-            double getX() const;
-
-            double getY() const;
-
-            double getZ() const;
-
-            std::string toXMLString() const;
-
-            ~OriginParameter();
-            
-            /*
-            Treat the origin parameter as an array of scalar values.
-            @param index : the index to fetch (index is one of x=0, y, z)
-            @return the origin value at the specified index.
-            */
-            double& operator[] (int index)
-            {
-              return m_origin[index];
-            }
-
-            /*
-            Getter for the parameter name associated with this type.
-            @return the parameter name.
-            */
-            static std::string parameterName()
-            {
-                return "OriginParameter";
-            }
-        };
+      
+      DECLARE_VECTOR_PARAMETER(OriginParameter, double);
     }
 }
 

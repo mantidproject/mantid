@@ -4,9 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
-#include "MantidKernel/System.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidMDAlgorithms/VectorParameter.h"
 
 namespace Mantid
 {
@@ -40,33 +38,22 @@ namespace MDAlgorithms
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport NormalParameter: public Mantid::API::ImplicitFunctionParameter
+class DLLExport NormalParameter: public VectorParameter<NormalParameter, double> 
 {
 
 private:
 
-  std::vector<double> m_normal;
-
-  /// Get the normal vector magnitude.
   double magnitude() const;
 
 public:
+  
+  typedef VectorParameter<NormalParameter, double> SuperType;  
 
   NormalParameter(double n1, double n2, double n3);
 
   NormalParameter();
 
-  NormalParameter(const NormalParameter& other);
-
-  NormalParameter& operator=(const NormalParameter& other);
-
-  bool operator==(const NormalParameter &other) const;
-
-  bool operator!=(const NormalParameter &other) const;
-
   std::string getName() const;
-
-  bool isValid() const;
 
   NormalParameter reflect() const;
 
@@ -74,26 +61,9 @@ public:
 
   ~NormalParameter();
 
-  double getX() const;
-
-  double getY() const;
-
-  double getZ() const;
-
   NormalParameter asUnitVector() const;
 
   bool isUnitVector() const;
-
-  std::string toXMLString() const;
-  /*
-  Treat the origin parameter as an array of scalar values.
-  @param index : the index to fetch (index is one of x=0, y, z)
-  @return the origin value at the specified index.
-  */
-  double& operator[] (int index)
-  {
-    return m_normal[index];
-  }
 
   /*
   Getter for the parameter name associated with this type.

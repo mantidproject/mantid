@@ -23,8 +23,6 @@ set ( SRC_FILES
 	src/MDPlane.cpp
 	src/NormalParameter.cpp
 	src/NullImplicitFunction.cpp
-	src/OriginParameter.cpp
-	src/PerpendicularParameter.cpp
 	src/PlaneFunctionBuilder.cpp
 	src/PlaneImplicitFunction.cpp
 	src/PlaneImplicitFunctionParser.cpp
@@ -35,9 +33,7 @@ set ( SRC_FILES
 	src/SimulateResolution.cpp
 	src/SingleValueParameterParser.cpp
 	src/TobyFitSimulate.cpp
-	src/UpParameter.cpp
 	src/VectorMathematics.cpp
-	src/VectorParameter.cpp
 	src/VectorParameterParser.cpp
 	src/WidthParameter.cpp
 )

@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/scoped_ptr.hpp>
 #include "MantidMDAlgorithms/UpParameter.h"
+#include "MantidMDAlgorithms/VectorParameter.h"
 
 class UpParameterTest: public CxxTest::TestSuite
 {
@@ -49,10 +50,10 @@ public:
     using namespace Mantid::MDAlgorithms;
     UpParameter A(0, 1, 2);
     UpParameter B;
-    A = B;
-    TSM_ASSERT_EQUALS("Assigned UpParameter getX() is not correct.", 0, A.getX() );
-    TSM_ASSERT_EQUALS("Assigned UpParameter getY() is not correct.", 1, A.getY() );
-    TSM_ASSERT_EQUALS("Assigned UpParameter getZ() is not correct.", 2, A.getZ() );
+    B = A;
+    TSM_ASSERT_EQUALS("Assigned UpParameter getX() is not correct.", 0, B.getX() );
+    TSM_ASSERT_EQUALS("Assigned UpParameter getY() is not correct.", 1, B.getY() );
+    TSM_ASSERT_EQUALS("Assigned UpParameter getZ() is not correct.", 2, B.getZ() );
     TSM_ASSERT_EQUALS("Assigned UpParameter isValid() is not same as original.", B.isValid(), A.isValid() );
   }
 
@@ -109,6 +110,21 @@ public:
     TSM_ASSERT_DIFFERS("The two up instances are considered equal, but should not be.", A, B);
     TSM_ASSERT_DIFFERS("The two up instances are considered equal, but should not be.", A, C);
     TSM_ASSERT_DIFFERS("The two up instances are considered equal, but should not be.", A, D);
+  }
+
+  void testVectorParameter()
+  {
+    using namespace Mantid::MDAlgorithms;
+    DECLARE_VECTOR_PARAMETER(Vec1, double)
+    Vec1 v1(1,2,3);
+    Vec1* e = v1.clone();
+
+    Vec1 v2(2, 2, 2);
+
+    Vec1 v3(v1);
+    bool res = (v1 == v2);
+    res = (v1 == v3);
+    std::string s = v1.getName();
   }
 };
 

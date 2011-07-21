@@ -1,7 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_UPPARAMETER_H_
 #define MANTID_MDALGORITHMS_UPPARAMETER_H_
 
-#include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidMDAlgorithms/VectorParameter.h"
 
 namespace Mantid
 {
@@ -35,53 +35,8 @@ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Co
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
- class DLLExport UpParameter :public Mantid::API::ImplicitFunctionParameter
- {
- private:
+  DECLARE_VECTOR_PARAMETER(UpParameter, double);
 
-    std::vector<double> m_up;
-
-    double magnitude() const;
-
- public:
-
-     UpParameter(double o1, double o2, double o3);
-
-     UpParameter();
-
-     UpParameter(const UpParameter & other);
-
-     UpParameter& operator=(const UpParameter& other);
-
-     bool operator==(const UpParameter &other) const;
-
-     bool operator!=(const UpParameter &other) const;
-
-     bool isValid() const;
-
-     std::string getName() const;
-
-     UpParameter* clone() const;
-
-     double getX() const;
-
-     double getY() const;
-
-     double getZ() const;
-
-     std::string toXMLString() const;
-
-     ~UpParameter();
-
-     static std::string parameterName()
-     {
-         return "UpParameter";
-     }
-
-     UpParameter asUnitVector() const;
-
-     bool isUnitVector() const;
- };
 }
 }
 

@@ -1,7 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_PERPENDICULARPARAMETER
 #define MANTID_MDALGORITHMS_PERPENDICULARPARAMETER
 
-#include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidMDAlgorithms/VectorParameter.h"
 
 namespace Mantid
 {
@@ -35,47 +35,7 @@ namespace MDAlgorithms
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport PerpendicularParameter :public Mantid::API::ImplicitFunctionParameter
-{
-private:
-
-   std::vector<double> m_perpendicular;
-
-public:
-
-    PerpendicularParameter(double o1, double o2, double o3);
-
-    PerpendicularParameter();
-
-    PerpendicularParameter(const PerpendicularParameter & other);
-
-    PerpendicularParameter& operator=(const PerpendicularParameter& other);
-
-    bool operator==(const PerpendicularParameter &other) const;
-
-    bool operator!=(const PerpendicularParameter &other) const;
-
-    bool isValid() const;
-
-    std::string getName() const;
-
-    PerpendicularParameter* clone() const;
-
-    double getX() const;
-
-    double getY() const;
-
-    double getZ() const;
-
-    std::string toXMLString() const;
-
-    ~PerpendicularParameter();
-
-    static std::string parameterName()
-    {
-        return "PerpendicularParameter";
-    }
-};
+DECLARE_VECTOR_PARAMETER(PerpendicularParameter, double);
 
 }
 }
