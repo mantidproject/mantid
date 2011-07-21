@@ -111,21 +111,6 @@ public:
     TSM_ASSERT_DIFFERS("The two up instances are considered equal, but should not be.", A, C);
     TSM_ASSERT_DIFFERS("The two up instances are considered equal, but should not be.", A, D);
   }
-
-  void testVectorParameter()
-  {
-    using namespace Mantid::MDAlgorithms;
-    DECLARE_VECTOR_PARAMETER(Vec1, double)
-    Vec1 v1(1,2,3);
-    Vec1* e = v1.clone();
-
-    Vec1 v2(2, 2, 2);
-
-    Vec1 v3(v1);
-    bool res = (v1 == v2);
-    res = (v1 == v3);
-    std::string s = v1.getName();
-  }
 };
 
 
