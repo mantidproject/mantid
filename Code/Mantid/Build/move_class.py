@@ -15,7 +15,8 @@ def move_one(subproject, classname, newproject, oldfilename, newfilename, args):
     """Move one file """
     text = open(oldfilename, 'r').read()
     # Replace any includes of it
-    text = text.replace("Mantid" + subproject + "/" + classname + ".h", "Mantid" + newproject + "/" + classname + ".h");
+    text = text.replace("Mantid" + subproject + "/" + args.source_subfolder + classname + ".h", 
+                        "Mantid" + newproject + "/" + args.dest_subfolder + classname + ".h");
     
     # Replace the namespace declaration
     text = text.replace("namespace " + subproject, "namespace " + newproject) 
@@ -37,12 +38,12 @@ def move_all(subproject, classname, newproject, args):
     
     newbasedir = os.path.join(os.path.curdir, "Framework/" + newproject)
     
-    headerfile = os.path.join(basedir, "inc/Mantid" + subproject + "/" + classname + ".h")
-    sourcefile = os.path.join(basedir, "src/" + classname + ".cpp")
+    headerfile = os.path.join(basedir, "inc/Mantid" + subproject + "/" + args.source_subfolder + classname + ".h")
+    sourcefile = os.path.join(basedir, "src/" + args.source_subfolder + classname + ".cpp")
     testfile = os.path.join(basedir, "test/" + classname + "Test.h")
-    
-    newheaderfile = os.path.join(newbasedir, "inc/Mantid" + newproject + "/" + classname + ".h")
-    newsourcefile = os.path.join(newbasedir, "src/" + classname + ".cpp")
+
+    newheaderfile = os.path.join(newbasedir, "inc/Mantid" + newproject + "/" + args.dest_subfolder + classname + ".h")
+    newsourcefile = os.path.join(newbasedir, "src/" + args.dest_subfolder + classname + ".cpp")
     newtestfile = os.path.join(newbasedir, "test/" + classname + "Test.h")
     
     if args.header and not overwrite and os.path.exists(newheaderfile):
@@ -103,9 +104,12 @@ if __name__ == "__main__":
     parser.add_argument('--delete', dest='delete', action='store_const',
                         const=True, default=False,
                         help="Delete the original files (default False)")
-    parser.add_argument('--subfolder', dest='subfolder', 
+    parser.add_argument('--source-subfolder', dest='source_subfolder', 
                         default="",
-                        help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
+                        help='The source is in a subfolder below the main part of the project, e.g. Geometry/Instrument.')
+    parser.add_argument('--dest-subfolder', dest='dest_subfolder', 
+                        default="",
+                        help='The destination is in a subfolder below the main part of the project, e.g. Geometry/Instrument.')
 
     args = parser.parse_args()
     subproject = args.subproject

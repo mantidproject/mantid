@@ -335,7 +335,7 @@ def generate(subproject, classname, overwrite, args):
         write_test(subproject, classname, testfile, args)
     
     # Insert into the cmake list
-    add_to_cmake(subproject, classname, args)
+    add_to_cmake(subproject, classname, args, args.subfolder)
     
     print "\n   Files were added to Framework/%s/CMakeLists.txt !" % (subproject)
     print 
