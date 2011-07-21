@@ -73,7 +73,9 @@ namespace Mantid
     /// Load the appropriate instrument
     void runLoadInstrument(const std::string& instrument,
         API::MatrixWorkspace_sptr localWorkspace);
-
+    /// Load the logs
+    void runLoadLogs(const std::string filename,
+        API::MatrixWorkspace_sptr localWorkspace);
     /// The name and path of the input file
     std::string filename;
     /// The workspace being filled out

@@ -205,6 +205,8 @@ void LoadNexusMonitors::exec()
   this->WS->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
   this->WS->setYUnit("Counts");
 
+  // Lod the logs
+  this->runLoadLogs(this->filename, this->WS);
   // Load the instrument
   this->runLoadInstrument(instrumentName, this->WS);
 
@@ -269,6 +271,23 @@ void LoadNexusMonitors::fixUDets(boost::scoped_array<detid_t> &det_ids, ::NeXus:
   file.closeGroup();
 }
 
+void LoadNexusMonitors::runLoadLogs(const std::string filename, API::MatrixWorkspace_sptr localWorkspace)
+{
+    // do the actual work
+    API::IAlgorithm_sptr loadLogs = createSubAlgorithm("LoadNexusLogs");
+    // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+    try
+    {
+      g_log.information() << "Loading logs from NeXus file..." << std::endl;
+      loadLogs->setPropertyValue("Filename", filename);
+      loadLogs->setProperty<API::MatrixWorkspace_sptr> ("Workspace",localWorkspace);
+      loadLogs->execute();
+    }
+    catch (...)
+    {
+      g_log.error() << "Error while loading Logs from Nexus. Some sample logs may be missing." << std::endl;
+    }
+}
 
 /**
  * Load the instrument geometry File
