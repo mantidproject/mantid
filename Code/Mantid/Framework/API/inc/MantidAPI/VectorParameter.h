@@ -204,7 +204,7 @@ size_t VectorParameter<Derived,ElemType>::getSize() const
     class classname : public Mantid::API::VectorParameter<classname, double> \
     {  \
       public: \
-      typedef VectorParameter<classname, type_> SuperType;  \
+      typedef Mantid::API::VectorParameter<classname, type_> SuperType;  \
       static std::string parameterName(){ return #classname;} \
       classname() : SuperType() {} \
       std::string getName() const { return #classname;} \
