@@ -55,10 +55,10 @@ namespace MDAlgorithms
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 template<class VectorValueParameterType>
-class DLLExport VectorParameterParser: public Mantid::API::ImplicitFunctionParameterParser
+class DLLExport Vector3DParameterParser: public Mantid::API::ImplicitFunctionParameterParser
 {
 public:
-  VectorParameterParser();
+  Vector3DParameterParser();
 
   VectorValueParameterType* parseVectorParameter(std::string value);
 
@@ -66,18 +66,18 @@ public:
 
   void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser* paramParser);
 
-  ~VectorParameterParser();
+  ~Vector3DParameterParser();
 };
 
 ////////////////////////////////////////////////////////////////////
 
 template<typename VectorValueParameterType>
-VectorParameterParser<VectorValueParameterType>::VectorParameterParser()
+Vector3DParameterParser<VectorValueParameterType>::Vector3DParameterParser()
 {
 }
 
 template<typename VectorValueParameterType>
-VectorValueParameterType* VectorParameterParser<VectorValueParameterType>::parseVectorParameter(
+VectorValueParameterType* Vector3DParameterParser<VectorValueParameterType>::parseVectorParameter(
     std::string value)
 {
   std::vector<std::string> strs;
@@ -99,7 +99,7 @@ VectorValueParameterType* VectorParameterParser<VectorValueParameterType>::parse
 }
 
 template<typename VectorValueParameterType>
-Mantid::API::ImplicitFunctionParameter* VectorParameterParser<VectorValueParameterType>::createParameter(
+Mantid::API::ImplicitFunctionParameter* Vector3DParameterParser<VectorValueParameterType>::createParameter(
     Poco::XML::Element* parameterElement)
 {
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
@@ -115,7 +115,7 @@ Mantid::API::ImplicitFunctionParameter* VectorParameterParser<VectorValueParamet
 }
 
 template<typename VectorValueParameterType>
-void VectorParameterParser<VectorValueParameterType>::setSuccessorParser(
+void Vector3DParameterParser<VectorValueParameterType>::setSuccessorParser(
     Mantid::API::ImplicitFunctionParameterParser* paramParser)
 {
   Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(paramParser);
@@ -123,23 +123,23 @@ void VectorParameterParser<VectorValueParameterType>::setSuccessorParser(
 }
 
 template<typename VectorValueParameterType>
-VectorParameterParser<VectorValueParameterType>::~VectorParameterParser()
+Vector3DParameterParser<VectorValueParameterType>::~Vector3DParameterParser()
 {
 }
 
 //Declare types based on this template.
 
 /// Parses Origin Parameters
-typedef VectorParameterParser<OriginParameter> OriginParameterParser;
+typedef Vector3DParameterParser<OriginParameter> OriginParameterParser;
 
 /// Parses Normal Parameters
-typedef VectorParameterParser<NormalParameter> NormalParameterParser;
+typedef Vector3DParameterParser<NormalParameter> NormalParameterParser;
 
 /// Parses Up Parameters
-typedef VectorParameterParser<UpParameter> UpParameterParser;
+typedef Vector3DParameterParser<UpParameter> UpParameterParser;
 
 /// Parses Perpendicular Parameters
-typedef VectorParameterParser<PerpendicularParameter> PerpendicularParameterParser;
+typedef Vector3DParameterParser<PerpendicularParameter> PerpendicularParameterParser;
 }
 }
 

@@ -38,7 +38,7 @@ namespace MDAlgorithms
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport NormalParameter: public VectorParameter<NormalParameter, double> 
+class DLLExport NormalParameter: public Vector3DParameter<NormalParameter, double> 
 {
 
 private:
@@ -47,7 +47,7 @@ private:
 
 public:
   
-  typedef VectorParameter<NormalParameter, double> SuperType;  
+  typedef Vector3DParameter<NormalParameter, double> SuperType;  
 
   NormalParameter(double n1, double n2, double n3);
 
