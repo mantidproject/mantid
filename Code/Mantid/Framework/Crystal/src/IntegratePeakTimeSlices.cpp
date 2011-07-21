@@ -107,13 +107,21 @@ IntegratePeakTimeSlices::IntegratePeakTimeSlices():Algorithm()
     ParamNames.push_back("SSrow");
     ParamNames.push_back("SSrc");
   }
+  wi_to_detid_map=0;
    g_log.setLevel(7);
 
  }
      /// Destructor
 IntegratePeakTimeSlices::~IntegratePeakTimeSlices()
 {
-
+ 
+  if( wi_to_detid_map)
+   {
+     
+     delete wi_to_detid_map;
+     wi_to_detid_map = 0;
+    
+   }
 }
 
 
@@ -372,7 +380,10 @@ void IntegratePeakTimeSlices::exec()
               std::cout<<"Not Enuf data done=true"<<std::endl;
            }
 
-
+           Data.reset();
+           if( fit_alg)
+               fit_alg.reset();
+          
            if( !done)
            {
 
@@ -397,6 +408,11 @@ void IntegratePeakTimeSlices::exec()
                       //std::cout<<"Prog set to step="<<(dChan)<<std::endl;
                    }
                }
+         params.clear();
+         errs.clear();
+         names.clear();
+         ParamAttr.clear();
+         Attr.clear();
 
     }
     }
@@ -424,7 +440,7 @@ void IntegratePeakTimeSlices::exec()
    
     //show( "ResTable",TabWS,-1);
 
-    delete wi_to_detid_map;
+   // delete wi_to_detid_map;
 
 
 }catch(std::exception &ss)
@@ -710,6 +726,7 @@ std::vector<double> getInitParamValues(std::vector<double> StatBase, double TotB
   }
 
   bool done = false;
+  int ntimes =0;
   double Mx ,My,Sxx,Syy ,Sxy;
   while (!done)
   {
@@ -718,12 +735,13 @@ std::vector<double> getInitParamValues(std::vector<double> StatBase, double TotB
     Sxx = (StatBase[ISSIxx] - b * StatBase[ISSxx] - Mx * Mx / Den) / Den;
     Syy = (StatBase[ISSIyy] - b * StatBase[ISSyy] - My * My / Den) / Den;
     Sxy = (StatBase[ISSIxy] - b * StatBase[ISSxy] - Mx * My / Den) / Den;
-
+    ntimes++;
     done = true;
     if (Sxx <= 0 || Syy <= 0 || Sxy * Sxy / Sxx / Syy > .8)
     {
 
-        done = false;
+      if( ntimes < 2)
+          done = false;
       Den =StatBase[IIntensities];
       if( Den <=1)
         Den = 1;
@@ -1047,7 +1065,11 @@ bool EnoughData( std::vector<std::vector<double > >ParamAttr )
   double Vxy= (VIxy0_num-Param[IBACK]*Vxy0_num)/Denominator;
 
   double Z =4*M_PI*M_PI*( Vx*Vy-Vxy*Vxy);
-  if( fabs(Z)<.10)
+
+  if( fabs(Z)<.10)  //Not high enough of a peak
+     return false;
+
+  if (Vx <= 0 || Vy <= 0 || Vxy * Vxy / Vx / Vy > .8)// All points close to one line
      return false;
 
   return true;  
