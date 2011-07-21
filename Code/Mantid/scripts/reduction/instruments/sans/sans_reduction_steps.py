@@ -1237,7 +1237,9 @@ class ConvertToQ(ReductionStep):
         self.binning = None
         #if set to true the normalization is done out side of the convert to Q algorithm
         self.prenorm = False
+        #The minimum distance in metres from the beam center at which all wavelengths are used in the calculation in mm
         self.r_cut = 0.0
+        #The shortest wavelength in angstrom at which counts should be summed from all detector pixels in Angstrom
         self.w_cut = 0.0
     
     def set_output_type(self, descript):
@@ -1297,7 +1299,7 @@ class ConvertToQ(ReductionStep):
 
         try:
             if self._Q_alg == 'Q1D':
-                Q1D(workspace, workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut, WaveCut=self.w_cut)
+                Q1D(workspace, workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut/1000., WaveCut=self.w_cut)
     
             elif self._Q_alg == 'Qxy':
                 Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, AccountForGravity=self._use_gravity)
