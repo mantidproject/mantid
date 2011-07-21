@@ -61,7 +61,7 @@ public:
     parser.setSuccessorParser(successor);
     Mantid::API::ImplicitFunctionParameter* iparam = parser.createParameter(pRootElem);
     delete iparam;
-    TSM_ASSERT("Chain of responsiblity did not execute as expected for OriginParameter type.", testing::Mock::VerifyAndClearExpectations(successor))
+    TSM_ASSERT("Chain of responsiblity did not execute as expected for OriginParameter type.", testing::Mock::VerifyAndClearExpectations(successor));
   }
 
   void testCanParseXMLOutput()
