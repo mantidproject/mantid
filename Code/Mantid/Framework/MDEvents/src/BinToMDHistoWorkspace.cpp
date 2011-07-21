@@ -200,8 +200,8 @@ namespace MDEvents
     // Start signal at 0.0
     outWS->setTo(0.0, 0.0);
 
-    std::cout << Kernel::Strings::join(dimensionToBinFrom.begin(), dimensionToBinFrom.end(), ",") << std::endl;
-    std::cout << Kernel::Strings::join(indexMultiplier, indexMultiplier+numBD, ",") << std::endl;
+//    std::cout << Kernel::Strings::join(dimensionToBinFrom.begin(), dimensionToBinFrom.end(), ",") << std::endl;
+//    std::cout << Kernel::Strings::join(indexMultiplier, indexMultiplier+numBD, ",") << std::endl;
 
     // Loop through all boxes
     while (true)
