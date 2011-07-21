@@ -91,12 +91,13 @@ public:
     TSM_ASSERT_THROWS("No successor, so should throw!", parser.createParameter(pRootElem), std::runtime_error);
   }
 
+  DECLARE_VECTOR_PARAMETER(SucessorVectorParameter, double);
+
   void testChainOfResponsibility()
   {
     using namespace Poco::XML;
 
     //Local declare of a successor parser with a successor parameter.
-    DECLARE_VECTOR_PARAMETER(SucessorVectorParameter, double);
     typedef VectorParameterParser<SucessorVectorParameter> ConcreteSuccessorVectorParameterParser;
 
     DOMParser pParser;
