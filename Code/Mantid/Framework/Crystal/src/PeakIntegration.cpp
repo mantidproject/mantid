@@ -55,8 +55,14 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input)
           , "A 2D workspace with X values of time of flight");
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "", Direction::Input), "Name of the peaks workspace.");
-
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutPeaksWorkspace", "", Direction::Output), "Name of the output peaks workspace with integrated intensities.");
+      declareProperty(
+        new ArrayProperty<double>("Params", new RebinParamsValidator), 
+        "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
+        "this can be followed by a comma and more widths and last boundary pairs.\n"
+        "Negative width values indicate logarithmic binning.");
+      declareProperty("FitSlices", false, "Integrate slices using IntegratePeakTimeSlices algorithm (default).\n"
+        "If false, then next 6 variables are used for shoebox with pixels masked that are outside peak cluster.");
 
       declareProperty("XMin", -7, "Minimum of X (col) Range to integrate for peak");
       declareProperty("XMax", 7, "Maximum of X (col) Range to integrate for peak");
@@ -64,11 +70,6 @@ namespace Mantid
       declareProperty("YMax", 7, "Maximum of Y (row) Range to integrate for peak");
       declareProperty("TOFBinMin", -4, "Minimum of TOF Bin Range to integrate for peak");
       declareProperty("TOFBinMax", 6, "Maximum of TOF Bin Range to integrate for peak");
-      declareProperty(
-        new ArrayProperty<double>("Params", new RebinParamsValidator), 
-        "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
-        "this can be followed by a comma and more widths and last boundary pairs.\n"
-        "Negative width values indicate logarithmic binning.");
 
     }
 
@@ -167,10 +168,10 @@ namespace Mantid
       //Copy geometry over.
       API::WorkspaceFactory::Instance().initializeFromParent(inputW, outputW, true);
       Progress prog(this, 0.0, 1.0, detList.size());
-      PARALLEL_FOR3(inputW, peaksW, outputW)
+      //PARALLEL_FOR3(inputW, peaksW, outputW)
       for (int det = 0; det < static_cast<int>(detList.size()); det++)
       {
-        PARALLEL_START_INTERUPT_REGION
+        //PARALLEL_START_INTERUPT_REGION
         // Build a map to sort by the peak bin count
         std::vector <std::pair<double, int> > v1;
         for (int i = 0; i<peaksW->getNumberPeaks(); i++)if(detList[det]->getName().compare(peaksW->getPeaks()[i].getBankName())==0)
@@ -211,7 +212,22 @@ namespace Mantid
           int YPeak = int(row+0.5)-2;
           double TOFPeakd = peak.getTOF();
   
-          sumneighbours(peak.getBankName(), XPeak+Xmin, YPeak+Ymin, Xmax-Xmin+1, Ymax-Ymin+1, TOFPeakd, haveMask, PeakIntensity, mask, static_cast<int>(det));
+          int TOFPeak, TOFmin, TOFmax;
+          if (getProperty("FitSlices"))
+          {
+            TOFmax = fitneighbours(i, peak.getBankName(), XPeak, YPeak, static_cast<int>(det));
+            TOFmin = 0;
+            TOFPeak = TOFmax/2;
+          }
+          else
+          {
+            sumneighbours(peak.getBankName(), XPeak+Xmin, YPeak+Ymin, Xmax-Xmin+1, Ymax-Ymin+1, TOFPeakd, haveMask, PeakIntensity, mask, static_cast<int>(det));
+            MantidVec& X = inputW->dataX(det);
+            TOFPeak = VectorHelper::getBinIndex(X, TOFPeakd);
+            TOFmin = TOFPeak+Binmin;
+            if (TOFmin<0) TOFmin = 0;
+            TOFmax = TOFPeak+Binmax;
+          }
   
           double I, sigI;
           //Initialize Ikeda-Carpender function variables
@@ -221,14 +237,10 @@ namespace Mantid
           double Kappa = 46.0;
           // Find point of peak centre
           // Get references to the current spectrum
+          const MantidVec& X = outputW->readX(det);
           const MantidVec& Y = outputW->readY(det);
-          int numbins = static_cast<int>(Y.size());
           const MantidVec& E = outputW->readE(det);
-          MantidVec& X = outputW->dataX(det);
-          int TOFPeak = VectorHelper::getBinIndex(X, TOFPeakd);
-          int TOFmin = TOFPeak+Binmin;
-          if (TOFmin<0) TOFmin = 0;
-          int TOFmax = TOFPeak+Binmax;
+          int numbins = static_cast<int>(Y.size());
           if (TOFmin > numbins) TOFmin = numbins;
           if (TOFmax > numbins) TOFmax = numbins;
     
@@ -256,7 +268,6 @@ namespace Mantid
           for (iSig=TOFmin; iSig <= TOFmax; iSig++)std::cout <<Y[iSig]<<"  "; 
           std::cout <<"\n";
           double bktime = X[TOFmin] + X[TOFmax];
-          double bkg0 = Y[TOFmin] + Y[TOFmax];
           double pktime = 0.0;
           for (int i = TOFmin; i < TOFmax; i++) pktime+= X[i];
           double ratio = pktime/bktime;
@@ -324,18 +335,22 @@ namespace Mantid
           if(chisq>0.0 && chisq<400.0)
           {
             for (int i = 0; i < n; i++) if ( !boost::math::isnan(y[i]) && !boost::math::isinf(y[i]))I+= y[i];
-            if(I>1e10)I=0.0;
-            if(I==0.0)for (int i = TOFmin; i <= TOFmax; i++)I+=Y[i];
           }
           else
             for (int i = TOFmin; i <= TOFmax; i++)I+=Y[i];
-          I-= ratio*bkg0;
     
           //Calculate errors correctly for nonPoisson distributions
           sigI = 0.0;
           for (int i = TOFmin; i <= TOFmax; i++) sigI+= E[i]*E[i];
-          double sigbkg0 = E[TOFmin]*E[TOFmin] + E[TOFmax]*E[TOFmax];
-          sigI = sqrt(sigI+ratio*ratio*sigbkg0);
+          if (getProperty("FitSlices"))
+          {
+            sigI = sqrt(sigI);
+          }
+          else
+          {
+            I-= ratio*(Y[TOFmin] + Y[TOFmax]);
+            sigI = sqrt(sigI+ratio*ratio*(E[TOFmin]*E[TOFmin] + E[TOFmax]*E[TOFmax]));
+          }
     
           delete [] x;
           delete [] y;
@@ -348,9 +363,9 @@ namespace Mantid
         delete [] **mask;
         delete [] *mask;
         delete [] mask;
-        PARALLEL_END_INTERUPT_REGION
+        //PARALLEL_END_INTERUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+      //PARALLEL_CHECK_INTERUPT_REGION
 
       // Save the output
       setProperty("OutPeaksWorkspace", peaksW);
@@ -391,7 +406,6 @@ void PeakIntegration::sumneighbours(std::string det_name, int x0, int y0, int Su
   //To get the workspace index from the detector ID
   detid2index_map * pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(true);
 
-  int outWI = 0;
   //std::cout << " inst->nelements() " << inst->nelements() << "\n";
 
   //Build a list of Rectangular Detectors
@@ -602,7 +616,6 @@ void PeakIntegration::sumneighbours(std::string det_name, int x0, int y0, int Su
             delete [] smtmp;
             delete [] *tmpmask;
             delete [] tmpmask;
-            outWI++;
           }
     }
   }
@@ -610,6 +623,135 @@ void PeakIntegration::sumneighbours(std::string det_name, int x0, int y0, int Su
   haveMask = true;
   //Clean up memory
   delete pixel_to_wi;
+
+}
+int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet)
+{
+  // Number of slices
+  int TOFmax = 0;
+  //Get some stuff from the input workspace
+  IInstrument_sptr inst = inputW->getInstrument();
+  if (!inst)
+    throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
+
+  //To get the workspace index from the detector ID
+  detid2index_map * pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(true);
+
+  //std::cout << " inst->nelements() " << inst->nelements() << "\n";
+
+  //Build a list of Rectangular Detectors
+  std::vector<boost::shared_ptr<RectangularDetector> > detList;
+  for (int i=0; i < inst->nelements(); i++)
+  {
+    boost::shared_ptr<RectangularDetector> det;
+    boost::shared_ptr<ICompAssembly> assem;
+    boost::shared_ptr<ICompAssembly> assem2;
+
+    det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
+    if (det) 
+    {
+      if(det_name.empty() || (!det_name.empty() && det->getName().compare(det_name)==0)) 
+        detList.push_back(det);
+    }
+    else
+    {
+      //Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
+      // We are not doing a full recursive search since that will be very long for lots of pixels.
+      assem = boost::dynamic_pointer_cast<ICompAssembly>( (*inst)[i] );
+      if (assem)
+      {
+        for (int j=0; j < assem->nelements(); j++)
+        {
+          det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
+          if (det)
+          {
+            if(det_name.empty() || (!det_name.empty() && det->getName().compare(det_name)==0)) 
+              detList.push_back(det);
+          }
+          else
+          {
+            //Also, look in the second sub-level for RectangularDetectors (e.g. PG3).
+            // We are not doing a full recursive search since that will be very long for lots of pixels.
+            assem2 = boost::dynamic_pointer_cast<ICompAssembly>( (*assem)[j] );
+            if (assem2)
+            {
+              for (int k=0; k < assem2->nelements(); k++)
+              {
+                det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem2)[k] );
+                if (det) 
+                {
+                  if(det_name.empty() || (!det_name.empty() && det->getName().compare(det_name)==0))  
+                    detList.push_back(det);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (detList.size() == 0)
+    throw std::runtime_error("This instrument does not have any RectangularDetector's. PeakIntegration cannot operate on this instrument at this time.");
+
+  //Loop through the RectangularDetector's we listed before.
+  for (int i=0; i < static_cast<int>(detList.size()); i++)
+  {
+    std::string det_name("");
+    boost::shared_ptr<RectangularDetector> det;
+    det = detList[i];
+    if (det)
+    {
+      IAlgorithm_sptr slice_alg = createSubAlgorithm("IntegratePeakTimeSlices");
+      slice_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+      TableWorkspace_sptr logtable;
+      slice_alg->setProperty<TableWorkspace_sptr>("OutputWorkspace", logtable);
+      slice_alg->setProperty<PeaksWorkspace_sptr>("Peaks", getProperty("InPeaksWorkspace"));
+      slice_alg->setProperty<PeaksWorkspace_sptr>("PeaksResult", getProperty("OutPeaksWorkspace"));
+      slice_alg->setProperty("PeakIndex", ipeak);
+      double lenunitcell;
+      try
+      {
+        OrientedLattice latt = inputW->mutableSample().getOrientedLattice();
+        lenunitcell = std::max(latt.a(), std::max(latt.b(),latt.c()));
+      }
+      catch(Kernel::Exception::NotFoundError& e)
+      {
+        lenunitcell = 16.;
+        g_log.warning() << "No UB matrix was loaded into workspace, so default unit cell lenght of 16 is used.\n";
+      }
+      slice_alg->setProperty("PeakQspan", 0.166666667/lenunitcell);
+      slice_alg->executeAsSubAlg();
+   
+      MantidVec& Xout=outputW->dataX(idet);
+      MantidVec& Yout=outputW->dataY(idet);
+      MantidVec& Eout=outputW->dataE(idet);
+      logtable = slice_alg->getProperty("OutputWorkspace");
+      TOFmax = logtable->rowCount();
+      for (int iSig=0; iSig < TOFmax; iSig++)
+      {
+        Xout[iSig] = logtable->getRef<double>(std::string("Time"), iSig);
+        Yout[iSig] = logtable->getRef<double>(std::string("ISAWIntensity"), iSig);
+        Eout[iSig] = logtable->getRef<double>(std::string("ISAWIntensityError"), iSig);
+      }
+
+      outputW->getSpectrum(idet)->clearDetectorIDs();
+      //Find the pixel ID at that XY position on the rectangular detector
+      int pixelID = det->getAtXY(x0,y0)->getID();
+
+      //Find the corresponding workspace index, if any
+      if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
+      {
+        size_t wi = (*pixel_to_wi)[pixelID];
+        //Set detectorIDs
+        outputW->getSpectrum(idet)->addDetectorIDs( inputW->getSpectrum(wi)->getDetectorIDs() );
+      }
+    }
+  }
+
+  //Clean up memory
+  delete pixel_to_wi;
+  return TOFmax-1;
 
 }
 void PeakIntegration::neighbours(double **matrix, int i, int j, int m, int n, int **mask)
