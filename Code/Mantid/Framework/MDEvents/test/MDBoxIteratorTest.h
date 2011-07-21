@@ -10,11 +10,16 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDPlane.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid;
 using namespace Mantid::Kernel;
+using Mantid::Geometry::MDImplicitFunction;
+using Mantid::Geometry::MDImplicitFunction;
+using Mantid::Geometry::MDPlane;
 
 class MDBoxIteratorTest : public CxxTest::TestSuite
 {
@@ -24,13 +29,15 @@ public:
 
   //--------------------------------------------------------------------------------------
   /** Make a gridded box with this structure:
-               A
+              Names                                   Width of each box
+
+               A                                        64
                |
-      B0 -- B1 -------- B2 ------------ B3
+      B0 -- B1 -------- B2 ------------ B3              16
       |                 |
-    C00-3        C20 C21 C22 C23
+    C00-3        C20 C21 C22 C23                         4
                       |
-                  D210 D211 D212 D213
+                  D210 D211 D212 D213                    1
 
    */
   gbox_t *A;
@@ -266,6 +273,143 @@ public:
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
   }
+
+  //--------------------------------------------------------------------------------------
+  void test_iterator_withImplicitFunction_above11()
+  {
+    // Implicit function = only boxes with x > 5.0
+    MDImplicitFunction * func = new MDImplicitFunction();
+    coord_t normal[1] = {+1.0}; coord_t origin[1] = {11.0};
+    func->addPlane( MDPlane(1, normal, origin) );
+
+    // Create an iterator
+    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, false, func);
+
+    // Start with the top one
+    TS_ASSERT_EQUALS( it->getBox(), A);
+    TS_ASSERT( nextIs(it, B0) );
+    // C00-C01 are outside the range
+    TS_ASSERT( nextIs(it, C02) );
+    TS_ASSERT( nextIs(it, C03) );
+    TS_ASSERT( nextIs(it, B1) );
+    TS_ASSERT( nextIs(it, B2) );
+    TS_ASSERT( nextIs(it, C20) );
+    TS_ASSERT( nextIs(it, C21) );
+    TS_ASSERT( nextIs(it, D210) );
+    TS_ASSERT( nextIs(it, D211) );
+    TS_ASSERT( nextIs(it, D212) );
+    TS_ASSERT( nextIs(it, D213) );
+    TS_ASSERT( nextIs(it, C22) );
+    TS_ASSERT( nextIs(it, C23) );
+    TS_ASSERT( nextIs(it, B3) );
+    // No more!
+    TS_ASSERT( !it->next() );
+    TS_ASSERT( !it->next() );
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_iterator_withImplicitFunction_above11_leafOnly()
+  {
+    // Implicit function = only boxes with x > 5.0
+    MDImplicitFunction * func = new MDImplicitFunction();
+    coord_t normal[1] = {+1.0}; coord_t origin[1] = {11.0};
+    func->addPlane( MDPlane(1, normal, origin) );
+
+    // Create an iterator
+    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, true, func);
+
+    // C00-C01 are outside the range, so the first one is C02
+    TS_ASSERT_EQUALS( it->getBox(), C02);
+    TS_ASSERT( nextIs(it, C03) );
+    TS_ASSERT( nextIs(it, B1) );
+    TS_ASSERT( nextIs(it, C20) );
+    TS_ASSERT( nextIs(it, D210) );
+    TS_ASSERT( nextIs(it, D211) );
+    TS_ASSERT( nextIs(it, D212) );
+    TS_ASSERT( nextIs(it, D213) );
+    TS_ASSERT( nextIs(it, C22) );
+    TS_ASSERT( nextIs(it, C23) );
+    TS_ASSERT( nextIs(it, B3) );
+    // No more!
+    TS_ASSERT( !it->next() );
+    TS_ASSERT( !it->next() );
+  }
+
+
+  //--------------------------------------------------------------------------------------
+  void test_iterator_withImplicitFunction_above17()
+  {
+    // Implicit function = only boxes with x > 17.0
+    MDImplicitFunction * func = new MDImplicitFunction();
+    coord_t normal[1] = {+1.0}; coord_t origin[1] = {17.0};
+    func->addPlane( MDPlane(1, normal, origin) );
+
+    // Create an iterator
+    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, false, func);
+
+    // Start with the top one
+    TS_ASSERT_EQUALS( it->getBox(), A);
+    // B0 (and all children) are outside the range
+    TS_ASSERT( nextIs(it, B1) );
+    TS_ASSERT( nextIs(it, B2) );
+    TS_ASSERT( nextIs(it, C20) );
+    TS_ASSERT( nextIs(it, C21) );
+    TS_ASSERT( nextIs(it, D210) );
+    TS_ASSERT( nextIs(it, D211) );
+    TS_ASSERT( nextIs(it, D212) );
+    TS_ASSERT( nextIs(it, D213) );
+    TS_ASSERT( nextIs(it, C22) );
+    TS_ASSERT( nextIs(it, C23) );
+    TS_ASSERT( nextIs(it, B3) );
+    // No more!
+    TS_ASSERT( !it->next() );
+    TS_ASSERT( !it->next() );
+  }
+
+
+  //--------------------------------------------------------------------------------------
+  void test_iterator_withImplicitFunction_between_37_and_39()
+  {
+    MDImplicitFunction * func = new MDImplicitFunction();
+    coord_t normal[1] = {+1.0}; coord_t origin[1] = {37.1};
+    func->addPlane( MDPlane(1, normal, origin) );
+    coord_t normal2[1] = {-1.0}; coord_t origin2[1] = {38.9};
+    func->addPlane( MDPlane(1, normal2, origin2) );
+
+    // Create an iterator
+    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, false, func);
+
+    // Go down to the only two leaf boxes that are in range
+    TS_ASSERT_EQUALS( it->getBox(), A);
+    TS_ASSERT( nextIs(it, B2) );
+    TS_ASSERT( nextIs(it, C21) );
+    TS_ASSERT( nextIs(it, D211) );
+    TS_ASSERT( nextIs(it, D212) );
+    // No more!
+    TS_ASSERT( !it->next() );
+    TS_ASSERT( !it->next() );
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_iterator_withImplicitFunction_between_37_and_39_leafOnly()
+  {
+    MDImplicitFunction * func = new MDImplicitFunction();
+    coord_t normal[1] = {+1.0}; coord_t origin[1] = {37.1};
+    func->addPlane( MDPlane(1, normal, origin) );
+    coord_t normal2[1] = {-1.0}; coord_t origin2[1] = {38.9};
+    func->addPlane( MDPlane(1, normal2, origin2) );
+
+    // Create an iterator
+    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, true, func);
+
+    // Only two leaf boxes are in range
+    TS_ASSERT_EQUALS( it->getBox(), D211);
+    TS_ASSERT( nextIs(it, D212) );
+    // No more!
+    TS_ASSERT( !it->next() );
+    TS_ASSERT( !it->next() );
+  }
+
 
 };
 

@@ -1,5 +1,7 @@
-#include "MantidMDEvents/MDBoxIterator.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
+#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBoxIterator.h"
 
 namespace Mantid
 {
@@ -13,11 +15,16 @@ namespace MDEvents
    * @param topBox :: top-level parent box.
    * @param maxDepth :: maximum depth to go to
    * @param leafOnly :: only report "leaf" nodes, e.g. boxes that are no longer split OR are at maxDepth.
+   * @param function :: ImplicitFunction that limits iteration volume. NULL for don't limit this way.
+   *        Note that the top level box is ALWAYS returned at least once, even if it is outside the
+   *        implicit function
    */
-  TMDE(MDBoxIterator)::MDBoxIterator(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly)
+  TMDE(MDBoxIterator)::MDBoxIterator(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
+      Mantid::Geometry::MDImplicitFunction * function)
       : m_topBox(topBox),
         m_maxDepth(maxDepth), m_leafOnly(leafOnly),
-        m_done(false)
+        m_done(false),
+        m_function(function)
   {
     if (!m_topBox)
       throw std::invalid_argument("MDBoxIterator::ctor(): NULL top-level box given.");
@@ -44,7 +51,7 @@ namespace MDEvents
     if (m_currentDepth > m_maxDepth)
       throw std::invalid_argument("MDBoxIterator::ctor(): The maxDepth parameter must be >= the depth of the topBox.");
 
-    // Starting with leafs only? You need to skip ahead
+    // Starting with leafs only? You need to skip ahead (if the top level box has children)
     if (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth)
       next();
 
@@ -70,6 +77,29 @@ namespace MDEvents
 //    return 0.0;
 //  }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Return true if the box is touching the implicit function
+   *
+   * @param function :: MDImplicitFunction
+   * @param box :: IMDBox
+   * @return true if the box is touching the implicit function
+   */
+  template<typename MDE, size_t nd>
+  bool boxIsTouching(Mantid::Geometry::MDImplicitFunction * function, IMDBox<MDE,nd> * box)
+  {
+    // NULL box does not touch anything.
+    if (!box) return false;
+    // Get the vertexes of the box as a bare array
+    size_t numVertices = 0;
+    coord_t * vertexes = box->getVertexesArray(numVertices);
+    bool retVal = function->isBoxTouching(vertexes, numVertices);
+    delete [] vertexes;
+    return retVal;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /**  Advance to the next box in the workspace. If the current box is the last one in the workspace
    * do nothing and return false.
    * @return true if there are more cells to iterate through.
@@ -95,8 +125,15 @@ namespace MDEvents
       // Take the first child of it
       m_current = m_parent->getChild(0);
 
+      // Check if the child is excluded by the implicit function
+      bool skipBecauseItIsExcluded = false;
+      if (m_function)
+        skipBecauseItIsExcluded = !boxIsTouching(m_function, m_current);
+
       // For leaves-only, you need to keep looking this way until you reach a leaf (no children)
-      if (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth)
+      // For boxes excluded by an implicit function, you need to keep looking too.
+      if ((skipBecauseItIsExcluded) ||
+          (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth) )
         return next();
       else
         // If not leaves-only, then you return each successive child you encounter.
@@ -140,10 +177,18 @@ namespace MDEvents
     // This is now the current box
     m_current = m_parent->getChild(m_indices[m_currentDepth]);
 
+    // Check if the child is excluded by the implicit function
+    bool skipBecauseItIsExcluded = false;
+    if (m_function)
+      skipBecauseItIsExcluded = !boxIsTouching(m_function, m_current);
+
     // For leaves-only, you need to keep looking this way until you reach a leaf (no children)
-    if (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth)
+    // For boxes excluded by an implicit function, you need to keep looking too.
+    if ((skipBecauseItIsExcluded) ||
+        (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth) )
       return next();
     else
+      // If not leaves-only, then you return each successive child you encounter.
       return true;
   }
 

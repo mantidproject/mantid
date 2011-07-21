@@ -1,10 +1,11 @@
 #ifndef MANTID_MDEVENTS_MDBOXITERATOR_H_
 #define MANTID_MDEVENTS_MDBOXITERATOR_H_
     
-#include "MantidKernel/System.h"
-#include "MantidMDEvents/MDEvent.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/System.h"
 #include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDEvent.h"
 
 namespace Mantid
 {
@@ -21,7 +22,8 @@ namespace MDEvents
   class DLLExport MDBoxIterator
   {
   public:
-    MDBoxIterator(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly);
+    MDBoxIterator(IMDBox<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
+        Mantid::Geometry::MDImplicitFunction * function = NULL);
     ~MDBoxIterator();
 
     /// Return a pointer to the current box pointed to by the iterator.
@@ -67,6 +69,9 @@ namespace MDEvents
 
     /// Set to true when reached the end
     bool m_done;
+
+    /// Implicit function for limiting where you iterate. NULL means no limits.
+    Mantid::Geometry::MDImplicitFunction * m_function;
   };
 
 
