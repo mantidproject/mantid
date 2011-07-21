@@ -59,6 +59,12 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "General"; }
 
+protected:
+  API::MatrixWorkspace_sptr setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace, std::vector<double>& newAxis);
+  void makeDistribution(API::MatrixWorkspace_sptr outputWS, const std::vector<double> qAxis);
+
+  /// Conversion constant
+  double m_EtoK;
 private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
@@ -67,8 +73,6 @@ private:
   /// Execution code
   void exec();
 
-  API::MatrixWorkspace_sptr setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace, std::vector<double>& newAxis);
-  void makeDistribution(API::MatrixWorkspace_sptr outputWS, const std::vector<double> qAxis);
 };
 
 } // namespace Algorithms

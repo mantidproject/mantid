@@ -80,9 +80,6 @@ namespace Mantid
       void init();
       /// Run the algorithm
       void exec();
-      /// Create a polygon
-      Geometry::ConvexPolygon createPolygon(const double x_i, const double x_ip1, 
-                                            const double y_i, const double y_ip1) const;
       /// Calculate the Y and E values for the given possible overlap
       std::pair<double,double> calculateYE(API::MatrixWorkspace_const_sptr inputWS,
                                            const MantidVec & oldYBins,

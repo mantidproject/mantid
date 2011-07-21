@@ -34,6 +34,7 @@ void SofQW::init()
 {
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("DeltaE"));
+  wsValidator->add(new SpectraAxisValidator<>());
   wsValidator->add(new CommonBinsValidator<>);
   wsValidator->add(new HistogramValidator<>);
   wsValidator->add(new InstrumentValidator<>);

@@ -61,14 +61,14 @@ namespace Algorithms
 	  // TODO Auto-generated execute stub
 	  // 1. Get input data
 	  const std::vector<std::string> inputWorkspaceNames = getProperty("InputWorkspaces");
-	  int numspaces = inputWorkspaceNames.size();
+	  const size_t numspaces = inputWorkspaceNames.size();
 	  std::vector<MatrixWorkspace_const_sptr> inputWorkspaces;
-	  for (int i = 0; i < numspaces; i ++){
+	  for (size_t i = 0; i < numspaces; i ++){
 		  MatrixWorkspace_sptr tws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWorkspaceNames[i]));
 		  inputWorkspaces.push_back(tws);
 	  }
 
-	  int size;
+	  size_t size;
 	  if (numspaces > 0){
               const MantidVec& wx = inputWorkspaces[0]->dataX(0);
               size = wx.size();
@@ -83,25 +83,24 @@ namespace Algorithms
 	  MantidVec& bx = outWs->dataX(0);
 	  MantidVec& by = outWs->dataY(0);
 	  MantidVec& be = outWs->dataE(0);
-	  for (int i = 0; i < size; i ++){
+	  for (size_t i = 0; i < size; i ++){
 		  bx[i] = inputWorkspaces[0]->dataX(0)[i];
 		  by[i] = 0;
 		  be[i] = 0; 
 	  }
 	  
 	  // 2. Blended
-	  for (int i = 0; i < numspaces; i ++){
-		  const MantidVec& ix = inputWorkspaces[i]->dataX(0);
+	  for (size_t i = 0; i < numspaces; i ++){
 		  const MantidVec& iy = inputWorkspaces[i]->dataY(0);
 		  const MantidVec& ie = inputWorkspaces[i]->dataE(0);
 		  
-		  for (int j = 0; j < size; j ++){
+		  for (size_t j = 0; j < size; j ++){
 			  by[j] += iy[j] / (ie[j]*ie[j]);
 			  be[j] += 1/(ie[j]*ie[j]);
 		  }
 	  }
 	  
-	  for (int j = 0; j < size; j ++){
+	  for (size_t j = 0; j < size; j ++){
 		  be[j] = sqrt(1/be[j]);
 		  by[j] = by[j]*be[j];
 	  }

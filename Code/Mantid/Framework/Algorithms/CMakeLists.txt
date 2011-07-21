@@ -133,6 +133,7 @@ set ( SRC_FILES
 	src/SmoothData.cpp
 	src/SmoothNeighbours.cpp
 	src/SofQW.cpp
+	src/SofQW2.cpp
 	src/SolidAngle.cpp
 	src/Sort.cpp
 	src/SortEvents.cpp
@@ -288,6 +289,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SmoothData.h
 	inc/MantidAlgorithms/SmoothNeighbours.h
 	inc/MantidAlgorithms/SofQW.h
+	inc/MantidAlgorithms/SofQW2.h
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/Sort.h
 	inc/MantidAlgorithms/SortEvents.h
@@ -426,6 +428,7 @@ set ( TEST_FILES
 	test/ScaleXTest.h
 	test/SmoothDataTest.h
 	test/SmoothNeighboursTest.h
+# too slow at the moment	test/SofQW2Test.h
 	test/SofQWTest.h
 	test/SolidAngleTest.h
 	test/SortEventsTest.h
