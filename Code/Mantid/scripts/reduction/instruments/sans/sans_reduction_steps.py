@@ -1011,7 +1011,7 @@ class Mask(ReductionStep):
             '<radius val="' + str(radius) + '" /></infinite-cylinder>\n'
 
     def add_cylinder(self, radius, xcentre, ycentre, ID='shape'):
-        '''Mask the inside of a cylinder on the input workspace.'''
+        '''Mask the inside of an infinite cylinder on the input workspace.'''
         self.add_xml_shape(
             self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1], id=ID)+'<algebra val="' + str(ID) + '"/>')
             

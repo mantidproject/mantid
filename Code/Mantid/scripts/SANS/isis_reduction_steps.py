@@ -467,6 +467,9 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         self.phi_max = 90.0
         self._readonly_phi = False
         self.spec_list = []
+        
+        #xml description of a line to mask
+        self._line_xml = ''
 
         ########################## Masking  ################################################
         # Mask the corners and beam stop if radius parameters are given
@@ -645,6 +648,15 @@ class Mask_ISIS(sans_reduction_steps.Mask):
               # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
                 self._lim_phi_xml += '<algebra val="#('+id+'_plane1 '+id+'_plane2)" />'
 
+    def _mask_line(self, width, angle):
+        '''
+            Creates the xml to mask a line of the given width at the given angle
+            into the member _line_xml
+        '''
+        pass
+#        self._line_xml = self._infinite_cylinder()
+#        self._line_xml += self._infinite_cylinder()
+
     def normalizePhi(self, phi):
         if phi > 90.0:
             phi -= 180.0
@@ -715,6 +727,9 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             
         if self._lim_phi_xml != '' and self.mask_phi:
             MaskDetectorsInShape(workspace, self._lim_phi_xml)
+
+        if self._line_xml and self.mask_line:
+            MaskDetectorsInShape(workspace, self._line_xml)
 
     def view(self, instrum):
         """
