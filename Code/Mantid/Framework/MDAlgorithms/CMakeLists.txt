@@ -11,10 +11,8 @@ set ( SRC_FILES
 	src/CompositeImplicitFunctionParser.cpp
 	src/CpRebinningNx3.cpp
 	src/CreateMDFitWorkspace.cpp
-	src/DepthParameter.cpp
 	src/DynamicCPRRebinning.cpp
 	src/DynamicRebinFromXML.cpp
-	src/HeightParameter.cpp
 	src/IDynamicRebinning.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
@@ -35,7 +33,6 @@ set ( SRC_FILES
 	src/TobyFitSimulate.cpp
 	src/VectorMathematics.cpp
 	src/Vector3DParameterParser.cpp
-	src/WidthParameter.cpp
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp

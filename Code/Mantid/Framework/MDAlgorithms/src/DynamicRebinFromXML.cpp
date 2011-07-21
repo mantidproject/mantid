@@ -96,8 +96,8 @@ namespace Mantid
       std::vector<boost::shared_ptr<IMDDimension> > dimensionVec;
 
       //Extract dimensions
-      size_t nDimensions = dimensionsXML->length();
-      for(size_t i = 0; i < nDimensions; i++)
+      unsigned long nDimensions = dimensionsXML->length();
+      for(unsigned long i = 0; i < nDimensions; i++)
       {
         Poco::XML::Element* dimensionXML = static_cast<Poco::XML::Element*>(dimensionsXML->item(i));
         MDDimension* dimension = createDimension(dimensionXML);

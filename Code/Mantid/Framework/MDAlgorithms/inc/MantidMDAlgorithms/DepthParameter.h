@@ -4,8 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidAPI/SingleValueParameter.h"
 
 namespace Mantid
 {
@@ -38,45 +37,7 @@ namespace Mantid
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
-
-        
-        class DLLExport DepthParameter :public Mantid::API::ImplicitFunctionParameter
-        {
-        private:
-
-           double m_depth;
-
-        public:
-
-            DepthParameter(double depth);
-            
-            DepthParameter();
-            
-            DepthParameter(const DepthParameter & other);
-            
-            DepthParameter& operator=(const DepthParameter& other);
-
-            bool operator==(const DepthParameter &other) const;
-
-            bool operator!=(const DepthParameter &other) const;
-
-            bool isValid() const;
-
-            std::string getName() const;
-
-            DepthParameter* clone() const;
-
-            double getValue() const;
-
-            std::string toXMLString() const;
-
-            ~DepthParameter();
-
-            static std::string parameterName()
-            {
-                return "DepthParameter";
-            }
-        };
+        DECLARE_SINGLE_VALUE_PARAMETER(DepthParameter, double);
     }
 }
 

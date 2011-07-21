@@ -4,8 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidAPI/SingleValueParameter.h"
 
 namespace Mantid
 {
@@ -38,45 +37,7 @@ namespace Mantid
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
-
-        
-        class DLLExport WidthParameter :public Mantid::API::ImplicitFunctionParameter
-        {
-        private:
-
-           double m_width;
-
-        public:
-
-            WidthParameter(double width);
-            
-            WidthParameter();
-            
-            WidthParameter(const WidthParameter & other);
-            
-            WidthParameter& operator=(const WidthParameter& other);
-
-            bool operator==(const WidthParameter &other) const;
-
-            bool operator!=(const WidthParameter &other) const;
-
-            bool isValid() const;
-
-            std::string getName() const;
-
-            WidthParameter* clone() const;
-
-            double getValue() const;
-
-            std::string toXMLString() const;
-
-            ~WidthParameter();
-
-            static std::string parameterName()
-            {
-                return "WidthParameter";
-            }
-        };
+        DECLARE_SINGLE_VALUE_PARAMETER(WidthParameter, double);
     }
 }
 

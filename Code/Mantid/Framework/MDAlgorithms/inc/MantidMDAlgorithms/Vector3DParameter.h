@@ -42,35 +42,20 @@ template<typename Derived, typename ElemType>
 class DLLExport Vector3DParameter : public  ImplicitFunctionParameter
 {
 public:
-
   Vector3DParameter(ElemType a, ElemType b, ElemType c);
-
   Vector3DParameter();
-
   Vector3DParameter(const Vector3DParameter<Derived, ElemType>& other);
-
   std::string toXMLString() const;
-
   Derived& operator=(const Derived& other);
-
   bool operator==(const Derived &other) const;
-
   bool operator!=(const Derived &other) const;
-
   ElemType getX() const;
-
   ElemType getY() const;
-
   ElemType getZ() const;
-
   virtual bool isValid() const;
-
   ElemType& operator[] (int index);
-
 protected:
-
   std::vector<ElemType> m_vector;
-
   bool m_isValid;
 };
 
@@ -163,7 +148,7 @@ ElemType& Vector3DParameter<Derived,ElemType>::operator[] (int index)
 }
 
 //-----------------------------------------------------------------------------------------------------------------//
-// Macro for generating concrete types of VectorParamters. 
+// Macro for generating concrete types of Vector3DParameters. 
 //
 // Use of macro enables parameter names to be assigned to each type.
 // Most of the work is done in the VectorParamter base class, which utilises CRTP.

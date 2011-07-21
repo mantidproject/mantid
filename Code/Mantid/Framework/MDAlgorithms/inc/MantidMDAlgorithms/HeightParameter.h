@@ -4,8 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidAPI/SingleValueParameter.h"
 
 namespace Mantid
 {
@@ -38,45 +37,7 @@ namespace Mantid
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
-
-        
-        class DLLExport HeightParameter :public Mantid::API::ImplicitFunctionParameter
-        {
-        private:
-
-           double m_height;
-
-        public:
-
-            HeightParameter(double width);
-            
-            HeightParameter();
-            
-            HeightParameter(const HeightParameter & other);
-            
-            HeightParameter& operator=(const HeightParameter& other);
-
-            bool operator==(const HeightParameter &other) const;
-
-            bool operator!=(const HeightParameter &other) const;
-
-            bool isValid() const;
-
-            std::string getName() const;
-
-            HeightParameter* clone() const;
-
-            double getValue() const;
-
-            std::string toXMLString() const;
-
-            ~HeightParameter();
-
-            static std::string parameterName()
-            {
-                return "HeightParameter";
-            }
-        };
+        DECLARE_SINGLE_VALUE_PARAMETER(HeightParameter, double);
     }
 }
 
