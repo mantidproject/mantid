@@ -331,7 +331,7 @@ public:
     std::cout << tim << " to set all detector IDs for " << nhist << " spectra, using the ISpectrum method (serial)." << std::endl;
 
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (size_t i=0; i < ws1->getNumberHistograms(); i++)
+    for (int i=0; i < (int)ws1->getNumberHistograms(); i++)
     {
       ISpectrum * spec = ws1->getSpectrum(i);
       spec->setDetectorID(detid_t(i));
