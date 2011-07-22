@@ -55,6 +55,7 @@ public:
   ElemType& operator[] (int index);
   const ElemType* getPointerToStart();
   size_t getSize() const;
+  ElemType& at(size_t index);
 protected:
   ElemType* m_arry;
   size_t m_size;
@@ -238,6 +239,17 @@ template<typename Derived, typename ElemType>
 const ElemType* VectorParameter<Derived,ElemType>::getPointerToStart()
 {
   return m_arry;
+}
+
+//----------------------------------------------------------------------
+/* Convienince array access method
+@param index : index to get element at
+@return element at index
+*/
+template<typename Derived, typename ElemType>
+ElemType& VectorParameter<Derived,ElemType>::at(size_t index)
+{
+  return m_arry[index];
 }
 
 //-----------------------------------------------------------------------------------------------------------------//

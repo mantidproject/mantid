@@ -26,13 +26,13 @@ namespace MDEvents
    * @return
    */
   CoordTransformDistance::CoordTransformDistance(const size_t inD, const coord_t * center, const bool * dimensionsUsed)
-  : CoordTransform(inD, 1), m_center(inD), m_dimensionsUsed(inD)
+    : CoordTransform(inD, 1), m_center(new CoordCenterVectorParam(inD)), m_dimensionsUsed(new DimensionsUsedVectorParam(inD))
   {
     // Create and copy the arrays.
     for (size_t d=0; d<inD; d++)
     {
-      m_center.addValue(d, center[d]);
-      m_dimensionsUsed.addValue(d, dimensionsUsed[d]);
+      m_center->addValue(d, center[d]);
+      m_dimensionsUsed->addValue(d, dimensionsUsed[d]);
     }
   }
     
@@ -58,9 +58,9 @@ namespace MDEvents
     coord_t distanceSquared = 0;
     for (size_t d=0; d<inD.getValue(); d++)
     {
-      if (true == m_dimensionsUsed[d])
+      if (true == m_dimensionsUsed->at(d))
       {
-        coord_t dist = inputVector[d] - m_center[d];
+        coord_t dist = inputVector[d] - m_center->at(d);
         distanceSquared += (dist * dist);
       }
     }
@@ -95,8 +95,8 @@ namespace MDEvents
       std::string formattedXMLString = boost::str(boost::format(xmlstream.str().c_str())
         % inD.toXMLString().c_str() 
         % outD.toXMLString().c_str() 
-        % m_center.toXMLString().c_str()
-        % m_dimensionsUsed.toXMLString().c_str());
+        % m_center->toXMLString().c_str()
+        % m_dimensionsUsed->toXMLString().c_str());
 
       return formattedXMLString;
   }

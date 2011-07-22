@@ -1,6 +1,7 @@
 #ifndef MANTID_MDEVENTS_COORDTRANSFORMDISTANCE_H_
 #define MANTID_MDEVENTS_COORDTRANSFORMDISTANCE_H_
-    
+
+#include <boost/scoped_ptr.hpp>
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Matrix.h"
@@ -32,6 +33,9 @@ namespace MDEvents
   class DLLExport CoordTransformDistance : public CoordTransform
   {
   public:
+    typedef boost::scoped_ptr<DimensionsUsedVectorParam> DimensionUsedVec_scptr;
+    typedef boost::scoped_ptr<CoordCenterVectorParam> CoodCenterVec_scptr;
+
     CoordTransformDistance(const size_t inD, const coord_t * center, const bool * dimensionsUsed);
     virtual ~CoordTransformDistance();
     virtual std::string toXMLString() const;
@@ -39,17 +43,17 @@ namespace MDEvents
     virtual void apply(const coord_t * inputVector, coord_t * outVector);
 
     /// Return the center coordinate array
-    const coord_t * getCenter() { return m_center.getPointerToStart(); }
+    const coord_t * getCenter() { return m_center->getPointerToStart(); }
 
     /// Return the dimensions used bool array
-    const bool * getDimensionsUsed() { return m_dimensionsUsed.getPointerToStart(); }
+    const bool * getDimensionsUsed() { return m_dimensionsUsed->getPointerToStart(); }
 
   protected:
     /// Coordinates at the center
-    CoordCenterVectorParam m_center;
+    CoodCenterVec_scptr m_center;
 
     /// Parmeter where True is set for those dimensions that are considered when calculating distance
-    DimensionsUsedVectorParam m_dimensionsUsed;
+    DimensionUsedVec_scptr m_dimensionsUsed;
   };
 
 
