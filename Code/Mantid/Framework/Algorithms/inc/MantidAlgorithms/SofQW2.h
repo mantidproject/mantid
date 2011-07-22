@@ -106,16 +106,16 @@ namespace Mantid
                              std::vector<BinWithWeight> & overlaps) const;
       /// Calculate the Q range
       std::pair<double,double> calculateQRange(Geometry::IDetector_sptr det, 
-                                               const double deltaE) const;
+                                               const double dEMin, 
+                                               const double dEMax) const;
       /// Get the Q Range from a given detector on the workspace
       std::pair<double,double> getQRange(Geometry::IDetector_sptr det, 
-                                         const double deltaE,
                                          const size_t xIndex) const;
     
       /// Init variables cache base on the given workspace
       void initCachedValues(API::MatrixWorkspace_const_sptr workspace);
       /// Init the theta index
-      void initThetaIndex(API::MatrixWorkspace_const_sptr workspace);
+      void initQCache(API::MatrixWorkspace_const_sptr workspace);
 
       /// E Mode
       int m_emode;
@@ -127,12 +127,10 @@ namespace Mantid
       Kernel::V3D m_samplePos;
       /// Indexable theta values
       std::vector<double> m_thetaIndex;
-      /// Type of cache
-      typedef std::map<Geometry::IDetector_sptr, std::map<size_t, std::pair<double,double> > > QCache;
-      /// Cached Q values
-      mutable QCache m_qcache;
       /// Progress reporter
       boost::shared_ptr<API::Progress> m_progress;
+      /// Pre-cache Q values
+      std::map<detid_t, std::vector<std::pair<double,double> > > m_qcache;
     };
 
 

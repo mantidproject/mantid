@@ -431,7 +431,7 @@ set ( TEST_FILES
 	test/ScaleXTest.h
 	test/SmoothDataTest.h
 	test/SmoothNeighboursTest.h
-# too slow at the moment	test/SofQW2Test.h
+	test/SofQW2Test.h
 	test/SofQWTest.h
 	test/SolidAngleTest.h
 	test/SortEventsTest.h

@@ -7,6 +7,8 @@
 #include "MantidGeometry/Math/Vertex2D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 
+#include "MantidKernel/Timer.h"
+
 namespace Mantid
 {
   namespace Algorithms
@@ -26,7 +28,7 @@ namespace Mantid
     /// Default constructor
     SofQW2::SofQW2() 
       : SofQW(), m_emode(0), m_efixed(0.0), m_beamDir(), 
-        m_samplePos(), m_thetaIndex(), m_qcache(), m_progress()
+        m_samplePos(), m_thetaIndex(), m_progress(), m_qcache()
     {
     }
 
@@ -181,6 +183,7 @@ namespace Mantid
         try
         {
           det_i = inputWS->getDetector(i);
+          if( det_i->isMonitor() ) continue;
         }
         catch(Kernel::Exception::NotFoundError&)
         {
@@ -206,22 +209,32 @@ namespace Mantid
                                    const Geometry::ConvexPolygon & newPoly,
                                    std::vector<BinWithWeight> & overlaps) const
     {
-      const size_t nxpoints(inputWS->blocksize());
       const MantidVec & oldAxis1 = inputWS->readX(0);
       const size_t ndets(dets.size());
       const double ndets_dbl = static_cast<double>(ndets);
+
+      // Find the region to search as we don't need to search everywhere
       const double xn_lo(newPoly[0].X()), xn_hi(newPoly[2].X());
       const double yn_lo(newPoly[0].Y()), yn_hi(newPoly[1].Y());
-      for(size_t j = 0; j < nxpoints; ++j)
+      MantidVec::const_iterator start_it = std::upper_bound(oldAxis1.begin(), oldAxis1.end(), xn_lo);
+      MantidVec::const_iterator end_it = std::upper_bound(oldAxis1.begin(), oldAxis1.end(), xn_hi);
+      const size_t start_index = (start_it - oldAxis1.begin() - 1);
+      const size_t end_index = start_index + (end_it - start_it + 1);
+
+      for( size_t i = 0; i < ndets; ++i )
       {
-        const double xo_lo(oldAxis1[j]), xo_hi(oldAxis1[j+1]);
-        if( xo_hi < xn_lo || xo_lo > xn_hi ) continue;
-        for( size_t i = 0; i < ndets; ++i )
+        IDetector_sptr det = dets[i];
+        for(size_t j = start_index; j < end_index; ++j)
         {
-          IDetector_sptr det = dets[i];
-          std::pair<double,double> qold = getQRange(det, 0.5*(xo_lo + xo_hi), j);
+          const double xo_lo(oldAxis1[j]), xo_hi(oldAxis1[j+1]);
+          std::pair<double,double> qold = getQRange(det, j);
           if( qold.second < yn_lo || qold.first > yn_hi ) continue;
-          ConvexPolygon oldPoly(xo_lo, xo_hi, qold.first, qold.second);
+          //ConvexPolygon oldPoly(xo_lo, xo_hi, qold.first, qold.second);
+          Vertex2D *head = new Vertex2D(xo_lo, qold.first);
+          head->insert(new Vertex2D(xo_hi, qold.first));
+          head->insert(new Vertex2D(xo_hi, qold.second));
+          head->insert(new Vertex2D(xo_lo, qold.first));
+          ConvexPolygon oldPoly(head);
           try
           {
             ConvexPolygon overlap = intersectionByLaszlo(newPoly, oldPoly);
@@ -239,7 +252,7 @@ namespace Mantid
      * @param deltaE :: The value of deltaE
      */
     std::pair<double,double> SofQW2::calculateQRange(Geometry::IDetector_sptr det, 
-                                                     const double deltaE) const
+                                                     const double dEMin, const double dEMax) const
     {
       double r(0.0), theta_pt(0.0), phi(0.0);
       det->getPos().getSpherical(r,theta_pt,phi);
@@ -258,39 +271,41 @@ namespace Mantid
       scatter_max = (scatter_max - m_samplePos);
       scatter_max.normalize();
       // Compute ki and kf wave vectors and therefore q = ki - kf
-      double ei(0.0), ef(0.0);
+      double ei_min(0.0), ei_max(0.0), ef_min(0.0), ef_max(0.0);
       if( m_emode == 2 )
       {
         std::vector<double> param = det->getNumberParameter("EFixed");
         double efixed = m_efixed;
         if( param.size() != 0 ) efixed = param[0];
-        ei = efixed + deltaE;
-        ef = efixed;
+        ei_min = efixed + dEMin;
+        ei_max = efixed + dEMax;
+        ef_min = ef_max = efixed;
       }
       else
       {
-        ei = m_efixed;
-        ef = m_efixed - deltaE;
+        ei_min = ei_max = m_efixed;
+        ef_min = m_efixed - dEMin;
+        ef_max = m_efixed - dEMax;
       }
-      const V3D ki = m_beamDir*sqrt(m_EtoK*ei);
-      const V3D kf_min = scatter_min*(sqrt(m_EtoK*ef));
-      const V3D kf_max = scatter_max*(sqrt(m_EtoK*ef));
+      const V3D ki_min = m_beamDir*sqrt(m_EtoK*ei_min);
+      const V3D ki_max = m_beamDir*sqrt(m_EtoK*ei_max);
+      const V3D kf_min = scatter_min*(sqrt(m_EtoK*ef_min));
+      const V3D kf_max = scatter_max*(sqrt(m_EtoK*ef_max));
       // Using the inelastic convention
-      return std::pair<double,double>((ki - kf_min).norm(), (ki - kf_max).norm());
+      return std::pair<double,double>((ki_min - kf_min).norm(), (ki_max - kf_max).norm());
     }
 
     /**
      * Get the Q Range from a given detector on the workspace
      * @param det :: The pointer to the detector instance
-     * @param deltaE :: The value of deltaE
      * @param xIndex :: The index in the X vector (for cache lookup)
      */
     std::pair<double,double> SofQW2::getQRange(Geometry::IDetector_sptr det, 
-                                               const double deltaE,
                                                const size_t xIndex) const
     {
-      UNUSED_ARG(xIndex);
-      return calculateQRange(det, deltaE);
+      std::map<detid_t, std::vector<std::pair<double,double> > >::const_iterator it = 
+        m_qcache.find(det->getID());
+      return it->second[xIndex];
     }   
 
     /**
@@ -333,15 +348,21 @@ namespace Mantid
         throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", 
                                                    workspace->getTitle());
       }
-      // Index detector theta values
-      initThetaIndex(workspace);
+      // Index Q cache
+      initQCache(workspace);
     }
 
     /**
-     * A map between theta angle and index
+     * A map detector ID and Q ranges
+     * This method looks unnecessary as it could be calculated on the fly but
+     * the parallelization means that lazy instantation slows it down due to the 
+     * necessary CRITICAL sections required to update the cache. The Q range 
+     * values are required very frequently so the total time is more than
+     * offset by this precaching step
      */
-    void SofQW2::initThetaIndex(API::MatrixWorkspace_const_sptr workspace)
+    void SofQW2::initQCache(API::MatrixWorkspace_const_sptr workspace)
     {
+      Mantid::Kernel::Timer clock;
       const size_t nhist(workspace->getNumberHistograms());
       std::vector<double> theta_pts;
       theta_pts.reserve(nhist);
@@ -367,8 +388,63 @@ namespace Mantid
       }
       m_thetaIndex[0] = 2.0*theta_pts.front() - m_thetaIndex[1];
       m_thetaIndex[npts] = 2.0*theta_pts.back() - m_thetaIndex[npts - 1];
+      const size_t nxpoints = workspace->blocksize();
+      const MantidVec & X = workspace->readX(0);
+
+      PARALLEL_FOR1(workspace)
+      for(size_t i = 0 ; i < nhist; ++i)
+      {
+        PARALLEL_START_INTERUPT_REGION
+
+        IDetector_sptr det;
+        try
+        {
+           det = workspace->getDetector(i);
+        }
+        catch(Kernel::Exception::NotFoundError&)
+        {
+          continue;
+        }
+        std::vector<std::pair<double, double> > qvalues(nxpoints);
+        DetectorGroup_sptr detGroup = boost::dynamic_pointer_cast<DetectorGroup>(det);
+        if( detGroup )
+        {
+          std::vector<IDetector_sptr> dets = detGroup->getDetectors();
+          const size_t ndets(dets.size());
+          for( size_t i = 0; i < ndets; ++i )
+          {
+            IDetector_sptr det_i = dets[i];
+            for( size_t j = 0; j < nxpoints; ++j)
+            {
+              qvalues[j] = calculateQRange(det_i, X[j], X[j+1]);
+            }
+            PARALLEL_CRITICAL(qcache_a)
+            {
+              m_qcache.insert(std::make_pair(det_i->getID(), qvalues));
+            }
+          }
+        }
+        else
+        {
+          for( size_t j = 0; j < nxpoints; ++j)
+          {
+            qvalues[j] = calculateQRange(det, X[j], X[j+1]);
+          }
+          PARALLEL_CRITICAL(qcache_b)
+          {
+            m_qcache.insert(std::make_pair(det->getID(), qvalues));
+          }
+        }
+
+        PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
+
+      g_log.debug() << "Initializing Q Cache took " << clock.elapsed() << " seconds\n";
+      // Clear theta bins and STL Trick to release memory
+      m_thetaIndex.clear();
+      std::vector<double>().swap(m_thetaIndex); 
     }
-    
 
   } // namespace Mantid
 } // namespace Algorithms
