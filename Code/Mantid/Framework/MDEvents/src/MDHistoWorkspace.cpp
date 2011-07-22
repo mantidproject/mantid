@@ -6,7 +6,7 @@
 #include "MantidAPI/ImplicitFunction.h"
 
 using Mantid::API::Point3D;
-using Mantid::Kernel::Utils::nestedForLoopSetUp;
+using Mantid::Kernel::Utils::NestedForLoop::SetUp;
 using namespace Mantid::Kernel;
 
 namespace Mantid
@@ -133,24 +133,6 @@ namespace MDEvents
         }
       }
     }
-
-
-//    size_t * index_max = Utils::nestedForLoopSetUp(numDimensions);
-//    size_t * index = Utils::nestedForLoopSetUp(numDimensions);
-//    for (size_t bd=0; bd<numDimensions; bd++) index_max[bd] = m_dimensions[bd]->getNBins();
-//    size_t * index_maker = Utils::nestedForLoopSetUpIndexMaker(numDimensions, index_max);
-//    for (size_t i=0; i < m_length; i++)
-//    {
-//
-//      // Get the index at each dimension for this bin.
-//      Utils::nestedForLoopGetIndicesFromLinearIndex(numBD, i, index_maker, index_max, index);
-//      x = index[0];
-//      double x,y,z;
-//      Point3D p(x,y,z);
-//      function->evaluate()
-//      m_signals[i] = signal;
-//      m_errors[i] = error;
-//    }
   }
 
   //----------------------------------------------------------------------------------------------

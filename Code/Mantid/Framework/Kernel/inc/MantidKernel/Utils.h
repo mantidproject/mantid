@@ -24,23 +24,22 @@ namespace Utils
 {
 
 
-
+  namespace NestedForLoop
+  {
   //TODO: Separate these into a namespace like NestedForLoop::
 
   //------------------------------------------------------------------------------------------------
-  /** Set up a nested for loop by creating an array of counters.
+  /** Set up a nested for loop by setting an array of counters.
    *
    * @param numDims :: how many levels of nesting do the for loops have?
+   * @param out :: a size-numDims array that will be modified
    * @param value :: fill the array to this.
-   * @return an array of counters, set to 0, of the right size.
    */
-  inline size_t * nestedForLoopSetUp(const size_t numDims, const size_t value = 0)
+  inline void SetUp(const size_t numDims, size_t * out, const size_t value = 0)
   {
     // Allocate and clear to 0.
-    size_t * out = new size_t[numDims];
     for (size_t d=0; d<numDims; d++)
       out[d] = value;
-    return out;
   }
 
 
@@ -54,21 +53,18 @@ namespace Utils
    * The lowest dimension index (0) will vary the slowest.
    *
    * @param numDims :: how many levels of nesting do the for loops have?
+   * @param out :: a size-numDims array that will be modified
    * @param index_max :: an array[numDims] of the maximum value (exclusive) of the index in each dimension.
    *        The minimum must be 0 in each dimension for the algorithm to work
-   * @return an array of linear_index, set to 0, of the right size.
    */
-  inline size_t * nestedForLoopSetUpIndexMaker(const size_t numDims, const size_t * index_max)
+  inline void SetUpIndexMaker(const size_t numDims, size_t * out, const size_t * index_max)
   {
     // Allocate and start at 1
-    size_t * out = new size_t[numDims];
     for (size_t d=0; d<numDims; d++)
       out[d] = 1;
 
     for (size_t d=1; d<numDims; d++)
       out[d] =  out[d-1] * index_max[d-1];
-
-    return out;
   }
 
 
@@ -81,10 +77,10 @@ namespace Utils
    *
    * @param numDims :: how many levels of nesting do the for loops have?
    * @param index :: an array[numDims] of the counter index in each dimension.
-   * @param index_maker :: result of nestedForLoopSetUpIndexMaker()
+   * @param index_maker :: result of SetUpIndexMaker()
    * @return the linear index into the array
    */
-  inline size_t nestedForLoopGetLinearIndex(const size_t numDims, size_t * index, size_t * index_maker)
+  inline size_t GetLinearIndex(const size_t numDims, size_t * index, size_t * index_maker)
   {
     size_t out = 0;
     for (size_t d=0; d<numDims; d++)
@@ -98,13 +94,13 @@ namespace Utils
    *
    * @param numDims :: how many levels of nesting do the for loops have?
    * @param linear_index :: linear index into the nested for loop.
-   * @param index_maker :: an array[numDims], result of nestedForLoopSetUpIndexMaker()
+   * @param index_maker :: an array[numDims], result of SetUpIndexMaker()
    * @param index_max :: an array[numDims] of the maximum value (exclusive) of the index in each dimension.
    *        The minimum must be 0 in each dimension for the algorithm to work
    * @param[out] out_indices :: an array, sized numDims, which will be
    *             filled with the index for each dimension, given the linear index
    */
-  inline void nestedForLoopGetIndicesFromLinearIndex(const size_t numDims, const size_t linear_index,
+  inline void GetIndicesFromLinearIndex(const size_t numDims, const size_t linear_index,
       const size_t * index_maker, const size_t * index_max,
       size_t * out_indices)
   {
@@ -125,7 +121,7 @@ namespace Utils
    * @param index_min :: an array[numDims] of the minimum value of the index in each dimension.
    * @return true if the end of the loop was reached; false otherwise.
    */
-  inline bool nestedForLoopIncrement(const size_t numDims, size_t * index, size_t * index_max, size_t * index_min)
+  inline bool Increment(const size_t numDims, size_t * index, size_t * index_max, size_t * index_min)
   {
     size_t d = 0;
     while (d < numDims)
@@ -157,7 +153,7 @@ namespace Utils
    * @param index_max :: an array[numDims] of the maximum value (exclusive) of the index in each dimension
    * @return true if the end of the loop was reached; false otherwise.
    */
-  inline bool nestedForLoopIncrement(const size_t numDims, size_t * index, size_t * index_max)
+  inline bool Increment(const size_t numDims, size_t * index, size_t * index_max)
   {
     size_t d = 0;
     while (d < numDims)
@@ -179,6 +175,8 @@ namespace Utils
     return false;
   }
 
+
+} // namespace NestedForLoop
 
 } // namespace Utils
 

@@ -316,10 +316,12 @@ namespace MDEvents
     IMDBox<MDE,nd> * rootBox = ws->getBox();
 
     // This is the limit to loop over in each dimension
-    size_t * index_max = Utils::nestedForLoopSetUp(numBD);
+    size_t * index_max = new size_t[numBD];
     for (size_t bd=0; bd<numBD; bd++) index_max[bd] = binDimensions[bd]->getNBins();
+
     // Cache a calculation to convert indices x,y,z,t into a linear index.
-    size_t * index_maker = Utils::nestedForLoopSetUpIndexMaker(numBD, index_max);
+    size_t * index_maker = new size_t[numBD];
+    Utils::NestedForLoop::SetUpIndexMaker(numBD, index_maker, index_max);
 
     int numPoints = int(outWS->getNPoints());
     // Run in OpenMP with dynamic scheduling and a smallish chunk size (binsPerTask)
@@ -331,7 +333,7 @@ namespace MDEvents
       size_t index[nd];
 
       // Get the index at each dimension for this bin.
-      Utils::nestedForLoopGetIndicesFromLinearIndex(numBD, linear_index, index_maker, index_max, index);
+      Utils::NestedForLoop::GetIndicesFromLinearIndex(numBD, linear_index, index_maker, index_max, index);
 
       // Construct the bin and its coordinates
       MDBin<MDE,nd> bin;
@@ -375,8 +377,8 @@ namespace MDEvents
 
     if (DODEBUG) std::cout << tim << " to run the openmp loop.\n";
 
-    delete index_max;
-    delete index_maker;
+    delete [] index_max;
+    delete [] index_maker;
   }
 
 

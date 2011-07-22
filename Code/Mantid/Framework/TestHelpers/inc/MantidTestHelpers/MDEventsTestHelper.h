@@ -64,8 +64,8 @@ namespace MDEventsTestHelper
     if (numEventsPerBox > 0)
     {
       out->splitBox();
-      size_t * index = Mantid::Kernel::Utils::nestedForLoopSetUp(nd);
-      size_t * index_max = Mantid::Kernel::Utils::nestedForLoopSetUp(nd, splitInto);
+      size_t index[nd]; Mantid::Kernel::Utils::NestedForLoop::SetUp(nd, index);
+      size_t index_max[nd]; Mantid::Kernel::Utils::NestedForLoop::SetUp(nd, index_max, splitInto);
       bool allDone = false;
       while (!allDone)
       {
@@ -78,7 +78,7 @@ namespace MDEventsTestHelper
           out->addEvent( Mantid::MDEvents::MDEvent<nd>(1.0, 1.0, centers) );
         }
 
-        allDone = Mantid::Kernel::Utils::nestedForLoopIncrement(nd, index, index_max);
+        allDone = Mantid::Kernel::Utils::NestedForLoop::Increment(nd, index, index_max);
       }
       out->refreshCache();
     }
@@ -142,8 +142,8 @@ namespace MDEventsTestHelper
   template <size_t nd>
   static void feedMDBox(IMDBox<MDEvent<nd>,nd> * box, size_t repeat=1, size_t numPerSide=10, coord_t start=0.5, coord_t step=1.0)
   {
-    size_t * counters = Mantid::Kernel::Utils::nestedForLoopSetUp(nd,0);
-    size_t * index_max = Mantid::Kernel::Utils::nestedForLoopSetUp(nd,numPerSide);
+    size_t counters[nd]; Mantid::Kernel::Utils::NestedForLoop::SetUp(nd,counters,0);
+    size_t index_max[nd]; Mantid::Kernel::Utils::NestedForLoop::SetUp(nd,index_max,numPerSide);
     // Recursive for loop
     bool allDone = false;
     while (!allDone)
@@ -158,11 +158,9 @@ namespace MDEventsTestHelper
         box->addEvent( MDEvent<nd>(1.0, 1.0, centers) );
 
       // Increment the nested for loop
-      allDone = Mantid::Kernel::Utils::nestedForLoopIncrement(nd, counters, index_max);
+      allDone = Mantid::Kernel::Utils::NestedForLoop::Increment(nd, counters, index_max);
     }
     box->refreshCache(NULL);
-    delete [] counters;
-    delete [] index_max;
   }
 
 

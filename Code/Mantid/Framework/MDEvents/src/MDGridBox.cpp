@@ -444,7 +444,8 @@ namespace MDEvents
       // OK, let's look for children that are either touching or completely contained by the implicit function.
 
       // The number of vertices in each dimension is the # split[d] + 1
-      size_t * vertices_max = Utils::nestedForLoopSetUp(nd, 0);
+      size_t vertices_max[nd];  Utils::NestedForLoop::SetUp(nd, vertices_max, 0);
+
       // Total number of vertices for all the boxes
       size_t numVertices = 1;
       for (size_t d=0; d<nd; ++d)
@@ -460,15 +461,17 @@ namespace MDEvents
       bool * vertexContained = new bool[numVertices * numPlanes];
 
       // The index to the vertex in each dimension
-      size_t * vertexIndex = Utils::nestedForLoopSetUp(nd, 0);
-      size_t * vertexIndexMaker = Utils::nestedForLoopSetUpIndexMaker(nd, vertices_max);
-      size_t * boxIndexMaker = Utils::nestedForLoopSetUpIndexMaker(nd, split);
+      size_t vertexIndex[nd]; Utils::NestedForLoop::SetUp(nd, vertexIndex, 0);
+      // To get indexes in the array of vertexes
+      size_t vertexIndexMaker[nd]; Utils::NestedForLoop::SetUpIndexMaker(nd, vertexIndexMaker, vertices_max);
+      // To get indexes in the array of BOXES
+      size_t boxIndexMaker[nd]; Utils::NestedForLoop::SetUpIndexMaker(nd, boxIndexMaker, split);
 
       size_t linearVertexIndex = 0;
       for (linearVertexIndex = 0; linearVertexIndex < numVertices; linearVertexIndex++)
       {
         // Get the nd-dimensional index
-        Utils::nestedForLoopGetIndicesFromLinearIndex(nd, linearVertexIndex, vertexIndexMaker, vertices_max, vertexIndex);
+        Utils::NestedForLoop::GetIndicesFromLinearIndex(nd, linearVertexIndex, vertexIndexMaker, vertices_max, vertexIndex);
 
         // Coordinates of this vertex
         coord_t vertexCoord[nd];
@@ -522,18 +525,18 @@ namespace MDEvents
           if (i & mask)
             vertIndex[d] = 1;
         }
-        size_t linIndex = Utils::nestedForLoopGetLinearIndex(nd, vertIndex, vertexIndexMaker);
+        size_t linIndex = Utils::NestedForLoop::GetLinearIndex(nd, vertIndex, vertexIndexMaker);
         vertexNeighborsOffsets[i] = linIndex;
       }
 
       // Go through all the boxes
-      size_t * boxIndex = Utils::nestedForLoopSetUp(nd, 0);
+      size_t boxIndex[nd]; Utils::NestedForLoop::SetUp(nd, boxIndex, 0);
 
       bool allDone = false;
       while (!allDone)
       {
         // Find the linear index into the BOXES array.
-        size_t boxLinearIndex =  Utils::nestedForLoopGetLinearIndex(nd, boxIndex, boxIndexMaker);
+        size_t boxLinearIndex = Utils::NestedForLoop::GetLinearIndex(nd, boxIndex, boxIndexMaker);
         IMDBox<MDE,nd> * box = boxes[boxLinearIndex];
 
 //        std::cout << "Box at " << Strings::join(boxIndex, boxIndex+nd, ", ")
@@ -542,7 +545,7 @@ namespace MDEvents
 
         // Find the linear index of the upper left vertex of the box.
         // (note that we're using the VERTEX index maker to find the linear index in that LARGER array)
-        size_t vertLinearIndex = Utils::nestedForLoopGetLinearIndex(nd, boxIndex, vertexIndexMaker);
+        size_t vertLinearIndex = Utils::NestedForLoop::GetLinearIndex(nd, boxIndex, vertexIndexMaker);
 
         // OK, now its time to see if the box is touching or contained or out of it.
         // Recall that:
@@ -603,8 +606,12 @@ namespace MDEvents
         }
 
         // Move on to the next box in the list
-        allDone = Utils::nestedForLoopIncrement(nd, boxIndex, split);
+        allDone = Utils::NestedForLoop::Increment(nd, boxIndex, split);
       }
+
+      // Clean up.
+      delete [] vertexContained;
+      delete [] vertexNeighborsOffsets;
 
     } // Not at max depth
     else
@@ -614,6 +621,7 @@ namespace MDEvents
       if (leafOnly)
         outBoxes.push_back(this);
     }
+
   }
 
 
@@ -848,7 +856,7 @@ namespace MDEvents
       }
 
       // Increment the counter(s) in the nested for loops.
-      allDone = Utils::nestedForLoopIncrement(nd, counters, counters_max, counters_min);
+      allDone = Utils::NestedForLoop::Increment(nd, counters, counters_max, counters_min);
     }
 
   }
@@ -936,10 +944,10 @@ namespace MDEvents
 //    size_t maxVertices = 1 << nd;
 //
 //    // The index to the vertex in each dimension
-//    size_t * vertexIndex = Utils::nestedForLoopSetUp(nd, 0);
+//    size_t * vertexIndex = Utils::NestedForLoop::SetUp(nd, 0);
 //
 //    // This is the index in each dimension at which we start looking at vertices
-//    size_t * vertices_min = Utils::nestedForLoopSetUp(nd, 0);
+//    size_t * vertices_min = Utils::NestedForLoop::SetUp(nd, 0);
 //    for (size_t d=0; d<nd; ++d)
 //    {
 //      vertices_min[d] = counters_min[d];
@@ -947,12 +955,12 @@ namespace MDEvents
 //    }
 //
 //    // There is one more vertex in each dimension than there are boxes we are considering
-//    size_t * vertices_max = Utils::nestedForLoopSetUp(nd, 0);
+//    size_t * vertices_max = Utils::NestedForLoop::SetUp(nd, 0);
 //    for (size_t d=0; d<nd; ++d)
 //      vertices_max[d] = counters_max[d]+1;
 //
-//    size_t * boxIndex = Utils::nestedForLoopSetUp(nd, 0);
-//    size_t * indexMaker = Utils::nestedForLoopSetUpIndexMaker(nd, split);
+//    size_t * boxIndex = Utils::NestedForLoop::SetUp(nd, 0);
+//    size_t * indexMaker = Utils::NestedForLoop::SetUpIndexMaker(nd, split);
 //
 //    bool allDone = false;
 //    while (!allDone)
@@ -990,7 +998,7 @@ namespace MDEvents
 //          if (!badIndex)
 //          {
 //            // Convert to linear index
-//            size_t linearIndex = Utils::nestedForLoopGetLinearIndex(nd, boxIndex, indexMaker);
+//            size_t linearIndex = Utils::NestedForLoop::GetLinearIndex(nd, boxIndex, indexMaker);
 //            // So we have one more vertex touching this box that is contained in the integration volume. Whew!
 //            verticesContained[linearIndex]++;
 ////            std::cout << "... added 1 vertex to box " << boxes[linearIndex]->getExtentsStr() << "\n";
@@ -999,7 +1007,7 @@ namespace MDEvents
 //      }
 //
 //      // Increment the counter(s) in the nested for loops.
-//      allDone = Utils::nestedForLoopIncrement(nd, vertexIndex, vertices_max, vertices_min);
+//      allDone = Utils::NestedForLoop::Increment(nd, vertexIndex, vertices_max, vertices_min);
 //    }
 //
 //    // OK, we've done all the vertices. Now we go through and check each box.
@@ -1033,7 +1041,7 @@ namespace MDEvents
 //      }
 //
 //      // Increment the counter(s) in the nested for loops.
-//      allDone = Utils::nestedForLoopIncrement(nd, counters, counters_max, counters_min);
+//      allDone = Utils::NestedForLoop::Increment(nd, counters, counters_max, counters_min);
 //    }
 //
 ////    std::cout << "Depth " << this->getDepth() << " with " << numFullyContained << " fully contained; " << numPartiallyContained << " partial. Signal = " << signal <<"\n";
@@ -1081,14 +1089,14 @@ namespace MDEvents
     size_t maxVertices = 1 << nd;
 
     // The number of vertices in each dimension is the # split[d] + 1
-    size_t * vertices_max = Utils::nestedForLoopSetUp(nd, 0);
+    size_t vertices_max[nd]; Utils::NestedForLoop::SetUp(nd, vertices_max, 0);
     for (size_t d=0; d<nd; ++d)
       vertices_max[d] = split[d]+1;
 
     // The index to the vertex in each dimension
-    size_t * vertexIndex = Utils::nestedForLoopSetUp(nd, 0);
-    size_t * boxIndex = Utils::nestedForLoopSetUp(nd, 0);
-    size_t * indexMaker = Utils::nestedForLoopSetUpIndexMaker(nd, split);
+    size_t vertexIndex[nd]; Utils::NestedForLoop::SetUp(nd, vertexIndex, 0);
+    size_t boxIndex[nd]; Utils::NestedForLoop::SetUp(nd, boxIndex, 0);
+    size_t indexMaker[nd]; Utils::NestedForLoop::SetUpIndexMaker(nd, indexMaker, split);
 
     bool allDone = false;
     while (!allDone)
@@ -1125,7 +1133,7 @@ namespace MDEvents
           if (!badIndex)
           {
             // Convert to linear index
-            size_t linearIndex = Utils::nestedForLoopGetLinearIndex(nd, boxIndex, indexMaker);
+            size_t linearIndex = Utils::NestedForLoop::GetLinearIndex(nd, boxIndex, indexMaker);
             // So we have one more vertex touching this box that is contained in the integration volume. Whew!
             verticesContained[linearIndex]++;
 //            std::cout << "... added 1 vertex to box " << boxes[linearIndex]->getExtentsStr() << "\n";
@@ -1134,7 +1142,7 @@ namespace MDEvents
       }
 
       // Increment the counter(s) in the nested for loops.
-      allDone = Utils::nestedForLoopIncrement(nd, vertexIndex, vertices_max);
+      allDone = Utils::NestedForLoop::Increment(nd, vertexIndex, vertices_max);
     }
 
     // OK, we've done all the vertices. Now we go through and check each box.
@@ -1201,10 +1209,6 @@ namespace MDEvents
 
     delete [] verticesContained;
     delete [] boxMightTouch;
-    delete [] vertexIndex;
-    delete [] vertices_max;
-    delete [] boxIndex;
-    delete [] indexMaker;
   }
 
 
