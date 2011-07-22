@@ -147,7 +147,7 @@ namespace Mantid
      */
     void MatrixWorkspace::replaceSpectraMap(const Geometry::ISpectraDetectorMap * spectraMap)
     {
-      g_log.notice() << "MatrixWorkspace::replaceSpectraMap() is being deprecated." << std::endl;
+      //g_log.notice() << "MatrixWorkspace::replaceSpectraMap() is being deprecated." << std::endl;
       m_spectraMap.reset(spectraMap);
       // The neighbour map needs to be rebuilt
       m_nearestNeighbours.reset();
