@@ -345,7 +345,7 @@ bool PythonScripting::loadInitFile(const QString & filename)
   {
     return false;
   }
-  this->write(QString("Loading init file: ") + filename + "\n");
+  //this->write(QString("Loading init file: ") + filename + "\n");
   // MG: The Python/C PyRun_SimpleFile function crashes on Windows when trying to run
   // a simple text file which is why it is not used here
   QFile file(filename);
