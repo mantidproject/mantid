@@ -200,7 +200,7 @@ void file_uncompress(const char  *file);
 ApplicationWindow::ApplicationWindow(bool factorySettings)
 : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this))
 {
-  QCoreApplication::setOrganizationName("ISIS");
+  QCoreApplication::setOrganizationName("MantidProject");
   QCoreApplication::setApplicationName("MantidPlot");
   mantidUI = new MantidUI(this);
   setAttribute(Qt::WA_DeleteOnClose);
