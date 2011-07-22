@@ -27,7 +27,6 @@ have_scipy = False
 try:
     import scipy.special
     have_scipy = True
-    print "Imported scipy.special. For more information type help(scipy.special)."
 except ImportError:
     pass          
 
@@ -36,7 +35,6 @@ except ImportError:
 try:
     if not have_scipy:
         import pygsl.sf
-        print "Imported pygsl.sf. For more information type help(pygsl.sf)."
 except ImportError: 
     pass
 
@@ -75,6 +73,5 @@ Layer.Top = GraphOptions.Top
 
 try:
     import_to_global("qtiUtil")
-    print "qtiUtil file successfully imported!"
 except (ImportError, SyntaxError), ex:
     print "Failed to import qtiUtil file:",str(ex)
