@@ -36,7 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-using Mantid::API::ImplicitFunctionParameter;
+
 template<typename Derived, typename ElemType>
 class DLLExport VectorParameter : public  ImplicitFunctionParameter
 {
@@ -48,7 +48,7 @@ public:
   virtual ~VectorParameter();
   void addValue(const size_t index, const ElemType& value);
   std::string toXMLString() const;
-  Derived& operator=(const Derived& other);
+  Derived& assignFrom(const Derived& other);
   bool operator==(const Derived &other) const;
   bool operator!=(const Derived &other) const;
   virtual bool isValid() const;
@@ -59,6 +59,8 @@ protected:
   ElemType* m_arry;
   size_t m_size;
   bool m_isValid;
+ private:
+Derived& operator=(const Derived& other);
 };
 
 //----------------------------------------------------------------------
@@ -72,12 +74,12 @@ bool VectorParameter<Derived,ElemType>::isValid() const
 }
 
 //----------------------------------------------------------------------
-/* Overriden assignement operator
+/* Assignment
 @param other : object to assign from.
 @return ref to assined object.
 */
 template<typename Derived, typename ElemType>
-Derived& VectorParameter<Derived,ElemType>::operator=(const Derived& other)
+Derived& VectorParameter<Derived,ElemType>::assignFrom(const Derived& other)
 {
   if(other.getSize() != this->getSize())
   {

@@ -77,8 +77,9 @@ public:
     ConcreteVectorDblParam B(2);
     B.addValue(0, 3); 
     B.addValue(1, 4); 
-    A = B;
+    A.assignFrom(B);
     TS_ASSERT(A == B);
+    TS_ASSERT(A.getPointerToStart() != B.getPointerToStart());
   }
 
   void testGetName()

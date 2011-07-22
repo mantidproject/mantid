@@ -38,7 +38,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-using Mantid::API::ImplicitFunctionParameter;
 template<typename Derived, typename ValueType>
 class DLLExport SingleValueParameter : public  ImplicitFunctionParameter
 {
