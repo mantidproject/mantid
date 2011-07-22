@@ -58,7 +58,7 @@ namespace MDEvents
     coord_t distanceSquared = 0;
     for (size_t d=0; d<inD.getValue(); d++)
     {
-      if (m_dimensionsUsed[d])
+      if (true == m_dimensionsUsed[d])
       {
         coord_t dist = inputVector[d] - m_center[d];
         distanceSquared += (dist * dist);
