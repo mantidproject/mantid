@@ -80,7 +80,7 @@ void Shape2D::setControlPoint(size_t i,const QPointF& pos)
   case 3: m_boundingRect.setBottomLeft(pos); correctBoundingRect(); refit(); break;
   }
   setShapeControlPoint(i - NCommonCP, pos);
-  adjustBoundingRect();
+  resetBoundingRect();
 }
 
 void Shape2D::correctBoundingRect()
@@ -312,7 +312,7 @@ m_stored_width(10.0)
   m_inner_shape = m_outer_shape->clone();
   QRectF inner_rect =  m_inner_shape->getBoundingRect();
   m_inner_shape->adjustBoundingRect(m_width,m_width,-m_width,-m_width);
-  adjustBoundingRect();
+  resetBoundingRect();
   m_outer_shape->setFillColor(QColor());
   m_inner_shape->setFillColor(QColor());
 }
@@ -324,7 +324,7 @@ m_inner_shape(ring.m_inner_shape->clone()),
 m_width(ring.m_width),
 m_stored_width(ring.m_stored_width)
 {
-  adjustBoundingRect();
+  resetBoundingRect();
 }
 
 bool Shape2DRing::selectAt(const QPointF& p)const
@@ -361,7 +361,7 @@ void Shape2DRing::refit()
   m_inner_shape->adjustBoundingRect(m_width,m_width,-m_width,-m_width);
 }
 
-void Shape2DRing::adjustBoundingRect()
+void Shape2DRing::resetBoundingRect()
 {
   m_boundingRect = m_outer_shape->getBoundingRect();
 }

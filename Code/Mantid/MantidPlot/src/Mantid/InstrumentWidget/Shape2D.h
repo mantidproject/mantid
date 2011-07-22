@@ -73,7 +73,7 @@ protected:
   // sets position of a shape specific control point, 0 < i < getShapeNControlPoints()
   virtual void setShapeControlPoint(size_t ,const QPointF& ){}
   // make sure the bounding box is correct
-  virtual void adjustBoundingRect() {}
+  virtual void resetBoundingRect() {}
 
   // make sure that width and heigth are positive
   void correctBoundingRect();
@@ -142,7 +142,7 @@ protected:
   virtual void drawShape(QPainter& painter) const;
   virtual void addToPath(QPainterPath& ) const {}
   virtual void refit();
-  virtual void adjustBoundingRect();
+  virtual void resetBoundingRect();
   virtual size_t getShapeNControlPoints() const{return 4;}
   virtual QPointF getShapeControlPoint(size_t i) const;
   virtual void setShapeControlPoint(size_t i,const QPointF& pos);

@@ -82,7 +82,7 @@ void Shape2DCollection::refit()
 {
 }
 
-void Shape2DCollection::adjustBoundingRect() 
+void Shape2DCollection::resetBoundingRect() 
 {
   m_boundingRect = QRectF();
   foreach(const Shape2D* shape,m_shapes)
@@ -109,7 +109,7 @@ void Shape2DCollection::mousePressEvent(QMouseEvent* e)
     {
       m_editing = true;
     }
-    else if (selectAt(e->x(),e->y()))
+    else if (selectAtXY(e->x(),e->y()))
     {
       m_x = e->x();
       m_y = e->y();
@@ -239,7 +239,7 @@ void Shape2DCollection::deselectAll()
   emit shapesDeselected();
 }
 
-bool Shape2DCollection::selectAt(int x,int y)
+bool Shape2DCollection::selectAtXY(int x,int y)
 {
   QPointF p = m_transform.inverted().map(QPointF(x,y));
   foreach(Shape2D* shape,m_shapes)

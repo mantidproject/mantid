@@ -2461,7 +2461,22 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
  */
 MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs, bool distr)
 {
-  UNUSED_ARG(errs)
+  UNUSED_ARG(errs);
+  if (toPlot.size() > 10)
+  {
+    QMessageBox ask;
+    QAbstractButton *confirmButton = ask.addButton(tr("Confirm"), QMessageBox::ActionRole);
+    ask.addButton(tr("Cancel"), QMessageBox::ActionRole);
+    ask.setText("You selected "+QString::number(toPlot.size())+" spectra to plot. "
+      "Please confirm or cancel this action.");
+    ask.setIcon(QMessageBox::Critical);
+    ask.exec();
+    if (ask.clickedButton() != confirmButton)
+    {
+      return NULL;
+    }
+  }
+
   const QString& firstWorkspace = toPlot.constBegin().key();
   MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(firstWorkspace+"-"));
   //ml->askOnCloseEvent(false);

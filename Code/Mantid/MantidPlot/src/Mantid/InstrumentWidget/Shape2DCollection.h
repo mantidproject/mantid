@@ -31,7 +31,7 @@ public:
   void addShape(const QString& type,int x,int y);
   void startCreatingShape2D(const QString& type,const QColor& borderColor = Qt::red,const QColor& fillColor = QColor());
   void deselectAll();
-  bool selectAt(int x,int y);
+  bool selectAtXY(int x,int y);
   void removeCurrentShape();
   void clear();
   bool isEmpty()const{return m_shapes.isEmpty();}
@@ -64,7 +64,7 @@ protected:
   virtual void drawShape(QPainter& ) const{} // never called
   virtual void addToPath(QPainterPath& ) const{}
   virtual void refit();
-  virtual void adjustBoundingRect();
+  virtual void resetBoundingRect();
 
   Shape2D* createShape(const QString& type,int x,int y)const;
   bool selectControlPointAt(int x,int y);
