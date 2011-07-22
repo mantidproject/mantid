@@ -115,6 +115,11 @@ def Mask(details):
     ReductionSingleton().mask.parse_instruction(details)
     
 def MaskFile(file_name):
+    """
+        Loads the settings file. The settings are loaded as soon as this line is encountered
+        and are overridden by other Python commands
+        @param file_name: the settings file
+    """
     _printMessage('#Opening "'+file_name+'"')
     ReductionSingleton().user_settings = isis_reduction_steps.UserFile(
         file_name)
@@ -129,9 +134,6 @@ def SetMonitorSpectrum(specNum, interp=False):
 def SetTransSpectrum(specNum, interp=False):
     ReductionSingleton().set_trans_spectrum(specNum, interp)
       
-def SetPhiLimit(phimin,phimax, phimirror=True):
-    ReductionSingleton().set_phi_limit(phimin, phimax, phimirror)
-    
 def SetSampleOffset(value):
     ReductionSingleton().instrument.set_sample_offset(value)
     
@@ -143,7 +145,11 @@ def TransFit(mode,lambdamin=None,lambdamax=None):
     """
         Sets the fit method to calculate the transmission fit and the wavelength range
         over which to do the fit. These arguments are passed to the algorithm
-        CalculateTransmission
+        CalculateTransmission.If mode is set to 'Off' then the unfitted workspace is
+        used and ??? not yet true, can we make it so??? lambdamin and max have no effect
+        @param mode: can be 'Logarithmic' ('YLOG', 'LOG') 'OFF' ('CLEAR') or 'LINEAR' (STRAIGHT', LIN')
+        @param lambdamin: the lowest wavelength to use in any fit
+        @param lambdamax: the end of the fit range
     """
     mode = str(mode).strip().upper()
     message = mode
@@ -384,15 +390,23 @@ def displayGeometry():
     print 'Beam centre: [' + str(x) + ',' + str(y) + ']'
     print ReductionSingleton().get_sample().geometry
 
-def SetPhiLimit(phimin,phimax, phimirror=True):
-    maskStep = ReductionSingleton().get_mask()
+def SetPhiLimit(phimin, phimax, use_mirror=True):
+    """
+        Call this function to restrict the analyse segments of the detector. Phimin and
+        phimax define the limits of the segment where phi=0 is the -x axis and phi = 90
+        is the y-axis. Setting use_mirror to true includes a second segment to be included
+        it is the same as the first but rotated 180 degrees.
+        @param phimin: the minimum phi angle to include
+        @param phimax: the upper limit on phi for the segment
+        @param use_mirror: when True (default) another segment is included, rotated 180 degrees from the first
+    """  
+    _printMessage("SetPhiLimit(" + str(phimin) + ', ' + str(phimax) + ',use_mirror='+str(use_mirror)+')')
     #a beam centre of [0,0,0] makes sense if the detector has been moved such that beam centre is at [0,0,0]
-    maskStep.set_phi_limit(phimin, phimax, phimirror)
+    ReductionSingleton().mask.set_phi_limit(phimin, phimax, use_mirror)
     
 def LimitsPhi(phimin, phimax, use_mirror=True):
     '''
-        !!DEPRECIATED by the function above, remove!!
-        need to remove from SANSRunWindow.cpp
+        !!DEPRECIATED by the function above, remove once I've check with Richard
     '''
     if use_mirror :
         _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=True)')

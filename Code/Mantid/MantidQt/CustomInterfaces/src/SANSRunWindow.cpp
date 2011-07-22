@@ -1799,7 +1799,7 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   exec_reduce += "i.LimitsQXY(0.0," + m_uiForm.qy_max->text().trimmed() + "," +
     m_uiForm.qy_dqy->text().trimmed() + ",'"
     + m_uiForm.qy_dqy_opt->itemData(m_uiForm.qy_dqy_opt->currentIndex()).toString()+"')\n" +
-    "i.LimitsPhi(" + m_uiForm.phi_min->text().trimmed() + "," + m_uiForm.phi_max->text().trimmed();
+    "i.SetPhiLimit(" + m_uiForm.phi_min->text().trimmed() + "," + m_uiForm.phi_max->text().trimmed();
   if ( m_uiForm.mirror_phi->isChecked() )
   {
     exec_reduce += ", True";
