@@ -381,13 +381,16 @@ class BaseReductionScripter(object):
             
             try:
                 exec script
-            except:
-                raise
-            finally:               
                 # Update scripter
                 for item in self._observers:
                     if item.state() is not None:
                         item.state().update()
+            except:
+                # Update scripter [Duplicated code because we can't use 'finally' on python 2.4]
+                for item in self._observers:
+                    if item.state() is not None:
+                        item.state().update()
+                raise
         else:
             raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
 
