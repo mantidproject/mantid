@@ -594,7 +594,6 @@ public:
     do_test_getBoxes(true, false, 125*125*125);
   }
 
-
   void test_getBoxes_withImplicitFunction()
   {
     do_test_getBoxes(false, true, 1 + 125*125 + 125 + 1);

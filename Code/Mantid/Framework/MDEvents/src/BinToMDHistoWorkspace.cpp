@@ -170,10 +170,6 @@ namespace MDEvents
   void BinToMDHistoWorkspace::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
 
-    // For progress reporting, the approx # of boxes
-    if (prog)
-      prog->setNumSteps( int(ws->getBoxController()->getMaxId()) );
-
     // Number of output binning dimensions found
     size_t numBD = binDimensions.size();
 
@@ -209,21 +205,20 @@ namespace MDEvents
       function_max[d] = binDimensions[bd]->getMaximum();
     }
     MDBoxImplicitFunction * function = new MDBoxImplicitFunction(function_min, function_max);
-    //TODO: Remove
-    function = NULL;
 
-    // Make a leaf-only iterator (returns only the MDBox'es)
-    // (with an implicit function added on)
-    MDBoxIterator<MDE,nd> boxIt(ws->getBox(), 1000, true, function);
+    // Use getBoxes() to get an array with a pointer to each box
+    std::vector<IMDBox<MDE,nd>*> boxes;
+    // Leaf-only; no depth limit; with the implicit function passed to it.
+    ws->getBox()->getBoxes(boxes, 1000, true, function);
 
-//    std::cout << Kernel::Strings::join(dimensionToBinFrom.begin(), dimensionToBinFrom.end(), ",") << std::endl;
-//    std::cout << Kernel::Strings::join(indexMultiplier, indexMultiplier+numBD, ",") << std::endl;
+    // For progress reporting, the # of boxes
+    if (prog)
+      prog->setNumSteps( boxes.size() );
 
-    // Loop through all boxes
-    while (true)
+    for (size_t i=0; i<boxes.size(); i++)
     {
       // Get the next box in the iterator
-      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxIt.getBox());
+      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
       if (box)
       {
         const std::vector<MDE> & events = box->getEvents();
@@ -273,9 +268,7 @@ namespace MDEvents
       // Progress reporting
       if (prog) prog->report();
 
-      if (!boxIt.next())
-        break;
-    }
+    }// for each box in the vector
 
     // Now the implicit function
     if (implicitFunction)
