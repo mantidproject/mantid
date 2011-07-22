@@ -353,7 +353,6 @@ public:
 
     boxes.clear();
     parent->getBoxes(boxes, 3, false, function);
-
     TS_ASSERT_EQUALS( boxes.size(), 54);
     // The boxes extents make sense
     for (size_t i=0; i<boxes.size(); i++)
@@ -370,6 +369,21 @@ public:
     {
       TS_ASSERT( boxes[i]->getExtents(0).max >= 1.51);
     }
+
+//    // Limit by another plane
+//    coord_t normal2[1] = {-1};
+//    coord_t origin2[1] = {2.99};
+//    function->addPlane( MDPlane(1, normal2, origin2) );
+//    boxes.clear();
+//    parent->getBoxes(boxes, 3, false, function);
+//    TS_ASSERT_EQUALS( boxes.size(), 54);
+//    // The boxes extents make sense
+//    for (size_t i=0; i<boxes.size(); i++)
+//    {
+//      TS_ASSERT( boxes[i]->getExtents(0).max >= 1.51);
+//      TS_ASSERT( boxes[i]->getExtents(0).min <= 2.99);
+//    }
+
   }
 
 

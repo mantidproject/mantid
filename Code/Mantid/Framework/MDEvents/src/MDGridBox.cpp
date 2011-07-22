@@ -419,7 +419,13 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Return all boxes contained within, limited by an implicit function
+  /** Return all boxes contained within, limited by an implicit function.
+   *
+   * This method evaluates each vertex to see how it is contained by the implicit function.
+   * For example, if there are 4x4 boxes, there are 5x5 vertices to evaluate.
+   *
+   * All boxes that might be touching the implicit function are returned (including ones that
+   * overlap without any point actually in the function).
    *
    * @param outBoxes :: vector to fill
    * @param maxDepth :: max depth value of the returned boxes.
@@ -486,7 +492,7 @@ namespace MDEvents
 
       /* There is a fixed relationship betwen a vertex (in a linear index) and its
        * neighbors for a given box. This array calculates this:  */
-      size_t vertexNeighborsOffsets[verticesPerBox];
+      size_t vertexNeighborsOffsets[1 << nd];
       for (size_t i=0; i < verticesPerBox; i++)
       {
         // Index (in n-dimensions) of this neighbor)
