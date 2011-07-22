@@ -486,7 +486,7 @@ int LoadRKH::fileCheck(const std::string& filePath)
     {
       if ( fileline.find("SANS2D") == std::string::npos )
       {
-        static const std::string MONTHS[12] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+        static const std::string MONTHS[12] = {"-JAN-", "-FEB-", "-MAR-", "-APR-", "-MAY-", "-JUN-", "-JUL-", "-AUG-", "-SEP-", "-OCT-", "-NOV-", "-DEC-"};
         size_t i = 0;
         for ( ; i < 12; ++i )
         {
