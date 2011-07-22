@@ -473,24 +473,15 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
         eventWS->getEventList(i).setTofs(tofs);
       }
 
-   } catch (Exception::NotFoundError&) {
+    } catch (Exception::NotFoundError&) {
       // Get to here if exception thrown when calculating distance to detector
       failedDetectorCount++;
-      if ( m_inputEvents )
-      {
-    	  eventWS->maskWorkspaceIndex(i);
-    	  eventWS->getEventList(i).clear();
-      }
-      else
-      {
-        outputWS->maskWorkspaceIndex(i);
-        outputWS->dataX(i).assign(outputWS->dataX(i).size(),0.0);
-        outputWS->dataY(i).assign(outputWS->dataY(i).size(),0.0);
-        outputWS->dataE(i).assign(outputWS->dataE(i).size(),0.0);
-      }
+      // Since you usually (always?) get to here when there's no attached detectors, this call is
+      // the same as just zeroing out the data (calling clearData on the spectrum)
+      outputWS->maskWorkspaceIndex(i);
     }
 
-   prog.report("Convert to " + m_outputUnit->unitID());
+    prog.report("Convert to " + m_outputUnit->unitID());
     PARALLEL_END_INTERUPT_REGION
   } // loop over spectra
   PARALLEL_CHECK_INTERUPT_REGION
