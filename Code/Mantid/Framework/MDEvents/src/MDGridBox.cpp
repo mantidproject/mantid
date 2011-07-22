@@ -479,13 +479,29 @@ namespace MDEvents
         for (size_t p=0; p<numPlanes; p++)
         {
           // Save whether this vertex is contained by this plane
-          vertexContained[p*numPlanes + linearVertexIndex] =
+          vertexContained[p*numVertices + linearVertexIndex] =
             function->getPlane(p).isPointBounded(vertexCoord);
         }
       }
 
       // OK, now we have an array saying which vertex is contained by which plane.
-      //std::cout << "vertexIndexMaker " << Strings::join(vertexIndexMaker, vertexIndexMaker+nd, ", ") << std::endl;
+
+
+//      if (1)
+//      {
+//        for (size_t p=0; p<numPlanes; p++)
+//        {
+//          std::cout << "Plane " << p << " normal " << Strings::join(function->getPlane(p).getNormal(), function->getPlane(p).getNormal()+2, ",") << std::endl;
+//          for (size_t y=0; y<5; y++)
+//          {
+//            for (size_t x=0; x<5; x++)
+//            {
+//              std::cout <<  vertexContained[p*numVertices + y*5 + x] << " ";
+//            }
+//            std::cout << std::endl;
+//          }
+//        }
+//      }
 
       // This is the number of vertices for each box, e.g. 8 in 3D
       size_t verticesPerBox = 1 << nd;
@@ -509,16 +525,20 @@ namespace MDEvents
         vertexNeighborsOffsets[i] = linIndex;
       }
 
-//      std::cout << "vertexNeighborsOffsets " << Strings::join(vertexNeighborsOffsets, vertexNeighborsOffsets+verticesPerBox, ", ");
-//      std::cout << " (for neighbors in " << nd << " dims with splitting " << split[0] << ")" << std::endl;
-
-
       // Go through all the boxes
       size_t * boxIndex = Utils::nestedForLoopSetUp(nd, 0);
 
       bool allDone = false;
       while (!allDone)
       {
+        // Find the linear index into the BOXES array.
+        size_t boxLinearIndex =  Utils::nestedForLoopGetLinearIndex(nd, boxIndex, boxIndexMaker);
+        IMDBox<MDE,nd> * box = boxes[boxLinearIndex];
+
+//        std::cout << "Box at " << Strings::join(boxIndex, boxIndex+nd, ", ")
+//              << " (" << box->getExtentsStr() << ") ";
+
+
         // Find the linear index of the upper left vertex of the box.
         // (note that we're using the VERTEX index maker to find the linear index in that LARGER array)
         size_t vertLinearIndex = Utils::nestedForLoopGetLinearIndex(nd, boxIndex, vertexIndexMaker);
@@ -541,7 +561,7 @@ namespace MDEvents
           for (size_t i=0; i<verticesPerBox; i++)
           {
             // (the index of the vertex is) = vertLinearIndex + vertexNeighborsOffsets[i]
-            if (vertexContained[p*numPlanes + vertLinearIndex + vertexNeighborsOffsets[i]])
+            if (vertexContained[p*numVertices + vertLinearIndex + vertexNeighborsOffsets[i]])
               numVertexesInThisPlane++;
           }
 
@@ -556,14 +576,6 @@ namespace MDEvents
           if (numVertexesInThisPlane == verticesPerBox)
             numPlanesWithAllVertexes++;
         } // (for each plane)
-
-
-        // Find the linear index into the BOXES array.
-        size_t boxLinearIndex =  Utils::nestedForLoopGetLinearIndex(nd, boxIndex, boxIndexMaker);
-        IMDBox<MDE,nd> * box = boxes[boxLinearIndex];
-
-//        std::cout << "Box at " << Strings::join(boxIndex, boxIndex+nd, ", ")
-//              << " (" << box->getExtents(0).min << "-" <<  box->getExtents(0).max << ") ";
 
         // Is there a chance that the box is contained?
         if (!boxIsNotTouching)

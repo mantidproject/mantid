@@ -27,6 +27,7 @@
 #include <memory>
 #include <Poco/File.h>
 #include <vector>
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -370,19 +371,73 @@ public:
       TS_ASSERT( boxes[i]->getExtents(0).max >= 1.51);
     }
 
-//    // Limit by another plane
-//    coord_t normal2[1] = {-1};
-//    coord_t origin2[1] = {2.99};
-//    function->addPlane( MDPlane(1, normal2, origin2) );
-//    boxes.clear();
-//    parent->getBoxes(boxes, 3, false, function);
-//    TS_ASSERT_EQUALS( boxes.size(), 54);
-//    // The boxes extents make sense
-//    for (size_t i=0; i<boxes.size(); i++)
-//    {
-//      TS_ASSERT( boxes[i]->getExtents(0).max >= 1.51);
-//      TS_ASSERT( boxes[i]->getExtents(0).min <= 2.99);
-//    }
+    // Limit by another plane
+    coord_t normal2[1] = {-1};
+    coord_t origin2[1] = {2.99};
+    function->addPlane( MDPlane(1, normal2, origin2) );
+    boxes.clear();
+    parent->getBoxes(boxes, 3, false, function);
+    TS_ASSERT_EQUALS( boxes.size(), 33);
+    for (size_t i=0; i<boxes.size(); i++)
+    {
+      TS_ASSERT( boxes[i]->getExtents(0).max >= 1.51);
+      TS_ASSERT( boxes[i]->getExtents(0).min <= 2.99);
+    }
+
+    // Same, leaf only
+    boxes.clear();
+    parent->getBoxes(boxes, 3, true, function);
+    TS_ASSERT_EQUALS( boxes.size(), 24);
+    for (size_t i=0; i<boxes.size(); i++)
+    {
+      TS_ASSERT( boxes[i]->getExtents(0).max >= 1.51);
+      TS_ASSERT( boxes[i]->getExtents(0).min <= 2.99);
+    }
+
+  }
+
+
+
+  //-------------------------------------------------------------------------------------
+  /** Recursive getting of a list of IMDBox, with an implicit function limiting it */
+  void test_getBoxes_ImplicitFunction_2D()
+  {
+
+    MDGridBox<MDEvent<2>,2> * parent = MDEventsTestHelper::makeRecursiveMDGridBox<2>(4,1);
+    TS_ASSERT(parent);
+    std::vector<IMDBox<MDEvent<2>,2> *> boxes;
+
+    // Function of x,y between 2 and 3
+    std::vector<coord_t> min(2, 1.99);
+    std::vector<coord_t> max(2, 3.01);
+    MDImplicitFunction * function = new MDBoxImplicitFunction(min, max);
+
+    boxes.clear();
+    parent->getBoxes(boxes, 3, false, function);
+    TS_ASSERT_EQUALS( boxes.size(), 46);
+    // The boxes extents make sense
+    for (size_t i=0; i<boxes.size(); i++)
+    {
+      //std::cout << boxes[i]->getExtentsStr() << std::endl;
+      TS_ASSERT( boxes[i]->getExtents(0).max >= 2.00);
+      TS_ASSERT( boxes[i]->getExtents(0).min <= 3.00);
+      TS_ASSERT( boxes[i]->getExtents(1).max >= 2.00);
+      TS_ASSERT( boxes[i]->getExtents(1).min <= 3.00);
+    }
+
+    // -- Leaf only ---
+    boxes.clear();
+    parent->getBoxes(boxes, 3, true, function);
+    TS_ASSERT_EQUALS( boxes.size(), 16+4*4+4); //16 in the center one + 4x4 at the 4 edges + 4 at the corners
+    // The boxes extents make sense
+    for (size_t i=0; i<boxes.size(); i++)
+    {
+      //std::cout << boxes[i]->getExtentsStr() << std::endl;
+      TS_ASSERT( boxes[i]->getExtents(0).max >= 2.00);
+      TS_ASSERT( boxes[i]->getExtents(0).min <= 3.00);
+      TS_ASSERT( boxes[i]->getExtents(1).max >= 2.00);
+      TS_ASSERT( boxes[i]->getExtents(1).min <= 3.00);
+    }
 
   }
 

@@ -552,14 +552,22 @@ public:
   /** For comparison, let's use getBoxes() that fills a vector directly.
    * After that, we iterate through them to compare how long the whole operation takes.
    */
-  void do_test_getBoxes(bool leafOnly)
+  void do_test_getBoxes(bool leafOnly, bool ImplicitFunction, size_t expected)
   {
-    size_t expected = 125*125*125 + 125*125 + 125 + 1;
-    if (leafOnly)
-      expected = 125*125*125;
-
     std::vector< IMDBox<MDEvent<3>,3> * > boxes;
-    top->getBoxes(boxes, 20, leafOnly);
+
+    MDBoxImplicitFunction * function = NULL;
+    if (ImplicitFunction)
+    {
+      std::vector<coord_t> min(3, 2.0);
+      std::vector<coord_t> max(3, 3.0);
+      function = new MDBoxImplicitFunction(min, max);
+      top->getBoxes(boxes, 20, leafOnly, function);
+    }
+    else
+    {
+      top->getBoxes(boxes, 20, leafOnly);
+    }
     TS_ASSERT_EQUALS( boxes.size(), expected);
 
     // Now we still need to iterate through the vector to do anything, so this is a more fair comparison
@@ -578,113 +586,125 @@ public:
 
   void test_getBoxes()
   {
-    do_test_getBoxes(false);
+    do_test_getBoxes(false, false, 125*125*125 + 125*125 + 125 + 1);
   }
 
   void test_getBoxes_leafOnly()
   {
-    do_test_getBoxes(true);
+    do_test_getBoxes(true, false, 125*125*125);
   }
 
 
-
-  // ============================ MDBoxImplicitFunction-related tests ============================
-  MDBoxImplicitFunction get3DFunction()
+  void test_getBoxes_withImplicitFunction()
   {
-    std::vector<coord_t> min;
-    min.push_back(1.0);
-    min.push_back(2.0);
-    min.push_back(3.0);
-    std::vector<coord_t> max;
-    max.push_back(2.0);
-    max.push_back(3.0);
-    max.push_back(4.0);
-    return MDBoxImplicitFunction(min,max);
+    do_test_getBoxes(false, true, 1 + 125*125 + 125 + 1);
   }
 
-  MDBoxImplicitFunction get4DFunction()
+  void test_getBoxes_withImplicitFunction_leafOnly()
   {
-    std::vector<coord_t> min;
-    min.push_back(1.0);
-    min.push_back(2.0);
-    min.push_back(3.0);
-    min.push_back(4.0);
-    std::vector<coord_t> max;
-    max.push_back(2.0);
-    max.push_back(3.0);
-    max.push_back(4.0);
-    max.push_back(5.0);
-    return MDBoxImplicitFunction(min,max);
-  }
-
-  // Box that is fully contained in the implicit function
-  void test_boxIsTouching_3D_allInside()
-  {
-    MDBox<MDEvent<3>,3> box;
-    box.setExtents(0, 1.2, 1.8);
-    box.setExtents(1, 2.2, 3.8);
-    box.setExtents(2, 3.2, 3.8);
-    MDBoxImplicitFunction f = get3DFunction();
-    bool res;
-    for (size_t i=0; i<1000000; i++)
-    {
-      res = MDBoxIterator<MDEvent<3>,3>::boxIsTouching(&f,&box);
-      (void) res;
-    }
-    TS_ASSERT(res);
-  }
-
-  // Box that is completely outside of the implicit function
-  void test_boxIsTouching_3D_allOutside()
-  {
-    MDBox<MDEvent<3>,3> box;
-    box.setExtents(0, 3.2, 5.8);
-    box.setExtents(1, -5.2, -3.8);
-    box.setExtents(2, 12.2, 73.8);
-    MDBoxImplicitFunction f = get3DFunction();
-    bool res;
-    for (size_t i=0; i<1000000; i++)
-    {
-      res = MDBoxIterator<MDEvent<3>,3>::boxIsTouching(&f,&box);
-      (void) res;
-    }
-    TS_ASSERT(!res);
+    do_test_getBoxes(true, true, 125*125);
   }
 
 
-  // Box that is fully contained in the implicit function
-  void test_boxContact_3D_allInside()
-  {
-    MDBox<MDEvent<3>,3> box;
-    box.setExtents(0, 1.2, 1.8);
-    box.setExtents(1, 2.2, 3.8);
-    box.setExtents(2, 3.2, 3.8);
-    MDBoxImplicitFunction f = get3DFunction();
-    MDBoxImplicitFunction::eContact res;
-    for (size_t i=0; i<1000000; i++)
-    {
-      res = MDBoxIterator<MDEvent<3>,3>::boxContact(&f,&box);
-      (void) res;
-    }
-    TS_ASSERT(res = MDBoxImplicitFunction::CONTAINED);
-  }
 
-  // Box that is fully contained in the implicit function
-  void test_boxContact_3D_allOutside()
-  {
-    MDBox<MDEvent<3>,3> box;
-    box.setExtents(0, 3.2, 5.8);
-    box.setExtents(1, -5.2, -3.8);
-    box.setExtents(2, 12.2, 73.8);
-    MDBoxImplicitFunction f = get3DFunction();
-    MDBoxImplicitFunction::eContact res;
-    for (size_t i=0; i<1000000; i++)
-    {
-      res = MDBoxIterator<MDEvent<3>,3>::boxContact(&f,&box);
-      (void) res;
-    }
-    TS_ASSERT(res = MDBoxImplicitFunction::CONTAINED);
-  }
+//
+//  // ============================ MDBoxImplicitFunction-related tests ============================
+//  MDBoxImplicitFunction get3DFunction()
+//  {
+//    std::vector<coord_t> min;
+//    min.push_back(1.0);
+//    min.push_back(2.0);
+//    min.push_back(3.0);
+//    std::vector<coord_t> max;
+//    max.push_back(2.0);
+//    max.push_back(3.0);
+//    max.push_back(4.0);
+//    return MDBoxImplicitFunction(min,max);
+//  }
+//
+//  MDBoxImplicitFunction get4DFunction()
+//  {
+//    std::vector<coord_t> min;
+//    min.push_back(1.0);
+//    min.push_back(2.0);
+//    min.push_back(3.0);
+//    min.push_back(4.0);
+//    std::vector<coord_t> max;
+//    max.push_back(2.0);
+//    max.push_back(3.0);
+//    max.push_back(4.0);
+//    max.push_back(5.0);
+//    return MDBoxImplicitFunction(min,max);
+//  }
+//
+//  // Box that is fully contained in the implicit function
+//  void test_boxIsTouching_3D_allInside()
+//  {
+//    MDBox<MDEvent<3>,3> box;
+//    box.setExtents(0, 1.2, 1.8);
+//    box.setExtents(1, 2.2, 3.8);
+//    box.setExtents(2, 3.2, 3.8);
+//    MDBoxImplicitFunction f = get3DFunction();
+//    bool res;
+//    for (size_t i=0; i<1000000; i++)
+//    {
+//      res = MDBoxIterator<MDEvent<3>,3>::boxIsTouching(&f,&box);
+//      (void) res;
+//    }
+//    TS_ASSERT(res);
+//  }
+//
+//  // Box that is completely outside of the implicit function
+//  void test_boxIsTouching_3D_allOutside()
+//  {
+//    MDBox<MDEvent<3>,3> box;
+//    box.setExtents(0, 3.2, 5.8);
+//    box.setExtents(1, -5.2, -3.8);
+//    box.setExtents(2, 12.2, 73.8);
+//    MDBoxImplicitFunction f = get3DFunction();
+//    bool res;
+//    for (size_t i=0; i<1000000; i++)
+//    {
+//      res = MDBoxIterator<MDEvent<3>,3>::boxIsTouching(&f,&box);
+//      (void) res;
+//    }
+//    TS_ASSERT(!res);
+//  }
+//
+//
+//  // Box that is fully contained in the implicit function
+//  void test_boxContact_3D_allInside()
+//  {
+//    MDBox<MDEvent<3>,3> box;
+//    box.setExtents(0, 1.2, 1.8);
+//    box.setExtents(1, 2.2, 3.8);
+//    box.setExtents(2, 3.2, 3.8);
+//    MDBoxImplicitFunction f = get3DFunction();
+//    MDBoxImplicitFunction::eContact res;
+//    for (size_t i=0; i<1000000; i++)
+//    {
+//      res = MDBoxIterator<MDEvent<3>,3>::boxContact(&f,&box);
+//      (void) res;
+//    }
+//    TS_ASSERT(res = MDBoxImplicitFunction::CONTAINED);
+//  }
+//
+//  // Box that is fully contained in the implicit function
+//  void test_boxContact_3D_allOutside()
+//  {
+//    MDBox<MDEvent<3>,3> box;
+//    box.setExtents(0, 3.2, 5.8);
+//    box.setExtents(1, -5.2, -3.8);
+//    box.setExtents(2, 12.2, 73.8);
+//    MDBoxImplicitFunction f = get3DFunction();
+//    MDBoxImplicitFunction::eContact res;
+//    for (size_t i=0; i<1000000; i++)
+//    {
+//      res = MDBoxIterator<MDEvent<3>,3>::boxContact(&f,&box);
+//      (void) res;
+//    }
+//    TS_ASSERT(res = MDBoxImplicitFunction::CONTAINED);
+//  }
 
 //
 //  // Box that is fully contained in the implicit function
