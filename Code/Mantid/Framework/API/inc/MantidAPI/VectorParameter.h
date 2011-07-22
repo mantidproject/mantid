@@ -43,18 +43,21 @@ class DLLExport VectorParameter : public  ImplicitFunctionParameter
 public:
   typedef ElemType ValueType;
   VectorParameter();
+  VectorParameter(size_t size);
   VectorParameter(const VectorParameter<Derived, ElemType>& other);
-  void addValue(const ElemType& value);
+  virtual ~VectorParameter();
+  void addValue(const size_t index, const ElemType& value);
   std::string toXMLString() const;
   Derived& operator=(const Derived& other);
   bool operator==(const Derived &other) const;
   bool operator!=(const Derived &other) const;
   virtual bool isValid() const;
   ElemType& operator[] (int index);
-  typename std::vector<ElemType>::reference element(int index);
+  const ElemType* getPointerToStart();
   size_t getSize() const;
 protected:
-  std::vector<ElemType> m_vector;
+  ElemType* m_arry;
+  size_t m_size;
   bool m_isValid;
 };
 
@@ -76,14 +79,17 @@ bool VectorParameter<Derived,ElemType>::isValid() const
 template<typename Derived, typename ElemType>
 Derived& VectorParameter<Derived,ElemType>::operator=(const Derived& other)
 {
-  if(other.m_vector.size() != this->m_vector.size())
+  if(other.getSize() != this->getSize())
   {
     throw std::runtime_error("Cannot assign between VectorParameters where the size of the vectors are different.");
   }
   if (&other != this)
   {
     this->m_isValid = other.m_isValid;
-    std::copy(other.m_vector.begin(), other.m_vector.end(), this->m_vector.begin());
+    for(size_t i = 0; i < other.getSize(); i++)
+    {
+      this->m_arry[i] = other.m_arry[i];
+    }
   }
   return *(dynamic_cast<Derived*>(this));
 }
@@ -104,7 +110,14 @@ bool VectorParameter<Derived,ElemType>::operator==(const Derived &other) const
   {
     return false; //Early termination
   }
-  return std::equal(m_vector.begin(), m_vector.end(), other.m_vector.begin());
+  for(size_t i = 0; i < other.getSize(); i++)
+  {
+     if(this->m_arry[i] != other.m_arry[i])
+     {
+       return false;
+     }
+  }
+  return true;
 }
 
 //----------------------------------------------------------------------
@@ -123,16 +136,38 @@ bool VectorParameter<Derived,ElemType>::operator!=(const Derived &other) const
 @param other : object to act as source of copy.
 */
 template<typename Derived, typename ElemType>
-VectorParameter<Derived,ElemType>::VectorParameter(const VectorParameter<Derived, ElemType> & other): m_vector(other.m_vector.size()) , m_isValid(other.m_isValid)
+VectorParameter<Derived,ElemType>::VectorParameter(const VectorParameter<Derived, ElemType> & other):  m_isValid(other.m_isValid), m_size(other.m_size)
 {
-  std::copy(other.m_vector.begin(), other.m_vector.end(), this->m_vector.begin());
+  m_arry = new ElemType[other.m_size];
+  for(size_t i = 0; i < other.getSize(); i++)
+  {
+    this->m_arry[i] = other.m_arry[i];
+  }
 }
 
 /// Default constructor
 template<typename Derived, typename ElemType>
-VectorParameter<Derived,ElemType>::VectorParameter() : m_vector(0) 
+VectorParameter<Derived,ElemType>::VectorParameter() : m_arry(NULL), m_size(0)
 {
   m_isValid = false;
+}
+
+//----------------------------------------------------------------------
+/* Constructor
+@param size : size of array
+*/
+template<typename Derived, typename ElemType>
+VectorParameter<Derived,ElemType>::VectorParameter(size_t size) : m_size(size)
+{
+  m_arry = new ElemType[size];
+  m_isValid = true;
+}
+
+///Destructor
+template<typename Derived, typename ElemType>
+VectorParameter<Derived,ElemType>::~VectorParameter()
+{
+  delete[] m_arry;
 }
 
 //----------------------------------------------------------------------
@@ -140,10 +175,9 @@ VectorParameter<Derived,ElemType>::VectorParameter() : m_vector(0)
 @param value : Value to add.
 */
 template<typename Derived, typename ElemType>
-void VectorParameter<Derived,ElemType>::addValue(const ElemType& value)
+void VectorParameter<Derived,ElemType>::addValue(const size_t index, const ElemType& value)
 {
-  m_vector.push_back(value);
-  m_isValid = true;
+  m_arry[index] = value;
 }
 
 //----------------------------------------------------------------------
@@ -158,17 +192,15 @@ std::string VectorParameter<Derived,ElemType>::toXMLString() const
     throw std::runtime_error("Cannot serialize VectorParameter if it is not valid!");
   }
   std::string valueXMLtext;
-  size_t vecSize = m_vector.size();
-  
-  for(size_t i = 0; i < vecSize ; i++)
+  for(size_t i = 0; i < m_size ; i++)
   {
-    if(i < (vecSize -1))
+    if(i < (m_size -1))
     {
-      valueXMLtext.append(ElementTraits<ElemType>::formatCS(m_vector[i])); //Comma-seperated
+      valueXMLtext.append(ElementTraits<ElemType>::formatCS(m_arry[i])); //Comma-seperated
     }
     else
     {
-      valueXMLtext.append(ElementTraits<ElemType>::format(m_vector[i])); //No comma sepearation for last value
+      valueXMLtext.append(ElementTraits<ElemType>::format(m_arry[i])); //No comma sepearation for last value
     }
   }
   return this->parameterXMLTemplate(valueXMLtext);
@@ -183,13 +215,7 @@ std::string VectorParameter<Derived,ElemType>::toXMLString() const
 template<typename Derived, typename ElemType>
 ElemType& VectorParameter<Derived,ElemType>::operator[] (int index)
 {
-  return m_vector[index];
-}
-
-template<typename Derived, typename ElemType>
-typename std::vector<ElemType>::reference VectorParameter<Derived,ElemType>::element(int index) 
-{
-   return m_vector[index];
+  return m_arry[index];
 }
 
 //----------------------------------------------------------------------
@@ -199,7 +225,17 @@ typename std::vector<ElemType>::reference VectorParameter<Derived,ElemType>::ele
 template<typename Derived, typename ElemType>
 size_t VectorParameter<Derived,ElemType>::getSize() const
 {
-  return m_vector.size();
+  return m_size;
+}
+
+//----------------------------------------------------------------------
+/* Getter to pointer to the start of the underlying array
+@return pointer to start.
+*/
+template<typename Derived, typename ElemType>
+const ElemType* VectorParameter<Derived,ElemType>::getPointerToStart()
+{
+  return m_arry;
 }
 
 //-----------------------------------------------------------------------------------------------------------------//
@@ -215,6 +251,7 @@ size_t VectorParameter<Derived,ElemType>::getSize() const
       typedef Mantid::API::VectorParameter<classname, type_> SuperType;  \
       static std::string parameterName(){ return #classname;} \
       classname() : SuperType() {} \
+      classname(size_t index) : SuperType(index) {} \
       std::string getName() const { return #classname;} \
       classname* clone() const {return new classname(*this); } \
     }; 

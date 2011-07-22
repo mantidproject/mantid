@@ -8,7 +8,7 @@
 
 namespace Mantid
 {
-namespace MDAlgorithms
+namespace API
 {
 
 /**
@@ -149,7 +149,7 @@ SingleValueParameter<Derived,ValueType>::SingleValueParameter(ValueType value) :
 template<typename Derived, typename ValueType>
 std::string SingleValueParameter<Derived,ValueType>::toXMLString() const
 {
-  std::string valueXMLtext = boost::str(boost::format("%.4f") % m_value);
+  std::string valueXMLtext = ElementTraits<ValueType>::format(m_value);
   return this->parameterXMLTemplate(valueXMLtext);
 }
 
@@ -161,10 +161,10 @@ std::string SingleValueParameter<Derived,ValueType>::toXMLString() const
 //
 //-----------------------------------------------------------------------------------------------------------------//
 #define DECLARE_SINGLE_VALUE_PARAMETER(classname, type_) \
-    class classname : public SingleValueParameter<classname, double> \
+    class classname : public Mantid::API::SingleValueParameter<classname, type_> \
     {  \
       public: \
-      typedef SingleValueParameter<classname, type_> SuperType;  \
+      typedef Mantid::API::SingleValueParameter<classname, type_> SuperType;  \
       static std::string parameterName(){ return #classname;} \
       classname(type_ value) : SuperType(value) {} \
       classname() : SuperType() {} \

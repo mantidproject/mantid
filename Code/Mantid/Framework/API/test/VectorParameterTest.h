@@ -24,8 +24,8 @@ public:
 
   void testAddValues()
   {
-    ConcreteVectorDblParam param;
-    param.addValue(1);
+    ConcreteVectorDblParam param(1);
+    param.addValue(0, 1);
     TSM_ASSERT("Should be valid now that a value has been added.", param.isValid());
     TS_ASSERT_EQUALS(1, param.getSize());
   }
@@ -34,16 +34,16 @@ public:
   {
     ConcreteVectorDblParam A; //Leave as invalid
 
-    ConcreteVectorDblParam B; //Add some values
-    B.addValue(1);
-    B.addValue(2);
+    ConcreteVectorDblParam B(2); //Add some values
+    B.addValue(0, 1);
+    B.addValue(1, 2);
 
-    ConcreteVectorDblParam C; //Duplicate B
-    C.addValue(1);
-    C.addValue(2);
+    ConcreteVectorDblParam C(2); //Duplicate B
+    C.addValue(0, 1);
+    C.addValue(1, 2);
 
-    ConcreteVectorDblParam D; //Add some other values
-    D.addValue(3);
+    ConcreteVectorDblParam D(1); //Add some other values
+    D.addValue(0, 3);
 
     TS_ASSERT(A != B);
     TS_ASSERT(B == C);
@@ -61,8 +61,8 @@ public:
 
   void testCopyValidObjects()
   {
-    ConcreteVectorDblParam original;
-    original.addValue(1);
+    ConcreteVectorDblParam original(1);
+    original.addValue(0, 1);
     ConcreteVectorDblParam copy(original);
     TS_ASSERT(original == copy); //NB. This assumes that the equality test above has passed!
 
@@ -70,13 +70,13 @@ public:
 
   void testAssignement()
   {
-    ConcreteVectorDblParam A;
-    A.addValue(1);
-    A.addValue(2); //Now has size == 2
+    ConcreteVectorDblParam A(2);
+    A.addValue(0, 1);
+    A.addValue(1, 2); //Now has size == 2
 
-    ConcreteVectorDblParam B;
-    B.addValue(3); 
-    B.addValue(4); 
+    ConcreteVectorDblParam B(2);
+    B.addValue(0, 3); 
+    B.addValue(1, 4); 
     A = B;
     TS_ASSERT(A == B);
   }
@@ -95,20 +95,19 @@ public:
 
   void testToXMLString()
   {
-    ConcreteVectorDblParam param;
-    param.addValue(1);
-    TS_ASSERT_EQUALS("<Parameter><Type>ConcreteVectorDblParam</Type><Value>1.0000</Value></Parameter>", param.toXMLString());
-    param.addValue(2);
-    param.addValue(3);
+    ConcreteVectorDblParam param(3);
+    param.addValue(0, 1);
+    param.addValue(1, 2);
+    param.addValue(2, 3);
     TS_ASSERT_EQUALS("<Parameter><Type>ConcreteVectorDblParam</Type><Value>1.0000,2.0000,3.0000</Value></Parameter>", param.toXMLString());
   }
 
   void testAsArray()
   {
-    ConcreteVectorDblParam param;
-    param.addValue(1);
-    param.addValue(2);
-    param.addValue(3);
+    ConcreteVectorDblParam param(3);
+    param.addValue(0, 1);
+    param.addValue(1, 2);
+    param.addValue(2, 3);
     TS_ASSERT_EQUALS(1, param[0]);
     TS_ASSERT_EQUALS(2, param[1]);
     TS_ASSERT_EQUALS(3, param[2]);
@@ -116,10 +115,10 @@ public:
 
   void testClone()
   {
-    ConcreteVectorDblParam param;
-    param.addValue(1);
-    param.addValue(2);
-    param.addValue(3);
+    ConcreteVectorDblParam param(3);
+    param.addValue(0, 1);
+    param.addValue(1, 2);
+    param.addValue(2, 3);
 
     ConcreteVectorDblParam* clone = param.clone();
     TS_ASSERT(*clone == param);
@@ -128,10 +127,10 @@ public:
 
   void testAddBoolValues()
   {
-    ConcreteVectorBoolParam param;
-    param.addValue(true);
-    param.addValue(false);
-    param.addValue(true);
+    ConcreteVectorBoolParam param(3);
+    param.addValue(0, true);
+    param.addValue(1, false);
+    param.addValue(2, true);
 
     TS_ASSERT_EQUALS("<Parameter><Type>ConcreteVectorBoolParam</Type><Value>1,0,1</Value></Parameter>", param.toXMLString());
   }

@@ -83,7 +83,7 @@ VectorValueParameterType* VectorParameterParser<VectorValueParameterType>::parse
   std::vector<std::string> strs;
   boost::split(strs, sValue, boost::is_any_of(","));
 
-  VectorValueParameterType* product = new VectorValueParameterType();
+  VectorValueParameterType* product = new VectorValueParameterType(strs.size());
   typedef typename VectorValueParameterType::ValueType ValType;
   ValType value = 0;
 
@@ -91,7 +91,7 @@ VectorValueParameterType* VectorParameterParser<VectorValueParameterType>::parse
   {
     boost::erase_all(strs[i], " ");
     value = boost::lexical_cast<ValType>(strs[i]);
-    product->addValue(value);
+    product->addValue(i, value);
   }
   return product;
 }

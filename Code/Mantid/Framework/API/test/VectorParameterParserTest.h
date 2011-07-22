@@ -136,10 +136,15 @@ public:
 
     TSM_ASSERT("The wrong product parameter has been produced", (actualProduct != NULL));
 
-    TS_ASSERT_EQUALS(true, actualProduct->element(0));
-    TS_ASSERT_EQUALS(false, actualProduct->element(1));
-    TS_ASSERT_EQUALS(true, actualProduct->element(2));
-    TS_ASSERT_EQUALS(false, actualProduct->element(3));
+    bool v1 = (*actualProduct)[0];
+    bool v2 = (*actualProduct)[1];
+    bool v3 = (*actualProduct)[2];
+    bool v4 = (*actualProduct)[3];
+
+    TS_ASSERT_EQUALS(true, v1);
+    TS_ASSERT_EQUALS(false, v2);
+    TS_ASSERT_EQUALS(true, v3);
+    TS_ASSERT_EQUALS(false, v4);
     delete actualProduct;
   }
 

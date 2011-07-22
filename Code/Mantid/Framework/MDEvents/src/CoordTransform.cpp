@@ -2,13 +2,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h> 
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/XML/XMLWriter.h>
-
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
@@ -73,12 +66,12 @@ namespace MDEvents
    */
   void CoordTransform::addTranslation(const coord_t * translationVector)
   {
-    Matrix<coord_t> translationMatrix(outD+1, inD+1);
+    Matrix<coord_t> translationMatrix(outD.getValue()+1, inD.getValue()+1);
     // Start with identity
     translationMatrix.identityMatrix();
     // Fill the last column with the translation value
-    for (size_t i=0; i < outD; i++)
-      translationMatrix[i][inD] = translationVector[i];
+    for (size_t i=0; i < outD.getValue(); i++)
+      translationMatrix[i][inD.getValue()] = translationVector[i];
 
     // Multiply the affine matrix by the translation affine matrix to combine them
     Matrix<coord_t> currentAffine = affineMatrixParameter.getAffineMatrix();
@@ -94,38 +87,27 @@ namespace MDEvents
   */
   std::string CoordTransform::toXMLString() const
   {
-    using namespace Poco::XML;
-    AutoPtr<Document> pDoc = new Document;
-    Element* coordTransformElement = pDoc->createElement("CoordTransform");
+     using namespace Poco::XML;
 
-    pDoc->appendChild(coordTransformElement);
-    Element* numInputDimsElement = pDoc->createElement("NumInputDims");
-    Element* numOutputDimsElement = pDoc->createElement("NumOutputDims");
-    Element* affineMatrixElement = pDoc->createElement("AffineMatrix");
+      AutoPtr<Document> pDoc = new Document;
+      AutoPtr<Element> functionElement = pDoc->createElement("CoordTransform");
+      pDoc->appendChild(functionElement);
 
-    std::stringstream input_stream;
-    input_stream << this->inD;
-    numInputDimsElement->appendChild(pDoc->createTextNode(input_stream.str()));
 
-    std::stringstream output_stream;
-    output_stream << this->outD;
-    numOutputDimsElement->appendChild(pDoc->createTextNode(output_stream.str()));
+      AutoPtr<Element> paramListElement = pDoc->createElement("ParameterList");
 
-    Text* affineMatrixText = pDoc->createTextNode("%s");
-    affineMatrixElement->appendChild(affineMatrixText);
-    
-    coordTransformElement->appendChild(numInputDimsElement);
-    coordTransformElement->appendChild(numOutputDimsElement);
-    coordTransformElement->appendChild(affineMatrixElement);
+      AutoPtr<Text> formatText = pDoc->createTextNode("%s%s%s");
+      paramListElement->appendChild(formatText);
+      functionElement->appendChild(paramListElement);
 
-    DOMWriter writer;
-    std::stringstream xml_stream;
-    writer.writeNode(xml_stream, pDoc);
+      std::stringstream xmlstream;
 
-    std::string formattedXMLString = boost::str(boost::format(xml_stream.str().c_str())
-      % affineMatrixParameter.toXMLString().c_str());
-    
-    return formattedXMLString;
+      DOMWriter writer;
+      writer.writeNode(xmlstream, pDoc);
+
+      std::string formattedXMLString = boost::str(boost::format(xmlstream.str().c_str())
+        % inD.toXMLString().c_str() % outD.toXMLString().c_str() % affineMatrixParameter.toXMLString().c_str());
+      return formattedXMLString;
   }
 
 //  //----------------------------------------------------------------------------------------------

@@ -109,6 +109,22 @@ namespace Mantid
     /** ElementTraits for boolean element types.
     */
     template<>
+    struct ElementTraits<size_t>
+    {
+      typedef size_t ValueType;
+      static std::string formatCS(const ValueType& value)
+      { 
+        return boost::str(boost::format("%u,") % value); 
+      }
+      static std::string format(const ValueType& value)
+      {
+        return boost::str(boost::format("%u") % value);
+      }
+    };
+
+    /** ElementTraits for boolean element types.
+    */
+    template<>
     struct ElementTraits<bool>
     {
       typedef bool ValueType;

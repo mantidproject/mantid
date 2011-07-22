@@ -76,6 +76,24 @@ public:
     TS_ASSERT_DELTA( out, 4.0, 1e-5);
   }
 
+  /** Test serialization */
+  void test_to_xml_string()
+  {
+    std::string expectedResult = std::string ("<CoordTransformDistance>") +
+      "<ParameterList>" +
+      "<Parameter><Type>InDimParameter</Type><Value>4</Value></Parameter>" +
+      "<Parameter><Type>OutDimParameter</Type><Value>1</Value></Parameter>" +
+      "<Parameter><Type>CoordCenterVectorParam</Type><Value>1.0000,2.0000,2.0000,1.0000</Value></Parameter>" +
+      "<Parameter><Type>DimensionsUsedVectorParam</Type><Value>1,0,0,1</Value></Parameter>"
+      "</ParameterList>"
+      "</CoordTransformDistance>";
+
+    coord_t center[4] = {1, 2, 2, 1};
+    bool used[4] = {true, false, false, true};
+    CoordTransformDistance ct(4,center,used);
+    TSM_ASSERT_EQUALS("CoordTransformDistance has failed to serialize correctly.", expectedResult, ct.toXMLString());
+  }
+
 };
 
 

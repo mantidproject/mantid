@@ -151,9 +151,8 @@ public:
     }
 
     ct.setMatrix(transform);
-    std::string result = ct.toXMLString();
     TSM_ASSERT_EQUALS("Serialization of CoordTransform has not worked correctly.", 
-      "<CoordTransform><NumInputDims>3</NumInputDims><NumOutputDims>3</NumOutputDims><AffineMatrix><Parameter><Type>AffineMatrixParameter</Type><Value>0,1,2,3;4,5,6,7;8,9,10,11;12,13,14,15</Value></Parameter></AffineMatrix></CoordTransform>"
+      "<CoordTransform><ParameterList><Parameter><Type>InDimParameter</Type><Value>3</Value></Parameter><Parameter><Type>OutDimParameter</Type><Value>3</Value></Parameter><Parameter><Type>AffineMatrixParameter</Type><Value>0,1,2,3;4,5,6,7;8,9,10,11;12,13,14,15</Value></Parameter></ParameterList></CoordTransform>"
       , ct.toXMLString());
   }
 

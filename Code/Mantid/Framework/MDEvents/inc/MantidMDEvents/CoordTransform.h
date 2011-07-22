@@ -6,11 +6,17 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidMDEvents/AffineMatrixParameter.h"
+#include "MantidAPI/SingleValueParameter.h"
 
 namespace Mantid
 {
 namespace MDEvents
 {
+  /// Unique SingleValueParameter Declaration for InputNDimensions
+  DECLARE_SINGLE_VALUE_PARAMETER(InDimParameter, size_t)
+  /// Unique SingleValueParaemter Declaration for OutputNDimensions
+  DECLARE_SINGLE_VALUE_PARAMETER(OutDimParameter, size_t)
+
   /** Generic class to transform from M input dimensions to N output dimensions.
    *
    * The types of conversions to account for are:
@@ -26,10 +32,23 @@ namespace MDEvents
    */
   class DLLExport CoordTransform 
   {
+  protected:
+    /// Input number of dimensions
+    InDimParameter inD;
+
+    /// Output number of dimensions
+    OutDimParameter outD;
+
+    /** Affine Matrix to perform the transformation. The matrix has inD+1 columns, outD+1 rows.
+     * By using an affine, translations and rotations (or other linear transforms) can be
+     * combined by simply multiplying the matrices.
+     */
+     AffineMatrixParameter affineMatrixParameter;
+
   public:
     CoordTransform(const size_t inD, const size_t outD);
     virtual ~CoordTransform();
-    std::string toXMLString() const;
+    virtual std::string toXMLString() const;
     void addTranslation(const coord_t * translationVector);
     Mantid::Kernel::Matrix<coord_t> getMatrix() const;
     void setMatrix(const Mantid::Kernel::Matrix<coord_t> newMatrix);
@@ -43,13 +62,13 @@ namespace MDEvents
     virtual void apply(const coord_t * inputVector, coord_t * outVector)
     {
       // For each output dimension
-      for (size_t out = 0; out < outD; ++out)
+      for (size_t out = 0; out < outD.getValue(); ++out)
       {
         //Cache the row pointer to make the matrix access a bit faster
         coord_t * rawMatrixRow = affineMatrixParameter.getRawMatrix()[out];
         coord_t outVal = 0.0;
         size_t in;
-        for (in = 0; in < inD; ++in)
+        for (in = 0; in < inD.getValue(); ++in)
           outVal += rawMatrixRow[in] * inputVector[in];
 
         // The last input coordinate is "1" always (made homogenous coordinate out of the input x,y,etc.)
@@ -58,21 +77,6 @@ namespace MDEvents
         outVector[out] = outVal;
       }
     }
-
-
-
-  protected:
-    /// Input number of dimensions
-    size_t inD;
-
-    /// Output number of dimensions
-    size_t outD;
-
-    /** Affine Matrix to perform the transformation. The matrix has inD+1 columns, outD+1 rows.
-     * By using an affine, translations and rotations (or other linear transforms) can be
-     * combined by simply multiplying the matrices.
-     */
-     AffineMatrixParameter affineMatrixParameter;
 
   };
 

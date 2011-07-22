@@ -5,12 +5,17 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidMDEvents/CoordTransform.h"
-
+#include "MantidAPI/VectorParameter.h"
 
 namespace Mantid
 {
 namespace MDEvents
 {
+  /// Unique CoordCenterVectorParam type declaration for ndimensional coordinate centers
+  DECLARE_VECTOR_PARAMETER(CoordCenterVectorParam, coord_t);
+
+  /// Unique DimensionsUsedVectorParam type declaration for boolean masks over dimensions
+  DECLARE_VECTOR_PARAMETER(DimensionsUsedVectorParam, bool);
 
   /** A non-linear coordinate transform that takes
    * a point from nd dimensions and converts it to a
@@ -29,21 +34,22 @@ namespace MDEvents
   public:
     CoordTransformDistance(const size_t inD, const coord_t * center, const bool * dimensionsUsed);
     virtual ~CoordTransformDistance();
+    virtual std::string toXMLString() const;
 
     virtual void apply(const coord_t * inputVector, coord_t * outVector);
 
     /// Return the center coordinate array
-    const coord_t * getCenter() { return m_center; }
+    const coord_t * getCenter() { return m_center.getPointerToStart(); }
 
     /// Return the dimensions used bool array
-    const bool * getDimensionsUsed() { return m_dimensionsUsed; }
+    const bool * getDimensionsUsed() { return m_dimensionsUsed.getPointerToStart(); }
 
   protected:
-    /// array of size[inD], with the coordinates at the center
-    coord_t * m_center;
+    /// Coordinates at the center
+    CoordCenterVectorParam m_center;
 
-    /// bool array of size[inD] where True is set for those dimensions that are considered when calculating distance
-    bool * m_dimensionsUsed;
+    /// Parmeter where True is set for those dimensions that are considered when calculating distance
+    DimensionsUsedVectorParam m_dimensionsUsed;
   };
 
 
