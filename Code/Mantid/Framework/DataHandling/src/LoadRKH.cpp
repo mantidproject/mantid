@@ -44,7 +44,8 @@ void LoadRKH::init()
 {
   std::vector<std::string> exts;
   exts.push_back(".txt");
-  exts.push_back(".Q");
+  exts.push_back(".q");
+  exts.push_back(".dat");
   declareProperty(new API::FileProperty("Filename","", API::FileProperty::Load, exts),
     "Name of the RKH file to load");
   declareProperty(
@@ -495,11 +496,11 @@ int LoadRKH::fileCheck(const std::string& filePath)
             //the line is acceptable
             break;
           }
-          if ( i == 12 )
-          {
-            //the line contains none of the strings we were looking for except one : which is not enough, reject the file
-            return 0;
-          }
+        }
+        if ( i == 12 )
+        {
+          //the line contains none of the strings we were looking for except one : which is not enough, reject the file
+          return 0;
         }
       }
     }
