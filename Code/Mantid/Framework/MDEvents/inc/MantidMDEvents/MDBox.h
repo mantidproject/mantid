@@ -124,6 +124,8 @@ namespace MDEvents
 
     void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
 
+    void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
+
   protected:
 
     /** Vector of MDEvent's, in no particular order.

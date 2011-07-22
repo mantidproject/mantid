@@ -62,7 +62,9 @@ namespace MDEvents
 
     std::vector< MDE > * getEventsCopy();
 
-    virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly);
+    void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly);
+
+    void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
 
     void addEvent(const MDE & point);
 

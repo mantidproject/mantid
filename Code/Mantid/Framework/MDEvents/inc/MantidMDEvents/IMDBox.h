@@ -2,7 +2,9 @@
 #define IMDBOX_H_
 
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/ImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
@@ -11,7 +13,6 @@
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidNexus/NeXusFile.hpp"
 #include <iosfwd>
-#include "MantidAPI/ImplicitFunction.h"
 
 namespace Mantid
 {
@@ -76,6 +77,9 @@ namespace MDEvents
 
     /// Fill a vector with all the boxes up to a certain depth
     virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly) = 0;
+
+    /// Fill a vector with all the boxes up to a certain depth
+    virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
 
     std::vector<Mantid::Geometry::Coordinate> getVertexes() const;
 

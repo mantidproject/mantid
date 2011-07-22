@@ -39,6 +39,10 @@ namespace MDEvents
     /// do nothing and return false.
     virtual bool next();
 
+    static bool boxIsTouching(Mantid::Geometry::MDImplicitFunction * function, IMDBox<MDE,nd> * box);
+
+    static Mantid::Geometry::MDImplicitFunction::eContact boxContact(Mantid::Geometry::MDImplicitFunction * function, IMDBox<MDE,nd> * box);
+
   private:
     /// Top-level box
     IMDBox<MDE,nd> * m_topBox;

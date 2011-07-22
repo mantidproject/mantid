@@ -1,6 +1,9 @@
 #ifndef MANTID_MDEVENTS_MDBOXITERATORTEST_H_
 #define MANTID_MDEVENTS_MDBOXITERATORTEST_H_
 
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDBoxIterator.h"
@@ -10,8 +13,6 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidGeometry/MDGeometry/MDPlane.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
@@ -20,6 +21,7 @@ using namespace Mantid::Kernel;
 using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDPlane;
+using Mantid::Geometry::MDBoxImplicitFunction;
 
 class MDBoxIteratorTest : public CxxTest::TestSuite
 {
@@ -410,6 +412,38 @@ public:
     TS_ASSERT( !it->next() );
   }
 
+  //--------------------------------------------------------------------------------------
+  void test_iterator_withImplicitFunction_noBoxInRange()
+  {
+    MDImplicitFunction * func = new MDImplicitFunction();
+    coord_t normal[1] = {+1.0}; coord_t origin[1] = {234.1};
+    func->addPlane( MDPlane(1, normal, origin) );
+
+    // Create an iterator
+    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, false, func);
+
+    // Returns the first box but that's it
+    TS_ASSERT_EQUALS( it->getBox(), A);
+    TS_ASSERT( !it->next() );
+    TS_ASSERT( !it->next() );
+  }
+
+  //--------------------------------------------------------------------------------------
+  void test_iterator_withImplicitFunction_noBoxInRange_leafOnly()
+  {
+    MDImplicitFunction * func = new MDImplicitFunction();
+    coord_t normal[1] = {+1.0}; coord_t origin[1] = {234.1};
+    func->addPlane( MDPlane(1, normal, origin) );
+
+    // Create an iterator
+    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, true, func);
+
+    // Returns the first box but that's it
+    TS_ASSERT_EQUALS( it->getBox(), A);
+    TS_ASSERT( !it->next() );
+    TS_ASSERT( !it->next() );
+  }
+
 
 };
 
@@ -419,25 +453,34 @@ class MDBoxIteratorTestPerformace : public CxxTest::TestSuite
 public:
   MDGridBox<MDEvent<3>,3> * top;
 
-  void setUp()
-  {
-    // About 2 mi1968876
-    top = MDEventsTestHelper::makeRecursiveMDGridBox<3>(5, 2);
-  }
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MDBoxIteratorTestPerformace *createSuite() { return new MDBoxIteratorTestPerformace(); }
+  static void destroySuite( MDBoxIteratorTestPerformace *suite ) { delete suite; }
 
-  void tearDown()
+  MDBoxIteratorTestPerformace()
   {
-    delete top;
+    // 1968876 boxes in this. Top box is 5*5*5
+    top = MDEventsTestHelper::makeRecursiveMDGridBox<3>(5, 2);
   }
 
   // ---------------------------------------------------------------
   /** Make a simple iterator that will go through all the boxes */
-  void do_test_iterator(bool leafOnly)
+  void do_test_iterator(bool leafOnly, bool ImplicitFunction, size_t expected)
   {
     // Count the top level box.
     size_t counter = 1;
     IMDBox<MDEvent<3>,3> * box = NULL;
-    MDBoxIterator<MDEvent<3>,3> it(top, 20, leafOnly);
+
+    MDBoxImplicitFunction * function = NULL;
+    if (ImplicitFunction)
+    {
+      std::vector<coord_t> min(3, 2.0);
+      std::vector<coord_t> max(3, 3.0);
+      function = new MDBoxImplicitFunction(min, max);
+    }
+
+    MDBoxIterator<MDEvent<3>,3> it(top, 20, leafOnly, function);
 
     // Count all of them
     while (it.next())
@@ -446,20 +489,27 @@ public:
       counter++;
     }
     TS_ASSERT( box );
-    size_t expected = 125*125*125 + 125*125 + 125 + 1;
-    if (leafOnly)
-      expected = 125*125*125;
     TS_ASSERT_EQUALS( counter, expected );
   }
 
   void test_iterator()
   {
-    do_test_iterator(false);
+    do_test_iterator(false, false, 125*125*125 + 125*125 + 125 + 1);
   }
 
   void test_iterator_leafOnly()
   {
-    do_test_iterator(true);
+    do_test_iterator(true, false, 125*125*125);
+  }
+
+  void test_iterator_withImplicitFunction()
+  {
+    do_test_iterator(false, true, 1 + 125*125 + 125 + 1);
+  }
+
+  void test_iterator_withImplicitFunction_leafOnly()
+  {
+    do_test_iterator(true, true, 125*125);
   }
 
   // ---------------------------------------------------------------
@@ -535,6 +585,144 @@ public:
   {
     do_test_getBoxes(true);
   }
+
+
+
+  // ============================ MDBoxImplicitFunction-related tests ============================
+  MDBoxImplicitFunction get3DFunction()
+  {
+    std::vector<coord_t> min;
+    min.push_back(1.0);
+    min.push_back(2.0);
+    min.push_back(3.0);
+    std::vector<coord_t> max;
+    max.push_back(2.0);
+    max.push_back(3.0);
+    max.push_back(4.0);
+    return MDBoxImplicitFunction(min,max);
+  }
+
+  MDBoxImplicitFunction get4DFunction()
+  {
+    std::vector<coord_t> min;
+    min.push_back(1.0);
+    min.push_back(2.0);
+    min.push_back(3.0);
+    min.push_back(4.0);
+    std::vector<coord_t> max;
+    max.push_back(2.0);
+    max.push_back(3.0);
+    max.push_back(4.0);
+    max.push_back(5.0);
+    return MDBoxImplicitFunction(min,max);
+  }
+
+  // Box that is fully contained in the implicit function
+  void test_boxIsTouching_3D_allInside()
+  {
+    MDBox<MDEvent<3>,3> box;
+    box.setExtents(0, 1.2, 1.8);
+    box.setExtents(1, 2.2, 3.8);
+    box.setExtents(2, 3.2, 3.8);
+    MDBoxImplicitFunction f = get3DFunction();
+    bool res;
+    for (size_t i=0; i<1000000; i++)
+    {
+      res = MDBoxIterator<MDEvent<3>,3>::boxIsTouching(&f,&box);
+      (void) res;
+    }
+    TS_ASSERT(res);
+  }
+
+  // Box that is completely outside of the implicit function
+  void test_boxIsTouching_3D_allOutside()
+  {
+    MDBox<MDEvent<3>,3> box;
+    box.setExtents(0, 3.2, 5.8);
+    box.setExtents(1, -5.2, -3.8);
+    box.setExtents(2, 12.2, 73.8);
+    MDBoxImplicitFunction f = get3DFunction();
+    bool res;
+    for (size_t i=0; i<1000000; i++)
+    {
+      res = MDBoxIterator<MDEvent<3>,3>::boxIsTouching(&f,&box);
+      (void) res;
+    }
+    TS_ASSERT(!res);
+  }
+
+
+  // Box that is fully contained in the implicit function
+  void test_boxContact_3D_allInside()
+  {
+    MDBox<MDEvent<3>,3> box;
+    box.setExtents(0, 1.2, 1.8);
+    box.setExtents(1, 2.2, 3.8);
+    box.setExtents(2, 3.2, 3.8);
+    MDBoxImplicitFunction f = get3DFunction();
+    MDBoxImplicitFunction::eContact res;
+    for (size_t i=0; i<1000000; i++)
+    {
+      res = MDBoxIterator<MDEvent<3>,3>::boxContact(&f,&box);
+      (void) res;
+    }
+    TS_ASSERT(res = MDBoxImplicitFunction::CONTAINED);
+  }
+
+  // Box that is fully contained in the implicit function
+  void test_boxContact_3D_allOutside()
+  {
+    MDBox<MDEvent<3>,3> box;
+    box.setExtents(0, 3.2, 5.8);
+    box.setExtents(1, -5.2, -3.8);
+    box.setExtents(2, 12.2, 73.8);
+    MDBoxImplicitFunction f = get3DFunction();
+    MDBoxImplicitFunction::eContact res;
+    for (size_t i=0; i<1000000; i++)
+    {
+      res = MDBoxIterator<MDEvent<3>,3>::boxContact(&f,&box);
+      (void) res;
+    }
+    TS_ASSERT(res = MDBoxImplicitFunction::CONTAINED);
+  }
+
+//
+//  // Box that is fully contained in the implicit function
+//  void test_boxIsTouching_4D_allInside()
+//  {
+//    MDBox<MDEvent<4>,4> box;
+//    box.setExtents(0, 1.2, 1.8);
+//    box.setExtents(1, 2.2, 3.8);
+//    box.setExtents(2, 3.2, 3.8);
+//    box.setExtents(3, 4.2, 4.8);
+//    MDBoxImplicitFunction f = get4DFunction();
+//    TS_ASSERT( f.isBoxTouching(&box) );
+//    bool res;
+//    for (size_t i=0; i<1000000; i++)
+//    {
+//      res = f.isBoxTouching(&box);
+//      (void) res;
+//    }
+//  }
+//
+//  // Box that is completely outside of the implicit function
+//  void test_boxIsTouching_4D_allOutside()
+//  {
+//    MDBox<MDEvent<4>,4> box;
+//    box.setExtents(0, 3.2, 5.8);
+//    box.setExtents(1, -5.2, -3.8);
+//    box.setExtents(2, 12.2, 73.8);
+//    box.setExtents(3, 18.2, 23.8);
+//    MDBoxImplicitFunction f = get4DFunction();
+//    TS_ASSERT( !f.isBoxTouching(&box) );
+//    bool res;
+//    for (size_t i=0; i<1000000; i++)
+//    {
+//      res = f.isBoxTouching(&box);
+//      (void) res;
+//    }
+//  }
+
 
 };
 

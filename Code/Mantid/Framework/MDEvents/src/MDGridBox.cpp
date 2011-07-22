@@ -417,6 +417,189 @@ namespace MDEvents
   }
 
 
+
+  //-----------------------------------------------------------------------------------------------
+  /** Return all boxes contained within, limited by an implicit function
+   *
+   * @param outBoxes :: vector to fill
+   * @param maxDepth :: max depth value of the returned boxes.
+   * @param leafOnly :: if true, only add the boxes that are no more subdivided (leaves on the tree)
+   * @param function :: implicitFunction pointer
+   */
+  TMDE(
+  void MDGridBox)::getBoxes(std::vector<IMDBox<MDE,nd> *> & outBoxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function)
+  {
+    // Add this box, unless we only want the leaves
+    if (!leafOnly)
+      outBoxes.push_back(this);
+
+    if (this->getDepth() + 1 <= maxDepth)
+    {
+      // OK, let's look for children that are either touching or completely contained by the implicit function.
+
+      // The number of vertices in each dimension is the # split[d] + 1
+      size_t * vertices_max = Utils::nestedForLoopSetUp(nd, 0);
+      // Total number of vertices for all the boxes
+      size_t numVertices = 1;
+      for (size_t d=0; d<nd; ++d)
+      {
+        vertices_max[d] = split[d]+1;
+        numVertices *= vertices_max[d];
+      }
+
+      // The function is limited by this many planes
+      size_t numPlanes = function->getNumPlanes();
+
+      // This array will hold whether each vertex is contained by each plane.
+      bool * vertexContained = new bool[numVertices * numPlanes];
+
+      // The index to the vertex in each dimension
+      size_t * vertexIndex = Utils::nestedForLoopSetUp(nd, 0);
+      size_t * vertexIndexMaker = Utils::nestedForLoopSetUpIndexMaker(nd, vertices_max);
+      size_t * boxIndexMaker = Utils::nestedForLoopSetUpIndexMaker(nd, split);
+
+      size_t linearVertexIndex = 0;
+      for (linearVertexIndex = 0; linearVertexIndex < numVertices; linearVertexIndex++)
+      {
+        // Get the nd-dimensional index
+        Utils::nestedForLoopGetIndicesFromLinearIndex(nd, linearVertexIndex, vertexIndexMaker, vertices_max, vertexIndex);
+
+        // Coordinates of this vertex
+        coord_t vertexCoord[nd];
+        for (size_t d=0; d<nd; ++d)
+          vertexCoord[d] = double(vertexIndex[d]) * boxSize[d] + this->extents[d].min;
+
+        // Now check each plane to see if the vertex is bounded by it
+        for (size_t p=0; p<numPlanes; p++)
+        {
+          // Save whether this vertex is contained by this plane
+          vertexContained[p*numPlanes + linearVertexIndex] =
+            function->getPlane(p).isPointBounded(vertexCoord);
+        }
+      }
+
+      // OK, now we have an array saying which vertex is contained by which plane.
+      //std::cout << "vertexIndexMaker " << Strings::join(vertexIndexMaker, vertexIndexMaker+nd, ", ") << std::endl;
+
+      // This is the number of vertices for each box, e.g. 8 in 3D
+      size_t verticesPerBox = 1 << nd;
+
+      /* There is a fixed relationship betwen a vertex (in a linear index) and its
+       * neighbors for a given box. This array calculates this:  */
+      size_t vertexNeighborsOffsets[verticesPerBox];
+      for (size_t i=0; i < verticesPerBox; i++)
+      {
+        // Index (in n-dimensions) of this neighbor)
+        size_t vertIndex[nd];
+        for (size_t d=0; d<nd; d++)
+        {
+          vertIndex[d] = 0;
+          // Use a bit mask to iterate through the 2^nd neighbor options
+          size_t mask = 1 << d;
+          if (i & mask)
+            vertIndex[d] = 1;
+        }
+        size_t linIndex = Utils::nestedForLoopGetLinearIndex(nd, vertIndex, vertexIndexMaker);
+        vertexNeighborsOffsets[i] = linIndex;
+      }
+
+//      std::cout << "vertexNeighborsOffsets " << Strings::join(vertexNeighborsOffsets, vertexNeighborsOffsets+verticesPerBox, ", ");
+//      std::cout << " (for neighbors in " << nd << " dims with splitting " << split[0] << ")" << std::endl;
+
+
+      // Go through all the boxes
+      size_t * boxIndex = Utils::nestedForLoopSetUp(nd, 0);
+
+      bool allDone = false;
+      while (!allDone)
+      {
+        // Find the linear index of the upper left vertex of the box.
+        // (note that we're using the VERTEX index maker to find the linear index in that LARGER array)
+        size_t vertLinearIndex = Utils::nestedForLoopGetLinearIndex(nd, boxIndex, vertexIndexMaker);
+
+        // OK, now its time to see if the box is touching or contained or out of it.
+        // Recall that:
+        //  - if a plane has NO vertices, then the box DOES NOT TOUCH
+        //  - if EVERY plane has EVERY vertex, then the box is CONTAINED
+        //  - if EVERY plane has at least one vertex, then the box is TOUCHING
+
+        size_t numPlanesWithAllVertexes = 0;
+
+        bool boxIsNotTouching = false;
+
+        // Go plane by plane
+        for (size_t p=0; p<numPlanes; p++)
+        {
+          size_t numVertexesInThisPlane = 0;
+          // Evaluate the 2^nd vertexes for this box.
+          for (size_t i=0; i<verticesPerBox; i++)
+          {
+            // (the index of the vertex is) = vertLinearIndex + vertexNeighborsOffsets[i]
+            if (vertexContained[p*numPlanes + vertLinearIndex + vertexNeighborsOffsets[i]])
+              numVertexesInThisPlane++;
+          }
+
+          // Plane with no vertexes = NOT TOUCHING. You can exit now
+          if (numVertexesInThisPlane == 0)
+          {
+            boxIsNotTouching = true;
+            break;
+          }
+
+          // Plane has all the vertexes
+          if (numVertexesInThisPlane == verticesPerBox)
+            numPlanesWithAllVertexes++;
+        } // (for each plane)
+
+
+        // Find the linear index into the BOXES array.
+        size_t boxLinearIndex =  Utils::nestedForLoopGetLinearIndex(nd, boxIndex, boxIndexMaker);
+        IMDBox<MDE,nd> * box = boxes[boxLinearIndex];
+
+//        std::cout << "Box at " << Strings::join(boxIndex, boxIndex+nd, ", ")
+//              << " (" << box->getExtents(0).min << "-" <<  box->getExtents(0).max << ") ";
+
+        // Is there a chance that the box is contained?
+        if (!boxIsNotTouching)
+        {
+
+          if (numPlanesWithAllVertexes == numPlanes)
+          {
+//            std::cout << " is fully contained." << std::endl;
+            // All planes have all vertexes
+            // The box is FULLY CONTAINED
+            // So we can get ALL children and don't need to check the implicit function
+            box->getBoxes(outBoxes, maxDepth, leafOnly);
+          }
+          else
+          {
+//            std::cout << " is touching." << std::endl;
+            // There is a chance the box is touching. Keep checking with implicit functions
+            box->getBoxes(outBoxes, maxDepth, leafOnly, function);
+          }
+        }
+        else
+        {
+//          std::cout << " is not touching at all." << std::endl;
+        }
+
+        // Move on to the next box in the list
+        allDone = Utils::nestedForLoopIncrement(nd, boxIndex, split);
+      }
+
+    } // Not at max depth
+    else
+    {
+      // Oh, we reached the max depth and want only leaves.
+      // ... so we consider this box to be a leaf too.
+      if (leafOnly)
+        outBoxes.push_back(this);
+    }
+  }
+
+
+
+
   //-----------------------------------------------------------------------------------------------
   /** Split a box that is contained in the GridBox, at the given index,
    * into a MDGridBox.
@@ -449,6 +632,8 @@ namespace MDEvents
       ts->push(new FunctionTask(boost::bind(&MDGridBox<MDE,nd>::splitAllIfNeeded, &*gridbox, ts) ) );
     }
   }
+
+
 
   //-----------------------------------------------------------------------------------------------
   /** Goes through all the sub-boxes and splits them if they contain

@@ -3,10 +3,54 @@
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBoxIterator.h"
 
+using namespace Mantid;
+using namespace Mantid::Geometry;
+
 namespace Mantid
 {
 namespace MDEvents
 {
+
+  //----------------------------------------------------------------------------------------------
+  /** Helper function. Return true if the box is touching the implicit function
+   *
+   * @param function :: MDImplicitFunction
+   * @param box :: IMDBox
+   * @return true if the box is touching the implicit function
+   */
+  TMDE(
+  bool MDBoxIterator)::boxIsTouching(Mantid::Geometry::MDImplicitFunction * function, IMDBox<MDE,nd> * box)
+  {
+    // NULL box does not touch anything.
+    if (!box) return false;
+    // Get the vertexes of the box as a bare array
+    size_t numVertices = 0;
+    coord_t * vertexes = box->getVertexesArray(numVertices);
+    bool retVal = function->isBoxTouching(vertexes, numVertices);
+    delete [] vertexes;
+    return retVal;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Helper function. Return true if the box is touching the implicit function
+   *
+   * @param function :: MDImplicitFunction
+   * @param box :: IMDBox
+   * @return true if the box is touching the implicit function
+   */
+  TMDE(
+  MDImplicitFunction::eContact MDBoxIterator)::boxContact(Mantid::Geometry::MDImplicitFunction * function, IMDBox<MDE,nd> * box)
+  {
+    // NULL box does not touch anything.
+    if (!box) return MDImplicitFunction::NOT_TOUCHING;
+    // Get the vertexes of the box as a bare array
+    size_t numVertices = 0;
+    coord_t * vertexes = box->getVertexesArray(numVertices);
+    MDImplicitFunction::eContact retVal = function->boxContact(vertexes, numVertices);
+    delete [] vertexes;
+    return retVal;
+  }
+
 
 
   //----------------------------------------------------------------------------------------------
@@ -51,6 +95,16 @@ namespace MDEvents
     if (m_currentDepth > m_maxDepth)
       throw std::invalid_argument("MDBoxIterator::ctor(): The maxDepth parameter must be >= the depth of the topBox.");
 
+    // Check if top-level box is excluded by the implicit function
+    if (m_function)
+    {
+      if (!boxIsTouching(m_function, m_current))
+      {
+        m_done = true;
+        return;
+      }
+    }
+
     // Starting with leafs only? You need to skip ahead (if the top level box has children)
     if (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth)
       next();
@@ -79,27 +133,6 @@ namespace MDEvents
 
 
   //----------------------------------------------------------------------------------------------
-  /** Return true if the box is touching the implicit function
-   *
-   * @param function :: MDImplicitFunction
-   * @param box :: IMDBox
-   * @return true if the box is touching the implicit function
-   */
-  template<typename MDE, size_t nd>
-  bool boxIsTouching(Mantid::Geometry::MDImplicitFunction * function, IMDBox<MDE,nd> * box)
-  {
-    // NULL box does not touch anything.
-    if (!box) return false;
-    // Get the vertexes of the box as a bare array
-    size_t numVertices = 0;
-    coord_t * vertexes = box->getVertexesArray(numVertices);
-    bool retVal = function->isBoxTouching(vertexes, numVertices);
-    delete [] vertexes;
-    return retVal;
-  }
-
-
-  //----------------------------------------------------------------------------------------------
   /**  Advance to the next box in the workspace. If the current box is the last one in the workspace
    * do nothing and return false.
    * @return true if there are more cells to iterate through.
@@ -109,21 +142,75 @@ namespace MDEvents
   {
     if (m_done) return false;
 
-    size_t children = m_current->getNumChildren();
-
-    if ((children > 0) && (m_currentDepth < m_maxDepth))
+    while (!m_done)
     {
-      // Current becomes the parent
-      m_parent = m_current;
-      m_parentNumChildren = m_parent->getNumChildren();
+      size_t children = m_current->getNumChildren();
 
-      // Go deeper
-      m_indices[++m_currentDepth] = 0;
+      if ((children > 0) && (m_currentDepth < m_maxDepth))
+      {
+        // Current becomes the parent
+        m_parent = m_current;
+        m_parentNumChildren = m_parent->getNumChildren();
 
-      // Save the parent for this depth
-      m_parents[m_currentDepth] = m_parent;
-      // Take the first child of it
-      m_current = m_parent->getChild(0);
+        // Go deeper
+        m_indices[++m_currentDepth] = 0;
+
+        // Save the parent for this depth
+        m_parents[m_currentDepth] = m_parent;
+        // Take the first child of it
+        m_current = m_parent->getChild(0);
+
+        // Check if the child is excluded by the implicit function
+        bool skipBecauseItIsExcluded = false;
+        if (m_function)
+          skipBecauseItIsExcluded = !boxIsTouching(m_function, m_current);
+
+        // For leaves-only, you need to keep looking this way until you reach a leaf (no children)
+        // For boxes excluded by an implicit function, you need to keep looking too.
+        if ((skipBecauseItIsExcluded) ||
+            (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth) )
+          return next();
+        else
+          // If not leaves-only, then you return each successive child you encounter.
+          return true;
+      }
+
+      // If you reach here, then it is a leaf node that we've already returned.
+
+      // Go to the next child
+      size_t newIndex = ++m_indices[m_currentDepth];
+
+      while (newIndex >= m_parentNumChildren)
+      {
+        // Reached the end of the number of children of the current parent.
+
+        // Are we as high as we can go?
+        if (m_currentDepth == 0)
+        {
+          m_done = true;
+          return false;
+        }
+
+        // Time to go up a level
+        m_currentDepth--;
+        m_parent = m_parents[m_currentDepth];
+
+        // Reached a null parent = higher than we started. We're done
+        if (!m_parent)
+        {
+          m_done = true;
+          return false;
+        }
+
+        // If we get here, then we have a valid parent
+        m_parentNumChildren = m_parent->getNumChildren();
+
+        // Move on to the next child of this level because we already returned this guy.
+        newIndex = ++m_indices[m_currentDepth];
+      }
+
+      // This is now the current box
+      m_current = m_parent->getChild(m_indices[m_currentDepth]);
 
       // Check if the child is excluded by the implicit function
       bool skipBecauseItIsExcluded = false;
@@ -134,62 +221,18 @@ namespace MDEvents
       // For boxes excluded by an implicit function, you need to keep looking too.
       if ((skipBecauseItIsExcluded) ||
           (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth) )
-        return next();
+      {
+        // Keep going
+        // return next();
+      }
       else
         // If not leaves-only, then you return each successive child you encounter.
         return true;
-    }
 
-    // If you reach here, then it is a leaf node that we've already returned.
+    } // (while not done)
 
-    // Go to the next child
-    size_t newIndex = ++m_indices[m_currentDepth];
-
-    while (newIndex >= m_parentNumChildren)
-    {
-      // Reached the end of the number of children of the current parent.
-
-      // Are we as high as we can go?
-      if (m_currentDepth == 0)
-      {
-        m_done = true;
-        return false;
-      }
-
-      // Time to go up a level
-      m_currentDepth--;
-      m_parent = m_parents[m_currentDepth];
-
-      // Reached a null parent = higher than we started. We're done
-      if (!m_parent)
-      {
-        m_done = true;
-        return false;
-      }
-
-      // If we get here, then we have a valid parent
-      m_parentNumChildren = m_parent->getNumChildren();
-
-      // Move on to the next child of this level because we already returned this guy.
-      newIndex = ++m_indices[m_currentDepth];
-    }
-
-    // This is now the current box
-    m_current = m_parent->getChild(m_indices[m_currentDepth]);
-
-    // Check if the child is excluded by the implicit function
-    bool skipBecauseItIsExcluded = false;
-    if (m_function)
-      skipBecauseItIsExcluded = !boxIsTouching(m_function, m_current);
-
-    // For leaves-only, you need to keep looking this way until you reach a leaf (no children)
-    // For boxes excluded by an implicit function, you need to keep looking too.
-    if ((skipBecauseItIsExcluded) ||
-        (m_leafOnly && m_current->getNumChildren() > 0 && m_currentDepth < m_maxDepth) )
-      return next();
-    else
-      // If not leaves-only, then you return each successive child you encounter.
-      return true;
+    // Done!
+    return false;
   }
 
 

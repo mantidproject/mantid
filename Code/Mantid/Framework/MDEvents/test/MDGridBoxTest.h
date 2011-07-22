@@ -1,7 +1,9 @@
 #ifndef MDGRIDBOXTEST_H
 #define MDGRIDBOXTEST_H
 
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
@@ -25,12 +27,12 @@
 #include <memory>
 #include <Poco/File.h>
 #include <vector>
-#include "MantidKernel/CPUTimer.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 class MDGridBoxTest :    public CxxTest::TestSuite
 {
@@ -331,9 +333,46 @@ public:
     parent->getBoxes(boxes, 2, true);
     TS_ASSERT_EQUALS( boxes.size(), 9);
     TS_ASSERT_EQUALS( boxes[0]->getDepth(), 2);
-
-
   }
+
+
+  //-------------------------------------------------------------------------------------
+  /** Recursive getting of a list of IMDBox, with an implicit function limiting it */
+  void test_getBoxes_ImplicitFunction()
+  {
+
+    MDGridBox<MDEvent<1>,1> * parent = MDEventsTestHelper::makeRecursiveMDGridBox<1>(4,3);
+    TS_ASSERT(parent);
+    std::vector<IMDBox<MDEvent<1>,1> *> boxes;
+
+    // Function of everything x > 1.51
+    MDImplicitFunction * function = new MDImplicitFunction;
+    coord_t normal[1] = {+1};
+    coord_t origin[1] = {1.51};
+    function->addPlane( MDPlane(1, normal, origin) );
+
+    boxes.clear();
+    parent->getBoxes(boxes, 3, false, function);
+
+    TS_ASSERT_EQUALS( boxes.size(), 54);
+    // The boxes extents make sense
+    for (size_t i=0; i<boxes.size(); i++)
+    {
+      TS_ASSERT( boxes[i]->getExtents(0).max >= 1.51);
+    }
+
+    // --- Now leaf-only ---
+    boxes.clear();
+    parent->getBoxes(boxes, 3, true, function);
+    TS_ASSERT_EQUALS( boxes.size(), 40);
+    // The boxes extents make sense
+    for (size_t i=0; i<boxes.size(); i++)
+    {
+      TS_ASSERT( boxes[i]->getExtents(0).max >= 1.51);
+    }
+  }
+
+
 
   //-------------------------------------------------------------------------------------
   /** Gauge how fast addEvent is with several levels of gridding

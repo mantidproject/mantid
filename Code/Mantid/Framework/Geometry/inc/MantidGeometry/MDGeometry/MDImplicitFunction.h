@@ -65,9 +65,33 @@ namespace Geometry
 
     void addPlane(const MDPlane & plane);
 
+    /** @return the MDPlane contained
+     * @param index :: which plane to return */
+    const MDPlane & getPlane(size_t index) const
+    {
+      return m_planes[index];
+    }
+
     /// @return the number of dimensions for which this object can be applied
     size_t getNumDims() const { return m_nd; }
 
+    /// @return the number of dimensions for which this object can be applied
+    size_t getNumPlanes() const { return m_planes.size(); }
+
+
+    //----------------------------------------------------------------------------------------------
+    /** Enum for describing the contact between a box and an
+     * implicit function.
+     */
+    enum eContact
+    {
+      /// No part of the box touches the implicit function
+      NOT_TOUCHING = 0,
+      /// Box is partly touching the implicit function region
+      TOUCHING = 1,
+      /// Box is fully contained by the implicit function
+      CONTAINED = 2
+    };
 
 
     // ==================== Methods that are inline for performance ================================
@@ -106,7 +130,6 @@ namespace Geometry
       }
       return true;
     }
-
 
     //----------------------------------------------------------------------------------------------
     /** Is there a chance that the box defined by these vertexes touches
@@ -196,26 +219,62 @@ namespace Geometry
       return true;
     }
 
-//    //----------------------------------------------------------------------------------------------
-//    /** Same as isBoxTouching(), except that
-//     * it uses a IMDBox instance in order to generate the
-//     * vertexes for it.
-//     *
-//     * @param box :: pointer to a IMDBox
-//     * @return true if there is a chance of the box touching.
-//     */
-//    template<typename MDE, size_t nd>
-//    bool isBoxTouching(const Mantid::MDEvents::IMDBox<MDE,nd> * box)
-//    {
-//      // NULL box does not touch anything.
-//      if (!box) return false;
-//      // Get the vertexes of the box
-//      size_t numVertices = 0;
-//      coord_t * vertexes = box->getVertexesArray(numVertices);
-//      bool retVal = isBoxTouching(vertexes, numVertices);
-//      delete [] vertexes;
-//      return retVal;
-//    }
+
+
+    //----------------------------------------------------------------------------------------------
+    /** Determine how a box (consisting of a number of vertexes)
+     * is in contact with the implicit function.
+     *
+     * Returns:
+     *  NOT_TOUCHING :  if any of the planes has no vertex in it.
+     *  CONTAINED :     if all of the vertexes are in all of the planes.
+     *  TOUCHING :      if there is a chance of the box touching the volume.
+     *                  (there can sometimes be false positives)
+     *
+     * @param vertexes :: bare array of length numPoints * m_nd
+     * @param numPoints :: number of vertexes in the array.
+     * @return eContact enum value
+     */
+    eContact boxContact(const coord_t * vertexes, const size_t numPoints)
+    {
+      // For speed, we can stop looking when we know the box CANNOT be fully contained.
+      bool lookForFullyContained = true;
+
+      // As the description states, the first plane with NO points inside it
+      // means the box does NOT touch. So iterate by planes
+      for (size_t i=0; i<m_numPlanes; i++)
+      {
+        size_t numBounded = 0;
+        for (size_t j=0; j<numPoints; j++)
+        {
+          if (m_planes[i].isPointBounded(vertexes + j*m_nd))
+          {
+            numBounded++;
+            // No need to evaluate any more points, unless we look for fully contained
+            if (!lookForFullyContained)
+              break;
+          }
+          else
+            // One of the vertexes is not contained by one of the planes.
+            // This means that the box CANNOT be fully contained.
+            lookForFullyContained = false;
+        }
+        // Not a single point is in this plane
+        if (numBounded == 0)
+          // That means the box CANNOT touch the implicit function
+          return NOT_TOUCHING;
+        // If all points were within this plane, then there is still a chance that
+        // the box is fully contained
+        if (numBounded != numPoints)
+          lookForFullyContained = false;
+      }
+      // If nothing said that the box might not be fully contained, then it is fully contained!
+      if (lookForFullyContained)
+        return CONTAINED;
+      else
+        return TOUCHING;
+    }
+
 
 
   protected:

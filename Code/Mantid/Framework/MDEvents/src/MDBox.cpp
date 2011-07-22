@@ -69,6 +69,14 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
+  /// Fill a vector with all the boxes up to a certain depth
+  TMDE(
+  void MDBox)::getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/, Mantid::Geometry::MDImplicitFunction * /*function*/)
+  {
+    boxes.push_back(this);
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Returns the total number of points (events) in this box */
   TMDE(size_t MDBox)::getNPoints() const
   {
