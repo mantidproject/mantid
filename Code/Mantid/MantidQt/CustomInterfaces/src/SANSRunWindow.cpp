@@ -6,6 +6,8 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -2323,6 +2325,11 @@ void SANSRunWindow::handleShowMaskButtonClick()
  */
 void SANSRunWindow::handleInstrumentChange()
 {
+  const std::string facility = ConfigService::Instance().getFacility().name();
+  if (facility != "ISIS"){
+    QMessageBox::critical(this, "Unsupported facility", "Only the ISIS facility is supported by this interface.\nSelect ISIS as your default facility to continue.");
+    return;
+  }
   //set up the required Python objects and delete what's out of date (perhaps everything is cleaned here)
   const QString instClass(getInstrumentClass());
   QString pyCode("if i.ReductionSingleton().get_instrument() != '");
