@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument valid-to="2100-01-31 23:59:59" name="BASIS" valid-from="2011-07-22 15:37:14.080242">
+<instrument valid-to="2100-01-31 23:59:59" name="BASIS" valid-from="1900-07-22 15:37:14.080242">
   <!-- Created by Stuart Campbell -->
   <defaults>
     <length unit="metre"/>
