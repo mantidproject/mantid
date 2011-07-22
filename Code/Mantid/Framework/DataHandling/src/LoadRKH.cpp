@@ -444,19 +444,15 @@ void LoadRKH::binCenter(const MantidVec oldBoundaries, MantidVec & toCenter) con
  *  @param header :: The first 100 bytes of the file as a union
  *  @return true if the given file is of type which can be loaded by this algorithm
  */
-bool LoadRKH::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
+bool LoadRKH::quickFileCheck(const std::string &,size_t nread,const file_header& header)
 {
-  std::string extn=extension(filePath);
-  bool bascii(false);
-  (!extn.compare("txt")|| extn.compare("q"))?bascii=true:bascii=false;
-
-  bool is_ascii (true);
   for(size_t i=0; i<nread; i++)
   {
     if (!isascii(header.full_hdr[i]))
-      is_ascii =false;
+      return false;
   }
-  return(is_ascii|| bascii?true:false);
+  // RKH files are always ASCII, they can have extension
+  return true;
 }
 
 /**checks the file by opening it and reading few lines 
@@ -477,61 +473,44 @@ int LoadRKH::fileCheck(const std::string& filePath)
    boost::char_separator<char> sep(" ");
 
   std::string fileline("");
-  std::string ws,da,dt,time;
-  int ncols=0;
+
   //get first line
   getline(file, fileline);
-  std::istringstream is(fileline);
-  //get diff words from first line
-  is>>ws>>da>>dt>>time;
-  //get the day,year and month part from first line
-  std::string::size_type pos=dt.find_last_of("-");
-  if(pos==std::string::npos)
-  {
-    return 0;
-  }
-  std::string year(dt.substr(pos+1,dt.length()-pos));
-  
-  std::string::size_type pos1=dt.find_last_of("-",pos-1);
-  if(pos1==std::string::npos)
-  {
-    return 0;
-  }
-  std::string month(dt.substr(pos1+1,pos-pos1));
-  
-  std::string day(dt.substr(0,pos1));
-  std::string rkhdate=year+"-";
-  rkhdate+=month;
-  rkhdate+="-";
-  rkhdate+=day;
-//if the first line contains date this could be rkh file
-  try
-  {
-    boost::gregorian::date d(boost::gregorian::from_string(rkhdate));
-    boost::gregorian::date::ymd_type ymd = d.year_month_day();
-    if(ymd.month>=1 && ymd.month<13)
-    {
-      bret+=10;
+  if ( fileline.find("Workspace:") == std::string::npos )
+  {//seeing Workspace: is enough to carry on
+    if ( fileline.find(":") == std::string::npos )
+    {//there must be a : in the line
+      return 0;
     }
-    if(ymd.day>=1 && ymd.month<32)
+    if ( fileline.find("LOQ") == std::string::npos )
     {
-      bret+=10;
+      if ( fileline.find("SANS2D") == std::string::npos )
+      {
+        static const std::string MONTHS[12] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+        size_t i = 0;
+        for ( ; i < 12; ++i )
+        {
+          if ( fileline.find(MONTHS[i]) != std::string::npos )
+          {
+            //the line is acceptable
+            break;
+          }
+          if ( i == 12 )
+          {
+            //the line contains none of the strings we were looking for except one : which is not enough, reject the file
+            return 0;
+          }
+        }
+      }
     }
   }
-  catch(std::exception&)
-  {
-    return 0;
-  }
- 
   
-  //read second line
+  //there are no constraints on the second line
   getline(file, fileline);
-  if(fileline.find("(")!=std::string::npos && fileline.find(")")!=std::string::npos)
-  {
-    bret+=10;
-  }
+
   //read 3rd line
   getline(file, fileline);
+  int ncols=0;
   if(fileline.find("(")!=std::string::npos && fileline.find(")")!=std::string::npos)
   {
     bret+=10;
