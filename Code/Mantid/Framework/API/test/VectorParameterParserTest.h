@@ -13,17 +13,23 @@ class VectorParameterParserTest : public CxxTest::TestSuite
 private:
 
   //Declare a concrete vector parameter for testing.
-  DECLARE_VECTOR_PARAMETER(ConcreteVectorParameter, double)
+  DECLARE_VECTOR_PARAMETER(ConcreteVectorDblParam, double)
 
   //Declare a concrete vector parameter parser for testing.
-  typedef VectorParameterParser<ConcreteVectorParameter> ConcreteVectorParameterParser;
+  typedef VectorParameterParser<ConcreteVectorDblParam> ConcreteVectorDblParamParser;
+
+  //Declare a concrete type with elements of type bool for testing.
+  DECLARE_VECTOR_PARAMETER(ConcreteVectorBoolParam, bool)
+
+  //Declare a concrete vector parameter parser for testing.
+  typedef VectorParameterParser<ConcreteVectorBoolParam> ConcreteVectorBoolParamParser;
 
 public:
 
   void testParsesParmeterValue1D()
   {
-    ConcreteVectorParameterParser parser;
-    ConcreteVectorParameter* product = parser.parseVectorParameter("1");
+    ConcreteVectorDblParamParser parser;
+    ConcreteVectorDblParam* product = parser.parseVectorParameter("1");
     double v1 = (*product)[0];
     TS_ASSERT_EQUALS(1, v1 );
     delete product;
@@ -31,8 +37,8 @@ public:
 
   void testParsesParmeterValue2D()
   {
-    ConcreteVectorParameterParser parser;
-    ConcreteVectorParameter* product = parser.parseVectorParameter("1,2");
+    ConcreteVectorDblParamParser parser;
+    ConcreteVectorDblParam* product = parser.parseVectorParameter("1,2");
     double v1 = (*product)[0];
     double v2 = (*product)[1];
     TS_ASSERT_EQUALS(1, v1 );
@@ -42,8 +48,8 @@ public:
 
   void testParsesParmeterValue3D()
   {
-    ConcreteVectorParameterParser parser;
-    ConcreteVectorParameter* product = parser.parseVectorParameter("1,2,3");
+    ConcreteVectorDblParamParser parser;
+    ConcreteVectorDblParam* product = parser.parseVectorParameter("1,2,3");
     double v1 = (*product)[0];
     double v2 = (*product)[1];
     double v3 = (*product)[2];
@@ -58,14 +64,14 @@ public:
     using namespace Poco::XML;
 
     DOMParser pParser;
-    std::string xmlToParse = "<Parameter><Type>ConcreteVectorParameter</Type><Value>1, 2, 3</Value></Parameter>";
+    std::string xmlToParse = "<Parameter><Type>ConcreteVectorDblParam</Type><Value>1, 2, 3</Value></Parameter>";
     Document* pDoc = pParser.parseString(xmlToParse);
     Element* pRootElem = pDoc->documentElement();
 
-    ConcreteVectorParameterParser parser;
+    ConcreteVectorDblParamParser parser;
     ImplicitFunctionParameter * product = parser.createParameter(pRootElem);
 
-    ConcreteVectorParameter* actualProduct = dynamic_cast<ConcreteVectorParameter*>(product);
+    ConcreteVectorDblParam* actualProduct = dynamic_cast<ConcreteVectorDblParam*>(product);
 
     TSM_ASSERT("The wrong product parameter has been produced", (actualProduct != NULL));
     double v1 = (*actualProduct)[0];
@@ -87,7 +93,7 @@ public:
     Document* pDoc = pParser.parseString(xmlToParse);
     Element* pRootElem = pDoc->documentElement();
 
-    ConcreteVectorParameterParser parser;
+    ConcreteVectorDblParamParser parser;
     TSM_ASSERT_THROWS("No successor, so should throw!", parser.createParameter(pRootElem), std::runtime_error);
   }
 
@@ -105,13 +111,36 @@ public:
     Document* pDoc = pParser.parseString(xmlToParse);
     Element* pRootElem = pDoc->documentElement();
 
-    ConcreteVectorParameterParser parser;
+    ConcreteVectorDblParamParser parser;
 
     parser.setSuccessorParser(new ConcreteSuccessorVectorParameterParser);
     Mantid::API::ImplicitFunctionParameter* product = parser.createParameter(pRootElem);
 
     TSM_ASSERT("Product should be a SucessorVectorParameter", dynamic_cast<SucessorVectorParameter*>(product));
     delete product;
+  }
+
+  void testSuccessfulParseBools()
+  {
+    using namespace Poco::XML;
+
+    DOMParser pParser;
+    std::string xmlToParse = "<Parameter><Type>ConcreteVectorBoolParam</Type><Value>1, 0, 1, 0</Value></Parameter>";
+    Document* pDoc = pParser.parseString(xmlToParse);
+    Element* pRootElem = pDoc->documentElement();
+
+    ConcreteVectorBoolParamParser parser;
+    ImplicitFunctionParameter * product = parser.createParameter(pRootElem);
+
+    ConcreteVectorBoolParam* actualProduct = dynamic_cast<ConcreteVectorBoolParam*>(product);
+
+    TSM_ASSERT("The wrong product parameter has been produced", (actualProduct != NULL));
+
+    TS_ASSERT_EQUALS(true, actualProduct->element(0));
+    TS_ASSERT_EQUALS(false, actualProduct->element(1));
+    TS_ASSERT_EQUALS(true, actualProduct->element(2));
+    TS_ASSERT_EQUALS(false, actualProduct->element(3));
+    delete actualProduct;
   }
 
 };

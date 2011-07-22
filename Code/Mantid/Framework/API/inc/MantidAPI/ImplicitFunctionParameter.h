@@ -14,86 +14,135 @@
 #include <sstream>
 #include <vector>
 #include <memory>
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 namespace Mantid
 {
-    namespace API
+  namespace API
+  {
+    /** Abstract parameter type for use with IImplicitFunctions.
+
+    @author Owen Arnold, Tessella plc
+    @date 01/10/2010
+
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+    */
+
+    class MANTID_API_DLL ImplicitFunctionParameter
     {
-        /** Abstract parameter type for use with IImplicitFunctions.
 
-        @author Owen Arnold, Tessella plc
-        @date 01/10/2010
+    public:
+      virtual std::string getName() const = 0;
 
-        Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+      virtual bool isValid() const = 0;
 
-        This file is part of Mantid.
+      virtual std::string toXMLString() const = 0;
 
-        Mantid is free software; you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation; either version 3 of the License, or
-        (at your option) any later version.
+      virtual ImplicitFunctionParameter* clone() const =0;
 
-        Mantid is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
+      virtual ~ImplicitFunctionParameter()
+      {
+      }
 
-        You should have received a copy of the GNU General Public License
-        along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    protected:
 
-        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-        Code Documentation is available at: <http://doxygen.mantidproject.org>
-        */
+      bool m_isValid;
 
-        class MANTID_API_DLL ImplicitFunctionParameter
-        {
+      std::string parameterXMLTemplate(std::string valueXMLtext) const
+      {
+        using namespace Poco::XML;
 
-        public:
-            virtual std::string getName() const = 0;
+        using namespace Poco::XML;
+        AutoPtr<Document> pDoc = new Document;
+        Element* paramElement = pDoc->createElement("Parameter");
 
-            virtual bool isValid() const = 0;
+        pDoc->appendChild(paramElement);
+        Element* typeElement = pDoc->createElement("Type");
+        Text* typeText = pDoc->createTextNode(this->getName());
+        typeElement->appendChild(typeText);
+        paramElement->appendChild(typeElement);
 
-            virtual std::string toXMLString() const = 0;
+        Element* valueElement = pDoc->createElement("Value");
+        Text* valueText = pDoc->createTextNode(valueXMLtext);
+        valueElement->appendChild(valueText);
+        paramElement->appendChild(valueElement);
 
-            virtual ImplicitFunctionParameter* clone() const =0;
+        std::stringstream xmlstream;
 
-            virtual ~ImplicitFunctionParameter()
-            {
-            }
+        DOMWriter writer;
+        writer.writeNode(xmlstream, pDoc);
+        return xmlstream.str();
+      }
+    };
 
-        protected:
+    //------------------------------------------------------------------------------------
+    // ElementTraits TypeTraits region
+    //------------------------------------------------------------------------------------
 
-            bool m_isValid;
+    /** Default ElementTraits SFINAE
+    Typetraits are used to provide the correct formatting based on the element type chosen.
+    */
+    template<typename T>
+    struct ElementTraits
+    {
+    };
 
-            std::string parameterXMLTemplate(std::string valueXMLtext) const
-            {
-                using namespace Poco::XML;
+    /** ElementTraits for boolean element types.
+    */
+    template<>
+    struct ElementTraits<bool>
+    {
+      typedef bool ValueType;
+      static std::string formatCS(const ValueType& value)
+      { 
+        return boost::str(boost::format("%u,") % value); 
+      }
+      static std::string format(const ValueType& value)
+      {
+        return boost::str(boost::format("%u") % value);
+      }
+    };
 
-                using namespace Poco::XML;
-                AutoPtr<Document> pDoc = new Document;
-                Element* paramElement = pDoc->createElement("Parameter");
-                
-                pDoc->appendChild(paramElement);
-                Element* typeElement = pDoc->createElement("Type");
-                Text* typeText = pDoc->createTextNode(this->getName());
-                typeElement->appendChild(typeText);
-                paramElement->appendChild(typeElement);
+    /** ElementTraits for double element types.
+    */
+    template<>
+    struct ElementTraits<double>
+    {
+      typedef double ValueType;
+      static std::string formatCS(const ValueType& value)
+      { 
+        return boost::str(boost::format("%.4f,") % value); 
+      }
+      static std::string format(const ValueType& value)
+      {
+        return boost::str(boost::format("%.4f") % value);
+      }
+    };
 
-                Element* valueElement = pDoc->createElement("Value");
-                Text* valueText = pDoc->createTextNode(valueXMLtext);
-                valueElement->appendChild(valueText);
-                paramElement->appendChild(valueElement);
-                
-                std::stringstream xmlstream;
+    //------------------------------------------------------------------------------------
+    // End ElementTraits TypeTraits region
+    //------------------------------------------------------------------------------------
 
-                DOMWriter writer;
-                writer.writeNode(xmlstream, pDoc);
-                return xmlstream.str();
-            }
-
-
-        };
-    }
+  }
 }
 
 #endif

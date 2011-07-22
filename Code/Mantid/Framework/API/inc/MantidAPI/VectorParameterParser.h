@@ -16,9 +16,7 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-
-#include <boost/algorithm/string.hpp>
-
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {
@@ -86,11 +84,13 @@ VectorValueParameterType* VectorParameterParser<VectorValueParameterType>::parse
   boost::split(strs, sValue, boost::is_any_of(","));
 
   VectorValueParameterType* product = new VectorValueParameterType();
-  double value = 0;
+  typedef typename VectorValueParameterType::ValueType ValType;
+  ValType value = 0;
 
   for(size_t i = 0; i < strs.size(); i++)
   {
-    value = atof(strs[i].c_str()); //TODO : atof cannot be used for all ValueTypes!
+    boost::erase_all(strs[i], " ");
+    value = boost::lexical_cast<ValType>(strs[i]);
     product->addValue(value);
   }
   return product;

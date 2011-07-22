@@ -3,8 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
+
 
 namespace Mantid
 {
@@ -52,6 +51,7 @@ public:
   bool operator!=(const Derived &other) const;
   virtual bool isValid() const;
   ElemType& operator[] (int index);
+  typename std::vector<ElemType>::reference element(int index);
   size_t getSize() const;
 protected:
   std::vector<ElemType> m_vector;
@@ -159,19 +159,21 @@ std::string VectorParameter<Derived,ElemType>::toXMLString() const
   }
   std::string valueXMLtext;
   size_t vecSize = m_vector.size();
+  
   for(size_t i = 0; i < vecSize ; i++)
   {
     if(i < (vecSize -1))
     {
-      valueXMLtext.append(boost::str(boost::format("%.4f,") % m_vector[i])); //Comma-seperated
+      valueXMLtext.append(ElementTraits<ElemType>::formatCS(m_vector[i])); //Comma-seperated
     }
     else
     {
-      valueXMLtext.append(boost::str(boost::format("%.4f") % m_vector[i])); //No comma sepearation for last value
+      valueXMLtext.append(ElementTraits<ElemType>::format(m_vector[i])); //No comma sepearation for last value
     }
   }
   return this->parameterXMLTemplate(valueXMLtext);
 }
+
 
 //----------------------------------------------------------------------
 /* Overrriden array operator
@@ -182,6 +184,12 @@ template<typename Derived, typename ElemType>
 ElemType& VectorParameter<Derived,ElemType>::operator[] (int index)
 {
   return m_vector[index];
+}
+
+template<typename Derived, typename ElemType>
+typename std::vector<ElemType>::reference VectorParameter<Derived,ElemType>::element(int index) 
+{
+   return m_vector[index];
 }
 
 //----------------------------------------------------------------------
@@ -201,7 +209,7 @@ size_t VectorParameter<Derived,ElemType>::getSize() const
 // Most of the work is done in the VectorParamter base class, which utilises CRTP.
 //-----------------------------------------------------------------------------------------------------------------//
 #define DECLARE_VECTOR_PARAMETER(classname, type_) \
-    class classname : public Mantid::API::VectorParameter<classname, double> \
+    class classname : public Mantid::API::VectorParameter<classname, type_> \
     {  \
       public: \
       typedef Mantid::API::VectorParameter<classname, type_> SuperType;  \
