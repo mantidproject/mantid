@@ -392,7 +392,7 @@ namespace Mantid
       const MantidVec & X = workspace->readX(0);
 
       PARALLEL_FOR1(workspace)
-      for(size_t i = 0 ; i < nhist; ++i)
+      for(int64_t i = 0 ; i < (int64_t)nhist; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
 
