@@ -70,7 +70,7 @@ namespace MDEvents
 
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 
-    void generalBin(MDBin<MDE,nd> & bin, Mantid::API::ImplicitFunction & function) const;
+    void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::API::ImplicitFunction & /*function*/) const {};
 
     void integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const;
 
