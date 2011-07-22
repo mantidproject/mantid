@@ -16252,7 +16252,7 @@ if( QFileInfo(action_data).exists() )
   {
     code.append(stream.readLine() + "\n");
   }
-  runPythonScript(code);
+  runPythonScript(code, true);
   code = "";
   code.append(QString("\nsys.path.remove(%1)").arg(scriptPath));
     runPythonScript(code, true);
