@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "BASIS" date = "2011-07-19T00:00:00">
+
+<component-link name = "BASIS">
+
+<parameter name="deltaE-mode" type="string">
+    <value val="indirect"/>
+</parameter>
+
+<!-- These properties are neceessary for use in the Indirect CTE interface. -->
+<parameter name="analysers" type="string">
+    <value val="silicon" />
+</parameter>
+<parameter name="refl-silicon" type="string">
+    <value val="111" />
+</parameter>
+
+</component-link>
+
+</parameter-file>
