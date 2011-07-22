@@ -304,9 +304,24 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
               if ( fitParam.getFormula().compare("") == 0 )
                 centreUnit = fitParam.getLookUpTable().getXUnit();  // from table
               else
-                centreUnit =  Kernel::UnitFactory::Instance().create(fitParam.getFormulaUnit());  // from formula
+              {
+                if ( !fitParam.getFormulaUnit().empty() )
+                {
+                  try
+                  {
+                    centreUnit = Kernel::UnitFactory::Instance().create(fitParam.getFormulaUnit());  // from formula
+                  }
+                  catch (...)
+                  {
+                    g_log.warning() << fitParam.getFormulaUnit() << " Is not an recognised formula unit for parameter " 
+                                    << fitParam.getName() << "\n";
+                  }
+                }
+              }
 
-              centreValue = convertValue(centreValue, centreUnit, m_workspace, wi);
+              // if unit specified convert centre value to unit required by formula or look-up-table
+              if (centreUnit)
+                centreValue = convertValue(centreValue, centreUnit, m_workspace, wi);
 
               double paramValue = fitParam.getValue(centreValue);
 
@@ -324,33 +339,36 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
 
                 std::string resultUnitStr = fitParam.getResultUnit();
 
-                std::vector<std::string> allUnitStr = Kernel::UnitFactory::Instance().getKeys();
-                for (unsigned iUnit = 0; iUnit < allUnitStr.size(); iUnit++)
+                if ( !resultUnitStr.empty() )
                 {
-                  size_t found = resultUnitStr.find(allUnitStr[iUnit]);
-                  if ( found != std::string::npos )
+                  std::vector<std::string> allUnitStr = Kernel::UnitFactory::Instance().getKeys();
+                  for (unsigned iUnit = 0; iUnit < allUnitStr.size(); iUnit++)
                   {
-                    size_t len = allUnitStr[iUnit].size();
-                    std::stringstream readDouble;
-                    Kernel::Unit_sptr unt = Kernel::UnitFactory::Instance().create(allUnitStr[iUnit]);
-                    readDouble << 1.0 / 
-                      convertValue(1.0, unt, m_workspace, wi);
-                    resultUnitStr.replace(found, len, readDouble.str());
-                  }
-                }  // end for
+                    size_t found = resultUnitStr.find(allUnitStr[iUnit]);
+                    if ( found != std::string::npos )
+                    {
+                      size_t len = allUnitStr[iUnit].size();
+                      std::stringstream readDouble;
+                      Kernel::Unit_sptr unt = Kernel::UnitFactory::Instance().create(allUnitStr[iUnit]);
+                      readDouble << 1.0 / 
+                        convertValue(1.0, unt, m_workspace, wi);
+                      resultUnitStr.replace(found, len, readDouble.str());
+                    }
+                  }  // end for
 
-                try
-                {
-                  mu::Parser p;
-                  p.SetExpr(resultUnitStr);
-                  paramValue *= p.Eval();
-                }
-                catch (mu::Parser::exception_type &e)
-                {
-                  g_log.error() << "Cannot convert formula unit to workspace unit"
-                    << " Formula unit which cannot be passed is " << resultUnitStr 
-                    << ". Muparser error message is: " << e.GetMsg() << std::endl;
-                }
+                  try
+                  {
+                    mu::Parser p;
+                    p.SetExpr(resultUnitStr);
+                    paramValue *= p.Eval();
+                  }
+                  catch (mu::Parser::exception_type &e)
+                  {
+                    g_log.error() << "Cannot convert formula unit to workspace unit"
+                      << " Formula unit which cannot be passed is " << resultUnitStr 
+                      << ". Muparser error message is: " << e.GetMsg() << std::endl;
+                  }
+                } // end if
               } // end else
               
 

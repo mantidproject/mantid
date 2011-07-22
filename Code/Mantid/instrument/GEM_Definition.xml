@@ -33,26 +33,6 @@
      stated with the <offsets spherical="delta" /> element above. 
   -->
 
-  
-   <!-- LIST OF INSTRUMENT SPECIFIC FITTING PARAMETERS -->  
-  <!-- These are instrument resolution function parameters taken from 
-       GEM_ISIS.irf generated 11/2003 -->
-  <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
-    <formula eq="0.734079" unit="TOF" result-unit="TOF"/>
-    <fixed /> 
-  </parameter>   
-  <parameter name="IkedaCarpenterPV:Beta0" type="fitting">
-    <formula eq="32.017204" unit="TOF" result-unit="TOF"/>
-    <fixed /> 
-  </parameter>
-  <parameter name="IkedaCarpenterPV:Alpha1" type="fitting">
-    <formula eq="2.067249" unit="TOF" result-unit="TOF"/>
-    <fixed /> 
-  </parameter>   
-  <parameter name="IkedaCarpenterPV:Kappa" type="fitting"> 
-    <value val="48.734158"/> 
-    <fixed /> 
-  </parameter>
 
 
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
@@ -64,63 +44,27 @@
   </component>
   
   <component type="bank1" idlist="bank1">
-    <location  r="2.3735" t="0" p="0"> <facing val="none"/> </location> 
-    <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
-      <formula eq="166.868*centre^2+98.757" unit="dSpacing" result-unit="TOF^2"/>
-    </parameter> 
-    <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
-      <formula eq="0.277*centre" unit="dSpacing" result-unit="TOF"/>
-    </parameter>     
+    <location  r="2.3735" t="0" p="0"> <facing val="none"/> </location>     
   </component>
 
   <component type="bank2" idlist="bank2">
-    <location  r="1.48074" t="19.9365" p="0"> <facing val="none"/> </location> 
-    <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
-      <formula eq="263.595*centre^2" unit="dSpacing" result-unit="TOF^2"/>
-    </parameter>      
-    <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
-      <formula eq="3.45*centre" unit="dSpacing" result-unit="TOF"/>
-    </parameter>    
+    <location  r="1.48074" t="19.9365" p="0"> <facing val="none"/> </location>   
   </component>
   
   <component type="bank3" idlist="bank3">
-    <location  r="1.08063" t="43.6277" p="0"> <facing val="none"/> </location>
-    <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
-      <formula eq="287.456*centre^2" unit="dSpacing" result-unit="TOF^2"/>
-    </parameter>    
-    <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
-      <formula eq="3.645*centre" unit="dSpacing" result-unit="TOF"/>
-    </parameter>    
+    <location  r="1.08063" t="43.6277" p="0"> <facing val="none"/> </location> 
   </component>
   
   <component type="bank4" idlist="bank4">
-    <location  r="1.03176" t="72.0603" p="0"> <facing val="none"/> </location>
-    <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
-      <formula eq="176.833*centre^2" unit="dSpacing" result-unit="TOF^2"/>
-    </parameter>    
-    <parameter name="IkedaCarpenterPV:Gamma" type="fitting" result-unit="TOF">
-      <formula eq="4.416*centre" unit="dSpacing"/>
-    </parameter>    
+    <location  r="1.03176" t="72.0603" p="0"> <facing val="none"/> </location> 
   </component>
   
   <component type="bank5" idlist="bank5">
-    <location  r="1.37931" t="91.5" p="0"> <facing val="none"/> </location>
-    <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
-      <formula eq="63.41*centre^2" unit="dSpacing" result-unit="TOF^2"/>
-    </parameter>    
-    <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
-      <formula eq="3.116*centre" unit="dSpacing" result-unit="TOF"/>
-    </parameter>    
+    <location  r="1.37931" t="91.5" p="0"> <facing val="none"/> </location>   
   </component>
   
   <component type="bank6" idlist="bank6">
-    <location  r="1.039" t="0" p="0"> <facing val="none"/> </location>
-    <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
-      <formula eq="29.321*centre^2" unit="dSpacing" result-unit="TOF^2"/>
-    </parameter>    
-    <parameter name="IkedaCarpenterPV:Gamma" type="fitting">
-      <formula eq="0.982*centre" unit="dSpacing" result-unit="TOF"/>
-    </parameter>    
+    <location  r="1.039" t="0" p="0"> <facing val="none"/> </location> 
   </component>
   
   <!-- source and sample-position components -->

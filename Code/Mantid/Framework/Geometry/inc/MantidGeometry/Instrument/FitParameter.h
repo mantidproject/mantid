@@ -70,11 +70,11 @@ namespace Mantid
       std::string getFormula() const { return m_formula; }
       /// set formula
       std::string& setFormula() { return m_formula; }
-      /// get formula unit
+      /// get formula unit, and Empty string is no unit has been specified
       std::string getFormulaUnit() const { return m_formulaUnit; }
       /// set formula unit
       std::string& setFormulaUnit() { return m_formulaUnit; }
-      /// get result formula unit
+      /// get result formula unit, and Empty string is no unit has been specified
       std::string getResultUnit() const { return m_resultUnit; }
       /// set result formula unit
       std::string& setResultUnit() { return m_resultUnit; }

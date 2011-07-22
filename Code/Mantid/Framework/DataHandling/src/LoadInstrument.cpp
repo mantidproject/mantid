@@ -1678,8 +1678,8 @@ namespace Mantid
           // Check if formula is specified
 
           std::string formula = "";
-          std::string formulaUnit = "TOF";
-          std::string resultUnit = "TOF";
+          std::string formulaUnit = "";
+          std::string resultUnit = "";
 
           if ( numberFormula >= 1 )
           {
