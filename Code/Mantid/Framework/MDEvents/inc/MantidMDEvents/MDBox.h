@@ -2,14 +2,14 @@
 #define MDBOX_H_
 
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/ImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidMDEvents/MDDimensionStats.h"
 #include "MantidMDEvents/MDEvent.h"
-#include "MantidAPI/ImplicitFunction.h"
 
 #undef MDBOX_TRACK_SIGNAL_WHEN_ADDING
 
@@ -41,6 +41,8 @@ namespace MDEvents
     MDBox();
 
     MDBox(BoxController_sptr splitter, const size_t depth = 0);
+
+    MDBox(BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
 
     virtual ~MDBox() {}
 

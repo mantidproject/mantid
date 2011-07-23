@@ -8,7 +8,7 @@ namespace Mantid
 namespace MDEvents
 {
 
-  //-----------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------
   /** Empty constructor */
   TMDE(MDBox)::MDBox()
    : IMDBox<MDE, nd>(),
@@ -22,7 +22,26 @@ namespace MDEvents
    * @param depth :: splitting depth of the new box.
    */
   TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth)
-        : m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
+    : IMDBox<MDE, nd>(),
+      m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
+  {
+    if (controller->getNDims() != nd)
+      throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
+    this->m_BoxController = controller;
+    this->m_depth = depth;
+    // Give it a fresh ID from the controller.
+    this->setId( controller->getNextId() );
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Constructor
+   * @param controller :: BoxController that controls how boxes split
+   * @param depth :: splitting depth of the new box.
+   * @param extents :: vector defining the extents
+   */
+  TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
+      : IMDBox<MDE, nd>(extentsVector),
+        m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
   {
     if (controller->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");

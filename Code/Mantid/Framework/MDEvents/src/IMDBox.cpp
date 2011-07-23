@@ -24,6 +24,26 @@ namespace MDEvents
       m_centroid[d] = 0;
   }
 
+
+  //-----------------------------------------------------------------------------------------------
+  /** Constructor with extents
+   */
+  TMDE(
+  IMDBox)::IMDBox(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
+    : m_signal(0.0), m_errorSquared(0.0),
+      m_inverseVolume(1.0),
+      m_depth(0)
+  {
+    // Clear the running total of the centroid
+    for (size_t d=0; d<nd; d++)
+      m_centroid[d] = 0;
+    // Set the extents
+    if (extentsVector.size() != nd) throw std::invalid_argument("IMDBox::ctor(): extentsVector.size() must be == nd.");
+    for (size_t d=0; d<nd; d++)
+      this->extents[d] = extentsVector[d];
+  }
+
+
   //-----------------------------------------------------------------------------------------------
   /** Copy constructor. Copies the extents, depth, etc.
    * and recalculates the boxes' volume.

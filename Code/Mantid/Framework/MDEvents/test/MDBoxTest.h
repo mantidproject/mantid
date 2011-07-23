@@ -1,22 +1,24 @@
 #ifndef MDBOXTEST_H
 #define MDBOXTEST_H
 
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
+#include "MantidNexus/NeXusFile.hpp"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <map>
 #include <memory>
-#include "MantidNexus/NeXusFile.hpp"
-#include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
 using Mantid::Kernel::ConfigService;
+using Mantid::Geometry::MDDimensionExtents;
 
 class MDBoxTest :    public CxxTest::TestSuite
 {
@@ -39,6 +41,22 @@ public:
     TS_ASSERT_EQUALS( b3.getNPoints(), 0);
     TS_ASSERT_EQUALS( b3.getDepth(), 2);
     TS_ASSERT_EQUALS( b3.getNumMDBoxes(), 1);
+  }
+
+  void test_constructorWithExtents()
+  {
+    BoxController_sptr sc( new BoxController(1));
+    std::vector<MDDimensionExtents> extents(1);
+    extents[0].min=1.23;
+    extents[0].max=2.34;
+    MDBox<MDEvent<1>,1> box(sc, 2, extents);
+    TS_ASSERT_EQUALS( box.getNumDims(), 1);
+    TS_ASSERT_EQUALS( box.getBoxController(), sc);
+    TS_ASSERT_EQUALS( box.getNPoints(), 0);
+    TS_ASSERT_EQUALS( box.getDepth(), 2);
+    TS_ASSERT_EQUALS( box.getNumMDBoxes(), 1);
+    TS_ASSERT_DELTA( box.getExtents(0).min, 1.23, 1e-5);
+    TS_ASSERT_DELTA( box.getExtents(0).max, 2.34, 1e-5);
   }
 
 

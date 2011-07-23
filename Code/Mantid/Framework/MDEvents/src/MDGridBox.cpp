@@ -40,20 +40,24 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
-  /** Constructor with a box controller. Used when loading files.
-   * */
-  TMDE(MDGridBox)::MDGridBox(BoxController_sptr bc)
-   : IMDBox<MDE, nd>(), numBoxes(0), nPoints(0)
+  /** Constructor with a box controller.
+   * @param bc :: BoxController
+   * @param extentsVector :: size of the box
+   */
+  TMDE(MDGridBox)::MDGridBox(BoxController_sptr bc, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
+   : IMDBox<MDE, nd>(extentsVector),
+     numBoxes(0), nPoints(0)
   {
     if (!bc)
       throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
+    this->m_BoxController = bc;
 
     // How many is it split?
     for (size_t d=0; d<nd; d++)
-      split[d] = bc->getSplitInto(d);
+      split[d] = this->m_BoxController->getSplitInto(d);
 
     // Compute sizes etc.
-    size_t tot = computeFromSplit();
+    size_t tot = computeSizesFromSplit();
     if (tot == 0)
       throw std::runtime_error("MDGridBox::ctor(): Invalid splitting criterion (one was zero).");
   }
@@ -78,7 +82,7 @@ namespace MDEvents
       split[d] = bc->getSplitInto(d);
 
     // Compute sizes etc.
-    size_t tot = computeFromSplit();
+    size_t tot = computeSizesFromSplit();
     if (tot == 0)
       throw std::runtime_error("MDGridBox::ctor(): Invalid splitting criterion (one was zero).");
 
@@ -140,9 +144,10 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Compute some data from the split[] array and the extents.
+   *
    * @return :: the total number of boxes */
   TMDE(
-  size_t MDGridBox)::computeFromSplit()
+  size_t MDGridBox)::computeSizesFromSplit()
   {
     // Do some computation based on how many splits per each dim.
     size_t tot = 1;

@@ -40,11 +40,10 @@ namespace MDEvents
   public:
 
     //-----------------------------------------------------------------------------------------------
-    /** Default constructor.
-     */
     IMDBox();
 
-    /// Copy constructor
+    IMDBox(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
+
     IMDBox(IMDBox<MDE,nd> * box);
 
     // -------------------------------------------------------------------------------------------

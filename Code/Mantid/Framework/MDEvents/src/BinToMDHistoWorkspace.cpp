@@ -211,6 +211,8 @@ namespace MDEvents
     // Leaf-only; no depth limit; with the implicit function passed to it.
     ws->getBox()->getBoxes(boxes, 1000, true, function);
 
+    std::cout << "Found " << boxes.size() << " boxes within the implicit function." << std::endl;
+
     // For progress reporting, the # of boxes
     if (prog)
       prog->setNumSteps( boxes.size() );

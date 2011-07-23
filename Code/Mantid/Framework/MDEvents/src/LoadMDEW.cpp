@@ -1,16 +1,18 @@
-#include "MantidMDEvents/LoadMDEW.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDEvents/MDEventFactory.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/CPUTimer.h"
-#include <vector>
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/System.h"
+#include "MantidMDEvents/LoadMDEW.h"
+#include "MantidMDEvents/MDEventFactory.h"
+#include <vector>
 
-using Mantid::Geometry::IMDDimensionFactory;
-using Mantid::Geometry::IMDDimension_sptr;
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -20,9 +22,6 @@ namespace MDEvents
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(LoadMDEW)
   
-  using namespace Mantid::Kernel;
-  using namespace Mantid::API;
-
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -206,10 +205,18 @@ namespace MDEvents
       {
         IMDBox<MDE,nd> * ibox = NULL;
 
+        // Extents of the box, as a vector
+        std::vector<Mantid::Geometry::MDDimensionExtents> extentsVector(nd);
+        for (size_t d=0; d<nd; d++)
+        {
+          extentsVector[d].min = extents[i*nd*2 + d*2];
+          extentsVector[d].max = extents[i*nd*2 + d*2 + 1];
+        }
+
         if (box_type == 1)
         {
           // --- Make a MDBox -----
-          MDBox<MDE,nd> * box = new MDBox<MDE,nd>(bc, depth[i]);
+          MDBox<MDE,nd> * box = new MDBox<MDE,nd>(bc, depth[i], extentsVector);
           ibox = box;
 
           // Load the events now
@@ -237,19 +244,13 @@ namespace MDEvents
         else if (box_type == 2)
         {
           // --- Make a MDGridBox -----
-          ibox = new MDGridBox<MDE,nd>(bc);
+          ibox = new MDGridBox<MDE,nd>(bc, extentsVector);
         }
         else
           continue;
 
         // Force correct ID
         ibox->setId(i);
-        // Same box controller as everything else.
-        ibox->setBoxController(bc);
-
-        // Extents of the box
-        for (size_t d=0; d<nd; d++)
-          ibox->setExtents(d, extents[i*nd*2 + d*2], extents[i*nd*2 + d*2 + 1]);
         ibox->calcVolume();
 
         // Set the cached values

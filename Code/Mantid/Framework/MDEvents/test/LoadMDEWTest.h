@@ -94,6 +94,7 @@ public:
         TS_ASSERT_DELTA( box->getExtents(d).min, box1->getExtents(d).min, 1e-5);
         TS_ASSERT_DELTA( box->getExtents(d).max, box1->getExtents(d).max, 1e-5);
       }
+      TS_ASSERT_DELTA( box->getVolume(), box1->getVolume(), 1e-3);
       TS_ASSERT_EQUALS( box->getNPoints(), box1->getNPoints() );
       TS_ASSERT( box->getBoxController() );
       TS_ASSERT_EQUALS( box->getBoxController(), ws->getBoxController() );

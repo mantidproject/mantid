@@ -40,7 +40,7 @@ namespace MDEvents
   public:
     MDGridBox();
 
-    MDGridBox(BoxController_sptr bc);
+    MDGridBox(BoxController_sptr bc, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
 
     MDGridBox(MDBox<MDE, nd> * box);
 
@@ -55,6 +55,8 @@ namespace MDEvents
     size_t getNumMDBoxes() const;
 
     size_t getNumChildren() const;
+
+    size_t computeSizesFromSplit();
 
     IMDBox<MDE,nd> * getChild(size_t index);
 
@@ -99,8 +101,6 @@ namespace MDEvents
 
 
   private:
-
-    size_t computeFromSplit();
 
     /// Each dimension is split into this many equally-sized boxes
     size_t split[nd];

@@ -2,11 +2,11 @@
 #define MANTID_MDEVENTS_IMDBOXTEST_H_
 
 #include "MantidAPI/ImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/IMDBox.h"
-#include "MantidNexus/NeXusFile.hpp"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -22,6 +22,14 @@ using Mantid::Kernel::ConfigService;
 TMDE_CLASS
 class IMDBoxTester : public IMDBox<MDE,nd>
 {
+public:
+  IMDBoxTester()
+  : IMDBox<MDE,nd>()
+  { }
+
+  IMDBoxTester(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
+  : IMDBox<MDE,nd>(extentsVector)
+  { }
 
   /// Clear all contained data
   virtual void clear()
@@ -85,6 +93,26 @@ public:
     IMDBoxTester<MDEvent<3>,3> box;
     TS_ASSERT_EQUALS( box.getSignal(), 0.0);
     TS_ASSERT_EQUALS( box.getErrorSquared(), 0.0);
+  }
+
+  void test_extents_constructor()
+  {
+    typedef IMDBoxTester<MDEvent<3>,3> ibox3;
+    std::vector<Mantid::Geometry::MDDimensionExtents> extentsVector;
+    TS_ASSERT_THROWS_ANYTHING( ibox3 box(extentsVector) );
+    extentsVector.resize(3);
+    for (size_t d=0; d<3; d++)
+    {
+      extentsVector[d].min = double(d) + 0.1;
+      extentsVector[d].max = double(d + 1);
+    }
+    IMDBoxTester<MDEvent<3>,3> box(extentsVector);
+    TS_ASSERT_DELTA( box.getExtents(0).min, 0.1, 1e-4 );
+    TS_ASSERT_DELTA( box.getExtents(0).max, 1.0, 1e-4 );
+    TS_ASSERT_DELTA( box.getExtents(1).min, 1.1, 1e-4 );
+    TS_ASSERT_DELTA( box.getExtents(1).max, 2.0, 1e-4 );
+    TS_ASSERT_DELTA( box.getExtents(2).min, 2.1, 1e-4 );
+    TS_ASSERT_DELTA( box.getExtents(2).max, 3.0, 1e-4 );
   }
 
   void test_get_and_set_signal()
