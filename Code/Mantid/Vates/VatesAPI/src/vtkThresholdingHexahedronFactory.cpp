@@ -140,6 +140,10 @@ namespace VATES
       bool * pointNeeded = new bool[nPointsX*nPointsY*nPointsZ];
       memset(pointNeeded, 0, nPointsX*nPointsY*nPointsZ*sizeof(bool));
 
+      /* The idea of the next chunk of code is that you should only
+       create the points that will be needed; so an array of pointNeeded
+       is set so that all required vertices are marked, and created in a second step. */
+
       size_t index = 0;
       //PARALLEL_FOR_NO_WSP_CHECK()
       for (int i = 0; i < nBinsX; i++)

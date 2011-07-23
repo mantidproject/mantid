@@ -49,7 +49,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     above.initialize(ws_sptr);
     vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create());
 
-    TS_ASSERT_EQUALS((9*9*9), insideProduct->GetNumberOfCells());
+    TS_ASSERT_EQUALS((10*10*10), insideProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS(0, belowProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS(0, aboveProduct->GetNumberOfCells());
   }
@@ -81,7 +81,7 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     TSM_ASSERT_EQUALS("A single array should be present on the product dataset.", 1, product->GetCellData()->GetNumberOfArrays());
     vtkDataArray* signalData = product->GetCellData()->GetArray(0);
     TSM_ASSERT_EQUALS("The obtained cell data has the wrong name.", std::string("signal"), signalData->GetName());
-    const int correctCellNumber = 9 * 9 * 9;
+    const int correctCellNumber = 10 * 10 * 10;
     TSM_ASSERT_EQUALS("The number of signal values generated is incorrect.", correctCellNumber, signalData->GetSize());
     product->Delete();
   }
