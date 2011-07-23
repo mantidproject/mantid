@@ -249,7 +249,7 @@ namespace MDEvents
 
         // Extents of the box
         for (size_t d=0; d<nd; d++)
-          ibox->setExtents(d, extents[i*2+d*2], extents[i*2+d*2+1]);
+          ibox->setExtents(d, extents[i*nd*2 + d*2], extents[i*nd*2 + d*2 + 1]);
         ibox->calcVolume();
 
         // Set the cached values

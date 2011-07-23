@@ -16,6 +16,11 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using Mantid::Kernel::CPUTimer;
 
+
+/** Note: See the LoadMDEWTest class
+ * for a more thorough test that does
+ * a round-trip.
+ */
 class SaveMDEWTest : public CxxTest::TestSuite
 {
 public:

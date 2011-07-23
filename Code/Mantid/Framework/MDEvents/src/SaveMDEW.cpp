@@ -144,7 +144,7 @@ namespace MDEvents
 
         for (size_t d=0; d<nd; d++)
         {
-          size_t newIndex = (id+d)*2;
+          size_t newIndex = id*(nd*2) + d*2;
           extents[newIndex] = box->getExtents(d).min;
           extents[newIndex+1] = box->getExtents(d).max;
         }
