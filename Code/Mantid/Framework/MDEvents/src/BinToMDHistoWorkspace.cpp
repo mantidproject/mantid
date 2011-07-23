@@ -13,6 +13,7 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include <boost/algorithm/string.hpp>
+#include "MantidMDEvents/MDBox.h"
 
 using Mantid::Kernel::CPUTimer;
 
@@ -81,6 +82,8 @@ namespace MDEvents
     declareProperty(new PropertyWithValue<bool>("IterateEvents",true,Direction::Input),
         "Alternative binning method where you iterate through every event, placing them in the proper bin.\n"
         "This may be faster for workspaces with few events and lots of output bins.");
+    declareProperty(new PropertyWithValue<bool>("Parallel",false,Direction::Input),
+        "Temporary parameter: true to run in parallel.");
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "A name for the output MDHistoWorkspace.");
   }
 
@@ -162,6 +165,61 @@ namespace MDEvents
 
 
   //----------------------------------------------------------------------------------------------
+  /** Bin the contents of a MDBox
+   *
+   * @param box :: pointer to the MDBox to bin
+   * @param chunkMin :: the minimum X in each dimension to consider "valid"
+   * @param chunkMax :: the maximum X in each dimension to consider "valid"
+   */
+  template<typename MDE, size_t nd>
+  inline void BinToMDHistoWorkspace::binMDBox(MDBox<MDE, nd> * box, coord_t * chunkMin, coord_t * chunkMax)
+  {
+    const std::vector<MDE> & events = box->getEvents();
+    typename std::vector<MDE>::const_iterator it = events.begin();
+    typename std::vector<MDE>::const_iterator it_end = events.end();
+    for (; it != it_end; it++)
+    {
+      // Cache the center of the event (again for speed)
+      const coord_t * center = it->getCenter();
+
+      // To build up the linear index
+      size_t linearIndex = 0;
+      // To mark events outside range
+      bool badEvent = false;
+
+      /// Loop through the dimensions on which we bin
+      for (size_t bd=0; bd<numBD; bd++)
+      {
+        // Dimension in the MDEventWorkspace
+        size_t d = dimensionToBinFrom[bd];
+        // Where the event is in that dimension?
+        coord_t x = center[d];
+        // Within range (for this chunk)?
+        if ((x >= chunkMin[bd]) && (x < chunkMax[bd]))
+        {
+          // Build up the linear index
+          linearIndex += indexMultiplier[bd] * size_t((x - min[bd])/step[bd]);
+        }
+        else
+        {
+          // Outside the range
+          badEvent = true;
+          break;
+        }
+      } // (for each dim in MDHisto)
+
+      if (!badEvent)
+      {
+        signals[linearIndex] += it->getSignal();
+        errors[linearIndex] += it->getErrorSquared();
+      }
+    }
+    // Done with the events list
+    box->releaseEvents();
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /** Perform binning by iterating through every event and placing them in the output workspace
    *
    * @param ws :: MDEventWorkspace of the given type.
@@ -169,15 +227,17 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void BinToMDHistoWorkspace::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
+    // Start with signal at 0.0
+    outWS->setTo(0.0, 0.0);
 
     // Number of output binning dimensions found
-    size_t numBD = binDimensions.size();
+    numBD = binDimensions.size();
 
     // Cache some data to speed up accessing them a bit
-    coord_t * min = new coord_t[numBD];
-    coord_t * max = new coord_t[numBD];
-    coord_t * step = new coord_t[numBD];
-    size_t * indexMultiplier = new size_t[numBD];
+    min = new coord_t[numBD];
+    max = new coord_t[numBD];
+    step = new coord_t[numBD];
+    indexMultiplier = new size_t[numBD];
     for (size_t d=0; d<numBD; d++)
     {
       min[d] = binDimensions[d]->getMinimum();
@@ -188,89 +248,89 @@ namespace MDEvents
       else
         indexMultiplier[d] = 1;
     }
-    signal_t * signals = outWS->getSignalArray();
-    signal_t * errors = outWS->getErrorSquaredArray();
+    signals = outWS->getSignalArray();
+    errors = outWS->getErrorSquaredArray();
 
-    // Start with signal at 0.0
-    outWS->setTo(0.0, 0.0);
+    // The dimension (in the output workspace) along which we chunk for parallel processing
+    size_t chunkDimension = 0;
+    // How many bins (in that dimension) per chunk.
+    // Try to split it so each core will get 2 tasks:
+    int chunkNumBins =  int(binDimensions[chunkDimension]->getNBins() / (Mantid::Kernel::ThreadPool::getNumPhysicalCores() * 2));
+    if (chunkNumBins < 1) chunkNumBins = 1;
 
-    // Build an implicit function (it needs to be in the space of the MDEventWorkspace)
-    std::vector<coord_t> function_min(nd, -1e50); // default to all space if the dimension is not specified
-    std::vector<coord_t> function_max(nd, +1e50); // default to all space if the dimension is not specified
-    for (size_t bd=0; bd<numBD; bd++)
+    // Do we actually do it in parallel?
+    bool doParallel = getProperty("Parallel");
+    if (!doParallel)
+      chunkNumBins = int(binDimensions[chunkDimension]->getNBins());
+
+    // Total number of steps
+    size_t progNumSteps = 0;
+
+    // Run the chunks in parallel. There is no overal in the output workspace so it is
+    // thread safe to write to it..
+    PRAGMA_OMP( parallel for schedule(dynamic,1) if (doParallel) )
+    for(int chunk=0; chunk < int(binDimensions[chunkDimension]->getNBins()); chunk += chunkNumBins)
     {
-      // Dimension in the MDEventWorkspace
-      size_t d = dimensionToBinFrom[bd];
-      function_min[d] = binDimensions[bd]->getMinimum();
-      function_max[d] = binDimensions[bd]->getMaximum();
-    }
-    MDBoxImplicitFunction * function = new MDBoxImplicitFunction(function_min, function_max);
-
-    // Use getBoxes() to get an array with a pointer to each box
-    std::vector<IMDBox<MDE,nd>*> boxes;
-    // Leaf-only; no depth limit; with the implicit function passed to it.
-    ws->getBox()->getBoxes(boxes, 1000, true, function);
-
-    std::cout << "Found " << boxes.size() << " boxes within the implicit function." << std::endl;
-
-    // For progress reporting, the # of boxes
-    if (prog)
-      prog->setNumSteps( boxes.size() );
-
-    for (size_t i=0; i<boxes.size(); i++)
-    {
-      // Get the next box in the iterator
-      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
-      if (box)
+      // Region of interest for this chunk.
+      coord_t * chunkMin = new coord_t[numBD];
+      coord_t * chunkMax = new coord_t[numBD];
+      for (size_t bd=0; bd<numBD; bd++)
       {
-        const std::vector<MDE> & events = box->getEvents();
-        typename std::vector<MDE>::const_iterator it = events.begin();
-        typename std::vector<MDE>::const_iterator it_end = events.end();
-        for (; it != it_end; it++)
+        // Same limits in the other dimensions
+        chunkMin[bd] = min[bd];
+        chunkMax[bd] = max[bd];
+      }
+      // Parcel out a chunk in that single dimension dimension
+      chunkMin[chunkDimension] = binDimensions[chunkDimension]->getX( size_t(chunk) );
+      if (size_t(chunk+chunkNumBins) > binDimensions[chunkDimension]->getNBins())
+        chunkMax[chunkDimension] = binDimensions[chunkDimension]->getMaximum();
+      else
+        chunkMax[chunkDimension] = binDimensions[chunkDimension]->getX( size_t(chunk+chunkNumBins) );
+
+      // Build an implicit function (it needs to be in the space of the MDEventWorkspace)
+      std::vector<coord_t> function_min(nd, -1e50); // default to all space if the dimension is not specified
+      std::vector<coord_t> function_max(nd, +1e50); // default to all space if the dimension is not specified
+      for (size_t bd=0; bd<numBD; bd++)
+      {
+        // Dimension in the MDEventWorkspace
+        size_t d = dimensionToBinFrom[bd];
+        function_min[d] = chunkMin[bd];
+        function_max[d] = chunkMax[bd];
+      }
+      MDBoxImplicitFunction * function = new MDBoxImplicitFunction(function_min, function_max);
+
+      // Use getBoxes() to get an array with a pointer to each box
+      std::vector<IMDBox<MDE,nd>*> boxes;
+      // Leaf-only; no depth limit; with the implicit function passed to it.
+      ws->getBox()->getBoxes(boxes, 1000, true, function);
+
+
+      // For progress reporting, the # of boxes
+      if (prog)
+      {
+        PARALLEL_CRITICAL(BinToMDHistoWorkspace_progress)
         {
-          // Cache the center of the event (again for speed)
-          const coord_t * center = it->getCenter();
-
-          // To build up the linear index
-          size_t linearIndex = 0;
-          // To mark events outside range
-          bool badEvent = false;
-
-          /// Loop through the dimensions on which we bin
-          for (size_t bd=0; bd<numBD; bd++)
-          {
-            // Dimension in the MDEventWorkspace
-            size_t d = dimensionToBinFrom[bd];
-            // Where the event is in that dimension?
-            coord_t x = center[d];
-            // Within range?
-            if ((x >= min[bd]) && (x < max[bd]))
-            {
-              // Build up the linear index
-              linearIndex += indexMultiplier[bd] * size_t((x - min[bd])/step[bd]);
-            }
-            else
-            {
-              // Outside the range
-              badEvent = true;
-              break;
-            }
-          } // (for each dim in MDHisto)
-
-          if (!badEvent)
-          {
-            signals[linearIndex] += it->getSignal();
-            errors[linearIndex] += it->getErrorSquared();
-          }
+          std::cout << "Chunk " << chunk << ": found " << boxes.size() << " boxes within the implicit function." << std::endl;
+          progNumSteps += boxes.size();
+          prog->setNumSteps( progNumSteps );
         }
-        // Done with the events list
-        box->releaseEvents();
       }
 
-      // Progress reporting
-      if (prog) prog->report();
+      // Go through every box for this chunk.
+      for (size_t i=0; i<boxes.size(); i++)
+      {
+        MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
+        // Perform the binning in this separate method.
+        if (box)
+          this->binMDBox(box, chunkMin, chunkMax);
 
-    }// for each box in the vector
+        // Progress reporting
+        if (prog) prog->report();
+
+      }// for each box in the vector
+    } // for each chunk
+
+
 
     // Now the implicit function
     if (implicitFunction)

@@ -11,6 +11,7 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidMDEvents/MDBox.h"
 
 
 namespace Mantid
@@ -56,6 +57,10 @@ namespace MDEvents
     template<typename MDE, size_t nd>
     void binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
+    /// Method to bin a single MDBox
+    template<typename MDE, size_t nd>
+    void binMDBox(MDBox<MDE, nd> * box, coord_t * chunkMin, coord_t * chunkMax);
+
     /// Input binning dimensions
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> binDimensionsIn;
     /// The output MDHistoWorkspace
@@ -69,6 +74,15 @@ namespace MDEvents
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> binDimensions;
     /// Index of the dimension in the MDEW for the dimension in the output.
     std::vector<size_t> dimensionToBinFrom;
+
+    /// Cached values for speed up
+    size_t numBD;
+    coord_t * min;
+    coord_t * max;
+    coord_t * step;
+    size_t * indexMultiplier;
+    signal_t * signals;
+    signal_t * errors;
 
 
   };
