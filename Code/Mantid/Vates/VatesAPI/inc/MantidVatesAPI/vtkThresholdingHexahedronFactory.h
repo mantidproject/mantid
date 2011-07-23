@@ -94,6 +94,9 @@ private:
   /// Create a hexahedron.
   inline vtkHexahedron* createHexahedron(PointMap& pointMap, const int& i, const int& j, const int& k) const;
 
+  inline vtkHexahedron* createHexahedron(vtkIdType * pointIDs, const int& i, const int& j, const int& k,
+        const int nPointsX, const int nPointsY, const int nPointsZ) const;
+
   /// Name of the scalar to provide on mesh.
   std::string m_scalarName;
 

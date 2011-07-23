@@ -74,6 +74,12 @@ namespace MDEvents
       return m_signals;
     }
 
+    /** @return the inverse of volume of EACH cell in the workspace. For normalizing. */
+    coord_t getInverseVolumeVolume() const
+    {
+      return m_inverseVolume;
+    }
+
     /** @return the direct pointer to the error squared array. For speed */
     signal_t * getErrorSquaredArray()
     {
