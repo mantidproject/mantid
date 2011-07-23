@@ -1,6 +1,5 @@
 # Source files
 set ( SRC_FILES
-	#	src/MDSplitBox.cpp
 	src/AffineMatrixParameter.cpp
 	src/AffineMatrixParameterParser.cpp
 	src/BinToMDHistoWorkspace.cpp
@@ -34,14 +33,12 @@ set ( SRC_UNITY_IGNORE_FILES
     src/MDBoxIterator.cpp
     src/MDEventWorkspace.cpp
     src/MDGridBox.cpp
-    #src/MDSplitBox.cpp
 )
 
 # Header files
 set ( INC_FILES
     inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
-	inc/MantidMDEvents/MDSplitBox.h
 	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/BoxController.h
 	inc/MantidMDEvents/CoordTransform.h
@@ -72,7 +69,6 @@ set ( INC_FILES
 set ( TEST_FILES
     test/AffineMatrixParameterTest.h
 	test/AffineMatrixParameterParserTest.h
-	#test/MDSplitBoxTest.h
 	test/BoxControllerTest.h
 	test/CoordTransformDistanceTest.h
 	test/CoordTransformTest.h

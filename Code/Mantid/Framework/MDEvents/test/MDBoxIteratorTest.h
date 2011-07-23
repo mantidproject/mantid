@@ -448,17 +448,17 @@ public:
 };
 
 
-class MDBoxIteratorTestPerformace : public CxxTest::TestSuite
+class MDBoxIteratorTestPerformance : public CxxTest::TestSuite
 {
 public:
   MDGridBox<MDEvent<3>,3> * top;
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDBoxIteratorTestPerformace *createSuite() { return new MDBoxIteratorTestPerformace(); }
-  static void destroySuite( MDBoxIteratorTestPerformace *suite ) { delete suite; }
+  static MDBoxIteratorTestPerformance *createSuite() { return new MDBoxIteratorTestPerformance(); }
+  static void destroySuite( MDBoxIteratorTestPerformance *suite ) { delete suite; }
 
-  MDBoxIteratorTestPerformace()
+  MDBoxIteratorTestPerformance()
   {
     // 1968876 boxes in this. Top box is 5*5*5
     top = MDEventsTestHelper::makeRecursiveMDGridBox<3>(5, 2);
