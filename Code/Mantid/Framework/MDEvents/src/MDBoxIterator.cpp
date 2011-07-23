@@ -140,8 +140,6 @@ namespace MDEvents
   TMDE(
   bool MDBoxIterator)::next()
   {
-    if (m_done) return false;
-
     while (!m_done)
     {
       size_t children = m_current->getNumChildren();

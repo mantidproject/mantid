@@ -552,16 +552,29 @@ public:
   /** For comparison, let's use getBoxes() that fills a vector directly.
    * After that, we iterate through them to compare how long the whole operation takes.
    */
-  void do_test_getBoxes(bool leafOnly, bool ImplicitFunction, size_t expected)
+  void do_test_getBoxes(bool leafOnly, int ImplicitFunction, size_t expected)
   {
     std::vector< IMDBox<MDEvent<3>,3> * > boxes;
 
-    MDBoxImplicitFunction * function = NULL;
-    if (ImplicitFunction)
+    MDImplicitFunction * function = NULL;
+    if (ImplicitFunction==1)
     {
+      // Box in 3D where 2 < (x,y,z) < 3
       std::vector<coord_t> min(3, 2.0);
       std::vector<coord_t> max(3, 3.0);
       function = new MDBoxImplicitFunction(min, max);
+      top->getBoxes(boxes, 20, leafOnly, function);
+    }
+    else if (ImplicitFunction==2)
+    {
+      // Plane defining 2.2 < x < 2.4
+      function = new MDImplicitFunction();
+      coord_t normal1[3] = {+1, 0, 0};
+      coord_t origin1[3] = {+2.20, 0, 0};
+      function->addPlane(MDPlane(3,normal1, origin1));
+      coord_t normal2[3] = {-1, 0, 0};
+      coord_t origin2[3] = {+2.40, 0, 0};
+      function->addPlane(MDPlane(3,normal2, origin2));
       top->getBoxes(boxes, 20, leafOnly, function);
     }
     else
@@ -586,22 +599,27 @@ public:
 
   void test_getBoxes()
   {
-    do_test_getBoxes(false, false, 125*125*125 + 125*125 + 125 + 1);
+    do_test_getBoxes(false, 0, 125*125*125 + 125*125 + 125 + 1);
   }
 
   void test_getBoxes_leafOnly()
   {
-    do_test_getBoxes(true, false, 125*125*125);
+    do_test_getBoxes(true, 0, 125*125*125);
   }
 
   void test_getBoxes_withImplicitFunction()
   {
-    do_test_getBoxes(false, true, 1 + 125*125 + 125 + 1);
+    do_test_getBoxes(false, 1, 1 + 125*125 + 125 + 1);
   }
 
   void test_getBoxes_withImplicitFunction_leafOnly()
   {
-    do_test_getBoxes(true, true, 125*125);
+    do_test_getBoxes(true, 1, 125*125);
+  }
+
+  void test_getBoxes_withPlaneImplicitFunction()
+  {
+    do_test_getBoxes(true, 2, 125*125*125 / 25);
   }
 
 
