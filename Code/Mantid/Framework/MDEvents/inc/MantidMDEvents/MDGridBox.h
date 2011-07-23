@@ -56,8 +56,6 @@ namespace MDEvents
 
     size_t getNumChildren() const;
 
-    size_t computeSizesFromSplit();
-
     IMDBox<MDE,nd> * getChild(size_t index);
 
     void setChildren(const std::vector<IMDBox<MDE,nd> *> & boxes, const size_t indexStart, const size_t indexEnd);
@@ -91,6 +89,9 @@ namespace MDEvents
     std::vector<IMDBox<MDE, nd>*> getBoxes()
     { return boxes; }
 
+    /** For testing: return the internal-stored size of each box in each dimension */
+    coord_t getBoxSize(size_t d)
+    { return boxSize[d]; }
 
   public:
     /// Typedef for a shared pointer to a MDGridBox
@@ -101,6 +102,8 @@ namespace MDEvents
 
 
   private:
+
+    size_t computeSizesFromSplit();
 
     /// Each dimension is split into this many equally-sized boxes
     size_t split[nd];

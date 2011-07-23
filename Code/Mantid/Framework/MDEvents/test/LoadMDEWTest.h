@@ -99,6 +99,17 @@ public:
       TS_ASSERT( box->getBoxController() );
       TS_ASSERT_EQUALS( box->getBoxController(), ws->getBoxController() );
 
+      // Are both MDGridBoxes ?
+      MDGridBox<MDE,nd>* gridbox = dynamic_cast<MDGridBox<MDE,nd>*>(box);
+      MDGridBox<MDE,nd>* gridbox1 = dynamic_cast<MDGridBox<MDE,nd>*>(box1);
+      if (gridbox)
+      {
+        for (size_t d=0; d<nd; d++)
+        {
+          TS_ASSERT_DELTA( gridbox->getBoxSize(d), gridbox1->getBoxSize(d), 1e-4);
+        }
+      }
+
       // Are both MDBoxes (with events)
       MDBox<MDE,nd>* mdbox = dynamic_cast<MDBox<MDE,nd>*>(box);
       MDBox<MDE,nd>* mdbox1 = dynamic_cast<MDBox<MDE,nd>*>(box1);
