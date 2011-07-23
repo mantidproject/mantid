@@ -128,9 +128,11 @@ namespace MDEvents
       ::NeXus::File * file = this->m_BoxController->getFile();
       if (file)
       {
-        //if (m_BoxController->UseFile())
+        //this->m_BoxController->fileMutex.lock();
+        fileMutex.lock();
         data.clear();
         MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
+        //this->m_BoxController->fileMutex.unlock();
       }
     }
     return data;
@@ -147,24 +149,32 @@ namespace MDEvents
       ::NeXus::File * file = this->m_BoxController->getFile();
       if (file)
       {
-        //if (m_BoxController->UseFile())
+        //this->m_BoxController->fileMutex.lock();
+        fileMutex.lock();
         data.clear();
         MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
+        //this->m_BoxController->fileMutex.unlock();
       }
     }
     return data;
   }
 
   //-----------------------------------------------------------------------------------------------
+  /** For file-backed MDBoxes, this releases the event list,
+   *  and allows it to be cleared from memory (if needed).
+   */
   TMDE(
   void MDBox)::releaseEvents() const
   {
     //TODO: Check a dirty flag and save the data if required?
     if (m_onDisk)
     {
+      //this->m_BoxController->fileMutex.lock();
       // Free up memory by clearing the events
       data.clear();
       vec_t().swap(data); // Linux trick to really free the memory
+      fileMutex.unlock();
+      //this->m_BoxController->fileMutex.unlock();
     }
   }
 
@@ -349,8 +359,10 @@ namespace MDEvents
       }
     }
 
-    typename std::vector<MDE>::const_iterator it = data.begin();
-    typename std::vector<MDE>::const_iterator it_end = data.end();
+    // If the box is cached to disk, you need to retrieve it
+    const std::vector<MDE> & events = this->getEvents();
+    typename std::vector<MDE>::const_iterator it = events.begin();
+    typename std::vector<MDE>::const_iterator it_end = events.end();
 
     // For each MDEvent
     for (; it != it_end; ++it)
@@ -374,6 +386,8 @@ namespace MDEvents
         bin.m_errorSquared += it->getErrorSquared();
       }
     }
+
+    this->releaseEvents();
   }
 
 
@@ -421,8 +435,10 @@ namespace MDEvents
   TMDE(
   void MDBox)::integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const
   {
-    typename std::vector<MDE>::const_iterator it = data.begin();
-    typename std::vector<MDE>::const_iterator it_end = data.end();
+    // If the box is cached to disk, you need to retrieve it
+    const std::vector<MDE> & events = this->getEvents();
+    typename std::vector<MDE>::const_iterator it = events.begin();
+    typename std::vector<MDE>::const_iterator it_end = events.end();
 
     // For each MDEvent
     for (; it != it_end; ++it)
@@ -435,6 +451,8 @@ namespace MDEvents
         errorSquared += it->getErrorSquared();
       }
     }
+
+    this->releaseEvents();
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -450,8 +468,10 @@ namespace MDEvents
   TMDE(
   void MDBox)::centroidSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const
   {
-    typename std::vector<MDE>::const_iterator it = data.begin();
-    typename std::vector<MDE>::const_iterator it_end = data.end();
+    // If the box is cached to disk, you need to retrieve it
+    const std::vector<MDE> & events = this->getEvents();
+    typename std::vector<MDE>::const_iterator it = events.begin();
+    typename std::vector<MDE>::const_iterator it_end = events.end();
 
     // For each MDEvent
     for (; it != it_end; ++it)
@@ -466,6 +486,8 @@ namespace MDEvents
           centroid[d] += it->getCenter(d) * eventSignal;
       }
     }
+
+    this->releaseEvents();
   }
 
 

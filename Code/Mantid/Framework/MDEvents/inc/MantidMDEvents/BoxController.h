@@ -343,6 +343,9 @@ namespace MDEvents
     { m_file = file; }
 
 
+    /// Mutex for locking access to the file, for file-back-end MDBoxes.
+    Mantid::Kernel::Mutex fileMutex;
+
 
     //-----------------------------------------------------------------------------------
   private:

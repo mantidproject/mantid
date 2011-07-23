@@ -146,6 +146,9 @@ namespace MDEvents
     /// True when the events are on disk and not in memory.
     bool m_onDisk;
 
+    /// Mutex for locking access to the file, for file-back-end MDBoxes.
+    mutable Mantid::Kernel::Mutex fileMutex;
+
   public:
     /// Typedef for a shared pointer to a MDBox
     typedef boost::shared_ptr< MDBox<MDE, nd> > sptr;

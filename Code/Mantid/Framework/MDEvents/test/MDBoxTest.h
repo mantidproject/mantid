@@ -14,6 +14,7 @@
 #include <map>
 #include <memory>
 #include <Poco/File.h>
+#include "MantidMDEvents/MDBin.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -427,16 +428,20 @@ public:
 
   //-----------------------------------------------------------------------------------------
   /** Create a test .NXS file with some data */
-  std::string do_saveNexus()
+  std::string do_saveNexus(bool goofyWeights = true)
   {
-    // Box with 1000 events
+    // Box with 1000 events evenly spread
     MDBox<MDEvent<3>,3> b;
     MDEventsTestHelper::feedMDBox(&b, 1, 10, 0.5, 1.0);
     TS_ASSERT_EQUALS( b.getNPoints(), 1000);
-    for (size_t i=0; i<1000; i++)
+    if (goofyWeights)
     {
-      b.getEvents()[i].setSignal(float(i));
-      b.getEvents()[i].setErrorSquared(float(i)+float(0.5));
+      // Give them goofy weights to be more interesting
+      for (size_t i=0; i<1000; i++)
+      {
+        b.getEvents()[i].setSignal(float(i));
+        b.getEvents()[i].setErrorSquared(float(i)+float(0.5));
+      }
     }
 
     // Start a NXS file
@@ -577,6 +582,7 @@ public:
     // Pretend we're letting go of the events. This should clear the list
     c.setOnDisk(true);
     c.releaseEvents();
+
     c.setOnDisk(false);
     TS_ASSERT_EQUALS( c.getNPoints(), 0);
 
@@ -586,7 +592,70 @@ public:
 
 
 
+  //-----------------------------------------------------------------------------------------
+  /** Set up the file back end and test accessing data */
+  void do_test_fileBackEnd_binningOperations(bool parallel)
+  {
+    // Create a box with a controller for the back-end
+    BoxController_sptr bc(new BoxController(3));
+    MDBox<MDEvent<3>,3> c(bc, 0);
 
+    // Open the NXS file
+    std::string filename = do_saveNexus(false);
+    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_RDWR);
+    file->openGroup("my_test_group", "NXdata");
+    MDEvent<3>::openNexusData(file);
+
+    // Set it in the controller for back-end
+    bc->setFile(file);
+    // Set the stuff that is handled outside the box itself
+    c.setFileIndex(500, 1000);
+    c.setOnDisk(true);
+
+    PARALLEL_FOR_IF(parallel)
+    for (int i=0; i<20; i++)
+    {
+      //std::cout << "Bin try " << i << "\n";
+      // Try a bin, 2x2x2 so 8 events should be in there
+      MDBin<MDEvent<3>,3> bin;
+      for (size_t d=0; d<3; d++)
+      {
+        bin.m_min[d] = 2.0;
+        bin.m_max[d] = 4.0;
+        bin.m_signal = 0;
+      }
+      c.centerpointBin(bin, NULL);
+      TS_ASSERT_DELTA( bin.m_signal, 8.0, 1e-4);
+      TS_ASSERT_DELTA( bin.m_errorSquared, 8.0, 1e-4);
+    }
+
+    PARALLEL_FOR_IF(parallel)
+    for (int i=0; i<20; i++)
+    {
+      //std::cout << "Sphere try " << i << "\n";
+      // Integrate a sphere in the middle
+      bool dimensionsUsed[3] = {true,true,true};
+      coord_t center[3] = {5,5,5};
+      CoordTransformDistance sphere(3, center, dimensionsUsed);
+
+      signal_t signal = 0;
+      signal_t error = 0;
+      c.integrateSphere(sphere, 1.0, signal, error);
+      TS_ASSERT_DELTA( signal, 8.0, 1e-4);
+      TS_ASSERT_DELTA( error, 8.0, 1e-4);
+    }
+
+  }
+
+  void test_fileBackEnd_binningOperations()
+  {
+    do_test_fileBackEnd_binningOperations(false);
+  }
+
+  void test_fileBackEnd_binningOperations_inParallel()
+  {
+    do_test_fileBackEnd_binningOperations(true);
+  }
 };
 
 
