@@ -652,7 +652,7 @@ public:
     do_test_fileBackEnd_binningOperations(false);
   }
 
-  void test_fileBackEnd_binningOperations_inParallel()
+  void xtest_fileBackEnd_binningOperations_inParallel()
   {
     do_test_fileBackEnd_binningOperations(true);
   }

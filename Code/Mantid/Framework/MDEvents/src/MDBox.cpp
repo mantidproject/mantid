@@ -128,11 +128,11 @@ namespace MDEvents
       ::NeXus::File * file = this->m_BoxController->getFile();
       if (file)
       {
-        //this->m_BoxController->fileMutex.lock();
         fileMutex.lock();
         data.clear();
+        this->m_BoxController->fileMutex.lock();
         MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
-        //this->m_BoxController->fileMutex.unlock();
+        this->m_BoxController->fileMutex.unlock();
       }
     }
     return data;
@@ -149,11 +149,11 @@ namespace MDEvents
       ::NeXus::File * file = this->m_BoxController->getFile();
       if (file)
       {
-        //this->m_BoxController->fileMutex.lock();
         fileMutex.lock();
         data.clear();
+        this->m_BoxController->fileMutex.lock();
         MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
-        //this->m_BoxController->fileMutex.unlock();
+        this->m_BoxController->fileMutex.unlock();
       }
     }
     return data;
@@ -169,12 +169,10 @@ namespace MDEvents
     //TODO: Check a dirty flag and save the data if required?
     if (m_onDisk)
     {
-      //this->m_BoxController->fileMutex.lock();
       // Free up memory by clearing the events
       data.clear();
       vec_t().swap(data); // Linux trick to really free the memory
       fileMutex.unlock();
-      //this->m_BoxController->fileMutex.unlock();
     }
   }
 
