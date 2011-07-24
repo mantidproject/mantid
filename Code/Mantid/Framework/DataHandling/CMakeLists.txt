@@ -74,7 +74,8 @@ set ( SRC_FILES
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
 	src/SaveCanSAS1D.cpp
-	src/SaveDASC.cpp
+        src/SaveDASC.cpp
+        src/SaveDaveGrp.cpp
 	src/SaveDspacemap.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveGSS.cpp
@@ -165,6 +166,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveCalFile.h
 	inc/MantidDataHandling/SaveCanSAS1D.h
 	inc/MantidDataHandling/SaveDASC.h
+        inc/MantidDataHandling/SaveDaveGrp.h
 	inc/MantidDataHandling/SaveDspacemap.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveGSS.h
@@ -251,6 +253,7 @@ set ( TEST_FILES
 	test/SaveCalFileTest.h
 	test/SaveCanSAS1dTest.h
 	test/SaveDASCTest.h
+        test/SaveDaveGrpTest.h
 	test/SaveDspacemapTest.h
 	test/SaveFocussedXYETest.h
 	test/SaveNexusTest.h
