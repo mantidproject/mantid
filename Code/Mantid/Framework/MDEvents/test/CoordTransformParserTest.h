@@ -22,7 +22,7 @@ private:
 
   class MockCoordTransformParser : public CoordTransformParser
   {
-    virtual CoordTransform* createTransform(Poco::XML::Element* coordTransElement) const
+    virtual CoordTransform* createTransform(Poco::XML::Element*) const
     {
       return new CoordTransform(1, 1);
     }
