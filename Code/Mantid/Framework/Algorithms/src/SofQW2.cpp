@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/SofQW2.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Math/LaszloIntersection.h"
+#include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Math/Vertex2D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 
@@ -15,7 +16,7 @@ namespace Mantid
   {
 
     // Register the algorithm into the AlgorithmFactory
-    //DECLARE_ALGORITHM(SofQW2)
+    DECLARE_ALGORITHM(SofQW2)
 
     using namespace Mantid::Kernel;
     using namespace Mantid::API;
@@ -23,12 +24,13 @@ namespace Mantid
     using Geometry::DetectorGroup;
     using Geometry::DetectorGroup_sptr;
     using Geometry::ConvexPolygon;
+    using Geometry::Quadrilateral;
     using Geometry::Vertex2D;
 
     /// Default constructor
     SofQW2::SofQW2() 
       : SofQW(), m_emode(0), m_efixed(0.0), m_beamDir(), 
-        m_samplePos(), m_thetaIndex(), m_progress(), m_qcache()
+        m_samplePos(), m_progress(), m_qcached()
     {
     }
 
@@ -73,7 +75,7 @@ namespace Mantid
         {
           m_progress->report("Computing polygon overlap");
           const double xo_lo(X[j]), xo_hi(X[j+1]);
-          ConvexPolygon newPoly(xo_lo, xo_hi, y_i, y_ip1);
+          Quadrilateral newPoly(xo_lo, xo_hi, y_i, y_ip1);
           std::pair<double,double> contrib = calculateYE(inputWS, newPoly);
           outY[j] = contrib.first;
           outE[j] = contrib.second;
@@ -173,140 +175,39 @@ namespace Mantid
     SofQW2::findIntersections(API::MatrixWorkspace_const_sptr inputWS,
                               const Geometry::ConvexPolygon & newPoly) const
     {
-      std::vector<BinWithWeight> overlaps;
-      overlaps.reserve(5); // Have a guess at a posible limit
-
-      const size_t nypoints(inputWS->getNumberHistograms());
-      for(size_t i = 0; i < nypoints; ++i)
-      {
-        IDetector_sptr det_i;
-        try
-        {
-          det_i = inputWS->getDetector(i);
-          if( det_i->isMonitor() ) continue;
-        }
-        catch(Kernel::Exception::NotFoundError&)
-        {
-          continue;
-        }
-        DetectorGroup_sptr detGroup = boost::dynamic_pointer_cast<DetectorGroup>(det_i);
-        if( detGroup ) 
-        {
-          findIntersections(inputWS, i, detGroup->getDetectors(), newPoly, overlaps);
-        }
-        else
-        {
-          findIntersections(inputWS, i, std::vector<IDetector_sptr>(1,det_i), newPoly, overlaps);
-        }
-      }
-      return overlaps;
-    }
-
-    /// Find the overlap of the inputWS with the given polygon
-    void SofQW2::findIntersections(API::MatrixWorkspace_const_sptr inputWS,
-                                   const size_t yIndex, 
-                                   const std::vector<Geometry::IDetector_sptr> & dets,
-                                   const Geometry::ConvexPolygon & newPoly,
-                                   std::vector<BinWithWeight> & overlaps) const
-    {
       const MantidVec & oldAxis1 = inputWS->readX(0);
-      const size_t ndets(dets.size());
-      const double ndets_dbl = static_cast<double>(ndets);
-
-      // Find the region to search as we don't need to search everywhere
       const double xn_lo(newPoly[0].X()), xn_hi(newPoly[2].X());
-      const double yn_lo(newPoly[0].Y()), yn_hi(newPoly[1].Y());
       MantidVec::const_iterator start_it = std::upper_bound(oldAxis1.begin(), oldAxis1.end(), xn_lo);
       MantidVec::const_iterator end_it = std::upper_bound(oldAxis1.begin(), oldAxis1.end(), xn_hi);
       const size_t start_index = (start_it - oldAxis1.begin() - 1);
       const size_t end_index = start_index + (end_it - start_it + 1);
 
-      for( size_t i = 0; i < ndets; ++i )
+      std::vector<BinWithWeight> overlaps;
+      overlaps.reserve(5); // Have a guess at a possible limit
+      const double yn_lo(newPoly[0].Y()), yn_hi(newPoly[1].Y());
+
+      std::list<QRangeCache>::const_iterator iend = m_qcached.end();
+      for(std::list<QRangeCache>::const_iterator itr = m_qcached.begin();
+          itr != iend; ++itr)
       {
-        IDetector_sptr det = dets[i];
         for(size_t j = start_index; j < end_index; ++j)
         {
           const double xo_lo(oldAxis1[j]), xo_hi(oldAxis1[j+1]);
-          std::pair<double,double> qold = getQRange(det, j);
+          std::pair<double,double> qold = itr->qValues[j];
           if( qold.second < yn_lo || qold.first > yn_hi ) continue;
-          //ConvexPolygon oldPoly(xo_lo, xo_hi, qold.first, qold.second);
-          Vertex2D *head = new Vertex2D(xo_lo, qold.first);
-          head->insert(new Vertex2D(xo_hi, qold.first));
-          head->insert(new Vertex2D(xo_hi, qold.second));
-          head->insert(new Vertex2D(xo_lo, qold.first));
-          ConvexPolygon oldPoly(head);
+          Quadrilateral oldPoly(V2D(xo_lo, qold.first), V2D(xo_hi, qold.first),
+                                V2D(xo_hi, qold.second), V2D(xo_lo, qold.first));
           try
           {
             ConvexPolygon overlap = intersectionByLaszlo(newPoly, oldPoly);
-            overlaps.push_back(BinWithWeight(yIndex,j,overlap.area()/oldPoly.area()/ndets_dbl));
+            overlaps.push_back(BinWithWeight(itr->wsIndex,j,itr->weight*overlap.area()/oldPoly.area()));
           }
           catch(Geometry::NoIntersectionException &)
           {}            
         }
-      }
+      } 
+      return overlaps;
     }
-
-    /**
-     * Determine the Q Range from a given detector on the workspace
-     * @param det :: The pointer to the detector instance
-     * @param deltaE :: The value of deltaE
-     */
-    std::pair<double,double> SofQW2::calculateQRange(Geometry::IDetector_sptr det, 
-                                                     const double dEMin, const double dEMax) const
-    {
-      double r(0.0), theta_pt(0.0), phi(0.0);
-      det->getPos().getSpherical(r,theta_pt,phi);
-      typedef std::vector<double>::const_iterator dbl_iterator;
-      // Find the upper bin boundary
-      dbl_iterator upp = std::upper_bound(m_thetaIndex.begin(), m_thetaIndex.end(), theta_pt);
-      const size_t ip1 = static_cast<size_t>(std::distance(m_thetaIndex.begin(), upp));
-      const double theta_max = m_thetaIndex[ip1];
-      const double theta_min = m_thetaIndex[ip1-1];      
-      V3D scatter_min;
-      scatter_min.spherical(r, theta_min, phi);
-      scatter_min = (scatter_min - m_samplePos);
-      scatter_min.normalize();
-      V3D scatter_max;
-      scatter_max.spherical(r, theta_max, phi);
-      scatter_max = (scatter_max - m_samplePos);
-      scatter_max.normalize();
-      // Compute ki and kf wave vectors and therefore q = ki - kf
-      double ei_min(0.0), ei_max(0.0), ef_min(0.0), ef_max(0.0);
-      if( m_emode == 2 )
-      {
-        std::vector<double> param = det->getNumberParameter("EFixed");
-        double efixed = m_efixed;
-        if( param.size() != 0 ) efixed = param[0];
-        ei_min = efixed + dEMin;
-        ei_max = efixed + dEMax;
-        ef_min = ef_max = efixed;
-      }
-      else
-      {
-        ei_min = ei_max = m_efixed;
-        ef_min = m_efixed - dEMin;
-        ef_max = m_efixed - dEMax;
-      }
-      const V3D ki_min = m_beamDir*sqrt(m_EtoK*ei_min);
-      const V3D ki_max = m_beamDir*sqrt(m_EtoK*ei_max);
-      const V3D kf_min = scatter_min*(sqrt(m_EtoK*ef_min));
-      const V3D kf_max = scatter_max*(sqrt(m_EtoK*ef_max));
-      // Using the inelastic convention
-      return std::pair<double,double>((ki_min - kf_min).norm(), (ki_max - kf_max).norm());
-    }
-
-    /**
-     * Get the Q Range from a given detector on the workspace
-     * @param det :: The pointer to the detector instance
-     * @param xIndex :: The index in the X vector (for cache lookup)
-     */
-    std::pair<double,double> SofQW2::getQRange(Geometry::IDetector_sptr det, 
-                                               const size_t xIndex) const
-    {
-      std::map<detid_t, std::vector<std::pair<double,double> > >::const_iterator it = 
-        m_qcache.find(det->getID());
-      return it->second[xIndex];
-    }   
 
     /**
      * Init variables caches
@@ -381,15 +282,16 @@ namespace Mantid
       // Make the bin boundaries
       std::sort(theta_pts.begin(), theta_pts.end());
       const size_t npts = theta_pts.size();
-      m_thetaIndex.resize(npts + 1);
+      std::vector<double> thetaIndex(npts + 1);
       for( size_t i = 0; i < npts - 1; ++i )
       {
-        m_thetaIndex[i+1] = 0.5*(theta_pts[i] + theta_pts[i+1]);
+        thetaIndex[i+1] = 0.5*(theta_pts[i] + theta_pts[i+1]);
       }
-      m_thetaIndex[0] = 2.0*theta_pts.front() - m_thetaIndex[1];
-      m_thetaIndex[npts] = 2.0*theta_pts.back() - m_thetaIndex[npts - 1];
+      thetaIndex[0] = 2.0*theta_pts.front() - thetaIndex[1];
+      thetaIndex[npts] = 2.0*theta_pts.back() - thetaIndex[npts - 1];
       const size_t nxpoints = workspace->blocksize();
       const MantidVec & X = workspace->readX(0);
+      m_qcached.clear();
 
       PARALLEL_FOR1(workspace)
       for(int64_t i = 0 ; i < (int64_t)nhist; ++i)
@@ -400,6 +302,7 @@ namespace Mantid
         try
         {
            det = workspace->getDetector(i);
+           if( det->isMonitor() ) det.reset();
         }
         catch(Kernel::Exception::NotFoundError&)
         {
@@ -416,28 +319,38 @@ namespace Mantid
         {
           std::vector<IDetector_sptr> dets = detGroup->getDetectors();
           const size_t ndets(dets.size());
-          for( size_t i = 0; i < ndets; ++i )
+          for( size_t j = 0; j < ndets; ++j )
           {
-            IDetector_sptr det_i = dets[i];
-            for( size_t j = 0; j < nxpoints; ++j)
+            IDetector_sptr det_j = dets[j];
+            std::vector<double> param = det_j->getNumberParameter("EFixed");
+            double efixed = m_efixed;
+            if( param.size() != 0 ) efixed = param[0];
+            QRangeCache qrange(i, efixed, 1.0/(double)ndets);
+            for( size_t k = 0; k < nxpoints; ++k)
             {
-              qvalues[j] = calculateQRange(det_i, X[j], X[j+1]);
+              qvalues[k] = calculateQRange(det_j, X[k], X[k+1], thetaIndex);
             }
+            qrange.qValues = qvalues;
             PARALLEL_CRITICAL(qcache_a)
             {
-              m_qcache.insert(std::make_pair(det_i->getID(), qvalues));
+              m_qcached.insert(m_qcached.end(), qrange);
             }
           }
         }
         else
         {
-          for( size_t j = 0; j < nxpoints; ++j)
+          std::vector<double> param = det->getNumberParameter("EFixed");
+          double efixed = m_efixed;
+          if( param.size() != 0 ) efixed = param[0];
+          QRangeCache qrange(i, efixed, 1.0);
+          for( size_t k = 0; k < nxpoints; ++k)
           {
-            qvalues[j] = calculateQRange(det, X[j], X[j+1]);
+            qvalues[k] = calculateQRange(det, X[k], X[k+1], thetaIndex);
           }
+          qrange.qValues = qvalues;
           PARALLEL_CRITICAL(qcache_b)
           {
-            m_qcache.insert(std::make_pair(det->getID(), qvalues));
+            m_qcached.insert(m_qcached.end(), qrange);
           }
         }
 
@@ -446,10 +359,58 @@ namespace Mantid
       PARALLEL_CHECK_INTERUPT_REGION
 
       g_log.debug() << "Initializing Q Cache took " << clock.elapsed() << " seconds\n";
-      // Clear theta bins and STL Trick to release memory
-      m_thetaIndex.clear();
-      std::vector<double>().swap(m_thetaIndex); 
     }
+
+    /**
+     * Determine the Q Range from a given detector on the workspace
+     * @param det :: The pointer to the detector instance
+     * @param deltaE :: The value of deltaE
+     */
+    std::pair<double,double> SofQW2::calculateQRange(Geometry::IDetector_sptr det, 
+                                                     const double dEMin, const double dEMax,
+                                                     const std::vector<double> &thetaIndex) const
+    {
+      double r(0.0), theta_pt(0.0), phi(0.0);
+      det->getPos().getSpherical(r,theta_pt,phi);
+      typedef std::vector<double>::const_iterator dbl_iterator;
+      // Find the upper bin boundary
+      dbl_iterator upp = std::upper_bound(thetaIndex.begin(), thetaIndex.end(), theta_pt);
+      const size_t ip1 = static_cast<size_t>(std::distance(thetaIndex.begin(), upp));
+      const double theta_max = thetaIndex[ip1];
+      const double theta_min = thetaIndex[ip1-1];      
+      V3D scatter_min;
+      scatter_min.spherical(r, theta_min, phi);
+      scatter_min = (scatter_min - m_samplePos);
+      scatter_min.normalize();
+      V3D scatter_max;
+      scatter_max.spherical(r, theta_max, phi);
+      scatter_max = (scatter_max - m_samplePos);
+      scatter_max.normalize();
+      // Compute ki and kf wave vectors and therefore q = ki - kf
+      double ei_min(0.0), ei_max(0.0), ef_min(0.0), ef_max(0.0);
+      if( m_emode == 2 )
+      {
+        std::vector<double> param = det->getNumberParameter("EFixed");
+        double efixed = m_efixed;
+        if( param.size() != 0 ) efixed = param[0];
+        ei_min = efixed + dEMin;
+        ei_max = efixed + dEMax;
+        ef_min = ef_max = efixed;
+      }
+      else
+      {
+        ei_min = ei_max = m_efixed;
+        ef_min = m_efixed - dEMin;
+        ef_max = m_efixed - dEMax;
+      }
+      const V3D ki_min = m_beamDir*sqrt(m_EtoK*ei_min);
+      const V3D ki_max = m_beamDir*sqrt(m_EtoK*ei_max);
+      const V3D kf_min = scatter_min*(sqrt(m_EtoK*ef_min));
+      const V3D kf_max = scatter_max*(sqrt(m_EtoK*ef_max));
+      // Using the inelastic convention
+      return std::pair<double,double>((ki_min - kf_min).norm(), (ki_max - kf_max).norm());
+    }
+
 
   } // namespace Mantid
 } // namespace Algorithms

@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/SofQW.h" 
 #include "MantidGeometry/Math/ConvexPolygon.h"
 #include "MantidGeometry/IDetector.h"
+#include <list>
 
 namespace Mantid
 {
@@ -56,9 +57,9 @@ namespace Mantid
       /// Default constructor
       SofQW2();
       /// Algorithm's name for identification 
-      virtual const std::string name() const { return "SofQW"; }
+      virtual const std::string name() const { return "SofQW2"; }
       /// Algorithm's version for identification 
-      virtual int version() const { return 2; };
+      virtual int version() const { return 1; };
       /// Algorithm's category for identification
       virtual const std::string category() const { return "General";}
 
@@ -98,24 +99,15 @@ namespace Mantid
       /// Find the overlap of the inputWS with the given polygon
       std::vector<BinWithWeight> findIntersections(API::MatrixWorkspace_const_sptr inputWS,
                                                    const Geometry::ConvexPolygon & poly) const;
-      /// Find the overlap of the inputWS with the given polygon
-      void findIntersections(API::MatrixWorkspace_const_sptr inputWS,
-                             const size_t yIndex,
-                             const std::vector<Geometry::IDetector_sptr> & dets,
-                             const Geometry::ConvexPolygon & newPoly,
-                             std::vector<BinWithWeight> & overlaps) const;
-      /// Calculate the Q range
-      std::pair<double,double> calculateQRange(Geometry::IDetector_sptr det, 
-                                               const double dEMin, 
-                                               const double dEMax) const;
-      /// Get the Q Range from a given detector on the workspace
-      std::pair<double,double> getQRange(Geometry::IDetector_sptr det, 
-                                         const size_t xIndex) const;
-    
       /// Init variables cache base on the given workspace
       void initCachedValues(API::MatrixWorkspace_const_sptr workspace);
       /// Init the theta index
       void initQCache(API::MatrixWorkspace_const_sptr workspace);
+      /// Calculate the Q range
+      std::pair<double,double> calculateQRange(Geometry::IDetector_sptr det, 
+                                               const double dEMin, 
+                                               const double dEMax,
+                                               const std::vector<double> & thetaIndex) const;
 
       /// E Mode
       int m_emode;
@@ -125,12 +117,24 @@ namespace Mantid
       Kernel::V3D m_beamDir;
       /// Sample position
       Kernel::V3D m_samplePos;
-      /// Indexable theta values
-      std::vector<double> m_thetaIndex;
       /// Progress reporter
       boost::shared_ptr<API::Progress> m_progress;
-      /// Pre-cache Q values
-      std::map<detid_t, std::vector<std::pair<double,double> > > m_qcache;
+      /// Small caching struct
+      struct QRangeCache
+      {
+        QRangeCache(const size_t index, const double efix, const double wght)
+          : wsIndex(index), efixed(efix), weight(wght), qValues(0) {}
+        /// workspace index origin
+        const size_t wsIndex;
+        /// EFixed value
+        const double efixed;
+        /// Weight
+        const double weight;
+        /// QValues for each energy point
+        std::vector<std::pair<double,double> > qValues;
+      };
+      /// The cache
+      std::list<QRangeCache> m_qcached;
     };
 
 
