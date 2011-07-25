@@ -26,11 +26,14 @@ private:
   double BIN_DELTA;
   int NUMPIXELS;
   int NUMBINS;
+  int NUMEVENTS;
+  std::string inWSName;
+  std::string outWSName;
 
   void makeFakeEventWorkspace(std::string wsName)
   {
     //Make an event workspace with 2 events in each bin.
-    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateEventWorkspace(NUMPIXELS, NUMBINS, NUMBINS, 0.0, BIN_DELTA, 2);
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateEventWorkspace(NUMPIXELS, NUMBINS, NUMEVENTS, 1000., BIN_DELTA, 2);
     //Fake a TOF unit in the data.
     test_in->getAxis(0)->unit() =UnitFactory::Instance().create("TOF");
     test_in->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS/9, false) );
@@ -45,9 +48,17 @@ private:
 public:
   RemovePromptPulseTest()
   {
-    BIN_DELTA = 2.;
+    BIN_DELTA = 100.;
     NUMPIXELS = 36;
     NUMBINS = 50;
+    NUMEVENTS = 1000;
+  }
+
+  ~RemovePromptPulseTest()
+  {
+    AnalysisDataService::Instance().remove(inWSName);
+    if (inWSName.compare(outWSName) != 0)
+      AnalysisDataService::Instance().remove(outWSName);
   }
 
   void test_Init()
@@ -57,30 +68,69 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void test_exec()
+  void test_exec_miss()
   {
-    std::string inWSName("RemovePromptPulseTest_InputWS");
-    std::string outWSName("RemovePromptPulseTest_OutputWS");
-  
+    std::cout << "****************************************" << std::endl; // REMOVE
+    inWSName = "RemovePromptPulseTest_InputWS_miss";
+    outWSName = inWSName; //"RemovePromptPulseTest_OutputWS_miss";
+    this->makeFakeEventWorkspace(inWSName);
+
+    EventWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inWSName)) );
+    std::size_t num_events = ws->getNumberEvents();
+
     RemovePromptPulse alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-//    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", inWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", inWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Width", "30.") );
-//    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-//    TS_ASSERT( alg.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Width", "1000.") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Frequency", "100") );
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    // Retrieve the workspace from data service. TODO: Change to your desired type
+    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT(ws);
+    if (!ws) return;
+
+    // Verify the results
+    std::cout << "miss " << ws->getTofMin() << " -> " << ws->getTofMax() << std::endl;
+    std::cout << "miss " << num_events << " " << ws->getNumberEvents() << std::endl;
+    TS_ASSERT_EQUALS(num_events, ws->getNumberEvents()); // should not drop events
+  }
+
+  void test_exec_hit()
+  {
+    std::cout << "****************************************" << std::endl; // REMOVE
+    inWSName = "RemovePromptPulseTest_InputWS_hit";
+    outWSName = inWSName; //"RemovePromptPulseTest_OutputWS_hit";
+    this->makeFakeEventWorkspace(inWSName);
+
+    EventWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inWSName)) );
+    std::size_t num_events = ws->getNumberEvents();
+
+    RemovePromptPulse alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", inWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Width", "1000.") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Frequency", "200") );
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
     
     // Retrieve the workspace from data service. TODO: Change to your desired type
-//    Workspace_sptr ws;
-//    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
-//    TS_ASSERT(ws);
-//    if (!ws) return;
-    
-    // TODO: Check the results
-    
-    // Remove workspace from the data service.
-//    AnalysisDataService::Instance().remove(outWSName);
+    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT(ws);
+    if (!ws) return;
+
+    // Verify the results
+    std::cout << "hit " << num_events << " " << ws->getNumberEvents() << std::endl;
+    TS_ASSERT(num_events > ws->getNumberEvents()); // should drop events
   }
 
 };

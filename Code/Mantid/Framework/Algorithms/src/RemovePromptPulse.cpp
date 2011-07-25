@@ -147,6 +147,7 @@ namespace { // anonymous namespace begin
     double tmin;
     double tmax;
     getTofRange(inputWS, tmin, tmax);
+    g_log.information() << "Data tmin=" << tmin << ", tmax=" << tmax << ", period=" << period << " microseconds\n";
 
     // get the first prompt pulse
     double left = 0.;
@@ -157,12 +158,12 @@ namespace { // anonymous namespace begin
     if (left > tmax)
     {
       g_log.notice() << "Not applying filter since prompt pulse is not in data range (" << left << " > " << tmax
-                      << " microseconds)\n";
+                      << " microseconds, period = " << period << ")\n";
       setProperty("OutputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(inputWS));
       return;
     }
     double right = left + width;
-    g_log.notice() << "Filtering tmin=" << (left*10.) << ", tmax=" << (right*10.) << " microseconds\n";
+    g_log.notice() << "Filtering tmin=" << left << ", tmax=" << right << " microseconds\n";
 
     // run maskbins to do the work on the first prompt pulse
     IAlgorithm_sptr algo = this->createSubAlgorithm("MaskBins");
@@ -179,7 +180,7 @@ namespace { // anonymous namespace begin
     if (left + period < tmax)
     {
       g_log.warning() << "There is more than one prompt pulse possible in the data, only the first was filtered "
-                      << "(at TOF = " << left << " and " << (left+period) << ")\n";
+                      << "(at TOF = " << left << ", not " << (left+period) << ")\n";
     }
   }
 
