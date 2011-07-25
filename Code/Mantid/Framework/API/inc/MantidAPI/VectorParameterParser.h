@@ -58,6 +58,8 @@ public:
 
   Mantid::API::ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement);
 
+  VectorValueParameterType* createWithoutDelegation(Poco::XML::Element* parameterElement);
+
   void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser* paramParser);
 
   ~VectorParameterParser();
@@ -113,6 +115,28 @@ Mantid::API::ImplicitFunctionParameter* VectorParameterParser<VectorValueParamet
       throw std::runtime_error("No successor ParameterParser!");
     }
     return m_successor->createParameter(parameterElement);
+  }
+  else
+  {
+    std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
+    return parseVectorParameter(sParameterValue);
+  }
+}
+
+//------------------------------------------------------------------------------
+/* Creates a parameter from an xml element. This is single-shot. Does not defer to successor if it fails!.
+@param parameterElement : xml Element
+@return A fully constructed VectorValueParameterType.
+*/
+template<class VectorValueParameterType>
+VectorValueParameterType* VectorParameterParser<VectorValueParameterType>::createWithoutDelegation(
+    Poco::XML::Element* parameterElement)
+{
+  typedef typename VectorValueParameterType::ValueType ValType;
+  std::string typeName = parameterElement->getChildElement("Type")->innerText();
+  if (VectorValueParameterType::parameterName() != typeName)
+  {
+    throw std::runtime_error("The attempted ::createWithoutDelegation failed. The type provided does not match this parser.");
   }
   else
   {

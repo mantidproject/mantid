@@ -6,6 +6,7 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
+using namespace Poco::XML;
 
 class VectorParameterParserTest : public CxxTest::TestSuite
 {
@@ -61,8 +62,6 @@ public:
 
   void testSuccessfulParse()
   {
-    using namespace Poco::XML;
-
     DOMParser pParser;
     std::string xmlToParse = "<Parameter><Type>ConcreteVectorDblParam</Type><Value>1, 2, 3</Value></Parameter>";
     Document* pDoc = pParser.parseString(xmlToParse);
@@ -86,8 +85,6 @@ public:
 
   void testThrowsIfNoSuccessor()
   {
-    using namespace Poco::XML;
-
     DOMParser pParser;
     std::string xmlToParse = "<Parameter><Type>SucessorVectorParameter</Type><Value>1, 2, 3</Value></Parameter>";
     Document* pDoc = pParser.parseString(xmlToParse);
@@ -101,8 +98,6 @@ public:
 
   void testChainOfResponsibility()
   {
-    using namespace Poco::XML;
-
     //Local declare of a successor parser with a successor parameter.
     typedef VectorParameterParser<SucessorVectorParameter> ConcreteSuccessorVectorParameterParser;
 
@@ -122,8 +117,6 @@ public:
 
   void testSuccessfulParseBools()
   {
-    using namespace Poco::XML;
-
     DOMParser pParser;
     std::string xmlToParse = "<Parameter><Type>ConcreteVectorBoolParam</Type><Value>1, 0, 1, 0</Value></Parameter>";
     Document* pDoc = pParser.parseString(xmlToParse);
@@ -146,6 +139,30 @@ public:
     TS_ASSERT_EQUALS(true, v3);
     TS_ASSERT_EQUALS(false, v4);
     delete actualProduct;
+  }
+
+  void testCreateWithoutDelegationThrows()
+  {
+    DOMParser pParser;
+    std::string xmlToParse = "<Parameter><Type>OTHER</Type><Value>1, 0, 1, 0</Value></Parameter>";
+    Document* pDoc = pParser.parseString(xmlToParse);
+    Element* pRootElem = pDoc->documentElement();
+
+    ConcreteVectorBoolParamParser parser;
+    TSM_ASSERT_THROWS("Should throw since delegation is not possible.", parser.createWithoutDelegation(pRootElem), std::runtime_error);
+  }
+
+  void testCreateWithoutDelegation()
+  {
+    DOMParser pParser;
+    std::string xmlToParse = "<Parameter><Type>ConcreteVectorDblParam</Type><Value>1, 0, 1, 0</Value></Parameter>";
+    Document* pDoc = pParser.parseString(xmlToParse);
+    Element* pRootElem = pDoc->documentElement();
+
+    ConcreteVectorDblParamParser parser;
+    ConcreteVectorDblParam * product = parser.createWithoutDelegation(pRootElem);
+    TS_ASSERT(product != NULL);
+    delete product;
   }
 
 };
