@@ -1,0 +1,101 @@
+<ServerManagerConfiguration>
+  <!-- Begin MDEWNexusReader -->
+  <ProxyGroup name="sources">
+    <SourceProxy name="MDEWNexusReader" class="vtkMDEWNexusReader">
+	    <IntVectorProperty
+         name="Load All Into Memory"
+         command="SetInMemory"
+         number_of_elements="1"
+         default_values="0">
+         <BooleanDomain name="bool"/>
+        </IntVectorProperty>
+	    <ProxyProperty name="ClipFunction" command="SetClipFunction" label="Rebinning Cut Type">
+           <ProxyGroupDomain name="groups">
+               <Group name="implicit_functions"/>
+           </ProxyGroupDomain>
+           <ProxyListDomain name="proxy_list">
+              <Proxy group="implicit_functions" name="Plane" />
+           </ProxyListDomain>
+           <Documentation>
+             This property specifies the parameters of the clip function (an implicit plane) used to clip/rebin the dataset.
+           </Documentation>
+        </ProxyProperty>
+		<IntVectorProperty
+         name="Apply Clipping"
+         command="SetApplyClip"
+         number_of_elements="1"
+         default_values="0">
+         <BooleanDomain name="bool"/>
+        </IntVectorProperty>
+		<DoubleVectorProperty
+         name="Plane Width"
+         command="SetWidth"
+         number_of_elements="1"
+	     default_values="1">
+	    </DoubleVectorProperty>
+        <DoubleVectorProperty
+         name="MinThreshold"
+         command="SetMinThreshold"
+         number_of_elements="1"
+	     default_values="0.1"
+	    >
+	   </DoubleVectorProperty>
+	   <DoubleVectorProperty
+         name="MaxThreshold"
+         command="SetMaxThreshold"
+         number_of_elements="1"
+	     default_values="10000">
+	   </DoubleVectorProperty>
+	   <StringVectorProperty
+         name="InputGeometryXML"
+         command="GetInputGeometryXML"
+         number_of_elements="1"
+         information_only="1">
+        <SimpleStringInformationHelper /> 
+       </StringVectorProperty>
+       <StringVectorProperty
+         name="AppliedGeometryXML"
+         command="SetAppliedGeometryXML"
+         number_of_elements="1"
+         default_values="--">
+       </StringVectorProperty>
+       <StringVectorProperty
+        name="FileName"
+        command="SetFileName"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+      </StringVectorProperty>
+	     <StringVectorProperty
+         name="ThresholdRangeStrategyIndex"
+         command="SetThresholdRangeStrategyIndex"
+         number_of_elements="1"
+	     default_values="0">
+	   </StringVectorProperty>
+	  <DoubleVectorProperty
+         name="InputMinThreshold"
+         command="GetInputMinThreshold"
+         number_of_elements="1"
+		 default_values="0.1"
+         information_only="1">
+        <SimpleDoubleInformationHelper /> 
+      </DoubleVectorProperty>
+	  <DoubleVectorProperty
+         name="InputMaxThreshold"
+         command="GetInputMaxThreshold"
+         number_of_elements="1"
+		 default_values="1000000"
+         information_only="1">
+       <SimpleDoubleInformationHelper /> 
+      </DoubleVectorProperty>
+	  <DoubleVectorProperty 
+        name="TimestepValues"
+        information_only="1">
+        <TimeStepsInformationHelper/>
+        <Documentation>
+          Available timestep values.
+        </Documentation>
+      </DoubleVectorProperty>
+    </SourceProxy>
+  </ProxyGroup>
+  <!-- End MDEWNexusReader -->
+</ServerManagerConfiguration>

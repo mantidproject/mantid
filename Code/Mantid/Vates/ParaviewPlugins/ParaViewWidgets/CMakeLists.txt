@@ -1,4 +1,5 @@
 add_subdirectory( EventNexusReaderObjectPanel )
+add_subdirectory( MDEWNexusReaderObjectPanel )
 add_subdirectory( SQWEventReaderObjectPanel )
 add_subdirectory( RebinningCutterObjectPanel )
 add_subdirectory( RebinningCutterToolBarExtension )

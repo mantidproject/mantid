@@ -1,4 +1,4 @@
-#include "vtkEventNexusReader.h"
+#include "vtkMDEWNexusReader.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
@@ -32,7 +32,7 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidMDEvents/OneStepMDEW.h"
+#include "MantidMDEvents/LoadMDEW.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
@@ -41,8 +41,8 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidNexus/NeXusFile.hpp"
 
-vtkCxxRevisionMacro(vtkEventNexusReader, "$Revision: 1.0 $");
-vtkStandardNewMacro(vtkEventNexusReader);
+vtkCxxRevisionMacro(vtkMDEWNexusReader, "$Revision: 1.0 $");
+vtkStandardNewMacro(vtkMDEWNexusReader);
 
 using namespace Mantid::VATES;
 using Mantid::Geometry::IMDDimension_sptr;
@@ -50,7 +50,7 @@ using Mantid::Geometry::IMDDimension_sptr;
 using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDHistoDimension_sptr;
 
-vtkEventNexusReader::vtkEventNexusReader() : 
+vtkMDEWNexusReader::vtkMDEWNexusReader() : 
   m_presenter(), 
   m_isSetup(false), 
   m_clipFunction(NULL),
@@ -64,13 +64,13 @@ vtkEventNexusReader::vtkEventNexusReader() :
   m_actionManager.ask(RecalculateAll);
 }
 
-vtkEventNexusReader::~vtkEventNexusReader()
+vtkMDEWNexusReader::~vtkMDEWNexusReader()
 {
   this->SetFileName(0);
 }
 
 
-void vtkEventNexusReader::configureThresholdRangeMethod()
+void vtkMDEWNexusReader::configureThresholdRangeMethod()
 {
   switch(m_thresholdMethodIndex)
   {
@@ -93,7 +93,7 @@ void vtkEventNexusReader::configureThresholdRangeMethod()
   Sets number of bins for x dimension.
   @param nbins : Number of bins for the x dimension.
 */
-void vtkEventNexusReader::SetXBins(int nbins)
+void vtkMDEWNexusReader::SetXBins(int nbins)
 {
   if(nbins != m_nXBins)
   {
@@ -107,7 +107,7 @@ void vtkEventNexusReader::SetXBins(int nbins)
   Sets number of bins for x dimension.
   @param nbins : Number of bins for the x dimension.
 */
-void vtkEventNexusReader::SetYBins(int nbins)
+void vtkMDEWNexusReader::SetYBins(int nbins)
 {
   if(nbins != m_nYBins)
   {
@@ -121,7 +121,7 @@ void vtkEventNexusReader::SetYBins(int nbins)
   Sets number of bins for y dimension.
   @param nbins : Number of bins for the x dimension.
 */
-void vtkEventNexusReader::SetZBins(int nbins)
+void vtkMDEWNexusReader::SetZBins(int nbins)
 {
   if(nbins != m_nZBins)
   {
@@ -135,7 +135,7 @@ void vtkEventNexusReader::SetZBins(int nbins)
   Sets maximum threshold for rendering.
   @param maxThreshold : Maximum threshold value.
 */
-void vtkEventNexusReader::SetMaxThreshold(double maxThreshold)
+void vtkMDEWNexusReader::SetMaxThreshold(double maxThreshold)
 {
   if(maxThreshold != m_maxThreshold)
   {
@@ -149,7 +149,7 @@ void vtkEventNexusReader::SetMaxThreshold(double maxThreshold)
   Sets minimum threshold for rendering.
   @param minThreshold : Minimum threshold value.
 */
-void vtkEventNexusReader::SetMinThreshold(double minThreshold)
+void vtkMDEWNexusReader::SetMinThreshold(double minThreshold)
 {
   if(minThreshold != m_minThreshold)
   {
@@ -163,7 +163,7 @@ void vtkEventNexusReader::SetMinThreshold(double minThreshold)
   Sets clipping.
   @param applyClip : true if clipping should be applied.
 */
-void vtkEventNexusReader::SetApplyClip(bool applyClip)
+void vtkMDEWNexusReader::SetApplyClip(bool applyClip)
 {
   if(m_applyClip != applyClip)
   {
@@ -174,10 +174,33 @@ void vtkEventNexusReader::SetApplyClip(bool applyClip)
 }
 
 /**
+  Sets algorithm in-memory property. If this is changed, the file is reloaded.
+  @param inMemory : true if the entire file should be loaded into memory.
+*/
+void vtkMDEWNexusReader::SetInMemory(bool inMemory)
+{
+  if(m_loadInMemory != inMemory && true == m_isSetup)
+  {
+    Mantid::API::AnalysisDataService::Instance().remove(m_mdEventWsId);
+
+    Mantid::MDEvents::LoadMDEW alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", this->FileName);
+    alg.setPropertyValue("OutputWorkspace", m_mdEventWsId);
+    alg.setProperty("FileBackEnd", !inMemory);
+    alg.execute();
+
+    this->Modified();
+    m_actionManager.ask(RecalculateAll);    
+  }
+  m_loadInMemory = inMemory;
+}
+
+/**
   Sets width for plane.
   @param width: width for plane.
 */
-void vtkEventNexusReader::SetWidth(double width)
+void vtkMDEWNexusReader::SetWidth(double width)
 {
   if(m_width.getValue() != width)
   {
@@ -191,7 +214,7 @@ void vtkEventNexusReader::SetWidth(double width)
   Sets maximum threshold for rendering.
   @param maxThreshold : Maximum threshold value.
 */
-void vtkEventNexusReader::SetClipFunction(vtkImplicitFunction* func)
+void vtkMDEWNexusReader::SetClipFunction(vtkImplicitFunction* func)
 {
   if(m_clipFunction != func)
   {
@@ -205,7 +228,7 @@ void vtkEventNexusReader::SetClipFunction(vtkImplicitFunction* func)
   Sets applied geometry xml. Provided by object panel.
   @xml. Dimension xml.
 */
-void vtkEventNexusReader::SetAppliedGeometryXML(std::string appliedGeometryXML)
+void vtkMDEWNexusReader::SetAppliedGeometryXML(std::string appliedGeometryXML)
 {
   if(m_isSetup)
   {
@@ -246,7 +269,7 @@ void vtkEventNexusReader::SetAppliedGeometryXML(std::string appliedGeometryXML)
   Sets the selected index for the thresholding method.
   @parameter selectedStrategyIndex : index as a string.
 */
-void vtkEventNexusReader::SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex)
+void vtkMDEWNexusReader::SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex)
 {
   int index = atoi(selectedStrategyIndex.c_str());
   if(index != m_thresholdMethodIndex)
@@ -261,7 +284,7 @@ void vtkEventNexusReader::SetThresholdRangeStrategyIndex(std::string selectedStr
   Gets the geometry xml from the workspace. Allows object panels to configure themeselves.
   @return geometry xml const * char reference.
 */
-const char* vtkEventNexusReader::GetInputGeometryXML()
+const char* vtkMDEWNexusReader::GetInputGeometryXML()
 {
   return this->m_geometryXmlBuilder.create().c_str();
 }
@@ -270,7 +293,7 @@ const char* vtkEventNexusReader::GetInputGeometryXML()
   Getter for the minimum threshold.
   @return geometry xml const * char reference.
 */
-double vtkEventNexusReader::GetInputMinThreshold()
+double vtkMDEWNexusReader::GetInputMinThreshold()
 {
   return m_minThreshold;
 }
@@ -279,7 +302,7 @@ double vtkEventNexusReader::GetInputMinThreshold()
   Getter for the maximum threshold.
   @return geometry xml const * char reference.
 */
-double vtkEventNexusReader::GetInputMaxThreshold()
+double vtkMDEWNexusReader::GetInputMaxThreshold()
 {
   return m_maxThreshold;
 }
@@ -289,7 +312,7 @@ double vtkEventNexusReader::GetInputMaxThreshold()
    @param dimension : dimension to extract property value for.
    @return true available, false otherwise.
  */
-std::string vtkEventNexusReader::extractFormattedPropertyFromDimension(Mantid::Geometry::IMDDimension_sptr dimension) const
+std::string vtkMDEWNexusReader::extractFormattedPropertyFromDimension(Mantid::Geometry::IMDDimension_sptr dimension) const
 {
   double min = dimension->getMinimum();
   double max = dimension->getMaximum();
@@ -301,7 +324,7 @@ std::string vtkEventNexusReader::extractFormattedPropertyFromDimension(Mantid::G
 /**
    Actually perform the rebinning. Configure the rebinning algorithm and pass to presenter.
  */
-void vtkEventNexusReader::doRebinning()
+void vtkMDEWNexusReader::doRebinning()
 {
   Mantid::API::AnalysisDataService::Instance().remove(m_histogrammedWsId);
 
@@ -353,13 +376,13 @@ void vtkEventNexusReader::doRebinning()
     }
   }
 
-  FilterUpdateProgressAction<vtkEventNexusReader> updatehandler(this);
+  FilterUpdateProgressAction<vtkMDEWNexusReader> updatehandler(this);
   // Run the algorithm and cache the output.
   m_presenter.execute(hist_alg, m_histogrammedWsId, updatehandler);
 }
 
 
-int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
+int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
@@ -367,7 +390,7 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   configureThresholdRangeMethod();
 
   vtkDataSet *output = vtkDataSet::SafeDownCast(
-      outInfo->Get(vtkDataObject::DATA_OBJECT()));
+    outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
 
   int time = 0;
@@ -388,13 +411,15 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   vtkThresholdingLineFactory vtkGridFactory(m_ThresholdRange, scalarName);
   vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(m_ThresholdRange, scalarName);
   vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(m_ThresholdRange, scalarName);
+  vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(m_ThresholdRange, scalarName, time);
   vtkGridFactory.SetSuccessor(p_2dSuccessorFactory);
   p_2dSuccessorFactory->SetSuccessor(p_3dSuccessorFactory);
+  p_3dSuccessorFactory->SetSuccessor(p_4dSuccessorFactory);
 
   RebinningKnowledgeSerializer serializer(LocationNotRequired); //Object handles serialization of meta data.
 
   vtkDataSet * structuredMesh = vtkDataSet::SafeDownCast(m_presenter.getMesh(serializer, vtkGridFactory));
-  
+
   m_minThreshold = m_ThresholdRange->getMinimum();
   m_maxThreshold = m_ThresholdRange->getMaximum();
   output->ShallowCopy(structuredMesh);
@@ -404,7 +429,7 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   return 1;
 }
 
-int vtkEventNexusReader::RequestInformation(
+int vtkMDEWNexusReader::RequestInformation(
   vtkInformation *vtkNotUsed(request),
   vtkInformationVector **vtkNotUsed(inputVector),
   vtkInformationVector *outputVector)
@@ -418,10 +443,11 @@ int vtkEventNexusReader::RequestInformation(
   {
     AnalysisDataService::Instance().remove(m_mdEventWsId);
 
-    Mantid::MDEvents::OneStepMDEW alg;
+    Mantid::MDEvents::LoadMDEW alg;
     alg.initialize();
     alg.setPropertyValue("Filename", this->FileName);
     alg.setPropertyValue("OutputWorkspace", m_mdEventWsId);
+    alg.setProperty("FileBackEnd", true); //Load from file by default.
     alg.execute();
 
     Workspace_sptr result=AnalysisDataService::Instance().retrieve(m_mdEventWsId);
@@ -470,65 +496,38 @@ int vtkEventNexusReader::RequestInformation(
     }
 
     m_isSetup = true;
-   
   }
-  std::vector<double> timeStepValues(1); //TODO set time-step information.
-  outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0], static_cast<int>(timeStepValues.size()));
-  double timeRange[2];
-  timeRange[0] = timeStepValues.front();
-  timeRange[1] = timeStepValues.back();
+  //setup time ranges.
+  setTimeRange(outInfo);
 
-  outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
   return 1; 
 }
 
-void vtkEventNexusReader::PrintSelf(ostream& os, vtkIndent indent)
+void vtkMDEWNexusReader::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
 }
 
-int vtkEventNexusReader::CanReadFile(const char* fname)
+int vtkMDEWNexusReader::CanReadFile(const char* fname)
 {
   ::NeXus::File * file = NULL;
+
+  file = new ::NeXus::File(fname);
+  // All SNS (event or histo) nxs files have entry
   try
   {
-    file = new ::NeXus::File(fname);
-    // All SNS (event or histo) nxs files have entry
-    try
-    {
-      file->openGroup("entry", "NXentry");
-    }
-    catch(...)
-    {
-      file->close();
-      return 0;
-    }
-    // Only eventNexus files have bank123_events as a group name
-    std::map<std::string, std::string> entries = file->getEntries();
-    bool hasEvents = false;
-    std::map<std::string, std::string>::iterator it;
-    for (it = entries.begin(); it != entries.end(); it++)
-    {
-      if (it->first.find("_events") != std::string::npos)
-      {
-        hasEvents=true;
-        break;
-      }
-    }
-    file->close();
-    return hasEvents ? 1 : 0;
+    file->openGroup("entry", "NXentry"); 
+    return 0;
   }
-  catch (std::exception & e)
+  catch(...)
   {
-    std::cerr << "Could not open " << this->FileName << " as an EventNexus file because of exception: " << e.what() << std::endl;
-    // Clean up, if possible
-    if (file)
-      file->close();
+    file->close();
+    return 1;
   }
-  return 0;
+
 }
 
-unsigned long vtkEventNexusReader::GetMTime()
+unsigned long vtkMDEWNexusReader::GetMTime()
 {
   unsigned long mTime = this->Superclass::GetMTime();
   unsigned long time;
@@ -550,10 +549,36 @@ unsigned long vtkEventNexusReader::GetMTime()
   Update/Set the progress.
   @parameter progress : progress increment.
 */
-void vtkEventNexusReader::UpdateAlgorithmProgress(double progress)
+void vtkMDEWNexusReader::UpdateAlgorithmProgress(double progress)
 {
   progressMutex.lock();
   this->SetProgressText("Executing Mantid MDEvent Rebinning Algorithm...");
   this->UpdateProgress(progress);
   progressMutex.unlock();
+}
+
+/**
+  Set the time ranges
+  @param outInfo : Information vector onto which the time ranges are set.
+*/
+void vtkMDEWNexusReader::setTimeRange(vtkInformation * outInfo)
+{
+  if(m_isSetup && NULL != m_appliedTDimension.get())
+  {
+    std::vector<double> timeStepValues(m_appliedTDimension->getNBins());
+    double min = m_appliedTDimension->getMaximum();
+    double max = m_appliedTDimension->getMinimum();
+    double stepSize = (max - min) / timeStepValues.size();
+    for(int i = 0; i < timeStepValues.size(); i++)
+    {
+      timeStepValues[i] = min + (stepSize * i);
+    }
+    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
+      static_cast<int> (timeStepValues.size()));
+    double timeRange[2];
+    timeRange[0] = timeStepValues.front();
+    timeRange[1] = timeStepValues.back();
+
+    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
+  }
 }
