@@ -56,7 +56,6 @@ namespace Mantid
     */
     class MANTID_GEOMETRY_DLL ConvexPolygon
     {
-    public:
 
     public:
       /// Construct a polygon with a head vertex
@@ -67,32 +66,34 @@ namespace Mantid
       /// Copy constructor
       ConvexPolygon(const ConvexPolygon & rhs);
       /// Destructor
-      ~ConvexPolygon();
+      virtual ~ConvexPolygon();
       /// Return a pointer to the head vertex
-      inline const Vertex2D * head() const { return m_head; }
+      virtual inline const Vertex2D * head() const { return m_head; }
       /// Index access.
-      const Kernel::V2D& operator[](const size_t index) const;
+      virtual const Kernel::V2D& operator[](const size_t index) const;
       /// Return the number of vertices
       inline size_t numVertices() const { return m_numVertices; }
       /// Is a point inside this polygon
-      bool contains(const Kernel::V2D & point) const;
+      virtual bool contains(const Kernel::V2D & point) const;
       /// Compute the area of the polygon using triangulation
-      double area() const;
+      virtual double area() const;
       /// Compute the 'determinant' of the points
-      double determinant() const;
+      virtual double determinant() const;
+
+    protected:
+      /// Default constructor
+      ConvexPolygon() : m_numVertices(0), m_head(NULL) {}
+      /// The size of the polygon
+      size_t m_numVertices;
+      /// Head vertex
+      Vertex2D *m_head;
 
     private:
-      /// Default constructor
-      ConvexPolygon();
       /// Test if a list of vertices is valid
       void validate(const Vertex2D * head) const;
       /// Compute the area of a triangle given by 3 points
       double triangleArea(const Kernel::V2D & a, const Kernel::V2D & b, 
                           const Kernel::V2D & c) const;
-      /// The size of the polygon
-      size_t m_numVertices;
-      /// Head vertex
-      Vertex2D *m_head;
     };
 
 

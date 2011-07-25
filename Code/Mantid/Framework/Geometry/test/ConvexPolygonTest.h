@@ -184,8 +184,27 @@ private:
     }
     TS_FAIL("Expecting an exception but non was thrown.");
   }
+};
+
+//------------------------------------------------------------------------------
+// Performance Test
+//------------------------------------------------------------------------------
+class ConvexPolygonTestPerformance : public CxxTest::TestSuite
+{
+public:
   
-  
+  void test_Area_Calls()
+  {
+    const size_t ntests(50000000);
+
+    double totalArea(0.0);
+    for( size_t i = 0; i < ntests; ++i)
+    {
+      ConvexPolygon test(0.0, 2.0, 0.0, 1.0);
+      totalArea += test.area();
+    }
+    
+  }
 
 };
 

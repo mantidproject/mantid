@@ -48,6 +48,7 @@ set ( SRC_FILES
 	src/Math/LaszloIntersection.cpp
 	src/Math/PolyBase.cpp
 	src/Math/PolygonEdge.cpp
+	src/Math/Quadrilateral.cpp
 	src/Math/RotCounter.cpp
 	src/Math/Triple.cpp
 	src/Math/Vertex2D.cpp
@@ -149,6 +150,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Math/MapSupport.h
 	inc/MantidGeometry/Math/PolyBase.h
 	inc/MantidGeometry/Math/PolygonEdge.h
+	inc/MantidGeometry/Math/Quadrilateral.h
 	inc/MantidGeometry/Math/RotCounter.h
 	inc/MantidGeometry/Math/Triple.h
 	inc/MantidGeometry/Math/Vertex2D.h
@@ -232,6 +234,7 @@ set ( TEST_FILES
 	test/ParametrizedComponentTest.h
 	test/PlaneTest.h
 	test/PolygonEdgeTest.h
+	test/QuadrilateralTest.h
 	test/RectangularDetectorTest.h
 	test/ReflectionConditionTest.h
 	test/RotCounterTest.h
