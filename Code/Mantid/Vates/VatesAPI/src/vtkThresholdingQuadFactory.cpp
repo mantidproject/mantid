@@ -9,8 +9,10 @@
 #include <vector>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/CPUTimer.h"
 
 using Mantid::API::IMDWorkspace;
+using Mantid::Kernel::CPUTimer;
 
 namespace Mantid
 {
@@ -60,6 +62,7 @@ namespace Mantid
       }
       else
       {
+        CPUTimer tim;
         const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
         const int nBinsY = static_cast<int>( m_workspace->getYDimension()->getNBins() );
 
@@ -68,8 +71,8 @@ namespace Mantid
         const double maxY = m_workspace-> getYDimension()->getMaximum();
         const double minY = m_workspace-> getYDimension()->getMinimum();
 
-        double incrementX = (maxX - minX) / (nBinsX-1);
-        double incrementY = (maxY - minY) / (nBinsY-1);
+        double incrementX = (maxX - minX) / (nBinsX);
+        double incrementY = (maxY - minY) / (nBinsY);
 
         const int imageSize = (nBinsX ) * (nBinsY );
         vtkPoints *points = vtkPoints::New();
@@ -83,68 +86,96 @@ namespace Mantid
         //The following represent actual calculated positions.
         double posX, posY;
 
-        UnstructuredPoint unstructPoint;
         float signalScalar;
-        const int nPointsX = nBinsX;
-        const int nPointsY = nBinsY;
-        Plane plane(nPointsX);
+        const int nPointsX = nBinsX+1;
+        const int nPointsY = nBinsY+1;
 
-        //Loop through dimensions
-        for (int i = 0; i < nPointsX; i++)
+        /* The idea of the next chunk of code is that you should only
+         create the points that will be needed; so an array of pointNeeded
+         is set so that all required vertices are marked, and created in a second step. */
+
+        // Array of the points that should be created, set to false
+        bool * pointNeeded = new bool[nPointsX*nPointsY];
+        memset(pointNeeded, 0, nPointsX*nPointsY*sizeof(bool));
+        // Array with true where the voxel should be shown
+        bool * voxelShown = new bool[nBinsX*nBinsY];
+
+        size_t index = 0;
+        for (int i = 0; i < nBinsX; i++)
         {
-          posX = minX + (i * incrementX); //Calculate increment in x;
-          Column column(nPointsY);
-          for (int j = 0; j < nPointsY; j++)
+          for (int j = 0; j < nBinsY; j++)
           {
-            posY = minY + (j * incrementY); //Calculate increment in y;
-
-            signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i, j));
-
+            index = j + nBinsY*i;
+            signalScalar = static_cast<signal_t>(m_workspace->getSignalNormalizedAt(i, j));
             if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
             {
-              //Flagged so that topological and scalar data is not applied.
-              unstructPoint.isSparse = true;
+              // out of range
+              voxelShown[index] = false;
             }
             else
             {
-              if ((i < (nBinsX -1)) && (j < (nBinsY - 1)))
-              {
-                signal->InsertNextValue(signalScalar);
-              }
-              unstructPoint.isSparse = false;
+              // Valid data
+              voxelShown[index] = true;
+              signal->InsertNextValue(static_cast<float>(signalScalar));
+              // Make sure all 4 neighboring points are set to true
+              size_t pointIndex = i * nPointsY + j;
+              pointNeeded[pointIndex] = true;  pointIndex++;
+              pointNeeded[pointIndex] = true;  pointIndex += nPointsY-1;
+              pointNeeded[pointIndex] = true;  pointIndex++;
+              pointNeeded[pointIndex] = true;
             }
-            unstructPoint.pointId = points->InsertNextPoint(posX, posY, 0);
-            column[j] = unstructPoint;
-
           }
-          plane[i] = column;
         }
 
-        points->Squeeze();
-        signal->Squeeze();
+        std::cout << tim << " to check all the signal values." << std::endl;
+
+        // Array with the point IDs (only set where needed)
+        vtkIdType * pointIDs = new vtkIdType[nPointsX*nPointsY];
+        index = 0;
+        for (int i = 0; i < nPointsX; i++)
+        {
+          posX = minX + (i * incrementX); //Calculate increment in x;
+          for (int j = 0; j < nPointsY; j++)
+          {
+            // Create the point only when needed
+            if (pointNeeded[index])
+            {
+              posY = minY + (j * incrementY); //Calculate increment in y;
+              pointIDs[index] = points->InsertNextPoint(posX, posY, 0);
+            }
+            index++;
+          }
+        }
+
+        std::cout << tim << " to create the needed points." << std::endl;
 
         vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
         visualDataSet->Allocate(imageSize);
         visualDataSet->SetPoints(points);
         visualDataSet->GetCellData()->SetScalars(signal);
 
-        for (int i = 0; i < nBinsX - 1; i++)
+        // ------ Quad creation ----------------
+        vtkQuad* quad = vtkQuad::New(); // Significant speed increase by creating ONE quad
+        index = 0;
+        for (int i = 0; i < nBinsX; i++)
         {
-          for (int j = 0; j < nBinsY -1; j++)
+          for (int j = 0; j < nBinsY; j++)
           {
-            //Only create topologies for those cells which are not sparse.
-            if (!plane[i][j].isSparse)
+            if (voxelShown[index])
             {
-              vtkQuad* quad = vtkQuad::New();
-              quad->GetPointIds()->SetId(0, plane[i][j].pointId);
-              quad->GetPointIds()->SetId(1, plane[i + 1][j].pointId);
-              quad->GetPointIds()->SetId(2, plane[i + 1][j + 1].pointId); 
-              quad->GetPointIds()->SetId(3, plane[i][j + 1].pointId);
+              // The quad will be shown
+              quad->GetPointIds()->SetId(0, pointIDs[(i)*nPointsY + j]);
+              quad->GetPointIds()->SetId(1, pointIDs[(i+1)*nPointsY + j]);
+              quad->GetPointIds()->SetId(2, pointIDs[(i+1)*nPointsY + j+1]);
+              quad->GetPointIds()->SetId(3, pointIDs[(i)*nPointsY + j+1]);
               visualDataSet->InsertNextCell(VTK_QUAD, quad->GetPointIds());
             }
-
+            index++;
           }
         }
+        quad->Delete();
+
+        std::cout << tim << " to create and add the quads." << std::endl;
 
         points->Delete();
         signal->Delete();

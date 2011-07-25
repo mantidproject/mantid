@@ -1,14 +1,16 @@
 #ifndef VTK_THRESHOLDING_HEXAHEDRON_FACTORY_TEST_H_
 #define VTK_THRESHOLDING_HEXAHEDRON_FACTORY_TEST_H_
 
+#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidVatesAPI/UserDefinedThresholdRange.h"
+#include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
+#include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <cxxtest/TestSuite.h>
-#include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
-#include "MantidVatesAPI/UserDefinedThresholdRange.h"
-#include "MockObjects.h"
 
 using namespace Mantid;
+using namespace Mantid::MDEvents;
 
 //=====================================================================================
 // Functional Tests
@@ -24,18 +26,8 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(1));
-    EXPECT_CALL(*pMockWs, getXDimension()).Times(9).WillRepeatedly(Return(IMDDimension_const_sptr(
-        new FakeIMDDimension("x"))));
-    EXPECT_CALL(*pMockWs, getYDimension()).Times(9).WillRepeatedly(Return(IMDDimension_const_sptr(
-        new FakeIMDDimension("y"))));
-    EXPECT_CALL(*pMockWs, getZDimension()).Times(9).WillRepeatedly(Return(IMDDimension_const_sptr(
-        new FakeIMDDimension("z"))));
-    EXPECT_CALL(*pMockWs, getTDimension()).Times(0); //No 4th dimension
-    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(6).WillRepeatedly(Return(VecIMDDimension_const_sptr(3)));
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    // Workspace with value 1.0 everywhere
+    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 3);
 
     vtkThresholdingHexahedronFactory inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal");
     inside.initialize(ws_sptr);
@@ -60,18 +52,8 @@ class vtkThresholdingHexahedronFactoryTest: public CxxTest::TestSuite
     using namespace Mantid::Geometry;
     using namespace testing;
 
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_, _, _)).WillRepeatedly(Return(1)); //Shouldn't access getSignal At
-    EXPECT_CALL(*pMockWs, getXDimension()).Times(AtLeast(1)).WillRepeatedly(Return(
-        IMDDimension_const_sptr(new FakeIMDDimension("x"))));
-    EXPECT_CALL(*pMockWs, getYDimension()).Times(AtLeast(1)).WillRepeatedly(Return(
-        IMDDimension_const_sptr(new FakeIMDDimension("y"))));
-    EXPECT_CALL(*pMockWs, getZDimension()).Times(AtLeast(1)).WillRepeatedly(Return(
-        IMDDimension_const_sptr(new FakeIMDDimension("z"))));
-    EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(0));
-    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(2).WillRepeatedly(Return(VecIMDDimension_const_sptr(3)));
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    // Workspace with value 1.0 everywhere
+    MDHistoWorkspace_sptr ws_sptr = getFakeMDHistoWorkspace(1.0, 3);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingHexahedronFactory factory (ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)), "signal");
@@ -223,19 +205,18 @@ public:
     using namespace testing; 
 
     //Create the workspace. 20 bins in each dimension.
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    
-    EXPECT_CALL(*pMockWs, getXDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
-        new FakeIMDDimension("x", 20))));
-    EXPECT_CALL(*pMockWs, getYDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
-        new FakeIMDDimension("y", 20))));
-    EXPECT_CALL(*pMockWs, getZDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
-        new FakeIMDDimension("z", 20))));
-    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(3)));
-    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_,_,_)).WillRepeatedly(Return(1));
+    m_ws_sptr = getFakeMDHistoWorkspace(1.0, 3, 100);
 
-    //Wrap with sptr.
-    m_ws_sptr = Mantid::API::IMDWorkspace_sptr(pMockWs);
+//    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+//    EXPECT_CALL(*pMockWs, getXDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
+//        new FakeIMDDimension("x", 20))));
+//    EXPECT_CALL(*pMockWs, getYDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
+//        new FakeIMDDimension("y", 20))));
+//    EXPECT_CALL(*pMockWs, getZDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(
+//        new FakeIMDDimension("z", 20))));
+//    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).WillRepeatedly(Return(VecIMDDimension_const_sptr(3)));
+//    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_,_,_)).WillRepeatedly(Return(1));
+//    m_ws_sptr = Mantid::API::IMDWorkspace_sptr(pMockWs);
   }
 
 	void testGenerateHexahedronVtkDataSet()

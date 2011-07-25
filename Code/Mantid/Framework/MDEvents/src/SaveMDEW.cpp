@@ -59,7 +59,8 @@ namespace MDEvents
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Templated method to do the work
+  /** Save the MDEventWorskpace to a file.
+   * Based on the Intermediate Data Format Detailed Design Document, v.1.R3 found in SVN.
    *
    * @param ws :: MDEventWorkspace of the given type
    */
@@ -72,11 +73,18 @@ namespace MDEvents
     ::NeXus::File * file;
     file = new ::NeXus::File(filename, NXACC_CREATE5);
 
+    // The base entry. Named so as to distinguish from other workspace types.
+    file->makeGroup("MDEventWorkspace", "NXentry", 1);
+
+    // General information
+    file->writeData("definition", ws->id() );
+    std::string title = ws->getTitle(); if (title.empty()) title = " ";
+    file->writeData("title", title );
+    // TODO: notes, sample, logs, instrument, process, run_start
+
     // Write out some general information like # of dimensions
-    file->makeGroup("workspace", "NXcollection", 1);
     file->writeData("dimensions", int32_t(nd));
     file->writeData("event_type", MDE::getTypeName());
-
     // Save each dimension, as their XML representation
     for (size_t d=0; d<nd; d++)
     {
@@ -84,11 +92,9 @@ namespace MDEvents
       mess << "dimension" << d;
       file->writeData( mess.str(), ws->getDimension(d)->toXMLString() );
     }
-
     // Add box controller info.
     file->writeData("box_controller_xml", ws->getBoxController()->toXMLString());
 
-    file->closeGroup();
 
     // Start the main data group
     file->makeGroup("data", "NXdata", 1);

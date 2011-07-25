@@ -1,13 +1,15 @@
-#include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
-#include <vtkStructuredGrid.h>
-#include <vtkRectilinearGrid.h>
+#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <vtkImageData.h>
+#include <vtkRectilinearGrid.h>
+#include <vtkStructuredGrid.h>
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
+using namespace Mantid::MDEvents;
 
 namespace Mantid
 {
@@ -85,6 +87,207 @@ namespace VATES
     validateWsNotNull();
   }
 
+  /** Method for creating a 3D or 4D data set
+   *
+   * @param timestep :: int index of the time step (4th dimension) in the workspace.
+   *        Set to 0 for a 3D workspace.
+   * @return the vtkDataSet created
+   */
+  vtkDataSet* vtkThresholdingHexahedronFactory::create3Dor4D(const int timestep) const
+  {
+    MDHistoWorkspace_sptr hws = boost::dynamic_pointer_cast<MDHistoWorkspace>(m_workspace);
+    if (!hws)
+      throw std::runtime_error("Unexpected MDWorkspace type passed. Expected a MDHistoWorkspace");
+
+    const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
+    const int nBinsY = static_cast<int>( m_workspace->getYDimension()->getNBins() );
+    const int nBinsZ = static_cast<int>( m_workspace->getZDimension()->getNBins() );
+
+    const double maxX = m_workspace-> getXDimension()->getMaximum();
+    const double minX = m_workspace-> getXDimension()->getMinimum();
+    const double maxY = m_workspace-> getYDimension()->getMaximum();
+    const double minY = m_workspace-> getYDimension()->getMinimum();
+    const double maxZ = m_workspace-> getZDimension()->getMaximum();
+    const double minZ = m_workspace-> getZDimension()->getMinimum();
+
+    double incrementX = (maxX - minX) / (nBinsX);
+    double incrementY = (maxY - minY) / (nBinsY);
+    double incrementZ = (maxZ - minZ) / (nBinsZ);
+
+    const int imageSize = (nBinsX ) * (nBinsY ) * (nBinsZ );
+    vtkPoints *points = vtkPoints::New();
+    points->Allocate(static_cast<int>(imageSize));
+
+    vtkFloatArray * signal = vtkFloatArray::New();
+    signal->Allocate(imageSize);
+    signal->SetName(m_scalarName.c_str());
+    signal->SetNumberOfComponents(1);
+
+    //The following represent actual calculated positions.
+    double posX, posY, posZ;
+
+    double signalScalar;
+    const int nPointsX = nBinsX+1;
+    const int nPointsY = nBinsY+1;
+    const int nPointsZ = nBinsZ+1;
+
+    CPUTimer tim;
+
+    /* The idea of the next chunk of code is that you should only
+     create the points that will be needed; so an array of pointNeeded
+     is set so that all required vertices are marked, and created in a second step. */
+
+    // Array of the points that should be created, set to false
+    bool * pointNeeded = new bool[nPointsX*nPointsY*nPointsZ];
+    memset(pointNeeded, 0, nPointsX*nPointsY*nPointsZ*sizeof(bool));
+    // Array with true where the voxel should be shown
+    bool * voxelShown = new bool[nBinsX*nBinsY*nBinsZ];
+
+    // For speed, get a bare array to the underlying data
+    const signal_t * signalData = hws->getSignalArray();
+    const coord_t inverseVolume = hws->getInverseVolumeVolume();
+    const size_t * indexMultiplier = hws->getIndexMultiplier();
+    size_t indexMultiplier0 = indexMultiplier[0];
+    size_t indexMultiplier1 = indexMultiplier[1];
+    size_t indexOffset = 0;
+
+    // For 4D data sets only: this is an extra offset
+    if (timestep > 0)
+      indexOffset = indexMultiplier[2] * timestep;
+
+    size_t index = 0;
+//      PARALLEL_FOR_NO_WSP_CHECK()
+    for (int z = 0; z < nBinsZ; z++)
+    {
+      for (int y = 0; y < nBinsY; y++)
+      {
+        for (int x = 0; x < nBinsX; x++)
+        {
+          /* NOTE: It is very important to match the ordering of the two arrays
+           * (the one used in MDHistoWorkspace and voxelShown/pointNeeded).
+           * If you access the array in the wrong way and can't cache it on L1/L2 cache, I got a factor of 8x slowdown.
+           */
+          //index = x + (nBinsX * y) + (nBinsX*nBinsY*z);
+
+          // The following code reproduces: signalScalar = m_workspace->getSignalNormalizedAt(x, y, z, timeoffset);
+          // (but should be much faster)
+          signalScalar = inverseVolume * signalData[x + indexMultiplier0*y + indexMultiplier1*z + indexOffset];
+
+          if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
+          {
+            // out of range
+            voxelShown[index] = false;
+          }
+          else
+          {
+            // Valid data
+            voxelShown[index] = true;
+            signal->InsertNextValue(static_cast<float>(signalScalar));
+
+            // Make sure all 8 neighboring points are set to true
+            size_t pointIndex = x + (nPointsX * y) + (nPointsX*nPointsY*z); //(Note this index is different then the other one)
+            pointNeeded[pointIndex] = true;  pointIndex++;
+            pointNeeded[pointIndex] = true;  pointIndex += nPointsX-1;
+            pointNeeded[pointIndex] = true;  pointIndex++;
+            pointNeeded[pointIndex] = true;  pointIndex += nPointsX*nPointsY - nPointsX - 1;
+            pointNeeded[pointIndex] = true;  pointIndex++;
+            pointNeeded[pointIndex] = true;  pointIndex += nPointsX-1;
+            pointNeeded[pointIndex] = true;  pointIndex++;
+            pointNeeded[pointIndex] = true;
+          }
+          index++;
+        }
+      }
+    }
+
+    std::cout << tim << " to check all the signal values." << std::endl;
+
+    // Array with the point IDs (only set where needed)
+    vtkIdType * pointIDs = new vtkIdType[nPointsX*nPointsY*nPointsZ];
+    index = 0;
+    for (int z = 0; z < nPointsZ; z++)
+    {
+      posZ = minZ + (z * incrementZ); //Calculate increment in z;
+      for (int y = 0; y < nPointsY; y++)
+      {
+        posY = minY + (y * incrementY); //Calculate increment in y;
+        for (int x = 0; x < nPointsX; x++)
+        {
+          // Create the point only when needed
+          if (pointNeeded[index])
+          {
+            posX = minX + (x * incrementX); //Calculate increment in x;
+            pointIDs[index] = points->InsertNextPoint(posX, posY, posZ);
+          }
+          index++;
+        }
+      }
+    }
+
+    std::cout << tim << " to create the needed points." << std::endl;
+
+    vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
+    visualDataSet->Allocate(imageSize);
+    visualDataSet->SetPoints(points);
+    visualDataSet->GetCellData()->SetScalars(signal);
+
+    // ------ Hexahedron creation ----------------
+    // It is approx. 40 x faster to create the hexadron only once, and reuse it for each voxel.
+    vtkHexahedron *theHex = vtkHexahedron::New();
+    index = 0;
+    for (int z = 0; z < nBinsZ; z++)
+    {
+      for (int y = 0; y < nBinsY; y++)
+      {
+        for (int x = 0; x < nBinsX; x++)
+        {
+          if (voxelShown[index])
+          {
+            //Only create topologies for those cells which are not sparse.
+            // create a hexahedron topology
+            vtkIdType id_xyz =    pointIDs[(x)   + (y)*nPointsX + z*nPointsX*nPointsY];
+            vtkIdType id_dxyz =   pointIDs[(x+1) + (y)*nPointsX + z*nPointsX*nPointsY];
+            vtkIdType id_dxdyz =  pointIDs[(x+1) + (y+1)*nPointsX + z*nPointsX*nPointsY];
+            vtkIdType id_xdyz =   pointIDs[(x)   + (y+1)*nPointsX + z*nPointsX*nPointsY];
+
+            vtkIdType id_xydz =   pointIDs[(x)   + (y)*nPointsX + (z+1)*nPointsX*nPointsY];
+            vtkIdType id_dxydz =  pointIDs[(x+1) + (y)*nPointsX + (z+1)*nPointsX*nPointsY];
+            vtkIdType id_dxdydz = pointIDs[(x+1) + (y+1)*nPointsX + (z+1)*nPointsX*nPointsY];
+            vtkIdType id_xdydz =  pointIDs[(x)   + (y+1)*nPointsX + (z+1)*nPointsX*nPointsY];
+
+            //create the hexahedron
+            theHex->GetPointIds()->SetId(0, id_xyz);
+            theHex->GetPointIds()->SetId(1, id_dxyz);
+            theHex->GetPointIds()->SetId(2, id_dxdyz);
+            theHex->GetPointIds()->SetId(3, id_xdyz);
+            theHex->GetPointIds()->SetId(4, id_xydz);
+            theHex->GetPointIds()->SetId(5, id_dxydz);
+            theHex->GetPointIds()->SetId(6, id_dxdydz);
+            theHex->GetPointIds()->SetId(7, id_xdydz);
+
+            visualDataSet->InsertNextCell(VTK_HEXAHEDRON, theHex->GetPointIds());
+          }
+          index++;
+        }
+      }
+    }
+    theHex->Delete();
+
+    std::cout << tim << " to create and add the hexadrons." << std::endl;
+
+
+    points->Delete();
+    signal->Delete();
+    visualDataSet->Squeeze();
+    return visualDataSet;
+
+  }
+
+
+  /** Create the data set;
+   * will call the successor if the # of dimensions is not for this factory.
+   * @return
+   */
   vtkDataSet* vtkThresholdingHexahedronFactory::create() const
   {
     validate();
@@ -94,375 +297,13 @@ namespace VATES
     {
       return m_successor->create();
     }
-
     else
     {
-      const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
-      const int nBinsY = static_cast<int>( m_workspace->getYDimension()->getNBins() );
-      const int nBinsZ = static_cast<int>( m_workspace->getZDimension()->getNBins() );
-
-      const double maxX = m_workspace-> getXDimension()->getMaximum();
-      const double minX = m_workspace-> getXDimension()->getMinimum();
-      const double maxY = m_workspace-> getYDimension()->getMaximum();
-      const double minY = m_workspace-> getYDimension()->getMinimum();
-      const double maxZ = m_workspace-> getZDimension()->getMaximum();
-      const double minZ = m_workspace-> getZDimension()->getMinimum();
-
-      double incrementX = (maxX - minX) / (nBinsX);
-      double incrementY = (maxY - minY) / (nBinsY);
-      double incrementZ = (maxZ - minZ) / (nBinsZ);
-
-      const int imageSize = (nBinsX ) * (nBinsY ) * (nBinsZ );
-      vtkPoints *points = vtkPoints::New();
-      points->Allocate(static_cast<int>(imageSize));
-
-      vtkFloatArray * signal = vtkFloatArray::New();
-      signal->Allocate(imageSize);
-      signal->SetName(m_scalarName.c_str());
-      signal->SetNumberOfComponents(1);
-
-      //The following represent actual calculated positions.
-      double posX, posY, posZ;
-
-//      UnstructuredPoint unstructPoint;
-      double signalScalar;
-      const int nPointsX = nBinsX+1;
-      const int nPointsY = nBinsY+1;
-      const int nPointsZ = nBinsZ+1;
-
-//      double minSig=1e32;
-//      double maxSig=-1e32;
-
-      CPUTimer tim;
-      bool * voxelShown = new bool[nBinsX*nBinsY*nBinsZ];
-
-      // Array of the points that should be created, set to false
-      bool * pointNeeded = new bool[nPointsX*nPointsY*nPointsZ];
-      memset(pointNeeded, 0, nPointsX*nPointsY*nPointsZ*sizeof(bool));
-
-      /* The idea of the next chunk of code is that you should only
-       create the points that will be needed; so an array of pointNeeded
-       is set so that all required vertices are marked, and created in a second step. */
-
-      size_t index = 0;
-      //PARALLEL_FOR_NO_WSP_CHECK()
-      for (int i = 0; i < nBinsX; i++)
-      {
-        for (int j = 0; j < nBinsY; j++)
-        {
-          for (int k = 0; k < nBinsZ; k++)
-          {
-            index = k + (nBinsZ * j) + (nBinsZ*nBinsY*i);
-            signalScalar = m_workspace->getSignalNormalizedAt(i, j, k);
-            if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
-            {
-              // out of range
-              voxelShown[index] = false;
-            }
-            else
-            {
-              // Valid data
-              voxelShown[index] = true;
-              signal->InsertNextValue(static_cast<float>(signalScalar));
-
-              // Make sure all 8 neighboring points are set to true
-              size_t pointIndex = i * nPointsY*nPointsZ + j*nPointsZ + k;
-              pointNeeded[pointIndex] = true;  pointIndex++;
-              pointNeeded[pointIndex] = true;  pointIndex += nPointsZ-1;
-              pointNeeded[pointIndex] = true;  pointIndex++;
-              pointNeeded[pointIndex] = true;  pointIndex += nPointsY*nPointsZ - nPointsZ - 1;
-              pointNeeded[pointIndex] = true;  pointIndex++;
-              pointNeeded[pointIndex] = true;  pointIndex += nPointsZ-1;
-              pointNeeded[pointIndex] = true;  pointIndex++;
-              pointNeeded[pointIndex] = true;
-            }
-            //index++;
-          }
-        }
-      }
-
-      std::cout << tim << " to check all the signal values." << std::endl;
-
-      // Array with the point IDs (only set where needed)
-      vtkIdType * pointIDs = new vtkIdType[nPointsX*nPointsY*nPointsZ];
-      index = 0;
-      for (int i = 0; i < nPointsX; i++)
-      {
-        posX = minX + (i * incrementX); //Calculate increment in x;
-        for (int j = 0; j < nPointsY; j++)
-        {
-          posY = minY + (j * incrementY); //Calculate increment in y;
-          for (int k = 0; k < nPointsZ; k++)
-          {
-            // Create the point only when needed
-            if (pointNeeded[index])
-            {
-              posZ = minZ + (k * incrementZ); //Calculate increment in z;
-              pointIDs[index] = points->InsertNextPoint(posX, posY, posZ);
-            }
-            index++;
-          }
-        }
-      }
-
-      std::cout << tim << " to create the needed points." << std::endl;
-
-      vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
-      visualDataSet->Allocate(imageSize);
-      visualDataSet->SetPoints(points);
-      visualDataSet->GetCellData()->SetScalars(signal);
-
-      // ------ Hexahedron creation ----------------
-      index = 0;
-      for (int i = 0; i < nBinsX; i++)
-      {
-        for (int j = 0; j < nBinsY; j++)
-        {
-          for (int k = 0; k < nBinsZ; k++)
-          {
-            if (voxelShown[index])
-            {
-              //Only create topologies for those cells which are not sparse.
-              // create a hexahedron topology
-              vtkHexahedron* hexahedron = createHexahedron(pointIDs, i, j, k, nPointsX, nPointsY, nPointsZ);
-              visualDataSet->InsertNextCell(VTK_HEXAHEDRON, hexahedron->GetPointIds());
-              hexahedron->Delete();
-            }
-            index++;
-          }
-        }
-      }
-
-
-//
-//      //Loop through dimensions
-//      for (int i = 0; i < nPointsX; i++)
-//      {
-//        posX = minX + (i * incrementX); //Calculate increment in x;
-//        Plane plane(nPointsY);
-//        for (int j = 0; j < nPointsY; j++)
-//        {
-//
-//          posY = minY + (j * incrementY); //Calculate increment in y;
-//          Column col(nPointsZ);
-//          for (int k = 0; k < nPointsZ; k++)
-//          {
-//
-//            posZ = minZ + (k * incrementZ); //Calculate increment in z;
-//            signalScalar = m_workspace->getSignalNormalizedAt(i, j, k);
-//
-//            // Track max/min
-//            if (signalScalar > maxSig) maxSig = signalScalar;
-//            if (signalScalar < minSig) minSig = signalScalar;
-//
-//            if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
-//            {
-//              //Flagged so that topological and scalar data is not applied.
-//              unstructPoint.isSparse = true;
-//            }
-//            else
-//            {
-//              if ((i < (nBinsX -1)) && (j < (nBinsY - 1)) && (k < (nBinsZ -1)))
-//              {
-//                signal->InsertNextValue(static_cast<float>(signalScalar));
-//              }                signal->InsertNextValue(static_cast<float>(signalScalar));
-//
-//              unstructPoint.isSparse = false;
-//            }
-//            unstructPoint.pointId = points->InsertNextPoint(posX, posY, posZ);
-//            col[k] = unstructPoint;
-//          }
-//          plane[j] = col;//      vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
-      //      visualDataSet->Allocate(imageSize);
-      //      visualDataSet->SetPoints(points);
-      //      visualDataSet->GetCellData()->SetScalars(signal);
-
-//        }
-//        pointMap[i] = plane;
-//      }
-//
-//      std::cout << "Min signal was " << minSig << ". Max was " << maxSig << std::endl;
-//      std::cout << tim << " to create all the points in the map." << std::endl;
-//
-//      points->Squeeze();
-//      signal->Squeeze();
-//
-//      vtkUnstructuredGrid *visualDataSet = vtkUnstructuredGrid::New();
-//      visualDataSet->Allocate(imageSize);
-//      visualDataSet->SetPoints(points);
-//      visualDataSet->GetCellData()->SetScalars(signal);
-//
-//      // ------ Hexahedron creation ----------------
-//      for (int i = 0; i < nBinsX - 1; i++)
-//      {
-//        for (int j = 0; j < nBinsY -1; j++)
-//        {
-//          for (int k = 0; k < nBinsZ -1; k++)
-//          {
-//            //Only create topologies for those cells which are not sparse.
-//            if (!pointMap[i][j][k].isSparse)
-//            {
-//              // create a hexahedron topology
-//              vtkHexahedron* hexahedron = createHexahedron(pointMap, i, j, k);
-//              visualDataSet->InsertNextCell(VTK_HEXAHEDRON, hexahedron->GetPointIds());
-//              hexahedron->Delete();
-//            }
-//          }
-//        }
-//      }
-
-
-      // NOTE: The following chunks of code are attempts to speed up vtkDataSet creation.
-
-/*
-      // ------------- vtkImageData ---------------
-      vtkImageData *visualDataSet = vtkImageData ::New();
-      visualDataSet->SetDimensions( nBinsX, nBinsY, nBinsZ );
-      visualDataSet->SetScalarTypeToDouble();
-      visualDataSet->SetOrigin( minX, minY, minZ);
-      visualDataSet->SetSpacing(incrementX, incrementY, incrementZ );
-      visualDataSet->AllocateScalars();
-
-      for (int i = 0; i < nPointsX; i++)
-      {
-        posX = minX + (i * incrementX); //Calculate increment in x;
-        for (int j = 0; j < nPointsY; j++)
-        {
-          posY = minY + (j * incrementY); //Calculate increment in y;
-          for (int k = 0; k < nPointsZ; k++)
-          {
-            visualDataSet->SetScalarComponentFromDouble(i,j,k, 0, m_workspace->getSignalNormalizedAt(i,j,k) );
-          }
-        }
-      }
-*/
-
-      /*
-      // ----------- vtkRectilinearGrid ---------------------------
-
-      // Array with the number of entries in each dimension
-      vtkRectilinearGrid  *visualDataSet = vtkRectilinearGrid ::New();
-      visualDataSet->SetDimensions( nBinsX, nBinsY, nBinsZ );
-
-      vtkFloatArray *xCoords = vtkFloatArray::New();
-      for (int i=0; i<nBinsX; i++) xCoords->InsertNextValue( m_workspace->getXDimension()->getX(i));
-      vtkFloatArray *yCoords = vtkFloatArray::New();
-      for (int i=0; i<nBinsY; i++) yCoords->InsertNextValue( m_workspace->getYDimension()->getX(i));
-      vtkFloatArray *zCoords = vtkFloatArray::New();
-      for (int i=0; i<nBinsZ; i++) zCoords->InsertNextValue( m_workspace->getZDimension()->getX(i));
-
-      visualDataSet->SetDimensions( nBinsX, nBinsY, nBinsZ );
-      visualDataSet->SetXCoordinates(xCoords);
-      visualDataSet->SetYCoordinates(yCoords);
-      visualDataSet->SetZCoordinates(zCoords);
-
-      visualDataSet->GetCellData()->SetScalars(signal);
-  */
-
-/*
-      PRAGMA_OMP( parallel for schedule(dynamic,1) )
-      for (int i = 0; i < nBinsX - 1; i++)
-      {
-        // Blank vector of the hexahedrons to start with
-        std::vector<vtkHexahedron*> hexas(nBinsY * nBinsZ, NULL);
-
-        for (int j = 0; j < nBinsY -1; j++)
-        {
-          for (int k = 0; k < nBinsZ -1; k++)
-          {
-            //Only create topologies for those cells which are not sparse.
-            if (!pointMap[i][j][k].isSparse)
-            {
-              // create a hexahedron topology. This = 63 % of the function's runtime.
-              vtkHexahedron* hexahedron = createHexahedron(pointMap, i, j, k);
-              // Save it for later. Thread safe since no push_back()
-              hexas[k*nBinsZ + j] = hexahedron;
-            }
-          }
-        }
-
-        // Now insert all the hexahedrons. This is probably not thread safe operation
-        PARALLEL_CRITICAL( vtkThresholdingHexahedronFactory_create )
-        {
-          std::vector<vtkHexahedron*>::iterator it;
-          std::vector<vtkHexahedron*>::iterator it_end = hexas.end();
-          for (it = hexas.begin(); it != it_end; it++)
-          {
-            if (*it)
-              visualDataSet->InsertNextCell(VTK_HEXAHEDRON, (*it)->GetPointIds());
-          }
-        }
-
-        // Now delete all these hexahedrons. This = 23% of the functions run time.
-        std::vector<vtkHexahedron*>::iterator it;
-        std::vector<vtkHexahedron*>::iterator it_end = hexas.end();
-        for (it = hexas.begin(); it != it_end; it++)
-        {
-          if (*it)
-          (*it)->Delete();
-        }
-      } // (for each X bin)
-*/
-      std::cout << tim << " to create and add the hexadrons." << std::endl;
-
-
-      points->Delete();
-      signal->Delete();
-      visualDataSet->Squeeze();
-      return visualDataSet;
+      // Create in 3D mode
+      this->create3Dor4D(0);
     }
   }
 
-  inline vtkHexahedron* vtkThresholdingHexahedronFactory::createHexahedron(PointMap& pointMap, const int& i, const int& j, const int& k) const
-  {
-    vtkIdType id_xyz = pointMap[i][j][k].pointId;
-    vtkIdType id_dxyz = pointMap[i + 1][j][k].pointId;
-    vtkIdType id_dxdyz = pointMap[i + 1][j + 1][k].pointId;
-    vtkIdType id_xdyz = pointMap[i][j + 1][k].pointId;
-
-    vtkIdType id_xydz = pointMap[i][j][k + 1].pointId;
-    vtkIdType id_dxydz = pointMap[i + 1][j][k + 1].pointId;
-    vtkIdType id_dxdydz = pointMap[i + 1][j + 1][k + 1].pointId;
-    vtkIdType id_xdydz = pointMap[i][j + 1][k + 1].pointId;
-
-    //create the hexahedron
-    vtkHexahedron *theHex = vtkHexahedron::New();
-    theHex->GetPointIds()->SetId(0, id_xyz);
-    theHex->GetPointIds()->SetId(1, id_dxyz);
-    theHex->GetPointIds()->SetId(2, id_dxdyz);
-    theHex->GetPointIds()->SetId(3, id_xdyz);
-    theHex->GetPointIds()->SetId(4, id_xydz);
-    theHex->GetPointIds()->SetId(5, id_dxydz);
-    theHex->GetPointIds()->SetId(6, id_dxdydz);
-    theHex->GetPointIds()->SetId(7, id_xdydz);
-    return theHex;
-  }
-
-  inline vtkHexahedron* vtkThresholdingHexahedronFactory::createHexahedron(vtkIdType * pointIDs, const int& i, const int& j, const int& k,
-      const int /*nPointsX*/, const int nPointsY, const int nPointsZ) const
-  {
-    vtkIdType id_xyz = pointIDs[(i) * nPointsY*nPointsZ + (j)*nPointsZ + k];
-    vtkIdType id_dxyz = pointIDs[(i+1) * nPointsY*nPointsZ + (j)*nPointsZ + k];
-    vtkIdType id_dxdyz = pointIDs[(i+1) * nPointsY*nPointsZ + (j+1)*nPointsZ + k];
-    vtkIdType id_xdyz = pointIDs[(i) * nPointsY*nPointsZ + (j+1)*nPointsZ + k];
-
-    vtkIdType id_xydz = pointIDs[(i) * nPointsY*nPointsZ + (j)*nPointsZ + k+1];
-    vtkIdType id_dxydz = pointIDs[(i+1) * nPointsY*nPointsZ + (j)*nPointsZ + k+1];
-    vtkIdType id_dxdydz = pointIDs[(i+1) * nPointsY*nPointsZ + (j+1)*nPointsZ + k+1];
-    vtkIdType id_xdydz = pointIDs[(i) * nPointsY*nPointsZ + (j+1)*nPointsZ + k+1];
-
-    //create the hexahedron
-    vtkHexahedron *theHex = vtkHexahedron::New();
-    theHex->GetPointIds()->SetId(0, id_xyz);
-    theHex->GetPointIds()->SetId(1, id_dxyz);
-    theHex->GetPointIds()->SetId(2, id_dxdyz);
-    theHex->GetPointIds()->SetId(3, id_xdyz);
-    theHex->GetPointIds()->SetId(4, id_xydz);
-    theHex->GetPointIds()->SetId(5, id_dxydz);
-    theHex->GetPointIds()->SetId(6, id_dxdydz);
-    theHex->GetPointIds()->SetId(7, id_xdydz);
-    return theHex;
-  }
 
   vtkThresholdingHexahedronFactory::~vtkThresholdingHexahedronFactory()
   {

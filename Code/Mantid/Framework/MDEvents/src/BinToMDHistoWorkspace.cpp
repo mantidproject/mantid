@@ -252,7 +252,9 @@ namespace MDEvents
     errors = outWS->getErrorSquaredArray();
 
     // The dimension (in the output workspace) along which we chunk for parallel processing
+    // TODO: Find the smartest dimension to chunk against
     size_t chunkDimension = 0;
+
     // How many bins (in that dimension) per chunk.
     // Try to split it so each core will get 2 tasks:
     int chunkNumBins =  int(binDimensions[chunkDimension]->getNBins() / (Mantid::Kernel::ThreadPool::getNumPhysicalCores() * 2));

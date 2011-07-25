@@ -28,13 +28,14 @@
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-#include "MantidVatesAPI/vtkDataSetFactory.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include <vtkUnstructuredGrid.h>
-#include <vtkFloatArray.h>
+#include "MantidVatesAPI/ThresholdRange.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
 #include <vtkCellData.h>
+#include <vtkFloatArray.h>
 #include <vtkHexahedron.h>
+#include <vtkUnstructuredGrid.h>
 
 namespace Mantid
 {
@@ -42,7 +43,7 @@ namespace VATES
 {
 
 template<typename TimeMapper>
-class DLLExport vtkThresholdingUnstructuredGridFactory: public vtkDataSetFactory
+class DLLExport vtkThresholdingUnstructuredGridFactory: public vtkThresholdingHexahedronFactory
 {
 public:
 
@@ -69,12 +70,6 @@ public:
 
   vtkFloatArray* createScalarArray() const;
 
-  typedef std::vector<std::vector<std::vector<UnstructuredPoint> > > PointMap;
-
-  typedef std::vector<std::vector<UnstructuredPoint> > Plane;
-
-  typedef std::vector<UnstructuredPoint> Column;
-
   virtual std::string getFactoryTypeName() const
   {
     return "vtkThresholdingUnstructuredGridFactory";
@@ -86,24 +81,11 @@ protected:
 
 private:
 
-  void validateWsNotNull() const;
-
-  /// Image from which to draw.
-  Mantid::API::IMDWorkspace_sptr m_workspace;
-
   /// timestep obtained from framework.
   double m_timestep;
 
-  /// Create a hexahedron.
-  inline vtkHexahedron* createHexahedron(PointMap& pointMap, const int& i, const int& j, const int& k) const;
-
-  /// Name of the scalar to provide on mesh.
-  std::string m_scalarName;
-
   /// Time mapper.
   TimeMapper m_timeMapper;
-
-  mutable ThresholdRange_scptr m_thresholdRange;
 
 };
 

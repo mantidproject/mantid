@@ -40,6 +40,7 @@
 #include "MantidGeometry/MDGeometry/MDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
 
 vtkCxxRevisionMacro(vtkEventNexusReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkEventNexusReader);
@@ -493,17 +494,17 @@ int vtkEventNexusReader::CanReadFile(const char* fname)
   try
   {
     file = new ::NeXus::File(fname);
-    // All SNS (event or histo) nxs files have entry
+    // All SNS (event or histo) nxs files have an entry named "entry"
     try
     {
       file->openGroup("entry", "NXentry");
     }
-    catch(...)
+    catch(::NeXus::Exception & e)
     {
       file->close();
       return 0;
     }
-    // Only eventNexus files have bank123_events as a group name
+    // But only eventNexus files have bank123_events as a group name
     std::map<std::string, std::string> entries = file->getEntries();
     bool hasEvents = false;
     std::map<std::string, std::string>::iterator it;

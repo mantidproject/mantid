@@ -513,18 +513,20 @@ int vtkMDEWNexusReader::CanReadFile(const char* fname)
   ::NeXus::File * file = NULL;
 
   file = new ::NeXus::File(fname);
-  // All SNS (event or histo) nxs files have entry
+  // MDEventWorkspace file has a different name for the entry
   try
   {
-    file->openGroup("entry", "NXentry"); 
-    return 0;
-  }
-  catch(...)
-  {
+    file->openGroup("MDEventWorkspace", "NXentry");
     file->close();
     return 1;
   }
-
+  catch(::NeXus::Exception & e)
+  {
+    // If the entry name does not match, then it can't read the file.
+    file->close();
+    return 0;
+  }
+  return 0;
 }
 
 unsigned long vtkMDEWNexusReader::GetMTime()

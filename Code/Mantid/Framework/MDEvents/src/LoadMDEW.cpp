@@ -77,7 +77,8 @@ namespace MDEvents
     // Start loading
     file = new ::NeXus::File(filename);
 
-    file->openGroup("workspace", "NXcollection");
+    // The main entry
+    file->openGroup("MDEventWorkspace", "NXentry");
 
     std::vector<int32_t> vecDims;
     file->readData("dimensions", vecDims);
@@ -91,9 +92,6 @@ namespace MDEvents
     std::string eventType;
     file->readData("event_type", eventType);
 
-    // Done loading that general data
-    file->closeGroup();
-
     // Use the factory to make the workspace of the right type
     IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDEventWorkspace(numDims, eventType);
 
@@ -106,7 +104,9 @@ namespace MDEvents
 
 
   //----------------------------------------------------------------------------------------------
-  /** Templated method to do the work
+  /** Do the loading.
+   *
+   * The file should be open at the entry level at this point.
    *
    * @param ws :: MDEventWorkspace of the given type
    */
@@ -122,8 +122,13 @@ namespace MDEvents
 
     prog->report("Opening file.");
 
-    file->openGroup("workspace", "NXcollection");
+    std::string title;
+    file->readData("title", title );
+    ws->setTitle("title");
 
+    // TODO: notes, sample, logs, instrument, process, run_start
+
+    // The workspace-specific data
     // Load each dimension, as their XML representation
     for (size_t d=0; d<nd; d++)
     {
@@ -136,14 +141,13 @@ namespace MDEvents
       IMDDimension_sptr dim(factory.create());
       ws->addDimension(dim);
     }
+
     // Load the box controller
     std::string bcXML;
     file->readData("box_controller_xml", bcXML);
     ws->getBoxController()->fromXMLString(bcXML);
 
     if (verbose) std::cout << tim << " to load the dimensions, etc." << std::endl;
-
-    file->closeGroup();
 
     file->openGroup("data", "NXdata");
 

@@ -1,17 +1,22 @@
 #ifndef VATESAPI_TEST_MOCKOBJECTS_H
 #define VATESAPI_TEST_MOCKOBJECTS_H
 
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/Workspace.h"
-#include "MDDataObjects/MDIndexCalculator.h"
-#include "MantidAPI/IMDIterator.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidVatesAPI/MDRebinningView.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidVatesAPI/Clipper.h"
+#include "MantidVatesAPI/MDRebinningView.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MDDataObjects/MDIndexCalculator.h"
 #include <gmock/gmock.h>
 
 using Mantid::VATES::MDRebinningView;
+using Mantid::Geometry::MDHistoDimension;
+using Mantid::Geometry::MDHistoDimension_sptr;
 
 //=====================================================================================
 // Test Helper Types. These are shared by several tests in VatesAPI
@@ -182,6 +187,30 @@ public:
 
 };
 
+
+Mantid::MDEvents::MDHistoWorkspace_sptr getFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10)
+{
+  Mantid::MDEvents::MDHistoWorkspace * ws;
+  if (numDims == 3)
+  {
+    ws = new Mantid::MDEvents::MDHistoWorkspace(
+        MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)),
+        MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, numBins)),
+        MDHistoDimension_sptr(new MDHistoDimension("z","z","m", 0.0, 10.0, numBins))   );
+  }
+  else if (numDims == 4)
+  {
+    ws = new Mantid::MDEvents::MDHistoWorkspace(
+        MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, numBins)),
+        MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, numBins)),
+        MDHistoDimension_sptr(new MDHistoDimension("z","z","m", 0.0, 10.0, numBins)),
+        MDHistoDimension_sptr(new MDHistoDimension("t","z","m", 0.0, 10.0, numBins))
+        );
+  }
+  Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);
+  ws_sptr->setTo(signal, signal);
+  return ws_sptr;
+}
 
 } // namespace
 

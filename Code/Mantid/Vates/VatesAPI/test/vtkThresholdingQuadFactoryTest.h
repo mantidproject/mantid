@@ -77,8 +77,8 @@ public:
     inside.initialize(ws_sptr);
     vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create());
 
-    TS_ASSERT_EQUALS((9*9), insideProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(100, insideProduct->GetNumberOfPoints());
+    TS_ASSERT_EQUALS((10*10), insideProduct->GetNumberOfCells());
+    TS_ASSERT_EQUALS((11*11), insideProduct->GetNumberOfPoints());
   }
 
   void testAboveThreshold()
@@ -102,8 +102,9 @@ public:
     above.initialize(ws_sptr);
     vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create());
 
+    // No points nor cells are created if nothing is within range
     TS_ASSERT_EQUALS(0, aboveProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(100, aboveProduct->GetNumberOfPoints());
+    TS_ASSERT_EQUALS(0, aboveProduct->GetNumberOfPoints());
   }
 
   void testBelowThreshold()
@@ -128,8 +129,9 @@ public:
     below.initialize(ws_sptr);
     vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create());
 
+    // No points nor cells are created if nothing is within range
     TS_ASSERT_EQUALS(0, belowProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(100, belowProduct->GetNumberOfPoints());
+    TS_ASSERT_EQUALS(0, belowProduct->GetNumberOfPoints());
   }
 
   void testInitializationDelegates()

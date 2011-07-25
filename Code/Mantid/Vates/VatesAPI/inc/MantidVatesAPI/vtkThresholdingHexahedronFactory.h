@@ -67,12 +67,6 @@ public:
 
   vtkFloatArray* createScalarArray() const;
 
-  typedef std::vector<std::vector<std::vector<UnstructuredPoint> > > PointMap;
-
-  typedef std::vector<std::vector<UnstructuredPoint> > Plane;
-
-  typedef std::vector<UnstructuredPoint> Column;
-
   virtual std::string getFactoryTypeName() const
   {
     return "vtkThresholdingHexahedronFactory";
@@ -82,7 +76,7 @@ protected:
 
   virtual void validate() const;
 
-private:
+  vtkDataSet* create3Dor4D(const int timestep) const;
 
   void validateWsNotNull() const;
 
@@ -90,12 +84,6 @@ private:
 
   /// Image from which to draw.
   Mantid::API::IMDWorkspace_sptr m_workspace;
-
-  /// Create a hexahedron.
-  inline vtkHexahedron* createHexahedron(PointMap& pointMap, const int& i, const int& j, const int& k) const;
-
-  inline vtkHexahedron* createHexahedron(vtkIdType * pointIDs, const int& i, const int& j, const int& k,
-        const int nPointsX, const int nPointsY, const int nPointsZ) const;
 
   /// Name of the scalar to provide on mesh.
   std::string m_scalarName;
