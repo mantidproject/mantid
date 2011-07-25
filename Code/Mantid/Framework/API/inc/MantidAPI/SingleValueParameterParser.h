@@ -17,6 +17,7 @@
 #include <Poco/Path.h>
 
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {
@@ -84,6 +85,7 @@ template<class SingleValueParameterType>
 Mantid::API::ImplicitFunctionParameter* SingleValueParameterParser<SingleValueParameterType>::createParameter(
     Poco::XML::Element* parameterElement)
 {
+  typename typedef SingleValueParameterType::ValueType ValueType;
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
   if (SingleValueParameterType::parameterName() != typeName)
   {
@@ -92,7 +94,7 @@ Mantid::API::ImplicitFunctionParameter* SingleValueParameterParser<SingleValuePa
   else
   {
     std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
-    double value = atof(sParameterValue.c_str());
+    ValueType value = boost::lexical_cast<ValueType>(sParameterValue);
     return new SingleValueParameterType(value);
   }
 }
@@ -106,6 +108,7 @@ template<class SingleValueParameterType>
 SingleValueParameterType* SingleValueParameterParser<SingleValueParameterType>::createWithoutDelegation(
     Poco::XML::Element* parameterElement)
 {
+  typename typedef SingleValueParameterType::ValueType ValueType;
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
   if (SingleValueParameterType::parameterName() != typeName)
   {
@@ -114,7 +117,7 @@ SingleValueParameterType* SingleValueParameterParser<SingleValueParameterType>::
   else
   {
     std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
-    double value = atof(sParameterValue.c_str());
+    ValueType value = boost::lexical_cast<ValueType>(sParameterValue);
     return new SingleValueParameterType(value);
   }
 }

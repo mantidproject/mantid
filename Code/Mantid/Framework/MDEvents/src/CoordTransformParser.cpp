@@ -16,10 +16,17 @@ namespace Mantid
 {
   namespace MDEvents
   {
+    /// Constructor
     CoordTransformParser::CoordTransformParser()
     {
     }
 
+    //-----------------------------------------------------------------------------------------------
+    /*
+    Create the transform object.
+    @param coordTransElement : xml coordinate transform element
+    @return a fully constructed coordinate transform object.
+    */
     CoordTransform* CoordTransformParser::createTransform(Poco::XML::Element* coordTransElement) const
     {
       typedef Mantid::API::SingleValueParameterParser<InDimParameter> InDimParameterParser;
@@ -41,35 +48,40 @@ namespace Mantid
       }
 
       Element* paramListElement = coordTransElement->getChildElement("ParameterList");
-      if(!paramListElement)
-      {
-        throw std::runtime_error("No ParameterList element.");
-      }
-
       Poco::XML::NodeList* parameters = paramListElement->getElementsByTagName("Parameter");
 
+      //Add input dimension parameter.
       InDimParameterParser inDimParser;
       Poco::XML::Element* parameter = dynamic_cast<Poco::XML::Element*>(parameters->item(0));
       InDimParameter* inDim = inDimParser.createWithoutDelegation(parameter);
-      
+
+      //Add output dimension parameter.
       OutDimParameterParser outDimParser;
       parameter = dynamic_cast<Poco::XML::Element*>(parameters->item(1));
       OutDimParameter* outDim = outDimParser.createWithoutDelegation(parameter);
-      
+
+      //Add affine matrix parameter.
       AffineMatrixParameterParser affineMatrixDimParser;
       parameter = dynamic_cast<Poco::XML::Element*>(parameters->item(2));
       AffineMatrixParameter* affineMatrix = affineMatrixDimParser.createParameter(parameter);
 
+      //Generate the coordinate transform with the matrix and return.
       CoordTransform* transform = new CoordTransform(inDim->getValue(), outDim->getValue());
       transform->setMatrix(affineMatrix->getAffineMatrix());
       return transform;
     }
 
+    //-----------------------------------------------------------------------------------------------
+    /*
+    Set the successor parser.
+    @param other : another parser to use if this one fails.
+    */
     void CoordTransformParser::setSuccessor(CoordTransformParser* other)
     {
       m_successor = SuccessorType_sptr(other);
     }
 
+    /// Destructor
     CoordTransformParser::~CoordTransformParser()
     {
     }

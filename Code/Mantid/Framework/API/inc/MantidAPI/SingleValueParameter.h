@@ -38,23 +38,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template<typename Derived, typename ValueType>
+template<typename Derived, typename ValType>
 class DLLExport SingleValueParameter : public  ImplicitFunctionParameter
 {
 public:
-
-  SingleValueParameter(ValueType value);
+  typedef ValType ValueType;
+  SingleValueParameter(ValType value);
   SingleValueParameter();
-  SingleValueParameter(const SingleValueParameter<Derived, ValueType>& other);
+  SingleValueParameter(const SingleValueParameter<Derived, ValType>& other);
   std::string toXMLString() const;
   Derived& operator=(const Derived& other);
   bool operator==(const Derived &other) const;
   bool operator!=(const Derived &other) const;
-  ValueType getValue() const;
+  ValType getValue() const;
   virtual bool isValid() const;
 
 protected:
-  ValueType m_value;
+  ValType m_value;
   bool m_isValid;
 };
 
@@ -62,8 +62,8 @@ protected:
 /* Getter for the valid state.
 @return raw underlying value.
 */
-template<typename Derived, typename ValueType>
-ValueType SingleValueParameter<Derived,ValueType>::getValue() const
+template<typename Derived, typename ValType>
+ValType SingleValueParameter<Derived,ValType>::getValue() const
 {
   return m_value;
 }
@@ -72,8 +72,8 @@ ValueType SingleValueParameter<Derived,ValueType>::getValue() const
 /* Getter for the valid state.
 @return true if the object is in a valid state.
 */
-template<typename Derived, typename ValueType>
-bool SingleValueParameter<Derived,ValueType>::isValid() const
+template<typename Derived, typename ValType>
+bool SingleValueParameter<Derived,ValType>::isValid() const
 {
   return m_isValid;
 }
@@ -83,8 +83,8 @@ bool SingleValueParameter<Derived,ValueType>::isValid() const
 @param other : object to use as origin for assignment.
 @return Ref to assigned object.
 */
-template<typename Derived, typename ValueType>
-Derived& SingleValueParameter<Derived,ValueType>::operator=(const Derived& other)
+template<typename Derived, typename ValType>
+Derived& SingleValueParameter<Derived,ValType>::operator=(const Derived& other)
 {
   if (&other != this)
   {
@@ -99,8 +99,8 @@ Derived& SingleValueParameter<Derived,ValueType>::operator=(const Derived& other
 @param other : object to use as rhs of comparison.
 @return true only if the two objects are considered equal.
 */
-template<typename Derived, typename ValueType>
-bool SingleValueParameter<Derived,ValueType>::operator==(const Derived &other) const
+template<typename Derived, typename ValType>
+bool SingleValueParameter<Derived,ValType>::operator==(const Derived &other) const
 {
   return other.m_value == this->m_value;
 }
@@ -110,8 +110,8 @@ bool SingleValueParameter<Derived,ValueType>::operator==(const Derived &other) c
 @param other : object to use as rhs of comparison.
 @return true only if the two objects are not considered equal.
 */
-template<typename Derived, typename ValueType>
-bool SingleValueParameter<Derived,ValueType>::operator!=(const Derived &other) const
+template<typename Derived, typename ValType>
+bool SingleValueParameter<Derived,ValType>::operator!=(const Derived &other) const
 {
   return !(*this == other);
 }
@@ -120,14 +120,14 @@ bool SingleValueParameter<Derived,ValueType>::operator!=(const Derived &other) c
 /* Copy constructor
 @param other : ref to object to use as origin for the new instance.
 */
-template<typename Derived, typename ValueType>
-SingleValueParameter<Derived,ValueType>::SingleValueParameter(const SingleValueParameter<Derived, ValueType> & other): m_value(other.m_value), m_isValid(other.m_isValid)
+template<typename Derived, typename ValType>
+SingleValueParameter<Derived,ValType>::SingleValueParameter(const SingleValueParameter<Derived, ValType> & other): m_value(other.m_value), m_isValid(other.m_isValid)
 {
 }
 
 /// Default constructor. Object is created in invalid state.
-template<typename Derived, typename ValueType>
-SingleValueParameter<Derived,ValueType>::SingleValueParameter() : m_isValid(false)
+template<typename Derived, typename ValType>
+SingleValueParameter<Derived,ValType>::SingleValueParameter() : m_isValid(false)
 {
 
 }
@@ -136,8 +136,8 @@ SingleValueParameter<Derived,ValueType>::SingleValueParameter() : m_isValid(fals
 /* Constructor. Leads to a valid instance/state.
 @param value : Internal value for the object to wrap.
 */
-template<typename Derived, typename ValueType>
-SingleValueParameter<Derived,ValueType>::SingleValueParameter(ValueType value) : m_value(value), m_isValid(true)
+template<typename Derived, typename ValType>
+SingleValueParameter<Derived,ValType>::SingleValueParameter(ValType value) : m_value(value), m_isValid(true)
 {
 }
 
@@ -145,10 +145,10 @@ SingleValueParameter<Derived,ValueType>::SingleValueParameter(ValueType value) :
 /* Serializes the object to an xml string.
 @return xml string containing the underlying value.
 */
-template<typename Derived, typename ValueType>
-std::string SingleValueParameter<Derived,ValueType>::toXMLString() const
+template<typename Derived, typename ValType>
+std::string SingleValueParameter<Derived,ValType>::toXMLString() const
 {
-  std::string valueXMLtext = ElementTraits<ValueType>::format(m_value);
+  std::string valueXMLtext = ElementTraits<ValType>::format(m_value);
   return this->parameterXMLTemplate(valueXMLtext);
 }
 
