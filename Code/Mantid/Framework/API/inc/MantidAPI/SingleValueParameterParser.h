@@ -85,7 +85,7 @@ template<class SingleValueParameterType>
 Mantid::API::ImplicitFunctionParameter* SingleValueParameterParser<SingleValueParameterType>::createParameter(
     Poco::XML::Element* parameterElement)
 {
-  typename typedef SingleValueParameterType::ValueType ValueType;
+  typedef typename SingleValueParameterType::ValueType ValType;
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
   if (SingleValueParameterType::parameterName() != typeName)
   {
@@ -94,7 +94,7 @@ Mantid::API::ImplicitFunctionParameter* SingleValueParameterParser<SingleValuePa
   else
   {
     std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
-    ValueType value = boost::lexical_cast<ValueType>(sParameterValue);
+    ValType value = boost::lexical_cast<ValType>(sParameterValue);
     return new SingleValueParameterType(value);
   }
 }
@@ -108,7 +108,7 @@ template<class SingleValueParameterType>
 SingleValueParameterType* SingleValueParameterParser<SingleValueParameterType>::createWithoutDelegation(
     Poco::XML::Element* parameterElement)
 {
-  typename typedef SingleValueParameterType::ValueType ValueType;
+  typedef typename SingleValueParameterType::ValueType ValType;
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
   if (SingleValueParameterType::parameterName() != typeName)
   {
@@ -117,7 +117,7 @@ SingleValueParameterType* SingleValueParameterParser<SingleValueParameterType>::
   else
   {
     std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
-    ValueType value = boost::lexical_cast<ValueType>(sParameterValue);
+    ValType value = boost::lexical_cast<ValType>(sParameterValue);
     return new SingleValueParameterType(value);
   }
 }
