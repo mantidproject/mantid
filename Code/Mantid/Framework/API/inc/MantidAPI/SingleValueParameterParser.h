@@ -59,6 +59,8 @@ public:
 
   Mantid::API::ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement);
 
+  SingleValueParameterType* createWithoutDelegation(Poco::XML::Element* parameterElement);
+
   void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser* paramParser);
 
   ~SingleValueParameterParser();
@@ -86,6 +88,28 @@ Mantid::API::ImplicitFunctionParameter* SingleValueParameterParser<SingleValuePa
   if (SingleValueParameterType::parameterName() != typeName)
   {
     return m_successor->createParameter(parameterElement);
+  }
+  else
+  {
+    std::string sParameterValue = parameterElement->getChildElement("Value")->innerText();
+    double value = atof(sParameterValue.c_str());
+    return new SingleValueParameterType(value);
+  }
+}
+
+//------------------------------------------------------------------------------
+/* Creates a parameter from an xml element. This is single-shot. Does not defer to successor if it fails!.
+@param parameterElement : xml Element
+@return A fully constructed SingleValueParameterType.
+*/
+template<class SingleValueParameterType>
+SingleValueParameterType* SingleValueParameterParser<SingleValueParameterType>::createWithoutDelegation(
+    Poco::XML::Element* parameterElement)
+{
+  std::string typeName = parameterElement->getChildElement("Type")->innerText();
+  if (SingleValueParameterType::parameterName() != typeName)
+  {
+    throw std::runtime_error("The attempted ::createWithoutDelegation failed. The type provided does not match this parser.");
   }
   else
   {

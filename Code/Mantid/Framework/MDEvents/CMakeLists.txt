@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/BoxController.cpp
 	src/CoordTransform.cpp
 	src/CoordTransformDistance.cpp
+    src/CoordTransformParser.cpp
 	src/CreateMDEventWorkspace.cpp
 	src/FakeMDEventData.cpp
 	src/IMDBox.cpp
@@ -43,6 +44,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/BoxController.h
 	inc/MantidMDEvents/CoordTransform.h
 	inc/MantidMDEvents/CoordTransformDistance.h
+    inc/MantidMDEvents/CoordTransformParser.h
 	inc/MantidMDEvents/CreateMDEventWorkspace.h
 	inc/MantidMDEvents/FakeMDEventData.h
 	inc/MantidMDEvents/IMDBox.h
@@ -72,7 +74,8 @@ set ( TEST_FILES
 	test/BoxControllerTest.h
 	test/CoordTransformDistanceTest.h
 	test/CoordTransformTest.h
-	test/CreateMDEventWorkspaceTest.h
+    test/CoordTransformParserTest.h
+    test/CreateMDEventWorkspaceTest.h
 	test/FakeMDEventDataTest.h
 	test/IMDBoxTest.h
     test/LoadMDEWTest.h

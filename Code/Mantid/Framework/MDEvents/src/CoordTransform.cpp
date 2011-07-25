@@ -90,15 +90,19 @@ namespace MDEvents
      using namespace Poco::XML;
 
       AutoPtr<Document> pDoc = new Document;
-      AutoPtr<Element> functionElement = pDoc->createElement("CoordTransform");
-      pDoc->appendChild(functionElement);
+      AutoPtr<Element> coordTransformElement = pDoc->createElement("CoordTransform");
+      pDoc->appendChild(coordTransformElement);
 
+      AutoPtr<Element> coordTransformTypeElement = pDoc->createElement("Type");
+      coordTransformTypeElement->appendChild(pDoc->createTextNode("CoordTransform"));
+      coordTransformElement->appendChild(coordTransformTypeElement);
 
       AutoPtr<Element> paramListElement = pDoc->createElement("ParameterList");
 
       AutoPtr<Text> formatText = pDoc->createTextNode("%s%s%s");
       paramListElement->appendChild(formatText);
-      functionElement->appendChild(paramListElement);
+
+      coordTransformElement->appendChild(paramListElement);
 
       std::stringstream xmlstream;
 

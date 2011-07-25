@@ -93,7 +93,7 @@ namespace Mantid
         sstream << elements[i-1];
         parameterValue.append(sstream.str());
         sstream.clear();
-        if(i%4 == 0)
+        if(i%affineMatrix.numCols() == 0)
         {
           if(i != size)
           {
