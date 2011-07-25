@@ -359,22 +359,19 @@ void vtkSQWEventReader::doRebinning()
 
 int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
-  try
-  {
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
   configureThresholdRangeMethod();
 
   vtkDataSet *output = vtkDataSet::SafeDownCast(
-      outInfo->Get(vtkDataObject::DATA_OBJECT()));
-
+    outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
   int time = 0;
   if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
   {
-     // usually only one actual step requested
-     time = static_cast<int>(outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0]);
+    // usually only one actual step requested
+    time = static_cast<int>(outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0]);
   }
 
   //When RecalculateAll wins-out, configure and run the rebinning algorithm.
@@ -396,7 +393,7 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
   RebinningKnowledgeSerializer serializer(LocationNotRequired); //Object handles serialization of meta data.
 
   vtkDataSet * structuredMesh = vtkDataSet::SafeDownCast(m_presenter.getMesh(serializer, vtkGridFactory));
-  
+
   m_minThreshold = m_ThresholdRange->getMinimum();
   m_maxThreshold = m_ThresholdRange->getMaximum();
   output->ShallowCopy(structuredMesh);
@@ -404,11 +401,6 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
   // Reset the action manager fresh for next cycle.
   m_actionManager.reset();
   return 1;
-  }
-  catch(std::exception& ex)
-  {
-    std::string msg = ex.what();
-  }
 }
 
 int vtkSQWEventReader::RequestInformation(
