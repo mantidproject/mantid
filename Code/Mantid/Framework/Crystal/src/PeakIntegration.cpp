@@ -262,7 +262,7 @@ namespace Mantid
           {
             if(((Y[iSig]-Y[TOFPeak]/2.)*(Y[iSig+1]-Y[TOFPeak]/2.))<0.)break;
           }
-          double Gamma = X[TOFPeak]-X[iSig];
+          double Gamma = fabs(X[TOFPeak]-X[iSig]);
           double SigmaSquared = Gamma*Gamma;
           std::cout <<"Y ";
           for (iSig=TOFmin; iSig <= TOFmax; iSig++)std::cout <<Y[iSig]<<"  "; 
@@ -707,7 +707,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
       TableWorkspace_sptr logtable;
       slice_alg->setProperty<TableWorkspace_sptr>("OutputWorkspace", logtable);
       slice_alg->setProperty<PeaksWorkspace_sptr>("Peaks", getProperty("InPeaksWorkspace"));
-      slice_alg->setProperty<PeaksWorkspace_sptr>("PeaksResult", getProperty("OutPeaksWorkspace"));
+      //slice_alg->setProperty<PeaksWorkspace_sptr>("PeaksResult", getProperty("OutPeaksWorkspace"));
       slice_alg->setProperty("PeakIndex", ipeak);
       double lenunitcell;
       try
