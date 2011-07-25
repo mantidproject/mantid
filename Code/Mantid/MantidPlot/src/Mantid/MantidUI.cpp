@@ -632,7 +632,7 @@ void MantidUI::copyRowsToWaterfall()
   const MantidMatrix* const m = (MantidMatrix*)appWindow()->activeWindow();
   if (!m || !m->isA("MantidMatrix")) return;
   MultiLayer* ml = plotSelectedRows(m,false);
-  convertToWaterfall(ml);
+  if (ml) convertToWaterfall(ml);
 }
 
 void MantidUI::plotWholeAsWaterfall()
@@ -640,7 +640,7 @@ void MantidUI::plotWholeAsWaterfall()
   const MantidMatrix* const m = (MantidMatrix*)appWindow()->activeWindow();
   if (!m || !m->isA("MantidMatrix")) return;
   MultiLayer* ml = plotSpectraRange(m->workspaceName(),0,m->numRows()-1,false);
-  convertToWaterfall(ml);
+  if (ml) convertToWaterfall(ml);
 }
 
 void MantidUI::convertToWaterfall(MultiLayer* ml)
@@ -695,7 +695,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
   const size_t nrows = indices.empty()? ws->getNumberHistograms() : indices.size();
   int ncols = 6;
   QStringList col_names;
-  col_names << "Index" << "Spectra" << "Detector ID";
+  col_names << "Index" << "Spectrum No" << "Detector ID";
   if( include_data )
   {
     ncols += 2;
@@ -709,6 +709,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
   for( int col = 0; col < ncols; ++col )
   {
     t->setColName(col, col_names[col]);
+    t->setColPlotDesignation(col, Table::None);
   }
 
   Mantid::API::Axis *spectraAxis = ws->getAxis(1);
@@ -2464,12 +2465,12 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   UNUSED_ARG(errs);
   if (toPlot.size() > 10)
   {
-    QMessageBox ask;
+    QMessageBox ask(appWindow());
     QAbstractButton *confirmButton = ask.addButton(tr("Confirm"), QMessageBox::ActionRole);
     ask.addButton(tr("Cancel"), QMessageBox::ActionRole);
     ask.setText("You selected "+QString::number(toPlot.size())+" spectra to plot. "
-      "Please confirm or cancel this action.");
-    ask.setIcon(QMessageBox::Critical);
+      "Are you sure you want to plot this many?");
+    ask.setIcon(QMessageBox::Question);
     ask.exec();
     if (ask.clickedButton() != confirmButton)
     {
