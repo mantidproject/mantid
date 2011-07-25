@@ -535,8 +535,8 @@ void vtkSQWEventReader::setTimeRange(vtkInformation * outInfo)
     std::vector<double> timeStepValues(m_appliedTDimension->getNBins());
     double min = m_appliedTDimension->getMaximum();
     double max = m_appliedTDimension->getMinimum();
-    double stepSize = (max - min) / timeStepValues.size();
-    for(int i = 0; i < timeStepValues.size(); i++)
+    double stepSize = (max - min) / static_cast<double>(timeStepValues.size());
+    for(unsigned int i = 0; i < timeStepValues.size(); i++)
     {
       timeStepValues[i] = min + (stepSize * i);
     }
