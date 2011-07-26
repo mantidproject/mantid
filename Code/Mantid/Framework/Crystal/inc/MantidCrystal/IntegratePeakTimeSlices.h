@@ -79,10 +79,12 @@ private:
   /// Map wi to detid
   Mantid::detid2index_map * wi_to_detid_map;
 
-  std::vector<std::vector<double> >  SetUpData( Mantid::API::MatrixWorkspace_sptr  Data,
-      Mantid::API::MatrixWorkspace_sptr  inpWkSpace,
-      Mantid::Geometry::RectangularDetector_const_sptr panel,
-      int  chan, std::vector<int> Attr);
+  double RectWidth ;  //for Weak Peaks, these can be set using info from close
+  double RectHeight ; // Strong peaks.
+  std::vector<std::vector<double> >  SetUpData( Mantid::API::MatrixWorkspace_sptr  &Data,
+      Mantid::API::MatrixWorkspace_sptr  const &inpWkSpace,
+      Mantid::Geometry::RectangularDetector_const_sptr const &panel,
+      const int  chan, std::vector<int> const &Attr)const;
 };
 
 } // namespace Crystal
