@@ -5,6 +5,9 @@
 #include <Poco/File.h>
 #include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/IDTypes.h"
 
 using Mantid::MantidVec;
 using std::size_t;
@@ -307,4 +310,77 @@ private:
   Mantid::DataObjects::ManagedWorkspace2D bigWorkspace;
 };
 
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class ManagedWorkspace2DTestPerformance : public CxxTest::TestSuite
+{
+private:
+  Mantid::API::MatrixWorkspace_sptr inWS;
+  Mantid::API::MatrixWorkspace_sptr managedWS;
+
+public:
+  static ManagedWorkspace2DTestPerformance *createSuite() { return new ManagedWorkspace2DTestPerformance(); }
+  static void destroySuite( ManagedWorkspace2DTestPerformance *suite ) { delete suite; }
+
+  ManagedWorkspace2DTestPerformance()
+  {
+    inWS = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D",7000,5000,5000);
+  }
+
+  // This should take ~no time (nothing should be written to disk)
+  void testCreationViaFactory()
+  {
+    // Make sure we go managed
+    Mantid::Kernel::ConfigServiceImpl& conf = Mantid::Kernel::ConfigService::Instance();
+    const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
+    const std::string oldValue = conf.getString(managed);
+    conf.setString(managed,"0");
+    const std::string managed2 = "ManagedRawFileWorkspace.DoNotUse";
+    const std::string oldValue2 = conf.getString(managed2);
+    conf.setString(managed2,"0");
+
+    managedWS = Mantid::API::WorkspaceFactory::Instance().create(inWS);
+  }
+
+  // This should also take ~no time (nothing should be written to disk)
+  void testReadSpectrumNumber()
+  {
+    Mantid::specid_t num;
+    for ( std::size_t i = 0 ; i < managedWS->getNumberHistograms(); ++i )
+    {
+      Mantid::API::ISpectrum * spec = managedWS->getSpectrum(i);
+      if ( ! spec->hasDetectorID(0) )
+      {
+        num = spec->getSpectrumNo();
+      }
+    }
+
+    TS_ASSERT ( num != 0 );
+  }
+
+  // This should take a while...
+  void testLoopOverHalf()
+  {
+    for ( std::size_t i = 0; i < 3500; ++i )
+    {
+      managedWS->dataX(i) = inWS->readX(i);
+      managedWS->dataY(i) = inWS->readY(i);
+      managedWS->dataE(i) = inWS->readE(i);
+    }
+  }
+
+  // ...but only about half as long as this
+  void testLoopOverWhole()
+  {
+    Mantid::API::MatrixWorkspace_sptr managedWS2 = Mantid::API::WorkspaceFactory::Instance().create(inWS);
+    for ( std::size_t i = 0 ; i < managedWS2->getNumberHistograms(); ++i )
+    {
+      managedWS2->dataX(i) = inWS->readX(i);
+      managedWS2->dataY(i) = inWS->readY(i);
+      managedWS2->dataE(i) = inWS->readE(i);
+    }
+  }
+};
 #endif /*MANAGEDWORKSPACE2DTEST_H_*/

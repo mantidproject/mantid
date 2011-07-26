@@ -1022,7 +1022,7 @@ namespace Mantid
     */
     bool MatrixWorkspace::isHistogramData() const
     {
-      return ( readX(0).size()==readY(0).size() ? false : true );
+      return ( readX(0).size()==blocksize() ? false : true );
     }
 
 

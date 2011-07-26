@@ -3,6 +3,7 @@
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidDataHandling/LoadRaw2.h"
 #include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
 #include "MantidKernel/ConfigService.h"
@@ -29,7 +30,7 @@ public:
     Workspace = new ManagedRawFileWorkspace2D(file,2);
   }
 
-  ~ManagedRawFileWorkspace2DTest()
+  virtual ~ManagedRawFileWorkspace2DTest()
   {
     delete Workspace;
   }
@@ -202,6 +203,23 @@ public:
     std::vector<detid_t> test = map.getDetectors(5);
     TS_ASSERT(test.empty());
     
+    //----------------------------------------------------------------------
+    // Test new-style spectrum/detector number retrieval
+    //----------------------------------------------------------------------
+    // Just test a few....
+    TS_ASSERT_EQUALS( output2D->getAxis(1)->spectraNo(0), 1 );
+    TS_ASSERT_EQUALS( output2D->getSpectrum(0)->getSpectrumNo(), 1 );
+    TS_ASSERT( output2D->getSpectrum(0)->hasDetectorID(601) );
+    TS_ASSERT_EQUALS( output2D->getDetector(0)->getID(), 601);
+    TS_ASSERT_EQUALS( output2D->getAxis(1)->spectraNo(1500), 1501 );
+    TS_ASSERT_EQUALS( output2D->getSpectrum(1500)->getSpectrumNo(), 1501 );
+    TS_ASSERT( output2D->getSpectrum(1500)->hasDetectorID(405049) );
+    TS_ASSERT_EQUALS( output2D->getDetector(1500)->getID(), 405049);
+    TS_ASSERT_EQUALS( output2D->getAxis(1)->spectraNo(2580), 2581 );
+    TS_ASSERT_EQUALS( output2D->getSpectrum(2580)->getSpectrumNo(), 2581 );
+    TS_ASSERT( output2D->getSpectrum(2580)->hasDetectorID(310217) );
+    TS_ASSERT_EQUALS( output2D->getDetector(2580)->getID(), 310217);
+
     AnalysisDataService::Instance().remove(outputSpace);
     conf.setString(managed,oldValue);
     conf.setString(managed2,oldValue2);
@@ -210,6 +228,70 @@ public:
 private:
   ManagedRawFileWorkspace2D* Workspace;
   std::string file;
+};
+
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class ManagedRawFileWorkspace2DTestPerformance : public CxxTest::TestSuite
+{
+private:
+  const std::string outputSpace;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ManagedRawFileWorkspace2DTestPerformance *createSuite() { return new ManagedRawFileWorkspace2DTestPerformance(); }
+  static void destroySuite( ManagedRawFileWorkspace2DTestPerformance *suite ) { delete suite; }
+
+  ManagedRawFileWorkspace2DTestPerformance() : outputSpace("wishWS")
+  {
+  }
+
+  // This should take ~no time. If it does an unacceptable change has occurred!
+  void testLoadTime()
+  {
+    // Make sure we go managed
+    ConfigServiceImpl& conf = ConfigService::Instance();
+    const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
+    const std::string oldValue = conf.getString(managed);
+    conf.setString(managed,"0");
+    const std::string managed2 = "ManagedRawFileWorkspace.DoNotUse";
+    const std::string oldValue2 = conf.getString(managed2);
+    conf.setString(managed2,"0");
+
+    IAlgorithm * loader = FrameworkManager::Instance().createAlgorithm("LoadRaw");
+    //IAlgorithm_sptr loader = AlgorithmFactory::Instance().create("LoadRaw");
+    loader->setPropertyValue("Filename","WISH00016748.raw");
+    loader->setPropertyValue("OutputWorkspace",outputSpace);
+    TS_ASSERT( loader->execute() );
+
+    conf.setString(managed,oldValue);
+    conf.setString(managed2,oldValue2);
+  }
+
+  // This also should be very quick (nothing should get written to disk)
+  void testReadValues()
+  {
+    MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
+    TS_ASSERT( ws );
+
+    double x,y,e;
+    for ( std::size_t i = 0 ; i < ws->getNumberHistograms() ; ++i )
+    {
+      x = ws->readX(i)[0];
+      y = ws->readY(i)[0];
+      e = ws->readE(i)[0];
+    }
+
+    TS_ASSERT( x > 0.0 );
+    TS_ASSERT( y == 0.0 );
+    TS_ASSERT( e == 0.0 );
+
+    AnalysisDataService::Instance().remove(outputSpace);
+  }
+
 };
 
 #endif /*ManagedRawFileWorkspace2DTEST_H_*/
