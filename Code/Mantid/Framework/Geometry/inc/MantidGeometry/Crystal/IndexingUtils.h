@@ -62,14 +62,6 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                size_t                     num_initial,
                                double                     degrees_per_step );
 
-  /// Find the UB matrix that most nearly indexes the specified qxyz values 
-  /// given the lattice parameters 
-  static double Find_UB(       Kernel::DblMatrix        & UB,
-                         const std::vector<Kernel::V3D> & q_vectors,
-                               double                     required_tolerance,
-                               double a, double b, double c,
-                               double alpha, double beta, double gamma );
-
   /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
   static double Find_UB(Kernel::DblMatrix               & UB,
                         const std::vector<Kernel::V3D>  & hkl_vectors, 
