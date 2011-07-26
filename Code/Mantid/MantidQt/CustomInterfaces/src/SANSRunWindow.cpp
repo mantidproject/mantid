@@ -577,7 +577,7 @@ QString SANSRunWindow::runReduceScriptFunction(const QString & pycode)
     return "Error";
   }
 
-  return allOutput[0];
+  return allOutput[0].trimmed();
 }
 
 /**
@@ -935,6 +935,27 @@ void SANSRunWindow::updateMaskTable()
   mask_string = runReduceScriptFunction(
       "print i.ReductionSingleton().mask.time_mask_f");
   addTimeMasksToTable(mask_string, frontdet_name);
+  //Rear detectors for SANS2D if monitor 4 in place (arm shadow detector)
+  mask_string = runReduceScriptFunction(
+      "print i.ReductionSingleton().mask.time_mask_f");
+  addTimeMasksToTable(mask_string, frontdet_name);
+
+  
+  if ( getInstrumentClass() == "SANS2D()" )
+  {
+    QString arm_width = runReduceScriptFunction(
+      "print i.ReductionSingleton().mask.arm_width");
+    QString arm_angle = runReduceScriptFunction(
+      "print i.ReductionSingleton().mask.arm_angle");
+    if ( arm_width != "None" && arm_angle != "None" )
+    {
+      int row = m_uiForm.mask_table->rowCount();
+      m_uiForm.mask_table->insertRow(row);
+      m_uiForm.mask_table->setItem(row, 0, new QTableWidgetItem("Arm"));
+      m_uiForm.mask_table->setItem(row, 1, new QTableWidgetItem(reardet_name));
+      m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("LINE " + arm_width + " " + arm_angle));      
+    }
+  }
 }
 
 /**
@@ -1115,6 +1136,7 @@ bool SANSRunWindow::isUserFileLoaded() const
 
 /**
  * Create the mask strings for spectra and times
+ * @exec_script Create userfile type execution script
  */
 void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& importCommand, enum MaskType mType)
 {  
@@ -1151,7 +1173,8 @@ void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& impor
     //Details are in the third column
     temp = importCommand + "('MASK";
     exec_script += temp;
-    if( m_uiForm.mask_table->item(row, 0)->text() == "time")
+    QString type = m_uiForm.mask_table->item(row, 0)->text();
+    if( type == "time")
     {
       exec_script += "/TIME";
     }
@@ -1163,7 +1186,10 @@ void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& impor
     }
     else if( detname == "rear-detector" || detname == "main-detector-bank" )
     {
-      exec_script += "/REAR " + details;
+      if ( type != "Arm" )
+      {
+        exec_script += "/REAR " + details;
+      }
     }
     else
     {

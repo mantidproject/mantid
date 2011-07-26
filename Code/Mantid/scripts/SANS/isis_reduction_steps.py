@@ -707,9 +707,8 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             self._mask_phi(
                 'unique phi', [0,0,0], self.phi_min,self.phi_max,self.phi_mirror)
 
-    def execute(self, reducer, workspace, instrument=None):
-        if not instrument:
-            instrument = reducer.instrument
+    def execute(self, reducer, workspace):
+        instrument = reducer.instrument
         #set up the spectra lists and shape xml to mask
         detector = instrument.cur_detector()
         if detector.isAlias('rear'):
@@ -742,7 +741,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             MaskDetectorsInShape(workspace, self._lim_phi_xml)
 
         if self.arm_width and self.arm_angle:
-            if reducer.instrument.name() == "SANS2D":
+            if instrument.name() == "SANS2D":
                 ws = mtd[str(workspace)]
                 det = ws.getInstrument().getComponentByName('rear-detector')
                 det_Z = det.getPos().getZ()
@@ -776,21 +775,22 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         #opens an instrument showing the contents of the workspace (i.e. the instrument with masked detectors) 
         instrum.view(wksp_name)
 
-    def display(self, wksp, instrum, counts=None):
+    def display(self, wksp, reducer, counts=None):
         """
             Mask detectors in a workspace and display its show instrument
             @param wksp: this named workspace will be masked and displayed
-            @param instrum: the instrument that the workspace is from
+            @param reducer: the reduction chain that contains all the settings
             @param counts: optional workspace containing neutron counts data that the mask will be supperimposed on to   
         """
         #apply masking to the current detector
-        self.execute(None, wksp, instrum)
+        self.execute(reducer, wksp)
         
+        instrum = reducer.instrument
         #now the other detector
         other = instrum.other_detector().name()
         original = instrum.cur_detector().name()
         instrum.setDetector(other)
-        self.execute(None, wksp, instrum)
+        self.execute(reducer, wksp)
         #reset the instrument to mask the current detector
         instrum.setDetector(original)
 

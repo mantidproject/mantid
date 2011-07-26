@@ -537,7 +537,7 @@ def DisplayMask(mask_worksp=None):
         else:
             instrument.load_empty(mask_worksp)
         
-    ReductionSingleton().mask.display(mask_worksp, instrument, counts_data)
+    ReductionSingleton().mask.display(mask_worksp, ReductionSingleton(), counts_data)
     if counts_data:
         mantid.deleteWorkspace(counts_data)
         
