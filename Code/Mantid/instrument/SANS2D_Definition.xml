@@ -58,8 +58,8 @@
   <type name="monitors">
     <component type="monitor-tbd" mark-as="monitor">
       <!-- better positions and shapes will be defined later -->
-      <location z="7.217"/>
-      <location z="17.937"/>
+      <location z="7.217" name="Monitor 1"/>
+      <location z="17.937" name="Monitor 2"/>
     </component>
     <component type="Moderator-Monitor3" mark-as="monitor">
       <!-- transmisssion detector, either in or out of beam -->
@@ -67,7 +67,7 @@
     </component>
     <component type="monitor-tbd" mark-as="monitor">
       <!-- better positions and shapes will be defined later -->
-      <location z="30.0"/>
+      <location z="30.0" name="Monitor 4"/>
     </component>    
   </type>
   
