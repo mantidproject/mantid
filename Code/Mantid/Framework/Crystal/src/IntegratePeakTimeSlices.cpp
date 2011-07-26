@@ -3,6 +3,9 @@
  *
  *  Created on: May 5, 2011
  *      Author: ruth
+ *
+ *  TODO: Rewrite this as a proper class
+ *
  */  
 //#include "MantidCurveFitting/BivariateNormal.h"
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
@@ -183,7 +186,7 @@ static void updatepeakInf( std::vector<double >const &params,std::vector<double 
 
 static int find( std::string const &oneName, std::vector<std::string> const &nameList);
 
-static void show( std::string const & Descr,TableWorkspace_sptr const&table,const int StringCol);
+//static void show( std::string const & Descr,TableWorkspace_sptr const&table,const int StringCol);
 
 static bool EnoughData( std::vector<std::vector<double > >const & ParamAttr );
 
@@ -1034,6 +1037,8 @@ static bool GoodFit1(std::vector<double > const &params,
     
   }
 
+
+/* Commenting this out because it leaves a warning during build. Should be cleaned up or removed.
 static void show( std::string const &Descr, TableWorkspace_sptr const &table,const int StringCol)
 {
    std::cout<<"        "<<Descr<<std::endl;
@@ -1054,6 +1059,7 @@ static void show( std::string const &Descr, TableWorkspace_sptr const &table,con
 
    }
 }
+*/
 
 static bool EnoughData( std::vector<std::vector<double > >const &ParamAttr )
 {
