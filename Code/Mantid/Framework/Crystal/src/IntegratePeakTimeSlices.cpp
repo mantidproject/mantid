@@ -42,36 +42,36 @@ namespace Crystal
 
 DECLARE_ALGORITHM(IntegratePeakTimeSlices)
 
-std::vector<std::string> AttrNames;
-std::vector<std::string> ParamNames;
+static std::vector<std::string> AttrNames;
+static std::vector<std::string> ParamNames;
 //Attr indicies
-int IStartRow=0;
-int IStartCol=1;
-int INRows=2;
-int INCol=3;
-int ISSIxx=4;
-int ISSIyy=5;
-int ISSIxy=6;
-int ISSxx=7;
-int ISSyy=8;
-int ISSxy=9;
-int ISSIx=10;
-int ISSIy=11;
-int ISSx=12;
-int ISSy=13;
-int IIntensities=14;
+#define IStartRow 0
+#define IStartCol 1
+#define INRows 2
+#define INCol 3
+#define ISSIxx 4
+#define ISSIyy 5
+#define ISSIxy 6
+#define ISSxx 7
+#define ISSyy 8
+#define ISSxy 9
+#define ISSIx 10
+#define ISSIy 11
+#define ISSx  12
+#define ISSy  13
+#define IIntensities 14
 
 //Parameter indicies
-int IBACK = 0;
-int ITINTENS = 1;
-int IXMEAN = 2;
-int IYMEAN = 3;
-int IVXX = 4;
-int IVYY = 5;
-int IVXY = 6;
+#define IBACK   0
+#define ITINTENS  1
+#define IXMEAN  2
+#define IYMEAN  3
+#define IVXX  4
+#define IVYY  5
+#define IVXY  6
 
 
-IntegratePeakTimeSlices::IntegratePeakTimeSlices():Algorithm()
+IntegratePeakTimeSlices::IntegratePeakTimeSlices():Algorithm( ),RectWidth(-1),RectHeight(-1)
  {
   if( AttrNames.size() <3)
   {
@@ -108,8 +108,7 @@ IntegratePeakTimeSlices::IntegratePeakTimeSlices():Algorithm()
     ParamNames.push_back("SSrc");
   }
   wi_to_detid_map=0;
-   g_log.setLevel(7);
-
+  g_log.setLevel(7);
  }
      /// Destructor
 IntegratePeakTimeSlices::~IntegratePeakTimeSlices()
@@ -135,52 +134,58 @@ void IntegratePeakTimeSlices::init()
      
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("Peaks","",Direction::Input), "Workspace of Peaks");
       
-      declareProperty( new WorkspaceProperty<PeaksWorkspace>("PeaksResult","",Direction::Output), 
-                        "Workspace of the resultant Peaks");
 
       declareProperty("PeakIndex",0,"Index of peak in PeaksWorkspace to integrate");
 
       declareProperty("PeakQspan", .03, "Max magnitude of Q of Peak to Q of Peak Center, where |Q|=1/d");
+
+      declareProperty("Intensity",0.0, "Peak Integrated Intensity");
+
+      declareProperty("SigmaIntensity",0.0,"Peak Integrated Intensity Error");
+
 }
 
 
 //----------------------- Declaration of methods used in exec method ---------------------------
 
-void getnPanelRowsCols(Peak peak,  int &nPanelRows, int & nPanelCols, double & CellHeight,
+static void getnPanelRowsCols(Peak const &peak,  int &nPanelRows, int & nPanelCols, double & CellHeight,
                                             double & CellWidth, Mantid::Kernel::Logger &g_log);
 
-int  getdChanSpan(Peak peak, double dQ, Mantid::MantidVec X, int specNum, int& Centerchan);
+static int  getdChanSpan(Peak const & peak, const double dQ, Mantid::MantidVec const & X, const int specNum, int& Centerchan);
 
-double getdRowSpan(  Peak peak, double dQ, double ystep, double xstep);
+static double getdRowSpan(  Peak const &peak, const double dQ, const double ystep, const double xstep);
 
-void SetUpOutputWSCols( TableWorkspace_sptr &TabWS);
+static void SetUpOutputWSCols( TableWorkspace_sptr &TabWS);
 
-boost::shared_ptr<const RectangularDetector> getPanel( Peak peak);
+static boost::shared_ptr<const RectangularDetector> getPanel( Peak const &peak);
 
-std::vector<int> getStartNRowCol( double CentRow,double CentCol, int dRow, int dCol, 
-                                 int nPanelRows, int nPanelCols);
+static std::vector<int> getStartNRowCol( const double CentRow, const double CentCol, const int dRow, const int dCol, 
+                                 const int nPanelRows, const int nPanelCols);
 
-std::vector<std::vector<double> >  SetUpData(MatrixWorkspace_sptr Data,MatrixWorkspace_sptr inpWkSpace,
-                boost::shared_ptr<const RectangularDetector> panel,int chan,std::vector<int>Attr,
+static std::vector<std::vector<double> >  SetUpData1(MatrixWorkspace_sptr  &Data,MatrixWorkspace_sptr const &inpWkSpace,
+                boost::shared_ptr<const RectangularDetector> const&panel,const int chan,std::vector<int>const &Attr,
+                     Mantid::detid2index_map  * const wi_to_detid_map,
                                               Logger&                              g_log);
 
-std::string CalcFunctionProperty( std::vector<std::vector<double> > ParamAttr);
+static std::string CalcFunctionProperty( std::vector<std::vector<double> > const &ParamAttr);
 
-bool GoodFit1(std::vector<double >params,std::vector<double >errs,std::vector<std::string >names,
-                                        double chisq, std::vector<std::vector<double > >ParamAttr ); 
+static bool GoodFit1(std::vector<double > const & params,std::vector<double >const & errs,std::vector<std::string >const &names,
+                                        double chisq, std::vector<std::vector<double > >const &ParamAttr ); 
 
-void UpdateOutputWS( TableWorkspace_sptr &TabWS,int dir, int chan,std::vector<double >params,std::vector<double >errs,
-    std::vector<std::string>names, double chisq, std::vector<std::vector<double > >ParamAttr, double time);
+static void UpdateOutputWS( TableWorkspace_sptr &TabWS,const int dir, const int chan,std::vector<double >const &params,
+                  std::vector<double >const &errs, std::vector<std::string>const &names, const double chisq, 
+                  std::vector<std::vector<double > >const &ParamAttr, const double time) ;
 
 
-void updatepeakInf( std::vector<double >params,std::vector<double >errs,std::vector<std::string >names,
-                               double &TotVariance, double &TotIntensity,double TotSliceIntensity, double chisqdivDOF, int ncelss);
+static void updatepeakInf( std::vector<double >const &params,std::vector<double >const &errs,std::vector<std::string >const &names,
+                               double &TotVariance, double &TotIntensity,double const TotSliceIntensity, double const chisqdivDOF, 
+                               const int ncelss);
 
-int find( std::string oneName, std::vector<std::string> nameList);
+static int find( std::string const &oneName, std::vector<std::string> const &nameList);
 
-void show( std::string Descr,TableWorkspace_sptr &table,int StringCol);
+static void show( std::string const & Descr,TableWorkspace_sptr const&table,const int StringCol);
 
-bool EnoughData( std::vector<std::vector<double > >ParamAttr );
+static bool EnoughData( std::vector<std::vector<double > >const & ParamAttr );
 
 //___________________________________ end methods start exec -----------------------------
 
@@ -289,7 +294,7 @@ void IntegratePeakTimeSlices::exec()
      
            std::vector<int> Attr= getStartNRowCol( lastRow,
                                                    lastCol,
-                                                   2*(int)dRow, 
+                                                   2*(int)dRow,// use Rectwidth/Height if valid. 
                                                    2*(int) dRow, 
                                                    nPanelRows,
                                                    nPanelCols);
@@ -431,16 +436,9 @@ void IntegratePeakTimeSlices::exec()
 
     setProperty("OutputWorkspace",TabWS);//Guess what this does the Analysis data service
     
-   
+    setProperty("Intensity",TotIntensity);
+    setProperty("SigmaIntensity", sqrt(TotVariance));  
 
-    PeaksWorkspace_sptr pks = peaksW;
- 
-    
-    this->setProperty("PeaksResult",pks);
-   
-    //show( "ResTable",TabWS,-1);
-
-   // delete wi_to_detid_map;
 
 
 }catch(std::exception &ss)
@@ -453,7 +451,7 @@ std::cout<<"Error occurred XX "<<ss.what()<<std::endl;
 }
 
 //Gets the Rectangular detector from an instrument
-boost::shared_ptr<const RectangularDetector> getPanel( Peak peak)
+static boost::shared_ptr<const RectangularDetector> getPanel( Peak const & peak)
 {
 
   Mantid::Geometry::IInstrument_const_sptr Iptr= peak.getInstrument() ;
@@ -474,7 +472,7 @@ boost::shared_ptr<const RectangularDetector> getPanel( Peak peak)
 }
 
 // first element of )NrowsCols in the # of rows,the second is the # of columns
-void getnPanelRowsCols(Peak peak, int &nPanelRows, int &nPanelCols,
+static void getnPanelRowsCols(Peak const & peak, int &nPanelRows, int &nPanelCols,
                                   double &CellHeight, double &CellWidth, Mantid::Kernel::Logger &g_log  )
 {
 
@@ -499,7 +497,7 @@ void getnPanelRowsCols(Peak peak, int &nPanelRows, int &nPanelCols,
 
  }
 
-double getQ( Peak peak)
+static double getQ( Peak const & peak)
 {
   V3D pos =peak.getDetPos();
 
@@ -518,7 +516,7 @@ double getQ( Peak peak)
 
   }
 
-double getdRowSpan( Peak peak, double dQ, double ystep, double xstep)
+static double getdRowSpan( Peak const & peak, const double dQ, const double ystep, const double xstep)
 {
   
 
@@ -575,7 +573,7 @@ double getdRowSpan( Peak peak, double dQ, double ystep, double xstep)
 }
 
 //Finds an item in a MantidVec of time bin boundaries
-int find( Mantid::MantidVec X, double time)
+static int find( Mantid::MantidVec const & X, const double time)
 {
  int sgn = 1;
 
@@ -598,7 +596,7 @@ int find( Mantid::MantidVec X, double time)
 }
 
 
-int  getdChanSpan(Peak peak, double dQ, Mantid::MantidVec X,int spectra, int &Centerchan)
+static int  getdChanSpan(Peak const &peak, const double dQ, Mantid::MantidVec const &X,const int spectra, int &Centerchan)
 {
   UNUSED_ARG( spectra);
   double Q = getQ( peak)/2/M_PI;
@@ -628,7 +626,7 @@ int  getdChanSpan(Peak peak, double dQ, Mantid::MantidVec X,int spectra, int &Ce
 }
 
 
-void SetUpOutputWSCols( TableWorkspace_sptr &TabWS)
+static void SetUpOutputWSCols( TableWorkspace_sptr &TabWS)
 {
      TabWS->setName("Log Table");
      TabWS->addColumn("double","Time");
@@ -654,12 +652,12 @@ void SetUpOutputWSCols( TableWorkspace_sptr &TabWS)
 }
 
 // returns StartRow,StartCol,NRows,NCols
-std::vector<int> getStartNRowCol( double CentRow,
-                                  double CentCol,
-                                  int dRow,
-                                  int dCol,
-                                  int nPanelRows,
-                                  int nPanelCols
+static std::vector<int> getStartNRowCol( const double CentRow,
+                                  const double CentCol,
+                                  const int dRow,
+                                  const int dCol,
+                                  const int nPanelRows,
+                                  const int nPanelCols
                                 )
     {
       //std::cout<<"Args getStartRC="<<CentRow<<","<<CentCol<<","<<dRow<<","<<dCol<<","<<nPanelRows<<","<<nPanelCols<<std::endl;
@@ -693,7 +691,7 @@ std::vector<int> getStartNRowCol( double CentRow,
 
     }
 
-void updateStats( double intensity, int row, int col,std::vector<double> & StatBase )
+static void updateStats( const double intensity, const int row, const int col,std::vector<double> & StatBase )
 {
   StatBase[ ISSIxx]+=col*col*intensity;
   StatBase[ ISSIyy]+=intensity*row*row;
@@ -708,8 +706,8 @@ void updateStats( double intensity, int row, int col,std::vector<double> & StatB
   StatBase[ IIntensities]+=intensity;
 }
 
-std::vector<double> getInitParamValues(std::vector<double> StatBase, double TotBoundaryIntensities,
-    int nBoundaryCells)
+static std::vector<double> getInitParamValues(std::vector<double> const &StatBase, const double TotBoundaryIntensities,
+    const int nBoundaryCells)
 {
   double b = 0;
   if (nBoundaryCells > 0)
@@ -761,12 +759,25 @@ std::vector<double> getInitParamValues(std::vector<double> StatBase, double TotB
 }
 
 //Data is the slice subdate, inpWkSpace is ALl the data,
-std::vector<std::vector<double> >  IntegratePeakTimeSlices::SetUpData( MatrixWorkspace_sptr                         Data,
-                                              MatrixWorkspace_sptr                         inpWkSpace,
-                                              boost::shared_ptr<const RectangularDetector> panel,
-                                              int                                          chan,
-                                              std::vector<int>                             Attr)
+std::vector<std::vector<double> >  IntegratePeakTimeSlices::SetUpData( MatrixWorkspace_sptr &      Data,
+                                              MatrixWorkspace_sptr                   const &      inpWkSpace,
+                                              boost::shared_ptr<const RectangularDetector> const & panel,
+                                              const int                                            chan,
+                                              std::vector<int>                         const &     Attr)const
     {
+ //TODO, Check RectWidth and RectHeight 
+ //  if( positive use that. Redo Attr
+ //  Otherwise run SetUpData1 once, find means and std devs.  Run again( fix Attr) using new center and 2.3* the stdev's
+ //  Also, can set RectWidth and RectHeight to non -1 values so all other slices use the original width and heights
+ //
+
+       return   SetUpData1( Data, inpWkSpace, panel, chan, Attr, wi_to_detid_map, g_log);
+    }
+static std::vector<std::vector<double> >  SetUpData1(MatrixWorkspace_sptr  &Data,MatrixWorkspace_sptr const &inpWkSpace,
+                boost::shared_ptr<const RectangularDetector> const&panel,const int chan,std::vector<int>const &Attr,
+                                              Mantid::detid2index_map  * const wi_to_detid_map,
+                                              Logger&                              g_log)
+ {
         UNUSED_ARG(g_log);
         boost::shared_ptr<Workspace2D> ws = boost::shared_dynamic_cast<Workspace2D>( Data);
       
@@ -846,7 +857,7 @@ std::vector<std::vector<double> >  IntegratePeakTimeSlices::SetUpData( MatrixWor
     }
 
 
-std::string CalcFunctionProperty( std::vector<std::vector<double> > ParamAttr)
+static std::string CalcFunctionProperty( std::vector<std::vector<double> > const &ParamAttr)
 { 
 
   std::vector<double> ParamValues = ParamAttr[0];
@@ -870,7 +881,7 @@ std::string CalcFunctionProperty( std::vector<std::vector<double> > ParamAttr)
   return fun_str.str();
 }
 
-int find( std::string oneName, std::vector<std::string> nameList)
+static int find( std::string const &oneName, std::vector<std::string> const &nameList)
 {
   for( size_t i=0; i< nameList.size(); i++)
     if( oneName.compare(nameList[i])== (int)0)
@@ -880,11 +891,11 @@ int find( std::string oneName, std::vector<std::string> nameList)
 }
  
 
-bool GoodFit1(std::vector<double >params,
-              std::vector<double >errs,
-             std::vector<std::string >names,
-             double chisq, 
-             std::vector<std::vector<double > >ParamAttr )
+static bool GoodFit1(std::vector<double > const &params,
+              std::vector<double >const &errs,
+             std::vector<std::string >const &names,
+             const double chisq, 
+             std::vector<std::vector<double > >const &ParamAttr )
   {
     int Ibk= find("Background", names);
     int IIntensity = find("Intensity", names);
@@ -937,7 +948,8 @@ bool GoodFit1(std::vector<double >params,
   }
 
   //Calculate error used by ISAW. It "doubles" the background error.
-  double CalcIsawIntError( double background, double backError, double ChiSqOverDOF, double TotIntensity, int ncells)
+ static  double CalcIsawIntError( const double background, const double backError, const double ChiSqOverDOF, 
+                          const double TotIntensity, const int ncells)
   {
     UNUSED_ARG(ChiSqOverDOF)
     double Variance = TotIntensity + (backError*backError*TotIntensity/ncells) *ncells*ncells +
@@ -947,15 +959,15 @@ bool GoodFit1(std::vector<double >params,
   }
 
 
-  void UpdateOutputWS( TableWorkspace_sptr &TabWS,
-                       int dir,
-                       int chan,
-                       std::vector<double >params,
-                       std::vector<double >errs,
-                       std::vector<std::string>names, 
-                       double chisq, 
-                       std::vector<std::vector<double > >ParamAttr,
-                       double time)
+  static void UpdateOutputWS( TableWorkspace_sptr &TabWS,
+                       const int dir,
+                       const int chan,
+                       std::vector<double >const &params,
+                       std::vector<double >const &errs,
+                       std::vector<std::string>const &names, 
+                       const double chisq, 
+                       std::vector<std::vector<double > >const &ParamAttr,
+                       const double time)
   {
     int Ibk= find("Background", names);
     int IIntensity = find("Intensity", names);
@@ -1001,14 +1013,14 @@ bool GoodFit1(std::vector<double >params,
        
   }
 
-  void updatepeakInf( std::vector<double >params,
-                      std::vector<double >errs,
-                      std::vector<std::string >names,
+  static void updatepeakInf( std::vector<double >const &params,
+                      std::vector<double >const &errs,
+                      std::vector<std::string >const &names,
                       double &TotVariance, 
                       double &TotIntensity, 
-                      double TotSliceIntensity,
-		      double chiSqdevDOF, 
-                      int ncells)
+                      const double TotSliceIntensity,
+		      const double chiSqdevDOF, 
+                      const int ncells)
   {
     int Ibk= find("Background", names);
     //int IIntensity = find("Intensity", names);
@@ -1022,7 +1034,7 @@ bool GoodFit1(std::vector<double >params,
     
   }
 
-void show( std::string Descr, TableWorkspace_sptr &table,int StringCol)
+static void show( std::string const &Descr, TableWorkspace_sptr const &table,const int StringCol)
 {
    std::cout<<"        "<<Descr<<std::endl;
    std::vector<std::string> ColNames = table->getColumnNames();
@@ -1043,7 +1055,7 @@ void show( std::string Descr, TableWorkspace_sptr &table,int StringCol)
    }
 }
 
-bool EnoughData( std::vector<std::vector<double > >ParamAttr )
+static bool EnoughData( std::vector<std::vector<double > >const &ParamAttr )
 {
 //If all "zeroes, const value" or all on one line can cause problems
 //  Var x, Var y about 0(-background). and Varx*Vary-Covxy*Covxy ~=
