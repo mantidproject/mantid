@@ -121,7 +121,7 @@ endif ()
 
 # Some unit tests need GMock/GTest
 find_package ( GMock )
-find_package ( GTest )
+
 if ( GMOCK_FOUND AND GTEST_FOUND )
   include_directories ( ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
   message ( STATUS "GMock/GTest is available for unit tests." )

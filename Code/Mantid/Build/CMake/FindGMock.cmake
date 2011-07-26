@@ -19,6 +19,12 @@ find_library ( GMOCK_LIB_DEBUG NAMES gmock_d gmock
 
 set ( GMOCK_LIBRARIES optimized ${GMOCK_LIB} debug ${GMOCK_LIB_DEBUG} )
 
+if ( WIN32 OR APPLE )
+    include ( EmbeddedGTest )
+else ()
+	find_package ( GTest )
+endif ( WIN32 OR APPLE )
+
 # handle the QUIETLY and REQUIRED arguments and set GMOCK_FOUND to TRUE if 
 # all listed variables are TRUE
 include ( FindPackageHandleStandardArgs )
