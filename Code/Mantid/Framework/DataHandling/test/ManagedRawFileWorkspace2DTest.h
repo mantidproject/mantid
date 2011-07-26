@@ -260,6 +260,10 @@ public:
     const std::string managed2 = "ManagedRawFileWorkspace.DoNotUse";
     const std::string oldValue2 = conf.getString(managed2);
     conf.setString(managed2,"0");
+    const std::string datapath = "datasearch.directories";
+    std::string pathValue = conf.getString(datapath);
+    pathValue.append(";../Data/SystemTests/");
+    conf.setString(datapath,pathValue);
 
     IAlgorithm * loader = FrameworkManager::Instance().createAlgorithm("LoadRaw");
     //IAlgorithm_sptr loader = AlgorithmFactory::Instance().create("LoadRaw");
