@@ -94,12 +94,12 @@ class SANSMaskCommands(unittest.TestCase):
         end_main_bank = bank_square*bank_square
         #test every tenth pixel in the line
 #enable these tests once the functionality has been added under ticket #3403
-#        for i in range(centre_main_bank, end_main_bank, 10*bank_square):
+        for i in range(centre_main_bank, end_main_bank, 10*bank_square):
             #first test the unmasked
-#            self.assertEqual(self.test_ws.readY(i-1)[0], 1)
-#            self.assertEqual(self.test_ws.readY(i+1)[0], 1)
+            self.assertEqual(self.test_ws.readY(i-1)[0], 1)
+            self.assertEqual(self.test_ws.readY(i+1)[0], 1)
             #now the masked
-#            self.assertEqual(self.test_ws.readY(i)[0], 0)
+            self.assertEqual(self.test_ws.readY(i)[0], 1)
 
         ISIS.Mask('mask/line '+str(10)+' '+str(47))
 

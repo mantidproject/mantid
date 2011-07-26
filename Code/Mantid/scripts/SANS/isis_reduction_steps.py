@@ -468,8 +468,10 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         self._readonly_phi = False
         self.spec_list = []
         
-        #xml description of a line to mask
-        self._line_xml = ''
+        #is set when there is an arm to mask, it's the width in millimetres
+        self.arm_width = None
+        #when there is an arm to mask this is its angle in degrees
+        self.arm_angle = None
 
         ########################## Masking  ################################################
         # Mask the corners and beam stop if radius parameters are given
@@ -510,6 +512,11 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                 self.time_mask += ';' + bin_range
             elif len(detname) == 2:
                 self.add_mask_string(mask_string=detname[1],detect=detname[0])
+            elif type.startswith('LINE'):
+                if len(detname) != 3:
+                    _issueWarning('Unrecognized line masking command "' + details + '" syntax is MASK/LINE width angle')
+                self.arm_width = float(detname[1])
+                self.arm_angle = float(detname[2])                                               
             else:
                 _issueWarning('Unrecognized masking option "' + details + '"')
         elif len(parts) == 3:
@@ -648,14 +655,20 @@ class Mask_ISIS(sans_reduction_steps.Mask):
               # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
                 self._lim_phi_xml += '<algebra val="#('+id+'_plane1 '+id+'_plane2)" />'
 
-    def _mask_line(self, width, angle):
+    def _mask_line(self, startPoint, length, width, angle):
         '''
-            Creates the xml to mask a line of the given width at the given angle
-            into the member _line_xml
+            Creates the xml to mask a line of the given width and height at the given angle
+            into the member _line_xml. The masking object which is used to mask a line of say
+            a detector array is a finite cylinder 
+            @param startPoint: startPoint of line 
+            @param length: length of line             
+            @param width: width of line in mm
+            @param angle: angle of line in xy-plane in units of degrees
+            @return: return xml shape string
         '''
-        pass
-#        self._line_xml = self._infinite_cylinder()
-#        self._line_xml += self._infinite_cylinder()
+        return self._finite_cylinder(startPoint, width/2000.0, length, 
+                                               [math.cos(angle*math.pi/180.0),math.sin(angle*math.pi/180.0),0.0], "arm")
+
 
     def normalizePhi(self, phi):
         if phi > 90.0:
@@ -728,8 +741,14 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         if self._lim_phi_xml != '' and self.mask_phi:
             MaskDetectorsInShape(workspace, self._lim_phi_xml)
 
-        if self._line_xml and self.mask_line:
-            MaskDetectorsInShape(workspace, self._line_xml)
+        if self.arm_width and self.arm_angle:
+            if reducer.instrument.name() == "SANS2D":
+                ws = mtd[str(workspace)]
+                det = ws.getInstrument().getComponentByName('rear-detector')
+                det_Z = det.getPos().getZ()
+                start_point = [0, 0, det_Z]
+                MaskDetectorsInShape(workspace,
+                                 self._mask_line(start_point, 1e6, self.arm_width, self.arm_angle))
 
     def view(self, instrum):
         """

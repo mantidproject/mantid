@@ -221,7 +221,7 @@ void SANSRunWindow::initAnalysDetTab()
   m_uiForm.qx_lb->setText(QString("Qx (%1^-1)").arg(ANGSROM_SYM));
   m_uiForm.qxy_lb->setText(QString("Qxy (%1^-1)").arg(ANGSROM_SYM));
   m_uiForm.transFit_ck->setText(QString("Trans Fit (%1)").arg(ANGSROM_SYM));
-
+  m_uiForm.q_rebin->setToolTip("Any string allowed by the Rebin algorithm may be used");
   
  
   //Listen for Workspace delete signals

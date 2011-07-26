@@ -1010,6 +1010,21 @@ class Mask(ReductionStep):
             '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
             '<radius val="' + str(radius) + '" /></infinite-cylinder>\n'
 
+    def _finite_cylinder(self, centre, radius, height, axis, id='shape'):
+        """
+            Generates xml code for an infintely long cylinder
+            @param centre: a tupple for a point on the axis
+            @param radius: cylinder radius
+            @param height: cylinder height            
+            @param axis: cylinder orientation
+            @param id: a string to refer to the shape by
+            @return the xml string
+        """
+        return '<cylinder id="' + str(id) + '">' + \
+            '<centre-of-bottom-base x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
+            '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
+            '<radius val="' + str(radius) + '" /><height val="' + str(height) + '" /></cylinder>\n'
+
     def add_cylinder(self, radius, xcentre, ycentre, ID='shape'):
         '''Mask the inside of an infinite cylinder on the input workspace.'''
         self.add_xml_shape(
