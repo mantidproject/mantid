@@ -16,7 +16,7 @@ class NormaliseByThickness(PythonAlgorithm):
         # Input workspace
         self.declareProperty("InputWorkspace", "", Direction=Direction.Input, Description="Workspace to be normalised")
         self.declareProperty("OutputWorkspace", "", Direction=Direction.Input, Description="Name of the workspace that will contain the transmission histogram")
-        self.declareProperty("SampleThickness", 1.0, Direction=Direction.Input, Description="Optional sample thickness value. If not provided the sample-thickness run propertywill be used.")
+        self.declareProperty("SampleThickness", 0.0, Direction=Direction.Input, Description="Optional sample thickness value. If not provided the sample-thickness run property will be used.")
         self.declareProperty("OutputMessage", "", Direction=Direction.Output)
 
     def PyExec(self):
