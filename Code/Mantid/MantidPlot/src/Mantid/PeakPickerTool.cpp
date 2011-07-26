@@ -72,6 +72,7 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
   connect(fitBrowser(),SIGNAL(removeFitCurves()),this,SLOT(removeFitCurves()));
 
   m_mantidUI->showFitPropertyBrowser();
+  connect(this,SIGNAL(xRangeChanged(double, double)), m_mantidUI, SLOT(x_range_from_picker(double, double)));
   connect(this,SIGNAL(isOn(bool)),fitBrowser(),SLOT(setPeakToolOn(bool)));
   emit isOn(true);
 
@@ -605,6 +606,7 @@ void PeakPickerTool::startXChanged(double sX)
 {
   xMin(sX);
   graph()->replot();
+  emit xRangeChanged(m_xMin, m_xMax);
 }
 
 /**
@@ -615,6 +617,7 @@ void PeakPickerTool::endXChanged(double eX)
 {
   xMax(eX);
   graph()->replot();
+  emit xRangeChanged(m_xMin, m_xMax);
 }
 
 /**
