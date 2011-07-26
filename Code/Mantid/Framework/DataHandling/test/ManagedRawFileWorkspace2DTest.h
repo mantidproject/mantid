@@ -262,7 +262,7 @@ public:
     conf.setString(managed2,"0");
     const std::string datapath = "datasearch.directories";
     std::string pathValue = conf.getString(datapath);
-    pathValue.append(";../Data/SystemTests/");
+    pathValue.append(";../../Data/SystemTests/");
     conf.setString(datapath,pathValue);
 
     IAlgorithm * loader = FrameworkManager::Instance().createAlgorithm("LoadRaw");
