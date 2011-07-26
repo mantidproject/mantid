@@ -16,6 +16,10 @@ add_paraview_plugin( MantidParaViewSQWEventReaderObjectPanel "1.0"
                      GUI_INTERFACES ${IFACES}
                      SOURCES ${MOC_SRCS} ${IFACE_SRCS} ${INCLUDE_FILES} 
                      ${SRC_FILES} )
+
+# Add to the 'VatesParaViewPlugins' group in VS
+set_property( TARGET MantidParaViewSQWEventReaderObjectPanel PROPERTY FOLDER "MantidVatesParaViewPlugins" )
+
 target_link_libraries( MantidParaViewSQWEventReaderObjectPanel 
 MantidParaViewQtWidgets )
 

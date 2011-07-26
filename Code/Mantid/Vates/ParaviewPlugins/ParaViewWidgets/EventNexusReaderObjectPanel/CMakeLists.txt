@@ -13,6 +13,10 @@ add_paraview_plugin( MantidParaViewEventNexusReaderObjectPanel "1.0"
                      GUI_INTERFACES ${IFACES}
                      SOURCES ${MOC_SRCS} ${IFACE_SRCS} ${INCLUDE_FILES} 
                      ${SRC_FILES} )
+					 
+# Add to the 'VatesParaViewPlugins' group in VS
+set_property( TARGET MantidParaViewEventNexusReaderObjectPanel PROPERTY FOLDER "MantidVatesParaViewPlugins" )
+					 
 target_link_libraries( MantidParaViewEventNexusReaderObjectPanel 
 MantidParaViewQtWidgets )
 

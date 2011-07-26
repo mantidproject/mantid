@@ -6,6 +6,9 @@ add_paraview_plugin( MantidParaViewEventNexusReaderSMPlugin "1.0"
 	GUI_RESOURCE_FILES EventNexusReaderGUI.xml
 )
 
+# Add to the 'VatesParaViewPlugins' group in VS
+set_property( TARGET MantidParaViewEventNexusReaderSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
+
 target_link_libraries( MantidParaViewEventNexusReaderSMPlugin 
 ${MANTID_SUBPROJECT_LIBS} )
 

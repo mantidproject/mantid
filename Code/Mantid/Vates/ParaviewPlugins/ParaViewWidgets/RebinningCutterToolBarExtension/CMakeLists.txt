@@ -14,7 +14,9 @@ if( PARAVIEW_BUILD_QT_GUI )
                        SOURCES RebinningCutterToolBarActions.cxx ${MOC_SRCS} 
                        ${IFACE_SRCS} ${INCLUDE_FILES} ${SRC_FILES} )
 					   
-
+  # Add to the 'VatesParaViewPlugins' group in VS
+  set_property( TARGET MantidParaViewRebinningCutterToolBarActions PROPERTY FOLDER "MantidVatesParaViewPlugins" )
+					   
 # Put library into subfolder.
 output_binary_to( MantidParaViewRebinningCutterToolBarActions  ${PVPLUGINS_DIR})	
 

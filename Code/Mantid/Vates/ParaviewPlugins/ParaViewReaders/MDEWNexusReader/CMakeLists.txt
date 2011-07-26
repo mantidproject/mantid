@@ -6,6 +6,9 @@ add_paraview_plugin( MantidParaViewMDEWNexusReaderSMPlugin "1.0"
 	GUI_RESOURCE_FILES MDEWNexusReaderGUI.xml
 )
 
+# Add to the 'VatesParaViewPlugins' group in VS
+set_property( TARGET MantidParaViewMDEWNexusReaderSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
+
 target_link_libraries( MantidParaViewMDEWNexusReaderSMPlugin 
 ${MANTID_SUBPROJECT_LIBS} )
 

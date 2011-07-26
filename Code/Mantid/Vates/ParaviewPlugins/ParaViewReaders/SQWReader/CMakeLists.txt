@@ -6,6 +6,9 @@ add_paraview_plugin( MantidParaViewSQWReaderSMPlugin "1.0"
     GUI_RESOURCE_FILES SQWReaderGUI.xml
 )
 
+# Add to the 'VatesParaViewPlugins' group in VS
+set_property( TARGET MantidParaViewSQWReaderSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
+
 target_link_libraries( MantidParaViewSQWReaderSMPlugin 
 ${MANTID_SUBPROJECT_LIBS} )
 

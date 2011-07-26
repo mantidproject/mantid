@@ -129,7 +129,7 @@ add_library( VatesAPI ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties( VatesAPI PROPERTIES OUTPUT_NAME MantidVatesAPI )
 # Add to the 'Framework' group in VS
-set_property( TARGET VatesAPI PROPERTY FOLDER "MantidFramework" )
+set_property( TARGET VatesAPI PROPERTY FOLDER "MantidVates" )
 
 target_link_libraries( VatesAPI
 ${MANTID_SUBPROJECT_LIBS} 
@@ -144,6 +144,8 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   target_link_libraries( VatesAPITest VatesAPI ${GMOCK_LIBRARIES} 
       ${GTEST_LIBRARIES})
   add_dependencies( FrameworkTests VatesAPITest )
+  # Add to the 'UnitTests' group in VS
+  set_property ( TARGET VatesAPITest PROPERTY FOLDER "UnitTests" )
 endif()
 
 install( TARGETS VatesAPI ${TARGET_TYPE} DESTINATION ${LIB_DIR} )

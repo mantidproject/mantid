@@ -8,6 +8,9 @@ add_paraview_plugin( MantidParaViewRebinningCutterSMPlugin "1.0"
 		GUI_RESOURCE_FILES RebinningCutterGUI.xml
 )
 
+# Add to the 'VatesParaViewPlugins' group in VS
+set_property( TARGET MantidParaViewRebinningCutterSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
+
 target_link_libraries( MantidParaViewRebinningCutterSMPlugin 
 ${MANTID_SUBPROJECT_LIBS} )
 
