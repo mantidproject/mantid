@@ -70,9 +70,8 @@ public:
   
   void test_exec_miss()
   {
-    std::cout << "****************************************" << std::endl; // REMOVE
     inWSName = "RemovePromptPulseTest_InputWS_miss";
-    outWSName = inWSName; //"RemovePromptPulseTest_OutputWS_miss";
+    outWSName = "RemovePromptPulseTest_OutputWS_miss";
     this->makeFakeEventWorkspace(inWSName);
 
     EventWorkspace_sptr ws;
@@ -96,14 +95,11 @@ public:
     if (!ws) return;
 
     // Verify the results
-    std::cout << "miss " << ws->getTofMin() << " -> " << ws->getTofMax() << std::endl;
-    std::cout << "miss " << num_events << " " << ws->getNumberEvents() << std::endl;
     TS_ASSERT_EQUALS(num_events, ws->getNumberEvents()); // should not drop events
   }
 
   void test_exec_hit()
   {
-    std::cout << "****************************************" << std::endl; // REMOVE
     inWSName = "RemovePromptPulseTest_InputWS_hit";
     outWSName = inWSName; //"RemovePromptPulseTest_OutputWS_hit";
     this->makeFakeEventWorkspace(inWSName);
@@ -129,7 +125,6 @@ public:
     if (!ws) return;
 
     // Verify the results
-    std::cout << "hit " << num_events << " " << ws->getNumberEvents() << std::endl;
     TS_ASSERT(num_events > ws->getNumberEvents()); // should drop events
   }
 
