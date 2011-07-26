@@ -894,6 +894,7 @@ public:
 
   void setWindowName(MdiSubWindow *, const QString &);
   void setPreferences(Graph*);
+  void selectMultiPeak();
 
   void saveProjectAs(const QString& fileName = QString(), bool = false);
   MdiSubWindow* clone(MdiSubWindow*);
