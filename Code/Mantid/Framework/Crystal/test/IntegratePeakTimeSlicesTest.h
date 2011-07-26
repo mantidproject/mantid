@@ -157,16 +157,13 @@ public:
 
     algP.setProperty<PeaksWorkspace_sptr> ("Peaks", pks);
     algP.setPropertyValue("OutputWorkspace","aaa");
-    algP.setPropertyValue("PeaksResult","bbb");
     algP.execute();
     algP.setPropertyValue("OutputWorkspace","aaa");
-    algP.setPropertyValue("PeaksResult","bbb");
     //std::cout<<"Peak results="<< peak.getIntensity()<<","<<peak.getSigmaIntensity()<<std::endl;
-    PeaksWorkspace_sptr Pks = algP.getProperty("PeaksResult");
     TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
 
-     TS_ASSERT_LESS_THAN( fabs(Pks->getPeak(0).getIntensity()-60000),100.0);
-     TS_ASSERT_LESS_THAN( fabs(Pks->getPeak(0).getSigmaIntensity()-375.5),1.0);
+     TS_ASSERT_LESS_THAN( fabs(pks->getPeak(0).getIntensity()-60000),100.0);
+     TS_ASSERT_LESS_THAN( fabs(pks->getPeak(0).getSigmaIntensity()-375.5),1.0);
      TS_ASSERT_LESS_THAN( fabs(Twk->getRef<double>("Time",0) -19250),20);
      TS_ASSERT_LESS_THAN( fabs(Twk->getRef<double>("Background",1) -1.4),.2);
      TS_ASSERT_LESS_THAN( fabs(Twk->getRef<double>("Intensity",2) -11206),20);
@@ -287,57 +284,25 @@ ISAWIntensityError     99.2641     133.555      160.85     184.072     160.865  
    algP.setProperty("PeakIndex",0);
    algP.setProperty("PeakQspan",.003);
    algP.setPropertyValue("OutputWorkspace","ccc");
-   algP.setPropertyValue("PeaksResult","ddd");
    algP.setProperty<MatrixWorkspace_sptr>("InputWorkspace",wsPtr); 
    algP.setProperty<PeaksWorkspace_sptr>("Peaks",pks);
    algP.execute();
    algP.setPropertyValue("OutputWorkspace","ccc");
-   algP.setPropertyValue("PeaksResult","ddd");
-   //std::cout<<"After execute"<<std::endl;
-   //algP.setPropertyValue("OutputWorkspace","OutputWorkspace1");
    TableWorkspace_sptr Table=(algP.getProperty("OutputWorkspace"));
   
    if( !Table)
    {
-        //std::cout<<"No table retrieved"<<std::endl;
         Table = boost::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("ccc"));
         if( !Table)
            std::cout<<"Could Not retrieve frome Analysys data service"<<std::endl;
     }
 
-   //if( Table) std::cout<<"Num rows in table="<<Table->rowCount()<<std::endl;
 
-
-   //algP.setProperty("PeaksResult","PeaksResult");
-
-   PeaksWorkspace_sptr ResPeaks= algP.getProperty("PeaksResult");
-   
-   if( !ResPeaks)
-   {
-     std::cout<<"Could Not retrieve Peaks with getProperty"<<std::endl;
-     ResPeaks = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("ddd"));
-     
-    }
-
-
- 
-   // if( ResPeaks)
-   //  std::cout<<"new peak info="<<ResPeaks->getPeak(0).getIntensity()<<","<<ResPeaks->getPeak(0).getSigmaIntensity()<<std::endl;
     std::vector<std::string> names = Table->getColumnNames();
-    /*for( int i=0; i<Table->columnCount();i++)
-    {
-       std::cout<<std::setw(15)<<names[i];
-       for( int j=0; j< Table->rowCount();j++)
-           std::cout<< setw(12)<<Table->cell<double>(j,i);
-       std::cout<<std::endl;
-
-     }
-    */
   }catch( std::exception &s)
   {
     std::cout<<"error ="<< s.what()<<std::endl;
   }
- // std::cout<<"F"<<std::endl;
 }
 
 private:
