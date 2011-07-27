@@ -42,8 +42,6 @@ namespace Mantid
     template<typename ViewType>
     class DLLExport MDEWEventNexusPresenter : public MDEWLoadingRebinningPresenter<ViewType>
     {
-    private:
-      typedef MDEWLoadingRebinningPresenter<ViewType> SuperType;
     public:
       MDEWEventNexusPresenter(std::string fileName, RebinningActionManager* request, ViewType* view);
       virtual ~MDEWEventNexusPresenter();
@@ -77,7 +75,7 @@ namespace Mantid
       ::NeXus::File * file = NULL;
       try
       {
-        file = new ::NeXus::File(SuperType::m_filename);
+        file = new ::NeXus::File(this->m_filename);
         // All SNS (event or histo) nxs files have an entry named "entry"
         try
         {
@@ -122,12 +120,12 @@ namespace Mantid
       using namespace Mantid::API;
       using namespace Mantid::Geometry;
 
-      AnalysisDataService::Instance().remove(m_mdEventWsId);
+      AnalysisDataService::Instance().remove(this->m_mdEventWsId);
 
       Mantid::MDEvents::OneStepMDEW alg;
       alg.initialize();
       alg.setPropertyValue("Filename", this->m_filename);
-      alg.setPropertyValue("OutputWorkspace", m_mdEventWsId);
+      alg.setPropertyValue("OutputWorkspace", this->m_mdEventWsId);
 
       Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
       //Add observer.
@@ -137,7 +135,7 @@ namespace Mantid
       //Remove observer.
       alg.removeObserver(observer);
 
-    Workspace_sptr result=AnalysisDataService::Instance().retrieve(m_mdEventWsId);
+    Workspace_sptr result=AnalysisDataService::Instance().retrieve(this->m_mdEventWsId);
     Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
     
     // Now, we get the minimum extents in order to get nice default sizes
@@ -160,37 +158,35 @@ namespace Mantid
     }
     
     //Clear out any old values by reassigning a new instance.
-    m_geometryXmlBuilder = MDGeometryBuilderXML<StrictDimensionPolicy>();
+    this->m_geometryXmlBuilder = MDGeometryBuilderXML<StrictDimensionPolicy>();
 
     //Configuring the geometry xml builder allows the object panel associated with this reader to later
     //determine how to display all geometry related properties.
     if(nDimensions > 0)
     {
-      m_geometryXmlBuilder.addXDimension( defaultDimensions[0] );
+      this->m_geometryXmlBuilder.addXDimension( defaultDimensions[0] );
     }
     if(nDimensions > 1)
     {
-      m_geometryXmlBuilder.addYDimension( defaultDimensions[1] );
+      this->m_geometryXmlBuilder.addYDimension( defaultDimensions[1] );
     }
     if(nDimensions > 2)
     {
-      m_geometryXmlBuilder.addZDimension( defaultDimensions[2] );
+      this->m_geometryXmlBuilder.addZDimension( defaultDimensions[2] );
     }
     if(nDimensions > 3)
     {
-      m_geometryXmlBuilder.addTDimension( defaultDimensions[3] );
+      this->m_geometryXmlBuilder.addTDimension( defaultDimensions[3] );
     }
     if(nDimensions > 4)
     {
       for(size_t i = 4; i < nDimensions; i++)
       {
-        m_geometryXmlBuilder.addOrdinaryDimension( defaultDimensions[i] );
+        this->m_geometryXmlBuilder.addOrdinaryDimension( defaultDimensions[i] );
       }
     }
-
-    std::string result_ofe = m_geometryXmlBuilder.create();
     //Now have a record of the input geometry.
-    m_serializer.setGeometryXML(m_geometryXmlBuilder.create());
+    this->m_serializer.setGeometryXML(this->m_geometryXmlBuilder.create());
 
     }
   }
