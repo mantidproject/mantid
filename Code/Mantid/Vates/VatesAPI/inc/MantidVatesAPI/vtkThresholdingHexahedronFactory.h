@@ -78,6 +78,8 @@ protected:
 
   vtkDataSet* create3Dor4D(const int timestep) const;
 
+  vtkDataSet* createFromAnyIMDWorkspace3D() const;
+
   void validateWsNotNull() const;
 
   void validateDimensionsPresent() const;

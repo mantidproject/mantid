@@ -499,7 +499,7 @@ int vtkEventNexusReader::CanReadFile(const char* fname)
     {
       file->openGroup("entry", "NXentry");
     }
-    catch(::NeXus::Exception & e)
+    catch(::NeXus::Exception &)
     {
       file->close();
       return 0;

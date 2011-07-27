@@ -520,7 +520,7 @@ int vtkMDEWNexusReader::CanReadFile(const char* fname)
     file->close();
     return 1;
   }
-  catch(::NeXus::Exception & e)
+  catch(::NeXus::Exception &)
   {
     // If the entry name does not match, then it can't read the file.
     file->close();

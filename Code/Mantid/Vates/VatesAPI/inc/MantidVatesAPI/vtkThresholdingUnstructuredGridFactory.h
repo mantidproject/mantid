@@ -81,6 +81,15 @@ protected:
 
 private:
 
+  typedef std::vector<std::vector<std::vector<UnstructuredPoint> > > PointMap;
+
+  typedef std::vector<std::vector<UnstructuredPoint> > Plane;
+
+  typedef std::vector<UnstructuredPoint> Column;
+
+
+  vtkDataSet* createFromAnyIMDWorkspace4D(const int timestep) const;
+
   /// timestep obtained from framework.
   double m_timestep;
 
