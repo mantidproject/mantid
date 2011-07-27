@@ -220,7 +220,7 @@ unsigned long vtkPeaksReader::GetMTime()
   Update/Set the progress.
   @parameter progress : progress increment.
 */
-void vtkPeaksReader::UpdateAlgorithmProgress(double progress)
+void vtkPeaksReader::updateAlgorithmProgress(double progress)
 {
   this->SetProgressText("Executing Mantid MDEvent Rebinning Algorithm...");
   this->UpdateProgress(progress);

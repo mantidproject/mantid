@@ -15,8 +15,9 @@ public:
   {
     //This ordering is fundamental to the operation of the EscalatingRebinningManagerTest.
     using namespace Mantid::VATES;
+    TS_ASSERT(RecalculateVisualDataSetOnly > UseCache);
     TS_ASSERT(RecalculateAll > RecalculateVisualDataSetOnly);
-    TS_ASSERT(RecalculateAll > UseCache);
+	TS_ASSERT(ReloadAndRecalculateAll > RecalculateAll)
   }
 
   void testEscalation()

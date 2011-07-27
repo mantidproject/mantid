@@ -36,8 +36,8 @@ namespace Mantid
     class DLLExport MDLoadingRebinningPresenter : public MDRebinningPresenter
     {
     public:
-      virtual bool canLoadFile() = 0;
-	    virtual void executeLoad(std::string fileName, ProgressAction& eventHandler) = 0;
+      virtual bool canLoadFile() const = 0;
+	    virtual void executeLoad(ProgressAction& eventHandler) = 0;
       virtual ~MDLoadingRebinningPresenter(){}
     };
 

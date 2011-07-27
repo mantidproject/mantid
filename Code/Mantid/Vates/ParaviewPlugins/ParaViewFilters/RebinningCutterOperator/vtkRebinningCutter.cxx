@@ -118,7 +118,7 @@ const char* vtkRebinningCutter::getAppliedGeometryXML() const
 /** Setter for the algorithm progress..
 @parameter progress
 */
-void vtkRebinningCutter::UpdateAlgorithmProgress(double progress)
+void vtkRebinningCutter::updateAlgorithmProgress(double progress)
 {
   this->SetProgressText("Executing Mantid Rebinning Algorithm...");
   this->UpdateProgress(progress);

@@ -49,7 +49,7 @@ public:
 
   virtual void eventRaised(double progress)
   {
-    m_filter->UpdateAlgorithmProgress(progress);
+    m_filter->updateAlgorithmProgress(progress);
   }
 
   ~FilterUpdateProgressAction()

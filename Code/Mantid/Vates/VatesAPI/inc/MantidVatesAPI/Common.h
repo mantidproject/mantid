@@ -27,7 +27,8 @@ typedef boost::shared_ptr<const Mantid::Geometry::IMDDimension> Dimension_const_
 enum RebinningIterationAction {
   UseCache, //There is no delta here. Use a cached vtkDataSet.
   RecalculateVisualDataSetOnly, // 4D data set has not altered so create a new visual 3D slice only.
-  RecalculateAll // Rebin and create 3D visualisation slice from 4D dataset.
+  RecalculateAll, // Rebin and create 3D visualisation slice from 4D dataset.
+  ReloadAndRecalculateAll // Reload the original workspace and then Rebin it.
 };
 
 }

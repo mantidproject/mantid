@@ -13,7 +13,7 @@ private:
   struct MockFilter
   {
     double Progress;
-    void UpdateAlgorithmProgress(double progress)
+    void updateAlgorithmProgress(double progress)
     {
       this->Progress = progress;
     }

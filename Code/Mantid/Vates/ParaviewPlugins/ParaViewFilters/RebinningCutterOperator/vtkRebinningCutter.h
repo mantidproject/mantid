@@ -77,7 +77,7 @@ public:
   /// Paraview Related Commands. See *.xml proxy/property file --------------------------------
 
   /// Called by presenter to force progress information updating.
-  void UpdateAlgorithmProgress(double progress);
+  void updateAlgorithmProgress(double progress);
 
 
 

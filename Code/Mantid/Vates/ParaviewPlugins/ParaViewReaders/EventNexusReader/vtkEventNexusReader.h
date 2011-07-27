@@ -30,7 +30,7 @@ public:
   double GetInputMinThreshold();
   double GetInputMaxThreshold();
   /// Called by presenter to force progress information updating.
-  void UpdateAlgorithmProgress(double progress);
+  void updateAlgorithmProgress(double progress);
 
   void SetAppliedGeometryXML(std::string xml);
 

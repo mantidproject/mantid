@@ -551,7 +551,7 @@ unsigned long vtkMDEWNexusReader::GetMTime()
   Update/Set the progress.
   @parameter progress : progress increment.
 */
-void vtkMDEWNexusReader::UpdateAlgorithmProgress(double progress)
+void vtkMDEWNexusReader::updateAlgorithmProgress(double progress)
 {
   progressMutex.lock();
   this->SetProgressText("Executing Mantid MDEvent Rebinning Algorithm...");

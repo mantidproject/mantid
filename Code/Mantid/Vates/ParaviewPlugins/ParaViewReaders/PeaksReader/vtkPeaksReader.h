@@ -19,7 +19,7 @@ public:
   void SetWidth(double width);
 
   /// Called by presenter to force progress information updating.
-  void UpdateAlgorithmProgress(double progress);
+  void updateAlgorithmProgress(double progress);
 
   void SetAppliedGeometryXML(std::string xml);
 
