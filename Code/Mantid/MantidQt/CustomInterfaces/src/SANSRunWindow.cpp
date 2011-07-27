@@ -140,7 +140,7 @@ void SANSRunWindow::initLayout()
   connect(m_batch_paste, SIGNAL(activated()), this, SLOT(pasteToBatchTable()));
   m_uiForm.batch_table->addAction(m_batch_paste);
 
-  m_batch_clear = new QAction(tr("&Clear"),m_uiForm.batch_table);    
+  m_batch_clear = new QAction(tr("&Clear"),m_uiForm.batch_table);
   m_uiForm.batch_table->addAction(m_batch_clear);
   connect(m_batch_clear, SIGNAL(activated()), this, SLOT(clearBatchTable()));
 
@@ -168,21 +168,13 @@ void SANSRunWindow::initLayout()
     (*it)->doButtonOpt(MWRunFiles::Icon);
   }
 
-
-  connectChangeSignals();
+  connectFirstPageSignals();
 
   initAnalysDetTab();
 
   if( ! m_addFilesTab )
   {//sets up the AddFiles tab which must be deleted in the destructor
     m_addFilesTab = new SANSAddFiles(this, &m_uiForm);
-  }
-
-  // Create the "Display" tab
-  if ( ! m_displayTab )
-  {
-    m_displayTab = new SANSPlotSpecial(this);
-    m_uiForm.displayLayout->addWidget(m_displayTab);
   }
 
   //diagnostics tab
@@ -194,13 +186,17 @@ void SANSRunWindow::initLayout()
   //Listen for Workspace delete signals
   AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
 
-  // Default transmission switch
-  connect(m_uiForm.transFit_ck, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));
-  updateTransInfo(m_uiForm.transFit_ck->state());
+  // Create the "Display" tab
+  if ( ! m_displayTab )
+  {
+    m_displayTab = new SANSPlotSpecial(this);
+    m_uiForm.displayLayout->addWidget(m_displayTab);
+  }
 
   readSettings();
 }
-
+/** Ssetup the controls for the Analysis Tab on this form
+*/
 void SANSRunWindow::initAnalysDetTab()
 {
   //Add shortened forms of step types to step boxes
@@ -229,9 +225,10 @@ void SANSRunWindow::initAnalysDetTab()
 
   makeValidator(m_uiForm.wavRanVal_lb, m_uiForm.wavRanges, m_uiForm.tab_2,
              "A comma separated list of numbers is required here");
-  connect(m_uiForm.wavRanges, SIGNAL(editingFinished()),
-                                    this, SLOT(checkList()));
+
+  connectAnalysDetSignals();
 }
+
 /** Formats a Qlabel to be a validator and adds it to the list
 *  @param newValid :: a QLabel to use as a validator
 *  @param control :: the control whose entry the validator is validates
@@ -342,10 +339,9 @@ void SANSRunWindow::connectButtonSignals()
   connect(m_uiForm.showMaskBtn, SIGNAL(clicked()), this, SLOT(handleShowMaskButtonClick()));
   connect(m_uiForm.clear_log, SIGNAL(clicked()), m_uiForm.centre_logging, SLOT(clear()));
 }
-/** Connect signals from the textChanged() signal from text boxes, index changed
-*  on ComboBoxes etc.
+/**  Calls connect to fix up all the slots for the run tab to their events
 */
-void SANSRunWindow::connectChangeSignals()
+void SANSRunWindow::connectFirstPageSignals()
 {
   //controls on the first tab page
 
@@ -355,7 +351,11 @@ void SANSRunWindow::connectChangeSignals()
 
   connect(m_uiForm.allowPeriods_ck, SIGNAL(stateChanged(int)), this,
     SLOT(disOrEnablePeriods(const int)));
-
+}
+/** Calls connect to fix up all the slots for the analysis details tab to their events
+*/
+void SANSRunWindow::connectAnalysDetSignals()
+{
   //controls on the second page
   connect(m_uiForm.wav_dw_opt, SIGNAL(currentIndexChanged(int)), this, 
     SLOT(handleWavComboChange(int)));
@@ -366,8 +366,13 @@ void SANSRunWindow::connectChangeSignals()
 
   connect(m_uiForm.inst_opt, SIGNAL(currentIndexChanged(int)), this, 
     SLOT(handleInstrumentChange()));
+  connect(m_uiForm.transFit_ck, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));
+  updateTransInfo(m_uiForm.transFit_ck->state());
 
   connect(m_uiForm.enableFlood_ck, SIGNAL(stateChanged(int)), this, SLOT(prepareFlood(int)));
+
+  connect(m_uiForm.wavRanges, SIGNAL(editingFinished()),
+                                    this, SLOT(checkList()));
 }
 /**
  * Initialize the widget maps

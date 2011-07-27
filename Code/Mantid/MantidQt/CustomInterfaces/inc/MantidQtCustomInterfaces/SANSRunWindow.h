@@ -109,8 +109,8 @@ private:
   void setupSaveBox();
   /// connect the buttons click events to signals
   void connectButtonSignals();
-  /// connect signals from the textChanged() signal from text boxes, index changed on ComboBoxes etc.
-  void connectChangeSignals();
+  void connectFirstPageSignals();
+  void connectAnalysDetSignals();
   /// Create the necessary widget maps
   void initWidgetMaps();
   ///Read previous settings

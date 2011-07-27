@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/GravitySANSHelper.h"
 
@@ -37,7 +38,7 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Q1D : public API::Algorithm
+class DLLExport Q1D : public API::Algorithm, public API::DeprecatedAlgorithm
 {
 public:
   /// (Empty) Constructor

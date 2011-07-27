@@ -41,7 +41,7 @@ class Sample(object):
     def set_run(self, run, reload, period, reducer):
         self.loader = isis_reduction_steps.LoadSample(run, reload, period)
         self.log = self.loader.execute(reducer, None)
-
+        
         self.geometry.execute(None, self.get_wksp_name())
         
     def get_wksp_name(self):
@@ -96,7 +96,6 @@ class ISISReducer(SANSReducer):
         """       
         #these steps are not executed by reduce
         self.user_settings =   None
-        self.place_det_sam =   isis_reduction_steps.MoveComponents()
         self._out_name =       isis_reduction_steps.GetOutputName()
 
         #except self.prep_normalize all the steps below are used by the reducer

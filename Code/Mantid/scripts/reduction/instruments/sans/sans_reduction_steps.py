@@ -1063,7 +1063,7 @@ class Mask(ReductionStep):
         """
         self._ignore_run_properties = ignore
         
-    def execute(self, reducer, workspace, instrument=None):
+    def execute(self, reducer, workspace):
         
         # Check whether the workspace has mask information
         if not self._ignore_run_properties and mtd[workspace].getRun().hasProperty("rectangular_masks"):
@@ -1077,8 +1077,7 @@ class Mask(ReductionStep):
         for shape in self._xml:
             MaskDetectorsInShape(workspace, shape)
         
-        if instrument is None:
-            instrument = reducer.instrument
+        instrument = reducer.instrument
         # Get a list of detector pixels to mask
         if self._nx_low != 0 or self._nx_high != 0 or self._ny_low != 0 or self._ny_high != 0:            
             self.masked_pixels.extend(instrument.get_masked_pixels(self._nx_low,

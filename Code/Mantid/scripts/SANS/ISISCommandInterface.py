@@ -216,6 +216,14 @@ def TransmissionCan(can, direct, reload = True, period_t = -1, period_d = -1):
                                             ReductionSingleton(), None)
     
 def AssignSample(sample_run, reload = True, period = isis_reduction_steps.LoadRun.UNSET_PERIOD):
+    """
+        Specifies the run to analyse using the format instrumentrunnumber.extension,
+        e.g. SANS2D7777.nxs. This is one of the few commands that executes Mantid algorithms
+        when called. Currently only reload=true is supported.
+        @param sample_run: run number to analysis e.g. SANS2D7777.nxs
+        @param reload: must be set to True
+        @param period: the period (entry) number to load, default is the first period
+    """
     mes = 'AssignSample("' + sample_run + '"'
     if period != isis_reduction_steps.LoadRun.UNSET_PERIOD:
         mes += ', ' + str(period)

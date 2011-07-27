@@ -409,9 +409,10 @@ class CanSubtraction(ReductionStep):
                 _issueWarning("Can logs could not be loaded, using sample values.")
                 return "()"    
         
-        if self.workspace._reload:
-            reducer.place_det_sam.reset(self.workspace.wksp_name)
-        reducer.place_det_sam.execute(reducer, self.workspace.wksp_name)
+        if not self.workspace._reload:
+            raise NotImplementedError('Moving components needs to be made compatible with not reloading the sample')
+        beamcoords = reducer._beam_finder.get_beam_center()
+        reducer.instrument.move_components(self.wksp_name, beamcoords[0], beamcoords[1])
 
         return logs
 
@@ -732,7 +733,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         if ( not self.max_radius is None ) and ( self.max_radius > 0.0 ):
             self.add_outside_cylinder(self.max_radius, 0, 0, 'beam_area')
         #now do the masking
-        sans_reduction_steps.Mask.execute(self, reducer, workspace, instrument)
+        sans_reduction_steps.Mask.execute(self, reducer, workspace)
 
         if len(self.spec_list)>0:
             MaskDetectors(workspace, SpectraList = self.spec_list)
@@ -905,44 +906,15 @@ class LoadSample(LoadRun, ReductionStep):
                 raise RuntimeError('Sample logs cannot be loaded, cannot continue')
             reducer.instrument.apply_detector_logs(logs)           
 
-        if self._reload:
-            reducer.place_det_sam.reset(self.wksp_name)
-        reducer.place_det_sam.execute(reducer, self.wksp_name)
+        if not self._reload:
+            raise NotImplementedError('Moving components needs to be made compatible with not reloading the sample')
+        beamcoords = reducer._beam_finder.get_beam_center()
+        reducer.instrument.move_components(self.wksp_name, beamcoords[0], beamcoords[1])
 
         return logs
     
     def get_group_name(self):
         return self._get_workspace_name(self._period)
-
-class MoveComponents(ReductionStep):
-    """
-        Moves the components so that the centre of the detector bank is at the location
-        that was passed to the BeamFinder
-    """
-    def __init__(self):
-        super(MoveComponents, self).__init__()
-        #dictionary contains where given workspaces were moved to to avoid moving them again
-        self._moved_to = {}
-
-    def execute(self, reducer, workspace):
-
-        # Put the components in the correct positions
-        beamcoords = reducer._beam_finder.get_beam_center()
-        if self._moved_to.has_key(workspace):
-            if self._moved_to[workspace] != beamcoords:
-                #the components had already been moved, return them to their original location first
-                reducer.instrument.set_component_positions(workspace,
-                    -self._moved_to[workspace][0], -self._moved_to[workspace][1])
-        
-        if ( not self._moved_to.has_key(workspace) ) or \
-                (self._moved_to[workspace] != beamcoords):
-            self.maskpt_rmin, self.maskpt_rmax = reducer.instrument.set_component_positions(workspace, beamcoords[0], beamcoords[1])
-            self._moved_to[workspace] = beamcoords
-
-        mantid.sendLogMessage('::SANS:: Moved sample workspace to [' + str(self.maskpt_rmin)+','+str(self.maskpt_rmax) + ']' )
-
-    def reset(self, workspace):
-        self._moved_to.pop(workspace, None)
 
 class CropDetBank(ReductionStep):
     """
@@ -1834,7 +1806,7 @@ class UserFile(ReductionStep):
         #a list of the key words this function can read and the functions it calls in response
         keys = ['TRANSPEC', 'SAMPLEWS', 'CANWS']
         funcs = [self._read_transpec, self._read_trans_samplews, self._read_trans_canws]
-        self._process(keys, funcs, arguments, reducer)
+        return self._process(keys, funcs, arguments, reducer)
 
     def _process(self, keys, funcs, params, reducer):
         #go through the list of recognised commands
@@ -1845,12 +1817,17 @@ class UserFile(ReductionStep):
                 #call the handling function for that keyword returning any error
                 return funcs[i](params, reducer)
         return 'Unrecognised line: '
-    
+
     def _read_transpec(self, arguments, reducer):        
         arguments = arguments.split('=')
-        if len(arguments) < 2:
+        if len(arguments) == 1:
             raise RuntimeError('An "=" is required after TRANSPEC')
+
         reducer.transmission_calculator.trans_spec = arguments[1]
+        if len(arguments) == 3:
+            reducer.instrument.set_monitor_4_z_off(arguments[2])
+        if len(arguments) > 3:
+            raise RuntimeError('TRANSPEC line must be in the format TRANS/TRANSPEC=? or TRANS/TRANSPEC=4/SHIFT=-? where ? is a number')
         return ''
         
     def _read_trans_samplews(self, arguments, reducer):
