@@ -256,11 +256,11 @@ namespace VATES
 
   /** Method for creating a 3D or 4D data set
    *
-   * @param timestep :: int index of the time step (4th dimension) in the workspace.
+   * @param timestep :: index of the time step (4th dimension) in the workspace.
    *        Set to 0 for a 3D workspace.
    * @return the vtkDataSet created
    */
-  vtkDataSet* vtkThresholdingHexahedronFactory::create3Dor4D(const int timestep) const
+  vtkDataSet* vtkThresholdingHexahedronFactory::create3Dor4D(size_t timestep) const
   {
     
     MDHistoWorkspace_sptr hws = boost::dynamic_pointer_cast<MDHistoWorkspace>(m_workspace);
