@@ -262,11 +262,6 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
 
     const Geometry::ParameterMap& paramMap = m_workspace->instrumentParameters();
 
-//    // in some tests where workspace a created on the fly a spectra to detector map
-//    // is for convenience not created.
-//    if ( !(m_workspace->spectraMap().nElements()) )
-//      return;
-
     Geometry::IDetector_sptr det = m_workspace->getDetector(wi);
 
     // if det is a detector groupworkspace then take as the detector

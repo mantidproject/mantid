@@ -1361,11 +1361,14 @@ using namespace DataObjects;
   bool NexusFileIO::writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localWorkspace,
       const std::vector<int>& spec) const
   {
+    // Count the total number of detectors
+    std::size_t nDetectors = 0;
+    for (size_t i=0; i<spec.size(); i++)
+    {
+      size_t wi = size_t(spec[i]); // Workspace index
+      nDetectors += localWorkspace->getSpectrum(wi)->getDetectorIDs().size();
+    }
 
-
-    const Geometry::ISpectraDetectorMap& spectraMap=localWorkspace->spectraMap();
-    API::Axis *spectraAxis = localWorkspace->getAxis(1);
-    const std::size_t nDetectors = spectraMap.nElements();
     if(nDetectors<1)
     {
       // No data in spectraMap to write
@@ -1401,15 +1404,21 @@ using namespace DataObjects;
     // get data from map into Nexus Muon format
     for(int i=0;i<numberSpec;i++)
     {
+      // Workspace index
       int si = spec[i];
-      spectra[i] = int32_t(spectraAxis->spectraNo(si));
-      const int ndet1=static_cast<int>(spectraMap.ndet(spectra[i]));
+      // Spectrum there
+      const ISpectrum * spectrum = localWorkspace->getSpectrum(si);
+      spectra[i] = int32_t(spectrum->getSpectrumNo());
+
+      // The detectors in this spectrum
+      const std::set<detid_t> & detectorgroup = spectrum->getDetectorIDs();
+      const int ndet1=static_cast<int>( detectorgroup.size() );
+
       detector_index[i+1]= int32_t(detector_index[i]+ndet1); // points to start of detector list for the next spectrum
       detector_count[i]= int32_t(ndet1);
       ndet += ndet1;
 
-      const std::vector<detid_t> detectorgroup = spectraMap.getDetectors(spectra[i]);
-      std::vector<detid_t>::const_iterator it;
+      std::set<detid_t>::const_iterator it;
       for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
       {
         detector_list[id++]=int32_t(*it);

@@ -122,6 +122,7 @@ namespace Mantid
       void getIndicesFromSpectra(const std::vector<specid_t>& spectraList, std::vector<size_t>& indexList) const;
       size_t getIndexFromSpectrumNumber(const specid_t specNo) const;
       void getIndicesFromDetectorIDs(const std::vector<detid_t>& detIdList, std::vector<size_t>& indexList) const;
+      void getSpectraFromDetectorIDs(const std::vector<detid_t>& detIdList, std::vector<specid_t>& spectraList) const;
 
       /// Get the footprint in memory in bytes.
       virtual size_t getMemorySize() const;

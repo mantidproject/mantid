@@ -231,10 +231,6 @@ double RemoveLowResTOF::calcTofMin(const size_t workspaceIndex)
   const std::set<detid_t> & detSet = m_inputWS->getSpectrum(workspaceIndex)->getDetectorIDs();
   detNumbers.assign(detSet.begin(), detSet.end());
 
-//  const specid_t spec = m_inputWS->getAxis(1)->spectraNo(workspaceIndex);
-//  std::vector<detid_t> detNumbers = m_inputWS->spectraMap().getDetectors(spec);
-
-
   std::map<detid_t,double> offsets; // just an empty offsets map
   double dspmap = Instrument::calcConversion(m_L1, beamline, beamline_norm, samplePos,
                                      m_instrument, detNumbers, offsets, false);

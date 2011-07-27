@@ -333,8 +333,7 @@ public:
     //The spectra map should take each workspace index and point to the right pixel id: 5,15,25, etc.
     for (int wi=0; wi<static_cast<int>(uneven->getNumberHistograms()); wi++)
     {
-      specid_t specNo = uneven->getAxis(1)->spectraNo(wi);
-      TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(specNo)[0], 5 + wi*10);
+      TS_ASSERT_EQUALS( *uneven->getSpectrum(wi)->getDetectorIDs().begin(), 5 + wi*10);
     }
 
     //Workspace index 0 is at pixelid 5 and has 5 events

@@ -444,9 +444,14 @@ namespace Mantid
     {
       if (!m_monitordetectorList.empty())
       {
+        // Old way to get the spectra # for these detectors
         const Geometry::ISpectraDetectorMap& specdetMap = localWorkspace->spectraMap();
-        //get the monitor spectrum list from SpectraDetectorMap
         std::vector<specid_t> specList = specdetMap.getSpectra(m_monitordetectorList);
+
+//        //get the monitor spectrum list from SpectraDetectorMap
+//        std::vector<specid_t> specList;
+//        localWorkspace->getSpectraFromDetectorIDs(m_monitordetectorList, specList);
+
         // remove duplicates by calling  sort & unique algorithms
         sort(specList.begin(), specList.end(), std::less<int>());
         std::vector<specid_t>::iterator uEnd;

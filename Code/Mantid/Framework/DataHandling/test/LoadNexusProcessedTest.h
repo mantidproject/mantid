@@ -13,11 +13,13 @@
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 #include <Poco/File.h>
+#include "MantidGeometry/IDTypes.h"
 
 using namespace Mantid::NeXus;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
+using Mantid::detid_t;
 
 class LoadNexusProcessedTest : public CxxTest::TestSuite
 {
@@ -391,6 +393,7 @@ public:
      {
        const EventList & el = ws->getEventList(wi);
        TS_ASSERT_EQUALS( el.getEventType(), type );
+       TS_ASSERT( el.hasDetectorID(detid_t(wi+1)*10) );
      }
      TS_ASSERT_EQUALS( ws->getEventList(0).getNumberEvents(), 300 );
      TS_ASSERT_EQUALS( ws->getEventList(1).getNumberEvents(), 100 );

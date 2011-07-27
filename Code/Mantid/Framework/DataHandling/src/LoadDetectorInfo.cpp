@@ -510,7 +510,8 @@ void LoadDetectorInfo::adjustXs(const std::vector<detid_t> &detIDs, const std::v
 {
   // getting spectra numbers from detector IDs is hard because the map works the other way, getting index numbers from spectra numbers has the same problem and we are about to do both
   // function adds zero if it can't find a detector into the new, probably large, multimap of detectorIDs to spectra numbers
-  std::vector<specid_t> spectraList = m_workspace->spectraMap().getSpectra(detIDs);
+  std::vector<specid_t> spectraList;
+  m_workspace->getSpectraFromDetectorIDs(detIDs, spectraList);
 
   // allow spectra number to spectra index look ups
   spec2index_map specs2index;
@@ -561,12 +562,12 @@ void LoadDetectorInfo::adjustXs(const double detectorOffset)
   MantidVecPtr newXs;
 
   for ( int specInd = 0; specInd < m_numHists; ++specInd )
-  {// check if we dealing with a monitor as these are dealt by a different function
-    const specid_t specNum = m_workspace->getAxis(1)->spectraNo(specInd);
-    const std::vector<detid_t> dets = m_workspace->spectraMap().getDetectors(specNum);
+  {
+    // check if we dealing with a monitor as these are dealt by a different function
+    const std::set<detid_t> & dets = m_workspace->getSpectrum(size_t(specInd))->getDetectorIDs();
     if ( dets.size() > 0 ) 
     {// is it in the monitors list
-      if ( m_monitors.find(dets[0]) == m_monitors.end() )
+      if ( m_monitors.find(*dets.begin()) == m_monitors.end() )
       {// it's not a monitor, it's a regular detector 
         if ( (*newXs).empty() )
         {// we don't have any cached values from doing the offsetting previously, do the calculation
@@ -649,13 +650,14 @@ void LoadDetectorInfo::adjustXsCommon(const std::vector<float> &offsets, const s
       // and then move on to the next detector in the loop
       continue;
     }
+
     const size_t specIndex = specs2index[spectraList[j]];
     // check if we dealing with a monitor as these are dealt by a different function
-    const std::vector<detid_t> dets =
-      m_workspace->spectraMap().getDetectors(spectraList[j]);
+    const std::set<detid_t> & dets = m_workspace->getSpectrum(specIndex)->getDetectorIDs();
+
     if ( dets.size() > 0 )
     {// is it in the monitors list
-      if ( m_monitors.find(dets[0]) == m_monitors.end() )
+      if ( m_monitors.find(*dets.begin()) == m_monitors.end() )
       {// it's not a monitor, it's a regular detector
         if ( offsets[j] != cachedOffSet )
         {
@@ -705,12 +707,13 @@ void LoadDetectorInfo::adjustXsUnCommon(const std::vector<float> &offsets, const
       continue;
     }
     const size_t specIndex = specs2index[spectraList[j]];
+
     // check if we dealing with a monitor as these are dealt by a different function
-    const std::vector<detid_t> dets =
-      m_workspace->spectraMap().getDetectors(spectraList[j]);
+    const std::set<detid_t> & dets = m_workspace->getSpectrum(specIndex)->getDetectorIDs();
+
     if ( dets.size() > 0 ) 
     {// is it in the monitors list
-      if ( m_monitors.find(dets[0]) == m_monitors.end() )
+      if ( m_monitors.find(*dets.begin()) == m_monitors.end() )
       {// it's not a monitor, it's a regular detector
         MantidVec &Xbins = m_workspace->dataX(specIndex);
         std::transform(Xbins.begin(), Xbins.end(), Xbins.begin(),

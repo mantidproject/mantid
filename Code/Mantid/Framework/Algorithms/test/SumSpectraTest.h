@@ -50,14 +50,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("StartWorkspaceIndex","1") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("EndWorkspaceIndex","3") );
 
-    size_t nspecEntries(0);
-    const Mantid::Geometry::ISpectraDetectorMap & specMap_in = inputSpace->spectraMap();
-    // Spectra at workspace index 1 is masked
-    for( int i = 2; i < 4; ++i )
-    {
-      nspecEntries += specMap_in.ndet(i);
-    }
-
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
 
@@ -87,7 +79,7 @@ public:
     // Check the detectors mapped to the single spectra
     const ISpectrum * spec = output2D->getSpectrum(0);
     TS_ASSERT_EQUALS( spec->getSpectrumNo(), 1);
-    TS_ASSERT_EQUALS( spec->getDetectorIDs().size(), nspecEntries);
+    TS_ASSERT_EQUALS( spec->getDetectorIDs().size(), 2);
     TS_ASSERT( spec->hasDetectorID(3) );
     TS_ASSERT( spec->hasDetectorID(4) );
   }
@@ -106,15 +98,6 @@ public:
 
     // Check setting of invalid property value causes failure
     TS_ASSERT_THROWS( alg2.setPropertyValue("StartWorkspaceIndex","-1"), std::invalid_argument) ;
-
-    size_t nspecEntries(0);
-    const size_t nHist(inputSpace->getNumberHistograms());
-    const Geometry::ISpectraDetectorMap & specMap_in = inputSpace->spectraMap();
-    // Spectra at workspace index 1 is masked, 8 & 9 are monitors
-    for( size_t i = 1; i < nHist-2; ++i )
-    {
-      nspecEntries += specMap_in.ndet(static_cast<specid_t>(i));
-    }
 
     TS_ASSERT_THROWS_NOTHING( alg2.execute());
     TS_ASSERT( alg2.isExecuted() );
@@ -148,7 +131,8 @@ public:
     // Check the detectors mapped to the single spectra
     const ISpectrum * spec = output2D->getSpectrum(0);
     TS_ASSERT_EQUALS( spec->getSpectrumNo(), 0);
-    TS_ASSERT_EQUALS( spec->getDetectorIDs().size(), nspecEntries);
+    // Spectra at workspace index 1 is masked, 8 & 9 are monitors
+    TS_ASSERT_EQUALS( spec->getDetectorIDs().size(), 7);
     TS_ASSERT( spec->hasDetectorID(1) );
     TS_ASSERT( spec->hasDetectorID(3) );
     TS_ASSERT( spec->hasDetectorID(4) );

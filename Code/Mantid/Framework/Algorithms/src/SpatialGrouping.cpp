@@ -78,8 +78,6 @@ void SpatialGrouping::exec()
   int gridSize = getProperty("GridSize");
   size_t nNeighbours = ( gridSize * gridSize ) - 1;
 
-  const Mantid::Geometry::ISpectraDetectorMap & smap = inputWorkspace->spectraMap();
-  
   // Make a map key = spectrum number, value = detector at that spectrum
   m_detectors.clear();
   for (size_t i=0; i<inputWorkspace->getNumberHistograms(); i++)
@@ -183,8 +181,10 @@ void SpatialGrouping::exec()
     xml << "<group name=\"group" << grpID++ << "\"><detids val=\"" << (*grpIt)[0];
     for ( size_t i = 1; i < (*grpIt).size(); i++ )
     {
-      std::vector<detid_t> detIds = smap.getDetectors((*grpIt)[i]);
-      for ( std::vector<detid_t>::iterator it = detIds.begin(); it != detIds.end(); ++it )
+      //The following lines replace: std::vector<detid_t> detIds = smap.getDetectors((*grpIt)[i]);
+      size_t workspaceIndex = inputWorkspace->getIndexFromSpectrumNumber((*grpIt)[i]);
+      const std::set<detid_t> & detIds = inputWorkspace->getSpectrum(workspaceIndex)->getDetectorIDs();
+      for ( std::set<detid_t>::const_iterator it = detIds.begin(); it != detIds.end(); ++it )
       {
         xml << "," << (*it);
       }

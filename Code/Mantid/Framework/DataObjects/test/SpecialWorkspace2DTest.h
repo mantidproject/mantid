@@ -30,8 +30,6 @@ public:
 
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 100);
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
-
-    TS_ASSERT_THROWS_NOTHING( ws->spectraMap());
   }
 
   void test_constructor_from_Instrument()
@@ -43,8 +41,7 @@ public:
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 45);
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
     TS_ASSERT_EQUALS( ws->getInstrument()->getName(), "basic"); // Name of the test instrument
-    TS_ASSERT_EQUALS( ws->spectraMap().nElements(), 45);
-    std::vector<detid_t> dets = ws->spectraMap().getDetectors(1);
+    const std::set<detid_t> & dets = ws->getSpectrum(0)->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
 
     TS_ASSERT_EQUALS( ws->getDetectorID(0), 1);

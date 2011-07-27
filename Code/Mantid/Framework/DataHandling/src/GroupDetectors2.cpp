@@ -195,10 +195,8 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
   {// go thorugh the rest of the properties in order of decreasing presidence, abort when we get the data we need ignore the rest
     if ( ! detectorList.empty() )
     {
-      // we are going to group on the basis of detector IDs, convert from detectors to spectra numbers
-      std::vector<specid_t> mySpectraList = workspace->spectraMap().getSpectra(detectorList);
-      //then from spectra numbers to indices
-      workspace->getIndicesFromSpectra( mySpectraList, m_GroupSpecInds[0]);
+      // we are going to group on the basis of detector IDs, convert from detectors to workspace indices
+      workspace->getIndicesFromDetectorIDs( detectorList, m_GroupSpecInds[0]);
       g_log.debug() << "Found " << m_GroupSpecInds[0].size() << " spectra indices from the list of " << detectorList.size() << " detectors\n";
     }
     else if ( ! indexList.empty() )

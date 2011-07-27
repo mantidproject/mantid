@@ -764,7 +764,7 @@ public:
     TS_ASSERT(output2D);
     if (!output2D) return;
 
-    // Should be 6 for selected input
+    // Should be 3 for selected input
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 3);
 
     // Check two X vectors are the same

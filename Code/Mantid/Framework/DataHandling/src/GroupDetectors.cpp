@@ -85,11 +85,10 @@ void GroupDetectors::exec()
     WS->getIndicesFromSpectra(spectraList,indexList);
   }// End dealing with spectraList
   else if ( ! detectorList.empty() )
-  {// Dealing with DetectorList
-    //convert from detectors to spectra numbers
-    std::vector<specid_t> mySpectraList = WS->spectraMap().getSpectra(detectorList);
-    //then from spectra numbers to indices
-    WS->getIndicesFromSpectra(mySpectraList,indexList);
+  {
+    // Dealing with DetectorList
+    //convert from detectors to workspace indices
+    WS->getIndicesFromDetectorIDs(detectorList, indexList);
   }
 
   if ( indexList.size() == 0 )
@@ -104,13 +103,6 @@ void GroupDetectors::exec()
   ISpectrum * firstSpectrum = WS->getSpectrum(firstIndex);
 
   setProperty("ResultIndex",firstIndex);
-  const Geometry::ISpectraDetectorMap & inputSpectra = WS->spectraMap();
-  API::SpectraDetectorMap *groupedMap = dynamic_cast<API::SpectraDetectorMap*>(inputSpectra.clone());
-  if( !groupedMap )
-  {
-    throw std::invalid_argument("Input workspace with a 1:1 spectra-detector map is not supported "
-				"by this algorithm.");
-  }
 
   // loop over the spectra to group
   Progress progress(this, 0.0, 1.0, static_cast<int>(indexList.size()-1));
@@ -122,7 +114,6 @@ void GroupDetectors::exec()
 
     // Add the current detector to belong to the first spectrum
     firstSpectrum->addDetectorIDs(spec->getDetectorIDs());
-    //groupedMap->remap(spectraAxis->spectraNo(currentIndex), firstSpectrum);
 
     // Add up all the Y spectra and store the result in the first one
     // Need to keep the next 3 lines inside loop for now until ManagedWorkspace mru-list works properly
@@ -146,11 +137,9 @@ void GroupDetectors::exec()
     spec->clearDetectorIDs();
     progress.report();
   }
-  g_log.information() << "Testing " << groupedMap->nElements() << "\n";
 
   // Replace the old map
   WS->generateSpectraMap();
-//  WS->replaceSpectraMap(groupedMap);
 }
 
 } // namespace DataHandling

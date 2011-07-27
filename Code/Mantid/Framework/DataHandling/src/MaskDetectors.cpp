@@ -91,10 +91,8 @@ void MaskDetectors::exec()
   }// End dealing with spectraList
   else if ( ! detectorList.empty() )
   {
-    // Convert from detectors to spectra numbers
-    std::vector<specid_t> mySpectraList = WS->spectraMap().getSpectra(detectorList);
-    //then from spectra numbers to indices
-    fillIndexListFromSpectra(indexList,mySpectraList,WS);
+    // Convert from detectors to workspace indexes
+    WS->getIndicesFromDetectorIDs(detectorList, indexList);
   }
   // If we have a workspace that could contain masking,copy that in too
   if( prevMasking )

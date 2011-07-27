@@ -352,7 +352,8 @@ namespace Mantid
         buildNearestNeighbours(comp);
       }
       // Find the spectrum number
-      std::vector<specid_t> spectra = m_spectraMap->getSpectra(std::vector<detid_t>(1, comp->getID()));
+      std::vector<specid_t> spectra;
+      this->getSpectraFromDetectorIDs(std::vector<detid_t>(1, comp->getID()), spectra);
       if(spectra.empty())
       {
         throw Kernel::Exception::NotFoundError("MatrixWorkspace::getNeighbours - Cannot find spectrum number for detector", comp->getID());
@@ -592,6 +593,42 @@ namespace Mantid
     }
 
 
+    //---------------------------------------------------------------------------------------
+    /** Converts a list of detector IDs to the corresponding spectrum numbers. Might be slow!
+     *
+     * @param detIdList :: The list of detector IDs required
+     * @param spectraList :: Returns a reference to the vector of spectrum numbers.
+     *                       0 for not-found detectors
+     */
+    void MatrixWorkspace::getSpectraFromDetectorIDs(const std::vector<detid_t>& detIdList, std::vector<specid_t>& spectraList) const
+    {
+      std::vector<detid_t>::const_iterator it_start = detIdList.begin();
+      std::vector<detid_t>::const_iterator it_end = detIdList.end();
+
+      spectraList.clear();
+
+      // Try every detector in the list
+      std::vector<detid_t>::const_iterator it;
+      for (it = it_start; it != it_end; it++)
+      {
+        bool foundDet = false;
+        specid_t foundSpecNum = 0;
+
+        // Go through every histogram
+        for (size_t i=0; i<this->getNumberHistograms(); i++)
+        {
+          if (this->getSpectrum(i)->hasDetectorID(*it))
+          {
+            foundDet = true;
+            foundSpecNum = this->getSpectrum(i)->getSpectrumNo();
+            break;
+          }
+        }
+
+        if (foundDet)
+          spectraList.push_back(foundSpecNum);
+      } // for each detector ID in the list
+    }
 
 
     //---------------------------------------------------------------------------------------
