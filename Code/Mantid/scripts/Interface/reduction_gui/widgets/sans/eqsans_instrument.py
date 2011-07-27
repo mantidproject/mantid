@@ -27,8 +27,6 @@ class SANSInstrumentWidget(BaseWidget):
     name = "Reduction Options"      
 
     # Place holder for data read from file
-    _sample_thickness = None
-    _sample_thickness_supplied = True
     _sample_detector_distance = None
     _sample_detector_distance_supplied = True
     _beam_diameter = None
@@ -78,11 +76,6 @@ class SANSInstrumentWidget(BaseWidget):
             if not self._summary.sample_dist_chk.isChecked():
                 self._summary.sample_dist_edit.setText(QtCore.QString(str(value)))
                 util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0.0)
-        elif key == "sample_thickness":
-            self._sample_thickness = value
-            if not self._summary.thickness_chk.isChecked():
-                self._summary.thickness_edit.setText(QtCore.QString(str(value)))
-                util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
         elif key == "beam_diameter":
             value_float = float(value)
             self._beam_diameter = "%-6.1f" % value_float
@@ -98,7 +91,6 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
         self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
         self._summary.n_q_bins_edit.setValidator(QtGui.QIntValidator(self._summary.n_q_bins_edit))
-        self._summary.thickness_edit.setValidator(QtGui.QDoubleValidator(self._summary.thickness_edit))
         
         # Event connections
         self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
@@ -144,7 +136,6 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.scale_att_trans_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_att_trans_edit))
         self.connect(self._summary.scale_data_browse_button, QtCore.SIGNAL("clicked()"), self._scale_data_browse)
         self.connect(self._summary.scale_data_plot_button, QtCore.SIGNAL("clicked()"), self._scale_data_plot_clicked)
-        self.connect(self._summary.thickness_chk, QtCore.SIGNAL("clicked(bool)"), self._thickness_clicked)
         self.connect(self._summary.beamstop_chk, QtCore.SIGNAL("clicked(bool)"), self._beamstop_clicked)
         self.connect(self._summary.scale_chk, QtCore.SIGNAL("clicked(bool)"), self._scale_clicked)
         self._scale_clicked(self._summary.scale_chk.isChecked())
@@ -169,8 +160,6 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.scale_data_browse_button.hide()
             self._summary.scale_att_trans_edit.hide()
             self._summary.scale_beam_radius_edit.hide()
-            self._summary.thickness_chk.hide()
-            self._summary.thickness_edit.hide()
             self._summary.scale_chk.hide()
             
             # Same thing for sample-detector distance and offset: not yet hooked in
@@ -232,17 +221,6 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.low_tof_label.setEnabled(not is_checked)
         self._summary.high_tof_label.setEnabled(not is_checked)
                         
-    def _thickness_clicked(self, is_checked):
-        self._summary.thickness_edit.setEnabled(is_checked and self._summary.scale_chk.isChecked())
-        
-        # Keep track of current value so we can restore it if the check box is clicked again
-        if self._sample_thickness_supplied != is_checked:
-            current_value = util._check_and_get_float_line_edit(self._summary.thickness_edit)
-            self._summary.thickness_edit.setText(QtCore.QString(str(self._sample_thickness)))
-            util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
-            self._sample_thickness = current_value
-            self._sample_thickness_supplied = is_checked
-        
     def _beamstop_clicked(self, is_checked):
         self._summary.scale_beam_radius_edit.setEnabled(is_checked and self._summary.scale_chk.isChecked())
         
@@ -263,8 +241,6 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.scale_data_browse_button.setEnabled(is_checked)
         self._summary.scale_att_trans_edit.setEnabled(is_checked)
         self._summary.scale_beam_radius_edit.setEnabled(is_checked and self._summary.beamstop_chk.isChecked())
-        self._summary.thickness_chk.setEnabled(is_checked)
-        self._summary.thickness_edit.setEnabled(is_checked and self._summary.thickness_chk.isChecked())
         
         self._summary.att_scale_factor_label.setEnabled(not is_checked)
         self._summary.scale_edit.setEnabled(not is_checked)
@@ -331,12 +307,6 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.beamstop_chk.setChecked(state.manual_beam_diam)
         util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
         
-        #self._summary.thickness_edit.setText(QtCore.QString(str(state.sample_thickness)))
-        #if self._sample_thickness is None:
-        #    self._sample_thickness = state.sample_thickness
-        #self._sample_thickness_supplied = state.manual_sample_thickness
-        #self._summary.thickness_chk.setChecked(state.manual_sample_thickness)
-        #util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
         self._scale_clicked(self._summary.scale_chk.isChecked())
         
         # Detector offset input
@@ -420,8 +390,6 @@ class SANSInstrumentWidget(BaseWidget):
         m.scaling_att_trans = util._check_and_get_float_line_edit(self._summary.scale_att_trans_edit)
         m.scaling_beam_diam = util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
         m.manual_beam_diam = self._summary.beamstop_chk.isChecked()
-        #m.sample_thickness = util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
-        #m.manual_sample_thickness = self._summary.thickness_chk.isChecked()
         
         # Detector offset input
         if self._summary.detector_offset_chk.isChecked():

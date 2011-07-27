@@ -64,7 +64,7 @@
             </size>
            </property>
            <property name="text">
-            <string>Scattering data file:</string>
+            <string>Scattering data file</string>
            </property>
           </widget>
          </item>
@@ -172,6 +172,89 @@
         </layout>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>175</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>175</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Sample thickness [cm]</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_6">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>78</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="sample_thickness_edit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>80</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Enter sample thickness [cm]</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_11">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -218,7 +301,7 @@
                  </size>
                 </property>
                 <property name="text">
-                 <string>Sample direct beam data file:</string>
+                 <string>Sample direct beam data file</string>
                 </property>
                </widget>
               </item>
@@ -293,7 +376,7 @@
                  </size>
                 </property>
                 <property name="text">
-                 <string>Empty direct beam data file:</string>
+                 <string>Empty direct beam data file</string>
                 </property>
                </widget>
               </item>
@@ -456,7 +539,7 @@
                 <item>
                  <widget class="QRadioButton" name="fix_trans_radio">
                   <property name="text">
-                   <string>Fix transmission:</string>
+                   <string>Fix transmission</string>
                   </property>
                  </widget>
                 </item>
@@ -620,7 +703,7 @@
             <string>Select to apply a background subtraction.</string>
            </property>
            <property name="text">
-            <string>Background data file:</string>
+            <string>Background data file</string>
            </property>
           </widget>
          </item>
@@ -740,6 +823,89 @@
         </layout>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_13">
+         <item>
+          <widget class="QLabel" name="bck_thickness_label">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>178</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>178</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Sample thickness [cm]</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_14">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>78</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="bck_thickness_edit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>80</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Enter background sample thickness [cm]</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_16">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QGroupBox" name="transmission_grpbox">
          <property name="title">
           <string>Transmission</string>
@@ -776,7 +942,7 @@
             <item>
              <widget class="QRadioButton" name="bck_fix_trans_radio">
               <property name="text">
-               <string>Fix transmission:</string>
+               <string>Fix transmission</string>
               </property>
              </widget>
             </item>
@@ -869,7 +1035,7 @@
                </size>
               </property>
               <property name="text">
-               <string>Sample direct beam data file:</string>
+               <string>Sample direct beam data file</string>
               </property>
              </widget>
             </item>
@@ -944,7 +1110,7 @@
                </size>
               </property>
               <property name="text">
-               <string>Empty direct beam data file:</string>
+               <string>Empty direct beam data file</string>
               </property>
              </widget>
             </item>

@@ -46,6 +46,7 @@ class DataSetsWidget(BaseWidget):
         self._content.transmission_edit.setValidator(QtGui.QDoubleValidator(self._content.transmission_edit))
         self._content.dtransmission_edit.setValidator(QtGui.QDoubleValidator(self._content.dtransmission_edit))
         self._content.beam_radius_edit.setValidator(QtGui.QDoubleValidator(self._content.beam_radius_edit))
+        self._content.sample_thickness_edit.setValidator(QtGui.QDoubleValidator(self._content.sample_thickness_edit))
         
         # Connections
         self.connect(self._content.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._data_file_browse)
@@ -83,6 +84,7 @@ class DataSetsWidget(BaseWidget):
         self._content.bck_transmission_edit.setValidator(QtGui.QDoubleValidator(self._content.bck_transmission_edit))
         self._content.bck_dtransmission_edit.setValidator(QtGui.QDoubleValidator(self._content.bck_dtransmission_edit))
         self._content.bck_beam_radius_edit.setValidator(QtGui.QDoubleValidator(self._content.beam_radius_edit))
+        self._content.bck_thickness_edit.setValidator(QtGui.QDoubleValidator(self._content.bck_thickness_edit))
         
         # Connections
         self.connect(self._content.background_chk, QtCore.SIGNAL("clicked(bool)"), self._background_clicked)
@@ -140,6 +142,7 @@ class DataSetsWidget(BaseWidget):
         
         self._content.transmission_edit.setText(QtCore.QString("%6.4f" % state.transmission))
         self._content.dtransmission_edit.setText(QtCore.QString("%6.4f" % state.transmission_spread))
+        self._content.sample_thickness_edit.setText(QtCore.QString("%6.4f" % state.sample_thickness))
         
         self._content.beam_radius_edit.setText(QtCore.QString(str(state.calculation_method.beam_radius)))
         self._content.sample_edit.setText(QtCore.QString(state.calculation_method.sample_file))
@@ -188,6 +191,7 @@ class DataSetsWidget(BaseWidget):
 
         self._content.bck_transmission_edit.setText(QtCore.QString("%6.4f" % state.background.bck_transmission))
         self._content.bck_dtransmission_edit.setText(QtCore.QString("%6.4f" % state.background.bck_transmission_spread))
+        self._content.bck_thickness_edit.setText(QtCore.QString("%6.4f" % state.background.sample_thickness))
                 
         self._content.bck_beam_radius_edit.setText(QtCore.QString(str(state.background.trans_calculation_method.beam_radius)))
         self._content.bck_sample_edit.setText(QtCore.QString(state.background.trans_calculation_method.sample_file))
@@ -217,6 +221,7 @@ class DataSetsWidget(BaseWidget):
 
         m.transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
         m.transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
+        m.sample_thickness = util._check_and_get_float_line_edit(self._content.sample_thickness_edit)
         
         m.calculate_transmission = self._content.calculate_radio.isChecked()
         m.theta_dependent = self._content.theta_dep_chk.isChecked()
@@ -238,6 +243,7 @@ class DataSetsWidget(BaseWidget):
         b.bck_transmission_enabled = True
         b.bck_transmission = util._check_and_get_float_line_edit(self._content.bck_transmission_edit)
         b.bck_transmission_spread = util._check_and_get_float_line_edit(self._content.bck_dtransmission_edit)
+        b.sample_thickness = util._check_and_get_float_line_edit(self._content.bck_thickness_edit)
         b.calculate_transmission = self._content.bck_calculate_radio.isChecked()
         b.theta_dependent = self._content.bck_theta_dep_chk.isChecked()
         b.combine_transmission_frames = self._content.bck_fit_together_check.isChecked()
@@ -251,6 +257,8 @@ class DataSetsWidget(BaseWidget):
 
     def _background_clicked(self, is_checked):
         self._content.background_edit.setEnabled(is_checked)
+        self._content.bck_thickness_edit.setEnabled(is_checked)
+        self._content.bck_thickness_label.setEnabled(is_checked)
         self._content.background_browse.setEnabled(is_checked)
         self._content.background_plot_button.setEnabled(is_checked)
         self._content.bck_calculate_radio.setEnabled(is_checked)
@@ -382,8 +390,9 @@ class DataSetsWidget(BaseWidget):
             self._settings.last_data_ws = dataproxy.data_ws
             if dataproxy.sample_detector_distance is not None:
                 self._settings.emit_key_value("sample_detector_distance", QtCore.QString(str(dataproxy.sample_detector_distance)))
-            if dataproxy.sample_thickness is not None:
-                self._settings.emit_key_value("sample_thickness", QtCore.QString(str(dataproxy.sample_thickness)))
+            # Keep for later
+            #if dataproxy.sample_thickness is not None:
+            #    self._settings.emit_key_value("sample_thickness", QtCore.QString(str(dataproxy.sample_thickness)))
             if dataproxy.beam_diameter is not None:
                 self._settings.emit_key_value("beam_diameter", QtCore.QString(str(dataproxy.beam_diameter)))
              
