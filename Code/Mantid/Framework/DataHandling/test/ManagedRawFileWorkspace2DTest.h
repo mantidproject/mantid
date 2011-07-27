@@ -281,7 +281,7 @@ public:
     MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
     TS_ASSERT( ws );
 
-    double x,y,e;
+    double x(0),y(0),e(0);
     for ( std::size_t i = 0 ; i < ws->getNumberHistograms() ; ++i )
     {
       x = ws->readX(i)[0];
