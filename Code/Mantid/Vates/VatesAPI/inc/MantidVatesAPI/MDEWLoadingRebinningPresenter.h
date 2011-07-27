@@ -22,6 +22,7 @@
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
 
 #include <vtkPlane.h>
+#include <vtkFieldData.h>
 #include <boost/scoped_ptr.hpp>
 
 namespace Mantid
