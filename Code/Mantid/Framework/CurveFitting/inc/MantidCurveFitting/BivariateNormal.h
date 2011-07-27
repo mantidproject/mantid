@@ -8,13 +8,12 @@
 #include "MantidCurveFitting/BackgroundFunction.h"
 #include "MantidAPI/IFitFunction.h"
 #include "MantidKernel/Logger.h"
-//#include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
-using namespace Mantid::API;
- namespace Mantid
+
+namespace Mantid
 {
   namespace CurveFitting
-{
+  {
    
     /**
     Provide peak shape function interface a Peak shape on one time slice of a

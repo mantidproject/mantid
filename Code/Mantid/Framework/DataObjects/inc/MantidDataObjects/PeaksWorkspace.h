@@ -28,10 +28,8 @@ namespace Mantid
 //----------------------------------------------------------------------
 namespace Kernel
 {
-class Logger;
+  class Logger;
 }
-
-using namespace API;
 
 namespace DataObjects
 {
@@ -108,7 +106,7 @@ namespace DataObjects
     /** Add a peak to the list
      * @param peak :: Peak object to add (copy) into this.
      */
-    void addPeak(const IPeak& ipeak)
+    void addPeak(const API::IPeak& ipeak)
     {
       if (dynamic_cast<const Peak*>(&ipeak))
       {
@@ -125,7 +123,7 @@ namespace DataObjects
      * @param peakNum :: index of the peak to get.
      * @return a reference to a Peak object.
      */
-    IPeak & getPeak(const int peakNum)
+    API::IPeak & getPeak(const int peakNum)
     {
       if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0 ) throw std::invalid_argument("PeaksWorkspace::getPeak(): peakNum is out of range.");
       return peaks[peakNum];
@@ -137,7 +135,7 @@ namespace DataObjects
      * @param detectorDistance :: distance between the sample and the detector.
      * @return a pointer to a new Peak object.
      */
-    IPeak* createPeak(Mantid::Kernel::V3D QLabFrame, double detectorDistance=1.0)
+    API::IPeak* createPeak(Kernel::V3D QLabFrame, double detectorDistance=1.0)
     {
       return new Peak(getInstrument(),QLabFrame,detectorDistance);
     }

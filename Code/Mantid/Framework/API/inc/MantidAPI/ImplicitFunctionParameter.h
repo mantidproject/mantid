@@ -70,8 +70,6 @@ namespace Mantid
       std::string parameterXMLTemplate(std::string valueXMLtext) const
       {
         using namespace Poco::XML;
-
-        using namespace Poco::XML;
         AutoPtr<Document> pDoc = new Document;
         Element* paramElement = pDoc->createElement("Parameter");
 
