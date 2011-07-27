@@ -277,8 +277,15 @@ def SetDirectBeamAbsoluteScale(direct_beam, beamstop_diameter=None, attenuator_t
                                                                          apply_sensitivity=apply_sensitivity))
    
 def DivideByThickness(thickness=1.0):
-    if thickness is None:
-        ReductionSingleton().set_geometry_coorecter(None)
-    elif thickness != 1.0:
+    if thickness is None or thickness == 1.0:
+        ReductionSingleton().set_geometry_correcter(None)
+    else:
         ReductionSingleton().set_geometry_correcter(mantidsimple.NormaliseByThickness, InputWorkspace=None, OutputWorkspace=None, SampleThickness=thickness)
         
+def BckDivideByThickness(thickness=1.0):
+    if ReductionSingleton().get_background() is None:
+        raise RuntimeError, "A background hasn't been defined."
+    if thickness is None or thickness == 1.0:
+        ReductionSingleton().get_background().set_geometry_correcter(None)
+    else:
+        ReductionSingleton().get_background().set_geometry_correcter(mantidsimple.NormaliseByThickness, InputWorkspace=None, OutputWorkspace=None, SampleThickness=thickness)
