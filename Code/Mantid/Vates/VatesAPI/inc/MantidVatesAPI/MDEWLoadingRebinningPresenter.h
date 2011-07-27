@@ -9,6 +9,7 @@
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidVatesAPI/MetadataToFieldData.h"
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
