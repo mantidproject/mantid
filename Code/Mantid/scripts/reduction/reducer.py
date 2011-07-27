@@ -27,7 +27,7 @@ import MantidFramework
 import mantidsimple
 import warnings
 import inspect
-from reduction import find_data
+from find_data import find_data
 
 
 ## Version number

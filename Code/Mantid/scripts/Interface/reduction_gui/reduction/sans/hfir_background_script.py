@@ -88,6 +88,7 @@ class Background(BaseScriptElement):
     theta_dependent = True 
     trans_dark_current = ''
     trans_calculation_method = DirectBeam()
+    sample_thickness = 1.0
         
     def to_script(self):
         """
@@ -106,6 +107,9 @@ class Background(BaseScriptElement):
             if len(str(self.background_file).strip())==0:
                 raise RuntimeError, "Background subtraction was selected but no background data file was entered."            
             script += "Background(\"%s\")\n" % self.background_file
+            
+            # Background sample thickness
+            script += "BckDivideByThickness(%g)\n" % self.sample_thickness
             
             # Background transmission
             if self.bck_transmission_enabled:
@@ -135,6 +139,7 @@ class Background(BaseScriptElement):
             Create XML from the current data.
         """
         xml  = "<Background>\n"
+        xml += "  <sample_thickness>%g</sample_thickness>\n" % self.sample_thickness        
         xml += "  <dark_current_corr>%s</dark_current_corr>\n" % str(self.dark_current_corr)
         xml += "  <dark_current_file>%s</dark_current_file>\n" % self.dark_current_file
 
@@ -159,6 +164,9 @@ class Background(BaseScriptElement):
         element_list = dom.getElementsByTagName("Background")
         if len(element_list)>0:
             instrument_dom = element_list[0]   
+            
+            self.sample_thickness = BaseScriptElement.getFloatElement(instrument_dom, "sample_thickness",
+                                                                      default=Background.sample_thickness)      
             
             self.dark_current_corr = BaseScriptElement.getBoolElement(instrument_dom, "dark_current_corr",
                                                                       default = Background.dark_current_corr)
@@ -203,4 +211,5 @@ class Background(BaseScriptElement):
         self.theta_dependent = Background.theta_dependent
         self.trans_dark_current = Background.trans_dark_current
         self.trans_calculation_method = Background.trans_calculation_method
+        self.sample_thickness = Background.sample_thickness
     

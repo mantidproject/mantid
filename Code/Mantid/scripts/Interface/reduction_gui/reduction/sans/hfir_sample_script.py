@@ -158,6 +158,7 @@ class SampleData(BaseScriptElement):
     calculation_method = DirectBeam()
     theta_dependent = True
     dark_current = ''
+    sample_thickness = 1.0
     
     # Data file
     data_files = []
@@ -171,6 +172,10 @@ class SampleData(BaseScriptElement):
             @param execute: if true, the script will be executed
         """
         script = ""
+
+        # Sample thickness
+        script += "DivideByThickness(%g)\n" % self.sample_thickness
+        
         if not self.calculate_transmission:
             script += "SetTransmission(%g, %g)\n" % (self.transmission, self.transmission_spread)
         else:
@@ -216,6 +221,7 @@ class SampleData(BaseScriptElement):
         xml += self.calculation_method.to_xml()
         xml += "</Transmission>\n"
         xml += "<SampleData>\n"
+        xml += "  <sample_thickness>%g</sample_thickness>\n" % self.sample_thickness
         for item in self.data_files:
             xml += "  <data_file>%s</data_file>\n" % item.strip()        
         xml += "</SampleData>\n"
@@ -261,6 +267,8 @@ class SampleData(BaseScriptElement):
         if len(element_list)>0:
             sample_data_dom = element_list[0]      
             self.data_files = BaseScriptElement.getStringList(sample_data_dom, "data_file")
+            self.sample_thickness = BaseScriptElement.getFloatElement(sample_data_dom, "sample_thickness",
+                                                                      default=SampleData.sample_thickness)      
     
     def reset(self):
         """
@@ -272,6 +280,7 @@ class SampleData(BaseScriptElement):
         self.calculation_method = SampleData.calculation_method
         self.theta_dependent = SampleData.theta_dependent
         self.dark_current = SampleData.dark_current
+        self.sample_thickness = SampleData.sample_thickness
         self.data_files = []
     
 

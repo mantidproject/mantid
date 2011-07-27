@@ -84,6 +84,7 @@ class BackgroundWidget(BaseWidget):
         # Validators
         self._content.transmission_edit.setValidator(QtGui.QDoubleValidator(self._content.transmission_edit))
         self._content.dtransmission_edit.setValidator(QtGui.QDoubleValidator(self._content.dtransmission_edit))
+        self._content.thickness_edit.setValidator(QtGui.QDoubleValidator(self._content.thickness_edit))
         
         # Connections
         self.connect(self._content.calculate_trans_chk, QtCore.SIGNAL("clicked(bool)"), self._calculate_clicked)
@@ -136,6 +137,7 @@ class BackgroundWidget(BaseWidget):
         if self.show_transmission:
             self._content.transmission_edit.setText(QtCore.QString("%6.4f" % state.bck_transmission))
             self._content.dtransmission_edit.setText(QtCore.QString("%6.4f" % state.bck_transmission_spread))
+            self._content.thickness_edit.setText(QtCore.QString("%6.4f" % state.sample_thickness))
                     
             if isinstance(state.trans_calculation_method, state.DirectBeam):
                 self._content.trans_direct_chk.setChecked(True)
@@ -156,14 +158,12 @@ class BackgroundWidget(BaseWidget):
         """
         m = Background()
         
-        #m.dark_current_corr = self._content.dark_current_chk.isChecked()
-        #m.dark_current_file = unicode(self._content.dark_current_edit.text())
-        
         m.background_corr = self._content.background_chk.isChecked()
         m.background_file = str(self._content.background_edit.text())
         
         m.bck_transmission_enabled = self.show_transmission
         if self.show_transmission:
+            m.sample_thickness = util._check_and_get_float_line_edit(self._content.thickness_edit)
             m.bck_transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
             m.bck_transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
             m.calculate_transmission = self._content.calculate_trans_chk.isChecked()
@@ -208,6 +208,8 @@ class BackgroundWidget(BaseWidget):
         
     def _background_clicked(self, is_checked):
         self._content.background_edit.setEnabled(is_checked)
+        self._content.thickness_edit.setEnabled(is_checked)
+        self._content.thickness_label.setEnabled(is_checked)
         self._content.geometry_options_groupbox.setEnabled(is_checked)
         self._content.background_browse.setEnabled(is_checked)
         self._content.background_plot_button.setEnabled(is_checked)

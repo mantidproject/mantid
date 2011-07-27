@@ -20,8 +20,6 @@ class ReductionOptions(BaseScriptElement):
     scaling_direct_file = ''
     scaling_att_trans = 1.0
     scaling_beam_diam = 25.0 
-    sample_thickness = 1.0
-    manual_sample_thickness = False
     manual_beam_diam = False
     
     # Sample-detector distance to force on the data set [mm]
@@ -111,11 +109,7 @@ class ReductionOptions(BaseScriptElement):
             script += "MonitorNormalization()\n"
         
         if self.calculate_scale:
-            if self.sample_thickness<=0:
-                raise RuntimeError, "Invalid value for sample thickness: %g cm" % self.sample_thickness
             scaling_params = ""
-            if self.manual_sample_thickness:
-                scaling_params += ", sample_thickness=%g" % self.sample_thickness
             if self.manual_beam_diam:
                 scaling_params += ", beamstop_diameter=%g" % self.scaling_beam_diam
             
@@ -198,14 +192,12 @@ class ReductionOptions(BaseScriptElement):
         xml += "</Mask>\n"
         
         xml += "<AbsScale>\n"
-        xml += "  <manual_sample_thickness>%s</manual_sample_thickness>\n" % str(self.manual_sample_thickness)
         xml += "  <manual_beam_diam>%s</manual_beam_diam>\n" % str(self.manual_beam_diam)
         xml += "  <scaling_factor>%g</scaling_factor>\n" % self.scaling_factor
         xml += "  <calculate_scale>%s</calculate_scale>\n" % str(self.calculate_scale)
         xml += "  <scaling_direct_file>%s</scaling_direct_file>\n" % self.scaling_direct_file
         xml += "  <scaling_att_trans>%g</scaling_att_trans>\n" % self.scaling_att_trans
         xml += "  <scaling_beam_diam>%g</scaling_beam_diam>\n" % self.scaling_beam_diam
-        xml += "  <sample_thickness>%g</sample_thickness>\n" % self.sample_thickness
         xml += "</AbsScale>\n"
 
         return xml
@@ -306,8 +298,6 @@ class ReductionOptions(BaseScriptElement):
         if len(element_list)>0: 
             scale_dom = element_list[0]
 
-            self.manual_sample_thickness = BaseScriptElement.getBoolElement(scale_dom, "manual_sample_thickness",
-                                                                            default = ReductionOptions.manual_sample_thickness)
             self.manual_beam_diam = BaseScriptElement.getBoolElement(scale_dom, "manual_beam_diam",
                                                                      default = ReductionOptions.manual_beam_diam)
             self.scaling_factor = BaseScriptElement.getFloatElement(scale_dom, "scaling_factor", 
@@ -319,8 +309,6 @@ class ReductionOptions(BaseScriptElement):
                                                                        default=ReductionOptions.scaling_att_trans)
             self.scaling_beam_diam = BaseScriptElement.getFloatElement(scale_dom, "scaling_beam_diam",
                                                                        default=ReductionOptions.scaling_beam_diam)
-            self.sample_thickness = BaseScriptElement.getFloatElement(scale_dom, "sample_thickness",
-                                                                       default=ReductionOptions.sample_thickness)
 
     def reset(self):
         """
@@ -336,8 +324,6 @@ class ReductionOptions(BaseScriptElement):
         self.calculate_scale = ReductionOptions.calculate_scale
         self.scaling_att_trans = ReductionOptions.scaling_att_trans
         self.scaling_beam_diam = ReductionOptions.scaling_beam_diam
-        self.sample_thickness = ReductionOptions.sample_thickness
-        self.manual_sample_thickness = ReductionOptions.manual_sample_thickness
         self.manual_beam_diam = ReductionOptions.manual_beam_diam
         
         self.sample_detector_distance = ReductionOptions.sample_detector_distance

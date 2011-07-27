@@ -231,6 +231,7 @@ class SampleDataWidget(BaseWidget):
         # Validators
         self._content.transmission_edit.setValidator(QtGui.QDoubleValidator(self._content.transmission_edit))
         self._content.dtransmission_edit.setValidator(QtGui.QDoubleValidator(self._content.dtransmission_edit))
+        self._content.thickness_edit.setValidator(QtGui.QDoubleValidator(self._content.thickness_edit))
         
         # Connections
         self.connect(self._content.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._data_file_browse)
@@ -256,6 +257,7 @@ class SampleDataWidget(BaseWidget):
         """
         self._content.transmission_edit.setText(QtCore.QString("%6.4f" % state.transmission))
         self._content.dtransmission_edit.setText(QtCore.QString("%6.4f" % state.transmission_spread))
+        self._content.thickness_edit.setText(QtCore.QString("%6.4f" % state.sample_thickness))
         
         if isinstance(state.calculation_method, state.DirectBeam):
             self._content.direct_beam_chk.setChecked(True)
@@ -299,6 +301,7 @@ class SampleDataWidget(BaseWidget):
 
         m.transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
         m.transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
+        m.sample_thickness = util._check_and_get_float_line_edit(self._content.thickness_edit)
         
         m.calculate_transmission = self._content.calculate_chk.isChecked()
         m.theta_dependent = self._content.theta_dep_chk.isChecked()
@@ -418,8 +421,9 @@ class SampleDataWidget(BaseWidget):
                 util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
             if dataproxy.wavelength_spread is not None:
                 self._content.wavelength_spread_edit.setText(QtCore.QString(str(dataproxy.wavelength_spread)))
-            if dataproxy.sample_thickness is not None:
-                self._settings.emit_key_value("sample_thickness", QtCore.QString(str(dataproxy.sample_thickness)))
+            # This will be enabled once the meta data contains the sample thickness - will be turned into check box
+            #if dataproxy.sample_thickness is not None:
+            #    self._content.thickness_edit.setText(QtCore.QString(str(dataproxy.sample_thickness)))
             if dataproxy.beam_diameter is not None:
                 self._settings.emit_key_value("beam_diameter", QtCore.QString(str(dataproxy.beam_diameter)))
              

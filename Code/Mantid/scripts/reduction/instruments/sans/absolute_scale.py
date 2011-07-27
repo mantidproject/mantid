@@ -10,6 +10,7 @@ import math
 from reduction import ReductionStep
 from reduction import extract_workspace_name
 from reduction import validate_step
+from reduction import find_data
 
 # Mantid imports
 from mantidsimple import *
@@ -82,7 +83,7 @@ class AbsoluteScale(BaseAbsoluteScale):
             raise RuntimeError, "AbsoluteScale called with no defined direct beam file"
 
         # Load data file
-        filepath = reducer._full_file_path(self._data_file)
+        filepath = find_data(self._data_file, instrument=reducer.instrument.name())
         data_file_ws = "__abs_scale_"+extract_workspace_name(filepath)
         
         loader = reducer._data_loader.clone(data_file=filepath)

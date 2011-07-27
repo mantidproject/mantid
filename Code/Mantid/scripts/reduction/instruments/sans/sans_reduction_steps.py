@@ -1405,7 +1405,7 @@ class SubtractBackground(ReductionStep):
             Set the ReductionStep object that takes care of the geometry correction
             @param subtracter: ReductionStep object
         """
-        self.geometry_correcter = correcter
+        self._geometry_correcter = correcter
         
     def set_transmission(self, trans):
         """

@@ -331,12 +331,12 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.beamstop_chk.setChecked(state.manual_beam_diam)
         util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
         
-        self._summary.thickness_edit.setText(QtCore.QString(str(state.sample_thickness)))
-        if self._sample_thickness is None:
-            self._sample_thickness = state.sample_thickness
-        self._sample_thickness_supplied = state.manual_sample_thickness
-        self._summary.thickness_chk.setChecked(state.manual_sample_thickness)
-        util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
+        #self._summary.thickness_edit.setText(QtCore.QString(str(state.sample_thickness)))
+        #if self._sample_thickness is None:
+        #    self._sample_thickness = state.sample_thickness
+        #self._sample_thickness_supplied = state.manual_sample_thickness
+        #self._summary.thickness_chk.setChecked(state.manual_sample_thickness)
+        #util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
         self._scale_clicked(self._summary.scale_chk.isChecked())
         
         # Detector offset input
@@ -420,8 +420,8 @@ class SANSInstrumentWidget(BaseWidget):
         m.scaling_att_trans = util._check_and_get_float_line_edit(self._summary.scale_att_trans_edit)
         m.scaling_beam_diam = util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
         m.manual_beam_diam = self._summary.beamstop_chk.isChecked()
-        m.sample_thickness = util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
-        m.manual_sample_thickness = self._summary.thickness_chk.isChecked()
+        #m.sample_thickness = util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
+        #m.manual_sample_thickness = self._summary.thickness_chk.isChecked()
         
         # Detector offset input
         if self._summary.detector_offset_chk.isChecked():
