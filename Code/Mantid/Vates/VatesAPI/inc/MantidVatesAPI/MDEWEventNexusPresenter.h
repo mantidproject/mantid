@@ -42,6 +42,8 @@ namespace Mantid
     template<typename ViewType>
     class DLLExport MDEWEventNexusPresenter : public MDEWLoadingRebinningPresenter<ViewType>
     {
+    private:
+      typedef MDEWLoadingRebinningPresenter<ViewType> SuperType;
     public:
       MDEWEventNexusPresenter(std::string fileName, RebinningActionManager* request, ViewType* view);
       virtual ~MDEWEventNexusPresenter();
@@ -75,7 +77,7 @@ namespace Mantid
       ::NeXus::File * file = NULL;
       try
       {
-        file = new ::NeXus::File(m_filename);
+        file = new ::NeXus::File(SuperType::m_filename);
         // All SNS (event or histo) nxs files have an entry named "entry"
         try
         {
