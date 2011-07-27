@@ -6,6 +6,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -558,6 +560,7 @@ public:
     delete fun1;
   }
 
+
   void testCreateFitFunction_creates_old_IFitFunction()
   {
     IFitFunction *gauss = FunctionFactory::Instance().createFitFunction("Gaussian(PeakCentre=17.4e-2,Height=10,Sigma=0.33)");
@@ -568,6 +571,48 @@ public:
     TS_ASSERT_EQUALS(gauss->getParameter("PeakCentre"),0.174);
     TS_ASSERT_EQUALS(gauss->getParameter("Height"),10);
     TS_ASSERT_EQUALS(gauss->getParameter("Sigma"),0.33);
+  }
+
+  void test_All_Function_Name_Retrieval()
+  {
+    // Should be all of them
+    doFunctionNameTest<IFitFunction>(36, "", "");
+  }
+
+  void test_PeakFunction_Name_Retrieval()
+  {
+    // Check peak types
+    doFunctionNameTest<IPeakFunction>(13, "LinearBackground", 
+                                      "Found a background function in the peak function list");
+  }
+  
+  void test_BackgroundFunction_Name_Retrieval()
+  {
+    // Check background types
+    doFunctionNameTest<IBackgroundFunction>(4, "Gaussian", 
+                                            "Found a peak function in the background function list");
+  }
+
+
+private:
+
+  template<typename TYPE>
+  void doFunctionNameTest(const size_t nexpected, const std::string & excludedName,
+                          const std::string & error)
+  {
+    std::vector<std::string> names = FunctionFactory::Instance().getFunctionNames<TYPE>();
+    // Due to the other tests and the fact that the function is a singleton
+    TS_ASSERT_EQUALS(names.size(), nexpected); 
+    if( excludedName.empty() == false )
+    {
+      for( size_t i = 0; i < names.size(); ++i )
+      {
+        if( names[i] == excludedName ) 
+        {
+          TS_FAIL(error);
+        }
+      }
+    }
   }
 
 };

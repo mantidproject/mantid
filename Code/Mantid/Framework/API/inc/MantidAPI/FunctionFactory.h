@@ -75,6 +75,10 @@ namespace API
     ///Creates an instance of a function
     IFitFunction* createFitFunction(const std::string& input) const;
 
+    /// Query available functions based on the template type
+    template<typename FunctionType>
+    std::vector<std::string> getFunctionNames() const;
+
   private:
     friend struct Mantid::Kernel::CreateUsingNew<FunctionFactoryImpl>;
 
@@ -113,7 +117,30 @@ namespace API
     Kernel::Logger& g_log;
 
   };
-  
+
+  /**
+   * Query available functions based on the template type
+   * @tparam FunctionType :: The type of the functions to list 
+   * @returns A vector of the names of the functions matching the template type 
+   */
+  template<typename FunctionType>
+  std::vector<std::string> FunctionFactoryImpl::getFunctionNames() const
+  {
+    const std::vector<std::string> names = this->getKeys();
+    std::vector<std::string> typeNames;
+    typeNames.reserve(names.size());
+    for( std::vector<std::string>::const_iterator it = names.begin(); 
+         it != names.end(); ++it )
+    {
+      IFitFunction *func = this->createFitFunction(*it);
+      if( dynamic_cast<FunctionType*>(func) )
+      {
+        typeNames.push_back(*it);
+      }
+      delete func;
+    }
+    return typeNames;
+  }
         ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
