@@ -46,8 +46,7 @@ class BaseAbsoluteScale(ReductionStep):
 class AbsoluteScale(BaseAbsoluteScale):
     """
     """
-    def __init__(self, data_file, beamstop_diameter=None, attenuator_trans=1.0, 
-                 sample_thickness=None, apply_sensitivity=False):
+    def __init__(self, data_file, beamstop_diameter=None, attenuator_trans=1.0, apply_sensitivity=False):
         """
             @param beamstop_diameter: beamstop diameter to use. Will otherwise be read from file, if possible [mm]
             @param attenuator_trans: attenuator transmission
