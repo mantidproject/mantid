@@ -332,7 +332,7 @@ void IntegratePeakTimeSlices::exec()
               fit_alg->setProperty("StartX", 0.0);
               fit_alg->setProperty("EndX", 0.0+Attr[2]*Attr[3]);
               fit_alg->setProperty("MaxIterations", 5000);
-              fit_alg->setProperty("Output", "fit");
+              //fit_alg->setProperty("Output", "fit");
 
               std::string fun_str =CalcFunctionProperty( ParamAttr); 
 

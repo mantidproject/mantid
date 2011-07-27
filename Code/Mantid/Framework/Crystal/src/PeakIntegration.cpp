@@ -97,7 +97,12 @@ namespace Mantid
       sort_alg->executeAsSubAlg();
 
       inputW = sort_alg->getProperty("InputWorkspace");
-
+      double qspan = 0.01;
+      if (getProperty("FitSlices"))
+      {
+        OrientedLattice latt = inputW->mutableSample().getOrientedLattice();
+        qspan = 1./std::max(latt.a(), std::max(latt.b(),latt.c()))/6.;
+      }
       IAlgorithm_sptr bin_alg = createSubAlgorithm("Rebin");
       bin_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
       bin_alg->setProperty("OutputWorkspace", inputW);
@@ -168,10 +173,10 @@ namespace Mantid
       //Copy geometry over.
       API::WorkspaceFactory::Instance().initializeFromParent(inputW, outputW, true);
       Progress prog(this, 0.0, 1.0, detList.size());
-      //PARALLEL_FOR3(inputW, peaksW, outputW)
+      PARALLEL_FOR3(inputW, peaksW, outputW)
       for (int det = 0; det < static_cast<int>(detList.size()); det++)
       {
-        //PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERUPT_REGION
         // Build a map to sort by the peak bin count
         std::vector <std::pair<double, int> > v1;
         for (int i = 0; i<peaksW->getNumberPeaks(); i++)if(detList[det]->getName().compare(peaksW->getPeaks()[i].getBankName())==0)
@@ -215,7 +220,7 @@ namespace Mantid
           int TOFPeak, TOFmin, TOFmax;
           if (getProperty("FitSlices"))
           {
-            TOFmax = fitneighbours(i, peak.getBankName(), XPeak, YPeak, static_cast<int>(det));
+            TOFmax = fitneighbours(i, peak.getBankName(), XPeak, YPeak, static_cast<int>(det), qspan);
             TOFmin = 0;
             TOFPeak = TOFmax/2;
           }
@@ -257,7 +262,7 @@ namespace Mantid
             if(Y[iSig]>0.0 && Y[iSig-1]>0.0)break;
           }
           TOFmax = iSig;
-          if(TOFmax <= TOFmin)break;
+          if(TOFmax <= TOFmin)continue;
           for (iSig=TOFmin; iSig <= TOFmax; iSig++) 
           {
             if(((Y[iSig]-Y[TOFPeak]/2.)*(Y[iSig+1]-Y[TOFPeak]/2.))<0.)break;
@@ -363,9 +368,9 @@ namespace Mantid
         delete [] **mask;
         delete [] *mask;
         delete [] mask;
-        //PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERUPT_REGION
       }
-      //PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERUPT_REGION
 
       // Save the output
       setProperty("OutPeaksWorkspace", peaksW);
@@ -625,7 +630,7 @@ void PeakIntegration::sumneighbours(std::string det_name, int x0, int y0, int Su
   delete pixel_to_wi;
 
 }
-int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet)
+int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan)
 {
   // Number of slices
   int TOFmax = 0;
@@ -704,29 +709,18 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
     {
       IAlgorithm_sptr slice_alg = createSubAlgorithm("IntegratePeakTimeSlices");
       slice_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
-      TableWorkspace_sptr logtable;
-      slice_alg->setProperty<TableWorkspace_sptr>("OutputWorkspace", logtable);
+      std::ostringstream tab_str;
+      tab_str << "LogTable" << i;
+      slice_alg->setPropertyValue("OutputWorkspace", tab_str.str());
       slice_alg->setProperty<PeaksWorkspace_sptr>("Peaks", getProperty("InPeaksWorkspace"));
-      //slice_alg->setProperty<PeaksWorkspace_sptr>("PeaksResult", getProperty("OutPeaksWorkspace"));
       slice_alg->setProperty("PeakIndex", ipeak);
-      double lenunitcell;
-      try
-      {
-        OrientedLattice latt = inputW->mutableSample().getOrientedLattice();
-        lenunitcell = std::max(latt.a(), std::max(latt.b(),latt.c()));
-      }
-      catch(Kernel::Exception::NotFoundError& e)
-      {
-        lenunitcell = 16.;
-        g_log.warning() << "No UB matrix was loaded into workspace, so default unit cell lenght of 16 is used.\n";
-      }
-      slice_alg->setProperty("PeakQspan", 0.166666667/lenunitcell);
+      slice_alg->setProperty("PeakQspan", qspan);
       slice_alg->executeAsSubAlg();
    
       MantidVec& Xout=outputW->dataX(idet);
       MantidVec& Yout=outputW->dataY(idet);
       MantidVec& Eout=outputW->dataE(idet);
-      logtable = slice_alg->getProperty("OutputWorkspace");
+      TableWorkspace_sptr logtable = slice_alg->getProperty("OutputWorkspace");
       TOFmax = logtable->rowCount();
       for (int iSig=0; iSig < TOFmax; iSig++)
       {
