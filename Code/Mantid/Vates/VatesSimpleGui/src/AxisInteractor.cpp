@@ -309,8 +309,8 @@ void AxisInteractor::showContextMenu(const QPoint &pos)
         {
           if (QString("Delete") == selectedItem->text())
           {
-            emit this->deleteIndicator(item->toolTip());
             this->scene->removeItem(item);
+            emit this->deleteIndicator(item->toolTip());
           }
           if (QString("Hide") == selectedItem->text())
           {
@@ -334,4 +334,19 @@ void AxisInteractor::createContextMenu()
   QAction *hideAction = this->indicatorContextMenu->addAction("Hide");
   hideAction->setCheckable(true);
   this->indicatorContextMenu->addAction("Delete");
+}
+
+int AxisInteractor::numIndicators()
+{
+  int count = 0;
+  QList<QGraphicsItem *> list = this->scene->items();
+  for (int i = 0; i < list.count(); ++i)
+  {
+    QGraphicsItem *item = list.at(i);
+    if (item->type() == IndicatorItemType)
+    {
+      count++;
+    }
+  }
+  return count;
 }

@@ -81,6 +81,11 @@ public:
 	 * @return true if yes
 	 */
 	bool hasIndicator();
+  /**
+   * Get the number of indicators held by the object.
+   * @return the current number of indicators
+   */
+  int numIndicators();
 	/**
 	 * Return the orientation of the axis scale ticket marks
 	 * @return the orientation code

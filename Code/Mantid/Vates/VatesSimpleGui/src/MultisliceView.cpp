@@ -357,7 +357,7 @@ void MultiSliceView::deleteCut(const QString &name)
   pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->destroy(cut);
-  this->originSourceRepr->setVisible(false);
+  this->originSourceRepr->setVisible(this->noIndicatorsLeft());
 }
 
 void MultiSliceView::cutVisibility(bool isVisible, const QString &name)
@@ -377,4 +377,13 @@ void MultiSliceView::onLogScale(int state)
                                   state);
   lut->getProxy()->UpdateVTKObjects();
   this->mainView->render();
+}
+
+bool MultiSliceView::noIndicatorsLeft()
+{
+  int count = 0;
+  count += this->ui.xAxisWidget->numIndicators();
+  count += this->ui.yAxisWidget->numIndicators();
+  count += this->ui.zAxisWidget->numIndicators();
+  return count == 0;
 }

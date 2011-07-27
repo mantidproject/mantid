@@ -147,6 +147,11 @@ private:
      */
     void clearPbwSelections(const QString &name);
     /**
+     * Function that polls all of the axis indicators to see if any are left.
+     * @return true if no indicators are left, false if there are indicators
+     */
+    bool noIndicatorsLeft();
+    /**
      * Function that creates a slice in the appropriate plane at the
      * requested axis location.
      * @param origin the cartesian coordinates of the slice origin
