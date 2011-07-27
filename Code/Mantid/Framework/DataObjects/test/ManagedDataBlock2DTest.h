@@ -4,15 +4,17 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/ManagedDataBlock2D.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::DataObjects;
 using Mantid::MantidVec;
+using Mantid::MantidVecPtr;
 
 class ManagedDataBlock2DTest : public CxxTest::TestSuite
 {
 public:
   ManagedDataBlock2DTest()
-    : data(0,2,4,3)
+    : data(0,2,4,3, NULL, MantidVecPtr() )
   {
     for (int i = 0; i < 4; ++i)
     {
@@ -31,9 +33,10 @@ public:
   
   void testConstructor()
   {
-    ManagedDataBlock2D aBlock(0,2,2,2);
+    ManagedDataBlock2D aBlock(0,2,2,2, NULL, MantidVecPtr());
     TS_ASSERT_EQUALS( aBlock.minIndex(), 0 );
     TS_ASSERT( ! aBlock.hasChanges() );
+    TSM_ASSERT("When initialized the block says it is loaded", aBlock.isLoaded() );
     TS_ASSERT_EQUALS( aBlock.getSpectrum(0)->dataX().size(), 2 );
     TS_ASSERT_EQUALS( aBlock.getSpectrum(0)->dataY().size(), 2 );
     TS_ASSERT_EQUALS( aBlock.getSpectrum(0)->dataE().size(), 2 );
@@ -41,10 +44,27 @@ public:
     TS_ASSERT_EQUALS( aBlock.getSpectrum(1)->dataY().size(), 2 );
     TS_ASSERT_EQUALS( aBlock.getSpectrum(1)->dataE().size(), 2 );
   }
+
+  void test_releaseData()
+  {
+    ManagedDataBlock2D aBlock(0,2,2,2, NULL, MantidVecPtr());
+    TSM_ASSERT("When initialized the block says it is loaded", aBlock.isLoaded() );
+    // Spectra start loaded too
+    ManagedHistogram1D * h0 = dynamic_cast<ManagedHistogram1D *>(aBlock.getSpectrum(0));
+    ManagedHistogram1D * h1 = dynamic_cast<ManagedHistogram1D *>(aBlock.getSpectrum(1));
+    TS_ASSERT(h0->isLoaded());
+    TS_ASSERT(h1->isLoaded());
+
+    aBlock.releaseData();
+
+    // No longer loaded
+    TS_ASSERT(!h0->isLoaded());
+    TS_ASSERT(!h1->isLoaded());
+  }
     
   void testSetX()
   {
-    ManagedDataBlock2D aBlock(0,1,1,1);
+    ManagedDataBlock2D aBlock(0,1,1,1, NULL, MantidVecPtr());
     double aNumber = 5.5;
     boost::shared_ptr<MantidVec > v( new MantidVec(1, aNumber) );
     TS_ASSERT_THROWS_NOTHING( aBlock.getSpectrum(0)->setX(v) );
@@ -56,21 +76,23 @@ public:
   
   void testSpectrumNo()
   {
-    ManagedDataBlock2D aBlock(0,1,1,1);
+    ManagedDataBlock2D aBlock(0,1,1,1, NULL, MantidVecPtr());
     TS_ASSERT_THROWS_NOTHING( aBlock.getSpectrum(0)->setSpectrumNo(1234) );
-    TS_ASSERT( aBlock.hasChanges() );
+    // You don't need to save back to disk since that's in memory all the time
+    TS_ASSERT( !aBlock.hasChanges() );
   }
 
   void testDetectorIDs()
   {
-    ManagedDataBlock2D aBlock(0,1,1,1);
+    ManagedDataBlock2D aBlock(0,1,1,1, NULL, MantidVecPtr());
     TS_ASSERT_THROWS_NOTHING( aBlock.getSpectrum(0)->addDetectorID(1234) );
-    TS_ASSERT( aBlock.hasChanges() );
+    // You don't need to save back to disk since that's in memory all the time
+    TS_ASSERT( !aBlock.hasChanges() );
   }
 
   void testSetData()
   {
-    ManagedDataBlock2D aBlock(0,1,1,1);
+    ManagedDataBlock2D aBlock(0,1,1,1, NULL, MantidVecPtr());
     double aNumber = 9.9;
     boost::shared_ptr<MantidVec > v( new MantidVec(1, aNumber) );
     double anotherNumber = 3.3;
@@ -114,7 +136,16 @@ public:
     
     std::fstream infile("ManagedDataBlock2DTest.tmp", std::ios::binary | std::ios::in);
     TS_ASSERT( infile );
-    ManagedDataBlock2D readData(0,2,4,3);
+
+    // Empty block
+    ManagedDataBlock2D readData(0,2,4,3, NULL, MantidVecPtr());
+
+    // The spectra say "loaded" because they were initialized
+    ManagedHistogram1D * h0 = dynamic_cast<ManagedHistogram1D *>(readData.getSpectrum(0));
+    ManagedHistogram1D * h1 = dynamic_cast<ManagedHistogram1D *>(readData.getSpectrum(1));
+    TS_ASSERT(h0->isLoaded());
+    TS_ASSERT(h1->isLoaded());
+
     infile >> readData;
     // use const methods so that I can check the changes flag behaves as it should
     TS_ASSERT( ! readData.hasChanges() );
@@ -123,6 +154,11 @@ public:
     dataETester(readData);
     TS_ASSERT( readData.hasChanges() );
     
+    // The spectra are now marked as loaded
+    TS_ASSERT(h0->isLoaded());
+    TS_ASSERT(h1->isLoaded());
+
+
     remove("ManagedDataBlock2DTest.tmp");
   }
 

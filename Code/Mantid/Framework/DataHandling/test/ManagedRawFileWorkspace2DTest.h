@@ -247,6 +247,11 @@ public:
 
   ManagedRawFileWorkspace2DTestPerformance() : outputSpace("wishWS")
   {
+    // Load the instrument alone so as to isolate the raw file loading time from the instrument loading time
+    IAlgorithm * loader = FrameworkManager::Instance().createAlgorithm("LoadEmptyInstrument");
+    loader->setPropertyValue("Filename","WISH_Definition.xml");
+    loader->setPropertyValue("OutputWorkspace", "InstrumentOnly");
+    TS_ASSERT( loader->execute() );
   }
 
   // This should take ~no time. If it does an unacceptable change has occurred!

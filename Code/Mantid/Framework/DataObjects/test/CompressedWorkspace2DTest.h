@@ -265,8 +265,8 @@ public:
     for (size_t i = 0; i < bigWorkspace.getNumberHistograms(); ++i)
     {
       TS_ASSERT_EQUALS( bigWorkspace.getAxis(1)->spectraNo(i), i+1 );
-      TS_ASSERT_EQUALS( bigWorkspace.getSpectrum(i)->getSpectrumNo(), i+1 );
-      TS_ASSERT( bigWorkspace.getSpectrum(i)->hasDetectorID((int)i+1) );
+      TS_ASSERT_EQUALS( bigWorkspace.getSpectrum(i)->getSpectrumNo(), i );
+      TS_ASSERT( bigWorkspace.getSpectrum(i)->hasDetectorID((int)i*100) );
     }
   }
 

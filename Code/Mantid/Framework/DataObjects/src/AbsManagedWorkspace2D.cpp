@@ -32,13 +32,16 @@ Kernel::Logger& AbsManagedWorkspace2D::g_log = Kernel::Logger::get("AbsManagedWo
 
 
 /// Constructor
-AbsManagedWorkspace2D::AbsManagedWorkspace2D(size_t NBlocks) :
-Workspace2D(), m_bufferedData(NBlocks)
+AbsManagedWorkspace2D::AbsManagedWorkspace2D() :
+Workspace2D()
 {
 }
 
 
-/** Sets the size of the workspace and sets up the temporary file
+//------------------------------------------------------------------------------
+/** Sets the size of the workspace and sets up the temporary file.
+ * The m_vectorsPerBlock value needs to be set by now.
+ *
 *  @param NVectors :: The number of vectors/histograms/detectors in the workspace
 *  @param XLength :: The number of X data points/bin boundaries in each vector (must all be the same)
 *  @param YLength :: The number of data/error points in each vector (must all be the same)
@@ -52,16 +55,49 @@ void AbsManagedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, 
   m_axes[1] = new API::SpectraAxis(NVectors);
   m_XLength = XLength;
   m_YLength = YLength;
-
-  // Define m_vectorSize, m_vectorsPerBlock in the init() of the derived class
-
 }
+
+//------------------------------------------------------------------------------
+/** Create all the blocks and spectra in the workspace
+  * The m_vectorsPerBlock value needs to be set by now.
+  * Must be called AFTER init()
+  *
+  */
+void AbsManagedWorkspace2D::initBlocks()
+{
+  // Make a default-0 DX vector (X error vector). It will be shared by all spectra
+  MantidVecPtr sharedDx;
+  sharedDx.access().resize(m_XLength, 0.0);
+
+  // Create all the data bloocks
+  m_blocks.clear();
+  for (size_t i=0; i<m_noVectors; i += m_vectorsPerBlock)
+  {
+    // Ensure the last block has the right # of vectors
+    size_t numVectorsInThisBlock = m_vectorsPerBlock;
+    if ((i + numVectorsInThisBlock) > m_noVectors) numVectorsInThisBlock = m_noVectors - i;
+    // Each ManagedDataBlock2D will create its own vectors.
+    ManagedDataBlock2D * block = new ManagedDataBlock2D(i, numVectorsInThisBlock, m_XLength, m_YLength, this, sharedDx );
+    m_blocks.push_back( block );
+  }
+
+  // Copy the pointers over into the Workspace2D thing
+  data.resize(m_noVectors, NULL);
+  for (size_t i=0; i<m_noVectors; i++)
+    data[i] = this->getSpectrum(i);
+}
+
+
 
 /// Destructor. Clears the buffer and deletes the temporary file.
 AbsManagedWorkspace2D::~AbsManagedWorkspace2D()
 {
-  // delete all ManagedDataBlock2D's
-  m_bufferedData.clear();
+  // Clear MRU list (minor amount of memory)
+  m_bufferedMarkers.clear();
+  // Delete the blocks (big memory);
+  for (size_t i=0; i<m_blocks.size(); i++)
+    delete m_blocks[i];
+  m_blocks.clear();
 }
 
 /// Get pseudo size
@@ -75,185 +111,7 @@ size_t AbsManagedWorkspace2D::blocksize() const
 {
   return (m_noVectors > 0) ? m_YLength : 0;
 }
-//
-///** Set the x values
-//*  @param histnumber :: Index of the histogram to be set
-//*  @param PA :: The data to enter
-//*/
-//void AbsManagedWorkspace2D::setX(const size_t histnumber, const MantidVecPtr& PA)
-//{
-//  if ( histnumber>=m_noVectors )
-//    throw std::range_error("AbsManagedWorkspace2D::setX, histogram number out of range");
-//
-//  getDataBlock(histnumber)->setX(histnumber, PA);
-//  return;
-//}
-//
-///** Set the x valuesMantid
-//*  @param histnumber :: Index of the histogram to be set
-//*  @param Vec :: The data to enter
-//*/
-//void AbsManagedWorkspace2D::setX(const size_t histnumber, const MantidVecPtr::ptr_type& Vec)
-//{
-//  if ( histnumber>=m_noVectors )
-//    throw std::range_error("AbsManagedWorkspace2D::setX, histogram number out of range");
-//
-//  getDataBlock(histnumber)->setX(histnumber, Vec);
-//  return;
-//}
-//
-///** Set the data values
-//*  @param histnumber :: Index of the histogram to be set
-//*  @param PY :: The data to enter
-//*/
-//void AbsManagedWorkspace2D::setData(const size_t histnumber, const MantidVecPtr& PY)
-//{
-//  if ( histnumber>=m_noVectors )
-//    throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
-//
-//  getDataBlock(histnumber)->setData(histnumber, PY);
-//  return;
-//}
-//
-///** Set the data values
-//*  @param histnumber :: Index of the histogram to be set
-//*  @param PY :: The data to enter
-//*  @param PE :: The corresponding errors
-//*/
-//void AbsManagedWorkspace2D::setData(const size_t histnumber, const MantidVecPtr& PY,
-//                                    const MantidVecPtr& PE)
-//{
-//  if ( histnumber>=m_noVectors )
-//    throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
-//
-//  getDataBlock(histnumber)->setData(histnumber, PY, PE);
-//  return;
-//}
-//
-///** Set the data values
-//*  @param histnumber :: Index of the histogram to be set
-//*  @param PY :: The data to enter
-//*  @param PE :: The corresponding errors
-//*/
-//void AbsManagedWorkspace2D::setData(const size_t histnumber, const MantidVecPtr::ptr_type& PY,
-//                                    const MantidVecPtr::ptr_type& PE)
-//{
-//  if ( histnumber>=m_noVectors )
-//    throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
-//
-//  getDataBlock(histnumber)->setData(histnumber, PY, PE);
-//  return;
-//}
-//
-///** Get the x data of a specified histogram
-//*  @param index :: The number of the histogram
-//*  @return A vector of doubles containing the x data
-//*/
-//MantidVec& AbsManagedWorkspace2D::dataX(const size_t index)
-//{
-//  if ( index>=m_noVectors )
-//    throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
-//
-//  return getDataBlock(index)->dataX(index);
-//}
-//
-///** Get the y data of a specified hMRUList<ManagedDataBlock2D>istogram
-//*  @param index :: The number of the histogram
-//*  @return A vector of doubles containing the y data
-//*/
-//MantidVec& AbsManagedWorkspace2D::dataY(const size_t index)
-//{
-//  if ( index>=m_noVectors )
-//    throw std::range_error("AbsManagedWorkspace2D::dataY, histogram number out of range");
-//
-//  return getDataBlock(index)->dataY(index);
-//}
-//
-///** Get the error data of a specified histogram
-//*  @param index :: The number of the histogram
-//*  @return A vector of doubles containing the error data
-//*/
-//MantidVec& AbsManagedWorkspace2D::dataE(const size_t index)
-//{
-//  if ( index>=m_noVectors )
-//    throw std::range_error("AbsManagedWorkspace2D::dataE, histogram number out of range");
-//
-//  return getDataBlock(index)->dataE(index);
-//}
-//
-///** Get the error x data for a specified histogram
-// *  @param index :: The number of the histogram
-// *  @return A vector of doubles containing the error x data
-// */
-//MantidVec& AbsManagedWorkspace2D::dataDx(const size_t index)
-//{
-//  if (index>=m_noVectors)
-//    throw std::range_error("AbsManagedWorkspace2D::dataDx, histogram number out of range");
-//
-//  // Need to create the storage for the X errors (in memory) the first time they are accessed
-//  if (data.empty()) this->lazyDxFill();
-//
-//  return data[index].dataDx();
-//}
-//
-///** Get the x data of a specified histogram
-//*  @param index :: The number of the histogram
-//*  @return A vector of doubles containing the x data
-//*/
-//const MantidVec& AbsManagedWorkspace2D::dataX(const size_t index) const
-//{
-//  if ( index>=m_noVectors )
-//    throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
-//
-//  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataX(index);
-//}
-//
-///** Get the y data of a specified histogram
-//*  @param index :: The number of the histogram
-//*  @return A vector of doubles containing the y data
-//*/
-//const MantidVec& AbsManagedWorkspace2D::dataY(const size_t index) const
-//{
-//  if ( index>=m_noVectors )
-//    throw std::range_error("AbsManagedWorkspace2D::dataY, histogram number out of range");
-//
-//  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataY(index);
-//}
-//
-///** Get the error data of a specified histogram
-//*  @param index :: The number of the histogram
-//*  @return A vector of doubles containing the error data
-//*/
-//const MantidVec& AbsManagedWorkspace2D::dataE(const size_t index) const
-//{
-//  if ( index>=m_noVectors )
-//    throw std::range_error("AbsManagedWorkspace2D::dataE, histogram number out of range");
-//
-//  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE(index);
-//}
-//
-///** Get the error x data for a specified histogram
-// *  @param index :: The number of the histogram
-// *  @return A vector of doubles containing the error x data
-// */
-//const MantidVec& AbsManagedWorkspace2D::dataDx(const size_t index) const
-//{
-//  if (index>=m_noVectors)
-//    throw std::range_error("AbsManagedWorkspace2D::dataDx, histogram number out of range");
-//
-//  // Need to create the storage for the X errors (in memory) the first time they are accessed
-//  if (data.empty()) const_cast<AbsManagedWorkspace2D*>(this)->lazyDxFill();
-//
-//  return data[index].dataDx();
-//}
-//
-//Kernel::cow_ptr<MantidVec> AbsManagedWorkspace2D::refX(const size_t index) const
-//{
-//  if ( index>=m_noVectors )
-//    throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
-//
-//  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->refX(index);
-//}
+
 
 //--------------------------------------------------------------------------------------------
 /// Return the underlying ISpectrum ptr at the given workspace index.
@@ -262,53 +120,20 @@ ISpectrum * AbsManagedWorkspace2D::getSpectrum(const size_t index)
   if (index>=m_noVectors)
     throw std::range_error("AbsManagedWorkspace2D::getSpectrum, histogram number out of range");
   ISpectrum * spec = getDataBlock(index)->getSpectrum(index);
-  if( spec->getDetectorIDs().empty() )
-  {
-    try
-    {
-      const specid_t spectrum_number = getAxis(1)->spectraNo(index);
-      const std::vector<detid_t> dets = m_spectraMap->getDetectors(spectrum_number);  
-      spec->addDetectorIDs(dets);
-      spec->setSpectrumNo(spectrum_number);
-    }
-    catch(std::domain_error&)
-    {
-    }  
-    catch(std::out_of_range&)
-    {
-    }
-  }
-
   return spec;
 }
+
 
 const ISpectrum * AbsManagedWorkspace2D::getSpectrum(const size_t index) const
 {
   if (index>=m_noVectors)
     throw std::range_error("AbsManagedWorkspace2D::getSpectrum, histogram number out of range");
 
-  // Temporary until a proper fix is found, i.e. including the det IDs in the written block
-  // or keep them around in some other way
   ISpectrum * spec = const_cast<ISpectrum*>(getDataBlock(index)->getSpectrum(index));
-  if( spec->getDetectorIDs().empty() )
-  {
-    try
-    {
-      const specid_t spectrum_number = getAxis(1)->spectraNo(index);
-      const std::vector<detid_t> dets = m_spectraMap->getDetectors(spectrum_number);  
-      spec->addDetectorIDs(dets);
-      spec->setSpectrumNo(spectrum_number);
-    }
-    catch(std::domain_error&)
-    {
-    }  
-    catch(std::out_of_range&)
-    {
-    }
-  }
   return spec;
 }
 
+//--------------------------------------------------------------------------------------------
 /** Returns the number of histograms.
  *  For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
  *  being virtual so it now just calls this private (and virtual) method which does the work.
@@ -319,6 +144,8 @@ size_t AbsManagedWorkspace2D::getHistogramNumberHelper() const
   return m_noVectors;
 }
 
+
+//--------------------------------------------------------------------------------------------
 /** Get a pointer to the data block containing the data corresponding to a given index
 *  @param index :: The index to search for
 *  @return A pointer to the data block containing the index requested
@@ -326,44 +153,51 @@ size_t AbsManagedWorkspace2D::getHistogramNumberHelper() const
 // not really a const method, but need to pretend it is so that const data getters can call it
 ManagedDataBlock2D* AbsManagedWorkspace2D::getDataBlock(const size_t index) const
 {
-  size_t startIndex = index - ( index%m_vectorsPerBlock );
-
-  // Look to see if the data block is already buffered
-  ManagedDataBlock2D *existingBlock =  m_bufferedData.find(startIndex);
-  if (existingBlock)
-    return existingBlock;
-
-  // If not found, need to load block into memory and mru list
-  ManagedDataBlock2D *newBlock = new ManagedDataBlock2D(startIndex, m_vectorsPerBlock, m_XLength, m_YLength);
-  // Check whether datablock has previously been saved. If so, read it in.
-  readDataBlock(newBlock,startIndex);
-
-  //Put the read block in the MRU
-  ManagedDataBlock2D *toWrite = m_bufferedData.insert(newBlock);
-  if (toWrite)
-  {
-    //We got out a block - it is a block that is being dropped.
-    //If it changed, we need to save it
-    if (toWrite->hasChanges())
-      this->writeDataBlock(toWrite);
-    //And it is up to us to delete the block now.
-    delete toWrite;
-  }
-
-  return newBlock;
+  // Which clock does this correspond to?
+  size_t blockIndex = index / m_vectorsPerBlock;
+  // Address of that block
+  return const_cast<ManagedDataBlock2D*>(m_blocks[blockIndex]);
 }
 
-/// Method to create Dx vectors in memory (until it's done properly for 'Managed' types)
-/// only if applicable methods (dataDx) are called.
-void AbsManagedWorkspace2D::lazyDxFill()
+
+/** Get and read in a data block only if required by the MRU lsit
+ *
+ * @param index :: workspace index of the spectrum wanted
+ */
+void AbsManagedWorkspace2D::readDataBlockIfNeeded(const std::size_t index) const
 {
-  data.resize(m_noVectors);
-  MantidVecPtr t1;
-  t1.access().resize(m_XLength);
-  for (size_t i=0;i<m_noVectors;i++)
+  // Which block does this correspond to?
+  size_t blockIndex = index / m_vectorsPerBlock;
+
+  // Read it in first.
+  ManagedDataBlock2D* readBlock = const_cast<ManagedDataBlock2D*>(m_blocks[blockIndex]);
+  this->readDataBlock(readBlock, readBlock->minIndex());
+
+  // Mark that this latest-read block was recently read into the MRU list
+  ManagedDataBlockMRUMarker * markerToDrop = m_bufferedMarkers.insert(
+      new ManagedDataBlockMRUMarker(blockIndex));
+
+  // Do we need to drop out a data block?
+  if (markerToDrop)
   {
-    data[i].setDx(t1);
+    size_t dropIndex = markerToDrop->getBlockIndex();
+    //std::cout << "Dropping block at " << dropIndex << " when asked to read block " << blockIndex << std::endl;
+    delete markerToDrop;
+    if (dropIndex < m_blocks.size())
+    {
+      // Address of that block
+      ManagedDataBlock2D* droppedBlock = const_cast<ManagedDataBlock2D*>(m_blocks[dropIndex]);
+      // Write it to disk only when needed
+      if (droppedBlock->hasChanges())
+        this->writeDataBlock(droppedBlock);
+      // Free up the memory
+      droppedBlock->releaseData();
+    }
   }
+
+
 }
+
+
 } // namespace DataObjects
 } // namespace Mantid

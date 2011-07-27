@@ -104,16 +104,7 @@ public:
     //	  TS_ASSERT_EQUALS(*(xye+1),y1[0]);
     //	  TS_ASSERT_EQUALS(*(xye+2),e1[0]);
   }
-  void testnxbin()
-  {
-    h.setX(x1);
-    TS_ASSERT_EQUALS(h.nxbin(),x1.size());
-  }
-  void testnybin()
-  {
-    h.setData(y1);
-    TS_ASSERT_EQUALS(h.nybin(),y1.size());
-  }
+
   void testrangeexceptionX()
   {
     h.setX(x1);

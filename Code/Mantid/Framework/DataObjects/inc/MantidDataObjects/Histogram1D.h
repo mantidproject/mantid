@@ -40,6 +40,8 @@ namespace DataObjects
 */
 class DLLExport Histogram1D : public Mantid::API::ISpectrum
 {
+  friend class ManagedDataBlock2D;
+
 public:
 
   // The data storage type used internally in a Histogram1D
@@ -47,7 +49,7 @@ public:
   // Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR
   //typedef Kernel::cow_ptr<MantidVec > MantidVecPtr;
   
-private:
+protected:
   MantidVecPtr refY;   ///< RefCounted Y
   MantidVecPtr refE;   ///< RefCounted Error
 
@@ -87,9 +89,6 @@ public:
   ///Returns the error data
   virtual MantidVec& dataE() { return refE.access(); }
 
-
-  std::size_t nxbin() const { return refX->size(); }         ///< Return the number of X bins
-  std::size_t nybin() const { return refY->size(); }         ///< Return the number of data bin (Y or YE)
   virtual std::size_t size() const { return refY->size(); }          ///< get pseudo size
 
   /// Checks for errors

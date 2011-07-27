@@ -1,16 +1,19 @@
 #ifndef MANAGEDWORKSPACE2DTEST_H_
 #define MANAGEDWORKSPACE2DTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <Poco/File.h>
+#include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/ManagedWorkspace2D.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/Memory.h"
+#include <cxxtest/TestSuite.h>
+#include <Poco/File.h>
 
 using Mantid::MantidVec;
 using std::size_t;
+using Mantid::DataObjects::ManagedWorkspace2D;
 
 class ManagedWorkspace2DTest : public CxxTest::TestSuite
 {
@@ -287,8 +290,9 @@ public:
     for (size_t i = 0; i < bigWorkspace.getNumberHistograms(); ++i)
     {
       TS_ASSERT_EQUALS( bigWorkspace.getAxis(1)->spectraNo(i), i+1 );
-      TS_ASSERT_EQUALS( bigWorkspace.getSpectrum(i)->getSpectrumNo(), i+1 );
-      TS_ASSERT( bigWorkspace.getSpectrum(i)->hasDetectorID((int)i+1) );
+      // Values were set in the constructor
+      TS_ASSERT_EQUALS( bigWorkspace.getSpectrum(i)->getSpectrumNo(), i );
+      TS_ASSERT( bigWorkspace.getSpectrum(i)->hasDetectorID((int)i*100) );
     }
   }
 
@@ -326,6 +330,12 @@ public:
 
   ManagedWorkspace2DTestPerformance()
   {
+    // Try to make the input workspace NOT managed if you can help it
+    Mantid::Kernel::ConfigServiceImpl& conf = Mantid::Kernel::ConfigService::Instance();
+    conf.setString("ManagedWorkspace.LowerMemoryLimit","90");
+    // 1 MB block size
+    conf.setString("ManagedWorkspace.DataBlockSize", "1000000");
+    // Workspace should use up around 800 MB of memory
     inWS = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D",7000,5000,5000);
   }
 
@@ -341,12 +351,25 @@ public:
     const std::string oldValue2 = conf.getString(managed2);
     conf.setString(managed2,"0");
 
+    Mantid::Kernel::MemoryStats stats;
+    stats.update();
+    size_t memBefore = stats.availMem() ;
+
     managedWS = Mantid::API::WorkspaceFactory::Instance().create(inWS);
+
+    stats.update();
+    double memLoss = double(memBefore) - double(stats.availMem());
+    TSM_ASSERT_LESS_THAN( "Memory used up in creating a ManagedWorkspace should be minimal", memLoss, 20*1024);
+    std::cout << memLoss/(1024.0) << " MB of memory used up in creating an empty ManagedWorkspace." << std::endl;
   }
 
   // This should also take ~no time (nothing should be written to disk)
   void testReadSpectrumNumber()
   {
+    Mantid::Kernel::MemoryStats stats;
+    stats.update();
+    size_t memBefore = stats.availMem() ;
+
     Mantid::specid_t num;
     for ( std::size_t i = 0 ; i < managedWS->getNumberHistograms(); ++i )
     {
@@ -356,19 +379,37 @@ public:
         num = spec->getSpectrumNo();
       }
     }
-
     TS_ASSERT ( num != 0 );
+
+    stats.update();
+    double memLoss = double(memBefore) - double(stats.availMem());
+    TSM_ASSERT_LESS_THAN( "Memory used up by looping only for spectrum numbers should be minimal", memLoss, 20*1024);
+    std::cout << memLoss/(1024.0) << " MB of memory used up in looping looking only for spectra." << std::endl;
   }
 
   // This should take a while...
   void testLoopOverHalf()
   {
+    Mantid::Kernel::MemoryStats stats;
+    stats.update();
+    size_t memBefore = stats.availMem() ;
+
+    boost::shared_ptr<ManagedWorkspace2D> ws = boost::dynamic_pointer_cast<ManagedWorkspace2D>(managedWS);
+    TSM_ASSERT("Workspace is really managed", ws);
+
     for ( std::size_t i = 0; i < 3500; ++i )
     {
       managedWS->dataX(i) = inWS->readX(i);
       managedWS->dataY(i) = inWS->readY(i);
       managedWS->dataE(i) = inWS->readE(i);
     }
+    // For linux, make sure to release old memory
+    Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+
+    stats.update();
+    double memLoss = double(memBefore) - double(stats.availMem());
+    TSM_ASSERT_LESS_THAN( "MRU list should limit the amount of memory to around 100 MB used when accessing the data.", memLoss, 200*1024);
+    std::cout << memLoss/(1024.0) << " MB of memory used up in looping. Memory looped over = " << 3500.0*5000*24 / (1024.0*1024.0) << " MB." << std::endl;
   }
 
   // ...but only about half as long as this

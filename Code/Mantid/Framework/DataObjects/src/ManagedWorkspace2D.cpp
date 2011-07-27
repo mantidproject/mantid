@@ -37,6 +37,7 @@ ManagedWorkspace2D::ManagedWorkspace2D() :
 #pragma warning (pop)
 #endif //_WIN32
 
+//------------------------------------------------------------------------------------------------------
 /** Sets the size of the workspace and sets up the temporary file
  *  @param NVectors :: The number of vectors/histograms/detectors in the workspace
  *  @param XLength :: The number of X data points/bin boundaries in each vector (must all be the same)
@@ -63,11 +64,15 @@ void ManagedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, con
   m_vectorsPerBlock = blockMemory / static_cast<int>(m_vectorSize);
   // Should this ever come out to be zero, then actually set it to 1
   if ( m_vectorsPerBlock == 0 ) m_vectorsPerBlock = 1;
-  
-  //g_log.debug()<<"blockMemory: "<<blockMemory<<"\n";
-  //g_log.debug()<<"m_vectorSize: "<<m_vectorSize<<"\n";
-  //g_log.debug()<<"m_vectorsPerBlock: "<<m_vectorsPerBlock<<"\n";
-  //g_log.debug()<<"Memeory: "<<getMemorySize()<<"\n";
+
+  // Create all the blocks
+  this->initBlocks();
+
+
+  g_log.debug()<<"blockMemory: "<<blockMemory<<"\n";
+  g_log.debug()<<"m_vectorSize: "<<m_vectorSize<<"\n";
+  g_log.debug()<<"m_vectorsPerBlock: "<<m_vectorsPerBlock<<"\n";
+  g_log.debug()<<"Memory: "<<getMemorySize()<<"\n";
 
 
   // Calculate the number of blocks that will go into a file
@@ -150,7 +155,7 @@ void ManagedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, con
 ManagedWorkspace2D::~ManagedWorkspace2D()
 {
   // delete all ManagedDataBlock2D's
-  m_bufferedData.clear();
+  //m_bufferedData.clear();
   // delete the temporary file and fstream objects
   for (unsigned int i = 0; i < m_datafile.size(); ++i)
   {
@@ -171,27 +176,37 @@ ManagedWorkspace2D::~ManagedWorkspace2D()
 */
 void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,size_t startIndex)const
 {
-  // Check whether datablock has previously been saved. If so, read it in.
-  // @todo: Careful here. Without the (int)cast the m_indexWrittenTo variable is cast to a size_t and if it
-  // is at its default (-1) then this wraps around and the if evaluates to true when it should not, i.e. the 
-  // first time the function is called with startIndex = 0 and m_indexWrittenTo = -1
-  if ((int)startIndex <= m_indexWrittenTo)
+  // You only need to read it if it hasn't been loaded before
+  if (!newBlock->isLoaded())
   {
-    long long seekPoint = startIndex * m_vectorSize;
-
-    int fileIndex = 0;
-    while (seekPoint > std::numeric_limits<int>::max())
+    // Check whether datablock has previously been saved. If so, read it in.
+    // @todo: Careful here. Without the (int)cast the m_indexWrittenTo variable is cast to a size_t and if it
+    // is at its default (-1) then this wraps around and the if evaluates to true when it should not, i.e. the
+    // first time the function is called with startIndex = 0 and m_indexWrittenTo = -1
+    if ((int)startIndex <= m_indexWrittenTo)
     {
-      seekPoint -= m_vectorSize * m_vectorsPerBlock * m_blocksPerFile;
-      ++fileIndex;
+      long long seekPoint = startIndex * m_vectorSize;
+
+      int fileIndex = 0;
+      while (seekPoint > std::numeric_limits<int>::max())
+      {
+        seekPoint -= m_vectorSize * m_vectorsPerBlock * m_blocksPerFile;
+        ++fileIndex;
+      }
+
+      // Safe to cast seekPoint to int because the while loop above guarantees that
+      // it'll be in range by this point.
+      m_datafile[fileIndex]->seekg(static_cast<int>(seekPoint), std::ios::beg);
+      // The stream operator does the loading
+      *m_datafile[fileIndex] >> *newBlock;
     }
-
-    // Safe to cast seekPoint to int because the while loop above guarantees that 
-    // it'll be in range by this point.
-    m_datafile[fileIndex]->seekg(static_cast<int>(seekPoint), std::ios::beg);
-    *m_datafile[fileIndex] >> *newBlock;
+    else
+    {
+      // The block does not exist on file.
+      // It needs to be created with some empty vectors of the right length.
+      newBlock->initialize();
+    }
   }
-
 }
 
 /**
@@ -200,49 +215,49 @@ void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,size_t start
  */
 void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
 {
-      size_t fileIndex = 0;
-      // Check whether we need to pad file with zeroes before writing data
-      if ( toWrite->minIndex() > static_cast<int>(m_indexWrittenTo+m_vectorsPerBlock) && m_indexWrittenTo >= 0 )
+  size_t fileIndex = 0;
+  // Check whether we need to pad file with zeroes before writing data
+  if ( toWrite->minIndex() > static_cast<int>(m_indexWrittenTo+m_vectorsPerBlock) && m_indexWrittenTo >= 0 )
+  {
+    fileIndex = m_indexWrittenTo / (m_vectorsPerBlock * m_blocksPerFile);
+
+    m_datafile[fileIndex]->seekp(0, std::ios::end);
+    const int speczero = 0;
+    const std::vector<double> xzeroes(m_XLength);
+    const std::vector<double> yzeroes(m_YLength);
+    for (int i = 0; i < (toWrite->minIndex() - m_indexWrittenTo); ++i)
+    {
+      if ( (m_indexWrittenTo + i) / (m_blocksPerFile * m_vectorsPerBlock) )
       {
-        fileIndex = m_indexWrittenTo / (m_vectorsPerBlock * m_blocksPerFile);
-
-        m_datafile[fileIndex]->seekp(0, std::ios::end);
-        const int speczero = 0;
-        const std::vector<double> xzeroes(m_XLength);
-        const std::vector<double> yzeroes(m_YLength);
-        for (int i = 0; i < (toWrite->minIndex() - m_indexWrittenTo); ++i)
-        {
-          if ( (m_indexWrittenTo + i) / (m_blocksPerFile * m_vectorsPerBlock) )
-          {
-            ++fileIndex;
-            m_datafile[fileIndex]->seekp(0, std::ios::beg);
-          }
-
-          m_datafile[fileIndex]->write((char *) &*xzeroes.begin(), m_XLength * sizeof(double));
-          m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
-          m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
-          m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
-          m_datafile[fileIndex]->write((char *) &speczero, sizeof(int) );
-        }
-      }
-      else
-      // If no padding needed, go to correct place in file
-      {
-        long long seekPoint = toWrite->minIndex() * m_vectorSize;
-
-        while (seekPoint > std::numeric_limits<int>::max())
-        {
-          seekPoint -= m_vectorSize * m_vectorsPerBlock * m_blocksPerFile;
-          ++fileIndex;
-        }
-
-        // Safe to cast seekPoint to int because the while loop above guarantees that 
-        // it'll be in range by this point.
-        m_datafile[fileIndex]->seekp(static_cast<int>(seekPoint), std::ios::beg);
+        ++fileIndex;
+        m_datafile[fileIndex]->seekp(0, std::ios::beg);
       }
 
-      *m_datafile[fileIndex] << *toWrite;
-      m_indexWrittenTo = std::max(m_indexWrittenTo, toWrite->minIndex());
+      m_datafile[fileIndex]->write((char *) &*xzeroes.begin(), m_XLength * sizeof(double));
+      m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
+      m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
+      m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
+      m_datafile[fileIndex]->write((char *) &speczero, sizeof(int) );
+    }
+  }
+  else
+    // If no padding needed, go to correct place in file
+    {
+    long long seekPoint = toWrite->minIndex() * m_vectorSize;
+
+    while (seekPoint > std::numeric_limits<int>::max())
+    {
+      seekPoint -= m_vectorSize * m_vectorsPerBlock * m_blocksPerFile;
+      ++fileIndex;
+    }
+
+    // Safe to cast seekPoint to int because the while loop above guarantees that
+    // it'll be in range by this point.
+    m_datafile[fileIndex]->seekp(static_cast<int>(seekPoint), std::ios::beg);
+    }
+
+  *m_datafile[fileIndex] << *toWrite;
+  m_indexWrittenTo = std::max(m_indexWrittenTo, toWrite->minIndex());
 }
 
 
@@ -259,7 +274,7 @@ size_t ManagedWorkspace2D::getHistogramNumberHelper() const
 /// Return the size used in memory
 size_t ManagedWorkspace2D::getMemorySize() const
 {
-    return size_t(m_vectorSize)*size_t(m_bufferedData.size())*size_t(m_vectorsPerBlock);
+  return size_t(m_vectorSize)*size_t(m_bufferedMarkers.size())*size_t(m_vectorsPerBlock);
 }
 
 /// Return the full path to the file used.

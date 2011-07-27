@@ -28,7 +28,13 @@ namespace Mantid
 
     ///Destructor
     Workspace2D::~Workspace2D()
-    {}
+    {
+      // Clear out the memory
+      for (size_t i=0; i<data.size(); i++)
+      {
+        delete data[i];
+      }
+    }
 
     /** Sets the size of the workspace and initializes arrays to zero
     *  @param NVectors :: The number of vectors/histograms/detectors in the workspace
@@ -49,7 +55,10 @@ namespace Mantid
       t2.access().resize(YLength);
       for (size_t i=0;i<m_noVectors;i++)
       {
-        ISpectrum * spec = this->getSpectrum(i);
+        // Create the spectrum upon init
+        Histogram1D * spec = new Histogram1D();
+        data[i] = spec;
+        // Set the data and X
         spec->setX(t1);
         spec->setDx(t1);
         // Y,E arrays populated
@@ -58,6 +67,7 @@ namespace Mantid
         spec->setSpectrumNo(specid_t(i+1));
         spec->setDetectorID(detid_t(i+1));
       }
+      // To be removed
       this->generateSpectraMap();
     }
 
@@ -79,7 +89,7 @@ namespace Mantid
     ///get the size of each vector
     size_t Workspace2D::blocksize() const
     {
-      return (data.size() > 0) ? data[0].size() : 0;
+      return (data.size() > 0) ? data[0]->dataY().size() : 0;
     }
 
 
@@ -89,14 +99,14 @@ namespace Mantid
     {
       if (index>=m_noVectors)
         throw std::range_error("Workspace2D::getSpectrum, histogram number out of range");
-      return &data[index];
+      return data[index];
     }
 
     const ISpectrum * Workspace2D::getSpectrum(const size_t index) const
     {
       if (index>=m_noVectors)
         throw std::range_error("Workspace2D::getSpectrum, histogram number out of range");
-      return &data[index];
+      return data[index];
     }
 
 

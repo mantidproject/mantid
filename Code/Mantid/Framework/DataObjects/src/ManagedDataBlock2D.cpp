@@ -1,11 +1,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataObjects/ManagedDataBlock2D.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include <iostream>
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/ManagedDataBlock2D.h"
+#include "MantidDataObjects/ManagedHistogram1D.h"
+#include "MantidKernel/Exception.h"
+#include <iostream>
 
 using Mantid::API::ISpectrum;
 
@@ -24,27 +25,47 @@ Kernel::Logger& ManagedDataBlock2D::g_log = Kernel::Logger::get("ManagedDataBloc
  *  @param NVectors :: The number of Histogram1D's in this data block
  *  @param XLength ::  The number of elements in the X data
  *  @param YLength ::  The number of elements in the Y/E data
+ *  @param parentWS :: The workspace that owns this block
+ *  @param sharedDx :: A cow-ptr to a correctly-sized DX vector that every spectrum will share (until written to).
  */
 ManagedDataBlock2D::ManagedDataBlock2D(const size_t &minIndex, const size_t &NVectors, 
-    const size_t &XLength, const size_t &YLength) :
-  m_data(NVectors), m_XLength(XLength), m_YLength(YLength), m_minIndex(minIndex), m_hasChanges(false)
+    const size_t &XLength, const size_t &YLength, AbsManagedWorkspace2D * parentWS, MantidVecPtr sharedDx) :
+  m_XLength(XLength), m_YLength(YLength), m_minIndex(minIndex), m_loaded(false)
 {
-  MantidVecPtr t1;
-  t1.access().resize(XLength); //this call initializes array to zero
+//  MantidVecPtr t1;
+//  t1.access().resize(XLength); //this call initializes array to zero
 
-  // Set all the internal vectors to the right size
-  for (std::vector<Histogram1D>::iterator it = m_data.begin(); it != m_data.end(); ++it)
+  m_data.clear();
+  for (size_t i=0; i<NVectors; i++)
   {
-    it->dataX().resize(m_XLength);
-    it->dataY().resize(m_YLength);
-    it->dataE().resize(m_YLength);
-    it->setDx(t1);
+    m_data.push_back( new ManagedHistogram1D(parentWS, minIndex+i) );
+    m_data[i]->setDx(sharedDx);
+    //TODO: Anything about Dx?
   }
+  if (!parentWS)
+    this->initialize();
+}
+
+//-----------------------------------------------------------------------
+/** Initialize the vectors to empty values */
+void ManagedDataBlock2D::initialize()
+{
+  for (size_t i=0; i<m_data.size(); i++)
+  {
+    // Initialize the vectors if no workspace is passed
+    m_data[i]->directDataX().resize(m_XLength, 0.0);
+    m_data[i]->directDataY().resize(m_YLength, 0.0);
+    m_data[i]->directDataE().resize(m_YLength, 0.0);
+    // It was 'loaded' so it won't get re-initialized in this block
+    m_data[i]->setLoaded(true);
+  }
+  this->m_loaded = true;
 }
 
 /// Virtual destructor
 ManagedDataBlock2D::~ManagedDataBlock2D()
 {
+  // Do nothing: Workspace2D owns the pointer!!!
 }
 
 /// The minimum index of the workspace data that this data block contains
@@ -65,7 +86,13 @@ int ManagedDataBlock2D::hashIndexFunction() const // TODO this should return siz
  */
 bool ManagedDataBlock2D::hasChanges() const
 {
-  return m_hasChanges;
+  bool hasChanges = false;
+  for (std::vector<ManagedHistogram1D*>::const_iterator iter = m_data.begin(); iter != m_data.end(); ++iter)
+  {
+    const ManagedHistogram1D * it = *iter;
+    hasChanges = hasChanges || it->isDirty();
+  }
+  return hasChanges;
 }
 
 /** Gives the possibility to drop the flag. Used in ManagedRawFileWorkspace2D atfer
@@ -74,7 +101,11 @@ bool ManagedDataBlock2D::hasChanges() const
  */
 void ManagedDataBlock2D::hasChanges(bool has)
 {
-  m_hasChanges = has;
+  for (std::vector<ManagedHistogram1D*>::iterator iter = m_data.begin(); iter != m_data.end(); ++iter)
+  {
+    ManagedHistogram1D * it = *iter;
+    it->m_dirty = has;
+  }
 }
 
 
@@ -86,9 +117,7 @@ ISpectrum * ManagedDataBlock2D::getSpectrum(const size_t index)
   if ( ( index < m_minIndex )
       || ( index >= m_minIndex + m_data.size() ) )
     throw std::range_error("ManagedDataBlock2D::getSpectrum, histogram number out of range");
-  // Any non-const access: we assume means there are changes
-  m_hasChanges = true;
-  return &m_data[index-m_minIndex];
+  return m_data[index-m_minIndex];
 }
 
 const ISpectrum * ManagedDataBlock2D::getSpectrum(const size_t index) const
@@ -96,7 +125,20 @@ const ISpectrum * ManagedDataBlock2D::getSpectrum(const size_t index) const
   if ( ( index < m_minIndex )
       || ( index >= m_minIndex + m_data.size() ) )
     throw std::range_error("ManagedDataBlock2D::getSpectrum, histogram number out of range");
-  return &m_data[index-m_minIndex];
+  return m_data[index-m_minIndex];
+}
+
+
+//--------------------------------------------------------------------------------------------
+/** Release the memory in the loaded data blocks */
+void ManagedDataBlock2D::releaseData()
+{
+  for (std::vector<ManagedHistogram1D*>::iterator iter = m_data.begin(); iter != m_data.end(); ++iter)
+  {
+    ManagedHistogram1D * it = *iter;
+    it->releaseData();
+  }
+  this->m_loaded = false;
 }
 
 
@@ -108,30 +150,33 @@ const ISpectrum * ManagedDataBlock2D::getSpectrum(const size_t index) const
  */
 std::fstream& operator<<(std::fstream& fs, ManagedDataBlock2D& data)
 {
-  for (std::vector<Histogram1D>::iterator it = data.m_data.begin(); it != data.m_data.end(); ++it)
+  for (std::vector<ManagedHistogram1D*>::iterator iter = data.m_data.begin(); iter != data.m_data.end(); ++iter)
   {
+    ManagedHistogram1D * it = *iter;
     // If anyone's gone and changed the size of the vectors then get them back to the
     // correct size, removing elements or adding zeroes as appropriate.
-    if (it->dataX().size() != data.m_XLength)
+    if (it->directDataX().size() != data.m_XLength)
     {
-      it->dataX().resize(data.m_XLength, 0.0);
+      it->directDataX().resize(data.m_XLength, 0.0);
       ManagedDataBlock2D::g_log.warning() << "X vector resized to " << data.m_XLength << " elements.";
     }
-    fs.write(reinterpret_cast<char *>(&(it->dataX().front())), data.m_XLength * sizeof(double));
-    if (it->dataY().size() != data.m_YLength)
+    fs.write(reinterpret_cast<char *>(&(it->directDataX().front())), data.m_XLength * sizeof(double));
+    if (it->directDataY().size() != data.m_YLength)
     {
-      it->dataY().resize(data.m_YLength, 0.0);
+      it->directDataY().resize(data.m_YLength, 0.0);
       ManagedDataBlock2D::g_log.warning() << "Y vector resized to " << data.m_YLength << " elements.";
     }
-    fs.write(reinterpret_cast<char *>(&(it->dataY().front())), data.m_YLength * sizeof(double));
-    if (it->dataE().size() != data.m_YLength)
+    fs.write(reinterpret_cast<char *>(&(it->directDataY().front())), data.m_YLength * sizeof(double));
+    if (it->directDataE().size() != data.m_YLength)
     {
-      it->dataE().resize(data.m_YLength, 0.0);
+      it->directDataE().resize(data.m_YLength, 0.0);
       ManagedDataBlock2D::g_log.warning() << "E vector resized to " << data.m_YLength << " elements.";
     }
-    fs.write(reinterpret_cast<char *>(&(it->dataE().front())), data.m_YLength * sizeof(double));
-    
+    fs.write(reinterpret_cast<char *>(&(it->directDataE().front())), data.m_YLength * sizeof(double));
     // N.B. ErrorHelper member not stored to file so will always be Gaussian default
+    
+    // Clear the "dirty" flag since it was just written out.
+    it->setDirty(false);
   }
   return fs;
 }
@@ -145,15 +190,17 @@ std::fstream& operator>>(std::fstream& fs, ManagedDataBlock2D& data)
 { 
   // Assumes that the ManagedDataBlock2D passed in is the same size as the data to be read in
   // Will be ManagedWorkspace2D's job to ensure that this is so
-  for (std::vector<Histogram1D>::iterator it = data.m_data.begin(); it != data.m_data.end(); ++it)
+  for (std::vector<ManagedHistogram1D*>::iterator iter = data.m_data.begin(); iter != data.m_data.end(); ++iter)
   {
-    it->dataX().resize(data.m_XLength, 0.0);
-    fs.read(reinterpret_cast<char *>(&(it->dataX().front())), data.m_XLength * sizeof(double));
-    it->dataY().resize(data.m_YLength, 0.0);
-    fs.read(reinterpret_cast<char *>(&(it->dataY().front())), data.m_YLength * sizeof(double));
-    it->dataE().resize(data.m_YLength, 0.0);
-    fs.read(reinterpret_cast<char *>(&(it->dataE().front())), data.m_YLength * sizeof(double));
-    
+    ManagedHistogram1D * it = *iter;
+    it->directDataX().resize(data.m_XLength, 0.0);
+    fs.read(reinterpret_cast<char *>(&(it->directDataX().front())), data.m_XLength * sizeof(double));
+    it->directDataY().resize(data.m_YLength, 0.0);
+    fs.read(reinterpret_cast<char *>(&(it->directDataY().front())), data.m_YLength * sizeof(double));
+    it->directDataE().resize(data.m_YLength, 0.0);
+    fs.read(reinterpret_cast<char *>(&(it->directDataE().front())), data.m_YLength * sizeof(double));
+    // Yes, it is loaded
+    it->setLoaded(true);
     // N.B. ErrorHelper member not stored to file so will always be Gaussian default
   }
   return fs;

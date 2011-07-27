@@ -16,6 +16,9 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <Poco/Exception.h>
+#include "MantidDataObjects/ManagedHistogram1D.h"
+
+using Mantid::DataObjects::ManagedHistogram1D;
 
 //DECLARE_WORKSPACE(ManagedRawFileWorkspace2D)
 
@@ -139,12 +142,14 @@ namespace Mantid
         throw std::runtime_error("Raw file was not open.");
       }
       int64_t blockIndex = startIndex / m_vectorsPerBlock;
+
       // Modified data is stored in ManagedWorkspace2D flat file.
       if (m_changedBlock[blockIndex])
       {
         ManagedWorkspace2D::readDataBlock(newBlock,startIndex);
         return;
       }
+
       if(m_monitorList.size()>0)
       { 
         if ( static_cast<int>(startIndex) > m_readIndex)
@@ -192,13 +197,18 @@ namespace Mantid
             //g_log.error()<<"readData called for spectrum index"<<m_readIndex<< " and wsIndex is "<<index<< std::endl;
             if( m_readIndex == static_cast<int64_t>(m_noVectors+m_monitorList.size()) )
               break;
-            MantidVec& y = newBlock->getSpectrum(index)->dataY();
+
+            // The managed histogram we are modifying
+            ManagedHistogram1D * spec = dynamic_cast<ManagedHistogram1D *>(newBlock->getSpectrum(index));
+
+            MantidVec& y = spec->directDataY();
             y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);  
             //g_log.error()<<"readData called for m_readIndex"<<m_readIndex<< " and wsIndex is "<<index<< "Y value at 0  column is "<<y[0]<<std::endl;
-            MantidVec& e = newBlock->getSpectrum(index)->dataE();
+            MantidVec& e = spec->directDataE();
+            e.resize(y.size(), 0);
             std::transform(y.begin(), y.end(), e.begin(), dblSqrt);
             if (m_timeChannels.size() == 1)
-              newBlock->getSpectrum(index)->setX(m_timeChannels[0]);
+              spec->directSetX(m_timeChannels[0]);
             else
             {
               // std::map<int,int>::const_iterator regime = m_specTimeRegimes.find(index+1);
@@ -209,8 +219,9 @@ namespace Mantid
                 g_log.error(" Assuming time regime of spectrum 1");
                 regime = m_specTimeRegimes.begin();
               }
-              newBlock->getSpectrum(index)->setX(m_timeChannels[(*regime).second-1]);
+              spec->directSetX(m_timeChannels[(*regime).second-1]);
             }
+            spec->setLoaded(true);
             ++index;
             ++m_readIndex;
           }
@@ -249,12 +260,17 @@ namespace Mantid
         {
           isisRaw->readData(m_fileRaw,m_readIndex+1);
           // g_log.error()<<"counter is "<<counter<<std::endl;
-          MantidVec& y = newBlock->getSpectrum(index)->dataY();
+
+          // The managed histogram we are modifying
+          ManagedHistogram1D * spec = dynamic_cast<ManagedHistogram1D *>(newBlock->getSpectrum(index));
+
+          MantidVec& y = spec->directDataY();
           y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);   
-          MantidVec& e = newBlock->getSpectrum(index)->dataE();
+          MantidVec& e = spec->directDataE();
+          e.resize(y.size(), 0);
           std::transform(y.begin(), y.end(), e.begin(), dblSqrt);
           if (m_timeChannels.size() == 1)
-            newBlock->getSpectrum(index)->setX(m_timeChannels[0]);
+            spec->directSetX(m_timeChannels[0]);
           else
           {
             std::map<int64_t,int64_t>::const_iterator regime = m_specTimeRegimes.find(index+1);
@@ -264,13 +280,14 @@ namespace Mantid
               g_log.error(" Assuming time regime of spectrum 1");
               regime = m_specTimeRegimes.begin();
             }
-            newBlock->getSpectrum(index)->setX(m_timeChannels[(*regime).second-1]);
+            spec->directSetX(m_timeChannels[(*regime).second-1]);
           }
-
+          spec->setLoaded(true);
         }
       }
 
       newBlock->hasChanges(false);
+      newBlock->setLoaded(true);
     }
     /** This method checks given spectrum is a monitor
      * @param readIndex :: a spectrum index

@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidAPI/ISpectrum.h"
 
 namespace Mantid
 {
@@ -96,7 +97,7 @@ protected:
   std::vector<specid_t> m_monitorList;
 
   /// A vector that holds the 1D histograms
-  std::vector<Histogram1D> data;
+  std::vector<Mantid::API::ISpectrum *> data;
 
 private:
   /// Private copy constructor. NO COPY ALLOWED

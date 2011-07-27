@@ -5,6 +5,7 @@
 
 #include <zlib.h>
 #include <cstring>
+#include "MantidDataObjects/ManagedHistogram1D.h"
 
 // Visual studio 2010 can't deal with NULL (for a pointer) being passed to the constructor of an std::pair
 // You have to use the c++0x keyword 'nullptr' instead.
@@ -29,7 +30,7 @@ Kernel::Logger& CompressedWorkspace2D::g_log = Kernel::Logger::get("CompressedWo
 
 /// Constructor
 CompressedWorkspace2D::CompressedWorkspace2D() :
-AbsManagedWorkspace2D(100)
+AbsManagedWorkspace2D()
 {
 }
 
@@ -50,6 +51,8 @@ void CompressedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, 
     m_vectorsPerBlock = 4;
   // Should this ever come out to be zero, then actually set it to 1
   if ( m_vectorsPerBlock == 0 ) m_vectorsPerBlock = 1;
+  // Because of iffy design, force to 1.
+  m_vectorsPerBlock = 1;
 
   m_blockSize = m_vectorSize * m_vectorsPerBlock;
   m_inBuffer.resize( ( m_XLength + 2*m_YLength ) * m_vectorsPerBlock );
@@ -58,12 +61,16 @@ void CompressedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, 
   size_t bufferSize = (m_vectorSize + m_vectorSize/1000 + 12) * m_vectorsPerBlock;
   m_outBuffer.resize(bufferSize);
 
+  // Create all the blocks
+  this->initBlocks();
+
   //std::cerr<<"Compressed buffer size "<<bufferSize<<'\n';
   //std::cerr<<"m_vectorSize: "<<m_vectorSize<<"\n";
   //std::cerr<<"m_vectorsPerBlock: "<<m_vectorsPerBlock<<"\n";
   //std::cerr<<"Memory: "<<getMemorySize()<<"\n";
 
-  ManagedDataBlock2D *newBlock = new ManagedDataBlock2D(0, m_vectorsPerBlock, m_XLength, m_YLength);
+  ManagedDataBlock2D *newBlock = m_blocks[0];
+  newBlock->initialize();
   CompressedPointer tmpBuff = compressBlock(newBlock,0);
   m_compressedData[0] = tmpBuff;
 
@@ -74,8 +81,6 @@ void CompressedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, 
     memcpy(p.first,tmpBuff.first,p.second);
     m_compressedData[i] = p;
   }
-  delete newBlock;
-
 }
 
 /// Destructor. Clears the buffer and deletes the temporary file.
@@ -94,7 +99,11 @@ be loaded from storage and loads it.
 */
 void CompressedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,size_t startIndex)const
 {
-  uncompressBlock(newBlock,startIndex);
+  // You only need to read it if it hasn't been loaded before
+  if (!newBlock->isLoaded())
+  {
+    uncompressBlock(newBlock,startIndex);
+  }
 }
 
 void CompressedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
@@ -124,36 +133,25 @@ size_t CompressedWorkspace2D::getMemorySize() const
 CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(ManagedDataBlock2D* block,size_t startIndex) const
 {
   //std::cerr<<"compress "<<startIndex<<'\n';
-
-  // --- old way -----
-  //int vSize = m_XLength + 2 * m_YLength;
-  //for(int i=0;i<m_vectorsPerBlock;i++)
-  //{
-  //    std::vector<double>& X = block->dataX(startIndex + i);
-  //    std::vector<double>& Y = block->dataY(startIndex + i);
-  //    std::vector<double>& E = block->dataE(startIndex + i);
-  //    std::vector<double>::iterator it = std::copy(X.begin(),X.end(),m_inBuffer.begin() + i * vSize);
-  //    it = std::copy(Y.begin(),Y.end(),it);
-  //    it = std::copy(E.begin(),E.end(),it);
-
-  //}
-  // --- new way -----
   size_t j = 0;
   for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
-    MantidVec& X = block->getSpectrum(startIndex + i)->dataX();
+    ManagedHistogram1D * spec = dynamic_cast<ManagedHistogram1D *>(block->getSpectrum(startIndex + i));
+    MantidVec& X = spec->directDataX();
     MantidVec::iterator it = std::copy(X.begin(),X.end(),m_inBuffer.begin() + j);
     j += m_XLength;
   }
   for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
-    MantidVec& Y = block->getSpectrum(startIndex + i)->dataY();
+    ManagedHistogram1D * spec = dynamic_cast<ManagedHistogram1D *>(block->getSpectrum(startIndex + i));
+    MantidVec& Y = spec->directDataY();
     MantidVec::iterator it = std::copy(Y.begin(),Y.end(),m_inBuffer.begin() + j);
     j += m_YLength;
   }
   for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
-    MantidVec& E = block->getSpectrum(startIndex + i)->dataE();
+    ManagedHistogram1D * spec = dynamic_cast<ManagedHistogram1D *>(block->getSpectrum(startIndex + i));
+    MantidVec& E = spec->directDataE();
     MantidVec::iterator it = std::copy(E.begin(),E.end(),m_inBuffer.begin() + j);
     j += m_YLength;
   }
@@ -194,38 +192,26 @@ void CompressedWorkspace2D::uncompressBlock(ManagedDataBlock2D* block,size_t sta
   }
 
   double* out = reinterpret_cast<double*>(&m_outBuffer[0]);
-  //-------- old way -----------------
-  //int vSize = m_XLength + 2 * m_YLength;
-  //for(int i=0;i<m_vectorsPerBlock;i++)
-  //{
-  //    int iX = i*vSize;
-  //    int iY = iX + m_XLength;
-  //    int iE = iY + m_YLength;
-  //    int iEnd = iE + m_YLength;
-  //    std::vector<double>& X = block->dataX(startIndex + i);
-  //    std::vector<double>& Y = block->dataY(startIndex + i);
-  //    std::vector<double>& E = block->dataE(startIndex + i);
-  //    X.assign(out + iX,out + iY);
-  //    Y.assign(out + iY,out + iE);
-  //    E.assign(out + iE,out + iEnd);
-  //}
-  //---------- new way -----------------
+
   size_t j = 0;
   for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
-    MantidVec& X = block->getSpectrum(startIndex + i)->dataX();
+    ManagedHistogram1D * spec = dynamic_cast<ManagedHistogram1D *>(block->getSpectrum(startIndex + i));
+    MantidVec& X = spec->directDataX();
     X.assign(out + j,out + j + m_XLength);
     j += m_XLength;
   }
   for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
-    MantidVec& Y = block->getSpectrum(startIndex + i)->dataY();
+    ManagedHistogram1D * spec = dynamic_cast<ManagedHistogram1D *>(block->getSpectrum(startIndex + i));
+    MantidVec& Y = spec->directDataY();
     Y.assign(out + j,out + j + m_YLength);
     j += m_YLength;
   }
   for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
-    MantidVec& E = block->getSpectrum(startIndex + i)->dataE();
+    ManagedHistogram1D * spec = dynamic_cast<ManagedHistogram1D *>(block->getSpectrum(startIndex + i));
+    MantidVec& E = spec->directDataE();
     E.assign(out + j,out + j + m_YLength);
     j += m_YLength;
   }

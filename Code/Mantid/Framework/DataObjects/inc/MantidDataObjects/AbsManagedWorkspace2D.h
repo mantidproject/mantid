@@ -9,6 +9,37 @@ namespace Mantid
 {
 namespace DataObjects
 {
+
+  /** For use in the AbsManagedWorkspace2D MRU list */
+  class ManagedDataBlockMRUMarker
+  {
+  public:
+    /** Constructor
+     * @param dataBlockIndex :: index of the data block in the list of data blocks of the ManagedWorkspace2D
+     */
+    ManagedDataBlockMRUMarker(size_t dataBlockIndex)
+    : m_index(dataBlockIndex)
+    {
+    }
+
+    /// Function returns a unique index, used for hashing for MRU list
+    int hashIndexFunction() const
+    {
+      return int(m_index);
+    }
+
+    /// @return index of the data block in the list of data blocks of the ManagedWorkspace2D
+    size_t getBlockIndex() const
+    {
+      return m_index;
+    }
+
+  private:
+    size_t m_index;
+  };
+
+
+
   /** AbsManagedWorkspace2D
 
   This is an abstract class for a managed workspace. 
@@ -40,13 +71,14 @@ namespace DataObjects
   */
   class DLLExport AbsManagedWorkspace2D : public Workspace2D
   {
+    friend class ManagedHistogram1D;
+
   protected:
-    /// Most-Recently-Used list of ManagedDataBlock2D objects.
-    typedef Mantid::Kernel::MRUList<ManagedDataBlock2D> mru_list;
-    //friend class mru_list;
+    /// Most-Recently-Used list of markers of ManagedDataBlocks objects.
+    typedef Mantid::Kernel::MRUList<ManagedDataBlockMRUMarker> mru_list;
 
   public:
-    AbsManagedWorkspace2D(std::size_t NBlocks=100);
+    AbsManagedWorkspace2D();
     virtual ~AbsManagedWorkspace2D();
 
     virtual const std::string id() const {return "AbsManagedWorkspace2D";}
@@ -63,14 +95,32 @@ namespace DataObjects
 
     /// Returns the size of physical memory the workspace takes
     virtual size_t getMemorySize() const = 0;
+
+    /// Managed workspaces are not really thread-safe (and parallel file access
+    /// would be silly anyway)
     virtual bool threadSafe() const { return false; }
 
   protected:
+    /// Vector of the data blocks contained. All blocks are in memory but their contents might be empty
+    std::vector<ManagedDataBlock2D *> m_blocks;
 
+    /// Initialize
     virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
+
+    /// Init the blocks alone
+    void initBlocks();
+
     /// Number of blocks in temporary storage
     std::size_t getNumberBlocks() const
-    {return m_bufferedData.size();}
+    {
+      return m_bufferedMarkers.size();
+    }
+
+    /// Get a data block for a workspace index
+    ManagedDataBlock2D* getDataBlock(const std::size_t index) const;
+
+    /// Get and read in a data block only if required by the MRU lsit
+    void readDataBlockIfNeeded(const std::size_t index) const;
 
     /// Reads in a data block.
     virtual void readDataBlock(ManagedDataBlock2D *newBlock,size_t startIndex)const = 0;
@@ -91,8 +141,8 @@ namespace DataObjects
     /// Static reference to the logger class
     static Kernel::Logger &g_log;
 
-    /// The most-recently-used list of buffered data blocks
-    mutable mru_list m_bufferedData;
+    /// Markers used only to track which data blocks to release
+    mutable mru_list m_bufferedMarkers;
 
   private:
     // Make copy constructor and copy assignment operator private (and without definition) unless they're needed
@@ -103,18 +153,7 @@ namespace DataObjects
 
     virtual std::size_t getHistogramNumberHelper() const;
 
-    ManagedDataBlock2D* getDataBlock(const std::size_t index) const;
-
-    /// Fills the Dx vectors in Workspace2D::data if an accessor method is called
-    void lazyDxFill();
-
   public:
-    /// Callback func
-    template <class ManagedDataBlock2D>
-    void dropItemCallback(ManagedDataBlock2D* item_to_write_maybe)
-    {
-      std::cout << "dropItemCallback called!" << std::endl;
-    }
 
   };
 

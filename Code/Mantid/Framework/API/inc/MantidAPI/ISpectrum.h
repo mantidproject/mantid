@@ -46,6 +46,8 @@ namespace API
   */
   class DLLExport ISpectrum 
   {
+    friend class ManagedDataBlock2D;
+
   public:
     ISpectrum();
     ISpectrum(const specid_t specNo);

@@ -4,12 +4,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataObjects/Histogram1D.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidDataObjects/DllConfig.h"
+#include "MantidDataObjects/Histogram1D.h"
+#include "MantidDataObjects/ManagedHistogram1D.h"
 #include "MantidKernel/cow_ptr.h"
 #include <fstream>
 #include <vector>
-#include "MantidAPI/ISpectrum.h"
 
 namespace Mantid
 {
@@ -60,19 +61,37 @@ class DLLExport ManagedDataBlock2D
   friend DLLExport std::fstream& operator>>(std::fstream&, ManagedDataBlock2D&);
   
 public:
-  ManagedDataBlock2D(const std::size_t &minIndex, const std::size_t &noVectors, const std::size_t &XLength, const std::size_t &YLength);
+  ManagedDataBlock2D(const std::size_t &minIndex, const std::size_t &noVectors, const std::size_t &XLength, const std::size_t &YLength,
+      AbsManagedWorkspace2D * parentWS, MantidVecPtr sharedDx);
   virtual ~ManagedDataBlock2D();
+
+  void initialize();
 
   int minIndex() const;
   int hashIndexFunction() const;
   bool hasChanges() const;
   void hasChanges(bool has);
 
+  void releaseData();
+
+  size_t getNumSpectra() const
+  { return m_data.size(); }
+
   /// Return the underlying ISpectrum ptr at the given workspace index.
   virtual Mantid::API::ISpectrum * getSpectrum(const size_t index);
 
   /// Return the underlying ISpectrum ptr (const version) at the given workspace index.
   virtual const Mantid::API::ISpectrum * getSpectrum(const size_t index) const;
+
+  //------------------------------------------------------------------------
+  /// @return true if the data was loaded from disk
+  bool isLoaded() const
+  { return m_loaded; }
+
+  /** Set the loaded flag
+   * @param loaded :: bool flag value */
+  void setLoaded(bool loaded)
+  { m_loaded = loaded; }
 
   
 private:
@@ -82,17 +101,19 @@ private:
   /// Private copy assignment operator
   ManagedDataBlock2D& operator=(const ManagedDataBlock2D&);
   
-  /// The data 'chunk'
-  std::vector<Histogram1D> m_data;
+  /// The data 'chunk'. NOTE: These pointers are owned by Workspace2D!
+  std::vector<ManagedHistogram1D *> m_data;
+
   /// The length of the X vector in each Histogram1D. Must all be the same. 
   const std::size_t m_XLength;
   /// The length of the Y & E vectors in each Histogram1D. Must all be the same. 
   const std::size_t m_YLength;
   /// The index of the workspace that this datablock starts from.
   const std::size_t m_minIndex;
-  /// A 'dirty' flag. Set if any of the elements of m_data are accessed through non-const accessors.
-  bool m_hasChanges;
   
+  /// Is the data block initialized or loaded from disk?
+  bool m_loaded;
+
   /// Static reference to the logger class
   static Kernel::Logger &g_log;
 };

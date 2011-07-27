@@ -3,12 +3,13 @@ set ( SRC_FILES
 	src/CompressedWorkspace2D.cpp
 	src/EventList.cpp
 	src/EventWorkspace.cpp
-	src/EventWorkspaceMRU.cpp
 	src/EventWorkspaceHelpers.cpp
+	src/EventWorkspaceMRU.cpp
 	src/Events.cpp
 	src/GroupingWorkspace.cpp
 	src/Histogram1D.cpp
 	src/ManagedDataBlock2D.cpp
+	src/ManagedHistogram1D.cpp
 	src/ManagedWorkspace2D.cpp
 	src/OffsetsWorkspace.cpp
 	src/Peak.cpp
@@ -33,12 +34,13 @@ set ( INC_FILES
 	inc/MantidDataObjects/DllConfig.h
 	inc/MantidDataObjects/EventList.h
 	inc/MantidDataObjects/EventWorkspace.h
-	inc/MantidDataObjects/EventWorkspaceMRU.h
 	inc/MantidDataObjects/EventWorkspaceHelpers.h
+	inc/MantidDataObjects/EventWorkspaceMRU.h
 	inc/MantidDataObjects/Events.h
 	inc/MantidDataObjects/GroupingWorkspace.h
 	inc/MantidDataObjects/Histogram1D.h
 	inc/MantidDataObjects/ManagedDataBlock2D.h
+	inc/MantidDataObjects/ManagedHistogram1D.h
 	inc/MantidDataObjects/ManagedWorkspace2D.h
 	inc/MantidDataObjects/OffsetsWorkspace.h
 	inc/MantidDataObjects/Peak.h
@@ -55,12 +57,13 @@ set ( INC_FILES
 set ( TEST_FILES
 	test/CompressedWorkspace2DTest.h
 	test/EventListTest.h
-	test/EventWorkspaceTest.h
 	test/EventWorkspaceMRUTest.h
+	test/EventWorkspaceTest.h
 	test/GroupingWorkspaceTest.h
 	test/Histogram1DTest.h
 	test/LibraryManagerTest.h
 	test/ManagedDataBlock2DTest.h
+	test/ManagedHistogram1DTest.h
 	test/ManagedWorkspace2DTest.h
 	test/OffsetsWorkspaceTest.h
 	test/PeakColumnTest.h
