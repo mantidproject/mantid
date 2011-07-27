@@ -85,13 +85,6 @@ public:
   */
   void setMonitorList(std::vector<specid_t>& mList){m_monitorList=mList;}
 
-   /** sets the number of histograms.This method is mainly useful when the user selects 
-   monitor 'select' or 'exclude' options from loadraw UI
-	@param nhistograms :: is the number of histograms
-  */
-  void sethistogramNumbers(const int64_t &nhistograms ){m_noVectors=static_cast<std::size_t>(nhistograms);}
-  void sethistogramNumbers(const std::size_t &nhistograms ){m_noVectors=nhistograms;}
-
 protected:
   /// Called by initialize()
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);

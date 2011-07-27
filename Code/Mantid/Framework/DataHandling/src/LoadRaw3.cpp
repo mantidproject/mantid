@@ -679,8 +679,10 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
   if ((bseparate && monitorwsList.size() > 0) || bexclude)
   {
     localWorkspace->setMonitorList(monitorwsList);
-    localWorkspace->sethistogramNumbers(
-      m_numberOfSpectra - static_cast<int64_t>(monitorwsList.size()));
+    // RJT: Comment this out on removal of method from Workspace2D. This whole method doesn't do
+    // the right thing anyway, so this only makes things slightly worse pending a fix.
+//    localWorkspace->sethistogramNumbers(
+//      m_numberOfSpectra - static_cast<int64_t>(monitorwsList.size()));
     if (bseparate)
     {
       fclose(file);
