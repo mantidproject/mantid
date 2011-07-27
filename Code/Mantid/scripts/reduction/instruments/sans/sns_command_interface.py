@@ -8,7 +8,7 @@ from hfir_command_interface import NoDarkCurrent, NoNormalization, Mask, MaskDet
 from hfir_command_interface import SensitivityCorrection, NoSensitivityCorrection
 from hfir_command_interface import SolidAngle, NoSolidAngle, NoTransmission, SetTransmission
 from hfir_command_interface import Background, NoBackground, IQxQy, NoIQxQy
-from hfir_command_interface import NoSaveIq
+from hfir_command_interface import NoSaveIq, DivideByThickness
 from hfir_command_interface import ThetaDependentTransmission, BckThetaDependentTransmission, SetBckTransmission
 from hfir_command_interface import TransmissionDarkCurrent, BckTransmissionDarkCurrent
 from hfir_command_interface import SetDirectBeamAbsoluteScale, SetAbsoluteScale

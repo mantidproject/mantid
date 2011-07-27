@@ -91,6 +91,9 @@ class SANSReducer(Reducer):
         
         # Resolution calculator
         self._resolution_calculator = ReactorSANSResolution
+        
+        # Sample geometry correction
+        self.geometry_correcter = None
     
     def set_instrument(self, configuration):
         """
@@ -334,6 +337,10 @@ class SANSReducer(Reducer):
         # Get the basic 2D steps
         self._reduction_steps = self._2D_steps()
         
+        # Sample geometry correction
+        if self.geometry_correcter is not None:
+            self.append_step(self.geometry_correcter)
+                    
         # Apply transmission correction
         if self._transmission_calculator is not None:
             self.append_step(self._transmission_calculator) 
@@ -357,5 +364,3 @@ class SANSReducer(Reducer):
         if self._save_iq is not None:
             self.append_step(self._save_iq)
             
-        if self.geometry_correcter is not None:
-            self.append_step(self.geometry_correcter)

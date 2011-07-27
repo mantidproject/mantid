@@ -59,7 +59,6 @@ class AbsoluteScale(BaseAbsoluteScale):
         self._attenuator_trans = attenuator_trans
         self._beamstop_diameter = beamstop_diameter
         self._apply_sensitivity = apply_sensitivity
-        self._sample_thickness = sample_thickness
         self._scaling_factor = None
         
     def execute(self, reducer, workspace=None):
@@ -69,22 +68,11 @@ class AbsoluteScale(BaseAbsoluteScale):
         # If we haven't calculated the scaling factor, do it now
         if self._scaling_factor is None:
             self._compute_scaling_factor(reducer)
-            
-        if self._sample_thickness is not None:
-            thickness = self._sample_thickness
-        else:
-            if mtd[workspace].getRun().hasProperty("sample-thickness"):
-                thickness = mtd[workspace].getRun().getProperty("sample-thickness").value
-            else:
-                raise RuntimeError, "AbsoluteScale could not get the sample thickness"
-                
-        if thickness <= 0:
-            raise RuntimeError, "Invalid value for sample thickness: %g cm" % thickness
-        scale = self._scaling_factor/thickness
+                            
         if workspace is not None:
-            Scale(workspace, workspace, scale, 'Multiply')
+            Scale(workspace, workspace, self._scaling_factor, 'Multiply')
         
-        return "Absolute scaling done [scaling factor = %g]" % scale
+        return "Absolute scale computed using direct beam: %6.4g" % self._scaling_factor
 
     def _compute_scaling_factor(self, reducer):
         """
