@@ -64,10 +64,10 @@ namespace Mantid
       }
     }
 
-
-
-
-
+    void Multiply::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out)
+    {
+      if ( !lhs->isDistribution() || !rhs->isDistribution() ) out->isDistribution(false);
+    }
 
     // ===================================== EVENT LIST BINARY OPERATIONS ==========================================
     /** Carries out the binary operation IN-PLACE on a single EventList,

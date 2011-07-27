@@ -89,7 +89,7 @@ void Q1D2::exec()
     // Construct a new spectra map. This will be faster than remapping the old one
   API::SpectraDetectorMap *specMap = new SpectraDetectorMap;
   // this will become the output workspace from this algorithm
-  MatrixWorkspace_sptr outputWS = setUpOutputWorkspace(getProperty("OutputBinning"), specMap);
+  MatrixWorkspace_sptr outputWS = setUpOutputWorkspace(getProperty("OutputBinning"));
   const MantidVec & QOut = outputWS->readX(0);
   MantidVec & YOut = outputWS->dataY(0);
   MantidVec & EOutTo2 = outputWS->dataE(0);
@@ -224,11 +224,10 @@ void Q1D2::examineInput(API::MatrixWorkspace_const_sptr binAdj, API::MatrixWorks
         throw std::invalid_argument("The WavelengthAdj workspace must have matching bins with the detector bank workspace");
       }
     }
-/* the distribution status of workspaces isn't getting propogated reliably enough for this work yet i.e. a distribution workspace x a raw counts = raw counts
-if ( binAdj->isDistribution() != m_dataWS->isDistribution() )
+    if ( binAdj->isDistribution() != m_dataWS->isDistribution() )
     {
-      throw std::invalid_argument("The distrbution/raw counts status of the wavelengthAdj and DetBankWorkspace must be the same");
-    }*/
+      throw std::invalid_argument("The distrbution/raw counts status of the wavelengthAdj and DetBankWorkspace must be the same, use ConvertToDistribution");
+    }
   }
   else if( ! m_dataWS->isDistribution() )
   {
@@ -267,7 +266,7 @@ void Q1D2::initizeCutOffs(const double RCut, const double WCut)
 *  @param specMap a spectra map that the new workspace should use and take owner ship of
 *  @return A pointer to the newly-created workspace
 */
-API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> & binParams,  const API::SpectraDetectorMap * const /*specMap*/) const
+API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> & binParams) const
 {
   // Calculate the output binning
   MantidVecPtr XOut;

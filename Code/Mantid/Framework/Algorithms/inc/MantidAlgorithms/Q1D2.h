@@ -68,7 +68,7 @@ private:
 
   void initizeCutOffs(const double RCut, const double WCut);
   void examineInput(API::MatrixWorkspace_const_sptr binAdj, API::MatrixWorkspace_const_sptr detectAdj);
-  API::MatrixWorkspace_sptr setUpOutputWorkspace(const std::vector<double> & binParams,  const API::SpectraDetectorMap * const specMap) const;
+  API::MatrixWorkspace_sptr setUpOutputWorkspace(const std::vector<double> & binParams) const;
   //these are the steps that are run on each individual spectrum
   size_t waveLengthCutOff(const size_t specInd) const;
   void calculateNormalization(const size_t wavStart, const size_t specInd, API::MatrixWorkspace_const_sptr pixelAdj, double const * const binNorms, double const * const binNormEs, const MantidVec::iterator norm, const MantidVec::iterator normETo2) const;
