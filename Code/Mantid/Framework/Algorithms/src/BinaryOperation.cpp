@@ -359,14 +359,7 @@ namespace Mantid
         //Zero the output data and ensure that the output spectra is masked. The masking is done outside of this
         //loop modiying the parameter map in a multithreaded loop requires too much locking
         m_indicesToMask.push_back(index);
-        MantidVec & yValues = out->dataY(index);
-        MantidVec & eValues = out->dataE(index);
-        MantidVec::const_iterator yend = yValues.end();
-        for( MantidVec::iterator yit(yValues.begin()), eit(eValues.begin()); yit != yend; ++yit, ++eit)
-        {
-          (*yit) = 0.0;
-          (*eit) = 0.0;
-        }
+        out->maskWorkspaceIndex(index);
       }
       return continueOp;
     }
@@ -440,7 +433,6 @@ namespace Mantid
       // Now loop over the spectra of the left hand side pulling m_out the single value from each m_rhs 'spectrum'
       // and then calling the virtual function
       const int64_t numHists = m_lhs->getNumberHistograms();
-
       if (m_eout)
       {
         // ---- The output is an EventWorkspace ------
