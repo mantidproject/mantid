@@ -52,9 +52,10 @@ void vtkMDEWNexusReaderII::SetRecursionDepth(int depth)
 {
   if(depth > 0)
   {
-    if(m_recursionDepth != depth)
+    size_t temp = static_cast<size_t>(depth);
+    if(m_recursionDepth != temp)
     {
-      m_recursionDepth = static_cast<size_t>(depth);
+      m_recursionDepth = temp;
       this->Modified();
     }
   }
@@ -112,7 +113,7 @@ int vtkMDEWNexusReaderII::RequestData(vtkInformation * vtkNotUsed(request), vtkI
 int vtkMDEWNexusReaderII::RequestInformation(
   vtkInformation *vtkNotUsed(request),
   vtkInformationVector **vtkNotUsed(inputVector),
-  vtkInformationVector *outputVector)
+  vtkInformationVector *)
 {
   return 1; 
 }
