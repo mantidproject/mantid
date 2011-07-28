@@ -370,7 +370,7 @@ public:
     stats.update();
     size_t memBefore = stats.availMem() ;
 
-    Mantid::specid_t num;
+    Mantid::specid_t num(0);
     for ( std::size_t i = 0 ; i < managedWS->getNumberHistograms(); ++i )
     {
       Mantid::API::ISpectrum * spec = managedWS->getSpectrum(i);
