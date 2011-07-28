@@ -855,8 +855,8 @@ void MantidDockWidget::saveToProgram(const QString & name)
         {
           //would string array be better to use here ? //////////////////////////////////////////
           QStringList sPNameAndDetail = saveParameters[i].split('=');
-          std::string saveParameterName = sPNameAndDetail[0].trimmed().toStdString());
-          std::string saveParameterDetail = sPNameAndDetail[1].trimmed().toStdString());
+          std::string saveParameterName = sPNameAndDetail[0].trimmed().toStdString();
+          std::string saveParameterDetail = sPNameAndDetail[1].trimmed().toStdString();
           if(saveParameterDetail == "True")
             alg->setProperty(saveParameterName, true);
           else if(saveParameterDetail == "False")
