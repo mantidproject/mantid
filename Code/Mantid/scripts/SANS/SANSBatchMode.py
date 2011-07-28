@@ -90,11 +90,10 @@ def addRunToStore(parts, run_store):
     run_store.append(inputdata)
     return 0
 
-def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False, centreit=False, reducer=None):
+def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False, centreit=False, reducer=None):
     """
         @param filename: the CSV file with the list of runs to analyse
         @param format: type of file to load, nxs for Nexus, etc.
-        @param full_trans_wav: when set to true (default) a wider range of wavelengths are used in the transmission correction  calculation
         @param plotresults: if true and this function is run from Mantidplot a graph will be created for the results of each reduction
         @param save: this named algorithm will be passed the name of the results workspace and filename (default = 'SaveRKH'). Pass a tuple of strings to save to multiple file formats
         @param verbose: set to true to write more information to the log (default=False)
@@ -142,7 +141,7 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
                     
             
             # WavRangeReduction runs the reduction for the specified wavelength range where the final argument can either be DefaultTrans or CalcTrans:
-            reduced = WavRangeReduction(full_trans_wav=full_trans_wav)
+            reduced = WavRangeReduction()
 
         except SkipEntry, reason:
             #this means that a load step failed, the warning and the fact that the results aren't there is enough for the user

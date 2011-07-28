@@ -77,7 +77,7 @@ class ISISReducer(SANSReducer):
         proc_wav = [self.norm_mon]
         proc_wav.append(self.transmission_calculator)
         proc_wav.append(self._corr_and_scale)
-        proc_wav.append(self._geo_corr)
+        proc_wav.append(self.geometry_correcter)
 
         self._can = [self.background_subtracter]
         
@@ -115,7 +115,7 @@ class ISISReducer(SANSReducer):
         self.to_Q =            sans_reduction_steps.ConvertToQ(
                                                         self.prep_normalize)
         self.background_subtracter = None
-        self._geo_corr =       sans_reduction_steps.SampleGeomCor(
+        self.geometry_correcter =       sans_reduction_steps.SampleGeomCor(
                                                 self._sample_run.geometry)
 #        self._zero_error_flags=isis_reduction_steps.ReplaceErrors()
         self._rem_nans =      sans_reduction_steps.StripEndNans()

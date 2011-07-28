@@ -1972,8 +1972,9 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
       csv_file = saveBatchGrid(selected_file);
     }
     py_code.prepend("import SANSBatchMode as batch\n");
-    py_code += "\nbatch.BatchReduce('" + csv_file + "','" + m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString() + "',";
-    py_code += m_uiForm.transFit_ck->isChecked() ? "True" : "False";
+    const int fileFormat = m_uiForm.file_opt->currentIndex();
+    py_code += "\nbatch.BatchReduce('" + csv_file + "','" +
+      m_uiForm.file_opt->itemData(fileFormat).toString() + "'";
     if( m_uiForm.plot_check->isChecked() )
     {
       py_code += ", plotresults=True";
