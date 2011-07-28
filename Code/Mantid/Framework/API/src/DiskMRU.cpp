@@ -12,7 +12,6 @@ namespace API
    */
   DiskMRU::DiskMRU()
   {
-    // TODO Auto-generated constructor stub
   }
     
   //----------------------------------------------------------------------------------------------
@@ -20,7 +19,8 @@ namespace API
    */
   DiskMRU::~DiskMRU()
   {
-    // TODO Auto-generated destructor stub
+    // The item pointers are NOT owned by the MRU.
+    list.clear();
   }
   
 

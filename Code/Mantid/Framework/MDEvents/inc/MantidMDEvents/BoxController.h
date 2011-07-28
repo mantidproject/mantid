@@ -361,11 +361,11 @@ namespace MDEvents
       m_numEventsInMem = bytesInMem / m_bytesPerEvent;
     }
 
-
-    /** Does the cache require that this box be released? */
-    bool releaseBox(size_t boxId, size_t numEvents)
-    {
-    }
+//
+//    /** Does the cache require that this box be released? */
+//    bool releaseBox(size_t boxId, size_t numEvents)
+//    {
+//    }
 
 
     //-----------------------------------------------------------------------------------

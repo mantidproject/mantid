@@ -64,7 +64,7 @@ namespace API
      * 1. sequenced = the order they were added.
      * 2. a hashed, unique index = the "id" number".
      */
-    typedef typename boost::multi_index::multi_index_container<
+    typedef boost::multi_index::multi_index_container<
       ISaveable *,
       boost::multi_index::indexed_by<
         boost::multi_index::sequenced<>,
@@ -72,23 +72,80 @@ namespace API
       >
     > item_list;
 
-    /// This typedef makes an ordered item list (you access it by the 1st index)
-    typedef typename boost::multi_index::nth_index<item_list,1>::type ordered_item_list;
-
-    item_list list;
 
     DiskMRU();
-    ~DiskMRU();
     
+    ~DiskMRU();
+
+    //---------------------------------------------------------------------------------------------
+    /** Tell the MRU that we are loading the given item.
+     *
+     * @param item :: item that is
+     * @param memory :: memory that the object will use.
+     */
+    void loading(ISaveable * item)
+    {
+      // Place the item in the MRU list
+      std::pair<item_list::iterator,bool> p;
+      p = list.push_front(item);
+
+      if (!p.second)
+      {
+        /* duplicate item */
+        list.relocate(list.begin(), p.first); /* put in front */
+        return;
+      }
+
+      // We are now using more memory.
+      m_memoryUsed += item->getMRUMemory();
+
+      if (m_memoryUsed > m_memoryAvail)
+      {
+        // Pop the least-used object out the back
+        ISaveable *toWrite = list.back();
+        list.pop_back();
+
+        // And put it in the queue of stuff to write.
+        m_toWrite.push_back(toWrite);
+        m_memoryToWrite += toWrite->getMRUMemory();
+
+        // Should we now write out the old data?
+        if (m_memoryToWrite > 0)
+          writeOldObjects();
+      }
+    }
+
+
+
   protected:
+    //---------------------------------------------------------------------------------------------
+    /** Method to write out the old objects that have been
+     * stored in the "toWrite" buffer.
+     */
+    void writeOldObjects()
+    {
+      size_t num = m_toWrite.size();
+      for (size_t i=0; i<num; i++)
+      {
+        // Write...
+      }
+    }
+
+
+    /// The MRU list container
+    item_list list;
+
     /// Amount of memory that the MRU is allowed to use.
     /// Note that the units are up to the ISaveable to define; they don't have to be bytes.
-    size_t m_memory;
+    size_t m_memoryAvail;
+
+    /// Amount of memory actually used up.
+    size_t m_memoryUsed;
 
     /// Vector of the data objects that should be written out (no particular order).
     std::vector<ISaveable *> m_toWrite;
 
-    /// Total amount of memory if the "toWrite" buffer.
+    /// Total amount of memory in the "toWrite" buffer.
     size_t m_memoryToWrite;
 
   };
