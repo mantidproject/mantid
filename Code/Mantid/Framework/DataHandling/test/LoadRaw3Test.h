@@ -113,30 +113,20 @@ public:
     //----------------------------------------------------------------------
     // Tests to check that Loading SpectraDetectorMap is done correctly
     //----------------------------------------------------------------------
-    const Geometry::ISpectraDetectorMap& map= output2D->spectraMap();
-
-    // Check the total number of elements in the map for HET
-    TS_ASSERT_EQUALS(map.nElements(),24964);
-
     // Test one to one mapping, for example spectra 6 has only 1 pixel
-    TS_ASSERT_EQUALS(map.ndet(6),1);
+    TS_ASSERT_EQUALS( output2D->getSpectrum(6)->getDetectorIDs().size(), 1);   // rummap.ndet(6),1);
 
-    // Test one to many mapping, for example 10 pixels contribute to spectra 2084
-    TS_ASSERT_EQUALS(map.ndet(2084),10);
+    // Test one to many mapping, for example 10 pixels contribute to spectra 2084 (workspace index 2083)
+    TS_ASSERT_EQUALS( output2D->getSpectrum(2083)->getDetectorIDs().size(), 10);   //map.ndet(2084),10);
+
     // Check the id number of all pixels contributing
-    std::vector<detid_t> detectorgroup;
-    detectorgroup=map.getDetectors(2084);
-    std::vector<detid_t>::const_iterator it;
+    std::set<detid_t> detectorgroup;
+    detectorgroup = output2D->getSpectrum(2083)->getDetectorIDs();
+    std::set<detid_t>::const_iterator it;
     int pixnum=101191;
     for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
-    TS_ASSERT_EQUALS(*it,pixnum++);
+      TS_ASSERT_EQUALS(*it,pixnum++);
 
-    // Test with spectra that does not exist
-    // Test that number of pixel=0
-    TS_ASSERT_EQUALS(map.ndet(5),0);
-    // Test that trying to get the Detector throws.
-    std::vector<detid_t> test = map.getDetectors(5);
-    TS_ASSERT(test.empty());
 	AnalysisDataService::Instance().remove(outputSpace);
   }
 
@@ -379,14 +369,12 @@ public:
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr6->dataY(1)[555] )
 
     TS_ASSERT_EQUALS( outsptr1->getBaseInstrument(), outsptr2->getBaseInstrument() )
-    TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr2->spectraMap()) )
     TS_ASSERT_EQUALS( &(outsptr1->sample()), &(outsptr2->sample()) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr2->run()))
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr3->run()) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr4->run()) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr5->run()) )
     TS_ASSERT_EQUALS( outsptr1->getBaseInstrument(), outsptr6->getBaseInstrument() )
-    TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr6->spectraMap()) )
     TS_ASSERT_EQUALS( &(outsptr1->sample()), &(outsptr6->sample()) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr6->run()) )
 
@@ -526,57 +514,47 @@ public:
     //----------------------------------------------------------------------
     // Tests to check that Loading SpectraDetectorMap is done correctly
     //----------------------------------------------------------------------
-    const Geometry::ISpectraDetectorMap& map= output2D->spectraMap();
-
-    // Check the total number of elements in the map for HET
-    TS_ASSERT_EQUALS(map.nElements(),24964);
-
     // Test one to one mapping, for example spectra 6 has only 1 pixel
-    TS_ASSERT_EQUALS(map.ndet(6),1);
+    TS_ASSERT_EQUALS( output2D->getSpectrum(6)->getDetectorIDs().size(), 1);   // rummap.ndet(6),1);
 
-    // Test one to many mapping, for example 10 pixels contribute to spectra 2084
-    TS_ASSERT_EQUALS(map.ndet(2084),10);
+    // Test one to many mapping, for example 10 pixels contribute to spectra 2084 (workspace index 2083)
+    TS_ASSERT_EQUALS( output2D->getSpectrum(2079)->getDetectorIDs().size(), 10);   //map.ndet(2084),10);
+
     // Check the id number of all pixels contributing
-    std::vector<detid_t> detectorgroup;
-    detectorgroup=map.getDetectors(2084);
-    std::vector<detid_t>::const_iterator it;
+    std::set<detid_t> detectorgroup;
+    detectorgroup = output2D->getSpectrum(2079)->getDetectorIDs();
+    std::set<detid_t>::const_iterator it;
     int pixnum=101191;
     for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
-    TS_ASSERT_EQUALS(*it,pixnum++);
+      TS_ASSERT_EQUALS(*it,pixnum++);
 
-    // Test with spectra that does not exist
-    // Test that number of pixel=0
-    TS_ASSERT_EQUALS(map.ndet(5),0);
-    // Test that trying to get the Detector throws.
-    std::vector<detid_t> test = map.getDetectors(5);
-    TS_ASSERT(test.empty());
-
-	AnalysisDataService::Instance().remove(outputSpace);
-	AnalysisDataService::Instance().remove(outputSpace+"_Monitors");
+    AnalysisDataService::Instance().remove(outputSpace);
+    AnalysisDataService::Instance().remove(outputSpace+"_Monitors");
   }
+
   void testSeparateMonitorsMultiPeriod()
   {
-	LoadRaw3 loader7;
+    LoadRaw3 loader7;
     loader7.initialize();
     loader7.setPropertyValue("Filename", "EVS13895.raw");
     loader7.setPropertyValue("OutputWorkspace", "multiperiod");
-	loader7.setPropertyValue("LoadMonitors", "Separate");
-    
+    loader7.setPropertyValue("LoadMonitors", "Separate");
+
     TS_ASSERT_THROWS_NOTHING( loader7.execute() )
     TS_ASSERT( loader7.isExecuted() )
-	
+
     WorkspaceGroup_sptr work_out;
     TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("multiperiod")));
 
 	  WorkspaceGroup_sptr monitor_work_out;
-    TS_ASSERT_THROWS_NOTHING(monitor_work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("multiperiod_Monitors")));
+	  TS_ASSERT_THROWS_NOTHING(monitor_work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("multiperiod_Monitors")));
 
-	Workspace_sptr monitorwsSptr=AnalysisDataService::Instance().retrieve("multiperiod_Monitors");
-    WorkspaceGroup_sptr monitorsptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(monitorwsSptr);
+	  Workspace_sptr monitorwsSptr=AnalysisDataService::Instance().retrieve("multiperiod_Monitors");
+	  WorkspaceGroup_sptr monitorsptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(monitorwsSptr);
 
-	
-    const std::vector<std::string>monitorwsNamevec = monitorsptrWSGrp->getNames();
-    int period=1;
+
+	  const std::vector<std::string>monitorwsNamevec = monitorsptrWSGrp->getNames();
+	  int period=1;
     std::vector<std::string>::const_iterator it=monitorwsNamevec.begin();
     for (;it!=monitorwsNamevec.end();it++)
     {	std::stringstream count;
@@ -621,13 +599,11 @@ public:
     TS_ASSERT_DIFFERS( monoutsptr1->dataY(1)[555], monoutsptr6->dataY(1)[555] )
 
     TS_ASSERT_EQUALS( monoutsptr1->getBaseInstrument(), monoutsptr2->getBaseInstrument() )
-    TS_ASSERT_EQUALS( &(monoutsptr1->spectraMap()), &(monoutsptr2->spectraMap()) )
     TS_ASSERT_DIFFERS( &(monoutsptr1->run()), &(monoutsptr2->run()) )
     TS_ASSERT_DIFFERS(  &(monoutsptr1->run()), &(monoutsptr3->run()) )
     TS_ASSERT_DIFFERS(  &(monoutsptr1->run()), &(monoutsptr4->run()) )
     TS_ASSERT_DIFFERS(  &(monoutsptr1->run()), &(monoutsptr5->run()) )
     TS_ASSERT_EQUALS( monoutsptr1->getBaseInstrument(), monoutsptr6->getBaseInstrument() )
-    TS_ASSERT_EQUALS( &(monoutsptr1->spectraMap()), &(monoutsptr6->spectraMap()) )
     TS_ASSERT_DIFFERS(  &(monoutsptr1->run()), &(monoutsptr6->run()) )
 	
     Workspace_sptr wsSptr=AnalysisDataService::Instance().retrieve("multiperiod");
@@ -678,13 +654,11 @@ public:
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr6->dataY(1)[555] )
 
     TS_ASSERT_EQUALS( outsptr1->getBaseInstrument(), outsptr2->getBaseInstrument() )
-    TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr2->spectraMap()) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr2->run() ))
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr3->run() ) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr4->run() ) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr5->run() ) )
     TS_ASSERT_EQUALS( outsptr1->getBaseInstrument(), outsptr6->getBaseInstrument() )
-    TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr6->spectraMap()) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr6->run() ) )
 
 	it=monitorwsNamevec.begin();

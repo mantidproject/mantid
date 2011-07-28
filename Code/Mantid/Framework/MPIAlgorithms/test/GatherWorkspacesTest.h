@@ -59,9 +59,9 @@ public:
       TS_ASSERT_EQUALS( inWS->readX(0)[i], outWS->readX(0)[i] );
       TS_ASSERT_EQUALS( inWS->readY(0)[i], outWS->readY(0)[i] );
       TS_ASSERT_EQUALS( inWS->readE(0)[i], outWS->readE(0)[i] );
+      //TODO: Check spectrum numbers and detector IDs are copied correctly (perhaps?)
     }
 
-    //TS_ASSERT( outWS->spectraMap().nElements() == 0 );
     TS_ASSERT_EQUALS( inWS->getBaseInstrument(), outWS->getBaseInstrument() );
   }
 

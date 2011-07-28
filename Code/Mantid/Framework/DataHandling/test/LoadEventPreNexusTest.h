@@ -173,10 +173,6 @@ public:
     int numpixels_with_events = 51200;
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
 
-    //This seems to be the size of the spectra map.
-    //TS_ASSERT_EQUALS( ew->spectraMap().nElements(), 50172); //or is it 50173
-    //TODO: Figure out why that fails there above...
-
     //Check if the instrument was loaded correctly
     boost::shared_ptr<Instrument> inst = ew->getBaseInstrument();
     TS_ASSERT_EQUALS (  inst->getName(), "CNCS" );
@@ -256,13 +252,15 @@ public:
     TS_ASSERT_EQUALS( ew->getAxis(1)->length(), 2);
 
     //Are the pixel IDs ok?
-    std::vector<detid_t> dets = ew->spectraMap().getDetectors(45);
+    TS_ASSERT_EQUALS( ew->getSpectrum(0)->getSpectrumNo(), 45);
+    std::set<detid_t> dets = ew->getSpectrum(0)->getDetectorIDs();
     TS_ASSERT_EQUALS( dets.size(), 1);
-    TS_ASSERT_EQUALS( dets[0], 45);
+    TS_ASSERT_EQUALS( *dets.begin(), 45);
 
-    dets = ew->spectraMap().getDetectors(110);
+    TS_ASSERT_EQUALS( ew->getSpectrum(1)->getSpectrumNo(), 110);
+    dets = ew->getSpectrum(1)->getDetectorIDs();
     TS_ASSERT_EQUALS( dets.size(), 1);
-    TS_ASSERT_EQUALS( dets[0], 110);
+    TS_ASSERT_EQUALS( *dets.begin(), 110);
   }
 
 

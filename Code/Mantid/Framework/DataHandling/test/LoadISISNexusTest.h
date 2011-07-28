@@ -41,7 +41,7 @@ public:
         TS_ASSERT_EQUALS(ws->readY(6)[0],1.);
         TS_ASSERT_EQUALS(ws->readY(8)[3],1.);
 
-        TS_ASSERT_EQUALS(ws->spectraMap().nElements(),17792);
+        TS_ASSERT_EQUALS(ws->getSpectrum(1234)->getDetectorIDs().size(), 1);
 
         const std::vector< Property* >& logs = ws->run().getLogData();
         TS_ASSERT_EQUALS(logs.size(), 58);

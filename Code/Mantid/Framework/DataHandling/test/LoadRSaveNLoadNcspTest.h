@@ -162,39 +162,13 @@ void testExecOnLoadraw()
 	  }
     }
 
-    //
-    // Get the map from the workspace : TESTS from LoadMappingTest.h
-  	  const Geometry::ISpectraDetectorMap& map=output->spectraMap();
-    TS_ASSERT( &map != NULL);
-    if(&map != NULL )
-    {
+    //----------------------------------------------------------------------
+    // Tests to check that Loading SpectraDetectorMap is done correctly
+    //----------------------------------------------------------------------
+    TS_ASSERT_EQUALS( output2D->getSpectrum(0)->getDetectorIDs().size(), 1);
+    TS_ASSERT_EQUALS( output2D->getSpectrum(0)->getSpectrumNo(), 1);
+    TS_ASSERT( output2D->getSpectrum(0)->hasDetectorID(1));
 
-        // Check the total number of elements in the map for CSP78173
-        TS_ASSERT_EQUALS(map.nElements(),4);
-
-        // Test one to one mapping, for example spectra 6 has only 1 pixel
-        TS_ASSERT_EQUALS(map.ndet(2),1);
-
-        // Test one to many mapping, for example 10 pixels contribute to spectra 2084
-        TS_ASSERT_EQUALS(map.ndet(3),1);
-
-        // Check the id number of all pixels contributing
-        std::vector<detid_t> detectorgroup;
-        //std::vector<boost::shared_ptr<Mantid::Geometry::IDetector> > detectorgroup;
-        detectorgroup=map.getDetectors(2084);
-        std::vector<detid_t>::const_iterator it;
-        int pixnum=101191;
-        for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
-          TS_ASSERT_EQUALS(*it,pixnum++);
-
-        // Test with spectra that does not exist
-        // Test that number of pixel=0
-        TS_ASSERT_EQUALS(map.ndet(5),0);
-        // Test that trying to get the Detector throws.
-        std::vector<detid_t> test = map.getDetectors(5);
-        TS_ASSERT(test.empty());
-        //
-    }
 
     // obtain the expected log data which was read from the Nexus file (NXlog)
 

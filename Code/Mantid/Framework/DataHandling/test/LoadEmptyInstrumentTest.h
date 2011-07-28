@@ -28,6 +28,16 @@ class LoadEmptyInstrumentTest : public CxxTest::TestSuite
 {
 public:
 
+  /// Helper that checks that each spectrum has one detector
+  void check_workspace_detectors(MatrixWorkspace_sptr output, size_t numberDetectors)
+  {
+    TS_ASSERT_EQUALS(output->getNumberHistograms(),numberDetectors);
+    for (size_t i=0;i < output->getNumberHistograms(); i++)
+    {
+      TS_ASSERT_EQUALS(output->getSpectrum(i)->getDetectorIDs().size(), 1);
+    }
+  }
+
   void testExecSLS()
   {
     LoadEmptyInstrument loaderSLS;
@@ -55,7 +65,7 @@ public:
     output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
     
     // Check the total number of elements in the map for SLS
-    TS_ASSERT_EQUALS(output->spectraMap().nElements(),683);
+    check_workspace_detectors(output, 683);
     AnalysisDataService::Instance().remove(wsName);
   }
 
@@ -86,7 +96,7 @@ public:
     output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
     
     // Check the total number of elements in the map for SLS
-    TS_ASSERT_EQUALS(output->spectraMap().nElements(),2502);
+    check_workspace_detectors(output, 2502);
   }
 
   void testExecMUSR()
@@ -116,7 +126,7 @@ public:
     output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
     
     // Check the total number of elements in the map for SLS
-    TS_ASSERT_EQUALS(output->spectraMap().nElements(),64);
+    check_workspace_detectors(output, 64);
   }
 
 

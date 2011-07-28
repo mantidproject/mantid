@@ -75,22 +75,19 @@ void Q1DTOF::exec()
   double const * const binNormEs = waveAdj ? &(waveAdj->readE(0)[0]) : NULL;
 
   //define the (large number of) data objects that are going to be used in all iterations of the loop below
-    // Construct a new spectra map. This will be faster than remapping the old one
-  API::SpectraDetectorMap *specMap = new SpectraDetectorMap;
+
   // this will become the output workspace from this algorithm
   MatrixWorkspace_sptr outputWS = setUpOutputWorkspace(getProperty("OutputBinning"));
+
+  // The output spectrum
   const MantidVec & QOut = outputWS->readX(0);
   MantidVec & YOut = outputWS->dataY(0);
   MantidVec & EOutTo2 = outputWS->dataE(0);
+
   // normalisation that is applied to counts in each Q bin
   MantidVec normSum(YOut.size(), 0.0);
   // the error on the normalisation
   MantidVec normError2(YOut.size(), 0.0);
-
-  const Geometry::ISpectraDetectorMap & inSpecMap = m_dataWS->spectraMap();
-  //const Axis* const spectraAxis = m_dataWS->getAxis(1);
-
-
 
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.1, 1.0, numSpec+1);
@@ -190,6 +187,7 @@ void Q1DTOF::exec()
 
   setProperty("OutputWorkspace",outputWS);
 }
+
 /** If the distribution/raw counts status and binning on all the input workspaces
 *  is the same and this reads some workspace description but throws if not
   @param binWS workpace that will be checked to see if it has one spectrum and the same number of bins as dataWS

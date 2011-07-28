@@ -31,6 +31,23 @@ class LoadMuonNexus2Test : public CxxTest::TestSuite
 {
 public:
   
+  void check_spectra_and_detectors(MatrixWorkspace_sptr output)
+  {
+
+    //----------------------------------------------------------------------
+    // Tests to check that Loading SpectraDetectorMap is done correctly
+    //----------------------------------------------------------------------
+    // Check the total number of elements in the map for HET
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 192);
+
+    // Test one to one mapping, for example spectra 6 has only 1 pixel
+    TS_ASSERT_EQUALS(output->getSpectrum(6)->getDetectorIDs().size(), 1);
+
+    std::set<detid_t> detectorgroup = output->getSpectrum(99)->getDetectorIDs();
+    TS_ASSERT_EQUALS(detectorgroup.size(),1);
+    TS_ASSERT_EQUALS(*detectorgroup.begin(),100);
+  }
+
   void testExec()
   {
     LoadMuonNexus2 nxLoad;
@@ -123,22 +140,7 @@ public:
     //check that sample name has been set correctly
     TS_ASSERT_EQUALS(output->sample().getName(), "GaAs");
     
-	
-    //----------------------------------------------------------------------
-    // Tests to check that Loading SpectraDetectorMap is done correctly
-    //----------------------------------------------------------------------
-    const Geometry::ISpectraDetectorMap& map = output->spectraMap();
-    
-    // Check the total number of elements in the map for HET
-    TS_ASSERT_EQUALS(map.nElements(),192);
-    
-   // Test one to one mapping, for example spectra 6 has only 1 pixel
-    TS_ASSERT_EQUALS(map.ndet(6),1);
-    
-    std::vector<detid_t> detectorgroup = map.getDetectors(100);
-    TS_ASSERT_EQUALS(detectorgroup.size(),1);
-    TS_ASSERT_EQUALS(detectorgroup.front(),100);
-
+    check_spectra_and_detectors(output);
 
     AnalysisDataService::Instance().remove(outputSpace);
   }
@@ -355,22 +357,7 @@ public:
     //check that sample name has been set correctly
     TS_ASSERT_EQUALS(output->sample().getName(), "GaAs");
     
-	
-    //----------------------------------------------------------------------
-    // Tests to check that Loading SpectraDetectorMap is done correctly
-    //----------------------------------------------------------------------
-    const Geometry::ISpectraDetectorMap& map = output->spectraMap();
-    
-    // Check the total number of elements in the map for HET
-    TS_ASSERT_EQUALS(map.nElements(),192);
-    
-   // Test one to one mapping, for example spectra 6 has only 1 pixel
-    TS_ASSERT_EQUALS(map.ndet(6),1);
-    
-    std::vector<detid_t> detectorgroup = map.getDetectors(100);
-    TS_ASSERT_EQUALS(detectorgroup.size(),1);
-    TS_ASSERT_EQUALS(detectorgroup.front(),100);
-
+    check_spectra_and_detectors(output);
 
     AnalysisDataService::Instance().remove(outputSpace);
   }
@@ -454,23 +441,8 @@ public:
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,25), "2009-Jul-08 10:23:50  10." );
     //check that sample name has been set correctly
     TS_ASSERT_EQUALS(output->sample().getName(), "GaAs");
-    
 	
-    //----------------------------------------------------------------------
-    // Tests to check that Loading SpectraDetectorMap is done correctly
-    //----------------------------------------------------------------------
-    const Geometry::ISpectraDetectorMap& map = output->spectraMap();
-    
-    // Check the total number of elements in the map for HET
-    TS_ASSERT_EQUALS(map.nElements(),192);
-    
-   // Test one to one mapping, for example spectra 6 has only 1 pixel
-    TS_ASSERT_EQUALS(map.ndet(6),1);
-    
-    std::vector<detid_t> detectorgroup = map.getDetectors(100);
-    TS_ASSERT_EQUALS(detectorgroup.size(),1);
-    TS_ASSERT_EQUALS(detectorgroup.front(),100);
-
+    check_spectra_and_detectors(output);
 
     AnalysisDataService::Instance().remove(outputSpace);
   }

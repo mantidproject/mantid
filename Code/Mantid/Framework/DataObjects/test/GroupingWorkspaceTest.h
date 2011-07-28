@@ -40,8 +40,7 @@ public:
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 45);
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
     TS_ASSERT_EQUALS( ws->getInstrument()->getName(), "basic"); // Name of the test instrument
-    TS_ASSERT_EQUALS( ws->spectraMap().nElements(), 45);
-    std::vector<detid_t> dets = ws->spectraMap().getDetectors(1);
+    std::set<detid_t> dets = ws->getSpectrum(0)->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
 
     // Set the group numbers

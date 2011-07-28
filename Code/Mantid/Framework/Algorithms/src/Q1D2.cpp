@@ -194,6 +194,7 @@ void Q1D2::exec()
 
   setProperty("OutputWorkspace",outputWS);
 }
+
 /** If the distribution/raw counts status and binning on all the input workspaces
 *  is the same and this reads some workspace description but throws if not
   @param binWS workpace that will be checked to see if it has one spectrum and the same number of bins as dataWS

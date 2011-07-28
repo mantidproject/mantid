@@ -96,36 +96,31 @@ public:
   void test_That_A_Workspace_Gets_SpectraMap_When_Initialized_With_NVector_Elements()
   {
     MatrixWorkspace_sptr testWS(new WorkspaceTester);
-    // Starts with an empty one
-    TS_ASSERT_EQUALS(testWS->spectraMap().nElements(), 0);
     const size_t nhist(10);
     testWS->initialize(nhist,1,1);
-    TS_ASSERT_EQUALS(testWS->spectraMap().nElements(), nhist);    
-  }
-
-  void test_spectraMap()
-  {
-    MatrixWorkspace_sptr ws2 = WorkspaceFactory::Instance().create(ws,1,1,1);
-    const Geometry::ISpectraDetectorMap &specs = ws2->spectraMap();
-    TS_ASSERT_EQUALS( &(ws->spectraMap()), &specs );
+    for (size_t i=0; i<testWS->getNumberHistograms(); i++)
+    {
+      TS_ASSERT_EQUALS(testWS->getSpectrum(i)->getSpectrumNo(), specid_t(i));
+      TS_ASSERT(testWS->getSpectrum(i)->hasDetectorID(detid_t(i)));
+    }
   }
 
   void test_replaceSpectraMap()
   {
     boost::scoped_ptr<MatrixWorkspace> testWS(new WorkspaceTester);
     testWS->initialize(1,1,1);
-    const Geometry::ISpectraDetectorMap &specs = testWS->spectraMap();
     // Default one
-    TS_ASSERT_EQUALS(specs.nElements(), 1);
+    TS_ASSERT_EQUALS(testWS->getSpectrum(0)->getSpectrumNo(), 0);
 
     ISpectraDetectorMap * spectraMap = new OneToOneSpectraDetectorMap(1,10);
     testWS->replaceAxis(1, new SpectraAxis(10, true));
     testWS->replaceSpectraMap(spectraMap);
     // Has it been replaced
-    TS_ASSERT_EQUALS(testWS->spectraMap().nElements(), 10);
-    // Have the components in the spectrum's been updated too?
-    TS_ASSERT_EQUALS(testWS->getSpectrum(0)->getSpectrumNo(), 1);
-    TS_ASSERT(testWS->getSpectrum(0)->hasDetectorID(1));
+    for (size_t i=0; i<testWS->getNumberHistograms(); i++)
+    {
+      TS_ASSERT_EQUALS(testWS->getSpectrum(i)->getSpectrumNo(), specid_t(i+1));
+      TS_ASSERT(testWS->getSpectrum(i)->hasDetectorID(detid_t(i+1)));
+    }
   }
   
   void testSpectraMapCopiedWhenAWorkspaceIsCopied()
@@ -136,9 +131,14 @@ public:
     parent->replaceAxis(1, new SpectraAxis(10, true));
     parent->replaceSpectraMap(spectraMap);
 
-    TS_ASSERT_EQUALS(parent->spectraMap().nElements(), 10);
     MatrixWorkspace_sptr copied = WorkspaceFactory::Instance().create(parent,1,1,1);
-    TS_ASSERT_EQUALS(copied->spectraMap().nElements(), 10);
+
+    // Has it been copied?
+    for (size_t i=0; i<copied->getNumberHistograms(); i++)
+    {
+      TS_ASSERT_EQUALS(copied->getSpectrum(i)->getSpectrumNo(), specid_t(i+1));
+      TS_ASSERT(copied->getSpectrum(i)->hasDetectorID(detid_t(i+1)));
+    }
   }
 
   void testGetMemorySize()
@@ -238,35 +238,6 @@ public:
     TS_ASSERT(!det2);
   }
 
-
-  /** After setting spectrum number and detector IDs, you can
-   * rebuild the spectraDetectorMap for future compatibility.
-   */
-  void test_generateSpectraMap()
-  {
-    WorkspaceTester ws;
-    ws.initialize(3, 10, 9);
-    ws.getSpectrum(0)->setSpectrumNo(1);
-    ws.getSpectrum(0)->clearDetectorIDs();
-    ws.getSpectrum(0)->addDetectorID(123);
-    ws.getSpectrum(1)->setSpectrumNo(10);
-    ws.getSpectrum(1)->clearDetectorIDs();
-    ws.getSpectrum(1)->addDetectorID(456);
-    ws.getSpectrum(2)->setSpectrumNo(100);
-    ws.getSpectrum(2)->clearDetectorIDs();
-    ws.getSpectrum(2)->addDetectorID(789);
-    ws.generateSpectraMap();
-
-    Axis * ax1 = ws.getAxis(1);
-    TS_ASSERT_EQUALS( ax1->spectraNo(0), 1);
-    TS_ASSERT_EQUALS( ax1->spectraNo(1), 10);
-    TS_ASSERT_EQUALS( ax1->spectraNo(2), 100);
-
-    const ISpectraDetectorMap & specMap = ws.spectraMap();
-    TS_ASSERT_EQUALS( *specMap.getDetectors(1).begin(), 123);
-    TS_ASSERT_EQUALS( *specMap.getDetectors(10).begin(), 456);
-    TS_ASSERT_EQUALS( *specMap.getDetectors(100).begin(), 789);
-  }
 
 
   void testWholeSpectraMasking()

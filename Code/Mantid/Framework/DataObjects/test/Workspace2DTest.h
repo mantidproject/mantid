@@ -244,37 +244,6 @@ public:
     ws2->generateSpectraMap();
   }
 
-  void test_spectraMap_getDetectorIDs()
-  {
-    CPUTimer tim;
-    SpectraAxis * axis = dynamic_cast<SpectraAxis *>(ws1->getAxis(1));
-    const ISpectraDetectorMap & specMap = ws1->spectraMap();
-    for (size_t i=0; i < ws1->getNumberHistograms(); i++)
-    {
-      specid_t specNo = axis->spectraNo(i);
-      std::vector<detid_t> detIDs = specMap.getDetectors(specNo);
-      detid_t oneDetId = detIDs[0];
-      UNUSED_ARG(oneDetId)
-    }
-    std::cout << tim << " to get detector ID's for " << nhist << " spectra using the classic SpectraDetectorMap." << std::endl;
-  }
-
-  void test_spectraMap_getDetectorIDs_in10groups()
-  {
-    CPUTimer tim;
-    SpectraAxis * axis = dynamic_cast<SpectraAxis *>(ws2->getAxis(1));
-    const ISpectraDetectorMap & specMap = ws2->spectraMap();
-    for (size_t i=0; i < ws2->getNumberHistograms(); i++)
-    {
-      specid_t specNo = axis->spectraNo(i);
-      std::vector<detid_t> detIDs = specMap.getDetectors(specNo);
-      detid_t oneDetId = detIDs[0];
-      UNUSED_ARG(oneDetId)
-    }
-    std::cout << tim << " to get detector ID's for 10 spectra (each with 100,000 detectors) using the classic SpectraDetectorMap." << std::endl;
-  }
-
-
   void test_ISpectrum_getDetectorIDs()
   {
     CPUTimer tim;
