@@ -65,7 +65,7 @@ namespace API
 
     //-----------------------------------------------------------------------------------------------
     /// Return the amount of memory that the object takes up in the MRU.
-    virtual size_t getMRUMemory() const {return 0};
+    virtual size_t getMRUMemory() const {return 0;};
 
   protected:
     /// Unique, sequential ID of the object/box within the containing workspace.
