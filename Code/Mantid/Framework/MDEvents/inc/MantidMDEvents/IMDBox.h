@@ -3,6 +3,7 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ImplicitFunction.h"
+#include "MantidAPI/ISaveable.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
@@ -35,7 +36,7 @@ namespace MDEvents
    *
    * */
   TMDE_CLASS
-  class DLLExport IMDBox : public Mantid::Geometry::SignalAggregate
+  class DLLExport IMDBox : public Mantid::Geometry::SignalAggregate, public Mantid::API::ISaveable
   {
   public:
 
@@ -211,22 +212,6 @@ namespace MDEvents
       m_inverseVolume = 1.0 / volume;
     }
 
-
-    //-----------------------------------------------------------------------------------------------
-    /** Returns the unique ID for this box     */
-    size_t getId() const
-    {
-      return m_id;
-    }
-
-    //-----------------------------------------------------------------------------------------------
-    /** Sets the unique ID for this box
-     * @param newId :: new ID value. */
-    void setId(size_t newId)
-    {
-      m_id = newId;
-    }
-
     //-----------------------------------------------------------------------------------------------
     /** Returns the integrated signal from all points within.
      */
@@ -342,9 +327,6 @@ namespace MDEvents
     }
 
   protected:
-    /// Unique, sequential ID of the IMDBox within the containing workspace.
-    size_t m_id;
-
     /** Array of MDDimensionStats giving the extents and
      * other stats on the box dimensions.
      */

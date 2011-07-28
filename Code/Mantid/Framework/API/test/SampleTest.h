@@ -9,6 +9,7 @@
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <MantidGeometry/Crystal/OrientedLattice.h>
+#include "MantidGeometry/Objects/ShapeFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -26,10 +27,28 @@ public:
     TS_ASSERT( ! sample.getName().compare("test") )
   }
 
+  //--------------------------------------------------------------------------------------------
+  Object_sptr createCappedCylinder(double radius, double height, const V3D & baseCentre, const V3D & axis, const std::string & id)
+  {
+    std::ostringstream xml;
+    xml << "<cylinder id=\"" << id << "\">"
+      << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\"" << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\"/>"
+      << "<axis x=\"" << axis.X() << "\" y=\"" << axis.Y() << "\" z=\"" << axis.Z() << "\"/>"
+      << "<radius val=\"" << radius << "\" />"
+      << "<height val=\"" << height << "\" />"  << "</cylinder>";
+    ShapeFactory shapeMaker;
+    return shapeMaker.createShape(xml.str());
+  }
+  ObjComponent * createSingleObjectComponent()
+  {
+    Object_sptr pixelShape = createCappedCylinder(0.5, 1.5, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube");
+    return new ObjComponent("pixel", pixelShape);
+  }
+
   void testShape()
   {
     Object_sptr shape_sptr = 
-      ComponentCreationHelper::createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
+      createCappedCylinder(0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
     Sample sample;
     TS_ASSERT_THROWS_NOTHING(sample.setShape(*shape_sptr))
     const Object & sampleShape = sample.getShape();
@@ -55,7 +74,7 @@ public:
     Sample sample;
     const std::string envName("TestKit");
     SampleEnvironment *kit = new SampleEnvironment(envName);
-    kit->add(ComponentCreationHelper::createSingleObjectComponent());
+    kit->add(createSingleObjectComponent());
     
     TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(kit));
     

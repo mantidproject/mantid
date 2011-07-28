@@ -135,6 +135,7 @@ namespace MDEvents
         this->m_BoxController->fileMutex.unlock();
       }
     }
+    // else: do nothing if the events are already in memory.
     return data;
   }
 
@@ -156,6 +157,7 @@ namespace MDEvents
         this->m_BoxController->fileMutex.unlock();
       }
     }
+    // else: do nothing if the events are already in memory.
     return data;
   }
 

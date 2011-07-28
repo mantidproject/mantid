@@ -31,6 +31,8 @@ public:
     TS_ASSERT_EQUALS( b3.getNumDims(), 3);
     TS_ASSERT_EQUALS( b3.getNPoints(), 0);
     TS_ASSERT_EQUALS( b3.getDepth(), 0);
+
+    //std::cout << sizeof(b3) << " bytes per MDBox(3)" << std::endl;
   }
 
   void test_constructor()

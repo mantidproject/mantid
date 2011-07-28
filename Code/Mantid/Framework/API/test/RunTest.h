@@ -128,15 +128,24 @@ public:
   }
 
 
+  void AddTSPEntry(Run & runInfo, std::string name, double val)
+  {
+    TimeSeriesProperty<double> * tsp;
+    tsp = new TimeSeriesProperty<double>(name);
+    tsp->addValue("2011-05-24T00:00:00", val);
+    runInfo.addProperty(tsp);
+  }
+
+
   /** Setting up a goniometer and the angles to feed it
    * using sample logs, then getting the right rotation matrix out.
    */
   void test_getGoniometerMatrix()
   {
     Run runInfo;
-    WorkspaceCreationHelper::AddTSPEntry(runInfo, "phi", 90.0);
-    WorkspaceCreationHelper::AddTSPEntry(runInfo, "chi", 90.0);
-    WorkspaceCreationHelper::AddTSPEntry(runInfo, "omega", 90.0);
+    AddTSPEntry(runInfo, "phi", 90.0);
+    AddTSPEntry(runInfo, "chi", 90.0);
+    AddTSPEntry(runInfo, "omega", 90.0);
     runInfo.getGoniometer().makeUniversalGoniometer();
     DblMatrix r = runInfo.getGoniometerMatrix();
     V3D rot = r * V3D(-1,0,0);
@@ -148,9 +157,9 @@ public:
   void test_getGoniometerMatrix2()
   {
     Run runInfo;
-    WorkspaceCreationHelper::AddTSPEntry(runInfo, "phi", 45.0);
-    WorkspaceCreationHelper::AddTSPEntry(runInfo, "chi", 90.0);
-    WorkspaceCreationHelper::AddTSPEntry(runInfo, "omega", 0.0);
+    AddTSPEntry(runInfo, "phi", 45.0);
+    AddTSPEntry(runInfo, "chi", 90.0);
+    AddTSPEntry(runInfo, "omega", 0.0);
     runInfo.getGoniometer().makeUniversalGoniometer();
     DblMatrix r = runInfo.getGoniometerMatrix();
     V3D rot = r * V3D(-1,0,0);

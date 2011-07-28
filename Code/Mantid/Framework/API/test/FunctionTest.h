@@ -449,7 +449,7 @@ public:
   {
     double expected;
     int numpixels = 15000;
-    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels,10);
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",numpixels,11,10);
     for (size_t wi=0; wi<ws->getNumberHistograms(); wi++)
     {
       MantidVec& x = ws->dataX(wi);

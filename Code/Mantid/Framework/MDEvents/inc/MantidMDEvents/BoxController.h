@@ -343,8 +343,29 @@ namespace MDEvents
     { m_file = file; }
 
 
-    /// Mutex for locking access to the file, for file-back-end MDBoxes.
-    Mantid::Kernel::Mutex fileMutex;
+
+    //-----------------------------------------------------------------------------------
+    /** Set the memory-caching parameters for a file-backed
+     * MDEventWorkspace.
+     *
+     * @param bytesInMem :: number of bytes to keep in memory.
+     * @param bytesPerEvent :: sizeof(MDEvent) that is in the workspace
+     *
+     */
+    void setCacheParameters(size_t bytesInMem, size_t bytesPerEvent)
+    {
+      if (bytesPerEvent == 0)
+        throw std::invalid_argument("Size of an event cannot be == 0.");
+      // Save the values
+      m_bytesPerEvent = bytesPerEvent;
+      m_numEventsInMem = bytesInMem / m_bytesPerEvent;
+    }
+
+
+    /** Does the cache require that this box be released? */
+    bool releaseBox(size_t boxId, size_t numEvents)
+    {
+    }
 
 
     //-----------------------------------------------------------------------------------
@@ -419,6 +440,20 @@ namespace MDEvents
 
     /// Open file handle to the file back-end
     ::NeXus::File * m_file;
+
+  public:
+    /// Mutex for locking access to the file, for file-back-end MDBoxes.
+    Mantid::Kernel::Mutex fileMutex;
+
+  private:
+    /// Number of events to keep in memory, when using a file-based back-end.
+    size_t m_numEventsInMem;
+
+    /// Number of bytes in a single MDEvent<> of the workspace.
+    size_t m_bytesPerEvent;
+
+    /// Minimum number of events in a MDBox to bother to cache to disk.
+    size_t m_minEventsToCache;
 
   };
 
