@@ -424,57 +424,57 @@ public:
     TS_ASSERT(!f.isExplicitlySet(3));
   }
 
-//  void test_setWorkspace_works()
-//  {
-//    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",10,11,10);
-//
-//    MantidVec& x = ws->dataX(3);
-//    MantidVec& y = ws->dataY(3);
-//    for(size_t i=0; i < y.size(); ++i)
-//    {
-//      x[i] = 0.1 * static_cast<double>(i);
-//      y[i] = static_cast<double>(i);
-//    }
-//    x.back() = 0.1 * static_cast<double>(y.size());
-//    AnalysisDataService::Instance().add("IFT_Test_WS",ws);
-//    IFT_Funct f;
-//    TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws,"WorkspaceIndex=3,StartX=0.2,EndX = 0.8"));
-//    TS_ASSERT_EQUALS(f.dataSize(),8);
-//    TS_ASSERT_EQUALS(f.getData(),&y[2]);
-//    AnalysisDataService::Instance().remove("IFT_Test_WS");
-//  }
-//
-//  /** Refs #3003: Test to make sure setMatrix works in parallel */
-//  void test_setWorkspace_works_inParallel()
-//  {
-//    double expected;
-//    int numpixels = 15000;
-//    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",numpixels,11,10);
-//    for (size_t wi=0; wi<ws->getNumberHistograms(); wi++)
-//    {
-//      MantidVec& x = ws->dataX(wi);
-//      MantidVec& y = ws->dataY(wi);
-//      for(size_t i=0; i < y.size(); ++i)
-//      {
-//        x[i] = 0.1 * double(i);
-//        y[i] = double(i);
-//      }
-//      x.back() = 0.1 * double(y.size());
-//      expected = y[2];
-//    }
-//
-//    // NOTE: In parallel, there is a segfault on SNS build servers ubuntu-10.04 and RHEL6. The rest pass!?
-//    PARALLEL_FOR_NO_WSP_CHECK()
-//    for (int i=0; i<numpixels; i++)
-//    {
-//      IFT_Funct f;
-//      std::stringstream mess;
-//      mess << "WorkspaceIndex=" << i << ",StartX=0.2,EndX = 0.8";
-//      TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws, mess.str() ));
-//      TS_ASSERT_EQUALS(f.dataSize(),8);
-//      TS_ASSERT_EQUALS(*f.getData(), expected);
-//    }
-//  }
+  void test_setWorkspace_works()
+  {
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",10,11,10);
+
+    MantidVec& x = ws->dataX(3);
+    MantidVec& y = ws->dataY(3);
+    for(size_t i=0; i < y.size(); ++i)
+    {
+      x[i] = 0.1 * static_cast<double>(i);
+      y[i] = static_cast<double>(i);
+    }
+    x.back() = 0.1 * static_cast<double>(y.size());
+    AnalysisDataService::Instance().add("IFT_Test_WS",ws);
+    IFT_Funct f;
+    TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws,"WorkspaceIndex=3,StartX=0.2,EndX = 0.8"));
+    TS_ASSERT_EQUALS(f.dataSize(),8);
+    TS_ASSERT_EQUALS(f.getData(),&y[2]);
+    AnalysisDataService::Instance().remove("IFT_Test_WS");
+  }
+
+  /** Refs #3003: Test to make sure setMatrix works in parallel */
+  void test_setWorkspace_works_inParallel()
+  {
+    double expected;
+    int numpixels = 15000;
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",numpixels,11,10);
+    for (size_t wi=0; wi<ws->getNumberHistograms(); wi++)
+    {
+      MantidVec& x = ws->dataX(wi);
+      MantidVec& y = ws->dataY(wi);
+      for(size_t i=0; i < y.size(); ++i)
+      {
+        x[i] = 0.1 * double(i);
+        y[i] = double(i);
+      }
+      x.back() = 0.1 * double(y.size());
+      expected = y[2];
+    }
+
+    // NOTE: In parallel, there is a segfault on SNS build servers ubuntu-10.04 and RHEL6. The rest pass!?
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i=0; i<numpixels; i++)
+    {
+      IFT_Funct f;
+      std::stringstream mess;
+      mess << "WorkspaceIndex=" << i << ",StartX=0.2,EndX = 0.8";
+      TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws, mess.str() ));
+      TS_ASSERT_EQUALS(f.dataSize(),8);
+      TS_ASSERT_EQUALS(*f.getData(), expected);
+    }
+  }
 
   private:
   void interrupt()
