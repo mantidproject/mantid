@@ -66,6 +66,9 @@ public:
   {
     return "vtkMDEWHexahedronFactory";
   }
+  
+  /// Typedef sptr to 3d event workspace.
+  typedef boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace3> MDEventWorkspace3_sptr;
 
 private:
 
@@ -78,8 +81,7 @@ private:
   /// Scalar name to provide on dataset.
   const std::string m_scalarName;
 
-  /// Typedef sptr to 3d event workspace.
-  typedef boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace3> MDEventWorkspace3_sptr;
+  
 
   /// Member workspace to generate vtkdataset from.
   MDEventWorkspace3_sptr m_workspace;

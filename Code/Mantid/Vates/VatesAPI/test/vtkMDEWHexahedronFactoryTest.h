@@ -71,7 +71,7 @@ public:
 
   void testCreateDataSet()
   {
-    IMDEventWorkspace_sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    vtkMDEWHexahedronFactory::MDEventWorkspace3_sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
     vtkDataSet* product = NULL;
@@ -87,6 +87,16 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of points to cells. Hexahedron has 8 vertexes.", expected_n_cells * 8,  product->GetNumberOfPoints());
     TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
     TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
+    
+    /*Check dataset bounds*/
+    double* bounds = product->GetBounds();
+    TS_ASSERT_EQUALS(0, bounds[0]);
+    TS_ASSERT_EQUALS(10, bounds[1]);
+    TS_ASSERT_EQUALS(0, bounds[2]);
+    TS_ASSERT_EQUALS(10, bounds[3]);
+    TS_ASSERT_EQUALS(0, bounds[4]);
+    TS_ASSERT_EQUALS(10, bounds[5]);
+
     product->Delete();
 
   }
@@ -96,5 +106,56 @@ public:
   //Check threshold and NAN signal values handled propertly
 
 };
+
+//=====================================================================================
+// Performance tests
+//=====================================================================================
+class vtkMDEWHexahedronFactoryTestPerformance : public CxxTest::TestSuite
+{
+
+private:
+  
+  vtkMDEWHexahedronFactory::MDEventWorkspace3_sptr m_ws;
+
+public :
+
+  void setUp()
+  {
+    m_ws = MDEventsTestHelper::makeMDEW<3>(100, 0.0, 100.0, 1);
+  }
+
+  /* Create 1E6 cells*/
+  void testCreateDataSet()
+  {
+    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    factory.initialize(m_ws);
+    vtkDataSet* product = NULL;
+
+    TS_ASSERT_THROWS_NOTHING(product = factory.create());
+
+    const size_t expected_n_points = 8000000;
+    const size_t expected_n_cells = 1000000;
+    const size_t expected_n_signals = expected_n_cells;
+
+    TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points, product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells, product->GetNumberOfCells());
+    TSM_ASSERT_EQUALS("Wrong number of points to cells. Hexahedron has 8 vertexes.", expected_n_cells * 8,  product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
+    TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
+    
+    /*Check dataset bounds*/
+    double* bounds = product->GetBounds();
+    TS_ASSERT_EQUALS(0, bounds[0]);
+    TS_ASSERT_EQUALS(100, bounds[1]);
+    TS_ASSERT_EQUALS(0, bounds[2]);
+    TS_ASSERT_EQUALS(100, bounds[3]);
+    TS_ASSERT_EQUALS(0, bounds[4]);
+    TS_ASSERT_EQUALS(100, bounds[5]);
+
+    product->Delete();
+
+  }
+};
+
 
 #endif
