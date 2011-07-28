@@ -349,6 +349,36 @@ def CompWavRanges(wavelens, plot=True):
     #return just the workspace name of the full range
     return calculated[0]
 
+def PhiRanges(phis, plot=True):
+    """
+        Given a list of phi ranges [a, b, c, d] it reduces in the phi ranges a-b and c-d
+        @param phis: the list of phi ranges
+        @param plot: set this to true to plot the result (must be run in Mantid), default is true
+    """ 
+
+    _printMessage('PhiRanges( %s,plot=%s)'%(str(phis),plot))
+
+    #todo covert their string into Python array 
+    
+    if len(phis)/2 != float(len(phis))/2.:
+        raise RuntimeError('Phi ranges must be given as pairs')
+
+    try:
+        #run the reductions, calculated will be an array with the names of all the workspaces produced
+        calculated = []
+        for i in ranges(0, len(phis), 2):
+            SetPhiLimit(phis[i],phis[i+1])
+            calculated.append(ReductionSingleton()._reduce())
+            ReductionSingleton.replace(ReductionSingleton().settings())
+    finally:
+        _refresh_singleton()
+    
+    if plot:
+        mantidplot.plotSpectrum(calculated, 0)
+    
+    #return just the workspace name of the full range
+    return calculated[0]
+
 def Reduce():
     try:
         result = ReductionSingleton()._reduce()
