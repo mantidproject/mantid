@@ -68,7 +68,7 @@ private:
 
   void initizeCutOffs(const double RCut, const double WCut);
   void examineInput(API::MatrixWorkspace_const_sptr binAdj, API::MatrixWorkspace_const_sptr detectAdj);
-  API::MatrixWorkspace_sptr setUpOutputWorkspace(const std::vector<double> & binParams,  const API::SpectraDetectorMap * const specMap) const;
+  API::MatrixWorkspace_sptr setUpOutputWorkspace(const std::vector<double> & binParams) const;
   //these are the steps that are run on each individual spectrum
   size_t waveLengthCutOff(const size_t specInd) const;
   void calculateNormalization(const size_t wavStart, const size_t specInd, API::MatrixWorkspace_const_sptr pixelAdj, double const * const binNorms, double const * const binNormEs, MantidVec & norm, MantidVec & normETo2) const;
@@ -77,7 +77,6 @@ private:
   void normToBinWidth(const size_t offSet, const size_t specIndex, MantidVec & theNorms, MantidVec & errorSquared) const;
   void getInputDataIterators(const size_t offset, const size_t specInd, MantidVec & QVec, MantidVec::const_iterator & Qs, MantidVec::const_iterator & YData, MantidVec::const_iterator & EData) const;
   void convertWavetoQ(const size_t specIndex, const bool doGravity, MantidVec::const_iterator waves, MantidVec & QVec) const;
-  void updateSpecMap(const size_t specIndex, API::SpectraDetectorMap * const specMap, const Geometry::ISpectraDetectorMap & inSpecMap, API::MatrixWorkspace_sptr outputWS) const;
   void normalize(const MantidVec & normSum, const MantidVec & normError2, MantidVec & YOut, MantidVec & errors) const;
 };
 

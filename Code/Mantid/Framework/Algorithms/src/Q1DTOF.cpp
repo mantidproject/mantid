@@ -78,7 +78,7 @@ void Q1DTOF::exec()
     // Construct a new spectra map. This will be faster than remapping the old one
   API::SpectraDetectorMap *specMap = new SpectraDetectorMap;
   // this will become the output workspace from this algorithm
-  MatrixWorkspace_sptr outputWS = setUpOutputWorkspace(getProperty("OutputBinning"), specMap);
+  MatrixWorkspace_sptr outputWS = setUpOutputWorkspace(getProperty("OutputBinning"));
   const MantidVec & QOut = outputWS->readX(0);
   MantidVec & YOut = outputWS->dataY(0);
   MantidVec & EOutTo2 = outputWS->dataE(0);
@@ -172,7 +172,11 @@ void Q1DTOF::exec()
     
     PARALLEL_CRITICAL(q1d_spectra_map)
     {
-      updateSpecMap(i, specMap, inSpecMap, outputWS);
+      // Add up the detector IDs in the output spectrum at workspace index 0
+      const ISpectrum * inSpec = m_dataWS->getSpectrum(i);
+      ISpectrum * outSpec = outputWS->getSpectrum(0);
+      outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+      //updateSpecMap(i, specMap, inSpecMap, outputWS);
     }
 
     progress.report("Computing I(Q)");
@@ -259,10 +263,9 @@ void Q1DTOF::initizeCutOffs(const double RCut, const double WCut)
 }
 /** Creates the output workspace, its size, units, etc.
 *  @param binParams the bin boundary specification using the same same syntax as param the Rebin algorithm
-*  @param specMap a spectra map that the new workspace should use and take owner ship of
 *  @return A pointer to the newly-created workspace
 */
-API::MatrixWorkspace_sptr Q1DTOF::setUpOutputWorkspace(const std::vector<double> & binParams,  const API::SpectraDetectorMap * const specMap) const
+API::MatrixWorkspace_sptr Q1DTOF::setUpOutputWorkspace(const std::vector<double> & binParams) const
 {
   // Calculate the output binning
   MantidVecPtr XOut;
@@ -278,7 +281,9 @@ API::MatrixWorkspace_sptr Q1DTOF::setUpOutputWorkspace(const std::vector<double>
   outputWS->setX(0, XOut);
   outputWS->isDistribution(true);
 
-  outputWS->replaceSpectraMap(specMap);
+  outputWS->getSpectrum(0)->clearDetectorIDs();
+  outputWS->getSpectrum(0)->setSpectrumNo(1);
+
   return outputWS;
 }
 /** Finds the first index number of the first wavelength bin that should included based on the
@@ -472,21 +477,6 @@ void Q1DTOF::convertWavetoQ(const size_t specIndex, const bool doGravity, Mantid
   }
 }
 
-/** !!!PROTOTYPE needs more testing !!! Map all the detectors onto the spectrum of the output
-*  @param[in] specIndex the spectrum to add
-*  @param[out] specMap the map in the output workspace to write to
-*  @param[in] inSpecMap spectrum data
-*  @param[out] outputWS the workspace with the spectra axis
-*/
-void Q1DTOF::updateSpecMap(const size_t specIndex, API::SpectraDetectorMap * const specMap, const Geometry::ISpectraDetectorMap & inSpecMap, API::MatrixWorkspace_sptr outputWS) const
-{
-  Axis* const spectraAxis = m_dataWS->getAxis(1);
-  if (spectraAxis->isSpectra())
-  {
-    specid_t newSpectrumNo = outputWS->getAxis(1)->spectraNo(0) = spectraAxis->spectraNo(specIndex);
-    specMap->addSpectrumEntries(newSpectrumNo,inSpecMap.getDetectors(spectraAxis->spectraNo(specIndex)));
-  }
-}
 /** Divides the number of counts in each output Q bin by the wrighting ("number that would expected to arrive")
 *  The errors are propogated using the uncorrolated error estimate for multiplication/division
 *  @param[in] normSum the weighting for each bin

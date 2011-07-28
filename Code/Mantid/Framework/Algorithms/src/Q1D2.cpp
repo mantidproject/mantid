@@ -86,10 +86,10 @@ void Q1D2::exec()
   double const * const binNormEs = waveAdj ? &(waveAdj->readE(0)[0]) : NULL;
 
   //define the (large number of) data objects that are going to be used in all iterations of the loop below
-    // Construct a new spectra map. This will be faster than remapping the old one
-  API::SpectraDetectorMap *specMap = new SpectraDetectorMap;
+
   // this will become the output workspace from this algorithm
   MatrixWorkspace_sptr outputWS = setUpOutputWorkspace(getProperty("OutputBinning"));
+
   const MantidVec & QOut = outputWS->readX(0);
   MantidVec & YOut = outputWS->dataY(0);
   MantidVec & EOutTo2 = outputWS->dataE(0);
@@ -97,8 +97,6 @@ void Q1D2::exec()
   MantidVec normSum(YOut.size(), 0.0);
   // the error on the normalisation
   MantidVec normError2(YOut.size(), 0.0);
-
-  const Geometry::ISpectraDetectorMap & inSpecMap = m_dataWS->spectraMap();
 
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec+1);
@@ -176,7 +174,12 @@ void Q1D2::exec()
     PARALLEL_CRITICAL(q1d_spectra_map)
     {
       progress.report("Computing I(Q)");
-      updateSpecMap(i, specMap, inSpecMap, outputWS);
+
+      // Add up the detector IDs in the output spectrum at workspace index 0
+      const ISpectrum * inSpec = m_dataWS->getSpectrum(i);
+      ISpectrum * outSpec = outputWS->getSpectrum(0);
+      outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+      //updateSpecMap(i, specMap, inSpecMap, outputWS);
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -281,6 +284,9 @@ API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> &
   // Set the X vector for the output workspace
   outputWS->setX(0, XOut);
   outputWS->isDistribution(true);
+
+  outputWS->getSpectrum(0)->clearDetectorIDs();
+  outputWS->getSpectrum(0)->setSpectrumNo(1);
 
   return outputWS;
 }
@@ -424,6 +430,7 @@ void Q1D2::normToBinWidth(const size_t offSet, const size_t specIndex, const Man
     }
   }
 }
+
 /** Fills a vector with the Q values calculated from the wavelength bin centers from the input workspace and
 *  the workspace geometry as Q = 4*pi*sin(theta)/lambda
 *  @param[in] specInd the spectrum to calculate
@@ -514,7 +521,7 @@ void Q1D2::updateSpecMap(const size_t specIndex, API::SpectraDetectorMap * const
   Axis* const spectraAxis = m_dataWS->getAxis(1);
   if (spectraAxis->isSpectra())
   {
-    specid_t newSpectrumNo = outputWS->getAxis(1)->spectraNo(0) = spectraAxis->spectraNo(specIndex);
+    specid_t newSpectrumNo = outputWS->getAxis(1)->spectraNo(0); // = spectraAxis->spectraNo(specIndex);
     specMap->addSpectrumEntries(newSpectrumNo,inSpecMap.getDetectors(spectraAxis->spectraNo(specIndex)));
   }
 }

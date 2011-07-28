@@ -429,21 +429,22 @@ public:
     Workspace2D_sptr output2D1 = boost::dynamic_pointer_cast<Workspace2D>(output1);
     TS_ASSERT_EQUALS( output2D1->getNumberHistograms(), 4);
 
-    const Geometry::ISpectraDetectorMap &specDetecMap = output2D1->spectraMap();
-    std::vector<detid_t> specDet = specDetecMap.getDetectors(1);
-    TS_ASSERT_EQUALS( specDet[0], 1);
-    specDet = specDetecMap.getDetectors(2);
-    TS_ASSERT_EQUALS( specDet[0], 2);
-    specDet = specDetecMap.getDetectors(3);
-    TS_ASSERT_EQUALS( specDet[1], 4);
-    TS_ASSERT_EQUALS( specDet[2], 5);
-    specDet = specDetecMap.getDetectors(8);
-    TS_ASSERT_EQUALS( specDet[0], 2);
-    TS_ASSERT_EQUALS( specDet[1], 8);
-    TS_ASSERT_EQUALS( specDet[2], 9);
-    TS_ASSERT_EQUALS( specDet[3], 11);
-    TS_ASSERT_EQUALS( specDet[4], 12);
-    TS_ASSERT_EQUALS( specDet[5], 13);
+    std::set<detid_t>::const_iterator specDet;
+    specDet = output2D1->getSpectrum(0)->getDetectorIDs().begin();
+    TS_ASSERT_EQUALS( *specDet, 1);
+    specDet = output2D1->getSpectrum(1)->getDetectorIDs().begin();
+    TS_ASSERT_EQUALS( *specDet, 2);
+    specDet = output2D1->getSpectrum(2)->getDetectorIDs().begin();
+    TS_ASSERT_EQUALS( *specDet, 3); specDet++;
+    TS_ASSERT_EQUALS( *specDet, 4); specDet++;
+    TS_ASSERT_EQUALS( *specDet, 5);
+    specDet = output2D1->getSpectrum(3)->getDetectorIDs().begin();
+    TS_ASSERT_EQUALS( *specDet, 2); specDet++;
+    TS_ASSERT_EQUALS( *specDet, 8); specDet++;
+    TS_ASSERT_EQUALS( *specDet, 9); specDet++;
+    TS_ASSERT_EQUALS( *specDet, 11); specDet++;
+    TS_ASSERT_EQUALS( *specDet, 12); specDet++;
+    TS_ASSERT_EQUALS( *specDet, 13);
 
     AnalysisDataService::Instance().remove(outputSpace);
     AnalysisDataService::Instance().remove("boevs");
