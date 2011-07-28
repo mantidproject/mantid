@@ -702,7 +702,7 @@ void ConfigDialog::initSendToProgramTab()
  //   
  //   m_sendToSettings[programNames[i]] = "0";
 
- //   for(int j(0); j<programKeys.size(); j++)
+ //   for(size_t j = 0; j<programKeys.size(); j++)
  //   {
  //     m_sendToSettings[programKeys[i]
  //   }
@@ -831,7 +831,7 @@ void ConfigDialog::deleteDialog()
     if(status == QMessageBox::Yes)
     {
       //For each program selected, remove all details from the user.properties file;
-      for (size_t i = 0; i<checkedItems.size(); i++)
+      for (int i = 0; i<checkedItems.size(); ++i)
       {      
         m_sendToSettings.erase(checkedItems[i].toStdString());
       }
@@ -855,7 +855,7 @@ void ConfigDialog::populateProgramTree()
     //Get a list of the program detail keys (mandatory - target, saveusing) (optional - arguments, save parameters, workspace type)
     std::vector<std::string> programKeys = (Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto." + programNames[i]));
 
-    for (int j(0); j<programKeys.size(); j++)
+    for (size_t j = 0; j<programKeys.size(); j++)
     {
       //Assign a key to its value using the map
       programKeysAndDetails[programKeys[j]] = (Mantid::Kernel::ConfigService::Instance().getString(("workspace.sendto." + programNames[i] + "." + programKeys[j])));
@@ -935,7 +935,7 @@ void ConfigDialog::updateSendToTab()
     {
       mantid_config.remove("workspace.sendto.name." + programNames[i]);
       std::vector<std::string> programKeys = mantid_config.getKeys("workspace.sendto." + programNames[i]);
-      for (int j(0); j<programKeys.size(); ++j)
+      for (size_t j = 0; j<programKeys.size(); ++j)
      // for ( ; pItr != programKeysAndDetails.end(); ++pItr)
       {
         mantid_config.remove("workspace.sendto." + programNames[i] + "." +  programKeys[j]);
@@ -2147,7 +2147,7 @@ QStringList ConfigDialog::treeChecking(QTreeWidgetItem *parent)
   //how many children at this level
   int count = parent ? parent->childCount() : treePrograms->topLevelItemCount();
 
-  for (size_t i = 0; i<count; i++)
+  for (int i = 0; i<count; ++i)
   {
     //get the child
     QTreeWidgetItem *item = parent ? parent->child(i) : treePrograms->topLevelItem(i);
