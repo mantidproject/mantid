@@ -315,6 +315,8 @@ class ISISInstrument(instrument.Instrument):
         self._back_start = None
         # default end region
         self._back_end = None 
+        #if the user moves a monitor from it's position in the IDF (with MON/LENGTH ...) this will be recorded here. These are overridden lines like TRANS/TRANSPEC=4/SHIFT=-100
+        self.monitor_moves = {}
 
 
     def get_incident_mon(self):
@@ -453,6 +455,12 @@ class ISISInstrument(instrument.Instrument):
             @param ws: the workspace containing the sample to move
         """
         MoveInstrumentComponent(ws, 'some-sample-holder', Z = self.SAMPLE_Z_CORR, RelativePosition="1")
+        
+        for i in self.monitor_moves.keys():
+            MoveInstrumentComponent(ws, self.monitor_names[i],
+                                    self.monitor_moves[i][0],
+                                    self.monitor_moves[i][1],
+                                    self.monitor_moves[i][2], RelativePosition="1")
 
 class LOQ(ISISInstrument):
     """
@@ -470,6 +478,9 @@ class LOQ(ISISInstrument):
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
         super(LOQ, self).__init__('LOQ_Definition_20020226-.xml')
+        #relates the numbers of the monitors to their names in the instrument definition file
+        self.monitor_names = {1 : 'monitor1',
+                              2 : 'monitor2'}
 
     def move_components(self, ws, xbeam, ybeam):
         """
@@ -535,8 +546,11 @@ class SANS2D(ISISInstrument):
         self.corrections_applied = False
         # a warning is issued if the can logs are not the same as the sample 
         self._can_logs = {}
-        # distance of monitor 4 from the back detector if set
-        self._monitor_4_offset = None
+        #relates the numbers of the monitors to their names in the instrument definition file
+        self.monitor_names = {1 : 'monitor1',
+                              2 : 'monitor2',
+                              3 : 'monitor3',
+                              4 : 'monitor4'}
 
     def set_up_for_run(self, base_runno):
         """
@@ -576,16 +590,6 @@ class SANS2D(ISISInstrument):
             @param ybeam: y-position of the beam
             @return: the locations of (in the new coordinates) beam center, center of detector bank
         """
-        super(SANS2D, self).move_components(ws)
-        
-        if self._monitor_4_offset:
-            ws = mtd[str(workspace)]
-            det = ws.getInstrument().getComponentByName(self.cur_detector().name())
-            loc = det.getPos()
-        
-            MoveInstrumentComponent(workspace, 'Monitor 4',
-                X = loc[0], Y = loc[1], Z = loc[2], RelativePosition=False)
-            mantid.sendLogMessage('::SANS:: Monitor 4 is at z = ' + mon_4_loc[2] )
 
         if self.cur_detector().name() == 'front-detector':
             rotateDet = (-self.FRONT_DET_ROT - self.cur_detector().rot_corr)
@@ -607,6 +611,18 @@ class SANS2D(ISISInstrument):
             mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.)+" "+str(zshift*1000.))
             MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
             return [0.0,0.0], [xshift, yshift]
+            
+        super(SANS2D, self).move_components(ws)
+        
+        #this implements the TRANS/TRANSPEC=4/SHIFT=... line, this overrides anyother monitor move
+        if self._monitor_4_offset:
+            ws = mtd[str(workspace)]
+            det = ws.getInstrument().getComponentByName(self.cur_detector().name())
+            loc = det.getPos()
+        
+            MoveInstrumentComponent(workspace, 'Monitor4',
+                X = loc[0], Y = loc[1], Z = loc[2], RelativePosition=False)
+            mantid.sendLogMessage('::SANS:: Monitor 4 is at z = ' + mon_4_loc[2] )
         
     def get_detector_log(self, wksp):
         """
@@ -709,46 +725,6 @@ class SANS2D(ISISInstrument):
 
     def get_marked_dets(self):
         return self._marked_dets
-    
-    #TODO: remove load_detector_logs() once centre finding has been replaced
-    def load_detector_logs(self,log_name,file_path):
-        """
-            Needed until centre finding is replaced
-        """
-        self._marked_dets = []
-        log_name = log_name[0:6] + '0' + log_name[7:]
-        filename = os.path.join(file_path, log_name + '.log')
-
-        # Build a dictionary of log data 
-        logvalues = {}
-        logvalues['Rear_Det_X'] = '0.0'
-        logvalues['Rear_Det_Z'] = '0.0'
-        logvalues['Front_Det_X'] = '0.0'
-        logvalues['Front_Det_Z'] = '0.0'
-        logvalues['Front_Det_Rot'] = '0.0'
-        try:
-            file_handle = open(filename, 'r')
-        except IOError:
-            mantid.sendLogMessage("::SANS::load_detector_logs: Log file \"" + filename + "\" could not be loaded.")
-            return None
-        
-        for line in file_handle:
-            parts = line.split()
-            if len(parts) != 3:
-                mantid.sendLogMessage('::SANS::load_detector_logs: Incorrect structure detected in logfile "' + filename + '" for line \n"' + line + '"\nEntry skipped')
-            component = parts[1]
-            if component in logvalues.keys():
-                logvalues[component] = parts[2]
-
-        file_handle.close()
-        
-        self.FRONT_DET_Z = float(logvalues['Front_Det_Z'])
-        self.FRONT_DET_X = float(logvalues['Front_Det_X'])
-        self.FRONT_DET_ROT = float(logvalues['Front_Det_Rot'])
-        self.REAR_DET_Z = float(logvalues['Rear_Det_Z'])
-        self.REAR_DET_X = float(logvalues['Rear_Det_X'])
-
-        return logvalues
     
     def load_transmission_inst(self, workspace):
         """

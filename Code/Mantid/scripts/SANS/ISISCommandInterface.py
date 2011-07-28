@@ -145,8 +145,8 @@ def TransFit(mode,lambdamin=None,lambdamax=None):
     """
         Sets the fit method to calculate the transmission fit and the wavelength range
         over which to do the fit. These arguments are passed to the algorithm
-        CalculateTransmission.If mode is set to 'Off' then the unfitted workspace is
-        used and ??? not yet true, can we make it so??? lambdamin and max have no effect
+        CalculateTransmission. If mode is set to 'Off' then the unfitted workspace is
+        used and lambdamin and max have no effect
         @param mode: can be 'Logarithmic' ('YLOG', 'LOG') 'OFF' ('CLEAR') or 'LINEAR' (STRAIGHT', LIN')
         @param lambdamin: the lowest wavelength to use in any fit
         @param lambdamax: the end of the fit range
@@ -442,16 +442,8 @@ def SetPhiLimit(phimin, phimax, use_mirror=True):
     #a beam centre of [0,0,0] makes sense if the detector has been moved such that beam centre is at [0,0,0]
     ReductionSingleton().mask.set_phi_limit(phimin, phimax, use_mirror)
     
-def LimitsPhi(phimin, phimax, use_mirror=True):
-    '''
-        !!DEPRECIATED by the function above, remove once I've check with Richard
-    '''
-    if use_mirror :
-        _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=True)')
-        ReductionSingleton().mask.set_phi_limit(phimin, phimax, True)
-    else :
-        _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=False)')
-        ReductionSingleton().mask.set_phi_limit(phimin, phimax, False)
+def LimitsPhi(Not, Implemented, use_mirror=True):
+    raise NotImplementedError('You must use SetPhiLimit() instead of LimitsPhi, processing stopped')
 
 def LimitsR(rmin, rmax, quiet=False, reducer=None):
     if reducer == None:

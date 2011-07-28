@@ -1064,17 +1064,14 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
 
 
     def set_trans_fit(self, min=None, max=None, fit_method=None, override=True):
-        if min: min = float(min)
-        if max: max = float(max)
-        if not min is None:
-            if (not self._min_set) or override:
-                self.lambda_min = min
-                self._min_set = override
-        if not max is None:
-            if (not self._max_set) or override:
-                self.lambda_max = max
-                self._max_set = override
-
+        """
+            Set how the transmission fraction fit is calculated, the range of wavelengths
+            to use and the fit method
+            @param min: minimum wavelength to use
+            @param max: highest wavelength to use
+            @param fit_method: the fit type to pass to CalculateTransmission ('Logarithmic' or 'Linear')or 'Off'
+            @param override: if set to False this call won't override the settings set by a previous call (default True)
+        """
         if fit_method:
             if (not self._method_set) or override:
                 fit_method = fit_method.upper()
@@ -1084,6 +1081,21 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
                     self.fit_method = self.DEFAULT_FIT
                     _issueWarning('ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
                 self._method_set = override
+
+        if min: min = float(min)
+        if max: max = float(max)
+        if not min is None:
+            if (not self._min_set) or override:
+                self.lambda_min = min
+                self._min_set = override
+                if self.fit_method == 'Off':
+                    _issueWarning('Transmission calculation: The minimum wavelength was set but fitting was set to off and so it will not be used')
+        if not max is None:
+            if (not self._max_set) or override:
+                self.lambda_max = max
+                self._max_set = override
+                if self.fit_method == 'Off':
+                    _issueWarning('Transmission calculation: The maximum wavelength was set but fitting was set to off and so it will not be used')
 
     def setup_wksp(self, inputWS, inst, wavbining, pre_monitor, post_monitor):
         """
@@ -1191,21 +1203,24 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         pre_sample = reducer.instrument.incid_mon_4_trans_calc
 
         if self._use_full_range is None:
-            use_full_range = reducer.full_trans_wav
+            use_instrum_default_range = reducer.full_trans_wav
         else:
-            use_full_range = self._use_full_range
-        if use_full_range:
+            use_instrum_default_range = self._use_full_range
+
+        #there are a number of settings and defaults that determine the wavelength to use, go through each in order of increasing precedence
+        if use_instrum_default_range:
             translambda_min = reducer.instrument.WAV_RANGE_MIN
             translambda_max = reducer.instrument.WAV_RANGE_MAX
         else:
-            if self.lambda_min:
+            if self.lambda_min and (fit_meth != 'Off'):
                 translambda_min = self.lambda_min
             else:
                 translambda_min = reducer.to_wavelen.wav_low
-            if self.lambda_max:
+            if self.lambda_max and (fit_meth != 'Off'):
                 translambda_max = self.lambda_max
             else:
                 translambda_max = reducer.to_wavelen.wav_high
+
         wavbin = str(translambda_min) 
         wavbin +=','+str(reducer.to_wavelen.wav_step)
         wavbin +=','+str(translambda_max)
