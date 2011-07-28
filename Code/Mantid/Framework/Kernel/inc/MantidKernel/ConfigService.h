@@ -116,8 +116,6 @@ namespace Mantid
       void updateConfig(const std::string& filename, const bool append=false, const bool update_caches=true);
       /// Save the configuration to the user file
       void saveConfig(const std::string &filename) const;
-      /// Trims a string by removing the leading and trailing white spaces
-      std::string trimLeadingAndTrailing(std::string& toTrim);
       /// Searches for a configuration property
       std::string getString(const std::string& keyName, bool use_cache=true) const;
       /// Searches for a key in the configuration property

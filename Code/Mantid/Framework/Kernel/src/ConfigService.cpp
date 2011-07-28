@@ -817,22 +817,6 @@ void ConfigServiceImpl::saveConfig(const std::string & filename) const
   writer.close();
 }
 
-/** Removes the leading and trailing white spaces from a given string and returns the value
- *  as a string.
- *
- *  @param toTrim :: The string value to be trimmed left and right.
- *  @returns The string value of toTrim without the white spaces at the beginning and end.
- */
-std::string ConfigServiceImpl::trimLeadingAndTrailing(std::string& toTrim)
-{
-  std::string tempValue;
-  std::string rtValue;
-  tempValue = Poco::trimRight(toTrim);
-  rtValue = Poco::trimLeft(tempValue);
-
-  return rtValue;
-}
-
 /** Searches for a string within the currently loaded configuaration values and
  *  returns the value as a string. If the key is one of those that was a possible relative path
  *  then the local store is searched first.
