@@ -28,7 +28,7 @@ if( ParaView_FOUND AND USE_PARAVIEW )
     message( STATUS "In Vates CPack" )
     set( CPACK_PACKAGE_NAME Mantid_Vates )
     include( CPackCommon )
-	set( CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/CPackVatesConfig.cmake" )
+    set( CPACK_OUTPUT_CONFIG_FILE "${CMAKE_BINARY_DIR}/CPackVatesConfig.cmake" )
 	
     if( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
       include( CPackLinuxSetup )
@@ -119,6 +119,9 @@ if( ParaView_FOUND AND USE_PARAVIEW )
     # Set dependency on Mantid. Need to add ParaView
     set( CPACK_RPM_PACKAGE_REQUIRES "mantid" )
     set( CPACK_DEBIAN_PACKAGE_DEPENDS "mantid" )
+
+    # Create target for Vates package creation
+    add_custom_target( package-vates COMMAND ${CMAKE_CPACK_COMMAND} --config ${CPACK_OUTPUT_CONFIG_FILE} )
 
     # run cpack configuration
     include( CPack )
