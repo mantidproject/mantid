@@ -293,7 +293,6 @@ void vtkRebinningCutter::SetApplyClip(int applyClip)
 void vtkRebinningCutter::SetClipFunction(vtkImplicitFunction * func)
 {
   vtkBox* box = dynamic_cast<vtkBox*>(func);
-
   if (box != m_clipFunction)
   {
     this->m_clipFunction = box;

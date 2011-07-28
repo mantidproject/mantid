@@ -24,6 +24,7 @@
 #include <Poco/Notification.h>
 #include <Poco/Environment.h>
 #include <Poco/Process.h>
+#include <Poco/String.h>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -727,32 +728,63 @@ void ConfigServiceImpl::saveConfig(const std::string & filename) const
       output = "";
       updated_file += "\n";
       continue;
-    }
-    std::set<std::string>::iterator iend = m_changed_keys.end();
-    std::set<std::string>::iterator itr = m_changed_keys.begin();
-    for (; itr != iend; ++itr)
-    {
-      if (output.find(*itr) != std::string::npos)
-      {
-        break;
-      }
-    }
+    } //end if-else
 
-    if (itr == iend)
+    // Output is the current line in the file   
+
+    // Extract the key from the current line
+    std::string key;
+    std::string::size_type pos = output.find('=');
+    if( pos == std::string::npos )
     {
-      updated_file += output;
+      key = output; //If no equals then the entire thing is the key
     }
     else
     {
-      std::string key = *itr;
-      std::string value = getString(*itr, false);
-      updated_file += key + "=" + value;
-      //Remove the key from the changed key list
-      m_changed_keys.erase(itr);
+      key = output.substr(0,pos); //Strip the equals to get only the key
     }
-    updated_file += "\n";
+    //Now deal with trimming (removes spaces)
+    Poco::trimInPlace(key);
 
-  }
+    //Find the comments
+    std::string::size_type comment = key.find('#');
+   
+    //Check if it exists in the service using hasProperty and make sure it isn't a comment
+    if( comment != 0 && !hasProperty(key) )
+    {
+        //Remove the key from the changed key list
+        m_changed_keys.erase(key);
+        continue;
+    }
+    else
+    {
+    //If it does exist perform the current actions below
+      std::set<std::string>::iterator iend = m_changed_keys.end();
+      std::set<std::string>::iterator itr = m_changed_keys.begin();
+
+      for (; itr != iend; ++itr)
+      {
+        if (output.find(*itr) != std::string::npos)
+        {
+          break;
+        }
+      }
+
+      if (itr == iend)
+      {
+        updated_file += output;
+      }
+      else
+      {
+        std::string key = *itr;
+        std::string value = getString(*itr, false);
+        updated_file += key + "=" + value;
+        //Remove the key from the changed key list
+        m_changed_keys.erase(itr);
+      }
+      updated_file += "\n";
+    }
+  } // End while-loop
 
   // Any remaining keys within the changed key store weren't present in the current user properties so append them
   if (!m_changed_keys.empty())
@@ -785,7 +817,21 @@ void ConfigServiceImpl::saveConfig(const std::string & filename) const
   writer.close();
 }
 
+/** Removes the leading and trailing white spaces from a given string and returns the value
+ *  as a string.
+ *
+ *  @param toTrim :: The string value to be trimmed left and right.
+ *  @returns The string value of toTrim without the white spaces at the beginning and end.
+ */
+std::string ConfigServiceImpl::trimLeadingAndTrailing(std::string& toTrim)
+{
+  std::string tempValue;
+  std::string rtValue;
+  tempValue = Poco::trimRight(toTrim);
+  rtValue = Poco::trimLeft(tempValue);
 
+  return rtValue;
+}
 
 /** Searches for a string within the currently loaded configuaration values and
  *  returns the value as a string. If the key is one of those that was a possible relative path
@@ -837,6 +883,63 @@ std::vector<std::string> ConfigServiceImpl::getKeys(const std::string& keyName) 
     keyVector.clear();
   }
   return keyVector;
+}
+
+/** Removes a key from the memory stored properties file and inserts the key into the 
+ *  changed key list so that when the program calls saveConfig the properties file will
+ *  be the same and not contain the key no more
+ *
+ *  @param keyName :: The key that is to be deleted
+ */
+void ConfigServiceImpl::remove(const std::string& rootName) const
+{
+  try
+  {
+    m_pConf->remove(rootName);
+  }
+  catch (Poco::NotFoundException&)
+  {
+    g_log.debug() << "Unable to find " << rootName << " in the properties file" << std::endl;
+  }
+  m_changed_keys.insert(rootName);
+}
+
+/** Checks to see whether the given key exists.
+ *
+ *  @param keyName :: The case sensitive key that you are looking to see if exists.
+ *  @returns Boolean value denoting whether the exists or not.
+ */
+bool ConfigServiceImpl::hasProperty(const std::string& rootName) const
+{
+  return m_pConf->hasProperty(rootName);
+}
+
+/** Checks to see whether the given file target is an executable one and it exists
+ *
+ *  @param keyName :: The path to the file you wish to see whether it's an executable.
+ *  @returns Boolean value denoting whether the file is an executable or not.
+ */
+bool ConfigServiceImpl::isExecutable(const std::string& target) const
+{    
+  try
+  {
+    Poco::File tempFile = Poco::File(target);
+
+    if (tempFile.exists())
+    {
+      if(tempFile.canExecute())
+        return true;
+      else 
+        return false;
+    }
+    else
+      return false;
+  }
+  catch(Poco::Exception&)
+  {
+    return false;
+  }
+ 
 }
 
 /** Runs a command line string to open a program. The function can take program arguments.

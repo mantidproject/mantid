@@ -805,7 +805,6 @@ void MantidDockWidget::saveToProgram(const QString & name)
   std::map<std::string,std::string> programKeysAndDetails;
   programKeysAndDetails["name"] = name.toStdString();
 
-  //Could use a standard vector but no #include <vector>
   //Get a list of the program detail keys (mandatory - target, saveusing) (optional - arguments, save parameters, workspace type)
   std::vector<std::string> programKeys = (Mantid::Kernel::ConfigService::Instance().getKeys(("workspace.sendto." + programKeysAndDetails.find("name")->second)));
 
@@ -852,18 +851,19 @@ void MantidDockWidget::saveToProgram(const QString & name)
         QStringList saveParameters = saveParametersGrouped.split(',');
 
         //For each one found split it up and assign the parameter
-        for (int i(0); i<saveParameters.size(); i++)
+        for (size_t i = 0; i<saveParameters.size(); i++)
         {
-          QStringList saveParameterDetails = saveParameters[i].split('=');
-          std::string saveParameterName = saveParameterDetails[0].toStdString();
-
-          if(saveParameterDetails[1] == "True")
+          //would string array be better to use here ? //////////////////////////////////////////
+          QStringList sPNameAndDetail = saveParameters[i].split('=');
+          std::string saveParameterName = Mantid::Kernel::ConfigService::Instance().trimLeadingAndTrailing(sPNameAndDetail[0].toStdString());
+          std::string saveParameterDetail = Mantid::Kernel::ConfigService::Instance().trimLeadingAndTrailing(sPNameAndDetail[1].toStdString());
+          if(saveParameterDetail == "True")
             alg->setProperty(saveParameterName, true);
-          else if(saveParameterDetails[1] == "False")
+          else if(saveParameterDetail == "False")
             alg->setProperty(saveParameterName, false);
           else  //if not true or false then must be a value
           {
-            alg->setPropertyValue(saveParameterName, saveParameterDetails[1].toStdString());
+            alg->setPropertyValue(saveParameterName, saveParameterDetail);
           }
         }
       }
@@ -881,8 +881,8 @@ void MantidDockWidget::saveToProgram(const QString & name)
       if (programKeysAndDetails.count("arguments") != 0)
       {
         QString temp = QString::fromStdString(programKeysAndDetails.find("arguments")->second);
-        temp.replace(QString("[File]"), savedFile);
-        //temp.replace(QString("[User]"), user;
+        temp.replace(QString("[file]"), savedFile);
+        //temp.replace(QString("[user]"), user;
         arguments = temp.split(",");
       }
       else
@@ -891,7 +891,7 @@ void MantidDockWidget::saveToProgram(const QString & name)
       //convert the list into a standard vector for compatibility with Poco
       std::vector<std::string> argumentsV;
 
-      for (int i(0); i<arguments.size(); i++)
+      for (size_t i = 0; i<arguments.size(); i++)
       {
         argumentsV.assign(1, (arguments[i].toStdString()));
       }
@@ -907,7 +907,7 @@ void MantidDockWidget::saveToProgram(const QString & name)
       }
     }
     else
-      QMessageBox::information(this, "Target Path Error", "User tried to open program from: " + QString::fromStdString(programKeysAndDetails.find("target")->second) + "  The target file path for the program can't be found. Please check that the full path is correct");
+      QMessageBox::information(this, "Target Path Error", "User tried to open program from: " + QString::fromStdString(programKeysAndDetails.find("target")->second) + " The target file path for the program can't be found. Please check that the full path is correct");
   }
 }
 
@@ -986,26 +986,45 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     
     //Get the names of the programs for the send to option
     std::vector<std::string> programNames = (Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto.name"));
-    if (programNames.size() > 0)
+
+    //Check to see if any options aren't visible
+    std::map<std::string,std::string> programVisible;
+    bool allVisible(false);
+    for (size_t i = 0; i<programNames.size(); i++)
+    {
+      programVisible[programNames[i]] = Mantid::Kernel::ConfigService::Instance().getString("workspace.sendto." + programNames[i] + ".visible");
+      if(programVisible.find(programNames[i])->second == "Yes")
+        allVisible = true;
+    }
+
+    if(allVisible == true)
     {
 	    m_saveToProgram = new QMenu(tr("Send to"),this);
 	    menu->addMenu(m_saveToProgram);
 
 	    //Sub-menu for program list
-	    m_programMapper = new QSignalMapper(this);    
-    
-	    for (size_t i=0; i<programNames.size(); i++)
-	    {
-	      //Convert name from std string to QString for use with QAction menu entry
-	      QString name = QString::fromStdString(programNames[i]);
-	      //Setup new menu option for the program
-	      m_program = new QAction(tr(name),this);
-	      connect(m_program,SIGNAL(activated()),m_programMapper,SLOT(map()));
-	      //Send name of program when clicked
-	      m_programMapper->setMapping(m_program, name);
-	      m_saveToProgram->addAction(m_program);
-	    }
-   
+	    m_programMapper = new QSignalMapper(this);  
+
+
+
+      for (size_t i = 0; i<programNames.size(); i++)
+      {
+        //Find out if visible is selected for any of the programs
+        std::string visible = Mantid::Kernel::ConfigService::Instance().getString("workspace.sendto." + programNames[i] + ".visible");
+                 
+        if(visible == "Yes")
+        {
+          //Convert name from std string to QString for use with QAction menu entry
+          QString name = QString::fromStdString(programNames[i]);
+          //Setup new menu option for the program
+          m_program = new QAction(tr(name),this);
+          connect(m_program,SIGNAL(activated()),m_programMapper,SLOT(map()));
+          //Send name of program when clicked
+          m_programMapper->setMapping(m_program, name);
+          m_saveToProgram->addAction(m_program);		
+	      }
+      }
+      //Tell the button what to listen for and what to do once clicked
       connect(m_programMapper, SIGNAL(mapped(const QString &)), this, SLOT(saveToProgram(const QString &)));
     }
     //Rename is valid for all workspace types

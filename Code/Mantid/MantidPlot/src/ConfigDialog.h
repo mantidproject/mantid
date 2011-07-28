@@ -31,6 +31,7 @@
 
 #include <QDialog>
 #include <QCheckBox>
+#include <map>
 
 class QLineEdit;
 class QGroupBox;
@@ -121,10 +122,15 @@ private slots:
   void addPythonAlgorithmsDirs();
   void addInstrumentDir();
   void addParameterDir();
+  void treeClicked();
+  void addDialog();
+  void editDialog();
+  void deleteDialog();
 
 private:
 	void initPlotsPage();
   void initOptionsPage();
+ 
   void initAxesPage();
 	void initAppPage();
   // Mantid
@@ -142,10 +148,19 @@ private:
   void updateDirSearchSettings();
   void updateCurveFitSettings();
   void updateMantidOptionsTab();
-  QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = 0);
-  void initMantidOptionsTab();
+  void updateSendToTab();
+
+  void initMantidOptionsTab(); 
+  void initSendToProgramTab();
   void refreshTreeCategories();
+  void populateProgramTree();
+  void updateProgramTree();
+ 
   QTreeWidgetItem* createCheckedTreeItem(QString name,bool checkBoxState);
+  QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = 0);
+  QStringList treeChecking(QTreeWidgetItem *parent = 0); 
+  
+  std::map<std::string,std::map<std::string,std::string> > m_sendToSettings;
 
 	QFont textFont, headerFont, axesFont, numbersFont, legendFont, titleFont, appFont;
 	QFont plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
@@ -155,6 +170,7 @@ private:
 	ColorButton *btnBackground3D, *btnMesh, *btnAxes, *btnLabels, *btnNumbers;
 	ColorButton *btnFromColor, *btnToColor, *btnGrid;
 	QPushButton	*btnTitleFnt, *btnLabelsFnt, *btnNumFnt;
+  QPushButton *deleteButton, *editButton, *addButton;
 	ColorButton *buttonBackground, *buttonText, *buttonHeader;
   QPushButton *buttonOk, *buttonCancel, *buttonApply;
 	QPushButton* buttonTextFont, *buttonHeaderFont;
@@ -182,8 +198,11 @@ private:
   QSpinBox  *decimals;
   /// mantid options page
   QWidget*  mantidOptionsPage;
+  QWidget*  mantidSendToPage;
   QCheckBox *m_invisibleWorkspaces;
+  QCheckBox *m_sendToPrograms;
   QTreeWidget *treeCategories;
+  QTreeWidget *treePrograms;
 
   
 	QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
@@ -222,6 +241,8 @@ private:
 	QSpinBox *undoStackSizeBox;
 	QComboBox *boxEndLine;
   QCheckBox* cbApplyToMantid;
+
+  
 
 #ifdef SCRIPTING_PYTHON
 	QLabel *lblPythonConfigDir;

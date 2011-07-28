@@ -258,6 +258,7 @@ public:
 
   void testSaveConfigExistingSettings()
   {
+
     const std::string filename("user.settings");
     Poco::File prop_file(filename);
     if( prop_file.exists() ) prop_file.remove();
@@ -269,8 +270,77 @@ public:
     runSaveTest(filename,"13");
   }
 
+  void testTrimLeadingAndTrailing()
+  {
+    std::string toTrim("   Input Workspace ");
+    std::string trimmedValue = ConfigService::Instance().trimLeadingAndTrailing(toTrim);
+    TS_ASSERT_EQUALS(trimmedValue, "Input Workspace");
+    toTrim = ("");
+    trimmedValue = ConfigService::Instance().trimLeadingAndTrailing(toTrim);
+    TS_ASSERT_EQUALS(trimmedValue, "");
+    toTrim = (" ");
+    trimmedValue = ConfigService::Instance().trimLeadingAndTrailing(toTrim);
+    TS_ASSERT_EQUALS(trimmedValue, "");
+  }
+
+  void testSaveConfigWithPropertyRemoved()
+  {
+    const std::string filename("user.settings.testSaveConfigWithPropertyRemoved");
+    Poco::File prop_file(filename);
+    if( prop_file.exists() ) prop_file.remove();
+
+    std::ofstream writer(filename.c_str(),std::ios_base::trunc);
+    writer << "mantid.legs = 6" << "\n";
+    writer << "\n";
+    writer << "mantid.thorax = 10\n";
+    writer << "# This comment line\n";
+    writer << "key.withnospace=5\n";
+    writer << "key.withnovalue";
+    writer.close();
+
+    ConfigService::Instance().updateConfig(filename);
+
+    std::string rootName = "mantid.thorax";
+    ConfigService::Instance().remove(rootName);
+    TS_ASSERT_EQUALS(ConfigService::Instance().hasProperty(rootName), false);
+    rootName = "key.withnovalue";
+    ConfigService::Instance().remove(rootName);
+    TS_ASSERT_EQUALS(ConfigService::Instance().hasProperty(rootName), false);
+
+    ConfigService::Instance().saveConfig(filename);
+
+    // Test the entry
+    std::ifstream reader(filename.c_str(), std::ios::in);
+    if( reader.bad() )
+    {
+      TS_FAIL("Unable to open config file for saving");
+    }
+    std::string line("");
+    std::map<int, std::string> prop_lines;
+    int line_index(0);
+    while(getline(reader, line))
+    {
+      prop_lines.insert(std::make_pair(line_index, line));
+      ++line_index;
+    }
+    reader.close();
+
+    TS_ASSERT_EQUALS(prop_lines.size(), 4);
+    TS_ASSERT_EQUALS(prop_lines[0], "mantid.legs = 6");
+    TS_ASSERT_EQUALS(prop_lines[1], "");
+    TS_ASSERT_EQUALS(prop_lines[2], "# This comment line");
+    TS_ASSERT_EQUALS(prop_lines[3], "key.withnospace=5");
+
+    // Clean up
+    prop_file.remove();
+  }
+
   void testSaveConfigWithLineContinuation()
   {
+    /*const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() 
+      + "MantidTest.properties";
+    ConfigService::Instance().updateConfig(propfile);*/
+
     const std::string filename("user.settings");
     Poco::File prop_file(filename);
     if( prop_file.exists() ) prop_file.remove();
@@ -284,6 +354,8 @@ public:
       "/test2;/test3;\\\n"
       "/test4\n";
     writer.close();
+
+    ConfigService::Instance().updateConfig(filename);
 
     TS_ASSERT_THROWS_NOTHING(settings.setString("mantid.legs", "15"));
 
@@ -339,6 +411,10 @@ public:
 
   void testGetKeysWithValidInput()
   {
+    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() 
+      + "MantidTest.properties";
+    ConfigService::Instance().updateConfig(propfile);
+
     // Returns all subkeys with the given root key
     std::vector<std::string> keyVector = ConfigService::Instance().getKeys("workspace.sendto");
     TS_ASSERT_EQUALS(keyVector.size(), 4);
@@ -350,6 +426,10 @@ public:
 
   void testGetKeysWithZeroSubKeys()
   {
+     const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() 
+      + "MantidTest.properties";
+    ConfigService::Instance().updateConfig(propfile);
+
     std::vector<std::string> keyVector = ConfigService::Instance().getKeys("mantid.legs");
     TS_ASSERT_EQUALS(keyVector.size(), 0);
     std::vector<std::string> keyVector2 = ConfigService::Instance().getKeys("mantidlegs");
@@ -358,9 +438,30 @@ public:
 
   void testGetKeysWithEmptyPrefix()
   {
+     const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() 
+      + "MantidTest.properties";
+    ConfigService::Instance().updateConfig(propfile);
+
     //Returns all *root* keys, i.e. unique keys left of the first period
     std::vector<std::string> keyVector = ConfigService::Instance().getKeys(""); 
-    TS_ASSERT_EQUALS(keyVector.size(), 5);
+    TS_ASSERT_EQUALS(keyVector.size(), 4);
+  }
+
+  void testRemovingProperty()
+  {
+    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() 
+      + "MantidTest.properties";
+    ConfigService::Instance().updateConfig(propfile);
+
+    std::string rootName = "mantid.legs";
+    bool mantidLegs = ConfigService::Instance().hasProperty(rootName);
+    TS_ASSERT_EQUALS(mantidLegs, true);
+    
+    //Remove the value from the key and test again
+    ConfigService::Instance().remove(rootName);
+    mantidLegs = ConfigService::Instance().hasProperty(rootName);
+    TS_ASSERT_EQUALS(mantidLegs, false);
+
   }
 
 protected:

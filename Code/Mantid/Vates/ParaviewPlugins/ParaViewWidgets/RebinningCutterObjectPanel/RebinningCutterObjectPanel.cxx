@@ -12,7 +12,7 @@
 #include "ThresholdRangeWidget.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include "MantidVatesAPI/SynchronisingGeometryPresenter.h"
-
+#include "vtkSMProxyProperty.h"
 using namespace Mantid::VATES;
 using namespace Mantid::Geometry;
 
@@ -88,6 +88,10 @@ void RebinningCutterObjectPanel::constructThresholdRanges(QGridLayout* gLayout)
   vtkSMDoubleVectorProperty* inputMinThresholdProperty = vtkSMDoubleVectorProperty::SafeDownCast(
     this->proxy()->GetProperty("InputMinThreshold"));
   double inputMinThreshold = inputMinThresholdProperty->GetElement(0);
+
+  vtkSMProperty* prop = this->proxy()->GetProperty("ClipFunction");
+  vtkSMProxyProperty* clipFunc = vtkSMProxyProperty::SafeDownCast(this->proxy()->GetProperty("ClipFunction"));
+
 
   if(inputMaxThreshold != m_cachedMaxThreshold || inputMinThreshold != m_cachedMinThreshold)
   {

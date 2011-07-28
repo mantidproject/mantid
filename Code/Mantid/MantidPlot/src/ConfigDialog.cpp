@@ -35,6 +35,7 @@
 #include "ColorBox.h"
 #include "pixmaps.h"
 #include "DoubleSpinBox.h"
+#include "SendToProgramDialog.h"
 #include "Mantid/MantidUI.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 
@@ -641,6 +642,7 @@ void ConfigDialog::initMantidPage()
 
   initDirSearchTab();
   initCurveFittingTab();
+  initSendToProgramTab();
   initMantidOptionsTab();
 
 }
@@ -682,6 +684,262 @@ void ConfigDialog::initMantidOptionsTab()
   
   grid->addWidget(treeCategories,1,0);
   refreshTreeCategories();
+}
+
+
+void ConfigDialog::initSendToProgramTab()
+{
+  
+ //std::vector<std::string> programNames = Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto.name");
+ // 
+ // for(size_t i = 0; i<programNames.size(); i++)
+ // {
+ //   //Create a map for the keys and details to go into
+ //   std::map<std::string,std::string> programKeysAndDetails;
+
+ //   //Get a list of the program detail keys (mandatory - target, saveusing) (optional - arguments, save parameters, workspace type)
+ //   std::vector<std::string> programKeys = (Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto." + programNames[i]));
+ //   
+ //   m_sendToSettings[programNames[i]] = "0";
+
+ //   for(int j(0); j<programKeys.size(); j++)
+ //   {
+ //     m_sendToSettings[programKeys[i]
+ //   }
+
+ // }
+  
+
+  
+  
+  mantidSendToPage = new QWidget();
+  mtdTabWidget->addTab(mantidSendToPage, tr("Send To"));
+  QVBoxLayout *widgetLayout = new QVBoxLayout(mantidSendToPage);
+  QGroupBox *frame = new QGroupBox();
+  widgetLayout ->addWidget(frame);
+  QGridLayout *grid = new QGridLayout(frame);
+    
+  //create tree diagram for all known programs that can be saved to
+  treePrograms = new QTreeWidget(frame);
+  treePrograms->setColumnCount(1);
+  treePrograms->setSortingEnabled(false);
+  treePrograms->setHeaderLabel(tr("List of Current Programs"));
+  
+  //connect(treePrograms, SIGNAL(itemClicked()), this, SLOT(treeClicked()));
+
+  grid->addWidget(treePrograms, 0,0);
+  
+  connect(treePrograms,SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(treeClicked()));
+  populateProgramTree();
+
+  //Add buttons to the bottom of the widget
+  deleteButton = new QPushButton(tr("Delete"));
+  deleteButton->setEnabled(false);
+  connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteDialog()));    
+  editButton = new QPushButton(tr("Edit..."));
+  editButton->setEnabled(false);
+  connect(editButton, SIGNAL(clicked()), this, SLOT(editDialog()));
+  addButton = new QPushButton(tr("Add..."));
+  connect(addButton, SIGNAL(clicked()), this, SLOT(addDialog()));
+
+  QHBoxLayout *buttons = new QHBoxLayout;
+  buttons->addStretch();
+  buttons->addWidget(deleteButton);
+  buttons->addWidget(editButton);
+  buttons->addWidget(addButton);
+
+  widgetLayout->addLayout(buttons);
+}
+
+void ConfigDialog::treeClicked()
+{
+  QStringList checkedItems = treeChecking();
+  //Set the buttons on whether the conditions are met. Reducing the amount of user errors
+  if (checkedItems.size() == 0)
+  {  
+    deleteButton->setEnabled(false);
+    editButton->setEnabled(false);
+  }
+  else if (checkedItems.size() == 1)
+  {
+    deleteButton->setEnabled(true);
+    editButton->setEnabled(true);
+  }
+  else
+  {
+    deleteButton->setEnabled(true);
+    editButton->setEnabled(false);
+  }
+}
+
+
+//Add a program
+void ConfigDialog::addDialog()
+{
+  SendToProgramDialog* addProgram = new SendToProgramDialog(this);
+  addProgram->setModal(true);
+  addProgram->exec();
+
+  //Get the settings of the program the user just added
+  std::pair<std::string, std::map<std::string,std::string> > tempSettings = addProgram->getSettings();
+  m_sendToSettings[tempSettings.first] = tempSettings.second;
+
+  //clear the tree and repopulate it without the programs that have just been deleted
+  treePrograms->clear();
+  updateProgramTree();
+  treeClicked();
+}
+
+//Edit a program
+void ConfigDialog::editDialog()
+{
+  QStringList checkedItems = treeChecking();
+
+  std::map<std::string,std::string> programKeysAndDetails = m_sendToSettings.find(checkedItems[0].toStdString())->second;
+
+  SendToProgramDialog* editProgram = new SendToProgramDialog(this, checkedItems[0], programKeysAndDetails);
+
+  editProgram->setWindowTitle(tr("Edit a Program"));
+  editProgram->setModal(true);
+  editProgram->exec();
+
+  //Get the settings of the program the user just edited
+  std::pair<std::string, std::map<std::string,std::string> > tempSettings = editProgram->getSettings();
+  m_sendToSettings[tempSettings.first] = tempSettings.second;
+
+  //clear the tree and repopulate it without the programs that have just been deleted
+  treePrograms->clear();
+  updateProgramTree();
+  treeClicked();
+}
+
+
+//Deleting send to options. Deletes them off the mantid.user.properties
+void ConfigDialog::deleteDialog()
+{
+  QStringList checkedItems = treeChecking();
+  if(checkedItems.size() > 0)
+  {
+    //Question box asking to continue to avoid accidental deletion of program options
+    int status = QMessageBox::question(this, tr("Delete save options?"), tr("Are you sure you want to delete \nthe (%1) selected save option(s)?").arg(checkedItems.size()),
+      QMessageBox::Yes|QMessageBox::Default,
+      QMessageBox::No|QMessageBox::Escape,
+      QMessageBox::NoButton);
+
+    if(status == QMessageBox::Yes)
+    {
+      //For each program selected, remove all details from the user.properties file;
+      for (size_t i = 0; i<checkedItems.size(); i++)
+      {      
+        m_sendToSettings.erase(checkedItems[i].toStdString());
+      }
+      //clear the tree and repopulate it without the programs that have just been deleted
+      treePrograms->clear();
+      updateProgramTree();
+    }
+  }
+}
+
+
+void ConfigDialog::populateProgramTree()
+{
+  std::vector<std::string> programNames = Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto.name");
+
+  for(size_t i = 0; i<programNames.size(); i++)
+  {
+    //Create a map for the keys and details to go into
+    std::map<std::string,std::string> programKeysAndDetails;
+
+    //Get a list of the program detail keys (mandatory - target, saveusing) (optional - arguments, save parameters, workspace type)
+    std::vector<std::string> programKeys = (Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto." + programNames[i]));
+
+    for (int j(0); j<programKeys.size(); j++)
+    {
+      //Assign a key to its value using the map
+      programKeysAndDetails[programKeys[j]] = (Mantid::Kernel::ConfigService::Instance().getString(("workspace.sendto." + programNames[i] + "." + programKeys[j])));
+    }
+
+    m_sendToSettings.insert(std::make_pair(programNames[i], programKeysAndDetails));
+  }
+  updateProgramTree();
+}
+
+void ConfigDialog::updateProgramTree()
+{
+  //Store into a map ready to go into config service when apply is clicked
+  std::map<std::string, std::map<std::string,std::string> >::const_iterator itr = m_sendToSettings.begin();
+  for( ; itr != m_sendToSettings.end(); ++itr)
+  {    
+    //Populate list
+    QTreeWidgetItem *program = createCheckedTreeItem(QString::fromStdString(itr->first), true);
+    treePrograms->addTopLevelItem(program);
+
+    //Check to see whether invisible. If so then change of colour is needed.
+    std::map<std::string, std::string> programKeysAndDetails = itr->second;
+    bool invisible = (programKeysAndDetails.find("visible")->second == "No");
+
+    //get the current program's (itr) keys and values (pItr)
+    std::map<std::string,std::string>::const_iterator pItr = programKeysAndDetails.begin();
+    for( ; pItr != programKeysAndDetails.end(); ++pItr)
+    {
+      QTreeWidgetItem *item = new QTreeWidgetItem(program);
+      item->setText(0, tr("   " + QString::fromStdString(pItr->first) + " --- " + QString::fromStdString(pItr->second)));
+      if (invisible)
+      {
+        item->setTextColor(0,QColor(150,150,150));
+        program->setTextColor(0,QColor(150,150,150));
+      }
+      program->addChild(item);
+    }
+  }
+}
+
+void ConfigDialog::updateSendToTab()
+{
+  Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+
+  //Add new values to the config service
+  std::map<std::string, std::map<std::string,std::string> >::const_iterator itr = m_sendToSettings.begin();
+  std::vector<std::string> programNames = mantid_config.getKeys("workspace.sendto.name");
+
+  for( ; itr != m_sendToSettings.end(); ++itr)
+  {
+    for (size_t i = 0; i<programNames.size(); ++i)
+    {
+      if (programNames[i] == itr->first)
+      {
+        //The selected program hasn't been deleted so set to blank string (all those left without blank strings are to be deleted
+        programNames[i] = "";
+      }
+    }
+
+    mantid_config.setString("workspace.sendto.name." + itr->first , "0");
+
+    std::map<std::string, std::string> programKeysAndDetails = itr->second;
+    
+    std::map<std::string, std::string>::const_iterator pItr = programKeysAndDetails.begin();
+
+    for( ; pItr != programKeysAndDetails.end(); ++pItr)
+    {
+      if(pItr->second != "")
+        mantid_config.setString("workspace.sendto." + itr->first + "." + pItr->first, pItr->second);
+    }  
+  }
+
+  //Delete the keys that are in the config but not in the temporary m_sendToSettings map
+  for (size_t i = 0; i<programNames.size(); ++i)
+  {
+    if (programNames[i] != "")
+    {
+      mantid_config.remove("workspace.sendto.name." + programNames[i]);
+      std::vector<std::string> programKeys = mantid_config.getKeys("workspace.sendto." + programNames[i]);
+      for (int j(0); j<programKeys.size(); ++j)
+     // for ( ; pItr != programKeysAndDetails.end(); ++pItr)
+      {
+        mantid_config.remove("workspace.sendto." + programNames[i] + "." +  programKeys[j]);
+      }
+    }
+  }
 }
 
 void ConfigDialog::refreshTreeCategories()
@@ -1615,6 +1873,7 @@ void ConfigDialog::apply()
 	sep.replace(tr("SPACE"), " ");
 	sep.replace("\\s", " ");
 
+
 	if (sep.contains(QRegExp("[0-9.eE+-]"))!=0){
 		QMessageBox::warning(0, tr("MantidPlot - Import options error"),
 				tr("The separator must not contain the following characters: 0-9eE.+-"));
@@ -1777,6 +2036,7 @@ void ConfigDialog::apply()
   updateDirSearchSettings();
   updateCurveFitSettings();
   updateMantidOptionsTab();
+  updateSendToTab();
 
 	try
 	{
@@ -1877,6 +2137,27 @@ void ConfigDialog::updateMantidOptionsTab()
     ApplicationWindow *app = (ApplicationWindow *)parentWidget();
     app->mantidUI->updateAlgorithms();
   }
+}
+
+QStringList ConfigDialog::treeChecking(QTreeWidgetItem *parent)
+{
+  QStringList results;
+  //how many children at this level
+  int count = parent ? parent->childCount() : treePrograms->topLevelItemCount();
+
+  for (size_t i = 0; i<count; i++)
+  {
+    //get the child
+    QTreeWidgetItem *item = parent ? parent->child(i) : treePrograms->topLevelItem(i);
+	
+    if (item->checkState(0) == Qt::Checked)
+    {
+      results.append(item->text(0));
+    }
+  }
+
+  return results;
+
 }
 
 QStringList ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent)

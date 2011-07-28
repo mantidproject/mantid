@@ -116,10 +116,18 @@ namespace Mantid
       void updateConfig(const std::string& filename, const bool append=false, const bool update_caches=true);
       /// Save the configuration to the user file
       void saveConfig(const std::string &filename) const;
+      /// Trims a string by removing the leading and trailing white spaces
+      std::string trimLeadingAndTrailing(std::string& toTrim);
       /// Searches for a configuration property
       std::string getString(const std::string& keyName, bool use_cache=true) const;
       /// Searches for a key in the configuration property
       std::vector<std::string> getKeys(const std::string& keyName) const;
+      /// Removes the value from a selected keyName
+      void remove(const std::string& rootName) const;
+      /// Checks to see whether a key has a value assigned to it
+      bool hasProperty(const std::string& rootName) const;
+      /// Checks to see whether the target passed is an executable file
+      bool isExecutable(const std::string& target) const;
       /// Launches a process i.e opening a program
       void launchProcess(const std::string& programFilePath, const std::vector<std::string>& programArguments) const;
       /// Sets a configuration property

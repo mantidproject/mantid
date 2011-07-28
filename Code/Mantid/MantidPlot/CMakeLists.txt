@@ -107,6 +107,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/ScriptingWindow.cpp
                    src/ScriptManagerWidget.cpp
                    src/SelectionMoveResizer.cpp
+				   src/SendToProgramDialog.cpp
                    src/SetColValuesDialog.cpp
                    src/SigmoidalFit.cpp
                    src/SmoothCurveDialog.cpp
@@ -324,6 +325,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/ScriptingWindow.h
                    src/ScriptManagerWidget.h
                    src/SelectionMoveResizer.h
+				   src/SendToProgramDialog.h
                    src/SetColValuesDialog.h
                    src/SigmoidalFit.h
                    src/SmoothCurveDialog.h
@@ -592,6 +594,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/ScriptingWindow.h
                         src/ScriptManagerWidget.h
                         src/SelectionMoveResizer.h
+						src/SendToProgramDialog.h
                         src/SetColValuesDialog.h
                         src/SigmoidalFit.h
                         src/SmoothCurveDialog.h
@@ -659,7 +662,8 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/InstrumentWidget/Shape2DCollection.h
 )
 
-set ( UI_FILES src/Mantid/FirstTimeSetup.ui
+set ( UI_FILES src/SendToProgramDialog.ui
+               src/Mantid/FirstTimeSetup.ui
                src/Mantid/UserFitFunctionDialog.ui
                src/Mantid/MantidAbout.ui
                src/Mantid/RemoveErrorsDialog.ui
