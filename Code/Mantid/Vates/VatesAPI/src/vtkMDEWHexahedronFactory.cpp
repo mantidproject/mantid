@@ -61,7 +61,7 @@ namespace Mantid
     std::vector<Mantid::Geometry::Coordinate> coords;
     Mantid::signal_t signal_normalized;
 
-    vtkIdType pointId;
+    vtkIdType pointIds[8];
     while(true)
     {
       box = it.getBox();
@@ -81,9 +81,24 @@ namespace Mantid
         {
           Mantid::Geometry::Coordinate& coord = coords[i];
           //Add points
-          pointId = points->InsertNextPoint(coord.getX(), coord.getY(), coord.getZ());
-          theHex->GetPointIds()->SetId(i, pointId);
+          pointIds[i] = points->InsertNextPoint(coord.getX(), coord.getY(), coord.getZ());  
         }
+        
+        /*
+        VTK needs cell points to be specified in a particular anti-clockwise ordering.
+        The coordinates gernated by IBox do not fit this format, so have to manually reorder them before setting the
+        hexahedron vertexes.
+        */
+
+        theHex->GetPointIds()->SetId(0, pointIds[0]); //xyx
+        theHex->GetPointIds()->SetId(1, pointIds[1]); //dxyz
+        theHex->GetPointIds()->SetId(2, pointIds[3]); //dxdyz
+        theHex->GetPointIds()->SetId(3, pointIds[2]); //xdyz
+        theHex->GetPointIds()->SetId(4, pointIds[4]); //xydz
+        theHex->GetPointIds()->SetId(5, pointIds[5]); //dxydz
+        theHex->GetPointIds()->SetId(6, pointIds[7]); //dxdydz
+        theHex->GetPointIds()->SetId(7, pointIds[6]); //xdydz
+
         
         //Add cells
         visualDataSet->InsertNextCell(VTK_HEXAHEDRON, theHex->GetPointIds());
