@@ -277,6 +277,8 @@ namespace Mantid
 
       /// The list of available facilities
       std::vector<FacilityInfo*> m_facilities;
+      /// Define a flag value for a removed property
+      const std::string m_removedFlag;
     };
 
     /// Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
