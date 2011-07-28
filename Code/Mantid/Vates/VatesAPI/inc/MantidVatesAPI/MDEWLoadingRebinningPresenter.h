@@ -344,7 +344,7 @@ namespace Mantid
     @parameter eventHandler : observer/listenter 
     */
     template<typename ViewType>
-    vtkDataSet* MDEWLoadingRebinningPresenter<ViewType>::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
+    vtkDataSet* MDEWLoadingRebinningPresenter<ViewType>::execute(vtkDataSetFactory* factory, ProgressAction&)
     {
       using namespace Mantid::API;
       using namespace Mantid::MDEvents;

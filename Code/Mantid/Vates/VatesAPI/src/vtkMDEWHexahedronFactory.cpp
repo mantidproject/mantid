@@ -71,7 +71,7 @@ namespace Mantid
       if (!boost::math::isnan( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
       {
         //Add signals
-        signals->InsertNextValue(signal_normalized);
+        signals->InsertNextValue(static_cast<float>(signal_normalized));
 
         //Get the coordinates. Candidate for speed improvement.
         std::vector<Mantid::Geometry::Coordinate> coords = box->getVertexes();

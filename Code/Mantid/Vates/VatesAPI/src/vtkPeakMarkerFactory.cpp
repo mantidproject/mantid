@@ -106,6 +106,9 @@ namespace VATES
       double dx = x+width;
       double dy = y+width;
       double dz = z+width;
+      UNUSED_ARG(dx) //TODO use?
+      UNUSED_ARG(dy) //TODO use?
+      UNUSED_ARG(dz) //TODO use?
 
       std::cout << "Making peak " << i << " at " << pos << " with signal " << peak.getIntensity() << std::endl;
 

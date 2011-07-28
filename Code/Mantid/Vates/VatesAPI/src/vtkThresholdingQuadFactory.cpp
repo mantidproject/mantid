@@ -106,7 +106,7 @@ namespace Mantid
           for (int j = 0; j < nBinsY; j++)
           {
             index = j + nBinsY*i;
-            signalScalar = static_cast<signal_t>(m_workspace->getSignalNormalizedAt(i, j));
+            signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i, j));
             if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
             {
               // out of range
