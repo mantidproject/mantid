@@ -1,0 +1,27 @@
+<ServerManagerConfiguration>
+  <!-- Begin MDEWNexusReaderII -->
+  <ProxyGroup name="sources">
+    <SourceProxy name="MDEWNexusReaderII" class="vtkMDEWNexusReaderII">
+	   <IntVectorProperty
+         name="Load All Into Memory"
+         command="SetInMemory"
+         number_of_elements="1"
+         default_values="0">
+         <BooleanDomain name="bool"/>
+       </IntVectorProperty>
+	   <IntVectorProperty
+         name="Recursion Depth"
+         command="SetRecursionDepth"
+         number_of_elements="1"
+         default_values="1000">
+       </IntVectorProperty>
+       <StringVectorProperty
+        name="FileName"
+        command="SetFileName"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+      </StringVectorProperty>
+    </SourceProxy>
+  </ProxyGroup>
+  <!-- End MDEWNexusReaderII -->
+</ServerManagerConfiguration>
