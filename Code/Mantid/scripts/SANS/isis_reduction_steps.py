@@ -1442,7 +1442,8 @@ class UserFile(ReductionStep):
         # maps the keywords that the file can contains to the functions that read them
         self.key_functions = {
             'BACK/' : self._read_back_line,
-            'TRANS/': self._read_trans_line}
+            'TRANS/': self._read_trans_line,
+            'MON/' : self._read_mon_line}
 
     def execute(self, reducer, workspace=None):
         if self.filename is None:
@@ -1499,9 +1500,6 @@ class UserFile(ReductionStep):
 
         if upper_line.startswith('L/'):
             self.readLimitValues(line, reducer)
-        
-        elif upper_line.startswith('MON/'):
-            self._readMONValues(line, reducer)
         
         elif upper_line.startswith('MASK'):
             if len(upper_line[5:].strip().split()) == 4:
@@ -1673,8 +1671,7 @@ class UserFile(ReductionStep):
         else:
             _issueWarning('Error in user file after L/, "%s" is not a valid limit line' % limit_type.upper())
 
-    def _readMONValues(self, line, reducer):
-        details = line[4:]
+    def _read_mon_line(self, details, reducer):
     
         #MON/LENTH, MON/SPECTRUM and MON/TRANS all accept the INTERPOLATE option
         interpolate = False
@@ -1689,15 +1686,20 @@ class UserFile(ReductionStep):
             self._incid_monitor_lckd = True
         
         elif details.upper().startswith('LENGTH'):
+            details = details.split('=')[1]
+            options = details.split()
+            spectrum = int(options[1])
+#            reducer.instrument.monitor_zs[spectrum] = options[0]
+
             #the settings here are overriden by MON/SPECTRUM
             if not self._incid_monitor_lckd:
                 reducer.set_monitor_spectrum(
-                    int(details.split()[1]), interpolate, override=False)
+                    spectrum, interpolate, override=False)
         
         elif details.upper().startswith('TRANS'):
             parts = details.split('=')
             if len(parts) < 2 or parts[0].upper() != 'TRANS/SPECTRUM' :
-                _issueWarning('Unable to parse MON/TRANS line, needs MON/TRANS/SPECTRUM=')
+                return 'Unable to parse MON/TRANS line, needs MON/TRANS/SPECTRUM=... not: '
             reducer.set_trans_spectrum(int(parts[1]), interpolate, override=False)
     
         elif 'DIRECT' in details.upper() or details.upper().startswith('FLAT'):
@@ -1737,13 +1739,13 @@ class UserFile(ReductionStep):
                         reducer.instrument.getDetector('FRONT').correction_file \
                             = filepath
                     else:
-                        _issueWarning('Incorrect detector specified for efficiency file "' + line + '"')
+                        return 'Incorrect detector specified for efficiency file: '
                 else:
-                    _issueWarning('Unable to parse monitor line "' + line + '"')
+                    return 'Unable to parse monitor line: '
             else:
-                _issueWarning('Unable to parse monitor line "' + line + '"')
+                return 'Unable to parse monitor line: '
         else:
-            _issueWarning('Unable to parse monitor line "' + line + '"')
+            return 'Unable to parse monitor line: '
 
     def _readDetectorCorrections(self, details, reducer):
         values = details.split()
@@ -1834,17 +1836,25 @@ class UserFile(ReductionStep):
         return 'Unrecognised line: '
 
     def _read_transpec(self, arguments, reducer):        
+        arguments = arguments.split('/')
+        
+        #check if there is an optional shift specification
+        if len(arguments) == 2:
+            #deal with the shift specification first
+            shift = arguments[1]
+            terms = shift.split('=')
+            if len(terms) < 2:
+                return 'Bad TRANS/TRANSPEC= / line: '
+            reducer.instrument.monitor_4_offset= float(terms[1])
+            
+        #now remove any shift specification and parse the first argument
+        arguments = arguments[0]
         arguments = arguments.split('=')
         if len(arguments) == 1:
             raise RuntimeError('An "=" is required after TRANSPEC')
-
-        reducer.transmission_calculator.trans_spec = arguments[1]
-        if len(arguments) == 3:
-            reducer.instrument.set_monitor_4_z_off(arguments[2])
-        if len(arguments) > 3:
-            raise RuntimeError('TRANSPEC line must be in the format TRANS/TRANSPEC=? or TRANS/TRANSPEC=4/SHIFT=-? where ? is a number')
-        return ''
         
+        reducer.transmission_calculator.trans_spec = int(arguments[1])
+       
     def _read_trans_samplews(self, arguments, reducer):
         if arguments.find('=') > -1:
             arguments = arguments.split('=')

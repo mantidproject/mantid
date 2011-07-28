@@ -315,8 +315,8 @@ class ISISInstrument(instrument.Instrument):
         self._back_start = None
         # default end region
         self._back_end = None 
-        #if the user moves a monitor from it's position in the IDF (with MON/LENGTH ...) this will be recorded here. These are overridden lines like TRANS/TRANSPEC=4/SHIFT=-100
-        self.monitor_moves = {}
+        #if the user moves a monitor to this z coordinate (with MON/LENGTH ...) this will be recorded here. These are overridden lines like TRANS/TRANSPEC=4/SHIFT=-100
+        self.monitor_zs = {}
 
 
     def get_incident_mon(self):
@@ -454,13 +454,18 @@ class ISISInstrument(instrument.Instrument):
             Move the sample object to the location set in the logs or user settings file
             @param ws: the workspace containing the sample to move
         """
-        MoveInstrumentComponent(ws, 'some-sample-holder', Z = self.SAMPLE_Z_CORR, RelativePosition="1")
+        MoveInstrumentComponent(ws, 'some-sample-holder', Z = self.SAMPLE_Z_CORR, RelativePosition=True)
         
-        for i in self.monitor_moves.keys():
-            MoveInstrumentComponent(ws, self.monitor_names[i],
-                                    self.monitor_moves[i][0],
-                                    self.monitor_moves[i][1],
-                                    self.monitor_moves[i][2], RelativePosition="1")
+        for i in self.monitor_zs.keys():
+            #get the current location
+            component = self.monitor_names[i]
+            ws = mtd[str(ws)]
+            mon = ws.getInstrument().getComponentByName(component)
+            z_loc = mon.getPos().getZ()
+            #now the relative move
+            offset = (self.monitor_zs[i]/1000.) - z_loc
+            MoveInstrumentComponent(ws, component, Z = offset,
+                                    RelativePosition=True)
 
 class LOQ(ISISInstrument):
     """
@@ -546,6 +551,8 @@ class SANS2D(ISISInstrument):
         self.corrections_applied = False
         # a warning is issued if the can logs are not the same as the sample 
         self._can_logs = {}
+        #The user can set the distance between monitor 4 and the rear detector in millimetres, should be negative
+        self.monitor_4_offset = None
         #relates the numbers of the monitors to their names in the instrument definition file
         self.monitor_names = {1 : 'monitor1',
                               2 : 'monitor2',
@@ -602,7 +609,8 @@ class SANS2D(ISISInstrument):
             zshift = (self.FRONT_DET_Z + self.cur_detector().z_corr + self.FRONT_DET_RADIUS*(1 - math.cos(RotRadians)) )/1000.
             zshift -= self.FRONT_DET_DEFAULT_SD_M
             MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
-            return [0.0, 0.0], [0.0, 0.0]
+            beam_cen = [0.0, 0.0]
+            det_cen = [0.0, 0.0]
         else:
             xshift = -xbeam
             yshift = -ybeam
@@ -610,19 +618,31 @@ class SANS2D(ISISInstrument):
             zshift -= self.REAR_DET_DEFAULT_SD_M
             mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.)+" "+str(zshift*1000.))
             MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
-            return [0.0,0.0], [xshift, yshift]
+            beam_cen = [0.0,0.0]
+            det_cen = [xshift, yshift]
             
         super(SANS2D, self).move_components(ws)
         
-        #this implements the TRANS/TRANSPEC=4/SHIFT=... line, this overrides anyother monitor move
-        if self._monitor_4_offset:
-            ws = mtd[str(workspace)]
+        #this implements the TRANS/TRANSPEC=4/SHIFT=... line, this overrides any other monitor move
+        if self.monitor_4_offset:
+            #get the current location of the monitor
+            component = 'monitor4'
+            ws = mtd[str(ws)]
+            mon = ws.getInstrument().getComponentByName(component)
+            z_orig = mon.getPos().getZ()
+
+            #the location is relative to the rear-detector, get its location
             det = ws.getInstrument().getComponentByName(self.cur_detector().name())
-            loc = det.getPos()
-        
-            MoveInstrumentComponent(workspace, 'Monitor4',
-                X = loc[0], Y = loc[1], Z = loc[2], RelativePosition=False)
-            mantid.sendLogMessage('::SANS:: Monitor 4 is at z = ' + mon_4_loc[2] )
+            det_z = det.getPos().getZ()
+            
+            monitor_4_offset = self.monitor_4_offset/1000. 
+            z_new = det_z + monitor_4_offset
+            z_move = z_new - z_orig
+            MoveInstrumentComponent(ws, component, Z=z_move, 
+                                    RelativePosition=True)
+            mantid.sendLogMessage('::SANS:: Monitor 4 is at z = ' + str(z_new) )
+
+        return beam_cen, det_cen
         
     def get_detector_log(self, wksp):
         """
