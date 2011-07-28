@@ -29,6 +29,7 @@ src/UserDefinedThresholdRange.cpp
 src/vtkDataSetFactory.cpp
 src/vtkDataSetToGeometry.cpp
 src/vtkClipperDataSetFactory.cpp
+src/vtkMDEWHexahedronFactory.cpp
 src/vtkPeakMarkerFactory.cpp
 src/vtkProxyFactory.cpp
 src/vtkStructuredGridFactory.cpp
@@ -77,6 +78,7 @@ inc/MantidVatesAPI/UserDefinedThresholdRange.h
 inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkClipperDataSetFactory.h
+inc/MantidVatesAPI/vtkMDEWHexahedronFactory.h
 inc/MantidVatesAPI/vtkPeakMarkerFactory.h
 inc/MantidVatesAPI/vtkProxyFactory.h
 inc/MantidVatesAPI/vtkStructuredGridFactory.h
@@ -92,6 +94,7 @@ test/EscalatingRebinningActionManagerTest.h
 test/vtkDataSetFactoryTest.h
 test/vtkClipperDataSetFactoryTest.h
 test/vtkDataSetToGeometryTest.h
+test/vtkMDEWHexahedronFactoryTest.h
 test/vtkPeakMarkerFactoryTest.h
 test/vtkProxyFactoryTest.h
 test/vtkStructuredGridFactoryTest.h
@@ -145,8 +148,9 @@ Crystal
 
 # Create test file projects
 if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
+  include_directories( inc ../../Framework/TestHelpers/inc)
   cxxtest_add_test( VatesAPITest ${TEST_FILES} )
-  target_link_libraries( VatesAPITest VatesAPI ${GMOCK_LIBRARIES} 
+  target_link_libraries( VatesAPITest VatesAPI TestHelpers ${GMOCK_LIBRARIES} 
       ${GTEST_LIBRARIES})
   add_dependencies( FrameworkTests VatesAPITest )
   # Add to the 'UnitTests' group in VS
