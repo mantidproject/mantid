@@ -213,7 +213,7 @@ void SendToProgramDialog::save()
 
 
 //Get the settings (key and detail of what is to go in the config service)
-std::pair<std::string, std::map<std::string, std::string>> SendToProgramDialog::getSettings() const
+std::pair<std::string, std::map<std::string, std::string> > SendToProgramDialog::getSettings() const
 {
   return m_settings;
 }
