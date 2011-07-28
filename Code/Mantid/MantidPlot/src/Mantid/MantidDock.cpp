@@ -851,7 +851,7 @@ void MantidDockWidget::saveToProgram(const QString & name)
         QStringList saveParameters = saveParametersGrouped.split(',');
 
         //For each one found split it up and assign the parameter
-        for (size_t i = 0; i<saveParameters.size(); i++)
+        for (int i = 0; i<saveParameters.size(); i++)
         {
           //would string array be better to use here ? //////////////////////////////////////////
           QStringList sPNameAndDetail = saveParameters[i].split('=');
@@ -891,7 +891,7 @@ void MantidDockWidget::saveToProgram(const QString & name)
       //convert the list into a standard vector for compatibility with Poco
       std::vector<std::string> argumentsV;
 
-      for (size_t i = 0; i<arguments.size(); i++)
+      for (int i = 0; i<arguments.size(); i++)
       {
         argumentsV.assign(1, (arguments[i].toStdString()));
       }
