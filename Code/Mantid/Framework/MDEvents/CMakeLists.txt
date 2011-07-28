@@ -148,4 +148,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MDEvents DESTINATION ${PLUGINS_DIR} )
+install ( TARGETS MDEvents DESTINATION ${LIB_DIR} )
