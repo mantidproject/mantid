@@ -778,11 +778,12 @@ void ConfigDialog::addDialog()
 {
   SendToProgramDialog* addProgram = new SendToProgramDialog(this);
   addProgram->setModal(true);
-  addProgram->exec();
-
+  if(addProgram->exec() == 1)
+  {
   //Get the settings of the program the user just added
   std::pair<std::string, std::map<std::string,std::string> > tempSettings = addProgram->getSettings();
   m_sendToSettings[tempSettings.first] = tempSettings.second;
+  }
 
   //clear the tree and repopulate it without the programs that have just been deleted
   treePrograms->clear();
@@ -801,11 +802,12 @@ void ConfigDialog::editDialog()
 
   editProgram->setWindowTitle(tr("Edit a Program"));
   editProgram->setModal(true);
-  editProgram->exec();
-
+  if(editProgram->exec() == 1)
+  {
   //Get the settings of the program the user just edited
   std::pair<std::string, std::map<std::string,std::string> > tempSettings = editProgram->getSettings();
   m_sendToSettings[tempSettings.first] = tempSettings.second;
+  }
 
   //clear the tree and repopulate it without the programs that have just been deleted
   treePrograms->clear();
