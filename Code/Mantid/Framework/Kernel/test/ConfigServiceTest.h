@@ -270,19 +270,6 @@ public:
     runSaveTest(filename,"13");
   }
 
-  void testTrimLeadingAndTrailing()
-  {
-    std::string toTrim("   Input Workspace ");
-    std::string trimmedValue = ConfigService::Instance().trimLeadingAndTrailing(toTrim);
-    TS_ASSERT_EQUALS(trimmedValue, "Input Workspace");
-    toTrim = ("");
-    trimmedValue = ConfigService::Instance().trimLeadingAndTrailing(toTrim);
-    TS_ASSERT_EQUALS(trimmedValue, "");
-    toTrim = (" ");
-    trimmedValue = ConfigService::Instance().trimLeadingAndTrailing(toTrim);
-    TS_ASSERT_EQUALS(trimmedValue, "");
-  }
-
   void testSaveConfigWithPropertyRemoved()
   {
     const std::string filename("user.settings.testSaveConfigWithPropertyRemoved");
