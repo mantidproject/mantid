@@ -105,11 +105,11 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         self.declareProperty("VanadiumPeakWidthPercentage", 5.)
         self.declareProperty("VanadiumSmoothParams", "20,2")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
-        outfiletypes = ['nxs'] #, 'gsas', 'fullprof', 'gsas and fullprof']
+        outfiletypes = ['', 'nxs'] #, 'gsas', 'fullprof', 'gsas and fullprof']
         self.declareProperty("FilterByLogValue", "", Description="Name of log value to filter by")
         self.declareProperty("FilterMinimumValue", 0.0, Description="Minimum log value for which to keep events.")
         self.declareProperty("FilterMaximumValue", 0.0, Description="Maximum log value for which to keep events.")
-        self.declareProperty("SaveAs", "gsas", ListValidator(outfiletypes))
+        self.declareProperty("SaveAs", "", ListValidator(outfiletypes))
         self.declareFileProperty("OutputDirectory", "", FileAction.Directory)
 
     def _findData(self, runnumber, extension):
