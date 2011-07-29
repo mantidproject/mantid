@@ -668,6 +668,7 @@ class SANS2D(ISISInstrument):
         return logvalues
 
     def _get_const_num(self, log_data, log_name):
+        from datetime import datetime        
         """
             Get a the named entry from the log object. If the entry is a
             time series it's assumed to contain unchanging data and the first
@@ -683,7 +684,24 @@ class SANS2D(ISISInstrument):
             return float(log_data.getLogData(log_name).value)
         except TypeError:
             # if the value was stored as a time series we have an array here 
-            return float(log_data.getLogData(log_name).value[0])
+            property = log_data.getLogData(log_name)
+            
+            size = len(property.value)
+            if size == 1:
+                return float(log_data.getLogData(log_name).value[0])
+
+            start = log_data.getLogData('run_start')
+            dt_0 = datetime.strptime(start.value,"%Y-%m-%dT%H:%M:%S")
+            for i in range(0, size):
+                dt = datetime.strptime(str(property.times[i]),"%Y-%m-%dT%H:%M:%S")
+                if dt > dt_0:
+                    if i == 0:
+                        return float(log_data.getLogData(log_name).value[0])
+                    else:
+                        return float(log_data.getLogData(log_name).value[i-1])
+            
+            # this gets executed if all entries is before the start-time    
+            return float(log_data.getLogData(log_name).value[size-1])    
         
     def apply_detector_logs(self, logvalues):
         #apply the corrections that came from the logs

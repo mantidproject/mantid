@@ -366,7 +366,7 @@ def PhiRanges(phis, plot=True):
     try:
         #run the reductions, calculated will be an array with the names of all the workspaces produced
         calculated = []
-        for i in ranges(0, len(phis), 2):
+        for i in range(0, len(phis), 2):
             SetPhiLimit(phis[i],phis[i+1])
             calculated.append(ReductionSingleton()._reduce())
             ReductionSingleton.replace(ReductionSingleton().settings())
