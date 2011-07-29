@@ -129,6 +129,12 @@ def MaskFile(file_name):
     return status
     
 def SetMonitorSpectrum(specNum, interp=False):
+    """
+        Specifies the spectrum number of the spectrum that will be used to
+        for monitor normalisation
+        @param specNum: a spectrum number (1 or greater)
+        @param interp: when rebinning the wavelength bins to match the main workspace, if use interpolation default no interpolation 
+    """ 
     ReductionSingleton().set_monitor_spectrum(specNum, interp)
 
 def SetTransSpectrum(specNum, interp=False):
@@ -169,6 +175,17 @@ def TransWorkspace(sample, can = None):
     ReductionSingleton().transmission_calculator.calculated_can = can 
 
 def AssignCan(can_run, reload = True, period = isis_reduction_steps.LoadRun.UNSET_PERIOD):
+    """
+        The can is a scattering run under the same conditions as the experimental run but the
+        only the sample container is in the sample position. Hence allowing the effect of the
+        container to be removed. The run is specified using instrumentrunnumber.extension,
+        e.g. SANS2D7777.nxs. On calling this function the run is loaded to a workspace and the
+        detector banks and other components moved as applicable. Currently only reload=true is
+        supported.
+        @param can_run: run number to analysis e.g. SANS2D7777.nxs
+        @param reload: must be set to True
+        @param period: the period (entry) number to load, default is the first period
+    """    
     mes = 'AssignCan("' + can_run + '"'
     if period != isis_reduction_steps.LoadRun.UNSET_PERIOD:
         mes += ', ' + str(period)

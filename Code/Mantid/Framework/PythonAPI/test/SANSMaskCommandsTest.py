@@ -2,7 +2,7 @@ import unittest
 from mantidsimple import *
 import ISISCommandInterface as ISIS
 
-class SANSMaskCommands(unittest.TestCase):
+class SANSMaskCommandsTest(unittest.TestCase):
     """
         The masking commands that are used in the ISIS SANS settings file
         or on the Python command prompt
