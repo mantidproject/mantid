@@ -955,7 +955,10 @@ class MantidPyFramework(FrameworkManager):
         Enables the framework to be used in a dictionary like manner.
         It returns the MatrixWorkspace proxy for the given name
         """
-        return self._proxyfactory.create(self._retrieveWorkspace(key))
+        try:
+            return self._proxyfactory.create(self._retrieveWorkspace(key))
+        except RuntimeError:
+            raise KeyError('Workspace "%s" can not be found' % str(key) )
 
     def __iter__(self):
         """Returns an iterator object that can loop through the workspaces.
@@ -1210,7 +1213,7 @@ class MantidPyFramework(FrameworkManager):
         try:
             return self._getRawTableWorkspacePointer(name)
         except RuntimeError:
-            return None
+            raise RuntimeError('Workspace "%s" does not exist' % str(name) )
         
 
     def _workspaceRemoved(self, name):
