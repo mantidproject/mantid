@@ -37,6 +37,7 @@ set ( SRC_FILES
 	src/IPeak.cpp
 	src/IPeakFunction.cpp
 	src/IPeaksWorkspace.cpp
+	src/ISaveable.cpp
 	src/ISpectrum.cpp
 	src/ITableWorkspace.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp

@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/CpRebinningNx3.h"
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid{
 namespace MDAlgorithms{
@@ -276,12 +277,12 @@ CpRebinningNx3::rebin_Nx3dataset()
       // and handle according to options settings.
       if(ignore_something){
         if(ignote_all){
-          if(s==Inf||isNaN(s)||
-              err==Inf ||isNaN(err)){
+          if(s==Inf||boost::math::isnan(s)||
+              err==Inf ||boost::math::isnan(err)){
             continue;
           }
         }else if(ignore_nan){
-          if(isNaN(s)||isNaN(err)){
+          if(boost::math::isnan(s)||boost::math::isnan(err)){
             continue;
           }
         }else if(ignore_inf){
