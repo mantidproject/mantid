@@ -10,6 +10,7 @@
 #include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
@@ -167,6 +168,14 @@ public:
     pkws->addPeak( PeakObj);
     AnalysisDataService::Instance().add("TOPAZ", pkws);
 
+    boost::shared_ptr<Mantid::API::Algorithm> algb =Mantid::API::AlgorithmFactory::Instance(). create(std::string("Rebin"), 1);
+    algb->initialize();
+    algb->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+    algb->setPropertyValue("OutputWorkspace", "RebinResult");
+    algb->setPropertyValue("Params", "5760.,10.0,5920.");
+    algb->execute();
+    inputW = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("RebinResult"));
+
     PeakIntegration alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
@@ -179,7 +188,6 @@ public:
     alg.setProperty("YMax", 2);
     alg.setProperty("TOFBinMin", -5);
     alg.setProperty("TOFBinMax", 5);
-    alg.setProperty("Params", "5760.,10.0,5920.");
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
     TS_ASSERT( alg.isExecuted() )
 

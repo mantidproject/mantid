@@ -75,7 +75,9 @@ namespace Crystal
         "Maximum wavelength limit at which to stop looking for single-crystal peaks.");
 
     declareProperty(new PropertyWithValue<double>("MinDSpacing",1.0,Direction::Input),
-        "Minimum d-spacing of peaks to consider.");
+        "Minimum d-spacing of peaks to consider. Default = 1.0");
+    declareProperty(new PropertyWithValue<double>("MaxDSpacing",100.0,Direction::Input),
+        "Maximum d-spacing of peaks to consider.");
 
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("HKLPeaksWorkspace","",Direction::Input, true),
         "Optional: An input PeaksWorkspace with the HKL of the peaks that we should predict.");
@@ -104,7 +106,7 @@ namespace Crystal
 
     // Skip those with unacceptable d-spacings
     double d = crystal.d(hkl);
-    if (d > minD)
+    if (d > minD && d < maxD)
     {
       // The q-vector direction of the peak is = goniometer * ub * hkl_vector
       // This is in inelastic convention: momentum transfer of the LATTICE!
@@ -189,6 +191,7 @@ namespace Crystal
     wlMin = getProperty("WavelengthMin");
     wlMax = getProperty("WavelengthMax");
     minD = getProperty("MinDSpacing");
+    maxD = getProperty("MaxDSpacing");
 
     PeaksWorkspace_sptr HKLPeaksWorkspace = getProperty("HKLPeaksWorkspace");
 
@@ -197,6 +200,7 @@ namespace Crystal
     if (wlMin >= wlMax) throw std::invalid_argument("WavelengthMin must be < WavelengthMax.");
     if (wlMin < 1e-5) throw std::invalid_argument("WavelengthMin must be stricly positive.");
     if (minD < 1e-4) throw std::invalid_argument("MinDSpacing must be stricly positive.");
+    if (minD >= maxD) throw std::invalid_argument("MinDSpacing must be < MaxDSpacing.");
 
     // Get the instrument and its detectors
     inst = inWS->getInstrument();
@@ -258,6 +262,7 @@ namespace Crystal
       // --------------Use the HKL from a list in a PeaksWorkspace --------------------------
       // Disable some of the other filters
       minD = 0.0;
+      maxD = 1e10;
       wlMin = 0.0;
       wlMax = 1e10;
 
@@ -303,7 +308,7 @@ namespace Crystal
       V3D hklDiff = hklMax-hklMin + V3D(1,1,1);
       size_t numHKLs = size_t( hklDiff[0] * hklDiff[1] * hklDiff[2]);
 
-      g_log.information() << "HKL range for d_min of " << minD << " is from " << hklMin << " to " << hklMax << ", a total of " << numHKLs << " possible HKL's\n";
+      g_log.information() << "HKL range for d_min of " << minD << "to d_max of " << maxD << " is from " << hklMin << " to " << hklMax << ", a total of " << numHKLs << " possible HKL's\n";
 
       if (numHKLs > 10000000000)
         throw std::invalid_argument("More than 10 billion HKLs to search. Is your d_min value too small?");

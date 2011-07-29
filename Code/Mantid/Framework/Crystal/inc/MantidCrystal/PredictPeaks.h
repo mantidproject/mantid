@@ -62,6 +62,8 @@ namespace Crystal
     OrientedLattice crystal;
     /// Min D spacing to apply.
     double minD;
+    /// Max D spacing to apply.
+    double maxD;
     /// Rotation matrix
     Mantid::Kernel::DblMatrix mat;
 
