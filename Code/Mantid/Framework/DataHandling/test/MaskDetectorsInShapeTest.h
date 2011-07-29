@@ -7,6 +7,8 @@
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidKernel/ArrayProperty.h"
 
+using namespace Mantid::API;
+
 class MaskDetectorsInShapeTest : public CxxTest::TestSuite
 {
 public:
@@ -116,4 +118,38 @@ private:
 
 };
 
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class MaskDetectorsInShapeTestPerformance : public CxxTest::TestSuite
+{
+
+private:
+  const std::string workspace;
+
+public:
+  static MaskDetectorsInShapeTestPerformance *createSuite() { return new MaskDetectorsInShapeTestPerformance(); }
+  static void destroySuite(MaskDetectorsInShapeTestPerformance *suite) { delete suite; }
+
+  MaskDetectorsInShapeTestPerformance() : workspace("SANS2D")
+  {
+    // Load the instrument alone so as to isolate the raw file loading time from the instrument loading time
+    IAlgorithm * loader = FrameworkManager::Instance().createAlgorithm("LoadEmptyInstrument");
+    loader->setPropertyValue("Filename","SANS2D_Definition.xml");
+    loader->setPropertyValue("OutputWorkspace", workspace);
+    TS_ASSERT( loader->execute() );
+  }
+
+  void testMaskingLotsOfDetectors()
+  {
+    IAlgorithm * masker = FrameworkManager::Instance().createAlgorithm("MaskDetectorsInShape");
+    masker->setPropertyValue("Workspace",workspace);
+    masker->setPropertyValue("ShapeXML","<infinite-cylinder id=\"beam_area\"><centre x=\"0\" y=\"0\" z=\"0.0\" /><axis x=\"0\" y=\"0\" z=\"1\" /><radius val=\"0.28\" /></infinite-cylinder><algebra val=\"#beam_area\"/>");
+    masker->execute();
+
+    AnalysisDataService::Instance().remove(workspace);
+  }
+
+};
 #endif /*MARKDEADDETECTORSINSHAPETEST_H_*/
