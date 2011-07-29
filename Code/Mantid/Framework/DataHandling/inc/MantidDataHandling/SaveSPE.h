@@ -52,7 +52,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DataHandling"; }
+  virtual const std::string category() const { return "DataHandling;Inelastic"; }
 
   /// the mask flag (=-1e30) from the SPE specification http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf
   static const double MASK_FLAG;

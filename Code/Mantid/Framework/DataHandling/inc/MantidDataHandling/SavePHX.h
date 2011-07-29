@@ -58,7 +58,7 @@ public:
   { return (1);}
   /// Algorithm's category for identification
   virtual const std::string category() const
-  { return "DataHandling";}
+  { return "DataHandling;Inelastic";}
 
 private:
   /// Initialisation code
