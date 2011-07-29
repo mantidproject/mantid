@@ -8,7 +8,7 @@
 #include "vtkPointData.h"
 #include "vtkTransform.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
-#include <vtkSphereSource.h>
+#include <vtkCubeSource.h>
 
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidCrystal/LoadPeaksFile.h"
@@ -89,14 +89,14 @@ int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInforma
   p_peakFactory->initialize(peakWS);
   vtkDataSet * structuredMesh = p_peakFactory->create();
 
-  vtkSphereSource* sphere = vtkSphereSource::New();
-  sphere->SetRadius(m_width); 
-  sphere->SetThetaResolution(10);//HARDCODED .. could be configurable.
-  sphere->SetThetaResolution(10);//HARDCODED .. could be configurable.
+  vtkCubeSource* cube = vtkCubeSource::New();
+  cube->SetXLength(m_width);
+  cube->SetYLength(m_width);
+  cube->SetZLength(m_width);
 
   vtkPVGlyphFilter* glyphFilter = vtkPVGlyphFilter::New();
   glyphFilter->SetInput(structuredMesh);
-  glyphFilter->SetSource(sphere->GetOutput());
+  glyphFilter->SetSource(cube->GetOutput());
   glyphFilter->Update();
   vtkPolyData* glyphed = glyphFilter->GetOutput();
 
