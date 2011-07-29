@@ -24,7 +24,7 @@ using Mantid::Kernel::CPUTimer;
 class ISaveableTester : public ISaveable
 {
 public:
-  ISaveableTester(size_t id) : ISaveable(id), m_safeToWrite(true){};
+  ISaveableTester(size_t id) : ISaveable(id), m_memory(1), m_safeToWrite(true){};
 
   virtual void save() const
   {
@@ -37,13 +37,14 @@ public:
   virtual void load()
   {}
 
-  virtual size_t getMRUMemory() const {return 1;};
+  size_t m_memory;
+  virtual size_t getMRUMemory() const {return m_memory;};
 
   bool m_safeToWrite;
   virtual bool safeToWrite() const {return m_safeToWrite; }
 
   // File position = same as its ID
-  virtual uint64_t getFilePosition() const { return uint64_t(getId()); }
+  virtual uint64_t getFilePosition() const { return uint64_t(10-getId()); }
 
   static std::string fakeFile;
 };
@@ -79,11 +80,11 @@ public:
       data.push_back( new ISaveableTester(i) );
     }
 
-    DiskMRU::item_list list;
+    DiskMRU::mru_list list;
     CPUTimer tim;
     for (size_t i=0; i<num; i++)
     {
-      std::pair<DiskMRU::item_list::iterator,bool> p;
+      std::pair<DiskMRU::mru_list::iterator,bool> p;
       p = list.push_front(data[i]);
     }
     std::cout << tim << " to fill the list." << std::endl;
@@ -103,21 +104,6 @@ public:
     }
     std::cout << tim << " to fill a map[size_t, *]." << std::endl;
 
-
-//    typedef boost::multi_index::multi_index_container<
-//      ISaveable *,
-//      boost::multi_index::indexed_by<
-//        boost::multi_index::ordered_non_unique<size_t>
-//      >
-//    > item_list2;
-//
-//    item_list2 list2;
-//    for (size_t i=0; i<num; i++)
-//    {
-//      //list2.insert(data[i]);
-//    }
-//    std::cout << tim << " to fill the list2." << std::endl;
-
     std::multimap<size_t, size_t> mmap;
     for (size_t i=0; i<num; i++)
     {
@@ -136,10 +122,9 @@ public:
 
 
   //--------------------------------------------------------------------------------
-  void test_simple()
+  /** Basic operation of pushing */
+  void test_basic()
   {
-    ISaveableTester::fakeFile = "";
-
     // Room for 4 in the MRU, and 3 in the to-write cache
     DiskMRU mru(4, 3);
 
@@ -167,7 +152,7 @@ public:
     TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4); //We should have 3,4,5,6 in there now
     TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
     // The "file" was written out this way (the right order):
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,");
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "2,1,0,");
   }
 
   //--------------------------------------------------------------------------------
@@ -210,7 +195,7 @@ public:
     TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
 
     // The "file" was written out this way (sorted by file position):
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "1,5,9,");
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "9,5,1,");
   }
 
   //--------------------------------------------------------------------------------
@@ -227,8 +212,61 @@ public:
     TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
 
     // Item #1 was skipped and is still in the buffer!
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,2,");
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "2,0,");
     TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 1);
+
+    // But it'll get written out next time
+    ISaveableTester::fakeFile = "";
+    data[1]->m_safeToWrite = true;
+    mru.loading(data[7]);
+    mru.loading(data[8]);
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "4,3,1,");
+    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
+  }
+
+  //--------------------------------------------------------------------------------
+  /** If a new block being loaded is big, it'll push more than one into the to-write buffer */
+  void test_canPushTwoIntoTheToWriteBuffer()
+  {
+    // Room for 4 in the MRU, and 3 in the to-write cache
+    DiskMRU mru(4, 3);
+    // Fill the cache
+    for (size_t i=0; i<4; i++)
+      mru.loading(data[i]);
+    // This one uses 2 blocks worth of memory
+    data[4]->m_memory = 2;
+    mru.loading(data[4]);
+    // So there's now 3 blocks (with 4 mem) in the MRU
+    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
+    // And 2 in the toWrite buffer
+    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 2);
+
+    // This will write out the 3 in the cache
+    mru.loading(data[5]);
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "2,1,0,");
+    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
+  }
+
+  //--------------------------------------------------------------------------------
+  /** A block placed in the toWrite buffer should get taken */
+  void test_takingBlockOutOfToWriteBuffer()
+  {
+    // Room for 4 in the MRU, and 3 in the to-write cache
+    DiskMRU mru(4, 3);
+    // Fill the cache. 0,1 in the toWrite buffer
+    for (size_t i=0; i<6; i++)
+      mru.loading(data[i]);
+    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 2);
+    // Should pop #0 out of the toWrite buffer and push another one in (#2 in this case)
+    mru.loading(data[0]);
+    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 2);
+
+    // 1,2,3 (and not 0) should be in "toWrite"
+    mru.loading(data[6]);
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "3,2,1,");
+    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
   }
 
 };

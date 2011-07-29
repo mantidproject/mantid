@@ -12,7 +12,9 @@ namespace API
    */
   DiskMRU::DiskMRU()
   : m_memoryAvail(100), m_writeBufferSize(50),
-    m_memoryUsed(0), m_memoryToWrite(0)
+    m_memoryUsed(0),
+    m_toWrite_byId( m_toWrite.get<1>() ),
+    m_memoryToWrite(0)
   {
   }
 
@@ -25,7 +27,9 @@ namespace API
    */
   DiskMRU::DiskMRU(size_t m_memoryAvail, size_t m_writeBufferSize)
   : m_memoryAvail(m_memoryAvail), m_writeBufferSize(m_writeBufferSize),
-    m_memoryUsed(0), m_memoryToWrite(0)
+    m_memoryUsed(0),
+    m_toWrite_byId( m_toWrite.get<1>() ),
+    m_memoryToWrite(0)
   {
   }
     
@@ -48,8 +52,16 @@ namespace API
   void DiskMRU::loading(ISaveable * item)
   {
     // Place the item in the MRU list
-    std::pair<item_list::iterator,bool> p;
+    std::pair<mru_list::iterator,bool> p;
     p = list.push_front(item);
+
+    // Find the item in the toWrite buffer (using the item's ID)
+    toWriteMap_by_Id_t::iterator found = m_toWrite_byId.find( item->getId() );
+    if (found != m_toWrite_byId.end())
+    {
+      m_toWrite_byId.erase(item->getId());
+      m_memoryToWrite -= item->getMRUMemory();
+    }
 
     if (!p.second)
     {
@@ -71,7 +83,8 @@ namespace API
         list.pop_back();
 
         // And put it in the queue of stuff to write.
-        m_toWrite.insert( pairObj_t(toWrite->getFilePosition(), toWrite) );
+        m_toWrite.insert(toWrite);
+        //m_toWrite.insert( pairObj_t(toWrite->getFilePosition(), toWrite) );
 
         // Track the memory change in the two buffers
         size_t thisMem = toWrite->getMRUMemory();
@@ -103,7 +116,7 @@ namespace API
 
     for (; it != it_end; it++)
     {
-      ISaveable * obj = it->second;
+      ISaveable * obj = *it; //->second;
       if (obj->safeToWrite())
       {
         // Write to the disk
@@ -112,7 +125,8 @@ namespace API
       else
       {
         // The object is busy, can't write. Save it for later
-        couldNotWrite.insert( pairObj_t(obj->getFilePosition(), obj) );
+        //couldNotWrite.insert( pairObj_t(obj->getFilePosition(), obj) );
+        couldNotWrite.insert( obj );
         memoryNotWritten += obj->getMRUMemory();
       }
     }

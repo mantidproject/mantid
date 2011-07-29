@@ -7,6 +7,7 @@
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
+#include <boost/multi_index/ordered_index.hpp>
 #include <stdint.h>
 #include <vector>
 #include <map>
@@ -72,13 +73,28 @@ namespace API
         boost::multi_index::sequenced<>,
         boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ISaveable, size_t, getId)>
       >
-    > item_list;
+    > mru_list;
 
     /// Typedef for a par for the map. Key = position in the file; value = the ISaveable object
     typedef std::pair<uint64_t, ISaveable*> pairObj_t;
 
-    /// A map for the buffer of "toWrite" objects.
-    typedef std::multimap<uint64_t, ISaveable*> toWriteMap_t;
+
+    /** A map for the buffer of "toWrite" objects.
+     * Index 1: Order in the file to save to
+     * Index 2: ID of the object
+     */
+    //typedef std::multimap<uint64_t, ISaveable*> toWriteMap_t;
+    typedef boost::multi_index::multi_index_container<
+      ISaveable *,
+      boost::multi_index::indexed_by<
+        boost::multi_index::ordered_non_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ISaveable, uint64_t, getFilePosition)>,
+        boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ISaveable, size_t, getId)>
+      >
+    > toWriteMap_t;
+
+    /// A way to index the toWrite buffer by ID (instead of the file position)
+    typedef toWriteMap_t::nth_index<1>::type toWriteMap_by_Id_t;
+
 
     DiskMRU();
 
@@ -101,7 +117,7 @@ namespace API
     void writeOldObjects();
 
     /// The MRU list container
-    item_list list;
+    mru_list list;
 
     /// Amount of memory that the MRU is allowed to use.
     /// Note that the units are up to the ISaveable to define; they don't have to be bytes.
@@ -113,8 +129,11 @@ namespace API
     /// Amount of memory actually used up (in the MRU, not the toWriteBuffer)
     size_t m_memoryUsed;
 
-    /// List of the data objects that should be written out.
+    /// List of the data objects that should be written out. Ordered by file position.
     toWriteMap_t m_toWrite;
+
+    /// Reference to the same m_toWrite map, but indexed by item ID instead of by file position.
+    toWriteMap_by_Id_t & m_toWrite_byId;
 
     /// Total amount of memory in the "toWrite" buffer.
     size_t m_memoryToWrite;
