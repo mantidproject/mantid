@@ -23,7 +23,7 @@ public:
 
   void testCategory()
   {
-    TS_ASSERT_EQUALS( sqw.category(), "General" );
+    TS_ASSERT_EQUALS( sqw.category(), "General;Inelastic" );
   }
   
   void testInit()
