@@ -1,4 +1,3 @@
-#include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MDDataObjects/MDIndexCalculator.h"

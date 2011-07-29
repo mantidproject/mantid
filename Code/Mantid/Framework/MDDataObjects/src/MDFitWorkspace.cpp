@@ -1,4 +1,3 @@
-#include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/MDFitWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Expression.h"

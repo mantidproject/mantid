@@ -1,4 +1,3 @@
-#include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/MD_File_hdfMatlab.h"
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDGeometryBasis.h"

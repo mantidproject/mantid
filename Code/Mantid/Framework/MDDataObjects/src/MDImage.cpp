@@ -1,4 +1,3 @@
-#include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/MDImage.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
 
