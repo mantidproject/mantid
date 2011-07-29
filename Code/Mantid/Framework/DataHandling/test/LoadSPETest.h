@@ -21,7 +21,7 @@ public:
 
   void testCategory()
   {
-    TS_ASSERT_EQUALS( loader.category(), "DataHandling" );
+    TS_ASSERT_EQUALS( loader.category(), "DataHandling;Inelastic" );
   }
 
   void testInit()

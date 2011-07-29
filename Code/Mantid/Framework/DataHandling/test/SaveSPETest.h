@@ -51,7 +51,7 @@ public:
 
   void testCategory()
   {
-    TS_ASSERT_EQUALS( saver->category(), "DataHandling" );
+    TS_ASSERT_EQUALS( saver->category(), "DataHandling;Inelastic" );
   }
 
   void testInit()
