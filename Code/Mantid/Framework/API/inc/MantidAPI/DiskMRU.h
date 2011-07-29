@@ -3,11 +3,13 @@
     
 #include "MantidAPI/ISaveable.h"
 #include "MantidKernel/System.h"
-#include <vector>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
+#include <stdint.h>
+#include <vector>
+#include <map>
 
 
 namespace Mantid
@@ -72,65 +74,31 @@ namespace API
       >
     > item_list;
 
+    /// Typedef for a par for the map. Key = position in the file; value = the ISaveable object
+    typedef std::pair<uint64_t, ISaveable*> pairObj_t;
+
+    /// A map for the buffer of "toWrite" objects.
+    typedef std::multimap<uint64_t, ISaveable*> toWriteMap_t;
 
     DiskMRU();
+
+    DiskMRU(size_t m_memoryAvail, size_t m_writeBufferSize);
     
     ~DiskMRU();
 
-    //---------------------------------------------------------------------------------------------
-    /** Tell the MRU that we are loading the given item.
-     *
-     * @param item :: item that is
-     * @param memory :: memory that the object will use.
-     */
-    void loading(ISaveable * item)
-    {
-      // Place the item in the MRU list
-      std::pair<item_list::iterator,bool> p;
-      p = list.push_front(item);
+    void loading(ISaveable * item);
 
-      if (!p.second)
-      {
-        /* duplicate item */
-        list.relocate(list.begin(), p.first); /* put in front */
-        return;
-      }
+    ///@return the memory in the MRU
+    size_t getMemoryUsed() const
+    { return m_memoryUsed;  }
 
-      // We are now using more memory.
-      m_memoryUsed += item->getMRUMemory();
-
-      if (m_memoryUsed > m_memoryAvail)
-      {
-        // Pop the least-used object out the back
-        ISaveable *toWrite = list.back();
-        list.pop_back();
-
-        // And put it in the queue of stuff to write.
-        m_toWrite.push_back(toWrite);
-        m_memoryToWrite += toWrite->getMRUMemory();
-
-        // Should we now write out the old data?
-        if (m_memoryToWrite > 0)
-          writeOldObjects();
-      }
-    }
-
+    ///@return the memory in the "toWrite" buffer
+    size_t getMemoryToWrite() const
+    { return m_memoryToWrite;  }
 
 
   protected:
-    //---------------------------------------------------------------------------------------------
-    /** Method to write out the old objects that have been
-     * stored in the "toWrite" buffer.
-     */
-    void writeOldObjects()
-    {
-      size_t num = m_toWrite.size();
-      for (size_t i=0; i<num; i++)
-      {
-        // Write...
-      }
-    }
-
+    void writeOldObjects();
 
     /// The MRU list container
     item_list list;
@@ -139,11 +107,14 @@ namespace API
     /// Note that the units are up to the ISaveable to define; they don't have to be bytes.
     size_t m_memoryAvail;
 
-    /// Amount of memory actually used up.
+    /// Amount of memory to accumulate in the write buffer before writing.
+    size_t m_writeBufferSize;
+
+    /// Amount of memory actually used up (in the MRU, not the toWriteBuffer)
     size_t m_memoryUsed;
 
-    /// Vector of the data objects that should be written out (no particular order).
-    std::vector<ISaveable *> m_toWrite;
+    /// List of the data objects that should be written out.
+    toWriteMap_t m_toWrite;
 
     /// Total amount of memory in the "toWrite" buffer.
     size_t m_memoryToWrite;

@@ -59,7 +59,7 @@ int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInforma
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
 
-   //Ensure that the Event Workspace is only generated once
+   //Ensure that the Peaks Workspace is only generated once
   if(!m_isSetup) 
   {
     // This actually loads the peaks file
