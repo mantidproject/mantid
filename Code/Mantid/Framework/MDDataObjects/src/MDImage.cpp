@@ -7,7 +7,6 @@ namespace Mantid
 namespace MDDataObjects
 {
 //
-using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
