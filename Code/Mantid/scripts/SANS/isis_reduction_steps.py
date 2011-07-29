@@ -150,18 +150,19 @@ class LoadRun(object):
 
         if not self._reload:
             raise NotImplementedError('Raw workspaces must be reloaded, run with reload=True')
-            if self._period > 1:
-                workspace = self._get_workspace_name(self._period)
-            else:
-                workspace = self._get_workspace_name()
-            self.periods_in_file = self._find_workspace_num_periods(workspace)
-            if mantid.workspaceExists(workspace):
-                self.wksp_name = workspace
-                return ''
-            period_definitely_inc = self._get_workspace_name(self._period)
-            if mantid.workspaceExists(period_definitely_inc):
-                self.wksp_name = period_definitely_inc
-                return ''
+            #this old code should be checked before reimplementing not reloading raw workspaces 
+            #if self._period > 1:
+            #    workspace = self._get_workspace_name(self._period)
+            #else:
+            #    workspace = self._get_workspace_name()
+            #self.periods_in_file = self._find_workspace_num_periods(workspace)
+            #if mantid.workspaceExists(workspace):
+            #    self.wksp_name = workspace
+            #    return ''
+            #period_definitely_inc = self._get_workspace_name(self._period)
+            #if mantid.workspaceExists(period_definitely_inc):
+            #    self.wksp_name = period_definitely_inc
+            #    return ''
 
         self._data_file = os.path.join(reducer._data_path, data_file)
         # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
