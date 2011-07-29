@@ -78,11 +78,17 @@ set ( UI_FILES inc/MantidQtMantidWidgets/ICatAdvancedSearch.ui
                inc/MantidQtMantidWidgets/SequentialFitDialog.ui
 )
 
+
 include_directories ( inc )
 include_directories ( ${QWT_INCLUDE_DIR} )
 include_directories ( ../../QtPropertyBrowser/src )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
+
+
+set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
+# Use a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MantidQtMantidWidgets/PrecompiledHeader.h MantidQtMantidWidgets MantidWidgets ALL_SRC INC_FILES )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
@@ -90,7 +96,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 # For Windows:
 add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS )
 
-add_library ( MantidWidgets ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} ${UI_HDRS} )
+add_library ( MantidWidgets ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 target_link_libraries ( MantidWidgets MantidQtAPI QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 

@@ -1,0 +1,7 @@
+#ifndef MANTID_APITEST_PRECOMPILED_HEADER_H_
+#define MANTID_APITEST_PRECOMPILED_HEADER_H_
+
+#include <cxxTest/TestSuite.h>
+#undef _CXXTEST_LONGLONG // Kill a warning
+
+#endif //MANTID_API_PRECOMPILED_HEADER_H_

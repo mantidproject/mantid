@@ -127,7 +127,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/origin/OPJFile.cpp
                    src/plot2D/ScaleEngine.cpp
                    src/analysis/fft2D.cpp
-                   src/zlib123/minigzip.c
                    src/lib/src/CollapsiveGroupBox.cpp
                    src/lib/src/ColorBox.cpp
                    src/lib/src/ColorButton.cpp
@@ -142,6 +141,8 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/lib/src/TextFormatButtons.cpp
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.cpp
 )
+
+set ( QTIPLOT_C_SRC src/zlib123/minigzip.c )
 
 # Suppress compiler warning on file that isn't ours
 if ( CMAKE_COMPILER_IS_GNUCXX )
@@ -678,6 +679,12 @@ set_source_files_properties ( ${CMAKE_CURRENT_BINARY_DIR}/qtcolorpicker.moc
                              PROPERTIES HEADER_FILE_ONLY true )
 set ( MOCCED_FILES ${MOCCED_FILES} ${CMAKE_CURRENT_BINARY_DIR}/qtcolorpicker.moc )
 
+set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
+set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
+set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
+# Use a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( src/PrecompiledHeader.h "" MantidPlot ALL_SRC INC_FILES )
+
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 # The generated ui headers will go here:
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
@@ -711,8 +718,6 @@ include_directories ( src )
 include_directories ( src/lib/include )
 include_directories ( src/lib/3rdparty/qtcolorpicker/src )
 
-set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
-set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
 
 ###########################################################################
 # Application icon files
@@ -731,9 +736,8 @@ if ( APPLE )
   set_source_files_properties(MANTID_RC_FILE PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif ()
 
-add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${SRC_FILES} ${INC_FILES} 
-                            ${MOCCED_FILES} ${UI_HDRS} ${RES_FILES} 
-                            ${MANTID_RC_FILE}
+add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} ${INC_FILES} 
+                            ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE}
 )
 
 # Library dependencies

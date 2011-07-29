@@ -104,6 +104,9 @@ set ( GMOCK_TEST_FILES
 	test/BinToMDHistoWorkspaceTest.h
 )
 
+# Use a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MantidMDEvents/PrecompiledHeader.h MantidMDEvents MDEvents SRC_FILES INC_FILES )
+
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(MDEvents SRC_FILES SRC_UNITY_IGNORE_FILES 10)

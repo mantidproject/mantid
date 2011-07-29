@@ -51,6 +51,9 @@ set ( TEST_FILES
 	test/SearchTest.h
 )
 
+# Use a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MantidICat/PrecompiledHeader.h MantidICat ICat SRC_FILES INC_FILES )
+
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(ICat SRC_FILES SRC_UNITY_IGNORE_FILES 10)

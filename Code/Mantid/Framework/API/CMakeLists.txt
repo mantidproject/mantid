@@ -19,7 +19,6 @@ set ( SRC_FILES
 	src/ConstraintFactory.cpp
 	src/CostFunctionFactory.cpp
 	src/DeprecatedAlgorithm.cpp
-	src/DiskMRU.cpp
 	src/ExperimentInfo.cpp
 	src/Expression.cpp
 	src/FileFinder.cpp
@@ -38,7 +37,6 @@ set ( SRC_FILES
 	src/IPeak.cpp
 	src/IPeakFunction.cpp
 	src/IPeaksWorkspace.cpp
-	src/ISaveable.cpp
 	src/ISpectrum.cpp
 	src/ITableWorkspace.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp
@@ -109,7 +107,6 @@ set ( INC_FILES
 	inc/MantidAPI/CostFunctionFactory.h
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
-	inc/MantidAPI/DiskMRU.h
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/ExperimentInfo.h
 	inc/MantidAPI/Expression.h
@@ -138,7 +135,6 @@ set ( INC_FILES
 	inc/MantidAPI/IPeak.h
 	inc/MantidAPI/IPeakFunction.h
 	inc/MantidAPI/IPeaksWorkspace.h
-	inc/MantidAPI/ISaveable.h
 	inc/MantidAPI/ISpectrum.h
 	inc/MantidAPI/ITableWorkspace.h
 	inc/MantidAPI/IWorkspaceProperty.h
@@ -202,7 +198,6 @@ set ( TEST_FILES
 	test/AsynchronousTest.h
 	test/CompositeFunctionTest.h
 	test/CostFunctionFactoryTest.h
-	test/DiskMRUTest.h
 	test/ExperimentInfoTest.h
 	test/ExpressionTest.h
 	test/FileFinderTest.h
@@ -212,7 +207,6 @@ set ( TEST_FILES
 	test/IEventListTest.h
 	test/IFunctionMDTest.h
 	test/IMDWorkspaceTest.h
-	test/ISaveableTest.h
 	test/ISpectrumTest.h
 	test/ImplicitFunctionParserFactoryTest.h
 	test/InstrumentDataServiceTest.h
@@ -229,8 +223,8 @@ set ( TEST_FILES
 	test/SpectraAxisTest.h
 	test/SpectraDetectorMapTest.h
 	test/TextAxisTest.h
-	test/VectorParameterParserTest.h
 	test/VectorParameterTest.h
+	test/VectorParameterParserTest.h
 	test/WorkspaceFactoryTest.h
 	test/WorkspaceHistoryTest.h
 	test/WorkspacePropertyTest.h
@@ -240,6 +234,9 @@ set ( GMOCK_TEST_FILES
         test/ImplicitFunctionFactoryTest.h
         test/ImplicitFunctionParameterParserFactoryTest.h
 )
+
+# Use a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MantidAPI/PrecompiledHeader.h MantidAPI API SRC_FILES INC_FILES )
 
 if(UNITY_BUILD)
   include(UnityBuild)
@@ -265,10 +262,10 @@ if ( CXXTEST_FOUND )
   include_directories ( ../TestHelpers/inc ../DataObjects/inc )
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( APITest API ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} DataObjects  )
+    target_link_libraries( APITest API ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} TestHelpers )
   else ()
     cxxtest_add_test ( APITest ${TEST_FILES} )
-    target_link_libraries( APITest API  )
+    target_link_libraries( APITest API TestHelpers )
   endif()
   add_dependencies ( FrameworkTests APITest )
   # Add to the 'FrameworkTests' group in VS

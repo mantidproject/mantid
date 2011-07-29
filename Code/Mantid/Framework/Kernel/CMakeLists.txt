@@ -232,10 +232,14 @@ set ( TEST_FILES
 	test/VectorHelperTest.h
 )
 
+# Use a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MantidKernel/PrecompiledHeader.h MantidKernel Kernel SRC_FILES INC_FILES )
+
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(Kernel SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
+
 
 # Add the target for this directory
 add_library ( Kernel ${SRC_FILES} ${INC_FILES} )

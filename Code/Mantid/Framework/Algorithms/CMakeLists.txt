@@ -451,6 +451,9 @@ set ( TEST_FILES
 	test/WorkspaceGroupTest.h
 )
 
+# Use a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MantidAlgorithms/PrecompiledHeader.h MantidAlgorithms Algorithms SRC_FILES INC_FILES )
+
 set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
     src/FFTSmooth.cpp 
     src/FFTSmooth2.cpp

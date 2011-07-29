@@ -66,6 +66,10 @@ include_directories ( ../../QtPropertyBrowser/src )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
+set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
+# Use a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MantidQtCustomInterfaces/PrecompiledHeader.h MantidQtCustomInterfaces MantidQtCustomInterfaces ALL_SRC INC_FILES )
+
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 
@@ -74,7 +78,7 @@ if(UNITY_BUILD)
   enable_unity_build(CustomInterfaces SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-add_library ( CustomInterfaces ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} ${UI_HDRS} )
+add_library ( CustomInterfaces ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 # Set the name of the generated library
 set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces )
 

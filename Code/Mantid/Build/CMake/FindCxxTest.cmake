@@ -90,6 +90,7 @@
 #     Eliminated superfluous CXXTEST_FOUND assignment
 #     Cleaned up and added more documentation
 
+include ( PrecompiledHeaderCommands )
 
 #=============================================================
 # CXXTEST_ADD_TEST (public macro to add unit tests)
@@ -106,7 +107,8 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
 
     # convert the header files to have full path
-    set (_cxxtest_cpp_files "${_cxxtest_real_outfname}")
+    set (_cxxtest_cpp_files ${_cxxtest_real_outfname} )
+    set (_cxxtest_h_files )
     foreach (part ${ARGN})
       get_filename_component(_cxxtest_cpp ${part} NAME)
       string ( REPLACE ".h" ".cpp" _cxxtest_cpp ${_cxxtest_cpp} )
@@ -119,14 +121,20 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
         COMMAND python ${CXXTEST_TESTGEN_EXECUTABLE} --part
         --world ${_cxxtest_testname} -o ${_cxxtest_cpp} ${_cxxtest_h}
 	)
-
+    
       set_source_files_properties(${_cxxtest_cpp} PROPERTIES GENERATED true)
 
       set (_cxxtest_cpp_files ${_cxxtest_cpp} ${_cxxtest_cpp_files})
+      set (_cxxtest_h_files ${part} ${_cxxtest_h_files})
     endforeach (part ${ARGN})
-
+    
+    get_filename_component( _test_dir ${ARGV1} PATH )
+    if( EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir}/PrecompiledHeader.h )
+      ADD_PRECOMPILED_HEADER( ${_test_dir}/PrecompiledHeader.h "" ${_cxxtest_testname} _cxxtest_cpp_files _cxxtest_h_files)
+    ENDIF ()     
+    
     # define the test executable and exclude it from the all target
-    add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_cpp_files} ${ARGN})
+    add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_cpp_files} ${_cxxtest_h_files} )
 
     # only the package wide test is added to check
     add_dependencies(check ${_cxxtest_testname})

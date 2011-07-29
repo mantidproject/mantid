@@ -37,7 +37,6 @@ set ( INC_FILES
     inc/MDDataObjects/MDWorkspaceIterator.h
 	inc/MDDataObjects/MD_FileFormatFactory.h
 	inc/MDDataObjects/MD_FileHoraceReader.h
-	inc/MDDataObjects/stdafx.h
 # test helpers
 	inc/MDDataObjectsTestHelpers/MDTestWorkspace.h 	
 	inc/MDDataObjectsTestHelpers/MD_FileTestDataGenerator.h 	
@@ -65,6 +64,8 @@ test/MDWorkspaceTest.h
 test/MDWorkspaceIteratorTest.h
 )
 
+# Use a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MDDataObjects/PrecompiledHeader.h MDDataObjects MDDataObjects SRC_FILES INC_FILES )
 
 if(UNITY_BUILD)
   include(UnityBuild)
