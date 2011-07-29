@@ -65,8 +65,8 @@ class CentreFinder(object):
         for out_wksp in self.QUADS:
             in_wksp = out_wksp+'_tmp' 
             ReplaceSpecialValues(InputWorkspace=in_wksp,OutputWorkspace=in_wksp,NaNValue=0,InfinityValue=0)
-            rem_zeros = sans_reduction_steps.StripEndZeros()
-            rem_zeros.execute(setup, in_wksp)
+            rem_nans = sans_reduction_steps.StripEndNans()
+            rem_nans.execute(setup, in_wksp)
     
             RenameWorkspace(in_wksp, out_wksp)
     
