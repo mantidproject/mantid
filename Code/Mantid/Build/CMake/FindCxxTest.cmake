@@ -130,7 +130,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     
     get_filename_component( _test_dir ${ARGV1} PATH )
     if( EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir}/PrecompiledHeader.h )
-      ADD_PRECOMPILED_HEADER( ${_test_dir}/PrecompiledHeader.h "" ${_cxxtest_testname} _cxxtest_cpp_files _cxxtest_h_files)
+      ADD_PRECOMPILED_HEADER( ${_test_dir}/PrecompiledHeader.h ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir} ${_cxxtest_testname} _cxxtest_cpp_files _cxxtest_h_files)
     ENDIF ()     
     
     # define the test executable and exclude it from the all target
