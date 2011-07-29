@@ -3,9 +3,11 @@
 
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
+#include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidNexus/NeXusFile.hpp"
@@ -14,12 +16,12 @@
 #include <map>
 #include <memory>
 #include <Poco/File.h>
-#include "MantidMDEvents/MDBin.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
 using Mantid::Kernel::ConfigService;
 using Mantid::Geometry::MDDimensionExtents;
+using Mantid::Kernel::CPUTimer;
 
 class MDBoxTest :    public CxxTest::TestSuite
 {
@@ -492,8 +494,10 @@ public:
     MDBox<MDEvent<3>,3> c;
     TS_ASSERT_EQUALS( c.getNPoints(), 0);
 
+    CPUTimer tim;
     c.setFileIndex(500, 1000);
     c.loadNexus(file);
+    std::cout << tim << " for the LoadNexus call alone." << std::endl;
     TS_ASSERT_EQUALS( c.getNPoints(), 1000);
     const std::vector<MDEvent<3> > & events = c.getEvents();
 

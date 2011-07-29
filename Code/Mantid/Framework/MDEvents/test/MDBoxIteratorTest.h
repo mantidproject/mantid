@@ -577,6 +577,14 @@ public:
       function->addPlane(MDPlane(3,normal2, origin2));
       top->getBoxes(boxes, 20, leafOnly, function);
     }
+    else if (ImplicitFunction==3)
+    {
+      // Box in 3D where -5 < (x,y,z) < +10
+      std::vector<coord_t> min(3, -5.0);
+      std::vector<coord_t> max(3, +10.0);
+      function = new MDBoxImplicitFunction(min, max);
+      top->getBoxes(boxes, 20, leafOnly, function);
+    }
     else
     {
       top->getBoxes(boxes, 20, leafOnly);
@@ -620,6 +628,11 @@ public:
   void test_getBoxes_withPlaneImplicitFunction()
   {
     do_test_getBoxes(true, 2, 125*125*125 / 25);
+  }
+
+  void test_getBoxes_withHugeImplicitFunction()
+  {
+    do_test_getBoxes(true, 3, 125*125*125);
   }
 
 

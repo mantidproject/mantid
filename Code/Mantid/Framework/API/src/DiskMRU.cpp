@@ -1,5 +1,6 @@
 #include "MantidAPI/DiskMRU.h"
 #include "MantidKernel/System.h"
+#include <iostream>
 
 namespace Mantid
 {
@@ -11,7 +12,7 @@ namespace API
   /** Constructor
    */
   DiskMRU::DiskMRU()
-  : m_memoryAvail(100), m_writeBufferSize(50),
+  : m_memoryAvail(100), m_writeBufferSize(50), m_useWriteBuffer(false),
     m_memoryUsed(0),
     m_toWrite_byId( m_toWrite.get<1>() ),
     m_memoryToWrite(0)
@@ -25,8 +26,8 @@ namespace API
    * @param m_writeBufferSize :: Amount of memory to accumulate in the write buffer before writing.
    * @return
    */
-  DiskMRU::DiskMRU(size_t m_memoryAvail, size_t m_writeBufferSize)
-  : m_memoryAvail(m_memoryAvail), m_writeBufferSize(m_writeBufferSize),
+  DiskMRU::DiskMRU(size_t m_memoryAvail, size_t m_writeBufferSize, bool useWriteBuffer)
+  : m_memoryAvail(m_memoryAvail), m_writeBufferSize(m_writeBufferSize), m_useWriteBuffer(useWriteBuffer),
     m_memoryUsed(0),
     m_toWrite_byId( m_toWrite.get<1>() ),
     m_memoryToWrite(0)
@@ -51,6 +52,60 @@ namespace API
    */
   void DiskMRU::loading(ISaveable * item)
   {
+    if (item == NULL) return;
+    if (m_useWriteBuffer) return loadingWithWriteBuffer(item);
+
+//    std::cout << "Loading " << item->getId() << std::endl;
+    m_mruMutex.lock();
+
+    // Place the item in the MRU list
+    std::pair<mru_list::iterator,bool> p;
+    p = list.push_front(item);
+
+    if (!p.second)
+    {
+      // duplicate item: put it back at the front of the list
+      list.relocate(list.begin(), p.first);
+      m_mruMutex.unlock();
+      return;
+    }
+
+    // We are now using more memory.
+    m_memoryUsed += item->getMRUMemory();
+
+    // You might have to pop 1 or more items until the MRU memory is below the limit
+    mru_list::iterator it = list.end();
+
+    while (m_memoryUsed > m_memoryAvail)
+    {
+      // Pop the least-used object out the back
+      it--;
+      if (it == list.begin()) break;
+      ISaveable *toWrite = *it;
+      // Can you save it to disk?
+      if (toWrite->safeToWrite())
+      {
+        toWrite->save();
+        m_memoryUsed -= toWrite->getMRUMemory();
+        list.erase(it);
+      }
+    }
+    m_mruMutex.unlock();
+  }
+
+
+  //---------------------------------------------------------------------------------------------
+  /** Tell the MRU that we are loading the given item.
+   * Use the methods that keep a buffer of items to write and
+   * and writes them as a block.
+   *
+   * @param item :: item that is
+   * @param memory :: memory that the object will use.
+   */
+  void DiskMRU::loadingWithWriteBuffer(ISaveable * item)
+  {
+    m_mruMutex.lock();
+
     // Place the item in the MRU list
     std::pair<mru_list::iterator,bool> p;
     p = list.push_front(item);
@@ -67,6 +122,7 @@ namespace API
     {
       // duplicate item: put it back at the front of the list
       list.relocate(list.begin(), p.first);
+      m_mruMutex.unlock();
       return;
     }
 
@@ -96,6 +152,7 @@ namespace API
       if (m_memoryToWrite >= m_writeBufferSize)
         writeOldObjects();
     }
+    m_mruMutex.unlock();
   }
 
 

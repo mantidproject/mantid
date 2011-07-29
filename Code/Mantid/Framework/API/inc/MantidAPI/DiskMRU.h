@@ -2,15 +2,16 @@
 #define MANTID_API_DISKMRU_H_
     
 #include "MantidAPI/ISaveable.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
-#include <boost/multi_index/sequenced_index.hpp>
 #include <boost/multi_index/ordered_index.hpp>
+#include <boost/multi_index/sequenced_index.hpp>
+#include <map>
 #include <stdint.h>
 #include <vector>
-#include <map>
 
 
 namespace Mantid
@@ -98,11 +99,13 @@ namespace API
 
     DiskMRU();
 
-    DiskMRU(size_t m_memoryAvail, size_t m_writeBufferSize);
+    DiskMRU(size_t m_memoryAvail, size_t m_writeBufferSize, bool useWriteBuffer);
     
     ~DiskMRU();
 
     void loading(ISaveable * item);
+
+    void loadingWithWriteBuffer(ISaveable * item);
 
     ///@return the memory in the MRU
     size_t getMemoryUsed() const
@@ -126,6 +129,9 @@ namespace API
     /// Amount of memory to accumulate in the write buffer before writing.
     size_t m_writeBufferSize;
 
+    /// Do we use the write buffer?
+    bool m_useWriteBuffer;
+
     /// Amount of memory actually used up (in the MRU, not the toWriteBuffer)
     size_t m_memoryUsed;
 
@@ -137,6 +143,9 @@ namespace API
 
     /// Total amount of memory in the "toWrite" buffer.
     size_t m_memoryToWrite;
+
+    /// Mutex for modifying the MRU list
+    Kernel::Mutex m_mruMutex;
 
   };
 
