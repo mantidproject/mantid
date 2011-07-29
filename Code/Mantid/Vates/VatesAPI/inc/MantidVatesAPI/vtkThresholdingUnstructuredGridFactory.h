@@ -87,8 +87,6 @@ private:
 
   typedef std::vector<UnstructuredPoint> Column;
 
-  vtkDataSet* createFromAnyIMDWorkspace4D() const;
-
   /// timestep obtained from framework.
   double m_timestep;
 

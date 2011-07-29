@@ -76,9 +76,7 @@ protected:
 
   virtual void validate() const;
 
-  vtkDataSet* create3Dor4D(size_t timestep) const;
-
-  vtkDataSet* createFromAnyIMDWorkspace3D() const;
+  vtkDataSet* create3Dor4D(size_t timestep, bool do4D) const;
 
   void validateWsNotNull() const;
 
