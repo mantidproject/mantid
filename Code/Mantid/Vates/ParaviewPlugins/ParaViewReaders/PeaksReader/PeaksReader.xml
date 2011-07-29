@@ -6,24 +6,8 @@
          name="Peak Width"
          command="SetWidth"
          number_of_elements="1"
-	     default_values="1">
+	     default_values="0.05">
 	    </DoubleVectorProperty>
-<!--
-      	<IntVectorProperty
-         name="X Bins"
-         command="SetXBins"
-         number_of_elements="1"
-         default_values="50">
-        </IntVectorProperty>
-	   <StringVectorProperty
-         name="InputGeometryXML"
-         command="GetInputGeometryXML"
-         number_of_elements="1"
-         information_only="1">
-        <SimpleStringInformationHelper /> 
-       </StringVectorProperty>
-   -->
-       
        <StringVectorProperty
         name="FileName"
         command="SetFileName"
