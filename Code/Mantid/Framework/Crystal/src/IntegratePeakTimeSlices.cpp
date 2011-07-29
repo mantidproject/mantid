@@ -322,7 +322,7 @@ void IntegratePeakTimeSlices::exec()
            std::vector<double> params;
            std::vector<double> errs;
            std::vector<std::string> names;
-           if( EnoughData( ParamAttr))
+           if( EnoughData( ParamAttr) && ParamAttr[0][1]>0)
            {  
               //std::cout<<"Enuf data"<<std::endl;
               fit_alg = createSubAlgorithm("Fit");
@@ -385,7 +385,7 @@ void IntegratePeakTimeSlices::exec()
            }else
            {
               done =true;
-              std::cout<<"Not Enuf data done=true"<<std::endl;
+              //std::cout<<"Not Enuf data done=true"<<std::endl;
            }
 
            Data.reset();
