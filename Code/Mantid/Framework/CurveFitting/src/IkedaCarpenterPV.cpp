@@ -72,7 +72,7 @@ double IkedaCarpenterPV::width()const
 
   if ( sigmaSquared < 0 )
   {
-    g_log.warning() << "SigmaSquared NEGATIVE!.\n"
+    g_log.debug() << "SigmaSquared NEGATIVE!.\n"
                     << "Likely due to a fit not converging properly\n"
                     << "If this is frequent problem please report to Mantid team.\n"
                     << "For now to calculate width force SigmaSquared positive.\n";
@@ -80,7 +80,7 @@ double IkedaCarpenterPV::width()const
   }
   if ( gamma < 0 )
   {
-    g_log.warning() << "Gamma NEGATIVE!.\n"
+    g_log.debug() << "Gamma NEGATIVE!.\n"
                     << "Likely due to a fit not converging properly\n"
                     << "If this is frequent problem please report to Mantid team.\n"
                     << "For now to calculate width force Gamma positive.\n";
