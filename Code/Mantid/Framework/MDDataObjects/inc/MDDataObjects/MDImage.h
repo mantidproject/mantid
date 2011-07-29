@@ -4,8 +4,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
-
-#include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/IMD_FileFormat.h"
 #include "MDDataObjects/MDImageDatatypes.h"
 #include <boost/shared_ptr.hpp>
