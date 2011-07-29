@@ -308,22 +308,7 @@ void MultiSliceView::indicatorSelected(const QString &name)
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
   pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
-  smsModel->setCurrentItem(cut, pqServerManagerSelectionModel::Select);
-  this->clearPbwSelections(cut->getSMName());
-}
-
-void MultiSliceView::clearPbwSelections(const QString &name)
-{
-  pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
-  const pqServerManagerSelection *list = smsModel->selectedItems();
-  for (int i = 0; i < list->size(); ++i)
-  {
-    pqPipelineSource *source = qobject_cast<pqPipelineSource *>(list->at(i));
-    if (name != source->getSMName())
-    {
-      smsModel->setCurrentItem(source, pqServerManagerSelectionModel::Deselect);
-    }
-  }
+  smsModel->setCurrentItem(cut, pqServerManagerSelectionModel::ClearAndSelect);
 }
 
 void MultiSliceView::updateCutPosition(double position)

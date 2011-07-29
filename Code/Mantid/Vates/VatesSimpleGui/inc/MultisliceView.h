@@ -141,12 +141,6 @@ private:
     /// Clear all axis indicator highlighting.
     void clearIndicatorSelections();
     /**
-     * Clear the selections from the pipeline browser that do not correspond
-     * to the currently selected slice.
-     * @param name the name of the currently selected slice
-     */
-    void clearPbwSelections(const QString &name);
-    /**
      * Function that polls all of the axis indicators to see if any are left.
      * @return true if no indicators are left, false if there are indicators
      */
