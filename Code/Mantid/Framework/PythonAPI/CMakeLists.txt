@@ -49,7 +49,7 @@ set ( TEST_PY_FILES test/ImportTest.py
 		    test/WorkspaceTests.py
 		    test/SettingsTest.py
 		    test/SANSWorkflowTest.py
-		    test/SANSMaskCommands.py
+		    test/SANSMaskCommandsTest.py
 )
 
 if(UNITY_BUILD)
