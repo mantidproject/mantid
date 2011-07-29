@@ -29,6 +29,7 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <MantidGeometry/Crystal/OrientedLattice.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -556,6 +557,20 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
     ws_item->addChild(data_item);
 
     s = "Y axis: " + workspace->YUnitLabel();
+    data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
+    data_item->setFlags(Qt::NoItemFlags);
+    ws_item->addChild(data_item);
+
+    if (workspace->sample().hasOrientedLattice())
+    {
+      const OrientedLattice & latt = workspace->sample().getOrientedLattice();
+      std::ostringstream out;
+      out << "Sample: a " << std::fixed << std::setprecision(1) << latt.a() <<", b " << latt.b() << ", c " << latt.c();
+      out << "; alpha " << std::fixed << std::setprecision(0) << latt.alpha() <<", beta " << latt.beta() << ", gamma " << latt.gamma();
+      s = out.str();
+    }
+    else
+      s = "Sample: No lattice set.";
     data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
     data_item->setFlags(Qt::NoItemFlags);
     ws_item->addChild(data_item);

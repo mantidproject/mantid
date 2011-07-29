@@ -186,6 +186,10 @@ namespace Mantid
       m_lattice = latt;
     }
 
+    /** @return true if the sample has an OrientedLattice  */
+    bool Sample::hasOrientedLattice() const
+    { return (m_lattice != NULL); }
+
     /**
      * Set the geometry flag that is specfied in the raw file within the SPB_STRUCT
      * 1 = cylinder, 2 = flat plate, 3 = disc, 4 = single crystal
