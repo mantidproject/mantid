@@ -128,7 +128,7 @@ void LoadNexusMonitors::exec()
     file.openGroup(monitorNames[i], "NXmonitor");
 
     // Check if the spectra index is there
-    specid_t spectrumNo(static_cast<specid_t>(i));
+    specid_t spectrumNo(static_cast<specid_t>(i+1));
     try
     {
       file.openData("spectrum_index");
