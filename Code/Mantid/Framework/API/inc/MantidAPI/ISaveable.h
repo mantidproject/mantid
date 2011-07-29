@@ -43,10 +43,10 @@ namespace API
     ~ISaveable();
     
     /// Save the data - to be overriden
-    virtual void save() const = 0;
+    virtual void save() const {}
 
     /// Load the data - to be overriden
-    virtual void load() = 0;
+    virtual void load() {}
 
     //-----------------------------------------------------------------------------------------------
     /** Returns the unique ID for this object/box     */
@@ -65,17 +65,17 @@ namespace API
 
     //-----------------------------------------------------------------------------------------------
     /// @return the amount of memory that the object takes up in the MRU.
-    virtual size_t getMRUMemory() const = 0;
+    virtual size_t getMRUMemory() const {return 0;}
 
     //-----------------------------------------------------------------------------------------------
     /// @return true if it is safe for the MRU to write out this data to disk.
     /// false if the data might get modified.
-    virtual bool safeToWrite() const = 0;
+    virtual bool safeToWrite() const  {return true;}
 
     //-----------------------------------------------------------------------------------------------
     /** @return the position in the file where the data will be stored.
      * This is used to optimize file writing. */
-    virtual uint64_t getFilePosition() const = 0;
+    virtual uint64_t getFilePosition() const {return 0;}
 
   protected:
     /// Unique, sequential ID of the object/box within the containing workspace.
