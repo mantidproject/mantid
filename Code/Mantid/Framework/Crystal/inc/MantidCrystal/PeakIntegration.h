@@ -66,7 +66,7 @@ private:
   void cluster(double **matrix, int m, int n, int **mask);
   void smooth(double **matrix, int m, int n, double **smmatrix);
   
-  
+  detid2index_map * pixel_to_wi; ///< Map of pixel to workspace index
   int Xmin;        ///< The start of the X range for fitting
   int Xmax;        ///< The end of the X range for fitting
   int Ymin;        ///< The start of the Y range for fitting

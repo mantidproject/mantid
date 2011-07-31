@@ -10,6 +10,7 @@
 #include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
@@ -139,14 +140,14 @@ public:
   
 
 
-  void do_test_MINITOPAZ(EventType type)
+  void do_test_MINITOPAZ(bool slices)
   {
 
     int numEventsPer = 100;
     MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
     EventWorkspace_sptr in_ws = boost::dynamic_pointer_cast<EventWorkspace>( inputW );
     inputW->getAxis(0)->setUnit("TOF");
-    if (type == WEIGHTED)
+    /*if (type == WEIGHTED)
       in_ws *= 2.0;
     if (type == WEIGHTED_NOTIME)
     {
@@ -155,7 +156,7 @@ public:
         EventList & el = in_ws->getEventList(i);
         el.compressEvents(0.0, &el);
       }
-    }
+    }*/
     // Register the workspace in the data service
 
     // Create the peaks workspace
@@ -167,19 +168,33 @@ public:
     pkws->addPeak( PeakObj);
     AnalysisDataService::Instance().add("TOPAZ", pkws);
 
+    boost::shared_ptr<Mantid::API::Algorithm> algu =Mantid::API::AlgorithmFactory::Instance(). create(std::string("LoadIsawUB"), 1);
+    algu->initialize();
+    algu->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+    algu->setPropertyValue("Filename", "TOPAZ_3007.mat");
+    algu->execute();
+
+    boost::shared_ptr<Mantid::API::Algorithm> algb =Mantid::API::AlgorithmFactory::Instance(). create(std::string("Rebin"), 1);
+    algb->initialize();
+    algb->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+    algb->setPropertyValue("OutputWorkspace", "RebinResult");
+    algb->setPropertyValue("Params", "5760.,10.0,5920.");
+    algb->execute();
+    inputW = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("RebinResult"));
+
     PeakIntegration alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     alg.setProperty("InputWorkspace", inputW);
     alg.setProperty("InPeaksWorkspace", "TOPAZ");
     alg.setProperty("OutPeaksWorkspace", "TOPAZ");
-    alg.setProperty("XMin", -2);
-    alg.setProperty("XMax", 2);
-    alg.setProperty("YMin", -2);
-    alg.setProperty("YMax", 2);
-    alg.setProperty("TOFBinMin", -5);
-    alg.setProperty("Params", "5760.,10.0,5920.");
-    alg.setProperty("TOFBinMax", 5);
+    alg.setProperty("FitSlices", slices);
+    alg.setProperty("XMin", -6);
+    alg.setProperty("XMax", 6);
+    alg.setProperty("YMin", -6);
+    alg.setProperty("YMax", 6);
+    alg.setProperty("TOFBinMin", -10);
+    alg.setProperty("TOFBinMax", 10);
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
     TS_ASSERT( alg.isExecuted() )
 
@@ -190,19 +205,17 @@ public:
     if (!ws) return;
     Peak & peak = ws->getPeaks()[0];
 
-    // TS_ASSERT_DELTA( peak.getIntensity(), 660.846, 10.0);
+    TS_ASSERT_DELTA( peak.getIntensity(), 3112.4175, 200.0);
 
-    // TODO: Note JZ: For some reasone the ISpectrum change #3203 changed the result of this test.
-    TS_ASSERT_DELTA( peak.getIntensity(), 660.846, 10.0);
-
-    TS_ASSERT_DELTA( peak.getSigmaIntensity(), 35.5412, 1.0);
+    TS_ASSERT_DELTA( peak.getSigmaIntensity(), 141.322, 70.0);
     AnalysisDataService::Instance().remove("TOPAZ");
 
   }
 
   void test_MINITOPAZ()
   {
-    do_test_MINITOPAZ(TOF);
+    do_test_MINITOPAZ(true);
+    do_test_MINITOPAZ(false);
   }
 
 
