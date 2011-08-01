@@ -148,11 +148,44 @@ public:
   bool operator==(const EventList& rhs) const;
   bool operator!=(const EventList& rhs) const;
 
-  void addEventQuickly(const TofEvent &event);
+//  inline void addEventQuickly(const TofEvent &event);
+//
+//  inline void addEventQuickly(const WeightedEvent &event);
+//
+//  inline void addEventQuickly(const WeightedEventNoTime &event);
 
-  void addEventQuickly(const WeightedEvent &event);
 
-  void addEventQuickly(const WeightedEventNoTime &event);
+
+  // --------------------------------------------------------------------------
+  /** Append an event to the histogram, without clearing the cache, to make it faster.
+   * NOTE: Only call this on a un-weighted event list!
+   *
+   * @param event :: TofEvent to add at the end of the list.
+   * */
+  inline void addEventQuickly(const TofEvent &event)
+  {
+    this->events.push_back(event);
+  }
+
+  // --------------------------------------------------------------------------
+  /** Append an event to the histogram, without clearing the cache, to make it faster.
+   * @param event :: WeightedEvent to add at the end of the list.
+   * */
+  inline void addEventQuickly(const WeightedEvent &event)
+  {
+    this->weightedEvents.push_back(event);
+  }
+
+  // --------------------------------------------------------------------------
+  /** Append an event to the histogram, without clearing the cache, to make it faster.
+   * @param event :: WeightedEventNoTime to add at the end of the list.
+   * */
+  inline void addEventQuickly(const WeightedEventNoTime &event)
+  {
+    this->weightedEventsNoTime.push_back(event);
+  }
+
+
 
   Mantid::API::EventType getEventType() const;
 

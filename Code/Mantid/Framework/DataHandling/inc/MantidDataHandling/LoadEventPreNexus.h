@@ -136,6 +136,8 @@ private:
   ///Execution code
   void exec();
 
+  Mantid::API::Progress * prog;
+
   std::vector<int64_t> spectra_list; ///<the list of Spectra
 
   /// The times for each pulse.
@@ -146,7 +148,7 @@ private:
   std::vector<double> proton_charge;
   /// The total proton charge for the run.
   double proton_charge_tot;
-  /// The value of the vector is the workspace index.
+  /// The value of the vector is the workspace index. The index into it is the pixel ID from DAS
   std::vector<std::size_t> pixel_to_wkspindex;
 
   /// Handles loading from the event file

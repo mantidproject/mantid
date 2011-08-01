@@ -459,38 +459,6 @@ namespace DataObjects
     return (!this->operator==(rhs));
   }
 
-
-  // --------------------------------------------------------------------------
-  /** Append an event to the histogram, without clearing the cache, to make it faster.
-   * NOTE: Only call this on a un-weighted event list!
-   *
-   * @param event :: TofEvent to add at the end of the list.
-   * */
-  void EventList::addEventQuickly(const TofEvent &event)
-  {
-    this->events.push_back(event);
-  }
-
-  // --------------------------------------------------------------------------
-  /** Append an event to the histogram, without clearing the cache, to make it faster.
-   * @param event :: WeightedEvent to add at the end of the list.
-   * */
-  void EventList::addEventQuickly(const WeightedEvent &event)
-  {
-    this->weightedEvents.push_back(event);
-  }
-
-  // --------------------------------------------------------------------------
-  /** Append an event to the histogram, without clearing the cache, to make it faster.
-   * @param event :: WeightedEventNoTime to add at the end of the list.
-   * */
-  void EventList::addEventQuickly(const WeightedEventNoTime &event)
-  {
-    this->weightedEventsNoTime.push_back(event);
-  }
-
-
-
   // -----------------------------------------------------------------------------------------------
   /** Return the type of Event vector contained within.
    * @return :: a EventType value.

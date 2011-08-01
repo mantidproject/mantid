@@ -165,6 +165,38 @@ public:
  }
 
 
+ void testLoadBlockAt()
+ {
+   MakeDummyFile(dummy_file, 20*8);
+   file.open(dummy_file);
+
+   //Right size?
+   size_t num = 20;
+   TS_ASSERT_EQUALS(file.getNumElements(), num);
+   //Get it
+   size_t block_size = 10;
+   size_t loaded_size = -1;
+   DasEvent * data = new DasEvent[block_size];
+   loaded_size = file.loadBlockAt(data, 5, block_size);
+   //Yes, we loaded that amount
+   TS_ASSERT_EQUALS(loaded_size, block_size);
+
+   //The first event is at index 5
+   TS_ASSERT_EQUALS( data[0].tof, 10);
+   TS_ASSERT_EQUALS( data[0].pid, 11);
+
+   delete [] data;
+   //Now try to load a lot more - going past the end
+   block_size = 10;
+   data = new DasEvent[block_size];
+   loaded_size = file.loadBlock(data, block_size);
+   TS_ASSERT_EQUALS(loaded_size, 5);
+   delete [] data;
+   file.close();
+   Poco::File(dummy_file).remove();
+ }
+
+
   void testCallingDestructorOnUnitializedObject()
   {
     BinaryFile<DasEvent> file2;

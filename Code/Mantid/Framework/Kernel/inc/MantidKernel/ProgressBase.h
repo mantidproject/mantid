@@ -45,6 +45,7 @@ namespace Kernel
     void reportIncrement(int inc, const std::string& msg = "");
     void reportIncrement(size_t inc, const std::string& msg = "");
     void setNumSteps(int64_t nsteps);
+    void resetNumSteps(int64_t nsteps, double start, double end);
     void setNotifyStep(double notifyStepPct);
 
   protected:

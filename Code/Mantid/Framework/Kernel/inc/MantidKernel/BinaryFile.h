@@ -256,6 +256,27 @@ public:
     return loaded_size;
   }
 
+  //-----------------------------------------------------------------------------
+  /** Loads a single block from file and returns a pointer to a vector containing it.
+   *  This can be called repeatedly to load an entire file.
+   *
+   * @param buffer: array of block_size[] of T; must have been allocated before.
+   * @param newOffset: offset (in # of elements) of where to start loading in the file.
+   * @param block_size: how many elements to load in the block. If there are not enough elements,
+   *  the vector returned is smaller than block_size
+   * @return loaded_size, actually how many elements were loaded.
+   */
+  size_t loadBlockAt(T * buffer, size_t newOffset, size_t block_size)
+  {
+    if (!handle) {
+      throw std::runtime_error("BinaryFile: file is not open.");
+    }
+    // Change our offset to the new spot.
+    offset = newOffset;
+    handle->seekg( sizeof(T) * offset, std::ios::beg);
+    return loadBlock(buffer, block_size);
+  }
+
 
 private:
   /// File stream

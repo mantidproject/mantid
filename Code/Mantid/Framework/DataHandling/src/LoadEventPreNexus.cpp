@@ -26,6 +26,7 @@
 #include "MantidDataHandling/LoadInstrumentHelper.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/CPUTimer.h"
 
 namespace Mantid
 {
@@ -166,13 +167,9 @@ void LoadEventPreNexus::init()
   this->declareProperty(new PropertyWithValue<int>("NumberOfEvents", 0, Direction::Input),
           "Number of events to read from the file.");
 
-#ifdef LOADEVENTPRENEXUS_ALLOW_PARALLEL
-  //Parallel processing
-  this->declareProperty(new PropertyWithValue<bool>(PARALLEL_PARAM, true, Direction::Input) );
-
-  //Loading block size
-  this->declareProperty(new PropertyWithValue<int>(BLOCK_SIZE_PARAM, 500000, Direction::Input) );
-#endif
+  // how many events to process
+  this->declareProperty(new PropertyWithValue<bool>("UseParallelProcessing", false, Direction::Input),
+          "Use multiple cores for loading the data?");
 
   // the output workspace name
   this->declareProperty(new WorkspaceProperty<IEventWorkspace>(OUT_PARAM,"",Direction::Output));
@@ -245,10 +242,14 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp)
     return *(files.rbegin());
 }
 
+
+
 //-----------------------------------------------------------------------------
 /** Execute the algorithm */
 void LoadEventPreNexus::exec()
 {
+  prog = new Progress(this,0.0,1.0,100);
+
   // what spectra (pixel ID's) to load
   this->spectra_list = this->getProperty(PID_PARAM);
 
@@ -274,10 +275,12 @@ void LoadEventPreNexus::exec()
     }
   }
 
+  prog->report("Loading Pulse ID file");
   this->readPulseidFile(pulseid_filename, throwError);
 
   this->openEventFile(event_filename);
 
+  prog->report("Creating output workspace");
   // prep the output workspace
   EventWorkspace_sptr localWorkspace = EventWorkspace_sptr(new EventWorkspace());
   //Make sure to initialize.
@@ -299,9 +302,11 @@ void LoadEventPreNexus::exec()
   }
 
   //Get the instrument!
+  prog->report("Loading Instrument");
   this->runLoadInstrument(event_filename, localWorkspace);
 
   // load the mapping file
+  prog->report("Loading Mapping File");
   string mapping_filename = this->getPropertyValue(MAP_PARAM);
   if (mapping_filename.empty()) {
     mapping_filename = generateMappingfileName(localWorkspace);
@@ -316,11 +321,8 @@ void LoadEventPreNexus::exec()
   //Save output
   this->setProperty<IEventWorkspace_sptr>(OUT_PARAM, localWorkspace);
 
-  // Clear any large vectors to free up memory.
-  this->pulsetimes.clear();
-  this->event_indices.clear();
-  this->proton_charge.clear();
-  this->spectraLoadMap.clear();
+  // Cleanup
+  delete prog;
 }
 
 
@@ -385,23 +387,19 @@ void LoadEventPreNexus::setMaxEventsToLoad(std::size_t max_events_to_load)
  */
 void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 {
-  // do the actual loading
   this->num_error_events = 0;
   this->num_good_events = 0;
   this->num_ignored_events = 0;
 
   //Default values in the case of no parallel
-  parallelProcessing = false;
-  loadBlockSize = Mantid::Kernel::DEFAULT_BLOCK_SIZE;
+  parallelProcessing = getProperty("UseParallelProcessing");
+  loadBlockSize = Mantid::Kernel::DEFAULT_BLOCK_SIZE * 2;
 
   shortest_tof = static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
   longest_tof = 0.;
 
   //Initialize progress reporting.
-  Progress prog(this,0.0,1.0,static_cast<int>(this->num_events/loadBlockSize));
-
-  //Allocate the buffer
-  DasEvent * event_buffer = new DasEvent[loadBlockSize];
+  size_t numBlocks = (eventfile->getFileSize() + loadBlockSize - 1) / loadBlockSize;
 
   // We want to pad out empty pixels.
   detid2det_map detector_map;
@@ -415,6 +413,7 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
       detid_max = it->first;
 
   // Pad all the pixels
+  prog->report("Padding Pixels");
   this->pixel_to_wkspindex.reserve(detid_max+1); //starting at zero up to and including detid_max
   this->pixel_to_wkspindex.assign(detid_max+1, 0);
   size_t workspaceIndex = 0;
@@ -439,31 +438,146 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   for (std::vector<int64_t>::iterator it = spectra_list.begin(); it != spectra_list.end(); it++)
     spectraLoadMap[*it] = true;
 
+  CPUTimer tim;
 
-  while (eventfile->getOffset() < this->num_events)
+  // --------------- Create the partial workspaces ------------------------------------------
+  // Vector of partial workspaces, for parallel processing.
+  std::vector<EventWorkspace_sptr> partWorkspaces;
+  std::vector<DasEvent *> buffers;
+  size_t numThreads = size_t(PARALLEL_GET_MAX_THREADS);
+  if (parallelProcessing)
   {
-    //Offset into the file before loading this new block
-    size_t fileOffset = eventfile->getOffset();
-
-    //Load a block into the buffer directly, up to loadBlockSize elements
-    size_t current_event_buffer_size = eventfile->loadBlock(event_buffer, loadBlockSize);
-
-    //This processes the events
-    procEventsLinear(workspace, event_buffer, current_event_buffer_size, fileOffset);
-
-    //Report progress
-    prog.report("Load Event PreNeXus");
+    partWorkspaces.resize(numThreads);
+    buffers.resize(numThreads);
+    PRAGMA_OMP( parallel for )
+    for (int i=0; i < int(numThreads); i++)
+    {
+      prog->report("Creating Partial Workspace");
+      // Create a partial workspace
+      EventWorkspace_sptr partWS(new EventWorkspace());
+      //Make sure to initialize.
+      partWS->initialize(1,1,1);
+      // Copy all the spectra numbers and stuff (no actual events to copy though).
+      partWS->copyDataFrom(*workspace);
+      // Push it in the array
+      partWorkspaces[i] = partWS;
+      //Allocate the buffers
+      buffers[i] = new DasEvent[loadBlockSize];
+    }
+    g_log.debug() << tim << " to create " << partWorkspaces.size() << " workspaces for parallel loading." << std::endl;
+  }
+  else
+  {
+    //Allocate the buffer
+    buffers.resize(1);
+    buffers[0] = new DasEvent[loadBlockSize];
   }
 
-  //Clean up the buffers
-  delete [] event_buffer;
+
+  prog->resetNumSteps( numBlocks, 0.1, 0.8);
+
+  // ---------------------------------- LOAD THE DATA --------------------------
+  PRAGMA_OMP( parallel for schedule(dynamic, 1) if (parallelProcessing) )
+  for (int blockNum=0; blockNum<int(numBlocks); blockNum++)
+  {
+
+    // Find the workspace for this particular thread
+    EventWorkspace_sptr ws;
+    size_t threadNum = 0;
+    if (parallelProcessing)
+    {
+      threadNum = PARALLEL_THREAD_NUMBER;
+      ws = partWorkspaces[threadNum];
+    }
+    else
+      ws = workspace;
+    // Get the buffer (for this thread)
+    DasEvent * event_buffer = buffers[threadNum];
+
+    // Where to start in the file?
+    size_t fileOffset = loadBlockSize * blockNum;
+    size_t current_event_buffer_size = 0;
+
+    // Load this chunk of event data (critical block)
+    PARALLEL_CRITICAL( LoadEventPreNexus_fileAccess )
+    {
+      current_event_buffer_size = eventfile->loadBlockAt(event_buffer, fileOffset, loadBlockSize);
+    }
+
+    // This processes the events. Can be done in parallel!
+    procEventsLinear(ws, event_buffer, current_event_buffer_size, fileOffset);
+
+    // Report progress
+    prog->report("Load Event PreNeXus");
+  }
+  g_log.debug() << tim << " to load the data." << std::endl;
+
+
+  // ---------------------------------- MERGE WORKSPACES BACK TOGETHER --------------------------
+  if (parallelProcessing)
+  {
+    prog->resetNumSteps( workspace->getNumberHistograms(), 0.8, 0.95);
+
+    size_t memoryCleared = 0;
+    MemoryManager::Instance().releaseFreeMemory();
+
+    // Merge all workspaces, index by index.
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int iwi=0; iwi<int(workspace->getNumberHistograms()); iwi++)
+    {
+      size_t wi = size_t(iwi);
+
+      // The output event list.
+      EventList & el = workspace->getEventList(wi);
+      el.clear(false);
+
+      // How many events will it have?
+      size_t numEvents = 0;
+      for (size_t i=0; i<numThreads; i++)
+        numEvents += partWorkspaces[i]->getEventList(wi).getNumberEvents();
+      // This will avoid too much copying.
+      el.reserve(numEvents);
+
+      // Now merge the event lists
+      for (size_t i=0; i<numThreads; i++)
+      {
+        EventList & partEl = partWorkspaces[i]->getEventList(wi);
+        el += partEl.getEvents();
+        // Free up memory as you go along.
+        partEl.clear(false);
+      }
+
+      // With TCMalloc, release memory when you accumulate enough to make sense
+      PARALLEL_CRITICAL( LoadEventPreNexus_trackMemory )
+      {
+        memoryCleared += numEvents;
+        if (memoryCleared > 10000000) // ten million events = about 160 MB
+        {
+          MemoryManager::Instance().releaseFreeMemory();
+          memoryCleared = 0;
+        }
+      }
+      prog->report("Merging Workspaces");
+    }
+    // Final memory release
+    MemoryManager::Instance().releaseFreeMemory();
+    g_log.debug() << tim << " to merge workspaces together." << std::endl;
+  }
+
+  // Delete the buffers for each thread.
+  for (size_t i=0; i<buffers.size(); i++)
+    delete buffers[i];
+
+  prog->resetNumSteps( 3, 0.94, 1.00);
 
   //finalize loading
-  workspace->doneAddingEventLists();
+  prog->report("Deleting Empty Lists");
   if(loadOnlySomeSpectra)
     workspace->deleteEmptyLists();
 
+  prog->report("Setting proton charge");
   this->setProtonCharge(workspace);
+  g_log.debug() << tim << " to set the proton charge log." << std::endl;
 
   //Make sure the MRU is cleared
   workspace->clearMRU();
@@ -507,6 +621,12 @@ void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
     numPulses = static_cast<int64_t>(event_indices.size());
   }
 
+  size_t local_num_error_events = 0;
+  size_t local_num_ignored_events = 0;
+  size_t local_num_good_events = 0;
+  double local_shortest_tof = static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
+  double local_longest_tof = 0.;
+
   // process the individual events
   for (size_t i = 0; i < current_event_buffer_size; i++)
   {
@@ -515,7 +635,7 @@ void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
 
     if ((pid & ERROR_PID) == ERROR_PID) // marked as bad
     {
-      this->num_error_events++;
+      local_num_error_events++;
       continue;
     }
 
@@ -530,7 +650,7 @@ void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
       if (it == spectraLoadMap.end())
       {
         //Pixel ID was not found, so the event is being ignored.
-        this->num_ignored_events++;
+        local_num_ignored_events++;
         continue;
       }
     }
@@ -561,18 +681,29 @@ void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
     event = TofEvent(tof, pulsetime);
 
     //Find the overall max/min tof
-    if (tof < shortest_tof)
-      shortest_tof = tof;
-    if (tof > longest_tof)
-      longest_tof = tof;
+    if (tof < local_shortest_tof)
+      local_shortest_tof = tof;
+    if (tof > local_longest_tof)
+      local_longest_tof = tof;
 
     //The addEventQuickly method does not clear the cache, making things slightly faster.
     workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
 
     // TODO work with period
-    this->num_good_events++;
+    local_num_good_events++;
 
   }//for each event
+
+  PARALLEL_CRITICAL( LoadEventPreNexus_global_statistics )
+  {
+    this->num_good_events += local_num_good_events;
+    this->num_ignored_events += local_num_ignored_events;
+    this->num_error_events += local_num_error_events;
+    if (local_shortest_tof < shortest_tof)
+      shortest_tof = local_shortest_tof;
+    if (local_longest_tof > longest_tof)
+      longest_tof = local_longest_tof;
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -599,12 +730,9 @@ void LoadEventPreNexus::setProtonCharge(DataObjects::EventWorkspace_sptr & works
   //Add the proton charge entries.
   TimeSeriesProperty<double>* log = new TimeSeriesProperty<double>("proton_charge");
   log->setUnits("picoCoulombs");
-  size_t num = this->proton_charge.size();
-  for (size_t i = 0; i < num; i++)
-  {
-    //Add the time and associated charge to the log
-    log->addValue(this->pulsetimes[i], this->proton_charge[i]);
-  }
+
+  //Add the time and associated charge to the log
+  log->addValues(this->pulsetimes, this->proton_charge);
 
   /// TODO set the units for the log
   run.addLogData(log);

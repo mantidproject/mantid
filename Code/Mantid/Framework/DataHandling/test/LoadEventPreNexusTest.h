@@ -150,10 +150,21 @@ public:
 
   void test_LoadPreNeXus_CNCS()
   {
+    do_test_LoadPreNeXus_CNCS(false);
+  }
+
+  void test_LoadPreNeXus_CNCS_parallel()
+  {
+    do_test_LoadPreNeXus_CNCS(true);
+  }
+
+  void do_test_LoadPreNeXus_CNCS(bool parallel)
+  {
     std::string eventfile( "CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
+    eventLoader->setProperty("UseParallelProcessing", parallel);
 
     //Get the event file size
     struct stat filestatus;
@@ -167,9 +178,9 @@ public:
 
     //The # of events = size of the file / 8 bytes (per event)
     //This fails cause of errors in events
-    //TS_ASSERT_EQUALS( ew->getNumberEvents(), filestatus.st_size / 8);
+    TS_ASSERT_EQUALS( ew->getNumberEvents(), 112266);
 
-    //Only some of the pixels weretof loaded, because of lot of them are empty
+    // We pad all pixels by default
     int numpixels_with_events = 51200;
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels_with_events);
 
@@ -204,6 +215,9 @@ public:
     TS_ASSERT_EQUALS( outputWS->getInstrument()->getName(), "CNCS");
 
     std::size_t wkspIndex = 4348; // a good workspace index (with events)
+    TS_ASSERT_EQUALS( outputWS->getEventList(wkspIndex).getNumberEvents(), 11);
+    if (outputWS->getEventList(wkspIndex).getNumberEvents() != 11)
+      return;
 
     TS_ASSERT_EQUALS( outputWS->getEventList(wkspIndex).getEvents()[0].tof(), inputWS->getEventList(wkspIndex).getEvents()[0].tof() );
     //It should be possible to change an event list and not affect the other one

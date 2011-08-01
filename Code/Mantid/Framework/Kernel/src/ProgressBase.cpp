@@ -121,6 +121,21 @@ namespace Kernel
     if (m_notifyStep <= 0) m_notifyStep = 1;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Change the number of steps between start/end.
+   *
+   * @param nsteps :: the number of steps to take between start and end
+   * @param start :: Starting progress
+   * @param end :: Ending progress
+   */
+  void ProgressBase::resetNumSteps(int64_t nsteps, double start, double end)
+  {
+    m_start = start;
+    m_end = end;
+    m_i = 0;
+    setNumSteps(nsteps);
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Override the frequency at which notifications are sent out.
