@@ -4,11 +4,14 @@
 //-----------------
 // Includes
 //-----------------
-#include <cxxtest/TestSuite.h>
-
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ConfigService.h"
+#include <cxxtest/TestSuite.h>
 #include <Poco/Path.h>
+
+using Mantid::Kernel::ConfigServiceImpl;
+using namespace Mantid::Kernel;
 
 class LoadRKHTest : public CxxTest::TestSuite
 {
@@ -31,6 +34,9 @@ public:
 
   void test1D()
   {
+    // Set the facility
+    ConfigService::Instance().setString("default.facility", "ISIS");
+
     if ( !loadrkh.isInitialized() ) loadrkh.initialize();
 
     //No parameters have been set yet, so it should throw
@@ -96,6 +102,9 @@ public:
   }
   void test2D()
   {
+    // Set the facility
+    ConfigService::Instance().setString("default.facility", "ISIS");
+
     // write a small file to load
     writeTestFile();
 
