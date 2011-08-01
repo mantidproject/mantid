@@ -68,8 +68,8 @@ if __name__ == '__main__':
         for prop_name in props:
             prop = alg.getProperty(prop_name)
             if prop.direction == Direction.Output and \
-               not issubclass(type(prop), WorkspaceProperty):
-                # Output properties should not appear as input arguments
+               not issubclass(type(prop), IWorkspaceProperty):
+                # Output properties should not appear as input arguments if they are not workspaces
                 continue
             if len(prop.isValid) > 0:
                 # Not valid by default, thus input is mandatory
