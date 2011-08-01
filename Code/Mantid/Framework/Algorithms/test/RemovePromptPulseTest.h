@@ -54,13 +54,6 @@ public:
     NUMEVENTS = 1000;
   }
 
-  ~RemovePromptPulseTest()
-  {
-    AnalysisDataService::Instance().remove(inWSName);
-    if (inWSName.compare(outWSName) != 0)
-      AnalysisDataService::Instance().remove(outWSName);
-  }
-
   void test_Init()
   {
     RemovePromptPulse alg;
@@ -96,6 +89,9 @@ public:
 
     // Verify the results
     TS_ASSERT_EQUALS(num_events, ws->getNumberEvents()); // should not drop events
+
+    AnalysisDataService::Instance().remove(inWSName);
+    AnalysisDataService::Instance().remove(outWSName);
   }
 
   void test_exec_hit()
@@ -126,6 +122,9 @@ public:
 
     // Verify the results
     TS_ASSERT(num_events > ws->getNumberEvents()); // should drop events
+    // Clean up
+    AnalysisDataService::Instance().remove(inWSName);
+
   }
 
 };

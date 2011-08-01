@@ -103,12 +103,26 @@ namespace Mantid
       void initCachedValues(API::MatrixWorkspace_const_sptr workspace);
       /// Init the theta index
       void initQCache(API::MatrixWorkspace_const_sptr workspace);
-      /// Calculate the Q range
-      std::pair<double,double> calculateQRange(Geometry::IDetector_sptr det, 
-                                               const double dEMin, 
-                                               const double dEMax,
-                                               const std::vector<double> & thetaIndex) const;
-
+      /// Q value struct
+      struct QValues
+      {
+	QValues() : lowerLeft(0.0), lowerRight(0.0), 
+		    upperRight(0.0), upperLeft(0.0) {}
+	QValues(const double lLeft, const double lRight,
+		const double uRight, const double uLeft) 
+	  : lowerLeft(lLeft), lowerRight(lRight), 
+	    upperRight(uRight), upperLeft(uLeft) {}
+	
+	/// Q values
+	double lowerLeft, lowerRight, upperRight, upperLeft;
+      };
+      /// Calculate the corner Q values
+      QValues calculateQValues(Geometry::IDetector_sptr det, 
+			       const double dEMin, const double dEMax) const;
+      /// Calculate the Kf vectors
+      std::pair<Kernel::V3D, Kernel::V3D> calculateScatterDir(Geometry::IDetector_sptr det) const;
+      /// Calculate a single Q value
+      double calculateQ(const Kernel::V3D scatterDir, const double energy) const;
       /// E Mode
       int m_emode;
       /// EFixed
@@ -122,16 +136,14 @@ namespace Mantid
       /// Small caching struct
       struct QRangeCache
       {
-        QRangeCache(const size_t index, const double efix, const double wght)
-          : wsIndex(index), efixed(efix), weight(wght), qValues(0) {}
+        QRangeCache(const size_t index, const double wght)
+          : wsIndex(index), weight(wght), qValues(0) {}
         /// workspace index origin
         const size_t wsIndex;
-        /// EFixed value
-        const double efixed;
         /// Weight
         const double weight;
-        /// QValues for each energy point
-        std::vector<std::pair<double,double> > qValues;
+	/// QValues for each energy bin
+	std::vector<QValues> qValues;
       };
       /// The cache
       std::list<QRangeCache> m_qcached;
