@@ -7,6 +7,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/DateAndTime.h"
 #include <boost/math/special_functions/fpclassify.hpp>
+#include "MantidKernel/CPUTimer.h"
 
 using namespace Mantid::Kernel;
 
@@ -76,6 +77,27 @@ public:
     TS_ASSERT_EQUALS( iString.substr(0,24), "2007-Nov-30 16:17:00  1\n" );
     const std::string sString = sProp->value();
     TS_ASSERT_EQUALS( sString.substr(0,27), "2007-Nov-30 16:17:00  test\n" );
+  }
+
+  void test_addValues()
+  {
+    size_t num=1000;
+    DateAndTime first("2007-11-30T16:17:10");
+    std::vector<DateAndTime> times;
+
+    std::vector<double> values;
+    for (size_t i=0; i<num; i++)
+    {
+      times.push_back( first + double(i) );
+      values.push_back( double(i) );
+    }
+    CPUTimer tim;
+    TimeSeriesProperty<double> tsp("test");
+    tsp.addValues(times, values);
+    TS_ASSERT_EQUALS( tsp.size(), 1000);
+    TS_ASSERT_EQUALS( tsp.nthValue(3), 3.0);
+    //std::cout << tim << " to add " << num << " entries." << std::endl;
+
   }
 
   void test_Casting()

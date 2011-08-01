@@ -456,6 +456,23 @@ public:
     return addValue(dt, value);
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /** Adds vectors of values to the map. Should be much faster than repeated calls to addValue.
+   *  @param time :: The time as a boost::posix_time::ptime value
+   *  @param value :: The associated value
+   */
+  void addValues(const std::vector<Kernel::DateAndTime> &times,
+      const std::vector<TYPE> & values)
+  {
+    typename timeMap::iterator it = m_propertySeries.begin();
+    for (size_t i=0; i < times.size(); i++)
+    {
+      // By feeding back the iterator, inserting N objects is O(N) instead of O(N * log N)
+      it = m_propertySeries.insert(it, typename timeMap::value_type(times[i], values[i]));
+      m_size++;
+    }
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the last time
