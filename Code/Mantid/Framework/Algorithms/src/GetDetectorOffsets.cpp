@@ -3,13 +3,15 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 #include <iomanip>
 #include <ostream>
 #include <sstream>
-
 
 namespace Mantid
 {
@@ -62,9 +64,11 @@ namespace Mantid
 
       declareProperty(new FileProperty("GroupingFileName","", FileProperty::OptionalSave, ".cal"),
           "Optional: The name of the output CalFile to save the generated OffsetsWorkspace." );
-
       declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace","",Direction::Output),
           "An output workspace containing the offsets.");
+      // Only keep peaks
+      std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
+      declareProperty("PeakFunction", "Gaussian", new ListValidator(peakNames));
     }
 
     //-----------------------------------------------------------------------------------------
@@ -161,11 +165,9 @@ namespace Mantid
       fit_alg->setProperty("EndX",Xmax);
       fit_alg->setProperty("MaxIterations",100);
 
-      std::ostringstream fun_str;
-      fun_str << "name=LinearBackground;name=Gaussian,Height="<<peakHeight<<",";
-      fun_str << "PeakCentre="<<peakLoc<<",Sigma=10.0";
-
-      fit_alg->setProperty("Function",fun_str.str());
+      std::string fun_str = createFunctionString(peakHeight, peakLoc);
+      
+      fit_alg->setProperty("Function",fun_str);
       fit_alg->executeAsSubAlg();
       std::string fitStatus = fit_alg->getProperty("OutputStatus");
       if ( fitStatus.compare("success") ) return (0.);
@@ -176,6 +178,30 @@ namespace Mantid
       //factor := factor * (1+offset) for d-spacemap conversion so factor cannot be negative
       if (offset < -1.) offset = -1.;
       return offset;
+    }
+
+    /**
+     * Create a function string from the given parameters and the algorithm inputs
+     * @param peakHeight :: The height of the peak
+     * @param peakLoc :: The location of the peak
+     */
+    std::string GetDetectorOffsets::createFunctionString(const double peakHeight, const double peakLoc) 
+    {
+      FunctionFactoryImpl & creator = FunctionFactory::Instance();
+      IBackgroundFunction *background = 
+        dynamic_cast<IBackgroundFunction*>(creator.createFunction("LinearBackground"));
+      IPeakFunction *peak =
+        dynamic_cast<IPeakFunction*>(creator.createFunction(getProperty("PeakFunction")));
+      peak->setHeight(peakHeight);
+      peak->setCentre(peakLoc);
+      const double sigma(10.0);
+      peak->setWidth(2.0*std::sqrt(2.0*std::log(2.0))*sigma);
+
+      CompositeFunctionMW fitFunc; //Takes ownership of the functions
+      fitFunc.addFunction(background);
+      fitFunc.addFunction(peak);
+
+      return fitFunc.asString();
     }
 
 

@@ -57,6 +57,8 @@ private:
   void exec();
   /// Call Gaussian as a sub-algorithm to fit the peak in a spectrum
   double fitSpectra(const int64_t s);
+  /// Create a function string from the given parameters and the algorithm inputs
+  std::string createFunctionString(const double peakHeight, const double peakLoc); 
   /// Read in all the input parameters
   void retrieveProperties();
   
