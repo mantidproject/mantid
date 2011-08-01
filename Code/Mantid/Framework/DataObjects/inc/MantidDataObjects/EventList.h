@@ -252,6 +252,10 @@ public:
   void generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
 
   template<class T>
+  static void integrateHelper(std::vector<T> & events, const double minX, const double maxX, const bool entireRange, double & sum, double & error);
+  void integrate(const double minX, const double maxX, const bool entireRange, double & sum, double & error) const;
+
+  template<class T>
   static double integrateHelper(std::vector<T> & events, const double minX, const double maxX, const bool entireRange);
   double integrate(const double minX, const double maxX, const bool entireRange) const;
 

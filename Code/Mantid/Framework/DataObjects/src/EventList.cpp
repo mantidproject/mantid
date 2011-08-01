@@ -1838,9 +1838,28 @@ namespace DataObjects
   template<class T>
   double EventList::integrateHelper(std::vector<T> & events, const double minX, const double maxX, const bool entireRange)
   {
+    double sum(0), error(0);
+    integrateHelper(events, minX, maxX, entireRange, sum, error);
+    return sum;
+  }
+
+  /** Integrate the events between a range of X values, or all events.
+   *
+   * @param events :: reference to a vector of events to change.
+   * @param minX :: minimum X bin to use in integrating.
+   * @param maxX :: maximum X bin to use in integrating.
+   * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
+   * @param sum :: reference to a double to put the sum in.
+   * @param error :: reference to a double to put the error in.
+   */
+  template<class T>
+  void EventList::integrateHelper(std::vector<T> & events, const double minX, const double maxX, const bool entireRange, double & sum, double & error)
+  {
+    sum = 0;
+    error = 0;
     //Nothing in the list?
     if (events.size() == 0)
-      return 0.0;
+      return;
 
     // Iterators for limits - whole range by default
     typename std::vector<T>::iterator lowit, highit;
@@ -1852,7 +1871,7 @@ namespace DataObjects
     {
       //If a silly range was given, return 0.
       if (maxX < minX)
-        return 0.0;
+        return;
 
       // If the first element is lower that the xmin then search for new lowit
       if (lowit->tof() < minX)
@@ -1865,13 +1884,13 @@ namespace DataObjects
     }
 
     // Sum up all the weights
-    double sum(0.0);
     typename std::vector<T>::iterator it;
     for (it = lowit; it != highit; it++)
+    {
       sum += it->weight();
-
-    //Give it
-    return sum;
+      error += it->errorSquared();
+    }
+    error = std::sqrt(error);
   }
 
   // --------------------------------------------------------------------------
@@ -1884,6 +1903,22 @@ namespace DataObjects
    */
   double EventList::integrate(const double minX, const double maxX, const bool entireRange) const
   {
+    double sum(0), error(0);
+    integrate(minX, maxX, entireRange, sum, error);
+    return sum;
+  }
+
+  /** Integrate the events between a range of X values, or all events.
+   *
+   * @param minX :: minimum X bin to use in integrating.
+   * @param maxX :: maximum X bin to use in integrating.
+   * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
+   * @return the integrated number of events.
+   */
+  void EventList::integrate(const double minX, const double maxX, const bool entireRange, double & sum, double & error) const
+  {
+    sum = 0;
+    error = 0;
     if (!entireRange)
     {
       //The event list must be sorted by TOF!
@@ -1894,16 +1929,18 @@ namespace DataObjects
     switch (eventType)
     {
     case TOF:
-      return integrateHelper(this->events, minX, maxX, entireRange);
+      integrateHelper(this->events, minX, maxX, entireRange, sum, error);
+      break;
     case WEIGHTED:
-      return integrateHelper(this->weightedEvents, minX, maxX, entireRange);
+      integrateHelper(this->weightedEvents, minX, maxX, entireRange, sum, error);
+      break;
     case WEIGHTED_NOTIME:
-      return integrateHelper(this->weightedEventsNoTime, minX, maxX, entireRange);
+      integrateHelper(this->weightedEventsNoTime, minX, maxX, entireRange, sum, error);
+      break;
+    default:
+      throw std::runtime_error("EventList: invalid event type value was found.");
     }
-    throw std::runtime_error("EventList: invalid event type value was found.");
   }
-
-
 
 
   // ==============================================================================================
