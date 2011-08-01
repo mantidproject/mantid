@@ -922,7 +922,7 @@ class SensitivityCorrection(ReductionStep):
             
         # Divide by detector efficiency
         Divide(workspace, self._efficiency_ws, workspace)
-        ReplaceSpecialValues(workspace, workspace, InfinityValue=0.0, InfinityError=0.0)
+        #ReplaceSpecialValues(workspace, workspace, InfinityValue=0.0, InfinityError=0.0)
         
         # Copy over the efficiency's masked pixels to the reduced workspace
         masked_detectors = GetMaskedDetectors(self._efficiency_ws)
