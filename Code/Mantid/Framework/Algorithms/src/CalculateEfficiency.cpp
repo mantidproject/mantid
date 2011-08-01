@@ -4,6 +4,8 @@
 #include "MantidAlgorithms/CalculateEfficiency.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/EventList.h"
 #include <vector>
 
 namespace Mantid
@@ -25,6 +27,7 @@ void CalculateEfficiency::initDocs()
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
 
 /** Initialization method.
  *
@@ -60,18 +63,51 @@ void CalculateEfficiency::exec()
 
   // Get the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr rebinnedWS = inputWS;
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
 
-  Progress progress(this,0.0,1.0,4);
+  Progress progress(this,0.0,1.0,numberOfSpectra);
 
-  // Sum up all the wavelength bins
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
-  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
-  childAlg->executeAsSubAlg();
+  DataObjects::EventWorkspace_const_sptr inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(rebinnedWS);
 
-  MatrixWorkspace_sptr rebinnedWS = childAlg->getProperty("OutputWorkspace");
+  if(inputEventWS)
+  {
+    std::vector<double> y_values(numberOfSpectra);
+    std::vector<double> e_values(numberOfSpectra);
+
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i = 0; i < numberOfSpectra; i++)
+    {
+      double sum_i(0), err_i(0);
+      progress.report("Integrating events");
+      const EventList& el = inputEventWS->getEventList(i);
+      el.integrate(0,0,true,sum_i,err_i);
+      y_values[i] = sum_i;
+      e_values[i] = err_i;
+    }
+
+    IAlgorithm_sptr algo = createSubAlgorithm("CreateWorkspace", 0.7, 1.0);
+    algo->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
+    algo->setProperty< std::vector<double> >("DataX", std::vector<double>(2,0.0) );
+    algo->setProperty< std::vector<double> >("DataY", y_values );
+    algo->setProperty< std::vector<double> >("DataE", e_values );
+    algo->setProperty<int>("NSpec", numberOfSpectra );
+    algo->execute();
+
+    rebinnedWS = algo->getProperty("OutputWorkspace");
+    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, rebinnedWS, false);
+  }
+  else
+  {
+    // Sum up all the wavelength bins
+    IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
+    childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
+    childAlg->executeAsSubAlg();
+    rebinnedWS = childAlg->getProperty("OutputWorkspace");
+  }
 
   outputWS = WorkspaceFactory::Instance().create(rebinnedWS);
   for (int i=0; i<(int)rebinnedWS->getNumberHistograms(); i++)
@@ -80,8 +116,6 @@ void CalculateEfficiency::exec()
   }
   setProperty("OutputWorkspace",outputWS);
 
-  progress.report("Detector Efficiency");
-
   double sum = 0.0;
   double err = 0.0;
   int npixels = 0;
@@ -89,8 +123,6 @@ void CalculateEfficiency::exec()
   // Loop over spectra and sum all the counts to get normalization
   // Skip monitors and masked detectors
   sumUnmaskedDetectors(rebinnedWS, sum, err, npixels);
-
-  progress.report("Detector Efficiency");
 
   // Normalize each detector pixel by the sum we just found to get the
   // relative efficiency. If the minimum and maximum efficiencies are
@@ -101,15 +133,11 @@ void CalculateEfficiency::exec()
   // the newly masked detectors.
   normalizeDetectors(rebinnedWS, outputWS, sum, err, npixels, min_eff, max_eff);
 
-  progress.report("Detector Efficiency");
-
   if ( !isEmpty(min_eff) || !isEmpty(max_eff) )
   {
     // Recompute the normalization, excluding the pixels that were outside
     // the acceptable efficiency range.
     sumUnmaskedDetectors(rebinnedWS, sum, err, npixels);
-
-    progress.report("Detector Efficiency");
 
     // Now that we have a normalization factor that excludes bad pixels,
     // recompute the relative efficiency.
@@ -132,7 +160,8 @@ void CalculateEfficiency::exec()
 void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
     double& sum, double& error, int& nPixels)
 {
-  // Number of spectra
+    Progress progress(this,0.0,1.0,rebinnedWS->getNumberHistograms());
+    // Number of spectra
     const size_t numberOfSpectra = rebinnedWS->getNumberHistograms();
     sum = 0.0;
     error = 0.0;
@@ -140,7 +169,7 @@ void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
 
     for (size_t i = 0; i < numberOfSpectra; i++)
     {
-      //std::cout << "getDetector" << i << std::endl;
+      progress.report("Summing up detector");
       // Get the detector object for this spectrum
       IDetector_const_sptr det = rebinnedWS->getDetector(i);
       // If this detector is masked, skip to the next one
@@ -176,6 +205,7 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
     MatrixWorkspace_sptr outputWS, double sum, double error, int nPixels,
     double min_eff, double max_eff)
 {
+    Progress progress(this,0.0,1.0,rebinnedWS->getNumberHistograms());
     // Number of spectra
     const int numberOfSpectra = static_cast<int>(rebinnedWS->getNumberHistograms());
 
@@ -184,6 +214,7 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
 
     for (int i = 0; i < numberOfSpectra; i++)
     {
+      progress.report("Normalizing pixels");
       // Get the detector object for this spectrum
       IDetector_const_sptr det = rebinnedWS->getDetector(i);
       // If this detector is masked, skip to the next one
@@ -212,7 +243,7 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
     if ( dets_to_mask.size()>0 )
     {
       // Mask detectors that were found to be outside the acceptable efficiency band
-      IAlgorithm_sptr mask = createSubAlgorithm("MaskDetectors");
+      IAlgorithm_sptr mask = createSubAlgorithm("MaskDetectors", 0.8, 1.0);
       try
       {
         // First we mask detectors in the output workspace

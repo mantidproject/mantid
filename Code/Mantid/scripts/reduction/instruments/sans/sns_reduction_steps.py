@@ -467,8 +467,12 @@ class LoadRun(ReductionStep):
         ScaleX(workspace+'_evt', workspace+'_evt', conversion_factor)
         mtd[workspace+'_evt'].getAxis(0).setUnit("Wavelength")
         
-        # Rebin so all the wavelength bins are aligned        
-        Rebin(workspace+'_evt', workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_combined_max), False)
+        # Rebin so all the wavelength bins are aligned
+        # Keep events
+        Rebin(workspace+'_evt', workspace+'_evt', "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_combined_max), True)
+        #TODO: remove the need to rename workspace once we know for sure that we will never need to
+        # go to histograms at this point in the reduction.
+        RenameWorkspace(workspace+'_evt', workspace)
         
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [frame-skipping: %s]" %(workspace, sdd, str(frame_skipping)))
         
