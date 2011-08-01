@@ -24,6 +24,7 @@ namespace API
    *
    * @param m_memoryAvail :: Amount of memory that the MRU is allowed to use.
    * @param m_writeBufferSize :: Amount of memory to accumulate in the write buffer before writing.
+   * @param useWriteBuffer :: True if you want to use the "to-Write" buffer.
    * @return
    */
   DiskMRU::DiskMRU(size_t m_memoryAvail, size_t m_writeBufferSize, bool useWriteBuffer)
@@ -50,7 +51,7 @@ namespace API
    * @param item :: item that is
    * @param memory :: memory that the object will use.
    */
-  void DiskMRU::loading(ISaveable * item)
+  void DiskMRU::loading(const ISaveable * item)
   {
     if (item == NULL) return;
     if (m_useWriteBuffer) return loadingWithWriteBuffer(item);
@@ -102,7 +103,7 @@ namespace API
    * @param item :: item that is
    * @param memory :: memory that the object will use.
    */
-  void DiskMRU::loadingWithWriteBuffer(ISaveable * item)
+  void DiskMRU::loadingWithWriteBuffer(const ISaveable * item)
   {
     m_mruMutex.lock();
 

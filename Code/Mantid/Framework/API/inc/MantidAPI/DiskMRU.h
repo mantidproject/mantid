@@ -101,11 +101,11 @@ namespace API
 
     DiskMRU(size_t m_memoryAvail, size_t m_writeBufferSize, bool useWriteBuffer);
     
-    ~DiskMRU();
+    virtual ~DiskMRU();
 
-    void loading(ISaveable * item);
+    void loading(const ISaveable * item);
 
-    void loadingWithWriteBuffer(ISaveable * item);
+    void loadingWithWriteBuffer(const ISaveable * item);
 
     ///@return the memory in the MRU
     size_t getMemoryUsed() const
@@ -146,6 +146,12 @@ namespace API
 
     /// Mutex for modifying the MRU list
     Kernel::Mutex m_mruMutex;
+
+  private:
+    /// Private Copy constructor: NO COPY ALLOWED
+    DiskMRU(const DiskMRU&);
+    /// Private assignment operator: NO ASSIGNMENT ALLOWED
+    DiskMRU& operator=(const DiskMRU&);
 
   };
 

@@ -9,6 +9,7 @@
 #include "MantidMDEvents/LoadMDEW.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include <vector>
+#include "MantidKernel/Memory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -60,6 +61,10 @@ namespace MDEvents
 
     declareProperty(new PropertyWithValue<bool>("FileBackEnd", false),
         "Set to true to load the data only on demand.");
+
+    declareProperty(new PropertyWithValue<int>("Memory", -1),
+        "For FileBackEnd only: the amount of memory (in MB) to allocate to the in-memory cache.\n"
+        "If not specified, a default of 50% of free physical memory is used.");
 
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output), "Name of the output MDEventWorkspace.");
   }
@@ -115,6 +120,23 @@ namespace MDEvents
   {
     // Are we using the file back end?
     bool FileBackEnd = getProperty("FileBackEnd");
+
+    // How much memory for the cache?
+    uint64_t cacheMemory = 0;
+    if (FileBackEnd)
+    {
+      int mb = getProperty("Memory");
+      if (mb < 0)
+      {
+        Kernel::MemoryStats stats;
+        stats.update();
+        mb = int(stats.availMem() / (1024 * 2));
+      }
+      if (mb <= 0) mb = 0;
+      // Express the cache memory in units of number of events.
+      cacheMemory = (uint64_t(mb) * 1024 * 1024) / sizeof(MDE);
+      g_log.information() << "Setting a memory cache size of " << mb << " MB, or " << cacheMemory << " events." << std::endl;
+    }
 
     CPUTimer tim;
     bool verbose=true;
@@ -181,6 +203,7 @@ namespace MDEvents
     file->readData("box_event_index", box_event_index);
 
     size_t numBoxes = boxType.size();
+    if (numBoxes == 0) throw std::runtime_error("Zero boxes found. There must have been an error reading or writing the file.");
 
     if (verbose) std::cout << tim << " to read all the box data vectors. There are " << numBoxes << " boxes." << std::endl;
 
@@ -195,6 +218,11 @@ namespace MDEvents
 
     std::vector<IMDBox<MDE,nd> *> boxes(numBoxes, NULL);
     BoxController_sptr bc = ws->getBoxController();
+
+    // Find a minimum size to cache to disk.
+    // We say that no more than 30% of the overall cache memory should be used on tiny boxes.
+    uint64_t minDiskCacheSize = uint64_t(double(cacheMemory) * 0.3) / numBoxes;
+    g_log.information() << "Boxes with fewer than " << minDiskCacheSize << " events will not be cached to disk." << std::endl;
 
     prog->setNumSteps(numBoxes);
 
@@ -231,12 +259,15 @@ namespace MDEvents
           {
             //std::cout << "box " << i << " from " << indexStart << " to " << indexEnd << std::endl;
             box->setFileIndex(uint64_t(indexStart), uint64_t(numEvents));
-            box->setOnDisk(FileBackEnd);
-            if (!FileBackEnd)
+            if (!FileBackEnd || (numEvents < minDiskCacheSize))
             {
-              // Don't load if using the file as the back-end
+              // Load if NOT using the file as the back-end,
+              // or if the box is small enough to keep in memory always
               box->loadNexus(file);
+              box->setOnDisk(false);
             }
+            else
+              box->setOnDisk(true);
           }
           else
           {

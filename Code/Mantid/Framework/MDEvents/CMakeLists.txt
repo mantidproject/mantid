@@ -122,7 +122,7 @@ set_target_properties ( MDEvents PROPERTIES OUTPUT_NAME MantidMDEvents
 set_property ( TARGET MDEvents PROPERTY FOLDER "MantidFramework" )
 
 include_directories( inc  ../Nexus/inc )
-target_link_libraries ( MDEvents ${MANTIDLIBS} Nexus)
+target_link_libraries ( MDEvents ${MANTIDLIBS} Nexus API)
 
 # Create test file projects
 if ( CXXTEST_FOUND )
@@ -133,11 +133,11 @@ if ( CXXTEST_FOUND )
     cxxtest_add_test ( MDEventsTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
     target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS}
          ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} DataHandling Nexus 
-         TestHelpers DataObjects )
+         TestHelpers DataObjects API)
   else ()
     cxxtest_add_test ( MDEventsTest ${TEST_FILES} )
     target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS}
-         DataHandling Nexus TestHelpers DataObjects )
+         DataHandling Nexus TestHelpers DataObjects API)
   endif ()
   
   add_dependencies ( FrameworkTests MDEventsTest )

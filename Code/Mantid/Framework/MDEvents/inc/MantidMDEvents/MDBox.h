@@ -46,6 +46,31 @@ namespace MDEvents
 
     virtual ~MDBox() {}
 
+
+    // ----------------------------- ISaveable Methods ------------------------------------------------------
+
+    /// Save the data
+    virtual void save() const;
+
+    /// Load the data - unused
+    virtual void load()
+    { }
+
+    /// @return the amount of memory that the object takes up in the MRU.
+    virtual size_t getMRUMemory() const
+    { return m_fileNumEvents; }
+
+    /// @return true if it is safe for the MRU to release the data from memory and write it out to disk; false if the data is still being used.
+    virtual bool safeToWrite() const
+    { return m_dataBusy; }
+
+    /** @return the position in the file where the data will be stored. This is used to optimize file writing. */
+    virtual uint64_t getFilePosition() const
+    { return m_fileIndexStart; }
+
+    //-----------------------------------------------------------------------------------------------
+
+
     void clear();
 
     size_t getNPoints() const;
@@ -77,12 +102,12 @@ namespace MDEvents
     void setFileIndex(uint64_t start, uint64_t numEvents);
 
 
-    /** Set whether the box is saved on disk (true) or in memory (false)
+    /** Set whether the box is cached on disk (true) or in memory (false)
      * @param onDisk :: true if it is on disk  */
     void setOnDisk(const bool onDisk)
     { m_onDisk = onDisk; }
 
-    /// @return whether the box is saved on disk (true) or in memory (false)
+    /// @return whether the box is cached on disk (true) or in memory (false)
     bool getOnDisk() const
     { return m_onDisk; }
 
@@ -136,6 +161,13 @@ namespace MDEvents
 
     /// Mutex for modifying the event list
     Mantid::Kernel::Mutex dataMutex;
+
+    /// Is the "data" vector currently in use by some algorithm?
+    mutable bool m_dataBusy;
+
+    /** Marker set to true when the data was accessed in a CONST getEvents() method
+     * (so it has not changed and does not need to be saved).  */
+    mutable bool m_dataConstAccess;
 
     /// Start point in the NXS file where the events are located
     uint64_t m_fileIndexStart;

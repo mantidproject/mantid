@@ -47,9 +47,32 @@ namespace MDEvents
 
     IMDBox(IMDBox<MDE,nd> * box);
 
-    // -------------------------------------------------------------------------------------------
     /// Destructor
     virtual ~IMDBox() {}
+
+    // ----------------------------- ISaveable Methods ------------------------------------------------------
+
+    /// Save the data - to be overriden
+    virtual void save() const
+    { }
+
+    /// Load the data - to be overriden
+    virtual void load()
+    { }
+
+    /// @return the amount of memory that the object takes up in the MRU.
+    virtual size_t getMRUMemory() const
+    { return 0; }
+
+    /// @return true if it is safe for the MRU to write out this data to disk; false if the data might get modified.
+    virtual bool safeToWrite() const
+    { return true; }
+
+    /** @return the position in the file where the data will be stored. This is used to optimize file writing. */
+    virtual uint64_t getFilePosition() const
+    { return 0; }
+
+    // -------------------------------------------------------------------------------------------
 
     /// Clear all contained data
     virtual void clear() = 0;

@@ -12,7 +12,7 @@ namespace MDEvents
   /** Empty constructor */
   TMDE(MDBox)::MDBox()
    : IMDBox<MDE, nd>(),
-     m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
+     m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
   {
   }
 
@@ -23,7 +23,7 @@ namespace MDEvents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth)
     : IMDBox<MDE, nd>(),
-      m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
+      m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
   {
     if (controller->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
@@ -41,7 +41,7 @@ namespace MDEvents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
       : IMDBox<MDE, nd>(extentsVector),
-        m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
+        m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
   {
     if (controller->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
@@ -125,15 +125,28 @@ namespace MDEvents
   {
     if (m_onDisk)
     {
-      ::NeXus::File * file = this->m_BoxController->getFile();
-      if (file)
+      // Is the data in memory right now (cached copy)?
+      if (data.empty())
       {
-        fileMutex.lock();
-        data.clear();
-        this->m_BoxController->fileMutex.lock();
-        MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
-        this->m_BoxController->fileMutex.unlock();
+        // Perform the data loading
+        ::NeXus::File * file = this->m_BoxController->getFile();
+        if (file)
+        {
+          //fileMutex.lock();
+          data.clear();
+          this->m_BoxController->fileMutex.lock();
+          MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
+          this->m_BoxController->fileMutex.unlock();
+          //fileMutex.unlock();
+        }
       }
+//      // After loading, or each time you request it:
+//      // Touch the MRU to say you just used it.
+//      this->m_BoxController->getDiskMRU().loading(this);
+      // The data vector is busy - can't release the memory yet
+      this->m_dataBusy = true;
+      // This access to data was NOT const, so it might have changed.
+      this->m_dataConstAccess = false;
     }
     // else: do nothing if the events are already in memory.
     return data;
@@ -147,36 +160,69 @@ namespace MDEvents
   {
     if (m_onDisk)
     {
-      ::NeXus::File * file = this->m_BoxController->getFile();
-      if (file)
+      // Is the data in memory right now (cached copy)?
+      if (data.empty())
       {
-        fileMutex.lock();
-        data.clear();
-        this->m_BoxController->fileMutex.lock();
-        MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
-        this->m_BoxController->fileMutex.unlock();
+        // Perform the data loading
+        ::NeXus::File * file = this->m_BoxController->getFile();
+        if (file)
+        {
+          //fileMutex.lock();
+          data.clear();
+          this->m_BoxController->fileMutex.lock();
+          MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
+          this->m_BoxController->fileMutex.unlock();
+          //fileMutex.unlock();
+        }
       }
+//      // After loading, or each time you request it:
+//      // Touch the MRU to say you just used it.
+//      this->m_BoxController->getDiskMRU().loading(this);
+      // The data vector is busy - can't release the memory yet
+      this->m_dataBusy = true;
+      // This access to data was const
+      this->m_dataConstAccess = true;
     }
     // else: do nothing if the events are already in memory.
     return data;
   }
 
   //-----------------------------------------------------------------------------------------------
-  /** For file-backed MDBoxes, this releases the event list,
-   *  and allows it to be cleared from memory (if needed).
+  /** For file-backed MDBoxes, this marks that the data vector is
+   * no longer "busy", and so it is safe for the MRU to cache it
+   * back to disk if needed.
    */
   TMDE(
   void MDBox)::releaseEvents() const
   {
-    //TODO: Check a dirty flag and save the data if required?
     if (m_onDisk)
     {
-      // Free up memory by clearing the events
-      data.clear();
-      vec_t().swap(data); // Linux trick to really free the memory
-      fileMutex.unlock();
+      // Data vector is no longer busy.
+      this->m_dataBusy = false;
+      // TODO: Remove when THE MRU does its thing
+      save();
     }
   }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Call to save the data (if needed) and release
+   * the memory used.
+   * Called from the DiskMRU.
+   */
+  TMDE(
+  void MDBox)::save() const
+  {
+    // Only save to disk when the access was non-const.
+    if (!m_dataConstAccess)
+    {
+      this->saveNexus( this->m_BoxController->getFile() );
+    }
+    // Free up memory by clearing the events
+    data.clear();
+    vec_t().swap(data); // Linux trick to really free the memory
+  }
+
 
 
   //-----------------------------------------------------------------------------------------------
