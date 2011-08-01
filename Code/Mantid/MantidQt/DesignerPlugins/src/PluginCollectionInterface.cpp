@@ -6,6 +6,7 @@
 #include "MantidQtDesignerPlugins/FileFinderPlugin.h"
 #include "MantidQtDesignerPlugins/InstrumentSelectorPlugin.h"
 #include "MantidQtDesignerPlugins/WorkspaceSelectorPlugin.h"
+#include "MantidQtDesignerPlugins/FitBrowserPlugin.h"
 
 Q_EXPORT_PLUGIN2(LIBRARY_NAME, PluginCollectionInterface)
 
@@ -18,6 +19,10 @@ PluginCollectionInterface::PluginCollectionInterface(QObject *parent) : QObject(
   m_widgets.append(new FileFinderPlugin(this));
   m_widgets.append(new InstrumentSelectorPlugin(this));
   m_widgets.append(new WorkspaceSelectorPlugin(this));
+  // for now adding the fit browser to qt-designer is in 
+  // development stage - only uncomment once they plugin
+  // can be can be dragged in without breaking designer
+  //m_widgets.append(new FitBrowserPlugin(this));
 }
 
 /**
