@@ -336,7 +336,7 @@ def createPropertiesFile(filename):
     "datasearch.directories" : "datasearch.directories = ../data",
     "icatDownload.directory":"icatDownload.directory = ../data",
     "ManagedWorkspace.FilePath" : "ManagedWorkspace.FilePath = ../temp",
-    "logging.channels.fileChannel.path" : "logging.channels.fileChannel.path = ../logs/mantid.logs"
+    "logging.channels.fileChannel.path" : "logging.channels.fileChannel.path = ../logs/mantid.log"
     }
 
     template = open(filename,'r')

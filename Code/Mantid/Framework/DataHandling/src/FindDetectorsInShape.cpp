@@ -50,7 +50,6 @@ void FindDetectorsInShape::initDocs()
         "Whether monitors should be included if they are contained in the\n"
         "shape (default false)");
 			declareProperty("DetectorList", std::vector<int>(),
-        new NullValidator< std::vector<int> >,                                      //the null validator always returns valid, there is no validation
         "The list of detector ids included within the shape",
         Direction::Output);
 		}
@@ -58,7 +57,7 @@ void FindDetectorsInShape::initDocs()
 		void FindDetectorsInShape::exec()
 		{
 			// Get the input workspace
-			const MatrixWorkspace_sptr WS = getProperty("Workspace");
+			const MatrixWorkspace_const_sptr WS = getProperty("Workspace");
 			
 			bool includeMonitors = getProperty("IncludeMonitors");
 

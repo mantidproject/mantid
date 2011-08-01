@@ -215,26 +215,26 @@ endif ()
 # things to put together a main program
 ###########################################################################
 
-set ( NAME_IS_PETE OFF CACHE BOOL "Ha ha" )
+set ( MAIN_TARGET OFF CACHE BOOL "Enable the target to generate a 'main' executable" )
 
 find_program( GEN_TEST_MAIN generatetestmain.py
               ${PROJECT_SOURCE_DIR}/TestingTools/ ${PROJECT_SOURCE_DIR}/../TestingTools/)
 mark_as_advanced ( GEN_TEST_MAIN )
-if (NAME_IS_PETE AND GEN_TEST_MAIN)
+if (MAIN_TARGET AND GEN_TEST_MAIN)
   # generate a default "main.cpp" file
   add_custom_command ( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
                        COMMAND ${GEN_TEST_MAIN} ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp )
-  add_custom_target( russellcpp
+  add_custom_target( maincpp
                      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp )
 
   # build an executable
-  add_executable(russell EXCLUDE_FROM_ALL ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp )
-  target_link_libraries ( russell ${MANTIDLIBS} Algorithms DataHandling )
+  add_executable(main EXCLUDE_FROM_ALL ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp )
+  target_link_libraries ( main ${MANTIDLIBS} Algorithms DataHandling )
 
   # run the executable
-  add_custom_target ( russellhappy
-                      DEPENDS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/russell 
-                      COMMAND ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/russell )
+  add_custom_target ( cleanmain
+                      DEPENDS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/main 
+                      COMMAND ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/main )
 endif ()
 
 ###########################################################################
