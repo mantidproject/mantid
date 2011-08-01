@@ -9,6 +9,7 @@ from reduction import ReductionStep
 from sans_reduction_steps import BaseTransmission, BaseBeamFinder, WeightedAzimuthalAverage
 from sans_reduction_steps import DirectBeamTransmission as SingleFrameDirectBeamTransmission
 from sans_reduction_steps import SaveIqAscii as BaseSaveIqAscii
+from sans_reduction_steps import SensitivityCorrection as BaseSensitivityCorrection
 from reduction import extract_workspace_name, find_file, find_data
 from eqsans_config import EQSANSConfig
 
@@ -469,10 +470,13 @@ class LoadRun(ReductionStep):
         
         # Rebin so all the wavelength bins are aligned
         # Keep events
-        Rebin(workspace+'_evt', workspace+'_evt', "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_combined_max), True)
-        #TODO: remove the need to rename workspace once we know for sure that we will never need to
-        # go to histograms at this point in the reduction.
-        RenameWorkspace(workspace+'_evt', workspace)
+        if False:
+            Rebin(workspace+'_evt', workspace+'_evt', "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_combined_max), True)
+            #TODO: remove the need to rename workspace once we know for sure that we will never need to
+            # go to histograms at this point in the reduction.
+            RenameWorkspace(workspace+'_evt', workspace)
+        else:
+            Rebin(workspace+'_evt', workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_combined_max), False)
         
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [frame-skipping: %s]" %(workspace, sdd, str(frame_skipping)))
         
@@ -890,3 +894,31 @@ class SaveIqAscii(BaseSaveIqAscii):
             
         return log_text
             
+class SensitivityCorrection(BaseSensitivityCorrection):
+    """
+        Perform sensitivity correction as a function of wavelength
+    """
+    def __init__(self, flood_data, min_sensitivity=0.5, max_sensitivity=1.5, dark_current=None, 
+                 beam_center=None, use_sample_dc=False):
+        super(SensitivityCorrection, self).__init__(flood_data=flood_data, 
+                                                    min_sensitivity=min_sensitivity, max_sensitivity=max_sensitivity, 
+                                                    dark_current=dark_current, beam_center=beam_center, use_sample_dc=use_sample_dc)
+    
+    def execute(self, reducer, workspace):
+        # Perform standard sensitivity correction
+        # If the sensitivity correction workspace exists, just apply it. Otherwise create it.      
+        output_str = "   Using data set: %s" % extract_workspace_name(self._flood_data)
+        if self._efficiency_ws is None:
+            self._compute_efficiency(reducer, workspace)
+            
+        # Modify for wavelength dependency of the efficiency of the detector tubes
+        EQSANSSensitivityCorrection(InputWorkspace=workspace, EfficiencyWorkspace=self._efficiency_ws,
+                                    Factor=0.95661, Error=0.005, OutputWorkspace=workspace,
+                                    OutputEfficiencyWorkspace="__wl_efficiency")
+        
+        # Copy over the efficiency's masked pixels to the reduced workspace
+        masked_detectors = GetMaskedDetectors(self._efficiency_ws)
+        MaskDetectors(workspace, None, masked_detectors.getPropertyValue("DetectorList"))        
+        
+        return "Wavelength-dependent sensitivity correction applied\n%s\n" % output_str
+        
