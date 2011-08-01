@@ -18,10 +18,10 @@ namespace Mantid
     The instructions here complement the instruction at <http://http://www.mantidproject.org/Writing_a_Fit_Function>
 
     1) Rename LorentzianTest.h and LorentzianTest.cpp to the name of your new Fit Function, say MyFit.h and MyFit.cpp
-    2) Open MyFit.h and substitute LORENTZIANTEST with MYFIT and LorentzianTest with MyFit. 
+    2) Open MyFit.h and substitute all instances of LORENTZIANTEST with MYFIT and LorentzianTest with MyFit. 
     3) Open MyFit.cpp and substitute LorentzianTest with MyFit
-    4) Check that MyFit, see <http://http://www.mantidproject.org/Writing_a_Fit_Function> for instructions
-    5) Now the fun bit, modify the sections in MyFit.h and MyFit.cpp which includes the header: ** MODIFY THIS **
+    4) Check that MyFit works, see <http://http://www.mantidproject.org/Writing_a_Fit_Function> for instructions
+    5) Now the fun bit, modify the sections in MyFit.h and MyFit.cpp entitled ** MODIFY THIS **
 
 
     Note for information about the Mantid implementation of the Lorentzian Fit Function see 
