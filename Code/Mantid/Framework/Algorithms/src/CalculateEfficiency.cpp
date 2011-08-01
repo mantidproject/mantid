@@ -71,7 +71,7 @@ void CalculateEfficiency::exec()
 
   Progress progress(this,0.0,1.0,numberOfSpectra);
 
-  DataObjects::EventWorkspace_const_sptr inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(rebinnedWS);
+  DataObjects::EventWorkspace_const_sptr inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
   if(inputEventWS)
   {
