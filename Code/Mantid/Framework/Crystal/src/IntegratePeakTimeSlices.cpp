@@ -668,12 +668,16 @@ static std::vector<int> getStartNRowCol( const double CentRow,
       double StartRow = CentRow - (int)(dRow/2);
       if(StartRow <3)
         StartRow = 3;
+      if(StartRow  > nPanelRows-3)
+        StartRow =nPanelRows-3;
 
       Res.push_back( (int)StartRow);
 
       double StartCol = CentCol - (int)(dCol/2);
       if(StartCol <3)
           StartCol = 3;
+      if(StartCol >nPanelCols-3)
+          StartCol =nPanelCols- 3;
 
       Res.push_back( (int)StartCol);
 
