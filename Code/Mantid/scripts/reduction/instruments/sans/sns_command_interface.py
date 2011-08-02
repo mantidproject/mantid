@@ -22,11 +22,13 @@ from reduction.find_data import find_data
 
 import mantidsimple
 
-def EQSANS():
+def EQSANS(keep_events=False):
     Clear(EqSansReducer)
     ReductionSingleton().set_instrument(sns_instrument.EQSANS())
     NoSolidAngle()
     AzimuthalAverage()
+    if keep_events:
+        ReductionSingleton().set_data_loader(sns_reduction_steps.LoadRun(keep_events=keep_events))
     
 def FrameSkipping(value=False):
     raise RuntimeError, "The FrameSkipping command is no longer needed and no longer supported" 

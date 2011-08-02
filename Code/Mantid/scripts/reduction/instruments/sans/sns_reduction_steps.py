@@ -45,7 +45,7 @@ class LoadRun(ReductionStep):
         Load a data file, move its detector to the right position according
         to the beam center and normalize the data.
     """
-    def __init__(self, datafile=None):
+    def __init__(self, datafile=None, keep_events=False):
         super(LoadRun, self).__init__()
         self._data_file = datafile
         
@@ -67,6 +67,9 @@ class LoadRun(ReductionStep):
         
         self._sample_det_dist = None
         self._sample_det_offset = 0
+        
+        # Flag to tell us whether we should do the full reduction with events
+        self._keep_events = keep_events
    
     def clone(self, data_file=None):
         if data_file is None:
@@ -470,19 +473,21 @@ class LoadRun(ReductionStep):
         
         # Rebin so all the wavelength bins are aligned
         # Keep events
-        if False:
+        if self._keep_events:
+            mantid.sendLogMessage("Reducing with events only")
             Rebin(workspace+'_evt', workspace+'_evt', "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_combined_max), True)
             #TODO: remove the need to rename workspace once we know for sure that we will never need to
             # go to histograms at this point in the reduction.
             RenameWorkspace(workspace+'_evt', workspace)
+            # Add the name of the event workspace as a property in case we need it later (used by the beam stop transmission)
+            mantid[workspace].getRun().addProperty_str("event_ws", workspace, True)
         else:
             Rebin(workspace+'_evt', workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_combined_max), False)
+            # Add the name of the event workspace as a property in case we need it later (used by the beam stop transmission)
+            mantid[workspace].getRun().addProperty_str("event_ws", workspace+'_evt', True)
         
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [frame-skipping: %s]" %(workspace, sdd, str(frame_skipping)))
-        
-        # Add the name of the event workspace as a property in case we need it later (used by the beam stop transmission)
-        mantid[workspace].getRun().addProperty_str("event_ws", workspace+'_evt', True)
-            
+                    
         if self._separate_corrections:
             # If we pick up the data file from the workspace, it's because we 
             # are going through the reduction chain, otherwise we are just loading
