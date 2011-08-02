@@ -5,7 +5,7 @@
 from reduction.command_interface import *
 from hfir_command_interface import SetBeamCenter, ScatteringBeamCenter
 from hfir_command_interface import NoDarkCurrent, NoNormalization, Mask, MaskDetectors, MaskRectangle
-from hfir_command_interface import SensitivityCorrection, NoSensitivityCorrection
+from hfir_command_interface import NoSensitivityCorrection
 from hfir_command_interface import SolidAngle, NoSolidAngle, NoTransmission, SetTransmission
 from hfir_command_interface import Background, NoBackground, IQxQy, NoIQxQy
 from hfir_command_interface import NoSaveIq, DivideByThickness, BckDivideByThickness
@@ -117,4 +117,14 @@ def DirectBeamCenter(datafile):
 def SensitivityDirectBeamCenter(datafile):
     find_data(datafile, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.DirectBeamCenter(datafile))
+    
+def SensitivityCorrection(flood_data, min_sensitivity=0.5, max_sensitivity=1.5, dark_current=None, use_sample_dc=False):
+    find_data(flood_data, instrument=ReductionSingleton().instrument.name())
+    if dark_current is not None:
+        find_data(dark_current, instrument=ReductionSingleton().instrument.name())
+    ReductionSingleton().set_sensitivity_correcter(sns_reduction_steps.SensitivityCorrection(flood_data, 
+                                                                                             min_sensitivity, 
+                                                                                             max_sensitivity,
+                                                                                             dark_current=dark_current,
+                                                                                             use_sample_dc=use_sample_dc))
     

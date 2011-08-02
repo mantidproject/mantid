@@ -875,11 +875,8 @@ class SensitivityCorrection(ReductionStep):
         else:
             return None
     
-    def execute(self, reducer, workspace):
-        # If the sensitivity correction workspace exists, just apply it.
-        # Otherwise create it.      
-        #TODO: check that the workspaces have the same binning!
-        output_str = "   Using data set: %s" % extract_workspace_name(self._flood_data)
+    def _compute_efficiency(self, reducer, workspace):
+        output_str = ""
         if self._efficiency_ws is None:
             # Load the flood data
             filepath = find_data(self._flood_data, instrument=reducer.instrument.name())
@@ -914,11 +911,21 @@ class SensitivityCorrection(ReductionStep):
         
             # Create efficiency profile: 
             # Divide each pixel by average signal, and mask high and low pixels.
-            CalculateEfficiency(flood_ws, "__efficiency", self._min_sensitivity, self._max_sensitivity)
             self._efficiency_ws = "__efficiency"
+            CalculateEfficiency(flood_ws, self._efficiency_ws, self._min_sensitivity, self._max_sensitivity)
             
             # Clean up
             reducer._data_loader.__class__.delete_workspaces(flood_ws)
+            
+        return output_str
+        
+    def execute(self, reducer, workspace):
+        # If the sensitivity correction workspace exists, just apply it.
+        # Otherwise create it.      
+        #TODO: check that the workspaces have the same binning!
+        output_str = "   Using data set: %s" % extract_workspace_name(self._flood_data)
+        if self._efficiency_ws is None:
+            output_str += self._compute_efficiency(reducer, workspace)
             
         # Divide by detector efficiency
         Divide(workspace, self._efficiency_ws, workspace)
