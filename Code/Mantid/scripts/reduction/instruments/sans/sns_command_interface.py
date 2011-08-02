@@ -36,8 +36,8 @@ def DarkCurrent(datafile):
     find_data(datafile, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().set_dark_current_subtracter(sns_reduction_steps.SubtractDarkCurrent(datafile))
 
-def TotalChargeNormalization():
-    ReductionSingleton().set_normalizer(sns_reduction_steps.Normalize())
+def TotalChargeNormalization(normalize_to_beam=True):
+    ReductionSingleton().set_normalizer(sns_reduction_steps.Normalize(normalize_to_beam=normalize_to_beam))
   
 def MonitorNormalization():
     TotalChargeNormalization()

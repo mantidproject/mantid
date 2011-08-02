@@ -507,6 +507,10 @@ class Normalize(ReductionStep):
     """
         Normalize the data to the accelerator current
     """
+    def __init__(self, normalize_to_beam=True):
+        super(Normalize, self).__init__()
+        self._normalize_to_beam = normalize_to_beam
+        
     def get_normalization_spectrum(self):
         return -1
     
@@ -514,29 +518,30 @@ class Normalize(ReductionStep):
         # Flag the workspace as dirty
         reducer.dirty(workspace)
         
-        # Find available beam flux file
-        # First, check whether we have access to the SNS mount, if
-        # not we will look in the data directory
         flux_data_path = None
-        
-        flux_files = find_file(filename="bl6_flux_at_sample", data_dir=reducer._data_path)
-        if len(flux_files)>0:
-            flux_data_path = flux_files[0]
-            mantid.sendLogMessage("Using beam flux file: %s" % flux_data_path)
-        else:
-            mantid.sendLogMessage("Could not find beam flux file!")
+        if self._normalize_to_beam:
+            # Find available beam flux file
+            # First, check whether we have access to the SNS mount, if
+            # not we will look in the data directory
             
-        if flux_data_path is not None:
-            beam_flux_ws = "__beam_flux"
-            LoadAscii(flux_data_path, beam_flux_ws, Separator="Tab", Unit="Wavelength")
-            ConvertToHistogram(beam_flux_ws, beam_flux_ws)
-            RebinToWorkspace(beam_flux_ws, workspace, beam_flux_ws)
-            NormaliseToUnity(beam_flux_ws, beam_flux_ws)
-            Divide(workspace, beam_flux_ws, workspace)
-            mtd[workspace].getRun().addProperty_str("beam_flux_ws", beam_flux_ws, True)
-        else:
-            flux_data_path = "Could not find beam flux file!"
-        
+            flux_files = find_file(filename="bl6_flux_at_sample", data_dir=reducer._data_path)
+            if len(flux_files)>0:
+                flux_data_path = flux_files[0]
+                mantid.sendLogMessage("Using beam flux file: %s" % flux_data_path)
+            else:
+                mantid.sendLogMessage("Could not find beam flux file!")
+                
+            if flux_data_path is not None:
+                beam_flux_ws = "__beam_flux"
+                LoadAscii(flux_data_path, beam_flux_ws, Separator="Tab", Unit="Wavelength")
+                ConvertToHistogram(beam_flux_ws, beam_flux_ws)
+                RebinToWorkspace(beam_flux_ws, workspace, beam_flux_ws)
+                NormaliseToUnity(beam_flux_ws, beam_flux_ws)
+                Divide(workspace, beam_flux_ws, workspace)
+                mtd[workspace].getRun().addProperty_str("beam_flux_ws", beam_flux_ws, True)
+            else:
+                flux_data_path = "Could not find beam flux file!"
+            
         #NormaliseByCurrent(workspace, workspace)
         proton_charge = mantid.getMatrixWorkspace(workspace).getRun()["proton_charge"].getStatistics().mean
         duration = mantid.getMatrixWorkspace(workspace).getRun()["proton_charge"].getStatistics().duration
