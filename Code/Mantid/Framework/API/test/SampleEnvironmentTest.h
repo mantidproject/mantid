@@ -3,6 +3,8 @@
 
 #include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/V3D.h"

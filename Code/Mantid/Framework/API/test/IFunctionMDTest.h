@@ -7,7 +7,6 @@
 
 using namespace Mantid;
 using namespace Mantid::API;
-using namespace WorkspaceCreationHelper;
 
 class IFunctionMDTest : public CxxTest::TestSuite
 {

@@ -4,10 +4,13 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include <cxxtest/TestSuite.h>
 
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using Mantid::API::Sample;
