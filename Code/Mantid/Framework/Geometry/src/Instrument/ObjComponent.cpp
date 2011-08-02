@@ -164,7 +164,12 @@ namespace Mantid
   {
  
 // Start with the box in the shape's coordinates
-      const BoundingBox & shapeBox = shape()->getBoundingBox();
+      const Object_const_sptr s = shape();
+      if ( ! s ){
+          absoluteBB.nullify();
+          return;
+      }
+      const BoundingBox & shapeBox = s->getBoundingBox();
       if ( shapeBox.isNull() ){
           absoluteBB.nullify();
           return;

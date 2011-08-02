@@ -198,6 +198,12 @@ void GLViewport::issueGL() const
     ymax += 0.001;
   }
 
+  if (zmin == zmax)
+  {
+    zmin -= 0.001;
+    zmax += 0.001;
+  }
+
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glViewport(0, 0, mWidth, mHeight);
