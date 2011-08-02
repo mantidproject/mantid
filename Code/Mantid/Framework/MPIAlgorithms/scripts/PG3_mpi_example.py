@@ -65,6 +65,7 @@ def loopmethod():
     for run in runs:
         name = "PG3_%d" % run
         data = focus(name + "_event.nxs", name, binning)
+        ConvertToMatrixWorkspace(data,data)
         data /= van
         names.append(str(data))
 
