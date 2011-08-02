@@ -4,6 +4,8 @@
 #include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/EventList.h"
 
 namespace Mantid
 {
@@ -23,6 +25,7 @@ void SANSSolidAngleCorrection::initDocs()
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
 
 void SANSSolidAngleCorrection::init()
 {
@@ -37,6 +40,9 @@ void SANSSolidAngleCorrection::init()
 void SANSSolidAngleCorrection::exec()
 {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  DataObjects::EventWorkspace_const_sptr inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  if (inputEventWS)
+    return execEvent();
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -55,8 +61,10 @@ void SANSSolidAngleCorrection::exec()
   // Number of X bins
   const int xLength = static_cast<int>(inputWS->readY(0).size());
 
+  PARALLEL_FOR2(outputWS, inputWS)
   for (int i = 0; i < numHists; ++i)
   {
+    PARALLEL_START_INTERUPT_REGION
     outputWS->dataX(i) = inputWS->readX(i);
 
     IDetector_const_sptr det;
@@ -88,7 +96,68 @@ void SANSSolidAngleCorrection::exec()
       EOut[j] = fabs(EIn[j]*corr);
     }
     progress.report("Solid Angle Correction");
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
+  setProperty("OutputMessage", "Solid angle correction applied");
+}
+
+void SANSSolidAngleCorrection::execEvent()
+{
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  EventWorkspace_sptr inputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(inputWS);
+
+  const int numberOfSpectra = static_cast<int>(inputEventWS->getNumberHistograms());
+  Progress progress(this,0.0,1.0,inputEventWS->getNumberHistograms());
+
+  // generate the output workspace pointer
+  MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
+  EventWorkspace_sptr outputEventWS;
+  if (outputWS == inputWS)
+    outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+  else
+  {
+    //Make a brand new EventWorkspace
+    outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(
+        WorkspaceFactory::Instance().create("EventWorkspace", inputEventWS->getNumberHistograms(), 2, 1));
+    //Copy geometry over.
+    WorkspaceFactory::Instance().initializeFromParent(inputEventWS, outputEventWS, false);
+    //You need to copy over the data as well.
+    outputEventWS->copyDataFrom( (*inputEventWS) );
+
+    //Cast to the matrixOutputWS and save it
+    outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputEventWS);
+    this->setProperty("OutputWorkspace", outputWS);
+  }
+
+  progress.report("Solid Angle Correction");
+
+  PARALLEL_FOR2(inputEventWS, outputEventWS)
+  for (int i = 0; i < numberOfSpectra; i++)
+  {
+    PARALLEL_START_INTERUPT_REGION
+    IDetector_const_sptr det;
+    try {
+      det = inputEventWS->getDetector(i);
+    } catch (Exception::NotFoundError&) {
+      g_log.warning() << "Spectrum index " << i << " has no detector assigned to it - discarding" << std::endl;
+      continue;
+    }
+
+    // Skip if we have a monitor or if the detector is masked.
+    if ( det->isMonitor() || det->isMasked() ) continue;
+
+    // Compute solid angle correction factor
+    const double tanTheta = tan( inputEventWS->detectorTwoTheta(det) );
+    const double term = sqrt(tanTheta*tanTheta + 1.0);
+    const double corr = term*term*term;
+    EventList& el = outputEventWS->getEventList(i);
+    el*=corr;
+    progress.report("Solid Angle Correction");
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+
   setProperty("OutputMessage", "Solid angle correction applied");
 }
 

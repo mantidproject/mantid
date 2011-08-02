@@ -55,6 +55,7 @@ private:
   void init();
   /// Execution code
   void exec();
+  void execEvent();
 };
 
 } // namespace Algorithms
