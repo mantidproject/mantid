@@ -485,9 +485,9 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     buffers[i] = new DasEvent[loadBlockSize];
 
     // For each partial workspace, make an array where index = detector ID and value = pointer to the events vector
-    eventVectors[i] = new EventVector_pt[detid_max];
+    eventVectors[i] = new EventVector_pt[detid_max+1];
     EventVector_pt * theseEventVectors = eventVectors[i];
-    for (detid_t j=0; j<detid_max; j++)
+    for (detid_t j=0; j<detid_max+1; j++)
     {
       size_t wi = pixel_to_wkspindex[j];
       // Save a POINTER to the vector<tofEvent>
@@ -641,7 +641,7 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 //-----------------------------------------------------------------------------
 /** Linear-version of the procedure to process the event file properly.
  * @param workspace :: EventWorkspace to write to.
- * @param arrayOfVectors :: For speed up: this is an array, of size detid_max, where the
+ * @param arrayOfVectors :: For speed up: this is an array, of size detid_max+1, where the
  *        index is a pixel ID, and the value is a pointer to the vector<tofEvent> in the given EventList.
  * @param event_buffer :: The buffer containing the DAS events
  * @param current_event_buffer_size :: The length of the given DAS buffer
