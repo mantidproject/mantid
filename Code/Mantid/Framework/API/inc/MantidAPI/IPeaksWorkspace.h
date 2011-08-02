@@ -14,9 +14,9 @@ namespace Mantid
 namespace API
 {
   //==========================================================================================
-  /** @class Mantid::DataObjects::PeaksWorkspace
+  /** Interface to the class Mantid::DataObjects::PeaksWorkspace
 
-     The class PeaksWorkspace stores information about a set of SCD peaks.
+      The class PeaksWorkspace stores information about a set of SCD peaks.
 
       @author Ruth Mikkelson, SNS ORNL
       @date 3/10/2010

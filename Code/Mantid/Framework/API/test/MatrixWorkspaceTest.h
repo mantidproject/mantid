@@ -1,19 +1,17 @@
 #ifndef WORKSPACETEST_H_
 #define WORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-
+#include "FakeObjects.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include <boost/scoped_ptr.hpp>
-#include "MantidAPI/ISpectrum.h"
-#include "MantidDataObjects/Histogram1D.h"
-#include "FakeObjects.h"
+#include <cxxtest/TestSuite.h>
 
 using std::size_t;
 using namespace Mantid::Kernel;

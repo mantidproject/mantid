@@ -1,14 +1,12 @@
 #ifndef IFUNCTIONTEST_H_
 #define IFUNCTIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
-#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;

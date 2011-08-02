@@ -1,11 +1,8 @@
 #ifndef IFUNCTIONMDTEST_H_
 #define IFUNCTIONMDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/IFunctionMD.h"
-
+#include <cxxtest/TestSuite.h>
 #include <iostream>
 
 using namespace Mantid;

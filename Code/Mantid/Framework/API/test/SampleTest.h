@@ -1,15 +1,12 @@
 #ifndef TESTSAMPLE_H_
 #define TESTSAMPLE_H_
 
-#include <cxxtest/TestSuite.h>
-
 #include "MantidAPI/Sample.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/SampleEnvironment.h"
-
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <MantidGeometry/Crystal/OrientedLattice.h>
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/Exception.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;

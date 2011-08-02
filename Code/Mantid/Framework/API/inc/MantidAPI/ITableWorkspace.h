@@ -356,6 +356,6 @@ typedef boost::shared_ptr<ITableWorkspace> ITableWorkspace_sptr;
 typedef boost::shared_ptr<const ITableWorkspace> ITableWorkspace_const_sptr;
 
 
-} // namespace DataObjects
+} // namespace API
 } // Namespace Mantid
 #endif /*MANTID_API_ITABLEWORKSPACE_H_*/

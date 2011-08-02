@@ -1,13 +1,12 @@
 #ifndef TESTSAMPLEENVIRONMENT_H_
 #define TESTSAMPLEENVIRONMENT_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidKernel/NeutronAtom.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/V3D.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::API::SampleEnvironment;
 using namespace Mantid::PhysicalConstants;

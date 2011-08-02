@@ -1,14 +1,13 @@
 #ifndef RUNTEST_H_
 #define RUNTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/Property.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/V3D.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

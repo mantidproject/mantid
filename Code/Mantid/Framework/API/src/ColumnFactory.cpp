@@ -24,5 +24,5 @@ namespace API
     }
 
 
-} // namespace DataObjects
+} // namespace API
 } // namespace Mantid
