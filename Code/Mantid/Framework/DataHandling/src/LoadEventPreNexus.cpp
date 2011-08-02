@@ -294,7 +294,7 @@ void LoadEventPreNexus::exec()
 
   // Add the run_start property
   // Use the first pulse as the run_start time.
-  if (pulsetimes.size() > 0)
+  if (this->num_pulses > 0)
   {
     // add the start of the run as a ISO8601 date/time string. The start = the first pulse.
     // (this is used in LoadInstrumentHelper to find the right instrument file to use).
@@ -359,7 +359,7 @@ void LoadEventPreNexus::runLoadInstrument(const std::string &eventfilename, Matr
 /** Turn a pixel id into a "corrected" pixelid and period.
  *
  */
-void LoadEventPreNexus::fixPixelId(PixelType &pixel, uint32_t &period) const
+inline void LoadEventPreNexus::fixPixelId(PixelType &pixel, uint32_t &period) const
 {
   if (!this->using_mapping_file) { // nothing to do here
     period = 0;
@@ -415,6 +415,7 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   // Pad all the pixels
   prog->report("Padding Pixels");
   this->pixel_to_wkspindex.reserve(detid_max+1); //starting at zero up to and including detid_max
+  // Set to zero
   this->pixel_to_wkspindex.assign(detid_max+1, 0);
   size_t workspaceIndex = 0;
   for (it = detector_map.begin(); it != detector_map.end(); it++)
@@ -444,34 +445,57 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   // Vector of partial workspaces, for parallel processing.
   std::vector<EventWorkspace_sptr> partWorkspaces;
   std::vector<DasEvent *> buffers;
-  size_t numThreads = size_t(PARALLEL_GET_MAX_THREADS);
+
+  /// Pointer to the vector of events
+  typedef std::vector<TofEvent> * EventVector_pt;
+  /// Bare array of arrays of pointers to the EventVectors
+  EventVector_pt ** eventVectors;
+
+  /// How many threads will we use?
+  size_t numThreads = 1;
   if (parallelProcessing)
+    numThreads = size_t(PARALLEL_GET_MAX_THREADS);
+
+
+  partWorkspaces.resize(numThreads);
+  buffers.resize(numThreads);
+  eventVectors = new EventVector_pt *[numThreads];
+
+  PRAGMA_OMP( parallel for if (parallelProcessing) )
+  for (int i=0; i < int(numThreads); i++)
   {
-    partWorkspaces.resize(numThreads);
-    buffers.resize(numThreads);
-    PRAGMA_OMP( parallel for )
-    for (int i=0; i < int(numThreads); i++)
+    // This is the partial workspace we are about to create (if in parallel)
+    EventWorkspace_sptr partWS;
+    if (parallelProcessing)
     {
       prog->report("Creating Partial Workspace");
       // Create a partial workspace
-      EventWorkspace_sptr partWS(new EventWorkspace());
+      partWS = EventWorkspace_sptr(new EventWorkspace());
       //Make sure to initialize.
       partWS->initialize(1,1,1);
       // Copy all the spectra numbers and stuff (no actual events to copy though).
       partWS->copyDataFrom(*workspace);
       // Push it in the array
       partWorkspaces[i] = partWS;
-      //Allocate the buffers
-      buffers[i] = new DasEvent[loadBlockSize];
     }
-    g_log.debug() << tim << " to create " << partWorkspaces.size() << " workspaces for parallel loading." << std::endl;
+    else
+      partWS = workspace;
+
+    //Allocate the buffers
+    buffers[i] = new DasEvent[loadBlockSize];
+
+    // For each partial workspace, make an array where index = detector ID and value = pointer to the events vector
+    eventVectors[i] = new EventVector_pt[detid_max];
+    EventVector_pt * theseEventVectors = eventVectors[i];
+    for (detid_t j=0; j<detid_max; j++)
+    {
+      size_t wi = pixel_to_wkspindex[j];
+      // Save a POINTER to the vector<tofEvent>
+      theseEventVectors[j] = &partWS->getEventList(wi).getEvents();
+    }
   }
-  else
-  {
-    //Allocate the buffer
-    buffers.resize(1);
-    buffers[0] = new DasEvent[loadBlockSize];
-  }
+
+  g_log.debug() << tim << " to create " << partWorkspaces.size() << " workspaces for parallel loading." << std::endl;
 
 
   prog->resetNumSteps( numBlocks, 0.1, 0.8);
@@ -480,6 +504,7 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   PRAGMA_OMP( parallel for schedule(dynamic, 1) if (parallelProcessing) )
   for (int blockNum=0; blockNum<int(numBlocks); blockNum++)
   {
+    PARALLEL_START_INTERUPT_REGION
 
     // Find the workspace for this particular thread
     EventWorkspace_sptr ws;
@@ -491,8 +516,12 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     }
     else
       ws = workspace;
+
     // Get the buffer (for this thread)
     DasEvent * event_buffer = buffers[threadNum];
+
+    // Get the speeding-up array of vector<tofEvent> where index = detid.
+    EventVector_pt * theseEventVectors = eventVectors[threadNum];
 
     // Where to start in the file?
     size_t fileOffset = loadBlockSize * blockNum;
@@ -505,17 +534,21 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     }
 
     // This processes the events. Can be done in parallel!
-    procEventsLinear(ws, event_buffer, current_event_buffer_size, fileOffset);
+    procEventsLinear(ws, theseEventVectors, event_buffer, current_event_buffer_size, fileOffset);
 
     // Report progress
     prog->report("Load Event PreNeXus");
+
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
   g_log.debug() << tim << " to load the data." << std::endl;
 
 
   // ---------------------------------- MERGE WORKSPACES BACK TOGETHER --------------------------
   if (parallelProcessing)
   {
+    PARALLEL_START_INTERUPT_REGION
     prog->resetNumSteps( workspace->getNumberHistograms(), 0.8, 0.95);
 
     size_t memoryCleared = 0;
@@ -562,11 +595,18 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     // Final memory release
     MemoryManager::Instance().releaseFreeMemory();
     g_log.debug() << tim << " to merge workspaces together." << std::endl;
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Delete the buffers for each thread.
-  for (size_t i=0; i<buffers.size(); i++)
-    delete buffers[i];
+  for (size_t i=0; i<numThreads; i++)
+  {
+    delete [] buffers[i];
+    delete [] eventVectors[i];
+  }
+  delete [] eventVectors;
+  //delete [] pulsetimes;
 
   prog->resetNumSteps( 3, 0.94, 1.00);
 
@@ -601,21 +641,23 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 //-----------------------------------------------------------------------------
 /** Linear-version of the procedure to process the event file properly.
  * @param workspace :: EventWorkspace to write to.
+ * @param arrayOfVectors :: For speed up: this is an array, of size detid_max, where the
+ *        index is a pixel ID, and the value is a pointer to the vector<tofEvent> in the given EventList.
  * @param event_buffer :: The buffer containing the DAS events
  * @param current_event_buffer_size :: The length of the given DAS buffer
  * @param fileOffset :: Value for an offset into the binary file
  */
-void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, DasEvent * event_buffer,
+void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & /*workspace*/,
+    std::vector<TofEvent> ** arrayOfVectors, DasEvent * event_buffer,
     size_t current_event_buffer_size, size_t fileOffset)
 {
-  DasEvent temp;
-  uint32_t period;
+  uint32_t period=0;
 
   //Starting pulse time
   DateAndTime pulsetime;
   int64_t pulse_i = 0;
-  int64_t numPulses = static_cast<int64_t>(this->pulsetimes.size());
-  if (static_cast<int64_t>(event_indices.size()) < numPulses)
+  int64_t numPulses = static_cast<int64_t>(num_pulses);
+  if (static_cast<int64_t>(event_indices.size()) < num_pulses)
   {
     g_log.warning() << "Event_indices vector is smaller than the pulsetimes array.\n";
     numPulses = static_cast<int64_t>(event_indices.size());
@@ -630,7 +672,7 @@ void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
   // process the individual events
   for (size_t i = 0; i < current_event_buffer_size; i++)
   {
-    temp = *(event_buffer + i);
+    DasEvent & temp = *(event_buffer + i);
     PixelType pid = temp.pid;
 
     if ((pid & ERROR_PID) == ERROR_PID) // marked as bad
@@ -640,7 +682,12 @@ void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
     }
 
     //Covert the pixel ID from DAS pixel to our pixel ID
-    this->fixPixelId(pid, period);
+    if (this->using_mapping_file)
+    {
+      PixelType unmapped_pid = pid % this->numpixel;
+      period = (pid - unmapped_pid) / this->numpixel;
+      pid = this->pixelmap[unmapped_pid];
+    }
 
     //Now check if this pid we want to load.
     if (loadOnlySomeSpectra)
@@ -677,8 +724,7 @@ void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
     }
 
     double tof = static_cast<double>(temp.tof) * TOF_CONVERSION;
-    TofEvent event;
-    event = TofEvent(tof, pulsetime);
+    TofEvent event(tof, pulsetime);
 
     //Find the overall max/min tof
     if (tof < local_shortest_tof)
@@ -687,7 +733,11 @@ void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
       local_longest_tof = tof;
 
     //The addEventQuickly method does not clear the cache, making things slightly faster.
-    workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
+    //workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
+
+    // This is equivalent to workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
+    // But should be faster as a bunch of these calls were cached.
+    arrayOfVectors[pid]->push_back(event);
 
     // TODO work with period
     local_num_good_events++;
@@ -733,6 +783,7 @@ void LoadEventPreNexus::setProtonCharge(DataObjects::EventWorkspace_sptr & works
 
   //Add the time and associated charge to the log
   log->addValues(this->pulsetimes, this->proton_charge);
+
 
   /// TODO set the units for the log
   run.addLogData(log);
@@ -850,16 +901,23 @@ void LoadEventPreNexus::readPulseidFile(const std::string &filename, const bool 
   }
 
   double temp;
-  for (std::vector<Pulse>::iterator it = pulses->begin(); it != pulses->end(); it++)
+
+  if (num_pulses > 0)
   {
-    this->pulsetimes.push_back( DateAndTime( (int64_t) (*it).seconds, (int64_t) (*it).nanoseconds));
-    this->event_indices.push_back((*it).event_index);
-    temp = (*it).pCurrent;
-    this->proton_charge.push_back(temp);
-    if (temp < 0.)
-      this->g_log.warning("Individiual proton charge < 0 being ignored");
-    else
-      this->proton_charge_tot += temp;
+    this->pulsetimes.reserve(num_pulses);
+    for (size_t i=0; i < num_pulses; i++)
+    {
+      Pulse & it = (*pulses)[i];
+      this->pulsetimes[i] = DateAndTime( (int64_t) it.seconds, (int64_t) it.nanoseconds);
+      this->event_indices.push_back(it.event_index);
+
+      temp = it.pCurrent;
+      this->proton_charge.push_back(temp);
+      if (temp < 0.)
+        this->g_log.warning("Individual proton charge < 0 being ignored");
+      else
+        this->proton_charge_tot += temp;
+    }
   }
 
   this->proton_charge_tot = this->proton_charge_tot * CURRENT_CONVERSION;

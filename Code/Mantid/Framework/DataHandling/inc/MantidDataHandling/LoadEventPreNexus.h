@@ -7,6 +7,7 @@
 #include "MantidAPI/IDataFileChecker.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
 
 
 namespace Mantid
@@ -141,6 +142,7 @@ private:
   std::vector<int64_t> spectra_list; ///<the list of Spectra
 
   /// The times for each pulse.
+  //Kernel::DateAndTime * pulsetimes;
   std::vector<Kernel::DateAndTime> pulsetimes;
   /// The index of the first event in each pulse.
   std::vector<uint64_t> event_indices;
@@ -191,11 +193,11 @@ private:
 
   void runLoadInstrument(const std::string &eventfilename, API::MatrixWorkspace_sptr localWorkspace);
 
-  void fixPixelId(PixelType &pixel, uint32_t &period) const;
+  inline void fixPixelId(PixelType &pixel, uint32_t &period) const;
 
   void procEvents(DataObjects::EventWorkspace_sptr & workspace);
 
-  void procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, DasEvent * event_buffer, size_t current_event_buffer_size, size_t fileOffset);
+  void procEventsLinear(DataObjects::EventWorkspace_sptr & workspace, std::vector<DataObjects::TofEvent> ** arrayOfVectors, DasEvent * event_buffer, size_t current_event_buffer_size, size_t fileOffset);
 
   void setProtonCharge(DataObjects::EventWorkspace_sptr & workspace);
 };
