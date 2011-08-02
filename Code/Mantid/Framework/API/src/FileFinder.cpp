@@ -290,9 +290,17 @@ namespace Mantid
       {
         // check in normal search locations
         std::string path = getFullPath(hint);
-        if (!path.empty() && Poco::File(path).exists())
+        try
         {
-          return path;
+          if (!path.empty() && Poco::File(path).exists())
+          {
+            return path;
+          }
+        }
+        catch(std::exception& e)
+        {
+          g_log.error() << "Cannot open file " << path << ": " << e.what() << '\n';
+          return "";
         }
       }
 
