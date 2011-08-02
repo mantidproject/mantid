@@ -22,7 +22,7 @@ if(UNITY_BUILD)
   enable_unity_build(WorkflowAlgorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-set ( TEST_PY_FILES test/EQSANSQ2DTest.py )
+set ( TEST_PY_FILES test/EQSANSQ2DTest.py test/EQSANSSensitivityCorrectionTest.py )
 
 # Add the target for this directory
 add_library ( WorkflowAlgorithms ${SRC_FILES} ${INC_FILES})
