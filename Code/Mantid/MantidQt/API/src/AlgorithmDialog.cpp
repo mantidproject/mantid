@@ -291,6 +291,8 @@ void AlgorithmDialog::addOptionalMessage(QVBoxLayout *mainLay)
   inputMessage->setPalette(pal);
   inputMessage->setAutoFillBackground(true);
   inputMessage->setWordWrap(true);
+  inputMessage->setAlignment(Qt::AlignJustify);
+  inputMessage->setMargin(3);
   inputMessage->setText(getOptionalMessage());
   QHBoxLayout *msgArea = new QHBoxLayout;
   msgArea->addWidget(inputMessage);
