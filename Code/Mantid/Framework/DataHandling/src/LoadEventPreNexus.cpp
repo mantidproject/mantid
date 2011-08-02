@@ -657,7 +657,7 @@ void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & /*wo
   DateAndTime pulsetime;
   int64_t pulse_i = 0;
   int64_t numPulses = static_cast<int64_t>(num_pulses);
-  if (static_cast<int64_t>(event_indices.size()) < num_pulses)
+  if (event_indices.size() < num_pulses)
   {
     g_log.warning() << "Event_indices vector is smaller than the pulsetimes array.\n";
     numPulses = static_cast<int64_t>(event_indices.size());

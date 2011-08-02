@@ -46,10 +46,10 @@ namespace Mantid
 
 
 /// Make the code clearer by having this an explicit type
-typedef uint32_t PixelType;
+typedef int PixelType;
 
 /// Type for the DAS time of flight (data file)
-typedef uint32_t DasTofType;
+typedef int DasTofType;
 
 /// Structure that matches the form in the binary event list.
 #pragma pack(push, 4) //Make sure the structure is 8 bytes.
