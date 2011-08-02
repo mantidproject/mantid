@@ -98,7 +98,7 @@ void CalculateEfficiency::exec()
     algo->execute();
 
     rebinnedWS = algo->getProperty("OutputWorkspace");
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, rebinnedWS, false);
+    WorkspaceFactory::Instance().initializeFromParent(inputWS, rebinnedWS, false);
   }
   else
   {
@@ -110,6 +110,7 @@ void CalculateEfficiency::exec()
   }
 
   outputWS = WorkspaceFactory::Instance().create(rebinnedWS);
+  WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
   for (int i=0; i<(int)rebinnedWS->getNumberHistograms(); i++)
   {
     outputWS->dataX(i) = rebinnedWS->readX(i);
