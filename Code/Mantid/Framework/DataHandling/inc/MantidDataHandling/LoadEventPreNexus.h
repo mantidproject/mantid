@@ -153,6 +153,9 @@ private:
   /// The value of the vector is the workspace index. The index into it is the pixel ID from DAS
   std::vector<std::size_t> pixel_to_wkspindex;
 
+  /// The maximum detector ID possible
+  Mantid::detid_t detid_max;
+
   /// Handles loading from the event file
   Mantid::Kernel::BinaryFile<DasEvent> * eventfile;
   std::size_t num_events; ///<the number of events

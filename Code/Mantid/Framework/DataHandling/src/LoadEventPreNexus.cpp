@@ -407,7 +407,7 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
 
   // determine maximum pixel id
   detid2det_map::iterator it;
-  detid_t detid_max = 0; // seems like a safe lower bound
+  detid_max = 0; // seems like a safe lower bound
   for (it = detector_map.begin(); it != detector_map.end(); it++)
     if (it->first > detid_max)
       detid_max = it->first;
@@ -687,6 +687,13 @@ void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & /*wo
       PixelType unmapped_pid = pid % this->numpixel;
       period = (pid - unmapped_pid) / this->numpixel;
       pid = this->pixelmap[unmapped_pid];
+    }
+
+    // Avoid segfaults for wrong pixel IDs
+    if (pid > detid_max)
+    {
+      local_num_error_events++;
+      continue;
     }
 
     //Now check if this pid we want to load.
