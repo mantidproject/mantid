@@ -5,6 +5,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/Run.h"
 
 #include <cfloat>
 
@@ -69,6 +70,10 @@ namespace Algorithms
     eModeOptions.push_back("Indirect");
     declareProperty("EMode", "Direct",new ListValidator(eModeOptions),
       "The energy mode type required for some conversions");
+    BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+    mustBePositive->setLower(0.0);
+    declareProperty("EFixed",EMPTY_DBL(),mustBePositive,
+    "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect))");
   }
 
   void ConvertSpectrumAxis::exec()
@@ -113,26 +118,7 @@ namespace Algorithms
           twoTheta = inputWS->detectorTwoTheta(detector);
           l2 = detector->getDistance(*sample);
           l1val = l1;
-          if (emode==2)
-          {
-            std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
-            if ( efixedVec.empty() )
-            {
-              int detid = detector->getID();
-              IDetector_sptr detectorSingle = inputWS->getInstrument()->getDetector(detid);
-              efixedVec = detectorSingle->getNumberParameter("Efixed");
-            }
-            if (! efixedVec.empty() ) 
-            {
-              efixed = efixedVec.at(0);
-              g_log.debug() << "Detector: " << detector->getID() << " EFixed: " << efixed << "\n";
-            }
-            else
-            {
-              efixed = 0.0;
-              g_log.warning() << "Efixed could not be found for detector " << detector->getID() << ", set to 0.0\n";
-            }
-          }
+          efixed = getEfixed(detector, inputWS, emode); //get efixed
         }
         else
         {
@@ -193,5 +179,56 @@ namespace Algorithms
     }
     setProperty("OutputWorkspace",outputWS);
   }
+
+
+  double ConvertSpectrumAxis::getEfixed(IDetector_sptr detector, MatrixWorkspace_const_sptr inputWS, int emode) const
+  {
+    double efixed;
+    double efixedProp = getProperty("Efixed");
+    if(efixedProp != EMPTY_DBL())
+    {
+      efixed = efixedProp;
+      g_log.debug() << "Detector: " << detector->getID() << " Efixed: " << efixed << "\n";
+    }
+    else   
+    {
+      if( emode == 1 )
+      {
+        if( inputWS->run().hasProperty("Ei") )
+        {
+          Kernel::Property *p = inputWS->run().getProperty("Ei");
+          Kernel::PropertyWithValue<double> *doublep = dynamic_cast<Kernel::PropertyWithValue<double>*>(p); 
+          efixed = (*doublep)();
+        }
+        else
+        {
+          efixed = 0.0;
+          g_log.warning() << "Efixed could not be found for detector " << detector->getID() << ", set to 0.0\n";
+        }
+      }
+      else if( emode == 2 )
+      {
+        std::vector<double> efixedVec = detector->getNumberParameter("Efixed"); 
+        if ( efixedVec.empty() )
+        {
+          int detid = detector->getID();
+          IDetector_sptr detectorSingle = inputWS->getInstrument()->getDetector(detid);
+          efixedVec = detectorSingle->getNumberParameter("Efixed");
+        }
+        if (! efixedVec.empty() ) 
+        {
+          efixed = efixedVec.at(0);
+          g_log.debug() << "Detector: " << detector->getID() << " EFixed: " << efixed << "\n";
+        }
+        else
+        {
+          efixed = 0.0;
+          g_log.warning() << "Efixed could not be found for detector " << detector->getID() << ", set to 0.0\n";
+        }
+      }
+    }
+    return efixed;
+  }
 } // namespace Algorithms
 } // namespace Mantid
+

@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/IDetector.h"
+
 
 namespace Mantid
 {
@@ -67,6 +69,8 @@ private:
   void init();
   ///Execution code
   void exec();
+  ///Getting Efixed
+  double getEfixed(Geometry::IDetector_sptr detector, API::MatrixWorkspace_const_sptr inputWS, int emode) const;
 };
 
 } // namespace Algorithms
