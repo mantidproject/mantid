@@ -908,7 +908,7 @@ void LoadEventPreNexus::readPulseidFile(const std::string &filename, const bool 
     for (size_t i=0; i < num_pulses; i++)
     {
       Pulse & it = (*pulses)[i];
-      this->pulsetimes[i] = DateAndTime( (int64_t) it.seconds, (int64_t) it.nanoseconds);
+      this->pulsetimes.push_back( DateAndTime( (int64_t) it.seconds, (int64_t) it.nanoseconds) );
       this->event_indices.push_back(it.event_index);
 
       temp = it.pCurrent;
