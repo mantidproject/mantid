@@ -183,7 +183,7 @@ namespace Algorithms
 
   double ConvertSpectrumAxis::getEfixed(IDetector_sptr detector, MatrixWorkspace_const_sptr inputWS, int emode) const
   {
-    double efixed;
+    double efixed(0);
     double efixedProp = getProperty("Efixed");
     if(efixedProp != EMPTY_DBL())
     {
