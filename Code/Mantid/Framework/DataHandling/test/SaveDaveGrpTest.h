@@ -109,7 +109,7 @@ public:
     {
       testfile>>d1>>d2;
       TS_ASSERT_EQUALS(d1,2);
-      TS_ASSERT_DELTA(d2,std::sqrt(2.d),0.0001);
+      TS_ASSERT_DELTA(d2,std::sqrt(2.0),0.0001);
     }
     getline(testfile,line);
     getline(testfile,line);
@@ -118,7 +118,7 @@ public:
     {
       testfile>>d1>>d2;
       TS_ASSERT_EQUALS(d1,2);
-      TS_ASSERT_DELTA(d2,std::sqrt(2.d),0.0001);
+      TS_ASSERT_DELTA(d2,std::sqrt(2.0),0.0001);
     }
     AnalysisDataService::Instance().remove(WSName);
     if( Poco::File(outputFile).exists() )
