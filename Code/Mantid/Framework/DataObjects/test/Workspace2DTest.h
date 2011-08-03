@@ -257,38 +257,6 @@ public:
     std::cout << tim << " to get detector ID's for " << nhist << " spectra using the ISpectrum method." << std::endl;
   }
 
-  void test_ISpectrum_getDetectorIDs_in10groups()
-  {
-    CPUTimer tim;
-    for (size_t i=0; i < ws2->getNumberHistograms(); i++)
-    {
-      const ISpectrum * spec = ws2->getSpectrum(i);
-      const std::set<detid_t> & detIDs = spec->getDetectorIDs();
-      detid_t oneDetId = *detIDs.begin();
-      UNUSED_ARG(oneDetId)
-    }
-    std::cout << tim << " to get detector ID's for 10 spectra (each with 100,000 detectors) using the ISpectrum method." << std::endl;
-  }
-
-  void test_spectraMap_changeDetectorIDs()
-  {
-    CPUTimer tim;
-    SpectraAxis * axis = dynamic_cast<SpectraAxis *>(ws1->getAxis(1));
-    SpectraDetectorMap specMap;
-    specid_t * specTable = new specid_t[nhist];
-    detid_t * udetTable = new detid_t[nhist];
-    for (size_t i=0; i < ws1->getNumberHistograms(); i++)
-    {
-      specid_t specNo = axis->spectraNo(i);
-      specTable[i] = specNo;
-      udetTable[i] = detid_t(specNo);
-    }
-    std::set<detid_t> ignore;
-    specMap.populate(specTable, udetTable, nhist, ignore);
-    std::cout << tim << " to populate a new SpectraDetectorMap for " << nhist << " spectra." << std::endl;
-  }
-
-
   void test_ISpectrum_changeDetectorIDs()
   {
     CPUTimer tim;
@@ -307,6 +275,39 @@ public:
     }
     std::cout << tim << " to set all detector IDs for " << nhist << " spectra, using the ISpectrum method (in parallel)." << std::endl;
   }
+
+//
+//  void test_ISpectrum_getDetectorIDs_in10groups()
+//  {
+//    CPUTimer tim;
+//    for (size_t i=0; i < ws2->getNumberHistograms(); i++)
+//    {
+//      const ISpectrum * spec = ws2->getSpectrum(i);
+//      const std::set<detid_t> & detIDs = spec->getDetectorIDs();
+//      detid_t oneDetId = *detIDs.begin();
+//      UNUSED_ARG(oneDetId)
+//    }
+//    std::cout << tim << " to get detector ID's for 10 spectra (each with 100,000 detectors) using the ISpectrum method." << std::endl;
+//  }
+//
+//  void test_spectraMap_changeDetectorIDs()
+//  {
+//    CPUTimer tim;
+//    SpectraAxis * axis = dynamic_cast<SpectraAxis *>(ws1->getAxis(1));
+//    SpectraDetectorMap specMap;
+//    specid_t * specTable = new specid_t[nhist];
+//    detid_t * udetTable = new detid_t[nhist];
+//    for (size_t i=0; i < ws1->getNumberHistograms(); i++)
+//    {
+//      specid_t specNo = axis->spectraNo(i);
+//      specTable[i] = specNo;
+//      udetTable[i] = detid_t(specNo);
+//    }
+//    std::set<detid_t> ignore;
+//    specMap.populate(specTable, udetTable, nhist, ignore);
+//    std::cout << tim << " to populate a new SpectraDetectorMap for " << nhist << " spectra." << std::endl;
+//  }
+
 
 };
 #endif
