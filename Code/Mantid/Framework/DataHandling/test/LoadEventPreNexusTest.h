@@ -150,21 +150,21 @@ public:
 
   void test_LoadPreNeXus_CNCS()
   {
-    do_test_LoadPreNeXus_CNCS(false);
+    do_test_LoadPreNeXus_CNCS("Serial");
   }
 
   void test_LoadPreNeXus_CNCS_parallel()
   {
-    do_test_LoadPreNeXus_CNCS(true);
+    do_test_LoadPreNeXus_CNCS("Parallel");
   }
 
-  void do_test_LoadPreNeXus_CNCS(bool parallel)
+  void do_test_LoadPreNeXus_CNCS(std::string parallel)
   {
     std::string eventfile( "CNCS_7860_neutron_event.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
     eventLoader->setPropertyValue("OutputWorkspace", "cncs");
-    eventLoader->setProperty("UseParallelProcessing", parallel);
+    eventLoader->setPropertyValue("UseParallelProcessing", parallel);
 
     //Get the event file size
     struct stat filestatus;

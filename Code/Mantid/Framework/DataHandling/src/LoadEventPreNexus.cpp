@@ -166,10 +166,20 @@ void LoadEventPreNexus::init()
   // how many events to process
   this->declareProperty(new PropertyWithValue<int>("NumberOfEvents", 0, Direction::Input),
           "Number of events to read from the file.");
+//
+//  // how many events to process
+//  this->declareProperty(new PropertyWithValue<bool>("UseParallelProcessing", false, Direction::Input),
+//          "Use multiple cores for loading the data?");
 
-  // how many events to process
-  this->declareProperty(new PropertyWithValue<bool>("UseParallelProcessing", false, Direction::Input),
-          "Use multiple cores for loading the data?");
+  std::vector<std::string> propOptions;
+  propOptions.push_back("Auto");
+  propOptions.push_back("Serial");
+  propOptions.push_back("Parallel");
+  declareProperty("UseParallelProcessing", "Auto",new ListValidator(propOptions),
+    "Use multiple cores for loading the data?\n"
+    "  Auto: Use serial loading for small data sets, parallel for large data sets.\n"
+    "  Serial: Use a single core.\n"
+    "  Parallel: Use all available cores.");
 
   // the output workspace name
   this->declareProperty(new WorkspaceProperty<IEventWorkspace>(OUT_PARAM,"",Direction::Output));
@@ -391,8 +401,8 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   this->num_good_events = 0;
   this->num_ignored_events = 0;
 
+
   //Default values in the case of no parallel
-  parallelProcessing = getProperty("UseParallelProcessing");
   loadBlockSize = Mantid::Kernel::DEFAULT_BLOCK_SIZE * 2;
 
   shortest_tof = static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
@@ -404,6 +414,22 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   // We want to pad out empty pixels.
   detid2det_map detector_map;
   workspace->getInstrument()->getDetectors(detector_map);
+
+  // -------------- Determine processing mode
+  std::string procMode = getProperty("UseParallelProcessing");
+  if (procMode == "Serial")
+    parallelProcessing = false;
+  else if (procMode == "Parallel")
+    parallelProcessing = true;
+  else
+  {
+    // Automatic determination. Loading serially (for me) is about 3 million events per second,
+    // (which is sped up by ~ x 3 with parallel processing, say 10 million per second, e.g. 7 million events more per seconds).
+    // compared to a setup time/merging time of about 10 seconds per million detectors.
+    double setUpTime = double(detector_map.size()) * 10e-6;
+    parallelProcessing = ((double(eventfile->getFileSize()) / 7e6) > setUpTime);
+    g_log.debug() << (parallelProcessing ? "Using" : "Not using") << " parallel processing." << std::endl;
+  }
 
   // determine maximum pixel id
   detid2det_map::iterator it;
