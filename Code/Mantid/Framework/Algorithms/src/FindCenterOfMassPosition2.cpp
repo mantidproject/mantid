@@ -12,6 +12,8 @@
 #include "MantidAPI/TableRow.h"
 #include <iostream>
 #include <vector>
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/EventList.h"
 
 namespace Mantid
 {
@@ -32,6 +34,7 @@ void FindCenterOfMassPosition2::initDocs()
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
 
 void FindCenterOfMassPosition2::init()
 {
@@ -60,7 +63,8 @@ void FindCenterOfMassPosition2::init()
 
 void FindCenterOfMassPosition2::exec()
 {
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputWSWvl = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputWS;
 
   // Option to exclude beam area
   bool direct_beam = getProperty("DirectBeam");
@@ -76,8 +80,48 @@ void FindCenterOfMassPosition2::exec()
   // Radius of the beam area, in pixels
   double beam_radius = getProperty("BeamRadius");
 
+  // Get the number of monitors. We assume that all monitors are stored in the first spectra
+  const int numSpec = static_cast<int>(inputWSWvl->getNumberHistograms());
+
   // Set up the progress reporting object
   Progress progress(this,0.0,1.0,max_iteration);
+
+  EventWorkspace_const_sptr inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWSWvl);
+  if(inputEventWS)
+  {
+    std::vector<double> y_values(numSpec);
+    std::vector<double> e_values(numSpec);
+
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i = 0; i < numSpec; i++)
+    {
+      double sum_i(0), err_i(0);
+      progress.report("Integrating events");
+      const EventList& el = inputEventWS->getEventList(i);
+      el.integrate(0,0,true,sum_i,err_i);
+      y_values[i] = sum_i;
+      e_values[i] = err_i;
+    }
+
+    IAlgorithm_sptr algo = createSubAlgorithm("CreateWorkspace", 0.7, 1.0);
+    algo->setPropertyValue("OutputWorkspace", "__com_ws");
+    algo->setProperty< std::vector<double> >("DataX", std::vector<double>(2,0.0) );
+    algo->setProperty< std::vector<double> >("DataY", y_values );
+    algo->setProperty< std::vector<double> >("DataE", e_values );
+    algo->setProperty<int>("NSpec", numSpec );
+    algo->execute();
+
+    inputWS = algo->getProperty("OutputWorkspace");
+    WorkspaceFactory::Instance().initializeFromParent(inputWSWvl, inputWS, false);
+  }
+  else
+  {
+    // Sum up all the wavelength bins
+    IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
+    childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
+    childAlg->executeAsSubAlg();
+    inputWS = childAlg->getProperty("OutputWorkspace");
+  }
 
   // Define box around center of mass so that only pixels in an area
   // _centered_ on the latest center position are considered. At each
@@ -99,9 +143,6 @@ void FindCenterOfMassPosition2::exec()
   double distance_check = 0;
   int n_local_minima = 0;
   int n_iteration = 0;
-
-  // Get the number of monitors. We assume that all monitors are stored in the first spectra
-  const int numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
   // Find center of mass and iterate until we converge
   // to within a quarter of a pixel
