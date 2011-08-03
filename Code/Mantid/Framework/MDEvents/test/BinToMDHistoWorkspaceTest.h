@@ -106,16 +106,17 @@ public:
       std::string name1, std::string name2, std::string name3, std::string name4,
       double expected_signal,
       size_t expected_numBins,
-      bool IterateEvents=false)
+      bool IterateEvents=false,
+      size_t numEventsPerBox=1)
   {
     BinToMDHistoWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
 
-    IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, numEventsPerBox);
     AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
     // 1000 boxes with 1 event each
-    TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
+    TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000*numEventsPerBox);
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinToMDHistoWorkspaceTest_ws") );
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimX", name1));
@@ -239,6 +240,10 @@ public:
   { do_test_exec("", "Axis2,2.0,8.0, 6", "", "", "", 1.0*100.0 /*signal*/, 6 /*# of bins*/, true /*IterateEvents*/ );
   }
 
+  void test_exec_1D_IterateEvents_boxCompletelyContained()
+  { do_test_exec("", "Axis2,2.0,8.0, 1", "", "", "", 20*6.0*100.0 /*signal*/, 1 /*# of bins*/, true /*IterateEvents*/, 20 /*numEventsPerBox*/ );
+  }
+
 
 };
 
@@ -311,6 +316,12 @@ public:
   {
     for (size_t i=0; i<1; i++)
       do_test("5.3,5.4, 60", true);
+  }
+
+  void test_3D_1cube_IterateEvents()
+  {
+    for (size_t i=0; i<1; i++)
+      do_test("2.0,8.0, 1", true);
   }
 
 };

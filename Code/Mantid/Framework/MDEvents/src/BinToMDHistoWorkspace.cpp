@@ -174,6 +174,82 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   inline void BinToMDHistoWorkspace::binMDBox(MDBox<MDE, nd> * box, coord_t * chunkMin, coord_t * chunkMax)
   {
+    // Evaluate whether the entire box is in the same bin
+    if (box->getNPoints() > (1 << nd) * 2)
+    {
+      // There is a check that the number of events is enough for it to make sense to do all this processing.
+      size_t numVertexes = 0;
+      coord_t * vertexes = box->getVertexesArray(numVertexes);
+
+      // All vertexes have to be within THE SAME BIN = have the same linear index.
+      size_t lastLinearIndex = 0;
+      bool badOne = false;
+
+      for (size_t i=0; i<numVertexes; i++)
+      {
+        // Cache the center of the event (again for speed)
+        const coord_t * center = vertexes + i * nd;;
+
+        // To build up the linear index
+        size_t linearIndex = 0;
+        // To mark VERTEXES outside range
+        badOne = false;
+
+        /// Loop through the dimensions on which we bin
+        for (size_t bd=0; bd<numBD; bd++)
+        {
+          // Dimension in the MDEventWorkspace
+          size_t d = dimensionToBinFrom[bd];
+          // Where the event is in that dimension?
+          coord_t x = center[d];
+          // Within range (for this chunk)?
+          if ((x >= chunkMin[bd]) && (x < chunkMax[bd]))
+          {
+            // Build up the linear index
+            linearIndex += indexMultiplier[bd] * size_t((x - min[bd])/step[bd]);
+          }
+          else
+          {
+            // Outside the range
+            badOne = true;
+            break;
+          }
+        } // (for each dim in MDHisto)
+
+        // Is the vertex at the same place as the last one?
+        if (!badOne)
+        {
+          if ((i > 0) && (linearIndex != lastLinearIndex))
+          {
+            // Change of index
+            badOne = true;
+            break;
+          }
+          lastLinearIndex = linearIndex;
+        }
+
+        // Was the vertex completely outside the range?
+        if (badOne)
+          break;
+      } // (for each vertex)
+
+      delete [] vertexes;
+
+      if (!badOne)
+      {
+        // Yes, the entire box is within a single bin
+//        std::cout << "Box at " << box->getExtentsStr() << " is within a single bin.\n";
+        // Add the CACHED signal from the entire box
+        signals[lastLinearIndex] += box->getSignal();
+        errors[lastLinearIndex] += box->getErrorSquared();
+        // And don't bother looking at each event. This may save lots of time loading from disk.
+        return;
+      }
+    }
+
+    // If you get here, you could not determine that the entire box was in the same bin.
+    // So you need to iterate through events.
+
     const std::vector<MDE> & events = box->getConstEvents();
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
@@ -185,7 +261,7 @@ namespace MDEvents
       // To build up the linear index
       size_t linearIndex = 0;
       // To mark events outside range
-      bool badEvent = false;
+      bool badOne = false;
 
       /// Loop through the dimensions on which we bin
       for (size_t bd=0; bd<numBD; bd++)
@@ -203,12 +279,12 @@ namespace MDEvents
         else
         {
           // Outside the range
-          badEvent = true;
+          badOne = true;
           break;
         }
       } // (for each dim in MDHisto)
 
-      if (!badEvent)
+      if (!badOne)
       {
         signals[linearIndex] += it->getSignal();
         errors[linearIndex] += it->getErrorSquared();
@@ -388,8 +464,10 @@ namespace MDEvents
     Utils::NestedForLoop::SetUpIndexMaker(numBD, index_maker, index_max);
 
     int numPoints = int(outWS->getNPoints());
+
     // Run in OpenMP with dynamic scheduling and a smallish chunk size (binsPerTask)
-    PRAGMA_OMP(parallel for schedule(dynamic, binsPerTask))
+    // Right now, not parallel for file-backed systems.
+    PRAGMA_OMP(parallel for schedule(dynamic, binsPerTask) if (ws->getBoxController()->getFile() == NULL) )
     for (int i=0; i < numPoints; i++)
     {
       size_t linear_index = size_t(i);
