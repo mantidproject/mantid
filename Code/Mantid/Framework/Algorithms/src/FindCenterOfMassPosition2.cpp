@@ -104,7 +104,6 @@ void FindCenterOfMassPosition2::exec()
     }
 
     IAlgorithm_sptr algo = createSubAlgorithm("CreateWorkspace", 0.7, 1.0);
-    algo->setPropertyValue("OutputWorkspace", "__com_ws");
     algo->setProperty< std::vector<double> >("DataX", std::vector<double>(2,0.0) );
     algo->setProperty< std::vector<double> >("DataY", y_values );
     algo->setProperty< std::vector<double> >("DataE", e_values );
@@ -118,7 +117,7 @@ void FindCenterOfMassPosition2::exec()
   {
     // Sum up all the wavelength bins
     IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
-    childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
+    childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWSWvl);
     childAlg->executeAsSubAlg();
     inputWS = childAlg->getProperty("OutputWorkspace");
   }
