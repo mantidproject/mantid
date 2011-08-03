@@ -485,7 +485,7 @@ namespace DataObjects
       const specid_t specNo = ax1->spectraNo(wi);
       //Create an event list for here
       EventList * newel = new EventList(mru, specNo);
-      newel->addDetectorID( specNo );
+      newel->addDetectorIDs( spectramap.getDetectors(specNo) );
       newel->setSpectrumNo( specNo );
       //Save it in the list
       data[wi] = newel;
