@@ -15,16 +15,16 @@ class ReactorSANSResolution(PythonAlgorithm):
 
     def PyInit(self):
         # Input workspace
-        self.declareWorkspaceProperty("InputWorkspace", "", Direction.Input, Description="Name the workspace to calculate the transmission from")
+        self.declareWorkspaceProperty("InputWorkspace", "", Direction.Input, Description="Name the workspace to calculate the resolution for")
         # Output workspace to put the transmission histo into
-        self.declareProperty("OutputWorkspace", "", Description="Name of the workspace that will contain the transmission histogram")
+        self.declareWorkspaceProperty("OutputWorkspace", "", Direction.Output, Description="Name of the workspace that will contain the resolution histogram")
 
     def PyExec(self):
         input_ws = self.getProperty("InputWorkspace")
         if input_ws.getAxis(0).getUnit().name() != "MomentumTransfer":
             raise RuntimeError, "ReactorSANSResolution expects an input workspace with units of Q"
 
-        output_ws_name = self.getProperty("OutputWorkspace")
+        output_ws_name = self.getPropertyValue("OutputWorkspace")
 
         if input_ws.getName() != output_ws_name:
             CloneWorkspace(input_ws, output_ws_name)
