@@ -1,17 +1,17 @@
-#include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidKernel/CPUTimer.h"
 #include "MantidMDEvents/MDBoxIterator.h"
-
+#include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
 #include <boost/math/special_functions/fpclassify.hpp>
-
-#include <vtkUnstructuredGrid.h>
-#include <vtkPoints.h>
-#include <vtkFloatArray.h>
 #include <vtkCellData.h>
+#include <vtkFloatArray.h>
 #include <vtkHexahedron.h>
+#include <vtkPoints.h>
+#include <vtkUnstructuredGrid.h>
 
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
+using Mantid::Kernel::CPUTimer;
 
 namespace Mantid
 {
@@ -39,6 +39,7 @@ namespace Mantid
   vtkDataSet* vtkMDEWHexahedronFactory::create() const
   {
     validate();
+    CPUTimer tim;
     
     vtkIdType imageSizeGuess = 1000000; //TODO. Need to know up front how many boxes are to be drawn to get this right.
     vtkIdType imageSizeActual = 0;
@@ -73,37 +74,44 @@ namespace Mantid
         //Add signals
         signals->InsertNextValue(static_cast<float>(signal_normalized));
 
-        //Get the coordinates. Candidate for speed improvement.
-        std::vector<Mantid::Geometry::Coordinate> coords = box->getVertexes();
+        //Get the coordinates.
+        size_t numVertexes = 0;
+        coord_t * coords = box->getVertexesArray(numVertexes);
 
-        //Iterate through all coordinates. Candidate for speed improvement.
-        for(size_t i = 0; i < 8; i++)
+        if (numVertexes == 8)
         {
-          Mantid::Geometry::Coordinate& coord = coords[i];
-          //Add points
-          pointIds[i] = points->InsertNextPoint(coord.getX(), coord.getY(), coord.getZ());  
-        }
+          //Iterate through all coordinates. Candidate for speed improvement.
+          for(size_t i = 0; i < numVertexes; i++)
+          {
+            coord_t * coord = coords + i*3;
+            //Add points
+            pointIds[i] = points->InsertNextPoint(coord[0], coord[1], coord[2]);
+          }
+
+          /*
+          VTK needs cell points to be specified in a particular anti-clockwise ordering.
+          The coordinates gernated by IBox do not fit this format, so have to manually reorder them before setting the
+          hexahedron vertexes.
+           */
+
+          theHex->GetPointIds()->SetId(0, pointIds[0]); //xyx
+          theHex->GetPointIds()->SetId(1, pointIds[1]); //dxyz
+          theHex->GetPointIds()->SetId(2, pointIds[3]); //dxdyz
+          theHex->GetPointIds()->SetId(3, pointIds[2]); //xdyz
+          theHex->GetPointIds()->SetId(4, pointIds[4]); //xydz
+          theHex->GetPointIds()->SetId(5, pointIds[5]); //dxydz
+          theHex->GetPointIds()->SetId(6, pointIds[7]); //dxdydz
+          theHex->GetPointIds()->SetId(7, pointIds[6]); //xdydz
+
+
+          //Add cells
+          visualDataSet->InsertNextCell(VTK_HEXAHEDRON, theHex->GetPointIds());
+
+          imageSizeActual++;
+        } // valid number of vertexes returned
         
-        /*
-        VTK needs cell points to be specified in a particular anti-clockwise ordering.
-        The coordinates gernated by IBox do not fit this format, so have to manually reorder them before setting the
-        hexahedron vertexes.
-        */
-
-        theHex->GetPointIds()->SetId(0, pointIds[0]); //xyx
-        theHex->GetPointIds()->SetId(1, pointIds[1]); //dxyz
-        theHex->GetPointIds()->SetId(2, pointIds[3]); //dxdyz
-        theHex->GetPointIds()->SetId(3, pointIds[2]); //xdyz
-        theHex->GetPointIds()->SetId(4, pointIds[4]); //xydz
-        theHex->GetPointIds()->SetId(5, pointIds[5]); //dxydz
-        theHex->GetPointIds()->SetId(6, pointIds[7]); //dxdydz
-        theHex->GetPointIds()->SetId(7, pointIds[6]); //xdydz
-
-        
-        //Add cells
-        visualDataSet->InsertNextCell(VTK_HEXAHEDRON, theHex->GetPointIds());
-
-        imageSizeActual++;
+        // Free memory
+        delete [] coords;
       }
       if (!it.next()) 
         break;
@@ -114,10 +122,15 @@ namespace Mantid
     signals->Squeeze();
     visualDataSet->Squeeze();
 
+    //visualDataSet->SetCells()
+    //points->SetPoint()
+
     //Add points
     visualDataSet->SetPoints(points);
     //Add scalars
     visualDataSet->GetCellData()->SetScalars(signals);
+
+    std::cout << tim << " to create " << imageSizeActual << " hexahedrons." << std::endl;
 
     return visualDataSet;
   }
