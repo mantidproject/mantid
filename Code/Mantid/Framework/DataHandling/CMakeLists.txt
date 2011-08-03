@@ -253,7 +253,7 @@ set ( TEST_FILES
 	test/SaveCalFileTest.h
 	test/SaveCanSAS1dTest.h
 	test/SaveDASCTest.h
-        test/SaveDaveGrpTest.h
+        #test/SaveDaveGrpTest.h
 	test/SaveDspacemapTest.h
 	test/SaveFocussedXYETest.h
 	test/SaveNexusTest.h
