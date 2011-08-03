@@ -297,9 +297,8 @@ namespace Mantid
       inputW = getProperty("InputWorkspace");
       if (inputW->readY(0).size() <= 1)
         throw std::runtime_error("Must Rebin data with more than 1 bin");
-      OrientedLattice latt = inputW->mutableSample().getOrientedLattice();
-      /*if (latt.a() == 0 && getProperty("FitSlices"))
-        throw std::runtime_error("Must load UB matrix in input workspace");*/
+      if (!inputW->mutableSample().hasOrientedLattice() && getProperty("FitSlices"))
+        throw std::runtime_error("Must load UB matrix in input workspace");
       Xmin = getProperty("XMin");
       Xmax = getProperty("XMax");
       Ymin = getProperty("YMin");
