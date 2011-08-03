@@ -72,8 +72,12 @@ void SANSSolidAngleCorrection::exec()
       det = inputWS->getDetector(i);
     } catch (Exception::NotFoundError&) {
       g_log.warning() << "Spectrum index " << i << " has no detector assigned to it - discarding" << std::endl;
-      continue;
+      // Catch if no detector. Next line tests whether this happened - test placed
+      // outside here because Mac Intel compiler doesn't like 'continue' in a catch
+      // in an openmp block.
     }
+    // If no detector found, skip onto the next spectrum
+    if( !det ) continue;
 
     // Skip if we have a monitor or if the detector is masked.
     if ( det->isMonitor() || det->isMasked() ) continue;
@@ -141,8 +145,11 @@ void SANSSolidAngleCorrection::execEvent()
       det = inputEventWS->getDetector(i);
     } catch (Exception::NotFoundError&) {
       g_log.warning() << "Spectrum index " << i << " has no detector assigned to it - discarding" << std::endl;
-      continue;
+      // Catch if no detector. Next line tests whether this happened - test placed
+      // outside here because Mac Intel compiler doesn't like 'continue' in a catch
+      // in an openmp block.
     }
+    if( !det ) continue;
 
     // Skip if we have a monitor or if the detector is masked.
     if ( det->isMonitor() || det->isMasked() ) continue;
