@@ -56,6 +56,15 @@ void Linear::init()
   declareProperty("FitSlope",0.0,
     "The slope of the fitted line. c1 in the equation below",
     Direction::Output);
+  declareProperty("Cov00",0.0,
+    "The first diagonal component of the covariance matrix.",
+    Direction::Output);
+  declareProperty("Cov11",0.0,
+    "The second diagonal component of the covariance matrix.",
+    Direction::Output);
+  declareProperty("Cov01",0.0,
+    "The off-diagonal component of the covariance matrix.",
+    Direction::Output);
   declareProperty("Chi2",0.0,
     "The goodness of the fit", Direction::Output);
 
@@ -175,6 +184,9 @@ void Linear::exec()
   setProperty("FitStatus",fitStatus);
   setProperty("FitIntercept",*c0);
   setProperty("FitSlope",*c1);
+  setProperty("Cov00",*cov00);
+  setProperty("Cov11",*cov11);
+  setProperty("Cov01",*cov01);
   setProperty("Chi2",*chisq);
   
   // Create and fill a workspace2D with the same bins as the fitted spectrum and the value of the fit for the centre of each bin

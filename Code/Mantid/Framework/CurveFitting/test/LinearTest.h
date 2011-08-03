@@ -55,7 +55,7 @@ public:
     TS_ASSERT( lin.isInitialized() )
 
     const std::vector<Property*> props = lin.getProperties();
-    TS_ASSERT_EQUALS( props.size(), 9 )
+    TS_ASSERT_EQUALS( props.size(), 12 )
   }
   
   void testExec()
@@ -75,6 +75,12 @@ public:
     TS_ASSERT_DELTA( slope, c1, 0.1*c1 )
     const double chisq = lin.getProperty("Chi2");
     TS_ASSERT( chisq )
+    const double cov00 = lin.getProperty("Cov00");
+    TS_ASSERT( cov00 != 0.0 )
+    const double cov11 = lin.getProperty("Cov11");
+    TS_ASSERT( cov11 != 0.0 )
+    const double cov01 = lin.getProperty("Cov01");
+    TS_ASSERT( cov01 != 0.0 )
     
     MatrixWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Line"));
     MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Fit"));
