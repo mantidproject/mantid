@@ -333,9 +333,11 @@ void IntegratePeakTimeSlices::exec()
 
               std::string fun_str =CalculateFunctionProperty_Fit( ); 
 
-             sprintf( logInfo, std::string("   Fit string %s\n").c_str(),
-                                                         fun_str.c_str());
-               g_log.debug( std::string(logInfo));
+             //sprintf( logInfo, std::string("   Fit string %s\n").c_str(),
+              //                                           fun_str.c_str());
+               std::string SSS("   Fit string ");
+               SSS +=fun_str;
+               g_log.debug( SSS);
 
               fit_alg->setProperty("Function", fun_str);             
 

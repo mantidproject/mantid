@@ -12,6 +12,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidCurveFitting/Fit.h"
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IInstrument.h"

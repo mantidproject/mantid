@@ -28,6 +28,8 @@ set ( INC_FILES
 set ( TEST_FILES
 	test/AnvredCorrectionTest.h
 	test/LoadIsawUBTest.h
+        test/IntegratePeakTimeSlicesTest.h
+        test/PeakIntegrationTest.h
 	test/LoadPeaksFileTest.h
 	test/MaskPeaksWorkspaceTest.h
 	test/PredictPeaksTest.h
