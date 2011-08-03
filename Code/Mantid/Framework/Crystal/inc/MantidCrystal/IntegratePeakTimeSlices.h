@@ -64,15 +64,21 @@ public:
  
   /// Algorithm's name for identification overriding a virtual method
  virtual const std::string name() const 
-        { return "IntegratePeakTimeSlices"; }
+ {
+    return "IntegratePeakTimeSlices";
+ }
  
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const 
-          { return 1; }
+ {
+     return 1;
+ }
   
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const
-        { return "Crystal"; }
+  {
+    return "Crystal";
+  }
 
 private:
 
@@ -95,99 +101,104 @@ private:
   double RectWidth ;  //for Weak Peaks, these can be set using info from close
   double RectHeight ; // Strong peaks.
 
-void SetUpData( Mantid::API::MatrixWorkspace_sptr                     &Data,
-                Mantid::API::MatrixWorkspace_sptr               const &inpWkSpace,
-                Mantid::Geometry::RectangularDetector_const_sptr const &panel,
-                const int                                              chan, 
-                std::vector<int>                                  const &Attr);
+  void SetUpData( Mantid::API::MatrixWorkspace_sptr                     &Data,
+                  Mantid::API::MatrixWorkspace_sptr               const &inpWkSpace,
+                  Mantid::Geometry::RectangularDetector_const_sptr const &panel,
+                  const int                                              chan,
+                  std::vector<int>                                  const &Attr);
 
 
- void findNumRowsColsinPanel(DataObjects::Peak const &peak,  
-                             int                     &nPanelRows,  
-                             int                     & nPanelCols, 
-                             double                  & CellHeight,
-                             double                  & CellWidth, 
-                             Mantid::Kernel::Logger  &g_log) ;
+  void findNumRowsColsinPanel(DataObjects::Peak const &peak,
+                              int                     &nPanelRows,
+                              int                     & nPanelCols,
+                              double                  & CellHeight,
+                              double                  & CellWidth,
+                              Mantid::Kernel::Logger  &g_log) ;
 
 
-int  CalculateTimeChannelSpan( DataObjects::Peak     const & peak, 
-                               const double                  dQ, 
-                               Mantid::MantidVec      const& X, 
-                               const int                     specNum, 
-                               int                         & Centerchan);
+  int  CalculateTimeChannelSpan( DataObjects::Peak     const & peak,
+                                 const double                  dQ,
+                                 Mantid::MantidVec      const& X,
+                                 const int                     specNum,
+                                 int                         & Centerchan);
 
-double CalculatePanelRowColSpan(  DataObjects::Peak const &peak, 
-                                  const double             dQ, 
-                                  const double             ystep, 
-                                  const double             xstep);
+  double CalculatePanelRowColSpan(  DataObjects::Peak const &peak,
+                                    const double             dQ,
+                                    const double             ystep,
+                                    const double             xstep);
 
-void InitializeColumnNamesInTableWorkspace( DataObjects::TableWorkspace_sptr &TabWS) ;
+  void InitializeColumnNamesInTableWorkspace( DataObjects::TableWorkspace_sptr &TabWS) ;
 
-boost::shared_ptr<const Geometry::RectangularDetector> getPanel( DataObjects::Peak const &peak);
+  boost::shared_ptr<const Geometry::RectangularDetector> getPanel( DataObjects::Peak const &peak);
 
-std::vector<int> CalculateStart_and_NRowsCols( const double CentRow, 
-                                               const double CentCol, 
-                                               const int dRow, 
-                                               const int dCol, 
-                                               const int nPanelRows, 
-                                               const int nPanelCols) ;
+  std::vector<int> CalculateStart_and_NRowsCols( const double CentRow,
+                                                 const double CentCol,
+                                                 const int dRow,
+                                                 const int dCol,
+                                                 const int nPanelRows,
+                                                 const int nPanelCols) ;
 
-void SetUpData1(API::MatrixWorkspace_sptr                                   &Data,
-                                              API::MatrixWorkspace_sptr                              const &inpWkSpace,
-                                              Mantid::Geometry::RectangularDetector_const_sptr        const &panel,
-                                              const int                                              chan,
-                                              std::vector<int>                                       const &Attr,
-                                              Mantid::detid2index_map                               *const  wi_to_detid_map,
-                                              Kernel::Logger                                               & g_log) ;
-
-std::string CalculateFunctionProperty_Fit(  ) ;
-
-bool isGoodFit(std::vector<double >              const & params,
-               std::vector<double >              const & errs,
-               std::vector<std::string >         const &names,
-               double                                   chisq 
-              ) ; 
-
-void UpdateOutputWS( DataObjects::TableWorkspace_sptr         &TabWS,
-                    const int                                  dir, 
-                    const int                                  chan,
-                    std::vector<double >                 const &params,
-                    std::vector<double >                 const &errs, 
-                    std::vector<std::string>             const &names, 
-                    const double                               chisq,                     
-                    const double                              time) ;
+  void SetUpData1( API::MatrixWorkspace_sptr                                    &Data,
+                   API::MatrixWorkspace_sptr                              const &inpWkSpace,
+                   Mantid::Geometry::RectangularDetector_const_sptr       const &panel,
+                   const int                                              chan,
+                   std::vector<int>                                       const &Attr,
+                   Mantid::detid2index_map                               *const  wi_to_detid_map,
+                   Kernel::Logger                                               & g_log ) ;
 
 
-void updatePeakInformation( std::vector<double >     const &params,
-                            std::vector<double >     const &errs,
-                            std::vector<std::string >const &names,
-                            double                        &TotVariance, 
-                            double                        &TotIntensity,
-                            double const                   TotSliceIntensity, 
-                            double const                   chisqdivDOF, 
-                            const int                      ncelss) ;
+  std::string CalculateFunctionProperty_Fit(  ) ;
 
-void updateStats( const double          intensity, 
-                  const int             row, 
-                  const int             col,
-                  std::vector<double> & StatBase );
+  bool isGoodFit( std::vector<double >              const & params,
+                  std::vector<double >              const & errs,
+                  std::vector<std::string >         const &names,
+                  double                                   chisq
+                ) ;
 
-
-int find( std::string              const &oneName, 
-          std::vector<std::string> const &nameList);
-
-void getInitParamValues(std::vector<double> const &StatBase, 
-                                       const double               TotBoundaryIntensities,
-                                       const int                  nBoundaryCells);
+  void UpdateOutputWS( DataObjects::TableWorkspace_sptr         &TabWS,
+                       const int                                  dir,
+                       const int                                  chan,
+                       std::vector<double >                 const &params,
+                       std::vector<double >                 const &errs,
+                       std::vector<std::string>             const &names,
+                       const double                               chisq,
+                       const double                              time) ;
 
 
-int find( Mantid::MantidVec const & X, 
-          const double              time);
+  void updatePeakInformation( std::vector<double >     const &params,
+                              std::vector<double >     const &errs,
+                              std::vector<std::string >const &names,
+                              double                        &TotVariance,
+                              double                        &TotIntensity,
+                              double const                   TotSliceIntensity,
+                              double const                   chisqdivDOF,
+                              const int                      ncelss) ;
 
-bool IsEnoughData(   ) ;
- 
- bool    debug;
-static Kernel::Logger& g_log;  
+
+  void updateStats( const double          intensity,
+                    const int             row,
+                    const int             col,
+                    std::vector<double> & StatBase );
+
+
+  int find( std::string              const &oneName,
+            std::vector<std::string> const &nameList);
+
+
+  void getInitParamValues( std::vector<double> const &StatBase,
+                           const double               TotBoundaryIntensities,
+                           const int                  nBoundaryCells);
+
+
+  int find( Mantid::MantidVec const & X,
+            const double              time);
+
+
+  bool IsEnoughData(   ) ;
+
+
+  bool    debug;
+  static Kernel::Logger& g_log;
 
 };
 } // namespace Crystal
