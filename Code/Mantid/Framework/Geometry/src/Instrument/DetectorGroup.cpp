@@ -176,32 +176,38 @@ namespace Mantid
     }
 
     /** Gives the total solid angle subtended by a group of detectors by summing the
-    *  contributions from the individual detectors.
-    *  @param observer :: The point from which the detector is being viewed
-    *  @return The solid angle in steradians
-    *  @throw NullPointerException If geometrical form of any detector has not been provided in the instrument definition file
-    */
+     *  contributions from the individual detectors.
+     *  Any masked detector in the group is excluded from the sum.
+     *  @param observer :: The point from which the detector is being viewed
+     *  @return The solid angle in steradians
+     *  @throw NullPointerException If geometrical form of any detector has not been provided in the instrument definition file
+     */
     double DetectorGroup::solidAngle(const V3D& observer) const
     {
       double result = 0.0;
       DetCollection::const_iterator it;
       for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
       {
-        result += (*it).second->solidAngle(observer);
+        IDetector_const_sptr det = (*it).second;
+        if ( ! det->isMasked() ) result += det->solidAngle(observer);
       }
       return result;
     }
 
+    /** Are ALL the detectors in this group masked?
+     *  @return True if every one of the detectors in this group is masked, false otherwise.
+     */
     bool DetectorGroup::isMasked() const
     {
       bool isMasked = true;
       DetCollection::const_iterator it;
       for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
       {
-        if ( !(*it).second->isMasked() ){
-      isMasked = false;
-      break;
-    }
+        if ( !(*it).second->isMasked() )
+        {
+          isMasked = false;
+          break;
+        }
       }
       return isMasked;
     }
