@@ -146,14 +146,14 @@ class LoadRun(ReductionStep):
         if mtd[event_ws].getRun().hasProperty("wavelength_min"):
             wl_min = mtd[event_ws].getRun().getProperty("wavelength_min").value
         else:
-            raise RuntimeError, "LoadRun could not get minimum wavelength for %s" % workspace
+            return False
 
         if mtd[event_ws].getRun().hasProperty("wavelength_max_frame2"):
             wl_max = mtd[event_ws].getRun().getProperty("wavelength_max_frame2").value
         elif mtd[event_ws].getRun().hasProperty("wavelength_max"):
             wl_max = mtd[event_ws].getRun().getProperty("wavelength_max").value
         else:
-            raise RuntimeError, "LoadRun could not get maximum wavelength for %s" % workspace
+            return False
 
         Rebin(event_ws, workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_max), False)
         
@@ -175,6 +175,7 @@ class LoadRun(ReductionStep):
         # Remove the dirty flag if it existed
         reducer.clean(workspace)
         mtd[workspace].getRun().addProperty_int("loaded_by_eqsans_reduction", 1, True)
+        return True
              
     @classmethod
     def delete_workspaces(cls, workspace):
@@ -300,9 +301,9 @@ class LoadRun(ReductionStep):
         
         # If the event workspace exists, don't reload it
         if mtd.workspaceExists(workspace+'_evt'):
-            self._process_existing_event_ws(reducer, workspace+'_evt', workspace)
-            mantid.sendLogMessage("INFO: %s already loaded" % workspace+'_evt')
-            return "INFO: %s_evt already loaded" % workspace
+            if self._process_existing_event_ws(reducer, workspace+'_evt', workspace):
+                mantid.sendLogMessage("INFO: %s already loaded" % workspace+'_evt')
+                return "INFO: %s_evt already loaded" % workspace
         
         # Check whether there is an equivalent event workspace
         eq_histo_ws, eq_event_ws = self._look_for_loaded_data(reducer, data_file)
@@ -313,9 +314,9 @@ class LoadRun(ReductionStep):
             return "INFO: %s already loaded as %s" % (workspace, eq_histo_ws)
         elif eq_event_ws is not None:
             # The data is available as an event workspace. We just need to process it.
-            self._process_existing_event_ws(reducer, eq_event_ws, workspace)
-            mantid.sendLogMessage("INFO: %s already loaded as %s" % (workspace+'_evt', eq_event_ws))
-            return "INFO: %s already loaded as %s" % (workspace+'_evt', eq_event_ws)
+            if self._process_existing_event_ws(reducer, eq_event_ws, workspace):
+                mantid.sendLogMessage("INFO: %s already loaded as %s" % (workspace+'_evt', eq_event_ws))
+                return "INFO: %s already loaded as %s" % (workspace+'_evt', eq_event_ws)
         
         # Check whether we have a list of files that need merging
         if type(data_file)==list:
