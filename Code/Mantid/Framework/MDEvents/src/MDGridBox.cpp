@@ -340,8 +340,8 @@ namespace MDEvents
   TMDE(
   void MDGridBox)::refreshCentroid(Kernel::ThreadScheduler * ts)
   {
-#ifdef MDBOX_TRACK_CENTROID
     UNUSED_ARG(ts);
+#ifdef MDBOX_TRACK_CENTROID
 
     // Start at 0.0
     for (size_t d=0; d<nd; d++)

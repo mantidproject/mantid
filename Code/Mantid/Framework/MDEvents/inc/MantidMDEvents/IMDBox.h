@@ -111,6 +111,8 @@ namespace MDEvents
 
     coord_t * getVertexesArray(size_t & numVertices) const;
 
+    coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const;
+
     /** @return the MDPoints contained. throws. */
     virtual std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > getContributingPoints() const
     {

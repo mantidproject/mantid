@@ -208,6 +208,67 @@ namespace MDEvents
   }
 
 
+  //-----------------------------------------------------------------------------------------------
+  /** Return the vertices of every corner of the box, but to a reduced
+   * number of dimensions.
+   *
+   * Essentially, this is a projection of the vertexes from nd down to a lower
+   * (or equal) number of dimensions. Redundant vertexes are NOT included.
+   *
+   * @param[out] numVertices :: returns the number of vertices in the array.
+   * @param outDimensions :: the number of dimensions in the output array (must be > 0).
+   * @param maskDim :: nd-sized array of a mask, with TRUE for the dimensions to KEEP.
+   *        The number of TRUEs in maskDim MUST be equal to outDimensions, and this is
+   *        not checked for here (for performance).
+   * @return the bare array, size of outDimensions. This should be deleted by the caller!
+   * @throw if outDimensions == 0
+   * */
+  TMDE(
+  coord_t * IMDBox)::getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const
+  {
+    if (outDimensions == 0)
+      throw std::invalid_argument("IMDBox::getVertexesArray(): Must have > 0 output dimensions.");
+
+    // How many vertices does one box have? 2^numOutputDimensions
+    numVertices = 1 << outDimensions;
+
+    // Allocate the array of the right size
+    coord_t * out = new coord_t[outDimensions * numVertices];
+
+    // For each vertex, increase an integeer
+    for (size_t i=0; i<numVertices; ++i)
+    {
+      // Start point index in the output array;
+      size_t outIndex = i * outDimensions;
+
+      // The OUTPUT dimension index
+      size_t outd = 0;
+
+      // Coordinates of the vertex
+      for (size_t ind=0; ind<nd; ind++)
+      {
+        if (maskDim[ind])
+        {
+          // Use a bit mask to look at each bit of the integer we are iterating through.
+          size_t mask = 1 << outd;
+          if ((i & mask) > 0)
+          {
+            // Bit is 1, use the max of the dimension
+            out[outIndex + outd] = extents[ind].max;
+          }
+          else
+          {
+            // Bit is 0, use the min of the dimension
+            out[outIndex + outd] = extents[ind].min;
+          }
+          outd++;
+        } // the dimensions is used in the output.
+      } // (for each INPUT dimension)
+    }
+    return out;
+  }
+
+
 
 } // namespace Mantid
 } // namespace MDEvents

@@ -221,6 +221,7 @@ public:
     b.setExtents(1, -4.0, 6.0);
     size_t numVertexes = 0;
     coord_t * v = b.getVertexesArray(numVertexes);
+    TS_ASSERT_EQUALS( numVertexes, 4);
     TS_ASSERT_EQUALS( v[0], -10.0);
     TS_ASSERT_EQUALS( v[0+1], -4.0);
     TS_ASSERT_EQUALS( v[2], 10.0);
@@ -230,6 +231,167 @@ public:
     TS_ASSERT_EQUALS( v[6], 10.0);
     TS_ASSERT_EQUALS( v[6+1], 6.0);
     delete [] v;
+  }
+
+  /** Get vertexes as a bare array,
+   * projecting down into fewer dimensions */
+  void test_getVertexesArray_reducedDimension()
+  {
+    IMDBoxTester<MDEvent<2>,2> b;
+    b.setExtents(0, -10.0, 10.0);
+    b.setExtents(1, -4.0, 6.0);
+    size_t numVertexes = 0;
+    coord_t * v;
+
+    bool maskDim[2] = {true, false};
+    v = b.getVertexesArray(numVertexes, 1, maskDim);
+    TS_ASSERT_EQUALS( numVertexes, 2);
+    TS_ASSERT_EQUALS( v[0], -10.0);
+    TS_ASSERT_EQUALS( v[1], 10.0);
+    delete [] v;
+
+    bool maskDim2[2] = {false, true};
+    v = b.getVertexesArray(numVertexes, 1, maskDim2);
+    TS_ASSERT_EQUALS( numVertexes, 2);
+    TS_ASSERT_EQUALS( v[0], -4.0);
+    TS_ASSERT_EQUALS( v[1], 6.0);
+    delete [] v;
+  }
+
+  /** Get vertexes as a bare array,
+   * projecting down into fewer dimensions */
+  void test_getVertexesArray_reducedDimension_3D()
+  {
+    IMDBoxTester<MDEvent<3>,3> b;
+    b.setExtents(0, -10.0, 10.0);
+    b.setExtents(1, -4.0, 6.0);
+    b.setExtents(2, -2.0, 8.0);
+    size_t numVertexes = 0;
+    coord_t * v;
+
+    // 3D projected down to 2D in X/Y
+    bool maskDim[3] = {true, true, false};
+    v = b.getVertexesArray(numVertexes, 2, maskDim);
+    TS_ASSERT_EQUALS( numVertexes, 4);
+    TS_ASSERT_EQUALS( v[0], -10.0);
+    TS_ASSERT_EQUALS( v[0+1], -4.0);
+    TS_ASSERT_EQUALS( v[2], 10.0);
+    TS_ASSERT_EQUALS( v[2+1], -4.0);
+    TS_ASSERT_EQUALS( v[4], -10.0);
+    TS_ASSERT_EQUALS( v[4+1], 6.0);
+    TS_ASSERT_EQUALS( v[6], 10.0);
+    TS_ASSERT_EQUALS( v[6+1], 6.0);
+    delete [] v;
+
+    // Can't give 0 dimensions.
+    TS_ASSERT_THROWS_ANYTHING( v = b.getVertexesArray(numVertexes, 0, maskDim) );
+
+    // 3D projected down to 1D in Y
+    bool maskDim2[3] = {false, true, false};
+    v = b.getVertexesArray(numVertexes, 1, maskDim2);
+    TS_ASSERT_EQUALS( numVertexes, 2);
+    TS_ASSERT_EQUALS( v[0], -4.0);
+    TS_ASSERT_EQUALS( v[1], 6.0);
+    delete [] v;
+
+    // 3D projected down to 2D in Y/Z
+    bool maskDim3[3] = {false, true, true};
+    v = b.getVertexesArray(numVertexes, 2, maskDim3);
+    TS_ASSERT_EQUALS( numVertexes, 4);
+    TS_ASSERT_EQUALS( v[0], -4.0);
+    TS_ASSERT_EQUALS( v[0+1], -2.0);
+    TS_ASSERT_EQUALS( v[2], 6.0);
+    TS_ASSERT_EQUALS( v[2+1], -2.0);
+    TS_ASSERT_EQUALS( v[4], -4.0);
+    TS_ASSERT_EQUALS( v[4+1], 8.0);
+    TS_ASSERT_EQUALS( v[6], 6.0);
+    TS_ASSERT_EQUALS( v[6+1], 8.0);
+    delete [] v;
+  }
+
+};
+
+
+
+//======================================================================
+//======================================================================
+//======================================================================
+class IMDBoxTestPerformance : public CxxTest::TestSuite
+{
+public:
+
+  /** Vector of Coordinate version of getVertexes (slower than the bare array version)
+   * (this is only 100 thousand, not a million times like the others).
+   */
+  void test_getVertexes_3D()
+  {
+    IMDBoxTester<MDEvent<3>,3> b;
+    b.setExtents(0, -9.0, 9.0);
+    b.setExtents(1, -8.0, 8.0);
+    b.setExtents(2, -7.0, 7.0);
+    for (size_t i=0; i<100000; i++)
+    {
+      std::vector<Mantid::Geometry::Coordinate> v = b.getVertexes();
+    }
+  }
+
+  void test_getVertexesArray_3D()
+  {
+    IMDBoxTester<MDEvent<3>,3> b;
+    b.setExtents(0, -9.0, 9.0);
+    b.setExtents(1, -8.0, 8.0);
+    b.setExtents(2, -7.0, 7.0);
+    for (size_t i=0; i<1000000; i++)
+    {
+      size_t numVertexes;
+      coord_t * v = b.getVertexesArray(numVertexes);
+      delete [] v;
+    }
+  }
+
+  void test_getVertexesArray_3D_projected_to_2D()
+  {
+    IMDBoxTester<MDEvent<3>,3> b;
+    b.setExtents(0, -9.0, 9.0);
+    b.setExtents(1, -8.0, 8.0);
+    b.setExtents(2, -7.0, 7.0);
+    bool maskDim[3] = {true, true, false};
+    for (size_t i=0; i<1000000; i++)
+    {
+      size_t numVertexes;
+      coord_t * v = b.getVertexesArray(numVertexes, 2, maskDim);
+      delete [] v;
+    }
+  }
+
+  void test_getVertexesArray_4D()
+  {
+    IMDBoxTester<MDEvent<4>,4> b;
+    b.setExtents(0, -9.0, 9.0);
+    b.setExtents(1, -8.0, 8.0);
+    b.setExtents(2, -7.0, 7.0);
+    b.setExtents(3, -6.0, 6.0);
+    for (size_t i=0; i<1000000; i++)
+    {
+      size_t numVertexes;
+      coord_t * v = b.getVertexesArray(numVertexes);
+      delete [] v;
+    }
+  }
+  void test_getVertexesArray_4D_projected_to_3D()
+  {
+    IMDBoxTester<MDEvent<4>,4> b;
+    bool maskDim[4] = {true, true, true, false};
+    b.setExtents(0, -9.0, 9.0);
+    b.setExtents(1, -8.0, 8.0);
+    b.setExtents(2, -7.0, 7.0);
+    b.setExtents(3, -6.0, 6.0);
+    for (size_t i=0; i<1000000; i++)
+    {
+      size_t numVertexes;
+      coord_t * v = b.getVertexesArray(numVertexes, 3, maskDim);
+      delete [] v;
+    }
   }
 
 };
