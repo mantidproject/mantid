@@ -48,23 +48,11 @@ void ApplyTransmissionCorrection::init()
 
 void ApplyTransmissionCorrection::exec()
 {
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const double trans_value = getProperty("TransmissionValue");
   const double trans_error = getProperty("TransmissionError");
-
-  // Now create the output workspace
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  if ( outputWS != inputWS )
-  {
-    outputWS = WorkspaceFactory::Instance().create(inputWS);
-    setProperty("OutputWorkspace",outputWS);
-  }
 
-  const std::size_t numHists = inputWS->getNumberHistograms();
-
-  Progress progress(this,0.0,1.0,numHists);
-
-  // If a transmission value was given, use it instead of the transmission workspace
   MantidVec trans(inputWS->readY(0).size(), trans_value);
   MantidVec dtrans(inputWS->readY(0).size(),trans_error);
   MantidVec& TrIn = trans;
@@ -85,9 +73,19 @@ void ApplyTransmissionCorrection::exec()
     TrIn  = transWS->readY(0);
     ETrIn = transWS->readE(0);
   }
+
+  const int numHists = static_cast<int>(inputWS->getNumberHistograms());
+  Progress progress(this,0.0,1.0,numHists);
+
+  // Create a Workspace2D to match the intput workspace
+  MatrixWorkspace_sptr corrWS = WorkspaceFactory::Instance().create(inputWS);
+
   // Loop through the spectra and apply correction
-  for (std::size_t i = 0; i < numHists; ++i)
+  PARALLEL_FOR2(inputWS, corrWS)
+  for (int i = 0; i < numHists; i++)
   {
+    PARALLEL_START_INTERUPT_REGION
+
     IDetector_const_sptr det;
     try {
       det = inputWS->getDetector(i);
@@ -97,33 +95,30 @@ void ApplyTransmissionCorrection::exec()
     }
 
     // Copy over the X data
-    outputWS->dataX(i) = inputWS->readX(i);
+    corrWS->dataX(i) = inputWS->readX(i);
 
     // Skip if we have a monitor or if the detector is masked.
     if ( det->isMonitor() || det->isMasked() ) continue;
 
-    const MantidVec& YIn = inputWS->readY(i);
-    const MantidVec& EIn = inputWS->readE(i);
+    // Compute theta-dependent transmission term for each wavelength bin
+    MantidVec& YOut = corrWS->dataY(i);
+    MantidVec& EOut = corrWS->dataE(i);
 
-    MantidVec& YOut = outputWS->dataY(i);
-    MantidVec& EOut = outputWS->dataE(i);
-
-    // Compute transmission exponent
     const double exp_term = (1.0/cos( inputWS->detectorTwoTheta(det) ) + 1.0)/2.0;
-
-    // Correct data for all X bins
     for (int j = 0; j < (int)inputWS->readY(0).size(); j++)
     {
-      const double t_term = pow(TrIn[j], exp_term);
-      const double d1 = EIn[j]/t_term;
-      const double d2 = ETrIn[j]*YIn[j]*exp_term/pow(TrIn[j], exp_term+1.0);
-      EOut[j] = sqrt( d1*d1 + d2*d2 );
-      YOut[j] = YIn[j]/t_term;
+      EOut[j] = std::fabs(ETrIn[j]*exp_term/pow(TrIn[j], exp_term+1.0));
+      YOut[j] = 1.0/pow(TrIn[j], exp_term);
     }
-    progress.report("Applying Transmission Correction");
-  }
-}
 
+    progress.report("Applying Transmission Correction");
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+
+  outputWS = inputWS*corrWS;
+  setProperty("OutputWorkspace",outputWS);
+}
 } // namespace Algorithms
 } // namespace Mantid
 

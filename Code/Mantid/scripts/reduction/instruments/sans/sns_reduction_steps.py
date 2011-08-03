@@ -654,7 +654,7 @@ class BeamStopTransmission(BaseTransmission):
             ApplyTransmissionCorrection(workspace, workspace, transmission_ws)
         else:
             Divide(workspace, transmission_ws, workspace)
-        ReplaceSpecialValues(workspace, workspace, NaNValue=0.0,NaNError=0.0)
+        #ReplaceSpecialValues(workspace, workspace, NaNValue=0.0,NaNError=0.0)
         
         # Clean up 
         for ws in ws_for_deletion:
