@@ -690,7 +690,7 @@ void LoadEventPreNexus::procEventsLinear(DataObjects::EventWorkspace_sptr & /*wo
     }
 
     // Avoid segfaults for wrong pixel IDs
-    if (pid > detid_max)
+    if (pid > static_cast<PixelType>(detid_max))
     {
       local_num_error_events++;
       continue;
