@@ -245,6 +245,7 @@ void InstrumentWindow::setWorkspaceName(std::string wsName)
   m_InstrumentDisplay->makeCurrent();
   m_instrumentActor = new InstrumentActor(m_workspace);
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),m_instrumentActor->maxBinValue());
+  m_xIntegration->setUnits(QString::fromStdString(m_workspace->getAxis(0)->unit()->caption()));
   setSurfaceType(m_surfaceType);
   setupColorMap();
   mInstrumentTree->setInstrumentActor(m_instrumentActor);

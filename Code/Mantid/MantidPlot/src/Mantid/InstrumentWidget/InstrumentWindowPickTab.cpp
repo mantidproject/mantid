@@ -329,7 +329,7 @@ void InstrumentWindowPickTab::getBinMinMaxIndex(size_t wi,size_t& imin, size_t& 
     Mantid::MantidVec::const_iterator x_begin = std::lower_bound(x.begin(),x.end(),instrActor->minBinValue());
     Mantid::MantidVec::const_iterator x_end = std::lower_bound(x.begin(),x.end(),instrActor->maxBinValue());
     imin = static_cast<size_t>(x_begin - x.begin());
-    imax = static_cast<size_t>(x_end - x.begin());
+    imax = static_cast<size_t>(x_end - x.begin()) - 1;
   }
 }
 
