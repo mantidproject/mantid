@@ -27,11 +27,9 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	test/AnvredCorrectionTest.h
-        test/IntegratePeakTimeSlicesTest.h
 	test/LoadIsawUBTest.h
 	test/LoadPeaksFileTest.h
 	test/MaskPeaksWorkspaceTest.h
-	test/PeakIntegrationTest.h
 	test/PredictPeaksTest.h
 	test/SaveIsawPeaksTest.h
 	test/SavePeaksFileTest.h
