@@ -73,9 +73,6 @@ class BaseBeamFinder(ReductionStep):
                    
         reducer._data_loader.clone(filepath).execute(reducer, workspace)
 
-        # Integrate over all wavelength bins so that we process a single detector image
-        Integration(workspace, workspace+'_int')
-
         # Mask edges of the detector
         # This is here mostly to allow a direct comparison with old HFIR code and 
         # ensure that we reproduce the same results
@@ -84,22 +81,13 @@ class BaseBeamFinder(ReductionStep):
             mask = Mask()
             mask.ignore_run_properties()
             mask.mask_edges(self._x_mask_low, self._x_mask_high, self._y_mask_low, self._y_mask_high)
-            mask.execute(reducer, workspace+'_int')
+            mask.execute(reducer, workspace)
                         
-        # NOTE: Version 1 of this algorithm computer the center in pixel coordinates (as in the HFIR IGOR code)  
-        #
-        # beam_center = FindCenterOfMassPosition(workspace+'_int',
-        #                                       Output = None,
-        #                                       NPixelX=reducer.instrument.nx_pixels,
-        #                                       NPixelY=reducer.instrument.ny_pixels,
-        #                                       DirectBeam = direct_beam,
-        #                                       BeamRadius = self._beam_radius)
-        
         # We must convert the beam radius from pixels to meters
         pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
         if self._beam_radius is not None:
             self._beam_radius *= pixel_size_x/1000.0
-        beam_center = FindCenterOfMassPosition(workspace+'_int',
+        beam_center = FindCenterOfMassPosition(workspace,
                                                Output = None,
                                                DirectBeam = direct_beam,
                                                BeamRadius = self._beam_radius)
