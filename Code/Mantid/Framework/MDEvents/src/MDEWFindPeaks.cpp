@@ -43,7 +43,18 @@ namespace MDEvents
     this->setWikiSummary("Find peaks in reciprocal space in a MDEventWorkspace.");
     this->setOptionalMessage("Find peaks in reciprocal space in a MDEventWorkspace.");
     this->setWikiDescription(""
-        ""
+        "This algorithm is used to find single-crystal peaks in a multi-dimensional workspace. It looks for high signal density areas."
+        "\n\n"
+        "The algorithm proceeds in this way:\n"
+        "* Sorts all the boxes in the workspace by decreasing order of signal density (total weighted event sum divided by box volume).\n"
+        "** It will skip any boxes with a density below a threshold. The threshold is <math>TotalSignal / TotalVolume * DensityThresholdFactor</math>.\n"
+        "* The centroid of the strongest box is considered a peak.\n"
+        "* The centroid of the next strongest box is calculated. \n"
+        "** We look through all the peaks that have already been found. If the box is too close to an existing peak, it is rejected. This distance is PeakDistanceThreshold.\n"
+        "* This is repeated until we find up to MaxPeaks peaks."
+        "\n\n"
+        "Each peak created is placed in the output [[PeaksWorkspace]]."
+
         );
   }
 
@@ -52,7 +63,8 @@ namespace MDEvents
    */
   void MDEWFindPeaks::init()
   {
-    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input), "An input MDEventWorkspace.");
+    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input),
+        "An input MDEventWorkspace with at least 3 dimensions.");
 
     declareProperty(new PropertyWithValue<double>("PeakDistanceThreshold",1.0,Direction::Input),
         "Threshold distance for rejecting peaks that are found to be too close from each other.\n"
@@ -80,6 +92,9 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void MDEWFindPeaks::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
+    if (nd < 3)
+      throw std::invalid_argument("Workspace must have at least 3 dimensions.");
+
     prog->report("Refreshing Centroids");
 
     // TODO: This might be slow, progress report?
