@@ -43,7 +43,7 @@ namespace MDEvents
     this->setWikiSummary("Find peaks in reciprocal space in a MDEventWorkspace.");
     this->setOptionalMessage("Find peaks in reciprocal space in a MDEventWorkspace.");
     this->setWikiDescription(""
-        "This algorithm is used to find single-crystal peaks in a multi-dimensional workspace. It looks for high signal density areas."
+        "This algorithm is used to find single-crystal peaks in a multi-dimensional workspace. It looks for high signal density areas, and is based on an algorithm designed by Dennis Mikkelson for ISAW."
         "\n\n"
         "The algorithm proceeds in this way:\n"
         "* Sorts all the boxes in the workspace by decreasing order of signal density (total weighted event sum divided by box volume).\n"
