@@ -470,6 +470,8 @@ namespace MDEvents
     PRAGMA_OMP(parallel for schedule(dynamic, binsPerTask) if (ws->getBoxController()->getFile() == NULL) )
     for (int i=0; i < numPoints; i++)
     {
+      PARALLEL_START_INTERUPT_REGION
+
       size_t linear_index = size_t(i);
       // nd >= numBD in all cases so this is safe.
       size_t index[nd];
@@ -515,7 +517,10 @@ namespace MDEvents
 
       // Report progress but not too often.
       if (((linear_index % 100) == 0) && prog ) prog->report();
+
+      PARALLEL_END_INTERUPT_REGION
     } // (for each linear index)
+    PARALLEL_CHECK_INTERUPT_REGION
 
     if (DODEBUG) std::cout << tim << " to run the openmp loop.\n";
 

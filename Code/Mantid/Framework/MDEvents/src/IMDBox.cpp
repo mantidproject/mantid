@@ -19,9 +19,11 @@ namespace MDEvents
       m_inverseVolume(1.0),
       m_depth(0)
   {
+#ifdef MDBOX_TRACK_CENTROID
     // Clear the running total of the centroid
     for (size_t d=0; d<nd; d++)
       m_centroid[d] = 0;
+#endif
   }
 
 
@@ -34,9 +36,11 @@ namespace MDEvents
       m_inverseVolume(1.0),
       m_depth(0)
   {
+#ifdef MDBOX_TRACK_CENTROID
     // Clear the running total of the centroid
     for (size_t d=0; d<nd; d++)
       m_centroid[d] = 0;
+#endif
     // Set the extents
     if (extentsVector.size() != nd) throw std::invalid_argument("IMDBox::ctor(): extentsVector.size() must be == nd.");
     for (size_t d=0; d<nd; d++)
@@ -63,9 +67,11 @@ namespace MDEvents
       this->extents[d] = box->extents[d];
     // Copy the depth
     this->m_depth = box->getDepth();
+#ifdef MDBOX_TRACK_CENTROID
     // Clear the running total of the centroid
     for (size_t d=0; d<nd; d++)
       m_centroid[d] = 0;
+#endif
     // Re-calculate the volume of the box
     this->calcVolume(); //TODO: Is this necessary or should we copy the volume?
 

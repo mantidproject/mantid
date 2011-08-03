@@ -15,6 +15,9 @@
 #include "MantidNexus/NeXusFile.hpp"
 #include <iosfwd>
 
+/// Define to keep the centroid around as a field on each IMDBox.
+#undef MDBOX_TRACK_CENTROID
+
 namespace Mantid
 {
 namespace MDEvents
@@ -164,6 +167,8 @@ namespace MDEvents
     // -------------------------------------------------------------------------------------------
     /** Cache the centroid of this box and all sub-boxes. */
     virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL) {} //= 0;
+
+    virtual void calculateCentroid(coord_t * /*centroid*/) const {};
 
     // -------------------------------------------------------------------------------------------
     /// @return the box controller saved.
@@ -332,6 +337,7 @@ namespace MDEvents
       m_inverseVolume = invVolume;
     }
 
+#ifdef MDBOX_TRACK_CENTROID
     //-----------------------------------------------------------------------------------------------
     /** Return the centroid of the box.
      * @param d :: index of the dimension to return.
@@ -348,6 +354,7 @@ namespace MDEvents
     {
       return m_centroid;
     }
+#endif
 
   protected:
     /** Array of MDDimensionStats giving the extents and
@@ -372,10 +379,12 @@ namespace MDEvents
     /// Recursion depth
     size_t m_depth;
 
+#ifdef MDBOX_TRACK_CENTROID
     /** The centroid (weighted center of mass) of the events in this MDBox.
-     * Set when refreshCache() is called.
+     * Set when refreshCentroid() is called.
      */
     coord_t m_centroid[nd];
+#endif
 
   public:
     /// Convenience typedef for a shared pointer to a this type of class

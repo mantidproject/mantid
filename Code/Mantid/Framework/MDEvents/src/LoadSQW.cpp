@@ -281,7 +281,6 @@ namespace Mantid
         prog->report("Splitting boxes");
 
         // This splits up all the boxes according to split thresholds and sizes.
-        // TODO: Would it be more efficient to do the splitting on regulare intervals? Not necessarily, should try it.
         Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
         ThreadPool tp(ts);
         ws->splitAllIfNeeded(ts);

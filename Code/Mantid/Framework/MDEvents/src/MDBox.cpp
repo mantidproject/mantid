@@ -133,11 +133,9 @@ namespace MDEvents
         ::NeXus::File * file = this->m_BoxController->getFile();
         if (file)
         {
-          //fileMutex.lock();
           this->m_BoxController->fileMutex.lock();
           MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
           this->m_BoxController->fileMutex.unlock();
-          //fileMutex.unlock();
         }
       }
       // After loading, or each time you request it:
@@ -168,12 +166,10 @@ namespace MDEvents
         ::NeXus::File * file = this->m_BoxController->getFile();
         if (file)
         {
-          //fileMutex.lock();
           data.clear();
           this->m_BoxController->fileMutex.lock();
           MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
           this->m_BoxController->fileMutex.unlock();
-          //fileMutex.unlock();
         }
       }
       // After loading, or each time you request it:
@@ -271,8 +267,19 @@ namespace MDEvents
   TMDE(
   void MDBox)::refreshCentroid(Kernel::ThreadScheduler * /*ts*/)
   {
+#ifdef MDBOX_TRACK_CENTROID
+    calculateCentroid(this->m_centroid);
+#endif
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Calculate the centroid of this box.
+   * @param centroid[out] :: nd-sized array that will be set to the centroid. */
+  TMDE(
+  void MDBox)::calculateCentroid(coord_t * centroid) const
+  {
     for (size_t d=0; d<nd; d++)
-      this->m_centroid[d] = 0;
+      centroid[d] = 0;
 
     // Signal was calculated before (when adding)
     // Keep 0.0 if the signal is null. This avoids dividing by 0.0
@@ -286,15 +293,14 @@ namespace MDEvents
       for (size_t d=0; d<nd; d++)
       {
         // Total up the coordinate weighted by the signal.
-        this->m_centroid[d] += event.getCenter(d) * signal;
+        centroid[d] += event.getCenter(d) * signal;
       }
     }
 
     // Normalize by the total signal
     for (size_t d=0; d<nd; d++)
-      this->m_centroid[d] /= this->m_signal;
+      centroid[d] /= this->m_signal;
   }
-
 
   //-----------------------------------------------------------------------------------------------
   /** Calculate the statistics for each dimension of this MDBox, using

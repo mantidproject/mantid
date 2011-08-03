@@ -1,9 +1,11 @@
 #ifndef MDGRIDBOXTEST_H
 #define MDGRIDBOXTEST_H
 
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
@@ -27,7 +29,6 @@
 #include <memory>
 #include <Poco/File.h>
 #include <vector>
-#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -58,6 +59,16 @@ public:
     // Start at ID 0.
     TS_ASSERT_EQUALS( b->getId(), 0);
     delete b;
+
+
+    std::cout << sizeof( MDEvent<3>) << " bytes per MDEvent(3)" << std::endl;
+    std::cout << sizeof( MDEvent<4>) << " bytes per MDEvent(4)" << std::endl;
+    std::cout << sizeof( Mantid::Kernel::Mutex ) << " bytes per Mutex" << std::endl;
+    std::cout << sizeof( MDDimensionExtents) << " bytes per MDDimensionExtents" << std::endl;
+    std::cout << sizeof( MDBox<MDEvent<3>,3>) << " bytes per MDBox(3)" << std::endl;
+    std::cout << sizeof( MDBox<MDEvent<4>,4> ) << " bytes per MDBox(4)" << std::endl;
+    std::cout << sizeof( MDGridBox<MDEvent<3>,3>) << " bytes per MDGridBox(3)" << std::endl;
+    std::cout << sizeof( MDGridBox<MDEvent<4>,4> ) << " bytes per MDGridBox(4)" << std::endl;
   }
 
 
@@ -266,9 +277,11 @@ public:
 
     TS_ASSERT_EQUALS( superbox->getNPoints(), 3 );
 
+#ifdef MDBOX_TRACK_CENTROID
     // Check the centroid for these 3 events
     TS_ASSERT_DELTA( superbox->getCentroid(0), 3.233, 0.001);
     TS_ASSERT_DELTA( superbox->getCentroid(1), 3.200, 0.001);
+#endif
 
     // Retrieve the 0th grid box
     boxes = superbox->getBoxes();

@@ -134,13 +134,25 @@ namespace MDEvents
     {
       signal_t density = it2->first;
       boxPtr box = it2->second;
+#ifndef MDBOX_TRACK_CENTROID
+      coord_t boxCenter[nd];
+      box->calculateCentroid(boxCenter);
+#else
       const coord_t * boxCenter = box->getCentroid();
+#endif
 
       // Compare to all boxes already picked.
       bool badBox = false;
       for (typename std::vector<boxPtr>::iterator it3=peakBoxes.begin(); it3 != peakBoxes.end(); it3++)
       {
+
+#ifndef MDBOX_TRACK_CENTROID
+        coord_t otherCenter[nd];
+        (*it3)->calculateCentroid(otherCenter);
+#else
         const coord_t * otherCenter = (*it3)->getCentroid();
+#endif
+
         // Distance between this box and a box we already put in.
         coord_t distSquared = 0.0;
         for (size_t d=0; d<nd; d++)
@@ -177,7 +189,14 @@ namespace MDEvents
     {
       // The center of the box = Q in the lab frame
       boxPtr box = *it3;
-      V3D Q(box->getCentroid(0), box->getCentroid(1), box->getCentroid(2));
+#ifndef MDBOX_TRACK_CENTROID
+      coord_t boxCenter[nd];
+      box->calculateCentroid(boxCenter);
+#else
+      const coord_t * boxCenter = box->getCentroid();
+#endif
+
+      V3D Q(boxCenter[0], boxCenter[1], boxCenter[2]);
 
       // Create a peak and add it
       try

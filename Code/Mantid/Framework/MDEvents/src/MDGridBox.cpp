@@ -294,8 +294,10 @@ namespace MDEvents
     nPoints = 0;
     this->m_signal = 0;
     this->m_errorSquared = 0;
+#ifdef MDBOX_TRACK_CENTROID
     for (size_t d=0; d<nd; d++)
       this->m_centroid[d] = 0;
+#endif
 
     typename boxVector_t::iterator it;
     typename boxVector_t::iterator it_end = boxes.end();
@@ -315,9 +317,11 @@ namespace MDEvents
         this->m_signal += ibox->getSignal();
         this->m_errorSquared += ibox->getErrorSquared();
 
+#ifdef MDBOX_TRACK_CENTROID
         // And track the centroid
         for (size_t d=0; d<nd; d++)
           this->m_centroid[d] += ibox->getCentroid(d) * ibox->getSignal();
+#endif
       }
     }
     else
@@ -336,6 +340,7 @@ namespace MDEvents
   TMDE(
   void MDGridBox)::refreshCentroid(Kernel::ThreadScheduler * ts)
   {
+#ifdef MDBOX_TRACK_CENTROID
     UNUSED_ARG(ts);
 
     // Start at 0.0
@@ -360,7 +365,6 @@ namespace MDEvents
         ibox->refreshCentroid();
 
         signal_t iBoxSignal = ibox->getSignal();
-
         // And track the centroid
         for (size_t d=0; d<nd; d++)
           this->m_centroid[d] += ibox->getCentroid(d) * iBoxSignal;
@@ -375,6 +379,7 @@ namespace MDEvents
     // Normalize centroid by the total signal
     for (size_t d=0; d<nd; d++)
       this->m_centroid[d] /= this->m_signal;
+#endif
   }
 
 

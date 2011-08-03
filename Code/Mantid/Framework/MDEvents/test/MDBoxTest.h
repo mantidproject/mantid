@@ -1,6 +1,7 @@
 #ifndef MDBOXTEST_H
 #define MDBOXTEST_H
 
+#include "MantidAPI/DiskMRU.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/CPUTimer.h"
@@ -16,7 +17,6 @@
 #include <map>
 #include <memory>
 #include <Poco/File.h>
-#include "MantidAPI/DiskMRU.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -35,8 +35,6 @@ public:
     TS_ASSERT_EQUALS( b3.getNumDims(), 3);
     TS_ASSERT_EQUALS( b3.getNPoints(), 0);
     TS_ASSERT_EQUALS( b3.getDepth(), 0);
-
-    //std::cout << sizeof(b3) << " bytes per MDBox(3)" << std::endl;
   }
 
   void test_constructor()
@@ -343,10 +341,11 @@ public:
     // Must call the signal cache first.
     b.refreshCache();
     b.refreshCentroid();
-
+#ifdef MDBOX_TRACK_CENTROID
     // This should be the weighted centroid
     TS_ASSERT_DELTA( b.getCentroid(0), 3.333, 0.001);
     TS_ASSERT_DELTA( b.getCentroid(1), 3.666, 0.001);
+#endif
   }
 
 
@@ -356,8 +355,10 @@ public:
     MDBox<MDEvent<2>,2> b;
     b.refreshCache();
     b.refreshCentroid();
+#ifdef MDBOX_TRACK_CENTROID
     TS_ASSERT_DELTA( b.getCentroid(0), 0.000, 0.001);
     TS_ASSERT_DELTA( b.getCentroid(1), 0.000, 0.001);
+#endif
   }
 
 
