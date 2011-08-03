@@ -9,6 +9,7 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/MaskedProperty.h"
 
+#include <QScrollArea>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -53,9 +54,23 @@ GenericDialog::~GenericDialog()
 */
 void GenericDialog::initLayout()
 {
+  QScrollArea *scroll = new QScrollArea(this);
+  scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+  QWidget *viewport = new QWidget(this);
+  scroll->setWidget(viewport);
+  scroll->setWidgetResizable(true);
+
   //Put everything in a vertical box
   // Making the dialog a parent of the layout automatically sets mainLay as the top-level layout
   QVBoxLayout *mainLay = new QVBoxLayout(this);
+  viewport->setLayout(mainLay);
+
+  // Add a layout for QDialog
+  QHBoxLayout *dialog_layout = new QHBoxLayout(this);
+  dialog_layout->addWidget(scroll); // add scroll to the QDialog's layout
+  setLayout(dialog_layout);
 
   // Create a grid of properties if there are any available
 
