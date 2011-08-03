@@ -71,10 +71,12 @@ class LoadRun(ReductionStep):
         # Flag to tell us whether we should do the full reduction with events
         self._keep_events = keep_events
    
-    def clone(self, data_file=None):
+    def clone(self, data_file=None, keep_events=None):
         if data_file is None:
             data_file = self._data_file
-        loader = LoadRun(datafile=data_file)
+        if keep_events is None:
+            keep_events = self._keep_events
+        loader = LoadRun(datafile=data_file, keep_events=keep_events)
         loader._use_config_cutoff = self._use_config_cutoff
         loader._low_TOF_cut = self._low_TOF_cut
         loader._high_TOF_cut = self._high_TOF_cut
@@ -191,14 +193,19 @@ class LoadRun(ReductionStep):
             mtd.deleteWorkspace(workspace+'_evt')
         
     def _look_for_loaded_data(self, reducer, file_path):
+        # If we are using only events, we can't trust any existing workspace
+        if self._keep_events:
+            return None, None
+        
         if not type(file_path) == list:
             file_path = [file_path] 
         for item in reducer._data_files.keys():
             if reducer._data_files[item] == file_path and \
                 mtd.workspaceExists(item):
-                if reducer.is_clean(item):
-                    return item, None
-                elif mtd[item].getRun().hasProperty("event_ws") and \
+                # Don't trust existing workspace2Ds
+                #if reducer.is_clean(item):
+                #    return item, None
+                if mtd[item].getRun().hasProperty("event_ws") and \
                     mtd.workspaceExists(mtd[item].getRun().getProperty("event_ws").value):
                     return None, mtd[item].getRun().getProperty("event_ws").value
         return None, None
