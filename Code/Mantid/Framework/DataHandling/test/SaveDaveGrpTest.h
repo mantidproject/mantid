@@ -66,7 +66,7 @@ public:
     MatrixWorkspace_const_sptr input = makeWorkspace(WSName);
 
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) );
-    std::string outputFile("testDaveGrp.grp");
+    std::string outputFile("testSaveDaveGrp1.grp");
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) );
     outputFile = saver->getPropertyValue("Filename");//get absolute path
 
@@ -78,48 +78,52 @@ public:
     //check the content of the file
     std::ifstream testfile;
     testfile.open(outputFile.c_str());
-    std::string line;
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "# Number of Energy transfer values" );
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "3" );
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "# Number of Y values" );
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "2" );
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "# Energy transfer (meV) values");
-    double d1,d2;
-    int i;
-    for (i=0;i<=2;i++)
+    if (testfile)
     {
-      testfile>>d1;
-      TS_ASSERT_EQUALS(d1,1.5+i);
+      std::string line;
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "# Number of Energy transfer values" );
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "3" );
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "# Number of Y values" );
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "2" );
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "# Energy transfer (meV) values");
+      double d1,d2;
+      int i;
+      for (i=0;i<=2;i++)
+      {
+        testfile>>d1;
+        TS_ASSERT_EQUALS(d1,1.5+i);
+      }
+      getline(testfile,line);
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "# Y () values" );
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "1" );
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "2" );
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "# Group 0" );
+      for (i=0;i<3;i++)
+      {
+        testfile>>d1>>d2;
+        TS_ASSERT_EQUALS(d1,2);
+        TS_ASSERT_DELTA(d2,std::sqrt(2.0),0.0001);
+      }
+      getline(testfile,line);
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "# Group 1" );
+      for (i=0;i<3;i++)
+      {
+        testfile>>d1>>d2;
+        TS_ASSERT_EQUALS(d1,2);
+        TS_ASSERT_DELTA(d2,std::sqrt(2.0),0.0001);
+      }
     }
-    getline(testfile,line);
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "# Y () values" );
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "1" );
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "2" );
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "# Group 0" );
-    for (i=0;i<3;i++)
-    {
-      testfile>>d1>>d2;
-      TS_ASSERT_EQUALS(d1,2);
-      TS_ASSERT_DELTA(d2,std::sqrt(2.0),0.0001);
-    }
-    getline(testfile,line);
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "# Group 1" );
-    for (i=0;i<3;i++)
-    {
-      testfile>>d1>>d2;
-      TS_ASSERT_EQUALS(d1,2);
-      TS_ASSERT_DELTA(d2,std::sqrt(2.0),0.0001);
-    }
+    else std::cout<<"In SaveDaveGrpTest test_exec() could not open the file"<<std::endl;
     AnalysisDataService::Instance().remove(WSName);
     if( Poco::File(outputFile).exists() )
       Poco::File(outputFile).remove();
@@ -145,7 +149,7 @@ public:
     TS_ASSERT_EQUALS(loader.isExecuted(), true);
 
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) );
-    std::string outputFile("testDaveGrp1.grp");
+    std::string outputFile("testSaveDaveGrp2.grp");
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) );
     outputFile = saver->getPropertyValue("Filename");//get absolute path
     TS_ASSERT_THROWS_NOTHING( saver->setProperty<bool>("ToMicroEV", true));
@@ -157,47 +161,53 @@ public:
     std::ifstream testin,testout;
     testin.open(inputFile.c_str());
     testout.open(outputFile.c_str());
-    int i;
-    std::string linein,lineout;
-    for (i=0;i<=4;i++)
+    if ((testin) && (testout))
     {
-      getline(testin,linein);
+      int i;
+      std::string linein,lineout;
+      for (i=0;i<=4;i++)
+      {
+        getline(testin,linein);
+        boost::to_upper(linein);
+
+        getline(testout,lineout);
+        boost::to_upper(lineout);
+        TS_ASSERT_EQUALS(linein.substr(0,12), lineout.substr(0,12) );//We have an extra "transfer" in "Q transfer", and "(ueV)" insted of "(micro eV)"
+      }
+      double din,dout;
+      for (i=0;i<60;i++)
+      {
+        testin>>din;
+        testout>>dout;
+        TS_ASSERT_DELTA(din,dout,1e-5);
+      }
+      getline(testin,linein); getline(testin,linein);
       boost::to_upper(linein);
 
-      getline(testout,lineout);
+      getline(testout,lineout); getline(testout,lineout);
       boost::to_upper(lineout);
-      TS_ASSERT_EQUALS(linein.substr(0,12), lineout.substr(0,12) );//We have an extra "transfer" in "Q transfer", and "(ueV)" insted of "(micro eV)"
-    }
-    double din,dout;
-    for (i=0;i<60;i++)
-    {
-      testin>>din;
-      testout>>dout;
+      lineout.insert(4,"TRANSFER ");
+      TS_ASSERT_EQUALS(linein.substr(0,20), lineout.substr(0,20) );
+      for (i=0;i<28;i++)
+      {
+        testin>>din;
+        testout>>dout;
       TS_ASSERT_DELTA(din,dout,1e-5);
+      }
+      getline(testin,linein); getline(testin,linein);
+      getline(testout,lineout); getline(testout,lineout);
+      TS_ASSERT_EQUALS(linein.substr(0,20), lineout.substr(0,20) );
+      for (i=0;i<60;i++)
+      {
+        testin>>din;
+        testout>>dout;
+        TS_ASSERT_DELTA(din,dout,1e-7);
+      }
     }
-    getline(testin,linein); getline(testin,linein);
-    boost::to_upper(linein);
-
-    getline(testout,lineout); getline(testout,lineout);
-    boost::to_upper(lineout);
-    lineout.insert(4,"TRANSFER ");
-    TS_ASSERT_EQUALS(linein.substr(0,20), lineout.substr(0,20) );
-    for (i=0;i<28;i++)
-    {
-      testin>>din;
-      testout>>dout;
-      TS_ASSERT_DELTA(din,dout,1e-5);
-    }
-    getline(testin,linein); getline(testin,linein);
-    getline(testout,lineout); getline(testout,lineout);
-    TS_ASSERT_EQUALS(linein.substr(0,20), lineout.substr(0,20) );
-    for (i=0;i<60;i++)
-    {
-      testin>>din;
-      testout>>dout;
-      TS_ASSERT_DELTA(din,dout,1e-7);
-    }
+    else std::cout<<"In SaveDaveGrpTest test_compare_to_original() could not open the file"<<std::endl;
     AnalysisDataService::Instance().remove(WSName);
+    if( Poco::File(outputFile).exists() )
+      Poco::File(outputFile).remove();
   }
 
   void test_exec_event()
@@ -216,7 +226,7 @@ public:
 
 
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", outws) );
-    std::string outputFile("testDaveGrp.grp");
+    std::string outputFile("testSaveDaveGrp3.grp");
     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) );
     outputFile = saver->getPropertyValue("Filename");//get absolute path
 
@@ -227,43 +237,45 @@ public:
     //check the content of the file
     std::ifstream testfile;
     testfile.open(outputFile.c_str());
-    std::string line;
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "# Number of Time-of-flight values" );
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "1" );//only one bin
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "# Number of Y values" );
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "51200" );
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "# Time-of-flight (microsecond) values");
-    double d;
-    testfile>>d;
-    TS_ASSERT_DELTA(d,52496.4,1);
-    getline(testfile,line);
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "# Y () values" );
-    for (int i=0;i<51200;i++)
+    if (testfile)
     {
+      std::string line;
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "# Number of Time-of-flight values" );
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "1" );//only one bin
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "# Number of Y values" );
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "51200" );
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "# Time-of-flight (microsecond) values");
+      double d;
       testfile>>d;
-      TS_ASSERT_DELTA(d,static_cast<double>(i),0.001);
+      TS_ASSERT_DELTA(d,52496.4,1);
+      getline(testfile,line);
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "# Y () values" );
+      for (int i=0;i<51200;i++)
+      {
+        testfile>>d;
+        TS_ASSERT_DELTA(d,static_cast<double>(i),0.001);
+      }
+      getline(testfile,line);
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "# Group 0" );
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "0 0" );
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "# Group 1" );
+      getline(testfile,line);
+      TS_ASSERT_EQUALS( line, "0 0" );
     }
-    getline(testfile,line);
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "# Group 0" );
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "0 0" );
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "# Group 1" );
-    getline(testfile,line);
-    TS_ASSERT_EQUALS( line, "0 0" );
-
+    else std::cout<<"In SaveDaveGrpTest test_event() could not open file"<<std::endl;
     AnalysisDataService::Instance().remove(outws);
     if( Poco::File(outputFile).exists() )
       Poco::File(outputFile).remove();
   }
-  
 
 private:
   IAlgorithm* saver;
@@ -277,7 +289,6 @@ private:
     return inputWS;
   }
 };
-
 
 #endif /* MANTID_DATAHANDLING_SAVEDAVEGRPTEST_H_ */
 
