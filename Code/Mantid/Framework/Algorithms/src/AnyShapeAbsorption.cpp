@@ -16,7 +16,7 @@ DECLARE_ALGORITHM(AnyShapeAbsorption)
 void AnyShapeAbsorption::initDocs()
 {
   this->setWikiSummary("Calculates an approximation of the attenuation due to absorption and single scattering in a generic sample shape. The sample shape can be defined by, e.g., the [[CreateSampleShape]] algorithm.  '''Note that if your sample is of cuboid or cylinder geometry, you will get a more accurate result from the [[FlatPlateAbsorption]] or [[CylinderAbsorption]] algorithms respectively.''' ");
-  this->setOptionalMessage("Calculates an approximation of the attenuation due to absorption and single scattering in a generic sample shape. The sample shape can be defined by, e.g., the CreateSampleShape algorithm.  'Note that if your sample is of cuboid or cylinder geometry, you will get a more accurate result from the FlatPlateAbsorption or CylinderAbsorption algorithms respectively.'");
+  this->setOptionalMessage("Calculates an approximation of the attenuation due to absorption and single scattering in a generic sample shape. The sample shape can be defined by, e.g., the CreateSampleShape algorithm.\nNote that if your sample is of cuboid or cylinder geometry, you will get a more accurate result from the FlatPlateAbsorption or CylinderAbsorption algorithms respectively.");
 }
 
 

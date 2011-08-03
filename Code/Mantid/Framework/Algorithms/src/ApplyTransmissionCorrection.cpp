@@ -91,8 +91,12 @@ void ApplyTransmissionCorrection::exec()
       det = inputWS->getDetector(i);
     } catch (Exception::NotFoundError&) {
       g_log.warning() << "Spectrum index " << i << " has no detector assigned to it - discarding" << std::endl;
-      continue;
+      // Catch if no detector. Next line tests whether this happened - test placed
+      // outside here because Mac Intel compiler doesn't like 'continue' in a catch
+      // in an openmp block.
     }
+    // If no detector found, skip onto the next spectrum
+    if( !det ) continue;
 
     // Copy over the X data
     corrWS->dataX(i) = inputWS->readX(i);
