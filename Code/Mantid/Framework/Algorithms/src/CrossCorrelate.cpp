@@ -90,7 +90,7 @@ void CrossCorrelate::exec()
    	const MantidVec& referenceX=inputWS->dataX(index_ref);
     MantidVec::const_iterator minIt=std::find_if(referenceX.begin(),referenceX.end(),std::bind2nd(std::greater<double>(),xmin));
    	if (minIt==referenceX.end())
-   		throw std::runtime_error("No data above XMin");
+   		throw std::runtime_error("No daWorkspaceIndexMaxta above XMin");
    	MantidVec::const_iterator maxIt=std::find_if(minIt,referenceX.end(),std::bind2nd(std::greater<double>(),xmax));
    	if (minIt==maxIt)
    		throw std::runtime_error("Range is not valid");
@@ -179,14 +179,15 @@ void CrossCorrelate::exec()
         PARALLEL_FOR2(inputWS, out)
         for (int i=0;i<nspecs;++i) // Now loop on all spectra
 	{
-                PARALLEL_START_INTERUPT_REGION
-		size_t spec_index=indexes[i]; // Get the spectrum index from the table
-		//Copy spectra info from input Workspace
-		out->getAxis(1)->spectraNo(i)=inputWS->getAxis(1)->spectraNo(spec_index);
-		out->dataX(i)=XX;
-		// Get temp references
-		const MantidVec&  iX=inputWS->dataX(spec_index);
-		const MantidVec&  iY=inputWS->dataY(spec_index);
+    PARALLEL_START_INTERUPT_REGION
+    size_t spec_index=indexes[i]; // Get the spectrum index from the table
+    //Copy spectra info from input Workspace
+    out->getSpectrum(spec_index)->copyInfoFrom( *inputWS->getSpectrum(spec_index) );
+    out->dataX(spec_index)=XX;
+
+    // Get temp references
+    const MantidVec&  iX=inputWS->dataX(spec_index);
+    const MantidVec&  iY=inputWS->dataY(spec_index);
 		const MantidVec&  iE=inputWS->dataE(spec_index);
 		// Copy Y,E data of spec(i) to temp vector
 		// Now rebin on the grid of reference spectrum
@@ -256,6 +257,7 @@ void CrossCorrelate::exec()
                 PARALLEL_END_INTERUPT_REGION
 	}
         PARALLEL_CHECK_INTERUPT_REGION
+        out->generateSpectraMap();
    	setProperty("OutputWorkspace",out);
    	return;
 }
