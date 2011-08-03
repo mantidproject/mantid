@@ -64,7 +64,7 @@ namespace MDEvents
 
     declareProperty(new PropertyWithValue<int>("Memory", -1),
         "For FileBackEnd only: the amount of memory (in MB) to allocate to the in-memory cache.\n"
-        "If not specified, a default of 50% of free physical memory is used.");
+        "If not specified, a default of 40% of free physical memory is used.");
 
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output), "Name of the output MDEventWorkspace.");
   }
@@ -120,23 +120,6 @@ namespace MDEvents
   {
     // Are we using the file back end?
     bool FileBackEnd = getProperty("FileBackEnd");
-
-    // How much memory for the cache?
-    uint64_t cacheMemory = 0;
-    if (FileBackEnd)
-    {
-      int mb = getProperty("Memory");
-      if (mb < 0)
-      {
-        Kernel::MemoryStats stats;
-        stats.update();
-        mb = int(stats.availMem() / (1024 * 2));
-      }
-      if (mb <= 0) mb = 0;
-      // Express the cache memory in units of number of events.
-      cacheMemory = (uint64_t(mb) * 1024 * 1024) / sizeof(MDE);
-      g_log.information() << "Setting a memory cache size of " << mb << " MB, or " << cacheMemory << " events." << std::endl;
-    }
 
     CPUTimer tim;
     bool verbose=true;
@@ -219,11 +202,39 @@ namespace MDEvents
     std::vector<IMDBox<MDE,nd> *> boxes(numBoxes, NULL);
     BoxController_sptr bc = ws->getBoxController();
 
-    // Find a minimum size to cache to disk.
-    // We say that no more than 30% of the overall cache memory should be used on tiny boxes.
-    uint64_t minDiskCacheSize = uint64_t(double(cacheMemory) * 0.3) / numBoxes;
-    g_log.information() << "Boxes with fewer than " << minDiskCacheSize << " events will not be cached to disk." << std::endl;
+    // ---------------------------------------- MEMORY FOR CACHE ------------------------------------
+    // How much memory for the cache?
+    uint64_t cacheMemory = 0;
+    uint64_t minDiskCacheSize = 0;
+    if (FileBackEnd)
+    {
+      int mb = getProperty("Memory");
+      if (mb < 0)
+      {
+        // Use 40% of available memory.
+        Kernel::MemoryStats stats;
+        stats.update();
+        mb = int(double(stats.availMem()) * 0.4 / 1024.0);
+      }
+      if (mb <= 0) mb = 0;
+      // Express the cache memory in units of number of events.
+      cacheMemory = (uint64_t(mb) * 1024 * 1024) / sizeof(MDE);
+      g_log.information() << "Setting a memory cache size of " << mb << " MB, or " << cacheMemory << " events." << std::endl;
 
+      // Find a minimum size to bother to cache to disk.
+      // We say that no more than 25% of the overall cache memory should be used on tiny boxes.
+      minDiskCacheSize = uint64_t(double(cacheMemory) * 0.25) / numBoxes;
+      g_log.information() << "Boxes with fewer than " << minDiskCacheSize << " events will not be cached to disk." << std::endl;
+
+      uint64_t writeBuffer = uint64_t(1000000 / sizeof(MDE));
+      g_log.information() << "Write buffer set to 1 MB (" << writeBuffer << " events)." << std::endl;
+
+      // Set these values in the diskMRU
+      bc->setCacheParameters(cacheMemory, writeBuffer, sizeof(MDE));
+    }
+
+
+    // ---------------------------------------- READ IN THE BOXES ------------------------------------
     prog->setNumSteps(numBoxes);
 
     // Get ready to read the slabs

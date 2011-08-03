@@ -82,9 +82,9 @@ namespace API
       // Pop the least-used object out the back
       it--;
       if (it == list.begin()) break;
-      ISaveable *toWrite = *it;
+      const ISaveable *toWrite = *it;
       // Can you save it to disk?
-      if (toWrite->safeToWrite())
+      if (!toWrite->dataBusy())
       {
         toWrite->save();
         m_memoryUsed -= toWrite->getMRUMemory();
@@ -136,7 +136,7 @@ namespace API
       while (m_memoryUsed > m_memoryAvail)
       {
         // Pop the least-used object out the back
-        ISaveable *toWrite = list.back();
+        const ISaveable *toWrite = list.back();
         list.pop_back();
 
         // And put it in the queue of stuff to write.
@@ -174,8 +174,8 @@ namespace API
 
     for (; it != it_end; it++)
     {
-      ISaveable * obj = *it; //->second;
-      if (obj->safeToWrite())
+      const ISaveable * obj = *it; //->second;
+      if (!obj->dataBusy())
       {
         // Write to the disk
         obj->save();
@@ -193,6 +193,32 @@ namespace API
     m_toWrite.swap(couldNotWrite);
     m_memoryToWrite = memoryNotWritten;
   }
+
+
+  //---------------------------------------------------------------------------------------------
+  /** Flush out all the data in the memory; and writes out everything in the to-write cache.
+   * Mostly used for debugging and unit tests */
+  void DiskMRU::flushCache()
+  {
+    // Pop everything from the cache
+    while (m_memoryUsed > 0)
+    {
+      // Pop the least-used object out the back
+      const ISaveable *toWrite = list.back();
+      list.pop_back();
+
+      // And put it in the queue of stuff to write.
+      m_toWrite.insert(toWrite);
+
+      // Track the memory change in the two buffers
+      size_t thisMem = toWrite->getMRUMemory();
+      m_memoryToWrite += thisMem;
+      m_memoryUsed -= thisMem;
+    }
+    // Now write everything out.
+    writeOldObjects();
+  }
+
 
 
 } // namespace Mantid

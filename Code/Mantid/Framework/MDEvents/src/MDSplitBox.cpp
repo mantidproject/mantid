@@ -53,7 +53,8 @@ namespace MDEvents
     initBoxes(box);
 
     // Add the events in the original box
-    this->addEvents(box->getEvents());
+    this->addEvents(box->getConstEvents());
+    box->releaseEvents();
   }
 
 

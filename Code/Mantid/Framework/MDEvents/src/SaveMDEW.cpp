@@ -179,7 +179,7 @@ namespace MDEvents
         MDBox<MDE,nd> * mdbox = dynamic_cast<MDBox<MDE,nd> *>(box);
         if (mdbox)
         {
-          const std::vector<MDE> & events = mdbox->getEvents();
+          const std::vector<MDE> & events = mdbox->getConstEvents();
           if (events.size() > 0)
           {
             mdbox->setFileIndex(uint64_t(start), uint64_t(events.size()));
@@ -191,6 +191,7 @@ namespace MDEvents
             // Move forward in the file.
             start += uint64_t(events.size());
           }
+          mdbox->releaseEvents();
         }
 
         // Move on to the next box

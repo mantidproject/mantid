@@ -16,8 +16,10 @@
 #include <map>
 #include <memory>
 #include <Poco/File.h>
+#include "MantidAPI/DiskMRU.h"
 
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace Mantid::MDEvents;
 using Mantid::Kernel::ConfigService;
 using Mantid::Geometry::MDDimensionExtents;
@@ -539,6 +541,13 @@ public:
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
+
+    // Handle the disk MRU values
+    bc->setCacheParameters(100000, 10000, sizeof(MDEvent<3>));
+    DiskMRU & mru = bc->getDiskMRU();
+    // It is empty now
+    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 0);
+
     MDBox<MDEvent<3>,3> c(bc, 0);
 
     // Open the NXS file
@@ -565,18 +574,27 @@ public:
     TS_ASSERT_DELTA( c.getErrorSquared(), 456.78, 1e-5);
 
     // This should actually load the events from the file
-    const std::vector<MDEvent<3> > & events = c.getEvents();
+    const std::vector<MDEvent<3> > & events = c.getConstEvents();
     // Try a couple of events to see if they are correct
     TS_ASSERT_DELTA( events[0].getErrorSquared(), 0.5, 1e-5);
     TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
     TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
+
+    // MRU has something now
+    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 1000);
+    // The box's data is busy
+    TS_ASSERT( c.dataBusy() );
+
+    // Done with the data.
+    c.releaseEvents();
+    TS_ASSERT( !c.dataBusy() );
 
     // This won't do anything because the value is cached
     c.refreshCache();
     TS_ASSERT_DELTA( c.getSignal(), 1234.5, 1e-5);
     TS_ASSERT_DELTA( c.getErrorSquared(), 456.78, 1e-5);
 
-    // OK, let's just keep it in memory
+    // OK, using this fake way, let's keep it in memory
     c.setOnDisk(false);
     // Now this actually does it
     c.refreshCache();
@@ -585,21 +603,79 @@ public:
     TS_ASSERT_DELTA( c.getSignal(), 499500.0, 1e-2);
     TS_ASSERT_DELTA( c.getErrorSquared(), 500000.0, 1e-2);
 
-    // Pretend we're letting go of the events. This should clear the list
+    // Flush out the cache
     c.setOnDisk(true);
-    c.releaseEvents();
-
-    c.setOnDisk(false);
-    TS_ASSERT_EQUALS( c.getNPoints(), 0);
+    // This should NOT call the write method since we had const access. Hard to test though!
+    mru.flushCache();
 
     file->close();
     if (Poco::File(filename).exists()) Poco::File(filename).remove();
   }
 
 
+  //-----------------------------------------------------------------------------------------
+  /** Set up the file back end and test accessing data
+   * in a non-const way, and writing it back out*/
+  void test_fileBackEnd_nonConst_access()
+  {
+    // Create a box with a controller for the back-end
+    BoxController_sptr bc(new BoxController(3));
+
+    // Handle the disk MRU values
+    bc->setCacheParameters(100000, 10000, sizeof(MDEvent<3>));
+    DiskMRU & mru = bc->getDiskMRU();
+    // It is empty now
+    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 0);
+
+    // A new empty box.
+    MDBox<MDEvent<3>,3> c(bc, 0);
+
+    // Open the NXS file
+    std::string filename = do_saveNexus(true /*signal=index*1.0*/);
+    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_RDWR);
+    file->openGroup("my_test_group", "NXdata");
+    MDEvent<3>::openNexusData(file);
+
+    // Set it in the controller for back-end
+    bc->setFile(file);
+    c.setFileIndex(500, 1000);
+    c.setOnDisk(true);
+
+    // The # of points (from the file, not in memory)
+    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
+
+    // Non-const access to the events.
+    std::vector<MDEvent<3> > & events = c.getEvents();
+    TS_ASSERT_EQUALS( events.size(), 1000);
+    TS_ASSERT_DELTA( events[123].getSignal(), 123.0, 1e-5);
+
+    // Modify the event
+    events[123].setSignal(456.0);
+
+    // Done with the events
+    c.releaseEvents();
+
+    // Flushing the cache will write out the events.
+    mru.flushCache();
+
+    // Now let's pretend we re-load that data into another box
+    MDBox<MDEvent<3>,3> c2(bc, 0);
+    c2.setFileIndex(500, 1000);
+    c2.setOnDisk(true);
+    // Is that event modified?
+    std::vector<MDEvent<3> > & events2 = c2.getEvents();
+    TS_ASSERT_EQUALS( events2.size(), 1000);
+    TS_ASSERT_DELTA( events2[123].getSignal(), 456.0, 1e-5);
+
+    file->close();
+//    if (Poco::File(filename).exists()) Poco::File(filename).remove();
+  }
+
+
 
   //-----------------------------------------------------------------------------------------
-  /** Set up the file back end and test accessing data */
+  /** Set up the file back end and test accessing data
+   * by binning and stuff */
   void do_test_fileBackEnd_binningOperations(bool parallel)
   {
     // Create a box with a controller for the back-end

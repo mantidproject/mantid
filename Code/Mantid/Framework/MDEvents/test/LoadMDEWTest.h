@@ -116,8 +116,8 @@ public:
       if (mdbox)
       {
         TS_ASSERT( mdbox1 );
-        std::vector<MDE > & events = mdbox->getEvents();
-        std::vector<MDE > & events1 = mdbox1->getEvents();
+        const std::vector<MDE > & events = mdbox->getConstEvents();
+        const std::vector<MDE > & events1 = mdbox1->getConstEvents();
         TS_ASSERT_EQUALS( events.size(), events1.size() );
         if (events.size() == events1.size() && events.size() > 2)
         {
@@ -132,6 +132,8 @@ public:
             TS_ASSERT_DELTA( events[i].getErrorSquared(), events1[i].getErrorSquared(), 1e-4);
           }
         }
+        mdbox->releaseEvents();
+        mdbox1->releaseEvents();
       }
     }
 

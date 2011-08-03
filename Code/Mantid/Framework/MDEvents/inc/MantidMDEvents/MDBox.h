@@ -60,8 +60,8 @@ namespace MDEvents
     virtual size_t getMRUMemory() const
     { return m_fileNumEvents; }
 
-    /// @return true if it is safe for the MRU to release the data from memory and write it out to disk; false if the data is still being used.
-    virtual bool safeToWrite() const
+    /// @return true if it the data of the object is busy and so cannot be cleared by the MRU; false if the data was released and can be cleared/written.
+    virtual bool dataBusy() const
     { return m_dataBusy; }
 
     /** @return the position in the file where the data will be stored. This is used to optimize file writing. */
@@ -115,7 +115,7 @@ namespace MDEvents
 
     std::vector< MDE > & getEvents();
 
-    const std::vector< MDE > & getEvents() const;
+    const std::vector<MDE> & getConstEvents() const;
 
     void releaseEvents() const;
 

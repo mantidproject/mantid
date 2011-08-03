@@ -138,20 +138,36 @@ namespace MDEvents
     mess << m_BoxController->getTotalNumMDGridBoxes() << " MDGridBoxes (" << mem << " kB)";
     out.push_back(mess.str()); mess.str("");
 
-    mess << "Avg recursion depth: " << m_BoxController->getAverageDepth();
-    out.push_back(mess.str()); mess.str("");
+//    mess << "Avg recursion depth: " << m_BoxController->getAverageDepth();
+//    out.push_back(mess.str()); mess.str("");
+//
+//    mess << "Recursion Coverage %: ";
+//    const std::vector<size_t> & num = m_BoxController->getNumMDBoxes();
+//    const std::vector<double> & max = m_BoxController->getMaxNumMDBoxes();
+//    for (size_t i=0; i<num.size(); i++)
+//    {
+//      if (i > 0) mess << ", ";
+//      double pct = (double(num[i]) / double(max[i] * 100));
+//      if (pct > 0 && pct < 1e-2) mess << std::scientific; else mess << std::fixed;
+//      mess << std::setprecision(2) << pct;
+//    }
+//    out.push_back(mess.str()); mess.str("");
 
-    mess << "Recursion Coverage %: ";
-    const std::vector<size_t> & num = m_BoxController->getNumMDBoxes();
-    const std::vector<double> & max = m_BoxController->getMaxNumMDBoxes();
-    for (size_t i=0; i<num.size(); i++)
+    if (m_BoxController->getFile())
     {
-      if (i > 0) mess << ", ";
-      double pct = (double(num[i]) / double(max[i] * 100));
-      if (pct > 0 && pct < 1e-2) mess << std::scientific; else mess << std::fixed;
-      mess << std::setprecision(2) << pct;
+      mess << "File backed: cache uses ";
+      double avail = double(m_BoxController->getDiskMRU().getMemoryAvail() * sizeof(MDE)) / (1024*1024);
+      double used = double(m_BoxController->getDiskMRU().getMemoryUsed() * sizeof(MDE)) / (1024*1024);
+      mess << std::setprecision(1) << std::fixed ;
+      mess << used << " of " << avail << " MB";
+      out.push_back(mess.str()); mess.str("");
     }
-    out.push_back(mess.str()); mess.str("");
+    else
+    {
+      mess << "Not file backed.";
+      out.push_back(mess.str()); mess.str("");
+    }
+
     return out;
   }
 
@@ -163,8 +179,20 @@ namespace MDEvents
 //    std::cout << "sizeof(MDE) " << sizeof(MDE) << std::endl;
 //    std::cout << "sizeof(MDBox<MDE,nd>) " << sizeof(MDBox<MDE,nd>) << std::endl;
 //    std::cout << "sizeof(MDGridBox<MDE,nd>) " << sizeof(MDGridBox<MDE,nd>) << std::endl;
-    // Add up the events and the MDBoxes contained.
-    size_t total = this->getNPoints() * sizeof(MDE);
+    size_t total = 0;
+    if (this->m_BoxController->getFile())
+    {
+      // File-backed workspace
+      // How much is in the cache?
+      total = this->m_BoxController->getDiskMRU().getMemoryUsed() * sizeof(MDE);
+      total += this->m_BoxController->getDiskMRU().getMemoryToWrite() * sizeof(MDE);
+    }
+    else
+    {
+      // All the events
+      total = this->getNPoints() * sizeof(MDE);
+    }
+    // The MDBoxes are always in memory
     total += this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE,nd>);
     total += this->m_BoxController->getTotalNumMDGridBoxes() * sizeof(MDGridBox<MDE,nd>);
     return total;

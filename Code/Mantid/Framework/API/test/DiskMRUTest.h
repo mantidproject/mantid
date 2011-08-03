@@ -26,7 +26,7 @@ class ISaveableTester : public ISaveable
 {
 public:
   ISaveableTester(size_t id) : ISaveable(id),
-  m_doSave(true), m_memory(1), m_safeToWrite(true)
+  m_doSave(true), m_memory(1), m_dataBusy(false)
   {}
 
   bool m_doSave;
@@ -47,8 +47,8 @@ public:
   size_t m_memory;
   virtual size_t getMRUMemory() const {return m_memory;};
 
-  bool m_safeToWrite;
-  virtual bool safeToWrite() const {return m_safeToWrite; }
+  bool m_dataBusy;
+  virtual bool dataBusy() const {return m_dataBusy; }
 
   // File position = same as its ID
   virtual uint64_t getFilePosition() const { return uint64_t(10-getId()); }
@@ -185,6 +185,19 @@ public:
 
 
   //--------------------------------------------------------------------------------
+  /** Getting and setting the cache sizes */
+  void test_set_and_get_methods()
+  {
+    DiskMRU mru(4, 3, true);
+    TS_ASSERT_EQUALS( mru.getMemoryAvail(), 4);
+    TS_ASSERT_EQUALS( mru.getWriteBufferSize(), 3);
+    mru.setMemoryAvail(15);
+    mru.setWriteBufferSize(11);
+    TS_ASSERT_EQUALS( mru.getMemoryAvail(), 15);
+    TS_ASSERT_EQUALS( mru.getWriteBufferSize(), 11);
+  }
+
+  //--------------------------------------------------------------------------------
   /** Basic operation of pushing */
   void test_basic_writeBuffer()
   {
@@ -219,7 +232,27 @@ public:
     TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
     // The "file" was written out this way (the right order):
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "2,1,0,");
+
   }
+
+  /// Empty out the cache with the flushCache() method
+  void test_flushCache()
+  {
+    DiskMRU mru(4, 3, true);
+    for (size_t i=0; i<6; i++)
+      mru.loading(data[i]);
+    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4); //We should have 2,3,4,5 in there now
+    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 2); // We should have 0,1 in there
+    // Nothing written out yet
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "");
+    mru.flushCache();
+    // Everything was written out at once (sorted by file index)
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "5,4,3,2,1,0,");
+    // Nothing left in cache
+    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
+  }
+
 
 
   //--------------------------------------------------------------------------------
@@ -248,7 +281,7 @@ public:
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,");
 
     // Avoid dropping off the next one
-    data[2]->m_safeToWrite = false;
+    data[2]->m_dataBusy = true;
     mru.loading(data[6]);
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,3,");
   }
@@ -261,14 +294,14 @@ public:
     DiskMRU mru(4, 0, false);
     for (size_t i=0; i<9; i++)
     {
-      data[i]->m_safeToWrite = false;
+      data[i]->m_dataBusy = true;
       mru.loading(data[i]);
     }
     // We ended up with too much in the buffer since nothing could be written.
     TS_ASSERT_EQUALS( mru.getMemoryUsed(), 9);
     // Let's make it all writable
     for (size_t i=0; i<9; i++)
-      data[i]->m_safeToWrite = true;
+      data[i]->m_dataBusy = false;
     // Trigger a write
     mru.loading(data[9]);
     TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
@@ -322,11 +355,11 @@ public:
 
   //--------------------------------------------------------------------------------
   /** Any ISaveable that says it can't be written remains in the cache */
-  void test_skipsUnsafeToWriteBlocks()
+  void test_skips_dataBusy_Blocks()
   {
     DiskMRU mru(4, 3, true);
     mru.loading(data[0]);
-    mru.loading(data[1]); data[1]->m_safeToWrite = false; // Won't get written out
+    mru.loading(data[1]); data[1]->m_dataBusy = true; // Won't get written out
     mru.loading(data[2]);
     // These 4 at the end will be in the cache
     for (size_t i=3; i<7; i++)
@@ -339,7 +372,7 @@ public:
 
     // But it'll get written out next time
     ISaveableTester::fakeFile = "";
-    data[1]->m_safeToWrite = true;
+    data[1]->m_dataBusy = false;
     mru.loading(data[7]);
     mru.loading(data[8]);
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "4,3,1,");
@@ -392,6 +425,8 @@ public:
   }
 
 
+  //--------------------------------------------------------------------------------
+  /** Accessing the map from multiple threads simultaneously does not segfault */
   void test_thread_safety()
   {
     // Room for 4 in the MRU, and 3 in the to-write cache
@@ -433,7 +468,7 @@ public:
       data[i]->m_doSave = false; // Items won't do any real saving
     }
     dataSeek.clear();
-    for (size_t i=0; i<1000; i++)
+    for (size_t i=0; i<100; i++)
       dataSeek.push_back( new ISaveableTesterWithSeek(i) );
   }
 
@@ -490,7 +525,7 @@ public:
       // Now pretend you're adding it to the MRU and might write out old stuff.
       mru.loading(dataSeek[i]);
     }
-    std::cout << tim << " to load " << dataSeek.size() << " into MRU with fake seeking. 0.95 sec = shortest possible time." << std::endl;
+    std::cout << tim << " to load " << dataSeek.size() << " into MRU with fake seeking. 0.095 sec = shortest possible time." << std::endl;
   }
 
   void test_withFakeSeeking_noWriteBuffer()
@@ -504,7 +539,7 @@ public:
       // Now pretend you're adding it to the MRU and might write out old stuff.
       mru.loading(dataSeek[i]);
     }
-    std::cout << tim << " to load " << dataSeek.size() << " into MRU with fake seeking. 0.95 sec = shortest possible time." << std::endl;
+    std::cout << tim << " to load " << dataSeek.size() << " into MRU with fake seeking. 0.095 sec = shortest possible time." << std::endl;
   }
 
 };

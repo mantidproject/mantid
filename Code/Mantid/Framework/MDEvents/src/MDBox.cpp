@@ -119,6 +119,7 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Returns a reference to the events vector contained within.
+   * VERY IMPORTANT: call MDBox::releaseEvents() when you are done accessing that data.
    */
   TMDE(
   std::vector< MDE > & MDBox)::getEvents()
@@ -133,16 +134,15 @@ namespace MDEvents
         if (file)
         {
           //fileMutex.lock();
-          data.clear();
           this->m_BoxController->fileMutex.lock();
           MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
           this->m_BoxController->fileMutex.unlock();
           //fileMutex.unlock();
         }
       }
-//      // After loading, or each time you request it:
-//      // Touch the MRU to say you just used it.
-//      this->m_BoxController->getDiskMRU().loading(this);
+      // After loading, or each time you request it:
+      // Touch the MRU to say you just used it.
+      this->m_BoxController->getDiskMRU().loading(this);
       // The data vector is busy - can't release the memory yet
       this->m_dataBusy = true;
       // This access to data was NOT const, so it might have changed.
@@ -153,10 +153,11 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
-  /** Returns a reference to the events vector contained within.
+  /** Returns a const reference to the events vector contained within.
+   * VERY IMPORTANT: call MDBox::releaseEvents() when you are done accessing that data.
    */
   TMDE(
-  const std::vector< MDE > & MDBox)::getEvents() const
+  const std::vector<MDE> & MDBox)::getConstEvents() const
   {
     if (m_onDisk)
     {
@@ -175,9 +176,9 @@ namespace MDEvents
           //fileMutex.unlock();
         }
       }
-//      // After loading, or each time you request it:
-//      // Touch the MRU to say you just used it.
-//      this->m_BoxController->getDiskMRU().loading(this);
+      // After loading, or each time you request it:
+      // Touch the MRU to say you just used it.
+      this->m_BoxController->getDiskMRU().loading(this);
       // The data vector is busy - can't release the memory yet
       this->m_dataBusy = true;
       // This access to data was const
@@ -199,8 +200,6 @@ namespace MDEvents
     {
       // Data vector is no longer busy.
       this->m_dataBusy = false;
-      // TODO: Remove when THE MRU does its thing
-      save();
     }
   }
 
@@ -216,6 +215,8 @@ namespace MDEvents
     // Only save to disk when the access was non-const.
     if (!m_dataConstAccess)
     {
+      if (data.size() != m_fileNumEvents)
+        throw std::runtime_error("MDBox does not (yet) support caching to disk when the number of events has changed!");
       this->saveNexus( this->m_BoxController->getFile() );
     }
     // Free up memory by clearing the events
@@ -406,7 +407,7 @@ namespace MDEvents
     }
 
     // If the box is cached to disk, you need to retrieve it
-    const std::vector<MDE> & events = this->getEvents();
+    const std::vector<MDE> & events = this->getConstEvents();
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
 
@@ -482,7 +483,7 @@ namespace MDEvents
   void MDBox)::integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const
   {
     // If the box is cached to disk, you need to retrieve it
-    const std::vector<MDE> & events = this->getEvents();
+    const std::vector<MDE> & events = this->getConstEvents();
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
 
@@ -515,7 +516,7 @@ namespace MDEvents
   void MDBox)::centroidSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const
   {
     // If the box is cached to disk, you need to retrieve it
-    const std::vector<MDE> & events = this->getEvents();
+    const std::vector<MDE> & events = this->getConstEvents();
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
 

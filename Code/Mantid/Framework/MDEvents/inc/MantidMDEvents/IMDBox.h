@@ -64,9 +64,9 @@ namespace MDEvents
     virtual size_t getMRUMemory() const
     { return 0; }
 
-    /// @return true if it is safe for the MRU to write out this data to disk; false if the data might get modified.
-    virtual bool safeToWrite() const
-    { return true; }
+    /// @return true if it the data of the object is busy and so cannot be cleared; false if the data was released and can be cleared/written.
+    virtual bool dataBusy() const
+    { return false; }
 
     /** @return the position in the file where the data will be stored. This is used to optimize file writing. */
     virtual uint64_t getFilePosition() const

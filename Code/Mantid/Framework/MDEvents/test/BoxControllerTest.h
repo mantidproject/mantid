@@ -1,14 +1,16 @@
 #ifndef BOXPLITCONTROLLER_TEST_H
 #define BOXPLITCONTROLLER_TEST_H
 
-#include <cxxtest/TestSuite.h>
-
+#include "MantidAPI/DiskMRU.h"
 #include "MantidMDEvents/BoxController.h"
-#include <memory>
+#include <cxxtest/TestSuite.h>
 #include <map>
+#include <memory>
 
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace Mantid::MDEvents;
+using Mantid::API::DiskMRU;
 
 class BoxControllerTest :    public CxxTest::TestSuite
 {
@@ -180,7 +182,19 @@ public:
     compareBoxControllers(a, b);
   }
 
+  void test_MRU_access()
+  {
+    BoxController a(2);
+    DiskMRU & mru = a.getDiskMRU();
+    // Set the cache parameters
 
+    // Can't have 0-sized events
+    TS_ASSERT_THROWS_ANYTHING( a.setCacheParameters(456, 123, 0) );
+    a.setCacheParameters(456, 123, 40);
+
+    TS_ASSERT_EQUALS( mru.getMemoryAvail(), 456);
+    TS_ASSERT_EQUALS( mru.getWriteBufferSize(), 123);
+  }
 
 
 };

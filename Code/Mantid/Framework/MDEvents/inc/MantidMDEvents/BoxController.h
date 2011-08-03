@@ -35,7 +35,7 @@ namespace MDEvents
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0), m_file(NULL)
+    :nd(nd), m_maxId(0), m_file(NULL), m_diskMRU()
     {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
@@ -334,7 +334,7 @@ namespace MDEvents
 
 
     //-----------------------------------------------------------------------------------
-    /** @return the open NeXus file handle */
+    /** @return the open NeXus file handle. NULL if not file-backed. */
     ::NeXus::File * getFile() const
     { return m_file; }
 
@@ -345,36 +345,31 @@ namespace MDEvents
 
     //-----------------------------------------------------------------------------------
     /** Return the disk MRU for disk caching */
-//    const Mantid::API::DiskMRU & getDiskMRU() const
-//    { return m_diskMRU; }
-//
-//    Mantid::API::DiskMRU & getDiskMRU()
-//    { return m_diskMRU; }
+    const Mantid::API::DiskMRU & getDiskMRU() const
+    { return m_diskMRU; }
+
+    Mantid::API::DiskMRU & getDiskMRU()
+    { return m_diskMRU; }
 
 
     //-----------------------------------------------------------------------------------
     /** Set the memory-caching parameters for a file-backed
      * MDEventWorkspace.
      *
-     * @param bytesInMem :: number of bytes to keep in memory.
+     * @param cacheSize :: number of EVENTS to keep in memory.
+     * @param writeBufferSize :: number of EVENTS to accumulate before performing a disk write.
      * @param bytesPerEvent :: sizeof(MDEvent) that is in the workspace
      *
      */
-    void setCacheParameters(size_t bytesInMem, size_t bytesPerEvent)
+    void setCacheParameters(size_t cacheSize, size_t writeBufferSize, size_t bytesPerEvent)
     {
       if (bytesPerEvent == 0)
         throw std::invalid_argument("Size of an event cannot be == 0.");
       // Save the values
+      m_diskMRU.setMemoryAvail(cacheSize);
+      m_diskMRU.setWriteBufferSize(writeBufferSize);
       m_bytesPerEvent = bytesPerEvent;
-      m_numEventsInMem = bytesInMem / m_bytesPerEvent;
     }
-
-//
-//    /** Does the cache require that this box be released? */
-//    bool releaseBox(size_t boxId, size_t numEvents)
-//    {
-//    }
-
 
     //-----------------------------------------------------------------------------------
   private:
@@ -449,22 +444,16 @@ namespace MDEvents
     /// Open file handle to the file back-end
     ::NeXus::File * m_file;
 
-//    /// Instance of the disk-caching MRU list.
-//    mutable Mantid::API::DiskMRU m_diskMRU;
+    /// Instance of the disk-caching MRU list.
+    mutable Mantid::API::DiskMRU m_diskMRU;
 
   public:
     /// Mutex for locking access to the file, for file-back-end MDBoxes.
     Mantid::Kernel::Mutex fileMutex;
 
   private:
-    /// Number of events to keep in memory, when using a file-based back-end.
-    size_t m_numEventsInMem;
-
     /// Number of bytes in a single MDEvent<> of the workspace.
     size_t m_bytesPerEvent;
-
-    /// Minimum number of events in a MDBox to bother to cache to disk.
-    size_t m_minEventsToCache;
 
   };
 

@@ -135,9 +135,10 @@ namespace MDEvents
     bc->getIdMutex().unlock();
 
     // Now distribute the events that were in the box before
-    this->addEvents(box->getEvents());
+    this->addEvents(box->getConstEvents());
     // Copy the cached numbers from the incoming box. This is quick - don't need to refresh cache
     this->nPoints = box->getNPoints();
+    box->releaseEvents();
   }
 
 

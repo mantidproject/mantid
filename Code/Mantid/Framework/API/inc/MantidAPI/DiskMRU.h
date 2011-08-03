@@ -1,6 +1,7 @@
 #ifndef MANTID_API_DISKMRU_H_
 #define MANTID_API_DISKMRU_H_
     
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ISaveable.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
@@ -61,7 +62,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport DiskMRU 
+  class MANTID_API_DLL DiskMRU
   {
   public:
     /** Typedef defines that we will keep the objects with these 2 orderings:
@@ -69,7 +70,7 @@ namespace API
      * 2. a hashed, unique index = the "id" number".
      */
     typedef boost::multi_index::multi_index_container<
-      ISaveable *,
+      const ISaveable *,
       boost::multi_index::indexed_by<
         boost::multi_index::sequenced<>,
         boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ISaveable, size_t, getId)>
@@ -77,7 +78,7 @@ namespace API
     > mru_list;
 
     /// Typedef for a par for the map. Key = position in the file; value = the ISaveable object
-    typedef std::pair<uint64_t, ISaveable*> pairObj_t;
+    typedef std::pair<uint64_t, const ISaveable*> pairObj_t;
 
 
     /** A map for the buffer of "toWrite" objects.
@@ -86,7 +87,7 @@ namespace API
      */
     //typedef std::multimap<uint64_t, ISaveable*> toWriteMap_t;
     typedef boost::multi_index::multi_index_container<
-      ISaveable *,
+      const ISaveable *,
       boost::multi_index::indexed_by<
         boost::multi_index::ordered_non_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ISaveable, uint64_t, getFilePosition)>,
         boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ISaveable, size_t, getId)>
@@ -107,13 +108,36 @@ namespace API
 
     void loadingWithWriteBuffer(const ISaveable * item);
 
-    ///@return the memory in the MRU
+    void flushCache();
+
+    //-------------------------------------------------------------------------------------------
+    ///@return the memory used in the MRU, in number of events
     size_t getMemoryUsed() const
     { return m_memoryUsed;  }
 
-    ///@return the memory in the "toWrite" buffer
+    ///@return the memory in the "toWrite" buffer, in number of events
     size_t getMemoryToWrite() const
     { return m_memoryToWrite;  }
+
+    //-------------------------------------------------------------------------------------------
+    /** Set the size of the to-write buffer, in number of events
+     * @param buffer :: number of events to accumulate before writing  */
+    void setWriteBufferSize(size_t buffer)
+    { m_writeBufferSize = buffer; }
+
+    /// @return the size of the to-write buffer, in number of events
+    size_t getWriteBufferSize() const
+    { return m_writeBufferSize; }
+
+    //-------------------------------------------------------------------------------------------
+    /** Set the size of the in-memory cache, in number of events
+     * @param buffer :: max number of events to keep in memory */
+    void setMemoryAvail(size_t buffer)
+    { m_memoryAvail = buffer; }
+
+    /// @return the size of the in-memory cache, in number of events
+    size_t getMemoryAvail() const
+    { return m_memoryAvail; }
 
 
   protected:

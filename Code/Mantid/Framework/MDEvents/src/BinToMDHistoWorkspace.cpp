@@ -174,7 +174,7 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   inline void BinToMDHistoWorkspace::binMDBox(MDBox<MDE, nd> * box, coord_t * chunkMin, coord_t * chunkMax)
   {
-    const std::vector<MDE> & events = box->getEvents();
+    const std::vector<MDE> & events = box->getConstEvents();
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
     for (; it != it_end; it++)
