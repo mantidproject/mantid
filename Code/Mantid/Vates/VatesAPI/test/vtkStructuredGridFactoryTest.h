@@ -286,19 +286,27 @@ public:
 class vtkStructuredGridFactoryTestPerformance : public CxxTest::TestSuite
 {
 public:
+  MockIMDWorkspace* pMockWs;
 
-  void testGenerateVTKDataSet()
+  void setUp()
   {
     using namespace Mantid::VATES;
     using namespace Mantid::Geometry;
     using namespace testing;
 
     //20 by 20 by 20 by 20 workspace.
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getXDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("x", 20))));
-    EXPECT_CALL(*pMockWs, getYDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("y", 20))));
-    EXPECT_CALL(*pMockWs, getZDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("z", 20))));
-    EXPECT_CALL(*pMockWs, getTDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("t", 20))));
+    pMockWs = new MockIMDWorkspace;
+    EXPECT_CALL(*pMockWs, getXDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("x", 100))));
+    EXPECT_CALL(*pMockWs, getYDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("y", 100))));
+    EXPECT_CALL(*pMockWs, getZDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("z", 100))));
+    EXPECT_CALL(*pMockWs, getTDimension()).WillRepeatedly(Return(IMDDimension_const_sptr(new FakeIMDDimension("t", 100))));
+  }
+
+  void testGenerateVTKDataSet()
+  {
+    using namespace Mantid::VATES;
+    using namespace Mantid::Geometry;
+    using namespace testing;
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
