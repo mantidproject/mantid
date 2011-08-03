@@ -467,7 +467,8 @@ namespace MDEvents
 
     // Run in OpenMP with dynamic scheduling and a smallish chunk size (binsPerTask)
     // Right now, not parallel for file-backed systems.
-    PRAGMA_OMP(parallel for schedule(dynamic, binsPerTask) if (ws->getBoxController()->getFile() == NULL) )
+    bool fileBacked = (ws->getBoxController()->getFile() == NULL);
+    PRAGMA_OMP(parallel for schedule(dynamic, binsPerTask) if (!fileBacked)  )
     for (int i=0; i < numPoints; i++)
     {
       PARALLEL_START_INTERUPT_REGION
