@@ -15,7 +15,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         return "CalibrateRectangularDetectors"
 
     def PyInit(self):
-        instruments = ["PG3", "VULCAN", "SNAP", "NOM"]
+        instruments = ["PG3", "VULCAN", "SNAP", "NOM", "TOPAZ"]
         self.declareProperty("Instrument", "PG3",
                              Validator=ListValidator(instruments))
         #types = ["Event preNeXus", "Event NeXus"]
@@ -41,7 +41,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self.declareProperty("CrossCorrelationPoints", 100,
                              Description="Number of points to find peak from cross correlation.  Default is 100")
         self.declareListProperty("Binning", [0.,0.,0.],
-                             Description="Min, Step, and Max of d-space bins.  Linear binning is better for finding offsets.")
+                             Description="Min, Step, and Max of d-space bins.  Logarithmic binning is used if Step is negative.")
         self.declareProperty("DiffractionFocus", False, Description="Diffraction focus by detectors.  Default is False")
         grouping = ["All", "Group", "Column", "bank"]
         self.declareProperty("GroupDetectorsBy", "All", Validator=ListValidator(grouping),
@@ -177,7 +177,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if self._xpixelbin*self._ypixelbin>1:
                 SumNeighbours(InputWorkspace=temp, OutputWorkspace=temp, SumX=self._xpixelbin, SumY=self._ypixelbin)
         # Bin events in d-Spacing
-        Rebin(InputWorkspace=temp, OutputWorkspace=temp,Params=str(self._peakmin)+","+str(self._binning[1])+","+str(self._peakmax))
+        Rebin(InputWorkspace=temp, OutputWorkspace=temp,Params=str(self._peakmin)+","+str(abs(self._binning[1]))+","+str(self._peakmax))
         #Find good peak for reference
         ymax = 0
         for s in range(0,temp.getNumberHistograms()):
@@ -198,11 +198,11 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         CrossCorrelate(InputWorkspace=temp, OutputWorkspace=str(wksp)+"cc", ReferenceSpectra=refpixel,
             WorkspaceIndexMin=0, WorkspaceIndexMax=self._lastpixel, XMin=self._peakmin, XMax=self._peakmax)
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
-        GetDetectorOffsets(InputWorkspace=str(wksp)+"cc", OutputWorkspace=str(wksp)+"offset", Step=self._binning[1],
+        GetDetectorOffsets(InputWorkspace=str(wksp)+"cc", OutputWorkspace=str(wksp)+"offset", Step=abs(self._binning[1]),
             DReference=self._peakpos, XMin=-self._ccnumber, XMax=self._ccnumber)
         mtd.deleteWorkspace(str(wksp)+"cc")
         mtd.releaseFreeMemory()
-        Rebin(InputWorkspace=temp, OutputWorkspace=temp,Params=str(self._peakmin2)+","+str(self._binning[1])+","+str(self._peakmax2))
+        Rebin(InputWorkspace=temp, OutputWorkspace=temp,Params=str(self._peakmin2)+","+str(abs(self._binning[1]))+","+str(self._peakmax2))
         if self._peakpos2 > 0.0:
             #Find good peak for reference
             ymax = 0
@@ -216,7 +216,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             CrossCorrelate(InputWorkspace=temp, OutputWorkspace=str(wksp)+"cc2", ReferenceSpectra=refpixel,
                 WorkspaceIndexMin=self._lastpixel+1, WorkspaceIndexMax=temp.getNumberHistograms()-1, XMin=self._peakmin2, XMax=self._peakmax2)
             # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
-            GetDetectorOffsets(InputWorkspace=str(wksp)+"cc2", OutputWorkspace=str(wksp)+"offset2", Step=self._binning[1],
+            GetDetectorOffsets(InputWorkspace=str(wksp)+"cc2", OutputWorkspace=str(wksp)+"offset2", Step=abs(self._binning[1]),
                 DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber)
             Plus(LHSWorkspace=str(wksp)+"offset", RHSWorkspace=str(wksp)+"offset2",OutputWorkspace=str(wksp)+"offset")
             mtd.deleteWorkspace(str(wksp)+"cc2")
