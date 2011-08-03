@@ -130,15 +130,15 @@ void Projection3D::drawSurface(MantidGLWidget*,bool picking)const
   m_instrActor->draw(picking);
   OpenGLError::check("GL3DWidget::draw3D()[scene draw] ");
 
-  //This draws a point at the origin, I guess
-  glPointSize(3.0);
-  glBegin(GL_POINTS);
-  glVertex3d(0.0,0.0,0.0);
-  glEnd();
-
   //Also some axes
-  if (m_drawAxes)
+  if (m_drawAxes && !picking)
   {
+    //This draws a point at the origin, I guess
+    glPointSize(3.0);
+    glBegin(GL_POINTS);
+    glVertex3d(0.0,0.0,0.0);
+    glEnd();
+
     drawAxes();
   }
 
