@@ -182,8 +182,8 @@ void CrossCorrelate::exec()
     PARALLEL_START_INTERUPT_REGION
     size_t spec_index=indexes[i]; // Get the spectrum index from the table
     //Copy spectra info from input Workspace
-    out->getSpectrum(spec_index)->copyInfoFrom( *inputWS->getSpectrum(spec_index) );
-    out->dataX(spec_index)=XX;
+    out->getSpectrum(i)->copyInfoFrom( *inputWS->getSpectrum(spec_index) );
+    out->dataX(i)=XX;
 
     // Get temp references
     const MantidVec&  iX=inputWS->dataX(spec_index);
