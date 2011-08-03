@@ -78,7 +78,8 @@ public:
     //check the content of the file
     std::ifstream testfile;
     testfile.open(outputFile.c_str());
-    if (testfile)
+    TS_ASSERT( testfile.is_open() );
+    if (testfile.is_open())
     {
       std::string line;
       getline(testfile,line);
@@ -122,8 +123,8 @@ public:
         TS_ASSERT_EQUALS(d1,2);
         TS_ASSERT_DELTA(d2,std::sqrt(2.0),0.0001);
       }
+      testfile.close();
     }
-    else std::cout<<"In SaveDaveGrpTest test_exec() could not open the file"<<std::endl;
     AnalysisDataService::Instance().remove(WSName);
     if( Poco::File(outputFile).exists() )
       Poco::File(outputFile).remove();
@@ -161,7 +162,9 @@ public:
     std::ifstream testin,testout;
     testin.open(inputFile.c_str());
     testout.open(outputFile.c_str());
-    if ((testin) && (testout))
+    TS_ASSERT( testin.is_open() );
+    TS_ASSERT( testout.is_open() );
+    if (testin.is_open() && testout.is_open())
     {
       int i;
       std::string linein,lineout;
@@ -203,8 +206,9 @@ public:
         testout>>dout;
         TS_ASSERT_DELTA(din,dout,1e-7);
       }
+      testin.close();
+      testout.close();
     }
-    else std::cout<<"In SaveDaveGrpTest test_compare_to_original() could not open the file"<<std::endl;
     AnalysisDataService::Instance().remove(WSName);
     if( Poco::File(outputFile).exists() )
       Poco::File(outputFile).remove();
@@ -237,7 +241,8 @@ public:
     //check the content of the file
     std::ifstream testfile;
     testfile.open(outputFile.c_str());
-    if (testfile)
+    TS_ASSERT( testfile.is_open() );
+    if (testfile.is_open())
     {
       std::string line;
       getline(testfile,line);
@@ -270,8 +275,8 @@ public:
       TS_ASSERT_EQUALS( line, "# Group 1" );
       getline(testfile,line);
       TS_ASSERT_EQUALS( line, "0 0" );
+      testfile.close();
     }
-    else std::cout<<"In SaveDaveGrpTest test_event() could not open file"<<std::endl;
     AnalysisDataService::Instance().remove(outws);
     if( Poco::File(outputFile).exists() )
       Poco::File(outputFile).remove();
