@@ -290,7 +290,7 @@ namespace MDEvents
         else if (box_type == 2)
         {
           // --- Make a MDGridBox -----
-          ibox = new MDGridBox<MDE,nd>(bc, extentsVector);
+          ibox = new MDGridBox<MDE,nd>(bc, depth[i], extentsVector);
         }
         else
           continue;

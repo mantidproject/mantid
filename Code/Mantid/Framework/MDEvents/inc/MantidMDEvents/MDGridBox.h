@@ -40,7 +40,7 @@ namespace MDEvents
   public:
     MDGridBox();
 
-    MDGridBox(BoxController_sptr bc, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
+    MDGridBox(BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
 
     MDGridBox(MDBox<MDE, nd> * box);
 

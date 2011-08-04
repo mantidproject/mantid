@@ -82,6 +82,7 @@ public:
       IMDBox<MDE,nd>* box1 = boxes1[j];
 
       TS_ASSERT_EQUALS( box->getId(), box1->getId() );
+      TS_ASSERT_EQUALS( box->getDepth(), box1->getDepth() );
       TS_ASSERT_EQUALS( box->getNumChildren(), box1->getNumChildren() );
       for (size_t i=0; i<box->getNumChildren(); i++)
       {

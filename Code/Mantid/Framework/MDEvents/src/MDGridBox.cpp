@@ -44,10 +44,11 @@ namespace MDEvents
    * @param bc :: BoxController
    * @param extentsVector :: size of the box
    */
-  TMDE(MDGridBox)::MDGridBox(BoxController_sptr bc, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
+  TMDE(MDGridBox)::MDGridBox(BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
    : IMDBox<MDE, nd>(extentsVector),
      numBoxes(0), nPoints(0)
   {
+    this->m_depth = depth;
     if (!bc)
       throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
     this->m_BoxController = bc;
