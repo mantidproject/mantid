@@ -96,7 +96,7 @@ public:
 
   virtual void configureWeakly();
 
-  virtual std::string getDimensionId() const;
+  virtual std::string getVisDimensionName() const;
 
   virtual unsigned int getNBins() const;
 

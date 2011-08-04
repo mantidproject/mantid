@@ -101,7 +101,7 @@ static std::string constructXML(std::string nbinsA, std::string nbinsB, std::str
     MOCK_METHOD1(showAsNotIntegrated, void(VecIMDDimension_sptr));
     MOCK_METHOD0(showAsIntegrated, void());
     MOCK_METHOD1(accept, void(DimensionPresenter*));
-    MOCK_CONST_METHOD0(getDimensionId, std::string());
+    MOCK_CONST_METHOD0(getVisDimensionName, std::string());
     MOCK_CONST_METHOD0(getMinimum, double());
     MOCK_CONST_METHOD0(getMaximum, double());
     MOCK_CONST_METHOD0(getNBins, unsigned int());
@@ -197,41 +197,10 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
   }
 
-  void testGetLabels()
-  {
-    NiceMock<MockDimensionView> dView;
-    
-    NiceMock<MockDimensionViewFactory> factory;
-    EXPECT_CALL(factory, create()).WillRepeatedly(Return(&dView));
-    
-    NiceMock<MockGeometryView> gView;
-    EXPECT_CALL(gView, getDimensionViewFactory()).WillRepeatedly(ReturnRef(factory));
-
-    MDGeometryXMLParser parser(constructXML());
-    parser.execute();
-
-    ExposedSynchronisingGeometryPresenter presenter(parser); 
-    presenter.acceptView(&gView);
-
-    DimPresenter_sptr xPresenter = presenter.getDimensionPresenter(0);
-    DimPresenter_sptr yPresenter = presenter.getDimensionPresenter(1);
-    DimPresenter_sptr zPresenter = presenter.getDimensionPresenter(2);
-    DimPresenter_sptr tPresenter = presenter.getDimensionPresenter(3);
-
-    TSM_ASSERT_EQUALS("Fetched label is not correct.", "T Axis" ,presenter.getLabel(xPresenter.get())); 
-    TSM_ASSERT_EQUALS("Fetched label is not correct.", "X Axis" ,presenter.getLabel(yPresenter.get())); 
-    TSM_ASSERT_EQUALS("Fetched label is not correct.", "Y Axis" ,presenter.getLabel(zPresenter.get())); 
-    TSM_ASSERT_EQUALS("Fetched label is not correct.", "Z Axis" ,presenter.getLabel(tPresenter.get())); 
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&gView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&dView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
-  }
-
   void testDimensionRealign()
   {
     NiceMock<MockDimensionView> dView;
-    EXPECT_CALL(dView, getDimensionId()).WillRepeatedly(Return("qx"));
+    EXPECT_CALL(dView, getVisDimensionName()).WillRepeatedly(Return("T_DIMENSION"));
     
     NiceMock<MockDimensionViewFactory> factory;
     EXPECT_CALL(factory, create()).WillRepeatedly(Return(&dView));
@@ -245,16 +214,17 @@ public:
     ExposedSynchronisingGeometryPresenter presenter(parser); 
     presenter.acceptView(&gView);
 
-    DimPresenter_sptr presenterA = presenter.getDimensionPresenter(0);
-    DimPresenter_sptr presenterB = presenter.getDimensionPresenter(1);
+    //find out what presenter X_DIMENSION maps to.
+    DimPresenter_sptr presenterA = presenter.getMappings().at(presenter.X_AXIS);
+    DimPresenter_sptr presenterB = presenter.getMappings().at(presenter.T_AXIS); 
 
-    TS_ASSERT_EQUALS("en" , presenterA->getModel()->getDimensionId()); 
-    TS_ASSERT_EQUALS("qx" , presenterB->getModel()->getDimensionId()); 
+    TSM_ASSERT_EQUALS("Swapping has not occured as expected.", presenter.X_AXIS, presenterA->getMapping());
+    TSM_ASSERT_EQUALS("Swapping has not occured as expected.", presenter.T_AXIS, presenterB->getMapping());
 
     presenter.dimensionRealigned(presenterA.get()); //Now swap these two dimensions
 
-    TS_ASSERT_EQUALS("qx" , presenterA->getModel()->getDimensionId());  
-    TS_ASSERT_EQUALS("en" , presenterB->getModel()->getDimensionId()); 
+    TSM_ASSERT_EQUALS("Swapping has not occured as expected.", presenter.T_AXIS, presenterA->getMapping());
+    TSM_ASSERT_EQUALS("Swapping has not occured as expected.", presenter.X_AXIS, presenterB->getMapping());
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&gView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&dView));

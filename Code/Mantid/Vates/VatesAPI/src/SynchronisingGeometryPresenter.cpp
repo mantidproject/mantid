@@ -4,6 +4,11 @@
 #include "MantidVatesAPI/DimensionView.h"
 #include "MantidVatesAPI/GeometryView.h"
 #include <algorithm>
+
+
+using Mantid::Geometry::IMDDimension_sptr;
+typedef Mantid::VATES::GeometryPresenter::MappingType MappingType;
+
 namespace Mantid
 {
   namespace VATES
@@ -22,12 +27,12 @@ namespace Mantid
     };
 
     /// Comparitor to find IMDDimension shared pointers via a dimension id.
-    struct FindModelId : public std::unary_function <Mantid::Geometry::IMDDimension_sptr, bool>
+    struct FindModelId : public std::unary_function <IMDDimension_sptr, bool>
     {
       const std::string m_id;
       FindModelId(const std::string id) : m_id(id){ }
 
-      bool operator ()(const Mantid::Geometry::IMDDimension_sptr obj) const
+      bool operator ()(const IMDDimension_sptr obj) const
       {
         return m_id == obj->getDimensionId();
       }
@@ -40,7 +45,11 @@ namespace Mantid
     SynchronisingGeometryPresenter::SynchronisingGeometryPresenter(Mantid::Geometry::MDGeometryXMLParser& source) : 
       m_notIntegrated(source.getNonIntegratedDimensions()), 
       m_integrated(source.getIntegratedDimensions()),
-      m_source(source)
+      m_source(source),
+      X_AXIS("X-AXIS"),
+      Y_AXIS("Y-AXIS"),
+      Z_AXIS("Z-AXIS"),
+      T_AXIS("T-AXIS")
     {
 
     }
@@ -52,17 +61,36 @@ namespace Mantid
     {
     }
 
+    void SynchronisingGeometryPresenter::swap(const MappingType::key_type& keyA, const MappingType::key_type& keyB)
+    {
+      DimPresenter_sptr temp = m_mapping[keyA];
+      
+      //Swap items in mapping list.
+      m_mapping[keyA] = m_mapping[keyB];
+      m_mapping[keyB] = temp;
+
+      //Set mapping name of presenter and then force view to update.
+      if(NULL != m_mapping[keyA])
+      {
+        m_mapping[keyA]->setMapping(keyA);
+        m_mapping[keyA]->acceptModelWeakly(m_mapping[keyA]->getModel());
+      }
+      //Set mapping name of presenter and then force view to update.
+      if(NULL != m_mapping[keyB])
+      {
+        m_mapping[keyB]->setMapping(keyB);
+        m_mapping[keyB]->acceptModelWeakly(m_mapping[keyB]->getModel());
+      }
+    }
+
     /**
     Handles dimension realignment. When a dimension presenter is handling a realignment, its is necessary for this to be synchronsied with other non-integrated dimensions.
     @parameter pDimensionPresenter : dimension presenter on which realignement has been requested.
     */
     void SynchronisingGeometryPresenter::dimensionRealigned(DimensionPresenter* pDimensionPresenter)
     {
-      VecDimPresenter_sptr::iterator pos = find_if (m_dimPresenters.begin(), m_dimPresenters.end(), FindId( pDimensionPresenter->getDimensionId()));
-      Mantid::Geometry::IMDDimension_sptr temp = (*pos)->getModel();
-      (*pos)->acceptModelWeakly(pDimensionPresenter->getModel());
-      pDimensionPresenter->acceptModelWeakly(temp);
-      //Pass on via-view that clipping boxes should be disregarded.
+      swap(pDimensionPresenter->getMapping(), pDimensionPresenter->getVisDimensionName());
+
       m_view->raiseNoClipping();
     }
 
@@ -74,21 +102,18 @@ namespace Mantid
       DimPresenter_sptr temp;
       if(hasYDim() && !hasXDim())
       {   
-        temp = m_yDim;
-        eraseMappedPresenter(m_yDim);
-        m_xDim = temp;
+        swap(X_AXIS, Y_AXIS);
+        eraseMappedPresenter(m_mapping[Y_AXIS]);
       }
       if(hasZDim() && !hasYDim())
       {
-        temp = m_zDim;
-        eraseMappedPresenter(m_zDim);
-        m_yDim = temp;
+        swap(Y_AXIS, Z_AXIS);
+        eraseMappedPresenter(m_mapping[Z_AXIS]);
       }
       if(hasTDim() && !hasZDim())
       {
-        temp = m_tDim;
-        eraseMappedPresenter(m_tDim);
-        m_zDim = temp;
+        swap(T_AXIS, Z_AXIS);
+        eraseMappedPresenter(m_mapping[T_AXIS]);
       }
     }
 
@@ -98,23 +123,9 @@ namespace Mantid
     */
     void SynchronisingGeometryPresenter::eraseMappedPresenter(DimPresenter_sptr expiredMappedDimension)
     {
-      DimensionPresenter* pNull = NULL;
-      DimPresenter_sptr nullDim(pNull);
-      if(isXDimensionPresenter(expiredMappedDimension.get()))
+      if(NULL != expiredMappedDimension)
       {
-        m_xDim = nullDim;
-      }
-      else if(isYDimensionPresenter(expiredMappedDimension.get()))
-      {
-        m_yDim = nullDim;
-      }
-      else if(isZDimensionPresenter(expiredMappedDimension.get()))
-      {
-        m_zDim = nullDim;
-      }
-      else if(isTDimensionPresenter(expiredMappedDimension.get()))
-      {
-        m_tDim = nullDim;
+        m_mapping.erase(expiredMappedDimension->getMapping());
       }
     }
 
@@ -124,21 +135,25 @@ namespace Mantid
     */
     void SynchronisingGeometryPresenter::insertMappedPresenter(DimPresenter_sptr candidateMappedDimension)
     {
-      if(!hasXDim())
+      if(!this->hasXDim())
       {
-        m_xDim = candidateMappedDimension;
+        m_mapping.insert(std::make_pair(X_AXIS, candidateMappedDimension));
+        candidateMappedDimension->setMapping(X_AXIS);
       }
-      else if(!hasYDim())
+      else if(!this->hasYDim())
       {
-        m_yDim = candidateMappedDimension;
+        m_mapping.insert(std::make_pair(Y_AXIS, candidateMappedDimension));
+        candidateMappedDimension->setMapping(Y_AXIS);
       }
       else if(!hasZDim())
       {
-        m_zDim = candidateMappedDimension;
+        m_mapping.insert(std::make_pair(Z_AXIS, candidateMappedDimension));
+        candidateMappedDimension->setMapping(Z_AXIS);
       }
       else if(!hasTDim())
       {
-        m_tDim = candidateMappedDimension;
+        m_mapping.insert(std::make_pair(T_AXIS, candidateMappedDimension));
+        candidateMappedDimension->setMapping(T_AXIS);
       }
     }
 
@@ -148,13 +163,13 @@ namespace Mantid
     */
     void SynchronisingGeometryPresenter::dimensionExpanded(DimensionPresenter* pDimensionPresenter)
     {
-      Mantid::Geometry::VecIMDDimension_sptr::iterator it = std::find_if(m_notIntegrated.begin(), m_notIntegrated.end(), FindModelId(pDimensionPresenter->getDimensionId()));
+      Mantid::Geometry::VecIMDDimension_sptr::iterator it = std::find_if(m_notIntegrated.begin(), m_notIntegrated.end(), FindModelId(pDimensionPresenter->getModel()->getDimensionId()));
       if(it == m_notIntegrated.end())
       {
         //TODO: Need to prevent m_nonIntegrated exceeding the number of mapped dimensions! Simple check here.
         m_notIntegrated.push_back(pDimensionPresenter->getAppliedModel()); 
-        m_integrated.erase(std::remove_if(m_integrated.begin(), m_integrated.end(), FindModelId(pDimensionPresenter->getDimensionId())), m_integrated.end());
-        VecDimPresenter_sptr::iterator location = std::find_if(m_dimPresenters.begin(), m_dimPresenters.end(), FindId(pDimensionPresenter->getDimensionId()));
+        m_integrated.erase(std::remove_if(m_integrated.begin(), m_integrated.end(), FindModelId(pDimensionPresenter->getModel()->getDimensionId())), m_integrated.end());
+        VecDimPresenter_sptr::iterator location = std::find_if(m_dimPresenters.begin(), m_dimPresenters.end(), FindId(pDimensionPresenter->getModel()->getDimensionId()));
         insertMappedPresenter((*location));
         shuffleMappedPresenters();
       }
@@ -172,13 +187,13 @@ namespace Mantid
         throw std::invalid_argument("Cannot have all dimensions integrated!");
       }
 
-      Mantid::Geometry::VecIMDDimension_sptr::iterator it = std::find_if(m_integrated.begin(), m_integrated.end(), FindModelId(pDimensionPresenter->getDimensionId()));
+      Mantid::Geometry::VecIMDDimension_sptr::iterator it = std::find_if(m_integrated.begin(), m_integrated.end(), FindModelId(pDimensionPresenter->getModel()->getDimensionId()));
       if(it == m_integrated.end())
       {
         m_integrated.push_back(pDimensionPresenter->getAppliedModel());
-        m_notIntegrated.erase(std::remove_if(m_notIntegrated.begin(), m_notIntegrated.end(), FindModelId(pDimensionPresenter->getDimensionId())), m_notIntegrated.end());
+        m_notIntegrated.erase(std::remove_if(m_notIntegrated.begin(), m_notIntegrated.end(), FindModelId(pDimensionPresenter->getModel()->getDimensionId())), m_notIntegrated.end());
 
-        VecDimPresenter_sptr::iterator location = std::find_if(m_dimPresenters.begin(), m_dimPresenters.end(), FindId(pDimensionPresenter->getDimensionId()));
+        VecDimPresenter_sptr::iterator location = std::find_if(m_dimPresenters.begin(), m_dimPresenters.end(), FindId(pDimensionPresenter->getModel()->getDimensionId()));
 
         eraseMappedPresenter((*location));
         shuffleMappedPresenters();
@@ -239,19 +254,19 @@ namespace Mantid
 
       if(hasXDim())
       {
-        xmlBuilder.addXDimension(m_xDim->getAppliedModel());
+        xmlBuilder.addXDimension(m_mapping.at(X_AXIS)->getAppliedModel());
       }
       if(hasYDim())
       {
-        xmlBuilder.addYDimension(m_yDim->getAppliedModel());
+        xmlBuilder.addYDimension(m_mapping.at(Y_AXIS)->getAppliedModel());
       }
       if(hasZDim())
       {
-        xmlBuilder.addZDimension(m_zDim->getAppliedModel());
+        xmlBuilder.addZDimension(m_mapping.at(Z_AXIS)->getAppliedModel());
       }
       if(hasTDim())
       {
-        xmlBuilder.addTDimension(m_tDim->getAppliedModel());
+        xmlBuilder.addTDimension(m_mapping.at(T_AXIS)->getAppliedModel());
       }
       return xmlBuilder.create().c_str();
     }
@@ -271,6 +286,7 @@ namespace Mantid
       m_view = view;
       const DimensionViewFactory& factory = m_view->getDimensionViewFactory();
       Mantid::Geometry::VecIMDDimension_sptr vecAllDimensions = m_source.getAllDimensions();
+
       for(size_t i =0; i < vecAllDimensions.size(); i++)
       {
         DimensionView* dimView = factory.create();
@@ -280,26 +296,37 @@ namespace Mantid
 
         if(m_source.isXDimension(model))
         {
-          m_xDim = dimPresenter;
+          dimPresenter->setMapping(X_AXIS);
+          m_mapping.insert(std::make_pair(X_AXIS, dimPresenter));
         }
         else if(m_source.isYDimension(model))
         {
-          m_yDim = dimPresenter;
+          dimPresenter->setMapping(Y_AXIS);
+          m_mapping.insert(std::make_pair(Y_AXIS, dimPresenter));
         }
         else if(m_source.isZDimension(model))
         {
-          m_zDim = dimPresenter;
+          dimPresenter->setMapping(Z_AXIS);
+          m_mapping.insert(std::make_pair(Z_AXIS, dimPresenter));
         }
         else if(m_source.isTDimension(model))
         {
-          m_tDim = dimPresenter;
+          dimPresenter->setMapping(T_AXIS);
+          m_mapping.insert(std::make_pair(T_AXIS, dimPresenter));
         }
 
+        // Dimension View must have reference to Dimension Presenter.
         dimView->accept(dimPresenter.get());
-        dimPresenter->acceptModelStrongly(model);
+        // Geometry View owns the Dimension View.
         m_view->addDimensionView(dimView);
+        // Presenters are mainatined internally.
         m_dimPresenters.push_back(dimPresenter);
       }
+      for(int i = 0; i < m_dimPresenters.size(); i++)
+        {
+          //Now that all presenters have views, models can be provided to complete the M-V-P chain.
+          m_dimPresenters[i]->acceptModelStrongly(m_source.getAllDimensions()[i]);
+        }
     }
 
     /**
@@ -308,7 +335,7 @@ namespace Mantid
     */
     bool SynchronisingGeometryPresenter::hasXDim() const
     {
-      return m_xDim.get() != NULL;
+      return m_mapping.find(X_AXIS) != m_mapping.end() && NULL != m_mapping.find(X_AXIS)->second;
     }
 
     /**
@@ -317,7 +344,7 @@ namespace Mantid
     */
     bool SynchronisingGeometryPresenter::hasYDim() const
     {
-      return m_yDim.get() != NULL;
+      return m_mapping.find(Y_AXIS) != m_mapping.end() && NULL != m_mapping.find(Y_AXIS)->second;
     }
 
     /**
@@ -326,7 +353,7 @@ namespace Mantid
     */
     bool SynchronisingGeometryPresenter::hasZDim() const
     {
-      return m_zDim.get() != NULL;
+      return m_mapping.find(Z_AXIS) != m_mapping.end() && NULL != m_mapping.find(Z_AXIS)->second;
     }
 
     /**
@@ -335,7 +362,7 @@ namespace Mantid
     */
     bool SynchronisingGeometryPresenter::hasTDim() const
     {
-      return m_tDim.get() != NULL;
+      return m_mapping.find(T_AXIS) != m_mapping.end()  && NULL != m_mapping.find(T_AXIS)->second;
     }
 
     /**
@@ -351,9 +378,9 @@ namespace Mantid
     @parameter pDimensionPresenter : The dimension presenter to which the comparison should be made.
     @return true if dimesion presenter matches exising mapping.
     */
-    bool SynchronisingGeometryPresenter::isXDimensionPresenter(DimensionPresenter const * const pDimensionPresenter) const
+    bool SynchronisingGeometryPresenter::isXDimensionPresenter(DimPresenter_sptr dimensionPresenter) const
     {
-      return pDimensionPresenter == m_xDim.get();
+      return dimensionPresenter == m_mapping.at(X_AXIS);
     }
 
     /**
@@ -361,9 +388,9 @@ namespace Mantid
     @parameter pDimensionPresenter : The dimension presenter to which the comparison should be made.
     @return true if dimesion presenter matches exising mapping.
     */
-    bool SynchronisingGeometryPresenter::isYDimensionPresenter(DimensionPresenter const * const pDimensionPresenter) const
+    bool SynchronisingGeometryPresenter::isYDimensionPresenter(DimPresenter_sptr dimensionPresenter) const
     {
-      return pDimensionPresenter == m_yDim.get();
+      return dimensionPresenter == m_mapping.at(Y_AXIS);
     }
 
     /**
@@ -371,9 +398,9 @@ namespace Mantid
     @parameter pDimensionPresenter : The dimension presenter to which the comparison should be made.
     @return true if dimesion presenter matches exising mapping.
     */
-    bool SynchronisingGeometryPresenter::isZDimensionPresenter(DimensionPresenter const * const pDimensionPresenter) const
+    bool SynchronisingGeometryPresenter::isZDimensionPresenter(DimPresenter_sptr dimensionPresenter) const
     {
-      return pDimensionPresenter == m_zDim.get();
+      return dimensionPresenter == m_mapping.at(Z_AXIS);
     }
 
     /**
@@ -381,46 +408,18 @@ namespace Mantid
     @parameter pDimensionPresenter : The dimension presenter to which the comparison should be made.
     @return true if dimesion presenter matches exising mapping.
     */
-    bool SynchronisingGeometryPresenter::isTDimensionPresenter(DimensionPresenter const * const pDimensionPresenter) const
+    bool SynchronisingGeometryPresenter::isTDimensionPresenter(DimPresenter_sptr dimensionPresenter) const
     {
-      return pDimensionPresenter == m_tDim.get();
+      return dimensionPresenter == m_mapping.at(T_AXIS);
     }
 
     /**
-    Lookup/Getter providing a label for dimension presenters. Used for display purposes.
+    Get mappings of vis diension names to dimension presenters.
+    @return mapping.
     */
-    std::string SynchronisingGeometryPresenter::getLabel(DimensionPresenter const * const pDimensionPresenter) const
+    MappingType SynchronisingGeometryPresenter::getMappings() const
     {
-      std::string result = "";
-      if(hasXDim())
-      {
-        if(isXDimensionPresenter(pDimensionPresenter))
-        {
-          result = "X Axis";
-        }
-      }
-      if(hasYDim())
-      {
-        if(isYDimensionPresenter(pDimensionPresenter))
-        {
-          result = "Y Axis";
-        }
-      }
-      if(hasXDim())
-      {
-        if(isZDimensionPresenter(pDimensionPresenter))
-        {
-          result = "Z Axis";
-        }
-      }
-      if(hasTDim())
-      {
-        if(isTDimensionPresenter(pDimensionPresenter))
-        {
-          result = "T Axis";
-        }
-      }
-      return result;
+      return m_mapping;
     }
 
   }

@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include <map>
 
 namespace Mantid
 {
@@ -40,16 +41,19 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
+    
+    class DimensionPresenter;
     class DLLExport GeometryPresenter
     {
     public:
+      typedef std::map<std::string, boost::shared_ptr<DimensionPresenter> > MappingType;
       virtual void dimensionResized(DimensionPresenter* pDimensionPresenter) = 0;
       virtual void dimensionRealigned(DimensionPresenter* pDimensionPresenter) = 0;
       virtual Mantid::Geometry::VecIMDDimension_sptr getNonIntegratedDimensions() const = 0;
+      virtual MappingType getMappings() const = 0;
       virtual std::string getGeometryXML() const = 0;
       virtual ~GeometryPresenter() {}
       virtual void acceptView(GeometryView*)=0;
-      virtual std::string getLabel(DimensionPresenter const * const  pDimensionPresenter) const = 0;
       virtual void setModified() = 0;
     };
   }

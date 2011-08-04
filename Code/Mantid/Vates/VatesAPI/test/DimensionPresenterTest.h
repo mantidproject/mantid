@@ -24,12 +24,12 @@ private:
     MOCK_METHOD1(showAsNotIntegrated, void(VecIMDDimension_sptr));
     MOCK_METHOD0(showAsIntegrated, void());
     MOCK_METHOD1(accept, void(DimensionPresenter*));
-    MOCK_CONST_METHOD0(getDimensionId, std::string());
     MOCK_CONST_METHOD0(getMinimum, double());
     MOCK_CONST_METHOD0(getMaximum, double());
     MOCK_CONST_METHOD0(getNBins, unsigned int());
     MOCK_CONST_METHOD0(getSelectedIndex, unsigned int());
     MOCK_CONST_METHOD0(getIsIntegrated, bool());
+    MOCK_CONST_METHOD0(getVisDimensionName, std::string());
     ~MockDimensionView(){};
   };
 
@@ -41,8 +41,8 @@ private:
     MOCK_CONST_METHOD0(getNonIntegratedDimensions, VecIMDDimension_sptr());
     MOCK_CONST_METHOD0(getGeometryXML, std::string());
     MOCK_METHOD1(acceptView, void(GeometryView*));
-    MOCK_CONST_METHOD1(getLabel, std::string(DimensionPresenter const * const));
     MOCK_METHOD0(setModified, void());
+    MOCK_CONST_METHOD0(getMappings, GeometryPresenter::MappingType());
     ~MockGeometryPresenter(){}
   };
 
@@ -134,11 +134,10 @@ public:
     EXPECT_CALL(view, showAsIntegrated()).Times(2);
     EXPECT_CALL(view, showAsNotIntegrated(_)).Times(0); //Explicitly should never use this.
     EXPECT_CALL(view, getIsIntegrated()).WillOnce(Return(true));
-    EXPECT_CALL(view, getDimensionId()).Times(1);
+    EXPECT_CALL(view, getVisDimensionName()).Times(1);
 
     MockIMDDimension* pMockDimension = new MockIMDDimension();
     EXPECT_CALL(*pMockDimension, getIsIntegrated()).Times(1).WillRepeatedly(Return(true)); //Model says it's integrated
-    EXPECT_CALL(*pMockDimension, getDimensionId()).Times(1);
     Mantid::Geometry::IMDDimension_sptr model(pMockDimension);
 
     MockGeometryPresenter gPresenter;
@@ -161,11 +160,10 @@ public:
     EXPECT_CALL(view, showAsNotIntegrated(_)).Times(2);
     EXPECT_CALL(view, showAsIntegrated()).Times(0); //Explicitly should never use this
     EXPECT_CALL(view, getIsIntegrated()).Times(AnyNumber()).WillRepeatedly(Return(false));//View is not integrated. 
-    EXPECT_CALL(view, getDimensionId()).Times(1); 
+    EXPECT_CALL(view, getVisDimensionName()).Times(1); 
 
     MockIMDDimension* pMockDimension = new MockIMDDimension();
     EXPECT_CALL(*pMockDimension, getIsIntegrated()).Times(AnyNumber()).WillRepeatedly(Return(false));
-    EXPECT_CALL(*pMockDimension, getDimensionId()).Times(1); 
     Mantid::Geometry::IMDDimension_sptr model(pMockDimension); 
 
     MockGeometryPresenter gPresenter;

@@ -56,17 +56,28 @@ namespace Mantid
 
       Mantid::Geometry::VecIMDDimension_sptr getNonIntegratedDimensions() const;
 
+      MappingType getMappings() const;
+
       std::string getGeometryXML() const;
 
       ~SynchronisingGeometryPresenter();
 
       void acceptView(GeometryView*);
 
-      std::string getLabel(DimensionPresenter const * const pDimensionPresenter) const;
-
       void setModified();
 
+      //Constant reference name for an X-AXIS
+      const std::string X_AXIS;
+      //Constant reference name for an Y-AXIS
+      const std::string Y_AXIS;
+      //Constant reference name for an Z-AXIS
+      const std::string Z_AXIS;
+      //Constant reference name for an T-AXIS
+      const std::string T_AXIS;
+
     private:
+
+      void swap(const GeometryPresenter::MappingType::key_type& keyA, const GeometryPresenter::MappingType::key_type& keyB);
 
       bool hasXDim() const;
 
@@ -76,13 +87,13 @@ namespace Mantid
 
       bool hasTDim() const;
 
-      bool isXDimensionPresenter(DimensionPresenter const * const) const;
+      bool isXDimensionPresenter(DimPresenter_sptr dimensionPresenter) const;
 
-      bool isYDimensionPresenter(DimensionPresenter const * const) const;
+      bool isYDimensionPresenter(DimPresenter_sptr dimensionPresenter) const;
 
-      bool isZDimensionPresenter(DimensionPresenter const * const) const;
+      bool isZDimensionPresenter(DimPresenter_sptr dimensionPresenter) const;
 
-      bool isTDimensionPresenter(DimensionPresenter const * const) const;
+      bool isTDimensionPresenter(DimPresenter_sptr dimensionPresenter) const;
 
       void shuffleMappedPresenters();
 
@@ -96,14 +107,6 @@ namespace Mantid
       SynchronisingGeometryPresenter(const SynchronisingGeometryPresenter&);
       /// Disabled assignement operator
       SynchronisingGeometryPresenter& operator=(const SynchronisingGeometryPresenter&);
-      /// The x-dimension mapping pointing to the correct dimension presenter.
-      DimPresenter_sptr m_xDim;
-      /// The y-dimension mapping pointing to the correct dimension presenter.
-      DimPresenter_sptr m_yDim;
-      /// The z-dimension mapping pointing to the correct dimension presenter.
-      DimPresenter_sptr m_zDim;
-      /// The t-dimension mapping pointing to the correct dimension presenter.
-      DimPresenter_sptr m_tDim;
       /// Collection of synchronised non-integrated dimensions.
       Mantid::Geometry::VecIMDDimension_sptr m_notIntegrated;
       /// Collection of synchronised integrated dimensions.
@@ -112,6 +115,8 @@ namespace Mantid
       Mantid::Geometry::MDGeometryXMLParser m_source; 
       /// The View with which the presenter will be bound.
       GeometryView* m_view;
+      //Map containing pairs of visdimensionnames to dimension presenters.
+      MappingType m_mapping;
     protected:
 
       virtual void dimensionCollapsed(DimensionPresenter* pDimensionPresenter);

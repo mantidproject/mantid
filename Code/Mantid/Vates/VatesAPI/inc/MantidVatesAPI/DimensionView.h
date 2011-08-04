@@ -15,7 +15,7 @@ namespace Mantid
       virtual void showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr nonIntegratedDims) = 0;
       virtual void showAsIntegrated() = 0;
       virtual void accept(DimensionPresenter* pDimensionPresenter) = 0; //TODO should accept non-deleting unique pointer.
-      virtual std::string getDimensionId() const = 0;
+      virtual std::string getVisDimensionName() const = 0;
       virtual double getMaximum() const = 0;
       virtual double getMinimum() const = 0;
       virtual unsigned int getNBins() const = 0;

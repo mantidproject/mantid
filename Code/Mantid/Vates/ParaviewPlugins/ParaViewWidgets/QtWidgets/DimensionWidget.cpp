@@ -14,6 +14,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
+using namespace Mantid::VATES;
+
 DimensionWidget::DimensionWidget(bool readOnlyLimits)
 {
   using namespace Mantid::Geometry;
@@ -22,6 +24,7 @@ DimensionWidget::DimensionWidget(bool readOnlyLimits)
   QLabel* integratedLabel = new QLabel("Int");
   integratedLabel->setToolTip("Collapse/Expand dimension");
   m_layout->addWidget(integratedLabel, 0, 0, Qt::AlignLeft);
+  m_layout->setColumnMinimumWidth(0, 30); //Set column to fixed minimum width!
 
   m_ckIntegrated = new QCheckBox();
   m_ckIntegrated->setToolTip("Collapse/Expand dimension");
@@ -123,17 +126,21 @@ void DimensionWidget::showAsIntegrated()
 */
 void DimensionWidget::configureWeakly()
 {
+  using Mantid::Geometry::VecIMDDimension_sptr;
   m_dimensionCombo->clear();
-  Mantid::Geometry::VecIMDDimension_sptr vecNonIntegrated = m_pDimensionPresenter->getNonIntegratedDimensions();
-  unsigned int vecSize = static_cast<unsigned int>(vecNonIntegrated.size());
-  for(unsigned int i = 0; i < vecSize; i++)
+
+  GeometryPresenter::MappingType mappings = m_pDimensionPresenter->getMappings(); //Should be sv collection?
+  GeometryPresenter::MappingType::iterator it = mappings.begin();
+  unsigned int count = 0;
+  for(; it != mappings.end(); ++it)
   {
-    boost::shared_ptr<Mantid::Geometry::IMDDimension> currentDimension = vecNonIntegrated[i];
-    m_dimensionCombo->addItem( currentDimension->getDimensionId().c_str());
-    if(currentDimension->getDimensionId() == m_pDimensionPresenter->getModel()->getDimensionId())
+    m_dimensionCombo->addItem(it->first.c_str());
+    if(it->first == m_pDimensionPresenter->getMapping())
     {
-      m_dimensionCombo->setCurrentItem(i);
+      m_dimensionCombo->setCurrentItem(count);
     }
+    count++;
+
   }
 }
 
@@ -205,11 +212,11 @@ DimensionWidget::~DimensionWidget()
 
 }
 
-std::string DimensionWidget::getDimensionId() const
+std::string DimensionWidget::getVisDimensionName() const
 {
   if(m_dimensionCombo->isHidden())
   {
-    return m_pDimensionPresenter->getModel()->getDimensionId();
+    return m_pDimensionPresenter->getMapping();
   }
   else
   {

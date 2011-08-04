@@ -2,12 +2,13 @@
 #define DIMENSION_PRESENTER_H_
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidVatesAPI/GeometryPresenter.h"
+
 namespace Mantid
 {
   namespace VATES
   {
     //Forward declarations.
-    class GeometryPresenter;
     class DimensionView;
 
     /** @class DimensionPresenter.
@@ -37,6 +38,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
+    class DimensionView;
     class DLLExport DimensionPresenter
     {
     public:
@@ -48,19 +50,33 @@ namespace Mantid
       Mantid::Geometry::IMDDimension_sptr getAppliedModel() const;
       Mantid::Geometry::IMDDimension_sptr getModel() const;
       Mantid::Geometry::VecIMDDimension_sptr getNonIntegratedDimensions() const;
-      std::string getDimensionId() const;
+      std::string getVisDimensionName() const;
       std::string getLabel() const;
       void updateIfNotIntegrated();
       virtual ~DimensionPresenter();
+      GeometryPresenter::MappingType getMappings() const;
+      void setMapping(std::string mapping);
+      std::string getMapping() const;
     private:
       void commonSetup();
       DimensionPresenter(const DimensionPresenter&);
       DimensionPresenter& operator=(const DimensionPresenter&);
-      Mantid::Geometry::IMDDimension_sptr m_model;
-      GeometryPresenter *  m_geometryPresenter; 
-      DimensionView* m_view; 
       void validate() const;
+      
+      /// Core model of MVP
+      Mantid::Geometry::IMDDimension_sptr m_model;
+
+      /// Core parent geometry presenter in MVP.
+      GeometryPresenter *  m_geometryPresenter; 
+
+      /// Core MVP view.
+      DimensionView* m_view; 
+      
+      /// Flag capturing the last state of the isIntegrated flag. Used for comparisons.
       bool m_lastIsIntegrated;
+      
+      /// Mapping name.
+      std::string m_mapping;
     };
   }
 }

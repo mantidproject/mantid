@@ -1,7 +1,7 @@
 #include "MantidVatesAPI/DimensionPresenter.h"
-#include "MantidVatesAPI/GeometryPresenter.h"
 #include "MantidVatesAPI/DimensionView.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
+
 namespace Mantid
 {
   namespace VATES
@@ -60,29 +60,22 @@ namespace Mantid
     }
 
     /**
-    Getter for read-only non-integrated dimensions.
-    @return collection of non-integrated dimensions.
-    */
-    Mantid::Geometry::VecIMDDimension_sptr DimensionPresenter::getNonIntegratedDimensions() const
-    {
-      return m_geometryPresenter->getNonIntegratedDimensions();
-    }
-
-    /**
     Callable method from the view. Determines what to do after the view is updated in some manner.
     */
     void DimensionPresenter::updateModel()
     {
       validate();
       bool isIntegrated = m_view->getIsIntegrated();
-      std::string id = m_view->getDimensionId();
+      std::string mapping = m_view->getVisDimensionName();
       if(isIntegrated != m_lastIsIntegrated)
       {
+        //Dimension must have been collapsed/integrated.
         m_geometryPresenter->dimensionResized(this);
         m_lastIsIntegrated = isIntegrated;
       }
-      else if(id != m_model->getDimensionId())
+      else if(mapping != this->m_mapping)
       {
+        //Dimensions must have been swapped.
         m_geometryPresenter->dimensionRealigned(this);
       }
       if(isIntegrated)
@@ -168,21 +161,48 @@ namespace Mantid
     }
 
     /**
-    Gets the current dimension id from the view. 
-    @return applied id
-    */
-    std::string DimensionPresenter::getDimensionId() const
-    {
-      return m_view->getDimensionId();
-    }
-
-    /**
     Getter for the label to use for this presenter.
     @return applied label.
     */
     std::string DimensionPresenter::getLabel() const
     {
-      return m_geometryPresenter->getLabel(this);
+      return this->m_model->getDimensionId();
+    }
+
+    /**
+    Getter for the name of the visualisation dimension.
+    @return name of the visualisation dimension this presenter is using (if any)
+    */
+    std::string DimensionPresenter::getVisDimensionName() const
+    {
+      return m_view->getVisDimensionName();
+    }
+
+    /**
+    Pass through method. Gets all mapping-presenter pairs.
+    @return mapping pairs.
+    */
+    GeometryPresenter::MappingType DimensionPresenter::getMappings() const
+    {
+      return m_geometryPresenter->getMappings();
+    }
+
+    /**
+    Setter for the mapping to use.
+    @parameter mapping to use.
+    */
+    void DimensionPresenter::setMapping(std::string mapping)
+    {
+      this->m_mapping = mapping;
+    }
+
+    /**
+    Getter for the mapping to use.
+    @return mapping used.
+    */
+    std::string DimensionPresenter::getMapping() const
+    {
+      return m_mapping;
     }
 
   }
