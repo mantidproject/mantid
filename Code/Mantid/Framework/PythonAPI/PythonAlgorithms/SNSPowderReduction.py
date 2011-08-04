@@ -352,6 +352,8 @@ class SNSPowderReduction(PythonAlgorithm):
         samRuns = self.getProperty("RunNumber")
         filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
 
+        workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
+
         if self.getProperty("Sum"):
             samRun = None
             info = None
@@ -372,6 +374,7 @@ class SNSPowderReduction(PythonAlgorithm):
                     Plus(samRun, temp, samRun)
                     mtd.deleteWorkspace(str(temp))
             samRuns = [samRun]
+            workspacelist.append(str(samRun))
 
         for samRun in samRuns:
             # first round of processing the sample
@@ -379,6 +382,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 samRun = self._loadData(samRun, SUFFIX, filterWall)
                 info = self._getinfo(samRun)
                 samRun = self._focus(samRun, calib, info, filterLogs)
+                workspacelist.append(str(samRun))
 
             # process the container
             canRun = self.getProperty("BackgroundNumber")
@@ -391,6 +395,8 @@ class SNSPowderReduction(PythonAlgorithm):
                     canRun = self._focus(canRun, calib, info)
                 else:
                     canRun = temp
+                ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
+                workspacelist.append(str(canRun))
             else:
                 canRun = None
 
@@ -414,6 +420,8 @@ class SNSPowderReduction(PythonAlgorithm):
                     SetUncertaintiesToZero(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                 else:
                     vanRun = temp
+                ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
+                workspacelist.append(str(vanRun))
             else:
                 vanRun = None
 
@@ -437,5 +445,10 @@ class SNSPowderReduction(PythonAlgorithm):
             self._save(samRun, info, normalized)
             samRun = str(samRun)
             mtd.releaseFreeMemory()
+
+        # convert everything into d-spacing
+        workspacelist = set(workspacelist) # only do each workspace once
+        for wksp in workspacelist:
+            ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
 
 mtd.registerPyAlgorithm(SNSPowderReduction())
