@@ -397,7 +397,7 @@ namespace Mantid
           PARALLEL_START_INTERUPT_REGION
           m_out->setX(i, m_lhs->refX(i));
           performEventBinaryOperation(m_eout->getEventList(i), rhsY, rhsE);
-          m_progress->report();
+          m_progress->report(this->name());
           PARALLEL_END_INTERUPT_REGION
         }
         PARALLEL_CHECK_INTERUPT_REGION
@@ -413,7 +413,7 @@ namespace Mantid
           PARALLEL_START_INTERUPT_REGION
           m_out->setX(i,m_lhs->refX(i));
           performBinaryOperation(m_lhs->readX(i),m_lhs->readY(i),m_lhs->readE(i),rhsY,rhsE,m_out->dataY(i),m_out->dataE(i));
-          m_progress->report();
+          m_progress->report(this->name());
           PARALLEL_END_INTERUPT_REGION
         }
         PARALLEL_CHECK_INTERUPT_REGION
@@ -448,7 +448,7 @@ namespace Mantid
           {
             performEventBinaryOperation(m_eout->getEventList(i), rhsY, rhsE);
           }
-          m_progress->report();
+          m_progress->report(this->name());
           PARALLEL_END_INTERUPT_REGION
         }
         PARALLEL_CHECK_INTERUPT_REGION
@@ -470,7 +470,7 @@ namespace Mantid
           {
             performBinaryOperation(m_lhs->readX(i),m_lhs->readY(i),m_lhs->readE(i),rhsY,rhsE,m_out->dataY(i),m_out->dataE(i));
           }
-          m_progress->report();
+          m_progress->report(this->name());
           PARALLEL_END_INTERUPT_REGION
         }
         PARALLEL_CHECK_INTERUPT_REGION
@@ -514,7 +514,7 @@ namespace Mantid
 
             //Perform the operation on the event list on the output (== lhs)
             performEventBinaryOperation(m_eout->getEventList(i), rhs_spectrum);
-            m_progress->report();
+            m_progress->report(this->name());
             PARALLEL_END_INTERUPT_REGION
           }
           PARALLEL_CHECK_INTERUPT_REGION
@@ -538,7 +538,7 @@ namespace Mantid
             //m_out->setX(i,m_lhs->refX(i)); //unnecessary - that was copied before.
             //Perform the operation on the event list on the output (== lhs)
             performEventBinaryOperation(m_eout->getEventList(i), rhsX, rhsY, rhsE);
-            m_progress->report();
+            m_progress->report(this->name());
             PARALLEL_END_INTERUPT_REGION
           }
           PARALLEL_CHECK_INTERUPT_REGION
@@ -565,7 +565,7 @@ namespace Mantid
           PARALLEL_START_INTERUPT_REGION
           m_out->setX(i,m_lhs->refX(i));
           performBinaryOperation(m_lhs->readX(i),m_lhs->readY(i),m_lhs->readE(i),rhsY,rhsE,m_out->dataY(i),m_out->dataE(i));
-          m_progress->report();
+          m_progress->report(this->name());
           PARALLEL_END_INTERUPT_REGION
         }
         PARALLEL_CHECK_INTERUPT_REGION
@@ -605,7 +605,7 @@ namespace Mantid
           for (int64_t i = 0; i < int64_t(numHists); ++i)
           {
             PARALLEL_START_INTERUPT_REGION
-            m_progress->report();
+            m_progress->report(this->name());
 
             int64_t rhs_wi = i;
             if (mismatchedSpectra && table)
@@ -643,7 +643,7 @@ namespace Mantid
           for (int64_t i = 0; i < int64_t(numHists); ++i)
           {
             PARALLEL_START_INTERUPT_REGION
-            m_progress->report();
+            m_progress->report(this->name());
             int64_t rhs_wi = i;
             if (mismatchedSpectra && table)
             {
@@ -685,7 +685,7 @@ namespace Mantid
         for (int64_t i = 0; i < int64_t(numHists); ++i)
         {
           PARALLEL_START_INTERUPT_REGION
-          m_progress->report();
+          m_progress->report(this->name());
           m_out->setX(i,m_lhs->refX(i));
           int64_t rhs_wi = i;
           if (mismatchedSpectra && table)
