@@ -20,6 +20,8 @@ namespace Mantid
 namespace MDEvents
 {
 
+#pragma pack(push, 4) //Ensure the structure is no larger than it needs to
+
   //===============================================================================================
   /** Templated class for a GRIDDED multi-dimensional event "box".
    * A MDGridBox contains a dense array with nd dimensions
@@ -194,6 +196,7 @@ namespace MDEvents
   };
 
 
+#pragma pack(pop) //Return to default packing size
 
 
 

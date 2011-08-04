@@ -29,6 +29,7 @@
 #include <memory>
 #include <Poco/File.h>
 #include <vector>
+#include "MantidKernel/Memory.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -61,14 +62,30 @@ public:
     delete b;
 
 
-    std::cout << sizeof( MDEvent<3>) << " bytes per MDEvent(3)" << std::endl;
-    std::cout << sizeof( MDEvent<4>) << " bytes per MDEvent(4)" << std::endl;
-    std::cout << sizeof( Mantid::Kernel::Mutex ) << " bytes per Mutex" << std::endl;
-    std::cout << sizeof( MDDimensionExtents) << " bytes per MDDimensionExtents" << std::endl;
-    std::cout << sizeof( MDBox<MDEvent<3>,3>) << " bytes per MDBox(3)" << std::endl;
-    std::cout << sizeof( MDBox<MDEvent<4>,4> ) << " bytes per MDBox(4)" << std::endl;
-    std::cout << sizeof( MDGridBox<MDEvent<3>,3>) << " bytes per MDGridBox(3)" << std::endl;
-    std::cout << sizeof( MDGridBox<MDEvent<4>,4> ) << " bytes per MDGridBox(4)" << std::endl;
+//    std::cout << sizeof( MDEvent<3>) << " bytes per MDEvent(3)" << std::endl;
+//    std::cout << sizeof( MDEvent<4>) << " bytes per MDEvent(4)" << std::endl;
+//    std::cout << sizeof( Mantid::Kernel::Mutex ) << " bytes per Mutex" << std::endl;
+//    std::cout << sizeof( MDDimensionExtents) << " bytes per MDDimensionExtents" << std::endl;
+//    std::cout << sizeof( MDBox<MDEvent<3>,3>) << " bytes per MDBox(3)" << std::endl;
+//    std::cout << sizeof( MDBox<MDEvent<4>,4> ) << " bytes per MDBox(4)" << std::endl;
+//    std::cout << sizeof( MDGridBox<MDEvent<3>,3>) << " bytes per MDGridBox(3)" << std::endl;
+//    std::cout << sizeof( MDGridBox<MDEvent<4>,4> ) << " bytes per MDGridBox(4)" << std::endl;
+//
+//    MemoryStats mem;
+//    size_t start = mem.availMem();
+//    std::cout << start << " KB before" << std::endl;
+//    CPUTimer tim;
+//    for (size_t i=0; i<1000000; i++)
+//    {
+//      MDBox<MDEvent<3>,3> * box = new MDBox<MDEvent<3>,3>();
+//      (void) box;
+//    }
+//    std::cout << tim << " to allocate a million boxes" << std::endl;
+//    mem.update();
+//    size_t stop = mem.availMem();
+//    std::cout << stop << " KB after " << std::endl;
+//    std::cout << start-stop << " KB change " << std::endl;
+//    std::cout << (start-stop)*1024 / sizeof( MDBox<MDEvent<3>,3>) << " times the sizeof MDBox3" << std::endl;
   }
 
 

@@ -16,6 +16,8 @@ namespace Mantid
 namespace Geometry
 {
 
+#pragma pack(push, 4) //Ensure the structure is no larger than it needs to
+
   //===============================================================================================
   /** Simple class that holds the extents (min/max)
    * of a given dimension in a MD workspace or MDBox
@@ -38,6 +40,7 @@ namespace Geometry
     coord_t max;
   };
 
+#pragma pack(pop) //Return to default packing size
 
 }//namespace API
 

@@ -18,6 +18,8 @@ namespace Mantid
 namespace MDEvents
 {
 
+#pragma pack(push, 4) //Ensure the structure is no larger than it needs to
+
   //===============================================================================================
   /** Templated class for a multi-dimensional event "box".
    *
@@ -190,7 +192,7 @@ namespace MDEvents
 
   };
 
-
+#pragma pack(pop) //Return to default packing size
 
 
 

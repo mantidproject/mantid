@@ -23,6 +23,8 @@ namespace Mantid
 namespace MDEvents
 {
 
+#pragma pack(push, 4) //Ensure the structure is no larger than it needs to
+
   //===============================================================================================
   /** Abstract Interface for a multi-dimensional event "box".
    * To be subclassed by MDBox and MDGridBox
@@ -392,9 +394,9 @@ namespace MDEvents
     /// Convenience typedef for a shared pointer to a this type of class
     typedef boost::shared_ptr< IMDBox<MDE, nd> > sptr;
 
-  };
+  }; //(end class IMDBox)
 
-
+#pragma pack(pop) //Return to default packing size
 
 
 
