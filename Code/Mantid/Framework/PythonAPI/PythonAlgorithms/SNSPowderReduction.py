@@ -103,6 +103,8 @@ class SNSPowderReduction(PythonAlgorithm):
                              Description="Reference total flight path for frame unwrapping. Zero skips the correction")
         self.declareProperty("LowResRef", 0., 
                              Description="Reference DIFC for resolution removal. Zero skips the correction")
+        self.declareProperty("RemovePromptPulseWidth", 0.0,
+                             Description="Width of events (in microseconds) near the prompt pulse to remove. 0 disables")
         self.declareProperty("FilterByTimeMin", 0.,
                              Description="Relative time to start filtering by in seconds. Applies only to sample.")
         self.declareProperty("FilterByTimeMax", 0.,
@@ -208,6 +210,8 @@ class SNSPowderReduction(PythonAlgorithm):
         # take care of filtering events
         if self._filterBadPulses and not self.getProperty("CompressOnRead"):
             FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
+        if self._removePromptPulseWidth > 0.:
+            RemovePromptPulse(InputWorkspace=wksp, OutputWorkspace=wksp, Width= self._removePromptPulseWidth)
         if filterLogs is not None:
             try:
                 logparam = wksp.getRun()[filterLogs[0]]
@@ -263,7 +267,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 binning = self._binning
             else:
                 binning = [info.dmin, self._binning[0], info.dmax]
-            print "d-Spacing Binning: " , binning
+            self.log().information("d-Spacing Binning: " + str(binning))
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         else:
             preserveEvents = True
@@ -333,6 +337,7 @@ class SNSPowderReduction(PythonAlgorithm):
 #        self._timeMin = self.getProperty("FilterByTimeMin")
 #        self._timeMax = self.getProperty("FilterByTimeMax")
         self._filterBadPulses = self.getProperty("FilterBadPulses")
+        self._removePromptPulseWidth = self.getProperty("RemovePromptPulseWidth")
         filterLogs = self.getProperty("FilterByLogValue")
         if len(filterLogs.strip()) <= 0:
             filterLogs = None
