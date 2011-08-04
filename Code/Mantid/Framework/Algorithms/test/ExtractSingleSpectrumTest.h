@@ -1,8 +1,7 @@
 #ifndef EXTRACTSINGLESPECTRUMTEST_H_
 #define EXTRACTSINGLESPECTRUMTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
+#include "CropWorkspaceTest.h" // Use the test lable functionality as it should do the same thing
 #include "MantidAlgorithms/ExtractSingleSpectrum.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -11,7 +10,7 @@ using Mantid::detid_t;
 class ExtractSingleSpectrumTest : public CxxTest::TestSuite
 {
 public:
-	void testName()
+  void testName()
   {
 	  TS_ASSERT_EQUALS( extractor.name(), "ExtractSingleSpectrum" )
   }
@@ -94,6 +93,15 @@ public:
     
     AnalysisDataService::Instance().remove("input");
     AnalysisDataService::Instance().remove("output");
+  }
+
+  void test_Input_With_TextAxis()
+  {
+    Algorithm *extractor = new ExtractSingleSpectrum;
+    extractor->initialize();
+    extractor->setPropertyValue("WorkspaceIndex", "1");
+    CropWorkspaceTest::doTestWithTextAxis(extractor); //Takes ownership
+
   }
   
 private:

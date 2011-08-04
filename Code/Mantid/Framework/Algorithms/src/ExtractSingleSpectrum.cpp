@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ExtractSingleSpectrum.h"
+#include "MantidAPI/TextAxis.h"
 
 namespace Mantid
 {
@@ -65,6 +66,18 @@ void ExtractSingleSpectrum::exec()
     const ISpectrum* inSpec = inputWorkspace->getSpectrum(desiredSpectrum);
     // Add the detectors for this spectrum to the output workspace's spectra-detector map
     outSpec->addDetectorIDs( inSpec->getDetectorIDs() );
+  }
+  else
+  {
+    if( axisOne->isNumeric() )
+    {
+      outputWorkspace->getAxis(1)->setValue(0, axisOne->operator()(desiredSpectrum));
+    }
+    else
+    {
+      TextAxis *txtAxis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
+      txtAxis->setLabel(0, axisOne->label(desiredSpectrum));
+    }
   }
 
   setProperty("OutputWorkspace",outputWorkspace);
