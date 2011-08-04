@@ -82,6 +82,9 @@ namespace DataHandling
 
     bool db1 = true;
 
+    bool multiplybybinwidth = false;
+    bool multiplybybinwidthdefined = false;
+
     // Gather data
     if ( input.is_open() )
     {
@@ -105,7 +108,8 @@ namespace DataHandling
         double bc2 = 0;
         if (  currentLine[0] == '\n' || currentLine[0] == '#' )
         {
-          if ( nSpec == 0 )
+          // Comment line
+          if ( nSpec == 0 || !multiplybybinwidthdefined)
           {
             int noSpectra = 0;
             std::string line;
@@ -117,8 +121,16 @@ namespace DataHandling
             if ( ( noSpectra != 0 ) && ( line == "Histograms" ) )
             {
               nSpec = noSpectra;
+            } else if (line == "Multiplied"){
+              if (noSpectra == 0)
+                multiplybybinwidth = false;
+              else
+                multiplybybinwidth = true;
+              multiplybybinwidthdefined = true;
+              g_log.debug() << "Multiplied by bin width = " << noSpectra << "\n";
             }
-          }
+
+          } // if nSpec
           continue;
         }
         else if ( currentLine[0] == 'B' )
@@ -241,8 +253,13 @@ namespace DataHandling
             }
 
         	  xValue = (2 * xValue) - xPrev;
-        	  yValue = yValue/(xValue-xPrev);
-        	  eValue = eValue/(xValue-xPrev);
+        	  if (multiplybybinwidth){
+        	    yValue = yValue/(xValue-xPrev);
+        	    eValue = eValue/(xValue-xPrev);
+        	  } else {
+        	    yValue = yValue;
+        	    eValue = eValue;
+        	  }
           }
           X->push_back(xValue);
           Y->push_back(yValue);
