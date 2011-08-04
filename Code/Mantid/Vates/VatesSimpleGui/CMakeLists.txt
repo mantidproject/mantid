@@ -19,6 +19,7 @@ set( INCLUDE_FILES
   inc/MpMainWindow.h
   inc/MultisliceView.h
   inc/ScalePicker.h
+  inc/SimpleGuiApp.h
   inc/StandardView.h
   inc/ThreesliceView.h
   inc/TimeControlWidget.h
@@ -35,6 +36,7 @@ set( SOURCE_FILES
   src/MpMainWindow.cpp
   src/MultisliceView.cpp
   src/ScalePicker.cpp
+  src/SimpleGuiApp.cpp
   src/StandardView.cpp
   src/ThreesliceView.cpp
   src/TimeControlWidget.cpp
@@ -51,6 +53,7 @@ qt4_wrap_cpp( MOC_SRCS
   inc/MpMainWindow.h
   inc/MultisliceView.h
   inc/ScalePicker.h
+  inc/SimpleGuiApp.h
   inc/StandardView.h
   inc/ThreesliceView.h
   inc/TimeControlWidget.h
