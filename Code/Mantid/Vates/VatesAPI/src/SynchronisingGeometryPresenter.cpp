@@ -43,13 +43,13 @@ namespace Mantid
     Constructor
     */
     SynchronisingGeometryPresenter::SynchronisingGeometryPresenter(Mantid::Geometry::MDGeometryXMLParser& source) : 
-      m_notIntegrated(source.getNonIntegratedDimensions()), 
-      m_integrated(source.getIntegratedDimensions()),
-      m_source(source),
       X_AXIS("X-AXIS"),
       Y_AXIS("Y-AXIS"),
       Z_AXIS("Z-AXIS"),
-      T_AXIS("T-AXIS")
+      T_AXIS("T-AXIS"),
+      m_notIntegrated(source.getNonIntegratedDimensions()), 
+      m_integrated(source.getIntegratedDimensions()),
+      m_source(source)
     {
 
     }
@@ -322,7 +322,7 @@ namespace Mantid
         // Presenters are mainatined internally.
         m_dimPresenters.push_back(dimPresenter);
       }
-      for(int i = 0; i < m_dimPresenters.size(); i++)
+      for(size_t i = 0; i < m_dimPresenters.size(); i++)
         {
           //Now that all presenters have views, models can be provided to complete the M-V-P chain.
           m_dimPresenters[i]->acceptModelStrongly(m_source.getAllDimensions()[i]);

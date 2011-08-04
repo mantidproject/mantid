@@ -155,10 +155,18 @@ public:
 
     SynchronisingGeometryPresenter presenter(parser); 
     presenter.acceptView(&gView);
+    GeometryPresenter::MappingType axisMappings = presenter.getMappings();
+
+    TSM_ASSERT_EQUALS("Wrong number of axis-mappings", 4, axisMappings.size());
+    TSM_ASSERT("Doesn't contain x-axis mapping", axisMappings.find(presenter.X_AXIS) != axisMappings.end());
+    TSM_ASSERT("Doesn't contain y-axis mapping", axisMappings.find(presenter.Y_AXIS) != axisMappings.end());
+    TSM_ASSERT("Doesn't contain z-axis mapping", axisMappings.find(presenter.Z_AXIS) != axisMappings.end());
+    TSM_ASSERT("Doesn't contain t-axis mapping", axisMappings.find(presenter.T_AXIS) != axisMappings.end());
     
     TS_ASSERT(Mock::VerifyAndClearExpectations(&gView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&dView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
+
   }
 
   void testCollapsingThrows()

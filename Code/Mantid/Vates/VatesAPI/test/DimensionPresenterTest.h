@@ -71,6 +71,19 @@ private:
 
 public:
 
+  void testSetMapping()
+  {
+    IMDDimension_sptr model(new MockIMDDimension());
+    MockDimensionView view;
+    MockGeometryPresenter gPresenter;
+    DimensionPresenter presenter(&view, &gPresenter);
+
+    TSM_ASSERT("Should have no mapping", presenter.getMapping().empty());
+
+    presenter.setMapping("Z-AXIS");
+    TSM_ASSERT_EQUALS("Should now have mapping set", "Z-AXIS", presenter.getMapping());
+  }
+
   void testWithoutProperConstructionThrows()
   {
     IMDDimension_sptr model(new MockIMDDimension());
