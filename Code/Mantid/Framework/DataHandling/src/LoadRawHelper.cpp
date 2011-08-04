@@ -15,6 +15,7 @@
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidDataHandling/LoadAscii.h"
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/shared_ptr.hpp>
@@ -495,23 +496,7 @@ namespace Mantid
     */
     bool LoadRawHelper::isAscii(FILE* file) const
     {  
-      char data[256];
-      char *pend = &data[fread(data, 1, sizeof(data), file)];
-      fseek(file,0,SEEK_SET);
-      /*
-      * Call it a binary file if we find a non-ascii character in the 
-      * first 256 bytes of the file.
-      */
-      for( char *p = data;  p < pend; ++p )
-      {
-        unsigned long ch = (unsigned long)*p;
-        if( !(ch <= 0x7F) )
-        {
-          return false;
-        }
-
-      }
-      return true;
+      return LoadAscii::isAscii(file);
     }
 
 

@@ -53,7 +53,7 @@ public:
      save.initialize();
      save.setPropertyValue("Filename", filename);
      filename = save.getPropertyValue("Filename"); //Get absolute path
-     save.setPropertyValue("Workspace", name);
+     save.setPropertyValue("InputWorkspace", name);
      TS_ASSERT_THROWS_NOTHING(save.execute());
 
      LoadAscii load;

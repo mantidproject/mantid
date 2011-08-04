@@ -47,16 +47,22 @@ namespace Mantid
     bool LoadAscii::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
     {
       std::string extn=extension(filePath);
-      bool bascii(false);
-      (!extn.compare("dat")||!extn.compare("csv")|| extn.compare("txt")|| extn.compare(""))?bascii=true:bascii=false;
-
-      bool is_ascii (true);
-      for(size_t i=0; i<nread; i++)
+      //bool bascii(false);
+      if (!extn.compare("dat")||!extn.compare("csv")|| !extn.compare("txt")|| !extn.compare("")) //If the file is of type ascii then have a go
       {
-        if (!isascii(header.full_hdr[i]))
-          is_ascii =false;
+        return true;
       }
-      return(is_ascii|| bascii?true:false);
+      else //See if file looks like Ascii and have a go at doing something about it
+      {
+        bool is_ascii (true);
+        for(size_t i=0; i<nread; i++)
+        {
+          if (!isascii(header.full_hdr[i]))
+            is_ascii =false;
+        }
+        return (is_ascii);
+        //return(is_ascii|| bascii?true:false);
+      }
     }
 
     /**
@@ -66,58 +72,46 @@ namespace Mantid
     */
     int LoadAscii::fileCheck(const std::string& filePath)
     {      
-      std::ifstream file(filePath.c_str());
+      FILE* file = fopen(filePath.c_str(), "rb");
       if (!file)
       {
         g_log.error("Unable to open file: " + filePath);
         throw Exception::FileError("Unable to open file: " , filePath);
       }
-      std::string separators(",");
-      int ncols=0; 
-      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-      boost::char_separator<char> seps(separators.c_str());
-      std::string line;
+      
       int confidence(0);
-      while(getline(file,line))
-      { 
-        if (line.empty()||line[0] == '#') 
-        {
-          continue;
-        }
-        else
-        {
-          //break at a non empty/non comment line is teh 1st data line
-          break;
-        }
-      }
 
-      // iterate through the first line columns
-      boost::tokenizer<boost::char_separator<char> > values(line, seps);
-      for (tokenizer::iterator it = values.begin(); it != values.end(); ++it)
-      {         
-        ++ncols;
-      } 
-      bool bloadAscii(true);
-      //if the data is of double type this file can be loaded by loadascci
-      double data;
-      for (tokenizer::iterator it = values.begin(); it != values.end(); ++it)
-      {       
-        std::istringstream is(*it);
-        is>>data;
-        if(is.fail())
-        {
-          bloadAscii=false;
-          break;
-        }
-
-      }
-      //if the line has odd number of coulmns with mantid supported separators
-      // this is considered as ascci file 
-      if (ncols % 2 == 1 && ncols > 2 && bloadAscii) 
+      if (isAscii(file))
       {
-        confidence = 80;
+        confidence = 10; //Lower because should load other files first
       }
       return confidence;
+    }
+
+    /**
+    * Check if a file is a text file
+    * @param file :: The file pointer
+    * @returns true if the file an ascii text file, false otherwise
+    */
+    bool LoadAscii::isAscii(FILE *file)
+    {
+          char data[256];
+      char *pend = &data[fread(data, 1, sizeof(data), file)];
+      fseek(file,0,SEEK_SET);
+      /*
+      * Call it a binary file if we find a non-ascii character in the 
+      * first 256 bytes of the file.
+      */
+      for( char *p = data;  p < pend; ++p )
+      {
+        unsigned long ch = (unsigned long)*p;
+        if( !(ch <= 0x7F) )
+        {
+          return false;
+        }
+
+      }
+      return true;
     }
 
     //--------------------------------------------------------------------------
@@ -251,7 +245,7 @@ namespace Mantid
 
         try
         {
-          fillInputValues(values, columns);
+          fillInputValues(values, columns); //ignores nans and replaces them with 0
         }
         catch(boost::bad_lexical_cast&)
         {
@@ -348,7 +342,16 @@ namespace Mantid
       {
         std::string value = *itr;
         boost::trim(value);
-        values[i] = boost::lexical_cast<double>(value);
+        boost::to_lower(value);
+        if (value == "nan") //ignores nans (not a number) and replaces them with a nan
+        { 
+          double nan = std::numeric_limits<double>::quiet_NaN();//(0.0/0.0);
+          values[i] = nan;
+        }
+        else
+        {
+          values[i] = boost::lexical_cast<double>(value);
+        }
         ++i;
       }
     }

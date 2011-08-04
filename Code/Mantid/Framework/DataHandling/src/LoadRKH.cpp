@@ -565,6 +565,11 @@ int LoadRKH::fileCheck(const std::string& filePath)
     bret+=20;
   }
   
+  if( bret == 10 )
+  {
+    // Assume we are better than LoadAscii
+    bret += 10;
+  }
   return bret;
 }
 

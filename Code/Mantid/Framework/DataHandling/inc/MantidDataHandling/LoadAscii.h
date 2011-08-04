@@ -62,6 +62,8 @@ namespace Mantid
       /// 0 and 100 of how much this file can be loaded
       virtual int fileCheck(const std::string& filePath);
 
+      static bool isAscii(FILE *file);
+
     protected:
       /// Process the header information within the file.
       virtual void processHeader(std::ifstream & file) const;

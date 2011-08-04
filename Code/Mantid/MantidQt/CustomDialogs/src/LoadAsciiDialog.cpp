@@ -62,11 +62,18 @@ void LoadAsciiDialog::initLayout()
   tie(unitBox ,"Unit",paramsLayout);
 
   QVBoxLayout *mainLayout = new QVBoxLayout;
+  
+  //Adds the yellow optional message
+  if( isMessageAvailable() )
+  {
+    this->addOptionalMessage(mainLayout);
+  }
+
   mainLayout->addLayout(paramsLayout);
   mainLayout->addLayout(createDefaultButtonLayout("?", "Load", "Cancel"));
 
   setLayout(mainLayout);
-  setWindowTitle(tr("Load Workspace from DAE"));
+  //setWindowTitle(tr("Load Workspace from DAE"));
   setFixedHeight(sizeHint().height());
 
   checkFileExtension();

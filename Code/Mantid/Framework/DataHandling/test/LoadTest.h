@@ -227,7 +227,7 @@ public:
   {
     Load loader;
     loader.initialize();
-    TS_ASSERT_THROWS(loader.setPropertyValue("Filename","hrpd_new_072_01.cal"), std::runtime_error);
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename","hrpd_new_072_01.cal"));
   }
 
   void testSPE()
@@ -241,7 +241,7 @@ public:
     TS_ASSERT(ws);
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
-
+  
   void testAscii()
   {
     Load loader;

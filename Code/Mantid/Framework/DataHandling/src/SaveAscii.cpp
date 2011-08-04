@@ -40,7 +40,7 @@ namespace Mantid
       exts.push_back(".csv");
       declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
 		      "A comma separated Ascii file that will be created");
-      declareProperty(new WorkspaceProperty<>("Workspace",
+      declareProperty(new WorkspaceProperty<>("InputWorkspace",
         "",Direction::Input), "The name of the workspace that will be saved.");
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
@@ -57,7 +57,7 @@ namespace Mantid
     void SaveAscii::exec()
     {
         // Get the workspace
-        MatrixWorkspace_const_sptr ws = getProperty("Workspace");
+        MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
         int nSpectra = static_cast<int>(ws->getNumberHistograms());
         int nBins = static_cast<int>(ws->blocksize());
 
