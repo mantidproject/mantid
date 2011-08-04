@@ -200,7 +200,7 @@ public:
   void testDimensionRealign()
   {
     NiceMock<MockDimensionView> dView;
-    EXPECT_CALL(dView, getVisDimensionName()).WillRepeatedly(Return("T_DIMENSION"));
+    EXPECT_CALL(dView, getVisDimensionName()).WillRepeatedly(Return("T-AXIS"));
     
     NiceMock<MockDimensionViewFactory> factory;
     EXPECT_CALL(factory, create()).WillRepeatedly(Return(&dView));
