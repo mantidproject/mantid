@@ -331,7 +331,7 @@ void vtkEventNexusReader::doRebinning()
   if(true == m_applyClip)
   {
     vtkPlane* plane = dynamic_cast<vtkPlane*>(this->m_clipFunction); 
-    vtkAbstractTransform* transform = plane->GetTransform();
+    //vtkAbstractTransform* transform = plane->GetTransform();
     if(NULL != plane)
     {
       //user has requested the use of implicit functions as part of rebinning. only planes understood for time being.

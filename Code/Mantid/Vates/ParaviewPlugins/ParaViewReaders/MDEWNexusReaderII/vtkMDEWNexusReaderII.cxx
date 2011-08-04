@@ -30,7 +30,9 @@ using namespace Mantid::VATES;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 
-vtkMDEWNexusReaderII::vtkMDEWNexusReaderII() : m_ThresholdRange(new IgnoreZerosThresholdRange())
+vtkMDEWNexusReaderII::vtkMDEWNexusReaderII() :
+    m_needsLoading(true),
+    m_ThresholdRange(new IgnoreZerosThresholdRange())
 {
   this->FileName = NULL;
   this->SetNumberOfInputPorts(0);
@@ -50,7 +52,7 @@ Sets maximum recursion depth.
 */
 void vtkMDEWNexusReaderII::SetRecursionDepth(int depth)
 {
-  if(depth > 0)
+  if(depth >= 0)
   {
     size_t temp = static_cast<size_t>(depth);
     if(m_recursionDepth != temp)
@@ -71,6 +73,7 @@ void vtkMDEWNexusReaderII::SetInMemory(bool inMemory)
   if(m_loadInMemory != inMemory)
   {
     m_loadInMemory = inMemory;
+    m_needsLoading = true; // Need to re-load
     this->Modified();   
   }
 }
@@ -84,18 +87,23 @@ int vtkMDEWNexusReaderII::RequestData(vtkInformation * vtkNotUsed(request), vtkI
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-  AnalysisDataService::Instance().remove("Ws_id");
+  if (m_needsLoading)
+  {
+    AnalysisDataService::Instance().remove("Ws_id");
 
-  Mantid::MDEvents::LoadMDEW alg;
+    Mantid::MDEvents::LoadMDEW alg;
 
-  alg.initialize();
-  alg.setPropertyValue("Filename", this->FileName);
-  alg.setPropertyValue("OutputWorkspace", "Ws_id");
-  alg.setProperty("FileBackEnd", !m_loadInMemory); //Load from file by default.
-  alg.addObserver(observer);
-  alg.execute();
-  alg.removeObserver(observer);
+    alg.initialize();
+    alg.setPropertyValue("Filename", this->FileName);
+    alg.setPropertyValue("OutputWorkspace", "Ws_id");
+    alg.setProperty("FileBackEnd", !m_loadInMemory); //Load from file by default.
+    alg.setProperty("Memory", 200); //Set a small cache
+    alg.addObserver(observer);
+    alg.execute();
+    alg.removeObserver(observer);
 
+    m_needsLoading = false; //Don't need to reload later
+  }
   Workspace_sptr result=AnalysisDataService::Instance().retrieve("Ws_id");
 
   vtkDataSet *output = vtkDataSet::SafeDownCast(

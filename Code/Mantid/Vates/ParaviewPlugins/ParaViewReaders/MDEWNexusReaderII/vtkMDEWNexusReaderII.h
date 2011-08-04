@@ -46,6 +46,9 @@ private:
   /// Flag indicating that file loading algorithm should attempt to fully load the file into memory.
   bool m_loadInMemory;
 
+  /// True if the data needs to be reloaded (due to a setting change).
+  bool m_needsLoading;
+
   /// Threshold range strategy
   Mantid::VATES::ThresholdRange_scptr m_ThresholdRange;
 
