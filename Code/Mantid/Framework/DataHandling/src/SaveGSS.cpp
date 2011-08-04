@@ -175,11 +175,13 @@ void SaveGSS::exec()
         throw std::runtime_error("Could not open filename: "+filename);
       }
 
-      if (l1 != 0. || l2 != 0. || tth != 0.)
+      if (l1 != 0. || l2 != 0. || tth != 0.){
         out << "# Total flight path " << (l1+l2) << "m, tth " << (tth*180./M_PI)
             << "deg, DIFC "
             << (( 2.0 * PhysicalConstants::NeutronMass * sin(tth/2.0) * ( l1 + l2 ) )
             / (PhysicalConstants::h * 1e4)) << "\n";
+        out << "# Primary flight path " << l1 << "m \n";
+      }
       out << "# Data for spectrum :"<< i << std::endl;
       if (RALF.compare(outputFormat) == 0) {
         this->writeRALFdata(bank+i, MultiplyByBinWidth, out,
