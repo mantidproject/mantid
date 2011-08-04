@@ -568,12 +568,10 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
       out << "Sample: a " << std::fixed << std::setprecision(1) << latt.a() <<", b " << latt.b() << ", c " << latt.c();
       out << "; alpha " << std::fixed << std::setprecision(0) << latt.alpha() <<", beta " << latt.beta() << ", gamma " << latt.gamma();
       s = out.str();
+      data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
+      data_item->setFlags(Qt::NoItemFlags);
+      ws_item->addChild(data_item);
     }
-    else
-      s = "Sample: No lattice set.";
-    data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
-    data_item->setFlags(Qt::NoItemFlags);
-    ws_item->addChild(data_item);
   }
 
 
