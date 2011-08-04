@@ -52,9 +52,6 @@ using namespace API;
 using Geometry::Instrument;
 
 
-
-
-
 //===============================================================================================
 //===============================================================================================
 /** This task does the disk IO from loading the NXS file,
@@ -281,15 +278,17 @@ public:
    *
    * @param top_entry_name :: The pathname of the top level NXentry to use
    * @param entry_name :: The pathname of the bank to load
+   * @param entry_type :: The classtype of the entry to load
    * @param pixelID_to_wi_map :: a map where key = pixelID and value = the workpsace index to use.
    * @param prog :: an optional Progress object
    * @param ioMutex :: a mutex shared for all Disk I-O tasks
    * @param scheduler :: the ThreadScheduler that runs this task.
    */
-  LoadBankFromDiskTask(LoadEventNexus * alg, const std::string& top_entry_name, const std::string& entry_name, detid2index_map * pixelID_to_wi_map,
+  LoadBankFromDiskTask(LoadEventNexus * alg, const std::string& top_entry_name, const std::string& entry_name, const std::string & entry_type, detid2index_map * pixelID_to_wi_map,
       Progress * prog, Mutex * ioMutex, ThreadScheduler * scheduler)
   : Task(),
-    alg(alg), top_entry_name(top_entry_name), entry_name(entry_name), pixelID_to_wi_map(pixelID_to_wi_map), prog(prog), scheduler(scheduler)
+    alg(alg), top_entry_name(top_entry_name), entry_name(entry_name), entry_type(entry_type),
+    pixelID_to_wi_map(pixelID_to_wi_map), prog(prog), scheduler(scheduler)
   {
     setMutex(ioMutex);
   }
@@ -323,7 +322,7 @@ public:
     file.openGroup(top_entry_name, "NXentry");
 
     //Open the bankN_event group
-    file.openGroup(entry_name, "NXevent_data");
+    file.openGroup(entry_name, entry_type);
 
     // Get the event_index (a list of size of # of pulses giving the index in the event list for that pulse)
     file.openData("event_index");
@@ -534,6 +533,8 @@ private:
   std::string top_entry_name;
   /// NXS path to bank
   std::string entry_name;
+  /// NXS type
+  std::string entry_type;
   /// Map of pixel ID to Workspace Index
   detid2index_map * pixelID_to_wi_map;
   /// Progress reporting
@@ -664,6 +665,9 @@ void LoadEventNexus::init()
       new PropertyWithValue<double>("CompressTolerance", -1.0, Direction::Input),
       "Run CompressEvents while loading (optional, leave blank or negative to not do). \n"
       "This specified the tolerance to use (in microseconds) when compressing.");
+
+  declareProperty(new PropertyWithValue<bool>("MonitorsAsEvents", false, Direction::Input),
+      "If present, load the monitors as events.\nWARNING: WILL SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). \n");
 }
 
 
@@ -724,37 +728,64 @@ void LoadEventNexus::exec()
 
   // Check to see if the monitors need to be loaded later
   bool load_monitors = this->getProperty("LoadMonitors");
-
   setTopEntryName();
-
-  // Create the output workspace
-  WS = EventWorkspace_sptr(new EventWorkspace());
-
-  //Make sure to initialize.
-  //   We can use dummy numbers for arguments, for event workspace it doesn't matter
-  WS->initialize(1,1,1);
-
-  // Set the units
-  WS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-  WS->setYUnit("Counts");
-
-  // Create a default "Universal" goniometer in the Run object
-  WS->mutableRun().getGoniometer().makeUniversalGoniometer();
 
   //Initialize progress reporting.
   int reports = 3;
   if (load_monitors)
     reports++;
-
   Progress prog(this,0.0,0.3,  reports);
+  
+  // Load the detector events
+  WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
+  loadEvents(&prog, false); // Do not load monitor blocks
+  //Save output
+  this->setProperty<IEventWorkspace_sptr>("OutputWorkspace", WS);
+  // Load the monitors
+  if (load_monitors)
+  {
+    prog.report("Loading monitors");
+    const bool eventMonitors = getProperty("MonitorsAsEvents");
+    if( eventMonitors && this->hasEventMonitors() )
+    {
+      WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
+      loadEvents(&prog, true);
+      std::string mon_wsname = this->getProperty("OutputWorkspace");
+      mon_wsname.append("_monitors");
+      this->declareProperty(new WorkspaceProperty<IEventWorkspace>
+                            ("MonitorWorkspace", mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
+      this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);      
+    }
+    else
+    {
+      this->runLoadMonitors();
+    }
+  }
 
+  // Clear any large vectors to free up memory.
+  this->pulseTimes.clear();
+
+  // Some memory feels like it sticks around (on Linux). Free it.
+  MemoryManager::Instance().releaseFreeMemory();
+
+  return;
+}
+
+//-----------------------------------------------------------------------------
+/**
+ * Load events from the file
+ * @param prop :: A pointer to the progress reporting object
+ * @param monitors :: If true the events from the monitors are loaded and not the main banks
+ */
+void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
+{
   // The run_start will be loaded from the pulse times.
   DateAndTime run_start(0,0);
 
   if (loadlogs)
   {
     // --------------------- Load DAS Logs -----------------
-    prog.doReport("Loading DAS logs");
+    prog->doReport("Loading DAS logs");
     //The pulse times will be empty if not specified in the DAS logs.
     pulseTimes.clear();
     IAlgorithm_sptr loadLogs = createSubAlgorithm("LoadNexusLogs");
@@ -770,8 +801,11 @@ void LoadEventNexus::exec()
       //If successful, we can try to load the pulse times
       Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( WS->mutableRun().getProperty("proton_charge") );
       std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
+      pulseTimes.reserve(temp.size());
       for (size_t i =0; i < temp.size(); i++)
+      {
         pulseTimes.push_back( temp[i] );
+      }
 
       // Use the first pulse as the run_start time.
       if (temp.size() > 0)
@@ -793,7 +827,7 @@ void LoadEventNexus::exec()
   {
     g_log.information() << "Skipping the loading of sample logs!" << endl;
   }
-  prog.report("Loading instrument");
+  prog->report("Loading instrument");
 
 
   //Load the instrument
@@ -802,11 +836,6 @@ void LoadEventNexus::exec()
   if (!this->instrument_loaded_correctly)
       throw std::runtime_error("Instrument was not initialized correctly! Loading cannot continue.");
 
-  if (load_monitors)
-  {
-    prog.report("Loading monitors");
-    this->runLoadMonitors();
-  }
 
   // top level file information
   ::NeXus::File file(m_filename);
@@ -818,11 +847,12 @@ void LoadEventNexus::exec()
   vector<string> bankNames;
   map<string, string> entries = file.getEntries();
   map<string,string>::const_iterator it = entries.begin();
+  std::string classType = monitors ? "NXmonitor" : "NXevent_data";
   for (; it != entries.end(); it++)
   {
     std::string entry_name(it->first);
     std::string entry_class(it->second);
-    if ((entry_class == "NXevent_data"))
+    if ( entry_class == classType )
     {
       bankNames.push_back( entry_name );
     }
@@ -836,7 +866,7 @@ void LoadEventNexus::exec()
   std::string onebank = getProperty("BankName");
   bool doOneBank = (onebank != "");
   bool SingleBankPixelsOnly = getProperty("SingleBankPixelsOnly");
-  if (doOneBank)
+  if (doOneBank && !monitors)
   {
     bool foundIt = false;
     for (std::vector<string>::iterator it=bankNames.begin(); it!= bankNames.end(); it++)
@@ -865,14 +895,12 @@ void LoadEventNexus::exec()
   if (AnalysisDataService::Instance().doesExist(outName))
     AnalysisDataService::Instance().remove( outName );
 
-  prog.report("Initializing all pixels");
+  prog->report("Initializing all pixels");
 
   //----------------- Pad Empty Pixels -------------------------------
-  bool indexBySpectrum(false);
   // Create the required spectra mapping so that the workspace knows what to pad to
-  createSpectraMapping(m_filename, WS, onebank);
+  createSpectraMapping(m_filename, WS, monitors, onebank);
   WS->padSpectra();
-  indexBySpectrum=true;
   
   // --------------------------- Time filtering ------------------------------------
   double filter_time_start_sec, filter_time_stop_sec;
@@ -911,28 +939,20 @@ void LoadEventNexus::exec()
   Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*3);
 
   //This map will be used to find the workspace index
-  //@todo: Move to always index by spectrum so that we don't have to do this
   detid2index_map * pixelID_to_wi_map(NULL);
-  if( indexBySpectrum )
-  {
-    pixelID_to_wi_map = WS->getSpectrumToWorkspaceIndexMap();
-  }
-  else
-  {
-    pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(false);
-  }
+  pixelID_to_wi_map = WS->getSpectrumToWorkspaceIndexMap();
 
   // Make the thread pool
   ThreadScheduler * scheduler = new ThreadSchedulerLargestCost();
   ThreadPool pool(scheduler);
   Mutex * diskIOMutex = new Mutex();
-  for (int i=0; i < static_cast<int>(bankNames.size()); i++)
+  for (size_t i=0; i < bankNames.size(); i++)
   {
     // We make tasks for loading
-    pool.schedule( new LoadBankFromDiskTask(this,m_top_entry_name,bankNames[i],pixelID_to_wi_map, prog2, diskIOMutex, scheduler) );
+    pool.schedule( new LoadBankFromDiskTask(this,m_top_entry_name,bankNames[i],classType, pixelID_to_wi_map, prog2, diskIOMutex, scheduler) );
+    // Start and end all threads
+    pool.joinAll();
   }
-  // Start and end all threads
-  pool.joinAll();
   delete diskIOMutex;
   delete prog2;
 
@@ -963,19 +983,29 @@ void LoadEventNexus::exec()
 
   // set more properties on the workspace
   this->loadEntryMetadata(m_top_entry_name);
-
-  //Save output
-  this->setProperty<IEventWorkspace_sptr>("OutputWorkspace", WS);
-
-  // Clear any large vectors to free up memory.
-  this->pulseTimes.clear();
-
-  // Some memory feels like it sticks around (on Linux). Free it.
-  MemoryManager::Instance().releaseFreeMemory();
-
-  return;
 }
 
+//-----------------------------------------------------------------------------
+/**
+ * Create a blank event workspace
+ * @returns A shared pointer to a new empty EventWorkspace object
+ */
+EventWorkspace_sptr LoadEventNexus::createEmptyEventWorkspace()
+{
+  // Create the output workspace
+  EventWorkspace_sptr eventWS(new EventWorkspace());
+  //Make sure to initialize.
+  //   We can use dummy numbers for arguments, for event workspace it doesn't matter
+  eventWS->initialize(1,1,1);
+
+  // Set the units
+  eventWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+  eventWS->setYUnit("Counts");
+
+  // Create a default "Universal" goniometer in the Run object
+  eventWS->mutableRun().getGoniometer().makeUniversalGoniometer();
+  return eventWS;
+}
 
 /** Load the run number and other meta data from the given bank */
 void LoadEventNexus::loadEntryMetadata(const std::string &entry_name) {
@@ -1080,10 +1110,11 @@ void LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
  */
 void LoadEventNexus::createSpectraMapping(const std::string &nxsfile, 
                                           API::MatrixWorkspace_sptr workspace,
+                                          const bool monitorsOnly,
                                           const std::string & bankName)
 {
   Geometry::ISpectraDetectorMap *spectramap(NULL);
-  if( !bankName.empty() )
+  if( !monitorsOnly && !bankName.empty() )
   {
     // Only build the map for the single bank
     std::vector<IDetector_sptr> dets;
@@ -1105,7 +1136,7 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
   }
   if( !spectramap )
   {
-    spectramap = loadSpectraMapping(nxsfile);
+    spectramap = loadSpectraMapping(nxsfile, monitorsOnly);
   }
   if( !spectramap )
   {
@@ -1123,15 +1154,51 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
 
 //-----------------------------------------------------------------------------
 /**
+ * Returns whether the file contains monitors with events in them
+ * @returns True if the file contains monitors with event data, false otherwise
+ */
+bool LoadEventNexus::hasEventMonitors()
+{
+  bool result(false);
+  // Determine whether to load histograms or events
+  try
+  {
+    ::NeXus::File file(m_filename);
+    file.openPath(m_top_entry_name);
+    //Start with the base entry
+    typedef std::map<std::string,std::string> string_map_t; 
+    //Now we want to go through and find the monitors
+    string_map_t entries = file.getEntries();
+    for( string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)
+    {
+      if( it->second == "NXmonitor" )
+      {
+        file.openGroup(it->first, it->second);
+        break;
+      }
+    }
+    file.openData("event_id");
+    result = true;
+    file.close();
+  }
+  catch(::NeXus::Exception &)
+  {
+    result = false;
+  }
+  return result;
+}
+
+//-----------------------------------------------------------------------------
+/**
  * Load the Monitors from the NeXus file into a workspace. The original
  * workspace name is used and appended with _monitors.
  */
 void LoadEventNexus::runLoadMonitors()
 {
-  IAlgorithm_sptr loadMonitors = this->createSubAlgorithm("LoadNexusMonitors");
   std::string mon_wsname = this->getProperty("OutputWorkspace");
   mon_wsname.append("_monitors");
 
+  IAlgorithm_sptr loadMonitors = this->createSubAlgorithm("LoadNexusMonitors");
   try
   {
     this->g_log.information() << "Loading monitors from NeXus file..."
@@ -1158,9 +1225,11 @@ void LoadEventNexus::runLoadMonitors()
  * Load a spectra mapping from the given file. This currently checks for the existence of
  * an isis_vms_compat block in the file, if it exists it pulls out the spectra mapping listed there
  * @param file :: A filename
+ * @param monitorsOnly :: If true then only the monitor spectra are loaded
  * @returns A pointer to a new map or NULL if the block does not exist
  */
-Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::string & filename) const
+Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::string & filename,
+                                                                   const bool monitorsOnly) const
 {
   ::NeXus::File file(filename);
   try
@@ -1196,13 +1265,33 @@ Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::st
     os << "UDET/SPEC list size mismatch. UDET=" << udet.size() << ", SPEC=" << spec.size() << "\n";
     throw std::runtime_error(os.str());
   }
-  // We need to filter the monitors out as they are included in the block also. Here we assume that they
-  // occur in a contiguous block
-  
+  // Monitor filtering/selection
   const std::vector<detid_t> monitors = WS->getInstrument()->getMonitors();
-  spectramap->populate(spec.data(), udet.data(), ndets, 
-                       std::set<detid_t>(monitors.begin(), monitors.end()));
-  g_log.debug() << "Loaded spectra map from " << filename << "\n";
+  if( monitorsOnly )
+  {
+    g_log.debug() << "Loading only monitor spectra from " << filename << "\n";
+    // Find the det_ids in the udet array. 
+    const size_t nmons(monitors.size());
+    for( size_t i = 0; i < nmons; ++i )
+    {
+      // Find the index in the udet array
+      const detid_t & id = monitors[i];
+      std::vector<int32_t>::const_iterator it = std::find(udet.begin(), udet.end(), id);
+      if( it != udet.end() )
+      {
+        const specid_t & specNo = spec[it - udet.begin()];
+        spectramap->addSpectrumEntries(specid_t(specNo), std::vector<detid_t>(1, id));
+      }
+    }
+  }
+  else
+  {
+    g_log.debug() << "Loading only detector spectra from " << filename << "\n";
+    // We need to filter the monitors out as they are included in the block also. Here we assume that they
+    // occur in a contiguous block
+    spectramap->populate(spec.data(), udet.data(), ndets, 
+                         std::set<detid_t>(monitors.begin(), monitors.end()));
+  }
   g_log.debug() << "Found " << spectramap->nSpectra() << " unique spectra and a total of " << spectramap->nElements() << " elements\n"; 
   return spectramap;
 }

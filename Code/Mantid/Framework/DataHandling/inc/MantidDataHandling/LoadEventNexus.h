@@ -126,20 +126,24 @@ namespace Mantid
 
       /// Do we load the sample logs?
       bool loadlogs;
-
+      
+      DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
+      void loadEvents(API::Progress * const prog, const bool monitors);
       void loadEntryMetadata(const std::string &entry_name);
       void runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace);
       void createSpectraMapping(const std::string &nxsfile, API::MatrixWorkspace_sptr workspace,
-                                const std::string & bankName = "");
+                                const bool monitorsOnly, const std::string & bankName = "");
+      bool hasEventMonitors();
       void runLoadMonitors();
 
     private:
       /// Load a spectra mapping from the given file
-      Geometry::ISpectraDetectorMap * loadSpectraMapping(const std::string & filename) const;
-	  /// name of top level NXentry to use
-	  std::string m_top_entry_name;
-
-	  void setTopEntryName();
+      Geometry::ISpectraDetectorMap * loadSpectraMapping(const std::string & filename, 
+                                                         const bool monitorsOnly) const;
+      /// name of top level NXentry to use
+      std::string m_top_entry_name;
+      /// Set the top entry field name
+      void setTopEntryName();
 
     };
 
