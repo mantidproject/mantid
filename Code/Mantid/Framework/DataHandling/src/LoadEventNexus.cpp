@@ -580,34 +580,34 @@ bool LoadEventNexus::quickFileCheck(const std::string& filePath,size_t nread, co
  */
 int LoadEventNexus::fileCheck(const std::string& filePath)
 {
-	int confidence(0);
-	typedef std::map<std::string,std::string> string_map_t; 
-	try
-	{
-		string_map_t::const_iterator it;
-		::NeXus::File file = ::NeXus::File(filePath);
-		string_map_t entries = file.getEntries();
-		for(string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)
-		{
-			if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") ) 
-			{
-				file.openGroup(it->first, it->second);
-				string_map_t entries2 = file.getEntries();
-				for(string_map_t::const_iterator it2 = entries2.begin(); it2 != entries2.end(); ++it2)
-				{
-					if (it2->second == "NXevent_data")
-					{
-						confidence = 80;
-					}
-				}
-				file.closeGroup();
-			}
-		}
-	}
-	catch(::NeXus::Exception&)
-	{
-	}
-	return confidence;
+  int confidence(0);
+  typedef std::map<std::string,std::string> string_map_t; 
+  try
+  {
+    string_map_t::const_iterator it;
+    ::NeXus::File file = ::NeXus::File(filePath);
+    string_map_t entries = file.getEntries();
+    for(string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)
+    {
+      if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") ) 
+      {
+        file.openGroup(it->first, it->second);
+        string_map_t entries2 = file.getEntries();
+        for(string_map_t::const_iterator it2 = entries2.begin(); it2 != entries2.end(); ++it2)
+        {
+          if (it2->second == "NXevent_data")
+          {
+            confidence = 80;
+          }
+        }
+        file.closeGroup();
+      }
+    }
+  }
+  catch(::NeXus::Exception&)
+  {
+  }
+  return confidence;
 }
 
 /// Initialisation method.
@@ -670,26 +670,26 @@ void LoadEventNexus::init()
 /// set the name of the top level NXentry m_top_entry_name
 void LoadEventNexus::setTopEntryName()
 {
-	typedef std::map<std::string,std::string> string_map_t; 
-	try
-	{
-		string_map_t::const_iterator it;
-		::NeXus::File file = ::NeXus::File(m_filename);
-		string_map_t entries = file.getEntries();
-		for (it = entries.begin(); it != entries.end(); ++it)
-		{
-			if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") )
-			{
-				m_top_entry_name = it->first;
-				break;
-			}
-		}
-	}
-	catch(const std::exception&)
-	{
-		g_log.error() << "Unable to determine name of top level NXentry - assuming \"entry\"." << std::endl;
-		m_top_entry_name = "entry";
-	}
+  typedef std::map<std::string,std::string> string_map_t; 
+  try
+  {
+    string_map_t::const_iterator it;
+    ::NeXus::File file = ::NeXus::File(m_filename);
+    string_map_t entries = file.getEntries();
+    for (it = entries.begin(); it != entries.end(); ++it)
+    {
+      if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") )
+      {
+        m_top_entry_name = it->first;
+        break;
+      }
+    }
+  }
+  catch(const std::exception&)
+  {
+    g_log.error() << "Unable to determine name of top level NXentry - assuming \"entry\"." << std::endl;
+    m_top_entry_name = "entry";
+  }
 }
 
 //------------------------------------------------------------------------------------------------
