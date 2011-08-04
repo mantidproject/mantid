@@ -848,7 +848,7 @@ void ApplicationWindow::initToolBars()
   btnPicker->setActionGroup(dataTools);
   btnPicker->setCheckable( true );
   btnPicker->setIcon(QIcon(getQPixmap("cursor_16_xpm")) );
-  //plotTools->addAction(btnPicker); disabled until fixed (#2783)
+  plotTools->addAction(btnPicker); //disabled until fixed (#2783)
 
   actionDrawPoints = new QAction(tr("&Draw Data Points"), this);
   actionDrawPoints->setActionGroup(dataTools);
