@@ -170,19 +170,18 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if not self.getProperty("CompressOnRead"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
 
-        alg = ConvertUnits(InputWorkspace=wksp, OutputWorkspace="temp", Target="dSpacing")
-        temp = alg['OutputWorkspace']
-        SortEvents(InputWorkspace=temp, SortBy="X Value")
+        ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
+        SortEvents(InputWorkspace=wksp, SortBy="X Value")
         # Sum pixelbin X pixelbin blocks of pixels
         if self._xpixelbin*self._ypixelbin>1:
-                SumNeighbours(InputWorkspace=temp, OutputWorkspace=temp, SumX=self._xpixelbin, SumY=self._ypixelbin)
+                SumNeighbours(InputWorkspace=wksp, OutputWorkspace=wksp, SumX=self._xpixelbin, SumY=self._ypixelbin)
         # Bin events in d-Spacing
-        Rebin(InputWorkspace=temp, OutputWorkspace=temp,Params=str(self._peakmin)+","+str(abs(self._binning[1]))+","+str(self._peakmax))
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._peakmin)+","+str(abs(self._binning[1]))+","+str(self._peakmax))
         #Find good peak for reference
         ymax = 0
-        for s in range(0,temp.getNumberHistograms()):
-            y_s = temp.readY(s)
-            midBin = temp.blocksize()/2
+        for s in range(0,wksp.getNumberHistograms()):
+            y_s = wksp.readY(s)
+            midBin = wksp.blocksize()/2
             if y_s[midBin] > ymax:
                     refpixel = s
                     ymax = y_s[midBin]
@@ -192,29 +191,29 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         os.system(cmd)
         # Cross correlate spectra using interval around peak at peakpos (d-Spacing)
         if self._lastpixel == 0:
-            self._lastpixel = temp.getNumberHistograms()-1
+            self._lastpixel = wksp.getNumberHistograms()-1
         else:
-            self._lastpixel = temp.getNumberHistograms()*self._lastpixel/self._lastpixel2-1
-        CrossCorrelate(InputWorkspace=temp, OutputWorkspace=str(wksp)+"cc", ReferenceSpectra=refpixel,
+            self._lastpixel = wksp.getNumberHistograms()*self._lastpixel/self._lastpixel2-1
+        CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc", ReferenceSpectra=refpixel,
             WorkspaceIndexMin=0, WorkspaceIndexMax=self._lastpixel, XMin=self._peakmin, XMax=self._peakmax)
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
         GetDetectorOffsets(InputWorkspace=str(wksp)+"cc", OutputWorkspace=str(wksp)+"offset", Step=abs(self._binning[1]),
             DReference=self._peakpos, XMin=-self._ccnumber, XMax=self._ccnumber)
         mtd.deleteWorkspace(str(wksp)+"cc")
         mtd.releaseFreeMemory()
-        Rebin(InputWorkspace=temp, OutputWorkspace=temp,Params=str(self._peakmin2)+","+str(abs(self._binning[1]))+","+str(self._peakmax2))
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._peakmin2)+","+str(abs(self._binning[1]))+","+str(self._peakmax2))
         if self._peakpos2 > 0.0:
             #Find good peak for reference
             ymax = 0
-            for s in range(0,temp.getNumberHistograms()):
-                y_s = temp.readY(s)
-                midBin = temp.blocksize()/2
+            for s in range(0,wksp.getNumberHistograms()):
+                y_s = wksp.readY(s)
+                midBin = wksp.blocksize()/2
                 if y_s[midBin] > ymax:
                         refpixel = s
                         ymax = y_s[midBin]
             print "Reference spectra=",refpixel
-            CrossCorrelate(InputWorkspace=temp, OutputWorkspace=str(wksp)+"cc2", ReferenceSpectra=refpixel,
-                WorkspaceIndexMin=self._lastpixel+1, WorkspaceIndexMax=temp.getNumberHistograms()-1, XMin=self._peakmin2, XMax=self._peakmax2)
+            CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc2", ReferenceSpectra=refpixel,
+                WorkspaceIndexMin=self._lastpixel+1, WorkspaceIndexMax=wksp.getNumberHistograms()-1, XMin=self._peakmin2, XMax=self._peakmax2)
             # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
             GetDetectorOffsets(InputWorkspace=str(wksp)+"cc2", OutputWorkspace=str(wksp)+"offset2", Step=abs(self._binning[1]),
                 DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber)
@@ -222,7 +221,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             mtd.deleteWorkspace(str(wksp)+"cc2")
             mtd.deleteWorkspace(str(wksp)+"offset2")
             mtd.releaseFreeMemory()
-        CreateGroupingWorkspace(InputWorkspace=temp, GroupNames=groups, OutputWorkspace=str(wksp)+"group")
+        CreateGroupingWorkspace(InputWorkspace=wksp, GroupNames=groups, OutputWorkspace=str(wksp)+"group")
         lcinst = str(self._instrument)
         
         if "dspacemap" in self._outTypes:
@@ -231,7 +230,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 DspacemapFile=self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat"))
         if "calibration" in self._outTypes:
             SaveCalFile(OffsetsWorkspace=str(wksp)+"offset",GroupingWorkspace=str(wksp)+"group",Filename=calib)
-        mtd.deleteWorkspace(str(temp))
         return wksp
 
     def _focus(self, wksp, calib, filterLogs=None):
@@ -291,10 +289,22 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         calib = self._outDir+lcinst+"_calibrate_d"+str(samRuns[0])+strftime("_%Y_%m_%d.cal")
         filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
 
-        for samRun in samRuns:
+        for samNum in samRuns:
             # first round of processing the sample
-            samRun = self._loadData(samRun, SUFFIX, filterWall)
+            samRun = self._loadData(samNum, SUFFIX, filterWall)
+            if str(self._instrument) == "SNAP":
+            	alg = CloneWorkspace(samRun, "tmp")
+        	origRun = alg['OutputWorkspace']
             samRun = self._calibrate(samRun, calib, filterLogs)
+            if self._xpixelbin*self._ypixelbin>1:
+               	mtd.deleteWorkspace(str(samRun))
+            	if str(self._instrument) == "SNAP":
+			alg = RenameWorkspace(origRun,"%s_%d" % (self._instrument, samNum))
+        		samRun = alg['OutputWorkspace']
+            	else:
+            		samRun = self._loadData(samNum, SUFFIX, filterWall)
+            else:
+		ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="TOF")
             samRun = self._focus(samRun, calib, filterLogs)
             RenameWorkspace(InputWorkspace=samRun,OutputWorkspace=str(samRun)+"_calibrated")
 
