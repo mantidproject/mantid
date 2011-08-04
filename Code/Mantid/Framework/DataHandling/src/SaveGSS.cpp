@@ -182,6 +182,7 @@ void SaveGSS::exec()
             / (PhysicalConstants::h * 1e4)) << "\n";
         out << "# Primary flight path " << l1 << "m \n";
       }
+      out << "# Multiplied By Bin Width " << MultiplyByBinWidth << "\n";
       out << "# Data for spectrum :"<< i << std::endl;
       if (RALF.compare(outputFormat) == 0) {
         this->writeRALFdata(bank+i, MultiplyByBinWidth, out,
