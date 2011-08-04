@@ -9,6 +9,8 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/MaskedProperty.h"
 
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QScrollArea>
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -54,17 +56,12 @@ GenericDialog::~GenericDialog()
 */
 void GenericDialog::initLayout()
 {
+  // Create a scroll area for the (rare) occasion when an algorithm has
+  // so many properties it won't fit on the screen
   QScrollArea *scroll = new QScrollArea(this);
-  scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-
   QWidget *viewport = new QWidget(this);
-  scroll->setWidget(viewport);
-  scroll->setWidgetResizable(true);
-
-  //Put everything in a vertical box
-  // Making the dialog a parent of the layout automatically sets mainLay as the top-level layout
-  QVBoxLayout *mainLay = new QVBoxLayout(this);
+  // Put everything in a vertical box and put it inside the scroll area
+  QVBoxLayout *mainLay = new QVBoxLayout(scroll);
   viewport->setLayout(mainLay);
 
   // Add a layout for QDialog
@@ -221,6 +218,17 @@ void GenericDialog::initLayout()
 
   // Add the help, run and cancel buttons
   mainLay->addLayout(createDefaultButtonLayout());
+
+  scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+  scroll->setWidget(viewport);
+  scroll->setWidgetResizable(true);
+
+  const int screenHeight = QApplication::desktop()->height();
+  const int dialogHeight = viewport->height();
+  // If the thing won't end up too big compared to the screen height,
+  // resize the scroll area so we don't get a scroll bar
+  if ( dialogHeight < 0.8*screenHeight ) scroll->setFixedHeight(viewport->height()+10);
 }
 
 
