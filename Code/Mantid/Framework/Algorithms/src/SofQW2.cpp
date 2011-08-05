@@ -181,7 +181,7 @@ namespace Mantid
       const double xn_lo(newPoly[0].X()), xn_hi(newPoly[2].X());
       MantidVec::const_iterator start_it = std::upper_bound(oldAxis1.begin(), oldAxis1.end(), xn_lo);
       MantidVec::const_iterator end_it = std::upper_bound(oldAxis1.begin(), oldAxis1.end(), xn_hi);
-      size_t start_index(0), end_index(oldAxis1.size());
+      size_t start_index(0), end_index(oldAxis1.size() - 1);
       if( start_it != oldAxis1.begin() )
       {
 	start_index = (start_it - oldAxis1.begin() - 1);

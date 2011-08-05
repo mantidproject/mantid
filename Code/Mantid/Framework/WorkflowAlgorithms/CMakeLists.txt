@@ -17,6 +17,9 @@ set ( TEST_FILES
 		test/SANSSolidAngleCorrectionTest.h
 )
 
+# Use a precompiled header where they are supported
+ADD_PRECOMPILED_HEADER( inc/MantidWorkflowAlgorithms/PrecompiledHeader.h MantidWorkflowAlgorithms WorkflowAlgorithms SRC_FILES INC_FILES )
+
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(WorkflowAlgorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)

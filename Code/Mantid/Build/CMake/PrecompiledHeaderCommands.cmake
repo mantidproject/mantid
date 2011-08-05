@@ -4,7 +4,7 @@
 
 # A switch to turn them on and off
 # 
-SET ( USE_PRECOMPILED_HEADERS OFF CACHE BOOL "If true, will use precompiled headers on those platforms that support it."  )
+SET ( USE_PRECOMPILED_HEADERS ON CACHE BOOL "If true, will use precompiled headers on those platforms that support it."  )
 
 # MACRO ( ADD_PRECOMPILED_HEADER HEADER SOURCE BIN_NAME SOURCE_FILES )
 #    Adds the given header and source file as precompiled header files 

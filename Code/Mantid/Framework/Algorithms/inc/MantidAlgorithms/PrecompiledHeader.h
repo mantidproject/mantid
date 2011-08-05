@@ -5,4 +5,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 
+//Boost
+#include <boost/shared_ptr.hpp>
+
+
 #endif // MANTID_ALGORITHMS_PRECOMPILEDHEADER_H_

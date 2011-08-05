@@ -1,9 +1,15 @@
 #ifndef MANTID_KERNELTEST_PRECOMPILEDHEADER_H_
 #define MANTID_KERNELTEST_PRECOMPILEDHEADER_H_
 
-#include <cxxTest/TestSuite.h>
-#undef _CXXTEST_LONGLONG // Kill a warning
+// cxxtest
+#include <cxxtest/WrappedTestSuite.h>
 
+//Mantid
 #include "MantidKernel/System.h"
 
-#endif // MANTID_ALGORITHMS_PRECOMPILEDHEADER_H_
+// STL
+#include <vector>
+#include <set>
+#include <string>
+
+#endif // MANTID_KERNEL_PRECOMPILEDHEADER_H_
