@@ -3,6 +3,8 @@
 
 #include <QApplication>
 
+#include "MantidKernel/Logger.h"
+
 class pqPVApplicationCore;
 /**
  *
@@ -50,7 +52,9 @@ public:
    */
   virtual bool notify(QObject *receiver, QEvent *event);
 private:
+  static Mantid::Kernel::Logger& g_log; ///< Static handle to logger
   pqPVApplicationCore *pvApp; ///< ParaView application engine
+
 };
 
 #endif // SIMPLEGUIAPP_H

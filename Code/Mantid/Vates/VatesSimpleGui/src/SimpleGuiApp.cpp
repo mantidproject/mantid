@@ -7,6 +7,9 @@
 
 #include <exception>
 
+// The logger
+Mantid::Kernel::Logger& SimpleGuiApp::g_log = Mantid::Kernel::Logger::get("VatesSimpleGui");
+
 SimpleGuiApp::SimpleGuiApp(int &argc, char **argv) : QApplication(argc, argv)
 {
   this->pvApp = new pqPVApplicationCore(argc, argv);
@@ -27,7 +30,7 @@ bool SimpleGuiApp::notify(QObject *receiver, QEvent *event)
       QApplication::restoreOverrideCursor();
     }
 
-    //g_log.fatal()<<"Unexpected exception: "<<e.what()<<"\n";
+    g_log.fatal() << "Unexpected exception: " << e.what() << "\n";
     QMessageBox ask;
     QAbstractButton *terminateButton = ask.addButton(tr("Terminate"),
                                                      QMessageBox::ActionRole);
@@ -41,13 +44,13 @@ bool SimpleGuiApp::notify(QObject *receiver, QEvent *event)
     ask.exec();
     if (ask.clickedButton() == terminateButton)
     {
-        //g_log.fatal("Terminated by user.");
+        g_log.fatal("Terminated by user.");
         quit();
     }
   }
   catch (...)
   {
-    //g_log.fatal()<<"Unknown exception\n";
+    g_log.fatal() << "Unknown exception\n";
     QMessageBox ask;
     QAbstractButton *terminateButton = ask.addButton(tr("Terminate"),
                                                      QMessageBox::ActionRole);
@@ -60,8 +63,8 @@ bool SimpleGuiApp::notify(QObject *receiver, QEvent *event)
     ask.exec();
     if (ask.clickedButton() == terminateButton)
     {
-        //g_log.fatal("Terminated by user.");
-        quit();
+       g_log.fatal("Terminated by user.");
+       quit();
     }
   }
 
