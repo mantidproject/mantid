@@ -27,7 +27,7 @@ namespace API
    * @param useWriteBuffer :: True if you want to use the "to-Write" buffer.
    * @return
    */
-  DiskMRU::DiskMRU(size_t m_memoryAvail, size_t m_writeBufferSize, bool useWriteBuffer)
+  DiskMRU::DiskMRU(uint64_t m_memoryAvail, uint64_t m_writeBufferSize, bool useWriteBuffer)
   : m_memoryAvail(m_memoryAvail), m_writeBufferSize(m_writeBufferSize), m_useWriteBuffer(useWriteBuffer),
     m_memoryUsed(0),
     m_toWrite_byId( m_toWrite.get<1>() ),
@@ -72,7 +72,7 @@ namespace API
     }
 
     // We are now using more memory.
-    m_memoryUsed += item->getMRUMemory();
+    m_memoryUsed += item->getSizeOnFile();
 
     // You might have to pop 1 or more items until the MRU memory is below the limit
     mru_list::iterator it = list.end();
@@ -87,7 +87,7 @@ namespace API
       if (!toWrite->dataBusy())
       {
         toWrite->save();
-        m_memoryUsed -= toWrite->getMRUMemory();
+        m_memoryUsed -= toWrite->getSizeOnFile();
         list.erase(it);
       }
     }
@@ -116,7 +116,7 @@ namespace API
     if (found != m_toWrite_byId.end())
     {
       m_toWrite_byId.erase(item->getId());
-      m_memoryToWrite -= item->getMRUMemory();
+      m_memoryToWrite -= item->getSizeOnFile();
     }
 
     if (!p.second)
@@ -128,7 +128,7 @@ namespace API
     }
 
     // We are now using more memory.
-    m_memoryUsed += item->getMRUMemory();
+    m_memoryUsed += item->getSizeOnFile();
 
     if (m_memoryUsed > m_memoryAvail)
     {
@@ -144,7 +144,7 @@ namespace API
         //m_toWrite.insert( pairObj_t(toWrite->getFilePosition(), toWrite) );
 
         // Track the memory change in the two buffers
-        size_t thisMem = toWrite->getMRUMemory();
+        size_t thisMem = toWrite->getSizeOnFile();
         m_memoryToWrite += thisMem;
         m_memoryUsed -= thisMem;
       }
@@ -185,7 +185,7 @@ namespace API
         // The object is busy, can't write. Save it for later
         //couldNotWrite.insert( pairObj_t(obj->getFilePosition(), obj) );
         couldNotWrite.insert( obj );
-        memoryNotWritten += obj->getMRUMemory();
+        memoryNotWritten += obj->getSizeOnFile();
       }
     }
 
@@ -211,7 +211,7 @@ namespace API
       m_toWrite.insert(toWrite);
 
       // Track the memory change in the two buffers
-      size_t thisMem = toWrite->getMRUMemory();
+      size_t thisMem = toWrite->getSizeOnFile();
       m_memoryToWrite += thisMem;
       m_memoryUsed -= thisMem;
     }
@@ -219,7 +219,114 @@ namespace API
     writeOldObjects();
   }
 
+  //---------------------------------------------------------------------------------------------
+  /** This method is called by an ISaveable object that has shrunk
+   * and so has left a bit of free space after itself on the file;
+   * or when an object gets moved to a new spot.
+   *
+   * @param pos :: position in the file of the START of the new free block
+   * @param size :: size of the free block
+   */
+  void DiskMRU::freeBlock(uint64_t const pos, uint64_t const size)
+  {
+    m_freeMutex.lock();
 
+    // Make the block
+    FreeBlock newBlock(pos, size);
+    // Insert it
+    std::pair<freeSpace_t::iterator,bool> p = m_free.insert( newBlock );
+    // This is where we inserted
+    freeSpace_t::iterator it = p.first;
+    if (it != m_free.begin())
+    {
+      freeSpace_t::iterator it_before = it; it_before--;
+      // There is a block before
+      //std::cout << "There is a block before " << pos << std::endl;
+      FreeBlock block_before = *it_before;
+      if (FreeBlock::merge(block_before, newBlock))
+      {
+        //std::cout << "Merged with before block" << std::endl;
+        // Change the map by replacing the old "before" block with the new merged one
+        m_free.replace(it_before, block_before);
+        // Remove the block we just inserted
+        m_free.erase(it);
+        // For cases where the new block was between two blocks.
+        newBlock = block_before;
+        it = it_before;
+      }
+    }
+    if (it != m_free.end())
+    {
+      // There is a block after
+      freeSpace_t::iterator it_after = it; it_after++;
+      //std::cout << "There is a block after " << pos << std::endl;
+      FreeBlock block_after = *it_after;
+      if (FreeBlock::merge(newBlock, block_after))
+      {
+        //std::cout << "Merged with after block" << std::endl;
+        // Change the map by replacing the old "new" block with the new merged one
+        m_free.replace(it, newBlock);
+        // Remove the block that was after this one
+        m_free.erase(it_after);
+      }
+    }
+
+    m_freeMutex.unlock();
+  }
+
+
+  //---------------------------------------------------------------------------------------------
+  /** Method that defrags free blocks by combining adjacent ones together
+   * NOTE: This is not necessary to run since the freeBlock() methods
+   * automatically defrags neighboring blocks.
+   */
+  void  DiskMRU::defragFreeBlocks()
+  {
+    freeSpace_t::iterator it = m_free.begin();
+    FreeBlock thisBlock;
+    thisBlock = *it;
+
+    while (it != m_free.end())
+    {
+      // Get iterator to the block after "it".
+      freeSpace_t::iterator it_after = it;
+      it_after++;
+      FreeBlock block_after = *it_after;
+
+      if (FreeBlock::merge(thisBlock, *it_after))
+      {
+        // Change the map by replacing the old "before" block with the new merged one
+        m_free.replace(it, thisBlock);
+        // Remove the block that was merged out
+        m_free.erase(it_after);
+        // And stay at this iterator to
+      }
+      else
+      {
+        // Move on to the next block
+        it++;
+        thisBlock = *it;
+      }
+    }
+  }
+
+
+  //---------------------------------------------------------------------------------------------
+  /** This method is called by an ISaveable object that has outgrown
+   * its space allocated on file and needs to relocate.
+   *
+   * This should only be called when the MRU is saving a block to disk,
+   * i.e. the ISaveable cannot be in either the MRU buffer or the toWrite buffer.
+   *
+   * @param oldPos :: original position in the file
+   * @param oldSize :: original size in the file. This will be marked as "free"
+   * @param newSize :: new size of the data
+   * @return a new position at which the data can be saved.
+   */
+  uint64_t DiskMRU::relocate(uint64_t const oldPos, uint64_t const /*oldSize*/, const uint64_t /*newSize*/)
+  {
+    return oldPos;
+  }
 
 } // namespace Mantid
 } // namespace API

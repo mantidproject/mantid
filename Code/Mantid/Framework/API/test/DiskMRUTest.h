@@ -1,8 +1,8 @@
 #ifndef MANTID_API_DISKMRUTEST_H_
 #define MANTID_API_DISKMRUTEST_H_
 
-
 #include "MantidAPI/DiskMRU.h"
+#include "MantidAPI/FreeBlock.h"
 #include "MantidAPI/ISaveable.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -44,8 +44,8 @@ public:
   virtual void load()
   {}
 
-  size_t m_memory;
-  virtual size_t getMRUMemory() const {return m_memory;};
+  uint64_t m_memory;
+  virtual uint64_t getSizeOnFile() const {return m_memory;};
 
   bool m_dataBusy;
   virtual bool dataBusy() const {return m_dataBusy; }
@@ -440,7 +440,122 @@ public:
     //std::cout << ISaveableTester::fakeFile << std::endl;
   }
 
+
+  //--------------------------------------------------------------------------------
+  /** Freeing blocks get merged properly */
+  void test_freeBlock_mergesWithPrevious()
+  {
+    DiskMRU mru(4, 3, true);
+    DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
+    FreeBlock b;
+
+    TS_ASSERT_EQUALS( map.size(), 0);
+    mru.freeBlock(0, 50);
+    TS_ASSERT_EQUALS( map.size(), 1);
+    mru.freeBlock(100, 50);
+    TS_ASSERT_EQUALS( map.size(), 2);
+    // Free a block next to another one, AFTER
+    mru.freeBlock(150, 50);
+    TSM_ASSERT_EQUALS( "Map remained the same size because adjacent blocks were merged", map.size(), 2);
+
+    // Get the 2nd free block.
+    DiskMRU::freeSpace_t::iterator it =map.begin();
+    it++;
+    b = *it;
+    TS_ASSERT_EQUALS( b.getFilePosition(), 100);
+    TS_ASSERT_EQUALS( b.getSize(), 100);
+  }
+
+  //--------------------------------------------------------------------------------
+  /** Freeing blocks get merged properly */
+  void test_freeBlock_mergesWithNext()
+  {
+    DiskMRU mru(4, 3, true);
+    DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
+    FreeBlock b;
+
+    mru.freeBlock(0, 50);
+    mru.freeBlock(200, 50);
+    TS_ASSERT_EQUALS( map.size(), 2);
+    // Free a block next to another one, BEFORE
+    mru.freeBlock(150, 50);
+    TSM_ASSERT_EQUALS( "Map remained the same size because adjacent blocks were merged", map.size(), 2);
+
+    // Get the 2nd free block.
+    DiskMRU::freeSpace_t::iterator it =map.begin();
+    it++;
+    b = *it;
+    TS_ASSERT_EQUALS( b.getFilePosition(), 150);
+    TS_ASSERT_EQUALS( b.getSize(), 100);
+
+    mru.freeBlock(50, 50);
+    TSM_ASSERT_EQUALS( "Map remained the same size because adjacent blocks were merged", map.size(), 2);
+    TS_ASSERT_EQUALS( map.begin()->getSize(), 100);
+  }
+
+  //--------------------------------------------------------------------------------
+  /** Freeing blocks get merged properly */
+  void test_freeBlock_mergesWithBothNeighbours()
+  {
+    DiskMRU mru(4, 3, true);
+    DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
+    FreeBlock b;
+
+    mru.freeBlock(0, 50);
+    mru.freeBlock(200, 50);
+    mru.freeBlock(300, 50);
+    mru.freeBlock(400, 50); // Disconnected 4th one
+    TS_ASSERT_EQUALS( map.size(), 4);
+    // Free a block between two block
+    mru.freeBlock(250, 50);
+    TSM_ASSERT_EQUALS( "Map shrank because three blocks were merged", map.size(), 3);
+
+    // Get the 2nd free block.
+    DiskMRU::freeSpace_t::iterator it =map.begin();
+    it++;
+    b = *it;
+    TS_ASSERT_EQUALS( b.getFilePosition(), 200);
+    TS_ASSERT_EQUALS( b.getSize(), 150);
+  }
+
+  //--------------------------------------------------------------------------------
+  /** Add blocks to the free block list in parallel threads,
+   * should not segfault or anything */
+  void test_freeBlock_threadSafety()
+  {
+    DiskMRU mru(100, 0, false);
+    PRAGMA_OMP( parallel for)
+    for (size_t i=0; i<10000; i++)
+    {
+      mru.freeBlock(i*100, (i%3==0) ? 100 : 50);
+    }
+    // 1/3 of the blocks got merged
+    TS_ASSERT_EQUALS( mru.getFreeSpaceMap().size(), 6667);
+  }
+
+  /** Disabled because it is not necessary to defrag since that happens on the fly */
+  void xtest_defragFreeBlocks()
+  {
+    DiskMRU mru(4, 3, true);
+    DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
+    FreeBlock b;
+
+    mru.freeBlock(0, 50);
+    mru.freeBlock(100, 50);
+    mru.freeBlock(150, 50);
+    mru.freeBlock(500, 50);
+    mru.freeBlock(550, 50);
+    mru.freeBlock(600, 50);
+    mru.freeBlock(650, 50);
+    mru.freeBlock(1000, 50);
+    TS_ASSERT_EQUALS( map.size(), 8);
+
+    mru.defragFreeBlocks();
+    TS_ASSERT_EQUALS( map.size(), 4);
+  }
+
 };
+
 
 
 
@@ -540,6 +655,19 @@ public:
       mru.loading(dataSeek[i]);
     }
     std::cout << tim << " to load " << dataSeek.size() << " into MRU with fake seeking. 0.095 sec = shortest possible time." << std::endl;
+  }
+
+  void test_freeBlock()
+  {
+    CPUTimer tim;
+    DiskMRU mru(100, 0, false);
+    for (size_t i=0; i<100000; i++)
+    {
+      mru.freeBlock(i*100, (i%3==0) ? 100 : 50);
+    }
+    //mru.defragFreeBlocks();
+    TS_ASSERT_EQUALS( mru.getFreeSpaceMap().size(), 66667);
+    std::cout << tim << " to add " << 100000 << " blocks in the free space list." << std::endl;
   }
 
 };

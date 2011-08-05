@@ -59,7 +59,7 @@ namespace MDEvents
     { }
 
     /// @return the amount of memory that the object takes up in the MRU.
-    virtual size_t getMRUMemory() const
+    virtual uint64_t getSizeOnFile() const
     { return m_fileNumEvents; }
 
     /// @return true if it the data of the object is busy and so cannot be cleared by the MRU; false if the data was released and can be cleared/written.

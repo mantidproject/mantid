@@ -24,6 +24,7 @@ set ( SRC_FILES
 	src/FileFinder.cpp
 	src/FileProperty.cpp
 	src/FrameworkManager.cpp
+	src/FreeBlock.cpp
 	src/FunctionFactory.cpp
 	src/IDataFileChecker.cpp
 	src/IEventList.cpp
@@ -108,13 +109,14 @@ set ( INC_FILES
 	inc/MantidAPI/CostFunctionFactory.h
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
-	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DiskMRU.h
+	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/ExperimentInfo.h
 	inc/MantidAPI/Expression.h
 	inc/MantidAPI/FileFinder.h
 	inc/MantidAPI/FileProperty.h
 	inc/MantidAPI/FrameworkManager.h
+	inc/MantidAPI/FreeBlock.h
 	inc/MantidAPI/FunctionFactory.h
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
@@ -206,6 +208,7 @@ set ( TEST_FILES
 	test/FileFinderTest.h
 	test/FilePropertyTest.h
 	test/FrameworkManagerTest.h
+	test/FreeBlockTest.h
 	test/FunctionTest.h
 	test/IEventListTest.h
 	test/IFunctionMDTest.h
@@ -226,8 +229,8 @@ set ( TEST_FILES
 	test/SpectraAxisTest.h
 	test/SpectraDetectorMapTest.h
 	test/TextAxisTest.h
-	test/VectorParameterTest.h
 	test/VectorParameterParserTest.h
+	test/VectorParameterTest.h
 	test/WorkspaceFactoryTest.h
 	test/WorkspaceHistoryTest.h
 	test/WorkspacePropertyTest.h

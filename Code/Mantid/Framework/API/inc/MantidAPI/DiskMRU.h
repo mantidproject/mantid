@@ -2,6 +2,7 @@
 #define MANTID_API_DISKMRU_H_
     
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/FreeBlock.h"
 #include "MantidAPI/ISaveable.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
@@ -85,7 +86,6 @@ namespace API
      * Index 1: Order in the file to save to
      * Index 2: ID of the object
      */
-    //typedef std::multimap<uint64_t, ISaveable*> toWriteMap_t;
     typedef boost::multi_index::multi_index_container<
       const ISaveable *,
       boost::multi_index::indexed_by<
@@ -97,10 +97,22 @@ namespace API
     /// A way to index the toWrite buffer by ID (instead of the file position)
     typedef toWriteMap_t::nth_index<1>::type toWriteMap_by_Id_t;
 
+    /** A map for the list of free space blocks in the file.
+     * Index 1: Position in the file.
+     * Index 2: Size of the free block
+     */
+    typedef boost::multi_index::multi_index_container<
+      FreeBlock,
+      boost::multi_index::indexed_by<
+        boost::multi_index::ordered_non_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(FreeBlock, uint64_t, getFilePosition)>,
+        boost::multi_index::ordered_non_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(FreeBlock, uint64_t, getSize)>
+      >
+    > freeSpace_t;
+
 
     DiskMRU();
 
-    DiskMRU(size_t m_memoryAvail, size_t m_writeBufferSize, bool useWriteBuffer);
+    DiskMRU(uint64_t m_memoryAvail, uint64_t m_writeBufferSize, bool useWriteBuffer);
     
     virtual ~DiskMRU();
 
@@ -110,35 +122,46 @@ namespace API
 
     void flushCache();
 
+    void freeBlock(uint64_t const pos, uint64_t const size);
+
+    void defragFreeBlocks();
+
+    uint64_t relocate(uint64_t const oldPos, uint64_t const oldSize, const uint64_t newSize);
+
     //-------------------------------------------------------------------------------------------
     ///@return the memory used in the MRU, in number of events
-    size_t getMemoryUsed() const
+    uint64_t getMemoryUsed() const
     { return m_memoryUsed;  }
 
     ///@return the memory in the "toWrite" buffer, in number of events
-    size_t getMemoryToWrite() const
+    uint64_t getMemoryToWrite() const
     { return m_memoryToWrite;  }
 
     //-------------------------------------------------------------------------------------------
     /** Set the size of the to-write buffer, in number of events
      * @param buffer :: number of events to accumulate before writing  */
-    void setWriteBufferSize(size_t buffer)
+    void setWriteBufferSize(uint64_t buffer)
     { m_writeBufferSize = buffer; }
 
     /// @return the size of the to-write buffer, in number of events
-    size_t getWriteBufferSize() const
+    uint64_t getWriteBufferSize() const
     { return m_writeBufferSize; }
 
     //-------------------------------------------------------------------------------------------
     /** Set the size of the in-memory cache, in number of events
      * @param buffer :: max number of events to keep in memory */
-    void setMemoryAvail(size_t buffer)
+    void setMemoryAvail(uint64_t buffer)
     { m_memoryAvail = buffer; }
 
     /// @return the size of the in-memory cache, in number of events
-    size_t getMemoryAvail() const
+    uint64_t getMemoryAvail() const
     { return m_memoryAvail; }
 
+
+    //-------------------------------------------------------------------------------------------
+    ///@return reference to the free space map (for testing only!)
+    freeSpace_t & getFreeSpaceMap()
+    { return m_free;  }
 
   protected:
     void writeOldObjects();
@@ -148,16 +171,16 @@ namespace API
 
     /// Amount of memory that the MRU is allowed to use.
     /// Note that the units are up to the ISaveable to define; they don't have to be bytes.
-    size_t m_memoryAvail;
+    uint64_t m_memoryAvail;
 
     /// Amount of memory to accumulate in the write buffer before writing.
-    size_t m_writeBufferSize;
+    uint64_t m_writeBufferSize;
 
     /// Do we use the write buffer?
     bool m_useWriteBuffer;
 
     /// Amount of memory actually used up (in the MRU, not the toWriteBuffer)
-    size_t m_memoryUsed;
+    uint64_t m_memoryUsed;
 
     /// List of the data objects that should be written out. Ordered by file position.
     toWriteMap_t m_toWrite;
@@ -166,10 +189,22 @@ namespace API
     toWriteMap_by_Id_t & m_toWrite_byId;
 
     /// Total amount of memory in the "toWrite" buffer.
-    size_t m_memoryToWrite;
+    uint64_t m_memoryToWrite;
 
     /// Mutex for modifying the MRU list
     Kernel::Mutex m_mruMutex;
+
+    /// Position of the last USED point in the file
+    uint64_t m_endOfFile;
+
+    /// Allocated length of the file
+    uint64_t m_fileLength;
+
+    /// Map of the free blocks in the file
+    freeSpace_t m_free;
+
+    /// Mutex for modifying the free space list
+    Kernel::Mutex m_freeMutex;
 
   private:
     /// Private Copy constructor: NO COPY ALLOWED
