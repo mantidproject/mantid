@@ -259,6 +259,24 @@ public:
   }
 
 
+  /** Create peaks using Q in the lab frame,
+   * then find the corresponding detector ID */
+  void test_findDetector()
+  {
+    Peak p1(inst, 19999, 2.0);
+    V3D Qlab1 = p1.getQLabFrame();
+    V3D detPos1 = p1.getDetPos();
+
+    // Construct using just Q
+    Peak p2(inst, Qlab1, detPos1.norm());
+    TS_ASSERT( p2.findDetector() );
+    comparePeaks(p1, p2);
+    TS_ASSERT_EQUALS( p2.getBankName(), "bank1");
+    TS_ASSERT_EQUALS( p2.getRow(), 99);
+    TS_ASSERT_EQUALS( p2.getCol(), 99);
+    TS_ASSERT_EQUALS( p2.getDetectorID(), 19999);
+  }
+
 
 };
 

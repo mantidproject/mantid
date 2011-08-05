@@ -1,6 +1,7 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/System.h"
+#include "MantidGeometry/Objects/InstrumentRayTracer.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -433,15 +434,31 @@ namespace DataObjects
     detPos = samplePos + beam * detectorDistance;
   }
 
-  /** Using the Q in the lab frame and the instrument set in the peak,
-   * try to find the detector that measured this peak.
+
+  /** After creating a peak using the Q in the lab frame,
+   * the detPos is set to the direction of the detector (but the detector is unknown)
    *
-   * Uses ray tracing to find the peak.
+   * Using the instrument set in the peak, perform ray tracing
+   * to find the exact detector.   *
    *
    * @return true if the detector ID was found.
    */
-  bool Peak::findDetectorUsingQ()
+  bool Peak::findDetector()
   {
+    // Scattered beam direction
+    V3D beam = detPos - samplePos;
+    beam.normalize();
+
+    // Create a ray tracer
+    InstrumentRayTracer tracker( boost::const_pointer_cast<IInstrument>(m_inst) );
+    tracker.traceFromSample(beam);
+    IDetector_sptr det = tracker.getDetectorResult();
+    if (det)
+    {
+      // Set the detector ID, the row, col, etc.
+      this->setDetectorID(det->getID());
+      return true;
+    }
     return false;
   }
 

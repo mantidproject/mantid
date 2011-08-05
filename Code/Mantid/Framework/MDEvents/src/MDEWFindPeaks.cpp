@@ -222,7 +222,7 @@ namespace MDEvents
         // TODO: Goniometer matrix and other stuff?
 
         // Look for a detector
-        p.findDetectorUsingQ();
+        p.findDetector();
 
         // The "bin count" used will be the box density.
         p.setBinCount( box->getSignalNormalized() );

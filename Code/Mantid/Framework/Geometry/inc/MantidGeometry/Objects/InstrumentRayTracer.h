@@ -58,7 +58,7 @@ namespace Mantid
     public:
 
       /// Constructor taking an instrument
-      InstrumentRayTracer(IInstrument_sptr instrument);      
+      InstrumentRayTracer(IInstrument_sptr instrument);
       /// Trace a given track from the instrument source in the given direction 
       /// and compile a list of results that this track intersects.
       void trace(const Kernel::V3D & direction) const;

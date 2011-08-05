@@ -43,7 +43,7 @@ namespace DataObjects
     Mantid::Geometry::IDetector_const_sptr getDetector() const;
     Mantid::Geometry::IInstrument_const_sptr getInstrument() const;
 
-    bool findDetectorUsingQ();
+    bool findDetector();
 
     int getRunNumber() const;
     void setRunNumber(int m_RunNumber);
