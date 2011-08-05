@@ -80,7 +80,7 @@ public:
 	//! Causes the master curve to delete this curve from its managed error bars list.
 	void detachFromMasterCurve(){d_master_curve->removeErrorBars(this);};
 
-    QString plotAssociation();
+    QString plotAssociation() const;
 
 	bool updateData(Table *t, const QString& colName);
 	void loadData();

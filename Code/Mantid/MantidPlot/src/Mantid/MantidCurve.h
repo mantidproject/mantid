@@ -109,6 +109,8 @@ public:
   Mantid::Kernel::Unit_sptr yUnits()const{return m_yUnits;}
 
 private:
+  using PlotCurve::draw; // Avoid Intel compiler warning
+
   /// Init the curve
   void init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,
               int index,bool distr);

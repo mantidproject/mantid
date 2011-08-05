@@ -301,7 +301,7 @@ void QwtErrorPlotCurve::loadData()
 	setErrors(err);
 }
 
-QString QwtErrorPlotCurve::plotAssociation()
+QString QwtErrorPlotCurve::plotAssociation() const
 {
     if (!d_master_curve)
 		return QString();

@@ -306,7 +306,7 @@ void VectorCurve::updateColumnNames(const QString& oldName, const QString& newNa
     }
 }
 
-QString VectorCurve::plotAssociation()
+QString VectorCurve::plotAssociation() const
 {
     QString base = d_x_column + "(X)," + title().text() + "(Y)," + d_end_x_a;
     if (d_style == XYAM)

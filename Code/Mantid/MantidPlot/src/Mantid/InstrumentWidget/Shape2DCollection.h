@@ -48,6 +48,7 @@ public:
   QPointF getCurrentPoint(const QString& prop) const;
   void setCurrentPoint(const QString& prop, const QPointF& value);
 
+  using Shape2D::isMasked; // Unhide base class method (avoids Intel compiler warning)
   // is a point in real space masked by any of the shapes
   bool isMasked(double x,double y)const;
   // collect all screen pixels that are masked by the shapes
