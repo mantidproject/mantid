@@ -72,6 +72,11 @@ public:
     TS_ASSERT_DELTA( spec->dataE()[95], sqrt(133.0), 1e-4);
 
     TS_ASSERT_EQUALS( ws->getAxis(1)->length(), 51200);
+    TS_ASSERT_EQUALS( ws->getAxis(0)->length(), 202);
+    TS_ASSERT_EQUALS( ws->getAxis(0)->unit()->caption(), "Time-of-flight");
+    TS_ASSERT_EQUALS( ws->YUnit(), "counts");
+    TS_ASSERT_EQUALS( ws->getTitle(), "test after manual intervention");
+
   }
 
 };

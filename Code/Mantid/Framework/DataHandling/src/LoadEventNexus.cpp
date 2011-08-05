@@ -987,7 +987,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   WS->setAllX(axis);
 
   // set more properties on the workspace
-  this->loadEntryMetadata(m_top_entry_name);
+  loadEntryMetadata(m_filename, WS, m_top_entry_name);
 }
 
 //-----------------------------------------------------------------------------
@@ -1012,10 +1012,14 @@ EventWorkspace_sptr LoadEventNexus::createEmptyEventWorkspace()
   return eventWS;
 }
 
+
+//-----------------------------------------------------------------------------
 /** Load the run number and other meta data from the given bank */
-void LoadEventNexus::loadEntryMetadata(const std::string &entry_name) {
+void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid::API::MatrixWorkspace_sptr WS,
+    const std::string &entry_name)
+{
   // Open the file
-  ::NeXus::File file(m_filename);
+  ::NeXus::File file(nexusfilename);
   file.openGroup(entry_name, "NXentry");
 
   // get the title

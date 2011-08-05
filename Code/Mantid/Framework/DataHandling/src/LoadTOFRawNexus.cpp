@@ -136,7 +136,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   if (numPixels == 0)
   { file->close(); g_log.warning() << "Invalid pixel_id data in " << bankName << std::endl; return; }
 
-  if (workspaceIndex + numPixels >= WS->getNumberHistograms())
+  if (workspaceIndex + numPixels > WS->getNumberHistograms())
   { file->close(); g_log.warning() << "Too many pixels in bank " << bankName << " to fit in the workspace" << std::endl; return; }
 
   // Load the TOF vector
@@ -221,6 +221,10 @@ void LoadTOFRawNexus::exec()
   prog->report("Loading instrument");
   LoadEventNexus::runLoadInstrument(filename, WS, entry_name, this);
 
+  // Load the meta data
+  prog->report("Loading metadata");
+  LoadEventNexus::loadEntryMetadata(filename, WS, entry_name);
+
   // Load each bank sequentially
   size_t workspaceIndex = 0;
   for (size_t i=0; i<bankNames.size(); i++)
@@ -229,6 +233,10 @@ void LoadTOFRawNexus::exec()
     prog->report("Loading bank " + bankName);
     loadBank(filename, entry_name, bankName, WS, workspaceIndex);
   }
+
+  // Set some units
+  WS->getAxis(0)->setUnit("TOF");
+  WS->setYUnit("counts");
 
   // Method that will eventually go away.
   WS->generateSpectraMap();

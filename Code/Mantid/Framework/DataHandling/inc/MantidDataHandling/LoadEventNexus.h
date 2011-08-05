@@ -143,11 +143,13 @@ namespace Mantid
       DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
       void makeMapToEventLists();
       void loadEvents(API::Progress * const prog, const bool monitors);
-      void loadEntryMetadata(const std::string &entry_name);
       void createSpectraMapping(const std::string &nxsfile, API::MatrixWorkspace_sptr workspace,
                                 const bool monitorsOnly, const std::string & bankName = "");
       bool hasEventMonitors();
       void runLoadMonitors();
+
+      static void loadEntryMetadata(const std::string &nexusfilename, Mantid::API::MatrixWorkspace_sptr WS,
+          const std::string &entry_name);
 
       static bool runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
           const std::string & top_entry_name, Algorithm * alg);
