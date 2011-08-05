@@ -52,10 +52,10 @@ void Q1DWeighted::init()
 
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
   positiveDouble->setLower(0);
-  declareProperty("PixelSizeX", 0.00515, positiveDouble,
-      "Pixel size in the X direction (m).");
-  declareProperty("PixelSizeY", 0.00515, positiveDouble->clone(),
-      "Pixel size in the Y direction (m).");
+  declareProperty("PixelSizeX", 5.15, positiveDouble,
+      "Pixel size in the X direction (mm).");
+  declareProperty("PixelSizeY", 5.15, positiveDouble->clone(),
+      "Pixel size in the Y direction (mm).");
   declareProperty("ErrorWeighting", false,
       "Choose whether each pixel contribution will be weighted by 1/error^2.");
 }
@@ -73,6 +73,9 @@ void Q1DWeighted::exec()
   // Get pixel size and pixel sub-division
   double pixelSizeX = getProperty("PixelSizeX");
   double pixelSizeY = getProperty("PixelSizeY");
+  // Convert from mm to meters
+  pixelSizeX /= 1000.0;
+  pixelSizeY /= 1000.0;
   int nSubPixels = getProperty("NPixelDivision");
 
   // Get weighting option

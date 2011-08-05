@@ -734,31 +734,28 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         
     def get_output_workspace(self, workspace):
         if not self._is_frame_skipping:
-            return workspace+str(self._suffix)
-        return [workspace+'_frame1'+str(self._suffix), workspace+'_frame2'+str(self._suffix)]
+            return workspace+self._suffix
+        return [workspace+'_frame1'+self._suffix, workspace+'_frame2'+self._suffix]
         
     def execute(self, reducer, workspace):
+        # We will need the pixel dimensions to compute the Q resolution        
+        pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
+        pixel_size_y = mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
+        
         if mtd[workspace].getRun().hasProperty("is_frame_skipping") \
             and mtd[workspace].getRun().getProperty("is_frame_skipping").value==0:
             self._is_frame_skipping = False
             output_str = super(AzimuthalAverageByFrame, self).execute(reducer, workspace)
-            #TOFSANSResolution(InputWorkspace=workspace+str(self._suffix), ReducedWorkspace=workspace, OutputBinning=self._binning)
+            TOFSANSResolution(InputWorkspace=workspace+self._suffix, 
+                              ReducedWorkspace=workspace, OutputBinning=self._binning,
+                              PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y)
             return output_str
         
         self._is_frame_skipping = True
         
-        # First frame
-        wl_min = None
-        wl_max = None
-        if mtd[workspace].getRun().hasProperty("wavelength_min"):
-            wl_min = mtd[workspace].getRun().getProperty("wavelength_min").value
-        if mtd[workspace].getRun().hasProperty("wavelength_max"):
-            wl_max = mtd[workspace].getRun().getProperty("wavelength_max").value
-        if wl_min is None and wl_max is None:
-            raise RuntimeError, "Could not get the wavelength band for frame 1"
-        CropWorkspace(workspace, workspace+'_frame1', XMin=wl_min, XMax=wl_max)
-        
-        output_str = "Performed radial averaging: frame 1 = [%6.1f, %-6.1f], " % (wl_min, wl_max)
+        # Execution computes the binning if it's initially set to None,
+        # so we keep track of it to make sure it's properly passed to both frames
+        binning = self._binning
         
         # Second frame
         wl_min = None
@@ -771,16 +768,34 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
             raise RuntimeError, "Could not get the wavelength band for frame 2"
         CropWorkspace(workspace, workspace+'_frame2', XMin=wl_min, XMax=wl_max)
         
-        output_str += "frame 2 = [%6.1f, %-6.1f]," % (wl_min, wl_max)
+        output_str = "Performed radial averaging: frame 2 = [%6.1f, %-6.1f], " % (wl_min, wl_max)
+        
+        super(AzimuthalAverageByFrame, self).execute(reducer, workspace+'_frame2')
+        TOFSANSResolution(InputWorkspace=workspace+'_frame2'+self._suffix, 
+                          ReducedWorkspace=workspace, OutputBinning=self._binning,
+                          MinWavelength=wl_min, MaxWavelength=wl_max,
+                          PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y)                                                                         
+        
+        # Reset binning
+        self._binning = binning
 
-        iq_frame1 = WeightedAzimuthalAverage(binning=self._binning, suffix=self._suffix, error_weighting=self._error_weighting, 
-                                             n_bins=self._nbins, n_subpix=self._nsubpix, log_binning=self._log_binning)
-        iq_frame1.execute(reducer, workspace+'_frame1')
+        # First frame
+        wl_min = None
+        wl_max = None
+        if mtd[workspace].getRun().hasProperty("wavelength_min"):
+            wl_min = mtd[workspace].getRun().getProperty("wavelength_min").value
+        if mtd[workspace].getRun().hasProperty("wavelength_max"):
+            wl_max = mtd[workspace].getRun().getProperty("wavelength_max").value
+        if wl_min is None and wl_max is None:
+            raise RuntimeError, "Could not get the wavelength band for frame 1"
+        CropWorkspace(workspace, workspace+'_frame1', XMin=wl_min, XMax=wl_max)
         
-        iq_frame2 = WeightedAzimuthalAverage(binning=self._binning, suffix=self._suffix, error_weighting=self._error_weighting, 
-                                             n_bins=self._nbins, n_subpix=self._nsubpix, log_binning=self._log_binning)
-        iq_frame2.execute(reducer, workspace+'_frame2')
+        output_str += "frame 1 = [%6.1f, %-6.1f]" % (wl_min, wl_max)
         
+        super(AzimuthalAverageByFrame, self).execute(reducer, workspace+'_frame1')
+        
+        # Workspace operations do not keep Dx, so scale frame 1 before putting
+        # in the Q resolution
         # Scale frame 1 to frame 2
         if self._scale:
             q_min = min(mtd[workspace+'_frame1'+self._suffix].dataX(0))
@@ -814,16 +829,22 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
                     scale_factor = scale_f2/scale_f1
             
             Scale(InputWorkspace=workspace+'_frame1'+self._suffix, OutputWorkspace=workspace+'_frame1'+self._suffix, Factor=scale_factor, Operation="Multiply")
-            # Clean up 
-            for ws in ["__frame1_rebinned", "__frame2_rebinned"]:
-                if mtd.workspaceExists(ws):
-                    mtd.deleteWorkspace(ws)
             
+        TOFSANSResolution(InputWorkspace=workspace+'_frame1'+self._suffix, 
+                          ReducedWorkspace=workspace, OutputBinning=self._binning,
+                          MinWavelength=wl_min, MaxWavelength=wl_max,
+                          PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y)        
+                    
         # Add output workspaces to the list of important output workspaces
         for item in self.get_output_workspace(workspace):
             if item in reducer.output_workspaces:
                 reducer.output_workspaces.remove(item)
         reducer.output_workspaces.append(self.get_output_workspace(workspace))                
+
+        # Clean up 
+        for ws in ["__frame1_rebinned", "__frame2_rebinned", workspace+'_frame1', workspace+'_frame2']:
+            if mtd.workspaceExists(ws):
+                mtd.deleteWorkspace(ws)
         
         return output_str
         
