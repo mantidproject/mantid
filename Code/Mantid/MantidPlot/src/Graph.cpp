@@ -105,7 +105,8 @@
  #pragma GCC diagnostic ignored "-Wstrict-overflow"
 #endif
 
-//Mantid::Kernel::Logger & Graph::g_log=Mantid::Kernel::Logger::get("Graph");
+Mantid::Kernel::Logger & Graph::g_log=Mantid::Kernel::Logger::get("Graph");
+
 Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 : QWidget(parent, f) //QwtPlot(parent)
 {	
@@ -3283,9 +3284,13 @@ PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth, int curveType)
       m_yUnits = mc->yUnits();
       m_isDistribution = mc->isDistribution();
     }
-    if (m_xUnits != mc->xUnits() || m_yUnits != mc->yUnits() || m_isDistribution != mc->isDistribution())
+    if ( m_xUnits != mc->xUnits() || m_yUnits != mc->yUnits() )
     {
-      return NULL;
+      g_log.warning("You are overlaying plots from data having differing units!");
+    }
+    if ( m_isDistribution != mc->isDistribution() )
+    {
+      g_log.warning("You are overlaying distribution and non-distribution data!");
     }
   }
 
@@ -3311,15 +3316,7 @@ void Graph::insertCurve(Graph* g, int i)
   PlotCurve *plotCurve = dynamic_cast<PlotCurve*>(g->curve(i));
   if( !plotCurve ) return;
   int curveType = g->curveType(i);
-  MantidCurve *mantidCurve = dynamic_cast<MantidCurve*>(g->curve(i));
-  if (mantidCurve)
-  {
-    this->insertCurve(mantidCurve, -1, curveType);
-  }
-  else
-  {
-    this->insertCurve(plotCurve, -1, curveType);
-  }
+  this->insertCurve(plotCurve, -1, curveType);
 }
 
 

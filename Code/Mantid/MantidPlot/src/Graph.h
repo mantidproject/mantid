@@ -50,10 +50,10 @@
 #include "PlotToolInterface.h"
 #include "MultiLayer.h"
 #include "ScaleDraw.h"
-//#include "MantidKernel/Logger.h"
+#include "MantidKernel/Logger.h"
 #include "GraphOptions.h"
 #include <boost/shared_ptr.hpp>
-#include<set>
+#include <set>
 
 
 #include <float.h>
@@ -823,7 +823,7 @@ private:
   LegendWidget *d_legend;
   //! Flag indicating if the axes limits should be changed in order to show all data each time a curva data change occurs
   bool d_auto_scale;
-  //static Mantid::Kernel::Logger &g_log;
+  static Mantid::Kernel::Logger &g_log;
   QString mCurrentColorMap;
   QwtPlotMagnifier *d_magnifier;
   QwtPlotPanner *d_panner;
