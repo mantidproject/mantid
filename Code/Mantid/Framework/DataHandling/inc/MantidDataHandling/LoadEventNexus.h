@@ -14,6 +14,7 @@
 //Copy of the NexusCpp API was placed in MantidNexus
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NeXusException.hpp"
+#include "MantidDataObjects/Events.h"
 
 
 namespace Mantid
@@ -127,7 +128,20 @@ namespace Mantid
       /// Do we load the sample logs?
       bool loadlogs;
       
+      /// Pointer to the vector of events
+      typedef std::vector<Mantid::DataObjects::TofEvent> * EventVector_pt;
+
+      /// Vector where index = pixel ID; value = ptr to std::vector<TofEvent> in the event list.
+      std::vector<EventVector_pt> eventVectors;
+
+      /// Maximum (inclusive) detector ID in instrument
+      detid_t detid_max;
+
+      /// Pointer to the map (key = pixel ID, value = workspace index)
+      detid2index_map * pixelID_to_wi_map;
+
       DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
+      void makeMapToEventLists();
       void loadEvents(API::Progress * const prog, const bool monitors);
       void loadEntryMetadata(const std::string &entry_name);
       void runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace);

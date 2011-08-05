@@ -100,31 +100,27 @@ public:
     // ---- Pre-counting events per pixel ID ----
     if (alg->precount)
     {
-      std::map<uint32_t, size_t> counts; // key = pixel ID, value = count
+      std::vector<size_t> counts;
+      // key = pixel ID, value = count
+      counts.resize(alg->detid_max+1);
       for (size_t i=0; i < numEvents; i++)
       {
-        uint32_t thisId = event_id[i];
-        std::map<uint32_t, size_t>::iterator map_found = counts.find(thisId);
-        if (map_found != counts.end())
-        {
-          map_found->second++;
-        }
-        else
-        {
-          counts[thisId] = 1; // First entry
-        }
-        if (alg->getCancel()) break; // User cancellation
+        detid_t thisId = detid_t(event_id[i]);
+        if (thisId <= alg->detid_max)
+          counts[thisId]++;
       }
 
       // Now we pre-allocate (reserve) the vectors of events in each pixel counted
-      std::map<uint32_t, size_t>::iterator pixID;
-      for (pixID = counts.begin(); pixID != counts.end(); pixID++)
+      for (detid_t pixID = 0; pixID <= alg->detid_max; pixID++)
       {
-        //Find the the workspace index corresponding to that pixel ID
-        size_t wi = static_cast<size_t>((*pixelID_to_wi_map)[ pixID->first ]);
-        // Allocate it
-        alg->WS->getEventList(wi).reserve( pixID->second );
-        if (alg->getCancel()) break; // User cancellation
+        if (counts[pixID] > 0)
+        {
+          //Find the the workspace index corresponding to that pixel ID
+          size_t wi = static_cast<size_t>((*pixelID_to_wi_map)[ pixID ]);
+          // Allocate it
+          alg->WS->getEventList(wi).reserve( counts[pixID] );
+          if (alg->getCancel()) break; // User cancellation
+        }
       }
     }
 
@@ -154,8 +150,9 @@ public:
 
     // Will we need to compress?
     bool compress = (alg->compressTolerance >= 0);
-    // Which workspace indices were touched?
-    std::set<size_t> usedWI;
+
+    // Which detector IDs were touched?
+    std::vector<bool> usedDetIds(alg->detid_max+1, false);
 
     //Go through all events in the list
     for (std::size_t i = 0; i < numEvents; i++)
@@ -188,21 +185,27 @@ public:
         //The event TOF passes the filter.
         TofEvent event(tof, pulsetime);
 
-        //Find the the workspace index corresponding to that pixel ID
-        size_t wi = static_cast<size_t>((*pixelID_to_wi_map)[event_id[i]]);
-        // Add it to the list at that workspace index
-        WS->getEventList(wi).addEventQuickly( event );
-
-        //Local tof limits
-        if (tof < my_shortest_tof) { my_shortest_tof = tof;}
-        if (tof > my_longest_tof) { my_longest_tof = tof;}
-
-        // Track all the touched wi
-        if (compress)
+        // We cached a pointer to the vector<tofEvent> -> so retrieve it and add the event
+        detid_t detId = event_id[i];
+        if (detId <= alg->detid_max)
         {
-          if (usedWI.find(wi) == usedWI.end())
-            usedWI.insert(wi);
-        }
+          alg->eventVectors[detId]->push_back( event );
+
+//        //Find the the workspace index corresponding to that pixel ID
+//        size_t wi = static_cast<size_t>((*pixelID_to_wi_map)[event_id[i]]);
+//        // Add it to the list at that workspace index
+//        WS->getEventList(wi).addEventQuickly( event );
+
+          //Local tof limits
+          if (tof < my_shortest_tof) { my_shortest_tof = tof;}
+          if (tof > my_longest_tof) { my_longest_tof = tof;}
+
+          // Track all the touched wi
+          if (compress)
+          {
+            usedDetIds[detId] = true;
+          }
+        } // valid detector IDs
 
       }
     } //(for each event)
@@ -211,12 +214,17 @@ public:
     //------------ Compress Events ------------------
     if (compress)
     {
-      // Do it on all the workspace indices we touched
+      // Do it on all the detector IDs we touched
       std::set<size_t>::iterator it;
-      for (it=usedWI.begin(); it!=usedWI.end(); it++)
+      for (detid_t pixID = 0; pixID <= alg->detid_max; pixID++)
       {
-        EventList * el = WS->getEventListPtr(*it);
-        el->compressEvents(alg->compressTolerance, el);
+        if (usedDetIds[pixID])
+        {
+          //Find the the workspace index corresponding to that pixel ID
+          size_t wi = static_cast<size_t>((*pixelID_to_wi_map)[ pixID ]);
+          EventList * el = WS->getEventListPtr(wi);
+          el->compressEvents(alg->compressTolerance, el);
+        }
       }
     }
 
@@ -771,6 +779,37 @@ void LoadEventNexus::exec()
   return;
 }
 
+
+
+//-----------------------------------------------------------------------------
+/** Generate a look-up table where the index = the pixel ID of an event
+ * and the value = a pointer to the EventList in the workspace
+ */
+void LoadEventNexus::makeMapToEventLists()
+{
+  // We want to pad out empty pixels.
+  detid2det_map detector_map;
+  WS->getInstrument()->getDetectors(detector_map);
+
+  // determine maximum pixel id
+  detid2det_map::iterator it;
+  detid_max = 0; // seems like a safe lower bound
+  for (it = detector_map.begin(); it != detector_map.end(); it++)
+    if (it->first > detid_max)
+      detid_max = it->first;
+
+  // Make an array where index = pixel ID
+  // Set the value to the 0th workspace index by default
+  eventVectors.resize(detid_max+1, &WS->getEventList(0).getEvents() );
+  for (detid_t j=0; j<detid_max+1; j++)
+  {
+    size_t wi = (*pixelID_to_wi_map)[j];
+    // Save a POINTER to the vector<tofEvent>
+    eventVectors[j] = &WS->getEventList(wi).getEvents();
+  }
+}
+
+
 //-----------------------------------------------------------------------------
 /**
  * Load events from the file
@@ -901,7 +940,13 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   // Create the required spectra mapping so that the workspace knows what to pad to
   createSpectraMapping(m_filename, WS, monitors, onebank);
   WS->padSpectra();
-  
+
+  //This map will be used to find the workspace index
+  pixelID_to_wi_map = WS->getSpectrumToWorkspaceIndexMap();
+
+  // Cache a map for speed.
+  this->makeMapToEventLists();
+
   // --------------------------- Time filtering ------------------------------------
   double filter_time_start_sec, filter_time_stop_sec;
   filter_time_start_sec = getProperty("FilterByTime_Start");
@@ -938,21 +983,17 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*3);
 
-  //This map will be used to find the workspace index
-  detid2index_map * pixelID_to_wi_map(NULL);
-  pixelID_to_wi_map = WS->getSpectrumToWorkspaceIndexMap();
-
   // Make the thread pool
   ThreadScheduler * scheduler = new ThreadSchedulerLargestCost();
-  ThreadPool pool(scheduler);
+  ThreadPool pool(scheduler, 8);
   Mutex * diskIOMutex = new Mutex();
   for (size_t i=0; i < bankNames.size(); i++)
   {
     // We make tasks for loading
     pool.schedule( new LoadBankFromDiskTask(this,m_top_entry_name,bankNames[i],classType, pixelID_to_wi_map, prog2, diskIOMutex, scheduler) );
-    // Start and end all threads
-    pool.joinAll();
   }
+  // Start and end all threads
+  pool.joinAll();
   delete diskIOMutex;
   delete prog2;
 
