@@ -814,6 +814,10 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
                     scale_factor = scale_f2/scale_f1
             
             Scale(InputWorkspace=workspace+'_frame1'+self._suffix, OutputWorkspace=workspace+'_frame1'+self._suffix, Factor=scale_factor, Operation="Multiply")
+            # Clean up 
+            for ws in ["__frame1_rebinned", "__frame2_rebinned"]:
+                if mtd.workspaceExists(ws):
+                    mtd.deleteWorkspace(ws)
             
         # Add output workspaces to the list of important output workspaces
         for item in self.get_output_workspace(workspace):
