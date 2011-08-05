@@ -136,7 +136,7 @@ namespace Mantid
         instrName = path.getFileName();
         if ((instrName.find("PG3") == 0) || (instrName.find("pg3") == 0))
         {
-          instrName = instrName.substr(0, 3);
+          instrName = "PG3";
         }
         else
         {
@@ -184,24 +184,26 @@ namespace Mantid
       }
       else
       {
+        /// Find the last non-digit as the instrument name can contain numbers
+        std::string::const_reverse_iterator it = std::find_if(hint.rbegin(), hint.rend(),
+            std::not1(std::ptr_fun(isdigit)));
+        // No non-digit or all non-digits
+        if (it == hint.rend() || it == hint.rbegin())
+        {
+          throw std::invalid_argument("Malformed hint to FileFinderImpl::makeFileName: " + hint);
+        }
+        std::string::size_type nChars = std::distance(it, hint.rend());
+
         // PG3 is a special case (name ends in a number)- don't trust them
         if ((hint.find("PG3") == 0) || (hint.find("pg3") == 0)) {
-          instrPart = hint.substr(0, 3);
-          runPart = hint.substr(3);
+          instrPart = "PG3";
+          if (nChars < 3)
+            nChars++;
         }
         else {
-          /// Find the last non-digit as the instrument name can contain numbers
-          std::string::const_reverse_iterator it = std::find_if(hint.rbegin(), hint.rend(),
-              std::not1(std::ptr_fun(isdigit)));
-          // No non-digit or all non-digits
-          if (it == hint.rend() || it == hint.rbegin())
-          {
-            throw std::invalid_argument("Malformed hint to FileFinderImpl::makeFileName: " + hint);
-          }
-          std::string::size_type nChars = std::distance(it, hint.rend());
           instrPart = hint.substr(0, nChars);
-          runPart = hint.substr(nChars);
         }
+        runPart = hint.substr(nChars);
       }
 
       Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().getInstrument(instrPart);
