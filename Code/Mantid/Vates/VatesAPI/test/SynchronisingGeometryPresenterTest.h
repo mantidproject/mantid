@@ -72,7 +72,7 @@ static std::string constructXML(std::string nbinsA, std::string nbinsB, std::str
 
   static std::string constructXML()
   {
-    return constructXML("1", "5", "5", "5", "1");
+    return constructXML("1", "5", "5", "5", "3");
   }
 
   class MockGeometryView : public GeometryView
@@ -131,8 +131,9 @@ public:
   {
     MDGeometryXMLParser parser(constructXML());
     parser.execute();
-    SynchronisingGeometryPresenter presenter(parser); 
-    TSM_ASSERT_EQUALS("Wrong number of nonintegrated dimensions", 3, presenter.getNonIntegratedDimensions().size());
+    SynchronisingGeometryPresenter* pPresenter;
+    TS_ASSERT_THROWS_NOTHING(pPresenter = new SynchronisingGeometryPresenter(parser)); 
+    delete pPresenter;
   }
 
   void testAcceptView()
@@ -140,14 +141,14 @@ public:
     MockDimensionView dView;
     EXPECT_CALL(dView, accept(_)).Times(5);
     EXPECT_CALL(dView, configureStrongly()).Times(5);
-    EXPECT_CALL(dView, showAsNotIntegrated(_)).Times(3);
-    EXPECT_CALL(dView, showAsIntegrated()).Times(2);
+    EXPECT_CALL(dView, showAsNotIntegrated(_)).Times(4);
+    EXPECT_CALL(dView, showAsIntegrated()).Times(1);
 
     MockDimensionViewFactory factory;
     EXPECT_CALL(factory, create()).Times(5).WillRepeatedly(Return(&dView));
     
     MockGeometryView gView;
-    EXPECT_CALL(gView, getDimensionViewFactory()).Times(1).WillRepeatedly(ReturnRef(factory));
+    EXPECT_CALL(gView, getDimensionViewFactory()).WillOnce(ReturnRef(factory));
     EXPECT_CALL(gView, addDimensionView(_)).Times(5);
 
     MDGeometryXMLParser parser(constructXML());
@@ -167,6 +168,21 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&dView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
 
+  }
+
+  void testDimensionPartitioning()
+  {
+    MDGeometryXMLParser parser(constructXML());
+    parser.execute();
+    SynchronisingGeometryPresenter presenter(parser);
+
+    VecIMDDimension_sptr nonIntegratedDimensions = presenter.getNonIntegratedDimensions();
+    VecIMDDimension_sptr integratedDimensions = presenter.getIntegratedDimensions();
+
+    TSM_ASSERT_EQUALS("Sum of partitions doesn't compute to total", 5, nonIntegratedDimensions.size() + integratedDimensions.size());
+    TSM_ASSERT_EQUALS("Wrong number of non-integrated dimensions", 4, nonIntegratedDimensions.size());
+    TSM_ASSERT_EQUALS("Wrong number of integrated dimensions", 1, integratedDimensions.size());
+    TSM_ASSERT_EQUALS("Wrong integrated dimension", "en", integratedDimensions[0]->getDimensionId());
   }
 
   void testCollapsingThrows()

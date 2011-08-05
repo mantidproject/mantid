@@ -56,6 +56,8 @@ namespace Mantid
 
       Mantid::Geometry::VecIMDDimension_sptr getNonIntegratedDimensions() const;
 
+      Mantid::Geometry::VecIMDDimension_sptr getIntegratedDimensions() const;
+
       MappingType getMappings() const;
 
       std::string getGeometryXML() const;
@@ -108,9 +110,7 @@ namespace Mantid
       /// Disabled assignement operator
       SynchronisingGeometryPresenter& operator=(const SynchronisingGeometryPresenter&);
       /// Collection of synchronised non-integrated dimensions.
-      Mantid::Geometry::VecIMDDimension_sptr m_notIntegrated;
-      /// Collection of synchronised integrated dimensions.
-      Mantid::Geometry::VecIMDDimension_sptr m_integrated;
+      mutable Mantid::Geometry::VecIMDDimension_sptr m_dimensions;
       /// Original geometry model/source.
       Mantid::Geometry::MDGeometryXMLParser m_source; 
       /// The View with which the presenter will be bound.

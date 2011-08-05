@@ -7,12 +7,22 @@
 
 
 using Mantid::Geometry::IMDDimension_sptr;
+using Mantid::Geometry::VecIMDDimension_sptr;
 typedef Mantid::VATES::GeometryPresenter::MappingType MappingType;
 
 namespace Mantid
 {
   namespace VATES
   {
+
+     struct FindIntegrated : public std::unary_function <IMDDimension_sptr, bool>
+    {
+      bool operator ()(const IMDDimension_sptr obj) const
+      {
+        return obj->getIsIntegrated();
+      }
+    };
+
     /// Comparitor to find DimensionPresenter shared pointers via a dimension id.
     struct FindId : public std::unary_function <DimPresenter_sptr, bool>
     {
@@ -47,8 +57,7 @@ namespace Mantid
       Y_AXIS("Y-AXIS"),
       Z_AXIS("Z-AXIS"),
       T_AXIS("T-AXIS"),
-      m_notIntegrated(source.getNonIntegratedDimensions()), 
-      m_integrated(source.getIntegratedDimensions()),
+      m_dimensions(source.getAllDimensions()), 
       m_source(source)
     {
 
@@ -163,16 +172,13 @@ namespace Mantid
     */
     void SynchronisingGeometryPresenter::dimensionExpanded(DimensionPresenter* pDimensionPresenter)
     {
-      Mantid::Geometry::VecIMDDimension_sptr::iterator it = std::find_if(m_notIntegrated.begin(), m_notIntegrated.end(), FindModelId(pDimensionPresenter->getModel()->getDimensionId()));
-      if(it == m_notIntegrated.end())
-      {
-        //TODO: Need to prevent m_nonIntegrated exceeding the number of mapped dimensions! Simple check here.
-        m_notIntegrated.push_back(pDimensionPresenter->getAppliedModel()); 
-        m_integrated.erase(std::remove_if(m_integrated.begin(), m_integrated.end(), FindModelId(pDimensionPresenter->getModel()->getDimensionId())), m_integrated.end());
-        VecDimPresenter_sptr::iterator location = std::find_if(m_dimPresenters.begin(), m_dimPresenters.end(), FindId(pDimensionPresenter->getModel()->getDimensionId()));
+        //Replace the old dimension with the new/modified one.
+        std::replace_if(m_dimensions.begin(), m_dimensions.end(), FindModelId(pDimensionPresenter->getAppliedModel()->getDimensionId()), pDimensionPresenter->getAppliedModel());
+        //Insert an axis-mapping for this expanded dimension.
+        VecDimPresenter_sptr::iterator location = std::find_if(m_dimPresenters.begin(), m_dimPresenters.end(), FindId(pDimensionPresenter->getAppliedModel()->getDimensionId()));
         insertMappedPresenter((*location));
         shuffleMappedPresenters();
-      }
+      
     }
 
     /**
@@ -181,23 +187,17 @@ namespace Mantid
     */
     void SynchronisingGeometryPresenter::dimensionCollapsed(DimensionPresenter* pDimensionPresenter)
     { 
-      //Effectively end the transactino if it will result in zero non-integrated dimensions
-      if(1 == m_notIntegrated.size())
+      //Effectively end the transaction if it will result in zero non-integrated dimensions
+      if(1 == getNonIntegratedDimensions().size())
       {
         throw std::invalid_argument("Cannot have all dimensions integrated!");
       }
-
-      Mantid::Geometry::VecIMDDimension_sptr::iterator it = std::find_if(m_integrated.begin(), m_integrated.end(), FindModelId(pDimensionPresenter->getModel()->getDimensionId()));
-      if(it == m_integrated.end())
-      {
-        m_integrated.push_back(pDimensionPresenter->getAppliedModel());
-        m_notIntegrated.erase(std::remove_if(m_notIntegrated.begin(), m_notIntegrated.end(), FindModelId(pDimensionPresenter->getModel()->getDimensionId())), m_notIntegrated.end());
-
-        VecDimPresenter_sptr::iterator location = std::find_if(m_dimPresenters.begin(), m_dimPresenters.end(), FindId(pDimensionPresenter->getModel()->getDimensionId()));
-
-        eraseMappedPresenter((*location));
-        shuffleMappedPresenters();
-      }
+      //Replace the old dimension with the new/modified one.
+      std::replace_if(m_dimensions.begin(), m_dimensions.end(), FindModelId(pDimensionPresenter->getAppliedModel()->getDimensionId()), pDimensionPresenter->getAppliedModel());
+      //Delete the axis mapping for the presenter of this dimension.
+      VecDimPresenter_sptr::iterator location = std::find_if(m_dimPresenters.begin(), m_dimPresenters.end(), FindId(pDimensionPresenter->getAppliedModel()->getDimensionId()));
+      eraseMappedPresenter((*location));
+      shuffleMappedPresenters();
 
     }
 
@@ -233,7 +233,39 @@ namespace Mantid
     */
     Mantid::Geometry::VecIMDDimension_sptr SynchronisingGeometryPresenter::getNonIntegratedDimensions() const
     {
-      return m_notIntegrated;
+      VecIMDDimension_sptr matches;
+      VecIMDDimension_sptr::iterator i = m_dimensions.begin();
+      FindIntegrated findIntegrated;
+      std::unary_negate<FindIntegrated> findNotIntegrated(findIntegrated);
+      while(true) 
+      {
+        i = std::find_if(i, m_dimensions.end(), findNotIntegrated);
+        if (i == m_dimensions.end())
+          break;
+        matches.push_back(*i);
+        i++;
+      }
+      return matches;
+    }
+
+    /**
+    Getter for integrated dimensions.
+    @return collection of non-integrated dimensions.
+    */
+    Mantid::Geometry::VecIMDDimension_sptr SynchronisingGeometryPresenter::getIntegratedDimensions() const
+    {
+      VecIMDDimension_sptr matches;
+      VecIMDDimension_sptr::iterator i = m_dimensions.begin();
+      FindIntegrated findIntegrated;
+      while(true) 
+      {
+        i = std::find_if(i, m_dimensions.end(), findIntegrated);
+        if (i == m_dimensions.end())
+          break;
+        matches.push_back(*i);
+        i++;
+      }
+      return matches;
     }
 
     /**
@@ -246,8 +278,9 @@ namespace Mantid
       using namespace Mantid::Geometry;
       MDGeometryBuilderXML<StrictDimensionPolicy> xmlBuilder;
 
-      Mantid::Geometry::VecIMDDimension_sptr::const_iterator it = m_integrated.begin();
-      for(;it != m_integrated.end(); ++it)
+      VecIMDDimension_sptr vecIntegrated = getIntegratedDimensions();
+      Mantid::Geometry::VecIMDDimension_sptr::const_iterator it = vecIntegrated.begin();
+      for(;it != vecIntegrated.end(); ++it)
       {
         xmlBuilder.addOrdinaryDimension(*it);
       }
@@ -323,10 +356,10 @@ namespace Mantid
         m_dimPresenters.push_back(dimPresenter);
       }
       for(size_t i = 0; i < m_dimPresenters.size(); i++)
-        {
-          //Now that all presenters have views, models can be provided to complete the M-V-P chain.
-          m_dimPresenters[i]->acceptModelStrongly(m_source.getAllDimensions()[i]);
-        }
+      {
+        //Now that all presenters have views, models can be provided to complete the M-V-P chain.
+        m_dimPresenters[i]->acceptModelStrongly(m_source.getAllDimensions()[i]);
+      }
     }
 
     /**
