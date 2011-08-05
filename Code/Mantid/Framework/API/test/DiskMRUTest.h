@@ -525,9 +525,9 @@ public:
   {
     DiskMRU mru(100, 0, false);
     PRAGMA_OMP( parallel for)
-    for (size_t i=0; i<10000; i++)
+    for (int i=0; i<10000; i++)
     {
-      mru.freeBlock(i*100, (i%3==0) ? 100 : 50);
+      mru.freeBlock(uint64_t(i)*100, (i%3==0) ? 100 : 50);
     }
     // 1/3 of the blocks got merged
     TS_ASSERT_EQUALS( mru.getFreeSpaceMap().size(), 6667);
