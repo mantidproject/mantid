@@ -1359,7 +1359,7 @@ class SaveIqAscii(ReductionStep):
             for output_ws in output_list:
                 if mtd.workspaceExists(output_ws):
                     filename = os.path.join(output_dir, output_ws+'.txt')
-                    SaveAscii(Filename=filename, Workspace=output_ws)
+                    SaveAscii(Filename=filename, InputWorkspace=output_ws)
                     filename = os.path.join(output_dir, output_ws+'.xml')
                     SaveCanSAS1D(Filename=filename, InputWorkspace=output_ws)
                     

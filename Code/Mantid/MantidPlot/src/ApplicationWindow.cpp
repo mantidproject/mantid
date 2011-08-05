@@ -6163,7 +6163,7 @@ void ApplicationWindow::exportASCII(const QString& tableName, const QString& sep
       {////////////////////////////////////////////////////
         Mantid::API::IAlgorithm_sptr alg =mantidUI->createAlgorithm("SaveAscii");
         alg->setPropertyValue("Filename",fname.toStdString());
-        alg->setPropertyValue("Workspace",tableName.toStdString());
+        alg->setPropertyValue("InputWorkspace",tableName.toStdString());
         alg->execute();
       }
       catch(...)
