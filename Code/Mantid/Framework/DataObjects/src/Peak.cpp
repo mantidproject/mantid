@@ -433,6 +433,17 @@ namespace DataObjects
     detPos = samplePos + beam * detectorDistance;
   }
 
+  /** Using the Q in the lab frame and the instrument set in the peak,
+   * try to find the detector that measured this peak.
+   *
+   * Uses ray tracing to find the peak.
+   *
+   * @return true if the detector ID was found.
+   */
+  bool Peak::findDetectorUsingQ()
+  {
+    return false;
+  }
 
 
 

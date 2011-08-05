@@ -4,10 +4,11 @@
 //-------------------------------------------------------------
 // Includes
 //-------------------------------------------------------------
-#include "MantidKernel/Logger.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IInstrument.h"
-#include <list>
+#include "MantidKernel/Logger.h"
 #include <deque>
+#include <list>
 
 namespace Mantid
 {
@@ -65,6 +66,8 @@ namespace Mantid
       /// Get the results of the intersection tests that have been updated 
       /// since the previous call to trace
       Links getResults() const;
+
+      IDetector_sptr getDetectorResult() const;
 
     private:
       /// Default constructor

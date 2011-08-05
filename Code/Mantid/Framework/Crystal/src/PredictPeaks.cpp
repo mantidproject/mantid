@@ -146,35 +146,22 @@ namespace Crystal
         V3D beamNormalized = beam;
         beamNormalized.normalize();
         tracker.traceFromSample(beamNormalized);
-        Links results = tracker.getResults();
-
-        // Go through all results
-        Links::const_iterator resultItr = results.begin();
-        for (; resultItr != results.end(); resultItr++)
+        IDetector_sptr det = tracker.getDetectorResult();
+        if (det)
         {
-          IComponent_sptr component = inst->getComponentByID(resultItr->componentID);
-          IDetector_sptr det = boost::dynamic_pointer_cast<IDetector>(component);
-          if (det)
+          // Found a detector (not a monitor) that intersected the ray. Take the first one!
+          //                std::cout << "HKL " << hkl << " and q " << q << " will project on id " << det->getID() << " at wl " << 1.0/one_over_wl << "\n";
+
+          // Create the peak
+          Peak p(inst, det->getID(), wl);
+          p.setHKL(hkl);
+
+          // Add it to the workspace
+          PARALLEL_CRITICAL(PredictPeaks_appendPeak)
           {
-            if (!det->isMonitor())
-            {
-              // Found a detector (not a monitor) that intersected the ray. Take the first one!
-              //                std::cout << "HKL " << hkl << " and q " << q << " will project on id " << det->getID() << " at wl " << 1.0/one_over_wl << "\n";
-
-              // Create the peak
-              Peak p(inst, det->getID(), wl);
-              p.setHKL(hkl);
-
-              // Add it to the workspace
-              PARALLEL_CRITICAL(PredictPeaks_appendPeak)
-              {
-                pw->addPeak(p);
-              }
-
-              break;
-            }
-          } // (is a detector)
-        } // each ray tracer result
+            pw->addPeak(p);
+          }
+        } // detector was found.
       } // (wavelength is okay)
     } // (d is acceptable)
   }

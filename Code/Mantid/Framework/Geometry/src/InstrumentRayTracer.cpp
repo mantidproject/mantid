@@ -8,6 +8,7 @@
 #include "MantidKernel/Exception.h"
 #include <deque>
 #include <iterator>
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid
 {
@@ -81,6 +82,33 @@ namespace Mantid
       Links results(m_resultsTrack.begin(), m_resultsTrack.end());
       m_resultsTrack.clearIntersectionResults();
       return results;
+    }
+
+
+    //----------------------------------------------------------------------------------
+    /** Gets the results of the trace, then returns the first detector
+     * (that is NOT a monitor) found in the results.
+     * @return sptr to IDetector, or an invalid sptr if not found
+     */
+    IDetector_sptr InstrumentRayTracer::getDetectorResult() const
+    {
+      Links results = this->getResults();
+
+      // Go through all results
+      Links::const_iterator resultItr = results.begin();
+      for (; resultItr != results.end(); resultItr++)
+      {
+        IComponent_sptr component = m_instrument->getComponentByID(resultItr->componentID);
+        IDetector_sptr det = boost::dynamic_pointer_cast<IDetector>(component);
+        if (det)
+        {
+          if (!det->isMonitor())
+          {
+            return det;
+          }
+        } // (is a detector)
+      } // each ray tracer result
+      return IDetector_sptr();
     }
 
     //-------------------------------------------------------------

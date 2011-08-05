@@ -199,6 +199,8 @@ namespace MDEvents
     }
 
     prog->report("Making PeaksWorkspace");
+    peakWS->setInstrument(inst);
+
     // --- Convert the "boxes" to peaks ----
     for (typename std::vector<boxPtr>::iterator it3=peakBoxes.begin(); it3 != peakBoxes.end(); it3++)
     {
@@ -217,9 +219,14 @@ namespace MDEvents
       try
       {
         Peak p(inst, Q);
+        // TODO: Goniometer matrix and other stuff?
+
+        // Look for a detector
+        p.findDetectorUsingQ();
+
         // The "bin count" used will be the box density.
         p.setBinCount( box->getSignalNormalized() );
-        // TODO: Goniometer matrix and other stuff?
+
         peakWS->addPeak(p);
       }
       catch (std::exception &e)
