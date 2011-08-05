@@ -726,9 +726,11 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         and transforms the 2D reduced data set into I(Q).
         Done for each frame independently.
     """
-    def __init__(self, binning=None, suffix="_Iq", error_weighting=False, n_bins=100, n_subpix=1, log_binning=False):
+    def __init__(self, binning=None, suffix="_Iq", error_weighting=False, n_bins=100, n_subpix=1, log_binning=False, scale=False):
         super(AzimuthalAverageByFrame, self).__init__(binning, suffix, error_weighting, n_bins, n_subpix, log_binning)
         self._is_frame_skipping = False
+        self._scale = scale
+        self._tolerance = 2.0
         
     def get_output_workspace(self, workspace):
         if not self._is_frame_skipping:
@@ -739,7 +741,9 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         if mtd[workspace].getRun().hasProperty("is_frame_skipping") \
             and mtd[workspace].getRun().getProperty("is_frame_skipping").value==0:
             self._is_frame_skipping = False
-            return super(AzimuthalAverageByFrame, self).execute(reducer, workspace)
+            output_str = super(AzimuthalAverageByFrame, self).execute(reducer, workspace)
+            #TOFSANSResolution(InputWorkspace=workspace+str(self._suffix), ReducedWorkspace=workspace, OutputBinning=self._binning)
+            return output_str
         
         self._is_frame_skipping = True
         
@@ -777,6 +781,40 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
                                              n_bins=self._nbins, n_subpix=self._nsubpix, log_binning=self._log_binning)
         iq_frame2.execute(reducer, workspace+'_frame2')
         
+        # Scale frame 1 to frame 2
+        if self._scale:
+            q_min = min(mtd[workspace+'_frame1'+self._suffix].dataX(0))
+            q_max = max(mtd[workspace+'_frame2'+self._suffix].dataX(0))
+            rebin_pars = "%s,0.001,%s" % (q_min, q_max)
+            Rebin(InputWorkspace=workspace+'_frame1'+self._suffix, OutputWorkspace="__frame1_rebinned", Params=rebin_pars)
+            Rebin(InputWorkspace=workspace+'_frame2'+self._suffix, OutputWorkspace="__frame2_rebinned", Params=rebin_pars)
+            iq_f1 = mtd["__frame1_rebinned"].dataY(0)
+            iq_f2 = mtd["__frame2_rebinned"].dataY(0)
+            
+            scale_f1 = 0.0
+            scale_f2 = 0.0
+            scale_factor = 1.0
+            for i in range(len(iq_f1)):
+                if iq_f1[i]>0 and iq_f2[i]>0:
+                    scale_f1 += iq_f1[i]
+                    scale_f2 += iq_f2[i]
+            if scale_f1>0 and scale_f2>0:
+                scale_factor = scale_f2/scale_f1
+            
+                scale_f1 = 0.0
+                scale_f2 = 0.0
+                scale_factor = 1.0
+                for i in range(len(iq_f1)):
+                    if iq_f1[i]>0 and iq_f2[i]>0 \
+                    and scale_factor*iq_f1[i]/iq_f2[i]<self._tolerance \
+                    and iq_f2[i]/(scale_factor*iq_f1[i])<self._tolerance:
+                        scale_f1 += iq_f1[i]
+                        scale_f2 += iq_f2[i]
+                if scale_f1>0 and scale_f2>0:
+                    scale_factor = scale_f2/scale_f1
+            
+            Scale(InputWorkspace=workspace+'_frame1'+self._suffix, OutputWorkspace=workspace+'_frame1'+self._suffix, Factor=scale_factor, Operation="Multiply")
+            
         # Add output workspaces to the list of important output workspaces
         for item in self.get_output_workspace(workspace):
             if item in reducer.output_workspaces:
