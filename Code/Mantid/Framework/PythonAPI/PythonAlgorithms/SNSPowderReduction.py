@@ -147,13 +147,39 @@ class SNSPowderReduction(PythonAlgorithm):
         wksp = alg['OutputWorkspace']
 
         # add the logs to it
-        nxsfile = self._findData(runnumber, ".nxs")
-        LoadLogsFromSNSNexus(Workspace=wksp, Filename=nxsfile)
+        nxsfile = "%s_%d_event.nxs" % (self._instrument, runnumber)
+        try:
+            LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
+            return wksp
+        except:
+            pass
+
+        nxsfile = "%s_%d_histo.nxs" % (self._instrument, runnumber)
+        try:
+            LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
+            return wksp
+        except:
+            pass
+
+        nxsfile = self._findData(runnumber, "_event.nxs")
+        try:
+            LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
+            return wksp
+        except:
+            pass
+
+        nxsfile = self._findData(runnumber, "_histo.nxs")
+        try:
+            LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
+            return wksp
+        except:
+            pass
+
         # TODO filter out events using timemin and timemax
 
         return wksp
 
-    def _loadNeXusData(self, runnumber, extension, **kwargs):
+    def _loadEventNeXusData(self, runnumber, extension, **kwargs):
         if self.getProperty("CompressOnRead"):
             kwargs["CompressTolerance"] = COMPRESS_TOL_TOF
         else:
@@ -193,8 +219,8 @@ class SNSPowderReduction(PythonAlgorithm):
         if  runnumber is None or runnumber <= 0:
             return None
 
-        if extension.endswith(".nxs"):
-            return self._loadNeXusData(runnumber, extension, **filter)
+        if extension.endswith("event.nxs"):
+            return self._loadEventNeXusData(runnumber, extension, **filter)
         else:
             return self._loadPreNeXusData(runnumber, extension)
 
@@ -318,8 +344,6 @@ class SNSPowderReduction(PythonAlgorithm):
         # temporary hack for getting python algorithms working
         import mantidsimple
         globals()["FindSNSNeXus"] = mantidsimple.FindSNSNeXus
-
-        print "This is VZ Debug Version +1"
 
         # get generic information
         SUFFIX = "_event.nxs"
