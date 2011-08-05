@@ -51,13 +51,9 @@ inc/MantidVatesAPI/FilteringUpdateProgressAction.h
 inc/MantidVatesAPI/GaussianThresholdRange.h
 inc/MantidVatesAPI/GeometryPresenter.h
 inc/MantidVatesAPI/GeometryView.h
-inc/MantidVatesAPI/MDEWLoadingRebinningPresenter.h
-inc/MantidVatesAPI/MDEWEventNexusPresenter.h
 inc/MantidVatesAPI/MDHistogramRebinningPresenter.h
 inc/MantidVatesAPI/MDRebinningPresenter.h
-inc/MantidVatesAPI/MDLoadingRebinningPresenter.h
 inc/MantidVatesAPI/MDRebinningView.h
-inc/MantidVatesAPI/MDLoadingRebinningView.h
 inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
 inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
@@ -105,8 +101,6 @@ test/vtkThresholdingQuadFactoryTest.h
 test/FieldDataToMetadataTest.h
 test/FilteringUpdateProgressActionTest.h
 test/IMDWorkspaceProxyTest.h
-test/MDEWLoadingRebinningPresenterTest.h
-test/MDEWEventNexusPresenterTest.h
 test/MultiDimensionalDbPresenterTest.h
 test/MDHistogramRebinningPresenterTest.h
 test/NullRebinningPresenterTest.h
