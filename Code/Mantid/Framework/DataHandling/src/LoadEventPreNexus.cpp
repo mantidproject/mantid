@@ -252,7 +252,21 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp)
     return *(files.rbegin());
 }
 
+namespace { // anonymous namespace
+string getRunnumber(const string &filename) {
+  // start by trimming the filename
+  string runnumber(Poco::Path(filename).getBaseName());
 
+  if (runnumber.find("neutron") >= string::npos)
+    return "0";
+
+  std::size_t left = runnumber.find("_");
+  std::size_t right = runnumber.find("_", left+1);
+
+  return runnumber.substr(left+1, right-left-1);
+}
+
+}
 
 //-----------------------------------------------------------------------------
 /** Execute the algorithm */
@@ -310,6 +324,9 @@ void LoadEventPreNexus::exec()
     // (this is used in LoadInstrumentHelper to find the right instrument file to use).
     localWorkspace->mutableRun().addProperty("run_start", pulsetimes[0].to_ISO8601_string(), true );
   }
+
+  // determine the run number and add it to the run object
+  localWorkspace->mutableRun().addProperty("run_number", getRunnumber(event_filename));
 
   //Get the instrument!
   prog->report("Loading Instrument");
