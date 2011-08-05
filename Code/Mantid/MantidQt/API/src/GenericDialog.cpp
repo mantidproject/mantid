@@ -65,8 +65,7 @@ void GenericDialog::initLayout()
   viewport->setLayout(mainLay);
 
   // Add a layout for QDialog
-  QHBoxLayout *dialog_layout = new QHBoxLayout(this);
-  dialog_layout->addWidget(scroll); // add scroll to the QDialog's layout
+  QVBoxLayout *dialog_layout = new QVBoxLayout(this);
   setLayout(dialog_layout);
 
   // Create a grid of properties if there are any available
@@ -210,14 +209,15 @@ void GenericDialog::initLayout()
 
     // Add the helpful summary message
     if( isMessageAvailable() )
-      this->addOptionalMessage(mainLay);
+      this->addOptionalMessage(dialog_layout);
 
     //The property boxes
     mainLay->addLayout(m_inputGrid);
   }
 
+  dialog_layout->addWidget(scroll); // add scroll to the QDialog's layout
   // Add the help, run and cancel buttons
-  mainLay->addLayout(createDefaultButtonLayout());
+  dialog_layout->addLayout(createDefaultButtonLayout());
 
   scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
