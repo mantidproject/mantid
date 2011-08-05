@@ -114,7 +114,7 @@ namespace NeXus {
     /** should be close handle on exit */
     bool m_close_handle;
 
-  public: //JZ
+  public:
     /**
      * @return A pair of the next entry available in a listing.
      */
@@ -464,7 +464,6 @@ namespace NeXus {
     void getData(std::vector<NumT>& data);
 
 
-    //JZ
     /** Put data into the supplied vector. The vector does not need to
      * be the correct size, just the correct type as it is resized to
      * the appropriate value.
@@ -479,7 +478,6 @@ namespace NeXus {
     void readData(const std::string & dataName, std::vector<NumT>& data);
 
     void readData(const std::string & dataName, std::string & data);
-    //JZ
 
 
     /** Get data and coerce into an int vector.

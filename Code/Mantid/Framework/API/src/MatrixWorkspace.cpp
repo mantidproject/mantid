@@ -23,6 +23,10 @@
 
 #include <numeric>
 #include "MantidAPI/NumericAxis.h"
+#include "MantidKernel/DateAndTime.h"
+
+using Mantid::Kernel::DateAndTime;
+using Mantid::Kernel::TimeSeriesProperty;
 
 namespace Mantid
 {
@@ -1209,6 +1213,57 @@ namespace Mantid
       return total;
     }
 
+
+
+    //-----------------------------------------------------------------------------
+    /** Return the time of the first pulse received, by accessing the run's
+     * sample logs to find the proton_charge.
+     *
+     * NOTE, JZ: Pulse times before 1991 (up to 100) are skipped. This is to avoid
+     * a DAS bug at SNS around Mar 2011 where the first pulse time is Jan 1, 1990.
+     *
+     * @return the time of the first pulse
+     * @throw runtime_error if the log is not found; or if it is empty.
+     */
+    Kernel::DateAndTime MatrixWorkspace::getFirstPulseTime() const
+    {
+      TimeSeriesProperty<double>* log = dynamic_cast<TimeSeriesProperty<double>*> (this->run().getLogData("proton_charge"));
+      if (!log)
+        throw std::runtime_error("EventWorkspace::getFirstPulseTime: No TimeSeriesProperty called 'proton_charge' found in the workspace.");
+      DateAndTime startDate;
+      DateAndTime reference("1991-01-01");
+
+      int i=0;
+      startDate = log->nthTime(i);
+
+      // Find the first pulse after 1991
+      while (startDate < reference && i < 100)
+      {
+        i++;
+        startDate = log->nthTime(i);
+      }
+
+      //Return as DateAndTime.
+      return startDate;
+    }
+
+
+    //-----------------------------------------------------------------------------
+    /** Return the time of the last pulse received, by accessing the run's
+     * sample logs to find the proton_charge
+     *
+     * @return the time of the first pulse
+     * @throw runtime_error if the log is not found; or if it is empty.
+     */
+    Kernel::DateAndTime MatrixWorkspace::getLastPulseTime() const
+    {
+      TimeSeriesProperty<double>* log = dynamic_cast<TimeSeriesProperty<double>*> (this->run().getLogData("proton_charge"));
+      if (!log)
+        throw std::runtime_error("EventWorkspace::getFirstPulseTime: No TimeSeriesProperty called 'proton_charge' found in the workspace.");
+      DateAndTime stopDate = log->lastTime();
+      //Return as DateAndTime.
+      return stopDate;
+    }
 
 
     //----------------------------------------------------------------------------------------------------

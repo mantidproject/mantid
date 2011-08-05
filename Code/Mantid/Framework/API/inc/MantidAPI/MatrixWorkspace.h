@@ -22,6 +22,7 @@
 #include "MantidKernel/Unit.h"
 #include <set>
 #include "MantidAPI/ISpectrum.h"
+#include "MantidKernel/DateAndTime.h"
 
 namespace Mantid
 {
@@ -140,6 +141,9 @@ namespace Mantid
       virtual void setTitle(const std::string&);
       /// Gets MatrixWorkspace title (same as Run object run_title property)
       virtual const std::string getTitle() const;
+
+      Kernel::DateAndTime getFirstPulseTime() const;
+      Kernel::DateAndTime getLastPulseTime() const;
 
       /// Returns the bin index for a given X value of a given workspace index
       size_t binIndexOf(const double xValue, const std::size_t = 0) const;

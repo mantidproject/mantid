@@ -144,11 +144,16 @@ namespace Mantid
       void makeMapToEventLists();
       void loadEvents(API::Progress * const prog, const bool monitors);
       void loadEntryMetadata(const std::string &entry_name);
-      void runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace);
       void createSpectraMapping(const std::string &nxsfile, API::MatrixWorkspace_sptr workspace,
                                 const bool monitorsOnly, const std::string & bankName = "");
       bool hasEventMonitors();
       void runLoadMonitors();
+
+      static bool runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+          const std::string & top_entry_name, Algorithm * alg);
+
+      static bool runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+          std::vector<Kernel::DateAndTime> & pulseTimes, Algorithm * alg);
 
     private:
       /// Load a spectra mapping from the given file

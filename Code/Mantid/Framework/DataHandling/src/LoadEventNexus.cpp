@@ -823,54 +823,18 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   if (loadlogs)
   {
-    // --------------------- Load DAS Logs -----------------
     prog->doReport("Loading DAS logs");
-    //The pulse times will be empty if not specified in the DAS logs.
-    pulseTimes.clear();
-    IAlgorithm_sptr loadLogs = createSubAlgorithm("LoadNexusLogs");
-
-    // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-    try
-    {
-      g_log.information() << "Loading logs from NeXus file..." << endl;
-      loadLogs->setPropertyValue("Filename", m_filename);
-      loadLogs->setProperty<MatrixWorkspace_sptr> ("Workspace", WS);
-      loadLogs->execute();
-
-      //If successful, we can try to load the pulse times
-      Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( WS->mutableRun().getProperty("proton_charge") );
-      std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
-      pulseTimes.reserve(temp.size());
-      for (size_t i =0; i < temp.size(); i++)
-      {
-        pulseTimes.push_back( temp[i] );
-      }
-
-      // Use the first pulse as the run_start time.
-      if (temp.size() > 0)
-      {
-        run_start = WS->getFirstPulseTime();
-        // add the start of the run as a ISO8601 date/time string. The start = first non-zero time.
-        // (this is used in LoadInstrumentHelper to find the right instrument file to use).
-        WS->mutableRun().addProperty("run_start", run_start.to_ISO8601_string(), true );
-      }
-      else
-        g_log.warning() << "Empty proton_charge sample log. You will not be able to filter by time.\n";
-    }
-    catch (...)
-    {
-      g_log.error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << std::endl;
-    }
+    runLoadNexusLogs(m_filename, WS, pulseTimes, this);
+    run_start = WS->getFirstPulseTime();
   }
   else
   {
     g_log.information() << "Skipping the loading of sample logs!" << endl;
   }
-  prog->report("Loading instrument");
-
 
   //Load the instrument
-  runLoadInstrument(m_filename, WS);
+  prog->report("Loading instrument");
+  instrument_loaded_correctly = runLoadInstrument(m_filename, WS, m_top_entry_name, this);
 
   if (!this->instrument_loaded_correctly)
       throw std::runtime_error("Instrument was not initialized correctly! Loading cannot continue.");
@@ -1081,31 +1045,34 @@ void LoadEventNexus::loadEntryMetadata(const std::string &entry_name) {
 
 
 //-----------------------------------------------------------------------------
-/** Load the instrument geometry File
+/** Load the instrument geometry file using info in the NXS file.
+ *
  *  @param nexusfilename :: Used to pick the instrument.
  *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
+ *  @param top_entry_name :: entry name at the top of the NXS file
+ *  @return true if successful
  */
-void LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace)
+bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace,
+    const std::string & top_entry_name, Algorithm * alg)
 {
-  this->instrument_loaded_correctly = false;
   string instrument;
 
   // Get the instrument name
   ::NeXus::File nxfile(nexusfilename);
   //Start with the base entry
-  nxfile.openGroup(m_top_entry_name, "NXentry");
+  nxfile.openGroup(top_entry_name, "NXentry");
   // Open the instrument
   nxfile.openGroup("instrument", "NXinstrument");
   nxfile.openData("name");
   instrument = nxfile.getStrData();
-  g_log.debug() << "Instrument name read from NeXus file is " << instrument << std::endl;
+  alg->getLogger().debug() << "Instrument name read from NeXus file is " << instrument << std::endl;
   if (instrument.compare("POWGEN3") == 0) // hack for powgen b/c of bad long name
           instrument = "POWGEN";
   // Now let's close the file as we don't need it anymore to load the instrument.
   nxfile.close();
 
   // do the actual work
-  IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
+  IAlgorithm_sptr loadInst= alg->createSubAlgorithm("LoadInstrument");
 
   // Now execute the sub-algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
@@ -1120,25 +1087,77 @@ void LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
     localWorkspace->populateInstrumentParameters();
   } catch (std::invalid_argument& e)
   {
-    g_log.information() << "Invalid argument to LoadInstrument sub-algorithm : " << e.what() << std::endl;
+    alg->getLogger().information() << "Invalid argument to LoadInstrument sub-algorithm : " << e.what() << std::endl;
     executionSuccessful = false;
   } catch (std::runtime_error& e)
   {
-    g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
-    g_log.information(e.what());
+    alg->getLogger().information("Unable to successfully run LoadInstrument sub-algorithm");
+    alg->getLogger().information(e.what());
     executionSuccessful = false;
   }
 
   // If loading instrument definition file fails
   if (!executionSuccessful)
   {
-    g_log.error() << "Error loading Instrument definition file\n";
+    alg->getLogger().error() << "Error loading Instrument definition file\n";
   }
-  else
-  {
-    this->instrument_loaded_correctly = true;
-  }
+  return executionSuccessful;
 }
+
+
+//-----------------------------------------------------------------------------
+/** Load the sample logs from the NXS file
+ *
+ *  @param nexusfilename :: Used to pick the instrument.
+ *  @param localWorkspace :: MatrixWorkspace in which to put the logs
+ *  @param[out] pulseTimes :: vector of pulse times to fill
+ *  @return true if successful
+ */
+bool LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+    std::vector<Kernel::DateAndTime> & pulseTimes, Algorithm * alg)
+{
+  // --------------------- Load DAS Logs -----------------
+  //The pulse times will be empty if not specified in the DAS logs.
+  pulseTimes.clear();
+  IAlgorithm_sptr loadLogs = alg->createSubAlgorithm("LoadNexusLogs");
+
+  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+  try
+  {
+    alg->getLogger().information() << "Loading logs from NeXus file..." << endl;
+    loadLogs->setPropertyValue("Filename", nexusfilename);
+    loadLogs->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+    loadLogs->execute();
+
+    //If successful, we can try to load the pulse times
+    Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( localWorkspace->mutableRun().getProperty("proton_charge") );
+    std::vector<Kernel::DateAndTime> temp = log->timesAsVector();
+    pulseTimes.reserve(temp.size());
+    for (size_t i =0; i < temp.size(); i++)
+    {
+      pulseTimes.push_back( temp[i] );
+    }
+
+    // Use the first pulse as the run_start time.
+    if (temp.size() > 0)
+    {
+      Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();
+      // add the start of the run as a ISO8601 date/time string. The start = first non-zero time.
+      // (this is used in LoadInstrumentHelper to find the right instrument file to use).
+      localWorkspace->mutableRun().addProperty("run_start", run_start.to_ISO8601_string(), true );
+    }
+    else
+      alg->getLogger().warning() << "Empty proton_charge sample log. You will not be able to filter by time.\n";
+  }
+  catch (...)
+  {
+    alg->getLogger().error() << "Error while loading Logs from SNS Nexus. Some sample logs may be missing." << std::endl;
+    return false;
+  }
+  return true;
+}
+
+
 
 //-----------------------------------------------------------------------------
 /**

@@ -8,6 +8,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidKernel/DateAndTime.h"
 
 namespace Mantid
 {
@@ -92,12 +93,12 @@ private:
   /// Load in details about the sample
   void loadSampleData(DataObjects::Workspace2D_sptr, Mantid::NeXus::NXEntry & entry);
 
-  /// The name and path of the input file
-  std::string m_filename;
-  /// The instrument name from Nexus
-  std::string m_instrument_name;
-  /// The sample name read from Nexus
-  std::string m_samplename;
+  void loadBank(const std::string &nexusfilename, const std::string & entry_name,
+      const std::string &bankName, Mantid::API::MatrixWorkspace_sptr WS,
+      size_t & workspaceIndex);
+
+  /// List of the absolute time of each pulse
+  std::vector<Kernel::DateAndTime> pulseTimes;
 
 };
 

@@ -168,9 +168,6 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   void sortAll(EventSortType sortType, Mantid::API::Progress * prog) const;
   void sortAllOld(EventSortType sortType, Mantid::API::Progress * prog) const;
 
-  Kernel::DateAndTime getFirstPulseTime() const;
-  Kernel::DateAndTime getLastPulseTime() const;
-
   virtual void getIntegratedSpectra(std::vector<double> & out, const double minX, const double maxX, const bool entireRange) const;
 
 private:

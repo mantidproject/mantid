@@ -242,7 +242,7 @@ set ( TEST_FILES
 	test/LoadSaveAsciiTest.h
 	test/LoadSpice2dTest.h
 	test/LoadTest.h
-	#test/LoadTOFRawNexusTest.h # TODO has no active tests in it
+	test/LoadTOFRawNexusTest.h
 	test/ManagedRawFileWorkspace2DTest.h
 	test/MaskDetectorsInShapeTest.h
 	test/MaskDetectorsTest.h
