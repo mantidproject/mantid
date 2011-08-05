@@ -79,6 +79,8 @@ namespace Crystal
     std::ofstream out( filename.c_str() );
 
     IInstrument_const_sptr inst = ws->getInstrument();
+    if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
+
     double l1; V3D beamline; double beamline_norm; V3D samplePos;
     inst->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
 
