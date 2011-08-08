@@ -38,8 +38,9 @@ namespace Mantid
      **/
     Instrument::Instrument(const boost::shared_ptr<Instrument> instr, ParameterMap_sptr map)
     : CompAssembly(instr.get(), map.get() ),
+      IInstrument(*instr.get()),
       _sourceCache(instr->_sourceCache), _sampleCache(instr->_sampleCache),
-    m_defaultViewAxis(instr->m_defaultViewAxis),
+      m_defaultViewAxis(instr->m_defaultViewAxis),
       m_instr(instr),
       m_map_nonconst(map)
     {

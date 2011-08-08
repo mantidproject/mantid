@@ -1,17 +1,18 @@
 #ifndef MANTIDDOCK_H
 #define MANTIDDOCK_H
 
-#include <QDockWidget>
-#include <QTreeWidget>
-#include <QComboBox>
-#include <QPoint>
-#include <QVector>
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include <QComboBox>
+#include <QDockWidget>
+#include <QPoint>
+#include <QTreeWidget>
+#include <QVector>
 
 class MantidUI;
 class ApplicationWindow;
@@ -71,6 +72,7 @@ private:
   void populateTableWorkspaceData(Mantid::API::ITableWorkspace_sptr workspace, QTreeWidgetItem* ws_item);
   void addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::MatrixWorkspace_const_sptr matrixWS) const;
   void addMDEventWorspaceMenuItems(QMenu *menu, Mantid::API::IMDEventWorkspace_const_sptr mdeventWS) const;
+  void addPeaksWorspaceMenuItems(QMenu *menu, Mantid::API::IPeaksWorkspace_const_sptr WS) const;
   void addWorkspaceGroupMenuItems(QMenu *menu) const;
   void addTableWorkspaceMenuItems(QMenu * menu) const;
   bool isInvisibleWorkspaceOptionSet();

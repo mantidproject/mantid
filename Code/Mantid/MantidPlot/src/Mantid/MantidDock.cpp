@@ -530,8 +530,14 @@ void MantidDockWidget::populateExperimentInfoData(Mantid::API::ExperimentInfo_sp
 {
   QTreeWidgetItem* data_item;
   std::string s;
+  std::ostringstream out;
 
-  s = "Instrument: " + workspace->getInstrument()->getName();
+  IInstrument_sptr inst = workspace->getInstrument();
+  out << "Instrument: " << inst->getName() << " ("
+      << inst->getValidFromDate().to_string("%Y-%b-%d")
+      << " to " << inst->getValidToDate().to_string("%Y-%b-%d") << ")";
+  s = out.str();
+
   data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
@@ -539,7 +545,7 @@ void MantidDockWidget::populateExperimentInfoData(Mantid::API::ExperimentInfo_sp
   if (workspace->sample().hasOrientedLattice())
   {
     const OrientedLattice & latt = workspace->sample().getOrientedLattice();
-    std::ostringstream out;
+    out.str("");
     out << "Sample: a " << std::fixed << std::setprecision(1) << latt.a() <<", b " << latt.b() << ", c " << latt.c();
     out << "; alpha " << std::fixed << std::setprecision(0) << latt.alpha() <<", beta " << latt.beta() << ", gamma " << latt.gamma();
     s = out.str();
@@ -755,18 +761,38 @@ void MantidDockWidget::addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::Matr
  * @param menu :: The menu to store the items
  * @param matrixWS :: The workspace related to the menu
  */
-void MantidDockWidget::addMDEventWorspaceMenuItems(QMenu *menu, Mantid::API::IMDEventWorkspace_const_sptr mdeventWS) const
+void MantidDockWidget::addMDEventWorspaceMenuItems(QMenu *menu, Mantid::API::IMDEventWorkspace_const_sptr WS) const
 {
-  (void) mdeventWS;
+  (void) WS;
 
   //menu->addAction(m_showData); // Show data
   //menu->addAction(m_showInst); // Show instrument
   //menu->addAction(m_plotSpec); // Plot spectra
   //menu->addAction(m_colorFill);
-  //menu->addAction(m_showLogs); // Sample logs
+  menu->addAction(m_showLogs); // Sample logs
   menu->addAction(m_showHist);
   //menu->addAction(m_saveNexus);
 }
+
+
+/** Add the actions that are appropriate for a PeaksWorkspace
+ * @param menu :: The menu to store the items
+ * @param matrixWS :: The workspace related to the menu
+ */
+void MantidDockWidget::addPeaksWorspaceMenuItems(QMenu *menu, Mantid::API::IPeaksWorkspace_const_sptr WS) const
+{
+  (void) WS;
+
+  //menu->addAction(m_showData); // Show data
+  //menu->addAction(m_showInst); // Show instrument
+  //menu->addAction(m_plotSpec); // Plot spectra
+  //menu->addAction(m_colorFill);
+  menu->addAction(m_showLogs); // Sample logs
+  menu->addAction(m_showHist);
+  //menu->addAction(m_saveNexus);
+}
+
+
 
 /**
  * Add the actions that are appropriate for a MatrixWorspace
@@ -1012,6 +1038,10 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     else if( IMDEventWorkspace_const_sptr mdeventWS = boost::dynamic_pointer_cast<const IMDEventWorkspace>(ws) )
     {
       addMDEventWorspaceMenuItems(menu, mdeventWS);
+    }
+    else if( IPeaksWorkspace_const_sptr peaksWS = boost::dynamic_pointer_cast<const IPeaksWorkspace>(ws) )
+    {
+      addPeaksWorspaceMenuItems(menu, peaksWS);
     }
     else if( boost::dynamic_pointer_cast<const WorkspaceGroup>(ws) ) 
     {

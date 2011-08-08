@@ -21,6 +21,7 @@
 #include <QMessageBox>
 #include <iostream>
 #include <sstream>
+#include "MantidAPI/ExperimentInfo.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -189,7 +190,7 @@ void MantidSampleLogDialog::showLogStatisticsOfItem(QTreeWidgetItem * item)
 
       // Get the workspace
       if (!AnalysisDataService::Instance().doesExist(m_wsname.toStdString()))  return;
-      Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(
           AnalysisDataService::Instance().retrieve(m_wsname.toStdString() ));
       if (!ws) return;
 
@@ -282,7 +283,7 @@ void MantidSampleLogDialog::popupMenu(const QPoint & pos)
 void MantidSampleLogDialog::init()
 {
   m_tree->clear();
-  Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(m_mantidUI->getWorkspace(m_wsname));
+  Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(m_mantidUI->getWorkspace(m_wsname));
   if (!ws)
   {
       throw std::runtime_error("Wrong type of a Workspace");

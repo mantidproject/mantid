@@ -54,6 +54,17 @@ namespace Geometry
 class MANTID_GEOMETRY_DLL IInstrument : public virtual Geometry::ICompAssembly
 {
 public:
+
+  IInstrument()
+  : ICompAssembly()
+  {}
+
+  IInstrument(const IInstrument & other)
+  : ICompAssembly(),
+    m_ValidFrom(other.m_ValidFrom),
+    m_ValidTo(other.m_ValidTo)
+  {}
+
   ///String description of the type of component
   virtual std::string type() const { return "IInstrument"; }
 

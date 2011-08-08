@@ -7,6 +7,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
+#include "MantidKernel/DateAndTime.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -246,7 +247,11 @@ public:
     inst->setValidToDate(validTo);
     TS_ASSERT_EQUALS( inst->getValidFromDate(), validFrom);
     TS_ASSERT_EQUALS( inst->getValidToDate(), validTo);
-
+    // Try the parametrized copy constructor
+    ParameterMap_sptr map(new ParameterMap());
+    Instrument * inst2 = new Instrument(boost::dynamic_pointer_cast<Instrument>(inst), map);
+    TS_ASSERT_EQUALS( inst2->getValidFromDate(), validFrom);
+    TS_ASSERT_EQUALS( inst2->getValidToDate(), validTo);
   }
 
 private:
