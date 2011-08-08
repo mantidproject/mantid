@@ -86,6 +86,10 @@ class SNSPowderReduction(PythonAlgorithm):
         #self.declareProperty("FileType", "Event NeXus",
         #                     Validator=ListValidator(types))
         self.declareListProperty("RunNumber", [0], Validator=ArrayBoundedValidator(Lower=0))
+        extensions = [".nxs", "_histo.nxs", "_event.nxs", "_neutron_event.dat",
+                      "_neutron0_event.dat", "_neutron1_event.dat"]
+        self.declareProperty("Extension", "_event.nxs",
+                             Validator=ListValidator(extensions))
         self.declareProperty("CompressOnRead", False,
                              Description="Compress the event list when reading in the data")
         self.declareProperty("Sum", False,
@@ -133,18 +137,24 @@ class SNSPowderReduction(PythonAlgorithm):
         return result["ResultPath"].value
 
     def _loadPreNeXusData(self, runnumber, extension):
-        # find the file to load
-        filename = self._findData(runnumber, extension)
-
         # generate the workspace name
-        (path, name) = os.path.split(filename)
-        name = name.split('.')[0]
-        (name, num) = name.split('_neutron')
-        num = num.replace('_event', '') # TODO should do something with this
+        name = "%s_%d" % (self._instrument, runnumber)
+        filename = name + extension
 
-        # load the prenexus file
-        alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
-        wksp = alg['OutputWorkspace']
+        try: # first just try loading the file
+            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
+            wksp = alg['OutputWorkspace']
+        except:
+            pass
+
+        if 'wksp' in locals():
+            pass
+        else:
+            # find the file to load
+            filename = self._findData(runnumber, extension)
+            # load the prenexus file
+            alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
+            wksp = alg['OutputWorkspace']
 
         # add the logs to it
         nxsfile = "%s_%d_event.nxs" % (self._instrument, runnumber)
@@ -197,12 +207,6 @@ class SNSPowderReduction(PythonAlgorithm):
         # find the file to load
         filename = self._findData(runnumber, extension)
 
-        # generate the workspace name
-        (path, name) = os.path.split(filename)
-        name = name.split('.')[0] # remove the extension
-        if "_event" in name:
-            name = name[0:-1*len("_event")]
-
         # TODO use timemin and timemax to filter what events are being read
         alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
 
@@ -219,7 +223,7 @@ class SNSPowderReduction(PythonAlgorithm):
         if  runnumber is None or runnumber <= 0:
             return None
 
-        if extension.endswith("event.nxs"):
+        if extension.endswith("_event.nxs"):
             return self._loadEventNeXusData(runnumber, extension, **filter)
         else:
             return self._loadPreNeXusData(runnumber, extension)
@@ -246,7 +250,7 @@ class SNSPowderReduction(PythonAlgorithm):
                                      MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
             except KeyError, e:
                 raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
-                                   % (filterLogs[0], str(wksp)))            
+                                   % (filterLogs[0], str(wksp)))        
         if not self.getProperty("CompressOnRead"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         SortEvents(wksp)
@@ -346,7 +350,7 @@ class SNSPowderReduction(PythonAlgorithm):
         globals()["FindSNSNeXus"] = mantidsimple.FindSNSNeXus
 
         # get generic information
-        SUFFIX = "_event.nxs"
+        SUFFIX = self.getProperty("Extension")
         self._config = self.PDConfigFile(self.getProperty("CharacterizationRunsFile"))
         self._binning = self.getProperty("Binning")
         if len(self._binning) != 1 and len(self._binning) != 3:
