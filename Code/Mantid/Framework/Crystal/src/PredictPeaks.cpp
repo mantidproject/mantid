@@ -149,9 +149,6 @@ namespace Crystal
         IDetector_sptr det = tracker.getDetectorResult();
         if (det)
         {
-          // Found a detector (not a monitor) that intersected the ray. Take the first one!
-          //                std::cout << "HKL " << hkl << " and q " << q << " will project on id " << det->getID() << " at wl " << 1.0/one_over_wl << "\n";
-
           // Create the peak
           Peak p(inst, det->getID(), wl);
           p.setHKL(hkl);

@@ -199,6 +199,8 @@ namespace MDEvents
     }
 
     prog->report("Making PeaksWorkspace");
+    // Set the same instrument in the peaks workspace.
+    // TODO: Copy sample, etc.
     peakWS->setInstrument(inst);
 
     // --- Convert the "boxes" to peaks ----

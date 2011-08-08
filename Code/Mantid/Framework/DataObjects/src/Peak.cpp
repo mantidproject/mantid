@@ -439,13 +439,14 @@ namespace DataObjects
    * the detPos is set to the direction of the detector (but the detector is unknown)
    *
    * Using the instrument set in the peak, perform ray tracing
-   * to find the exact detector.   *
+   * to find the exact detector.
    *
    * @return true if the detector ID was found.
    */
   bool Peak::findDetector()
   {
     // Scattered beam direction
+    V3D oldDetPos = detPos;
     V3D beam = detPos - samplePos;
     beam.normalize();
 
@@ -457,6 +458,8 @@ namespace DataObjects
     {
       // Set the detector ID, the row, col, etc.
       this->setDetectorID(det->getID());
+      // HOWEVER, we retain the old detector position because we assume that is a little more precise.
+      detPos = samplePos + beam * detPos.norm();
       return true;
     }
     return false;
