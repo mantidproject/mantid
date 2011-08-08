@@ -67,6 +67,12 @@ namespace API
 
   };
 
+  /// Shared pointer to ExperimentInfo
+  typedef boost::shared_ptr<ExperimentInfo> ExperimentInfo_sptr;
+
+  /// Shared pointer to const ExperimentInfo
+  typedef boost::shared_ptr<const ExperimentInfo> ExperimentInfo_const_sptr;
+
 
 } // namespace Mantid
 } // namespace API

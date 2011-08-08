@@ -6,8 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeak.h"
+#include "MantidAPI/ExperimentInfo.h"
 
-//IsamplePosition should be IsampleOrientation
 namespace Mantid
 {
 
@@ -40,10 +40,21 @@ namespace API
 
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
    */
-  class MANTID_API_DLL IPeaksWorkspace: public ITableWorkspace
+  class MANTID_API_DLL IPeaksWorkspace: public ITableWorkspace, public Mantid::API::ExperimentInfo
   {
   public:
 
+    /// Ctor
+    IPeaksWorkspace()
+    : ExperimentInfo()
+    {}
+
+    /// Copy constructor
+    IPeaksWorkspace(const IPeaksWorkspace & other)
+    : ExperimentInfo(other)
+    {}
+
+    /// Destructor
     virtual ~IPeaksWorkspace();
 
     //boost::shared_ptr<IPeaksWorkspace> clone() = 0;

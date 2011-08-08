@@ -61,7 +61,7 @@ namespace DataObjects
 
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
    */
-  class DLLExport PeaksWorkspace: public Mantid::API::IPeaksWorkspace, public Mantid::API::ExperimentInfo
+  class DLLExport PeaksWorkspace: public Mantid::API::IPeaksWorkspace
   {
   public:
 

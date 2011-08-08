@@ -30,6 +30,7 @@
 #include <iostream>
 #include <sstream>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
+#include "MantidAPI/ExperimentInfo.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -341,6 +342,13 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
   }
   else return;
 
+  // Experiment info data
+  ExperimentInfo_sptr experimentInfo_ws = boost::dynamic_pointer_cast<ExperimentInfo>(workspace);
+  bool specialWorkspace = false;
+  specialWorkspace = (workspace->id() == "SpecialWorkspace2D" || workspace->id() == "OffsetsWorkspace" || workspace->id() == "GroupingWorkspace");
+  if (experimentInfo_ws && (!specialWorkspace))
+    populateExperimentInfoData(experimentInfo_ws, item);
+
   if (showMemory)
   {
     // For all workspaces, show the memory
@@ -512,6 +520,36 @@ void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspa
 }
 
 
+
+/** Populate the children of this item with data relevant to a workspace with ExperimentInfo (instrument, sample, logs)
+ *
+ * @param workspace :: ExperimentInfo *
+ * @param ws_item :: The tree item that has been expanded
+*/
+void MantidDockWidget::populateExperimentInfoData(Mantid::API::ExperimentInfo_sptr workspace, QTreeWidgetItem* ws_item)
+{
+  QTreeWidgetItem* data_item;
+  std::string s;
+
+  s = "Instrument: " + workspace->getInstrument()->getName();
+  data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
+  data_item->setFlags(Qt::NoItemFlags);
+  ws_item->addChild(data_item);
+
+  if (workspace->sample().hasOrientedLattice())
+  {
+    const OrientedLattice & latt = workspace->sample().getOrientedLattice();
+    std::ostringstream out;
+    out << "Sample: a " << std::fixed << std::setprecision(1) << latt.a() <<", b " << latt.b() << ", c " << latt.c();
+    out << "; alpha " << std::fixed << std::setprecision(0) << latt.alpha() <<", beta " << latt.beta() << ", gamma " << latt.gamma();
+    s = out.str();
+    data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
+    data_item->setFlags(Qt::NoItemFlags);
+    ws_item->addChild(data_item);
+  }
+}
+
+
 /**
 * Populate the children of this item with data relevant to the MatrixWorkspace object
 * @param workspace :: A pointer to the MatrixWorkspace object to inspect
@@ -560,18 +598,6 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
     data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
     data_item->setFlags(Qt::NoItemFlags);
     ws_item->addChild(data_item);
-
-    if (workspace->sample().hasOrientedLattice())
-    {
-      const OrientedLattice & latt = workspace->sample().getOrientedLattice();
-      std::ostringstream out;
-      out << "Sample: a " << std::fixed << std::setprecision(1) << latt.a() <<", b " << latt.b() << ", c " << latt.c();
-      out << "; alpha " << std::fixed << std::setprecision(0) << latt.alpha() <<", beta " << latt.beta() << ", gamma " << latt.gamma();
-      s = out.str();
-      data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
-      data_item->setFlags(Qt::NoItemFlags);
-      ws_item->addChild(data_item);
-    }
   }
 
 

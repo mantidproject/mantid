@@ -58,7 +58,7 @@ namespace DataObjects
    * @return
    */
   PeaksWorkspace::PeaksWorkspace(PeaksWorkspace & other)
-  : IPeaksWorkspace(), ExperimentInfo(other),
+  : IPeaksWorkspace(other),
     peaks(other.peaks)
   {
     initColumns();

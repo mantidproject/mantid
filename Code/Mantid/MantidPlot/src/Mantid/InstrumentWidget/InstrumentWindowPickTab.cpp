@@ -482,7 +482,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   
   InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
-  Mantid::Geometry::IInstrument_const_sptr instr = ws->getInstrument();
+  Mantid::Geometry::IInstrument_sptr instr = ws->getInstrument();
   Mantid::Geometry::IObjComponent_const_sptr source = instr->getSource();
   Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
   Mantid::Geometry::IDetector_const_sptr det = instr->getDetector(m_currentDetID);
