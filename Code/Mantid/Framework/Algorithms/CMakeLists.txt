@@ -144,6 +144,7 @@ set ( SRC_FILES
 	src/SumNeighbours.cpp
 	src/SumRowColumn.cpp
 	src/SumSpectra.cpp
+        src/TOFSANSResolution.cpp
 	src/Transpose.cpp
 	src/UnGroupWorkspaces.cpp
 	src/UnaryOperation.cpp
@@ -301,6 +302,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SumNeighbours.h
 	inc/MantidAlgorithms/SumRowColumn.h
 	inc/MantidAlgorithms/SumSpectra.h
+        inc/MantidAlgorithms/TOFSANSResolution.h
 	inc/MantidAlgorithms/Transpose.h
 	inc/MantidAlgorithms/UnGroupWorkspaces.h
 	inc/MantidAlgorithms/UnaryOperation.h
