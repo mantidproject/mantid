@@ -157,10 +157,11 @@ namespace Mantid
       static bool runLoadNexusLogs(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
           std::vector<Kernel::DateAndTime> & pulseTimes, Algorithm * alg);
 
-    private:
       /// Load a spectra mapping from the given file
-      Geometry::ISpectraDetectorMap * loadSpectraMapping(const std::string & filename, 
-                                                         const bool monitorsOnly) const;
+      static Geometry::ISpectraDetectorMap * loadSpectraMapping(const std::string & filename, Mantid::Geometry::IInstrument_sptr inst,
+          const bool monitorsOnly, const std::string entry_name, Mantid::Kernel::Logger & g_log);
+
+    private:
       /// name of top level NXentry to use
       std::string m_top_entry_name;
       /// Set the top entry field name

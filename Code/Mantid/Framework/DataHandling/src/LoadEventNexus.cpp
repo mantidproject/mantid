@@ -1173,9 +1173,8 @@ bool LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, API::Mat
  * @param bankName :: An optional bank name for loading a single bank
  */
 void LoadEventNexus::createSpectraMapping(const std::string &nxsfile, 
-                                          API::MatrixWorkspace_sptr workspace,
-                                          const bool monitorsOnly,
-                                          const std::string & bankName)
+    API::MatrixWorkspace_sptr workspace, const bool monitorsOnly,
+    const std::string & bankName)
 {
   Geometry::ISpectraDetectorMap *spectramap(NULL);
   if( !monitorsOnly && !bankName.empty() )
@@ -1200,7 +1199,7 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
   }
   if( !spectramap )
   {
-    spectramap = loadSpectraMapping(nxsfile, monitorsOnly);
+    spectramap = loadSpectraMapping(nxsfile, WS->getInstrument(), monitorsOnly, m_top_entry_name, g_log);
   }
   if( !spectramap )
   {
@@ -1290,16 +1289,17 @@ void LoadEventNexus::runLoadMonitors()
  * an isis_vms_compat block in the file, if it exists it pulls out the spectra mapping listed there
  * @param file :: A filename
  * @param monitorsOnly :: If true then only the monitor spectra are loaded
+ * @param entry_name :: name of the NXentry to open.
  * @returns A pointer to a new map or NULL if the block does not exist
  */
-Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::string & filename,
-                                                                   const bool monitorsOnly) const
+Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::string & filename, Mantid::Geometry::IInstrument_sptr inst,
+                                   const bool monitorsOnly, const std::string entry_name, Mantid::Kernel::Logger & g_log)
 {
   ::NeXus::File file(filename);
   try
   {
-    g_log.debug() << "Attempting to load custom spectra mapping from '" << m_top_entry_name << "/isis_vms_compat'.\n";
-    file.openPath(m_top_entry_name + "/isis_vms_compat");
+    g_log.debug() << "Attempting to load custom spectra mapping from '" << entry_name << "/isis_vms_compat'.\n";
+    file.openPath(entry_name + "/isis_vms_compat");
   }
   catch(::NeXus::Exception&)
   {
@@ -1330,7 +1330,7 @@ Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::st
     throw std::runtime_error(os.str());
   }
   // Monitor filtering/selection
-  const std::vector<detid_t> monitors = WS->getInstrument()->getMonitors();
+  const std::vector<detid_t> monitors = inst->getMonitors();
   if( monitorsOnly )
   {
     g_log.debug() << "Loading only monitor spectra from " << filename << "\n";

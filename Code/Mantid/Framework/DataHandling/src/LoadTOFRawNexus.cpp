@@ -121,8 +121,7 @@ void countPixels(const std::string &nexusfilename, const std::string & entry_nam
  * @param workspaceIndex :: workspaceIndex of the first spectrum. This will be incremented by the # of pixels in the bank.
  */
 void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::string & entry_name,
-    const std::string &bankName, Mantid::API::MatrixWorkspace_sptr WS,
-    size_t & workspaceIndex)
+    const std::string &bankName, Mantid::API::MatrixWorkspace_sptr WS)
 {
   // Navigate to the point in the file
   ::NeXus::File * file = new ::NeXus::File(nexusfilename);
@@ -135,9 +134,6 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   size_t numPixels = pixel_id.size();
   if (numPixels == 0)
   { file->close(); g_log.warning() << "Invalid pixel_id data in " << bankName << std::endl; return; }
-
-  if (workspaceIndex + numPixels > WS->getNumberHistograms())
-  { file->close(); g_log.warning() << "Too many pixels in bank " << bankName << " to fit in the workspace" << std::endl; return; }
 
   // Load the TOF vector
   std::vector<float> tof;
@@ -160,8 +156,11 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
 
   for (size_t i=0; i<numPixels; i++)
   {
+    // Find the workspace index for this detector
+    detid_t pixelID = pixel_id[i];
+    size_t wi = (*id_to_wi)[pixelID];
+
     // Set the basic info of that spectrum
-    size_t wi = workspaceIndex + i;
     ISpectrum * spec = WS->getSpectrum(wi);
     spec->setSpectrumNo( specid_t(wi) );
     spec->setDetectorID( pixel_id[i] );
@@ -177,9 +176,6 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
     E = Y;
     std::transform(E.begin(), E.end(), E.begin(), (double(*)(double)) sqrt);
   }
-
-  // Modify the workspace index in the output
-  workspaceIndex = workspaceIndex + numPixels;
 
   // Done!
   file->close();
@@ -225,18 +221,23 @@ void LoadTOFRawNexus::exec()
   prog->report("Loading metadata");
   LoadEventNexus::loadEntryMetadata(filename, WS, entry_name);
 
+  // Set the spectrum number/detector ID at each spectrum. This is consistent with LoadEventNexus for non-ISIS files.
+  prog->report("Building Spectra Mapping");
+  WS->rebuildSpectraMapping(false);
+  // And map ID to WI
+  id_to_wi = WS->getDetectorIDToWorkspaceIndexMap(false);
+
   // Load each bank sequentially
-  size_t workspaceIndex = 0;
   for (size_t i=0; i<bankNames.size(); i++)
   {
     std::string bankName = bankNames[i];
     prog->report("Loading bank " + bankName);
-    loadBank(filename, entry_name, bankName, WS, workspaceIndex);
+    loadBank(filename, entry_name, bankName, WS);
   }
 
   // Set some units
   WS->getAxis(0)->setUnit("TOF");
-  WS->setYUnit("counts");
+  WS->setYUnit("Counts");
 
   // Method that will eventually go away.
   WS->generateSpectraMap();
@@ -245,6 +246,7 @@ void LoadTOFRawNexus::exec()
   setProperty("OutputWorkspace", WS);
 
   delete prog;
+  delete id_to_wi;
 }
 
 } // namespace DataHandling

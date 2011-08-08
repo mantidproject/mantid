@@ -9,6 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
 
 namespace Mantid
 {
@@ -94,11 +95,13 @@ private:
   void loadSampleData(DataObjects::Workspace2D_sptr, Mantid::NeXus::NXEntry & entry);
 
   void loadBank(const std::string &nexusfilename, const std::string & entry_name,
-      const std::string &bankName, Mantid::API::MatrixWorkspace_sptr WS,
-      size_t & workspaceIndex);
+      const std::string &bankName, Mantid::API::MatrixWorkspace_sptr WS);
 
   /// List of the absolute time of each pulse
   std::vector<Kernel::DateAndTime> pulseTimes;
+
+  /// Map where key = detector ID, value = workspace index
+  detid2index_map * id_to_wi;
 
 };
 
