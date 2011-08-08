@@ -106,7 +106,7 @@ public slots:
   /// Set a reference to a double  in the global scope
   virtual bool setDouble(double, const char*) { return false; }
   /// Update the global namespace of algorithms. Bit of a hack for Python algorithms
-  virtual void refreshAlgorithms() {};
+  virtual void refreshAlgorithms(bool = false) {};
   
   /// Clear the global environment. What exactly happens depends on the implementation.
   virtual void clear() {}
