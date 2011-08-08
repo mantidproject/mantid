@@ -1,7 +1,7 @@
 #ifndef BOXCONTROLLER_H_
 #define BOXCONTROLLER_H_
 
-#include "MantidAPI/DiskMRU.h"
+#include "MantidKernel/DiskMRU.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
@@ -345,10 +345,10 @@ namespace MDEvents
 
     //-----------------------------------------------------------------------------------
     /** Return the disk MRU for disk caching */
-    const Mantid::API::DiskMRU & getDiskMRU() const
+    const Mantid::Kernel::DiskMRU & getDiskMRU() const
     { return m_diskMRU; }
 
-    Mantid::API::DiskMRU & getDiskMRU()
+    Mantid::Kernel::DiskMRU & getDiskMRU()
     { return m_diskMRU; }
 
 
@@ -445,7 +445,7 @@ namespace MDEvents
     ::NeXus::File * m_file;
 
     /// Instance of the disk-caching MRU list.
-    mutable Mantid::API::DiskMRU m_diskMRU;
+    mutable Mantid::Kernel::DiskMRU m_diskMRU;
 
   public:
     /// Mutex for locking access to the file, for file-back-end MDBoxes.

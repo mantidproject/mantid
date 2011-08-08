@@ -1,10 +1,10 @@
-#include "MantidAPI/DiskMRU.h"
+#include "MantidKernel/DiskMRU.h"
 #include "MantidKernel/System.h"
 #include <iostream>
 
 namespace Mantid
 {
-namespace API
+namespace Kernel
 {
 
 
@@ -329,5 +329,5 @@ namespace API
   }
 
 } // namespace Mantid
-} // namespace API
+} // namespace Kernel
 

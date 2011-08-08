@@ -1,16 +1,15 @@
 #ifndef BOXPLITCONTROLLER_TEST_H
 #define BOXPLITCONTROLLER_TEST_H
 
-#include "MantidAPI/DiskMRU.h"
+#include "MantidKernel/DiskMRU.h"
 #include "MantidMDEvents/BoxController.h"
 #include <cxxtest/TestSuite.h>
 #include <map>
 #include <memory>
 
 using namespace Mantid;
-using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace Mantid::MDEvents;
-using Mantid::API::DiskMRU;
 
 class BoxControllerTest :    public CxxTest::TestSuite
 {

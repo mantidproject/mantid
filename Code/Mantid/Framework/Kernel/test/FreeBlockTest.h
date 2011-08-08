@@ -1,7 +1,7 @@
 #ifndef MANTID_API_FREEBLOCKTEST_H_
 #define MANTID_API_FREEBLOCKTEST_H_
 
-#include "MantidAPI/FreeBlock.h"
+#include "MantidKernel/FreeBlock.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
@@ -9,7 +9,6 @@
 #include <iostream>
 
 using namespace Mantid;
-using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 class FreeBlockTest : public CxxTest::TestSuite

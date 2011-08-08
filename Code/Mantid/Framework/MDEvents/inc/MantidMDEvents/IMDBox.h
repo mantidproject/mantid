@@ -3,10 +3,10 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ImplicitFunction.h"
-#include "MantidAPI/ISaveable.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
+#include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/CoordTransform.h"
@@ -41,7 +41,7 @@ namespace MDEvents
    *
    * */
   TMDE_CLASS
-  class DLLExport IMDBox : public Mantid::Geometry::SignalAggregate, public Mantid::API::ISaveable
+  class DLLExport IMDBox : public Mantid::Geometry::SignalAggregate, public Mantid::Kernel::ISaveable
   {
   public:
 

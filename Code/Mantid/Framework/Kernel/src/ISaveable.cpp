@@ -1,9 +1,9 @@
-#include "MantidAPI/ISaveable.h"
+#include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid
 {
-namespace API
+namespace Kernel
 {
 
 
@@ -33,5 +33,5 @@ namespace API
 
 
 } // namespace Mantid
-} // namespace API
+} // namespace Kernel
 

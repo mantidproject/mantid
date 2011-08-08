@@ -1,14 +1,14 @@
-#include "MantidAPI/FreeBlock.h"
+#include "MantidKernel/FreeBlock.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid
 {
-namespace API
+namespace Kernel
 {
 
   
 
 
 } // namespace Mantid
-} // namespace API
+} // namespace Kernel
 

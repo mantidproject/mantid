@@ -18,13 +18,11 @@ set ( SRC_FILES
 	src/ConstraintFactory.cpp
 	src/CostFunctionFactory.cpp
 	src/DeprecatedAlgorithm.cpp
-	src/DiskMRU.cpp
 	src/ExperimentInfo.cpp
 	src/Expression.cpp
 	src/FileFinder.cpp
 	src/FileProperty.cpp
 	src/FrameworkManager.cpp
-	src/FreeBlock.cpp
 	src/FunctionFactory.cpp
 	src/IDataFileChecker.cpp
 	src/IEventList.cpp
@@ -38,7 +36,6 @@ set ( SRC_FILES
 	src/IPeak.cpp
 	src/IPeakFunction.cpp
 	src/IPeaksWorkspace.cpp
-	src/ISaveable.cpp
 	src/ISpectrum.cpp
 	src/ITableWorkspace.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp
@@ -109,14 +106,12 @@ set ( INC_FILES
 	inc/MantidAPI/CostFunctionFactory.h
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
-	inc/MantidAPI/DiskMRU.h
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/ExperimentInfo.h
 	inc/MantidAPI/Expression.h
 	inc/MantidAPI/FileFinder.h
 	inc/MantidAPI/FileProperty.h
 	inc/MantidAPI/FrameworkManager.h
-	inc/MantidAPI/FreeBlock.h
 	inc/MantidAPI/FunctionFactory.h
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
@@ -202,13 +197,11 @@ set ( TEST_FILES
 	test/AsynchronousTest.h
 	test/CompositeFunctionTest.h
 	test/CostFunctionFactoryTest.h
-	test/DiskMRUTest.h
 	test/ExperimentInfoTest.h
 	test/ExpressionTest.h
 	test/FileFinderTest.h
 	test/FilePropertyTest.h
 	test/FrameworkManagerTest.h
-	test/FreeBlockTest.h
 	test/FunctionTest.h
 	test/IEventListTest.h
 	test/IFunctionMDTest.h

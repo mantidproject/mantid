@@ -1,9 +1,9 @@
 #ifndef MANTID_API_DISKMRUTEST_H_
 #define MANTID_API_DISKMRUTEST_H_
 
-#include "MantidAPI/DiskMRU.h"
-#include "MantidAPI/FreeBlock.h"
-#include "MantidAPI/ISaveable.h"
+#include "MantidKernel/DiskMRU.h"
+#include "MantidKernel/FreeBlock.h"
+#include "MantidKernel/ISaveable.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
@@ -17,7 +17,6 @@
 #include <iostream>
 
 using namespace Mantid;
-using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::Kernel::CPUTimer;
 
@@ -532,6 +531,7 @@ public:
     // 1/3 of the blocks got merged
     TS_ASSERT_EQUALS( mru.getFreeSpaceMap().size(), 6667);
   }
+
 
   /** Disabled because it is not necessary to defrag since that happens on the fly */
   void xtest_defragFreeBlocks()

@@ -6,7 +6,7 @@
 
 namespace Mantid
 {
-namespace API
+namespace Kernel
 {
 
   /** FreeBlock: a simple class that holds the position
@@ -109,7 +109,7 @@ namespace API
   };
 
 
-} // namespace API
+} // namespace Kernel
 } // namespace Mantid
 
 #endif  /* MANTID_API_FREEBLOCK_H_ */

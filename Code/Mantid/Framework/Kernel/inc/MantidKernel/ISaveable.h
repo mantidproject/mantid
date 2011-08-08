@@ -5,7 +5,7 @@
 
 namespace Mantid
 {
-namespace API
+namespace Kernel
 {
 
   /** An interface for objects that can be cached or saved to disk.
@@ -82,7 +82,7 @@ namespace API
   };
 
 
-} // namespace API
+} // namespace Kernel
 } // namespace Mantid
 
 #endif  /* MANTID_MDEVENTS_ISAVEABLE_H_ */

@@ -1,9 +1,9 @@
 #ifndef MANTID_API_DISKMRU_H_
 #define MANTID_API_DISKMRU_H_
     
-#include "MantidAPI/DllConfig.h"
-#include "MantidAPI/FreeBlock.h"
-#include "MantidAPI/ISaveable.h"
+#include "MantidKernel/DllConfig.h"
+#include "MantidKernel/FreeBlock.h"
+#include "MantidKernel/ISaveable.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include <boost/multi_index_container.hpp>
@@ -18,7 +18,7 @@
 
 namespace Mantid
 {
-namespace API
+namespace Kernel
 {
 
   /** A Most-Recently-Used list of objects defined specifically for caching to disk.
@@ -63,7 +63,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class MANTID_API_DLL DiskMRU
+  class DLLExport DiskMRU
   {
   public:
     /** Typedef defines that we will keep the objects with these 2 orderings:
@@ -215,7 +215,7 @@ namespace API
   };
 
 
-} // namespace API
+} // namespace Kernel
 } // namespace Mantid
 
 #endif  /* MANTID_API_DISKMRU_H_ */

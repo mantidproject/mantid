@@ -1,10 +1,14 @@
 #ifndef MDBOXTEST_H
 #define MDBOXTEST_H
 
-#include "MantidAPI/DiskMRU.h"
+#include <cxxtest/TestSuite.h>
+#include <map>
+#include <memory>
+#include <Poco/File.h>
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/DiskMRU.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
@@ -13,17 +17,12 @@
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <cxxtest/TestSuite.h>
-#include <map>
-#include <memory>
-#include <Poco/File.h>
 
 using namespace Mantid;
+using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
-using Mantid::Kernel::ConfigService;
-using Mantid::Geometry::MDDimensionExtents;
-using Mantid::Kernel::CPUTimer;
 
 class MDBoxTest :    public CxxTest::TestSuite
 {
