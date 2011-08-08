@@ -155,7 +155,7 @@ class LoadRun(ReductionStep):
         else:
             return False
 
-        Rebin(event_ws, workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_max), False)
+        Rebin(event_ws, workspace, "%4.1f,%4.1f,%4.1f" % (wl_min, 0.1, wl_max), False)
         
         # Add the name of the event workspace as a property in case we need it later (used by the beam stop transmission)
         mantid[workspace].getRun().addProperty_str("event_ws", event_ws, True)

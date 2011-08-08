@@ -154,6 +154,9 @@ void Q1DWeighted::exec()
       // equal to the number of detector channels + 1.
       for ( int j = 0; j < xLength-1; j++)
       {
+        double wl_bin_width = 1.0;
+        if (xLength>2) wl_bin_width = XIn[j+1]-XIn[j];
+
         double q = factor*2.0/(XIn[j]+XIn[j+1]);
         int iq = 0;
 
@@ -186,7 +189,7 @@ void Q1DWeighted::exec()
           {
             YOut[iq] += YIn[j]*w;
             EOut[iq] += w*w*EIn[j]*EIn[j];
-            XNorm[iq] += w;
+            XNorm[iq] += w*wl_bin_width;
           }
         }
       }

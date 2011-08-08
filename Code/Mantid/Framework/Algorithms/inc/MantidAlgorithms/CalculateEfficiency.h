@@ -66,6 +66,8 @@ private:
   void normalizeDetectors(API::MatrixWorkspace_sptr rebinnedWS,
       API::MatrixWorkspace_sptr outputWS, double sum, double error, int nPixels,
       double min_eff, double max_eff);
+
+  double m_progress;
 };
 
 } // namespace Algorithm

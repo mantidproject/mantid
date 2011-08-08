@@ -69,7 +69,7 @@ void CalculateEfficiency::exec()
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
 
-  Progress progress(this,0.0,1.0,numberOfSpectra);
+  m_progress = 0.0;
 
   DataObjects::EventWorkspace_const_sptr inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
@@ -81,15 +81,16 @@ void CalculateEfficiency::exec()
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < numberOfSpectra; i++)
     {
+      m_progress += 0.1/numberOfSpectra;
+      progress(m_progress, "Computing sensitivity");
       double sum_i(0), err_i(0);
-      progress.report("Integrating events");
       const EventList& el = inputEventWS->getEventList(i);
       el.integrate(0,0,true,sum_i,err_i);
       y_values[i] = sum_i;
       e_values[i] = err_i;
     }
 
-    IAlgorithm_sptr algo = createSubAlgorithm("CreateWorkspace", 0.7, 1.0);
+    IAlgorithm_sptr algo = createSubAlgorithm("CreateWorkspace", 0.1, 0.2);
     algo->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
     algo->setProperty< std::vector<double> >("DataX", std::vector<double>(2,0.0) );
     algo->setProperty< std::vector<double> >("DataY", y_values );
@@ -103,7 +104,7 @@ void CalculateEfficiency::exec()
   else
   {
     // Sum up all the wavelength bins
-    IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
+    IAlgorithm_sptr childAlg = createSubAlgorithm("Integration", 0.0, 0.2);
     childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
     childAlg->executeAsSubAlg();
     rebinnedWS = childAlg->getProperty("OutputWorkspace");
@@ -161,16 +162,15 @@ void CalculateEfficiency::exec()
 void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
     double& sum, double& error, int& nPixels)
 {
-    Progress progress(this,0.0,1.0,rebinnedWS->getNumberHistograms());
     // Number of spectra
-    const size_t numberOfSpectra = rebinnedWS->getNumberHistograms();
+    const int numberOfSpectra = static_cast<int>(rebinnedWS->getNumberHistograms());
     sum = 0.0;
     error = 0.0;
     nPixels = 0;
 
-    for (size_t i = 0; i < numberOfSpectra; i++)
+    for (int i = 0; i < numberOfSpectra; i++)
     {
-      progress.report("Summing up detector");
+      progress(0.2+0.2*i/numberOfSpectra, "Computing sensitivity");
       // Get the detector object for this spectrum
       IDetector_const_sptr det = rebinnedWS->getDetector(i);
       // If this detector is masked, skip to the next one
@@ -206,7 +206,6 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
     MatrixWorkspace_sptr outputWS, double sum, double error, int nPixels,
     double min_eff, double max_eff)
 {
-    Progress progress(this,0.0,1.0,rebinnedWS->getNumberHistograms());
     // Number of spectra
     const int numberOfSpectra = static_cast<int>(rebinnedWS->getNumberHistograms());
 
@@ -215,7 +214,7 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
 
     for (int i = 0; i < numberOfSpectra; i++)
     {
-      progress.report("Normalizing pixels");
+      progress(0.4+0.2*i/numberOfSpectra, "Computing sensitivity");
       // Get the detector object for this spectrum
       IDetector_const_sptr det = rebinnedWS->getDetector(i);
       // If this detector is masked, skip to the next one
