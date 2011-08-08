@@ -3,7 +3,6 @@
 """
 import os
 import re
-from reduction.instruments.sans.sns_instrument import EQSANS
 
 class EQSANSConfig(object):
     
@@ -43,6 +42,9 @@ class EQSANSConfig(object):
         
         # Prompt pulse width
         self.prompt_pulse_width = None
+        
+        # Slit positions
+        self.slit_positions = [8*[20.0],8*[20.0],8*[20.0]]
     
     def _process_file(self):
         """
@@ -97,3 +99,16 @@ class EQSANSConfig(object):
                 width = re.search("=[ ]*([0-9]+.?[0-9]*)", line)
                 if width is not None:
                     self.prompt_pulse_width = float(width.group(1))
+                    
+            # Slits
+            if line.lower().find("wheel"):
+                slit = re.search("([1-8]) wheel[ ]*([1-3])[ \t]*=[ \t]*(\w+)", line.lower())
+                if slit is not None:
+                    slit_number = int(slit.group(1))-1
+                    wheel_number = int(slit.group(2))-1
+                    slit_name = slit.group(3)
+                    slit_size = 0.0
+                    slit_size_re = re.search("\w*?([0-9]+)mm", slit_name)
+                    if slit_size_re is not None:
+                        slit_size = float(slit_size_re.group(1))
+                    self.slit_positions[wheel_number][slit_number] = slit_size                    

@@ -211,6 +211,53 @@ class LoadRun(ReductionStep):
                     return None, mtd[item].getRun().getProperty("event_ws").value
         return None, None
                 
+    def _get_source_slit_size(self, reducer, workspace, config=None):
+        """
+            Determine the source aperture by reading in the slit settings from 
+            the log
+            @param reducer: Reducer object
+            @param workspace: name of workspace being processed
+            @param config: EQSANSConfig object 
+        """
+        
+        slit_positions = config.slit_positions
+        # If we don't have a config file, assume the standard slit settings
+        if config is None:
+            slit_positions = [[5.0, 10.0, 10.0, 15.0, 20.0, 20.0, 25.0, 40.0], 
+                              [0.0, 10.0, 10.0, 15.0, 15.0, 20.0, 20.0, 40.0], 
+                              [0.0, 10.0, 10.0, 15.0, 15.0, 20.0, 20.0, 40.0]]
+        
+        slit1 = None
+        slit2 = None
+        slit3 = None
+        if mtd[workspace].getRun().hasProperty("vBeamSlit"):
+            slit1 = int(mtd[workspace].getRun().getProperty("vBeamSlit").value[0])
+        if mtd[workspace].getRun().hasProperty("vBeamSlit2"):
+            slit2 = int(mtd[workspace].getRun().getProperty("vBeamSlit2").value[0])
+        if mtd[workspace].getRun().hasProperty("vBeamSlit3"):
+            slit3 = int(mtd[workspace].getRun().getProperty("vBeamSlit3").value[0])
+            
+        if slit1 is None and slit2 is None and slit3 is None:
+            return "   Could not determine source aperture diameter\n"
+            
+        slits = [slit1, slit2, slit3]
+        
+        S1 = 20.0 # slit default size
+        source_to_sample = math.fabs(mtd[workspace].getInstrument().getSource().getPos().getZ())*1000.0 
+        L1 = None
+        
+        for i in range(3):
+            m=slits[i]-1; 
+            if m>=0 and m<6:
+                x = slit_positions[i][m];
+                y = source_to_sample - reducer.instrument.slit_to_source[i]
+                if (L1 is None or x/y<S1/L1):
+                    L1=y
+                    S1=x
+                    
+        mtd[workspace].getRun().addProperty_dbl("source-aperture-diameter", S1, 'mm', True) 
+        return "   Source aperture diameter = %g mm\n" % S1    
+                
     def execute(self, reducer, workspace, force=False):
         output_str = ""      
         # If we don't have a data file, look up the workspace handle
@@ -382,6 +429,8 @@ class LoadRun(ReductionStep):
         # Width of the prompt pulse
         prompt_pulse_width = 20
         
+        # Read in the configuration file
+        conf = None
         if config_file is not None:
             mantid.sendLogMessage("Using configuration file: %s\n" % config_file)
             output_str +=  "   Using configuration file: %s\n" % config_file
@@ -409,6 +458,9 @@ class LoadRun(ReductionStep):
         else:
             mantid.sendLogMessage("Could not find configuration file for %s" % workspace)
             output_str += "   Could not find configuration file for %s\n" % workspace
+
+        # Get source aperture radius
+        output_str += self._get_source_slit_size(reducer, workspace+'_evt', conf)
 
         # Move detector array to correct position
         [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
@@ -742,13 +794,19 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
         pixel_size_y = mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
         
+        # Get the source aperture radius
+        source_aperture_radius = 20.0
+        if mtd[workspace].getRun().hasProperty("source-aperture-diameter"):
+            source_aperture_radius = mtd[workspace].getRun().getProperty("source-aperture-diameter").value/2.0
+
         if mtd[workspace].getRun().hasProperty("is_frame_skipping") \
             and mtd[workspace].getRun().getProperty("is_frame_skipping").value==0:
             self._is_frame_skipping = False
             output_str = super(AzimuthalAverageByFrame, self).execute(reducer, workspace)
             TOFSANSResolution(InputWorkspace=workspace+self._suffix, 
                               ReducedWorkspace=workspace, OutputBinning=self._binning,
-                              PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y)
+                              PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y,
+                              SourceApertureRadius=source_aperture_radius)
             return output_str
         
         self._is_frame_skipping = True
@@ -774,7 +832,8 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         TOFSANSResolution(InputWorkspace=workspace+'_frame2'+self._suffix, 
                           ReducedWorkspace=workspace, OutputBinning=self._binning,
                           MinWavelength=wl_min, MaxWavelength=wl_max,
-                          PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y)                                                                         
+                          PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y,
+                          SourceApertureRadius=source_aperture_radius)                                                                         
         
         # Reset binning
         self._binning = binning
@@ -833,7 +892,8 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         TOFSANSResolution(InputWorkspace=workspace+'_frame1'+self._suffix, 
                           ReducedWorkspace=workspace, OutputBinning=self._binning,
                           MinWavelength=wl_min, MaxWavelength=wl_max,
-                          PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y)        
+                          PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y,
+                          SourceApertureRadius=source_aperture_radius)        
                     
         # Add output workspaces to the list of important output workspaces
         for item in self.get_output_workspace(workspace):

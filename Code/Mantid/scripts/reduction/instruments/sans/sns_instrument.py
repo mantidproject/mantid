@@ -22,6 +22,8 @@ class EQSANS(Instrument):
         self.pixel_size_y = 4.297
         ## Detector name
         self.detector_ID = "detector1"
+        # Slit to source distance in mm for the three slit wheels
+        self.slit_to_source = [10080, 11156, 12150]
 
     def get_default_beam_center(self, workspace=None):
         """
