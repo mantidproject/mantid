@@ -69,6 +69,18 @@ static bool CompareMagnitude( const V3D & v1, const V3D & v2 )
   @param  gamma               third unit cell angle in degrees.
   @param  required_tolerance  The maximum allowed deviation of Miller indices
                               from integer values for a peak to be indexed.
+  @param  base_index          The sequence number of the peak that should 
+                              be used as the central peak.  On the first
+                              scan for a UB matrix that fits the data,
+                              the remaining peaks in the list of q_vectors 
+                              will be shifted by -base_peak, where base_peak
+                              is the q_vector with the specified base index.
+                              If fewer than 5 peaks are specified in the
+                              q_vectors list, this parameter is ignored.
+                              If this parameter is -1, and there are at least
+                              four peaks in the q_vector list, then a base
+                              index will be calculated internally.  In most
+                              cases, it should suffice to set this to -1.
   @param  num_initial         The number of low |Q| peaks that should be
                               used to scan for an initial orientation matrix.
   @param  degrees_per_step    The number of degrees between different
@@ -86,6 +98,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                                      double a, double b, double c,
                                      double alpha, double beta, double gamma,
                                      double             required_tolerance,
+                                     int                base_index,
                                      size_t             num_initial,
                                      double             degrees_per_step )
 {
@@ -115,8 +128,42 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
   }
 
                                       // get list of peaks, sorted on |Q|
-  std::vector<V3D> sorted_qs( q_vectors );
-  std::sort( sorted_qs.begin(), sorted_qs.end(), CompareMagnitude );
+  std::vector<V3D> sorted_qs;
+
+  if ( q_vectors.size() > 5 )       // shift to be centered on peak (we lose
+                                    // one peak that way, so require > 5)
+  {
+    std::vector<V3D> shifted_qs( q_vectors );
+    size_t mid_ind = q_vectors.size()/3;
+                                    // either do an initial sort and use
+                                    // default mid index, or use the index
+                                    // specified by the base_peak parameter
+    if ( base_index < 0 || base_index >= (int)q_vectors.size() )
+    {
+      std::sort( shifted_qs.begin(), shifted_qs.end(), CompareMagnitude );
+    }
+    else
+    {
+      mid_ind = base_index;
+    }
+    V3D mid_vec( shifted_qs[mid_ind] );
+
+    for ( size_t i = 0; i < shifted_qs.size(); i++ )
+    {
+      if ( i != mid_ind )
+      {
+        V3D shifted_vec( shifted_qs[i] );
+        shifted_vec -= mid_vec;
+        sorted_qs.push_back( shifted_vec );
+      }
+    }
+  }
+  else
+  {
+    for ( size_t i = 0; i < q_vectors.size(); i++ )
+      sorted_qs.push_back( q_vectors[i] );
+  }
+
 
   if ( num_initial > sorted_qs.size() )
     num_initial = sorted_qs.size();

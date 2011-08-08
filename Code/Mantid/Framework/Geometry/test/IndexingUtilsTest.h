@@ -58,7 +58,8 @@ public:
     double  gamma = 70;
 
     double required_tolerance = 0.2;
-    size_t num_initial = 3;
+    int    base_index  = -1;
+    size_t num_initial =  3;
     double degrees_per_step = 3;
     
     double error = IndexingUtils::Find_UB( UB, 
@@ -66,6 +67,7 @@ public:
                                            a, b, c, 
                                            alpha, beta, gamma,
                                            required_tolerance,
+                                           base_index,
                                            num_initial,
                                            degrees_per_step );
 

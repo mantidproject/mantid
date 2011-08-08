@@ -59,6 +59,7 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                double a, double b, double c,
                                double alpha, double beta, double gamma,
                                double                     required_tolerance,
+                               int                        base_index,
                                size_t                     num_initial,
                                double                     degrees_per_step );
 
