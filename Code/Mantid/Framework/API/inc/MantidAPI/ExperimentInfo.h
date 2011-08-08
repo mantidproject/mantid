@@ -29,7 +29,7 @@ namespace API
     ExperimentInfo();
     ~ExperimentInfo();
     
-    void copyExperimentInfoFrom(ExperimentInfo * other);
+    void copyExperimentInfoFrom(const ExperimentInfo * other);
 
     /// Instrument accessors
     void setInstrument(const Geometry::IInstrument_sptr&);

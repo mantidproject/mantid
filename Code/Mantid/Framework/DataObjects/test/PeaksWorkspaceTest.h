@@ -25,33 +25,6 @@ class PeaksWorkspaceTest : public CxxTest::TestSuite
 {
 public:
 
-
-//  int removeFile( std::string outfile)
-//  {
-//     return remove( outfile.c_str());
-//  }
-//
-//  bool sameFileContents( std::string file1, std::string file2)
-//  {
-//    std::ifstream in1( file1.c_str() );
-//    std::ifstream in2( file2.c_str() );
-//
-//    std::string s1, s2;
-//    while (in1.good() && in2.good())
-//    {
-//      std::getline(in1,s1);
-//      std::getline(in2,s2);
-//      s1 = Strings::replace(s1, "\r", "");
-//      s2 = Strings::replace(s2, "\r", "");
-//      if (s1 != s2)
-//        return false;
-//    }
-//    if( in1.good() || in2.good())
-//      return false;
-//    return true;
-//  }
-
-
   /** Build a test PeaksWorkspace
    *
    * @return PeaksWorkspace
@@ -59,7 +32,11 @@ public:
   PeaksWorkspace * buildPW()
   {
     IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+    inst->setName("SillyInstrument");
     PeaksWorkspace * pw = new PeaksWorkspace();
+    pw->setInstrument(inst);
+    std::string val = "value";
+    pw->mutableRun().addProperty("TestProp", val);
     Peak p(inst, 1, 3.0);
     pw->addPeak(p);
     return pw;
@@ -73,6 +50,9 @@ public:
     TS_ASSERT_EQUALS( pw->getNumberPeaks(), 1);
     if (pw->getNumberPeaks() != 1) return;
     TS_ASSERT_DELTA( pw->getPeak(0).getWavelength(), 3.0, 1e-4);
+    // Experiment info stuff got copied
+    TS_ASSERT_EQUALS( pw->getInstrument()->getName(), "SillyInstrument");
+    TS_ASSERT( pw->run().hasProperty("TestProp") );
   }
 
   void test_defaultConstructor()

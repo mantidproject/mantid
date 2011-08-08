@@ -41,7 +41,7 @@ namespace API
    * e.g. a MatrixWorkspace.
    * @param other :: the source from which to copy ExperimentInfo
    */
-  void ExperimentInfo::copyExperimentInfoFrom(ExperimentInfo * other)
+  void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo * other)
   {
     m_sample = other->m_sample;
     m_run = other->m_run;
@@ -81,7 +81,7 @@ namespace API
 
   //---------------------------------------------------------------------------------------
   /** Get a shared pointer to the base instrument (i.e. non-parameterized) associated with this workspace
-  *
+  *getInstrument
   *  @return The instrument class
   */
   boost::shared_ptr<Instrument> ExperimentInfo::getBaseInstrument() const

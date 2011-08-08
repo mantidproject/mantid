@@ -58,9 +58,8 @@ namespace DataObjects
    * @return
    */
   PeaksWorkspace::PeaksWorkspace(PeaksWorkspace & other)
-  : IPeaksWorkspace(),
-    peaks(other.peaks),
-    m_defaultInst(other.m_defaultInst)
+  : IPeaksWorkspace(), ExperimentInfo(other),
+    peaks(other.peaks)
   {
     initColumns();
     this->peaks = other.peaks;

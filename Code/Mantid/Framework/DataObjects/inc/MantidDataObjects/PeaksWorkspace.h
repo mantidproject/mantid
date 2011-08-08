@@ -4,19 +4,20 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/Column.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/Column.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakColumn.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
 #include <string>
 
 
@@ -60,7 +61,7 @@ namespace DataObjects
 
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
    */
-  class DLLExport PeaksWorkspace: public Mantid::API::IPeaksWorkspace
+  class DLLExport PeaksWorkspace: public Mantid::API::IPeaksWorkspace, public Mantid::API::ExperimentInfo
   {
   public:
 
@@ -75,14 +76,6 @@ namespace DataObjects
     boost::shared_ptr<PeaksWorkspace> clone();
 
     void appendFile( std::string filename, Mantid::Geometry::IInstrument_sptr inst);
-
-    /** Sets the default instrument for new peaks */
-    void setInstrument(Mantid::Geometry::IInstrument_const_sptr inst)
-    { m_defaultInst = inst; }
-
-    /** Returns the default instrument for new peaks */
-    Mantid::Geometry::IInstrument_const_sptr getInstrument() const
-    { return m_defaultInst; }
 
     //---------------------------------------------------------------------------------------------
     /** @return the number of peaks
@@ -137,7 +130,8 @@ namespace DataObjects
      */
     API::IPeak* createPeak(Kernel::V3D QLabFrame, double detectorDistance=1.0)
     {
-      return new Peak(getInstrument(),QLabFrame,detectorDistance);
+      Mantid::Geometry::IInstrument_const_sptr inst = this->getInstrument();
+      return new Peak(inst, QLabFrame, detectorDistance);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -194,9 +188,6 @@ namespace DataObjects
   private:
     /** Vector of Peak contained within. */
     std::vector<Peak> peaks;
-
-    /// Default instrument for new peaks
-    Mantid::Geometry::IInstrument_const_sptr m_defaultInst;
 
     /** Column shared pointers. */
     std::vector<boost::shared_ptr<Mantid::DataObjects::PeakColumn> > columns;

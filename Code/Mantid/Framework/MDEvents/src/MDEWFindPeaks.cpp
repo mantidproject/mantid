@@ -199,9 +199,8 @@ namespace MDEvents
     }
 
     prog->report("Making PeaksWorkspace");
-    // Set the same instrument in the peaks workspace.
-    // TODO: Copy sample, etc.
-    peakWS->setInstrument(inst);
+    // Copy the instrument, sample, run to the peaks workspace.
+    peakWS->copyExperimentInfoFrom(ws.get());
 
     // --- Convert the "boxes" to peaks ----
     for (typename std::vector<boxPtr>::iterator it3=peakBoxes.begin(); it3 != peakBoxes.end(); it3++)

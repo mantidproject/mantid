@@ -203,7 +203,8 @@ namespace Crystal
     // Create the output
     pw = PeaksWorkspace_sptr(new PeaksWorkspace());
     setProperty<PeaksWorkspace_sptr>("OutputWorkspace", pw);
-    pw->setInstrument( inst );
+    // Copy instrument, sample, etc.
+    pw->copyExperimentInfoFrom(inWS.get());
 
     // Retrieve the OrientedLattice (UnitCell) from the workspace
     crystal = inWS->sample().getOrientedLattice();

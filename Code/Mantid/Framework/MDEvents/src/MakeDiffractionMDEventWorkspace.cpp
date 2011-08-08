@@ -318,6 +318,8 @@ namespace MDEvents
       bc->setMaxDepth(20);
       // We always want the box to be split (it will reject bad ones)
       ws->splitBox();
+      // Copy the instrument, sample, etc.
+      ws->copyExperimentInfoFrom(in_ws.get());
     }
 
     ws->splitBox();
