@@ -212,6 +212,24 @@ class SNSPowderReduction(PythonAlgorithm):
 
         return alg.workspace()
 
+    def _loadHistoNeXusData(self, runnumber, extension):
+        name = "%s_%d" % (self._instrument, runnumber)
+        filename = name + extension
+
+        try: # first just try loading the file
+            alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
+
+            return alg.workspace()
+        except:
+            pass
+
+        # find the file to load
+        filename = self._findData(runnumber, extension)
+
+        alg = LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
+
+        return alg.workspace()
+
     def _loadData(self, runnumber, extension, filterWall=None):
         filter = {}
         if filterWall is not None:
@@ -225,6 +243,8 @@ class SNSPowderReduction(PythonAlgorithm):
 
         if extension.endswith("_event.nxs"):
             return self._loadEventNeXusData(runnumber, extension, **filter)
+        elif extension.endswith("_histo.nxs"):
+            return self._loadHistoNeXusData(runnumber, extension)
         else:
             return self._loadPreNeXusData(runnumber, extension)
 
@@ -237,23 +257,24 @@ class SNSPowderReduction(PythonAlgorithm):
             or (mtd[self._instrument + "_group"] is None):
             LoadCalFile(InputWorkspace=wksp, CalFileName=calib, WorkspaceName=self._instrument)
 
-        # take care of filtering events
-        if self._filterBadPulses and not self.getProperty("CompressOnRead"):
-            FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
-        if self._removePromptPulseWidth > 0.:
-            RemovePromptPulse(InputWorkspace=wksp, OutputWorkspace=wksp, Width= self._removePromptPulseWidth)
-        if filterLogs is not None:
-            try:
-                logparam = wksp.getRun()[filterLogs[0]]
-                if logparam is not None:
-                    FilterByLogValue(InputWorkspace=wksp, OutputWorkspace=wksp, LogName=filterLogs[0],
-                                     MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
-            except KeyError, e:
-                raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
-                                   % (filterLogs[0], str(wksp)))        
-        if not self.getProperty("CompressOnRead"):
-            CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-        SortEvents(wksp)
+        if not "histo" in self.getProperty("Extension"):
+            # take care of filtering events
+            if self._filterBadPulses and not self.getProperty("CompressOnRead"):
+                FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
+            if self._removePromptPulseWidth > 0.:
+                RemovePromptPulse(InputWorkspace=wksp, OutputWorkspace=wksp, Width= self._removePromptPulseWidth)
+            if filterLogs is not None:
+                try:
+                    logparam = wksp.getRun()[filterLogs[0]]
+                    if logparam is not None:
+                        FilterByLogValue(InputWorkspace=wksp, OutputWorkspace=wksp, LogName=filterLogs[0],
+                                         MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
+                except KeyError, e:
+                    raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
+                                       % (filterLogs[0], str(wksp)))            
+            if not self.getProperty("CompressOnRead"):
+                CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
+            SortEvents(wksp)
         try:
             if info.tmin > 0.:
                 MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=0., XMax=info.tmin)
@@ -292,7 +313,7 @@ class SNSPowderReduction(PythonAlgorithm):
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing") # put it back to the original units
         if len(self._binning) == 3:
             info.has_dspace = self._bin_in_dspace
-        if info.has_dspace:
+        if info.has_dspace and not "histo" in self.getProperty("Extension"):
             if len(self._binning) == 3:
                 binning = self._binning
             else:
@@ -303,9 +324,9 @@ class SNSPowderReduction(PythonAlgorithm):
             preserveEvents = True
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp, GroupingWorkspace=self._instrument + "_group", PreserveEvents=preserveEvents)
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
-        if preserveEvents:
+        if preserveEvents and not "histo" in self.getProperty("Extension"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-        if not info.has_dspace:
+        if not info.has_dspace and not "histo" in self.getProperty("Extension"):
             if len(self._binning) == 3:
                 binning = self._binning
             else:
@@ -456,7 +477,8 @@ class SNSPowderReduction(PythonAlgorithm):
             # the final bit of math
             if canRun is not None:
                 samRun -= canRun
-                CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
+                if not "histo" in self.getProperty("Extension"):
+                    CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                                Tolerance=COMPRESS_TOL_TOF) # 10ns
                 canRun = str(canRun)
             if vanRun is not None:
@@ -468,7 +490,8 @@ class SNSPowderReduction(PythonAlgorithm):
                 normalized = False
 
             # write out the files
-            CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
+            if not "histo" in self.getProperty("Extension"):
+                CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                            Tolerance=COMPRESS_TOL_TOF) # 5ns
             self._save(samRun, info, normalized)
             samRun = str(samRun)
