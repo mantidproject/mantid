@@ -8,12 +8,12 @@
 #include "MantidKernel/Utils.h"
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
 #include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include <boost/algorithm/string.hpp>
-#include "MantidMDEvents/MDBox.h"
 
 using Mantid::Kernel::CPUTimer;
 
@@ -129,39 +129,6 @@ namespace MDEvents
     }
   }
 
-
-  //-----------------------------------------------------------------------------------------------
-  /** Performs template argument deduction and uses local call to fabricate an adapter instance of Point3D.
-   * Templated function may have a more suitable location.
-   */
-  template <typename AdapteeType>
-  Mantid::API::Point3D* makePoint3D(const AdapteeType& adaptee)
-  {
-
-    //Local adapter.
-    class PointAdapter : public Mantid::API::Point3D
-    {
-    private:
-      AdapteeType m_adaptee;
-    public:
-      PointAdapter(const AdapteeType& adaptee) : m_adaptee(adaptee)
-      {
-      }
-      virtual double getX() const
-      {
-        return m_adaptee.m_min[0] + ((m_adaptee.m_max[0] - m_adaptee.m_min[0]) /2);
-      }
-      virtual double getY() const
-      {
-        return m_adaptee.m_min[1] + ((m_adaptee.m_max[1] - m_adaptee.m_min[1]) /2);
-      }
-      virtual double getZ() const
-      {
-        return m_adaptee.m_min[2] + ((m_adaptee.m_max[2] - m_adaptee.m_min[2]) /2);
-      }
-    };
-    return new PointAdapter(adaptee);
-  }
 
 
   //----------------------------------------------------------------------------------------------
@@ -494,11 +461,15 @@ namespace MDEvents
       }
       bin.m_index = linear_index;
 
+      bool dimensionsUsed[nd];
+      for (size_t d=0; d<nd; d++)
+        dimensionsUsed[d] = (d<3);
+
       // Check if the bin is in the ImplicitFunction (if any)
       bool binContained = true;
       if (implicitFunction)
       {
-        binContained = implicitFunction->evaluate(makePoint3D(bin));
+        binContained = implicitFunction->evaluate(bin.m_min, dimensionsUsed, nd);
       }
 
       if (binContained)

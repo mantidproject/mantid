@@ -85,6 +85,18 @@ macro_top = """
 #define CALL_MDEVENT_FUNCTION(funcname, workspace) \\
 { \\
 """
+
+macro_top3 = """
+/** Macro that makes it possible to call a templated method for
+ * a MDEventWorkspace using a IMDEventWorkspace_sptr WITH AT LEAST 3 DIMENSIONS as the input.
+ * @param funcname :: name of the function that will be called.
+ * @param workspace :: IMDEventWorkspace_sptr input workspace.
+ */
+ 
+#define CALL_MDEVENT_FUNCTION3(funcname, workspace) \\
+{ \\
+"""
+
 macro = """MDEventWorkspace<%s, %d>::sptr MDEW%d = boost::dynamic_pointer_cast<MDEventWorkspace<%s, %d> >(workspace); \\
 if (MDEW%d) funcname<%s, %d>(MDEW%d); \\
 """
@@ -95,6 +107,16 @@ def get_macro():
     for nd in dimensions:
         eventType = "MDEvent<%d>" % nd
         s += macro % (eventType,nd,nd,eventType,nd,nd,eventType,nd,nd) 
+    s +=  "} \n"
+    return s
+
+def get_macro3():
+    """ Return the macro code CALL_MDEVENT_FUNCTION3 """
+    s = macro_top3;
+    for nd in dimensions:
+        if (nd >= 3):
+            eventType = "MDEvent<%d>" % nd
+            s += macro % (eventType,nd,nd,eventType,nd,nd,eventType,nd,nd) 
     s +=  "} \n"
     return s
 
@@ -209,6 +231,9 @@ def generate():
 
     # Make the macro then pad it into the list of lines
     macro = get_macro()
+    lines = insert_lines(lines, len(lines), macro, padding)
+    # Again for 3+ dimensions 
+    macro = get_macro3()
     lines = insert_lines(lines, len(lines), macro, padding)
 
     # Typedefs for MDEventWorkspace

@@ -182,7 +182,7 @@ namespace MDEvents
   {
     inWS = getProperty("InputWorkspace");
 
-    CALL_MDEVENT_FUNCTION(this->integrate, inWS);
+    CALL_MDEVENT_FUNCTION3(this->integrate, inWS);
   }
 
 } // namespace Mantid

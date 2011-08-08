@@ -59,6 +59,31 @@ namespace MDEvents
   if (MDEW9) funcname<MDEvent<9>, 9>(MDEW9); \
   } 
   
+  
+  /** Macro that makes it possible to call a templated method for
+   * a MDEventWorkspace using a IMDEventWorkspace_sptr WITH AT LEAST 3 DIMENSIONS as the input.
+   * @param funcname :: name of the function that will be called.
+   * @param workspace :: IMDEventWorkspace_sptr input workspace.
+   */
+   
+  #define CALL_MDEVENT_FUNCTION3(funcname, workspace) \
+  { \
+  MDEventWorkspace<MDEvent<3>, 3>::sptr MDEW3 = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3> >(workspace); \
+  if (MDEW3) funcname<MDEvent<3>, 3>(MDEW3); \
+  MDEventWorkspace<MDEvent<4>, 4>::sptr MDEW4 = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<4>, 4> >(workspace); \
+  if (MDEW4) funcname<MDEvent<4>, 4>(MDEW4); \
+  MDEventWorkspace<MDEvent<5>, 5>::sptr MDEW5 = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<5>, 5> >(workspace); \
+  if (MDEW5) funcname<MDEvent<5>, 5>(MDEW5); \
+  MDEventWorkspace<MDEvent<6>, 6>::sptr MDEW6 = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<6>, 6> >(workspace); \
+  if (MDEW6) funcname<MDEvent<6>, 6>(MDEW6); \
+  MDEventWorkspace<MDEvent<7>, 7>::sptr MDEW7 = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<7>, 7> >(workspace); \
+  if (MDEW7) funcname<MDEvent<7>, 7>(MDEW7); \
+  MDEventWorkspace<MDEvent<8>, 8>::sptr MDEW8 = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<8>, 8> >(workspace); \
+  if (MDEW8) funcname<MDEvent<8>, 8>(MDEW8); \
+  MDEventWorkspace<MDEvent<9>, 9>::sptr MDEW9 = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<9>, 9> >(workspace); \
+  if (MDEW9) funcname<MDEvent<9>, 9>(MDEW9); \
+  } 
+  
 
 
 
@@ -182,6 +207,7 @@ namespace MDEvents
 } // namespace MDEvents
 
 #endif  /* MANTID_MDEVENTS_MDEVENTFACTORY_H_ */
+
 
 
 

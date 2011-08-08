@@ -194,7 +194,10 @@ namespace MDEvents
         }
 
         peakBoxes.push_back(box);
-        g_log.information() << "Found box at " << boxCenter[0] << "," << boxCenter[1] << "," << boxCenter[2] << "; Density = " << density << std::endl;
+        g_log.information() << "Found box at ";
+        for (size_t d=0; d<nd; d++)
+          g_log.information() << (d>0?",":"") << boxCenter[d];
+        g_log.information() << "; Density = " << density << std::endl;
       }
     }
 
@@ -263,7 +266,7 @@ namespace MDEvents
 
     prog = new Progress(this, 0.0, 1.0, 10);
 
-    CALL_MDEVENT_FUNCTION(this->findPeaks, inWS);
+    CALL_MDEVENT_FUNCTION3(this->findPeaks, inWS);
 
     delete prog;
   }
