@@ -6,6 +6,7 @@
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IDataFileChecker.h"
+
 namespace Mantid
 {
 namespace DataHandling
@@ -62,6 +63,12 @@ private:
   void init();
   ///Execution code
   void exec();
+  // Convert a string (value+unit) to double (value)
+  double convertToDouble(std::string inputstring);
+  // Create an instrument geometry.
+  void createInstrumentGeometry(API::MatrixWorkspace_sptr workspace, std::string instrumentname, double primaryflightpath,
+      std::vector<int> detectorids, std::vector<double> totalflightpaths, std::vector<double> twothetas);
+
 };
 }
 }
