@@ -25,8 +25,8 @@
 
 VsgMainWindow::VsgMainWindow(QWidget *parent) : QMainWindow(parent)
 {
-  this->setupUi(this);
-  this->splitter_2->setStretchFactor(1, 1);
+  this->ui.setupUi(this);
+  this->ui.splitter_2->setStretchFactor(1, 1);
 
   // Unset the connections since the views aren't up yet.
   this->removeProxyTabWidgetConnections();
@@ -35,11 +35,11 @@ VsgMainWindow::VsgMainWindow(QWidget *parent) : QMainWindow(parent)
 
   // We want the actionLoad to result in the showing up the ParaView's OpenData
   // dialog letting the user pick from one of the supported file formats.
-  pqLoadDataReaction* dataLoader = new pqLoadDataReaction(this->action_Open);
+  pqLoadDataReaction* dataLoader = new pqLoadDataReaction(this->ui.action_Open);
   QObject::connect(dataLoader, SIGNAL(loadedData(pqPipelineSource*)),
     this, SLOT(onDataLoaded(pqPipelineSource*)));
 
-  QObject::connect(this->modeControlWidget,
+  QObject::connect(this->ui.modeControlWidget,
 		  SIGNAL(executeSwitchViews(ModeControlWidget::Views)),
 		  this, SLOT(switchViews(ModeControlWidget::Views)));
 
@@ -49,11 +49,11 @@ VsgMainWindow::VsgMainWindow(QWidget *parent) : QMainWindow(parent)
   vtkSMProxyManager::GetProxyManager()->GetReaderFactory()->RegisterPrototypes("sources");
 
   // Set the standard view as the default
-  this->currentView = this->setMainViewWidget(this->viewWidget,
+  this->currentView = this->setMainViewWidget(this->ui.viewWidget,
 		  ModeControlWidget::STANDARD);
 
   // Create a layout to manage the view properly
-  this->viewLayout = new QHBoxLayout(this->viewWidget);
+  this->viewLayout = new QHBoxLayout(this->ui.viewWidget);
   this->viewLayout->setMargin(0);
   this->viewLayout->setStretch(0, 1);
   this->viewLayout->addWidget(this->currentView);
@@ -69,7 +69,7 @@ VsgMainWindow::~VsgMainWindow()
 void VsgMainWindow::removeProxyTabWidgetConnections()
 {
 	QObject::disconnect(&pqActiveObjects::instance(), 0,
-			this->proxyTabWidget, 0);
+      this->ui.proxyTabWidget, 0);
 }
 
 ViewBase* VsgMainWindow::setMainViewWidget(QWidget *container,
@@ -103,17 +103,17 @@ ViewBase* VsgMainWindow::setMainViewWidget(QWidget *container,
 void VsgMainWindow::setMainWindowComponentsForView()
 {
 	// Extra setup stuff to hook up view to other items
-	this->proxyTabWidget->setupDefaultConnections();
-	this->proxyTabWidget->setView(this->currentView->getView());
-	this->proxyTabWidget->setShowOnAccept(true);
-	this->pipelineBrowser->setActiveView(this->currentView->getView());
+  this->ui.proxyTabWidget->setupDefaultConnections();
+  this->ui.proxyTabWidget->setView(this->currentView->getView());
+  this->ui.proxyTabWidget->setShowOnAccept(true);
+  this->ui.pipelineBrowser->setActiveView(this->currentView->getView());
 	if (this->currentView->inherits("MultiSliceView"))
 	{
-		QObject::connect(this->pipelineBrowser,
+    QObject::connect(this->ui.pipelineBrowser,
       SIGNAL(clicked(const QModelIndex &)),
       static_cast<MultiSliceView *>(this->currentView),
       SLOT(selectIndicator()));
-		QObject::connect(this->proxyTabWidget->getObjectInspector(),
+    QObject::connect(this->ui.proxyTabWidget->getObjectInspector(),
       SIGNAL(accepted()),
       static_cast<MultiSliceView *>(this->currentView),
       SLOT(updateSelectedIndicator()));
@@ -124,15 +124,15 @@ void VsgMainWindow::setMainWindowComponentsForView()
     SIGNAL(enableMultiSliceViewButton()),
     this, SIGNAL(enableMultiSliceViewButton()));
   }
-  QObject::connect(this->colorSelectionWidget, SIGNAL(colorMapChanged(const pqColorMapModel *)),
+  QObject::connect(this->ui.colorSelectionWidget, SIGNAL(colorMapChanged(const pqColorMapModel *)),
     this->currentView, SLOT(onColorMapChange(const pqColorMapModel *)));
-  QObject::connect(this->colorSelectionWidget, SIGNAL(colorScaleChanged(double, double)),
+  QObject::connect(this->ui.colorSelectionWidget, SIGNAL(colorScaleChanged(double, double)),
     this->currentView, SLOT(onColorScaleChange(double, double)));
   QObject::connect(this->currentView, SIGNAL(dataRange(double, double)),
-    this->colorSelectionWidget, SLOT(setColorScaleRange(double, double)));
-  QObject::connect(this->colorSelectionWidget, SIGNAL(autoScale()),
+    this->ui.colorSelectionWidget, SLOT(setColorScaleRange(double, double)));
+  QObject::connect(this->ui.colorSelectionWidget, SIGNAL(autoScale()),
     this->currentView, SLOT(onAutoScale()));
-  QObject::connect(this->colorSelectionWidget, SIGNAL(logScale(int)),
+  QObject::connect(this->ui.colorSelectionWidget, SIGNAL(logScale(int)),
                    this->currentView, SLOT(onLogScale(int)));
 }
 
@@ -145,7 +145,7 @@ void VsgMainWindow::onDataLoaded(pqPipelineSource* source)
   this->originSource = source;
 
   this->currentView->render();
-  this->proxyTabWidget->getObjectInspector()->accept();
+  this->ui.proxyTabWidget->getObjectInspector()->accept();
 
   const unsigned int val = vtkSMPropertyHelper(this->originSource->getProxy(),
       "InputGeometryXML", true).GetNumberOfElements();
@@ -159,7 +159,7 @@ void VsgMainWindow::onDataLoaded(pqPipelineSource* source)
 void VsgMainWindow::switchViews(ModeControlWidget::Views v)
 {
 	this->removeProxyTabWidgetConnections();
-	this->hiddenView = this->setMainViewWidget(this->viewWidget, v);
+  this->hiddenView = this->setMainViewWidget(this->ui.viewWidget, v);
 	this->hiddenView->hide();
   this->viewLayout->removeWidget(this->currentView);
 	this->swapViews();
@@ -173,11 +173,11 @@ void VsgMainWindow::switchViews(ModeControlWidget::Views v)
   if (this->currentView->inherits("ThreeSliceView") ||
 			this->currentView->inherits("StandardView"))
 	{
-		this->proxyTabWidget->getObjectInspector()->accept();
+    this->ui.proxyTabWidget->getObjectInspector()->accept();
 	}
   if (this->currentView->inherits("ThreeSliceView"))
   {
-    static_cast<ThreeSliceView *>(this->currentView)->correctVisibility(this->pipelineBrowser);
+    static_cast<ThreeSliceView *>(this->currentView)->correctVisibility(this->ui.pipelineBrowser);
   }
 }
 

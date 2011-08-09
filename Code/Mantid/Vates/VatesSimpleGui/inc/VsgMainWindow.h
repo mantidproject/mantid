@@ -37,9 +37,9 @@ class QHBoxLayout;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class VsgMainWindow : public QMainWindow, public Ui::vsgMainWindow
+class VsgMainWindow : public QMainWindow
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
     /**
@@ -75,6 +75,7 @@ private:
     ViewBase *currentView; ///< Holder for the current view
     ViewBase *hiddenView; ///< Holder for the view that is being switched from
     QPointer<pqPipelineSource> originSource; ///< Holder for the current source
+    Ui::vsgMainWindow ui; ///< The main window's UI form
     QHBoxLayout *viewLayout; ///< Layout manager for the view widget
 
     /// Disable communication with the proxy tab widget.
