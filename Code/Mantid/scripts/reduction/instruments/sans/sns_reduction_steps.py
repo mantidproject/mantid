@@ -31,14 +31,47 @@ class QuickLoad(ReductionStep):
         # a path that is passed directly. Data files that are reduced
         # are simply found in reducer._data_files 
         if self._data_file is None:
-            raise RuntimeError, "File not found: " % self._data_file
+            raise RuntimeError, "A file needs to be specified to use quick-load: " % self._data_file
         
         # Load data
         filepath = find_data(self._data_file, instrument=reducer.instrument.name())
-
         LoadEventNexus(Filename=filepath, OutputWorkspace=workspace)
 
-        return "Quick-load of data file: %s" % (workspace)
+        # Store the sample-detector distance.
+        sdd = mtd[workspace].getRun()["detectorZ"].getStatistics().mean
+        mtd[workspace].getRun().addProperty_dbl("sample_detector_distance", sdd, 'mm', True)
+        
+        # Move the detector to its correct position
+        MoveInstrumentComponent(workspace, "detector1", Z=sdd/1000.0, RelativePosition=0)
+
+        # Move detector array to correct position
+        [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
+        if pixel_ctr_x is not None and pixel_ctr_y is not None:
+            # Check that the center of the detector really is at (0,0)
+            nx_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+            ny_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+            
+            pixel_first = mtd[workspace].getInstrument().getDetector(0).getPos()
+            pixel_last_x = mtd[workspace].getInstrument().getDetector(reducer.instrument.get_detector_from_pixel([[nx_pixels-1,0]])[0]).getPos()
+            pixel_last_y = mtd[workspace].getInstrument().getDetector(reducer.instrument.get_detector_from_pixel([[0,ny_pixels-1]])[0]).getPos()
+            x_offset = (pixel_first.getX()+pixel_last_x.getX())/2.0
+            y_offset = (pixel_first.getY()+pixel_last_y.getY())/2.0
+            
+            [beam_ctr_x, beam_ctr_y] = reducer.instrument.get_coordinate_from_pixel(pixel_ctr_x, pixel_ctr_y)
+            [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
+            [default_x, default_y] = reducer.instrument.get_coordinate_from_pixel(default_pixel_x, default_pixel_y)
+            MoveInstrumentComponent(workspace, "detector1", 
+                                    X = default_x-x_offset-beam_ctr_x,
+                                    Y = default_y-y_offset-beam_ctr_y,
+                                    RelativePosition="1")
+            mtd[workspace].getRun().addProperty_dbl("beam_center_x", pixel_ctr_x, 'pixel', True)            
+            mtd[workspace].getRun().addProperty_dbl("beam_center_y", pixel_ctr_y, 'pixel', True)   
+            mantid.sendLogMessage("Beam center: %-6.1f, %-6.1f" % (pixel_ctr_x, pixel_ctr_y))                             
+        else:            
+            mantid.sendLogMessage("Beam center isn't defined! Cannot use quick-load")
+            raise RuntimeError, "Beam center isn't defined! Cannot use quick-load"
+        
+        return "Quick-load of data file: %s" % workspace    
     
 class LoadRun(ReductionStep):
     """
@@ -70,6 +103,9 @@ class LoadRun(ReductionStep):
         
         # Flag to tell us whether we should do the full reduction with events
         self._keep_events = keep_events
+        
+        # Flag to tell the loader to skip lengthy correction if possible.
+        self._is_quick = False
    
     def clone(self, data_file=None, keep_events=None):
         if data_file is None:
@@ -84,6 +120,13 @@ class LoadRun(ReductionStep):
         loader._use_config_mask = self._use_config_mask
         return loader
 
+    def set_quick_load(self, is_quick=False):
+        """
+            Sets a flag to tell the loader to skip lengthy correction if possible.
+            CAUTION: use at your own risks!
+        """
+        self._is_quick = is_quick
+        
     def set_sample_detector_distance(self, distance):
         # Check that the distance given is either None of a float
         if distance is not None and type(distance) != int and type(distance) != float:
@@ -803,7 +846,7 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
             and mtd[workspace].getRun().getProperty("is_frame_skipping").value==0:
             self._is_frame_skipping = False
             output_str = super(AzimuthalAverageByFrame, self).execute(reducer, workspace)
-            TOFSANSResolution(InputWorkspace=workspace+self._suffix, 
+            EQSANSResolution(InputWorkspace=workspace+self._suffix, 
                               ReducedWorkspace=workspace, OutputBinning=self._binning,
                               PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y,
                               SourceApertureRadius=source_aperture_radius)
@@ -829,7 +872,7 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         output_str = "Performed radial averaging: frame 2 = [%6.1f, %-6.1f], " % (wl_min, wl_max)
         
         super(AzimuthalAverageByFrame, self).execute(reducer, workspace+'_frame2')
-        TOFSANSResolution(InputWorkspace=workspace+'_frame2'+self._suffix, 
+        EQSANSResolution(InputWorkspace=workspace+'_frame2'+self._suffix, 
                           ReducedWorkspace=workspace, OutputBinning=self._binning,
                           MinWavelength=wl_min, MaxWavelength=wl_max,
                           PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y,
@@ -889,7 +932,7 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
             
             Scale(InputWorkspace=workspace+'_frame1'+self._suffix, OutputWorkspace=workspace+'_frame1'+self._suffix, Factor=scale_factor, Operation="Multiply")
             
-        TOFSANSResolution(InputWorkspace=workspace+'_frame1'+self._suffix, 
+        EQSANSResolution(InputWorkspace=workspace+'_frame1'+self._suffix, 
                           ReducedWorkspace=workspace, OutputBinning=self._binning,
                           MinWavelength=wl_min, MaxWavelength=wl_max,
                           PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y,
