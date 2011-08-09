@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>mpMainWindow</class>
- <widget class="QMainWindow" name="mpMainWindow">
+ <class>vsgMainWindow</class>
+ <widget class="QMainWindow" name="vsgMainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -219,7 +219,7 @@
   <connection>
    <sender>action_Exit</sender>
    <signal>triggered()</signal>
-   <receiver>mpMainWindow</receiver>
+   <receiver>vsgMainWindow</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
