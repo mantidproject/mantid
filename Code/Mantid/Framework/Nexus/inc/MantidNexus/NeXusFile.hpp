@@ -83,10 +83,10 @@ namespace NeXus {
   };
 
   /**
-   * This structure holds the type and dimensions of a primative field/array.
+   * This structure holds the type and dimensions of a primitive field/array.
    */
   struct Info{
-    /** The primative type for the field. */
+    /** The primitive type for the field. */
     NXnumtype type;
     /** The dimensions of the file. */
     std::vector<int> dims;
@@ -94,7 +94,7 @@ namespace NeXus {
 
   /** Information about an attribute. */
   struct AttrInfo{
-    /** The primative type for the attribute. */
+    /** The primitive type for the attribute. */
     NXnumtype type;
     /** The length of the attribute. */
     unsigned length;
@@ -219,11 +219,27 @@ namespace NeXus {
      */
     void closeGroup();
 
+    //JZ
+    /** Create an extendible data field with the specified information.
+     *
+     * @param name :: The name of the field to create (i.e. "distance").
+     * @param type :: The primitive type of the field (i.e. "NeXus::FLOAT32").
+     * @param dims :: The initial dimensions of dimensions of the field. Set to -1 for EXTENDIBLE dimensions
+     * @param chunking :: The HDF chunking size. Select this carefully as it affects performance.
+     * @param open_data :: Whether or not to open the data after creating it.
+     */
+    void makeExtendibleData(const std::string& name, NXnumtype type,
+        const std::vector<int> & dims,
+        const std::vector<int> & chunking,
+        bool open_data);
+    //JZ
+
+
     /**
      * Create a data field with the specified information.
      *
      * @param name :: The name of the field to create (i.e. "distance").
-     * @param type :: The primative type of the field (i.e. "NeXus::FLOAT32").
+     * @param type :: The primitive type of the field (i.e. "NeXus::FLOAT32").
      * @param dims :: The dimensions of the field.
      * @param open_data :: Whether or not to open the data after creating it.
      */
@@ -234,7 +250,7 @@ namespace NeXus {
      * Create a 1D data field with the specified information.
      *
      * @param name :: The name of the field to create (i.e. "distance").
-     * @param type :: The primative type of the field (i.e. "NeXus::FLOAT32").
+     * @param type :: The primitive type of the field (i.e. "NeXus::FLOAT32").
      * @param length :: The number of elements in the field.
      * @param open_data :: Whether or not to open the data after creating it.
      */
@@ -263,9 +279,40 @@ namespace NeXus {
      * \tparam NumT numeric data type of \a value
      * @param name :: The name of the field to create.
      * @param value :: The vector to put into the file.
+     * @param extendible :: true if the vector is to be extendible.
      */
     template <typename NumT>
     void writeData(const std::string& name, const std::vector<NumT>& value);
+
+    /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
+     *
+     * \tparam NumT numeric data type of \a value
+     * @param name :: The name of the field to create.
+     * @param value :: The vector to put into the file.
+     */
+    template <typename NumT>
+    void writeExtendibleData(const std::string& name, const std::vector<NumT>& value);
+
+    /** Updates the data written into an already-created
+     * data vector. If the data was created as extendible, it will be resized.
+     *
+     * \tparam NumT numeric data type of \a value
+     * @param name :: The name of the field to create.
+     * @param value :: The vector to put into the file.
+     */
+    template <typename NumT>
+    void writeUpdatedData(const std::string& name, std::vector<NumT>& value);
+
+    /** If the named data field does not exist, it gets created as an
+     * extendible data set.
+     * If the data does exist, its contents are replaced.
+     *
+     * \tparam NumT numeric data type of \a value
+     * @param name :: The name of the field to create.
+     * @param value :: The vector to put into the file.
+     */
+    template <typename NumT>
+    void writeOrUpdateData(const std::string& name, std::vector<NumT>& value);
 
     /**
      * Create a 1D data field, insert the data, and close the data.

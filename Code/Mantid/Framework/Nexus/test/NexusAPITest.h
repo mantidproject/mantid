@@ -252,9 +252,47 @@ public:
     // Remove the file. Windows requires it to be closed first
     file.close();
     Poco::File(filename).remove();
-
   }
 
+  void test_writeData()
+  {
+    std::string filename("NexusAPITest.hdf");
+    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
+    std::vector<int> data(10, 123);
+    file->makeGroup("data", "NXdata", 1);
+    file->writeData("mydata", data);
+    file->writeExtendibleData("mydata_extendible", data);
+    file->writeExtendibleData("mydata_extendible2", data);
+    file->close();
+
+    // Data vector can grow
+    for (size_t i=0; i<5; i++)
+      data.push_back(456);
+    data[0]=789;
+    file = new ::NeXus::File(filename, NXACC_RDWR);
+    file->openGroup("data", "NXdata");
+    file->writeUpdatedData("mydata_extendible", data);
+
+    // Data vector can also shrink!
+    data.clear();
+    data.resize(5, 234);
+    file->writeUpdatedData("mydata_extendible2", data);
+    file->close();
+  }
+
+  void test_writeOrUpdateData()
+  {
+    std::string filename("NexusAPITest2.hdf");
+    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
+
+    std::vector<int> data(10, 123);
+    file->makeGroup("data", "NXdata", 1);
+    file->writeOrUpdateData("mydata", data);
+    data.clear();
+    data.resize(5, 234);
+    file->writeOrUpdateData("mydata", data);
+    file->close();
+  }
 
 };
 

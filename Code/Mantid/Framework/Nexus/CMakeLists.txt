@@ -44,9 +44,8 @@ include_directories ( inc )
 target_link_libraries ( Nexus ${MANTIDLIBS} ${NEXUS_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
-  include_directories (../DataHandling/inc ../TestHelpers/inc)
   cxxtest_add_test ( NexusTest ${TEST_FILES} )
-  target_link_libraries( NexusTest Nexus DataHandling TestHelpers)
+  target_link_libraries( NexusTest Nexus  )
   add_dependencies ( FrameworkTests NexusTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET NexusTest PROPERTY FOLDER "UnitTests" )
