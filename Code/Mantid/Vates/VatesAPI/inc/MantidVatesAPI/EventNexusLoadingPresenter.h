@@ -67,6 +67,14 @@ namespace Mantid
       bool m_isSetup;
     };
 
+    /*
+    Constructor
+    @param view : MVP view
+    @param filename : name of file to load
+    @throw invalid_argument if file name is empty
+    @throw invalid_arument if view is null
+    @throw logic_error if cannot use the reader-presenter for this filetype.
+    */
     template<typename ViewType>
     EventNexusLoadingPresenter<ViewType>::EventNexusLoadingPresenter(ViewType* view, const std::string filename) : MDLoadingPresenter(), m_filename(filename), m_view(view), m_isSetup(false)
     {
@@ -84,6 +92,10 @@ namespace Mantid
       }
     }
 
+     /*
+    Indicates whether this presenter is capable of handling the type of file that is attempted to be loaded.
+    @return false if the file cannot be read.
+    */
     template<typename ViewType>
     bool EventNexusLoadingPresenter<ViewType>::canReadFile() const
     {
@@ -126,6 +138,11 @@ namespace Mantid
       return 0;
     }
 
+    /*
+    Executes the underlying algorithm to create the MVP model.
+    @param factory : visualisation factory to use.
+    @param eventHandler : object that encapuslates the direction of the gui change as the algorithm progresses.
+    */
     template<typename ViewType>
     vtkDataSet* EventNexusLoadingPresenter<ViewType>::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
     {
@@ -158,6 +175,11 @@ namespace Mantid
       return visualDataSet;
     }
 
+    /*
+    Append the geometry and function information onto the outgoing vtkDataSet.
+    @param visualDataSet : outgoing dataset on which to append metadata.
+    @param eventWs : Event workspace from which metadata is drawn.
+    */
     template<typename ViewType>
     void EventNexusLoadingPresenter<ViewType>::appendMetadata(vtkDataSet* visualDataSet, Mantid::API::IMDEventWorkspace_sptr eventWs)
     {
@@ -208,7 +230,6 @@ namespace Mantid
         xmlBuilder.addTDimension(tDimension);
       }
 
-     
       serializer.setGeometryXML(xmlBuilder.create());
       serializer.setImplicitFunction( ImplicitFunction_sptr(new Mantid::MDAlgorithms::CompositeImplicitFunction()));
       std::string xmlString = serializer.createXMLString();
@@ -222,6 +243,11 @@ namespace Mantid
       m_isSetup = true;
     }
 
+    /**
+    Gets the geometry in a string format.
+    @return geometry string.
+    @throw runtime_error if execute has not been run first.
+    */
     template<typename ViewType>
     std::string EventNexusLoadingPresenter<ViewType>::getGeometryXML() const
     {
@@ -232,6 +258,10 @@ namespace Mantid
       return xmlBuilder.create();
     }
 
+    /**
+    @return boolean indicating whether the T dimension is available.
+    @throw runtime_error if execute has not been run first.
+    */
     template<typename ViewType>
     bool EventNexusLoadingPresenter<ViewType>::hasTDimensionAvailable() const
     {
@@ -242,6 +272,10 @@ namespace Mantid
       return xmlBuilder.hasTDimension();
     }
 
+    /*
+    @return timestep values.
+    @throw runtime_error if execute has not been run first.
+    */
     template<typename ViewType>
     std::vector<double> EventNexusLoadingPresenter<ViewType>::getTimeStepValues() const
     {
@@ -257,6 +291,7 @@ namespace Mantid
       return result;
     }
 
+    ///Destructor
     template<typename ViewType>
     EventNexusLoadingPresenter<ViewType>::~EventNexusLoadingPresenter()
     {
