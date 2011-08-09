@@ -40,7 +40,7 @@ class pqRenderView;
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class ThreeSliceView : public ViewBase, public Ui::ThreeSliceView
+class ThreeSliceView : public ViewBase
 {
     Q_OBJECT
 
@@ -139,6 +139,8 @@ private:
     QPointer<pqPipelineSource> zCut; ///< The slice for the XY plane
     QPointer<pqPipelineRepresentation> zCutRepr; ///< The XY slice representation
     QPointer<pqRenderView> zView; ///< The XY plane view
+
+    Ui::ThreeSliceView ui; ///< The three slice view's UI form
 };
 
 #endif // THREESLICEVIEW_H_

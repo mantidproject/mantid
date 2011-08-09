@@ -25,12 +25,12 @@
 
 ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
 {
-	this->setupUi(this);
+  this->ui.setupUi(this);
 
-	this->mainView = this->createRenderView(this->mainRenderFrame);
-	this->xView = this->create2dRenderView(this->xRenderFrame);
-	this->yView = this->create2dRenderView(this->yRenderFrame);
-	this->zView = this->create2dRenderView(this->zRenderFrame);
+  this->mainView = this->createRenderView(this->ui.mainRenderFrame);
+  this->xView = this->create2dRenderView(this->ui.xRenderFrame);
+  this->yView = this->create2dRenderView(this->ui.yRenderFrame);
+  this->zView = this->create2dRenderView(this->ui.zRenderFrame);
   pqActiveObjects::instance().setActiveView(this->mainView);
 }
 
