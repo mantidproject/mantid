@@ -29,7 +29,7 @@
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class TimeControlWidget : public QWidget, public Ui::TimeControlWidget
+class TimeControlWidget : public QWidget
 {
     Q_OBJECT
 
@@ -41,6 +41,9 @@ public:
     TimeControlWidget(QWidget *parent = 0);
     /// Default constructor.
     virtual ~TimeControlWidget();
+
+private:
+    Ui::TimeControlWidget ui; ///< The time control widget's UI form
 };
 
 #endif	// TIMECONTROLWIDGET_H_
