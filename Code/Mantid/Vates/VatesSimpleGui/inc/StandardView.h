@@ -38,7 +38,7 @@ class pqRenderView;
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class StandardView : public ViewBase, public Ui::StandardView
+class StandardView : public ViewBase
 {
   Q_OBJECT
 
@@ -100,6 +100,7 @@ private:
   QPointer<pqPipelineSource> origSource; ///< The current source
   QPointer<pqPipelineRepresentation> originSourceRepr; ///< The current source representation
   QPointer<pqPipelineSource> rebinCut; ///< Holder for the RebinnerCutter
+  Ui::StandardView ui; ///< The standard view's UI form
   QPointer<pqRenderView> view; ///< The main view
 };
 

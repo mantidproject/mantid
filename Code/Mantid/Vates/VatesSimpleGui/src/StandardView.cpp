@@ -20,17 +20,17 @@
 
 StandardView::StandardView(QWidget *parent) : ViewBase(parent)
 {
-	this->setupUi(this);
+  this->ui.setupUi(this);
 
 	// Set the cut button to create a slice on the data
-	QObject::connect(this->cutButton, SIGNAL(clicked()), this,
+  QObject::connect(this->ui.cutButton, SIGNAL(clicked()), this,
 			SLOT(onCutButtonClicked()));
 
 	// Set the rebin button to create the RebinCutter operator
-	QObject::connect(this->rebinButton, SIGNAL(clicked()), this,
+  QObject::connect(this->ui.rebinButton, SIGNAL(clicked()), this,
 			SLOT(onRebinButtonClicked()));
 
-	this->view = this->createRenderView(this->renderFrame);
+  this->view = this->createRenderView(this->ui.renderFrame);
 }
 
 StandardView::~StandardView()
