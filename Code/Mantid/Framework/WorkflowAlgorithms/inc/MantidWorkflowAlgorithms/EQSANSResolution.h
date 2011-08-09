@@ -1,18 +1,18 @@
-#ifndef MANTID_ALGORITHMS_TOFSANSRESOLUTION_H_
-#define MANTID_ALGORITHMS_TOFSANSRESOLUTION_H_
+#ifndef MANTID_ALGORITHMS_EQSANSRESOLUTION_H_
+#define MANTID_ALGORITHMS_EQSANSRESOLUTION_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/TOFSANSResolution.h"
 
 namespace Mantid
 {
-namespace Algorithms
+namespace WorkflowAlgorithms
 {
 /**
-    Computes the resolution on TOF SANS data
+
+    Computes the resolution on EQSANS data
     Required Properties:
     <UL>
     <LI> InputWorkspace    - The data in units of wavelength. </LI>
@@ -34,34 +34,33 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport TOFSANSResolution : public API::Algorithm
+class DLLExport EQSANSResolution : public Algorithms::TOFSANSResolution
 {
 public:
   /// (Empty) Constructor
-  TOFSANSResolution() : API::Algorithm() {}
+  EQSANSResolution() : Algorithms::TOFSANSResolution() {}
   /// Virtual destructor
-  virtual ~TOFSANSResolution() {}
+  virtual ~EQSANSResolution() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "TOFSANSResolution"; }
+  virtual const std::string name() const { return "EQSANSResolution"; }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "SANS"; }
+  virtual const std::string category() const { return "Workflow\\SANS"; }
 
 private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   /// Initialisation code
-  void init();
+  //void init();
   /// Execution code
-  void exec();
+  //void exec();
   /// Return the TOF resolution for a particular wavelength
   virtual double getTOFResolution(double wl);
-  /// Wavelength resolution (constant for all wavelengths)
-  double wl_resolution;
+
 };
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_TOFSANSRESOLUTION_H_*/
+#endif /*MANTID_ALGORITHMS_EQSANSRESOLUTION_H_*/

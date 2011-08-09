@@ -1,5 +1,6 @@
 set ( SRC_FILES
         src/EQSANSQ2D.cpp
+        src/EQSANSResolution.cpp
         src/SANSSolidAngleCorrection.cpp
         src/EQSANSSensitivityCorrection.cpp
 )
@@ -9,6 +10,7 @@ set ( SRC_UNITY_IGNORE_FILES
 
 set ( INC_FILES
         inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
+        inc/MantidWorkflowAlgorithms/EQSANSResolution.h
         inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
         inc/MantidWorkflowAlgorithms/EQSANSSensitivityCorrection.h
 )
@@ -34,9 +36,9 @@ set_target_properties ( WorkflowAlgorithms PROPERTIES OUTPUT_NAME MantidWorkflow
 # Add to the 'Framework' group in VS
 set_property ( TARGET WorkflowAlgorithms PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc )
+include_directories ( inc ../Algorithms/inc)
 
-target_link_libraries ( WorkflowAlgorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( WorkflowAlgorithms Algorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
   # Make the rest of the tests

@@ -62,6 +62,15 @@ void TOFSANSResolution::init()
       "TOF spread (microsec).");
 }
 
+/*
+ * Double Boltzmann fit to the TOF resolution as a function of wavelength
+ */
+double TOFSANSResolution::getTOFResolution(double wl)
+{
+  UNUSED_ARG(wl);
+  return wl_resolution;
+}
+
 void TOFSANSResolution::exec()
 {
   MatrixWorkspace_sptr iqWS = getProperty("InputWorkspace");
@@ -78,7 +87,7 @@ void TOFSANSResolution::exec()
   pixel_size_y /= 1000.0;
   R1 /= 1000.0;
   R2 /= 1000.0;
-  double deltaT = getProperty("DeltaT");
+  wl_resolution = getProperty("DeltaT");
 
   if (!reducedEventWS)
   {
@@ -173,7 +182,7 @@ void TOFSANSResolution::exec()
       const double dTheta2 = ( 3.0*R1*R1/(L1*L1) + 3.0*R2*R2*src_to_pixel*src_to_pixel/(L1*L1*L2*L2)
             + 2.0*(pixel_size_x*pixel_size_x+pixel_size_y*pixel_size_y)/(L2*L2) )/12.0;
 
-      const double dwl_over_wl = 3.9560*deltaT/(1000.0*(L1+L2)*itev->m_tof);
+      const double dwl_over_wl = 3.9560*getTOFResolution(itev->m_tof)/(1000.0*(L1+L2)*itev->m_tof);
       const double dq_over_q = std::sqrt(dTheta2/(theta*theta)+dwl_over_wl*dwl_over_wl);
 
       PARALLEL_CRITICAL(iq)    /* Write to shared memory - must protect */
