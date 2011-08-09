@@ -19,6 +19,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidAPI/Point3D.h"
+#include <boost/shared_ptr.hpp>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
@@ -75,6 +76,9 @@ namespace Mantid
           }
 
         };
+
+        //Convenience typedef.
+        typedef  boost::shared_ptr<ImplicitFunction> ImplicitFunction_sptr;
 
     }
 }

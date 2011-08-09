@@ -82,6 +82,18 @@ public:
   /// Create the xml.
   const std::string& create() const;
 
+  /// Determine whetether a valid x dimension has been provided.
+  bool hasXDimension() const;
+
+  /// Determine whetether a valid y dimension has been provided.
+  bool hasYDimension() const;
+
+  /// Determine whetether a valid z dimension has been provided.
+  bool hasZDimension() const;
+
+  /// Determine whetether a valid t dimension has been provided.
+  bool hasTDimension() const;
+
 private:
 
   typedef std::vector<IMDDimension_const_sptr> DimensionContainerType;
@@ -95,18 +107,6 @@ private:
   mutable IMDDimension_const_sptr m_spZDimension;
 
   mutable IMDDimension_const_sptr m_spTDimension;
-
-  /// Determine whetether a valid x dimension has been provided.
-  bool hasXDimension() const;
-
-  /// Determine whetether a valid y dimension has been provided.
-  bool hasYDimension() const;
-
-  /// Determine whetether a valid z dimension has been provided.
-  bool hasZDimension() const;
-
-  /// Determine whetether a valid t dimension has been provided.
-  bool hasTDimension() const;
 
   /// Instantiate and apply the checking policy.
   void applyPolicyChecking(IMDDimension_const_sptr dimensionToAdd) const;

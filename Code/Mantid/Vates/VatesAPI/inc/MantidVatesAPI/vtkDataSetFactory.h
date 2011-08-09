@@ -88,6 +88,11 @@ public:
   /// Get the name of the type.
   virtual std::string getFactoryTypeName() const =0;
 
+  virtual void setRecursionDepth(size_t depth) //TODO subtype vtkDataSet factory specifically for MDWEW type workspaces and put this method on that subtype.
+  {
+    throw std::runtime_error("vtkDataSetFactory does not implement ::setRecursionDepth"); 
+  }
+
   /// Dimensionalities of interest.
   enum{OneDimensional=1, TwoDimensional=2, ThreeDimensional=3, FourDimensional=4};
 

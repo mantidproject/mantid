@@ -46,12 +46,15 @@ inc/MantidVatesAPI/DimensionPresenter.h
 inc/MantidVatesAPI/DimensionView.h
 inc/MantidVatesAPI/DimensionViewFactory.h
 inc/MantidVatesAPI/EscalatingRebinningActionManager.h
+inc/MantidVatesAPI/EventNexusLoadingPresenter.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/FilteringUpdateProgressAction.h
 inc/MantidVatesAPI/GaussianThresholdRange.h
 inc/MantidVatesAPI/GeometryPresenter.h
 inc/MantidVatesAPI/GeometryView.h
 inc/MantidVatesAPI/MDHistogramRebinningPresenter.h
+inc/MantidVatesAPI/MDLoadingPresenter.h
+inc/MantidVatesAPI/MDLoadingView.h
 inc/MantidVatesAPI/MDRebinningPresenter.h
 inc/MantidVatesAPI/MDRebinningView.h
 inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
@@ -87,6 +90,7 @@ inc/MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h
 set( TEST_FILES
 test/DimensionPresenterTest.h
 test/EscalatingRebinningActionManagerTest.h
+test/EventNexusLoadingPresenterTest.h
 test/vtkDataSetFactoryTest.h
 test/vtkClipperDataSetFactoryTest.h
 test/vtkDataSetToGeometryTest.h

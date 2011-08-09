@@ -206,5 +206,12 @@ namespace Mantid
     }
   }
 
+  /** Sets the recursion depth to a specified level in the workspace.
+  */
+  void vtkMDEWHexahedronFactory::setRecursionDepth(size_t depth)
+  {
+    m_maxDepth = depth;
+  }
+
   }
 }

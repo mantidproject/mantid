@@ -11,6 +11,7 @@
 #include "MantidVatesAPI/Clipper.h"
 #include "MantidVatesAPI/MDRebinningView.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/MDLoadingView.h"
 #include "MDDataObjects/MDIndexCalculator.h"
 #include <gmock/gmock.h>
 
@@ -184,7 +185,18 @@ public:
   MOCK_CONST_METHOD0(validate,
     void());
   MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
+  MOCK_METHOD1(setRecursionDepth, void(size_t));
+};
 
+//=================================================================================================
+/// Mock to allow the behaviour of MDLoadingPresenters to be tested.
+class MockMDLoadingView : public Mantid::VATES::MDLoadingView
+{
+public:
+  MOCK_CONST_METHOD0(getRecursionDepth, size_t());
+  MOCK_CONST_METHOD0(getLoadInMemory, bool());
+  MOCK_METHOD1(updateAlgorithmProgress, void(double));
+  ~MockMDLoadingView(){}
 };
 
 

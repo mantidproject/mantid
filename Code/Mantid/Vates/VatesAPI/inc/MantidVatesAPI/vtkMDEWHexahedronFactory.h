@@ -66,6 +66,8 @@ public:
   {
     return "vtkMDEWHexahedronFactory";
   }
+
+  virtual void setRecursionDepth(size_t depth);
   
   /// Typedef sptr to 3d event workspace.
   typedef boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace3> MDEventWorkspace3_sptr;
@@ -81,13 +83,11 @@ private:
   /// Scalar name to provide on dataset.
   const std::string m_scalarName;
 
-  
-
   /// Member workspace to generate vtkdataset from.
   MDEventWorkspace3_sptr m_workspace;
 
   /// Maximum recursion depth to use.
-  const size_t m_maxDepth;
+  size_t m_maxDepth;
 
 };
 
