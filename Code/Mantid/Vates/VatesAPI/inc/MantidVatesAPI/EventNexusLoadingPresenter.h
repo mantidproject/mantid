@@ -5,12 +5,12 @@
 #include <vtkFieldData.h>
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-#include "MantidAPI/IMDEventWorkspace.h";
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ImplicitFunction.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidVatesAPI/MDLoadingPresenter.h"
-#include "MantidVatesAPI/FilteringUpdateProgressAction.h";
-#include "MantidVatesAPI/vtkDataSetFactory.h";
+#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
@@ -68,7 +68,7 @@ namespace Mantid
     };
 
     template<typename ViewType>
-    EventNexusLoadingPresenter<ViewType>::EventNexusLoadingPresenter(ViewType* view, const std::string filename) : MDLoadingPresenter(), m_view(view), m_filename(filename), m_isSetup(false)
+    EventNexusLoadingPresenter<ViewType>::EventNexusLoadingPresenter(ViewType* view, const std::string filename) : MDLoadingPresenter(), m_filename(filename), m_view(view), m_isSetup(false)
     {
       if(m_filename.empty())
       {
