@@ -171,11 +171,13 @@ namespace MDEvents
     if (!filename.empty())
     {
       // First save to the NXS file
+      g_log.notice() << "Running SaveMDEW" << std::endl;
       IAlgorithm_sptr alg = createSubAlgorithm("SaveMDEW");
       alg->setPropertyValue("Filename", filename);
       alg->setProperty("InputWorkspace", out);
       alg->executeAsSubAlg();
       // And now re-load it with this file as the backing.
+      g_log.notice() << "Running LoadMDEW" << std::endl;
       alg = createSubAlgorithm("LoadMDEW");
       alg->setPropertyValue("Filename", filename);
       alg->setProperty("FileBackEnd", true);

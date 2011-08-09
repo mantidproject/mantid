@@ -159,7 +159,7 @@ namespace MDEvents
   {
     if (m_onDisk)
     {
-      // Is the data in memory right now (cached copy)?
+      // Is the data in NOT memory right now (it is on disk)?
       if (data.empty())
       {
         // Perform the data loading
@@ -201,8 +201,7 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Call to save the data (if needed) and release
-   * the memory used.
+  /** Call to save the data (if needed) and release the memory used.
    * Called from the DiskMRU.
    */
   TMDE(
@@ -219,6 +218,35 @@ namespace MDEvents
     data.clear();
     vec_t().swap(data); // Linux trick to really free the memory
   }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Save the box's Event data to an open nexus file.
+   *
+   * @param file :: Nexus File object, must already by opened with MDE::prepareNexusData()
+   */
+  TMDE(
+  void MDBox)::saveNexus(::NeXus::File * file) const
+  {
+    MDE::saveVectorToNexusSlab(this->data, file, m_fileIndexStart);
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Load the box's Event data from an open nexus file.
+   * The FileIndex start and numEvents must be set correctly already.
+   *
+   * @param file :: Nexus File object, must already by opened with MDE::openNexusData()
+   */
+  TMDE(
+  void MDBox)::loadNexus(::NeXus::File * file)
+  {
+    this->data.clear();
+    MDE::loadVectorFromNexusSlab(this->data, file, m_fileIndexStart, m_fileNumEvents);
+  }
+
+
+
 
 
 
@@ -541,32 +569,6 @@ namespace MDEvents
     }
 
     this->releaseEvents();
-  }
-
-
-  //-----------------------------------------------------------------------------------------------
-  /** Save the box's Event data to an open nexus file.
-   *
-   * @param file :: Nexus File object, must already by opened with MDE::prepareNexusData()
-   */
-  TMDE(
-  void MDBox)::saveNexus(::NeXus::File * file) const
-  {
-    MDE::saveVectorToNexusSlab(this->data, file, m_fileIndexStart);
-  }
-
-
-  //-----------------------------------------------------------------------------------------------
-  /** Load the box's Event data from an open nexus file.
-   * The FileIndex start and numEvents must be set correctly already.
-   *
-   * @param file :: Nexus File object, must already by opened with MDE::openNexusData()
-   */
-  TMDE(
-  void MDBox)::loadNexus(::NeXus::File * file)
-  {
-    this->data.clear();
-    MDE::loadVectorFromNexusSlab(this->data, file, m_fileIndexStart, m_fileNumEvents);
   }
 
 

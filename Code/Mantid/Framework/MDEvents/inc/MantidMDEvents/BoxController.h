@@ -348,6 +348,7 @@ namespace MDEvents
     const Mantid::Kernel::DiskMRU & getDiskMRU() const
     { return m_diskMRU; }
 
+    /** Return the disk MRU for disk caching */
     Mantid::Kernel::DiskMRU & getDiskMRU()
     { return m_diskMRU; }
 
@@ -417,7 +418,7 @@ namespace MDEvents
     /// When you split a MDBox, it becomes this many sub-boxes
     size_t m_numSplit;
 
-    /// For adding events tasksm_file
+    /// For adding events tasks
     size_t m_addingEvents_eventsPerTask;
 
     /// For adding events tasks
