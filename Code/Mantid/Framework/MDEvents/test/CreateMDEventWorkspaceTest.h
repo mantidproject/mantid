@@ -86,7 +86,8 @@ public:
     {
       std::string s = alg.getPropertyValue("Filename");
       TSM_ASSERT( "File for the back-end was created.", Poco::File(s).exists() );
-      if (Poco::File(s).exists()) Poco::File(s).remove();
+      std::cout << "End of file-backed test" << std::endl;
+      //if (Poco::File(s).exists()) Poco::File(s).remove();
     }
   }
 
