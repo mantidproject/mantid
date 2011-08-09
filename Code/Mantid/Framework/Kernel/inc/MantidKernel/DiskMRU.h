@@ -14,6 +14,7 @@
 #include <map>
 #include <stdint.h>
 #include <vector>
+#include "MantidKernel/IFile.h"
 
 
 namespace Mantid
@@ -76,7 +77,7 @@ namespace Kernel
         boost::multi_index::sequenced<>,
         boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ISaveable, size_t, getId)>
       >
-    > mru_list;
+    > mru_t;
 
     /// Typedef for a par for the map. Key = position in the file; value = the ISaveable object
     typedef std::pair<uint64_t, const ISaveable*> pairObj_t;
@@ -109,10 +110,13 @@ namespace Kernel
       >
     > freeSpace_t;
 
+    /// A way to index the free space by their size
+    typedef freeSpace_t::nth_index<1>::type freeSpace_by_size_t;
+
 
     DiskMRU();
 
-    DiskMRU(uint64_t m_memoryAvail, uint64_t m_writeBufferSize, bool useWriteBuffer);
+    DiskMRU(uint64_t m_memoryAvail, uint64_t m_writeBufferSize, bool useWriteBuffer, IFile * file = NULL);
     
     virtual ~DiskMRU();
 
@@ -125,6 +129,8 @@ namespace Kernel
     void freeBlock(uint64_t const pos, uint64_t const size);
 
     void defragFreeBlocks();
+
+    uint64_t allocate(uint64_t const newSize);
 
     uint64_t relocate(uint64_t const oldPos, uint64_t const oldSize, const uint64_t newSize);
 
@@ -157,30 +163,39 @@ namespace Kernel
     uint64_t getMemoryAvail() const
     { return m_memoryAvail; }
 
-
     //-------------------------------------------------------------------------------------------
     ///@return reference to the free space map (for testing only!)
     freeSpace_t & getFreeSpaceMap()
     { return m_free;  }
 
+    ///@return the position of the last used point in the file (for testing only!)
+    uint64_t getFileUsed() const
+    { return m_fileUsed; }
+
+    ///@return the position of the last allocated point in the file (for testing only!)
+    uint64_t getFileLength() const
+    { return m_fileLength; }
+
   protected:
     void writeOldObjects();
 
+    // ----------------------- In-memory buffer --------------------------------------
     /// The MRU list container
-    mru_list list;
+    mru_t m_mru;
 
     /// Amount of memory that the MRU is allowed to use.
     /// Note that the units are up to the ISaveable to define; they don't have to be bytes.
     uint64_t m_memoryAvail;
 
-    /// Amount of memory to accumulate in the write buffer before writing.
-    uint64_t m_writeBufferSize;
+    /// Amount of memory actually used up (in the MRU, not the toWriteBuffer)
+    uint64_t m_memoryUsed;
 
+    // ----------------------- To-write buffer --------------------------------------
     /// Do we use the write buffer?
     bool m_useWriteBuffer;
 
-    /// Amount of memory actually used up (in the MRU, not the toWriteBuffer)
-    uint64_t m_memoryUsed;
+    /// Amount of memory to accumulate in the write buffer before writing.
+    uint64_t m_writeBufferSize;
 
     /// List of the data objects that should be written out. Ordered by file position.
     toWriteMap_t m_toWrite;
@@ -194,17 +209,25 @@ namespace Kernel
     /// Mutex for modifying the MRU list
     Kernel::Mutex m_mruMutex;
 
-    /// Position of the last USED point in the file
-    uint64_t m_endOfFile;
-
-    /// Allocated length of the file
-    uint64_t m_fileLength;
-
+    // ----------------------- Free space map --------------------------------------
     /// Map of the free blocks in the file
     freeSpace_t m_free;
 
+    /// Index into m_free, but indexed by block size.
+    freeSpace_by_size_t & m_free_bySize;
+
     /// Mutex for modifying the free space list
     Kernel::Mutex m_freeMutex;
+
+    // ----------------------- File object --------------------------------------
+    /// The IFile object that allows us to resize the output file.
+    Kernel::IFile * m_file;
+
+    /// Position of the last USED point in the file
+    uint64_t m_fileUsed;
+
+    /// Allocated length of the file
+    uint64_t m_fileLength;
 
   private:
     /// Private Copy constructor: NO COPY ALLOWED

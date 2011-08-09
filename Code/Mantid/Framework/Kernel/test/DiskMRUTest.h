@@ -15,12 +15,14 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidKernel/IFile.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using Mantid::Kernel::CPUTimer;
 
 
+//====================================================================================
 class ISaveableTester : public ISaveable
 {
 public:
@@ -105,6 +107,71 @@ uint64_t ISaveableTesterWithSeek::filePos;
 
 
 
+//====================================================================================
+/** An ISaveable that fakes writing to a fixed-size file */
+class ISaveableTesterWithFile : public ISaveable
+{
+public:
+  ISaveableTesterWithFile(size_t id, uint64_t pos, uint64_t size, char ch) : ISaveable(id),
+  m_ch(ch), m_memory(size), m_pos(pos), m_dataBusy(false)
+  {}
+
+  char m_ch;
+  virtual void save() const
+  {
+    // Fake writing to a file
+    streamMutex.lock();
+    for (size_t i=m_pos; i< m_pos+m_memory; i++)
+      fakeFile[i] = m_ch;
+    streamMutex.unlock();
+  }
+
+  virtual void load()
+  {}
+
+  uint64_t m_memory;
+  virtual uint64_t getSizeOnFile() const {return m_memory;};
+
+  uint64_t m_pos;
+  virtual uint64_t getFilePosition() const { return m_pos; }
+
+  bool m_dataBusy;
+  virtual bool dataBusy() const {return m_dataBusy; }
+
+  static std::string fakeFile;
+
+  static Kernel::Mutex streamMutex;
+};
+
+// Declare the static members here.
+std::string ISaveableTesterWithFile::fakeFile;
+Kernel::Mutex ISaveableTesterWithFile::streamMutex;
+
+
+
+//====================================================================================
+/// Tester for IFile
+class IFileTester : public IFile
+{
+  /// Return the length of the file, in units compatible with DiskMRU (not necessarily bytes).
+  virtual uint64_t getFileLength() const
+  { return ISaveableTesterWithFile::fakeFile.size(); }
+
+  /// Increase the size of the file to the given length.
+  virtual void extendFile(uint64_t newLength)
+  {
+    uint64_t added = newLength - ISaveableTesterWithFile::fakeFile.size();
+    std::string add;
+    for (size_t i=0; i<added; i++)
+      add += " ";
+    ISaveableTesterWithFile::fakeFile += add;
+  }
+
+};
+
+
+
+
 
 //====================================================================================
 class DiskMRUTest : public CxxTest::TestSuite
@@ -142,11 +209,11 @@ public:
       data.push_back( new ISaveableTester(i) );
     }
 
-    DiskMRU::mru_list list;
+    DiskMRU::mru_t list;
     CPUTimer tim;
     for (size_t i=0; i<num; i++)
     {
-      std::pair<DiskMRU::mru_list::iterator,bool> p;
+      std::pair<DiskMRU::mru_t::iterator,bool> p;
       p = list.push_front(data[i]);
     }
     std::cout << tim << " to fill the list." << std::endl;
@@ -552,6 +619,99 @@ public:
 
     mru.defragFreeBlocks();
     TS_ASSERT_EQUALS( map.size(), 4);
+  }
+
+  void test_allocate_and_relocate()
+  {
+    DiskMRU mru(4, 3, true);
+    DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
+    FreeBlock b;
+
+    mru.freeBlock(100, 10);
+    mru.freeBlock(200, 20);
+    mru.freeBlock(300, 30);
+    mru.freeBlock(400, 40);
+    TS_ASSERT_EQUALS( map.size(), 4);
+    // Where does the block end up?
+    TS_ASSERT_EQUALS( mru.allocate(20), 200 );
+    // The map has shrunk by one since the new one was removed.
+    TS_ASSERT_EQUALS( map.size(), 3);
+    // OK, now look for a smaller block, size of 4
+    TS_ASSERT_EQUALS( mru.allocate(4), 100 );
+    // This left a little chunk of space free, sized 6 at position 104. So the # of entries in the free space map did not change
+    TS_ASSERT_EQUALS( map.size(), 3);
+    TS_ASSERT_EQUALS( map.begin()->getFilePosition(), 104);
+    TS_ASSERT_EQUALS( map.begin()->getSize(), 6);
+
+    // Now try to relocate. Had a block after a 30-sized free block at 300.
+    // It gets freed, opening up a slot for the new chunk of memory
+    TS_ASSERT_EQUALS( mru.relocate(330, 5, 35), 300 );
+    // One fewer free block.
+    TS_ASSERT_EQUALS( map.size(), 2);
+
+    // Ok, now lets ask for a block that is too big.
+    // This throws because no file is set
+    TS_ASSERT_THROWS_ANYTHING( mru.allocate(55) );
+  }
+
+  void test_allocate_with_file()
+  {
+    IFile * file = new IFileTester;
+    file->extendFile(10);
+
+    DiskMRU mru(4, 3, true, file);
+    DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
+    uint64_t newPos;
+
+    // File lengths are known correctly
+    TS_ASSERT_EQUALS( mru.getFileLength(), 10);
+    TS_ASSERT_EQUALS( mru.getFileUsed(), 10);
+
+    ISaveableTesterWithFile * blockA = new ISaveableTesterWithFile(0, 0, 2, 'A');
+    ISaveableTesterWithFile * blockB = new ISaveableTesterWithFile(1, 2, 3, 'B');
+    ISaveableTesterWithFile * blockC = new ISaveableTesterWithFile(2, 5, 5, 'C');
+    blockA->save();
+    blockB->save();
+    blockC->save();
+    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AABBBCCCCC");
+
+    // Asking for a new chunk of space that needs to be at the end
+    newPos = mru.relocate(blockB->m_pos, blockB->m_memory, 7);
+    TSM_ASSERT_EQUALS( "One freed block", map.size(), 1);
+    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile.size(), 18); // One extra cause of that 10%
+    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AABBBCCCCC        ");
+    TS_ASSERT_EQUALS( mru.getFileLength(), 18);
+    TS_ASSERT_EQUALS( mru.getFileUsed(), 17);
+
+    // Simulate saving
+    blockB->m_pos = newPos;
+    blockB->m_memory = 7;
+    blockB->save();
+    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AABBBCCCCCBBBBBBB ");
+
+    // Now let's allocate a new block
+    newPos = mru.allocate(2);
+    TS_ASSERT_EQUALS( newPos, 2 );
+    ISaveableTesterWithFile * blockD = new ISaveableTesterWithFile(3, newPos, 2, 'D');
+    blockD->save();
+    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AADDBCCCCCBBBBBBB ");
+    TSM_ASSERT_EQUALS( "Still one freed block", map.size(), 1);
+
+    // Grow blockD by 1
+    newPos = mru.relocate(2, 2, 3);
+    TSM_ASSERT_EQUALS( "Block D stayed in the same place since there was room after it", newPos, 2 );
+    blockD->m_memory = 3;
+    blockD->save();
+    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AADDDCCCCCBBBBBBB ");
+
+    // Allocate a little block at the end
+    newPos = mru.allocate(1);
+    TSM_ASSERT_EQUALS( "The extra free space at the end of the file was used", newPos, 17 );
+    TS_ASSERT_EQUALS( mru.getFileLength(), 18);
+    TS_ASSERT_EQUALS( mru.getFileUsed(), 18);
+
+
+    //std::cout <<  ISaveableTesterWithFile::fakeFile << "!" << std::endl;
   }
 
 };

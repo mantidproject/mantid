@@ -12,10 +12,16 @@ namespace Kernel
   /** Constructor
    */
   DiskMRU::DiskMRU()
-  : m_memoryAvail(100), m_writeBufferSize(50), m_useWriteBuffer(false),
+  : m_memoryAvail(100),
     m_memoryUsed(0),
+    m_useWriteBuffer(false),
+    m_writeBufferSize(50),
     m_toWrite_byId( m_toWrite.get<1>() ),
-    m_memoryToWrite(0)
+    m_memoryToWrite(0),
+    m_free_bySize( m_free.get<1>() ),
+    m_file(NULL),
+    m_fileUsed(0),
+    m_fileLength(0)
   {
   }
 
@@ -25,14 +31,26 @@ namespace Kernel
    * @param m_memoryAvail :: Amount of memory that the MRU is allowed to use.
    * @param m_writeBufferSize :: Amount of memory to accumulate in the write buffer before writing.
    * @param useWriteBuffer :: True if you want to use the "to-Write" buffer.
+   * @param file :: ptr to a IFile object that allows use to resize the file.
    * @return
    */
-  DiskMRU::DiskMRU(uint64_t m_memoryAvail, uint64_t m_writeBufferSize, bool useWriteBuffer)
-  : m_memoryAvail(m_memoryAvail), m_writeBufferSize(m_writeBufferSize), m_useWriteBuffer(useWriteBuffer),
+  DiskMRU::DiskMRU(uint64_t m_memoryAvail, uint64_t m_writeBufferSize, bool useWriteBuffer, IFile * file)
+  : m_memoryAvail(m_memoryAvail),
     m_memoryUsed(0),
+    m_useWriteBuffer(useWriteBuffer),
+    m_writeBufferSize(m_writeBufferSize),
     m_toWrite_byId( m_toWrite.get<1>() ),
-    m_memoryToWrite(0)
+    m_memoryToWrite(0),
+    m_free_bySize( m_free.get<1>() ),
+    m_file(file),
+    m_fileUsed(0),
+    m_fileLength(0)
   {
+    if (m_file)
+    {
+      m_fileLength = m_file->getFileLength();
+      m_fileUsed = m_fileLength;
+    }
   }
     
   //----------------------------------------------------------------------------------------------
@@ -41,7 +59,7 @@ namespace Kernel
   DiskMRU::~DiskMRU()
   {
     // The item pointers are NOT owned by the MRU.
-    list.clear();
+    m_mru.clear();
   }
   
 
@@ -60,13 +78,13 @@ namespace Kernel
     m_mruMutex.lock();
 
     // Place the item in the MRU list
-    std::pair<mru_list::iterator,bool> p;
-    p = list.push_front(item);
+    std::pair<mru_t::iterator,bool> p;
+    p = m_mru.push_front(item);
 
     if (!p.second)
     {
       // duplicate item: put it back at the front of the list
-      list.relocate(list.begin(), p.first);
+      m_mru.relocate(m_mru.begin(), p.first);
       m_mruMutex.unlock();
       return;
     }
@@ -75,20 +93,20 @@ namespace Kernel
     m_memoryUsed += item->getSizeOnFile();
 
     // You might have to pop 1 or more items until the MRU memory is below the limit
-    mru_list::iterator it = list.end();
+    mru_t::iterator it = m_mru.end();
 
     while (m_memoryUsed > m_memoryAvail)
     {
       // Pop the least-used object out the back
       it--;
-      if (it == list.begin()) break;
+      if (it == m_mru.begin()) break;
       const ISaveable *toWrite = *it;
       // Can you save it to disk?
       if (!toWrite->dataBusy())
       {
         toWrite->save();
         m_memoryUsed -= toWrite->getSizeOnFile();
-        list.erase(it);
+        m_mru.erase(it);
       }
     }
     m_mruMutex.unlock();
@@ -108,8 +126,8 @@ namespace Kernel
     m_mruMutex.lock();
 
     // Place the item in the MRU list
-    std::pair<mru_list::iterator,bool> p;
-    p = list.push_front(item);
+    std::pair<mru_t::iterator,bool> p;
+    p = m_mru.push_front(item);
 
     // Find the item in the toWrite buffer (using the item's ID)
     toWriteMap_by_Id_t::iterator found = m_toWrite_byId.find( item->getId() );
@@ -122,7 +140,7 @@ namespace Kernel
     if (!p.second)
     {
       // duplicate item: put it back at the front of the list
-      list.relocate(list.begin(), p.first);
+      m_mru.relocate(m_mru.begin(), p.first);
       m_mruMutex.unlock();
       return;
     }
@@ -136,8 +154,8 @@ namespace Kernel
       while (m_memoryUsed > m_memoryAvail)
       {
         // Pop the least-used object out the back
-        const ISaveable *toWrite = list.back();
-        list.pop_back();
+        const ISaveable *toWrite = m_mru.back();
+        m_mru.pop_back();
 
         // And put it in the queue of stuff to write.
         m_toWrite.insert(toWrite);
@@ -204,8 +222,8 @@ namespace Kernel
     while (m_memoryUsed > 0)
     {
       // Pop the least-used object out the back
-      const ISaveable *toWrite = list.back();
-      list.pop_back();
+      const ISaveable *toWrite = m_mru.back();
+      m_mru.pop_back();
 
       // And put it in the queue of stuff to write.
       m_toWrite.insert(toWrite);
@@ -282,6 +300,8 @@ namespace Kernel
    */
   void  DiskMRU::defragFreeBlocks()
   {
+    m_freeMutex.lock();
+
     freeSpace_t::iterator it = m_free.begin();
     FreeBlock thisBlock;
     thisBlock = *it;
@@ -308,8 +328,64 @@ namespace Kernel
         thisBlock = *it;
       }
     }
+    m_freeMutex.unlock();
   }
 
+  //---------------------------------------------------------------------------------------------
+  /** Allocate a block of the given size in a free spot in the file,
+   * or at the end of the file if there is no space.
+   *
+   * @param newSize :: new size of the data
+   * @return a new position at which the data can be saved.
+   */
+  uint64_t DiskMRU::allocate(uint64_t const newSize)
+  {
+    m_freeMutex.lock();
+    // Now, find the first available block of sufficient size.
+    freeSpace_by_size_t::iterator it = m_free_bySize.lower_bound( newSize );
+    if (it == m_free_bySize.end())
+    {
+      // No block found
+//      std::cout << "No block found for allocate " << newSize << std::endl;
+      if (m_file)
+      {
+        // Go at the end of the file.
+        uint64_t retVal = m_fileUsed;
+        m_fileUsed += newSize;
+        if (m_fileUsed > m_fileLength)
+        {
+          // Grow the file by 10% more than the requested size,
+          // each time it grows. This avoids too many calls to extend,
+          // at the cost of up to 10% wasted space.
+          m_fileLength = uint64_t( double(m_fileUsed) * 1.1);
+          m_file->extendFile(m_fileLength);
+        }
+        // Will place the new block at the end of the file
+        m_freeMutex.unlock();
+        return retVal;
+      }
+      else
+      {
+        m_freeMutex.unlock();
+        throw std::runtime_error("DiskMRU::allocate(): No free block is large enough, and you did not give a IFile object to allow extending the file. Cannot relocate.");
+      }
+    }
+    else
+    {
+//      std::cout << "Block found for allocate " << newSize << std::endl;
+      uint64_t foundPos = it->getFilePosition();
+      uint64_t foundSize = it->getSize();
+      // Remove the free block you found - it is no longer free
+      m_free_bySize.erase(it);
+      m_freeMutex.unlock();
+      // Block was too large - free the bit of space after it.
+      if (foundSize > newSize)
+      {
+        this->freeBlock( foundPos + newSize, foundSize - newSize );
+      }
+      return foundPos;
+    }
+  }
 
   //---------------------------------------------------------------------------------------------
   /** This method is called by an ISaveable object that has outgrown
@@ -323,9 +399,19 @@ namespace Kernel
    * @param newSize :: new size of the data
    * @return a new position at which the data can be saved.
    */
-  uint64_t DiskMRU::relocate(uint64_t const oldPos, uint64_t const /*oldSize*/, const uint64_t /*newSize*/)
+  uint64_t DiskMRU::relocate(uint64_t const oldPos, uint64_t const oldSize, const uint64_t newSize)
   {
-    return oldPos;
+    // Call does not make size unless newSize > oldSize
+    if (newSize <= oldSize)
+    {
+      throw std::runtime_error("Logic error: Do not call relocate() for a block that has not grown.");
+    }
+    else
+    {
+      // First, release the space in the old block.
+      this->freeBlock(oldPos, oldSize);
+      return this->allocate(newSize);
+    }
   }
 
 } // namespace Mantid
