@@ -168,9 +168,10 @@ public:
     EventWorkspace_sptr work_in = WorkspaceCreationHelper::CreateEventWorkspace2();
     IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(10);
     work_in->setInstrument(inst);
+    DateAndTime run_start("2010-01-01");
     // Add ten more at #10 so that it fails
-    for (int i=300; i<310; i++)
-      work_in->getEventList(10).addEventQuickly( TofEvent( i, 10) );
+    for (int i=0; i<10; i++)
+      work_in->getEventList(10).addEventQuickly( TofEvent((i+0.5), run_start+double(i)) );
 
     AnalysisDataService::Instance().add("testdead_in", work_in);
 
