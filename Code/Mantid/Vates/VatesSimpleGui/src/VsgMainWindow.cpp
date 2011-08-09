@@ -1,4 +1,4 @@
-#include "MpMainWindow.h"
+#include "VsgMainWindow.h"
 
 #include "ModeControlWidget.h"
 #include "MultisliceView.h"
@@ -23,7 +23,7 @@
 
 #include <iostream>
 
-mpMainWindow::mpMainWindow(QWidget *parent) : QMainWindow(parent)
+VsgMainWindow::VsgMainWindow(QWidget *parent) : QMainWindow(parent)
 {
   this->setupUi(this);
   this->splitter_2->setStretchFactor(1, 1);
@@ -61,18 +61,18 @@ mpMainWindow::mpMainWindow(QWidget *parent) : QMainWindow(parent)
   this->setMainWindowComponentsForView();
 }
 
-mpMainWindow::~mpMainWindow()
+VsgMainWindow::~VsgMainWindow()
 {
 
 }
 
-void mpMainWindow::removeProxyTabWidgetConnections()
+void VsgMainWindow::removeProxyTabWidgetConnections()
 {
 	QObject::disconnect(&pqActiveObjects::instance(), 0,
 			this->proxyTabWidget, 0);
 }
 
-ViewBase* mpMainWindow::setMainViewWidget(QWidget *container,
+ViewBase* VsgMainWindow::setMainViewWidget(QWidget *container,
 		ModeControlWidget::Views v)
 {
   ViewBase *view;
@@ -100,7 +100,7 @@ ViewBase* mpMainWindow::setMainViewWidget(QWidget *container,
 	return view;
 }
 
-void mpMainWindow::setMainWindowComponentsForView()
+void VsgMainWindow::setMainWindowComponentsForView()
 {
 	// Extra setup stuff to hook up view to other items
 	this->proxyTabWidget->setupDefaultConnections();
@@ -136,7 +136,7 @@ void mpMainWindow::setMainWindowComponentsForView()
                    this->currentView, SLOT(onLogScale(int)));
 }
 
-void mpMainWindow::onDataLoaded(pqPipelineSource* source)
+void VsgMainWindow::onDataLoaded(pqPipelineSource* source)
 {
   if (this->originSource)
   {
@@ -156,7 +156,7 @@ void mpMainWindow::onDataLoaded(pqPipelineSource* source)
   emit this->enableThreeSliceViewButton();
 }
 
-void mpMainWindow::switchViews(ModeControlWidget::Views v)
+void VsgMainWindow::switchViews(ModeControlWidget::Views v)
 {
 	this->removeProxyTabWidgetConnections();
 	this->hiddenView = this->setMainViewWidget(this->viewWidget, v);
@@ -181,7 +181,7 @@ void mpMainWindow::switchViews(ModeControlWidget::Views v)
   }
 }
 
-void mpMainWindow::swapViews()
+void VsgMainWindow::swapViews()
 {
 	ViewBase *temp;
 	temp = this->currentView;

@@ -1,5 +1,5 @@
 #include "SimpleGuiApp.h"
-#include "MpMainWindow.h"
+#include "VsgMainWindow.h"
 
 #include <QMessageBox>
 
@@ -8,7 +8,7 @@ int main(int argc, char** argv)
   SimpleGuiApp app(argc, argv);
   try
   {
-    mpMainWindow window;
+    VsgMainWindow window;
     window.show();
     return app.exec();
   }

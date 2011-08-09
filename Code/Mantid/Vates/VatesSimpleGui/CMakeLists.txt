@@ -16,7 +16,6 @@ set( INCLUDE_FILES
   inc/GeometryParser.h
   inc/Indicator.h
   inc/ModeControlWidget.h
-  inc/MpMainWindow.h
   inc/MultisliceView.h
   inc/ScalePicker.h
   inc/SimpleGuiApp.h
@@ -24,6 +23,7 @@ set( INCLUDE_FILES
   inc/ThreesliceView.h
   inc/TimeControlWidget.h
   inc/ViewBase.h
+  inc/VsgMainWindow.h
 )
 set( SOURCE_FILES
   src/AxisInformation.cpp
@@ -33,7 +33,6 @@ set( SOURCE_FILES
   src/Indicator.cpp
   src/main.cpp
   src/ModeControlWidget.cpp
-  src/MpMainWindow.cpp
   src/MultisliceView.cpp
   src/ScalePicker.cpp
   src/SimpleGuiApp.cpp
@@ -41,6 +40,7 @@ set( SOURCE_FILES
   src/ThreesliceView.cpp
   src/TimeControlWidget.cpp
   src/ViewBase.cpp
+  src/VsgMainWindow.cpp
 )
 
 # These are the headers to be preprocessed using
@@ -50,13 +50,13 @@ qt4_wrap_cpp( MOC_SRCS
   inc/ColorSelectionWidget.h
   inc/Indicator.h
   inc/ModeControlWidget.h
-  inc/MpMainWindow.h
   inc/MultisliceView.h
   inc/ScalePicker.h
   inc/SimpleGuiApp.h
   inc/StandardView.h
   inc/ThreesliceView.h
   inc/TimeControlWidget.h
+  inc/VsgMainWindow.h
 )
 
 # These are the ui files to be processed using
@@ -64,11 +64,11 @@ qt4_wrap_cpp( MOC_SRCS
 qt4_wrap_ui( UI_BUILT_SOURCES
   ui/ColorSelectionWidget.ui
   ui/ModeControlWidget.ui
-  ui/MpMainWindow.ui
   ui/MultisliceView.ui
   ui/StandardView.ui
   ui/ThreesliceView.ui
   ui/TimeControlWidget.ui
+  ui/VsgMainWindow.ui
 )
 
 add_executable( ${PROJECT_NAME}

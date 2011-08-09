@@ -1,9 +1,9 @@
-#ifndef MPMAINWINDOW_H_
-#define MPMAINWINDOW_H_
+#ifndef VSGMAINWINDOW_H_
+#define VSGMAINWINDOW_H_
 
 #include <QtGui/QMainWindow>
 #include <QPointer>
-#include "ui_MpMainWindow.h"
+#include "ui_VsgMainWindow.h"
 
 class ViewBase;
 
@@ -37,7 +37,7 @@ class QHBoxLayout;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class mpMainWindow : public QMainWindow, public Ui::mpMainWindow
+class VsgMainWindow : public QMainWindow, public Ui::mpMainWindow
 {
     Q_OBJECT
 
@@ -46,9 +46,9 @@ public:
      * Default constructor.
      * @param parent the parent widget for the main window
      */
-    mpMainWindow(QWidget *parent = 0);
+    VsgMainWindow(QWidget *parent = 0);
     /// Default destructor.
-    virtual ~mpMainWindow();
+    virtual ~VsgMainWindow();
 
 protected slots:
     /**
@@ -71,7 +71,7 @@ signals:
   void enableMultiSliceViewButton();
 
 private:
-    Q_DISABLE_COPY(mpMainWindow);
+    Q_DISABLE_COPY(VsgMainWindow);
     ViewBase *currentView; ///< Holder for the current view
     ViewBase *hiddenView; ///< Holder for the view that is being switched from
     QPointer<pqPipelineSource> originSource; ///< Holder for the current source
@@ -92,4 +92,4 @@ private:
     void swapViews();
 };
 
-#endif // MPMAINWINDOW_H_
+#endif // VSGMAINWINDOW_H_
