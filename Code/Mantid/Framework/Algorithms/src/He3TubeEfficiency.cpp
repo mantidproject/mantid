@@ -461,7 +461,7 @@ void He3TubeEfficiency::execEvent()
       continue;
     }
 
-    double exp_constant;
+    double exp_constant = 0.0;
     try
     {
       exp_constant = this->calculateExponential(i, det);
