@@ -462,7 +462,6 @@ void He3TubeEfficiency::execEvent()
     }
 
     double exp_constant;
-    bool is_good = true;
     try
     {
       exp_constant = this->calculateExponential(i, det);
@@ -473,18 +472,8 @@ void He3TubeEfficiency::execEvent()
       PARALLEL_CRITICAL(deteff_invalid)
       {
         this->spectraSkipped.push_back(inputWS->getAxis(1)->spectraNo(i));
-        is_good = false;
-        //outputWS->maskWorkspaceIndex(i);
+        outputWS->maskWorkspaceIndex(i);
       }
-    }
-
-    if (!is_good)
-    {
-      // Clear out events so that they don't bother anything else until
-      // true masking is available.
-      DataObjects::EventList *evlist = outputWS->getEventListPtr(i);
-      evlist->clear();
-      continue;
     }
 
     // Do the correction
