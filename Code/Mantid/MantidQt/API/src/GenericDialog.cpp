@@ -229,6 +229,8 @@ void GenericDialog::initLayout()
   // If the thing won't end up too big compared to the screen height,
   // resize the scroll area so we don't get a scroll bar
   if ( dialogHeight < 0.8*screenHeight ) scroll->setFixedHeight(viewport->height()+10);
+
+  dialog_layout->setSizeConstraint(QLayout::SetMinimumSize);
 }
 
 
