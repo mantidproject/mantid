@@ -118,6 +118,18 @@ namespace MDEvents
   }
 
 
+  //------------------------------------------------------------------------------------------------------
+  /** Close the open file for the back-end, if any
+   * Note: this does not save any data that might be, e.g., in the MRU.
+   */
+  void BoxController::closeFile()
+  {
+    if (m_file)
+    {
+      m_file->close();
+    }
+  }
+
 } // namespace Mantid
 
 } // namespace MDEvents

@@ -343,6 +343,8 @@ namespace MDEvents
     void setFile(::NeXus::File * file)
     { m_file = file; }
 
+    void closeFile();
+
     //-----------------------------------------------------------------------------------
     /** Return the disk MRU for disk caching */
     const Mantid::Kernel::DiskMRU & getDiskMRU() const
