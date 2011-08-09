@@ -70,7 +70,7 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  void execEvent();
+
   /// Input event workspace
   DataObjects::EventWorkspace_const_sptr inputEventWS;
 

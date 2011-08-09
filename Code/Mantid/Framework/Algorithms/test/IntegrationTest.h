@@ -222,27 +222,33 @@ public:
     integ.execute();
     TS_ASSERT( integ.isExecuted() );
 
-    EventWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<EventWorkspace>( AnalysisDataService::Instance().retrieve(outName) ) );
-    //Yep, it is an event
+    //No longer output an EventWorkspace, Rebin should be used instead
+    //EventWorkspace_sptr output;
+    //TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<EventWorkspace>( AnalysisDataService::Instance().retrieve(outName) ) );
+
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outName) );
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+
+    //Check that it is a matrix workspace
     TS_ASSERT( output );
     if (!output) return;
 
-    TS_ASSERT_EQUALS( output->getNumberHistograms(), EndWorkspaceIndex -StartWorkspaceIndex+1 );
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), EndWorkspaceIndex -StartWorkspaceIndex+1 );
 
-    for (size_t i=0; i< output->getNumberHistograms(); i++)
+    for (size_t i=0; i< output2D->getNumberHistograms(); i++)
     {
-      MantidVec X = output->readX(i);
-      MantidVec Y = output->readY(i);
-      MantidVec E = output->readE(i);
+      MantidVec X = output2D->readX(i);
+      MantidVec Y = output2D->readY(i);
+      MantidVec E = output2D->readE(i);
       TS_ASSERT_EQUALS( X.size(), 2);
       TS_ASSERT_EQUALS( Y.size(), 1);
       TS_ASSERT_DELTA( Y[0], 20.0, 1e-6);
       TS_ASSERT_DELTA( E[0], sqrt(20.0), 1e-6);
       // Correct spectra etc?
-      specid_t specNo = output->getSpectrum(i)->getSpectrumNo();
+      specid_t specNo = output2D->getSpectrum(i)->getSpectrumNo();
       TS_ASSERT_EQUALS( specNo, StartWorkspaceIndex+i);
-      TS_ASSERT( output->getSpectrum(i)->hasDetectorID(specNo));
+      TS_ASSERT( output2D->getSpectrum(i)->hasDetectorID(specNo));
     }
 
     AnalysisDataService::Instance().remove(inName);
