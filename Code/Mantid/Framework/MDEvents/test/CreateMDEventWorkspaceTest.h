@@ -1,16 +1,16 @@
 #ifndef MANTID_MDEVENTS_CREATEMDEVENTWORKSPACETEST_H_
 #define MANTID_MDEVENTS_CREATEMDEVENTWORKSPACETEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidMDEvents/CreateMDEventWorkspace.h"
+#include "MantidMDEvents/MDEventFactory.h"
 #include <cxxtest/TestSuite.h>
-#include <MantidKernel/Timer.h>
-#include <MantidKernel/System.h>
-#include <iostream>
 #include <iomanip>
-
-#include <MantidMDEvents/CreateMDEventWorkspace.h>
-#include <MantidMDEvents/MDEventFactory.h>
-#include <MantidAPI/IMDEventWorkspace.h>
-#include <MantidAPI/AnalysisDataService.h>
+#include <iostream>
+#include <Poco/File.h>
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
@@ -28,7 +28,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  void do_test_exec()
+  void do_test_exec(std::string Filename)
   {
     std::string wsName = "CreateMDEventWorkspaceTest_out";
     CreateMDEventWorkspace alg;
@@ -42,6 +42,8 @@ public:
     alg.setPropertyValue("SplitThreshold", "500");
     alg.setPropertyValue("MaxRecursionDepth", "7");
     alg.setPropertyValue("OutputWorkspace",wsName);
+    alg.setPropertyValue("Filename", Filename);
+    alg.setPropertyValue("Memory", "1");
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
@@ -79,11 +81,23 @@ public:
     TS_ASSERT_EQUALS(bc->getSplitInto(0), 6 );
     TS_ASSERT_EQUALS(bc->getSplitThreshold(), 500 );
     TS_ASSERT_EQUALS(bc->getMaxDepth(), 7 );
+
+    if (Filename != "")
+    {
+      std::string s = alg.getPropertyValue("Filename");
+      TSM_ASSERT( "File for the back-end was created.", Poco::File(s).exists() );
+      if (Poco::File(s).exists()) Poco::File(s).remove();
+    }
   }
 
   void test_exec()
   {
-    do_test_exec();
+    do_test_exec("");
+  }
+
+  void test_exec_fileBacked()
+  {
+    do_test_exec("CreateMDEventWorkspaceTest.nxs");
   }
 
 

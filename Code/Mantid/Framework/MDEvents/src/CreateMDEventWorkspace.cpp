@@ -1,9 +1,10 @@
-#include "MantidMDEvents/CreateMDEventWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/System.h"
+#include "MantidMDEvents/CreateMDEventWorkspace.h"
+#include "MantidMDEvents/MDEventFactory.h"
 
 namespace Mantid
 {
@@ -76,6 +77,17 @@ namespace MDEvents
       "How many levels of box splitting recursion are allowed.");
 
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "Name of the output MDEventWorkspace.");
+
+    std::vector<std::string> exts;
+    exts.push_back(".nxs");
+    declareProperty(new FileProperty("Filename", "", FileProperty::OptionalSave, exts),
+        "Optional: to use a file as the back end, give the path to the file to save.");
+
+    declareProperty(new PropertyWithValue<int>("Memory", -1),
+        "If Filename is specified to use a file back end:\n"
+        "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
+        "  If not specified, a default of 40% of free physical memory is used.");
+
   }
 
 
@@ -153,6 +165,25 @@ namespace MDEvents
 
     // Call the templated function to finish ints
     CALL_MDEVENT_FUNCTION(this->finish, out);
+
+    // --- File back end ? ----------------
+    std::string filename = getProperty("Filename");
+    if (!filename.empty())
+    {
+      // First save to the NXS file
+      IAlgorithm_sptr alg = createSubAlgorithm("SaveMDEW");
+      alg->setPropertyValue("Filename", filename);
+      alg->setProperty("InputWorkspace", out);
+      alg->executeAsSubAlg();
+      // And now re-load it with this file as the backing.
+      alg = createSubAlgorithm("LoadMDEW");
+      alg->setPropertyValue("Filename", filename);
+      alg->setProperty("FileBackEnd", true);
+      alg->setPropertyValue("Memory", getPropertyValue("Memory"));
+      alg->executeAsSubAlg();
+      // Replace the workspace with the loaded, file-backed one
+      out = alg->getProperty("OutputWorkspace");
+    }
 
     // Save it on the output.
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(out));
