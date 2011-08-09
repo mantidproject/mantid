@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/AnvredCorrection.cpp
-        src/IntegratePeakTimeSlices.cpp
+	src/CalculateUMatrix.cpp
+	src/IntegratePeakTimeSlices.cpp
 	src/LoadIsawUB.cpp
 	src/LoadPeaksFile.cpp
 	src/MaskPeaksWorkspace.cpp
@@ -14,6 +15,7 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
 	inc/MantidCrystal/AnvredCorrection.h
+	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/LoadIsawUB.h
 	inc/MantidCrystal/LoadPeaksFile.h
@@ -27,11 +29,12 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	test/AnvredCorrectionTest.h
+	test/CalculateUMatrixTest.h
+	test/IntegratePeakTimeSlicesTest.h
 	test/LoadIsawUBTest.h
-        test/IntegratePeakTimeSlicesTest.h
-        test/PeakIntegrationTest.h
 	test/LoadPeaksFileTest.h
 	test/MaskPeaksWorkspaceTest.h
+	test/PeakIntegrationTest.h
 	test/PredictPeaksTest.h
 	test/SaveIsawPeaksTest.h
 	test/SavePeaksFileTest.h
