@@ -38,7 +38,7 @@ Q_OBJECT
 public:
     Convolution(ApplicationWindow *parent, Table *t, const QString& signalColName, const QString& responseColName);
 
-	void setDataFromTable(Table *t, const QString& signalColName, const QString& responseColName);
+	bool setDataFromTable(Table *t, const QString& signalColName, const QString& responseColName, int = 1, int = -1);
 	//! Returns the size of the signal data set
 	int signalDataSize(){return d_n_signal;};
 	//! Returns the size of the response data set

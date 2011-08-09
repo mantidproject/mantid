@@ -43,7 +43,7 @@ Convolution::Convolution(ApplicationWindow *parent, Table *t, const QString& sig
     setDataFromTable(t, signalColName, responseColName);
 }
 
-void Convolution::setDataFromTable(Table *t, const QString& signalColName, const QString& responseColName)
+bool Convolution::setDataFromTable(Table *t, const QString& signalColName, const QString& responseColName, int, int)
 {
     if (t && d_table != t)
         d_table = t;
@@ -56,14 +56,14 @@ void Convolution::setDataFromTable(Table *t, const QString& signalColName, const
 		QMessageBox::warning((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
 		tr("The signal data set %1 does not exist!").arg(signalColName));
 		d_init_err = true;
-		return;
+		return false;
 	}
 	else if (response_col < 0)
 	{
 		QMessageBox::warning((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
 		tr("The response data set %1 does not exist!").arg(responseColName));
 		d_init_err = true;
-		return;
+		return false;
 	}
 
     if (d_n > 0)
@@ -84,14 +84,14 @@ void Convolution::setDataFromTable(Table *t, const QString& signalColName, const
 		QMessageBox::warning((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
 		tr("The response dataset '%1' must be less then half the size of the signal dataset '%2'!").arg(responseColName).arg(signalColName));
 		d_init_err = true;
-		return;
+		return false;
 	}
 	else if (d_n_response%2 == 0)
 	{
 		QMessageBox::warning((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
 		tr("The response dataset '%1' must contain an odd number of points!").arg(responseColName));
 		d_init_err = true;
-		return;
+		return false;
 	}
 
 	d_n = rows;
@@ -117,7 +117,10 @@ void Convolution::setDataFromTable(Table *t, const QString& signalColName, const
                         tr("Could not allocate memory, operation aborted!"));
         d_init_err = true;
 		d_n = 0;
+		return false;
 	}
+
+  return true;
 }
 
 void Convolution::output()

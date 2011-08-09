@@ -73,9 +73,11 @@ public:
   /// Set a reference to a QObject in the global dictionary
   bool setQObject(QObject *val, const char *name) { return setQObject(val,name,NULL); }
   /// Set a reference to an int in the global dictionary
-  bool setInt(int, const char*, PyObject *dict=NULL);
+  bool setInt(int, const char*);
+  bool setInt(int, const char*, PyObject *dict);
   /// Set a reference to a double in the global dictionary
-  bool setDouble(double, const char*, PyObject *dict=NULL);
+  bool setDouble(double, const char*);
+  bool setDouble(double, const char*, PyObject *dict);
   /// Return a list of mathematical functions define by qtiplot
   const QStringList mathFunctions() const;
   /// Return a doc string for the given function

@@ -85,6 +85,8 @@ public:
   void setLexer(QsciLexer *);
   // Size hint
   QSize sizeHint() const;
+  // Unhide base class method to avoid intel compiler warning
+  using QsciScintilla::setText;
   /// Set the text on a given line number
   void setText(int lineno, const QString& text,int index=0);
   /// Save a the text to the given filename

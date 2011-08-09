@@ -37,7 +37,9 @@ class QwtPieCurve: public DataCurve
 {
 public:
 	QwtPieCurve(Table *t, const QString& name, int startRow, int endRow);
-    void clone(QwtPieCurve* c);
+
+  using DataCurve::clone; // Unhide base class method (avoids Intel compiler warning)
+  void clone(QwtPieCurve* c);
 
     double viewAngle(){return d_view_angle;};
     void setViewAngle(double a){d_view_angle = a;};

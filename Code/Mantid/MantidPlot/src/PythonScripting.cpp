@@ -274,6 +274,11 @@ bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
   return true;
 }
 
+bool PythonScripting::setInt(int val, const char* name)
+{
+  return setInt(val,name,NULL);
+}
+
 bool PythonScripting::setInt(int val, const char *name, PyObject *dict)
 {
   PyObject *pyobj = Py_BuildValue("i",val);
@@ -284,6 +289,11 @@ bool PythonScripting::setInt(int val, const char *name, PyObject *dict)
     PyDict_SetItemString(m_globals,name,pyobj);
   Py_DECREF(pyobj);
   return true;
+}
+
+bool PythonScripting::setDouble(double val, const char *name)
+{
+  return setDouble(val,name,NULL);
 }
 
 bool PythonScripting::setDouble(double val, const char *name, PyObject *dict)
