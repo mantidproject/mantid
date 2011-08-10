@@ -341,6 +341,9 @@ void File::makeData(const string & name, const NXnumtype type,
   this->makeData(name, type, dims, open_data);
 }
 
+
+
+
 template <typename NumT>
 void File::writeData(const string& name, const NumT& value) {
   std::vector<NumT> v(1, value);
@@ -352,14 +355,14 @@ void File::writeData(const string& name, const char* value) {
 }
 
 void File::writeData(const string& name, const string& value) {
-  if (value.empty()) {
-    throw Exception("Supplied empty value to makeData");
-  }
+  string my_value(value);
+  // Allow empty strings by defaulting to a space
+  if (my_value.empty())
+    my_value = " ";
   vector<int> dims;
   dims.push_back(static_cast<int>(value.size()));
   this->makeData(name, CHAR, dims, true);
 
-  string my_value(value);
   this->putData(&(my_value[0]));
 
   this->closeData();
@@ -373,10 +376,28 @@ void File::writeData(const string& name, const vector<NumT>& value) {
 }
 
 template <typename NumT>
+void File::writeData(const string& name, const vector<NumT>& value,
+                     const vector<int>& dims) {
+  this->makeData(name, getType<NumT>(), dims, true);
+  this->putData(value);
+  this->closeData();
+}
+
+
+
+
+template <typename NumT>
 void File::writeExtendibleData(const string& name, const vector<NumT>& value) {
   vector<int> dims(1, NX_UNLIMITED);
   this->writeData(name, value, dims);
 }
+
+//void File::writeExtendibleData(const string& name, const std::string& value) {
+//  std::vector<char> s(value.size());
+//  for (size_t i=0; i<value.size(); i++)
+//    s[i] = value[i];
+//  writeExtendibleData(name, s);
+//}
 
 template <typename NumT>
 void File::writeUpdatedData(const std::string& name, std::vector<NumT>& value)
@@ -386,33 +407,26 @@ void File::writeUpdatedData(const std::string& name, std::vector<NumT>& value)
   this->closeData();
 }
 
-template <typename NumT>
-void File::writeOrUpdateData(const std::string& name, std::vector<NumT>& value)
-{
-  if (name.empty()) {
-    throw Exception("Supplied empty name to writeOrUpdateData");
-  }
-  NXstatus status = NXopendata(this->m_file_id, name.c_str());
-  if (status != NX_OK)
-  {
-    // Data probably did not exist. Create it
-    this->writeExtendibleData(name, value);
-  }
-  else
-  {
-    // Update
-    this->putSlab(value, int(0), int(value.size()));
-    this->closeData();
-  }
-}
+//void File::writeUpdatedData(const std::string& name, const std::string& value)
+//{
+//  this->openData(name);
+//  string my_value(value);
+//  std::vector<int> start(1,0);
+//  std::vector<int> size(1,int(my_value.size()));
+//  this->putSlab((void *) &my_value[0], start, size);
+//  this->closeData();
+//}
 
 template <typename NumT>
-void File::writeData(const string& name, const vector<NumT>& value,
-                     const vector<int>& dims) {
-  this->makeData(name, getType<NumT>(), dims, true);
-  this->putData(value);
+void File::writeUpdatedData(const std::string& name, std::vector<NumT>& value,
+                            std::vector<int>& dims)
+{
+  this->openData(name);
+  std::vector<int> start( dims.size(), 0 );
+  this->putSlab(value, start, dims);
   this->closeData();
 }
+
 
 
 void File::makeCompData(const string& name, const NXnumtype type,
@@ -1431,27 +1445,27 @@ template
 NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<char>& value);
 
 template
-NXDLL_EXPORT void File::writeOrUpdateData(const string& name, vector<float>& value);
+NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<float>& value, std::vector<int> & dims);
 template
-NXDLL_EXPORT void File::writeOrUpdateData(const string& name, vector<double>& value);
+NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<double>& value, std::vector<int> & dims);
 template
-NXDLL_EXPORT void File::writeOrUpdateData(const string& name, vector<int8_t>& value);
+NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<int8_t>& value, std::vector<int> & dims);
 template
-NXDLL_EXPORT void File::writeOrUpdateData(const string& name, vector<uint8_t>& value);
+NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<uint8_t>& value, std::vector<int> & dims);
 template
-NXDLL_EXPORT void File::writeOrUpdateData(const string& name, vector<int16_t>& value);
+NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<int16_t>& value, std::vector<int> & dims);
 template
-NXDLL_EXPORT void File::writeOrUpdateData(const string& name, vector<uint16_t>& value);
+NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<uint16_t>& value, std::vector<int> & dims);
 template
-NXDLL_EXPORT void File::writeOrUpdateData(const string& name, vector<int32_t>& value);
+NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<int32_t>& value, std::vector<int> & dims);
 template
-NXDLL_EXPORT void File::writeOrUpdateData(const string& name, vector<uint32_t>& value);
+NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<uint32_t>& value, std::vector<int> & dims);
 template
-NXDLL_EXPORT void File::writeOrUpdateData(const string& name, vector<int64_t>& value);
+NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<int64_t>& value, std::vector<int> & dims);
 template
-NXDLL_EXPORT void File::writeOrUpdateData(const string& name, vector<uint64_t>& value);
+NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<uint64_t>& value, std::vector<int> & dims);
 template
-NXDLL_EXPORT void File::writeOrUpdateData(const string& name, vector<char>& value);
+NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<char>& value, std::vector<int> & dims);
 
 template
 NXDLL_EXPORT void File::writeData(const string& name, const vector<float>& value, const std::vector<int>& dims);

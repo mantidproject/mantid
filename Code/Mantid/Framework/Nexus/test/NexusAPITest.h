@@ -256,41 +256,50 @@ public:
 
   void test_writeData()
   {
-    std::string filename("NexusAPITest.hdf");
+    std::string filename("NexusAPITest1.hdf");
     ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
     std::vector<int> data(10, 123);
     file->makeGroup("data", "NXdata", 1);
     file->writeData("mydata", data);
-    file->writeExtendibleData("mydata_extendible", data);
-    file->writeExtendibleData("mydata_extendible2", data);
+    file->close();
+  }
+
+  void test_writeExtendibleData_writeUpdatedData()
+  {
+    std::string filename("NexusAPITest2.hdf");
+    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
+    std::vector<int> data(10, 123);
+    file->makeGroup("data", "NXdata", 1);
+    file->writeExtendibleData("mydata1", data);
+    file->writeExtendibleData("mydata2", data);
+    std::vector<int> dims(2);
+    dims[0] = NX_UNLIMITED;
+    dims[1] = 2;
+    file->writeData("my2Ddata", data, dims);
+//    std::string s = "short string";
+//    file->writeExtendibleData("mystring", s);
     file->close();
 
     // Data vector can grow
-    for (size_t i=0; i<5; i++)
+    for (size_t i=0; i<6; i++)
       data.push_back(456);
     data[0]=789;
     file = new ::NeXus::File(filename, NXACC_RDWR);
     file->openGroup("data", "NXdata");
-    file->writeUpdatedData("mydata_extendible", data);
+    file->writeUpdatedData("mydata1", data);
+
+    dims[0] = 8;
+    dims[1] = 2;
+    file->writeUpdatedData("my2Ddata", data, dims);
 
     // Data vector can also shrink!
     data.clear();
     data.resize(5, 234);
-    file->writeUpdatedData("mydata_extendible2", data);
-    file->close();
-  }
+    file->writeUpdatedData("mydata2", data);
 
-  void test_writeOrUpdateData()
-  {
-    std::string filename("NexusAPITest2.hdf");
-    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
 
-    std::vector<int> data(10, 123);
-    file->makeGroup("data", "NXdata", 1);
-    file->writeOrUpdateData("mydata", data);
-    data.clear();
-    data.resize(5, 234);
-    file->writeOrUpdateData("mydata", data);
+    // Also a string
+//    file->writeUpdatedData("mystring", "a much longer string filled with interesting comments that I'm sure you are glad you are reading right now 42.");
     file->close();
   }
 

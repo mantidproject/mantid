@@ -257,6 +257,9 @@ namespace NeXus {
     void makeData(const std::string& name, const NXnumtype type,
                   const int length, bool open_data = false);
 
+
+
+
     /**
      * Create a 1D data field, insert the data, and close the data.
      *
@@ -284,36 +287,6 @@ namespace NeXus {
     template <typename NumT>
     void writeData(const std::string& name, const std::vector<NumT>& value);
 
-    /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
-     *
-     * \tparam NumT numeric data type of \a value
-     * @param name :: The name of the field to create.
-     * @param value :: The vector to put into the file.
-     */
-    template <typename NumT>
-    void writeExtendibleData(const std::string& name, const std::vector<NumT>& value);
-
-    /** Updates the data written into an already-created
-     * data vector. If the data was created as extendible, it will be resized.
-     *
-     * \tparam NumT numeric data type of \a value
-     * @param name :: The name of the field to create.
-     * @param value :: The vector to put into the file.
-     */
-    template <typename NumT>
-    void writeUpdatedData(const std::string& name, std::vector<NumT>& value);
-
-    /** If the named data field does not exist, it gets created as an
-     * extendible data set.
-     * If the data does exist, its contents are replaced.
-     *
-     * \tparam NumT numeric data type of \a value
-     * @param name :: The name of the field to create.
-     * @param value :: The vector to put into the file.
-     */
-    template <typename NumT>
-    void writeOrUpdateData(const std::string& name, std::vector<NumT>& value);
-
     /**
      * Create a 1D data field, insert the data, and close the data.
      *
@@ -335,6 +308,58 @@ namespace NeXus {
     template <typename NumT>
     void writeData(const std::string& name, const std::vector<NumT>& value,
                    const std::vector<int>& dims);
+
+
+
+    /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
+     *
+     * \tparam NumT numeric data type of \a value
+     * @param name :: The name of the field to create.
+     * @param value :: The vector to put into the file.
+     */
+    template <typename NumT>
+    void writeExtendibleData(const std::string& name, const std::vector<NumT>& value);
+
+    /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
+     *
+     * \tparam NumT numeric data type of \a value
+     * @param name :: The name of the field to create.
+     * @param value :: The vector to put into the file.
+     */
+    void writeExtendibleData(const std::string& name, const std::string& value);
+
+
+
+    /** Updates the data written into an already-created
+     * data vector. If the data was created as extendible, it will be resized.
+     *
+     * \tparam NumT numeric data type of \a value
+     * @param name :: The name of the field to create.
+     * @param value :: The vector to put into the file.
+     */
+    template <typename NumT>
+    void writeUpdatedData(const std::string& name, std::vector<NumT>& value);
+
+    /** Updates the data written into an already-created
+     * data vector. If the data was created as extendible, it will be resized.
+     *
+     * \tparam NumT numeric data type of \a value
+     * @param name :: The name of the field to create.
+     * @param value :: The vector to put into the file.
+     */
+    void writeUpdatedData(const std::string& name, const std::string& value);
+
+    /** Updates the data written into an already-created
+     * data vector. If the data was created as extendible, it will be resized.
+     *
+     * \tparam NumT numeric data type of \a value
+     * @param name :: The name of the field to create.
+     * @param value :: The vector to put into the file.
+     * @param dims :: The dimensions of the data.
+     */
+    template <typename NumT>
+    void writeUpdatedData(const std::string& name, std::vector<NumT>& value,
+                          std::vector<int>& dims);
 
     /**
      * Create a field with compression.
