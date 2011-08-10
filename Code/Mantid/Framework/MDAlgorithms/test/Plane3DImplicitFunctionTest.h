@@ -1,11 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_MDPLANEIMPLICITFUNCTIONTEST_H_
 #define MANTID_MDALGORITHMS_MDPLANEIMPLICITFUNCTIONTEST_H_
 
-
 #include <cxxtest/TestSuite.h>
 #include <cmath>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <vector>
 #include <MantidKernel/Matrix.h>
 #include "MantidMDAlgorithms/Plane3DImplicitFunction.h"
@@ -14,20 +11,6 @@
 
 using namespace Mantid::MDAlgorithms;
 
-//=====================================================================================
-// Helper Types
-//=====================================================================================
-namespace
-{
-  class MockPoint3D: public Mantid::API::Point3D
-  {
-  public:
-    MOCK_CONST_METHOD0 (getX, double());
-    MOCK_CONST_METHOD0(getY, double());
-    MOCK_CONST_METHOD0(getZ, double());
-    virtual ~MockPoint3D(){}
-  };
-}
 
 //=====================================================================================
 // Functional Tests
