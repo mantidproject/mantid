@@ -58,8 +58,9 @@ public:
 	Matrix* matrix(){return d_matrix;};
 
 private:
-	void draw(QPainter *painter,const QwtScaleMap &xMap,
-		const QwtScaleMap &yMap, int from, int to) const;
+// RJT: These methods cause Intel compiler warnings and aren't called anyway, so just comment them out
+//	void draw(QPainter *painter,const QwtScaleMap &xMap,
+//		const QwtScaleMap &yMap, int from, int to) const;
 
     void loadDataFromMatrix();
     Matrix *d_matrix;

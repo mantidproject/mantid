@@ -78,12 +78,13 @@ public:
     void loadData();
 
 private:
-	void draw(QPainter *painter,const QwtScaleMap &xMap,
-		const QwtScaleMap &yMap, int from, int to) const;
-	void drawBox(QPainter *painter, const QwtScaleMap &xMap,
-				const QwtScaleMap &yMap, double *dat, int size) const;
-	void drawSymbols(QPainter *painter, const QwtScaleMap &xMap,
-				const QwtScaleMap &yMap, double *dat, int size) const;
+// RJT: These methods cause Intel compiler warnings and aren't called anyway, so just comment them out
+//	void draw(QPainter *painter,const QwtScaleMap &xMap,
+//		const QwtScaleMap &yMap, int from, int to) const;
+//	void drawBox(QPainter *painter, const QwtScaleMap &xMap,
+//				const QwtScaleMap &yMap, double *dat, int size) const;
+//	void drawSymbols(QPainter *painter, const QwtScaleMap &xMap,
+//				const QwtScaleMap &yMap, double *dat, int size) const;
 
 	QwtSymbol::Style min_style, max_style, mean_style, p99_style, p1_style;
 	double b_coeff, w_coeff;
