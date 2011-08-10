@@ -557,7 +557,7 @@ public:
     MDEvent<3>::openNexusData(file);
 
     // Set it in the controller for back-end
-    bc->setFile(file);
+    bc->setFile(file,filename);
 
     // Nothing on it to start
     TS_ASSERT_EQUALS( c.getNPoints(), 0);
@@ -637,7 +637,7 @@ public:
     MDEvent<3>::openNexusData(file);
 
     // Set it in the controller for back-end
-    bc->setFile(file);
+    bc->setFile(file,filename);
     c.setFileIndex(500, 1000);
     c.setOnDisk(true);
 
@@ -689,7 +689,7 @@ public:
     MDEvent<3>::openNexusData(file);
 
     // Set it in the controller for back-end
-    bc->setFile(file);
+    bc->setFile(file,filename);
     // Set the stuff that is handled outside the box itself
     c.setFileIndex(500, 1000);
     c.setOnDisk(true);

@@ -58,9 +58,9 @@ namespace MDEvents
         "The name of the Nexus file to write, as a full or relative path.\n"
         "Optional if UpdateFileBackEnd is checked.");
 
-//    declareProperty("UpdateFileBackEnd", false,
-//        "Only for MDEventWorkspaces with a file back end: check this to update the NXS file on disk\n"
-//        "to reflect the current data structure. Filename parameter is ignored.");
+    declareProperty("UpdateFileBackEnd", false,
+        "Only for MDEventWorkspaces with a file back end: check this to update the NXS file on disk\n"
+        "to reflect the current data structure. Filename parameter is ignored.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -73,8 +73,7 @@ namespace MDEvents
   void SaveMDEW::doSave(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     std::string filename = getPropertyValue("Filename");
-//    bool update = getProperty("UpdateFileBackEnd");
-    bool update = false;
+    bool update = getProperty("UpdateFileBackEnd");
 
     // Open/create the file
     ::NeXus::File * file;
@@ -84,12 +83,19 @@ namespace MDEvents
       file = ws->getBoxController()->getFile();
       if (!file)
         throw std::invalid_argument("MDEventWorkspace is not file-backed. Do not check UpdateFileBackEnd!");
-      // Navigate back to the root
-      file->openPath("/");
+      // Normally the file is left open with the event data open. Close it.
+      MDE::closeNexusData(file);
+      file->close();
+
+      // Reopen the file
+      filename = ws->getBoxController()->getFilename();
+      file = new ::NeXus::File(filename, NXACC_RDWR);
+      // Set it back to the new file handle
+      ws->getBoxController()->setFile(file, filename);
     }
     else
     {
-      // Create a new file
+      // Create a new file in HDF5 mode.
       file = new ::NeXus::File(filename, NXACC_CREATE5);
     }
 
@@ -132,6 +138,8 @@ namespace MDEvents
     if (numPoints == 0) numPoints = 1;
     if (!update)
       MDE::prepareNexusData(file, numPoints);
+    else
+      MDE::openNexusData(file);
 
     BoxController_sptr bc = ws->getBoxController();
     size_t maxBoxes = bc->getMaxId();
@@ -233,7 +241,7 @@ namespace MDEvents
       }
     }
 
-    // Done writing the event data
+    // Done writing the event data.
     MDE::closeNexusData(file);
 
     // OK, we've filled these big arrays of data. Save them.
@@ -263,10 +271,13 @@ namespace MDEvents
       file->writeExtendibleData("box_children", box_children, box_2_dims, box_2_chunk);
       file->writeExtendibleData("box_signal_errorsquared", box_signal_errorsquared, box_2_dims, box_2_chunk);
       file->writeExtendibleData("box_event_index", box_event_index, box_2_dims, box_2_chunk);
+      // Finished - close the file
+      file->close();
     }
     else
     {
       // Update the extendible data sets
+      std::cout << "About to extend, i'm at " << file->getPath() << std::endl;
       file->writeUpdatedData("box_type", box_type);
       file->writeUpdatedData("depth", depth);
       file->writeUpdatedData("inverse_volume", inverse_volume);
@@ -274,9 +285,10 @@ namespace MDEvents
       file->writeUpdatedData("box_children", box_children, box_2_dims);
       file->writeUpdatedData("box_signal_errorsquared", box_signal_errorsquared, box_2_dims);
       file->writeUpdatedData("box_event_index", box_event_index, box_2_dims);
+      // Need to keep the file open since it is still used as a back end.
+      // Re-open the data for events.
+      MDE::openNexusData(file);
     }
-
-    file->close();
 
     delete prog;
 

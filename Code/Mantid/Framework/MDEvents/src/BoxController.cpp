@@ -23,6 +23,12 @@ namespace Mantid
 namespace MDEvents
 {
 
+  /// Destructor
+  BoxController::~BoxController()
+  {
+    this->closeFile();
+  }
+
 
   /** Serialize to an XML string
    * @return XML string
@@ -127,6 +133,7 @@ namespace MDEvents
     if (m_file)
     {
       m_file->close();
+      m_file = NULL;
     }
   }
 

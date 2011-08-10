@@ -45,6 +45,8 @@ namespace MDEvents
       resetNumBoxes();
     }
 
+    ~BoxController();
+
     /// Serialize
     std::string toXMLString() const;
 
@@ -339,9 +341,14 @@ namespace MDEvents
     { return m_file; }
 
     /** Sets the open Nexus file to use with file-based back-end
-     * @param file :: file handle */
-    void setFile(::NeXus::File * file)
-    { m_file = file; }
+     * @param file :: file handle
+     * @param filename :: full path to the file */
+    void setFile(::NeXus::File * file, const std::string & filename)
+    { m_file = file; m_filename = filename;}
+
+    /// @return the full path to the file open as the file-based back end.
+    const std::string & getFilename() const
+    { return m_filename; }
 
     void closeFile();
 

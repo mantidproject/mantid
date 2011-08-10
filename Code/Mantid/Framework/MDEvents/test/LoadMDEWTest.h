@@ -7,6 +7,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/LoadMDEW.h"
 #include "MantidMDEvents/MDBox.h"
+#include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "SaveMDEWTest.h"
@@ -143,7 +144,7 @@ public:
 
 
   template <size_t nd>
-  void do_test_exec(bool FileBackEnd)
+  void do_test_exec(bool FileBackEnd, bool deleteWorkspace=true)
   {
     //------ Start by creating the file ----------------------------------------------
     // Make a 1D MDEventWorkspace
@@ -200,7 +201,11 @@ public:
     do_compare_MDEW(ws, ws1);
 
     // Remove workspace from the data service.
-    //AnalysisDataService::Instance().remove(outWSName);
+    if (deleteWorkspace)
+    {
+      ws->getBoxController()->closeFile();
+      AnalysisDataService::Instance().remove(outWSName);
+    }
   }
 
 
@@ -212,10 +217,12 @@ public:
     IMDEventWorkspace_sptr iws;
     TS_ASSERT_THROWS_NOTHING( iws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
     TS_ASSERT(iws); if (!iws) return;
-    boost::shared_ptr<MDEventWorkspace<MDEvent<nd>,nd> > ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<nd>,nd> >(iws);
+    boost::shared_ptr<MDEventWorkspace<MDEvent<nd>,nd> > ws2 = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<nd>,nd> >(iws);
 
     // Modify that by adding some boxes
-
+    MDGridBox<MDEvent<nd>,nd> * box = dynamic_cast<MDGridBox<MDEvent<nd>,nd>*>(ws2->getBox());
+    // Now there are 20001 boxes
+    box->splitContents(12);
 
     // Save it
     SaveMDEW saver;
@@ -228,6 +235,28 @@ public:
     TS_ASSERT( saver.isExecuted() );
 
     // The file should have been modified but that's tricky to check directly.
+    std::string filename = ws2->getBoxController()->getFilename();
+    ws2->getBoxController()->closeFile();
+    AnalysisDataService::Instance().remove(outWSName);
+
+    // Now we re-re-load it!
+    LoadMDEW alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("FileBackEnd", false) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "reloaded_again") );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    TS_ASSERT_THROWS_NOTHING( iws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("reloaded_again")) );
+    boost::shared_ptr<MDEventWorkspace<MDEvent<nd>,nd> > ws3 = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<nd>,nd> >(iws);
+    TS_ASSERT(ws3); if (!ws3) return;
+
+//    // Perform the full comparison of the second and 3rd loaded workspaces
+//    do_compare_MDEW(ws2, ws3);
+
+
   }
 
 
@@ -250,7 +279,7 @@ public:
   }
 
   /// Run the loading but keep the events on file and load on demand
-  void test_exec_3D_with_file_backEnd()
+  void test_exec_3D_with_FileBackEnd()
   {
     do_test_exec<3>(true);
   }
@@ -258,11 +287,10 @@ public:
 
   /** Use the file back end,
    * then change it and save to update the file at the back end.
-   * DISABLED BECAUSE OF SUPER SLOW NEXUS WRITES WITH BAD CHUNKING.
    */
-  void xtest_exec_3D_with_file_backEnd_whichIsThenUpdated()
+  void test_exec_3D_with_FileBackEnd_then_update_SaveMDEW()
   {
-    do_test_exec<3>(true);
+    do_test_exec<3>(true, false);
     do_test_UpdateFileBackEnd<3>();
   }
 

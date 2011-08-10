@@ -64,6 +64,9 @@ namespace MDEvents
     /// Open file handle
     ::NeXus::File * file;
 
+    /// Name of that file
+    std::string m_filename;
+
   };
 
 

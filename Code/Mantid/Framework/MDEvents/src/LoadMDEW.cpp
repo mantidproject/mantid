@@ -77,10 +77,10 @@ namespace MDEvents
    */
   void LoadMDEW::exec()
   {
-    std::string filename = getPropertyValue("Filename");
+    m_filename = getPropertyValue("Filename");
 
     // Start loading
-    file = new ::NeXus::File(filename);
+    file = new ::NeXus::File(m_filename);
 
     // The main entry
     file->openGroup("MDEventWorkspace", "NXentry");
@@ -312,7 +312,7 @@ namespace MDEvents
     if (FileBackEnd)
     {
       // Leave the file open in the box controller
-      bc->setFile(file);
+      bc->setFile(file, m_filename);
     }
     else
     {
@@ -321,7 +321,7 @@ namespace MDEvents
       file->closeGroup();
       file->close();
       // Make sure no back-end is used
-      bc->setFile(NULL);
+      bc->setFile(NULL, "");
     }
 
     if (verbose) std::cout << tim << " to create all the boxes and fill them with events." << std::endl;
