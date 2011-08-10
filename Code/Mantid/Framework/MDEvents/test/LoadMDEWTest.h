@@ -82,7 +82,7 @@ public:
       IMDBox<MDE,nd>* box = boxes[j];
       IMDBox<MDE,nd>* box1 = boxes1[j];
 
-      std::cout << "ID: " << box->getId() << std::endl;
+      //std::cout << "ID: " << box->getId() << std::endl;
       TS_ASSERT_EQUALS( box->getId(), box1->getId() );
       TS_ASSERT_EQUALS( box->getDepth(), box1->getDepth() );
       TS_ASSERT_EQUALS( box->getNumChildren(), box1->getNumChildren() );

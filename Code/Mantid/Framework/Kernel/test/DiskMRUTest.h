@@ -41,8 +41,8 @@ public:
     streamMutex.unlock();
   }
 
-  virtual void load()
-  {}
+  virtual void load() {}
+  virtual void flushData() const {}
 
   uint64_t m_memory;
   virtual uint64_t getSizeOnFile() const {return m_memory;};
@@ -127,8 +127,8 @@ public:
     streamMutex.unlock();
   }
 
-  virtual void load()
-  {}
+  virtual void load() {}
+  virtual void flushData() const {}
 
   uint64_t m_memory;
   virtual uint64_t getSizeOnFile() const {return m_memory;};

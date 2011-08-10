@@ -342,9 +342,14 @@ namespace MDEvents
 
     /** Sets the open Nexus file to use with file-based back-end
      * @param file :: file handle
-     * @param filename :: full path to the file */
-    void setFile(::NeXus::File * file, const std::string & filename)
-    { m_file = file; m_filename = filename;}
+     * @param filename :: full path to the file
+     * @param fileLength :: length of the file being open, in number of events in this case */
+    void setFile(::NeXus::File * file, const std::string & filename, const uint64_t fileLength)
+    {
+      m_file = file;
+      m_filename = filename;
+      m_diskMRU.setFileLength(fileLength);
+    }
 
     /// @return the full path to the file open as the file-based back end.
     const std::string & getFilename() const

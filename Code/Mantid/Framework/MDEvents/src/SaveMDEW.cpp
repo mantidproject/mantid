@@ -90,8 +90,6 @@ namespace MDEvents
       // Reopen the file
       filename = ws->getBoxController()->getFilename();
       file = new ::NeXus::File(filename, NXACC_RDWR);
-      // Set it back to the new file handle
-      ws->getBoxController()->setFile(file, filename);
     }
     else
     {
@@ -133,14 +131,15 @@ namespace MDEvents
     file->openGroup("data", "NXdata");
 
     // Prepare the data chunk storage.
-    size_t numPoints = ws->getNPoints();
-
-    // Must have at least 1 point!
-    if (numPoints == 0) numPoints = 1;
+    size_t chunkSize = 100000; // TODO: Determine a smart chunk size!
     if (!update)
-      MDE::prepareNexusData(file, numPoints);
+      MDE::prepareNexusData(file, chunkSize);
     else
-      MDE::openNexusData(file);
+    {
+      uint64_t totalNumEvents = MDE::openNexusData(file);
+      // Set it back to the new file handle
+      ws->getBoxController()->setFile(file, filename, totalNumEvents);
+    }
 
     BoxController_sptr bc = ws->getBoxController();
     size_t maxBoxes = bc->getMaxId();

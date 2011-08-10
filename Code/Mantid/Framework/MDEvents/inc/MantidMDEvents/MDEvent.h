@@ -370,18 +370,23 @@ namespace MDEvents
      * data block(s) need to be created.
      *
      * @param file :: open NXS file.
+     * @param chunkSize :: chunk size to use when creating the data set (in number of events).
      */
-    static void prepareNexusData(::NeXus::File * file, size_t numPoints)
+    static void prepareNexusData(::NeXus::File * file, const uint64_t chunkSize)
     {
       std::vector<int> dims(2,0);
-      dims[0] = int(numPoints);
-      dims[1] = (nd)+2;
+      dims[0] = NX_UNLIMITED;
+      dims[1] = (nd)+2; // One point per dimension, plus signal, plus error = nd+2
+
+      // Now the chunk size.
+      std::vector<int> chunk(dims);
+      chunk[0] = int(chunkSize);
+
       // Make and open the data
-      file->makeData("event_data", ::NeXus::FLOAT64, dims, true);
+      file->makeCompData("event_data", ::NeXus::FLOAT64, dims, ::NeXus::NONE, chunk, true);
+
       // A little bit of description for humans to read later
       file->putAttr("description", "signal, errorsquared, center (each dim.)");
-//      dims[1]=2;
-//      file->makeData("event_signal_errorsquared", ::NeXus::FLOAT32, dims, 0);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -389,11 +394,14 @@ namespace MDEvents
      * The data should have been created before.
      *
      * @param file :: open NXS file.
+     * @return the number of events currently in the data field.
      */
-    static void openNexusData(::NeXus::File * file)
+    static uint64_t openNexusData(::NeXus::File * file)
     {
       // Open the data
       file->openData("event_data");
+      // Return the size of dimension 0 = the number of events in the field
+      return uint64_t(file->getInfo().dims[0]);
     }
 
     //---------------------------------------------------------------------------------------------

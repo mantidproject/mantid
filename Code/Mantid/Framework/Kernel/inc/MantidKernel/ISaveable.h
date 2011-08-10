@@ -64,6 +64,9 @@ namespace Kernel
     /// Load the data - to be overriden
     virtual void load() = 0;
 
+    /// Method to flush the data to disk and ensure it is written.
+    virtual void flushData() const = 0;
+
     /** @return the amount of memory that the object takes up in the MRU or in the file.
      * This should be in the same units as getFilePosition(), e.g. the object uses a block
      * from getFilePosition() to getFilePosition()+getSizeOnFile()-1 in the file.

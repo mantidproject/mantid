@@ -238,7 +238,7 @@ namespace MDEvents
     prog->setNumSteps(numBoxes);
 
     // Get ready to read the slabs
-    MDE::openNexusData(file);
+    uint64_t totalNumEvents = MDE::openNexusData(file);
 
     for (size_t i=0; i<numBoxes; i++)
     {
@@ -312,7 +312,7 @@ namespace MDEvents
     if (FileBackEnd)
     {
       // Leave the file open in the box controller
-      bc->setFile(file, m_filename);
+      bc->setFile(file, m_filename, totalNumEvents);
     }
     else
     {
@@ -321,7 +321,7 @@ namespace MDEvents
       file->closeGroup();
       file->close();
       // Make sure no back-end is used
-      bc->setFile(NULL, "");
+      bc->setFile(NULL, "", 0);
     }
 
     if (verbose) std::cout << tim << " to create all the boxes and fill them with events." << std::endl;

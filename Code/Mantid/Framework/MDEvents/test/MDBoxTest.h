@@ -557,7 +557,7 @@ public:
     MDEvent<3>::openNexusData(file);
 
     // Set it in the controller for back-end
-    bc->setFile(file,filename);
+    bc->setFile(file,filename, 2000);
 
     // Nothing on it to start
     TS_ASSERT_EQUALS( c.getNPoints(), 0);
@@ -637,7 +637,7 @@ public:
     MDEvent<3>::openNexusData(file);
 
     // Set it in the controller for back-end
-    bc->setFile(file,filename);
+    bc->setFile(file,filename, 2000);
     c.setFileIndex(500, 1000);
     c.setOnDisk(true);
 
@@ -696,7 +696,7 @@ public:
     MDEvent<3>::openNexusData(file);
 
     // Set it in the controller for back-end
-    bc->setFile(file,filename);
+    bc->setFile(file,filename, 2000);
     c.setFileIndex(500, 1000);
     c.setOnDisk(true);
 
@@ -732,16 +732,32 @@ public:
     TS_ASSERT_EQUALS( events2.size(), 600);
     TS_ASSERT_DELTA( events2[123].getSignal(), 456.0, 1e-5);
 
-//    // Now we GROW the event list
-//    events2.resize(1500);
-//    events2[1499].setSignal(789.0);
-//    // And we finish and write it out
-//    c2.releaseEvents();
-//    mru.flushCache();
-//    // The new event list should have ended up at the end of the file
-//    TS_ASSERT_EQUALS( c.getFileIndexStart(), 500);
-//    TS_ASSERT_EQUALS( c.getFileNumEvents(), 1500);
+    // Now we GROW the event list
+    events2.resize(1500);
+    events2[1499].setSignal(789.0);
+    // And we finish and write it out
+    c2.releaseEvents();
+    mru.flushCache();
+    // The new event list should have ended up at the end of the file
+    TS_ASSERT_EQUALS( c2.getFileIndexStart(), 2000);
+    TS_ASSERT_EQUALS( c2.getFileNumEvents(), 1500);
+    // The file has now grown.
+    TS_ASSERT_EQUALS( mru.getFileLength(), 3500);
 
+    // This counts the number of events actually in the file.
+    TS_ASSERT_EQUALS( file->getInfo().dims[0], 3500);
+
+    // Now let's pretend we re-load that data into a 3rd box
+    MDBox<MDEvent<3>,3> c3(bc, 0);
+    c3.setFileIndex(2000, 1500);
+    c3.setOnDisk(true);
+    // Is that event modified?
+    const std::vector<MDEvent<3> > & events3 = c3.getEvents();
+    TS_ASSERT_EQUALS( events3.size(), 1500);
+    TS_ASSERT_DELTA( events3[1499].getSignal(), 789.0, 1e-5);
+    c3.releaseEvents();
+
+    file->closeData();
     file->close();
   }
 
@@ -763,7 +779,7 @@ public:
     MDEvent<3>::openNexusData(file);
 
     // Set it in the controller for back-end
-    bc->setFile(file,filename);
+    bc->setFile(file,filename, 2000);
     // Set the stuff that is handled outside the box itself
     c.setFileIndex(500, 1000);
     c.setOnDisk(true);

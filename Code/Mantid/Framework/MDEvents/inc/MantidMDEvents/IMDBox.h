@@ -15,6 +15,8 @@
 #include "MantidNexus/NeXusFile.hpp"
 #include <iosfwd>
 
+using NeXus::File;
+
 /// Define to keep the centroid around as a field on each IMDBox.
 #undef MDBOX_TRACK_CENTROID
 
@@ -60,6 +62,17 @@ namespace MDEvents
     /// Save the data - to be overriden
     virtual void save() const
     { }
+
+    /// Flush the data to disk. Allows NXS api to actually write out the file.
+    virtual void flushData() const
+    {
+      ::NeXus::File * file = this->m_BoxController->getFile();
+      if (file)
+      {
+        MDE::closeNexusData(file);
+        MDE::openNexusData(file);
+      }
+    }
 
     /// Load the data - to be overriden
     virtual void load()

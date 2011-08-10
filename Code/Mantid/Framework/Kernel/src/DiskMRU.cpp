@@ -180,9 +180,10 @@ namespace Kernel
     toWriteMap_t::iterator it = m_toWrite.begin();
     toWriteMap_t::iterator it_end = m_toWrite.end();
 
+    const ISaveable * obj = NULL;
     for (; it != it_end; it++)
     {
-      const ISaveable * obj = *it; //->second;
+      obj = *it; //->second;
       if (!obj->dataBusy())
       {
         // Write to the disk
@@ -195,6 +196,13 @@ namespace Kernel
         couldNotWrite.insert( obj );
         memoryNotWritten += obj->getSizeOnFile();
       }
+    }
+
+    if (obj)
+    {
+      // NXS needs to flush the writes to file by closing and re-opening the data block.
+      // For speed, it is best to do this only once per write dump.
+      obj->flushData();
     }
 
     // Exchange with the new map you built out of the not-written blocks.
