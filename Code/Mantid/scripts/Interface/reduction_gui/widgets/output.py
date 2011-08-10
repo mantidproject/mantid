@@ -33,6 +33,14 @@ class OutputWidget(BaseWidget):
         # Clear data list
         self._content.output_text_edit.clear()
         
+        # Clear rebin
+        self._content.rebin_groupbox.deleteLater()
+        self._content.n_q_bins_label.hide()
+        self._content.n_q_bins_edit.hide()
+        self._content.rebin_button.hide()
+        self._content.lin_binning_radio.hide()
+        self._content.log_binning_radio.hide()
+        
     def set_state(self, state):
         self._content.output_text_edit.setText(QtCore.QString(state.log_text))
             
