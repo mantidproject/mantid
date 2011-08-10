@@ -18,7 +18,7 @@ using namespace Mantid::API;
 // These pragmas ignores the warning in the ctor where "d<nd-1" for nd=1.
 // This is okay (though would be better if it were for only that function
 #if (defined(__INTEL_COMPILER))
-#pragma warning disable 196
+#pragma warning disable 186
 #elif defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wtype-limits"
 #endif
