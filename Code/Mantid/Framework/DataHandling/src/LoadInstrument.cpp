@@ -395,7 +395,7 @@ namespace Mantid
         Poco::File fallbackFile = Poco::File(fallback_dir.resolve(filestem));
         if( cacheAvailable == false )
         { 
-          g_log.warning() << "Trying fallback " << fallbackFile.path() << "\n";
+          g_log.information() << "Trying fallback " << fallbackFile.path() << "\n";
           if ((!fallbackFile.exists()) || defFile.getLastModified() > fallbackFile.getLastModified())
           {
             cacheAvailable = false;
@@ -427,7 +427,7 @@ namespace Mantid
             if( !instrDir.canWrite() )
             {
               cacheFilename = fallbackFile.path();
-              g_log.warning() << "Instrument directory is read only, writing cache to system temp.\n";
+              g_log.information() << "Instrument directory is read only, writing cache to system temp.\n";
             }
           }
           catch(Poco::FileNotFoundException &)
