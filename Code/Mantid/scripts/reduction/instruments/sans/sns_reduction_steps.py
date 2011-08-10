@@ -760,6 +760,16 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         self._is_frame_skipping = False
         self._scale = scale
         self._tolerance = 2.0
+        self._compute_resolution = False
+        self._sample_aperture_radius = 5.0
+        
+    def compute_resolution(self, sample_aperture_diameter=10.0):
+        """
+            Sets the flag to compute the Q resolution
+            @param sample_aperture_diameter: diameter of the sample aperture, in mm
+        """
+        self._compute_resolution = True
+        self._sample_aperture_radius = sample_aperture_diameter/2.0
         
     def get_output_workspace(self, workspace):
         if not self._is_frame_skipping:
@@ -772,7 +782,7 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         pixel_size_y = mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
         
         # Get the source aperture radius
-        source_aperture_radius = 20.0
+        source_aperture_radius = 10.0
         if mtd[workspace].getRun().hasProperty("source-aperture-diameter"):
             source_aperture_radius = mtd[workspace].getRun().getProperty("source-aperture-diameter").value/2.0
 
@@ -780,10 +790,12 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
             and mtd[workspace].getRun().getProperty("is_frame_skipping").value==0:
             self._is_frame_skipping = False
             output_str = super(AzimuthalAverageByFrame, self).execute(reducer, workspace)
-            EQSANSResolution(InputWorkspace=workspace+self._suffix, 
-                              ReducedWorkspace=workspace, OutputBinning=self._binning,
-                              PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y,
-                              SourceApertureRadius=source_aperture_radius)
+            if self._compute_resolution:
+                EQSANSResolution(InputWorkspace=workspace+self._suffix, 
+                                  ReducedWorkspace=workspace, OutputBinning=self._binning,
+                                  PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y,
+                                  SourceApertureRadius=source_aperture_radius,
+                                  SampleApertureRadius=self._sample_aperture_radius)
             return output_str
         
         self._is_frame_skipping = True
@@ -806,12 +818,14 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         output_str = "Performed radial averaging: frame 2 = [%6.1f, %-6.1f], " % (wl_min, wl_max)
         
         super(AzimuthalAverageByFrame, self).execute(reducer, workspace+'_frame2')
-        EQSANSResolution(InputWorkspace=workspace+'_frame2'+self._suffix, 
-                          ReducedWorkspace=workspace, OutputBinning=self._binning,
-                          MinWavelength=wl_min, MaxWavelength=wl_max,
-                          PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y,
-                          SourceApertureRadius=source_aperture_radius)                                                                         
-        
+        if self._compute_resolution:
+            EQSANSResolution(InputWorkspace=workspace+'_frame2'+self._suffix, 
+                              ReducedWorkspace=workspace, OutputBinning=self._binning,
+                              MinWavelength=wl_min, MaxWavelength=wl_max,
+                              PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y,
+                              SourceApertureRadius=source_aperture_radius,
+                              SampleApertureRadius=self._sample_aperture_radius)                                                                        
+            
         # Reset binning
         self._binning = binning
 
@@ -866,11 +880,13 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
             
             Scale(InputWorkspace=workspace+'_frame1'+self._suffix, OutputWorkspace=workspace+'_frame1'+self._suffix, Factor=scale_factor, Operation="Multiply")
             
-        EQSANSResolution(InputWorkspace=workspace+'_frame1'+self._suffix, 
-                          ReducedWorkspace=workspace, OutputBinning=self._binning,
-                          MinWavelength=wl_min, MaxWavelength=wl_max,
-                          PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y,
-                          SourceApertureRadius=source_aperture_radius)        
+        if self._compute_resolution:
+            EQSANSResolution(InputWorkspace=workspace+'_frame1'+self._suffix, 
+                             ReducedWorkspace=workspace, OutputBinning=self._binning,
+                             MinWavelength=wl_min, MaxWavelength=wl_max,
+                             PixelSizeX=pixel_size_x, PixelSizeY=pixel_size_y,
+                             SourceApertureRadius=source_aperture_radius,
+                             SampleApertureRadius=self._sample_aperture_radius)       
                     
         # Add output workspaces to the list of important output workspaces
         for item in self.get_output_workspace(workspace):

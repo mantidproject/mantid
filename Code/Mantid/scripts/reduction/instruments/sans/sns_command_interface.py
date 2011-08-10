@@ -131,3 +131,6 @@ def SensitivityCorrection(flood_data, min_sensitivity=0.5, max_sensitivity=1.5, 
                                                                                              dark_current=dark_current,
                                                                                              use_sample_dc=use_sample_dc))
     
+def Resolution(sample_aperture_diameter=10.0):
+    ReductionSingleton().get_azimuthal_averager().compute_resolution(sample_aperture_diameter=sample_aperture_diameter)
+    

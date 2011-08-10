@@ -234,6 +234,12 @@ class SANSReducer(Reducer):
         """
         self._azimuthal_averager = averager
     
+    def get_azimuthal_averager(self):
+        """
+            Return the azimuthal average reduction step
+        """
+        return self._azimuthal_averager
+    
     @validate_step
     def set_save_Iq(self, save_iq):
         """

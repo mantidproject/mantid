@@ -24,7 +24,10 @@ class ReductionOptions(BaseOptions):
     
     # Don't use data directory because it's not writable
     use_data_directory = False
-
+    
+    # Resolution parameters
+    compute_resolution = True
+    sample_aperture_diameter = 10.0
 
     def __init__(self):
         super(ReductionOptions, self).__init__()
@@ -46,6 +49,9 @@ class ReductionOptions(BaseOptions):
         
         self.use_config_mask = ReductionOptions.use_config_mask
         self.use_data_directory = ReductionOptions.use_data_directory
+        
+        self.compute_resolution = ReductionOptions.compute_resolution
+        self.sample_aperture_diameter = ReductionOptions.sample_aperture_diameter
 
     def to_script(self):
         """
@@ -68,6 +74,10 @@ class ReductionOptions(BaseOptions):
         # Use mask defined in configuration file
         script += "UseConfigMask(%s)\n" % self.use_config_mask
         
+        # Resolution
+        if self.compute_resolution:
+            script += "Resolution(sample_aperture_diameter=%g)\n" % self.sample_aperture_diameter
+
         return script
             
     def to_xml(self):
@@ -87,6 +97,9 @@ class ReductionOptions(BaseOptions):
         # Mask
         xml += "<UseConfigMask>%s</UseConfigMask>\n" % self.use_config_mask
         
+        # Resolution
+        xml += "<ComputeResolution>%s</ComputeResolution>\n" % self.compute_resolution
+        xml += "<SampleApertureDiameter>%g</SampleApertureDiameter>\n" % self.sample_aperture_diameter
         return xml
     
     def from_xml(self, xml_str):
@@ -117,4 +130,9 @@ class ReductionOptions(BaseOptions):
         self.use_config_mask = BaseScriptElement.getBoolElement(dom, "UseConfigMask",
                                                                 default = ReductionOptions.use_config_mask)
         
+        # Resolution
+        self.compute_resolution = BaseScriptElement.getBoolElement(dom, "ComputeResolution",
+                                                                   default = ReductionOptions.compute_resolution)
+        self.sample_aperture_diameter = BaseScriptElement.getFloatElement(dom, "SampleApertureDiameter",
+                                                                         default = ReductionOptions.sample_aperture_diameter)
     

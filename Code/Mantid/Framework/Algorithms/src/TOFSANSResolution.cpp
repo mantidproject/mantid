@@ -54,9 +54,9 @@ void TOFSANSResolution::init()
       "Pixel size in the X direction (mm).");
   declareProperty("PixelSizeY", 5.15, positiveDouble->clone(),
       "Pixel size in the Y direction (mm).");
-  declareProperty("SampleApertureRadius", 10.0, positiveDouble->clone(),
+  declareProperty("SampleApertureRadius", 5.0, positiveDouble->clone(),
       "Sample aperture radius (mm).");
-  declareProperty("SourceApertureRadius", 20.0, positiveDouble->clone(),
+  declareProperty("SourceApertureRadius", 10.0, positiveDouble->clone(),
       "Source aperture radius (mm).");
   declareProperty("DeltaT", 250.0, positiveDouble->clone(),
       "TOF spread (microsec).");

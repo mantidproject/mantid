@@ -147,6 +147,10 @@ class SANSInstrumentWidget(BaseWidget):
         # TOF connections
         self.connect(self._summary.tof_cut_chk, QtCore.SIGNAL("clicked(bool)"), self._tof_clicked)
         
+        # Resolution validator
+        self._summary.sample_apert_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_apert_edit))
+        self.connect(self._summary.resolution_chk, QtCore.SIGNAL("clicked(bool)"), self._resolution_clicked)
+        
         # Since EQSANS does not currently use the absolute scale calculation, expose it in debug mode only for now
         if not self._settings.debug:
             self._summary.config_options_layout.deleteLater()
@@ -178,6 +182,10 @@ class SANSInstrumentWidget(BaseWidget):
         if True or not self._in_mantidplot:
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
+
+    def _resolution_clicked(self, is_checked):
+        self._summary.sample_apert_edit.setEnabled(is_checked)
+        self._summary.sample_apert_label.setEnabled(is_checked)
 
     def _mask_plot_clicked(self):        
         self.mask_ws = "__mask_%s" % extract_workspace_name(str(self._summary.mask_edit.text()))
@@ -357,6 +365,11 @@ class SANSInstrumentWidget(BaseWidget):
         self._masked_detectors = state.detector_ids
         self.mask_reload = True
         
+        # Resolution parameters
+        self._summary.resolution_chk.setChecked(state.compute_resolution)
+        self._summary.sample_apert_edit.setText(QtCore.QString(str(state.sample_aperture_diameter)))
+        self._resolution_clicked(self._summary.resolution_chk.isChecked())
+        
         # Output directory
         self._summary.select_output_dir_radio.setChecked(not state.use_data_directory)
         self._summary.use_data_dir_radio.setChecked(state.use_data_directory)
@@ -427,6 +440,10 @@ class SANSInstrumentWidget(BaseWidget):
                 masked_detectors = GetMaskedDetectors(self.mask_ws)
                 ids_str = masked_detectors.getPropertyValue("DetectorList")
                 m.detector_ids = map(int, ids_str.split(','))
+
+        # Resolution parameters
+        m.compute_resolution = self._summary.resolution_chk.isChecked()
+        m.sample_aperture_diameter = util._check_and_get_float_line_edit(self._summary.sample_apert_edit) 
 
         # Output directory
         m.use_data_directory = self._summary.use_data_dir_radio.isChecked()
