@@ -291,15 +291,15 @@ std::string File::getPath(){
   char cPath[2048];
 
   memset(cPath,0,2048*sizeof(char));
-//  throw Exception("File::getPath() not implemented in MantidNexus for now.");
-
-  NXstatus status = NXgetpath(this->m_file_id,cPath, 1024);
-  if (status != NX_OK) {
-    stringstream msg;
-    msg << "NXgetpath() failed";
-    throw Exception(msg.str(), status);
-  }
-  return std::string(cPath);
+  throw Exception("File::getPath() not implemented in MantidNexus for now.");
+//
+//  NXstatus status = NXgetpath(this->m_file_id,cPath, 1024);
+//  if (status != NX_OK) {
+//    stringstream msg;
+//    msg << "NXgetpath() failed";
+//    throw Exception(msg.str(), status);
+//  }
+//  return std::string(cPath);
 }
 
 void File::closeGroup() {

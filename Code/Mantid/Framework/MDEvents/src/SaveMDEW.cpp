@@ -277,7 +277,6 @@ namespace MDEvents
     else
     {
       // Update the extendible data sets
-      std::cout << "About to extend, i'm at " << file->getPath() << std::endl;
       file->writeUpdatedData("box_type", box_type);
       file->writeUpdatedData("depth", depth);
       file->writeUpdatedData("inverse_volume", inverse_volume);
