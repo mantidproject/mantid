@@ -105,7 +105,7 @@ private:
                   Mantid::API::MatrixWorkspace_sptr               const &inpWkSpace,
                   Mantid::Geometry::RectangularDetector_const_sptr const &panel,
                   const int                                              chan,
-                  std::vector<int>                                  const &Attr);
+                  std::vector<int>                                       &Attr);
 
 
   void findNumRowsColsinPanel(DataObjects::Peak const &peak,
@@ -142,7 +142,7 @@ private:
                    API::MatrixWorkspace_sptr                              const &inpWkSpace,
                    Mantid::Geometry::RectangularDetector_const_sptr       const &panel,
                    const int                                              chan,
-                   std::vector<int>                                       const &Attr,
+                   std::vector<int>                                             &Attr,
                    Mantid::detid2index_map                               *const  wi_to_detid_map,
                    Kernel::Logger                                               & g_log ) ;
 
@@ -189,6 +189,11 @@ private:
                            const double               TotBoundaryIntensities,
                            const int                  nBoundaryCells);
 
+  double CalculateIsawIntegrateError(const double background,
+                                     const double backError,
+                                     const double ChiSqOverDOF,
+                                     const double TotIntensity,
+                                     const int ncells);
 
   int find( Mantid::MantidVec const & X,
             const double              time);

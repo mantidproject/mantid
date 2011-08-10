@@ -169,48 +169,48 @@ public:
 
       TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
 
-      TS_ASSERT_LESS_THAN(fabs(pks->getPeak(0).getIntensity() - 60000), 100.0);
-      TS_ASSERT_LESS_THAN(fabs(pks->getPeak(0).getSigmaIntensity() - 375.5), 1.0);
+      TS_ASSERT_LESS_THAN(fabs(pks->getPeak(0).getIntensity() - 59923.5), 100.0);
+      TS_ASSERT_LESS_THAN(fabs(pks->getPeak(0).getSigmaIntensity() - 380.71), 1.0);
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Time", 0) - 19250), 20);
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Background", 1) - 1.4), .2);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) - 11206), 20);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) - 420), 5);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) - 134.464), 1.5);
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) - 4338), 10);
-      //std::cout<< Pks->getPeak(0).getIntensity()<<","<< Pks->getPeak(0).getSigmaIntensity()<<std::endl;
-      std::vector<std::string> names = Twk->getColumnNames();
-      /*
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) - 11157.3), 20);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  225), 5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) - 258.275), 1.5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) - 4065), 10);
+
+      /*   std::vector<std::string> names = Twk->getColumnNames();
+      std::cout<<"Intensitty="<<pks->getPeak(0).getIntensity()<<"   sigma="<<pks->getPeak(0).getSigmaIntensity()<<std::endl;
        for( int i=0; i<Twk->columnCount();i++)
        {
-       std::cout<<std::setw(15)<<names[i];
+         std::cout<<std::setw(15)<<names[i];
        for( int j=0; j< Twk->rowCount();j++)
        std::cout<< setw(12)<<Twk->cell<double>(j,i);
        std::cout<<std::endl;
 
        }
 
-       Intensitty=59985.5,  sigma= 375.476
-       slice Info
-       Time       19250       19350       19450       19550       19650       19750       19850
-       Channel          12          13          14          15          16          17          18
-       Background     1.40207     1.40485     1.40621     1.40828     1.40728     1.40414     1.40243
-       Intensity     3735.37     7469.21     11206.2     14941.6     11203.8     7470.79     3734.57
-       Mcol          17          17          17          17          17          17          17
-       Mrow          12          12          12          12          12          12          12
-       SScol     3.99188     3.99281     3.99224     3.99229     3.99239     3.99216     3.99223
-       SSrow     3.99316     3.99376     3.99351     3.99343     3.99403     3.99369     3.99316
-       SSrc           0-0.000266736           0           0 0.000124477           0-0.000106694
-       NCells         420         399         420         420         399         420         399
-       ChiSqrOverDOF     14.2131     59.7547      127.85     227.296     134.464     56.8184     14.9517
-       TotIntensity        4338      8058.6       11838       15588     11808.6        8088      4308.6
-       BackgroundError     0.19604    0.413891    0.587967    0.783968    0.620871    0.391965    0.207033
-       FitIntensityError     28.4576     58.5656     85.3544     113.807     87.8525     56.9013     29.2931
-       ISAWIntensity     3749.13     7498.06     11247.4     14996.5     11247.1     7498.26     3749.03
-       ISAWIntensityError     99.2641     133.555      160.85     184.072     160.865     133.653     98.9773
-       Start Row           3           3           3           3           3           3           3
-       End Row          22          21          22          22          21          22          21
-       Start Col           7           7           7           7           7           7           7
-       End Col          27          27          27          27          27
+        Intensitty=59923.5   sigma=380.71
+           Time       19250       19350       19450       19550       19650       19750       19850
+        Channel          12          13          14          15          16          17          18
+     Background     1.42022     1.44054      1.4735     1.48123      1.4735     1.44054     1.42022
+      Intensity     3720.21      7440.3     11157.3     14880.4     11157.3      7440.3     3720.21
+           Mcol          17          17          17          17          17          17          17
+           Mrow          12          12          12          12          12          12          12
+          SScol     3.98085     3.98281     3.97949     3.98244     3.97949     3.98281     3.98085
+          SSrow     3.98219     3.98214     3.98291     3.98211     3.98291     3.98214     3.98219
+           SSrc           0           0 0.000267033           0 0.000267033           0           0
+         NCells         225         225         210         225         210         225         225
+  ChiSqrOverDOF       26.77      106.92     258.275     427.785     258.275      106.92       26.77
+   TotIntensity        4065        7815       11544       15315       11544        7815        4065
+BackgroundError     0.39112    0.781681     1.27035     1.56355     1.27035    0.781681     0.39112
+FitIntensityError     41.4984     82.9473      130.21      165.91      130.21     82.9473     41.4984
+  ISAWIntensity     3745.45     7490.88     11234.6     14981.7     11234.6     7490.88     3745.45
+ISAWIntensityError     98.0362     134.863      164.32     187.991      164.32     134.863     98.0362
+      Start Row           5           5           5           5           5           5           5
+        End Row          19          19          18          19          18          19          19
+      Start Col          10          10          10          10          10          10          10
+        End Col          24          24          24          24          24          24          24
+
        */
     } catch (char * s)
     {

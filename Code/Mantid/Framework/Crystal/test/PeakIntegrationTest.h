@@ -203,11 +203,14 @@ public:
         ws = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("TOPAZ")) );
     TS_ASSERT(ws);
     if (!ws) return;
-    Peak & peak = ws->getPeaks()[0];
+    IPeak &peak = ws->getPeak(0);
 
-    TS_ASSERT_DELTA( peak.getIntensity(), 3112.4175, 200.0);
+    double intensity =peak.getIntensity();
+    TS_ASSERT_DELTA(intensity,2770, 200.0);
 
-    TS_ASSERT_DELTA( peak.getSigmaIntensity(), 141.322, 70.0);
+    double sigIntensity =peak.getSigmaIntensity();
+    TS_ASSERT_DELTA( sigIntensity,100.0, 70.0);
+
     AnalysisDataService::Instance().remove("TOPAZ");
 
   }
