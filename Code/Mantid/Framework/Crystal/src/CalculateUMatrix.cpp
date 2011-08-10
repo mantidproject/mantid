@@ -38,7 +38,7 @@ namespace Crystal
   {
     this->setWikiSummary("Calculate the U matrix from a peaks workspace, given lattice parameters.");
     this->setOptionalMessage("Calculate the U matrix from a peaks workspace, given lattice parameters.");
-    this->setWikiDescription("Given a set of peaks (Q in sample frame, HKL values), and given lattice parameters (<math>a,b,c,/alpha,/beta,gamma</math>), it will try to find the U matrix, using least squares approach and quaternions");
+    this->setWikiDescription("Given a set of peaks (Q in sample frame, HKL values), and given lattice parameters (<math>a,b,c,\alpha,\beta,\gamma</math>), it will try to find the U matrix, using least squares approach and quaternions");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -96,11 +96,11 @@ namespace Crystal
         Hi[2][0]=Qhkl.Y();  Hi[2][1]=-Qhkl.Z(); Hi[2][2]=0.;        Hi[2][3]=Qhkl.X();
         Hi[3][0]=Qhkl.Z();  Hi[3][1]=Qhkl.Y();  Hi[3][2]=-Qhkl.X(); Hi[3][3]=0.;
 
-        V3D Qsam=p.getQSampleFrame();
-        Si[0][0]=0.;        Si[0][1]=-Qsam.X(); Si[0][2]=-Qsam.Y(); Si[0][3]=-Qsam.Z();
-        Si[1][0]=Qsam.X();  Si[1][1]=0.;        Si[1][2]=-Qsam.Z(); Si[1][3]=Qsam.Y();
-        Si[2][0]=Qsam.Y();  Si[2][1]=Qsam.Z();  Si[2][2]=0.;        Si[2][3]=-Qsam.X();
-        Si[3][0]=Qsam.Z();  Si[3][1]=-Qsam.Y(); Si[3][2]=Qsam.X(); Si[3][3]=0.;
+        V3D Qgon=p.getQSampleFrame();
+        Si[0][0]=0.;        Si[0][1]=-Qgon.X(); Si[0][2]=-Qgon.Y(); Si[0][3]=-Qgon.Z();
+        Si[1][0]=Qgon.X();  Si[1][1]=0.;        Si[1][2]=-Qgon.Z(); Si[1][3]=Qgon.Y();
+        Si[2][0]=Qgon.Y();  Si[2][1]=Qgon.Z();  Si[2][2]=0.;        Si[2][3]=-Qgon.X();
+        Si[3][0]=Qgon.Z();  Si[3][1]=-Qgon.Y(); Si[3][2]=Qgon.X(); Si[3][3]=0.;
 
         HS+=(Hi*Si);
       }
