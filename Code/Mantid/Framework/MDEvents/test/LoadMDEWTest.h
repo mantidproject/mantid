@@ -82,6 +82,7 @@ public:
       IMDBox<MDE,nd>* box = boxes[j];
       IMDBox<MDE,nd>* box1 = boxes1[j];
 
+      std::cout << "ID: " << box->getId() << std::endl;
       TS_ASSERT_EQUALS( box->getId(), box1->getId() );
       TS_ASSERT_EQUALS( box->getDepth(), box1->getDepth() );
       TS_ASSERT_EQUALS( box->getNumChildren(), box1->getNumChildren() );
@@ -223,6 +224,7 @@ public:
     MDGridBox<MDEvent<nd>,nd> * box = dynamic_cast<MDGridBox<MDEvent<nd>,nd>*>(ws2->getBox());
     // Now there are 20001 boxes
     box->splitContents(12);
+    ws2->refreshCache();
 
     // Save it
     SaveMDEW saver;
@@ -252,6 +254,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( iws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("reloaded_again")) );
     boost::shared_ptr<MDEventWorkspace<MDEvent<nd>,nd> > ws3 = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<nd>,nd> >(iws);
     TS_ASSERT(ws3); if (!ws3) return;
+    ws3->refreshCache();
 
 //    // Perform the full comparison of the second and 3rd loaded workspaces
 //    do_compare_MDEW(ws2, ws3);

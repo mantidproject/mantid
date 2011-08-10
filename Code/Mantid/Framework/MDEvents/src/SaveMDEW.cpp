@@ -107,23 +107,24 @@ namespace MDEvents
     // General information
     if (!update)
     {
-      file->writeData("definition",  ws->id());
-      file->writeData("title",  ws->getTitle() );
-      // TODO: notes, sample, logs, instrument, process, run_start
-
       // Write out some general information like # of dimensions
       file->writeData("dimensions", int32_t(nd));
-      file->writeData("event_type", MDE::getTypeName());
-      // Save each dimension, as their XML representation
-      for (size_t d=0; d<nd; d++)
-      {
-        std::ostringstream mess;
-        mess << "dimension" << d;
-        file->writeData( mess.str(), ws->getDimension(d)->toXMLString() );
-      }
-      // Add box controller info.
-      file->writeData("box_controller_xml", ws->getBoxController()->toXMLString());
+      file->putAttr("event_type", MDE::getTypeName());
+      // TODO: notes, sample, logs, instrument, process, run_start
     }
+
+    // Save some info as attributes. (Note: need to use attributes, not data sets because those cannot be resized).
+    file->putAttr("definition",  ws->id());
+    file->putAttr("title",  ws->getTitle() );
+    // Save each dimension, as their XML representation
+    for (size_t d=0; d<nd; d++)
+    {
+      std::ostringstream mess;
+      mess << "dimension" << d;
+      file->putAttr( mess.str(), ws->getDimension(d)->toXMLString() );
+    }
+    // Add box controller info.
+    file->putAttr("box_controller_xml", ws->getBoxController()->toXMLString());
 
 
     // Start the main data group

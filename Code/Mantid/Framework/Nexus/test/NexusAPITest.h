@@ -261,6 +261,7 @@ public:
     std::vector<int> data(10, 123);
     file->makeGroup("data", "NXdata", 1);
     file->writeData("mydata", data);
+    file->putAttr("empty_string", ""); // Don't want this to error
     file->close();
   }
 
@@ -277,8 +278,7 @@ public:
     dims[1] = 2;
     std::vector<int> chunk(2, 2);
     file->writeExtendibleData("my2Ddata", data, dims, chunk);
-//    std::string s = "short string";
-//    file->writeExtendibleData("mystring", s);
+    file->putAttr("string_attrib", "some short string");
     file->close();
 
     // Data vector can grow
@@ -298,9 +298,8 @@ public:
     data.resize(5, 234);
     file->writeUpdatedData("mydata2", data);
 
-
     // Also a string
-//    file->writeUpdatedData("mystring", "a much longer string filled with interesting comments that I'm sure you are glad you are reading right now 42.");
+    file->putAttr("string_attrib", "some much longer string filled with interesting comments that I'm sure you are glad you are reading right now 42.");
     file->close();
   }
 

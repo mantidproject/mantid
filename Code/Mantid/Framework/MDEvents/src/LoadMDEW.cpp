@@ -95,7 +95,7 @@ namespace MDEvents
 
     //The type of event
     std::string eventType;
-    file->readData("event_type", eventType);
+    file->getAttr("event_type", eventType);
 
     // Use the factory to make the workspace of the right type
     IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDEventWorkspace(numDims, eventType);
@@ -128,7 +128,7 @@ namespace MDEvents
     prog->report("Opening file.");
 
     std::string title;
-    file->readData("title", title );
+    file->getAttr("title", title);
     ws->setTitle("title");
 
     // TODO: notes, sample, logs, instrument, process, run_start
@@ -140,7 +140,7 @@ namespace MDEvents
       std::ostringstream mess;
       mess << "dimension" << d;
       std::string dimXML;
-      file->readData(mess.str(), dimXML);
+      file->getAttr(mess.str(), dimXML);
       // Use the dimension factory to read the XML
       IMDDimensionFactory factory = IMDDimensionFactory::createDimensionFactory(dimXML);
       IMDDimension_sptr dim(factory.create());
@@ -149,7 +149,7 @@ namespace MDEvents
 
     // Load the box controller
     std::string bcXML;
-    file->readData("box_controller_xml", bcXML);
+    file->getAttr("box_controller_xml", bcXML);
     ws->getBoxController()->fromXMLString(bcXML);
 
     if (verbose) std::cout << tim << " to load the dimensions, etc." << std::endl;

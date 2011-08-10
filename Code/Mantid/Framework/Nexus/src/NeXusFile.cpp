@@ -405,13 +405,6 @@ void File::writeExtendibleData(const string& name, vector<NumT>& value, const in
   this->closeData();
 }
 
-//void File::writeExtendibleData(const string& name, const std::string& value) {
-//  std::vector<char> s(value.size());
-//  for (size_t i=0; i<value.size(); i++)
-//    s[i] = value[i];
-//  writeExtendibleData(name, s);
-//}
-
 template <typename NumT>
 void File::writeExtendibleData(const string& name, vector<NumT>& value,
     vector<int>& dims, std::vector<int> & chunk)
@@ -436,16 +429,6 @@ void File::writeUpdatedData(const std::string& name, std::vector<NumT>& value)
   this->putSlab(value, int(0), int(value.size()));
   this->closeData();
 }
-
-//void File::writeUpdatedData(const std::string& name, const std::string& value)
-//{
-//  this->openData(name);
-//  string my_value(value);
-//  std::vector<int> start(1,0);
-//  std::vector<int> size(1,int(my_value.size()));
-//  this->putSlab((void *) &my_value[0], start, size);
-//  this->closeData();
-//}
 
 template <typename NumT>
 void File::writeUpdatedData(const std::string& name, std::vector<NumT>& value,
@@ -593,10 +576,9 @@ void File::putAttr(const char* name, const char* value) {
 }
 
 void File::putAttr(const std::string& name, const std::string value) {
-  if (value.empty()) {
-    throw Exception("Supplied empty value to putAttr");
-  }
   string my_value(value);
+  if (my_value.empty())
+    my_value = " "; // Make a default "space" to avoid errors.
   AttrInfo info;
   info.name = name;
   info.length = static_cast<int>(my_value.size());
