@@ -77,7 +77,7 @@ namespace Geometry
     // ==================== Methods that are inline for performance ================================
     //----------------------------------------------------------------------------------------------
     /** Is a point in MDimensions bounded by this hyperplane, that is,
-     * is (a1*x1 + a2*x2 + ... >= b)?
+     * is (a1*x1 + a2*x2 + ... > b)?
      *
      * @param coords :: nd-sized array of coordinates
      * @return true if it is bounded by the plane
@@ -89,7 +89,7 @@ namespace Geometry
       {
         total += m_normal[d] * coords[d];
       }
-      return (total >= m_inequality);
+      return (total > m_inequality);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ namespace Geometry
       {
         total += m_normal[d] * coords[d];
       }
-      return (total >= m_inequality);
+      return (total > m_inequality);
     }
 
 

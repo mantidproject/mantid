@@ -74,16 +74,6 @@ public:
     return plane.isPointContained(coords);
   }
 
-  void testEvaluateInsidePointOnForwardSurface()
-  {
-    TSM_ASSERT("The point should have been found to be inside the region bounded by the plane.", do_test(1,2,3) );
-  }
-
-  void testEvaluateInsidePointOnBackwardSurface()
-  {
-    TSM_ASSERT("The point should have been found to be inside the region bounded by the plane.", do_test(-1,-2,-3));
-  }
-
   void testEvaluateInsidePointReflectNormal() //Test that plane automatically relects normals where necessary.
   {
     NormalParameter tNormal(1, 2, 3);
@@ -93,7 +83,7 @@ public:
 
     Plane3DImplicitFunction plane(rNormal, tOrigin, tWidth);
 
-    Mantid::coord_t coords[3] = {1,2,3};
+    Mantid::coord_t coords[3] = {0.999,2,3};
     TSM_ASSERT("The point should have been found to be inside the region bounded by the plane after the normal was reflected.", plane.isPointContained(coords));
   }
 
@@ -180,60 +170,6 @@ public:
     TSM_ASSERT_DIFFERS("These two objects should not be considered equal.", A, D);
   }
 
-
-};
-
-//=====================================================================================
-// Performance Tests
-//=====================================================================================
-class Plane3DImplicitFunctionTestPerformance : public CxxTest::TestSuite
-{
-private:
-
-  boost::shared_ptr<Mantid::MDAlgorithms::Plane3DImplicitFunction> m_plane;
-
-public:
-
-  void setUp()
-  {
-    using namespace Mantid::MDAlgorithms;
-
-    NormalParameter tNormal(1, 2, 3);
-    OriginParameter tOrigin(0, 0, 0);
-    WidthParameter tWidth(std::sqrt((1 * 1) + (2 * 2.0) + (3 * 3)) * 2.0); // Width set up so that points 1,2,3 and -1,-2,-3 are within boundary
-    m_plane = boost::shared_ptr<Mantid::MDAlgorithms::Plane3DImplicitFunction>(new Plane3DImplicitFunction(tNormal, tOrigin, tWidth));
-  }
-
-  /// Test using point3D API.
-  void testMultipleExecutionFromPoint3D()
-  {
-    MockPoint3D point;
-    EXPECT_CALL(point, getX()).WillRepeatedly(testing::Return(1));
-    EXPECT_CALL(point, getY()).WillRepeatedly(testing::Return(2));
-    EXPECT_CALL(point, getZ()).WillRepeatedly(testing::Return(3));
-
-    bool bIsInside = true;
-    //Ten thousand runs should give a good benchmark.
-    for(size_t i = 0; i < 10000; i++)
-    {
-//      bIsInside = m_plane->evaluate(&point);
-    }
-    TS_ASSERT(bIsInside);
-  }
-
-  void testMultipleExecutionFromCoords()
-  {
-    //Test exactly same schenario using coordinate API.
-    Mantid::coord_t coords[3] = {1,2,3};
-    bool masks[3] = {false, false, false};
-    bool bIsInside = true;
-    //Ten thousand runs should give a good benchmark.
-    for(size_t i = 0; i < 10000; i++)
-    {
-//      bIsInside = m_plane->evaluate(coords, masks, 3);
-    }
-    TS_ASSERT(bIsInside);
-  }
 
 };
 

@@ -386,6 +386,7 @@ namespace MDEvents
 
     //---------------------------------------------------------------------------------------------
     /** Open the NXS data blocks for loading.
+     * The data should have been created before.
      *
      * @param file :: open NXS file.
      */
