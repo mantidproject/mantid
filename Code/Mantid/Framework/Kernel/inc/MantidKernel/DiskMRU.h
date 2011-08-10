@@ -14,7 +14,6 @@
 #include <map>
 #include <stdint.h>
 #include <vector>
-#include "MantidKernel/IFile.h"
 
 
 namespace Mantid
@@ -116,7 +115,7 @@ namespace Kernel
 
     DiskMRU();
 
-    DiskMRU(uint64_t m_memoryAvail, uint64_t m_writeBufferSize, bool useWriteBuffer, IFile * file = NULL);
+    DiskMRU(uint64_t m_memoryAvail, uint64_t m_writeBufferSize, bool useWriteBuffer);
     
     virtual ~DiskMRU();
 
@@ -168,13 +167,15 @@ namespace Kernel
     freeSpace_t & getFreeSpaceMap()
     { return m_free;  }
 
-    ///@return the position of the last used point in the file (for testing only!)
-    uint64_t getFileUsed() const
-    { return m_fileUsed; }
-
+    //-------------------------------------------------------------------------------------------
     ///@return the position of the last allocated point in the file (for testing only!)
     uint64_t getFileLength() const
     { return m_fileLength; }
+
+    /** Set the length of the file that this MRU writes to.
+     * @param length :: length in the same units as the cache, etc. (not necessarily bytes)  */
+    void setFileLength(const uint64_t length)
+    { m_fileLength = length; }
 
   protected:
     void writeOldObjects();
@@ -220,13 +221,7 @@ namespace Kernel
     Kernel::Mutex m_freeMutex;
 
     // ----------------------- File object --------------------------------------
-    /// The IFile object that allows us to resize the output file.
-    Kernel::IFile * m_file;
-
-    /// Position of the last USED point in the file
-    uint64_t m_fileUsed;
-
-    /// Allocated length of the file
+    /// Length of the file. This is where new blocks that don't fit get placed.
     uint64_t m_fileLength;
 
   private:

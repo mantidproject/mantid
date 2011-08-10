@@ -19,8 +19,6 @@ namespace Kernel
     m_toWrite_byId( m_toWrite.get<1>() ),
     m_memoryToWrite(0),
     m_free_bySize( m_free.get<1>() ),
-    m_file(NULL),
-    m_fileUsed(0),
     m_fileLength(0)
   {
   }
@@ -31,10 +29,9 @@ namespace Kernel
    * @param m_memoryAvail :: Amount of memory that the MRU is allowed to use.
    * @param m_writeBufferSize :: Amount of memory to accumulate in the write buffer before writing.
    * @param useWriteBuffer :: True if you want to use the "to-Write" buffer.
-   * @param file :: ptr to a IFile object that allows use to resize the file.
    * @return
    */
-  DiskMRU::DiskMRU(uint64_t m_memoryAvail, uint64_t m_writeBufferSize, bool useWriteBuffer, IFile * file)
+  DiskMRU::DiskMRU(uint64_t m_memoryAvail, uint64_t m_writeBufferSize, bool useWriteBuffer)
   : m_memoryAvail(m_memoryAvail),
     m_memoryUsed(0),
     m_useWriteBuffer(useWriteBuffer),
@@ -42,15 +39,8 @@ namespace Kernel
     m_toWrite_byId( m_toWrite.get<1>() ),
     m_memoryToWrite(0),
     m_free_bySize( m_free.get<1>() ),
-    m_file(file),
-    m_fileUsed(0),
     m_fileLength(0)
   {
-    if (m_file)
-    {
-      m_fileLength = m_file->getFileLength();
-      m_fileUsed = m_fileLength;
-    }
   }
     
   //----------------------------------------------------------------------------------------------
@@ -347,29 +337,13 @@ namespace Kernel
     if (it == m_free_bySize.end())
     {
       // No block found
-//      std::cout << "No block found for allocate " << newSize << std::endl;
-      if (m_file)
-      {
-        // Go at the end of the file.
-        uint64_t retVal = m_fileUsed;
-        m_fileUsed += newSize;
-        if (m_fileUsed > m_fileLength)
-        {
-          // Grow the file by 10% more than the requested size,
-          // each time it grows. This avoids too many calls to extend,
-          // at the cost of up to 10% wasted space.
-          m_fileLength = uint64_t( double(m_fileUsed) * 1.1);
-          m_file->extendFile(m_fileLength);
-        }
-        // Will place the new block at the end of the file
-        m_freeMutex.unlock();
-        return retVal;
-      }
-      else
-      {
-        m_freeMutex.unlock();
-        throw std::runtime_error("DiskMRU::allocate(): No free block is large enough, and you did not give a IFile object to allow extending the file. Cannot relocate.");
-      }
+      // Go to the end of the file.
+      uint64_t retVal = m_fileLength;
+      // And we assume the file will grow by this much.
+      m_fileLength += newSize;
+      // Will place the new block at the end of the file
+      m_freeMutex.unlock();
+      return retVal;
     }
     else
     {

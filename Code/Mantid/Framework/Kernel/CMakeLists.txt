@@ -20,7 +20,6 @@ set ( SRC_FILES
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
 	src/Glob.cpp
-	src/IFile.cpp
 	src/IPropertyManager.cpp
 	src/ISaveable.cpp
 	src/InstrumentInfo.cpp
@@ -113,7 +112,6 @@ set ( INC_FILES
 	inc/MantidKernel/FloatingPointComparison.h
 	inc/MantidKernel/FreeBlock.h
 	inc/MantidKernel/Glob.h
-	inc/MantidKernel/IFile.h
 	inc/MantidKernel/IPropertyManager.h
 	inc/MantidKernel/ISaveable.h
 	inc/MantidKernel/IValidator.h
@@ -196,7 +194,6 @@ set ( TEST_FILES
 	test/FloatingPointComparisonTest.h
 	test/FreeBlockTest.h
 	test/FunctionTaskTest.h
-	test/IFileTest.h
 	test/ISaveableTest.h
 	test/InterpolationTest.h
 	test/ListValidatorTest.h
