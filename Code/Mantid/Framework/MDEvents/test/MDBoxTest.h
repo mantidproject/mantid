@@ -672,6 +672,80 @@ public:
   }
 
 
+  //-----------------------------------------------------------------------------------------
+  /** Set up the file back end and test accessing data
+   * where the number of events in the box is reduced or increased. */
+  void test_fileBackEnd_nonConst_EventListChangesSize()
+  {
+    // Create a box with a controller for the back-end
+    BoxController_sptr bc(new BoxController(3));
+
+    // Handle the disk MRU values
+    bc->setCacheParameters(100000, 10000, sizeof(MDEvent<3>));
+    DiskMRU & mru = bc->getDiskMRU();
+    // It is empty now
+    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 0);
+
+    // A new empty box.
+    MDBox<MDEvent<3>,3> c(bc, 0);
+
+    // Open the NXS file
+    std::string filename = do_saveNexus(true /*signal=index*1.0*/);
+    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_RDWR);
+    file->openGroup("my_test_group", "NXdata");
+    MDEvent<3>::openNexusData(file);
+
+    // Set it in the controller for back-end
+    bc->setFile(file,filename);
+    c.setFileIndex(500, 1000);
+    c.setOnDisk(true);
+
+    // The # of points (from the file, not in memory)
+    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
+
+    // Non-const access to the events.
+    std::vector<MDEvent<3> > & events = c.getEvents();
+    TS_ASSERT_EQUALS( events.size(), 1000);
+    TS_ASSERT_DELTA( events[123].getSignal(), 123.0, 1e-5);
+
+    // Modify an event
+    events[123].setSignal(456.0);
+    // Also change the size of the event list
+    events.resize(600);
+
+    // Done with the events
+    c.releaseEvents();
+
+    // Flushing the cache will write out the events.
+    mru.flushCache();
+
+    // The size on disk should have been changed (but not the position since that was the only free spot)
+    TS_ASSERT_EQUALS( c.getFileIndexStart(), 500);
+    TS_ASSERT_EQUALS( c.getFileNumEvents(), 600);
+
+    // Now let's pretend we re-load that data into another box
+    MDBox<MDEvent<3>,3> c2(bc, 0);
+    c2.setFileIndex(500, 600);
+    c2.setOnDisk(true);
+    // Is that event modified?
+    std::vector<MDEvent<3> > & events2 = c2.getEvents();
+    TS_ASSERT_EQUALS( events2.size(), 600);
+    TS_ASSERT_DELTA( events2[123].getSignal(), 456.0, 1e-5);
+
+//    // Now we GROW the event list
+//    events2.resize(1500);
+//    events2[1499].setSignal(789.0);
+//    // And we finish and write it out
+//    c2.releaseEvents();
+//    mru.flushCache();
+//    // The new event list should have ended up at the end of the file
+//    TS_ASSERT_EQUALS( c.getFileIndexStart(), 500);
+//    TS_ASSERT_EQUALS( c.getFileNumEvents(), 1500);
+
+    file->close();
+  }
+
+
 
   //-----------------------------------------------------------------------------------------
   /** Set up the file back end and test accessing data

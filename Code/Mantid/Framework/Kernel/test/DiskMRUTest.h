@@ -518,6 +518,9 @@ public:
     TS_ASSERT_EQUALS( map.size(), 0);
     mru.freeBlock(0, 50);
     TS_ASSERT_EQUALS( map.size(), 1);
+    // zero-sized free block does nothing
+    mru.freeBlock(1234, 0);
+    TS_ASSERT_EQUALS( map.size(), 1);
     mru.freeBlock(100, 50);
     TS_ASSERT_EQUALS( map.size(), 2);
     // Free a block next to another one, AFTER
@@ -621,6 +624,42 @@ public:
     TS_ASSERT_EQUALS( map.size(), 4);
   }
 
+  /// You can call relocate() if an block is shrinking.
+  void test_relocate_when_shrinking()
+  {
+    DiskMRU mru(4, 3, true);
+    DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
+    // You stay in the same place because that's the only free spot.
+    TS_ASSERT_EQUALS( mru.relocate(100, 10, 5), 100 );
+    // You left a free block at 105.
+    TS_ASSERT_EQUALS( map.size(), 1);
+    // This one, instead of staying in place, will fill in that previously freed 5-sized block
+    //  since that's the smallest one that fits the whole block.
+    TS_ASSERT_EQUALS( mru.relocate(200, 10, 5), 105 );
+    // Still one free block, but its at 200-209 now.
+    TS_ASSERT_EQUALS( map.size(), 1);
+  }
+
+  /// You can call relocate() if an block is shrinking.
+  void test_relocate_when_growing()
+  {
+    DiskMRU mru(4, 3, true);
+    DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
+    mru.freeBlock(200, 20);
+    mru.freeBlock(300, 30);
+    TS_ASSERT_EQUALS( map.size(), 2);
+
+    // Grab the smallest block that's big enough
+    TS_ASSERT_EQUALS( mru.relocate(100, 10, 20), 200 );
+    // You left a free block at 100 of size 10 to replace that one.
+    TS_ASSERT_EQUALS( map.size(), 2);
+    // A zero-sized block is "relocated" by basically allocating it to the free spot
+    TS_ASSERT_EQUALS( mru.relocate(100, 0, 5), 100 );
+    TS_ASSERT_EQUALS( map.size(), 2);
+
+  }
+
+  /// Various tests of allocating and relocating
   void test_allocate_and_relocate()
   {
     DiskMRU mru(4, 3, true);

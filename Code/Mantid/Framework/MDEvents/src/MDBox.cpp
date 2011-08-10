@@ -2,6 +2,9 @@
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidAPI/ImplicitFunction.h"
 #include "MantidNexus/NeXusFile.hpp"
+#include "MantidKernel/DiskMRU.h"
+
+using Mantid::Kernel::DiskMRU;
 
 namespace Mantid
 {
@@ -210,9 +213,21 @@ namespace MDEvents
     // Only save to disk when the access was non-const.
     if (!m_dataConstAccess)
     {
-      if (data.size() != m_fileNumEvents)
-        throw std::runtime_error("MDBox does not (yet) support caching to disk when the number of events has changed!");
-      this->saveNexus( this->m_BoxController->getFile() );
+      size_t newNumEvents = data.size();
+      DiskMRU & mru = this->m_BoxController->getDiskMRU();
+      if (newNumEvents != m_fileNumEvents)
+      {
+        // Event list changed size. The MRU can tell us where it best fits now.
+        m_fileIndexStart = mru.relocate(m_fileIndexStart, m_fileNumEvents, newNumEvents);
+        m_fileNumEvents = newNumEvents;
+        // Save it where the MRU told us to
+        this->saveNexus( this->m_BoxController->getFile() );
+      }
+      else
+      {
+        // Save at the same place
+        this->saveNexus( this->m_BoxController->getFile() );
+      }
     }
     // Free up memory by clearing the events
     data.clear();

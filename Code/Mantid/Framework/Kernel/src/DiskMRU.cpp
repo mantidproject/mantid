@@ -247,6 +247,7 @@ namespace Kernel
    */
   void DiskMRU::freeBlock(uint64_t const pos, uint64_t const size)
   {
+    if (size == 0) return;
     m_freeMutex.lock();
 
     // Make the block
@@ -401,17 +402,9 @@ namespace Kernel
    */
   uint64_t DiskMRU::relocate(uint64_t const oldPos, uint64_t const oldSize, const uint64_t newSize)
   {
-    // Call does not make size unless newSize > oldSize
-    if (newSize <= oldSize)
-    {
-      throw std::runtime_error("Logic error: Do not call relocate() for a block that has not grown.");
-    }
-    else
-    {
-      // First, release the space in the old block.
-      this->freeBlock(oldPos, oldSize);
-      return this->allocate(newSize);
-    }
+    // First, release the space in the old block.
+    this->freeBlock(oldPos, oldSize);
+    return this->allocate(newSize);
   }
 
 } // namespace Mantid

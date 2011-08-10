@@ -174,10 +174,10 @@ namespace MDEvents
     mutable bool m_dataConstAccess;
 
     /// Start point in the NXS file where the events are located
-    uint64_t m_fileIndexStart;
+    mutable uint64_t m_fileIndexStart;
 
     /// Number of events saved in the file, after the start index location
-    uint64_t m_fileNumEvents;
+    mutable uint64_t m_fileNumEvents;
 
     /// True when the events are on disk and not in memory.
     bool m_onDisk;
