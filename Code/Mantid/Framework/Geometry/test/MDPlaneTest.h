@@ -87,14 +87,14 @@ public:
     MDPlane p1(2, normal1, point1);
     TS_ASSERT(  try2Dpoint(p1, 4.0, 12.) );
     TS_ASSERT( !try2Dpoint(p1, 6.0, -5.) );
-    TS_ASSERT( !try2Dpoint(p1, 5.0, 1. ) );
+    TS_ASSERT( !try2Dpoint(p1, 5.001, 1. ) );
 
     // Plane where x > 5
     coord_t normal2[2] = {+1., 0};
     MDPlane p2(2, normal2, point1);
     TS_ASSERT( !try2Dpoint(p2, 4.0, 12.) );
     TS_ASSERT(  try2Dpoint(p2, 6.0, -5.) );
-    TS_ASSERT( !try2Dpoint(p2, 5.0, 1. ) );
+    TS_ASSERT(  try2Dpoint(p2, 5.001, 1. ) );
 
     // Plane where y < 10
     coord_t normal3[2] = {0., -1.};

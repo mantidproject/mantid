@@ -18,6 +18,7 @@ set ( SRC_FILES
 	src/InvalidParameterParser.cpp
 	src/Load_MDWorkspace.cpp
 	src/MDParameterParserDeclarations.cpp
+	src/Plane3DImplicitFunction.cpp
 	src/NormalParameter.cpp
 	src/NullImplicitFunction.cpp
 	src/PlaneFunctionBuilder.cpp
@@ -57,6 +58,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/Load_MDWorkspace.h
 	inc/MantidMDAlgorithms/MDParameterParserDeclarations.h
+	inc/MantidMDAlgorithms/Plane3DImplicitFunction.h
 	inc/MantidMDAlgorithms/NormalParameter.h
 	inc/MantidMDAlgorithms/NullImplicitFunction.h
 	inc/MantidMDAlgorithms/OriginParameter.h
@@ -92,6 +94,7 @@ set ( TEST_FILES
 	test/InvalidParameterParserTest.h
 	test/InvalidParameterTest.h
 	test/Load_MDWorkspaceTest.h
+	test/Plane3DImplicitFunctionTest.h
 	test/NormalParameterTest.h
 	test/OriginParameterTest.h
 	test/PlaneFunctionBuilderTest.h

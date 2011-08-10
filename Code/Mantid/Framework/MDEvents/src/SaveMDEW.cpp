@@ -242,21 +242,27 @@ namespace MDEvents
     std::vector<int> exents_dims(2,0);
     exents_dims[0] = (int(maxBoxes));
     exents_dims[1] = (nd*2);
+    std::vector<int> exents_chunk(2,0);
+    exents_chunk[0] = int(100000);
+    exents_chunk[1] = (nd*2);
 
     std::vector<int> box_2_dims(2,0);
     box_2_dims[0] = int(maxBoxes);
     box_2_dims[1] = (2);
+    std::vector<int> box_2_chunk(2,0);
+    box_2_chunk[0] = int(100000);
+    box_2_chunk[1] = (2);
 
     if (!update)
     {
       // Write it for the first time
-      file->writeData("box_type", box_type);
-      file->writeData("depth", depth);
-      file->writeData("inverse_volume", inverse_volume);
-      file->writeData("extents", extents, exents_dims);
-      file->writeData("box_children", box_children, box_2_dims);
-      file->writeData("box_signal_errorsquared", box_signal_errorsquared, box_2_dims);
-      file->writeData("box_event_index", box_event_index, box_2_dims);
+      file->writeExtendibleData("box_type", box_type);
+      file->writeExtendibleData("depth", depth);
+      file->writeExtendibleData("inverse_volume", inverse_volume);
+      file->writeExtendibleData("extents", extents, exents_dims, exents_chunk);
+      file->writeExtendibleData("box_children", box_children, box_2_dims, box_2_chunk);
+      file->writeExtendibleData("box_signal_errorsquared", box_signal_errorsquared, box_2_dims, box_2_chunk);
+      file->writeExtendibleData("box_event_index", box_event_index, box_2_dims, box_2_chunk);
     }
     else
     {

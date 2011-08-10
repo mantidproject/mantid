@@ -62,7 +62,7 @@ namespace Geometry
     MDPlane(const size_t nd, const coord_t * normal, const coord_t * point);
     MDPlane(const MDPlane & other);
     MDPlane & operator=(const MDPlane & other);
-    virtual ~MDPlane();
+    ~MDPlane();
 
     /// @return the number of dimensions for which this object can be applied
     size_t getNumDims() const { return m_nd; }
@@ -77,36 +77,36 @@ namespace Geometry
     // ==================== Methods that are inline for performance ================================
     //----------------------------------------------------------------------------------------------
     /** Is a point in MDimensions bounded by this hyperplane, that is,
-     * is (a1*x1 + a2*x2 + ... < b)?
+     * is (a1*x1 + a2*x2 + ... >= b)?
      *
      * @param coords :: nd-sized array of coordinates
      * @return true if it is bounded by the plane
      */
-    bool isPointBounded(const coord_t * coords) const
+    inline bool isPointBounded(const coord_t * coords) const
     {
       coord_t total = 0;
       for (size_t d=0; d<m_nd; d++)
       {
         total += m_normal[d] * coords[d];
       }
-      return (total > m_inequality);
+      return (total >= m_inequality);
     }
 
     //----------------------------------------------------------------------------------------------
     /** Is a point in MDimensions bounded by this hyperplane, that is,
-     * is (a1*x1 + a2*x2 + ... < b)?
+     * is (a1*x1 + a2*x2 + ... >= b)?
      *
      * @param coords :: nd-sized vector of coordinates. No size check is made!
      * @return true if it is bounded by the plane
      */
-    bool isPointBounded(const std::vector<coord_t> & coords) const
+    inline bool isPointBounded(const std::vector<coord_t> & coords) const
     {
       coord_t total = 0;
       for (size_t d=0; d<m_nd; d++)
       {
         total += m_normal[d] * coords[d];
       }
-      return (total > m_inequality);
+      return (total >= m_inequality);
     }
 
 
