@@ -1409,7 +1409,7 @@ namespace {
   {
     if (d1.category < d2.category) return true;
     else if (d1.category == d2.category && d1.name < d2.name) return true;
-    else if (d1.name == d2.name && d1.version > d2.version) return true;
+    else if (d1.category == d2.category && d1.name == d2.name && d1.version > d2.version) return true;
 
     return false;
   }
