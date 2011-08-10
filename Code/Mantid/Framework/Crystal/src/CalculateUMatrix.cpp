@@ -12,7 +12,6 @@ namespace Crystal
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(CalculateUMatrix)
 
-  using namespace Mantid::Geometry;
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
   using namespace Mantid::DataObjects;
@@ -74,7 +73,7 @@ namespace Crystal
     double beta=this->getProperty("beta");
     double gamma=this->getProperty("gamma");
     OrientedLattice o(a,b,c,alpha,beta,gamma);
-    DblMatrix B=o.getB();
+    Matrix<double> B=o.getB();
 
     double H,K,L;
 
@@ -82,8 +81,7 @@ namespace Crystal
     ws = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
     if (!ws) throw std::runtime_error("Problems reading the peaks workspace");
 
-    DblMatrix Pi(4,4),Qi(4,4),PQ(4,4),zero(4,4);
-
+    Matrix<double> Hi(4,4),Si(4,4),HS(4,4),zero(4,4);
     for (int i=0;i<ws->getNumberPeaks();i++)
     {
       Peak p=ws->getPeaks()[i];
@@ -92,31 +90,31 @@ namespace Crystal
       L=p.getL();
       if(H*H+K*K+L*L>0)
       {
-        V3D QSampleFrame=p.getQSampleFrame();
-        Pi[0][0]=0.;Pi[0][1]=-QSampleFrame.X();Pi[0][2]=-QSampleFrame.Y();Pi[0][3]=-QSampleFrame.Z();
-        Pi[1][0]=QSampleFrame.X();Pi[1][1]=0.;Pi[1][2]=QSampleFrame.Z();Pi[1][3]=-QSampleFrame.Y();
-        Pi[2][0]=QSampleFrame.Y();Pi[2][1]=-QSampleFrame.Z();Pi[2][2]=0.;Pi[2][3]=QSampleFrame.X();
-        Pi[3][0]=QSampleFrame.Z();Pi[3][1]=QSampleFrame.Y();Pi[3][2]=-QSampleFrame.X();Pi[3][3]=0.;
-
         V3D Qhkl=B*V3D(H,K,L);
-        Qi[0][0]=0.;Qi[0][1]=-Qhkl.X();Qi[0][2]=-Qhkl.Y();Qi[0][3]=-Qhkl.Z();
-        Qi[1][0]=Qhkl.X();Qi[1][1]=0.;Qi[1][2]=-Qhkl.Z();Qi[1][3]=Qhkl.Y();
-        Qi[2][0]=Qhkl.Y();Qi[2][1]=Qhkl.Z();Qi[2][2]=0.;Qi[2][3]=-Qhkl.X();
-        Qi[3][0]=Qhkl.Z();Qi[3][1]=-Qhkl.Y();Qi[3][2]=Qhkl.X();Qi[3][3]=0.;
+        Hi[0][0]=0.;        Hi[0][1]=-Qhkl.X(); Hi[0][2]=-Qhkl.Y(); Hi[0][3]=-Qhkl.Z();
+        Hi[1][0]=Qhkl.X();  Hi[1][1]=0.;        Hi[1][2]=Qhkl.Z();  Hi[1][3]=-Qhkl.Y();
+        Hi[2][0]=Qhkl.Y();  Hi[2][1]=-Qhkl.Z(); Hi[2][2]=0.;        Hi[2][3]=Qhkl.X();
+        Hi[3][0]=Qhkl.Z();  Hi[3][1]=Qhkl.Y();  Hi[3][2]=-Qhkl.X(); Hi[3][3]=0.;
 
-        PQ+=(Pi*Qi);
+        V3D Qsam=p.getQSampleFrame();
+        Si[0][0]=0.;        Si[0][1]=-Qsam.X(); Si[0][2]=-Qsam.Y(); Si[0][3]=-Qsam.Z();
+        Si[1][0]=Qsam.X();  Si[1][1]=0.;        Si[1][2]=-Qsam.Z(); Si[1][3]=Qsam.Y();
+        Si[2][0]=Qsam.Y();  Si[2][1]=Qsam.Z();  Si[2][2]=0.;        Si[2][3]=-Qsam.X();
+        Si[3][0]=Qsam.Z();  Si[3][1]=-Qsam.Y(); Si[3][2]=Qsam.X(); Si[3][3]=0.;
+
+        HS+=(Hi*Si);
       }
     }
-    //check if PQ is 0
-    if (PQ==zero) throw std::invalid_argument("The peaks workspace is not indexed or something really bad happened");
+    //check if HS is 0
+    if (HS==zero) throw std::invalid_argument("The peaks workspace is not indexed or something really bad happened");
 
     Matrix<double> Eval;
     Matrix<double> Diag;
-    PQ.Diagonalise(Eval,Diag);
+    HS.Diagonalise(Eval,Diag);
     Eval.sortEigen(Diag);
-    Mantid::Kernel::Quat qR(Eval[0][0],Eval[1][0],Eval[2][0],Eval[3][0]);
+    Mantid::Kernel::Quat qR(Eval[0][0],Eval[1][0],Eval[2][0],Eval[3][0]);//the first column corresponds to the highest eigenvalue
     DblMatrix U(qR.getRotation());
-    o.setU(U.Transpose());
+    o.setU(U);
 
     ws->mutableSample().setOrientedLattice(new OrientedLattice(o));
 

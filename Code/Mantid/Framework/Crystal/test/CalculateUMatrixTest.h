@@ -89,8 +89,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg1.isExecuted(); );
     OrientedLattice lattFromUB=ws->mutableSample().getOrientedLattice();
     */
-
-
     TS_ASSERT(latt.getUB().equals(lattFromUB.getUB(),2e-4)); //Some values differ by up to 1.7e-4
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(WSName);
