@@ -200,7 +200,34 @@ public:
     do_compare_MDEW(ws, ws1);
 
     // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
+    //AnalysisDataService::Instance().remove(outWSName);
+  }
+
+
+  /** Follow up test that saves AGAIN to update a file back end */
+  template <size_t nd>
+  void do_test_UpdateFileBackEnd()
+  {
+    std::string outWSName("LoadMDEWTest_OutputWS");
+    IMDEventWorkspace_sptr iws;
+    TS_ASSERT_THROWS_NOTHING( iws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT(iws); if (!iws) return;
+    boost::shared_ptr<MDEventWorkspace<MDEvent<nd>,nd> > ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<nd>,nd> >(iws);
+
+    // Modify that by adding some boxes
+
+
+    // Save it
+    SaveMDEW saver;
+    TS_ASSERT_THROWS_NOTHING( saver.initialize() )
+    TS_ASSERT( saver.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("InputWorkspace", outWSName ) );
+    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename", "") );
+    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("UpdateFileBackEnd", "1") );
+    TS_ASSERT_THROWS_NOTHING( saver.execute(); );
+    TS_ASSERT( saver.isExecuted() );
+
+    // The file should have been modified but that's tricky to check directly.
   }
 
 
@@ -229,12 +256,16 @@ public:
   }
   
 
-  void xtest_exec_from_file()
+  /** Use the file back end,
+   * then change it and save to update the file at the back end.
+   * DISABLED BECAUSE OF SUPER SLOW NEXUS WRITES WITH BAD CHUNKING.
+   */
+  void xtest_exec_3D_with_file_backEnd_whichIsThenUpdated()
   {
-    AlgorithmHelper::runAlgorithm("LoadMDEW", 4,
-        "Filename", "pg3.nxs",
-        "OutputWorkspace", "DontCare");
+    do_test_exec<3>(true);
+    do_test_UpdateFileBackEnd<3>();
   }
+
 
 };
 

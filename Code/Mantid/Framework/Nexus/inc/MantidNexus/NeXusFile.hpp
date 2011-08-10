@@ -260,11 +260,11 @@ namespace NeXus {
 
 
 
-    /**
-     * Create a 1D data field, insert the data, and close the data.
+    /** Create a 1D string data field, insert the data, and close the data.
      *
      * @param name :: The name of the field to create.
-     * @param value :: The string to put into the file.
+     * @param value :: The string to put into the file. If empty, it will
+     *                 be written out as a single space.
      */
     void writeData(const std::string& name, const std::string& value);
 
@@ -318,7 +318,7 @@ namespace NeXus {
      * @param value :: The vector to put into the file.
      */
     template <typename NumT>
-    void writeExtendibleData(const std::string& name, const std::vector<NumT>& value);
+    void writeExtendibleData(const std::string& name, std::vector<NumT>& value);
 
     /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
      *
@@ -328,6 +328,16 @@ namespace NeXus {
      */
     void writeExtendibleData(const std::string& name, const std::string& value);
 
+    /** Create a 1D data field with an unlimited dimension, insert the data, and close the data.
+     *
+     * \tparam NumT numeric data type of \a value
+     * @param name :: The name of the field to create.
+     * @param value :: The vector to put into the file.
+     * @param dims :: The dimensions of the data.
+     */
+    template <typename NumT>
+    void writeExtendibleData(const std::string& name, std::vector<NumT>& value,
+                             std::vector<int>& dims);
 
 
     /** Updates the data written into an already-created

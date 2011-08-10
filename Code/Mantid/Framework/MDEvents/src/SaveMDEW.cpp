@@ -54,8 +54,13 @@ namespace MDEvents
 
     std::vector<std::string> exts;
     exts.push_back(".nxs");
-    declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
-        "The name of the Nexus file to write, as a full or relative path");
+    declareProperty(new FileProperty("Filename", "", FileProperty::OptionalSave, exts),
+        "The name of the Nexus file to write, as a full or relative path.\n"
+        "Optional if UpdateFileBackEnd is checked.");
+
+//    declareProperty("UpdateFileBackEnd", false,
+//        "Only for MDEventWorkspaces with a file back end: check this to update the NXS file on disk\n"
+//        "to reflect the current data structure. Filename parameter is ignored.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -68,43 +73,65 @@ namespace MDEvents
   void SaveMDEW::doSave(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     std::string filename = getPropertyValue("Filename");
+//    bool update = getProperty("UpdateFileBackEnd");
+    bool update = false;
 
     // Open/create the file
     ::NeXus::File * file;
-    file = new ::NeXus::File(filename, NXACC_CREATE5);
+    if (update)
+    {
+      // Use the open file
+      file = ws->getBoxController()->getFile();
+      if (!file)
+        throw std::invalid_argument("MDEventWorkspace is not file-backed. Do not check UpdateFileBackEnd!");
+      // Navigate back to the root
+      file->openPath("/");
+    }
+    else
+    {
+      // Create a new file
+      file = new ::NeXus::File(filename, NXACC_CREATE5);
+    }
 
     // The base entry. Named so as to distinguish from other workspace types.
-    file->makeGroup("MDEventWorkspace", "NXentry", 1);
+    if (!update)
+      file->makeGroup("MDEventWorkspace", "NXentry", 0);
+    file->openGroup("MDEventWorkspace", "NXentry");
 
     // General information
-    file->writeData("definition", ws->id() );
-    std::string title = ws->getTitle(); if (title.empty()) title = " ";
-    file->writeData("title", title );
-    // TODO: notes, sample, logs, instrument, process, run_start
-
-    // Write out some general information like # of dimensions
-    file->writeData("dimensions", int32_t(nd));
-    file->writeData("event_type", MDE::getTypeName());
-    // Save each dimension, as their XML representation
-    for (size_t d=0; d<nd; d++)
+    if (!update)
     {
-      std::ostringstream mess;
-      mess << "dimension" << d;
-      file->writeData( mess.str(), ws->getDimension(d)->toXMLString() );
+      file->writeData("definition",  ws->id());
+      file->writeData("title",  ws->getTitle() );
+      // TODO: notes, sample, logs, instrument, process, run_start
+
+      // Write out some general information like # of dimensions
+      file->writeData("dimensions", int32_t(nd));
+      file->writeData("event_type", MDE::getTypeName());
+      // Save each dimension, as their XML representation
+      for (size_t d=0; d<nd; d++)
+      {
+        std::ostringstream mess;
+        mess << "dimension" << d;
+        file->writeData( mess.str(), ws->getDimension(d)->toXMLString() );
+      }
+      // Add box controller info.
+      file->writeData("box_controller_xml", ws->getBoxController()->toXMLString());
     }
-    // Add box controller info.
-    file->writeData("box_controller_xml", ws->getBoxController()->toXMLString());
 
 
     // Start the main data group
-    file->makeGroup("data", "NXdata", 1);
+    if (!update)
+      file->makeGroup("data", "NXdata");
+    file->openGroup("data", "NXdata");
 
     // Prepare the data chunk storage.
     size_t numPoints = ws->getNPoints();
 
     // Must have at least 1 point!
     if (numPoints == 0) numPoints = 1;
-    MDE::prepareNexusData(file, numPoints);
+    if (!update)
+      MDE::prepareNexusData(file, numPoints);
 
     BoxController_sptr bc = ws->getBoxController();
     size_t maxBoxes = bc->getMaxId();
@@ -112,7 +139,7 @@ namespace MDEvents
     // Prepare the vectors we will fill with data.
 
     // Box type (0=None, 1=MDBox, 2=MDGridBox
-    std::vector<int> boxType(maxBoxes, 0);
+    std::vector<int> box_type(maxBoxes, 0);
     // Recursion depth
     std::vector<int> depth(maxBoxes, -1);
     // Start/end indices into the list of events
@@ -120,7 +147,7 @@ namespace MDEvents
     // Min/Max extents in each dimension
     std::vector<double> extents(maxBoxes*nd*2, 0);
     // Inverse of the volume of the cell
-    std::vector<double> inverseVolume(maxBoxes, 0);
+    std::vector<double> inverse_volume(maxBoxes, 0);
     // Box cached signal/error squared
     std::vector<double> box_signal_errorsquared(maxBoxes*2, 0);
 
@@ -146,7 +173,7 @@ namespace MDEvents
         depth[id] = int(box->getDepth());
         box_signal_errorsquared[id*2] = double(box->getSignal());
         box_signal_errorsquared[id*2+1] = double(box->getErrorSquared());
-        inverseVolume[id] = box->getInverseVolume();
+        inverse_volume[id] = box->getInverseVolume();
 
         for (size_t d=0; d<nd; d++)
         {
@@ -170,14 +197,14 @@ namespace MDEvents
 
           box_children[id*2] = int(box->getChild(0)->getId());
           box_children[id*2+1] = int(box->getChild(numChildren-1)->getId());
-          boxType[id] = 2;
+          box_type[id] = 2;
         }
         else
-          boxType[id] = 1;
+          box_type[id] = 1;
 
 
         MDBox<MDE,nd> * mdbox = dynamic_cast<MDBox<MDE,nd> *>(box);
-        if (mdbox)
+        if (mdbox && !update)
         {
           const std::vector<MDE> & events = mdbox->getConstEvents();
           if (events.size() > 0)
@@ -209,34 +236,39 @@ namespace MDEvents
     // Done writing the event data
     MDE::closeNexusData(file);
 
-
-//    for (size_t i=0; i<20; i++)
-//    {
-//      std::cout << i << " : " << box_event_index[i] << std::endl;
-//    }
-
     // OK, we've filled these big arrays of data. Save them.
     prog->report("Writing Box Data");
 
-    file->writeData("box_type", boxType);
-    file->writeData("depth", depth);
-    file->writeData("inverseVolume", inverseVolume);
+    std::vector<int> exents_dims(2,0);
+    exents_dims[0] = (int(maxBoxes));
+    exents_dims[1] = (nd*2);
 
-    std::vector<int> dims(2,0);
-    dims[0] = (int(maxBoxes));
-    dims[1] = (nd*2);
-    file->writeData("extents", extents, dims);
+    std::vector<int> box_2_dims(2,0);
+    box_2_dims[0] = int(maxBoxes);
+    box_2_dims[1] = (2);
 
-    dims[0] = (int(maxBoxes));
-    dims[1] = (2);
-    file->writeData("box_children", box_children, dims);
-
-    file->writeData("box_signal_errorsquared", box_signal_errorsquared, dims);
-
-    file->writeData("box_event_index", box_event_index, dims);
-
-//    dims.clear();
-//    file->writeData("children", children);
+    if (!update)
+    {
+      // Write it for the first time
+      file->writeData("box_type", box_type);
+      file->writeData("depth", depth);
+      file->writeData("inverse_volume", inverse_volume);
+      file->writeData("extents", extents, exents_dims);
+      file->writeData("box_children", box_children, box_2_dims);
+      file->writeData("box_signal_errorsquared", box_signal_errorsquared, box_2_dims);
+      file->writeData("box_event_index", box_event_index, box_2_dims);
+    }
+    else
+    {
+      // Update the extendible data sets
+      file->writeUpdatedData("box_type", box_type);
+      file->writeUpdatedData("depth", depth);
+      file->writeUpdatedData("inverse_volume", inverse_volume);
+      file->writeUpdatedData("extents", extents, exents_dims);
+      file->writeUpdatedData("box_children", box_children, box_2_dims);
+      file->writeUpdatedData("box_signal_errorsquared", box_signal_errorsquared, box_2_dims);
+      file->writeUpdatedData("box_event_index", box_event_index, box_2_dims);
+    }
 
     file->close();
 

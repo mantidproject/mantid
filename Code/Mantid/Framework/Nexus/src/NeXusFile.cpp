@@ -360,7 +360,7 @@ void File::writeData(const string& name, const string& value) {
   if (my_value.empty())
     my_value = " ";
   vector<int> dims;
-  dims.push_back(static_cast<int>(value.size()));
+  dims.push_back(static_cast<int>(my_value.size()));
   this->makeData(name, CHAR, dims, true);
 
   this->putData(&(my_value[0]));
@@ -387,9 +387,11 @@ void File::writeData(const string& name, const vector<NumT>& value,
 
 
 template <typename NumT>
-void File::writeExtendibleData(const string& name, const vector<NumT>& value) {
+void File::writeExtendibleData(const string& name, vector<NumT>& value) {
   vector<int> dims(1, NX_UNLIMITED);
-  this->writeData(name, value, dims);
+  this->makeData(name, getType<NumT>(), dims, true);
+  this->putSlab(value, int(0), int(value.size()));
+  this->closeData();
 }
 
 //void File::writeExtendibleData(const string& name, const std::string& value) {
@@ -398,6 +400,22 @@ void File::writeExtendibleData(const string& name, const vector<NumT>& value) {
 //    s[i] = value[i];
 //  writeExtendibleData(name, s);
 //}
+
+template <typename NumT>
+void File::writeExtendibleData(const string& name, vector<NumT>& value,
+    vector<int>& dims)
+{
+  // Create the data with unlimited 0th dimensions
+  std::vector<int> unlim_dims(dims);
+  unlim_dims[0] = NX_UNLIMITED;
+  this->makeData(name, getType<NumT>(), unlim_dims, true);
+  // And put that slab of that of that given size in there
+  std::vector<int> start( dims.size(), 0 );
+  this->putSlab(value, start, dims);
+  this->closeData();
+
+}
+
 
 template <typename NumT>
 void File::writeUpdatedData(const std::string& name, std::vector<NumT>& value)
@@ -1399,27 +1417,50 @@ template
 NXDLL_EXPORT void File::writeData(const string& name, const vector<char>& value);
 
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, const vector<float>& value);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<float>& value);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, const vector<double>& value);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<double>& value);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, const vector<int8_t>& value);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int8_t>& value);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, const vector<uint8_t>& value);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint8_t>& value);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, const vector<int16_t>& value);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int16_t>& value);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, const vector<uint16_t>& value);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint16_t>& value);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, const vector<int32_t>& value);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int32_t>& value);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, const vector<uint32_t>& value);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint32_t>& value);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, const vector<int64_t>& value);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int64_t>& value);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, const vector<uint64_t>& value);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint64_t>& value);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, const vector<char>& value);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<char>& value);
+
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<float>& value, std::vector<int> & dims);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<double>& value, std::vector<int> & dims);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int8_t>& value, std::vector<int> & dims);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint8_t>& value, std::vector<int> & dims);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int16_t>& value, std::vector<int> & dims);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint16_t>& value, std::vector<int> & dims);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int32_t>& value, std::vector<int> & dims);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint32_t>& value, std::vector<int> & dims);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int64_t>& value, std::vector<int> & dims);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint64_t>& value, std::vector<int> & dims);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<char>& value, std::vector<int> & dims);
 
 template
 NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<float>& value);

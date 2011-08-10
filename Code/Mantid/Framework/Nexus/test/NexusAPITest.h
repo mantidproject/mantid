@@ -273,9 +273,9 @@ public:
     file->writeExtendibleData("mydata1", data);
     file->writeExtendibleData("mydata2", data);
     std::vector<int> dims(2);
-    dims[0] = NX_UNLIMITED;
+    dims[0] = 5;
     dims[1] = 2;
-    file->writeData("my2Ddata", data, dims);
+    file->writeExtendibleData("my2Ddata", data, dims);
 //    std::string s = "short string";
 //    file->writeExtendibleData("mystring", s);
     file->close();

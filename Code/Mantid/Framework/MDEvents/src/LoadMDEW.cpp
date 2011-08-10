@@ -167,7 +167,7 @@ namespace MDEvents
     // Min/Max extents in each dimension
     std::vector<double> extents;
     // Inverse of the volume of the cell
-    std::vector<double> inverseVolume;
+    std::vector<double> inverse_volume;
     // Box cached signal/error squared
     std::vector<double> box_signal_errorsquared;
     // Start/end children IDs
@@ -179,7 +179,7 @@ namespace MDEvents
     // Read all the data blocks
     file->readData("box_type", boxType);
     file->readData("depth", depth);
-    file->readData("inverseVolume", inverseVolume);
+    file->readData("inverse_volume", inverse_volume);
     file->readData("extents", extents);
     file->readData("box_children", box_children);
     file->readData("box_signal_errorsquared", box_signal_errorsquared);
@@ -192,7 +192,7 @@ namespace MDEvents
 
     // Check all vector lengths match
     if (depth.size() != numBoxes) throw std::runtime_error("Incompatible size for data: depth.");
-    if (inverseVolume.size() != numBoxes) throw std::runtime_error("Incompatible size for data: inverseVolume.");
+    if (inverse_volume.size() != numBoxes) throw std::runtime_error("Incompatible size for data: inverse_volume.");
     if (boxType.size() != numBoxes) throw std::runtime_error("Incompatible size for data: boxType.");
     if (extents.size() != numBoxes*nd*2) throw std::runtime_error("Incompatible size for data: extents.");
     if (box_children.size() != numBoxes*2) throw std::runtime_error("Incompatible size for data: box_children.");
