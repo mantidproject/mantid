@@ -24,31 +24,31 @@ namespace Mantid
   {
 DECLARE_FUNCTION(BivariateNormal)
 //Indicies into the Attrib array
-int StartRow = 0;
-int StartCol = 1;
-int NRows = 2;
-int NCols = 3;
-int S_int = 4;
-int S_xint = 5;
-int S_yint = 6;
-int S_x2int = 7;
-int S_y2int = 8;
-int S_xyint = 9;
-int S_y = 10;
-int S_x = 11;
-int S_x2 = 12;
-int S_y2 = 13;
-int S_xy = 14;
-int S_1 = 15;
+#define StartRow   0
+#define StartCol   1
+#define NRows   2
+#define NCols   3
+#define S_int   4
+#define S_xint   5
+#define S_yint   6
+#define S_x2int   7
+#define S_y2int   8
+#define S_xyint   9
+#define S_y   10
+#define S_x   11
+#define S_x2   12
+#define S_y2   13
+#define S_xy   14
+#define S_1   15
 
 //Indicies into the LastParams array
-int IBACK = 0;
-int ITINTENS = 1;
-int IXMEAN = 2;
-int IYMEAN = 3;
-int IVXX = 4;
-int IVYY = 5;
-int IVXY = 6;
+#define IBACK   0
+#define ITINTENS   1
+#define IXMEAN   2
+#define IYMEAN   3
+#define IVXX   4
+#define IVYY   5
+#define IVXY   6
 
 Kernel::Logger& BivariateNormal::g_log= Kernel::Logger::get("BivariateNormal");
 
@@ -340,7 +340,11 @@ void BivariateNormal::initCommon()
 
     // std::cout<<"row formula="<< ssyy.str()<<std::endl;
     //API::ParameterTie* pt =
-        tie("SSrow", ssyy.str());
+       if( getTie( IVYY) == NULL)
+       {
+         tie("SSrow", ssyy.str());
+
+       }
     //  std::cout << "  ddK" <<pt->eval()<< std::endl;
 
     ssxx << std::string("(") << (SIxx) << "+(Mcol-" << (mIx) << ")*(Mcol-" << (mIx) << ")*"
@@ -350,7 +354,11 @@ void BivariateNormal::initCommon()
 
     // std::cout<<"col formula="<< ssxx.str()<<std::endl;
     //API::ParameterTie* ptx =
-    tie("SScol", ssxx.str());
+    if( getTie( IVXX) == NULL)
+    {
+      tie("SScol", ssxx.str());
+
+    }
     // std::cout << "  ddK" <<ptx->eval()<< std::endl;
 
     ssxy << std::string("(") << (SIxy) << "+(Mcol-" << (mIx) << ")*(Mrow-" << (mIy) << ")*"
@@ -360,7 +368,11 @@ void BivariateNormal::initCommon()
 
     //std::cout<<"cov formula="<< ssxy.str()<<std::endl;
    // API::ParameterTie* ptxy =
-    tie("SSrc", ssxy.str());
+    if( getTie( IVXY) == NULL)
+    {
+      tie("SSrc", ssxy.str());
+
+    }
     //std::cout << "   ddK" <<ptxy->eval()<< std::endl;
 
 
