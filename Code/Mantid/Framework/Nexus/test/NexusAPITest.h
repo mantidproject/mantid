@@ -271,11 +271,12 @@ public:
     std::vector<int> data(10, 123);
     file->makeGroup("data", "NXdata", 1);
     file->writeExtendibleData("mydata1", data);
-    file->writeExtendibleData("mydata2", data);
+    file->writeExtendibleData("mydata2", data, 1000);
     std::vector<int> dims(2);
     dims[0] = 5;
     dims[1] = 2;
-    file->writeExtendibleData("my2Ddata", data, dims);
+    std::vector<int> chunk(2, 2);
+    file->writeExtendibleData("my2Ddata", data, dims, chunk);
 //    std::string s = "short string";
 //    file->writeExtendibleData("mystring", s);
     file->close();

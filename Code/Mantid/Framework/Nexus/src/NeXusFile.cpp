@@ -387,9 +387,19 @@ void File::writeData(const string& name, const vector<NumT>& value,
 
 
 template <typename NumT>
-void File::writeExtendibleData(const string& name, vector<NumT>& value) {
+void File::writeExtendibleData(const string& name, vector<NumT>& value)
+{
+  // Use a default chunk size of 4096 bytes. TODO: Is this optimal?
+  writeExtendibleData(name, value, 4096);
+}
+
+template <typename NumT>
+void File::writeExtendibleData(const string& name, vector<NumT>& value, const int chunk)
+{
   vector<int> dims(1, NX_UNLIMITED);
-  this->makeData(name, getType<NumT>(), dims, true);
+  vector<int> chunk_dims(1, chunk);
+  // Use chunking without using compression
+  this->makeCompData(name, getType<NumT>(), dims, NONE, chunk_dims, true );
   this->putSlab(value, int(0), int(value.size()));
   this->closeData();
 }
@@ -403,12 +413,13 @@ void File::writeExtendibleData(const string& name, vector<NumT>& value) {
 
 template <typename NumT>
 void File::writeExtendibleData(const string& name, vector<NumT>& value,
-    vector<int>& dims)
+    vector<int>& dims, std::vector<int> & chunk)
 {
   // Create the data with unlimited 0th dimensions
   std::vector<int> unlim_dims(dims);
   unlim_dims[0] = NX_UNLIMITED;
-  this->makeData(name, getType<NumT>(), unlim_dims, true);
+  // Use chunking without using compression
+  this->makeCompData(name, getType<NumT>(), unlim_dims, NONE, chunk, true );
   // And put that slab of that of that given size in there
   std::vector<int> start( dims.size(), 0 );
   this->putSlab(value, start, dims);
@@ -1440,27 +1451,50 @@ template
 NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<char>& value);
 
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<float>& value, std::vector<int> & dims);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<float>& value, const int chunk);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<double>& value, std::vector<int> & dims);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<double>& value, const int chunk);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int8_t>& value, std::vector<int> & dims);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int8_t>& value, const int chunk);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint8_t>& value, std::vector<int> & dims);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint8_t>& value, const int chunk);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int16_t>& value, std::vector<int> & dims);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int16_t>& value, const int chunk);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint16_t>& value, std::vector<int> & dims);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint16_t>& value, const int chunk);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int32_t>& value, std::vector<int> & dims);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int32_t>& value, const int chunk);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint32_t>& value, std::vector<int> & dims);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint32_t>& value, const int chunk);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int64_t>& value, std::vector<int> & dims);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int64_t>& value, const int chunk);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint64_t>& value, std::vector<int> & dims);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint64_t>& value, const int chunk);
 template
-NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<char>& value, std::vector<int> & dims);
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<char>& value, const int chunk);
+
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<float>& value, std::vector<int> & dims, std::vector<int> & chunk);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<double>& value, std::vector<int> & dims, std::vector<int> & chunk);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int8_t>& value, std::vector<int> & dims, std::vector<int> & chunk);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint8_t>& value, std::vector<int> & dims, std::vector<int> & chunk);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int16_t>& value, std::vector<int> & dims, std::vector<int> & chunk);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint16_t>& value, std::vector<int> & dims, std::vector<int> & chunk);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int32_t>& value, std::vector<int> & dims, std::vector<int> & chunk);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint32_t>& value, std::vector<int> & dims, std::vector<int> & chunk);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<int64_t>& value, std::vector<int> & dims, std::vector<int> & chunk);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<uint64_t>& value, std::vector<int> & dims, std::vector<int> & chunk);
+template
+NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<char>& value, std::vector<int> & dims, std::vector<int> & chunk);
 
 template
 NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<float>& value);
