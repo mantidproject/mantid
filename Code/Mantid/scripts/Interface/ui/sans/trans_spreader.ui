@@ -363,7 +363,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Click to plot data 2D data.</string>
+        <string>Click to plot 2D data.</string>
        </property>
        <property name="text">
         <string>Plot</string>
@@ -385,7 +385,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Click to plot data 2D data.</string>
+        <string>Click to plot 2D data.</string>
        </property>
        <property name="text">
         <string>Plot</string>
@@ -407,7 +407,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Click to plot data 2D data.</string>
+        <string>Click to plot 2D data.</string>
        </property>
        <property name="text">
         <string>Plot</string>
@@ -429,7 +429,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Click to plot data 2D data.</string>
+        <string>Click to plot 2D data.</string>
        </property>
        <property name="text">
         <string>Plot</string>

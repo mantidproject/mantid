@@ -319,7 +319,7 @@
                </sizepolicy>
               </property>
               <property name="toolTip">
-               <string>Click to plot data 2D data.</string>
+               <string>Click to plot 2D data.</string>
               </property>
               <property name="text">
                <string>Plot</string>
@@ -364,6 +364,9 @@
             </item>
             <item>
              <widget class="QCheckBox" name="beamstop_chk">
+              <property name="toolTip">
+               <string>Select to overright the beam diameter.</string>
+              </property>
               <property name="text">
                <string>Beam diameter [mm]</string>
               </property>
@@ -467,6 +470,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>Select to specify a dark current data set.</string>
+              </property>
               <property name="text">
                <string>Dark current file</string>
               </property>
@@ -534,7 +540,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Click to plot data 2D data.</string>
+               <string>Click to plot 2D data.</string>
               </property>
               <property name="text">
                <string>Plot</string>
@@ -594,6 +600,9 @@
                 <width>150</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>Select to compute the Q resolution.</string>
               </property>
               <property name="text">
                <string>Q resolution</string>
@@ -858,6 +867,9 @@
             </item>
             <item>
              <widget class="QRadioButton" name="lin_binning_radio">
+              <property name="toolTip">
+               <string>Select to use linear binning for I(Q).</string>
+              </property>
               <property name="text">
                <string>Linear Q binning</string>
               </property>
@@ -1224,7 +1236,7 @@ The mask information is saved separately so that your data file will NOT be modi
             <item>
              <widget class="QPushButton" name="mask_plot_button">
               <property name="toolTip">
-               <string>Click to plot data 2D data.</string>
+               <string>Click to plot 2D data and edit mask.</string>
               </property>
               <property name="text">
                <string>Edit Mask</string>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/trans_spreader.ui'
 #
-# Created: Fri Apr 15 15:10:01 2011
+# Created: Wed Aug 10 11:58:25 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -210,12 +210,12 @@ class Ui_GroupBox(object):
         self.spreader_trans_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Transmission of the beam spreader in %.", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("GroupBox", "+/-", None, QtGui.QApplication.UnicodeUTF8))
         self.spreader_trans_spread_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Uncertainty on the beam spreader transmission.", None, QtGui.QApplication.UnicodeUTF8))
-        self.sample_scatt_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_scatt_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_scatt_plot.setText(QtGui.QApplication.translate("GroupBox", "Plot", None, QtGui.QApplication.UnicodeUTF8))
-        self.sample_spread_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_spread_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_spread_plot.setText(QtGui.QApplication.translate("GroupBox", "Plot", None, QtGui.QApplication.UnicodeUTF8))
-        self.direct_scatt_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.direct_scatt_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.direct_scatt_plot.setText(QtGui.QApplication.translate("GroupBox", "Plot", None, QtGui.QApplication.UnicodeUTF8))
-        self.direct_spread_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.direct_spread_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.direct_spread_plot.setText(QtGui.QApplication.translate("GroupBox", "Plot", None, QtGui.QApplication.UnicodeUTF8))
 

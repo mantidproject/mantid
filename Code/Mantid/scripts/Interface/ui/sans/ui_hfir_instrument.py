@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_instrument.ui'
 #
-# Created: Wed Jul 27 13:29:02 2011
+# Created: Wed Aug 10 11:58:25 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -443,7 +443,7 @@ class Ui_Frame(object):
         self.scale_data_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path for a direct beam data file.", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_data_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_data_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
-        self.scale_data_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.scale_data_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_data_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.beamstop_chk.setText(QtGui.QApplication.translate("Frame", "Beam diameter [mm]", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_beam_radius_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the beam diameter in mm.", None, QtGui.QApplication.UnicodeUTF8))
@@ -453,7 +453,7 @@ class Ui_Frame(object):
         self.dark_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the dark current data.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
-        self.dark_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.dark_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.solid_angle_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to perform a solid angle correction.", None, QtGui.QApplication.UnicodeUTF8))
         self.solid_angle_chk.setText(QtGui.QApplication.translate("Frame", "Perform solid angle correction", None, QtGui.QApplication.UnicodeUTF8))
@@ -489,6 +489,6 @@ class Ui_Frame(object):
         self.mask_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a file to be used to create your mask.", None, QtGui.QApplication.UnicodeUTF8))
         self.mask_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.mask_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
-        self.mask_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.mask_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data and edit mask.", None, QtGui.QApplication.UnicodeUTF8))
         self.mask_plot_button.setText(QtGui.QApplication.translate("Frame", "Edit Mask", None, QtGui.QApplication.UnicodeUTF8))
 

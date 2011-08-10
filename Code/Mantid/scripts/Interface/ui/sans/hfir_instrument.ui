@@ -378,7 +378,7 @@
                </sizepolicy>
               </property>
               <property name="toolTip">
-               <string>Click to plot data 2D data.</string>
+               <string>Click to plot 2D data.</string>
               </property>
               <property name="text">
                <string>Plot</string>
@@ -593,7 +593,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Click to plot data 2D data.</string>
+               <string>Click to plot 2D data.</string>
               </property>
               <property name="text">
                <string>Plot</string>
@@ -1090,7 +1090,7 @@ The mask information is saved separately so that your data file will NOT be modi
               <item>
                <widget class="QPushButton" name="mask_plot_button">
                 <property name="toolTip">
-                 <string>Click to plot data 2D data.</string>
+                 <string>Click to plot 2D data and edit mask.</string>
                 </property>
                 <property name="text">
                  <string>Edit Mask</string>

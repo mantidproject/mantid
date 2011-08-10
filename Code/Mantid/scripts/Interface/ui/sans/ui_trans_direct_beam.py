@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/trans_direct_beam.ui'
 #
-# Created: Fri Apr 15 15:10:01 2011
+# Created: Wed Aug 10 11:58:25 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -113,8 +113,8 @@ class Ui_GroupBox(object):
         self.direct_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_radius_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Radius of the beam in pixels.", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("GroupBox", "Beam radius (pixels)", None, QtGui.QApplication.UnicodeUTF8))
-        self.sample_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_plot.setText(QtGui.QApplication.translate("GroupBox", "Plot", None, QtGui.QApplication.UnicodeUTF8))
-        self.direct_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.direct_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.direct_plot.setText(QtGui.QApplication.translate("GroupBox", "Plot", None, QtGui.QApplication.UnicodeUTF8))
 

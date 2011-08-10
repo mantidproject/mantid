@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_background.ui'
 #
-# Created: Fri Jul 15 14:44:45 2011
+# Created: Wed Aug 10 11:58:26 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -69,6 +69,7 @@ class Ui_Frame(object):
         self.background_plot_button.setSizePolicy(sizePolicy)
         self.background_plot_button.setMinimumSize(QtCore.QSize(0, 0))
         self.background_plot_button.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.background_plot_button.setToolTip("")
         self.background_plot_button.setObjectName("background_plot_button")
         self.horizontalLayout_4.addWidget(self.background_plot_button)
         spacerItem1 = QtGui.QSpacerItem(49, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
@@ -229,7 +230,6 @@ class Ui_Frame(object):
         self.background_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
         self.background_browse.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.background_browse.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
-        self.background_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.background_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.transmission_grpbox.setTitle(QtGui.QApplication.translate("Frame", "Transmission", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_trans_label.setText(QtGui.QApplication.translate("Frame", "Background transmission:", None, QtGui.QApplication.UnicodeUTF8))

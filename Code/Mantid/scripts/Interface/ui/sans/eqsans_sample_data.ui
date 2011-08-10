@@ -146,7 +146,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Click to plot data 2D data.</string>
+            <string>Click to plot 2D data.</string>
            </property>
            <property name="text">
             <string>Plot</string>
@@ -313,6 +313,9 @@
                   <height>0</height>
                  </size>
                 </property>
+                <property name="toolTip">
+                 <string>Enter a valid data file path.</string>
+                </property>
                </widget>
               </item>
               <item>
@@ -335,6 +338,9 @@
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>Click to plot 2D data.</string>
                 </property>
                 <property name="text">
                  <string>Plot</string>
@@ -388,6 +394,9 @@
                   <height>0</height>
                  </size>
                 </property>
+                <property name="toolTip">
+                 <string>Enter a valid data file path.</string>
+                </property>
                </widget>
               </item>
               <item>
@@ -410,6 +419,9 @@
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>Click to plot 2D data.</string>
                 </property>
                 <property name="text">
                  <string>Plot</string>
@@ -468,6 +480,9 @@
                   <width>80</width>
                   <height>16777215</height>
                  </size>
+                </property>
+                <property name="toolTip">
+                 <string>Radius of the beam in pixels.</string>
                 </property>
                </widget>
               </item>
@@ -797,7 +812,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Click to plot data 2D data.</string>
+            <string>Click to plot 2D data.</string>
            </property>
            <property name="text">
             <string>Plot</string>
@@ -1047,6 +1062,9 @@
                 <height>0</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>Enter a valid data file path.</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -1069,6 +1087,9 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Click to plot 2D data.</string>
               </property>
               <property name="text">
                <string>Plot</string>
@@ -1122,6 +1143,9 @@
                 <height>0</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>Enter a valid data file path.</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -1144,6 +1168,9 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Click to plot 2D data.</string>
               </property>
               <property name="text">
                <string>Plot</string>
@@ -1208,6 +1235,9 @@
                 <width>80</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>Radius of the beam in pixels.</string>
               </property>
              </widget>
             </item>

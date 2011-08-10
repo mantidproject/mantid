@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_background.ui'
 #
-# Created: Wed Jul 27 13:29:02 2011
+# Created: Wed Aug 10 11:58:24 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -290,7 +290,7 @@ class Ui_Frame(object):
         self.background_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
         self.background_browse.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.background_browse.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
-        self.background_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.background_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.background_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.thickness_label.setText(QtGui.QApplication.translate("Frame", "Sample thickness [cm]:", None, QtGui.QApplication.UnicodeUTF8))
         self.thickness_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter thickness of the background sample [cm]", None, QtGui.QApplication.UnicodeUTF8))
@@ -314,7 +314,7 @@ class Ui_Frame(object):
         self.trans_dark_current_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the dark current data.", None, QtGui.QApplication.UnicodeUTF8))
         self.trans_dark_current_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.trans_dark_current_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
-        self.trans_dark_current_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.trans_dark_current_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.trans_dark_current_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.trans_direct_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to use the direct beam method for transmission calculation.", None, QtGui.QApplication.UnicodeUTF8))
         self.trans_direct_chk.setText(QtGui.QApplication.translate("Frame", "Direct beam", None, QtGui.QApplication.UnicodeUTF8))

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_sample_data.ui'
 #
-# Created: Wed Jul 27 14:14:08 2011
+# Created: Wed Aug 10 11:58:25 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -463,18 +463,23 @@ class Ui_Frame(object):
         self.data_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_file_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.data_file_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Frame", "Sample thickness [cm]", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_thickness_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter sample thickness [cm]", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Transmission", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_label.setText(QtGui.QApplication.translate("Frame", "Sample direct beam data file", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.empty_label.setText(QtGui.QApplication.translate("Frame", "Empty direct beam data file", None, QtGui.QApplication.UnicodeUTF8))
+        self.empty_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
         self.empty_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.empty_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.empty_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_radius_label.setText(QtGui.QApplication.translate("Frame", "Beam radius (pixels)", None, QtGui.QApplication.UnicodeUTF8))
+        self.beam_radius_edit.setToolTip(QtGui.QApplication.translate("Frame", "Radius of the beam in pixels.", None, QtGui.QApplication.UnicodeUTF8))
         self.fit_together_check.setToolTip(QtGui.QApplication.translate("Frame", "Select to fit the two frames together when in frame-skipping mode.", None, QtGui.QApplication.UnicodeUTF8))
         self.fit_together_check.setText(QtGui.QApplication.translate("Frame", "Fit frames together", None, QtGui.QApplication.UnicodeUTF8))
         self.calculate_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to let the reduction software calculate the transmission.", None, QtGui.QApplication.UnicodeUTF8))
@@ -490,7 +495,7 @@ class Ui_Frame(object):
         self.background_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
         self.background_browse.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.background_browse.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
-        self.background_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.background_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.background_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_thickness_label.setText(QtGui.QApplication.translate("Frame", "Sample thickness [cm]", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_thickness_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter background sample thickness [cm]", None, QtGui.QApplication.UnicodeUTF8))
@@ -502,12 +507,17 @@ class Ui_Frame(object):
         self.bck_plus_minus_label.setText(QtGui.QApplication.translate("Frame", "+/-", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_dtransmission_edit.setToolTip(QtGui.QApplication.translate("Frame", "Uncertainty on the background transmission.", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_sample_label.setText(QtGui.QApplication.translate("Frame", "Sample direct beam data file", None, QtGui.QApplication.UnicodeUTF8))
+        self.bck_sample_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_sample_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.bck_sample_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_sample_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_empty_label.setText(QtGui.QApplication.translate("Frame", "Empty direct beam data file", None, QtGui.QApplication.UnicodeUTF8))
+        self.bck_empty_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_empty_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.bck_empty_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_empty_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_beam_radius_label.setText(QtGui.QApplication.translate("Frame", "Beam radius (pixels)", None, QtGui.QApplication.UnicodeUTF8))
+        self.bck_beam_radius_edit.setToolTip(QtGui.QApplication.translate("Frame", "Radius of the beam in pixels.", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_fit_together_check.setToolTip(QtGui.QApplication.translate("Frame", "Select to fit the two frames together when in frame-skipping mode.", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_fit_together_check.setText(QtGui.QApplication.translate("Frame", "Fit frames together", None, QtGui.QApplication.UnicodeUTF8))
         self.bck_theta_dep_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to apply a theta-dependent transmission correction.", None, QtGui.QApplication.UnicodeUTF8))
