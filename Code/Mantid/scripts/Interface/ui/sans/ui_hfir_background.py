@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_background.ui'
 #
-# Created: Wed Aug 10 11:58:24 2011
+# Created: Wed Aug 10 17:26:19 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -14,16 +14,17 @@ class Ui_Frame(object):
         Frame.setObjectName("Frame")
         Frame.setEnabled(True)
         Frame.resize(961, 721)
-        Frame.setFrameShape(QtGui.QFrame.StyledPanel)
+        Frame.setFrameShape(QtGui.QFrame.NoFrame)
         Frame.setFrameShadow(QtGui.QFrame.Raised)
         self.verticalLayout = QtGui.QVBoxLayout(Frame)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.scrollArea = QtGui.QScrollArea(Frame)
         self.scrollArea.setFrameShape(QtGui.QFrame.NoFrame)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtGui.QWidget(self.scrollArea)
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 941, 701))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 961, 721))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
