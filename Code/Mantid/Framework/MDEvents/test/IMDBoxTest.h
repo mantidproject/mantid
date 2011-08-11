@@ -65,10 +65,6 @@ public:
   virtual void addEvent(const MDE & /*point*/)
   {}
 
-  /// Add several events
-  virtual size_t addEvents(const std::vector<MDE> & /*events*/)
-  {return 0;}
-
   /** Perform centerpoint binning of events
    * @param bin :: MDBin object giving the limits of events to accept.
    */

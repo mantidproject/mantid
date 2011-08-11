@@ -28,7 +28,7 @@ public:
   virtual ~SimplexBackToBackExponential() {}
 
 protected:
-  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
+  void functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData)
   {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);

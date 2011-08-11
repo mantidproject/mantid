@@ -34,7 +34,7 @@ public:
   /// function to return a category of the algorithm. A default implementation is provided
   virtual const std::string category() const {return "Helper";}
 
-  bool checkSizeCompatibility(const MatrixWorkspace_sptr ws1,const MatrixWorkspace_sptr ws2)
+  bool checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,const MatrixWorkspace_const_sptr ws2)
   {
     m_lhs = ws1;
     m_rhs = ws2;

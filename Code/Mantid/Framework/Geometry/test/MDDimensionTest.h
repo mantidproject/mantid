@@ -15,7 +15,7 @@ class tDimension: public MDDimension
 {
 public:
     tDimension(const std::string &ID):MDDimension(ID){};
-    virtual void  setRange(double rMin=-1,double rMax=1,unsigned int nBins=1){
+    virtual void  setRange(double rMin=-1,double rMax=1,size_t nBins=1){
         MDDimension::setRange(rMin,rMax,nBins);
     }
     void  setName(const char *name){
@@ -38,7 +38,7 @@ class tDimensionRes: public MDDimensionRes
 {
 public:
    tDimensionRes(const std::string &ID,const rec_dim nDim):MDDimensionRes(ID,nDim){}; 
-   virtual void  setRange(double rMin=-1,double rMax=1,unsigned int nBins=1){
+   virtual void  setRange(double rMin=-1,double rMax=1,size_t nBins=1){
         MDDimensionRes::setRange(rMin,rMax,nBins);
     }
     void  setName(const char *name){
@@ -151,7 +151,7 @@ public:
       TS_ASSERT_THROWS_NOTHING(x=pOrtDim->getX(nBins));
       TS_ASSERT_DELTA(x,pOrtDim->getMaximum(),FLT_EPSILON);
       // out of range request
-      TS_ASSERT_THROWS_ANYTHING(x=pOrtDim->getX(-1));
+      TS_ASSERT_THROWS_ANYTHING(x=pOrtDim->getX(size_t(-1))); // size_t cast avoids Intel compiler warning
       TS_ASSERT_THROWS_ANYTHING(x=pOrtDim->getX(nBins+1));
     }
 

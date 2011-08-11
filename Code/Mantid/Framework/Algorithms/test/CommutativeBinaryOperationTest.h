@@ -22,7 +22,7 @@ public:
   virtual const std::string name() const { return "CommutativeBinaryOperationHelper"; }
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
-  bool checkSizeCompatibility(const MatrixWorkspace_sptr ws1,const MatrixWorkspace_sptr ws2)
+  bool checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,const MatrixWorkspace_const_sptr ws2)
   {
     m_lhs = ws1;
     m_rhs = ws2;

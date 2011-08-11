@@ -41,7 +41,7 @@ public:
   /// Update in parallel to test thread safety
   void test_parallel()
   {
-    PARALLEL_FOR_IF(true)
+    PARALLEL_FOR_NO_WSP_CHECK()
     for(int i=0; i<500; i++)
     {
       MemoryStats mem;

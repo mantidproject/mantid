@@ -139,9 +139,8 @@ public:
    TS_ASSERT_EQUALS(file.getNumElements(), num);
    //Get it
    size_t block_size = 10;
-   size_t loaded_size = -1;
    DasEvent * data = new DasEvent[block_size];
-   loaded_size = file.loadBlock(data, block_size);
+   size_t loaded_size = file.loadBlock(data, block_size);
    //Yes, we loaded that amount
    TS_ASSERT_EQUALS(loaded_size, block_size);
 
@@ -175,9 +174,8 @@ public:
    TS_ASSERT_EQUALS(file.getNumElements(), num);
    //Get it
    size_t block_size = 10;
-   size_t loaded_size = -1;
    DasEvent * data = new DasEvent[block_size];
-   loaded_size = file.loadBlockAt(data, 5, block_size);
+   size_t loaded_size = file.loadBlockAt(data, 5, block_size);
    //Yes, we loaded that amount
    TS_ASSERT_EQUALS(loaded_size, block_size);
 
