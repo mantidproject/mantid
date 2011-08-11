@@ -129,8 +129,8 @@ public:
     // Spectra mapping has been updated
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(0), 1);
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(255), 256);
-    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(256), 601);
-    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(257), 602);
+    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(256), 257);
+    TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(257), 258);
 
     std::set<detid_t> ids_from_map = output->getSpectrum(257)->getDetectorIDs();
     IDetector_sptr det_from_ws = output->getDetector(257);

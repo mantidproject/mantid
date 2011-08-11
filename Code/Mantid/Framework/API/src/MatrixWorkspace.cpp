@@ -232,14 +232,13 @@ namespace Mantid
         {
           // The detector ID
           const detid_t detId = *it;
-          // By default: Spectrum number = detector ID #
-          const specid_t specNo = specid_t(detId);
+          // By default: Spectrum number = index +  1
+          const specid_t specNo = specid_t(index + 1);
           // We keep the entry in the spectraDetectorMap. TODO: Deprecate spectraDetectorMap entirely.
           spectramap->addSpectrumEntries(specNo, std::vector<detid_t>(1, detId));
 
           // Also set the spectrum number in the axis(1). TODO: Remove this, it is redundant (but it is stuck everywhere)
           m_axes[1]->setValue(index, specNo);
-//          if (index < 300) std::cout << "rebuildSpectraMapping index " << index << " specNo " << specNo << std::endl;
 
           if (index < this->getNumberHistograms())
           {

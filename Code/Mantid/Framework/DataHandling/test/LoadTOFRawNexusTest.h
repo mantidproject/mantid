@@ -46,7 +46,7 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 51200);
 
     ISpectrum * spec = ws->getSpectrum(2);
-    TS_ASSERT_EQUALS( spec->getSpectrumNo(), 2);
+    TS_ASSERT_EQUALS( spec->getSpectrumNo(), 3);
     TS_ASSERT_EQUALS( spec->getDetectorIDs().size(), 1);
     TS_ASSERT( spec->hasDetectorID(2) );
     MantidVec X, Y, E;
@@ -66,7 +66,7 @@ public:
 
     // More data in this spectrum
     spec = ws->getSpectrum(36540);
-    TS_ASSERT_EQUALS( spec->getSpectrumNo(), 36540);
+    TS_ASSERT_EQUALS( spec->getSpectrumNo(), 36541);
     TS_ASSERT_EQUALS( spec->getDetectorIDs().size(), 1);
     TS_ASSERT( spec->hasDetectorID(36540) );
     TS_ASSERT_DELTA( spec->dataY()[95], 133.0, 1e-4);

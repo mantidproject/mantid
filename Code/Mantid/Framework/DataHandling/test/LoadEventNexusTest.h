@@ -32,6 +32,12 @@ class LoadEventNexusTest : public CxxTest::TestSuite
 {
 public:
 
+    void test_SingleBank_PixelsOnlyInThatBank()
+  {
+    doTestSingleBank(true, false);
+  }
+
+
   void test_fileCheck()
   {
     LoadEventNexus ld;
@@ -68,7 +74,7 @@ public:
     TS_ASSERT_DELTA( (*WS->refX(0))[0],  44162.6, 0.05);
     TS_ASSERT_DELTA( (*WS->refX(0))[1],  60830.2, 0.05);
     // Valid spectrum info
-    TS_ASSERT_EQUALS( WS->getSpectrum(0)->getSpectrumNo(), 0);
+    TS_ASSERT_EQUALS( WS->getSpectrum(0)->getSpectrumNo(), 1);
     TS_ASSERT_EQUALS( WS->getSpectrum(0)->getDetectorIDs().size(), 1);
     TS_ASSERT_EQUALS( *WS->getSpectrum(0)->getDetectorIDs().begin(), 0);
 
@@ -337,10 +343,6 @@ public:
     doTestSingleBank(false, false);
   }
 
-  void test_SingleBank_PixelsOnlyInThatBank()
-  {
-    doTestSingleBank(true, false);
-  }
 
   void test_SingleBank_AllPixels_Precount()
   {

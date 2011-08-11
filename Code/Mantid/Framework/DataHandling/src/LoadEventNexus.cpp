@@ -102,16 +102,16 @@ public:
     {
       std::vector<size_t> counts;
       // key = pixel ID, value = count
-      counts.resize(alg->detid_max+1);
+      counts.resize(alg->eventid_max+1);
       for (size_t i=0; i < numEvents; i++)
       {
         detid_t thisId = detid_t(event_id[i]);
-        if (thisId <= alg->detid_max)
+        if (thisId <= alg->eventid_max)
           counts[thisId]++;
       }
 
       // Now we pre-allocate (reserve) the vectors of events in each pixel counted
-      for (detid_t pixID = 0; pixID <= alg->detid_max; pixID++)
+      for (detid_t pixID = 0; pixID <= alg->eventid_max; pixID++)
       {
         if (counts[pixID] > 0)
         {
@@ -152,7 +152,7 @@ public:
     bool compress = (alg->compressTolerance >= 0);
 
     // Which detector IDs were touched?
-    std::vector<bool> usedDetIds(alg->detid_max+1, false);
+    std::vector<bool> usedDetIds(alg->eventid_max+1, false);
 
     //Go through all events in the list
     for (std::size_t i = 0; i < numEvents; i++)
@@ -187,7 +187,7 @@ public:
 
         // We cached a pointer to the vector<tofEvent> -> so retrieve it and add the event
         detid_t detId = event_id[i];
-        if (detId <= alg->detid_max)
+        if (detId <= alg->eventid_max)
         {
           alg->eventVectors[detId]->push_back( event );
 
@@ -216,7 +216,7 @@ public:
     {
       // Do it on all the detector IDs we touched
       std::set<size_t>::iterator it;
-      for (detid_t pixID = 0; pixID <= alg->detid_max; pixID++)
+      for (detid_t pixID = 0; pixID <= alg->eventid_max; pixID++)
       {
         if (usedDetIds[pixID])
         {
@@ -787,21 +787,31 @@ void LoadEventNexus::exec()
  */
 void LoadEventNexus::makeMapToEventLists()
 {
-  // We want to pad out empty pixels.
-  detid2det_map detector_map;
-  WS->getInstrument()->getDetectors(detector_map);
+  eventid_max = 0; // seems like a safe lower bound
+  if( this->event_id_is_spec )
+  {
+    // Maximum possible spectrum number
+    detid2index_map::const_iterator it = pixelID_to_wi_map->end();
+    --it;
+    eventid_max = it->first;
+  }
+  else
+  {
+    // We want to pad out empty pixels.
+    detid2det_map detector_map;
+    WS->getInstrument()->getDetectors(detector_map);
 
-  // determine maximum pixel id
-  detid2det_map::iterator it;
-  detid_max = 0; // seems like a safe lower bound
-  for (it = detector_map.begin(); it != detector_map.end(); it++)
-    if (it->first > detid_max)
-      detid_max = it->first;
-
+    // determine maximum pixel id
+    detid2det_map::iterator it;
+    for (it = detector_map.begin(); it != detector_map.end(); it++)
+    {
+      if (it->first > eventid_max) eventid_max = it->first;
+    }
+  }
   // Make an array where index = pixel ID
   // Set the value to the 0th workspace index by default
-  eventVectors.resize(detid_max+1, &WS->getEventList(0).getEvents() );
-  for (detid_t j=0; j<detid_max+1; j++)
+  eventVectors.resize(eventid_max+1, &WS->getEventList(0).getEvents() );
+  for (detid_t j=0; j<eventid_max+1; j++)
   {
     size_t wi = (*pixelID_to_wi_map)[j];
     // Save a POINTER to the vector<tofEvent>
@@ -906,7 +916,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   WS->padSpectra();
 
   //This map will be used to find the workspace index
-  pixelID_to_wi_map = WS->getSpectrumToWorkspaceIndexMap();
+  if( this->event_id_is_spec ) pixelID_to_wi_map = WS->getSpectrumToWorkspaceIndexMap();
+  else pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(true);
 
   // Cache a map for speed.
   this->makeMapToEventLists();
@@ -1177,6 +1188,7 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
     const std::string & bankName)
 {
   Geometry::ISpectraDetectorMap *spectramap(NULL);
+  this->event_id_is_spec = false;
   if( !monitorsOnly && !bankName.empty() )
   {
     // Only build the map for the single bank
@@ -1189,7 +1201,7 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
       for(size_t wi=0; wi < dets.size(); wi++)
       {
         const detid_t detID = dets[wi]->getID();
-        singlebank->addSpectrumEntries(specid_t(detID), std::vector<detid_t>(1, detID));
+        singlebank->addSpectrumEntries(specid_t(wi+1), std::vector<detid_t>(1, detID));
       }
       spectramap = singlebank;
       g_log.debug() << "Populated spectra map for single bank " << bankName << "\n";
@@ -1197,10 +1209,13 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
     else
       throw std::runtime_error("Could not find the bank named " + bankName + " as a component assembly in the instrument tree; or it did not contain any detectors.");
   }
-  if( !spectramap )
+  else
   {
     spectramap = loadSpectraMapping(nxsfile, WS->getInstrument(), monitorsOnly, m_top_entry_name, g_log);
+    // Did we load one? If so then the event ID is the spectrum number and not det ID
+    if( spectramap ) this->event_id_is_spec = true;
   }
+
   if( !spectramap )
   {
     g_log.debug() << "No custom spectra mapping found, continuing with default 1:1 mapping of spectrum:detectorID\n";

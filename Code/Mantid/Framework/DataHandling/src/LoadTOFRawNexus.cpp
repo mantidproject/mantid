@@ -162,7 +162,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
 
     // Set the basic info of that spectrum
     ISpectrum * spec = WS->getSpectrum(wi);
-    spec->setSpectrumNo( specid_t(wi) );
+    spec->setSpectrumNo( specid_t(wi+1) );
     spec->setDetectorID( pixel_id[i] );
     // Set the shared X pointer
     spec->setX(X);

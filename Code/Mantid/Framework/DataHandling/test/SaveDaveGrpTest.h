@@ -264,7 +264,7 @@ public:
       for (int i=0;i<51200;i++)
       {
         testfile>>d;
-        TS_ASSERT_DELTA(d,static_cast<double>(i),0.001);
+        TS_ASSERT_DELTA(d,static_cast<double>(i+1),0.001);
       }
       getline(testfile,line);
       getline(testfile,line);

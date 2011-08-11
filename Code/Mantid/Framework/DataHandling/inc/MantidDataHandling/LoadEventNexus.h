@@ -131,14 +131,17 @@ namespace Mantid
       /// Pointer to the vector of events
       typedef std::vector<Mantid::DataObjects::TofEvent> * EventVector_pt;
 
-      /// Vector where index = pixel ID; value = ptr to std::vector<TofEvent> in the event list.
+      /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the event list.
       std::vector<EventVector_pt> eventVectors;
 
-      /// Maximum (inclusive) detector ID in instrument
-      detid_t detid_max;
+      /// Maximum (inclusive) event ID possible for this instrument
+      int32_t eventid_max;
 
       /// Pointer to the map (key = pixel ID, value = workspace index)
       detid2index_map * pixelID_to_wi_map;
+
+      /// True if the event_id is spectrum no not pixel ID
+      bool event_id_is_spec;
 
       DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
       void makeMapToEventLists();
