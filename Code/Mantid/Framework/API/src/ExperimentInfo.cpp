@@ -48,6 +48,16 @@ namespace API
     this->setInstrument(other->getInstrument());
   }
 
+  //---------------------------------------------------------------------------------------
+  /** Clone this ExperimentInfo class into a new one
+   * @param other :: the source from which to copy ExperimentInfo */
+  ExperimentInfo * ExperimentInfo::cloneExperimentInfo()
+  {
+    ExperimentInfo * out = new ExperimentInfo();
+    out->copyExperimentInfoFrom(this);
+    return out;
+  }
+
 
   //---------------------------------------------------------------------------------------
   /** Set the instrument

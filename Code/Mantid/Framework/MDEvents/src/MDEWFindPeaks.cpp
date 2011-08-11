@@ -103,8 +103,13 @@ namespace MDEvents
 
     typedef IMDBox<MDE,nd>* boxPtr;
 
+    if (ws->getNumExperimentInfo() == 0)
+      throw std::runtime_error("No instrument was found in the MDEventWorkspace. Cannot find peaks.");
+
+    // TODO: Do we need to pick a different instrument info?
+    ExperimentInfo_sptr ei = ws->getExperimentInfo(0);
     // Instrument associated with workspace
-    IInstrument_sptr inst = ws->getInstrument();
+    IInstrument_sptr inst = ei->getInstrument();
 
     // Calculate a threshold below which a box is too diffuse to be considered a peak.
     signal_t thresholdDensity = 0.0;
@@ -202,8 +207,9 @@ namespace MDEvents
     }
 
     prog->report("Making PeaksWorkspace");
+
     // Copy the instrument, sample, run to the peaks workspace.
-    peakWS->copyExperimentInfoFrom(ws.get());
+    peakWS->copyExperimentInfoFrom(ei.get());
 
     // --- Convert the "boxes" to peaks ----
     for (typename std::vector<boxPtr>::iterator it3=peakBoxes.begin(); it3 != peakBoxes.end(); it3++)

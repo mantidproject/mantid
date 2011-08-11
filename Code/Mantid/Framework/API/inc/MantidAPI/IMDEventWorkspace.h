@@ -6,10 +6,10 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ProgressBase.h"
 #include <boost/shared_ptr.hpp>
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 
 namespace Mantid
 {
@@ -25,7 +25,7 @@ namespace API
    * @date Dec 3, 2010
    *
    * */
-  class MANTID_API_DLL IMDEventWorkspace  : public API::Workspace, public API::ExperimentInfo
+  class MANTID_API_DLL IMDEventWorkspace  : public API::Workspace
   {
   public:
 
@@ -54,9 +54,22 @@ namespace API
     virtual size_t getDimensionIndexByName(const std::string & name) const;
 
 
+    ExperimentInfo_sptr getExperimentInfo(const uint16_t runIndex);
+
+    ExperimentInfo_const_sptr getExperimentInfo(const uint16_t runIndex) const;
+
+    uint16_t addExperimentInfo(ExperimentInfo_sptr ei);
+
+    void setExperimentInfo(const uint16_t runIndex, ExperimentInfo_sptr ei);
+
+    uint16_t getNumExperimentInfo() const;
+
   protected:
     /// Vector with each dimension (length must match nd)
     std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions;
+
+    /// Vector for each ExperimentInfo class
+    std::vector<ExperimentInfo_sptr> m_expInfos;
 
   };
 

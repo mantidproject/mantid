@@ -31,6 +31,8 @@ namespace API
     
     void copyExperimentInfoFrom(const ExperimentInfo * other);
 
+    ExperimentInfo * cloneExperimentInfo();
+
     /// Instrument accessors
     void setInstrument(const Geometry::IInstrument_sptr&);
     Geometry::IInstrument_sptr getInstrument() const;

@@ -318,8 +318,6 @@ namespace MDEvents
       bc->setMaxDepth(20);
       // We always want the box to be split (it will reject bad ones)
       ws->splitBox();
-      // Copy the instrument, sample, etc.
-      ws->copyExperimentInfoFrom(in_ws.get());
     }
 
     ws->splitBox();
@@ -332,7 +330,9 @@ namespace MDEvents
       throw std::runtime_error("Output MDEventWorkspace does not have a BoxController!");
 
     // Copy ExperimentInfo (instrument, run, sample) to the output WS
-    ws->copyExperimentInfoFrom(in_ws.get());
+    ExperimentInfo_sptr ei(in_ws->cloneExperimentInfo());
+    uint16_t runIndex = ws->addExperimentInfo(ei);
+    UNUSED_ARG(runIndex);
 
 
     // ------------------- Cache values that are common for all ---------------------------

@@ -41,8 +41,9 @@ public:
     IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 16);
     IMDEventWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("MDEWS")) );
-    ws->setInstrument(inst);
-
+    ExperimentInfo_sptr ei(new ExperimentInfo());
+    ei->setInstrument(inst);
+    ws->addExperimentInfo(ei);
   }
 
   //-------------------------------------------------------------------------------
