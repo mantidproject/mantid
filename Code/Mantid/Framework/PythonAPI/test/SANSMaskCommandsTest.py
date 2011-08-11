@@ -37,11 +37,9 @@ class SANSMaskCommandsTest(unittest.TestCase):
         #sanity check the unmasked, most pixels should start at 1, check a random number
         self.assertEqual(self.test_ws.readY(500)[0], 1)
 
-
-        # note spectrum index is one less than the spectrum number for the main detector
+        # Spectrum number is one more than workspace index
         self.assertEqual(self.test_ws.readY(spec_nums1-1)[0], 0)
-        # for the front detector (HAB) the offset is 5
-        self.assertEqual(self.test_ws.readY(spec_nums2-5)[0], 0)
+        self.assertEqual(self.test_ws.readY(spec_nums2-1)[0], 0)
         
     def test_masking_timebins(self):
         """
