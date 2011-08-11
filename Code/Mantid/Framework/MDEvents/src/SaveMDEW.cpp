@@ -126,14 +126,13 @@ namespace MDEvents
       mess << "dimension" << d;
       file->putAttr( mess.str(), ws->getDimension(d)->toXMLString() );
     }
-    // Add box controller info.
-    file->putAttr("box_controller_xml", bc->toXMLString());
 
 
-    // Start the main data group
+    // Start the event Data group
     if (!update)
-      file->makeGroup("data", "NXdata");
-    file->openGroup("data", "NXdata");
+      file->makeGroup("event_data", "NXdata");
+    file->openGroup("event_data", "NXdata");
+    file->putAttr("version", "1.0");
 
     // Prepare the data chunk storage.
     size_t chunkSize = 100000; // TODO: Determine a smart chunk size!
@@ -265,9 +264,19 @@ namespace MDEvents
 
     // Done writing the event data.
     MDE::closeNexusData(file);
+    file->closeGroup();
 
     // OK, we've filled these big arrays of data. Save them.
     prog->report("Writing Box Data");
+
+    // Start the box data group
+    if (!update)
+      file->makeGroup("box_structure", "NXdata");
+    file->openGroup("box_structure", "NXdata");
+    file->putAttr("version", "1.0");
+
+    // Add box controller info to this group
+    file->putAttr("box_controller_xml", bc->toXMLString());
 
     // Get a vector of the free space blocks to save to the file
     std::vector<uint64_t> freeSpaceBlocks;
@@ -327,7 +336,7 @@ namespace MDEvents
       file = new ::NeXus::File(filename, NXACC_RDWR);
       // Re-open the data for events.
       file->openGroup("MDEventWorkspace", "NXentry");
-      file->openGroup("data", "NXdata");
+      file->openGroup("event_data", "NXdata");
       uint64_t totalNumEvents = MDE::openNexusData(file);
       bc->setFile(file, filename, totalNumEvents);
     }

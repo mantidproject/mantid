@@ -147,14 +147,15 @@ namespace MDEvents
       ws->addDimension(dim);
     }
 
+    if (verbose) std::cout << tim << " to load the dimensions, etc." << std::endl;
+
+    // ----------------------------------------- Box Structure ------------------------------
+    file->openGroup("box_structure", "NXdata");
+
     // Load the box controller
     std::string bcXML;
     file->getAttr("box_controller_xml", bcXML);
     ws->getBoxController()->fromXMLString(bcXML);
-
-    if (verbose) std::cout << tim << " to load the dimensions, etc." << std::endl;
-
-    file->openGroup("data", "NXdata");
 
     prog->report("Creating Vectors");
 
@@ -238,6 +239,8 @@ namespace MDEvents
     prog->setNumSteps(numBoxes);
 
     // Get ready to read the slabs
+    file->closeGroup();
+    file->openGroup("event_data", "NXdata");
     uint64_t totalNumEvents = MDE::openNexusData(file);
 
     for (size_t i=0; i<numBoxes; i++)
