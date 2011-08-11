@@ -75,6 +75,7 @@ public:
     // Check some detector events
     EventList det1_ev = ev_result->getEventList(1);
     TS_ASSERT_DELTA(det1_ev.getEvent(1).m_weight, 1.098646, 1e-6);
+    TS_ASSERT_DELTA(det1_ev.getEvent(1).m_errorSquared, 1.207024, 1e-6);
     EventList det3_ev = ev_result->getEventList(3);
     TS_ASSERT_DELTA(det3_ev.getEvent(4).m_weight, 1.000036, 1e-6);
 

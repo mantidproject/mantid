@@ -524,7 +524,7 @@ void He3TubeEfficiency::eventHelper(std::vector<T> &events, double expval)
     float de = static_cast<float>(this->detectorEfficiency(expval * it->m_tof,
                                                            scale));
     it->m_weight *= de;
-    it->m_errorSquared *= de;
+    it->m_errorSquared *= de * de;
   }
 }
 
