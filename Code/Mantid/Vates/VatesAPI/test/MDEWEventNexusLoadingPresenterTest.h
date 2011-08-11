@@ -24,13 +24,15 @@ private:
   // Helper method to return the full path to a real nexus file that is the correct format for this functionality.
   static std::string getSuitableFile()
   {
-    return Mantid::API::FileFinder::Instance().getFullPath("MAPS_MDEW.nxs");
+    std::string temp = Mantid::API::FileFinder::Instance().getFullPath("MAPS_MDEW.nxs");
+    return temp;
   }
   
   // Helper method to return the full path to a real nexus file that is the wrong format for this functionality.
   static std::string getUnhandledFile()
   {
-    return Mantid::API::FileFinder::Instance().getFullPath("CNCS_7860_event.nxs");
+    std::string temp = Mantid::API::FileFinder::Instance().getFullPath("CNCS_7860_event.nxs");
+    return temp;
   }
 
 public:
@@ -64,39 +66,39 @@ void testCanReadFile()
   TSM_ASSERT("A file of this type cannot and should not be read by this presenter!.", !presenter.canReadFile());
 }
 
-void testExecution()
-{
-  //Setup view
-  MockMDLoadingView view;
-  EXPECT_CALL(view, getRecursionDepth()).Times(1); 
-  EXPECT_CALL(view, getLoadInMemory()).WillOnce(testing::Return(true)); 
-  EXPECT_CALL(view, updateAlgorithmProgress(_)).Times(AnyNumber());
-
-  //Setup rendering factory
-  MockvtkDataSetFactory factory;
-  EXPECT_CALL(factory, initialize(_)).Times(1);
-  EXPECT_CALL(factory, create()).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
-  EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
-
-  //Setup progress updates object
-  FilterUpdateProgressAction<MockMDLoadingView> progressAction(&view);
-
-  //Create the presenter and runit!
-  MDEWEventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
-  vtkDataSet* product = presenter.execute(&factory, progressAction);
-
-  TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
-  TSM_ASSERT_EQUALS("Wrong type of output generated", "vtkUnstructuredGrid", std::string(product->GetClassName()));
-  TSM_ASSERT("No field data!", NULL != product->GetFieldData());
-  TSM_ASSERT_EQUALS("One array expected on field data!", 1, product->GetFieldData()->GetNumberOfArrays());
-  TS_ASSERT_THROWS_NOTHING(presenter.hasTDimensionAvailable());
-  TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
-
-  TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
-  TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
-
-  product->Delete();
-}
+//void testExecution()
+//{
+//  //Setup view
+//  MockMDLoadingView view;
+//  EXPECT_CALL(view, getRecursionDepth()).Times(1); 
+//  EXPECT_CALL(view, getLoadInMemory()).WillOnce(testing::Return(true)); 
+//  EXPECT_CALL(view, updateAlgorithmProgress(_)).Times(AnyNumber());
+//
+//  //Setup rendering factory
+//  MockvtkDataSetFactory factory;
+//  EXPECT_CALL(factory, initialize(_)).Times(1);
+//  EXPECT_CALL(factory, create()).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+//  EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
+//
+//  //Setup progress updates object
+//  FilterUpdateProgressAction<MockMDLoadingView> progressAction(&view);
+//
+//  //Create the presenter and runit!
+//  MDEWEventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+//  vtkDataSet* product = presenter.execute(&factory, progressAction);
+//
+//  TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
+//  TSM_ASSERT_EQUALS("Wrong type of output generated", "vtkUnstructuredGrid", std::string(product->GetClassName()));
+//  TSM_ASSERT("No field data!", NULL != product->GetFieldData());
+//  TSM_ASSERT_EQUALS("One array expected on field data!", 1, product->GetFieldData()->GetNumberOfArrays());
+//  TS_ASSERT_THROWS_NOTHING(presenter.hasTDimensionAvailable());
+//  TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
+//
+//  TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+//  TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
+//
+//  product->Delete();
+//}
 
 void testCallHasTDimThrows()
 {
