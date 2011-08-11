@@ -47,7 +47,9 @@ namespace Mantid
     void PlotPeakByLogValue::init()
     {
       declareProperty("Input","",new MandatoryValidator<std::string>(),
-        "List of input names");
+        "List of input strings separated by ';'. Each string has a format: "
+        "file | workspace[,sp<spectrum>|i<ws index>|v<from>:<to>[,<period>]]. "
+        "'|' means 'or', [] means optional, <...> means a number");
 
       declareProperty("Spectrum", 1, "The spectrum number to be fitted in"
         " each workspace of the input list");
@@ -56,7 +58,8 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace","",Direction::Output));
       declareProperty("Function","",new MandatoryValidator<std::string>(),
         "The fitting function, common for all workspaces");
-      declareProperty("LogValue","","Name of the log value to plot the parameters against");
+      declareProperty("LogValue","","Name of the log value to plot the parameters against. "
+        "If empty the axis1 values are used. If \"SourceName\" the name of the workspace or file is used.");
       declareProperty("StartX", EMPTY_DBL(),
         "A value of x in, or on the low x boundary of, the first bin to include in\n"
         "the fit (default lowest value of x)" );
@@ -95,8 +98,14 @@ namespace Mantid
       std::string logName = getProperty("LogValue");
       bool sequential = getPropertyValue("FitType") == "Sequential";
 
+      bool isDataName = false; // if true first output column is of type string and is the data source name
       ITableWorkspace_sptr result = WorkspaceFactory::Instance().createTable("TableWorkspace");
-      if (logName.empty())
+      if (logName == "SourceName")
+      {
+        result->addColumn("str","Source name");
+        isDataName = true;
+      }
+      else if (logName.empty())
       {
         result->addColumn("double","axis-1");
       }
@@ -115,6 +124,7 @@ namespace Mantid
         result->addColumn("double",ifun->parameterName(iPar));
         result->addColumn("double",ifun->parameterName(iPar)+"_Err");
       }
+      result->addColumn("double","Chi_squared");
       delete ifun;
       setProperty("OutputWorkspace",result);
 
@@ -159,7 +169,7 @@ namespace Mantid
             API::Axis* axis = data.ws->getAxis(1);
             logValue = (*axis)(j);
           }
-          else
+          else if (logName != "SourceName")
           {
             Kernel::Property* prop = data.ws->run().getLogData(logName);
             if (!prop)
@@ -173,6 +183,7 @@ namespace Mantid
 
           std::string resFun = fun;
           std::vector<double> errors;
+          double chi2;
 
           try
           {
@@ -190,6 +201,7 @@ namespace Mantid
             fit->execute();
             resFun = fit->getPropertyValue("Function");
             errors = fit->getProperty("Errors");
+            chi2 = fit->getProperty("OutputChi2overDoF");
           }
           catch(...)
           {
@@ -204,12 +216,20 @@ namespace Mantid
 
           // Extract the fitted parameters and put them into the result table
           TableRow row = result->appendRow();
-          row << logValue;
+          if (isDataName)
+          {
+            row << wsNames[i].name;
+          }
+          else
+          {
+            row << logValue;
+          }
           ifun = FunctionFactory::Instance().createInitialized(resFun);
           for(int iPar=0;iPar<ifun->nParams();++iPar)
           {
             row << ifun->getParameter(iPar) << errors[iPar];
           }
+          row << chi2;
           delete ifun;
           Prog += dProg;
           progress(Prog);

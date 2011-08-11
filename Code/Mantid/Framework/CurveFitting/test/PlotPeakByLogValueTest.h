@@ -64,10 +64,10 @@ public:
     alg.execute();
 
     TWS_type result = getTWS("PlotPeakResult");
-    TS_ASSERT_EQUALS(result->columnCount(),11);
+    TS_ASSERT_EQUALS(result->columnCount(),12);
 
     std::vector<std::string> tnames = result->getColumnNames();
-    TS_ASSERT_EQUALS(tnames.size(),11);
+    TS_ASSERT_EQUALS(tnames.size(),12);
     TS_ASSERT_EQUALS(tnames[0],"var");
     TS_ASSERT_EQUALS(tnames[1],"f0.A0");
     TS_ASSERT_EQUALS(tnames[2],"f0.A0_Err");
@@ -79,6 +79,7 @@ public:
     TS_ASSERT_EQUALS(tnames[8],"f1.PeakCentre_Err");
     TS_ASSERT_EQUALS(tnames[9],"f1.Sigma");
     TS_ASSERT_EQUALS(tnames[10],"f1.Sigma_Err");
+    TS_ASSERT_EQUALS(tnames[11],"Chi_squared");
 
     TS_ASSERT_DELTA(result->Double(0,0),1,1e-12);
     TS_ASSERT_DELTA(result->Double(0,1),1,1e-12);
@@ -120,10 +121,10 @@ public:
     alg.execute();
 
     TWS_type result = getTWS("PlotPeakResult");
-    TS_ASSERT_EQUALS(result->columnCount(),11);
+    TS_ASSERT_EQUALS(result->columnCount(),12);
 
     std::vector<std::string> tnames = result->getColumnNames();
-    TS_ASSERT_EQUALS(tnames.size(),11);
+    TS_ASSERT_EQUALS(tnames.size(),12);
     TS_ASSERT_EQUALS(tnames[0],"var");
     TS_ASSERT_EQUALS(tnames[1],"f0.A0");
     TS_ASSERT_EQUALS(tnames[2],"f0.A0_Err");
@@ -135,6 +136,7 @@ public:
     TS_ASSERT_EQUALS(tnames[8],"f1.PeakCentre_Err");
     TS_ASSERT_EQUALS(tnames[9],"f1.Sigma");
     TS_ASSERT_EQUALS(tnames[10],"f1.Sigma_Err");
+    TS_ASSERT_EQUALS(tnames[11],"Chi_squared");
 
     TS_ASSERT_DELTA(result->Double(0,0),1,1e-12);
     TS_ASSERT_DELTA(result->Double(0,1),1,1e-12);
@@ -162,8 +164,36 @@ public:
 
   }
 
-  // LoadNexus doesn't exist
-  void t1estNexusFiles()
+  void testWorkspaceList_plotting_against_ws_names()
+  {
+    createData();
+
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input","PlotPeakGroup_0;PlotPeakGroup_1;PlotPeakGroup_2");
+    alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
+    alg.setPropertyValue("WorkspaceIndex","1");
+    alg.setPropertyValue("LogValue","SourceName");
+    alg.setPropertyValue("Function","name=LinearBackground,A0=1,A1=0.3;name=Gaussian,PeakCentre=5,Height=2,Sigma=0.1");
+    alg.execute();
+
+    TWS_type result = getTWS("PlotPeakResult");
+    TS_ASSERT_EQUALS(result->columnCount(),12);
+
+    std::vector<std::string> tnames = result->getColumnNames();
+    TS_ASSERT_EQUALS(tnames.size(),12);
+    TS_ASSERT_EQUALS(tnames[0],"Source name");
+
+    TS_ASSERT_EQUALS(result->String(0,0),"PlotPeakGroup_0");
+    TS_ASSERT_EQUALS(result->String(1,0),"PlotPeakGroup_1");
+    TS_ASSERT_EQUALS(result->String(2,0),"PlotPeakGroup_2");
+
+    deleteData();
+    AnalysisDataService::Instance().remove("PlotPeakResult");
+
+  }
+
+  void testNexusFiles()
   {
 
     PlotPeakByLogValue alg;
@@ -180,7 +210,7 @@ public:
     alg.execute();
 
     TWS_type result = getTWS("PlotPeakResult");
-    TS_ASSERT_EQUALS(result->columnCount(),5);
+    TS_ASSERT_EQUALS(result->columnCount(),6);
     TS_ASSERT_EQUALS(result->rowCount(),3);
 
     AnalysisDataService::Instance().remove("PlotPeakResult");
@@ -200,7 +230,7 @@ public:
     alg.execute();
 
     TWS_type result = getTWS("PlotPeakResult");
-    TS_ASSERT_EQUALS(result->columnCount(),11);
+    TS_ASSERT_EQUALS(result->columnCount(),12);
     TS_ASSERT_EQUALS(result->rowCount(),3);
 
     AnalysisDataService::Instance().remove("PlotPeakResult");

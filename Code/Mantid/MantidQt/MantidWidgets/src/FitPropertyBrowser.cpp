@@ -1577,11 +1577,11 @@ void FitPropertyBrowser::getFitResults()
   else
   {
     std::string wsName = outputName() + "_Parameters";
-    Mantid::API::ITableWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
-
-    if (ws)
+    if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName))
     {
+      Mantid::API::ITableWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
+
       Mantid::API::TableRow row = ws->getFirstRow();
       do
       {

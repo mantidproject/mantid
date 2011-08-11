@@ -112,6 +112,12 @@ private:
 
   void setRange(int row,double from,double to);
 
+  /// Ret. index for the data source in row row to be used in "Input" property of PlotPeakByLogValue
+  QString getIndex(int row)const;
+
+  /// Return true if data source in a row is a file (rather than a workspace)
+  bool isFile(int row)const;
+
   int rowCount()const;
 
   int defaultSpectrum()const;

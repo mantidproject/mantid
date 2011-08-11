@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>SequentialFitDialog</class>
- <widget class="QDialog" name="SequentialFitDialog" >
-  <property name="geometry" >
+ <widget class="QDialog" name="SequentialFitDialog">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,37 +10,37 @@
     <height>528</height>
    </rect>
   </property>
-  <property name="minimumSize" >
+  <property name="minimumSize">
    <size>
     <width>543</width>
     <height>306</height>
    </size>
   </property>
-  <property name="maximumSize" >
+  <property name="maximumSize">
    <size>
     <width>10003402</width>
     <height>10003648</height>
    </size>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>SequentialFit</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3" >
+  <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <layout class="QGridLayout" name="gridLayout" >
-     <property name="sizeConstraint" >
+    <layout class="QGridLayout" name="gridLayout">
+     <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
-     <item row="0" column="0" >
-      <widget class="QLabel" name="label_3" >
-       <property name="text" >
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
         <string>Parameter</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1" >
-      <widget class="QComboBox" name="cbParameter" >
-       <property name="minimumSize" >
+     <item row="0" column="1">
+      <widget class="QComboBox" name="cbParameter">
+       <property name="minimumSize">
         <size>
          <width>186</width>
          <height>0</height>
@@ -47,48 +48,48 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="2" >
-      <widget class="QLabel" name="label_4" >
-       <property name="text" >
+     <item row="0" column="2">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
         <string>Curve Type</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="3" >
-      <widget class="QComboBox" name="cbCurveType" >
-       <property name="minimumSize" >
+     <item row="0" column="3">
+      <widget class="QComboBox" name="cbCurveType">
+       <property name="minimumSize">
         <size>
          <width>186</width>
          <height>0</height>
         </size>
        </property>
        <item>
-        <property name="text" >
+        <property name="text">
          <string>Line</string>
         </property>
        </item>
        <item>
-        <property name="text" >
+        <property name="text">
          <string>Scatter</string>
         </property>
        </item>
        <item>
-        <property name="text" >
+        <property name="text">
          <string>Line+Symbols</string>
         </property>
        </item>
       </widget>
      </item>
-     <item row="1" column="0" >
-      <widget class="QLabel" name="lblLogValue" >
-       <property name="text" >
+     <item row="1" column="0">
+      <widget class="QLabel" name="lblLogValue">
+       <property name="text">
         <string>Log Value</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1" >
-      <widget class="QComboBox" name="cbLogValue" >
-       <property name="minimumSize" >
+     <item row="1" column="1">
+      <widget class="QComboBox" name="cbLogValue">
+       <property name="minimumSize">
         <size>
          <width>186</width>
          <height>0</height>
@@ -96,12 +97,12 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="4" >
-      <spacer name="horizontalSpacer_3" >
-       <property name="orientation" >
+     <item row="0" column="4">
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -112,20 +113,20 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4" >
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
-      <widget class="QCheckBox" name="ckbLogPlot" >
-       <property name="text" >
+      <widget class="QCheckBox" name="ckbLogPlot">
+       <property name="text">
         <string>Plot against log</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_4" >
-       <property name="orientation" >
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -136,66 +137,71 @@
     </layout>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox" >
-     <property name="title" >
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
       <string>Input</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2" >
+     <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3" >
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QTableWidget" name="tWorkspaces" >
+         <widget class="QTableWidget" name="tWorkspaces">
           <column>
-           <property name="text" >
+           <property name="text">
             <string>Workspace/File</string>
            </property>
           </column>
           <column>
-           <property name="text" >
+           <property name="text">
             <string>Period</string>
            </property>
           </column>
           <column>
-           <property name="text" >
+           <property name="text">
             <string>Spectrum</string>
            </property>
           </column>
           <column>
-           <property name="text" >
+           <property name="text">
             <string>WS Index</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Range</string>
            </property>
           </column>
          </widget>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout" >
+         <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QPushButton" name="btnAddWorkspace" >
-            <property name="text" >
+           <widget class="QPushButton" name="btnAddWorkspace">
+            <property name="text">
              <string>Add workspaces</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btnAddFile" >
-            <property name="text" >
+           <widget class="QPushButton" name="btnAddFile">
+            <property name="text">
              <string>Add files</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btnDelete" >
-            <property name="text" >
+           <widget class="QPushButton" name="btnDelete">
+            <property name="text">
              <string>Delete</string>
             </property>
            </widget>
           </item>
           <item>
-           <spacer name="verticalSpacer" >
-            <property name="orientation" >
+           <spacer name="verticalSpacer">
+            <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
-            <property name="sizeHint" stdset="0" >
+            <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
               <height>40</height>
@@ -208,94 +214,94 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2" >
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QLabel" name="lblPeriod" >
-          <property name="text" >
+         <widget class="QLabel" name="lblPeriod">
+          <property name="text">
            <string>Period</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="sbPeriod" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+         <widget class="QSpinBox" name="sbPeriod">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize" >
+          <property name="minimumSize">
            <size>
             <width>71</width>
             <height>0</height>
            </size>
           </property>
-          <property name="maximum" >
+          <property name="maximum">
            <number>2000000000</number>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="lblSpectrum" >
-          <property name="text" >
+         <widget class="QLabel" name="lblSpectrum">
+          <property name="text">
            <string>Spectrum</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="sbSpectrum" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+         <widget class="QSpinBox" name="sbSpectrum">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize" >
+          <property name="minimumSize">
            <size>
             <width>71</width>
             <height>0</height>
            </size>
           </property>
-          <property name="maximum" >
+          <property name="maximum">
            <number>2000000000</number>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="rbSequential" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+         <widget class="QRadioButton" name="rbSequential">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="text" >
+          <property name="text">
            <string>Sequential</string>
           </property>
-          <property name="checked" >
+          <property name="checked">
            <bool>true</bool>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="rbIndividual" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+         <widget class="QRadioButton" name="rbIndividual">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="text" >
+          <property name="text">
            <string>Individual</string>
           </property>
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer_2" >
-          <property name="orientation" >
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizeHint" stdset="0" >
+          <property name="sizeHint" stdset="0">
            <size>
             <width>40</width>
             <height>20</height>
@@ -309,26 +315,26 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" >
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="btnHelp" >
-       <property name="maximumSize" >
+      <widget class="QPushButton" name="btnHelp">
+       <property name="maximumSize">
         <size>
          <width>31</width>
          <height>16777215</height>
         </size>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>?</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer" >
-       <property name="orientation" >
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -337,18 +343,18 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="btnFit" >
-       <property name="text" >
+      <widget class="QPushButton" name="btnFit">
+       <property name="text">
         <string>Fit</string>
        </property>
-       <property name="default" >
+       <property name="default">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnCancel" >
-       <property name="text" >
+      <widget class="QPushButton" name="btnCancel">
+       <property name="text">
         <string>Cancel</string>
        </property>
       </widget>
