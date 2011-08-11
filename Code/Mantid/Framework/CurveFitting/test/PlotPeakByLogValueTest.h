@@ -193,14 +193,15 @@ public:
 
   }
 
-  void testNexusFiles()
+  // LoadNexus doesn't exist
+  void t1estNexusFiles()
   {
 
     PlotPeakByLogValue alg;
     alg.initialize();
-    alg.setPropertyValue("Input","../../../../Test/Nexus/MUSR00015189.nxs,sp3;"
-      "../../../../Test/Nexus/MUSR00015190.nxs,sp3;"
-      "../../../../Test/Nexus/MUSR00015191.nxs,sp3");
+    alg.setPropertyValue("Input","MUSR00015189.nxs,sp3;"
+      "MUSR00015190.nxs,sp3;"
+      "MUSR00015191.nxs,sp3");
     alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
     //alg.setPropertyValue("WorkspaceIndex","1");
     alg.setPropertyValue("StartX","0");
