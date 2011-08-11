@@ -504,6 +504,9 @@ public:
     // Make the box know where it is in the file
     box.setFileIndex(500, 1000);
     box.setOnDisk(true);
+    // This would be set on loading. Only makes sense with GoofyWeights == false
+    box.setSignal(1000.0);
+    box.setErrorSquared(1000.0);
 
     return file;
   }
@@ -788,6 +791,7 @@ public:
     ::NeXus::File * file = do_saveAndOpenNexus(c, "MDBoxTest.nxs", false);
     TSM_ASSERT_EQUALS("1000 events on file", c.getFileNumEvents(), 1000);
     TSM_ASSERT("The data was NOT loaded from disk.", !c.getInMemory());
+    TSM_ASSERT_DELTA("Correct cached signal", c.getSignal(), 1000.0, 1e-3);
 
     // Add an event to it
     MDEvent<3> ev(1.2, 3.4);
@@ -798,6 +802,7 @@ public:
     TSM_ASSERT_EQUALS("Still 1000 events on file", c.getFileNumEvents(), 1000);
     TSM_ASSERT_EQUALS("But now 1001 events total because they are in two places.", c.getNPoints(), 1001);
     TSM_ASSERT("The data is STILL NOT loaded from disk.", !c.getInMemory());
+    TSM_ASSERT_DELTA("At this point the cached signal is still incorrect - this is normal", c.getSignal(), 1000.0, 1e-3);
 
     // Get the const vector of events AFTER adding events
     const std::vector<MDEvent<3> > & events = c.getConstEvents();
@@ -811,7 +816,9 @@ public:
     TSM_ASSERT_EQUALS("Now there are 1001 events on file", c.getFileNumEvents(), 1001);
     TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 2000);
     TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
+    TSM_ASSERT("And the data is on disk.", c.getOnDisk());
     TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1001);
+    TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1001.2, 1e-3);
 
     // Now getEvents in a const way then call addEvent()
     const std::vector<MDEvent<3> > & events2 = c.getConstEvents();
@@ -825,6 +832,7 @@ public:
     TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 3001);
     TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
     TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1002);
+    TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1002.4, 1e-3);
 
     // Now getEvents in a non-const way then call addEvent()
     std::vector<MDEvent<3> > & events3 = c.getEvents();
@@ -838,6 +846,7 @@ public:
     TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 2000);
     TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
     TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1003);
+    TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1003.6, 1e-3);
 
     file->close();
     //do_deleteNexusFile();

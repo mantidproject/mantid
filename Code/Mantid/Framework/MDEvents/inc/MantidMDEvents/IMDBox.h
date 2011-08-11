@@ -381,11 +381,11 @@ namespace MDEvents
 
     /** Cached total signal from all points within.
      * Set when refreshCache() is called. */
-    signal_t m_signal;
+    mutable signal_t m_signal;
 
     /** Cached total error (squared) from all points within.
     * Set when refreshCache() is called. */
-    signal_t m_errorSquared;
+    mutable signal_t m_errorSquared;
 
     /// Inverse of the volume of the cell, to be used for normalized signal.
     coord_t m_inverseVolume;
