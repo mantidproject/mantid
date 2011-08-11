@@ -38,7 +38,7 @@ namespace Crystal
   {
     this->setWikiSummary("Calculate the U matrix from a peaks workspace, given lattice parameters.");
     this->setOptionalMessage("Calculate the U matrix from a peaks workspace, given lattice parameters.");
-    this->setWikiDescription("Given a set of peaks (Q in sample frame, HKL values), and given lattice parameters (<math>a,b,c,\alpha,\beta,\gamma</math>), it will try to find the U matrix, using least squares approach and quaternions");
+    this->setWikiDescription("Given a set of peaks (Q in sample frame, HKL values), and given lattice parameters (<math>a,b,c,alpha,beta,gamma</math>), it will try to find the U matrix, using least squares approach and quaternions");
   }
 
   //----------------------------------------------------------------------------------------------
