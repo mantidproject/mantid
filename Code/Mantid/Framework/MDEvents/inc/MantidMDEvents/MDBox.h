@@ -113,6 +113,10 @@ namespace MDEvents
     bool getOnDisk() const
     { return m_onDisk; }
 
+    /// @return whether the box data (from disk) is loaded in memory (for debugging purposes).
+    bool getInMemory() const
+    { return m_inMemory; }
+
 
 
     std::vector< MDE > & getEvents();
@@ -179,8 +183,11 @@ namespace MDEvents
     /// Number of events saved in the file, after the start index location
     mutable uint64_t m_fileNumEvents;
 
-    /// True when the events are on disk and not in memory.
+    /// True when the events are cached to disk. If false, then the events are ALWAYS kept in memory
     bool m_onDisk;
+
+    /// True when the events were loaded up from disk. Irrelevant if m_onDisk is false.
+    mutable bool m_inMemory;
 
   public:
     /// Typedef for a shared pointer to a MDBox

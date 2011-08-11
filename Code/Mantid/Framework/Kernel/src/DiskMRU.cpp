@@ -12,7 +12,8 @@ namespace Kernel
   /** Constructor
    */
   DiskMRU::DiskMRU()
-  : m_memoryAvail(100),
+  : m_mru_byId( m_mru.get<1>() ),
+    m_memoryAvail(100),
     m_memoryUsed(0),
     m_useWriteBuffer(false),
     m_writeBufferSize(50),
@@ -32,7 +33,8 @@ namespace Kernel
    * @return
    */
   DiskMRU::DiskMRU(uint64_t m_memoryAvail, uint64_t m_writeBufferSize, bool useWriteBuffer)
-  : m_memoryAvail(m_memoryAvail),
+  : m_mru_byId( m_mru.get<1>() ),
+    m_memoryAvail(m_memoryAvail),
     m_memoryUsed(0),
     m_useWriteBuffer(useWriteBuffer),
     m_writeBufferSize(m_writeBufferSize),
@@ -162,6 +164,39 @@ namespace Kernel
         writeOldObjects();
     }
     m_mruMutex.unlock();
+  }
+
+  //---------------------------------------------------------------------------------------------
+  /** Call this method when an object that might be in the cache
+   * is getting deleted.
+   * The object is removed from the MRU and the to-write buffer (if present).
+   * The space it uses on disk is marked as free.
+   *
+   * @param item :: ISaveable object that is getting deleted.
+   */
+  void DiskMRU::objectDeleted(const ISaveable * item)
+  {
+    size_t id = item->getId();
+    uint64_t size = item->getSizeOnFile();
+
+    // Take it out of the MRU cache
+    mru_byId_t::iterator it = m_mru_byId.find(id);
+    if (it != m_mru_byId.end())
+    {
+      m_mru_byId.erase(it);
+      m_memoryUsed -= size;
+    }
+
+    // Take it out of the to-write buffer
+    toWriteMap_by_Id_t::iterator it2 = m_toWrite_byId.find(id);
+    if (it2 != m_toWrite_byId.end())
+    {
+      m_toWrite_byId.erase(it2);
+      m_memoryToWrite -= size;
+    }
+
+    // Mark as a free block
+    this->freeBlock( item->getFilePosition(), size );
   }
 
 
@@ -388,6 +423,23 @@ namespace Kernel
     this->freeBlock(oldPos, oldSize);
     return this->allocate(newSize);
   }
+
+  //---------------------------------------------------------------------------------------------
+  /** Returns a vector with two entries per free block: position and size.
+   * @param[out] free :: vector to fill */
+  void DiskMRU::getFreeSpaceVector(std::vector<uint64_t> & free) const
+  {
+    free.reserve( m_free.size() * 2);
+    freeSpace_by_size_t::const_iterator it = m_free_bySize.begin();
+    freeSpace_by_size_t::const_iterator it_end = m_free_bySize.end();
+    size_t i=0;
+    for (; it != it_end; it++)
+    {
+      free[i++] = it->getFilePosition();
+      free[i++] = it->getSize();
+    }
+  }
+
 
 } // namespace Mantid
 } // namespace Kernel

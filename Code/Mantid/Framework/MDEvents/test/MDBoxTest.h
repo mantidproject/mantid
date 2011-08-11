@@ -151,7 +151,6 @@ public:
     // Did it keep a running total of the signal and error?
     TS_ASSERT_DELTA( b.getSignal(), 1.2*num, 1e-5*num);
     TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*num, 1e-5*num);
-
   }
 
   void test_calculateDimensionStats()
@@ -174,7 +173,8 @@ public:
 
   void test_clear()
   {
-    MDBox<MDEvent<2>,2> b;
+    BoxController_sptr bc( new BoxController(2));
+    MDBox<MDEvent<2>,2> b(bc);
     MDEvent<2> ev(1.2, 3.4);
     b.addEvent(ev);
     b.addEvent(ev);
@@ -420,21 +420,26 @@ public:
     TS_ASSERT_DELTA( b.getSignal(), 100., 0.001);
     TS_ASSERT_DELTA( b.getErrorSquared(), 100., 0.001);
     b.setOnDisk(true);
-    // Because it wasn't set, the # of points on disk is 0
-    TS_ASSERT_EQUALS( b.getNPoints(), 0);
-    b.setFileIndex(1234, 100);
-    // Now it returns the cached number of points
+    // Because it wasn't set, the # of points on disk is = data.size() + 0
     TS_ASSERT_EQUALS( b.getNPoints(), 100);
+    b.setFileIndex(1234, 100);
+    // Now it returns the cached number of points + the number in the data
+    TS_ASSERT_EQUALS( b.getNPoints(), 200);
     // Still returns the signal/error
     TS_ASSERT_DELTA( b.getSignal(), 100., 0.001);
     TS_ASSERT_DELTA( b.getErrorSquared(), 100., 0.001);
-
   }
 
 
   //-----------------------------------------------------------------------------------------
-  /** Create a test .NXS file with some data */
-  std::string do_saveNexus(bool goofyWeights = true)
+  /** Create a test .NXS file with some data for a MDBox<3>
+   * 1000 events starting at position 500 of the file are made.
+   *
+   * @param goofyWeights :: weights increasing from 0 to 999
+   * @param barefilename :: file to save to (no path)
+   * @return filename with full path that was saved.
+   * */
+  static std::string do_saveNexus(bool goofyWeights = true, std::string barefilename = "MDBoxTest.nxs")
   {
     // Box with 1000 events evenly spread
     MDBox<MDEvent<3>,3> b;
@@ -451,12 +456,12 @@ public:
     }
 
     // Start a NXS file
-    std::string filename = (ConfigService::Instance().getString("defaultsave.directory") + "MDBoxTest.nxs");
+    std::string filename = (ConfigService::Instance().getString("defaultsave.directory") + barefilename);
     if (Poco::File(filename).exists())  Poco::File(filename).remove();
     ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
     file->makeGroup("my_test_group", "NXdata", 1);
 
-    // Must prepare the data. Make a 2000-sized array
+    // Must prepare the data.
     MDEvent<3>::prepareNexusData(file, 2000);
 
     // Save it with some offset
@@ -471,6 +476,49 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------
+  /** Create a test .NXS file with some data for a MDBox<3>.
+   * 1000 events starting at position 500 of the file are made.
+   * Each event is spread evenly around a 10x10x10 region from 0.5 to 9.5 in each direction
+   * Then the file is open appropriately and returned.
+   *
+   * @param goofyWeights :: weights increasing from 0 to 999
+   * @param barefilename :: file to save to (no path)
+   * @param box :: MDBox3 that will get set to be file-backed
+   * @return ptr to the NeXus file object
+   * */
+  static ::NeXus::File * do_saveAndOpenNexus(MDBox<MDEvent<3>,3> & box,
+      std::string barefilename = "MDBoxTest.nxs", bool goofyWeights = true)
+  {
+    // Create the NXS file
+    std::string filename = do_saveNexus(goofyWeights, barefilename);
+    // Open the NXS file
+    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_RDWR);
+    file->openGroup("my_test_group", "NXdata");
+    // Must get ready to load in the data
+    MDEvent<3>::openNexusData(file);
+
+    // Set it in the BoxController
+    if (box.getBoxController())
+      box.getBoxController()->setFile(file,filename, 2000);
+
+    // Make the box know where it is in the file
+    box.setFileIndex(500, 1000);
+    box.setOnDisk(true);
+
+    return file;
+  }
+
+  /** Deletes the file created by do_saveNexus */
+  static void do_deleteNexusFile(std::string barefilename = "MDBoxTest.nxs")
+  {
+    std::string filename = (ConfigService::Instance().getString("defaultsave.directory") + barefilename);
+    if (Poco::File(filename).exists())  Poco::File(filename).remove();
+  }
+
+
+
+
+  //-----------------------------------------------------------------------------------------
   /** Can we save to a file ? */
   void test_saveNexus()
   {
@@ -483,23 +531,14 @@ public:
   /** Can we load it back? */
   void test_loadNexus()
   {
-    std::string filename = do_saveNexus();
-
-    // Open the NXS file
-    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_READ);
-    file->openGroup("my_test_group", "NXdata");
-
-    // Must get ready to load in the data
-    MDEvent<3>::openNexusData(file);
-
     // A box to load stuff from
     MDBox<MDEvent<3>,3> c;
-    TS_ASSERT_EQUALS( c.getNPoints(), 0);
+    TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
 
-    CPUTimer tim;
-    c.setFileIndex(500, 1000);
+    // Create and open the test NXS file
+    ::NeXus::File * file = do_saveAndOpenNexus(c);
+    c.setOnDisk(false); // Avoid touching MRU
     c.loadNexus(file);
-    std::cout << tim << " for the LoadNexus call alone." << std::endl;
     TS_ASSERT_EQUALS( c.getNPoints(), 1000);
     const std::vector<MDEvent<3> > & events = c.getEvents();
 
@@ -509,7 +548,6 @@ public:
     TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
 
     file->close();
-    if (Poco::File(filename).exists()) Poco::File(filename).remove();
   }
 
 
@@ -517,22 +555,19 @@ public:
   /** What if the box has no events, does it crash? */
   void test_loadNexus_noEvents()
   {
-    // Open the NXS file
-    std::string filename = do_saveNexus();
-    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_READ);
-    file->openGroup("my_test_group", "NXdata");
-    MDEvent<3>::openNexusData(file);
-
     // A box to load stuff from
     MDBox<MDEvent<3>,3> c;
     TS_ASSERT_EQUALS( c.getNPoints(), 0);
 
+    // Create and open the test NXS file
+    ::NeXus::File * file = do_saveAndOpenNexus(c);
+    // Tell it we actually have no events
     c.setFileIndex(500, 0);
     c.loadNexus(file);
     TS_ASSERT_EQUALS( c.getNPoints(), 0);
 
     file->close();
-    if (Poco::File(filename).exists()) Poco::File(filename).remove();
+    do_deleteNexusFile();
   }
 
   //-----------------------------------------------------------------------------------------
@@ -548,23 +583,12 @@ public:
     // It is empty now
     TS_ASSERT_EQUALS( mru.getMemoryUsed(), 0);
 
+    // Create and open the test NXS file
     MDBox<MDEvent<3>,3> c(bc, 0);
-
-    // Open the NXS file
-    std::string filename = do_saveNexus();
-    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_RDWR);
-    file->openGroup("my_test_group", "NXdata");
-    MDEvent<3>::openNexusData(file);
-
-    // Set it in the controller for back-end
-    bc->setFile(file,filename, 2000);
-
-    // Nothing on it to start
-    TS_ASSERT_EQUALS( c.getNPoints(), 0);
+    TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
+    ::NeXus::File * file = do_saveAndOpenNexus(c);
 
     // Set the stuff that is handled outside the box itself
-    c.setFileIndex(500, 1000);
-    c.setOnDisk(true);
     c.setSignal(1234.5); // fake value loaded from disk
     c.setErrorSquared(456.78);
 
@@ -609,7 +633,7 @@ public:
     mru.flushCache();
 
     file->close();
-    if (Poco::File(filename).exists()) Poco::File(filename).remove();
+    do_deleteNexusFile();
   }
 
 
@@ -630,16 +654,8 @@ public:
     // A new empty box.
     MDBox<MDEvent<3>,3> c(bc, 0);
 
-    // Open the NXS file
-    std::string filename = do_saveNexus(true /*signal=index*1.0*/);
-    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_RDWR);
-    file->openGroup("my_test_group", "NXdata");
-    MDEvent<3>::openNexusData(file);
-
-    // Set it in the controller for back-end
-    bc->setFile(file,filename, 2000);
-    c.setFileIndex(500, 1000);
-    c.setOnDisk(true);
+    // Create and open the test NXS file
+    ::NeXus::File * file = do_saveAndOpenNexus(c);
 
     // The # of points (from the file, not in memory)
     TS_ASSERT_EQUALS( c.getNPoints(), 1000);
@@ -668,7 +684,7 @@ public:
     TS_ASSERT_DELTA( events2[123].getSignal(), 456.0, 1e-5);
 
     file->close();
-//    if (Poco::File(filename).exists()) Poco::File(filename).remove();
+    do_deleteNexusFile();
   }
 
 
@@ -689,16 +705,8 @@ public:
     // A new empty box.
     MDBox<MDEvent<3>,3> c(bc, 0);
 
-    // Open the NXS file
-    std::string filename = do_saveNexus(true /*signal=index*1.0*/);
-    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_RDWR);
-    file->openGroup("my_test_group", "NXdata");
-    MDEvent<3>::openNexusData(file);
-
-    // Set it in the controller for back-end
-    bc->setFile(file,filename, 2000);
-    c.setFileIndex(500, 1000);
-    c.setOnDisk(true);
+    // Create and open the test NXS file
+    ::NeXus::File * file = do_saveAndOpenNexus(c);
 
     // The # of points (from the file, not in memory)
     TS_ASSERT_EQUALS( c.getNPoints(), 1000);
@@ -759,8 +767,108 @@ public:
 
     file->closeData();
     file->close();
+    do_deleteNexusFile();
   }
 
+
+
+  //-----------------------------------------------------------------------------------------
+  /** If a MDBox is file-backed, test that
+   * you can add events to it without having to load the data from disk.
+   */
+  void test_fileBackEnd_addEvent()
+  {
+    // Create a box with a controller for the back-end
+    BoxController_sptr bc(new BoxController(3));
+    bc->setCacheParameters(0, 10, sizeof(MDEvent<3>));
+    DiskMRU & mru = bc->getDiskMRU();
+
+    // Create and open the test NXS file
+    MDBox<MDEvent<3>,3> c(bc, 0);
+    ::NeXus::File * file = do_saveAndOpenNexus(c, "MDBoxTest.nxs", false);
+    TSM_ASSERT_EQUALS("1000 events on file", c.getFileNumEvents(), 1000);
+    TSM_ASSERT("The data was NOT loaded from disk.", !c.getInMemory());
+
+    // Add an event to it
+    MDEvent<3> ev(1.2, 3.4);
+    ev.setCenter(0, 1.5);
+    ev.setCenter(1, 2.5);
+    ev.setCenter(2, 3.5);
+    c.addEvent(ev);
+    TSM_ASSERT_EQUALS("Still 1000 events on file", c.getFileNumEvents(), 1000);
+    TSM_ASSERT_EQUALS("But now 1001 events total because they are in two places.", c.getNPoints(), 1001);
+    TSM_ASSERT("The data is STILL NOT loaded from disk.", !c.getInMemory());
+
+    // Get the const vector of events AFTER adding events
+    const std::vector<MDEvent<3> > & events = c.getConstEvents();
+    TSM_ASSERT("The data is ALL in memory right now.", c.getInMemory());
+    TSM_ASSERT_EQUALS("The resulting event vector has concatenated both", events.size(), 1001);
+    TSM_ASSERT_DELTA("The first event is the one that was manually added.", events[0].getSignal(), 1.2, 1e-4);
+    c.releaseEvents();
+
+    // Flush the cache to write out the modified data
+    mru.flushCache();
+    TSM_ASSERT_EQUALS("Now there are 1001 events on file", c.getFileNumEvents(), 1001);
+    TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 2000);
+    TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
+    TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1001);
+
+    // Now getEvents in a const way then call addEvent()
+    const std::vector<MDEvent<3> > & events2 = c.getConstEvents();
+    (void) events2;
+    c.addEvent(ev);
+    TSM_ASSERT_EQUALS("Still 1001 events on file", c.getFileNumEvents(), 1001);
+    TSM_ASSERT_EQUALS("But the number of points had grown.", c.getNPoints(), 1002);
+    c.releaseEvents();
+    mru.flushCache();
+    TSM_ASSERT_EQUALS("Now there are 1002 events on file", c.getFileNumEvents(), 1002);
+    TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 3001);
+    TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
+    TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1002);
+
+    // Now getEvents in a non-const way then call addEvent()
+    std::vector<MDEvent<3> > & events3 = c.getEvents();
+    (void) events3;
+    c.addEvent(ev);
+    TSM_ASSERT_EQUALS("Still 1002 events on file", c.getFileNumEvents(), 1002);
+    TSM_ASSERT_EQUALS("But the number of points had grown.", c.getNPoints(), 1003);
+    c.releaseEvents();
+    mru.flushCache();
+    TSM_ASSERT_EQUALS("Now there are 1003 events on file", c.getFileNumEvents(), 1003);
+    TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 2000);
+    TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
+    TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1003);
+
+    file->close();
+    //do_deleteNexusFile();
+  }
+//
+//  //-----------------------------------------------------------------------------------------
+//  /** Try to add a large number of events in parallel
+//   * to the same MDBox, to make sure it is thread-safe.
+//   */
+//  void test_fileBackEnd_addEvent_inParallel()
+//  {
+//    MDBox<MDEvent<2>,2> b;
+//    MDEvent<2> ev(1.2, 3.4);
+//    ev.setCenter(0, 2.0);
+//    ev.setCenter(1, 3.0);
+//
+//    int num = 5e5;
+//    PARALLEL_FOR_NO_WSP_CHECK()
+//    for (int i=0; i < num; i++)
+//    {
+//      b.addEvent(ev);
+//    }
+//#ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
+//    b.refreshCache();
+//#endif
+//
+//    TS_ASSERT_EQUALS( b.getNPoints(), num)
+//    // Did it keep a running total of the signal and error?
+//    TS_ASSERT_DELTA( b.getSignal(), 1.2*num, 1e-5*num);
+//    TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*num, 1e-5*num);
+//  }
 
 
   //-----------------------------------------------------------------------------------------
@@ -772,17 +880,8 @@ public:
     BoxController_sptr bc(new BoxController(3));
     MDBox<MDEvent<3>,3> c(bc, 0);
 
-    // Open the NXS file
-    std::string filename = do_saveNexus(false);
-    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_RDWR);
-    file->openGroup("my_test_group", "NXdata");
-    MDEvent<3>::openNexusData(file);
-
-    // Set it in the controller for back-end
-    bc->setFile(file,filename, 2000);
-    // Set the stuff that is handled outside the box itself
-    c.setFileIndex(500, 1000);
-    c.setOnDisk(true);
+    // Create and open the test NXS file
+    ::NeXus::File * file = do_saveAndOpenNexus(c, "MDBoxBinningTest.nxs", false);
 
     PARALLEL_FOR_IF(parallel)
     for (int i=0; i<20; i++)
@@ -817,6 +916,8 @@ public:
       TS_ASSERT_DELTA( error, 8.0, 1e-4);
     }
 
+    file->close();
+    do_deleteNexusFile("MDBoxBinningTest.nxs");
   }
 
   void test_fileBackEnd_binningOperations()

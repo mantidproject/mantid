@@ -78,6 +78,9 @@ namespace Kernel
       >
     > mru_t;
 
+    /// A way to index the MRU buffer by ID (instead of the file position)
+    typedef mru_t::nth_index<1>::type mru_byId_t;
+
     /// Typedef for a par for the map. Key = position in the file; value = the ISaveable object
     typedef std::pair<uint64_t, const ISaveable*> pairObj_t;
 
@@ -133,6 +136,10 @@ namespace Kernel
 
     uint64_t relocate(uint64_t const oldPos, uint64_t const oldSize, const uint64_t newSize);
 
+    void objectDeleted(const ISaveable * item);
+
+    void getFreeSpaceVector(std::vector<uint64_t> & free) const;
+
     //-------------------------------------------------------------------------------------------
     ///@return the memory used in the MRU, in number of events
     uint64_t getMemoryUsed() const
@@ -184,6 +191,9 @@ namespace Kernel
     /// The MRU list container
     mru_t m_mru;
 
+    /// The MRU list, indexed by ID
+    mru_byId_t & m_mru_byId;
+
     /// Amount of memory that the MRU is allowed to use.
     /// Note that the units are up to the ISaveable to define; they don't have to be bytes.
     uint64_t m_memoryAvail;
@@ -202,8 +212,8 @@ namespace Kernel
     toWriteMap_t m_toWrite;
 
     /// Reference to the same m_toWrite map, but indexed by item ID instead of by file position.
-    toWriteMap_by_Id_t & m_toWrite_byId;
 
+    toWriteMap_by_Id_t & m_toWrite_byId;
     /// Total amount of memory in the "toWrite" buffer.
     uint64_t m_memoryToWrite;
 

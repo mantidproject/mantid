@@ -15,7 +15,8 @@ namespace MDEvents
   /** Empty constructor */
   TMDE(MDBox)::MDBox()
    : IMDBox<MDE, nd>(),
-     m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
+     m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false), m_inMemory(false),
+     m_dataConstAccess(true)
   {
   }
 
@@ -26,7 +27,8 @@ namespace MDEvents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth)
     : IMDBox<MDE, nd>(),
-      m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
+      m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false), m_inMemory(false),
+      m_dataConstAccess(true)
   {
     if (controller->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
@@ -44,7 +46,8 @@ namespace MDEvents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
       : IMDBox<MDE, nd>(extentsVector),
-        m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false)
+        m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false), m_inMemory(false),
+        m_dataConstAccess(true)
   {
     if (controller->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
@@ -59,6 +62,9 @@ namespace MDEvents
   TMDE(
   void MDBox)::clear()
   {
+    // Make sure the object is not in any of the disk MRUs
+    this->m_BoxController->getDiskMRU().objectDeleted(this);
+    // Clear all contents
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;
     m_fileNumEvents = 0;
@@ -103,7 +109,12 @@ namespace MDEvents
   TMDE(size_t MDBox)::getNPoints() const
   {
     if (m_onDisk)
-      return m_fileNumEvents;
+    {
+      if (m_inMemory)
+        return data.size();
+      else
+        return m_fileNumEvents + data.size();
+    }
     else
       return data.size();
   }
@@ -130,15 +141,17 @@ namespace MDEvents
     if (m_onDisk)
     {
       // Is the data in memory right now (cached copy)?
-      if (data.empty())
+      if (!m_inMemory)
       {
         // Perform the data loading
         ::NeXus::File * file = this->m_BoxController->getFile();
         if (file)
         {
           this->m_BoxController->fileMutex.lock();
+          // Note that this APPENDS any events to the existing event list
           MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
           this->m_BoxController->fileMutex.unlock();
+          m_inMemory = true;
         }
       }
       // After loading, or each time you request it:
@@ -163,16 +176,17 @@ namespace MDEvents
     if (m_onDisk)
     {
       // Is the data in NOT memory right now (it is on disk)?
-      if (data.empty())
+      if (!m_inMemory)
       {
         // Perform the data loading
         ::NeXus::File * file = this->m_BoxController->getFile();
         if (file)
         {
-          data.clear();
           this->m_BoxController->fileMutex.lock();
+          // Note that this APPENDS any events to the existing event list
           MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
           this->m_BoxController->fileMutex.unlock();
+          m_inMemory = true;
         }
       }
       // After loading, or each time you request it:
@@ -210,8 +224,9 @@ namespace MDEvents
   TMDE(
   void MDBox)::save() const
   {
-    // Only save to disk when the access was non-const.
-    if (!m_dataConstAccess)
+    // Only save to disk when the access was non-const;
+    // OR: when addEvent() was called on cached data
+    if (!m_dataConstAccess || (data.size() != m_fileNumEvents))
     {
       size_t newNumEvents = data.size();
       DiskMRU & mru = this->m_BoxController->getDiskMRU();
@@ -220,18 +235,26 @@ namespace MDEvents
         // Event list changed size. The MRU can tell us where it best fits now.
         m_fileIndexStart = mru.relocate(m_fileIndexStart, m_fileNumEvents, newNumEvents);
         m_fileNumEvents = newNumEvents;
-        // Save it where the MRU told us to
-        this->saveNexus( this->m_BoxController->getFile() );
+        if (newNumEvents > 0)
+        {
+          // Save it where the MRU told us to
+          this->saveNexus( this->m_BoxController->getFile() );
+        }
       }
       else
       {
-        // Save at the same place
-        this->saveNexus( this->m_BoxController->getFile() );
+        if (newNumEvents > 0)
+        {
+          // Save at the same place
+          this->saveNexus( this->m_BoxController->getFile() );
+        }
       }
     }
     // Free up memory by clearing the events
     data.clear();
     vec_t().swap(data); // Linux trick to really free the memory
+    // Data is no longer in memory
+    m_inMemory = false;
   }
 
 

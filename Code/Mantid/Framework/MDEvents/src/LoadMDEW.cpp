@@ -264,9 +264,8 @@ namespace MDEvents
 
           // Load the events now
           uint64_t indexStart = box_event_index[i*2];
-          uint64_t indexEnd = box_event_index[i*2+1];
-          uint64_t numEvents = indexEnd-indexStart;
-          if (indexEnd > indexStart)
+          uint64_t numEvents = box_event_index[i*2+1];
+          if (numEvents > 0)
           {
             //std::cout << "box " << i << " from " << indexStart << " to " << indexEnd << std::endl;
             box->setFileIndex(uint64_t(indexStart), uint64_t(numEvents));

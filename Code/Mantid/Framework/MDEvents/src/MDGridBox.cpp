@@ -136,9 +136,19 @@ namespace MDEvents
     bc->getIdMutex().unlock();
 
     // Now distribute the events that were in the box before
-    this->addEvents(box->getConstEvents());
+    std::vector<MDE> & events = box->getEvents();
+
+    // Add all the events, with no bounds checking
+    typename std::vector<MDE>::const_iterator it = events.begin();
+    typename std::vector<MDE>::const_iterator it_end = events.end();
+    for (; it != it_end; it++)
+        addEvent(*it);
+
     // Copy the cached numbers from the incoming box. This is quick - don't need to refresh cache
     this->nPoints = box->getNPoints();
+
+    // Clear the old box. This releases it from the DiskMRU if needed
+    box->clear();
     box->releaseEvents();
   }
 
@@ -660,6 +670,9 @@ namespace MDEvents
     this->m_BoxController->trackNumBoxes(box->getDepth());
     // Construct the grid box
     MDGridBox<MDE, nd> * gridbox = new MDGridBox<MDE, nd>(box);
+
+    // TODO: Make sure to move it out of the DiskMRU????
+
     // Delete the old ungridded box
     delete boxes[index];
     // And now we have a gridded box instead of a boring old regular box.

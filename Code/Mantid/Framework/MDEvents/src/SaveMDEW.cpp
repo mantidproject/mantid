@@ -75,20 +75,26 @@ namespace MDEvents
     std::string filename = getPropertyValue("Filename");
     bool update = getProperty("UpdateFileBackEnd");
 
+    BoxController_sptr bc = ws->getBoxController();
+
     // Open/create the file
     ::NeXus::File * file;
     if (update)
     {
+      // First, flush to disk. This writes all the event data to disk!
+      bc->getDiskMRU().flushCache();
+
       // Use the open file
-      file = ws->getBoxController()->getFile();
+      file = bc->getFile();
       if (!file)
         throw std::invalid_argument("MDEventWorkspace is not file-backed. Do not check UpdateFileBackEnd!");
+
       // Normally the file is left open with the event data open. Close it.
       MDE::closeNexusData(file);
       file->close();
 
       // Reopen the file
-      filename = ws->getBoxController()->getFilename();
+      filename = bc->getFilename();
       file = new ::NeXus::File(filename, NXACC_RDWR);
     }
     else
@@ -122,7 +128,7 @@ namespace MDEvents
       file->putAttr( mess.str(), ws->getDimension(d)->toXMLString() );
     }
     // Add box controller info.
-    file->putAttr("box_controller_xml", ws->getBoxController()->toXMLString());
+    file->putAttr("box_controller_xml", bc->toXMLString());
 
 
     // Start the main data group
@@ -138,10 +144,9 @@ namespace MDEvents
     {
       uint64_t totalNumEvents = MDE::openNexusData(file);
       // Set it back to the new file handle
-      ws->getBoxController()->setFile(file, filename, totalNumEvents);
+      bc->setFile(file, filename, totalNumEvents);
     }
 
-    BoxController_sptr bc = ws->getBoxController();
     size_t maxBoxes = bc->getMaxId();
 
     // Prepare the vectors we will fill with data.
@@ -158,7 +163,6 @@ namespace MDEvents
     std::vector<double> inverse_volume(maxBoxes, 0);
     // Box cached signal/error squared
     std::vector<double> box_signal_errorsquared(maxBoxes*2, 0);
-
     // Start/end children IDs
     std::vector<int> box_children(maxBoxes*2, 0);
 
@@ -212,21 +216,40 @@ namespace MDEvents
 
 
         MDBox<MDE,nd> * mdbox = dynamic_cast<MDBox<MDE,nd> *>(box);
-        if (mdbox && !update)
+        if (mdbox)
         {
-          const std::vector<MDE> & events = mdbox->getConstEvents();
-          if (events.size() > 0)
+          if (update)
           {
-            mdbox->setFileIndex(uint64_t(start), uint64_t(events.size()));
-            mdbox->saveNexus(file);
-            // std::cout << id << " starts at " << start[0] << std::endl;
+            // File-backed: update where on the file it is
+            if (!mdbox->getOnDisk())
+            {
+              // This box is new and was never cached to disk
+              // This will relocate and save the box if it has any events
+              mdbox->save();
+              // We've now forced it to go on disk
+              mdbox->setOnDisk(true);
+            }
             // Save the index
-            box_event_index[id*2] = start;
-            box_event_index[id*2+1] = start + uint64_t(events.size());
-            // Move forward in the file.
-            start += uint64_t(events.size());
+            box_event_index[id*2] = mdbox->getFileIndexStart();
+            box_event_index[id*2+1] = mdbox->getFileNumEvents();
           }
-          mdbox->releaseEvents();
+          else
+          {
+            // Save for the first time
+            const std::vector<MDE> & events = mdbox->getConstEvents();
+            if (events.size() > 0)
+            {
+              mdbox->setFileIndex(uint64_t(start), uint64_t(events.size()));
+              mdbox->saveNexus(file);
+              // std::cout << id << " starts at " << start[0] << std::endl;
+              // Save the index
+              box_event_index[id*2] = start;
+              box_event_index[id*2+1] = uint64_t(events.size());
+              // Move forward in the file.
+              start += uint64_t(events.size());
+            }
+            mdbox->releaseEvents();
+          }
         }
 
         // Move on to the next box
@@ -246,6 +269,14 @@ namespace MDEvents
 
     // OK, we've filled these big arrays of data. Save them.
     prog->report("Writing Box Data");
+
+    // Get a vector of the free space blocks to save to the file
+    std::vector<uint64_t> freeSpaceBlocks;
+    bc->getDiskMRU().getFreeSpaceVector(freeSpaceBlocks);
+    if (freeSpaceBlocks.size() == 0)
+      freeSpaceBlocks.resize(2, 0); // Needs a minimum size
+    std::vector<int> free_dims(2,2); free_dims[0] = int(freeSpaceBlocks.size()/2);
+    std::vector<int> free_chunk(2,2); free_chunk[0] = 1000;
 
     std::vector<int> exents_dims(2,0);
     exents_dims[0] = (int(maxBoxes));
@@ -271,6 +302,7 @@ namespace MDEvents
       file->writeExtendibleData("box_children", box_children, box_2_dims, box_2_chunk);
       file->writeExtendibleData("box_signal_errorsquared", box_signal_errorsquared, box_2_dims, box_2_chunk);
       file->writeExtendibleData("box_event_index", box_event_index, box_2_dims, box_2_chunk);
+      file->writeExtendibleData("free_space_blocks", freeSpaceBlocks, free_dims, free_chunk);
       // Finished - close the file
       file->close();
     }
@@ -284,6 +316,7 @@ namespace MDEvents
       file->writeUpdatedData("box_children", box_children, box_2_dims);
       file->writeUpdatedData("box_signal_errorsquared", box_signal_errorsquared, box_2_dims);
       file->writeUpdatedData("box_event_index", box_event_index, box_2_dims);
+      file->writeUpdatedData("free_space_blocks", freeSpaceBlocks, free_dims);
       // Need to keep the file open since it is still used as a back end.
       // Re-open the data for events.
       MDE::openNexusData(file);

@@ -184,6 +184,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("FileBackEnd", FileBackEnd) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Memory", 0) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
@@ -222,11 +223,13 @@ public:
 
     // Modify that by adding some boxes
     MDGridBox<MDEvent<nd>,nd> * box = dynamic_cast<MDGridBox<MDEvent<nd>,nd>*>(ws2->getBox());
-    // Now there are 20001 boxes
+    std::cout << dynamic_cast<MDBox<MDEvent<nd>,nd>*>(box->getChild(12))->getOnDisk() << " onDisk for box 12" << std::endl;
+    // Now there are 2002 boxes
     box->splitContents(12);
     ws2->refreshCache();
 
-    // Save it
+    // There are some new boxes that are not cached to disk at this point.
+    // Save it again.
     SaveMDEW saver;
     TS_ASSERT_THROWS_NOTHING( saver.initialize() )
     TS_ASSERT( saver.isInitialized() )
@@ -238,8 +241,6 @@ public:
 
     // The file should have been modified but that's tricky to check directly.
     std::string filename = ws2->getBoxController()->getFilename();
-    ws2->getBoxController()->closeFile();
-    AnalysisDataService::Instance().remove(outWSName);
 
     // Now we re-re-load it!
     LoadMDEW alg;
@@ -256,9 +257,11 @@ public:
     TS_ASSERT(ws3); if (!ws3) return;
     ws3->refreshCache();
 
-//    // Perform the full comparison of the second and 3rd loaded workspaces
-//    do_compare_MDEW(ws2, ws3);
+    // Perform the full comparison of the second and 3rd loaded workspaces
+    do_compare_MDEW(ws2, ws3);
 
+    ws2->getBoxController()->closeFile();
+    AnalysisDataService::Instance().remove(outWSName);
 
   }
 

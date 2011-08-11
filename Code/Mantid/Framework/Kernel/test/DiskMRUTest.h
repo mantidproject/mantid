@@ -470,6 +470,40 @@ public:
     TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
   }
 
+  //--------------------------------------------------------------------------------
+  /** If a block will get deleted it needs to be taken
+   * out of the caches */
+  void test_objectDeleted()
+  {
+    // Room for 4 in the MRU, and 3 in the to-write cache
+    DiskMRU mru(4, 3, true);
+    // Fill the cache. 0,1 in the toWrite buffer
+    for (size_t i=0; i<6; i++)
+      mru.loading(data[i]);
+    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 2);
+
+    // First let's get rid of something in to to-write buffer
+    mru.objectDeleted(data[1]);
+    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 1);
+    TSM_ASSERT_EQUALS( "Space on disk was marked as free", mru.getFreeSpaceMap().size(), 1);
+
+    // Now let's get rid of something in to MRU buffer
+    mru.objectDeleted(data[4]);
+    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 3);
+    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 1);
+    TSM_ASSERT_EQUALS( "Space on disk was marked as free", mru.getFreeSpaceMap().size(), 2);
+
+    mru.loading(data[6]);
+    mru.loading(data[7]);
+    mru.loading(data[8]);
+    // This triggers a write. 1 is no longer in the to-write buffer
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "3,2,0,");
+    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
+  }
+
 
   //--------------------------------------------------------------------------------
   /** Accessing the map from multiple threads simultaneously does not segfault */
@@ -507,12 +541,13 @@ public:
     mru.freeBlock(150, 50);
     TSM_ASSERT_EQUALS( "Map remained the same size because adjacent blocks were merged", map.size(), 2);
 
-    // Get the 2nd free block.
-    DiskMRU::freeSpace_t::iterator it =map.begin();
-    it++;
-    b = *it;
-    TS_ASSERT_EQUALS( b.getFilePosition(), 100);
-    TS_ASSERT_EQUALS( b.getSize(), 100);
+    // Get a vector of the free blocks and sizes
+    std::vector<uint64_t> free;
+    mru.getFreeSpaceVector(free);
+    TS_ASSERT_EQUALS( free[0], 0);
+    TS_ASSERT_EQUALS( free[1], 50);
+    TS_ASSERT_EQUALS( free[2], 100);
+    TS_ASSERT_EQUALS( free[3], 100);
   }
 
   //--------------------------------------------------------------------------------

@@ -5,6 +5,7 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/ThreadPool.h"
@@ -18,6 +19,7 @@
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MDBoxTest.h"
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
@@ -29,7 +31,6 @@
 #include <memory>
 #include <Poco/File.h>
 #include <vector>
-#include "MantidKernel/Memory.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -158,6 +159,48 @@ public:
   }
 
 
+
+  //-----------------------------------------------------------------------------------------
+  /** Test splitting of a MDBox into a MDGridBox when the
+   * original box is backed by a file. */
+  void test_fileBackEnd_construction()
+  {
+    // Create a box with a controller for the back-end
+    BoxController_sptr bc(new BoxController(3));
+    bc->setSplitInto(5);
+    // Handle the disk MRU values
+    bc->setCacheParameters(100000, 10000, sizeof(MDEvent<3>));
+    DiskMRU & mru = bc->getDiskMRU();
+    // Make a box from 0-10 in 3D
+    MDBox<MDEvent<3>,3> * c = new MDBox<MDEvent<3>,3>(bc, 0);
+    for (size_t d=0; d<3; d++) c->setExtents(d, 0, 10);
+
+    // Create and open the test NXS file
+    ::NeXus::File * file = MDBoxTest::do_saveAndOpenNexus(*c, "MDGridBoxTest.nxs");
+    TSM_ASSERT_EQUALS( "1000 events (on file)", c->getNPoints(), 1000);
+
+    // At this point the MDBox is set to be on disk
+    TSM_ASSERT_EQUALS( "No free blocks to start with", mru.getFreeSpaceMap().size(), 0);
+
+    // Construct the grid box by splitting the MDBox
+    MDGridBox<MDEvent<3>,3> * gb = new MDGridBox<MDEvent<3>,3>(c);
+    TSM_ASSERT_EQUALS( "Grid box also has 1000 points", gb->getNPoints(), 1000);
+    TSM_ASSERT_EQUALS( "Grid box has 125 children (5x5x5)", gb->getNumChildren(), 125);
+    TSM_ASSERT_EQUALS( "The old spot in the file is now free", mru.getFreeSpaceMap().size(), 1);
+
+    // Get a child
+    MDBox<MDEvent<3>,3> * b = dynamic_cast<MDBox<MDEvent<3>,3> *>(gb->getChild(22));
+    TSM_ASSERT_EQUALS( "Child has 8 events", b->getNPoints(), 8);
+    TSM_ASSERT_EQUALS( "Child is NOT on disk", b->getOnDisk(), false);
+
+
+    file->close();
+    MDBoxTest::do_deleteNexusFile("MDGridBoxTest.nxs");
+  }
+
+
+  //-----------------------------------------------------------------------------------------
+  /** Manually setting children of a grid box (for NXS file loading) */
   void test_setChildren()
   {
     // Build the grid box
