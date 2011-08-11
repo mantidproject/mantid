@@ -352,7 +352,7 @@ template<class T>
     {
       kioverkf = static_cast<float>(std::sqrt( Ei / Ef ));
       it->m_weight*=kioverkf;
-      it->m_errorSquared*=kioverkf;
+      it->m_errorSquared*=kioverkf*kioverkf;
       ++it;
     }
   }
