@@ -43,6 +43,7 @@ namespace Mantid
       virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler) = 0;
       virtual bool hasTDimensionAvailable() const = 0;
       virtual std::vector<double> getTimeStepValues() const = 0;
+      virtual bool canReadFile() const = 0;
       virtual ~MDLoadingPresenter(){}
     };
 

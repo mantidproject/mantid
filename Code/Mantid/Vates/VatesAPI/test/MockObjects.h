@@ -9,11 +9,17 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidVatesAPI/Clipper.h"
+#include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/MDRebinningView.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/MDLoadingView.h"
+#include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/RebinningActionManager.h"
+#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MDDataObjects/MDIndexCalculator.h"
 #include <gmock/gmock.h>
+#include <vtkFieldData.h>
+#include <vtkCharArray.h>
 
 using Mantid::VATES::MDRebinningView;
 using Mantid::Geometry::MDHistoDimension;
@@ -199,6 +205,55 @@ public:
   ~MockMDLoadingView(){}
 };
 
+class MockMDRebinningView : public MDRebinningView 
+{
+public:
+  MOCK_CONST_METHOD0(getImplicitFunction,
+    vtkImplicitFunction*());
+  MOCK_CONST_METHOD0(getMaxThreshold,
+    double());
+  MOCK_CONST_METHOD0(getMinThreshold,
+    double());
+  MOCK_CONST_METHOD0(getApplyClip,
+    bool());
+  MOCK_CONST_METHOD0(getTimeStep,
+    double());
+  MOCK_CONST_METHOD0(getAppliedGeometryXML,
+    const char*());
+  MOCK_METHOD1(updateAlgorithmProgress,
+    void(double));
+};
+
+class MockClipper: public Mantid::VATES::Clipper
+{
+public:
+  MOCK_METHOD1(SetInput, void(vtkDataSet* in_ds));
+  MOCK_METHOD1(SetClipFunction, void(vtkImplicitFunction* func));
+  MOCK_METHOD1(SetInsideOut, void(bool insideout));
+  MOCK_METHOD1(SetRemoveWholeCells, void(bool removeWholeCells));
+  MOCK_METHOD1(SetOutput, void(vtkUnstructuredGrid* out_ds));
+  MOCK_METHOD0(Update, void());
+  MOCK_METHOD0(Delete,void());
+  MOCK_METHOD0(GetOutput, vtkDataSet*());
+  MOCK_METHOD0(die, void());
+  virtual ~MockClipper(){}
+};
+
+class MockRebinningActionManager : public Mantid::VATES::RebinningActionManager
+{
+public:
+  MOCK_METHOD1(ask, void(Mantid::VATES::RebinningIterationAction));
+  MOCK_CONST_METHOD0(action, Mantid::VATES::RebinningIterationAction());
+  MOCK_METHOD0(reset, void());
+  virtual ~MockRebinningActionManager(){}
+};
+
+class FakeProgressAction : public Mantid::VATES::ProgressAction
+{
+  virtual void eventRaised(double)
+  {
+  }
+};
 
 Mantid::MDEvents::MDHistoWorkspace_sptr getFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10)
 {
@@ -223,6 +278,146 @@ Mantid::MDEvents::MDHistoWorkspace_sptr getFakeMDHistoWorkspace(double signal, s
   ws_sptr->setTo(signal, signal);
   return ws_sptr;
 }
+
+  static vtkFieldData* createFieldDataWithCharArray(std::string testData)
+  {
+    vtkFieldData* fieldData = vtkFieldData::New();
+    vtkCharArray* charArray = vtkCharArray::New();
+    charArray->SetName(Mantid::VATES::XMLDefinitions::metaDataId().c_str());
+    charArray->Allocate(100);
+    for(unsigned int i = 0; i < testData.size(); i++)
+    {
+      char cNextVal = testData.at(i);
+      if(int(cNextVal) > 1)
+      {
+        charArray->InsertNextValue(cNextVal);
+
+      }
+    }
+    fieldData->AddArray(charArray);
+    charArray->Delete();
+    return fieldData;
+  }
+
+  static std::string constrctGeometryOnlyXML(const std::string& xDimensionIdMapping, const std::string& yDimensionIdMapping, const std::string& zDimensionIdMapping, const std::string& tDimensionIdMapping
+    ,std::string xBins = "10",
+    std::string yBins = "10",
+    std::string zBins = "10",
+    std::string tBins = "10"
+    )
+  {
+    std::string body = std::string("<DimensionSet>") +
+      "<Dimension ID=\"en\">" +
+      "<Name>Energy</Name>" +
+      "<Units>None</Units>" +
+      "<UpperBounds>150.0000</UpperBounds>" +
+      "<LowerBounds>0.0000</LowerBounds>" +
+      "<NumberOfBins>" + xBins + "</NumberOfBins>" +
+      "</Dimension>" +
+      "<Dimension ID=\"qx\">" +
+      "<Name>Qx</Name>" +
+      "<Units>None</Units>" +
+      "<UpperBounds>5.0000</UpperBounds>" +
+      "<LowerBounds>-1.5000</LowerBounds>" +
+      "<NumberOfBins>" + yBins + "</NumberOfBins>" +
+      "</Dimension>" +
+      "<Dimension ID=\"qy\">" +
+      "<Name>Qy</Name>" +
+      "<Units>None</Units>" +
+      "<UpperBounds>6.6000</UpperBounds>" +
+      "<LowerBounds>-6.6000</LowerBounds>" +
+      "<NumberOfBins>" + zBins  + "</NumberOfBins>" +
+      "</Dimension>" +
+      "<Dimension ID=\"qz\">" +
+      "<Name>Qz</Name>" +
+      "<Units>None</Units>" +
+      "<UpperBounds>6.6000</UpperBounds>" +
+      "<LowerBounds>-6.6000</LowerBounds>" +
+      "<NumberOfBins>" + tBins + "</NumberOfBins>" +
+      "</Dimension>" +
+      "<XDimension>" +
+      "<RefDimensionId>" +
+      xDimensionIdMapping +
+      "</RefDimensionId>" +
+      "</XDimension>" +
+      "<YDimension>" +
+      "<RefDimensionId>" +
+      yDimensionIdMapping +
+      "</RefDimensionId>" +
+      "</YDimension>" +
+      "<ZDimension>" +
+      "<RefDimensionId>" + 
+      zDimensionIdMapping +
+      "</RefDimensionId>" +
+      "</ZDimension>" +
+      "<TDimension>" +
+      "<RefDimensionId>" +
+      tDimensionIdMapping +
+      "</RefDimensionId>" +
+      "</TDimension>" +
+      "</DimensionSet>";
+    return body;
+  }
+
+  static std::string constructXML(const std::string& xDimensionIdMapping, const std::string& yDimensionIdMapping, const std::string& zDimensionIdMapping, const std::string& tDimensionIdMapping)
+  {
+    return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
+      "<MDInstruction>" +
+      "<MDWorkspaceName>Input</MDWorkspaceName>" +
+      "<MDWorkspaceLocation>test_horace_reader.sqw</MDWorkspaceLocation>" +
+      constrctGeometryOnlyXML(xDimensionIdMapping, yDimensionIdMapping, zDimensionIdMapping, tDimensionIdMapping) +
+      "<Function>" +
+      "<Type>CompositeImplicitFunction</Type>" +
+      "<ParameterList/>" +
+      "<Function>" +
+      "<Type>BoxImplicitFunction</Type>" +
+      "<ParameterList>" +
+      "<Parameter>" +
+      "<Type>HeightParameter</Type>" +
+      "<Value>6</Value>" +
+      "</Parameter>" +
+      "<Parameter>" +
+      "<Type>WidthParameter</Type>" +
+      "<Value>1.5</Value>" +
+      "</Parameter>" +
+      "<Parameter>" +
+      "<Type>DepthParameter</Type>" +
+      "<Value>6</Value>" +
+      "</Parameter>" +
+      "<Parameter>" +
+      "<Type>OriginParameter</Type>" +
+      "<Value>0, 0, 0</Value>" +
+      "</Parameter>" +
+      "</ParameterList>" +
+      "</Function>" +
+      "<Function>" +
+      "<Type>CompositeImplicitFunction</Type>" +
+      "<ParameterList/>" +
+      "<Function>" +
+      "<Type>BoxImplicitFunction</Type>" +
+      "<ParameterList>" +
+      "<Parameter>" +
+      "<Type>WidthParameter</Type>" +
+      "<Value>4</Value>" +
+      "</Parameter>" +
+      "<Parameter>" +
+      "<Type>HeightParameter</Type>" +
+      "<Value>1.5</Value>" +
+      "</Parameter>" +
+      "<Parameter>" +
+      "<Type>DepthParameter</Type>" +
+      "<Value>6</Value>" +
+      "</Parameter>" +
+      "<Parameter>" +
+      "<Type>OriginParameter</Type>" +
+      "<Value>0, 0, 0</Value>" +
+      "</Parameter>" +
+      "</ParameterList>" +
+      "</Function>" +
+      "</Function>" +
+      "</Function>" +
+      "</MDInstruction>";
+  }
 
 } // namespace
 

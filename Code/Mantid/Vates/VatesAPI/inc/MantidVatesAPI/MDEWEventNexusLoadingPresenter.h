@@ -1,5 +1,5 @@
-#ifndef MANTID_VATES_EVENT_NEXUS_LOADING_PRESENTER
-#define MANTID_VATES_EVENT_NEXUS_LOADING_PRESENTER
+#ifndef MANTID_VATES_MDEW_EVENT_NEXUS_LOADING_PRESENTER
+#define MANTID_VATES_MDEW_EVENT_NEXUS_LOADING_PRESENTER
 
 #include <vtkUnstructuredGrid.h>
 #include <vtkFieldData.h>
@@ -16,16 +16,16 @@
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NeXusException.hpp"
-#include "MantidMDEvents/OneStepMDEW.h"
+#include "MantidMDEvents/LoadMDEW.h"
 
 namespace Mantid
 {
   namespace VATES
   {
     /** 
-    @class EventNexusLoadingPresenter, Abstract presenters for loading conversion of MDEW workspaces into render-able vtk objects.
+    @class MDEWEventNexusLoadingPresenter, Abstract presenters for loading conversion of MDEW workspaces into render-able vtk objects.
     @author Owen Arnold, Tessella plc
-    @date 05/08/2011
+    @date 09/08/2011
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -48,15 +48,15 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     template<typename ViewType>
-    class DLLExport EventNexusLoadingPresenter : public MDLoadingPresenter
+    class DLLExport MDEWEventNexusLoadingPresenter : public MDLoadingPresenter
     {
     public:
-      EventNexusLoadingPresenter(ViewType* view, const std::string fileName);
+      MDEWEventNexusLoadingPresenter(ViewType* view, const std::string fileName);
       virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler);
       virtual bool hasTDimensionAvailable() const;
       virtual std::vector<double> getTimeStepValues() const;
       std::string getGeometryXML() const;
-      virtual ~EventNexusLoadingPresenter();
+      virtual ~MDEWEventNexusLoadingPresenter();
       virtual bool canReadFile() const;
     private:
       const std::string m_filename;
@@ -76,7 +76,7 @@ namespace Mantid
     @throw logic_error if cannot use the reader-presenter for this filetype.
     */
     template<typename ViewType>
-    EventNexusLoadingPresenter<ViewType>::EventNexusLoadingPresenter(ViewType* view, const std::string filename) : MDLoadingPresenter(), m_filename(filename), m_view(view), m_isSetup(false)
+    MDEWEventNexusLoadingPresenter<ViewType>::MDEWEventNexusLoadingPresenter(ViewType* view, const std::string filename) : MDLoadingPresenter(), m_filename(filename), m_view(view), m_isSetup(false)
     {
       if(m_filename.empty())
       {
@@ -93,43 +93,23 @@ namespace Mantid
     @return false if the file cannot be read.
     */
     template<typename ViewType>
-    bool EventNexusLoadingPresenter<ViewType>::canReadFile() const
+    bool MDEWEventNexusLoadingPresenter<ViewType>::canReadFile() const
     {
       ::NeXus::File * file = NULL;
+
+      file = new ::NeXus::File(m_filename);
+      // MDEventWorkspace file has a different name for the entry
       try
       {
-        file = new ::NeXus::File(m_filename);
-        // All SNS (event or histo) nxs files have an entry named "entry"
-        try
-        {
-          file->openGroup("entry", "NXentry");
-        }
-        catch(::NeXus::Exception &)
-        {
-          file->close();
-          return 0;
-        }
-        // But only eventNexus files have bank123_events as a group name
-        std::map<std::string, std::string> entries = file->getEntries();
-        bool hasEvents = false;
-        std::map<std::string, std::string>::iterator it;
-        for (it = entries.begin(); it != entries.end(); it++)
-        {
-          if (it->first.find("_events") != std::string::npos)
-          {
-            hasEvents=true;
-            break;
-          }
-        }
+        file->openGroup("MDEventWorkspace", "NXentry");
         file->close();
-        return hasEvents ? 1 : 0;
+        return 1;
       }
-      catch (std::exception & e)
+      catch(::NeXus::Exception &)
       {
-        std::cerr << "Could not open " << this->m_filename << " as an EventNexus file because of exception: " << e.what() << std::endl;
-        // Clean up, if possible
-        if (file)
-          file->close();
+        // If the entry name does not match, then it can't read the file.
+        file->close();
+        return 0;
       }
       return 0;
     }
@@ -140,24 +120,20 @@ namespace Mantid
     @param eventHandler : object that encapuslates the direction of the gui change as the algorithm progresses.
     */
     template<typename ViewType>
-    vtkDataSet* EventNexusLoadingPresenter<ViewType>::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
+    vtkDataSet* MDEWEventNexusLoadingPresenter<ViewType>::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
     {
       using namespace Mantid::API;
       using namespace Mantid::Geometry;
 
-      m_view->getLoadInMemory(); //TODO, nexus reader algorithm currently has no use of this.
-      
       Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
-
       AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
 
-      Mantid::MDEvents::OneStepMDEW alg;
+      Mantid::MDEvents::LoadMDEW alg;
       alg.initialize();
       alg.setPropertyValue("Filename", this->m_filename);
       alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
-      alg.addObserver(observer);
+      alg.setProperty("FileBackEnd", !m_view->getLoadInMemory()); //Load from file by default.
       alg.execute();
-      alg.removeObserver(observer);
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
       Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
@@ -177,7 +153,7 @@ namespace Mantid
     @param eventWs : Event workspace from which metadata is drawn.
     */
     template<typename ViewType>
-    void EventNexusLoadingPresenter<ViewType>::appendMetadata(vtkDataSet* visualDataSet, Mantid::API::IMDEventWorkspace_sptr eventWs)
+    void MDEWEventNexusLoadingPresenter<ViewType>::appendMetadata(vtkDataSet* visualDataSet, Mantid::API::IMDEventWorkspace_sptr eventWs)
     {
       using namespace Mantid::Geometry;
       using namespace Mantid::API;
@@ -245,7 +221,7 @@ namespace Mantid
     @throw runtime_error if execute has not been run first.
     */
     template<typename ViewType>
-    std::string EventNexusLoadingPresenter<ViewType>::getGeometryXML() const
+    std::string MDEWEventNexusLoadingPresenter<ViewType>::getGeometryXML() const
     {
       if(!m_isSetup)
       {
@@ -259,7 +235,7 @@ namespace Mantid
     @throw runtime_error if execute has not been run first.
     */
     template<typename ViewType>
-    bool EventNexusLoadingPresenter<ViewType>::hasTDimensionAvailable() const
+    bool MDEWEventNexusLoadingPresenter<ViewType>::hasTDimensionAvailable() const
     {
       if(!m_isSetup)
       {
@@ -273,7 +249,7 @@ namespace Mantid
     @throw runtime_error if execute has not been run first.
     */
     template<typename ViewType>
-    std::vector<double> EventNexusLoadingPresenter<ViewType>::getTimeStepValues() const
+    std::vector<double> MDEWEventNexusLoadingPresenter<ViewType>::getTimeStepValues() const
     {
       if(!m_isSetup)
       {
@@ -289,7 +265,7 @@ namespace Mantid
 
     ///Destructor
     template<typename ViewType>
-    EventNexusLoadingPresenter<ViewType>::~EventNexusLoadingPresenter()
+    MDEWEventNexusLoadingPresenter<ViewType>::~MDEWEventNexusLoadingPresenter()
     {
     }
 

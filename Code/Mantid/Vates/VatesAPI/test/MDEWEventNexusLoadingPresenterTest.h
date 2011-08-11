@@ -1,5 +1,5 @@
-#ifndef EVENT_NEXUS_LOADING_PRESENTER_TEST_H_
-#define EVENT_NEXUS_LOADING_PRESENTER_TEST_H_
+#ifndef MDEW_EVENT_NEXUS_LOADING_PRESENTER_TEST_H_
+#define MDEW_EVENT_NEXUS_LOADING_PRESENTER_TEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <vtkUnstructuredGrid.h>
@@ -9,14 +9,14 @@
 #include "MockObjects.h"
 
 #include "MantidAPI/FileFinder.h"
-#include "MantidVatesAPI/EventNexusLoadingPresenter.h"
+#include "MantidVatesAPI/MDEWEventNexusLoadingPresenter.h"
 
 using namespace Mantid::VATES;
 using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class EventNexusLoadingPresenterTest : public CxxTest::TestSuite
+class MDEWEventNexusLoadingPresenterTest : public CxxTest::TestSuite
 {
 
 private:
@@ -24,13 +24,13 @@ private:
   // Helper method to return the full path to a real nexus file that is the correct format for this functionality.
   static std::string getSuitableFile()
   {
-    return Mantid::API::FileFinder::Instance().getFullPath("CNCS_7860_event.nxs");
+    return Mantid::API::FileFinder::Instance().getFullPath("MAPS_MDEW.nxs");
   }
   
   // Helper method to return the full path to a real nexus file that is the wrong format for this functionality.
   static std::string getUnhandledFile()
   {
-    return Mantid::API::FileFinder::Instance().getFullPath("emu00006473.nxs");
+    return Mantid::API::FileFinder::Instance().getFullPath("CNCS_7860_event.nxs");
   }
 
 public:
@@ -39,28 +39,28 @@ void testConstructWithEmptyFileThrows()
 {
   MockMDLoadingView view;
 
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", EventNexusLoadingPresenter<MockMDLoadingView>(&view, ""), std::invalid_argument);
+  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", MDEWEventNexusLoadingPresenter<MockMDLoadingView>(&view, ""), std::invalid_argument);
 }
 
 void testConstructWithNullViewThrows()
 {
   MockMDLoadingView*  pView = NULL;
 
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", EventNexusLoadingPresenter<MockMDLoadingView>(pView, "some_file"), std::invalid_argument);
+  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", MDEWEventNexusLoadingPresenter<MockMDLoadingView>(pView, "some_file"), std::invalid_argument);
 }
 
 void testConstruct()
 {
   MockMDLoadingView view;
 
-  TSM_ASSERT_THROWS_NOTHING("Object should be created without exception.", EventNexusLoadingPresenter<MockMDLoadingView>(&view, getSuitableFile()));
+  TSM_ASSERT_THROWS_NOTHING("Object should be created without exception.", MDEWEventNexusLoadingPresenter<MockMDLoadingView>(&view, getSuitableFile()));
 }
 
 
 void testCanReadFile()
 {
   MockMDLoadingView view;
-  EventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getUnhandledFile());
+  MDEWEventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getUnhandledFile());
   TSM_ASSERT("A file of this type cannot and should not be read by this presenter!.", !presenter.canReadFile());
 }
 
@@ -82,7 +82,7 @@ void testExecution()
   FilterUpdateProgressAction<MockMDLoadingView> progressAction(&view);
 
   //Create the presenter and runit!
-  EventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  MDEWEventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
   vtkDataSet* product = presenter.execute(&factory, progressAction);
 
   TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
@@ -101,21 +101,21 @@ void testExecution()
 void testCallHasTDimThrows()
 {
   MockMDLoadingView view;
-  EventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  MDEWEventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
   TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.hasTDimensionAvailable(), std::runtime_error);
 }
 
 void testCallGetTDimensionValuesThrows()
 {
   MockMDLoadingView view;
-  EventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  MDEWEventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
   TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getTimeStepValues(), std::runtime_error);
 }
 
 void testCallGetGeometryThrows()
 {
   MockMDLoadingView view;
-  EventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  MDEWEventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
   TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getGeometryXML(), std::runtime_error);
 }
 

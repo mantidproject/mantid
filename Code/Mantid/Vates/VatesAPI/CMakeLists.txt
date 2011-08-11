@@ -13,6 +13,7 @@ src/GaussianThresholdRange.cpp
 src/IgnoreZerosThresholdRange.cpp
 src/IMDDimensionComparitor.cpp
 src/IMDWorkspaceProxy.cpp
+src/MDEWRebinningPresenter.cpp
 src/MDHistogramRebinningPresenter.cpp
 src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
@@ -52,6 +53,8 @@ inc/MantidVatesAPI/FilteringUpdateProgressAction.h
 inc/MantidVatesAPI/GaussianThresholdRange.h
 inc/MantidVatesAPI/GeometryPresenter.h
 inc/MantidVatesAPI/GeometryView.h
+inc/MantidVatesAPI/MDEWEventNexusLoadingPresenter.h
+inc/MantidVatesAPI/MDEWRebinningPresenter.h
 inc/MantidVatesAPI/MDHistogramRebinningPresenter.h
 inc/MantidVatesAPI/MDLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingView.h
@@ -106,6 +109,8 @@ test/FieldDataToMetadataTest.h
 test/FilteringUpdateProgressActionTest.h
 test/IMDWorkspaceProxyTest.h
 test/MultiDimensionalDbPresenterTest.h
+test/MDEWEventNexusLoadingPresenterTest.h
+test/MDEWRebinningPresenterTest.h
 test/MDHistogramRebinningPresenterTest.h
 test/NullRebinningPresenterTest.h
 test/MetadataToFieldDataTest.h
