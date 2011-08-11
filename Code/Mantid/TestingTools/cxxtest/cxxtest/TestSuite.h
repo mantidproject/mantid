@@ -579,6 +579,13 @@ namespace CxxTest
 #   include <cxxtest/StdTestSuite.h>
 #endif // _CXXTEST_HAVE_STD
 
+// Russell Taylor: Disable Intel compiler warning about sign changes
+// This allows us to test passing, e.g., -1 into an array index without
+// having to do a cast every time to avoid a warning.
+#ifdef __INTEL_COMPILER
+  #pragma warning disable 68
+#endif
+
 #endif // __cxxtest__TestSuite_h__
 
 // Copyright 2008 Sandia Corporation. Under the terms of Contract
