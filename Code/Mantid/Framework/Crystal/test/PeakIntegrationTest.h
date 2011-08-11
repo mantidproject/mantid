@@ -170,7 +170,7 @@ public:
 
     boost::shared_ptr<Mantid::API::Algorithm> algu =Mantid::API::AlgorithmFactory::Instance(). create(std::string("LoadIsawUB"), 1);
     algu->initialize();
-    algu->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+    algu->setProperty<Workspace_sptr>("InputWorkspace", inputW);
     algu->setPropertyValue("Filename", "TOPAZ_3007.mat");
     algu->execute();
 

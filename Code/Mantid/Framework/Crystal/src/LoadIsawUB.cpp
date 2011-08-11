@@ -55,7 +55,7 @@ namespace Crystal
    */
   void LoadIsawUB::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::InOut),
+    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::InOut),
         "An input workspace to which to add the lattice information.");
 
     std::vector<std::string> exts;
@@ -73,11 +73,10 @@ namespace Crystal
   void LoadIsawUB::exec()
   {
     // In and Out workspace.
-    MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
-//    Workspace_sptr ws1 = getProperty("InputWorkspace");
-//    ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
-//    if (!ws) throw
-//        std::invalid_argument("Must specify either a MatrixWorkspace or a PeaksWorkspace or a MDEventWorkspace.");
+    Workspace_sptr ws1 = getProperty("InputWorkspace");
+    ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
+   if (!ws) throw
+        std::invalid_argument("Must specify either a MatrixWorkspace or a PeaksWorkspace or a MDEventWorkspace.");
 
     std::string Filename = getProperty("Filename");
 
@@ -127,7 +126,7 @@ namespace Crystal
     ws->mutableSample().setOrientedLattice(latt);
 
 
-    this->setProperty("InputWorkspace", ws);
+    this->setProperty("InputWorkspace", ws1);
 
   }
 
