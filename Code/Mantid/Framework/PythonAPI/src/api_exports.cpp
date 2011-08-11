@@ -78,7 +78,6 @@ using namespace boost::python;
       .def("getConfigProperty", &FrameworkManagerProxy::getConfigProperty)
       .def("releaseFreeMemory", &FrameworkManagerProxy::releaseFreeMemory)
       .def("_getRawIEventWorkspacePointer", &FrameworkManagerProxy::retrieveIEventWorkspace)
-//      .def("_getRawPeaksWorkspacePointer", &FrameworkManagerProxy::retrievePeaksWorkspace)
       .def("_getRawIMDWorkspacePointer", &FrameworkManagerProxy::retrieveIMDWorkspace)
       .def("_getRawIMDEventWorkspacePointer", &FrameworkManagerProxy::retrieveIMDEventWorkspace)
       .def("_getRawMatrixWorkspacePointer", &FrameworkManagerProxy::retrieveMatrixWorkspace)
@@ -320,15 +319,6 @@ using namespace boost::python;
         ;
   }
 
-//  void export_PeaksWorkspace()
-//  {
-//    register_ptr_to_python<PeaksWorkspace_sptr>();
-//
-//    // PeaksWorkspace class
-//    class_< PeaksWorkspace, bases<Workspace>, boost::noncopyable >("PeaksWorkspace", no_init)
-//        ;
-//  }
-
   void export_eventworkspace()
   {
     register_ptr_to_python<IEventWorkspace_sptr>();
@@ -364,14 +354,7 @@ using namespace boost::python;
     class_< IEventList, boost::noncopyable >("IEventList", no_init)
         .def("getEventType", &IEventList::getEventType)
         .def("switchTo", &IEventList::switchTo)
-        //TODO: Expose ISpectrum
-//        .def("addDetectorID", &IEventList::addDetectorID)
-//        .def("hasDetectorID", &IEventList::hasDetectorID)
         .def("clear", &IEventList::clear)
-//        .def("reserve", &IEventList::reserve)
-//        .def("sort", &IEventList::sort)
-//        .def("filterByPulseTime", &IEventList::filterByPulseTime)
-//        .def("getSortType", &IEventList::getSortType)
         .def("isSortedByTof", &IEventList::isSortedByTof)
         .def("getNumberEvents", &IEventList::getNumberEvents)
         .def("getMemorySize", &IEventList::getMemorySize)
@@ -634,7 +617,6 @@ using namespace boost::python;
     export_IMDDimension();
     export_ISpectrum();
     export_EventList();
-//    export_PeaksWorkspace();
   }
   //@endcond
 

@@ -84,7 +84,7 @@ public:
     Mantid::API::AnalysisDataService::Instance().add(name,WorkspaceCreationHelper::Create2DWorkspace123(22,10,1));
 
     TS_ASSERT_EQUALS(mgr->workspaceExists(name), true);
-    //Remove it to clean up properly
+    //Remove it to clean up afterwards
     Mantid::API::AnalysisDataService::Instance().remove(name);
 
   }
