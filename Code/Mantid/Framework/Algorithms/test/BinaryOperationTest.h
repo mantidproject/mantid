@@ -43,6 +43,8 @@ public:
   }
 
 private:
+  // Unhide base class method to avoid Intel compiler warning
+  using BinaryOperation::checkSizeCompatibility;
   // Overridden BinaryOperation methods
   void performBinaryOperation(const Mantid::MantidVec&, const Mantid::MantidVec& , const Mantid::MantidVec& ,
       const Mantid::MantidVec&, const Mantid::MantidVec& , Mantid::MantidVec&, Mantid::MantidVec&)

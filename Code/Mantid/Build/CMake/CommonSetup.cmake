@@ -123,7 +123,7 @@ endif ()
 find_package ( GMock )
 
 if ( GMOCK_FOUND AND GTEST_FOUND )
-  include_directories ( ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+  include_directories ( SYSTEM ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
   message ( STATUS "GMock/GTest is available for unit tests." )
 else ()
   message ( STATUS "GMock/GTest is not available. Some unit tests will not run." ) 
