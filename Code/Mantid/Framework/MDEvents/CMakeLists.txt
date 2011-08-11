@@ -137,7 +137,7 @@ if ( CXXTEST_FOUND )
   else ()
     cxxtest_add_test ( MDEventsTest ${TEST_FILES} )
     target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS}
-         DataHandling Nexus TestHelpers DataObjects API)
+         DataHandling Nexus TestHelpers )
   endif ()
   
   add_dependencies ( FrameworkTests MDEventsTest )

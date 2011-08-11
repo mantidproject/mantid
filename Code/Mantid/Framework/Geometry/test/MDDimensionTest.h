@@ -151,7 +151,7 @@ public:
       TS_ASSERT_THROWS_NOTHING(x=pOrtDim->getX(nBins));
       TS_ASSERT_DELTA(x,pOrtDim->getMaximum(),FLT_EPSILON);
       // out of range request
-      TS_ASSERT_THROWS_ANYTHING(x=pOrtDim->getX(size_t(-1))); // size_t cast avoids Intel compiler warning
+      TS_ASSERT_THROWS_ANYTHING(x=pOrtDim->getX(-1));
       TS_ASSERT_THROWS_ANYTHING(x=pOrtDim->getX(nBins+1));
     }
 
