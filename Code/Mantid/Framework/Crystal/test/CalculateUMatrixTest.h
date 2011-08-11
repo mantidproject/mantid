@@ -11,7 +11,6 @@
 #include "MantidCrystal/LoadPeaksFile.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidCrystal/LoadIsawUB.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -66,20 +65,6 @@ public:
     // Check that the UB matrix is the same as in TOPAZ_3007.mat
     OrientedLattice latt=ws->mutableSample().getOrientedLattice();
 
-    // Fake output WS
-    MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
-    AnalysisDataService::Instance().addOrReplace("LoadIsawUBTest_ws", ws1);
-
-    LoadIsawUB alg1;
-    TS_ASSERT_THROWS_NOTHING( alg1.initialize() )
-    TS_ASSERT( alg1.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("Filename", "TOPAZ_3007.mat") );
-    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("InputWorkspace", "LoadIsawUBTest_ws") );
-    TS_ASSERT_THROWS_NOTHING( alg1.execute(); );
-    TS_ASSERT( alg1.isExecuted() );
-    OrientedLattice lattFromUB=ws1->mutableSample().getOrientedLattice();
-
-    /* //this should be used instead if PeaksWorkspace is allowed in LoadIsawUB
     LoadIsawUB alg1;
     TS_ASSERT_THROWS_NOTHING( alg1.initialize() )
     TS_ASSERT( alg1.isInitialized() )
@@ -88,7 +73,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg1.execute(); );
     TS_ASSERT_THROWS_NOTHING( alg1.isExecuted(); );
     OrientedLattice lattFromUB=ws->mutableSample().getOrientedLattice();
-    */
+
     TS_ASSERT(latt.getUB().equals(lattFromUB.getUB(),2e-4)); //Some values differ by up to 1.7e-4
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(WSName);
