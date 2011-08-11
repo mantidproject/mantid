@@ -223,7 +223,6 @@ public:
 
     // Modify that by adding some boxes
     MDGridBox<MDEvent<nd>,nd> * box = dynamic_cast<MDGridBox<MDEvent<nd>,nd>*>(ws2->getBox());
-    std::cout << dynamic_cast<MDBox<MDEvent<nd>,nd>*>(box->getChild(12))->getOnDisk() << " onDisk for box 12" << std::endl;
     // Now there are 2002 boxes
     box->splitContents(12);
     ws2->refreshCache();

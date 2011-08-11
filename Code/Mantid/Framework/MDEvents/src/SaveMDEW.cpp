@@ -89,10 +89,9 @@ namespace MDEvents
       if (!file)
         throw std::invalid_argument("MDEventWorkspace is not file-backed. Do not check UpdateFileBackEnd!");
 
-      // Normally the file is left open with the event data open. Close it.
+      // Normally the file is left open with the event data open. Needs to be closed and reopened for things to work
       MDE::closeNexusData(file);
       file->close();
-
       // Reopen the file
       filename = bc->getFilename();
       file = new ::NeXus::File(filename, NXACC_RDWR);
@@ -303,8 +302,6 @@ namespace MDEvents
       file->writeExtendibleData("box_signal_errorsquared", box_signal_errorsquared, box_2_dims, box_2_chunk);
       file->writeExtendibleData("box_event_index", box_event_index, box_2_dims, box_2_chunk);
       file->writeExtendibleData("free_space_blocks", freeSpaceBlocks, free_dims, free_chunk);
-      // Finished - close the file
-      file->close();
     }
     else
     {
@@ -317,9 +314,22 @@ namespace MDEvents
       file->writeUpdatedData("box_signal_errorsquared", box_signal_errorsquared, box_2_dims);
       file->writeUpdatedData("box_event_index", box_event_index, box_2_dims);
       file->writeUpdatedData("free_space_blocks", freeSpaceBlocks, free_dims);
+    }
+
+    // Finished - close the file. This ensures everything gets written out even when updating.
+    file->close();
+
+    if (update)
+    {
       // Need to keep the file open since it is still used as a back end.
+      // Reopen the file
+      filename = bc->getFilename();
+      file = new ::NeXus::File(filename, NXACC_RDWR);
       // Re-open the data for events.
-      MDE::openNexusData(file);
+      file->openGroup("MDEventWorkspace", "NXentry");
+      file->openGroup("data", "NXdata");
+      uint64_t totalNumEvents = MDE::openNexusData(file);
+      bc->setFile(file, filename, totalNumEvents);
     }
 
     delete prog;
