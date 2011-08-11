@@ -125,6 +125,12 @@ namespace CurveFitting
                           << " therefore Simplex method used for fitting\n";
     }
 
+    // set-up minimizer
+
+    std::string costFunction = getProperty("CostFunction");
+    IFuncMinimizer* minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
+    minimizer->initialize(m_function.get(), costFunction);
+
     // create and populate data containers. Warn user if nData < nParam 
     // since as a rule of thumb this is required as a minimum to obtained 'accurate'
     // fitting parameter values.
@@ -134,6 +140,7 @@ namespace CurveFitting
     if (nParam == 0)
     {
       g_log.error("There are no active parameters.");
+      setProperty("OutputChi2overDoF", minimizer->costFunctionVal());
       throw std::runtime_error("There are no active parameters.");
     }
     if (nData == 0)
@@ -146,12 +153,6 @@ namespace CurveFitting
       g_log.error("Number of data points less than number of parameters to be fitted.");
       throw std::runtime_error("Number of data points less than number of parameters to be fitted.");
     }
-
-    // set-up minimizer
-
-    std::string costFunction = getProperty("CostFunction");
-    IFuncMinimizer* minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
-    minimizer->initialize(m_function.get(), costFunction);
 
     // finally do the fitting
 

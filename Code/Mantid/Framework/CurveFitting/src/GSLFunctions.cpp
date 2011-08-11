@@ -147,15 +147,30 @@ namespace CurveFitting
     p = fun->nActive();
     n = fun->dataSize(); 
     Y = fun->getData();
+
+    bool functionFixed = false;
+    if (p == 0)
+    {
+      p = 1;
+      functionFixed = true;
+    }
+
     sqrtWeightData = fun->getWeights();
     holdCalculatedData = new double[n];
     holdCalculatedJacobian =  gsl_matrix_alloc (n, p);
     
     initFuncParams = gsl_vector_alloc(p);
 
-    for (size_t i = 0; i < p; i++)
+    if (functionFixed)
     {
+      gsl_vector_set(initFuncParams, 0, 0.0);
+    }
+    else
+    {
+      for (size_t i = 0; i < p; i++)
+      {
         gsl_vector_set(initFuncParams, i, fun->activeParameter(static_cast<int>(i)));
+      }
     }
 
     int j = 0;

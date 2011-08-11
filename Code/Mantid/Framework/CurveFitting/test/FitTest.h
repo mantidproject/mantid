@@ -765,6 +765,31 @@ public:
     removeWS("out_Parameters");
   }
 
+  void testFunctionWithAllParametersFixed()
+  {
+    //press_return();
+
+    WS_type ws = mkWS(FitExpression(),1,0,10,0.1);
+    storeWS("Exp",ws);
+
+    Fit alg;
+    alg.initialize();
+
+    alg.setPropertyValue("InputWorkspace","Exp");
+    alg.setPropertyValue("WorkspaceIndex","0");
+    alg.setPropertyValue("Output","out");
+    std::string params = "name=FitTest_Linear,ties=(a=1,b=0)";
+
+    alg.setPropertyValue("Function",params);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    WS_type outWS = getWS("out_Workspace");
+    TS_ASSERT(outWS);
+    double chi = alg.getProperty("OutputChi2overDoF");
+    TS_ASSERT(chi);
+  }
 private:
 
   template<class Funct>
