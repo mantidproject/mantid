@@ -15,8 +15,8 @@ namespace MDEvents
   /** Empty constructor */
   TMDE(MDBox)::MDBox()
    : IMDBox<MDE, nd>(),
-     m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false), m_inMemory(false),
-     m_dataConstAccess(true)
+     m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false),
+     m_dataConstAccess(true), m_inMemory(false)
   {
   }
 
@@ -27,8 +27,8 @@ namespace MDEvents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth)
     : IMDBox<MDE, nd>(),
-      m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false), m_inMemory(false),
-      m_dataConstAccess(true)
+      m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false),
+      m_dataConstAccess(true), m_inMemory(false)
   {
     if (controller->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
@@ -46,8 +46,8 @@ namespace MDEvents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
       : IMDBox<MDE, nd>(extentsVector),
-        m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false), m_inMemory(false),
-        m_dataConstAccess(true)
+        m_dataBusy(false), m_fileIndexStart(0), m_fileNumEvents(0), m_onDisk(false),
+        m_dataConstAccess(true), m_inMemory(false)
   {
     if (controller->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
