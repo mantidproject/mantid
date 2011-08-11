@@ -9,7 +9,7 @@ namespace Mantid
 namespace Crystal
 {
 
-  /** CalculateUMatrix : TODO: DESCRIPTION
+  /** CalculateUMatrix : Algorithm to calculate the U matrix, given lattice parameters and a list of peaks
     
     @author Andrei Savici, ORNL
     @date 2011-08-05
