@@ -51,7 +51,7 @@ namespace MDEvents
     /// The input event workspace
     DataObjects::EventWorkspace_sptr in_ws;
     /// The output MDEventWorkspace<3>
-    MDEvents::MDEventWorkspace3::sptr ws;
+    MDEvents::MDEventWorkspace3Lean::sptr ws;
     /// Do we clear events on the input during loading?
     bool ClearInputWorkspace;
     /// Perform LorentzCorrection on the fly.

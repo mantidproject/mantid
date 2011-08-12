@@ -67,7 +67,7 @@ namespace MDEvents
   const std::string MDEventWorkspace)::id() const
   {
     std::ostringstream out;
-    out << "MDEventWorkspace<MDLeanEvent," << getNumDims() << ">";
+    out << "MDEventWorkspace<" << MDE::getTypeName() << "," << getNumDims() << ">";
     return out.str();
   }
 

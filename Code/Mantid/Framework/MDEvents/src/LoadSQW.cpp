@@ -47,7 +47,7 @@ namespace Mantid
       parseMetadata();
 
       // Create a new output workspace.
-      MDEventWorkspace4* pWs = new MDEventWorkspace4;
+      MDEventWorkspace<MDLeanEvent<4>,4>* pWs = new MDEventWorkspace<MDLeanEvent<4>,4>;
       Mantid::API::IMDEventWorkspace_sptr ws(pWs);
 
       // Add dimensions onto workspace.
@@ -90,7 +90,7 @@ namespace Mantid
     }
 
     /// Add a dimension after reading info from file.
-    void LoadSQW::addDimensions(Mantid::MDEvents::MDEventWorkspace4* ws)
+    void LoadSQW::addDimensions(Mantid::MDEvents::MDEventWorkspace<MDLeanEvent<4>,4>* ws)
     {
       using Mantid::Geometry::MDHistoDimensionBuilder;
       Mantid::Geometry::Vec_MDHistoDimensionBuilder dimensionVec(4);
@@ -219,7 +219,7 @@ namespace Mantid
     }
 
     /// Add events after reading pixels/datapoints from file.
-    void LoadSQW::addEvents(Mantid::MDEvents::MDEventWorkspace4* ws)
+    void LoadSQW::addEvents(Mantid::MDEvents::MDEventWorkspace<MDLeanEvent<4>,4>* ws)
     {
       CPUTimer tim;
 

@@ -34,8 +34,8 @@ private:
       // Parse Extract metadata. Including data locations.
       parseMetadata();
     }
-    virtual void addEvents(MDEventWorkspace4* ws) { return LoadSQW::addEvents(ws); };
-    virtual void addDimensions(MDEventWorkspace4* ws) { return LoadSQW::addDimensions(ws); };
+    virtual void addEvents(MDEventWorkspace4Lean* ws) { return LoadSQW::addEvents(ws); };
+    virtual void addDimensions(MDEventWorkspace4Lean* ws) { return LoadSQW::addDimensions(ws); };
   };
 
 public:
@@ -57,7 +57,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "testAddDimension");
     alg.setup();
 
-    MDEventWorkspace4 ws;
+    MDEventWorkspace4Lean ws;
     alg.addDimensions(&ws);
 
     TSM_ASSERT_EQUALS("Wrong number of dimensions", 4, ws.getNumDims());
@@ -107,7 +107,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "testAddDimension");
     alg.setup();
 
-    MDEventWorkspace4 ws;
+    MDEventWorkspace4Lean ws;
     alg.addDimensions(&ws);
     ws.initialize();
     alg.addEvents(&ws);
@@ -124,7 +124,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
     TS_ASSERT( alg.isExecuted() );
-    boost::shared_ptr<MDEventWorkspace4>  ws = boost::dynamic_pointer_cast<MDEventWorkspace4>(Mantid::API::AnalysisDataService::Instance().retrieve("createdWs"));
+    MDEventWorkspace4Lean::sptr ws =
+        boost::dynamic_pointer_cast<MDEventWorkspace4Lean>(Mantid::API::AnalysisDataService::Instance().retrieve("createdWs"));
 
     //Check the product
     TSM_ASSERT_EQUALS("Wrong number of points", 580, ws->getNPoints());
@@ -149,7 +150,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
     TS_ASSERT( alg.isExecuted() );
-    boost::shared_ptr<MDEventWorkspace4>  ws = boost::dynamic_pointer_cast<MDEventWorkspace4>(Mantid::API::AnalysisDataService::Instance().retrieve("benchmarkWS"));
+    MDEventWorkspace4Lean::sptr  ws =
+        boost::dynamic_pointer_cast<MDEventWorkspace4Lean>(Mantid::API::AnalysisDataService::Instance().retrieve("benchmarkWS"));
 
     //Check the product
     TSM_ASSERT_EQUALS("Wrong number of points", 580, ws->getNPoints());

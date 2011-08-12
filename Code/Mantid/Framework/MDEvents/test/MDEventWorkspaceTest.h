@@ -50,6 +50,10 @@ public:
     TS_ASSERT(ew3.getBox());
     TS_ASSERT(ew3.getBox()->getBoxController());
     TS_ASSERT_EQUALS(ew3.getBox()->getId(), 0);
+
+    // Now with the MDEvent type
+    MDEventWorkspace<MDEvent<3>, 3> ew3b;
+    TS_ASSERT_EQUALS( ew3b.id(), "MDEventWorkspace<MDEvent,3>");
   }
 
   void test_Constructor_IMDEventWorkspace()
@@ -109,7 +113,7 @@ public:
   /** Adding dimension info and searching for it back */
   void test_addDimension_getDimension()
   {
-    MDEventWorkspace2 * ew = new MDEventWorkspace2();
+    MDEventWorkspace2Lean * ew = new MDEventWorkspace2Lean();
     MDHistoDimension_sptr dim(new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 0));
     TS_ASSERT_THROWS_NOTHING( ew->addDimension(dim); )
     MDHistoDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", "Ang", -1, +1, 0));
@@ -134,7 +138,7 @@ public:
     if (DODEBUG) prog = new ProgressText(0.0, 1.0, 10, false);
 
     typedef MDGridBox<MDLeanEvent<2>,2> box_t;
-    MDEventWorkspace2::sptr b = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
+    MDEventWorkspace2Lean::sptr b = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
     box_t * subbox;
 
     // Manually set some of the tasking parameters
@@ -190,7 +194,7 @@ public:
     TS_ASSERT_DELTA( ext[1].max, ymax, 1e-4);
   }
 
-  void addEvent(MDEventWorkspace2::sptr b, coord_t x, coord_t y)
+  void addEvent(MDEventWorkspace2Lean::sptr b, coord_t x, coord_t y)
   {
     coord_t centers[2] = {x, y};
     b->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
@@ -198,7 +202,7 @@ public:
 
   void test_getMinimumExtents()
   {
-    MDEventWorkspace2::sptr ws = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
+    MDEventWorkspace2Lean::sptr ws = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
     std::vector<Mantid::Geometry::MDDimensionExtents> ext;
 
     // If nothing in the workspace, the extents given are invalid.
@@ -303,7 +307,7 @@ public:
   void test_integrateSphere()
   {
     // 10x10x10 eventWorkspace
-    MDEventWorkspace3::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
     TS_ASSERT_EQUALS( ws->getNPoints(), 1000);
 
     // The sphere transformation

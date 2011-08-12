@@ -251,7 +251,7 @@ public:
 class BinToMDHistoWorkspaceTestPerformance : public CxxTest::TestSuite
 {
 public:
-  MDEventWorkspace3::sptr in_ws;
+  MDEventWorkspace3Lean::sptr in_ws;
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests

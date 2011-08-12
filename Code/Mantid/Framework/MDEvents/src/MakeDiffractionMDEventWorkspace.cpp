@@ -256,7 +256,7 @@ namespace MDEvents
 
     // Try to get the output workspace
     IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
-    ws = boost::dynamic_pointer_cast<MDEventWorkspace3>( i_out );
+    ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<3>,3> >( i_out );
 
     // Initalize the matrix to 3x3 identity
     mat = Kernel::Matrix<double>(3,3, true);
@@ -301,7 +301,7 @@ namespace MDEvents
       // Create an output workspace with 3 dimensions.
       size_t nd = 3;
       i_out = MDEventFactory::CreateMDEventWorkspace(nd, "MDLeanEvent");
-      ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(i_out);
+      ws = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(i_out);
 
       // Give all the dimensions
       for (size_t d=0; d<nd; d++)

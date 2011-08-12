@@ -28,13 +28,14 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  void do_test_exec(std::string Filename)
+  void do_test_exec(std::string Filename, bool lean)
   {
     std::string wsName = "CreateMDEventWorkspaceTest_out";
     CreateMDEventWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     alg.setPropertyValue("Dimensions", "3");
+    alg.setPropertyValue("EventType", lean ? "MDLeanEvent" : "MDEvent");
     alg.setPropertyValue("Extents", "-1,1,-2,2,-3,3");
     alg.setPropertyValue("Names", "x,y,z");
     alg.setPropertyValue("Units", "m,mm,um");
@@ -72,10 +73,21 @@ public:
     TS_ASSERT_EQUALS( dim->getUnits(), "um");
 
     // What about the box controller
-    MDEventWorkspace3::sptr ews = boost::dynamic_pointer_cast<MDEventWorkspace3>(ws);
-    TS_ASSERT( ews );
-    if (!ews) return;
-    BoxController_sptr bc = ews->getBoxController();
+    BoxController_sptr bc;
+
+    if (lean)
+    {
+      MDEventWorkspace3Lean::sptr ews = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(ws);
+      TS_ASSERT( ews ); if (!ews) return;
+      bc = ews->getBoxController();
+    }
+    else
+    {
+      MDEventWorkspace3::sptr ews = boost::dynamic_pointer_cast<MDEventWorkspace3>(ws);
+      TS_ASSERT( ews ); if (!ews) return;
+      bc = ews->getBoxController();
+    }
+
     TS_ASSERT( bc );
     if (!bc) return;
     TS_ASSERT_EQUALS(bc->getSplitInto(0), 6 );
@@ -92,14 +104,24 @@ public:
     }
   }
 
-  void test_exec()
+  void test_exec_MDEvent()
   {
-    do_test_exec("");
+    do_test_exec("", false);
   }
 
-  void test_exec_fileBacked()
+  void test_exec_MDEvent_fileBacked()
   {
-    do_test_exec("CreateMDEventWorkspaceTest.nxs");
+    do_test_exec("CreateMDEventWorkspaceTest.nxs", false);
+  }
+
+  void test_exec_MDLeanEvent()
+  {
+    do_test_exec("", true);
+  }
+
+  void test_exec_MDLeanEvent_fileBacked()
+  {
+    do_test_exec("CreateMDEventWorkspaceTest.nxs", true);
   }
 
 

@@ -42,7 +42,7 @@ namespace Mantid
     CPUTimer tim;
     
     // First we get all the boxes, up to the given depth
-    std::vector<IMDBox3 *> boxes;
+    std::vector<IMDBox<MDLeanEvent<3>,3> *> boxes;
     m_workspace->getBox()->getBoxes(boxes, m_maxDepth, true);
 
     vtkIdType numBoxes = boxes.size();
@@ -73,7 +73,7 @@ namespace Mantid
     vtkUnstructuredGrid* visualDataSet = vtkUnstructuredGrid::New();
     visualDataSet->Allocate(numBoxes);
 
-    IMDBox3 * box;
+    IMDBox<MDLeanEvent<3>,3> * box;
 
     std::vector<Mantid::Geometry::Coordinate> coords;
     Mantid::signal_t signal_normalized;
@@ -188,7 +188,7 @@ namespace Mantid
     {
       throw std::runtime_error("Workspace is null");
     }
-    MDEventWorkspace3_sptr temp = boost::dynamic_pointer_cast<MDEventWorkspace3>(ws);
+    MDEventWorkspace3Lean::sptr temp = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(ws);
     if(!temp)
     {
       std::string message = "Cannot initialize vtkMDEWHexahedronFactory with workspace of type: " + ws->getName();

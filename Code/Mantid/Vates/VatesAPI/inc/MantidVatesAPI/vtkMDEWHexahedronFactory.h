@@ -70,7 +70,7 @@ public:
   virtual void setRecursionDepth(size_t depth);
   
   /// Typedef sptr to 3d event workspace.
-  typedef boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace3> MDEventWorkspace3_sptr;
+  typedef boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace3Lean> MDEventWorkspace3Lean_sptr;
 
 private:
 
@@ -84,7 +84,7 @@ private:
   const std::string m_scalarName;
 
   /// Member workspace to generate vtkdataset from.
-  MDEventWorkspace3_sptr m_workspace;
+  MDEventWorkspace3Lean_sptr m_workspace;
 
   /// Maximum recursion depth to use.
   size_t m_maxDepth;

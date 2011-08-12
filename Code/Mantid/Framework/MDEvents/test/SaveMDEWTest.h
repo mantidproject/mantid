@@ -46,7 +46,7 @@ public:
   void do_test_exec(size_t numPerBox, std::string filename)
   {
     // Make a 1D MDEventWorkspace
-    MDEventWorkspace1::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, numPerBox);
+    MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, numPerBox);
     // Make sure it is split
     if (numPerBox == 0) ws->splitBox();
     // Recurse split so that it has lots more boxes, recursively
@@ -86,7 +86,7 @@ public:
 class SaveMDEWTestPerformance : public CxxTest::TestSuite
 {
 public:
-  MDEventWorkspace3::sptr  ws;
+  MDEventWorkspace3Lean::sptr  ws;
   void setUp()
   {
     CPUTimer tim;

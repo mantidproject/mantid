@@ -32,10 +32,10 @@ namespace MDEvents
   protected:
 
     /// Add events onto the workspace.
-    virtual void addEvents(Mantid::MDEvents::MDEventWorkspace4* ws);
+    virtual void addEvents(Mantid::MDEvents::MDEventWorkspace<MDLeanEvent<4>,4>* ws);
 
     /// Add dimensions onto the workspace.
-    virtual void addDimensions(Mantid::MDEvents::MDEventWorkspace4* ws);  
+    virtual void addDimensions(Mantid::MDEvents::MDEventWorkspace<MDLeanEvent<4>,4>* ws);
 
     /// Parse metadata from file.
     void parseMetadata(); // New controlling function over legacy ones.

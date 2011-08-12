@@ -47,8 +47,8 @@ public:
         "OutputDimensions", "Q (lab frame)");
     TS_ASSERT( alg->isExecuted() );
 
-    MDEventWorkspace3::sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(AnalysisDataService::Instance().retrieve("testOutMD")) );
+    MDEventWorkspace3Lean::sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(AnalysisDataService::Instance().retrieve("testOutMD")) );
     TS_ASSERT(ws);
     if (!ws) return;
     TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "Qx");
@@ -68,7 +68,7 @@ public:
         "OutputDimensions", "HKL");
     TS_ASSERT( alg->isExecuted() );
 
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(AnalysisDataService::Instance().retrieve("testOutMD")) );
+    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(AnalysisDataService::Instance().retrieve("testOutMD")) );
     TS_ASSERT(ws);
     if (!ws) return;
     TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "H");
@@ -101,9 +101,9 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
     TS_ASSERT( alg.isExecuted() )
 
-    MDEventWorkspace3::sptr ws;
+    MDEventWorkspace3Lean::sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(AnalysisDataService::Instance().retrieve("test_md3")) );
+        ws = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(AnalysisDataService::Instance().retrieve("test_md3")) );
     TS_ASSERT(ws);
     if (!ws) return;
     size_t npoints = ws->getNPoints();
@@ -121,7 +121,7 @@ public:
       TS_ASSERT( alg.isExecuted() )
 
       TS_ASSERT_THROWS_NOTHING(
-          ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(AnalysisDataService::Instance().retrieve("test_md3")) );
+          ws = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(AnalysisDataService::Instance().retrieve("test_md3")) );
       TS_ASSERT(ws);
       if (!ws) return;
 

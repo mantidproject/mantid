@@ -35,7 +35,7 @@ namespace MDEvents
   template<size_t nd>
   class DLLExport MDLeanEvent
   {
-  private:
+  protected:
     /** The signal (aka weight) from the neutron event.
      * Will be exactly 1.0 unless modified at some point.
      */
@@ -66,8 +66,8 @@ namespace MDEvents
     //---------------------------------------------------------------------------------------------
     /** Constructor with signal and error
      *
-     * @param signal :: signal
-     * @param errorSquared :: errorSquared
+     * @param signal :: signal (aka weight)
+     * @param errorSquared :: square of the error on the weight
      * */
     MDLeanEvent(const double signal, const double errorSquared) :
       signal(float(signal)), errorSquared(float(errorSquared))
@@ -77,8 +77,8 @@ namespace MDEvents
     //---------------------------------------------------------------------------------------------
     /** Constructor with signal and error
      *
-     * @param signal :: signal
-     * @param errorSquared :: errorSquared
+     * @param signal :: signal (aka weight)
+     * @param errorSquared :: square of the error on the weight
      * */
     MDLeanEvent(const float signal, const float errorSquared) :
       signal(signal), errorSquared(errorSquared)
@@ -88,8 +88,8 @@ namespace MDEvents
     //---------------------------------------------------------------------------------------------
     /** Constructor with signal and error and an array of centers
      *
-     * @param signal :: signal
-     * @param errorSquared :: errorSquared
+     * @param signal :: signal (aka weight)
+     * @param errorSquared :: square of the error on the weight
      * @param centers :: pointer to a nd-sized array of values to set for all coordinates.
      * */
     MDLeanEvent(const float signal, const float errorSquared, const coord_t * centers) :
@@ -348,12 +348,15 @@ namespace MDEvents
       events.reserve( events.size() + numEvents);
       for (size_t i=0; i<numEvents; i++)
       {
+        // Index into the data array
+        size_t ii = i*(nd+2);
+
         // Point directly into the data block for the centers.
         // WARNING: coord_t type must be same as double for this to work!
-        coord_t * centers = data + i*(nd+2)+2;
+        coord_t * centers = data + ii+2;
 
         // Create the event with signal, error squared, and the centers
-        events.push_back( MDLeanEvent<nd>( float(data[i*(nd+2)]), float(data[i*(nd+2) + 1]), centers) );
+        events.push_back( MDLeanEvent<nd>( float(data[ii]), float(data[ii + 1]), centers) );
       }
 
       // Release the memory (all has been COPIED into MDLeanEvent's)

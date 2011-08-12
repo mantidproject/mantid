@@ -47,9 +47,10 @@ namespace MDEvents
     declareProperty(new PropertyWithValue<int>("Dimensions",1,Direction::Input), "Number of dimensions that the workspace will have.");
 
     std::vector<std::string> propOptions;
+    propOptions.push_back("MDEvent");
     propOptions.push_back("MDLeanEvent");
     declareProperty("EventType", "MDLeanEvent",new ListValidator(propOptions),
-      "Which underlying data type will event take (only one option is currently available).");
+      "Which underlying data type will event take.");
 
     declareProperty(
       new ArrayProperty<double>("Extents"),

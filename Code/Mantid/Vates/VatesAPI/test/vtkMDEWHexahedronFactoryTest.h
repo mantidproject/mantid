@@ -71,7 +71,7 @@ public:
 
   void testCreateDataSet()
   {
-    vtkMDEWHexahedronFactory::MDEventWorkspace3_sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    vtkMDEWHexahedronFactory::MDEventWorkspace3Lean_sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
     vtkDataSet* product = NULL;
@@ -115,7 +115,7 @@ class vtkMDEWHexahedronFactoryTestPerformance : public CxxTest::TestSuite
 
 private:
   
-  vtkMDEWHexahedronFactory::MDEventWorkspace3_sptr m_ws;
+  vtkMDEWHexahedronFactory::MDEventWorkspace3Lean_sptr m_ws;
 
 public :
 
