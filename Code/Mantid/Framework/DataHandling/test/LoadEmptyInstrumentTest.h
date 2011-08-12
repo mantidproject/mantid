@@ -75,7 +75,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loaderSLS.initialize());
     TS_ASSERT( loaderSLS.isInitialized() );
-    loaderSLS.setPropertyValue("Filename", "ENGINX_Definition.xml");
+    loaderSLS.setPropertyValue("Filename", "ENGIN-X_Definition.xml");
     inputFile = loaderSLS.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentTestEngineX";
     loaderSLS.setPropertyValue("OutputWorkspace", wsName);
