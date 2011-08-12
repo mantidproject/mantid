@@ -105,8 +105,8 @@ MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols
                          vert_align(VCenter),
                          d_scale_on_print(true),
                          d_print_cropmarks(false),
-						 d_is_waterfall_plot(false),
-d_waterfall_fill_color(Qt::black)
+                         d_is_waterfall_plot(false),
+                         d_waterfall_fill_color(/*Invalid color*/)
 {
 	layerButtonsBox = new QHBoxLayout();
 	waterfallBox = new QHBoxLayout();
@@ -1471,7 +1471,8 @@ void MultiLayer::showWaterfallFillDialog()
   hl1->setRowStretch(2, 1);
 
   QBrush brush = active_graph->curve(0)->brush();
-  fillColorBox->setColor(brush.style() != Qt::NoBrush ? brush.color() : d_waterfall_fill_color);
+  //fillColorBox->setColor(brush.style() != Qt::NoBrush ? brush.color() : d_waterfall_fill_color);
+  fillColorBox->setColor(Qt::white);
   gb1->setChecked(brush.style() != Qt::NoBrush);
 
   connect(gb1, SIGNAL(toggled(bool)), active_graph, SLOT(updateWaterfallFill(bool)));
