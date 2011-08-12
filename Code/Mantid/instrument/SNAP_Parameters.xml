@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "SNAP" date = "2011-08-12T00:00:00">
+
+<component-link name = "SNAP">
+
+<parameter name="TS_mapping_file" type="string">
+    <value val="SNAP_TS_2011_07_28.dat"/>
+</parameter>
+
+
+</component-link>
+
+</parameter-file>
