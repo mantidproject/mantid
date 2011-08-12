@@ -89,8 +89,8 @@ void RebinningCutterObjectPanel::constructThresholdRanges(QGridLayout* gLayout)
     this->proxy()->GetProperty("InputMinThreshold"));
   double inputMinThreshold = inputMinThresholdProperty->GetElement(0);
 
-  vtkSMProperty* prop = this->proxy()->GetProperty("ClipFunction");
-  vtkSMProxyProperty* clipFunc = vtkSMProxyProperty::SafeDownCast(this->proxy()->GetProperty("ClipFunction"));
+  //vtkSMProperty* prop = this->proxy()->GetProperty("ClipFunction");
+  //vtkSMProxyProperty* clipFunc = vtkSMProxyProperty::SafeDownCast(this->proxy()->GetProperty("ClipFunction"));
 
 
   if(inputMaxThreshold != m_cachedMaxThreshold || inputMinThreshold != m_cachedMinThreshold)
