@@ -1007,6 +1007,10 @@ class MantidPyFramework(FrameworkManager):
 
         self.__is_initialized = True
 
+    # Overload for the 'other' spelling
+    def initialize(self, GUI=None):
+        self.initialise(GUI)
+
     def list(self):
         """
         Print a list of the workspaces stored in Mantid along with their type
