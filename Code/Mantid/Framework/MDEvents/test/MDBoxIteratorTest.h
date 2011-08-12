@@ -475,8 +475,8 @@ public:
     MDBoxImplicitFunction * function = NULL;
     if (ImplicitFunction)
     {
-      std::vector<coord_t> min(3, 2.0);
-      std::vector<coord_t> max(3, 3.0);
+      std::vector<coord_t> min(3, 2.001);
+      std::vector<coord_t> max(3, 2.999);
       function = new MDBoxImplicitFunction(min, max);
     }
 
@@ -560,8 +560,8 @@ public:
     if (ImplicitFunction==1)
     {
       // Box in 3D where 2 < (x,y,z) < 3
-      std::vector<coord_t> min(3, 2.0);
-      std::vector<coord_t> max(3, 3.0);
+      std::vector<coord_t> min(3, 2.001);
+      std::vector<coord_t> max(3, 2.999);
       function = new MDBoxImplicitFunction(min, max);
       top->getBoxes(boxes, 20, leafOnly, function);
     }
@@ -569,19 +569,19 @@ public:
     {
       // Plane defining 2.2 < x < 2.4
       function = new MDImplicitFunction();
-      coord_t normal1[3] = {+1, 0, 0};
-      coord_t origin1[3] = {+2.20, 0, 0};
+      coord_t normal1[3] = {+1.000, 0, 0};
+      coord_t origin1[3] = {+2.201, 0, 0};
       function->addPlane(MDPlane(3,normal1, origin1));
-      coord_t normal2[3] = {-1, 0, 0};
-      coord_t origin2[3] = {+2.40, 0, 0};
+      coord_t normal2[3] = {-1.000, 0, 0};
+      coord_t origin2[3] = {+2.399, 0, 0};
       function->addPlane(MDPlane(3,normal2, origin2));
       top->getBoxes(boxes, 20, leafOnly, function);
     }
     else if (ImplicitFunction==3)
     {
       // Box in 3D where -5 < (x,y,z) < +10
-      std::vector<coord_t> min(3, -5.0);
-      std::vector<coord_t> max(3, +10.0);
+      std::vector<coord_t> min(3, -4.999);
+      std::vector<coord_t> max(3, +9.999);
       function = new MDBoxImplicitFunction(min, max);
       top->getBoxes(boxes, 20, leafOnly, function);
     }
