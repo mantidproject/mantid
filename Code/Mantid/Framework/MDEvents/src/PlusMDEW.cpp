@@ -59,6 +59,40 @@ namespace MDEvents
    */
   void PlusMDEW::exec()
   {
+    IMDEventWorkspace_sptr lhs_ws = getProperty("LHSWorkspace");
+    IMDEventWorkspace_sptr rhs_ws = getProperty("RHSWorkspace");
+    IMDEventWorkspace_sptr out_ws = getProperty("OutputWorkspace");
+
+    if (lhs_ws->id() != rhs_ws->id())
+      throw std::invalid_argument("LHS and RHS workspaces must be of the same type and number of dimensions.");
+
+    IMDEventWorkspace_sptr ws1;
+    IMDEventWorkspace_sptr ws2;
+
+    bool inPlace = false;
+    if (out_ws == rhs_ws)
+    { // Adding inplace on the right workspace
+      inPlace = true;
+      ws1 = rhs_ws;
+      ws2 = lhs_ws;
+    }
+    else if (out_ws == lhs_ws)
+    { // Adding inplace on the left workspace
+      inPlace = true;
+      ws1 = lhs_ws;
+      ws2 = rhs_ws;
+    }
+    else
+    { // Not adding in place
+      inPlace = false;
+      // TODO: Clone the lhs workspace into ws1!!!
+      ws1 = lhs_ws;
+      ws2 = rhs_ws;
+      out_ws = ws1;
+    }
+
+    // Now we add ws2 into ws1.
+    // TODO!
   }
 
 

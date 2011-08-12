@@ -38,7 +38,7 @@ CompressEvents::~CompressEvents() {}
 
 void CompressEvents::init()
 {
-  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::InOut),
+  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input),
     "The name of the EventWorkspace on which to perform the algorithm");
 
   declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace","",Direction::Output),
