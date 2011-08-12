@@ -9,16 +9,33 @@ namespace Geometry
 
 
   //----------------------------------------------------------------------------------------------
-  /** Constructor with min/max dimensions.
-   *
-   * The dimensions must be IN THE SAME ORDER and the SAME LENGTH as the
-   * nd dimensions of the MDEventWorkspace on which they will be applied.
-   *
+  /** Default ctor
+   */
+  MDBoxImplicitFunction::MDBoxImplicitFunction()
+  : MDImplicitFunction()
+  {
+  }
+
+  //----------------------------------------------------------------------------------------------
+    /** Constructor with min/max dimensions.
+     *
+     * The dimensions must be IN THE SAME ORDER and the SAME LENGTH as the
+     * nd dimensions of the MDEventWorkspace on which they will be applied.
+     *
+     * @param min :: nd-sized vector of the minimum edge of the box in each dimension
+     * @param max :: nd-sized vector of the maximum edge of the box
+     */
+    MDBoxImplicitFunction::MDBoxImplicitFunction(const std::vector<coord_t> & min, const std::vector<coord_t> & max)
+    {
+      construct(min,max);
+    }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor helper method
    * @param min :: nd-sized vector of the minimum edge of the box in each dimension
    * @param max :: nd-sized vector of the maximum edge of the box
-   * @return
-   */
-  MDBoxImplicitFunction::MDBoxImplicitFunction(const std::vector<coord_t> & min, const std::vector<coord_t> & max)
+   * */
+  void MDBoxImplicitFunction::construct(const std::vector<coord_t> & min, const std::vector<coord_t> & max)
   {
     size_t nd = min.size();
     if (max.size() != nd) throw std::invalid_argument("MDBoxImplicitFunction::ctor(): Min and max vector sizes must match!");

@@ -41,7 +41,11 @@ namespace Geometry
   class DLLExport MDBoxImplicitFunction : public MDImplicitFunction
   {
   public:
+    MDBoxImplicitFunction();
+
     MDBoxImplicitFunction(const std::vector<coord_t> & min, const std::vector<coord_t> & max);
+
+    void construct(const std::vector<coord_t> & min, const std::vector<coord_t> & max);
 
     ~MDBoxImplicitFunction();
     
