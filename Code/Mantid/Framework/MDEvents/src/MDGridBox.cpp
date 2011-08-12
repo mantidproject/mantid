@@ -6,7 +6,7 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include <ostream>
 #include "MantidKernel/Strings.h"
@@ -749,7 +749,7 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Add a single MDEvent to the grid box. If the boxes
+  /** Add a single MDLeanEvent to the grid box. If the boxes
    * contained within are also gridded, this will recursively push the event
    * down to the deepest level.
    * Warning! No bounds checking is done (for performance). It must
@@ -758,7 +758,7 @@ namespace MDEvents
    * Note! nPoints, signal and error must be re-calculated using refreshCache()
    * after all events have been added.
    *
-   * @param event :: reference to a MDEvent to add.
+   * @param event :: reference to a MDLeanEvent to add.
    * */
   TMDE(
   inline void MDGridBox)::addEvent( const MDE & event)

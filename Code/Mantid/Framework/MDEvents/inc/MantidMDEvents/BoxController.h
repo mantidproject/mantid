@@ -373,7 +373,7 @@ namespace MDEvents
      *
      * @param cacheSize :: number of EVENTS to keep in memory.
      * @param writeBufferSize :: number of EVENTS to accumulate before performing a disk write.
-     * @param bytesPerEvent :: sizeof(MDEvent) that is in the workspace
+     * @param bytesPerEvent :: sizeof(MDLeanEvent) that is in the workspace
      *
      */
     void setCacheParameters(size_t cacheSize, size_t writeBufferSize, size_t bytesPerEvent)
@@ -467,7 +467,7 @@ namespace MDEvents
     Mantid::Kernel::Mutex fileMutex;
 
   private:
-    /// Number of bytes in a single MDEvent<> of the workspace.
+    /// Number of bytes in a single MDLeanEvent<> of the workspace.
     size_t m_bytesPerEvent;
 
   };

@@ -5,7 +5,7 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/IMDBox.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 
 namespace Mantid
 {

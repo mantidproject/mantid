@@ -18,7 +18,7 @@ public:
 
   void test_constructor()
   {
-    typedef MDEvent<3> MDE;
+    typedef MDLeanEvent<3> MDE;
     MDBin<MDE,3> bin;
     for (size_t d=0; d<3; d++)
     {

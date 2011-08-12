@@ -25,7 +25,7 @@ public:
 
   //-------------------------------------------------------------------------------------
   /** Generate an empty MDBox , 10x10*/
-  MDBox<MDEvent<2>,2> * makeMDBox2()
+  MDBox<MDLeanEvent<2>,2> * makeMDBox2()
   {
     // Split at 5 events
     BoxController_sptr splitter(new BoxController(2));
@@ -33,7 +33,7 @@ public:
     // Splits into 10 boxes
     splitter->setSplitInto(10);
     // Set the size
-    MDBox<MDEvent<2>,2> * out = new MDBox<MDEvent<2>,2>(splitter);
+    MDBox<MDLeanEvent<2>,2> * out = new MDBox<MDLeanEvent<2>,2>(splitter);
     out->setExtents(0, 0.0, 10.0);
     out->setExtents(1, 0.0, 10.0);
     out->calcVolume();
@@ -56,20 +56,20 @@ public:
   void test_constructor()
   {
     // Start with an empty MDBox2
-    MDBox<MDEvent<2>,2> * mdbox = makeMDBox2();
+    MDBox<MDLeanEvent<2>,2> * mdbox = makeMDBox2();
 
     // Fill events that are more spread in dimension 1.
     for (double x=40; x<60; x++) //20
       for (double y=20; y<80; y++) //60
       {
         coord_t centers[2] = {x*0.1,y*0.1 + 0.05};
-        mdbox->addEvent( MDEvent<2>(2.0, 2.0, centers) );
+        mdbox->addEvent( MDLeanEvent<2>(2.0, 2.0, centers) );
       }
     TS_ASSERT_EQUALS(mdbox->getNPoints(), 20*60);
 
     // Build the splitbox
-    typedef MDSplitBox<MDEvent<2>,2> MDSplitBox2;
-    typedef IMDBox<MDEvent<2>,2> IMDBox2;
+    typedef MDSplitBox<MDLeanEvent<2>,2> MDSplitBox2;
+    typedef IMDBox<MDLeanEvent<2>,2> IMDBox2;
     MDSplitBox2 * box = NULL;
     TS_ASSERT_THROWS_NOTHING( box = new MDSplitBox2(mdbox) );
 
@@ -118,10 +118,10 @@ public:
   void test_manual_constructor()
   {
     // Start with an empty MDBox2
-    MDBox<MDEvent<2>,2> * mdbox = makeMDBox2();
+    MDBox<MDLeanEvent<2>,2> * mdbox = makeMDBox2();
 
-    typedef MDSplitBox<MDEvent<2>,2> MDSplitBox2;
-    typedef IMDBox<MDEvent<2>,2> IMDBox2;
+    typedef MDSplitBox<MDLeanEvent<2>,2> MDSplitBox2;
+    typedef IMDBox<MDLeanEvent<2>,2> IMDBox2;
     MDSplitBox2 * box = NULL;
 
     //Manually create it

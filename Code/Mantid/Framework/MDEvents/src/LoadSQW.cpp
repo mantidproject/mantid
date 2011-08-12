@@ -273,7 +273,7 @@ namespace Mantid
               *(reinterpret_cast<float*>(pData + current_pix + column_size_3))
           };
           error = *reinterpret_cast<float*>(pData + current_pix + column_size_5);
-          ws->addEvent(MDEvent<4>(*reinterpret_cast<float*>(pData + current_pix + column_size_4), error*error , centers));
+          ws->addEvent(MDLeanEvent<4>(*reinterpret_cast<float*>(pData + current_pix + column_size_4), error*error , centers));
         }
 
         std::cout << tim << " to make and add the events." << std::endl;

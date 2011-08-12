@@ -164,7 +164,7 @@ Update/Set the progress.
 void vtkMDEWNexusReaderII::updateAlgorithmProgress(double progress)
 {
   progressMutex.lock();
-  this->SetProgressText("Executing Mantid MDEvent Loading Algorithm...");
+  this->SetProgressText("Executing Mantid MDLeanEvent Loading Algorithm...");
   this->UpdateProgress(progress);
   progressMutex.unlock();
 }

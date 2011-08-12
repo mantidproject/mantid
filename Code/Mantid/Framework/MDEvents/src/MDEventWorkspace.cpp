@@ -9,7 +9,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDSplitBox.h"
@@ -67,7 +67,7 @@ namespace MDEvents
   const std::string MDEventWorkspace)::id() const
   {
     std::ostringstream out;
-    out << "MDEventWorkspace<MDEvent," << getNumDims() << ">";
+    out << "MDEventWorkspace<MDLeanEvent," << getNumDims() << ">";
     return out.str();
   }
 

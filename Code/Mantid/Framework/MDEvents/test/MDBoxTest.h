@@ -14,7 +14,7 @@
 #include "MantidMDEvents/CoordTransformDistance.h"
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
@@ -30,7 +30,7 @@ class MDBoxTest :    public CxxTest::TestSuite
 public:
   void test_default_constructor()
   {
-    MDBox<MDEvent<3>,3> b3;
+    MDBox<MDLeanEvent<3>,3> b3;
     TS_ASSERT_EQUALS( b3.getNumDims(), 3);
     TS_ASSERT_EQUALS( b3.getNPoints(), 0);
     TS_ASSERT_EQUALS( b3.getDepth(), 0);
@@ -39,7 +39,7 @@ public:
   void test_constructor()
   {
     BoxController_sptr sc( new BoxController(3));
-    MDBox<MDEvent<3>,3> b3(sc, 2);
+    MDBox<MDLeanEvent<3>,3> b3(sc, 2);
     TS_ASSERT_EQUALS( b3.getNumDims(), 3);
     TS_ASSERT_EQUALS( b3.getBoxController(), sc);
     TS_ASSERT_EQUALS( b3.getNPoints(), 0);
@@ -53,7 +53,7 @@ public:
     std::vector<MDDimensionExtents> extents(1);
     extents[0].min=1.23;
     extents[0].max=2.34;
-    MDBox<MDEvent<1>,1> box(sc, 2, extents);
+    MDBox<MDLeanEvent<1>,1> box(sc, 2, extents);
     TS_ASSERT_EQUALS( box.getNumDims(), 1);
     TS_ASSERT_EQUALS( box.getBoxController(), sc);
     TS_ASSERT_EQUALS( box.getNPoints(), 0);
@@ -67,8 +67,8 @@ public:
   /** Adding events tracks the total signal */
   void test_addEvent()
   {
-    MDBox<MDEvent<2>,2> b;
-    MDEvent<2> ev(1.2, 3.4);
+    MDBox<MDLeanEvent<2>,2> b;
+    MDLeanEvent<2> ev(1.2, 3.4);
     ev.setCenter(0, 2.0);
     ev.setCenter(1, 3.0);
     b.addEvent(ev);
@@ -85,9 +85,9 @@ public:
   /** Add a vector of events */
   void test_addEvents()
   {
-    MDBox<MDEvent<2>,2> b;
-    MDEvent<2> ev(1.2, 3.4);
-    std::vector< MDEvent<2> > vec;
+    MDBox<MDLeanEvent<2>,2> b;
+    MDLeanEvent<2> ev(1.2, 3.4);
+    std::vector< MDLeanEvent<2> > vec;
     ev.setCenter(0, 2.0);
     ev.setCenter(1, 3.0);
     vec.push_back(ev);
@@ -107,9 +107,9 @@ public:
   /** Add a vector of events and give start/end spots*/
   void test_addEvents_with_start_stop()
   {
-    MDBox<MDEvent<2>,2> b;
-    MDEvent<2> ev(1.2, 3.4);
-    std::vector< MDEvent<2> > vec;
+    MDBox<MDLeanEvent<2>,2> b;
+    MDLeanEvent<2> ev(1.2, 3.4);
+    std::vector< MDLeanEvent<2> > vec;
     ev.setCenter(0, 2.0);
     ev.setCenter(1, 3.0);
     for (size_t i=0; i<10; i++)
@@ -132,8 +132,8 @@ public:
    */
   void test_addEvent_inParallel()
   {
-    MDBox<MDEvent<2>,2> b;
-    MDEvent<2> ev(1.2, 3.4);
+    MDBox<MDLeanEvent<2>,2> b;
+    MDLeanEvent<2> ev(1.2, 3.4);
     ev.setCenter(0, 2.0);
     ev.setCenter(1, 3.0);
 
@@ -156,8 +156,8 @@ public:
   void test_calculateDimensionStats()
   {
     MDDimensionStats stats[2];
-    MDBox<MDEvent<2>,2> b;
-    MDEvent<2> ev(1.2, 3.4);
+    MDBox<MDLeanEvent<2>,2> b;
+    MDLeanEvent<2> ev(1.2, 3.4);
     ev.setCenter(0, 2.0);
     ev.setCenter(1, 3.0);
     b.addEvent(ev);
@@ -174,8 +174,8 @@ public:
   void test_clear()
   {
     BoxController_sptr bc( new BoxController(2));
-    MDBox<MDEvent<2>,2> b(bc);
-    MDEvent<2> ev(1.2, 3.4);
+    MDBox<MDLeanEvent<2>,2> b(bc);
+    MDLeanEvent<2> ev(1.2, 3.4);
     b.addEvent(ev);
     b.addEvent(ev);
 #ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
@@ -191,8 +191,8 @@ public:
 
   void test_getEvents()
   {
-    MDBox<MDEvent<2>,2> b;
-    MDEvent<2> ev(4.0, 3.4);
+    MDBox<MDLeanEvent<2>,2> b;
+    MDLeanEvent<2> ev(4.0, 3.4);
     b.addEvent(ev);
     b.addEvent(ev);
     b.addEvent(ev);
@@ -202,12 +202,12 @@ public:
 
   void test_getEventsCopy()
   {
-    MDBox<MDEvent<2>,2> b;
-    MDEvent<2> ev(4.0, 3.4);
+    MDBox<MDLeanEvent<2>,2> b;
+    MDLeanEvent<2> ev(4.0, 3.4);
     b.addEvent(ev);
     b.addEvent(ev);
     b.addEvent(ev);
-    std::vector<MDEvent<2> > * events;
+    std::vector<MDLeanEvent<2> > * events;
     events = b.getEventsCopy();
     TS_ASSERT_EQUALS( events->size(), 3);
     TS_ASSERT_EQUALS( (*events)[2].getSignal(), 4.0);
@@ -215,7 +215,7 @@ public:
 
   void test_sptr()
   {
-    typedef MDBox<MDEvent<3>,3> mdbox3;
+    typedef MDBox<MDLeanEvent<3>,3> mdbox3;
     TS_ASSERT_THROWS_NOTHING( mdbox3::sptr a( new mdbox3()); )
   }
 
@@ -223,7 +223,7 @@ public:
   {
     BoxController_sptr sc( new BoxController(4));
     sc->setSplitThreshold(10);
-    typedef MDBox<MDEvent<3>,3> MACROS_ARE_DUMB; //...since they get confused by commas
+    typedef MDBox<MDLeanEvent<3>,3> MACROS_ARE_DUMB; //...since they get confused by commas
     TS_ASSERT_THROWS( MACROS_ARE_DUMB b3(sc), std::invalid_argument);
   }
 
@@ -232,12 +232,12 @@ public:
   {
     BoxController_sptr sc( new BoxController(3));
     sc->setSplitThreshold(10);
-    MDBox<MDEvent<3>,3> b3(sc);
+    MDBox<MDLeanEvent<3>,3> b3(sc);
     TS_ASSERT_EQUALS( b3.getNumDims(), 3);
     TS_ASSERT_EQUALS( b3.getNPoints(), 0);
 
-    MDEvent<3> ev(1.2, 3.4);
-    std::vector< MDEvent<3> > vec;
+    MDLeanEvent<3> ev(1.2, 3.4);
+    std::vector< MDLeanEvent<3> > vec;
     for(size_t i=0; i < 12; i++) vec.push_back(ev);
     b3.addEvents( vec );
 
@@ -247,18 +247,18 @@ public:
 
   void test_centerpointBin()
   {
-    MDBox<MDEvent<2>,2> box;
+    MDBox<MDLeanEvent<2>,2> box;
     for (coord_t x=0.5; x < 10.0; x += 1.0)
       for (coord_t y=0.5; y < 10.0; y += 1.0)
       {
-        MDEvent<2> ev(1.0, 1.5);
+        MDLeanEvent<2> ev(1.0, 1.5);
         ev.setCenter(0, x);
         ev.setCenter(1, y);
         box.addEvent(ev);
       }
     TS_ASSERT_EQUALS(box.getNPoints(), 100);
     // First, a bin object that holds everything
-    MDBin<MDEvent<2>,2> bin;
+    MDBin<MDLeanEvent<2>,2> bin;
     // Perform the centerpoint binning
     box.centerpointBin(bin, NULL);
     // 100 events = 100 weight.
@@ -284,7 +284,7 @@ public:
    * @param radius :: radius to integrate
    * @param numExpected :: how many events should be in there
    */
-  void dotest_integrateSphere(MDBox<MDEvent<3>,3> & box, coord_t x, coord_t y, coord_t z, const coord_t radius, double numExpected)
+  void dotest_integrateSphere(MDBox<MDLeanEvent<3>,3> & box, coord_t x, coord_t y, coord_t z, const coord_t radius, double numExpected)
   {
     // The sphere transformation
     bool dimensionsUsed[3] = {true,true,true};
@@ -301,12 +301,12 @@ public:
   void test_integrateSphere()
   {
     // One event at each integer coordinate value between 1 and 9
-    MDBox<MDEvent<3>,3> box;
+    MDBox<MDLeanEvent<3>,3> box;
     for (coord_t x=1.0; x < 10.0; x += 1.0)
       for (coord_t y=1.0; y < 10.0; y += 1.0)
         for (coord_t z=1.0; z < 10.0; z += 1.0)
         {
-          MDEvent<3> ev(1.0, 1.5);
+          MDLeanEvent<3> ev(1.0, 1.5);
           ev.setCenter(0, x);
           ev.setCenter(1, y);
           ev.setCenter(2, z);
@@ -325,14 +325,14 @@ public:
   /** refreshCache() tracks the centroid */
   void test_refreshCentroid()
   {
-    MDBox<MDEvent<2>,2> b;
+    MDBox<MDLeanEvent<2>,2> b;
 
-    MDEvent<2> ev(2.0, 2.0);
+    MDLeanEvent<2> ev(2.0, 2.0);
     ev.setCenter(0, 2.0);
     ev.setCenter(1, 3.0);
     b.addEvent(ev);
 
-    MDEvent<2> ev2(4.0, 4.0);
+    MDLeanEvent<2> ev2(4.0, 4.0);
     ev2.setCenter(0, 4.0);
     ev2.setCenter(1, 4.0);
     b.addEvent(ev2);
@@ -351,7 +351,7 @@ public:
   /** Centroid of an empty MDBox is 0.0 */
   void test_refreshCache_withCentroid_emptyMDBox()
   {
-    MDBox<MDEvent<2>,2> b;
+    MDBox<MDLeanEvent<2>,2> b;
     b.refreshCache();
     b.refreshCentroid();
 #ifdef MDBOX_TRACK_CENTROID
@@ -364,14 +364,14 @@ public:
   //-----------------------------------------------------------------------------------------
   void test_centroidSphere()
   {
-    MDBox<MDEvent<2>,2> b;
+    MDBox<MDLeanEvent<2>,2> b;
 
-    MDEvent<2> ev(2.0, 2.0);
+    MDLeanEvent<2> ev(2.0, 2.0);
     ev.setCenter(0, 2.0);
     ev.setCenter(1, 3.0);
     b.addEvent(ev);
 
-    MDEvent<2> ev2(4.0, 4.0);
+    MDLeanEvent<2> ev2(4.0, 4.0);
     ev2.setCenter(0, 4.0);
     ev2.setCenter(1, 4.0);
     b.addEvent(ev2);
@@ -413,7 +413,7 @@ public:
   void test_fileBackEnd_related()
   {
     // Box with 100 events
-    MDBox<MDEvent<2>,2> b;
+    MDBox<MDLeanEvent<2>,2> b;
     MDEventsTestHelper::feedMDBox(&b, 1, 10, 0.5, 1.0);
     TS_ASSERT_EQUALS( b.getNPoints(), 100);
     b.refreshCache();
@@ -442,7 +442,7 @@ public:
   static std::string do_saveNexus(bool goofyWeights = true, std::string barefilename = "MDBoxTest.nxs")
   {
     // Box with 1000 events evenly spread
-    MDBox<MDEvent<3>,3> b;
+    MDBox<MDLeanEvent<3>,3> b;
     MDEventsTestHelper::feedMDBox(&b, 1, 10, 0.5, 1.0);
     TS_ASSERT_EQUALS( b.getNPoints(), 1000);
     if (goofyWeights)
@@ -462,7 +462,7 @@ public:
     file->makeGroup("my_test_group", "NXdata", 1);
 
     // Must prepare the data.
-    MDEvent<3>::prepareNexusData(file, 2000);
+    MDLeanEvent<3>::prepareNexusData(file, 2000);
 
     // Save it with some offset
     b.setFileIndex(500, 1000);
@@ -486,7 +486,7 @@ public:
    * @param box :: MDBox3 that will get set to be file-backed
    * @return ptr to the NeXus file object
    * */
-  static ::NeXus::File * do_saveAndOpenNexus(MDBox<MDEvent<3>,3> & box,
+  static ::NeXus::File * do_saveAndOpenNexus(MDBox<MDLeanEvent<3>,3> & box,
       std::string barefilename = "MDBoxTest.nxs", bool goofyWeights = true)
   {
     // Create the NXS file
@@ -495,7 +495,7 @@ public:
     ::NeXus::File * file = new ::NeXus::File(filename, NXACC_RDWR);
     file->openGroup("my_test_group", "NXdata");
     // Must get ready to load in the data
-    MDEvent<3>::openNexusData(file);
+    MDLeanEvent<3>::openNexusData(file);
 
     // Set it in the BoxController
     if (box.getBoxController())
@@ -535,7 +535,7 @@ public:
   void test_loadNexus()
   {
     // A box to load stuff from
-    MDBox<MDEvent<3>,3> c;
+    MDBox<MDLeanEvent<3>,3> c;
     TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
 
     // Create and open the test NXS file
@@ -543,7 +543,7 @@ public:
     c.setOnDisk(false); // Avoid touching MRU
     c.loadNexus(file);
     TS_ASSERT_EQUALS( c.getNPoints(), 1000);
-    const std::vector<MDEvent<3> > & events = c.getEvents();
+    const std::vector<MDLeanEvent<3> > & events = c.getEvents();
 
     // Try a couple of events to see if they are correct
     TS_ASSERT_DELTA( events[0].getErrorSquared(), 0.5, 1e-5);
@@ -559,7 +559,7 @@ public:
   void test_loadNexus_noEvents()
   {
     // A box to load stuff from
-    MDBox<MDEvent<3>,3> c;
+    MDBox<MDLeanEvent<3>,3> c;
     TS_ASSERT_EQUALS( c.getNPoints(), 0);
 
     // Create and open the test NXS file
@@ -581,13 +581,13 @@ public:
     BoxController_sptr bc(new BoxController(3));
 
     // Handle the disk MRU values
-    bc->setCacheParameters(100000, 10000, sizeof(MDEvent<3>));
+    bc->setCacheParameters(100000, 10000, sizeof(MDLeanEvent<3>));
     DiskMRU & mru = bc->getDiskMRU();
     // It is empty now
     TS_ASSERT_EQUALS( mru.getMemoryUsed(), 0);
 
     // Create and open the test NXS file
-    MDBox<MDEvent<3>,3> c(bc, 0);
+    MDBox<MDLeanEvent<3>,3> c(bc, 0);
     TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
     ::NeXus::File * file = do_saveAndOpenNexus(c);
 
@@ -601,7 +601,7 @@ public:
     TS_ASSERT_DELTA( c.getErrorSquared(), 456.78, 1e-5);
 
     // This should actually load the events from the file
-    const std::vector<MDEvent<3> > & events = c.getConstEvents();
+    const std::vector<MDLeanEvent<3> > & events = c.getConstEvents();
     // Try a couple of events to see if they are correct
     TS_ASSERT_DELTA( events[0].getErrorSquared(), 0.5, 1e-5);
     TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
@@ -649,13 +649,13 @@ public:
     BoxController_sptr bc(new BoxController(3));
 
     // Handle the disk MRU values
-    bc->setCacheParameters(100000, 10000, sizeof(MDEvent<3>));
+    bc->setCacheParameters(100000, 10000, sizeof(MDLeanEvent<3>));
     DiskMRU & mru = bc->getDiskMRU();
     // It is empty now
     TS_ASSERT_EQUALS( mru.getMemoryUsed(), 0);
 
     // A new empty box.
-    MDBox<MDEvent<3>,3> c(bc, 0);
+    MDBox<MDLeanEvent<3>,3> c(bc, 0);
 
     // Create and open the test NXS file
     ::NeXus::File * file = do_saveAndOpenNexus(c);
@@ -664,7 +664,7 @@ public:
     TS_ASSERT_EQUALS( c.getNPoints(), 1000);
 
     // Non-const access to the events.
-    std::vector<MDEvent<3> > & events = c.getEvents();
+    std::vector<MDLeanEvent<3> > & events = c.getEvents();
     TS_ASSERT_EQUALS( events.size(), 1000);
     TS_ASSERT_DELTA( events[123].getSignal(), 123.0, 1e-5);
 
@@ -678,11 +678,11 @@ public:
     mru.flushCache();
 
     // Now let's pretend we re-load that data into another box
-    MDBox<MDEvent<3>,3> c2(bc, 0);
+    MDBox<MDLeanEvent<3>,3> c2(bc, 0);
     c2.setFileIndex(500, 1000);
     c2.setOnDisk(true);
     // Is that event modified?
-    std::vector<MDEvent<3> > & events2 = c2.getEvents();
+    std::vector<MDLeanEvent<3> > & events2 = c2.getEvents();
     TS_ASSERT_EQUALS( events2.size(), 1000);
     TS_ASSERT_DELTA( events2[123].getSignal(), 456.0, 1e-5);
 
@@ -700,13 +700,13 @@ public:
     BoxController_sptr bc(new BoxController(3));
 
     // Handle the disk MRU values
-    bc->setCacheParameters(100000, 10000, sizeof(MDEvent<3>));
+    bc->setCacheParameters(100000, 10000, sizeof(MDLeanEvent<3>));
     DiskMRU & mru = bc->getDiskMRU();
     // It is empty now
     TS_ASSERT_EQUALS( mru.getMemoryUsed(), 0);
 
     // A new empty box.
-    MDBox<MDEvent<3>,3> c(bc, 0);
+    MDBox<MDLeanEvent<3>,3> c(bc, 0);
 
     // Create and open the test NXS file
     ::NeXus::File * file = do_saveAndOpenNexus(c);
@@ -715,7 +715,7 @@ public:
     TS_ASSERT_EQUALS( c.getNPoints(), 1000);
 
     // Non-const access to the events.
-    std::vector<MDEvent<3> > & events = c.getEvents();
+    std::vector<MDLeanEvent<3> > & events = c.getEvents();
     TS_ASSERT_EQUALS( events.size(), 1000);
     TS_ASSERT_DELTA( events[123].getSignal(), 123.0, 1e-5);
 
@@ -735,11 +735,11 @@ public:
     TS_ASSERT_EQUALS( c.getFileNumEvents(), 600);
 
     // Now let's pretend we re-load that data into another box
-    MDBox<MDEvent<3>,3> c2(bc, 0);
+    MDBox<MDLeanEvent<3>,3> c2(bc, 0);
     c2.setFileIndex(500, 600);
     c2.setOnDisk(true);
     // Is that event modified?
-    std::vector<MDEvent<3> > & events2 = c2.getEvents();
+    std::vector<MDLeanEvent<3> > & events2 = c2.getEvents();
     TS_ASSERT_EQUALS( events2.size(), 600);
     TS_ASSERT_DELTA( events2[123].getSignal(), 456.0, 1e-5);
 
@@ -759,11 +759,11 @@ public:
     TS_ASSERT_EQUALS( file->getInfo().dims[0], 3500);
 
     // Now let's pretend we re-load that data into a 3rd box
-    MDBox<MDEvent<3>,3> c3(bc, 0);
+    MDBox<MDLeanEvent<3>,3> c3(bc, 0);
     c3.setFileIndex(2000, 1500);
     c3.setOnDisk(true);
     // Is that event modified?
-    const std::vector<MDEvent<3> > & events3 = c3.getEvents();
+    const std::vector<MDLeanEvent<3> > & events3 = c3.getEvents();
     TS_ASSERT_EQUALS( events3.size(), 1500);
     TS_ASSERT_DELTA( events3[1499].getSignal(), 789.0, 1e-5);
     c3.releaseEvents();
@@ -783,18 +783,18 @@ public:
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
-    bc->setCacheParameters(0, 10, sizeof(MDEvent<3>));
+    bc->setCacheParameters(0, 10, sizeof(MDLeanEvent<3>));
     DiskMRU & mru = bc->getDiskMRU();
 
     // Create and open the test NXS file
-    MDBox<MDEvent<3>,3> c(bc, 0);
+    MDBox<MDLeanEvent<3>,3> c(bc, 0);
     ::NeXus::File * file = do_saveAndOpenNexus(c, "MDBoxTest.nxs", false);
     TSM_ASSERT_EQUALS("1000 events on file", c.getFileNumEvents(), 1000);
     TSM_ASSERT("The data was NOT loaded from disk.", !c.getInMemory());
     TSM_ASSERT_DELTA("Correct cached signal", c.getSignal(), 1000.0, 1e-3);
 
     // Add an event to it
-    MDEvent<3> ev(1.2, 3.4);
+    MDLeanEvent<3> ev(1.2, 3.4);
     ev.setCenter(0, 1.5);
     ev.setCenter(1, 2.5);
     ev.setCenter(2, 3.5);
@@ -805,7 +805,7 @@ public:
     TSM_ASSERT_DELTA("At this point the cached signal is still incorrect - this is normal", c.getSignal(), 1000.0, 1e-3);
 
     // Get the const vector of events AFTER adding events
-    const std::vector<MDEvent<3> > & events = c.getConstEvents();
+    const std::vector<MDLeanEvent<3> > & events = c.getConstEvents();
     TSM_ASSERT("The data is ALL in memory right now.", c.getInMemory());
     TSM_ASSERT_EQUALS("The resulting event vector has concatenated both", events.size(), 1001);
     TSM_ASSERT_DELTA("The first event is the one that was manually added.", events[0].getSignal(), 1.2, 1e-4);
@@ -821,7 +821,7 @@ public:
     TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1001.2, 1e-3);
 
     // Now getEvents in a const way then call addEvent()
-    const std::vector<MDEvent<3> > & events2 = c.getConstEvents();
+    const std::vector<MDLeanEvent<3> > & events2 = c.getConstEvents();
     (void) events2;
     c.addEvent(ev);
     TSM_ASSERT_EQUALS("Still 1001 events on file", c.getFileNumEvents(), 1001);
@@ -835,7 +835,7 @@ public:
     TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1002.4, 1e-3);
 
     // Now getEvents in a non-const way then call addEvent()
-    std::vector<MDEvent<3> > & events3 = c.getEvents();
+    std::vector<MDLeanEvent<3> > & events3 = c.getEvents();
     (void) events3;
     c.addEvent(ev);
     TSM_ASSERT_EQUALS("Still 1002 events on file", c.getFileNumEvents(), 1002);
@@ -858,8 +858,8 @@ public:
 //   */
 //  void test_fileBackEnd_addEvent_inParallel()
 //  {
-//    MDBox<MDEvent<2>,2> b;
-//    MDEvent<2> ev(1.2, 3.4);
+//    MDBox<MDLeanEvent<2>,2> b;
+//    MDLeanEvent<2> ev(1.2, 3.4);
 //    ev.setCenter(0, 2.0);
 //    ev.setCenter(1, 3.0);
 //
@@ -887,7 +887,7 @@ public:
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
-    MDBox<MDEvent<3>,3> c(bc, 0);
+    MDBox<MDLeanEvent<3>,3> c(bc, 0);
 
     // Create and open the test NXS file
     ::NeXus::File * file = do_saveAndOpenNexus(c, "MDBoxBinningTest.nxs", false);
@@ -897,7 +897,7 @@ public:
     {
       //std::cout << "Bin try " << i << "\n";
       // Try a bin, 2x2x2 so 8 events should be in there
-      MDBin<MDEvent<3>,3> bin;
+      MDBin<MDLeanEvent<3>,3> bin;
       for (size_t d=0; d<3; d++)
       {
         bin.m_min[d] = 2.0;

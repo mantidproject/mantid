@@ -26,8 +26,8 @@ using Mantid::Geometry::MDBoxImplicitFunction;
 class MDBoxIteratorTest : public CxxTest::TestSuite
 {
 public:
-  typedef MDGridBox<MDEvent<1>,1> gbox_t;
-  typedef IMDBox<MDEvent<1>,1> ibox_t;
+  typedef MDGridBox<MDLeanEvent<1>,1> gbox_t;
+  typedef IMDBox<MDLeanEvent<1>,1> ibox_t;
 
   //--------------------------------------------------------------------------------------
   /** Make a gridded box with this structure:
@@ -49,7 +49,7 @@ public:
   ibox_t *C20,       *C22, *C23;
   gbox_t *C21;
   ibox_t *D210, *D211, *D212, *D213;
-  MDBoxIterator<MDEvent<1>,1> * it;
+  MDBoxIterator<MDLeanEvent<1>,1> * it;
   void setUp()
   {
     // Top level grid box
@@ -80,14 +80,14 @@ public:
   //--------------------------------------------------------------------------------------
   void test_ctor_with_null_box_fails()
   {
-    typedef MDBoxIterator<MDEvent<1>,1> boxit_t;
+    typedef MDBoxIterator<MDLeanEvent<1>,1> boxit_t;
     boxit_t * it;
     TS_ASSERT_THROWS_ANYTHING( it = new boxit_t(NULL, 10, false); );
   }
 
   //--------------------------------------------------------------------------------------
   /** Increment the iterator and return true if the next box is the expected one*/
-  bool nextIs(MDBoxIterator<MDEvent<1>,1> * it, ibox_t * expected)
+  bool nextIs(MDBoxIterator<MDLeanEvent<1>,1> * it, ibox_t * expected)
   {
     // std::cout << it->getBox()->getExtentsStr() << std::endl;
     if (!it->next()) return false;
@@ -98,7 +98,7 @@ public:
   void test_iterator_basic()
   {
     // Create an iterator
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, false);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, false);
 
     // Start with the top one
     TS_ASSERT_EQUALS( it->getBox(), A);
@@ -128,7 +128,7 @@ public:
   void test_depth_limit_1()
   {
     // Limit depth to 1 (the B level)
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 1, false);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 1, false);
     TS_ASSERT_EQUALS( it->getBox(), A);
     TS_ASSERT( nextIs(it, B0) );
     TS_ASSERT( nextIs(it, B1) );
@@ -141,7 +141,7 @@ public:
   void test_depth_limit_0()
   {
     // Limit depth to 0 (the A level)
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 0, false);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 0, false);
     TS_ASSERT_EQUALS( it->getBox(), A);
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
@@ -150,7 +150,7 @@ public:
   void test_starting_deeper_fails_for_wrong_maxDepth()
   {
     // Typedef for the iterator (for macros)
-    typedef MDBoxIterator<MDEvent<1>,1> boxit_t;
+    typedef MDBoxIterator<MDLeanEvent<1>,1> boxit_t;
     // Start at a depth of 1 (on B0): you need to give a valid maxDepth
     TS_ASSERT_THROWS_ANYTHING( it = new boxit_t(B0, 0, false); );
   }
@@ -158,7 +158,7 @@ public:
   void test_starting_deeper()
   {
     // Start at a depth of 1 (on B0)
-    it = new MDBoxIterator<MDEvent<1>,1>(B0, 20, false);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(B0, 20, false);
     TS_ASSERT_EQUALS( it->getBox(), B0);
     TS_ASSERT( nextIs(it, C00) );
     TS_ASSERT( nextIs(it, C01) );
@@ -171,7 +171,7 @@ public:
   void test_leaf_only()
   {
     // Leaf-only iterator = skips anything with children
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, true);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true);
 
     // This is the first leaf node
     TS_ASSERT_EQUALS( it->getBox(), C00);
@@ -195,7 +195,7 @@ public:
   void test_leaf_only_depth_2()
   {
     // A node is considered a 'leaf' if it is at maxDepth
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 2, true);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 2, true);
 
     // This is the first leaf node
     TS_ASSERT_EQUALS( it->getBox(), C00);
@@ -215,7 +215,7 @@ public:
   void test_leaf_only_depth_1()
   {
     // A node is considered a 'leaf' if it is at maxDepth
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 1, true);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 1, true);
     // This is the first leaf node
     TS_ASSERT_EQUALS( it->getBox(), B0);
     TS_ASSERT( nextIs(it, B1) );
@@ -228,7 +228,7 @@ public:
   void test_leaf_only_depth_0()
   {
     // A node is considered a 'leaf' if it is at maxDepth
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 0, true);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 0, true);
     // This is the ONLY leaf node
     TS_ASSERT_EQUALS( it->getBox(), A);
     TS_ASSERT( !it->next() );
@@ -238,7 +238,7 @@ public:
   void test_leaf_only_starting_deeper()
   {
     //Now we start at B2 and look at only leaves
-    it = new MDBoxIterator<MDEvent<1>,1>(B2, 10, true);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(B2, 10, true);
     TS_ASSERT_EQUALS( it->getBox(), C20);
     TS_ASSERT( nextIs(it, D210) );
     TS_ASSERT( nextIs(it, D211) );
@@ -253,7 +253,7 @@ public:
   void test_leaf_only_starting_deeper_depth_limited()
   {
     //Now we start at B2 and look at only leaves up to depth 2
-    it = new MDBoxIterator<MDEvent<1>,1>(B2, 2, true);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(B2, 2, true);
     TS_ASSERT_EQUALS( it->getBox(), C20);
     TS_ASSERT( nextIs(it, C21) );
     TS_ASSERT( nextIs(it, C22) );
@@ -270,7 +270,7 @@ public:
   {
     // Top level grid box
     ibox_t * A = MDEventsTestHelper::makeMDBox1();
-    MDBoxIterator<MDEvent<1>,1> * it = new MDBoxIterator<MDEvent<1>,1>(A, 20, false);
+    MDBoxIterator<MDLeanEvent<1>,1> * it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, false);
     TS_ASSERT_EQUALS( it->getBox(), A);
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
@@ -285,7 +285,7 @@ public:
     func->addPlane( MDPlane(1, normal, origin) );
 
     // Create an iterator
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, false, func);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, false, func);
 
     // Start with the top one
     TS_ASSERT_EQUALS( it->getBox(), A);
@@ -318,7 +318,7 @@ public:
     func->addPlane( MDPlane(1, normal, origin) );
 
     // Create an iterator
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, true, func);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true, func);
 
     // C00-C01 are outside the range, so the first one is C02
     TS_ASSERT_EQUALS( it->getBox(), C02);
@@ -347,7 +347,7 @@ public:
     func->addPlane( MDPlane(1, normal, origin) );
 
     // Create an iterator
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, false, func);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, false, func);
 
     // Start with the top one
     TS_ASSERT_EQUALS( it->getBox(), A);
@@ -379,7 +379,7 @@ public:
     func->addPlane( MDPlane(1, normal2, origin2) );
 
     // Create an iterator
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, false, func);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, false, func);
 
     // Go down to the only two leaf boxes that are in range
     TS_ASSERT_EQUALS( it->getBox(), A);
@@ -402,7 +402,7 @@ public:
     func->addPlane( MDPlane(1, normal2, origin2) );
 
     // Create an iterator
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, true, func);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true, func);
 
     // Only two leaf boxes are in range
     TS_ASSERT_EQUALS( it->getBox(), D211);
@@ -420,7 +420,7 @@ public:
     func->addPlane( MDPlane(1, normal, origin) );
 
     // Create an iterator
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, false, func);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, false, func);
 
     // Returns the first box but that's it
     TS_ASSERT_EQUALS( it->getBox(), A);
@@ -436,7 +436,7 @@ public:
     func->addPlane( MDPlane(1, normal, origin) );
 
     // Create an iterator
-    it = new MDBoxIterator<MDEvent<1>,1>(A, 20, true, func);
+    it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true, func);
 
     // Returns the first box but that's it
     TS_ASSERT_EQUALS( it->getBox(), A);
@@ -451,7 +451,7 @@ public:
 class MDBoxIteratorTestPerformance : public CxxTest::TestSuite
 {
 public:
-  MDGridBox<MDEvent<3>,3> * top;
+  MDGridBox<MDLeanEvent<3>,3> * top;
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -470,7 +470,7 @@ public:
   {
     // Count the top level box.
     size_t counter = 1;
-    IMDBox<MDEvent<3>,3> * box = NULL;
+    IMDBox<MDLeanEvent<3>,3> * box = NULL;
 
     MDBoxImplicitFunction * function = NULL;
     if (ImplicitFunction)
@@ -480,7 +480,7 @@ public:
       function = new MDBoxImplicitFunction(min, max);
     }
 
-    MDBoxIterator<MDEvent<3>,3> it(top, 20, leafOnly, function);
+    MDBoxIterator<MDLeanEvent<3>,3> it(top, 20, leafOnly, function);
 
     // Count all of them
     while (it.next())
@@ -518,9 +518,9 @@ public:
    * which directly returns that vector, if that happens to be what you need.*/
   void do_test_iterator_that_fills_a_vector(bool leafOnly)
   {
-    IMDBox<MDEvent<3>,3> * box;
-    MDBoxIterator<MDEvent<3>,3> it(top, 20, leafOnly);
-    std::vector< IMDBox<MDEvent<3>,3> * > boxes;
+    IMDBox<MDLeanEvent<3>,3> * box;
+    MDBoxIterator<MDLeanEvent<3>,3> it(top, 20, leafOnly);
+    std::vector< IMDBox<MDLeanEvent<3>,3> * > boxes;
 
     // Iterate and fill the vector as you go.
     boxes.push_back(it.getBox());
@@ -554,7 +554,7 @@ public:
    */
   void do_test_getBoxes(bool leafOnly, int ImplicitFunction, size_t expected)
   {
-    std::vector< IMDBox<MDEvent<3>,3> * > boxes;
+    std::vector< IMDBox<MDLeanEvent<3>,3> * > boxes;
 
     MDImplicitFunction * function = NULL;
     if (ImplicitFunction==1)
@@ -593,9 +593,9 @@ public:
 
     // Now we still need to iterate through the vector to do anything, so this is a more fair comparison
     size_t counter = 0;
-    IMDBox<MDEvent<3>,3> * box;
-    std::vector< IMDBox<MDEvent<3>,3> * >::iterator it;
-    std::vector< IMDBox<MDEvent<3>,3> * >::iterator it_end = boxes.end();
+    IMDBox<MDLeanEvent<3>,3> * box;
+    std::vector< IMDBox<MDLeanEvent<3>,3> * >::iterator it;
+    std::vector< IMDBox<MDLeanEvent<3>,3> * >::iterator it_end = boxes.end();
     for (it = boxes.begin(); it != it_end; it++)
     {
       box = *it;
@@ -670,7 +670,7 @@ public:
 //  // Box that is fully contained in the implicit function
 //  void test_boxIsTouching_3D_allInside()
 //  {
-//    MDBox<MDEvent<3>,3> box;
+//    MDBox<MDLeanEvent<3>,3> box;
 //    box.setExtents(0, 1.2, 1.8);
 //    box.setExtents(1, 2.2, 3.8);
 //    box.setExtents(2, 3.2, 3.8);
@@ -678,7 +678,7 @@ public:
 //    bool res;
 //    for (size_t i=0; i<1000000; i++)
 //    {
-//      res = MDBoxIterator<MDEvent<3>,3>::boxIsTouching(&f,&box);
+//      res = MDBoxIterator<MDLeanEvent<3>,3>::boxIsTouching(&f,&box);
 //      (void) res;
 //    }
 //    TS_ASSERT(res);
@@ -687,7 +687,7 @@ public:
 //  // Box that is completely outside of the implicit function
 //  void test_boxIsTouching_3D_allOutside()
 //  {
-//    MDBox<MDEvent<3>,3> box;
+//    MDBox<MDLeanEvent<3>,3> box;
 //    box.setExtents(0, 3.2, 5.8);
 //    box.setExtents(1, -5.2, -3.8);
 //    box.setExtents(2, 12.2, 73.8);
@@ -695,7 +695,7 @@ public:
 //    bool res;
 //    for (size_t i=0; i<1000000; i++)
 //    {
-//      res = MDBoxIterator<MDEvent<3>,3>::boxIsTouching(&f,&box);
+//      res = MDBoxIterator<MDLeanEvent<3>,3>::boxIsTouching(&f,&box);
 //      (void) res;
 //    }
 //    TS_ASSERT(!res);
@@ -705,7 +705,7 @@ public:
 //  // Box that is fully contained in the implicit function
 //  void test_boxContact_3D_allInside()
 //  {
-//    MDBox<MDEvent<3>,3> box;
+//    MDBox<MDLeanEvent<3>,3> box;
 //    box.setExtents(0, 1.2, 1.8);
 //    box.setExtents(1, 2.2, 3.8);
 //    box.setExtents(2, 3.2, 3.8);
@@ -713,7 +713,7 @@ public:
 //    MDBoxImplicitFunction::eContact res;
 //    for (size_t i=0; i<1000000; i++)
 //    {
-//      res = MDBoxIterator<MDEvent<3>,3>::boxContact(&f,&box);
+//      res = MDBoxIterator<MDLeanEvent<3>,3>::boxContact(&f,&box);
 //      (void) res;
 //    }
 //    TS_ASSERT(res = MDBoxImplicitFunction::CONTAINED);
@@ -722,7 +722,7 @@ public:
 //  // Box that is fully contained in the implicit function
 //  void test_boxContact_3D_allOutside()
 //  {
-//    MDBox<MDEvent<3>,3> box;
+//    MDBox<MDLeanEvent<3>,3> box;
 //    box.setExtents(0, 3.2, 5.8);
 //    box.setExtents(1, -5.2, -3.8);
 //    box.setExtents(2, 12.2, 73.8);
@@ -730,7 +730,7 @@ public:
 //    MDBoxImplicitFunction::eContact res;
 //    for (size_t i=0; i<1000000; i++)
 //    {
-//      res = MDBoxIterator<MDEvent<3>,3>::boxContact(&f,&box);
+//      res = MDBoxIterator<MDLeanEvent<3>,3>::boxContact(&f,&box);
 //      (void) res;
 //    }
 //    TS_ASSERT(res = MDBoxImplicitFunction::CONTAINED);
@@ -740,7 +740,7 @@ public:
 //  // Box that is fully contained in the implicit function
 //  void test_boxIsTouching_4D_allInside()
 //  {
-//    MDBox<MDEvent<4>,4> box;
+//    MDBox<MDLeanEvent<4>,4> box;
 //    box.setExtents(0, 1.2, 1.8);
 //    box.setExtents(1, 2.2, 3.8);
 //    box.setExtents(2, 3.2, 3.8);
@@ -758,7 +758,7 @@ public:
 //  // Box that is completely outside of the implicit function
 //  void test_boxIsTouching_4D_allOutside()
 //  {
-//    MDBox<MDEvent<4>,4> box;
+//    MDBox<MDLeanEvent<4>,4> box;
 //    box.setExtents(0, 3.2, 5.8);
 //    box.setExtents(1, -5.2, -3.8);
 //    box.setExtents(2, 12.2, 73.8);

@@ -50,7 +50,7 @@ public:
     // Make sure it is split
     if (numPerBox == 0) ws->splitBox();
     // Recurse split so that it has lots more boxes, recursively
-    MDEventsTestHelper::recurseSplit<1>( dynamic_cast<MDGridBox<MDEvent<1>,1>*>(ws->getBox()), 0, 4);
+    MDEventsTestHelper::recurseSplit<1>( dynamic_cast<MDGridBox<MDLeanEvent<1>,1>*>(ws->getBox()), 0, 4);
 
     // Add some points
     if (numPerBox > 0)

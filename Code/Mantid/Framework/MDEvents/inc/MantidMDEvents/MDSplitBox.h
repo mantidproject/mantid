@@ -5,7 +5,7 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 
 
 namespace Mantid

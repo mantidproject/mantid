@@ -163,7 +163,7 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Add a single MDEvent to the split box.
+  /** Add a single MDLeanEvent to the split box.
    * If the boxes contained within are also split,
    * this will recursively push the event down to the deepest level.
    *
@@ -173,7 +173,7 @@ namespace MDEvents
    * Note! nPoints, signal and error must be re-calculated using refreshCache()
    * after all events have been added.
    *
-   * @param event :: reference to a MDEvent to add.
+   * @param event :: reference to a MDLeanEvent to add.
    * */
   TMDE(
   inline void MDSplitBox)::addEvent( const MDE & event)

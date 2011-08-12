@@ -20,7 +20,7 @@ public:
   void test_factory()
   {
     IMDEventWorkspace_sptr ew;
-    ew = MDEventFactory::CreateMDEventWorkspace(4, "MDEvent");
+    ew = MDEventFactory::CreateMDEventWorkspace(4, "MDLeanEvent");
     TS_ASSERT_EQUALS( ew->getNumDims(), 4);
 
     size_t n = 9;
@@ -40,7 +40,7 @@ public:
 
   void test_CALL_MDEVENT_FUNCTION_macro()
   {
-    IMDEventWorkspace_sptr ew(new MDEventWorkspace<MDEvent<1>, 1>() );
+    IMDEventWorkspace_sptr ew(new MDEventWorkspace<MDLeanEvent<1>, 1>() );
     TS_ASSERT_EQUALS( ew->getNumDims(), 1);
     TS_ASSERT_EQUALS( ew->getNPoints(), 0);
     test_value = 0;
@@ -50,7 +50,7 @@ public:
 
   void test_CALL_MDEVENT_FUNCTION_macro_2()
   {
-    IMDEventWorkspace_sptr ew(new MDEventWorkspace<MDEvent<8>, 8>() );
+    IMDEventWorkspace_sptr ew(new MDEventWorkspace<MDLeanEvent<8>, 8>() );
     TS_ASSERT_EQUALS( ew->getNumDims(), 8);
     TS_ASSERT_EQUALS( ew->getNPoints(), 0);
     test_value = 0;

@@ -555,7 +555,7 @@ unsigned long vtkEventNexusReader::GetMTime()
 void vtkEventNexusReader::updateAlgorithmProgress(double progress)
 {
   progressMutex.lock();
-  this->SetProgressText("Executing Mantid MDEvent Rebinning Algorithm...");
+  this->SetProgressText("Executing Mantid MDLeanEvent Rebinning Algorithm...");
   this->UpdateProgress(progress);
   progressMutex.unlock();
 }

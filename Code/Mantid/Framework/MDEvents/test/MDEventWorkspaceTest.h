@@ -8,7 +8,7 @@
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDGridBox.h"
@@ -41,10 +41,10 @@ public:
 
   void test_Constructor()
   {
-    MDEventWorkspace<MDEvent<3>, 3> ew3;
+    MDEventWorkspace<MDLeanEvent<3>, 3> ew3;
     TS_ASSERT_EQUALS( ew3.getNumDims(), 3);
     TS_ASSERT_EQUALS( ew3.getNPoints(), 0);
-    TS_ASSERT_EQUALS( ew3.id(), "MDEventWorkspace<MDEvent,3>");
+    TS_ASSERT_EQUALS( ew3.id(), "MDEventWorkspace<MDLeanEvent,3>");
     // Box controller MUST always be present
     TS_ASSERT(ew3.getBoxController() );
     TS_ASSERT(ew3.getBox());
@@ -54,7 +54,7 @@ public:
 
   void test_Constructor_IMDEventWorkspace()
   {
-    IMDEventWorkspace * ew3 = new MDEventWorkspace<MDEvent<3>, 3>();
+    IMDEventWorkspace * ew3 = new MDEventWorkspace<MDLeanEvent<3>, 3>();
     TS_ASSERT_EQUALS( ew3->getNumDims(), 3);
     TS_ASSERT_EQUALS( ew3->getNPoints(), 0);
     delete ew3;
@@ -62,7 +62,7 @@ public:
 
   void test_IMDEventWorkspace_setExperimentInfos()
   {
-    IMDEventWorkspace * ew3 = new MDEventWorkspace<MDEvent<3>, 3>();
+    IMDEventWorkspace * ew3 = new MDEventWorkspace<MDLeanEvent<3>, 3>();
     TS_ASSERT_EQUALS( ew3->getNumExperimentInfo(), 0);
     ExperimentInfo_sptr ei(new ExperimentInfo);
     TS_ASSERT_EQUALS( ew3->addExperimentInfo(ei), 0);
@@ -76,7 +76,7 @@ public:
 
   void test_initialize_throws()
   {
-    IMDEventWorkspace * ew = new MDEventWorkspace<MDEvent<3>, 3>();
+    IMDEventWorkspace * ew = new MDEventWorkspace<MDLeanEvent<3>, 3>();
     TS_ASSERT_THROWS( ew->initialize(), std::runtime_error);
     for (size_t i=0; i<5; i++)
       ew->addDimension( MDHistoDimension_sptr(new MDHistoDimension("x","x","m",-1,1,0)) );
@@ -86,7 +86,7 @@ public:
 
   void test_initialize()
   {
-    IMDEventWorkspace * ew = new MDEventWorkspace<MDEvent<3>, 3>();
+    IMDEventWorkspace * ew = new MDEventWorkspace<MDLeanEvent<3>, 3>();
     TS_ASSERT_THROWS( ew->initialize(), std::runtime_error);
     for (size_t i=0; i<3; i++)
       ew->addDimension( MDHistoDimension_sptr(new MDHistoDimension("x","x","m",-1,1,0)) );
@@ -133,7 +133,7 @@ public:
     ProgressText * prog = NULL;
     if (DODEBUG) prog = new ProgressText(0.0, 1.0, 10, false);
 
-    typedef MDGridBox<MDEvent<2>,2> box_t;
+    typedef MDGridBox<MDLeanEvent<2>,2> box_t;
     MDEventWorkspace2::sptr b = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
     box_t * subbox;
 
@@ -143,7 +143,7 @@ public:
     b->getBoxController()->setSplitThreshold(100);
     b->getBoxController()->setMaxDepth(4);
 
-    std::vector< MDEvent<2> > events;
+    std::vector< MDLeanEvent<2> > events;
     size_t num_repeat = 1000;
     // Make an event in the middle of each box
     for (double x=0.0005; x < 10; x += 1.0)
@@ -152,7 +152,7 @@ public:
         for (size_t i=0; i < num_repeat; i++)
         {
           coord_t centers[2] = {x, y};
-          events.push_back( MDEvent<2>(2.0, 2.0, centers) );
+          events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
         }
       }
     TS_ASSERT_EQUALS( events.size(), 100*num_repeat);
@@ -163,7 +163,7 @@ public:
     TS_ASSERT_EQUALS( b->getBox()->getErrorSquared(), 100*double(num_repeat)*2.0);
 
     box_t * gridBox = dynamic_cast<box_t *>(b->getBox());
-    std::vector<IMDBox<MDEvent<2>,2>*> boxes = gridBox->getBoxes();
+    std::vector<IMDBox<MDLeanEvent<2>,2>*> boxes = gridBox->getBoxes();
     TS_ASSERT_EQUALS( boxes[0]->getNPoints(), num_repeat);
     // The box should have been split itself into a gridbox, because 1000 events > the split threshold.
     subbox = dynamic_cast<box_t *>(boxes[0]);
@@ -193,7 +193,7 @@ public:
   void addEvent(MDEventWorkspace2::sptr b, coord_t x, coord_t y)
   {
     coord_t centers[2] = {x, y};
-    b->addEvent(MDEvent<2>(2.0, 2.0, centers));
+    b->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
   }
 
   void test_getMinimumExtents()
@@ -205,13 +205,13 @@ public:
     ext = ws->getMinimumExtents(2);
     TS_ASSERT( ext[0].min > ext[0].max )
 
-    std::vector< MDEvent<2> > events;
+    std::vector< MDLeanEvent<2> > events;
     // Make an event in the middle of each box
     for (double x=4.0005; x < 7; x += 1.0)
       for (double y=4.0005; y < 7; y += 1.0)
       {
         coord_t centers[2] = {x, y};
-        events.push_back( MDEvent<2>(2.0, 2.0, centers) );
+        events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
       }
     // So it doesn't split
     ws->getBoxController()->setSplitThreshold(1000);
@@ -249,7 +249,7 @@ public:
 //    ProgressText * prog = new ProgressText(0.0, 1.0, 10, true);
 //    prog->setNotifyStep(0.5); //Notify more often
 //
-//    typedef MDGridBox<MDEvent<2>,2> box_t;
+//    typedef MDGridBox<MDLeanEvent<2>,2> box_t;
 //    box_t * b = makeMDEW<2>(10, 0.0, 10.0);
 //
 //    // Manually set some of the tasking parameters
@@ -259,7 +259,7 @@ public:
 //    b->getBoxController()->m_maxDepth = 6;
 //
 //    Timer tim;
-//    std::vector< MDEvent<2> > events;
+//    std::vector< MDLeanEvent<2> > events;
 //    double step_size = 1e-3;
 //    size_t numPoints = (10.0/step_size)*(10.0/step_size);
 //    std::cout << "Starting to write out " << numPoints << " events\n";
@@ -270,7 +270,7 @@ public:
 //        for (double y=step_size; y < 10; y += step_size)
 //        {
 //          double centers[2] = {x, y};
-//          events.push_back( MDEvent<2>(2.0, 3.0, centers) );
+//          events.push_back( MDLeanEvent<2>(2.0, 3.0, centers) );
 //        }
 //    }
 //    else
@@ -283,7 +283,7 @@ public:
 //      for (size_t i=0; i < numPoints; i++)
 //      {
 //        double centers[2] = {gen(), gen()};
-//        events.push_back( MDEvent<2>(2.0, 3.0, centers) );
+//        events.push_back( MDLeanEvent<2>(2.0, 3.0, centers) );
 //      }
 //    }
 //    TS_ASSERT_EQUALS( events.size(), numPoints);

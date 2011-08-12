@@ -11,7 +11,7 @@
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/CoordTransform.h"
 #include "MantidMDEvents/IMDBox.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 

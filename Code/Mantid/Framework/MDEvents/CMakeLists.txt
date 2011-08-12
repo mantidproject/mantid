@@ -23,6 +23,7 @@ set ( SRC_FILES
 	src/MDEventWorkspace.cpp
 	src/MDGridBox.cpp
 	src/MDHistoWorkspace.cpp
+	src/MDLeanEvent.cpp
 	src/MakeDiffractionMDEventWorkspace.cpp
 	src/OneStepMDEW.cpp
 	src/SaveMDEW.cpp
@@ -59,11 +60,12 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEWFindPeaks.h
 	inc/MantidMDEvents/MDEWPeakIntegration.h
-	inc/MantidMDEvents/MDEvent.h
+	inc/MantidMDEvents/MDLeanEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
 	inc/MantidMDEvents/MDEventWorkspace.h
 	inc/MantidMDEvents/MDGridBox.h
 	inc/MantidMDEvents/MDHistoWorkspace.h
+	inc/MantidMDEvents/MDLeanEvent.h
 	inc/MantidMDEvents/MakeDiffractionMDEventWorkspace.h
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/SaveMDEW.h
@@ -95,6 +97,7 @@ set ( TEST_FILES
 	test/MDEventWorkspaceTest.h
 	test/MDGridBoxTest.h
 	test/MDHistoWorkspaceTest.h
+	test/MDLeanEventTest.h
 	test/MakeDiffractionMDEventWorkspaceTest.h
 	test/OneStepMDEWTest.h
 	test/SaveMDEWTest.h

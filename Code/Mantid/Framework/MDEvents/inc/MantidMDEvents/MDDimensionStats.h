@@ -2,7 +2,7 @@
 #define MANTID_MDEVENTS_MDDIMENSIONSTATS_H_
     
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 
 
 namespace Mantid

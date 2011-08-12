@@ -1,5 +1,5 @@
 """ Simple script that generates references to all
-needed MDEvent<X> instantiations. """
+needed MDLeanEvent<X> instantiations. """
 import sys
 import os
 import time
@@ -65,7 +65,7 @@ def write_factory(f):
     """ Write out a factory method """
     f.write(factory_top)
     for nd in dimensions:
-        eventType = "MDEvent<%d>" % nd
+        eventType = "MDLeanEvent<%d>" % nd
         f.write(factory_lines % (nd,eventType,nd,eventType,nd) )
     f.write(factory_bottom)
         
@@ -105,7 +105,7 @@ def get_macro():
     """ Return the macro code CALL_MDEVENT_FUNCTION """
     s = macro_top;
     for nd in dimensions:
-        eventType = "MDEvent<%d>" % nd
+        eventType = "MDLeanEvent<%d>" % nd
         s += macro % (eventType,nd,nd,eventType,nd,nd,eventType,nd,nd) 
     s +=  "} \n"
     return s
@@ -115,7 +115,7 @@ def get_macro3():
     s = macro_top3;
     for nd in dimensions:
         if (nd >= 3):
-            eventType = "MDEvent<%d>" % nd
+            eventType = "MDLeanEvent<%d>" % nd
             s += macro % (eventType,nd,nd,eventType,nd,nd,eventType,nd,nd) 
     s +=  "} \n"
     return s
@@ -171,7 +171,7 @@ def generate():
     # Classes that have a .cpp file (and will get an Include line)
     classes_cpp = ["IMDBox", "MDBox", "MDEventWorkspace", "MDGridBox", "MDBin", "MDBoxIterator"]
     # All of the classes to instantiate
-    classes = classes_cpp + ["MDEvent"]
+    classes = classes_cpp + ["MDLeanEvent"]
     
     # First, open the header and read all the lines
     f = open("../inc/MantidMDEvents/MDEventFactory.h", 'r')
@@ -204,20 +204,20 @@ def generate():
     
     f.write(header)
 
-    # MDEvent type (just one template arg)
-    classes = ["MDEvent"]
+    # MDLeanEvent type (just one template arg)
+    classes = ["MDLeanEvent"]
     for c in classes:
         f.write("// Instantiations for %s\n" % c )
         for nd in dimensions:
             f.write("template DLLExport class %s<%d>;\n" % (c, nd) )
         f.write("\n\n")
 
-    # Classes with MDEvent<x>,x
+    # Classes with MDLeanEvent<x>,x
     classes = classes_cpp
     for c in classes:
         f.write("// Instantiations for %s\n" % c )
         for nd in dimensions:
-            f.write("template DLLExport class %s<MDEvent<%d>, %d>;\n" % (c, nd, nd) )
+            f.write("template DLLExport class %s<MDLeanEvent<%d>, %d>;\n" % (c, nd, nd) )
         f.write("\n\n")
             
     write_factory(f)
@@ -243,7 +243,7 @@ def generate():
         lines.append("\n%s// ------------- Typedefs for %s ------------------\n" % (padding, c));
         for nd in dimensions:
             lines.append(padding + "/// Typedef for a %s with %d dimension%s " % (c, nd, ['','s'][nd>1]) )
-            lines.append(padding + "typedef %s<MDEvent<%d>, %d> %s%d;" % (c, nd, nd, c, nd) )
+            lines.append(padding + "typedef %s<MDLeanEvent<%d>, %d> %s%d;" % (c, nd, nd, c, nd) )
         lines.append("\n");
             
 

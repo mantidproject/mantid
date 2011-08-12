@@ -108,8 +108,8 @@ namespace MDEvents
   }
 
 
-  /// Our MDEvent dimension
-  typedef MDEvent<3> MDE;
+  /// Our MDLeanEvent dimension
+  typedef MDLeanEvent<3> MDE;
 
 
   //----------------------------------------------------------------------------------------------
@@ -204,12 +204,12 @@ namespace MDEvents
           //double lambda = 1.0/wavenumber;
           // (sin(theta))^2 / wavelength^4
           float correct = float( sin_theta_squared * wavenumber*wavenumber*wavenumber*wavenumber * sin_theta_squared );
-          // Push the MDEvent but correct the weight.
+          // Push the MDLeanEvent but correct the weight.
           out_events.push_back( MDE(float(it->weight()*correct), float(it->errorSquared()*correct*correct), center) );
         }
         else
         {
-          // Push the MDEvent with the same weight
+          // Push the MDLeanEvent with the same weight
           out_events.push_back( MDE(float(it->weight()), float(it->errorSquared()), center) );
         }
       }
@@ -300,7 +300,7 @@ namespace MDEvents
     {
       // Create an output workspace with 3 dimensions.
       size_t nd = 3;
-      i_out = MDEventFactory::CreateMDEventWorkspace(nd, "MDEvent");
+      i_out = MDEventFactory::CreateMDEventWorkspace(nd, "MDLeanEvent");
       ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(i_out);
 
       // Give all the dimensions

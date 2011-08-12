@@ -20,7 +20,7 @@ namespace MDEvents
 
   /** A non-linear coordinate transform that takes
    * a point from nd dimensions and converts it to a
-   * single dimension: the SQUARE of the distance between the MDEvent
+   * single dimension: the SQUARE of the distance between the MDLeanEvent
    * and a given point in up to nd dimensions.
    * 
    * The number of output dimensions is 1 (the square of the distance to the point).

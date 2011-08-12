@@ -86,14 +86,14 @@ public:
 
   void test_default_constructor()
   {
-    IMDBoxTester<MDEvent<3>,3> box;
+    IMDBoxTester<MDLeanEvent<3>,3> box;
     TS_ASSERT_EQUALS( box.getSignal(), 0.0);
     TS_ASSERT_EQUALS( box.getErrorSquared(), 0.0);
   }
 
   void test_extents_constructor()
   {
-    typedef IMDBoxTester<MDEvent<3>,3> ibox3;
+    typedef IMDBoxTester<MDLeanEvent<3>,3> ibox3;
     std::vector<Mantid::Geometry::MDDimensionExtents> extentsVector;
     TS_ASSERT_THROWS_ANYTHING( ibox3 box(extentsVector) );
     extentsVector.resize(3);
@@ -102,7 +102,7 @@ public:
       extentsVector[d].min = double(d) + 0.1;
       extentsVector[d].max = double(d + 1);
     }
-    IMDBoxTester<MDEvent<3>,3> box(extentsVector);
+    IMDBoxTester<MDLeanEvent<3>,3> box(extentsVector);
     TS_ASSERT_DELTA( box.getExtents(0).min, 0.1, 1e-4 );
     TS_ASSERT_DELTA( box.getExtents(0).max, 1.0, 1e-4 );
     TS_ASSERT_DELTA( box.getExtents(1).min, 1.1, 1e-4 );
@@ -113,7 +113,7 @@ public:
 
   void test_get_and_set_signal()
   {
-    IMDBoxTester<MDEvent<3>,3> box;
+    IMDBoxTester<MDLeanEvent<3>,3> box;
     TS_ASSERT_EQUALS( box.getSignal(), 0.0);
     TS_ASSERT_EQUALS( box.getErrorSquared(), 0.0);
     box.setSignal(123.0);
@@ -125,7 +125,7 @@ public:
 
   void test_get_and_set_depth()
   {
-    IMDBoxTester<MDEvent<3>,3> b;
+    IMDBoxTester<MDLeanEvent<3>,3> b;
     b.setDepth(123);
     TS_ASSERT_EQUALS( b.getDepth(), 123);
   }
@@ -134,7 +134,7 @@ public:
    * also, getting the center */
   void test_setExtents()
   {
-    IMDBoxTester<MDEvent<2>,2> b;
+    IMDBoxTester<MDLeanEvent<2>,2> b;
     b.setExtents(0, -8.0, 10.0);
     TS_ASSERT_DELTA(b.getExtents(0).min, -8.0, 1e-6);
     TS_ASSERT_DELTA(b.getExtents(0).max, +10.0, 1e-6);
@@ -153,14 +153,14 @@ public:
 
   void test_copy_constructor()
   {
-    IMDBoxTester<MDEvent<2>,2> b;
+    IMDBoxTester<MDLeanEvent<2>,2> b;
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
     b.setSignal(123.0);
     b.setErrorSquared(456.0);
 
     // Perform the copy
-    IMDBoxTester<MDEvent<2>,2> box(b);
+    IMDBoxTester<MDLeanEvent<2>,2> box(b);
     TS_ASSERT_DELTA(box.getExtents(0).min, -10.0, 1e-6);
     TS_ASSERT_DELTA(box.getExtents(0).max, +10.0, 1e-6);
     TS_ASSERT_DELTA(box.getExtents(1).min, -4.0, 1e-6);
@@ -174,7 +174,7 @@ public:
   /** Calculating volume and normalizing signal by it. */
   void test_calcVolume()
   {
-    IMDBoxTester<MDEvent<2>,2> b;
+    IMDBoxTester<MDLeanEvent<2>,2> b;
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
     b.calcVolume();
@@ -195,7 +195,7 @@ public:
   /** Get vertexes using the extents */
   void test_getVertexes()
   {
-    IMDBoxTester<MDEvent<2>,2> b;
+    IMDBoxTester<MDLeanEvent<2>,2> b;
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
     std::vector<Mantid::Geometry::Coordinate> v = b.getVertexes();
@@ -212,7 +212,7 @@ public:
   /** Get vertexes as a bare array */
   void test_getVertexesArray()
   {
-    IMDBoxTester<MDEvent<2>,2> b;
+    IMDBoxTester<MDLeanEvent<2>,2> b;
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
     size_t numVertexes = 0;
@@ -233,7 +233,7 @@ public:
    * projecting down into fewer dimensions */
   void test_getVertexesArray_reducedDimension()
   {
-    IMDBoxTester<MDEvent<2>,2> b;
+    IMDBoxTester<MDLeanEvent<2>,2> b;
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
     size_t numVertexes = 0;
@@ -258,7 +258,7 @@ public:
    * projecting down into fewer dimensions */
   void test_getVertexesArray_reducedDimension_3D()
   {
-    IMDBoxTester<MDEvent<3>,3> b;
+    IMDBoxTester<MDLeanEvent<3>,3> b;
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
     b.setExtents(2, -2.0, 8.0);
@@ -321,7 +321,7 @@ public:
    */
   void test_getVertexes_3D()
   {
-    IMDBoxTester<MDEvent<3>,3> b;
+    IMDBoxTester<MDLeanEvent<3>,3> b;
     b.setExtents(0, -9.0, 9.0);
     b.setExtents(1, -8.0, 8.0);
     b.setExtents(2, -7.0, 7.0);
@@ -333,7 +333,7 @@ public:
 
   void test_getVertexesArray_3D()
   {
-    IMDBoxTester<MDEvent<3>,3> b;
+    IMDBoxTester<MDLeanEvent<3>,3> b;
     b.setExtents(0, -9.0, 9.0);
     b.setExtents(1, -8.0, 8.0);
     b.setExtents(2, -7.0, 7.0);
@@ -347,7 +347,7 @@ public:
 
   void test_getVertexesArray_3D_projected_to_2D()
   {
-    IMDBoxTester<MDEvent<3>,3> b;
+    IMDBoxTester<MDLeanEvent<3>,3> b;
     b.setExtents(0, -9.0, 9.0);
     b.setExtents(1, -8.0, 8.0);
     b.setExtents(2, -7.0, 7.0);
@@ -362,7 +362,7 @@ public:
 
   void test_getVertexesArray_4D()
   {
-    IMDBoxTester<MDEvent<4>,4> b;
+    IMDBoxTester<MDLeanEvent<4>,4> b;
     b.setExtents(0, -9.0, 9.0);
     b.setExtents(1, -8.0, 8.0);
     b.setExtents(2, -7.0, 7.0);
@@ -376,7 +376,7 @@ public:
   }
   void test_getVertexesArray_4D_projected_to_3D()
   {
-    IMDBoxTester<MDEvent<4>,4> b;
+    IMDBoxTester<MDLeanEvent<4>,4> b;
     bool maskDim[4] = {true, true, true, false};
     b.setExtents(0, -9.0, 9.0);
     b.setExtents(1, -8.0, 8.0);

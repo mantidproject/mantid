@@ -9,7 +9,7 @@
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDDimensionStats.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 
 #undef MDBOX_TRACK_SIGNAL_WHEN_ADDING
 
@@ -23,13 +23,13 @@ namespace MDEvents
   //===============================================================================================
   /** Templated class for a multi-dimensional event "box".
    *
-   * A box is a container of MDEvent's within a certain range of values
+   * A box is a container of MDLeanEvent's within a certain range of values
    * within the nd dimensions. This range defines a n-dimensional "box"
    * or rectangular prism.
    *
    * This class is a simple list of points with no more internal structure.
    *
-   * @tparam nd :: the number of dimensions that each MDEvent will be tracking.
+   * @tparam nd :: the number of dimensions that each MDLeanEvent will be tracking.
    *                  an int > 0.
    *
    * @author Janik Zikovsky, SNS
@@ -163,7 +163,7 @@ namespace MDEvents
 
   protected:
 
-    /** Vector of MDEvent's, in no particular order.
+    /** Vector of MDLeanEvent's, in no particular order.
      * */
     mutable std::vector< MDE > data;
 

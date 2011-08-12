@@ -149,7 +149,7 @@ public:
   {
     //------ Start by creating the file ----------------------------------------------
     // Make a 1D MDEventWorkspace
-    boost::shared_ptr<MDEventWorkspace<MDEvent<nd>,nd> > ws1 = MDEventsTestHelper::makeMDEW<nd>(10, 0.0, 10.0, 0);
+    boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>,nd> > ws1 = MDEventsTestHelper::makeMDEW<nd>(10, 0.0, 10.0, 0);
     ws1->getBoxController()->setSplitThreshold(100);
     // Put in ADS so we can use fake data
     AnalysisDataService::Instance().addOrReplace("LoadMDEWTest_ws", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
@@ -197,7 +197,7 @@ public:
     TS_ASSERT(iws);
     if (!iws) return;
 
-    boost::shared_ptr<MDEventWorkspace<MDEvent<nd>,nd> > ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<nd>,nd> >(iws);
+    boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>,nd> > ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>,nd> >(iws);
 
     // Perform the full comparison
     do_compare_MDEW(ws, ws1);
@@ -219,10 +219,10 @@ public:
     IMDEventWorkspace_sptr iws;
     TS_ASSERT_THROWS_NOTHING( iws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
     TS_ASSERT(iws); if (!iws) return;
-    boost::shared_ptr<MDEventWorkspace<MDEvent<nd>,nd> > ws2 = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<nd>,nd> >(iws);
+    boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>,nd> > ws2 = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>,nd> >(iws);
 
     // Modify that by adding some boxes
-    MDGridBox<MDEvent<nd>,nd> * box = dynamic_cast<MDGridBox<MDEvent<nd>,nd>*>(ws2->getBox());
+    MDGridBox<MDLeanEvent<nd>,nd> * box = dynamic_cast<MDGridBox<MDLeanEvent<nd>,nd>*>(ws2->getBox());
     // Now there are 2002 boxes
     box->splitContents(12);
     ws2->refreshCache();
@@ -252,7 +252,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     TS_ASSERT_THROWS_NOTHING( iws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("reloaded_again")) );
-    boost::shared_ptr<MDEventWorkspace<MDEvent<nd>,nd> > ws3 = boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<nd>,nd> >(iws);
+    boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>,nd> > ws3 = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>,nd> >(iws);
     TS_ASSERT(ws3); if (!ws3) return;
     ws3->refreshCache();
 

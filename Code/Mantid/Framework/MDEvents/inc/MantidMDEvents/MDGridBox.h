@@ -12,7 +12,7 @@
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidNexus/NeXusFile.hpp"
 
 namespace Mantid
@@ -29,7 +29,7 @@ namespace MDEvents
    *
    * This means that MDGridBoxes can be recursively gridded finer and finer.
    *
-   * @tparam nd :: the number of dimensions that each MDEvent will be tracking.
+   * @tparam nd :: the number of dimensions that each MDLeanEvent will be tracking.
    *                  an int > 0.
    *
    * @author Janik Zikovsky, SNS

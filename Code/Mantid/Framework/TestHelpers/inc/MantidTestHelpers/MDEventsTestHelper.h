@@ -5,7 +5,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Utils.h"
 #include "MantidMDEvents/BoxController.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidTestHelpers/DLLExport.h"
 
@@ -38,16 +38,16 @@ namespace MDEventsTestHelper
    * @param splitInto :: each dimension will split into this many subgrids
    * @param min :: extent of each dimension (min)
    * @param max :: extent of each dimension (max)
-   * @param numEventsPerBox :: will create one MDEvent in the center of each sub-box.
+   * @param numEventsPerBox :: will create one MDLeanEvent in the center of each sub-box.
    *        0 = don't split box, don't add events
    * @return
    */
   template<size_t nd>
-  boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<nd>,nd> >
+  boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDLeanEvent<nd>,nd> >
     makeMDEW(size_t splitInto, double min, double max, size_t numEventsPerBox = 0)
   {
-    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<nd>,nd> >
-            out(new Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<nd>,nd>());
+    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDLeanEvent<nd>,nd> >
+            out(new Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDLeanEvent<nd>,nd>());
     Mantid::MDEvents::BoxController_sptr bc = out->getBoxController();
     bc->setSplitThreshold(100);
     bc->setSplitInto(splitInto);
@@ -75,7 +75,7 @@ namespace MDEventsTestHelper
           Mantid::coord_t centers[nd];
           for (size_t d=0; d<nd; d++)
             centers[d] = min + (double(index[d])+0.5)*(max-min)/double(splitInto);
-          out->addEvent( Mantid::MDEvents::MDEvent<nd>(1.0, 1.0, centers) );
+          out->addEvent( Mantid::MDEvents::MDLeanEvent<nd>(1.0, 1.0, centers) );
         }
 
         allDone = Mantid::Kernel::Utils::NestedForLoop::Increment(nd, index, index_max);
@@ -94,13 +94,13 @@ namespace MDEventsTestHelper
   //=====================================================================================
 
   /** Generate an empty MDBox */
-  DLL_TESTHELPERS MDBox<MDEvent<1>,1> * makeMDBox1(size_t splitInto=10);
+  DLL_TESTHELPERS MDBox<MDLeanEvent<1>,1> * makeMDBox1(size_t splitInto=10);
 
   /** Generate an empty MDBox with 3 dimensions, split 10x5x2 */
-  DLL_TESTHELPERS MDBox<MDEvent<3>,3> * makeMDBox3();
+  DLL_TESTHELPERS MDBox<MDLeanEvent<3>,3> * makeMDBox3();
 
   /** Return a vector with this many MDEvents, spaced evenly from 0.5, 1.5, etc. */
-  DLL_TESTHELPERS std::vector<MDEvent<1> > makeMDEvents1(size_t num);
+  DLL_TESTHELPERS std::vector<MDLeanEvent<1> > makeMDEvents1(size_t num);
 
 
   //-------------------------------------------------------------------------------------
@@ -110,7 +110,7 @@ namespace MDEventsTestHelper
    * @param split0, split1 :: for uneven splitting
    * */
   template <size_t nd>
-  static MDGridBox<MDEvent<nd>,nd> * makeMDGridBox(size_t split0=10, size_t split1=10, coord_t dimensionMin=0.0, coord_t dimensionMax=10.0)
+  static MDGridBox<MDLeanEvent<nd>,nd> * makeMDGridBox(size_t split0=10, size_t split1=10, coord_t dimensionMin=0.0, coord_t dimensionMax=10.0)
   {
     // Split at 5 events
     BoxController_sptr splitter(new BoxController(nd));
@@ -120,12 +120,12 @@ namespace MDEventsTestHelper
     splitter->setSplitInto(0, split0);
     if (nd > 1) splitter->setSplitInto(1, split1);
     // Set the size to 10.0 in all directions
-    MDBox<MDEvent<nd>,nd> * box = new MDBox<MDEvent<nd>,nd>(splitter);
+    MDBox<MDLeanEvent<nd>,nd> * box = new MDBox<MDLeanEvent<nd>,nd>(splitter);
     for (size_t d=0; d<nd; d++)
       box->setExtents(d, dimensionMin, dimensionMax);
 
     // Split
-    MDGridBox<MDEvent<nd>,nd> * out = new MDGridBox<MDEvent<nd>,nd>(box);
+    MDGridBox<MDLeanEvent<nd>,nd> * out = new MDGridBox<MDLeanEvent<nd>,nd>(box);
 
     return out;
   }
@@ -140,7 +140,7 @@ namespace MDEventsTestHelper
    * @param step :: x-coordinate increases by this much.
    */
   template <size_t nd>
-  static void feedMDBox(IMDBox<MDEvent<nd>,nd> * box, size_t repeat=1, size_t numPerSide=10, coord_t start=0.5, coord_t step=1.0)
+  static void feedMDBox(IMDBox<MDLeanEvent<nd>,nd> * box, size_t repeat=1, size_t numPerSide=10, coord_t start=0.5, coord_t step=1.0)
   {
     size_t counters[nd]; Mantid::Kernel::Utils::NestedForLoop::SetUp(nd,counters,0);
     size_t index_max[nd]; Mantid::Kernel::Utils::NestedForLoop::SetUp(nd,index_max,numPerSide);
@@ -155,7 +155,7 @@ namespace MDEventsTestHelper
 
       // Add that event 'repeat' times
       for (size_t i=0; i<repeat; ++i)
-        box->addEvent( MDEvent<nd>(1.0, 1.0, centers) );
+        box->addEvent( MDLeanEvent<nd>(1.0, 1.0, centers) );
 
       // Increment the nested for loop
       allDone = Mantid::Kernel::Utils::NestedForLoop::Increment(nd, counters, index_max);
@@ -172,9 +172,9 @@ namespace MDEventsTestHelper
    * @param recurseLimit :: this is where to spot
    */
   template<size_t nd>
-  static void recurseSplit(MDGridBox<MDEvent<nd>,nd> * box, size_t atRecurseLevel, size_t recurseLimit)
+  static void recurseSplit(MDGridBox<MDLeanEvent<nd>,nd> * box, size_t atRecurseLevel, size_t recurseLimit)
   {
-    typedef std::vector<IMDBox<MDEvent<nd>,nd> *> boxVector;
+    typedef std::vector<IMDBox<MDLeanEvent<nd>,nd> *> boxVector;
     if (atRecurseLevel >= recurseLimit) return;
 
     // Split all the contents
@@ -189,7 +189,7 @@ namespace MDEventsTestHelper
     // Go through them and split them
     for (size_t i=0; i< boxes.size(); i++)
     {
-      MDGridBox<MDEvent<nd>,nd> * containedbox = dynamic_cast<MDGridBox<MDEvent<nd>,nd> *>(boxes[i]);
+      MDGridBox<MDLeanEvent<nd>,nd> * containedbox = dynamic_cast<MDGridBox<MDLeanEvent<nd>,nd> *>(boxes[i]);
       if (containedbox)
         recurseSplit(containedbox, atRecurseLevel+1, recurseLimit);
     }
@@ -204,7 +204,7 @@ namespace MDEventsTestHelper
    * @return
    */
   template<size_t nd>
-  static MDGridBox<MDEvent<nd>,nd> * makeRecursiveMDGridBox(size_t splitInto, size_t levels)
+  static MDGridBox<MDLeanEvent<nd>,nd> * makeRecursiveMDGridBox(size_t splitInto, size_t levels)
   {
     // Split at 5 events
     BoxController_sptr splitter(new BoxController(nd));
@@ -214,11 +214,11 @@ namespace MDEventsTestHelper
     // Splits into splitInto x splitInto x ... boxes
     splitter->setSplitInto(splitInto);
     // Set the size to splitInto*1.0 in all directions
-    MDBox<MDEvent<nd>,nd> * box = new MDBox<MDEvent<nd>,nd>(splitter);
+    MDBox<MDLeanEvent<nd>,nd> * box = new MDBox<MDLeanEvent<nd>,nd>(splitter);
     for (size_t d=0; d<nd; d++)
       box->setExtents(d, 0.0, double(splitInto));
     // Split into the gridbox.
-    MDGridBox<MDEvent<nd>,nd> * gridbox = new MDGridBox<MDEvent<nd>,nd>(box);
+    MDGridBox<MDLeanEvent<nd>,nd> * gridbox = new MDGridBox<MDLeanEvent<nd>,nd>(box);
 
     // Now recursively split more
     recurseSplit(gridbox, 0, levels);

@@ -50,7 +50,29 @@ namespace Mantid
   /// Maximum value (large positive number) that a coordinate can take
   static const coord_t coord_t_max = std::numeric_limits<coord_t>::max();
 
- 
+
+  /** Macro TMDE to make declaring template functions
+   * faster. Put this macro before function declarations.
+   * Use:
+   * TMDE(void ClassName)::methodName()
+   * {
+   *    // function body here
+   * }
+   *
+   * @tparam MDE :: the MDLeanEvent/MDEvent type; at first, this will always be MDLeanEvent<nd>
+   * @tparam nd :: the number of dimensions in the center coords. Passing this
+   *               as a template argument should speed up some code.
+   */
+  #define TMDE(decl) template <typename MDE, size_t nd> decl<MDE, nd>
+
+  /** Macro to make declaring template classes faster.
+   * Use:
+   * TMDE_CLASS
+   * class ClassName : ...
+   */
+  #define TMDE_CLASS template <typename MDE, size_t nd>
+
+
 }
 
 #endif //MANTID_GEOMETRY_MDTYPES_H_

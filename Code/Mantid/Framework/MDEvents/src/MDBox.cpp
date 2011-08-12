@@ -1,5 +1,5 @@
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidAPI/ImplicitFunction.h"
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidKernel/DiskMRU.h"
@@ -395,8 +395,8 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Add a MDEvent to the box.
-   * @param event :: reference to a MDEvent to add.
+  /** Add a MDLeanEvent to the box.
+   * @param event :: reference to a MDLeanEvent to add.
    * */
   TMDE(
   void MDBox)::addEvent( const MDE & event)
@@ -488,7 +488,7 @@ namespace MDEvents
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
 
-    // For each MDEvent
+    // For each MDLeanEvent
     for (; it != it_end; ++it)
     {
       // Go through each dimension
@@ -532,7 +532,7 @@ namespace MDEvents
     typename std::vector<MDE>::const_iterator it = data.begin();
     typename std::vector<MDE>::const_iterator it_end = data.end();
     bool mask[3] = {false, false, false}; //HACK
-    // For each MDEvent
+    // For each MDLeanEvent
     for (; it != it_end; ++it)
     {
       if (function.evaluate(it->getCenter(), mask, 3)) //HACK
@@ -564,7 +564,7 @@ namespace MDEvents
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
 
-    // For each MDEvent
+    // For each MDLeanEvent
     for (; it != it_end; ++it)
     {
       coord_t out[nd];
@@ -597,7 +597,7 @@ namespace MDEvents
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
 
-    // For each MDEvent
+    // For each MDLeanEvent
     for (; it != it_end; ++it)
     {
       coord_t out[nd];

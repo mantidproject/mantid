@@ -11,7 +11,7 @@
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/CoordTransform.h"
 #include "MantidMDEvents/MDBin.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidNexus/NeXusFile.hpp"
 #include <iosfwd>
 
@@ -35,7 +35,7 @@ namespace MDEvents
    * within the nd dimensions. This range defines a n-dimensional "box"
    * or rectangular prism.
    *
-   * @tparam nd :: the number of dimensions that each MDEvent will be tracking.
+   * @tparam nd :: the number of dimensions that each MDLeanEvent will be tracking.
    *                  an int > 0.
    *
    * @author Janik Zikovsky, SNS
