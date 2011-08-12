@@ -374,6 +374,7 @@ void LoadEventPreNexus::runLoadInstrument(const std::string &eventfilename, Matr
   // Now execute the sub-algorithm. Catch and log any error, but don't stop.
   loadInst->setPropertyValue("InstrumentName", instrument);
   loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+  loadInst->setProperty("RewriteSpectraMap", false);
   loadInst->executeAsSubAlg();
 
   // Populate the instrument parameters in this workspace - this works around a bug
@@ -468,8 +469,8 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
       this->pixel_to_wkspindex[it->first] = workspaceIndex;
       EventList & spec = workspace->getOrAddEventList(workspaceIndex);
       spec.addDetectorID(it->first);
-      // Match the spectrum number and detector ID
-      spec.setSpectrumNo(it->first);
+      // Start the spectrum number at 1
+      spec.setSpectrumNo(specid_t(workspaceIndex+1));
       workspaceIndex += 1;
     }
   }

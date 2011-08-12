@@ -260,17 +260,17 @@ public:
     TS_ASSERT_EQUALS( ew->getNumberHistograms(), numpixels);
 
     //Mapping between workspace index and spectrum number; simple
-    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(0), 45);
-    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(1), 110);
+    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(0), 46);
+    TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(1), 111);
     TS_ASSERT_EQUALS( ew->getAxis(1)->length(), 2);
 
     //Are the pixel IDs ok?
-    TS_ASSERT_EQUALS( ew->getSpectrum(0)->getSpectrumNo(), 45);
+    TS_ASSERT_EQUALS( ew->getSpectrum(0)->getSpectrumNo(), 46);
     std::set<detid_t> dets = ew->getSpectrum(0)->getDetectorIDs();
     TS_ASSERT_EQUALS( dets.size(), 1);
     TS_ASSERT_EQUALS( *dets.begin(), 45);
 
-    TS_ASSERT_EQUALS( ew->getSpectrum(1)->getSpectrumNo(), 110);
+    TS_ASSERT_EQUALS( ew->getSpectrum(1)->getSpectrumNo(), 111);
     dets = ew->getSpectrum(1)->getDetectorIDs();
     TS_ASSERT_EQUALS( dets.size(), 1);
     TS_ASSERT_EQUALS( *dets.begin(), 110);
