@@ -86,8 +86,8 @@ class SNSPowderReduction(PythonAlgorithm):
         #self.declareProperty("FileType", "Event NeXus",
         #                     Validator=ListValidator(types))
         self.declareListProperty("RunNumber", [0], Validator=ArrayBoundedValidator(Lower=0))
-        extensions = [".nxs", "_histo.nxs", "_event.nxs", "_neutron_event.dat",
-                      "_neutron0_event.dat", "_neutron1_event.dat"]
+        extensions = [ "_histo.nxs", "_event.nxs", "_neutron_event.dat",
+                      "_neutron0_event.dat", "_neutron1_event.dat", "_neutron0_event.dat and _neutron1_event.dat"]
         self.declareProperty("Extension", "_event.nxs",
                              Validator=ListValidator(extensions))
         self.declareProperty("CompressOnRead", False,
@@ -140,6 +140,7 @@ class SNSPowderReduction(PythonAlgorithm):
         # generate the workspace name
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
+        print filename
 
         try: # first just try loading the file
             alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
@@ -160,6 +161,8 @@ class SNSPowderReduction(PythonAlgorithm):
         nxsfile = "%s_%d_event.nxs" % (self._instrument, runnumber)
         try:
             LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
+            if str(self._instrument) == "SNAP":
+                LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
             return wksp
         except:
             pass
@@ -167,6 +170,8 @@ class SNSPowderReduction(PythonAlgorithm):
         nxsfile = "%s_%d_histo.nxs" % (self._instrument, runnumber)
         try:
             LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
+            if str(self._instrument) == "SNAP":
+                LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
             return wksp
         except:
             pass
@@ -174,6 +179,8 @@ class SNSPowderReduction(PythonAlgorithm):
         nxsfile = self._findData(runnumber, "_event.nxs")
         try:
             LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
+            if str(self._instrument) == "SNAP":
+                LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
             return wksp
         except:
             pass
@@ -181,6 +188,8 @@ class SNSPowderReduction(PythonAlgorithm):
         nxsfile = self._findData(runnumber, "_histo.nxs")
         try:
             LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
+            if str(self._instrument) == "SNAP":
+                LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
             return wksp
         except:
             pass
@@ -245,6 +254,10 @@ class SNSPowderReduction(PythonAlgorithm):
             return self._loadEventNeXusData(runnumber, extension, **filter)
         elif extension.endswith("_histo.nxs"):
             return self._loadHistoNeXusData(runnumber, extension)
+        elif "and" in extension:
+            wksp0 = self._loadPreNeXusData(runnumber, "_neutron0_event.dat")
+            wksp1 = self._loadPreNeXusData(runnumber, "_neutron1_event.dat")
+            return wksp0 + wksp1;
         else:
             return self._loadPreNeXusData(runnumber, extension)
 
@@ -313,7 +326,7 @@ class SNSPowderReduction(PythonAlgorithm):
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing") # put it back to the original units
         if len(self._binning) == 3:
             info.has_dspace = self._bin_in_dspace
-        if info.has_dspace and not "histo" in self.getProperty("Extension"):
+        if info.has_dspace:
             if len(self._binning) == 3:
                 binning = self._binning
             else:
@@ -326,7 +339,7 @@ class SNSPowderReduction(PythonAlgorithm):
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         if preserveEvents and not "histo" in self.getProperty("Extension"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-        if not info.has_dspace and not "histo" in self.getProperty("Extension"):
+        if not info.has_dspace:
             if len(self._binning) == 3:
                 binning = self._binning
             else:
