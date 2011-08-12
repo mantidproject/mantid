@@ -30,13 +30,11 @@ public:
   const std::string category() const { return "Cat";} ///< Algorithm's category for identification
 
 protected:
-  void functionDeriv(const double* in, Mantid::CurveFitting::Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const size_t nData)
+  void functionDeriv(const double* in, Mantid::CurveFitting::Jacobian* out, const double* xValues, const size_t nData)
   {
     UNUSED_ARG(in);
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
-    UNUSED_ARG(yValues);
-    UNUSED_ARG(yErrors);
     UNUSED_ARG(nData);
     throw Exception::NotImplementedError("No derivative function provided");
   }
@@ -229,9 +227,9 @@ public:
     double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.076185,0.0001);
     dummy = alg2.getProperty("BG0");
-    TS_ASSERT_DELTA( dummy, 2.8765 ,0.0001);
+    TS_ASSERT_DELTA( dummy, 2.8775 ,0.0001);
     dummy = alg2.getProperty("Height");
-    TS_ASSERT_DELTA( dummy, 97.8039 ,0.001);
+    TS_ASSERT_DELTA( dummy, 97.7855 ,0.001);
     dummy = alg2.getProperty("PeakCentre");
     TS_ASSERT_DELTA( dummy, 11.2356 ,0.0001);
     dummy = alg2.getProperty("Sigma");
