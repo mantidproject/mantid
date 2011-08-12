@@ -83,4 +83,65 @@ public:
 
 };
 
+
+class MDEventTestPerformance :  public CxxTest::TestSuite
+{
+public:
+  std::vector<MDEvent<3> > events3;
+  std::vector<MDLeanEvent<3> > lean_events3;
+  std::vector<MDEvent<4> > events4;
+  std::vector<MDLeanEvent<4> > lean_events4;
+  size_t num;
+
+  void setUp()
+  {
+    num = 1000000;
+    events3.clear(); events3.reserve(num);
+    events4.clear(); events4.reserve(num);
+    lean_events3.clear(); lean_events3.reserve(num);
+    lean_events4.clear(); lean_events4.reserve(num);
+  }
+
+  void test_create_MDEvent3()
+  {
+    float signal(1.5);
+    float error(2.5);
+    uint16_t runIndex = 123;
+    uint16_t detectorId = 45678;
+    coord_t center[3] = {1.23, 2.34, 3.45};
+    for (size_t i=0; i<num; i++)
+      events3.push_back( MDEvent<3>(signal, error, runIndex, detectorId, center) );
+  }
+
+  void test_create_MDEvent4()
+  {
+    float signal(1.5);
+    float error(2.5);
+    uint16_t runIndex = 123;
+    uint16_t detectorId = 45678;
+    coord_t center[4] = {1.23, 2.34, 3.45, 4.56};
+    for (size_t i=0; i<num; i++)
+      events4.push_back( MDEvent<4>(signal, error, runIndex, detectorId, center) );
+  }
+
+  void test_create_MDLeanEvent3()
+  {
+    float signal(1.5);
+    float error(2.5);
+    coord_t center[3] = {1.23, 2.34, 3.45};
+    for (size_t i=0; i<num; i++)
+      lean_events3.push_back( MDLeanEvent<3>(signal, error, center) );
+  }
+
+  void test_create_MDLeanEvent4()
+  {
+    float signal(1.5);
+    float error(2.5);
+    coord_t center[4] = {1.23, 2.34, 3.45, 4.56};
+    for (size_t i=0; i<num; i++)
+      lean_events4.push_back( MDLeanEvent<4>(signal, error, center) );
+  }
+
+};
+
 #endif
