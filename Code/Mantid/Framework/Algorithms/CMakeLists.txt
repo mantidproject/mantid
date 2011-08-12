@@ -26,6 +26,7 @@ set ( SRC_FILES
 	src/ConvertToMatrixWorkspace.cpp
 	src/ConvertToPointData.cpp
 	src/ConvertUnits.cpp
+	src/CopySample.cpp
 	src/CorrectKiKf.cpp
 	src/CorrectToFile.cpp
 	src/CreateCalFileByNames.cpp
@@ -144,7 +145,7 @@ set ( SRC_FILES
 	src/SumNeighbours.cpp
 	src/SumRowColumn.cpp
 	src/SumSpectra.cpp
-        src/TOFSANSResolution.cpp
+	src/TOFSANSResolution.cpp
 	src/Transpose.cpp
 	src/UnGroupWorkspaces.cpp
 	src/UnaryOperation.cpp
@@ -183,6 +184,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertToPointData.h
 	inc/MantidAlgorithms/ConvertUnits.h
+	inc/MantidAlgorithms/CopySample.h
 	inc/MantidAlgorithms/CorrectKiKf.h
 	inc/MantidAlgorithms/CorrectToFile.h
 	inc/MantidAlgorithms/CreateCalFileByNames.h
@@ -302,7 +304,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SumNeighbours.h
 	inc/MantidAlgorithms/SumRowColumn.h
 	inc/MantidAlgorithms/SumSpectra.h
-        inc/MantidAlgorithms/TOFSANSResolution.h
+	inc/MantidAlgorithms/TOFSANSResolution.h
 	inc/MantidAlgorithms/Transpose.h
 	inc/MantidAlgorithms/UnGroupWorkspaces.h
 	inc/MantidAlgorithms/UnaryOperation.h
@@ -340,6 +342,7 @@ set ( TEST_FILES
 	test/ConvertToMatrixWorkspaceTest.h
 	test/ConvertToPointDataTest.h
 	test/ConvertUnitsTest.h
+	test/CopySampleTest.h
 	test/CorrectKiKfTest.h
 	test/CorrectToFileTest.h
 	test/CreateCalFileByNamesTest.h
