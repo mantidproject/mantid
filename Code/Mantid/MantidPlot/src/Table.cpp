@@ -163,6 +163,11 @@ void Table::setTextFont(const QFont& fnt)
   d_table->setLeftMargin( lm );
 }
 
+const QFont & Table::getTextFont()
+{
+  return d_table->font();
+}
+
 void Table::setHeaderColor(const QColor& col)
 {
   d_table->horizontalHeader()->setPaletteForegroundColor (col);

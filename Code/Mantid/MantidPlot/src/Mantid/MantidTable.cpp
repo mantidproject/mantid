@@ -6,6 +6,7 @@
 
 #include <QMessageBox>
 #include <iostream>
+#include <qfontmetrics.h>
 
 using namespace MantidQt::API;
 
@@ -59,15 +60,33 @@ void MantidTable::fillTable()
     {
       setColPlotDesignation(i,Table::yErr);
     }
+
+    // Track the column width. All text should fit in.
+    int maxWidth = 60;
+    QFontMetrics fm( this->getTextFont() );
+    int thisWidth = fm.width(colName);
+    if (thisWidth > maxWidth) maxWidth = thisWidth;
+
     // Print out the data in each row of this column
     for(int j=0; j<m_ws->rowCount(); j++)
     {
       std::ostringstream ostr;
       // This is the method on the Column object to convert to a string.
       c->print(ostr,j);
-      setText(j,i,QString::fromStdString(ostr.str()));
+      QString qstr = QString::fromStdString(ostr.str());
+      setText(j,i,qstr);
+
+      // Measure the width
+      thisWidth = fm.width(qstr);
+      if (thisWidth > maxWidth) maxWidth = thisWidth;
       d_table->verticalHeader()->setLabel(j,QString::number(j));
     }
+
+    // A bit of padding
+    maxWidth += 10;
+    // Avoid crazy widths
+    if (maxWidth > 300) maxWidth = 300;
+    setColumnWidth(i, maxWidth);
   }
 
 }

@@ -332,6 +332,7 @@ public slots:
 	void setTextColor(const QColor& col);
 	void setHeaderColor(const QColor& col);
 	void setTextFont(const QFont& fnt);
+	const QFont & getTextFont();
 	void setHeaderFont(const QFont& fnt);
 
 	int verticalHeaderWidth(){return d_table->verticalHeader()->width();};
