@@ -90,7 +90,7 @@ public:
   }
 
 
-  void test_Find_UB_given_indexing() 
+  void test_Optimize_UB_given_indexing() 
   {  
      double h_vals[]  = {  1,  0,  0, -1,  0,  0, 1, 1 };
      double k_vals[]  = { .1,  1,  0,  0, -1,  0, 1, 2 };
@@ -121,7 +121,7 @@ public:
        hkl_list[row] = hkl;
      }
 
-     double sum_sq_error = IndexingUtils::Find_UB( UB, hkl_list, q_list );
+     double sum_sq_error = IndexingUtils::Optimize_UB( UB, hkl_list, q_list );
 
      std::vector<double> UB_returned = UB.get_vector();
 
@@ -132,7 +132,7 @@ public:
   }
 
   
-  void test_Find_Direction()
+  void test_Optimize_Direction()
   {
     std::vector<int> index_values;
     int correct_indices[] = { 1, 4, 2, 0, 1, 3, 0, -1, 0, -1, -2, -3 };
@@ -144,9 +144,9 @@ public:
     std::vector<V3D> q_vectors = getNatroliteQs();
 
     V3D best_vec;
-    double error = IndexingUtils::Find_Direction( best_vec, 
-                                                     index_values, 
-                                                     q_vectors );
+    double error = IndexingUtils::Optimize_Direction( best_vec, 
+                                                      index_values, 
+                                                      q_vectors );
     TS_ASSERT_DELTA( error, 0.00218606, 1e-5 );
     TS_ASSERT_DELTA( best_vec[0], -2.58222, 1e-4 );
     TS_ASSERT_DELTA( best_vec[1],  3.97345, 1e-4 );

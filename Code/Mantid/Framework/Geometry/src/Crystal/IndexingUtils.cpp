@@ -204,7 +204,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
       num_indexed = GetIndexedPeaks( UB, some_qs, required_tolerance,
                                      miller_ind, indexed_qs, fit_error );
       Matrix<double> temp_UB(3,3,false);
-      fit_error = Find_UB( temp_UB, miller_ind, indexed_qs );
+      fit_error = Optimize_UB( temp_UB, miller_ind, indexed_qs );
       UB = temp_UB;
     }
     catch (...)
@@ -220,7 +220,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
       num_indexed = GetIndexedPeaks( UB, q_vectors, required_tolerance,
                                      miller_ind, indexed_qs, fit_error );
       Matrix<double> temp_UB(3,3,false);
-      fit_error = Find_UB( temp_UB, miller_ind, indexed_qs );
+      fit_error = Optimize_UB( temp_UB, miller_ind, indexed_qs );
       UB = temp_UB;
     }
     catch (...)
@@ -238,11 +238,12 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 
 
 /** 
-  STATIC method Find_UB: Calculates the matrix that most nearly maps
+  STATIC method Optimize_UB: Calculates the matrix that most nearly maps
   the specified hkl_vectors to the specified q_vectors.  The calculated
   UB minimizes the sum squared differences between UB*(h,k,l) and the
   corresponding (qx,qy,qz) for all of the specified hkl and Q vectors.
-  The sum of the squares of the residual errors is returned.
+  The sum of the squares of the residual errors is returned.  This method is
+  used to optimize the UB matrix once an initial indexing has been found.
   
   @param  UB           3x3 matrix that will be set to the UB matrix
   @param  hkl_vectors  std::vector of V3D objects that contains the 
@@ -266,9 +267,9 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                                  the UB matrix can't be calculated or if 
                                  UB is a singular matrix.
 */  
-double IndexingUtils::Find_UB(      DblMatrix         & UB,
-                              const std::vector<V3D>  & hkl_vectors, 
-                              const std::vector<V3D>  & q_vectors )
+double IndexingUtils::Optimize_UB(      DblMatrix         & UB,
+                                  const std::vector<V3D>  & hkl_vectors, 
+                                  const std::vector<V3D>  & q_vectors )
 {
   if ( UB.numRows() != 3 || UB.numCols() != 3 )
   {
@@ -368,16 +369,16 @@ double IndexingUtils::Find_UB(      DblMatrix         & UB,
 
 
 /** 
-  STATIC method Find_Direction: Calculates the vector for which the
+  STATIC method Optimize_Direction: Calculates the vector for which the
   dot product of the the vector with each of the specified Qxyz vectors 
   is most nearly the corresponding integer index.  The calculated best_vec
   minimizes the sum squared differences between best_vec dot (qx,qy,z) 
   and the corresponding index for all of the specified Q vectors and 
   indices.  The sum of the squares of the residual errors is returned.
-  NOTE: This method is similar the Find_UB method, but this method only
+  NOTE: This method is similar the Optimize_UB method, but this method only
         optimizes the plane normal in one direction.  Also, this optimizes
         the mapping from (qx,qy,qz) to one index (Q to index), while the 
-        Find_UB method optimizes the mapping from three (h,k,l) to
+        Optimize_UB method optimizes the mapping from three (h,k,l) to
         (qx,qy,qz) (3 indices to Q).
   
   @param  best_vec     V3D vector that will be set to a vector whose 
@@ -402,9 +403,9 @@ double IndexingUtils::Find_UB(      DblMatrix         & UB,
                                  the best direction can't be calculated.
 */
 
-double IndexingUtils::Find_Direction(           V3D          & best_vec,
-                                     const std::vector<int>  & index_values,
-                                     const std::vector<V3D>  & q_vectors )
+double IndexingUtils::Optimize_Direction(          V3D          & best_vec,
+                                        const std::vector<int>  & index_values,
+                                        const std::vector<V3D>  & q_vectors )
 {
   if ( index_values.size() < 3 )
   {

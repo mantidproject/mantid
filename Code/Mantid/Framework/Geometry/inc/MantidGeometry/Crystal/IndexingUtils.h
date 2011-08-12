@@ -64,14 +64,14 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                double                     degrees_per_step );
 
   /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
-  static double Find_UB(Kernel::DblMatrix               & UB,
-                        const std::vector<Kernel::V3D>  & hkl_vectors, 
-                        const std::vector<Kernel::V3D>  & q_vectors   );
+  static double Optimize_UB(      Kernel::DblMatrix         & UB,
+                            const std::vector<Kernel::V3D>  & hkl_vectors, 
+                            const std::vector<Kernel::V3D>  & q_vectors   );
 
   /// Find the vector that best corresponds to plane normal, given 1-D indices
-  static double Find_Direction(      Kernel::V3D       & best_vec,
-                               const std::vector<int>  & index_values,
-                               const std::vector<Kernel::V3D>  & q_vectors );
+  static double Optimize_Direction(   Kernel::V3D               & best_vec,
+                                const std::vector<int>          & index_values,
+                                const std::vector<Kernel::V3D>  & q_vectors );
 
   /// Scan rotations to find UB that indexes peaks given lattice parameters
   static double ScanFor_UB(       Kernel::DblMatrix         & UB,
