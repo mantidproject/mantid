@@ -1,18 +1,17 @@
 #ifndef VTK_MDEW_HEXAHEDRON_FACTORY_TEST
 #define VTK_MDEW_HEXAHEDRON_FACTORY_TEST
 
-#include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
-#include "MantidVatesAPI/UserDefinedThresholdRange.h"
+#include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidVatesAPI/UserDefinedThresholdRange.h"
+#include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
 #include "MockObjects.h"
-
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <vtkCellData.h>
 #include <vtkDataArray.h>
 
@@ -55,7 +54,7 @@ public:
     vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
 
     IMDEventWorkspace* ws = NULL;
-    TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.", factory.initialize( Workspace_sptr(ws) ), std::runtime_error);
+    TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.", factory.initialize( Workspace_sptr(ws) ), std::invalid_argument);
   }
 
   void testInitalizeWithWrongWorkspaceTypeThrows()
@@ -69,9 +68,9 @@ public:
 
   /*Demonstrative tests*/
 
-  void testCreateDataSet()
+  void test_3DWorkspace()
   {
-    vtkMDEWHexahedronFactory::MDEventWorkspace3Lean_sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    Mantid::MDEvents::MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
     vtkDataSet* product = NULL;
@@ -98,8 +97,40 @@ public:
     TS_ASSERT_EQUALS(10, bounds[5]);
 
     product->Delete();
-
   }
+
+  void test_4DWorkspace()
+  {
+    Mantid::MDEvents::MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
+    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    factory.initialize(ws);
+    vtkDataSet* product = NULL;
+
+    TS_ASSERT_THROWS_NOTHING(product = factory.create());
+
+    const size_t expected_n_points = 8*125;
+    const size_t expected_n_cells = 125;
+    const size_t expected_n_signals = expected_n_cells;
+
+    TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points, product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells, product->GetNumberOfCells());
+    TSM_ASSERT_EQUALS("Wrong number of points to cells. Hexahedron has 8 vertexes.", expected_n_cells * 8,  product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
+    TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
+
+    /*Check dataset bounds*/
+    double* bounds = product->GetBounds();
+    TS_ASSERT_EQUALS(-10.0, bounds[0]);
+    TS_ASSERT_EQUALS(10, bounds[1]);
+    TS_ASSERT_EQUALS(-10, bounds[2]);
+    TS_ASSERT_EQUALS(10, bounds[3]);
+    TS_ASSERT_EQUALS(-10, bounds[4]);
+    TS_ASSERT_EQUALS(10, bounds[5]);
+
+    product->Delete();
+  }
+
+
 
   //TODO more tests
   //Check recurssion works properly.
@@ -115,20 +146,22 @@ class vtkMDEWHexahedronFactoryTestPerformance : public CxxTest::TestSuite
 
 private:
   
-  vtkMDEWHexahedronFactory::MDEventWorkspace3Lean_sptr m_ws;
+  Mantid::MDEvents::MDEventWorkspace3Lean::sptr m_ws3;
+  Mantid::MDEvents::MDEventWorkspace4Lean::sptr m_ws4;
 
 public :
 
   void setUp()
   {
-    m_ws = MDEventsTestHelper::makeMDEW<3>(100, 0.0, 100.0, 1);
+    m_ws3 = MDEventsTestHelper::makeMDEW<3>(100, 0.0, 100.0, 1);
+    m_ws4 = MDEventsTestHelper::makeMDEW<4>(32, -50.0, 50.0, 1);
   }
 
   /* Create 1E6 cells*/
-  void testCreateDataSet()
+  void test_CreateDataSet_from3D()
   {
     vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
-    factory.initialize(m_ws);
+    factory.initialize(m_ws3);
     vtkDataSet* product = NULL;
 
     TS_ASSERT_THROWS_NOTHING(product = factory.create());
@@ -155,6 +188,27 @@ public :
       TS_ASSERT_EQUALS(100, bounds[5]);
     }
 
+
+    product->Delete();
+  }
+  /* Create 1E6 cells*/
+  void test_CreateDataSet_from4D()
+  {
+    vtkMDEWHexahedronFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    factory.initialize(m_ws4);
+    vtkDataSet* product = NULL;
+
+    TS_ASSERT_THROWS_NOTHING(product = factory.create());
+
+    const size_t expected_n_points = 8*65536;
+    const size_t expected_n_cells = 65536;
+    const size_t expected_n_signals = expected_n_cells;
+
+    TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points, product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells, product->GetNumberOfCells());
+    TSM_ASSERT_EQUALS("Wrong number of points to cells. Hexahedron has 8 vertexes.", expected_n_cells * 8,  product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
+    TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
 
     product->Delete();
   }

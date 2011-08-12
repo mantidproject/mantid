@@ -1,10 +1,14 @@
 #ifndef MANTID_VATES_VTK_MDEW_HEXAHEDRON_FACTORY_H_
 #define MANTID_VATES_VTK_MDEW_HEXAHEDRON_FACTORY_H_
 
-#include "MantidVatesAPI/vtkDataSetFactory.h"
-#include "MantidVatesAPI/ThresholdRange.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidVatesAPI/ThresholdRange.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <boost/shared_ptr.hpp>
+
+using Mantid::MDEvents::MDEventWorkspace;
 
 namespace Mantid
 {
@@ -68,11 +72,11 @@ public:
   }
 
   virtual void setRecursionDepth(size_t depth);
-  
-  /// Typedef sptr to 3d event workspace.
-  typedef boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace3Lean> MDEventWorkspace3Lean_sptr;
 
 private:
+
+  template<typename MDE, size_t nd>
+  void doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const;
 
   /// Template Method pattern to validate the factory before use.
   virtual void validate() const;
@@ -84,10 +88,22 @@ private:
   const std::string m_scalarName;
 
   /// Member workspace to generate vtkdataset from.
-  MDEventWorkspace3Lean_sptr m_workspace;
+  Mantid::API::IMDEventWorkspace_sptr m_workspace;
 
   /// Maximum recursion depth to use.
   size_t m_maxDepth;
+
+  /// Data set that will be generated
+  mutable vtkDataSet * dataSet;
+
+  /// We are slicing down from > 3 dimensions
+  mutable bool slice;
+
+  /// Mask for choosing along which dimensions to slice
+  mutable bool * sliceMask;
+
+  /// Implicit function to define which boxes to render.
+  mutable Mantid::Geometry::MDImplicitFunction * sliceImplicitFunction;
 
 };
 

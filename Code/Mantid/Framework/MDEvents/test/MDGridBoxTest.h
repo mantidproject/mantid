@@ -467,6 +467,17 @@ public:
       TS_ASSERT( boxes[i]->getExtents(0).min <= 2.99);
     }
 
+    // ----- Infinitely thin plane for an implicit function ------------
+    function = new MDImplicitFunction;
+    coord_t normal3[1] = {-1};
+    coord_t origin3[1] = {1.51};
+    function->addPlane( MDPlane(1, normal, origin) );
+    function->addPlane( MDPlane(1, normal3, origin3) );
+
+    boxes.clear();
+    parent->getBoxes(boxes, 3, true, function);
+    TSM_ASSERT_EQUALS( "Only one box is found by an infinitely thin plane", boxes.size(), 1);
+
   }
 
 
@@ -512,6 +523,62 @@ public:
       TS_ASSERT( boxes[i]->getExtents(1).min <= 3.00);
     }
 
+  }
+
+
+
+  //-------------------------------------------------------------------------------------
+  /** Recursive getting of a list of IMDBox, with an implicit function limiting it.
+   * This implicit function is a box of size 0. */
+  void test_getBoxes_ZeroSizeImplicitFunction_2D()
+  {
+    MDGridBox<MDLeanEvent<2>,2> * parent = MDEventsTestHelper::makeRecursiveMDGridBox<2>(4,1);
+    TS_ASSERT(parent);
+    std::vector<IMDBox<MDLeanEvent<2>,2> *> boxes;
+
+    // Function of x,y with 0 width and height
+    std::vector<coord_t> min(2, 1.99);
+    std::vector<coord_t> max(2, 1.99);
+    MDImplicitFunction * function = new MDBoxImplicitFunction(min, max);
+
+    boxes.clear();
+    parent->getBoxes(boxes, 3, false, function);
+    // Returns 3 boxes: the big one with everything, the size 1 under, and the size 0.25 under that
+    TS_ASSERT_EQUALS( boxes.size(), 3);
+
+    // Leaf only: returns only one box
+    boxes.clear();
+    parent->getBoxes(boxes, 3, true, function);
+    TS_ASSERT_EQUALS( boxes.size(), 1);
+    TS_ASSERT_DELTA( boxes[0]->getExtents(0).min, 1.75, 1e-4);
+    TS_ASSERT_DELTA( boxes[0]->getExtents(0).max, 2.00, 1e-4);
+  }
+
+  //-------------------------------------------------------------------------------------
+  /** Recursive getting of a list of IMDBox, with an implicit function limiting it.
+   * This implicit function is a box of size 0. */
+  void test_getBoxes_ZeroSizeImplicitFunction_4D()
+  {
+    MDGridBox<MDLeanEvent<4>,4> * parent = MDEventsTestHelper::makeRecursiveMDGridBox<4>(4,1);
+    TS_ASSERT(parent);
+    std::vector<IMDBox<MDLeanEvent<4>,4> *> boxes;
+
+    // Function of x,y with 0 width and height
+    std::vector<coord_t> min(4, 1.99);
+    std::vector<coord_t> max(4, 1.99);
+    MDImplicitFunction * function = new MDBoxImplicitFunction(min, max);
+
+    boxes.clear();
+    parent->getBoxes(boxes, 3, false, function);
+    // Returns 3 boxes: the big one with everything, the size 1 under, and the size 0.25 under that
+    TS_ASSERT_EQUALS( boxes.size(), 3);
+
+    // Leaf only: returns only one box
+    boxes.clear();
+    parent->getBoxes(boxes, 3, true, function);
+    TS_ASSERT_EQUALS( boxes.size(), 1);
+    TS_ASSERT_DELTA( boxes[0]->getExtents(0).min, 1.75, 1e-4);
+    TS_ASSERT_DELTA( boxes[0]->getExtents(0).max, 2.00, 1e-4);
   }
 
 
