@@ -164,6 +164,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
       sorted_qs.push_back( q_vectors[i] );
   }
 
+  std::sort( sorted_qs.begin(), sorted_qs.end(), CompareMagnitude );
 
   if ( num_initial > sorted_qs.size() )
     num_initial = sorted_qs.size();

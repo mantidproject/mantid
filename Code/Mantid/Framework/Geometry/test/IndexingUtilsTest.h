@@ -56,33 +56,37 @@ public:
     double  alpha = 84;
     double  beta  = 71;
     double  gamma = 70;
-
-    double required_tolerance = 0.2;
-    int    base_index  = -1;
-    size_t num_initial =  3;
-    double degrees_per_step = 3;
-    
-    double error = IndexingUtils::Find_UB( UB, 
-                                           q_vectors, 
-                                           a, b, c, 
-                                           alpha, beta, gamma,
-                                           required_tolerance,
-                                           base_index,
-                                           num_initial,
-                                           degrees_per_step );
-
-    TS_ASSERT_DELTA( error, 0.00671575, 1e-5 );
-
-    std::vector<double> UB_returned = UB.get_vector();
-    for ( size_t i = 0; i < 9; i++ )
+                                           // test both default case(-1) and
+                                           // case with specified base index(0)
+    for ( int base_index = -1; base_index <1 ; base_index++ )
     {
-      TS_ASSERT_DELTA( UB_returned[i], correct_UB[i], 1e-5 );
-    }
+      std::cout << "Base Index = " << base_index << std::endl;
+      double required_tolerance = 0.2;
+      size_t num_initial = 3;
+      double degrees_per_step = 3;
+    
+      double error = IndexingUtils::Find_UB( UB, 
+                                             q_vectors, 
+                                             a, b, c, 
+                                             alpha, beta, gamma,
+                                             required_tolerance,
+                                             base_index,
+                                             num_initial,
+                                             degrees_per_step );
 
-    int num_indexed = IndexingUtils::NumberIndexed( UB, 
-                                                    q_vectors, 
-                                                    required_tolerance );
-    TS_ASSERT_EQUALS( num_indexed, 12 ); 
+      TS_ASSERT_DELTA( error, 0.00671575, 1e-5 );
+
+      std::vector<double> UB_returned = UB.get_vector();
+      for ( size_t i = 0; i < 9; i++ )
+      {
+        TS_ASSERT_DELTA( UB_returned[i], correct_UB[i], 1e-5 );
+      }
+
+      int num_indexed = IndexingUtils::NumberIndexed( UB, 
+                                                      q_vectors, 
+                                                      required_tolerance );
+      TS_ASSERT_EQUALS( num_indexed, 12 ); 
+    }
   }
 
 
