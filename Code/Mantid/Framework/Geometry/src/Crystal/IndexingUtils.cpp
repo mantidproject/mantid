@@ -672,6 +672,144 @@ double IndexingUtils::ScanFor_UB(      DblMatrix         & UB,
 
 
 /**
+   Get list of possible edge vectors for the real space unit cell.  This list
+   will consist of vectors, V, for which V dot Q is essentially an integer for
+   the most Q vectors.  The difference between V dot Q and an integer must be
+   less than the required tolerance for it to count as an integer.
+    @param  directions          Vector that will be filled with the directions
+                                that may correspond to unit cell edges.
+    @param  q_vectors           Vector of new Vector3D objects that contains 
+                                the list of q_vectors that are to be indexed.
+    @param  min_d               Lower bound on shortest unit cell edge length.
+                                This does not have to be specified exactly but
+                                must be strictly less than the smallest edge
+                                length, in Angstroms.
+    @param  max_d               Upper bound on longest unit cell edge length.
+                                This does not have to be specified exactly but
+                                must be strictly more than the longest edge
+                                length in angstroms.
+    @param  required_tolerance  The maximum allowed deviation of Miller indices
+                                from integer values for a peak to be indexed.
+    @param  degrees_per_step    The number of degrees between directions that
+                                are checked while scanning for an initial 
+                                indexing of the peaks with lowest |Q|.
+ */
+
+size_t IndexingUtils::ScanFor_Directions( std::vector<V3D>  & directions,   
+                                    const std::vector<V3D>  & q_vectors,
+                                          double min_d,
+                                          double max_d,
+                                          double required_tolerance,
+                                          double degrees_per_step )
+{
+  double error;
+  double fit_error;
+  double dot_prod;
+  int    nearest_int;
+  int    max_indexed = 0;
+  V3D    q_vec;
+                           // first, make hemisphere of possible directions 
+                           // with specified resolution.
+  int    num_steps   = round( 90.0 / degrees_per_step );
+  std::vector<V3D> full_list = MakeHemisphereDirections( num_steps );
+                           // Now, look for possible real-space unit cell edges
+                           // by checking for vectors with length between 
+                           // min_d and max_d that would index the most peaks,
+                           // in some direction, keeping the shortest vector
+                           // for each direction where the max peaks are indexed
+  double delta_d = 0.1f;
+  int    n_steps = round( 1 +(max_d - min_d)/delta_d );
+
+  std::vector<V3D> selected_dirs;
+  V3D         dir_temp;
+
+  for ( size_t dir_num = 0; dir_num < full_list.size(); dir_num++ )
+  {
+    V3D current_dir = full_list[ dir_num ];
+
+    for ( int step = 0; step <= n_steps; step++ )
+    {
+      dir_temp = current_dir;
+      dir_temp *= ( min_d + step * delta_d );    // increasing size
+
+      int num_indexed = 0;
+      for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
+      {
+        q_vec = q_vectors[ q_num ];
+        dot_prod = dir_temp.scalar_prod( q_vec );
+        nearest_int = round( dot_prod );
+        error = fabs( dot_prod - nearest_int );
+        if ( error <= required_tolerance )
+          num_indexed++;
+      }
+
+      if ( num_indexed > max_indexed )     // only keep those directions that
+      {                                    // index the max number of peaks
+        selected_dirs.clear();
+        max_indexed = num_indexed;
+      }
+      if ( num_indexed >= max_indexed )
+      {
+        selected_dirs.push_back( V3D( dir_temp ) );
+      }
+    }
+  }
+                           // Now, optimize each direction and discard possible
+                           // unit cell edges that are duplicates, putting the
+                           // new smaller list in the vector "directions"
+  std::vector<int> index_vals;
+  std::vector<V3D> indexed_qs;
+  directions.clear();
+  V3D current_dir;
+  V3D diff;
+  for ( size_t dir_num = 0; dir_num < selected_dirs.size(); dir_num++ )
+  {
+    current_dir = selected_dirs[ dir_num ];
+
+    GetIndexedPeaks_1D( current_dir,
+                        q_vectors,
+                        required_tolerance,
+                        index_vals,
+                        indexed_qs,
+                        fit_error  );
+
+    Optimize_Direction( current_dir, index_vals, indexed_qs );
+
+    double length = current_dir.norm();
+    if ( length >= min_d && length <= max_d )   // only keep if within range
+    {
+      bool duplicate = false;
+      for ( size_t i = 0; i < directions.size(); i++ )
+      {
+        dir_temp = directions[i];
+        diff = current_dir - dir_temp;        
+                                                // discard same direction  
+        if ( diff.norm() < 0.001 )
+        {
+          duplicate = true;
+        }
+        else
+        { 
+          diff = current_dir + dir_temp;
+                                                // discard opposite direction 
+          if ( diff.norm() < 0.001 ) 
+          {
+            duplicate = true;
+          }
+        }
+      }
+      if (!duplicate)
+      {
+        directions.push_back( current_dir );
+      }
+    }
+  }
+  return max_indexed;
+}
+
+
+
+/**
     For a rotated unit cell, calculate the vector in the direction of edge
     "c" given two vectors a_dir and b_dir in the directions of edges "a" 
     and "b", with lengths a and b, and the cell angles.  The calculation is

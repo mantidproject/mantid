@@ -60,7 +60,6 @@ public:
                                            // case with specified base index(0)
     for ( int base_index = -1; base_index <1 ; base_index++ )
     {
-      std::cout << "Base Index = " << base_index << std::endl;
       double required_tolerance = 0.2;
       size_t num_initial = 3;
       double degrees_per_step = 3;
@@ -185,6 +184,40 @@ public:
     {
       TS_ASSERT_DELTA( UB_returned[i], correct_UB[i], 1e-5 );
     }
+  }
+
+
+  void test_ScanFor_Directions()
+  {
+    double vectors[5][3] = { {  0.08445961, 9.26951000,  3.4138980 },
+                             { -2.58222370, 3.97345330, -4.5514464 },
+                             {  2.66668320, 5.29605670,  7.9653444 },
+                             {  7.01297300, 3.23755380, -5.8988633 },
+                             { -9.59519700, 0.73589927,  1.3474168 }  };
+
+    std::vector<V3D> directions;
+    std::vector<V3D> q_vectors = getNatroliteQs();
+    double d_min = 6;
+    double d_max = 10;
+    double degrees_per_step = 1.0;
+    double required_tolerance = 0.12;
+
+    IndexingUtils::ScanFor_Directions( directions,
+                                       q_vectors,
+                                       d_min, d_max,
+                                       required_tolerance,
+                                       degrees_per_step );
+
+    TS_ASSERT_EQUALS( 5, directions.size() );
+
+    for ( size_t i = 0; i < 3; i++ )
+    {
+       V3D vec = directions[i];
+       for ( int j = 0; j < 3; j++ )
+       {
+         TS_ASSERT_DELTA( vectors[i][j], vec[j], 1.e-5 );
+       }
+     }
   }
 
 

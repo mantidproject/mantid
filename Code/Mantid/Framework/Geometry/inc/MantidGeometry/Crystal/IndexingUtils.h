@@ -81,6 +81,15 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                   double degrees_per_step,
                                   double required_tolerance );
 
+  /// Get list of possible directions and lengths for real space unit cell
+  static size_t ScanFor_Directions( std::vector<Kernel::V3D>  & directions,
+                              const std::vector<Kernel::V3D>  & q_vectors,
+                                    double min_d,
+                                    double max_d,
+                                    double required_tolerance,
+                                    double degrees_per_step   );
+  
+
   /// Get the vector in the direction of "c" given other unit cell information
   static Kernel::V3D Make_c_dir( const Kernel::V3D  & a_dir,
                                  const Kernel::V3D  & b_dir,
