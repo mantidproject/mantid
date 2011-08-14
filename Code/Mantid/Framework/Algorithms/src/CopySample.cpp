@@ -102,7 +102,7 @@ namespace Algorithms
     if (outMDWS != NULL)
     {
       int outputSampleNumber=getProperty("MDOutputSampleNumber");
-      if ((outputSampleNumber!=EMPTY_INT()) || (outputSampleNumber<0)) //copy to all samples
+      if ((outputSampleNumber==EMPTY_INT()) || (outputSampleNumber<0)) //copy to all samples
       {
         for(uint16_t i=0;i<outMDWS->getNumExperimentInfo();i++)
         copyParameters(sample,outMDWS->getExperimentInfo(i)->mutableSample(),copyName,copyMaterial,copyEnvironment,copyShape,copyLattice);

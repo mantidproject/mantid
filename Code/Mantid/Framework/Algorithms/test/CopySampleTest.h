@@ -17,12 +17,17 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
 
+#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
+
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using namespace Mantid::MDEvents;
 
 class CopySampleTest : public CxxTest::TestSuite
 {
@@ -167,6 +172,94 @@ public:
   }
   void test_MDcopy()
   {
+    IMDEventWorkspace_sptr ew(new MDEventWorkspace<MDEvent<3>, 3>());
+    TS_ASSERT_EQUALS( ew->getNumExperimentInfo(), 0);
+    ExperimentInfo_sptr ei(new ExperimentInfo);
+    ExperimentInfo_sptr ei1(new ExperimentInfo);
+    Sample s=createsample();
+    Sample s1;
+    s1.setOrientedLattice(new OrientedLattice(6.0,7.0,8.0, 90, 90, 90));
+    s1.setName("newsample");
+    ei->mutableSample()=s;
+    TS_ASSERT_EQUALS( ew->addExperimentInfo(ei), 0);
+    TS_ASSERT_EQUALS( ew->addExperimentInfo(ei), 1);
+    ei1->mutableSample()=s1;
+    TS_ASSERT_EQUALS( ew->addExperimentInfo(ei1), 2);
+    TS_ASSERT_EQUALS( ew->getNumExperimentInfo(), 3);
+    TS_ASSERT_EQUALS(ew->getExperimentInfo(1)->sample().getOrientedLattice().c(),3);
+    TS_ASSERT_EQUALS(ew->getExperimentInfo(2)->sample().getOrientedLattice().c(),8);
+
+    IMDEventWorkspace_sptr ewout(new MDEventWorkspace<MDEvent<3>, 3>());
+    ExperimentInfo_sptr eiout0(new ExperimentInfo);
+    eiout0->mutableSample()=s;
+    ExperimentInfo_sptr eiout1(new ExperimentInfo);
+    ExperimentInfo_sptr eiout2(new ExperimentInfo);
+    ExperimentInfo_sptr eiout3(new ExperimentInfo);
+    TS_ASSERT_EQUALS( ewout->addExperimentInfo(eiout0), 0);
+    TS_ASSERT_EQUALS( ewout->addExperimentInfo(eiout1), 1);
+    TS_ASSERT_EQUALS( ewout->addExperimentInfo(eiout2), 2);
+    TS_ASSERT_EQUALS( ewout->addExperimentInfo(eiout3), 3);
+    TS_ASSERT(ewout->getExperimentInfo(0)->sample().hasOrientedLattice());
+    TS_ASSERT(!ewout->getExperimentInfo(1)->sample().hasOrientedLattice());
+    TS_ASSERT(!ewout->getExperimentInfo(2)->sample().hasOrientedLattice());
+    TS_ASSERT(!ewout->getExperimentInfo(3)->sample().hasOrientedLattice());
+
+    //run algorithm twice: set all samples to s1, then set sample in last experiment info to s
+    std::string inWSName("CopySampleTest_InputWS");
+    std::string outWSName("CopySampleTest_OutputWS");
+    AnalysisDataService::Instance().add(inWSName, ew);
+    AnalysisDataService::Instance().add(outWSName, ewout);
+    CopySample alg,alg1;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", inWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CopyName", "1") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CopyMaterial", "0") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CopyEnvironment", "0") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CopyShape", "0") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CopyLattice", "1") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("MDInputSampleNumber", "2") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("MDOutputSampleNumber", "-1") );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    TS_ASSERT_THROWS_NOTHING( alg1.initialize() )
+    TS_ASSERT( alg1.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("InputWorkspace", inWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("CopyName", "1") );
+    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("CopyMaterial", "0") );
+    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("CopyEnvironment", "0") );
+    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("CopyShape", "0") );
+    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("CopyLattice", "1") );
+    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("MDInputSampleNumber", "0") );
+    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("MDOutputSampleNumber", "3") );
+    TS_ASSERT_THROWS_NOTHING( alg1.execute(); );
+    TS_ASSERT( alg1.isExecuted() );
+
+    // Retrieve the workspace from data service.
+    IMDEventWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT(ws);
+    if (!ws) return;
+
+    // test output
+    TS_ASSERT(ws->getExperimentInfo(0)->sample().hasOrientedLattice());
+    TS_ASSERT(ws->getExperimentInfo(1)->sample().hasOrientedLattice());
+    TS_ASSERT(ws->getExperimentInfo(2)->sample().hasOrientedLattice());
+    TS_ASSERT(ws->getExperimentInfo(3)->sample().hasOrientedLattice());
+    TS_ASSERT_EQUALS(ws->getExperimentInfo(0)->sample().getOrientedLattice().a(),6);
+    TS_ASSERT_EQUALS(ws->getExperimentInfo(1)->sample().getOrientedLattice().c(),8);
+    TS_ASSERT_EQUALS(ws->getExperimentInfo(2)->sample().getOrientedLattice().c(),8);
+    TS_ASSERT_EQUALS(ws->getExperimentInfo(3)->sample().getOrientedLattice().c(),3);
+    TS_ASSERT_EQUALS(ws->getExperimentInfo(0)->sample().getName(),"newsample");
+    TS_ASSERT_EQUALS(ws->getExperimentInfo(1)->sample().getName(),"newsample");
+    TS_ASSERT_EQUALS(ws->getExperimentInfo(2)->sample().getName(),"newsample");
+    TS_ASSERT_EQUALS(ws->getExperimentInfo(3)->sample().getName(),"test");
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(inWSName);
+    AnalysisDataService::Instance().remove(outWSName);
   }
 
 

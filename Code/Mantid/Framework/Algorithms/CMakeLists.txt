@@ -504,7 +504,7 @@ if ( CXXTEST_FOUND )
   configure_file ( test/PlusMinusTest.in.h      test/MinusTest.h)
   
   # Make the rest of the tests
-  include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc )
+  include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc ../MDEvents/inc)
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
   target_link_libraries ( AlgorithmsTest Algorithms CurveFitting DataHandling Nexus TestHelpers )
   add_dependencies ( FrameworkTests AlgorithmsTest )
