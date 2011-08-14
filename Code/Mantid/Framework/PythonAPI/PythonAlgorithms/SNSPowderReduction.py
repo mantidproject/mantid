@@ -256,8 +256,12 @@ class SNSPowderReduction(PythonAlgorithm):
             return self._loadHistoNeXusData(runnumber, extension)
         elif "and" in extension:
             wksp0 = self._loadPreNeXusData(runnumber, "_neutron0_event.dat")
+            RenameWorkspace(InputWorkspace=wksp0,OutputWorkspace="tmp")
             wksp1 = self._loadPreNeXusData(runnumber, "_neutron1_event.dat")
-            return wksp0 + wksp1;
+            Plus(LHSWorkspace=wksp1, RHSWorkspace="tmp",OutputWorkspace=wksp1)
+            wksp1.getRun()['gd_prtn_chrg'] = wksp1.getRun()['gd_prtn_chrg'].value/2
+            mtd.deleteWorkspace("tmp")
+            return wksp1;
         else:
             return self._loadPreNeXusData(runnumber, extension)
 
