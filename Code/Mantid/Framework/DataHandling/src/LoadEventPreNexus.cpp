@@ -220,6 +220,10 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp)
   if (temp.empty())
     return "";
   string mapping = temp[0];
+  // Try to get it from the working directory
+  Poco::File localmap(mapping);
+  if (localmap.exists())
+    return mapping;
 
   // Try to get it from the data directories
   string dataversion = Mantid::API::FileFinder::Instance().getFullPath(mapping);
@@ -229,8 +233,14 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp)
   // get a list of all proposal directories
   string instrument = wksp->getInstrument()->getName();
   Poco::File base("/SNS/" + instrument + "/");
+  // try short instrument name
   if (!base.exists())
-    return "";
+  {
+    instrument = Kernel::ConfigService::Instance().getInstrument(instrument).shortName();
+    base = "/SNS/" + instrument + "/";
+    if (!base.exists())
+      return "";
+  }
   vector<string> dirs; // poco won't let me reuse temp
   base.list(dirs);
 
