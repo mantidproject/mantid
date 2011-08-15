@@ -81,7 +81,10 @@ def write_factory(f):
             eventType = "%s<%d>" % (mdevent_type, nd)
             f.write(factory_lines % (nd,eventType,nd,eventType,nd) )
         f.write(factory_bottom)
-    f.write("\n}\n")
+    # Throw for an invalid event type
+    f.write('  // Unknown event type\n')
+    f.write('  throw std::invalid_argument("Unknown event type passed to CreateMDEventWorkspace.");\n')
+    f.write("}\n")
         
 
 
