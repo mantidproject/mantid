@@ -39,7 +39,7 @@ public:
   }
 
 
-  void test_Constructor()
+  void test_constructor()
   {
     MDEventWorkspace<MDLeanEvent<3>, 3> ew3;
     TS_ASSERT_EQUALS( ew3.getNumDims(), 3);
@@ -56,7 +56,7 @@ public:
     TS_ASSERT_EQUALS( ew3b.id(), "MDEventWorkspace<MDEvent,3>");
   }
 
-  void test_Constructor_IMDEventWorkspace()
+  void test_constructor_IMDEventWorkspace()
   {
     IMDEventWorkspace * ew3 = new MDEventWorkspace<MDLeanEvent<3>, 3>();
     TS_ASSERT_EQUALS( ew3->getNumDims(), 3);
@@ -78,13 +78,32 @@ public:
     TS_ASSERT_EQUALS( ew3->getExperimentInfo(0), ei2);
   }
 
+  void test_copy_constructor()
+  {
+    MDEventWorkspace<MDLeanEvent<3>, 3> ew3;
+    for (size_t i=0; i<3; i++)
+      ew3.addDimension( MDHistoDimension_sptr(new MDHistoDimension("x","x","m",-1,1,0)) );
+    ew3.initialize();
+    ew3.addEvent( MDLeanEvent<3>(1.23, 4.56) );
+    ExperimentInfo_sptr ei(new ExperimentInfo);
+    TS_ASSERT_EQUALS( ew3.addExperimentInfo(ei), 0);
+
+    MDEventWorkspace<MDLeanEvent<3>, 3> copy(ew3);
+    TS_ASSERT( !copy.isGridBox());
+    TS_ASSERT_EQUALS( copy.getNumDims(), 3);
+    TS_ASSERT_EQUALS( copy.getDimension(0)->getName(), "x");
+    TS_ASSERT_EQUALS( copy.getNumExperimentInfo(), 1);
+    TSM_ASSERT_DIFFERS( "ExperimentInfo's were deep-copied", copy.getExperimentInfo(0), ew3.getExperimentInfo(0));
+    TSM_ASSERT_DIFFERS( "BoxController was deep-copied", copy.getBoxController(), ew3.getBoxController());
+  }
+
   void test_initialize_throws()
   {
     IMDEventWorkspace * ew = new MDEventWorkspace<MDLeanEvent<3>, 3>();
     TS_ASSERT_THROWS( ew->initialize(), std::runtime_error);
     for (size_t i=0; i<5; i++)
-      ew->addDimension( MDHistoDimension_sptr(new MDHistoDimension("x","x","m",-1,1,0)) );
-    TS_ASSERT_THROWS( ew->initialize(), std::runtime_error);
+          ew->addDimension( MDHistoDimension_sptr(new MDHistoDimension("x","x","m",-1,1,0)) );
+        TS_ASSERT_THROWS( ew->initialize(), std::runtime_error);
     delete ew;
   }
 

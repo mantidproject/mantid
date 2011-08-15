@@ -28,6 +28,8 @@ namespace API
   class MANTID_API_DLL IMDEventWorkspace  : public API::Workspace
   {
   public:
+    IMDEventWorkspace();
+    IMDEventWorkspace(const IMDEventWorkspace & other);
 
     /// Perform initialization after dimensions (and others) have been set.
     virtual void initialize() = 0;

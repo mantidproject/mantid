@@ -99,6 +99,8 @@ namespace MDEvents
     else
     {
       // Perform the clone in memory.
+      boost::shared_ptr<MDEventWorkspace<MDE,nd> > outWS(new MDEventWorkspace<MDE,nd>(*ws));
+      this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS) );
     }
   }
 

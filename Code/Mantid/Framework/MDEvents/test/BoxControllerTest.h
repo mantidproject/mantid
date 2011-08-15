@@ -181,6 +181,18 @@ public:
     compareBoxControllers(a, b);
   }
 
+  void test_copy_constructor()
+  {
+    BoxController a(2);
+    a.setMaxDepth(4);
+    a.setSplitInto(10);
+    a.setMaxDepth(10);
+    a.setMaxId(123456);
+    BoxController b(a);
+    // Check that it is the same
+    compareBoxControllers(a, b);
+  }
+
   void test_MRU_access()
   {
     BoxController a(2);

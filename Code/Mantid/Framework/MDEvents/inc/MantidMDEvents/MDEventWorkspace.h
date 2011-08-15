@@ -38,6 +38,7 @@ namespace MDEvents
   {
   public:
     MDEventWorkspace();
+    MDEventWorkspace(const MDEventWorkspace<MDE,nd> & other);
     virtual ~MDEventWorkspace();
 
     /// Perform initialization after dimensions (and others) have been set.

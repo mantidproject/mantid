@@ -11,6 +11,28 @@ namespace API
 {
 
   //-----------------------------------------------------------------------------------------------
+  /** Empty constructor */
+  IMDEventWorkspace::IMDEventWorkspace()
+  : Workspace(),
+    dimensions()
+  {
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Copy constructor */
+  IMDEventWorkspace::IMDEventWorkspace(const IMDEventWorkspace & other)
+  : Workspace(other),
+    dimensions(other.dimensions)
+  {
+    // Do a deep copy
+    for (size_t i=0; i<other.m_expInfos.size(); i++)
+    {
+      ExperimentInfo_sptr copy(new ExperimentInfo(*other.m_expInfos[i]));
+      m_expInfos.push_back(copy);
+    }
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Add a new dimension
    *
    * @param dimInfo :: IMDDimension object which will be copied into the workspace

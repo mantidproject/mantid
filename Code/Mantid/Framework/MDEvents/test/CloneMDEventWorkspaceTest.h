@@ -26,12 +26,12 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void xtest_exec_InMemory()
+  void test_exec_InMemory()
   {
     do_test(false);
   }
 
-  void xtest_exec_FileBacked()
+  void test_exec_FileBacked()
   {
     do_test(true);
   }
@@ -50,10 +50,11 @@ public:
         "InputWorkspace", "CloneMDEventWorkspaceTest_ws", "UniformParams", "10000", "RandomizeSignal", "1");
     if (fileBacked)
     {
-      AlgorithmHelper::runAlgorithm("SaveMDEW", 4,
+      IAlgorithm_sptr saver = AlgorithmHelper::runAlgorithm("SaveMDEW", 4,
           "InputWorkspace", "CloneMDEventWorkspaceTest_ws", "Filename", "CloneMDEventWorkspaceTest_ws.nxs");
       AlgorithmHelper::runAlgorithm("LoadMDEW", 8,
-          "OutputWorkspace", "CloneMDEventWorkspaceTest_ws", "Filename", "CloneMDEventWorkspaceTest_ws.nxs",
+          "OutputWorkspace", "CloneMDEventWorkspaceTest_ws",
+          "Filename", saver->getPropertyValue("Filename").c_str(),
           "FileBackEnd", "1", "Memory", "0");
     }
 

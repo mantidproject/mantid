@@ -45,6 +45,8 @@ namespace MDEvents
       resetNumBoxes();
     }
 
+    BoxController(const BoxController & other );
+
     ~BoxController();
 
     /// Serialize

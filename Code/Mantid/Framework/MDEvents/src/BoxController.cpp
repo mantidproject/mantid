@@ -23,6 +23,25 @@ namespace Mantid
 namespace MDEvents
 {
 
+  //-----------------------------------------------------------------------------------
+  /** Copy constructor
+   */
+  BoxController::BoxController(const BoxController & other)
+  : nd(other.nd), m_maxId(other.m_maxId),
+    m_SplitThreshold(other.m_SplitThreshold),
+    m_maxDepth(other.m_maxDepth), m_splitInto(other.m_splitInto),
+    m_numSplit(other.m_numSplit),
+    m_addingEvents_eventsPerTask(other.m_addingEvents_eventsPerTask),
+    m_addingEvents_numTasksPerBlock(other.m_addingEvents_numTasksPerBlock),
+    m_numMDBoxes(other.m_numMDBoxes),
+    m_numMDGridBoxes(other.m_numMDGridBoxes),
+    m_maxNumMDBoxes(other.m_maxNumMDBoxes),
+    m_filename(other.m_filename),
+    m_file(other.m_file),
+    m_bytesPerEvent(other.m_bytesPerEvent)
+  {
+  }
+
   /// Destructor
   BoxController::~BoxController()
   {
