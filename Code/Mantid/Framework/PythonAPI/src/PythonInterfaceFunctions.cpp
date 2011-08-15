@@ -37,6 +37,7 @@ void handlePythonError(const bool with_trace)
     boost::python::throw_error_already_set();
     return;
   }
+
   PyObject *exception(NULL), *value(NULL), *traceback(NULL);
   PyErr_Fetch(&exception, &value, &traceback);
   PyErr_NormalizeException(&exception, &value, &traceback);
@@ -54,6 +55,15 @@ void handlePythonError(const bool with_trace)
   if (with_trace)
     tracebackToMsg(msg, (PyTracebackObject *)(traceback));
 
+  // Ensure we decrement the reference count on the traceback and exception 
+  // objects as they hold references to local the stack variables that were
+  // present when the exception was raised. This could include child algorithms
+  // with workspaces stored that would not otherwise be cleaned up until the
+  // program exited.
+  Py_XDECREF(exception);
+  Py_XDECREF(value);
+  Py_XDECREF(traceback);
+  // Raise this error as a C++ error
   throw std::runtime_error(msg.str());
 }
 
