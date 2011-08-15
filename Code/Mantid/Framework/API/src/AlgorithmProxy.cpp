@@ -210,9 +210,16 @@ namespace Mantid
       createConcreteAlg();
       // Call Algorithm::executeAsyncImpl rather than executeAsync() because the latter
       // would spawn off another (3rd) thread which is unecessary.
-      m_alg->executeAsyncImpl(dummy); // Pass through dummy argument, though not used
+      try
+      {
+        m_alg->executeAsyncImpl(dummy); // Pass through dummy argument, though not used
+      }
+      catch(...)
+      {
+        m_alg.reset(); // Release the concrete algorithm instance
+        throw;
+      }
       stopped();
-
       return m_isExecuted;
     }
     ///setting the child start progress
