@@ -31,7 +31,7 @@ public:
     do_test(false);
   }
 
-  void test_exec_FileBacked()
+  void xtest_exec_FileBacked()
   {
     do_test(true);
   }
