@@ -244,10 +244,8 @@ namespace Kernel
     }
 
     // Exchange with the new map you built out of the not-written blocks.
-    m_mruMutex.lock();
     m_toWrite.swap(couldNotWrite);
     m_memoryToWrite = memoryNotWritten;
-    m_mruMutex.unlock();
   }
 
 
@@ -273,10 +271,10 @@ namespace Kernel
       m_memoryToWrite += thisMem;
       m_memoryUsed -= thisMem;
     }
-    m_mruMutex.unlock();
 
     // Now write everything out.
     writeOldObjects();
+    m_mruMutex.unlock();
   }
 
   //---------------------------------------------------------------------------------------------
