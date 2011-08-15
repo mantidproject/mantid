@@ -85,7 +85,7 @@ namespace MDEvents
       g_log.information() << "File copied successfully." << std::endl;
 
       // Now load it back
-      IAlgorithm_sptr alg = createSubAlgorithm("LoadMDEW", 0.5, 1.0, true);
+      IAlgorithm_sptr alg = createSubAlgorithm("LoadMDEW", 0.5, 1.0, false);
       alg->setPropertyValue("Filename", path.toString());
       alg->setPropertyValue("FileBackEnd", "1");
       alg->setPropertyValue("Memory", "0"); //TODO: How much memory?

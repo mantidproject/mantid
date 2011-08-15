@@ -57,9 +57,12 @@ namespace MDEvents
 
     /// Returns the BoxController used in this workspace
     BoxController_sptr getBoxController()
-    {
-      return m_BoxController;
-    }
+    { return m_BoxController; }
+
+    /// @return true if the workspace is file-backed
+    virtual bool isFileBacked() const
+    { return m_BoxController->isFileBacked(); }
+
 
     virtual std::vector<std::string> getBoxControllerStats() const;
 

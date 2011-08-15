@@ -122,7 +122,6 @@ namespace MDEvents
     bool FileBackEnd = getProperty("FileBackEnd");
 
     CPUTimer tim;
-    bool verbose=true;
     Progress * prog = new Progress(this, 0.0, 1.0, 100);
 
     prog->report("Opening file.");
@@ -147,7 +146,7 @@ namespace MDEvents
       ws->addDimension(dim);
     }
 
-    if (verbose) std::cout << tim << " to load the dimensions, etc." << std::endl;
+    g_log.debug() << tim << " to load the dimensions, etc." << std::endl;
 
     // ----------------------------------------- Box Structure ------------------------------
     file->openGroup("box_structure", "NXdata");
@@ -174,7 +173,7 @@ namespace MDEvents
     // Start/end children IDs
     std::vector<int> box_children;
 
-    if (verbose) std::cout << tim << " to initialize the box data vectors." << std::endl;
+    g_log.debug() << tim << " to initialize the box data vectors." << std::endl;
     prog->report("Reading Box Data");
 
     // Read all the data blocks
@@ -189,7 +188,7 @@ namespace MDEvents
     size_t numBoxes = boxType.size();
     if (numBoxes == 0) throw std::runtime_error("Zero boxes found. There must have been an error reading or writing the file.");
 
-    if (verbose) std::cout << tim << " to read all the box data vectors. There are " << numBoxes << " boxes." << std::endl;
+    g_log.debug() << tim << " to read all the box data vectors. There are " << numBoxes << " boxes." << std::endl;
 
     // Check all vector lengths match
     if (depth.size() != numBoxes) throw std::runtime_error("Incompatible size for data: depth.");
@@ -326,7 +325,7 @@ namespace MDEvents
       bc->setFile(NULL, "", 0);
     }
 
-    if (verbose) std::cout << tim << " to create all the boxes and fill them with events." << std::endl;
+    g_log.debug() << tim << " to create all the boxes and fill them with events." << std::endl;
 
     // Go again, giving the children to the parents
     for (size_t i=0; i<numBoxes; i++)
@@ -339,7 +338,7 @@ namespace MDEvents
       }
     }
 
-    if (verbose) std::cout << tim << " to give all the children to the boxes." << std::endl;
+    g_log.debug() << tim << " to give all the children to the boxes." << std::endl;
 
     // Box of ID 0 is the head box.
     ws->setBox( boxes[0] );
@@ -348,9 +347,9 @@ namespace MDEvents
 
     // Refresh cache
     ws->refreshCache();
-    if (verbose) std::cout << tim << " to refreshCache(). " << ws->getNPoints() << " points after refresh." << std::endl;
+    g_log.debug() << tim << " to refreshCache(). " << ws->getNPoints() << " points after refresh." << std::endl;
 
-    if (verbose) std::cout << tim << " to finish up." << std::endl;
+    g_log.debug() << tim << " to finish up." << std::endl;
     delete prog;
   }
 

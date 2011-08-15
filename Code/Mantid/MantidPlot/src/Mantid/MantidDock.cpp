@@ -769,7 +769,7 @@ void MantidDockWidget::addMDEventWorspaceMenuItems(QMenu *menu, Mantid::API::IMD
   //menu->addAction(m_showInst); // Show instrument
   //menu->addAction(m_plotSpec); // Plot spectra
   //menu->addAction(m_colorFill);
-  menu->addAction(m_showLogs); // Sample logs
+  //menu->addAction(m_showLogs); // Sample logs
   menu->addAction(m_showHist);
   //menu->addAction(m_saveNexus);
 }

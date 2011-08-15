@@ -52,6 +52,9 @@ namespace API
     /// Returns some information about the box controller, to be displayed in the GUI, for example
     virtual std::vector<std::string> getBoxControllerStats() const = 0;
 
+    /// @return true if the workspace is file-backed
+    virtual bool isFileBacked() const = 0;
+
     /// Get the dimension index, searching by name
     virtual size_t getDimensionIndexByName(const std::string & name) const;
 

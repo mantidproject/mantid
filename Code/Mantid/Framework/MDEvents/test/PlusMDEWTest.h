@@ -8,6 +8,8 @@
 #include <iomanip>
 
 #include "MantidMDEvents/PlusMDEW.h"
+#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -25,31 +27,74 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void xtest_exec()
+  void do_test(bool lhs_file, bool rhs_file, int inPlace)
   {
-    // Name of the output workspace.
-    std::string outWSName("PlusMDEWTest_OutputWS");
+    // Make two input workspaces
+    MDEventWorkspace3Lean::sptr lhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDEWTest_lhs", lhs_file);
+    MDEventWorkspace3Lean::sptr rhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDEWTest_rhs", rhs_file);
+    std::string outWSName = "PlusMDEWTest_out";
+    if (inPlace == 1)
+      outWSName = "PlusMDEWTest_lhs";
+    else if (inPlace == 2)
+      outWSName = "PlusMDEWTest_rhs";
   
     PlusMDEW alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("LHSWorkspace", "PlusMDEWTest_lhs") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("RHSWorkspace", "PlusMDEWTest_rhs") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     
-    // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
-    TS_ASSERT(ws);
-    if (!ws) return;
+    // Retrieve the workspace from data service.
+    MDEventWorkspace3Lean::sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT(ws); if (!ws) return;
     
-    // TODO: Check the results
+    // Check the results
+    if (inPlace == 1)
+      { TS_ASSERT( ws == lhs); }
+    else if (inPlace == 2)
+      { TS_ASSERT( ws == rhs); }
     
+    if ((lhs_file || rhs_file) && !((inPlace==1) && !lhs_file && rhs_file))
+      { TSM_ASSERT( "If either input WS is file backed, then the output should be too.", ws->getBoxController()->isFileBacked() ); }
+    TS_ASSERT_EQUALS( ws->getNPoints(), 20000);
+
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
   
+  void test_mem_plus_mem()
+  { do_test(false, false, 0); }
+
+  void test_mem_plus_mem_inPlace()
+  { do_test(false, false, 1); }
+
+  void test_mem_plus_mem_inPlace_ofRHS()
+  { do_test(false, false, 2); }
+
+  void test_file_plus_mem()
+  { do_test(true, false, 0); }
+
+  void test_file_plus_mem_inPlace()
+  { do_test(true, false, 1); }
+
+  void test_mem_plus_file()
+  { do_test(false, true, 0); }
+
+  void test_mem_plus_file_inPlace()
+  { do_test(false, true, 1); }
+
+  void test_file_plus_file()
+  { do_test(true, true, 0); }
+
+  void test_file_plus_file_inPlace()
+  { do_test(true, true, 1); }
+
+  void test_file_plus_file_inPlace_ofRHS()
+  { do_test(true, true, 2); }
 
 };
 

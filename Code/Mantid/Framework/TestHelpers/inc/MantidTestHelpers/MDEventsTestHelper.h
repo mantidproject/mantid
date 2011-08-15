@@ -5,9 +5,13 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Utils.h"
 #include "MantidMDEvents/BoxController.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidTestHelpers/DLLExport.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidTestHelpers/AlgorithmHelper.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 
 namespace Mantid
 {
@@ -30,6 +34,14 @@ namespace MDEventsTestHelper
    * @return EventWorkspace_sptr
    */
   DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents);
+
+  /** Make a (optionally) file backed MDEventWorkspace with 10000 fake random data points
+   *
+   * @param wsName :: name of the workspace in ADS
+   * @param fileBacked :: true for file-backed
+   * @return MDEW sptr
+   */
+  DLL_TESTHELPERS Mantid::MDEvents::MDEventWorkspace3Lean::sptr makeFileBackedMDEW(std::string wsName, bool fileBacked);
 
 
   //-------------------------------------------------------------------------------------

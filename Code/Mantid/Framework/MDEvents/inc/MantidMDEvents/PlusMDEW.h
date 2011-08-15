@@ -3,6 +3,8 @@
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
 
 namespace Mantid
 {
@@ -55,6 +57,13 @@ namespace MDEvents
     /// Run the algorithm
     void exec();
 
+    template<typename MDE, size_t nd>
+    void doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
+    /// Workspace into which stuff will get added
+    Mantid::API::IMDEventWorkspace_sptr iws1;
+    /// Workspace that will be added into ws1
+    Mantid::API::IMDEventWorkspace_sptr iws2;
 
   };
 

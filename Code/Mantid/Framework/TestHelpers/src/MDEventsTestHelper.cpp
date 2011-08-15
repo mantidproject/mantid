@@ -103,6 +103,42 @@ namespace MDEventsTestHelper
 
 
 
+  //=====================================================================================
+  /** Make a (optionally) file backed MDEventWorkspace with 10000 fake random data points
+   *
+   * @param wsName :: name of the workspace in ADS
+   * @param fileBacked :: true for file-backed
+   * @return MDEW sptr
+   */
+  MDEventWorkspace3Lean::sptr makeFileBackedMDEW(std::string wsName, bool fileBacked)
+  {
+    // Name of the output workspace.
+    std::string outWSName("CloneMDEventWorkspaceTest_OutputWS");
+
+    // ---------- Make a file-backed MDEventWorkspace -----------------------
+    MDEventWorkspace3Lean::sptr ws1 = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
+    ws1->getBoxController()->setSplitThreshold(100);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName,
+        boost::dynamic_pointer_cast< Mantid::API::IMDEventWorkspace>(ws1));
+    AlgorithmHelper::runAlgorithm("FakeMDEventData", 6,
+        "InputWorkspace", wsName.c_str(),
+        "UniformParams", "10000", "RandomizeSignal", "1");
+    if (fileBacked)
+    {
+      std::string filename = wsName + ".nxs";
+      Mantid::API::IAlgorithm_sptr saver = AlgorithmHelper::runAlgorithm("SaveMDEW", 4,
+          "InputWorkspace", wsName.c_str(),
+          "Filename", filename.c_str());
+      AlgorithmHelper::runAlgorithm("LoadMDEW", 8,
+          "OutputWorkspace", wsName.c_str(),
+          "Filename", saver->getPropertyValue("Filename").c_str(),
+          "FileBackEnd", "1", "Memory", "0");
+    }
+    return boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(  Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
+  }
+
+
+
   //-------------------------------------------------------------------------------------
   /** Generate an empty MDBox */
   MDBox<MDLeanEvent<1>,1> * makeMDBox1(size_t splitInto)
