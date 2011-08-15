@@ -63,6 +63,17 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                size_t                     num_initial,
                                double                     degrees_per_step );
 
+  /// Find the UB matrix that most nearly indexes the specified qxyz values 
+  /// given the range of possible real space unit cell edge lengths. 
+  static double Find_UB(       Kernel::DblMatrix        & UB,
+                         const std::vector<Kernel::V3D> & q_vectors,
+                               double                     min_d,
+                               double                     max_d,
+                               double                     required_tolerance,
+                               int                        base_index,
+                               size_t                     num_initial,
+                               double                     degrees_per_step );
+
   /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
   static double Optimize_UB(      Kernel::DblMatrix         & UB,
                             const std::vector<Kernel::V3D>  & hkl_vectors, 

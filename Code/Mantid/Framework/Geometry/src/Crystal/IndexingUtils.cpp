@@ -88,9 +88,10 @@ static bool CompareMagnitude( const V3D & v1, const V3D & v2 )
 
   @return  This will return the sum of the squares of the residual errors.
   
-  @throws  std::invalid_argument exception if there are not at least 2
-                                 q vectors, if num_initial is < 2, or if 
-                                 required_tolerance or degrees_per_step
+  @throws  std::invalid_argument exception if UB is not a 3X3 matrix, 
+                                 if there are not at least 2 q vectors, 
+                                 if num_initial is < 2, or 
+                                 if the required_tolerance or degrees_per_step
                                  is <= 0. 
 */
 double IndexingUtils::Find_UB(       DblMatrix        & UB,
@@ -233,6 +234,287 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                                  // HKL space.
   num_indexed = GetIndexedPeaks( UB, q_vectors, required_tolerance,
                                  miller_ind, indexed_qs, fit_error );
+  return fit_error;
+}
+
+
+/** 
+    STATIC method Find_UB: This method will attempt to calculate the matrix 
+  that most nearly indexes the specified q_vectors, given only a range of 
+  possible unit cell edge lengths. 
+     The resolution of the search through possible orientations is specified
+  by the degrees_per_step parameter.  Approximately 1-3 degrees_per_step is
+  usually adequate.  NOTE: This is an expensive calculation which takes 
+  approximately 1 second using 1 degree_per_step.  However, the execution 
+  time is O(n^3) so decreasing the resolution to 0.5 degree per step will take 
+  about 8 seconds, etc.  It should not be necessary to decrease this value 
+  below 1 degree per step, and users will have to be VERY patient, if it is
+  decreased much below 1 degree per step.
+    The number of peaks used to obtain an initial indexing is specified by
+  the "num_initial" parameter.  Good values for this are typically around 
+  15-25.  The specified q_vectors must correspond to a single crystal.  If
+  several crystallites are present or there are other sources of "noise" 
+  leading to invalid peaks, this method will not work well.  The method that
+  uses lattice parameters may be better in such cases.  Alternatively, adjust
+  the list of specified q_vectors so it does not include noise peaks or peaks
+  from more than one crystal, by increasing the threshold for what counts
+  as a peak, or by other methods.
+  
+  @param  UB                  3x3 matrix that will be set to the UB matrix
+  @param  q_vectors           std::vector of V3D objects that contains the 
+                              list of q_vectors that are to be indexed
+                              NOTE: There must be at least 2 q_vectors.
+  @param  min_d               Lower bound on shortest unit cell edge length.
+                              This does not have to be specified exactly but
+                              must be strictly less than the smallest edge
+                              length, in Angstroms.
+  @param  max_d               Upper bound on longest unit cell edge length.
+                              This does not have to be specified exactly but
+                              must be strictly more than the longest edge
+                              length in angstroms.
+  @param  required_tolerance  The maximum allowed deviation of Miller indices
+                              from integer values for a peak to be indexed.
+  @param  base_index          The sequence number of the peak that should 
+                              be used as the central peak.  On the first
+                              scan for a UB matrix that fits the data,
+                              the remaining peaks in the list of q_vectors 
+                              will be shifted by -base_peak, where base_peak
+                              is the q_vector with the specified base index.
+                              If fewer than 6 peaks are specified in the
+                              q_vectors list, this parameter is ignored.
+                              If this parameter is -1, and there are at least
+                              five peaks in the q_vector list, then a base
+                              index will be calculated internally.  In most
+                              cases, it should suffice to set this to -1.
+  @param  num_initial         The number of low |Q| peaks that should be
+                              used to scan for an initial orientation matrix.
+  @param  degrees_per_step    The number of degrees between different
+                              orientations used during the initial scan.
+
+  @return  This will return the sum of the squares of the residual errors.
+  
+  @throws  std::invalid_argument exception if UB is not a 3X3 matrix, 
+                                 if there are not at least 3 q vectors, 
+                                 if min_d >= max_d or min_d <= 0
+                                 if num_initial is < 3, or 
+                                 if the required_tolerance or degrees_per_step
+                                 is <= 0. 
+*/
+double IndexingUtils::Find_UB(       DblMatrix        & UB,
+                               const std::vector<V3D> & q_vectors,
+                                     double             min_d,
+                                     double             max_d,
+                                     double             required_tolerance,
+                                     int                base_index,
+                                     size_t             num_initial,
+                                     double             degrees_per_step )
+{
+  if ( UB.numRows() != 3 || UB.numCols() != 3 )
+  {
+   throw std::invalid_argument("UB matrix NULL or not 3X3");
+  }
+
+  if ( q_vectors.size() < 3 )
+  {
+   throw std::invalid_argument("Two or more indexed peaks needed to find UB");
+  }
+
+  if ( min_d >= max_d || min_d <= 0 )
+  {
+   throw std::invalid_argument("Need 0 < min_d < max_d");
+  }
+
+  if ( required_tolerance <= 0 )
+  {
+   throw std::invalid_argument("required_tolerance must be positive");
+  }
+
+  if ( num_initial < 3 )
+  {
+   throw std::invalid_argument("number of peaks for inital scan must be > 2");
+  }
+
+  if ( degrees_per_step <= 0 )
+  {
+   throw std::invalid_argument("degrees_per_step must be positive");
+  }
+
+                                    // get list of peaks, sorted on |Q|
+  std::vector<V3D> sorted_qs;
+
+  if ( q_vectors.size() > 5 )       // shift to be centered on peak (we lose
+                                    // one peak that way, so require > 5)
+  {
+    std::vector<V3D> shifted_qs( q_vectors );
+    size_t mid_ind = q_vectors.size()/2;
+                                    // either do an initial sort and use
+                                    // default mid index, or use the index
+                                    // specified by the base_peak parameter
+    if ( base_index < 0 || base_index >= (int)q_vectors.size() )
+    {
+      std::sort( shifted_qs.begin(), shifted_qs.end(), CompareMagnitude );
+    }
+    else
+    {
+      mid_ind = base_index;
+    }
+    V3D mid_vec( shifted_qs[mid_ind] );
+
+    for ( size_t i = 0; i < shifted_qs.size(); i++ )
+    {
+      if ( i != mid_ind )
+      {
+        V3D shifted_vec( shifted_qs[i] );
+        shifted_vec -= mid_vec;
+        sorted_qs.push_back( shifted_vec );
+      }
+    }
+  }
+  else
+  {
+    for ( size_t i = 0; i < q_vectors.size(); i++ )
+      sorted_qs.push_back( q_vectors[i] );
+  }
+
+  std::sort( sorted_qs.begin(), sorted_qs.end(), CompareMagnitude );
+
+  if ( num_initial > sorted_qs.size() )
+    num_initial = sorted_qs.size();
+
+  std::vector<V3D> some_qs;
+  for ( size_t i = 0; i < num_initial; i++ )
+    some_qs.push_back( sorted_qs[i] );
+
+  std::vector<V3D> directions;
+  ScanFor_Directions( directions,
+                      some_qs,
+                      min_d, max_d,
+                      required_tolerance,
+                      degrees_per_step );
+
+  std::sort( directions.begin(), directions.end(), CompareMagnitude );
+
+  V3D a_dir = directions[0];     // take the shortest direction to be "a"
+                                 // then take "b" to be the next shortest 
+                                 // direction that forms a large enough angle
+                                 // with "a".
+
+  double min_deg = (180/PI) * atan(2*min_d/max_d);
+
+  double epsilon = 5;                    //  tolerance on right angle (degrees)
+  V3D    b_dir;
+  bool   b_found = false;
+  size_t index = 1;
+  while ( !b_found && index < directions.size() )
+  {
+    V3D vec = directions[index];
+    double gamma = a_dir.angle( vec ) * 180 / PI;
+    if ( gamma >= min_deg && (180 - gamma) >= min_deg )
+    {
+      b_dir = vec;
+      if ( gamma > 90 + epsilon )       // try for Nigli cell with angles <= 90
+        b_dir *= -1;
+      b_found = true;
+    }
+    index++;
+  }
+  if ( ! b_found )
+  {
+    throw std::runtime_error("Could not find independent b direction");   
+  }
+
+  V3D c_dir;
+  bool c_found = false;
+
+  V3D perp = a_dir.cross_prod( b_dir );
+  perp.normalize();
+  double perp_ang;
+  double alpha;
+  double beta;
+  while ( !c_found && index < directions.size() )
+  {
+    V3D vec = directions[index];
+    int factor = 1;
+    while ( !c_found && factor >= -1 )         // try c in + or - direction
+    {
+      c_dir = vec; 
+      c_dir *= factor;
+      perp_ang = perp.angle( c_dir )  * 180 / PI;
+      alpha    = b_dir.angle( c_dir ) * 180 / PI;
+      beta     = a_dir.angle( c_dir ) * 180 / PI;
+                                       // keep a,b,c right handed by choosing
+                                       // c in general directiion of a X b 
+      if ( perp_ang > 90 - epsilon                      &&
+           alpha >= min_deg && (180 - alpha) >= min_deg &&
+           beta  >= min_deg && (180 - beta ) >= min_deg  )
+      { 
+        c_found = true;
+      }
+      factor -= 2;
+    }
+    if ( ! c_found )
+      index++;
+  }
+
+  if ( ! c_found )
+  {
+    throw std::runtime_error("Could not find independent c direction"); 
+  }
+                                     // now build the UB matrix from a,b,c 
+  UB.setRow( 0, a_dir );
+  UB.setRow( 1, b_dir );
+  UB.setRow( 2, c_dir );
+  UB.Invert();
+                                     // now gradually bring in the remaining
+                                     // peaks and re-optimize the UB to index
+                                     // them as well
+  std::vector<V3D> miller_ind;
+  std::vector<V3D> indexed_qs;
+
+  Matrix<double> temp_UB(3,3,false);
+  double         fit_error;
+  int            num_indexed = 0;
+  while ( num_initial < sorted_qs.size() )
+  {
+    num_initial = round(1.5 * (double)num_initial + 3);
+                                             // add 3, in case we started with
+                                             // a very small number of peaks!
+    if ( num_initial >= sorted_qs.size() )
+      num_initial = sorted_qs.size();
+
+    for ( size_t i = some_qs.size(); i < num_initial; i++ )
+      some_qs.push_back( sorted_qs[i] );
+
+    num_indexed = GetIndexedPeaks( UB, some_qs, required_tolerance,
+                                   miller_ind, indexed_qs, fit_error );
+
+    try
+    {
+      fit_error = Optimize_UB( temp_UB, miller_ind, indexed_qs );
+      UB = temp_UB;
+    }
+    catch (...)
+    {
+      // failed to improve with these peaks, so continue with more peaks
+      // if possible
+    }
+  }
+
+  if ( q_vectors.size() >= 5 )   // try one last refinement using all peaks
+  {
+    num_indexed = GetIndexedPeaks( UB, q_vectors, required_tolerance,
+                                   miller_ind, indexed_qs, fit_error );
+    try
+    {
+      fit_error = Optimize_UB( temp_UB, miller_ind, indexed_qs );
+      UB = temp_UB;
+    }
+    catch (...)
+    {
+      // failed to improve with all peaks, so return the UB we had 
+    }
+  }
+
   return fit_error;
 }
 

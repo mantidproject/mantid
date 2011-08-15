@@ -57,8 +57,8 @@ public:
     double  beta  = 71;
     double  gamma = 70;
                                            // test both default case(-1) and
-                                           // case with specified base index(0)
-    for ( int base_index = -1; base_index <1 ; base_index++ )
+                                           // case with specified base index(4)
+    for ( int base_index = -1; base_index < 5 ; base_index += 5 )
     {
       double required_tolerance = 0.2;
       size_t num_initial = 3;
@@ -87,6 +87,60 @@ public:
       TS_ASSERT_EQUALS( num_indexed, 12 ); 
     }
   }
+
+
+
+  void test_Find_UB_given_d_min_d_max()
+  {
+    Matrix<double> UB(3,3,false);
+
+    double correct_UB[] = { -0.1015550,  0.0992964, 0.0155078,
+                             0.1274830,  0.0150210, 0.0839671,
+                            -0.0507717, -0.0432269, 0.0645173 };
+
+    std::vector<V3D> q_vectors = getNatroliteQs();
+
+    double d_min =  6;
+    double d_max = 10;
+    double required_tolerance = 0.08;
+    int    num_initial        = 12;
+    double degrees_per_step   = 1; 
+                                           // test both default case(-1) and
+                                           // case with specified base index(4)
+    for ( int base_index = -1; base_index < 5 ; base_index += 5 )
+    {
+
+      double error = IndexingUtils::Find_UB( UB,
+                                             q_vectors,
+                                             d_min,
+                                             d_max,
+                                             required_tolerance,
+                                             base_index,
+                                             num_initial,
+                                             degrees_per_step );
+
+      int num_indexed = IndexingUtils::NumberIndexed( UB,
+                                                      q_vectors,
+                                                      required_tolerance );
+/*    
+      std::cout << std::endl;
+      std::cout << "Error = " << error << std::endl;
+      std::cout << std::endl << "Num indexed = " << num_indexed << std::endl;
+      std::cout << "UB = " << std::endl;
+      std::cout << UB << std::endl;
+*/
+      TS_ASSERT_EQUALS( num_indexed, 12 );
+
+      TS_ASSERT_DELTA( error, 0.000111616, 1e-5 );
+
+      std::vector<double> UB_returned = UB.get_vector();
+      for ( size_t i = 0; i < 9; i++ )
+      {
+        TS_ASSERT_DELTA( UB_returned[i], correct_UB[i], 1e-5 );
+      }
+    }
+  }
+
 
 
   void test_Optimize_UB_given_indexing() 
