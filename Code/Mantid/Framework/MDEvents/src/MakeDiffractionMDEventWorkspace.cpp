@@ -222,7 +222,7 @@ namespace MDEvents
         // Clear it now
         el.clear();
         // For Linux with tcmalloc, make sure memory goes back, if you've cleared 200 Megs
-        MemoryManager::Instance().releaseFreeMemoryIfAccumulated(memoryCleared, 2e8);
+        MemoryManager::Instance().releaseFreeMemoryIfAccumulated(memoryCleared, (size_t)2e8);
       }
 
       // Add them to the MDEW
@@ -368,13 +368,13 @@ namespace MDEvents
       switch (el.getEventType())
       {
       case TOF:
-        func = boost::bind(&MakeDiffractionMDEventWorkspace::convertEventList<TofEvent>, &*this, wi);
+        func = boost::bind(&MakeDiffractionMDEventWorkspace::convertEventList<TofEvent>, &*this, static_cast<int>(wi));
         break;
       case WEIGHTED:
-        func = boost::bind(&MakeDiffractionMDEventWorkspace::convertEventList<WeightedEvent>, &*this, wi);
+        func = boost::bind(&MakeDiffractionMDEventWorkspace::convertEventList<WeightedEvent>, &*this, static_cast<int>(wi));
         break;
       case WEIGHTED_NOTIME:
-        func = boost::bind(&MakeDiffractionMDEventWorkspace::convertEventList<WeightedEventNoTime>, &*this, wi);
+        func = boost::bind(&MakeDiffractionMDEventWorkspace::convertEventList<WeightedEventNoTime>, &*this, static_cast<int>(wi));
         break;
       default:
         throw std::runtime_error("EventList had an unexpected data type!");

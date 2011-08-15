@@ -70,6 +70,8 @@ factory_bottom = """    default:
       throw std::invalid_argument("Invalid number of dimensions passed to CreateMDEventWorkspace.");
     } // end switch
   } // end if eventType
+  // Unknown event type
+  throw std::invalid_argument("Invalid event type passed to CreateMDEventWorkspace.");
 """
 
 def write_factory(f):

@@ -1147,7 +1147,7 @@ namespace MDEvents
           // Build the index of the neighbor
           for (size_t d=0; d<nd;d++)
           {
-            boxIndex[d] = vertexIndex[d] - ((neighb & (1 << d)) >> d); //(this does a bitwise and mask, shifted back to 1 to subtract 1 to the dimension)
+            boxIndex[d] = vertexIndex[d] - ((neighb & ((size_t)1 << d)) >> d); //(this does a bitwise and mask, shifted back to 1 to subtract 1 to the dimension)
             // Taking advantage of the fact that unsigned(0)-1 = some large POSITIVE number.
             if (boxIndex[d] >= split[d])
             {

@@ -230,7 +230,7 @@ namespace MDEvents
       throw std::invalid_argument("IMDBox::getVertexesArray(): Must have > 0 output dimensions.");
 
     // How many vertices does one box have? 2^numOutputDimensions
-    numVertices = 1 << outDimensions;
+    numVertices = (size_t)1 << outDimensions;
 
     // Allocate the array of the right size
     coord_t * out = new coord_t[outDimensions * numVertices];
@@ -250,7 +250,7 @@ namespace MDEvents
         if (maskDim[ind])
         {
           // Use a bit mask to look at each bit of the integer we are iterating through.
-          size_t mask = 1 << outd;
+          size_t mask = (size_t)1 << outd;
           if ((i & mask) > 0)
           {
             // Bit is 1, use the max of the dimension
