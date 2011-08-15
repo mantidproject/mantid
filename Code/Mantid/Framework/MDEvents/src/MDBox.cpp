@@ -61,6 +61,19 @@ namespace MDEvents
     this->setId( controller->getNextId() );
   }
 
+
+  //-----------------------------------------------------------------------------------------------
+  /** Copy constructor */
+  TMDE(MDBox)::MDBox(const MDBox<MDE,nd> & other)
+   : IMDBox<MDE, nd>(other),
+     data(other.data),
+     m_dataBusy(other.m_dataBusy), m_dataConstAccess(other.m_dataConstAccess),
+     m_fileIndexStart(other.m_fileIndexStart), m_fileNumEvents(other.m_fileNumEvents),
+     m_onDisk(other.m_onDisk), m_inMemory(other.m_inMemory)
+  {
+  }
+
+
   //-----------------------------------------------------------------------------------------------
   /** Clear any points contained. */
   TMDE(

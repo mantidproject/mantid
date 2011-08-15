@@ -113,8 +113,6 @@ def write_source(subproject, classname, filename, args):
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(%s)
   
-  using namespace Mantid::Kernel;
-  using namespace Mantid::API;
 """ % (classname)
 
     algorithm_source = """
@@ -153,6 +151,9 @@ def write_source(subproject, classname, filename, args):
     
     s = """#include "Mantid%s/%s%s.h"
 #include "MantidKernel/System.h"
+
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 namespace Mantid
 {

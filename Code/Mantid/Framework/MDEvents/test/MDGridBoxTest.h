@@ -90,21 +90,8 @@ public:
   }
 
 
-  //-------------------------------------------------------------------------------------
-  void test_MDGridBox_Construction()
+  void check_MDGridBox(MDGridBox<MDLeanEvent<1>,1> * g)
   {
-    MDBox<MDLeanEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1();
-    // Start at ID 0.
-    TS_ASSERT_EQUALS( b->getId(), 0);
-    // Give it 10 events
-    const std::vector<MDLeanEvent<1> > events = MDEventsTestHelper::makeMDEvents1(10);
-    b->addEvents( events );
-    TS_ASSERT_EQUALS( b->getNPoints(), 10 );
-    TS_ASSERT_DELTA(b->getVolume(), 10.0, 1e-5);
-
-    // Build the grid box out of it
-    MDGridBox<MDLeanEvent<1>,1> * g = new MDGridBox<MDLeanEvent<1>,1>(b);
-
     // The grid box stole the ID of the box it replaces.
     TS_ASSERT_EQUALS( g->getId(), 0);
 
@@ -114,9 +101,9 @@ public:
     // Its depth level should be 0 (same as parent)
     TS_ASSERT_EQUALS(g->getDepth(), 0);
     // It was split into 10 MDBoxes.
-    TS_ASSERT_EQUALS( g->getNumMDBoxes(), 10);
+    TS_ASSERT_EQUALS(g->getNumMDBoxes(), 10);
     // Same result for non-recursive children
-    TS_ASSERT_EQUALS( g->getNumChildren(), 10);
+    TS_ASSERT_EQUALS(g->getNumChildren(), 10);
     // The volume was set correctly
     TS_ASSERT_DELTA(g->getVolume(), 10.0, 1e-5);
 
@@ -147,15 +134,57 @@ public:
       TS_ASSERT_DELTA(box->getVolume(), 1.0, 1e-5);
     }
 
+  }
+
+
+
+  //-------------------------------------------------------------------------------------
+  void test_MDGridBox_constructor_from_MDBox()
+  {
+    MDBox<MDLeanEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1();
+    // Start at ID 0.
+    TS_ASSERT_EQUALS( b->getId(), 0);
+    // Give it 10 events
+    const std::vector<MDLeanEvent<1> > events = MDEventsTestHelper::makeMDEvents1(10);
+    b->addEvents( events );
+    TS_ASSERT_EQUALS( b->getNPoints(), 10 );
+    TS_ASSERT_DELTA(b->getVolume(), 10.0, 1e-5);
+
+    // Build the grid box out of it
+    MDGridBox<MDLeanEvent<1>,1> * g = new MDGridBox<MDLeanEvent<1>,1>(b);
+
+    // Perform a detailed check
+    check_MDGridBox(g);
+
     // Now we add 10 more events
     g->addEvents( MDEventsTestHelper::makeMDEvents1(10) );
 
     // And now there should be 2 events per box
+    std::vector<IMDBox<MDLeanEvent<1>,1> *> boxes = g->getBoxes();
     for (size_t i=0; i<10; i++)
     {
       MDBox<MDLeanEvent<1>,1> * box = dynamic_cast<MDBox<MDLeanEvent<1>,1> *>(boxes[i]);
       TS_ASSERT_EQUALS(box->getNPoints(), 2);
     }
+  }
+
+
+  //-------------------------------------------------------------------------------------
+  void test_MDGridBox_copy_constructor()
+  {
+    MDBox<MDLeanEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1();
+    TS_ASSERT_EQUALS( b->getId(), 0);
+    const std::vector<MDLeanEvent<1> > events = MDEventsTestHelper::makeMDEvents1(10);
+    b->addEvents( events );
+    TS_ASSERT_EQUALS( b->getNPoints(), 10 );
+    TS_ASSERT_DELTA(b->getVolume(), 10.0, 1e-5);
+
+    // Build the grid box out of it
+    MDGridBox<MDLeanEvent<1>,1> * g1 = new MDGridBox<MDLeanEvent<1>,1>(b);
+    MDGridBox<MDLeanEvent<1>,1> * g2 = new MDGridBox<MDLeanEvent<1>,1>(*g1);
+
+    // Perform a detailed check
+    check_MDGridBox(g2);
   }
 
 

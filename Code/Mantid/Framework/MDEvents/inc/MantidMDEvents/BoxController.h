@@ -351,6 +351,10 @@ namespace MDEvents
       m_diskMRU.setFileLength(fileLength);
     }
 
+    /** @return true if the MDEventWorkspace is backed by a file */
+    bool isFileBacked() const
+    { return m_file != NULL; }
+
     /// @return the full path to the file open as the file-based back end.
     const std::string & getFilename() const
     { return m_filename; }

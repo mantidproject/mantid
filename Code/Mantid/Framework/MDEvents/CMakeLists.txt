@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/AffineMatrixParameterParser.cpp
 	src/BinToMDHistoWorkspace.cpp
 	src/BoxController.cpp
+	src/CloneMDEventWorkspace.cpp
 	src/CoordTransform.cpp
 	src/CoordTransformDistance.cpp
 	src/CoordTransformDistanceParser.cpp
@@ -45,6 +46,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
 	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/BoxController.h
+	inc/MantidMDEvents/CloneMDEventWorkspace.h
 	inc/MantidMDEvents/CoordTransform.h
 	inc/MantidMDEvents/CoordTransformDistance.h
 	inc/MantidMDEvents/CoordTransformDistanceParser.h
@@ -77,6 +79,7 @@ set ( TEST_FILES
 	test/AffineMatrixParameterParserTest.h
 	test/AffineMatrixParameterTest.h
 	test/BoxControllerTest.h
+	test/CloneMDEventWorkspaceTest.h
 	test/CoordTransformDistanceParserTest.h
 	test/CoordTransformDistanceTest.h
 	test/CoordTransformParserTest.h

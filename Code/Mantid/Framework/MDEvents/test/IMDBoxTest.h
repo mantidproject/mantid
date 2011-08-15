@@ -154,10 +154,13 @@ public:
   void test_copy_constructor()
   {
     IMDBoxTester<MDLeanEvent<2>,2> b;
+    b.setDepth(6);
     b.setExtents(0, -10.0, 10.0);
     b.setExtents(1, -4.0, 6.0);
     b.setSignal(123.0);
     b.setErrorSquared(456.0);
+    b.setId(8765);
+    b.calcVolume();
 
     // Perform the copy
     IMDBoxTester<MDLeanEvent<2>,2> box(b);
@@ -165,8 +168,11 @@ public:
     TS_ASSERT_DELTA(box.getExtents(0).max, +10.0, 1e-6);
     TS_ASSERT_DELTA(box.getExtents(1).min, -4.0, 1e-6);
     TS_ASSERT_DELTA(box.getExtents(1).max, +6.0, 1e-6);
-    TS_ASSERT_EQUALS( box.getSignal(), 123.0);
-    TS_ASSERT_EQUALS( box.getErrorSquared(), 456.0);
+    TS_ASSERT_DELTA( box.getSignal(), b.getSignal(), 1e-6);
+    TS_ASSERT_DELTA( box.getErrorSquared(), b.getErrorSquared(), 1e-6);
+    TS_ASSERT_DELTA( box.getInverseVolume(), b.getInverseVolume(), 1e-6);
+    TS_ASSERT_EQUALS( box.getId(), b.getId());
+    TS_ASSERT_EQUALS( box.getDepth(), b.getDepth());
   }
 
 

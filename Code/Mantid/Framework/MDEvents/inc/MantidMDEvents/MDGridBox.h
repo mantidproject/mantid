@@ -46,6 +46,8 @@ namespace MDEvents
 
     MDGridBox(MDBox<MDE, nd> * box);
 
+    MDGridBox(const MDGridBox<MDE, nd> & box);
+
     virtual ~MDGridBox();
 
     void clear();

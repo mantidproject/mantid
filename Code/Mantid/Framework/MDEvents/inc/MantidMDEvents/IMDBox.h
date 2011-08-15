@@ -52,7 +52,7 @@ namespace MDEvents
 
     IMDBox(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
 
-    IMDBox(IMDBox<MDE,nd> * box);
+    IMDBox(const IMDBox<MDE,nd> & box);
 
     /// Destructor
     virtual ~IMDBox() {}

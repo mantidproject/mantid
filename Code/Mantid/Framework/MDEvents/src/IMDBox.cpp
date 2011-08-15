@@ -54,19 +54,18 @@ namespace MDEvents
    * @param box :: incoming box to copy.
    */
   TMDE(
-  IMDBox)::IMDBox(IMDBox<MDE,nd> * box)
-  : m_signal(box->getSignal()), m_errorSquared(box->getErrorSquared()),
-    m_inverseVolume(box->m_inverseVolume), m_depth(box->getDepth())
+  IMDBox)::IMDBox(const IMDBox<MDE,nd> & box)
+  : ISaveable(box),
+    m_signal(box.getSignal()), m_errorSquared(box.getErrorSquared()),
+    m_inverseVolume(box.m_inverseVolume), m_depth(box.getDepth())
   {
-    if (!box)
-      throw std::runtime_error("IMDBox::ctor(): box is NULL.");
     // Save the controller in this object.
-    this->m_BoxController = box->m_BoxController;
+    this->m_BoxController = box.m_BoxController;
     // Copy the extents
     for (size_t d=0; d<nd; d++)
-      this->extents[d] = box->extents[d];
+      this->extents[d] = box.extents[d];
     // Copy the depth
-    this->m_depth = box->getDepth();
+    this->m_depth = box.getDepth();
 #ifdef MDBOX_TRACK_CENTROID
     // Clear the running total of the centroid
     for (size_t d=0; d<nd; d++)

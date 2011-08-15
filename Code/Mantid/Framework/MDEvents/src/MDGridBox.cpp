@@ -68,7 +68,7 @@ namespace MDEvents
   /** Constructor
    * @param box :: MDBox containing the events to split */
   TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> * box)
-   : IMDBox<MDE, nd>(box),
+   : IMDBox<MDE, nd>(*box),
      nPoints(0)
   {
     BoxController_sptr bc = box->getBoxController();
@@ -153,6 +153,42 @@ namespace MDEvents
   }
 
 
+  //-----------------------------------------------------------------------------------------------
+  /** Copy constructor
+   * @param other :: MDGridBox to copy */
+  TMDE(MDGridBox)::MDGridBox(const MDGridBox<MDE, nd> & other)
+   : IMDBox<MDE, nd>(other),
+     numBoxes(other.numBoxes),
+     diagonalSquared(other.diagonalSquared),
+     nPoints(other.nPoints)
+  {
+    for (size_t d=0; d<nd; d++)
+    {
+      split[d] = other.split[d];
+      splitCumul[d] = other.splitCumul[d];
+      boxSize[d] = other.boxSize[d];
+    }
+    // Copy all the boxes
+    boxes.clear();
+    for (size_t i=0; i<other.boxes.size(); i++)
+    {
+      IMDBox<MDE, nd>* otherBox = other.boxes[i];
+      const MDBox<MDE, nd>* otherMDBox = dynamic_cast<const MDBox<MDE, nd>* >(otherBox);
+      const MDGridBox<MDE, nd>* otherMDGridBox = dynamic_cast<const MDGridBox<MDE, nd>* >(otherBox);
+      if (otherMDBox)
+      {
+        boxes.push_back( new MDBox<MDE, nd>(*otherMDBox));
+      }
+      else if (otherMDGridBox)
+      {
+        boxes.push_back( new MDGridBox<MDE, nd>(*otherMDGridBox));
+      }
+      else
+      {
+        throw std::runtime_error("MDGridBox::copy_ctor(): an unexpected child box type was found.");
+      }
+    }
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Compute some data from the split[] array and the extents.

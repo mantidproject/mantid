@@ -33,7 +33,7 @@ public:
   
 
   /// Compare two box controllers and assert each part of them.
-  void compareBoxControllers(BoxController & a, BoxController & b)
+  static void compareBoxControllers(BoxController & a, BoxController & b)
   {
     TS_ASSERT_EQUALS( a.getNDims(), b.getNDims());
     TS_ASSERT_EQUALS( a.getMaxDepth(), b.getMaxDepth());
@@ -54,7 +54,7 @@ public:
    * @param ws1 :: reference workspace
    */
   template<typename MDE, size_t nd>
-  void do_compare_MDEW(boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws,
+  static void do_compare_MDEW(boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws,
       boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws1)
   {
     TS_ASSERT(ws->getBox());

@@ -39,6 +39,7 @@ namespace Kernel
   {
   public:
     ISaveable();
+    ISaveable(const ISaveable & other);
     ISaveable(const size_t id);
     ~ISaveable();
 

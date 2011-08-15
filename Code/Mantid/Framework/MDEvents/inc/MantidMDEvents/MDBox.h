@@ -46,6 +46,8 @@ namespace MDEvents
 
     MDBox(BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
 
+    MDBox(const MDBox & other);
+
     virtual ~MDBox() {}
 
 

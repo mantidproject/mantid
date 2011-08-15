@@ -63,6 +63,34 @@ public:
     TS_ASSERT_DELTA( box.getExtents(0).max, 2.34, 1e-5);
   }
 
+  void test_copy_constructor()
+  {
+    BoxController_sptr sc( new BoxController(1));
+    std::vector<MDDimensionExtents> extents(1);
+    extents[0].min=1.23;
+    extents[0].max=2.34;
+    MDBox<MDLeanEvent<1>,1> box1(sc, 2, extents);
+    MDLeanEvent<1> ev(1.23, 2.34);
+    for (size_t i=0; i<15; i++)
+    {
+      ev.setCenter(0, double(i)*1.0);
+      box1.addEvent(ev);
+    }
+    // Do the copy
+    MDBox<MDLeanEvent<1>,1> box2(box1);
+    // Compare
+    std::vector<MDLeanEvent<1> > events = box2.getEvents();
+    TS_ASSERT_EQUALS( box2.getNumDims(), 1);
+    TS_ASSERT_EQUALS( box2.getBoxController(), sc);
+    TS_ASSERT_EQUALS( box2.getNPoints(), 15);
+    TS_ASSERT_EQUALS( events.size(), 15);
+    TS_ASSERT_DELTA( events[7].getCenter(0), 7.0, 1e-4);
+    TS_ASSERT_EQUALS( box2.getDepth(), 2);
+    TS_ASSERT_EQUALS( box2.getNumMDBoxes(), 1);
+    TS_ASSERT_DELTA( box2.getExtents(0).min, 1.23, 1e-5);
+    TS_ASSERT_DELTA( box2.getExtents(0).max, 2.34, 1e-5);
+  }
+
 
   /** Adding events tracks the total signal */
   void test_addEvent()
