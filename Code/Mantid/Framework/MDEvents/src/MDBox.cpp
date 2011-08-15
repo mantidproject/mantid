@@ -166,6 +166,7 @@ namespace MDEvents
         {
           this->m_BoxController->fileMutex.lock();
           // Note that this APPENDS any events to the existing event list
+          //  (in the event that addEvent() was called for a box that was on disk)
           MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
           this->m_BoxController->fileMutex.unlock();
           m_inMemory = true;

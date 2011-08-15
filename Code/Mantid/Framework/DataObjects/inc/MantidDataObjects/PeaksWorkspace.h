@@ -141,12 +141,7 @@ namespace DataObjects
       return peaks;
     }
 
-    //---------------------------------------------------------------------------------------------
-    /// Number of columns in the workspace.
-    virtual int columnCount() const
-    {
-      return static_cast<int>(columns.size());
-    }
+
 
     //---------------------------------------------------------------------------------------------
     /// Return the memory used in bytes
@@ -155,7 +150,15 @@ namespace DataObjects
       return getNumberPeaks() * sizeof(Peak);
     }
 
-    //---------------------------------------------------------------------------------------------
+    // ====================================== ITableWorkspace Methods ==================================
+    /// Number of columns in the workspace.
+    virtual int columnCount() const
+    { return static_cast<int>(columns.size()); }
+
+    /// Number of rows in the workspace.
+    virtual int rowCount() const
+    { return getNumberPeaks();  }
+
     /// Gets the shared pointer to a column by name.
     virtual boost::shared_ptr<Mantid::API::Column> getColumn(const std::string& name)
     { return getColumn(getColumnIndex(name)); }
@@ -168,6 +171,8 @@ namespace DataObjects
 
     /// Gets the shared pointer to a column by index - return none-modifyable column.
     API::Column_const_sptr getColumn(int index) const;
+    // ====================================== End ITableWorkspace Methods ==================================
+
 
     //---------------------------------------------------------------------------------------------
     /// Returns a vector of all column names.
@@ -176,12 +181,7 @@ namespace DataObjects
       return this->columnNames;
     }
 
-    //---------------------------------------------------------------------------------------------
-    /// Number of rows in the workspace.
-    virtual int rowCount() const
-    {
-      return getNumberPeaks();
-    }
+
     virtual bool threadSafe() const { return true;}
 
 
@@ -199,6 +199,8 @@ namespace DataObjects
 
 
   public:
+
+    // ====================================== ITableWorkspace Methods ==================================
 
     virtual bool addColumn(const std::string& /*type*/, const std::string& /*name*/);
 
@@ -237,6 +239,8 @@ namespace DataObjects
     /// find method to get the index of  Mantid::Kernel::V3D cell value in a table workspace
     virtual void find(Mantid::Kernel::V3D /*value*/,int& /*row*/,const int & /*col*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented."); }
+
+    // ====================================== End ITableWorkspace Methods ==================================
 
   };
 

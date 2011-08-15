@@ -94,7 +94,7 @@ private:
   QSignalMapper *m_loadMapper, *m_programMapper;
 
   //Context-menu actions
-  QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecDistr, *m_showDetectors, *m_colorFill, *m_showLogs, *m_showHist, 
+  QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecDistr, *m_showDetectors, *m_showBoxData, *m_colorFill, *m_showLogs, *m_showHist,
     *m_saveNexus, *m_rename, *m_delete, *m_program; 
 
   static Mantid::Kernel::Logger& logObject;

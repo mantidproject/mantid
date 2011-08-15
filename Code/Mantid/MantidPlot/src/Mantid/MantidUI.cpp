@@ -455,6 +455,31 @@ void MantidUI::importWorkspace()
   importWorkspace(wsName,true,true);
 }
 
+
+/**  Create a TableWorkspace of box data from the MDEventWorkspace
+ */
+void MantidUI::importBoxDataTable()
+{
+  std::cout << "MantidUI::importBoxDataTable()" << std::endl;
+  QString wsName = getSelectedWorkspaceName();
+  try
+  {
+    // Get the MD event table
+    IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+        AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
+    if (!ws) return;
+    ITableWorkspace_sptr tabWs = ws->makeBoxTable(0,0);
+    if (!tabWs) return;
+    std::string tableName = wsName.toStdString() + "_boxdata";
+    AnalysisDataService::Instance().addOrReplace(tableName, tabWs);
+    // Now show that table
+    importWorkspace(QString::fromStdString(tableName), true, true);
+  }
+  catch (...)
+  {
+  }
+}
+
 /** #539: For adding Workspace History display to MantidPlot
 	Show Algorithm History Details in a window .
  */

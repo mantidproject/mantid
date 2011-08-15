@@ -328,18 +328,20 @@ public slots:
     // Display a message in QtiPlot's results window. Used by MantidLog class to display Mantid log information.
     void logMessage(const Poco::Message& msg);
 
-   void showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidWidgets::FitPropertyBrowser* fitbrowser);
+    void showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidWidgets::FitPropertyBrowser* fitbrowser);
 
     // Import the workspace selected in the Workspace dock window
     void importWorkspace();
-	// #539: For adding Workspace History display to MantidPlot
-	void showAlgorithmHistory();
+    void importBoxDataTable();
+
+    // #539: For adding Workspace History display to MantidPlot
+    void showAlgorithmHistory();
 
     // Import a workspace wsName
     void importWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
 
-  // Create a MantidMatrix from workspace wsName
-  MantidMatrix *importMatrixWorkspace(const QString& wsName, int lower = -1, int upper = -1,
+    // Create a MantidMatrix from workspace wsName
+    MantidMatrix *importMatrixWorkspace(const QString& wsName, int lower = -1, int upper = -1,
 				      bool showDlg = true, bool makeVisible = true);
 
     // Create a MantidMatrix from workspace wsName

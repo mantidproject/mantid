@@ -4,6 +4,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
@@ -51,6 +52,9 @@ namespace API
 
     /// Returns some information about the box controller, to be displayed in the GUI, for example
     virtual std::vector<std::string> getBoxControllerStats() const = 0;
+
+    /// Helper method that makes a table workspace with some box data
+    virtual Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num) = 0;
 
     /// @return true if the workspace is file-backed
     virtual bool isFileBacked() const = 0;

@@ -62,8 +62,6 @@ public:
       { TSM_ASSERT( "If either input WS is file backed, then the output should be too.", ws->getBoxController()->isFileBacked() ); }
     TS_ASSERT_EQUALS( ws->getNPoints(), 20000);
 
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
   }
   
   void test_mem_plus_mem()
@@ -95,6 +93,14 @@ public:
 
   void test_file_plus_file_inPlace_ofRHS()
   { do_test(true, true, 2); }
+
+  void test_file_plus_file_thenSaveMDEW()
+  {
+    do_test(true, true, 0);
+    AlgorithmHelper::runAlgorithm("SaveMDEW", 4,
+        "InputWorkspace", "PlusMDEWTest_out",
+        "UpdateFileBackEnd", "1");
+  }
 
 };
 

@@ -201,6 +201,9 @@ namespace Kernel
     /// Amount of memory actually used up (in the MRU, not the toWriteBuffer)
     uint64_t m_memoryUsed;
 
+    /// Mutex for modifying the MRU list and/or the toWrite buffer.
+    Kernel::Mutex m_mruMutex;
+
     // ----------------------- To-write buffer --------------------------------------
     /// Do we use the write buffer?
     bool m_useWriteBuffer;
@@ -217,8 +220,6 @@ namespace Kernel
     /// Total amount of memory in the "toWrite" buffer.
     uint64_t m_memoryToWrite;
 
-    /// Mutex for modifying the MRU list
-    Kernel::Mutex m_mruMutex;
 
     // ----------------------- Free space map --------------------------------------
     /// Map of the free blocks in the file

@@ -1,3 +1,5 @@
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/FunctionTask.h"
@@ -9,16 +11,18 @@
 #include "MantidKernel/Utils.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDGridBox.h"
+#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/MDSplitBox.h"
 #include <iomanip>
+#include <functional>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -187,6 +191,75 @@ namespace MDEvents
     }
 
     return out;
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Comparator for sorting IMDBox'es by ID */
+  template <typename BOXTYPE>
+  bool SortBoxesByID(const BOXTYPE& a, const BOXTYPE& b)
+  {
+    return a->getId() < b->getId();
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Create a table of data about the boxes contained */
+  TMDE(
+  Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(size_t start, size_t num)
+  {
+    CPUTimer tim;
+    UNUSED_ARG(start);
+    UNUSED_ARG(num);
+    // Boxes to show
+    std::vector<IMDBox<MDE,nd>*> boxes;
+    std::vector<IMDBox<MDE,nd>*> boxes_filtered;
+    this->getBox()->getBoxes(boxes, 1000, false);
+
+    bool withPointsOnly = true;
+    if (withPointsOnly)
+    {
+      boxes_filtered.reserve(boxes.size());
+      for (size_t i=0; i<boxes.size(); i++)
+        if (boxes[i]->getNPoints() > 0)
+          boxes_filtered.push_back(boxes[i]);
+    }
+
+    // Now sort by ID
+    typedef IMDBox<MDE,nd> * ibox_t;
+    std::sort(boxes_filtered.begin(), boxes_filtered.end(), SortBoxesByID<ibox_t> );
+
+
+    // Create the table
+    int numRows = int(boxes_filtered.size());
+    TableWorkspace_sptr ws(new TableWorkspace(numRows));
+    ws->addColumn("int", "ID");
+    ws->addColumn("int", "Depth");
+    ws->addColumn("int", "# children");
+    ws->addColumn("int", "File Pos.");
+    ws->addColumn("int", "File Size");
+    ws->addColumn("int", "EventVec Size");
+    ws->addColumn("bool","OnDisk?");
+    ws->addColumn("bool","InMemory?");
+    ws->addColumn("str", "Extents");
+
+    for (int i=0; i<int(boxes_filtered.size()); i++)
+    {
+      IMDBox<MDE,nd>* box = boxes_filtered[i];
+      int col = 0;
+      ws->cell<int>(i, col++) = int(box->getId());;
+      ws->cell<int>(i, col++) = int(box->getDepth());
+      ws->cell<int>(i, col++) = int(box->getNumChildren());
+      ws->cell<int>(i, col++) = int(box->getFilePosition());
+      ws->cell<int>(i, col++) = int(box->getSizeOnFile());
+      MDBox<MDE,nd>* mdbox = dynamic_cast<MDBox<MDE,nd>*>(box);
+      ws->cell<int>(i, col++) = int(mdbox ? mdbox->getEventVectorSize() : -1);
+      ws->cell<bool>(i, col++) = bool(mdbox ? mdbox->getOnDisk() : false);
+      ws->cell<bool>(i, col++) = bool(mdbox ? mdbox->getInMemory() : false);
+      ws->cell<std::string>(i, col++) = box->getExtentsStr();
+    }
+    std::cout << tim << " to create the MDBox data table." << std::endl;
+    return ws;
   }
 
   //-----------------------------------------------------------------------------------------------

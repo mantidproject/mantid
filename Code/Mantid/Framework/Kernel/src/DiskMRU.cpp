@@ -179,6 +179,8 @@ namespace Kernel
     size_t id = item->getId();
     uint64_t size = item->getSizeOnFile();
 
+    m_mruMutex.lock();
+
     // Take it out of the MRU cache
     mru_byId_t::iterator it = m_mru_byId.find(id);
     if (it != m_mru_byId.end())
@@ -194,6 +196,7 @@ namespace Kernel
       m_toWrite_byId.erase(it2);
       m_memoryToWrite -= size;
     }
+    m_mruMutex.unlock();
 
     // Mark as a free block
     this->freeBlock( item->getFilePosition(), size );
@@ -241,8 +244,10 @@ namespace Kernel
     }
 
     // Exchange with the new map you built out of the not-written blocks.
+    m_mruMutex.lock();
     m_toWrite.swap(couldNotWrite);
     m_memoryToWrite = memoryNotWritten;
+    m_mruMutex.unlock();
   }
 
 
@@ -251,6 +256,8 @@ namespace Kernel
    * Mostly used for debugging and unit tests */
   void DiskMRU::flushCache()
   {
+    m_mruMutex.lock();
+
     // Pop everything from the cache
     while (m_memoryUsed > 0)
     {
@@ -266,6 +273,8 @@ namespace Kernel
       m_memoryToWrite += thisMem;
       m_memoryUsed -= thisMem;
     }
+    m_mruMutex.unlock();
+
     // Now write everything out.
     writeOldObjects();
   }

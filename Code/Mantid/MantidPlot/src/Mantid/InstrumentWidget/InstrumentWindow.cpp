@@ -397,6 +397,8 @@ void InstrumentWindow::showDetectorTable()
   emit createDetectorTable(QString::fromStdString(m_workspace->getName()), indexes, true);
 }
 
+
+
 QString InstrumentWindow::confirmDetectorOperation(const QString & opName, const QString & inputWS, int ndets)
 {
   QString message("This operation will affect %1 detectors.\nSelect output workspace option:");

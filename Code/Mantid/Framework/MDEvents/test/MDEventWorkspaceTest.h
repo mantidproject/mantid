@@ -22,6 +22,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include "MantidAPI/ITableWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -143,6 +144,18 @@ public:
     TS_ASSERT_EQUALS( ew->getDimensionIndexByName("Qx"), 0);
     TS_ASSERT_EQUALS( ew->getDimensionIndexByName("Qy"), 1);
     TS_ASSERT_THROWS_ANYTHING( ew->getDimensionIndexByName("IDontExist"));
+  }
+
+  /** Method that makes a table workspace for use in MantidPlot */
+  void test_makeBoxTable()
+  {
+    MDEventWorkspace3 * ew = new MDEventWorkspace3();
+    BoxController_sptr bc = ew->getBoxController();
+    bc->setSplitInto(4);
+    ew->splitBox();
+    ITableWorkspace_sptr itab = ew->makeBoxTable(0,0);
+    TS_ASSERT_EQUALS( itab->rowCount(), 4*4*4+1);
+    TS_ASSERT_EQUALS( itab->cell<int>(3,0), 3);
   }
 
 

@@ -79,7 +79,6 @@ void MantidTable::fillTable()
       // Measure the width
       thisWidth = fm.width(qstr);
       if (thisWidth > maxWidth) maxWidth = thisWidth;
-      d_table->verticalHeader()->setLabel(j,QString::number(j));
     }
 
     // A bit of padding
@@ -87,6 +86,14 @@ void MantidTable::fillTable()
     // Avoid crazy widths
     if (maxWidth > 300) maxWidth = 300;
     setColumnWidth(i, maxWidth);
+  }
+
+  // Set all the row labels
+  if (m_ws->rowCount() < 1000)
+  {
+    // Note: This is very slow for some reason so it is only done for smallish tables.
+    for(int j=0; j<m_ws->rowCount(); j++)
+      d_table->verticalHeader()->setLabel(j,QString::number(j));
   }
 
 }

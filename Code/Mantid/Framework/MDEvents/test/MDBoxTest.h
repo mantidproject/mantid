@@ -879,33 +879,6 @@ public:
     file->close();
     //do_deleteNexusFile();
   }
-//
-//  //-----------------------------------------------------------------------------------------
-//  /** Try to add a large number of events in parallel
-//   * to the same MDBox, to make sure it is thread-safe.
-//   */
-//  void test_fileBackEnd_addEvent_inParallel()
-//  {
-//    MDBox<MDLeanEvent<2>,2> b;
-//    MDLeanEvent<2> ev(1.2, 3.4);
-//    ev.setCenter(0, 2.0);
-//    ev.setCenter(1, 3.0);
-//
-//    int num = 5e5;
-//    PARALLEL_FOR_NO_WSP_CHECK()
-//    for (int i=0; i < num; i++)
-//    {
-//      b.addEvent(ev);
-//    }
-//#ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
-//    b.refreshCache();
-//#endif
-//
-//    TS_ASSERT_EQUALS( b.getNPoints(), num)
-//    // Did it keep a running total of the signal and error?
-//    TS_ASSERT_DELTA( b.getSignal(), 1.2*num, 1e-5*num);
-//    TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*num, 1e-5*num);
-//  }
 
 
   //-----------------------------------------------------------------------------------------

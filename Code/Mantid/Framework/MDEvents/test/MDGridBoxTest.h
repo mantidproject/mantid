@@ -222,7 +222,6 @@ public:
     TSM_ASSERT_EQUALS( "Child has 8 events", b->getNPoints(), 8);
     TSM_ASSERT_EQUALS( "Child is NOT on disk", b->getOnDisk(), false);
 
-
     file->close();
     MDBoxTest::do_deleteNexusFile("MDGridBoxTest.nxs");
   }

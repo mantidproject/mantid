@@ -14,6 +14,7 @@
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid
 {
@@ -65,6 +66,8 @@ namespace MDEvents
 
 
     virtual std::vector<std::string> getBoxControllerStats() const;
+
+    Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num);
 
     void splitBox();
 

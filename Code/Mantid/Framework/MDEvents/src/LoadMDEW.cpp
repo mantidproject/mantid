@@ -224,6 +224,8 @@ namespace MDEvents
       // Find a minimum size to bother to cache to disk.
       // We say that no more than 25% of the overall cache memory should be used on tiny boxes.
       minDiskCacheSize = uint64_t(double(cacheMemory) * 0.25) / numBoxes;
+      // TODO :
+      minDiskCacheSize = 0;
       g_log.information() << "Boxes with fewer than " << minDiskCacheSize << " events will not be cached to disk." << std::endl;
 
       uint64_t writeBuffer = uint64_t(1000000 / sizeof(MDE));
@@ -267,26 +269,18 @@ namespace MDEvents
           // Load the events now
           uint64_t indexStart = box_event_index[i*2];
           uint64_t numEvents = box_event_index[i*2+1];
-          if (numEvents > 0)
+          // Save the index in the file in the box data
+          box->setFileIndex(uint64_t(indexStart), uint64_t(numEvents));
+
+          if (!FileBackEnd || (numEvents < minDiskCacheSize))
           {
-            //std::cout << "box " << i << " from " << indexStart << " to " << indexEnd << std::endl;
-            box->setFileIndex(uint64_t(indexStart), uint64_t(numEvents));
-            if (!FileBackEnd || (numEvents < minDiskCacheSize))
-            {
-              // Load if NOT using the file as the back-end,
-              // or if the box is small enough to keep in memory always
-              box->loadNexus(file);
-              box->setOnDisk(false);
-            }
-            else
-              box->setOnDisk(true);
-          }
-          else
-          {
-            // Nothing on disk, since there are no events.
-            box->setFileIndex(0, 0);
+            // Load if NOT using the file as the back-end,
+            // or if the box is small enough to keep in memory always
+            box->loadNexus(file);
             box->setOnDisk(false);
           }
+          else
+            box->setOnDisk(true);
         }
         else if (box_type == 2)
         {

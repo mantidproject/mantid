@@ -119,6 +119,9 @@ namespace MDEvents
     bool getInMemory() const
     { return m_inMemory; }
 
+    /// @return the size of the event vector. FOR DEBUGGING! Note that this is NOT necessarily the same as the number of points (because it might be cached to disk) or the size on disk (because you might have called AddEvents)
+    size_t getEventVectorSize() const
+    { return data.size(); }
 
 
     std::vector< MDE > & getEvents();

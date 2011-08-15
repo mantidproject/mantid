@@ -228,6 +228,9 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_showDetectors = new QAction(tr("Show Detectors"),this);
   connect(m_showDetectors,SIGNAL(activated()),this,SLOT(showDetectorTable()));
 
+  m_showBoxData = new QAction(tr("Show Box Data Table"),this);
+  connect(m_showBoxData,SIGNAL(activated()),m_mantidUI,SLOT(importBoxDataTable()));
+
   m_showLogs = new QAction(tr("Sample Logs..."), this);
   connect(m_showLogs,SIGNAL(triggered()),m_mantidUI,SLOT(showLogFileWindow()));
 
@@ -765,13 +768,8 @@ void MantidDockWidget::addMDEventWorspaceMenuItems(QMenu *menu, Mantid::API::IMD
 {
   (void) WS;
 
-  //menu->addAction(m_showData); // Show data
-  //menu->addAction(m_showInst); // Show instrument
-  //menu->addAction(m_plotSpec); // Plot spectra
-  //menu->addAction(m_colorFill);
-  //menu->addAction(m_showLogs); // Sample logs
-  menu->addAction(m_showHist);
-  //menu->addAction(m_saveNexus);
+  menu->addAction(m_showBoxData); // Show MD Box data
+  menu->addAction(m_showHist);  // Algorithm history
 }
 
 
