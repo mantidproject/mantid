@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/PeakIntegration.cpp
 	src/PredictPeaks.cpp
 	src/SaveIsawPeaks.cpp
+        src/SaveIsawUB.cpp
 	src/SavePeaksFile.cpp
 	src/SetGoniometer.cpp
 )
@@ -23,6 +24,7 @@ set ( INC_FILES
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PredictPeaks.h
 	inc/MantidCrystal/SaveIsawPeaks.h
+        inc/MantidCrystal/SaveIsawUB.h
 	inc/MantidCrystal/SavePeaksFile.h
 	inc/MantidCrystal/SetGoniometer.h
 )
@@ -37,6 +39,7 @@ set ( TEST_FILES
 	test/PeakIntegrationTest.h
 	test/PredictPeaksTest.h
 	test/SaveIsawPeaksTest.h
+        test/SaveIsawUBTest.h
 	test/SavePeaksFileTest.h
 	test/SetGoniometerTest.h
 )
