@@ -149,10 +149,7 @@ public:
   /** Method that makes a table workspace for use in MantidPlot */
   void test_makeBoxTable()
   {
-    MDEventWorkspace3 * ew = new MDEventWorkspace3();
-    BoxController_sptr bc = ew->getBoxController();
-    bc->setSplitInto(4);
-    ew->splitBox();
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
     ITableWorkspace_sptr itab = ew->makeBoxTable(0,0);
     TS_ASSERT_EQUALS( itab->rowCount(), 4*4*4+1);
     TS_ASSERT_EQUALS( itab->cell<int>(3,0), 3);
