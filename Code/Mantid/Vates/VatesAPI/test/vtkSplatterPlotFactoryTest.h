@@ -78,14 +78,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(product = factory.create());
 
     const size_t expected_n_points = 1000;
-    const size_t expected_n_cells = 1;
-    const size_t expected_n_signals = expected_n_points;
+    const size_t expected_n_cells = 999;
+    const size_t expected_n_signals = expected_n_cells;
 
     TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points, product->GetNumberOfPoints());
     TSM_ASSERT_EQUALS("Wrong number of cells", expected_n_cells, product->GetNumberOfCells());
     TSM_ASSERT_EQUALS("No signal Array", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
     TSM_ASSERT_EQUALS("Wrong sized signal Array", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
-    
+
     /*Check dataset bounds*/
     double* bounds = product->GetBounds();
     TS_ASSERT_EQUALS(0, bounds[0]);

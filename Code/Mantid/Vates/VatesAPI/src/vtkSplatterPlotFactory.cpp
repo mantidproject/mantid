@@ -72,9 +72,7 @@ namespace Mantid
     // Same number of scalars. Create them all
     vtkFloatArray * signals = vtkFloatArray::New();
     signals->Allocate(numPoints);
-    signals->SetNumberOfComponents( int(numPoints) );
     signals->SetName(m_scalarName.c_str());
-    signals->SetNumberOfComponents(1);
 
     // Create the data set
     vtkUnstructuredGrid * visualDataSet = vtkUnstructuredGrid::New();
@@ -98,53 +96,60 @@ namespace Mantid
       if (box)
       {
         size_t newPoints = box->getNPoints();
-        if (pointsCounted + newPoints > interval)
+        if (newPoints > 0)
         {
-          // Cache the normalized signal
-          float signal_normalized = float(box->getSignalNormalized());
-
-          // Show at least an event from this box
-          const std::vector<MDE> & events = box->getConstEvents();
-          // Start here
-          size_t j = interval-pointsCounted;
-          for (; j < events.size(); j += interval)
+          if (pointsCounted + newPoints > interval)
           {
-            const MDE & ev = events[j];
-            // TODO: Handle reduced dimensions
-            points->SetPoint(pointIndex, ev.getCenter());
-            // The signal will match that point
-            signals->SetValue(pointIndex, signal_normalized);
-            // Save for the point set
-            ids[pointIndex] = pointIndex;
-            pointIndex++;
+            // Cache the normalized signal
+            float signal_normalized = float(box->getSignalNormalized());
+            // Where in the ID list does this box start?
+            size_t startPointIndex = pointIndex;
 
-            if (pointIndex >= numPoints)
+            // Show at least an event from this box
+            const std::vector<MDE> & events = box->getConstEvents();
+            // Start here
+            size_t j = interval-pointsCounted;
+            for (; j < events.size(); j += interval)
             {
-              std::cout << "Exceeded allocated points!" << std::endl;
-              ii = int(boxes.size());
-              break;
+              const MDE & ev = events[j];
+              const coord_t * center = ev.getCenter();
+              // TODO: Handle reduced dimensions
+              //std::cout << box->getId() << " event at " << ev.getCenter(0) << "," << ev.getCenter(1) << "," << ev.getCenter(2) << std::endl;
+              //points->SetPoint(pointIndex, center[0], center[1], center[2]);
+              points->SetPoint(pointIndex, center);
+              // Save for the point set
+              ids[pointIndex] = pointIndex;
+              pointIndex++;
+              if (pointIndex > numPoints)
+              {
+                std::cout << "Exceeded allocated points!" << std::endl;
+                ii = int(boxes.size());
+                break;
+              }
             }
+            // Set the points counted to the remainder of what was skipped
+            pointsCounted = (events.size() - (j-interval));
+            // Done with the event list
+            box->releaseEvents();
+
+            // The signal will match that point
+            signals->InsertNextTuple1(signal_normalized);
+            // Create a "poly vertex" set of vertexes starting at this point in the box
+            visualDataSet->InsertNextCell(VTK_POLY_VERTEX, pointIndex-startPointIndex, ids+startPointIndex);
           }
-          // Set the points counted to the remainder of what was skipped
-          pointsCounted = (events.size() - pointsCounted) % interval + 1;
-          // Done with the event list
-          box->releaseEvents();
-        }
-        else
-        {
-          // Skip it. Too few events, we are going on
-          pointsCounted += newPoints;
-        }
-      }
+          else
+          {
+            // Skip it. Too few events, we are going on
+            pointsCounted += newPoints;
+          }
+        } // box has any points
+      } // box is valid MDBox
     } // For each box
     if (VERBOSE) std::cout << tim << " to create " << pointIndex << " points." << std::endl;
 
-    visualDataSet->InsertNextCell(VTK_POLY_VERTEX, pointIndex, ids);
-    if (VERBOSE) std::cout << tim << " to insert the VTK_POLY_VERTEX." << std::endl;
-
     //Shrink to fit
-//    signals->Squeeze();
 //    points->Squeeze();
+    signals->Squeeze();
     visualDataSet->Squeeze();
 
     //Add points and scalars
