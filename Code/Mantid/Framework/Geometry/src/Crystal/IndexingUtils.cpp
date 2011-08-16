@@ -444,7 +444,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
       beta     = a_dir.angle( c_dir ) * 180 / PI;
                                        // keep a,b,c right handed by choosing
                                        // c in general directiion of a X b 
-      if ( perp_ang > 90 - epsilon                      &&
+      if ( perp_ang < 90 - epsilon                      &&
            alpha >= min_deg && (180 - alpha) >= min_deg &&
            beta  >= min_deg && (180 - beta ) >= min_deg  )
       { 
