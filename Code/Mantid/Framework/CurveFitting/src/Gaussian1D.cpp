@@ -14,6 +14,13 @@ namespace CurveFitting
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Gaussian1D)
 
+/// Empty default constructor
+Gaussian1D::Gaussian1D()
+{
+  useAlgorithm("Fit alg with Gaussian function");
+  deprecatedDate("2011-08-16");
+}
+
 /// Sets documentation strings for this algorithm
 void Gaussian1D::initDocs()
 {

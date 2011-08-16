@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Fit1D.h"
 
+#include "MantidAPI/DeprecatedAlgorithm.h"
+
 namespace Mantid
 {
   namespace CurveFitting
@@ -52,9 +54,11 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Gaussian1D : public Fit1D
+    class DLLExport Gaussian1D : public Fit1D, public API::DeprecatedAlgorithm
     {
     public:
+      /// Default constructor
+      Gaussian1D();
       /// Destructor
       virtual ~Gaussian1D() {};
       /// Algorithm's name for identification overriding a virtual method

@@ -8,6 +8,13 @@ namespace Mantid
 namespace CurveFitting
 {
 
+/// Empty default constructor
+GaussianLinearBG1D::GaussianLinearBG1D()
+{
+  useAlgorithm("Fit alg with Gaussian and linear background function");
+  deprecatedDate("2011-08-16");
+}
+
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(GaussianLinearBG1D)
 
