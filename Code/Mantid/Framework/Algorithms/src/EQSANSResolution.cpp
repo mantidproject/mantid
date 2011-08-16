@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidWorkflowAlgorithms/EQSANSResolution.h"
+#include "MantidAlgorithms/EQSANSResolution.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
@@ -11,7 +11,7 @@
 
 namespace Mantid
 {
-namespace WorkflowAlgorithms
+namespace Algorithms
 {
 
 // Register the algorithm into the AlgorithmFactory

@@ -51,6 +51,7 @@ set ( SRC_FILES
 	src/DiffractionFocussing2.cpp
 	src/Divide.cpp
 	src/DspacemaptoCal.cpp
+    src/EQSANSResolution.cpp
 	src/EQSANSTofStructure.cpp
 	src/ElasticWindow.cpp
 	src/Exponential.cpp
@@ -209,6 +210,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/DiffractionFocussing2.h
 	inc/MantidAlgorithms/Divide.h
 	inc/MantidAlgorithms/DspacemaptoCal.h
+    inc/MantidAlgorithms/EQSANSResolution.h
 	inc/MantidAlgorithms/EQSANSTofStructure.h
 	inc/MantidAlgorithms/ElasticWindow.h
 	inc/MantidAlgorithms/Exponential.h
