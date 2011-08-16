@@ -39,13 +39,6 @@ namespace MantidQt
       wksp1_opt = new QComboBox;
       fillAndSetComboBox("InPeaksWorkspace",wksp1_opt);
       m_loaderLayout->addWidget(new QLabel(tr("InPeaksWorkspace")),0,0);
-      // Check input workspace property. If there are available workspaces then
-      // these have been set as allowed values
-      std::set<std::string> workspaces = getAlgorithmProperty("InPeaksWorkspace")->allowedValues();
-      for( std::set<std::string>::const_iterator itr = workspaces.begin(); itr != workspaces.end(); ++itr )
-      {
-        wksp1_opt->addItem(QString::fromStdString(*itr));
-      }
       m_loaderLayout->addWidget(wksp1_opt,0,1);
       tie(wksp1_opt, "InPeaksWorkspace", m_loaderLayout);
       flagInputWS(wksp1_opt);
@@ -53,13 +46,6 @@ namespace MantidQt
       wksp2_opt = new QComboBox;
       fillAndSetComboBox("InputWorkspace",wksp2_opt);
       m_loaderLayout->addWidget(new QLabel(tr("InputWorkspace")),1,0);
-      // Check input workspace property. If there are available workspaces then
-      // these have been set as allowed values
-      workspaces = getAlgorithmProperty("InputWorkspace")->allowedValues();
-      for( std::set<std::string>::const_iterator itr = workspaces.begin(); itr != workspaces.end(); ++itr )
-      {
-        wksp2_opt->addItem(QString::fromStdString(*itr));
-      }
       m_loaderLayout->addWidget(wksp2_opt,1,1);
       tie(wksp2_opt, "InputWorkspace", m_loaderLayout);
     
