@@ -431,7 +431,15 @@ class LoadRun(ReductionStep):
             if type(reducer._beam_finder) is BaseBeamFinder:
                 if reducer.get_beam_center() == [0.0,0.0]:
                     reducer.set_beam_finder(BaseBeamFinder(conf.center_x, conf.center_y))   
-                    output_str += "   Beam center set from config file: %-6.1f, %-6.1f\n" % (conf.center_x, conf.center_y)                             
+                    output_str += "   Beam center set from config file: %-6.1f, %-6.1f\n" % (conf.center_x, conf.center_y)          
+                    
+            # Modify moderator position
+            if conf.moderator_position is not None:
+                sample_to_mod = -conf.moderator_position/1000.0
+                MoveInstrumentComponent(workspace+'_evt', "moderator", 
+                                        Z=sample_to_mod,
+                                        RelativePosition="0")
+                mtd[workspace+'_evt'].getRun().addProperty_dbl("moderator_position", sample_to_mod, "mm", True)  
         else:
             mantid.sendLogMessage("Could not find configuration file for %s" % workspace)
             output_str += "   Could not find configuration file for %s\n" % workspace

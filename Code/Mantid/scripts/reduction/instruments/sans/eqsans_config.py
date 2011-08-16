@@ -45,6 +45,9 @@ class EQSANSConfig(object):
         
         # Slit positions
         self.slit_positions = [8*[20.0],8*[20.0],8*[20.0]]
+        
+        # Moderator position
+        self.moderator_position = None
     
     def _process_file(self):
         """
@@ -101,7 +104,7 @@ class EQSANSConfig(object):
                     self.prompt_pulse_width = float(width.group(1))
                     
             # Slits
-            if line.lower().find("wheel"):
+            if line.lower().find("wheel")>=0:
                 slit = re.search("([1-8]) wheel[ ]*([1-3])[ \t]*=[ \t]*(\w+)", line.lower())
                 if slit is not None:
                     slit_number = int(slit.group(1))-1
@@ -111,4 +114,11 @@ class EQSANSConfig(object):
                     slit_size_re = re.search("\w*?([0-9]+)mm", slit_name)
                     if slit_size_re is not None:
                         slit_size = float(slit_size_re.group(1))
-                    self.slit_positions[wheel_number][slit_number] = slit_size                    
+                    self.slit_positions[wheel_number][slit_number] = slit_size      
+                    
+            # Distance between moderator and sample
+            # Sample Location         = 14160
+            if line.lower().find("sample location")>=0:
+                pos = re.search("=[ ]*([0-9]+)", line)
+                if pos is not None:
+                    self.moderator_position = float(pos.group(1))
