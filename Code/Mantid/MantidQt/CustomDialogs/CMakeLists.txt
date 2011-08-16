@@ -5,6 +5,7 @@ set ( SRC_FILES src/CreateSampleShapeDialog.cpp
                 src/LoadRawDialog.cpp
                 src/LOQScriptInputDialog.cpp
                 src/MantidGLWidget.cpp
+                src/PeakIntegrationDialog.cpp
                 src/PlotAsymmetryByLogValueDialog.cpp
                 src/SampleShapeHelpers.cpp
 )
@@ -19,6 +20,7 @@ set ( INC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
                 inc/MantidQtCustomDialogs/LoadRawDialog.h
                 inc/MantidQtCustomDialogs/LOQScriptInputDialog.h
                 inc/MantidQtCustomDialogs/MantidGLWidget.h
+                inc/MantidQtCustomDialogs/PeakIntegrationDialog.h
                 inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.h
                 inc/MantidQtCustomDialogs/SampleShapeHelpers.h
 )
@@ -30,6 +32,7 @@ set ( MOC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
                 inc/MantidQtCustomDialogs/LoadRawDialog.h
                 inc/MantidQtCustomDialogs/LOQScriptInputDialog.h
                 inc/MantidQtCustomDialogs/MantidGLWidget.h
+                inc/MantidQtCustomDialogs/PeakIntegrationDialog.h
                 inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.h
                 inc/MantidQtCustomDialogs/SampleShapeHelpers.h
 )
