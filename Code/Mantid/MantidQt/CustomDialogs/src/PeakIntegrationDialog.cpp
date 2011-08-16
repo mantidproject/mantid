@@ -152,9 +152,13 @@ namespace MantidQt
       untie("TOFBinMin");
       untie("TOFBinMax");
     
-    
-      if(!(state == Qt::Checked))
+      if(state == Qt::Checked)
       {
+        setFixedHeight(sizeHint().height());
+      }
+      else
+      {
+        setFixedHeight(sizeHint().height()+200);
         label1 = new QLabel(tr("XMin"));
         input1 = new QLineEdit;
         label1->setBuddy(input1);
