@@ -173,6 +173,9 @@ protected:
   //@{
   ///Tie a widget to a property
   QWidget* tie(QWidget* widget, const QString & property, QLayout* parent_layout, bool readHistory = true);
+  ///Untie a widget to a property
+  void untie(const QString & property);
+
   
   /// Open a file dialog to select a file.
   QString openFileDialog(const QString & propName);

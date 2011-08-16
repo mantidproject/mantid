@@ -346,6 +346,17 @@ bool AlgorithmDialog::isWidgetEnabled(const QString & propName) const
 }
 
 /**
+ * UnTie a property
+ * @param property :: The name of the property to tie the given widget to
+ */
+void AlgorithmDialog::untie(const QString & property) 
+{
+  if( m_tied_properties.contains(property) )
+  {
+    m_tied_properties.remove(property);
+  }
+}
+/**
  * Tie together an input widget and a property
  * @param widget :: The widget that will collect the input
  * @param property :: The name of the property to tie the given widget to
