@@ -24,6 +24,8 @@ using Mantid::detid_t;
 class LoadNexusProcessedTest : public CxxTest::TestSuite
 {
 public:
+  static LoadNexusProcessedTest *createSuite() { return new LoadNexusProcessedTest(); }
+  static void destroySuite(LoadNexusProcessedTest *suite) { delete suite; }
 
   LoadNexusProcessedTest() :
     testFile("GEM38370_Focussed_Legacy.nxs"),
