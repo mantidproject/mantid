@@ -1,4 +1,4 @@
-#include "vtkMDEWNexusReaderII.h"
+#include "vtkMDEWSplatterReader.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
@@ -24,14 +24,14 @@
 #include "MantidNexus/NeXusException.hpp"
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"
 
-vtkCxxRevisionMacro(vtkMDEWNexusReaderII, "$Revision: 1.0 $");
-vtkStandardNewMacro(vtkMDEWNexusReaderII);
+vtkCxxRevisionMacro(vtkMDEWSplatterReader, "$Revision: 1.0 $");
+vtkStandardNewMacro(vtkMDEWSplatterReader);
 
 using namespace Mantid::VATES;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 
-vtkMDEWNexusReaderII::vtkMDEWNexusReaderII() :
+vtkMDEWSplatterReader::vtkMDEWSplatterReader() :
     m_needsLoading(true),
     m_ThresholdRange(new IgnoreZerosThresholdRange())
 {
@@ -41,7 +41,7 @@ vtkMDEWNexusReaderII::vtkMDEWNexusReaderII() :
   //On first-pass rebinning is necessary.
 }
 
-vtkMDEWNexusReaderII::~vtkMDEWNexusReaderII()
+vtkMDEWSplatterReader::~vtkMDEWSplatterReader()
 {
   this->SetFileName(0);
 }
@@ -51,14 +51,14 @@ vtkMDEWNexusReaderII::~vtkMDEWNexusReaderII()
 Sets maximum recursion depth.
 @param depth : recursion maximum depth.
 */
-void vtkMDEWNexusReaderII::SetRecursionDepth(int depth)
+void vtkMDEWSplatterReader::SetNumberOfPoints(int depth)
 {
   if(depth >= 0)
   {
     size_t temp = static_cast<size_t>(depth);
-    if(m_recursionDepth != temp)
+    if(m_numberPoints != temp)
     {
-      m_recursionDepth = temp;
+      m_numberPoints = temp;
       this->Modified();
     }
   }
@@ -69,7 +69,7 @@ void vtkMDEWNexusReaderII::SetRecursionDepth(int depth)
 Sets algorithm in-memory property. If this is changed, the file is reloaded.
 @param inMemory : true if the entire file should be loaded into memory.
 */
-void vtkMDEWNexusReaderII::SetInMemory(bool inMemory)
+void vtkMDEWSplatterReader::SetInMemory(bool inMemory)
 {
   if(m_loadInMemory != inMemory)
   {
@@ -80,9 +80,9 @@ void vtkMDEWNexusReaderII::SetInMemory(bool inMemory)
 }
 
 
-int vtkMDEWNexusReaderII::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
+int vtkMDEWSplatterReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
-  FilterUpdateProgressAction<vtkMDEWNexusReaderII> updatehandler(this);
+  FilterUpdateProgressAction<vtkMDEWSplatterReader> updatehandler(this);
   Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(updatehandler, &ProgressAction::handler);
 
   //get the info objects
@@ -111,8 +111,7 @@ int vtkMDEWNexusReaderII::RequestData(vtkInformation * vtkNotUsed(request), vtkI
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
   std::string scalarName = "signal";
-  vtkMDEWHexahedronFactory vtkGridFactory(m_ThresholdRange, scalarName, m_recursionDepth);
-  // vtkSplatterPlotFactory vtkGridFactory(m_ThresholdRange, scalarName, m_recursionDepth);
+  vtkSplatterPlotFactory vtkGridFactory(m_ThresholdRange, scalarName, m_numberPoints);
   vtkGridFactory.initialize(result);
 
   output->ShallowCopy(vtkGridFactory.create());
@@ -120,7 +119,7 @@ int vtkMDEWNexusReaderII::RequestData(vtkInformation * vtkNotUsed(request), vtkI
   return 1;
 }
 
-int vtkMDEWNexusReaderII::RequestInformation(
+int vtkMDEWSplatterReader::RequestInformation(
   vtkInformation *vtkNotUsed(request),
   vtkInformationVector **vtkNotUsed(inputVector),
   vtkInformationVector *)
@@ -128,12 +127,12 @@ int vtkMDEWNexusReaderII::RequestInformation(
   return 1; 
 }
 
-void vtkMDEWNexusReaderII::PrintSelf(ostream& os, vtkIndent indent)
+void vtkMDEWSplatterReader::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
 }
 
-int vtkMDEWNexusReaderII::CanReadFile(const char* fname)
+int vtkMDEWSplatterReader::CanReadFile(const char* fname)
 {
   ::NeXus::File * file = NULL;
 
@@ -154,7 +153,7 @@ int vtkMDEWNexusReaderII::CanReadFile(const char* fname)
   return 0;
 }
 
-unsigned long vtkMDEWNexusReaderII::GetMTime()
+unsigned long vtkMDEWSplatterReader::GetMTime()
 {
   return Superclass::GetMTime();
 }
@@ -163,10 +162,10 @@ unsigned long vtkMDEWNexusReaderII::GetMTime()
 Update/Set the progress.
 @parameter progress : progress increment.
 */
-void vtkMDEWNexusReaderII::updateAlgorithmProgress(double progress)
+void vtkMDEWSplatterReader::updateAlgorithmProgress(double progress)
 {
   progressMutex.lock();
-  this->SetProgressText("Executing Mantid MDLeanEvent Loading Algorithm...");
+  this->SetProgressText("Executing Mantid MDEventWorkspace Loading Algorithm...");
   this->UpdateProgress(progress);
   progressMutex.unlock();
 }

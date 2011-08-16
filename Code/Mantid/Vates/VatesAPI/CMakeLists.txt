@@ -30,6 +30,7 @@ src/UserDefinedThresholdRange.cpp
 src/vtkDataSetFactory.cpp
 src/vtkDataSetToGeometry.cpp
 src/vtkClipperDataSetFactory.cpp
+src/vtkSplatterPlotFactory.cpp
 src/vtkMDEWHexahedronFactory.cpp
 src/vtkPeakMarkerFactory.cpp
 src/vtkProxyFactory.cpp
@@ -81,6 +82,7 @@ inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkClipperDataSetFactory.h
 inc/MantidVatesAPI/vtkMDEWHexahedronFactory.h
+inc/MantidVatesAPI/vtkSplatterPlotFactory.h
 inc/MantidVatesAPI/vtkPeakMarkerFactory.h
 inc/MantidVatesAPI/vtkProxyFactory.h
 inc/MantidVatesAPI/vtkStructuredGridFactory.h
@@ -98,6 +100,7 @@ test/vtkDataSetFactoryTest.h
 test/vtkClipperDataSetFactoryTest.h
 test/vtkDataSetToGeometryTest.h
 test/vtkMDEWHexahedronFactoryTest.h
+test/vtkSplatterPlotFactoryTest.h
 test/vtkPeakMarkerFactoryTest.h
 test/vtkProxyFactoryTest.h
 test/vtkStructuredGridFactoryTest.h
