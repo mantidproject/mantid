@@ -254,8 +254,8 @@ namespace MDEvents
       ws->cell<int>(i, col++) = int(box->getSizeOnFile());
       MDBox<MDE,nd>* mdbox = dynamic_cast<MDBox<MDE,nd>*>(box);
       ws->cell<int>(i, col++) = int(mdbox ? mdbox->getEventVectorSize() : -1);
-      ws->cell<Boolean>(i, 6) = Boolean(mdbox ? mdbox->getOnDisk() : false);
-      ws->cell<Boolean>(i, 7) = Boolean(mdbox ? mdbox->getInMemory() : false);
+      ws->cell<Boolean>(i, 6) = bool(mdbox ? mdbox->getOnDisk() : false);
+      ws->cell<Boolean>(i, 7) = bool(mdbox ? mdbox->getInMemory() : false);
       ws->cell<std::string>(i, 8) = box->getExtentsStr();
     }
     std::cout << tim << " to create the MDBox data table." << std::endl;
