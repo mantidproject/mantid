@@ -246,6 +246,7 @@ namespace MDEvents
               // Move forward in the file.
               start += uint64_t(events.size());
             }
+
             mdbox->releaseEvents();
           }
         }
@@ -264,8 +265,25 @@ namespace MDEvents
 
     // Done writing the event data.
     MDE::closeNexusData(file);
+
+    // ------------------------- Save Free Blocks --------------------------------------------------
+    // Get a vector of the free space blocks to save to the file
+    std::vector<uint64_t> freeSpaceBlocks;
+    bc->getDiskMRU().getFreeSpaceVector(freeSpaceBlocks);
+    if (freeSpaceBlocks.size() == 0)
+      freeSpaceBlocks.resize(2, 0); // Needs a minimum size
+    std::vector<int> free_dims(2,2); free_dims[0] = int(freeSpaceBlocks.size()/2);
+    std::vector<int> free_chunk(2,2); free_chunk[0] = 1000;
+
+    // Now the free space blocks under event_data
+    if (!update)
+      file->writeExtendibleData("free_space_blocks", freeSpaceBlocks, free_dims, free_chunk);
+    else
+      file->writeUpdatedData("free_space_blocks", freeSpaceBlocks, free_dims);
     file->closeGroup();
 
+
+    // -------------- Save Box Structure  -------------------------------------
     // OK, we've filled these big arrays of data. Save them.
     prog->report("Writing Box Data");
 
@@ -277,14 +295,6 @@ namespace MDEvents
 
     // Add box controller info to this group
     file->putAttr("box_controller_xml", bc->toXMLString());
-
-    // Get a vector of the free space blocks to save to the file
-    std::vector<uint64_t> freeSpaceBlocks;
-    bc->getDiskMRU().getFreeSpaceVector(freeSpaceBlocks);
-    if (freeSpaceBlocks.size() == 0)
-      freeSpaceBlocks.resize(2, 0); // Needs a minimum size
-    std::vector<int> free_dims(2,2); free_dims[0] = int(freeSpaceBlocks.size()/2);
-    std::vector<int> free_chunk(2,2); free_chunk[0] = 1000;
 
     std::vector<int> exents_dims(2,0);
     exents_dims[0] = (int(maxBoxes));
@@ -310,7 +320,6 @@ namespace MDEvents
       file->writeExtendibleData("box_children", box_children, box_2_dims, box_2_chunk);
       file->writeExtendibleData("box_signal_errorsquared", box_signal_errorsquared, box_2_dims, box_2_chunk);
       file->writeExtendibleData("box_event_index", box_event_index, box_2_dims, box_2_chunk);
-      file->writeExtendibleData("free_space_blocks", freeSpaceBlocks, free_dims, free_chunk);
     }
     else
     {
@@ -322,7 +331,6 @@ namespace MDEvents
       file->writeUpdatedData("box_children", box_children, box_2_dims);
       file->writeUpdatedData("box_signal_errorsquared", box_signal_errorsquared, box_2_dims);
       file->writeUpdatedData("box_event_index", box_event_index, box_2_dims);
-      file->writeUpdatedData("free_space_blocks", freeSpaceBlocks, free_dims);
     }
 
     // Finished - close the file. This ensures everything gets written out even when updating.

@@ -1,15 +1,16 @@
 #ifndef MANTID_MDEVENTS_PLUSMDEWTEST_H_
 #define MANTID_MDEVENTS_PLUSMDEWTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
-#include "MantidMDEvents/PlusMDEW.h"
+#include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/PlusMDEW.h"
+#include "MantidNexus/NeXusFile.hpp"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include <cxxtest/TestSuite.h>
+#include <iomanip>
+#include <iostream>
+#include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -27,7 +28,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void do_test(bool lhs_file, bool rhs_file, int inPlace)
+  void do_test(bool lhs_file, bool rhs_file, int inPlace, bool deleteFile=true)
   {
     // Make two input workspaces
     MDEventWorkspace3Lean::sptr lhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDEWTest_lhs", lhs_file);
@@ -62,6 +63,22 @@ public:
       { TSM_ASSERT( "If either input WS is file backed, then the output should be too.", ws->getBoxController()->isFileBacked() ); }
     TS_ASSERT_EQUALS( ws->getNPoints(), 20000);
 
+    if (ws->isFileBacked())
+    {
+      BoxController_sptr bc = ws->getBoxController();
+      std::cout << bc->getDiskMRU().getFreeSpaceMap().size() << " entries in the free space map" << std::endl;
+      ::NeXus::File * file = bc->getFile();
+      // The file should have an entry of 20000 points too (with some error due to the free space blocks). This means the file back-end was updated
+      TS_ASSERT_DELTA(file->getInfo().dims[0], 20000, 100);
+
+      // Close the file so you can delete it. Otherwise the following test gets confused.
+      if (deleteFile)
+      {
+        file->close();
+        Poco::File(bc->getFilename()).remove();
+      }
+    }
+
   }
   
   void test_mem_plus_mem()
@@ -94,9 +111,12 @@ public:
   void test_file_plus_file_inPlace_ofRHS()
   { do_test(true, true, 2); }
 
+  /** Does the file adding to a clone that will also be file-backed,
+   * then updates the filebackend using SaveMDEW
+   */
   void test_file_plus_file_thenSaveMDEW()
   {
-    do_test(true, true, 0);
+    do_test(true, true, 0, false);
     AlgorithmHelper::runAlgorithm("SaveMDEW", 4,
         "InputWorkspace", "PlusMDEWTest_out",
         "UpdateFileBackEnd", "1");

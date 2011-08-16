@@ -76,13 +76,13 @@ namespace MDEvents
     IMDBox<MDE,nd> * box1 = ws1->getBox();
     IMDBox<MDE,nd> * box2 = ws2->getBox();
 
-    Progress prog(this, 0.0, 0.9, box2->getBoxController()->getTotalNumMDBoxes());
+    Progress prog(this, 0.0, 0.7, box2->getBoxController()->getTotalNumMDBoxes());
 
-    // Make a leaf-only iterator through all boxes with events in the workspace
-    MDBoxIterator<MDE,nd> it(box2, 1000, true);
+    // Make a leaf-only iterator through all boxes with events in the RHS workspace
+    MDBoxIterator<MDE,nd> it2(box2, 1000, true);
     while (true)
     {
-      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(it.getBox());
+      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(it2.getBox());
       if (box)
       {
         // Copy the events from WS2 and add them into WS1
@@ -92,15 +92,38 @@ namespace MDEvents
         box->releaseEvents();
       }
       prog.report();
-      if (!it.next()) break;
+      if (!it2.next()) break;
     }
 
-    prog.resetNumSteps(3, 0.9, 1.0);
+    prog.resetNumSteps(2, 0.7, 0.8);
     prog.report("Splitting Boxes");
     ThreadScheduler * ts = new ThreadSchedulerFIFO();
     ThreadPool tp(ts);
     ws1->splitAllIfNeeded(ts);
     tp.joinAll();
+
+    // Now we need to save all the data that was not saved before.
+    if (ws1->isFileBacked())
+    {
+      // Flush anything else in the to-write buffer
+      BoxController_sptr bc = ws1->getBoxController();
+      bc->getDiskMRU().flushCache();
+
+      prog.resetNumSteps(bc->getTotalNumMDBoxes(), 0.8, 1.0);
+      MDBoxIterator<MDE,nd> it1(box1, 1000, true);
+      while (true)
+      {
+        MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(it1.getBox());
+        if (box)
+          box->save();
+        prog.report("Saving");
+        if (!it1.next()) break;
+      }
+      // Flush the data writes to disk.
+      box1->flushData();
+    }
+
+
 
     prog.report("Refreshing cache");
     ws1->refreshCache();

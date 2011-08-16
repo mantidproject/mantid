@@ -149,6 +149,33 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
+  /** Private method to load the events from a disk cache into the "data" member vector.
+   * If there were events in data[] because of the use of addEvents, they are APPENDED
+   * to the ones from disk.
+   *
+   */
+  TMDE(
+  inline void MDBox)::loadEvents() const
+  {
+    // Is the data in memory right now (cached copy)?
+    if (!m_inMemory)
+    {
+      // Perform the data loading
+      ::NeXus::File * file = this->m_BoxController->getFile();
+      if (file)
+      {
+        this->m_BoxController->fileMutex.lock();
+        // Note that this APPENDS any events to the existing event list
+        //  (in the event that addEvent() was called for a box that was on disk)
+        MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
+        this->m_BoxController->fileMutex.unlock();
+        m_inMemory = true;
+      }
+    }
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
   /** Returns a reference to the events vector contained within.
    * VERY IMPORTANT: call MDBox::releaseEvents() when you are done accessing that data.
    */
@@ -157,21 +184,8 @@ namespace MDEvents
   {
     if (m_onDisk)
     {
-      // Is the data in memory right now (cached copy)?
-      if (!m_inMemory)
-      {
-        // Perform the data loading
-        ::NeXus::File * file = this->m_BoxController->getFile();
-        if (file)
-        {
-          this->m_BoxController->fileMutex.lock();
-          // Note that this APPENDS any events to the existing event list
-          //  (in the event that addEvent() was called for a box that was on disk)
-          MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
-          this->m_BoxController->fileMutex.unlock();
-          m_inMemory = true;
-        }
-      }
+      // Load and concatenate the events if needed
+      this->loadEvents();
       // After loading, or each time you request it:
       // Touch the MRU to say you just used it.
       this->m_BoxController->getDiskMRU().loading(this);
@@ -193,20 +207,8 @@ namespace MDEvents
   {
     if (m_onDisk)
     {
-      // Is the data in NOT memory right now (it is on disk)?
-      if (!m_inMemory)
-      {
-        // Perform the data loading
-        ::NeXus::File * file = this->m_BoxController->getFile();
-        if (file)
-        {
-          this->m_BoxController->fileMutex.lock();
-          // Note that this APPENDS any events to the existing event list
-          MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
-          this->m_BoxController->fileMutex.unlock();
-          m_inMemory = true;
-        }
-      }
+      // Load and concatenate the events if needed
+      this->loadEvents();
       // After loading, or each time you request it:
       // Touch the MRU to say you just used it.
       this->m_BoxController->getDiskMRU().loading(this);
@@ -242,10 +244,19 @@ namespace MDEvents
   TMDE(
   void MDBox)::save() const
   {
+    // When addEvent() was called on cached data, so the data[] vector has something despite the events being on disk
+    bool addedEventsOnCached = (!m_inMemory && (data.size() != 0));
+
     // Only save to disk when the access was non-const;
-    // OR: when addEvent() was called on cached data
-    if (!m_dataConstAccess || (data.size() != m_fileNumEvents))
+    //  or when you added events to a cached data
+    //  or when you added events, FOLLOWED by getting the events (which merged the vector together)
+    if (!m_dataConstAccess || addedEventsOnCached || (m_fileNumEvents != data.size()) )
     {
+      // This will load and append events ONLY if needed.
+      if (addedEventsOnCached)
+        this->loadEvents();
+
+      // This is the new size of the event list, possibly appended (if used AddEvent) or changed otherwise (non-const access)
       size_t newNumEvents = data.size();
       DiskMRU & mru = this->m_BoxController->getDiskMRU();
       if (newNumEvents != m_fileNumEvents)
@@ -261,6 +272,7 @@ namespace MDEvents
       }
       else
       {
+        // Size of the event list is the same, keep it there.
         if (newNumEvents > 0)
         {
           // Save at the same place
@@ -282,8 +294,9 @@ namespace MDEvents
    * @param file :: Nexus File object, must already by opened with MDE::prepareNexusData()
    */
   TMDE(
-  void MDBox)::saveNexus(::NeXus::File * file) const
+  inline void MDBox)::saveNexus(::NeXus::File * file) const
   {
+    //std::cout << "Box " << this->getId() << " saving to " << m_fileIndexStart << std::endl;
     MDE::saveVectorToNexusSlab(this->data, file, m_fileIndexStart,
                                this->m_signal, this->m_errorSquared);
   }
@@ -296,7 +309,7 @@ namespace MDEvents
    * @param file :: Nexus File object, must already by opened with MDE::openNexusData()
    */
   TMDE(
-  void MDBox)::loadNexus(::NeXus::File * file)
+  inline void MDBox)::loadNexus(::NeXus::File * file)
   {
     this->data.clear();
     MDE::loadVectorFromNexusSlab(this->data, file, m_fileIndexStart, m_fileNumEvents);

@@ -80,7 +80,7 @@ namespace MDEvents
     m_filename = getPropertyValue("Filename");
 
     // Start loading
-    file = new ::NeXus::File(m_filename);
+    file = new ::NeXus::File(m_filename, NXACC_RDWR);
 
     // The main entry
     file->openGroup("MDEventWorkspace", "NXentry");

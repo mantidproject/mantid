@@ -439,11 +439,10 @@ namespace Kernel
     free.reserve( m_free.size() * 2);
     freeSpace_by_size_t::const_iterator it = m_free_bySize.begin();
     freeSpace_by_size_t::const_iterator it_end = m_free_bySize.end();
-    size_t i=0;
     for (; it != it_end; it++)
     {
-      free[i++] = it->getFilePosition();
-      free[i++] = it->getSize();
+      free.push_back(it->getFilePosition());
+      free.push_back(it->getSize());
     }
   }
 

@@ -168,6 +168,8 @@ namespace MDEvents
 
   protected:
 
+    inline void loadEvents() const;
+
     /** Vector of MDLeanEvent's, in no particular order.
      * */
     mutable std::vector< MDE > data;
