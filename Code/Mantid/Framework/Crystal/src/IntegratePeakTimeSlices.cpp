@@ -127,6 +127,31 @@ namespace Mantid
       }
     }
 
+    void IntegratePeakTimeSlices::initDocs()
+    {
+      this->setWikiSummary("Integrates each time slice around a peak adding the results to the peak object");
+
+      this->setOptionalMessage("The algorithm uses CurveFitting::BivariateNormal for fitting a time slice");
+
+      std::string description =
+        "This algorithm fits a bivariate normal distribution( plus background) to the \n";
+
+      description +=
+        "data on each time slice. This algorithm only works for peaks on Rectangular  \n";
+
+      description +=
+        "Detector.  The rectangular area used for the fitting is calculated based on \n";
+
+
+      description +=
+         "the dQ parameter.  A good value for dQ is .1667/largest unit cell length.";
+
+      this->setWikiDescription(
+             description
+             );
+    }
+
+
     void IntegratePeakTimeSlices::init()
     {
       declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InputWorkspace", "", Direction::Input),
@@ -226,7 +251,7 @@ namespace Mantid
 
         Mantid::MantidVec X = inpWkSpace->dataX(specNum);
         int dChan = CalculateTimeChannelSpan(peak, dQ, X, int(specNum), Chan);
-        //dChan = min<int>(dChan, ((int)X.size())/5);
+
         dChan = max<int> (dChan, 5);
 
         sprintf(logInfo, std::string("   dRow = %5.3f  dChan = %d \n").c_str(), dRow, dChan);
@@ -318,8 +343,6 @@ namespace Mantid
 
                 std::string fun_str = CalculateFunctionProperty_Fit();
 
-                //sprintf( logInfo, std::string("   Fit string %s\n").c_str(),
-                //                                           fun_str.c_str());
                 std::string SSS("   Fit string ");
                 SSS += fun_str;
                 g_log.debug(SSS);
@@ -391,13 +414,13 @@ namespace Mantid
                 if (dir > 0)
                 {
                   prog.report(dChan / 2);
-                  //std::cout<<"Prog set to step="<<(dChan/2)<<std::endl;
+
 
                 }
                 else
                 {
                   prog.report(dChan);
-                  //std::cout<<"Prog set to step="<<(dChan)<<std::endl;
+
                 }
               }
               params.clear();
@@ -436,6 +459,7 @@ namespace Mantid
 
     }
 
+
     //Gets the Rectangular detector from an instrument
     boost::shared_ptr<const RectangularDetector> IntegratePeakTimeSlices::getPanel(Peak const & peak)
     {
@@ -456,6 +480,7 @@ namespace Mantid
           const RectangularDetector>(parent);
       return RDet;
     }
+
 
     // first element of )NrowsCols in the # of rows,the second is the # of columns
     void IntegratePeakTimeSlices::findNumRowsColsinPanel ( DataObjects::Peak           const &peak,
@@ -503,12 +528,12 @@ namespace Mantid
         Geometry::IInstrument_const_sptr instr = peak.getInstrument();
         const Geometry::IObjComponent_sptr  sample = instr->getSample();
         V3D pos = peak.getDetPos()-sample->getPos();
-        //std::cout<<"Pos1,Pos2="<< peak.getDetPos()<<"::::"<< sample->getPos()<<"::::"<<pos<<endl;
+
         ScatAngle = acos(pos.Z() / pos.norm());
 
 
         dScatAngle = 2 * dQ / Q * tan(ScatAngle/2);
-        //std::cout<<" CalculatePanelRowColSpan D,d2thet"<<ScatAngle<<","<<dScatAngle<<std::endl;
+
 
         DetSpan = pos.norm() * dScatAngle; //s=r*theta
 
@@ -517,8 +542,7 @@ namespace Mantid
 
 
         ncols = DetSpan / xstep;
-       // std::cout<<"Q,ScatAngle,dScatAngle,DetSpan,nrows,ncols="<<Q<<","<<
-        //                               ScatAngle<<","<<dScatAngle<<","<< DetSpan<<","<<nrows<<","<<ncols<<std::endl;
+
         if (nrows > ncols)
         {
           if (nrows < 8)
@@ -583,19 +607,12 @@ namespace Mantid
       V3D pos = peak.getDetPos();
       double time = peak.getTOF();
       double dtime = dQ / Q * time;
-      // std::cout<<"Q,dQ="<<Q<<","<<dQ<<endl;
-      //std::cout<<"Time,dtime="<<time<<","<<dtime<<std::endl;
-
-      //std::cout<<"XScale:";
-      //for( size_t i=0; i < X.size(); i++)
-      //    std::cout<<X[i]<<",";
-      //  std::cout<<std::endl;
       int chanCenter = find(X, time);
 
       Centerchan = chanCenter;
       int chanLeft = find(X, time - dtime);
       int chanRight = find(X, time + dtime);
-      //std::cout<<"chan left,cent,right="<<chanLeft<<","<<Centerchan<<","<<chanRight<<endl;
+
       int dchan = abs(chanCenter - chanLeft);
 
       if (abs(chanRight - chanCenter) > dchan)
@@ -604,6 +621,9 @@ namespace Mantid
       dchan = max<int> (3,  dchan );
       return  dchan + 5;//heuristic should be a lot more
     }
+
+
+
 
     void IntegratePeakTimeSlices::InitializeColumnNamesInTableWorkspace(
                                                     TableWorkspace_sptr &TabWS)
@@ -631,7 +651,7 @@ namespace Mantid
       TabWS->addColumn("double", "End Col");
     }
 
-// returns StartRow,StartCol,NRows,NCols
+    // returns StartRow,StartCol,NRows,NCols
     //dRow is tot # rows. dCol is tot # columns
     vector<int> IntegratePeakTimeSlices::CalculateStart_and_NRowsCols( const double CentRow,
                                                                        const double CentCol,
@@ -641,7 +661,7 @@ namespace Mantid
                                                                        const int nPanelCols
                                                                       )
     {
-      //std::cout<<"Args getStartRC="<<CentRow<<","<<CentCol<<","<<dRow<<","<<dCol<<","<<nPanelRows<<","<<nPanelCols<<std::endl;
+
       std::vector<int> Res;
 
       double StartRow = CentRow - (int) (dRow / 2);
@@ -843,7 +863,7 @@ namespace Mantid
           Mantid::MantidVec histogram = inpWkSpace->readY(workspaceIndex);
 
           double intensity = histogram[chan];
-          //            std::cout<<intensity<<",";
+
           yvalB.push_back(intensity);
           errB.push_back(1);
 
@@ -960,6 +980,7 @@ namespace Mantid
           GoodNums = false;
         else if (params[i] != params[i])
           GoodNums = false;
+
       if (!GoodNums)
         g_log.debug("   Bad Slice.Some params and errs are not numbers");
 
@@ -967,6 +988,7 @@ namespace Mantid
 
       if (params[Ibk] < 0)
         GoodNums = false;
+
       if (params[IIntensity] < 0)
         GoodNums = false;
 
@@ -1007,6 +1029,8 @@ namespace Mantid
       return true;
     }
 
+
+
     //Calculate error used by ISAW. It "doubles" the background error.
     double IntegratePeakTimeSlices::CalculateIsawIntegrateError(const double background,
                                                                 const double backError,
@@ -1015,8 +1039,10 @@ namespace Mantid
                                                                 const int ncells)
     {
       UNUSED_ARG(ChiSqOverDOF)
+
       double Variance = TotIntensity + (backError * backError * TotIntensity / ncells) * ncells * ncells
           + background * ncells;
+
       return sqrt(Variance);
 
     }
@@ -1094,15 +1120,12 @@ namespace Mantid
                                                          const int ncells)
     {
       int Ibk = find("Background", names);
-      //int IIntensity = find("Intensity", names);
 
       double err = CalculateIsawIntegrateError(params[Ibk], errs[Ibk], chisqdivDOF, TotSliceIntensity, ncells);
 
       TotIntensity += TotSliceIntensity - params[IBACK] * ncells;
 
       TotVariance += err * err;
-
-
 
     }
 

@@ -86,6 +86,8 @@ private:
   void init();
   void exec();
 
+  virtual void initDocs();
+
   Mantid::API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace, the data set
   Mantid::DataObjects::TableWorkspace_sptr outputW; ///< A pointer to the output workspace
 

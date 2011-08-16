@@ -136,8 +136,8 @@ void test_exec()
   }
   else
   {
-    TS_ASSERT( F1.good());
-    TS_ASSERT(F2.good());
+    TS_ASSERT( F1.good() );
+    TS_ASSERT( F2.good() );
     remove( File2.c_str());
     return;
   }
