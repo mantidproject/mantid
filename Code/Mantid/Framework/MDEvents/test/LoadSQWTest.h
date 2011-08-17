@@ -115,6 +115,26 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of events in workspace", 580, ws.getNPoints());
   }
 
+  void testCreateWithoutEvents()
+  {
+    LoadSQW alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename","test_horace_reader.sqw");
+    alg.setPropertyValue("OutputWorkspace", "wsWithoutEvents");
+    alg.setProperty("MetadataOnly", true); //Load only metadata.
+    alg.execute();
+
+    TS_ASSERT(alg.isExecuted());
+
+    MDEventWorkspace4Lean::sptr ws =
+        boost::dynamic_pointer_cast<MDEventWorkspace4Lean>(Mantid::API::AnalysisDataService::Instance().retrieve("wsWithoutEvents"));
+
+    //Check the product
+    TSM_ASSERT_EQUALS("Should have no events!", 0, ws->getNPoints());
+    TSM_ASSERT_EQUALS("Wrong number of dimensions", 4, ws->getNumDims());
+
+  }
+
   void testSuccessfulLoad()
   {
     LoadSQW alg;

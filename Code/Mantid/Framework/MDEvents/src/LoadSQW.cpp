@@ -9,6 +9,7 @@
 #include "MantidKernel/ThreadPool.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 using Mantid::Kernel::ThreadSchedulerFIFO;
 using Mantid::Kernel::ThreadPool;
@@ -35,6 +36,8 @@ namespace Mantid
       declareProperty(new API::FileProperty("Filename","", API::FileProperty::Load,fileExtensions), "File of type SQW format");
       declareProperty(new API::WorkspaceProperty<API::IMDEventWorkspace>("OutputWorkspace","", Kernel::Direction::Output),
         "Output IMDEventWorkspace reflecting sqw data read-in");
+      declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),
+        "Load Metadata without events.");
     }
 
     /// Execute the algorithm
@@ -63,7 +66,11 @@ namespace Mantid
       pWs->splitBox();
 
       // Read events into the workspace.
-      addEvents(pWs);
+      bool bMetadataOnly = getProperty("MetadataOnly");
+      if(!bMetadataOnly)
+      {
+        addEvents(pWs);
+      }
 
       //Persist the workspace.
       

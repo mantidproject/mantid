@@ -145,7 +145,7 @@ public:
 
 
   template <size_t nd>
-  void do_test_exec(bool FileBackEnd, bool deleteWorkspace=true)
+  void do_test_exec(bool FileBackEnd, bool deleteWorkspace=true, bool metadataonly=false)
   {
     //------ Start by creating the file ----------------------------------------------
     // Make a 1D MDEventWorkspace
@@ -186,6 +186,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("FileBackEnd", FileBackEnd) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Memory", 0) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MetadataOnly", metadataonly));
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
@@ -262,6 +263,60 @@ public:
     ws2->getBoxController()->closeFile();
     AnalysisDataService::Instance().remove(outWSName);
 
+  }
+
+  void testMetaDataOnly()
+  {
+    //------ Start by creating the file ----------------------------------------------
+    // Make a 1D MDEventWorkspace
+    boost::shared_ptr<MDEventWorkspace<MDLeanEvent<2>,2> > ws1 = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0, 0);
+    ws1->getBoxController()->setSplitThreshold(100);
+    // Put in ADS so we can use fake data
+    AnalysisDataService::Instance().addOrReplace("LoadMDEWTest_ws", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
+    AlgorithmHelper::runAlgorithm("FakeMDEventData", 6,
+        "InputWorkspace", "LoadMDEWTest_ws", "UniformParams", "10000", "RandomizeSignal", "1");
+
+    std::ostringstream fileStream;
+    fileStream << "LoadMDEWTest" << 2 << ".nxs";
+
+    // Save it
+    SaveMDEW saver;
+    TS_ASSERT_THROWS_NOTHING( saver.initialize() )
+    TS_ASSERT( saver.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", "LoadMDEWTest_ws" ) );
+    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename", fileStream.str()) );
+    TS_ASSERT_THROWS_NOTHING( saver.execute(); );
+    TS_ASSERT( saver.isExecuted() );
+
+    // Retrieve the full path
+    std::string filename = saver.getPropertyValue("Filename");
+
+    //------ Now the loading -------------------------------------
+    // Name of the output workspace.
+    std::string outWSName("LoadMDEWTest_OutputWS");
+
+    CPUTimer tim;
+
+    LoadMDEW alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("FileBackEnd", false) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Memory", 0) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MetadataOnly", true));
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    std::cout << tim << " to do the entire MDEW loading without Events." << std::endl;
+
+    boost::shared_ptr<MDEventWorkspace<MDLeanEvent<2>,2> > ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<2>,2> >(AnalysisDataService::Instance().retrieve(outWSName));
+
+    TSM_ASSERT_EQUALS("Should have no events!", 0, ws->getNPoints());
+    TSM_ASSERT_EQUALS("Wrong number of dimensions", 2, ws->getNumDims());
+
+    ws->getBoxController()->closeFile();
+    AnalysisDataService::Instance().remove(outWSName);
   }
 
 
