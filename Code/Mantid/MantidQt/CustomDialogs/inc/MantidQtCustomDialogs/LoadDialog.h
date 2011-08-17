@@ -5,16 +5,12 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidQtAPI/AlgorithmDialog.h"
+#include "ui_LoadDialog.h"
 
 //------------------------------------------------------------------------------
 // Qt Forward declarations
 //------------------------------------------------------------------------------
-class QLineEdit;
-class QBoxLayout;
 class QVBoxLayout;
-class QHBoxLayout;
-class QGridLayout;
-class QSignalMapper;
 
 namespace MantidQt
 {
@@ -87,32 +83,23 @@ namespace MantidQt
       void initLayout();
       /// Save the input history
       void saveInput();
-      /// Create the widgets and layouts that are static, i.e do not depend on 
-      /// the specific load algorithm
-      void createStaticWidgets(QBoxLayout* layout);
       /// Tie static widgets to their properties
       void tieStaticWidgets(const bool readHistory);
       /// Clears all of the widgets from the old layout
-      void setupDynamicLayout();
+      void removeOldInputWidgets(QVBoxLayout *layout);
       /// Create
       void createDynamicLayout();
       /// Create the widgets for a given property
-      QBoxLayout* createWidgetsForProperty(const Mantid::Kernel::Property* prop, 
-					   QGridLayout *loaderGrid);
+      int createWidgetsForProperty(const Mantid::Kernel::Property* prop,
+					                         QVBoxLayout *propertyLayout, QWidget *parent);
 
     private:
-      /// A widget for the filename text input
-      MantidWidgets::MWRunFiles *m_fileWidget;
-      /// The workspace name widget
-      QLineEdit *m_wkspaceWidget;
-      /// The HBox layout for the workspace line
-      QHBoxLayout *m_wkspaceLayout;
-      /// The top-level layout
-      QVBoxLayout *m_dialogLayout;
-      /// The dynamic layout
-      QGridLayout *m_loaderLayout;
+      /// Form
+      Ui::LoadDialog m_form;
       /// The current file
       QString m_currentFile;
+      /// The initial height
+      int m_initialHeight;
     };
 
   }

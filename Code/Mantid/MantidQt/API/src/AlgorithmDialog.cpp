@@ -392,13 +392,13 @@ QWidget* AlgorithmDialog::tie(QWidget* widget, const QString & property, QLayout
       int item_index = parent_layout->indexOf(widget);
       if( QBoxLayout *box = qobject_cast<QBoxLayout*>(parent_layout) )
       {
-	box->insertWidget(item_index + 1, validlbl);
+        box->insertWidget(item_index + 1, validlbl);
       }
       else if( QGridLayout *grid = qobject_cast<QGridLayout*>(parent_layout) )
       {
-	int row(0), col(0), span(0);
-	grid->getItemPosition(item_index, &row, &col, &span, &span);
-	grid->addWidget(validlbl, row, col + 1);
+        int row(0), col(0), span(0);
+        grid->getItemPosition(item_index, &row, &col, &span, &span);
+        grid->addWidget(validlbl, row, col + 1);
       }
       else {}
     }

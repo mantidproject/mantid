@@ -41,6 +41,7 @@ set ( UI_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.ui
                inc/MantidQtCustomDialogs/DiagScriptInputDialog.ui
                inc/MantidQtCustomDialogs/LOQScriptInputDialog.ui
                inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.ui
+               inc/MantidQtCustomDialogs/LoadDialog.ui
 )
 
 include_directories ( inc )
