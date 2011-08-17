@@ -26,6 +26,7 @@ set ( SRC_FILES
 	src/MDHistoWorkspace.cpp
 	src/MDLeanEvent.cpp
 	src/MakeDiffractionMDEventWorkspace.cpp
+	src/MergeMDEW.cpp
 	src/OneStepMDEW.cpp
 	src/PlusMDEW.cpp
 	src/SaveMDEW.cpp
@@ -69,6 +70,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDHistoWorkspace.h
 	inc/MantidMDEvents/MDLeanEvent.h
 	inc/MantidMDEvents/MakeDiffractionMDEventWorkspace.h
+	inc/MantidMDEvents/MergeMDEW.h
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/PlusMDEW.h
 	inc/MantidMDEvents/SaveMDEW.h
@@ -103,6 +105,7 @@ set ( TEST_FILES
 	test/MDHistoWorkspaceTest.h
 	test/MDLeanEventTest.h
 	test/MakeDiffractionMDEventWorkspaceTest.h
+	test/MergeMDEWTest.h
 	test/OneStepMDEWTest.h
 	test/PlusMDEWTest.h
 	test/SaveMDEWTest.h

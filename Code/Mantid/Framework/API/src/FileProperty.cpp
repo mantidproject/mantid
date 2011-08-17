@@ -115,7 +115,7 @@ bool FileProperty::isOptional() const
 /**
  * Set the value of the property
  * @param propValue :: The value here is treated as relating to a filename
- * @returns A string indicating the outcome of the attempt to set the property. An empty string indicates success.
+ * @return A string indicating the outcome of the attempt to set the property. An empty string indicates success.
  */
 std::string FileProperty::setValue(const std::string & propValue)
 {

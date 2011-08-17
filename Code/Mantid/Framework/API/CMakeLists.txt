@@ -49,6 +49,7 @@ set ( SRC_FILES
 	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
 	src/MemoryManager.cpp
+	src/MultipleFileProperty.cpp
 	src/NumericAxis.cpp
 	src/PairedGroupAlgorithm.cpp
 	src/ParamFunction.cpp
@@ -153,6 +154,7 @@ set ( INC_FILES
 	inc/MantidAPI/MatrixWSIndexCalculator.h
 	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MemoryManager.h
+	inc/MantidAPI/MultipleFileProperty.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/PairedGroupAlgorithm.h
 	inc/MantidAPI/ParamFunction.h
@@ -212,6 +214,7 @@ set ( TEST_FILES
 	test/MDPropertyGeometryTest.h
 	test/MatrixWorkspaceTest.h
 	test/MemoryManagerTest.h
+	test/MultipleFilePropertyTest.h
 	test/NumericAxisTest.h
 	test/ParameterReferenceTest.h
 	test/ParameterTieTest.h
