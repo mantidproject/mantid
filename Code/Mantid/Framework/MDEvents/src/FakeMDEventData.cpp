@@ -95,6 +95,9 @@ namespace MDEvents
       throw std::invalid_argument("PeakParams: number_of_events needs to be > 0");
     size_t num = size_t(params[0]);
 
+    Progress prog(this, 0.0, 1.0, 100);
+    size_t progIncrement = num / 100; if (progIncrement == 0) progIncrement = 1;
+
     // Width of the peak
     double desiredRadius = params.back();
 
@@ -145,6 +148,8 @@ namespace MDEvents
 
       // Create and add the event.
       ws->addEvent( MDE( signal, errorSquared, centers) );
+      // Progress report
+      if ((i % progIncrement) == 0) prog.report();
     }
 
     ws->splitBox();
@@ -171,6 +176,9 @@ namespace MDEvents
     if (params[0] <= 0)
       throw std::invalid_argument("UniformParams: number_of_events needs to be > 0");
     size_t num = size_t(params[0]);
+
+    Progress prog(this, 0.0, 1.0, 100);
+    size_t progIncrement = num / 100; if (progIncrement == 0) progIncrement = 1;
 
     if (params.size() == 1)
     {
@@ -223,6 +231,8 @@ namespace MDEvents
 
       // Create and add the event.
       ws->addEvent( MDE( signal, errorSquared, centers) );
+      // Progress report
+      if ((i % progIncrement) == 0) prog.report();
     }
 
     /// Clean up the generators
