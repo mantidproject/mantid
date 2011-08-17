@@ -11,6 +11,7 @@
 #include <iostream>
 #include "MantidKernel/CPUTimer.h"
 #include "MantidTestHelpers/AlgorithmHelper.h"
+#include <Poco/File.h>
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
@@ -43,7 +44,13 @@ public:
     do_test_exec(0, "SaveMDEWTest_noEvents.nxs");
   }
 
-  void do_test_exec(size_t numPerBox, std::string filename)
+  void test_MakeFileBacked()
+  {
+    do_test_exec(23, "SaveMDEWTest.nxs", true);
+  }
+
+
+  void do_test_exec(size_t numPerBox, std::string filename, bool MakeFileBacked = false)
   {
     // Make a 1D MDEventWorkspace
     MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, numPerBox);
@@ -72,10 +79,19 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "SaveMDEWTest_ws") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MakeFileBacked", MakeFileBacked) );
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
     std::cout << tim << " to save " << ws->getBoxController()->getMaxId() << " boxes." << std::endl;
+
+    std::string this_filename = alg.getProperty("Filename");
+    TSM_ASSERT( "File was indeed created", Poco::File(this_filename).exists());
+
+    if (MakeFileBacked)
+    {
+      TSM_ASSERT( "Workspace was made file-backed", ws->isFileBacked() );
+    }
   }
   
 

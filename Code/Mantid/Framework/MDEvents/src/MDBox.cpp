@@ -89,6 +89,17 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
+  /** Clear the data[] vector ONLY but does not change the file-backed settings.
+   * Used to free up the memory in a file-backed workspace without removing the events from disk. */
+  TMDE(
+  void MDBox)::clearDataOnly() const
+  {
+    data.clear();
+    vec_t().swap(data); // Linux trick to really free the memory
+    m_inMemory = false;
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Returns the number of dimensions in this box */
   TMDE(
   size_t MDBox)::getNumDims() const

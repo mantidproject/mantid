@@ -77,6 +77,8 @@ namespace MDEvents
 
     void clear();
 
+    void clearDataOnly() const;
+
     size_t getNPoints() const;
 
     size_t getNumDims() const;
@@ -118,6 +120,11 @@ namespace MDEvents
     /// @return whether the box data (from disk) is loaded in memory (for debugging purposes).
     bool getInMemory() const
     { return m_inMemory; }
+
+    /** Set whether the box data (from disk) is loaded in memory (for SaveMDEW with MakeFileBacked).
+     * @param inMem :: true if it is in memory  */
+    void setInMemory(const bool inMem)
+    { m_inMemory = inMem; }
 
     /// @return the size of the event vector. FOR DEBUGGING! Note that this is NOT necessarily the same as the number of points (because it might be cached to disk) or the size on disk (because you might have called AddEvents)
     size_t getEventVectorSize() const
