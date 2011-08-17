@@ -141,6 +141,7 @@ set ( SRC_FILES
 	src/Sort.cpp
 	src/SortEvents.cpp
 	src/SpatialGrouping.cpp
+	src/SphericalAbsorption.cpp
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
 	src/SumNeighbours.cpp
@@ -301,6 +302,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Sort.h
 	inc/MantidAlgorithms/SortEvents.h
 	inc/MantidAlgorithms/SpatialGrouping.h
+	inc/MantidAlgorithms/SphericalAbsorption.h
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
 	inc/MantidAlgorithms/SumNeighbours.h
@@ -443,6 +445,7 @@ set ( TEST_FILES
 	test/SolidAngleTest.h
 	test/SortEventsTest.h
 	test/SpatialGroupingTest.h
+	test/SphericalAbsorptionTest.h
 	test/StripPeaksTest.h
 	test/StripVanadiumPeaksTest.h
 	test/SumNeighboursTest.h

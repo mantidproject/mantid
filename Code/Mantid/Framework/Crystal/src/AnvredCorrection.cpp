@@ -80,6 +80,8 @@ void AnvredCorrection::init()
       "If false, then the workspace gets converted to a Workspace2D histogram.");
    declareProperty("OnlySphericalAbsorption", false, "All corrections done if false (default).\n"
       "If true, only the spherical absorption correction.");
+   declareProperty("ReturnTransmissionOnly", false, "Corrections applied to data if false (default).\n"
+      "If true, only return the transmission coefficient.");
 
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
   mustBePositive->setLower(0.0);
@@ -106,7 +108,9 @@ void AnvredCorrection::exec()
   BuildLamdaWeights();
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>( m_inputWS );
-  if ((getProperty("PreserveEvents")) && (eventW != NULL))
+  if(eventW)eventW->sortAll(TOF_SORT, NULL);
+  bool transOnly = getProperty("ReturnTransmissionOnly");
+  if ((getProperty("PreserveEvents")) && (eventW != NULL) && !transOnly)
   {
     //Input workspace is an event workspace. Use the other exec method
     this->execEvent();
@@ -164,7 +168,14 @@ void AnvredCorrection::exec()
     {
       const double lambda = (isHist ? (0.5 * (Xin[j] + Xin[j + 1])) : Xin[j]);
 
-      Y[j] = Yin[j]*this->getEventWeight(lambda, scattering);
+      if (transOnly)
+      {
+        Y[j] = 1.0 / this->getEventWeight(lambda, scattering);
+      }
+      else
+      {
+        Y[j] = Yin[j] * this->getEventWeight(lambda, scattering);
+      }
 
     }
 
@@ -305,7 +316,7 @@ double AnvredCorrection::getEventWeight( double lamda, double two_theta )
     if ( radius > 0 )
        transinv = absor_sphere(two_theta, lamda);
     // Only Spherical absorption correction 
-    if (getProperty("OnlySphericalAbsorption")) return transinv;
+    if (getProperty("OnlySphericalAbsorption") || getProperty("ReturnTransmissionOnly")) return transinv;
 
     // Resolution of the lambda table
     size_t lamda_index = static_cast<size_t>( STEPS_PER_ANGSTROM * lamda );
