@@ -136,6 +136,16 @@ class SNSPowderReduction(PythonAlgorithm):
 #                                    RunNumber=runnumber, Extension=extension)
         return result["ResultPath"].value
 
+    def _addNeXusLogs(self, wksp, nxsfile, reloadInstr):
+        try:
+            LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
+            if reloadInstr:
+                LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
+            return True
+        except:
+            return False
+
+
     def _loadPreNeXusData(self, runnumber, extension):
         # generate the workspace name
         name = "%s_%d" % (self._instrument, runnumber)
@@ -146,11 +156,6 @@ class SNSPowderReduction(PythonAlgorithm):
             alg = LoadEventPreNexus(EventFilename=filename, OutputWorkspace=name)
             wksp = alg['OutputWorkspace']
         except:
-            pass
-
-        if 'wksp' in locals():
-            pass
-        else:
             # find the file to load
             filename = self._findData(runnumber, extension)
             # load the prenexus file
@@ -158,41 +163,23 @@ class SNSPowderReduction(PythonAlgorithm):
             wksp = alg['OutputWorkspace']
 
         # add the logs to it
+        reloadInstr = (str(self._instrument) == "SNAP")
+
         nxsfile = "%s_%d_event.nxs" % (self._instrument, runnumber)
-        try:
-            LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
-            if str(self._instrument) == "SNAP":
-                LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
+        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
             return wksp
-        except:
-            pass
 
         nxsfile = "%s_%d_histo.nxs" % (self._instrument, runnumber)
-        try:
-            LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
-            if str(self._instrument) == "SNAP":
-                LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
+        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
             return wksp
-        except:
-            pass
 
         nxsfile = self._findData(runnumber, "_event.nxs")
-        try:
-            LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
-            if str(self._instrument) == "SNAP":
-                LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
+        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
             return wksp
-        except:
-            pass
 
         nxsfile = self._findData(runnumber, "_histo.nxs")
-        try:
-            LoadNexusLogs(Workspace=wksp, Filename=nxsfile)
-            if str(self._instrument) == "SNAP":
-                LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
+        if self._addNeXusLogs(wksp, nxsfile, reloadInstr):
             return wksp
-        except:
-            pass
 
         # TODO filter out events using timemin and timemax
 
@@ -431,10 +418,12 @@ class SNSPowderReduction(PythonAlgorithm):
                     samRun = temp
                     info = tempinfo
                 else:
-                    if abs(tempinfo.freq - info.freq)/info.freq > .05:
+                    if (tempinfo.freq is not None) and (info.freq is not None) \
+                            and (abs(tempinfo.freq - info.freq)/info.freq > .05):
                         raise RuntimeError("Cannot add incompatible frequencies (%f!=%f)" \
                                            % (tempinfo.freq, info.freq))
-                    if abs(tempinfo.wl - info.wl)/info.freq > .05:
+                    if (tempinfo.wl is not None) and (info.wl is not None) \
+                            and abs(tempinfo.wl - info.wl)/info.freq > .05:
                         raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
                                            % (tempinfo.wl, info.wl))
                     Plus(samRun, temp, samRun)
