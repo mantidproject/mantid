@@ -704,10 +704,8 @@ namespace MDEvents
     if (!box) return;
     // Track how many MDBoxes there are in the overall workspace
     this->m_BoxController->trackNumBoxes(box->getDepth());
-    // Construct the grid box
+    // Construct the grid box. This should take the object out of the disk MRU
     MDGridBox<MDE, nd> * gridbox = new MDGridBox<MDE, nd>(box);
-
-    // TODO: Make sure to move it out of the DiskMRU????
 
     // Delete the old ungridded box
     delete boxes[index];

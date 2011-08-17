@@ -130,6 +130,18 @@ namespace MDEvents
     size_t getEventVectorSize() const
     { return data.size(); }
 
+    /// @return true if events were added to the box (using addEvent()) while the rest of the event list is cached to disk
+    bool getHasAddedEventsOnCached() const
+    { return (!m_inMemory && (data.size() != 0)); }
+
+    /// @return true if the data was modified in some way.
+    bool dataModified() const
+    { return m_dataModified; }
+
+    /// @return true if any events were added to the data
+    bool dataAdded() const
+    { return m_dataAdded; }
+
 
     std::vector< MDE > & getEvents();
 
@@ -187,9 +199,11 @@ namespace MDEvents
     /// Is the "data" vector currently in use by some algorithm?
     mutable bool m_dataBusy;
 
-    /** Marker set to true when the data was accessed in a CONST getEvents() method
-     * (so it has not changed and does not need to be saved).  */
-    mutable bool m_dataConstAccess;
+    /** Marker set to true when the data was possibly modifed, due to NON-const access.  */
+    mutable bool m_dataModified;
+
+    /** Marker set to true when one (or more) events were ADDED to this list WHILE it was cached to disk. */
+    mutable bool m_dataAdded;
 
     /// Start point in the NXS file where the events are located
     mutable uint64_t m_fileIndexStart;

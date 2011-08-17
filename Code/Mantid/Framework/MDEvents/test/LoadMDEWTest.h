@@ -212,7 +212,10 @@ public:
   }
 
 
-  /** Follow up test that saves AGAIN to update a file back end */
+  /** Follow up test that:
+   *  - Modifies the data in a couple of ways
+   *  - Saves AGAIN to update a file back end
+   *  - Re-loads to a brand new workspace and compares everything. */
   template <size_t nd>
   void do_test_UpdateFileBackEnd()
   {
@@ -226,6 +229,23 @@ public:
     MDGridBox<MDLeanEvent<nd>,nd> * box = dynamic_cast<MDGridBox<MDLeanEvent<nd>,nd>*>(ws2->getBox());
     // Now there are 2002 boxes
     box->splitContents(12);
+
+    // Add one event using addEvent(). The event will need to be written out to disk too.
+    MDLeanEvent<nd> ev(1.0, 2.3);
+    for (size_t d=0; d<nd; d++) ev.setCenter(d, 0.5);
+    box->addEvent(ev);
+
+    // Modify a different box by accessing the events
+    MDBox<MDLeanEvent<nd>,nd> * box8 = dynamic_cast<MDBox<MDLeanEvent<nd>,nd>*>(box->getChild(8));
+    std::vector<MDLeanEvent<nd> > & events = box8->getEvents();
+    events[0].setSignal(10.0);
+
+    // Modify a third box by accessing the events AND adding an event
+    MDBox<MDLeanEvent<nd>,nd> * box17 = dynamic_cast<MDBox<MDLeanEvent<nd>,nd>*>(box->getChild(17));
+    std::vector<MDLeanEvent<nd> > & events17 = box17->getEvents();
+    box->addEvent( events17[0] ); // Copy the event so that it ends up in the same box
+    events17[0].setSignal(100.0);
+
     ws2->refreshCache();
 
     // There are some new boxes that are not cached to disk at this point.

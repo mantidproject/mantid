@@ -210,6 +210,7 @@ namespace Kernel
    */
   void DiskMRU::writeOldObjects()
   {
+    std::cout << "DiskMRU:: Writing out " << m_memoryToWrite << " events" << std::endl;
     // Holder for any objects that you were NOT able to write.
     toWriteMap_t couldNotWrite;
     size_t memoryNotWritten = 0;

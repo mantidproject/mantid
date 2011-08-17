@@ -448,7 +448,8 @@ public:
     TS_ASSERT_DELTA( b.getSignal(), 100., 0.001);
     TS_ASSERT_DELTA( b.getErrorSquared(), 100., 0.001);
     b.setOnDisk(true);
-    // Because it wasn't set, the # of points on disk is = data.size() + 0
+    b.setInMemory(false);
+    // Because it wasn't set, the # of points on disk is 0, so NPoints = data.size() + 0
     TS_ASSERT_EQUALS( b.getNPoints(), 100);
     b.setFileIndex(1234, 100);
     // Now it returns the cached number of points + the number in the data
@@ -532,6 +533,7 @@ public:
     // Make the box know where it is in the file
     box.setFileIndex(500, 1000);
     box.setOnDisk(true);
+    box.setInMemory(false);
     // This would be set on loading. Only makes sense with GoofyWeights == false
     box.setSignal(1000.0);
     box.setErrorSquared(1000.0);
@@ -627,10 +629,14 @@ public:
     TS_ASSERT_EQUALS( c.getNPoints(), 1000);
     TS_ASSERT_DELTA( c.getSignal(), 1234.5, 1e-5);
     TS_ASSERT_DELTA( c.getErrorSquared(), 456.78, 1e-5);
+    TSM_ASSERT("Data is not flagged as modified", !c.dataModified());
 
     // This should actually load the events from the file
     const std::vector<MDLeanEvent<3> > & events = c.getConstEvents();
+    TSM_ASSERT("Data is STILL not flagged as modified", !c.dataModified());
     // Try a couple of events to see if they are correct
+    TS_ASSERT_EQUALS( events.size(), 1000);
+    if (events.size() != 1000) return;
     TS_ASSERT_DELTA( events[0].getErrorSquared(), 0.5, 1e-5);
     TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
     TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
@@ -639,15 +645,9 @@ public:
     TS_ASSERT_EQUALS( mru.getMemoryUsed(), 1000);
     // The box's data is busy
     TS_ASSERT( c.dataBusy() );
-
     // Done with the data.
     c.releaseEvents();
     TS_ASSERT( !c.dataBusy() );
-
-    // This won't do anything because the value is cached
-    c.refreshCache();
-    TS_ASSERT_DELTA( c.getSignal(), 1234.5, 1e-5);
-    TS_ASSERT_DELTA( c.getErrorSquared(), 456.78, 1e-5);
 
     // OK, using this fake way, let's keep it in memory
     c.setOnDisk(false);
@@ -690,10 +690,13 @@ public:
 
     // The # of points (from the file, not in memory)
     TS_ASSERT_EQUALS( c.getNPoints(), 1000);
+    TSM_ASSERT("Data is not flagged as modified", !c.dataModified());
 
     // Non-const access to the events.
     std::vector<MDLeanEvent<3> > & events = c.getEvents();
+    TSM_ASSERT("Data is flagged as modified", c.dataModified());
     TS_ASSERT_EQUALS( events.size(), 1000);
+    if (events.size() != 1000) return;
     TS_ASSERT_DELTA( events[123].getSignal(), 123.0, 1e-5);
 
     // Modify the event
@@ -709,9 +712,11 @@ public:
     MDBox<MDLeanEvent<3>,3> c2(bc, 0);
     c2.setFileIndex(500, 1000);
     c2.setOnDisk(true);
+    c2.setInMemory(false);
     // Is that event modified?
     std::vector<MDLeanEvent<3> > & events2 = c2.getEvents();
     TS_ASSERT_EQUALS( events2.size(), 1000);
+    if (events2.size() != 1000) return;
     TS_ASSERT_DELTA( events2[123].getSignal(), 456.0, 1e-5);
 
     file->close();
@@ -741,10 +746,13 @@ public:
 
     // The # of points (from the file, not in memory)
     TS_ASSERT_EQUALS( c.getNPoints(), 1000);
+    TSM_ASSERT("Data is not flagged as modified", !c.dataModified());
 
     // Non-const access to the events.
     std::vector<MDLeanEvent<3> > & events = c.getEvents();
+    TSM_ASSERT("Data is flagged as modified", c.dataModified());
     TS_ASSERT_EQUALS( events.size(), 1000);
+    if (events.size() != 1000) return;
     TS_ASSERT_DELTA( events[123].getSignal(), 123.0, 1e-5);
 
     // Modify an event
@@ -766,9 +774,11 @@ public:
     MDBox<MDLeanEvent<3>,3> c2(bc, 0);
     c2.setFileIndex(500, 600);
     c2.setOnDisk(true);
+    c2.setInMemory(false);
     // Is that event modified?
     std::vector<MDLeanEvent<3> > & events2 = c2.getEvents();
     TS_ASSERT_EQUALS( events2.size(), 600);
+    if (events2.size() != 600) return;
     TS_ASSERT_DELTA( events2[123].getSignal(), 456.0, 1e-5);
 
     // Now we GROW the event list
@@ -790,6 +800,7 @@ public:
     MDBox<MDLeanEvent<3>,3> c3(bc, 0);
     c3.setFileIndex(2000, 1500);
     c3.setOnDisk(true);
+    c3.setInMemory(false);
     // Is that event modified?
     const std::vector<MDLeanEvent<3> > & events3 = c3.getEvents();
     TS_ASSERT_EQUALS( events3.size(), 1500);
@@ -820,6 +831,8 @@ public:
     TSM_ASSERT_EQUALS("1000 events on file", c.getFileNumEvents(), 1000);
     TSM_ASSERT("The data was NOT loaded from disk.", !c.getInMemory());
     TSM_ASSERT_DELTA("Correct cached signal", c.getSignal(), 1000.0, 1e-3);
+    TSM_ASSERT("Data is not flagged as modified", !c.dataModified());
+    TSM_ASSERT("Data is not flagged as 'added'", !c.dataAdded());
 
     // Add an event to it
     MDLeanEvent<3> ev(1.2, 3.4);
@@ -827,6 +840,7 @@ public:
     ev.setCenter(1, 2.5);
     ev.setCenter(2, 3.5);
     c.addEvent(ev);
+    TSM_ASSERT("Data was added", c.dataAdded());
     TSM_ASSERT_EQUALS("Still 1000 events on file", c.getFileNumEvents(), 1000);
     TSM_ASSERT_EQUALS("But now 1001 events total because they are in two places.", c.getNPoints(), 1001);
     TSM_ASSERT("The data is STILL NOT loaded from disk.", !c.getInMemory());
@@ -835,12 +849,16 @@ public:
     // Get the const vector of events AFTER adding events
     const std::vector<MDLeanEvent<3> > & events = c.getConstEvents();
     TSM_ASSERT("The data is ALL in memory right now.", c.getInMemory());
+    TSM_ASSERT("Data still flagged as added", c.dataAdded());
+    TSM_ASSERT("Data is not flagged as modified (const access)", !c.dataModified());
     TSM_ASSERT_EQUALS("The resulting event vector has concatenated both", events.size(), 1001);
     TSM_ASSERT_DELTA("The first event is the one that was manually added.", events[0].getSignal(), 1.2, 1e-4);
     c.releaseEvents();
 
     // Flush the cache to write out the modified data
     mru.flushCache();
+    TSM_ASSERT("Data is not flagged as modified because it was written out to disk.", !c.dataModified());
+    TSM_ASSERT("Data is not flagged as added because it was written out", !c.dataAdded());
     TSM_ASSERT_EQUALS("Now there are 1001 events on file", c.getFileNumEvents(), 1001);
     TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 2000);
     TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
@@ -850,12 +868,16 @@ public:
 
     // Now getEvents in a const way then call addEvent()
     const std::vector<MDLeanEvent<3> > & events2 = c.getConstEvents();
+    TSM_ASSERT("Data is not flagged as modified because it was accessed as const", !c.dataModified());
     (void) events2;
     c.addEvent(ev);
+    TSM_ASSERT("Data flagged as added", c.dataAdded());
+    TSM_ASSERT("Data is still not flagged as modified because it was accessed as const", !c.dataModified());
     TSM_ASSERT_EQUALS("Still 1001 events on file", c.getFileNumEvents(), 1001);
     TSM_ASSERT_EQUALS("But the number of points had grown.", c.getNPoints(), 1002);
     c.releaseEvents();
     mru.flushCache();
+    TSM_ASSERT("Data is not flagged as modified because it was written out to disk.", !c.dataModified());
     TSM_ASSERT_EQUALS("Now there are 1002 events on file", c.getFileNumEvents(), 1002);
     TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 3001);
     TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());

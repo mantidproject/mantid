@@ -76,7 +76,7 @@ namespace MDEvents
     IMDBox<MDE,nd> * box1 = ws1->getBox();
     IMDBox<MDE,nd> * box2 = ws2->getBox();
 
-    Progress prog(this, 0.0, 0.7, box2->getBoxController()->getTotalNumMDBoxes());
+    Progress prog(this, 0.0, 0.4, box2->getBoxController()->getTotalNumMDBoxes());
 
     // Make a leaf-only iterator through all boxes with events in the RHS workspace
     MDBoxIterator<MDE,nd> it2(box2, 1000, true);
@@ -91,41 +91,49 @@ namespace MDEvents
         box1->addEvents(events);
         box->releaseEvents();
       }
-      prog.report();
+      prog.report("Adding Events");
       if (!it2.next()) break;
     }
 
-    prog.resetNumSteps(2, 0.7, 0.8);
-    prog.report("Splitting Boxes");
+    this->progress(0.41, "Splitting Boxes");
+    Progress * prog2 = new Progress(this, 0.4, 0.9, 100);
     ThreadScheduler * ts = new ThreadSchedulerFIFO();
-    ThreadPool tp(ts);
+    ThreadPool tp(ts, 0, prog2);
     ws1->splitAllIfNeeded(ts);
+    prog2->resetNumSteps( ts->size(), 0.4, 0.6);
     tp.joinAll();
 
-    // Now we need to save all the data that was not saved before.
-    if (ws1->isFileBacked())
-    {
-      // Flush anything else in the to-write buffer
-      BoxController_sptr bc = ws1->getBoxController();
-      bc->getDiskMRU().flushCache();
+//    // Now we need to save all the data that was not saved before.
+//    if (ws1->isFileBacked())
+//    {
+//      // Flush anything else in the to-write buffer
+//      BoxController_sptr bc = ws1->getBoxController();
+//
+//      prog.resetNumSteps(bc->getTotalNumMDBoxes(), 0.6, 1.0);
+//      MDBoxIterator<MDE,nd> it1(box1, 1000, true);
+//      while (true)
+//      {
+//        MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(it1.getBox());
+//        if (box)
+//        {
+//          // Something was maybe added to this box
+//          if (box->getEventVectorSize() > 0)
+//          {
+//            // By getting the events, this will merge the newly added and the cached events.
+//            box->getEvents();
+//            // The MRU to-write cache will optimize writes by reducing seek times
+//            box->releaseEvents();
+//          }
+//        }
+//        prog.report("Saving");
+//        if (!it1.next()) break;
+//      }
+//      //bc->getDiskMRU().flushCache();
+//      // Flush the data writes to disk.
+//      box1->flushData();
+//    }
 
-      prog.resetNumSteps(bc->getTotalNumMDBoxes(), 0.8, 1.0);
-      MDBoxIterator<MDE,nd> it1(box1, 1000, true);
-      while (true)
-      {
-        MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(it1.getBox());
-        if (box)
-          box->save();
-        prog.report("Saving");
-        if (!it1.next()) break;
-      }
-      // Flush the data writes to disk.
-      box1->flushData();
-    }
-
-
-
-    prog.report("Refreshing cache");
+    this->progress(0.95, "Refreshing cache");
     ws1->refreshCache();
   }
 

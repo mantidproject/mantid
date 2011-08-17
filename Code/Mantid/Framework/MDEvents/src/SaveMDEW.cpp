@@ -235,14 +235,10 @@ namespace MDEvents
           if (update)
           {
             // File-backed: update where on the file it is
-            if (!mdbox->getOnDisk())
-            {
-              // This box is new and was never cached to disk
-              // This will relocate and save the box if it has any events
-              mdbox->save();
-              // We've now forced it to go on disk
-              mdbox->setOnDisk(true);
-            }
+            // This will relocate and save the box if it has any events
+            mdbox->save();
+            // We've now forced it to go on disk
+            mdbox->setOnDisk(true);
             // Save the index
             box_event_index[id*2] = mdbox->getFileIndexStart();
             box_event_index[id*2+1] = mdbox->getFileNumEvents();

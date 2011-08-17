@@ -65,6 +65,11 @@ public:
 
     if (ws->isFileBacked())
     {
+      // Run SaveMDEW so as to update the file in the back
+      AlgorithmHelper::runAlgorithm("SaveMDEW", 4,
+          "InputWorkspace", outWSName.c_str(),
+          "UpdateFileBackEnd", "1");
+
       BoxController_sptr bc = ws->getBoxController();
       std::cout << bc->getDiskMRU().getFreeSpaceMap().size() << " entries in the free space map" << std::endl;
       ::NeXus::File * file = bc->getFile();
@@ -84,43 +89,32 @@ public:
   void test_mem_plus_mem()
   { do_test(false, false, 0); }
 
-//  void test_mem_plus_mem_inPlace()
-//  { do_test(false, false, 1); }
-//
-//  void test_mem_plus_mem_inPlace_ofRHS()
-//  { do_test(false, false, 2); }
-//
-//  void test_file_plus_mem()
-//  { do_test(true, false, 0); }
-//
-//  void test_file_plus_mem_inPlace()
-//  { do_test(true, false, 1); }
-//
-//  void test_mem_plus_file()
-//  { do_test(false, true, 0); }
-//
-//  void test_mem_plus_file_inPlace()
-//  { do_test(false, true, 1); }
-//
-//  void test_file_plus_file()
-//  { do_test(true, true, 0); }
-//
-//  void test_file_plus_file_inPlace()
-//  { do_test(true, true, 1); }
-//
-//  void test_file_plus_file_inPlace_ofRHS()
-//  { do_test(true, true, 2); }
-//
-//  /** Does the file adding to a clone that will also be file-backed,
-//   * then updates the filebackend using SaveMDEW
-//   */
-//  void test_file_plus_file_thenSaveMDEW()
-//  {
-//    do_test(true, true, 0, false);
-//    AlgorithmHelper::runAlgorithm("SaveMDEW", 4,
-//        "InputWorkspace", "PlusMDEWTest_out",
-//        "UpdateFileBackEnd", "1");
-//  }
+  void test_mem_plus_mem_inPlace()
+  { do_test(false, false, 1); }
+
+  void test_mem_plus_mem_inPlace_ofRHS()
+  { do_test(false, false, 2); }
+
+  void test_file_plus_mem()
+  { do_test(true, false, 0); }
+
+  void test_file_plus_mem_inPlace()
+  { do_test(true, false, 1); }
+
+  void test_mem_plus_file()
+  { do_test(false, true, 0); }
+
+  void test_mem_plus_file_inPlace()
+  { do_test(false, true, 1); }
+
+  void test_file_plus_file()
+  { do_test(true, true, 0); }
+
+  void test_file_plus_file_inPlace()
+  { do_test(true, true, 1); }
+
+  void test_file_plus_file_inPlace_ofRHS()
+  { do_test(true, true, 2); }
 
 };
 

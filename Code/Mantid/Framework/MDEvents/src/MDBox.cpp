@@ -15,9 +15,9 @@ namespace MDEvents
   /** Empty constructor */
   TMDE(MDBox)::MDBox()
    : IMDBox<MDE, nd>(),
-     m_dataBusy(false), m_dataConstAccess(true),
+     m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
      m_fileIndexStart(0), m_fileNumEvents(0),
-     m_onDisk(false), m_inMemory(false)
+     m_onDisk(false), m_inMemory(true)
   {
   }
 
@@ -28,9 +28,9 @@ namespace MDEvents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth)
     : IMDBox<MDE, nd>(),
-      m_dataBusy(false), m_dataConstAccess(true),
+      m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
       m_fileIndexStart(0), m_fileNumEvents(0),
-      m_onDisk(false), m_inMemory(false)
+      m_onDisk(false), m_inMemory(true)
 
   {
     if (controller->getNDims() != nd)
@@ -49,9 +49,9 @@ namespace MDEvents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
       : IMDBox<MDE, nd>(extentsVector),
-        m_dataBusy(false), m_dataConstAccess(true),
+        m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
         m_fileIndexStart(0), m_fileNumEvents(0),
-        m_onDisk(false), m_inMemory(false)
+        m_onDisk(false), m_inMemory(true)
   {
     if (controller->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
@@ -67,7 +67,7 @@ namespace MDEvents
   TMDE(MDBox)::MDBox(const MDBox<MDE,nd> & other)
    : IMDBox<MDE, nd>(other),
      data(other.data),
-     m_dataBusy(other.m_dataBusy), m_dataConstAccess(other.m_dataConstAccess),
+     m_dataBusy(other.m_dataBusy), m_dataModified(other.m_dataModified), m_dataAdded(other.m_dataAdded),
      m_fileIndexStart(other.m_fileIndexStart), m_fileNumEvents(other.m_fileNumEvents),
      m_onDisk(other.m_onDisk), m_inMemory(other.m_inMemory)
   {
@@ -86,6 +86,7 @@ namespace MDEvents
     this->m_errorSquared = 0.0;
     m_fileNumEvents = 0;
     data.clear();
+    m_dataAdded = false;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -202,8 +203,8 @@ namespace MDEvents
       this->m_BoxController->getDiskMRU().loading(this);
       // The data vector is busy - can't release the memory yet
       this->m_dataBusy = true;
-      // This access to data was NOT const, so it might have changed.
-      this->m_dataConstAccess = false;
+      // This access to data was NOT const, so it might have changed. We assume it has by setting m_dataModified to true.
+      this->m_dataModified = true;
     }
     // else: do nothing if the events are already in memory.
     return data;
@@ -225,8 +226,7 @@ namespace MDEvents
       this->m_BoxController->getDiskMRU().loading(this);
       // The data vector is busy - can't release the memory yet
       this->m_dataBusy = true;
-      // This access to data was const
-      this->m_dataConstAccess = true;
+      // This access to data was const. Don't change the m_dataModified flag.
     }
     // else: do nothing if the events are already in memory.
     return data;
@@ -255,16 +255,12 @@ namespace MDEvents
   TMDE(
   void MDBox)::save() const
   {
-    // When addEvent() was called on cached data, so the data[] vector has something despite the events being on disk
-    bool addedEventsOnCached = (!m_inMemory && (data.size() != 0));
-
     // Only save to disk when the access was non-const;
     //  or when you added events to a cached data
-    //  or when you added events, FOLLOWED by getting the events (which merged the vector together)
-    if (!m_dataConstAccess || addedEventsOnCached || (m_fileNumEvents != data.size()) )
+    if (m_dataModified || m_dataAdded)
     {
       // This will load and append events ONLY if needed.
-      if (addedEventsOnCached)
+      if (m_dataAdded)
         this->loadEvents();
 
       // This is the new size of the event list, possibly appended (if used AddEvent) or changed otherwise (non-const access)
@@ -296,6 +292,10 @@ namespace MDEvents
     vec_t().swap(data); // Linux trick to really free the memory
     // Data is no longer in memory
     m_inMemory = false;
+    // Data was not modified
+    m_dataModified = false;
+    // Data was not added
+    m_dataAdded = false;
   }
 
 
@@ -353,11 +353,23 @@ namespace MDEvents
   {
 #ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
     // Use the cached value if it is on disk
-    if (!m_onDisk) // TODO: Dirty flag?
+    if (m_inMemory)
     {
+      // In memory - just sum up everything
       this->m_signal = 0;
       this->m_errorSquared = 0;
 
+      typename std::vector<MDE>::const_iterator it_end = data.end();
+      for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; it++)
+      {
+        const MDE & event = *it;
+        this->m_signal += event.getSignal();
+        this->m_errorSquared += event.getErrorSquared();
+      }
+    }
+    else if (m_dataAdded)
+    {
+      // ADD the events that were added to the cache, without reloading the whole event list.
       typename std::vector<MDE>::const_iterator it_end = data.end();
       for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; it++)
       {
@@ -442,6 +454,9 @@ namespace MDEvents
     dataMutex.lock();
     this->data.push_back(event);
 
+    // Yes, we added some data
+    this->m_dataAdded = true;
+
 #ifdef MDBOX_TRACK_SIGNAL_WHEN_ADDING
     // Keep the running total of signal and error
     double signal = event.getSignal();
@@ -474,6 +489,9 @@ namespace MDEvents
     typename std::vector<MDE>::const_iterator end = events.begin()+stop_at;
     // Copy all the events
     this->data.insert(this->data.end(), start, end);
+
+    // Yes, we added some data
+    this->m_dataAdded = true;
 
 #ifdef MDBOX_TRACK_SIGNAL_WHEN_ADDING
     //Running total of signal/error

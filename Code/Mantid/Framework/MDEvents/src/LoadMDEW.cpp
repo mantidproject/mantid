@@ -234,8 +234,10 @@ namespace Mantid
           minDiskCacheSize = 0;
           g_log.information() << "Boxes with fewer than " << minDiskCacheSize << " events will not be cached to disk." << std::endl;
 
-          uint64_t writeBuffer = uint64_t(1000000 / sizeof(MDE));
-          g_log.information() << "Write buffer set to 1 MB (" << writeBuffer << " events)." << std::endl;
+          double writeBufferMB = mb/10;
+          if (writeBufferMB < 1) writeBufferMB = 1;
+          uint64_t writeBuffer = (uint64_t(writeBufferMB) * 1024 * 1024) / sizeof(MDE);
+          g_log.information() << "Write buffer set to " << writeBufferMB << " MB (" << writeBuffer << " events)." << std::endl;
 
           // Set these values in the diskMRU
           bc->setCacheParameters(cacheMemory, writeBuffer, sizeof(MDE));
@@ -284,9 +286,14 @@ namespace Mantid
                 // or if the box is small enough to keep in memory always
                 box->loadNexus(file);
                 box->setOnDisk(false);
+                box->setInMemory(true);
               }
               else
+              {
+                // Box is on disk and NOT in memory
                 box->setOnDisk(true);
+                box->setInMemory(false);
+              }
             }
             else if (box_type == 2)
             {

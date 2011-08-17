@@ -178,10 +178,14 @@ namespace MDEvents
     if (m_BoxController->getFile())
     {
       mess << "File backed: cache uses ";
-      double avail = double(m_BoxController->getDiskMRU().getMemoryAvail() * sizeof(MDE)) / (1024*1024);
-      double used = double(m_BoxController->getDiskMRU().getMemoryUsed() * sizeof(MDE)) / (1024*1024);
+      double avail, used;
+      avail = double(m_BoxController->getDiskMRU().getMemoryAvail() * sizeof(MDE)) / (1024*1024);
+      used = double(m_BoxController->getDiskMRU().getMemoryUsed() * sizeof(MDE)) / (1024*1024);
       mess << std::setprecision(1) << std::fixed ;
-      mess << used << " of " << avail << " MB";
+      mess << used << " of " << avail << " MB. ";
+      avail = double(m_BoxController->getDiskMRU().getWriteBufferSize() * sizeof(MDE)) / (1024*1024);
+      used = double(m_BoxController->getDiskMRU().getMemoryToWrite() * sizeof(MDE)) / (1024*1024);
+      mess << "Write buffer: " << used << " of " << avail << " MB. ";
       out.push_back(mess.str()); mess.str("");
     }
     else
