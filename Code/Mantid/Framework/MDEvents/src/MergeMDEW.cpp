@@ -1,6 +1,10 @@
 #include "MantidMDEvents/MergeMDEW.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidMDEvents/IMDBox.h"
+#include "MantidAPI/FileProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -57,7 +61,129 @@ namespace MDEvents
   {
     declareProperty(new MultipleFileProperty("Filenames"),
         "Select several MDEventWorkspace NXS files to merge together. Files must have common box structure.");
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
+
+    std::vector<std::string> exts(1, ".nxs");
+    declareProperty(new FileProperty("OutputFilename", "", FileProperty::OptionalSave, exts),
+        "Choose a file to which to save the output workspace. Optional: if specified, the workspace created will be file-backed.");
+
+    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
+        "An output MDEventWorkspace.");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the merging
+   *
+   * @param ws :: first MDEventWorkspace in the list to merge
+   */
+  template<typename MDE, size_t nd>
+  void MergeMDEW::doExec(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  {
+    // Use the copy constructor to get the same dimensions etc.
+    typename MDEventWorkspace<MDE, nd>::sptr outWS(new MDEventWorkspace<MDE, nd>(*ws));
+    this->outIWS = outWS;
+
+    std::string outputFile = getProperty("OutputFilename");
+
+    // Fix the box controller settings in the output workspace so that it splits normally
+    BoxController_sptr bc = outWS->getBoxController();
+    // TODO: Specify these split parameters some smarter way?
+    bc->setMaxDepth(20);
+    bc->setSplitInto(4);
+    bc->setSplitThreshold(2000);
+
+    // Perform the initial box splitting.
+    IMDBox<MDE,nd> * box = outWS->getBox();
+    for (size_t d=0; d<nd; d++)
+      box->setExtents(d, outWS->getDimension(d)->getMinimum(), outWS->getDimension(d)->getMaximum());
+    box->setBoxController(bc);
+    outWS->splitBox();
+
+    if (!outputFile.empty())
+    {
+      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMDEW" ,0.01, 0.05);
+      saver->setProperty("InputWorkspace", outIWS);
+      saver->setPropertyValue("Filename", outputFile);
+      saver->executeAsSubAlg();
+    }
+
+    // Vector of file handles to each input file
+    std::vector< ::NeXus::File *> files;
+    // Vector of the box_index vector for each each input file
+    std::vector< std::vector<uint64_t> > box_indexes;
+
+    this->progress(0.01, "Loading File Info");
+
+    try
+    {
+      for (size_t i=0; i<m_filenames.size(); i++)
+      {
+        // Open the file to read
+        ::NeXus::File * file = new ::NeXus::File(m_filenames[i], NXACC_READ);
+        files.push_back(file);
+
+        file->openGroup("MDEventWorkspace", "NXentry");
+        file->openGroup("box_structure", "NXdata");
+        // Start index/length into the list of events
+        std::vector<uint64_t> box_event_index;
+        file->readData("box_event_index", box_event_index);
+        box_indexes.push_back(box_event_index);
+
+        // Check for consistency
+        if (i>0)
+        {
+          if (box_event_index.size() != box_indexes[0].size())
+            throw std::runtime_error("Inconsistent number of boxes found in file " + m_filenames[i] + ". Cannot merge these files.");
+        }
+        file->closeGroup();
+
+        // Navigate to the event_data block and leave it open
+        file->openGroup("event_data", "NXdata");
+        MDE::openNexusData(file);
+      }
+    }
+    catch (...)
+    {
+      // Close all open files in case of error
+      for (size_t i=0; i<files.size(); i++)
+        files[i]->close();
+      throw;
+      return;
+    }
+
+    // This is how many boxes are in all the files.
+    size_t numBoxes = box_indexes[0].size() / 2;
+    Progress prog(this, 0.1, 0.9, numBoxes);
+
+    for (size_t ib=0; ib<numBoxes; ib++)
+    {
+      // Vector of events accumulated for ALL files to merge.
+      std::vector<MDE> events;
+
+      // Go through each file
+      for (size_t iw=0; iw<files.size(); iw++)
+      {
+        // The file and the indexes into that file
+        ::NeXus::File * file = files[iw];
+        std::vector<uint64_t> & box_event_index = box_indexes[iw];
+
+        uint64_t indexStart = box_event_index[ib*2+0];
+        uint64_t numEvents = box_event_index[ib*2+1];
+        // This will APPEND the events to the one vector
+        MDE::loadVectorFromNexusSlab(events, file, indexStart, numEvents);
+      } // For each file
+
+      if (events.size() > 0)
+      {
+        // Add all the events from the same box
+        outWS->addEvents( events );
+        // TODO: Split, save to file, etc.
+      }
+      prog.report("Loading Box");
+    } // for each box
+
+    this->progress(0.91, "Refreshing Cache");
+    outWS->refreshCache();
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -65,7 +191,21 @@ namespace MDEvents
    */
   void MergeMDEW::exec()
   {
-    // TODO Auto-generated execute stub
+    m_filenames = getProperty("Filenames");
+    std::string firstFile = m_filenames[0];
+
+    // Start by loading the first file but just the meta data to get dimensions, etc.
+    IAlgorithm_sptr loader = createSubAlgorithm("LoadMDEW", 0.0, 0.05, false);
+    loader->setPropertyValue("Filename", firstFile);
+    loader->setPropertyValue("MetadataOnly", "1");
+    loader->setPropertyValue("OutputWorkspace", "anonymous");
+    loader->executeAsSubAlg();
+
+    IMDEventWorkspace_sptr firstWS = loader->getProperty("OutputWorkspace");
+
+    CALL_MDEVENT_FUNCTION( this->doExec, firstWS);
+
+    setProperty("OutputWorkspace", outIWS);
   }
 
 

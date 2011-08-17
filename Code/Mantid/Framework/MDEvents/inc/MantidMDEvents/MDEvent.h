@@ -262,7 +262,7 @@ namespace MDEvents
      * @param indexStart :: index (in events) in the data field to start at
      * @param numEvents :: number of events to load.
      * */
-    static void loadVectorFromNexusSlab(std::vector<MDEvent<nd> > & events, ::NeXus::File * file, size_t indexStart, size_t numEvents)
+    static void loadVectorFromNexusSlab(std::vector<MDEvent<nd> > & events, ::NeXus::File * file, uint64_t indexStart, uint64_t numEvents)
     {
       if (numEvents == 0)
         return;

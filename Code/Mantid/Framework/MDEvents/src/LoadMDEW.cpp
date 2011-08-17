@@ -168,7 +168,7 @@ namespace Mantid
         std::vector<int> boxType;
         // Recursion depth
         std::vector<int> depth;
-        // Start/end indices into the list of events
+        // Start index/length into the list of events
         std::vector<uint64_t> box_event_index;
         // Min/Max extents in each dimension
         std::vector<double> extents;

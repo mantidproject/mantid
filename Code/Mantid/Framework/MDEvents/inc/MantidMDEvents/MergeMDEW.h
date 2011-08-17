@@ -3,6 +3,8 @@
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
 
 namespace Mantid
 {
@@ -56,7 +58,14 @@ namespace MDEvents
     /// Run the algorithm
     void exec();
 
+    template<typename MDE, size_t nd>
+    void doExec(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
+    /// Files to load
+    std::vector<std::string> m_filenames;
+
+    /// Output IMDEventWorkspace
+    Mantid::API::IMDEventWorkspace_sptr outIWS;
   };
 
 

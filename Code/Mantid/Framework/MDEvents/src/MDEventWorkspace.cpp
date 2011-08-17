@@ -216,7 +216,7 @@ namespace MDEvents
     std::vector<IMDBox<MDE,nd>*> boxes_filtered;
     this->getBox()->getBoxes(boxes, 1000, false);
 
-    bool withPointsOnly = true;
+    bool withPointsOnly = false;
     if (withPointsOnly)
     {
       boxes_filtered.reserve(boxes.size());
@@ -224,6 +224,8 @@ namespace MDEvents
         if (boxes[i]->getNPoints() > 0)
           boxes_filtered.push_back(boxes[i]);
     }
+    else
+      boxes_filtered = boxes;
 
     // Now sort by ID
     typedef IMDBox<MDE,nd> * ibox_t;
