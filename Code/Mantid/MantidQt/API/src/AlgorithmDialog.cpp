@@ -442,7 +442,7 @@ QString AlgorithmDialog::openFileDialog(const QString & propName)
     if( !exts.empty() )
     {
       // --------- Load a File -------------
-      filter = "Files (";
+      filter = "";
       std::set<std::string>::const_iterator iend = exts.end();
       // Push a wild-card onto the front of each file suffix
       for( std::set<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
@@ -451,7 +451,6 @@ QString AlgorithmDialog::openFileDialog(const QString & propName)
       }
       
       filter.trimmed();
-      filter.append(QString::fromStdString(")"));
     }
     filter.append(";;All Files (*.*)");
 

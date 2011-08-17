@@ -174,13 +174,12 @@ QString UserSubWindow::openFileDialog(const bool save, const QStringList &exts)
   QString filter;
   if ( !exts.empty() )
   {
-    filter = "Files (";
+    filter = "";
     for ( int i = 0; i < exts.size(); i ++ )
     {
       filter.append("*." + exts[i] + " ");
     }
     filter.trimmed();
-    filter.append(")");
   }
   filter.append(";;All Files (*.*)");
 

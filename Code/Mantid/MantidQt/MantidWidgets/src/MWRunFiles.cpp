@@ -579,7 +579,7 @@ QString MWRunFiles::createFileFilter()
     
     if( extsAsSingleOption() )
     {
-      fileFilter += "Files (";
+      fileFilter += "";
       QListIterator<QPair<QString, QStringList> > itr(finalIndex);
       while( itr.hasNext() )
       {
@@ -590,7 +590,7 @@ QString MWRunFiles::createFileFilter()
         }
         fileFilter += "*" + values.join(" *");
       }
-      fileFilter += ");;";
+      fileFilter += ";;";
     }
     else
     {
@@ -598,7 +598,7 @@ QString MWRunFiles::createFileFilter()
       while( itr.hasNext() )
       {
         const QStringList values = itr.next().second;
-        fileFilter += "Files (*" + values.join(" *") + ");;";
+        fileFilter += "*" + values.join(" *") + ";;";
       }
     }
   }

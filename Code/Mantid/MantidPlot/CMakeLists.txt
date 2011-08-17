@@ -153,14 +153,12 @@ endif ()
 set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/AlgMonitor.cpp
                    src/Mantid/AlgorithmHistoryWindow.cpp
-                   src/Mantid/ExecuteAlgorithm.cpp
                    src/Mantid/FirstTimeSetup.cpp
                    src/Mantid/FitParameterTie.cpp
                    src/Mantid/IFunctionWrapper.cpp
                    src/Mantid/ImportWorkspaceDlg.cpp
                    src/Mantid/InputHistory.cpp
                    src/Mantid/LoadDAEDlg.cpp
-                   src/Mantid/LoadRawDlg.cpp
                    src/Mantid/ManageCustomMenus.cpp
                    src/Mantid/MantidAbout.cpp
                    src/Mantid/MantidApplication.cpp
@@ -364,14 +362,12 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
 set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/AlgMonitor.h
                    src/Mantid/AlgorithmHistoryWindow.h
-                   src/Mantid/ExecuteAlgorithm.h
                    src/Mantid/FirstTimeSetup.h
                    src/Mantid/FitParameterTie.h
                    src/Mantid/IFunctionWrapper.h
                    src/Mantid/ImportWorkspaceDlg.h
                    src/Mantid/InputHistory.h
                    src/Mantid/LoadDAEDlg.h
-                   src/Mantid/LoadRawDlg.h
                    src/Mantid/ManageCustomMenus.h
                    src/Mantid/MantidAbout.h
                    src/Mantid/MantidApplication.h
@@ -626,12 +622,10 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
 
 set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/AlgorithmHistoryWindow.h
-                       src/Mantid/ExecuteAlgorithm.h
                        src/Mantid/FirstTimeSetup.h
                        src/Mantid/IFunctionWrapper.h
                        src/Mantid/ImportWorkspaceDlg.h
                        src/Mantid/LoadDAEDlg.h
-                       src/Mantid/LoadRawDlg.h
                        src/Mantid/ManageCustomMenus.h
                        src/Mantid/MantidAbout.h
                        src/Mantid/MantidApplication.h
