@@ -136,8 +136,23 @@ namespace CurveFitting
     setProperty("OutputChi2overDoF", finalCostFuncVal);
     setProperty("Minimizer", fit->getPropertyValue("Minimizer"));
 
-    std::string output = getProperty("Output");
+    std::vector<double> errors;
+    if (fit->existsProperty("Parameters"))
+    {
+      // Add Parameters, Errors and ParameterNames properties to output so they can be queried on the algorithm.
+      declareProperty(new ArrayProperty<double> ("Parameters",new NullValidator<std::vector<double> >,Direction::Output));
+      declareProperty(new ArrayProperty<double> ("Errors",new NullValidator<std::vector<double> >,Direction::Output));
+      declareProperty(new ArrayProperty<std::string> ("ParameterNames",new NullValidator<std::vector<std::string> >,Direction::Output));
+      std::vector<double> params = fit->getProperty("Parameters");
+      errors = fit->getProperty("Errors");
+      std::vector<std::string> parNames = fit->getProperty("ParameterNames");
 
+      setProperty("Parameters",params);
+      setProperty("Errors",errors);
+      setProperty("ParameterNames",parNames);
+    }
+    
+    std::string output = getProperty("Output");
     if (!output.empty())
     {
       // create output parameter table workspace to store final fit parameters 
@@ -155,27 +170,12 @@ namespace CurveFitting
         int workspaceIndex  = getProperty("WorkspaceIndex");
         if (workspaceIndex < 0) throw std::invalid_argument("WorkspaceIndex must be >= 0");
         funmw->setWorkspace(ws,input);
-        API::MatrixWorkspace_sptr outws = funmw->createCalculatedWorkspace(ws,workspaceIndex);
+        API::MatrixWorkspace_sptr outws = funmw->createCalculatedWorkspace(ws,workspaceIndex,errors);
 
         setProperty("OutputWorkspace",outws);
       }
     }
 
-    if (fit->existsProperty("Parameters"))
-    {
-      // Add Parameters, Errors and ParameterNames properties to output so they can be queried on the algorithm.
-      declareProperty(new ArrayProperty<double> ("Parameters",new NullValidator<std::vector<double> >,Direction::Output));
-      declareProperty(new ArrayProperty<double> ("Errors",new NullValidator<std::vector<double> >,Direction::Output));
-      declareProperty(new ArrayProperty<std::string> ("ParameterNames",new NullValidator<std::vector<std::string> >,Direction::Output));
-      std::vector<double> params = fit->getProperty("Parameters");
-      std::vector<double> errors = fit->getProperty("Errors");
-      std::vector<std::string> parNames = fit->getProperty("ParameterNames");
-
-      setProperty("Parameters",params);
-      setProperty("Errors",errors);
-      setProperty("ParameterNames",parNames);
-    }
-    
   }
 
   /**

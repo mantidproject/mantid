@@ -586,16 +586,51 @@ void IFunctionMW::setUpNewStuff(boost::shared_array<double> xs,boost::shared_arr
 
 }
 
-/** TODO: Fill comment !!!!!!!!!!!!!!!!!!!!!!!!!!11
- *
+namespace
+{
+  /**
+   * A simple implementation of Jacobian.
+   */
+  class SimpleJacobian: public Jacobian
+  {
+  public:
+    /// Constructor
+    SimpleJacobian(size_t nData,size_t nParams):m_nData(nData),m_nParams(nParams),m_data(nData*nParams){}
+    /// Setter
+    virtual void set(size_t iY, size_t iP, double value)
+    {
+      m_data[iY * m_nParams + iP] = value;
+    }
+    /// Getter
+    virtual double get(size_t iY, size_t iP)
+    {
+      return m_data[iY * m_nParams + iP];
+    }
+  private:
+    size_t m_nData; ///< size of the data / first dimension
+    size_t m_nParams; ///< number of parameters / second dimension
+    std::vector<double> m_data; ///< data storage
+  };
+}
+
+/** 
+ * Creates a workspace containing values calculated with this function. It takes a workspace and ws index
+ * of a spectrum which this function may have been fitted to. The output contains the original spectrum 
+ * (wi = 0), the calculated values (ws = 1), and the difference between them (ws = 2).
  * @param inWS :: input workspace
  * @param wi :: workspace index
- * @return
+ * @param sd :: optional standard deviations of the parameters for calculating the error bars
+ * @return created workspase
  */
-boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS, int wi)const
+boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(
+  boost::shared_ptr<const API::MatrixWorkspace> inWS, 
+  int wi,
+  const std::vector<double>& sd
+  )
 {
       const MantidVec& inputX = inWS->readX(wi);
       const MantidVec& inputY = inWS->readY(wi);
+      const MantidVec& inputE = inWS->readE(wi);
       size_t nData = dataSize();
 
       size_t histN = inWS->isHistogramData() ? 1 : 0;
@@ -623,8 +658,10 @@ boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(b
       }
 
       ws->dataY(0).assign(inputY.begin()+m_xMinIndex,inputY.begin()+m_xMaxIndex+1);
+      ws->dataE(0).assign(inputE.begin()+m_xMinIndex,inputE.begin()+m_xMaxIndex+1);
 
       MantidVec& Ycal = ws->dataY(1);
+      MantidVec& Ecal = ws->dataE(1);
       MantidVec& E = ws->dataY(2);
 
       double* lOut = new double[nData];  // to capture output from call to function()
@@ -637,6 +674,29 @@ boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(b
       }
 
       delete [] lOut; 
+
+      if (sd.size() == this->nParams())
+      {
+        SimpleJacobian J(nData,this->nParams());
+        try
+        {
+          this->functionDeriv(&J);
+        }
+        catch(...)
+        {
+          this->calNumericalDeriv(&J,&m_xValues[0],nData);
+        }
+        for(size_t i=0; i<nData; i++)
+        {
+          double err = 0.0;
+          for(size_t j=0;j<nParams();++j)
+          {
+            double d = J.get(i,j) * sd[j];
+            err += d*d;
+          }
+          Ecal[i] = sqrt(err);
+        }
+      }
 
       return ws;
 }
