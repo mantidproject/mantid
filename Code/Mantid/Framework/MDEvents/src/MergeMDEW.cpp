@@ -98,11 +98,13 @@ namespace MDEvents
     box->setBoxController(bc);
     outWS->splitBox();
 
+    // Save the empty WS and turn it into a file-backed MDEventWorkspace
     if (!outputFile.empty())
     {
       IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMDEW" ,0.01, 0.05);
       saver->setProperty("InputWorkspace", outIWS);
       saver->setPropertyValue("Filename", outputFile);
+      saver->setProperty("MakeFileBacked", true);
       saver->executeAsSubAlg();
     }
 
@@ -177,6 +179,7 @@ namespace MDEvents
         // Add all the events from the same box
         outWS->addEvents( events );
         // TODO: Split, save to file, etc.
+        outWS->splitAllIfNeeded(NULL);
       }
       prog.report("Loading Box");
     } // for each box
@@ -184,6 +187,15 @@ namespace MDEvents
     this->progress(0.91, "Refreshing Cache");
     outWS->refreshCache();
 
+    // Now re-save the MDEventWorkspace to update the file
+    if (!outputFile.empty())
+    {
+      g_log.notice() << "Starting SaveMDEW to update the file back-end." << std::endl;
+      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMDEW" ,0.92, 1.00);
+      saver->setProperty("InputWorkspace", outIWS);
+      saver->setProperty("UpdateFileBackEnd", true);
+      saver->executeAsSubAlg();
+    }
   }
 
   //----------------------------------------------------------------------------------------------
@@ -192,6 +204,8 @@ namespace MDEvents
   void MergeMDEW::exec()
   {
     m_filenames = getProperty("Filenames");
+    if (m_filenames.size() == 0)
+      throw std::invalid_argument("Must specify at least one filename.");
     std::string firstFile = m_filenames[0];
 
     // Start by loading the first file but just the meta data to get dimensions, etc.

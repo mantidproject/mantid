@@ -146,7 +146,7 @@ namespace MDEvents
     file->putAttr("version", "1.0");
 
     // Prepare the data chunk storage.
-    size_t chunkSize = 100000; // TODO: Determine a smart chunk size!
+    size_t chunkSize = 10000; // TODO: Determine a smart chunk size!
     if (!update)
     {
       MDE::prepareNexusData(file, chunkSize);
