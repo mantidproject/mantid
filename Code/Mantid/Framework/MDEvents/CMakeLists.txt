@@ -149,7 +149,7 @@ if ( CXXTEST_FOUND )
     cxxtest_add_test ( MDEventsTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
     target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS}
          ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} DataHandling Nexus 
-         TestHelpers DataObjects API)
+         TestHelpers)
   else ()
     cxxtest_add_test ( MDEventsTest ${TEST_FILES} )
     target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS}

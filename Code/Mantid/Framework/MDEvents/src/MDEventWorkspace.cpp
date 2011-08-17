@@ -253,7 +253,7 @@ namespace MDEvents
       ws->cell<int>(i, col++) = int(box->getFilePosition());
       ws->cell<int>(i, col++) = int(box->getSizeOnFile());
       MDBox<MDE,nd>* mdbox = dynamic_cast<MDBox<MDE,nd>*>(box);
-      ws->cell<int>(i, col++) = int(mdbox ? mdbox->getEventVectorSize() : -1);
+      ws->cell<int>(i, col++) = mdbox ? int(mdbox->getEventVectorSize()) : -1;
       ws->cell<std::string>(i, col++) = (mdbox ? (mdbox->getOnDisk() ? "yes":"no") : "N/A");
       ws->cell<std::string>(i, col++) = (mdbox ? (mdbox->getInMemory() ? "yes":"no") : "N/A");
       ws->cell<std::string>(i, col++) = box->getExtentsStr();
