@@ -1446,6 +1446,19 @@ class UserFile(ReductionStep):
             'TRANS/': self._read_trans_line,
             'MON/' : self._read_mon_line}
 
+    def __deepcopy__(self, memo):
+        """Called when a deep copy is requested                    
+        """
+        fresh = UserFile(self.filename)
+        fresh._incid_monitor_lckd = self._incid_monitor_lckd
+        fresh.executed = self.executed
+        fresh.key_functions = {
+            'BACK/' : fresh._read_back_line,
+            'TRANS/': fresh._read_trans_line,
+            'MON/' : fresh._read_mon_line
+            }
+        return fresh
+
     def execute(self, reducer, workspace=None):
         if self.filename is None:
             raise AttributeError('The user file must be set, use the function MaskFile')
@@ -1490,7 +1503,7 @@ class UserFile(ReductionStep):
         for keyword in self.key_functions.keys():            
             if upper_line.startswith(keyword):
                 #remove the keyword as it has already been parsed
-                params = upper_line[len(keyword):]
+                params = line[len(keyword):]
                 #call the handling function for that keyword
                 error = self.key_functions[keyword](params, reducer)
                 

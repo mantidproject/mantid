@@ -142,9 +142,12 @@ class ISISReducer(SANSReducer):
         self._workspace = [self._temporys, self._outputs] 
 
         self._init_steps()
-
+        
         #process the background (can) run instead of the sample 
         self._process_can = False
+        # Python 2.4 has a problem deep copying the _resolution_calculator in
+        # the base class. ISIS don't need it so kill it off here
+        self._resolution_calculator = None
 
     def set_sample(self, run, reload, period):
         """

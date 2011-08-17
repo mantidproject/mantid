@@ -668,7 +668,6 @@ class SANS2D(ISISInstrument):
         return logvalues
 
     def _get_const_num(self, log_data, log_name):
-        from datetime import datetime        
         """
             Get a the named entry from the log object. If the entry is a
             time series it's assumed to contain unchanging data and the first
@@ -683,6 +682,15 @@ class SANS2D(ISISInstrument):
             # return the log value if it stored as a single number
             return float(log_data.getLogData(log_name).value)
         except TypeError:
+            # Python 2.4 doesn't have datetime.strptime...
+            def format_date(date_string, format):
+                from datetime import datetime
+                if sys.version_info[0] == 2 and sys.version_info[1] <  5:
+	            import time
+                    return datetime(*(time.strptime(date_string, format)[0:6]))
+		else:
+                    return datetime.strptime(date_string, format)
+            
             # if the value was stored as a time series we have an array here 
             property = log_data.getLogData(log_name)
             
@@ -691,9 +699,9 @@ class SANS2D(ISISInstrument):
                 return float(log_data.getLogData(log_name).value[0])
 
             start = log_data.getLogData('run_start')
-            dt_0 = datetime.strptime(start.value,"%Y-%m-%dT%H:%M:%S")
+            dt_0 = format_date(start.value,"%Y-%m-%dT%H:%M:%S")
             for i in range(0, size):
-                dt = datetime.strptime(str(property.times[i]),"%Y-%m-%dT%H:%M:%S")
+                dt = format_date(str(property.times[i]),"%Y-%m-%dT%H:%M:%S")
                 if dt > dt_0:
                     if i == 0:
                         return float(log_data.getLogData(log_name).value[0])
