@@ -343,6 +343,19 @@ QVariant MWRunFiles::getUserInput() const
 
 /**
  * Sets a value on the widget through a common interface. The 
+ * QString is assumed to be text and to contain a file string. Note that this
+ * is primarily here for use within the MuonAnalysis when the previous and 
+ * next buttons select files and the text needs to be updated.
+ * @param value A QString containing text to be entered into the widget
+ */
+
+void MWRunFiles::setText(const QString & value)
+{
+  m_uiForm.fileEditor->setText(value);
+}
+
+/**
+ * Sets a value on the widget through a common interface. The 
  * QVariant is assumed to be text and to contain a file string. Note that this
  * is primarily here for use within the AlgorithmDialog
  * @param value A QVariant containing user text

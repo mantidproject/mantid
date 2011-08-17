@@ -30,6 +30,8 @@ namespace MantidWidgets
 {
 
 /// Constructor
+/// @param fitBrowser
+/// @param mantidui Its purpose is to provide the slot showSequentialPlot
 SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser* fitBrowser, QObject* mantidui) :
 QDialog(fitBrowser),m_fitBrowser(fitBrowser)
 {
@@ -51,6 +53,8 @@ QDialog(fitBrowser),m_fitBrowser(fitBrowser)
   populateParameters();
 
   connect(fitBrowser,SIGNAL(functionChanged()),this,SLOT(functionChanged()));
+
+  // When a fit is completed finishHandle is called which emits needShowPlot
   connect(this,SIGNAL(needShowPlot(Ui::SequentialFitDialog*, MantidQt::MantidWidgets::FitPropertyBrowser*)),
           mantidui,SLOT(showSequentialPlot(Ui::SequentialFitDialog*, MantidQt::MantidWidgets::FitPropertyBrowser*)));
   connect(ui.tWorkspaces,SIGNAL(cellChanged(int,int)),this,SLOT(spectraChanged(int,int)));

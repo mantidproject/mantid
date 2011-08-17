@@ -164,11 +164,9 @@ void MantidUI::init()
   m_exploreAlgorithms->update();
   try
   {
-    //QDockWidget* dock = new QDockWidget(m_appWindow);
-    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow->mantidUI);
-    m_fitFunction->init();
+    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, m_appWindow->mantidUI, false);
+   // m_fitFunction->init();
     m_fitFunction->hide();
-    //dock->setWidget(m_fitFunction);
     m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, m_fitFunction );
 
   }

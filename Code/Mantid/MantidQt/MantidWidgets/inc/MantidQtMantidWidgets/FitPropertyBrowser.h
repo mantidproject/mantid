@@ -62,7 +62,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FitPropertyBrowser: public QDockWidget, 
   Q_OBJECT
 public:
   /// Constructor
-  FitPropertyBrowser(QObject* mantidui);
+  FitPropertyBrowser(QWidget *parent = NULL, QObject* mantidui = NULL, bool customFittings = true);
   /// Destructor
   ~FitPropertyBrowser();
   /// Get handler to the root composite function
@@ -357,6 +357,8 @@ private:
   QtBrowserItem* m_functionsGroup;
   /// Group for input/output settings
   QtBrowserItem* m_settingsGroup;
+  /// Group for custom options available on muon analysis widget
+  QtBrowserItem* m_customGroup;
 
   QtProperty *m_workspace;
   QtProperty *m_workspaceIndex;
@@ -367,6 +369,7 @@ private:
   QtProperty *m_costFunction;
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
+  QtProperty *m_data;
 
   /// A list of registered functions
   mutable QStringList m_registeredFunctions;

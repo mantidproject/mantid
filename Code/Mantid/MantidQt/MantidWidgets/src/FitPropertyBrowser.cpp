@@ -49,6 +49,7 @@
 
 #include <algorithm>
 
+
 namespace MantidQt
 {
 namespace MantidWidgets
@@ -88,8 +89,8 @@ protected:
  * Constructor
  * @param parent :: The parent widget - must be an ApplicationWindow
  */
-FitPropertyBrowser::FitPropertyBrowser(QObject* mantidui)
-:QDockWidget("Fit Function"),
+FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui, bool customFittings)
+:QDockWidget("Fit Function",parent),
 m_currentHandler(0),
 m_logValue(NULL),
 m_compositeFunction(0),
@@ -198,6 +199,7 @@ m_mantidui(mantidui)
   m_costFunctions << "Least squares"
                   << "Ignore positive peaks";
   m_enumManager->setEnumNames(m_costFunction,m_costFunctions);
+
   m_plotDiff = m_boolManager->addProperty("Plot Difference");
   bool plotDiff = settings.value("Plot Difference",QVariant(true)).toBool();
   m_boolManager->setValue(m_plotDiff,plotDiff);
@@ -208,7 +210,13 @@ m_mantidui(mantidui)
   settingsGroup->addSubProperty(m_endX);
   settingsGroup->addSubProperty(m_output);
   settingsGroup->addSubProperty(m_minimizer);
-  settingsGroup->addSubProperty(m_costFunction);
+  
+  // Only include the cost function when in the dock widget inside mantid plot, not on muon analysis widget
+  if (customFittings == false)
+  {
+    settingsGroup->addSubProperty(m_costFunction);
+  }
+
   settingsGroup->addSubProperty(m_plotDiff);
 
      /* Create editors and assign them to the managers */
@@ -233,9 +241,18 @@ m_mantidui(mantidui)
   m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
 
   updateDecimals();
-
+  
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
+
+  // Custom settings that are specific to the muon analysis group
+  if (customFittings == true)
+  {
+    QtProperty* customGroup = m_groupManager->addProperty("Custom");
+    m_data = m_enumManager->addProperty("Data");
+    customGroup->addSubProperty(m_data);
+    m_customGroup = m_browser->addProperty(customGroup);
+  }
 
   QVBoxLayout* layout = new QVBoxLayout(w);
   QGridLayout* buttonsLayout = new QGridLayout();
@@ -354,6 +371,8 @@ m_mantidui(mantidui)
 
   observeDelete();
   observeAdd();
+
+  init();
 }
 
 /// Update setup menus according to how these are set in
@@ -1486,6 +1505,7 @@ void FitPropertyBrowser::setEndX(double value)
   m_doubleManager->setValue(m_endX,value);
 }
 
+///
 QtBrowserItem* FitPropertyBrowser::findItem(QtBrowserItem* parent,QtProperty* prop)const
 {
   QList<QtBrowserItem*> children = parent->children();
@@ -2035,8 +2055,12 @@ void FitPropertyBrowser::checkFunction()
 
 void FitPropertyBrowser::saveFunction()
 {
-  QString fnName = QInputDialog::getText(this,"Mantid - Input","Please select a name for the function");
-  saveFunction(fnName);
+  bool ok(false);
+  QString fnName = QInputDialog::getText(this, tr("Mantid - Input"), tr("Please select a name for the function"), QLineEdit::Normal, "", &ok);
+  if (ok && !fnName.isEmpty())
+  {
+    saveFunction(fnName);
+  }
 }
 
 void FitPropertyBrowser::saveFunction(const QString& fnName)
@@ -2344,7 +2368,6 @@ void FitPropertyBrowser::sequentialFit()
   {
     dlg->show();
   }
-  
 }
 
 void FitPropertyBrowser::findPeaks()

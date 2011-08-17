@@ -124,8 +124,19 @@ private slots:
 
   ///
   void muonAnalysisHelpGroupingClicked();
+  
   ///
   void runFirstGoodBinFront();
+
+  /// Check to see if the user want to append the previous run and set accordingly
+  void checkAppendingPreviousRun();
+
+  /// Check to see if the user want to append the next run and set accordingly
+  void checkAppendingNextRun();
+
+  /// Changes the format of the file string. i.e file MUSR001-06 are files 01-06
+  ///void appendSelected();
+
 
 private:
   /// Initialize the layout
@@ -278,9 +289,23 @@ private:
   /// Load auto saved values
   void loadAutoSavedValues(const QString& group);
 
+  /// connect the settings for the fit function to their respective slots
+  void loadFittings();
+
+  /// Add or take one away from the range of files
+  void setAppendingRun(int inc);
+
+  /// change and load the run depending on the value passed as a parameter
+  void changeRun(int amountToChange);
+
+  /// Separate the muon file, current File becomes the beginning part of the file i.e the instrument in the file MUSR002413
+  void separateMuonFile(QString & currentFile, int & runNumberSize, int & runNumber);
+
+  /// Include the 0's fromt eh beginning of the file that were lost in conversion from QString to int
+  void getFullCode(int size, QString & limitedCode);
+
   ///
- // MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
-    MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
+  MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

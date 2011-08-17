@@ -3,6 +3,7 @@
 #include <QDesignerFormEditorInterface>
 #include <QtPlugin>
 
+
 using namespace MantidQt::MantidWidgets;
 
 /**
@@ -115,6 +116,5 @@ QString FitBrowserPlugin::includeFile() const
  */
 QString FitBrowserPlugin::domXml() const
 {
-  return  "<widget class=\"MantidQt::MantidWidgets::FitPropertyBrowser\" name=\"fitBrowser\">\n"
-    "</widget>\n";
+  return  "<widget class=\"MantidQt::MantidWidgets::FitPropertyBrowser\" name=\"fitBrowser\" />";
 }

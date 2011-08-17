@@ -105,6 +105,8 @@ namespace MantidQt
       QVariant getUserInput() const;      
       /// Sets a value on the widget through a common interface
       void setUserInput(const QVariant & value);
+      /// Sets a value on the widget but doesn't emit a signal to say it has changed
+      void setText(const QString & value);
       /// flag a problem with the file the user entered, an empty string means no error
       void setFileProblem(const QString & message);
       /// Read settings from the given group
