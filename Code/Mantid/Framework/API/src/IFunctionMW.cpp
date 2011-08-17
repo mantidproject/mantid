@@ -675,7 +675,7 @@ boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(
 
       delete [] lOut; 
 
-      if (sd.size() == this->nParams())
+      if (sd.size() == static_cast<size_t>(this->nParams()))
       {
         SimpleJacobian J(nData,this->nParams());
         try
@@ -689,7 +689,7 @@ boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(
         for(size_t i=0; i<nData; i++)
         {
           double err = 0.0;
-          for(size_t j=0;j<nParams();++j)
+          for(size_t j=0;j< static_cast<size_t>(nParams());++j)
           {
             double d = J.get(i,j) * sd[j];
             err += d*d;
