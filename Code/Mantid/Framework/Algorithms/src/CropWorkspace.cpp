@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/TextAxis.h"
+#include <iostream>
 
 namespace 
 {
@@ -220,8 +221,10 @@ size_t CropWorkspace::getXMin(const int wsIndex)
     const MantidVec& X = m_inputWorkspace->readX(wsIndex);
     if ( m_commonBoundaries && minX_val > X.back() )
     {
-      g_log.error("XMin is greater than the largest X value");
-      throw std::out_of_range("XMin is greater than the largest X value");
+      std::stringstream msg;
+      msg << "XMin is greater than the largest X value (" << minX_val << " > " << X.back() << ")";
+      g_log.error(msg.str());
+      throw std::out_of_range(msg.str());
     }
     // Reduce cut-off value slightly to allow for rounding errors
     // when trying to exactly hit a bin boundary.
@@ -246,8 +249,10 @@ size_t CropWorkspace::getXMax(const int wsIndex)
   {//we have a user value, check it and maybe store it
     if ( m_commonBoundaries && maxX_val < X.front() )
     {
-      g_log.error("XMax is less than the smallest X value");
-      throw std::out_of_range("XMax is less than the smallest X value");
+      std::stringstream msg;
+      msg << "XMax is less than the smallest X value (" << maxX_val << " < " << X.front() << ")";
+      g_log.error(msg.str());
+      throw std::out_of_range(msg.str());
     }
     // Increase cut-off value slightly to allow for rounding errors
     // when trying to exactly hit a bin boundary.
