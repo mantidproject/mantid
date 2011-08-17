@@ -71,13 +71,38 @@ class ISaveableTesterWithSeek : public ISaveableTester
 {
 public:
   ISaveableTesterWithSeek(size_t id) : ISaveableTester(id)
-  {}
+  {
+    myFilePos = id;
+  }
+
+  virtual void load(DiskMRU & mru) const
+  {
+    std::cout << "Block " << getId() << " loading at " << myFilePos << std::endl;
+    ISaveableTesterWithSeek::fakeSeekAndWrite( this->getFilePosition() );
+    mru.loading(this);
+  }
 
   virtual void save() const
   {
     if (!m_doSave) return;
     // Pretend to seek to the point and write
+    std::cout << "Block " << getId() << " saving at " << myFilePos << std::endl;
     fakeSeekAndWrite(getFilePosition());
+  }
+
+  void grow(DiskMRU & mru, bool tellMRU)
+  {
+    // OK first you seek to where the OLD data was and load it.
+    std::cout << "Block " << getId() << " loading at " << myFilePos << std::endl;
+    ISaveableTesterWithSeek::fakeSeekAndWrite( this->getFilePosition() );
+    // Simulate that the data is growing and so needs to be written out
+    size_t newfilePos = mru.relocate(myFilePos, m_memory, m_memory+1);
+    std::cout << "Block " << getId() << " has moved from " << myFilePos << " to " << newfilePos << std::endl;
+    myFilePos = newfilePos;
+    // Grow the size by 1
+    m_memory = m_memory + 1;
+    // Now pretend you're adding it to the MRU and might write out old stuff.
+    if (tellMRU) mru.loading(this);
   }
 
   /// Fake a seek followed by a write
@@ -97,7 +122,8 @@ public:
   }
 
   // File position = same as its ID
-  virtual uint64_t getFilePosition() const { return uint64_t(getId()); }
+  uint64_t myFilePos;
+  virtual uint64_t getFilePosition() const { return myFilePos; }
 
   static uint64_t filePos;
 };
@@ -793,7 +819,7 @@ public:
       data[i]->m_doSave = false; // Items won't do any real saving
     }
     dataSeek.clear();
-    for (size_t i=0; i<100; i++)
+    for (size_t i=0; i<200; i++)
       dataSeek.push_back( new ISaveableTesterWithSeek(i) );
   }
 
@@ -839,20 +865,20 @@ public:
     std::cout << tim << " to load " << num << " into MRU (no write buffer)." << std::endl;
   }
 
-  void test_withFakeSeeking()
+  /** Demonstrate that using a write buffer reduces time spent seeking on disk */
+  void test_withFakeSeeking_withWriteBuffer()
   {
     CPUTimer tim;
     DiskMRU mru(100, 10, true);
     for (int i=0; i<int(dataSeek.size()); i++)
     {
       // Pretend you just loaded the data
-      ISaveableTesterWithSeek::fakeSeekAndWrite( dataSeek[i]->getFilePosition() );
-      // Now pretend you're adding it to the MRU and might write out old stuff.
-      mru.loading(dataSeek[i]);
+      dataSeek[i]->load(mru);
     }
-    std::cout << tim << " to load " << dataSeek.size() << " into MRU with fake seeking. 0.095 sec = shortest possible time." << std::endl;
+    std::cout << tim << " to load " << dataSeek.size() << " into MRU with fake seeking. " << std::endl;
   }
 
+  /** Use a 0-sized write buffer so that it constantly needs to seek and write out. This should be slower due to seeking. */
   void test_withFakeSeeking_noWriteBuffer()
   {
     CPUTimer tim;
@@ -860,13 +886,45 @@ public:
     for (int i=0; i<int(dataSeek.size()); i++)
     {
       // Pretend you just loaded the data
-      ISaveableTesterWithSeek::fakeSeekAndWrite( dataSeek[i]->getFilePosition() );
-      // Now pretend you're adding it to the MRU and might write out old stuff.
-      mru.loading(dataSeek[i]);
+      dataSeek[i]->load(mru);
     }
-    std::cout << tim << " to load " << dataSeek.size() << " into MRU with fake seeking. 0.095 sec = shortest possible time." << std::endl;
+    std::cout << tim << " to load " << dataSeek.size() << " into MRU with fake seeking. " << std::endl;
   }
 
+  /** Example of a situation where vectors grew, meaning that they need to be
+   * relocated causing lots of seeking if no write buffer exists.*/
+  void test_withFakeSeeking_growingData()
+  {
+    CPUTimer tim;
+    DiskMRU mru(10, 20, true);
+    mru.setFileLength(dataSeek.size());
+    for (int i=0; i<int(dataSeek.size()); i++)
+    {
+      // Pretend you just loaded the data
+      dataSeek[i]->grow(mru, true);
+    }
+    std::cout << "About to flush the cache to finish writes." << std::endl;
+    mru.flushCache();
+    std::cout << tim << " to grow " << dataSeek.size() << " into MRU with fake seeking. " << std::endl;
+  }
+
+  /** Demonstrate that calling "save" manually without using the MRU write buffer will slow things down
+   * due to seeking. Was an issue in LoadMDEW */
+  void test_withFakeSeeking_growingData_savingWithoutUsingMRU()
+  {
+    CPUTimer tim;
+    DiskMRU mru(20, 20, true);
+    mru.setFileLength(dataSeek.size());
+    for (int i=0; i<int(dataSeek.size()); i++)
+    {
+      // Pretend you just loaded the data
+      dataSeek[i]->grow(mru, false);
+      dataSeek[i]->save();
+    }
+    std::cout << tim << " to grow " << dataSeek.size() << " into MRU with fake seeking. " << std::endl;
+  }
+
+  /** Speed of freeing a lot of blocks and putting them in the free space map */
   void test_freeBlock()
   {
     CPUTimer tim;
