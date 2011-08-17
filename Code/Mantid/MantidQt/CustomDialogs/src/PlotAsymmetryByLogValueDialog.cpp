@@ -77,6 +77,11 @@ void PlotAsymmetryByLogValueDialog::initLayout()
   fillLineEdit("BackwardSpectra", m_uiForm.backwardBox);
   fillLineEdit("TimeMin", m_uiForm.timeMinBox);
   fillLineEdit("TimeMax", m_uiForm.timeMaxBox);
+  
+  QString asdfdasasdf = m_uiForm.firstRunBox->text();
+   
+  if ( !m_uiForm.firstRunBox->text().isEmpty() )
+    fillLogBox(m_uiForm.firstRunBox->text());
 }
 
 /**
