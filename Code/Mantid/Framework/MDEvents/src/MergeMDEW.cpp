@@ -1,5 +1,6 @@
 #include "MantidMDEvents/MergeMDEW.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/MultipleFileProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -19,7 +20,6 @@ namespace MDEvents
    */
   MergeMDEW::MergeMDEW()
   {
-    // TODO Auto-generated constructor stub
   }
     
   //----------------------------------------------------------------------------------------------
@@ -27,7 +27,6 @@ namespace MDEvents
    */
   MergeMDEW::~MergeMDEW()
   {
-    // TODO Auto-generated destructor stub
   }
   
 
@@ -56,7 +55,8 @@ namespace MDEvents
    */
   void MergeMDEW::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
+    declareProperty(new MultipleFileProperty("Filenames"),
+        "Select several MDEventWorkspace NXS files to merge together. Files must have common box structure.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
   }
 

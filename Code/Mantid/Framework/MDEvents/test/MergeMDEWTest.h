@@ -8,6 +8,8 @@
 #include <iomanip>
 
 #include "MantidMDEvents/MergeMDEW.h"
+#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -34,7 +36,7 @@ public:
     {
       std::ostringstream mess;
       mess << "MergeMDEWTestInput" << i;
-      MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeFileBackedMDEW(mess.str(), lhs_file);
+      MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeFileBackedMDEW(mess.str(), true);
       inWorkspaces.push_back(ws);
       filenames.push_back(ws->getBoxController()->getFilename());
     }
