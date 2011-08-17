@@ -123,7 +123,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     for run in runinfo:
         raw_workspaces = []
         try:
-            # Load in the runs specified in the csv file
+            # Load in the sample runs specified in the csv file
             raw_workspaces.append(read_run(run, 'sample_sans', format))
             
             #Transmission runs to be applied to the sample
@@ -153,7 +153,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             continue
         except ValueError, reason:
             issueWarning('Cannot load file :'+str(reason))
-#when we are all up to Python 2.5 replace the duplicated code below with one finally:
+            #when we are all up to Python 2.5 replace the duplicated code below with one finally:
             delete_workspaces(raw_workspaces)
             raise
         

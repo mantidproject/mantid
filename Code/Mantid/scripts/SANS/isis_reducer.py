@@ -39,6 +39,12 @@ class Sample(object):
         self.geometry = sans_reduction_steps.GetSampleGeom()
 
     def set_run(self, run, reload, period, reducer):
+        """
+            Assigns and load the run
+            @param run: the run in a number.raw|nxs format
+            @param reload: if this sample should be reloaded before the first reduction  
+            @param period: the period within the sample to be analysed
+        """        
         self.loader = isis_reduction_steps.LoadSample(run, reload, period)
         self.log = self.loader.execute(reducer, None)
         
@@ -142,7 +148,7 @@ class ISISReducer(SANSReducer):
 
     def set_sample(self, run, reload, period):
         """
-            Assigns the run that this reduction chain will analysis
+            Assigns and load the run that this reduction chain will analysis
             @param run: the run in a number.raw|nxs format
             @param reload: if this sample should be reloaded before the first reduction  
             @param period: the period within the sample to be analysed

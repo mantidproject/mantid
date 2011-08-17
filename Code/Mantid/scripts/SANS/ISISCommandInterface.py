@@ -270,7 +270,7 @@ def _setUpPeriod(i):
     trans_samp = ReductionSingleton().samp_trans_load
     can = ReductionSingleton().background_subtracter
     trans_can = ReductionSingleton().can_trans_load
-    AssignSample(ReductionSingleton().get_sample().loader._data_file, period=i)
+    new_sample_workspaces = AssignSample(ReductionSingleton().get_sample().loader._data_file, period=i)[0]
     if can:
         #replace one thing that gets overwritten
         AssignCan(can.workspace._data_file, True, period=can.workspace.getCorrospondingPeriod(i, ReductionSingleton()))
@@ -282,6 +282,8 @@ def _setUpPeriod(i):
         trans = trans_can.trans
         direct = trans_can.direct
         TransmissionCan(trans._data_file, direct._data_file, True, period_t=trans.getCorrospondingPeriod(i, ReductionSingleton()),period_d=direct.getCorrospondingPeriod(i, ReductionSingleton()))  
+
+    return new_sample_workspaces
 
 def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None):
     """
@@ -300,6 +302,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     _printMessage('Running reduction for ' + str(ReductionSingleton().to_wavelen))
 
     try:
+        # do a reduction
         calculated = [ReductionSingleton()._reduce()]
 
         periods = ReductionSingleton().get_sample().loader.entries    
@@ -307,8 +310,10 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             run_setup = ReductionSingleton().settings()
             for i in periods[1:len(periods)]:
                 ReductionSingleton.replace(copy.deepcopy(run_setup))
-                _setUpPeriod(i)
+                temp_workspaces = _setUpPeriod(i)
+                # do a reduction for period i
                 calculated.append(ReductionSingleton()._reduce())
+                delete_workspaces(temp_workspaces)
             result = ReductionSingleton().get_out_ws_name(show_period=False)
             all_results = calculated[0]
             for name in calculated[1:len(calculated)]:
@@ -326,6 +331,24 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         RenameWorkspace(old, result)
         
     return result
+
+def delete_workspaces(workspaces):
+    """
+        Delete the list of workspaces if possible but fail siliently if there is
+        a problem
+        @param workspaces: the list to delete
+    """
+    if type(workspaces) != type(list()):
+        if type(workspaces) != type(tuple()):
+            workspaces = [workspaces]
+
+    for wksp in workspaces:
+        if wksp and mtd.workspaceExists(wksp):
+            try:
+                DeleteWorkspace(wksp)
+            except:
+                #we're only deleting to save memory, if the workspace really won't delete leave it
+                pass
 
 def CompWavRanges(wavelens, plot=True):
     """
