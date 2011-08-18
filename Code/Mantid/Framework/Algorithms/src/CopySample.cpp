@@ -37,8 +37,8 @@ namespace Algorithms
     this->setWikiSummary("Copy some/all the sample information from one workspace to another.");
     this->setOptionalMessage("Copy some/all the sample information from one workspace to another.");
     this->setWikiDescription("The algorithm copies some/all the sample information from one workspace to another."
-                             "For MD workspaces, if no input sample number is specified, or not found, it will copy the"
-                             "first sample. For MD workspaces, if no output sample number is specified, it will copy to all samples, ");
+                             "For MD workspaces, if no input sample number is specified, or not found, it will copy the "
+                             "first sample. For MD workspaces, if no output sample number is specified, it will copy to all samples.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -48,11 +48,11 @@ namespace Algorithms
   {
     declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input), "An input workspace from wich to copy sample information.");
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::InOut), "An output workspace to wich to copy sample information..");
-    declareProperty(new PropertyWithValue<bool>("CopyName",true,Direction::Input),"Copies the name of the sample" );
-    declareProperty(new PropertyWithValue<bool>("CopyMaterial",true,Direction::Input),"Copies the material of the sample" );
-    declareProperty(new PropertyWithValue<bool>("CopyEnvironment",true,Direction::Input),"" );
-    declareProperty(new PropertyWithValue<bool>("CopyShape",true,Direction::Input),"" );
-    declareProperty(new PropertyWithValue<bool>("CopyLattice",true,Direction::Input),"" );
+    declareProperty(new PropertyWithValue<bool>("CopyName",true,Direction::Input),"Copy the name of the sample" );
+    declareProperty(new PropertyWithValue<bool>("CopyMaterial",true,Direction::Input),"Copy the material of the sample" );
+    declareProperty(new PropertyWithValue<bool>("CopyEnvironment",true,Direction::Input),"Copy the sample environment" );
+    declareProperty(new PropertyWithValue<bool>("CopyShape",true,Direction::Input),"Copy the sample shape" );
+    declareProperty(new PropertyWithValue<bool>("CopyLattice",true,Direction::Input),"Copy the sample oriented lattice" );
     declareProperty(new PropertyWithValue<int>("MDInputSampleNumber",0,Direction::Input),"The number of the sample to be copied from, for an MD workspace (starting from 0)" );
     declareProperty(new PropertyWithValue<int>("MDOutputSampleNumber",EMPTY_INT(),Direction::Input),"The number of the sample to be copied to for an MD workspace (starting from 0). No number, or negative number, means that it will copy to all samples" );
   }

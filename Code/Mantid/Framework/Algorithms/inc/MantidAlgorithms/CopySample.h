@@ -10,7 +10,15 @@ namespace Mantid
 namespace Algorithms
 {
 
-  /** CopySample : Algorithm to copy some/all the sample information from one workspace to another
+  /** CopySample : The algorithm copies some/all the sample information from one workspace to another.
+  For MD workspaces, if no input sample number is specified, or not found, it will copy the first sample.
+  For MD workspaces, if no output sample number is specified (or negative), it will copy to all samples. The following information can be copied:
+
+    Name
+    Material
+    Sample environment
+    Shape
+    Oriented lattice
     
     @author Andrei Savici, ORNL
     @date 2011-08-11
