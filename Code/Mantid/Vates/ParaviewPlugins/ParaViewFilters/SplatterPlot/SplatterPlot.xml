@@ -1,0 +1,25 @@
+<ServerManagerConfiguration>
+  <!-- Begin SplatterPlot -->
+  <ProxyGroup name="filters">
+    <SourceProxy name="MantidParaViewSplatterPlot" class="vtkSplatterPlot" label="MDEW Scatter Plot">
+      <InputProperty
+        name="Input"
+        command="SetInputConnection">
+        <ProxyGroupDomain name="groups">
+          <Group name="sources"/>
+          <Group name="filters"/>
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkUnstructuredGrid"/>
+        </DataTypeDomain>
+      </InputProperty>
+	  <IntVectorProperty
+         name="Number of Points"
+         command="SetNumberOfPoints"
+         number_of_elements="1"
+         default_values="1000">
+       </IntVectorProperty>
+    </SourceProxy>
+  </ProxyGroup>
+  <!-- End SplatterPlot -->
+</ServerManagerConfiguration>
