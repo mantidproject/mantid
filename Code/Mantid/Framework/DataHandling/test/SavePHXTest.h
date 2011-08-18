@@ -68,7 +68,7 @@ public:
       count[0]=" 0 ";count[1]=" 1 ";count[2]=" 2 ";count[3]=" 3 ";
 
       std::ifstream testFile;
-      testFile.open(TestOutputFile);
+      testFile.open(TestOutputFile.c_str());
       TSM_ASSERT(" Can not open test file produced by algorithm phxSaver",testFile.is_open());
       int ic(0);
       while(ic<5){
