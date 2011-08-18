@@ -89,8 +89,8 @@ class SANSReducer(Reducer):
         # Default dark current subtracter class
         self._dark_current_subtracter_class = sans_reduction_steps.SubtractDarkCurrent
         
-        # Resolution calculator
-        self._resolution_calculator = ReactorSANSResolution
+        # Resolution calculator. The mac seems to require the module qualification for some reason...
+        self._resolution_calculator = mantidsimple.ReactorSANSResolution
         
         # Sample geometry correction
         self.geometry_correcter = None
