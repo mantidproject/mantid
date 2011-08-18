@@ -1,5 +1,5 @@
-#ifndef EVENT_NEXUS_LOADING_PRESENTER_TEST_H_
-#define EVENT_NEXUS_LOADING_PRESENTER_TEST_H_
+#ifndef SQW_LOADING_PRESENTER_TEST_H_
+#define SQW_LOADING_PRESENTER_TEST_H_ 
 
 #include <cxxtest/TestSuite.h>
 #include <vtkUnstructuredGrid.h>
@@ -9,25 +9,26 @@
 #include "MockObjects.h"
 
 #include "MantidAPI/FileFinder.h"
-#include "MantidVatesAPI/EventNexusLoadingPresenter.h"
+#include "MantidVatesAPI/SQWLoadingPresenter.h"
+#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 
 using namespace Mantid::VATES;
-using namespace testing;
+
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class EventNexusLoadingPresenterTest : public CxxTest::TestSuite
+class SQWLoadingPresenterTest : public CxxTest::TestSuite
 {
 
 private:
 
-  // Helper method to return the full path to a real nexus file that is the correct format for this functionality.
+  // Helper method to return the full path to a real sqw file.
   static std::string getSuitableFile()
   {
-    return Mantid::API::FileFinder::Instance().getFullPath("CNCS_7860_event.nxs");
+    return Mantid::API::FileFinder::Instance().getFullPath("test_horace_reader.sqw");
   }
   
-  // Helper method to return the full path to a real nexus file that is the wrong format for this functionality.
+  // Helper method to return the full path to a file that is invalid.
   static std::string getUnhandledFile()
   {
     return Mantid::API::FileFinder::Instance().getFullPath("emu00006473.nxs");
@@ -38,35 +39,49 @@ public:
 void testConstructWithEmptyFileThrows()
 {
   MockMDLoadingView view;
-
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", EventNexusLoadingPresenter<MockMDLoadingView>(&view, ""), std::invalid_argument);
+  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", SQWLoadingPresenter<MockMDLoadingView>(&view, ""), std::invalid_argument);
 }
 
 void testConstructWithNullViewThrows()
 {
   MockMDLoadingView*  pView = NULL;
-
-  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", EventNexusLoadingPresenter<MockMDLoadingView>(pView, "some_file"), std::invalid_argument);
+  TSM_ASSERT_THROWS("Should throw if an empty file string is given.", SQWLoadingPresenter<MockMDLoadingView>(pView, "some_file"), std::invalid_argument);
 }
 
 void testConstruct()
 {
   MockMDLoadingView view;
-
-  TSM_ASSERT_THROWS_NOTHING("Object should be created without exception.", EventNexusLoadingPresenter<MockMDLoadingView>(&view, getSuitableFile()));
+  TSM_ASSERT_THROWS_NOTHING("Object should be created without exception.", SQWLoadingPresenter<MockMDLoadingView>(&view, getSuitableFile()));
 }
-
 
 void testCanReadFile()
 {
   MockMDLoadingView view;
-  EventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getUnhandledFile());
-  TSM_ASSERT("A file of this type cannot and should not be read by this presenter!.", !presenter.canReadFile());
+
+  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  TSM_ASSERT("Should be readable, valid SQW file.", presenter.canReadFile());
+}
+
+void testCanReadFileWithDifferentCaseExtension()
+{
+  MockMDLoadingView view;
+
+  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, "other.Sqw");
+  TSM_ASSERT("Should be readable, only different in case.", presenter.canReadFile());
+}
+
+void testCannotReadFileWithWrongExtension()
+{
+  MockMDLoadingView view;
+
+  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, getUnhandledFile());
+  TSM_ASSERT("Should NOT be readable, completely wrong file type.", !presenter.canReadFile());
 }
 
 void testExecution()
 {
-  //Setup view
+  using namespace testing;
+   //Setup view
   MockMDLoadingView view;
   EXPECT_CALL(view, getRecursionDepth()).Times(AtLeast(1)); 
   EXPECT_CALL(view, getLoadInMemory()).Times(AtLeast(1)); 
@@ -83,7 +98,7 @@ void testExecution()
   FilterUpdateProgressAction<MockMDLoadingView> progressAction(&view);
 
   //Create the presenter and runit!
-  EventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
   presenter.executeLoadMetadata();
   vtkDataSet* product = presenter.execute(&factory, progressAction);
 
@@ -100,37 +115,37 @@ void testExecution()
   product->Delete();
 }
 
-void testGetTDimension()
+void testCallHasTDimThrows()
 {
   MockMDLoadingView view;
-  EventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
-  TSM_ASSERT("EventNexus MDEW are created in fixed 3D.", !presenter.hasTDimensionAvailable());
+  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.hasTDimensionAvailable(), std::runtime_error);
 }
 
 void testCallGetTDimensionValuesThrows()
 {
   MockMDLoadingView view;
-  EventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
   TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getTimeStepValues(), std::runtime_error);
 }
 
 void testCallGetGeometryThrows()
 {
   MockMDLoadingView view;
-  EventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
   TSM_ASSERT_THROWS("Should throw. Execute not yet run.", presenter.getGeometryXML(), std::runtime_error);
 }
 
 void testExecuteLoadMetadata()
 {
   MockMDLoadingView view;
-  EventNexusLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
+  SQWLoadingPresenter<MockMDLoadingView> presenter(&view, getSuitableFile());
   presenter.executeLoadMetadata();
-  TSM_ASSERT_THROWS("Should always throw. Algorithm fixed to create 3 dimensions.", presenter.getTimeStepValues(), std::runtime_error);
+  TSM_ASSERT_THROWS_NOTHING("Should throw. Execute not yet run.", presenter.getTimeStepValues());
   TSM_ASSERT_THROWS_NOTHING("Should throw. Execute not yet run.", presenter.hasTDimensionAvailable());
   TSM_ASSERT_THROWS_NOTHING("Should throw. Execute not yet run.", presenter.getGeometryXML());
 }
 
-
 };
+
 #endif

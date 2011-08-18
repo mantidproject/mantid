@@ -6,6 +6,7 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/TimeToTimeStep.h"
 #include <boost/shared_ptr.hpp>
 
 using Mantid::MDEvents::MDEventWorkspace;
@@ -73,6 +74,9 @@ public:
 
   virtual void setRecursionDepth(size_t depth);
 
+  /// Set the time value.
+  void setTime(double timeStep);
+
 private:
 
   template<typename MDE, size_t nd>
@@ -104,6 +108,9 @@ private:
 
   /// Implicit function to define which boxes to render.
   mutable Mantid::Geometry::MDImplicitFunction * sliceImplicitFunction;
+
+  /// Time value.
+  double m_time;
 
 };
 

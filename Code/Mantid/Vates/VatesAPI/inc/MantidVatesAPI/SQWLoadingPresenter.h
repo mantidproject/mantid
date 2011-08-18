@@ -1,23 +1,18 @@
-#ifndef MANTID_VATES_MDEW_EVENT_NEXUS_LOADING_PRESENTER
-#define MANTID_VATES_MDEW_EVENT_NEXUS_LOADING_PRESENTER
-
-#include <vtkUnstructuredGrid.h>
+#ifndef SQW_LOADING_PRESENTER_H_
+#define SQW_LOADING_PRESENTER_H_
 
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
-#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
-
-#include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/NeXusException.hpp"
-#include "MantidMDEvents/LoadMDEW.h"
+#include "MantidMDEvents/LoadSQW.h"
+#include <boost/regex.hpp>
 
 namespace Mantid
 {
   namespace VATES
   {
     /** 
-    @class MDEWEventNexusLoadingPresenter, Abstract presenters for loading conversion of MDEW workspaces into render-able vtk objects.
+    @class SQWLoadingPresenter, MVP loading presenter for .*sqw file types.
     @author Owen Arnold, Tessella plc
-    @date 09/08/2011
+    @date 16/08/2011
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -40,13 +35,14 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     template<typename ViewType>
-    class DLLExport MDEWEventNexusLoadingPresenter : public MDEWLoadingPresenter<ViewType>
+    class DLLExport SQWLoadingPresenter : public MDEWLoadingPresenter<ViewType>
     {
     public:
-      MDEWEventNexusLoadingPresenter(ViewType* view, const std::string fileName);
+      SQWLoadingPresenter(ViewType* view, const std::string fileName);
       virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler);
+      virtual void extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs);
       virtual void executeLoadMetadata();
-      virtual ~MDEWEventNexusLoadingPresenter();
+      virtual ~SQWLoadingPresenter();
       virtual bool canReadFile() const;
     };
 
@@ -59,7 +55,7 @@ namespace Mantid
     @throw logic_error if cannot use the reader-presenter for this filetype.
     */
     template<typename ViewType>
-    MDEWEventNexusLoadingPresenter<ViewType>::MDEWEventNexusLoadingPresenter(ViewType* view, const std::string filename) : MDEWLoadingPresenter<ViewType>(filename, view)
+    SQWLoadingPresenter<ViewType>::SQWLoadingPresenter(ViewType* view, const std::string filename) : MDEWLoadingPresenter<ViewType>(filename, view)
     {
       if(m_filename.empty())
       {
@@ -76,26 +72,12 @@ namespace Mantid
     @return false if the file cannot be read.
     */
     template<typename ViewType>
-    bool MDEWEventNexusLoadingPresenter<ViewType>::canReadFile() const
+    bool SQWLoadingPresenter<ViewType>::canReadFile() const
     {
-      ::NeXus::File * file = NULL;
-
-      file = new ::NeXus::File(m_filename);
-      // MDEventWorkspace file has a different name for the entry
-      try
-      {
-        file->openGroup("MDEventWorkspace", "NXentry");
-        file->close();
-        return 1;
-      }
-      catch(::NeXus::Exception &)
-      {
-        // If the entry name does not match, then it can't read the file.
-        file->close();
-        return 0;
-      }
-      return 0;
+      boost::regex expression(".*sqw$", boost::regex_constants::icase); //check that the file ends with sqw.
+      return boost::regex_match(m_filename, expression);
     }
+
 
     /*
     Executes the underlying algorithm to create the MVP model.
@@ -103,7 +85,7 @@ namespace Mantid
     @param eventHandler : object that encapuslates the direction of the gui change as the algorithm progresses.
     */
     template<typename ViewType>
-    vtkDataSet* MDEWEventNexusLoadingPresenter<ViewType>::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
+    vtkDataSet* SQWLoadingPresenter<ViewType>::execute(vtkDataSetFactory* factory, ProgressAction& eventHandler)
     {
       using namespace Mantid::API;
       using namespace Mantid::Geometry;
@@ -113,11 +95,10 @@ namespace Mantid
         Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
         AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
 
-        Mantid::MDEvents::LoadMDEW alg;
+        Mantid::MDEvents::LoadSQW alg;
         alg.initialize();
         alg.setPropertyValue("Filename", this->m_filename);
         alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
-        alg.setProperty("FileBackEnd", !m_view->getLoadInMemory()); //Load from file by default.
         alg.execute();
       }
 
@@ -127,45 +108,89 @@ namespace Mantid
       factory->setRecursionDepth(m_view->getRecursionDepth());
       factory->initialize(eventWs);
       vtkDataSet* visualDataSet = factory->create();
-      
-      /*extractMetaData needs to be re-run here because the first execution of this from ::executeLoadMetadata will not have ensured that all dimensions
-        have proper range extents set.
-      */
-      MDEWLoadingPresenter::extractMetadata(eventWs);
 
       appendMetadata(visualDataSet, eventWs->getName());
+      
       return visualDataSet;
     }
+
+     /*
+    Extract the geometry and function information 
+
+    This implementation is an override of the base-class method, which deals with the more common event based route. However the SQW files will provide complete
+    dimensions with ranges already set. Less work needs to be done here than for event workspaces where the extents of each dimension need to be individually
+    extracted.
+
+    @param eventWs : event workspace to get the information from.
+    */
+    template<typename ViewType>
+    void SQWLoadingPresenter<ViewType>::extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs)
+    {
+      using namespace Mantid::Geometry;
+      MDGeometryBuilderXML<StrictDimensionPolicy> refresh;
+      xmlBuilder= refresh; //Reassign.
+      std::vector<MDDimensionExtents> ext = eventWs->getMinimumExtents(5);
+      std::vector<IMDDimension_sptr> dimensions;
+      size_t nDimensions = eventWs->getNumDims();
+      for (size_t d=0; d<nDimensions; d++)
+      {
+        IMDDimension_sptr inDim = eventWs->getDimension(d);
+        //Copy the dimension, but set the ID and name to be the same. This is an assumption in bintohistoworkspace.
+        MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getUnits(), inDim->getMinimum(), inDim->getMaximum(), size_t(10)));
+        dimensions.push_back(dim);
+      }
+
+      //Configuring the geometry xml builder allows the object panel associated with this reader to later
+      //determine how to display all geometry related properties.
+      if(nDimensions > 0)
+      {
+        xmlBuilder.addXDimension( dimensions[0] );
+      }
+      if(nDimensions > 1)
+      {
+        xmlBuilder.addYDimension( dimensions[1] );
+      }
+      if(nDimensions > 2)
+      {
+        xmlBuilder.addZDimension( dimensions[2]  );
+      }
+      if(nDimensions > 3)
+      {
+        tDimension = dimensions[3];
+        xmlBuilder.addTDimension(tDimension);
+      }
+      m_isSetup = true;
+    }
+    
 
     /**
      Executes any meta-data loading required.
     */
     template<typename ViewType>
-    void MDEWEventNexusLoadingPresenter<ViewType>::executeLoadMetadata()
+    void SQWLoadingPresenter<ViewType>::executeLoadMetadata()
     {
       using namespace Mantid::API;
+      using namespace Mantid::Geometry;
+
       AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
 
-      Mantid::MDEvents::LoadMDEW alg;
+      Mantid::MDEvents::LoadSQW alg;
       alg.initialize();
       alg.setPropertyValue("Filename", this->m_filename);
-      alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
       alg.setProperty("MetadataOnly", true); //Don't load the events.
-      alg.setProperty("FileBackEnd", false); //Only require metadata, so do it in memory.
+      alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
       alg.execute();
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
-      IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
+      Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
 
       //Call base-class extraction method.
-      MDEWLoadingPresenter::extractMetadata(eventWs);
-
-      AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
+      extractMetadata(eventWs);
     }
 
     ///Destructor
     template<typename ViewType>
-    MDEWEventNexusLoadingPresenter<ViewType>::~MDEWEventNexusLoadingPresenter()
+    SQWLoadingPresenter<ViewType>::~SQWLoadingPresenter()
     {
     }
 

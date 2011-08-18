@@ -8,7 +8,7 @@ set( SRC_FILES EventNexusReaderObjectPanel.cxx )
 qt4_wrap_cpp( MOC_SRCS EventNexusReaderObjectPanel.h )
 add_paraview_object_panel( IFACES IFACE_SRCS 
                            CLASS_NAME EventNexusReaderObjectPanel
-                           XML_NAME EventNexusReader XML_GROUP sources )
+                           XML_NAME DUMMY XML_GROUP sources )
 add_paraview_plugin( MantidParaViewEventNexusReaderObjectPanel "1.0"
                      GUI_INTERFACES ${IFACES}
                      SOURCES ${MOC_SRCS} ${IFACE_SRCS} ${INCLUDE_FILES} 

@@ -1,22 +1,14 @@
 #ifndef MANTID_VATES_EVENT_NEXUS_LOADING_PRESENTER
 #define MANTID_VATES_EVENT_NEXUS_LOADING_PRESENTER
 
-#include <vtkUnstructuredGrid.h>
-#include <vtkFieldData.h>
-
-#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/ImplicitFunction.h"
-#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include "MantidVatesAPI/MDLoadingPresenter.h"
+#include "MantidVatesAPI/MDEWLoadingPresenter.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
-#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
-#include "MantidVatesAPI/MetadataToFieldData.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NeXusException.hpp"
 #include "MantidMDEvents/OneStepMDEW.h"
+
+#include <vtkUnstructuredGrid.h>
 
 namespace Mantid
 {
@@ -48,23 +40,16 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     template<typename ViewType>
-    class DLLExport EventNexusLoadingPresenter : public MDLoadingPresenter
+    class DLLExport EventNexusLoadingPresenter : public MDEWLoadingPresenter<ViewType>
     {
     public:
       EventNexusLoadingPresenter(ViewType* view, const std::string fileName);
       virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler);
+      virtual void executeLoadMetadata();
       virtual bool hasTDimensionAvailable() const;
       virtual std::vector<double> getTimeStepValues() const;
-      std::string getGeometryXML() const;
       virtual ~EventNexusLoadingPresenter();
       virtual bool canReadFile() const;
-    private:
-      const std::string m_filename;
-      ViewType* m_view;
-      Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::StrictDimensionPolicy> xmlBuilder;
-      Mantid::Geometry::IMDDimension_sptr tDimension;
-      void appendMetadata(vtkDataSet* visualDataSet, Mantid::API::IMDEventWorkspace_sptr eventWs);
-      bool m_isSetup;
     };
 
     /*
@@ -76,7 +61,7 @@ namespace Mantid
     @throw logic_error if cannot use the reader-presenter for this filetype.
     */
     template<typename ViewType>
-    EventNexusLoadingPresenter<ViewType>::EventNexusLoadingPresenter(ViewType* view, const std::string filename) : MDLoadingPresenter(), m_filename(filename), m_view(view), m_isSetup(false)
+    EventNexusLoadingPresenter<ViewType>::EventNexusLoadingPresenter(ViewType* view, const std::string filename) : MDEWLoadingPresenter<ViewType>(filename, view)
     {
       if(m_filename.empty())
       {
@@ -147,17 +132,20 @@ namespace Mantid
 
       m_view->getLoadInMemory(); //TODO, nexus reader algorithm currently has no use of this.
       
-      Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
+      if(shouldLoad())
+      {
+        Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
+        AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
 
-      AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
-
-      Mantid::MDEvents::OneStepMDEW alg;
-      alg.initialize();
-      alg.setPropertyValue("Filename", this->m_filename);
-      alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
-      alg.addObserver(observer);
-      alg.execute();
-      alg.removeObserver(observer);
+        Mantid::MDEvents::OneStepMDEW alg;
+        alg.initialize();
+        alg.setRethrows(true);
+        alg.setPropertyValue("Filename", this->m_filename);
+        alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
+        alg.addObserver(observer);
+        alg.execute();
+        alg.removeObserver(observer);
+      }
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
       Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
@@ -166,92 +154,10 @@ namespace Mantid
       factory->initialize(eventWs);
       vtkDataSet* visualDataSet = factory->create();
 
-      appendMetadata(visualDataSet, eventWs);
+      extractMetadata(eventWs);
+      appendMetadata(visualDataSet, eventWs->getName());
       
       return visualDataSet;
-    }
-
-    /*
-    Append the geometry and function information onto the outgoing vtkDataSet.
-    @param visualDataSet : outgoing dataset on which to append metadata.
-    @param eventWs : Event workspace from which metadata is drawn.
-    */
-    template<typename ViewType>
-    void EventNexusLoadingPresenter<ViewType>::appendMetadata(vtkDataSet* visualDataSet, Mantid::API::IMDEventWorkspace_sptr eventWs)
-    {
-      using namespace Mantid::Geometry;
-      using namespace Mantid::API;
-
-      vtkFieldData* outputFD = vtkFieldData::New();
-      
-      //Serialize metadata
-      RebinningKnowledgeSerializer serializer(LocationNotRequired);
-      serializer.setWorkspaceName(eventWs->getName());
-
-      std::vector<MDDimensionExtents> ext = eventWs->getMinimumExtents(5);
-      std::vector<IMDDimension_sptr> dimensions;
-      size_t nDimensions = eventWs->getNumDims();
-      for (size_t d=0; d<nDimensions; d++)
-      {
-        IMDDimension_sptr inDim = eventWs->getDimension(d);
-        double min = (ext[d].min);
-        double max = (ext[d].max);
-        if (min > max)
-        {
-          min = 0.0;
-          max = 1.0;
-        }
-        //std::cout << "dim " << d << min << " to " <<  max << std::endl;
-        MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getUnits(), min, max, size_t(10)));
-        dimensions.push_back(dim);
-      }
-
-      //Configuring the geometry xml builder allows the object panel associated with this reader to later
-      //determine how to display all geometry related properties.
-      if(nDimensions > 0)
-      {
-        xmlBuilder.addXDimension( dimensions[0] );
-      }
-      if(nDimensions > 1)
-      {
-        xmlBuilder.addYDimension( dimensions[1] );
-      }
-      if(nDimensions > 2)
-      {
-        xmlBuilder.addZDimension( dimensions[2]  );
-      }
-      if(nDimensions > 3)
-      {
-        tDimension = dimensions[3];
-        xmlBuilder.addTDimension(tDimension);
-      }
-
-      serializer.setGeometryXML(xmlBuilder.create());
-      serializer.setImplicitFunction( ImplicitFunction_sptr(new Mantid::MDAlgorithms::CompositeImplicitFunction()));
-      std::string xmlString = serializer.createXMLString();
-
-      //Add metadata to dataset.
-      MetadataToFieldData convert;
-      convert(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
-      visualDataSet->SetFieldData(outputFD);
-      outputFD->Delete();
-
-      m_isSetup = true;
-    }
-
-    /**
-    Gets the geometry in a string format.
-    @return geometry string.
-    @throw runtime_error if execute has not been run first.
-    */
-    template<typename ViewType>
-    std::string EventNexusLoadingPresenter<ViewType>::getGeometryXML() const
-    {
-      if(!m_isSetup)
-      {
-        throw std::runtime_error("Have not yet run ::execute!");
-      }
-      return xmlBuilder.create();
     }
 
     /**
@@ -261,36 +167,38 @@ namespace Mantid
     template<typename ViewType>
     bool EventNexusLoadingPresenter<ViewType>::hasTDimensionAvailable() const
     {
-      if(!m_isSetup)
-      {
-        throw std::runtime_error("Have not yet run ::execute!");
-      }
-      return xmlBuilder.hasTDimension();
+      return false; //OneStepMDEW uses MakeDiffractionMDEventWorkspace, which always generates 3 dimensional MDEW
     }
 
-    /*
+       /*
     @return timestep values.
     @throw runtime_error if execute has not been run first.
     */
     template<typename ViewType>
     std::vector<double> EventNexusLoadingPresenter<ViewType>::getTimeStepValues() const
     {
-      if(!m_isSetup)
-      {
-        throw std::runtime_error("Have not yet run ::execute!");
-      }
-      std::vector<double> result;
-      for(size_t i = 0; i < tDimension->getNBins(); i++)
-      {
-        result.push_back(tDimension->getX(i));
-      }
-      return result;
+      throw std::runtime_error("Does not have a 4th Dimension, so can be no T-axis");
     }
 
     ///Destructor
     template<typename ViewType>
     EventNexusLoadingPresenter<ViewType>::~EventNexusLoadingPresenter()
     {
+    }
+
+     /**
+     Executes any meta-data loading required.
+    */
+    template<typename ViewType>
+    void EventNexusLoadingPresenter<ViewType>::executeLoadMetadata()
+    {
+      /*Effectively a do-nothing implementation. 
+      
+      Do not have a metadataonly switch for the underlying algorithm, therfore would be costly to load metadata.
+      For these file types we know that we get 3 dimensions anyway so do not need anyfurther geometry information until the point
+      at which it must be added to the outgoing vtkdataset.
+      */
+      m_isSetup = true;
     }
 
   }

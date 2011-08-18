@@ -8,7 +8,7 @@ set( SRC_FILES RebinningCutterObjectPanel.cxx )
 qt4_wrap_cpp( MOC_SRCS RebinningCutterObjectPanel.h )
 add_paraview_object_panel( IFACES IFACE_SRCS 
                            CLASS_NAME RebinningCutterObjectPanel
-                           XML_NAME RebinningCutter XML_GROUP filters)
+                           XML_NAME MDEWRebinningCutter XML_GROUP filters)
 add_paraview_plugin( MantidParaViewRebinningCutterObjectPanel "1.0"
                      GUI_INTERFACES ${IFACES}
                      SOURCES ${MOC_SRCS} ${IFACE_SRCS} ${INCLUDE_FILES} 

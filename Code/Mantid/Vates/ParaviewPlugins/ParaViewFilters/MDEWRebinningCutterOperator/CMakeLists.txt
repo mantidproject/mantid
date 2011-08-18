@@ -1,0 +1,21 @@
+cmake_minimum_required( VERSION 2.6)
+project( MantidParaViewMDEWRebinningCutter )
+
+add_paraview_plugin( MantidParaViewMDEWRebinningCutterSMPlugin "1.0"
+	SERVER_MANAGER_XML MDEWRebinningCutter.xml
+	SERVER_MANAGER_SOURCES vtkMDEWRebinningCutter.cxx
+        GUI_RESOURCES MDEWRebinningCutter.qrc
+		GUI_RESOURCE_FILES MDEWRebinningCutterGUI.xml
+)
+
+# Add to the 'VatesParaViewPlugins' group in VS
+set_property( TARGET MantidParaViewMDEWRebinningCutterSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
+
+target_link_libraries( MantidParaViewMDEWRebinningCutterSMPlugin 
+${MANTID_SUBPROJECT_LIBS} )
+
+# Put library into subfolder.
+output_binary_to(MantidParaViewMDEWRebinningCutterSMPlugin  ${PVPLUGINS_DIR})
+
+install( TARGETS MantidParaViewMDEWRebinningCutterSMPlugin ${TARGET_TYPE} DESTINATION ${PVPLUGINS_DIR} )
+

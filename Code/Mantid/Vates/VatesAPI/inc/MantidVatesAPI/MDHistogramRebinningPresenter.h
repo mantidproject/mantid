@@ -190,6 +190,7 @@ namespace Mantid
       {
         throw std::logic_error("Rebinning operations require Rebinning Metadata");
       }
+      Mantid::API::FrameworkManager::Instance();
 
       vtkDataSetToGeometry parser(input);
       parser.execute();

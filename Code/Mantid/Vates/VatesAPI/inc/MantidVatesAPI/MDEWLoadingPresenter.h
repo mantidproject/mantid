@@ -1,0 +1,258 @@
+#ifndef MANTID_VATES_MDEW_LOADING_PRESENTER
+#define MANTID_VATES_MDEW_LOADING_PRESENTER
+
+#include "MantidVatesAPI/MDLoadingPresenter.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+
+#include "MantidAPI/ImplicitFunction.h"
+
+#include "MantidMDAlgorithms/NullImplicitFunction.h"
+#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+#include "MantidVatesAPI/MetadataToFieldData.h"
+#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+
+#include <vtkFieldData.h>
+#include <vtkDataSet.h>
+
+namespace Mantid
+{
+  namespace VATES
+  {
+
+    /** 
+    @class MDEWLoadingPresenter, Abstract presenter encapsulating common operations used by all MDEW type loading. Reduces template bloat.
+    @author Owen Arnold, Tessella plc
+    @date 16/08/2011
+
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+    */
+    template<typename ViewType>
+    class MDEWLoadingPresenter : public MDLoadingPresenter
+    {
+    public:
+      MDEWLoadingPresenter(std::string filename, ViewType* view);
+      std::string getGeometryXML() const;
+      virtual bool hasTDimensionAvailable() const;
+      virtual std::vector<double> getTimeStepValues() const;
+      virtual ~MDEWLoadingPresenter();
+    protected:
+      /*---------------------------------------------------------------------------
+      Common/shared operations and members for all MDEW file-type loading.
+      ---------------------------------------------------------------------------*/
+      const std::string m_filename;
+      ViewType* m_view;
+      
+      Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::StrictDimensionPolicy> xmlBuilder;
+      Mantid::Geometry::IMDDimension_sptr tDimension;
+      virtual void appendMetadata(vtkDataSet* visualDataSet, const std::string& wsName) ;
+      virtual void extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs);
+      virtual bool shouldLoad();
+      bool m_isSetup;
+      double m_time;
+      size_t m_recursionDepth;
+      double m_loadInMemory;
+      bool m_firstLoad;
+    };
+
+    /// Constructor
+    template<typename ViewType>
+    MDEWLoadingPresenter<ViewType>::MDEWLoadingPresenter(std::string filename, ViewType* view) : 
+    m_filename(filename), 
+    m_view(view), 
+    m_isSetup(false), 
+    m_time(-1),
+    m_recursionDepth(0),
+    m_loadInMemory(false),
+    m_firstLoad(true)
+    {
+      Mantid::API::FrameworkManager::Instance();
+    }
+
+    /// Destructor
+    template<typename ViewType>
+    MDEWLoadingPresenter<ViewType>::~MDEWLoadingPresenter()
+    {
+    }
+
+     /*
+    Extract the geometry and function information 
+    @param eventWs : event workspace to get the information from.
+    */
+    template<typename ViewType>
+    void MDEWLoadingPresenter<ViewType>::extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs)
+    {
+      using namespace Mantid::Geometry;
+      MDGeometryBuilderXML<StrictDimensionPolicy> refresh;
+      xmlBuilder= refresh; //Reassign.
+      std::vector<MDDimensionExtents> ext = eventWs->getMinimumExtents(5);
+      std::vector<IMDDimension_sptr> dimensions;
+      size_t nDimensions = eventWs->getNumDims();
+      for (size_t d=0; d<nDimensions; d++)
+      {
+        IMDDimension_sptr inDim = eventWs->getDimension(d);
+        double min = (ext[d].min);
+        double max = (ext[d].max);
+        if (min > max)
+        {
+          min = 0.0;
+          max = 1.0;
+        }
+        //std::cout << "dim " << d << min << " to " <<  max << std::endl;
+        MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getUnits(), min, max, size_t(10)));
+        dimensions.push_back(dim);
+      }
+
+      //Configuring the geometry xml builder allows the object panel associated with this reader to later
+      //determine how to display all geometry related properties.
+      if(nDimensions > 0)
+      {
+        xmlBuilder.addXDimension( dimensions[0] );
+      }
+      if(nDimensions > 1)
+      {
+        xmlBuilder.addYDimension( dimensions[1] );
+      }
+      if(nDimensions > 2)
+      {
+        xmlBuilder.addZDimension( dimensions[2]  );
+      }
+      if(nDimensions > 3)
+      {
+        tDimension = dimensions[3];
+        xmlBuilder.addTDimension(tDimension);
+      }
+      m_isSetup = true;
+    }
+
+    /**
+    Method determines whether loading/re-loading is necessary.
+    */
+    template<typename ViewType>
+    bool MDEWLoadingPresenter<ViewType>::shouldLoad()
+    {
+      bool bExecute = false;
+      if(m_time != m_view->getTime())
+      {
+        bExecute = false; //Time has changed. This DOES NOT require reloading.
+      }
+      if(m_recursionDepth != m_view->getRecursionDepth())
+      {
+        bExecute = false; //Recursion depth has changed. This is a vtkDataSet factory concern.
+      }
+      if(m_loadInMemory != m_view->getLoadInMemory())
+      {
+        bExecute = true; //Must reload with memory/file option.
+      }
+      if(m_firstLoad)
+      {
+        bExecute = true; //First time round. should execute underlying algorithm.
+      }
+
+      // Save state.
+      m_time = m_view->getTime();
+      m_recursionDepth = m_view->getRecursionDepth();
+      m_loadInMemory = m_view->getLoadInMemory();
+      m_firstLoad = false;
+      //Return decision.
+      return bExecute;
+    }
+    
+    /*
+    Append the geometry and function information onto the outgoing vtkDataSet.
+    @param visualDataSet : outgoing dataset on which to append metadata.
+    @param wsName : name of the workspace.
+    */
+    template<typename ViewType>
+    void MDEWLoadingPresenter<ViewType>::appendMetadata(vtkDataSet* visualDataSet, const std::string& wsName)
+    {
+      using namespace Mantid::API;
+
+      vtkFieldData* outputFD = vtkFieldData::New();
+      
+      //Serialize metadata
+      RebinningKnowledgeSerializer serializer(LocationNotRequired);
+      serializer.setWorkspaceName(wsName);
+      serializer.setGeometryXML(xmlBuilder.create());
+      serializer.setImplicitFunction( ImplicitFunction_sptr(new Mantid::MDAlgorithms::NullImplicitFunction()));
+      std::string xmlString = serializer.createXMLString();
+
+      //Add metadata to dataset.
+      MetadataToFieldData convert;
+      convert(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
+      visualDataSet->SetFieldData(outputFD);
+      outputFD->Delete();
+    }
+
+    /**
+    Gets the geometry in a string format.
+    @return geometry string.
+    @throw runtime_error if execute has not been run first.
+    */
+    template<typename ViewType>
+    std::string MDEWLoadingPresenter<ViewType>::getGeometryXML() const
+    {
+      if(!m_isSetup)
+      {
+        throw std::runtime_error("Have not yet run extractMetaData!");
+      }
+      return xmlBuilder.create();
+    }
+
+            /**
+    @return boolean indicating whether the T dimension is available.
+    @throw runtime_error if execute has not been run first.
+    */
+    template<typename ViewType>
+    bool MDEWLoadingPresenter<ViewType>::hasTDimensionAvailable() const
+    {
+      if(!m_isSetup)
+      {
+        throw std::runtime_error("Have not yet run ::extractMetaData!");
+      }
+      return xmlBuilder.hasTDimension();
+    }
+
+       /*
+    @return timestep values.
+    @throw runtime_error if execute has not been run first.
+    */
+    template<typename ViewType>
+    std::vector<double> MDEWLoadingPresenter<ViewType>::getTimeStepValues() const
+    {
+      if(!m_isSetup)
+      {
+        throw std::runtime_error("Have not yet run ::extractMetaData!");
+      }
+      std::vector<double> result;
+      for(size_t i = 0; i < tDimension->getNBins(); i++)
+      {
+        result.push_back(tDimension->getX(i));
+      }
+      return result;
+    }
+
+
+  }
+}
+
+#endif

@@ -68,6 +68,6 @@ void RebinningCutterToolBarActions::createTargetFilter()
   src->updatePipeline();
 
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-  builder->createFilter("filters", "RebinningCutter", src);
+  builder->createFilter("filters", "MDEWRebinningCutter", src);
 }
 

@@ -8,7 +8,7 @@ set( SRC_FILES MDEWNexusReaderObjectPanel.cxx )
 qt4_wrap_cpp( MOC_SRCS MDEWNexusReaderObjectPanel.h )
 add_paraview_object_panel( IFACES IFACE_SRCS 
                            CLASS_NAME MDEWNexusReaderObjectPanel
-                           XML_NAME MDEWNexusReader XML_GROUP sources )
+                           XML_NAME DUMMY XML_GROUP sources )
 add_paraview_plugin( MantidParaViewMDEWNexusReaderObjectPanel "1.0"
                      GUI_INTERFACES ${IFACES}
                      SOURCES ${MOC_SRCS} ${IFACE_SRCS} ${INCLUDE_FILES} 

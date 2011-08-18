@@ -36,6 +36,7 @@ namespace Mantid
     class DLLExport MDLoadingView
     {
     public:
+      virtual double getTime() const = 0;
       virtual size_t getRecursionDepth() const = 0;
       virtual bool getLoadInMemory() const = 0;
       virtual ~MDLoadingView(){}

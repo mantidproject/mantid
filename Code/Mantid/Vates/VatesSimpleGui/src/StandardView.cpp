@@ -78,7 +78,7 @@ void StandardView::onRebinButtonClicked()
   if (this->origSource)
   {
     pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-    this->rebinCut = builder->createFilter("filters", "RebinningCutter",
+    this->rebinCut = builder->createFilter("filters", "MDEWRebinningCutter",
     this->origSource);
     emit this->enableMultiSliceViewButton();
   }

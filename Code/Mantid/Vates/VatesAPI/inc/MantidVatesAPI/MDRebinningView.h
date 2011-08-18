@@ -39,6 +39,7 @@ namespace Mantid
     public:
 
       virtual vtkImplicitFunction* getImplicitFunction() const = 0;
+      virtual double getWidth() const = 0;
       virtual double getMaxThreshold() const = 0;
       virtual double getMinThreshold() const = 0;
       virtual bool getApplyClip() const = 0;

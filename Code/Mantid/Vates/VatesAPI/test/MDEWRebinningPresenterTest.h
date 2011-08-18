@@ -44,12 +44,12 @@ void testConstructorThrows()
   void testUpdateModelWithNoChanges()
   {
     MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
+    EXPECT_CALL(view, getTimeStep()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getMaxThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getMinThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getApplyClip()).WillRepeatedly(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
-    EXPECT_CALL(view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
+    EXPECT_CALL(view, getAppliedGeometryXML()).WillRepeatedly(Return(viewXML.c_str()));
 
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateAll)).Times(0); //Since nothing has changed, no requests should be made.
@@ -67,12 +67,12 @@ void testConstructorThrows()
   void testUpdateModelWithDifferentMaxThreshold()
   {
     MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaxThreshold()).Times(2).WillRepeatedly(Return(1)); //Maxthreshold non-zero
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
+    EXPECT_CALL(view, getTimeStep()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getMaxThreshold()).WillRepeatedly(Return(1)); //Maxthreshold non-zero
+    EXPECT_CALL(view, getMinThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getApplyClip()).WillRepeatedly(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
-    EXPECT_CALL(view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
+    EXPECT_CALL(view, getAppliedGeometryXML()).WillRepeatedly(Return(viewXML.c_str()));
 
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateVisualDataSetOnly)).Times(1); //Maxthreshold updated should reflect on request.
@@ -90,12 +90,12 @@ void testConstructorThrows()
   void testUpdateModelWithDifferentMinThreshold()
   {
     MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0)); 
-    EXPECT_CALL(view, getMinThreshold()).Times(2).WillRepeatedly(Return(1)); //Minthreshold non-zero
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
+    EXPECT_CALL(view, getTimeStep()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getMaxThreshold()).WillRepeatedly(Return(0)); 
+    EXPECT_CALL(view, getMinThreshold()).WillRepeatedly(Return(1)); //Minthreshold non-zero
+    EXPECT_CALL(view, getApplyClip()).WillRepeatedly(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
-    EXPECT_CALL(view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
+    EXPECT_CALL(view, getAppliedGeometryXML()).WillRepeatedly(Return(viewXML.c_str()));
 
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateVisualDataSetOnly)).Times(1); //Minthreshold updated should reflect on request.
@@ -114,11 +114,11 @@ void testConstructorThrows()
   {
     MockMDRebinningView view;
     EXPECT_CALL(view, getTimeStep()).Times(2).WillRepeatedly(Return(1)); //Timestep updated
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
+    EXPECT_CALL(view, getMaxThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getMinThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getApplyClip()).WillRepeatedly(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
-    EXPECT_CALL(view, getAppliedGeometryXML()).WillOnce(Return(viewXML.c_str()));
+    EXPECT_CALL(view, getAppliedGeometryXML()).WillRepeatedly(Return(viewXML.c_str()));
    
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateVisualDataSetOnly)).Times(1); //Timestep updated should reflect on request.
@@ -136,10 +136,10 @@ void testConstructorThrows()
   void testUpdateModelWithMoreXBins()
   {
     MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
+    EXPECT_CALL(view, getTimeStep()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getMaxThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getMinThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getApplyClip()).WillRepeatedly(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en", "11");
     EXPECT_CALL(view, getAppliedGeometryXML()).Times(2).WillRepeatedly(Return(viewXML.c_str())); //Geometry (4D) should reflect on request.
    
@@ -159,10 +159,10 @@ void testConstructorThrows()
   void testUpdateModelWithMoreXYBins()
   {
     MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getApplyClip()).WillOnce(Return(false));
+    EXPECT_CALL(view, getTimeStep()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getMaxThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getMinThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getApplyClip()).WillRepeatedly(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en", "11", "11");
     EXPECT_CALL(view, getAppliedGeometryXML()).Times(2).WillRepeatedly(Return(viewXML.c_str()));
 
@@ -183,9 +183,9 @@ void testConstructorThrows()
   void testUpdateModelWithMoreXYZBins()
   {
     MockMDRebinningView view;
-    EXPECT_CALL(view, getTimeStep()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaxThreshold()).WillOnce(Return(0));
-    EXPECT_CALL(view, getMinThreshold()).WillOnce(Return(0));
+    EXPECT_CALL(view, getTimeStep()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getMaxThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(view, getMinThreshold()).WillRepeatedly(Return(0));
     EXPECT_CALL(view, getApplyClip()).WillRepeatedly(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en", "11", "11", "11");
     EXPECT_CALL(view, getAppliedGeometryXML()).Times(2).WillRepeatedly(Return(viewXML.c_str()));

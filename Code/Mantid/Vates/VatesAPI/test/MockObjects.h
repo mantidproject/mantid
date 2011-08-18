@@ -199,6 +199,7 @@ public:
 class MockMDLoadingView : public Mantid::VATES::MDLoadingView
 {
 public:
+  MOCK_CONST_METHOD0(getTime, double());
   MOCK_CONST_METHOD0(getRecursionDepth, size_t());
   MOCK_CONST_METHOD0(getLoadInMemory, bool());
   MOCK_METHOD1(updateAlgorithmProgress, void(double));
@@ -222,6 +223,7 @@ public:
     const char*());
   MOCK_METHOD1(updateAlgorithmProgress,
     void(double));
+  MOCK_CONST_METHOD0(getWidth, double());
 };
 
 class MockClipper: public Mantid::VATES::Clipper

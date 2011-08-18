@@ -25,7 +25,7 @@ namespace Mantid
   @scalarName : Name for scalar signal array.
   */
   vtkMDEWHexahedronFactory::vtkMDEWHexahedronFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth) :
-  m_thresholdRange(thresholdRange), m_scalarName(scalarName), m_maxDepth(maxDepth)
+  m_thresholdRange(thresholdRange), m_scalarName(scalarName), m_maxDepth(maxDepth), m_time(0)
   {
   }
 
@@ -120,6 +120,7 @@ namespace Mantid
             coord_t * coord = coords + v*3;
             // Set the point at that given ID
             points->SetPoint(i*8 + v, coord[0], coord[1], coord[2]);
+            std::string msg;
           }
 
         } // valid number of vertexes returned
@@ -130,6 +131,8 @@ namespace Mantid
     } // For each box
 
     if (VERBOSE) std::cout << tim << " to create the necessary points." << std::endl;
+    //Add points
+    visualDataSet->SetPoints(points);
 
     for (size_t i=0; i<boxes.size(); i++)
     {
@@ -152,6 +155,16 @@ namespace Mantid
 
         //Add cells
         visualDataSet->InsertNextCell(VTK_HEXAHEDRON, hexPointList);
+        
+
+        double bounds[6];
+
+        visualDataSet->GetCellBounds(imageSizeActual, bounds);
+
+        if(bounds[0] < -10 || bounds[2] < -10 ||bounds[4]< -10)
+        {
+          std::string msg = "";
+        }
         imageSizeActual++;
       }
     } // for each box.
@@ -160,8 +173,6 @@ namespace Mantid
     signals->Squeeze();
     visualDataSet->Squeeze();
 
-    //Add points
-    visualDataSet->SetPoints(points);
     //Add scalars
     visualDataSet->GetCellData()->SetScalars(signals);
 
@@ -195,6 +206,7 @@ namespace Mantid
       // Define where the slice is in 4D
       // TODO: Where to slice? Right now is just 0
       std::vector<coord_t> point(nd, 0);
+      point[3] = m_time; //Specifically for 4th/time dimension.
 
       // Define two opposing planes that point in all higher dimensions
       std::vector<coord_t> normal1(nd, 0);
@@ -208,8 +220,8 @@ namespace Mantid
       sliceImplicitFunction->addPlane( MDPlane(normal1, point) );
       sliceImplicitFunction->addPlane( MDPlane(normal2, point) );
 
-      coord_t pointA[4] = {0, 0, 0, -1.0};
-      coord_t pointB[4] = {0, 0, 0, +2.0};
+      //coord_t pointA[4] = {0, 0, 0, -1.0};
+      //coord_t pointB[4] = {0, 0, 0, +2.0};
     }
     else
     {
@@ -258,7 +270,12 @@ namespace Mantid
   {
     this->m_workspace = boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
     if(!m_workspace)
+    {
       throw std::invalid_argument("Workspace is null or not IMDEventWorkspace");
+    }
+    //Setup range values according to whatever strategy object has been injected.
+    m_thresholdRange->setWorkspace(m_workspace);
+    m_thresholdRange->calculate();
   }
 
   /// Validate the current object.
@@ -277,6 +294,14 @@ namespace Mantid
   void vtkMDEWHexahedronFactory::setRecursionDepth(size_t depth)
   {
     m_maxDepth = depth;
+  }
+
+  /*
+  Set the time value.
+  */
+  void vtkMDEWHexahedronFactory::setTime(double time)
+  {
+    m_time = time;
   }
 
   }

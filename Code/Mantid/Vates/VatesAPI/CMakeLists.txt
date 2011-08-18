@@ -55,6 +55,7 @@ inc/MantidVatesAPI/GaussianThresholdRange.h
 inc/MantidVatesAPI/GeometryPresenter.h
 inc/MantidVatesAPI/GeometryView.h
 inc/MantidVatesAPI/MDEWEventNexusLoadingPresenter.h
+inc/MantidVatesAPI/MDEWLoadingPresenter.h
 inc/MantidVatesAPI/MDEWRebinningPresenter.h
 inc/MantidVatesAPI/MDHistogramRebinningPresenter.h
 inc/MantidVatesAPI/MDLoadingPresenter.h
@@ -73,6 +74,7 @@ inc/MantidVatesAPI/ProgressAction.h
 inc/MantidVatesAPI/RebinningActionManager.h
 inc/MantidVatesAPI/RebinningCutterXMLDefinitions.h 
 inc/MantidVatesAPI/RebinningKnowledgeSerializer.h
+inc/MantidVatesAPI/SQWLoadingPresenter.h
 inc/MantidVatesAPI/SynchronisingGeometryPresenter.h
 inc/MantidVatesAPI/ThresholdRange.h
 inc/MantidVatesAPI/TimeStepToTimeStep.h
@@ -118,6 +120,7 @@ test/MDHistogramRebinningPresenterTest.h
 test/NullRebinningPresenterTest.h
 test/MetadataToFieldDataTest.h
 test/RebinningKnowledgeSerializerTest.h
+test/SQWLoadingPresenterTest.h
 test/SynchronisingGeometryPresenterTest.h
 test/TimeStepToTimeStepTest.h
 test/TimeToTimeStepTest.h
@@ -147,6 +150,7 @@ add_library( VatesAPI ${SRC_FILES} ${INC_FILES} )
 set_target_properties( VatesAPI PROPERTIES OUTPUT_NAME MantidVatesAPI )
 # Add to the 'Framework' group in VS
 set_property( TARGET VatesAPI PROPERTY FOLDER "MantidVates" )
+
 
 target_link_libraries( VatesAPI
 ${MANTID_SUBPROJECT_LIBS} 
