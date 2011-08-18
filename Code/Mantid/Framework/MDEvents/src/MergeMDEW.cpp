@@ -71,13 +71,153 @@ namespace MDEvents
         "An output MDEventWorkspace.");
   }
 
+
+  //======================================================================================
+  /** Task that loads all of the events from a particular block from a file
+   * that is being merged and then adds them onto another workspace.
+   */
+  TMDE_CLASS
+  class MergeMDEWLoadTask : public Mantid::Kernel::Task
+  {
+  public:
+    /** Constructor
+     *
+     * @param alg :: MergeMDEW Algorithm - used to pass parameters etc. around
+     * @param blockNum :: Which block to load?
+     * @param outWS :: Output workspace
+     */
+    MergeMDEWLoadTask(MergeMDEW * alg, size_t blockNum, typename MDEventWorkspace<MDE, nd>::sptr outWS)
+        : m_alg(alg), m_blockNum(blockNum), outWS(outWS)
+    {
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Main method that performs the work for the task. */
+    void run()
+    {
+      // Vector of events accumulated from ALL files to merge.
+      std::vector<MDE> events;
+
+      // Go through each file
+      m_alg->fileMutex.lock();
+      for (size_t iw=0; iw<m_alg->files.size(); iw++)
+      {
+        // The file and the indexes into that file
+        ::NeXus::File * file = m_alg->files[iw];
+        std::vector<uint64_t> & box_event_index = m_alg->box_indexes[iw];
+
+        uint64_t indexStart = box_event_index[m_blockNum*2+0];
+        uint64_t numEvents = box_event_index[m_blockNum*2+1];
+        // This will APPEND the events to the one vector
+        MDE::loadVectorFromNexusSlab(events, file, indexStart, numEvents);
+      } // For each file
+      m_alg->fileMutex.unlock();
+
+      if (events.size() > 0)
+      {
+        // Add all the events from the same box
+        outWS->addEvents( events );
+
+        // Track the total number of added events
+        m_alg->statsMutex.lock();
+        m_alg->totalSinceLastSplit += uint64_t(events.size());
+        m_alg->totalLoaded += uint64_t(events.size());
+        m_alg->getLogger().debug() << "Box " << m_blockNum << ". Total events " << m_alg->totalLoaded << ". This one added " << events.size() << ". "<< std::endl;
+        // Report the progress
+        m_alg->prog->reportIncrement(events.size(), "Loading Box");
+        m_alg->statsMutex.unlock();
+      } // there was something loaded
+
+    }
+
+
+  private:
+    /// MergeMDEW Algorithm - used to pass parameters etc. around
+    MergeMDEW * m_alg;
+    /// Which block to load?
+    size_t m_blockNum;
+    /// Output workspace
+    typename MDEventWorkspace<MDE, nd>::sptr outWS;
+  };
+
+
+
   //----------------------------------------------------------------------------------------------
-  /** Perform the merging
+  /** Loads all of the box data required (no events) for later use.
+   * Also opens the files and leaves them open */
+  template<typename MDE, size_t nd>
+  void MergeMDEW::loadBoxData()
+  {
+    this->progress(0.01, "Loading File Info");
+
+    // Total number of events in ALL files.
+    totalEvents = 0;
+
+    try
+    {
+      for (size_t i=0; i<m_filenames.size(); i++)
+      {
+        // Open the file to read
+        ::NeXus::File * file = new ::NeXus::File(m_filenames[i], NXACC_READ);
+        files.push_back(file);
+
+        file->openGroup("MDEventWorkspace", "NXentry");
+        file->openGroup("box_structure", "NXdata");
+
+        // Start index/length into the list of events
+        std::vector<uint64_t> box_event_index;
+        file->readData("box_event_index", box_event_index);
+        box_indexes.push_back(box_event_index);
+
+        // Check for consistency
+        if (i>0)
+        {
+          if (box_event_index.size() != box_indexes[0].size())
+            throw std::runtime_error("Inconsistent number of boxes found in file " + m_filenames[i] + ". Cannot merge these files.");
+        }
+        file->closeGroup();
+
+        // Navigate to the event_data block and leave it open
+        file->openGroup("event_data", "NXdata");
+        // Open the event data, track the total number of events
+        totalEvents += MDE::openNexusData(file);
+      }
+    }
+    catch (...)
+    {
+      // Close all open files in case of error
+      for (size_t i=0; i<files.size(); i++)
+        files[i]->close();
+      throw;
+      return;
+    }
+
+    // This is how many boxes are in all the files.
+    numBoxes = box_indexes[0].size() / 2;
+
+    // Count the number of events in each box.
+    eventsPerBox.resize(numBoxes, 0);
+    for (size_t ib=0; ib<numBoxes; ib++)
+    {
+      uint64_t tot = 0;
+      for (size_t j=0; j<files.size(); j++)
+        tot += box_indexes[j][ib*2 + 1];
+      eventsPerBox[ib] = tot;
+    }
+
+    g_log.notice() << totalEvents << " events in " << files.size() << " files." << std::endl;
+  }
+
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Create the output workspace using the input as a guide
    *
-   * @param ws :: first MDEventWorkspace in the list to merge
+   * @param ws :: first workspace from the inputs
+   * @return the MDEventWorkspace sptr.
    */
   template<typename MDE, size_t nd>
-  void MergeMDEW::doExec(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  typename MDEventWorkspace<MDE, nd>::sptr MergeMDEW::createOutputWS(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     // Use the copy constructor to get the same dimensions etc.
     typename MDEventWorkspace<MDE, nd>::sptr outWS(new MDEventWorkspace<MDE, nd>(*ws));
@@ -109,132 +249,76 @@ namespace MDEvents
       saver->executeAsSubAlg();
     }
 
-    // Vector of file handles to each input file
-    std::vector< ::NeXus::File *> files;
-    // Vector of the box_index vector for each each input file
-    std::vector< std::vector<uint64_t> > box_indexes;
+    // Complete the file-back-end creation.
+    DiskMRU & mru = bc->getDiskMRU(); UNUSED_ARG(mru);
+    g_log.notice() << "Setting cache to 0 MB read, 30 MB write." << std::endl;
+    bc->setCacheParameters(0, 30000000/sizeof(MDE), sizeof(MDE));
 
-    this->progress(0.01, "Loading File Info");
+    return outWS;
+  }
 
-    // Total number of events in ALL files.
-    uint64_t totalEvents = 0;
 
-    try
-    {
-      for (size_t i=0; i<m_filenames.size(); i++)
-      {
-        // Open the file to read
-        ::NeXus::File * file = new ::NeXus::File(m_filenames[i], NXACC_READ);
-        files.push_back(file);
+  //----------------------------------------------------------------------------------------------
+  /** Perform the merging
+   *
+   * @param ws :: first MDEventWorkspace in the list to merge
+   */
+  template<typename MDE, size_t nd>
+  void MergeMDEW::doExec(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  {
+    // First, load all the box data
+    this->loadBoxData<MDE,nd>();
 
-        file->openGroup("MDEventWorkspace", "NXentry");
-        file->openGroup("box_structure", "NXdata");
-        // Start index/length into the list of events
-        std::vector<uint64_t> box_event_index;
-        file->readData("box_event_index", box_event_index);
-        box_indexes.push_back(box_event_index);
+    // Now create the output workspace
+    typename MDEventWorkspace<MDE, nd>::sptr outWS = this->createOutputWS<MDE,nd>(ws);
 
-        // Check for consistency
-        if (i>0)
-        {
-          if (box_event_index.size() != box_indexes[0].size())
-            throw std::runtime_error("Inconsistent number of boxes found in file " + m_filenames[i] + ". Cannot merge these files.");
-        }
-        file->closeGroup();
-
-        // Navigate to the event_data block and leave it open
-        file->openGroup("event_data", "NXdata");
-        // Open the event data, track the total number of events
-        totalEvents += MDE::openNexusData(file);
-      }
-    }
-    catch (...)
-    {
-      // Close all open files in case of error
-      for (size_t i=0; i<files.size(); i++)
-        files[i]->close();
-      throw;
-      return;
-    }
-
-    g_log.notice() << totalEvents << " events in " << files.size() << " files." << std::endl;
-
-    // This is how many boxes are in all the files.
-    size_t numBoxes = box_indexes[0].size() / 2;
-    Progress prog(this, 0.1, 0.8, totalEvents);
+    // Progress report based on events processed.
+    this->prog = new Progress(this, 0.1, 0.8, size_t(totalEvents));
 
     // For tracking progress
-    uint64_t totalLoaded = 0;
-    uint64_t totalSinceLastSplit = 0;
-    Kernel::Mutex fileMutex;
-    Kernel::Mutex statsMutex;
-    //DiskMRU & mru = bc->getDiskMRU();
-    g_log.notice() << "Setting cache to 300 MB read, 30 MB write." << std::endl;
-    bc->setCacheParameters(300000000/sizeof(MDE), 30000000/sizeof(MDE), sizeof(MDE));
+    uint64_t totalEventsInTasks = 0;
 
-    //PRAGMA_OMP( parallel for schedule(dynamic, numBoxes/100) )
-    for (int iib=0; iib<int(numBoxes); iib++)
+    // Prepare thread pool
+    ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
+    ThreadPool tp(ts);
+
+    for (size_t ib=0; ib<numBoxes; ib++)
     {
-      size_t ib = size_t(iib);
-      // Vector of events accumulated for ALL files to merge.
-      std::vector<MDE> events;
-
-      // Go through each file
-      fileMutex.lock();
-      for (size_t iw=0; iw<files.size(); iw++)
+      // Add a task for each box that actually has some events
+      if (this->eventsPerBox[ib] > 0)
       {
-        // The file and the indexes into that file
-        ::NeXus::File * file = files[iw];
-        std::vector<uint64_t> & box_event_index = box_indexes[iw];
+        totalEventsInTasks += eventsPerBox[ib];
+        MergeMDEWLoadTask<MDE,nd> * task = new MergeMDEWLoadTask<MDE,nd>(this, ib, outWS);
+        ts->push(task);
+      }
 
-        uint64_t indexStart = box_event_index[ib*2+0];
-        uint64_t numEvents = box_event_index[ib*2+1];
-        // This will APPEND the events to the one vector
-        MDE::loadVectorFromNexusSlab(events, file, indexStart, numEvents);
-      } // For each file
-      fileMutex.unlock();
-
-      if (events.size() > 0)
+      // You've added enough tasks that will fill up some memory.
+      if (totalEventsInTasks > 10000000)
       {
-        // Add all the events from the same box
-        outWS->addEvents( events );
+        // Run all the tasks
+        tp.joinAll();
 
-        // Track the total number of added events
-        statsMutex.lock();
-        totalSinceLastSplit += uint64_t(events.size());
-        totalLoaded += uint64_t(events.size());
-        g_log.debug() << "Box " << ib << ". Total events " << totalLoaded << ". This one added " << events.size() << "." << std::endl;
-        //g_log.debug() << mru.getMemoryStr() << std::endl;
-        // Report the progress
-        prog.reportIncrement(events.size(), "Loading Box");
-        statsMutex.unlock();
-
-        // Perform splitting in a single thread. All others block while this runs.
-        //PRAGMA_OMP( single )
-        {
-          // Is now a good time to split?
-          //if (totalSinceLastSplit > (bc->getSplitThreshold() * bc->getTotalNumMDBoxes()))
-          if (totalSinceLastSplit > 1000000)
-          {
-            g_log.debug() << "Splitting because we collected " << totalSinceLastSplit << " events" << std::endl;
-            CPUTimer splitTime;
-            ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
-            ThreadPool tp(ts);
-            outWS->splitAllIfNeeded(ts);
-            tp.joinAll();
-            g_log.debug() << splitTime << " to split." << std::endl;
-            totalSinceLastSplit = 0;
-          }
-        }
-
+        // Now do all the splitting tasks
+        ws->splitAllIfNeeded(ts);
+        if (ts->size() > 0)
+          prog->doReport("Splitting Boxes");
+        tp.joinAll();
       }
     } // for each box
 
+    // Run any final tasks
+    tp.joinAll();
+
+    // Final splitting
+    ws->splitAllIfNeeded(ts);
+    tp.joinAll();
 
     this->progress(0.91, "Refreshing Cache");
     outWS->refreshCache();
 
+
     // Now re-save the MDEventWorkspace to update the file
+    std::string outputFile = getProperty("OutputFilename");
     if (!outputFile.empty())
     {
       g_log.notice() << "Starting SaveMDEW to update the file back-end." << std::endl;
@@ -261,9 +345,9 @@ namespace MDEvents
     loader->setPropertyValue("MetadataOnly", "1");
     loader->setPropertyValue("OutputWorkspace", "anonymous");
     loader->executeAsSubAlg();
-
     IMDEventWorkspace_sptr firstWS = loader->getProperty("OutputWorkspace");
 
+    // Call the templated method
     CALL_MDEVENT_FUNCTION( this->doExec, firstWS);
 
     setProperty("OutputWorkspace", outIWS);

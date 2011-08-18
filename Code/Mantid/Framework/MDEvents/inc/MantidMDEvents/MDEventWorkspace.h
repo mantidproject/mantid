@@ -77,7 +77,7 @@ namespace MDEvents
 
     void addEvent(const MDE & event);
 
-    void addEvents(const std::vector<MDE> & events);
+    size_t addEvents(const std::vector<MDE> & events);
 
     void addManyEvents(const std::vector<MDE> & events, Mantid::Kernel::ProgressBase * prog);
 

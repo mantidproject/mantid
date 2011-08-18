@@ -327,9 +327,9 @@ namespace MDEvents
    *        MDBox'es contained within.
    */
   TMDE(
-  void MDEventWorkspace)::addEvents(const std::vector<MDE> & events)
+  size_t MDEventWorkspace)::addEvents(const std::vector<MDE> & events)
   {
-    data->addEvents(events);
+    return data->addEvents(events);
   }
 
   //-----------------------------------------------------------------------------------------------

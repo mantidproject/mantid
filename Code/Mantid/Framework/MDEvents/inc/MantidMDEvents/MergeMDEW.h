@@ -5,6 +5,7 @@
 #include "MantidAPI/Algorithm.h" 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidNexus/NeXusFile.hpp"
 
 namespace Mantid
 {
@@ -59,13 +60,46 @@ namespace MDEvents
     void exec();
 
     template<typename MDE, size_t nd>
+    void loadBoxData();
+
+    template<typename MDE, size_t nd>
+    typename MDEventWorkspace<MDE, nd>::sptr createOutputWS(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
+    template<typename MDE, size_t nd>
     void doExec(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
+  public:
 
     /// Files to load
     std::vector<std::string> m_filenames;
 
+    /// Vector of file handles to each input file
+    std::vector< ::NeXus::File *> files;
+
+    /// Vector of the box_index vector for each each input file
+    std::vector< std::vector<uint64_t> > box_indexes;
+
+    /// Number of events in each box, summed over all input files
+    std::vector<uint64_t> eventsPerBox;
+
+    /// # of boxes in the input workspaces.
+    size_t numBoxes;
+
     /// Output IMDEventWorkspace
     Mantid::API::IMDEventWorkspace_sptr outIWS;
+
+    /// # of events from ALL input files
+    uint64_t totalEvents;
+
+    /// # of events loaded from all tasks
+    uint64_t totalLoaded;
+    uint64_t totalSinceLastSplit;
+    Kernel::Mutex fileMutex;
+    Kernel::Mutex statsMutex;
+
+    /// Progress reporter
+    Mantid::API::Progress * prog;
+
   };
 
 
