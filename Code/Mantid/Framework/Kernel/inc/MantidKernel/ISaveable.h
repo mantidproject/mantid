@@ -68,17 +68,17 @@ namespace Kernel
     /// Method to flush the data to disk and ensure it is written.
     virtual void flushData() const = 0;
 
-    /** @return the amount of memory that the object takes up in the MRU or in the file.
-     * This should be in the same units as getFilePosition(), e.g. the object uses a block
-     * from getFilePosition() to getFilePosition()+getSizeOnFile()-1 in the file.
-     */
-    virtual uint64_t getSizeOnFile() const = 0;
-
     /// @return true if it the data of the object is busy and so cannot be cleared; false if the data was released and can be cleared/written.
     virtual bool dataBusy() const = 0;
 
     /** @return the position in the file where the data will be stored. This is used to optimize file writing. */
     virtual uint64_t getFilePosition() const = 0;
+
+    /** @return the amount of memory that the object takes up in MEMORY.
+     * This should be in the same units as getFilePosition(), e.g. the object will use a block
+     * from getFilePosition() to getFilePosition()+getMRUMemorySize()-1 in the file.
+     */
+    virtual uint64_t getMRUMemorySize() const = 0;
 
   protected:
     /// Unique, sequential ID of the object/box within the containing workspace.

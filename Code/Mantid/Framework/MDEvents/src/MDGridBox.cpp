@@ -714,7 +714,7 @@ namespace MDEvents
 
     if (ts)
     {
-      // Create a task to split the newly create MDGridBox.
+      // Create a task to split the newly created MDGridBox.
       ts->push(new FunctionTask(boost::bind(&MDGridBox<MDE,nd>::splitAllIfNeeded, &*gridbox, ts) ) );
     }
   }
@@ -759,6 +759,22 @@ namespace MDEvents
             // So we create a task to split this MDBox,
             // Task is : this->splitContents(i, ts);
             ts->push(new FunctionTask(boost::bind(&MDGridBox<MDE,nd>::splitContents, &*this, i, ts) ) );
+          }
+        }
+        else
+        {
+          // This box does NOT have enough events to be worth splitting
+          if (!box->getOnDisk() && this->m_BoxController->isFileBacked())
+          {
+            // The box is NOT on disk but the workspace is file-backed.
+            // Therefore, it is likely a NEW MDBox that was just created by splitting.
+            // Mark that it is to be on disk from now on
+            box->setOnDisk(true);
+            // Set it "modified" so that it gets written out upon saving
+            box->setDataModified(true);
+            // Make the MRU track it in the buffer. It is using up memory!
+            this->m_BoxController->getDiskMRU().loading(box);
+            // So the MRU will cache it to disk when it falls out of the cache.
           }
         }
       }

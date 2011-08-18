@@ -79,8 +79,8 @@ namespace MDEvents
   TMDE(
   void MDBox)::clear()
   {
-    // Make sure the object is not in any of the disk MRUs
-    this->m_BoxController->getDiskMRU().objectDeleted(this);
+    // Make sure the object is not in any of the disk MRUs, and mark any space it used as free
+    this->m_BoxController->getDiskMRU().objectDeleted(this, m_fileNumEvents);
     // Clear all contents
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;

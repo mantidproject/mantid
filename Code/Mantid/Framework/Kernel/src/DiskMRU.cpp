@@ -1,6 +1,7 @@
 #include "MantidKernel/DiskMRU.h"
 #include "MantidKernel/System.h"
 #include <iostream>
+#include <sstream>
 
 namespace Mantid
 {
@@ -64,8 +65,6 @@ namespace Kernel
   void DiskMRU::loading(const ISaveable * item)
   {
     if (item == NULL) return;
-    if (item->getId() == 4)
-      std::cout << "DiskMRU::loading( id 4)" << std::endl;
     if (m_useWriteBuffer) return loadingWithWriteBuffer(item);
 
 //    std::cout << "Loading " << item->getId() << std::endl;
@@ -84,7 +83,7 @@ namespace Kernel
     }
 
     // We are now using more memory.
-    m_memoryUsed += item->getSizeOnFile();
+    m_memoryUsed += item->getMRUMemorySize();
 
     // You might have to pop 1 or more items until the MRU memory is below the limit
     mru_t::iterator it = m_mru.end();
@@ -99,7 +98,7 @@ namespace Kernel
       if (!toWrite->dataBusy())
       {
         toWrite->save();
-        m_memoryUsed -= toWrite->getSizeOnFile();
+        m_memoryUsed -= toWrite->getMRUMemorySize();
         m_mru.erase(it);
       }
     }
@@ -128,7 +127,7 @@ namespace Kernel
     if (found != m_toWrite_byId.end())
     {
       m_toWrite_byId.erase(item->getId());
-      m_memoryToWrite -= item->getSizeOnFile();
+      m_memoryToWrite -= item->getMRUMemorySize();
     }
 
     if (!p.second)
@@ -140,7 +139,7 @@ namespace Kernel
     }
 
     // We are now using more memory.
-    m_memoryUsed += item->getSizeOnFile();
+    m_memoryUsed += item->getMRUMemorySize();
 
     if (m_memoryUsed > m_memoryAvail)
     {
@@ -155,7 +154,7 @@ namespace Kernel
         m_toWrite.insert(toWrite);
 
         // Track the memory change in the two buffers
-        size_t thisMem = toWrite->getSizeOnFile();
+        size_t thisMem = toWrite->getMRUMemorySize();
         m_memoryToWrite += thisMem;
         m_memoryUsed -= thisMem;
       }
@@ -171,14 +170,15 @@ namespace Kernel
   /** Call this method when an object that might be in the cache
    * is getting deleted.
    * The object is removed from the MRU and the to-write buffer (if present).
-   * The space it uses on disk is marked as free.
+   * The space it uses on disk is marked as free
    *
    * @param item :: ISaveable object that is getting deleted.
+   * @param sizeOnFile :: size that the object used on file. This amount of space is marked as "free"
    */
-  void DiskMRU::objectDeleted(const ISaveable * item)
+  void DiskMRU::objectDeleted(const ISaveable * item, const uint64_t sizeOnFile)
   {
     size_t id = item->getId();
-    uint64_t size = item->getSizeOnFile();
+    uint64_t size = item->getMRUMemorySize();
 
     m_mruMutex.lock();
 
@@ -199,8 +199,8 @@ namespace Kernel
     }
     m_mruMutex.unlock();
 
-    // Mark as a free block
-    this->freeBlock( item->getFilePosition(), size );
+    // Mark the amount of space used on disk as free
+    this->freeBlock(item->getFilePosition(), sizeOnFile);
   }
 
 
@@ -212,6 +212,12 @@ namespace Kernel
   void DiskMRU::writeOldObjects()
   {
     std::cout << "DiskMRU:: Writing out " << m_memoryToWrite << " events in " << m_toWrite.size() << " blocks." << std::endl;
+//    std::cout << getMemoryStr() << std::endl;
+//    std::cout << getFreeSpaceMap().size() << " entries in the free size map." << std::endl;
+//    for (freeSpace_t::iterator it = m_free.begin(); it != m_free.end(); it++)
+//      std::cout << " Free : " << it->getFilePosition() << " size " << it->getSize() << std::endl;
+//    std::cout << m_fileLength << " length of file" << std::endl;
+
     // Holder for any objects that you were NOT able to write.
     toWriteMap_t couldNotWrite;
     size_t memoryNotWritten = 0;
@@ -234,7 +240,7 @@ namespace Kernel
         // The object is busy, can't write. Save it for later
         //couldNotWrite.insert( pairObj_t(obj->getFilePosition(), obj) );
         couldNotWrite.insert( obj );
-        memoryNotWritten += obj->getSizeOnFile();
+        memoryNotWritten += obj->getMRUMemorySize();
       }
     }
 
@@ -290,6 +296,7 @@ namespace Kernel
   {
     if (size == 0) return;
     m_freeMutex.lock();
+    //std::cout << "Freeing block " << pos << " size " << size << std::endl;
 
     // Make the block
     FreeBlock newBlock(pos, size);
@@ -427,6 +434,7 @@ namespace Kernel
    */
   uint64_t DiskMRU::relocate(uint64_t const oldPos, uint64_t const oldSize, const uint64_t newSize)
   {
+    //std::cout << "Relocating " << oldPos << ", " << oldSize << ", " << newSize << std::endl;
     // First, release the space in the old block.
     this->freeBlock(oldPos, oldSize);
     return this->allocate(newSize);
@@ -447,6 +455,13 @@ namespace Kernel
     }
   }
 
+  /// @return a string describing the memory buffers, for debugging.
+  std::string DiskMRU::getMemoryStr() const
+  {
+    std::ostringstream mess;
+    mess << "Cache: " << m_memoryUsed << " events in " << m_mru.size() << " blocks. To-Write buffer: " << m_memoryToWrite << " in " << m_toWrite.size() << " blocks.";
+    return mess.str();
+  }
 
 } // namespace Mantid
 } // namespace Kernel

@@ -5,6 +5,7 @@
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/CPUTimer.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -115,6 +116,9 @@ namespace MDEvents
 
     this->progress(0.01, "Loading File Info");
 
+    // Total number of events in ALL files.
+    uint64_t totalEvents = 0;
+
     try
     {
       for (size_t i=0; i<m_filenames.size(); i++)
@@ -140,7 +144,8 @@ namespace MDEvents
 
         // Navigate to the event_data block and leave it open
         file->openGroup("event_data", "NXdata");
-        MDE::openNexusData(file);
+        // Open the event data, track the total number of events
+        totalEvents += MDE::openNexusData(file);
       }
     }
     catch (...)
@@ -152,16 +157,30 @@ namespace MDEvents
       return;
     }
 
+    g_log.notice() << totalEvents << " events in " << files.size() << " files." << std::endl;
+
     // This is how many boxes are in all the files.
     size_t numBoxes = box_indexes[0].size() / 2;
-    Progress prog(this, 0.1, 0.9, numBoxes);
+    Progress prog(this, 0.1, 0.8, totalEvents);
 
-    for (size_t ib=0; ib<numBoxes; ib++)
+    // For tracking progress
+    uint64_t totalLoaded = 0;
+    uint64_t totalSinceLastSplit = 0;
+    Kernel::Mutex fileMutex;
+    Kernel::Mutex statsMutex;
+    //DiskMRU & mru = bc->getDiskMRU();
+    g_log.notice() << "Setting cache to 300 MB read, 30 MB write." << std::endl;
+    bc->setCacheParameters(300000000/sizeof(MDE), 30000000/sizeof(MDE), sizeof(MDE));
+
+    //PRAGMA_OMP( parallel for schedule(dynamic, numBoxes/100) )
+    for (int iib=0; iib<int(numBoxes); iib++)
     {
+      size_t ib = size_t(iib);
       // Vector of events accumulated for ALL files to merge.
       std::vector<MDE> events;
 
       // Go through each file
+      fileMutex.lock();
       for (size_t iw=0; iw<files.size(); iw++)
       {
         // The file and the indexes into that file
@@ -173,16 +192,44 @@ namespace MDEvents
         // This will APPEND the events to the one vector
         MDE::loadVectorFromNexusSlab(events, file, indexStart, numEvents);
       } // For each file
+      fileMutex.unlock();
 
       if (events.size() > 0)
       {
         // Add all the events from the same box
         outWS->addEvents( events );
-        // TODO: Split, save to file, etc.
-        outWS->splitAllIfNeeded(NULL);
+
+        // Track the total number of added events
+        statsMutex.lock();
+        totalSinceLastSplit += uint64_t(events.size());
+        totalLoaded += uint64_t(events.size());
+        g_log.debug() << "Box " << ib << ". Total events " << totalLoaded << ". This one added " << events.size() << "." << std::endl;
+        //g_log.debug() << mru.getMemoryStr() << std::endl;
+        // Report the progress
+        prog.reportIncrement(events.size(), "Loading Box");
+        statsMutex.unlock();
+
+        // Perform splitting in a single thread. All others block while this runs.
+        //PRAGMA_OMP( single )
+        {
+          // Is now a good time to split?
+          //if (totalSinceLastSplit > (bc->getSplitThreshold() * bc->getTotalNumMDBoxes()))
+          if (totalSinceLastSplit > 1000000)
+          {
+            g_log.debug() << "Splitting because we collected " << totalSinceLastSplit << " events" << std::endl;
+            CPUTimer splitTime;
+            ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
+            ThreadPool tp(ts);
+            outWS->splitAllIfNeeded(ts);
+            tp.joinAll();
+            g_log.debug() << splitTime << " to split." << std::endl;
+            totalSinceLastSplit = 0;
+          }
+        }
+
       }
-      prog.report("Loading Box");
     } // for each box
+
 
     this->progress(0.91, "Refreshing Cache");
     outWS->refreshCache();

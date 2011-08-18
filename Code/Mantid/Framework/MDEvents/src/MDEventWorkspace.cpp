@@ -247,6 +247,7 @@ namespace MDEvents
     ws->addColumn("int", "EventVec Size");
     ws->addColumn("str", "OnDisk?");
     ws->addColumn("str", "InMemory?");
+    ws->addColumn("str", "Changes?");
     ws->addColumn("str", "Extents");
 
     for (int i=0; i<int(boxes_filtered.size()); i++)
@@ -257,11 +258,21 @@ namespace MDEvents
       ws->cell<int>(i, col++) = int(box->getDepth());
       ws->cell<int>(i, col++) = int(box->getNumChildren());
       ws->cell<int>(i, col++) = int(box->getFilePosition());
-      ws->cell<int>(i, col++) = int(box->getSizeOnFile());
       MDBox<MDE,nd>* mdbox = dynamic_cast<MDBox<MDE,nd>*>(box);
+      ws->cell<int>(i, col++) = mdbox ? int(mdbox->getFileNumEvents()) : 0;
       ws->cell<int>(i, col++) = mdbox ? int(mdbox->getEventVectorSize()) : -1;
-      ws->cell<std::string>(i, col++) = (mdbox ? (mdbox->getOnDisk() ? "yes":"no") : "N/A");
-      ws->cell<std::string>(i, col++) = (mdbox ? (mdbox->getInMemory() ? "yes":"no") : "N/A");
+      if (mdbox)
+      {
+        ws->cell<std::string>(i, col++) = (mdbox->getOnDisk() ? "yes":"no");
+        ws->cell<std::string>(i, col++) = (mdbox->getInMemory() ? "yes":"no");
+        ws->cell<std::string>(i, col++) = std::string(mdbox->dataAdded() ? "Added ":"") + std::string(mdbox->dataModified() ? "Modif.":"") ;
+      }
+      else
+      {
+        ws->cell<std::string>(i, col++) = "-";
+        ws->cell<std::string>(i, col++) = "-";
+        ws->cell<std::string>(i, col++) = "-";
+      }
       ws->cell<std::string>(i, col++) = box->getExtentsStr();
     }
     std::cout << tim << " to create the MDBox data table." << std::endl;

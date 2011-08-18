@@ -865,19 +865,7 @@ public:
 
     Timer tim;
     if (DODEBUG) std::cout << "Adding " << num_repeat*100 << " events...\n";
-
-    std::vector< MDLeanEvent<2> > events;
-    for (double x=0.5; x < 10; x += 1.0)
-      for (double y=0.5; y < 10; y += 1.0)
-      {
-        coord_t centers[2] = {x,y};
-        for (size_t i=0; i < num_repeat; i++)
-        {
-          // Make an event in the middle of each box
-          events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
-        }
-      }
-    TS_ASSERT_THROWS_NOTHING( b->addEvents( events ); );
+    MDEventsTestHelper::feedMDBox<2>(b, num_repeat, 10, 0.5, 1.0);
     if (DODEBUG) std::cout << "Adding events done in " << tim.elapsed() << "!\n";
 
     // Split those boxes in parallel.
@@ -911,6 +899,88 @@ public:
     }
 
   }
+
+
+
+
+  //------------------------------------------------------------------------------------------------
+  /** This test splits a large number of events,
+   * for a workspace that is backed by a file (and thus tries to stay below
+   * a certain amount of memory used).
+   */
+  void test_splitAllIfNeeded_fileBacked()
+  {
+    typedef MDLeanEvent<2> MDE;
+    typedef MDGridBox<MDE,2> gbox_t;
+    typedef MDBox<MDE,2> box_t;
+    typedef IMDBox<MDE,2> ibox_t;
+
+    // Make a fake file-backing for the grid box
+    std::string filename = "MDGridBoxTest.nxs";
+    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE);
+    file->makeGroup("MDEventWorkspaceTest", "NXentry", 1);
+    MDE::prepareNexusData(file, 2000);
+    file->close();
+    file = new ::NeXus::File(filename, NXACC_RDWR);
+    file->openGroup("MDEventWorkspaceTest", "NXentry");
+    MDE::openNexusData(file);
+
+    // Create the grid box and make it file-backed.
+    gbox_t * b = MDEventsTestHelper::makeMDGridBox<2>();
+    BoxController_sptr bc = b->getBoxController();
+    bc->setSplitThreshold(100);
+    bc->setMaxDepth(4);
+    bc->setCacheParameters(10000, 1000, 1);
+    bc->setFile(file, filename, 0);
+    DiskMRU & mru = bc->getDiskMRU();
+    mru.setFileLength(0);
+
+    // Make a 1000 events in each sub-box
+    size_t num_repeat = 10;
+    if (DODEBUG) num_repeat = 20;
+    Timer tim;
+    if (DODEBUG) std::cout << "Adding " << num_repeat*10000 << " events...\n";
+    MDEventsTestHelper::feedMDBox<2>(b, num_repeat, 100, 0.05, 0.1);
+    if (DODEBUG) std::cout << "Adding events done in " << tim.elapsed() << "!\n";
+
+    // Split those boxes in parallel.
+    ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
+    ThreadPool tp(ts);
+    b->splitAllIfNeeded(ts);
+    tp.joinAll();
+
+    if (DODEBUG) std::cout << "Splitting events done in " << tim.elapsed() << " sec.\n";
+
+    // Get all the MDBoxes created
+    std::vector<ibox_t*> boxes;
+    b->getBoxes(boxes, 1000, true);
+    TS_ASSERT_EQUALS(boxes.size(), 10000);
+    size_t numOnDisk = 0;
+    uint64_t eventsOnDisk = 0;
+    uint64_t maxFilePos = 0;
+    for (size_t i=0; i<boxes.size(); i++)
+    {
+      ibox_t * box = boxes[i];
+      TS_ASSERT_EQUALS( box->getNPoints(), num_repeat );
+      box_t * mdbox = dynamic_cast<box_t *>(box);
+      TS_ASSERT( mdbox);
+      if ( mdbox->getOnDisk() ) numOnDisk++;
+      eventsOnDisk += mdbox->getFileNumEvents();
+      // Track the last point used in the file
+      uint64_t fileEnd = mdbox->getFilePosition() + mdbox->getFileNumEvents();
+      if (fileEnd > maxFilePos) maxFilePos = fileEnd;
+      //std::cout << mdbox->getFilePosition() << " file pos " << i << std::endl;
+    }
+    TSM_ASSERT_EQUALS("All new boxes were set to be cached to disk.", numOnDisk, 10000);
+    uint64_t minimumSaved = 10000*(num_repeat-2);
+    TSM_ASSERT_LESS_THAN("Length of the file makes sense", minimumSaved, mru.getFileLength());
+    TSM_ASSERT_LESS_THAN("Most of the boxes' events were cached to disk (some remain in memory because of the MRU cache)", minimumSaved, eventsOnDisk);
+    TSM_ASSERT_LESS_THAN("And the events were properly saved sequentially in the files.", minimumSaved, maxFilePos);
+    std::cout << mru.getMemoryStr() << std::endl;
+    file->close();
+    if (Poco::File(filename).exists()) Poco::File(filename).remove();
+  }
+
 
 
   //------------------------------------------------------------------------------------------------

@@ -136,9 +136,11 @@ namespace Kernel
 
     uint64_t relocate(uint64_t const oldPos, uint64_t const oldSize, const uint64_t newSize);
 
-    void objectDeleted(const ISaveable * item);
+    void objectDeleted(const ISaveable * item, const uint64_t sizeOnFile);
 
     void getFreeSpaceVector(std::vector<uint64_t> & free) const;
+
+    std::string getMemoryStr() const;
 
     //-------------------------------------------------------------------------------------------
     ///@return the memory used in the MRU, in number of events
@@ -153,7 +155,10 @@ namespace Kernel
     /** Set the size of the to-write buffer, in number of events
      * @param buffer :: number of events to accumulate before writing  */
     void setWriteBufferSize(uint64_t buffer)
-    { m_writeBufferSize = buffer; }
+    {
+      m_writeBufferSize = buffer;
+      m_useWriteBuffer = (buffer > 0);
+    }
 
     /// @return the size of the to-write buffer, in number of events
     uint64_t getWriteBufferSize() const

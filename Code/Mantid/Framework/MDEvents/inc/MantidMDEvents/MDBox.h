@@ -60,10 +60,6 @@ namespace MDEvents
     virtual void load()
     { }
 
-    /// @return the amount of memory that the object takes up in the MRU.
-    virtual uint64_t getSizeOnFile() const
-    { return m_fileNumEvents; }
-
     /// @return true if it the data of the object is busy and so cannot be cleared by the MRU; false if the data was released and can be cleared/written.
     virtual bool dataBusy() const
     { return m_dataBusy; }
@@ -72,8 +68,11 @@ namespace MDEvents
     virtual uint64_t getFilePosition() const
     { return m_fileIndexStart; }
 
-    //-----------------------------------------------------------------------------------------------
+    /// @return the amount of memory that the object takes up in the MRU.
+    virtual uint64_t getMRUMemorySize() const
+    { return uint64_t(getNPoints()); }
 
+    //-----------------------------------------------------------------------------------------------
 
     void clear();
 
@@ -102,7 +101,7 @@ namespace MDEvents
     /// @return Start point in the NXS file where the events are located
     uint64_t getFileIndexStart() const { return m_fileIndexStart; }
 
-    /// @return Number of events saved in the file, after the start index location
+    /// @return Number of events saved in the file, after the start index location (= not necessarily the number of events it currently has in memory)
     uint64_t getFileNumEvents() const { return m_fileNumEvents; }
 
     void setFileIndex(uint64_t start, uint64_t numEvents);
@@ -137,6 +136,11 @@ namespace MDEvents
     /// @return true if the data was modified in some way.
     bool dataModified() const
     { return m_dataModified; }
+
+    /** Set the dataModified flag.
+     * @param value :: true if the data was modified in some way.   */
+    void setDataModified(const bool value)
+    { m_dataModified = value; }
 
     /// @return true if any events were added to the data
     bool dataAdded() const

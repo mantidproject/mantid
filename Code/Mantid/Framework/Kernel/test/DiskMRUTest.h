@@ -45,7 +45,7 @@ public:
   virtual void flushData() const {}
 
   uint64_t m_memory;
-  virtual uint64_t getSizeOnFile() const {return m_memory;};
+  virtual uint64_t getMRUMemorySize() const { return m_memory; };
 
   bool m_dataBusy;
   virtual bool dataBusy() const {return m_dataBusy; }
@@ -158,7 +158,7 @@ public:
   virtual void flushData() const {}
 
   uint64_t m_memory;
-  virtual uint64_t getSizeOnFile() const {return m_memory;};
+  virtual uint64_t getMRUMemorySize() const {return m_memory;};
 
   uint64_t m_pos;
   virtual uint64_t getFilePosition() const { return m_pos; }
@@ -511,13 +511,13 @@ public:
     TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 2);
 
     // First let's get rid of something in to to-write buffer
-    mru.objectDeleted(data[1]);
+    mru.objectDeleted(data[1], 1);
     TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
     TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 1);
     TSM_ASSERT_EQUALS( "Space on disk was marked as free", mru.getFreeSpaceMap().size(), 1);
 
     // Now let's get rid of something in to MRU buffer
-    mru.objectDeleted(data[4]);
+    mru.objectDeleted(data[4], 1);
     TS_ASSERT_EQUALS( mru.getMemoryUsed(), 3);
     TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 1);
     TSM_ASSERT_EQUALS( "Space on disk was marked as free", mru.getFreeSpaceMap().size(), 2);

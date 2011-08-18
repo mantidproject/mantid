@@ -822,7 +822,7 @@ public:
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
-    bc->setCacheParameters(0, 10, sizeof(MDLeanEvent<3>));
+    bc->setCacheParameters(0, 10000, sizeof(MDLeanEvent<3>));
     DiskMRU & mru = bc->getDiskMRU();
 
     // Create and open the test NXS file
