@@ -208,6 +208,7 @@ void AnvredCorrection::execEvent()
   DataObjects::EventWorkspace_sptr correctionFactors;
   correctionFactors = boost::dynamic_pointer_cast<EventWorkspace>(
       API::WorkspaceFactory::Instance().create("EventWorkspace",numHists,2,1) );
+  correctionFactors->sortAll(TOF_SORT, NULL);
   //Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, correctionFactors, true);
   bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
@@ -225,14 +226,14 @@ void AnvredCorrection::execEvent()
     PARALLEL_START_INTERUPT_REGION
 
     // Copy over bin boundaries
-    const MantidVec& X = m_inputWS->readX(i);
+    const MantidVec& X = eventW->readX(i);
     correctionFactors->dataX(i) = X;
 
     // Get detector position
     IDetector_sptr det;
     try
     {
-      det = m_inputWS->getDetector(i);
+      det = eventW->getDetector(i);
     } catch (Exception::NotFoundError&)
     {
       // Catch if no detector. Next line tests whether this happened - test placed
@@ -243,7 +244,7 @@ void AnvredCorrection::execEvent()
     if ( !det ) continue;
 
     // This is the scattered beam direction
-    IInstrument_sptr inst = m_inputWS->getInstrument();
+    IInstrument_sptr inst = eventW->getInstrument();
     V3D dir = det->getPos() - samplePos;
     // Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
     double scattering = dir.angle( V3D(0.0, 0.0, 1.0) );
@@ -263,9 +264,7 @@ void AnvredCorrection::execEvent()
       itev->m_errorSquared = static_cast<float>(itev->m_errorSquared * value*value);
       itev->m_weight *= static_cast<float>(value);
     }
-    EventList elOut;
-    elOut += events;
-    correctionFactors->getOrAddEventList(i) +=elOut;
+    correctionFactors->getOrAddEventList(i) +=events;
     
     std::set<detid_t>& dets = eventW->getEventList(i).getDetectorIDs();
     std::set<detid_t>::iterator j;
