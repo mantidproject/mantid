@@ -42,9 +42,10 @@ vtkMDEWNexusReader::~vtkMDEWNexusReader()
 
 void vtkMDEWNexusReader::SetDepth(int depth)
 {
-  if(m_depth != depth)
+  size_t temp = depth;
+  if(m_depth != temp)
   {
-   this->m_depth = depth;
+   this->m_depth = temp;
    this->Modified();
   }
 }
