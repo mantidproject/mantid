@@ -64,6 +64,8 @@ namespace Kernel
   void DiskMRU::loading(const ISaveable * item)
   {
     if (item == NULL) return;
+    if (item->getId() == 4)
+      std::cout << "DiskMRU::loading( id 4)" << std::endl;
     if (m_useWriteBuffer) return loadingWithWriteBuffer(item);
 
 //    std::cout << "Loading " << item->getId() << std::endl;
@@ -91,7 +93,7 @@ namespace Kernel
     {
       // Pop the least-used object out the back
       it--;
-      if (it == m_mru.begin()) break;
+      if (it == m_mru.begin()) break; // Avoid going out of bounds
       const ISaveable *toWrite = *it;
       // Can you save it to disk?
       if (!toWrite->dataBusy())
@@ -143,7 +145,7 @@ namespace Kernel
     if (m_memoryUsed > m_memoryAvail)
     {
       // You might have to pop 1 or more items until the MRU memory is below the limit
-      while (m_memoryUsed > m_memoryAvail)
+      while ((m_memoryUsed > m_memoryAvail) && (m_mru.size() > 0))
       {
         // Pop the least-used object out the back
         const ISaveable *toWrite = m_mru.back();
@@ -151,7 +153,6 @@ namespace Kernel
 
         // And put it in the queue of stuff to write.
         m_toWrite.insert(toWrite);
-        //m_toWrite.insert( pairObj_t(toWrite->getFilePosition(), toWrite) );
 
         // Track the memory change in the two buffers
         size_t thisMem = toWrite->getSizeOnFile();
@@ -210,7 +211,7 @@ namespace Kernel
    */
   void DiskMRU::writeOldObjects()
   {
-    std::cout << "DiskMRU:: Writing out " << m_memoryToWrite << " events" << std::endl;
+    std::cout << "DiskMRU:: Writing out " << m_memoryToWrite << " events in " << m_toWrite.size() << " blocks." << std::endl;
     // Holder for any objects that you were NOT able to write.
     toWriteMap_t couldNotWrite;
     size_t memoryNotWritten = 0;
@@ -222,7 +223,7 @@ namespace Kernel
     const ISaveable * obj = NULL;
     for (; it != it_end; it++)
     {
-      obj = *it; //->second;
+      obj = *it;
       if (!obj->dataBusy())
       {
         // Write to the disk
@@ -258,7 +259,7 @@ namespace Kernel
     m_mruMutex.lock();
 
     // Pop everything from the cache
-    while (m_memoryUsed > 0)
+    while (m_mru.size() > 0)
     {
       // Pop the least-used object out the back
       const ISaveable *toWrite = m_mru.back();
@@ -266,12 +267,11 @@ namespace Kernel
 
       // And put it in the queue of stuff to write.
       m_toWrite.insert(toWrite);
-
-      // Track the memory change in the two buffers
-      size_t thisMem = toWrite->getSizeOnFile();
-      m_memoryToWrite += thisMem;
-      m_memoryUsed -= thisMem;
     }
+
+    // Track the memory change in the two buffers
+    m_memoryToWrite += m_memoryUsed;
+    m_memoryUsed = 0;
 
     // Now write everything out.
     writeOldObjects();

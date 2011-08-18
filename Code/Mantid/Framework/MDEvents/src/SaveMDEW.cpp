@@ -92,6 +92,7 @@ namespace MDEvents
     ::NeXus::File * file;
     if (update)
     {
+      progress(0.01, "Flushing Cache");
       // First, flush to disk. This writes all the event data to disk!
       bc->getDiskMRU().flushCache();
 
@@ -186,7 +187,7 @@ namespace MDEvents
     // Get a starting iterator
     MDBoxIterator<MDE,nd> it(ws->getBox(), 1000, false);
 
-    Progress * prog = new Progress(this, 0, 0.9, maxBoxes);
+    Progress * prog = new Progress(this, 0.05, 0.9, maxBoxes);
 
     IMDBox<MDE,nd> * box;
     while (true)
@@ -271,7 +272,7 @@ namespace MDEvents
         }
 
         // Move on to the next box
-        prog->report();
+        prog->report("Saving Box");
         if (!it.next()) break;
       }
       else
@@ -304,7 +305,8 @@ namespace MDEvents
 
     // -------------- Save Box Structure  -------------------------------------
     // OK, we've filled these big arrays of data. Save them.
-    prog->report("Writing Box Data");
+    progress(0.91, "Writing Box Data");
+    prog->resetNumSteps(8, 0.92, 1.00);
 
     // Start the box data group
     if (!update)

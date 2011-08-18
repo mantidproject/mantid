@@ -61,7 +61,10 @@ namespace MDEvents
 
     /// Save the data - to be overriden
     virtual void save() const
-    { }
+    {
+      std::cerr << "ID " << getId() << std::endl;
+      throw std::runtime_error("IMDBox::save() called and should have been overridden.");
+    }
 
     /// Flush the data to disk. Allows NXS api to actually write out the file.
     virtual void flushData() const
