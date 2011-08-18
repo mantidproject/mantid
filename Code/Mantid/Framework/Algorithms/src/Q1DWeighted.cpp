@@ -95,8 +95,6 @@ void Q1DWeighted::exec()
 
   const int numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
-  // Set up the progress reporting object
-  Progress progress(this,0.0,1.0,numSpec);
 
   const V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
   const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
@@ -104,59 +102,63 @@ void Q1DWeighted::exec()
   const int xLength = static_cast<int>(inputWS->readX(0).size());
   const double fmp=4.0*M_PI;
 
+  // Set up the progress reporting object
+  Progress progress(this,0.0,1.0,numSpec*(xLength-1));
+
   // Count histogram for normalization
-  std::vector<double> XNorm(sizeOut-1, 0.0) ;
+  std::vector<double> XNormLambda(sizeOut-1, 0.0);
 
   // Beam line axis, to compute scattering angle
   V3D beamLine = samplePos - sourcePos;
 
   PARALLEL_FOR2(inputWS,outputWS)
-  for (int i = 0; i < numSpec; i++)
+  // Loop over all xLength-1 detector channels
+  // Note: xLength -1, because X is a histogram and has a number of boundaries
+  // equal to the number of detector channels + 1.
+  for ( int j = 0; j < xLength-1; j++)
   {
     PARALLEL_START_INTERUPT_REGION
-    // Get the pixel relating to this spectrum
-    IDetector_const_sptr det;
-    try {
-      det = inputWS->getDetector(i);
-    } catch (Exception::NotFoundError&) {
-      g_log.warning() << "Spectrum index " << i << " has no detector assigned to it - discarding" << std::endl;
-      // Catch if no detector. Next line tests whether this happened - test placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a catch
-      // in an openmp block.
-    }
-    // If no detector found or if it's masked or a monitor, skip onto the next spectrum
-    if ( !det || det->isMonitor() || det->isMasked() ) continue;
 
-    // Get the current spectrum for both input workspaces
-    const MantidVec& XIn = inputWS->readX(i);
-    const MantidVec& YIn = inputWS->readY(i);
-    const MantidVec& EIn = inputWS->readE(i);
+    std::vector<double> lambda_iq(sizeOut-1, 0.0);
+    std::vector<double> lambda_iq_err(sizeOut-1, 0.0);
+    std::vector<double> XNorm(sizeOut-1, 0.0);
 
-
-    // Calculate the Q values for the current spectrum
-    // Each pixel is sub-divided in the number of pixels given as input parameter (NPixelDivision)
-    for ( int isub=0; isub<nSubPixels*nSubPixels; isub++ )
+    for (int i = 0; i < numSpec; i++)
     {
+      // Get the pixel relating to this spectrum
+      IDetector_const_sptr det;
+      try {
+        det = inputWS->getDetector(i);
+      } catch (Exception::NotFoundError&) {
+        g_log.warning() << "Spectrum index " << i << " has no detector assigned to it - discarding" << std::endl;
+        // Catch if no detector. Next line tests whether this happened - test placed
+        // outside here because Mac Intel compiler doesn't like 'continue' in a catch
+        // in an openmp block.
+      }
+      // If no detector found or if it's masked or a monitor, skip onto the next spectrum
+      if ( !det || det->isMonitor() || det->isMasked() ) continue;
 
-      // Find the position offset for this sub-pixel in real space
-      double sub_y = pixelSizeY * ((isub%nSubPixels) - (nSubPixels-1.0)/2.0) / nSubPixels;
-      double sub_x = pixelSizeX * (floor((double)isub/nSubPixels) - (nSubPixels-1.0)/2.0) / nSubPixels;
+      // Get the current spectrum for both input workspaces
+      const MantidVec& XIn = inputWS->readX(i);
+      const MantidVec& YIn = inputWS->readY(i);
+      const MantidVec& EIn = inputWS->readE(i);
 
-      // Find the position of this sub-pixel in real space and compute Q
-      // For reference - in the case where we don't use sub-pixels, simply use:
-      //     double sinTheta = sin( inputWS->detectorTwoTheta(det)/2.0 );
-      V3D pos = det->getPos() - V3D(sub_x, sub_y, 0.0);
-      double sinTheta = sin( pos.angle(beamLine)/2.0 );
-      double factor = fmp*sinTheta;
+      double wl_bin_width = 1.0;
+      if (xLength>2) wl_bin_width = XIn[j+1]-XIn[j];
 
-      // Loop over all xLength-1 detector channels
-      // Note: xLength -1, because X is a histogram and has a number of boundaries
-      // equal to the number of detector channels + 1.
-      for ( int j = 0; j < xLength-1; j++)
+      // Each pixel is sub-divided in the number of pixels given as input parameter (NPixelDivision)
+      for ( int isub=0; isub<nSubPixels*nSubPixels; isub++ )
       {
-        double wl_bin_width = 1.0;
-        if (xLength>2) wl_bin_width = XIn[j+1]-XIn[j];
+        // Find the position offset for this sub-pixel in real space
+        double sub_y = pixelSizeY * ((isub%nSubPixels) - (nSubPixels-1.0)/2.0) / nSubPixels;
+        double sub_x = pixelSizeX * (floor((double)isub/nSubPixels) - (nSubPixels-1.0)/2.0) / nSubPixels;
 
+        // Find the position of this sub-pixel in real space and compute Q
+        // For reference - in the case where we don't use sub-pixels, simply use:
+        //     double sinTheta = sin( inputWS->detectorTwoTheta(det)/2.0 );
+        V3D pos = det->getPos() - V3D(sub_x, sub_y, 0.0);
+        double sinTheta = sin( pos.angle(beamLine)/2.0 );
+        double factor = fmp*sinTheta;
         double q = factor*2.0/(XIn[j]+XIn[j+1]);
         int iq = 0;
 
@@ -185,15 +187,28 @@ void Q1DWeighted::exec()
             w = 1.0/(nSubPixels*nSubPixels*err*err);
           }
 
-          PARALLEL_CRITICAL(iq)    /* Write to shared memory - must protect */
+          PARALLEL_CRITICAL(iqnorm)    /* Write to shared memory - must protect */
           {
-            YOut[iq] += YIn[j]*w;
-            EOut[iq] += w*w*EIn[j]*EIn[j];
+            lambda_iq[iq] += YIn[j]*w;
+            lambda_iq_err[iq] += w*w*EIn[j]*EIn[j];
             XNorm[iq] += w*wl_bin_width;
           }
         }
       }
       progress.report("Computing I(Q)");
+    }
+    // Normalize according to the chosen weighting scheme
+    PARALLEL_CRITICAL(iq)    /* Write to shared memory - must protect */
+    {
+      for ( int k = 0; k<sizeOut-1; k++ )
+      {
+        if (XNorm[k]>0)
+        {
+          YOut[k] += lambda_iq[k]/XNorm[k];
+          EOut[k] += lambda_iq_err[k]/XNorm[k]/XNorm[k];
+          XNormLambda[k] += 1.0;
+        }
+      }
     }
     PARALLEL_END_INTERUPT_REGION
   }
@@ -202,8 +217,8 @@ void Q1DWeighted::exec()
   // Normalize according to the chosen weighting scheme
   for ( int i = 0; i<sizeOut-1; i++ )
   {
-    YOut[i] /= XNorm[i];
-    EOut[i] = sqrt(EOut[i])/XNorm[i];
+    YOut[i] /= XNormLambda[i];
+    EOut[i] = sqrt(EOut[i])/XNormLambda[i];
   }
 
 }

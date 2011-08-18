@@ -96,16 +96,16 @@ class BaseBeamFinder(ReductionStep):
         mantid.sendLogMessage("Beam coordinate in real-space: %s" % str(ctr))  
         
         # Compute the relative distance to the current beam center in pixels
-        if self._beam_center_x is None or self._beam_center_y is None:
-            [self._beam_center_x, self._beam_center_y] = reducer.instrument.get_default_beam_center(workspace)
-            
         # Move detector array to correct position. Do it here so that we don't need to
         # move it if we need to load that data set for analysis later.
         # Note: the position of the detector in Z is now part of the load
         # Note: if the relative translation is correct, we shouldn't have to keep 
         #       the condition below. Check with EQSANS data (where the beam center and the data are the same workspace)
         if not workspace == workspace_default:
-            old_ctr = reducer.instrument.get_coordinate_from_pixel(self._beam_center_x, self._beam_center_y, workspace)
+            if self._beam_center_x is None or self._beam_center_y is None:
+                old_ctr = [0.0,0.0]
+            else:
+                old_ctr = reducer.instrument.get_coordinate_from_pixel(self._beam_center_x, self._beam_center_y, workspace)
             detector_ID=mtd[workspace].getInstrument().getStringParameter("detector-name")[0]
             MoveInstrumentComponent(workspace, detector_ID, 
                                     X = old_ctr[0]-float(ctr[0]),
@@ -734,6 +734,43 @@ class WeightedAzimuthalAverage(ReductionStep):
         self._nsubpix = n_subpix
         self._log_binning = log_binning
         
+    def _get_binning(self, reducer, workspace, wavelength_min, wavelength_max):
+        
+        sample_detector_distance = mtd[workspace].getRun().getProperty("sample_detector_distance").value
+        nx_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+        ny_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+        pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
+        pixel_size_y = mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
+
+        # Q min is one pixel from the center, unless we have the beam trap size
+        if mtd[workspace].getRun().hasProperty("beam-trap-radius"):
+            mindist = mtd[workspace].getRun().getProperty("beam-trap-radius").value
+        else:
+            mindist = min(pixel_size_x, pixel_size_y)
+        qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/sample_detector_distance))
+        
+        beam_ctr = reducer._beam_finder.get_beam_center()
+        dxmax = pixel_size_x*max(beam_ctr[0],nx_pixels-beam_ctr[0])
+        dymax = pixel_size_y*max(beam_ctr[1],ny_pixels-beam_ctr[1])
+        maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
+        qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
+        
+        if not self._log_binning:
+            qstep = (qmax-qmin)/self._nbins
+            f_step = (qmax-qmin)/qstep
+            n_step = math.floor(f_step)
+            if f_step-n_step>10e-10:
+                qmax = qmin+qstep*n_step
+            return qmin, qstep, qmax
+        else:
+            # Note: the log binning in Mantid is x_i+1 = x_i * ( 1 + dx )
+            qstep = (math.log10(qmax)-math.log10(qmin))/self._nbins
+            f_step = (math.log10(qmax)-math.log10(qmin))/qstep
+            n_step = math.floor(f_step)
+            if f_step-n_step>10e-10:
+                qmax = math.pow(10.0, math.log10(qmin)+qstep*n_step)
+            return qmin, -(math.pow(10.0,qstep)-1.0), qmax
+        
     def execute(self, reducer, workspace):
         # Q range                        
         beam_ctr = reducer._beam_finder.get_beam_center()
@@ -751,38 +788,8 @@ class WeightedAzimuthalAverage(ReductionStep):
             wavelength_min = (x[0]+x[1])/2.0
             if wavelength_min==0 or wavelength_max==0:
                 raise RuntimeError, "Azimuthal averaging needs positive wavelengths"
-                    
-            sample_detector_distance = mtd[workspace].getRun().getProperty("sample_detector_distance").value
-            nx_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
-            ny_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
-            
-            # Q min is one pixel from the center, unless we have the beam trap size
-            if mtd[workspace].getRun().hasProperty("beam-trap-radius"):
-                mindist = mtd[workspace].getRun().getProperty("beam-trap-radius").value
-            else:
-                mindist = min(pixel_size_x, pixel_size_y)
-            qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/sample_detector_distance))
-            
-            dxmax = pixel_size_x*max(beam_ctr[0],nx_pixels-beam_ctr[0])
-            dymax = pixel_size_y*max(beam_ctr[1],ny_pixels-beam_ctr[1])
-            maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
-            qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
-            
-            if not self._log_binning:
-                qstep = (qmax-qmin)/self._nbins
-                f_step = (qmax-qmin)/qstep
-                n_step = math.floor(f_step)
-                if f_step-n_step>10e-10:
-                    qmax = qmin+qstep*n_step
-                self._binning = "%g, %g, %g" % (qmin, qstep, qmax)
-            else:
-                # Note: the log binning in Mantid is x_i+1 = x_i * ( 1 + dx )
-                qstep = (math.log10(qmax)-math.log10(qmin))/self._nbins
-                f_step = (math.log10(qmax)-math.log10(qmin))/qstep
-                n_step = math.floor(f_step)
-                if f_step-n_step>10e-10:
-                    qmax = math.pow(10.0, math.log10(qmin)+qstep*n_step)
-                self._binning = "%g, %g, %g" % (qmin, -(math.pow(10.0,qstep)-1.0), qmax)
+            qmin, qstep, qmax = self._get_binning(reducer, workspace, wavelength_min, wavelength_max)
+            self._binning = "%g, %g, %g" % (qmin, qstep, qmax)
         else:
             toks = self._binning.split(',')
             if len(toks)<3:
@@ -1461,7 +1468,14 @@ class SubtractBackground(ReductionStep):
         
         # Make sure that we have the same binning
         RebinToWorkspace(self._background_ws, workspace, OutputWorkspace="__tmp_bck")
-        Minus(workspace, "__tmp_bck", workspace)
+        if mtd[workspace].getRun().hasProperty("data_ws"):
+            if reducer._absolute_scale is not None:
+                reducer._absolute_scale.execute(reducer, "__tmp_bck")
+            if reducer._azimuthal_averager is not None:
+                reducer._azimuthal_averager.execute(reducer, "__tmp_bck")
+
+        else:
+            Minus(workspace, "__tmp_bck", workspace)
         if mtd.workspaceExists("__tmp_bck"):
             mtd.deleteWorkspace("__tmp_bck")        
         
