@@ -214,7 +214,7 @@ namespace DataHandling
    * @param bank :: name of the bank being written.
    * @return error code
    */
-  int SaveToSNSHistogramNexus::WriteOutDataOrErrors(boost::shared_ptr<Mantid::Geometry::RectangularDetector> det,
+  int SaveToSNSHistogramNexus::WriteOutDataOrErrors(Geometry::RectangularDetector_const_sptr det,
       int x_pixel_slab,
       const char * field_name, const char * errors_field_name,
       bool doErrors, bool doBoth, int is_definition,
@@ -412,8 +412,8 @@ namespace DataHandling
     if (NXgetinfo (inId, &dataRank, dataDimensions, &dataType) != NX_OK) return NX_ERROR;
 
     // Get the rectangular detector
-    IComponent_sptr det_comp = inputWorkspace->getInstrument()->getComponentByName( std::string(bank) );
-    boost::shared_ptr<RectangularDetector> det = boost::dynamic_pointer_cast<RectangularDetector>(det_comp);
+    IComponent_const_sptr det_comp = inputWorkspace->getInstrument()->getComponentByName( std::string(bank) );
+    RectangularDetector_const_sptr det = boost::dynamic_pointer_cast<const RectangularDetector>(det_comp);
     if (!det)
     {
       g_log.information() << "Detector '" + bank + "' not found, or it is not a rectangular detector!\n";

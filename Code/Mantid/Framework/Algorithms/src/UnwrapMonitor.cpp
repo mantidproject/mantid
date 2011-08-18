@@ -23,7 +23,6 @@ void UnwrapMonitor::initDocs()
 
 using namespace Kernel;
 using namespace API;
-using Geometry::IInstrument_const_sptr;
 
 /// Default constructor
 UnwrapMonitor::UnwrapMonitor():m_progress(NULL)
@@ -149,7 +148,7 @@ void UnwrapMonitor::exec()
 double UnwrapMonitor::getPrimaryFlightpath() const
 {
   // Get a pointer to the instrument contained in the input workspace
-  IInstrument_const_sptr instrument = m_inputWS->getInstrument();
+  Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
   // Get the distance between the source and the sample
   Geometry::IObjComponent_const_sptr sample = instrument->getSample();
   double L1;
@@ -158,7 +157,7 @@ double UnwrapMonitor::getPrimaryFlightpath() const
     L1 = instrument->getSource()->getDistance(*sample);
     g_log.debug() << "Source-sample distance (in metres): " << L1 << std::endl;
   }
-  catch (Exception::NotFoundError e)
+  catch (Exception::NotFoundError&)
   {
     g_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", m_inputWS->getTitle());
@@ -196,7 +195,7 @@ double UnwrapMonitor::calculateFlightpath(const int& spectrum, const double& L1,
       Ld = det->getDistance(*(m_inputWS->getInstrument()->getSource()));
     }
   }
-  catch (Exception::NotFoundError)
+  catch (Exception::NotFoundError&)
   {
     // If the detector information is missing, return a negative number
   }

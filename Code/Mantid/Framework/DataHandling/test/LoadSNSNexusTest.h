@@ -60,7 +60,7 @@ public:
     TS_ASSERT_EQUALS(logs.size(),1);
 
     //------------ Instrument Loading Sub-Test -----------------------
-    IInstrument_sptr inst = ws->getInstrument();
+    Instrument_sptr inst = ws->getInstrument();
 
     TS_ASSERT_EQUALS(inst->getName(), "REF_L");
     std::map<int, Geometry::IDetector_sptr> detectors = inst->getDetectors();

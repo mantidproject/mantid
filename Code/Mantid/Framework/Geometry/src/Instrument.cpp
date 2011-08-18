@@ -1,4 +1,4 @@
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -21,13 +21,13 @@ namespace Mantid
     Kernel::Logger& Instrument::g_log = Kernel::Logger::get("Instrument");
 
     /// Default constructor
-    Instrument::Instrument() : Geometry::CompAssembly(),
+    Instrument::Instrument() : CompAssembly(),
       _detectorCache(),_sourceCache(0),_sampleCache(0),
       m_defaultViewAxis("Z+")
     {}
 
     /// Constructor with name
-    Instrument::Instrument(const std::string& name) : Geometry::CompAssembly(name),
+    Instrument::Instrument(const std::string& name) : CompAssembly(name),
       _detectorCache(),_sourceCache(0),_sampleCache(0),
       m_defaultViewAxis("Z+")
     {}
@@ -38,11 +38,10 @@ namespace Mantid
      **/
     Instrument::Instrument(const boost::shared_ptr<Instrument> instr, ParameterMap_sptr map)
     : CompAssembly(instr.get(), map.get() ),
-      IInstrument(*instr.get()),
       _sourceCache(instr->_sourceCache), _sampleCache(instr->_sampleCache),
       m_defaultViewAxis(instr->m_defaultViewAxis),
-      m_instr(instr),
-      m_map_nonconst(map)
+      m_instr(instr), m_map_nonconst(map),
+      m_ValidFrom(instr->m_ValidFrom), m_ValidTo(instr->m_ValidTo)
     {
     }
 
@@ -60,7 +59,7 @@ namespace Mantid
      * Pointer to the ParameterMap holding the parameters of the modified instrument components.
      * @return parameter map from modified instrument components
      */
-    Geometry::ParameterMap_sptr Instrument::getParameterMap() const
+    ParameterMap_sptr Instrument::getParameterMap() const
     {
       if (m_isParametrized)
         return m_map_nonconst;
@@ -131,19 +130,19 @@ namespace Mantid
      *        The name must be unique, otherwise the first matching component (getComponentByName)
      *        is used.
      */
-    void Instrument::getDetectorsInBank(std::vector<Geometry::IDetector_sptr> & dets, const std::string & bankName)
+    void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> & dets, const std::string & bankName) const
     {
-      boost::shared_ptr<IComponent> comp = this->getComponentByName(bankName);
-      boost::shared_ptr<ICompAssembly> bank = boost::dynamic_pointer_cast<ICompAssembly>(comp);
+      boost::shared_ptr<const IComponent> comp = this->getComponentByName(bankName);
+      boost::shared_ptr<const ICompAssembly> bank = boost::dynamic_pointer_cast<const ICompAssembly>(comp);
       if (bank)
       {
         // Get a vector of children (recursively)
-        std::vector<boost::shared_ptr<IComponent> > children;
+        std::vector<boost::shared_ptr<const IComponent> > children;
         bank->getChildren(children, true);
-        std::vector<boost::shared_ptr<IComponent> >::iterator it;
+        std::vector<boost::shared_ptr<const IComponent> >::iterator it;
         for (it = children.begin(); it != children.end(); it++)
         {
-          IDetector_sptr det = boost::dynamic_pointer_cast<IDetector>(*it);
+          IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(*it);
           if (det)
           {
             dets.push_back( det );
@@ -195,18 +194,29 @@ namespace Mantid
       }
     }
 
+    /** Gets the beam direction (i.e. source->sample direction).
+    *  Not virtual because it relies the getSample() & getPos() virtual functions
+    *  @returns A unit vector denoting the direction of the beam
+    */
+    Kernel::V3D Instrument::getBeamDirection() const
+    {
+      V3D retval = getSample()->getPos() - getSource()->getPos();
+      retval.normalize();
+      return retval;
+    }
+
     //------------------------------------------------------------------------------------------
     /**  Get a shared pointer to a component by its ID
     *   @param id :: ID
     *   @return A pointer to the component.
     */
-    boost::shared_ptr<Geometry::IComponent> Instrument::getComponentByID(Geometry::ComponentID id)
+    boost::shared_ptr<IComponent> Instrument::getComponentByID(ComponentID id)
     {
       IComponent* base = (IComponent*)(id);
       if (m_isParametrized)
         return ParComponentFactory::create(boost::shared_ptr<IComponent>(base,NoDeleting()),m_map);
       else
-        return boost::shared_ptr<Geometry::IComponent>(base, NoDeleting());
+        return boost::shared_ptr<IComponent>(base, NoDeleting());
     }
 
     //------------------------------------------------------------------------------------------
@@ -214,13 +224,107 @@ namespace Mantid
     *   @param id :: ID
     *   @return A pointer to the component.
     */
-    boost::shared_ptr<const Geometry::IComponent> Instrument::getComponentByID(Geometry::ComponentID id)const
+    boost::shared_ptr<const IComponent> Instrument::getComponentByID(ComponentID id) const
     {
       IComponent* base = (IComponent*)(id);
       if (m_isParametrized)
         return ParComponentFactory::create(boost::shared_ptr<IComponent>(base,NoDeleting()),m_map);
       else
-        return boost::shared_ptr<Geometry::IComponent>(base, NoDeleting());
+        return boost::shared_ptr<IComponent>(base, NoDeleting());
+    }
+
+    /**
+    * Find a component by name.
+    * @param cname :: The name of the component. If there are multiple matches, the first one found is returned.
+    * @returns A shared pointer to the component
+    */
+    boost::shared_ptr<const IComponent> Instrument::getComponentByName(const std::string & cname) const
+    {
+      boost::shared_ptr<const IComponent> node = boost::shared_ptr<const IComponent>(this, NoDeleting());
+      // Check the instrument name first
+      if( this->getName() == cname )
+      {
+        return node;
+      }
+      // Otherwise Search the instrument tree using a breadth-first search algorithm since most likely candidates
+      // are higher-level components
+      // I found some useful info here http://www.cs.bu.edu/teaching/c/tree/breadth-first/
+      std::deque<boost::shared_ptr<const IComponent> > nodeQueue;
+      // Need to be able to enter the while loop
+      nodeQueue.push_back(node);
+      while( !nodeQueue.empty() )
+      {
+        node = nodeQueue.front();
+        nodeQueue.pop_front();
+        int nchildren(0);
+        boost::shared_ptr<const ICompAssembly> asmb = boost::dynamic_pointer_cast<const ICompAssembly>(node);
+        if( asmb )
+        {
+          nchildren = asmb->nelements();
+        }
+        for( int i = 0; i < nchildren; ++i )
+        {
+          boost::shared_ptr<const IComponent> comp = (*asmb)[i];
+          if( comp->getName() == cname )
+          {
+            return comp;
+          }
+          else
+          {
+            nodeQueue.push_back(comp);
+          }
+        }
+      }// while-end
+
+      // If we have reached here then the search failed
+      return boost::shared_ptr<const IComponent>();
+    }
+
+    /** Find all components in an Instrument Definition File (IDF) with a given name. If you know a component
+     *  has a unique name use instead getComponentByName(), which is as fast or faster for retrieving a uniquely
+     *  named component.
+     *  @param cname :: The name of the component. If there are multiple matches, the first one found is returned.
+     *  @returns Pointers to components
+     */
+    std::vector<boost::shared_ptr<IComponent> > Instrument::getAllComponentsWithName(const std::string & cname)
+    {
+      boost::shared_ptr<IComponent> node = boost::shared_ptr<IComponent>(this, NoDeleting());
+      std::vector<boost::shared_ptr<IComponent> > retVec;
+      // Check the instrument name first
+      if( this->getName() == cname )
+      {
+        retVec.push_back(node);
+      }
+      // Same algorithm as used in getComponentByName() but searching the full tree
+      std::deque<boost::shared_ptr<IComponent> > nodeQueue;
+      // Need to be able to enter the while loop
+      nodeQueue.push_back(node);
+      while( !nodeQueue.empty() )
+      {
+        node = nodeQueue.front();
+        nodeQueue.pop_front();
+        int nchildren(0);
+        boost::shared_ptr<ICompAssembly> asmb = boost::dynamic_pointer_cast<ICompAssembly>(node);
+        if( asmb )
+        {
+          nchildren = asmb->nelements();
+        }
+        for( int i = 0; i < nchildren; ++i )
+        {
+          boost::shared_ptr<IComponent> comp = (*asmb)[i];
+          if( comp->getName() == cname )
+          {
+            retVec.push_back(comp);
+          }
+          else
+          {
+            nodeQueue.push_back(comp);
+          }
+        }
+      }// while-end
+
+      // If we have reached here then the search failed
+      return retVec;
     }
 
     /**	Gets a pointer to the detector from its ID
@@ -231,7 +335,7 @@ namespace Mantid
     *  @returns A pointer to the detector object
     *  @throw   NotFoundError If no detector is found for the detector ID given
     */
-    Geometry::IDetector_sptr Instrument::getDetector(const detid_t &detector_id) const
+    IDetector_sptr Instrument::getDetector(const detid_t &detector_id) const
     {
       if (m_isParametrized)
       {
@@ -240,7 +344,7 @@ namespace Mantid
       }
       else
       {
-        std::map<detid_t, Geometry::IDetector_sptr >::const_iterator it = _detectorCache.find(detector_id);
+        std::map<detid_t, IDetector_sptr >::const_iterator it = _detectorCache.find(detector_id);
         if ( it == _detectorCache.end() )
         {
           g_log.debug() << "Detector with ID " << detector_id << " not found." << std::endl;
@@ -284,7 +388,7 @@ namespace Mantid
      */
     std::vector<IDetector_sptr> Instrument::getDetectors(const std::vector<detid_t> &det_ids) const
     {
-      std::vector<Geometry::IDetector_sptr> dets_ptr;
+      std::vector<IDetector_sptr> dets_ptr;
       dets_ptr.reserve(det_ids.size());
       std::vector<detid_t>::const_iterator it;
       for ( it = det_ids.begin(); it != det_ids.end(); ++it )
@@ -300,7 +404,7 @@ namespace Mantid
      */
     std::vector<IDetector_sptr> Instrument::getDetectors(const std::set<detid_t> &det_ids) const
     {
-      std::vector<Geometry::IDetector_sptr> dets_ptr;
+      std::vector<IDetector_sptr> dets_ptr;
       dets_ptr.reserve(det_ids.size());
       std::set<detid_t>::const_iterator it;
       for ( it = det_ids.begin(); it != det_ids.end(); ++it )
@@ -316,7 +420,7 @@ namespace Mantid
     *  @return A pointer to the detector object
     *  @throw   NotFoundError If no monitor is found for the detector ID given
     */
-    Geometry::IDetector_sptr Instrument::getMonitor(const int &detector_id)const
+    IDetector_sptr Instrument::getMonitor(const int &detector_id)const
     {
       //No parametrized monitors - I guess ....
 
@@ -329,7 +433,7 @@ namespace Mantid
         readInt << detector_id;
         throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + readInt.str() + " not found.","");
       }
-      Geometry::IDetector_sptr monitor=getDetector(detector_id);
+      IDetector_sptr monitor=getDetector(detector_id);
 
       return monitor;
     }
@@ -339,9 +443,9 @@ namespace Mantid
     * @param name :: the name of the object requested (case insensitive)
     * @returns a pointer to the component
     */
-    Geometry::IComponent* Instrument::getChild(const std::string& name) const
+    IComponent* Instrument::getChild(const std::string& name) const
     {
-      Geometry::IComponent *retVal = 0;
+      IComponent *retVal = 0;
       std::string searchName = name;
       std::transform(searchName.begin(), searchName.end(), searchName.begin(), toupper);
 
@@ -349,7 +453,7 @@ namespace Mantid
       for (int i = 0; i < noOfChildren; i++)
       {
         //The proper (parametrized or not) component will be returned by [i] operator.
-        Geometry::IComponent *loopPtr = (*this)[i].get();
+        IComponent *loopPtr = (*this)[i].get();
         std::string loopName = loopPtr->getName();
         std::transform(loopName.begin(), loopName.end(), loopName.begin(), toupper);
         if (loopName == searchName)
@@ -374,7 +478,7 @@ namespace Mantid
     *
     * @param comp :: Component to be marked (stored for later retrievel) as a "SamplePos" Component
     */
-    void Instrument::markAsSamplePos(Geometry::ObjComponent* comp)
+    void Instrument::markAsSamplePos(ObjComponent* comp)
     {
       if (m_isParametrized)
         throw std::runtime_error("Instrument::markAsSamplePos() called on a parametrized Instrument object.");
@@ -391,7 +495,7 @@ namespace Mantid
     *
     * @param comp :: Component to be marked (stored for later retrievel) as a "source" Component
     */
-    void Instrument::markAsSource(Geometry::ObjComponent* comp)
+    void Instrument::markAsSource(ObjComponent* comp)
     {
       if (m_isParametrized)
         throw std::runtime_error("Instrument::markAsSource() called on a parametrized Instrument object.");
@@ -408,14 +512,14 @@ namespace Mantid
     * @param det :: Component to be marked (stored for later retrievel) as a detector Component
     *
     */
-    void Instrument::markAsDetector(Geometry::IDetector* det)
+    void Instrument::markAsDetector(IDetector* det)
     {
       if (m_isParametrized)
         throw std::runtime_error("Instrument::markAsDetector() called on a parametrized Instrument object.");
 
       //Create a (non-deleting) shared pointer to it
-      Geometry::IDetector_sptr det_sptr = Geometry::IDetector_sptr(det, NoDeleting() );
-      if ( !_detectorCache.insert( std::map<int, Geometry::IDetector_sptr >::value_type(det->getID(), det_sptr) ).second )
+      IDetector_sptr det_sptr = IDetector_sptr(det, NoDeleting() );
+      if ( !_detectorCache.insert( std::map<int, IDetector_sptr >::value_type(det->getID(), det_sptr) ).second )
       {
         std::stringstream convert;
         convert << det->getID();
@@ -430,7 +534,7 @@ namespace Mantid
     *
     * @throw Exception::ExistsError if cannot add detector to cache
     */
-    void Instrument::markAsMonitor(Geometry::IDetector* det)
+    void Instrument::markAsMonitor(IDetector* det)
     {
       if (m_isParametrized)
         throw std::runtime_error("Instrument::markAsMonitor() called on a parametrized Instrument object.");
@@ -439,7 +543,7 @@ namespace Mantid
       markAsDetector(det);
 
       // mark detector as a monitor
-      Geometry::Detector *d = dynamic_cast<Geometry::Detector*>(det);
+      Detector *d = dynamic_cast<Detector*>(det);
       if (d)
       {
         d->markAsMonitor();
@@ -522,21 +626,21 @@ namespace Mantid
     }
 
 
-    IInstrument::plottables_const_sptr Instrument::getPlottable() const
+    boost::shared_ptr<const std::vector<IObjComponent_const_sptr> > Instrument::getPlottable() const
     {
       if (m_isParametrized)
       {
         // Get the 'base' plottable components
-        IInstrument::plottables_const_sptr objs = m_instr->getPlottable();
+        boost::shared_ptr<const std::vector<IObjComponent_const_sptr> > objs = m_instr->getPlottable();
 
         // Get a reference to the underlying vector, casting away the constness so that we
         // can modify it to get our result rather than creating another long vector
-        IInstrument::plottables & res = const_cast<IInstrument::plottables&>(*objs);
-        const plottables::size_type total = res.size();
-        for(plottables::size_type i = 0; i < total; ++i)
+        std::vector<IObjComponent_const_sptr> & res = const_cast<std::vector<IObjComponent_const_sptr>&>(*objs);
+        const std::vector<IObjComponent_const_sptr>::size_type total = res.size();
+        for(std::vector<IObjComponent_const_sptr>::size_type i = 0; i < total; ++i)
         {
-    res[i] = boost::dynamic_pointer_cast<const Detector>(
-      ParComponentFactory::create(objs->at(i), m_map));
+          res[i] = boost::dynamic_pointer_cast<const Detector>(
+              ParComponentFactory::create(objs->at(i), m_map));
         }
         return objs;
 
@@ -544,7 +648,7 @@ namespace Mantid
       else
       {
         // Base instrument
-        boost::shared_ptr<std::vector<Geometry::IObjComponent_const_sptr> > res( new std::vector<Geometry::IObjComponent_const_sptr> );
+        boost::shared_ptr<std::vector<IObjComponent_const_sptr> > res( new std::vector<IObjComponent_const_sptr> );
         res->reserve(_detectorCache.size()+10);
         appendPlottable(*this,*res);
         return res;
@@ -553,21 +657,21 @@ namespace Mantid
     }
 
 
-    void Instrument::appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_const_sptr>& lst) const
+    void Instrument::appendPlottable(const CompAssembly& ca,std::vector<IObjComponent_const_sptr>& lst) const
     {
       for(int i=0;i<ca.nelements();i++)
       {
-        Geometry::IComponent* c = ca[i].get();
-        Geometry::CompAssembly* a = dynamic_cast<Geometry::CompAssembly*>(c);
+        IComponent* c = ca[i].get();
+        CompAssembly* a = dynamic_cast<CompAssembly*>(c);
         if (a) appendPlottable(*a,lst);
         else
         {
-          Geometry::Detector* d = dynamic_cast<Geometry::Detector*>(c);
-          Geometry::ObjComponent* o = dynamic_cast<Geometry::ObjComponent*>(c);
+          Detector* d = dynamic_cast<Detector*>(c);
+          ObjComponent* o = dynamic_cast<ObjComponent*>(c);
           if (d)
-            lst.push_back(Geometry::IObjComponent_const_sptr(d,NoDeleting()));
+            lst.push_back(IObjComponent_const_sptr(d,NoDeleting()));
           else if (o)
-            lst.push_back(Geometry::IObjComponent_const_sptr(o,NoDeleting()));
+            lst.push_back(IObjComponent_const_sptr(o,NoDeleting()));
           else
             g_log.error()<<"Unknown comp type\n";
         }
@@ -609,7 +713,7 @@ namespace Mantid
                           const Kernel::V3D &beamline,
                           const double beamline_norm,
                           const Kernel::V3D &samplePos,
-                          const Geometry::IDetector_const_sptr &det,
+                          const IDetector_const_sptr &det,
                           const double offset,
                           bool vulcancorrection)
     {
@@ -647,7 +751,7 @@ namespace Mantid
                           const Kernel::V3D &beamline,
                           const double beamline_norm,
                           const Kernel::V3D &samplePos,
-                          const IInstrument_const_sptr &instrument,
+                          const Instrument_const_sptr &instrument,
                           const std::vector<detid_t> &detectors,
                           const std::map<detid_t,double> &offsets,
                           bool vulcancorrection)
@@ -685,7 +789,7 @@ namespace Mantid
         double & beamline_norm, Kernel::V3D & samplePos) const
     {
       // Get some positions
-      const Geometry::IObjComponent_sptr sourceObj = this->getSource();
+      const IObjComponent_sptr sourceObj = this->getSource();
       if (sourceObj == NULL)
       {
         throw Exception::InstrumentDefinitionError("Failed to get source component from instrument");
@@ -696,7 +800,7 @@ namespace Mantid
       beamline_norm=2.0*beamline.norm();
 
       // Get the distance between the source and the sample (assume in metres)
-      Geometry::IObjComponent_const_sptr sample = this->getSample();
+      IObjComponent_const_sptr sample = this->getSample();
       try
       {
         l1 = this->getSource()->getDistance(*sample);

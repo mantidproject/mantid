@@ -45,25 +45,25 @@ public:
   void test_That_Constructor_Throws_Invalid_Argument_On_Giving_A_Null_Instrument()
   {
     InstrumentRayTracer *rayTracker(NULL);
-    TS_ASSERT_THROWS(rayTracker = new InstrumentRayTracer(boost::shared_ptr<IInstrument>()), std::invalid_argument);
+    TS_ASSERT_THROWS(rayTracker = new InstrumentRayTracer(boost::shared_ptr<Instrument>()), std::invalid_argument);
   }
 
   void test_That_Constructor_Throws_Invalid_Argument_On_Giving_An_Instrument_With_No_Source()
   {
-    IInstrument_sptr testInst(new Instrument("empty"));
+    Instrument_sptr testInst(new Instrument("empty"));
     InstrumentRayTracer *rayTracker(NULL);
     TS_ASSERT_THROWS(rayTracker = new InstrumentRayTracer(testInst), std::invalid_argument);
   }
 
   void test_That_A_Trace_For_A_Ray_That_Intersects_Many_Components_Gives_These_Components_As_A_Result()
   {
-    IInstrument_sptr testInst = setupInstrument(); 
+    Instrument_sptr testInst = setupInstrument(); 
     InstrumentRayTracer tracker(testInst);
     tracker.trace(V3D(0.,0.,1));
     Links results = tracker.getResults();
     TS_ASSERT_EQUALS(results.size(), 2);
     // Check they are actually what we expect: 1 with the sample and 1 with the central detector
-    IComponent_sptr centralPixel = testInst->getComponentByName("pixel-(0,0)");
+    IComponent_const_sptr centralPixel = testInst->getComponentByName("pixel-(0,0)");
     IComponent_sptr sampleComp = testInst->getSample();
 
     if( !sampleComp )
@@ -112,14 +112,14 @@ public:
 
   void test_That_A_Ray_Which_Just_Intersects_One_Component_Gives_This_Component_Only()
   {
-    IInstrument_sptr testInst = setupInstrument(); 
+    Instrument_sptr testInst = setupInstrument(); 
     InstrumentRayTracer tracker(testInst);
     V3D testDir(0.010,0.0,15.004);
     tracker.trace(testDir);
     Links results = tracker.getResults();
     TS_ASSERT_EQUALS(results.size(), 1);
 
-    IComponent * interceptedPixel = testInst->getComponentByName("pixel-(1,0)").get();
+    const IComponent * interceptedPixel = testInst->getComponentByName("pixel-(1,0)").get();
 
     Link intersect = results.front();
     TS_ASSERT_DELTA(intersect.distFromStart, 15.003468, 1e-6);
@@ -149,7 +149,7 @@ public:
    * @param expectX :: expected x index, -1 if off
    * @param expectY :: expected y index, -1 if off
    */
-  void doTestRectangularDetector(std::string message, IInstrument_sptr inst, V3D testDir, int expectX, int expectY)
+  void doTestRectangularDetector(std::string message, Instrument_sptr inst, V3D testDir, int expectX, int expectY)
   {
 //    std::cout << message << std::endl;
     InstrumentRayTracer tracker(inst);
@@ -181,7 +181,7 @@ public:
 
   void test_RectangularDetector()
   {
-    IInstrument_sptr inst;
+    Instrument_sptr inst;
     inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
 
     // Towards the detector lower-left corner
@@ -205,7 +205,7 @@ public:
   }
 
 
-  static void showResults(Links & results, IInstrument_sptr inst)
+  static void showResults(Links & results, Instrument_sptr inst)
   {
     Links::const_iterator resultItr = results.begin();
     for (; resultItr != results.end(); resultItr++)
@@ -218,7 +218,7 @@ public:
 
 private:
   /// Setup the shared test instrument
-  IInstrument_sptr setupInstrument()
+  Instrument_sptr setupInstrument()
   {
     if( !m_testInst )
     {
@@ -230,7 +230,7 @@ private:
 
 private:
   /// Test instrument
-  IInstrument_sptr m_testInst;
+  Instrument_sptr m_testInst;
 };
 
 
@@ -247,7 +247,7 @@ class InstrumentRayTracerTestPerformance : public CxxTest::TestSuite
 {
 public:
   /// Test instrument
-  IInstrument_sptr m_inst;
+  Instrument_sptr m_inst;
   Workspace2D_sptr topazWS;
 
   // This pair of boilerplate methods prevent the suite being created statically
@@ -289,7 +289,7 @@ public:
   void test_TOPAZ()
   {
     bool verbose=false;
-    IInstrument_sptr inst = topazWS->getInstrument();
+    Instrument_sptr inst = topazWS->getInstrument();
     // Directly in Z+ = towards the detector center
     for (int azimuth=0; azimuth < 360; azimuth += 3)
       for (int elev=-89; elev < 89; elev += 3)

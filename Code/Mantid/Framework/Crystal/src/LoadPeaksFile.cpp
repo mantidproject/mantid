@@ -223,7 +223,7 @@ namespace Crystal
     lastStr = getWord( in , false );
 
     // Find the detector ID from row/col
-    IInstrument_const_sptr inst = outWS->getInstrument();
+    Instrument_const_sptr inst = outWS->getInstrument();
     if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace!");
     IComponent_const_sptr bank = inst->getComponentByName(bankName);
     if (!bank) throw std::runtime_error("Bank named " + bankName + " not found!");

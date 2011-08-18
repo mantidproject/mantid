@@ -48,7 +48,7 @@ namespace Mantid{
       return m_cells.size()*sizeof(MDCell) + m_points.size()*(2*sizeof(void*)+sizeof(MDPoint));
     } 
 
-    void  MDFitWorkspace::setInstrument(const IInstrument_sptr& instr)
+    void  MDFitWorkspace::setInstrument(const Instrument_sptr& instr)
     {
       boost::shared_ptr<Instrument> tmp = boost::dynamic_pointer_cast<Instrument>(instr);
       if (tmp->isParametrized())

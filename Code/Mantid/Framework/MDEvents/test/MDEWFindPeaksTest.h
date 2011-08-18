@@ -2,7 +2,6 @@
 #define MANTID_MDEVENTS_MDEWFINDPEAKSTEST_H_
 
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEWFindPeaks.h"
@@ -16,7 +15,7 @@
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using Mantid::Geometry::IInstrument_sptr;
+using Mantid::Geometry::Instrument_sptr;
 
 class MDEWFindPeaksTest : public CxxTest::TestSuite
 {
@@ -38,7 +37,7 @@ public:
         "OutputWorkspace", "MDEWS");
 
     // Give it an instrument
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 16);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 16);
     IMDEventWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("MDEWS")) );
     ExperimentInfo_sptr ei(new ExperimentInfo());

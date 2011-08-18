@@ -6,7 +6,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidGeometry/IInstrument.h"
 
 #include <queue>
 #include <fstream>
@@ -84,7 +83,7 @@ namespace Mantid
         throw std::invalid_argument("No InputWorkspace");
 
       //Get some stuff from the input workspace
-      IInstrument_sptr inst = inputW->getInstrument();
+      Instrument_sptr inst = inputW->getInstrument();
       std::string instname = inst->getName();
 
       // Check that the instrument is in store

@@ -94,7 +94,7 @@ namespace Mantid
       pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(true);
 
 
-      IInstrument_sptr inst = inputW->getInstrument();
+      Instrument_sptr inst = inputW->getInstrument();
       if (!inst)
         throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
     
@@ -322,7 +322,7 @@ void PeakIntegration::sumneighbours(std::string det_name, int x0, int y0, int Su
 {
 
   //Get some stuff from the input workspace
-  IInstrument_sptr inst = inputW->getInstrument();
+  Instrument_sptr inst = inputW->getInstrument();
   if (!inst)
     throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
 
@@ -545,7 +545,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
   // Number of slices
   int TOFmax = 0;
   //Get some stuff from the input workspace
-  IInstrument_sptr inst = inputW->getInstrument();
+  Instrument_sptr inst = inputW->getInstrument();
   if (!inst)
     throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
 

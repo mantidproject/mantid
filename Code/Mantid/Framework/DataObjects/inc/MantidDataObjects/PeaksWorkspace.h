@@ -11,7 +11,7 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakColumn.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
@@ -75,7 +75,7 @@ namespace DataObjects
 
     boost::shared_ptr<PeaksWorkspace> clone();
 
-    void appendFile( std::string filename, Mantid::Geometry::IInstrument_sptr inst);
+    void appendFile( std::string filename, Geometry::Instrument_sptr inst);
 
     //---------------------------------------------------------------------------------------------
     /** @return the number of peaks
@@ -130,8 +130,7 @@ namespace DataObjects
      */
     API::IPeak* createPeak(Kernel::V3D QLabFrame, double detectorDistance=1.0)
     {
-      Mantid::Geometry::IInstrument_const_sptr inst = this->getInstrument();
-      return new Peak(inst, QLabFrame, detectorDistance);
+      return new Peak(this->getInstrument(), QLabFrame, detectorDistance);
     }
 
     //---------------------------------------------------------------------------------------------

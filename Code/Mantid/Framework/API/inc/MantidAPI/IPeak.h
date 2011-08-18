@@ -2,12 +2,10 @@
 #define MANTID_API_IPEAK_H_
     
 #include "MantidAPI/DllConfig.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
-//#include "MantidKernel/System.h"
-
 
 namespace Mantid
 {
@@ -25,12 +23,12 @@ namespace API
 
     virtual ~IPeak();
 
-    virtual void setInstrument(Mantid::Geometry::IInstrument_const_sptr inst) = 0;
+    virtual void setInstrument(Geometry::Instrument_const_sptr inst) = 0;
 
     virtual int getDetectorID() const = 0;
     virtual void setDetectorID(int m_DetectorID) = 0;
-    virtual Mantid::Geometry::IDetector_const_sptr getDetector() const = 0;
-    virtual Mantid::Geometry::IInstrument_const_sptr getInstrument() const = 0;
+    virtual Geometry::IDetector_const_sptr getDetector() const = 0;
+    virtual Geometry::Instrument_const_sptr getInstrument() const = 0;
 
     virtual int getRunNumber() const = 0;
     virtual void setRunNumber(int m_RunNumber) = 0;

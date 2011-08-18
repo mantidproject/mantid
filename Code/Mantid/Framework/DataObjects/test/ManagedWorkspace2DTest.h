@@ -296,6 +296,48 @@ public:
     }
   }
 
+  void testPadding()
+  {
+    std::cout << "Start!!!!" << std::endl;
+
+    // This will make sure 1 ManagedDataBlock = 1 Vector
+    Mantid::Kernel::ConfigServiceImpl& conf = Mantid::Kernel::ConfigService::Instance();
+    const std::string blocksize = "ManagedWorkspace.DataBlockSize";
+    const std::string oldValue = conf.getString(blocksize);
+    conf.setString(blocksize,"1");
+
+    Mantid::DataObjects::ManagedWorkspace2D ws;
+    ws.initialize(111,10,9);
+
+    MantidVec fours(10,4.0);
+    MantidVec fives(9,5.0);
+    MantidVec sixes(9,6.0);
+    for ( std::size_t i = 10; i < ws.getNumberHistograms(); ++i )
+    {
+      ws.dataX(i) = fours;
+      ws.dataY(i) = fives;
+      ws.dataE(i) = sixes;
+    }
+
+    // Get back a block that should have gone out to disk and check its values
+    MantidVec xvals = ws.dataX(10);
+    MantidVec yvals = ws.dataY(10);
+    MantidVec evals = ws.dataE(10);
+    TS_ASSERT_EQUALS( xvals.size(), 10 );
+    TS_ASSERT_EQUALS( yvals.size(), 9 );
+    TS_ASSERT_EQUALS( evals.size(), 9 );
+    for ( std::size_t j = 0; j < 9; ++j )
+    {
+      TS_ASSERT_EQUALS( xvals[j], 4.0 );
+      TS_ASSERT_EQUALS( yvals[j], 5.0 );
+      TS_ASSERT_EQUALS( evals[j], 6.0 );
+    }
+    TS_ASSERT_EQUALS( xvals.back(), 4.0 );
+
+    conf.setString(blocksize,oldValue);
+    std::cout << "End!!!!" << std::endl;
+  }
+
   void testDestructor()
   {
     std::string filename;
@@ -330,13 +372,12 @@ public:
 
   ManagedWorkspace2DTestPerformance()
   {
-    // Try to make the input workspace NOT managed if you can help it
+    // Make sure the input workspace is NOT managed
     Mantid::Kernel::ConfigServiceImpl& conf = Mantid::Kernel::ConfigService::Instance();
-    conf.setString("ManagedWorkspace.LowerMemoryLimit","90");
-    // 1 MB block size
-    conf.setString("ManagedWorkspace.DataBlockSize", "1000000");
+    conf.setString("ManagedWorkspace.AlwaysInMemory","1");
     // Workspace should use up around 800 MB of memory
     inWS = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D",7000,5000,5000);
+    conf.setString("ManagedWorkspace.AlwaysInMemory","0");
   }
 
   // This should take ~no time (nothing should be written to disk)
@@ -350,6 +391,8 @@ public:
     const std::string managed2 = "ManagedRawFileWorkspace.DoNotUse";
     const std::string oldValue2 = conf.getString(managed2);
     conf.setString(managed2,"0");
+    // 1 MB block size
+    conf.setString("ManagedWorkspace.DataBlockSize", "1000000");
 
     Mantid::Kernel::MemoryStats stats;
     stats.update();

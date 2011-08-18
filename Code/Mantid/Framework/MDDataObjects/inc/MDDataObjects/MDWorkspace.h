@@ -8,7 +8,7 @@
 #include "MDDataObjects/IMD_FileFormat.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDDimension.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 
 
 /** MD-workspace -> main class which keeps all data objects necessary for work with 
@@ -174,7 +174,7 @@ namespace Mantid
       /// Get the geometry xml.
       virtual std::string getGeometryXML() const;
 
-      void setInstrument(const Mantid::Geometry::IInstrument_sptr& instr);
+      void setInstrument(const Geometry::Instrument_sptr& instr);
 
       /// Creates a new iterator pointing to the first cell in the workspace
       Mantid::API::IMDIterator* createIterator() const;

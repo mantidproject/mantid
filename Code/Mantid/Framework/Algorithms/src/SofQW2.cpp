@@ -242,7 +242,7 @@ namespace Mantid
         (PhysicalConstants::h*PhysicalConstants::h);
 
       // Get a pointer to the instrument contained in the workspace
-      Geometry::IInstrument_const_sptr instrument = workspace->getInstrument();
+      Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
       // Get the distance between the source and the sample (assume in metres)
       Geometry::IObjComponent_const_sptr source = instrument->getSource();
       Geometry::IObjComponent_const_sptr sample = instrument->getSample();

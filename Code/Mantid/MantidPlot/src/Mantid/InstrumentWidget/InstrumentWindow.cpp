@@ -184,7 +184,7 @@ void InstrumentWindow::setSurfaceType(int type)
     QApplication::setOverrideCursor(Qt::WaitCursor);
     m_surfaceType = SurfaceType(type);
     if (!m_instrumentActor) return;
-    boost::shared_ptr<Mantid::Geometry::IInstrument> instr = m_workspace->getInstrument();
+    Mantid::Geometry::Instrument_const_sptr instr = m_workspace->getInstrument();
     Mantid::Geometry::IObjComponent_sptr sample = instr->getSample();
     Mantid::Kernel::V3D sample_pos = sample->getPos();
     Mantid::Kernel::V3D axis;

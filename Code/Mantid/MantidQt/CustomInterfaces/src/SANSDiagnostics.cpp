@@ -366,7 +366,7 @@ namespace MantidQt
       {
         return std::vector<boost::shared_ptr<RectDetectorDetails> > ();
       }
-      Mantid::Geometry::IInstrument_sptr inst=mws_sptr->getInstrument();
+      Mantid::Geometry::Instrument_const_sptr inst=mws_sptr->getInstrument();
       if(!inst)
       {       
         return std::vector<boost::shared_ptr<RectDetectorDetails> > ();

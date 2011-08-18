@@ -6,13 +6,13 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Detector.h"
 
 using Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::Geometry::IInstrument_sptr;
+using Mantid::Geometry::Instrument_sptr;
 
 class CreatePSDBleedMaskTest : public CxxTest::TestSuite
 {
@@ -113,9 +113,8 @@ private:
     return testWS;
   }
 
-  Mantid::Geometry::IInstrument_sptr createTestInstrument(const int nTubes = 3, const int nPixelsPerTube = 50)
+  Mantid::Geometry::Instrument_sptr createTestInstrument(const int nTubes = 3, const int nPixelsPerTube = 50)
   {
-    using Mantid::Geometry::IInstrument;
     using Mantid::Geometry::Instrument_sptr;
     using Mantid::Geometry::Instrument;
     using Mantid::Geometry::CompAssembly;

@@ -5,7 +5,7 @@
 #endif
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/ICompAssembly.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "GLActor.h"
 #include <queue>

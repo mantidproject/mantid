@@ -5,7 +5,7 @@
 // Includes
 //-------------------------------------------------------------
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include <deque>
 #include <list>
@@ -58,7 +58,7 @@ namespace Mantid
     public:
 
       /// Constructor taking an instrument
-      InstrumentRayTracer(IInstrument_sptr instrument);
+      InstrumentRayTracer(Instrument_sptr instrument);
       /// Trace a given track from the instrument source in the given direction 
       /// and compile a list of results that this track intersects.
       void trace(const Kernel::V3D & direction) const;
@@ -76,7 +76,7 @@ namespace Mantid
       void fireRay(Track & testRay, bool checkInstrumentBB = true) const;
 
       /// Pointer to the instrument
-      IInstrument_sptr m_instrument;
+      Instrument_sptr m_instrument;
       /// Accumulate results in this Track object, aids performance. This is cleared when getResults is called.
       mutable Track m_resultsTrack;
       /// Logger

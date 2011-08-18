@@ -5,12 +5,11 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/System.h"
 #include <fstream>
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 
-using Mantid::Geometry::IInstrument_sptr;
+using Mantid::Geometry::Instrument_sptr;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -73,7 +72,7 @@ namespace DataHandling
   /** Get a pointer to an instrument in one of 3 ways: InputWorkspace, InstrumentName, InstrumentFilename
    * @param alg :: algorithm from which to get the property values.
    * */
-  Mantid::Geometry::IInstrument_sptr LoadCalFile::getInstrument3Ways(Algorithm * alg)
+  Geometry::Instrument_sptr LoadCalFile::getInstrument3Ways(Algorithm * alg)
   {
     MatrixWorkspace_sptr inWS = alg->getProperty("InputWorkspace");
     std::string InputWorkspace = alg->getPropertyValue("InputWorkspace");
@@ -92,7 +91,7 @@ namespace DataHandling
       throw std::invalid_argument("You must specify exactly ONE way to get an instrument (workspace, instrument name, or IDF file). You specified none.");
 
     // ---------- Get the instrument one of 3 ways ---------------------------
-    IInstrument_sptr inst;
+    Instrument_sptr inst;
     if (inWS)
     {
       inst = inWS->getInstrument();
@@ -150,7 +149,7 @@ namespace DataHandling
     if (WorkspaceName.empty())
       throw std::invalid_argument("Must specify WorkspaceName.");
 
-    IInstrument_sptr inst = LoadCalFile::getInstrument3Ways(this);
+    Instrument_sptr inst = LoadCalFile::getInstrument3Ways(this);
 
     GroupingWorkspace_sptr groupWS;
     OffsetsWorkspace_sptr offsetsWS;

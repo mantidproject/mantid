@@ -4,7 +4,6 @@
 #include "MantidDataHandling/SaveDspacemap.h"
 #include "MantidDataHandling/LoadDspacemap.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -16,7 +15,7 @@
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using Mantid::Geometry::IInstrument_sptr;
+using Mantid::Geometry::Instrument_sptr;
 
 class SaveDspacemapTest : public CxxTest::TestSuite
 {
@@ -41,7 +40,7 @@ public:
     // Name of the output workspace.
     std::string filename("./SaveDspacemapTest_Output.dat");
 
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     OffsetsWorkspace_sptr offsetsWS(new OffsetsWorkspace(inst));
     offsetsWS->setValue(1,0.10);
     offsetsWS->setValue(2,0.20);
@@ -84,7 +83,7 @@ public:
   {
     std::string filename("./SaveDspacemapTest_Output.dat");
 
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     OffsetsWorkspace_sptr offsetsWS(new OffsetsWorkspace(inst));
     offsetsWS->setValue(1,0.10);
     offsetsWS->setValue(2,0.20);

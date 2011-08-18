@@ -2,7 +2,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 // Nearest neighbours library
@@ -18,10 +18,10 @@ namespace Mantid
 
     /**
      * Constructor
-     * @param instrument :: A shared pointer to IInstrument object
+     * @param instrument :: A shared pointer to Instrument object
      * @param spectraMap :: A reference to the spectra-detector mapping
      */
-    NearestNeighbours::NearestNeighbours(IInstrument_const_sptr instrument,
+    NearestNeighbours::NearestNeighbours(Instrument_const_sptr instrument,
                                          const ISpectraDetectorMap & spectraMap) : 
       m_instrument(instrument), m_spectraMap(spectraMap), m_noNeighbours(8), m_cutoff(-DBL_MAX), m_scale()
     {
@@ -221,7 +221,7 @@ namespace Mantid
      * @returns A map of spectra number to detector pointer
      */
     std::map<specid_t, IDetector_sptr>
-    NearestNeighbours::getSpectraDetectors(IInstrument_const_sptr instrument, 
+    NearestNeighbours::getSpectraDetectors(Instrument_const_sptr instrument,
                                            const ISpectraDetectorMap & spectraMap)
     {
       std::map<specid_t, IDetector_sptr> spectra;

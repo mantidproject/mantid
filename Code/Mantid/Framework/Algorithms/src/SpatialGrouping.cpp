@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SpatialGrouping.h"
 
-#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/ISpectraDetectorMap.h"

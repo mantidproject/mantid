@@ -2,7 +2,6 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -146,7 +145,7 @@ namespace Crystal
         V3D beamNormalized = beam;
         beamNormalized.normalize();
         tracker.traceFromSample(beamNormalized);
-        IDetector_sptr det = tracker.getDetectorResult();
+        IDetector_const_sptr det = tracker.getDetectorResult();
         if (det)
         {
           // Create the peak

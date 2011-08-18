@@ -96,7 +96,7 @@ namespace DataHandling
       std::map<int,double> scaleMap;
       std::map<int,double>::iterator its;
 
-      IInstrument_const_sptr instrument = m_workspace->getInstrument();
+      Instrument_const_sptr instrument = m_workspace->getInstrument();
       if(scalingFile.find(".sca")!=std::string::npos || scalingFile.find(".SCA")!=std::string::npos)
       {
           // read a .sca text format file
@@ -275,7 +275,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Kernel::
   *   @param scaleMap :: A map of integer detectorID and corresponding scaling (in Y)
   */
   std::map<int,Kernel::V3D>::iterator iter = posMap.begin();
-  boost::shared_ptr<IInstrument> inst = WS->getInstrument();
+  boost::shared_ptr<Instrument> inst = WS->getInstrument();
   boost::shared_ptr<IComponent> comp;
 
   // Want to get all the detectors to move, but don't want to do this one at a time

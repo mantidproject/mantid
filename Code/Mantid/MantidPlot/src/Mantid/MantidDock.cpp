@@ -535,7 +535,7 @@ void MantidDockWidget::populateExperimentInfoData(Mantid::API::ExperimentInfo_sp
   std::string s;
   std::ostringstream out;
 
-  IInstrument_sptr inst = workspace->getInstrument();
+  Instrument_const_sptr inst = workspace->getInstrument();
   out << "Instrument: " << inst->getName() << " ("
       << inst->getValidFromDate().to_string("%Y-%b-%d")
       << " to " << inst->getValidToDate().to_string("%Y-%b-%d") << ")";

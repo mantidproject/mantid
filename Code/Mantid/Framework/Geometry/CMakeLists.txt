@@ -4,7 +4,7 @@ set ( SRC_FILES
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/UnitCell.cpp
 	src/IDetector.cpp
-	src/IInstrument.cpp
+  src/Instrument.cpp
 	src/IObjComponent.cpp
 	src/Instrument/CompAssembly.cpp
 	src/Instrument/Component.cpp
@@ -12,7 +12,6 @@ set ( SRC_FILES
 	src/Instrument/DetectorGroup.cpp
 	src/Instrument/FitParameter.cpp
 	src/Instrument/Goniometer.cpp
-	src/Instrument/Instrument.cpp
 	src/Instrument/NearestNeighbours.cpp
 	src/Instrument/ObjCompAssembly.cpp
 	src/Instrument/ObjComponent.cpp
@@ -22,7 +21,6 @@ set ( SRC_FILES
 	src/Instrument/ParameterMap.cpp
 	src/Instrument/RectangularDetector.cpp
 	src/Instrument/XMLlogfile.cpp
-	src/InstrumentRayTracer.cpp
 	src/MDGeometry/Coordinate.cpp
 	src/MDGeometry/IMDDimension.cpp
 	src/MDGeometry/IMDDimensionFactory.cpp
@@ -55,6 +53,7 @@ set ( SRC_FILES
 	src/Math/Vertex2DList.cpp
 	src/Math/mathSupport.cpp
 	src/Objects/BoundingBox.cpp
+  src/Objects/InstrumentRayTracer.cpp
 	src/Objects/Material.cpp
 	src/Objects/Object.cpp
 	src/Objects/RuleItems.cpp
@@ -101,7 +100,7 @@ set ( INC_FILES
 	inc/MantidGeometry/ICompAssembly.h
 	inc/MantidGeometry/IComponent.h
 	inc/MantidGeometry/IDetector.h
-	inc/MantidGeometry/IInstrument.h
+  inc/MantidGeometry/Instrument.h
 	inc/MantidGeometry/IObjComponent.h
 	inc/MantidGeometry/ISpectraDetectorMap.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
@@ -110,7 +109,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/DetectorGroup.h
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
-	inc/MantidGeometry/Instrument/Instrument.h
 	inc/MantidGeometry/Instrument/NearestNeighbours.h
 	inc/MantidGeometry/Instrument/ObjCompAssembly.h
 	inc/MantidGeometry/Instrument/ObjComponent.h

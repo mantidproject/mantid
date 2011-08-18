@@ -18,7 +18,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/Run.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/V3D.h"
@@ -2103,7 +2102,7 @@ void MuonAnalysis::setDummyGrouping(const int numDetectors)
  */
 void MuonAnalysis::setGroupingFromIDF(const std::string& mainFieldDirection, MatrixWorkspace_sptr matrix_workspace)
 {
-  IInstrument_sptr inst = matrix_workspace->getInstrument();
+  Instrument_const_sptr inst = matrix_workspace->getInstrument();
 
   QString instname = m_uiForm.instrSelector->currentText().toUpper();
 

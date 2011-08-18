@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include <iostream>
 

@@ -117,7 +117,7 @@ namespace Mantid
       int WriteAttributes (int is_definition);
       int copy_file(const char* inFile, int nx_read_access, const char* outFile, int nx_write_access);
 
-      int WriteOutDataOrErrors(boost::shared_ptr<Mantid::Geometry::RectangularDetector> det,
+      int WriteOutDataOrErrors(Geometry::RectangularDetector_const_sptr det,
           int x_pixel_slab,
           const char * field_name, const char * errors_field_name,
           bool doErrors, bool doBoth, int is_definition,

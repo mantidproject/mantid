@@ -60,7 +60,7 @@ std::map<detid_t, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API
                                   bool vulcancorrection)
 {
   // Get a pointer to the instrument contained in the workspace
-  IInstrument_const_sptr instrument = inputWS->getInstrument();
+  Instrument_const_sptr instrument = inputWS->getInstrument();
 
   double l1;
   Kernel::V3D beamline,samplePos;

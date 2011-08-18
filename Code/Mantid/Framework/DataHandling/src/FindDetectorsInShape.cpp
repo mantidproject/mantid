@@ -68,7 +68,7 @@ void FindDetectorsInShape::initDocs()
 			boost::shared_ptr<Geometry::Object> shape_sptr = sFactory.createShape(shapeXML);
 
 			//get the instrument out of the workspace
-			IInstrument_sptr instrument_sptr = WS->getInstrument();
+			Instrument_const_sptr instrument_sptr = WS->getInstrument();
 
       //To get all the detector ID's
       detid2det_map allDetectors;

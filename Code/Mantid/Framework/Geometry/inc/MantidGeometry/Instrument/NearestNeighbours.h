@@ -24,7 +24,7 @@ namespace Mantid
     //------------------------------------------------------------------------------
     // Forward Declarations
     //------------------------------------------------------------------------------
-    class IInstrument;
+    class Instrument;
     class IComponent;
     class ISpectraDetectorMap;
 
@@ -70,7 +70,7 @@ namespace Mantid
     {
     public:
       /// Constructor with an instrument and a spectra map
-      NearestNeighbours(boost::shared_ptr<const IInstrument> instrument,
+      NearestNeighbours(boost::shared_ptr<const Instrument> instrument,
                         const ISpectraDetectorMap & spectraMap);
       /// Default (empty) destructor
       virtual ~NearestNeighbours() {};
@@ -97,11 +97,11 @@ namespace Mantid
 
       /// Get the spectra associated with all in the instrument
       std::map<specid_t, IDetector_sptr> 
-        getSpectraDetectors(boost::shared_ptr<const IInstrument> instrument, 
+        getSpectraDetectors(boost::shared_ptr<const Instrument> instrument,
                             const ISpectraDetectorMap & spectraMap);
 
       /// A pointer the the instrument
-      boost::shared_ptr<const IInstrument> m_instrument;
+      boost::shared_ptr<const Instrument> m_instrument;
       /// A reference to the spectra map
       const ISpectraDetectorMap & m_spectraMap;
       /// The current number of nearest neighbours

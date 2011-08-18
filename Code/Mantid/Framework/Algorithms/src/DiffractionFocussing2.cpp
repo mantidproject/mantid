@@ -391,7 +391,7 @@ void DiffractionFocussing2::execEvent()
     // ------------- Pre-allocate Event Lists ----------------------------
     std::vector< std::vector<int> > ws_indices(nGroups+1);
     std::vector<size_t> size_required(nGroups+1,0);
-    Geometry::IInstrument_const_sptr instrument = eventW->getInstrument();
+    Geometry::Instrument_const_sptr instrument = eventW->getInstrument();
     Geometry::IObjComponent_const_sptr source;
     Geometry::IObjComponent_const_sptr sample;
     if (instrument != NULL)

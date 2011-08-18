@@ -4,12 +4,11 @@
 #include "RectangularDetectorActor.h"
 #include "OpenGLError.h"
 
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
-//#include "MantidGeometry/Instrument/ParObjCompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -17,12 +16,11 @@
 
 #include <cfloat>
 
-using Mantid::Geometry::IInstrument;
+using Mantid::Geometry::Instrument;
 using Mantid::Geometry::IComponent;
 using Mantid::Geometry::IObjComponent;
 using Mantid::Geometry::ICompAssembly;
 using Mantid::Geometry::ObjCompAssembly;
-//using Mantid::Geometry::ParObjCompAssembly;
 using Mantid::Geometry::ComponentID;
 using Mantid::Geometry::RectangularDetector;
 using Mantid::Geometry::RectangularDetector;

@@ -33,7 +33,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/Coordinate.h"
 #include "MantidGeometry/DllConfig.h"
 #include <vector>
@@ -59,19 +59,19 @@ namespace Mantid
     private:
       signal_t m_signal;
       signal_t m_error;
-      IInstrument_sptr m_instrument;
+      Instrument_sptr m_instrument;
       IDetector_sptr m_detector;
       std::vector<Coordinate> m_vertexes;
       int m_runId;
     public:
       MDPoint(){};
-      MDPoint(signal_t signal, signal_t error, const std::vector<Coordinate>& vertexes, IDetector_sptr detector, IInstrument_sptr instrument,
+      MDPoint(signal_t signal, signal_t error, const std::vector<Coordinate>& vertexes, IDetector_sptr detector, Instrument_sptr instrument,
           const int runId = 0);
       std::vector<Coordinate> getVertexes() const;
       signal_t getSignal() const;
       signal_t getError() const;
       IDetector_sptr getDetector() const;
-      IInstrument_sptr getInstrument() const;
+      Instrument_sptr getInstrument() const;
       int getRunId() const;
       virtual ~MDPoint();
       std::vector<boost::shared_ptr<MDPoint> > getContributingPoints() const;

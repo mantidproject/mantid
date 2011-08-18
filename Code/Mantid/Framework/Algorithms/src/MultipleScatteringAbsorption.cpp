@@ -85,7 +85,7 @@ void MultipleScatteringAbsorption::exec()
 
   // geometry stuff
   size_t nHist = in_WS->getNumberHistograms();
-  Geometry::IInstrument_const_sptr instrument = in_WS->getInstrument();
+  Geometry::Instrument_const_sptr instrument = in_WS->getInstrument();
   if (instrument == NULL)
     throw std::runtime_error("Failed to find instrument attached to InputWorkspace");
   Geometry::IObjComponent_const_sptr source = instrument->getSource();

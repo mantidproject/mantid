@@ -1,11 +1,25 @@
 #ifndef INSTRUMENTTREEWIDGET_H
 #define INSTRUMENTTREEWIDGET_H
 
+//---------------------------------------
+// Includes
+//--------------------------------------
 #include <QTreeView>
 #include "InstrumentTreeModel.h"
 #include "MantidGeometry/IComponent.h"
 
+//---------------------------------------
+// Forward declarations
+//--------------------------------------
 class InstrumentActor;
+
+namespace Mantid
+{
+  namespace Geometry
+  {
+    class Instrument;
+  }
+}
 
 /** The InstrumentTreeWidget is a tree view
  * of the components of an instrument.
@@ -29,7 +43,7 @@ signals:
 private:
   InstrumentActor* m_instrActor;
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
-  boost::shared_ptr<const Mantid::Geometry::IInstrument> m_instrument;
+  boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
   InstrumentTreeModel *m_treeModel;
 };
 

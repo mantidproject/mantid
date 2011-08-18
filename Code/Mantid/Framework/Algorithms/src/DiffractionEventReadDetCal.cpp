@@ -106,7 +106,7 @@ namespace Algorithms
     MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
 
     //Get some stuff from the input workspace
-    IInstrument_sptr inst = inputW->getInstrument();
+    Instrument_sptr inst = inputW->getInstrument();
     if (!inst)
       throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
     std::string instname = inst->getName();
@@ -245,7 +245,7 @@ namespace Algorithms
         Quat Rot = Q2 * Q1;
 
         // Then find the corresponding relative position
-        boost::shared_ptr<IComponent> comp = inst->getComponentByName(detname);
+        boost::shared_ptr<const IComponent> comp = inst->getComponentByName(detname);
         boost::shared_ptr<const IComponent> parent = comp->getParent();
         if (parent)
         {

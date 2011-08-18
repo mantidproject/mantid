@@ -5,7 +5,6 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -34,7 +33,7 @@ public:
   
   void do_test(int numRuns, size_t numBanks, size_t numPeaksPerBank)
   {
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(4, 10, 1.0);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(4, 10, 1.0);
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
     ws->setInstrument(inst);
 

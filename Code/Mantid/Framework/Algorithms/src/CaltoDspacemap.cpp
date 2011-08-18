@@ -8,7 +8,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -36,7 +36,6 @@ void CaltoDspacemap::initDocs()
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
-using Geometry::IInstrument_const_sptr;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;

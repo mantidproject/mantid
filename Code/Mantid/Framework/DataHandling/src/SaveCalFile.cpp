@@ -2,7 +2,6 @@
 #include "MantidDataHandling/SaveCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/System.h"
 #include <cmath>
 #include <fstream>
@@ -89,7 +88,7 @@ namespace DataHandling
   void SaveCalFile::saveCalFile(const std::string& calFileName,
       GroupingWorkspace_sptr groupWS, OffsetsWorkspace_sptr offsetsWS, MatrixWorkspace_sptr maskWS)
   {
-    IInstrument_sptr inst;
+    Instrument_sptr inst;
 
     bool doGroup = false;
     if (groupWS) { doGroup = true; inst = groupWS->getInstrument(); }

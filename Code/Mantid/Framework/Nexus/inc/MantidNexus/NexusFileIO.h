@@ -98,7 +98,7 @@ namespace Mantid
       bool writeNexusInstrumentXmlName(const std::string& instrumentXml,const std::string& date,
                             const std::string& version) const;
       /// write an instrument section - currently only the name
-      bool writeNexusInstrument(const Geometry::IInstrument_const_sptr& instrument) const;
+      bool writeNexusInstrument(const Geometry::Instrument_const_sptr& instrument) const;
       /// write any spectra map information to Nexus file
       bool writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localWorkspace, const std::vector<int>& spec) const;
      /// write instrument parameters

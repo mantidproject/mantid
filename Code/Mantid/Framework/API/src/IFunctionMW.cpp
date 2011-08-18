@@ -268,7 +268,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
     // the detector returned by det->getID()
     if ( boost::dynamic_pointer_cast<Geometry::DetectorGroup>(det) )
     {
-      IInstrument_sptr inst = m_workspace->getInstrument();
+      Instrument_sptr inst = m_workspace->getInstrument();
       det = inst->getDetector(det->getID());
     }
 
@@ -436,7 +436,7 @@ double IFunctionMW::convertValue(double value, Kernel::Unit_sptr& outUnit,
       double l1,l2,twoTheta;
 
       // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
-      IInstrument_const_sptr instrument = ws->getInstrument();
+      Instrument_const_sptr instrument = ws->getInstrument();
       Geometry::IObjComponent_const_sptr sample = instrument->getSample();
       if (sample == NULL)
       {
@@ -498,7 +498,7 @@ void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& o
       double l1,l2,twoTheta;
 
       // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
-      IInstrument_const_sptr instrument = ws->getInstrument();
+      Instrument_const_sptr instrument = ws->getInstrument();
       Geometry::IObjComponent_const_sptr sample = instrument->getSample();
       if (sample == NULL)
       {

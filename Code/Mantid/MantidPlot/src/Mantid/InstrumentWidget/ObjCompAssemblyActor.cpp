@@ -3,14 +3,12 @@
 #include "InstrumentActor.h"
 #include "OpenGLError.h"
 
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
-//#include "MantidGeometry/Instrument/ParObjCompAssembly.h"
 #include "MantidKernel/Exception.h"
 #include <cfloat>
 using namespace Mantid;

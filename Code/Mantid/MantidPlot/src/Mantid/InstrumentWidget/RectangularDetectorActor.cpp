@@ -3,7 +3,6 @@
 #include "RectangularDetectorActor.h"
 #include "InstrumentActor.h"
 
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/BoundingBox.h"

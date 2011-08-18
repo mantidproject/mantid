@@ -98,7 +98,7 @@ bool InstrumentActor::accept(const GLActorVisitor& visitor)
   return ok;
 }
 
-boost::shared_ptr<const Mantid::Geometry::IInstrument> InstrumentActor::getInstrument()const
+boost::shared_ptr<const Mantid::Geometry::Instrument> InstrumentActor::getInstrument()const
 {
   return m_workspace->getInstrument();
 }

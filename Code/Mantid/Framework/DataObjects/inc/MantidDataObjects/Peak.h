@@ -2,7 +2,7 @@
 #define MANTID_DATAOBJECTS_PEAK_H_
 
 #include "MantidAPI/IPeak.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -25,23 +25,23 @@ namespace DataObjects
     /// Allow PeakColumn class to directly access members.
     friend class PeakColumn;
 
-    Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, Mantid::Kernel::V3D QLabFrame, double detectorDistance=1.0);
-    Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, Mantid::Kernel::V3D QSampleFrame, Mantid::Kernel::Matrix<double> goniometer, double detectorDistance=1.0);
-    Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength);
-    Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Kernel::V3D HKL);
-    Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Kernel::V3D HKL, Mantid::Kernel::Matrix<double> goniometer);
+    Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QLabFrame, double detectorDistance=1.0);
+    Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QSampleFrame, Mantid::Kernel::Matrix<double> goniometer, double detectorDistance=1.0);
+    Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength);
+    Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Kernel::V3D HKL);
+    Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Kernel::V3D HKL, Mantid::Kernel::Matrix<double> goniometer);
 
     // Copy constructor is compiler-provided.
     Peak(const Peak & other);
     Peak(const API::IPeak & ipeak);
     virtual ~Peak();
 
-    void setInstrument(Mantid::Geometry::IInstrument_const_sptr inst);
+    void setInstrument(Geometry::Instrument_const_sptr inst);
 
     int getDetectorID() const;
     void setDetectorID(int m_DetectorID);
-    Mantid::Geometry::IDetector_const_sptr getDetector() const;
-    Mantid::Geometry::IInstrument_const_sptr getInstrument() const;
+    Geometry::IDetector_const_sptr getDetector() const;
+    Geometry::Instrument_const_sptr getInstrument() const;
 
     bool findDetector();
 
@@ -96,10 +96,10 @@ namespace DataObjects
 
   protected:
     /// Shared pointer to the instrument (for calculating some values )
-    Mantid::Geometry::IInstrument_const_sptr m_inst;
+    Geometry::Instrument_const_sptr m_inst;
 
     /// Detector pointed to
-    Mantid::Geometry::IDetector_const_sptr m_det;
+    Geometry::IDetector_const_sptr m_det;
 
     /// Name of the parent bank
     std::string m_BankName;

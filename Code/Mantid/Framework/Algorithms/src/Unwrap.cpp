@@ -10,10 +10,6 @@ namespace Algorithms
 
 DECLARE_ALGORITHM(Unwrap)
 
-using namespace Kernel;
-using namespace API;
-using Geometry::IInstrument_const_sptr;
-
 /// Default constructor
 Unwrap::Unwrap()
 {

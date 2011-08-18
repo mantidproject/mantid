@@ -35,7 +35,7 @@ public:
   void test_constructor_from_Instrument()
   {
     // Fake instrument with 5*9 pixels with ID starting at 1
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D(inst));
 
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 45);
@@ -50,7 +50,7 @@ public:
 
   void test_setValue_getValue()
   {
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D(inst));
 
     TS_ASSERT_DIFFERS( ws->getValue(1), 12.3 );

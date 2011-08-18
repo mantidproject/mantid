@@ -1527,7 +1527,7 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
   if( !Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()) ) return NULL;
   Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
   if (!ws) return NULL;
-  Mantid::Geometry::IInstrument_const_sptr instr = ws->getInstrument();
+  Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
   if (!instr || instr->getName().empty())
   {
     return NULL;
@@ -3005,7 +3005,7 @@ void MantidUI::memoryImage2()
 // End of Windows specfic stuff
 //=======================================================================
 
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 
 void MantidUI::test()

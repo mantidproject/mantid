@@ -33,7 +33,7 @@ public:
   void test_constructor_from_Instrument()
   {
     // Fake instrument with 5*9 pixels with ID starting at 1
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
     GroupingWorkspace_sptr ws(new GroupingWorkspace(inst));
 

@@ -13,7 +13,7 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -103,7 +103,7 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
-    boost::shared_ptr<IInstrument> i = output->getBaseInstrument();
+    boost::shared_ptr<Instrument> i = output->getBaseInstrument();
     boost::shared_ptr<IComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
@@ -205,7 +205,7 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
-    boost::shared_ptr<IInstrument> i = output->getInstrument();
+    boost::shared_ptr<Instrument> i = output->getInstrument();
     boost::shared_ptr<IObjComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Z(), -17.0,0.01);
@@ -283,7 +283,7 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
-    boost::shared_ptr<IInstrument> i = output->getInstrument();
+    boost::shared_ptr<Instrument> i = output->getInstrument();
     boost::shared_ptr<IObjComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Z(), -11.016,0.01);
@@ -345,7 +345,7 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
-    boost::shared_ptr<IInstrument> i = output->getInstrument();
+    boost::shared_ptr<Instrument> i = output->getInstrument();
 
     boost::shared_ptr<IDetector> ptrDet = i->getDetector(20201001);
     TS_ASSERT_EQUALS( ptrDet->getName(), "det 1");
@@ -394,7 +394,7 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
-    boost::shared_ptr<IInstrument> i = output->getInstrument();
+    boost::shared_ptr<Instrument> i = output->getInstrument();
 
     boost::shared_ptr<IDetector> ptrDetShape = i->getDetector(3100);
     TS_ASSERT_EQUALS( ptrDetShape->getName(), "Det0");
@@ -410,7 +410,7 @@ public:
     TS_ASSERT( !ptrDetShape->isValid(V3D(-0.0069,0.0227,0.011)+ptrDetShape->getPos()) );
 
     // test if a dummy parameter has been read in
-    boost::shared_ptr<IComponent> comp = i->getComponentByName("bank_90degnew");
+    boost::shared_ptr<const IComponent> comp = i->getComponentByName("bank_90degnew");
     TS_ASSERT_EQUALS( comp->getName(), "bank_90degnew");
 
     ParameterMap& paramMap = output->instrumentParameters();
@@ -458,7 +458,7 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
-    boost::shared_ptr<IInstrument> i = output->getInstrument();
+    boost::shared_ptr<Instrument> i = output->getInstrument();
     boost::shared_ptr<IObjComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Z(), -17.0,0.01);
@@ -679,7 +679,7 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
-    boost::shared_ptr<IInstrument> i = output->getInstrument();
+    boost::shared_ptr<Instrument> i = output->getInstrument();
 
     boost::shared_ptr<IDetector> ptrDetShape = i->getDetector(1100);
     TS_ASSERT_EQUALS( ptrDetShape->getID(), 1100);
@@ -728,10 +728,10 @@ public:
       // Get back the saved workspace
       MatrixWorkspace_sptr output;
       TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
-      boost::shared_ptr<IInstrument> i = output->getInstrument();
+      boost::shared_ptr<Instrument> i = output->getInstrument();
 
       // Now the XY detector in bank1
-      boost::shared_ptr<RectangularDetector> bank1 = boost::dynamic_pointer_cast<RectangularDetector>( i->getComponentByName("bank1") );
+      boost::shared_ptr<const RectangularDetector> bank1 = boost::dynamic_pointer_cast<const RectangularDetector>( i->getComponentByName("bank1") );
       TS_ASSERT( bank1 );
       if (!bank1) return;
 
@@ -783,7 +783,7 @@ public:
 //      loaderIDF2->execute();
 //      TS_ASSERT( loaderIDF2->isExecuted() );
 //      output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
-//      boost::shared_ptr<IInstrument> i_new = output->getInstrument();
+//      boost::shared_ptr<Instrument> i_new = output->getInstrument();
 //      TS_ASSERT_EQUALS( i_new->getName(), "SNAP");
 //
 //      TS_ASSERT_EQUALS( i_new->nelements(), 21);
@@ -801,7 +801,7 @@ public:
 //      loaderIDF2->execute();
 //      TS_ASSERT( loaderIDF2->isExecuted() );
 //      output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
-//      boost::shared_ptr<IInstrument> i_old = output->getInstrument();
+//      boost::shared_ptr<Instrument> i_old = output->getInstrument();
 //      TS_ASSERT_EQUALS( i_old->getName(), "SNAPOLD");
 //
 //      std::cout << "Comparing\n";
@@ -852,7 +852,7 @@ public:
 //      loaderIDF2->execute();
 //      TS_ASSERT( loaderIDF2->isExecuted() );
 //      output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
-//      boost::shared_ptr<IInstrument> i_new = output->getInstrument();
+//      boost::shared_ptr<Instrument> i_new = output->getInstrument();
 //      TS_ASSERT_EQUALS( i_new->getName(), "PG3");
 //
 //      std::cout << "Loading the OLD geometry\n";
@@ -868,7 +868,7 @@ public:
 //      loaderIDF2->execute();
 //      TS_ASSERT( loaderIDF2->isExecuted() );
 //      output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
-//      boost::shared_ptr<IInstrument> i_old = output->getInstrument();
+//      boost::shared_ptr<Instrument> i_old = output->getInstrument();
 //      TS_ASSERT_EQUALS( i_old->getName(), "PG3OLD");
 //
 //      std::cout << "Comparing #\n";

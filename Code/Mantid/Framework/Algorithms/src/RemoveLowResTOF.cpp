@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAlgorithms/RemoveLowResTOF.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include <limits>
 #include <map>
 #include <math.h>
@@ -15,7 +15,6 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using DataObjects::EventWorkspace;
-using Geometry::IInstrument_const_sptr;
 using Kernel::Exception::InstrumentDefinitionError;
 using Kernel::Exception::NotFoundError;
 using std::size_t;

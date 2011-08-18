@@ -87,7 +87,7 @@ void SumNeighbours::exec()
   //Get some stuff from the input workspace
   //const size_t numberOfSpectra = inWS->getNumberHistograms();
   const int YLength = static_cast<int>(inWS->blocksize());
-  IInstrument_sptr inst = inWS->getInstrument();
+  Instrument_sptr inst = inWS->getInstrument();
   if (!inst)
     throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
 

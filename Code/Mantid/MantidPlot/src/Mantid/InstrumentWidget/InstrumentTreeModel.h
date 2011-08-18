@@ -10,7 +10,7 @@ namespace Mantid
 {
   namespace Geometry
   {
-    class IInstrument;
+    class Instrument;
   }
   namespace API
   {
@@ -46,7 +46,7 @@ public:
 
 private:
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
-  boost::shared_ptr<const Mantid::Geometry::IInstrument> m_instrument; ///< instrument to which the model corresponds to
+  boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument; ///< instrument to which the model corresponds to
 };
 
 #endif

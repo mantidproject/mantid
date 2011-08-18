@@ -9,7 +9,7 @@
 #include "UnwrappedSphere.h"
 #include "OpenGLError.h"
 #include "DetSelector.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/Object.h"
 
 #include <boost/shared_ptr.hpp>
@@ -43,14 +43,14 @@ Projection3D::Projection3D(const InstrumentActor* rootActor,int winWidth,int win
   m_isKeyPressed(false)
 {
 
-  IInstrument_const_sptr instr = rootActor->getInstrument();
-  std::vector<boost::shared_ptr<IComponent> > allComponents;
+  Instrument_const_sptr instr = rootActor->getInstrument();
+  std::vector<IComponent_const_sptr> allComponents;
   instr->getChildren(allComponents,true);
   std::vector<ComponentID> nonDetectors;
-  std::vector<boost::shared_ptr<IComponent> >::const_iterator it = allComponents.begin();
+  std::vector<IComponent_const_sptr>::const_iterator it = allComponents.begin();
   for(; it != allComponents.end(); ++it)
   {
-    IDetector_const_sptr det = boost::dynamic_pointer_cast<IDetector>(*it);
+    IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(*it);
     if (!det)
     {
       nonDetectors.push_back((*it)->getComponentID());
@@ -373,7 +373,7 @@ void Projection3D::getMaskedDetectors(QList<int>& dets)const
 void Projection3D::componentSelected(Mantid::Geometry::ComponentID id)
 {
 
-  IInstrument_const_sptr instr = m_instrActor->getInstrument();
+  Instrument_const_sptr instr = m_instrActor->getInstrument();
 
   if (id == NULL || id == instr->getComponentID())
   {

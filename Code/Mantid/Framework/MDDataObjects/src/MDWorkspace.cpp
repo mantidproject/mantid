@@ -117,7 +117,7 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
     } 
 
  //
-    void  MDWorkspace::setInstrument(const IInstrument_sptr& instr)
+    void  MDWorkspace::setInstrument(const Instrument_sptr& instr)
     {
       boost::shared_ptr<Instrument> tmp = boost::dynamic_pointer_cast<Instrument>(instr);
       if (tmp->isParametrized())

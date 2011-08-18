@@ -25,7 +25,7 @@ namespace DataObjects
   class DLLExport GroupingWorkspace : public SpecialWorkspace2D
   {
   public:
-    GroupingWorkspace(Mantid::Geometry::IInstrument_sptr inst);
+    GroupingWorkspace(Geometry::Instrument_sptr inst);
     GroupingWorkspace();
     ~GroupingWorkspace();
     

@@ -299,7 +299,7 @@ namespace WorkspaceCreationHelper
    */
   Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels, int numBins)
   {
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(numBanks, numPixels);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(numBanks, numPixels);
     Workspace2D_sptr ws = Create2DWorkspaceBinned(numBanks*numPixels*numPixels, numBins);
     ws->setInstrument(inst);
     ws->getAxis(0)->setUnit("dSpacing");
@@ -323,7 +323,7 @@ namespace WorkspaceCreationHelper
    */
   Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithFullInstrument(int numBanks, int numPixels, bool clearEvents)
   {
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(numBanks, numPixels);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(numBanks, numPixels);
     EventWorkspace_sptr ws = CreateEventWorkspace2(numBanks*numPixels*numPixels, 10);
     ws->setInstrument(inst);
     ws->getAxis(0)->setUnit("dSpacing");

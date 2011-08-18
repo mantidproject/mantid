@@ -4,12 +4,10 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include <vector>
 #include <map>
-#include "MantidGeometry/IInstrument.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using Mantid::Geometry::IInstrument_sptr;
 
 namespace Mantid
 {
@@ -109,7 +107,7 @@ namespace MDEvents
     // TODO: Do we need to pick a different instrument info?
     ExperimentInfo_sptr ei = ws->getExperimentInfo(0);
     // Instrument associated with workspace
-    IInstrument_sptr inst = ei->getInstrument();
+    Geometry::Instrument_sptr inst = ei->getInstrument();
 
     // Calculate a threshold below which a box is too diffuse to be considered a peak.
     signal_t thresholdDensity = 0.0;

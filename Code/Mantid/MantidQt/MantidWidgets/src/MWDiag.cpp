@@ -8,7 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <QSignalMapper>
 #include <QFileInfo>
@@ -25,7 +25,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
-using Mantid::Geometry::IInstrument_sptr;
+using Mantid::Geometry::Instrument_const_sptr;
 
 MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const instru):
   MantidWidget(parent),
@@ -47,7 +47,7 @@ MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const 
 void MWDiag::loadSettings()
 {
   // Want the defaults from the instrument if nothing is saved in the config
-  IInstrument_sptr instrument = getInstrument(m_instru->currentText());
+  Instrument_const_sptr instrument = getInstrument(m_instru->currentText());
 
   m_designWidg.leIFile->setText(getSetting("input mask"));
   m_designWidg.leOFile->setText(getSetting("output file"));
@@ -87,7 +87,7 @@ void MWDiag::setSumState(bool checked)
 /**
  * Get an instrument pointer for the name instrument
  */
-IInstrument_sptr MWDiag::getInstrument(const QString & name)
+Instrument_const_sptr MWDiag::getInstrument(const QString & name)
 {
   std::string ws_name = "__empty_" + name.toStdString();
   
@@ -101,7 +101,7 @@ IInstrument_sptr MWDiag::getInstrument(const QString & name)
     runPythonCode(pyInput);
     if( !dataStore.doesExist(ws_name) )
     {
-      return IInstrument_sptr();
+      return Instrument_const_sptr();
     }
   }
   MatrixWorkspace_sptr inst_ws = 
@@ -110,8 +110,8 @@ IInstrument_sptr MWDiag::getInstrument(const QString & name)
   return inst_ws->getInstrument();
 }
 
-QString MWDiag::getSetting(const QString & settingName, IInstrument_sptr instrument,
-			   const QString & idfName) const
+QString MWDiag::getSetting(const QString & settingName, Instrument_const_sptr instrument,
+                           const QString & idfName) const
 {
   QString value;
   if( m_prevSets.contains(settingName) )

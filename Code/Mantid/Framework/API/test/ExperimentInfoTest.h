@@ -19,7 +19,7 @@ public:
   void test_GetInstrument_default()
   {
     ExperimentInfo ws;
-    boost::shared_ptr<IInstrument> i = ws.getInstrument();
+    boost::shared_ptr<Instrument> i = ws.getInstrument();
     TSM_ASSERT( "ExperimentInfo gets a default, empty Instrument.", i);
     TS_ASSERT_EQUALS( ws.getInstrument()->type(), "Instrument" );
   }
@@ -27,16 +27,16 @@ public:
   void test_GetSetInstrument_default()
   {
     ExperimentInfo ws;
-    boost::shared_ptr<IInstrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1(new Instrument());
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
 
     // Instruments don't point to the same base place since they
-    boost::shared_ptr<IInstrument> inst2 = ws.getInstrument();
+    boost::shared_ptr<Instrument> inst2 = ws.getInstrument();
     TS_ASSERT_EQUALS( inst2->getName(), "MyTestInst");
 
     // But the base instrument does!
-    boost::shared_ptr<IInstrument> inst3 = ws.getBaseInstrument();
+    boost::shared_ptr<Instrument> inst3 = ws.getBaseInstrument();
     TS_ASSERT_EQUALS( inst3.get(), inst1.get());
     TS_ASSERT_EQUALS( inst3->getName(), "MyTestInst");
   }
@@ -89,7 +89,7 @@ public:
     ws.mutableRun().setProtonCharge(1.234);
     ws.mutableSample().setName("test");
     ws.mutableSample().setOrientedLattice( new OrientedLattice(1,2,3,90,90,90) );
-    boost::shared_ptr<IInstrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1(new Instrument());
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
 
@@ -104,7 +104,7 @@ public:
     ws.mutableRun().setProtonCharge(1.234);
     ws.mutableSample().setName("test");
     ws.mutableSample().setOrientedLattice( new OrientedLattice(1,2,3,90,90,90) );
-    boost::shared_ptr<IInstrument> inst1(new Instrument());
+    boost::shared_ptr<Instrument> inst1(new Instrument());
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
 

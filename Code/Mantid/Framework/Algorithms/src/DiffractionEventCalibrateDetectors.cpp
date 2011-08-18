@@ -296,7 +296,7 @@ namespace Algorithms
     const std::string rb_params=getProperty("Params");
 
     //Get some stuff from the input workspace
-    IInstrument_sptr inst = inputW->getInstrument();
+    Instrument_sptr inst = inputW->getInstrument();
     if (!inst)
       throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
 

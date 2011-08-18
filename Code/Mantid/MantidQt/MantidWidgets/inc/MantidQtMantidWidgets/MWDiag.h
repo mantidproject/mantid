@@ -16,7 +16,7 @@ namespace Mantid
 {
   namespace Geometry
   {
-    class IInstrument;
+    class Instrument;
   }
 }
 
@@ -71,9 +71,9 @@ namespace MantidQt
 
       void closeDialog();
       QString openFileDialog(const bool save, const QStringList &exts);
-      boost::shared_ptr<Mantid::Geometry::IInstrument> getInstrument(const QString & name);
+      boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument(const QString & name);
       QString getSetting(const QString & settingName, 
-			 boost::shared_ptr<Mantid::Geometry::IInstrument> inst = boost::shared_ptr<Mantid::Geometry::IInstrument>(), 
+			 boost::shared_ptr<const Mantid::Geometry::Instrument> inst = boost::shared_ptr<const Mantid::Geometry::Instrument>(),
 			 const QString & idfName = "") const;
       void saveDefaults();
       void setupToolTips();

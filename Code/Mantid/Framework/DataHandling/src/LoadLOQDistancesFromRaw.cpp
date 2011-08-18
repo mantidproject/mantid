@@ -72,7 +72,7 @@ namespace DataHandling
 
     // Get current sample position
     std::string compname = "some-sample-holder";
-    boost::shared_ptr<Geometry::IComponent> sample_holder = data_ws->getInstrument()->getComponentByName(compname);
+    Geometry::IComponent_const_sptr sample_holder = data_ws->getInstrument()->getComponentByName(compname);
     if( sample_holder.get() )
     {
       double curr_zpos = sample_holder->getPos().Z();
@@ -89,7 +89,7 @@ namespace DataHandling
     sample_holder = data_ws->getInstrument()->getComponentByName(compname);
     //Get the main detector component
     compname = "main-detector-bank";
-    boost::shared_ptr<Geometry::IComponent> main_det = data_ws->getInstrument()->getComponentByName(compname);
+    Geometry::IComponent_const_sptr main_det = data_ws->getInstrument()->getComponentByName(compname);
     if( main_det.get() && sample_holder.get() )
     {
       double curr_zpos = main_det->getPos().Z();

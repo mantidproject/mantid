@@ -13,7 +13,6 @@ namespace Algorithms
 
 using namespace Kernel;
 using namespace API;
-using Geometry::IInstrument_const_sptr;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(RemoveBins)
@@ -270,7 +269,7 @@ void RemoveBins::transformRangeUnit(const int& index, double& startX, double& en
 void RemoveBins::calculateDetectorPosition(const int& index, double& l1, double& l2, double& twoTheta)
 {
   // Get a pointer to the instrument contained in the workspace
-  IInstrument_const_sptr instrument = m_inputWorkspace->getInstrument();
+  Geometry::Instrument_const_sptr instrument = m_inputWorkspace->getInstrument();
   // Get the distance between the source and the sample (assume in metres)
   Geometry::IObjComponent_const_sptr sample = instrument->getSample();
   // Check for valid instrument

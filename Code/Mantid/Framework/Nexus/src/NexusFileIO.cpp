@@ -10,7 +10,7 @@
 #ifdef _WIN32
 #include <io.h>
 #endif /* _WIN32 */
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -199,7 +199,7 @@ using namespace DataObjects;
 
 
   //-----------------------------------------------------------------------------------------------
-  bool NexusFileIO::writeNexusInstrument(const Geometry::IInstrument_const_sptr& instrument) const
+  bool NexusFileIO::writeNexusInstrument(const Geometry::Instrument_const_sptr& instrument) const
   {
     NXstatus status;
 

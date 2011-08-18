@@ -110,7 +110,7 @@ public:
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    IInstrument_sptr i = output->getInstrument();
+    Instrument_sptr i = output->getInstrument();
     Mantid::Geometry::IObjComponent_sptr source = i->getSource();
     
     Mantid::Geometry::IObjComponent_sptr samplepos = i->getSample();
@@ -327,7 +327,7 @@ public:
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    IInstrument_sptr i = output->getInstrument();
+    Instrument_sptr i = output->getInstrument();
     Mantid::Geometry::IObjComponent_sptr source = i->getSource();
     
     Mantid::Geometry::IObjComponent_sptr samplepos = i->getSample();
@@ -412,7 +412,7 @@ public:
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    IInstrument_sptr i = output->getInstrument();
+    Instrument_sptr i = output->getInstrument();
     Mantid::Geometry::IObjComponent_sptr source = i->getSource();
     
     Mantid::Geometry::IObjComponent_sptr samplepos = i->getSample();

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/UpdateInstrumentFromFile.h"
 #include "MantidDataHandling/LoadRawHelper.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"

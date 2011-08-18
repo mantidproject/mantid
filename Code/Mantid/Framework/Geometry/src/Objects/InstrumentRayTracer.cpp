@@ -8,7 +8,6 @@
 #include "MantidKernel/Exception.h"
 #include <deque>
 #include <iterator>
-#include "MantidGeometry/IDetector.h"
 
 namespace Mantid
 {
@@ -29,7 +28,7 @@ namespace Mantid
      * component.
      * @param instrument :: The instrument to perform the ray tracings on. It must have a defined source.
      */
-    InstrumentRayTracer::InstrumentRayTracer(IInstrument_sptr instrument) : m_instrument(instrument)
+    InstrumentRayTracer::InstrumentRayTracer(Instrument_sptr instrument) : m_instrument(instrument)
     {
       if( !m_instrument )
       {

@@ -68,7 +68,7 @@ namespace Mantid
 
       // load the instrument into this workspace
       MatrixWorkspace_sptr ws = this->runLoadInstrument();
-      IInstrument_sptr instrument = ws->getInstrument();
+      Instrument_sptr instrument = ws->getInstrument();
 
       // Get detectors stored in instrument and create dummy c-arrays for the purpose
       // of calling method of SpectraDetectorMap 

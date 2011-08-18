@@ -80,7 +80,7 @@ public:
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    boost::shared_ptr<Mantid::Geometry::IInstrument> i = output2D->getInstrument();
+    Mantid::Geometry::Instrument_const_sptr i = output2D->getInstrument();
     boost::shared_ptr<Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS( source->getName(), "undulator");

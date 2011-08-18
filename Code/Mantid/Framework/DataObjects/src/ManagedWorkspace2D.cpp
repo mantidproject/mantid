@@ -215,6 +215,9 @@ void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,size_t start
  */
 void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
 {
+  std::cout << "Writing " << toWrite->minIndex() << std::endl;
+  std::cout << ">>> " << m_indexWrittenTo << std::endl;
+  std::cout << ">>> " << m_vectorsPerBlock << std::endl;
   size_t fileIndex = 0;
   // Check whether we need to pad file with zeroes before writing data
   if ( toWrite->minIndex() > static_cast<int>(m_indexWrittenTo+m_vectorsPerBlock) && m_indexWrittenTo >= 0 )
@@ -239,10 +242,11 @@ void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
       m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
       m_datafile[fileIndex]->write((char *) &speczero, sizeof(int) );
     }
+    std::cout << "Here!!!!" << std::endl;
   }
   else
-    // If no padding needed, go to correct place in file
-    {
+  // If no padding needed, go to correct place in file
+  {
     long long seekPoint = toWrite->minIndex() * m_vectorSize;
 
     while (seekPoint > std::numeric_limits<int>::max())
@@ -254,7 +258,8 @@ void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
     // Safe to cast seekPoint to int because the while loop above guarantees that
     // it'll be in range by this point.
     m_datafile[fileIndex]->seekp(static_cast<int>(seekPoint), std::ios::beg);
-    }
+    std::cout << "Now here!!!!" << std::endl;
+  }
 
   *m_datafile[fileIndex] << *toWrite;
   m_indexWrittenTo = std::max(m_indexWrittenTo, toWrite->minIndex());

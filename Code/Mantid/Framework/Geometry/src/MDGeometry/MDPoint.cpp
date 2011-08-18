@@ -5,7 +5,7 @@ namespace Mantid
   namespace Geometry
   {
     MDPoint::MDPoint(signal_t signal, signal_t error,
-        const std::vector<Coordinate>& vertexes, IDetector_sptr detector, IInstrument_sptr instrument,
+        const std::vector<Coordinate>& vertexes, IDetector_sptr detector, Instrument_sptr instrument,
         const int runId)
       : m_signal(signal),
         m_error(error),
@@ -36,7 +36,7 @@ namespace Mantid
         return this->m_detector;
       }
 
-      IInstrument_sptr MDPoint::getInstrument() const
+      Instrument_sptr MDPoint::getInstrument() const
       {
         return this->m_instrument;
       }

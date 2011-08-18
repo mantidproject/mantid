@@ -19,7 +19,7 @@ public:
 
   void test_createDetector()
   {
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     IDetector_sptr idet = inst->getDetector(1);
     Detector * det = boost::dynamic_pointer_cast<Detector>(idet).get();
     ParameterMap * map = new ParameterMap();
@@ -31,7 +31,7 @@ public:
 
   void test_createInstrument()
   {
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     ParameterMap_sptr map(new ParameterMap());
 
     Instrument_sptr pinst;

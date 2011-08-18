@@ -6,7 +6,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -86,7 +85,7 @@ namespace DataHandling
   void LoadDspacemap::exec()
   {
     // Get the instrument
-    IInstrument_sptr inst = LoadCalFile::getInstrument3Ways(this);
+    Instrument_sptr inst = LoadCalFile::getInstrument3Ways(this);
 
     // Read in the calibration data
     const std::string DFileName = getProperty("Filename");
@@ -137,7 +136,7 @@ namespace DataHandling
       Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS)
   {
     // Get a pointer to the instrument contained in the workspace
-    IInstrument_const_sptr instrument = offsetsWS->getInstrument();
+    Instrument_const_sptr instrument = offsetsWS->getInstrument();
     double l1;
     Kernel::V3D beamline,samplePos;
     double beamline_norm;
@@ -197,7 +196,7 @@ namespace DataHandling
       Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS)
   {
     // Get a pointer to the instrument contained in the workspace
-    IInstrument_const_sptr instrument = offsetsWS->getInstrument();
+    Instrument_const_sptr instrument = offsetsWS->getInstrument();
 
     //To get all the detector ID's
     detid2det_map allDetectors;

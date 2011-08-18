@@ -24,7 +24,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidMDAlgorithms/QuadEnBackground.h"
 
 #include <math.h>
@@ -297,7 +297,7 @@ private:
         Coordinate c = Coordinate::createCoordinate4D(x, y, z, t);
         vertices.push_back(c);
         IDetector_sptr detector = IDetector_sptr(new DummyDetector("dummydetector"));
-        IInstrument_sptr instrument = IInstrument_sptr(new DummyInstrument("dummyinstrument"));
+        Instrument_sptr instrument = Instrument_sptr(new DummyInstrument("dummyinstrument"));
         return new MDPoint(s, e, vertices, detector, instrument);
     }
 

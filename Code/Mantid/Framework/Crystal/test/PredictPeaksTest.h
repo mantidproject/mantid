@@ -35,7 +35,7 @@ public:
   }
   
   /** Make a HKL peaks workspace */
-  PeaksWorkspace_sptr getHKLpw(IInstrument_sptr inst, std::vector<V3D> hkls, detid_t detid)
+  PeaksWorkspace_sptr getHKLpw(Instrument_sptr inst, std::vector<V3D> hkls, detid_t detid)
   {
     PeaksWorkspace_sptr hklPW;
     if (hkls.size() > 0)
@@ -59,7 +59,7 @@ public:
 
     // Make the fake input workspace
     MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace(10000, 1);
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
     inWS->setInstrument(inst);
 
     //Set ub and Goniometer rotation
@@ -126,7 +126,7 @@ public:
 
     // Make the fake input workspace
     MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace(10000, 1);
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
     inWS->setInstrument(inst);
 
     //Set ub and Goniometer rotation

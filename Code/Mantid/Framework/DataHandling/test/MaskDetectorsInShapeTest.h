@@ -81,7 +81,7 @@ public:
   {
     //check that the detectors have actually been marked dead
     std::vector<int> expectedDetectorArray = convertStringToVector(expectedHits);
-    Mantid::Geometry::IInstrument_const_sptr i = outWS->getInstrument();
+    Mantid::Geometry::Instrument_const_sptr i = outWS->getInstrument();
     for (std::vector<int>::iterator it = expectedDetectorArray.begin(); it!=expectedDetectorArray.end(); ++it)
     {
       TS_ASSERT( i->getDetector((*it))->isMasked() )

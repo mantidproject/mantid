@@ -6,7 +6,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <map>
@@ -123,7 +123,7 @@ namespace Mantid
       /// Get the geometry xml.
       virtual std::string getGeometryXML() const{return "";}
 
-      void setInstrument(const Mantid::Geometry::IInstrument_sptr& instr);
+      void setInstrument(const Geometry::Instrument_sptr& instr);
 
       /// Creates a new iterator pointing to the first cell in the workspace
       virtual API::IMDIterator* createIterator() const;

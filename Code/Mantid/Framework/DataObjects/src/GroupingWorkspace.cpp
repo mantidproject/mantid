@@ -30,7 +30,7 @@ namespace DataObjects
    * @param inst :: input instrument that is the base for this workspace
    * @return created GroupingWorkspace
    */
-  GroupingWorkspace::GroupingWorkspace(Mantid::Geometry::IInstrument_sptr inst)
+  GroupingWorkspace::GroupingWorkspace(Geometry::Instrument_sptr inst)
   : SpecialWorkspace2D(inst)
   {
   }

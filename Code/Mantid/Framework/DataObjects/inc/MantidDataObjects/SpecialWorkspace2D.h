@@ -5,7 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/System.h"
 
 
@@ -28,7 +28,7 @@ namespace DataObjects
   {
   public:
     SpecialWorkspace2D();
-    SpecialWorkspace2D(Mantid::Geometry::IInstrument_sptr inst);
+    SpecialWorkspace2D(Geometry::Instrument_sptr inst);
     ~SpecialWorkspace2D();
     
     /** Gets the name of the workspace type

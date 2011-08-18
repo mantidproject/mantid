@@ -8,7 +8,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>

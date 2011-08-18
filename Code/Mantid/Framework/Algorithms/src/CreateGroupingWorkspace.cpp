@@ -129,7 +129,7 @@ namespace Algorithms
    * @param detIDtoGroup :: output: map of detID: to group number
    * @param prog :: progress report
    */
-  void makeGroupingByNames(std::string GroupNames, IInstrument_sptr inst, std::map<detid_t, int> & detIDtoGroup, Progress & prog)
+  void makeGroupingByNames(std::string GroupNames, Instrument_sptr inst, std::map<detid_t, int> & detIDtoGroup, Progress & prog)
   {
     // Split the names of the group and insert in a vector
     std::vector<std::string> vgroups;
@@ -232,7 +232,7 @@ namespace Algorithms
       throw std::invalid_argument("You must specify either to use the OldCalFilename parameter OR GroupNames but not both!");
 
     // ---------- Get the instrument one of 3 ways ---------------------------
-    IInstrument_sptr inst;
+    Instrument_sptr inst;
     if (inWS)
     {
       inst = inWS->getInstrument();

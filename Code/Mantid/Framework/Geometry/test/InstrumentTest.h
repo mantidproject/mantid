@@ -1,9 +1,8 @@
 #ifndef INSTRUMENTTEST_H_
 #define INSTRUMENTTEST_H_
 
-#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -204,8 +203,8 @@ public:
   void test_getDetectorsInBank()
   {
     // 5 banks with 6x6 pixels in them.
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
-    std::vector<IDetector_sptr> dets;
+    Instrument_const_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
+    std::vector<IDetector_const_sptr> dets;
     inst->getDetectorsInBank(dets, "bank2");
     TS_ASSERT_EQUALS(dets.size(), 36);
     TS_ASSERT_EQUALS(dets[0]->getID(), 36*2);
@@ -214,8 +213,8 @@ public:
   void test_getDetectorsInBank2()
   {
     // 5 banks with 9 pixels each
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5, false);
-    std::vector<IDetector_sptr> dets;
+    Instrument_const_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5, false);
+    std::vector<IDetector_const_sptr> dets;
     inst->getDetectorsInBank(dets, "bank2");
     TS_ASSERT_EQUALS(dets.size(), 9);
   }
@@ -223,7 +222,7 @@ public:
   void test_getDetectors()
   {
     // 5 banks with 6x6 pixels in them.
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
     detid2det_map dets;
     inst->getDetectors(dets);
     TS_ASSERT_EQUALS(dets.size(), 36*5);
@@ -232,7 +231,7 @@ public:
   void test_getDetectorIDs()
   {
     // 5 banks with 6x6 pixels in them.
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
     std::vector<detid_t> dets;
     dets = inst->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 36*5);
@@ -240,7 +239,7 @@ public:
 
   void test_getValidFromDate()
   {
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
     Kernel::DateAndTime validFrom("1900-01-31T23:59:59");
     Kernel::DateAndTime validTo("2100-01-31 23:59:59");
     inst->setValidFromDate(validFrom);

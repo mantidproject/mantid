@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/Detector.h"

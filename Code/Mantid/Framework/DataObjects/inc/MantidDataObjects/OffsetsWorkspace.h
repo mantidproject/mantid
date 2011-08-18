@@ -5,7 +5,6 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/System.h"
 
 
@@ -25,7 +24,7 @@ namespace DataObjects
   {
   public:
     OffsetsWorkspace();
-    OffsetsWorkspace(Mantid::Geometry::IInstrument_sptr inst);
+    OffsetsWorkspace(Geometry::Instrument_sptr inst);
     ~OffsetsWorkspace();
     
     /** Gets the name of the workspace type

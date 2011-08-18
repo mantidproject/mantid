@@ -22,7 +22,7 @@ namespace DataObjects
    * @param detectorDistance :: distance between the sample and the detector.
    *        Used to give a valid TOF. Default 1.0 meters.
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, Mantid::Kernel::V3D QLabFrame, double detectorDistance)
+  Peak::Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QLabFrame, double detectorDistance)
   : m_H(0), m_K(0), m_L(0),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
@@ -45,7 +45,7 @@ namespace DataObjects
    * @param detectorDistance :: distance between the sample and the detector.
    *        Used to give a valid TOF. Default 1.0 meters.
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, Mantid::Kernel::V3D QSampleFrame,
+  Peak::Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QSampleFrame,
       Mantid::Kernel::Matrix<double> goniometer, double detectorDistance)
   : m_H(0), m_K(0), m_L(0),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
@@ -68,7 +68,7 @@ namespace DataObjects
    * @param m_Wavelength :: incident neutron wavelength, in Angstroms
    * @return
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength)
+  Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength)
   : m_H(0), m_K(0), m_L(0),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
@@ -90,7 +90,7 @@ namespace DataObjects
    * @param HKL :: vector with H,K,L position of the peak
    * @return
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Kernel::V3D HKL)
+  Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Kernel::V3D HKL)
   : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
@@ -112,7 +112,7 @@ namespace DataObjects
    * @param goniometer :: a 3x3 rotation matrix
    * @return
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Kernel::V3D HKL, Mantid::Kernel::Matrix<double> goniometer) :
+  Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Kernel::V3D HKL, Mantid::Kernel::Matrix<double> goniometer) :
     m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]),
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(goniometer),
@@ -215,7 +215,7 @@ namespace DataObjects
    *
    * @param inst :: Instrument sptr to use
    */
-  void Peak::setInstrument(Mantid::Geometry::IInstrument_const_sptr inst)
+  void Peak::setInstrument(Geometry::Instrument_const_sptr inst)
   {
     m_inst = inst;
     if (!inst) throw std::runtime_error("Peak::setInstrument(): No instrument is set!");
@@ -451,9 +451,9 @@ namespace DataObjects
     beam.normalize();
 
     // Create a ray tracer
-    InstrumentRayTracer tracker( boost::const_pointer_cast<IInstrument>(m_inst) );
+    InstrumentRayTracer tracker( boost::const_pointer_cast<Instrument>(m_inst) );
     tracker.traceFromSample(beam);
-    IDetector_sptr det = tracker.getDetectorResult();
+    IDetector_const_sptr det = tracker.getDetectorResult();
     if (det)
     {
       // Set the detector ID, the row, col, etc.
@@ -469,12 +469,10 @@ namespace DataObjects
 
   //----------------------------------------------------------------------------------------------
   /** Return a shared ptr to the detector at center of peak. */
-  Mantid::Geometry::IDetector_const_sptr Peak::getDetector() const
-  {    return m_det;  }
+  Geometry::IDetector_const_sptr Peak::getDetector() const { return m_det; }
 
   /** Return a shared ptr to the instrument for this peak. */
-  Mantid::Geometry::IInstrument_const_sptr Peak::getInstrument() const
-  {    return m_inst;  }
+  Geometry::Instrument_const_sptr Peak::getInstrument() const { return m_inst; }
 
   //----------------------------------------------------------------------------------------------
   /** Return the run number this peak was measured at. */

@@ -4,7 +4,7 @@
 #include "MantidTestHelpers/DLLExport.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -105,7 +105,7 @@ namespace ComponentCreationHelper
    * @param num_banks: number of 9-cylinder banks to create
    * @param verbose: prints out the instrument after creation.
    */
-  DLL_TESTHELPERS Mantid::Geometry::IInstrument_sptr 
+  DLL_TESTHELPERS Mantid::Geometry::Instrument_sptr
   createTestInstrumentCylindrical(int num_banks, bool verbose = false);
   /**
    * Create a test instrument with n panels of rectangular detectors, pixels*pixels in size, a source and spherical sample shape.
@@ -113,9 +113,9 @@ namespace ComponentCreationHelper
    * @param num_banks: number of 9-cylinder banks to create
    * @param verbose: prints out the instrument after creation.
    */
-  DLL_TESTHELPERS Mantid::Geometry::IInstrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing = 0.008);
+  DLL_TESTHELPERS Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing = 0.008);
 
-  DLL_TESTHELPERS Mantid::Geometry::IInstrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, double pixelSpacing = 0.008);
+  DLL_TESTHELPERS Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, double pixelSpacing = 0.008);
 
 }
 

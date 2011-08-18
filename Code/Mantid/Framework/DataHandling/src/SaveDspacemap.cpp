@@ -83,7 +83,7 @@ namespace DataHandling
   {
     const char * filename = DFileName.c_str();
     // Get a pointer to the instrument contained in the workspace
-    IInstrument_const_sptr instrument = offsetsWS->getInstrument();
+    Instrument_const_sptr instrument = offsetsWS->getInstrument();
     double l1;
     Kernel::V3D beamline,samplePos;
     double beamline_norm;

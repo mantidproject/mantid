@@ -4,9 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/Run.h"
-#include "MantidGeometry/Instrument/Instrument.h"
-#include "MantidGeometry/IInstrument.h"
-
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid
 {
@@ -34,8 +32,8 @@ namespace API
     ExperimentInfo * cloneExperimentInfo();
 
     /// Instrument accessors
-    void setInstrument(const Geometry::IInstrument_sptr&);
-    Geometry::IInstrument_sptr getInstrument() const;
+    void setInstrument(const Geometry::Instrument_sptr&);
+    Geometry::Instrument_sptr getInstrument() const;
     boost::shared_ptr<Geometry::Instrument> getBaseInstrument() const;
 
     /// Returns the set of parameters modifying the base instrument

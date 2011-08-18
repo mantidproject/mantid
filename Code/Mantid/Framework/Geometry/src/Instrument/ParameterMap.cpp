@@ -3,7 +3,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include <cstring>
 
 namespace Mantid

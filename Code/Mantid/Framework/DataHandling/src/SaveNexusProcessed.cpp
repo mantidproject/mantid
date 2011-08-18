@@ -26,7 +26,7 @@ namespace DataHandling
   using namespace Kernel;
   using namespace API;
   using namespace DataObjects;
-  using Geometry::IInstrument_const_sptr;
+  using Geometry::Instrument_const_sptr;
 
   // Register the algorithm into the algorithm factory
   DECLARE_ALGORITHM(SaveNexusProcessed)
@@ -164,7 +164,7 @@ namespace DataHandling
     // write instrument data, if present and writer enabled
     if (matrixWorkspace) 
     { 
-      IInstrument_const_sptr instrument = matrixWorkspace->getInstrument();
+      Instrument_const_sptr instrument = matrixWorkspace->getInstrument();
       nexusFile->writeNexusInstrument(instrument);
       prog_init.reportIncrement(1, "Writing instrument");
 

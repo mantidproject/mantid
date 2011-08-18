@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -1192,7 +1191,7 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
   if( !monitorsOnly && !bankName.empty() )
   {
     // Only build the map for the single bank
-    std::vector<IDetector_sptr> dets;
+    std::vector<IDetector_const_sptr> dets;
     WS->getInstrument()->getDetectorsInBank(dets, bankName);
     if (dets.size() > 0)
     {
@@ -1307,7 +1306,7 @@ void LoadEventNexus::runLoadMonitors()
  * @param entry_name :: name of the NXentry to open.
  * @returns A pointer to a new map or NULL if the block does not exist
  */
-Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::string & filename, Mantid::Geometry::IInstrument_sptr inst,
+Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::string & filename, Geometry::Instrument_sptr inst,
                                    const bool monitorsOnly, const std::string entry_name, Mantid::Kernel::Logger & g_log)
 {
   ::NeXus::File file(filename);

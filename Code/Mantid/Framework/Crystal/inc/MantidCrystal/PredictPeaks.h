@@ -4,7 +4,6 @@
 #include "MantidAPI/Algorithm.h" 
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/System.h"
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include "MantidKernel/Matrix.h"
@@ -53,7 +52,7 @@ namespace Crystal
     /// Max wavelength parameter
     double wlMax;
     /// Instrument reference
-    Mantid::Geometry::IInstrument_sptr inst;
+    Geometry::Instrument_sptr inst;
     /// Output peaks workspace
     Mantid::DataObjects::PeaksWorkspace_sptr pw;
     /// Counter of possible peaks

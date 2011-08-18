@@ -2,7 +2,6 @@
 #include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Strings.h"
@@ -13,8 +12,6 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::Geometry::IInstrument_sptr;
-using Mantid::Geometry::IInstrument_sptr;
 
 namespace Mantid
 {
@@ -78,7 +75,7 @@ namespace Crystal
 
     std::ofstream out( filename.c_str() );
 
-    IInstrument_const_sptr inst = ws->getInstrument();
+    Instrument_const_sptr inst = ws->getInstrument();
     if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
 
     double l1; V3D beamline; double beamline_norm; V3D samplePos;

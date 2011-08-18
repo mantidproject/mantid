@@ -1,11 +1,9 @@
-#include "MantidGeometry/IInstrument.h"
-#include "MantidKernel/V3D.h"
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/ICompAssembly.h"
-#include "MantidGeometry/IObjComponent.h"
-#include "MantidKernel/Exception.h"
 #include "ICompAssemblyActor.h"
 #include <cfloat>
+
+#include "MantidKernel/V3D.h"
+#include "MantidGeometry/IComponent.h"
+
 using namespace Mantid;
 using namespace Geometry;
 

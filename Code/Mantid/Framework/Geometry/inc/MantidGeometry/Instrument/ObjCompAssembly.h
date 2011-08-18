@@ -74,7 +74,7 @@ public:
   //! Get a pointer to the ith component within the assembly. Easier to use than [] when you have a pointer
   boost::shared_ptr<IComponent> getChild(const int i) const{return (*this)[i];}
   //! Get all children
-  void getChildren(std::vector<boost::shared_ptr<IComponent> > & outVector, bool recursive) const;
+  void getChildren(std::vector<IComponent_const_sptr> & outVector, bool recursive) const;
   //! Get a pointer to the ith component in the assembly
   boost::shared_ptr<IComponent> operator[](int i) const;
   //! Print information about all children

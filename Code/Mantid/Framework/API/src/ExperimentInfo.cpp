@@ -1,7 +1,6 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/IInstrument.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
@@ -64,17 +63,16 @@ namespace API
   *
   * @param instr :: Shared pointer to an instrument.
   */
-  void ExperimentInfo::setInstrument(const IInstrument_sptr& instr)
+  void ExperimentInfo::setInstrument(const Instrument_sptr& instr)
   {
-    boost::shared_ptr<Instrument> tmp = boost::dynamic_pointer_cast<Instrument>(instr);
-    if (tmp->isParametrized())
+    if (instr->isParametrized())
     {
-      sptr_instrument = tmp->baseInstrument();
-      m_parmap = tmp->getParameterMap();
+      sptr_instrument = instr->baseInstrument();
+      m_parmap = instr->getParameterMap();
     }
     else
     {
-      sptr_instrument=tmp;
+      sptr_instrument = instr;
     }
   }
 
@@ -84,7 +82,7 @@ namespace API
   *
   *  @return The instrument class
   */
-  IInstrument_sptr ExperimentInfo::getInstrument()const
+  Instrument_sptr ExperimentInfo::getInstrument()const
   {
     return Geometry::ParComponentFactory::createInstrument(sptr_instrument, m_parmap);
   }

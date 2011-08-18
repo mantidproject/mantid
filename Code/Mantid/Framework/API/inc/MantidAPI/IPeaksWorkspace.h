@@ -58,7 +58,7 @@ namespace API
     virtual ~IPeaksWorkspace();
 
     //boost::shared_ptr<IPeaksWorkspace> clone() = 0;
-    //void appendFile( std::string filename, Mantid::Geometry::IInstrument_sptr inst) = 0;
+    //void appendFile( std::string filename, Mantid::Geometry::Instrument_sptr inst) = 0;
 
     //---------------------------------------------------------------------------------------------
     /** @return the number of peaks

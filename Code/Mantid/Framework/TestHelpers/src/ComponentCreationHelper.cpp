@@ -257,7 +257,7 @@ namespace ComponentCreationHelper
    * @param num_banks: number of 9-cylinder banks to create
    * @param verbose: prints out the instrument after creation.
    */
-  IInstrument_sptr createTestInstrumentCylindrical(int num_banks, bool verbose)
+  Instrument_sptr createTestInstrumentCylindrical(int num_banks, bool verbose)
   {
     boost::shared_ptr<Instrument> testInst(new Instrument("basic"));
 
@@ -344,7 +344,7 @@ namespace ComponentCreationHelper
    * @param num_banks: number of rectangular banks to create
    * @param pixels :: number of pixels in each direction.
    */
-  IInstrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing)
+  Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing)
   {
     boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
 
@@ -407,7 +407,7 @@ namespace ComponentCreationHelper
    * @param num_banks: number of rectangular banks to create
    * @param pixels :: number of pixels in each direction.
    */
-  IInstrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, double pixelSpacing)
+  Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, double pixelSpacing)
   {
     boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
 

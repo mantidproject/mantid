@@ -30,7 +30,6 @@ void FilterBadPulses::initDocs()
 
 using namespace Kernel;
 using namespace API;
-using Geometry::IInstrument_const_sptr;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;

@@ -2,9 +2,8 @@
 #define MANTID_TEST_GEOMETRY_NEARESTNEIGHBOURS
 
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -101,8 +100,8 @@ public:
     TS_ASSERT_EQUALS( m_instrument->getDetectorIDs().size(), 512);
 
 
-    RectangularDetector_sptr bank1 = boost::dynamic_pointer_cast<RectangularDetector>(m_instrument->getComponentByName("bank1"));
-    boost::shared_ptr<Detector> det = bank1->getAtXY(2,3);
+    RectangularDetector_const_sptr bank1 = boost::dynamic_pointer_cast<const RectangularDetector>(m_instrument->getComponentByName("bank1"));
+    boost::shared_ptr<const Detector> det = bank1->getAtXY(2,3);
     TS_ASSERT( det );
     std::map<specid_t, double> nb;
 

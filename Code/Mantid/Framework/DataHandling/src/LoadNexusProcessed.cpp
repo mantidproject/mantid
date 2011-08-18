@@ -42,7 +42,7 @@ using namespace Mantid::NeXus;
 using namespace DataObjects;
 using namespace Kernel;
 using namespace API;
-using Geometry::IInstrument_sptr;
+using Geometry::Instrument_sptr;
 
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed() : m_shared_bins(false), m_xbins(),
@@ -1176,7 +1176,7 @@ void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
 
   const std::string & details =  pmap_node.data().front();
   Geometry::ParameterMap& pmap = local_workspace->instrumentParameters();
-  IInstrument_sptr instr = local_workspace->getBaseInstrument();
+  Instrument_sptr instr = local_workspace->getBaseInstrument();
   
   int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
   options += Poco::StringTokenizer::TOK_TRIM;
@@ -1191,7 +1191,7 @@ void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry,
     std::string comp_name = tokens[0];
     //if( comp_name == prev_name ) continue; this blocks reading in different parameters of the same component. RNT
     //prev_name = comp_name;
-    Geometry::IComponent* comp = 0;
+    const Geometry::IComponent* comp = 0;
     if (comp_name.find("detID:") != std::string::npos)
     {
       int detID = atoi(comp_name.substr(6).c_str());

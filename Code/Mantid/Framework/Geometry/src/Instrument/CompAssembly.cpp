@@ -226,7 +226,7 @@ boost::shared_ptr<IComponent> CompAssembly::operator[](int i) const
  * @param outVector :: vector of IComponent sptr.
  * @param recursive :: if a child is a CompAssembly, returns its children recursively
  */
-void CompAssembly::getChildren(std::vector<boost::shared_ptr<IComponent> > & outVector, bool recursive) const
+void CompAssembly::getChildren(std::vector<IComponent_const_sptr> & outVector, bool recursive) const
 {
   for (int i=0; i < this->nelements(); i++)
   {

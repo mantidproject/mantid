@@ -15,7 +15,6 @@
 #include "MantidCurveFitting/Fit.h"
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Unit.h"
@@ -77,13 +76,13 @@ public:
     for (size_t k = 0; k < wsPtr->getNumberHistograms(); k++)
       wsPtr->setX(k, x_vals);
 
-    Geometry::IInstrument_sptr instP = wsPtr->getInstrument();
-    boost::shared_ptr<Geometry::IComponent> bankC = instP->getComponentByName(std::string("bank1"));
+    Geometry::Instrument_sptr instP = wsPtr->getInstrument();
+    IComponent_const_sptr bankC = instP->getComponentByName(std::string("bank1"));
 
     if (bankC->type().compare("RectangularDetector") != 0)
       throw std::runtime_error(" No Rect bank named bank 1");
 
-    boost::shared_ptr<Geometry::RectangularDetector> bankR = boost::dynamic_pointer_cast<
+    boost::shared_ptr<const Geometry::RectangularDetector> bankR = boost::dynamic_pointer_cast<const
         Geometry::RectangularDetector>(bankC);
 
     boost::shared_ptr<Geometry::Detector> pixelp = bankR->getAtXY(PeakCol, PeakRow);
@@ -275,15 +274,15 @@ ISAWIntensityError     98.0362     134.863      164.32     187.991      164.32  
       Workspace2D_sptr wsPtr = boost::dynamic_pointer_cast<Workspace2D>(
           AnalysisDataService::Instance().retrieve("RebinResult"));
 
-      Geometry::IInstrument_sptr instP = wsPtr->getInstrument();
+      Geometry::Instrument_sptr instP = wsPtr->getInstrument();
 
-      boost::shared_ptr<Geometry::IComponent> bankC = instP->getComponentByName(std::string("bank26"));
+      IComponent_const_sptr bankC = instP->getComponentByName(std::string("bank26"));
 
       if (bankC->type().compare("RectangularDetector") != 0)
         throw std::runtime_error(" No Rect bank named bank 26");
 
-      boost::shared_ptr<Geometry::RectangularDetector> bankR = boost::dynamic_pointer_cast<
-          Geometry::RectangularDetector>(bankC);
+      boost::shared_ptr<const Geometry::RectangularDetector> bankR = boost::dynamic_pointer_cast<
+          const Geometry::RectangularDetector>(bankC);
 
       boost::shared_ptr<Geometry::Detector> pixelp = bankR->getAtXY(57, 214);
 
@@ -327,7 +326,7 @@ private:
   /**
    *   Calculates Q
    */
-  double calcQ(RectangularDetector_sptr bankP, boost::shared_ptr<IInstrument> instPtr, int row, int col,
+  double calcQ(RectangularDetector_const_sptr bankP, boost::shared_ptr<Instrument> instPtr, int row, int col,
       double time)
   {
     boost::shared_ptr<Detector> detP = bankP->getAtXY(col, row);
@@ -363,10 +362,10 @@ private:
         WorkspaceFactory::Instance().create("Workspace2D", NVectors, ntimes, nvals));
     //wsPtr->initialize(NVectors, ntimes, nvals);
 
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(Npanels, NRC,
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(Npanels, NRC,
         sideLength);
 
-    wsPtr->setInstrument(boost::dynamic_pointer_cast<Geometry::IInstrument>(inst));
+    wsPtr->setInstrument(inst);
 
     wsPtr->rebuildSpectraMapping(false);
 

@@ -22,7 +22,6 @@
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidAPI/Progress.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/PropertyManagerOwner.h"
 #include "MantidKernel/Unit.h"
@@ -464,7 +463,7 @@ namespace Mantid
     boost::shared_ptr<const RectangularDetector> IntegratePeakTimeSlices::getPanel(Peak const & peak)
     {
 
-      Mantid::Geometry::IInstrument_const_sptr Iptr = peak.getInstrument();
+      Geometry::Instrument_const_sptr Iptr = peak.getInstrument();
       std::string bankName = peak.getBankName();
 
       boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
@@ -525,7 +524,7 @@ namespace Mantid
       try
       {
         Q = peak.getQLabFrame().norm();
-        Geometry::IInstrument_const_sptr instr = peak.getInstrument();
+        Geometry::Instrument_const_sptr instr = peak.getInstrument();
         const Geometry::IObjComponent_sptr  sample = instr->getSample();
         V3D pos = peak.getDetPos()-sample->getPos();
 

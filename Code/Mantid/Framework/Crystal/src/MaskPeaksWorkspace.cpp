@@ -79,7 +79,7 @@ namespace Mantid
       //To get the workspace index from the detector ID
       detid2index_map * pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(true);
       //Get some stuff from the input workspace
-      Geometry::IInstrument_sptr inst = inputW->getInstrument();
+      Geometry::Instrument_sptr inst = inputW->getInstrument();
       if (!inst)
         throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
 
@@ -101,9 +101,9 @@ namespace Mantid
         XPeak = int(col+0.5)-1;
         YPeak = int(row+0.5)-1;
   
-        boost::shared_ptr<Geometry::IComponent> comp = inst->getComponentByName(peak.getBankName());
+        Geometry::IComponent_const_sptr comp = inst->getComponentByName(peak.getBankName());
         if (!comp) throw std::invalid_argument("Component "+peak.getBankName()+" does not exist in instrument");
-        boost::shared_ptr<Geometry::RectangularDetector> det = boost::dynamic_pointer_cast<Geometry::RectangularDetector>(comp);
+        Geometry::RectangularDetector_const_sptr det = boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
         if (!det) throw std::invalid_argument("Component "+peak.getBankName()+" is not a rectangular detector");
         for (int ix=Xmin; ix <= Xmax; ix++)
           for (int iy=Ymin; iy <= Ymax; iy++)

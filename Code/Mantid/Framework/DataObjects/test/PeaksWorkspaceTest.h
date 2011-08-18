@@ -31,7 +31,7 @@ public:
    */
   PeaksWorkspace * buildPW()
   {
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
     inst->setName("SillyInstrument");
     PeaksWorkspace * pw = new PeaksWorkspace();
     pw->setInstrument(inst);

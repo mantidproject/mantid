@@ -27,7 +27,6 @@ using namespace Kernel;
 using namespace API;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
-using Geometry::IInstrument_const_sptr;
 using Kernel::Exception::InstrumentDefinitionError;
 using Kernel::Exception::NotFoundError;
 using std::size_t;
@@ -109,11 +108,11 @@ void UnwrapSNS::exec()
 
   // without the primary flight path the algorithm cannot work
   try {
-    IInstrument_const_sptr instrument = m_inputWS->getInstrument();
+    Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
     Geometry::IObjComponent_const_sptr sample = instrument->getSample();
     m_L1 = instrument->getSource()->getDistance(*sample);
   }
-  catch (NotFoundError e)
+  catch (NotFoundError&)
   {
     throw InstrumentDefinitionError("Unable to calculate source-sample distance",
         m_inputWS->getTitle());

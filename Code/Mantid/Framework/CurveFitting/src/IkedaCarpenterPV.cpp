@@ -142,7 +142,7 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
       // its size smaller than nData
       if ( m_workspace != 0 )
       {
-        IInstrument_const_sptr instrument = m_workspace->getInstrument();
+        Instrument_const_sptr instrument = m_workspace->getInstrument();
         Geometry::IObjComponent_const_sptr sample = instrument->getSample();
         if (sample != NULL)
         {

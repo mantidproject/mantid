@@ -7,7 +7,7 @@
 #include "SampleActor.h"
 #include "MantidColorMap.h"
 
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 
 #include <boost/shared_ptr.hpp>
@@ -76,7 +76,7 @@ public:
   void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const{m_scene.getBoundingBox(minBound,maxBound);}
   bool accept(const GLActorVisitor& visitor);
 
-  boost::shared_ptr<const Mantid::Geometry::IInstrument> getInstrument()const;
+  boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument()const;
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace()const{return m_workspace;}
   const MantidColorMap & getColorMap() const;
   void loadColorMap(const QString& ,bool reset_colors = true);
@@ -128,7 +128,7 @@ protected:
   /// The user requested data and bin ranges
   double m_DataMinValue, m_DataMaxValue;
   double m_BinMinValue, m_BinMaxValue;
-  boost::shared_ptr<const Mantid::Geometry::IInstrument::plottables> m_plottables;
+  boost::shared_ptr<const std::vector<Mantid::Geometry::IObjComponent_const_sptr> > m_plottables;
   boost::scoped_ptr<Mantid::detid2index_map> m_id2wi_map;
   mutable std::vector<Mantid::detid_t> m_detIDs; ///< all det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors
   mutable std::vector<GLColor> m_colors; ///< colors in order of workspace indexes

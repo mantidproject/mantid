@@ -18,7 +18,7 @@ class PeakTest : public CxxTest::TestSuite
 {
 public:
   /// Common instrument
-  IInstrument_sptr inst;
+  Instrument_sptr inst;
   void setUp()
   {
     inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 100);

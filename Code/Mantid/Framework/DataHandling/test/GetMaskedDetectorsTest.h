@@ -7,7 +7,7 @@
 #include "MantidDataHandling/MaskDetectors.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <vector>
@@ -69,7 +69,7 @@ public:
     marker_mask.setPropertyValue("Workspace", inputWS);
     marker_mask.setPropertyValue("DetectorList","1,3");
     marker_mask.execute();
-    boost::shared_ptr<IInstrument> instrument = space->getInstrument();
+    boost::shared_ptr<Instrument> instrument = space->getInstrument();
     TS_ASSERT( instrument->getDetector(1)->isMasked() )
     TS_ASSERT( instrument->getDetector(3)->isMasked() )
   }

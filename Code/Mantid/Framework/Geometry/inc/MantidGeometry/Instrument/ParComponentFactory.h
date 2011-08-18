@@ -18,7 +18,6 @@ namespace Mantid
     class IComponent;
     class IDetector;
     class Detector;
-    class IInstrument;
     class Instrument;
 
     /** 

@@ -57,8 +57,8 @@ void MoveInstrumentComponent::exec()
   const double Z = getProperty("Z");
   const bool RelativePosition = getProperty("RelativePosition");
 
-  boost::shared_ptr<IInstrument> inst = WS->getInstrument();
-  boost::shared_ptr<IComponent> comp;
+  Instrument_sptr inst = WS->getInstrument();
+  IComponent_const_sptr comp;
 
   // Find the component to move
   if (DetID != -1)

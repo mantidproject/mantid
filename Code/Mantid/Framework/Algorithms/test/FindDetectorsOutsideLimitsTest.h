@@ -166,7 +166,7 @@ public:
   {
     // Make a workspace with 50 pixels, 200 events per pixel.
     EventWorkspace_sptr work_in = WorkspaceCreationHelper::CreateEventWorkspace2();
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(10);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(10);
     work_in->setInstrument(inst);
     DateAndTime run_start("2010-01-01");
     // Add ten more at #10 so that it fails

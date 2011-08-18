@@ -16,7 +16,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
@@ -54,8 +54,7 @@ using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid;
-using Mantid::Geometry::IInstrument_sptr;
-using Mantid::Geometry::IInstrument;
+using Mantid::Geometry::Instrument_const_sptr;
 
 // Initialize the logger
 Logger& SANSRunWindow::g_log = Logger::get("SANSRunWindow");
@@ -1031,8 +1030,8 @@ void SANSRunWindow::addTimeMasksToTable(const QString & mask_string, const QStri
  */
 void SANSRunWindow::componentLOQDistances(Mantid::API::MatrixWorkspace_sptr workspace, double & lms, double & lsda, double & lsdb)
 {
-  IInstrument_sptr instr = workspace->getInstrument();
-  if( instr == boost::shared_ptr<IInstrument>() ) return;
+  Instrument_const_sptr instr = workspace->getInstrument();
+  if( !instr ) return;
 
   Mantid::Geometry::IObjComponent_sptr source = instr->getSource();
   if( source == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
@@ -1042,7 +1041,7 @@ void SANSRunWindow::componentLOQDistances(Mantid::API::MatrixWorkspace_sptr work
   lms = source->getPos().distance(sample->getPos()) * 1000.;
    
   //Find the main detector bank
-  boost::shared_ptr<Mantid::Geometry::IComponent> comp = instr->getComponentByName("main-detector-bank");
+  Mantid::Geometry::IComponent_const_sptr comp = instr->getComponentByName("main-detector-bank");
   if( comp != boost::shared_ptr<Mantid::Geometry::IComponent>() )
   {
     lsda = sample->getPos().distance(comp->getPos()) * 1000.;
@@ -1307,7 +1306,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
     sample_workspace = getGroupMember(workspace_ptr, 1);
   }
 
-  IInstrument_sptr instr = sample_workspace->getInstrument();
+  Instrument_const_sptr instr = sample_workspace->getInstrument();
   boost::shared_ptr<Mantid::Geometry::IComponent> source = instr->getSource();
 
   // Moderator-monitor distance is common to LOQ and S2D
@@ -1444,7 +1443,7 @@ void SANSRunWindow::setSANS2DGeometry(Mantid::API::MatrixWorkspace_sptr workspac
 {  
   double unitconv = 1000.;
 
-  IInstrument_sptr instr = workspace->getInstrument();
+  Instrument_const_sptr instr = workspace->getInstrument();
   boost::shared_ptr<Mantid::Geometry::IComponent> sample = instr->getSample();
   boost::shared_ptr<Mantid::Geometry::IComponent> source = instr->getSource();
   double distance = source->getDistance(*sample) * unitconv;

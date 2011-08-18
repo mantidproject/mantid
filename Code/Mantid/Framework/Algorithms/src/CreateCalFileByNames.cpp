@@ -6,7 +6,6 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/ConfigService.h"
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -37,7 +36,7 @@ namespace Mantid
     using namespace Kernel;
     using API::Progress;
     using API::FileProperty;
-    using Geometry::IInstrument_sptr;
+    using Geometry::Instrument_sptr;
 
     CreateCalFileByNames::CreateCalFileByNames():API::Algorithm(),group_no(0)
     {
@@ -75,7 +74,7 @@ namespace Mantid
         throw std::runtime_error("Workspace not found!");
 
       // Get the instrument.
-      IInstrument_sptr inst = ws->getInstrument();
+      Instrument_sptr inst = ws->getInstrument();
       if (!inst)
         throw std::runtime_error("No instrument found in the workspace " + ws->getName());
 

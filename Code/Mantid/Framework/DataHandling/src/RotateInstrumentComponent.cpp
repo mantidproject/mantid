@@ -61,8 +61,8 @@ void RotateInstrumentComponent::exec()
 
   if (X + Y + Z == 0.0) throw std::invalid_argument("The rotation axis must not be a zero vector");
 
-  boost::shared_ptr<IInstrument> inst = WS->getInstrument();
-  boost::shared_ptr<IComponent> comp;
+  Instrument_sptr inst = WS->getInstrument();
+  IComponent_const_sptr comp;
 
   // Find the component to move
   if (DetID != -1)

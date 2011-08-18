@@ -70,7 +70,7 @@ namespace Mantid
     void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum, double &l1, double &l2,
         double &tth)
     {
-      Geometry::IInstrument_const_sptr instrument = wksp->getInstrument();
+      Geometry::Instrument_const_sptr instrument = wksp->getInstrument();
       if (instrument == NULL)
       {
         l1 = 0.;
@@ -135,7 +135,7 @@ namespace Mantid
       ios_base::openmode mode = (append ? (ios_base::out | ios_base::app) : ios_base::out);
       Progress p(this, 0.0, 1.0, nHist);
       double l1, l2, tth;
-      Geometry::IInstrument_const_sptr instrument = inputWS->getInstrument();
+      Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
       Geometry::IObjComponent_const_sptr source;
       Geometry::IObjComponent_const_sptr sample;
       if (instrument != NULL)

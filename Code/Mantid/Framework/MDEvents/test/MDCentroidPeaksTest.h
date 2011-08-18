@@ -5,7 +5,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -83,7 +82,7 @@ public:
       std::string OutputWorkspace = "MDCentroidPeaksTest_Peaks")
   {
     // Make a fake instrument - doesn't matter, we won't use it really
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
     // --- Make a fake PeaksWorkspace in the given coordinate space ---
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());

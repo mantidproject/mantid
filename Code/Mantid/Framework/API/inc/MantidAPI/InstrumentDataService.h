@@ -3,7 +3,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DataService.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid

@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/V3D.h"
 #include <boost/scoped_ptr.hpp>
@@ -38,7 +38,7 @@ private:
     Coordinate c = Coordinate::createCoordinate4D(1, 2, 3, 4);
     vertexes.push_back(c);
     IDetector_sptr detector = IDetector_sptr(new DummyDetector("dummydetector"));
-    IInstrument_sptr instrument = IInstrument_sptr(new DummyInstrument("dummyinstrument"));
+    Instrument_sptr instrument = Instrument_sptr(new DummyInstrument("dummyinstrument"));
     return new MDPoint(1, 0.1, vertexes, detector, instrument);
   }
 

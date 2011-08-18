@@ -21,7 +21,7 @@
 #include <MantidGeometry/Instrument/Component.h>
 #include <MantidGeometry/Instrument/CompAssembly.h>
 #include <MantidGeometry/Instrument/Detector.h>
-#include <MantidGeometry/Instrument/Instrument.h>
+#include <MantidGeometry/Instrument.h>
 #include <MantidGeometry/Instrument/DetectorGroup.h>
 #include "MantidPythonAPI/geometryhelper.h" //exports for matrices to numpy arrays
 
@@ -138,24 +138,16 @@ namespace Mantid
   void export_instrument()
   {
     //Pointer to the interface
-    register_ptr_to_python<boost::shared_ptr<Geometry::IInstrument> >();
-    
-    //IInstrument class
-    class_< Geometry::IInstrument, boost::python::bases<Geometry::ICompAssembly>, 
-      boost::noncopyable>("IInstrument", no_init)
-      .def("getSample", &Geometry::IInstrument::getSample)
-      .def("getSource", &Geometry::IInstrument::getSource)
-      .def("getComponentByName", (boost::shared_ptr<Geometry::IComponent> (Geometry::IInstrument::*)(const std::string&))&Geometry::IInstrument::getComponentByName)
-      .def("getDetector", (Geometry::IDetector_sptr (Geometry::IInstrument::*)(const detid_t&)const)&Geometry::IInstrument::getDetector)
-      ;
-
-    /** Concrete implementations so that Python knows about them */
+    register_ptr_to_python<boost::shared_ptr<Geometry::Instrument> >();
     
     //Instrument class
-    class_< Geometry::Instrument, boost::python::bases<Geometry::IInstrument, Geometry::CompAssembly>, 
-	    boost::noncopyable>("Instrument", no_init)
+    class_< Geometry::Instrument, boost::python::bases<Geometry::CompAssembly>,
+      boost::noncopyable>("Instrument", no_init)
+      .def("getSample", &Geometry::Instrument::getSample)
+      .def("getSource", &Geometry::Instrument::getSource)
+      .def("getComponentByName", (boost::shared_ptr<Geometry::IComponent> (Geometry::Instrument::*)(const std::string&))&Geometry::Instrument::getComponentByName)
+      .def("getDetector", (Geometry::IDetector_sptr (Geometry::Instrument::*)(const detid_t&)const)&Geometry::Instrument::getDetector)
       ;
-    
   }
 
   void export_unit_cell()

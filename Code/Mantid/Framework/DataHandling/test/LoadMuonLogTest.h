@@ -11,7 +11,7 @@
 
 #include "MantidDataHandling/LoadMuonLog.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Exception.h"

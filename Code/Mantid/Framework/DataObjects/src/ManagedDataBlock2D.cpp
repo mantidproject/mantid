@@ -173,7 +173,6 @@ std::fstream& operator<<(std::fstream& fs, ManagedDataBlock2D& data)
       ManagedDataBlock2D::g_log.warning() << "E vector resized to " << data.m_YLength << " elements.";
     }
     fs.write(reinterpret_cast<char *>(&(it->directDataE().front())), data.m_YLength * sizeof(double));
-    // N.B. ErrorHelper member not stored to file so will always be Gaussian default
     
     // Clear the "dirty" flag since it was just written out.
     it->setDirty(false);
@@ -201,7 +200,6 @@ std::fstream& operator>>(std::fstream& fs, ManagedDataBlock2D& data)
     fs.read(reinterpret_cast<char *>(&(it->directDataE().front())), data.m_YLength * sizeof(double));
     // Yes, it is loaded
     it->setLoaded(true);
-    // N.B. ErrorHelper member not stored to file so will always be Gaussian default
   }
   return fs;
 }

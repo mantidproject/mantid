@@ -9,7 +9,6 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 
@@ -101,7 +100,7 @@ namespace Algorithms
       throw std::runtime_error("Workspace not found!");
 
     // Get the instrument.
-    IInstrument_sptr inst = ws->getInstrument();
+    Instrument_sptr inst = ws->getInstrument();
     if (!inst)
       throw std::runtime_error("No instrument found in the workspace " + ws->getName());
 

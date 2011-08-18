@@ -5,7 +5,7 @@
 
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Exception.h"
@@ -65,7 +65,7 @@ public:
       mover.setPropertyValue("Z","30");
       mover.execute();
 
-      IInstrument_sptr inst = WS->getInstrument();
+      Instrument_sptr inst = WS->getInstrument();
       // get pointer to the first detector in the bank
       boost::shared_ptr<IComponent> comp = (*boost::dynamic_pointer_cast<ICompAssembly>(
                                               (*boost::dynamic_pointer_cast<ICompAssembly>(inst))[0]))[0];
@@ -87,7 +87,7 @@ public:
       mover.setPropertyValue("RelativePosition","0");
       mover.execute();
 
-      IInstrument_sptr inst = WS->getInstrument();
+      Instrument_sptr inst = WS->getInstrument();
       // get pointer to the first detector in the bank
       boost::shared_ptr<IComponent> comp = (*boost::dynamic_pointer_cast<ICompAssembly>(
                                               (*boost::dynamic_pointer_cast<ICompAssembly>(inst))[0]))[0];
@@ -108,7 +108,7 @@ public:
     mover.setPropertyValue("RelativePosition","0");
     mover.execute();
 
-    IInstrument_sptr inst = WS->getInstrument();
+    Instrument_sptr inst = WS->getInstrument();
     // get pointer to the first detector in the bank
     boost::shared_ptr<IComponent> comp = (*boost::dynamic_pointer_cast<ICompAssembly>((*boost::dynamic_pointer_cast<ICompAssembly>(inst))[0]))[0];
 

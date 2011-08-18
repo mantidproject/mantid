@@ -332,7 +332,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
   int64_t numberOfSpectra_i = static_cast<int64_t>(m_numberOfSpectra); // cast to make openmp happy
 
   // Get a pointer to the instrument contained in the workspace
-  IInstrument_const_sptr instrument = outputWS->getInstrument();
+  Instrument_const_sptr instrument = outputWS->getInstrument();
   // Get the parameter map
   const ParameterMap& pmap = outputWS->constInstrumentParameters();
 

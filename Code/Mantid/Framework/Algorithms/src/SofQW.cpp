@@ -77,7 +77,7 @@ void SofQW::exec()
   else if (emodeStr == "Indirect") emode=2;
   
   // Get a pointer to the instrument contained in the workspace
-  IInstrument_const_sptr instrument = inputWorkspace->getInstrument();
+  Instrument_const_sptr instrument = inputWorkspace->getInstrument();
   // Get the parameter map
   const ParameterMap& pmap = inputWorkspace->constInstrumentParameters();
   // Get the distance between the source and the sample (assume in metres)

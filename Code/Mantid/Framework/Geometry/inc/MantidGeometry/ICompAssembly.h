@@ -66,7 +66,7 @@ namespace Mantid
       //! Get a pointer to the ith component within the assembly. Easier to use than [] when you have a pointer
       virtual boost::shared_ptr<IComponent> getChild(const int i) const = 0;
       //! Get all children
-      virtual void getChildren(std::vector<boost::shared_ptr<IComponent> > & outVector, bool recursive) const = 0;
+      virtual void getChildren(std::vector<IComponent_const_sptr> & outVector, bool recursive) const = 0;
       //! Overloaded index operator. Get a pointer to the ith component in the assembly
       virtual boost::shared_ptr<IComponent> operator[](int i) const = 0;
       //! Print information about all children

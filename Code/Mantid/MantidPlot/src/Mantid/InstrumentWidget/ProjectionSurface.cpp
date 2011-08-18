@@ -5,7 +5,6 @@
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/IInstrument.h"
 
 #include <QRgb>
 #include <QSet>

@@ -38,7 +38,7 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
-    using Geometry::IInstrument;
+    using Geometry::Instrument;
     using namespace Mantid::NeXus;
 
     /// Empty default constructor
@@ -131,7 +131,7 @@ namespace Mantid
       Property *ws = getProperty("OutputWorkspace");
       std::string localWSName = ws->value();
       // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
-      boost::shared_ptr<IInstrument> instrument;
+      boost::shared_ptr<Instrument> instrument;
       boost::shared_ptr<Sample> sample;
 
       // Call private method to validate the optional parameters, if set

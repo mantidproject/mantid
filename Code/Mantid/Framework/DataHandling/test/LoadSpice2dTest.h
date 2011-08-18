@@ -9,7 +9,6 @@
 
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -103,14 +102,14 @@ public:
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    boost::shared_ptr<Mantid::Geometry::IInstrument> i = ws2d->getInstrument();
+    Mantid::Geometry::Instrument_const_sptr i = ws2d->getInstrument();
     boost::shared_ptr<Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS( i->getName(), "GPSANS");
     TS_ASSERT_EQUALS( source->getName(), "source");
 
     // Check parameters for sample aperture
-    boost::shared_ptr<Mantid::Geometry::IComponent> sample_aperture = i->getComponentByName("sample_aperture");
+    Mantid::Geometry::IComponent_const_sptr sample_aperture = i->getComponentByName("sample_aperture");
     TS_ASSERT_EQUALS( sample_aperture->getNumberParameter("Size")[0], 14.0);
 
     // Check parameter map access

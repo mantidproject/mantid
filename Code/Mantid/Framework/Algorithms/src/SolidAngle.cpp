@@ -26,7 +26,6 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
-    using Geometry::IInstrument_const_sptr;
 
     /// Default constructor
     SolidAngle::SolidAngle() : Algorithm()
@@ -95,7 +94,7 @@ namespace Mantid
       setProperty("OutputWorkspace",outputWS);
 
       // Get a pointer to the instrument contained in the workspace
-      IInstrument_const_sptr instrument = inputWS->getInstrument();
+      Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
 
       // Get the distance between the source and the sample (assume in metres)
       Geometry::IObjComponent_const_sptr sample = instrument->getSample();

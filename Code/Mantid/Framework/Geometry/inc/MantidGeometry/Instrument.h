@@ -5,9 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/cow_ptr.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -17,6 +17,8 @@
 
 namespace Mantid
 {
+  /// Typedef of a map from detector ID to detector shared pointer.
+  typedef std::map<detid_t, Geometry::IDetector_sptr> detid2det_map;
 
   namespace Geometry
   {
@@ -56,7 +58,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class MANTID_GEOMETRY_DLL Instrument : public Geometry::CompAssembly, public IInstrument
+    class MANTID_GEOMETRY_DLL Instrument : public CompAssembly
     {
     public:
       ///String description of the type of component
@@ -70,6 +72,8 @@ namespace Mantid
 
       IObjComponent_sptr getSource() const;
       IObjComponent_sptr getSample() const;
+      Kernel::V3D getBeamDirection() const;
+
       IDetector_sptr getDetector(const detid_t &detector_id) const;
       /// Returns a pointer to the geometrical object for the given set of IDs
       IDetector_sptr getDetector(const std::vector<detid_t> &det_ids) const;
@@ -86,27 +90,27 @@ namespace Mantid
       /// mark a Component which has already been added to the Instrument (as a child comp.)
       /// to be 'the' samplePos Component. For now it is assumed that we have
       /// at most one of these.
-      void markAsSamplePos(Geometry::ObjComponent*);
+      void markAsSamplePos(ObjComponent*);
 
       /// mark a Component which has already been added to the Instrument (as a child comp.)
       /// to be 'the' source Component. For now it is assumed that we have
       /// at most one of these.
-      void markAsSource(Geometry::ObjComponent*);
+      void markAsSource(ObjComponent*);
 
       /// mark a Component which has already been added to the Instrument (as a child comp.)
       /// to be a Detector component by adding it to _detectorCache
-      void markAsDetector(Geometry::IDetector*);
+      void markAsDetector(IDetector*);
 
       /// mark a Component which has already been added to the Instrument (as a child comp.)
       /// to be a monitor and also add it to _detectorCache for possible later retrieval
-      void markAsMonitor(Geometry::IDetector*);
+      void markAsMonitor(IDetector*);
 
       /// return reference to detector cache 
       void getDetectors(detid2det_map & out_map) const;
 
       std::vector<detid_t> getDetectorIDs(bool skipMonitors = false) const;
 
-      void getDetectorsInBank(std::vector<Geometry::IDetector_sptr> & dets, const std::string & bankName);
+      void getDetectorsInBank(std::vector<IDetector_const_sptr> & dets, const std::string & bankName) const;
 
       /// returns a list containing  detector ids of monitors
       const std::vector<detid_t> getMonitors()const ;
@@ -120,15 +124,19 @@ namespace Mantid
       void getBoundingBox(BoundingBox& boundingBox) const;
 
       /// Get pointers to plottable components
-      plottables_const_sptr getPlottable() const;
-
-      std::string getName()const{return Geometry::CompAssembly::getName();}
+      boost::shared_ptr<const std::vector<IObjComponent_const_sptr> > getPlottable() const;
 
       /// Returns a shared pointer to a component
-      boost::shared_ptr<Geometry::IComponent> getComponentByID(Geometry::ComponentID id);
+      boost::shared_ptr<IComponent> getComponentByID(ComponentID id);
 
       /// Returns a shared pointer to a component
-      boost::shared_ptr<const Geometry::IComponent> getComponentByID(Geometry::ComponentID id)const;
+      boost::shared_ptr<const IComponent> getComponentByID(ComponentID id) const;
+
+      /// Returns a pointer to the first component encountered with the given name
+      boost::shared_ptr<const IComponent> getComponentByName(const std::string & cname) const;
+
+      /// Returns pointers to all components encountered with the given name
+      std::vector<boost::shared_ptr<IComponent> > getAllComponentsWithName(const std::string & cname);
 
       /// Get information about the parameters described in the instrument definition file and associated parameter files
       std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& getLogfileCache() {return _logfileCache;}
@@ -143,23 +151,36 @@ namespace Mantid
       // Allow access by index
       using CompAssembly::getChild;
 
-
       /// Pointer to the 'real' instrument, for parametrized instruments
       boost::shared_ptr<Instrument> baseInstrument() const;
 
       /// Pointer to the NOT const ParameterMap holding the parameters of the modified instrument components.
       boost::shared_ptr<ParameterMap> getParameterMap() const;
 
+      /// @return the date from which the instrument definition begins to be valid.
+      Kernel::DateAndTime getValidFromDate() const { return m_ValidFrom; }
+
+      /// @return the date at which the instrument definition is no longer valid.
+      Kernel::DateAndTime getValidToDate() const { return m_ValidTo; }
+
+      /// Set the date from which the instrument definition begins to be valid.
+      /// @param val :: date
+      void setValidFromDate(const Kernel::DateAndTime val) { m_ValidFrom = val; }
+
+      /// Set the date at which the instrument definition is no longer valid.
+      /// @param val :: date
+      void setValidToDate(const Kernel::DateAndTime val) { m_ValidTo = val; }
+
       // ----- Useful static functions ------
       static double calcConversion(const double l1, const Kernel::V3D &beamline, const double beamline_norm,
-          const Kernel::V3D &samplePos, const Geometry::IDetector_const_sptr &det, const double offset,
+          const Kernel::V3D &samplePos, const IDetector_const_sptr &det, const double offset,
           bool vulcancorrection);
 
       static double calcConversion(const double l1,
                             const Kernel::V3D &beamline,
                             const double beamline_norm,
                             const Kernel::V3D &samplePos,
-                            const Geometry::IInstrument_const_sptr &instrument,
+                            const boost::shared_ptr<const Instrument> &instrument,
                             const std::vector<detid_t> &detectors,
                             const std::map<detid_t,double> &offsets,
                             bool vulcancorrection);
@@ -177,10 +198,10 @@ namespace Mantid
       static Kernel::Logger& g_log;
 
       /// Get a child by name
-      Geometry::IComponent* getChild(const std::string& name) const;
+      IComponent* getChild(const std::string& name) const;
 
       /// Add a plottable component
-      void appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_const_sptr>& lst)const;
+      void appendPlottable(const CompAssembly& ca,std::vector<IObjComponent_const_sptr>& lst)const;
 
       // This method is only required for efficent caching of parameterized components and
       // should not form part of the interface. It is an implementation detail.
@@ -189,13 +210,13 @@ namespace Mantid
       void swap(const Instrument* base, const ParameterMap * map);
 
       /// Map which holds detector-IDs and pointers to detector components
-      std::map<detid_t, Geometry::IDetector_sptr > _detectorCache;
+      std::map<detid_t, IDetector_sptr > _detectorCache;
 
       /// Purpose to hold copy of source component. For now assumed to be just one component
-      Geometry::ObjComponent* _sourceCache;
+      ObjComponent* _sourceCache;
 
       /// Purpose to hold copy of samplePos component. For now assumed to be just one component
-      Geometry::ObjComponent* _sampleCache;
+      ObjComponent* _sampleCache;
 
       /// To store info about the parameters defined in IDF. Indexed according to logfile-IDs, which equals logfile filename minus the run number and file extension
       std::multimap<std::string, boost::shared_ptr<XMLlogfile> > _logfileCache;
@@ -220,6 +241,10 @@ namespace Mantid
       /// Non-const pointer to the parameter map
       boost::shared_ptr<ParameterMap> m_map_nonconst;
 
+      /// the date from which the instrument definition begins to be valid.
+      Kernel::DateAndTime m_ValidFrom;
+      /// the date at which the instrument definition is no longer valid.
+      Kernel::DateAndTime m_ValidTo;
     };
 
     /// Shared pointer to an instrument object

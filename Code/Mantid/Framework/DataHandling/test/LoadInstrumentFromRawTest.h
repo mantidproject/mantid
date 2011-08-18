@@ -5,7 +5,7 @@
 
 #include "MantidDataHandling/LoadInstrumentFromRaw.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Exception.h"
@@ -72,7 +72,7 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
-    boost::shared_ptr<IInstrument> i = output->getInstrument();
+    boost::shared_ptr<Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS( i->getName(), "HET     ");
     boost::shared_ptr<IComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "Source");

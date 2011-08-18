@@ -1,7 +1,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DateAndTime.h"

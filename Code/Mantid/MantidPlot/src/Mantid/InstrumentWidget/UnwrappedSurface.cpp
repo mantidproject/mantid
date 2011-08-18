@@ -5,7 +5,7 @@
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <QRgb>
 #include <QSet>
@@ -340,7 +340,7 @@ bool hasParent(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,Mantid
 
 void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id)
 {
-  boost::shared_ptr<const Mantid::Geometry::IInstrument> instr = m_instrActor->getInstrument();
+  boost::shared_ptr<const Mantid::Geometry::Instrument> instr = m_instrActor->getInstrument();
   if (id == NULL)
   {
     id = instr->getComponentID();

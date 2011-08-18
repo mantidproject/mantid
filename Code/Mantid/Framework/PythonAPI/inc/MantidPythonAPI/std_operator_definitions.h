@@ -3,7 +3,8 @@
 
 #include <MantidKernel/InstrumentInfo.h>
 
-/** 
+/** @file
+
     Some classes that are exported to Python do not define certain operators that are necessary
     to wrap them. These operators are added here.
 

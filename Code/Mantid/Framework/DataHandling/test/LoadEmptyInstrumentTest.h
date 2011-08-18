@@ -5,7 +5,7 @@
 
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Exception.h"
@@ -242,7 +242,7 @@ public:
     dummy = paramMap.getDouble("nickel-holder", "fjols");
     TS_ASSERT_DELTA( dummy[0], 200.0, 0.0001);
 
-    boost::shared_ptr<IInstrument> i = ws->getInstrument();
+    boost::shared_ptr<Instrument> i = ws->getInstrument();
     boost::shared_ptr<IDetector> ptrDet = i->getDetector(1008);
     TS_ASSERT_EQUALS( ptrDet->getID(), 1008);
     TS_ASSERT_EQUALS( ptrDet->getName(), "combined translation6");
@@ -252,7 +252,7 @@ public:
     TS_ASSERT_DELTA( param->value<double>(), 77.0, 0.0001);
 
     // test that can hold of "string" parameter in two ways
-    boost::shared_ptr<IComponent> ptrNickelHolder = i->getComponentByName("nickel-holder");
+    boost::shared_ptr<const IComponent> ptrNickelHolder = i->getComponentByName("nickel-holder");
     std::string dummyString = paramMap.getString(&(*ptrNickelHolder), "fjols-string");
     TS_ASSERT( dummyString.compare("boevs") == 0 );
     std::vector<std::string> dummyStringVec = paramMap.getString("nickel-holder", "fjols-string");
@@ -384,7 +384,7 @@ public:
     TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 1, 0.0001);
 
     // testing r-position, t-position and p-position parameters
-    boost::shared_ptr<IComponent> ptrRTP_Test = i->getComponentByName("rtpTest1");
+    boost::shared_ptr<const IComponent> ptrRTP_Test = i->getComponentByName("rtpTest1");
     TS_ASSERT_DELTA(ptrRTP_Test->getPos().X(), 0.0, 0.0001);
     TS_ASSERT_DELTA(ptrRTP_Test->getPos().Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(ptrRTP_Test->getPos().Z(), 20.0, 0.0001);
@@ -428,7 +428,7 @@ public:
     MatrixWorkspace_sptr ws;
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 
-    boost::shared_ptr<IInstrument> i = ws->getInstrument();
+    boost::shared_ptr<Instrument> i = ws->getInstrument();
 
     // check if combined translation works
     boost::shared_ptr<IDetector> ptrDet1 = i->getDetector(1001);
@@ -605,7 +605,7 @@ public:
     // get parameter map
     ParameterMap& paramMap = ws->instrumentParameters();
 
-    boost::shared_ptr<IInstrument> i = ws->getInstrument();
+    boost::shared_ptr<Instrument> i = ws->getInstrument();
     boost::shared_ptr<IDetector> det = i->getDetector(1100);  // should be a detector from bank_bsk
     Parameter_sptr param = paramMap.getRecursive(&(*det), "S", "fitting");
     const FitParameter& fitParam1 = param->value<FitParameter>();
@@ -788,7 +788,7 @@ public:
     IDetector_sptr det = ws->getDetector(1);
     TS_ASSERT_EQUALS( (det->getNumberParameter("number-of-x-pixels"))[0], 192);
 
-    IInstrument_sptr inst = ws->getInstrument();
+    Instrument_sptr inst = ws->getInstrument();
     TS_ASSERT_EQUALS( (inst->getNumberParameter("number-of-x-pixels")).size(), 1);
     TS_ASSERT_EQUALS( (inst->getNumberParameter("number-of-x-pixels"))[0], 192);
 
@@ -813,7 +813,7 @@ void testSANS2D()
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 
     // get parameter map
-    boost::shared_ptr<IInstrument> i = ws->getInstrument();
+    boost::shared_ptr<Instrument> i = ws->getInstrument();
 
     double pixelLength = 0.0051;
     double bankLength = 192*pixelLength;

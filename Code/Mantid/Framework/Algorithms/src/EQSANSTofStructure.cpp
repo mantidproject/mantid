@@ -7,7 +7,7 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <vector>
 

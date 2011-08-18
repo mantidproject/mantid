@@ -8,7 +8,6 @@
 #include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
@@ -18,7 +17,6 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
-using Mantid::Geometry::IInstrument;
 
 class LoadRaw2Test : public CxxTest::TestSuite
 {
@@ -82,7 +80,7 @@ public:
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    boost::shared_ptr<IInstrument> i = output2D->getInstrument();
+    boost::shared_ptr<Mantid::Geometry::Instrument> i = output2D->getInstrument();
     boost::shared_ptr<Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS( source->getName(), "undulator");

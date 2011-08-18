@@ -4,7 +4,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidAPI/Progress.h"
@@ -268,6 +268,7 @@ namespace Mantid
         NodeList* pNL_parameter = pRootElem->getElementsByTagName("parameter");
 
         unsigned long numParameter = pNL_parameter->length();
+        hasParameterElement.reserve(numParameter);
         for (unsigned long i = 0; i < numParameter; i++)
         {
           Element* pParameterElem = static_cast<Element*>(pNL_parameter->item(i));
@@ -533,7 +534,7 @@ namespace Mantid
 
       // Read detector IDs into idlist if required
       // Note idlist may be defined for any component
-      // Note any new idlist found will take presedence. 
+      // Note any new idlist found will take precedence.
 
       if ( pCompElem->hasAttribute("idlist") )
       {

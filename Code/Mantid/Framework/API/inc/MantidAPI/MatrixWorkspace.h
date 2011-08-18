@@ -15,7 +15,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Exception.h"

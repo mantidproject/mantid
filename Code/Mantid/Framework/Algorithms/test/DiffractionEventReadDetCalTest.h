@@ -6,7 +6,7 @@
 #include "MantidAlgorithms/DiffractionEventReadDetCal.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -68,11 +68,11 @@ public:
     output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
     
     //Get some stuff from the input workspace
-    IInstrument_sptr ins = output->getInstrument();
+    Instrument_sptr ins = output->getInstrument();
     if (!ins)
       throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
 
-    boost::shared_ptr<Mantid::Geometry::IComponent> det = ins->getComponentByName("bank1");
+    IComponent_const_sptr det = ins->getComponentByName("bank1");
     V3D PosNew = det->getPos();
     Quat rot = det->getRotation();
     TS_ASSERT_EQUALS(PosNew, V3D(0.500000,0.167548,-0.167548));

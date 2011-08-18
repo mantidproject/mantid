@@ -5,7 +5,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/InstrumentInfo.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/MatrixWorkspace.h"

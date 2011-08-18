@@ -27,8 +27,6 @@ void LoadMuonLog::initDocs()
 
 
 using namespace Kernel;
-using Geometry::IInstrument;
-using Geometry::IInstrument_sptr;
 using API::WorkspaceProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;

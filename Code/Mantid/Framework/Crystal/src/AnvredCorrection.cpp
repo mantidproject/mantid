@@ -160,7 +160,7 @@ void AnvredCorrection::exec()
     if ( !det ) continue;
 
     // This is the scattered beam direction
-    IInstrument_sptr inst = m_inputWS->getInstrument();
+    Instrument_const_sptr inst = m_inputWS->getInstrument();
     V3D dir = det->getPos() - samplePos;
     // Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
     double scattering = dir.angle( V3D(0.0, 0.0, 1.0) );
@@ -244,7 +244,7 @@ void AnvredCorrection::execEvent()
     if ( !det ) continue;
 
     // This is the scattered beam direction
-    IInstrument_sptr inst = eventW->getInstrument();
+    Instrument_const_sptr inst = eventW->getInstrument();
     V3D dir = det->getPos() - samplePos;
     // Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
     double scattering = dir.angle( V3D(0.0, 0.0, 1.0) );

@@ -4,7 +4,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -107,7 +106,7 @@ public:
     TS_ASSERT_DELTA( mdews->getBox()->getSignal(), 3000.0, 1e-2);
 
     // Make a fake instrument - doesn't matter, we won't use it really
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
     // --- Make a fake PeaksWorkspace ---
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
@@ -192,7 +191,7 @@ public:
     addPeak(1000, 0.,0.,0., 1.0);
 
     // Make a fake instrument - doesn't matter, we won't use it really
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     // --- Make a fake PeaksWorkspace ---
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
     peakWS->addPeak( Peak(inst, 1, 1.0, V3D(0., 0., 0.) ) );
@@ -242,7 +241,7 @@ public:
 
 
     // Make a fake instrument - doesn't matter, we won't use it really
-    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
     boost::mt19937 rng;
     boost::uniform_real<double> u(-9.0, 9.0); // Random from -9 to 9.0

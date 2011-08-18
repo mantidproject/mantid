@@ -7,7 +7,7 @@
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
@@ -709,7 +709,7 @@ namespace Mantid
         throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): NULL spectrum found at the given workspace index.", "");
 
       const std::set<detid_t> dets = spec->getDetectorIDs();
-      IInstrument_sptr localInstrument = getInstrument();
+      Instrument_sptr localInstrument = getInstrument();
       if( !localInstrument )
       {
         g_log.debug() << "No instrument defined.\n";

@@ -6,7 +6,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "SaveNexusProcessedTest.h"
