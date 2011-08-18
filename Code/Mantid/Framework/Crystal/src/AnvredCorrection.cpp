@@ -137,11 +137,13 @@ void AnvredCorrection::exec()
 
     // Get a reference to the Y's in the output WS for storing the factors
     MantidVec& Y = correctionFactors->dataY(i);
+    MantidVec& E = correctionFactors->dataE(i);
 
     // Copy over bin boundaries
     const MantidVec& Xin = m_inputWS->readX(i);
     correctionFactors->dataX(i) = Xin;
     const MantidVec& Yin = m_inputWS->readY(i);
+    const MantidVec& Ein = m_inputWS->readE(i);
 
     // Get detector position
     IDetector_sptr det;
@@ -174,7 +176,9 @@ void AnvredCorrection::exec()
       }
       else
       {
-        Y[j] = Yin[j] * this->getEventWeight(lambda, scattering);
+        double value = this->getEventWeight(lambda, scattering);
+        Y[j] = Yin[j] * value;
+        E[j] = Ein[j] * value;
       }
 
     }
@@ -244,7 +248,6 @@ void AnvredCorrection::execEvent()
     // Two-theta = polar angle = scattering angle = between +Z vector and the scattered beam
     double scattering = dir.angle( V3D(0.0, 0.0, 1.0) );
 
-    EventWorkspace_const_sptr event_correctionFactors = boost::dynamic_pointer_cast<const EventWorkspace>( correctionFactors);
     EventList el = eventW->getEventList(i);
     el.switchTo(WEIGHTED_NOTIME);
     std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
@@ -367,8 +370,20 @@ double AnvredCorrection::absor_sphere(double& twoth, double& wl)
     mu = smu + (amu/1.8f)*wl;
 
     mur = mu*radius;
+    if (mur < 0. || mur > 2.5)
+    {
+      std::ostringstream s;
+      s << mur;
+      throw std::runtime_error("muR is not in range of Dwiggins' table :" + s.str());
+    }
 
     theta = twoth*radtodeg_half;
+    if (theta < 0. || theta > 90.)
+    {
+      std::ostringstream s;
+      s << theta;
+      throw std::runtime_error("theta is not in range of Dwiggins' table :" + s.str());
+    }
 
 //  using the polymial coefficients, calulate astar (= 1/transmission) at
 //  theta values below and above the actual theta value.

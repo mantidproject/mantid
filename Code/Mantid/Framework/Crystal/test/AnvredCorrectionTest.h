@@ -41,7 +41,7 @@ public:
   {
     int numPixels = 10000;
     int numBins = 16;
-    double binDelta = 10.0;
+    double binDelta = 0.10;
     boost::mt19937 rng;
     boost::uniform_real<double> u2(0, 1.0); // Random from 0 to 1.0
     boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > genUnit(rng, u2);
@@ -95,7 +95,7 @@ public:
       int r = static_cast<int>(numEvents/std::sqrt((pix/100-50.5)*(pix/100-50.5) + (pix%100-50.5)*(pix%100-50.5)));
       for (int i=0; i<r; i++)
       {
-        el += TofEvent(75.+10.*(((*gens[0])()+(*gens[0])()+(*gens[0])())*2.-3.), run_start+double(i));
+        el += TofEvent(0.75+binDelta*(((*gens[0])()+(*gens[0])()+(*gens[0])())*2.-3.), run_start+double(i));
       }
 
     }
@@ -168,7 +168,7 @@ public:
         ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("TOPAZ")) );
     TS_ASSERT(ws);
     if (!ws) return;
-    TS_ASSERT_DELTA( ws->readY(5050)[5], 0.00412, 0.0001);
+    TS_ASSERT_DELTA( ws->readY(5050)[5], 130.0, 6.0);
     AnalysisDataService::Instance().remove("TOPAZ");
   }
 
