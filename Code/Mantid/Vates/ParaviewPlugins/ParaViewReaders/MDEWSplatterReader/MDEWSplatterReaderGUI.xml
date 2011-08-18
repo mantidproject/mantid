@@ -1,6 +1,0 @@
-<ParaViewReaders>
-  <Reader name="MDEWSplatterReader"
-    extensions="nxs_sp"
-    file_description="MDEW Nexus File, Splatter Plot">
-  </Reader>
-</ParaViewReaders>

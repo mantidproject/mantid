@@ -39,7 +39,7 @@ void vtkSplatterPlot::SetNumberOfPoints(int nPoints)
   if(nPoints >= 0)
   {
     size_t temp = static_cast<size_t>(nPoints);
-    if(nPoints != temp)
+    if(m_numberPoints != temp)
     {
       m_numberPoints = temp;
       this->Modified();
@@ -48,7 +48,7 @@ void vtkSplatterPlot::SetNumberOfPoints(int nPoints)
 }
 
 
-int vtkSplatterPlot::RequestData(vtkInformation *request, vtkInformationVector **inputVector, vtkInformationVector *outputVector)
+int vtkSplatterPlot::RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *outputVector)
 {
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
@@ -63,7 +63,7 @@ int vtkSplatterPlot::RequestData(vtkInformation *request, vtkInformationVector *
   Workspace_sptr result=AnalysisDataService::Instance().retrieve(wsName);
 
   std::string scalarName = "signal";
-  vtkSplatterPlotFactory vtkGridFactory(ThresholdRange_scptr(new NoThresholdRange), "signal", m_numberPoints);
+  vtkSplatterPlotFactory vtkGridFactory(ThresholdRange_scptr(new NoThresholdRange), scalarName, m_numberPoints);
   vtkGridFactory.initialize(result);
 
   output->ShallowCopy(vtkGridFactory.create());
@@ -76,7 +76,7 @@ int vtkSplatterPlot::RequestData(vtkInformation *request, vtkInformationVector *
 
 int vtkSplatterPlot::RequestInformation(vtkInformation *request, vtkInformationVector **inputVector, vtkInformationVector *outputVector)
 {
-  return 1;
+  return Superclass::RequestInformation(request, inputVector, outputVector);
 }
 
 void vtkSplatterPlot::PrintSelf(ostream& os, vtkIndent indent)
