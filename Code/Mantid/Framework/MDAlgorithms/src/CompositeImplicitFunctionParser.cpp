@@ -47,7 +47,7 @@ namespace Mantid
         CompositeFunctionBuilder * CompositeImplicitFunctionParser::parseCompositeFunction(Poco::XML::Element* functionElement)
         {
             using namespace Poco::XML;
-            ImplicitFunctionParser::checkSuccessorExists();
+            //ImplicitFunctionParser::checkSuccessorExists();
             boost::interprocess::unique_ptr<CompositeFunctionBuilder, Mantid::API::DeleterPolicy<CompositeFunctionBuilder> > functionBuilder(new CompositeFunctionBuilder);
             NodeList* childFunctionElementList = functionElement->childNodes();
            

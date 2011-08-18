@@ -28,7 +28,7 @@ void testGetName()
   TSM_ASSERT_EQUALS("The static and dynamic names do not align", NullImplicitFunction::functionName(), function.getName());
 }
 
-void testEvaluateThrows()
+void testEvaluateReturnsTrue()
 {
   using namespace Mantid::MDAlgorithms;
   NullImplicitFunction function;
@@ -36,16 +36,16 @@ void testEvaluateThrows()
   EXPECT_CALL(mockPoint, getX()).Times(0);
   EXPECT_CALL(mockPoint, getY()).Times(0);
   EXPECT_CALL(mockPoint, getZ()).Times(0);
-  TSM_ASSERT_THROWS("Not logically correct to evaluate a NullImplicitFunction", function.evaluate(&mockPoint), std::logic_error);
+  TS_ASSERT(function.evaluate(&mockPoint));
 }
 
-void testEvaluateCoordsThrows()
+void testEvaluateCoordReturnsTrue()
 {
   using namespace Mantid::MDAlgorithms;
   NullImplicitFunction function;
   Mantid::coord_t coords[3];
   bool masks[3];
-  TSM_ASSERT_THROWS("Not logically correct to evaluate a NullImplicitFunction", function.evaluate(coords, masks, 3), std::logic_error);
+  TS_ASSERT(function.evaluate(coords, masks, 3));
 }
 
 void testToXMLEmpty()
