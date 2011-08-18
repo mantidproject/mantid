@@ -15,6 +15,7 @@
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include <vtkDataSet.h>
