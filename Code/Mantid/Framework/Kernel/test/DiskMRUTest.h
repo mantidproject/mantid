@@ -75,6 +75,7 @@ public:
     myFilePos = id;
   }
 
+  using ISaveableTester::load; // Unhide base class method to avoid Intel compiler warning
   virtual void load(DiskMRU & mru) const
   {
     std::cout << "Block " << getId() << " loading at " << myFilePos << std::endl;
