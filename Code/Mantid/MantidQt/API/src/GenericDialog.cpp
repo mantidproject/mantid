@@ -286,7 +286,6 @@ void GenericDialog::browseClicked(QWidget* widget)
 */
 void GenericDialog::browseMultipleClicked(QWidget* widget)
 {
-  std::cout << "GenericDialog::browseMultipleClicked()" << std::endl;
   //I mapped this to a QLineEdit, so cast it
   QLineEdit *pathBox = qobject_cast<QLineEdit*>(widget);
 
