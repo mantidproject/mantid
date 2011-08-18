@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/norm_refl.ui'
 #
-# Created: Thu Aug 18 12:24:06 2011
+# Created: Thu Aug 18 13:12:20 2011
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_Frame(object):
     def setupUi(self, Frame):
         Frame.setObjectName("Frame")
-        Frame.resize(907, 338)
+        Frame.resize(895, 355)
         Frame.setFrameShape(QtGui.QFrame.StyledPanel)
         Frame.setFrameShadow(QtGui.QFrame.Raised)
         self.verticalLayout_5 = QtGui.QVBoxLayout(Frame)
@@ -29,6 +29,7 @@ class Ui_Frame(object):
         self.label_6.setObjectName("label_6")
         self.horizontalLayout_5.addWidget(self.label_6)
         self.lineEdit_4 = QtGui.QLineEdit(Frame)
+        self.lineEdit_4.setMinimumSize(QtCore.QSize(100, 0))
         self.lineEdit_4.setStatusTip("")
         self.lineEdit_4.setText("")
         self.lineEdit_4.setObjectName("lineEdit_4")
@@ -70,6 +71,8 @@ class Ui_Frame(object):
         self.norm_peak_from_pixel.setMaximumSize(QtCore.QSize(40, 16777215))
         self.norm_peak_from_pixel.setObjectName("norm_peak_from_pixel")
         self.horizontalLayout_3.addWidget(self.norm_peak_from_pixel)
+        spacerItem = QtGui.QSpacerItem(30, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem)
         self.label_5 = QtGui.QLabel(self.groupBox)
         self.label_5.setObjectName("label_5")
         self.horizontalLayout_3.addWidget(self.label_5)
@@ -89,24 +92,18 @@ class Ui_Frame(object):
         self.pushButton_10 = QtGui.QPushButton(self.groupBox)
         self.pushButton_10.setObjectName("pushButton_10")
         self.horizontalLayout_3.addWidget(self.pushButton_10)
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_3.addItem(spacerItem)
+        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem1)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
         self.horizontalLayout.addLayout(self.verticalLayout)
         self.verticalLayout_4.addWidget(self.groupBox)
         self.horizontalLayout_8 = QtGui.QHBoxLayout()
         self.horizontalLayout_8.setObjectName("horizontalLayout_8")
-        self.norm_background_switch = QtGui.QRadioButton(Frame)
-        font = QtGui.QFont()
-        font.setPointSize(13)
-        font.setWeight(50)
-        font.setBold(False)
-        self.norm_background_switch.setFont(font)
-        self.norm_background_switch.setAutoExclusive(False)
+        self.norm_background_switch = QtGui.QCheckBox(Frame)
         self.norm_background_switch.setObjectName("norm_background_switch")
         self.horizontalLayout_8.addWidget(self.norm_background_switch)
-        spacerItem1 = QtGui.QSpacerItem(30, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_8.addItem(spacerItem1)
+        spacerItem2 = QtGui.QSpacerItem(30, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_8.addItem(spacerItem2)
         self.norm_background_from_pixel_label = QtGui.QLabel(Frame)
         self.norm_background_from_pixel_label.setEnabled(False)
         self.norm_background_from_pixel_label.setObjectName("norm_background_from_pixel_label")
@@ -146,11 +143,11 @@ class Ui_Frame(object):
         self.norm_background_save_button.setEnabled(False)
         self.norm_background_save_button.setObjectName("norm_background_save_button")
         self.horizontalLayout_8.addWidget(self.norm_background_save_button)
-        spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_8.addItem(spacerItem2)
+        spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_8.addItem(spacerItem3)
         self.verticalLayout_4.addLayout(self.horizontalLayout_8)
-        spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_4.addItem(spacerItem3)
+        spacerItem4 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_4.addItem(spacerItem4)
         self.horizontalLayout_11.addLayout(self.verticalLayout_4)
         self.verticalLayout_3.addLayout(self.horizontalLayout_11)
         self.horizontalLayout_7 = QtGui.QHBoxLayout()

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>907</width>
-    <height>338</height>
+    <width>895</width>
+    <height>355</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,6 +37,12 @@
            </item>
            <item>
             <widget class="QLineEdit" name="lineEdit_4">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="statusTip">
               <string/>
              </property>
@@ -111,6 +117,22 @@
                  </widget>
                 </item>
                 <item>
+                 <spacer name="horizontalSpacer_13">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Fixed</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>30</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
                  <widget class="QLabel" name="label_5">
                   <property name="text">
                    <string>   To pixel</string>
@@ -176,19 +198,9 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_8">
            <item>
-            <widget class="QRadioButton" name="norm_background_switch">
-             <property name="font">
-              <font>
-               <pointsize>13</pointsize>
-               <weight>50</weight>
-               <bold>false</bold>
-              </font>
-             </property>
+            <widget class="QCheckBox" name="norm_background_switch">
              <property name="text">
               <string>Background</string>
-             </property>
-             <property name="autoExclusive">
-              <bool>false</bool>
              </property>
             </widget>
            </item>

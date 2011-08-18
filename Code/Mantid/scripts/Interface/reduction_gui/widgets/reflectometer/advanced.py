@@ -116,18 +116,6 @@ class AdvancedWidget(BaseWidget):
         self.connect(self._summary.advanced_overwrite_data_geometry_switch, QtCore.SIGNAL("clicked(bool)"), self._advanced_data_geometry_clicked)            
         self.connect(self._summary.advanced_overwrite_norm_geometry_switch, QtCore.SIGNAL("clicked(bool)"), self._advanced_norm_geometry_clicked)            
 
-
-#        self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
-#        self.connect(self._summary.sample_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_dist_clicked)
-#        self.connect(self._summary.wavelength_chk, QtCore.SIGNAL("clicked(bool)"), self._wavelength_clicked)
-#    
-#        self.connect(self._summary.dark_current_check, QtCore.SIGNAL("clicked(bool)"), self._dark_clicked)
-#        self.connect(self._summary.dark_browse_button, QtCore.SIGNAL("clicked()"), self._dark_browse)
-#        self.connect(self._summary.dark_plot_button, QtCore.SIGNAL("clicked()"), self._dark_plot_clicked)
-#        self.connect(self._summary.normalization_none_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
-#        self.connect(self._summary.normalization_time_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
-#        self.connect(self._summary.normalization_monitor_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
-#
 #        # Q range
 #        self._summary.n_q_bins_edit.setText(QtCore.QString("100"))
 #        self._summary.n_sub_pix_edit.setText(QtCore.QString("1"))

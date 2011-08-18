@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>931</width>
-    <height>467</height>
+    <width>1062</width>
+    <height>568</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -226,6 +226,22 @@
                  </widget>
                 </item>
                 <item>
+                 <spacer name="horizontalSpacer_5">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Fixed</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
                  <widget class="QLabel" name="data_peak_to_pixel_label">
                   <property name="text">
                    <string>   To pixel</string>
@@ -345,19 +361,9 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_8">
            <item>
-            <widget class="QRadioButton" name="data_background_switch">
-             <property name="font">
-              <font>
-               <pointsize>13</pointsize>
-               <weight>50</weight>
-               <bold>false</bold>
-              </font>
-             </property>
+            <widget class="QCheckBox" name="data_background_switch">
              <property name="text">
               <string>Background</string>
-             </property>
-             <property name="autoExclusive">
-              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -419,12 +425,28 @@
             </widget>
            </item>
            <item>
+            <spacer name="horizontalSpacer_14">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>30</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
             <widget class="QLabel" name="data_background_to_pixel_label">
              <property name="enabled">
               <bool>false</bool>
              </property>
              <property name="text">
-              <string>   To pixel</string>
+              <string>To pixel</string>
              </property>
             </widget>
            </item>
@@ -452,6 +474,22 @@
               </size>
              </property>
             </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_13">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>30</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
            <item>
             <widget class="QPushButton" name="data_background_load_button">
