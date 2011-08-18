@@ -1,6 +1,0 @@
-<ParaViewReaders>
-  <Reader name="MDEWNexusReaderII"
-    extensions="nxs_ro"
-    file_description="MDEW Nexus File Read-Only, no rebinning">
-  </Reader>
-</ParaViewReaders>
