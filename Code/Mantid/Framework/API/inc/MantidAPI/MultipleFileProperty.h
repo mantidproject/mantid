@@ -48,12 +48,12 @@ namespace API
     virtual std::string setValue(const std::string & propValue);
 
     /// @return the vector of suggested extensions. For use in GUIs showing files.
-    const std::vector<std::string> getExts() const
+    const std::set<std::string> & getExts() const
     { return m_exts; }
 
   private:
     /// Suggested extensions
-    std::vector<std::string> m_exts;
+    std::set<std::string> m_exts;
 
     /// Is the file optional?
     bool m_optional;

@@ -24,6 +24,7 @@
 #include <QSignalMapper>
 #include <QFileInfo>
 #include <QDir>
+#include "MantidAPI/MultipleFileProperty.h"
 
 // Dialog stuff is defined here
 using namespace MantidQt::API;
@@ -38,7 +39,8 @@ using namespace Mantid::API;
 */
 GenericDialog::GenericDialog(QWidget* parent) : AlgorithmDialog(parent)
 {
-  m_signalMapper = new QSignalMapper(this);
+  m_signalMapper_browse = new QSignalMapper(this);
+  m_signalMapper_browseMultiple = new QSignalMapper(this);
 }
 
 /**
@@ -46,6 +48,8 @@ GenericDialog::GenericDialog(QWidget* parent) : AlgorithmDialog(parent)
 */
 GenericDialog::~GenericDialog()
 {
+  delete m_signalMapper_browse;
+  delete m_signalMapper_browseMultiple;
 }
 
 //----------------------------------
@@ -115,17 +119,18 @@ void GenericDialog::initLayout()
 
       bool isEnabled = isWidgetEnabled(propName);
 
-      //check if there are only certain allowed values for the property
       Mantid::API::FileProperty* fileType = dynamic_cast<Mantid::API::FileProperty*>(prop);
+      Mantid::API::MultipleFileProperty* multipleFileType = dynamic_cast<Mantid::API::MultipleFileProperty*>(prop);
+
+      // CheckBox shown for BOOL properties
       if( dynamic_cast<PropertyWithValue<bool>* >(prop) ) 
       {
         QCheckBox *checkBox = new QCheckBox(propName);
-
         m_inputGrid->addWidget(new QLabel(""), row, 0, 0);
         m_inputGrid->addWidget(checkBox, row, 1, 0);
-
         tie(checkBox, propName, m_inputGrid);
       }
+      //Check if there are only certain allowed values for the property
       else if ( !prop->allowedValues().empty() && !fileType )
       {
         //It is a choice of certain allowed values and can use a combination box
@@ -195,17 +200,32 @@ void GenericDialog::initLayout()
         {
           //Make a browser button
           QPushButton *browseBtn = new QPushButton(tr("Browse"));
-          connect(browseBtn, SIGNAL(clicked()), m_signalMapper, SLOT(map()));
-          m_signalMapper->setMapping(browseBtn, textBox);
+          connect(browseBtn, SIGNAL(clicked()), m_signalMapper_browse, SLOT(map()));
+          m_signalMapper_browse->setMapping(browseBtn, textBox);
           m_inputGrid->addWidget(browseBtn, row, col_pos + 1, 0);
           browseBtn->setEnabled(isEnabled);
+          //Wire up the signal mapping object
+          connect(m_signalMapper_browse, SIGNAL(mapped(QWidget*)), this, SLOT(browseClicked(QWidget*)));
         }
+
+        //Is this a MultipleFileProperty?
+        if( multipleFileType )
+        {
+          //Make a browser button
+          QPushButton *browseBtn = new QPushButton(tr("Browse"));
+          connect(browseBtn, SIGNAL(clicked()), m_signalMapper_browseMultiple, SLOT(map()));
+          m_signalMapper_browseMultiple->setMapping(browseBtn, textBox);
+          m_inputGrid->addWidget(browseBtn, row, col_pos + 1, 0);
+          browseBtn->setEnabled(isEnabled);
+          //Wire up the signal mapping object
+          connect(m_signalMapper_browseMultiple, SIGNAL(mapped(QWidget*)), this, SLOT(browseMultipleClicked(QWidget*)));
+        }
+
+
       }//end combo box/dialog box decision
 
     }
 
-    //Wire up the signal mapping object
-    connect(m_signalMapper, SIGNAL(mapped(QWidget*)), this, SLOT(browseClicked(QWidget*)));
 
     // Add the helpful summary message
     if( isMessageAvailable() )
@@ -258,3 +278,51 @@ void GenericDialog::browseClicked(QWidget* widget)
     pathBox->setText(filepath.trimmed());
   }
 }
+
+
+/** This slot is called when a browse button for multiple files is clicked.
+ *
+* @param widget :: The widget that is associated with the button that was clicked. In this case they are always QLineEdit widgets
+*/
+void GenericDialog::browseMultipleClicked(QWidget* widget)
+{
+  std::cout << "GenericDialog::browseMultipleClicked()" << std::endl;
+  //I mapped this to a QLineEdit, so cast it
+  QLineEdit *pathBox = qobject_cast<QLineEdit*>(widget);
+
+  // Get property name
+  QString propName("");
+  if( m_editBoxes.contains(pathBox) ) propName = m_editBoxes[pathBox];
+  else return;
+
+  // Adjust the starting driectory
+  if( !pathBox->text().isEmpty() )
+  {
+    QStringList files =  pathBox->text().split(",");
+    if (files.size() > 0)
+    {
+      QString firstFile = files[0];
+      AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(firstFile).absoluteDir().path());
+    }
+  }
+  // Open multiple files in the dialog
+  QStringList files = this->openMultipleFileDialog(propName);
+
+  // Make into comma-sep string
+  QString output;
+  QStringList list = files;
+  QStringList::Iterator it = list.begin();
+  while(it != list.end())
+  {
+    if (it != list.begin()) output += ",";
+    output += *it;
+    it++;
+  }
+  if( !output.isEmpty() )
+  {
+    pathBox->clear();
+    pathBox->setText(output);
+  }
+}
+
+

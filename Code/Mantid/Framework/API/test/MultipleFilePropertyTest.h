@@ -36,8 +36,9 @@ public:
     exts.push_back(".hdf");
 
     MultipleFileProperty p("Filename", exts);
-    TS_ASSERT_EQUALS( p.getExts()[0], ".nxs");
-    TS_ASSERT_EQUALS( p.getExts()[1], ".hdf");
+    TS_ASSERT_EQUALS( p.getExts().size(), 2);
+    TS_ASSERT_EQUALS( p.getExts().count(".nxs"), 1);
+    TS_ASSERT_EQUALS( p.getExts().count(".hdf"), 1);
   }
 
   void test_setValue()

@@ -59,10 +59,10 @@ namespace MDEvents
    */
   void MergeMDEW::init()
   {
-    declareProperty(new MultipleFileProperty("Filenames"),
+    std::vector<std::string> exts(1, ".nxs");
+    declareProperty(new MultipleFileProperty("Filenames", exts),
         "Select several MDEventWorkspace NXS files to merge together. Files must have common box structure.");
 
-    std::vector<std::string> exts(1, ".nxs");
     declareProperty(new FileProperty("OutputFilename", "", FileProperty::OptionalSave, exts),
         "Choose a file to which to save the output workspace. Optional: if specified, the workspace created will be file-backed.");
 

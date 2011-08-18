@@ -180,6 +180,9 @@ protected:
   /// Open a file dialog to select a file.
   QString openFileDialog(const QString & propName);
 
+  /// Open a file dialog to select many file.
+  QStringList openMultipleFileDialog(const QString & propName);
+
   /// Fill a combo box for the named algorithm's allowed values
   void fillAndSetComboBox(const QString & propName, QComboBox* optionsBox) const;
 

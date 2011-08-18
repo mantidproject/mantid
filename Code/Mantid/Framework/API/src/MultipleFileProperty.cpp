@@ -21,9 +21,9 @@ namespace API
   MultipleFileProperty::MultipleFileProperty(const std::string & name,
       const std::vector<std::string> & exts, bool optional)
     : ArrayProperty<std::string>(name),
-      m_exts(exts),
       m_optional(optional)
   {
+    m_exts.insert( exts.begin(), exts.end());
   }
 
 

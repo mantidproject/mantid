@@ -70,10 +70,16 @@ private slots:
   /// Browse for a file
   void browseClicked(QWidget* editBox);
 
+  /// Browse for multiple files.
+  void browseMultipleClicked(QWidget* editBox);
+
 private:
 
   /// A mapper to ensure that the  buttons are connected to the correct editing boxes
-  QSignalMapper *m_signalMapper; 
+  QSignalMapper *m_signalMapper_browse;
+
+  /// Signal mapper for multipleFile edit box.
+  QSignalMapper *m_signalMapper_browseMultiple;
   
   /// The grid widget containing the input boxes
   QGridLayout *m_inputGrid;
