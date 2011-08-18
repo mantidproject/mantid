@@ -3,8 +3,10 @@
 
 #include <vtkUnstructuredGrid.h>
 
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
-#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NeXusException.hpp"
@@ -133,7 +135,7 @@ namespace Mantid
       */
       MDEWLoadingPresenter::extractMetadata(eventWs);
 
-      appendMetadata(visualDataSet, eventWs->getName());
+      this->appendMetadata(visualDataSet, eventWs->getName());
       return visualDataSet;
     }
 
@@ -158,7 +160,7 @@ namespace Mantid
       IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
 
       //Call base-class extraction method.
-      MDEWLoadingPresenter::extractMetadata(eventWs);
+      this->extractMetadata(eventWs);
 
       AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
     }

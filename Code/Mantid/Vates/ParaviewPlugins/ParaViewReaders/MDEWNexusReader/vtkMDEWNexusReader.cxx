@@ -14,6 +14,7 @@
 
 #include "MantidVatesAPI/vtkMDEWHexahedronFactory.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
+#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 
 vtkCxxRevisionMacro(vtkMDEWNexusReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkMDEWNexusReader);

@@ -1,7 +1,10 @@
 #ifndef SQW_LOADING_PRESENTER_H_
 #define SQW_LOADING_PRESENTER_H_
 
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
+#include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidMDEvents/LoadSQW.h"
 #include <boost/regex.hpp>
 
@@ -109,7 +112,7 @@ namespace Mantid
       factory->initialize(eventWs);
       vtkDataSet* visualDataSet = factory->create();
 
-      appendMetadata(visualDataSet, eventWs->getName());
+      this->appendMetadata(visualDataSet, eventWs->getName());
       
       return visualDataSet;
     }

@@ -10,6 +10,7 @@
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidVatesAPI/EventNexusLoadingPresenter.h"
+#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 
 using namespace Mantid::VATES;
 using namespace testing;

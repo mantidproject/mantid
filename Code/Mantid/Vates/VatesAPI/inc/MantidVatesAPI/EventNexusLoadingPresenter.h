@@ -1,8 +1,10 @@
 #ifndef MANTID_VATES_EVENT_NEXUS_LOADING_PRESENTER
 #define MANTID_VATES_EVENT_NEXUS_LOADING_PRESENTER
 
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
-#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NeXusException.hpp"
@@ -154,8 +156,8 @@ namespace Mantid
       factory->initialize(eventWs);
       vtkDataSet* visualDataSet = factory->create();
 
-      extractMetadata(eventWs);
-      appendMetadata(visualDataSet, eventWs->getName());
+      this->extractMetadata(eventWs);
+      this->appendMetadata(visualDataSet, eventWs->getName());
       
       return visualDataSet;
     }
