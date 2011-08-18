@@ -130,6 +130,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 
                                       // get list of peaks, sorted on |Q|
   std::vector<V3D> sorted_qs;
+  sorted_qs.reserve( q_vectors.size() );
 
   if ( q_vectors.size() > 5 )       // shift to be centered on peak (we lose
                                     // one peak that way, so require > 5)
@@ -171,6 +172,8 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
     num_initial = sorted_qs.size();
 
   std::vector<V3D> some_qs;
+  some_qs.reserve( q_vectors.size() );
+
   for ( size_t i = 0; i < num_initial; i++ )
     some_qs.push_back( sorted_qs[i] );
 
@@ -183,7 +186,8 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
   int     num_indexed;
   std::vector<V3D> miller_ind;
   std::vector<V3D> indexed_qs;
-
+  miller_ind.reserve( q_vectors.size() );
+  indexed_qs.reserve( q_vectors.size() );
                                      // now gradually bring in the remaining
                                      // peaks and re-optimize the UB to index
                                      // them as well
@@ -341,6 +345,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 
                                     // get list of peaks, sorted on |Q|
   std::vector<V3D> sorted_qs;
+  sorted_qs.reserve( q_vectors.size() );
 
   if ( q_vectors.size() > 5 )       // shift to be centered on peak (we lose
                                     // one peak that way, so require > 5)
@@ -382,6 +387,8 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
     num_initial = sorted_qs.size();
 
   std::vector<V3D> some_qs;
+  some_qs.reserve( q_vectors.size() );
+
   for ( size_t i = 0; i < num_initial; i++ )
     some_qs.push_back( sorted_qs[i] );
 
@@ -470,6 +477,8 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                                      // them as well
   std::vector<V3D> miller_ind;
   std::vector<V3D> indexed_qs;
+  miller_ind.reserve( q_vectors.size() );
+  indexed_qs.reserve( q_vectors.size() );
 
   Matrix<double> temp_UB(3,3,false);
   double         fit_error;
@@ -1041,6 +1050,9 @@ size_t IndexingUtils::ScanFor_Directions( std::vector<V3D>  & directions,
                            // new smaller list in the vector "directions"
   std::vector<int> index_vals;
   std::vector<V3D> indexed_qs;
+  index_vals.reserve( q_vectors.size() );
+  indexed_qs.reserve( q_vectors.size() );
+
   directions.clear();
   V3D current_dir;
   V3D diff;
@@ -1194,12 +1206,13 @@ bool IndexingUtils::ValidIndex( const V3D & hkl, double tolerance )
                       q_vectors that are indexed by the corresponding hkl
                       vectors.
   @param tolerance    The maximum allowed distance between each component
-                      of UB*Q and the nearest integer value, required to
+                      of UB^(-1)*Q and the nearest integer value, required to
                       to count the peak as indexed by UB.
 
   @return A non-negative integer giving the number of peaks indexed by UB. 
   
-  @throws std::invalid_argument exception if the UB matrix is not a 3X3 matrix.
+  @throws std::invalid_argument exception if the UB matrix is not a 3X3 matrix,
+                                or if UB is singular.
  */
 int IndexingUtils::NumberIndexed( const DblMatrix         & UB,
                                   const std::vector<V3D>  & q_vectors,
@@ -1231,6 +1244,83 @@ int IndexingUtils::NumberIndexed( const DblMatrix         & UB,
 
   return count;
 }
+
+
+/**
+  Calculate the Miller Indices for each of the specified Q vectors, using the
+  inverse of the specified UB matrix.  The Miller Indices will be set to 
+  0, 0, 0 for any peak for which h, k or l differs from an intenger by more 
+  than the specified tolerance.  Also (h,k,l) = (0,0,0) the peak will NOT be 
+  counted as indexed, since (0,0,0) is not a valid index of any peak.
+  
+  @param UB             A 3x3 matrix of doubles holding the UB matrix
+  @param q_vectors      std::vector of V3D objects that contains the list of 
+                        q_vectors that are to be indexed.
+  @param tolerance      The maximum allowed distance between each component
+                        of UB^(-1)*Q and the nearest integer value, required to
+                        to count the peak as indexed by UB.
+  @param miller_indices This vector returns a list of Miller Indices, with 
+                        one entry for each given Q vector. 
+
+  @return A non-negative integer giving the number of peaks indexed by UB,
+          within the specified tolerance on h,k,l. 
+  
+  @throws std::invalid_argument exception if the UB matrix is not a 3X3 matrix,
+                                or if UB is singular.
+ */
+int IndexingUtils::CalculateMillerIndices( 
+                                  const DblMatrix         & UB,
+                                  const std::vector<V3D>  & q_vectors,
+                                        double              tolerance,
+                                        std::vector<V3D>  & miller_indices,
+                                        double            & ave_error )
+{
+  int count = 0;
+
+  if ( UB.numRows() != 3 || UB.numCols() != 3 )
+  {
+   throw std::invalid_argument("UB matrix NULL or not 3X3");
+  }
+
+  DblMatrix UB_inverse( UB );
+  double determinant = UB_inverse.Invert();
+  if ( fabs( determinant ) < 1.0e-10 )
+  {
+   throw std::invalid_argument("UB is singular (det < 1e-10)");
+  }
+
+  miller_indices.clear();
+  miller_indices.reserve( q_vectors.size() );
+
+  double h_error,
+         k_error,
+         l_error;
+  ave_error = 0.0;
+  V3D hkl;
+  for ( size_t i = 0; i < q_vectors.size(); i++ )
+  {
+    hkl = UB_inverse * q_vectors[i];
+    if ( ValidIndex( hkl, tolerance ) )
+    {
+      count++;
+      miller_indices.push_back( V3D(hkl) );
+      h_error = fabs( round(hkl[0]) - hkl[0] );
+      k_error = fabs( round(hkl[1]) - hkl[1] );
+      l_error = fabs( round(hkl[2]) - hkl[2] );
+      ave_error += h_error + k_error + l_error; 
+    }
+    else
+      miller_indices.push_back( V3D(0,0,0) );
+  }
+
+  if ( count > 0 )
+  {
+    ave_error /= ( 3.0 * count );
+  }
+
+  return count;
+}
+
 
 
 /**
@@ -1274,6 +1364,9 @@ int IndexingUtils::GetIndexedPeaks_1D( const V3D              & direction,
   int     num_indexed = 0;
   index_vals.clear();
   indexed_qs.clear();
+  index_vals.reserve( q_vectors.size() );
+  indexed_qs.reserve( q_vectors.size() );
+
   fit_error = 0;
 
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
@@ -1349,8 +1442,13 @@ int IndexingUtils::GetIndexedPeaks_3D( const V3D              & direction_1,
   int     l_int;
   V3D     hkl;
   int     num_indexed = 0;
+
   miller_indices.clear();
+  miller_indices.reserve( q_vectors.size() );
+
   indexed_qs.clear();
+  indexed_qs.reserve( q_vectors.size() );
+
   fit_error = 0;
 
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
@@ -1423,7 +1521,11 @@ int IndexingUtils::GetIndexedPeaks( const DblMatrix         & UB,
   V3D     hkl;
 
   miller_indices.clear();
+  miller_indices.reserve( q_vectors.size() );
+
   indexed_qs.clear();
+  indexed_qs.reserve( q_vectors.size() );
+
   fit_error = 0;
 
   DblMatrix UB_inverse( UB );

@@ -116,6 +116,14 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                             const std::vector<Kernel::V3D>  & q_vectors,
                                   double                      tolerance   );
 
+  /// Given a UB, get list of Miller indices for specifed Qs
+  static int CalculateMillerIndices(
+                          const Kernel::DblMatrix         & UB,
+                          const std::vector<Kernel::V3D>  & q_vectors,
+                                double                      tolerance,
+                                std::vector<Kernel::V3D>  & miller_indices,
+                                double                    & average_error );
+
   /// Get lists of indices and Qs for peaks indexed in the specified direction 
   static int GetIndexedPeaks_1D( 
                           const Kernel::V3D              & direction,

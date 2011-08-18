@@ -348,6 +348,50 @@ public:
     TS_ASSERT_EQUALS( IndexingUtils::NumberIndexed( UB, q_list, 0.017 ), 4 );
   }
 
+
+  void test_CalculateMillerIndices()
+  {
+    Matrix<double> UB(3,3,false);
+
+    UB.setRow( 0, V3D( -0.1015550,  0.0992964, -0.0155078 ) );
+    UB.setRow( 1, V3D(  0.1274830,  0.0150210, -0.0839671 ) );
+    UB.setRow( 2, V3D( -0.0507717, -0.0432269, -0.0645173 ) );
+
+    std::vector<V3D> q_vectors = getNatroliteQs();
+    double           tolerance = 0.08;
+    std::vector<V3D> miller_indices;
+    double           average_error;
+
+    int num_indexed = IndexingUtils::CalculateMillerIndices( UB,
+                                                             q_vectors,
+                                                             tolerance,
+                                                             miller_indices,
+                                                             average_error ); 
+
+    TS_ASSERT_EQUALS( num_indexed, 12 );
+
+    TS_ASSERT_DELTA( average_error, 0.0103505, 1e-5 );
+
+    V3D mi_0  = V3D(  0.992465, -4.00351, 4.997260 );
+    V3D mi_1  = V3D(  3.991040, -8.00753, 14.00010 );
+    V3D mi_2  = V3D(  2.018340, -7.96556, 8.020210 );
+    V3D mi_11 = V3D( -3.006000, -7.99572, 0.980049 );
+
+    double diff;
+                                                 // spot check a few indices 
+    diff = (mi_0  - miller_indices[0] ).norm();
+    TS_ASSERT_DELTA( diff, 0, 1e-5 );
+
+    diff = (mi_1  - miller_indices[1] ).norm();
+    TS_ASSERT_DELTA( diff, 0, 1e-5 );
+
+    diff = (mi_2  - miller_indices[2] ).norm();
+    TS_ASSERT_DELTA( diff, 0, 1e-5 );
+
+    diff = (mi_11 - miller_indices[11]).norm();
+    TS_ASSERT_DELTA( diff, 0, 1e-5 );
+  }
+
   
   void test_GetIndexedPeaks_1D()
   {
