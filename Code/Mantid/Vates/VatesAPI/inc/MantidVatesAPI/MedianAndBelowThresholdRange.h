@@ -60,7 +60,7 @@ public:
 
 private:
   
-  MedianAndBelowThresholdRange(signal_t min, signal_t max, bool isCalculated, Mantid::API::IMDWorkspace_sptr m_workspace);
+  MedianAndBelowThresholdRange(signal_t min, signal_t max, bool isCalculated, Mantid::API::Workspace_sptr m_workspace);
 
   signal_t m_min;
   

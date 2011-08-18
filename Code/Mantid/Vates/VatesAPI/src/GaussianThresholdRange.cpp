@@ -160,10 +160,14 @@ namespace Mantid
     Setter for IMDWorkspace.
     @parameter: workspace : The workspace to extract ranges from.
     */
-    void GaussianThresholdRange::setWorkspace(Mantid::API::IMDWorkspace_sptr workspace)
+    void GaussianThresholdRange::setWorkspace(Mantid::API::Workspace_sptr workspace)
     {
       m_isCalculated = false;
-      m_workspace = workspace;
+      m_workspace = boost::shared_dynamic_cast<Mantid::API::IMDWorkspace>(workspace);
+      if(!workspace)
+      {
+        throw std::logic_error("GaussianThresholdRange only works for IMDWorkspaces");
+      }
     }
 
     /**

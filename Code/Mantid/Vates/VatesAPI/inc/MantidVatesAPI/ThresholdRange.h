@@ -4,7 +4,7 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/Workspace.h"
 
 /** Abstract type promises to supply a minimum and maximum set of threshold range values.
 
@@ -65,7 +65,7 @@ public:
   }
 
   /// Interface allows the threshold range to accept a workspace.
-  virtual void setWorkspace(Mantid::API::IMDWorkspace_sptr)
+  virtual void setWorkspace(Mantid::API::Workspace_sptr)
   {
   }
 };

@@ -44,7 +44,7 @@ public:
 
   GaussianThresholdRange(double preferred_nStd = 1, size_t sampleSize = 100);
 
-  virtual void setWorkspace(Mantid::API::IMDWorkspace_sptr workspace);
+  virtual void setWorkspace(Mantid::API::Workspace_sptr workspace);
 
   virtual void calculate();
 

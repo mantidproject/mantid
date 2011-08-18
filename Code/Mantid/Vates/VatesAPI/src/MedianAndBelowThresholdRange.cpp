@@ -114,10 +114,14 @@ namespace Mantid
     Setter for IMDWorkspace.
     @parameter: workspace : The workspace to extract ranges from.
     */
-    void MedianAndBelowThresholdRange::setWorkspace(Mantid::API::IMDWorkspace_sptr workspace)
+    void MedianAndBelowThresholdRange::setWorkspace(Mantid::API::Workspace_sptr workspace)
     {
       m_isCalculated = false;
-      m_workspace = workspace;
+      m_workspace = boost::shared_dynamic_cast<Mantid::API::IMDWorkspace>(workspace);
+      if(!workspace)
+      {
+        throw std::logic_error("MedianAndBelowThresholdRange only works for IMDWorkspaces");
+      }
     }
 
     /**
