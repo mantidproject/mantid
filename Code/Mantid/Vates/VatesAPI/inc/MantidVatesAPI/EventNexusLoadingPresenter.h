@@ -63,11 +63,11 @@ namespace Mantid
     template<typename ViewType>
     EventNexusLoadingPresenter<ViewType>::EventNexusLoadingPresenter(ViewType* view, const std::string filename) : MDEWLoadingPresenter<ViewType>(filename, view)
     {
-      if(m_filename.empty())
+      if(this->m_filename.empty())
       {
         throw std::invalid_argument("File name is an empty string.");
       }
-      if(NULL == m_view)
+      if(NULL == this->m_view)
       {
         throw std::invalid_argument("View is NULL.");
       }
@@ -83,7 +83,7 @@ namespace Mantid
       ::NeXus::File * file = NULL;
       try
       {
-        file = new ::NeXus::File(m_filename);
+        file = new ::NeXus::File(this->m_filename);
         // All SNS (event or histo) nxs files have an entry named "entry"
         try
         {
@@ -130,9 +130,9 @@ namespace Mantid
       using namespace Mantid::API;
       using namespace Mantid::Geometry;
 
-      m_view->getLoadInMemory(); //TODO, nexus reader algorithm currently has no use of this.
+      this->m_view->getLoadInMemory(); //TODO, nexus reader algorithm currently has no use of this.
       
-      if(shouldLoad())
+      if(this->shouldLoad())
       {
         Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
         AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
@@ -150,7 +150,7 @@ namespace Mantid
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
       Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
 
-      factory->setRecursionDepth(m_view->getRecursionDepth());
+      factory->setRecursionDepth(this->m_view->getRecursionDepth());
       factory->initialize(eventWs);
       vtkDataSet* visualDataSet = factory->create();
 
@@ -198,7 +198,7 @@ namespace Mantid
       For these file types we know that we get 3 dimensions anyway so do not need anyfurther geometry information until the point
       at which it must be added to the outgoing vtkdataset.
       */
-      m_isSetup = true;
+      this->m_isSetup = true;
     }
 
   }

@@ -61,11 +61,11 @@ namespace Mantid
     template<typename ViewType>
     MDEWEventNexusLoadingPresenter<ViewType>::MDEWEventNexusLoadingPresenter(ViewType* view, const std::string filename) : MDEWLoadingPresenter<ViewType>(filename, view)
     {
-      if(m_filename.empty())
+      if(this->m_filename.empty())
       {
         throw std::invalid_argument("File name is an empty string.");
       }
-      if(NULL == m_view)
+      if(NULL == this->m_view)
       {
         throw std::invalid_argument("View is NULL.");
       }
@@ -80,7 +80,7 @@ namespace Mantid
     {
       ::NeXus::File * file = NULL;
 
-      file = new ::NeXus::File(m_filename);
+      file = new ::NeXus::File(this->m_filename);
       // MDEventWorkspace file has a different name for the entry
       try
       {
@@ -108,7 +108,7 @@ namespace Mantid
       using namespace Mantid::API;
       using namespace Mantid::Geometry;
 
-      if(shouldLoad())
+      if(this->shouldLoad())
       {
         Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
         AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
@@ -117,14 +117,14 @@ namespace Mantid
         alg.initialize();
         alg.setPropertyValue("Filename", this->m_filename);
         alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
-        alg.setProperty("FileBackEnd", !m_view->getLoadInMemory()); //Load from file by default.
+        alg.setProperty("FileBackEnd", !this->m_view->getLoadInMemory()); //Load from file by default.
         alg.execute();
       }
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
       Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
 
-      factory->setRecursionDepth(m_view->getRecursionDepth());
+      factory->setRecursionDepth(this->m_view->getRecursionDepth());
       factory->initialize(eventWs);
       vtkDataSet* visualDataSet = factory->create();
       

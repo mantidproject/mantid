@@ -3,6 +3,7 @@
 
 #include "MantidVatesAPI/MDLoadingPresenter.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
