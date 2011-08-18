@@ -159,7 +159,7 @@ namespace Mantid
       if(nDimensions > 3)
       {
         this->tDimension = dimensions[3];
-        this->xmlBuilder.addTDimension(tDimension);
+        this->xmlBuilder.addTDimension(this->tDimension);
       }
       this->m_isSetup = true;
     }
