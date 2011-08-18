@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/norm_refl.ui'
 #
-# Created: Thu Aug 18 06:21:45 2011
+# Created: Thu Aug 18 07:40:13 2011
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_Frame(object):
     def setupUi(self, Frame):
         Frame.setObjectName("Frame")
-        Frame.resize(990, 347)
+        Frame.resize(907, 338)
         Frame.setFrameShape(QtGui.QFrame.StyledPanel)
         Frame.setFrameShadow(QtGui.QFrame.Raised)
         self.verticalLayout_5 = QtGui.QVBoxLayout(Frame)
@@ -108,9 +108,11 @@ class Ui_Frame(object):
         spacerItem1 = QtGui.QSpacerItem(30, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_8.addItem(spacerItem1)
         self.label_12 = QtGui.QLabel(Frame)
+        self.label_12.setEnabled(False)
         self.label_12.setObjectName("label_12")
         self.horizontalLayout_8.addWidget(self.label_12)
         self.lineEdit_8 = QtGui.QLineEdit(Frame)
+        self.lineEdit_8.setEnabled(False)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -122,9 +124,11 @@ class Ui_Frame(object):
         self.lineEdit_8.setObjectName("lineEdit_8")
         self.horizontalLayout_8.addWidget(self.lineEdit_8)
         self.label_13 = QtGui.QLabel(Frame)
+        self.label_13.setEnabled(False)
         self.label_13.setObjectName("label_13")
         self.horizontalLayout_8.addWidget(self.label_13)
         self.lineEdit_9 = QtGui.QLineEdit(Frame)
+        self.lineEdit_9.setEnabled(False)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -135,15 +139,17 @@ class Ui_Frame(object):
         self.lineEdit_9.setObjectName("lineEdit_9")
         self.horizontalLayout_8.addWidget(self.lineEdit_9)
         self.pushButton_8 = QtGui.QPushButton(Frame)
+        self.pushButton_8.setEnabled(False)
         self.pushButton_8.setObjectName("pushButton_8")
         self.horizontalLayout_8.addWidget(self.pushButton_8)
         self.pushButton_9 = QtGui.QPushButton(Frame)
+        self.pushButton_9.setEnabled(False)
         self.pushButton_9.setObjectName("pushButton_9")
         self.horizontalLayout_8.addWidget(self.pushButton_9)
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_8.addItem(spacerItem2)
         self.verticalLayout_4.addLayout(self.horizontalLayout_8)
-        spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_4.addItem(spacerItem3)
         self.horizontalLayout_11.addLayout(self.verticalLayout_4)
         self.verticalLayout_3.addLayout(self.horizontalLayout_11)

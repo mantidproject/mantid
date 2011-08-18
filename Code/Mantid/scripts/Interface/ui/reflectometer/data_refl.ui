@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
-    <height>557</height>
+    <width>931</width>
+    <height>467</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,6 +37,12 @@
            </item>
            <item>
             <widget class="QLineEdit" name="lineEdit_4">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="statusTip">
               <string/>
              </property>
@@ -283,26 +289,31 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="label_7">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>135</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>135</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string>Number of selection:</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_5">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>220</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
                  <widget class="QLabel" name="label_8">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
                   <property name="text">
                    <string>N/A</string>
                   </property>
@@ -368,6 +379,9 @@
            </item>
            <item>
             <widget class="QLabel" name="label_12">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>From pixel</string>
              </property>
@@ -375,6 +389,9 @@
            </item>
            <item>
             <widget class="QLineEdit" name="lineEdit_8">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -403,6 +420,9 @@
            </item>
            <item>
             <widget class="QLabel" name="label_13">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>   To pixel</string>
              </property>
@@ -410,6 +430,9 @@
            </item>
            <item>
             <widget class="QLineEdit" name="lineEdit_9">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -432,6 +455,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_8">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>Load...</string>
              </property>
@@ -439,6 +465,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_9">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>Save...</string>
              </property>
@@ -521,6 +550,19 @@
             </item>
            </layout>
           </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>
