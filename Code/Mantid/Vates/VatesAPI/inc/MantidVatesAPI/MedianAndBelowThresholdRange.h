@@ -56,11 +56,11 @@ public:
 
   virtual bool inRange(const signal_t& signal);
 
-  virtual void setWorkspace(Mantid::API::IMDWorkspace_sptr workspace);
+  virtual void setWorkspace(Mantid::API::Workspace_sptr workspace);
 
 private:
   
-  MedianAndBelowThresholdRange(signal_t min, signal_t max, bool isCalculated, Mantid::API::Workspace_sptr m_workspace);
+  MedianAndBelowThresholdRange(signal_t min, signal_t max, bool isCalculated, Mantid::API::IMDWorkspace_sptr m_workspace);
 
   signal_t m_min;
   
