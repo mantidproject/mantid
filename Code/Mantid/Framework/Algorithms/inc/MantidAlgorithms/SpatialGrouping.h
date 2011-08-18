@@ -16,7 +16,6 @@ namespace Geometry
 {
 /// Forward Declarations
 class IDetector;
-class IInstrument;
 class BoundingBox;
 }
 

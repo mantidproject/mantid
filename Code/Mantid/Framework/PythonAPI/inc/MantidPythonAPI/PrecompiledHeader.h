@@ -6,6 +6,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 
 #endif //MANTID_PYTHONAPI_PRECOMPILED_HEADER_H_

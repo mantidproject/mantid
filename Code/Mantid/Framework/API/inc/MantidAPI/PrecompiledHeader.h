@@ -13,7 +13,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
 
 // STL
