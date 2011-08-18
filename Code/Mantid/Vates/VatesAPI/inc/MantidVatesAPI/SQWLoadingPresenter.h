@@ -1,7 +1,6 @@
 #ifndef SQW_LOADING_PRESENTER_H_
 #define SQW_LOADING_PRESENTER_H_
 
-#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
@@ -131,7 +130,7 @@ namespace Mantid
     {
       using namespace Mantid::Geometry;
       MDGeometryBuilderXML<StrictDimensionPolicy> refresh;
-      xmlBuilder= refresh; //Reassign.
+      this->xmlBuilder= refresh; //Reassign.
       std::vector<MDDimensionExtents> ext = eventWs->getMinimumExtents(5);
       std::vector<IMDDimension_sptr> dimensions;
       size_t nDimensions = eventWs->getNumDims();
@@ -147,20 +146,20 @@ namespace Mantid
       //determine how to display all geometry related properties.
       if(nDimensions > 0)
       {
-        xmlBuilder.addXDimension( dimensions[0] );
+        this->xmlBuilder.addXDimension( dimensions[0] );
       }
       if(nDimensions > 1)
       {
-        xmlBuilder.addYDimension( dimensions[1] );
+        this->xmlBuilder.addYDimension( dimensions[1] );
       }
       if(nDimensions > 2)
       {
-        xmlBuilder.addZDimension( dimensions[2]  );
+        this->xmlBuilder.addZDimension( dimensions[2]  );
       }
       if(nDimensions > 3)
       {
-        tDimension = dimensions[3];
-        xmlBuilder.addTDimension(tDimension);
+        this->tDimension = dimensions[3];
+        this->xmlBuilder.addTDimension(tDimension);
       }
       this->m_isSetup = true;
     }
