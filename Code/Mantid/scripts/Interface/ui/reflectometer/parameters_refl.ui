@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1003</width>
-    <height>426</height>
+    <width>1127</width>
+    <height>446</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -79,7 +79,10 @@
                  </size>
                 </property>
                 <property name="text">
-                 <string>    from</string>
+                 <string> From</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -134,7 +137,10 @@
                  </size>
                 </property>
                 <property name="text">
-                 <string>        to</string>
+                 <string> To</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -210,18 +216,18 @@
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>60</width>
+                  <width>120</width>
                   <height>0</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>60</width>
+                  <width>120</width>
                   <height>16777215</height>
                  </size>
                 </property>
                 <property name="text">
-                 <string>Nbr bins</string>
+                 <string>Number of Q  bins</string>
                 </property>
                </widget>
               </item>
@@ -275,18 +281,18 @@
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>60</width>
+                  <width>70</width>
                   <height>0</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>60</width>
+                  <width>70</width>
                   <height>16777215</height>
                  </size>
                 </property>
                 <property name="text">
-                 <string>bin size</string>
+                 <string>Q bin size</string>
                 </property>
                </widget>
               </item>
@@ -361,7 +367,7 @@
                  <bool>false</bool>
                 </property>
                 <property name="text">
-                 <string>Linear</string>
+                 <string>Linear Q binning</string>
                 </property>
                 <property name="checked">
                  <bool>true</bool>
@@ -377,7 +383,7 @@
                  <bool>false</bool>
                 </property>
                 <property name="text">
-                 <string>Log</string>
+                 <string>Log Q binning</string>
                 </property>
                 <property name="autoExclusive">
                  <bool>false</bool>
@@ -396,76 +402,32 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_5">
-     <property name="title">
-      <string>Output file name</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <widget class="QLabel" name="label_5">
-            <property name="minimumSize">
-             <size>
-              <width>90</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>90</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Output folder</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_2">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="text">
-             <string>~/results/</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_7">
-          <item>
-           <widget class="QLabel" name="label_6">
-            <property name="maximumSize">
-             <size>
-              <width>270</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>File name</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="lineEdit_3"/>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Output directory</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="parameters_output_directory_value">
+       <property name="text">
+        <string>~/results/</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="parameters_output_directory_browse_button">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>Browse...</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <spacer name="verticalSpacer">

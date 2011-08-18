@@ -119,7 +119,7 @@ class ParametersReflWidget(BaseWidget):
         self.connect(self._summary.parameters_q_range_manual_switch, QtCore.SIGNAL("clicked(bool)"), self._q_range_manual_clicked)
         self.connect(self._summary.parameters_q_range_linear_switch, QtCore.SIGNAL("clicked(bool)"), self._q_range_linear_clicked)
         self.connect(self._summary.parameters_q_range_log_switch, QtCore.SIGNAL("clicked(bool)"), self._q_range_log_clicked)
-
+        self.connect(self._summary.parameters_output_directory_browse_button, QtCore.SIGNAL("clicked()"), self._browse_output_directory_clicked)
 
 #        self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
 #        self.connect(self._summary.sample_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_dist_clicked)
@@ -160,6 +160,16 @@ class ParametersReflWidget(BaseWidget):
 #            self._summary.dark_plot_button.hide()
 #            self._summary.scale_data_plot_button.hide()
 #            
+    def _browse_output_directory_clicked(self):
+        """
+            Reached by the browse output folder button
+        """
+        output_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
+                                                            os.path.expanduser('~'), 
+                                                            QtGui.QFileDialog.ShowDirsOnly
+                                                            | QtGui.QFileDialog.DontResolveSymlinks)
+        if output_dir:
+            self._summary.parameters_output_directory_value.setText(output_dir)   
 
     def _q_range_automatic_clicked(self, is_clicked):
         """

@@ -116,6 +116,8 @@ class AdvancedWidget(BaseWidget):
         self.connect(self._summary.advanced_overwrite_data_geometry_switch, QtCore.SIGNAL("clicked(bool)"), self._advanced_data_geometry_clicked)            
         self.connect(self._summary.advanced_overwrite_norm_geometry_switch, QtCore.SIGNAL("clicked(bool)"), self._advanced_norm_geometry_clicked)            
 
+        self.connect(self._summary.advanced_overwrite_data_button, QtCore.SIGNAL("clicked()"), self._data_geometry_clicked)
+
 #        # Q range
 #        self._summary.n_q_bins_edit.setText(QtCore.QString("100"))
 #        self._summary.n_sub_pix_edit.setText(QtCore.QString("1"))
@@ -165,7 +167,28 @@ class AdvancedWidget(BaseWidget):
         """
         self._summary.advanced_overwrite_norm_button.setEnabled(is_clicked)
         self._summary.advanced_overwrite_norm_label.setEnabled(is_clicked)
+
+    def _data_geometry_clicked(self):
+        """
+            Reached by Overwrite data geometry browse button
+        """
+
         
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        _file = QtGui.QFileDialog.getExistingDirectory(self, "Select data geometry", 
+                                                       os.path.expanduser('~'),
+                                                       | QtGui.QFileDialog.DontResolveSymlinks)
+        if _file:
+            self._summary.advanced_overwrite_data_label.setText(output_dir)   
+
 
 #    def _mask_plot_clicked(self):        
 #        self.mask_ws = "__mask_%s" % extract_workspace_name(str(self._summary.mask_edit.text()))
