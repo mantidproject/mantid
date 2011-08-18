@@ -133,7 +133,7 @@ namespace Mantid
       /*extractMetaData needs to be re-run here because the first execution of this from ::executeLoadMetadata will not have ensured that all dimensions
         have proper range extents set.
       */
-      MDEWLoadingPresenter::extractMetadata(eventWs);
+      this->extractMetadata(eventWs);
 
       this->appendMetadata(visualDataSet, eventWs->getName());
       return visualDataSet;
