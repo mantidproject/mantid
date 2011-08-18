@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1011</width>
-    <height>981</height>
+    <width>1138</width>
+    <height>980</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -45,7 +45,7 @@
      <rect>
       <x>20</x>
       <y>60</y>
-      <width>971</width>
+      <width>1021</width>
       <height>291</height>
      </rect>
     </property>
@@ -55,7 +55,7 @@
      <rect>
       <x>870</x>
       <y>10</y>
-      <width>115</width>
+      <width>171</width>
       <height>32</height>
      </rect>
     </property>
@@ -68,7 +68,7 @@
      <rect>
       <x>420</x>
       <y>360</y>
-      <width>571</width>
+      <width>621</width>
       <height>32</height>
      </rect>
     </property>
@@ -94,7 +94,7 @@
      <rect>
       <x>420</x>
       <y>410</y>
-      <width>571</width>
+      <width>621</width>
       <height>121</height>
      </rect>
     </property>
@@ -106,7 +106,7 @@
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>551</width>
+       <width>601</width>
        <height>41</height>
       </rect>
      </property>
@@ -139,7 +139,7 @@
       <rect>
        <x>10</x>
        <y>70</y>
-       <width>551</width>
+       <width>601</width>
        <height>41</height>
       </rect>
      </property>
@@ -342,7 +342,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>570</y>
+      <y>550</y>
       <width>671</width>
       <height>361</height>
      </rect>
@@ -571,18 +571,67 @@
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="pushButton_14">
+   <widget class="QGroupBox" name="groupBox_4">
     <property name="geometry">
      <rect>
-      <x>720</x>
-      <y>900</y>
-      <width>271</width>
-      <height>32</height>
+      <x>710</x>
+      <y>550</y>
+      <width>331</width>
+      <height>161</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Advanced settings ...</string>
+    <property name="title">
+     <string>Settings</string>
     </property>
+    <widget class="QRadioButton" name="radioButton_9">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>211</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Automatic loading cleaning</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_14">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>70</y>
+       <width>201</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>% of Q to remove on both sides</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_7">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>70</y>
+       <width>41</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButton_10">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>120</y>
+       <width>311</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Use predefined SF values when loading table</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -590,7 +639,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1011</width>
+     <width>1138</width>
      <height>22</height>
     </rect>
    </property>

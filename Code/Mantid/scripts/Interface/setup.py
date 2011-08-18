@@ -29,7 +29,8 @@ try:
     # REF - new
     os.system("pyuic4 -o ui/reflectometer/ui_advanced.py ui/reflectometer/advanced.ui")
     os.system("pyuic4 -o ui/reflectometer/ui_data_refl.py ui/reflectometer/data_refl.ui")
-    os.system("pyuic4 -o ui/reflectometer/ui_merging_reflm.py ui/reflectometer/merging_reflm.ui")
+    os.system("pyuic4 -o ui/reflectometer/ui_merging_reflm.py ui/reflectometer/merging_refl.ui")
+    os.system("pyuic4 -o ui/reflectometer/ui_merging_reflm.py ui/reflectometer/merging_refm.ui")
     os.system("pyuic4 -o ui/reflectometer/ui_norm_refl.py ui/reflectometer/norm_refl.ui")
     os.system("pyuic4 -o ui/reflectometer/ui_parameters_refl.py ui/reflectometer/parameters_refl.ui")
     os.system("pyuic4 -o ui/reflectometer/ui_parameters_refm.py ui/reflectometer/parameters_refm.ui")

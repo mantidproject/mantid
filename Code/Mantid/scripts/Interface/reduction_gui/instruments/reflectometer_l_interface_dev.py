@@ -9,10 +9,11 @@ from reduction_gui.widgets.reflectometer.refl_data import DataReflWidget
 from reduction_gui.widgets.reflectometer.refl_parameters import ParametersReflWidget
 from reduction_gui.widgets.reflectometer.refl_norm import NormReflWidget
 from reduction_gui.widgets.reflectometer.advanced import AdvancedWidget
-
+from reduction_gui.widgets.output import OutputWidget
+    
 #from reduction_gui.reduction.hfir_reduction import HFIRReductionScripter
 
-#from reduction_gui.reduction.sans.hfir_data_proxy import DataProxy
+from reduction_gui.reduction.reflectometer.refl_data_proxy import DataProxy
 
 class REFLInterface(InstrumentInterface):
     """
@@ -22,26 +23,20 @@ class REFLInterface(InstrumentInterface):
     def __init__(self, name, settings):
         super(REFLInterface, self).__init__(name, settings)
         
-        pass
-        
         # Scripter object to interface with Mantid 
 #        self.scripter = HFIRReductionScripter(name=name)        
-#
-#
-#
-#
-#
-#        # data REF_L tab
-#        self.attach(DataReflWidget(settings = self._settings, name=name, data_proxy=DataProxy))
-#        
-#        # normalization REF_L tab
-#        self.attach(NormReflWidget(settings = self._settings, data_proxy=DataProxy))
-#
-#        # Parameters REF_L tab
-#        self.attach(ParametersReflWidget(settings = self._settings, data_proxy=DataProxy))
-#        
-#        # merging
-#        self.attach(ReflMergingWidget(settings = self._settings, data_proxy=DataProxy))
-#        
-#        # Reduction output
-#        self.attach(OutputWidget(settings = self._settings))
+
+        # data REF_L tab
+        self.attach(DataReflWidget(settings = self._settings, name=name, data_proxy=DataProxy))
+        
+        # normalization REF_L tab
+        self.attach(NormReflWidget(settings = self._settings, data_proxy=DataProxy))
+
+        # Parameters REF_L tab
+        self.attach(ParametersReflWidget(settings = self._settings, data_proxy=DataProxy))
+
+        # Parameters advanced tab
+        self.attach(AdvancedWidget(settings = self._settings, data_proxy=DataProxy))
+        
+        # Reduction output
+        self.attach(OutputWidget(settings = self._settings))

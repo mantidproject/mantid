@@ -23,35 +23,33 @@ class DataReflWidget(BaseWidget):
         Widget that present instrument details to the user
     """
     ## Widget name
-    name = "Reduction Options"      
+    name = "Sample"      
 
-    # Place holder for data read from file
-    _sample_detector_distance = None
-    _sample_detector_distance_supplied = True
-    _beam_diameter = None
-    _beam_diameter_supplied = True
-    _wavelength = None
-    _wavelength_supplied = True
-    _wavelength_spread = None
-    
-    # Internal data members for mask editor logic
-    mask_file = ''
-    mask_reload = False
-    mask_ws = "__hfir_mask"
+#    # Place holder for data read from file
+#    _sample_detector_distance = None
+#    _sample_detector_distance_supplied = True
+#    _beam_diameter = None
+#    _beam_diameter_supplied = True
+#    _wavelength = None
+#    _wavelength_supplied = True
+#    _wavelength_spread = None
+#    
+#    # Internal data members for mask editor logic
+#    mask_file = ''
+#    mask_reload = False
+#    mask_ws = "__hfir_mask"
     
     def __init__(self, parent=None, state=None, settings=None, name="REFL", data_proxy=None):      
         super(DataReflWidget, self).__init__(parent, state, settings, data_proxy=data_proxy) 
 
-        pass
-
-#        class SummaryFrame(QtGui.QFrame, ui.sans.ui_hfir_instrument.Ui_Frame): 
-#            def __init__(self, parent=None):
-#                QtGui.QFrame.__init__(self, parent)
-#                self.setupUi(self)
+        class SummaryFrame(QtGui.QFrame, ui.reflectometer.ui_data_refl.Ui_Frame):
+            def __init__(self, parent=None):
+                QtGui.QFrame.__init__(self, parent)
+                self.setupUi(self)
 #                
-#        self._summary = SummaryFrame(self)
-#        self.initialize_content()
-#        self._layout.addWidget(self._summary)
+        self._summary = SummaryFrame(self)
+        self.initialize_content()
+        self._layout.addWidget(self._summary)
 #        
 #        self._masked_detectors = []
 #        
