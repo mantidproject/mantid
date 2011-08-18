@@ -106,16 +106,21 @@ class ParametersReflWidget(BaseWidget):
 #    def content(self):
 #        return self._summary
 #
-#    def initialize_content(self):
-#        # Validators
-#        self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
-#        self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
-#        self._summary.wavelength_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_edit))
-#        self._summary.wavelength_spread_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_spread_edit))
-#        self._summary.n_q_bins_edit.setValidator(QtGui.QIntValidator(self._summary.n_q_bins_edit))
-#        self._summary.n_sub_pix_edit.setValidator(QtGui.QIntValidator(self._summary.n_sub_pix_edit))
-#        
-#        # Event connections
+    def initialize_content(self):
+
+        # Validators
+        self._summary.parameters_q_range_from_value.setValidator(QtGui.QDoubleValidator(self._summary.parameters_q_range_from_value))
+        self._summary.parameters_q_range_to_value.setValidator(QtGui.QDoubleValidator(self._summary.parameters_q_range_to_value))
+        self._summary.parameters_q_range_nbr_bins_value.setValidator(QtGui.QIntValidator(self._summary.parameters_q_range_nbr_bins_value))
+        self._summary.parameters_q_range_bin_size_value.setValidator(QtGui.QIntValidator(self._summary.parameters_q_range_bin_size_value))
+
+        # Event connections
+        self.connect(self._summary.parameters_q_range_automatic_switch, QtCore.SIGNAL("clicked(bool)"), self._q_range_automatic_clicked)
+        self.connect(self._summary.parameters_q_range_manual_switch, QtCore.SIGNAL("clicked(bool)"), self._q_range_manual_clicked)
+        self.connect(self._summary.parameters_q_range_linear_switch, QtCore.SIGNAL("clicked(bool)"), self._q_range_linear_clicked)
+        self.connect(self._summary.parameters_q_range_log_switch, QtCore.SIGNAL("clicked(bool)"), self._q_range_log_clicked)
+
+
 #        self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
 #        self.connect(self._summary.sample_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_dist_clicked)
 #        self.connect(self._summary.wavelength_chk, QtCore.SIGNAL("clicked(bool)"), self._wavelength_clicked)
@@ -155,6 +160,58 @@ class ParametersReflWidget(BaseWidget):
 #            self._summary.dark_plot_button.hide()
 #            self._summary.scale_data_plot_button.hide()
 #            
+
+    def _q_range_automatic_clicked(self, is_clicked):
+        """
+            Reached by the Q range automatic switch
+        """
+        self._q_range_activate_manual_mode(False)
+        self._summary.parameters_q_range_manual_switch.setChecked(False)
+        self._summary.parameters_q_range_automatic_switch.setChecked(True)
+        
+    def _q_range_manual_clicked(self, is_clicked):
+        """
+            Reached by the Q range manual switch
+        """
+        self._q_range_activate_manual_mode(True)
+        self._summary.parameters_q_range_automatic_switch.setChecked(False)
+        self._summary.parameters_q_range_manual_switch.setChecked(True)
+        
+    def _q_range_activate_manual_mode(self, is_activated):
+        """
+            Reached by the Q range automatic and manual switches
+        """
+        #disable or not the widgets releated to the manual mode
+        self._summary.parameters_q_range_from_label.setEnabled(is_activated)
+        self._summary.parameters_q_range_from_value.setEnabled(is_activated)
+        self._summary.parameters_q_range_from_unit_label.setEnabled(is_activated)
+        self._summary.parameters_q_range_to_label.setEnabled(is_activated)
+        self._summary.parameters_q_range_to_value.setEnabled(is_activated)
+        self._summary.parameters_q_range_to_unit_label.setEnabled(is_activated)
+        self._summary.parameters_q_range_nbr_bins_label.setEnabled(is_activated)
+        self._summary.parameters_q_range_nbr_bins_value.setEnabled(is_activated)
+        self._summary.parameters_q_range_bin_size_label.setEnabled(is_activated)
+        self._summary.parameters_q_range_bin_size_value.setEnabled(is_activated)
+        self._summary.parameters_q_range_bin_size_unit_label.setEnabled(is_activated)
+        self._summary.parameters_q_range_linear_switch.setEnabled(is_activated)
+        self._summary.parameters_q_range_log_switch.setEnabled(is_activated)
+        self._summary.parameters_q_range_or_label.setEnabled(is_activated)
+        
+    def _q_range_linear_clicked(self, is_clicked):
+        """
+            Reached by the Q range linear switch
+        """
+        self._summary.parameters_q_range_linear_switch.setChecked(True)
+        self._summary.parameters_q_range_log_switch.setChecked(False)
+        
+    def _q_range_log_clicked(self, is_clicked):
+        """
+            Reached by the Q range log switch
+        """
+        self._summary.parameters_q_range_linear_switch.setChecked(False)
+        self._summary.parameters_q_range_log_switch.setChecked(True)
+        
+        
 #    def _mask_plot_clicked(self):        
 #        self.mask_ws = "__mask_%s" % extract_workspace_name(str(self._summary.mask_edit.text()))
 #        self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2, reload=self.mask_reload, mask=self._masked_detectors)

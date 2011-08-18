@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/sans/trans_direct_beam.ui'
 #
-# Created: Wed Aug 10 11:58:25 2011
-#      by: PyQt4 UI code generator 4.7.4
+# Created: Thu Aug 18 12:24:04 2011
+#      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
 

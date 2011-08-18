@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_detector.ui'
 #
-# Created: Wed Aug 10 17:26:19 2011
-#      by: PyQt4 UI code generator 4.7.4
+# Created: Thu Aug 18 12:24:04 2011
+#      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
 

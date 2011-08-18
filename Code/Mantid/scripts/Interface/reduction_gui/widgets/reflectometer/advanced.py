@@ -106,16 +106,17 @@ class AdvancedWidget(BaseWidget):
 #    def content(self):
 #        return self._summary
 #
-#    def initialize_content(self):
-#        # Validators
-#        self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
-#        self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
-#        self._summary.wavelength_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_edit))
-#        self._summary.wavelength_spread_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_spread_edit))
-#        self._summary.n_q_bins_edit.setValidator(QtGui.QIntValidator(self._summary.n_q_bins_edit))
-#        self._summary.n_sub_pix_edit.setValidator(QtGui.QIntValidator(self._summary.n_sub_pix_edit))
-#        
-#        # Event connections
+    def initialize_content(self):
+
+        # Validators
+        self._summary.advanced_auto_cleanup_percentage_value.setValidator(QtGui.QDoubleValidator(self._summary.advanced_auto_cleanup_percentage_value))
+
+        # Event connections
+        self.connect(self._summary.advanced_auto_cleanup_switch, QtCore.SIGNAL("clicked(bool)"), self._advanced_auto_cleanup_clicked)
+        self.connect(self._summary.advanced_overwrite_data_geometry_switch, QtCore.SIGNAL("clicked(bool)"), self._advanced_data_geometry_clicked)            
+        self.connect(self._summary.advanced_overwrite_norm_geometry_switch, QtCore.SIGNAL("clicked(bool)"), self._advanced_norm_geometry_clicked)            
+
+
 #        self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
 #        self.connect(self._summary.sample_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_dist_clicked)
 #        self.connect(self._summary.wavelength_chk, QtCore.SIGNAL("clicked(bool)"), self._wavelength_clicked)
@@ -155,6 +156,29 @@ class AdvancedWidget(BaseWidget):
 #            self._summary.dark_plot_button.hide()
 #            self._summary.scale_data_plot_button.hide()
 #            
+    def _advanced_auto_cleanup_clicked(self, is_clicked):
+        """
+            Reached by auto_cleanup switch
+        """
+        self._summary.advanced_auto_cleanup_percentage_label.setEnabled(is_clicked)
+        self._summary.advanced_auto_cleanup_percentage_value.setEnabled(is_clicked)
+        self._summary.advanced_auto_cleanup_percentage_label2.setEnabled(is_clicked)
+
+    def _advanced_data_geometry_clicked(self, is_clicked):
+        """
+            Reached by the Overwrite data geometry
+        """
+        self._summary.advanced_overwrite_data_button.setEnabled(is_clicked)
+        self._summary.advanced_overwrite_data_label.setEnabled(is_clicked)
+        
+    def _advanced_norm_geometry_clicked(self, is_clicked):
+        """
+            Reached by the Overwrite normalization geometry
+        """
+        self._summary.advanced_overwrite_norm_button.setEnabled(is_clicked)
+        self._summary.advanced_overwrite_norm_label.setEnabled(is_clicked)
+        
+
 #    def _mask_plot_clicked(self):        
 #        self.mask_ws = "__mask_%s" % extract_workspace_name(str(self._summary.mask_edit.text()))
 #        self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2, reload=self.mask_reload, mask=self._masked_detectors)

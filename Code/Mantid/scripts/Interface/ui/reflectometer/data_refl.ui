@@ -92,7 +92,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QRadioButton" name="radioButton">
+                 <widget class="QRadioButton" name="data_peak_narrow_switch">
                   <property name="enabled">
                    <bool>true</bool>
                   </property>
@@ -108,7 +108,17 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QRadioButton" name="radioButton_3">
+                 <widget class="QRadioButton" name="data_peak_broad_switch">
+                  <property name="text">
+                   <string>Broad</string>
+                  </property>
+                  <property name="autoExclusive">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="data_peak_discrete_switch">
                   <property name="enabled">
                    <bool>true</bool>
                   </property>
@@ -120,16 +130,6 @@
                   </property>
                   <property name="checked">
                    <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QRadioButton" name="radioButton_2">
-                  <property name="text">
-                   <string>Broad</string>
-                  </property>
-                  <property name="autoExclusive">
-                   <bool>true</bool>
                   </property>
                  </widget>
                 </item>
@@ -197,14 +197,14 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_4">
+                 <widget class="QLabel" name="data_peak_from_pixel_label">
                   <property name="text">
                    <string>From pixel</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_2">
+                 <widget class="QLineEdit" name="data_peak_from_pixel">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -213,27 +213,27 @@
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>40</width>
+                    <width>50</width>
                     <height>0</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>40</width>
+                    <width>50</width>
                     <height>16777215</height>
                    </size>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_5">
+                 <widget class="QLabel" name="data_peak_to_pixel_label">
                   <property name="text">
                    <string>   To pixel</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_3">
+                 <widget class="QLineEdit" name="data_peak_to_pixel">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -242,13 +242,13 @@
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>40</width>
+                    <width>50</width>
                     <height>0</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>40</width>
+                    <width>50</width>
                     <height>16777215</height>
                    </size>
                   </property>
@@ -288,7 +288,7 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_7">
+                 <widget class="QLabel" name="data_peak_nbr_selection_label">
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
@@ -310,7 +310,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_8">
+                 <widget class="QLabel" name="data_peak_nbr_selection_value">
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
@@ -345,7 +345,7 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_8">
            <item>
-            <widget class="QRadioButton" name="radioButton_10">
+            <widget class="QRadioButton" name="data_background_switch">
              <property name="font">
               <font>
                <pointsize>13</pointsize>
@@ -378,7 +378,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="label_12">
+            <widget class="QLabel" name="data_background_from_pixel_label">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -388,7 +388,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit_8">
+            <widget class="QLineEdit" name="data_background_from_pixel">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -400,13 +400,13 @@
              </property>
              <property name="minimumSize">
               <size>
-               <width>40</width>
+               <width>50</width>
                <height>0</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
-               <width>40</width>
+               <width>50</width>
                <height>16777215</height>
               </size>
              </property>
@@ -419,7 +419,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_13">
+            <widget class="QLabel" name="data_background_to_pixel_label">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -429,7 +429,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit_9">
+            <widget class="QLineEdit" name="data_background_to_pixel">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -441,20 +441,20 @@
              </property>
              <property name="minimumSize">
               <size>
-               <width>40</width>
+               <width>50</width>
                <height>0</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
-               <width>40</width>
+               <width>50</width>
                <height>16777215</height>
               </size>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_8">
+            <widget class="QPushButton" name="data_background_load_button">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -464,7 +464,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_9">
+            <widget class="QPushButton" name="data_background_save_button">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -520,7 +520,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEdit_10"/>
+               <widget class="QLineEdit" name="data_from_tof"/>
               </item>
               <item>
                <widget class="QLabel" name="label_15">
@@ -530,7 +530,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEdit_11"/>
+               <widget class="QLineEdit" name="data_to_tof"/>
               </item>
               <item>
                <widget class="QLabel" name="label_16">
@@ -542,7 +542,7 @@
               <item>
                <widget class="QPushButton" name="pushButton_6">
                 <property name="text">
-                 <string>TOF range selection</string>
+                 <string>TOF Selection tool</string>
                 </property>
                </widget>
               </item>

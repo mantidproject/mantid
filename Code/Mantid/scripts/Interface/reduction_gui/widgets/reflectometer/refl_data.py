@@ -97,16 +97,24 @@ class DataReflWidget(BaseWidget):
 #    def content(self):
 #        return self._summary
 #
-#    def initialize_content(self):
-#        # Validators
-#        self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
-#        self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
-#        self._summary.wavelength_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_edit))
-#        self._summary.wavelength_spread_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_spread_edit))
-#        self._summary.n_q_bins_edit.setValidator(QtGui.QIntValidator(self._summary.n_q_bins_edit))
-#        self._summary.n_sub_pix_edit.setValidator(QtGui.QIntValidator(self._summary.n_sub_pix_edit))
-#        
-#        # Event connections
+    def initialize_content(self):
+        
+        # Validators
+        self._summary.data_peak_from_pixel.setValidator(QtGui.QIntValidator(self._summary.data_peak_from_pixel))
+        self._summary.data_peak_to_pixel.setValidator(QtGui.QIntValidator(self._summary.data_peak_to_pixel))
+        self._summary.data_background_from_pixel.setValidator(QtGui.QIntValidator(self._summary.data_background_from_pixel))
+        self._summary.data_background_to_pixel.setValidator(QtGui.QIntValidator(self._summary.data_background_to_pixel))
+        self._summary.data_from_tof.setValidator(QtGui.QDoubleValidator(self._summary.data_from_tof))
+        self._summary.data_to_tof.setValidator(QtGui.QDoubleValidator(self._summary.data_to_tof))
+
+        # Event connections
+        self.connect(self._summary.data_background_switch, QtCore.SIGNAL("clicked(bool)"), self._data_background_clicked)
+        self.connect(self._summary.data_peak_narrow_switch, QtCore.SIGNAL("clicked(bool)"), self._data_peak_switch_clicked)
+        self.connect(self._summary.data_peak_broad_switch, QtCore.SIGNAL("clicked(bool)"), self._data_peak_switch_clicked)
+        self.connect(self._summary.data_peak_discrete_switch, QtCore.SIGNAL("clicked(bool)"), self._data_peak_switch_clicked_discrete)
+        
+
+
 #        self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
 #        self.connect(self._summary.sample_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_dist_clicked)
 #        self.connect(self._summary.wavelength_chk, QtCore.SIGNAL("clicked(bool)"), self._wavelength_clicked)
@@ -205,7 +213,43 @@ class DataReflWidget(BaseWidget):
 #        fname = self.data_browse_dialog()
 #        if fname:
 #            self._summary.scale_data_edit.setText(fname)              
-#            
+
+    def _data_background_clicked(self, is_checked):
+        """
+            This is reached when the user clicks the Background switch and will enabled or not
+            the widgets that follow that button
+        """
+        self._summary.data_background_from_pixel.setEnabled(is_checked)
+        self._summary.data_background_from_pixel_label.setEnabled(is_checked)
+        self._summary.data_background_to_pixel.setEnabled(is_checked)
+        self._summary.data_background_to_pixel_label.setEnabled(is_checked)
+        self._summary.data_background_load_button.setEnabled(is_checked)
+        self._summary.data_background_save_button.setEnabled(is_checked)
+        
+    def _data_peak_switch_clicked(self, is_checked):
+        """
+           This is reached when the user clicks the Peak selection Narrow or Broad switch 
+        """
+        if (is_checked):
+            self._summary.data_peak_from_pixel_label.setEnabled(True)
+            self._summary.data_peak_from_pixel.setEnabled(True)
+            self._summary.data_peak_to_pixel_label.setEnabled(True)
+            self._summary.data_peak_to_pixel.setEnabled(True)
+            self._summary.data_peak_nbr_selection_label.setEnabled(False)
+            self._summary.data_peak_nbr_selection_value.setEnabled(False)
+         
+    def _data_peak_switch_clicked_discrete(self, is_checked):
+        """
+           This is reached when the user clicks the Peak selection Discrete switch 
+        """
+        if (is_checked):
+            self._summary.data_peak_from_pixel_label.setEnabled(False)
+            self._summary.data_peak_from_pixel.setEnabled(False)
+            self._summary.data_peak_to_pixel_label.setEnabled(False)
+            self._summary.data_peak_to_pixel.setEnabled(False)
+            self._summary.data_peak_nbr_selection_label.setEnabled(True)
+            self._summary.data_peak_nbr_selection_value.setEnabled(True)
+            
 #    def _det_offset_clicked(self, is_checked):
 #        self._summary.detector_offset_edit.setEnabled(is_checked)
 #        

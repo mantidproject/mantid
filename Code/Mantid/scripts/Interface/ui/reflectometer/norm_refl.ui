@@ -89,7 +89,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_2">
+                 <widget class="QLineEdit" name="norm_peak_from_pixel">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -118,7 +118,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_3">
+                 <widget class="QLineEdit" name="norm_peak_to_pixel">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -176,7 +176,7 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_8">
            <item>
-            <widget class="QRadioButton" name="radioButton_10">
+            <widget class="QRadioButton" name="norm_background_switch">
              <property name="font">
               <font>
                <pointsize>13</pointsize>
@@ -209,7 +209,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QLabel" name="label_12">
+            <widget class="QLabel" name="norm_background_from_pixel_label">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -219,7 +219,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit_8">
+            <widget class="QLineEdit" name="norm_background_from_pixel">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -250,7 +250,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_13">
+            <widget class="QLabel" name="norm_background_to_pixel_label">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -260,7 +260,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit_9">
+            <widget class="QLineEdit" name="norm_background_to_pixel">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -285,7 +285,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_8">
+            <widget class="QPushButton" name="norm_background_load_button">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -295,7 +295,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_9">
+            <widget class="QPushButton" name="norm_background_save_button">
              <property name="enabled">
               <bool>false</bool>
              </property>

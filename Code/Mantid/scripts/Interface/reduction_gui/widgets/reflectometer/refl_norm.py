@@ -106,8 +106,19 @@ class NormReflWidget(BaseWidget):
 #    def content(self):
 #        return self._summary
 #
-#    def initialize_content(self):
-#        # Validators
+    def initialize_content(self):
+
+        # Validators
+        self._summary.norm_peak_from_pixel.setValidator(QtGui.QIntValidator(self._summary.norm_peak_from_pixel))
+        self._summary.norm_peak_to_pixel.setValidator(QtGui.QIntValidator(self._summary.norm_peak_to_pixel))
+        self._summary.norm_background_from_pixel.setValidator(QtGui.QIntValidator(self._summary.norm_background_from_pixel))
+        self._summary.norm_background_to_pixel.setValidator(QtGui.QIntValidator(self._summary.norm_background_to_pixel))
+
+        # Event connections
+        self.connect(self._summary.norm_background_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_background_clicked)
+        
+        
+
 #        self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
 #        self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
 #        self._summary.wavelength_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_edit))
@@ -154,6 +165,18 @@ class NormReflWidget(BaseWidget):
 #        if not self._in_mantidplot:
 #            self._summary.dark_plot_button.hide()
 #            self._summary.scale_data_plot_button.hide()
+
+    def _norm_background_clicked(self, is_checked):
+        """
+            This is reached when user clicks the normalization background switch
+        """
+        self._summary.norm_background_from_pixel_label.setEnabled(is_checked)
+        self._summary.norm_background_from_pixel.setEnabled(is_checked)
+        self._summary.norm_background_to_pixel_label.setEnabled(is_checked)
+        self._summary.norm_background_to_pixel.setEnabled(is_checked)
+        self._summary.norm_background_load_button.setEnabled(is_checked)
+        self._summary.norm_background_save_button.setEnabled(is_checked)
+
 #            
 #    def _mask_plot_clicked(self):        
 #        self.mask_ws = "__mask_%s" % extract_workspace_name(str(self._summary.mask_edit.text()))
