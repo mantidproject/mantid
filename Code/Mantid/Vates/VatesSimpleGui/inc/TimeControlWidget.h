@@ -31,19 +31,19 @@
  */
 class TimeControlWidget : public QWidget
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    /**
-     * Default constructor.
-     * @param parent the parent widget for the time control widget
-     */
-    TimeControlWidget(QWidget *parent = 0);
-    /// Default constructor.
-    virtual ~TimeControlWidget();
+  /**
+   * Default constructor.
+   * @param parent the parent widget for the time control widget
+   */
+  TimeControlWidget(QWidget *parent = 0);
+  /// Default constructor.
+  virtual ~TimeControlWidget();
 
 private:
-    Ui::TimeControlWidget ui; ///< The time control widget's UI form
+  Ui::TimeControlWidget ui; ///< The time control widget's UI form
 };
 
 #endif	// TIMECONTROLWIDGET_H_

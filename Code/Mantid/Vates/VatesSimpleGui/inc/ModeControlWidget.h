@@ -32,26 +32,26 @@
  */
 class ModeControlWidget : public QWidget
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    /**
-     * Default constructor.
-     * @param parent the parent widget of the mode control widget
-     */
-    ModeControlWidget(QWidget *parent = 0);
-    /// Default destructor.
-    virtual ~ModeControlWidget();
+  /**
+   * Default constructor.
+   * @param parent the parent widget of the mode control widget
+   */
+  ModeControlWidget(QWidget *parent = 0);
+  /// Default destructor.
+  virtual ~ModeControlWidget();
 
-    /// Enumeration for the view types
-    enum Views {STANDARD, THREESLICE, MULTISLICE};
+  /// Enumeration for the view types
+  enum Views {STANDARD, THREESLICE, MULTISLICE};
 
 signals:
   /**
    * Function to make the main program window switch to a given view.
    * @param v the type of view to switch to
    */
-	void executeSwitchViews(ModeControlWidget::Views v);
+  void executeSwitchViews(ModeControlWidget::Views v);
 
 protected slots:
   /**
@@ -62,11 +62,11 @@ protected slots:
    * Enable on the threeslice view button.
    */
   void enableThreeSliceViewButton();
-	/**
-	 * Execute switch to multislice view, disable multislice button and
-	 * enable other view buttons.
-	 */
-	void onMultiSliceViewButtonClicked();
+  /**
+   * Execute switch to multislice view, disable multislice button and
+   * enable other view buttons.
+   */
+  void onMultiSliceViewButtonClicked();
   /**
    * Execute switch to standard view, disable standard button and
    * enable other view buttons.
@@ -79,7 +79,7 @@ protected slots:
   void onThreeSliceViewButtonClicked();
 
 private:
-    Ui::ModeControlWidgetClass ui; ///< The mode control widget's UI form
+  Ui::ModeControlWidgetClass ui; ///< The mode control widget's UI form
 };
 
 #endif // MODECONTROLWIDGET_H_

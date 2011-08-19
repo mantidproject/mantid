@@ -29,49 +29,50 @@
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class AxisInformation {
+class AxisInformation
+{
 public:
   /// Default constructor.
-	AxisInformation();
-	/// Default destructor.
-	virtual ~AxisInformation() {}
+  AxisInformation();
+  /// Default destructor.
+  virtual ~AxisInformation() {}
 
-	/**
-	 * Get the maximum extent of the associated axis.
-	 * @return the maximum axis extent
-	 */
-	double getMaximum() { return this->maximum; }
+  /**
+   * Get the maximum extent of the associated axis.
+   * @return the maximum axis extent
+   */
+  double getMaximum() { return this->maximum; }
   /**
    * Get the minimum extent of the associated axis.
    * @return the minimum axis extent
    */
-	double getMinimum() { return this->minimum; }
+  double getMinimum() { return this->minimum; }
   /**
    * Get the title of the associated axis.
    * @return the axis title
    */
-	std::string getTitle() { return this->title; }
+  std::string getTitle() { return this->title; }
 
   /**
    * Set the maximum extent of the associated axis.
    * @param max the maximum axis extent to apply
    */
-	void setMaximum(double max) { this->maximum = max; }
+  void setMaximum(double max) { this->maximum = max; }
   /**
    * Set the minimum extent of the associated axis.
    * @param min the minimum axis extent to apply
    */
-	void setMinimum(double min) { this->minimum = min; }
+  void setMinimum(double min) { this->minimum = min; }
   /**
    * Set the title of the associated axis.
    * @param title the axis title to apply
    */
-	void setTitle(std::string title) { this->title = title; }
+  void setTitle(std::string title) { this->title = title; }
 
 private:
-	std::string title; ///< The axis title (or label)
-	double minimum; ///< The minimum extent of the axis
-	double maximum; ///< The maximum extent of the axis
+  std::string title; ///< The axis title (or label)
+  double minimum; ///< The minimum extent of the axis
+  double maximum; ///< The maximum extent of the axis
 };
 
 #endif // AXISINFORMATION_H_

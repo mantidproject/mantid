@@ -33,43 +33,49 @@
 #include <iostream>
 MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
 {
-	this->ui.setupUi(this);
-	this->ui.xAxisWidget->setScalePosition(AxisInteractor::LeftScale);
+  this->ui.setupUi(this);
+  this->ui.xAxisWidget->setScalePosition(AxisInteractor::LeftScale);
   this->ui.yAxisWidget->setScalePosition(AxisInteractor::TopScale);
-	this->ui.zAxisWidget->setScalePosition(AxisInteractor::RightScale);
+  this->ui.zAxisWidget->setScalePosition(AxisInteractor::RightScale);
 
-	this->mainView = this->createRenderView(this->ui.renderFrame);
-
-	QObject::connect(this->ui.xAxisWidget->getScalePicker(),
-			SIGNAL(clicked(double)), this, SLOT(makeXcut(double)));
-	QObject::connect(this->ui.yAxisWidget->getScalePicker(),
-			SIGNAL(clicked(double)), this, SLOT(makeYcut(double)));
-	QObject::connect(this->ui.zAxisWidget->getScalePicker(),
-			SIGNAL(clicked(double)), this, SLOT(makeZcut(double)));
+  this->mainView = this->createRenderView(this->ui.renderFrame);
 
   QObject::connect(this->ui.xAxisWidget->getScalePicker(),
-      SIGNAL(moved(double)), this, SLOT(updateCutPosition(double)));
+                   SIGNAL(clicked(double)), this, SLOT(makeXcut(double)));
   QObject::connect(this->ui.yAxisWidget->getScalePicker(),
-      SIGNAL(moved(double)), this, SLOT(updateCutPosition(double)));
+                   SIGNAL(clicked(double)), this, SLOT(makeYcut(double)));
   QObject::connect(this->ui.zAxisWidget->getScalePicker(),
-      SIGNAL(moved(double)), this, SLOT(updateCutPosition(double)));
+                   SIGNAL(clicked(double)), this, SLOT(makeZcut(double)));
+
+  QObject::connect(this->ui.xAxisWidget->getScalePicker(),
+                   SIGNAL(moved(double)), this,
+                   SLOT(updateCutPosition(double)));
+  QObject::connect(this->ui.yAxisWidget->getScalePicker(),
+                   SIGNAL(moved(double)), this,
+                   SLOT(updateCutPosition(double)));
+  QObject::connect(this->ui.zAxisWidget->getScalePicker(),
+                   SIGNAL(moved(double)), this,
+                   SLOT(updateCutPosition(double)));
 
   QObject::connect(this->ui.xAxisWidget,
-    SIGNAL(indicatorSelected(const QString &)), this,
-    SLOT(indicatorSelected(const QString &)));
+                   SIGNAL(indicatorSelected(const QString &)), this,
+                   SLOT(indicatorSelected(const QString &)));
   QObject::connect(this->ui.yAxisWidget,
-    SIGNAL(indicatorSelected(const QString &)), this,
-    SLOT(indicatorSelected(const QString &)));
+                   SIGNAL(indicatorSelected(const QString &)), this,
+                   SLOT(indicatorSelected(const QString &)));
   QObject::connect(this->ui.zAxisWidget,
-    SIGNAL(indicatorSelected(const QString &)), this,
-    SLOT(indicatorSelected(const QString &)));
+                   SIGNAL(indicatorSelected(const QString &)), this,
+                   SLOT(indicatorSelected(const QString &)));
 
-	QObject::connect(this, SIGNAL(sliceNamed(const QString &)),
-			this->ui.xAxisWidget, SLOT(setIndicatorName(const QString &)));
-	QObject::connect(this, SIGNAL(sliceNamed(const QString &)),
-			this->ui.yAxisWidget, SLOT(setIndicatorName(const QString &)));
-	QObject::connect(this, SIGNAL(sliceNamed(const QString &)),
-			this->ui.zAxisWidget, SLOT(setIndicatorName(const QString &)));
+  QObject::connect(this, SIGNAL(sliceNamed(const QString &)),
+                   this->ui.xAxisWidget,
+                   SLOT(setIndicatorName(const QString &)));
+  QObject::connect(this, SIGNAL(sliceNamed(const QString &)),
+                   this->ui.yAxisWidget,
+                   SLOT(setIndicatorName(const QString &)));
+  QObject::connect(this, SIGNAL(sliceNamed(const QString &)),
+                   this->ui.zAxisWidget,
+                   SLOT(setIndicatorName(const QString &)));
 
   QObject::connect(this->ui.xAxisWidget,
                    SIGNAL(deleteIndicator(const QString &)), this,
@@ -94,140 +100,153 @@ MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
 
 MultiSliceView::~MultiSliceView()
 {
-	pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-	this->destroyFilter(builder, QString("Slice"));
-	builder->destroy(this->mainView);
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  this->destroyFilter(builder, QString("Slice"));
+  builder->destroy(this->mainView);
 }
 
 pqRenderView* MultiSliceView::getView()
 {
-	return this->mainView.data();
+  return this->mainView.data();
 }
 
 void MultiSliceView::clearIndicatorSelections()
 {
-	this->ui.xAxisWidget->clearSelections();
-	this->ui.yAxisWidget->clearSelections();
-	this->ui.zAxisWidget->clearSelections();
+  this->ui.xAxisWidget->clearSelections();
+  this->ui.yAxisWidget->clearSelections();
+  this->ui.zAxisWidget->clearSelections();
 }
 
 void MultiSliceView::setupData()
 {
-	pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
 
-	pqDataRepresentation *drep = builder->createDataRepresentation(
-			this->origSource->getOutputPort(0), this->mainView);
-	vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(VTK_SURFACE);
-	drep->getProxy()->UpdateVTKObjects();
-	this->originSourceRepr = qobject_cast<pqPipelineRepresentation*>(drep);
-	this->originSourceRepr->colorByArray("signal",
-			vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  pqDataRepresentation *drep = builder->createDataRepresentation(\
+        this->origSource->getOutputPort(0), this->mainView);
+  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(VTK_SURFACE);
+  drep->getProxy()->UpdateVTKObjects();
+  this->originSourceRepr = qobject_cast<pqPipelineRepresentation*>(drep);
+  this->originSourceRepr->colorByArray("signal",
+                                       vtkDataObject::FIELD_ASSOCIATION_CELLS);
 }
 
 void MultiSliceView::setupAxisInfo()
 {
-	const char *geomXML = vtkSMPropertyHelper(this->origSource->getProxy(),
-			"InputGeometryXML").GetAsString();
-	GeometryParser parser(geomXML);
-	AxisInformation *xinfo = parser.getAxisInfo("XDimension");
-	AxisInformation *yinfo = parser.getAxisInfo("YDimension");
-	AxisInformation *zinfo = parser.getAxisInfo("ZDimension");
+  const char *geomXML = vtkSMPropertyHelper(this->origSource->getProxy(),
+                                            "InputGeometryXML").GetAsString();
+  GeometryParser parser(geomXML);
+  AxisInformation *xinfo = parser.getAxisInfo("XDimension");
+  AxisInformation *yinfo = parser.getAxisInfo("YDimension");
+  AxisInformation *zinfo = parser.getAxisInfo("ZDimension");
 
-	this->ui.xAxisWidget->setInformation(QString(xinfo->getTitle().c_str()),
-				xinfo->getMinimum(), xinfo->getMaximum());
-	this->ui.yAxisWidget->setInformation(QString(yinfo->getTitle().c_str()),
-				yinfo->getMinimum(), yinfo->getMaximum());
-	this->ui.zAxisWidget->setInformation(QString(zinfo->getTitle().c_str()),
-			zinfo->getMinimum(), zinfo->getMaximum());
+  this->ui.xAxisWidget->setInformation(QString(xinfo->getTitle().c_str()),
+                                       xinfo->getMinimum(),
+                                       xinfo->getMaximum());
+  this->ui.yAxisWidget->setInformation(QString(yinfo->getTitle().c_str()),
+                                       yinfo->getMinimum(),
+                                       yinfo->getMaximum());
+  this->ui.zAxisWidget->setInformation(QString(zinfo->getTitle().c_str()),
+                                       zinfo->getMinimum(),
+                                       zinfo->getMaximum());
 
-	delete xinfo;
-	delete yinfo;
-	delete zinfo;
+  delete xinfo;
+  delete yinfo;
+  delete zinfo;
 }
 
 void MultiSliceView::render()
 {
-	this->origSource = pqActiveObjects::instance().activeSource();
-	this->setupData();
-	this->setupAxisInfo();
-	this->mainView->resetDisplay();
-	this->mainView->render();
+  this->origSource = pqActiveObjects::instance().activeSource();
+  this->setupData();
+  this->setupAxisInfo();
+  this->resetDisplay();
+  this->renderAll();
 
   QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
   emit this->dataRange(range.first, range.second);
 }
 
+void MultiSliceView::renderAll()
+{
+  this->mainView->render();
+}
+
+void MultiSliceView::resetDisplay()
+{
+  this->mainView->resetDisplay();
+}
+
 void MultiSliceView::makeXcut(double value)
 {
-	double origin[3], orient[3];
-	origin[0] = value;
-	origin[1] = 0.0;
-	origin[2] = 0.0;
-	orient[0] = 1.0;
-	orient[1] = 0.0;
-	orient[2] = 0.0;
-	this->makeCut(origin, orient);
+  double origin[3], orient[3];
+  origin[0] = value;
+  origin[1] = 0.0;
+  origin[2] = 0.0;
+  orient[0] = 1.0;
+  orient[1] = 0.0;
+  orient[2] = 0.0;
+  this->makeCut(origin, orient);
 }
 
 void MultiSliceView::makeYcut(double value)
 {
-	double origin[3], orient[3];
-	origin[0] = 0.0;
-	origin[1] = value;
-	origin[2] = 0.0;
-	orient[0] = 0.0;
-	orient[1] = 1.0;
-	orient[2] = 0.0;
-	this->makeCut(origin, orient);
+  double origin[3], orient[3];
+  origin[0] = 0.0;
+  origin[1] = value;
+  origin[2] = 0.0;
+  orient[0] = 0.0;
+  orient[1] = 1.0;
+  orient[2] = 0.0;
+  this->makeCut(origin, orient);
 }
 
 void MultiSliceView::makeZcut(double value)
 {
-	double origin[3], orient[3];
-	origin[0] = 0.0;
-	origin[1] = 0.0;
-	origin[2] = value;
-	orient[0] = 0.0;
-	orient[1] = 0.0;
-	orient[2] = 1.0;
-	this->makeCut(origin, orient);
+  double origin[3], orient[3];
+  origin[0] = 0.0;
+  origin[1] = 0.0;
+  origin[2] = value;
+  orient[0] = 0.0;
+  orient[1] = 0.0;
+  orient[2] = 1.0;
+  this->makeCut(origin, orient);
 }
 
 void MultiSliceView::makeCut(double origin[], double orient[])
 {
-	this->clearIndicatorSelections();
-	pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  this->clearIndicatorSelections();
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
 
-	pqPipelineSource *cut = builder->createFilter("filters", "Cut",
-			this->origSource);
-	emit sliceNamed(cut->getSMName());
-	pqDataRepresentation *trepr = builder->createDataRepresentation(
-			cut->getOutputPort(0),this->mainView);
-	pqPipelineRepresentation *repr = qobject_cast<pqPipelineRepresentation *>(trepr);
-	vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
-      "CutFunction").GetAsProxy();
+  pqPipelineSource *cut = builder->createFilter("filters", "Cut",
+                                                this->origSource);
+  emit sliceNamed(cut->getSMName());
+  pqDataRepresentation *trepr = builder->createDataRepresentation(\
+        cut->getOutputPort(0),this->mainView);
+  pqPipelineRepresentation *repr = qobject_cast<pqPipelineRepresentation *>(trepr);
+  vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
+                                          "CutFunction").GetAsProxy();
 
-	repr->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  repr->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
-	vtkSMPropertyHelper(plane, "Origin").Set(origin, 3);
-	vtkSMPropertyHelper(plane, "Normal").Set(orient, 3);
-	trepr->getProxy()->UpdateVTKObjects();
+  vtkSMPropertyHelper(plane, "Origin").Set(origin, 3);
+  vtkSMPropertyHelper(plane, "Normal").Set(orient, 3);
+  trepr->getProxy()->UpdateVTKObjects();
 }
 
 void MultiSliceView::selectIndicator()
 {
-	pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
-	pqPipelineSource *source = qobject_cast<pqPipelineSource *>(smsModel->currentItem());
-	QString name = source->getSMName();
-	this->ui.xAxisWidget->selectIndicator(name);
-	this->ui.yAxisWidget->selectIndicator(name);
-	this->ui.zAxisWidget->selectIndicator(name);
+  pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
+  pqPipelineSource *source = qobject_cast<pqPipelineSource *>(smsModel->currentItem());
+  QString name = source->getSMName();
+  this->ui.xAxisWidget->selectIndicator(name);
+  this->ui.yAxisWidget->selectIndicator(name);
+  this->ui.zAxisWidget->selectIndicator(name);
 }
 
 void MultiSliceView::updateSelectedIndicator()
 {
-	pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
-	pqPipelineSource *cut = qobject_cast<pqPipelineSource *>(smsModel->currentItem());
+  pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
+  pqPipelineSource *cut = qobject_cast<pqPipelineSource *>(smsModel->currentItem());
   if (cut->getSMName().contains("Slice"))
   {
     vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
@@ -249,60 +268,6 @@ void MultiSliceView::updateSelectedIndicator()
   }
 }
 
-void MultiSliceView::onColorScaleChange(double min, double max)
-{
-  this->originSourceRepr->getLookupTable()->setScalarRange(min, max);
-  this->originSourceRepr->getProxy()->UpdateVTKObjects();
-  this->mainView->render();
-}
-
-void MultiSliceView::onAutoScale()
-{
-  QPair<double, double> val = this->originSourceRepr->getColorFieldRange();
-  double min = val.first;
-  double max = val.second;
-  this->originSourceRepr->getLookupTable()->setScalarRange(min, max);
-  this->originSourceRepr->getProxy()->UpdateVTKObjects();
-  this->mainView->render();
-  emit this->dataRange(min, max);
-}
-
-void MultiSliceView::onColorMapChange(const pqColorMapModel *model)
-{
-  pqScalarsToColors *lut = this->originSourceRepr->getLookupTable();
-  // Need the scalar bounds to calculate the color point settings
-  QPair<double, double> bounds = lut->getScalarRange();
-
-  vtkSMProxy *lutProxy = lut->getProxy();
-
-  pqSMAdaptor::setElementProperty(lutProxy->GetProperty("ColorSpace"),
-                                  model->getColorSpace());
-  // Set the NaN color
-  QList<QVariant> values;
-  QColor nanColor;
-  model->getNanColor(nanColor);
-  values << nanColor.redF() << nanColor.greenF() << nanColor.blueF();
-  pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("NanColor"),
-                                          values);
-
-  // Set the RGB points
-  QList<QVariant> rgbPoints;
-  for(int i = 0; i < model->getNumberOfPoints(); i++)
-  {
-    QColor rgbPoint;
-    pqChartValue fraction;
-    model->getPointColor(i, rgbPoint);
-    model->getPointValue(i, fraction);
-    rgbPoints << fraction.getDoubleValue() * bounds.second << rgbPoint.redF()
-              << rgbPoint.greenF() << rgbPoint.blueF();
-  }
-  pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("RGBPoints"),
-                                          rgbPoints);
-
-  lutProxy->UpdateVTKObjects();
-  this->mainView->render();
-}
-
 void MultiSliceView::indicatorSelected(const QString &name)
 {
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
@@ -318,7 +283,7 @@ void MultiSliceView::updateCutPosition(double position)
   pqPipelineSource *cut = qobject_cast<pqPipelineSource *>(list->at(0));
 
   vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
-      "CutFunction").GetAsProxy();
+                                          "CutFunction").GetAsProxy();
   double origin[3] = {0.0, 0.0, 0.0};
   if (this->ui.xAxisWidget->hasIndicator())
   {
@@ -352,16 +317,7 @@ void MultiSliceView::cutVisibility(bool isVisible, const QString &name)
   pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
   pqOutputPort *port = cut->getOutputPort(0);
   display_policy->setRepresentationVisibility(port, this->mainView, isVisible);
-  this->mainView->render();
-}
-
-void MultiSliceView::onLogScale(int state)
-{
-  pqScalarsToColors *lut = this->originSourceRepr->getLookupTable();
-  pqSMAdaptor::setElementProperty(lut->getProxy()->GetProperty("UseLogScale"),
-                                  state);
-  lut->getProxy()->UpdateVTKObjects();
-  this->mainView->render();
+  this->renderAll();
 }
 
 bool MultiSliceView::noIndicatorsLeft()

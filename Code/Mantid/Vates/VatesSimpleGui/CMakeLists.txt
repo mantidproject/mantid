@@ -13,8 +13,10 @@ set( INCLUDE_FILES
   inc/AxisInformation.h
   inc/AxisInteractor.h
   inc/ColorSelectionWidget.h
+  inc/ColorUpdater.h
   inc/GeometryParser.h
   inc/Indicator.h
+  inc/MdViewerWidget.h
   inc/ModeControlWidget.h
   inc/MultisliceView.h
   inc/ScalePicker.h
@@ -25,13 +27,16 @@ set( INCLUDE_FILES
   inc/ViewBase.h
   inc/VsgMainWindow.h
 )
+
 set( SOURCE_FILES
   src/AxisInformation.cpp
   src/AxisInteractor.cpp
   src/ColorSelectionWidget.cpp
+  src/ColorUpdater.cpp
   src/GeometryParser.cpp
   src/Indicator.cpp
   src/main.cpp
+  src/MdViewerWidget.cpp
   src/ModeControlWidget.cpp
   src/MultisliceView.cpp
   src/ScalePicker.cpp
@@ -49,6 +54,7 @@ qt4_wrap_cpp( MOC_SRCS
   inc/AxisInteractor.h
   inc/ColorSelectionWidget.h
   inc/Indicator.h
+  inc/MdViewerWidget.h
   inc/ModeControlWidget.h
   inc/MultisliceView.h
   inc/ScalePicker.h
@@ -56,6 +62,7 @@ qt4_wrap_cpp( MOC_SRCS
   inc/StandardView.h
   inc/ThreesliceView.h
   inc/TimeControlWidget.h
+  inc/ViewBase.h
   inc/VsgMainWindow.h
 )
 
@@ -63,12 +70,12 @@ qt4_wrap_cpp( MOC_SRCS
 # Qt's ui file processor.
 qt4_wrap_ui( UI_BUILT_SOURCES
   ui/ColorSelectionWidget.ui
+  ui/MdViewerWidget.ui
   ui/ModeControlWidget.ui
   ui/MultisliceView.ui
   ui/StandardView.ui
   ui/ThreesliceView.ui
   ui/TimeControlWidget.ui
-  ui/VsgMainWindow.ui
 )
 
 add_executable( ${PROJECT_NAME}

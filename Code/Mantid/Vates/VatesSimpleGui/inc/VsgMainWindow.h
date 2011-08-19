@@ -2,14 +2,11 @@
 #define VSGMAINWINDOW_H_
 
 #include <QtGui/QMainWindow>
-#include <QPointer>
-#include "ui_VsgMainWindow.h"
 
-class ViewBase;
+class MdViewerWidget;
 
-class pqPipelineSource;
-
-class QHBoxLayout;
+class QAction;
+class QMenu;
 /**
  *
   This class represents the main level program.
@@ -42,55 +39,24 @@ class VsgMainWindow : public QMainWindow
   Q_OBJECT
 
 public:
-    /**
-     * Default constructor.
-     * @param parent the parent widget for the main window
-     */
-    VsgMainWindow(QWidget *parent = 0);
-    /// Default destructor.
-    virtual ~VsgMainWindow();
-
-protected slots:
-    /**
-     * Load and render data from the given source.
-     * @param source a ParaView compatible source
-     */
-    void onDataLoaded(pqPipelineSource *source);
-    /**
-     * Execute the logic for switching views on the main level window.
-     * @param v the view mode to switch to
-     */
-    void switchViews(ModeControlWidget::Views v);
-
-signals:
-  /// Signal to disable all view modes but standard.
-	void disableViewModes();
-  /// Signal to enable the threeslice view mode button.
-  void enableThreeSliceViewButton();
-  /// Signal to enable the multislice view mode button.
-  void enableMultiSliceViewButton();
+  /**
+   * Default constructor.
+   * @param parent the parent widget for the main window
+   */
+  VsgMainWindow(QWidget *parent = 0);
+  /// Default destructor.
+  virtual ~VsgMainWindow();
 
 private:
-    Q_DISABLE_COPY(VsgMainWindow);
-    ViewBase *currentView; ///< Holder for the current view
-    ViewBase *hiddenView; ///< Holder for the view that is being switched from
-    QPointer<pqPipelineSource> originSource; ///< Holder for the current source
-    Ui::vsgMainWindow ui; ///< The main window's UI form
-    QHBoxLayout *viewLayout; ///< Layout manager for the view widget
+  /// Create the actions for the main program.
+  void createActions();
+  /// Create the menus for the main program.
+  void createMenus();
 
-    /// Disable communication with the proxy tab widget.
-    void removeProxyTabWidgetConnections();
-    /// Set the signals/slots for the main program components based on the view.
-    void setMainWindowComponentsForView();
-    /**
-     * Create the requested view on the main window.
-     * @param container the UI widget to associate the view mode with
-     * @param v the view mode to set on the main window
-     * @return the requested view
-     */
-    ViewBase *setMainViewWidget(QWidget *container, ModeControlWidget::Views v);
-    /// Helper function to swap current and hidden view pointers.
-    void swapViews();
+  QAction *openAction; ///< Action for opening files
+  QAction *exitAction; ///< Action for exiting the program
+  QMenu *fileMenu; ///< File actions menu
+  MdViewerWidget *mdViewer; ///< The VATES viz widget
 };
 
 #endif // VSGMAINWINDOW_H_

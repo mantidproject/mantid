@@ -91,7 +91,8 @@ protected slots:
    */
   void setColorScaleRange(double min, double max);
   /**
-   * Function that presents the user with the available color presets and gets the
+   * Function that presents the user with the available color presets and 
+   * gets the
    * result from the user.
    */
   void loadPreset();
@@ -104,7 +105,8 @@ protected slots:
 
 private:
   /**
-   * Function that sets up various colormaps. This is copied verbaitum from pqColorScaleEditor.
+   * Function that sets up various colormaps. This is copied verbaitum from 
+   * pqColorScaleEditor.
    */
   void loadBuiltinColorPresets();
   /**

@@ -61,6 +61,14 @@ public:
    * ViewBase::render
    */
   void render();
+  /**
+   * ViewBase::renderAll
+   */
+  void renderAll();
+  /**
+   * ViewBase::resetDisplay()
+   */
+  void resetDisplay();
 
 protected slots:
   /**
@@ -80,8 +88,6 @@ protected slots:
    * @param name the server manager name of the selected slice
    */
   void indicatorSelected(const QString &name);
-  /// Set the color scale back to the original bounds.
-  void onAutoScale();
   /**
    * Create a slice in the YZ plane at a specific point on the dataset x axis.
    * @param value create a YZ slice at the given x axis location
@@ -97,22 +103,6 @@ protected slots:
    * @param value create a XY slice at the given z axis location
    */
 	void makeZcut(double value);
-  /**
-   * Set the requested color map on the data.
-   * @param model the color map to use
-   */
-  void onColorMapChange(const pqColorMapModel *model);
-  /**
-   * Set the color scale to the currently requested bounds.
-   * @param min the minimum value for the color scale
-   * @param max the maximum value for the color scale
-   */
-  void onColorScaleChange(double min, double max);
-  /**
-   * Set logarithmic color scaling on the data.
-   * @param state flag to determine whether or not to use log color scaling
-   */
-  void onLogScale(int state);
 	/// Select the appropriate indicator on the correct axis interactor widget.
 	void selectIndicator();
   /**
@@ -129,38 +119,30 @@ signals:
    * @param name the name of the ParaView slice representation
    */
 	void sliceNamed(const QString &name);
-  /**
-   * Signal to get the range of the data.
-   * @param min the minimum value of the data
-   * @param max the maximum value of the data
-   */
-  void dataRange(double min, double max);
 
 private:
-    Q_DISABLE_COPY(MultiSliceView);
-    /// Clear all axis indicator highlighting.
-    void clearIndicatorSelections();
-    /**
-     * Function that polls all of the axis indicators to see if any are left.
-     * @return true if no indicators are left, false if there are indicators
-     */
-    bool noIndicatorsLeft();
-    /**
-     * Function that creates a slice in the appropriate plane at the
-     * requested axis location.
-     * @param origin the cartesian coordinates of the slice origin
-     * @param orient the cartesian coordinates of the slice normal
-     */
-    void makeCut(double origin[], double orient[]);
-    /// Pull the dataset information and setup the axis interactors.
-    void setupAxisInfo();
-    /// Create the current data representation.
-    void setupData();
+  Q_DISABLE_COPY(MultiSliceView);
+  /// Clear all axis indicator highlighting.
+  void clearIndicatorSelections();
+  /**
+   * Function that polls all of the axis indicators to see if any are left.
+   * @return true if no indicators are left, false if there are indicators
+   */
+  bool noIndicatorsLeft();
+  /**
+   * Function that creates a slice in the appropriate plane at the
+   * requested axis location.
+   * @param origin the cartesian coordinates of the slice origin
+   * @param orient the cartesian coordinates of the slice normal
+   */
+  void makeCut(double origin[], double orient[]);
+  /// Pull the dataset information and setup the axis interactors.
+  void setupAxisInfo();
+  /// Create the current data representation.
+  void setupData();
 
-    QPointer<pqRenderView> mainView; ///< The main view class
-    QPointer<pqPipelineSource> origSource; ///< The current source
-    QPointer<pqPipelineRepresentation> originSourceRepr; ///< The current source representation
-    Ui::MultiSliceViewClass ui; ///< The view's UI form
+  QPointer<pqRenderView> mainView; ///< The main view class
+  Ui::MultiSliceViewClass ui; ///< The view's UI form
 };
 
 #endif // MULTISLICEVIEW_H_

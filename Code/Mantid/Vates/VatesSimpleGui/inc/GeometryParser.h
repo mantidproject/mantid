@@ -41,26 +41,26 @@ public:
    * Default constructor.
    * @param xml the string containing the XML information to be parsed
    */
-	GeometryParser(const char *xml);
-	/// Default destructor.
-	virtual ~GeometryParser() {};
+  GeometryParser(const char *xml);
+  /// Default destructor.
+  virtual ~GeometryParser() {};
 
-	/**
-	 * Parse the dataset XML for information on the dataset axis.
-	 * @param dimension the XML string containing the axis information
-	 * @return an axis information object containing the given information
-	 */
-	AxisInformation *getAxisInfo(const std::string dimension);
+  /**
+   * Parse the dataset XML for information on the dataset axis.
+   * @param dimension the XML string containing the axis information
+   * @return an axis information object containing the given information
+   */
+  AxisInformation *getAxisInfo(const std::string dimension);
 
 private:
-	/**
-	 * A private function that converts a string bound to a double.
-	 * @param val the axis bound to convert
-	 * @return the double representation of the bound
-	 */
-	double convertBounds(Poco::XML::XMLString val);
+  /**
+   * A private function that converts a string bound to a double.
+   * @param val the axis bound to convert
+   * @return the double representation of the bound
+   */
+  double convertBounds(Poco::XML::XMLString val);
 
-	Poco::AutoPtr<Poco::XML::Document> pDoc; ///< A XML document handle
+  Poco::AutoPtr<Poco::XML::Document> pDoc; ///< A XML document handle
 };
 
 #endif // GEOMETRYPARSER_H_

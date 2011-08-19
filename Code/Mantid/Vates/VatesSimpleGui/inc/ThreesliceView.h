@@ -42,105 +42,77 @@ class pqRenderView;
  */
 class ThreeSliceView : public ViewBase
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    /**
-     * Default constructor.
-     * @param parent the parent widget for the threeslice view
-     */
-    ThreeSliceView(QWidget *parent = 0);
-    /// Default destructor.
-    virtual ~ThreeSliceView();
-    /**
-     * Correct an oddity in the creation of the view so that the cuts
-     * are visibile.
-     * @param pbw the main program's handle to the pqPipelineBrowserWidget
-     */
-    void correctVisibility(pqPipelineBrowserWidget *pbw);
-    /// Correct the color scale range if not in automatic mode.
-    void correctColorScaleRange();
-    /**
-     * ViewBase::getView
-     */
-    pqRenderView* getView();
-    /**
-     * ViewBase::render
-     */
-    void render();
-
-signals:
   /**
-   * Signal to get the range of the data.
-   * @param min the minimum value of the data
-   * @param max the maximum value of the data
+   * Default constructor.
+   * @param parent the parent widget for the threeslice view
    */
-  void dataRange(double min, double max);
-
-protected slots:
-  /// Set the color scale back to the original bounds.
-  void onAutoScale();
+  ThreeSliceView(QWidget *parent = 0);
+  /// Default destructor.
+  virtual ~ThreeSliceView();
   /**
-   * Set the requested color map on the data.
-   * @param model the color map to use
+   * Correct an oddity in the creation of the view so that the cuts
+   * are visibile.
+   * @param pbw the main program's handle to the pqPipelineBrowserWidget
    */
-  void onColorMapChange(const pqColorMapModel *model);
+  void correctVisibility(pqPipelineBrowserWidget *pbw);
+  /// Correct the color scale range if not in automatic mode.
+  void correctColorScaleRange();
   /**
-   * Set the data color scale range to the requested bounds.
-   * @param min the minimum bound for the color scale
-   * @param max the maximum bound for the color scale
+   * ViewBase::getView
    */
-  void onColorScaleChange(double min, double max);
+  pqRenderView* getView();
   /**
-   * Set logarithmic color scaling on the data.
-   * @param state flag to determine whether or not to use log color scaling
+   * ViewBase::render
    */
-  void onLogScale(int state);
+  void render();
+  /**
+   * ViewBase::renderAll
+   */
+  void renderAll();
+  /**
+   * ViewBase::resetDisplay()
+   */
+  void resetDisplay();
 
 protected:
-    /**
-     * Function that creates a 2D view by reducing the functionality of a 3D
-     * view.
-     * @param container the widget to associate with the view
-     * @return the created view
-     */
-    pqRenderView *create2dRenderView(QWidget *container);
+  /**
+   * Function that creates a 2D view by reducing the functionality of a 3D
+   * view.
+   * @param container the widget to associate with the view
+   * @return the created view
+   */
+  pqRenderView *create2dRenderView(QWidget *container);
 
 private:
-    Q_DISABLE_COPY(ThreeSliceView);
+  Q_DISABLE_COPY(ThreeSliceView);
 
-    /**
-     * A helper function that creates a single Cartesian slice.
-     * @param i the Cartesian direction of the slice
-     * @param view the associated Cartesian 2D view
-     * @param cut the created Cartesian slice
-     * @param repr the representation of the Cartesian slice
-     */
-    void makeSlice(ViewBase::Direction i, pqRenderView *view,
-    		pqPipelineSource *cut, pqPipelineRepresentation *repr);
-    /// Helper function that creates all three Cartesian orthogonal slices.
-    void makeThreeSlice();
-    /**
-     * Render all of the views.
-     * @param resetDisplay flag to tell function to reset displays on views
-     */
-    void renderAll(bool resetDisplay = true);
+  /**
+   * A helper function that creates a single Cartesian slice.
+   * @param i the Cartesian direction of the slice
+   * @param view the associated Cartesian 2D view
+   * @param cut the created Cartesian slice
+   * @param repr the representation of the Cartesian slice
+   */
+  void makeSlice(ViewBase::Direction i, pqRenderView *view,
+                 pqPipelineSource *cut, pqPipelineRepresentation *repr);
+  /// Helper function that creates all three Cartesian orthogonal slices.
+  void makeThreeSlice();
 
-    QPointer<pqPipelineSource> origSource; ///< The current source
-    QPointer<pqPipelineRepresentation> originSourceRepr; ///< The current source representation
+  QPointer<pqRenderView> mainView; ///< The 3D view
+  QPointer<pqPipelineSource> xCut; ///< The slice for the YZ plane
+  QPointer<pqPipelineRepresentation> xCutRepr; ///< The YZ slice representation
+  QPointer<pqRenderView> xView; ///< The YZ plane view
+  QPointer<pqPipelineSource> yCut; ///< The slice for the XZ plane
+  QPointer<pqPipelineRepresentation> yCutRepr; ///< The XZ slice representation
+  QPointer<pqRenderView> yView; ///< The XZ plane view
+  QPointer<pqPipelineSource> zCut; ///< The slice for the XY plane
+  QPointer<pqPipelineRepresentation> zCutRepr; ///< The XY slice representation
+  QPointer<pqRenderView> zView; ///< The XY plane view
 
-    QPointer<pqRenderView> mainView; ///< The 3D view
-    QPointer<pqPipelineSource> xCut; ///< The slice for the YZ plane
-    QPointer<pqPipelineRepresentation> xCutRepr; ///< The YZ slice representation
-    QPointer<pqRenderView> xView; ///< The YZ plane view
-    QPointer<pqPipelineSource> yCut; ///< The slice for the XZ plane
-    QPointer<pqPipelineRepresentation> yCutRepr; ///< The XZ slice representation
-    QPointer<pqRenderView> yView; ///< The XZ plane view
-    QPointer<pqPipelineSource> zCut; ///< The slice for the XY plane
-    QPointer<pqPipelineRepresentation> zCutRepr; ///< The XY slice representation
-    QPointer<pqRenderView> zView; ///< The XY plane view
-
-    Ui::ThreeSliceView ui; ///< The three slice view's UI form
+  Ui::ThreeSliceView ui; ///< The three slice view's UI form
 };
 
 #endif // THREESLICEVIEW_H_

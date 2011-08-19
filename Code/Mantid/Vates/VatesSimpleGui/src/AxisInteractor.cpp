@@ -37,20 +37,20 @@ AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
   this->gridLayout = new QGridLayout(this);
   this->scaleWidget = new QwtScaleWidget(this);
 
-	this->scene = new QGraphicsScene(this);
-	this->scene->setItemIndexMethod(QGraphicsScene::NoIndex);
-	this->isSceneGeomInit = false;
+  this->scene = new QGraphicsScene(this);
+  this->scene->setItemIndexMethod(QGraphicsScene::NoIndex);
+  this->isSceneGeomInit = false;
 
-	//this->widgetLayout();
+  //this->widgetLayout();
 
-	this->graphicsView->setScene(this->scene);
+  this->graphicsView->setScene(this->scene);
   //this->graphicsView->installEventFilter(this);
 
-	this->engine = new QwtLinearScaleEngine;
-	this->transform = new QwtScaleTransformation(QwtScaleTransformation::Linear);
-	this->scalePicker = new ScalePicker(this->scaleWidget);
-	QObject::connect(this->scalePicker, SIGNAL(makeIndicator(const QPoint &)),
-			this, SLOT(createIndicator(const QPoint &)));
+  this->engine = new QwtLinearScaleEngine;
+  this->transform = new QwtScaleTransformation(QwtScaleTransformation::Linear);
+  this->scalePicker = new ScalePicker(this->scaleWidget);
+  QObject::connect(this->scalePicker, SIGNAL(makeIndicator(const QPoint &)),
+                   this, SLOT(createIndicator(const QPoint &)));
 
   QObject::connect(this->scene, SIGNAL(selectionChanged()), this,
                    SLOT(getIndicator()));
@@ -131,127 +131,129 @@ void AxisInteractor::widgetLayout()
 
 void AxisInteractor::setInformation(QString title, double min, double max)
 {
-	this->scaleWidget->setTitle(title);
-	this->scaleWidget->setScaleDiv(this->transform,
-			this->engine->divideScale(std::floor(min), std::ceil(max), 10, 0));
+  this->scaleWidget->setTitle(title);
+  this->scaleWidget->setScaleDiv(this->transform,
+                                 this->engine->divideScale(std::floor(min), 
+                                                           std::ceil(max), 
+                                                           10, 0));
 }
 
 void AxisInteractor::createIndicator(const QPoint &point)
 {
-	QRect gv_rect = this->graphicsView->geometry();
-	if (! this->isSceneGeomInit)
-	{
-		this->scene->setSceneRect(gv_rect);
-		this->isSceneGeomInit = true;
-	}
-	Indicator *tri = new Indicator();
+  QRect gv_rect = this->graphicsView->geometry();
+  if (! this->isSceneGeomInit)
+  {
+    this->scene->setSceneRect(gv_rect);
+    this->isSceneGeomInit = true;
+  }
+  Indicator *tri = new Indicator();
   QObject::connect(tri, SIGNAL(indicatorMoved(const QPoint &, int)),
                    this->scalePicker,
                    SLOT(determinePosition(const QPoint &, int)));
   tri->setOrientation(this->scalePos);
-	tri->setPoints(point, gv_rect);
-	this->scene->addItem(tri);
+  tri->setPoints(point, gv_rect);
+  this->scene->addItem(tri);
 }
 
 void AxisInteractor::setIndicatorName(const QString &name)
 {
-	QList<QGraphicsItem *> list = this->scene->items();
-	for (int i = 0; i < list.count(); ++i)
-	{
-		QGraphicsItem *item = list.at(i);
-		if (item->type() == IndicatorItemType)
-		{
-			if (item->toolTip().isEmpty())
-			{
-				// This must be the most recently added
-				item->setToolTip(name);
-			}
-		}
-	}
+  QList<QGraphicsItem *> list = this->scene->items();
+  for (int i = 0; i < list.count(); ++i)
+  {
+    QGraphicsItem *item = list.at(i);
+    if (item->type() == IndicatorItemType)
+    {
+      if (item->toolTip().isEmpty())
+      {
+        // This must be the most recently added
+        item->setToolTip(name);
+      }
+    }
+  }
 }
 
 void AxisInteractor::selectIndicator(const QString &name)
 {
-	this->clearSelections();
-	QList<QGraphicsItem *> list = this->scene->items();
-	for (int i = 0; i < list.count(); ++i)
-	{
-		QGraphicsItem *item = list.at(i);
-		if (item->type() == IndicatorItemType)
-		{
-			if (item->toolTip() == name)
-			{
-				item->setSelected(true);
-			}
-		}
-	}
+  this->clearSelections();
+  QList<QGraphicsItem *> list = this->scene->items();
+  for (int i = 0; i < list.count(); ++i)
+  {
+    QGraphicsItem *item = list.at(i);
+    if (item->type() == IndicatorItemType)
+    {
+      if (item->toolTip() == name)
+      {
+        item->setSelected(true);
+      }
+    }
+  }
 }
 
 bool AxisInteractor::hasIndicator()
 {
-	QList<QGraphicsItem *> list = this->scene->selectedItems();
-	if (list.count() > 0)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+  QList<QGraphicsItem *> list = this->scene->selectedItems();
+  if (list.count() > 0)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 void AxisInteractor::clearSelections()
 {
-	QList<QGraphicsItem *> list = this->scene->selectedItems();
-	for (int i = 0; i < list.count(); ++i)
-	{
-		QGraphicsItem *item = list.at(i);
-		if (item->type() == IndicatorItemType)
-		{
-			item->setSelected(false);
-		}
-	}
+  QList<QGraphicsItem *> list = this->scene->selectedItems();
+  for (int i = 0; i < list.count(); ++i)
+  {
+    QGraphicsItem *item = list.at(i);
+    if (item->type() == IndicatorItemType)
+    {
+      item->setSelected(false);
+    }
+  }
 }
 
 void AxisInteractor::updateIndicator(double value)
 {
-	QPoint *pos = this->scalePicker->getLocation(value);
-	QList<QGraphicsItem *> list = this->scene->selectedItems();
-	if (list.count() > 0)
-	{
-		Indicator *item = static_cast<Indicator *>(list.at(0));
-		item->updatePos(*pos);
-	}
+  QPoint *pos = this->scalePicker->getLocation(value);
+  QList<QGraphicsItem *> list = this->scene->selectedItems();
+  if (list.count() > 0)
+  {
+    Indicator *item = static_cast<Indicator *>(list.at(0));
+    item->updatePos(*pos);
+  }
 }
 
 bool AxisInteractor::eventFilter(QObject *obj, QEvent *event)
 {
-	if (obj == this->graphicsView)
-	{
-		if (event->type() == QEvent::MouseButtonPress ||
-				event->type() == QEvent::MouseButtonDblClick)
-		{
-			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-			if (mouseEvent->button() == Qt::RightButton)
-			{
-				// Want to eat these so users don't add the indicators
-				// via the QGraphicsView (Yum!)
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else
-		{
-			return false;
-		}
-	}
-	else
-	{
-		return AxisInteractor::eventFilter(obj, event);
-	}
+  if (obj == this->graphicsView)
+  {
+    if (event->type() == QEvent::MouseButtonPress ||
+        event->type() == QEvent::MouseButtonDblClick)
+    {
+      QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+      if (mouseEvent->button() == Qt::RightButton)
+      {
+        // Want to eat these so users don't add the indicators
+        // via the QGraphicsView (Yum!)
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    }
+    else
+    {
+      return false;
+    }
+  }
+  else
+  {
+    return AxisInteractor::eventFilter(obj, event);
+  }
 }
 
 AxisInteractor::ScalePos AxisInteractor::scalePosition() const

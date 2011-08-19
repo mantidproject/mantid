@@ -49,43 +49,43 @@ class Indicator: public QObject, public QGraphicsPolygonItem
 
 public:
   /// Enumeration for a graphicsitem type
-	enum {Type = IndicatorItemType};
+  enum {Type = IndicatorItemType};
 
-	/**
-	 * Default constructor.
-	 * @param parent the parent widget of the indicator graphicsitem
-	 */
-	Indicator(QGraphicsItem *parent = 0);
-	/// Default destructor.
-	virtual ~Indicator() {}
+  /**
+   * Default constructor.
+   * @param parent the parent widget of the indicator graphicsitem
+   */
+  Indicator(QGraphicsItem *parent = 0);
+  /// Default destructor.
+  virtual ~Indicator() {}
   /**
    * Update the indicators fill color based on visibility.
    * @param isVisible flag to determine the fill color of the indicator
    */
   void changeIndicatorColor(bool isVisible);
-	/// Print the triangle's vertex coordinates.
-	void printSelf();
-	/**
-	 * Create the triangle's vertex coordinates.
-	 * @param eloc x,y position of the creation event
+  /// Print the triangle's vertex coordinates.
+  void printSelf();
+  /**
+   * Create the triangle's vertex coordinates.
+   * @param eloc x,y position of the creation event
    * @param rect location rectangle from the axis widget scale picker
-	 */
-	void setPoints(const QPoint &eloc, const QRect &rect);
-	/**
-	 * Set the orientation of the head of the indicator.
-	 * @param orient the orientation of the associated axis scale
-	 */
-	void setOrientation(AxisInteractor::ScalePos orient);
-	/**
-	 * Get the type value for the indicator graphicsitem.
-	 * @return the numeric value for the indicator graphicsitem type
-	 */
-	int type() const { return Type; }
-	/**
-	 * Move the indicator to the specified location.
-	 * @param pos location to move the indicator to
-	 */
-	void updatePos(const QPoint &pos);
+   */
+  void setPoints(const QPoint &eloc, const QRect &rect);
+  /**
+   * Set the orientation of the head of the indicator.
+   * @param orient the orientation of the associated axis scale
+   */
+  void setOrientation(AxisInteractor::ScalePos orient);
+  /**
+   * Get the type value for the indicator graphicsitem.
+   * @return the numeric value for the indicator graphicsitem type
+   */
+  int type() const { return Type; }
+  /**
+   * Move the indicator to the specified location.
+   * @param pos location to move the indicator to
+   */
+  void updatePos(const QPoint &pos);
 
 signals:
   /**
@@ -98,33 +98,33 @@ signals:
   void indicatorMoved(const QPoint &pos, int coord);
 
 protected:
-	/**
-	 * Update the indicator's position based on the current mouse position.
-	 * @param event the associated event
-	 */
-	void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-	/**
-	 * Highlight the indicator as selected when the mouse button is released.
-	 * @param event the associated event
-	 */
-	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+  /**
+   * Update the indicator's position based on the current mouse position.
+   * @param event the associated event
+   */
+  void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+  /**
+   * Highlight the indicator as selected when the mouse button is released.
+   * @param event the associated event
+   */
+  void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
 private:
-	/**
-	 * Adjust the indicator's coordinates to get the apex point to point near
-	 * the requested axis position.
-	 * @param level the requested position
-	 * @return the fixed position for the indicator
-	 */
-	int fixPosition(int level);
+  /**
+   * Adjust the indicator's coordinates to get the apex point to point near
+   * the requested axis position.
+   * @param level the requested position
+   * @return the fixed position for the indicator
+   */
+  int fixPosition(int level);
 
   QColor hiddenFillColor; ///< The fill color for the triangle if cut is hidden
   QColor visibleFillColor; ///< The fill color for the triangle if cut is visible
-	QColor outlineColor; ///< The outline color for the triangle
-	QPolygonF path; ///< The holder for the triangle's shape coordinates
-	int half_base; ///< Half the size of the triangle's base
-	int tip_edge; ///< The triangle's closest point (apex) to the axis indicator
-	AxisInteractor::ScalePos orientation; ///< The orientation of the indicator apex
+  QColor outlineColor; ///< The outline color for the triangle
+  QPolygonF path; ///< The holder for the triangle's shape coordinates
+  int half_base; ///< Half the size of the triangle's base
+  int tip_edge; ///< The triangle's closest point (apex) to the axis indicator
+  AxisInteractor::ScalePos orientation; ///< The orientation of the indicator apex
 };
 
 #endif // INDICATOR_H_

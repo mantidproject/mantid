@@ -59,46 +59,27 @@ public:
    * ViewBase::render
    */
   void render();
+  /**
+   * ViewBase::renderAll
+   */
+  void renderAll();
+  /**
+   * ViewBase::resetDisplay()
+   */
+  void resetDisplay();
 
 signals:
-  /**
-   * Signal to get the range of the data.
-   * @param min the minimum value of the data
-   * @param max the maximum value of the data
-   */
-  void dataRange(double min, double max);
   /// Signal to tell program to enable multi slice view mode button.
   void enableMultiSliceViewButton();
 
 protected slots:
-  /// Set the color scale back to the original bounds.
-  void onAutoScale();
   /// Add a slice to the current dataset.
   void onCutButtonClicked();
-  /**
-   * Set the requested color map on the data.
-   * @param model the color map to use
-   */
-  void onColorMapChange(const pqColorMapModel *model);
-  /**
-   * Set the data color scale range to the requested bounds.
-   * @param min the minimum bound for the color scale
-   * @param max the maximum bound for the color scale
-   */
-  void onColorScaleChange(double min, double max);
-  /**
-   * Set logarithmic color scaling on the data.
-   * @param state flag to determine whether or not to use log color scaling
-   */
-  void onLogScale(int state);
   /// Invoke the RebinnerCutter on the current dataset.
   void onRebinButtonClicked();
 
-
 private:
   Q_DISABLE_COPY(StandardView);
-  QPointer<pqPipelineSource> origSource; ///< The current source
-  QPointer<pqPipelineRepresentation> originSourceRepr; ///< The current source representation
   QPointer<pqPipelineSource> rebinCut; ///< Holder for the RebinnerCutter
   Ui::StandardView ui; ///< The standard view's UI form
   QPointer<pqRenderView> view; ///< The main view

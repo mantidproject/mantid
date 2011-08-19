@@ -46,79 +46,77 @@ class ScalePicker;
  */
 class AxisInteractor : public QWidget
 {
-	Q_OBJECT
-
-	Q_ENUMS(ScalePos)
-
-	Q_PROPERTY( ScalePos scalePosition READ scalePosition
-	        WRITE setScalePosition )
+  Q_OBJECT
+  Q_ENUMS(ScalePos)
+  Q_PROPERTY( ScalePos scalePosition READ scalePosition
+              WRITE setScalePosition )
 
 public:
-	/// Enumeration for scale orientation
-	enum ScalePos {
-	  LeftScale,
+  /// Enumeration for scale orientation
+  enum ScalePos {
+    LeftScale,
     RightScale,
     TopScale,
     BottomScale };
-	/**
-	 * Default constructor.
-	 * @param parent the parent UI object for the axis interactor widget
-	 */
-	AxisInteractor(QWidget *parent = 0);
-	/// Default destructor.
-	virtual ~AxisInteractor() {}
-	/**
-	 * Remove highlights from all selected indicators.
-	 */
-	void clearSelections();
+  /**
+   * Default constructor.
+   * @param parent the parent UI object for the axis interactor widget
+   */
+  AxisInteractor(QWidget *parent = 0);
+  /// Default destructor.
+  virtual ~AxisInteractor() {}
+  /**
+   * Remove highlights from all selected indicators.
+   */
+  void clearSelections();
   /**
    * Get the associated ScalePicker for the indicator.
    * @return the associated ScalePicker
    */
   ScalePicker *getScalePicker() { return this->scalePicker; }
-	/**
-	 * Is there at least one indicator?
-	 * @return true if yes
-	 */
-	bool hasIndicator();
+  /**
+   * Is there at least one indicator?
+   * @return true if yes
+   */
+  bool hasIndicator();
   /**
    * Get the number of indicators held by the object.
    * @return the current number of indicators
    */
   int numIndicators();
-	/**
-	 * Return the orientation of the axis scale ticket marks
-	 * @return the orientation code
-	 */
+  /**
+   * Return the orientation of the axis scale ticket marks
+   * @return the orientation code
+   */
   ScalePos scalePosition() const;
   /**
    * Highlight the requested indicator.
    * @param name the name of the slice being highlighted
    */
   void selectIndicator(const QString &name);
-	/**
-	 * Set the axis information for the associated dataset axis.
-	 * @param title the dataset axis title
-	 * @param min the dataset axis minimum extent
-	 * @param max the dataset axis maximum extent
-	 */
-	void setInformation(QString title, double min, double max);
-	/**
-	 * Set the orientation of the axis scale and graphicsview.
-	 * @param orient the orientation of the graphicsview
-	 * @param scalePos the orientation of the axis scale
-	 */
+  /**
+   * Set the axis information for the associated dataset axis.
+   * @param title the dataset axis title
+   * @param min the dataset axis minimum extent
+   * @param max the dataset axis maximum extent
+   */
+  void setInformation(QString title, double min, double max);
+  /**
+   * Set the orientation of the axis scale and graphicsview.
+   * @param orient the orientation of the graphicsview
+   * @param scalePos the orientation of the axis scale
+   */
   void setOrientation(Qt::Orientation orient, ScalePos scalePos);
   /**
    * Set the orientation of the axis scale tick marks.
    * @param scalePos the orientation code
    */
   void setScalePosition(ScalePos scalePos);
-	/**
-	 * Update the current indicator to a new location.
-	 * @param value the new location for the indicator
-	 */
-	void updateIndicator(double value);
+  /**
+   * Update the current indicator to a new location.
+   * @param value the new location for the indicator
+   */
+  void updateIndicator(double value);
 
 signals:
   /**
@@ -144,13 +142,13 @@ protected slots:
    * a new slice.
    * @param point the (x,y) location for the indicator
    */
-	void createIndicator(const QPoint &point);
+  void createIndicator(const QPoint &point);
   /// Determine the indicator being selected and pass along that information.
   void getIndicator();
-	/**
-	 * Associate a ParaView slice object name with the new indicator.
-	 * @param name the ParaView name of the slice
-	 */
+  /**
+   * Associate a ParaView slice object name with the new indicator.
+   * @param name the ParaView name of the slice
+   */
   void setIndicatorName(const QString &name);
   /**
    * Show a context menu for the indicator that will allow it to be
@@ -160,31 +158,31 @@ protected slots:
   void showContextMenu(const QPoint &pos);
 
 protected:
-	/**
-	 * Intercept mouse clicks to avoid inadvertent creation of indicators. This
-	 * forces the mode of right clicking near the axis to get an indicator.
-	 * @param obj the QObject that spawned the event
-	 * @param event the associated QEvent
-	 */
-	bool eventFilter(QObject *obj, QEvent *event);
+  /**
+   * Intercept mouse clicks to avoid inadvertent creation of indicators. This
+   * forces the mode of right clicking near the axis to get an indicator.
+   * @param obj the QObject that spawned the event
+   * @param event the associated QEvent
+   */
+  bool eventFilter(QObject *obj, QEvent *event);
 
 private:
   /// Create the context menu of the indicators
   void createContextMenu();
-	/// Handle the setup of the widget based on orientation requests.
-	void widgetLayout();
+  /// Handle the setup of the widget based on orientation requests.
+  void widgetLayout();
 
   QMenu *indicatorContextMenu; ///< The indicator context menu
-	QwtScaleEngine *engine; ///< The scale type for the axis widget
-	QGraphicsView *graphicsView; ///< The holder for the slice indicators
-	QGridLayout *gridLayout; ///< Layout manager for widgets
-	bool isSceneGeomInit; ///< Flag to ensure the scene is initialized once
+  QwtScaleEngine *engine; ///< The scale type for the axis widget
+  QGraphicsView *graphicsView; ///< The holder for the slice indicators
+  QGridLayout *gridLayout; ///< Layout manager for widgets
+  bool isSceneGeomInit; ///< Flag to ensure the scene is initialized once
   Qt::Orientation orientation; ///< The overall orientation of the widget
-	ScalePicker *scalePicker; ///< The picker that retrieves the axis location
+  ScalePicker *scalePicker; ///< The picker that retrieves the axis location
   ScalePos scalePos; ///< The orientation of the axis scale tick marks
   QwtScaleWidget *scaleWidget; ///< The axis scale widget
-	QGraphicsScene *scene; ///< The contained for the slice indicators
-	QwtScaleTransformation *transform; ///< The scale type for the engine
+  QGraphicsScene *scene; ///< The contained for the slice indicators
+  QwtScaleTransformation *transform; ///< The scale type for the engine
 };
 
 #endif // AXISINTERACTOR_H_

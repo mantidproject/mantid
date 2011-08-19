@@ -84,8 +84,8 @@ bool createIndicator)
 
 QPoint *ScalePicker::getLocation(double axisval)
 {
-	QwtScaleWidget *scale = static_cast<QwtScaleWidget *>(this->parent());
-	const QwtScaleDraw *sd = scale->scaleDraw();
+  QwtScaleWidget *scale = static_cast<QwtScaleWidget *>(this->parent());
+  const QwtScaleDraw *sd = scale->scaleDraw();
 
   QRect rect = this->scaleRect(scale);
 
