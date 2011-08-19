@@ -9,7 +9,9 @@
 #include "Projection3D.h"
 #include "../MantidUI.h"
 #include "../AlgMonitor.h"
+
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 
 #include <Poco/Path.h>
 
@@ -33,6 +35,8 @@
 #include <QCheckBox>
 #include <QImageWriter>
 #include <QApplication>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 
 #include <numeric>
 #include <fstream>
@@ -154,6 +158,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   tabChanged(0);
 
   connect(this,SIGNAL(needSetIntegrationRange(double,double)),this,SLOT(setIntegrationRange(double,double)));
+  setAcceptDrops(true);
 }
 
 /**
@@ -991,4 +996,37 @@ void InstrumentWindow::setViewType(const QString& type)
   }
   setSurfaceType(itype);
   m_renderTab->updateSurfaceTypeControl(itype);
+}
+
+void InstrumentWindow::dragEnterEvent( QDragEnterEvent* e )
+{
+  QString text = e->mimeData()->text();
+  if (text.startsWith("Workspace::"))
+  {
+    e->accept();
+  }
+  else
+  {
+    e->ignore();
+  }
+}
+
+void InstrumentWindow::dropEvent( QDropEvent* e )
+{
+  QString text = e->mimeData()->text();
+  if (text.startsWith("Workspace::"))
+  {
+    QStringList wsName = text.split("::");
+    Mantid::API::IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(wsName[1].toStdString()));
+    UnwrappedSurface* surface = dynamic_cast<UnwrappedSurface*>(m_InstrumentDisplay->getSurface());
+    if (pws && surface)
+    {
+      surface->setPeaksWorkspace(pws);
+      m_InstrumentDisplay->refreshView();
+      e->accept();
+      return;
+    }
+  }
+  e->ignore();
 }

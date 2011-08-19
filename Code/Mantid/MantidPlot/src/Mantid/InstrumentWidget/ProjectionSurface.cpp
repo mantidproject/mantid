@@ -119,6 +119,8 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
       QRectF windowRect = getSurfaceBounds();
       m_maskShapes.setWindow(windowRect,painter.viewport());
       m_maskShapes.draw(painter);
+      m_peakShapes.setWindow(windowRect,painter.viewport());
+      m_peakShapes.draw(painter);
       painter.end();
     }
     m_viewChanged = false;
@@ -132,6 +134,9 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
     QRectF windowRect = getSurfaceBounds();
     m_maskShapes.setWindow(windowRect,painter.viewport());
     m_maskShapes.draw(painter);
+
+    m_peakShapes.setWindow(windowRect,painter.viewport());
+    m_peakShapes.draw(painter);
 
     // draw the selection rectangle
     if (!m_selectRect.isNull())

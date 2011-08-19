@@ -6,6 +6,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 
 #include <QRgb>
 #include <QSet>
@@ -35,7 +36,8 @@ UnwrappedSurface::UnwrappedSurface(const InstrumentActor* rootActor,const Mantid
     m_v_min(DBL_MAX),
     m_v_max(-DBL_MAX),
     m_height_max(0),
-    m_width_max(0)
+    m_width_max(0),
+    m_startPeakShapes(false)
 {
 }
 
@@ -55,13 +57,20 @@ void UnwrappedSurface::init()
   size_t ndet = m_instrActor->ndetectors();
   for(size_t i = 0; i < ndet; ++i)
   {
+    unsigned char color[3];
     boost::shared_ptr<Mantid::Geometry::IDetector> det = m_instrActor->getDetector(i);
-    if (!det) continue;
-    if (det->isMonitor()) continue;
+    if (!det || det->isMonitor())
+    {
+      m_unwrappedDetectors.append(UnwrappedDetector(&color[0],boost::shared_ptr<Mantid::Geometry::IDetector>()));
+      continue;
+    }
     Mantid::detid_t id = -1;
     id = m_instrActor->getDetID(i);
-    if (id < 0) continue;
-    unsigned char color[3];
+    if (id < 0)
+    {
+      m_unwrappedDetectors.append(UnwrappedDetector(&color[0],boost::shared_ptr<Mantid::Geometry::IDetector>()));
+      continue;
+    }
     m_instrActor->getColor(id).getUB3(&color[0]);
     // first detector defines the surface's x axis
     if (m_xaxis.nullVector())
@@ -85,6 +94,7 @@ void UnwrappedSurface::init()
 
   foreach(const UnwrappedDetector& udet,m_unwrappedDetectors)
   {
+    if (! udet.detector ) continue;
     boost::shared_ptr<const Mantid::Geometry::IComponent> parent = udet.detector->getParent();
     if (parent)
     {
@@ -156,6 +166,13 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
   const double dw = fabs(m_viewRect.width() / vwidth);
   const double dh = fabs(m_viewRect.height()/ vheight);
 
+  //std::cerr << m_viewRect.left() << ' ' << m_viewRect.right() << " : " <<  m_viewRect.bottom() << ' ' << m_viewRect.top() << std::endl;
+
+  if (m_startPeakShapes)
+  {
+    ceatePeakShapes(widget->rect());
+  }
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   //glDisable(GL_DEPTH_TEST);
   glViewport(0, 0, vwidth, vheight);
@@ -184,7 +201,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
   {
     const UnwrappedDetector& udet = m_unwrappedDetectors[i];
 
-    if (!m_viewRect.contains(udet.u,udet.v)) continue;
+    if (!udet.detector || !m_viewRect.contains(udet.u,udet.v)) continue;
 
     setColor(i,picking);
 
@@ -355,7 +372,7 @@ void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id)
     int detID = det->getID();
     foreach(const UnwrappedDetector& udet,m_unwrappedDetectors)
     {
-      if (udet.detector->getID() == detID)
+      if (udet.detector && udet.detector->getID() == detID)
       {
         double w = udet.width;
         if (w > m_width_max) w = m_width_max;
@@ -438,6 +455,7 @@ void UnwrappedSurface::getSelectedDetectors(QList<int>& dets)
   for(int i = 0; i < m_unwrappedDetectors.size(); ++i)
   {
     UnwrappedDetector& udet = m_unwrappedDetectors[i];
+    if (! udet.detector ) continue;
     if (udet.u >= uleft && udet.u <= uright && udet.v >= vbottom && udet.v <= vtop)
     {
       dets.push_back(udet.detector->getID());
@@ -453,6 +471,7 @@ void UnwrappedSurface::getMaskedDetectors(QList<int>& dets)const
   for(int i = 0; i < m_unwrappedDetectors.size(); ++i)
   {
     const UnwrappedDetector& udet = m_unwrappedDetectors[i];
+    if (! udet.detector ) continue;
     if (m_maskShapes.isMasked(udet.u, udet.v))
     {
       dets.append(udet.detector->getID());
@@ -471,6 +490,7 @@ void UnwrappedSurface::findAndCorrectUGap()
   QList<UnwrappedDetector>::const_iterator ud = m_unwrappedDetectors.begin();
   for(;ud != m_unwrappedDetectors.end(); ++ud)
   {
+    if (! ud->detector ) continue;
     double u = ud->u;
     int i = int((u - m_u_min) / bin_width);
     ubins[i] = true;
@@ -510,6 +530,7 @@ void UnwrappedSurface::findAndCorrectUGap()
     QList<UnwrappedDetector>::iterator ud = m_unwrappedDetectors.begin();
     for(;ud != m_unwrappedDetectors.end(); ++ud)
     {
+      if (! ud->detector ) continue;
       double& u = ud->u;
       u += du;
       if (u > m_u_max)
@@ -526,6 +547,7 @@ void UnwrappedSurface::changeColorMap()
   for(int i = 0; i < m_unwrappedDetectors.size(); ++i)
   {
     UnwrappedDetector& udet = m_unwrappedDetectors[i];
+    if (! udet.detector ) continue;
     const boost::shared_ptr<const Mantid::Geometry::IDetector> det = udet.detector;
     unsigned char color[3];
     m_instrActor->getColor(det->getID()).getUB3(&color[0]);
@@ -589,4 +611,46 @@ QString UnwrappedSurface::getInfoText()const
 QRectF UnwrappedSurface::getSurfaceBounds()const
 {
   return QRectF(m_viewRect.left(),m_viewRect.bottom(),m_viewRect.width(),-m_viewRect.height());
+}
+
+/**
+ * Set a peaks workspace to be drawn ontop of the workspace.
+ * @param pws :: A shared pointer to the workspace.
+ */
+void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws)
+{
+  m_peakShapes.clear();
+  m_peaksWorkspace = pws;
+  if (!pws)
+  {
+    return;
+  }
+  m_startPeakShapes = true;
+}
+
+/**
+ * Create the peak labels from the peaks set by setPeaksWorkspace. The method is called from the draw(...) method
+ * @param window :: The screen window rectangle in pixels.
+ */
+void UnwrappedSurface::ceatePeakShapes(QRect& viewport)const
+{
+  m_peakShapes.setWindow(getSurfaceBounds(),viewport);
+  int nPeaks = m_peaksWorkspace->getNumberPeaks();
+  for(int i = 0; i < nPeaks; ++i)
+  {
+    Mantid::API::IPeak& peak = m_peaksWorkspace->getPeak(i);
+    int detID = peak.getDetectorID();
+    foreach(UnwrappedDetector udet,m_unwrappedDetectors)
+    {
+      Mantid::Geometry::IDetector_const_sptr det = udet.detector;
+      if (! det ) continue;
+      if (det->getID() != detID) continue;
+      Shape2DRectangle* r = new Shape2DRectangle();
+      r->setFillColor(QColor(255,255,255,100));
+      m_peakShapes.addShape(r,true);
+      m_peakShapes.setCurrentBoundingRectReal(QRectF(udet.u-udet.width/2,udet.v-udet.height/2,udet.width,udet.height));
+    }
+  }
+  m_peakShapes.deselectAll();
+  m_startPeakShapes = false;
 }

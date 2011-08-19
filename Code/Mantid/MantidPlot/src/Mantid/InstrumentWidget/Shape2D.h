@@ -111,6 +111,7 @@ protected:
 class Shape2DRectangle: public Shape2D
 {
 public:
+  Shape2DRectangle();
   Shape2DRectangle(const QPointF& leftTop,const QPointF& bottomRight);
   Shape2DRectangle(const QPointF& leftTop,const QSizeF& size);
   virtual Shape2D* clone()const{return new Shape2DRectangle(*this);}

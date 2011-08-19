@@ -44,10 +44,14 @@ void Shape2DCollection::draw(QPainter& painter) const
   painter.restore();
 }
 
-void Shape2DCollection::addShape(Shape2D* shape)
+void Shape2DCollection::addShape(Shape2D* shape,bool slct)
 {
   m_shapes.push_back(shape);
   m_boundingRect |= shape->getBoundingRect();
+  if (slct)
+  {
+    select(shape);
+  }
   emit shapeCreated();
 }
 
@@ -239,6 +243,9 @@ void Shape2DCollection::deselectAll()
   emit shapesDeselected();
 }
 
+/**
+ * Select a shape which contains a point (x,y) of the screen.
+ */
 bool Shape2DCollection::selectAtXY(int x,int y)
 {
   QPointF p = m_transform.inverted().map(QPointF(x,y));
@@ -247,19 +254,42 @@ bool Shape2DCollection::selectAtXY(int x,int y)
     bool picked = shape->selectAt(p);
     if (picked) 
     {
-      if (m_currentShape)
-      {
-        m_currentShape->edit(false);
-      }
-      m_currentShape = shape;
-      m_currentShape->edit(true);
-      emit shapeSelected();
+      select(shape);
       return true;
     }
   }
   return false;
 }
 
+/**
+ * Select a shape with index i.
+ */
+void Shape2DCollection::select(size_t i)
+{
+  if (i < size())
+  {
+    select(m_shapes[i]);
+  }
+}
+
+/**
+ * Make a shape current.
+ * @param shape :: Pointer to a shape which is to become current. The shape must be in the collection.
+ */
+void Shape2DCollection::select(Shape2D* shape)
+{
+  if (m_currentShape)
+  {
+    m_currentShape->edit(false);
+  }
+  m_currentShape = shape;
+  m_currentShape->edit(true);
+  emit shapeSelected();
+}
+
+/**
+ * Checks if the screen point (x,y) is inside the current shape.
+ */
 bool Shape2DCollection::isOverCurrentAt(int x,int y)
 {
   if (!m_currentShape) return false;
@@ -410,4 +440,19 @@ void Shape2DCollection::getMaskedPixels(QList<QPoint>& pixels)const
       }
     }
   }
+}
+
+/**
+ * Set the bounding rect of the current shape in real coordinates.
+ */
+void Shape2DCollection::setCurrentBoundingRectReal(const QRectF& rect)
+{
+  if (!m_currentShape) return;
+  // convert rect from real to original screen coordinates
+  double x = (rect.x() - m_windowRect.left()) * m_wx;
+  double y = m_h - (rect.bottom() - m_windowRect.y()) * m_wy;
+  double width = rect.width() * m_wx;
+  double height = rect.height() * m_wy;
+  
+  m_currentShape->setBoundingRect(QRectF(x,y,width,height));
 }

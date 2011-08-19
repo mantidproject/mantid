@@ -262,6 +262,11 @@ void Shape2DEllipse::setPoint(const QString& prop, const QPointF& value)
 
 // --- Shape2DRectangle --- //
 
+Shape2DRectangle::Shape2DRectangle()
+{
+  m_boundingRect = QRectF();
+}
+
 Shape2DRectangle::Shape2DRectangle(const QPointF& leftTop,const QPointF& bottomRight)
 {
   m_boundingRect = QRectF(leftTop,bottomRight);

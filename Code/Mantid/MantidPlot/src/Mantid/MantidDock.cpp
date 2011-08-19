@@ -1226,7 +1226,7 @@ void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e)
   QDrag *drag = new QDrag(this);
   QMimeData *mimeData = new QMimeData;
 
-  mimeData->setText("Workspace");
+  mimeData->setText("Workspace::"+getSelectedWorkspaceNames()[0]);
   drag->setMimeData(mimeData);
 
   Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);

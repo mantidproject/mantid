@@ -18,6 +18,9 @@ namespace Mantid{
   namespace Geometry{
     class IDetector;
   }
+  namespace API{
+    class IPeaksWorkspace;
+  }
 }
 
 class GLColor;
@@ -58,7 +61,7 @@ public:
   * @date 18 Nov 2010
   */
 
-class UnwrappedSurface: /*public DetectorCallback,*/ public ProjectionSurface
+class UnwrappedSurface: public ProjectionSurface
 {
   //Q_OBJECT
 public:
@@ -67,6 +70,7 @@ public:
   void componentSelected(Mantid::Geometry::ComponentID = NULL);
   void getSelectedDetectors(QList<int>& dets);
   void getMaskedDetectors(QList<int>& dets)const;
+  void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
   virtual QString getInfoText()const;
   virtual QRectF getSurfaceBounds()const;
 
@@ -93,6 +97,7 @@ protected:
   void showPickedDetector();
   void calcAssemblies(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,const QRectF& compRect);
   void findAndCorrectUGap();
+  void ceatePeakShapes(QRect& viewport)const;
 
   const InstrumentActor* m_instrActor;
   double m_u_min;                      ///< Minimum u
@@ -103,6 +108,8 @@ protected:
   double m_width_max;   ///< Maximum detector width
   QList<UnwrappedDetector> m_unwrappedDetectors;  ///< info needed to draw detectors onto unwrapped image
   QMap<Mantid::Geometry::ComponentID,QRectF> m_assemblies;
+  boost::shared_ptr<Mantid::API::IPeaksWorkspace> m_peaksWorkspace; ///< peaks to be drawn ontop of the surface
+  mutable bool m_startPeakShapes; ///< set to true to start creating m_peakShapes from m_peaksWorkspace, return to false after creation
 
 };
 

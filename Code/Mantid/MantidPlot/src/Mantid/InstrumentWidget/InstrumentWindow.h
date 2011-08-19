@@ -48,6 +48,8 @@ class QCheckBox;
 class QComboBox;
 class QTextEdit;
 class QShowEvent;
+class QDragEnterEvent;
+class QDropEvent;
 
 /**
   \class  InstrumentWindow
@@ -112,6 +114,8 @@ protected:
   virtual void showEvent(QShowEvent* event);
   /// Implements AlgorithmObserver's finish handler
   void finishHandle(const Mantid::API::IAlgorithm* alg);
+  void dragEnterEvent( QDragEnterEvent* e );
+  void dropEvent( QDropEvent* e );
 
 public slots:
   void tabChanged(int i);

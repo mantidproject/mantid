@@ -11,6 +11,9 @@ class QMouseEvent;
 class QWheelEvent;
 class QKeyEvent;
 
+/**
+ * Class Shape2DCollection is a collection of 2D shapes. 
+ */
 class Shape2DCollection: public QObject, public Shape2D
 {
   Q_OBJECT
@@ -20,7 +23,7 @@ public:
   Shape2D* clone()const{return NULL;}
   void setWindow(const QRectF& rect,const QRect& viewport) const;
   virtual void draw(QPainter& painter) const;
-  virtual void addShape(Shape2D*);
+  virtual void addShape(Shape2D*,bool slct = false);
   
   void mousePressEvent(QMouseEvent*);
   void mouseMoveEvent(QMouseEvent*);
@@ -35,7 +38,8 @@ public:
   void removeCurrentShape();
   void clear();
   bool isEmpty()const{return m_shapes.isEmpty();}
-  //Shape2D* getCurrentShape()const{return m_currentShape;}
+  size_t size()const {return static_cast<size_t>(m_shapes.size());}
+  void select(size_t i);
 
   QRectF getCurrentBoundingRect()const;
   void setCurrentBoundingRect(const QRectF& rect);
@@ -54,6 +58,8 @@ public:
   // collect all screen pixels that are masked by the shapes
   void getMaskedPixels(QList<QPoint>& pixels)const;
 
+  void setCurrentBoundingRectReal(const QRectF& rect);
+
 signals:
 
   void shapeCreated();
@@ -70,6 +76,7 @@ protected:
   Shape2D* createShape(const QString& type,int x,int y)const;
   bool selectControlPointAt(int x,int y);
   bool isOverCurrentAt(int x,int y);
+  void select(Shape2D* shape);
 
   QList<Shape2D*> m_shapes;
   mutable QRectF m_windowRect; // original surface window in "real" cooerdinates

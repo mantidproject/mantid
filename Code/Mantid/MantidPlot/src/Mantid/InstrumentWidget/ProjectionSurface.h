@@ -172,7 +172,9 @@ protected:
   InteractionMode m_interactionMode;
   bool m_leftButtonDown;
 
-  Shape2DCollection m_maskShapes;
+  Shape2DCollection m_maskShapes;  ///< to draw mask shapes
+  mutable Shape2DCollection m_peakShapes; ///< to draw peak labels
+
 };
 
 #endif // PROJECTIONSURFACE_H
