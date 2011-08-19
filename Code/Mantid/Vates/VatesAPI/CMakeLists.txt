@@ -114,6 +114,7 @@ test/FilteringUpdateProgressActionTest.h
 test/IMDWorkspaceProxyTest.h
 test/MultiDimensionalDbPresenterTest.h
 test/MDEWEventNexusLoadingPresenterTest.h
+test/MDEWLoadingPresenterTest.h
 test/MDEWRebinningPresenterTest.h
 test/MDHistogramRebinningPresenterTest.h
 test/NullRebinningPresenterTest.h

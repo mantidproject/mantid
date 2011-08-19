@@ -151,16 +151,20 @@ namespace Mantid
     template<typename ViewType>
     bool MDEWLoadingPresenter<ViewType>::shouldLoad()
     {
+      double viewTime = m_view->getTime();
+      size_t viewDepth = m_view->getRecursionDepth();
+      bool viewLoadInMemory = m_view->getLoadInMemory();
+
       bool bExecute = false;
-      if(m_time != m_view->getTime())
+      if(m_time != viewTime)
       {
         bExecute = false; //Time has changed. This DOES NOT require reloading.
       }
-      if(m_recursionDepth != m_view->getRecursionDepth())
+      if(m_recursionDepth != viewDepth)
       {
         bExecute = false; //Recursion depth has changed. This is a vtkDataSet factory concern.
       }
-      if(m_loadInMemory != m_view->getLoadInMemory())
+      if(m_loadInMemory != viewLoadInMemory)
       {
         bExecute = true; //Must reload with memory/file option.
       }
@@ -170,9 +174,9 @@ namespace Mantid
       }
 
       // Save state.
-      m_time = m_view->getTime();
-      m_recursionDepth = m_view->getRecursionDepth();
-      m_loadInMemory = m_view->getLoadInMemory();
+      m_time = viewTime;
+      m_recursionDepth = viewDepth;
+      m_loadInMemory = viewLoadInMemory;
       m_firstLoad = false;
       //Return decision.
       return bExecute;
