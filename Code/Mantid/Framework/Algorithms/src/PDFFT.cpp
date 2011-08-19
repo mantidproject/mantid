@@ -44,14 +44,14 @@ void PDFFT::init() {
 	// declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, wsValidator), "An input workspace S(d).");
 	declareProperty(new WorkspaceProperty<> ("InputWorkspace", "",
 			Direction::Input, uv), "An input workspace S(d).");
-	declareProperty(new WorkspaceProperty<> ("OutputWorkspace0", "",
+	declareProperty(new WorkspaceProperty<> ("OutputGorRWorkspace", "",
 			Direction::Output), "An output workspace G(r)");
-	declareProperty(new WorkspaceProperty<> ("OutputWorkspace1", "",
+	declareProperty(new WorkspaceProperty<> ("OutputQSQm1Workspace", "",
 			Direction::Output), "An output workspace for Q(S(Q)-1))");
   declareProperty(new Kernel::PropertyWithValue<double>("RMax", 20, Direction::Input),
       "Maximum r value of output G(r).");
 	// declareProperty("RMax", 20.0);
-  declareProperty(new Kernel::PropertyWithValue<double>("DeltaR", 0.1, Direction::Input),
+  declareProperty(new Kernel::PropertyWithValue<double>("DeltaR", 0.01, Direction::Input),
       "Step of r in G(r). ");
 	declareProperty(new Kernel::PropertyWithValue<double>("Qmin", 0.0, Direction::Input),
 	    "Staring value Q of S(Q) for Fourier Transform");
@@ -74,7 +74,7 @@ void PDFFT::exec() {
 	double qmin = getProperty("Qmin");
   int sizer = static_cast<int>(rmax/deltar);
 
-	// 2. Set up G(r)
+	// 2. Set up G(r) dataX(0)
 	Gspace
 			= WorkspaceFactory::Instance().create("Workspace2D", 1, sizer, sizer);
 	MantidVec& vr = Gspace->dataX(0);
@@ -99,42 +99,58 @@ void PDFFT::exec() {
 			throw std::invalid_argument("Unit of input Workspace is not supported");
 	}
 
-	if (unit != "Q" && unit != "d") {
-		g_log.information() << "Unit " << unit << " is not supported (Q or d)"
-				<< std::endl;
-	}
+	g_log.information() << "Range of Q for F.T. : (" << qmin << ", " << qmax << ")\n";
 
-	// 4. Check qmax, qmin
-	double dataqmax, dataqmin;
+	// 4. Check datamax, datamin and do Fourier transform
 	const MantidVec& inputx = Sspace->dataX(0);
 	int sizesq = static_cast<int>(inputx.size());
-	if (unit == "d") {
-		dataqmax = 2 * M_PI / inputx[inputx.size() - 1];
-		dataqmin = 2 * M_PI / inputx[0];
-	} else {
-		dataqmin = inputx[0];
-		dataqmax = inputx[inputx.size() - 1];
-	}
-	if (qmin < dataqmin) {
-		qmin = dataqmin;
-	}
-	if (qmax > dataqmax) {
-		qmax = dataqmax;
-	}
+	double error;
 
-	// 5. Calculate G(r)
-  g_log.debug() << "Unit = " << unit << "  Size = " << sizer << std::endl;
-	for (int i = 0; i < sizer; i++) {
-		double error;
-		if (unit == "Q") {
+	if (unit == "d") {
+	  // d-Spacing
+	  g_log.information()<< "Fourier Transform in d-Space" << std::endl;
+
+	  double datadmax = 2 * M_PI / inputx[inputx.size() - 1];
+		double datadmin = 2 * M_PI / inputx[0];
+		double dmin = 2*M_PI/qmax;
+		double dmax = 2*M_PI/qmin;
+
+	  if (dmin < datadmin) {
+	    g_log.notice() << "User input dmin = " << dmin << "is out of range.  Using Min(d) = " << datadmin << "instead\n";
+	    dmin = datadmin;
+	  }
+	  if (dmax > datadmax) {
+	    g_log.notice() << "User input dmax = " << dmax << "is out of range.  Using Max(d) = " << datadmax << "instead\n";
+	    dmax = datadmax;
+	  }
+
+		for (int i = 0; i < sizer; i ++){
+	      vg[i] = CalculateGrFromD(vr[i], error, dmin, dmax);
+	      vge[i] = error;
+		}
+
+	} else if (unit == "Q"){
+	  // Q-spacing
+	  g_log.information()<< "Fourier Transform in Q-Space" << std::endl;
+
+		double dataqmin = inputx[0];
+		double dataqmax = inputx[inputx.size() - 1];
+
+		if (qmin < dataqmin) {
+		  g_log.notice() << "User input qmin = " << qmin << "is out of range.  Using Min(Q) = " << dataqmin << "instead\n";
+		  qmin = dataqmin;
+		}
+		if (qmax > dataqmax) {
+		  g_log.notice() << "User input qmax = " << qmax << "is out of range.  Using Max(Q) = " << dataqmax << "instead\n";
+		  qmax = dataqmax;
+		}
+
+		for (int i = 0; i < sizer; i ++){
 			vg[i] = CalculateGrFromQ(vr[i], error, qmin, qmax);
 			vge[i] = error;
-
-		} else if (unit == "d") {
-			vg[i] = CalculateGrFromD(vr[i], error, qmin, qmax);
-			vge[i] = error;
 		}
-	}
+
+	} // ENDIF unit
 
 	// 3. TODO Calculate rho(r)????
 
@@ -154,8 +170,8 @@ void PDFFT::exec() {
 	}
 
 	// 4. Set property
-	setProperty("OutputWorkspace0", Gspace);
-	setProperty("OutputWorkspace1", QSspace);
+	setProperty("OutputGorRWorkspace", Gspace);
+	setProperty("OutputQSQm1Workspace", QSspace);
 
 	return;
 }
@@ -192,51 +208,30 @@ double PDFFT::CalculateGrFromD(double r, double& egr, double qmin, double qmax) 
 
 double PDFFT::CalculateGrFromQ(double r, double& egr, double qmin, double qmax) {
 
-	double gr = 0;
-	double PI = 3.1415926545;
-
 	const MantidVec& vq = Sspace->dataX(0);
 	const MantidVec& vs = Sspace->dataY(0);
 	const MantidVec& ve = Sspace->dataE(0);
 
-	double temp, q, s, deltaq;
-	double error = 0;
+	double sinus, q, s, deltaq, fs, error;
 
-	// g_log.information()<< "r = " << r << "  size(q) = " << vq.size() << std::endl;
-
+	fs = 0;
+	error = 0;
 	for (size_t i = 1; i < vq.size(); i++) {
 		q = vq[i];
 		if (q >= qmin && q <= qmax) {
 			s = vs[i];
 			deltaq = vq[i] - vq[i - 1];
-			temp = q * (s - 1) * sin(q * r) * deltaq;
-			gr += temp;
-			error += ve[i] * ve[i];
-#if 0
-			if (printout) {
-				g_log.information() << "q[" << i << "] = " << q << "  dq = " << deltaq << "  S(q) =" << s;
-				g_log.information() << "  d(gr) = " << temp << "  gr = " << gr << std::endl;
-			}
-#endif
+			sinus  = sin(q * r) * q * deltaq;
+			fs    += sinus * (s - 1.0);
+			error += (sinus*ve[i]) * (sinus*ve[i]);
+		  // g_log.debug() << "q[" << i << "] = " << q << "  dq = " << deltaq << "  S(q) =" << s;
+		  // g_log.debug() << "  d(gr) = " << temp << "  gr = " << gr << std::endl;
 		}
 	}
 
-	// Extrapolate to zero
-	double dq = fabs(vq[1]-vq[0]);
-	size_t num = size_t(qmin/dq);
-	g_log.information() << "Extrapolate:  qmin = " << qmin << "  num = " << num << "  dq = " << dq << std::endl;
-	for (size_t i = 0; i < num; i ++){
-    q = double(i)*dq;
-    s = 0.0;
-    deltaq = dq;
-    temp = q * (s - 1) * sin(q * r) * deltaq;
-    gr += temp;
-    error += 0;
-	}
-
 	// Summarize
-	gr = gr * 2 / PI;
-	egr = sqrt(error); //TODO: Wrong!
+	double gr = fs * 2 / M_PI;
+	egr = error*2/M_PI; //TODO: Wrong!
 
 	return gr;
 }
