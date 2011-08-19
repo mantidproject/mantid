@@ -224,11 +224,6 @@ namespace Mantid
               throw std::invalid_argument("Log "+logName+" does not exist or not a double type");
             }
             double Y,E; 
-            calcIntAsymmetry(ws_red,ws_green,Y,E);
-            outWS->dataY(0)[i-is] = Y;
-            outWS->dataX(0)[i-is] = logp->lastValue();
-            outWS->dataE(0)[i-is] = E;
-
             double Y1,E1;
             calcIntAsymmetry(ws_red,Y,E);
             calcIntAsymmetry(ws_green,Y1,E1);
@@ -242,7 +237,14 @@ namespace Mantid
 
             outWS->dataY(3)[i-is] = Y + Y1;
             outWS->dataX(3)[i-is] = logp->lastValue();
-            outWS->dataE(3)[i-is] = E + E1;
+            outWS->dataE(3)[i-is] = sqrt(E) + sqrt(E1);
+
+            // move to last for safety since some grouping takes place in the
+            // calcIntAsymmetry call below
+            calcIntAsymmetry(ws_red,ws_green,Y,E);
+            outWS->dataY(0)[i-is] = Y;
+            outWS->dataX(0)[i-is] = logp->lastValue();
+            outWS->dataE(0)[i-is] = E;
           }
           else
             if (!ws_red)
@@ -440,7 +442,7 @@ namespace Mantid
      *  @param ws :: A local workspace
      *  @param spectraList :: A list of spectra to group.
      */
-    void PlotAsymmetryByLogValue::groupDetectors(API::MatrixWorkspace_sptr ws,const std::vector<int>& spectraList)
+    void PlotAsymmetryByLogValue::groupDetectors(API::MatrixWorkspace_sptr& ws,const std::vector<int>& spectraList)
     {
       API::IAlgorithm_sptr group = createSubAlgorithm("GroupDetectors");
       group->setProperty("InputWorkspace",ws);

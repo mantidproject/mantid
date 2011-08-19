@@ -83,7 +83,7 @@ namespace Mantid
       void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
           API::MatrixWorkspace_sptr ws_geen,double& Y, double& E);
       /// Group detectors
-      void groupDetectors(API::MatrixWorkspace_sptr ws,const std::vector<int>& spectraList);
+      void groupDetectors(API::MatrixWorkspace_sptr& ws,const std::vector<int>& spectraList);
 
       /// Stores property "Int"
       bool m_int;
