@@ -71,7 +71,7 @@ namespace Mantid
       bool m_isSetup;
       double m_time;
       size_t m_recursionDepth;
-      double m_loadInMemory;
+      bool m_loadInMemory;
       bool m_firstLoad;
     };
 
