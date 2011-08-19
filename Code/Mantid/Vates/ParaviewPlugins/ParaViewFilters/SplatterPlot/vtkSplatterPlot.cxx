@@ -66,12 +66,11 @@ int vtkSplatterPlot::RequestData(vtkInformation *, vtkInformationVector **, vtkI
   vtkSplatterPlotFactory vtkGridFactory(ThresholdRange_scptr(new NoThresholdRange), scalarName, m_numberPoints);
   vtkGridFactory.initialize(result);
 
-  output->ShallowCopy(vtkGridFactory.create());
+  vtkDataSet* product = vtkGridFactory.create();
+  product->SetFieldData(input->GetFieldData());
+  output->ShallowCopy(product);
 
-  //Relay the field data.
-  output->SetFieldData(input->GetFieldData());
   return 1;
-
 }
 
 int vtkSplatterPlot::RequestInformation(vtkInformation *request, vtkInformationVector **inputVector, vtkInformationVector *outputVector)

@@ -1,6 +1,6 @@
   <ParaViewFilters>
     <Category name="Mantid" menu_label="&amp;Mantid">
       <!-- adds a new category and then adds our filter to it -->
-      <Filter name="MantidParaViewSplatterPlot" icon=":/" /> /> 
+      <Filter name="MantidParaViewSplatterPlot" icon=":/Splatter.png" /> /> 
     </Category>
   </ParaViewFilters>
