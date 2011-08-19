@@ -82,16 +82,19 @@ class BaseWidget(QtGui.QWidget):
         """
         return NotImplemented
     
-    def data_browse_dialog(self, data_type=None, multi=False):
+    def data_browse_dialog(self, data_type=None, title=None, multi=False):
         """
             Pop up a file dialog box.
             @param data_type: string used to filter the files
+            @param title: string to use as title
             @param multi: multiselection is enabled if True
         """
         if data_type is None:
             data_type = self._data_type
+        if title is None:
+            title = "Data file - Choose a data file"
         if multi:
-            qflist = QtGui.QFileDialog.getOpenFileNames(self, "Data file - Choose a data file",
+            qflist = QtGui.QFileDialog.getOpenFileNames(self, title,
                                                               self._settings.data_path, 
                                                               data_type)
             if qflist.count()>0:
@@ -104,7 +107,7 @@ class BaseWidget(QtGui.QWidget):
             else:
                 return None
         else:       
-            fname = QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, "Data file - Choose a data file",
+            fname = QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, title,
                                                               self._settings.data_path, 
                                                               data_type)).filePath()
             if fname:

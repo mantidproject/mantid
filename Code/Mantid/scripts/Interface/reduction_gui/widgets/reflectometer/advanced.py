@@ -117,6 +117,7 @@ class AdvancedWidget(BaseWidget):
         self.connect(self._summary.advanced_overwrite_norm_geometry_switch, QtCore.SIGNAL("clicked(bool)"), self._advanced_norm_geometry_clicked)            
 
         self.connect(self._summary.advanced_overwrite_data_button, QtCore.SIGNAL("clicked()"), self._data_geometry_clicked)
+        self.connect(self._summary.advanced_overwrite_norm_button, QtCore.SIGNAL("clicked()"), self._norm_geometry_clicked)
 
 #        # Q range
 #        self._summary.n_q_bins_edit.setText(QtCore.QString("100"))
@@ -172,23 +173,17 @@ class AdvancedWidget(BaseWidget):
         """
             Reached by Overwrite data geometry browse button
         """
+        fname = self.data_browse_dialog(data_type="*.nxs", title="Data geometry file - Choose a geometry file")
+        if fname:
+            self._summary.advanced_overwrite_data_label.setText(fname)      
 
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        _file = QtGui.QFileDialog.getExistingDirectory(self, "Select data geometry", 
-                                                       os.path.expanduser('~'),
-                                                       | QtGui.QFileDialog.DontResolveSymlinks)
-        if _file:
-            self._summary.advanced_overwrite_data_label.setText(output_dir)   
-
+    def _norm_geometry_clicked(self):
+        """
+            Reached by Overwrite norm geometry browse button
+        """
+        fname = self.data_browse_dialog(data_type="*.nxs", title="Normalization geometry file - Choose a geometry file")
+        if fname:
+            self._summary.advanced_overwrite_norm_label.setText(fname)      
 
 #    def _mask_plot_clicked(self):        
 #        self.mask_ws = "__mask_%s" % extract_workspace_name(str(self._summary.mask_edit.text()))
