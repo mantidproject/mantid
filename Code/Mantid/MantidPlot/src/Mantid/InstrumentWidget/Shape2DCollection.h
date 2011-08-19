@@ -39,7 +39,7 @@ public:
   void clear();
   bool isEmpty()const{return m_shapes.isEmpty();}
   size_t size()const {return static_cast<size_t>(m_shapes.size());}
-  void select(size_t i);
+  void select(int i);
 
   QRectF getCurrentBoundingRect()const;
   void setCurrentBoundingRect(const QRectF& rect);

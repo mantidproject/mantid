@@ -264,9 +264,9 @@ bool Shape2DCollection::selectAtXY(int x,int y)
 /**
  * Select a shape with index i.
  */
-void Shape2DCollection::select(size_t i)
+void Shape2DCollection::select(int i)
 {
-  if (i < size())
+  if (i < static_cast<int>(size()))
   {
     select(m_shapes[i]);
   }
