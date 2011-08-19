@@ -120,7 +120,6 @@ namespace MDEvents
 
         // Track the total number of added events
         m_alg->statsMutex.lock();
-        m_alg->totalSinceLastSplit += uint64_t(events.size());
         m_alg->totalLoaded += uint64_t(events.size());
         m_alg->getLogger().debug() << "Box " << m_blockNum << ". Total events " << m_alg->totalLoaded << ". This one added " << events.size() << ". "<< std::endl;
         // Report the progress
@@ -230,7 +229,7 @@ namespace MDEvents
     // TODO: Specify these split parameters some smarter way?
     bc->setMaxDepth(20);
     bc->setSplitInto(4);
-    bc->setSplitThreshold(2000);
+    bc->setSplitThreshold(10000);
 
     // Perform the initial box splitting.
     IMDBox<MDE,nd> * box = outWS->getBox();
@@ -277,8 +276,10 @@ namespace MDEvents
 
     // For tracking progress
     uint64_t totalEventsInTasks = 0;
+    this->totalLoaded = 0;
 
     // Prepare thread pool
+    CPUTimer overallTime;
     ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
     ThreadPool tp(ts);
 
@@ -299,10 +300,13 @@ namespace MDEvents
         tp.joinAll();
 
         // Now do all the splitting tasks
-        ws->splitAllIfNeeded(ts);
+        g_log.information() << "Splitting boxes since we have added " << totalEventsInTasks << " events." << std::endl;
+        outWS->splitAllIfNeeded(ts);
         if (ts->size() > 0)
           prog->doReport("Splitting Boxes");
         tp.joinAll();
+
+        totalEventsInTasks = 0;
       }
     } // for each box
 
@@ -310,14 +314,18 @@ namespace MDEvents
     tp.joinAll();
 
     // Final splitting
-    ws->splitAllIfNeeded(ts);
+    g_log.debug() << "Final splitting of boxes. " << totalEventsInTasks << " events." << std::endl;
+    outWS->splitAllIfNeeded(ts);
     tp.joinAll();
+
+    g_log.debug() << overallTime << " to do all the adding." << std::endl;
 
     this->progress(0.91, "Refreshing Cache");
     outWS->refreshCache();
+    g_log.debug() << overallTime << " to run refreshCache()." << std::endl;
 
 
-    // Now re-save the MDEventWorkspace to update the file
+    // Now re-save the MDEventWorkspace to update the filec
     std::string outputFile = getProperty("OutputFilename");
     if (!outputFile.empty())
     {
@@ -327,6 +335,8 @@ namespace MDEvents
       saver->setProperty("UpdateFileBackEnd", true);
       saver->executeAsSubAlg();
     }
+
+    g_log.debug() << overallTime << " to run SaveMDEW." << std::endl;
   }
 
   //----------------------------------------------------------------------------------------------

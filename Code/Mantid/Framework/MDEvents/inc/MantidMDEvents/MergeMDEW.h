@@ -93,8 +93,11 @@ namespace MDEvents
 
     /// # of events loaded from all tasks
     uint64_t totalLoaded;
-    uint64_t totalSinceLastSplit;
+
+    /// Mutex for file access
     Kernel::Mutex fileMutex;
+
+    /// Mutex for modifying stats
     Kernel::Mutex statsMutex;
 
     /// Progress reporter
