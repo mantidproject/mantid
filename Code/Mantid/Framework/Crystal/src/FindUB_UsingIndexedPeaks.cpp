@@ -107,8 +107,7 @@ namespace Crystal
     char logInfo[200];
     if (  UB.determinant() > 100 )        // UB not found correctly
     {
-      sprintf( logInfo, std::string("UB NOT FOUND").c_str() );
-      g_log.notice( std::string(logInfo) );
+      g_log.notice( std::string("UB NOT FOUND") );
     }
     else                                  // tell user how many would be indexed
     {                                     // from the full list of peaks, and  
