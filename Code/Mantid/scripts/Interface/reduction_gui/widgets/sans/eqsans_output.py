@@ -48,7 +48,6 @@ class EQSANSOutputWidget(OutputWidget):
             self._content.log_binning_radio.hide()
         
     def _perform_rebin(self, workspace):
-        print "Rebinning %s" % workspace
         avg = ReductionSingleton().get_azimuthal_averager()
         avg._binning = None
         avg._nbins = self._content.n_q_bins_edit.text().toInt()[0]
@@ -80,7 +79,6 @@ class EQSANSOutputWidget(OutputWidget):
                 _check_and_append(item)
                 
         for event_ws in to_rebin:
-            print "Rebinning %s" % event_ws
             avg = ReductionSingleton().get_azimuthal_averager()
             avg._binning = None
             avg._nbins = self._content.n_q_bins_edit.text().toInt()[0]

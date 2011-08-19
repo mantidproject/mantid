@@ -36,6 +36,7 @@ class LoadRun(ReductionStep):
         
         # Use mask defined in configuration file
         self._use_config_mask = False
+        self._use_config = True
         
         # Workspace on which to apply correction that should be done
         # independently of the pixel. If False, all correction will be 
@@ -59,6 +60,7 @@ class LoadRun(ReductionStep):
         loader._high_TOF_cut = self._high_TOF_cut
         loader._correct_for_flight_path = self._correct_for_flight_path
         loader._use_config_mask = self._use_config_mask
+        loader._use_config = self._use_config
         return loader
 
     def set_sample_detector_distance(self, distance):
@@ -97,6 +99,13 @@ class LoadRun(ReductionStep):
             @param use_config: if True, the configuration file will be used
         """
         self._use_config_cutoff = use_config
+
+    def use_config(self, use_config=True):
+        """
+            Set the flag to use the configuration file or not.
+            Only used for test purposes
+        """
+        self._use_config = use_config
 
     def use_config_mask(self, use_config=False):
         """
@@ -196,6 +205,8 @@ class LoadRun(ReductionStep):
             @param workspace: name of workspace being processed
             @param config: EQSANSConfig object 
         """
+        if config is None:
+            return "   Could not find source aperture\n"
         
         slit_positions = config.slit_positions
         # If we don't have a config file, assume the standard slit settings
@@ -292,18 +303,19 @@ class LoadRun(ReductionStep):
                 is_event_nxs = True
             
             # Find available configuration files
-            data_dir,_ = os.path.split(filepath)
-            files = find_file(startswith="eqsans_configuration", data_dir=data_dir)
-            for file in files:
-                name, ext = os.path.splitext(file)
-                # The extension should be a run number
-                try:
-                    ext = ext.replace('.','')
-                    config_files.append(_ConfigFile(int(ext),file))
-                except:
-                    # Bad extension, which means it's not the file we are looking for
-                    pass
-                           
+            if self._use_config:
+                data_dir,_ = os.path.split(filepath)
+                files = find_file(startswith="eqsans_configuration", data_dir=data_dir)
+                for file in files:
+                    name, ext = os.path.splitext(file)
+                    # The extension should be a run number
+                    try:
+                        ext = ext.replace('.','')
+                        config_files.append(_ConfigFile(int(ext),file))
+                    except:
+                        # Bad extension, which means it's not the file we are looking for
+                        pass
+                               
             if is_event_nxs:
                 mantid.sendLogMessage("Loading %s as event Nexus" % (filepath))
                 LoadEventNexus(Filename=filepath, OutputWorkspace=wks_name)
@@ -540,6 +552,7 @@ class LoadRun(ReductionStep):
         
                 CloneWorkspace(workspace, data_ws)
                 Divide(workspace, workspace, workspace)
+                #mtd[workspace].setYUnit("Counts")                
                 reducer.clean(data_ws)
                     
         # Remove the dirty flag if it existed

@@ -10,6 +10,9 @@ class HFIRSANS(Instrument):
         # to load the instrument description until later 
         self._NAME = instrument_id
 
+    def get_incident_mon(self):
+        return 2
+    
     def get_default_beam_center(self, workspace=None):
         """
             Returns the default beam center position, or the pixel location

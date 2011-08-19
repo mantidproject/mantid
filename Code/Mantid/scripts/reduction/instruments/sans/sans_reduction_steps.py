@@ -384,7 +384,7 @@ class DirectBeamTransmission(BaseTransmission):
         if self._monitor_det_ID is not None and self._monitor_det_ID>=0:
             CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
                                   OutputWorkspace=trans_output_workspace,
-                                  IncidentBeamMonitor=str(self._monitor_det_ID), 
+                                  IncidentBeamMonitor=str(self._monitor_det_ID+1), 
                                   TransmissionMonitor=str(first_det),
                                   OutputUnfittedData=True)
         else:

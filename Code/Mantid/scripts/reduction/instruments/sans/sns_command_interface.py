@@ -64,6 +64,9 @@ def UseConfigTOFTailsCutoff(use_config=True):
 def UseConfigMask(use_config=True):
     ReductionSingleton().get_data_loader().use_config_mask(use_config)
     
+def UseConfig(use_config=True):
+    ReductionSingleton().get_data_loader().use_config(use_config)
+    
 def AzimuthalAverage(suffix="_Iq", n_bins=100, n_subpix=1, log_binning=False, scale=True):
     ReductionSingleton().set_azimuthal_averager(sns_reduction_steps.AzimuthalAverageByFrame(binning=None,
                                                                                             suffix=suffix,
