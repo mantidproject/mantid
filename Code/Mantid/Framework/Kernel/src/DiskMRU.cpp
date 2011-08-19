@@ -13,13 +13,14 @@ namespace Kernel
   /** Constructor
    */
   DiskMRU::DiskMRU()
-  : m_mru_byId( m_mru.get<1>() ),
-    m_memoryAvail(100),
-    m_memoryUsed(0),
+  : m_useMRU(true),
+    m_mru_byId( m_mru.get<1>() ),
+    m_mruSize(100),
+    m_mruUsed(0),
     m_useWriteBuffer(false),
     m_writeBufferSize(50),
-    m_toWrite_byId( m_toWrite.get<1>() ),
-    m_memoryToWrite(0),
+    m_writeBuffer_byId( m_writeBuffer.get<1>() ),
+    m_writeBufferUsed(0),
     m_free_bySize( m_free.get<1>() ),
     m_fileLength(0)
   {
@@ -28,19 +29,20 @@ namespace Kernel
   //----------------------------------------------------------------------------------------------
   /** Constructor
    *
-   * @param m_memoryAvail :: Amount of memory that the MRU is allowed to use.
+   * @param m_mruSize :: Amount of memory that the MRU is allowed to use.
    * @param m_writeBufferSize :: Amount of memory to accumulate in the write buffer before writing.
    * @param useWriteBuffer :: True if you want to use the "to-Write" buffer.
    * @return
    */
-  DiskMRU::DiskMRU(uint64_t m_memoryAvail, uint64_t m_writeBufferSize, bool useWriteBuffer)
-  : m_mru_byId( m_mru.get<1>() ),
-    m_memoryAvail(m_memoryAvail),
-    m_memoryUsed(0),
+  DiskMRU::DiskMRU(uint64_t m_mruSize, uint64_t m_writeBufferSize, bool useWriteBuffer)
+  : m_useMRU(true),
+    m_mru_byId( m_mru.get<1>() ),
+    m_mruSize(m_mruSize),
+    m_mruUsed(0),
     m_useWriteBuffer(useWriteBuffer),
     m_writeBufferSize(m_writeBufferSize),
-    m_toWrite_byId( m_toWrite.get<1>() ),
-    m_memoryToWrite(0),
+    m_writeBuffer_byId( m_writeBuffer.get<1>() ),
+    m_writeBufferUsed(0),
     m_free_bySize( m_free.get<1>() ),
     m_fileLength(0)
   {
@@ -83,12 +85,12 @@ namespace Kernel
     }
 
     // We are now using more memory.
-    m_memoryUsed += item->getMRUMemorySize();
+    m_mruUsed += item->getMRUMemorySize();
 
     // You might have to pop 1 or more items until the MRU memory is below the limit
     mru_t::iterator it = m_mru.end();
 
-    while (m_memoryUsed > m_memoryAvail)
+    while (m_mruUsed > m_mruSize)
     {
       // Pop the least-used object out the back
       it--;
@@ -98,7 +100,7 @@ namespace Kernel
       if (!toWrite->dataBusy())
       {
         toWrite->save();
-        m_memoryUsed -= toWrite->getMRUMemorySize();
+        m_mruUsed -= toWrite->getMRUMemorySize();
         m_mru.erase(it);
       }
     }
@@ -123,11 +125,11 @@ namespace Kernel
     p = m_mru.push_front(item);
 
     // Find the item in the toWrite buffer (using the item's ID)
-    toWriteMap_by_Id_t::iterator found = m_toWrite_byId.find( item->getId() );
-    if (found != m_toWrite_byId.end())
+    writeBuffer_byId_t::iterator found = m_writeBuffer_byId.find( item->getId() );
+    if (found != m_writeBuffer_byId.end())
     {
-      m_toWrite_byId.erase(item->getId());
-      m_memoryToWrite -= item->getMRUMemorySize();
+      m_writeBuffer_byId.erase(item->getId());
+      m_writeBufferUsed -= item->getMRUMemorySize();
     }
 
     if (!p.second)
@@ -139,28 +141,28 @@ namespace Kernel
     }
 
     // We are now using more memory.
-    m_memoryUsed += item->getMRUMemorySize();
+    m_mruUsed += item->getMRUMemorySize();
 
-    if (m_memoryUsed > m_memoryAvail)
+    if (m_mruUsed > m_mruSize)
     {
       // You might have to pop 1 or more items until the MRU memory is below the limit
-      while ((m_memoryUsed > m_memoryAvail) && (m_mru.size() > 0))
+      while ((m_mruUsed > m_mruSize) && (m_mru.size() > 0))
       {
         // Pop the least-used object out the back
         const ISaveable *toWrite = m_mru.back();
         m_mru.pop_back();
 
         // And put it in the queue of stuff to write.
-        m_toWrite.insert(toWrite);
+        m_writeBuffer.insert(toWrite);
 
         // Track the memory change in the two buffers
         size_t thisMem = toWrite->getMRUMemorySize();
-        m_memoryToWrite += thisMem;
-        m_memoryUsed -= thisMem;
+        m_writeBufferUsed += thisMem;
+        m_mruUsed -= thisMem;
       }
 
       // Should we now write out the old data?
-      if (m_memoryToWrite >= m_writeBufferSize)
+      if (m_writeBufferUsed >= m_writeBufferSize)
         writeOldObjects();
     }
     m_mruMutex.unlock();
@@ -187,15 +189,15 @@ namespace Kernel
     if (it != m_mru_byId.end())
     {
       m_mru_byId.erase(it);
-      m_memoryUsed -= size;
+      m_mruUsed -= size;
     }
 
     // Take it out of the to-write buffer
-    toWriteMap_by_Id_t::iterator it2 = m_toWrite_byId.find(id);
-    if (it2 != m_toWrite_byId.end())
+    writeBuffer_byId_t::iterator it2 = m_writeBuffer_byId.find(id);
+    if (it2 != m_writeBuffer_byId.end())
     {
-      m_toWrite_byId.erase(it2);
-      m_memoryToWrite -= size;
+      m_writeBuffer_byId.erase(it2);
+      m_writeBufferUsed -= size;
     }
     m_mruMutex.unlock();
 
@@ -211,7 +213,7 @@ namespace Kernel
    */
   void DiskMRU::writeOldObjects()
   {
-    std::cout << "DiskMRU:: Writing out " << m_memoryToWrite << " events in " << m_toWrite.size() << " blocks." << std::endl;
+    std::cout << "DiskMRU:: Writing out " << m_writeBufferUsed << " events in " << m_writeBuffer.size() << " blocks." << std::endl;
 //    std::cout << getMemoryStr() << std::endl;
 //    std::cout << getFreeSpaceMap().size() << " entries in the free size map." << std::endl;
 //    for (freeSpace_t::iterator it = m_free.begin(); it != m_free.end(); it++)
@@ -219,12 +221,12 @@ namespace Kernel
 //    std::cout << m_fileLength << " length of file" << std::endl;
 
     // Holder for any objects that you were NOT able to write.
-    toWriteMap_t couldNotWrite;
+    writeBuffer_t couldNotWrite;
     size_t memoryNotWritten = 0;
 
     // Iterate through the map
-    toWriteMap_t::iterator it = m_toWrite.begin();
-    toWriteMap_t::iterator it_end = m_toWrite.end();
+    writeBuffer_t::iterator it = m_writeBuffer.begin();
+    writeBuffer_t::iterator it_end = m_writeBuffer.end();
 
     const ISaveable * obj = NULL;
     for (; it != it_end; it++)
@@ -252,8 +254,8 @@ namespace Kernel
     }
 
     // Exchange with the new map you built out of the not-written blocks.
-    m_toWrite.swap(couldNotWrite);
-    m_memoryToWrite = memoryNotWritten;
+    m_writeBuffer.swap(couldNotWrite);
+    m_writeBufferUsed = memoryNotWritten;
   }
 
 
@@ -272,12 +274,12 @@ namespace Kernel
       m_mru.pop_back();
 
       // And put it in the queue of stuff to write.
-      m_toWrite.insert(toWrite);
+      m_writeBuffer.insert(toWrite);
     }
 
     // Track the memory change in the two buffers
-    m_memoryToWrite += m_memoryUsed;
-    m_memoryUsed = 0;
+    m_writeBufferUsed += m_mruUsed;
+    m_mruUsed = 0;
 
     // Now write everything out.
     writeOldObjects();
@@ -391,7 +393,7 @@ namespace Kernel
   {
     m_freeMutex.lock();
     // Now, find the first available block of sufficient size.
-    freeSpace_by_size_t::iterator it = m_free_bySize.lower_bound( newSize );
+    freeSpace_bySize_t::iterator it = m_free_bySize.lower_bound( newSize );
     if (it == m_free_bySize.end())
     {
       // No block found
@@ -446,8 +448,8 @@ namespace Kernel
   void DiskMRU::getFreeSpaceVector(std::vector<uint64_t> & free) const
   {
     free.reserve( m_free.size() * 2);
-    freeSpace_by_size_t::const_iterator it = m_free_bySize.begin();
-    freeSpace_by_size_t::const_iterator it_end = m_free_bySize.end();
+    freeSpace_bySize_t::const_iterator it = m_free_bySize.begin();
+    freeSpace_bySize_t::const_iterator it_end = m_free_bySize.end();
     for (; it != it_end; it++)
     {
       free.push_back(it->getFilePosition());
@@ -459,7 +461,7 @@ namespace Kernel
   std::string DiskMRU::getMemoryStr() const
   {
     std::ostringstream mess;
-    mess << "Cache: " << m_memoryUsed << " events in " << m_mru.size() << " blocks. To-Write buffer: " << m_memoryToWrite << " in " << m_toWrite.size() << " blocks.";
+    mess << "Cache: " << m_mruUsed << " events in " << m_mru.size() << " blocks. To-Write buffer: " << m_writeBufferUsed << " in " << m_writeBuffer.size() << " blocks.";
     return mess.str();
   }
 

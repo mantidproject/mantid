@@ -203,7 +203,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING( a.setCacheParameters(456, 123, 0) );
     a.setCacheParameters(456, 123, 40);
 
-    TS_ASSERT_EQUALS( mru.getMemoryAvail(), 456);
+    TS_ASSERT_EQUALS( mru.getMruSize(), 456);
     TS_ASSERT_EQUALS( mru.getWriteBufferSize(), 123);
   }
 

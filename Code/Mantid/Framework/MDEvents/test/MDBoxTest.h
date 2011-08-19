@@ -614,7 +614,7 @@ public:
     bc->setCacheParameters(100000, 10000, sizeof(MDLeanEvent<3>));
     DiskMRU & mru = bc->getDiskMRU();
     // It is empty now
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
 
     // Create and open the test NXS file
     MDBox<MDLeanEvent<3>,3> c(bc, 0);
@@ -642,7 +642,7 @@ public:
     TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
 
     // MRU has something now
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 1000);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 1000);
     // The box's data is busy
     TS_ASSERT( c.dataBusy() );
     // Done with the data.
@@ -680,7 +680,7 @@ public:
     bc->setCacheParameters(100000, 10000, sizeof(MDLeanEvent<3>));
     DiskMRU & mru = bc->getDiskMRU();
     // It is empty now
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
 
     // A new empty box.
     MDBox<MDLeanEvent<3>,3> c(bc, 0);
@@ -736,7 +736,7 @@ public:
     bc->setCacheParameters(100000, 10000, sizeof(MDLeanEvent<3>));
     DiskMRU & mru = bc->getDiskMRU();
     // It is empty now
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
 
     // A new empty box.
     MDBox<MDLeanEvent<3>,3> c(bc, 0);

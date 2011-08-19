@@ -95,10 +95,10 @@ namespace Kernel
         boost::multi_index::ordered_non_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ISaveable, uint64_t, getFilePosition)>,
         boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ISaveable, size_t, getId)>
       >
-    > toWriteMap_t;
+    > writeBuffer_t;
 
     /// A way to index the toWrite buffer by ID (instead of the file position)
-    typedef toWriteMap_t::nth_index<1>::type toWriteMap_by_Id_t;
+    typedef writeBuffer_t::nth_index<1>::type writeBuffer_byId_t;
 
     /** A map for the list of free space blocks in the file.
      * Index 1: Position in the file.
@@ -113,12 +113,12 @@ namespace Kernel
     > freeSpace_t;
 
     /// A way to index the free space by their size
-    typedef freeSpace_t::nth_index<1>::type freeSpace_by_size_t;
+    typedef freeSpace_t::nth_index<1>::type freeSpace_bySize_t;
 
 
     DiskMRU();
 
-    DiskMRU(uint64_t m_memoryAvail, uint64_t m_writeBufferSize, bool useWriteBuffer);
+    DiskMRU(uint64_t m_mruSize, uint64_t m_writeBufferSize, bool useWriteBuffer);
     
     virtual ~DiskMRU();
 
@@ -143,17 +143,8 @@ namespace Kernel
     std::string getMemoryStr() const;
 
     //-------------------------------------------------------------------------------------------
-    ///@return the memory used in the MRU, in number of events
-    uint64_t getMemoryUsed() const
-    { return m_memoryUsed;  }
-
-    ///@return the memory in the "toWrite" buffer, in number of events
-    uint64_t getMemoryToWrite() const
-    { return m_memoryToWrite;  }
-
-    //-------------------------------------------------------------------------------------------
     /** Set the size of the to-write buffer, in number of events
-     * @param buffer :: number of events to accumulate before writing  */
+     * @param buffer :: number of events to accumulate before writing. 0 to NOT use the write buffer  */
     void setWriteBufferSize(uint64_t buffer)
     {
       m_writeBufferSize = buffer;
@@ -164,15 +155,26 @@ namespace Kernel
     uint64_t getWriteBufferSize() const
     { return m_writeBufferSize; }
 
-    //-------------------------------------------------------------------------------------------
-    /** Set the size of the in-memory cache, in number of events
-     * @param buffer :: max number of events to keep in memory */
-    void setMemoryAvail(uint64_t buffer)
-    { m_memoryAvail = buffer; }
+    ///@return the memory used in the "toWrite" buffer, in number of events
+    uint64_t getWriteBufferUsed() const
+    { return m_writeBufferUsed;  }
 
-    /// @return the size of the in-memory cache, in number of events
-    uint64_t getMemoryAvail() const
-    { return m_memoryAvail; }
+    //-------------------------------------------------------------------------------------------
+    /** Set the size of the memory allowed in the MRU list, in number of events
+     * @param buffer :: max number of events to keep in memory. 0 to NOT use the MRU */
+    void setMruSize(uint64_t buffer)
+    {
+      m_mruSize = buffer;
+      m_useMRU = (buffer > 0);
+    }
+
+    /// @return the size of the in-memory MRU, in number of events
+    uint64_t getMruSize() const
+    { return m_mruSize; }
+
+    ///@return the memory used in the MRU, in number of events
+    uint64_t getMruUsed() const
+    { return m_mruUsed;  }
 
     //-------------------------------------------------------------------------------------------
     ///@return reference to the free space map (for testing only!)
@@ -189,10 +191,15 @@ namespace Kernel
     void setFileLength(const uint64_t length)
     { m_fileLength = length; }
 
+
+
   protected:
     void writeOldObjects();
 
     // ----------------------- In-memory buffer --------------------------------------
+    /// Do we use the MRU buffer?
+    bool m_useMRU;
+
     /// The MRU list container
     mru_t m_mru;
 
@@ -201,10 +208,10 @@ namespace Kernel
 
     /// Amount of memory that the MRU is allowed to use.
     /// Note that the units are up to the ISaveable to define; they don't have to be bytes.
-    uint64_t m_memoryAvail;
+    uint64_t m_mruSize;
 
-    /// Amount of memory actually used up (in the MRU, not the toWriteBuffer)
-    uint64_t m_memoryUsed;
+    /// Amount of memory actually used up in the MRU
+    uint64_t m_mruUsed;
 
     /// Mutex for modifying the MRU list and/or the toWrite buffer.
     Kernel::Mutex m_mruMutex;
@@ -217,13 +224,13 @@ namespace Kernel
     uint64_t m_writeBufferSize;
 
     /// List of the data objects that should be written out. Ordered by file position.
-    toWriteMap_t m_toWrite;
+    writeBuffer_t m_writeBuffer;
 
-    /// Reference to the same m_toWrite map, but indexed by item ID instead of by file position.
+    /// Reference to the same m_writeBuffer map, but indexed by item ID instead of by file position.
+    writeBuffer_byId_t & m_writeBuffer_byId;
 
-    toWriteMap_by_Id_t & m_toWrite_byId;
     /// Total amount of memory in the "toWrite" buffer.
-    uint64_t m_memoryToWrite;
+    uint64_t m_writeBufferUsed;
 
 
     // ----------------------- Free space map --------------------------------------
@@ -231,7 +238,7 @@ namespace Kernel
     freeSpace_t m_free;
 
     /// Index into m_free, but indexed by block size.
-    freeSpace_by_size_t & m_free_bySize;
+    freeSpace_bySize_t & m_free_bySize;
 
     /// Mutex for modifying the free space list
     Kernel::Mutex m_freeMutex;

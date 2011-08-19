@@ -179,12 +179,12 @@ namespace MDEvents
     {
       mess << "File backed: cache uses ";
       double avail, used;
-      avail = double(m_BoxController->getDiskMRU().getMemoryAvail() * sizeof(MDE)) / (1024*1024);
-      used = double(m_BoxController->getDiskMRU().getMemoryUsed() * sizeof(MDE)) / (1024*1024);
+      avail = double(m_BoxController->getDiskMRU().getMruSize() * sizeof(MDE)) / (1024*1024);
+      used = double(m_BoxController->getDiskMRU().getMruUsed() * sizeof(MDE)) / (1024*1024);
       mess << std::setprecision(1) << std::fixed ;
       mess << used << " of " << avail << " MB. ";
       avail = double(m_BoxController->getDiskMRU().getWriteBufferSize() * sizeof(MDE)) / (1024*1024);
-      used = double(m_BoxController->getDiskMRU().getMemoryToWrite() * sizeof(MDE)) / (1024*1024);
+      used = double(m_BoxController->getDiskMRU().getWriteBufferUsed() * sizeof(MDE)) / (1024*1024);
       mess << "Write buffer: " << used << " of " << avail << " MB. ";
       out.push_back(mess.str()); mess.str("");
     }
@@ -292,8 +292,8 @@ namespace MDEvents
     {
       // File-backed workspace
       // How much is in the cache?
-      total = this->m_BoxController->getDiskMRU().getMemoryUsed() * sizeof(MDE);
-      total += this->m_BoxController->getDiskMRU().getMemoryToWrite() * sizeof(MDE);
+      total = this->m_BoxController->getDiskMRU().getMruUsed() * sizeof(MDE);
+      total += this->m_BoxController->getDiskMRU().getWriteBufferUsed() * sizeof(MDE);
     }
     else
     {

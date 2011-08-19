@@ -262,11 +262,11 @@ public:
   void test_set_and_get_methods()
   {
     DiskMRU mru(4, 3, true);
-    TS_ASSERT_EQUALS( mru.getMemoryAvail(), 4);
+    TS_ASSERT_EQUALS( mru.getMruSize(), 4);
     TS_ASSERT_EQUALS( mru.getWriteBufferSize(), 3);
-    mru.setMemoryAvail(15);
+    mru.setMruSize(15);
     mru.setWriteBufferSize(11);
-    TS_ASSERT_EQUALS( mru.getMemoryAvail(), 15);
+    TS_ASSERT_EQUALS( mru.getMruSize(), 15);
     TS_ASSERT_EQUALS( mru.getWriteBufferSize(), 11);
   }
 
@@ -278,31 +278,31 @@ public:
     DiskMRU mru(4, 3, true);
 
     // Nothing in cache
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 0);
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
 
     // NULLs are ignored
     TS_ASSERT_THROWS_NOTHING( mru.loading(NULL) );
 
     mru.loading(data[0]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 1);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 1);
     mru.loading(data[1]);
     mru.loading(data[2]);
     mru.loading(data[3]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
 
     // Adding a 5th item drops off the oldest one and moves it to the toWrite buffer.
     mru.loading(data[4]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 1);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 1);
     mru.loading(data[5]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 2);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 2);
 
     // Next one will reach 3 in the "toWrite" buffer and so trigger a write out
     mru.loading(data[6]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4); //We should have 3,4,5,6 in there now
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4); //We should have 3,4,5,6 in there now
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
     // The "file" was written out this way (the right order):
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "2,1,0,");
 
@@ -314,16 +314,16 @@ public:
     DiskMRU mru(4, 3, true);
     for (size_t i=0; i<6; i++)
       mru.loading(data[i]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4); //We should have 2,3,4,5 in there now
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 2); // We should have 0,1 in there
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4); //We should have 2,3,4,5 in there now
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 2); // We should have 0,1 in there
     // Nothing written out yet
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "");
     mru.flushCache();
     // Everything was written out at once (sorted by file index)
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "5,4,3,2,1,0,");
     // Nothing left in cache
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 0);
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
   }
 
 
@@ -335,22 +335,22 @@ public:
     // Room for 4 in the MRU, no write buffer
     DiskMRU mru(4, 0, false);
     // Nothing in cache
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
     // NULLs are ignored
     TS_ASSERT_THROWS_NOTHING( mru.loading(NULL) );
     mru.loading(data[0]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 1);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 1);
     mru.loading(data[1]);
     mru.loading(data[2]);
     mru.loading(data[3]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
 
     // Adding a 5th item drops off the oldest one and saves it to disk
     mru.loading(data[4]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,");
     mru.loading(data[5]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,");
 
     // Avoid dropping off the next one
@@ -371,13 +371,13 @@ public:
       mru.loading(data[i]);
     }
     // We ended up with too much in the buffer since nothing could be written.
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 9);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 9);
     // Let's make it all writable
     for (size_t i=0; i<9; i++)
       data[i]->m_dataBusy = false;
     // Trigger a write
     mru.loading(data[9]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
     // And all of these get written out at once
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,4,5,");
   }
@@ -393,11 +393,11 @@ public:
     mru.loading(data[2]);
     mru.loading(data[0]);
     mru.loading(data[3]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
     // 1 is actually the oldest one
     mru.loading(data[4]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4); //We should have 0,2,3,4 in there now
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4); //We should have 0,2,3,4 in there now
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
     // # 1 was written out
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "1,");
   }
@@ -419,8 +419,8 @@ public:
     mru.loading(data[4]);
     mru.loading(data[6]);
 
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
 
     // The "file" was written out this way (sorted by file position):
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "9,5,1,");
@@ -437,11 +437,11 @@ public:
     // These 4 at the end will be in the cache
     for (size_t i=3; i<7; i++)
       mru.loading(data[i]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
 
     // Item #1 was skipped and is still in the buffer!
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "2,0,");
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 1);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 1);
 
     // But it'll get written out next time
     ISaveableTester::fakeFile = "";
@@ -449,7 +449,7 @@ public:
     mru.loading(data[7]);
     mru.loading(data[8]);
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "4,3,1,");
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
   }
 
   //--------------------------------------------------------------------------------
@@ -465,14 +465,14 @@ public:
     data[4]->m_memory = 2;
     mru.loading(data[4]);
     // So there's now 3 blocks (with 4 mem) in the MRU
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
     // And 2 in the toWrite buffer
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 2);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 2);
 
     // This will write out the 3 in the cache
     mru.loading(data[5]);
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "2,1,0,");
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
   }
 
   //--------------------------------------------------------------------------------
@@ -484,17 +484,17 @@ public:
     // Fill the cache. 0,1 in the toWrite buffer
     for (size_t i=0; i<6; i++)
       mru.loading(data[i]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 2);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 2);
     // Should pop #0 out of the toWrite buffer and push another one in (#2 in this case)
     mru.loading(data[0]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 2);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 2);
 
     // 1,2,3 (and not 0) should be in "toWrite"
     mru.loading(data[6]);
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "3,2,1,");
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
   }
 
   //--------------------------------------------------------------------------------
@@ -507,19 +507,19 @@ public:
     // Fill the cache. 0,1 in the toWrite buffer
     for (size_t i=0; i<6; i++)
       mru.loading(data[i]);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 2);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 2);
 
     // First let's get rid of something in to to-write buffer
     mru.objectDeleted(data[1], 1);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 1);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 1);
     TSM_ASSERT_EQUALS( "Space on disk was marked as free", mru.getFreeSpaceMap().size(), 1);
 
     // Now let's get rid of something in to MRU buffer
     mru.objectDeleted(data[4], 1);
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 3);
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 1);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 3);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 1);
     TSM_ASSERT_EQUALS( "Space on disk was marked as free", mru.getFreeSpaceMap().size(), 2);
 
     mru.loading(data[6]);
@@ -527,8 +527,8 @@ public:
     mru.loading(data[8]);
     // This triggers a write. 1 is no longer in the to-write buffer
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "3,2,0,");
-    TS_ASSERT_EQUALS( mru.getMemoryUsed(), 4);
-    TS_ASSERT_EQUALS( mru.getMemoryToWrite(), 0);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 4);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
   }
 
 

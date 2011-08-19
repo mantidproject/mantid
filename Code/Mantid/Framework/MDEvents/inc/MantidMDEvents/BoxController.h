@@ -387,7 +387,7 @@ namespace MDEvents
       if (bytesPerEvent == 0)
         throw std::invalid_argument("Size of an event cannot be == 0.");
       // Save the values
-      m_diskMRU.setMemoryAvail(cacheSize);
+      m_diskMRU.setMruSize(cacheSize);
       m_diskMRU.setWriteBufferSize(writeBufferSize);
       m_bytesPerEvent = bytesPerEvent;
     }
