@@ -848,7 +848,9 @@ bool SANSRunWindow::loadCSVFile()
     QString line = file_in.readLine().simplified();
     if( !line.isEmpty() )
     {
-      errors += addBatchLine(line, ",");
+      // if first line of batch contain string MANTID_BATCH_FILE this is a 'metadata' line
+      if ( !line.upper().contains("MANTID_BATCH_FILE") )
+        errors += addBatchLine(line, ",");
     }
   }
   if( errors > 0 )
@@ -1997,6 +1999,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
   //Disable buttons so that interaction is limited while processing data
   setProcessingState(type);
 
+  std::cout << "\n\n" << py_code.toStdString() << "\n\n";
   QString pythonStdOut = runReduceScriptFunction(py_code);
 
   //Reset the objects by initialising a new reducer object
@@ -2006,6 +2009,8 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
     QFileInfo(m_uiForm.userfile_edit->text()).path() + "'";
   py_code += "\ni.ReductionSingleton().user_settings = _user_settings_copy";
   py_code += "\ni.ReductionSingleton().user_settings.execute(i.ReductionSingleton())";
+
+  std::cout << "\n\n" << py_code.toStdString() << "\n\n";
   runReduceScriptFunction(py_code);
 
   if ( runMode == SingleMode )
