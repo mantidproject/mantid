@@ -206,31 +206,17 @@ namespace Mantid
     }
 
     //------------------------------------------------------------------------------------------
-    /**  Get a shared pointer to a component by its ID
-    *   @param id :: ID
-    *   @return A pointer to the component.
-    */
-    boost::shared_ptr<IComponent> Instrument::getComponentByID(ComponentID id)
-    {
-      IComponent* base = (IComponent*)(id);
-      if (m_isParametrized)
-        return ParComponentFactory::create(boost::shared_ptr<IComponent>(base,NoDeleting()),m_map);
-      else
-        return boost::shared_ptr<IComponent>(base, NoDeleting());
-    }
-
-    //------------------------------------------------------------------------------------------
     /**  Get a shared pointer to a component by its ID, const version
     *   @param id :: ID
     *   @return A pointer to the component.
     */
     boost::shared_ptr<const IComponent> Instrument::getComponentByID(ComponentID id) const
     {
-      IComponent* base = (IComponent*)(id);
+      const IComponent* base = (const IComponent*)(id);
       if (m_isParametrized)
-        return ParComponentFactory::create(boost::shared_ptr<IComponent>(base,NoDeleting()),m_map);
+        return ParComponentFactory::create(boost::shared_ptr<const IComponent>(base,NoDeleting()),m_map);
       else
-        return boost::shared_ptr<IComponent>(base, NoDeleting());
+        return boost::shared_ptr<const IComponent>(base, NoDeleting());
     }
 
     /**
@@ -286,17 +272,17 @@ namespace Mantid
      *  @param cname :: The name of the component. If there are multiple matches, the first one found is returned.
      *  @returns Pointers to components
      */
-    std::vector<boost::shared_ptr<IComponent> > Instrument::getAllComponentsWithName(const std::string & cname)
+    std::vector<boost::shared_ptr<const IComponent> > Instrument::getAllComponentsWithName(const std::string & cname) const
     {
-      boost::shared_ptr<IComponent> node = boost::shared_ptr<IComponent>(this, NoDeleting());
-      std::vector<boost::shared_ptr<IComponent> > retVec;
+      boost::shared_ptr<const IComponent> node = boost::shared_ptr<const IComponent>(this, NoDeleting());
+      std::vector<boost::shared_ptr<const IComponent> > retVec;
       // Check the instrument name first
       if( this->getName() == cname )
       {
         retVec.push_back(node);
       }
       // Same algorithm as used in getComponentByName() but searching the full tree
-      std::deque<boost::shared_ptr<IComponent> > nodeQueue;
+      std::deque<boost::shared_ptr<const IComponent> > nodeQueue;
       // Need to be able to enter the while loop
       nodeQueue.push_back(node);
       while( !nodeQueue.empty() )
@@ -304,14 +290,14 @@ namespace Mantid
         node = nodeQueue.front();
         nodeQueue.pop_front();
         int nchildren(0);
-        boost::shared_ptr<ICompAssembly> asmb = boost::dynamic_pointer_cast<ICompAssembly>(node);
+        boost::shared_ptr<const ICompAssembly> asmb = boost::dynamic_pointer_cast<const ICompAssembly>(node);
         if( asmb )
         {
           nchildren = asmb->nelements();
         }
         for( int i = 0; i < nchildren; ++i )
         {
-          boost::shared_ptr<IComponent> comp = (*asmb)[i];
+          boost::shared_ptr<const IComponent> comp = (*asmb)[i];
           if( comp->getName() == cname )
           {
             retVec.push_back(comp);

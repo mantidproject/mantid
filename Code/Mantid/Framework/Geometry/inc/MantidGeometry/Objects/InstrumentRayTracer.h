@@ -67,7 +67,7 @@ namespace Mantid
       /// since the previous call to trace
       Links getResults() const;
 
-      IDetector_sptr getDetectorResult() const;
+      IDetector_const_sptr getDetectorResult() const;
 
     private:
       /// Default constructor

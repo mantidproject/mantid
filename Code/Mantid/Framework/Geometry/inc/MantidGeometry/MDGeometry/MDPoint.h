@@ -59,7 +59,7 @@ namespace Mantid
     private:
       signal_t m_signal;
       signal_t m_error;
-      Instrument_sptr m_instrument;
+      Instrument_const_sptr m_instrument;
       IDetector_sptr m_detector;
       std::vector<Coordinate> m_vertexes;
       int m_runId;
@@ -71,7 +71,7 @@ namespace Mantid
       signal_t getSignal() const;
       signal_t getError() const;
       IDetector_sptr getDetector() const;
-      Instrument_sptr getInstrument() const;
+      Instrument_const_sptr getInstrument() const;
       int getRunId() const;
       virtual ~MDPoint();
       std::vector<boost::shared_ptr<MDPoint> > getContributingPoints() const;

@@ -1738,11 +1738,11 @@ namespace Mantid
       {
         Element* pLinkElem = static_cast<Element*>(pNL_link->item(iLink));
         std::string name = pLinkElem->getAttribute("name");
-        std::vector<boost::shared_ptr<Geometry::IComponent> > sharedIComp = instrument->getAllComponentsWithName(name);
+        std::vector<boost::shared_ptr<const Geometry::IComponent> > sharedIComp = instrument->getAllComponentsWithName(name);
 
         for (size_t i = 0; i < sharedIComp.size(); i++)
         {
-          boost::shared_ptr<Geometry::Component> sharedComp = boost::dynamic_pointer_cast<Geometry::Component>(sharedIComp[i]);
+          boost::shared_ptr<const Geometry::Component> sharedComp = boost::dynamic_pointer_cast<const Geometry::Component>(sharedIComp[i]);
           if ( sharedComp )
           {
             //Not empty Component

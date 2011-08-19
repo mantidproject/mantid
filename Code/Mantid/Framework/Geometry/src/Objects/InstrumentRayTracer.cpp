@@ -89,7 +89,7 @@ namespace Mantid
      * (that is NOT a monitor) found in the results.
      * @return sptr to IDetector, or an invalid sptr if not found
      */
-    IDetector_sptr InstrumentRayTracer::getDetectorResult() const
+    IDetector_const_sptr InstrumentRayTracer::getDetectorResult() const
     {
       Links results = this->getResults();
 
@@ -97,8 +97,8 @@ namespace Mantid
       Links::const_iterator resultItr = results.begin();
       for (; resultItr != results.end(); resultItr++)
       {
-        IComponent_sptr component = m_instrument->getComponentByID(resultItr->componentID);
-        IDetector_sptr det = boost::dynamic_pointer_cast<IDetector>(component);
+        IComponent_const_sptr component = m_instrument->getComponentByID(resultItr->componentID);
+        IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(component);
         if (det)
         {
           if (!det->isMonitor())
@@ -107,7 +107,7 @@ namespace Mantid
           }
         } // (is a detector)
       } // each ray tracer result
-      return IDetector_sptr();
+      return IDetector_const_sptr();
     }
 
     //-------------------------------------------------------------

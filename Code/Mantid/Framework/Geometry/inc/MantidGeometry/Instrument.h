@@ -127,16 +127,13 @@ namespace Mantid
       boost::shared_ptr<const std::vector<IObjComponent_const_sptr> > getPlottable() const;
 
       /// Returns a shared pointer to a component
-      boost::shared_ptr<IComponent> getComponentByID(ComponentID id);
-
-      /// Returns a shared pointer to a component
       boost::shared_ptr<const IComponent> getComponentByID(ComponentID id) const;
 
       /// Returns a pointer to the first component encountered with the given name
       boost::shared_ptr<const IComponent> getComponentByName(const std::string & cname) const;
 
       /// Returns pointers to all components encountered with the given name
-      std::vector<boost::shared_ptr<IComponent> > getAllComponentsWithName(const std::string & cname);
+      std::vector<boost::shared_ptr<const IComponent> > getAllComponentsWithName(const std::string & cname) const;
 
       /// Get information about the parameters described in the instrument definition file and associated parameter files
       std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& getLogfileCache() {return _logfileCache;}

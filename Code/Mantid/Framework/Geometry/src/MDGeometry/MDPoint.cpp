@@ -36,7 +36,7 @@ namespace Mantid
         return this->m_detector;
       }
 
-      Instrument_sptr MDPoint::getInstrument() const
+      Instrument_const_sptr MDPoint::getInstrument() const
       {
         return this->m_instrument;
       }
