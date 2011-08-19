@@ -7,6 +7,10 @@
   <value val="detector1"/>
 </parameter>
 
+<parameter name="default-incident-timer-spectrum">
+  <value val="2"/>
+</parameter>
+
 <parameter name="default-incident-monitor-spectrum">
   <value val="1"/>
 </parameter>
