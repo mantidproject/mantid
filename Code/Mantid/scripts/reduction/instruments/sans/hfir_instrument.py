@@ -5,13 +5,21 @@ class HFIRSANS(Instrument):
     """
         HFIR SANS instrument description
     """
+    NORMALIZATION_NONE = None
+    NORMALIZATION_TIME = 1
+    NORMALIZATION_MONITOR = 0    
+    
     def __init__(self, instrument_id="BIOSANS") :
         # We skip the base class initialization because we don't need
         # to load the instrument description until later 
         self._NAME = instrument_id
 
-    def get_incident_mon(self):
-        return 2
+    def get_incident_mon(self, workspace, option):
+        if option == HFIRSANS.NORMALIZATION_TIME:
+            return int(MantidFramework.mtd[workspace].getInstrument().getNumberParameter("default-incident-timer-spectrum")[0])
+        elif option == HFIRSANS.NORMALIZATION_MONITOR:
+            return int(MantidFramework.mtd[workspace].getInstrument().getNumberParameter("default-incident-monitor-spectrum")[0])
+        return -1
     
     def get_default_beam_center(self, workspace=None):
         """

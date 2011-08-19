@@ -25,6 +25,9 @@ class EQSANS(Instrument):
         # Slit to source distance in mm for the three slit wheels
         self.slit_to_source = [10080, 11156, 12150]
 
+    def get_incident_mon(self, workspace, option):
+        return -1
+    
     def get_default_beam_center(self, workspace=None):
         """
             Returns the default beam center position, or the pixel location

@@ -278,7 +278,7 @@ class TestCommands(unittest.TestCase):
         HFIRSANS()
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
-    
+        TimeNormalization()
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
                                empty_file="BioSANS_empty_trans.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
@@ -290,7 +290,7 @@ class TestCommands(unittest.TestCase):
 
         deltas = map(_diff_iq, data, check)
         delta  = reduce(_add, deltas)/len(deltas)
-        self.assertTrue(math.fabs(delta)<0.00001)
+        self.assertTrue(math.fabs(delta)<0.001)
                 
     def test_spreader_transmission(self):
         HFIRSANS()

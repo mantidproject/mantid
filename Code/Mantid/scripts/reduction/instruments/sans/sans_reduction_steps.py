@@ -254,9 +254,10 @@ class BeamSpreaderTransmission(BaseTransmission):
                 reducer._dark_current_subtracter_class(self._dark_current_data).execute(reducer, direct_scatt_ws)
                         
             # Get normalization for transmission calculation
-            norm_spectrum = reducer.NORMALIZATION_TIME
+            norm_detector = reducer.instrument.get_incident_mon(workspace, reducer.NORMALIZATION_TIME)
             if reducer._normalizer is not None:
-                norm_spectrum = reducer._normalizer.get_normalization_spectrum()
+                norm_option = reducer._normalizer.get_normalization_spectrum()
+                norm_detector = reducer.instrument.get_incident_mon(workspace, norm_option)
             
             # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
             # as the monitor channel.
@@ -264,6 +265,7 @@ class BeamSpreaderTransmission(BaseTransmission):
                                               DirectSpreaderRunWorkspace=direct_spreader_ws,
                                               SampleScatterRunWorkspace=sample_scatt_ws, 
                                               DirectScatterRunWorkspace=direct_scatt_ws, 
+                                              IncidentBeamMonitor=norm_detector,
                                               OutputWorkspace=self._transmission_ws,
                                               SpreaderTransmissionValue=str(self._spreader_transmission), 
                                               SpreaderTransmissionError=str(self._spreader_transmission_err))
@@ -360,9 +362,10 @@ class DirectBeamTransmission(BaseTransmission):
         #TODO: check that both workspaces have the same masked spectra
         
         # Get normalization for transmission calculation
-        self._monitor_det_ID = reducer.NORMALIZATION_TIME
+        self._monitor_det_ID = reducer.instrument.get_incident_mon(workspace, reducer.NORMALIZATION_TIME)
         if reducer._normalizer is not None:
-            self._monitor_det_ID = reducer._normalizer.get_normalization_spectrum()
+            norm_option = reducer._normalizer.get_normalization_spectrum()
+            self._monitor_det_ID = reducer.instrument.get_incident_mon(workspace, norm_option)
             if self._monitor_det_ID<0:
                 reducer._normalizer.execute(reducer, empty_mon_ws)
                 reducer._normalizer.execute(reducer, sample_mon_ws)
@@ -384,7 +387,7 @@ class DirectBeamTransmission(BaseTransmission):
         if self._monitor_det_ID is not None and self._monitor_det_ID>=0:
             CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
                                   OutputWorkspace=trans_output_workspace,
-                                  IncidentBeamMonitor=str(self._monitor_det_ID+1), 
+                                  IncidentBeamMonitor=str(self._monitor_det_ID), 
                                   TransmissionMonitor=str(first_det),
                                   OutputUnfittedData=True)
         else:
