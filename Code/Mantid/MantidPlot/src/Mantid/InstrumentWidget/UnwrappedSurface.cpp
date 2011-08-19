@@ -632,7 +632,7 @@ void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWo
  * Create the peak labels from the peaks set by setPeaksWorkspace. The method is called from the draw(...) method
  * @param window :: The screen window rectangle in pixels.
  */
-void UnwrappedSurface::ceatePeakShapes(QRect& viewport)const
+void UnwrappedSurface::ceatePeakShapes(const QRect& viewport)const
 {
   m_peakShapes.setWindow(getSurfaceBounds(),viewport);
   int nPeaks = m_peaksWorkspace->getNumberPeaks();

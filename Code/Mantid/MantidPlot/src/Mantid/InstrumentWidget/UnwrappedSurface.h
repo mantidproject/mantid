@@ -97,7 +97,7 @@ protected:
   void showPickedDetector();
   void calcAssemblies(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,const QRectF& compRect);
   void findAndCorrectUGap();
-  void ceatePeakShapes(QRect& viewport)const;
+  void ceatePeakShapes(const QRect& viewport)const;
 
   const InstrumentActor* m_instrActor;
   double m_u_min;                      ///< Minimum u
