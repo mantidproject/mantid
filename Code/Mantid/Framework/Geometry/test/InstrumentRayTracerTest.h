@@ -169,7 +169,7 @@ public:
 
     // Get the first result
     Link res = *results.begin();
-    IDetector_sptr det = boost::dynamic_pointer_cast<IDetector>( inst->getComponentByID( res.componentID ) );
+    IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>( inst->getComponentByID( res.componentID ) );
     // Parent bank
     RectangularDetector_const_sptr rect = boost::dynamic_pointer_cast<const RectangularDetector>( det->getParent()->getParent() );
     // Find the xy index from the detector ID
@@ -210,7 +210,7 @@ public:
     Links::const_iterator resultItr = results.begin();
     for (; resultItr != results.end(); resultItr++)
     {
-      IComponent_sptr component = inst->getComponentByID(resultItr->componentID);
+      IComponent_const_sptr component = inst->getComponentByID(resultItr->componentID);
       std::cout << component->getName() << ", ";
     }
     std::cout << "\n";
