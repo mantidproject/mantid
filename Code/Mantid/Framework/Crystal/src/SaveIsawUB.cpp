@@ -58,7 +58,7 @@ namespace Crystal
    */
   void SaveIsawUB::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
+    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input),
         "An input workspace containing the orientation matrix.");
 
     std::vector<std::string> exts;
@@ -77,7 +77,8 @@ namespace Crystal
   {
    try
       {
-        MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+        Workspace_sptr ws1 = getProperty("InputWorkspace");
+        ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
 
         if (!ws)
           throw std::invalid_argument(
