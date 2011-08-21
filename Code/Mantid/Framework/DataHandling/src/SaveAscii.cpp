@@ -49,6 +49,9 @@ namespace Mantid
       declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBePositive->clone());
       declareProperty(new ArrayProperty<int>("SpectrumList"));
       declareProperty("Precision", EMPTY_INT(), mustBePositive->clone());
+      declareProperty("WriteXError", false, "If true, the error on X with be written as the fourth column.");
+      declareProperty("Separator", " , ", "Characters to put as separator between X, Y, E values.");
+      declareProperty("CommentIndicator", "", "Characters to put in front of comment lines.");
     }
 
     /** 
@@ -65,6 +68,11 @@ namespace Mantid
         std::vector<int> spec_list = getProperty("SpectrumList");
         int spec_min = getProperty("WorkspaceIndexMin");
         int spec_max = getProperty("WorkspaceIndexMax");
+
+        // Check whether we need to write the fourth column
+        bool write_dx = getProperty("WriteXError");
+        std::string sep = getPropertyValue("Separator");
+        std::string comment = getPropertyValue("CommentIndicator");
 
         // Create an spectra index list for output
         std::set<int> idx;
@@ -99,16 +107,18 @@ namespace Mantid
         }
 
         // Write the column captions
-        file << "X";
+        file << comment << "X";
         if (idx.empty())
             for(int spec=0;spec<nSpectra;spec++)
             {
                 file << " , Y" << spec << " , E" << spec;
+                if (write_dx) file << " , DX" << spec;
             }
         else
             for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();spec++)
             {
                 file << " , Y" << *spec << " , E" << *spec;
+                if (write_dx) file << " , DX" << *spec;
             }
         file << '\n';
 
@@ -133,13 +143,25 @@ namespace Mantid
             if (idx.empty())
                 for(int spec=0;spec<nSpectra;spec++)
                 {
-                    file << " , " << ws->readY(spec)[bin] << " , " << ws->readE(spec)[bin];
+                    file << sep << ws->readY(spec)[bin] << sep << ws->readE(spec)[bin];
                 }
             else
                 for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();spec++)
                 {
-                    file << " , " << ws->readY(*spec)[bin] << " , " << ws->readE(*spec)[bin];
+                    file << sep << ws->readY(*spec)[bin] << sep << ws->readE(*spec)[bin];
                 }
+
+            if (write_dx)
+            {
+				if (isHistogram) // bin centres
+				{
+					file << sep << ( ws->readDx(0)[bin] + ws->readDx(0)[bin+1] )/2;
+				}
+				else // data points
+				{
+					file << sep << ws->readDx(0)[bin];
+				}
+            }
             file << '\n';
             progress.report();
         }
