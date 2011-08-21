@@ -473,6 +473,12 @@ class Reducer(object):
 
         return reduction_step
         
+    def clear_data_files(self):
+        """
+            Empty the list of files to reduce while keeping all the
+            other options the same.
+        """
+        self._data_files = {}
     def append_data_file(self, data_file, workspace=None):
         """
             Append a file to be processed.

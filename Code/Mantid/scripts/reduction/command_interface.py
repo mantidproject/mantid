@@ -89,4 +89,10 @@ def AppendDataFile(datafile, workspace=None):
     """
     ReductionSingleton().append_data_file(datafile, workspace)
     
+def ClearDataFiles():
+    """
+        Empty the list of data files to be processed while keeping
+        all other reduction options.
+    """
+    ReductionSingleton().clear_data_files()
     

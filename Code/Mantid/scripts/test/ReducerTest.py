@@ -103,7 +103,15 @@ class ReducerTest(unittest.TestCase):
         r.append_step("NotAnAlgorithm")
         self.assertRaises(RuntimeError, r._reduction_steps[0].execute, (r, "test") )
             
-    
+    def test_data_files(self):
+        r = Reducer()
+        r.append_data_file("AsciiExample.txt")
+                
+        # Check that we can empty the list of data files
+        self.assertEqual(len(r._data_files), 1)
+        r.clear_data_files()
+        self.assertEqual(len(r._data_files), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
