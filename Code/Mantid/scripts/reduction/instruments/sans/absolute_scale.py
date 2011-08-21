@@ -93,10 +93,14 @@ class AbsoluteScale(BaseAbsoluteScale):
         # Get counting time
         if reducer._normalizer is None:
             # Note: this option shouldn't really be allowed
-            monitor = reducer.NORMALIZATION_MONITOR
+            monitor_id = reducer.NORMALIZATION_MONITOR
         else:
-            monitor = reducer._normalizer.get_normalization_spectrum()
-        monitor = mtd[data_file_ws].dataY(monitor)[0]
+            monitor_id = reducer._normalizer.get_normalization_spectrum()
+        monitor = mtd[data_file_ws].dataY(monitor_id)[0]
+        # HFIR-specific: If we count for monitor we need to multiply by 1e8
+        # Need to be consistent with the Normalization step
+        if monitor_id == reducer.NORMALIZATION_MONITOR:         
+            monitor /= 1.0e8
         
         if mtd[data_file_ws].getRun().hasProperty("sample_detector_distance"):
             sdd = mtd[data_file_ws].getRun().getProperty("sample_detector_distance").value
