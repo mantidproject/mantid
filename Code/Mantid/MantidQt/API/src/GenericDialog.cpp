@@ -65,7 +65,7 @@ void GenericDialog::initLayout()
   QScrollArea *scroll = new QScrollArea(this);
   QWidget *viewport = new QWidget(this);
   // Put everything in a vertical box and put it inside the scroll area
-  QVBoxLayout *mainLay = new QVBoxLayout(scroll);
+  QVBoxLayout *mainLay = new QVBoxLayout();
   viewport->setLayout(mainLay);
 
   // Add a layout for QDialog
