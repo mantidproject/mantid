@@ -118,13 +118,11 @@ namespace Kernel
 
     DiskMRU();
 
-    DiskMRU(uint64_t m_mruSize, uint64_t m_writeBufferSize, bool useWriteBuffer);
+    DiskMRU(uint64_t m_mruSize, uint64_t m_writeBufferSize);
     
     virtual ~DiskMRU();
 
     void loading(const ISaveable * item);
-
-    void loadingWithWriteBuffer(const ISaveable * item);
 
     void flushCache();
 
@@ -175,6 +173,24 @@ namespace Kernel
     ///@return the memory used in the MRU, in number of events
     uint64_t getMruUsed() const
     { return m_mruUsed;  }
+
+//    //-------------------------------------------------------------------------------------------
+//    /** Set the size of the "small" buffer, in number of events.
+//     * This is the buffer for event lists that are too small to bother caching to disk
+//     * @param buffer :: total number of events to allow in the "small" buffer */
+//    void setSmallBufferSize(uint64_t buffer)
+//    {
+//      m_SmallBufferSize = buffer;
+//      m_useSmallBuffer = (buffer > 0);
+//    }
+//
+//    /// @return the size of the to-Small buffer, in number of events
+//    uint64_t getSmallBufferSize() const
+//    { return m_SmallBufferSize; }
+//
+//    ///@return the memory used in the "toSmall" buffer, in number of events
+//    uint64_t getSmallBufferUsed() const
+//    { return m_SmallBufferUsed;  }
 
     //-------------------------------------------------------------------------------------------
     ///@return reference to the free space map (for testing only!)

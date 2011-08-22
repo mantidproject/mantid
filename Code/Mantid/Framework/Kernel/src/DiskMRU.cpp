@@ -34,12 +34,12 @@ namespace Kernel
    * @param useWriteBuffer :: True if you want to use the "to-Write" buffer.
    * @return
    */
-  DiskMRU::DiskMRU(uint64_t m_mruSize, uint64_t m_writeBufferSize, bool useWriteBuffer)
-  : m_useMRU(true),
+  DiskMRU::DiskMRU(uint64_t m_mruSize, uint64_t m_writeBufferSize)
+  : m_useMRU(m_mruSize > 0),
     m_mru_byId( m_mru.get<1>() ),
     m_mruSize(m_mruSize),
     m_mruUsed(0),
-    m_useWriteBuffer(useWriteBuffer),
+    m_useWriteBuffer(m_writeBufferSize > 0),
     m_writeBufferSize(m_writeBufferSize),
     m_writeBuffer_byId( m_writeBuffer.get<1>() ),
     m_writeBufferUsed(0),
@@ -67,106 +67,99 @@ namespace Kernel
   void DiskMRU::loading(const ISaveable * item)
   {
     if (item == NULL) return;
-    if (m_useWriteBuffer) return loadingWithWriteBuffer(item);
-
-//    std::cout << "Loading " << item->getId() << std::endl;
     m_mruMutex.lock();
 
-    // Place the item in the MRU list
-    std::pair<mru_t::iterator,bool> p;
-    p = m_mru.push_front(item);
-
-    if (!p.second)
+    if (m_useMRU)
     {
-      // duplicate item: put it back at the front of the list
-      m_mru.relocate(m_mru.begin(), p.first);
-      m_mruMutex.unlock();
-      return;
-    }
+      // Place the item in the MRU list
+      std::pair<mru_t::iterator,bool> p;
+      p = m_mru.push_front(item);
 
-    // We are now using more memory.
-    m_mruUsed += item->getMRUMemorySize();
-
-    // You might have to pop 1 or more items until the MRU memory is below the limit
-    mru_t::iterator it = m_mru.end();
-
-    while (m_mruUsed > m_mruSize)
-    {
-      // Pop the least-used object out the back
-      it--;
-      if (it == m_mru.begin()) break; // Avoid going out of bounds
-      const ISaveable *toWrite = *it;
-      // Can you save it to disk?
-      if (!toWrite->dataBusy())
+      if (!p.second)
       {
-        toWrite->save();
-        m_mruUsed -= toWrite->getMRUMemorySize();
-        m_mru.erase(it);
-      }
-    }
-    m_mruMutex.unlock();
-  }
-
-
-  //---------------------------------------------------------------------------------------------
-  /** Tell the MRU that we are loading the given item.
-   * Use the methods that keep a buffer of items to write and
-   * and writes them as a block.
-   *
-   * @param item :: item that is
-   * @param memory :: memory that the object will use.
-   */
-  void DiskMRU::loadingWithWriteBuffer(const ISaveable * item)
-  {
-    m_mruMutex.lock();
-
-    // Place the item in the MRU list
-    std::pair<mru_t::iterator,bool> p;
-    p = m_mru.push_front(item);
-
-    // Find the item in the toWrite buffer (using the item's ID)
-    writeBuffer_byId_t::iterator found = m_writeBuffer_byId.find( item->getId() );
-    if (found != m_writeBuffer_byId.end())
-    {
-      m_writeBuffer_byId.erase(item->getId());
-      m_writeBufferUsed -= item->getMRUMemorySize();
-    }
-
-    if (!p.second)
-    {
-      // duplicate item: put it back at the front of the list
-      m_mru.relocate(m_mru.begin(), p.first);
-      m_mruMutex.unlock();
-      return;
-    }
-
-    // We are now using more memory.
-    m_mruUsed += item->getMRUMemorySize();
-
-    if (m_mruUsed > m_mruSize)
-    {
-      // You might have to pop 1 or more items until the MRU memory is below the limit
-      while ((m_mruUsed > m_mruSize) && (m_mru.size() > 0))
-      {
-        // Pop the least-used object out the back
-        const ISaveable *toWrite = m_mru.back();
-        m_mru.pop_back();
-
-        // And put it in the queue of stuff to write.
-        m_writeBuffer.insert(toWrite);
-
-        // Track the memory change in the two buffers
-        size_t thisMem = toWrite->getMRUMemorySize();
-        m_writeBufferUsed += thisMem;
-        m_mruUsed -= thisMem;
+        // duplicate item: put it back at the front of the list
+        m_mru.relocate(m_mru.begin(), p.first);
+        m_mruMutex.unlock();
+        return;
       }
 
+      // We are now using more memory.
+      m_mruUsed += item->getMRUMemorySize();
+
+      if (!m_useWriteBuffer)
+      {
+        // No write buffer - just write things out directly.
+        // You might have to pop 1 or more items until the MRU memory is below the limit
+        mru_t::iterator it = m_mru.end();
+
+        while (m_mruUsed > m_mruSize && (m_mru.size() > 0))
+        {
+          // Pop the least-used object out the back
+          it--;
+          if (it == m_mru.begin()) break; // Avoid going out of bounds
+          const ISaveable *toWrite = *it;
+          // Can you save it to disk?
+          if (!toWrite->dataBusy())
+          {
+            toWrite->save();
+            m_mruUsed -= toWrite->getMRUMemorySize();
+            m_mru.erase(it);
+          }
+        }
+      }
+      else
+      {
+        // Write buffer - accumulate objects to write
+
+        // Find the newly loaded item in the toWrite buffer (using the item's ID)
+        writeBuffer_byId_t::iterator found = m_writeBuffer_byId.find( item->getId() );
+        if (found != m_writeBuffer_byId.end())
+        {
+          m_writeBuffer_byId.erase(item->getId());
+          m_writeBufferUsed -= item->getMRUMemorySize();
+        }
+
+        // You might have to pop 1 or more items until the MRU memory is below the limit
+        while ((m_mruUsed > m_mruSize) && (m_mru.size() > 0))
+        {
+          // Pop the least-used object out the back
+          const ISaveable *toWrite = m_mru.back();
+          m_mru.pop_back();
+
+          // And put it in the queue of stuff to write.
+          m_writeBuffer.insert(toWrite);
+
+          // Track the memory change in the two buffers
+          size_t thisMem = toWrite->getMRUMemorySize();
+          m_writeBufferUsed += thisMem;
+          m_mruUsed -= thisMem;
+        }
+      }
+    } // end (if using the MRU)
+    else
+    {
+      if (m_useWriteBuffer)
+      {
+        // Take the newly loaded item and immediately put it in the "to-write" queue.
+        if (m_writeBuffer.insert(item).second)
+        {
+          // The insert() method returns a pair with the 'second" member = TRUE if the insert was successful
+          m_writeBufferUsed += item->getMRUMemorySize();
+        }
+      }
+    } // end (not using the mru)
+
+
+    if (m_useWriteBuffer)
+    {
       // Should we now write out the old data?
       if (m_writeBufferUsed >= m_writeBufferSize)
         writeOldObjects();
     }
+
     m_mruMutex.unlock();
   }
+
 
   //---------------------------------------------------------------------------------------------
   /** Call this method when an object that might be in the cache

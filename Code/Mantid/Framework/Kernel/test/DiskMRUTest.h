@@ -261,7 +261,7 @@ public:
   /** Getting and setting the cache sizes */
   void test_set_and_get_methods()
   {
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     TS_ASSERT_EQUALS( mru.getMruSize(), 4);
     TS_ASSERT_EQUALS( mru.getWriteBufferSize(), 3);
     mru.setMruSize(15);
@@ -275,7 +275,7 @@ public:
   void test_basic_writeBuffer()
   {
     // Room for 4 in the MRU, and 3 in the to-write cache
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
 
     // Nothing in cache
     TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
@@ -305,13 +305,74 @@ public:
     TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
     // The "file" was written out this way (the right order):
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "2,1,0,");
-
   }
+
+
+  //--------------------------------------------------------------------------------
+  /** Set a MRU size of 0, so no writeBuffer is used */
+  void test_basic_noMRU()
+  {
+    // No MRU, 3 in the to-write cache
+    DiskMRU mru(0, 3);
+    TS_ASSERT_EQUALS( mru.getMruSize(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferSize(), 3);
+
+    // Nothing in cache
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
+
+    mru.loading(data[0]);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 1);
+    mru.loading(data[1]);
+    mru.loading(data[2]);
+    // Write buffer now got flushed out
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
+
+    // The "file" was written out this way (the right order):
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "2,1,0,");
+    ISaveableTester::fakeFile ="";
+
+    // If you add the same one multiple times, it only is tracked once in the to-write buffer.
+    mru.loading(data[4]);
+    mru.loading(data[4]);
+    mru.loading(data[4]);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 1);
+  }
+
+
+  //--------------------------------------------------------------------------------
+  /** Set a MRU size of 0, so no writeBuffer is used */
+  void test_basic_noMRU_noWriteBuffer()
+  {
+    // No MRU, no write buffer
+    DiskMRU mru(0, 0);
+    TS_ASSERT_EQUALS( mru.getMruSize(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferSize(), 0);
+    // Nothing in cache
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
+
+    mru.loading(data[0]);
+    mru.loading(data[1]);
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
+    mru.loading(data[2]);
+    mru.loading(data[3]);
+    mru.loading(data[4]);
+    // Nothing ever happens.
+    TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getWriteBufferUsed(), 0);
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "");
+  }
+
+
 
   /// Empty out the cache with the flushCache() method
   void test_flushCache()
   {
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     for (size_t i=0; i<6; i++)
       mru.loading(data[i]);
     TS_ASSERT_EQUALS( mru.getMruUsed(), 4); //We should have 2,3,4,5 in there now
@@ -333,7 +394,7 @@ public:
   void test_basic_no_writeBuffer()
   {
     // Room for 4 in the MRU, no write buffer
-    DiskMRU mru(4, 0, false);
+    DiskMRU mru(4, 0);
     // Nothing in cache
     TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
     // NULLs are ignored
@@ -364,7 +425,7 @@ public:
   void test_noWriteBuffer_nothingWritable()
   {
     // Room for 4 in the MRU, no write buffer
-    DiskMRU mru(4, 0, false);
+    DiskMRU mru(4, 0);
     for (size_t i=0; i<9; i++)
     {
       data[i]->m_dataBusy = true;
@@ -387,7 +448,7 @@ public:
   /** MRU properly keeps recently used items at the top */
   void test_mru()
   {
-    DiskMRU mru(4, 1, true);
+    DiskMRU mru(4, 1);
     mru.loading(data[0]);
     mru.loading(data[1]);
     mru.loading(data[2]);
@@ -408,7 +469,7 @@ public:
   void test_writesOutInFileOrder()
   {
     // Room for 4 in the MRU, and 3 in the to-write cache
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     // These 3 will get written out
     mru.loading(data[5]);
     mru.loading(data[1]);
@@ -430,7 +491,7 @@ public:
   /** Any ISaveable that says it can't be written remains in the cache */
   void test_skips_dataBusy_Blocks()
   {
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     mru.loading(data[0]);
     mru.loading(data[1]); data[1]->m_dataBusy = true; // Won't get written out
     mru.loading(data[2]);
@@ -457,7 +518,7 @@ public:
   void test_canPushTwoIntoTheToWriteBuffer()
   {
     // Room for 4 in the MRU, and 3 in the to-write cache
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     // Fill the cache
     for (size_t i=0; i<4; i++)
       mru.loading(data[i]);
@@ -480,7 +541,7 @@ public:
   void test_takingBlockOutOfToWriteBuffer()
   {
     // Room for 4 in the MRU, and 3 in the to-write cache
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     // Fill the cache. 0,1 in the toWrite buffer
     for (size_t i=0; i<6; i++)
       mru.loading(data[i]);
@@ -503,7 +564,7 @@ public:
   void test_objectDeleted()
   {
     // Room for 4 in the MRU, and 3 in the to-write cache
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     // Fill the cache. 0,1 in the toWrite buffer
     for (size_t i=0; i<6; i++)
       mru.loading(data[i]);
@@ -537,7 +598,7 @@ public:
   void test_thread_safety()
   {
     // Room for 4 in the MRU, and 3 in the to-write cache
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i=0; i<int(bigNum); i++)
@@ -552,7 +613,7 @@ public:
   /** Freeing blocks get merged properly */
   void test_freeBlock_mergesWithPrevious()
   {
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
     FreeBlock b;
 
@@ -581,7 +642,7 @@ public:
   /** Freeing blocks get merged properly */
   void test_freeBlock_mergesWithNext()
   {
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
     FreeBlock b;
 
@@ -608,7 +669,7 @@ public:
   /** Freeing blocks get merged properly */
   void test_freeBlock_mergesWithBothNeighbours()
   {
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
     FreeBlock b;
 
@@ -634,7 +695,7 @@ public:
    * should not segfault or anything */
   void test_freeBlock_threadSafety()
   {
-    DiskMRU mru(100, 0, false);
+    DiskMRU mru(100, 0);
     PRAGMA_OMP( parallel for)
     for (int i=0; i<10000; i++)
     {
@@ -648,7 +709,7 @@ public:
   /** Disabled because it is not necessary to defrag since that happens on the fly */
   void xtest_defragFreeBlocks()
   {
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
     FreeBlock b;
 
@@ -669,7 +730,7 @@ public:
   /// You can call relocate() if an block is shrinking.
   void test_relocate_when_shrinking()
   {
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
     // You stay in the same place because that's the only free spot.
     TS_ASSERT_EQUALS( mru.relocate(100, 10, 5), 100 );
@@ -685,7 +746,7 @@ public:
   /// You can call relocate() if an block is shrinking.
   void test_relocate_when_growing()
   {
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
     mru.freeBlock(200, 20);
     mru.freeBlock(300, 30);
@@ -704,7 +765,7 @@ public:
   /// Various tests of allocating and relocating
   void test_allocate_and_relocate()
   {
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     mru.setFileLength(1000); // Lets say the file goes up to 1000
     DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
     FreeBlock b;
@@ -747,7 +808,7 @@ public:
     blockC->save();
     TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AABBBCCCCC");
 
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     mru.setFileLength(10);
     DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
     uint64_t newPos;
@@ -833,7 +894,7 @@ public:
   void test_smallCache_writeBuffer()
   {
     CPUTimer tim;
-    DiskMRU mru(4, 3, true);
+    DiskMRU mru(4, 3);
     for (int i=0; i<int(num); i++)
       mru.loading(data[i]);
     std::cout << tim << " to load " << num << " into MRU." << std::endl;
@@ -842,7 +903,7 @@ public:
   void test_smallCache_no_writeBuffer()
   {
     CPUTimer tim;
-    DiskMRU mru(4, 0, false);
+    DiskMRU mru(4, 0);
     for (int i=0; i<int(num); i++)
       mru.loading(data[i]);
     std::cout << tim << " to load " << num << " into MRU (no write cache)." << std::endl;
@@ -851,7 +912,7 @@ public:
   void test_largeCache_writeBuffer()
   {
     CPUTimer tim;
-    DiskMRU mru(50000, 1000, true);
+    DiskMRU mru(50000, 1000);
     for (int i=0; i<int(num); i++)
       mru.loading(data[i]);
     std::cout << tim << " to load " << num << " into MRU." << std::endl;
@@ -860,7 +921,7 @@ public:
   void test_largeCache_noWriteBuffer()
   {
     CPUTimer tim;
-    DiskMRU mru(50000, 0, false);
+    DiskMRU mru(50000, 0);
     for (int i=0; i<int(num); i++)
       mru.loading(data[i]);
     std::cout << tim << " to load " << num << " into MRU (no write buffer)." << std::endl;
@@ -870,7 +931,7 @@ public:
   void test_withFakeSeeking_withWriteBuffer()
   {
     CPUTimer tim;
-    DiskMRU mru(100, 10, true);
+    DiskMRU mru(100, 10);
     for (int i=0; i<int(dataSeek.size()); i++)
     {
       // Pretend you just loaded the data
@@ -883,7 +944,7 @@ public:
   void test_withFakeSeeking_noWriteBuffer()
   {
     CPUTimer tim;
-    DiskMRU mru(100, 0, false);
+    DiskMRU mru(100, 0);
     for (int i=0; i<int(dataSeek.size()); i++)
     {
       // Pretend you just loaded the data
@@ -897,7 +958,7 @@ public:
   void test_withFakeSeeking_growingData()
   {
     CPUTimer tim;
-    DiskMRU mru(10, 20, true);
+    DiskMRU mru(10, 20);
     mru.setFileLength(dataSeek.size());
     for (int i=0; i<int(dataSeek.size()); i++)
     {
@@ -914,7 +975,7 @@ public:
   void test_withFakeSeeking_growingData_savingWithoutUsingMRU()
   {
     CPUTimer tim;
-    DiskMRU mru(20, 20, true);
+    DiskMRU mru(20, 20);
     mru.setFileLength(dataSeek.size());
     for (int i=0; i<int(dataSeek.size()); i++)
     {
@@ -929,7 +990,7 @@ public:
   void test_freeBlock()
   {
     CPUTimer tim;
-    DiskMRU mru(100, 0, false);
+    DiskMRU mru(100, 0);
     for (size_t i=0; i<100000; i++)
     {
       mru.freeBlock(i*100, (i%3==0) ? 100 : 50);
