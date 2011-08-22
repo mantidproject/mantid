@@ -1,8 +1,5 @@
 PROJECT(SplatterPlot)
 
-FIND_PACKAGE(ParaView REQUIRED)
-INCLUDE(${PARAVIEW_USE_FILE})
-
 ADD_PARAVIEW_PLUGIN(MantidParaViewSplatterPlotSMPlugin "1.0"
 	SERVER_MANAGER_XML SplatterPlot.xml
 	SERVER_MANAGER_SOURCES vtkSplatterPlot.cxx

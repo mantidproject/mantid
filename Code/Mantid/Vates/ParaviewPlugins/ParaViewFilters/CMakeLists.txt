@@ -1,2 +1,2 @@
 add_subdirectory( MDEWRebinningCutterOperator )
-add_subdirectory ( SplatterPlot )
+add_subdirectory( SplatterPlot )
