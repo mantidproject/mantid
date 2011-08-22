@@ -34,6 +34,7 @@ using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
+using std::size_t;
 
 const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
@@ -110,6 +111,7 @@ void FilterBadPulses::exec()
   }
   this->g_log.information() << "Filtering pcharge outside of " << min_pcharge
                             << " to " << max_pcharge << std::endl;
+  size_t inputNumEvents = inputWS->getNumberEvents();
 
   // sub-algorithme does all of the actual work - do not set the output workspace
   IAlgorithm_sptr filterAlgo = createSubAlgorithm("FilterByLogValue", 0., 1.);
@@ -121,7 +123,25 @@ void FilterBadPulses::exec()
 
   // just grab the child's output workspace
   EventWorkspace_sptr outputWS = filterAlgo->getProperty("OutputWorkspace");
+  size_t outputNumEvents = outputWS->getNumberEvents();
   this->setProperty("OutputWorkspace", outputWS);
+
+  // log the number of events deleted
+  double percent = static_cast<double>(inputNumEvents - outputNumEvents)
+      / static_cast<double>(inputNumEvents);
+  percent *= 100.;
+  if (percent > 10.)
+  {
+    this->g_log.warning() << "Deleted " << (inputNumEvents - outputNumEvents)
+                          << " of " << inputNumEvents
+                          << " events (" << static_cast<int>(percent) << "%)\n";
+  }
+  else
+  {
+    this->g_log.information() << "Deleted " << (inputNumEvents - outputNumEvents)
+                              << " of " << inputNumEvents
+                              << " events (" << static_cast<int>(percent) << "%)\n";
+  }
 }
 
 
