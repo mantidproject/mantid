@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_EDITTOFPOWDERDIFFRACTOMERGEOMETRY_H_
     
 #include "MantidKernel/System.h"
-
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
@@ -40,6 +40,14 @@ namespace Algorithms
     EditTOFPowderDiffractomerGeometry();
     ~EditTOFPowderDiffractomerGeometry();
     
+  private:
+    /// Sets documentation strings for this algorithm
+    virtual void initDocs();
+    /// Initialise the properties
+    void init();
+    /// Run the algorithm
+    void exec();
+
   };
 
 
