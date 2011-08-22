@@ -14,7 +14,6 @@ src/GaussianThresholdRange.cpp
 src/IgnoreZerosThresholdRange.cpp
 src/IMDDimensionComparitor.cpp
 src/IMDWorkspaceProxy.cpp
-src/MDHistogramRebinningPresenter.cpp
 src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
 src/MultiDimensionalDbPresenter.cpp
