@@ -12,7 +12,7 @@ using namespace Mantid;
 //=====================================================================================
 // Test Helpers Types
 //=====================================================================================
-namespace
+namespace vtkStructuredGridFactoryTestHelpers
 {
   ///Helper class. Concrete instance of IMDDimension.
   class FakeIMDDimension: public Mantid::Geometry::IMDDimension
@@ -26,10 +26,10 @@ namespace
     std::string getUnits() const {throw std::runtime_error("Not implemented");}
     std::string getDimensionId() const {return m_id;}
     double getMaximum() const {return 10;}
-    double getMinimum() const {return 0;};
-    size_t getNBins() const {return m_nbins;};
-    std::string toXMLString() const {throw std::runtime_error("Not implemented");};
-    double getX(size_t) const {throw std::runtime_error("Not implemented");};
+    double getMinimum() const {return 0;}
+    size_t getNBins() const {return m_nbins;}
+    std::string toXMLString() const {throw std::runtime_error("Not implemented");}
+    double getX(size_t) const {throw std::runtime_error("Not implemented");}
     virtual ~FakeIMDDimension()
     {
     }
@@ -71,6 +71,8 @@ namespace
     virtual ~MockIMDWorkspace() {}
   };
 }
+
+using namespace vtkStructuredGridFactoryTestHelpers;
 
 //=====================================================================================
 // Functional Tests
@@ -286,7 +288,7 @@ public:
 class vtkStructuredGridFactoryTestPerformance : public CxxTest::TestSuite
 {
 public:
-  MockIMDWorkspace* pMockWs;
+ MockIMDWorkspace* pMockWs;
 
   void setUp()
   {

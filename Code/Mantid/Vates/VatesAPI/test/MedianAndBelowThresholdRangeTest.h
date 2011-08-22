@@ -14,7 +14,7 @@ using namespace testing;
 //=====================================================================================
 // Helper Fake/Mock types
 //=====================================================================================
-namespace
+namespace MedianAndBelowThresholdRangeTestHelpers
 {
 
   //Helper type. Fake-out of an Iterator for the Mock workspace (see below) to return.
@@ -120,6 +120,8 @@ namespace
     virtual ~MockIMDWorkspace() {}
   };
 }
+
+using namespace MedianAndBelowThresholdRangeTestHelpers;
 
 //=====================================================================================
 // Functional tests

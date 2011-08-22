@@ -131,7 +131,7 @@ public:
   {
     MDGeometryXMLParser parser(constructXML());
     parser.execute();
-    SynchronisingGeometryPresenter* pPresenter;
+    SynchronisingGeometryPresenter* pPresenter = NULL;
     TS_ASSERT_THROWS_NOTHING(pPresenter = new SynchronisingGeometryPresenter(parser)); 
     delete pPresenter;
   }
