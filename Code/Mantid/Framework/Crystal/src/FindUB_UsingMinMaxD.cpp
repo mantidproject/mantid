@@ -107,14 +107,26 @@ namespace Crystal
                                            num_initial, 
                                            degrees_per_step );
 
+    double det =   UB[0][0] * ( UB[1][1] * UB[2][2] - UB[1][2] * UB[2][1] )
+                 - UB[0][1] * ( UB[1][0] * UB[2][2] - UB[1][2] * UB[2][0] )
+                 + UB[0][2] * ( UB[1][0] * UB[2][1] - UB[1][1] * UB[2][0] );
+
+    double abs_det = fabs(det);
+
     std::cout << "Error = " << error << std::endl;
     std::cout << "UB = " << UB << std::endl;
-    std::cout << "Determinant = " << UB.determinant() << std::endl;
+    std::cout << "Det = " << det << std::endl;
 
     char logInfo[200];
-    if ( UB.determinant() > 100 )         // UB not found correctly
+    if ( abs_det > 10 || abs_det < 1e-9 ) // UB not found correctly
     {
-      g_log.notice( std::string("UB NOT FOUND") );
+      g_log.notice( std::string(
+         "Found Invalid UB...peaks used might not be linearly independent") );
+      sprintf( logInfo,
+               std::string("determinant(UB) = %10.5e").c_str(), det );
+      g_log.notice( std::string(logInfo) );
+      g_log.notice( std::string(
+         "UB NOT SAVED.") );
     }
     else                                  // tell user how many would be indexed
     {                                     // and save the UB in the sample 

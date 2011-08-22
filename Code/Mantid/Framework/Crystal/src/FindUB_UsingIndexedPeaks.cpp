@@ -81,7 +81,7 @@ namespace Crystal
     size_t indexed_count = 0;
     for ( size_t i = 0; i < n_peaks; i++ )
     {
-      V3D hkl( peaks[i].getH(), peaks[i].getK(), peaks[i].getL() );  
+      V3D hkl( peaks[i].getH(), peaks[i].getK(), peaks[i].getL() );    // ##### KEEP
       if ( IndexingUtils::ValidIndex( hkl, 1.0 ) )    // use tolerance == 1 to 
                                                       // just check for (0,0,0) 
       {
@@ -100,14 +100,26 @@ namespace Crystal
     Matrix<double> UB(3,3,false);
     double error = IndexingUtils::Optimize_UB( UB, hkl_vectors, q_vectors );
 
+    double det =   UB[0][0] * ( UB[1][1] * UB[2][2] - UB[1][2] * UB[2][1] )
+                 - UB[0][1] * ( UB[1][0] * UB[2][2] - UB[1][2] * UB[2][0] )
+                 + UB[0][2] * ( UB[1][0] * UB[2][1] - UB[1][1] * UB[2][0] );
+
+    double abs_det = fabs(det);
+
     std::cout << "Error = " << error << std::endl;
     std::cout << "UB = " << UB << std::endl;
-    std::cout << "Determinant = " << UB.determinant() << std::endl;
+    std::cout << "Det = " << det << std::endl;
 
     char logInfo[200];
-    if (  UB.determinant() > 100 )        // UB not found correctly
+    if ( abs_det > 10 || abs_det < 1e-9 ) // UB not found correctly
     {
-      g_log.notice( std::string("UB NOT FOUND") );
+      g_log.notice( std::string(
+         "Found Invalid UB...peaks used might not be linearly independent") );
+      sprintf( logInfo,
+               std::string("determinant(UB) = %10.5e").c_str(), det );
+      g_log.notice( std::string(logInfo) );
+      g_log.notice( std::string(
+         "UB NOT SAVED.") );
     }
     else                                  // tell user how many would be indexed
     {                                     // from the full list of peaks, and  
@@ -119,6 +131,7 @@ namespace Crystal
       }
       double tolerance = 0.1;
       int num_indexed = IndexingUtils::NumberIndexed( UB, q_vectors, tolerance );
+
       sprintf( logInfo,
                std::string("New UB will index %1d Peaks out of %1d with tolerance %5.3f").c_str(),
                num_indexed, n_peaks, tolerance);
