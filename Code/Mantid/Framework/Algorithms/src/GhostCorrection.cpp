@@ -27,8 +27,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void GhostCorrection::initDocs()
     {
-      this->setWikiSummary("Perform ghost correction for older POWGEN detectors on an inputWorkspace. ");
-      this->setOptionalMessage("Perform ghost correction for older POWGEN detectors on an inputWorkspace.");
+      this->setWikiSummary("Perform ghost correction for older POWGEN detectors on an EventWorkspace. ");
+      this->setOptionalMessage("Perform ghost correction for older POWGEN detectors on an EventWorkspace.");
     }
     
 
@@ -79,7 +79,7 @@ namespace Mantid
 
       declareProperty(
         new WorkspaceProperty<EventWorkspace>("InputWorkspace", "",Direction::Input, wsValidator),
-        "inputWorkspace from which to make a ghost correction histogram.");
+        "EventWorkspace from which to make a ghost correction histogram.");
 
       declareProperty(
         new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),

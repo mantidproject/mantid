@@ -86,7 +86,6 @@ public:
   {
 
     int numEventsPer = 100;
-//    MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
     EventWorkspace_sptr in_ws = createDiffractionEventWorkspace(numEventsPer);
     if (type == WEIGHTED)
       in_ws *= 2.0;
