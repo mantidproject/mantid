@@ -177,8 +177,6 @@ namespace Mantid
       m_serializer.setGeometryXML(xmlBuilder.create());
       //Apply the workspace name after extraction from the input xml.
       m_serializer.setWorkspaceName( wsName);
-      //Apply the workspace location after extraction from the input xml.
-      m_serializer.setWorkspaceLocation( vtkDataSetToWsLocation::exec(m_input));
 
     }
 
