@@ -535,11 +535,12 @@ public:
     TS_ASSERT( !mru.shouldStayInMemory(1, 150) );
     TSM_ASSERT_EQUALS("Memory was tracked as released from small buffer", mru.getSmallBufferUsed(), 0);
 
-//    // Deleting an object
-//    TS_ASSERT( mru.shouldStayInMemory(2, 90) );
-//    TS_ASSERT_EQUALS( mru.getSmallBufferUsed(), 90);
-//    ISaveableTester data2(2);
-//    mru.objectDeleted( &data2, 0);
+    // Deleting an object
+    TS_ASSERT( mru.shouldStayInMemory(2, 90) );
+    TS_ASSERT_EQUALS( mru.getSmallBufferUsed(), 90);
+    ISaveableTester data2(2);
+    mru.objectDeleted( &data2, 0);
+    TS_ASSERT_EQUALS( mru.getSmallBufferUsed(), 0);
 
   }
 

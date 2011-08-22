@@ -727,10 +727,18 @@ namespace MDEvents
    *
    * @param ts :: optional ThreadScheduler * that will be used to parallelize
    *        recursive splitting. Set to NULL to do it serially.
+   * @param newBoxes :: optional pointer to a vector that will be filled with the
+   *        newly created boxes.
+   * @param newBoxesMutex :: must specify this mutex for parallel splitting of boxes.
+   *        The mutex protects the newBoxes vector.
    */
   TMDE(
-  void MDGridBox)::splitAllIfNeeded(ThreadScheduler * ts)
+  void MDGridBox)::splitAllIfNeeded(ThreadScheduler * ts
+      /*,std::vector<IMDBox<MDE,nd>*> * newBoxes, Mantid::Kernel::Mutex * newBoxesMutex */ )
   {
+    DiskMRU & mru = this->m_BoxController->getDiskMRU();
+    mru.setNumberOfObjects( this->m_BoxController->getMaxId() );
+
     for (size_t i=0; i < numBoxes; ++i)
     {
       MDBox<MDE, nd> * box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
@@ -764,17 +772,19 @@ namespace MDEvents
         else
         {
           // This box does NOT have enough events to be worth splitting
-          if (!box->getOnDisk() && this->m_BoxController->isFileBacked())
+          if (!box->getOnDisk() && this->m_BoxController->isFileBacked() &&
+              !mru.shouldStayInMemory(box->getId(), box->getNPoints()) )
           {
             // The box is NOT on disk but the workspace is file-backed.
             // Therefore, it is likely a NEW MDBox that was just created by splitting.
+            // We then check if it is BIG enough to bother caching to disk = !shouldStayInMemory()
             // Mark that it is to be on disk from now on
             box->setOnDisk(true);
             // Set it "modified" so that it gets written out upon saving
             box->setDataModified(true);
             // Make the MRU track it in the buffer. It is using up memory!
             this->m_BoxController->getDiskMRU().loading(box);
-            // So the MRU will cache it to disk when it falls out of the cache.
+            // So the MRU will cache it to the WriteBuffer when it falls out of the cache.
           }
         }
       }

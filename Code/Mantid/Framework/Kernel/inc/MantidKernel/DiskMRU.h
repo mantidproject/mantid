@@ -271,6 +271,9 @@ namespace Kernel
     /// Threshold number of events for an object to be considered "small"
     uint64_t m_smallThreshold;
 
+    /// Mutex for modifying entries in the small buffer
+    Kernel::Mutex m_smallBufferMutex;
+
 
     // ----------------------- Free space map --------------------------------------
     /// Map of the free blocks in the file

@@ -84,13 +84,15 @@ namespace MDEvents
 
     void splitAllIfNeeded(Kernel::ThreadScheduler * ts = NULL);
 
+    void cacheChildrenToDisk();
+
     void refreshCache(Kernel::ThreadScheduler * ts = NULL);
 
     void refreshCentroid(Kernel::ThreadScheduler * ts = NULL);
 
     // ======================= Testing/Debugging Methods =================
-    /** For testing: get (a copy of) the vector of boxes */
-    std::vector<IMDBox<MDE, nd>*> getBoxes()
+    /** For testing: get (a reference to) the vector of boxes */
+    std::vector<IMDBox<MDE, nd>*> & getBoxes()
     { return boxes; }
 
     /** For testing: return the internal-stored size of each box in each dimension */

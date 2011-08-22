@@ -930,7 +930,7 @@ public:
     BoxController_sptr bc = b->getBoxController();
     bc->setSplitThreshold(100);
     bc->setMaxDepth(4);
-    bc->setCacheParameters(1, 10000, 1000, 0);
+    bc->setCacheParameters(1, 10000, 1000, 20000);
     bc->setFile(file, filename, 0);
     DiskMRU & mru = bc->getDiskMRU();
     mru.setFileLength(0);

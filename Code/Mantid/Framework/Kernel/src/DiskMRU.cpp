@@ -203,9 +203,13 @@ namespace Kernel
     }
     m_mruMutex.unlock();
 
-//    // Take it out of the small buffer
-//    if (id < m_
-//
+    // Take it out of the small buffer
+    if (id < m_smallBuffer.size())
+    {
+      uint32_t & bufferValue = m_smallBuffer[id];
+      m_smallBufferUsed -= bufferValue;
+      bufferValue = 0;
+    }
 
     // Mark the amount of space used on disk as free
     this->freeBlock(item->getFilePosition(), sizeOnFile);
@@ -481,9 +485,11 @@ namespace Kernel
    */
   void DiskMRU::setNumberOfObjects(size_t numObjects)
   {
+    m_smallBufferMutex.lock();
     if (m_smallBuffer.size() < numObjects)
       m_smallBuffer.resize(numObjects, 0);
     calcSmallThreshold();
+    m_smallBufferMutex.unlock();
   }
 
   //---------------------------------------------------------------------------------------------
@@ -515,19 +521,23 @@ namespace Kernel
       return false;
     if (size < m_smallThreshold)
     {
+      m_smallBufferMutex.lock();
       // Update the entry in the buffer, and the total memory size
       uint32_t & sizeInBuffer = m_smallBuffer[id];
       m_smallBufferUsed -= sizeInBuffer;
       sizeInBuffer = uint32_t(size);
       m_smallBufferUsed += sizeInBuffer;
+      m_smallBufferMutex.unlock();
       return true;
     }
     else
     {
+      m_smallBufferMutex.lock();
       // Too big - take it out of the tracking buffer it it is in there.
       uint32_t & sizeInBuffer = m_smallBuffer[id];
       m_smallBufferUsed -= sizeInBuffer;
       sizeInBuffer = 0;
+      m_smallBufferMutex.unlock();
       return false;
     }
   }
