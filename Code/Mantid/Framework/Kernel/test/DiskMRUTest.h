@@ -488,6 +488,56 @@ public:
   }
 
   //--------------------------------------------------------------------------------
+  /** DiskMRU tracking small objects */
+  void test_smallBuffer_constructors()
+  {
+    // Try some constructors
+    DiskMRU mru1;
+    TS_ASSERT_EQUALS( mru1.getSmallBufferSize(), 0);
+    TS_ASSERT_EQUALS( mru1.getSmallThreshold(), 0);
+    DiskMRU mru(0, 0, 0);
+    TS_ASSERT_EQUALS( mru.getSmallBufferSize(), 0);
+    TS_ASSERT_EQUALS( mru.getSmallThreshold(), 0);
+    mru.setSmallBufferSize(1000);
+    TS_ASSERT_EQUALS( mru.getSmallBufferSize(), 1000);
+    TS_ASSERT_EQUALS( mru.getSmallBufferUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getSmallThreshold(), 0);
+    mru.setNumberOfObjects(10);
+    TS_ASSERT_EQUALS( mru.getSmallThreshold(), 100);
+    // Changing the size AFTER the number of objects updates threshold
+    mru.setSmallBufferSize(2000);
+    TS_ASSERT_EQUALS( mru.getSmallThreshold(), 200);
+  }
+
+  //--------------------------------------------------------------------------------
+  /** DiskMRU tracking small objects */
+  void test_smallBuffer()
+  {
+    // Use a "small objects" buffer
+    DiskMRU mru(0, 0, 1000);
+    mru.setNumberOfObjects(10);
+    TS_ASSERT_EQUALS( mru.getSmallBufferSize(), 1000);
+    TS_ASSERT_EQUALS( mru.getSmallBufferUsed(), 0);
+    TS_ASSERT_EQUALS( mru.getSmallThreshold(), 100);
+    // Requesting an object out of bounds fails quietly
+    TS_ASSERT( !mru.shouldStayInMemory(10, 1234) );
+    TS_ASSERT_EQUALS( mru.getSmallBufferUsed(), 0);
+    // Small object stays in memory
+    TS_ASSERT( mru.shouldStayInMemory(1, 12) );
+    TS_ASSERT_EQUALS( mru.getSmallBufferUsed(), 12);
+    // Big object does not
+    TS_ASSERT( !mru.shouldStayInMemory(5, 130) );
+    TS_ASSERT_EQUALS( mru.getSmallBufferUsed(), 12);
+    // Changing the size of the small object, still small
+    TS_ASSERT( mru.shouldStayInMemory(1, 30) );
+    TS_ASSERT_EQUALS( mru.getSmallBufferUsed(), 30);
+    // Changing the size of the small object, now too big
+    TS_ASSERT( !mru.shouldStayInMemory(1, 150) );
+    TSM_ASSERT_EQUALS("Memory was tracked as released from small buffer", mru.getSmallBufferUsed(), 0);
+
+  }
+
+  //--------------------------------------------------------------------------------
   /** Any ISaveable that says it can't be written remains in the cache */
   void test_skips_dataBusy_Blocks()
   {

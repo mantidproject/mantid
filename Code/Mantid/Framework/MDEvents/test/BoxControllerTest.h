@@ -200,11 +200,12 @@ public:
     // Set the cache parameters
 
     // Can't have 0-sized events
-    TS_ASSERT_THROWS_ANYTHING( a.setCacheParameters(456, 123, 0) );
-    a.setCacheParameters(456, 123, 40);
+    TS_ASSERT_THROWS_ANYTHING( a.setCacheParameters(0, 456, 123, 0) );
+    a.setCacheParameters(40, 456, 123, 789);
 
     TS_ASSERT_EQUALS( mru.getMruSize(), 456);
     TS_ASSERT_EQUALS( mru.getWriteBufferSize(), 123);
+    TS_ASSERT_EQUALS( mru.getSmallBufferSize(), 789);
   }
 
 

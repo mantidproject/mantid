@@ -250,8 +250,8 @@ namespace MDEvents
 
     // Complete the file-back-end creation.
     DiskMRU & mru = bc->getDiskMRU(); UNUSED_ARG(mru);
-    g_log.notice() << "Setting cache to 0 MB read, 30 MB write." << std::endl;
-    bc->setCacheParameters(0, 30000000/sizeof(MDE), sizeof(MDE));
+    g_log.notice() << "Setting cache to 0 MB read, 30 MB write, 300 MB small objects." << std::endl;
+    bc->setCacheParameters(sizeof(MDE), 0, 30000000/sizeof(MDE), 30000000/sizeof(MDE));
 
     return outWS;
   }

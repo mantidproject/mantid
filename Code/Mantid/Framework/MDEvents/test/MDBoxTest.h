@@ -611,7 +611,7 @@ public:
     BoxController_sptr bc(new BoxController(3));
 
     // Handle the disk MRU values
-    bc->setCacheParameters(100000, 10000, sizeof(MDLeanEvent<3>));
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 100000, 10000, 0);
     DiskMRU & mru = bc->getDiskMRU();
     // It is empty now
     TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
@@ -677,7 +677,7 @@ public:
     BoxController_sptr bc(new BoxController(3));
 
     // Handle the disk MRU values
-    bc->setCacheParameters(100000, 10000, sizeof(MDLeanEvent<3>));
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 100000, 10000, 0);
     DiskMRU & mru = bc->getDiskMRU();
     // It is empty now
     TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
@@ -733,7 +733,7 @@ public:
     BoxController_sptr bc(new BoxController(3));
 
     // Handle the disk MRU values
-    bc->setCacheParameters(100000, 10000, sizeof(MDLeanEvent<3>));
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 100000, 10000, 0);
     DiskMRU & mru = bc->getDiskMRU();
     // It is empty now
     TS_ASSERT_EQUALS( mru.getMruUsed(), 0);
@@ -822,7 +822,7 @@ public:
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
-    bc->setCacheParameters(0, 10000, sizeof(MDLeanEvent<3>));
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 0, 10000, 0);
     DiskMRU & mru = bc->getDiskMRU();
 
     // Create and open the test NXS file

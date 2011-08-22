@@ -62,7 +62,7 @@ namespace Mantid
       declareProperty(new PropertyWithValue<bool>("FileBackEnd", false),
         "Set to true to load the data only on demand.");
 
-      declareProperty(new PropertyWithValue<int>("Memory", -1),
+      declareProperty(new PropertyWithValue<double>("Memory", -1),
         "For FileBackEnd only: the amount of memory (in MB) to allocate to the in-memory cache.\n"
         "If not specified, a default of 40% of free physical memory is used.");
 
@@ -209,38 +209,40 @@ namespace Mantid
         BoxController_sptr bc = ws->getBoxController();
 
         // ---------------------------------------- MEMORY FOR CACHE ------------------------------------
+        DiskMRU & mru = bc->getDiskMRU();
+        // For the small objects buffer
+        mru.setNumberOfObjects(numBoxes);
+
         // How much memory for the cache?
-        uint64_t cacheMemory = 0;
-        uint64_t minDiskCacheSize = 0;
         if (FileBackEnd)
         {
-          int mb = getProperty("Memory");
+          double mb = getProperty("Memory");
           if (mb < 0)
           {
             // Use 40% of available memory.
             Kernel::MemoryStats stats;
             stats.update();
-            mb = int(double(stats.availMem()) * 0.4 / 1024.0);
+            mb = double(stats.availMem()) * 0.4 / 1024.0;
           }
           if (mb <= 0) mb = 0;
-          // Express the cache memory in units of number of events.
-          cacheMemory = (uint64_t(mb) * 1024 * 1024) / sizeof(MDE);
-          g_log.information() << "Setting a memory cache size of " << mb << " MB, or " << cacheMemory << " events." << std::endl;
 
-          // Find a minimum size to bother to cache to disk.
-          // We say that no more than 25% of the overall cache memory should be used on tiny boxes.
-          minDiskCacheSize = uint64_t(double(cacheMemory) * 0.25) / numBoxes;
-          // TODO :
-          minDiskCacheSize = 0;
-          g_log.information() << "Boxes with fewer than " << minDiskCacheSize << " events will not be cached to disk." << std::endl;
+          // Express the cache memory in units of number of events.
+          uint64_t cacheMemory = (uint64_t(mb) * 1024 * 1024) / sizeof(MDE);
+
+          // Split the memory 45-45-10
+          uint64_t mruMemory = uint64_t(double(cacheMemory) * 0.45);
+          uint64_t smallBufferMemory = uint64_t(double(cacheMemory) * 0.45);
 
           double writeBufferMB = mb/10;
           if (writeBufferMB < 1) writeBufferMB = 1;
-          uint64_t writeBuffer = (uint64_t(writeBufferMB) * 1024 * 1024) / sizeof(MDE);
-          g_log.information() << "Write buffer set to " << writeBufferMB << " MB (" << writeBuffer << " events)." << std::endl;
+          uint64_t writeBufferMemory = (uint64_t(writeBufferMB) * 1024 * 1024) / sizeof(MDE);
 
           // Set these values in the diskMRU
-          bc->setCacheParameters(cacheMemory, writeBuffer, sizeof(MDE));
+          bc->setCacheParameters(sizeof(MDE), mruMemory, writeBufferMemory, smallBufferMemory);
+
+          g_log.information() << "Setting a memory cache size of " << mb << " MB, or " << cacheMemory << " events." << std::endl;
+          g_log.information() << "MRU: " << mruMemory << " events; WriteBuffer: " << writeBufferMemory << " events; Small objects: " << smallBufferMemory << " events." << std::endl;
+          g_log.information() << "Boxes with fewer than " << mru.getSmallThreshold() << " events will not be cached to disk." << std::endl;
         }
 
 
@@ -280,7 +282,7 @@ namespace Mantid
               // Save the index in the file in the box data
               box->setFileIndex(uint64_t(indexStart), uint64_t(numEvents));
 
-              if (!FileBackEnd || (numEvents < minDiskCacheSize))
+              if (!FileBackEnd || mru.shouldStayInMemory(i, numEvents) )
               {
                 // Load if NOT using the file as the back-end,
                 // or if the box is small enough to keep in memory always

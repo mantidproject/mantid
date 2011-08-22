@@ -21,6 +21,10 @@ namespace Kernel
     m_writeBufferSize(50),
     m_writeBuffer_byId( m_writeBuffer.get<1>() ),
     m_writeBufferUsed(0),
+    m_useSmallBuffer(false),
+    m_smallBufferSize(0),
+    m_smallBufferUsed(0),
+    m_smallThreshold(0),
     m_free_bySize( m_free.get<1>() ),
     m_fileLength(0)
   {
@@ -31,10 +35,10 @@ namespace Kernel
    *
    * @param m_mruSize :: Amount of memory that the MRU is allowed to use.
    * @param m_writeBufferSize :: Amount of memory to accumulate in the write buffer before writing.
-   * @param useWriteBuffer :: True if you want to use the "to-Write" buffer.
+   * @param smallBufferSize :: Number of events in the "small objects" buffer
    * @return
    */
-  DiskMRU::DiskMRU(uint64_t m_mruSize, uint64_t m_writeBufferSize)
+  DiskMRU::DiskMRU(uint64_t m_mruSize, uint64_t m_writeBufferSize, uint64_t smallBufferSize)
   : m_useMRU(m_mruSize > 0),
     m_mru_byId( m_mru.get<1>() ),
     m_mruSize(m_mruSize),
@@ -43,9 +47,14 @@ namespace Kernel
     m_writeBufferSize(m_writeBufferSize),
     m_writeBuffer_byId( m_writeBuffer.get<1>() ),
     m_writeBufferUsed(0),
+    m_useSmallBuffer(smallBufferSize > 0),
+    m_smallBufferSize(smallBufferSize),
+    m_smallBufferUsed(0),
+    m_smallThreshold(0),
     m_free_bySize( m_free.get<1>() ),
     m_fileLength(0)
   {
+    calcSmallThreshold();
   }
     
   //----------------------------------------------------------------------------------------------
@@ -197,7 +206,6 @@ namespace Kernel
     // Mark the amount of space used on disk as free
     this->freeBlock(item->getFilePosition(), sizeOnFile);
   }
-
 
 
   //---------------------------------------------------------------------------------------------
@@ -454,9 +462,73 @@ namespace Kernel
   std::string DiskMRU::getMemoryStr() const
   {
     std::ostringstream mess;
-    mess << "Cache: " << m_mruUsed << " events in " << m_mru.size() << " blocks. To-Write buffer: " << m_writeBufferUsed << " in " << m_writeBuffer.size() << " blocks.";
+    mess << "MRU: " << m_mruUsed << " events in " << m_mru.size() << " blocks. "
+        << "Write Buffer: " << m_writeBufferUsed << " in " << m_writeBuffer.size() << " blocks. "
+        << "Small objects: " << m_smallBufferSize << " events.";
     return mess.str();
   }
+
+
+
+  //---------------------------------------------------------------------------------------------
+  /** Sets the total number of objects to consider.
+   * This is used by the "small objects" buffer to determine the threshold to allow.
+   * @param numObjects
+   */
+  void DiskMRU::setNumberOfObjects(size_t numObjects)
+  {
+    if (m_smallBuffer.size() < numObjects)
+      m_smallBuffer.resize(numObjects, 0);
+    calcSmallThreshold();
+  }
+
+  //---------------------------------------------------------------------------------------------
+  /** Calculate the threshold # of events below which objects are never
+   * cached to disk.
+   */
+  inline void DiskMRU::calcSmallThreshold()
+  {
+    if (m_smallBuffer.size() > 0)
+      m_smallThreshold = m_smallBufferSize / m_smallBuffer.size();
+    else
+      // Something is not set
+      m_smallThreshold = 0;
+  }
+
+
+  //---------------------------------------------------------------------------------------------
+  /** Returns true if the object is small enough that it should stay
+   * in memory and never cache to disk.
+   *
+   * @param id :: id of the object
+   * @param size :: current or new size of the object
+   * @return true if the object is small enough to stay in memory
+   */
+  bool DiskMRU::shouldStayInMemory(size_t id, uint64_t size)
+  {
+    // Out of bounds? Just return NO
+    if (id >= m_smallBuffer.size())
+      return false;
+    if (size < m_smallThreshold)
+    {
+      // Update the entry in the buffer, and the total memory size
+      uint32_t & sizeInBuffer = m_smallBuffer[id];
+      m_smallBufferUsed -= sizeInBuffer;
+      sizeInBuffer = uint32_t(size);
+      m_smallBufferUsed += sizeInBuffer;
+      return true;
+    }
+    else
+    {
+      // Too big - take it out of the tracking buffer it it is in there.
+      uint32_t & sizeInBuffer = m_smallBuffer[id];
+      m_smallBufferUsed -= sizeInBuffer;
+      sizeInBuffer = 0;
+      return false;
+    }
+  }
+
+
 
 } // namespace Mantid
 } // namespace Kernel

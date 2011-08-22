@@ -198,7 +198,7 @@ public:
     BoxController_sptr bc(new BoxController(3));
     bc->setSplitInto(5);
     // Handle the disk MRU values
-    bc->setCacheParameters(100000, 10000, sizeof(MDLeanEvent<3>));
+    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 100000, 10000, 0);
     DiskMRU & mru = bc->getDiskMRU();
     // Make a box from 0-10 in 3D
     MDBox<MDLeanEvent<3>,3> * c = new MDBox<MDLeanEvent<3>,3>(bc, 0);
@@ -930,12 +930,11 @@ public:
     BoxController_sptr bc = b->getBoxController();
     bc->setSplitThreshold(100);
     bc->setMaxDepth(4);
-    bc->setCacheParameters(10000, 1000, 1);
+    bc->setCacheParameters(1, 10000, 1000, 0);
     bc->setFile(file, filename, 0);
     DiskMRU & mru = bc->getDiskMRU();
     mru.setFileLength(0);
 
-    // Make a 1000 events in each sub-box
     size_t num_repeat = 10;
     if (DODEBUG) num_repeat = 20;
     Timer tim;

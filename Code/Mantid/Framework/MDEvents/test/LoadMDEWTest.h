@@ -145,11 +145,13 @@ public:
 
 
   template <size_t nd>
-  void do_test_exec(bool FileBackEnd, bool deleteWorkspace=true, bool metadataonly=false)
+  void do_test_exec(bool FileBackEnd, bool deleteWorkspace=true, double memory=0)
   {
+    typedef MDLeanEvent<nd> MDE;
+
     //------ Start by creating the file ----------------------------------------------
     // Make a 1D MDEventWorkspace
-    boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>,nd> > ws1 = MDEventsTestHelper::makeMDEW<nd>(10, 0.0, 10.0, 0);
+    boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws1 = MDEventsTestHelper::makeMDEW<nd>(10, 0.0, 10.0, 0);
     ws1->getBoxController()->setSplitThreshold(100);
     // Put in ADS so we can use fake data
     AnalysisDataService::Instance().addOrReplace("LoadMDEWTest_ws", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1));
@@ -184,9 +186,9 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("FileBackEnd", FileBackEnd) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Memory", 0) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Memory", memory) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MetadataOnly", metadataonly));
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MetadataOnly", false));
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
@@ -198,10 +200,48 @@ public:
     TS_ASSERT(iws);
     if (!iws) return;
 
-    boost::shared_ptr<MDEventWorkspace<MDLeanEvent<nd>,nd> > ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>,nd> >(iws);
+    boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>,nd> >(iws);
 
     // Perform the full comparison
     do_compare_MDEW(ws, ws1);
+
+    // Look for the not-disk-cached-cause-they-are-too-small
+    if (memory > 0)
+    {
+      // Force a flush of the read-write cache
+      BoxController_sptr bc = ws->getBoxController();
+      DiskMRU & mru = bc->getDiskMRU();
+      mru.flushCache();
+
+      typename std::vector<IMDBox<MDE,nd>*> boxes;
+      ws->getBox()->getBoxes(boxes, 1000, false);
+      uint64_t threshold = uint64_t(memory*1024*1024*0.45) / (boxes.size() * sizeof(MDE));
+
+      TSM_ASSERT_EQUALS("Threshold size for small buffer agrees.", mru.getSmallThreshold(), threshold );
+      uint64_t memoryInSmall = 0;
+      for (size_t i=0; i<boxes.size(); i++)
+      {
+        MDBox<MDE,nd>*box = dynamic_cast<MDBox<MDE,nd>*>(boxes[i]);
+        if (box)
+        {
+          if (box->getNPoints() < threshold)
+          {
+            TSM_ASSERT("Small box should be in memory", box->getInMemory());
+            TSM_ASSERT("Small box should not be cached to disk", !box->getOnDisk());
+            memoryInSmall += box->getNPoints();
+          }
+          else
+          {
+            TSM_ASSERT("Large box should not be in memory", !box->getInMemory());
+            TSM_ASSERT("Large box should be cached to disk", box->getOnDisk());
+          }
+        }
+      }
+
+      TSM_ASSERT_EQUALS("Memory used in small buffer agrees.", memoryInSmall, mru.getSmallBufferUsed() );
+      TSM_ASSERT("Test was correctly done, and some memory was in the small.", memoryInSmall > 0 );
+      std::cout << "Expected threshold of " << threshold << ". Memory in small buffer " << mru.getSmallBufferUsed() << std::endl;
+    }
 
     // Remove workspace from the data service.
     if (deleteWorkspace)
@@ -322,7 +362,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("FileBackEnd", false) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Memory", 0) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Memory", 0.0) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("MetadataOnly", true));
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
@@ -362,6 +402,12 @@ public:
   void test_exec_3D_with_FileBackEnd()
   {
     do_test_exec<3>(true);
+  }
+
+  /// Run the loading but keep the events on file and load on demand
+  void test_exec_3D_with_FileBackEnd_andSmallBuffer()
+  {
+    do_test_exec<3>(true, true, 1.0);
   }
   
 

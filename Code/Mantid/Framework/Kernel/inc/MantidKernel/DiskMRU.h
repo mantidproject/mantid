@@ -117,28 +117,29 @@ namespace Kernel
 
 
     DiskMRU();
-
-    DiskMRU(uint64_t m_mruSize, uint64_t m_writeBufferSize);
-    
+    DiskMRU(uint64_t m_mruSize, uint64_t m_writeBufferSize, uint64_t smallBufferSize = 0);
     virtual ~DiskMRU();
 
+    // MRU and list management
     void loading(const ISaveable * item);
-
     void flushCache();
-
-    void freeBlock(uint64_t const pos, uint64_t const size);
-
-    void defragFreeBlocks();
-
-    uint64_t allocate(uint64_t const newSize);
-
-    uint64_t relocate(uint64_t const oldPos, uint64_t const oldSize, const uint64_t newSize);
-
     void objectDeleted(const ISaveable * item, const uint64_t sizeOnFile);
 
-    void getFreeSpaceVector(std::vector<uint64_t> & free) const;
+    // Free space map methods
+    void freeBlock(uint64_t const pos, uint64_t const size);
+    void defragFreeBlocks();
 
+    // Allocating
+    uint64_t allocate(uint64_t const newSize);
+    uint64_t relocate(uint64_t const oldPos, uint64_t const oldSize, const uint64_t newSize);
+
+    // For reporting and saving
+    void getFreeSpaceVector(std::vector<uint64_t> & free) const;
     std::string getMemoryStr() const;
+
+    // For the Small buffer
+    void setNumberOfObjects(size_t numObjects);
+    bool shouldStayInMemory(size_t id, uint64_t size);
 
     //-------------------------------------------------------------------------------------------
     /** Set the size of the to-write buffer, in number of events
@@ -174,23 +175,28 @@ namespace Kernel
     uint64_t getMruUsed() const
     { return m_mruUsed;  }
 
-//    //-------------------------------------------------------------------------------------------
-//    /** Set the size of the "small" buffer, in number of events.
-//     * This is the buffer for event lists that are too small to bother caching to disk
-//     * @param buffer :: total number of events to allow in the "small" buffer */
-//    void setSmallBufferSize(uint64_t buffer)
-//    {
-//      m_SmallBufferSize = buffer;
-//      m_useSmallBuffer = (buffer > 0);
-//    }
-//
-//    /// @return the size of the to-Small buffer, in number of events
-//    uint64_t getSmallBufferSize() const
-//    { return m_SmallBufferSize; }
-//
-//    ///@return the memory used in the "toSmall" buffer, in number of events
-//    uint64_t getSmallBufferUsed() const
-//    { return m_SmallBufferUsed;  }
+    //-------------------------------------------------------------------------------------------
+    /** Set the size of the "small" buffer, in number of events.
+     * This is the buffer for event lists that are too small to bother caching to disk
+     * @param buffer :: total number of events to allow in the "small" buffer */
+    void setSmallBufferSize(uint64_t buffer)
+    {
+      m_smallBufferSize = buffer;
+      m_useSmallBuffer = (buffer > 0);
+      calcSmallThreshold();
+    }
+
+    /// @return the size of the to-Small buffer, in number of events
+    uint64_t getSmallBufferSize() const
+    { return m_smallBufferSize; }
+
+    ///@return the memory used in the "toSmall" buffer, in number of events
+    uint64_t getSmallBufferUsed() const
+    { return m_smallBufferUsed;  }
+
+    ///@return Threshold number of events for an object to be considered "small"
+    uint64_t getSmallThreshold() const
+    { return m_smallThreshold;  }
 
     //-------------------------------------------------------------------------------------------
     ///@return reference to the free space map (for testing only!)
@@ -210,7 +216,8 @@ namespace Kernel
 
 
   protected:
-    void writeOldObjects();
+    inline void writeOldObjects();
+    void calcSmallThreshold();
 
     // ----------------------- In-memory buffer --------------------------------------
     /// Do we use the MRU buffer?
@@ -248,6 +255,22 @@ namespace Kernel
     /// Total amount of memory in the "toWrite" buffer.
     uint64_t m_writeBufferUsed;
 
+    // ----------------------- Small Objects Buffer --------------------------------------
+    /// Do we use the buffer of "small" objects?
+    bool m_useSmallBuffer;
+
+    /// Approximate amount of memory to allow in "small" objects. This will be an UPPER bound.
+    uint64_t m_smallBufferSize;
+
+    /// Vector where the index = object ID; value = size of the object if it is in the small object buffer.
+    std::vector<uint32_t> m_smallBuffer;
+
+    /// Total amount of memory in the "small objects" buffer.
+    uint64_t m_smallBufferUsed;
+
+    /// Threshold number of events for an object to be considered "small"
+    uint64_t m_smallThreshold;
+
 
     // ----------------------- Free space map --------------------------------------
     /// Map of the free blocks in the file
@@ -268,6 +291,7 @@ namespace Kernel
     DiskMRU(const DiskMRU&);
     /// Private assignment operator: NO ASSIGNMENT ALLOWED
     DiskMRU& operator=(const DiskMRU&);
+
 
   };
 

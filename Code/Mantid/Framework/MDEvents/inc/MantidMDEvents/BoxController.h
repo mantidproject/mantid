@@ -377,18 +377,19 @@ namespace MDEvents
     /** Set the memory-caching parameters for a file-backed
      * MDEventWorkspace.
      *
-     * @param cacheSize :: number of EVENTS to keep in memory.
-     * @param writeBufferSize :: number of EVENTS to accumulate before performing a disk write.
      * @param bytesPerEvent :: sizeof(MDLeanEvent) that is in the workspace
-     *
+     * @param mruSize :: number of EVENTS to keep in the MRU.
+     * @param writeBufferSize :: number of EVENTS to accumulate before performing a disk write.
+     * @param smallBufferSize :: number of EVENTS to allow to stay in memory for small objects.
      */
-    void setCacheParameters(size_t cacheSize, size_t writeBufferSize, size_t bytesPerEvent)
+    void setCacheParameters(size_t bytesPerEvent, uint64_t mruSize, uint64_t writeBufferSize, uint64_t smallBufferSize)
     {
       if (bytesPerEvent == 0)
         throw std::invalid_argument("Size of an event cannot be == 0.");
       // Save the values
-      m_diskMRU.setMruSize(cacheSize);
+      m_diskMRU.setMruSize(mruSize);
       m_diskMRU.setWriteBufferSize(writeBufferSize);
+      m_diskMRU.setSmallBufferSize(smallBufferSize);
       m_bytesPerEvent = bytesPerEvent;
     }
 

@@ -177,7 +177,7 @@ namespace MDEvents
 
     if (m_BoxController->getFile())
     {
-      mess << "File backed: cache uses ";
+      mess << "File backed: MRU: ";
       double avail, used;
       avail = double(m_BoxController->getDiskMRU().getMruSize() * sizeof(MDE)) / (1024*1024);
       used = double(m_BoxController->getDiskMRU().getMruUsed() * sizeof(MDE)) / (1024*1024);
@@ -186,6 +186,9 @@ namespace MDEvents
       avail = double(m_BoxController->getDiskMRU().getWriteBufferSize() * sizeof(MDE)) / (1024*1024);
       used = double(m_BoxController->getDiskMRU().getWriteBufferUsed() * sizeof(MDE)) / (1024*1024);
       mess << "Write buffer: " << used << " of " << avail << " MB. ";
+      avail = double(m_BoxController->getDiskMRU().getSmallBufferSize() * sizeof(MDE)) / (1024*1024);
+      used = double(m_BoxController->getDiskMRU().getSmallBufferUsed() * sizeof(MDE)) / (1024*1024);
+      mess << "Small objects: " << used << " of " << avail << " MB. ";
       out.push_back(mess.str()); mess.str("");
     }
     else
@@ -220,7 +223,7 @@ namespace MDEvents
     std::vector<IMDBox<MDE,nd>*> boxes_filtered;
     this->getBox()->getBoxes(boxes, 1000, false);
 
-    bool withPointsOnly = false;
+    bool withPointsOnly = true;
     if (withPointsOnly)
     {
       boxes_filtered.reserve(boxes.size());
