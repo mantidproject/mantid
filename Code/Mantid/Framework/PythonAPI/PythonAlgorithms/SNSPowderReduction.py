@@ -17,6 +17,8 @@ class SNSPowderReduction(PythonAlgorithm):
                 self.van = int(data[3])
                 self.can = int(data[4])
                 self.has_dspace = has_dspace
+                self.tmin = 0. # default value
+                self.tmax = 0. # default value
                 if has_dspace:
                     self.dmin = data[5]
                     self.dmax = data[6]
@@ -279,18 +281,22 @@ class SNSPowderReduction(PythonAlgorithm):
             if not self.getProperty("CompressOnRead"):
                 CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
             SortEvents(wksp)
-        try:
+        if "histo" in self.getProperty("Extension"):
+            cropkwargs = {}
             if info.tmin > 0.:
-                MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=0., XMax=info.tmin)
-        except AttributeError:
-            pass
-        try:
+                cropkwargs["XMin"] = info.tmin
+            if info.tmax > 0.:
+                cropkwargs["XMax"] = info.tmax
+            CropWorkspace(InputWorkspace=wksp, OutputWorkspace=wksp, **cropkwargs)
+        else:
+            tmin = wksp.getTofMin()
+            tmax = wksp.getTofMax()
+            if info.tmin > 0. and info.tmin > tmin:
+                MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, Xmin=tmin, XMax=info.tmin)
             if info.tmax > 0.:
                 if info.tmin >= info.tmax:
                     raise RuntimeError("Encountered tmin (%f) >= tmax (%f)" % (info.tmin, info.tmax))
-                MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=info.tmax, XMax=5.*info.tmax)
-        except AttributeError:
-            pass
+                MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=info.tmax, XMax=tmax)
         MaskDetectors(Workspace=wksp, MaskedWorkspace=self._instrument + "_mask")
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets")
         LRef = self.getProperty("UnwrapRef")
@@ -368,6 +374,10 @@ class SNSPowderReduction(PythonAlgorithm):
             SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles="False", Append=False, MultiplyByBinWidth=normalized, Bank=info.bank, Format="SLOG")
         if "fullprof" in self._outTypes:
             SaveFocusedXYE(InputWorkspace=wksp, Filename=filename+".dat")
+
+        # always save processed files
+        SaveNexusProcessed(InputWorkspace=wksp, 
+                           Filename=filename+"_processed.nxs")
 
     def PyExec(self):
         # temporary hack for getting python algorithms working
