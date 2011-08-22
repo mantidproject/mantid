@@ -111,6 +111,9 @@ class MANTID_GEOMETRY_DLL IndexingUtils
   static bool ValidIndex( const Kernel::V3D  & hkl,
                                 double         tolerance );
 
+  /// Check that the specified UB is reasonable for an orientation matrix 
+  static bool CheckUB( const Kernel::DblMatrix & UB );
+
   /// Calculate the number of Q vectors that are mapped to integer indices by UB
   static int NumberIndexed( const Kernel::DblMatrix         & UB,
                             const std::vector<Kernel::V3D>  & q_vectors,

@@ -94,43 +94,34 @@ namespace Crystal
 
     if ( indexed_count < 3 ) 
     { 
-      throw std::runtime_error("At least three linearly independent indexed peaks are needed.");
+      throw std::runtime_error(
+            "At least three linearly independent indexed peaks are needed.");
     }
 
     Matrix<double> UB(3,3,false);
     double error = IndexingUtils::Optimize_UB( UB, hkl_vectors, q_vectors );
 
-    double det =   UB[0][0] * ( UB[1][1] * UB[2][2] - UB[1][2] * UB[2][1] )
-                 - UB[0][1] * ( UB[1][0] * UB[2][2] - UB[1][2] * UB[2][0] )
-                 + UB[0][2] * ( UB[1][0] * UB[2][1] - UB[1][1] * UB[2][0] );
-
-    double abs_det = fabs(det);
-
     std::cout << "Error = " << error << std::endl;
     std::cout << "UB = " << UB << std::endl;
-    std::cout << "Det = " << det << std::endl;
 
     char logInfo[200];
-    if ( abs_det > 10 || abs_det < 1e-9 ) // UB not found correctly
+    if ( ! IndexingUtils::CheckUB( UB ) ) // UB not found correctly
     {
       g_log.notice( std::string(
          "Found Invalid UB...peaks used might not be linearly independent") );
-      sprintf( logInfo,
-               std::string("determinant(UB) = %10.5e").c_str(), det );
-      g_log.notice( std::string(logInfo) );
       g_log.notice( std::string(
          "UB NOT SAVED.") );
     }
-    else                                  // tell user how many would be indexed
-    {                                     // from the full list of peaks, and  
-      q_vectors.clear();                  // save the UB in the sample
+    else                                 // tell user how many would be indexed
+    {                                    // from the full list of peaks, and  
+      q_vectors.clear();                 // save the UB in the sample
       q_vectors.reserve( n_peaks );
       for ( size_t i = 0; i < n_peaks; i++ )
       {
         q_vectors.push_back( peaks[i].getQSampleFrame() );
       }
       double tolerance = 0.1;
-      int num_indexed = IndexingUtils::NumberIndexed( UB, q_vectors, tolerance );
+      int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
 
       sprintf( logInfo,
                std::string("New UB will index %1d Peaks out of %1d with tolerance %5.3f").c_str(),
@@ -145,7 +136,7 @@ namespace Crystal
       double calc_alpha = o_lattice.alpha();
       double calc_beta  = o_lattice.beta();
       double calc_gamma = o_lattice.gamma();
-                                          // Show the modified lattice parameters
+                                       // Show the modified lattice parameters
       sprintf( logInfo, 
                std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
                calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);

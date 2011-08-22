@@ -2,8 +2,7 @@
 
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidKernel/Quat.h"
-
-
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
@@ -391,7 +390,6 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
 
   for ( size_t i = 0; i < num_initial; i++ )
     some_qs.push_back( sorted_qs[i] );
-
   std::vector<V3D> directions;
   ScanFor_Directions( directions,
                       some_qs,
@@ -399,13 +397,17 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
                       required_tolerance,
                       degrees_per_step );
 
-  std::sort( directions.begin(), directions.end(), CompareMagnitude );
+  if ( directions.size() < 3 )
+  {
+    throw std::runtime_error(
+                 "Could not find at least three possible lattice directions");
+  }
 
+  std::sort( directions.begin(), directions.end(), CompareMagnitude );
   V3D a_dir = directions[0];     // take the shortest direction to be "a"
                                  // then take "b" to be the next shortest 
                                  // direction that forms a large enough angle
                                  // with "a".
-
   double min_deg = (180/PI) * atan(2*min_d/max_d);
 
   double epsilon = 5;                    //  tolerance on right angle (degrees)
@@ -649,10 +651,10 @@ double IndexingUtils::Optimize_UB(      DblMatrix         & UB,
   {
     throw std::runtime_error("Failed to find UB, invalid hkl or Q values");
   }
- 
-  if ( fabs ( UB.determinant() ) < 1.0e-10 )
+
+  if ( ! CheckUB( UB ) )
   {
-    throw std::runtime_error("UB is singular, invalid hkl or Q values");
+    throw std::runtime_error( "The optimized UB is not valid");
   }
 
   return sum_sq_error;
@@ -1195,6 +1197,49 @@ bool IndexingUtils::ValidIndex( const V3D & hkl, double tolerance )
 
 
 /**
+  Check whether or not the specified matrix is reasonable for an orientation
+  matrix.  In particular, check that it is a 3x3 matrix without any nan values
+  and with a determinant that is within a reasonable range, for an 
+  orientation matrix.
+
+  @param UB  A 3x3 matrix of doubles holding the UB matrix
+
+  @return true if this could be a valid UB matrix. 
+ */
+
+bool IndexingUtils::CheckUB( const DblMatrix & UB )
+{
+  if ( UB.numRows() != 3 || UB.numCols() != 3 )
+    return false;
+
+  for ( size_t row = 0; row < 3; row++ )
+    for ( size_t col = 0; col < 3; col++ )
+    {
+      if ( (boost::math::isnan)(UB[row][col]) )
+      {
+        return false;
+      }
+      if ( (boost::math::isinf)(UB[row][col]) )
+      {
+        return false;
+      }
+    }
+
+  double det =   UB[0][0] * ( UB[1][1] * UB[2][2] - UB[1][2] * UB[2][1] )
+               - UB[0][1] * ( UB[1][0] * UB[2][2] - UB[1][2] * UB[2][0] )
+               + UB[0][2] * ( UB[1][0] * UB[2][1] - UB[1][1] * UB[2][0] );
+
+  double abs_det = fabs(det);
+  if ( abs_det > 10 || abs_det < 1e-9 ) // UB not found correctly
+  {
+    return false;
+  }
+
+  return true;
+}
+
+
+/**
   Calculate the number of Q vectors that are mapped to integer h,k,l 
   values by UB.  Each of the Miller indexes, h, k and l must be within
   the specified tolerance of an integer, in order to count the peak
@@ -1220,17 +1265,15 @@ int IndexingUtils::NumberIndexed( const DblMatrix         & UB,
 {
   int count = 0;
 
-  if ( UB.numRows() != 3 || UB.numCols() != 3 )
-  {
-   throw std::invalid_argument("UB matrix NULL or not 3X3");
-  }
-
   DblMatrix UB_inverse( UB );
-  double determinant = UB_inverse.Invert();
-  if ( fabs( determinant ) < 1.0e-10 )
+  if ( CheckUB( UB ) )
   {
-   throw std::invalid_argument("UB is singular (det < 1e-10)");
-  } 
+    UB_inverse.Invert();
+  }
+  else
+  {
+    throw std::runtime_error( "The UB in NumberIndexed() is not valid");
+  }
 
   V3D hkl;
   for ( size_t i = 0; i < q_vectors.size(); i++ )
@@ -1275,23 +1318,21 @@ int IndexingUtils::CalculateMillerIndices(
                                         std::vector<V3D>  & miller_indices,
                                         double            & ave_error )
 {
-  int count = 0;
-
-  if ( UB.numRows() != 3 || UB.numCols() != 3 )
-  {
-   throw std::invalid_argument("UB matrix NULL or not 3X3");
-  }
-
   DblMatrix UB_inverse( UB );
-  double determinant = UB_inverse.Invert();
-  if ( fabs( determinant ) < 1.0e-10 )
+
+  if ( CheckUB( UB ) )
   {
-   throw std::invalid_argument("UB is singular (det < 1e-10)");
+    UB_inverse.Invert();
+  }
+  else
+  {
+    throw std::runtime_error("The UB in CalculateMillerIndices is not valid");
   }
 
   miller_indices.clear();
   miller_indices.reserve( q_vectors.size() );
 
+  int count = 0;
   double h_error,
          k_error,
          l_error;
@@ -1529,7 +1570,14 @@ int IndexingUtils::GetIndexedPeaks( const DblMatrix         & UB,
   fit_error = 0;
 
   DblMatrix UB_inverse( UB );
-  UB_inverse.Invert();
+  if ( CheckUB( UB ) )
+  {
+    UB_inverse.Invert();
+  }
+  else
+  {
+    throw std::runtime_error("The UB in GetIndexedPeaks is not valid");
+  }
 
   for ( size_t q_num = 0; q_num < q_vectors.size(); q_num++ )
   {

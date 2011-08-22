@@ -76,6 +76,12 @@ namespace Crystal
     OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
     Matrix<double> UB = o_lattice.getUB();
 
+    if ( ! IndexingUtils::CheckUB( UB ) )
+    {
+       throw std::runtime_error(
+             "ERROR: The stored UB is not a valid orientation matrix");
+    }
+
     std::vector<Peak> &peaks = ws->getPeaks();
     size_t n_peaks = ws->getNumberPeaks();
 
@@ -96,7 +102,7 @@ namespace Crystal
                                                              miller_indices,
                                                              average_error );
 
-                                          // now tell the user how many were indexed
+                                   // now tell the user how many were indexed
     char logInfo[200];
     sprintf( logInfo, 
              std::string("Indexed %1d Peaks out of %1d").c_str(),    
@@ -112,7 +118,6 @@ namespace Crystal
     {
       peaks[i].setHKL( miller_indices[i] );
     } 
-
   }
 
 
