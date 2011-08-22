@@ -17,6 +17,9 @@
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
+#include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
+#include "MantidVatesAPI/vtkDataSetToWsLocation.h"
+#include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include <vtkDataSet.h>
@@ -79,9 +82,6 @@ namespace Mantid
     private:
 
       Mantid::API::ImplicitFunction_sptr constructPlaneFromVTKPlane(vtkPlane* plane, Mantid::MDAlgorithms::WidthParameter& width);
-      std::string findExistingWorkspaceName(vtkDataSet *inputDataSet, const char* id);
-      std::string findExistingWorkspaceLocation(vtkDataSet *inputDataSet, const char* id);
-      Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(vtkDataSet* inputDataSet, const char* id);
       void persistReductionKnowledge(vtkDataSet* out_ds, const RebinningKnowledgeSerializer& xmlGenerator, const char* id);
       std::string extractFormattedPropertyFromDimension(Mantid::Geometry::IMDDimension_sptr dimension) const;
       void addFunctionKnowledge();
@@ -137,7 +137,7 @@ namespace Mantid
       {
         throw std::logic_error("Rebinning operations require Rebinning Metadata");
       }
-      std::string wsName = findExistingWorkspaceName(m_input, XMLDefinitions::metaDataId().c_str());
+      std::string wsName = vtkDataSetToWsName::exec(m_input);
       if(!wsProvider.canProvideWorkspace(wsName))
       {
         throw std::invalid_argument("Wrong type of Workspace stored. Cannot handle with this presenter");
@@ -178,7 +178,7 @@ namespace Mantid
       //Apply the workspace name after extraction from the input xml.
       m_serializer.setWorkspaceName( wsName);
       //Apply the workspace location after extraction from the input xml.
-      m_serializer.setWorkspaceLocation( findExistingWorkspaceLocation(m_input, XMLDefinitions::metaDataId().c_str()));
+      m_serializer.setWorkspaceLocation( vtkDataSetToWsLocation::exec(m_input));
 
     }
 
@@ -212,7 +212,7 @@ namespace Mantid
       //Add existing functions.
       Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
       compFunction->addFunction(m_plane);
-      Mantid::API::ImplicitFunction* existingFunctions = findExistingRebinningDefinitions(m_input, XMLDefinitions::metaDataId().c_str());
+      Mantid::API::ImplicitFunction* existingFunctions = vtkDataSetToImplicitFunction::exec(m_input);
       if (existingFunctions != NULL)
       {
         compFunction->addFunction(Mantid::API::ImplicitFunction_sptr(existingFunctions));
@@ -397,42 +397,6 @@ namespace Mantid
     }
 
     template<typename ViewType>
-    std::string MDEWRebinningPresenter<ViewType>::findExistingWorkspaceName(vtkDataSet *inputDataSet, const char* id)
-    {
-      using Mantid::Geometry::MDGeometryXMLDefinitions;
-      FieldDataToMetadata convert;
-      std::string xmlString = convert(inputDataSet->GetFieldData(), id);
-
-      Poco::XML::DOMParser pParser;
-      Poco::XML::Document* pDoc = pParser.parseString(xmlString);
-      Poco::XML::Element* pRootElem = pDoc->documentElement();
-      Poco::XML::Element* wsNameElem = pRootElem->getChildElement(MDGeometryXMLDefinitions::workspaceNameElementName());
-      if(wsNameElem == NULL)
-      {
-        throw std::runtime_error("The element containing the workspace name must be present.");
-      }
-      return wsNameElem->innerText();
-    }
-
-    template<typename ViewType>
-    std::string MDEWRebinningPresenter<ViewType>::findExistingWorkspaceLocation(vtkDataSet *inputDataSet, const char* id)
-    {
-      using Mantid::Geometry::MDGeometryXMLDefinitions;
-      FieldDataToMetadata convert;
-      std::string xmlString = convert(inputDataSet->GetFieldData(), id);
-
-      Poco::XML::DOMParser pParser;
-      Poco::XML::Document* pDoc = pParser.parseString(xmlString);
-      Poco::XML::Element* pRootElem = pDoc->documentElement();
-      Poco::XML::Element* wsLocationElem = pRootElem->getChildElement(MDGeometryXMLDefinitions::workspaceLocationElementName());
-      if(wsLocationElem == NULL)
-      {
-        return "";
-      }
-      return wsLocationElem->innerText();
-    }
-
-    template<typename ViewType>
     void MDEWRebinningPresenter<ViewType>::persistReductionKnowledge(vtkDataSet* out_ds, const
       RebinningKnowledgeSerializer& xmlGenerator, const char* id)
     {
@@ -443,29 +407,6 @@ namespace Mantid
 
       out_ds->SetFieldData(fd);
       fd->Delete();
-    }
-
-    template<typename ViewType>
-    Mantid::API::ImplicitFunction*  MDEWRebinningPresenter<ViewType>::findExistingRebinningDefinitions(
-      vtkDataSet* inputDataSet, const char* id)
-    {
-      using Mantid::Geometry::MDGeometryXMLDefinitions;
-      Mantid::API::ImplicitFunction* function = NULL;
-
-      FieldDataToMetadata convert;
-      std::string xmlString = convert(inputDataSet->GetFieldData(), id);
-      if (false == xmlString.empty())
-      {
-        Poco::XML::DOMParser pParser;
-        Poco::XML::Document* pDoc = pParser.parseString(xmlString);
-        Poco::XML::Element* pRootElem = pDoc->documentElement();
-        Poco::XML::Element* functionElem = pRootElem->getChildElement(MDGeometryXMLDefinitions::functionElementName());
-        if(NULL != functionElem)
-        {
-          function = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(functionElem);
-        }
-      }
-      return function;
     }
 
   }

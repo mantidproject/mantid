@@ -13,6 +13,7 @@
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
+#include "MantidVatesAPI/vtkDataSetToWsName.h"
 
 using namespace Mantid::API;
 using namespace Mantid::VATES;
@@ -58,7 +59,7 @@ int vtkSplatterPlot::RequestData(vtkInformation *, vtkInformationVector **, vtkI
 
   vtkDataSet *input = vtkDataSet::SafeDownCast(this->GetInput(0));
   
-  std::string wsName = findExistingWorkspaceName(input, XMLDefinitions::metaDataId().c_str());
+  std::string wsName = Mantid::VATES::vtkDataSetToWsName::exec(input);
 
   Workspace_sptr result=AnalysisDataService::Instance().retrieve(wsName);
 
@@ -83,21 +84,4 @@ void vtkSplatterPlot::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os, indent);
 }
 
-//TODO move or refactor this.
-std::string vtkSplatterPlot::findExistingWorkspaceName(vtkDataSet *inputDataSet, const char* id)
-{
-  using Mantid::Geometry::MDGeometryXMLDefinitions;
-  FieldDataToMetadata convert;
-  std::string xmlString = convert(inputDataSet->GetFieldData(), id);
-
-  Poco::XML::DOMParser pParser;
-  Poco::XML::Document* pDoc = pParser.parseString(xmlString);
-  Poco::XML::Element* pRootElem = pDoc->documentElement();
-  Poco::XML::Element* wsNameElem = pRootElem->getChildElement(MDGeometryXMLDefinitions::workspaceNameElementName());
-  if(wsNameElem == NULL)
-  {
-    throw std::runtime_error("The element containing the workspace name must be present.");
-  }
-  return wsNameElem->innerText();
-}
 

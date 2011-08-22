@@ -19,7 +19,6 @@ protected:
 private:
   vtkSplatterPlot(const vtkSplatterPlot&);
   void operator = (const vtkSplatterPlot&);
-  std::string findExistingWorkspaceName(vtkDataSet *inputDataSet, const char* id);
   size_t m_numberPoints;
 };
 #endif
