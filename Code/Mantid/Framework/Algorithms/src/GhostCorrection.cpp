@@ -5,7 +5,6 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -28,8 +27,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void GhostCorrection::initDocs()
     {
-      this->setWikiSummary("Perform ghost correction for older POWGEN detectors on an EventWorkspace. ");
-      this->setOptionalMessage("Perform ghost correction for older POWGEN detectors on an EventWorkspace.");
+      this->setWikiSummary("Perform ghost correction for older POWGEN detectors on an inputWorkspace. ");
+      this->setOptionalMessage("Perform ghost correction for older POWGEN detectors on an inputWorkspace.");
     }
     
 
@@ -73,15 +72,14 @@ namespace Mantid
     {
       nGroups = 0;
 
-      //Input workspace must be in dSpacing and be an EventWorkspace
-      API::CompositeValidator<MatrixWorkspace> *wsValidator = new API::CompositeValidator<MatrixWorkspace>;
-      wsValidator->add(new API::WorkspaceUnitValidator<MatrixWorkspace>("TOF"));
-      wsValidator->add(new API::RawCountValidator<MatrixWorkspace>);
-      wsValidator->add(new API::EventWorkspaceValidator<MatrixWorkspace>);
+      //Input workspace must be in dSpacing and be an inputWorkspace
+      API::CompositeValidator<EventWorkspace> *wsValidator = new API::CompositeValidator<EventWorkspace>;
+      wsValidator->add(new API::WorkspaceUnitValidator<EventWorkspace>("TOF"));
+      wsValidator->add(new API::RawCountValidator<EventWorkspace>);
 
       declareProperty(
-        new WorkspaceProperty<>("InputWorkspace", "",Direction::Input, wsValidator),
-        "EventWorkspace from which to make a ghost correction histogram.");
+        new WorkspaceProperty<EventWorkspace>("InputWorkspace", "",Direction::Input, wsValidator),
+        "inputWorkspace from which to make a ghost correction histogram.");
 
       declareProperty(
         new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
@@ -230,11 +228,6 @@ namespace Mantid
       // Get the input workspace
       this->inputW = getProperty("InputWorkspace");
 
-      //Now, determine if the input workspace is actually an EventWorkspace
-      EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
-      if (eventW == NULL)
-        throw std::runtime_error("Invalid workspace type provided to GhostCorrection. Only EventWorkspaces work with this algorithm.");
-
       //Load the grouping
       GroupingWorkspace_sptr groupWS = getProperty("GroupingWorkspace");
       groupWS->makeDetectorIDToGroupMap(detId_to_group, nGroups);
@@ -286,7 +279,7 @@ namespace Mantid
       outputW->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 
       //Go through the groups, starting at #1!
-      PARALLEL_FOR2(eventW, outputW)
+      PARALLEL_FOR2(inputW, outputW)
       for (int64_t gr=1; gr < this->nGroups; ++gr)
       {
         PARALLEL_START_INTERUPT_REGION
@@ -313,7 +306,7 @@ namespace Mantid
           int64_t inputDetectorID = it->second;
 
           //This is the events in the pixel CAUSING the ghost.
-          const EventList & sourceEventList = eventW->getEventList(inputWorkspaceIndex);
+          const EventList & sourceEventList = inputW->getEventList(inputWorkspaceIndex);
 
           //Now get the actual vector of tofevents
           const std::vector<TofEvent>& events = sourceEventList.getEvents();

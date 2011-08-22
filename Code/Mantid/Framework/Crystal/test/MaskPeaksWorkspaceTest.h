@@ -39,20 +39,19 @@ public:
   {
 
     int numEventsPer = 100;
-    MatrixWorkspace_sptr inputW = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer);
-    EventWorkspace_sptr in_ws = boost::dynamic_pointer_cast<EventWorkspace>( inputW );
-    AnalysisDataService::Instance().addOrReplace("testInEW", in_ws);
+    EventWorkspace_sptr inputW = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer);
+    AnalysisDataService::Instance().addOrReplace("testInEW", inputW);
     if (type == WEIGHTED)
-      in_ws *= 2.0;
+      inputW *= 2.0;
     if (type == WEIGHTED_NOTIME)
     {
-      for (size_t i =0; i<in_ws->getNumberHistograms(); i++)
+      for (size_t i =0; i<inputW->getNumberHistograms(); i++)
       {
-        EventList & el = in_ws->getEventList(i);
+        EventList & el = inputW->getEventList(i);
         el.compressEvents(0.0, &el);
       }
     }
-    size_t nevents0 = in_ws->getNumberEvents();
+    size_t nevents0 = inputW->getNumberEvents();
     // Register the workspace in the data service
 
     // Create the peaks workspace
@@ -60,7 +59,7 @@ public:
     pkws->setName("TOPAZ");
 
     // This loads (appends) the peaks
-    Mantid::DataObjects::Peak PeakObj(in_ws->getInstrument(),1000,100.);
+    Mantid::DataObjects::Peak PeakObj(inputW->getInstrument(),1000,100.);
     pkws->addPeak( PeakObj);
     AnalysisDataService::Instance().add("TOPAZ", pkws);
 

@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
@@ -32,11 +33,7 @@ using namespace DataObjects;
 
 void TOFSANSResolution::init()
 {
-  CompositeValidator<> *iqValidator = new CompositeValidator<>;
-  iqValidator->add(new WorkspaceUnitValidator<>("MomentumTransfer"));
-  iqValidator->add(new EventWorkspaceValidator<>(false));
-
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::InOut, iqValidator),
+  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::InOut, new WorkspaceUnitValidator<Workspace2D>("MomentumTransfer")),
       "Name the workspace to calculate the resolution for");
 
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
@@ -73,7 +70,7 @@ double TOFSANSResolution::getTOFResolution(double wl)
 
 void TOFSANSResolution::exec()
 {
-  MatrixWorkspace_sptr iqWS = getProperty("InputWorkspace");
+  Workspace2D_sptr iqWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr reducedWS = getProperty("ReducedWorkspace");
   EventWorkspace_sptr reducedEventWS = boost::dynamic_pointer_cast<EventWorkspace>(reducedWS);
   const double min_wl = getProperty("MinWavelength");
@@ -89,6 +86,8 @@ void TOFSANSResolution::exec()
   R2 /= 1000.0;
   wl_resolution = getProperty("DeltaT");
 
+  // Although we want the 'ReducedWorkspace' to be an event workspace for this algorithm to do
+  // anything, we don't want the algorithm to 'fail' if it isn't
   if (!reducedEventWS)
   {
     g_log.warning() << "An Event Workspace is needed to compute dQ. Calculation skipped." << std::endl;

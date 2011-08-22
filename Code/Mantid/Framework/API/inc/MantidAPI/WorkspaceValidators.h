@@ -210,59 +210,6 @@ private:
 };
 
 
-
-//===============================================================================================
-/** A validator which checks that a workspace is an EventWorkspace.
- *
- *  @author Janik Zikovsky, SNS
- *  @date 13/08/2010
- */
-template <typename TYPE = MatrixWorkspace>
-class DLLExport EventWorkspaceValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
-{
-public:
-  /** Constructor
-   *  @param mustBeEvent :: Flag indicating whether the check is that a workspace should
-   *                     be EventWorkspace (true, default) or shouldn't (false).
-   */
-  explicit EventWorkspaceValidator(const bool& mustBeEvent = true) :
-    m_mustBeEvent(mustBeEvent) {}
-
-  virtual ~EventWorkspaceValidator() {}
-
-  ///Gets the type of the validator
-  std::string getType() const { return "eventworkspace"; }
-
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new EventWorkspaceValidator(*this); }
-
-private:
-  /** Checks if the workspace contains a histogram when it shouldn't and vice-versa
-   *  @param value :: The workspace to test
-   *  @return A user level description if a problem exists or ""
-   */
-  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
-  {
-    //Try to cast to EventWorkspace
-    IEventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<IEventWorkspace>(value);
-
-    if (m_mustBeEvent)
-    {
-      if ( eventWS ) return "";
-      else return "The workspace must be an EventWorkspace";
-    }
-    else
-    {
-      if ( !eventWS ) return "";
-      else return "The workspace must be not be an EventWorkspace";
-    }
-  }
-
-  /// A flag indicating whether this validator requires that the workspace be a histogram (true) or not
-  const bool m_mustBeEvent;
-};
-
-
-
 //===============================================================================================
 /** A validator which checks that a workspace contains raw counts in its bins
  *

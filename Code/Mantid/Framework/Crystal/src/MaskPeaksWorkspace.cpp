@@ -43,7 +43,7 @@ namespace Mantid
     void MaskPeaksWorkspace::init()
     {
 
-      declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, new EventWorkspaceValidator<>)
+      declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace", "", Direction::Input)
           , "A 2D event workspace");
 
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "", Direction::Input), "Name of the peaks workspace.");
@@ -119,7 +119,7 @@ namespace Mantid
             {
               size_t wi = (*pixel_to_wi)[pixelID];
               const MantidVec& X = inputW->readX(wi);
-              eventW->getEventList(wi).maskTof(X[0],X[X.size()-1]);
+              inputW->getEventList(wi).maskTof(X[0],X[X.size()-1]);
             }
           }
 
@@ -131,7 +131,6 @@ namespace Mantid
     void MaskPeaksWorkspace::retrieveProperties()
     {
       inputW = getProperty("InputWorkspace");
-      eventW = boost::dynamic_pointer_cast<EventWorkspace>( inputW );
       Xmin = getProperty("XMin");
       Xmax = getProperty("XMax");
       Ymin = getProperty("YMin");

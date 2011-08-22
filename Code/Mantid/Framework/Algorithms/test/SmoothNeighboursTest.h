@@ -86,8 +86,8 @@ public:
   {
 
     int numEventsPer = 100;
-    MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
-    EventWorkspace_sptr in_ws = boost::dynamic_pointer_cast<EventWorkspace>( inputW );
+//    MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
+    EventWorkspace_sptr in_ws = createDiffractionEventWorkspace(numEventsPer);
     if (type == WEIGHTED)
       in_ws *= 2.0;
     if (type == WEIGHTED_NOTIME)
@@ -104,7 +104,7 @@ public:
     SmoothNeighbours alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT( alg.isInitialized() );
-    alg.setProperty("InputWorkspace", inputW);
+    alg.setProperty("InputWorkspace", in_ws);
     alg.setProperty("OutputWorkspace", "testEW");
     alg.setProperty("AdjX", 1);
     alg.setProperty("AdjY", 1);

@@ -38,10 +38,10 @@ using namespace DataObjects;
 void SmoothNeighbours::init()
 {
   declareProperty(
-    new WorkspaceProperty<>("InputWorkspace","",Direction::Input, new EventWorkspaceValidator<>),
+    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input),
                             "The workspace containing the spectra to be averaged." );
   declareProperty(
-    new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+    new WorkspaceProperty<EventWorkspace>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm." );
 
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
@@ -68,10 +68,7 @@ void SmoothNeighbours::exec()
   AdjY = getProperty("AdjY");
 
   // Get the input workspace
-  MatrixWorkspace_const_sptr matrixInWS = getProperty("InputWorkspace");
-  EventWorkspace_const_sptr inWS = boost::dynamic_pointer_cast<const EventWorkspace>( matrixInWS );
-  if (!inWS)
-    throw std::invalid_argument("InputWorkspace should be an EventWorkspace.");
+  EventWorkspace_const_sptr inWS = getProperty("InputWorkspace");
 
   //Get some stuff from the input workspace
   const size_t numberOfSpectra = inWS->getNumberHistograms();
@@ -80,7 +77,6 @@ void SmoothNeighbours::exec()
   if (!inst)
     throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
 
-  API::MatrixWorkspace_sptr matrixOutputWS = this->getProperty("OutputWorkspace");
   EventWorkspace_sptr outWS;
   //Make a brand new EventWorkspace
   outWS = boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", numberOfSpectra, YLength+1, YLength));
@@ -89,9 +85,7 @@ void SmoothNeighbours::exec()
   inWS->sortAll(TOF_SORT, NULL);
   outWS->sortAll(TOF_SORT, NULL);
 
-  //Cast to the matrixOutputWS and save it
-  matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS);
-  this->setProperty("OutputWorkspace", matrixOutputWS);
+  this->setProperty("OutputWorkspace", outWS);
 
 //  //Split the detector names string.
 //  std::vector<std::string> det_names;

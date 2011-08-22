@@ -53,16 +53,12 @@ FilterByLogValue::~FilterByLogValue()
 //-----------------------------------------------------------------------
 void FilterByLogValue::init()
 {
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
-  //Workspace must be an Event workspace
-  wsValidator->add(new API::EventWorkspaceValidator<MatrixWorkspace>);
-
   declareProperty(
-    new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::InOut,wsValidator),
+    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::InOut),
     "An input event workspace" );
 
   declareProperty(
-    new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+    new WorkspaceProperty<EventWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
 
   declareProperty("LogName", "ProtonCharge, "
@@ -95,13 +91,7 @@ void FilterByLogValue::exec()
 {
 
   // convert the input workspace into the event workspace we already know it is
-  const MatrixWorkspace_sptr matrixInputWS = this->getProperty("InputWorkspace");
-  EventWorkspace_sptr inputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixInputWS);
-  if (!inputWS)
-  {
-    throw std::invalid_argument("Input workspace is not an EventWorkspace. Aborting.");
-  }
-
+  EventWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
 
   // Get the properties.
   double min = getProperty("MinimumValue");
@@ -204,7 +194,7 @@ void FilterByLogValue::exec()
     inputWS->mutableRun().integrateProtonCharge();
 
     //Cast the outputWS to the matrixOutputWS and save it
-    this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS));
+    this->setProperty("OutputWorkspace", inputWS);
   }
   else
   {
@@ -245,7 +235,7 @@ void FilterByLogValue::exec()
     inputWS->run().splitByTime(splitter, output_runs);
 
     //Cast the outputWS to the matrixOutputWS and save it
-    this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS));
+    this->setProperty("OutputWorkspace", outputWS);
   }
 
 

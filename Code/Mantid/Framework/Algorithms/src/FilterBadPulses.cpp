@@ -71,10 +71,10 @@ const std::string FilterBadPulses::category() const
 void FilterBadPulses::init()
 {
   declareProperty(
-    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, new API::EventWorkspaceValidator<MatrixWorkspace>),
+    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input),
     "An event workspace" );
   declareProperty(
-    new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+    new WorkspaceProperty<EventWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
   BoundedValidator<double> *range = new BoundedValidator<double>();
   range->setBounds(0., 100.);
@@ -88,7 +88,7 @@ void FilterBadPulses::init()
 void FilterBadPulses::exec()
 {
   // the input workspace into the event workspace we already know it is
-  MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
+  EventWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
 
   // get the proton charge exists in the run object
   const API::Run& runlogs = inputWS->run();
@@ -113,14 +113,14 @@ void FilterBadPulses::exec()
 
   // sub-algorithme does all of the actual work - do not set the output workspace
   IAlgorithm_sptr filterAlgo = createSubAlgorithm("FilterByLogValue", 0., 1.);
-  filterAlgo->setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS));
+  filterAlgo->setProperty("InputWorkspace", inputWS);
   filterAlgo->setProperty("LogName", "proton_charge");
   filterAlgo->setProperty("MinimumValue", min_pcharge);
   filterAlgo->setProperty("MaximumValue", max_pcharge);
   filterAlgo->execute();
 
   // just grab the child's output workspace
-  MatrixWorkspace_sptr outputWS = filterAlgo->getProperty("OutputWorkspace");
+  EventWorkspace_sptr outputWS = filterAlgo->getProperty("OutputWorkspace");
   this->setProperty("OutputWorkspace", outputWS);
 }
 

@@ -52,16 +52,12 @@ void FilterByTime::init()
 {
   std::string commonHelp("\nYou can only specify the relative or absolute start/stop times, not both.");
 
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
-  //Workspace must be an Event workspace
-  wsValidator->add(new API::EventWorkspaceValidator<MatrixWorkspace>);
-
   declareProperty(
-    new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
+    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input),
     "An input event workspace" );
 
   declareProperty(
-    new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+    new WorkspaceProperty<EventWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
 
 
@@ -88,16 +84,7 @@ void FilterByTime::init()
  */
 void FilterByTime::exec()
 {
-
-  // convert the input workspace into the event workspace we already know it is
-  const MatrixWorkspace_const_sptr matrixInputWS = this->getProperty("InputWorkspace");
-  EventWorkspace_const_sptr inputWS
-                 = boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
-  if (!inputWS)
-  {
-    throw std::invalid_argument("Input workspace is not an EventWorkspace. Aborting.");
-  }
-
+  EventWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
 
   // ---- Find the start/end times ----
   DateAndTime start, stop;
@@ -136,11 +123,8 @@ void FilterByTime::exec()
 
 
   // generate the output workspace pointer
-  API::MatrixWorkspace_sptr matrixOutputWS = this->getProperty("OutputWorkspace");
-  EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS)
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
-  else
+  EventWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
+  if (inputWS != outputWS)
   {
     //Make a brand new EventWorkspace
     outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
@@ -149,9 +133,7 @@ void FilterByTime::exec()
     API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
     //But we don't copy the data.
 
-    //Cast to the matrixOutputWS and save it
-    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
-    this->setProperty("OutputWorkspace", matrixOutputWS);
+    this->setProperty("OutputWorkspace", outputWS);
   }
 
   size_t numberOfSpectra = inputWS->getNumberHistograms();

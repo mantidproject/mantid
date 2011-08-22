@@ -247,7 +247,7 @@ namespace Algorithms
   void DiffractionEventCalibrateDetectors::init()
   {
   declareProperty(
-    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input),
                             "The workspace containing the geometry to be calibrated." );
 
     declareProperty("Params", "",
@@ -287,10 +287,7 @@ namespace Algorithms
     const double peakOpt = getProperty("LocationOfPeakToOptimize");
 
     // Get the input workspace
-    MatrixWorkspace_const_sptr matrixInWS = getProperty("InputWorkspace");
-    EventWorkspace_const_sptr inputW = boost::dynamic_pointer_cast<const EventWorkspace>( matrixInWS );
-    if (!inputW)
-      throw std::invalid_argument("InputWorkspace should be an EventWorkspace.");
+    EventWorkspace_const_sptr inputW = getProperty("InputWorkspace");
 
      // retrieve the properties
     const std::string rb_params=getProperty("Params");
@@ -366,7 +363,7 @@ namespace Algorithms
     algS->setPropertyValue("InputWorkspace",inname);
     algS->setPropertyValue("SortBy", "X Value");
     algS->executeAsSubAlg();
-    matrixInWS=algS->getProperty("InputWorkspace");
+    inputW=algS->getProperty("InputWorkspace");
 
     //Write DetCal File
     double baseX,baseY,baseZ,upX,upY,upZ;

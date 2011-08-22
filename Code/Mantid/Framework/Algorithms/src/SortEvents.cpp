@@ -35,7 +35,7 @@ namespace Mantid
     void SortEvents::init()
     {
       declareProperty(
-        new WorkspaceProperty<>("InputWorkspace", "",Direction::InOut,new EventWorkspaceValidator<>),
+        new WorkspaceProperty<EventWorkspace>("InputWorkspace", "",Direction::InOut),
         "EventWorkspace to be sorted.");
 
       std::vector<std::string> propOptions;
@@ -56,36 +56,24 @@ namespace Mantid
     void SortEvents::exec()
     {
       // Get the input workspace
-      MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
+      EventWorkspace_sptr eventW = getProperty("InputWorkspace");
       //And other properties
       bool sortByTof = (getPropertyValue("SortBy") == "X Value");
 
-      //---------------------------------------------------------------------------------
-      //Now, determine if the input workspace is actually an EventWorkspace
-      EventWorkspace_sptr eventW = boost::dynamic_pointer_cast<EventWorkspace>(inputW);
+      //------- EventWorkspace ---------------------------
+      const size_t histnumber = eventW->getNumberHistograms();
 
-      if (eventW != NULL)
-      {
-        //------- EventWorkspace ---------------------------
-        const size_t histnumber = inputW->getNumberHistograms();
+      //Initialize progress reporting.
+      Progress prog(this,0.0,1.0, histnumber);
 
-        //Initialize progress reporting.
-        Progress prog(this,0.0,1.0, histnumber);
+      DataObjects::EventSortType sortType = DataObjects::TOF_SORT;
+      if (!sortByTof) sortType = DataObjects::PULSETIME_SORT;
 
-        DataObjects::EventSortType sortType = DataObjects::TOF_SORT;
-        if (!sortByTof) sortType = DataObjects::PULSETIME_SORT;
-
-        //This runs the SortEvents algorithm in parallel
-        eventW->sortAll(sortType, &prog);
-
-      } // END ---- EventWorkspace
-      else
-        throw std::runtime_error("Invalid workspace type provided to SortEvents. Only EventWorkspaces work with this algorithm.");
+      //This runs the SortEvents algorithm in parallel
+      eventW->sortAll(sortType, &prog);
 
       return;
     }
-
-
 
   } // namespace Algorithm
 } // namespace Mantid

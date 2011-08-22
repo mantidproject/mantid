@@ -1,9 +1,9 @@
 #ifndef GHOSTCORRECTION_H_
 #define GHOSTCORRECTION_H_
 
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -144,7 +144,7 @@ protected:
   std::vector< GhostSourcesMap * > groupedGhostMaps;
 
   /// Workspaces we are working with.
-  Mantid::API::MatrixWorkspace_const_sptr inputW;
+  Mantid::DataObjects::EventWorkspace_const_sptr inputW;
 
   /// Mapping between indices
   detid2index_map * input_detectorIDToWorkspaceIndexMap;

@@ -56,7 +56,7 @@ private:
       double tof_frame_width, double tmp_frame_width, bool frame_skipping);
 
   /// Compute TOF offset
-  double getTofOffset(API::MatrixWorkspace_const_sptr inputWS, bool frame_skipping);
+  double getTofOffset(DataObjects::EventWorkspace_const_sptr inputWS, bool frame_skipping);
   double frame_tof0;
   bool flight_path_correction;
   double low_tof_cut;

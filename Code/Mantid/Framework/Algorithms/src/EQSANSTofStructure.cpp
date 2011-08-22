@@ -37,10 +37,7 @@ using namespace Geometry;
 
 void EQSANSTofStructure::init()
 {
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
-  wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
-  wsValidator->add(new EventWorkspaceValidator<>);
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
+  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input,new WorkspaceUnitValidator<EventWorkspace>("TOF")),
       "Workspace to apply the TOF correction to");
   declareProperty("FlightPathCorrection", false, Kernel::Direction::Input);
   declareProperty("LowTOFCut", 0.0, Kernel::Direction::Input);
@@ -57,7 +54,7 @@ void EQSANSTofStructure::init()
 
 void EQSANSTofStructure::exec()
 {
-  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
   flight_path_correction = getProperty("FlightPathCorrection");
   low_tof_cut = getProperty("LowTOFCut");
   high_tof_cut = getProperty("HighTOFCut");
@@ -79,8 +76,7 @@ void EQSANSTofStructure::exec()
   double frame_offset=0.0;
   if (frame_tof0 >= tmp_frame_width) frame_offset = tmp_frame_width * ( (int)( frame_tof0/tmp_frame_width ) );
 
-  Mantid::DataObjects::EventWorkspace_sptr eventW = boost::dynamic_pointer_cast<EventWorkspace>(inputWS);
-  this->execEvent(eventW, frame_tof0, frame_offset, tof_frame_width, tmp_frame_width, frame_skipping);
+  this->execEvent(inputWS, frame_tof0, frame_offset, tof_frame_width, tmp_frame_width, frame_skipping);
 }
 
 
@@ -159,7 +155,7 @@ void EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inpu
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-double EQSANSTofStructure::getTofOffset(MatrixWorkspace_const_sptr inputWS, bool frame_skipping)
+double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS, bool frame_skipping)
 {
   //# Storage for chopper information read from the logs
   double chopper_set_phase[4] = {0,0,0,0};

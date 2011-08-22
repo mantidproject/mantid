@@ -147,7 +147,7 @@ add_subdirectory (MDEvents)
 
 set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI DataObjects
                      DataHandling Nexus Algorithms CurveFitting ICat
-                     MDDataObjects MDAlgorithms MDEvents
+                     Crystal MDDataObjects MDAlgorithms MDEvents WorkflowAlgorithms
 )
 
 add_custom_target ( Framework DEPENDS ${FRAMEWORK_LIBS})
