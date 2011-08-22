@@ -69,7 +69,7 @@ void GenericDialog::initLayout()
   viewport->setLayout(mainLay);
 
   // Add a layout for QDialog
-  QVBoxLayout *dialog_layout = new QVBoxLayout(this);
+  QVBoxLayout *dialog_layout = new QVBoxLayout();
   setLayout(dialog_layout);
 
   // Create a grid of properties if there are any available
