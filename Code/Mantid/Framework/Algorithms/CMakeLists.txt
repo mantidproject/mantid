@@ -85,7 +85,6 @@ set ( SRC_FILES
 	src/He3TubeEfficiency.cpp
 	src/IQTransform.cpp
 	src/IdentifyNoisyDetectors.cpp
-	src/InputWSDetectorInfo.cpp
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
 	src/Logarithm.cpp
@@ -247,7 +246,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/He3TubeEfficiency.h
 	inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/IdentifyNoisyDetectors.h
-	inc/MantidAlgorithms/InputWSDetectorInfo.h
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/Logarithm.h

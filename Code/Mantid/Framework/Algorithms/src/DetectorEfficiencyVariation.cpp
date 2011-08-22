@@ -6,9 +6,6 @@
 
 #include <boost/math/special_functions/fpclassify.hpp>
 
-// togo
-#include "MantidAlgorithms/InputWSDetectorInfo.h"
-
 namespace Mantid
 {
   namespace Algorithms
@@ -152,23 +149,6 @@ namespace Mantid
       if ( maxSpecIndex != static_cast<int>(whiteBeam2->getNumberHistograms()) - 1 )
       {//we would get a crash later on if this were not true
         throw std::invalid_argument("The input white beam vanadium workspaces must be have the same number of histograms");
-      }
-      // construting this object will throw an invalid_argument if there is no instrument information, 
-      //we don't catch it we the algorithm will be stopped
-      InputWSDetectorInfo testingTesting(whiteBeam1);
-      InputWSDetectorInfo testingTestingTesting(whiteBeam2); 
-      try
-      {//now try to access the detector map, this is non-fatal
-        testingTesting.aDetecIsMaskedinSpec(0);
-        testingTestingTesting.aDetecIsMaskedinSpec(0);
-      }
-      catch(Kernel::Exception::NotFoundError)
-      {
-        m_usableMaskMap = false;
-        // it still makes sense to carry on
-        g_log.warning(
-          "Precision warning: Detector masking map can't be found, assuming that no detectors "
-          "have been previously marked unreliable in this workspace");
       }
 
       variation = getProperty("Variation");

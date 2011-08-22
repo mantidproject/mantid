@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAlgorithms/InputWSDetectorInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <algorithm>
