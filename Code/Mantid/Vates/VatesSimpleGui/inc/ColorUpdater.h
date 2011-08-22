@@ -1,5 +1,5 @@
-#ifndef COLORUPDATER_H
-#define COLORUPDATER_H
+#ifndef COLORUPDATER_H_
+#define COLORUPDATER_H_
 
 #include <QPair>
 
@@ -69,4 +69,4 @@ public:
   void logScale(pqPipelineRepresentation *repr, int state);
 };
 
-#endif // COLORUPDATER_H
+#endif // COLORUPDATER_H_
