@@ -203,6 +203,10 @@ namespace Kernel
     }
     m_mruMutex.unlock();
 
+//    // Take it out of the small buffer
+//    if (id < m_
+//
+
     // Mark the amount of space used on disk as free
     this->freeBlock(item->getFilePosition(), sizeOnFile);
   }
@@ -486,7 +490,7 @@ namespace Kernel
   /** Calculate the threshold # of events below which objects are never
    * cached to disk.
    */
-  inline void DiskMRU::calcSmallThreshold()
+  void DiskMRU::calcSmallThreshold()
   {
     if (m_smallBuffer.size() > 0)
       m_smallThreshold = m_smallBufferSize / m_smallBuffer.size();
