@@ -1,0 +1,69 @@
+#include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
+#include "MantidVatesAPI/FieldDataToMetadata.h"
+#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
+#include "MantidAPI/ImplicitFunctionFactory.h"
+#include "MantidMDAlgorithms/NullImplicitFunction.h"
+#include <vtkDataSet.h>
+
+namespace Mantid
+{
+  namespace VATES
+  {
+    /**
+    Static creational method to run functionality in one method call.
+    @param dataSet : input dataset containing field data.
+    @return extracted implicit function.
+    */
+    Mantid::API::ImplicitFunction* vtkDataSetToImplicitFunction::exec(vtkDataSet* dataSet)
+    {
+      vtkDataSetToImplicitFunction temp(dataSet);
+      return temp.execute();
+    }
+
+    
+    /**
+    Constructor
+    @param dataSet : input dataset containing field data.
+    */
+    vtkDataSetToImplicitFunction::vtkDataSetToImplicitFunction(vtkDataSet* dataSet) : m_dataset(dataSet)
+    {
+      if(m_dataset == NULL)
+      {
+        throw std::runtime_error("Tried to construct vtkDataSetToImplicitFunction with NULL vtkDataSet");
+      }
+    }
+
+    /**
+    Execution method to run the extraction.
+    @return implicit function if one could be found, or a NullImplicitFunction.
+    */
+    Mantid::API::ImplicitFunction* vtkDataSetToImplicitFunction::execute()
+    {
+      using Mantid::MDAlgorithms::NullImplicitFunction;
+      using Mantid::Geometry::MDGeometryXMLDefinitions;
+      Mantid::API::ImplicitFunction* function = new NullImplicitFunction;
+
+      FieldDataToMetadata convert;
+      std::string xmlString = convert(m_dataset->GetFieldData(), XMLDefinitions::metaDataId()); 
+      if (false == xmlString.empty())
+      {
+        Poco::XML::DOMParser pParser;
+        Poco::XML::Document* pDoc = pParser.parseString(xmlString);
+        Poco::XML::Element* pRootElem = pDoc->documentElement();
+        Poco::XML::Element* functionElem = pRootElem->getChildElement(MDGeometryXMLDefinitions::functionElementName());
+        if(NULL != functionElem)
+        {
+          delete function;
+          function = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(functionElem);
+        }
+      }
+      return function;
+    }
+
+    /// Destructor.
+    vtkDataSetToImplicitFunction::~vtkDataSetToImplicitFunction()
+    {
+    }
+  }
+}

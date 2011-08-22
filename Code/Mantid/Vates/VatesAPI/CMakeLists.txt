@@ -29,6 +29,9 @@ src/TimeToTimeStep.cpp
 src/UserDefinedThresholdRange.cpp
 src/vtkDataSetFactory.cpp
 src/vtkDataSetToGeometry.cpp
+src/vtkDataSetToImplicitFunction.cpp
+src/vtkDataSetToWsName.cpp
+src/vtkDataSetToWsLocation.cpp
 src/vtkClipperDataSetFactory.cpp
 src/vtkSplatterPlotFactory.cpp
 src/vtkMDEWHexahedronFactory.cpp
@@ -83,6 +86,9 @@ inc/MantidVatesAPI/TimeToTimeStep.h
 inc/MantidVatesAPI/UserDefinedThresholdRange.h
 inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkDataSetToGeometry.h
+inc/MantidVatesAPI/vtkDataSetToImplicitFunction.h
+inc/MantidVatesAPI/vtkDataSetToWsName.h
+inc/MantidVatesAPI/vtkDataSetToWsLocation.h
 inc/MantidVatesAPI/vtkClipperDataSetFactory.h
 inc/MantidVatesAPI/vtkMDEWHexahedronFactory.h
 inc/MantidVatesAPI/vtkSplatterPlotFactory.h
@@ -97,6 +103,9 @@ inc/MantidVatesAPI/WorkspaceProvider.h
 )
 
 set( TEST_FILES
+test/vtkDataSetToImplicitFunctionTest.h
+test/vtkDataSetToWsNameTest.h
+test/vtkDataSetToWsLocationTest.h
 test/ADSWorkspaceProviderTest.h
 test/DimensionPresenterTest.h
 test/EscalatingRebinningActionManagerTest.h
