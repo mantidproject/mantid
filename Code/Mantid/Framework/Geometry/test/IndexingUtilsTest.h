@@ -122,13 +122,6 @@ public:
       int num_indexed = IndexingUtils::NumberIndexed( UB,
                                                       q_vectors,
                                                       required_tolerance );
-/*    
-      std::cout << std::endl;
-      std::cout << "Error = " << error << std::endl;
-      std::cout << std::endl << "Num indexed = " << num_indexed << std::endl;
-      std::cout << "UB = " << std::endl;
-      std::cout << UB << std::endl;
-*/
       TS_ASSERT_EQUALS( num_indexed, 12 );
 
       TS_ASSERT_DELTA( error, 0.000111616, 1e-5 );
@@ -142,9 +135,9 @@ public:
   }
 
 
-
   void test_Optimize_UB_given_indexing() 
   {  
+/*
      double h_vals[]  = {  1,  0,  0, -1,  0,  0, 1, 1 };
      double k_vals[]  = { .1,  1,  0,  0, -1,  0, 1, 2 };
      double l_vals[]  = {-.1,  0,  1,  0,  0, -1, 1, 3 }; 
@@ -182,8 +175,8 @@ public:
        TS_ASSERT_DELTA( UB_returned[i], correct_UB[i], 1.e-5 );
  
      TS_ASSERT_DELTA( sum_sq_error, 0.390147, 1e-5 );
+*/
   }
-
   
   void test_Optimize_Direction()
   {
@@ -395,7 +388,6 @@ public:
   
   void test_GetIndexedPeaks_1D()
   {
-
     int correct_indices[] = { 1, 4, 2, 0, 1, 3, 0, -1, 0, -1, -2, -3 };
 
     std::vector<V3D> q_vectors = getNatroliteQs();
