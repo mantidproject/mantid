@@ -1,8 +1,8 @@
 #include "MantidAlgorithms/EditTOFPowderDiffractomerGeometry.h"
 #include "MantidKernel/System.h"
 
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
+// using namespace Kernel;
+// using namespace Mantid::API;
 
 namespace Mantid
 {
