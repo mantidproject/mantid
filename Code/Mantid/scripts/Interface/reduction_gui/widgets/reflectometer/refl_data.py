@@ -6,6 +6,7 @@ import os
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.reflectometer.ui_data_refl
+from LoadSNSRoi import LoadSNSRoi
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -112,7 +113,7 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.data_peak_narrow_switch, QtCore.SIGNAL("clicked(bool)"), self._data_peak_switch_clicked)
         self.connect(self._summary.data_peak_broad_switch, QtCore.SIGNAL("clicked(bool)"), self._data_peak_switch_clicked)
         self.connect(self._summary.data_peak_discrete_switch, QtCore.SIGNAL("clicked(bool)"), self._data_peak_switch_clicked_discrete)
-        
+        self.connect(self._summary.data_peak_load_roi, QtCore.SIGNAL("clicked()"), self._data_peak_load_roi_clicked)
 
 
 #        self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
@@ -249,6 +250,37 @@ class DataReflWidget(BaseWidget):
             self._summary.data_peak_to_pixel.setEnabled(False)
             self._summary.data_peak_nbr_selection_label.setEnabled(True)
             self._summary.data_peak_nbr_selection_value.setEnabled(True)
+
+    def _data_peak_load_roi_clicked(self):
+        """
+            Reached by the Load peak selection button
+        """
+        fname = self.data_browse_dialog(data_type="*.txt *.dat", title="Data peak selection - Choose a ROI file")
+        if fname:
+            #retrieved from and to pixels values
+                myROI = LoadSNSRoi(filename=fname)
+                mode = myROI.getMode()
+                pixelRange = myROI.getPixelRange()
+                
+                if (mode == 'narrow/broad'):
+                    if self._summary.data_peak_discrete_switch.isChecked():
+#                        QtGui.QMessageBox.warning(self, "Incompatibility of Formats",
+#                                                      "The ROI file you are trying to load is for DISCRETE mode only")
+                        from_pixel = pixelRange[0]
+                        to_pixel = pixelRange[1]
+                        self._summary.data_peak_from_pixel.setText(str(from_pixel))
+                        self._summary.data_peak_to_pixel.setText(str(to_pixel))
+                    else:
+                        from_pixel = pixelRange[0]
+                        to_pixel = pixelRange[1]
+                        self._summary.data_peak_from_pixel.setText(str(from_pixel))
+                        self._summary.data_peak_to_pixel.setText(str(to_pixel))
+                        self._summary.data_peak_nbr_selection_value.setText("1")
+                else:
+                    self._summary.data_peak_nbr_selection_value.setText(str(len(pixelRange)))
+                
+        #print myROI.getPixelRange()
+            
             
 #    def _det_offset_clicked(self, is_checked):
 #        self._summary.detector_offset_edit.setEnabled(is_checked)

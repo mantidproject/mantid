@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/norm_refl.ui'
 #
-# Created: Thu Aug 18 13:58:09 2011
+# Created: Mon Aug 22 07:08:25 2011
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_Frame(object):
     def setupUi(self, Frame):
         Frame.setObjectName("Frame")
-        Frame.resize(895, 355)
+        Frame.resize(978, 355)
         Frame.setFrameShape(QtGui.QFrame.StyledPanel)
         Frame.setFrameShadow(QtGui.QFrame.Raised)
         self.verticalLayout_5 = QtGui.QVBoxLayout(Frame)
@@ -25,18 +25,6 @@ class Ui_Frame(object):
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
-        self.label_6 = QtGui.QLabel(Frame)
-        self.label_6.setObjectName("label_6")
-        self.horizontalLayout_5.addWidget(self.label_6)
-        self.lineEdit_4 = QtGui.QLineEdit(Frame)
-        self.lineEdit_4.setMinimumSize(QtCore.QSize(100, 0))
-        self.lineEdit_4.setStatusTip("")
-        self.lineEdit_4.setText("")
-        self.lineEdit_4.setObjectName("lineEdit_4")
-        self.horizontalLayout_5.addWidget(self.lineEdit_4)
-        self.label_9 = QtGui.QLabel(Frame)
-        self.label_9.setObjectName("label_9")
-        self.horizontalLayout_5.addWidget(self.label_9)
         self.pushButton_4 = QtGui.QPushButton(Frame)
         self.pushButton_4.setObjectName("pushButton_4")
         self.horizontalLayout_5.addWidget(self.pushButton_4)
@@ -169,9 +157,7 @@ class Ui_Frame(object):
 
     def retranslateUi(self, Frame):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_6.setText(QtGui.QApplication.translate("Frame", "Runs #", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_9.setText(QtGui.QApplication.translate("Frame", "or", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_4.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton_4.setText(QtGui.QApplication.translate("Frame", "Load Normalization ...", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Peak Selection", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("Frame", "From pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("Frame", "   To pixel", None, QtGui.QApplication.UnicodeUTF8))

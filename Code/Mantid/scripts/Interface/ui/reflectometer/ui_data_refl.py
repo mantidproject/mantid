@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/data_refl.ui'
 #
-# Created: Thu Aug 18 13:58:09 2011
+# Created: Mon Aug 22 07:08:25 2011
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -25,21 +25,9 @@ class Ui_Frame(object):
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
-        self.label_6 = QtGui.QLabel(Frame)
-        self.label_6.setObjectName("label_6")
-        self.horizontalLayout_5.addWidget(self.label_6)
-        self.lineEdit_4 = QtGui.QLineEdit(Frame)
-        self.lineEdit_4.setMinimumSize(QtCore.QSize(100, 0))
-        self.lineEdit_4.setStatusTip("")
-        self.lineEdit_4.setText("")
-        self.lineEdit_4.setObjectName("lineEdit_4")
-        self.horizontalLayout_5.addWidget(self.lineEdit_4)
-        self.label_9 = QtGui.QLabel(Frame)
-        self.label_9.setObjectName("label_9")
-        self.horizontalLayout_5.addWidget(self.label_9)
-        self.pushButton_4 = QtGui.QPushButton(Frame)
-        self.pushButton_4.setObjectName("pushButton_4")
-        self.horizontalLayout_5.addWidget(self.pushButton_4)
+        self.data_nexus_browse = QtGui.QPushButton(Frame)
+        self.data_nexus_browse.setObjectName("data_nexus_browse")
+        self.horizontalLayout_5.addWidget(self.data_nexus_browse)
         self.verticalLayout_2.addLayout(self.horizontalLayout_5)
         self.tableWidget = QtGui.QTableWidget(Frame)
         self.tableWidget.setObjectName("tableWidget")
@@ -78,9 +66,9 @@ class Ui_Frame(object):
         self.horizontalLayout_2.addWidget(self.data_peak_discrete_switch)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem)
-        self.pushButton_2 = QtGui.QPushButton(self.groupBox)
-        self.pushButton_2.setObjectName("pushButton_2")
-        self.horizontalLayout_2.addWidget(self.pushButton_2)
+        self.data_peak_load_roi = QtGui.QPushButton(self.groupBox)
+        self.data_peak_load_roi.setObjectName("data_peak_load_roi")
+        self.horizontalLayout_2.addWidget(self.data_peak_load_roi)
         self.pushButton_3 = QtGui.QPushButton(self.groupBox)
         self.pushButton_3.setObjectName("pushButton_3")
         self.horizontalLayout_2.addWidget(self.pushButton_3)
@@ -246,15 +234,13 @@ class Ui_Frame(object):
 
     def retranslateUi(self, Frame):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_6.setText(QtGui.QApplication.translate("Frame", "Runs #", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_9.setText(QtGui.QApplication.translate("Frame", "or", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_4.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.data_nexus_browse.setText(QtGui.QApplication.translate("Frame", "Load data ...", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Peak Selection", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("Frame", "Selection type:", None, QtGui.QApplication.UnicodeUTF8))
         self.data_peak_narrow_switch.setText(QtGui.QApplication.translate("Frame", "Narrow ", None, QtGui.QApplication.UnicodeUTF8))
         self.data_peak_broad_switch.setText(QtGui.QApplication.translate("Frame", "Broad", None, QtGui.QApplication.UnicodeUTF8))
         self.data_peak_discrete_switch.setText(QtGui.QApplication.translate("Frame", "Discrete", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_2.setText(QtGui.QApplication.translate("Frame", "Load...", None, QtGui.QApplication.UnicodeUTF8))
+        self.data_peak_load_roi.setText(QtGui.QApplication.translate("Frame", "Load...", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_3.setText(QtGui.QApplication.translate("Frame", "Save...", None, QtGui.QApplication.UnicodeUTF8))
         self.data_peak_from_pixel_label.setText(QtGui.QApplication.translate("Frame", "From pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.data_peak_to_pixel_label.setText(QtGui.QApplication.translate("Frame", "   To pixel", None, QtGui.QApplication.UnicodeUTF8))
