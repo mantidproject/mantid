@@ -6,23 +6,36 @@
 #include <vtkFieldData.h>
 #include "MantidVatesAPI/EscalatingRebinningActionManager.h"
 
+using namespace Mantid::VATES;
+
 class EscalatingRebinningActionManagerTest : public CxxTest::TestSuite
 {
 
 public:
+  
+  void testDefaultConstruction()
+  {
+    EscalatingRebinningActionManager escManager;
+    TSM_ASSERT_EQUALS("Wrong default level. Should be lowest escalation level.", UseCache, escManager.action());
+  }
+
+  void testConstructor()
+  {
+    EscalatingRebinningActionManager escManager(RecalculateAll);
+    TSM_ASSERT_EQUALS("Constructor/initalized value does not reflect result of action(). Not wired-up properly.", RecalculateAll, escManager.action());
+  }
 
   void testExpecedEscalationTypes()
   {
     //This ordering is fundamental to the operation of the EscalatingRebinningManagerTest.
-    using namespace Mantid::VATES;
+
     TS_ASSERT(RecalculateVisualDataSetOnly > UseCache);
     TS_ASSERT(RecalculateAll > RecalculateVisualDataSetOnly);
-	TS_ASSERT(ReloadAndRecalculateAll > RecalculateAll)
+	  TS_ASSERT(ReloadAndRecalculateAll > RecalculateAll)
   }
 
   void testEscalation()
   {
-    using namespace Mantid::VATES;
     EscalatingRebinningActionManager escManager;
     RebinningActionManager& manager = escManager;
 
@@ -35,7 +48,6 @@ public:
 
   void testNoEscalation()
   {
-    using namespace Mantid::VATES;
     EscalatingRebinningActionManager escManager;
     RebinningActionManager& manager = escManager;
     manager.ask(RecalculateAll);
@@ -50,7 +62,6 @@ public:
 
   void testReset()
   {
-    using namespace Mantid::VATES;
     EscalatingRebinningActionManager escManager;
     RebinningActionManager& manager = escManager;
 

@@ -56,7 +56,6 @@ enum Clipping{ ApplyClipping, IgnoreClipping};
 ///Type marks wheter original extents should be used over box extents.
 enum OrignalExtents{ ApplyOriginal, IgnoreOriginal};
 
-class vtkPlane;
 class vtkImplicitFunction;
 class VTK_EXPORT vtkMDEWRebinningCutter : public vtkUnstructuredGridAlgorithm//, public Mantid::VATES::MDRebinningView
 {
@@ -117,7 +116,7 @@ protected:
 
 private:
 
-  Mantid::VATES::MDRebinningPresenter* m_presenter;
+  boost::shared_ptr<Mantid::VATES::MDRebinningPresenter> m_presenter;
   std::string m_appliedGeometryXML;
 
   vtkMDEWRebinningCutter(const vtkMDEWRebinningCutter&);
@@ -129,7 +128,7 @@ private:
   void setTimeRange(vtkInformationVector* outputVector);
 
   /// Clip function provided by ClipFunction ProxyProperty
-  vtkPlane * m_clipFunction;
+  vtkImplicitFunction * m_clipFunction;
   /// Cached vtkDataSet. Enables fast visualization where possible.
 
   /// Flag indicating that the clip boundaries should be use to construct the rebinning region.

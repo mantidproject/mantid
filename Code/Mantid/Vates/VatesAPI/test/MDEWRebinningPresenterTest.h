@@ -22,22 +22,42 @@ class MDEWRebinningPresenterTest : public CxxTest::TestSuite
 
 public:
 
-void testConstructorThrows()
-{
-  MockMDRebinningView view;
-  MockRebinningActionManager actionManager;
-  TSM_ASSERT_THROWS("Should throw if no FieldData", MDEWRebinningPresenter<MockMDRebinningView>(vtkUnstructuredGrid::New(), new MockRebinningActionManager, &view), std::logic_error);
-}
+  void testConstructorThrowsWithoutFieldData()
+  {
+    MockMDRebinningView view;
+    MockRebinningActionManager actionManager;
+
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).Times(0);
+
+    TSM_ASSERT_THROWS("Should throw if no FieldData", MDEWRebinningPresenter<MockMDRebinningView>(vtkUnstructuredGrid::New(), new MockRebinningActionManager, &view, wsProvider), std::logic_error);
+  }
+
+  void testConstructorThrowsWhenCannotProvideWorkspace()
+  {
+    MockMDRebinningView view;
+    MockRebinningActionManager actionManager;
+
+    vtkUnstructuredGrid* dataset = vtkUnstructuredGrid::New();
+    dataset->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillOnce(Return(false));
+
+    TSM_ASSERT_THROWS("Should throw if cannot provide workspace", MDEWRebinningPresenter<MockMDRebinningView>(dataset, new MockRebinningActionManager, &view, wsProvider), std::invalid_argument);
+  }
 
   void testConstruction()
   {
     MockMDRebinningView view;
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view);
+    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, wsProvider);
     TSM_ASSERT("Geometry should be available immediately after construction.", !presenter.getAppliedGeometryXML().empty());
   }
 
@@ -53,11 +73,14 @@ void testConstructorThrows()
 
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateAll)).Times(0); //Since nothing has changed, no requests should be made.
-    
+
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view);
+    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -76,11 +99,14 @@ void testConstructorThrows()
 
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateVisualDataSetOnly)).Times(1); //Maxthreshold updated should reflect on request.
-    
+
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view);
+    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -99,11 +125,14 @@ void testConstructorThrows()
 
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateVisualDataSetOnly)).Times(1); //Minthreshold updated should reflect on request.
-    
+
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view);
+    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -119,14 +148,17 @@ void testConstructorThrows()
     EXPECT_CALL(view, getApplyClip()).WillRepeatedly(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en");
     EXPECT_CALL(view, getAppliedGeometryXML()).WillRepeatedly(Return(viewXML.c_str()));
-   
+
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateVisualDataSetOnly)).Times(1); //Timestep updated should reflect on request.
+
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view);
+    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -142,14 +174,17 @@ void testConstructorThrows()
     EXPECT_CALL(view, getApplyClip()).WillRepeatedly(Return(false));
     std::string viewXML = constrctGeometryOnlyXML("qx", "qy", "qz", "en", "11");
     EXPECT_CALL(view, getAppliedGeometryXML()).Times(2).WillRepeatedly(Return(viewXML.c_str())); //Geometry (4D) should reflect on request.
-   
+
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateAll)).Times(1); //Nxbins changed, requires rebin request.
+
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view);
+    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -169,17 +204,20 @@ void testConstructorThrows()
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateAll)).Times(1); //Nxbins & Nybins changed, requires rebin request.
 
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view);
+    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
   }
 
-  
+
   void testUpdateModelWithMoreXYZBins()
   {
     MockMDRebinningView view;
@@ -193,10 +231,13 @@ void testConstructorThrows()
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     EXPECT_CALL(*pRequest, ask(RecalculateAll)).Times(1); //Nxbins & Nybins & Nzbins changed, requires rebin request.
 
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view);
+    MDEWRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));

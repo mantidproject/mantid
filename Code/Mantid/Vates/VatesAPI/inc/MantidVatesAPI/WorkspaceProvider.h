@@ -1,23 +1,22 @@
-#ifndef MANTID_VATES_MD_REBINNING_PRESENTER
-#define MANTID_VATES_MD_REBINNING_PRESENTER
+#ifndef MANTID_VATESAPI_WORKSPACE_PROVIDER_H
+#define MANTID_VATESAPI_WORKSPACE_PROVIDER_H
 
 #include "MantidKernel/System.h"
-#include <vector>
+#include "MantidAPI/Workspace.h"
 #include <string>
-#include "vtkDataSet.h"
-#include <boost/shared_ptr.hpp>
 
-class vtkUnstructuredGrid;
 namespace Mantid
 {
   namespace VATES
   {
-    class ProgressAction;
-    class vtkDataSetFactory;
-     /** 
-    @class MDRebinningPresenter, Abstract presenters for multi-dimensional rebinning of various types.
+
+    /** 
+    @class WorspaceProvider. Abstract type for fetching and disposing of workspaces. ADS instance is a singleton and therfore very hard 
+    to fake in testing. Attempting to test the behaviour of types using the ADS directly was causing code-bloat. Use this abstract type instead, which can
+    be mocked in testing. Concrete types can use the ADS under-the-hood.
+
     @author Owen Arnold, Tessella plc
-    @date 03/06/2011
+    @date 22/08/2011
 
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -39,18 +38,14 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport MDRebinningPresenter
+    class DLLExport WorkspaceProvider
     {
     public:
-      virtual void updateModel() = 0;
-      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler) = 0;
-      virtual const std::string& getAppliedGeometryXML() const = 0;
-      virtual bool hasTDimensionAvailable() const = 0;
-      virtual std::vector<double> getTimeStepValues() const = 0;
-      virtual ~MDRebinningPresenter(){}
+      virtual bool canProvideWorkspace(std::string wsName) const = 0;
+      virtual Mantid::API::Workspace_sptr fetchWorkspace(std::string wsName) const = 0;
+      virtual void disposeWorkspace(std::string wsName) const = 0;
+      virtual ~WorkspaceProvider(){}
     };
-
-    typedef boost::shared_ptr<MDRebinningPresenter> MDRebinningPresenter_sptr;
   }
 }
 

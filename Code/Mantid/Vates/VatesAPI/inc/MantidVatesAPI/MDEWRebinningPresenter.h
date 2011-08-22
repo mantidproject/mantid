@@ -16,6 +16,7 @@
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include <vtkDataSet.h>
@@ -71,7 +72,7 @@ namespace Mantid
 
       /*-----------------------------------End MDRebinningPresenter methods -------------------------------------*/
 
-      MDEWRebinningPresenter(vtkDataSet* input, RebinningActionManager* request, ViewType* view);
+      MDEWRebinningPresenter(vtkDataSet* input, RebinningActionManager* request, ViewType* view, const WorkspaceProvider& wsProvider);
 
       virtual ~MDEWRebinningPresenter();
 
@@ -114,9 +115,10 @@ namespace Mantid
     @param input : input vtk dataset containing existing metadata.
     @param request : object performing decision making on what rebinning action to take.
     @param view : mvp view handle to use.
+    @param wsProvider : ref to object used to determine the availability of the correct ws for this prsenter to work on.
     */
     template<typename ViewType>
-    MDEWRebinningPresenter<ViewType>::MDEWRebinningPresenter(vtkDataSet* input, RebinningActionManager* request, ViewType* view) :
+    MDEWRebinningPresenter<ViewType>::MDEWRebinningPresenter(vtkDataSet* input, RebinningActionManager* request, ViewType* view, const WorkspaceProvider& wsProvider) :
     m_inputParser(input),
       m_input(input), 
       m_request(request), 
@@ -129,12 +131,17 @@ namespace Mantid
       m_plane(Mantid::API::ImplicitFunction_sptr(new Mantid::MDAlgorithms::NullImplicitFunction())),
       m_applyClipping(false)
     {
+      using namespace Mantid::API;
       vtkFieldData* fd = input->GetFieldData();
       if(NULL == fd || NULL == fd->GetArray(XMLDefinitions::metaDataId().c_str()))
       {
         throw std::logic_error("Rebinning operations require Rebinning Metadata");
       }
-      //Mantid::API::FrameworkManager::Instance();
+      std::string wsName = findExistingWorkspaceName(m_input, XMLDefinitions::metaDataId().c_str());
+      if(!wsProvider.canProvideWorkspace(wsName))
+      {
+        throw std::invalid_argument("Wrong type of Workspace stored. Cannot handle with this presenter");
+      }
 
       vtkDataSetToGeometry parser(input);
       parser.execute();
@@ -169,7 +176,7 @@ namespace Mantid
       //Apply the geometry.
       m_serializer.setGeometryXML(xmlBuilder.create());
       //Apply the workspace name after extraction from the input xml.
-      m_serializer.setWorkspaceName( findExistingWorkspaceName(m_input, XMLDefinitions::metaDataId().c_str()));
+      m_serializer.setWorkspaceName( wsName);
       //Apply the workspace location after extraction from the input xml.
       m_serializer.setWorkspaceLocation( findExistingWorkspaceLocation(m_input, XMLDefinitions::metaDataId().c_str()));
 

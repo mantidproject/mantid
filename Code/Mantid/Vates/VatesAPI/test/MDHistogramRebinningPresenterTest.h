@@ -35,11 +35,58 @@ public:
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
     MockClipper* pClipper = new MockClipper;
 
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper);
+    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
     TSM_ASSERT("Geometry should be available immediately after construction.", !presenter.getAppliedGeometryXML().empty());
+  }
+
+  void testConstructionThrowsWhenNoFieldData()
+  {
+    MockMDRebinningView view;
+
+    MockRebinningActionManager* pRequest = new MockRebinningActionManager;
+    EXPECT_CALL(*pRequest, action()).WillRepeatedly(Return(RecalculateAll)); //Request is preset to RecalculateAll.
+
+    MockClipper* pClipper = new MockClipper;
+
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).Times(0);
+
+    vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
+    //NO FIELD DATA ADDED TO DATASET!
+
+    FakeProgressAction progressAction;
+
+    MDHistogramRebinningPresenter<MockMDRebinningView>* presenter;
+    TSM_ASSERT_THROWS("Should not process without field data. Should throw!",presenter = new MDHistogramRebinningPresenter<MockMDRebinningView>(dataSet, pRequest, &view, pClipper, wsProvider), std::logic_error);
+
+  }
+
+  void testConstructionThrowsWhenCannotProvideWorkspace()
+  {
+    MockMDRebinningView view;
+
+    MockRebinningActionManager* pRequest = new MockRebinningActionManager;
+    EXPECT_CALL(*pRequest, action()).WillRepeatedly(Return(RecalculateAll)); //Request is preset to RecalculateAll.
+
+    MockClipper* pClipper = new MockClipper;
+
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillOnce(Return(false)); //Not yielding a workspace.
+
+    vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
+    dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
+
+    FakeProgressAction progressAction;
+
+    MDHistogramRebinningPresenter<MockMDRebinningView>* presenter;
+    TSM_ASSERT_THROWS("No workspace provided. Should throw!",presenter = new MDHistogramRebinningPresenter<MockMDRebinningView>(dataSet, pRequest, &view, pClipper, wsProvider), std::invalid_argument);
+
   }
 
   void testUpdateModelWithNoChanges()
@@ -57,10 +104,13 @@ public:
     
     MockClipper* pClipper = new MockClipper;
 
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper);
+    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -82,10 +132,13 @@ public:
     
     MockClipper* pClipper = new MockClipper;
 
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper);
+    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -107,10 +160,13 @@ public:
     
     MockClipper* pClipper = new MockClipper;
 
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper);
+    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -131,11 +187,14 @@ public:
     EXPECT_CALL(*pRequest, ask(RecalculateVisualDataSetOnly)).Times(1); //Timestep updated should reflect on request.
 
     MockClipper* pClipper = new MockClipper;
+    
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
 
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper);
+    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -157,10 +216,13 @@ public:
 
     MockClipper* pClipper = new MockClipper;
 
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper);
+    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -183,10 +245,13 @@ public:
 
     MockClipper* pClipper = new MockClipper;
 
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper);
+    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -209,10 +274,13 @@ public:
 
     MockClipper* pClipper = new MockClipper;
 
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper);
+    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -236,10 +304,13 @@ public:
 
     MockClipper* pClipper = new MockClipper;
 
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper);
+    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
     presenter.updateModel();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
@@ -271,12 +342,15 @@ public:
     EXPECT_CALL(*pDataSetFactory, initialize(_)).Times(1);
     EXPECT_CALL(*pDataSetFactory, create()).WillOnce(Return(vtkUnstructuredGrid::New()));
 
+    MockWorkspaceProvider wsProvider;
+    EXPECT_CALL(wsProvider, canProvideWorkspace(_)).WillRepeatedly(Return(true));
+
     vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
     dataSet->SetFieldData(createFieldDataWithCharArray(constructXML("qx", "qy", "qz", "en")));
 
     FakeProgressAction progressAction;
 
-    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper);
+    MDHistogramRebinningPresenter<MockMDRebinningView> presenter(dataSet, pRequest, &view, pClipper, wsProvider);
     presenter.updateModel();
     vtkDataSet* product = presenter.execute(pDataSetFactory, progressAction);
 
@@ -286,26 +360,6 @@ public:
     delete pDataSetFactory;
     product->Delete();
   }
-
-  void testConstructionThrowsWhenNoFieldData()
-  {
-    MockMDRebinningView view;
-
-    MockRebinningActionManager* pRequest = new MockRebinningActionManager;
-    EXPECT_CALL(*pRequest, action()).WillRepeatedly(Return(RecalculateAll)); //Request is preset to RecalculateAll.
-
-    MockClipper* pClipper = new MockClipper;
-
-    vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
-    //NO FIELD DATA ADDED TO DATASET!
-
-    FakeProgressAction progressAction;
-
-    MDHistogramRebinningPresenter<MockMDRebinningView>* presenter;
-    TSM_ASSERT_THROWS("Should not process without field data. Should throw!",presenter = new MDHistogramRebinningPresenter<MockMDRebinningView>(dataSet, pRequest, &view, pClipper), std::logic_error);
-
-  }
-
 
 };
 

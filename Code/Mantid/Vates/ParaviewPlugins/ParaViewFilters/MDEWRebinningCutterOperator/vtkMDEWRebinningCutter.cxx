@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/MDEWRebinningPresenter.h"
+#include "MantidVatesAPI/MDHistogramRebinningPresenter.h"
 #include "MantidVatesAPI/NullRebinningPresenter.h"
 
 #include "vtkMDEWRebinningCutter.h"
@@ -35,11 +36,73 @@
 #include "MantidVatesAPI/NoThresholdRange.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidVatesAPI/MedianAndBelowThresholdRange.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
 #include <boost/functional/hash.hpp>
 #include <sstream>
+
+
+#include "MantidVatesAPI/Clipper.h"
+#include <vtkPVClipDataSet.h>
+
+class ClipperAdapter : public Mantid::VATES::Clipper
+{
+private:
+  vtkPVClipDataSet* m_clipper;
+public:
+
+  ClipperAdapter(vtkPVClipDataSet* pClipper) : m_clipper(pClipper)
+  {
+  }
+
+  void SetInput(vtkDataSet* input)
+  {
+    m_clipper->SetInput(input);
+  }
+
+  void SetClipFunction(vtkImplicitFunction* func)
+  {
+    m_clipper->SetClipFunction(func);
+  }
+
+  void SetInsideOut(bool insideout)
+  {
+    m_clipper->SetInsideOut(insideout);
+  }
+
+  void SetRemoveWholeCells(bool) 
+  {
+  }
+
+  void SetOutput(vtkUnstructuredGrid* out_ds)
+  {
+    m_clipper->SetOutput(out_ds);
+  }
+
+  void Update()
+  {
+    m_clipper->Update();
+  }
+
+  void Delete()
+  {
+    delete this;
+  }
+
+  ~ClipperAdapter()
+  {
+    m_clipper->Delete();
+  }
+
+  vtkDataSet* GetOutput()
+  {
+    return m_clipper->GetOutput();
+  }
+
+};
+
 
 /** Plugin for ParaView. Performs simultaneous rebinning and slicing of Mantid data.
 
@@ -161,9 +224,11 @@ m_presenter(new NullRebinningPresenter()),
 ///Destructor.
 vtkMDEWRebinningCutter::~vtkMDEWRebinningCutter()
 {
-  delete m_presenter;
 }
 
+/*
+Determine the threshold range strategy to use.
+*/
 void vtkMDEWRebinningCutter::configureThresholdRangeMethod()
 {
   switch(m_thresholdMethodIndex)
@@ -238,28 +303,41 @@ int vtkMDEWRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(reques
   Status status=Good;
   if (Pending == m_setup)
   {
+    try
+    {
     vtkInformation * inputInf = inputVector[0]->GetInformationObject(0);
     vtkDataSet * inputDataset = vtkDataSet::SafeDownCast(inputInf->Get(vtkDataObject::DATA_OBJECT()));
 
     using namespace Mantid::VATES;
 
-    RebinningActionManager* requester = new EscalatingRebinningActionManager();
-    requester->ask(RecalculateAll);
-    Mantid::VATES::MDEWRebinningPresenter<vtkMDEWRebinningCutter>* temp;
     try
     {
-      temp = new MDEWRebinningPresenter<vtkMDEWRebinningCutter>(inputDataset, requester, this);
-      delete this->m_presenter;
+      ADSWorkspaceProvider<Mantid::API::IMDWorkspace> wsProvider;
+      MDRebinningPresenter_sptr temp= MDRebinningPresenter_sptr(new MDHistogramRebinningPresenter<vtkMDEWRebinningCutter>(inputDataset, new EscalatingRebinningActionManager(RecalculateAll), this, new ClipperAdapter(vtkPVClipDataSet::New()), wsProvider));
       m_presenter = temp;
-      m_appliedGeometryXML = m_presenter->getAppliedGeometryXML();
-      m_setup = SetupDone;
+    }
+    catch(std::invalid_argument&)
+    {
+      //Try to use another type of presenter with this view. One for MDEWs.
+      ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> wsProvider;
+      MDRebinningPresenter_sptr temp= MDRebinningPresenter_sptr(new MDEWRebinningPresenter<vtkMDEWRebinningCutter>(inputDataset, new EscalatingRebinningActionManager(RecalculateAll), this, wsProvider));
+      m_presenter = temp;
     }
     catch(std::logic_error&)
     {
       vtkErrorMacro("Rebinning operations require Rebinning Metadata. Have you provided a rebinning source?");
       status = Bad;
     }
+    
+    m_appliedGeometryXML = m_presenter->getAppliedGeometryXML();
+    m_setup = SetupDone;
+
     setTimeRange(outputVector);
+    }
+    catch(std::exception& e)
+    {
+      std::string ex = e.what();
+    }
   }
   return status;
 }
@@ -303,10 +381,9 @@ void vtkMDEWRebinningCutter::SetWidth(double width)
 
 void vtkMDEWRebinningCutter::SetClipFunction(vtkImplicitFunction * func)
 {
-  vtkPlane* plane = dynamic_cast<vtkPlane*>(func);
-  if (plane != m_clipFunction)
+  if (func != m_clipFunction)
   {
-    this->m_clipFunction = plane;
+    this->m_clipFunction = func;
     this->Modified();
   }
 }

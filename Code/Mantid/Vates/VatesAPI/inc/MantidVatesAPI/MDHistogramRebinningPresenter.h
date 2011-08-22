@@ -36,6 +36,7 @@
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/IMDWorkspaceProxy.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+#include "MantidVatesAPI/WorkspaceProvider.h"
 
 //Forward declarations
 class vtkDataSet;
@@ -92,7 +93,7 @@ namespace Mantid
       
       virtual ~MDHistogramRebinningPresenter();
 
-      MDHistogramRebinningPresenter(vtkDataSet* input, RebinningActionManager* request, ViewType* view, Clipper* clipper);
+      MDHistogramRebinningPresenter(vtkDataSet* input, RebinningActionManager* request, ViewType* view, Clipper* clipper, const WorkspaceProvider& wsProvider);
 
     private:
 
@@ -171,7 +172,7 @@ namespace Mantid
     * @param clipper : Clipper for determining boundaries.
     */
     template<typename ViewType>
-    MDHistogramRebinningPresenter<ViewType>::MDHistogramRebinningPresenter(vtkDataSet* input, RebinningActionManager* request, ViewType* view, Clipper* clipper) :
+    MDHistogramRebinningPresenter<ViewType>::MDHistogramRebinningPresenter(vtkDataSet* input, RebinningActionManager* request, ViewType* view, Clipper* clipper, const WorkspaceProvider& wsProvider) :
     m_inputParser(input), 
       m_input(input), 
       m_request(request), 
@@ -184,12 +185,19 @@ namespace Mantid
       m_timestep(0),
       m_wsGeometry("")
     {
-
+      using namespace Mantid::API;
       vtkFieldData* fd = input->GetFieldData();
       if(NULL == fd || NULL == fd->GetArray(XMLDefinitions::metaDataId().c_str()))
       {
         throw std::logic_error("Rebinning operations require Rebinning Metadata");
       }
+      std::string wsName = findExistingWorkspaceName(m_input, XMLDefinitions::metaDataId().c_str());
+
+      if(!wsProvider.canProvideWorkspace(wsName))
+      {
+        throw std::invalid_argument("Wrong type of Workspace stored. Cannot handle with this presenter");
+      }
+
       Mantid::API::FrameworkManager::Instance();
 
       vtkDataSetToGeometry parser(input);
@@ -225,7 +233,7 @@ namespace Mantid
       //Apply the geometry.
       m_serializer.setGeometryXML(xmlBuilder.create());
       //Apply the workspace name after extraction from the input xml.
-      m_serializer.setWorkspaceName( findExistingWorkspaceName(m_input, XMLDefinitions::metaDataId().c_str()));
+      m_serializer.setWorkspaceName( wsName);
       //Apply the workspace location after extraction from the input xml.
       m_serializer.setWorkspaceLocation( findExistingWorkspaceLocation(m_input, XMLDefinitions::metaDataId().c_str()));
       //Set-up a default box.

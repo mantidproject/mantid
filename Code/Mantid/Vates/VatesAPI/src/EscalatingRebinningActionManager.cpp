@@ -5,9 +5,13 @@ namespace Mantid
 namespace VATES
 {
 
-///Constructor
-EscalatingRebinningActionManager::EscalatingRebinningActionManager() :
-  m_currentAction(UseCache)
+
+/*
+Constructor
+@param action : optional starting action.
+*/
+EscalatingRebinningActionManager::EscalatingRebinningActionManager(RebinningIterationAction action) :
+  m_currentAction(action)
 {
 }
 

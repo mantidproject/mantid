@@ -4,6 +4,7 @@ cmake_minimum_required( VERSION 2.6 )
 project( VatesAPI )
 
 set( SRC_FILES 
+src/ADSWorkspaceProvider.cpp
 src/Clipper.cpp
 src/Common.cpp
 src/DimensionPresenter.cpp
@@ -41,6 +42,7 @@ src/vtkThresholdingUnstructuredGridFactory.cpp
 )
 
 set( INC_FILES 
+inc/MantidVatesAPI/ADSWorkspaceProvider.h
 inc/MantidVatesAPI/Clipper.h
 inc/MantidVatesAPI/Common.h
 inc/MantidVatesAPI/DimensionPresenter.h
@@ -91,9 +93,11 @@ inc/MantidVatesAPI/vtkThresholdingHexahedronFactory.h
 inc/MantidVatesAPI/vtkThresholdingLineFactory.h
 inc/MantidVatesAPI/vtkThresholdingQuadFactory.h
 inc/MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h
+inc/MantidVatesAPI/WorkspaceProvider.h
 )
 
 set( TEST_FILES
+test/ADSWorkspaceProviderTest.h
 test/DimensionPresenterTest.h
 test/EscalatingRebinningActionManagerTest.h
 test/EventNexusLoadingPresenterTest.h

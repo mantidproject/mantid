@@ -1,23 +1,17 @@
-#ifndef MANTID_VATES_MD_REBINNING_PRESENTER
-#define MANTID_VATES_MD_REBINNING_PRESENTER
+#ifndef MANTID_VATESAPI_ADSWORKSPACEPROVIDER_H
+#define MANTID_VATESAPI_ADSWORKSPACEPROVIDER_H
 
-#include "MantidKernel/System.h"
-#include <vector>
-#include <string>
-#include "vtkDataSet.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidVatesAPI/WorkspaceProvider.h"
 
-class vtkUnstructuredGrid;
 namespace Mantid
 {
   namespace VATES
   {
-    class ProgressAction;
-    class vtkDataSetFactory;
      /** 
-    @class MDRebinningPresenter, Abstract presenters for multi-dimensional rebinning of various types.
+    @class ADSWorspaceProvider. Type for fetching and disposing of workspaces using the Mantid Analysis Data Service Instance under-the-hood. 
+
     @author Owen Arnold, Tessella plc
-    @date 03/06/2011
+    @date 22/08/2011
 
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -39,18 +33,21 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport MDRebinningPresenter
+    template<typename Workspace_Type>
+    class DLLExport ADSWorkspaceProvider : public WorkspaceProvider
     {
     public:
-      virtual void updateModel() = 0;
-      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& eventHandler) = 0;
-      virtual const std::string& getAppliedGeometryXML() const = 0;
-      virtual bool hasTDimensionAvailable() const = 0;
-      virtual std::vector<double> getTimeStepValues() const = 0;
-      virtual ~MDRebinningPresenter(){}
-    };
+      ADSWorkspaceProvider();
+      ~ADSWorkspaceProvider();
 
-    typedef boost::shared_ptr<MDRebinningPresenter> MDRebinningPresenter_sptr;
+      //-------WorkspaceProivder Implementations ------------
+      bool canProvideWorkspace(std::string wsName) const;
+      Mantid::API::Workspace_sptr fetchWorkspace(std::string wsName) const;
+      void disposeWorkspace(std::string wsName) const;
+    private:
+      ADSWorkspaceProvider& operator=(const ADSWorkspaceProvider&);
+      ADSWorkspaceProvider(const ADSWorkspaceProvider&);
+    };
   }
 }
 

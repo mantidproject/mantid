@@ -41,7 +41,7 @@ namespace Mantid
     private:
       RebinningIterationAction m_currentAction;
     public:
-      EscalatingRebinningActionManager();
+      EscalatingRebinningActionManager(RebinningIterationAction action=UseCache);
       virtual ~EscalatingRebinningActionManager();
       virtual void ask(RebinningIterationAction requestedAction);
       virtual RebinningIterationAction action() const;

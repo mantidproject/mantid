@@ -16,6 +16,7 @@
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/RebinningActionManager.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MDDataObjects/MDIndexCalculator.h"
 #include <gmock/gmock.h>
 #include <vtkFieldData.h>
@@ -248,6 +249,16 @@ public:
   MOCK_CONST_METHOD0(action, Mantid::VATES::RebinningIterationAction());
   MOCK_METHOD0(reset, void());
   virtual ~MockRebinningActionManager(){}
+};
+
+
+class MockWorkspaceProvider : public Mantid::VATES::WorkspaceProvider
+{
+public:
+  MOCK_CONST_METHOD1(canProvideWorkspace, bool(std::string));
+  MOCK_CONST_METHOD1(fetchWorkspace, Mantid::API::Workspace_sptr(std::string));
+  MOCK_CONST_METHOD1(disposeWorkspace, void(std::string));
+  ~MockWorkspaceProvider(){}
 };
 
 class FakeProgressAction : public Mantid::VATES::ProgressAction
