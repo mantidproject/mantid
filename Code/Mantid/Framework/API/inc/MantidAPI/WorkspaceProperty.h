@@ -266,19 +266,26 @@ namespace Mantid
        */
       virtual std::set<std::string> allowedValues() const
       {
-        if ( this->direction() == 0 || this->direction() == 2 )
+        if ( this->direction() == Kernel::Direction::Input || this->direction() == Kernel::Direction::InOut )
         {
           // If an input workspace, get the list of workspaces currently in the ADS
+          std::set<std::string> vals = AnalysisDataService::Instance().getObjectNames();
           if (m_optional)
           {
-            std::set<std::string> vals = AnalysisDataService::Instance().getObjectNames();
             vals.insert("");
-            return vals;
           }
           else
           {
-            return AnalysisDataService::Instance().getObjectNames();
+            // Copy-construct a temporary workspace property to test the validity of each workspace
+            WorkspaceProperty<TYPE> tester(*this);
+            std::set<std::string>::iterator it;
+            for (it = vals.begin(); it != vals.end(); ++it)
+            {
+              // Remove any workspace that's not valid for this algorithm
+              if (!tester.setValue(*it).empty()) vals.erase(it);
+            }
           }
+          return vals;
         }
         else
         {

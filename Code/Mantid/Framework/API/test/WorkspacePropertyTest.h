@@ -155,7 +155,7 @@ public:
     TS_ASSERT( wsp2->allowedValues().empty() )
 
     TS_ASSERT_THROWS_NOTHING( vals = wsp3->allowedValues() )
-    TS_ASSERT_EQUALS( vals.size(), 2 )
+    TS_ASSERT_EQUALS( vals.size(), 1 )
   }
 
   void testCreateHistory()

@@ -139,6 +139,9 @@ private:
    */
   std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
   {
+    // This effectively checks for single-valued workspaces
+    if ( value->axes() == 0 ) return "A single valued workspace has no unit, which is required for this algorithm";
+
     Kernel::Unit_const_sptr unit = value->getAxis(0)->unit();
     // If m_unitID is empty it means that the workspace must have units, which can be anything
     if ( m_unitID.empty() )
