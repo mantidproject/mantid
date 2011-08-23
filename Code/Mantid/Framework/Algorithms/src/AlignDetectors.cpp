@@ -83,6 +83,12 @@ std::map<detid_t, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API
 
     //Find the offset, if any
     double offset = offsetsWS->getValue(detectorID, 0.0);
+    if (offset <= -1.) { // non-physical
+      std::stringstream msg;
+      msg << "Encountered offset of " << offset << " which converts data to negative d-spacing for detectorID "
+          << detectorID << "\n";
+      throw std::logic_error(msg.str());
+    }
 
     //Compute the factor
     double factor = Instrument::calcConversion(l1, beamline, beamline_norm, samplePos, det, offset, vulcancorrection);
