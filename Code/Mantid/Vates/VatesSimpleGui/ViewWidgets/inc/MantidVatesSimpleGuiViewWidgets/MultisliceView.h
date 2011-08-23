@@ -5,6 +5,7 @@
 #include <QPointer>
 #include "ViewBase.h"
 #include "ui_MultisliceView.h"
+#include "WidgetDllOption.h"
 
 class pqColorMapModel;
 class pqPipelineRepresentation;
@@ -12,6 +13,13 @@ class pqPipelineSource;
 class pqRenderView;
 
 class QModelIndex;
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
 /**
  *
   This class creates a multislice view which is based on the Matlab(C)
@@ -40,7 +48,7 @@ class QModelIndex;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MultiSliceView : public ViewBase
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS MultiSliceView : public ViewBase
 {
   Q_OBJECT
 
@@ -144,5 +152,9 @@ private:
   QPointer<pqRenderView> mainView; ///< The main view class
   Ui::MultiSliceViewClass ui; ///< The view's UI form
 };
+
+}
+}
+}
 
 #endif // MULTISLICEVIEW_H_

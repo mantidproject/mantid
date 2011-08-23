@@ -6,6 +6,8 @@
 #include <QMenu>
 #include <QMenuBar>
 
+using namespace Mantid::Vates::SimpleGui;
+
 VsgMainWindow::VsgMainWindow(QWidget *parent) : QMainWindow(parent)
 {
   this->mdViewer = new MdViewerWidget(this);

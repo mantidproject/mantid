@@ -24,7 +24,12 @@
 
 #include <iostream>
 
-using namespace Mantid::Vates::SimpleGui;
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
 
 MdViewerWidget::MdViewerWidget(QWidget *parent) : QWidget(parent)
 {
@@ -205,4 +210,8 @@ void MdViewerWidget::swapViews()
   temp = this->currentView;
   this->currentView = this->hiddenView;
   this->hiddenView = temp;
+}
+
+}
+}
 }

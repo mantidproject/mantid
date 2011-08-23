@@ -23,6 +23,13 @@
 
 #include <iostream>
 
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
 ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
 {
   this->ui.setupUi(this);
@@ -193,4 +200,8 @@ void ThreeSliceView::correctColorScaleRange()
 {
   QPair<double, double> range = this->originSourceRepr->getColorFieldRange();
   emit this->dataRange(range.first, range.second);
+}
+
+}
+}
 }

@@ -8,6 +8,14 @@
 #include <QDoubleValidator>
 
 #include <iostream>
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
 ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent)
 {
   this->ui.setupUi(this);
@@ -157,4 +165,8 @@ void ColorSelectionWidget::useLogScaling(int state)
     state -= 1;
   }
   emit this->logScale(state);
+}
+
+}
+}
 }

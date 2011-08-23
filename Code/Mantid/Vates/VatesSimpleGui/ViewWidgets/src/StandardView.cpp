@@ -18,6 +18,13 @@
 
 #include <QHBoxLayout>
 
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
 StandardView::StandardView(QWidget *parent) : ViewBase(parent)
 {
   this->ui.setupUi(this);
@@ -92,4 +99,8 @@ void StandardView::renderAll()
 void StandardView::resetDisplay()
 {
   this->view->resetDisplay();
+}
+
+}
+}
 }

@@ -3,7 +3,16 @@
 
 #include <QtGui/QMainWindow>
 
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
 class MdViewerWidget;
+}
+}
+}
 
 class QAction;
 class QMenu;
@@ -56,7 +65,7 @@ private:
   QAction *openAction; ///< Action for opening files
   QAction *exitAction; ///< Action for exiting the program
   QMenu *fileMenu; ///< File actions menu
-  MdViewerWidget *mdViewer; ///< The VATES viz widget
+  Mantid::Vates::SimpleGui::MdViewerWidget *mdViewer; ///< The VATES viz widget
 };
 
 #endif // VSGMAINWINDOW_H_

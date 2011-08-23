@@ -10,6 +10,13 @@
 #include <QColor>
 #include <QList>
 
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
 ColorUpdater::ColorUpdater()
 {
 }
@@ -76,4 +83,8 @@ void ColorUpdater::logScale(pqPipelineRepresentation *repr, int state)
   pqSMAdaptor::setElementProperty(lut->getProxy()->GetProperty("UseLogScale"),
                                   state);
   lut->getProxy()->UpdateVTKObjects();
+}
+
+}
+}
 }

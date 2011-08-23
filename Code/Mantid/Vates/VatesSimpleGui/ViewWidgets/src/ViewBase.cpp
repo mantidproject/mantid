@@ -12,6 +12,13 @@
 #include <QHBoxLayout>
 #include <QPointer>
 
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
 ViewBase::ViewBase(QWidget *parent) : QWidget(parent)
 {
 }
@@ -73,4 +80,8 @@ void ViewBase::onLogScale(int state)
 {
   this->colorUpdater.logScale(this->originSourceRepr, state);
   this->renderAll();
+}
+
+}
+}
 }

@@ -2,6 +2,15 @@
 #define	TIMECONTROLWIDGET_H_
 
 #include "ui_TimeControlWidget.h"
+#include "WidgetDllOption.h"
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
 /**
  *
  This class wraps the ParaView time control toolbars into a widget.
@@ -29,7 +38,7 @@
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class TimeControlWidget : public QWidget
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS TimeControlWidget : public QWidget
 {
   Q_OBJECT
 
@@ -43,7 +52,11 @@ public:
   virtual ~TimeControlWidget();
 
 private:
-  Ui::TimeControlWidget ui; ///< The time control widget's UI form
+  Ui::TimeControlWidgetClass ui; ///< The time control widget's UI form
 };
+
+}
+}
+}
 
 #endif	// TIMECONTROLWIDGET_H_

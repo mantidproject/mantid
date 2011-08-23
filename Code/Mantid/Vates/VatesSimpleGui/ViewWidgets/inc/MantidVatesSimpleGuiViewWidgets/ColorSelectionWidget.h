@@ -3,10 +3,17 @@
 
 #include <QtGui/QWidget>
 #include "ui_ColorSelectionWidget.h"
+#include "WidgetDllOption.h"
 
 class pqColorMapModel;
 class pqColorPresetManager;
 
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
 /**
  *
   This class controls the color scale for the main level program viewed
@@ -35,7 +42,7 @@ class pqColorPresetManager;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class ColorSelectionWidget : public QWidget
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorSelectionWidget : public QWidget
 {
   Q_OBJECT
 
@@ -119,5 +126,9 @@ private:
   pqColorPresetManager *presets; ///< Dialog for choosing color presets
   Ui::ColorSelectionWidgetClass ui; ///< The mode control widget's UI form
 };
+
+}
+}
+}
 
 #endif // COLORSELECTIONWIDGET_H_

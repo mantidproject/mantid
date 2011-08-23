@@ -1,10 +1,19 @@
 #ifndef COLORUPDATER_H_
 #define COLORUPDATER_H_
 
+#include "WidgetDllOption.h"
+
 #include <QPair>
 
 class pqColorMapModel;
 class pqPipelineRepresentation;
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
 /**
  *
   This class handles the application of requests from the ColorSelectionWidget.
@@ -32,7 +41,7 @@ class pqPipelineRepresentation;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class ColorUpdater
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorUpdater
 {
 public:
   /// Object constructor
@@ -68,5 +77,9 @@ public:
    */
   void logScale(pqPipelineRepresentation *repr, int state);
 };
+
+}
+}
+}
 
 #endif // COLORUPDATER_H_

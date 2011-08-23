@@ -32,7 +32,12 @@
 
 #include <iostream>
 
-using namespace Mantid::Vates::SimpleGui;
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
 
 MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
 {
@@ -330,4 +335,8 @@ bool MultiSliceView::noIndicatorsLeft()
   count += this->ui.yAxisWidget->numIndicators();
   count += this->ui.zAxisWidget->numIndicators();
   return count == 0;
+}
+
+}
+}
 }

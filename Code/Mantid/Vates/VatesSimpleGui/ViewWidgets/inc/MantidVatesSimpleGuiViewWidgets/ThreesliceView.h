@@ -5,12 +5,20 @@
 #include <QPointer>
 #include "ViewBase.h"
 #include "ui_ThreesliceView.h"
+#include "WidgetDllOption.h"
 
 class pqColorMapModel;
 class pqPipelineBrowserWidget;
 class pqPipelineRepresentation;
 class pqPipelineSource;
 class pqRenderView;
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
 /**
  *
  This class creates four views of the given dataset. There are three 2D views
@@ -40,7 +48,7 @@ class pqRenderView;
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class ThreeSliceView : public ViewBase
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ThreeSliceView : public ViewBase
 {
   Q_OBJECT
 
@@ -114,5 +122,9 @@ private:
 
   Ui::ThreeSliceView ui; ///< The three slice view's UI form
 };
+
+}
+}
+}
 
 #endif // THREESLICEVIEW_H_

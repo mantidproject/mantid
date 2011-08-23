@@ -5,11 +5,19 @@
 #include <QPointer>
 #include "ViewBase.h"
 #include "ui_StandardView.h"
+#include "WidgetDllOption.h"
 
 class pqColorMapModel;
 class pqPipelineRepresentation;
 class pqPipelineSource;
 class pqRenderView;
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
 /**
  *
  This class represents the initial view for the main program. It is meant to
@@ -38,7 +46,7 @@ class pqRenderView;
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class StandardView : public ViewBase
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS StandardView : public ViewBase
 {
   Q_OBJECT
 
@@ -84,5 +92,9 @@ private:
   Ui::StandardView ui; ///< The standard view's UI form
   QPointer<pqRenderView> view; ///< The main view
 };
+
+}
+}
+}
 
 #endif // STANDARDVIEW_H_

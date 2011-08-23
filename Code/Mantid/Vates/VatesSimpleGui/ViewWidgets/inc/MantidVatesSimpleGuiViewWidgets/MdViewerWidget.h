@@ -4,14 +4,23 @@
 #include <QtGui/QWidget>
 #include <QPointer>
 #include "ui_MdViewerWidget.h"
-
-class ViewBase;
+#include "WidgetDllOption.h"
 
 class pqLoadDataReaction;
 class pqPipelineSource;
 
 class QAction;
 class QHBoxLayout;
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
+class ViewBase;
+
 /**
  *
   This class represents the central widget for handling VATES visualization
@@ -40,7 +49,7 @@ class QHBoxLayout;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MdViewerWidget : public QWidget
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS MdViewerWidget : public QWidget
 {
   Q_OBJECT
 
@@ -69,7 +78,7 @@ protected slots:
    * Execute the logic for switching views on the main level window.
    * @param v the view mode to switch to
    */
-  void switchViews(Mantid::Vates::SimpleGui::ModeControlWidget::Views v);
+  void switchViews(ModeControlWidget::Views v);
 
 signals:
   /// Signal to disable all view modes but standard.
@@ -85,7 +94,7 @@ private:
   pqLoadDataReaction *dataLoader; ///< Holder for the load data reaction
   ViewBase *hiddenView; ///< Holder for the view that is being switched from
   QPointer<pqPipelineSource> originSource; ///< Holder for the current source
-  Ui::MdViewerWidget ui; ///< The MD viewer's UI form
+  Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
 
   /// Disable communication with the proxy tab widget.
@@ -98,10 +107,13 @@ private:
    * @param v the view mode to set on the main window
    * @return the requested view
    */
-  ViewBase *setMainViewWidget(QWidget *container,
-                         Mantid::Vates::SimpleGui::ModeControlWidget::Views v);
+  ViewBase *setMainViewWidget(QWidget *container, ModeControlWidget::Views v);
   /// Helper function to swap current and hidden view pointers.
   void swapViews();
 };
+
+}
+}
+}
 
 #endif // MDVIEWERWIDGET_H_

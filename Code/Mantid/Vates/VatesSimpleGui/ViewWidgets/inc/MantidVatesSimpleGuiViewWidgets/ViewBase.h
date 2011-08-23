@@ -2,6 +2,7 @@
 #define VIEWBASE_H_
 
 #include "ColorUpdater.h"
+#include "WidgetDllOption.h"
 
 #include <QtGui/QWidget>
 #include <QPointer>
@@ -13,6 +14,13 @@ class pqPipelineRepresentation;
 class pqRenderView;
 
 class QString;
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
 /**
  *
   This class is an abstract base class for all of the Vates simple GUI's views.
@@ -40,7 +48,7 @@ class QString;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class ViewBase : public QWidget 
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ViewBase : public QWidget
 {
   Q_OBJECT
 public:
@@ -119,5 +127,9 @@ private:
   Q_DISABLE_COPY(ViewBase);
   ColorUpdater colorUpdater; /// Handle to the color updating delegator
 };
+
+}
+}
+}
 
 #endif // VIEWBASE_H_
