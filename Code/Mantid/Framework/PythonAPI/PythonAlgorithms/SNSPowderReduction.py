@@ -8,7 +8,7 @@ class SNSPowderReduction(PythonAlgorithm):
     class PDConfigFile(object):
         class PDInfo:
             """Inner class for holding configuration information for a reduction."""
-            def __init__(self, data, has_dspace=False):
+            def __init__(self, data, has_dspace=False, has_vback=False):
                 if data is None:
                     data = [None, None, 1, 0, 0, 0., 0.]
                 self.freq = data[0]
@@ -16,19 +16,25 @@ class SNSPowderReduction(PythonAlgorithm):
                 self.bank = int(data[2])
                 self.van = int(data[3])
                 self.can = int(data[4])
+                self.vback = 0 # default value
                 self.has_dspace = has_dspace
                 self.tmin = 0. # default value
                 self.tmax = 0. # default value
+
+                # calculate the remaining indices
+                offset = 5
+                if has_vback:
+                    self.vback = int(data[offset])
+                    offset += 1
+
                 if has_dspace:
-                    self.dmin = data[5]
-                    self.dmax = data[6]
-                    if len(data) > 7:
-                        self.tmin = data[7]
-                        if len(data) > 8:
-                            self.tmax = data[8]
-                else:
-                    self.tmin = data[5] * 1000. # convert to microseconds
-                    self.tmax = data[6] * 1000.
+                    self.dmin = data[offset]
+                    self.dmax = data[offset+1]
+                    offset += 2
+                if len(data) > offset:
+                    self.tmin = data[offset]
+                    if len(data) > offset+1:
+                        self.tmax = data[offset+1]
     
         def __init__(self, filename):
             if len(filename.strip()) <= 0:
@@ -261,7 +267,12 @@ class SNSPowderReduction(PythonAlgorithm):
         # load the calibration file if the workspaces aren't already in memory
         if (mtd[self._instrument + "_offsets"] is None) or (mtd[self._instrument + "_mask"] is None) \
             or (mtd[self._instrument + "_group"] is None):
-            LoadCalFile(InputWorkspace=wksp, CalFileName=calib, WorkspaceName=self._instrument)
+            whichones = {}
+            whichones['MakeGroupingWorkspace'] = (mtd[self._instrument + "_group"] is None)
+            whichones['MakeOffsetsWorkspace'] = (mtd[self._instrument + "_offsets"] is None)
+            whichones['MakeMaskWorkspace'] = (mtd[self._instrument + "_mask"] is None)
+            LoadCalFile(InputWorkspace=wksp, CalFileName=calib, WorkspaceName=self._instrument,
+                        **whichones)
 
         if not "histo" in self.getProperty("Extension"):
             # take care of filtering events
