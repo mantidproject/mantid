@@ -73,8 +73,9 @@ namespace Algorithms
 
     Progress prog(this, 0.0, 1.0, inWS->getNumberHistograms());
     PARALLEL_FOR1(inWS)
-    for (size_t wi=0; wi<inWS->getNumberHistograms(); wi++)
+    for (int iwi=0; iwi<inWS->getNumberHistograms(); iwi++)
     {
+      size_t wi = size_t(iwi);
       // The input spectrum (a histogram)
       const ISpectrum * inSpec = inWS->getSpectrum(wi);
       const MantidVec & X = inSpec->dataX();
