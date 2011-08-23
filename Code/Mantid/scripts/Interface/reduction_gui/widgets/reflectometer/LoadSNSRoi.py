@@ -94,6 +94,13 @@ class LoadSNSRoi:
             left_pixel = right_pixel
         self.pixel_range.append([start_pixel, right_pixel])
             
-            
-            
+    def retrieveFormatedDiscretePixelRange(self):
+        _list = self.pixel_range
+        _formated_string = ""
+        for i in _list:
+            _formated_string += " " + str(i)
+        return _formated_string
+        
+        
+        
             

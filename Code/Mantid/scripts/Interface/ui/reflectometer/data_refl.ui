@@ -280,18 +280,18 @@
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>135</width>
+                    <width>190</width>
                     <height>0</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>135</width>
+                    <width>190</width>
                     <height>16777215</height>
                    </size>
                   </property>
                   <property name="text">
-                   <string>Number of selection:</string>
+                   <string>Number of discrete selection:</string>
                   </property>
                  </widget>
                 </item>

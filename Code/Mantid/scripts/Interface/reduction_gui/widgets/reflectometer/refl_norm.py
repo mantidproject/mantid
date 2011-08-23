@@ -6,6 +6,7 @@ import os
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.reflectometer.ui_norm_refl
+from loadSNSRoi import LoadSNSRoi
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -116,8 +117,8 @@ class NormReflWidget(BaseWidget):
 
         # Event connections
         self.connect(self._summary.norm_background_switch, QtCore.SIGNAL("clicked(bool)"), self._norm_background_clicked)
-        
-        
+        self.connect(self._summary.norm_peak_load_roi, QtCore.SIGNAL("clicked()"), self._norm_peak_load_roi_clicked)
+        self.connect(self._summary.norm_background_load_button, QtCore.SIGNAL("clicked()"), self._norm_background_roi_clicked)
 
 #        self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
 #        self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
@@ -177,7 +178,49 @@ class NormReflWidget(BaseWidget):
         self._summary.norm_background_load_button.setEnabled(is_checked)
         self._summary.norm_background_save_button.setEnabled(is_checked)
 
-#            
+    
+    def _norm_peak_load_roi_clicked(self):
+        """
+            Reached by the Load peak selection button
+        """
+        fname = self.data_browse_dialog(data_type="*.txt *.dat", title="Normalization peak selection - Choose a ROI file")
+        if fname:
+            #retrieved from and to pixels values
+            myROI = LoadSNSRoi(filename=fname)
+            mode = myROI.getMode()
+            pixelRange = myROI.getPixelRange()
+                
+        if (mode == 'narrow/broad'):                
+            from_pixel = pixelRange[0]
+            to_pixel = pixelRange[1]
+            self._summary.norm_peak_from_pixel.setText(str(from_pixel))
+            self._summary.norm_peak_to_pixel.setText(str(to_pixel))
+        else:
+            QtGui.QMessageBox.warning(self, "Wrong normalization peak ROI file format!",
+                                            "                             Please check the ROI file!")           
+ 
+    def _norm_background_roi_clicked(self):
+        """
+            Reached by the load background selection button
+        """
+        fname = self.data_browse_dialog(data_type="*.txt *.dat", title="Normalization background selection - Choose a ROI file")
+        if fname:
+            #retrieved from and to pixels values
+            myROI = LoadSNSRoi(filename=fname)
+            mode = myROI.getMode()
+            pixelRange = myROI.getPixelRange()
+                
+        if (mode == 'narrow/broad'):                
+            from_pixel = pixelRange[0]
+            to_pixel = pixelRange[1]
+            self._summary.norm_background_from_pixel.setText(str(from_pixel))
+            self._summary.norm_background_to_pixel.setText(str(to_pixel))
+        else:
+            QtGui.QMessageBox.warning(self, "Wrong normalization background ROI file format!",
+                                            "                                   Please check the ROI file!")                  
+        
+        
+        
 #    def _mask_plot_clicked(self):        
 #        self.mask_ws = "__mask_%s" % extract_workspace_name(str(self._summary.mask_edit.text()))
 #        self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2, reload=self.mask_reload, mask=self._masked_detectors)

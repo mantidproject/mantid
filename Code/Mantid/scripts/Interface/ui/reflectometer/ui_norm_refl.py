@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/norm_refl.ui'
 #
-# Created: Mon Aug 22 07:08:25 2011
+# Created: Tue Aug 23 06:54:06 2011
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -74,12 +74,12 @@ class Ui_Frame(object):
         self.norm_peak_to_pixel.setMaximumSize(QtCore.QSize(40, 16777215))
         self.norm_peak_to_pixel.setObjectName("norm_peak_to_pixel")
         self.horizontalLayout_3.addWidget(self.norm_peak_to_pixel)
+        self.norm_peak_load_roi = QtGui.QPushButton(self.groupBox)
+        self.norm_peak_load_roi.setObjectName("norm_peak_load_roi")
+        self.horizontalLayout_3.addWidget(self.norm_peak_load_roi)
         self.pushButton_11 = QtGui.QPushButton(self.groupBox)
         self.pushButton_11.setObjectName("pushButton_11")
         self.horizontalLayout_3.addWidget(self.pushButton_11)
-        self.pushButton_10 = QtGui.QPushButton(self.groupBox)
-        self.pushButton_10.setObjectName("pushButton_10")
-        self.horizontalLayout_3.addWidget(self.pushButton_10)
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem1)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
@@ -161,8 +161,8 @@ class Ui_Frame(object):
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Peak Selection", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("Frame", "From pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("Frame", "   To pixel", None, QtGui.QApplication.UnicodeUTF8))
+        self.norm_peak_load_roi.setText(QtGui.QApplication.translate("Frame", "Load...", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_11.setText(QtGui.QApplication.translate("Frame", "Save...", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_10.setText(QtGui.QApplication.translate("Frame", "Load...", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_background_switch.setText(QtGui.QApplication.translate("Frame", "Background", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_background_from_pixel_label.setText(QtGui.QApplication.translate("Frame", "From pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_background_to_pixel_label.setText(QtGui.QApplication.translate("Frame", "   To pixel", None, QtGui.QApplication.UnicodeUTF8))

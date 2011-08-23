@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_background.ui'
 #
-# Created: Mon Aug 22 07:08:23 2011
+# Created: Tue Aug 23 06:54:03 2011
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!

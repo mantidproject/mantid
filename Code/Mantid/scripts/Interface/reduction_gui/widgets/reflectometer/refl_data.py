@@ -114,7 +114,7 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.data_peak_broad_switch, QtCore.SIGNAL("clicked(bool)"), self._data_peak_switch_clicked)
         self.connect(self._summary.data_peak_discrete_switch, QtCore.SIGNAL("clicked(bool)"), self._data_peak_switch_clicked_discrete)
         self.connect(self._summary.data_peak_load_roi, QtCore.SIGNAL("clicked()"), self._data_peak_load_roi_clicked)
-
+        self.connect(self._summary.data_background_load_button, QtCore.SIGNAL("clicked()"), self._data_background_roi_clicked)
 
 #        self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
 #        self.connect(self._summary.sample_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_dist_clicked)
@@ -264,24 +264,43 @@ class DataReflWidget(BaseWidget):
                 
                 if (mode == 'narrow/broad'):
                     if self._summary.data_peak_discrete_switch.isChecked():
-#                        QtGui.QMessageBox.warning(self, "Incompatibility of Formats",
-#                                                      "The ROI file you are trying to load is for DISCRETE mode only")
-                        from_pixel = pixelRange[0]
-                        to_pixel = pixelRange[1]
-                        self._summary.data_peak_from_pixel.setText(str(from_pixel))
-                        self._summary.data_peak_to_pixel.setText(str(to_pixel))
+                       QtGui.QMessageBox.warning(self, "Incompatibility of Formats!",
+                                                      "Selection type and ROI file loaded do not match !")
                     else:
                         from_pixel = pixelRange[0]
                         to_pixel = pixelRange[1]
                         self._summary.data_peak_from_pixel.setText(str(from_pixel))
                         self._summary.data_peak_to_pixel.setText(str(to_pixel))
-                        self._summary.data_peak_nbr_selection_value.setText("1")
-                else:
-                    self._summary.data_peak_nbr_selection_value.setText(str(len(pixelRange)))
+                        self._summary.data_peak_nbr_selection_value.setText("N/A")
+                else: #file loaded is a discrete ROI-------
+                    if self._summary.data_peak_discrete_switch.isChecked():
+                        _txt = str(len(pixelRange)) + ' -> ' + myROI.retrieveFormatedDiscretePixelRange()
+                        self._summary.data_peak_nbr_selection_value.setText(_txt)
+                    else:
+                        self._summary.data_peak_nbr_selection_value.setText("N/A")
+                        QtGui.QMessageBox.warning(self, "Incompatibility of Formats!",
+                                                  "Selection type and ROI file loaded do not match !")
+
+    def _data_background_roi_clicked(self):
+        """
+            Reached by the load background selection button
+        """
+        fname = self.data_browse_dialog(data_type="*.txt *.dat", title="Data background selection - Choose a ROI file")
+        if fname:
+            #retrieved from and to pixels values
+            myROI = LoadSNSRoi(filename=fname)
+            mode = myROI.getMode()
+            pixelRange = myROI.getPixelRange()
                 
-        #print myROI.getPixelRange()
-            
-            
+        if (mode == 'narrow/broad'):                
+            from_pixel = pixelRange[0]
+            to_pixel = pixelRange[1]
+            self._summary.data_background_from_pixel.setText(str(from_pixel))
+            self._summary.data_background_to_pixel.setText(str(to_pixel))
+        else:
+            QtGui.QMessageBox.warning(self, "Wrong data background ROI file format!",
+                                             "                         Please check the ROI file!")                  
+                    
 #    def _det_offset_clicked(self, is_checked):
 #        self._summary.detector_offset_edit.setEnabled(is_checked)
 #        

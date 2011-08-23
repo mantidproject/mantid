@@ -132,16 +132,16 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_11">
+                 <widget class="QPushButton" name="norm_peak_load_roi">
                   <property name="text">
-                   <string>Save...</string>
+                   <string>Load...</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_10">
+                 <widget class="QPushButton" name="pushButton_11">
                   <property name="text">
-                   <string>Load...</string>
+                   <string>Save...</string>
                   </property>
                  </widget>
                 </item>

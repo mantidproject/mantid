@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/data_refl.ui'
 #
-# Created: Mon Aug 22 07:08:25 2011
+# Created: Tue Aug 23 06:54:05 2011
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -116,8 +116,8 @@ class Ui_Frame(object):
         self.horizontalLayout_6.addItem(spacerItem5)
         self.data_peak_nbr_selection_label = QtGui.QLabel(self.groupBox)
         self.data_peak_nbr_selection_label.setEnabled(False)
-        self.data_peak_nbr_selection_label.setMinimumSize(QtCore.QSize(135, 0))
-        self.data_peak_nbr_selection_label.setMaximumSize(QtCore.QSize(135, 16777215))
+        self.data_peak_nbr_selection_label.setMinimumSize(QtCore.QSize(190, 0))
+        self.data_peak_nbr_selection_label.setMaximumSize(QtCore.QSize(190, 16777215))
         self.data_peak_nbr_selection_label.setObjectName("data_peak_nbr_selection_label")
         self.horizontalLayout_6.addWidget(self.data_peak_nbr_selection_label)
         self.data_peak_nbr_selection_value = QtGui.QLabel(self.groupBox)
@@ -244,7 +244,7 @@ class Ui_Frame(object):
         self.pushButton_3.setText(QtGui.QApplication.translate("Frame", "Save...", None, QtGui.QApplication.UnicodeUTF8))
         self.data_peak_from_pixel_label.setText(QtGui.QApplication.translate("Frame", "From pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.data_peak_to_pixel_label.setText(QtGui.QApplication.translate("Frame", "   To pixel", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_peak_nbr_selection_label.setText(QtGui.QApplication.translate("Frame", "Number of selection:", None, QtGui.QApplication.UnicodeUTF8))
+        self.data_peak_nbr_selection_label.setText(QtGui.QApplication.translate("Frame", "Number of discrete selection:", None, QtGui.QApplication.UnicodeUTF8))
         self.data_peak_nbr_selection_value.setText(QtGui.QApplication.translate("Frame", "N/A", None, QtGui.QApplication.UnicodeUTF8))
         self.data_background_switch.setText(QtGui.QApplication.translate("Frame", "Background", None, QtGui.QApplication.UnicodeUTF8))
         self.data_background_from_pixel_label.setText(QtGui.QApplication.translate("Frame", "From pixel", None, QtGui.QApplication.UnicodeUTF8))
