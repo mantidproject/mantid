@@ -87,6 +87,14 @@ class TextEditor;
 class AssociationsDialog;
 class MantidMatrix;
 
+
+namespace MantidQt
+{
+namespace MantidWidgets
+{
+class FitPropertyBrowser;
+}}
+
 //Mantid
 class MantidUI;
 class ScriptingWindow;
@@ -1114,6 +1122,9 @@ private:
 
   /// Open up the FirstRunSetup dialog
   void showFirstTimeSetup();
+
+  /// Run the peakPickerTool for the new plot and delete it for the old plot if there was one.
+  void runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser* fpb, const QString& nameOfPlot);
 
   // TODO: a lot of this stuff should be private
 public:

@@ -179,9 +179,12 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
+
 #include "MantidQtMantidWidgets/ICatSearch.h"
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
 #include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
+#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
@@ -7627,7 +7630,8 @@ void ApplicationWindow::selectMultiPeak()
     }
     if (g->validCurvesDataSize())
     {
-      PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI);
+      //Called when setting up usual peakPickerTool
+      PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser());
       g->setActiveTool(ppicker);
       connect(plot,SIGNAL(windowStateChanged(Qt::WindowStates, Qt::WindowStates)),ppicker,SLOT(windowStateChanged(Qt::WindowStates, Qt::WindowStates)));
     }
@@ -16277,6 +16281,9 @@ else
     setGeometry(usr_win,user_interface);
     connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this,
         SLOT(runPythonScript(const QString&)));
+    //If the fitting is requested then run the peak picker tool in runConnectFitting
+    connect(user_interface, SIGNAL(fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)), this,
+        SLOT(runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)));
     user_interface->initializeLocalPython();
   }
   else
@@ -16290,6 +16297,56 @@ QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
     tr("MantidPlot was not built with Python scripting support included!"));
 #endif
 }
+/**This searches for the graph with a selected name and then attaches the fitFunctionBrowser to it
+* 
+* @param fpb The fit property browser from the custom interface
+* @param nameOfPlot A string variable containing the name of the graph we want to fit.
+*
+*/
+void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser* fpb, const QString& nameOfPlot)
+{
+  // Loop through all multilayer (i.e. plots) windows displayed in Mantidplot 
+  // and apply pickpickertool to relevant plot
+  QList<MdiSubWindow *> windows = windowsList();
+  foreach (MdiSubWindow *w, windows) 
+  {
+    if (w->isA("MultiLayer"))
+    {
+      MultiLayer *plot = (MultiLayer *)w;
+      {
+        // Check to see if graph is the new one by comparing the names
+        if (w->objectName() != nameOfPlot)
+        {
+          QList<Graph *> layers = plot->layersList();
+          if (layers.size() > 1) // Check to see if more than one graph with the same name on the layer
+          {
+            QMessageBox::information(this, "Mantid - Warning", "More than one graph detected on this layer. Default is to take the first graph"); 
+          }
+          foreach(Graph *g, layers)
+          {
+            // Delete the PeakPickerTool
+            g->disableTools();
+          }
+        }
+        else   // if (w->objectName() == nameOfPlot)
+        {
+          QList<Graph *> layers = plot->layersList();
+          if (layers.size() > 1) // Check to see if more than one graph with the same name on the layer
+          {
+            QMessageBox::information(this, "Mantid - Warning", "More than one graph detected on this layer. Default is to take the first graph"); 
+          }
+          foreach(Graph *g, layers)
+          {
+            // Go through and set up the PeakPickerTool for the new graph
+            PeakPickerTool* ppicker = new PeakPickerTool(g, fpb);
+            g->setActiveTool(ppicker);
+          }
+        }     
+      }
+    }
+  } 
+}
+
 
 void ApplicationWindow::runPythonScript(const QString & code, bool quiet)
 {

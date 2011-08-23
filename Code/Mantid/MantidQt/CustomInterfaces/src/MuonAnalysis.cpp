@@ -1391,6 +1391,11 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
  */
 void MuonAnalysis::plotGroup(const std::string& plotType)
 {
+  //Setup a graph name that can be identified later on by the peakPickerTool (set to the name of the file as this is pretty unique)
+  QString graphName(m_previousFilename);
+  //Replace '\' with '/' because python uses it as a special character
+  graphName.replace("\\", "/");
+
   int groupNum = getGroupNumberFromRow(m_groupTableRowInFocus);
   if ( groupNum >= 0 )
   {
@@ -1433,10 +1438,12 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
       pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ",True)\n";
     else
       pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ")\n";
-    pyS += "l = gs.activeLayer()\n"
-      "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
-      "l.setTitle(\"" + m_title.c_str() + "\")\n";
-
+    // Add the objectName for the peakPickerTool to find
+    pyS += "gs.setObjectName(\"" + graphName + "\")\n"
+           "l = gs.activeLayer()\n"
+           "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
+           "l.setTitle(\"" + m_title.c_str() + "\")\n";
+      
     Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
     MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
     if ( !m_uiForm.yAxisAutoscale->isChecked() )
@@ -1517,6 +1524,8 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     // run python script
     QString pyOutput = runPythonCode( pyString ).trimmed();
   }  
+  // Emit the signal to load the peak picker tool associating itself with the fitPropertyBrowser in the muon analysis widget
+  emit fittingRequested(m_uiForm.fitBrowser, graphName);
 }
 
 /**
@@ -1524,6 +1533,9 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
  */
 void MuonAnalysis::plotPair(const std::string& plotType)
 {
+  //Setup a graph name that can be identified later on by the peakPickerTool (set to the name of the file as this is pretty unique)
+  QString graphName(m_previousFilename);
+
   int pairNum = getPairNumberFromRow(m_pairTableRowInFocus);
   if ( pairNum >= 0 )
   {
@@ -1560,7 +1572,6 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     // curve plot label
     QString titleLabel = cropWS;
 
-
     // create first part of plotting Python string
     QString gNum = QString::number(pairNum);
     QString pyS;
@@ -1568,10 +1579,13 @@ void MuonAnalysis::plotPair(const std::string& plotType)
       pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + "0" + ",True)\n";
     else
       pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + "0" + ")\n";
-    pyS += "l = gs.activeLayer()\n"
-      "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
-      "l.setTitle(\"" + m_title.c_str() + "\")\n";
-
+    //add the objectName for the peakPickerTool to find
+    pyS +=  "gs.setObjectName(\"" + graphName + "\")\n"
+            "l = gs.activeLayer()\n"
+            "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
+            "l.setTitle(\"" + m_title.c_str() + "\")\n";   
+     
+    
     Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
     MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
     if ( !m_uiForm.yAxisAutoscale->isChecked() )
@@ -1629,8 +1643,11 @@ void MuonAnalysis::plotPair(const std::string& plotType)
 
     // run python script
     std::string bsdfasdf = pyString.toStdString();
+    
     QString pyOutput = runPythonCode( pyString ).trimmed();
   }
+  //emit the signal to load the peak picker tool associating itself with the fitPropertyBrowser in the muon analysis widget
+  emit fittingRequested(m_uiForm.fitBrowser, graphName);
 }
 
 /**

@@ -315,14 +315,8 @@ signals:
   // Display a critical error dialog box
   void needToShowCritical(const QString&);
 
-  // Signals that the fit property browser has updated its X range
-  void x_range_update(double, double);
-
-
 public slots:
 
-    // Receives a new X range from a PeakPickerTool and re-emits it.
-    void x_range_from_picker(double, double);
     void test();
 
     // Display a message in QtiPlot's results window. Used by MantidLog class to display Mantid log information.

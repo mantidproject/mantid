@@ -18,6 +18,7 @@
 // Forward declarations
 //---------------------------
 
+
 class MantidUI;
 class QwtPlotCurve;
 class QPoint;
@@ -76,7 +77,7 @@ class PeakPickerTool : public QwtPlotPicker, public PlotToolInterface, public Qw
   Q_OBJECT
 public:
   /// Constructor
-  PeakPickerTool(Graph *graph, MantidUI *mantidUI);
+  PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser); //MantidUI *mantidUI);
   /// Destructor
   ~PeakPickerTool();
   /// Runtime type identifier
@@ -185,9 +186,9 @@ private:
   // Set the tool tip text
   void setToolTip(const QString& txt);
 
-  MantidQt::MantidWidgets::FitPropertyBrowser* fitBrowser()const;
-  /// The parent application window
-  MantidUI* m_mantidUI;
+  /// Creates a pointer to fitPropertyBrowser
+  MantidQt::MantidWidgets::FitPropertyBrowser* m_fitPropertyBrowser;
+
   /// Workspace name
   QString m_wsName;
   /// Spectrum index

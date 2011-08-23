@@ -38,6 +38,10 @@
 //Top-level namespace for this library
 namespace MantidQt
 {
+  namespace MantidWidgets 
+  {
+  class FitPropertyBrowser;
+  }
 
 namespace API 
 {
@@ -46,6 +50,8 @@ namespace API
 // Forward declarations
 //----------------------------------
 class InterfaceManagerImpl;
+
+
 
 /** 
     This is the base class all customised user interfaces that do not wish to be tied
@@ -107,6 +113,9 @@ signals:
   ///Mantid log message recieved
   void logMessageReceived(const QString & msg);
 
+  ///Connects MantidPlot up with the muon analysis custom interface and in turn the fitPropertyBrowser. (Emitted when a new graph is created).
+  void fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&);
+  
 protected:
   /**@name Virtual Functions */
   //@{

@@ -19,10 +19,10 @@
 
 #include <iostream>
 
-PeakPickerTool::PeakPickerTool(Graph *graph, MantidUI *mantidUI) :
+PeakPickerTool::PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser) : //MantidUI *mantidUI) :
 QwtPlotPicker(graph->plotWidget()->canvas()),
 PlotToolInterface(graph),
-m_mantidUI(mantidUI),m_wsName(),m_spec(),m_init(false),//m_current(0),
+m_fitPropertyBrowser(fitPropertyBrowser),m_wsName(),m_spec(),m_init(false), //m_current(0),
 m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
 {
   d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
@@ -48,36 +48,37 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
       }
     }
   }
-  fitBrowser()->getHandler()->removeAllPlots();
-  fitBrowser()->setWorkspaceName(m_wsName);
-  fitBrowser()->setWorkspaceIndex(m_spec);
-  connect(fitBrowser(),SIGNAL(currentChanged()),this,SLOT(currentChanged()));
-  connect(fitBrowser(),SIGNAL(workspaceIndexChanged(int)),this,SLOT(workspaceIndexChanged(int)));
-  connect(fitBrowser(),SIGNAL(workspaceNameChanged(const QString&)),
+  m_fitPropertyBrowser->getHandler()->removeAllPlots();
+  m_fitPropertyBrowser->setWorkspaceName(m_wsName);
+  m_fitPropertyBrowser->setWorkspaceIndex(m_spec);
+  connect(m_fitPropertyBrowser,SIGNAL(currentChanged()),this,SLOT(currentChanged()));
+  connect(m_fitPropertyBrowser,SIGNAL(workspaceIndexChanged(int)),this,SLOT(workspaceIndexChanged(int)));
+  connect(m_fitPropertyBrowser,SIGNAL(workspaceNameChanged(const QString&)),
                   this,SLOT(workspaceNameChanged(const QString&)));
-  connect(fitBrowser(),SIGNAL(functionRemoved()),this,SLOT(functionRemoved()));
-  connect(fitBrowser(),SIGNAL(functionCleared()),this,SLOT(functionCleared()));
-  connect(fitBrowser(),SIGNAL(algorithmFinished(const QString&)),
+  connect(m_fitPropertyBrowser,SIGNAL(functionRemoved()),this,SLOT(functionRemoved()));
+  connect(m_fitPropertyBrowser,SIGNAL(functionCleared()),this,SLOT(functionCleared()));
+  connect(m_fitPropertyBrowser,SIGNAL(algorithmFinished(const QString&)),
                   this,SLOT(algorithmFinished(const QString&)));
-  connect(fitBrowser(),SIGNAL(startXChanged(double)),this,SLOT(startXChanged(double)));
-  connect(fitBrowser(),SIGNAL(endXChanged(double)),this,SLOT(endXChanged(double)));
-  connect(fitBrowser(),SIGNAL(parameterChanged(const Mantid::API::IFitFunction*)),
+  connect(m_fitPropertyBrowser,SIGNAL(startXChanged(double)),this,SLOT(startXChanged(double)));
+  connect(m_fitPropertyBrowser,SIGNAL(endXChanged(double)),this,SLOT(endXChanged(double)));
+  connect(m_fitPropertyBrowser,SIGNAL(parameterChanged(const Mantid::API::IFitFunction*)),
                   this,SLOT(parameterChanged(const Mantid::API::IFitFunction*)));
-  connect(fitBrowser(),SIGNAL(plotGuess()),this,SLOT(plotGuess()));
-  connect(fitBrowser(),SIGNAL(plotCurrentGuess()),this,SLOT(plotCurrentGuess()));
-  connect(fitBrowser(),SIGNAL(removeGuess()),this,SLOT(removeGuess()));
-  connect(fitBrowser(),SIGNAL(removeCurrentGuess()),this,SLOT(removeCurrentGuess()));
-  connect(fitBrowser(),SIGNAL(removePlotSignal(MantidQt::MantidWidgets::PropertyHandler*)),
+  connect(m_fitPropertyBrowser,SIGNAL(plotGuess()),this,SLOT(plotGuess()));
+  connect(m_fitPropertyBrowser,SIGNAL(plotCurrentGuess()),this,SLOT(plotCurrentGuess()));
+  connect(m_fitPropertyBrowser,SIGNAL(removeGuess()),this,SLOT(removeGuess()));
+  connect(m_fitPropertyBrowser,SIGNAL(removeCurrentGuess()),this,SLOT(removeCurrentGuess()));
+  connect(m_fitPropertyBrowser,SIGNAL(removePlotSignal(MantidQt::MantidWidgets::PropertyHandler*)),
           this,SLOT(removePlot(MantidQt::MantidWidgets::PropertyHandler*)));
-  connect(fitBrowser(),SIGNAL(removeFitCurves()),this,SLOT(removeFitCurves()));
+  connect(m_fitPropertyBrowser,SIGNAL(removeFitCurves()),this,SLOT(removeFitCurves()));
 
-  m_mantidUI->showFitPropertyBrowser();
-  connect(this,SIGNAL(xRangeChanged(double, double)), m_mantidUI, SLOT(x_range_from_picker(double, double)));
-  connect(this,SIGNAL(isOn(bool)),fitBrowser(),SLOT(setPeakToolOn(bool)));
+  //Show the fitPropertyBrowser if it isn't already.
+  m_fitPropertyBrowser->show();
+
+  connect(this,SIGNAL(isOn(bool)),m_fitPropertyBrowser,SLOT(setPeakToolOn(bool)));
   emit isOn(true);
 
-  Mantid::API::CompositeFunction* cf = fitBrowser()->compositeFunction();
-  if (fitBrowser()->count() == 0 || (fitBrowser()->count() == 1 && fitBrowser()->isAutoBack()))
+  Mantid::API::CompositeFunction* cf = m_fitPropertyBrowser->compositeFunction();
+  if (m_fitPropertyBrowser->count() == 0 || (m_fitPropertyBrowser->count() == 1 && m_fitPropertyBrowser->isAutoBack()))
   {
     m_init = true;
     QwtScaleMap xMap = d_graph->plotWidget()->canvasMap(QwtPlot::xBottom);
@@ -87,18 +88,18 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
     xMax(s2 - ds);
     m_changingXMin = false;
     m_changingXMax = false;
-    fitBrowser()->setStartX(xMin());
-    fitBrowser()->setEndX(xMax());
-    if (fitBrowser()->isAutoBack())
+    m_fitPropertyBrowser->setStartX(xMin());
+    m_fitPropertyBrowser->setEndX(xMax());
+    if (m_fitPropertyBrowser->isAutoBack())
     {
-      fitBrowser()->addAutoBackground();
+      m_fitPropertyBrowser->addAutoBackground();
     }
   }
   else
   {
     m_init = true;
-    xMin(fitBrowser()->startX());
-    xMax(fitBrowser()->endX());
+    xMin(m_fitPropertyBrowser->startX());
+    xMax(m_fitPropertyBrowser->endX());
     m_changingXMin = false;
     m_changingXMax = false;
     for(size_t i=0;i<cf->nFunctions();i++)
@@ -164,7 +165,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
           double c = centre();
           double w = d_graph->plotWidget()->invTransform(2,pnt.x()) - c;
           setWidth(2*fabs(w));
-          fitBrowser()->updateParameters();
+          m_fitPropertyBrowser->updateParameters();
           emit peakChanged();
         }
         else if (resetting())
@@ -173,7 +174,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
           int yAxis = QwtPlot::yLeft;
           double h = d_graph->plotWidget()->invTransform(yAxis,pnt.y());
           setPeak(c,h);
-          fitBrowser()->updateParameters();
+          m_fitPropertyBrowser->updateParameters();
           emit peakChanged();
         }
         else if (changingXMin() && changingXMax())
@@ -194,20 +195,20 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
           }
           xMin(xmin);
           xMax(xmax);
-          fitBrowser()->setStartX(xMin());
-          fitBrowser()->setEndX(xMax());
+          m_fitPropertyBrowser->setStartX(xMin());
+          m_fitPropertyBrowser->setEndX(xMax());
         }
         else if (changingXMin())
         {
           double x = d_graph->plotWidget()->invTransform(2,pnt.x());
           xMin(x);
-          fitBrowser()->setStartX(xMin());
+          m_fitPropertyBrowser->setStartX(xMin());
         }
         else if (changingXMax())
         {
           double x = d_graph->plotWidget()->invTransform(2,pnt.x());
           xMax(x);
-          fitBrowser()->setEndX(xMax());
+          m_fitPropertyBrowser->setEndX(xMax());
         }
         d_graph->plotWidget()->replot();
         //}
@@ -228,8 +229,8 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
             // when PeakRangeMarker is created chngingxMin() and changingXMax are both true
             xMin(x);
             xMax(x);
-            fitBrowser()->setStartX(xMin());
-            fitBrowser()->setEndX(xMax());
+            m_fitPropertyBrowser->setStartX(xMin());
+            m_fitPropertyBrowser->setEndX(xMax());
             d_graph->plotWidget()->replot();
           }
           else if (m_addingPeak)
@@ -255,14 +256,14 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
               changingXMax(true);
               d_graph->plotWidget()->canvas()->setCursor(Qt::SizeHorCursor);
               d_graph->plotWidget()->replot();
-              fitBrowser()->setStartX(xMin());
+              m_fitPropertyBrowser->setStartX(xMin());
             }
             if (clickedOnXMin(x,fabs(x1-x)))
             {// begin changing xMin
               changingXMin(true);
               d_graph->plotWidget()->canvas()->setCursor(Qt::SizeHorCursor);
               d_graph->plotWidget()->replot();
-              fitBrowser()->setEndX(xMax());
+              m_fitPropertyBrowser->setEndX(xMax());
             }
             if (clickedOnWidthMarker(x,fabs(x1-x)))
             {// begin changing width
@@ -273,7 +274,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
             }
             else if (handler)
             {// select current, begin changing centre and height
-              fitBrowser()->setCurrentFunction(handler);
+              m_fitPropertyBrowser->setCurrentFunction(handler);
               d_graph->plotWidget()->replot();
               resetting(true);
               emit peakChanged();
@@ -287,16 +288,16 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
     case QEvent::MouseButtonRelease:
       d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
       widthIsSet();
-      if ((m_changingXMin || m_changingXMax) && fitBrowser()->isAutoBack())
+      if ((m_changingXMin || m_changingXMax) && m_fitPropertyBrowser->isAutoBack())
       {
-        fitBrowser()->refitAutoBackground();
+        m_fitPropertyBrowser->refitAutoBackground();
       }
       resetting(false);
       changingXMin(false);
       changingXMax(false);
       m_addingPeak = false;
-      fitBrowser()->setStartX(xMin());
-      fitBrowser()->setEndX(xMax());
+      m_fitPropertyBrowser->setStartX(xMin());
+      m_fitPropertyBrowser->setEndX(xMax());
       //if (current() >= 0 && m_width == 0.)
       //{
       //  setToolTip("Click and drag the red line to set the peak width");
@@ -323,16 +324,11 @@ void PeakPickerTool::functionCleared()
   d_graph->plotWidget()->replot();
 }
 
-MantidQt::MantidWidgets::FitPropertyBrowser* PeakPickerTool::fitBrowser()const
-{
-  return m_mantidUI->fitFunctionBrowser();
-}
-
 void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const
 {
   try
   {
-    MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->getHandler();
+    MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->getHandler();
     if ( !h ) return;
     QList<MantidQt::MantidWidgets::PropertyHandler*> peaks = h->getPeakList();
     foreach(MantidQt::MantidWidgets::PropertyHandler* peak,peaks)
@@ -341,7 +337,7 @@ void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMa
       if (c >= xMap.s1() && c <= xMap.s2())
       {
         int ic = xMap.transform(c);
-        if (peak == fitBrowser()->currentHandler())
+        if (peak == m_fitPropertyBrowser->currentHandler())
         {// draw current peak
           double width = peak->width();
           QPen pen;
@@ -395,8 +391,8 @@ void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMa
 // Add a new peak with centre c and height h. 
 void PeakPickerTool::addPeak(double c,double h)
 {
-  std::string fnName = fitBrowser()->defaultPeakType();
-  MantidQt::MantidWidgets::PropertyHandler* handler = fitBrowser()->addFunction(fnName);
+  std::string fnName = m_fitPropertyBrowser->defaultPeakType();
+  MantidQt::MantidWidgets::PropertyHandler* handler = m_fitPropertyBrowser->addFunction(fnName);
   if (!handler || !handler->pfun()) return;
   handler->setCentre(c);
   double width = handler->width();
@@ -414,7 +410,7 @@ void PeakPickerTool::addPeak(double c,double h)
 // Give new centre and height to the current peak
 void PeakPickerTool::setPeak(double c,double h)
 {
-  MantidQt::MantidWidgets::PropertyHandler* handler = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* handler = m_fitPropertyBrowser->currentHandler();
   if ( ! handler ) return;
   handler->setCentre(c);
   handler->calcBase();
@@ -424,28 +420,28 @@ void PeakPickerTool::setPeak(double c,double h)
 // Return the centre of the currently selected peak
 double PeakPickerTool::centre()const
 {
-  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
   return h? h->centre(): 0;
 }
 
 // Return the width of the currently selected peak
 double PeakPickerTool::width()const
 {
-  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
   return h? h->width(): 0;
 }
 
 // Return the height of the currently selected peak
 double PeakPickerTool::height()const
 {
-  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
   return h? h->width(): 0;
 }
 
 // Change the width of the currently selected peak
 void PeakPickerTool::setWidth(double x)
 {
-  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
   if (!h || !h->pfun()) return;
   m_width = x;
   h->setWidth(x);
@@ -472,7 +468,7 @@ bool PeakPickerTool::clickedOnXMax(double x,double dx)
 // Check if x is near a width marker (+-dx)
 bool PeakPickerTool::clickedOnWidthMarker(double x,double dx)
 {
-  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
   if (!h) return false;
   double c = h->centre();
   double w = h->width()/2;
@@ -482,7 +478,7 @@ bool PeakPickerTool::clickedOnWidthMarker(double x,double dx)
 // Check if x is near a peak centre marker (+-dx). If true returns the peak's address or 0 otherwise.
 MantidQt::MantidWidgets::PropertyHandler* PeakPickerTool::clickedOnCentreMarker(double x,double dx)const
 {
-  QList<MantidQt::MantidWidgets::PropertyHandler*> peaks = fitBrowser()->getHandler()->getPeakList();
+  QList<MantidQt::MantidWidgets::PropertyHandler*> peaks = m_fitPropertyBrowser->getHandler()->getPeakList();
   foreach(MantidQt::MantidWidgets::PropertyHandler* peak,peaks)
   {
     if (fabs(x - peak->centre()) <= dx)
@@ -545,7 +541,7 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   graph()->removeCurve(m_curveDifName);
 
   new MantidCurve(m_curveFitName,out,graph(),1,false);
-  if (fitBrowser()->plotDiff())
+  if (m_fitPropertyBrowser->plotDiff())
   {
     new MantidCurve(m_curveDifName,out,graph(),2,false);
   }
@@ -561,7 +557,7 @@ void PeakPickerTool::workspaceIndexChanged(int i)
 {
   if (i != m_spec)
   {
-    fitBrowser()->setWorkspaceIndex(m_spec);
+    m_fitPropertyBrowser->setWorkspaceIndex(m_spec);
   }
 }
 
@@ -575,9 +571,14 @@ void PeakPickerTool::workspaceNameChanged(const QString& wsName)
 {
   if (wsName != m_wsName)
   {
-    Mantid::API::Workspace_sptr ws = m_mantidUI->getWorkspace(wsName);
-    Mantid::API::WorkspaceGroup_sptr wsg = 
-      boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+    Mantid::API::Workspace_sptr ws;
+ 
+    if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+    {
+      ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString());
+    }
+
+    Mantid::API::WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
     if (wsg)
     {
       std::vector<std::string> names = wsg->getNames();
@@ -589,11 +590,11 @@ void PeakPickerTool::workspaceNameChanged(const QString& wsName)
         }
       }
       // reject the new name
-      fitBrowser()->setWorkspaceName(m_wsName);
+      m_fitPropertyBrowser->setWorkspaceName(m_wsName);
     }
     else
     {// reject the new name
-      fitBrowser()->setWorkspaceName(m_wsName);
+      m_fitPropertyBrowser->setWorkspaceName(m_wsName);
     }
   }
 }
@@ -626,7 +627,7 @@ void PeakPickerTool::endXChanged(double eX)
  */
 void PeakPickerTool::parameterChanged(const Mantid::API::IFitFunction* f)
 {
-  MantidQt::MantidWidgets::PropertyHandler* theHandler = fitBrowser()->getHandler();
+  MantidQt::MantidWidgets::PropertyHandler* theHandler = m_fitPropertyBrowser->getHandler();
   MantidQt::MantidWidgets::PropertyHandler* h = theHandler->findHandler(f);
   if (!h) return;
   replot(h);
@@ -687,9 +688,9 @@ void PeakPickerTool::prepareContextMenu(QMenu& menu)
 
   menu.addSeparator();
 
-  if (fitBrowser()->count()>0)
+  if (m_fitPropertyBrowser->count()>0)
   {
-    if (fitBrowser()->getHandler()->hasPlot())
+    if (m_fitPropertyBrowser->getHandler()->hasPlot())
     {
       action = new QAction("Remove guess",this);
       connect(action,SIGNAL(triggered()),this,SLOT(removeGuess()));
@@ -702,7 +703,7 @@ void PeakPickerTool::prepareContextMenu(QMenu& menu)
       menu.addAction(action);
     }
 
-    MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
+    MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
     if (h && h->pfun())
     {
       if (h->hasPlot())
@@ -737,14 +738,14 @@ void PeakPickerTool::prepareContextMenu(QMenu& menu)
 
   menu.addSeparator();
 
-  if (fitBrowser()->isFitEnabled())
+  if (m_fitPropertyBrowser->isFitEnabled())
   {
     action = new QAction("Fit",this);
     connect(action,SIGNAL(triggered()),this,SLOT(fit()));
     menu.addAction(action);
   }
 
-  if (fitBrowser()->isUndoEnabled())
+  if (m_fitPropertyBrowser->isUndoEnabled())
   {
     action = new QAction("Undo fit",this);
     connect(action,SIGNAL(triggered()),this,SLOT(undoFit()));
@@ -758,13 +759,13 @@ void PeakPickerTool::prepareContextMenu(QMenu& menu)
  */
 void PeakPickerTool::addPeak()
 {
-  int i = fitBrowser()->registeredPeaks().indexOf(QString::fromStdString(fitBrowser()->defaultPeakType()));
+  int i = m_fitPropertyBrowser->registeredPeaks().indexOf(QString::fromStdString(m_fitPropertyBrowser->defaultPeakType()));
   bool ok = false;
   QString fnName = 
-    QInputDialog::getItem(m_mantidUI->appWindow(), "MantidPlot - Fit", "Select peak type", fitBrowser()->registeredPeaks(),i,false,&ok);
+    QInputDialog::getItem(d_graph, "MantidPlot - Fit", "Select peak type", m_fitPropertyBrowser->registeredPeaks(),i,false,&ok);
   if (ok)
   {
-    fitBrowser()->setDefaultPeakType(fnName.toStdString());
+    m_fitPropertyBrowser->setDefaultPeakType(fnName.toStdString());
     m_addingPeak = true;
     d_graph->plotWidget()->canvas()->setCursor(Qt::CrossCursor);
     setToolTip("Click to add the peak");
@@ -782,7 +783,7 @@ void PeakPickerTool::addPeakAt(int x,int y)
   addPeak(c,h);
   emit peakChanged();
   d_graph->plotWidget()->replot();
-  fitBrowser()->updateParameters();
+  m_fitPropertyBrowser->updateParameters();
 }
 
 /**
@@ -790,7 +791,7 @@ void PeakPickerTool::addPeakAt(int x,int y)
  */
 void PeakPickerTool::deletePeak()
 {
-  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
   if (!h) return;
   h->removeFunction();
   functionRemoved();
@@ -801,7 +802,7 @@ void PeakPickerTool::deletePeak()
  */
 void PeakPickerTool::fit()
 {
-  fitBrowser()->fit();
+  m_fitPropertyBrowser->fit();
 }
 
 /**
@@ -811,21 +812,21 @@ void PeakPickerTool::addBackground()
 {
   bool ok = false;
   QString fnName = 
-    QInputDialog::getItem(m_mantidUI->appWindow(), 
+    QInputDialog::getItem(d_graph, 
          "MantidPlot - Fit", "Select background type", 
-         fitBrowser()->registeredBackgrounds(),
-         fitBrowser()->registeredBackgrounds().indexOf("LinearBackground"),
+         m_fitPropertyBrowser->registeredBackgrounds(),
+         m_fitPropertyBrowser->registeredBackgrounds().indexOf("LinearBackground"),
          false,&ok);
   if (ok)
   {
     if (fnName == "LinearBackground")
     {
-      fitBrowser()->setAutoBackgroundName(fnName);
-      fitBrowser()->addAutoBackground();
+      m_fitPropertyBrowser->setAutoBackgroundName(fnName);
+      m_fitPropertyBrowser->addAutoBackground();
     }
     else
     {
-      fitBrowser()->addFunction(fnName.toStdString());
+      m_fitPropertyBrowser->addFunction(fnName.toStdString());
     }
   }
 }
@@ -837,13 +838,13 @@ void PeakPickerTool::addOther()
 {
   bool ok = false;
   QString fnName = 
-    QInputDialog::getItem(m_mantidUI->appWindow(), 
+    QInputDialog::getItem(d_graph, 
          "MantidPlot - Fit", "Select function type", 
-         fitBrowser()->registeredOthers(),0,
+         m_fitPropertyBrowser->registeredOthers(),0,
          false,&ok);
   if (ok)
   {
-    fitBrowser()->addFunction(fnName.toStdString());
+    m_fitPropertyBrowser->addFunction(fnName.toStdString());
   }
 }
 
@@ -852,7 +853,7 @@ void PeakPickerTool::addOther()
  */
 void PeakPickerTool::undoFit()
 {
-  fitBrowser()->undoFit();
+  m_fitPropertyBrowser->undoFit();
 }
 
 /**
@@ -860,7 +861,7 @@ void PeakPickerTool::undoFit()
  */
 void PeakPickerTool::clear()
 {
-  fitBrowser()->clear();
+  m_fitPropertyBrowser->clear();
 }
 
 /** Set the tool tip text
@@ -869,7 +870,7 @@ void PeakPickerTool::clear()
 void PeakPickerTool::setToolTip(const QString& txt)
 {
   d_graph->setToolTip(txt);
-  fitBrowser()->setTip(txt);
+  m_fitPropertyBrowser->setTip(txt);
 }
 
 /**
@@ -877,7 +878,7 @@ void PeakPickerTool::setToolTip(const QString& txt)
  */
 void PeakPickerTool::plotGuess()
 {
-  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->getHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->getHandler();
   plotFitFunction(h);
   h->hasPlot() = true;
   d_graph->replot();
@@ -885,7 +886,7 @@ void PeakPickerTool::plotGuess()
 
 void PeakPickerTool::plotCurrentGuess()
 {
-  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
   plotFitFunction(h);
   h->hasPlot() = true;
   d_graph->replot();
@@ -918,17 +919,17 @@ void PeakPickerTool::plotFitFunction(MantidQt::MantidWidgets::PropertyHandler* h
     {
       fc = new FunctionCurve(
         h->ifun(),
-        QString::fromStdString(fitBrowser()->groupMember()),//m_browser->workspaceName()),
-        fitBrowser()->workspaceIndex(),
+        QString::fromStdString(m_fitPropertyBrowser->groupMember()),//m_browser->workspaceName()),
+        m_fitPropertyBrowser->workspaceIndex(),
         h->functionName());
-      fc->setRange(fitBrowser()->startX(),fitBrowser()->endX());
+      fc->setRange(m_fitPropertyBrowser->startX(),m_fitPropertyBrowser->endX());
       fc->loadData();
       // Graph now owns m_curve. Use m_curve->removeMe() to remove (and delete) from Graph
       d_graph->insertCurve(fc);
       connect(fc,SIGNAL(forgetMe()),h,SLOT(plotRemoved()));
-      if (h == fitBrowser()->getHandler())
+      if (h == m_fitPropertyBrowser->getHandler())
       {
-        fitBrowser()->setTextPlotGuess("Remove guess");
+        m_fitPropertyBrowser->setTextPlotGuess("Remove guess");
       }
     }
   }
@@ -940,7 +941,7 @@ void PeakPickerTool::plotFitFunction(MantidQt::MantidWidgets::PropertyHandler* h
  */
 void PeakPickerTool::removeGuess()
 {
-  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->getHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->getHandler();
   removePlot(h);
   h->hasPlot() = false;
   d_graph->replot();
@@ -967,9 +968,9 @@ void PeakPickerTool::removePlot(MantidQt::MantidWidgets::PropertyHandler* h)
   if (indexForFC >= 0)
   {
     fc->removeMe();
-    if (h == fitBrowser()->getHandler())
+    if (h == m_fitPropertyBrowser->getHandler())
     {
-      fitBrowser()->setTextPlotGuess("Plot guess");
+      m_fitPropertyBrowser->setTextPlotGuess("Plot guess");
     }
   }
 }
@@ -979,7 +980,7 @@ void PeakPickerTool::removePlot(MantidQt::MantidWidgets::PropertyHandler* h)
  */
 void PeakPickerTool::removeCurrentGuess()
 {
-  MantidQt::MantidWidgets::PropertyHandler* h = fitBrowser()->currentHandler();
+  MantidQt::MantidWidgets::PropertyHandler* h = m_fitPropertyBrowser->currentHandler();
   if (h)
   {
     removePlot(h);
@@ -1000,11 +1001,11 @@ void PeakPickerTool::resetRange()
   double ds = fabs(s2-s1)*0.05;
   xMin(s1 + ds);
   xMax(s2 - ds);
-  fitBrowser()->setStartX(xMin());
-  fitBrowser()->setEndX(xMax());
-  if (fitBrowser()->isAutoBack())
+  m_fitPropertyBrowser->setStartX(xMin());
+  m_fitPropertyBrowser->setEndX(xMax());
+  if (m_fitPropertyBrowser->isAutoBack())
   {
-    fitBrowser()->addAutoBackground();
+    m_fitPropertyBrowser->addAutoBackground();
   }
   d_graph->replot();
 }
