@@ -11,6 +11,7 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -60,24 +61,6 @@ namespace MDEvents
   MakeDiffractionMDEventWorkspace::~MakeDiffractionMDEventWorkspace()
   {
   }
-  
-  //  template<typename MDE, size_t nd>
-//  bool pointContained(double * coords)
-//
-//  template<typename MDE, size_t nd>
-//  void evaluateBox(MDBox<MDE, nd> & box, bool fullyContained)
-//  {
-//    if (fullyContained)
-//    {
-//      // MDBox is fully contained - use the cached value.
-//      //signal += box.getSignal();
-//    }
-//    else
-//    {
-//      // Go through each event
-//    }
-//  }
-
 
 
   //----------------------------------------------------------------------------------------------
@@ -86,7 +69,9 @@ namespace MDEvents
   void MakeDiffractionMDEventWorkspace::init()
   {
     //TODO: Make sure in units are okay
-    declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input), "An input EventWorkspace.");
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+        "An input Workspace. If you specify a Workspace2D, it gets converted to "
+        "an EventWorkspace using ConvertToEventWorkspace.");
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
         "Name of the output MDEventWorkspace. If the workspace already exists, then the events will be added to it.");
     declareProperty(new PropertyWithValue<bool>("ClearInputWorkspace", false, Direction::Input), "Clear the events from the input workspace during conversion, to save memory.");
@@ -238,10 +223,28 @@ namespace MDEvents
     std::string OutputDimensions = getPropertyValue("OutputDimensions");
     LorentzCorrection = getProperty("LorentzCorrection");
 
-    // Input workspace
-    in_ws = getProperty("InputWorkspace");
+    // -------- Input workspace -> convert to Event ------------------------------------
+    MatrixWorkspace_sptr inMatrixWS = getProperty("InputWorkspace");
+    Workspace2D_sptr inWS2D = boost::dynamic_pointer_cast<Workspace2D>(inMatrixWS);
+    in_ws = boost::dynamic_pointer_cast<EventWorkspace>(inMatrixWS);
     if (!in_ws)
-      throw std::invalid_argument("No input event workspace was passed to algorithm.");
+    {
+      if (inWS2D)
+      {
+        // Convert from 2D to Event
+        IAlgorithm_sptr alg = createSubAlgorithm("ConvertToEventWorkspace", 0.0, 0.1, true);
+        alg->setProperty("InputWorkspace", inWS2D);
+        alg->setProperty("GenerateMultipleEvents", false); // One event per bin by default
+        alg->setPropertyValue("OutputWorkspace", getPropertyValue("InputWorkspace") + "_event");
+        alg->executeAsSubAlg();
+        in_ws = alg->getProperty("OutputWorkspace");
+        if (!alg->isExecuted() || !in_ws)
+          throw std::runtime_error("Error in ConvertToEventWorkspace. Cannot proceed.");
+      }
+      else
+        throw std::invalid_argument("InputWorkspace must be either an EventWorkspace or a Workspace2D (which will get converted to events).");
+    }
+
 
     // check the input units
     if (in_ws->getAxis(0)->unit()->unitID() != "TOF")

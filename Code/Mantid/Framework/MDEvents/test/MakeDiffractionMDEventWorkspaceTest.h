@@ -96,7 +96,7 @@ public:
     MakeDiffractionMDEventWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    alg.setProperty("InputWorkspace", in_ws);
+    alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(in_ws) );
     alg.setPropertyValue("OutputWorkspace", "test_md3");
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
     TS_ASSERT( alg.isExecuted() )
