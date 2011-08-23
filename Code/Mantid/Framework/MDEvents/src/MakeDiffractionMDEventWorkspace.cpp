@@ -132,15 +132,8 @@ namespace MDEvents
       std::vector<MDE> out_events;
       out_events.reserve( el.getNumberEvents() );
 
-      // Warn if the event list is the sum of more than one detector ID
-      if (detectors.size() != 1)
-      {
-        g_log.warning() << "Event list at workspace index " << workspaceIndex << " has " << detectors.size() << " detectors. Only 1 detector ID per pixel is supported.\n";
-        return;
-      }
-
-      detid_t detID = *(detectors.begin());
-      IDetector_sptr det = allDetectors[detID];
+      // Get the detector (might be a detectorGroup for multiple detectors)
+      IDetector_sptr det = in_ws->getDetector(workspaceIndex);
 
       // Vector between the sample and the detector
       V3D detPos = det->getPos() - samplePos;

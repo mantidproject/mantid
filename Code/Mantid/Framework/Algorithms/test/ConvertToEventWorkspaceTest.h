@@ -31,14 +31,29 @@ public:
   
   void test_exec()
   {
+    do_test_exec(false);
+  }
+
+  void test_exec_GenerateMultipleEvents()
+  {
+    do_test_exec(true);
+  }
+
+  void do_test_exec(bool GenerateMultipleEvents)
+  {
     // Create the input
     Workspace2D_sptr inWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(50, 10, true);
 
     inWS->dataY(0)[0] = 1.0;
+    inWS->dataE(0)[0] = 1.0;
     inWS->dataY(0)[1] = 3.0;
-    inWS->dataE(0)[1] = 4.0;
+    inWS->dataE(0)[1] = sqrt(3.0);
     inWS->dataY(0)[2] = 0.0;
     inWS->dataE(0)[2] = 0.0;
+    inWS->dataY(0)[3] = 2.0;
+    inWS->dataE(0)[3] = sqrt(2.0);
+    inWS->dataY(0)[4] = 10000.0;
+    inWS->dataE(0)[4] = 100.0;
 
     // Name of the output workspace.
     std::string outWSName("ConvertToEventWorkspaceTest_OutputWS");
@@ -47,6 +62,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inWS) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("GenerateMultipleEvents", GenerateMultipleEvents) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
@@ -69,26 +85,53 @@ public:
     TS_ASSERT_EQUALS( matcher.getPropertyValue("Result"), "Success!" );
 
     // Event-specific checks
-    TS_ASSERT_EQUALS( outWS->getNumberEvents(), 499 );
-    TS_ASSERT_EQUALS( outWS->getEventList(1).getNumberEvents(), 10);
+    TS_ASSERT_EQUALS( outWS->getNumberEvents(), GenerateMultipleEvents ? 1006 : 499);
+    TS_ASSERT_EQUALS( outWS->getEventList(1).getNumberEvents(), GenerateMultipleEvents ? 20 : 10);
 
     // Check a couple of events
     EventList & el = outWS->getEventList(0);
-    TS_ASSERT_EQUALS( el.getWeightedEventsNoTime().size(), 9);
+    TS_ASSERT_EQUALS( el.getWeightedEventsNoTime().size(), GenerateMultipleEvents ? 26 : 9);
     WeightedEventNoTime ev;
     ev = el.getWeightedEventsNoTime()[0];
     TS_ASSERT_DELTA( ev.tof(), 0.5, 1e-6);
     TS_ASSERT_DELTA( ev.weight(), 1.0, 1e-6);
-    TS_ASSERT_DELTA( ev.errorSquared(), 2.0, 1e-6);
-    ev = el.getWeightedEventsNoTime()[1];
-    TS_ASSERT_DELTA( ev.tof(), 1.5, 1e-6);
-    TS_ASSERT_DELTA( ev.weight(), 3.0, 1e-6);
-    TS_ASSERT_DELTA( ev.errorSquared(), 16.0, 1e-6);
-    // Skipped an event because the bin was 0.0 weight
-    ev = el.getWeightedEventsNoTime()[2];
-    TS_ASSERT_DELTA( ev.tof(), 3.5, 1e-6);
-    TS_ASSERT_DELTA( ev.weight(), 2.0, 1e-6);
-    TS_ASSERT_DELTA( ev.errorSquared(), 2.0, 1e-6);
+    TS_ASSERT_DELTA( ev.errorSquared(), 1.0, 1e-6);
+
+    if (GenerateMultipleEvents)
+    {
+      ev = el.getWeightedEventsNoTime()[1];
+      TS_ASSERT_DELTA( ev.tof(), 1.1666, 1e-4);
+      TS_ASSERT_DELTA( ev.weight(), 1.0, 1e-6); TS_ASSERT_DELTA( ev.errorSquared(), 1.0, 1e-6);
+      ev = el.getWeightedEventsNoTime()[2];
+      TS_ASSERT_DELTA( ev.tof(), 1.5000, 1e-4);
+      TS_ASSERT_DELTA( ev.weight(), 1.0, 1e-6); TS_ASSERT_DELTA( ev.errorSquared(), 1.0, 1e-6);
+      ev = el.getWeightedEventsNoTime()[3];
+      TS_ASSERT_DELTA( ev.tof(), 1.8333, 1e-4);
+      TS_ASSERT_DELTA( ev.weight(), 1.0, 1e-6); TS_ASSERT_DELTA( ev.errorSquared(), 1.0, 1e-6);
+      // Skipped a bin
+      ev = el.getWeightedEventsNoTime()[4];
+      TS_ASSERT_DELTA( ev.tof(), 3.25, 1e-4);
+      TS_ASSERT_DELTA( ev.weight(), 1.0, 1e-6); TS_ASSERT_DELTA( ev.errorSquared(), 1.0, 1e-6);
+      ev = el.getWeightedEventsNoTime()[5];
+      TS_ASSERT_DELTA( ev.tof(), 3.75, 1e-4);
+      TS_ASSERT_DELTA( ev.weight(), 1.0, 1e-6); TS_ASSERT_DELTA( ev.errorSquared(), 1.0, 1e-6);
+      // The one with 10000 events, reduced to 10 events with weight 1000 each
+      ev = el.getWeightedEventsNoTime()[6];
+      TS_ASSERT_DELTA( ev.tof(), 4.05, 1e-4);
+      TS_ASSERT_DELTA( ev.weight(), 1000.0, 1e-6); TS_ASSERT_DELTA( ev.errorSquared(), 1000.0, 1e-6);
+    }
+    else
+    {
+      ev = el.getWeightedEventsNoTime()[1];
+      TS_ASSERT_DELTA( ev.tof(), 1.5, 1e-6);
+      TS_ASSERT_DELTA( ev.weight(), 3.0, 1e-6);
+      TS_ASSERT_DELTA( ev.errorSquared(), 3.0, 1e-6);
+      // Skipped an event because the bin was 0.0 weight
+      ev = el.getWeightedEventsNoTime()[2];
+      TS_ASSERT_DELTA( ev.tof(), 3.5, 1e-6);
+      TS_ASSERT_DELTA( ev.weight(), 2.0, 1e-6);
+      TS_ASSERT_DELTA( ev.errorSquared(), 2.0, 1e-6);
+    }
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
