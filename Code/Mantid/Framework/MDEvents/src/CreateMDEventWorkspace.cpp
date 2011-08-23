@@ -66,16 +66,23 @@ namespace MDEvents
       "A comma separated list of the units of each dimension.");
 
     declareProperty(
-      new ArrayProperty<int>("SplitInto", "10"),
-      "A comma separated list of into how many sub-grid elements each dimension should split; or just one to split into the same number for all dimensions.");
+      new ArrayProperty<int>("SplitInto", "5"),
+      "A comma separated list of into how many sub-grid elements each dimension should split; \n"
+      "or just one to split into the same number for all dimensions. Default 5.");
 
     declareProperty(
       new PropertyWithValue<int>("SplitThreshold", 1000),
-      "How many events in a box before it should be split.");
+      "How many events in a box before it should be split. Default 1000.");
+
+    declareProperty(
+      new PropertyWithValue<int>("MinRecursionDepth", 0),
+      "Optional. If specified, then all the boxes will be split to this minimum recursion depth. 0 = no splitting, 1 = one level of splitting, etc.\n"
+      "Be careful using this since it can quickly create a huge number of boxes = (SplitInto ^ (MinRercursionDepth * NumDimensions)).");
 
     declareProperty(
       new PropertyWithValue<int>("MaxRecursionDepth", 5),
-      "How many levels of box splitting recursion are allowed.");
+      "How many levels of box splitting recursion are allowed. \n"
+      "The smallest box will have each side length l = (extents) / (SplitInto ^ MaxRecursionDepth). Default 10.");
 
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "Name of the output MDEventWorkspace.");
 
@@ -122,7 +129,29 @@ namespace MDEvents
       throw std::invalid_argument("SplitInto parameter must have 1 or ndims arguments.");
     bc->resetNumBoxes();
 
+    // Split to level 1
     ws->splitBox();
+
+    // Do we split more due to MinRecursionDepth?
+    int minDepth = this->getProperty("MinRecursionDepth");
+    for (int depth = 1; depth < minDepth; depth++)
+    {
+      // Get all the MDGridBoxes in the workspace
+      std::vector<IMDBox<MDE,nd>*> boxes;
+      boxes.clear();
+      ws->getBox()->getBoxes(boxes, depth-1, false);
+      for (size_t i=0; i<boxes.size(); i++)
+      {
+        IMDBox<MDE,nd> * box = boxes[i];
+        MDGridBox<MDE,nd>* gbox = dynamic_cast<MDGridBox<MDE,nd>*>(box);
+        if (gbox)
+        {
+          // Split ALL the contents.
+          for (size_t j=0; j<gbox->getNumChildren(); j++)
+            gbox->splitContents(j, NULL);
+        }
+      }
+    }
 
   }
 
@@ -132,11 +161,17 @@ namespace MDEvents
    */
   void CreateMDEventWorkspace::exec()
   {
-    // Get the properties
+    // Get the properties and validate them
     std::string eventType = getPropertyValue("EventType");
     int ndims_prop = getProperty("Dimensions");
     if (ndims_prop <= 0)
       throw std::invalid_argument("You must specify a number of dimensions >= 1.");
+    int mind = this->getProperty("MinRecursionDepth");
+    int maxd = this->getProperty("MaxRecursionDepth");
+    if (mind > maxd)
+      throw std::invalid_argument("MinRecursionDepth must be <= MaxRecursionDepth.");
+    if (mind < 0 || maxd < 0)
+      throw std::invalid_argument("MinRecursionDepth and MaxRecursionDepth must be positive.");
 
     size_t ndims = static_cast<size_t>(ndims_prop);
 

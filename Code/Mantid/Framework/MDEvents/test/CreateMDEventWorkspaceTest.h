@@ -7,6 +7,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/CreateMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidTestHelpers/AlgorithmHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -28,7 +29,33 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  void do_test_exec(std::string Filename, bool lean)
+  /** Validate bad inputs. */
+  void test_validation()
+  {
+    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 4,
+        "OutputWorkspace","failed_output",
+        "Dimensions", "0")->isExecuted() );
+    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 6,
+        "OutputWorkspace","failed_output",
+        "Dimensions", "3",
+        "Extents", "-1,1,-2,2")->isExecuted() );
+    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 6,
+        "OutputWorkspace","failed_output",
+        "Dimensions", "3",
+        "Extents", "-1,1,-2,2,3,3,4,4")->isExecuted() );
+    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 8,
+        "OutputWorkspace","failed_output",
+        "Dimensions", "3", "Extents", "-1,1,-2,2,3,3",
+        "Names", "One,Two")->isExecuted() );
+    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 12,
+        "OutputWorkspace","failed_output",
+        "Dimensions", "3", "Extents", "-1,1,-2,2,3,3",
+        "Names", "One,Two,Three",
+        "MinRecursionDepth", "5",
+        "MaxRecursionDepth", "4")->isExecuted() );
+  }
+
+  void do_test_exec(std::string Filename, bool lean, int MinRecursionDepth=0, int expectedNumMDBoxes=216)
   {
     std::string wsName = "CreateMDEventWorkspaceTest_out";
     CreateMDEventWorkspace alg;
@@ -41,7 +68,8 @@ public:
     alg.setPropertyValue("Units", "m,mm,um");
     alg.setPropertyValue("SplitInto", "6");
     alg.setPropertyValue("SplitThreshold", "500");
-    alg.setPropertyValue("MaxRecursionDepth", "7");
+    alg.setProperty("MinRecursionDepth", MinRecursionDepth);
+    alg.setProperty("MaxRecursionDepth", 7);
     alg.setPropertyValue("OutputWorkspace",wsName);
     alg.setPropertyValue("Filename", Filename);
     alg.setPropertyValue("Memory", "1");
@@ -94,6 +122,8 @@ public:
     TS_ASSERT_EQUALS(bc->getSplitThreshold(), 500 );
     TS_ASSERT_EQUALS(bc->getMaxDepth(), 7 );
 
+    TS_ASSERT_EQUALS(bc->getTotalNumMDBoxes(), expectedNumMDBoxes);
+
     if (Filename != "")
     {
       std::string s = alg.getPropertyValue("Filename");
@@ -125,6 +155,10 @@ public:
   }
 
 
+  void test_exec_MinRecursionDepth()
+  {
+    do_test_exec("", true, 2, 216*216);
+  }
 };
 
 

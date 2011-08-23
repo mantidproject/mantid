@@ -172,7 +172,7 @@ namespace MDEvents
         if (i>0)
         {
           if (box_event_index.size() != box_indexes[0].size())
-            throw std::runtime_error("Inconsistent number of boxes found in file " + m_filenames[i] + ". Cannot merge these files.");
+            throw std::runtime_error("Inconsistent number of boxes found in file " + m_filenames[i] + ". Cannot merge these files. Did you generate them all with exactly the same box structure?");
         }
         file->closeGroup();
 
@@ -250,8 +250,8 @@ namespace MDEvents
 
     // Complete the file-back-end creation.
     DiskMRU & mru = bc->getDiskMRU(); UNUSED_ARG(mru);
-    g_log.notice() << "Setting cache to 0 MB read, 30 MB write, 2000 MB small objects." << std::endl;
-    bc->setCacheParameters(sizeof(MDE), 0, 30000000/sizeof(MDE), 2000000000/sizeof(MDE));
+    g_log.notice() << "Setting cache to 0 MB read, 400 MB write, 2000 MB small objects." << std::endl;
+    bc->setCacheParameters(sizeof(MDE), 0, 400000000/sizeof(MDE), 2000000000/sizeof(MDE));
     g_log.notice() << "Threshold for small boxes: " << bc->getDiskMRU().getSmallThreshold() << " events." << std::endl;
 
 
@@ -301,6 +301,9 @@ namespace MDEvents
         // Run all the tasks
         tp.joinAll();
 
+        // Occasionally release free memory (has an effect on Linux only).
+        MemoryManager::Instance().releaseFreeMemory();
+
         // Now do all the splitting tasks
         g_log.information() << "Splitting boxes since we have added " << totalEventsInTasks << " events." << std::endl;
         outWS->splitAllIfNeeded(ts);
@@ -320,11 +323,11 @@ namespace MDEvents
     outWS->splitAllIfNeeded(ts);
     tp.joinAll();
 
-    g_log.debug() << overallTime << " to do all the adding." << std::endl;
+    g_log.information() << overallTime << " to do all the adding." << std::endl;
 
     this->progress(0.91, "Refreshing Cache");
     outWS->refreshCache();
-    g_log.debug() << overallTime << " to run refreshCache()." << std::endl;
+    g_log.information() << overallTime << " to run refreshCache()." << std::endl;
 
 
     // Now re-save the MDEventWorkspace to update the filec
@@ -332,13 +335,13 @@ namespace MDEvents
     if (!outputFile.empty())
     {
       g_log.notice() << "Starting SaveMDEW to update the file back-end." << std::endl;
-      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMDEW" ,0.92, 1.00);
+      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMDEW" ,0.8, 1.00);
       saver->setProperty("InputWorkspace", outIWS);
       saver->setProperty("UpdateFileBackEnd", true);
       saver->executeAsSubAlg();
     }
 
-    g_log.debug() << overallTime << " to run SaveMDEW." << std::endl;
+    g_log.information() << overallTime << " to run SaveMDEW." << std::endl;
   }
 
   //----------------------------------------------------------------------------------------------
