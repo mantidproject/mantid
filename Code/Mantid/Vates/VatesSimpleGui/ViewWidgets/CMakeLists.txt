@@ -66,6 +66,7 @@ set_property( TARGET VatesSimpleGuiViewWidgets PROPERTY FOLDER MantidVatesSimple
 
 target_link_libraries( VatesSimpleGuiViewWidgets
 VatesSimpleGuiQtWidgets
+pqApplicationComponents
 pqComponents
 ${QT_LIBRARIES}
 )
