@@ -12,7 +12,7 @@ namespace Crystal
 /** IndexPeaks : Algorithm to use the UB saved in the sample associated
     with the specified PeaksWorkspace, to index the peaks in the workspace.
     
-    @author Dennis Mikkelson(adapted from Andrei Savici's CalculateUBMatrix)
+    @author Dennis Mikkelson
     @date   2011-08-17
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & 

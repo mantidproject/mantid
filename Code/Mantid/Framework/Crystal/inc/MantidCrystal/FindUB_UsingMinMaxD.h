@@ -12,7 +12,7 @@ namespace Crystal
 /** FindUB_UsingMinMaxD : Algorithm to calculate a UB matrix,
     given lattice parameters and a list of peaks
     
-    @author Dennis Mikkelson(adapted from Andrei Savici's CalculateUBMatrix)
+    @author Dennis Mikkelson(adapted from Andrei Savici's CalculateUMatrix)
     @date   2011-08-17
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & 

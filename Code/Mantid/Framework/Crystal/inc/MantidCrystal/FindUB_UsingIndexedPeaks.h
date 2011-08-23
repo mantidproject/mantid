@@ -12,7 +12,7 @@ namespace Crystal
 /** FindUB_UsingIndexedPeaks : Algorithm to calculate a UB matrix,
     given a list of peaks that have already been indexed by some means.
     
-    @author Dennis Mikkelson(adapted from Andrei Savici's CalculateUBMatrix)
+    @author Dennis Mikkelson(adapted from Andrei Savici's CalculateUMatrix)
     @date   2011-08-17
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & 
