@@ -53,6 +53,15 @@ public:
         "Names", "One,Two,Three",
         "MinRecursionDepth", "5",
         "MaxRecursionDepth", "4")->isExecuted() );
+    // Uses too much memory
+    TS_ASSERT(  !AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 14,
+        "OutputWorkspace","failed_output",
+        "Dimensions", "3", "Extents", "-1,1,-2,2,3,3",
+        "Names", "One,Two,Three",
+        "Units", "One,Two,Three",
+        "SplitInto", "10",
+        "MinRecursionDepth", "5",
+        "MaxRecursionDepth", "5")->isExecuted() );
   }
 
   void do_test_exec(std::string Filename, bool lean, int MinRecursionDepth=0, int expectedNumMDBoxes=216)
