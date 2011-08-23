@@ -42,7 +42,7 @@ include_directories(
 )
 
 # For Windows
-add_definitions( -DIN_MANTID_VATES_SIMPLEGUI )
+add_definitions( -DIN_MANTID_VATES_SIMPLEGUI_QTWIDGETS )
 # Add the target for this directory
 add_library( VatesSimpleGuiQtWidgets ${INCLUDE_FILES} ${SOURCE_FILES} 
 ${MOC_SOURCES} ${UI_BUILT_SOURCES} )
