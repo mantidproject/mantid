@@ -230,7 +230,7 @@ namespace DataHandling
 
       if (doOffsets)
       {
-        if (offset < -1.) // should never happen
+        if (offset <= -1.) // should never happen
         {
           std::stringstream msg;
           msg << "Encountered offset = " << offset << " at index " << n << " for udet = " << udet
