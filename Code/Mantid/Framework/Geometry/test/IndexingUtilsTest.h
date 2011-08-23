@@ -36,9 +36,41 @@ public:
     q_vectors.push_back( V3D(-0.54099, -0.46900,  0.11535 ));
     q_vectors.push_back( V3D(-0.90478, -0.50667,  0.51072 ));
     q_vectors.push_back( V3D(-0.50387, -0.58561,  0.43502 ));
-
     return q_vectors;
   } 
+
+
+  static std::vector<V3D> getNatroliteIndices()
+  {
+    std::vector<V3D> correct_indices;
+    correct_indices.push_back( V3D( 1,  9, -9) );
+    correct_indices.push_back( V3D( 4, 20,-24) );
+    correct_indices.push_back( V3D( 2, 18,-14) );
+    correct_indices.push_back( V3D( 0, 12,-12) );
+    correct_indices.push_back( V3D( 1, 19, -9) );
+    correct_indices.push_back( V3D( 3, 31,-13) );
+    correct_indices.push_back( V3D( 0, 20,-14) );
+    correct_indices.push_back( V3D(-1,  3, -5) );
+    correct_indices.push_back( V3D( 0, 16, -6) );
+    correct_indices.push_back( V3D(-1, 11, -7) );
+    correct_indices.push_back( V3D(-2, 20, -4) );
+    correct_indices.push_back( V3D(-3, 13, -5) );
+    return correct_indices;
+  }
+
+
+  static Matrix<double> getNatroliteUB()
+  {
+    Matrix<double> UB(3,3,false);
+    V3D row_0( -0.059660400, -0.049648200, 0.0077539105 );
+    V3D row_1(  0.093009956, -0.007510495, 0.0419835400 );
+    V3D row_2( -0.104643770 , 0.021613428, 0.0322586300 );
+    UB.setRow( 0, row_0 );
+    UB.setRow( 1, row_1 );
+    UB.setRow( 2, row_2 );
+    return UB;
+  }
+
 
   void test_Find_UB_given_lattice_parameters()
   {
@@ -89,7 +121,6 @@ public:
   }
 
 
-
   void test_Find_UB_given_d_min_d_max()
   {
     Matrix<double> UB(3,3,false);
@@ -137,47 +168,21 @@ public:
 
   void test_Optimize_UB_given_indexing() 
   {  
-/*
-     double h_vals[]  = {  1,  0,  0, -1,  0,  0, 1, 1 };
-     double k_vals[]  = { .1,  1,  0,  0, -1,  0, 1, 2 };
-     double l_vals[]  = {-.1,  0,  1,  0,  0, -1, 1, 3 }; 
+    std::vector<V3D> q_list   = getNatroliteQs();
+    std::vector<V3D> hkl_list = getNatroliteIndices();
+    Matrix<double> correct_UB = getNatroliteUB();
+    Matrix<double> UB(3,3,false);
 
-     double qx_vals[]  = {  2,  0,  0, -2,  0,  0, 2,  2 };
-     double qy_vals[]  = {  1,  3,  0,  0, -3,  0, 3,  6 };
-     double qz_vals[]  = {  0,  0,  4,  0,  0, -4, 4, 12 }; 
+    double sum_sq_error = IndexingUtils::Optimize_UB( UB, hkl_list, q_list );
 
-     double correct_UB[] = { 2.000000e+00,  0.000000e+00, -0.000000e+00,
-                             2.766704e-01,  2.959570e+00, -7.214043e-02,  
-                             1.580974e-01, -2.310306e-02,  3.958777e+00 };
-
-     size_t N_INDEXED_PEAKS = 8;
-
-     Matrix<double> UB(3,3,false);
-     std::vector<V3D> q_list( N_INDEXED_PEAKS );
-     for ( size_t row = 0; row < N_INDEXED_PEAKS; row++ )
-     {
-       V3D qxyz( qx_vals[row], qy_vals[row], qz_vals[row] );
-       q_list[row] = qxyz;
-     }   
-
-     std::vector<V3D> hkl_list( N_INDEXED_PEAKS );
-     for ( size_t row = 0; row < N_INDEXED_PEAKS; row++ )
-     {
-       V3D hkl( h_vals[row], k_vals[row], l_vals[row] );
-       hkl_list[row] = hkl;
-     }
-
-     double sum_sq_error = IndexingUtils::Optimize_UB( UB, hkl_list, q_list );
-
-     std::vector<double> UB_returned = UB.get_vector();
-
-     for ( int i = 0; i < 3; i++ )
-       TS_ASSERT_DELTA( UB_returned[i], correct_UB[i], 1.e-5 );
+    for ( int i = 0; i < 3; i++ )
+      for ( int j = 0; j < 3; j++ )
+        TS_ASSERT_DELTA( UB[i][j], correct_UB[i][j], 1.e-5 );
  
-     TS_ASSERT_DELTA( sum_sq_error, 0.390147, 1e-5 );
-*/
+    TS_ASSERT_DELTA( sum_sq_error, 0.000111616, 1e-5 );
   }
   
+
   void test_Optimize_Direction()
   {
     std::vector<int> index_values;
@@ -308,6 +313,46 @@ public:
   }
 
 
+  void test_CheckUB()
+  {
+    Matrix<double> UB(3,3,false);    
+    for ( int i = 0; i < 3; i++ )     // check for matrix and det OK
+      for ( int j = 0; j < 3; j++ )
+        if ( i == j )
+          UB[i][j] = .1;
+        else
+          UB[i][j] = 0;
+
+    TS_ASSERT_EQUALS( IndexingUtils::CheckUB(UB), true );
+    
+    for ( int i = 0; i < 3; i++ )     // check for det too small
+      UB[i][i] = 0.0005;
+
+    TS_ASSERT_EQUALS( IndexingUtils::CheckUB(UB), false );
+
+    for ( int i = 0; i < 3; i++ )      // check for det too large
+      UB[i][i] = 3;
+
+    TS_ASSERT_EQUALS( IndexingUtils::CheckUB(UB), false );
+
+    for ( int i = 0; i < 2; i++ )       // check for NaN
+      UB[i][i] = 0.1;
+    UB[2][2] = sqrt(-1);
+
+    TS_ASSERT_EQUALS( IndexingUtils::CheckUB(UB), false );
+
+    Matrix<double> UB_4(4,4,false);      // check wrong size
+    for ( int i = 0; i < 4; i++ )
+      for ( int j = 0; j < 4; j++ )
+        if ( i == j )
+          UB_4[i][j] = .1;
+        else
+          UB_4[i][j] = 0;
+
+    TS_ASSERT_EQUALS( IndexingUtils::CheckUB(UB_4), false );
+  }
+
+
   void test_NumberIndexed()
   {
     Matrix<double> UB(3,3,false);
@@ -344,14 +389,11 @@ public:
 
   void test_CalculateMillerIndices()
   {
-    Matrix<double> UB(3,3,false);
-
-    UB.setRow( 0, V3D( -0.1015550,  0.0992964, -0.0155078 ) );
-    UB.setRow( 1, V3D(  0.1274830,  0.0150210, -0.0839671 ) );
-    UB.setRow( 2, V3D( -0.0507717, -0.0432269, -0.0645173 ) );
-
     std::vector<V3D> q_vectors = getNatroliteQs();
-    double           tolerance = 0.08;
+    std::vector<V3D> indices   = getNatroliteIndices();
+    Matrix<double>   UB        = getNatroliteUB();
+
+    double           tolerance = 0.1;
     std::vector<V3D> miller_indices;
     double           average_error;
 
@@ -360,29 +402,17 @@ public:
                                                              tolerance,
                                                              miller_indices,
                                                              average_error ); 
-
     TS_ASSERT_EQUALS( num_indexed, 12 );
 
-    TS_ASSERT_DELTA( average_error, 0.0103505, 1e-5 );
-
-    V3D mi_0  = V3D(  0.992465, -4.00351, 4.997260 );
-    V3D mi_1  = V3D(  3.991040, -8.00753, 14.00010 );
-    V3D mi_2  = V3D(  2.018340, -7.96556, 8.020210 );
-    V3D mi_11 = V3D( -3.006000, -7.99572, 0.980049 );
+    TS_ASSERT_DELTA( average_error, 0.0185, 1e-3 );
 
     double diff;
-                                                 // spot check a few indices 
-    diff = (mi_0  - miller_indices[0] ).norm();
-    TS_ASSERT_DELTA( diff, 0, 1e-5 );
 
-    diff = (mi_1  - miller_indices[1] ).norm();
-    TS_ASSERT_DELTA( diff, 0, 1e-5 );
-
-    diff = (mi_2  - miller_indices[2] ).norm();
-    TS_ASSERT_DELTA( diff, 0, 1e-5 );
-
-    diff = (mi_11 - miller_indices[11]).norm();
-    TS_ASSERT_DELTA( diff, 0, 1e-5 );
+    for ( size_t i = 0; i < indices.size(); i++ )
+    {
+      diff = ( indices[i] - miller_indices[i] ).norm();
+      TS_ASSERT_DELTA( diff, 0, 0.1 );
+    }
   }
 
   
@@ -419,21 +449,8 @@ public:
 
   void test_GetIndexedPeaks_3D()
   {
-    std::vector<V3D> correct_indices;
-    correct_indices.push_back( V3D( 1,  9, -9) );
-    correct_indices.push_back( V3D( 4, 20,-24) );
-    correct_indices.push_back( V3D( 2, 18,-14) );
-    correct_indices.push_back( V3D( 0, 12,-12) );
-    correct_indices.push_back( V3D( 1, 19, -9) );
-    correct_indices.push_back( V3D( 3, 31,-13) );
-    correct_indices.push_back( V3D( 0, 20,-14) );
-    correct_indices.push_back( V3D(-1,  3, -5) );
-    correct_indices.push_back( V3D( 0, 16, -6) );
-    correct_indices.push_back( V3D(-1, 11, -7) );
-    correct_indices.push_back( V3D(-2, 20, -4) );
-    correct_indices.push_back( V3D(-3, 13, -5) );
-
-    std::vector<V3D> q_vectors = getNatroliteQs();
+    std::vector<V3D> q_vectors       = getNatroliteQs();
+    std::vector<V3D> correct_indices = getNatroliteIndices();
 
     V3D direction_1(  -2.5825930,  3.9741700, -4.5514810 );
     V3D direction_2( -16.6087800, -2.5005515,  7.2465878 );
@@ -470,30 +487,9 @@ public:
 
   void test_GetIndexedPeaks()
   {
-    std::vector<V3D> correct_indices;
-    correct_indices.push_back( V3D( 1,  9, -9) );
-    correct_indices.push_back( V3D( 4, 20,-24) );
-    correct_indices.push_back( V3D( 2, 18,-14) );
-    correct_indices.push_back( V3D( 0, 12,-12) );
-    correct_indices.push_back( V3D( 1, 19, -9) );
-    correct_indices.push_back( V3D( 3, 31,-13) );
-    correct_indices.push_back( V3D( 0, 20,-14) );
-    correct_indices.push_back( V3D(-1,  3, -5) );
-    correct_indices.push_back( V3D( 0, 16, -6) );
-    correct_indices.push_back( V3D(-1, 11, -7) );
-    correct_indices.push_back( V3D(-2, 20, -4) );
-    correct_indices.push_back( V3D(-3, 13, -5) );
-
-    std::vector<V3D> q_vectors = getNatroliteQs();
-
-    V3D row_0( -0.059660400, -0.049648200, 0.0077539105 );
-    V3D row_1(  0.093009956, -0.007510495, 0.0419835400 );
-    V3D row_2( -0.104643770 , 0.021613428, 0.0322586300 );
-
-    Matrix<double> UB(3,3,false);
-    UB.setRow( 0, row_0 );    
-    UB.setRow( 1, row_1 );    
-    UB.setRow( 2, row_2 );    
+    std::vector<V3D> q_vectors       = getNatroliteQs();
+    std::vector<V3D> correct_indices = getNatroliteIndices();
+    Matrix<double>   UB              = getNatroliteUB();
 
     double required_tolerance = 0.1;
     double fit_error = 0;
@@ -521,7 +517,6 @@ public:
     }
 
   }
-
 
 
   void test_MakeHemisphereDirections()
