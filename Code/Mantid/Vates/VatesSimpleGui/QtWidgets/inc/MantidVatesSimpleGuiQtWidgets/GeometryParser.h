@@ -1,7 +1,7 @@
 #ifndef GEOMETRYPARSER_H_
 #define GEOMETRYPARSER_H_
 
-#include "MantidKernel/System.h"
+#include "WidgetDllOption.h"
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
@@ -46,7 +46,7 @@ class AxisInformation;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport GeometryParser {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS GeometryParser {
 public:
   /**
    * Default constructor.

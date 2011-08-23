@@ -3,7 +3,7 @@
 
 #include "ui_ModeControlWidget.h"
 
-#include "MantidKernel/System.h"
+#include "WidgetDllOption.h"
 
 #include <QtGui/QWidget>
 
@@ -40,7 +40,7 @@ namespace SimpleGui
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport ModeControlWidget : public QWidget
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS ModeControlWidget : public QWidget
 {
   Q_OBJECT
 

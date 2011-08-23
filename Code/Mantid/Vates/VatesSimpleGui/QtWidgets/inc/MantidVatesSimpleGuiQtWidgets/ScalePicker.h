@@ -1,7 +1,7 @@
 #ifndef SCALEPICKER_H_
 #define SCALEPICKER_H_
 
-#include "MantidKernel/System.h"
+#include "WidgetDllOption.h"
 
 #include <QObject>
 
@@ -45,7 +45,7 @@ namespace SimpleGui
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport ScalePicker: public QObject
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS ScalePicker: public QObject
 {
   Q_OBJECT
 

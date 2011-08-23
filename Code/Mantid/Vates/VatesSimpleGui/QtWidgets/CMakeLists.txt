@@ -8,6 +8,7 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiQtWidgets/Indicator.h
   inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h
   inc/MantidVatesSimpleGuiQtWidgets/ScalePicker.h
+  inc/MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h
 )
 
 set( SOURCE_FILES
@@ -48,7 +49,7 @@ ${MOC_SOURCES} ${UI_BUILT_SOURCES} )
 # Set the name of the generated library
 set_target_properties( VatesSimpleGuiQtWidgets PROPERTIES OUTPUT_NAME MantidVatesSimpleGuiQtWidgets )
 # Add to the 'VatesSimpleGui' group in VS
-set_property( TARGET VatesSimpleGuiQtWidgets PROPERTY FOLDER 'MantidVatesSimpleGui' )
+set_property( TARGET VatesSimpleGuiQtWidgets PROPERTY FOLDER MantidVatesSimpleGui )
 
 target_link_libraries( VatesSimpleGuiQtWidgets 
 ${POCO_LIBRARIES}

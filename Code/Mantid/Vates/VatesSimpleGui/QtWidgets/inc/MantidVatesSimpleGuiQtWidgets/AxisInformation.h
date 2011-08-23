@@ -1,7 +1,7 @@
 #ifndef AXISINFORMATION_H_
 #define AXISINFORMATION_H_
 
-#include "MantidKernel/System.h"
+#include "WidgetDllOption.h"
 #include <string>
 
 namespace Mantid
@@ -37,7 +37,7 @@ namespace SimpleGui
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport AxisInformation
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS AxisInformation
 {
 public:
   /// Default constructor.

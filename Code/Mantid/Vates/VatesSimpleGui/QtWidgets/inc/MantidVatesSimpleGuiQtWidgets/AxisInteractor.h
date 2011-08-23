@@ -1,7 +1,7 @@
 #ifndef AXISINTERACTOR_H_
 #define AXISINTERACTOR_H_
 
-#include "MantidKernel/System.h"
+#include "WidgetDllOption.h"
 
 #include <QtGui/QWidget>
 
@@ -55,7 +55,7 @@ class ScalePicker;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport AxisInteractor : public QWidget
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS AxisInteractor : public QWidget
 {
   Q_OBJECT
   Q_ENUMS(ScalePos)

@@ -3,7 +3,7 @@
 
 #include "AxisInteractor.h"
 
-#include "MantidKernel/System.h"
+#include "WidgetDllOption.h"
 
 #include <QGraphicsItem>
 #include <QObject>
@@ -52,7 +52,7 @@ namespace SimpleGui
  */
 const int IndicatorItemType = QGraphicsItem::UserType + 1;
 
-class DLLExport Indicator: public QObject, public QGraphicsPolygonItem
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS Indicator: public QObject, public QGraphicsPolygonItem
 {
   Q_OBJECT
 
