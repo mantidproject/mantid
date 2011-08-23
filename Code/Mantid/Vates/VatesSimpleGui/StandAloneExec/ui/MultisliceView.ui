@@ -15,10 +15,10 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="1">
-    <widget class="AxisInteractor" name="yAxisWidget" native="true"/>
+    <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="yAxisWidget" native="true"/>
    </item>
    <item row="1" column="0">
-    <widget class="AxisInteractor" name="xAxisWidget" native="true"/>
+    <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="xAxisWidget" native="true"/>
    </item>
    <item row="1" column="1">
     <widget class="QFrame" name="renderFrame">
@@ -43,14 +43,14 @@
     </widget>
    </item>
    <item row="1" column="2">
-    <widget class="AxisInteractor" name="zAxisWidget" native="true"/>
+    <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="zAxisWidget" native="true"/>
    </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>AxisInteractor</class>
+   <class>Mantid::Vates::SimpleGui::AxisInteractor</class>
    <extends>QWidget</extends>
    <header>AxisInteractor.h</header>
    <container>1</container>

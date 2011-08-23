@@ -69,7 +69,7 @@ protected slots:
    * Execute the logic for switching views on the main level window.
    * @param v the view mode to switch to
    */
-  void switchViews(ModeControlWidget::Views v);
+  void switchViews(Mantid::Vates::SimpleGui::ModeControlWidget::Views v);
 
 signals:
   /// Signal to disable all view modes but standard.
@@ -98,7 +98,8 @@ private:
    * @param v the view mode to set on the main window
    * @return the requested view
    */
-  ViewBase *setMainViewWidget(QWidget *container, ModeControlWidget::Views v);
+  ViewBase *setMainViewWidget(QWidget *container,
+                         Mantid::Vates::SimpleGui::ModeControlWidget::Views v);
   /// Helper function to swap current and hidden view pointers.
   void swapViews();
 };

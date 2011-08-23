@@ -6,20 +6,16 @@ set( PROJECT_NAME VatesSimpleGui )
 include_directories(
   inc
   ${CMAKE_CURRENT_BINARY_DIR}
-  ${QWT_INCLUDE_DIR} )
+  ../QtWidgets/inc/MantidVatesSimpleGuiQtWidgets
+  ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
+)
 
 # These are the C++ files to be compiled.
 set( INCLUDE_FILES
-  inc/AxisInformation.h
-  inc/AxisInteractor.h
   inc/ColorSelectionWidget.h
   inc/ColorUpdater.h
-  inc/GeometryParser.h
-  inc/Indicator.h
   inc/MdViewerWidget.h
-  inc/ModeControlWidget.h
   inc/MultisliceView.h
-  inc/ScalePicker.h
   inc/SimpleGuiApp.h
   inc/StandardView.h
   inc/ThreesliceView.h
@@ -29,17 +25,11 @@ set( INCLUDE_FILES
 )
 
 set( SOURCE_FILES
-  src/AxisInformation.cpp
-  src/AxisInteractor.cpp
   src/ColorSelectionWidget.cpp
   src/ColorUpdater.cpp
-  src/GeometryParser.cpp
-  src/Indicator.cpp
   src/main.cpp
   src/MdViewerWidget.cpp
-  src/ModeControlWidget.cpp
   src/MultisliceView.cpp
-  src/ScalePicker.cpp
   src/SimpleGuiApp.cpp
   src/StandardView.cpp
   src/ThreesliceView.cpp
@@ -51,13 +41,9 @@ set( SOURCE_FILES
 # These are the headers to be preprocessed using
 # Qt's moc preprocessor.
 qt4_wrap_cpp( MOC_SRCS
-  inc/AxisInteractor.h
   inc/ColorSelectionWidget.h
-  inc/Indicator.h
   inc/MdViewerWidget.h
-  inc/ModeControlWidget.h
   inc/MultisliceView.h
-  inc/ScalePicker.h
   inc/SimpleGuiApp.h
   inc/StandardView.h
   inc/ThreesliceView.h
@@ -71,7 +57,6 @@ qt4_wrap_cpp( MOC_SRCS
 qt4_wrap_ui( UI_BUILT_SOURCES
   ui/ColorSelectionWidget.ui
   ui/MdViewerWidget.ui
-  ui/ModeControlWidget.ui
   ui/MultisliceView.ui
   ui/StandardView.ui
   ui/ThreesliceView.ui
@@ -83,7 +68,9 @@ ${INCLUDE_FILES} ${SOURCE_FILES} ${MOC_SRCS} ${UI_BUILT_SOURCES} )
 
 target_link_libraries( ${PROJECT_NAME}
 pqCore pqComponents pqApplicationComponents
-${QT_LIBRARIES} ${QWT_LIBRARIES} ${POCO_LIBRARIES}
-${MANTID_SUBPROJECT_LIBS} )
+${QT_LIBRARIES}
+${MANTID_SUBPROJECT_LIBS}
+VatesSimpleGuiQtWidgets
+)
 
 install( TARGETS VatesSimpleGui RUNTIME DESTINATION ${BIN_DIR} )

@@ -1,5 +1,12 @@
 #include "AxisInformation.h"
 
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
 AxisInformation::AxisInformation()
 {
   this->title = std::string("");
@@ -7,5 +14,6 @@ AxisInformation::AxisInformation()
   this->maximum = -9999999.0;
 }
 
-
-
+}
+}
+}

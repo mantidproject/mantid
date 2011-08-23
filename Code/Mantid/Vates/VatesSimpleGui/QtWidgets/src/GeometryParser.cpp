@@ -10,6 +10,13 @@
 #include <iostream>
 #include <sstream>
 
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
 GeometryParser::GeometryParser(const char *xml)
 {
   Poco::XML::DOMParser parser;
@@ -78,3 +85,6 @@ double GeometryParser::convertBounds(Poco::XML::XMLString val)
   return temp;
 }
 
+}
+}
+}

@@ -1,6 +1,8 @@
 #ifndef AXISINTERACTOR_H_
 #define AXISINTERACTOR_H_
 
+#include "MantidKernel/System.h"
+
 #include <QtGui/QWidget>
 
 class QGraphicsScene;
@@ -12,7 +14,16 @@ class QString;
 class QwtScaleEngine;
 class QwtScaleTransformation;
 class QwtScaleWidget;
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
 class ScalePicker;
+
 /**
  *
   This class provides a mechanism for setting slices onto a dataset that are
@@ -44,7 +55,7 @@ class ScalePicker;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class AxisInteractor : public QWidget
+class DLLExport AxisInteractor : public QWidget
 {
   Q_OBJECT
   Q_ENUMS(ScalePos)
@@ -184,5 +195,9 @@ private:
   QGraphicsScene *scene; ///< The contained for the slice indicators
   QwtScaleTransformation *transform; ///< The scale type for the engine
 };
+
+}
+}
+}
 
 #endif // AXISINTERACTOR_H_

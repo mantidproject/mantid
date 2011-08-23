@@ -20,6 +20,14 @@
 
 #include <cmath>
 #include <iostream>
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
 AxisInteractor::AxisInteractor(QWidget *parent) : QWidget(parent)
 {
   this->indicatorContextMenu = NULL;
@@ -351,4 +359,8 @@ int AxisInteractor::numIndicators()
     }
   }
   return count;
+}
+
+}
+}
 }

@@ -9,6 +9,14 @@
 #include <QRect>
 
 #include <iostream>
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
 ScalePicker::ScalePicker(QwtScaleWidget *scale) : QObject(scale)
 {
   static_cast<QwtScaleWidget *>(this->parent())->installEventFilter(this);
@@ -195,4 +203,8 @@ void ScalePicker::determinePosition(const QPoint &pos, int coord)
     }
   }
   this->mouseClicked(scale, shiftPt, false);
+}
+
+}
+}
 }

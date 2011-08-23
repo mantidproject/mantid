@@ -1,8 +1,18 @@
 #ifndef MODECONTROLWIDGET_H_
 #define MODECONTROLWIDGET_H_
 
-#include <QtGui/QWidget>
 #include "ui_ModeControlWidget.h"
+
+#include "MantidKernel/System.h"
+
+#include <QtGui/QWidget>
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
 /**
  *
   This class controls the current view for the main level program.
@@ -30,7 +40,7 @@
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class ModeControlWidget : public QWidget
+class DLLExport ModeControlWidget : public QWidget
 {
   Q_OBJECT
 
@@ -81,5 +91,9 @@ protected slots:
 private:
   Ui::ModeControlWidgetClass ui; ///< The mode control widget's UI form
 };
+
+}
+}
+}
 
 #endif // MODECONTROLWIDGET_H_

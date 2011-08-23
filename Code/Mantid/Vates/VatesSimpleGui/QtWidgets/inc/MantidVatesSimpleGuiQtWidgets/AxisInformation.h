@@ -1,7 +1,15 @@
 #ifndef AXISINFORMATION_H_
 #define AXISINFORMATION_H_
 
+#include "MantidKernel/System.h"
 #include <string>
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
 /**
  *
   This class provides a container for a given data axis information.
@@ -29,7 +37,7 @@
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class AxisInformation
+class DLLExport AxisInformation
 {
 public:
   /// Default constructor.
@@ -74,5 +82,9 @@ private:
   double minimum; ///< The minimum extent of the axis
   double maximum; ///< The maximum extent of the axis
 };
+
+}
+}
+}
 
 #endif // AXISINFORMATION_H_

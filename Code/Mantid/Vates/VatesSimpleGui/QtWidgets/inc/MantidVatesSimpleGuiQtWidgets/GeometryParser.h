@@ -1,10 +1,21 @@
 #ifndef GEOMETRYPARSER_H_
 #define GEOMETRYPARSER_H_
 
+#include "MantidKernel/System.h"
+
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
 
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
 class AxisInformation;
+
 /**
  *
   This class takes the associated XML information from a given dataset and
@@ -35,7 +46,7 @@ class AxisInformation;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class GeometryParser {
+class DLLExport GeometryParser {
 public:
   /**
    * Default constructor.
@@ -62,5 +73,9 @@ private:
 
   Poco::AutoPtr<Poco::XML::Document> pDoc; ///< A XML document handle
 };
+
+}
+}
+}
 
 #endif // GEOMETRYPARSER_H_

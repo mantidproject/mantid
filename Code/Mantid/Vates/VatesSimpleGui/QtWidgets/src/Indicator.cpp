@@ -11,6 +11,13 @@
 #include <iostream>
 #include <vector>
 
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
 Indicator::Indicator(QGraphicsItem *parent) : QGraphicsPolygonItem(parent)
 {
   this->visibleFillColor = Qt::blue;
@@ -186,4 +193,8 @@ void Indicator::changeIndicatorColor(bool isVisible)
     {
       this->setBrush(this->hiddenFillColor);
     }
+}
+
+}
+}
 }

@@ -31,6 +31,9 @@
 #include <QString>
 
 #include <iostream>
+
+using namespace Mantid::Vates::SimpleGui;
+
 MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
 {
   this->ui.setupUi(this);

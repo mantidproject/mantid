@@ -1,12 +1,21 @@
 #ifndef SCALEPICKER_H_
 #define SCALEPICKER_H_
 
+#include "MantidKernel/System.h"
+
 #include <QObject>
 
 class QEvent;
 class QPoint;
 class QRect;
 class QwtScaleWidget;
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
 /**
  *
  This class handles finding the axis location when a slice indicator is
@@ -36,7 +45,7 @@ class QwtScaleWidget;
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class ScalePicker: public QObject
+class DLLExport ScalePicker: public QObject
 {
   Q_OBJECT
 
@@ -108,5 +117,9 @@ private:
    */
   QRect scaleRect(const QwtScaleWidget *scale) const;
 };
+
+}
+}
+}
 
 #endif // SCALEPICKER_H_

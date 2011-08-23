@@ -24,6 +24,8 @@
 
 #include <iostream>
 
+using namespace Mantid::Vates::SimpleGui;
+
 MdViewerWidget::MdViewerWidget(QWidget *parent) : QWidget(parent)
 {
   this->ui.setupUi(this);

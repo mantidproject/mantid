@@ -3,6 +3,8 @@
 
 #include "AxisInteractor.h"
 
+#include "MantidKernel/System.h"
+
 #include <QGraphicsItem>
 #include <QObject>
 
@@ -11,6 +13,13 @@ class QGraphicsSceneMouseEvent;
 class QPoint;
 class QPolygonF;
 class QRect;
+
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
 /**
  *
   This class represents the manifestation of the slice indicator. This
@@ -43,7 +52,7 @@ class QRect;
  */
 const int IndicatorItemType = QGraphicsItem::UserType + 1;
 
-class Indicator: public QObject, public QGraphicsPolygonItem
+class DLLExport Indicator: public QObject, public QGraphicsPolygonItem
 {
   Q_OBJECT
 
@@ -126,5 +135,9 @@ private:
   int tip_edge; ///< The triangle's closest point (apex) to the axis indicator
   AxisInteractor::ScalePos orientation; ///< The orientation of the indicator apex
 };
+
+}
+}
+}
 
 #endif // INDICATOR_H_

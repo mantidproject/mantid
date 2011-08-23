@@ -1,5 +1,12 @@
 #include "ModeControlWidget.h"
 
+namespace Mantid
+{
+namespace Vates
+{
+namespace SimpleGui
+{
+
 ModeControlWidget::ModeControlWidget(QWidget *parent)
   : QWidget(parent)
 {
@@ -54,4 +61,8 @@ void ModeControlWidget::onThreeSliceViewButtonClicked()
   this->ui.threeSliceButton->setEnabled(false);
   this->ui.multiSliceButton->setEnabled(true);
   this->ui.standardButton->setEnabled(true);
+}
+
+}
+}
 }

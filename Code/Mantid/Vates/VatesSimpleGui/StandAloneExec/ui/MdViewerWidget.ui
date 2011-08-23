@@ -33,7 +33,7 @@
       <widget class="TimeControlWidget" name="timeControlWidget" native="true"/>
      </item>
      <item>
-      <widget class="ModeControlWidget" name="modeControlWidget" native="true"/>
+      <widget class="Mantid::Vates::SimpleGui::ModeControlWidget" name="modeControlWidget" native="true"/>
      </item>
      <item>
       <widget class="ColorSelectionWidget" name="colorSelectionWidget" native="true"/>
@@ -123,15 +123,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ModeControlWidget</class>
-   <extends>QWidget</extends>
-   <header>ModeControlWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ColorSelectionWidget</class>
    <extends>QWidget</extends>
    <header>ColorSelectionWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Mantid::Vates::SimpleGui::ModeControlWidget</class>
+   <extends>QWidget</extends>
+   <header>ModeControlWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
