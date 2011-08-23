@@ -8,6 +8,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Exception::NotFoundError;
@@ -703,6 +704,13 @@ namespace Mantid
                           const double offset,
                           bool vulcancorrection)
     {
+      if (offset <= -1.) // not physically possible, means result is negative d-spacing
+      {
+        std::stringstream msg;
+        msg << "Encountered offset of " << offset << " which converts data to negative d-spacing\n";
+        throw std::logic_error(msg.str());
+      }
+
       // Get the sample-detector distance for this detector (in metres)
 
       // The scattering angle for this detector (in radians).
