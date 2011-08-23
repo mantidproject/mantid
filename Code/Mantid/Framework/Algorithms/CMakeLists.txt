@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/ConvertFromDistribution.cpp
 	src/ConvertSpectrumAxis.cpp
 	src/ConvertToDistribution.cpp
+	src/ConvertToEventWorkspace.cpp
 	src/ConvertToHistogram.cpp
 	src/ConvertToMatrixWorkspace.cpp
 	src/ConvertToPointData.cpp
@@ -182,6 +183,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertFromDistribution.h
 	inc/MantidAlgorithms/ConvertSpectrumAxis.h
 	inc/MantidAlgorithms/ConvertToDistribution.h
+	inc/MantidAlgorithms/ConvertToEventWorkspace.h
 	inc/MantidAlgorithms/ConvertToHistogram.h
 	inc/MantidAlgorithms/ConvertToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertToPointData.h
@@ -342,6 +344,7 @@ set ( TEST_FILES
 	test/ConvertFromDistributionTest.h
 	test/ConvertSpectrumAxisTest.h
 	test/ConvertToDistributionTest.h
+	test/ConvertToEventWorkspaceTest.h
 	test/ConvertToHistogramTest.h
 	test/ConvertToMatrixWorkspaceTest.h
 	test/ConvertToPointDataTest.h

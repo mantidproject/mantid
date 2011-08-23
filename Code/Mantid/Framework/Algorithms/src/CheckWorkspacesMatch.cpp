@@ -31,13 +31,14 @@ void CheckWorkspacesMatch::init()
   declareProperty(new WorkspaceProperty<>("Workspace1","",Direction::Input));
   declareProperty(new WorkspaceProperty<>("Workspace2","",Direction::Input));
 
-  declareProperty("Tolerance",0.0);
+  declareProperty("Tolerance",0.0, "The maximum amount by which values may differ between the workspaces.");
   
-  declareProperty("CheckAxes",true);
-  declareProperty("CheckSpectraMap",true);
-  declareProperty("CheckInstrument",true);
-  declareProperty("CheckMasking",true);
-  declareProperty("CheckSample",false);    // Have this one false by default - the logs are brittle
+  declareProperty("CheckType",true, "Whether to check that the data types (Workspace2D vs EventWorkspace) match.");
+  declareProperty("CheckAxes",true, "Whether to check that the axes match.");
+  declareProperty("CheckSpectraMap",true, "Whether to check that the spectra-detector maps match. ");
+  declareProperty("CheckInstrument",true, "Whether to check that the instruments match. ");
+  declareProperty("CheckMasking",true, "Whether to check that the bin masking matches. ");
+  declareProperty("CheckSample",false, "Whether to check that the sample (e.g. logs).");    // Have this one false by default - the logs are brittle
   
   declareProperty("Result","",Direction::Output);
 }
@@ -67,12 +68,17 @@ void CheckWorkspacesMatch::doComparison()
   MatrixWorkspace_const_sptr ws2 = getProperty("Workspace2");
 
   // Check that both workspaces are the same type
-  EventWorkspace_const_sptr ews1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
-  EventWorkspace_const_sptr ews2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
-  if ((ews1 && !ews2) ||(!ews1 && ews2))
+  bool checkType = getProperty("CheckType");
+  EventWorkspace_const_sptr ews1, ews2;
+  if (checkType)
   {
-    result = "One workspace is an EventWorkspace and the other is not.";
-    return;
+    ews1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
+    ews2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
+    if ((ews1 && !ews2) ||(!ews1 && ews2))
+    {
+      result = "One workspace is an EventWorkspace and the other is not.";
+      return;
+    }
   }
 
   size_t numhist = ws1->getNumberHistograms();
