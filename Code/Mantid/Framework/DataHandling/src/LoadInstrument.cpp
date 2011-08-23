@@ -224,7 +224,13 @@ namespace Mantid
           g_log.error("XML file: " + m_filename + "contains no type elements.");
           throw Kernel::Exception::InstrumentDefinitionError("No type elements in XML instrument file", m_filename);
         }
-
+        
+        // Collect some information about types and components for later use including:
+        //  * populate directory getTypeElement
+        //  * populate directory isTypeAssemply
+        //  * create shapes for all none assemply components and store in mapTyepNameToShape
+        //  * If 'Outline' attribute set for assemply add attribute object_created=no to tell
+        //    create shape for such assemply also later  
         unsigned long numberTypes = pNL_type->length();
         for (unsigned long iType = 0; iType < numberTypes; iType++)
         {
