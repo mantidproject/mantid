@@ -337,7 +337,7 @@ public:
 
     for ( int i = 0; i < 2; i++ )       // check for NaN
       UB[i][i] = 0.1;
-    UB[2][2] = sqrt(-1);
+    UB[2][2] = sqrt(-1.0);
 
     TS_ASSERT_EQUALS( IndexingUtils::CheckUB(UB), false );
 
