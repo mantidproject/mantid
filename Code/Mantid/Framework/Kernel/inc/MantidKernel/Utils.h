@@ -24,6 +24,17 @@ namespace Utils
 {
 
 
+  //------------------------------------------------------------------------------------------------
+  /** Custom rounding method for a double->long because none is
+   * portable in C++ (!)
+   *
+   * @param x :: floating point value to round
+   * @return closes integer (positive or negative)
+   */
+  long round(double x);
+
+
+
   namespace NestedForLoop
   {
   //TODO: Separate these into a namespace like NestedForLoop::

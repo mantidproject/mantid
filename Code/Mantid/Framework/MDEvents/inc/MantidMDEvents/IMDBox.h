@@ -56,6 +56,11 @@ namespace MDEvents
     /// Destructor
     virtual ~IMDBox() {}
 
+    /// Get number of dimensions
+    virtual size_t getNumDims() const = 0;
+
+
+
     // ----------------------------- ISaveable Methods ------------------------------------------------------
 
     /// Save the data - to be overriden
@@ -92,20 +97,15 @@ namespace MDEvents
     virtual uint64_t getFilePosition() const
     { return 0; }
 
-
     // -------------------------------------------------------------------------------------------
 
-    /// Clear all contained data
-    virtual void clear() = 0;
 
-    /// Get total number of points
-    virtual size_t getNPoints() const = 0;
 
-    /// Get number of dimensions
-    virtual size_t getNumDims() const = 0;
+    // -------------------------------- Parents/Children-Related -------------------------------------------
 
     /// Get the total # of unsplit MDBoxes contained.
     virtual size_t getNumMDBoxes() const = 0;
+
 
     /// Get the # of children IMDBox'es (non-recursive)
     virtual size_t getNumChildren() const = 0;
@@ -116,8 +116,17 @@ namespace MDEvents
     /// Sets the children from a vector of children
     virtual void setChildren(const std::vector<IMDBox<MDE,nd> *> & boxes, const size_t indexStart, const size_t indexEnd) = 0;
 
-    /// Return a copy of contained events
-    virtual std::vector< MDE > * getEventsCopy() = 0;
+    /// Return a pointer to the parent box
+    void setParent(IMDBox<MDE,nd> * parent)
+    { m_parent = parent; }
+
+    /// Return a pointer to the parent box
+    IMDBox<MDE,nd> * getParent()
+    { return m_parent; }
+
+    /// Return a pointer to the parent box (const)
+    const IMDBox<MDE,nd> * getParent() const
+    { return m_parent; }
 
     /// Fill a vector with all the boxes up to a certain depth
     virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly) = 0;
@@ -125,17 +134,42 @@ namespace MDEvents
     /// Fill a vector with all the boxes up to a certain depth
     virtual void getBoxes(std::vector<IMDBox<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
 
-    std::vector<Mantid::Geometry::Coordinate> getVertexes() const;
+    /** Split sub-boxes, if this is possible and neede for this box */
+    virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)
+    {  /* Do nothing by default. */ }
 
-    coord_t * getVertexesArray(size_t & numVertices) const;
+    /** Recalculate signal etc. */
+    virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL)
+    {  /* Do nothing by default. */ }
 
-    coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const;
+
+
+    // -------------------------------- Events-Related -------------------------------------------
+
+    /// Clear all contained data
+    virtual void clear() = 0;
+
+    /// Get total number of points
+    virtual size_t getNPoints() const = 0;
+
+    /// Return a copy of contained events
+    virtual std::vector< MDE > * getEventsCopy() = 0;
 
     /** @return the MDPoints contained. throws. */
     virtual std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > getContributingPoints() const
     {
       throw std::runtime_error("Not implemented and never will be. This does not apply to MDBoxes.");
     }
+
+
+    // -------------------------------- Geometry/vertexes-Related -------------------------------------------
+
+    std::vector<Mantid::Geometry::Coordinate> getVertexes() const;
+
+    coord_t * getVertexesArray(size_t & numVertices) const;
+
+    coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const;
+
 
     /// Add a single event
     virtual void addEvent(const MDE & point) = 0;
@@ -167,22 +201,6 @@ namespace MDEvents
     /** Find the centroid around a sphere */
     virtual void centroidSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const = 0;
 
-    // -------------------------------------------------------------------------------------------
-    /** Split sub-boxes, if this is possible and neede for this box */
-    virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)
-    {
-      // Do nothing by default.
-//      // Can't split it!
-//      throw std::runtime_error("splitAllIfNeeded called on a MDBox (call splitBox() first). Call MDEventWorkspace::splitBox() before!");
-    }
-
-
-    // -------------------------------------------------------------------------------------------
-    /** Recalculate signal etc. */
-    virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL)
-    {
-      // Do nothing by default.
-    }
 
     // -------------------------------------------------------------------------------------------
     /** Cache the centroid of this box and all sub-boxes. */
@@ -398,6 +416,9 @@ namespace MDEvents
 
     /// Recursion depth
     size_t m_depth;
+
+    /// Pointer to the parent of this box. NULL if no parent.
+    IMDBox<MDE,nd> * m_parent;
 
 #ifdef MDBOX_TRACK_CENTROID
     /** The centroid (weighted center of mass) of the events in this MDBox.

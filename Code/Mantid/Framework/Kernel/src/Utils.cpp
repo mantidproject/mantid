@@ -9,6 +9,10 @@ namespace Kernel
 namespace Utils
 {
 
+  long round(double x)
+  {
+    return long(x + (x<0?-0.5:+0.5));
+  }
 
 
 

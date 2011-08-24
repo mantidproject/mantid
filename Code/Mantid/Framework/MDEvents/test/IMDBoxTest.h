@@ -129,6 +129,19 @@ public:
     TS_ASSERT_EQUALS( b.getDepth(), 123);
   }
 
+  void test_getParent_and_setParent()
+  {
+    IMDBoxTester<MDLeanEvent<3>,3> b;
+    TSM_ASSERT( "Default parent is NULL", !b.getParent() );
+    IMDBoxTester<MDLeanEvent<3>,3> * daddy = new IMDBoxTester<MDLeanEvent<3>,3>;
+    b.setParent(daddy);
+    TS_ASSERT_EQUALS( b.getParent(), daddy);
+    // Copy ctor
+    IMDBoxTester<MDLeanEvent<3>,3> c(b);
+    TS_ASSERT_EQUALS( c.getParent(), daddy);
+
+  }
+
   /** Setting and getting the extents;
    * also, getting the center */
   void test_setExtents()

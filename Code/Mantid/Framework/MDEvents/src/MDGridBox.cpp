@@ -111,6 +111,8 @@ namespace MDEvents
         // Create the box
         // (Increase the depth of this box to one more than the parent (this))
         MDBox<MDE,nd> * myBox = new MDBox<MDE,nd>(bc, this->m_depth + 1);
+        // This MDGridBox is the parent of the new child.
+        myBox->setParent(this);
 
         // Set the extents of this box.
         for (size_t d=0; d<nd; d++)
@@ -177,11 +179,15 @@ namespace MDEvents
       const MDGridBox<MDE, nd>* otherMDGridBox = dynamic_cast<const MDGridBox<MDE, nd>* >(otherBox);
       if (otherMDBox)
       {
-        boxes.push_back( new MDBox<MDE, nd>(*otherMDBox));
+        MDBox<MDE, nd> * newBox = new MDBox<MDE, nd>(*otherMDBox);
+        newBox->setParent(this);
+        boxes.push_back( newBox );
       }
       else if (otherMDGridBox)
       {
-        boxes.push_back( new MDGridBox<MDE, nd>(*otherMDGridBox));
+        MDGridBox<MDE, nd> * newBox = new MDGridBox<MDE, nd>(*otherMDGridBox);
+        newBox->setParent(this);
+        boxes.push_back( newBox );
       }
       else
       {
@@ -306,6 +312,9 @@ namespace MDEvents
   {
     boxes.clear();
     boxes.assign( otherBoxes.begin()+indexStart, otherBoxes.begin()+indexEnd);
+    // Set the parent of each new child box.
+    for (size_t i=0; i<boxes.size(); i++)
+      boxes[i]->setParent(this);
     numBoxes = boxes.size();
   }
 

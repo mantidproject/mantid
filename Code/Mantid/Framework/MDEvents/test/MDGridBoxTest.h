@@ -132,6 +132,8 @@ public:
       TS_ASSERT_EQUALS(box->getDepth(), 1);
       // The volume was set correctly
       TS_ASSERT_DELTA(box->getVolume(), 1.0, 1e-5);
+      // The parent of the MDBox is the grid box
+      TS_ASSERT_EQUALS(box->getParent(), g);
     }
 
   }
@@ -240,7 +242,11 @@ public:
 
     TS_ASSERT_EQUALS( g->getNumChildren(), 10);
     for (size_t i=2; i<12; i++)
+    {
       TS_ASSERT_EQUALS( g->getChild(i-2), boxes[i]);
+      // Parent was set correctly in child
+      TS_ASSERT_EQUALS( g->getChild(i-2)->getParent(), g);
+    }
   }
 
 

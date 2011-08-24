@@ -7,6 +7,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include <fstream>
+#include "MantidKernel/Utils.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -235,9 +236,9 @@ namespace Crystal
             out <<  "3" <<  std::setw( 7 ) << seqNum;
 
             // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
-            out <<  std::setw( 5 ) << static_cast<int>(-p.getH())
-                <<  std::setw( 5 ) << static_cast<int>(-p.getK())
-                <<  std::setw( 5 ) << static_cast<int>(-p.getL());
+            out <<  std::setw( 5 ) << Utils::round(-p.getH())
+                <<  std::setw( 5 ) << Utils::round(-p.getK())
+                <<  std::setw( 5 ) << Utils::round(-p.getL());
 
             // Row/column
             out <<  std::setw( 8 ) <<  std::fixed << std::setprecision( 2 )
