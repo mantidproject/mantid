@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <iomanip>

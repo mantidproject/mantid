@@ -5,7 +5,7 @@
 #include <cmath>
 #include <vector>
 #include <MantidKernel/Matrix.h>
-#include "MantidMDAlgorithms/Plane3DImplicitFunction.h"
+#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include <boost/shared_ptr.hpp>
 
 
@@ -15,7 +15,7 @@ using namespace Mantid::MDAlgorithms;
 //=====================================================================================
 // Functional Tests
 //=====================================================================================
-class Plane3DImplicitFunctionTest: public CxxTest::TestSuite
+class PlaneImplicitFunctionTest: public CxxTest::TestSuite
 {
 private:
 
@@ -26,7 +26,7 @@ private:
 
 public:
 
-  Plane3DImplicitFunctionTest() :
+  PlaneImplicitFunctionTest() :
     normal(1, 1, 1), origin(2, 3, 4), width(2), PI(3.14159265)
   {
   }
@@ -157,4 +157,3 @@ public:
 };
 
 #endif /* MANTID_MDALGORITHMS_MDPLANEIMPLICITFUNCTIONTEST_H_ */
-

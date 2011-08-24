@@ -10,7 +10,7 @@
 
 #include "MantidMDAlgorithms/DynamicRebinFromXML.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
 #include "MantidMDAlgorithms/BoxInterpreter.h"
 #include "MantidMDAlgorithms/PlaneInterpreter.h"

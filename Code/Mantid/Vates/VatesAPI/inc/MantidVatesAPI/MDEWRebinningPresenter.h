@@ -4,7 +4,7 @@
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include "MantidMDAlgorithms/Plane3DImplicitFunction.h"
+#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidMDAlgorithms/NullImplicitFunction.h"
 #include "MantidVatesAPI/vtkDataSetToGeometry.h"
 #include "MantidVatesAPI/MDRebinningPresenter.h"

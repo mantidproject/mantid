@@ -1,6 +1,6 @@
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidKernel/V3D.h"
-#include "MantidMDAlgorithms/Plane3DImplicitFunction.h"
+#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <cmath>

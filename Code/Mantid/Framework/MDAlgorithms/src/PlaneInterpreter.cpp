@@ -1,5 +1,5 @@
 #include "MantidMDAlgorithms/PlaneInterpreter.h"
-#include "MantidMDAlgorithms/Plane3DImplicitFunction.h"
+#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 
 namespace Mantid

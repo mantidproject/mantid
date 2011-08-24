@@ -9,7 +9,7 @@
 #include <MantidMDAlgorithms/NormalParameter.h>
 #include <MantidMDAlgorithms/OriginParameter.h>
 #include <MantidMDAlgorithms/PlaneInterpreter.h>
-#include <MantidMDAlgorithms/Plane3DImplicitFunction.h>
+#include <MantidMDAlgorithms/PlaneImplicitFunction.h>
 #include <MantidMDAlgorithms/CompositeImplicitFunction.h>
 #include <gsl/gsl_blas.h>
 

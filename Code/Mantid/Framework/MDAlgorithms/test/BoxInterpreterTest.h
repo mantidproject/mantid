@@ -6,9 +6,9 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/shared_ptr.hpp>
 #include <MantidMDAlgorithms/BoxInterpreter.h>
-#include <MantidMDAlgorithms/Plane3DImplicitFunction.h>
+#include <MantidMDAlgorithms/PlaneImplicitFunction.h>
 #include <MantidMDAlgorithms/CompositeImplicitFunction.h>
-#include <MantidMDAlgorithms/Box3DImplicitFunction.h>
+#include <MantidMDAlgorithms/BoxImplicitFunction.h>
 
 using namespace Mantid::MDAlgorithms;
 

@@ -7,7 +7,7 @@
 #include <vector>
 #include <memory>
 #include "MantidKernel/System.h"
-#include "MantidMDAlgorithms/Plane3DImplicitFunction.h"
+#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
 #include "MantidMDAlgorithms/NormalParameter.h"

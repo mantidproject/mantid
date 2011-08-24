@@ -1,4 +1,4 @@
-#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <cmath>

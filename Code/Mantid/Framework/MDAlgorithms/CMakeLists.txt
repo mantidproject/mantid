@@ -1,6 +1,6 @@
 # GLOBs should be replaced with explicit listings
 set ( SRC_FILES
-	src/Box3DImplicitFunction.cpp
+	src/BoxImplicitFunction.cpp
 	src/BoxFunctionBuilder.cpp
 	src/BoxImplicitFunctionParser.cpp
 	src/BoxInterpreter.cpp
@@ -20,7 +20,7 @@ set ( SRC_FILES
 	src/MDParameterParserDeclarations.cpp
 	src/NormalParameter.cpp
 	src/NullImplicitFunction.cpp
-	src/Plane3DImplicitFunction.cpp
+	src/PlaneImplicitFunction.cpp
 	src/PlaneFunctionBuilder.cpp
 	src/PlaneImplicitFunctionParser.cpp
 	src/PlaneInterpreter.cpp
@@ -37,7 +37,7 @@ set ( SRC_FILES
 #)
 
 set ( INC_FILES
-	inc/MantidMDAlgorithms/Box3DImplicitFunction.h
+	inc/MantidMDAlgorithms/BoxImplicitFunction.h
 	inc/MantidMDAlgorithms/BoxFunctionBuilder.h
 	inc/MantidMDAlgorithms/BoxImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/BoxInterpreter.h
@@ -61,7 +61,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/NullImplicitFunction.h
 	inc/MantidMDAlgorithms/OriginParameter.h
 	inc/MantidMDAlgorithms/PerpendicularParameter.h
-	inc/MantidMDAlgorithms/Plane3DImplicitFunction.h
+	inc/MantidMDAlgorithms/PlaneImplicitFunction.h
 	inc/MantidMDAlgorithms/PlaneFunctionBuilder.h
 	inc/MantidMDAlgorithms/PlaneImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/PlaneInterpreter.h
@@ -83,7 +83,7 @@ set ( TEST_FILES
 	#test/CobaltSWDTest.h
 	#test/CreateMDFitWorkspaceTest.h
 	#test/QuadEnBackgroundTest.h
-	test/Box3DImplicitFunctionTest.h
+	test/BoxImplicitFunctionTest.h
 	test/CP3DxN_RebinningTest.h
 	test/CPR_preselectCellsTest.h
 	test/CPRebinKeepPixTest.h
@@ -95,7 +95,7 @@ set ( TEST_FILES
 	test/Load_MDWorkspaceTest.h
 	test/NormalParameterTest.h
 	test/OriginParameterTest.h
-	test/Plane3DImplicitFunctionTest.h
+	test/PlaneImplicitFunctionTest.h
 	test/PlaneFunctionBuilderTest.h
 	test/RunParamTest.h
 	test/SimulateMDDataTest.h

@@ -2,7 +2,7 @@
 #define MD_MANTID_ALGORITHMS_DYNAMICREBINFROMXML_H
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
 
 namespace Mantid
 {

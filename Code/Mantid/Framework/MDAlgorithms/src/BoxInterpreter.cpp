@@ -1,5 +1,5 @@
 #include "MantidMDAlgorithms/BoxInterpreter.h"
-#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 
 namespace Mantid

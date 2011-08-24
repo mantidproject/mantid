@@ -1,5 +1,5 @@
 #include "MantidVatesAPI/vtkClipperDataSetFactory.h"
-#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/BoxInterpreter.h"
 #include "vtkUnstructuredGrid.h"
 #include "vtkBox.h"

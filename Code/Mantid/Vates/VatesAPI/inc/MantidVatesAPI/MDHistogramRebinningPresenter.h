@@ -17,7 +17,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 
 #include "MantidMDAlgorithms/NullImplicitFunction.h" 
-#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidMDAlgorithms/DynamicRebinFromXML.h"
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"

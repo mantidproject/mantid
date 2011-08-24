@@ -7,7 +7,7 @@
 #include "MantidVatesAPI/vtkClipperDataSetFactory.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "vtkRectilinearGrid.h"
 
 class vtkClipperDataSetFactoryTest: public CxxTest::TestSuite

@@ -7,7 +7,7 @@
 #include <vector>
 #include <memory>
 #include "MantidKernel/System.h"
-#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
 
 namespace Mantid
