@@ -546,6 +546,7 @@ void MuonAnalysis::runLoadCurrent()
   }  
 }
 
+
 /**
  * Pair table plot button (slot)
  */
@@ -1391,11 +1392,6 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
  */
 void MuonAnalysis::plotGroup(const std::string& plotType)
 {
-  //Setup a graph name that can be identified later on by the peakPickerTool (set to the name of the file as this is pretty unique)
-  QString graphName(m_previousFilename);
-  //Replace '\' with '/' because python uses it as a special character
-  graphName.replace("\\", "/");
-
   int groupNum = getGroupNumberFromRow(m_groupTableRowInFocus);
   if ( groupNum >= 0 )
   {
@@ -1439,7 +1435,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     else
       pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ")\n";
     // Add the objectName for the peakPickerTool to find
-    pyS += "gs.setObjectName(\"" + graphName + "\")\n"
+    pyS += "gs.setObjectName(\"" + titleLabel + "\")\n"
            "l = gs.activeLayer()\n"
            "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
            "l.setTitle(\"" + m_title.c_str() + "\")\n";
@@ -1523,9 +1519,10 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
 
     // run python script
     QString pyOutput = runPythonCode( pyString ).trimmed();
+    
+    // Emit the signal to load the peak picker tool associating itself with the fitPropertyBrowser in the muon analysis widget
+    emit fittingRequested(m_uiForm.fitBrowser, titleLabel);
   }  
-  // Emit the signal to load the peak picker tool associating itself with the fitPropertyBrowser in the muon analysis widget
-  emit fittingRequested(m_uiForm.fitBrowser, graphName);
 }
 
 /**
@@ -1533,9 +1530,6 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
  */
 void MuonAnalysis::plotPair(const std::string& plotType)
 {
-  //Setup a graph name that can be identified later on by the peakPickerTool (set to the name of the file as this is pretty unique)
-  QString graphName(m_previousFilename);
-
   int pairNum = getPairNumberFromRow(m_pairTableRowInFocus);
   if ( pairNum >= 0 )
   {
@@ -1580,7 +1574,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     else
       pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + "0" + ")\n";
     //add the objectName for the peakPickerTool to find
-    pyS +=  "gs.setObjectName(\"" + graphName + "\")\n"
+    pyS +=  "gs.setObjectName(\"" + titleLabel + "\")\n"
             "l = gs.activeLayer()\n"
             "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
             "l.setTitle(\"" + m_title.c_str() + "\")\n";   
@@ -1645,9 +1639,11 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     std::string bsdfasdf = pyString.toStdString();
     
     QString pyOutput = runPythonCode( pyString ).trimmed();
+    
+    //emit the signal to load the peak picker tool associating itself with the fitPropertyBrowser in the muon analysis widget
+    emit fittingRequested(m_uiForm.fitBrowser, titleLabel);
   }
-  //emit the signal to load the peak picker tool associating itself with the fitPropertyBrowser in the muon analysis widget
-  emit fittingRequested(m_uiForm.fitBrowser, graphName);
+  
 }
 
 /**
