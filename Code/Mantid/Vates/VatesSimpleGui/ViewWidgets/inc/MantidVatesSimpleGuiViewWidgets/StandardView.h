@@ -61,6 +61,10 @@ public:
   virtual ~StandardView();
 
   /**
+   * ViewBase::destroyView
+   */
+  void destroyView();
+  /**
    * ViewBase::getView
    */
   pqRenderView* getView();

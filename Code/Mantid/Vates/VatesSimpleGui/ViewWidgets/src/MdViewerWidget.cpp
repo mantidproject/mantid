@@ -72,7 +72,6 @@ MdViewerWidget::MdViewerWidget(QWidget *parent) : QWidget(parent)
 
 MdViewerWidget::~MdViewerWidget()
 {
-
 }
 
 void MdViewerWidget::connectLoadDataReaction(QAction *action)
@@ -191,6 +190,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->hiddenView->hide();
   this->setParaViewComponentsForView();
   this->hiddenView->close();
+  this->hiddenView->destroyView();
   delete this->hiddenView;
   this->currentView->render();
   if (this->currentView->inherits("ThreeSliceView") ||

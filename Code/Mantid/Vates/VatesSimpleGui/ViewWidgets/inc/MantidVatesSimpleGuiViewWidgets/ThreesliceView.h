@@ -70,6 +70,10 @@ public:
   /// Correct the color scale range if not in automatic mode.
   void correctColorScaleRange();
   /**
+   * ViewBase::destroyView
+   */
+  void destroyView();
+  /**
    * ViewBase::getView
    */
   pqRenderView* getView();

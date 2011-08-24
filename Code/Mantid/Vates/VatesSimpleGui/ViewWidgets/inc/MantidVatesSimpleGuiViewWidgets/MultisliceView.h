@@ -63,6 +63,10 @@ public:
   virtual ~MultiSliceView();
 
   /**
+   * ViewBase::destroyView
+   */
+  void destroyView();
+  /**
    * ViewBase::getView
    */
   pqRenderView* getView();

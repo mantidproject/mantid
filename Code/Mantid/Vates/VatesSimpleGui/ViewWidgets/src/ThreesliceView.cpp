@@ -43,6 +43,10 @@ ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
 
 ThreeSliceView::~ThreeSliceView()
 {
+}
+
+void ThreeSliceView::destroyView()
+{
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   this->destroyFilter(builder, QString("Slice"));
   builder->destroy(this->mainView);

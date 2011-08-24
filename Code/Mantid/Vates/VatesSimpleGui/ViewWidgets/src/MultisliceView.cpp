@@ -108,6 +108,10 @@ MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
 
 MultiSliceView::~MultiSliceView()
 {
+}
+
+void MultiSliceView::destroyView()
+{
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   this->destroyFilter(builder, QString("Slice"));
   builder->destroy(this->mainView);

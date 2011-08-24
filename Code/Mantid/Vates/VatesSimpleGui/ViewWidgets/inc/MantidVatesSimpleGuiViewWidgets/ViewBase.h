@@ -72,6 +72,10 @@ public:
    */
   virtual void destroyFilter(pqObjectBuilder *builder, const QString &name);
   /**
+   * Destroy sources and view relevant to mode switching.
+   */
+  virtual void destroyView() = 0;
+  /**
    * The function gets the main view.
    * @return the main view
    */
