@@ -1089,7 +1089,7 @@ class MantidPyFramework(FrameworkManager):
             else:
                 ialg = self.createManagedAlgorithm(ialg, version) 
                 ialg.__async__ = mtd.__gui__
-        ialg.setRethrows(not mtd.__gui__) # TODO get rid of this line
+        ialg.setRethrows(True) # Ensure the console rethrows. Async ones rethrow anyway
         return IAlgorithmProxy(ialg, self)
 
     # make what comes out of C++ a little friendlier to use
