@@ -13,7 +13,10 @@ using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 
-class BoxImplicitFunctionTest : public CxxTest::TestSuite
+//=====================================================================================
+// Functional Tests
+//=====================================================================================
+class Box3DImplicitFunctionTest : public CxxTest::TestSuite
 {
 public:
 

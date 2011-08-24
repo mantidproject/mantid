@@ -15,7 +15,7 @@ using namespace Mantid::MDAlgorithms;
 //=====================================================================================
 // Functional Tests
 //=====================================================================================
-class PlaneImplicitFunctionTest: public CxxTest::TestSuite
+class Plane3DImplicitFunctionTest: public CxxTest::TestSuite
 {
 private:
 
