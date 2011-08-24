@@ -32,7 +32,7 @@ void VsgMainWindow::createActions()
 
   // Program exit
   this->exitAction = new QAction(QApplication::tr("&Exit"), this);
-  this->exitAction->setShortcut(QApplication::tr("Crtl+Q"));
+  this->exitAction->setShortcut(QApplication::tr("Ctrl+Q"));
   this->exitAction->setStatusTip(QApplication::tr("Exit the program."));
   QObject::connect(this->exitAction, SIGNAL(triggered()), this, SLOT(close()));
 }
