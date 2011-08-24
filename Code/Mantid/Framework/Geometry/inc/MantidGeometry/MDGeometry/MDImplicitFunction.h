@@ -4,8 +4,11 @@
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Exception.h"
 #include <vector>
+#include <string>
 #include <boost/shared_ptr.hpp>
+
 
 namespace Mantid
 {
