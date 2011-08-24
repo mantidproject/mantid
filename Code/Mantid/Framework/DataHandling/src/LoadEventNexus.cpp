@@ -1052,6 +1052,29 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
   }
   file.closeData();
 
+  // get the duration
+  file.openData("duration");
+  std::vector<double> duration;
+  file.getDataCoerce(duration);
+  if (duration.size() == 1)
+  {
+    // get the units
+    std::vector<AttrInfo> infos = file.getAttrInfos();
+    std::string units("");
+    for (std::vector<AttrInfo>::const_iterator it = infos.begin(); it != infos.end(); it++)
+    {
+      if (it->name.compare("units") == 0)
+      {
+        units = file.getStrAttr(*it);
+        break;
+      }
+    }
+
+    // set the property
+    WS->mutableRun().addProperty("duration", duration[0], units);
+  }
+  file.closeData();
+
   // close the file
   file.close();
 }
