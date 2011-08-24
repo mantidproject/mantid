@@ -9,10 +9,6 @@ namespace Kernel
 namespace Utils
 {
 
-  DLLExport long round(double x)
-  {
-    return long(x + (x<0?-0.5:+0.5));
-  }
 
 
 

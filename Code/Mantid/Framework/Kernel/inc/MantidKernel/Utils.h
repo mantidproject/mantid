@@ -31,8 +31,10 @@ namespace Utils
    * @param x :: floating point value to round
    * @return closes integer (positive or negative)
    */
-  long round(double x);
-
+  inline long round(double x)
+  {
+    return long(x + (x<0?-0.5:+0.5));
+  }
 
 
   namespace NestedForLoop
