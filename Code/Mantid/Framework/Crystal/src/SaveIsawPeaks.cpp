@@ -67,7 +67,7 @@ namespace Crystal
   void SaveIsawPeaks::exec()
   {
     // Section header
-    std::string header = "2   SEQN    H    K    L     COL     ROW    CHAN       L2  2_THETA       AZ        WL        D   IPK      INTI   SIGI RFLG";
+    std::string header = "2   SEQN    H    K    L     COL      ROW     CHAN        L2   2_THETA        AZ         WL         D      IPK          INTI    SIGI  RFLG";
 
     std::string filename = getPropertyValue("Filename");
     PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
@@ -91,7 +91,7 @@ namespace Crystal
 
     out << "This is the header format:" << std::endl;
 
-    out << "0     1     2    3    4      5       6       7        8       9       10        11        12     13      14      15    16" << std::endl;
+    out << "0     1     2    3    4      5       6       7        8       9              10           11          12        13       14      15    16" << std::endl;
     out << "-" << header.substr(1, header.size()-1) << std::endl;
 
     out << "6         L1    T0_SHIFT" <<  std::endl;
@@ -241,17 +241,17 @@ namespace Crystal
 
             // Row/column
             out <<  std::setw( 8 ) <<  std::fixed << std::setprecision( 2 )
-              << static_cast<double>(p.getCol());
+              << static_cast<double>(p.getCol()) << " ";
 
             out << std::setw( 8 ) << std::fixed << std::setprecision( 2 )
-              << static_cast<double>(p.getRow());
+              << static_cast<double>(p.getRow()) << " ";
 
             out << std::setw( 8 ) << std::fixed << std::setprecision( 0 )
-            << p.getTOF();
+              << p.getTOF() << " ";
 
 
             out << std::setw( 9 ) << std::fixed << std::setprecision( 3 )
-            << (p.getL2()*100.0);
+              << (p.getL2()*100.0) << " ";
 
             // This is the scattered beam direction
             V3D dir = p.getDetPos() - inst->getSample()->getPos();
@@ -264,22 +264,22 @@ namespace Crystal
             azimuth = atan2( dir.Y(), dir.X() );
 
             out << std::setw( 9 ) << std::fixed << std::setprecision( 5 )
-            << scattering; //two-theta scattering
+              << scattering << " "; //two-theta scattering
 
             out << std::setw( 9 ) << std::fixed << std::setprecision( 5 )
-            << azimuth;
+              << azimuth << " ";
 
             out << std::setw( 10 ) << std::fixed << std::setprecision( 6 )
-            << p.getWavelength();
+              << p.getWavelength() << " ";
 
             out << std::setw( 9 ) << std::fixed << std::setprecision( 4 )
-            << p.getDSpacing();
+              << p.getDSpacing() << " ";
 
-            out << std::setw( 6 ) << static_cast<int>(p.getBinCount()) << std::setw( 10 )
-            << std::fixed << std::setprecision( 2 ) << p.getIntensity();
+            out << std::setw( 8 ) << std::fixed << (p.getBinCount()) << std::setw( 10 ) << " "
+              << std::fixed << std::setprecision( 2 ) << p.getIntensity() << " ";
 
             out << std::setw( 7 ) << std::fixed << std::setprecision( 2 )
-            << p.getSigmaIntensity();
+              << p.getSigmaIntensity() << " ";
 
             int thisReflag = 0;
             out << std::setw( 5 ) << thisReflag;
