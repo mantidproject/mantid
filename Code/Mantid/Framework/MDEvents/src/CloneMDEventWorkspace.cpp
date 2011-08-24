@@ -4,6 +4,7 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include "MantidAPI/FileProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -55,6 +56,14 @@ namespace MDEvents
         "An input MDEventWorkspace.");
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
         "Name of the output MDEventWorkspace.");
+
+    std::vector<std::string> exts(1, ".nxs");
+    declareProperty(new FileProperty("Filename", "", FileProperty::OptionalSave, exts),
+        "If the input workspace is file-backed, specify a file to which to save the cloned workspace.\n"
+        "If the workspace is file-backed but this parameter is NOT specified, then a new filename with '_clone' appended is created next to the original file.\n"
+        "No effect if the input workspace is NOT file-backed.\n"
+        "");
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -75,18 +84,24 @@ namespace MDEvents
       // Generate a new filename to copy to
       prog.report("Copying File");
       std::string originalFile = bc->getFilename();
-      Poco::Path path = Poco::Path(originalFile).absolute();
-      std::string newName = path.getBaseName() + "_clone." + path.getExtension();
-      path.setFileName(newName);
+      std::string outFilename = getPropertyValue("Filename");
+      if (outFilename.empty())
+      {
+        // Auto-generated name
+        Poco::Path path = Poco::Path(originalFile).absolute();
+        std::string newName = path.getBaseName() + "_clone." + path.getExtension();
+        path.setFileName(newName);
+        outFilename = path.toString();
+      }
 
       // Perform the copying
-      g_log.notice() << "Cloned workspace file being copied to: " << path.toString() << std::endl;
-      Poco::File(originalFile).copyTo(path.toString());
+      g_log.notice() << "Cloned workspace file being copied to: " << outFilename << std::endl;
+      Poco::File(originalFile).copyTo(outFilename);
       g_log.information() << "File copied successfully." << std::endl;
 
       // Now load it back
       IAlgorithm_sptr alg = createSubAlgorithm("LoadMDEW", 0.5, 1.0, false);
-      alg->setPropertyValue("Filename", path.toString());
+      alg->setPropertyValue("Filename", outFilename);
       alg->setPropertyValue("FileBackEnd", "1");
       alg->setPropertyValue("Memory", "0"); //TODO: How much memory?
       alg->setPropertyValue("OutputWorkspace", outWSName);

@@ -10,6 +10,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -37,8 +38,13 @@ public:
     do_test(true);
   }
 
+  void test_exec_FileBacked_withFilename()
+  {
+    do_test(true, "CloneMDEventWorkspaceTest_ws_custom_cloned_name.nxs");
+  }
 
-  void do_test(bool fileBacked)
+
+  void do_test(bool fileBacked, std::string Filename = "")
   {
     // Name of the output workspace.
     std::string outWSName("CloneMDEventWorkspaceTest_OutputWS");
@@ -51,6 +57,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "CloneMDEventWorkspaceTest_ws") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", Filename) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     
@@ -62,6 +69,13 @@ public:
     // Compare the two workspaces
     LoadMDEWTest::do_compare_MDEW(ws1, ws2);
     
+    // Check that the custom file name file exists
+    if (fileBacked && !Filename.empty())
+    {
+      std::string realFile = alg.getPropertyValue("Filename");
+      TS_ASSERT( Poco::File( realFile ).exists() );
+    }
+
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove("CloneMDEventWorkspaceTest_ws");
     AnalysisDataService::Instance().remove(outWSName);
