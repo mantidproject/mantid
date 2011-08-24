@@ -2,7 +2,6 @@
 #define MDBOX_H_
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/ImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
@@ -167,7 +166,7 @@ namespace MDEvents
 
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 
-    void generalBin(MDBin<MDE,nd> & bin, Mantid::API::ImplicitFunction & function) const;
+    void generalBin(MDBin<MDE,nd> & bin, Mantid::Geometry::MDImplicitFunction & function) const;
 
     void calculateDimensionStats(MDDimensionStats * stats) const;
 

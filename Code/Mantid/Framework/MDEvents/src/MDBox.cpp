@@ -1,6 +1,5 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidAPI/ImplicitFunction.h"
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidKernel/DiskMRU.h"
 
@@ -581,17 +580,16 @@ namespace MDEvents
    *        contained within the (non-axis-aligned) bin.
    */
   TMDE(
-  void MDBox)::generalBin(MDBin<MDE,nd> & bin, Mantid::API::ImplicitFunction & function) const
+  void MDBox)::generalBin(MDBin<MDE,nd> & bin, Mantid::Geometry::MDImplicitFunction & function) const
   {
     UNUSED_ARG(bin);
 
     typename std::vector<MDE>::const_iterator it = data.begin();
     typename std::vector<MDE>::const_iterator it_end = data.end();
-    bool mask[3] = {false, false, false}; //HACK
     // For each MDLeanEvent
     for (; it != it_end; ++it)
     {
-      if (function.evaluate(it->getCenter(), mask, 3)) //HACK
+      if (function.isPointContained(it->getCenter())) //HACK
       {
         // Accumulate error and signal
         bin.m_signal += it->getSignal();

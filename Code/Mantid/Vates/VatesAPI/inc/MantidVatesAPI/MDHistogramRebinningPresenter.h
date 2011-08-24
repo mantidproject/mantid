@@ -14,11 +14,10 @@
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 
 #include "MantidAPI/ImplicitFunctionFactory.h"
-#include "MantidAPI/ImplicitFunction.h"
 #include "MantidAPI/IMDWorkspace.h"
 
 #include "MantidMDAlgorithms/NullImplicitFunction.h" 
-#include "MantidMDAlgorithms/BoxImplicitFunction.h"
+#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidMDAlgorithms/DynamicRebinFromXML.h"
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
@@ -110,10 +109,10 @@ namespace Mantid
       void forumulateBinChangeRequest(Mantid::Geometry::MDGeometryXMLParser& old_geometry, Mantid::Geometry::MDGeometryXMLParser& new_geometry);
 
       /// Construct a box from the interactor.
-      Mantid::API::ImplicitFunction_sptr constructBoxFromVTKBox(vtkBox* box) const;
+      Mantid::Geometry::MDImplicitFunction_sptr constructBoxFromVTKBox(vtkBox* box) const;
 
       /// Construct a box from the input dataset metadata.
-      Mantid::API::ImplicitFunction_sptr constructBoxFromInput() const;
+      Mantid::Geometry::MDImplicitFunction_sptr constructBoxFromInput() const;
 
       /// Disabled copy constructor.
       MDHistogramRebinningPresenter(const MDHistogramRebinningPresenter& other);
@@ -138,7 +137,7 @@ namespace Mantid
       ///The view of this MVP pattern.
       ViewType* m_view;
       ///Box implicit function used to determine boundaries via evaluation.
-      Mantid::API::ImplicitFunction_sptr m_box;
+      Mantid::Geometry::MDImplicitFunction_sptr m_box;
       ///Clipper used to determine boundaries.
       boost::scoped_ptr<Clipper> m_clipper;
       ///Maximum threshold
@@ -307,7 +306,7 @@ namespace Mantid
     * @return ImplicitFunction_sptr containing ImplicitFunction box.
     */
     template<typename ViewType>
-    Mantid::API::ImplicitFunction_sptr MDHistogramRebinningPresenter<ViewType>::constructBoxFromVTKBox(vtkBox* box) const
+    Mantid::Geometry::MDImplicitFunction_sptr MDHistogramRebinningPresenter<ViewType>::constructBoxFromVTKBox(vtkBox* box) const
     {
       using namespace Mantid::MDAlgorithms;
 
@@ -339,14 +338,14 @@ namespace Mantid
       BoxImplicitFunction* boxFunction = new BoxImplicitFunction(widthParam, heightParam, depthParam,
         originParam);
 
-      return Mantid::API::ImplicitFunction_sptr(boxFunction);
+      return Mantid::Geometry::MDImplicitFunction_sptr(boxFunction);
     }
 
     /** Constructs a box from the inputs vtkdataset.
     * @return ImplicitFunction_sptr containing ImplicitFunction box.
     */
     template<typename ViewType>
-    Mantid::API::ImplicitFunction_sptr MDHistogramRebinningPresenter<ViewType>::constructBoxFromInput() const
+    Mantid::Geometry::MDImplicitFunction_sptr MDHistogramRebinningPresenter<ViewType>::constructBoxFromInput() const
     {
       using namespace Mantid::MDAlgorithms;
 
@@ -372,7 +371,7 @@ namespace Mantid
       BoxImplicitFunction* boxFunction = new BoxImplicitFunction(widthParam, heightParam, depthParam,
         originParam);
 
-      return Mantid::API::ImplicitFunction_sptr(boxFunction);
+      return Mantid::Geometry::MDImplicitFunction_sptr(boxFunction);
     }
 
     /** Update the MVP model, forumulates and hive-off a request for rebinning
@@ -461,13 +460,13 @@ namespace Mantid
       //Add existing functions.
       Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
       compFunction->addFunction(m_box);
-      Mantid::API::ImplicitFunction* existingFunctions = vtkDataSetToImplicitFunction::exec(m_input);
+      Mantid::Geometry::MDImplicitFunction* existingFunctions = vtkDataSetToImplicitFunction::exec(m_input);
       if (existingFunctions != NULL)
       {
-        compFunction->addFunction(Mantid::API::ImplicitFunction_sptr(existingFunctions));
+        compFunction->addFunction(Mantid::Geometry::MDImplicitFunction_sptr(existingFunctions));
       }
       //Apply the implicit function.
-      m_serializer.setImplicitFunction(Mantid::API::ImplicitFunction_sptr(compFunction));
+      m_serializer.setImplicitFunction(Mantid::Geometry::MDImplicitFunction_sptr(compFunction));
     }
 
     /** Coordinate the production of a vtkDataSet matching the request

@@ -8,15 +8,6 @@
 
 class NullImplicitFunctionTest: public CxxTest::TestSuite
 {
-private:
-
-class MockPoint3D: public Mantid::API::Point3D
-{
-  public:
-  MOCK_CONST_METHOD0(getX, double());
-  MOCK_CONST_METHOD0(getY, double());
-  MOCK_CONST_METHOD0(getZ, double());
-};
 
 public:
 
@@ -32,20 +23,8 @@ void testEvaluateReturnsTrue()
 {
   using namespace Mantid::MDAlgorithms;
   NullImplicitFunction function;
-  MockPoint3D mockPoint;
-  EXPECT_CALL(mockPoint, getX()).Times(0);
-  EXPECT_CALL(mockPoint, getY()).Times(0);
-  EXPECT_CALL(mockPoint, getZ()).Times(0);
-  TS_ASSERT(function.evaluate(&mockPoint));
-}
-
-void testEvaluateCoordReturnsTrue()
-{
-  using namespace Mantid::MDAlgorithms;
-  NullImplicitFunction function;
-  Mantid::coord_t coords[3];
-  bool masks[3];
-  TS_ASSERT(function.evaluate(coords, masks, 3));
+  Mantid::coord_t coord[3] = {0, 0, 0};
+  TS_ASSERT(function.isPointContained(coord));
 }
 
 void testToXMLEmpty()

@@ -30,7 +30,7 @@ namespace Mantid
           this->m_depth = depthParam;
         }
 
-        ImplicitFunction* BoxFunctionBuilder::create() const
+        Mantid::Geometry::MDImplicitFunction* BoxFunctionBuilder::create() const
         {
             //check that builder parameters are valid.
             if(!m_origin.isValid())

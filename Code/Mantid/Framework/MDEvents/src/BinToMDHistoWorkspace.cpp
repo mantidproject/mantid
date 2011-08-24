@@ -1,4 +1,3 @@
-#include "MantidAPI/ImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -469,7 +468,7 @@ namespace MDEvents
       bool binContained = true;
       if (implicitFunction)
       {
-        binContained = implicitFunction->evaluate(bin.m_min, dimensionsUsed, nd);
+        binContained = implicitFunction->isPointContained(bin.m_min); //TODO. Correct argument passed to this method?
       }
 
       if (binContained)

@@ -2,8 +2,6 @@
 #define MDEVENTWORKSPACE_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/ImplicitFunction.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/System.h"

@@ -2,7 +2,7 @@
 #define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/ImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
@@ -33,20 +33,12 @@ class BinToMDHistoWorkspaceTest : public CxxTest::TestSuite
 private:
 
   //Helper class. Mock Implicit function.
-  class MockImplicitFunction : public Mantid::API::ImplicitFunction
+  class MockImplicitFunction : public Mantid::Geometry::MDImplicitFunction
   {
   public:
-    bool evaluate(const Mantid::coord_t*, const bool *, const size_t) const
+    virtual bool isPointContained(const Mantid::coord_t *)
     {
       return false;
-    }
-    bool evaluate(const Mantid::API::Point3D* /*pPoint3D*/) const
-    {
-      return false; //Always reject points.
-    }
-    bool evaluate(const Mantid::coord_t*, const bool *)
-    {
-      return false; //Always reject points.
     }
     virtual std::string getName() const
     {
@@ -60,7 +52,7 @@ private:
   class MockImplicitFunctionBuilder : public Mantid::API::ImplicitFunctionBuilder
   {
   public:
-    Mantid::API::ImplicitFunction* create() const
+    Mantid::Geometry::MDImplicitFunction* create() const
     {
       return new MockImplicitFunction;
     }

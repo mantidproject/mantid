@@ -2,7 +2,6 @@
 #define IMDBOX_H_
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/ImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
@@ -160,7 +159,7 @@ namespace MDEvents
     virtual void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const = 0;
 
     /// General binning method for any shape.
-    virtual void generalBin(MDBin<MDE,nd> & bin, Mantid::API::ImplicitFunction & function) const = 0;
+    virtual void generalBin(MDBin<MDE,nd> & bin, Mantid::Geometry::MDImplicitFunction & function) const = 0;
 
     /** Sphere (peak) integration */
     virtual void integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const = 0;

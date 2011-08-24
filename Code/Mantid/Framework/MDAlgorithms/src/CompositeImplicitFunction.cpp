@@ -1,6 +1,12 @@
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string.hpp> 
 #include <boost/format.hpp>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <sstream>
 
 namespace Mantid
 {
@@ -15,7 +21,7 @@ namespace Mantid
         {
         }
 
-        bool CompositeImplicitFunction::addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction> constituentFunction)
+        bool CompositeImplicitFunction::addFunction(Mantid::Geometry::MDImplicitFunction_sptr constituentFunction)
         {
           bool bSuccess = false;
           if(constituentFunction.get() != NULL)
@@ -70,47 +76,28 @@ namespace Mantid
             return static_cast<int>( this->m_Functions.size() );
         }
 
-
-        /** Evaluate a composite of several Implicit functions.
-         *
-         * This returns true if all ImplicitFunctions evaluate as true
-         * (basically an AND operation on the evaluate() of each function).
-         *
-         * @param pPoint3D :: point to evaluate
-         * @return bool
-         */
-        bool CompositeImplicitFunction::evaluate(const API::Point3D*  pPoint3D) const
-        {
-            bool evalResult = false;
-            std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> >::const_iterator it;
-            for(it = this->m_Functions.begin(); it != this->m_Functions.end(); ++it)
-            {
-                evalResult = (*it)->evaluate(pPoint3D);
-                if(!evalResult)
-                {
-                    break;
-                }
-            }
-            return evalResult;
-        }
-
-        /** Evaluate a composite of several Implicit functions.
-         *
-         * This returns true if all ImplicitFunctions evaluate as true
-         * (basically an AND operation on the evaluate() of each function).
-         *
-         * @param coords :: point to evaluate
-         * @param masks :: masks to reduce nDims down to 3
-         * @param nDims :: number of dimensions masked + unmasked
-         * @return true if all nested implicit functions evaluate to true, otherwise false.
-         */
-        bool CompositeImplicitFunction::evaluate(const Mantid::coord_t* coords, const bool * masks, const size_t nDims) const
+        bool CompositeImplicitFunction::isPointContained(const coord_t * coords)
         {
           bool evalResult = false;
-          std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> >::const_iterator it;
+          std::vector<boost::shared_ptr<Mantid::Geometry::MDImplicitFunction> >::const_iterator it;
           for(it = this->m_Functions.begin(); it != this->m_Functions.end(); ++it)
           {
-            evalResult = (*it)->evaluate(coords, masks, nDims);
+            evalResult = (*it)->isPointContained(coords);
+            if(!evalResult)
+            {
+              break;
+            }
+          }
+          return evalResult;
+        }
+
+        bool CompositeImplicitFunction::isPointContained(const std::vector<coord_t> & coords)
+        {
+          bool evalResult = false;
+          std::vector<boost::shared_ptr<Mantid::Geometry::MDImplicitFunction> >::const_iterator it;
+          for(it = this->m_Functions.begin(); it != this->m_Functions.end(); ++it)
+          {
+            evalResult = (*it)->isPointContained(coords);
             if(!evalResult)
             {
               break;
@@ -147,7 +134,7 @@ namespace Mantid
         }
 
         //TODO. retire this function, call evaluate instead!
-        std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> > CompositeImplicitFunction::getFunctions() const
+        std::vector<Mantid::Geometry::MDImplicitFunction_sptr > CompositeImplicitFunction::getFunctions() const
         {
           return this->m_Functions;
         }

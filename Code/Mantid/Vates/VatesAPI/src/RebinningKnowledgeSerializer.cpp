@@ -1,4 +1,4 @@
-#include <MantidAPI/ImplicitFunction.h>
+#include <MantidGeometry/MDGeometry/MDImplicitFunction.h>
 #include <boost/shared_ptr.hpp>
 #include <MantidAPI/IMDWorkspace.h>
 #include <boost/algorithm/string.hpp>
@@ -24,7 +24,7 @@ RebinningKnowledgeSerializer::RebinningKnowledgeSerializer(LocationPolicy locati
 {
 }
 
-void RebinningKnowledgeSerializer::setImplicitFunction(boost::shared_ptr<const Mantid::API::ImplicitFunction> spFunction)
+void RebinningKnowledgeSerializer::setImplicitFunction(boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction)
 {
   this->m_spFunction = spFunction;
 }

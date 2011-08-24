@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include <vector>
 #include "MantidKernel/System.h"
-#include "MantidAPI/ImplicitFunction.h"
 #include "MantidMDAlgorithms/WidthParameter.h"
 #include "MantidMDAlgorithms/DepthParameter.h"
 #include "MantidMDAlgorithms/HeightParameter.h"
@@ -45,11 +44,11 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport Box3DImplicitFunction : public Mantid::Geometry::MDBoxImplicitFunction
+        class DLLExport BoxImplicitFunction : public Mantid::Geometry::MDBoxImplicitFunction
         {
         public:
-            Box3DImplicitFunction(WidthParameter& width, HeightParameter& height, DepthParameter& depth, OriginParameter& origin);
-            ~Box3DImplicitFunction();
+            BoxImplicitFunction(WidthParameter& width, HeightParameter& height, DepthParameter& depth, OriginParameter& origin);
+            ~BoxImplicitFunction();
             std::string getName() const;
             std::string toXMLString() const;
             double getUpperX() const;
@@ -58,12 +57,12 @@ namespace Mantid
             double getLowerY() const;
             double getUpperZ() const;
             double getLowerZ() const;
-            bool operator==(const Box3DImplicitFunction &other) const;
-            bool operator!=(const Box3DImplicitFunction &other) const;
+            bool operator==(const BoxImplicitFunction &other) const;
+            bool operator!=(const BoxImplicitFunction &other) const;
 
             static std::string functionName()
             {
-                return "Box3DImplicitFunction";
+                return "BoxImplicitFunction";
             }
 
         private:

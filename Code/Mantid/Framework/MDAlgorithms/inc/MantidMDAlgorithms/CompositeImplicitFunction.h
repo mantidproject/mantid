@@ -5,16 +5,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include "MantidAPI/ImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
-namespace API
-{
-class Point3D;
-}
 namespace MDAlgorithms
 {
 /**
@@ -46,15 +42,18 @@ namespace MDAlgorithms
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport CompositeImplicitFunction: public Mantid::API::ImplicitFunction
+class DLLExport CompositeImplicitFunction: public Mantid::Geometry::MDImplicitFunction
 {
 public:
-  CompositeImplicitFunction();
 
+  //---------------------------------- Override base-class methods---
+  virtual bool isPointContained(const coord_t * coords);
+  virtual bool isPointContained(const std::vector<coord_t> & coords);
+  //-----------------------------------------------------------------
+
+  CompositeImplicitFunction();
   ~CompositeImplicitFunction();
-  bool addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction> constituentFunction);
-  bool evaluate(const Mantid::API::Point3D* pPoint3D) const;
-  bool evaluate(const Mantid::coord_t* coords, const bool * masks, const size_t nDims) const;
+  bool addFunction(Mantid::Geometry::MDImplicitFunction_sptr constituentFunction);
   std::string getName() const;
   std::string toXMLString() const;
   int getNFunctions() const;
@@ -64,10 +63,10 @@ public:
   {
     return "CompositeImplicitFunction";
   }
-  std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> > getFunctions() const;
+  std::vector<Mantid::Geometry::MDImplicitFunction_sptr > getFunctions() const;
 protected:
-  std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> > m_Functions;
-  typedef std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> >::const_iterator
+  std::vector<Mantid::Geometry::MDImplicitFunction_sptr > m_Functions;
+  typedef std::vector<Mantid::Geometry::MDImplicitFunction_sptr >::const_iterator
       FunctionIterator;
 
 };

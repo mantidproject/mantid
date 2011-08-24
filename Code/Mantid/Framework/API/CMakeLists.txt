@@ -138,7 +138,6 @@ set ( INC_FILES
 	inc/MantidAPI/ISpectrum.h
 	inc/MantidAPI/ITableWorkspace.h
 	inc/MantidAPI/IWorkspaceProperty.h
-	inc/MantidAPI/ImplicitFunction.h
 	inc/MantidAPI/ImplicitFunctionBuilder.h
 	inc/MantidAPI/ImplicitFunctionFactory.h
 	inc/MantidAPI/ImplicitFunctionParameter.h
@@ -160,7 +159,6 @@ set ( INC_FILES
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
-	inc/MantidAPI/Point3D.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/Run.h

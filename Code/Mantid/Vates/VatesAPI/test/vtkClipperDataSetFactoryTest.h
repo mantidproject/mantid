@@ -6,7 +6,8 @@
 #include <gtest/gtest.h>
 #include "MantidVatesAPI/vtkClipperDataSetFactory.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include "MantidMDAlgorithms/BoxImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
 #include "vtkRectilinearGrid.h"
 
 class vtkClipperDataSetFactoryTest: public CxxTest::TestSuite
@@ -49,11 +50,11 @@ class MockClipper: public Mantid::VATES::Clipper
   };
 
   // Mock type to represent other implicit functions.
-  class MockImplicitFunction: public Mantid::API::ImplicitFunction
+  class MockImplicitFunction: public Mantid::Geometry::MDImplicitFunction
   {
   public:
-    MOCK_CONST_METHOD1(evaluate, bool(const Mantid::API::Point3D* pPoint3D));
-    MOCK_CONST_METHOD3(evaluate, bool(const Mantid::coord_t*, const bool *, const size_t));
+    MOCK_METHOD1(isPointContained, bool(const Mantid::coord_t* pPoint));
+    MOCK_METHOD1(isPointContained, bool(const std::vector<Mantid::coord_t>&));
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_CONST_METHOD0(toXMLString, std::string());
     MOCK_METHOD0(die, void());
@@ -77,7 +78,7 @@ public:
     EXPECT_CALL(*mockGrid, die()).Times(1); //VisIT framework expects that input datasets are not destroyed.
     EXPECT_CALL(*mockClipper, die()).Times(1);
     {
-      vtkClipperDataSetFactory factory(boost::shared_ptr<ImplicitFunction>(mockFunction), mockGrid, mockClipper);
+      vtkClipperDataSetFactory factory(Mantid::Geometry::MDImplicitFunction_sptr(mockFunction), mockGrid, mockClipper);
     }
 
     mockGrid->Delete(); //Clean up in test scenario
@@ -105,8 +106,8 @@ public:
     BoxImplicitFunction* boxTwo = new BoxImplicitFunction(widthTwo, heightTwo, depthTwo, originTwo);
 
     CompositeImplicitFunction* compositeFunction = new CompositeImplicitFunction;
-    compositeFunction->addFunction(boost::shared_ptr<ImplicitFunction>(boxOne));
-    compositeFunction->addFunction(boost::shared_ptr<ImplicitFunction>(boxTwo));
+    compositeFunction->addFunction(Mantid::Geometry::MDImplicitFunction_sptr(boxOne));
+    compositeFunction->addFunction(Mantid::Geometry::MDImplicitFunction_sptr(boxTwo));
 
 
     MockClipper* mockClipper = new MockClipper;
@@ -119,7 +120,7 @@ public:
     EXPECT_CALL(*mockClipper, die()).Times(1);
 
     {
-    Mantid::VATES::vtkClipperDataSetFactory factory(boost::shared_ptr<ImplicitFunction>(compositeFunction), vtkRectilinearGrid::New(), mockClipper);
+    Mantid::VATES::vtkClipperDataSetFactory factory(Mantid::Geometry::MDImplicitFunction_sptr(compositeFunction), vtkRectilinearGrid::New(), mockClipper);
     factory.create();
     }
 

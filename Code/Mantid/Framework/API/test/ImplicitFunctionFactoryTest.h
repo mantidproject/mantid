@@ -10,7 +10,7 @@
 #include "MantidAPI/ImplicitFunctionParserFactory.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/ImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -20,27 +20,32 @@ class ImplicitFunctionFactoryTest : public CxxTest::TestSuite
 {
 private:
 
-  class MockImplicitFunctionA : public Mantid::API::ImplicitFunction
+  class MockImplicitFunctionA : public Mantid::Geometry::MDImplicitFunction
   {
   public:
-    MOCK_CONST_METHOD1(evaluate, bool(const Mantid::API::Point3D* pPoint3D));
-    MOCK_CONST_METHOD3(evaluate, bool(const Mantid::coord_t*, const bool *, const size_t));
     virtual std::string getName() const
     {
       return "MockImplicitFunctionA";
     }
+    MOCK_METHOD1(isPointContained, bool(const Mantid::coord_t* pPoint));
+    MOCK_METHOD1(isPointContained, bool(const std::vector<Mantid::coord_t>&));
     MOCK_CONST_METHOD0(toXMLString, std::string());
     ~MockImplicitFunctionA()   {;}
   };
 
-  class MockImplicitFunctionB : public Mantid::API::ImplicitFunction
+  class MockImplicitFunctionB : public Mantid::Geometry::MDImplicitFunction
   {
   public:
-    MOCK_CONST_METHOD1(evaluate, bool(const Mantid::API::Point3D* pPoint3D));
-    MOCK_CONST_METHOD3(evaluate, bool(const Mantid::coord_t*, const bool *, const size_t));
-    MOCK_CONST_METHOD0(getName, std::string());
+    MOCK_METHOD1(isPointContained, bool(const Mantid::coord_t* pPoint));
+    MOCK_METHOD1(isPointContained, bool(const std::vector<Mantid::coord_t>&));
+    virtual std::string getName() const
+    {
+      return "MockImplicitFunctionB";
+    }
     MOCK_CONST_METHOD0(toXMLString, std::string());
-    ~MockImplicitFunctionB()   {;}
+    ~MockImplicitFunctionB()
+    {
+    }
   };
 
   class MockImplicitFunctionParserA : public Mantid::API::ImplicitFunctionParser
@@ -104,7 +109,7 @@ private:
   class MockImplicitFunctionBuilderA : public Mantid::API::ImplicitFunctionBuilder
   {
   public:
-    Mantid::API::ImplicitFunction* create() const
+    Mantid::Geometry::MDImplicitFunction* create() const
     {
       return new MockImplicitFunctionA;
     }
@@ -113,7 +118,7 @@ private:
   class MockImplicitFunctionBuilderB : public Mantid::API::ImplicitFunctionBuilder
   {
   public:
-    Mantid::API::ImplicitFunction* create() const
+    Mantid::Geometry::MDImplicitFunction* create() const
     {
       return new MockImplicitFunctionA;
     }
@@ -171,11 +176,10 @@ public:
 
   }
 
-  //Test a simple exaple using with one 
   void testCreateunwrappedSimple()
   {
-    using Mantid::API::ImplicitFunction;
-    boost::scoped_ptr<ImplicitFunction> function(Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(generateComplexXML()));
+    using Mantid::Geometry::MDImplicitFunction;
+    Mantid::Geometry::MDImplicitFunction_sptr function(Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(generateComplexXML()));
     
     TSM_ASSERT_EQUALS("The correct implicit function type has not been generated", "MockImplicitFunctionA", function->getName());
   }

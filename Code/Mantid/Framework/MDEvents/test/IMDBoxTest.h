@@ -1,7 +1,6 @@
 #ifndef MANTID_MDEVENTS_IMDBOXTEST_H_
 #define MANTID_MDEVENTS_IMDBOXTEST_H_
 
-#include "MantidAPI/ImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
@@ -75,7 +74,7 @@ public:
   virtual void centroidSphere(CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, coord_t *, signal_t & ) const {};
   virtual void getBoxes(std::vector<IMDBox<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool) {};
   virtual void getBoxes(std::vector<IMDBox<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool, Mantid::Geometry::MDImplicitFunction *) {};
-  virtual void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::API::ImplicitFunction & /*function*/) const {}
+  virtual void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const {}
 
 };
 

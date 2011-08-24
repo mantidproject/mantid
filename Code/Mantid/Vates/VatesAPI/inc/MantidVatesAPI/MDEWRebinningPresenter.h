@@ -4,7 +4,7 @@
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
+#include "MantidMDAlgorithms/Plane3DImplicitFunction.h"
 #include "MantidMDAlgorithms/NullImplicitFunction.h"
 #include "MantidVatesAPI/vtkDataSetToGeometry.h"
 #include "MantidVatesAPI/MDRebinningPresenter.h"
@@ -81,7 +81,7 @@ namespace Mantid
 
     private:
 
-      Mantid::API::ImplicitFunction_sptr constructPlaneFromVTKPlane(vtkPlane* plane, Mantid::MDAlgorithms::WidthParameter& width);
+      Mantid::Geometry::MDImplicitFunction_sptr constructPlaneFromVTKPlane(vtkPlane* plane, Mantid::MDAlgorithms::WidthParameter& width);
       void persistReductionKnowledge(vtkDataSet* out_ds, const RebinningKnowledgeSerializer& xmlGenerator, const char* id);
       std::string extractFormattedPropertyFromDimension(Mantid::Geometry::IMDDimension_sptr dimension) const;
       void addFunctionKnowledge();
@@ -105,7 +105,7 @@ namespace Mantid
       ///Serializer of rebinning 
       RebinningKnowledgeSerializer m_serializer;
       /// Plane with width
-      Mantid::API::ImplicitFunction_sptr m_plane;
+      Mantid::Geometry::MDImplicitFunction_sptr m_plane;
       /// Flag indicating that clipping should be used.
       bool m_applyClipping;
     };
@@ -128,7 +128,7 @@ namespace Mantid
       m_timestep(0),
       m_wsGeometry(""),
       m_serializer(LocationNotRequired),
-      m_plane(Mantid::API::ImplicitFunction_sptr(new Mantid::MDAlgorithms::NullImplicitFunction())),
+      m_plane(Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::MDAlgorithms::NullImplicitFunction())),
       m_applyClipping(false)
     {
       using namespace Mantid::API;
@@ -192,13 +192,13 @@ namespace Mantid
     @param width: plane width
     */
     template<typename ViewType>
-    Mantid::API::ImplicitFunction_sptr MDEWRebinningPresenter<ViewType>::constructPlaneFromVTKPlane(vtkPlane* plane, Mantid::MDAlgorithms::WidthParameter& width)
+    Mantid::Geometry::MDImplicitFunction_sptr MDEWRebinningPresenter<ViewType>::constructPlaneFromVTKPlane(vtkPlane* plane, Mantid::MDAlgorithms::WidthParameter& width)
     {
       double* pOrigin = plane->GetOrigin();
       double* pNormal = plane->GetNormal();
       Mantid::MDAlgorithms::OriginParameter origin(pOrigin[0], pOrigin[1], pOrigin[2]);
       Mantid::MDAlgorithms::NormalParameter normal(pNormal[0], pNormal[1], pNormal[2]);
-      return Mantid::API::ImplicitFunction_sptr(new Mantid::MDAlgorithms::PlaneImplicitFunction(normal, origin, width));
+      return Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::MDAlgorithms::PlaneImplicitFunction(normal, origin, width));
     }
 
     /*
@@ -210,13 +210,13 @@ namespace Mantid
       //Add existing functions.
       Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
       compFunction->addFunction(m_plane);
-      Mantid::API::ImplicitFunction* existingFunctions = vtkDataSetToImplicitFunction::exec(m_input);
+      Mantid::Geometry::MDImplicitFunction* existingFunctions = vtkDataSetToImplicitFunction::exec(m_input);
       if (existingFunctions != NULL)
       {
-        compFunction->addFunction(Mantid::API::ImplicitFunction_sptr(existingFunctions));
+        compFunction->addFunction(Mantid::Geometry::MDImplicitFunction_sptr(existingFunctions));
       }
       //Apply the implicit function.
-      m_serializer.setImplicitFunction(Mantid::API::ImplicitFunction_sptr(compFunction));
+      m_serializer.setImplicitFunction(Mantid::Geometry::MDImplicitFunction_sptr(compFunction));
     }
 
     /**

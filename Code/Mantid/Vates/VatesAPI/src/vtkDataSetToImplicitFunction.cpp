@@ -15,7 +15,7 @@ namespace Mantid
     @param dataSet : input dataset containing field data.
     @return extracted implicit function.
     */
-    Mantid::API::ImplicitFunction* vtkDataSetToImplicitFunction::exec(vtkDataSet* dataSet)
+    Mantid::Geometry::MDImplicitFunction* vtkDataSetToImplicitFunction::exec(vtkDataSet* dataSet)
     {
       vtkDataSetToImplicitFunction temp(dataSet);
       return temp.execute();
@@ -38,11 +38,11 @@ namespace Mantid
     Execution method to run the extraction.
     @return implicit function if one could be found, or a NullImplicitFunction.
     */
-    Mantid::API::ImplicitFunction* vtkDataSetToImplicitFunction::execute()
+    Mantid::Geometry::MDImplicitFunction* vtkDataSetToImplicitFunction::execute()
     {
       using Mantid::MDAlgorithms::NullImplicitFunction;
       using Mantid::Geometry::MDGeometryXMLDefinitions;
-      Mantid::API::ImplicitFunction* function = new NullImplicitFunction;
+      Mantid::Geometry::MDImplicitFunction* function = new NullImplicitFunction;
 
       FieldDataToMetadata convert;
       std::string xmlString = convert(m_dataset->GetFieldData(), XMLDefinitions::metaDataId()); 

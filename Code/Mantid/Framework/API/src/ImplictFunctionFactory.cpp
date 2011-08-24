@@ -22,13 +22,13 @@ namespace Mantid
     {
     }
 
-    boost::shared_ptr<ImplicitFunction> ImplicitFunctionFactoryImpl::create(const std::string& className) const
+    Mantid::Geometry::MDImplicitFunction_sptr ImplicitFunctionFactoryImpl::create(const std::string& className) const
     {   
       UNUSED_ARG(className);
       throw std::runtime_error("Use of create in this context is forbidden. Use createUnwrappedInstead.");
     }
 
-    ImplicitFunction* ImplicitFunctionFactoryImpl::createUnwrapped(Poco::XML::Element* processXML) const
+    Mantid::Geometry::MDImplicitFunction* ImplicitFunctionFactoryImpl::createUnwrapped(Poco::XML::Element* processXML) const
     {
 
       ImplicitFunctionParser* funcParser = Mantid::API::ImplicitFunctionParserFactory::Instance().createImplicitFunctionParserFromXML(processXML);
@@ -38,7 +38,7 @@ namespace Mantid
     }
 
 
-    ImplicitFunction* ImplicitFunctionFactoryImpl::createUnwrapped(const std::string& processXML) const
+    Mantid::Geometry::MDImplicitFunction* ImplicitFunctionFactoryImpl::createUnwrapped(const std::string& processXML) const
     {
       using namespace Poco::XML;
       DOMParser pParser;

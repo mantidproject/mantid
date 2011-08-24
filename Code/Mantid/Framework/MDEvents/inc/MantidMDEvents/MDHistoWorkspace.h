@@ -7,7 +7,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/ImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 
 
 namespace Mantid
@@ -88,7 +88,7 @@ namespace MDEvents
 
     void setTo(signal_t signal, signal_t error);
 
-    void applyImplicitFunction(Mantid::API::ImplicitFunction * function, signal_t signal, signal_t error);
+    void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t error);
 
 
     // --------------------------------------------------------------------------------------------

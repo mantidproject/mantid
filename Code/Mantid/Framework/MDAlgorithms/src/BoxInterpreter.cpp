@@ -1,5 +1,5 @@
 #include "MantidMDAlgorithms/BoxInterpreter.h"
-#include "MantidMDAlgorithms/BoxImplicitFunction.h"
+#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 
 namespace Mantid
@@ -25,7 +25,7 @@ boxVector BoxInterpreter::walkTree(CompositeImplicitFunction* compFunc) const
     else if (BoxImplicitFunction::functionName()  == nestedFuncs[i]->getName())
     {
       boost::shared_ptr<BoxImplicitFunction> spBox =
-             boost::static_pointer_cast<BoxImplicitFunction, Mantid::API::ImplicitFunction>(nestedFuncs[i]);
+             boost::dynamic_pointer_cast<BoxImplicitFunction>(nestedFuncs[i]);
 
       flattenedboxes.push_back(spBox);
     }
@@ -34,12 +34,12 @@ boxVector BoxInterpreter::walkTree(CompositeImplicitFunction* compFunc) const
 
 }
 
-std::vector<double> BoxInterpreter::operator()(Mantid::API::ImplicitFunction* implicitFunction) const
+std::vector<double> BoxInterpreter::operator()(Mantid::Geometry::MDImplicitFunction* implicitFunction) const
 {
   return Execute(implicitFunction);
 }
 
-std::vector<double> BoxInterpreter::Execute(Mantid::API::ImplicitFunction* implicitFunction) const
+std::vector<double> BoxInterpreter::Execute(Mantid::Geometry::MDImplicitFunction* implicitFunction) const
 {
   std::vector<double> endBox(6, 0);
   Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction =
@@ -81,7 +81,7 @@ std::vector<double> BoxInterpreter::Execute(Mantid::API::ImplicitFunction* impli
 }
 
 
-boxVector BoxInterpreter::getAllBoxes(Mantid::API::ImplicitFunction* implicitFunction) const
+boxVector BoxInterpreter::getAllBoxes(Mantid::Geometry::MDImplicitFunction* implicitFunction) const
 {
   Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction =
       dynamic_cast<Mantid::MDAlgorithms::CompositeImplicitFunction*> (implicitFunction);

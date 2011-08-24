@@ -10,7 +10,6 @@
 #include <iostream>
 
 using namespace Mantid::Geometry;
-using namespace Mantid::API;
 using namespace Mantid;
 
 class MDImplicitFunctionTest : public CxxTest::TestSuite

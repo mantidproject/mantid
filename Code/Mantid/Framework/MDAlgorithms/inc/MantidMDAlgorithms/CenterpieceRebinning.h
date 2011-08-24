@@ -9,7 +9,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MDDataObjects/MDWorkspace.h"
-#include "MantidAPI/ImplicitFunction.h"
 
     /**  The algorithm implements centerpiece rebinning  for multidimensional workspaces
 

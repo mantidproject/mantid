@@ -7,7 +7,6 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/BinToMDHistoWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
@@ -16,6 +15,11 @@
 
 namespace Mantid
 {
+  namespace Geometry
+  {
+    //Forward declaration
+    class MDImplicitFunction;
+  }
 namespace MDEvents
 {
 
@@ -68,7 +72,7 @@ namespace MDEvents
     /// Progress reporting
     Mantid::API::Progress * prog;
     /// ImplicitFunction used
-    Mantid::API::ImplicitFunction * implicitFunction;
+    Mantid::Geometry::MDImplicitFunction * implicitFunction;
 
     /// Bin dimensions to actually use
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> binDimensions;

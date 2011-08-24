@@ -2,7 +2,7 @@
 #define MD_MANTID_ALGORITHMS_DYNAMICREBINFROMXML_H
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidMDAlgorithms/BoxImplicitFunction.h"
+#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
 
 namespace Mantid
 {
@@ -70,16 +70,16 @@ protected:
     virtual std::string getWorkspaceLocation(Poco::XML::Element* pRootElem) const;
 
     /// Get the implicit function from xml.
-    virtual Mantid::API::ImplicitFunction* getImplicitFunction(Poco::XML::Element* pRootElem) const;
+    virtual Mantid::Geometry::MDImplicitFunction* getImplicitFunction(Poco::XML::Element* pRootElem) const;
 
     /// Get the geometry description from the xml.
-    virtual Mantid::Geometry::MDGeometryDescription* getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem, Mantid::API::ImplicitFunction* impFunction) const;
+    virtual Mantid::Geometry::MDGeometryDescription* getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem, Mantid::Geometry::MDImplicitFunction * impFunction) const;
 
     /// Create a dimension from the xml.
     virtual Mantid::Geometry::MDDimension* createDimension(Poco::XML::Element* dimensionXML) const;
 
     /// Current implementation of geometry description requires cut information associated with dimensions.
-    virtual void ApplyImplicitFunctionToMDGeometryDescription(Mantid::Geometry::MDGeometryDescription* description, Mantid::API::ImplicitFunction* impFunction) const;
+    virtual void ApplyImplicitFunctionToMDGeometryDescription(Mantid::Geometry::MDGeometryDescription* description, Mantid::Geometry::MDImplicitFunction* impFunction) const;
 
 private:
   /// Initialise the Algorithm (declare properties)

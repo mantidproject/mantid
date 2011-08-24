@@ -1,5 +1,5 @@
 #include "MantidMDAlgorithms/PlaneInterpreter.h"
-#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
+#include "MantidMDAlgorithms/Plane3DImplicitFunction.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 
 namespace Mantid
@@ -23,7 +23,7 @@ planeVector PlaneInterpreter::walkTree(CompositeImplicitFunction* compFunc) cons
     else if (PlaneImplicitFunction::functionName() == nestedFuncs[i]->getName())
     {
       boost::shared_ptr<PlaneImplicitFunction> spPlane =
-          boost::static_pointer_cast<PlaneImplicitFunction, Mantid::API::ImplicitFunction>(nestedFuncs[i]);
+          boost::static_pointer_cast<PlaneImplicitFunction, Mantid::Geometry::MDImplicitFunction>(nestedFuncs[i]);
       flattenedboxes.push_back(spPlane);
     }
   }
@@ -39,12 +39,12 @@ std::vector<double> PlaneInterpreter::defaultRotationMatrix() const
   return identityMatrix;
 }
 
-std::vector<double> PlaneInterpreter::operator()(Mantid::API::ImplicitFunction* implicitFunction) const
+std::vector<double> PlaneInterpreter::operator()(Mantid::Geometry::MDImplicitFunction* implicitFunction) const
 {
   return Execute(implicitFunction);
 }
 
-std::vector<double> PlaneInterpreter::Execute(Mantid::API::ImplicitFunction* implicitFunction) const
+std::vector<double> PlaneInterpreter::Execute(Mantid::Geometry::MDImplicitFunction* implicitFunction) const
 {
   //A rotation matrix is by default an identity matrix.
   std::vector<double> rotationMatrix = defaultRotationMatrix();
@@ -70,7 +70,7 @@ std::vector<double> PlaneInterpreter::Execute(Mantid::API::ImplicitFunction* imp
   return rotationMatrix;
 }
 
-planeVector PlaneInterpreter::getAllPlanes(Mantid::API::ImplicitFunction* implicitFunction) const
+planeVector PlaneInterpreter::getAllPlanes(Mantid::Geometry::MDImplicitFunction* implicitFunction) const
 {
   CompositeImplicitFunction* compFunction =
       dynamic_cast<Mantid::MDAlgorithms::CompositeImplicitFunction*> (implicitFunction);

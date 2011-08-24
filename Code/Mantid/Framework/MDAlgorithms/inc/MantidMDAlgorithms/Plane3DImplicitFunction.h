@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_PLANE3DIMPLICITFUNCTION_H_
-#define MANTID_ALGORITHMS_PLANE3DIMPLICITFUNCTION_H_
+#ifndef MANTID_ALGORITHMS_PlaneImplicitFunction_H_
+#define MANTID_ALGORITHMS_PlaneImplicitFunction_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -7,7 +7,6 @@
 #include <vector>
 #include <gsl/gsl_blas.h>
 #include "MantidKernel/System.h"
-#include "MantidAPI/ImplicitFunction.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidMDAlgorithms/OriginParameter.h"
 #include "MantidMDAlgorithms/NormalParameter.h"
@@ -51,11 +50,11 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport Plane3DImplicitFunction : public Mantid::Geometry::MDImplicitFunction
+        class DLLExport PlaneImplicitFunction : public Mantid::Geometry::MDImplicitFunction
         {
         public:
-          Plane3DImplicitFunction(NormalParameter& normal, OriginParameter& origin,  WidthParameter& width);
-          ~Plane3DImplicitFunction();
+          PlaneImplicitFunction(NormalParameter& normal, OriginParameter& origin,  WidthParameter& width);
+          ~PlaneImplicitFunction();
           std::string getName() const;
           std::string toXMLString() const;
           double getOriginX() const;
@@ -65,11 +64,11 @@ namespace Mantid
           double getNormalY() const;
           double getNormalZ() const;
           double getWidth() const;
-          bool operator==(const Plane3DImplicitFunction &other) const;
-          bool operator!=(const Plane3DImplicitFunction &other) const;
+          bool operator==(const PlaneImplicitFunction &other) const;
+          bool operator!=(const PlaneImplicitFunction &other) const;
           static std::string functionName()
           {
-            return "Plane3DImplicitFunction";
+            return "PlaneImplicitFunction";
           }
 
         private:

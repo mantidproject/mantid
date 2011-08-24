@@ -108,19 +108,19 @@ private:
       return DynamicRebinFromXML::getWorkspaceLocation(pRootElem);
     }
     
-    Mantid::API::ImplicitFunction* getImplicitFunction(Poco::XML::Element* pRootElem) const
+    Mantid::Geometry::MDImplicitFunction* getImplicitFunction(Poco::XML::Element* pRootElem) const
     {
       //call method on base class.
       return DynamicRebinFromXML::getImplicitFunction(pRootElem);
     }
 
-    Mantid::Geometry::MDGeometryDescription* getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem, Mantid::API::ImplicitFunction* impFunction) const
+    Mantid::Geometry::MDGeometryDescription* getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem, Mantid::Geometry::MDImplicitFunction* impFunction) const
     {
       //call method on base class.
       return DynamicRebinFromXML::getMDGeometryDescriptionWithoutCuts(pRootElem, impFunction);
     }
 
-    void ApplyImplicitFunctionToMDGeometryDescription(Mantid::Geometry::MDGeometryDescription* description, Mantid::API::ImplicitFunction* impFunction) const
+    void ApplyImplicitFunctionToMDGeometryDescription(Mantid::Geometry::MDGeometryDescription* description, Mantid::Geometry::MDImplicitFunction* impFunction) const
     {
       //call method on base class.
       return DynamicRebinFromXML::ApplyImplicitFunctionToMDGeometryDescription(description, impFunction);
@@ -292,7 +292,7 @@ public:
   void testGetImplicitFunction()
   {
     ExposedDynamicRebinFromXML xmlRebinAlg;
-    boost::scoped_ptr<Mantid::API::ImplicitFunction> impFunction(xmlRebinAlg.getImplicitFunction(MDInstructionXML()));
+    MDImplicitFunction_sptr impFunction(xmlRebinAlg.getImplicitFunction(MDInstructionXML()));
     
     CompositeImplicitFunction* compFunction = dynamic_cast<CompositeImplicitFunction*>(impFunction.get());
 
@@ -343,7 +343,7 @@ public:
   void testApplyImplicitFunctionToMDGeometryDescription()
   {
     ExposedDynamicRebinFromXML xmlRebinAlg;
-    ImplicitFunction* impFunction = xmlRebinAlg.getImplicitFunction(MDInstructionXML());
+    MDImplicitFunction* impFunction = xmlRebinAlg.getImplicitFunction(MDInstructionXML());
     MDGeometryDescription* description = xmlRebinAlg.getMDGeometryDescriptionWithoutCuts(MDInstructionXML(), impFunction);
 
     xmlRebinAlg.ApplyImplicitFunctionToMDGeometryDescription(description, impFunction);

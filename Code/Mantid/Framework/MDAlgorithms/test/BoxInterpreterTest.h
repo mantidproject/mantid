@@ -6,9 +6,9 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/shared_ptr.hpp>
 #include <MantidMDAlgorithms/BoxInterpreter.h>
-#include <MantidMDAlgorithms/PlaneImplicitFunction.h>
+#include <MantidMDAlgorithms/Plane3DImplicitFunction.h>
 #include <MantidMDAlgorithms/CompositeImplicitFunction.h>
-#include <MantidMDAlgorithms/BoxImplicitFunction.h>
+#include <MantidMDAlgorithms/Box3DImplicitFunction.h>
 
 using namespace Mantid::MDAlgorithms;
 
@@ -20,13 +20,12 @@ public:
 
    void testFindsNothing()
    {
-     class FakeImplicitFunction : public Mantid::API::ImplicitFunction
+     class FakeImplicitFunction : public Mantid::Geometry::MDImplicitFunction
      {
-       virtual bool evaluate(const Mantid::API::Point3D*) const { return true;}
-       virtual bool evaluate(const Mantid::coord_t*, const bool *, const size_t) const { return true;}
        virtual std::string getName() const {return "FakeImplicitFunction";}
-       virtual std::string toXMLString() const {return "";}
      };
+
+
      FakeImplicitFunction fakeFunction;
      BoxInterpreter boxInterpreter;
      std::vector<double> box = boxInterpreter(&fakeFunction);
@@ -53,11 +52,11 @@ public:
       BoxImplicitFunction* boxTwo = new BoxImplicitFunction(widthTwo, heightTwo, depthTwo, originTwo);
 
       CompositeImplicitFunction* innerComposite = new CompositeImplicitFunction;
-      innerComposite->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxTwo));
+      innerComposite->addFunction(Mantid::Geometry::MDImplicitFunction_sptr(boxTwo));
 
       CompositeImplicitFunction topComposite;
-      topComposite.addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxOne));
-      topComposite.addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(innerComposite));
+      topComposite.addFunction(Mantid::Geometry::MDImplicitFunction_sptr(boxOne));
+      topComposite.addFunction(Mantid::Geometry::MDImplicitFunction_sptr(innerComposite));
 
       BoxInterpreter boxInterpreter;
       std::vector<double> box = boxInterpreter(&topComposite);
@@ -86,8 +85,8 @@ public:
     BoxImplicitFunction* boxTwo = new BoxImplicitFunction(widthTwo, heightTwo, depthTwo, originTwo);
 
     CompositeImplicitFunction compositeFunction;
-    compositeFunction.addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxOne));
-    compositeFunction.addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(boxTwo));
+    compositeFunction.addFunction(Mantid::Geometry::MDImplicitFunction_sptr(boxOne));
+    compositeFunction.addFunction(Mantid::Geometry::MDImplicitFunction_sptr(boxTwo));
 
     BoxInterpreter interpreter;
     boxVector boxes = interpreter.getAllBoxes(&compositeFunction);

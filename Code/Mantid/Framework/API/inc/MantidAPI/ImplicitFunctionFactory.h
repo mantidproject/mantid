@@ -32,7 +32,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/DllConfig.h"
-#include "ImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "ImplicitFunctionParserFactory.h"
 
 
@@ -40,15 +40,15 @@ namespace Mantid
 {
   namespace API
   {
-    class MANTID_API_DLL ImplicitFunctionFactoryImpl : public Kernel::DynamicFactory<ImplicitFunction>
+    class MANTID_API_DLL ImplicitFunctionFactoryImpl : public Kernel::DynamicFactory<Mantid::Geometry::MDImplicitFunction>
     {
     public:
 
-      virtual boost::shared_ptr<ImplicitFunction> create(const std::string& className) const;
+      virtual Mantid::Geometry::MDImplicitFunction_sptr create(const std::string& className) const;
 
-      virtual ImplicitFunction* createUnwrapped(Poco::XML::Element* processXML) const;
+      virtual Mantid::Geometry::MDImplicitFunction* createUnwrapped(Poco::XML::Element* processXML) const;
 
-      virtual ImplicitFunction* createUnwrapped(const std::string& processXML) const;
+      virtual Mantid::Geometry::MDImplicitFunction* createUnwrapped(const std::string& processXML) const;
 
       friend struct Mantid::Kernel::CreateUsingNew<ImplicitFunctionFactoryImpl>;
 

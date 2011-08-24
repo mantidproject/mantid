@@ -31,7 +31,7 @@ namespace Mantid
              this->m_width = WidthParameter(width);
         }
 
-        ImplicitFunction* PlaneFunctionBuilder::create() const
+        Mantid::Geometry::MDImplicitFunction* PlaneFunctionBuilder::create() const
         {
             //check that builder parameters are valid.
             if(!m_origin.isValid())

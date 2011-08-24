@@ -58,7 +58,7 @@ public:
       builder.addHeightParameter(HeightParameter(2));
       builder.addDepthParameter(DepthParameter(3));
       builder.addOriginParameter(OriginParameter(4, 5, 6));
-      boost::scoped_ptr<Mantid::API::ImplicitFunction> impFunction(builder.create());
+      Mantid::Geometry::MDImplicitFunction_sptr impFunction(builder.create());
 
       BoxImplicitFunction* boxFunction = dynamic_cast<BoxImplicitFunction*>(impFunction.get());
       TSM_ASSERT("The function generated is not a boxFunction", boxFunction != NULL);

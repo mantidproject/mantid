@@ -1,5 +1,5 @@
 #ifndef MANTID_ALGORITHMS_NULLIMPLICITFUNCTION_H_
-#define MANTID_ALGORITHMS_NULLIMPLICITFUNCTION_H_
+#define MANTID_ALGORITHMS_NULLIMPLICITFUNCTION_H_ 
 
 //----------------------------------------------------------------------
 // Includes
@@ -7,14 +7,10 @@
 #include <vector>
 #include <gsl/gsl_blas.h>
 #include "MantidKernel/System.h"
-#include "MantidAPI/ImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 
 namespace Mantid
 {
-    namespace MDDataObjects
-    {
-        class point3D;
-    }
     namespace MDAlgorithms
     {
         /**
@@ -45,18 +41,26 @@ namespace Mantid
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
 
-        class DLLExport NullImplicitFunction : public Mantid::API::ImplicitFunction
+        class DLLExport NullImplicitFunction : public Mantid::Geometry::MDImplicitFunction
         {
         public:
             NullImplicitFunction();
             ~NullImplicitFunction();
             virtual std::string getName() const;
             virtual std::string toXMLString() const;
-            virtual bool evaluate(const API::Point3D* pPoint) const;
-            virtual bool evaluate(const Mantid::coord_t*, const bool *, const size_t) const;
+            //----------------------MDImplicit function methods ------------
+            virtual bool isPointContained(const coord_t *)
+            {
+              return true;
+            }
+            virtual bool isPointContained(const std::vector<coord_t> &)
+            {
+              return true;
+            }
+            //---------------------------------------------------------------
             static std::string functionName()
             {
-                return "NullImplicitFunction";
+              return "NullImplicitFunction";
             }
         };
     }

@@ -1,11 +1,11 @@
 #ifndef MANTID_MDALGORITHMS_MDIMPLICITFUNCTION_H_
 #define MANTID_MDALGORITHMS_MDIMPLICITFUNCTION_H_
     
-#include "MantidAPI/ImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/System.h"
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -78,6 +78,17 @@ namespace Geometry
     /// @return the number of dimensions for which this object can be applied
     size_t getNumPlanes() const { return m_planes.size(); }
 
+    /// @return the MDImplicitFunction type name.
+    virtual std::string getName() const
+    {
+      throw std::runtime_error("Cannot call MDImplicitFunction does not implement getName()");
+    }
+
+    /// @return the XML string.
+    virtual std::string toXMLString() const
+    {
+      throw std::runtime_error("Cannot call MDImplicitFunction does not implement toXMLString()");
+    }
 
     //----------------------------------------------------------------------------------------------
     /** Enum for describing the contact between a box and an
@@ -103,7 +114,7 @@ namespace Geometry
      * @param coords :: nd-sized array of coordinates
      * @return true if it is contained in the implicit function.
      */
-    bool isPointContained(const coord_t * coords)
+    virtual bool isPointContained(const coord_t * coords)
     {
       for (size_t i=0; i<m_numPlanes; i++)
       {
@@ -121,7 +132,7 @@ namespace Geometry
      * @param coords :: nd-sized vector of coordinates. No size-check is made!
      * @return true if it is contained in the implicit function.
      */
-    bool isPointContained(const std::vector<coord_t> & coords)
+    virtual bool isPointContained(const std::vector<coord_t> & coords)
     {
       for (size_t i=0; i<m_numPlanes; i++)
       {
@@ -289,8 +300,11 @@ namespace Geometry
 
   };
 
+typedef boost::shared_ptr<MDImplicitFunction> MDImplicitFunction_sptr;
 
 } // namespace Geometry
 } // namespace Mantid
+
+
 
 #endif  /* MANTID_MDALGORITHMS_MDIMPLICITFUNCTION_H_ */

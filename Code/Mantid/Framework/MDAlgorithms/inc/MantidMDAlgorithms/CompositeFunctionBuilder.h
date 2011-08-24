@@ -8,7 +8,6 @@
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/ImplicitFunctionParameter.h"
-#include "MantidAPI/ImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
 
 namespace Mantid
@@ -52,7 +51,7 @@ namespace Mantid
         public:
             CompositeFunctionBuilder();
             void addFunctionBuilder(ImplicitFunctionBuilder* funcBuilder);
-            Mantid::API::ImplicitFunction* create() const;
+            Mantid::Geometry::MDImplicitFunction* create() const;
             ~CompositeFunctionBuilder();
         };
 

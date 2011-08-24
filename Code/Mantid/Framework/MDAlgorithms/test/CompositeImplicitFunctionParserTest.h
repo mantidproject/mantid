@@ -107,7 +107,7 @@ public:
     planeParser->setParameterParser(constructRootParameterParser());
     functionParser.setSuccessorParser(planeParser);
     ImplicitFunctionBuilder* implicitFunctionBuilder = functionParser.createFunctionBuilder(pRootElem);
-    boost::scoped_ptr<Mantid::API::ImplicitFunction> impFunction(implicitFunctionBuilder->create());
+    Mantid::Geometry::MDImplicitFunction_sptr impFunction(implicitFunctionBuilder->create());
 
     CompositeImplicitFunction* compositeFunction = dynamic_cast<CompositeImplicitFunction*>(impFunction.get());
 

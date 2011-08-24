@@ -8,7 +8,6 @@
 #include <boost/scoped_ptr.hpp>
 #include "MantidMDAlgorithms/CompositeFunctionBuilder.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include "MantidAPI/ImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
 
@@ -37,16 +36,12 @@ private:
 
 
 
-    class FakeImplicitFunction : public Mantid::API::ImplicitFunction
+    class FakeImplicitFunction : public Mantid::Geometry::MDImplicitFunction
     {
     public:
-        bool evaluate(const Mantid::API::Point3D*) const
+        bool isPointContained(const Mantid::coord_t*)
         {    
             return false;
-        }
-        bool evaluate(const Mantid::coord_t*, const bool *, const size_t) const
-        {
-          return false;
         }
 		MOCK_CONST_METHOD0(getName, std::string());
 		MOCK_CONST_METHOD0(toXMLString, std::string());
@@ -57,7 +52,7 @@ private:
     public:
         mutable bool isInvoked;
 
-        Mantid::API::ImplicitFunction* create() const
+        Mantid::Geometry::MDImplicitFunction* create() const
         {
             isInvoked = true;
             return new FakeImplicitFunction;
@@ -78,7 +73,7 @@ public:
         innerCompBuilder->addFunctionBuilder(builderB);
         boost::scoped_ptr<CompositeFunctionBuilder> outterCompBuilder(new CompositeFunctionBuilder);
         outterCompBuilder->addFunctionBuilder(innerCompBuilder);
-        boost::scoped_ptr<Mantid::API::ImplicitFunction> topFunc(outterCompBuilder->create());
+        Mantid::Geometry::MDImplicitFunction_sptr topFunc(outterCompBuilder->create());
         //CompositeImplicitFunction* topCompFunc = dynamic_cast<CompositeImplicitFunction*>(topFunc.get());
 
         TSM_ASSERT("Nested builder not called by composite", builderA->isInvoked);

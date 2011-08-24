@@ -1,7 +1,7 @@
 #ifndef MANTID_VATES_VTKCLIPPERDATASETFACTORY_H
 #define MANTID_VATES_VTKCLIPPERDATASETFACTORY_H
 
-#include "MantidAPI/ImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/Clipper.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -44,7 +44,7 @@ class DLLExport vtkClipperDataSetFactory : public vtkDataSetFactory
 {
 public:
   /// Constructor
-  vtkClipperDataSetFactory(boost::shared_ptr<Mantid::API::ImplicitFunction> implicitFunction, vtkDataSet* dataSet, Clipper* clipper);
+  vtkClipperDataSetFactory(Mantid::Geometry::MDImplicitFunction_sptr implicitFunction, vtkDataSet* dataSet, Clipper* clipper);
 
   /// Destructor
   virtual ~vtkClipperDataSetFactory();
@@ -77,7 +77,7 @@ private:
   vtkClipperDataSetFactory& operator=(const vtkClipperDataSetFactory&);
 
   /// Function describing clipping.
-  boost::shared_ptr<Mantid::API::ImplicitFunction> m_implicitFunction;
+  Mantid::Geometry::MDImplicitFunction_sptr  m_implicitFunction;
 
   /// Dataset on which to apply clipping.
   vtkDataSet* m_dataset;

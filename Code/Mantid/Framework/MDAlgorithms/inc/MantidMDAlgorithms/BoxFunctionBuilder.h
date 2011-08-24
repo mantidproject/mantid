@@ -7,7 +7,7 @@
 #include <vector>
 #include <memory>
 #include "MantidKernel/System.h"
-#include "MantidMDAlgorithms/BoxImplicitFunction.h"
+#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
 
 namespace Mantid
@@ -57,7 +57,7 @@ namespace Mantid
             void addDepthParameter(const DepthParameter& depthParam);
             void addWidthParameter(const WidthParameter& widthParam);
             void addHeightParameter(const HeightParameter& heightParam);
-            Mantid::API::ImplicitFunction* create() const;
+            Mantid::Geometry::MDImplicitFunction* create() const;
             ~BoxFunctionBuilder();
         };
 

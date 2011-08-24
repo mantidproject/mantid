@@ -6,9 +6,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-
-#include "MantidAPI/ImplicitFunction.h"
-
 #include "MantidMDAlgorithms/NullImplicitFunction.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
@@ -198,7 +195,7 @@ namespace Mantid
       RebinningKnowledgeSerializer serializer(LocationNotRequired);
       serializer.setWorkspaceName(wsName);
       serializer.setGeometryXML(xmlBuilder.create());
-      serializer.setImplicitFunction( ImplicitFunction_sptr(new Mantid::MDAlgorithms::NullImplicitFunction()));
+      serializer.setImplicitFunction( Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::MDAlgorithms::NullImplicitFunction()));
       std::string xmlString = serializer.createXMLString();
 
       //Add metadata to dataset.

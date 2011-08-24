@@ -9,7 +9,7 @@
 #include "vtkTransform.h"
 #include "vtkFloatArray.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
-#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
+#include "MantidMDAlgorithms/Plane3DImplicitFunction.h"
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 #include "MantidVatesAPI/vtkStructuredGridFactory.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"

@@ -1,5 +1,4 @@
 #include "MantidMDAlgorithms/Box3DImplicitFunction.h"
-#include "MantidAPI/Point3D.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <cmath>
@@ -10,7 +9,7 @@ namespace Mantid
   namespace MDAlgorithms
   {
 
-    Box3DImplicitFunction::Box3DImplicitFunction(WidthParameter& width, HeightParameter& height, DepthParameter& depth, OriginParameter& origin)
+    BoxImplicitFunction::BoxImplicitFunction(WidthParameter& width, HeightParameter& height, DepthParameter& depth, OriginParameter& origin)
     : MDBoxImplicitFunction()
     {
       //Parameters describing box implicit function.
@@ -37,7 +36,7 @@ namespace Mantid
     }
 
 
-    bool Box3DImplicitFunction::operator==(const Box3DImplicitFunction &other) const
+    bool BoxImplicitFunction::operator==(const BoxImplicitFunction &other) const
     {
       return
         this->m_width == other.m_width &&
@@ -46,47 +45,47 @@ namespace Mantid
         this->m_origin == other.m_origin;
     }
 
-    bool Box3DImplicitFunction::operator!=(const Box3DImplicitFunction &other) const
+    bool BoxImplicitFunction::operator!=(const BoxImplicitFunction &other) const
     {
       return !(*this == other);
     }
 
-    std::string Box3DImplicitFunction::getName() const
+    std::string BoxImplicitFunction::getName() const
     {
       return functionName();
     }
 
-    double Box3DImplicitFunction::getUpperX() const
+    double BoxImplicitFunction::getUpperX() const
     {
       return this->max[0];
     }
 
-    double Box3DImplicitFunction::getLowerX() const
+    double BoxImplicitFunction::getLowerX() const
     {
       return this->min[0];
     }
 
-    double Box3DImplicitFunction::getUpperY() const
+    double BoxImplicitFunction::getUpperY() const
     {
       return this->max[1];
     }
 
-    double Box3DImplicitFunction::getLowerY() const
+    double BoxImplicitFunction::getLowerY() const
     {
       return this->min[1];
     }
 
-    double Box3DImplicitFunction::getUpperZ() const
+    double BoxImplicitFunction::getUpperZ() const
     {
       return this->max[2];
     }
 
-    double Box3DImplicitFunction::getLowerZ() const
+    double BoxImplicitFunction::getLowerZ() const
     {
       return this->min[2];
     }
 
-    std::string Box3DImplicitFunction::toXMLString() const
+    std::string BoxImplicitFunction::toXMLString() const
     {
       using namespace Poco::XML;
 
@@ -114,7 +113,7 @@ namespace Mantid
       return formattedXMLString;
     }
 
-    Box3DImplicitFunction::~Box3DImplicitFunction()
+    BoxImplicitFunction::~BoxImplicitFunction()
     {
     }
 

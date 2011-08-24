@@ -92,7 +92,7 @@ public:
 
 
     ImplicitFunctionBuilder* implicitFunctionBuilder = functionParser.createFunctionBuilder(pRootElem);
-    boost::scoped_ptr<Mantid::API::ImplicitFunction> impFunction(implicitFunctionBuilder->create());
+    Mantid::Geometry::MDImplicitFunction_sptr impFunction(implicitFunctionBuilder->create());
 
     BoxImplicitFunction* boxFunction = dynamic_cast<BoxImplicitFunction*>(impFunction.get());
     TSM_ASSERT("A box implicit function should have been created from the xml.", boxFunction != NULL);

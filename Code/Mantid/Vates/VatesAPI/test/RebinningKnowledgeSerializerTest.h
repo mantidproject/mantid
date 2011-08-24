@@ -8,7 +8,7 @@
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/ImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 
@@ -19,11 +19,11 @@ class RebinningKnowledgeSerializerTest: public CxxTest::TestSuite
 private:
 
   //Helper class
-  class MockImplicitFunction: public Mantid::API::ImplicitFunction
+  class MockImplicitFunction: public Mantid::Geometry::MDImplicitFunction
   {
   public:
-    MOCK_CONST_METHOD1(evaluate, bool(const Mantid::API::Point3D* pPoint));
-    MOCK_CONST_METHOD3(evaluate, bool(const Mantid::coord_t*, const bool *, const size_t));
+    MOCK_METHOD1(isPointContained, bool(const Mantid::coord_t* pPoint));
+    MOCK_METHOD1(isPointContained, bool(const std::vector<Mantid::coord_t>&));
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_CONST_METHOD0(toXMLString, std::string());
     ~MockImplicitFunction()
@@ -104,7 +104,7 @@ public:
 void testNoWorkspaceThrows()
 {
   RebinningKnowledgeSerializer generator;
-  boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(new MockImplicitFunction);
+  Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
   generator.setImplicitFunction(impFunction);
   TSM_ASSERT_THROWS("Cannot generate the xml without the workspace", generator.createXMLString(), std::runtime_error);
 }
@@ -123,7 +123,7 @@ void testNoImplicitFunctionThrows()
 
 void testNoGeometryXMLThrows()
 {
-  boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(new MockImplicitFunction);
+  Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
   pWorkspace->setName("someName");
   EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return(""));
@@ -138,7 +138,7 @@ void testNoGeometryXMLThrows()
 
 void testNoLocationThrows()
 {
-  boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(new MockImplicitFunction);
+  Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
   pWorkspace->setName("someName");
   EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return("<DimensionSet/>"));
@@ -158,11 +158,11 @@ void testNoLocationDoesNotThrow()
   pWorkspace->setName("someName");
   EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return("<DimensionSet/>"));
   EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return(""));
-  boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
+  Mantid::API::IMDWorkspace_sptr workspace(pWorkspace);
 
   MockImplicitFunction* pImpFunction = new MockImplicitFunction;
   EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
-  boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(pImpFunction);
+  Mantid::Geometry::MDImplicitFunction_sptr impFunction(pImpFunction);
   
   RebinningKnowledgeSerializer generator(LocationNotRequired); //Location is not required.
   generator.setImplicitFunction(impFunction);
@@ -174,7 +174,7 @@ void testNoLocationDoesNotThrow()
 
 void testNoNameThrows()
 {
-  boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(new MockImplicitFunction);
+  Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
   EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return("<DimensionSet/>"));
   EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return("..../somelocation/somefile.sqw"));
@@ -197,7 +197,7 @@ void testCreateXMLWithWorkspace() //Uses the workspace setter.
   EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return("location"));
 
   boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
-  boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(pImpFunction);
+  Mantid::Geometry::MDImplicitFunction_sptr impFunction(pImpFunction);
   RebinningKnowledgeSerializer generator;
 
   //Apply setters.
@@ -213,7 +213,7 @@ void testCreateXMLWithComponents() //Uses individual setters for geometry, locat
 {
   MockImplicitFunction* pImpFunction = new MockImplicitFunction;
   EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
-  boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(pImpFunction);
+  Mantid::Geometry::MDImplicitFunction_sptr impFunction(pImpFunction);
 
   RebinningKnowledgeSerializer generator;
   //Apply setters.
@@ -255,7 +255,7 @@ void testHasFunction()
 {
   RebinningKnowledgeSerializer withoutFunction;
   RebinningKnowledgeSerializer withFunction;
-  boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(new MockImplicitFunction);
+  Mantid::Geometry::MDImplicitFunction_sptr impFunction(new MockImplicitFunction);
   withFunction.setImplicitFunction(impFunction);
 
   TSM_ASSERT_EQUALS("A function has not been provided. ::hasFunctionInfo() should return false.", false,  withoutFunction.hasFunctionInfo());

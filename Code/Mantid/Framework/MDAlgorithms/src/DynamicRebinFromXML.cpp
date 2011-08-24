@@ -10,7 +10,7 @@
 
 #include "MantidMDAlgorithms/DynamicRebinFromXML.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include "MantidMDAlgorithms/BoxImplicitFunction.h"
+#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
 #include "MantidMDAlgorithms/BoxInterpreter.h"
 #include "MantidMDAlgorithms/PlaneInterpreter.h"
@@ -71,7 +71,7 @@ namespace Mantid
       return workspaceLocationXML->innerText();
     }
 
-    Mantid::API::ImplicitFunction* DynamicRebinFromXML::getImplicitFunction(Poco::XML::Element* pRootElem) const
+    Mantid::Geometry::MDImplicitFunction* DynamicRebinFromXML::getImplicitFunction(Poco::XML::Element* pRootElem) const
     {
       Poco::XML::Element* functionXML = pRootElem->getChildElement("Function");
 
@@ -86,7 +86,7 @@ namespace Mantid
       return dimensionFactory.createAsMDDimension();
     }
 
-    Mantid::Geometry::MDGeometryDescription* DynamicRebinFromXML::getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem, Mantid::API::ImplicitFunction* impFunction) const
+    Mantid::Geometry::MDGeometryDescription* DynamicRebinFromXML::getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem, Mantid::Geometry::MDImplicitFunction* impFunction) const
     {
 
       using namespace Mantid::Geometry;
@@ -154,7 +154,7 @@ namespace Mantid
       
     }
 
-    void DynamicRebinFromXML::ApplyImplicitFunctionToMDGeometryDescription(Mantid::Geometry::MDGeometryDescription* description, Mantid::API::ImplicitFunction* impFunction) const
+    void DynamicRebinFromXML::ApplyImplicitFunctionToMDGeometryDescription(Mantid::Geometry::MDGeometryDescription* description, Mantid::Geometry::MDImplicitFunction* impFunction) const
     {
       //Attempt to intepret all applied implicit functions as a box by evaluating inner surfaces.
       BoxInterpreter boxInterpreter;
@@ -223,7 +223,7 @@ namespace Mantid
       }
 
       //de-serialise the function component.
-      ImplicitFunction* function = getImplicitFunction(pRootElem);
+      MDImplicitFunction * function = getImplicitFunction(pRootElem);
 
       //get the input workspace.
       const std::string name = getWorkspaceName(pRootElem);

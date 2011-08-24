@@ -9,12 +9,11 @@
 #include <MantidMDAlgorithms/NormalParameter.h>
 #include <MantidMDAlgorithms/OriginParameter.h>
 #include <MantidMDAlgorithms/PlaneInterpreter.h>
-#include <MantidMDAlgorithms/PlaneImplicitFunction.h>
+#include <MantidMDAlgorithms/Plane3DImplicitFunction.h>
 #include <MantidMDAlgorithms/CompositeImplicitFunction.h>
 #include <gsl/gsl_blas.h>
 
 using namespace Mantid::MDAlgorithms;
-using namespace Mantid::MDDataObjects;
 using Mantid::Kernel::V3D;
 
 class PlaneInterpreterTest: public CxxTest::TestSuite
@@ -23,11 +22,11 @@ class PlaneInterpreterTest: public CxxTest::TestSuite
 private:
 
   // Mock type to represent other implicit functions.
-  class MockImplicitFunction : public Mantid::API::ImplicitFunction
+  class MockImplicitFunction: public Mantid::Geometry::MDImplicitFunction
   {
-   public:
-    MOCK_CONST_METHOD1(evaluate, bool(const Mantid::API::Point3D* pPoint3D));
-    MOCK_CONST_METHOD3(evaluate, bool(const Mantid::coord_t*, const bool *, const size_t));
+  public:
+    MOCK_METHOD1(isPointContained, bool(const Mantid::coord_t* pPoint));
+    MOCK_METHOD1(isPointContained, bool(const std::vector<Mantid::coord_t>&));
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_CONST_METHOD0(toXMLString, std::string());
     ~MockImplicitFunction()

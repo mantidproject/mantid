@@ -13,7 +13,7 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-Plane3DImplicitFunction::Plane3DImplicitFunction(NormalParameter& normal, OriginParameter& origin, WidthParameter& width) :
+PlaneImplicitFunction::PlaneImplicitFunction(NormalParameter& normal, OriginParameter& origin, WidthParameter& width) :
   m_origin(origin),
   m_normal(normal),
   m_width(width)
@@ -71,7 +71,7 @@ Plane3DImplicitFunction::Plane3DImplicitFunction(NormalParameter& normal, Origin
 
 }
 
-inline double Plane3DImplicitFunction::calculateNormContributionAlongAxisComponent(const Mantid::Kernel::V3D& axis) const
+inline double PlaneImplicitFunction::calculateNormContributionAlongAxisComponent(const Mantid::Kernel::V3D& axis) const
 {
   using Mantid::Kernel::V3D;
 
@@ -84,7 +84,7 @@ inline double Plane3DImplicitFunction::calculateNormContributionAlongAxisCompone
   return  hyp*dotProduct(normal, axis);
 }
 
-inline NormalParameter Plane3DImplicitFunction::calculateEffectiveNormal(const OriginParameter& forwardOrigin) const
+inline NormalParameter PlaneImplicitFunction::calculateEffectiveNormal(const OriginParameter& forwardOrigin) const
 {
     //Figure out whether the origin is bounded by the forward plane.
     bool planesOutwardLooking = dotProduct(m_origin.getX() - forwardOrigin.getX(), m_origin.getY() - forwardOrigin.getY(), m_origin.getZ()
@@ -100,59 +100,59 @@ inline NormalParameter Plane3DImplicitFunction::calculateEffectiveNormal(const O
     }
 }
 
-bool Plane3DImplicitFunction::operator==(const Plane3DImplicitFunction &other) const
+bool PlaneImplicitFunction::operator==(const PlaneImplicitFunction &other) const
 {
   return this->m_normal == other.m_normal
       && this->m_origin == other.m_origin
       && this->m_width == other.m_width;
 }
 
-bool Plane3DImplicitFunction::operator!=(const Plane3DImplicitFunction &other) const
+bool PlaneImplicitFunction::operator!=(const PlaneImplicitFunction &other) const
 {
   return !(*this == other);
 }
 
-std::string Plane3DImplicitFunction::getName() const
+std::string PlaneImplicitFunction::getName() const
 {
   return functionName();
 }
 
-double Plane3DImplicitFunction::getOriginX() const
+double PlaneImplicitFunction::getOriginX() const
 {
   return this->m_origin.getX();
 }
 
-double Plane3DImplicitFunction::getOriginY() const
+double PlaneImplicitFunction::getOriginY() const
 {
   return this->m_origin.getY();
 }
 
-double Plane3DImplicitFunction::getOriginZ() const
+double PlaneImplicitFunction::getOriginZ() const
 {
   return this->m_origin.getZ();
 }
 
-double Plane3DImplicitFunction::getNormalX() const
+double PlaneImplicitFunction::getNormalX() const
 {
   return this->m_normal.getX();
 }
 
-double Plane3DImplicitFunction::getNormalY() const
+double PlaneImplicitFunction::getNormalY() const
 {
   return this->m_normal.getY();
 }
 
-double Plane3DImplicitFunction::getNormalZ() const
+double PlaneImplicitFunction::getNormalZ() const
 {
   return this->m_normal.getZ();
 }
 
-double Plane3DImplicitFunction::getWidth() const
+double PlaneImplicitFunction::getWidth() const
 {
   return this->m_width.getValue();
 }
 
-std::string Plane3DImplicitFunction::toXMLString() const
+std::string PlaneImplicitFunction::toXMLString() const
 {
   using namespace Poco::XML;
 
@@ -182,7 +182,7 @@ std::string Plane3DImplicitFunction::toXMLString() const
 
 
 
-Plane3DImplicitFunction::~Plane3DImplicitFunction()
+PlaneImplicitFunction::~PlaneImplicitFunction()
 {
 }
 

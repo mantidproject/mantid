@@ -2,7 +2,6 @@
 #define MDGRIDBOX_H_
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/ImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/ProgressBase.h"
@@ -74,7 +73,7 @@ namespace MDEvents
 
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 
-    void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::API::ImplicitFunction & /*function*/) const {};
+    void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const {};
 
     void integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const;
 

@@ -13,10 +13,6 @@
 
 namespace Mantid
 {
-    namespace MDDataObjects
-    {
-        class point3D;
-    }
     namespace MDAlgorithms
     {
         /**

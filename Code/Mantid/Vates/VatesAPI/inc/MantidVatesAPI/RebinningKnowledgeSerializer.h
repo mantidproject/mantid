@@ -7,9 +7,12 @@
 namespace Mantid
 {
 /// Forward Declarations;
+namespace Geometry
+{
+class MDImplicitFunction;
+}
 namespace API
 {
-class ImplicitFunction;
 class IMDWorkspace;
 }
 
@@ -55,7 +58,7 @@ class DLLExport RebinningKnowledgeSerializer
 
 private:
 
-  boost::shared_ptr<const Mantid::API::ImplicitFunction>  m_spFunction;
+  boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction>  m_spFunction;
   std::string m_wsLocationXML;
   std::string m_wsNameXML;
   std::string m_wsLocation;
@@ -67,7 +70,7 @@ public:
   RebinningKnowledgeSerializer(LocationPolicy locationPolicy=LocationMandatory);
 
   /// Set the implicit function to use called.
-  void setImplicitFunction(boost::shared_ptr<const Mantid::API::ImplicitFunction> spFunction);
+  void setImplicitFunction(boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction);
 
   /// Set the workspace name to apply.
   void setWorkspace(boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace);

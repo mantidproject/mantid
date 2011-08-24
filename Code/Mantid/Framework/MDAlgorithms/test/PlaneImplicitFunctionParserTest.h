@@ -105,7 +105,7 @@ public:
         ExposedPlaneFunctionParser functionParser;
 		    functionParser.setParameterParser(constructRootParameterParser());
         PlaneFunctionBuilder* planeBuilder = functionParser.exposedParsePlaneFunction(pRootElem);
-        boost::scoped_ptr<Mantid::API::ImplicitFunction> impFunction(planeBuilder->create());
+        Mantid::Geometry::MDImplicitFunction_sptr impFunction(planeBuilder->create());
 
         PlaneImplicitFunction* planeFunction = dynamic_cast<PlaneImplicitFunction*>(impFunction.get());
 

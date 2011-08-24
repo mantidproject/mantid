@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include <vector>
 #include "MantidAPI/DllConfig.h"
-#include "ImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "ImplicitFunctionParameter.h"
 
 namespace Mantid
@@ -46,7 +46,7 @@ namespace Mantid
         class MANTID_API_DLL ImplicitFunctionBuilder
         {
         public:
-            virtual Mantid::API::ImplicitFunction* create() const = 0;
+            virtual Mantid::Geometry::MDImplicitFunction* create() const = 0;
             virtual ~ImplicitFunctionBuilder()
             {
             }

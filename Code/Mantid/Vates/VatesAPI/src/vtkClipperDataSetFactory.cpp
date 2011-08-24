@@ -1,5 +1,5 @@
 #include "MantidVatesAPI/vtkClipperDataSetFactory.h"
-#include "MantidMDAlgorithms/BoxImplicitFunction.h"
+#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
 #include "MantidMDAlgorithms/BoxInterpreter.h"
 #include "vtkUnstructuredGrid.h"
 #include "vtkBox.h"
@@ -10,7 +10,7 @@ namespace VATES
 {
 /// Constructor
 vtkClipperDataSetFactory::vtkClipperDataSetFactory(
-    boost::shared_ptr<Mantid::API::ImplicitFunction> implicitFunction,
+    Mantid::Geometry::MDImplicitFunction_sptr implicitFunction,
     vtkDataSet* dataset, Clipper* clipper) :
   m_implicitFunction(implicitFunction), m_dataset(dataset), m_clipper(clipper)
 {

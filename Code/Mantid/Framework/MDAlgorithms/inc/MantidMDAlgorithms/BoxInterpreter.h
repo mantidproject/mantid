@@ -35,9 +35,9 @@
 namespace Mantid
 {
 //Forward declaration.
-namespace API
+namespace Geometry
 {
-class ImplicitFunction;
+class MDImplicitFunction;
 }
 
 namespace MDAlgorithms
@@ -49,9 +49,9 @@ class BoxImplicitFunction;
 
 typedef std::vector<boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> > boxVector;
 
-typedef std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> > functionVector;
+typedef std::vector<boost::shared_ptr<Mantid::Geometry::MDImplicitFunction> > functionVector;
 
-class DLLExport BoxInterpreter: public std::unary_function<Mantid::API::ImplicitFunction*, std::vector<double> >
+class DLLExport BoxInterpreter: public std::unary_function<Mantid::Geometry::MDImplicitFunction*, std::vector<double> >
 {
 private:
   /// Recursively walk the composite tree and extract flattened vector of BoxImplicit functions.
@@ -59,13 +59,13 @@ private:
 public:
 
   /// Act as Functor.
-  std::vector<double> operator()(Mantid::API::ImplicitFunction* implicitFunction) const;
+  std::vector<double> operator()(Mantid::Geometry::MDImplicitFunction* implicitFunction) const;
 
   /// Explicit call to Functor execution.
-  std::vector<double> Execute(Mantid::API::ImplicitFunction* implicitFunction) const;
+  std::vector<double> Execute(Mantid::Geometry::MDImplicitFunction* implicitFunction) const;
 
   /// Get all the boxes extractable from the implicit function.
-  boxVector getAllBoxes(Mantid::API::ImplicitFunction* implicitFunction) const;
+  boxVector getAllBoxes(Mantid::Geometry::MDImplicitFunction* implicitFunction) const;
 };
 }
 

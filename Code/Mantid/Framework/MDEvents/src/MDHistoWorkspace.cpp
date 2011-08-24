@@ -1,11 +1,8 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-#include "MantidAPI/Point3D.h"
 #include "MantidKernel/Utils.h"
-#include "MantidAPI/ImplicitFunction.h"
 
-using Mantid::API::Point3D;
 using Mantid::Kernel::Utils::NestedForLoop::SetUp;
 using namespace Mantid::Kernel;
 
@@ -111,21 +108,21 @@ namespace MDEvents
   * @param signal :: signal value to set when function evaluates to false
   * @param error :: error value to set when function evaluates to false
   */
-  void MDHistoWorkspace::applyImplicitFunction(Mantid::API::ImplicitFunction * function, signal_t signal, signal_t error)
+  void MDHistoWorkspace::applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t error)
   {
     if (numDimensions<3) throw std::invalid_argument("Need 3 dimensions for ImplicitFunction.");
-
+    Mantid::coord_t coord[3];
     for (size_t x=0; x<m_dimensions[0]->getNBins(); x++)
     {
-      double xPos = m_dimensions[0]->getX(x);
+      coord[0] = m_dimensions[0]->getX(x);
       for (size_t y=0; y<m_dimensions[1]->getNBins(); y++)
       {
-        double yPos = m_dimensions[1]->getX(y);
+        coord[1] = m_dimensions[1]->getX(y);
         for (size_t z=0; z<m_dimensions[2]->getNBins(); z++)
         {
-          double zPos = m_dimensions[2]->getX(z);
-          Point3D p(xPos,yPos,zPos);
-          if (!function->evaluate(&p))
+          coord[2] = m_dimensions[2]->getX(z);
+          
+          if (!function->isPointContained(coord))
           {
             m_signals[x + indexMultiplier[0]*y + indexMultiplier[1]*z] = signal;
             m_errors[x + indexMultiplier[0]*y + indexMultiplier[1]*z] = error;

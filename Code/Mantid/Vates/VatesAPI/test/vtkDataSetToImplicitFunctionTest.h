@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MockObjects.h"
 #include <vtkDataSet.h>
 #include <vtkStructuredGrid.h>
@@ -56,7 +57,7 @@ public:
     ds->SetFieldData(createFieldDataWithCharArray(constructXML()));
 
     vtkDataSetToImplicitFunction extractor(ds);
-    Mantid::API::ImplicitFunction* func = NULL;
+    Mantid::Geometry::MDImplicitFunction* func = NULL;
     TS_ASSERT_THROWS_NOTHING(func = extractor.execute());
     TS_ASSERT_EQUALS("PlaneImplicitFunction", func->getName());
     ds->Delete();
@@ -69,7 +70,7 @@ public:
     ds->SetFieldData(createFieldDataWithCharArray("<MDInstruction/>"));
 
     vtkDataSetToImplicitFunction extractor(ds);
-    Mantid::API::ImplicitFunction* func = NULL;
+    Mantid::Geometry::MDImplicitFunction* func = NULL;
     TS_ASSERT_THROWS_NOTHING(func = extractor.execute());
     TS_ASSERT_EQUALS("NullImplicitFunction", func->getName());
     ds->Delete();
@@ -81,7 +82,7 @@ public:
     vtkStructuredGrid* ds = vtkStructuredGrid::New();
     ds->SetFieldData(createFieldDataWithCharArray(constructXML()));
 
-    Mantid::API::ImplicitFunction* func = NULL;
+    Mantid::Geometry::MDImplicitFunction* func = NULL;
     TS_ASSERT_THROWS_NOTHING(func = vtkDataSetToImplicitFunction::exec(ds));
     TS_ASSERT_EQUALS("PlaneImplicitFunction", func->getName());
     ds->Delete();

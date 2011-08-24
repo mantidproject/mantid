@@ -7,7 +7,7 @@
 #include <vector>
 #include <memory>
 #include "MantidKernel/System.h"
-#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
+#include "MantidMDAlgorithms/Plane3DImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
 #include "MantidMDAlgorithms/NormalParameter.h"
@@ -57,7 +57,7 @@ namespace Mantid
             void addNormalParameter(const NormalParameter& parameter);
             void addOriginParameter(const OriginParameter& parameter);
             void addWidthParameter(const WidthParameter& width);
-            Mantid::API::ImplicitFunction* create() const;
+            Mantid::Geometry::MDImplicitFunction* create() const;
             ~PlaneFunctionBuilder();
         };
 

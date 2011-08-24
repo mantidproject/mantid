@@ -11,7 +11,6 @@
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
-using namespace Mantid::API;
 
 class MDBoxImplicitFunctionTest : public CxxTest::TestSuite
 {

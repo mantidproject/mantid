@@ -35,9 +35,9 @@
 namespace Mantid
 {
 //Forward declaration.
-namespace API
+namespace Geometry
 {
-class ImplicitFunction;
+class MDImplicitFunction;
 }
 
 namespace MDAlgorithms
@@ -49,7 +49,7 @@ class PlaneImplicitFunction;
 
 typedef std::vector<boost::shared_ptr<Mantid::MDAlgorithms::PlaneImplicitFunction> > planeVector;
 
-class DLLExport PlaneInterpreter: public std::unary_function<Mantid::API::ImplicitFunction*, std::vector<double> >
+class DLLExport PlaneInterpreter: public std::unary_function<Mantid::Geometry::MDImplicitFunction*, std::vector<double> >
 {
 private:
   /// Recursively walk the composite tree and extract flattened vector of BoxImplicit functions.
@@ -60,16 +60,16 @@ private:
 
 public:
 
-  typedef std::vector<boost::shared_ptr<Mantid::API::ImplicitFunction> > functionVector;
+  typedef std::vector<boost::shared_ptr<Mantid::Geometry::MDImplicitFunction> > functionVector;
 
   /// Act as Functor.
-  std::vector<double> operator()(Mantid::API::ImplicitFunction* implicitFunction) const;
+  std::vector<double> operator()(Mantid::Geometry::MDImplicitFunction* implicitFunction) const;
 
   /// Explicit call to Functor execution.
-  std::vector<double> Execute(Mantid::API::ImplicitFunction* implicitFunction) const;
+  std::vector<double> Execute(Mantid::Geometry::MDImplicitFunction* implicitFunction) const;
 
   /// Extract planes from implicit function into a flattened vector.
-  planeVector getAllPlanes(Mantid::API::ImplicitFunction* implicitFunction) const;
+  planeVector getAllPlanes(Mantid::Geometry::MDImplicitFunction* implicitFunction) const;
 };
 }
 

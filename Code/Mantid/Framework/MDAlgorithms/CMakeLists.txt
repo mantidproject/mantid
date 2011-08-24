@@ -2,7 +2,6 @@
 set ( SRC_FILES
 	src/Box3DImplicitFunction.cpp
 	src/BoxFunctionBuilder.cpp
-	src/BoxImplicitFunction.cpp
 	src/BoxImplicitFunctionParser.cpp
 	src/BoxInterpreter.cpp
 	src/CenterpieceRebinning.cpp
@@ -23,7 +22,6 @@ set ( SRC_FILES
 	src/NullImplicitFunction.cpp
 	src/Plane3DImplicitFunction.cpp
 	src/PlaneFunctionBuilder.cpp
-	src/PlaneImplicitFunction.cpp
 	src/PlaneImplicitFunctionParser.cpp
 	src/PlaneInterpreter.cpp
 	src/QuadEnBackground.cpp
@@ -41,7 +39,6 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidMDAlgorithms/Box3DImplicitFunction.h
 	inc/MantidMDAlgorithms/BoxFunctionBuilder.h
-	inc/MantidMDAlgorithms/BoxImplicitFunction.h
 	inc/MantidMDAlgorithms/BoxImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/BoxInterpreter.h
 	inc/MantidMDAlgorithms/CenterpieceRebinning.h
@@ -66,7 +63,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/PerpendicularParameter.h
 	inc/MantidMDAlgorithms/Plane3DImplicitFunction.h
 	inc/MantidMDAlgorithms/PlaneFunctionBuilder.h
-	inc/MantidMDAlgorithms/PlaneImplicitFunction.h
 	inc/MantidMDAlgorithms/PlaneImplicitFunctionParser.h
 	inc/MantidMDAlgorithms/PlaneInterpreter.h
 	inc/MantidMDAlgorithms/QuadEnBackground.h
@@ -111,7 +107,6 @@ set ( TEST_FILES
 set ( GMOCK_TEST_FILES
 test/BoxBuilderTest.h
 test/BoxImplicitFunctionParserTest.h
-test/BoxImplicitFunctionTest.h
 test/BoxInterpreterTest.h
 test/CompositeBuilderTest.h
 test/CompositeImplicitFunctionParserTest.h
@@ -124,7 +119,6 @@ test/OriginParameterParserTest.h
 test/PerpendicularParameterParserTest.h
 test/PerpendicularParameterTest.h
 test/PlaneImplicitFunctionParserTest.h
-test/PlaneImplicitFunctionTest.h
 test/PlaneInterpreterTest.h
 test/WidthParameterParserTest.h
 test/UpParameterParserTest.h

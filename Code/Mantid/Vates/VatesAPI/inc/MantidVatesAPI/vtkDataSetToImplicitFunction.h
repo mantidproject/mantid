@@ -6,10 +6,10 @@
 class vtkDataSet;
 namespace Mantid
 {
-  namespace API
+  namespace Geometry
   {
     //Forward declaration.
-    class ImplicitFunction;
+    class MDImplicitFunction;
   }
   namespace VATES
   {
@@ -44,9 +44,9 @@ namespace Mantid
     class DLLExport vtkDataSetToImplicitFunction
     {
     public:
-        static Mantid::API::ImplicitFunction* exec(vtkDataSet* dataSet);
+        static Mantid::Geometry::MDImplicitFunction* exec(vtkDataSet* dataSet);
         vtkDataSetToImplicitFunction(vtkDataSet* dataSet);
-        Mantid::API::ImplicitFunction* execute();
+        Mantid::Geometry::MDImplicitFunction* execute();
         ~vtkDataSetToImplicitFunction();
     private:
         vtkDataSetToImplicitFunction& operator=(const vtkDataSetToImplicitFunction& other);
