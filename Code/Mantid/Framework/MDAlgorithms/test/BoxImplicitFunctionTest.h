@@ -16,7 +16,7 @@ using namespace Mantid::API;
 //=====================================================================================
 // Functional Tests
 //=====================================================================================
-class Box3DImplicitFunctionTest : public CxxTest::TestSuite
+class BoxImplicitFunctionTest : public CxxTest::TestSuite
 {
 public:
 

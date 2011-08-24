@@ -15,8 +15,8 @@
 #include "vtkBox.h"
 
 #include "MantidKernel/Exception.h"
-#include "MantidMDAlgorithms/Plane3DImplicitFunction.h"
-#include "MantidMDAlgorithms/Box3DImplicitFunction.h"
+#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
+#include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/NullImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidVatesAPI/EscalatingRebinningActionManager.h"
