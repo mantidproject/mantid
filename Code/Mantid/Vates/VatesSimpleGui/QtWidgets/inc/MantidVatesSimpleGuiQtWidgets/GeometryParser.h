@@ -1,11 +1,10 @@
 #ifndef GEOMETRYPARSER_H_
 #define GEOMETRYPARSER_H_
 
-#include "WidgetDllOption.h"
+#include "MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h"
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
-
 
 namespace Mantid
 {

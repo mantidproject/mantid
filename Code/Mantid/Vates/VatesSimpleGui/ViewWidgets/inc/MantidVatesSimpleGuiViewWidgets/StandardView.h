@@ -1,11 +1,12 @@
 #ifndef STANDARDVIEW_H_
 #define STANDARDVIEW_H_
 
-#include <QtGui/QWidget>
-#include <QPointer>
-#include "ViewBase.h"
 #include "ui_StandardView.h"
-#include "WidgetDllOption.h"
+#include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+
+#include <QPointer>
+#include <QWidget>
 
 class pqColorMapModel;
 class pqPipelineRepresentation;

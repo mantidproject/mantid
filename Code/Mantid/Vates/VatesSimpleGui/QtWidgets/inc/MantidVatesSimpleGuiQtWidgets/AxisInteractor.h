@@ -1,9 +1,9 @@
 #ifndef AXISINTERACTOR_H_
 #define AXISINTERACTOR_H_
 
-#include "WidgetDllOption.h"
+#include "MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h"
 
-#include <QtGui/QWidget>
+#include <QWidget>
 
 class QGraphicsScene;
 class QGraphicsView;

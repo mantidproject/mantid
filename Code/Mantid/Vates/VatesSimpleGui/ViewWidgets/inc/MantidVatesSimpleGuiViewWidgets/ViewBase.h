@@ -1,11 +1,11 @@
 #ifndef VIEWBASE_H_
 #define VIEWBASE_H_
 
-#include "ColorUpdater.h"
-#include "WidgetDllOption.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
-#include <QtGui/QWidget>
 #include <QPointer>
+#include <QWidget>
 
 class pqColorMapModel;
 class pqObjectBuilder;

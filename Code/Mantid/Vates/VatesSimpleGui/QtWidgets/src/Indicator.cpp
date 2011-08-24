@@ -1,4 +1,4 @@
-#include "Indicator.h"
+#include "MantidVatesSimpleGuiQtWidgets/Indicator.h"
 
 #include <QBrush>
 #include <QGraphicsSceneMouseEvent>

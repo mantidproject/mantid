@@ -1,11 +1,12 @@
 #ifndef THREESLICEVIEW_H_
 #define THREESLICEVIEW_H_
 
-#include <QtGui/QWidget>
-#include <QPointer>
-#include "ViewBase.h"
 #include "ui_ThreesliceView.h"
-#include "WidgetDllOption.h"
+#include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+
+#include <QPointer>
+#include <QWidget>
 
 class pqColorMapModel;
 class pqPipelineBrowserWidget;

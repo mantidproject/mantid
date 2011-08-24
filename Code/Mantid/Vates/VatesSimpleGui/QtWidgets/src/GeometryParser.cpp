@@ -1,5 +1,5 @@
-#include "GeometryParser.h"
-#include "AxisInformation.h"
+#include "MantidVatesSimpleGuiQtWidgets/GeometryParser.h"
+#include "MantidVatesSimpleGuiQtWidgets/AxisInformation.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>

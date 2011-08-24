@@ -1,10 +1,11 @@
 #ifndef MDVIEWERWIDGET_H_
 #define MDVIEWERWIDGET_H_
 
-#include <QtGui/QWidget>
-#include <QPointer>
 #include "ui_MdViewerWidget.h"
-#include "WidgetDllOption.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+
+#include <QPointer>
+#include <QWidget>
 
 class pqLoadDataReaction;
 class pqPipelineSource;

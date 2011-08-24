@@ -1,7 +1,7 @@
 #ifndef COLORUPDATER_H_
 #define COLORUPDATER_H_
 
-#include "WidgetDllOption.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
 #include <QPair>
 

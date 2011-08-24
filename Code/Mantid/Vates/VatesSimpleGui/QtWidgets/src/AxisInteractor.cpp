@@ -1,6 +1,6 @@
-#include "AxisInteractor.h"
-#include "Indicator.h"
-#include "ScalePicker.h"
+#include "MantidVatesSimpleGuiQtWidgets/AxisInteractor.h"
+#include "MantidVatesSimpleGuiQtWidgets/Indicator.h"
+#include "MantidVatesSimpleGuiQtWidgets/ScalePicker.h"
 
 #include <qwt_scale_draw.h>
 #include <qwt_scale_engine.h>

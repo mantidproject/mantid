@@ -1,6 +1,6 @@
 #include "VsgMainWindow.h"
 
-#include "MdViewerWidget.h"
+#include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
 
 #include <QAction>
 #include <QMenu>

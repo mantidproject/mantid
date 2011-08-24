@@ -1,4 +1,4 @@
-#include "ModeControlWidget.h"
+#include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 
 namespace Mantid
 {

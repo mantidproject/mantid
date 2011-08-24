@@ -1,11 +1,11 @@
-#include "ColorUpdater.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 
-#include "pqChartValue.h"
-#include "pqColorMapModel.h"
-#include "pqPipelineRepresentation.h"
-#include "pqScalarsToColors.h"
-#include "pqSMAdaptor.h"
-#include "vtkSMProxy.h"
+#include <pqChartValue.h>
+#include <pqColorMapModel.h>
+#include <pqPipelineRepresentation.h>
+#include <pqScalarsToColors.h>
+#include <pqSMAdaptor.h>
+#include <vtkSMProxy.h>
 
 #include <QColor>
 #include <QList>

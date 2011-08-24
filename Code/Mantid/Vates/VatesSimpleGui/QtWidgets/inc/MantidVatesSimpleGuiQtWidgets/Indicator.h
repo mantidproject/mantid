@@ -1,9 +1,8 @@
 #ifndef INDICATOR_H_
 #define INDICATOR_H_
 
-#include "AxisInteractor.h"
-
-#include "WidgetDllOption.h"
+#include "MantidVatesSimpleGuiQtWidgets/AxisInteractor.h"
+#include "MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h"
 
 #include <QGraphicsItem>
 #include <QObject>

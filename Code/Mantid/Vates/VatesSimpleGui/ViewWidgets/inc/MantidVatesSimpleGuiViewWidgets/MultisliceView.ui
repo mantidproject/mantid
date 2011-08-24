@@ -52,7 +52,7 @@
   <customwidget>
    <class>Mantid::Vates::SimpleGui::AxisInteractor</class>
    <extends>QWidget</extends>
-   <header>AxisInteractor.h</header>
+   <header>MantidVatesSimpleGuiQtWidgets/AxisInteractor.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

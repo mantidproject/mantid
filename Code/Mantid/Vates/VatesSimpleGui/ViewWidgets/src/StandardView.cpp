@@ -1,4 +1,4 @@
-#include "StandardView.h"
+#include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>

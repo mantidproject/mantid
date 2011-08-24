@@ -1,4 +1,4 @@
-#include "ThreesliceView.h"
+#include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>

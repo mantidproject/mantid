@@ -1,9 +1,10 @@
 #ifndef COLORSELECTIONWIDGET_H_
 #define COLORSELECTIONWIDGET_H_
 
-#include <QtGui/QWidget>
 #include "ui_ColorSelectionWidget.h"
-#include "WidgetDllOption.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+
+#include <QWidget>
 
 class pqColorMapModel;
 class pqColorPresetManager;

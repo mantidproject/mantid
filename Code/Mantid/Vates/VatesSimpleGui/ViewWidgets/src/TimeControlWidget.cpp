@@ -1,4 +1,4 @@
-#include "TimeControlWidget.h"
+#include "MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h"
 
 namespace Mantid
 {

@@ -1,4 +1,4 @@
-#include "ScalePicker.h"
+#include "MantidVatesSimpleGuiQtWidgets/ScalePicker.h"
 
 #include <qwt_scale_draw.h>
 #include <qwt_scale_map.h>

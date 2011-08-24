@@ -1,7 +1,8 @@
 #ifndef AXISINFORMATION_H_
 #define AXISINFORMATION_H_
 
-#include "WidgetDllOption.h"
+#include "MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h"
+
 #include <string>
 
 namespace Mantid

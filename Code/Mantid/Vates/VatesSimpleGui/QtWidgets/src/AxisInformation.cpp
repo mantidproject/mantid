@@ -1,4 +1,4 @@
-#include "AxisInformation.h"
+#include "MantidVatesSimpleGuiQtWidgets/AxisInformation.h"
 
 namespace Mantid
 {

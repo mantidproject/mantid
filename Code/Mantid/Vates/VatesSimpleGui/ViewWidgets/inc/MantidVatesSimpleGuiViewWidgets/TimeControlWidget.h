@@ -2,7 +2,7 @@
 #define	TIMECONTROLWIDGET_H_
 
 #include "ui_TimeControlWidget.h"
-#include "WidgetDllOption.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
 namespace Mantid
 {

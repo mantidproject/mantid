@@ -1,4 +1,4 @@
-#include "ColorSelectionWidget.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 
 #include <pqChartValue.h>
 #include <pqColorMapModel.h>

@@ -2,10 +2,9 @@
 #define MODECONTROLWIDGET_H_
 
 #include "ui_ModeControlWidget.h"
+#include "MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h"
 
-#include "WidgetDllOption.h"
-
-#include <QtGui/QWidget>
+#include <QWidget>
 
 namespace Mantid
 {

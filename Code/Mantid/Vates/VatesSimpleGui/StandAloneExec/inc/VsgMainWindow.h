@@ -1,7 +1,7 @@
 #ifndef VSGMAINWINDOW_H_
 #define VSGMAINWINDOW_H_
 
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
 
 namespace Mantid
 {

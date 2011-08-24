@@ -36,7 +36,7 @@ qt4_wrap_ui( UI_BUILT_SOURCES
 
 # Setup the include locations.
 include_directories(
-  inc/MantidVatesSimpleGuiQtWidgets
+  inc
   ${CMAKE_CURRENT_BINARY_DIR}
   ${QWT_INCLUDE_DIR} 
 )

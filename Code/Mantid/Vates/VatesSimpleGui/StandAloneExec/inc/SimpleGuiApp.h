@@ -1,9 +1,9 @@
 #ifndef SIMPLEGUIAPP_H
 #define SIMPLEGUIAPP_H
 
-#include <QApplication>
-
 #include "MantidKernel/Logger.h"
+
+#include <QApplication>
 
 class pqPVApplicationCore;
 /**

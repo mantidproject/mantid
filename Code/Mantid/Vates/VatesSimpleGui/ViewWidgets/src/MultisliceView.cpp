@@ -1,9 +1,9 @@
-#include "MultisliceView.h"
+#include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
 
-#include "AxisInformation.h"
-#include "AxisInteractor.h"
-#include "GeometryParser.h"
-#include "ScalePicker.h"
+#include "MantidVatesSimpleGuiQtWidgets/AxisInformation.h"
+#include "MantidVatesSimpleGuiQtWidgets/AxisInteractor.h"
+#include "MantidVatesSimpleGuiQtWidgets/GeometryParser.h"
+#include "MantidVatesSimpleGuiQtWidgets/ScalePicker.h"
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>

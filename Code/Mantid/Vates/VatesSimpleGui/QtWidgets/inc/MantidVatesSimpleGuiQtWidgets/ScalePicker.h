@@ -1,7 +1,7 @@
 #ifndef SCALEPICKER_H_
 #define SCALEPICKER_H_
 
-#include "WidgetDllOption.h"
+#include "MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h"
 
 #include <QObject>
 

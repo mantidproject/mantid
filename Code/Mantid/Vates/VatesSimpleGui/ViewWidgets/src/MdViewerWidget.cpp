@@ -1,10 +1,10 @@
-#include "MdViewerWidget.h"
+#include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
 
-#include "ModeControlWidget.h"
-#include "MultisliceView.h"
-#include "StandardView.h"
-#include "ThreesliceView.h"
-#include "TimeControlWidget.h"
+#include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
+#include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
+#include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
+#include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
+#include "MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h"
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>

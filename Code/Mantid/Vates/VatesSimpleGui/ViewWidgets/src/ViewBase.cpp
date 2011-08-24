@@ -1,4 +1,4 @@
-#include "ViewBase.h"
+#include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>

@@ -119,19 +119,19 @@
   <customwidget>
    <class>Mantid::Vates::SimpleGui::ModeControlWidget</class>
    <extends>QWidget</extends>
-   <header>ModeControlWidget.h</header>
+   <header>MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>Mantid::Vates::SimpleGui::ColorSelectionWidget</class>
    <extends>QWidget</extends>
-   <header>ColorSelectionWidget.h</header>
+   <header>MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>Mantid::Vates::SimpleGui::TimeControlWidget</class>
    <extends>QWidget</extends>
-   <header>TimeControlWidget.h</header>
+   <header>MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
