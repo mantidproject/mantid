@@ -51,7 +51,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(AnalysisDataService::Instance().retrieve("testOutMD")) );
     TS_ASSERT(ws);
     if (!ws) return;
-    TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "Qx");
+    TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "Q_lab_x");
 
     // But you can't add to an existing one of the wrong dimensions type
     alg = AlgorithmHelper::runAlgorithm("MakeDiffractionMDEventWorkspace", 6,
