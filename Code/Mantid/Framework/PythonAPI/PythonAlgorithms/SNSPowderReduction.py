@@ -42,6 +42,7 @@ class SNSPowderReduction(PythonAlgorithm):
             self.filename = filename
             self._data = {}
             self.use_dspace = False
+            self._use_vback = False
             if self.filename is None:
                 return
             handle = file(filename, 'r')
@@ -51,12 +52,14 @@ class SNSPowderReduction(PythonAlgorithm):
             if line.startswith('#') or len(line.strip()) <= 0:
                 if "d_min" in line and "d_max" in line:
                     self.use_dspace = True
+                if "vanadium_back" in line:
+                    self._use_vback = True
                 return
             data = line.strip().split()
             data = [float(i) for i in data]
             if data[0] not in self._data.keys():
                 self._data[data[0]]={}
-            info = self.PDInfo(data, self.use_dspace)
+            info = self.PDInfo(data, self.use_dspace, self._use_vback)
             self._data[info.freq][info.wl]=info
         def __getFrequency(self, request):
             for freq in self._data.keys():
@@ -260,7 +263,8 @@ class SNSPowderReduction(PythonAlgorithm):
         else:
             return self._loadPreNeXusData(runnumber, extension)
 
-    def _focus(self, wksp, calib, info, filterLogs=None, preserveEvents=True):
+    def _focus(self, wksp, calib, info, filterLogs=None, preserveEvents=True, normByCurrent=True,
+               filterBadPulsesOverride=True):
         if wksp is None:
             return None
 
@@ -276,7 +280,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
         if not "histo" in self.getProperty("Extension"):
             # take care of filtering events
-            if self._filterBadPulses and not self.getProperty("CompressOnRead"):
+            if self._filterBadPulses and not self.getProperty("CompressOnRead") and filterBadPulsesOverride:
                 FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
             if self._removePromptPulseWidth > 0.:
                 RemovePromptPulse(InputWorkspace=wksp, OutputWorkspace=wksp, Width= self._removePromptPulseWidth)
@@ -353,7 +357,8 @@ class SNSPowderReduction(PythonAlgorithm):
             else:
                 binning = [info.tmin, self._binning[0], info.tmax]
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
-        NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
+        if normByCurrent:
+            NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
 
         return wksp
 
@@ -484,7 +489,19 @@ class SNSPowderReduction(PythonAlgorithm):
                 temp = mtd["%s_%d" % (self._instrument, vanRun)]
                 if temp is None:
                     vanRun = self._loadData(vanRun, SUFFIX, (0., 0.))
-                    vanRun = self._focus(vanRun, calib, info, preserveEvents=False)
+                    vbackRun = info.vback # background run for the vanadium
+                    vanRun = self._focus(vanRun, calib, info, preserveEvents=False, normByCurrent = (vbackRun < 0))
+
+                    if (vbackRun > 0):
+                        vbackRun = self._loadData(vbackRun, SUFFIX, (0., 0.))
+                        vbackRun = self._focus(vbackRun, calib, info, preserveEvents=False,
+                                               normByCurrent=False, filterBadPulsesOverride=False)
+                        ConvertUnits(InputWorkspace=vbackRun, OutputWorkspace=vbackRun, Target="TOF")
+                        FFTSmooth(InputWorkspace=vbackRun, OutputWorkspace=vbackRun, Filter="Butterworth",
+                                  Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
+                    else:
+                        vbackRun = None
+
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
                     StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, PeakWidthPercent=self._vanPeakWidthPercent)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
@@ -493,6 +510,21 @@ class SNSPowderReduction(PythonAlgorithm):
                     MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun, # numbers for vanadium
                                                          AttenuationXSection=2.8, ScatteringXSection=5.1,
                                                          SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
+                    if vbackRun is not None:
+                        try:
+                            vanDuration = vanRun.getRun().get('duration')
+                            vanDuration = vanDuration.value
+                        except:
+                            vanDuration = 1.
+                        try:
+                            vbackDuration = vbackRun.getRun().get('duration')
+                            vbackDuration = vbackDuration.value
+                        except:
+                            vbackDuration = 1.
+                        vbackRun *= (vanDuration/vbackDuration)
+                        vanRun -= vbackRun
+                        NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                        workspacelist.append(str(vbackRun))
                     SetUncertaintiesToZero(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                 else:
                     vanRun = temp
