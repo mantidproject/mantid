@@ -26,7 +26,7 @@ private:
 
 public:
 
-  PlaneImplicitFunctionTest() :
+  Plane3DImplicitFunctionTest() :
     normal(1, 1, 1), origin(2, 3, 4), width(2), PI(3.14159265)
   {
   }
