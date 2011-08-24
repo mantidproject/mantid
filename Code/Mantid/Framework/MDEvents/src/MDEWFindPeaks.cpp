@@ -88,6 +88,11 @@ namespace MDEvents
 
   }
 
+  /** Enum describing which type of dimensions in the MDEventWorkspace */
+  enum eDimensionType
+  {
+    HKL, QLAB, QSAMPLE
+  };
 
   //----------------------------------------------------------------------------------------------
   /** Integrate the peaks of the workspace using parameters saved in the algorithm class
@@ -99,7 +104,7 @@ namespace MDEvents
     if (nd < 3)
       throw std::invalid_argument("Workspace must have at least 3 dimensions.");
 
-    prog->report("Refreshing Centroids");
+    progress(0.01, "Refreshing Centroids");
 
     // TODO: This might be slow, progress report?
     // Make sure all centroids are fresh
@@ -114,6 +119,39 @@ namespace MDEvents
     ExperimentInfo_sptr ei = ws->getExperimentInfo(0);
     // Instrument associated with workspace
     Geometry::Instrument_sptr inst = ei->getInstrument();
+    // Find the run number
+    int runNumber = ei->getRunNumber();
+
+    // Check that the workspace dimensions are in Q-sample-frame or Q-lab-frame.
+    eDimensionType dimType;
+
+    std::string dim0 = ws->getDimension(0)->getName();
+    if (dim0 == "H")
+    {
+      dimType = HKL;
+      throw std::runtime_error("Cannot find peaks in a workspace that is already in HKL space.");
+    }
+    else if (dim0 == "Q_lab_x")
+    {
+      dimType = QLAB;
+    }
+    else if (dim0 == "Q_sample_x")
+      dimType = QSAMPLE;
+    else
+      throw std::runtime_error("Unexpected dimensions: need either Q_lab_x or Q_sample_x.");
+
+    // Find the goniometer rotation matrix
+    Mantid::Kernel::Matrix<double> goniometer(3,3, true); // Default IDENTITY matrix
+    try
+    {
+      goniometer = ei->mutableRun().getGoniometerMatrix();
+    }
+    catch (std::exception & e)
+    {
+      g_log.warning() << "Error finding goniometer matrix. It will not be set in the peaks found." << std::endl;
+      g_log.warning() << e.what() << std::endl;
+    }
+
 
     // Calculate a threshold below which a box is too diffuse to be considered a peak.
     signal_t thresholdDensity = 0.0;
@@ -123,9 +161,11 @@ namespace MDEvents
     // We will fill this vector with pointers to all the boxes (up to a given depth)
     typename std::vector<boxPtr> boxes;
 
-    // TODO: Don't go to unlimited depth maybe in the future?
-    prog->report("Getting Boxes");
-    ws->getBox()->getBoxes(boxes, 1000, false); //TODO: Do we want only the leaves?
+    // Get all the MDboxes
+    progress(0.10, "Getting Boxes");
+    ws->getBox()->getBoxes(boxes, 1000, true);
+
+
 
     // TODO: Here keep only the boxes > e.g. 3 * mean.
     typedef std::pair<double, boxPtr> dens_box;
@@ -133,7 +173,7 @@ namespace MDEvents
     // Map that will sort the boxes by increasing density. The key = density; value = box *.
     typename std::multimap<double, boxPtr> sortedBoxes;
 
-    prog->report("Sorting Boxes by Density");
+    progress(0.20, "Sorting Boxes by Density");
     typename std::vector<boxPtr>::iterator it1;
     typename std::vector<boxPtr>::iterator it1_end = boxes.end();
     for (it1 = boxes.begin(); it1 != it1_end; it1++)
@@ -148,7 +188,8 @@ namespace MDEvents
     // List of chosen possible peak boxes.
     std::vector<boxPtr> peakBoxes;
 
-    prog->report("Evaluating Strong Boxes");
+    prog = new Progress(this, 0.30, 0.95, MaxPeaks);
+
     int64_t numBoxesFound = 0;
     // Now we go (backwards) through the map
     // e.g. from highest density down to lowest density.
@@ -207,10 +248,12 @@ namespace MDEvents
         for (size_t d=0; d<nd; d++)
           g_log.information() << (d>0?",":"") << boxCenter[d];
         g_log.information() << "; Density = " << density << std::endl;
+        // Report progres for each box found.
+        prog->report("Finding Peaks");
       }
     }
 
-    prog->report("Making PeaksWorkspace");
+    prog->resetNumSteps(numBoxesFound, 0.95, 1.0);
 
     // Copy the instrument, sample, run to the peaks workspace.
     peakWS->copyExperimentInfoFrom(ei.get());
@@ -232,7 +275,21 @@ namespace MDEvents
       // Create a peak and add it
       try
       {
-        Peak p(inst, Q);
+        // Empty starting peak.
+        Peak p;
+        if (dimType == QLAB)
+        {
+          // Build using the Q-lab-frame constructor
+          p = Peak(inst, Q);
+          // Save gonio matrix for later
+          p.setGoniometerMatrix(goniometer);
+        }
+        else if (dimType == QSAMPLE)
+        {
+          // Build using the Q-sample-frame constructor
+          p = Peak(inst, Q, goniometer);
+        }
+
         // TODO: Goniometer matrix and other stuff?
 
         // Look for a detector
@@ -241,7 +298,13 @@ namespace MDEvents
         // The "bin count" used will be the box density.
         p.setBinCount( box->getSignalNormalized() );
 
+        // Save the run number found before.
+        p.setRunNumber(runNumber);
+
         peakWS->addPeak(p);
+
+        // Report progres for each box found.
+        prog->report("Adding Peaks");
       }
       catch (std::exception &e)
       {
@@ -272,10 +335,6 @@ namespace MDEvents
 
     DensityThresholdFactor = getProperty("DensityThresholdFactor");
     MaxPeaks = getProperty("MaxPeaks");
-
-    // TODO: Check that the workspace dimensions are in Q-sample-frame or Q-lab-frame.
-
-    prog = new Progress(this, 0.0, 1.0, 10);
 
     CALL_MDEVENT_FUNCTION3(this->findPeaks, inWS);
 

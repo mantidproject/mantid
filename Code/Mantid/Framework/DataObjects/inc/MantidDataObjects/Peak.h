@@ -25,6 +25,7 @@ namespace DataObjects
     /// Allow PeakColumn class to directly access members.
     friend class PeakColumn;
 
+    Peak();
     Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QLabFrame, double detectorDistance=1.0);
     Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QSampleFrame, Mantid::Kernel::Matrix<double> goniometer, double detectorDistance=1.0);
     Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength);

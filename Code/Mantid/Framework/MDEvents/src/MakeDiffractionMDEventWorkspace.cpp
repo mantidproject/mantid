@@ -259,7 +259,7 @@ namespace MDEvents
 
     // ----------------- Handle the type of output -------------------------------------
 
-    std::string dimensionNames[3] = {"Qx", "Qy", "Qz"};
+    std::string dimensionNames[3] = {"Q_lab_x", "Q_lab_y", "Q_lab_z"};
     std::string dimensionUnits = "Angstroms^-1";
     if (OutputDimensions == "Q (sample frame)")
     {
@@ -267,6 +267,10 @@ namespace MDEvents
       mat = in_ws->mutableRun().getGoniometerMatrix();
       // But we need to invert it, since we want to get the Q in the sample frame.
       mat.Invert();
+      // Names
+      dimensionNames[0] = "Q_sample_x";
+      dimensionNames[1] = "Q_sample_y";
+      dimensionNames[2] = "Q_sample_z";
     }
     else if (OutputDimensions == "HKL")
     {

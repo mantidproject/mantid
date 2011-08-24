@@ -54,6 +54,9 @@ namespace API
     /// Writable version of the run object
     Run& mutableRun();
 
+    /// Utility method to get the run number
+    int getRunNumber() const;
+
 
   protected:
     /// The information on the sample environment

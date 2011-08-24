@@ -11,11 +11,13 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include "MantidKernel/PropertyWithValue.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::Geometry::Instrument_sptr;
+using Mantid::Kernel::PropertyWithValue;
 
 class MDEWFindPeaksTest : public CxxTest::TestSuite
 {
@@ -29,7 +31,7 @@ public:
     AlgorithmHelper::runAlgorithm("CreateMDEventWorkspace", 16,
         "Dimensions", "3",
         "Extents", "-10,10,-10,10,-10,10",
-        "Names", "h,k,l",
+        "Names", "Q_lab_x,Q_lab_y,Q_lab_z",
         "Units", "-,-,-",
         "SplitInto", "5",
         "SplitThreshold", "20",
@@ -42,6 +44,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve("MDEWS")) );
     ExperimentInfo_sptr ei(new ExperimentInfo());
     ei->setInstrument(inst);
+    // Give it a run number
+    ei->mutableRun().addProperty(new PropertyWithValue<std::string>("run_number", "12345"), true);
     ws->addExperimentInfo(ei);
   }
 
@@ -110,6 +114,7 @@ public:
     TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[0], -5.0, 0.1);
     TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[1], -5.0, 0.1);
     TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[2],  5.0, 0.1);
+    TS_ASSERT_EQUALS(ws->getPeak(0).getRunNumber(),  12345);
 
     if (MaxPeaks > 1)
     {

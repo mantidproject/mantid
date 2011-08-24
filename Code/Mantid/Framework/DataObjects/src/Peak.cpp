@@ -15,6 +15,16 @@ namespace Mantid
 namespace DataObjects
 {
 
+  //----------------------------------------------------------------------------------------------
+  /** Default constructor */
+  Peak::Peak()
+  : m_H(0), m_K(0), m_L(0),
+    m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
+    m_GoniometerMatrix(3,3,true),
+    m_InverseGoniometerMatrix(3,3,true),
+    m_RunNumber(0)
+  {
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Constructor that uses the Q position of the peak (in the lab frame).

@@ -4,11 +4,14 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <map>
 
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 namespace Mantid
 {
@@ -186,6 +189,36 @@ namespace API
   {
     return m_run.access();
   }
+
+  //---------------------------------------------------------------------------------------
+  /** Utility method to get the run number
+   *
+   * @return the run number (int) or 0 if not found.
+   */
+  int ExperimentInfo::getRunNumber() const
+  {
+    if (!m_run->hasProperty("run_number"))
+    {
+      // No run_number property, default to 0
+      return 0;
+    }
+    else
+    {
+      Property * prop = m_run->getProperty("run_number");
+      if (prop)
+      {
+        // Use the string representation. That way both a string and a number property will work.
+        int val;
+        if (Strings::convert(prop->value(), val))
+          return val;
+        else
+          return 0;
+      }
+    }
+    return 0;
+  }
+
+
 
 } // namespace Mantid
 } // namespace API
