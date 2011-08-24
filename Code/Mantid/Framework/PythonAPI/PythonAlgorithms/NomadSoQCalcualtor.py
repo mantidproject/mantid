@@ -103,7 +103,7 @@ class NomadSoQCalculator(PythonAlgorithm):
         numbakbanks = self.bakwksp.getNumberHistograms()
 
         if self.numBanks != numvanbanks or self.numBanks != numbakbanks:
-            raise NotImplementedError("Input workspaces have different number of banks")
+            raise NotImplementedError("Input workspaces have different number of banks: %d, %d, %d" % (self.numBanks, numvanbanks, numbakbanks))
 
         workspaces = [self.samwksp, self.bakwksp, self.vanwksp]
 

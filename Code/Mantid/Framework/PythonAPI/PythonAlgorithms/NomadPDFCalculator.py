@@ -188,7 +188,7 @@ class NomadPDFCalculator(PythonAlgorithm):
         gorws = mtd[gorwsname]
 
         # 2. Post process
-        factorft = math.pi*self.rho_sample*self.sbs/self.sb2
+        factorft = 4.0*math.pi*self.rho_sample*self.sbs/self.sb2
         print "PDF to g(r) factor = %f"  % (factorft)
 
         gorws *= 1/factorft
