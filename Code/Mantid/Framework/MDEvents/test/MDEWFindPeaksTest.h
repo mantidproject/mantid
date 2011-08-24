@@ -69,7 +69,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void test_exec()
+  void do_test(bool deleteWS, int MaxPeaks, int expectedPeaks, bool AppendPeaks = false)
   {
     // Name of the output workspace.
     std::string outWSName("peaksFound");
@@ -89,6 +89,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("DensityThresholdFactor", "2.0") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeakDistanceThreshold", "0.7") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MaxPeaks", int64_t(MaxPeaks)) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("AppendPeaks", AppendPeaks) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     
@@ -99,26 +101,59 @@ public:
     if (!ws) return;
     
     // Should find 3 peaks.
-    TS_ASSERT_EQUALS( ws->getNumberPeaks(), 3);
-    if (ws->getNumberPeaks() != 3) return;
+    TS_ASSERT_EQUALS( ws->getNumberPeaks(), expectedPeaks);
+    if (ws->getNumberPeaks() != expectedPeaks) return;
+    // Stop checking for the AppendPeaks case. This is good enough.
+    if (AppendPeaks) return;
 
     // The order of the peaks found is a little random because it depends on the way the boxes were sorted...
     TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[0], -5.0, 0.1);
     TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[1], -5.0, 0.1);
     TS_ASSERT_DELTA( ws->getPeak(0).getQLabFrame()[2],  5.0, 0.1);
 
-    TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[0], 4.0, 0.1);
-    TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[1], 5.0, 0.1);
-    TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[2], 6.0, 0.1);
+    if (MaxPeaks > 1)
+    {
+      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[0], 4.0, 0.1);
+      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[1], 5.0, 0.1);
+      TS_ASSERT_DELTA( ws->getPeak(1).getQLabFrame()[2], 6.0, 0.1);
 
-    TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[0], 1.0, 0.1);
-    TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[1], 2.0, 0.1);
-    TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[2], 3.0, 0.1);
-    
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
+      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[0], 1.0, 0.1);
+      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[1], 2.0, 0.1);
+      TS_ASSERT_DELTA( ws->getPeak(2).getQLabFrame()[2], 3.0, 0.1);
+    }
+
+    if (deleteWS)
+    {
+      // Remove workspace from the data service.
+      AnalysisDataService::Instance().remove(outWSName);
+    }
+    AnalysisDataService::Instance().remove("MDEWS");
   }
-  
+
+  /** Running the algo twice with same output workspace = replace the output, don't append */
+  void test_exec_twice_replaces_workspace()
+  {
+    do_test(false, 100, 3);
+    do_test(true, 100, 3);
+  }
+
+  /** Run twice and append to the peaks workspace*/
+  void test_exec_AppendPeaks()
+  {
+    do_test(false, 100, 3);
+    do_test(true, 100, 6, true /* Append */ );
+  }
+
+  void test_exec()
+  {
+    do_test(true, 100, 3);
+  }
+
+  void test_exec_withMaxPeaks()
+  {
+    do_test(true, 1, 1);
+  }
+
 
 };
 

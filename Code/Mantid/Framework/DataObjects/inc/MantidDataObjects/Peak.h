@@ -94,6 +94,8 @@ namespace DataObjects
     double getL1() const;
     double getL2() const;
 
+    double getValueByColName(const std::string & name) const;
+
   protected:
     /// Shared pointer to the instrument (for calculating some values )
     Geometry::Instrument_const_sptr m_inst;

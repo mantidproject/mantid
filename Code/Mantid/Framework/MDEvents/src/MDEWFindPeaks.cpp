@@ -64,22 +64,28 @@ namespace MDEvents
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input),
         "An input MDEventWorkspace with at least 3 dimensions.");
 
-    declareProperty(new PropertyWithValue<double>("PeakDistanceThreshold",1.0,Direction::Input),
+    declareProperty(new PropertyWithValue<double>("PeakDistanceThreshold", 0.1, Direction::Input),
         "Threshold distance for rejecting peaks that are found to be too close from each other.\n"
-        "This should be some multiple of the radius of a peak."
+        "This should be some multiple of the radius of a peak. Default: 0.1."
         );
 
-    declareProperty(new PropertyWithValue<int64_t>("MaxPeaks",1000,Direction::Input),
-        "Maximum number of peaks to find."
+    declareProperty(new PropertyWithValue<int64_t>("MaxPeaks",500,Direction::Input),
+        "Maximum number of peaks to find. Default: 500."
         );
 
-    declareProperty(new PropertyWithValue<double>("DensityThresholdFactor", 1.0, Direction::Input),
-        "The overall signal density of the workspace will be multiplied by this factor "
-        "to get a threshold signal density below which boxes are NOT considered to be peaks. See the help."
+    declareProperty(new PropertyWithValue<double>("DensityThresholdFactor", 10.0, Direction::Input),
+        "The overall signal density of the workspace will be multiplied by this factor \n"
+        "to get a threshold signal density below which boxes are NOT considered to be peaks. See the help.\n"
+        "Default: 10.0"
         );
 
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output),
         "An output PeaksWorkspace with the peaks' found positions.");
+
+    declareProperty("AppendPeaks", false,
+        "If checked, then append the peaks in the output workspace if it exists. \n"
+        "If unchecked, the output workspace is replaced (Default)."  );
+
   }
 
 
@@ -190,7 +196,7 @@ namespace MDEvents
       // The box was not rejected for another reason.
       if (!badBox)
       {
-        if (numBoxesFound++ > MaxPeaks)
+        if (numBoxesFound++ >= MaxPeaks)
         {
           g_log.notice() << "Number of peaks found exceeded the limit of " << MaxPeaks << ". Stopping peak finding." << std::endl;
           break;
@@ -250,11 +256,12 @@ namespace MDEvents
    */
   void MDEWFindPeaks::exec()
   {
-    /// Output peaks workspace, create if needed
+    bool AppendPeaks = getProperty("AppendPeaks");
+
+    // Output peaks workspace, create if needed
     peakWS = getProperty("OutputWorkspace");
-    if (!peakWS)
+    if (!peakWS || !AppendPeaks)
       peakWS = PeaksWorkspace_sptr(new PeaksWorkspace());
-    setProperty("OutputWorkspace", peakWS);
 
     // The MDEventWorkspace as input
     IMDEventWorkspace_sptr inWS = getProperty("InputWorkspace");
@@ -273,6 +280,16 @@ namespace MDEvents
     CALL_MDEVENT_FUNCTION3(this->findPeaks, inWS);
 
     delete prog;
+
+    // Do a sort by bank name and then descending bin count (intensity)
+    std::vector< std::pair<std::string, bool> > criteria;
+    criteria.push_back( std::pair<std::string, bool>("BankName", true) );
+    criteria.push_back( std::pair<std::string, bool>("bincount", false) );
+    peakWS->sort(criteria);
+
+    // Save the output
+    setProperty("OutputWorkspace", peakWS);
+
   }
 
 

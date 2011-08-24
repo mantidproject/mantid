@@ -87,6 +87,21 @@ public:
     TS_ASSERT_EQUALS(p.getInstrument(), p2.getInstrument())
   }
 
+  void test_getValueByColName()
+  {
+    Peak p(inst, 10102, 2.0);
+    p.setHKL(1,2,3);
+    p.setRunNumber(1234);
+    TS_ASSERT_EQUALS(p.getValueByColName("Row"), p.getRow());
+    TS_ASSERT_EQUALS(p.getValueByColName("Col"), p.getCol());
+    TS_ASSERT_EQUALS(p.getValueByColName("H"), p.getH());
+    TS_ASSERT_EQUALS(p.getValueByColName("K"), p.getK());
+    TS_ASSERT_EQUALS(p.getValueByColName("L"), p.getL());
+    TS_ASSERT_EQUALS(p.getValueByColName("RunNumber"), p.getRunNumber());
+    TS_ASSERT_EQUALS(p.getValueByColName("DetId"), p.getDetectorID())
+    TS_ASSERT_THROWS_ANYTHING( p.getValueByColName("bankname") );
+  }
+
   /** Set the wavelength and see the other "versions" of it get calculated. */
   void test_wavelength_conversion()
   {

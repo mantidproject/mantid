@@ -2,6 +2,9 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include <algorithm>
+#include <string>
+#include <cctype>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -654,6 +657,50 @@ namespace DataObjects
   {
     return (detPos - samplePos).norm();
   }
+
+  // -------------------------------------------------------------------------------------
+  /** Helper function for displaying/sorting peaks in MantidPlot
+   *
+   * @param name :: name of the column in the table workspace
+   * @return a double representing that value (if that's possible)
+   * @throw std::runtime_error if you asked for a column that can't convert to double.
+   */
+  double Peak::getValueByColName(const std::string & name_in) const
+  {
+    std::string name = name_in;
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+    if (name == "runnumber")
+      return double(this->getRunNumber());
+    else if (name == "detid")
+      return double(this->getDetectorID());
+    else if (name == "h")
+      return this->getH();
+    else if (name == "k")
+      return this->getK();
+    else if (name == "l")
+      return this->getL();
+    else if (name == "wavelength")
+      return this->getWavelength();
+    else if (name == "energy")
+      return this->getInitialEnergy();
+    else if (name == "tof")
+      return this->getTOF();
+    else if (name == "dspacing")
+      return this->getDSpacing();
+    else if (name == "intens")
+      return this->getIntensity();
+    else if (name == "sigint")
+      return this->getSigmaIntensity();
+    else if (name == "bincount")
+      return this->getBinCount();
+    else if (name == "row")
+      return this->getRow();
+    else if (name == "col")
+      return this->getCol();
+    else
+      throw std::runtime_error("Peak::getValueByColName() unknown column or column is not a number: " + name);
+  }
+
 
 } // namespace Mantid
 } // namespace DataObjects

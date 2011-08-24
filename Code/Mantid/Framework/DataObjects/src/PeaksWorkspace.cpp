@@ -94,11 +94,83 @@ namespace DataObjects
     addColumn( "double", "Intens");
     addColumn( "double", "SigInt");
     addColumn( "double", "BinCount");
-    addColumn( "double", "BankName");
+    addColumn( "str", "BankName");
     addColumn( "double", "Row");
     addColumn( "double", "Col");
     addColumn( "V3D", "QLab");
     addColumn( "V3D", "QSample");
+  }
+
+  //=====================================================================================
+  //=====================================================================================
+  /** Comparator class for sorting peaks by one or more criteria
+   */
+  class PeakComparator : public std::binary_function<Peak,Peak,bool>
+  {
+  public:
+    std::vector< std::pair<std::string, bool> > & criteria;
+
+    /** Constructor for the comparator for sorting peaks
+    * @param criteria : a vector with a list of pairs: column name, bool;
+    *        where bool = true for ascending, false for descending sort.
+    */
+    PeakComparator(std::vector< std::pair<std::string, bool> > & criteria)
+    : criteria(criteria)
+    {
+    }
+
+    /** Compare two peaks using the stored criteria */
+    inline bool operator()(const Peak& a, const Peak& b)
+    {
+      for (size_t i = 0; i < criteria.size(); i++)
+      {
+        std::string & col = criteria[i].first;
+        bool ascending = criteria[i].second;
+        bool lessThan = false;
+        if (col == "BankName")
+        {
+          // If this criterion is equal, move on to the next one
+          std::string valA = a.getBankName();
+          std::string valB = b.getBankName();
+          // Move on to lesser criterion if equal
+          if (valA == valB)
+            continue;
+          lessThan = (valA < valB);
+        }
+        else
+        {
+          // General double comparison
+          double valA = a.getValueByColName(col);
+          double valB = b.getValueByColName(col);
+          // Move on to lesser criterion if equal
+          if (valA == valB)
+            continue;
+          lessThan = (valA < valB);
+        }
+        // Flip the sign of comparison if descending.
+        if (ascending)
+          return lessThan;
+        else
+          return !lessThan;
+
+      }
+      // If you reach here, all criteria were ==; so not <, so return false
+      return false;
+    }
+  };
+
+
+  //---------------------------------------------------------------------------------------------
+  /** Sort the peaks by one or more criteria
+   *
+   * @param criteria : a vector with a list of pairs: column name, bool;
+   *        where bool = true for ascending, false for descending sort.
+   *        The peaks are sorted by the first criterion first, then the 2nd if equal, etc.
+   */
+  void PeaksWorkspace::sort(std::vector< std::pair<std::string, bool> > & criteria)
+  {
+    PeakComparator comparator(criteria);
+    std::stable_sort(peaks.begin(), peaks.end(), comparator);
   }
 
 

@@ -19,6 +19,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <string>
+#include <utility>
+#include <vector>
 
 
 //IsamplePosition should be IsampleOrientation
@@ -76,6 +78,8 @@ namespace DataObjects
     boost::shared_ptr<PeaksWorkspace> clone();
 
     void appendFile( std::string filename, Geometry::Instrument_sptr inst);
+
+    void sort(std::vector< std::pair<std::string, bool> > & criteria);
 
     //---------------------------------------------------------------------------------------------
     /** @return the number of peaks

@@ -78,6 +78,52 @@ public:
     checkPW(pw2.get());
   }
 
+  void test_sort()
+  {
+    PeaksWorkspace_sptr pw(buildPW());
+    Instrument_sptr inst = pw->getInstrument();
+    Peak p0 = pw->getPeak(0); //Peak(inst, 1, 3.0)
+    Peak p1(inst, 1, 4.0);
+    Peak p2(inst, 1, 5.0);
+    Peak p3(inst, 2, 3.0);
+    Peak p4(inst, 3, 3.0);
+    pw->addPeak(p1);
+    pw->addPeak(p2);
+    pw->addPeak(p3);
+    pw->addPeak(p4);
+
+    std::vector< std::pair<std::string, bool> > criteria;
+    // Sort by detector ID then descending wavelength
+    criteria.push_back( std::pair<std::string, bool>("detid", true) );
+    criteria.push_back( std::pair<std::string, bool>("wavelength", false) );
+    pw->sort(criteria);
+    TS_ASSERT_EQUALS( pw->getPeak(0).getDetectorID(), 1);
+    TS_ASSERT_DELTA(  pw->getPeak(0).getWavelength(), 5.0, 1e-5);
+    TS_ASSERT_EQUALS( pw->getPeak(1).getDetectorID(), 1);
+    TS_ASSERT_DELTA(  pw->getPeak(1).getWavelength(), 4.0, 1e-5);
+    TS_ASSERT_EQUALS( pw->getPeak(2).getDetectorID(), 1);
+    TS_ASSERT_DELTA(  pw->getPeak(2).getWavelength(), 3.0, 1e-5);
+    TS_ASSERT_EQUALS( pw->getPeak(3).getDetectorID(), 2);
+    TS_ASSERT_DELTA(  pw->getPeak(3).getWavelength(), 3.0, 1e-5);
+
+    // Sort by wavelength ascending then detID
+    criteria.clear();
+    criteria.push_back( std::pair<std::string, bool>("wavelength", true) );
+    criteria.push_back( std::pair<std::string, bool>("detid", true) );
+    pw->sort(criteria);
+    TS_ASSERT_EQUALS( pw->getPeak(0).getDetectorID(), 1);
+    TS_ASSERT_DELTA(  pw->getPeak(0).getWavelength(), 3.0, 1e-5);
+    TS_ASSERT_EQUALS( pw->getPeak(1).getDetectorID(), 2);
+    TS_ASSERT_DELTA(  pw->getPeak(1).getWavelength(), 3.0, 1e-5);
+    TS_ASSERT_EQUALS( pw->getPeak(2).getDetectorID(), 3);
+    TS_ASSERT_DELTA(  pw->getPeak(2).getWavelength(), 3.0, 1e-5);
+    TS_ASSERT_EQUALS( pw->getPeak(3).getDetectorID(), 1);
+    TS_ASSERT_DELTA(  pw->getPeak(3).getWavelength(), 4.0, 1e-5);
+    TS_ASSERT_EQUALS( pw->getPeak(4).getDetectorID(), 1);
+    TS_ASSERT_DELTA(  pw->getPeak(4).getWavelength(), 5.0, 1e-5);
+
+  }
+
 
 };
 
