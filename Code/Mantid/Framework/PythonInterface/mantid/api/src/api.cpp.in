@@ -1,0 +1,16 @@
+#include <boost/python/module.hpp>
+#include <boost/python/docstring_options.hpp>
+#include <boost/python/numeric.hpp>
+
+// Forward declare
+@EXPORT_DECLARE@
+
+BOOST_PYTHON_MODULE(_api)
+{
+  // Doc string options - User defined, python arguments, C++ call signatures
+  boost::python::docstring_options docstrings(true, true, false);
+  // Use numpy arrays
+  boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+
+@EXPORT_FUNCTIONS@
+}
