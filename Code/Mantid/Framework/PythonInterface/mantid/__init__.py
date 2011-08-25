@@ -14,7 +14,7 @@ if not os.environ.has_key('MANTIDPATH') and os.path.exists(os.path.join(_bindir,
     os.environ['MANTIDPATH'] = _bindir
 
 # Mantid imports
-from api import get_framework_mgr as _get_framework_mgr
+from api import framework_mgr
 
 # Start Mantid (mtd for old times sake)
-mtd = _get_framework_mgr()
+mtd = framework_mgr

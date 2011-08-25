@@ -51,6 +51,11 @@ endif ()
 
 set ( TEST_PY_FILES
   test/python/AlgorithmManagerTest.py
+  test/python/PythonAlgorithmTest.py
+  test/python/FrameworkManagerTest.py
+  test/python/V3DTest.py
+  test/python/QuatTest.py
+  test/python/ImportModuleTest.py
 )
 
 # python unit tests

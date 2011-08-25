@@ -6,7 +6,7 @@ set ( MODULE_TEMPLATE src/kernel.cpp.in )
 
 set ( EXPORT_FILES
   src/V3D.cpp
-#  Property.cpp
+  src/Quat.cpp
 )  
 
 set ( INC_FILES )

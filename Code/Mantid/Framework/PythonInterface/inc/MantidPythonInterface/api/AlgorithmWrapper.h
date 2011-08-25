@@ -13,11 +13,6 @@ namespace Mantid
   namespace PythonInterface
   {
     /**
-      This class wraps the Algorithm class and allows classes in Python
-      to inherit from it.
-
-      This class is treated by Boost Python as if it were of type Algorithm.
-
       @author Martyn Gigg, Tessella plc
 
       Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -40,12 +35,28 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class AlgorithmWrapper : public API::Algorithm, public boost::python::wrapper<API::Algorithm>
-    {
-    public:
-      /// Destructor
-      ~AlgorithmWrapper();
 
+    /**
+     * This class simply acts as a marker for now.
+     * It is required so that the export functions
+     * can properly mark Algorithm as a base class
+     * of a PythonAlgorithm.
+     *
+     * Trying to do this with the wrapper below
+     * causes a compilation error
+     */
+    class PythonAlgorithm : public API::Algorithm
+    {};
+
+    /**
+      This class wraps the PythonAlgorithm class and allows classes in Python
+      to inherit from it.
+
+      This class is treated by Boost Python as if it were of type PythonAlgorithm.
+     */
+
+    class AlgorithmWrapper : public PythonAlgorithm, public boost::python::wrapper<PythonAlgorithm>
+    {
     public:
       /// Returns the name of the algorithm
       virtual const std::string name() const;

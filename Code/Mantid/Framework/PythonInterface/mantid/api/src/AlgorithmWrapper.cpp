@@ -10,12 +10,6 @@ namespace Mantid
 {
   namespace PythonInterface
   {
-    /**
-     * Destructor
-     */
-    AlgorithmWrapper::~AlgorithmWrapper()
-    {
-    }
 
     /**
      * Returns the name of the algorithm. If not overridden
@@ -57,7 +51,7 @@ namespace Mantid
      */
     const std::string AlgorithmWrapper::category() const
     {
-      std::string cat("PythonAlgorithm");
+      std::string cat("PythonAlgorithms");
       if ( boost::python::override fn = this->get_override("category_") )
       {
         cat = boost::python::call<std::string>(fn.ptr());

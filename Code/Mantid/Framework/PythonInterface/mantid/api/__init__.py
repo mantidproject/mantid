@@ -8,5 +8,6 @@ from _api import *
 dlopen.restore_flags(flags)
 
 # Alias the singleton objects
+framework_mgr = get_framework_mgr() # The first import of this starts the framework
 algorithm_mgr = get_algorithm_mgr()
  

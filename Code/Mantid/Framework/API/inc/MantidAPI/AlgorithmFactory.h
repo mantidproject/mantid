@@ -71,11 +71,20 @@ public:
   void subscribe()
   {
     Kernel::Instantiator<C, Algorithm>* newI = new Kernel::Instantiator<C, Algorithm>;
-    boost::shared_ptr<IAlgorithm> tempAlg = newI-> createInstance();
+    this->subscribe(newI);
+  }
 
+  /**
+   * Subscribes an algorithm using a custom instantiator. This
+   * object takes ownership of the instantiator
+   * @param instantiator - A pointer to a custom instantiator
+   */
+  template<class T>
+  void subscribe(Kernel::AbstractInstantiator<T> *instantiator)
+  {
+    boost::shared_ptr<IAlgorithm> tempAlg = instantiator-> createInstance();
     const int version = extractAlgVersion(tempAlg);
     const std::string className = extractAlgName(tempAlg);
-    delete newI;
     typename VersionMap::const_iterator it = m_vmap.find(className);
     if (!className.empty())
     {
@@ -91,7 +100,7 @@ public:
         if(version > it->second)
           m_vmap[className]=version;
       }  
-      Kernel::DynamicFactory<Algorithm>::subscribe<C>(createName(className,version));   
+      Kernel::DynamicFactory<Algorithm>::subscribe(createName(className,version), instantiator);
     }
   }
 
