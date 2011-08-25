@@ -392,6 +392,7 @@ class SNSPowderReduction(PythonAlgorithm):
             SaveFocusedXYE(InputWorkspace=wksp, Filename=filename+".dat")
 
         # always save processed files
+        ConvertToMatrixWorkspace(InputWorkspace=wksp, OutputWorkspace=wksp)
         SaveNexusProcessed(InputWorkspace=wksp, 
                            Filename=filename+"_processed.nxs")
 
