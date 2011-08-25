@@ -49,7 +49,7 @@ GetEi::GetEi() : Algorithm(),
 void GetEi::init()
 {
   // Declare required input parameters for algorithm and do some validation here
-  CompositeValidator<> *val = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *val = new CompositeWorkspaceValidator<>;
   val->add(new WorkspaceUnitValidator<>("TOF"));
   val->add(new HistogramValidator<>);
   val->add(new InstrumentValidator<>);

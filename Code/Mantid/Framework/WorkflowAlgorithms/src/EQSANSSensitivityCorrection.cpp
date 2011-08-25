@@ -27,7 +27,7 @@ using namespace Geometry;
 
 void EQSANSSensitivityCorrection::init()
 {
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new HistogramValidator<>);
   wsValidator->add(new CommonBinsValidator<>);

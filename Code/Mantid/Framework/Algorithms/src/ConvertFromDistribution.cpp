@@ -24,7 +24,7 @@ using namespace API;
 
 void ConvertFromDistribution::init()
 {
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   wsValidator->add(new HistogramValidator<>);
   wsValidator->add(new RawCountValidator<>(false));
   declareProperty(new WorkspaceProperty<>("Workspace", "",

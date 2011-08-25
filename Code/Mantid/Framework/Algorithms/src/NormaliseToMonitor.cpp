@@ -40,7 +40,7 @@ void NormaliseToMonitor::initDocs()
 
 void NormaliseToMonitor::init()
 {
-  CompositeValidator<> *val = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *val = new CompositeWorkspaceValidator<>;
   val->add(new HistogramValidator<>);
   val->add(new RawCountValidator<>);
   // It's been said that we should restrict the unit to being wavelength, but I'm not sure about that...

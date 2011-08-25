@@ -28,7 +28,7 @@ void SaveDASC::initDocs()
  */
 void SaveDASC::init()
 {
-  API::CompositeValidator<> *wsValidator = new API::CompositeValidator<>;
+  API::CompositeWorkspaceValidator<> *wsValidator = new API::CompositeWorkspaceValidator<>;
   // Data must havec common bins
   wsValidator->add(new API::CommonBinsValidator<>);
   // the output of this algorithm is spectrum data, not histogram, but as a histogram to spectrum conversion is built in a spectrum as input would be no good, at the moment

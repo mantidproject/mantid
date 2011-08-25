@@ -37,7 +37,7 @@ FindDetectorsPar::~FindDetectorsPar(){};
 
 void FindDetectorsPar::init()
 {
-    CompositeValidator<> * wsValidator = new CompositeValidator<> ;
+    CompositeWorkspaceValidator<> * wsValidator = new CompositeWorkspaceValidator<> ;
       wsValidator->add(new API::InstrumentValidator<>);
       wsValidator->add(new API::CommonBinsValidator<>);
   // input workspace

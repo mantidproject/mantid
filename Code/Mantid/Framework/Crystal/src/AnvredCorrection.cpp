@@ -68,7 +68,7 @@ AnvredCorrection::AnvredCorrection() : API::Algorithm()
 void AnvredCorrection::init()
 {
   // The input workspace must have an instrument and units of wavelength
-  CompositeValidator<> * wsValidator = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> * wsValidator = new CompositeWorkspaceValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<> ("Wavelength"));
   wsValidator->add(new InstrumentValidator<>());
 

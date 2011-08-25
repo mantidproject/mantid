@@ -48,7 +48,7 @@ namespace Mantid
           exts),
           "The name of the NXSPE file to write, as a full or relative path");
 
-      CompositeValidator<> * wsValidator = new CompositeValidator<> ;
+      CompositeWorkspaceValidator<> * wsValidator = new CompositeWorkspaceValidator<> ;
       wsValidator->add(new API::WorkspaceUnitValidator<>("DeltaE"));
       wsValidator->add(new API::CommonBinsValidator<>);
       wsValidator->add(new API::HistogramValidator<>);

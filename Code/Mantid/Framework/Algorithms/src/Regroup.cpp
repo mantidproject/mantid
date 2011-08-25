@@ -39,7 +39,7 @@ using API::MatrixWorkspace;
 /// Initialisation method. Declares properties to be used in algorithm.
 void Regroup::init()
 {
-  API::CompositeValidator<> *wsVal = new API::CompositeValidator<>;
+  API::CompositeWorkspaceValidator<> *wsVal = new API::CompositeWorkspaceValidator<>;
   wsVal->add(new API::HistogramValidator<>);
   wsVal->add(new API::CommonBinsValidator<>);
   declareProperty(

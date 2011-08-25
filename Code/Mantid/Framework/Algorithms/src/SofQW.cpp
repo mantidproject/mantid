@@ -32,7 +32,7 @@ using namespace API;
 
 void SofQW::init()
 {
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("DeltaE"));
   wsValidator->add(new SpectraAxisValidator<>());
   wsValidator->add(new CommonBinsValidator<>);

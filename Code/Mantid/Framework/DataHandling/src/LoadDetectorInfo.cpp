@@ -44,7 +44,7 @@ LoadDetectorInfo::LoadDetectorInfo()
 void LoadDetectorInfo::init()
 {
   // Declare required input parameters for algorithm
-  CompositeValidator<> *val = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *val = new CompositeWorkspaceValidator<>;
   val->add(new WorkspaceUnitValidator<>("TOF"));
   val->add(new HistogramValidator<>);
   declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut,val),

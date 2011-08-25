@@ -25,7 +25,7 @@ using namespace Geometry;
 
 void EQSANSQ2D::init()
 {
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
       "Workspace to calculate I(qx,Qy) from");

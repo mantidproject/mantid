@@ -36,7 +36,7 @@ using namespace DataObjects;
 
 void Q1DTOF::init()
 {
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new HistogramValidator<>);
   wsValidator->add(new InstrumentValidator<>);

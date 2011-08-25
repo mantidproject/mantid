@@ -33,7 +33,7 @@ using namespace Geometry;
 
 void Q1D2::init()
 {
-  CompositeValidator<> *dataVal = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *dataVal = new CompositeWorkspaceValidator<>;
   dataVal->add(new WorkspaceUnitValidator<>("Wavelength"));
   dataVal->add(new HistogramValidator<>);
   dataVal->add(new InstrumentValidator<>);
@@ -49,7 +49,7 @@ void Q1D2::init()
   declareProperty(new WorkspaceProperty<>("PixelAdj","", Direction::Input, true),
     "The scaling to apply to each spectrum e.g. for detector efficiency, must have\n"
     "the same number of spectra as the DetBankWorkspace");
-  CompositeValidator<> *wavVal = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *wavVal = new CompositeWorkspaceValidator<>;
   wavVal->add(new WorkspaceUnitValidator<>("Wavelength"));
   wavVal->add(new HistogramValidator<>);
   declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input, true, wavVal),

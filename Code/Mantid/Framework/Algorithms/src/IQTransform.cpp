@@ -50,7 +50,7 @@ IQTransform::~IQTransform() {}
 
 void IQTransform::init()
 {
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   // Require the input to be in units of Q and to be a distribution
   // (which the result of a SANS reduction in Mantid will be)
   wsValidator->add(new WorkspaceUnitValidator<>("MomentumTransfer"));

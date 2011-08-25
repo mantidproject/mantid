@@ -54,7 +54,7 @@ namespace Algorithms
   void ConvertSpectrumAxis::init()
   {
     // Validator for Input Workspace
-    CompositeValidator<> *wsVal = new CompositeValidator<>;
+    CompositeWorkspaceValidator<> *wsVal = new CompositeWorkspaceValidator<>;
     wsVal->add(new HistogramValidator<>);
     wsVal->add(new SpectraAxisValidator<>);
     wsVal->add(new InstrumentValidator<>);

@@ -39,7 +39,7 @@ void PDFFT::initDocs() {
 void PDFFT::init() {
 	API::WorkspaceUnitValidator<>* uv = new API::WorkspaceUnitValidator<>(
 			"MomentumTransfer");
-	// CompositeValidator<> *wsValidator = new CompositeValidator<>;
+	// CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
 	// wsValidator->add(new WorkspaceUnitValidator<>("MomentumTransfer"));
 	// declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, wsValidator), "An input workspace S(d).");
 	declareProperty(new WorkspaceProperty<> ("InputWorkspace", "",

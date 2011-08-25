@@ -28,7 +28,7 @@ using namespace Geometry;
 
 void SaveNISTDAT::init()
 {
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("MomentumTransfer"));
   wsValidator->add(new HistogramValidator<>);
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, wsValidator));

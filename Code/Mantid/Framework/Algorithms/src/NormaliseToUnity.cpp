@@ -30,7 +30,7 @@ using namespace API;
  */
 void NormaliseToUnity::init()
 {
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   wsValidator->add(new HistogramValidator<>);
   wsValidator->add(new CommonBinsValidator<>);
 

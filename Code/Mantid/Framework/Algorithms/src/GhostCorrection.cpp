@@ -73,7 +73,7 @@ namespace Mantid
       nGroups = 0;
 
       //Input workspace must be in dSpacing and be an inputWorkspace
-      API::CompositeValidator<EventWorkspace> *wsValidator = new API::CompositeValidator<EventWorkspace>;
+      API::CompositeWorkspaceValidator<EventWorkspace> *wsValidator = new API::CompositeWorkspaceValidator<EventWorkspace>;
       wsValidator->add(new API::WorkspaceUnitValidator<EventWorkspace>("TOF"));
       wsValidator->add(new API::RawCountValidator<EventWorkspace>);
 

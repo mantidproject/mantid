@@ -34,7 +34,7 @@ CalculateTransmission::~CalculateTransmission()
 
 void CalculateTransmission::init()
 {
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new CommonBinsValidator<>);
   wsValidator->add(new HistogramValidator<>);

@@ -44,7 +44,7 @@ GetEi2::GetEi2() : Algorithm(), m_input_ws(), m_peak1_pos(0, 0.0), m_fixedei(fal
 void GetEi2::init()
 
 {// Declare required input parameters for algorithm and do some validation here
-  CompositeValidator<> *validator = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *validator = new CompositeWorkspaceValidator<>;
   validator->add(new WorkspaceUnitValidator<>("TOF"));
   validator->add(new HistogramValidator<>);
   validator->add(new InstrumentValidator<>);

@@ -42,7 +42,7 @@ namespace Mantid
     /// Initialisation method.
     void CrossCorrelate::init()
     {
-      API::CompositeValidator<MatrixWorkspace> *wsValidator = new API::CompositeValidator<MatrixWorkspace>;
+      API::CompositeWorkspaceValidator<MatrixWorkspace> *wsValidator = new API::CompositeWorkspaceValidator<MatrixWorkspace>;
       wsValidator->add(new API::WorkspaceUnitValidator<MatrixWorkspace>("dSpacing"));
       wsValidator->add(new API::RawCountValidator<MatrixWorkspace>);
 

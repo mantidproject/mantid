@@ -52,6 +52,7 @@ set ( SRC_FILES
 	src/DiffractionFocussing2.cpp
 	src/Divide.cpp
 	src/DspacemaptoCal.cpp
+	src/Dummy.cpp
 	src/EQSANSResolution.cpp
 	src/EQSANSTofStructure.cpp
 	src/EditTOFPowderDiffractomerGeometry.cpp
@@ -213,6 +214,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/DiffractionFocussing2.h
 	inc/MantidAlgorithms/Divide.h
 	inc/MantidAlgorithms/DspacemaptoCal.h
+	inc/MantidAlgorithms/Dummy.h
 	inc/MantidAlgorithms/EQSANSResolution.h
 	inc/MantidAlgorithms/EQSANSTofStructure.h
 	inc/MantidAlgorithms/EditTOFPowderDiffractomerGeometry.h
@@ -371,6 +373,7 @@ set ( TEST_FILES
 	test/DiffractionFocussing2Test.h
 	test/DivideTest.h
 	test/DspacemaptoCalTest.h
+	test/DummyTest.h
 	test/EditTOFPowderDiffractomerGeometryTest.h
 	test/ExponentialCorrectionTest.h
 	test/ExponentialTest.h

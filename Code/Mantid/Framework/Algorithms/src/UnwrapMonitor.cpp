@@ -35,7 +35,7 @@ UnwrapMonitor::~UnwrapMonitor()
 /// Initialisation method
 void UnwrapMonitor::init()
 {
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new HistogramValidator<>);
   wsValidator->add(new RawCountValidator<>);

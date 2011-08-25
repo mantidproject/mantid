@@ -20,7 +20,7 @@ void IdentifyNoisyDetectors::initDocs()
 
 void IdentifyNoisyDetectors::init()
 {
-  CompositeValidator<> *wsVal = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *wsVal = new CompositeWorkspaceValidator<>;
   wsVal->add(new WorkspaceUnitValidator<>("TOF"));
   wsVal->add(new HistogramValidator<>);
   wsVal->add(new SpectraAxisValidator<>);

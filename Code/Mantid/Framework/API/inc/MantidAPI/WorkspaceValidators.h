@@ -4,13 +4,14 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/IValidator.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/IValidator.h"
 #include <boost/shared_ptr.hpp>
-#include <vector>
 #include <numeric>
+#include <vector>
 
 namespace Mantid
 {
@@ -45,65 +46,8 @@ namespace API
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE = MatrixWorkspace>
-class DLLExport CompositeValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
+class DLLExport CompositeWorkspaceValidator : public Kernel::CompositeValidator<boost::shared_ptr<TYPE> >
 {
-public:
-  CompositeValidator() {}
-
-  virtual ~CompositeValidator()
-  {
-    for (unsigned int i=0; i < m_children.size(); ++i)
-    {
-      delete m_children[i];
-    }
-    m_children.clear();
-  }
-
-  // IValidator methods
-  ///Gets the type of the validator
-  std::string getType() const { return "composite"; }
-
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone()
-  {
-    CompositeValidator<TYPE>* copy = new CompositeValidator<TYPE>();
-    for (unsigned int i=0; i < m_children.size(); ++i)
-    {
-      copy->add( m_children[i]->clone() );
-    }
-    return copy;
-  }
-
-  /** Adds a validator to the group of validators to check
-   *  @param child :: A pointer to the validator to add
-   */
-  void add(Kernel::IValidator<boost::shared_ptr<TYPE> >* child)
-  {
-    m_children.push_back(child);
-  }
-
-private:
-  /// Private Copy constructor: NO DIRECT COPY ALLOWED
-  CompositeValidator(const CompositeValidator&);
-
-  /** Checks the value of all child validators. Fails if any child fails.
-   *  @param value :: The workspace to test
-   *  @return A user level description of the first problem it finds otherwise ""
-   */
-  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
-  {
-    //Go though all the validators
-    for (unsigned int i=0; i < m_children.size(); ++i)
-    {
-      std::string error = m_children[i]->isValid(value);
-      //exit on the first error, to avoid passing doing more tests on invalid objects that could fail
-      if (error != "") return error;
-    }
-    //there were no errors
-    return "";
-  }
-
-  /// A container for the child validators
-  std::vector<Kernel::IValidator<boost::shared_ptr<TYPE> >*> m_children;
 };
 
 

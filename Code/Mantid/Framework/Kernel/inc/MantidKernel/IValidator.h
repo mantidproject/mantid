@@ -55,6 +55,14 @@ public:
     return failure;
   }
 
+  /** Is the property to be shown as "enabled" in the GUI. Default true. */
+  virtual bool isEnabled() const
+  { return true; }
+
+  /** Is the property to be shown in the GUI? Default true. */
+  virtual bool isVisible() const
+  { return true; }
+
   /** The set of allowed values that this validator may have, if a discrete set exists.
    *  Overridden in applicable concrete validators; the base class just returns an empty set.
    *  @return The set of allowed values that this validator may have or an empty set

@@ -151,7 +151,7 @@ AlignDetectors::~AlignDetectors()
 //-----------------------------------------------------------------------
 void AlignDetectors::init()
 {
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   //Workspace unit must be TOF.
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new RawCountValidator<>);

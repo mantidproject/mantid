@@ -79,7 +79,7 @@ DetectorEfficiencyCor::DetectorEfficiencyCor() :
  */
 void DetectorEfficiencyCor::init()
 {
-  CompositeValidator<> *val = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *val = new CompositeWorkspaceValidator<>;
   val->add(new WorkspaceUnitValidator<>("DeltaE"));
   val->add(new HistogramValidator<>);
   val->add(new InstrumentValidator<>);

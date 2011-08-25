@@ -254,6 +254,7 @@ void GenericDialog::initLayout()
 }
 
 
+//--------------------------------------------------------------------------------------
 /**
 * This slot is called when a browse button is clicked
 * @param widget :: The widget that is associated with the button that was clicked. In this case they are always QLineEdit widgets
@@ -280,6 +281,7 @@ void GenericDialog::browseClicked(QWidget* widget)
 }
 
 
+//--------------------------------------------------------------------------------------
 /** This slot is called when a browse button for multiple files is clicked.
  *
 * @param widget :: The widget that is associated with the button that was clicked. In this case they are always QLineEdit widgets

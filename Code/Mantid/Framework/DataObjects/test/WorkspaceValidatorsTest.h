@@ -19,7 +19,7 @@ private:
   RawCountValidator<>* rawVal;
   RawCountValidator<>* nonRawVal;
   CommonBinsValidator<>* binVal;
-  CompositeValidator<> compVal;
+  CompositeWorkspaceValidator<> compVal;
 
   MatrixWorkspace_sptr ws1;
   MatrixWorkspace_sptr ws2;
@@ -164,20 +164,20 @@ public:
     delete v;
   }
 
-  void testCompositeValidator_getType()
+  void testCompositeWorkspaceValidator_getType()
   {
     TS_ASSERT_EQUALS( compVal.getType(), "composite" );
   }
 
-  void testCompositeValidator_clone()
+  void testCompositeWorkspaceValidator_clone()
   {
     IValidator<MatrixWorkspace_sptr> *v = compVal.clone();
     TS_ASSERT_DIFFERS( v, &compVal );
-    TS_ASSERT( dynamic_cast<CompositeValidator<>*>(v) );
+    TS_ASSERT( v );
     delete v;
   }
 
-  void testCompositeValidator_isValidandAdd()
+  void testCompositeWorkspaceValidator_isValidandAdd()
   {
     // Passes if empty
     TS_ASSERT_EQUALS( compVal.isValid(ws1), "" );
@@ -187,7 +187,7 @@ public:
         "The workspace must have units of Wavelength");
     TS_ASSERT_EQUALS( compVal.isValid(ws2), "" );
 
-    CompositeValidator<> compVal2;
+    CompositeWorkspaceValidator<> compVal2;
     compVal2.add(histVal->clone());
     TS_ASSERT_EQUALS( compVal2.isValid(ws1), "" );
     TS_ASSERT_EQUALS( compVal2.isValid(ws2),

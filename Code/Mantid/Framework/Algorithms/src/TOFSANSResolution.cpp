@@ -36,7 +36,7 @@ void TOFSANSResolution::init()
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::InOut, new WorkspaceUnitValidator<Workspace2D>("MomentumTransfer")),
       "Name the workspace to calculate the resolution for");
 
-  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  CompositeWorkspaceValidator<> *wsValidator = new CompositeWorkspaceValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   declareProperty(new WorkspaceProperty<>("ReducedWorkspace","",Direction::Input, wsValidator),
       "I(Q) workspace");

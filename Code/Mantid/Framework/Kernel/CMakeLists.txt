@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/Atom.cpp
 	src/BinFinder.cpp
 	src/CPUTimer.cpp
+	src/CompositeValidator.cpp
 	src/ConfigService.cpp
 	src/DateAndTime.cpp
 	src/DateValidator.cpp
@@ -92,6 +93,7 @@ set ( INC_FILES
 	inc/MantidKernel/BoundedValidator.h
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
+	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTime.h
@@ -181,6 +183,7 @@ set ( TEST_FILES
 	test/BoundedValidatorTest.h
 	test/CPUTimerTest.h
 	test/CacheTest.h
+	test/CompositeValidatorTest.h
 	test/ConfigServiceTest.h
 	test/DateAndTimeTest.h
 	test/DateValidatorTest.h

@@ -30,7 +30,7 @@ namespace Mantid
     DECLARE_ALGORITHM(MonteCarloAbsorption)
 
     using API::WorkspaceProperty;
-    using API::CompositeValidator;
+    using API::CompositeWorkspaceValidator;
     using API::WorkspaceUnitValidator;
     using API::InstrumentValidator;
     using API::MatrixWorkspace_sptr;
@@ -74,7 +74,7 @@ namespace Mantid
     void MonteCarloAbsorption::init()
     {
       // The input workspace must have an instrument and units of wavelength
-      CompositeValidator<> * wsValidator = new CompositeValidator<>;
+      CompositeWorkspaceValidator<> * wsValidator = new CompositeWorkspaceValidator<>;
       wsValidator->add(new WorkspaceUnitValidator<> ("Wavelength"));
       wsValidator->add(new InstrumentValidator<>());
 
