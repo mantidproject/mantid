@@ -70,7 +70,8 @@ void Progress::doReport(const std::string& msg)
   double p = m_start + m_step*double(m_i - m_ifirst);
   if (p > m_end) p = m_end;
   if (!m_alg) return;
-  m_alg->progress(p,msg);
+
+  m_alg->progress(p,msg, this->getEstimatedTime(), this->m_notifyStepPrecision );
   m_alg->interruption_point();
 }
 

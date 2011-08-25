@@ -661,10 +661,12 @@ namespace Mantid
     /** Sends ProgressNotification. 
     @param p :: Reported progress,  must be between 0 (just started) and 1 (finished)
     @param msg :: Optional message string
+    @param estimatedTime :: Optional estimated time to completion
+    @param progressPrecision :: optional, int number of digits after the decimal point to show.
     */
-    void Algorithm::progress(double p, const std::string& msg)
+    void Algorithm::progress(double p, const std::string& msg, double estimatedTime, int progressPrecision)
     {
-      m_notificationCenter.postNotification(new ProgressNotification(this,p,msg));
+      m_notificationCenter.postNotification(new ProgressNotification(this,p,msg, estimatedTime, progressPrecision));
     }
 
     void Algorithm::interruption_point()

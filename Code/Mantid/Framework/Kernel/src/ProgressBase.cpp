@@ -16,8 +16,10 @@ namespace Kernel
    m_notifyStep(1),
    m_notifyStepPct(1),
    m_step(1), m_i(0),
-   m_last_reported(-1)
+   m_last_reported(-1),
+   m_notifyStepPrecision(0)
   {
+    m_timeElapsed.reset();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -31,10 +33,12 @@ namespace Kernel
     : m_start(start),m_end(end),
       m_ifirst(0),
       m_notifyStepPct(1),
-      m_i(0)
+      m_i(0),
+      m_notifyStepPrecision(0)
   {
     this->setNumSteps(numSteps);
     m_last_reported = -m_notifyStep;
+    m_timeElapsed.reset();
   }
     
   //----------------------------------------------------------------------------------------------
@@ -149,9 +153,28 @@ namespace Kernel
     m_notifyStepPct = notifyStepPct;
     m_notifyStep = (static_cast<int64_t>(double(m_numSteps)*m_notifyStepPct/100/(m_end-m_start)));
     if (m_notifyStep <= 0) m_notifyStep = 1;
+    m_notifyStepPrecision = 0;
+    if (m_notifyStepPct < 1.0) m_notifyStepPrecision = 1;
+    if (m_notifyStepPct < 0.09) m_notifyStepPrecision = 2;
   }
 
 
+  //----------------------------------------------------------------------------------------------
+  /** Returns the estimated number of seconds until the algorithm completes
+   *
+   * @return seconds estimated to remain. 0 if it cannot calculate it */
+  double ProgressBase::getEstimatedTime() const
+  {
+    double elapsed = double(m_timeElapsed.elapsed_no_reset());
+    double prog = double(m_i) * m_step;
+    if (prog <= 1e-4)
+      return 0.0; // unknown
+    else
+    {
+      double total = elapsed/prog;
+      return total - elapsed;
+    }
+  }
 
 } // namespace Mantid
 } // namespace Kernel

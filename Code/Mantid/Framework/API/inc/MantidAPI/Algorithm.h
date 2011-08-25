@@ -129,14 +129,19 @@ public:
   };
 
   /// An algorithm can report its progress by sending ProgressNotification. Use
-  /// Algorithm::progress(double) function to send a preogress notification.
+  /// Algorithm::progress(double) function to send a progress notification.
   class ProgressNotification: public AlgorithmNotification
   {
   public:
-    ProgressNotification(const Algorithm* const alg, double p,const std::string& msg):AlgorithmNotification(alg),progress(p),message(msg){}///< Constructor
+    /// Constructor
+    ProgressNotification(const Algorithm* const alg, double p,const std::string& msg, double estimatedTime, int progressPrecision)
+    : AlgorithmNotification(alg),progress(p),message(msg), estimatedTime(estimatedTime), progressPrecision(progressPrecision)
+    { }
     virtual std::string name() const{return "ProgressNotification";}///< class name
     double progress;///< Current progress. Value must be between 0 and 1.
     std::string message;///< Message sent with notification
+    double estimatedTime; ///<Estimated time to completion
+    int progressPrecision; ///<Digits of precision to the progress (after the decimal).
   };
 
   /// ErrorNotification is sent when an exception is caught during execution of the algorithm.
@@ -302,7 +307,7 @@ protected:
 
   friend class Progress;
   /// Sends ProgressNotification. p must be between 0 (just started) and 1 (finished)
-  void progress(double p, const std::string& msg = "");
+  void progress(double p, const std::string& msg = "", double estimatedTime = 0.0, int progressPrecision = 0);
   /// Interrupts algorithm execution if Algorithm::cancel() has been called.
   /// Does nothing otherwise.
   void interruption_point();

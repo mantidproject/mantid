@@ -3,6 +3,7 @@
     
 #include "MantidKernel/DllConfig.h"
 #include <string>
+#include "MantidKernel/Timer.h"
 
 namespace Mantid
 {
@@ -48,6 +49,8 @@ namespace Kernel
     void resetNumSteps(int64_t nsteps, double start, double end);
     void setNotifyStep(double notifyStepPct);
 
+    double getEstimatedTime() const;
+
   protected:
     /// Starting progress
     double m_start;
@@ -67,6 +70,10 @@ namespace Kernel
     int64_t m_i;
     /// Last loop counter value the was a peport
     int64_t m_last_reported;
+    /// Timer that is started when the progress bar is constructed.
+    Kernel::Timer m_timeElapsed;
+    /// Digits of precision in the reporting
+    int m_notifyStepPrecision;
   };
 
 

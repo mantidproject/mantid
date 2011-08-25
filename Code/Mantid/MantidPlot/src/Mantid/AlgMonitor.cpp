@@ -79,8 +79,8 @@ void AlgorithmMonitor::handleAlgorithmFinishedNotification(const Poco::AutoPtr<A
 
 void AlgorithmMonitor::handleAlgorithmProgressNotification(const Poco::AutoPtr<Algorithm::ProgressNotification>& pNf)
 {
-    //if (m_monitorDlg->isVisible()) 
-    emit needUpdateProgress(pNf->algorithm()->getAlgorithmID(),static_cast<int>(pNf->progress*100),QString::fromStdString(pNf->message));
+    emit needUpdateProgress(pNf->algorithm()->getAlgorithmID(),static_cast<double>(pNf->progress*100), QString::fromStdString(pNf->message),
+        double(pNf->estimatedTime), int(pNf->progressPrecision) );
 }
 
 void AlgorithmMonitor::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algorithm::ErrorNotification>& pNf)
@@ -118,8 +118,8 @@ MonitorDlg::MonitorDlg(QWidget *parent,AlgorithmMonitor *algMonitor):QDialog(par
     m_tree = 0;
     update();
     connect(algMonitor,SIGNAL(countChanged()),this,SLOT(update()), Qt::QueuedConnection);
-    connect(algMonitor,SIGNAL(needUpdateProgress(void*,int, const QString&)),
-	    SLOT(updateProgress(void*,int, const QString&)));
+    connect(algMonitor,SIGNAL(needUpdateProgress(void*, double, const QString&, double, int)),
+	    SLOT(updateProgress(void*, double, const QString&, double, int)));
 
     QHBoxLayout *buttonLayout = new QHBoxLayout;
     QPushButton *closeButton = new QPushButton("Close");
@@ -200,7 +200,7 @@ void MonitorDlg::update()
 }
 
 // The void* corresponds to Mantid::API::AlgorithmID, but Qt wasn't coping with the typedef
-void MonitorDlg::updateProgress(void* alg, const int p, const QString& msg)
+void MonitorDlg::updateProgress(void* alg, const double p, const QString& msg, double estimatedTime, int progressPrecision)
 {
   m_algMonitor->lock();
   const int index = m_algMonitor->algorithms().indexOf(alg);
@@ -210,6 +210,6 @@ void MonitorDlg::updateProgress(void* alg, const int p, const QString& msg)
   if ( !item ) return;
  
   QProgressBar *algProgress = static_cast<QProgressBar*>( m_tree->itemWidget(item, 1) );
-  algProgress->setValue(p);
+  algProgress->setValue( int(p) );
   algProgress->setFormat(msg + " %p%");
 }

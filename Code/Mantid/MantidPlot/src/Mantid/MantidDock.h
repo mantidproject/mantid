@@ -139,7 +139,7 @@ public slots:
     void findAlgTextChanged(const QString& text);
     void treeSelectionChanged();
     void selectionChanged(const QString& algName);
-    void updateProgress(void* alg, const int p, const QString& msg);
+    void updateProgress(void* alg, const double p, const QString& msg, double estimatedTime, int progressPrecision);
     void algorithmStarted(void* alg);
     void algorithmFinished(void* alg);
 protected:

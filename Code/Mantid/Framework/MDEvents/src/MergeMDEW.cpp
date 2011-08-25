@@ -165,7 +165,7 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void MergeMDEW::loadBoxData()
   {
-    this->progress(0.01, "Loading File Info");
+    this->progress(0.05, "Loading File Info");
 
     // Total number of events in ALL files.
     totalEvents = 0;
@@ -293,6 +293,7 @@ namespace MDEvents
 
     // Progress report based on events processed.
     this->prog = new Progress(this, 0.1, 0.9, size_t(totalEvents));
+    this->prog->setNotifyStep(0.1);
 
     // For tracking progress
     uint64_t totalEventsInTasks = 0;
@@ -374,7 +375,7 @@ namespace MDEvents
     {
       // ---- in-memory output ------------------------
       // Load the first workspace again, this time in memory
-      IAlgorithm_sptr loader = createSubAlgorithm("LoadMDEW", 0.0, 0.05, false);
+      IAlgorithm_sptr loader = createSubAlgorithm("LoadMDEW", 0.05, 0.10, false);
       loader->setPropertyValue("Filename", m_filenames[0]);
       loader->setPropertyValue("MetadataOnly", "0");
       loader->setPropertyValue("FileBackEnd", "0");
@@ -385,7 +386,7 @@ namespace MDEvents
     else
     {
       // -------- file-backed output ---------------------
-      IAlgorithm_sptr cloner = this->createSubAlgorithm("CloneMDEventWorkspace" ,0.01, 0.05, true);
+      IAlgorithm_sptr cloner = this->createSubAlgorithm("CloneMDEventWorkspace" ,0.05, 0.10, true);
       cloner->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws) );
       cloner->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
       cloner->setPropertyValue("Filename", outputFile);
@@ -583,6 +584,7 @@ namespace MDEvents
 
     // Progress report based on events processed.
     this->prog = new Progress(this, 0.1, 0.9, size_t(totalEvents));
+    prog->setNotifyStep(0.1);
 
     // For tracking progress
     uint64_t totalEventsInTasks = 0;

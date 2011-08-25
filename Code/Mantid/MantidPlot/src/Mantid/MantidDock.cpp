@@ -31,6 +31,8 @@
 #include <sstream>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include "MantidAPI/ExperimentInfo.h"
+#include <iomanip>
+#include <cstdio>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -1534,13 +1536,41 @@ void AlgorithmDockWidget::selectionChanged(const QString& algName)
   m_findAlgChanged = false;
 }
 
-void AlgorithmDockWidget::updateProgress(void* alg, const int p, const QString& msg)
+void AlgorithmDockWidget::updateProgress(void* alg, const double p, const QString& msg, double estimatedTime, int progressPrecision)
 {
   if (m_algID.empty()) return;
   if (alg == m_algID.first() && p >= 0 && p <= 100 && m_progressBar)
   {
-    m_progressBar->setValue(p);
-    m_progressBar->setFormat(msg + " %p%");
+    m_progressBar->setValue( static_cast<int>(p) );
+    // Make the progress string
+    std::ostringstream mess;
+    mess << msg.toStdString();
+    mess.precision(progressPrecision);
+    mess << " " << std::fixed << p << "%";
+    if (estimatedTime > 0.5)
+    {
+      mess.precision(0);
+      mess << " (~";
+      if (estimatedTime < 60)
+        mess << static_cast<int>(estimatedTime) << "s";
+      else if (estimatedTime < 60*60)
+      {
+        int min = static_cast<int>(estimatedTime/60);
+        int sec = static_cast<int>(estimatedTime - min*60);
+        mess << min << "m"
+            << std::setfill('0') << std::setw(2) << sec << "s";
+      }
+      else
+      {
+        int hours = static_cast<int>(estimatedTime/3600);
+        int min = static_cast<int>( (estimatedTime-hours*3600)/60);
+        mess << hours << "h"
+            << std::setfill('0') << std::setw(2) << min << "h";
+      }
+      mess << ")";
+    }
+    QString formatStr = QString::fromStdString(mess.str());
+    m_progressBar->setFormat(formatStr);
   }
 }
 

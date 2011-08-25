@@ -128,8 +128,8 @@ MantidUI::MantidUI(ApplicationWindow *aw):
   m_algMonitor = new AlgorithmMonitor(this);
   connect(m_algMonitor,SIGNAL(algorithmStarted(void*)),m_exploreAlgorithms,SLOT(algorithmStarted(void*)), Qt::QueuedConnection);
   connect(m_algMonitor,SIGNAL(algorithmFinished(void*)),m_exploreAlgorithms,SLOT(algorithmFinished(void*)), Qt::QueuedConnection);
-  connect(m_algMonitor,SIGNAL(needUpdateProgress(void*,int, const QString&)),
-      m_exploreAlgorithms,SLOT(updateProgress(void*,int, const QString&)), Qt::QueuedConnection);
+  connect(m_algMonitor,SIGNAL(needUpdateProgress(void*,double, const QString&, double, int)),
+      m_exploreAlgorithms,SLOT(updateProgress(void*,double, const QString&, double, int)), Qt::QueuedConnection);
   m_algMonitor->start();
 
   mantidMenu = new QMenu(m_appWindow);

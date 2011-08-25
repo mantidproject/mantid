@@ -2,21 +2,22 @@
 #define ALGMONITOR_H
 
 #include "MantidAPI/Algorithm.h"
-
 #include <Poco/NObserver.h>
-
-#include <QObject>
-#include <QVector>
 #include <QDialog>
-#include <QPushButton>
 #include <QMutex>
+#include <QObject>
+#include <QPushButton>
 #include <QThread>
+#include <QVector>
 
 class QLabel;
 class QTreeWidget;
 class MantidUI;
 class MonitorDlg;
 
+/** Monitor for reporting progress and canceling running algorithms
+ *
+ */
 class AlgorithmMonitor: public QThread
 {
 	Q_OBJECT
@@ -40,7 +41,7 @@ public:
 signals:
   void algorithmStarted(void* alg);
   void algorithmFinished(void* alg);
-  void needUpdateProgress(void* alg,int p, const QString& msg);
+  void needUpdateProgress(void* alg,double p, const QString& msg, double estimatedTime, int progressPrecision);
   void countChanged();
   void allAlgorithmsStopped();
 protected:
@@ -78,7 +79,7 @@ public:
 public slots:
   void update();
   // The void* corresponds to Mantid::API::AlgorithmID, but Qt wasn't coping with the typedef
-  void updateProgress(void* alg, const int p, const QString& msg);
+  void updateProgress(void* alg, const double p, const QString& msg, double estimatedTime, int progressPrecision);
 private:
   AlgorithmMonitor *m_algMonitor;
   QTreeWidget *m_tree;
