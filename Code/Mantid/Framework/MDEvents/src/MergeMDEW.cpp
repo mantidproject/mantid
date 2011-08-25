@@ -292,7 +292,7 @@ namespace MDEvents
     typename MDEventWorkspace<MDE, nd>::sptr outWS = this->createOutputWS<MDE,nd>(ws);
 
     // Progress report based on events processed.
-    this->prog = new Progress(this, 0.1, 0.8, size_t(totalEvents));
+    this->prog = new Progress(this, 0.1, 0.9, size_t(totalEvents));
 
     // For tracking progress
     uint64_t totalEventsInTasks = 0;
@@ -407,8 +407,8 @@ namespace MDEvents
 
     // Complete the file-back-end creation.
     DiskMRU & mru = bc->getDiskMRU(); UNUSED_ARG(mru);
-    g_log.notice() << "Setting cache to 2000 MB read, 400 MB write, 200 MB small objects." << std::endl;
-    bc->setCacheParameters(sizeof(MDE), 2000000000/sizeof(MDE), 400000000/sizeof(MDE), 200000000/sizeof(MDE));
+    g_log.notice() << "Setting cache to 2000 MB read, 400 MB write, 0 MB small objects." << std::endl;
+    bc->setCacheParameters(sizeof(MDE), 2000000000/sizeof(MDE), 400000000/sizeof(MDE), 0/sizeof(MDE));
 
     return outWS;
   }
@@ -511,9 +511,6 @@ namespace MDEvents
 
       if (events.size() > 0)
       {
-        // Flush out any items to write.
-        bc->getDiskMRU().flushCache();
-
         // Add all the events from the same box
         outBox->addEvents( events );
         events.clear();
@@ -536,6 +533,9 @@ namespace MDEvents
 
           if (m_parallelSplit)
             tp.joinAll();
+
+          // Flush out any items to write.
+          bc->getDiskMRU().flushCache();
         }
       } // there was something loaded
 
@@ -582,7 +582,7 @@ namespace MDEvents
 
 
     // Progress report based on events processed.
-    this->prog = new Progress(this, 0.1, 0.8, size_t(totalEvents));
+    this->prog = new Progress(this, 0.1, 0.9, size_t(totalEvents));
 
     // For tracking progress
     uint64_t totalEventsInTasks = 0;
@@ -623,7 +623,7 @@ namespace MDEvents
   {
     CPUTimer overallTime;
 
-    this->progress(0.91, "Refreshing Cache");
+    this->progress(0.90, "Refreshing Cache");
     outWS->refreshCache();
     g_log.information() << overallTime << " to run refreshCache()." << std::endl;
 
@@ -631,7 +631,7 @@ namespace MDEvents
     if (!outputFile.empty())
     {
       g_log.notice() << "Starting SaveMDEW to update the file back-end." << std::endl;
-      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMDEW" ,0.8, 1.00);
+      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMDEW" ,0.9, 1.00);
       saver->setProperty("InputWorkspace", outIWS);
       saver->setProperty("UpdateFileBackEnd", true);
       saver->executeAsSubAlg();

@@ -222,7 +222,8 @@ namespace Kernel
    */
   void DiskMRU::writeOldObjects()
   {
-    std::cout << "DiskMRU:: Writing out " << m_writeBufferUsed << " events in " << m_writeBuffer.size() << " blocks." << std::endl;
+    if (m_writeBufferUsed > 0)
+      std::cout << "DiskMRU:: Writing out " << m_writeBufferUsed << " events in " << m_writeBuffer.size() << " blocks." << std::endl;
 //    std::cout << getMemoryStr() << std::endl;
 //    std::cout << getFreeSpaceMap().size() << " entries in the free size map." << std::endl;
 //    for (freeSpace_t::iterator it = m_free.begin(); it != m_free.end(); it++)
