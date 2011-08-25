@@ -544,7 +544,7 @@ namespace MDEvents
       this->m_alg->totalLoaded += numEvents;
       this->m_alg->getLogger().debug() << "Box " << this->m_blockNum << ". Total events " << this->m_alg->totalLoaded << ". This one added " << numEvents << ". "<< std::endl;
       // Report the progress
-      this->m_alg->prog->reportIncrement(numEvents, "Loading Box");
+      this->m_alg->prog->reportIncrement(int(numEvents), "Loading Box");
       this->m_alg->statsMutex.unlock();
 
     } // (end run)
