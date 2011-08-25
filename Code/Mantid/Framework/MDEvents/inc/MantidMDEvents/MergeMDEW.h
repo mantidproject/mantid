@@ -66,7 +66,16 @@ namespace MDEvents
     typename MDEventWorkspace<MDE, nd>::sptr createOutputWS(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
     template<typename MDE, size_t nd>
+    typename MDEventWorkspace<MDE, nd>::sptr createOutputWSbyCloning(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
+    template<typename MDE, size_t nd>
     void doExec(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
+    template<typename MDE, size_t nd>
+    void doExecByCloning(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
+    template<typename MDE, size_t nd>
+    void finalizeOutput(typename MDEventWorkspace<MDE, nd>::sptr outWS);
 
   public:
 
@@ -102,6 +111,9 @@ namespace MDEvents
 
     /// Progress reporter
     Mantid::API::Progress * prog;
+
+    /// Set to true if the output is cloned of the first one
+    bool clonedFirst;
 
   };
 

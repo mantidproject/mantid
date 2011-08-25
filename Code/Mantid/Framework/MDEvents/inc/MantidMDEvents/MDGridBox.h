@@ -59,6 +59,8 @@ namespace MDEvents
 
     size_t getNumChildren() const;
 
+    size_t getChildIndexFromID(size_t childId) const;
+
     IMDBox<MDE,nd> * getChild(size_t index);
 
     void setChildren(const std::vector<IMDBox<MDE,nd> *> & boxes, const size_t indexStart, const size_t indexEnd);
@@ -80,6 +82,7 @@ namespace MDEvents
     void centroidSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const;
 
     void splitContents(size_t index, Kernel::ThreadScheduler * ts = NULL);
+    void splitContentsById(size_t childId);
 
     void splitAllIfNeeded(Kernel::ThreadScheduler * ts = NULL);
 

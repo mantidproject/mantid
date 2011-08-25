@@ -1,11 +1,12 @@
-#include "MantidMDEvents/MergeMDEW.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/MultipleFileProperty.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidNexus/NeXusFile.hpp"
-#include "MantidMDEvents/IMDBox.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
+#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/MergeMDEW.h"
+#include "MantidNexus/NeXusFile.hpp"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -24,6 +25,7 @@ namespace MDEvents
   /** Constructor
    */
   MergeMDEW::MergeMDEW()
+  : clonedFirst(false)
   {
   }
     
@@ -65,7 +67,9 @@ namespace MDEvents
         "Select several MDEventWorkspace NXS files to merge together. Files must have common box structure.");
 
     declareProperty(new FileProperty("OutputFilename", "", FileProperty::OptionalSave, exts),
-        "Choose a file to which to save the output workspace. Optional: if specified, the workspace created will be file-backed.");
+        "Choose a file to which to save the output workspace. \n"
+        "Optional: if specified, the workspace created will be file-backed. \n"
+        "If not, it will be created in memory.");
 
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
         "An output MDEventWorkspace.");
@@ -74,7 +78,7 @@ namespace MDEvents
 
   //======================================================================================
   /** Task that loads all of the events from a particular block from a file
-   * that is being merged and then adds them onto another workspace.
+   * that is being merged and then adds them onto the output workspace.
    */
   TMDE_CLASS
   class MergeMDEWLoadTask : public Mantid::Kernel::Task
@@ -87,7 +91,7 @@ namespace MDEvents
      * @param outWS :: Output workspace
      */
     MergeMDEWLoadTask(MergeMDEW * alg, size_t blockNum, typename MDEventWorkspace<MDE, nd>::sptr outWS)
-        : m_alg(alg), m_blockNum(blockNum), outWS(outWS)
+    : m_alg(alg), m_blockNum(blockNum), outWS(outWS)
     {
     }
 
@@ -99,19 +103,19 @@ namespace MDEvents
       std::vector<MDE> events;
 
       // Go through each file
-      m_alg->fileMutex.lock();
+      this->m_alg->fileMutex.lock();
       for (size_t iw=0; iw<m_alg->files.size(); iw++)
       {
         // The file and the indexes into that file
-        ::NeXus::File * file = m_alg->files[iw];
-        std::vector<uint64_t> & box_event_index = m_alg->box_indexes[iw];
+        ::NeXus::File * file = this->m_alg->files[iw];
+        std::vector<uint64_t> & box_event_index = this->m_alg->box_indexes[iw];
 
-        uint64_t indexStart = box_event_index[m_blockNum*2+0];
-        uint64_t numEvents = box_event_index[m_blockNum*2+1];
+        uint64_t indexStart = box_event_index[this->m_blockNum*2+0];
+        uint64_t numEvents = box_event_index[this->m_blockNum*2+1];
         // This will APPEND the events to the one vector
         MDE::loadVectorFromNexusSlab(events, file, indexStart, numEvents);
       } // For each file
-      m_alg->fileMutex.unlock();
+      this->m_alg->fileMutex.unlock();
 
       if (events.size() > 0)
       {
@@ -130,7 +134,7 @@ namespace MDEvents
     }
 
 
-  private:
+  protected:
     /// MergeMDEW Algorithm - used to pass parameters etc. around
     MergeMDEW * m_alg;
     /// Which block to load?
@@ -138,6 +142,20 @@ namespace MDEvents
     /// Output workspace
     typename MDEventWorkspace<MDE, nd>::sptr outWS;
   };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -260,7 +278,7 @@ namespace MDEvents
 
 
   //----------------------------------------------------------------------------------------------
-  /** Perform the merging
+  /** Perform the merging, with generalized output workspace
    *
    * @param ws :: first MDEventWorkspace in the list to merge
    */
@@ -322,15 +340,293 @@ namespace MDEvents
     g_log.debug() << "Final splitting of boxes. " << totalEventsInTasks << " events." << std::endl;
     outWS->splitAllIfNeeded(ts);
     tp.joinAll();
-
     g_log.information() << overallTime << " to do all the adding." << std::endl;
+
+    // Finish things up
+    this->finalizeOutput<MDE,nd>(outWS);
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Create the output workspace by cloning the first one
+   *
+   * @param ws :: first workspace from the inputs
+   * @return the MDEventWorkspace sptr.
+   */
+  template<typename MDE, size_t nd>
+  typename MDEventWorkspace<MDE, nd>::sptr MergeMDEW::createOutputWSbyCloning(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  {
+    this->clonedFirst = true;
+    std::string outputFile = getProperty("OutputFilename");
+
+    if (outputFile.empty())
+    {
+      // ---- in-memory output ------------------------
+      // Load the first workspace again, this time in memory
+      IAlgorithm_sptr loader = createSubAlgorithm("LoadMDEW", 0.0, 0.05, false);
+      loader->setPropertyValue("Filename", m_filenames[0]);
+      loader->setPropertyValue("MetadataOnly", "0");
+      loader->setPropertyValue("FileBackEnd", "0");
+      loader->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace") );
+      loader->executeAsSubAlg();
+      outIWS = loader->getProperty("OutputWorkspace");
+    }
+    else
+    {
+      // -------- file-backed output ---------------------
+      IAlgorithm_sptr cloner = this->createSubAlgorithm("CloneMDEventWorkspace" ,0.01, 0.05, true);
+      cloner->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws) );
+      cloner->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
+      cloner->setPropertyValue("Filename", outputFile);
+      cloner->executeAsSubAlg();
+      outIWS = cloner->getProperty("OutputWorkspace");
+    }
+
+    // Make sure it is correct type
+    typename MDEventWorkspace<MDE, nd>::sptr outWS =
+        boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd> >(outIWS);
+    if (!outWS)
+      throw std::runtime_error("NULL or unexpected type resulting from the CloneMDEventWorkspace algorithm");
+
+    // Fix the box controller settings in the output workspace so that it splits normally
+    BoxController_sptr bc = outWS->getBoxController();
+    // Fix the max depth to something bigger.
+    bc->setMaxDepth(20);
+    bc->setSplitThreshold(5000);
+
+    // Complete the file-back-end creation.
+    DiskMRU & mru = bc->getDiskMRU(); UNUSED_ARG(mru);
+    g_log.notice() << "Setting cache to 2000 MB read, 400 MB write, 200 MB small objects." << std::endl;
+    bc->setCacheParameters(sizeof(MDE), 2000000000/sizeof(MDE), 400000000/sizeof(MDE), 200000000/sizeof(MDE));
+
+    return outWS;
+  }
+
+
+  //======================================================================================
+  /** Task that loads all of the events from a particular block from a file
+   * that is being merged and then adds them to
+   * a particular box in the output workspace.
+   */
+  TMDE_CLASS
+  class MergeMDEWLoadToBoxTask : public Mantid::Kernel::Task
+  {
+  public:
+    /// MergeMDEW Algorithm - used to pass parameters etc. around
+    MergeMDEW * m_alg;
+    /// Which block to load?
+    size_t m_blockNum;
+    /// Output workspace
+    typename MDEventWorkspace<MDE, nd>::sptr outWS;
+    /// List of boxes where index = box ID, value = the box pointer.
+    typename std::vector<IMDBox<MDE,nd> *> & m_boxesById;
+    /// True to split in parallel
+    bool m_parallelSplit;
+
+    /** Constructor
+     *
+     * @param alg :: MergeMDEW Algorithm - used to pass parameters etc. around
+     * @param blockNum :: Which block to load?
+     * @param outWS :: Output workspace
+     */
+    MergeMDEWLoadToBoxTask(MergeMDEW * alg, size_t blockNum, typename MDEventWorkspace<MDE, nd>::sptr outWS,
+        typename std::vector<IMDBox<MDE,nd> *> & boxesById, bool parallelSplit)
+      : m_alg(alg), m_blockNum(blockNum), outWS(outWS),
+        m_boxesById(boxesById), m_parallelSplit(parallelSplit)
+    {
+      this->m_cost = double(this->m_alg->eventsPerBox[this->m_blockNum]);
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Main method that performs the work for the task. */
+    void run()
+    {
+      uint64_t numEvents = this->m_alg->eventsPerBox[this->m_blockNum];
+      if (numEvents == 0) return;
+
+      // Find the box in the output.
+      IMDBox<MDE,nd> * outBox = this->m_boxesById[this->m_blockNum];
+      if (!outBox)
+        throw std::runtime_error("Could not find box at ID " + Strings::toString(this->m_blockNum) );
+      BoxController_sptr bc = outBox->getBoxController();
+
+      // Should we pre-emptively split the box
+      MDBox<MDE,nd> * outMDBox = dynamic_cast<MDBox<MDE,nd> *>(outBox);
+      if (outMDBox && (numEvents > bc->getSplitThreshold()))
+      {
+        // Yes, let's split it
+        MDGridBox<MDE,nd> * parent = dynamic_cast<MDGridBox<MDE,nd> *>(outMDBox->getParent());
+        if (parent)
+        {
+          size_t index = parent->getChildIndexFromID( outBox->getId() );
+          if (index < parent->getNumChildren())
+          {
+            parent->splitContents(index);
+            // Have to update our pointer - old one was deleted!
+            outBox = parent->getChild(index);
+          }
+        }
+      }
+      // Is the output a grid box?
+      MDGridBox<MDE,nd> * outGridBox = dynamic_cast<MDGridBox<MDE,nd> *>(outBox);
+
+
+      // Vector of events accumulated from ALL files to merge.
+      std::vector<MDE> events;
+
+      // Occasionally release free memory (has an effect on Linux only).
+      if (numEvents > 1000000)
+        MemoryManager::Instance().releaseFreeMemory();
+
+      // Reserve ALL the space you will need for this vector. Should speed up a lot.
+      events.reserve(numEvents);
+
+      // Go through each file
+      this->m_alg->fileMutex.lock();
+      //bc->fileMutex.lock();
+      for (size_t iw=1; iw<this->m_alg->files.size(); iw++)
+      {
+        // The file and the indexes into that file
+        ::NeXus::File * file = this->m_alg->files[iw];
+        std::vector<uint64_t> & box_event_index = this->m_alg->box_indexes[iw];
+
+        uint64_t indexStart = box_event_index[this->m_blockNum*2+0];
+        uint64_t numEvents = box_event_index[this->m_blockNum*2+1];
+        // This will APPEND the events to the one vector
+        MDE::loadVectorFromNexusSlab(events, file, indexStart, numEvents);
+      } // For each file
+      //bc->fileMutex.unlock();
+      this->m_alg->fileMutex.unlock();
+
+      if (events.size() > 0)
+      {
+        // Flush out any items to write.
+        bc->getDiskMRU().flushCache();
+
+        // Add all the events from the same box
+        outBox->addEvents( events );
+        events.clear();
+        std::vector<MDE>().swap(events); // really free the data
+
+        if (outGridBox)
+        {
+          // Occasionally release free memory (has an effect on Linux only).
+          MemoryManager::Instance().releaseFreeMemory();
+
+          // Now do a split on only this box.
+
+          // On option, do the split in parallel
+          ThreadSchedulerFIFO * ts = NULL;
+          if (m_parallelSplit)
+            ts = new ThreadSchedulerFIFO();
+          ThreadPool tp(ts);
+
+          outGridBox->splitAllIfNeeded(ts);
+
+          if (m_parallelSplit)
+            tp.joinAll();
+        }
+      } // there was something loaded
+
+      // Track the total number of added events
+      this->m_alg->statsMutex.lock();
+      this->m_alg->totalLoaded += numEvents;
+      this->m_alg->getLogger().debug() << "Box " << this->m_blockNum << ". Total events " << this->m_alg->totalLoaded << ". This one added " << numEvents << ". "<< std::endl;
+      // Report the progress
+      this->m_alg->prog->reportIncrement(numEvents, "Loading Box");
+      this->m_alg->statsMutex.unlock();
+
+    } // (end run)
+
+  };
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Perform the merging, but clone the initial workspace and use the same splitting
+   * as it
+   *
+   * @param ws :: first MDEventWorkspace in the list to merge
+   */
+  template<typename MDE, size_t nd>
+  void MergeMDEW::doExecByCloning(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  {
+    // First, load all the box data
+    this->loadBoxData<MDE,nd>();
+
+    // Now create the output workspace
+    typename MDEventWorkspace<MDE, nd>::sptr outWS = this->createOutputWSbyCloning<MDE,nd>(ws);
+
+    // --------  Make a vector where index = box ID, value = box. ------------
+    std::vector<IMDBox<MDE,nd> *> boxes;
+    std::vector<IMDBox<MDE,nd> *> boxesById(outWS->getBoxController()->getMaxId()+1, NULL);
+    //std::cout << boxesById.size() << " vector" << std::endl;
+    outWS->getBox()->getBoxes(boxes, 1000, false);
+    for (size_t i=0; i < boxes.size(); i++)
+    {
+      IMDBox<MDE,nd> * box = boxes[i];
+      //std::cout << "Found box " << box->getId() << std::endl;
+      boxesById[box->getId()] = box;
+    }
+
+
+
+    // Progress report based on events processed.
+    this->prog = new Progress(this, 0.1, 0.8, size_t(totalEvents));
+
+    // For tracking progress
+    uint64_t totalEventsInTasks = 0;
+    this->totalLoaded = 0;
+    // Prepare thread pool
+    CPUTimer overallTime;
+    //ThreadSchedulerLargestCost * ts = new ThreadSchedulerLargestCost();
+    ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
+    ThreadPool tp(ts);
+
+    for (size_t ib=0; ib<numBoxes; ib++)
+    {
+      // Add a task for each box that actually has some events
+      if (this->eventsPerBox[ib] > 0)
+      {
+        totalEventsInTasks += eventsPerBox[ib];
+        MergeMDEWLoadToBoxTask<MDE,nd> * task = new MergeMDEWLoadToBoxTask<MDE,nd>(this, ib, outWS, boxesById, true);
+        task->run();
+        delete task;
+        //ts->push(task);
+      }
+    } // for each box
+
+    // Run any final tasks
+    tp.joinAll();
+    g_log.information() << overallTime << " to do all the adding." << std::endl;
+
+    // Finish things up
+    this->finalizeOutput<MDE,nd>(outWS);
+  }
+
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Now re-save the MDEventWorkspace to update the file back end */
+  template<typename MDE, size_t nd>
+  void MergeMDEW::finalizeOutput(typename MDEventWorkspace<MDE, nd>::sptr outWS)
+  {
+    CPUTimer overallTime;
 
     this->progress(0.91, "Refreshing Cache");
     outWS->refreshCache();
     g_log.information() << overallTime << " to run refreshCache()." << std::endl;
 
-
-    // Now re-save the MDEventWorkspace to update the filec
     std::string outputFile = getProperty("OutputFilename");
     if (!outputFile.empty())
     {
@@ -343,6 +639,7 @@ namespace MDEvents
 
     g_log.information() << overallTime << " to run SaveMDEW." << std::endl;
   }
+
 
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
@@ -357,13 +654,14 @@ namespace MDEvents
     // Start by loading the first file but just the meta data to get dimensions, etc.
     IAlgorithm_sptr loader = createSubAlgorithm("LoadMDEW", 0.0, 0.05, false);
     loader->setPropertyValue("Filename", firstFile);
-    loader->setPropertyValue("MetadataOnly", "1");
+    loader->setPropertyValue("MetadataOnly", "0");
+    loader->setPropertyValue("FileBackEnd", "1");
     loader->setPropertyValue("OutputWorkspace", "anonymous");
     loader->executeAsSubAlg();
     IMDEventWorkspace_sptr firstWS = loader->getProperty("OutputWorkspace");
 
     // Call the templated method
-    CALL_MDEVENT_FUNCTION( this->doExec, firstWS);
+    CALL_MDEVENT_FUNCTION( this->doExecByCloning, firstWS);
 
     setProperty("OutputWorkspace", outIWS);
   }

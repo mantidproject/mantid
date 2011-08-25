@@ -249,6 +249,17 @@ public:
     }
   }
 
+  void test_getChildIndexFromID()
+  {
+    // Build the grid box
+    MDGridBox<MDLeanEvent<1>,1> * g = MDEventsTestHelper::makeMDGridBox<1>(10,10,0.0, 10.0);
+    TS_ASSERT_EQUALS(g->getChildIndexFromID( g->getChild(0)->getId() ), 0);
+    TS_ASSERT_EQUALS(g->getChildIndexFromID( g->getChild(5)->getId() ), 5);
+    TS_ASSERT_EQUALS(g->getChildIndexFromID(0), size_t(-1) );
+    TS_ASSERT_EQUALS(g->getChildIndexFromID(11), size_t(-1) );
+  }
+
+
 
   //-------------------------------------------------------------------------------------
   /** Build a 3D MDGridBox and check that the boxes created within are where you expect */

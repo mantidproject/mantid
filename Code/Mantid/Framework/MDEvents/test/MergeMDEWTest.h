@@ -74,10 +74,12 @@ public:
     
     TS_ASSERT_EQUALS( ws->getNPoints(), 30000);
     IMDBox3Lean * box = ws->getBox();
-    TS_ASSERT_EQUALS( box->getNumChildren(), 64);
-    // Every sub-box has some events since it was uniformly distributed before
+    TS_ASSERT_EQUALS( box->getNumChildren(), 1000);
+
+    // Every sub-box has on average 30 events (there are 1000 boxes)
+    // Check that each box has at least SOMETHING
     for (size_t i=0; i<box->getNumChildren(); i++)
-      TS_ASSERT_LESS_THAN( 300, box->getChild(i)->getNPoints());
+      TS_ASSERT_LESS_THAN( 1, box->getChild(i)->getNPoints());
 
     if (!OutputFilename.empty())
     {
