@@ -120,6 +120,8 @@ namespace Mantid
         void reset() { counted=0; vec.clear();};  
       };
 
+      /// Check the validity range and add it to the instrument object
+      void setValidityRange(const Poco::XML::Element* pRootElem);
       /// Reads the contents of the \<defaults\> element to set member variables,
       void readDefaults(Poco::XML::Element* defaults);
 

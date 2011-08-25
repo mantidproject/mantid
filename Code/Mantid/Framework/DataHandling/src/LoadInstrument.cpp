@@ -123,16 +123,12 @@ namespace Mantid
         }
       }
 
-
-      // Clear off any existing instrument for this workspace
-      m_workspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
+      // Create our new instrument
+      m_instrument = Instrument_sptr(new Instrument);
 
       // Remove the path from the filename for use with the InstrumentDataService
       const std::string::size_type stripPath = m_filename.find_last_of("\\/");
       std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
-
-      // Get reference to Instrument and set its name
-      m_instrument = m_workspace->getBaseInstrument();
 
       // Set up the DOM parser and parse xml file
       DOMParser pParser;
@@ -157,62 +153,24 @@ namespace Mantid
         throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", m_filename);
       }
 
-      // check if IDF has valid-from and valid-to tags defined
-      if ( !pRootElem->hasAttribute("valid-from") )
-      {
-        throw Kernel::Exception::InstrumentDefinitionError("<instrument> element must contain a valid-from tag", m_filename);
-      }
-      else
-      {
-        try
-        {
-          DateAndTime d(pRootElem->getAttribute("valid-from"));
-          m_instrument->setValidFromDate(d);
-        }
-        catch(...)
-        {
-          throw Kernel::Exception::InstrumentDefinitionError("The valid-from <instrument> tag must be a ISO8601 string", m_filename);
-        }
-      }
-
-      if ( !pRootElem->hasAttribute("valid-to") )
-      {
-        DateAndTime d = DateAndTime::get_current_time();
-        m_instrument->setValidToDate(d);
-        // Ticket #2335: no required valid-to date.
-        //throw Kernel::Exception::InstrumentDefinitionError("<instrument> element must contain a valid-to tag", m_filename);
-      }
-      else
-      {
-        try
-        {
-          DateAndTime d(pRootElem->getAttribute("valid-to"));
-          m_instrument->setValidToDate(d);
-        }
-        catch(...)
-        {
-          throw Kernel::Exception::InstrumentDefinitionError("The valid-to <instrument> tag must be a ISO8601 string", m_filename);
-        }
-      }
-
       // Handle used in the singleton constructor for instrument file should append the value
       // of the last-modified tag inside the file to determine if it is already in memory so that
       // changes to the instrument file will cause file to be reloaded.
-      instrumentFile = instrumentFile + pRootElem->getAttribute("last-modified"); // pRootElem->getAttribute("name") + pRootElem->getAttribute("last-modified");
+      instrumentFile = instrumentFile + pRootElem->getAttribute("last-modified");
 
       // Check whether the instrument is already in the InstrumentDataService
       if ( InstrumentDataService::Instance().doesExist(instrumentFile) )
       {
         // If it does, just use the one from the one stored there
-        m_workspace->setInstrument(InstrumentDataService::Instance().retrieve(instrumentFile));
-        // Get reference to Instrument 
-        m_instrument = m_workspace->getBaseInstrument();
+        m_instrument = InstrumentDataService::Instance().retrieve(instrumentFile);
         //get list of monitors and set the property
         std::vector<detid_t>monitordetIdList=m_instrument->getMonitors();
         setProperty("MonitorList",monitordetIdList);
       }
       else
       {
+        setValidityRange(pRootElem);
+
         readDefaults(pRootElem->getChildElement("defaults"));
 
         // create maps: isTypeAssembly and mapTypeNameToShape
@@ -461,7 +419,10 @@ namespace Mantid
       }
       // release XML document
       pDoc->release();
-      
+
+      // Add the instrument to the workspace
+      m_workspace->setInstrument(m_instrument);
+
       // populate parameter map of workspace 
       m_workspace->populateInstrumentParameters();
 
@@ -474,6 +435,50 @@ namespace Mantid
       if( rewriteSpectraMap )
       {
         m_workspace->rebuildSpectraMapping();
+      }
+    }
+
+    /** Checks the validity range in the IDF and adds it to the instrument object
+     *  @param pRootElem A pointer to the root element of the instrument definition
+     */
+    void LoadInstrument::setValidityRange(const Poco::XML::Element* pRootElem)
+    {
+      // check if IDF has valid-from and valid-to tags defined
+      if ( !pRootElem->hasAttribute("valid-from") )
+      {
+        throw Kernel::Exception::InstrumentDefinitionError("<instrument> element must contain a valid-from tag", m_filename);
+      }
+      else
+      {
+        try
+        {
+          DateAndTime d(pRootElem->getAttribute("valid-from"));
+          m_instrument->setValidFromDate(d);
+        }
+        catch(...)
+        {
+          throw Kernel::Exception::InstrumentDefinitionError("The valid-from <instrument> tag must be a ISO8601 string", m_filename);
+        }
+      }
+
+      if ( !pRootElem->hasAttribute("valid-to") )
+      {
+        DateAndTime d = DateAndTime::get_current_time();
+        m_instrument->setValidToDate(d);
+        // Ticket #2335: no required valid-to date.
+        //throw Kernel::Exception::InstrumentDefinitionError("<instrument> element must contain a valid-to tag", m_filename);
+      }
+      else
+      {
+        try
+        {
+          DateAndTime d(pRootElem->getAttribute("valid-to"));
+          m_instrument->setValidToDate(d);
+        }
+        catch(...)
+        {
+          throw Kernel::Exception::InstrumentDefinitionError("The valid-to <instrument> tag must be a ISO8601 string", m_filename);
+        }
       }
     }
 
