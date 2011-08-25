@@ -709,7 +709,7 @@ namespace Mantid
         throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): NULL spectrum found at the given workspace index.", "");
 
       const std::set<detid_t> dets = spec->getDetectorIDs();
-      Instrument_sptr localInstrument = getInstrument();
+      Instrument_const_sptr localInstrument = getInstrument();
       if( !localInstrument )
       {
         g_log.debug() << "No instrument defined.\n";

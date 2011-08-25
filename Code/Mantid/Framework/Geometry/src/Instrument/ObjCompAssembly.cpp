@@ -48,12 +48,12 @@ ObjCompAssembly::ObjCompAssembly(const IComponent* base, const ParameterMap * ma
  *  an assembly itself, then in addition to parenting
  *  this is registered as a children of reference.
  */
-ObjCompAssembly::ObjCompAssembly(const std::string& n, Component* reference) :
+ObjCompAssembly::ObjCompAssembly(const std::string& n, IComponent* reference) :
   ObjComponent(n, reference)
 {
   if (reference)
   {
-    ObjCompAssembly* test=dynamic_cast<ObjCompAssembly*>(reference);
+    ICompAssembly* test=dynamic_cast<ICompAssembly*>(reference);
     if (test)
       test->add(this);
   }

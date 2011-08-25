@@ -569,17 +569,12 @@ namespace Mantid
       Element* pType = getTypeElement[pCompElem->getAttribute("type")];
       if (pType->hasAttribute("outline") && pType->getAttribute("outline") != "no")
       {
-        ass = new Geometry::ObjCompAssembly(getNameOfLocationElement(pLocElem));
+        ass = new Geometry::ObjCompAssembly(getNameOfLocationElement(pLocElem),parent);
       }
       else
       {
-        ass = new Geometry::CompAssembly;
-        ass->setName( getNameOfLocationElement(pLocElem) );
+        ass = new Geometry::CompAssembly(getNameOfLocationElement(pLocElem),parent);
       }
-      ass->setParent(parent);
-      parent->add(ass);
-
-      ass->setName( getNameOfLocationElement(pLocElem) );
 
       if (VERBOSE) std::cout << "appendAssembly() is creating an assembly called " << ass->getName() << "\n";
 

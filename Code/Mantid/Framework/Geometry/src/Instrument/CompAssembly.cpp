@@ -58,7 +58,7 @@ CompAssembly::CompAssembly(const std::string& n, IComponent* reference) :
 {
   if (reference)
   {
-    CompAssembly* test=dynamic_cast<CompAssembly*>(reference);
+    ICompAssembly* test=dynamic_cast<ICompAssembly*>(reference);
     if (test)
     {
       test->add(this);

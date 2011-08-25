@@ -268,7 +268,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
     // the detector returned by det->getID()
     if ( boost::dynamic_pointer_cast<Geometry::DetectorGroup>(det) )
     {
-      Instrument_sptr inst = m_workspace->getInstrument();
+      Instrument_const_sptr inst = m_workspace->getInstrument();
       det = inst->getDetector(det->getID());
     }
 
