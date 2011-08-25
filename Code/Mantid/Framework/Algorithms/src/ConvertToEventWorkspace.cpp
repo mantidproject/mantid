@@ -72,7 +72,7 @@ namespace Algorithms
    */
   void ConvertToEventWorkspace::exec()
   {
-    Workspace2D_sptr inWS = getProperty("InputWorkspace");
+    Workspace2D_const_sptr inWS = getProperty("InputWorkspace");
 
     bool GenerateMultipleEvents = getProperty("GenerateMultipleEvents");
     int MaxEventsPerBin = getProperty("MaxEventsPerBin");

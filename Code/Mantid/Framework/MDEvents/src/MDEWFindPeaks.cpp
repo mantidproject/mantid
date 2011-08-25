@@ -273,10 +273,10 @@ namespace MDEvents
       V3D Q(boxCenter[0], boxCenter[1], boxCenter[2]);
 
       // Create a peak and add it
+      // Empty starting peak.
+      Peak p;
       try
       {
-        // Empty starting peak.
-        Peak p;
         if (dimType == QLAB)
         {
           // Build using the Q-lab-frame constructor
@@ -289,29 +289,33 @@ namespace MDEvents
           // Build using the Q-sample-frame constructor
           p = Peak(inst, Q, goniometer);
         }
-
-        // TODO: Goniometer matrix and other stuff?
-
-        // Look for a detector
-        p.findDetector();
-
-        // The "bin count" used will be the box density.
-        p.setBinCount( box->getSignalNormalized() );
-
-        // Save the run number found before.
-        p.setRunNumber(runNumber);
-
-        peakWS->addPeak(p);
-
-        // Report progres for each box found.
-        prog->report("Adding Peaks");
       }
       catch (std::exception &e)
       {
-        g_log.notice() << "Error adding peak at " << Q << " because of '" << e.what() << "'. Peak will be skipped." << std::endl;
+        g_log.notice() << "Error creating peak at " << Q << " because of '" << e.what() << "'. Peak will be skipped." << std::endl;
+        continue;
       }
 
-    }
+      try
+      { // Look for a detector
+        p.findDetector();
+      }
+      catch (...)
+      { /* Ignore errors in ray-tracer TODO: Handle for WISH data later */ }
+
+      // The "bin count" used will be the box density.
+      p.setBinCount( box->getSignalNormalized() );
+
+      // Save the run number found before.
+      p.setRunNumber(runNumber);
+
+      peakWS->addPeak(p);
+
+      // Report progres for each box found.
+      prog->report("Adding Peaks");
+
+    } // for each box found
+
   }
 
   //----------------------------------------------------------------------------------------------
