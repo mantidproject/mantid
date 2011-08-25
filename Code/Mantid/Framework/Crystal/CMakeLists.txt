@@ -1,9 +1,9 @@
 set ( SRC_FILES
 	src/AnvredCorrection.cpp
 	src/CalculateUMatrix.cpp
-        src/FindUB_UsingLatticeParameters.cpp
-        src/FindUB_UsingMinMaxD.cpp
-        src/FindUB_UsingIndexedPeaks.cpp
+        src/FindUBUsingLatticeParameters.cpp
+        src/FindUBUsingMinMaxD.cpp
+        src/FindUBUsingIndexedPeaks.cpp
         src/IndexPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
 	src/LoadIsawUB.cpp
@@ -21,9 +21,9 @@ set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
 	inc/MantidCrystal/AnvredCorrection.h
 	inc/MantidCrystal/CalculateUMatrix.h
-	inc/MantidCrystal/FindUB_UsingLatticeParameters.h
-	inc/MantidCrystal/FindUB_UsingMinMaxD.h
-	inc/MantidCrystal/FindUB_UsingIndexedPeaks.h
+	inc/MantidCrystal/FindUBUsingLatticeParameters.h
+	inc/MantidCrystal/FindUBUsingMinMaxD.h
+	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/LoadIsawUB.h
@@ -40,6 +40,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	test/AnvredCorrectionTest.h
 	test/CalculateUMatrixTest.h
+        test/FindUBUsingIndexedPeaksTest.h
 	test/IntegratePeakTimeSlicesTest.h
 	test/LoadIsawUBTest.h
 	test/LoadPeaksFileTest.h
