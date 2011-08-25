@@ -583,6 +583,22 @@ int convert(const char* A,T& out)
   return convert(Cx,out);
 }
 
+
+//------------------------------------------------------------------------------------------------
+/** Convert a number or other value to a string
+ *
+ * @param value :: templated value (e.g. a double) to convert
+ * @return a string
+ */
+template<typename T>
+std::string toString(const T value)
+{
+  std::ostringstream mess;
+  mess << value;
+  return mess.str();
+}
+
+
 //------------------------------------------------------------------------------------------------
 /**
   Write out the three vectors into a file of type dc 9
@@ -813,6 +829,10 @@ template DLLExport int convert(const char*,std::string&);
 template DLLExport int convert(const char*,double&);
 template DLLExport int convert(const char*,int&);
 template DLLExport int convert(const char*,std::size_t&);
+
+template DLLExport std::string toString(const double value);
+template DLLExport std::string toString(const int value);
+template DLLExport std::string toString(const size_t value);
 
 template DLLExport int convPartNum(const std::string&,double&);
 template DLLExport int convPartNum(const std::string&,int&);

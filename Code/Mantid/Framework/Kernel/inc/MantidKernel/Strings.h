@@ -103,6 +103,9 @@ template<typename T> int convert(const std::string& A,T& out);
 /// Convert a char* into a number
 template<typename T> int convert(const char* A,T& out);
 
+/// Convert a number to a string
+template<typename T> std::string toString(const T value);
+
 
 template<typename T> 
 int setValues(const std::string& Line,const std::vector<int>& Index,std::vector<T>& Out);
