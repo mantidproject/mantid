@@ -126,7 +126,6 @@ void EQSANSLoad::readRectangularMasks(const std::string& line)
 
 void EQSANSLoad::readTOFcuts(const std::string& line)
 {
-  //TODO: property to tell us whether to use the config cuts
   Poco::RegularExpression re_key("tof edge discard", Poco::RegularExpression::RE_CASELESS);
   Poco::RegularExpression::Match match;
   if (re_key.match(line, 0, match))
@@ -147,6 +146,48 @@ void EQSANSLoad::readTOFcuts(const std::string& line)
   }
 }
 
+void EQSANSLoad::readBeamCenter(const std::string& line)
+{
+  Poco::RegularExpression re_key("spectrum center", Poco::RegularExpression::RE_CASELESS);
+  Poco::RegularExpression::Match match;
+  if (re_key.match(line, 0, match))
+  {
+    Poco::RegularExpression re_sig("=[ ]*([0-9]+.[0-9]*)[ ]*[ ,][ ]*([0-9]+.[0-9]+)");
+    if (re_sig.match(line, 0, match))
+    {
+      Poco::RegularExpression::MatchVec posVec;
+      re_sig.match(line, 0, posVec);
+      if (posVec.size()==3)
+      {
+        std::string num_str = line.substr(posVec[1].offset, posVec[1].length);
+        Poco::NumberParser::tryParseFloat(num_str, m_center_x);
+        num_str = line.substr(posVec[2].offset, posVec[2].length);
+        Poco::NumberParser::tryParseFloat(num_str, m_center_y);
+      }
+    }
+  }
+}
+
+void EQSANSLoad::readModeratorPosition(const std::string& line)
+{
+  Poco::RegularExpression re_key("sample location", Poco::RegularExpression::RE_CASELESS);
+  Poco::RegularExpression::Match match;
+  if (re_key.match(line, 0, match))
+  {
+    Poco::RegularExpression re_sig("=[ ]*([0-9]+)");
+    if (re_sig.match(line, 0, match))
+    {
+      Poco::RegularExpression::MatchVec posVec;
+      re_sig.match(line, 0, posVec);
+      if (posVec.size()==2)
+      {
+        std::string num_str = line.substr(posVec[1].offset, posVec[1].length);
+        Poco::NumberParser::tryParseFloat(num_str, m_moderator_position);
+      }
+    }
+  }
+}
+
 
 void EQSANSLoad::readConfigFile(const std::string& filePath)
 {
@@ -154,6 +195,14 @@ void EQSANSLoad::readConfigFile(const std::string& filePath)
   m_mask_as_string = "";
   m_low_TOF_cut = 0;
   m_high_TOF_cut = 0;
+  m_center_x = 0;
+  m_center_y = 0;
+  m_moderator_position = 0;
+
+  // The following should be properties
+  bool use_config_mask = true;
+  bool use_config_cutoff = true;
+  bool use_config_center = true;
 
   std::ifstream file(filePath.c_str());
   if (!file)
@@ -167,23 +216,28 @@ void EQSANSLoad::readConfigFile(const std::string& filePath)
   while( getline(file,line) )
   {
     boost::trim(line);
-    readRectangularMasks(line);
-    readTOFcuts(line);
+    if (use_config_mask) readRectangularMasks(line);
+    if (use_config_cutoff) readTOFcuts(line);
+    if (use_config_center) readBeamCenter(line);
   }
 
-  bool use_config_mask = true;
+
   if (use_config_mask)
   {
     dataWS->mutableRun().addProperty("rectangular_masks", m_mask_as_string, "pixels", true);
   }
 
-  bool use_config_cutoff = true;
   if (use_config_cutoff)
   {
     dataWS->mutableRun().addProperty("low_tof_cut", m_low_TOF_cut, "microsecond", true);
     dataWS->mutableRun().addProperty("high_tof_cut", m_high_TOF_cut, "microsecond", true);
   }
 
+  if (use_config_beam)
+  {
+    dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel", true);
+    dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel", true);
+  }
 }
 
 void EQSANSLoad::exec()
@@ -231,11 +285,19 @@ void EQSANSLoad::exec()
   if (config_file.size()>0)
   {
     readConfigFile(config_file);
-
-
-
   } else {
     g_log.error() << "Cound not find config file for workspace " << getPropertyValue("OutputWorkspace") << std::endl;
+  }
+
+  // If we use the config file, move the sample position
+  if (m_use_config)
+  {
+    /*
+    MoveInstrumentComponent(workspace+'_evt', "moderator",
+                            Z=sample_to_mod,
+                            RelativePosition="0")
+    mtd[workspace+'_evt'].getRun().addProperty_dbl("moderator_position", sample_to_mod, "mm", True)
+    */
   }
 
 

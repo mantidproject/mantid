@@ -37,7 +37,8 @@ class DLLExport EQSANSLoad : public API::Algorithm
 public:
   /// (Empty) Constructor
   EQSANSLoad() : API::Algorithm(), m_low_TOF_cut(0), m_high_TOF_cut(0),
-  m_mask_as_string("") {}
+  m_mask_as_string(""), m_center_x(0), m_center_y(0), m_moderator_position(0),
+  m_use_config(true){}
   /// Virtual destructor
   virtual ~EQSANSLoad() {}
   /// Algorithm's name
@@ -58,12 +59,18 @@ private:
   void readConfigFile(const std::string& filePath);
   void readRectangularMasks(const std::string& line);
   void readTOFcuts(const std::string& line);
+  void readBeamCenter(const std::string& line);
+  void readModeratorPosition(const std::string& line);
 
   //std::vector< std::vector<int> > m_rectangular_masks;
   double m_low_TOF_cut;
   double m_high_TOF_cut;
+  double m_center_x;
+  double m_center_y;
   std::string m_mask_as_string;
+  double m_moderator_position;
   DataObjects::EventWorkspace_sptr dataWS;
+  bool m_use_config;
 };
 
 } // namespace Algorithms
