@@ -36,6 +36,7 @@ private:
   class MockImplicitFunction : public Mantid::Geometry::MDImplicitFunction
   {
   public:
+    using MDImplicitFunction::isPointContained; // Avoids Intel compiler warning.
     virtual bool isPointContained(const Mantid::coord_t *)
     {
       return false;

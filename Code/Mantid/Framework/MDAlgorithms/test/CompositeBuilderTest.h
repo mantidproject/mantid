@@ -32,19 +32,20 @@ private:
         {
             return new FakeParameter;
         }
-    };	
+    };
 
 
 
     class FakeImplicitFunction : public Mantid::Geometry::MDImplicitFunction
     {
     public:
-        bool isPointContained(const Mantid::coord_t*)
-        {    
-            return false;
-        }
-		MOCK_CONST_METHOD0(getName, std::string());
-		MOCK_CONST_METHOD0(toXMLString, std::string());
+      using MDImplicitFunction::isPointContained; // Avoids Intel compiler warning.
+      bool isPointContained(const Mantid::coord_t*)
+      {
+        return false;
+      }
+      MOCK_CONST_METHOD0(getName, std::string());
+      MOCK_CONST_METHOD0(toXMLString, std::string());
     };
 
     class FakeFunctionBuilder : public Mantid::API::ImplicitFunctionBuilder
