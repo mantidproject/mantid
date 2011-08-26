@@ -55,6 +55,12 @@ if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
       set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el5" )
     elseif ( ${UNIX_CODENAME} MATCHES "Santiago" )
       set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el6" )
+    elseif ( ${UNIX_CODENAME} MATCHES "Laughlin" )
+      set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc14" )
+    elseif ( ${UNIX_CODENAME} MATCHES "Lovelock" )
+      set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc15" )
+    elseif ( ${UNIX_CODENAME} MATCHES "Verne" )
+      set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc16" )
     endif ( ${UNIX_CODENAME} MATCHES "Tikanga" )
     
     # according to rpm.org: name-version-release.architecture.rpm
