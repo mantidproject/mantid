@@ -82,7 +82,8 @@ namespace Crystal
           reasonable_angle->clone(),Direction::Input),"Lattice parameter gamma");
 
     this->declareProperty(new PropertyWithValue<int>( "num_initial", 15,
-          moreThan2Int,Direction::Input), "Number of Peaks to Use on First Pass(15)");
+          moreThan2Int,Direction::Input), 
+          "Number of Peaks to Use on First Pass(15)");
 
     this->declareProperty(new PropertyWithValue<double>( "tolerance",0.15,
           mustBePositive->clone(),Direction::Input),"Indexing Tolerance (0.15)");

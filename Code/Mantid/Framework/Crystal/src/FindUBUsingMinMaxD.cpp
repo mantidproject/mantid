@@ -60,13 +60,16 @@ namespace Crystal
 
     // use negative values, force user to input all parameters
     this->declareProperty(new PropertyWithValue<double>( "min_d",-1.0,
-          mustBePositive->clone(),Direction::Input),"Lower Bound on Lattice Parameters a, b, c");
+          mustBePositive->clone(),Direction::Input),
+          "Lower Bound on Lattice Parameters a, b, c");
 
     this->declareProperty(new PropertyWithValue<double>( "max_d",-1.0,
-          mustBePositive->clone(),Direction::Input),"Upper Bound on Lattice Parameters a, b, c");
+          mustBePositive->clone(),Direction::Input),
+          "Upper Bound on Lattice Parameters a, b, c");
 
     this->declareProperty(new PropertyWithValue<int>( "num_initial", 20,
-          atLeast3Int,Direction::Input), "Number of Peaks to Use on First Pass(20)");
+          atLeast3Int,Direction::Input), 
+          "Number of Peaks to Use on First Pass(20)");
 
     this->declareProperty(new PropertyWithValue<double>( "tolerance",0.15,
           mustBePositive->clone(),Direction::Input),"Indexing Tolerance (0.15)");

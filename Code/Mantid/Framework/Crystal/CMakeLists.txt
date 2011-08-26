@@ -40,6 +40,8 @@ set ( INC_FILES
 set ( TEST_FILES
 	test/AnvredCorrectionTest.h
 	test/CalculateUMatrixTest.h
+        test/FindUBUsingLatticeParametersTest.h
+        test/FindUBUsingMinMaxDTest.h
         test/FindUBUsingIndexedPeaksTest.h
 	test/IntegratePeakTimeSlicesTest.h
 	test/LoadIsawUBTest.h
