@@ -88,7 +88,7 @@ public:
     /// Clears all properties under management
     void clear();  
 
-protected:
+public:
 
     Property* getPointerToProperty(const std::string &name) const;
     Property* getPointerToPropertyOrdinal(const int &index) const;

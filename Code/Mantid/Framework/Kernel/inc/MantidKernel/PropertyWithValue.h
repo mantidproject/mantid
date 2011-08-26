@@ -396,6 +396,22 @@ public:
     return  m_initialValue == m_value;
   }
 
+  /** Checks if the property should be enabled in gui
+   *  @returns bool
+   */
+  virtual bool isEnabled() const
+  {
+    return m_validator->isEnabled();
+  }
+
+  /** Checks if the property should be visible in gui
+   *  @returns bool
+   */
+  virtual bool isVisible() const
+  {
+    return m_validator->isVisible();
+  }
+
   /** Returns the set of valid values for this property, if such a set exists.
    *  If not, it returns an empty vector.
    *  @return Returns the set of valid values for this property, or it returns an empty vector.

@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/DiskMRU.cpp
 	src/DllOpen.cpp
 	src/EmptyValues.cpp
+	src/EnabledWhenProperty.cpp
 	src/EnvironmentHistory.cpp
 	src/Exception.cpp
 	src/FacilityInfo.cpp
@@ -105,6 +106,7 @@ set ( INC_FILES
 	inc/MantidKernel/DocumentationHeader.h
 	inc/MantidKernel/DynamicFactory.h
 	inc/MantidKernel/EmptyValues.h
+	inc/MantidKernel/EnabledWhenProperty.h
 	inc/MantidKernel/EnvironmentHistory.h
 	inc/MantidKernel/Exception.h
 	inc/MantidKernel/FacilityInfo.h
@@ -190,6 +192,7 @@ set ( TEST_FILES
 	test/DirectoryValidatorTest.h
 	test/DiskMRUTest.h
 	test/DynamicFactoryTest.h
+	test/EnabledWhenPropertyTest.h
 	test/EnvironmentHistoryTest.h
 	test/FacilitiesTest.h
 	test/FileValidatorTest.h

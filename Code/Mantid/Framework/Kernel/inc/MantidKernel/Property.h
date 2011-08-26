@@ -95,6 +95,15 @@ public:
 
   ///Overridden function that checks whether the property, if not overriden returns ""
   virtual std::string isValid() const;
+
+  ///Overridden function that returns true if the property should be enabled in GUI
+  virtual bool isEnabled() const
+  { return true; }
+
+  ///Overridden function that returns true if the property should be visible in GUI
+  virtual bool isVisible() const
+  { return true; }
+
   ///Overriden function that returns if property has the same value that it was initialised with, if applicable
   virtual bool isDefault() const = 0;
   ///Whether to save input values

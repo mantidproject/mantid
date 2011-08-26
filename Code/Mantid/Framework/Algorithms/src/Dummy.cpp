@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/Dummy.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -10,7 +11,7 @@ namespace Algorithms
 {
 
   // Register the algorithm into the AlgorithmFactory
-  //DECLARE_ALGORITHM(Dummy)
+  DECLARE_ALGORITHM(Dummy)
   
 
 
@@ -42,7 +43,15 @@ namespace Algorithms
    */
   void Dummy::init()
   {
-    declareProperty("IntNumber", 123);
+    declareProperty("MyIntProp", 123);
+    // Make another property that is only enabled when the first one is NOT the default
+    declareProperty("OtherProp", 123,
+        new EnabledWhenProperty<int>(this, "MyIntProp", IS_NOT_DEFAULT) );
+
+    declareProperty("AdvancedStuff", false);
+    declareProperty("AdvancedInt", 123,
+        new EnabledWhenProperty<int>(this, "AdvancedStuff", IS_NOT_DEFAULT) );
+
   }
 
   //----------------------------------------------------------------------------------------------

@@ -12,6 +12,11 @@ namespace Mantid
 {
 namespace Kernel
 {
+//----------------------------------------------------------------------
+// Forward Declaration
+//----------------------------------------------------------------------
+class IPropertyManager;
+
 /** IValidator is the basic interface for all validators for properties
 
     @author Nick Draper, Tessella Support Services plc
@@ -41,9 +46,20 @@ template <typename TYPE>
 class DLLExport IValidator
 {
 public:
+  /// Constructor
+  IValidator()
+  : m_propertyManager(NULL)
+  {}
+
+  /// Constructor
+  IValidator(const IPropertyManager * propManager)
+  : m_propertyManager(propManager)
+  {}
+
   ///virtual Destructor
   virtual ~IValidator() {}
 
+  //------------------------------------------------------------------------------------------------------------
   /** Calls the validator
    *  
    *  @param value :: The value to be checked
@@ -63,6 +79,17 @@ public:
   virtual bool isVisible() const
   { return true; }
 
+
+  //------------------------------------------------------------------------------------------------------------
+  /** Set the property manager (i.e. algorithm) containing the other properties to use to validate
+   * @param propertyManager :: pointer  */
+  void setPropertyManager(const IPropertyManager * propertyManager)
+  {
+    m_propertyManager = propertyManager;
+  }
+
+
+  //------------------------------------------------------------------------------------------------------------
   /** The set of allowed values that this validator may have, if a discrete set exists.
    *  Overridden in applicable concrete validators; the base class just returns an empty set.
    *  @return The set of allowed values that this validator may have or an empty set
@@ -78,6 +105,9 @@ protected:
    *  @returns An error message to display to users or an empty string on no error
    */
   virtual std::string checkValidity(const TYPE &) const = 0;
+
+  /** Pointer to the property manager (i.e. algorithm) containing the other properties to use to validate */
+  const IPropertyManager * m_propertyManager;
 
 };
 
