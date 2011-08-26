@@ -4,13 +4,14 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DllConfig.h"
-#include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DllConfig.h"
+#include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/TimeSplitter.h"
+#include <set>
 #include <string>
 #include <typeinfo>
-#include <set>
 
 
 namespace Mantid
@@ -98,11 +99,19 @@ public:
 
   ///Overridden function that returns true if the property should be enabled in GUI
   virtual bool isEnabled() const
-  { return true; }
+  { if (m_settings) return m_settings->isEnabled();
+    else return true;
+  }
 
   ///Overridden function that returns true if the property should be visible in GUI
   virtual bool isVisible() const
-  { return true; }
+  { if (m_settings) return m_settings->isVisible();
+    else return true;
+  }
+
+  /** Set the PropertySettings determining when this property is visible/enabled */
+  void setSettings(IPropertySettings * settings)
+  { m_settings = settings; }
 
   ///Overriden function that returns if property has the same value that it was initialised with, if applicable
   virtual bool isDefault() const = 0;
@@ -171,6 +180,9 @@ private:
   const unsigned int m_direction;
   /// Units of the property (optional)
   std::string m_units;
+
+  /// Property settings (enabled/visible)
+  IPropertySettings * m_settings;
 
   /// Private default constructor
   Property();

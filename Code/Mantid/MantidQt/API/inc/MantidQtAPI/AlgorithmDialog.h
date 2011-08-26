@@ -149,6 +149,9 @@ protected:
 
   /// Set properties on this algorithm by pulling values from the tied widgets
   bool setPropertyValues(const QStringList & skipList = QStringList());
+  bool setPropertyValue(const QString pName, bool validateOthers);
+
+  void hideOrDisableProperties();
   //@}
 
   /** @name Dialog information */
@@ -172,7 +175,8 @@ protected:
   /** @name Helper functions */
   //@{
   ///Tie a widget to a property
-  QWidget* tie(QWidget* widget, const QString & property, QLayout* parent_layout, bool readHistory = true);
+  QWidget* tie(QWidget* widget, const QString & property, QLayout* parent_layout, bool readHistory = true,
+      QWidget * otherWidget1 = NULL, QWidget * otherWidget2 = NULL, QWidget * otherWidget3 = NULL);
   ///Untie a widget to a property
   void untie(const QString & property);
 
@@ -206,8 +210,11 @@ protected:
   /// Flag an input workspace combobox with its property name
   void flagInputWS(QWidget *inputWidget);
   //@}
-						       
- protected slots:
+
+  /// Retrieve a text value for a property from a widget
+  QString getValue(QWidget *widget);
+
+protected slots:
   
   /// A default slot that can be used for an OK button.
   virtual void accept();
@@ -232,12 +239,10 @@ private:
   void isForScript(bool forScript);
   /// Set an optional message to be displayed at the top of the dialog
   void setOptionalMessage(const QString & message);
-  /// Retrieve a text value for a property from a widget
-  QString getValue(QWidget *widget);
   /// Set a value based on any old input that we have
   void setPreviousValue(QWidget *widget, const QString & property);
     
-private:
+protected:
   /** @name Member variables. */
   //@{
   /// The algorithm associated with this dialog
@@ -247,10 +252,16 @@ private:
   QString m_algName;
   /// The properties associated with this dialog
   QStringList m_algProperties;
+
   /// A map of property <name, value> pairs that have been taken from the dialog
   QHash<QString, QString> m_propertyValueMap;
-  /// A list pointers to PropertyWidget objects
+
+  /// A list pointers to the widget for each property
   QHash<QString, QWidget*> m_tied_properties;
+
+  /// For each property, a list of ALL associated widgets
+  QHash<QString, QList<QWidget*> > m_tied_all_widgets;
+
   /// A boolean indicating whether this is for a script or not
   bool m_forScript;
   /// A list of property names that have been passed from Python
@@ -267,6 +278,10 @@ private:
 
   /// A list of labels to use as validation markers
   mutable QHash<QString, QLabel*> m_validators;
+
+  /// A map where key = property name; value = the error for this property (i.e. it is not valid).
+  mutable QHash<QString, QString> m_errors;
+
   /// A list of property names whose widgets handle their own validation
   QStringList m_noValidation;
 

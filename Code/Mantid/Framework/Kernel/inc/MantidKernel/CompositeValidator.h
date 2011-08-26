@@ -77,27 +77,6 @@ namespace Kernel
       m_children.push_back(child);
     }
 
-    // ------------------------------------------------------------------------------------
-    /** @return true if ALL the validators say that it is enabled */
-    virtual bool isEnabled() const
-    {
-      bool out = true;
-      for (unsigned int i=0; i < m_children.size(); ++i)
-        out = out && m_children[i]->isEnabled();
-      return out;
-    }
-
-    // ------------------------------------------------------------------------------------
-    /** @return true if ALL the validators say that it is visible */
-    virtual bool isVisible() const
-    {
-      bool out = true;
-      for (unsigned int i=0; i < m_children.size(); ++i)
-        out = out && m_children[i]->isVisible();
-      return out;
-    }
-
-
   private:
     /// Private Copy constructor: NO DIRECT COPY ALLOWED
     CompositeValidator(const CompositeValidator&);

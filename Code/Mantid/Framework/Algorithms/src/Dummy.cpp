@@ -2,6 +2,9 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/MultipleFileProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -44,18 +47,38 @@ namespace Algorithms
    */
   void Dummy::init()
   {
-    declareProperty("MyIntProp", 123);
-    declareProperty("OtherProp", 123,
-        new EnabledWhenProperty<int>(this, "MyIntProp", IS_DEFAULT) );
+    declareProperty( new FileProperty("File", "", FileProperty::Load));
+    declareProperty( new MultipleFileProperty("ManyFiles"));
 
-    declareProperty("AdvancedStuff", false);
-    declareProperty("AdvancedInt", 123,
-        new EnabledWhenProperty<int>(this, "AdvancedStuff", IS_NOT_DEFAULT) );
+    declareProperty( new WorkspaceProperty<>("InputWorkspace", "", Direction::Input) );
+
+    declareProperty("IntProp1", 123);
+    declareProperty("EnabledWhenDefault", 123);
+    setPropertySettings("EnabledWhenDefault", new EnabledWhenProperty(this, "IntProp1", IS_DEFAULT) );
+
+    declareProperty("BoolProp1", false);
+    declareProperty("EnabledWhenNotDefault", 123);
+    setPropertySettings("EnabledWhenNotDefault", new EnabledWhenProperty(this, "BoolProp1", IS_NOT_DEFAULT) );
 
     // Secret property!
-    declareProperty("IntProp2", 123);
-    declareProperty("InvisibleProp", 123,
-        new VisibleWhenProperty<int>(this, "IntProp2", IS_EQUAL_TO, "234") );
+    declareProperty("BoolProp2", false);
+    declareProperty("InvisibleProp", 123);
+    setPropertySettings("InvisibleProp", new VisibleWhenProperty(this, "BoolProp2", IS_EQUAL_TO, "1"));
+    declareProperty( new WorkspaceProperty<>("InvisibleWorkspace", "", Direction::Output) );
+    setPropertySettings("InvisibleWorkspace", new VisibleWhenProperty(this, "BoolProp2", IS_EQUAL_TO, "1") );
+
+    std::vector<std::string> propOptions;
+    propOptions.push_back("Q (lab frame)");
+    propOptions.push_back("Q (sample frame)");
+    propOptions.push_back("HKL");
+    declareProperty("OutputDimensions", "Q (lab frame)", new ListValidator(propOptions));
+
+    IPropertySettings * set =  new VisibleWhenProperty(this, "OutputDimensions", IS_EQUAL_TO, "HKL");
+    declareProperty("InvisibleProp2", 123);
+    setPropertySettings("InvisibleProp2", set);
+    declareProperty( new FileProperty("File2", "", FileProperty::Load));
+    setPropertySettings("File2", set->clone() );
+
 
   }
 

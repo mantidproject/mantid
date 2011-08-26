@@ -7,6 +7,9 @@
 #include "AlgorithmDialog.h"
 
 #include <QHash>
+#include <QtCore/qvariant.h>
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/Property.h"
 
 //----------------------------------
 // Forward declarations
@@ -62,30 +65,31 @@ public:
 
 private:
 
+  void layoutBoolProperty(Mantid::Kernel::PropertyWithValue<bool>* prop, int row);
+  void layoutOptionsProperty(Mantid::Kernel::Property* prop, int row);
+  void layoutTextProperty(Mantid::Kernel::Property* prop, int row);
+
   /// This does the work and must be overridden in each deriving class
   virtual void initLayout();
 
 private slots:
 
+  /// Any property changed
+  void propertyChanged(const QString & pName);
+
   /// Browse for a file
-  void browseClicked(QWidget* editBox);
+  void browseClicked(const QString & propName);
 
   /// Browse for multiple files.
-  void browseMultipleClicked(QWidget* editBox);
+  void browseMultipleClicked(const QString & propName);
 
 private:
-
-  /// A mapper to ensure that the  buttons are connected to the correct editing boxes
-  QSignalMapper *m_signalMapper_browse;
-
-  /// Signal mapper for multipleFile edit box.
-  QSignalMapper *m_signalMapper_browseMultiple;
   
   /// The grid widget containing the input boxes
   QGridLayout *m_inputGrid;
 
-  /// A map of QLineEdit pointers to the Property names
-  QHash<QLineEdit*, QString> m_editBoxes;
+  /// List of the QSignalMappers for each property
+  QHash<QString, QSignalMapper *> m_mappers;
 };
 
 }

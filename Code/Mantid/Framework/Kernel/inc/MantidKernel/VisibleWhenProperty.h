@@ -36,8 +36,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  template <typename TYPE>
-  class DLLExport VisibleWhenProperty : public EnabledWhenProperty<TYPE>
+  class DLLExport VisibleWhenProperty : public EnabledWhenProperty
   {
   public:
     //--------------------------------------------------------------------------------------------
@@ -48,8 +47,8 @@ namespace Kernel
      * @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value (as string) to check for
      */
     VisibleWhenProperty(const IPropertyManager * algo, std::string otherPropName,
-                        eValidatorCriterion when, std::string value = "")
-    : EnabledWhenProperty<TYPE>(algo, otherPropName, when, value)
+                        ePropertyCriterion when, std::string value = "")
+    : EnabledWhenProperty(algo, otherPropName, when, value)
     {}
 
     /// Destructor
@@ -72,9 +71,9 @@ namespace Kernel
 
     //--------------------------------------------------------------------------------------------
     /// Make a copy of the present type of validator
-    virtual IValidator<TYPE>* clone()
+    virtual IPropertySettings* clone()
     {
-      VisibleWhenProperty<TYPE> * out = new VisibleWhenProperty<TYPE>(this->m_propertyManager, this->m_otherPropName, this->m_when, this->m_value);
+      VisibleWhenProperty * out = new VisibleWhenProperty(this->m_propertyManager, this->m_otherPropName, this->m_when, this->m_value);
       return out;
     }
 

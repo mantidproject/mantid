@@ -14,6 +14,7 @@
 #include <boost/shared_ptr.hpp>
 #include <Poco/StringTokenizer.h>
 #include <vector>
+#include "MantidKernel/IPropertySettings.h"
 
 namespace Mantid
 {
@@ -213,7 +214,8 @@ public:
    *  @param validator :: The validator to use for this property (this class will take ownership of the validator)
    *  @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
    */
-  PropertyWithValue( const std::string &name, const TYPE& defaultValue, IValidator<TYPE> *validator = new NullValidator<TYPE>, const unsigned int direction = Direction::Input ) :
+  PropertyWithValue( const std::string &name, const TYPE& defaultValue, IValidator<TYPE> *validator = new NullValidator<TYPE>,
+      const unsigned int direction = Direction::Input) :
     Property( name, typeid( TYPE ), direction ),
     m_value( defaultValue ),
     m_initialValue( defaultValue ),
@@ -394,22 +396,6 @@ public:
   virtual bool isDefault() const
   {
     return  m_initialValue == m_value;
-  }
-
-  /** Checks if the property should be enabled in gui
-   *  @returns bool
-   */
-  virtual bool isEnabled() const
-  {
-    return m_validator->isEnabled();
-  }
-
-  /** Checks if the property should be visible in gui
-   *  @returns bool
-   */
-  virtual bool isVisible() const
-  {
-    return m_validator->isVisible();
   }
 
   /** Returns the set of valid values for this property, if such a set exists.

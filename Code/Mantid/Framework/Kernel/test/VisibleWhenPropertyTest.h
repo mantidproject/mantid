@@ -25,8 +25,9 @@ public:
     alg.declareProperty("MyIntProp", 123);
 
     // Make a property with its validator. Will be Visible when that other one is NOT the default
-    VisibleWhenProperty<int> * val = new VisibleWhenProperty<int>(&alg, "MyIntProp", IS_NOT_DEFAULT);
-    alg.declareProperty("MyValidatorProp", 456, val);
+    VisibleWhenProperty * val = new VisibleWhenProperty(&alg, "MyIntProp", IS_NOT_DEFAULT);
+    alg.declareProperty("MyValidatorProp", 456);
+    alg.setPropertySettings("MyValidatorProp", val);
 
     Property * prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop); if (!prop) return;
@@ -37,8 +38,9 @@ public:
     alg.setProperty("MyIntProp", 234);
     TSM_ASSERT( "Becomes visible when another property has been changed",  prop->isVisible());
 
-    IValidator<int> * val2 = val->clone();
-    alg.declareProperty("MySecondValidatorProp", 456, val2);
+    IPropertySettings * val2 = val->clone();
+    alg.declareProperty("MySecondValidatorProp", 456);
+    alg.setPropertySettings("MySecondValidatorProp", val2);
     prop = alg.getPointerToProperty("MySecondValidatorProp");
     TSM_ASSERT( "Starts off visible",  prop->isVisible());
     alg.setProperty("MyIntProp", 123);
@@ -50,8 +52,9 @@ public:
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
     // Make a property with its validator. Will be Visible when that other one is the default
-    VisibleWhenProperty<int> * val = new VisibleWhenProperty<int>(&alg, "MyIntProp", IS_DEFAULT);
-    alg.declareProperty("MyValidatorProp", 456, val);
+    VisibleWhenProperty * val = new VisibleWhenProperty(&alg, "MyIntProp", IS_DEFAULT);
+    alg.declareProperty("MyValidatorProp", 456);
+    alg.setPropertySettings("MyValidatorProp", val);
     Property * prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop); if (!prop) return;
     TSM_ASSERT( "Starts off visible", prop->isVisible());
@@ -63,8 +66,9 @@ public:
   {
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
-    VisibleWhenProperty<int> * val = new VisibleWhenProperty<int>(&alg, "MyIntProp", IS_EQUAL_TO, "234");
-    alg.declareProperty("MyValidatorProp", 456, val);
+    VisibleWhenProperty * val = new VisibleWhenProperty(&alg, "MyIntProp", IS_EQUAL_TO, "234");
+    alg.declareProperty("MyValidatorProp", 456);
+    alg.setPropertySettings("MyValidatorProp", val);
     Property * prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop); if (!prop) return;
     TSM_ASSERT( "Starts off not visible", !prop->isVisible());
@@ -76,8 +80,9 @@ public:
   {
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
-    VisibleWhenProperty<int> * val = new VisibleWhenProperty<int>(&alg, "MyIntProp", IS_NOT_EQUAL_TO, "234");
-    alg.declareProperty("MyValidatorProp", 456, val);
+    VisibleWhenProperty * val = new VisibleWhenProperty(&alg, "MyIntProp", IS_NOT_EQUAL_TO, "234");
+    alg.declareProperty("MyValidatorProp", 456);
+    alg.setPropertySettings("MyValidatorProp", val);
     Property * prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop); if (!prop) return;
     TSM_ASSERT( "Starts off not visible", prop->isVisible());

@@ -2,8 +2,8 @@
 #define MANTID_KERNEL_ENABLEDWHENPROPERTY_H_
     
 #include "MantidKernel/System.h"
-#include "MantidKernel/IValidator.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/IPropertySettings.h"
 
 
 namespace Mantid
@@ -12,7 +12,7 @@ namespace Kernel
 {
 
   /** Enum for use in EnabledWhenProperty */
-  enum eValidatorCriterion
+  enum ePropertyCriterion
   {
     IS_DEFAULT,
     IS_NOT_DEFAULT,
@@ -48,8 +48,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  template <typename TYPE>
-  class DLLExport EnabledWhenProperty : public IValidator<TYPE>
+  class DLLExport EnabledWhenProperty : public IPropertySettings
   {
   public:
     //--------------------------------------------------------------------------------------------
@@ -60,8 +59,8 @@ namespace Kernel
      * @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value (as string) to check for
      */
     EnabledWhenProperty(const IPropertyManager * algo, std::string otherPropName,
-                        eValidatorCriterion when, std::string value = "")
-    : IValidator<TYPE>(algo),
+                        ePropertyCriterion when, std::string value = "")
+    : IPropertySettings(algo),
       m_otherPropName(otherPropName), m_when(when), m_value(value)
     {
     }
@@ -127,23 +126,17 @@ namespace Kernel
 
     //--------------------------------------------------------------------------------------------
     /// Make a copy of the present type of validator
-    virtual IValidator<TYPE>* clone()
+    virtual IPropertySettings * clone()
     {
-      EnabledWhenProperty<TYPE> * out = new EnabledWhenProperty<TYPE>(this->m_propertyManager, m_otherPropName, m_when, m_value);
+      EnabledWhenProperty * out = new EnabledWhenProperty(this->m_propertyManager, m_otherPropName, m_when, m_value);
       return out;
     }
-
-  protected:
-
-    /** Checks the value based on the validator's rules */
-    virtual std::string checkValidity(const TYPE &) const
-    { return ""; }
 
   protected:
     /// Name of the OTHER property that we will check.
     std::string m_otherPropName;
     /// Criterion to evaluate
-    eValidatorCriterion m_when;
+    ePropertyCriterion m_when;
     /// For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value (as string) to check for
     std::string m_value;
   };

@@ -116,6 +116,15 @@ public:
     /// Return the property manager serialized as a string.
     virtual std::string asString(bool withDefaultValues = false) const = 0;
 
+    /** Give settings to a property to determine when it gets enabled/hidden
+     * @param name :: property name
+     * @param settings :: IPropertySettings     */
+    void setPropertySettings(const std::string &name, IPropertySettings * settings)
+    {
+      getPointerToProperty(name)->setSettings(settings);
+    }
+
+
 protected:
 
     /** Add a property of the template type to the list of managed properties
@@ -208,10 +217,11 @@ protected:
    *  @throw Exception::ExistsError if a property with the given name already exists
    *  @throw std::invalid_argument  if the name argument is empty
    */
-  void declareProperty(const std::string &name, const char* value, const unsigned int direction)
-  {
+    void declareProperty(const std::string &name, const char* value, const unsigned int direction)
+    {
       declareProperty(name, std::string(value), new NullValidator<std::string>, "", direction);
-  }
+    }
+
 
   /// Get a property by an index
   virtual Property* getPointerToPropertyOrdinal(const int &index) const = 0;
