@@ -94,10 +94,13 @@ namespace Mantid
       void setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pElem);
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      void initDocs();
       void init();
       void exec();
+      /// Check the validity range and add it to the instrument object
+      void setValidityRange(const Poco::XML::Element* pRootElem);
+      /// Reads the contents of the \<defaults\> element to set member variables,
+      void readDefaults(Poco::XML::Element* defaults);
 
       /// Structure for holding detector IDs
       struct IdList
@@ -119,11 +122,6 @@ namespace Mantid
         void reset() { counted=0; vec.clear();};  
       };
 
-      /// Check the validity range and add it to the instrument object
-      void setValidityRange(const Poco::XML::Element* pRootElem);
-      /// Reads the contents of the \<defaults\> element to set member variables,
-      void readDefaults(Poco::XML::Element* defaults);
-
       /// Method for populating IdList
       void populateIdList(Poco::XML::Element* pElem, IdList& idList);
 
@@ -133,6 +131,8 @@ namespace Mantid
       /// Add XML element to parent assuming the element contains other component elements
       void appendAssembly(boost::shared_ptr<Geometry::ICompAssembly> parent, Poco::XML::Element* pElem, IdList& idList,
                           const std::vector<std::string> excludeList);
+      /// Return true if assembly, false if not assembly and throws exception if string not in assembly
+      bool isAssembly(std::string) const;
 
       /// Add XML element to parent assuming the element contains no other component elements
       void appendLeaf(Geometry::ICompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
@@ -146,53 +146,53 @@ namespace Mantid
       void setLogfile(const Geometry::IComponent* comp, Poco::XML::Element* pElem, 
                                 std::multimap<std::string, boost::shared_ptr<Geometry::XMLlogfile> >& logfileCache);
 
-
-      /// Holds all the xml elements that have a \<parameter\> child element. Added purely for the purpose of computing speed and is used in setLogFile() for the purpose of quickly accessing if a component have a parameter/logfile associated with it or not - instead of using the comparatively slow poco call getElementsByTagName() (or getChildElement)
-      std::vector<Poco::XML::Element*> hasParameterElement;
-      /// has hasParameterElement been set - used when public method setComponentLinks is used
-      bool hasParameterElement_beenSet;
-
-
       /// Get parent component element of location element
       Poco::XML::Element* getParentComponent(Poco::XML::Element* pLocElem);
+      /// get name of location element
+      std::string getNameOfLocationElement(Poco::XML::Element* pElem);
 
-      /// map which holds names of types and whether or not they are catagorised as being
-      /// assembles, which means whether the type element contains component elements
-      std::map<std::string,bool> isTypeAssembly;
-
-      /// map which maps the type name to a shared pointer to a geometric shape
-      std::map<std::string, boost::shared_ptr<Geometry::Object> > mapTypeNameToShape;
-
-      /// Container to hold all detectors and monitors added to the instrument. Used for 'facing' these to component specified under \<defaults\>. NOTE: Seems unused, ever.
-      std::vector< Geometry::ObjComponent* > m_facingComponent;
+      /// Calculate the position of comp relative to its parent from info provided by \<location\> element
+      Kernel::V3D getRelativeTranslation(const Geometry::IComponent* comp, const Poco::XML::Element* pElem);
 
       /// Parse position of facing element to V3D
       Kernel::V3D parseFacingElementToV3D(Poco::XML::Element* pElem);
-
       /// Set facing of comp as specified in XML facing element
       void setFacing(Geometry::IComponent* comp, Poco::XML::Element* pElem);
-
-      /// True if defaults->components-are-facing is set in instrument def. file
-      bool m_haveDefaultFacing;
-
-      /// Hold default facing position
-      Kernel::V3D m_defaultFacing;
-
       /// Make the shape defined in 1st argument face the component in the second argument
       void makeXYplaneFaceComponent(Geometry::IComponent* &in, const Geometry::ObjComponent* facing);
-
       /// Make the shape defined in 1st argument face the position in the second argument
       void makeXYplaneFaceComponent(Geometry::IComponent* &in, const Kernel::V3D& facingPoint);
 
-      /// Return true if assembly, false if not assembly and throws exception if string not in assembly
-      bool isAssembly(std::string);
+      /// Reads in or creates the geometry cache ('vtp') file
+      void setupGeometryCache();
+      /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
+      void runLoadParameterFile();
 
-      /// map which holds names of types and pointers to these type for fast retrievel in code
+      /** Holds all the xml elements that have a \<parameter\> child element.
+       *  Added purely for the purpose of computing speed and is used in setLogFile() for the purpose
+       *  of quickly accessing if a component have a parameter/logfile associated with it or not
+       *  - instead of using the comparatively slow poco call getElementsByTagName() (or getChildElement)
+       */
+      std::vector<Poco::XML::Element*> hasParameterElement;
+      /// has hasParameterElement been set - used when public method setComponentLinks is used
+      bool hasParameterElement_beenSet;
+      /** map which holds names of types and whether or not they are categorized as being
+       *  assemblies, which means whether the type element contains component elements
+       */
+      std::map<std::string,bool> isTypeAssembly;
+      /// map which maps the type name to a shared pointer to a geometric shape
+      std::map<std::string, boost::shared_ptr<Geometry::Object> > mapTypeNameToShape;
+      /// Container to hold all detectors and monitors added to the instrument. Used for 'facing' these to component specified under \<defaults\>. NOTE: Seems unused, ever.
+      std::vector< Geometry::ObjComponent* > m_facingComponent;
+      /// True if defaults->components-are-facing is set in instrument def. file
+      bool m_haveDefaultFacing;
+      /// Hold default facing position
+      Kernel::V3D m_defaultFacing;
+      /// map which holds names of types and pointers to these type for fast retrieval in code
       std::map<std::string,Poco::XML::Element*> getTypeElement;
 
       /// The name and path of the input file
       std::string m_filename;
-
       /// For convenience added pointer to instrument here
       boost::shared_ptr<Geometry::Instrument> m_instrument;
 
@@ -214,17 +214,6 @@ namespace Mantid
 
       /// Map to store positions of parent components in spherical coordinates
       std::map<const Geometry::IComponent*,SphVec> m_tempPosHolder;
-
-      void setupGeometryCache();
-
-      /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
-      void runLoadParameterFile();
-
-      /// get name of location element
-      std::string getNameOfLocationElement(Poco::XML::Element* pElem);
-
-      /// Calculate the position of comp relative to its parent from info provided by \<location\> element
-      Kernel::V3D getRelativeTranslation(const Geometry::IComponent* comp, const Poco::XML::Element* pElem);
 
       /// when this const equals 1 it means that angle=degree (default) is set in IDF
       /// otherwise if this const equals 180/pi it means that angle=radian is set in IDF 

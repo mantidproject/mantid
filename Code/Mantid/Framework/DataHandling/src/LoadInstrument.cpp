@@ -1182,7 +1182,6 @@ namespace Mantid
     }
 
 
-
     //-----------------------------------------------------------------------------------------------------------------------
     /** Returns True if the (string) type given is an assembly.
      *
@@ -1190,10 +1189,9 @@ namespace Mantid
      *  @return True if the type is an assembly
      *  @throw InstrumentDefinitionError Thrown if type not defined in XML definition
     */
-    bool LoadInstrument::isAssembly(std::string type)
+    bool LoadInstrument::isAssembly(std::string type) const
     {
-      std::map<std::string,bool>::iterator it;
-      it = isTypeAssembly.find(type);
+      std::map<std::string,bool>::const_iterator it = isTypeAssembly.find(type);
 
       if ( it == isTypeAssembly.end() )
       {
@@ -1201,7 +1199,7 @@ namespace Mantid
           " not defined.", m_filename);
       }
 
-      return isTypeAssembly[type];
+      return it->second;
     }
 
 
@@ -1215,11 +1213,8 @@ namespace Mantid
     */
     void LoadInstrument::makeXYplaneFaceComponent(Geometry::IComponent* &in, const Geometry::ObjComponent* facing)
     {
-      const Kernel::V3D facingPoint = facing->getPos();
-
-      makeXYplaneFaceComponent(in, facingPoint);
+      makeXYplaneFaceComponent(in, facing->getPos());
     }
-
 
 
     //-----------------------------------------------------------------------------------------------------------------------
@@ -1235,16 +1230,13 @@ namespace Mantid
       Kernel::V3D pos = in->getPos();
 
       // vector from facing object to component we want to rotate
-
       Kernel::V3D facingDirection = pos - facingPoint;
       facingDirection.normalize();
 
       if ( facingDirection.norm() == 0.0 ) return;
 
-
       // now aim to rotate shape such that the z-axis of of the object we want to rotate
       // points in the direction of facingDirection. That way the XY plane faces the 'facing object'.
-
       Kernel::V3D z = Kernel::V3D(0,0,1);
       Kernel::Quat R = in->getRotation();
       R.inverse();
@@ -1273,7 +1265,6 @@ namespace Mantid
     */
     Kernel::V3D LoadInstrument::parseFacingElementToV3D(Poco::XML::Element* pElem)
     {
-
       Kernel::V3D retV3D;
 
       // Polar coordinates can be labelled as (r,t,p) or (R,theta,phi)
@@ -1662,7 +1653,7 @@ namespace Mantid
       if ( unit_it != units.end() )
         if ( unit_it->second == "radian" )
           m_angleConvertConst = 180.0/M_PI;
-      
+
 
       for (unsigned long iLink = 0; iLink < numberLinks; iLink++)
       {
