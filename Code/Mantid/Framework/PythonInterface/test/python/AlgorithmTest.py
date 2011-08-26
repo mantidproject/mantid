@@ -18,8 +18,8 @@ class AlgorithmTest(unittest.TestCase):
     def test_alg_set_invalid_prop_raises_error(self):
         alg = algorithm_mgr.create_unmanaged('Load')
         alg.initialize()
-        args = ('Filename', 'XYZ12345.txt')
-        self.assertRaises(RuntimeError, alg.set_property, *args)
+        args = ('Filename', 'nonexistent.txt')
+        self.assertRaises(ValueError, alg.set_property, *args)
         
     def test_cannot_execute_with_invalid_properties(self):
         alg = algorithm_mgr.create_unmanaged('Load')
