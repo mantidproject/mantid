@@ -112,7 +112,7 @@ namespace Kernel
     }
 
     //--------------------------------------------------------------------------------------------
-    /// Return the chosen value if the other property is/isn't default
+    /// Return true/false based on whether the other property satisfies the criterion
     virtual bool isEnabled() const
     {
       return fulfillsCriterion();

@@ -200,7 +200,7 @@ void MonitorDlg::update()
 }
 
 // The void* corresponds to Mantid::API::AlgorithmID, but Qt wasn't coping with the typedef
-void MonitorDlg::updateProgress(void* alg, const double p, const QString& msg, double estimatedTime, int progressPrecision)
+void MonitorDlg::updateProgress(void* alg, const double p, const QString& msg, double /*estimatedTime*/, int /*progressPrecision*/)
 {
   m_algMonitor->lock();
   const int index = m_algMonitor->algorithms().indexOf(alg);

@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/Dummy.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -44,13 +45,17 @@ namespace Algorithms
   void Dummy::init()
   {
     declareProperty("MyIntProp", 123);
-    // Make another property that is only enabled when the first one is NOT the default
     declareProperty("OtherProp", 123,
-        new EnabledWhenProperty<int>(this, "MyIntProp", IS_NOT_DEFAULT) );
+        new EnabledWhenProperty<int>(this, "MyIntProp", IS_DEFAULT) );
 
     declareProperty("AdvancedStuff", false);
     declareProperty("AdvancedInt", 123,
         new EnabledWhenProperty<int>(this, "AdvancedStuff", IS_NOT_DEFAULT) );
+
+    // Secret property!
+    declareProperty("IntProp2", 123);
+    declareProperty("InvisibleProp", 123,
+        new VisibleWhenProperty<int>(this, "IntProp2", IS_EQUAL_TO, "234") );
 
   }
 

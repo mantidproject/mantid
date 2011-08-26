@@ -69,6 +69,7 @@ set ( SRC_FILES
 	src/V2D.cpp
 	src/V3D.cpp
 	src/VectorHelper.cpp
+	src/VisibleWhenProperty.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
@@ -173,6 +174,7 @@ set ( INC_FILES
 	inc/MantidKernel/V2D.h
 	inc/MantidKernel/V3D.h
 	inc/MantidKernel/VectorHelper.h
+	inc/MantidKernel/VisibleWhenProperty.h
 	inc/MantidKernel/cow_ptr.h
 )
 
@@ -245,6 +247,7 @@ set ( TEST_FILES
 	test/V2DTest.h
 	test/V3DTest.h
 	test/VectorHelperTest.h
+	test/VisibleWhenPropertyTest.h
 )
 
 # Use a precompiled header where they are supported
