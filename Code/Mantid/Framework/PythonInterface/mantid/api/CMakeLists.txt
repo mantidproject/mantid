@@ -14,9 +14,13 @@ set ( EXPORT_FILES
 # Files containing addtional helper code that do not require processing
 set ( SRC_FILES 
   src/AlgorithmWrapper.cpp
+  src/PropertyMarshal.cpp
 )
 
-set ( INC_FILES )
+set ( INC_FILES 
+  ${HEADER_DIR}/api/AlgorithmWrapper.h
+  ${HEADER_DIR}/api/PropertyMarshal.h
+)
 
 set ( PY_FILES 
   __init__.py

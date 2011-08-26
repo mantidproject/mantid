@@ -21,13 +21,15 @@ using namespace boost::python;
 namespace
 {
   ///@cond
+  //------------------------------------------------------------------------------------------------------
   // A factory function returning a reference to the AlgorithmManager instance so that Python can use it
   AlgorithmManagerImpl & getAlgorithmManager()
   {
     return AlgorithmManager::Instance();
   }
 
-  // A free function to register an algorithm from Python
+  //------------------------------------------------------------------------------------------------------
+  // A function to register an algorithm from Python
   void registerAlgorithm(boost::python::object obj)
   {
     // The current frame should know what a PythonAlgorithm is, or it
@@ -56,6 +58,7 @@ namespace
     AlgorithmFactory::Instance().subscribe(new PythonObjectInstantiator<Algorithm>(classType));
   }
 
+  //------------------------------------------------------------------------------------------------------
   /// Define overload generators
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(create_overloads,AlgorithmManagerImpl::create, 1,2);
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads,AlgorithmManagerImpl::createUnmanaged, 1,2);
@@ -72,7 +75,7 @@ void export_AlgorithmManager()
     ;
 
   // Create a factory function to return this in Python
-  def("get_algorithm_mgr", &getAlgorithmManager, return_value_policy<reference_existing_object>(), //Note this policy is really only safe for singletons
+  def("get_algorithm_mgr", &getAlgorithmManager, return_value_policy<reference_existing_object>(), //This policy is really only safe for singletons
         "Returns a reference to the AlgorithmManager singleton");
 
   // The registration function

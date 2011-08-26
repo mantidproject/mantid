@@ -5,11 +5,15 @@
 set ( MODULE_TEMPLATE src/kernel.cpp.in )
 
 set ( EXPORT_FILES
-  src/V3D.cpp
+  src/Property.cpp
   src/Quat.cpp
+  src/V3D.cpp
 )  
 
-set ( INC_FILES )
+set ( INC_FILES 
+  ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
+  ${HEADER_DIR}/kernel/PropertyWithValue.h
+)
 
 set ( PY_FILES 
   __init__.py

@@ -1,11 +1,12 @@
 ###########################################################################
+#
 # Python API (version 2)
+#
 ###########################################################################
 
 ###########################################################################
 # Set local dependencies
 ###########################################################################
-
 set ( Boost_LIBRARIES ) # Empty out the variable after previous use
 set ( Boost_USE_DEBUG_PYTHON TRUE )
 find_package ( Boost REQUIRED python )
@@ -13,12 +14,14 @@ add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB )
 
 find_package ( Numpy REQUIRED )
 include_directories ( ${PYTHON_NUMPY_INCLUDE_DIR} )
+set ( HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidPythonInterface )
 include_directories ( inc )
 
-# Note: On some Linux systems, seen on various Ubuntu versions, importing Mantid into a standalone python
+# Note: On some Linux systems (seen on various Ubuntu versions) importing Mantid into a standalone python
 # interpreter causes a segfault. It is some issue due to exception handling but the fix is 
 # to ensure that the stdc++ library appears as early in the link list as possible so that it
-# is loaded first, hence the hard coding of it here rather than leaving it to be implicitly defined.
+# is loaded first, hence the hard coding of it here rather than leaving it to be implicitly defined
+# by the linker.
 if ( UNIX ) 
   set ( PYTHON_DEPS stdc++ ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
 else ()
@@ -33,7 +36,7 @@ add_subdirectory ( mantid )
 ###########################################################################
 # tests 
 ###########################################################################
-# cxxtest unit tests
+# cxx unit tests
 set ( TEST_FILES
   test/cpp/PythonObjectInstantiatorTest.h
 )
@@ -49,13 +52,15 @@ if ( CXXTEST_FOUND )
   set_property ( TARGET PythonInterfaceTest PROPERTY FOLDER "UnitTests" )
 endif ()
 
+# python unit tests
 set ( TEST_PY_FILES
+  test/python/AlgorithmTest.py
   test/python/AlgorithmManagerTest.py
-  test/python/PythonAlgorithmTest.py
   test/python/FrameworkManagerTest.py
-  test/python/V3DTest.py
-  test/python/QuatTest.py
   test/python/ImportModuleTest.py
+  test/python/PythonAlgorithmTest.py
+  test/python/QuatTest.py
+  test/python/V3DTest.py
 )
 
 # python unit tests
