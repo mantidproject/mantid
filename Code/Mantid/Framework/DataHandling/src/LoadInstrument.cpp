@@ -66,7 +66,7 @@ namespace Mantid
 
     /// Empty default constructor
     LoadInstrument::LoadInstrument() : Algorithm(), hasParameterElement_beenSet(false),
-      m_haveDefaultFacing(false), m_deltaOffsets(false)
+      m_haveDefaultFacing(false), m_deltaOffsets(false), m_angleConvertConst(1.0)
     {}
 
 
@@ -88,7 +88,6 @@ namespace Mantid
       declareProperty("RewriteSpectraMap", true, "If true then the spectra-detector mapping "
                       "for the input workspace will be overwritten with a 1:1 map of spectrum "
                       "number to detector ID");
-      m_angleConvertConst = 1.0;
     }
 
 
@@ -123,12 +122,16 @@ namespace Mantid
         }
       }
 
-      // Create our new instrument
-      m_instrument = Instrument_sptr(new Instrument);
-
       // Remove the path from the filename for use with the InstrumentDataService
       const std::string::size_type stripPath = m_filename.find_last_of("\\/");
       std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
+
+      // We don't want the instrument name taken out of the XML file itself, it should come from the filename
+      // Strip off "_Definition.xml"
+      const std::string instrumentName = instrumentFile.substr(0,instrumentFile.find_first_of("_"));
+
+      // Create our new instrument
+      m_instrument = Instrument_sptr(new Instrument(instrumentName));
 
       // Set up the DOM parser and parse xml file
       DOMParser pParser;
@@ -163,9 +166,6 @@ namespace Mantid
       {
         // If it does, just use the one from the one stored there
         m_instrument = InstrumentDataService::Instance().retrieve(instrumentFile);
-        //get list of monitors and set the property
-        std::vector<detid_t>monitordetIdList=m_instrument->getMonitors();
-        setProperty("MonitorList",monitordetIdList);
       }
       else
       {
@@ -240,11 +240,6 @@ namespace Mantid
         }
         pNL_parameter->release();
         hasParameterElement_beenSet = true;
-
-        // We don't want the name taken out of the XML file itself, it should come from the filename
-        // Strip off "_Definition.xml"
-        const size_t underScore = instrumentFile.find_first_of("_");
-        m_instrument->setName( instrumentFile.substr(0,underScore) );
 
         // See if any parameters set at instrument level
         setLogfile(m_instrument.get(), pRootElem, m_instrument->getLogfileCache());
@@ -327,8 +322,6 @@ namespace Mantid
                 appendLeaf(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
               }
             }
-            std::vector<detid_t>monitordetIdList=m_instrument->getMonitors();
-            setProperty("MonitorList",monitordetIdList);
             pNL_location->release();
           }
         }
@@ -337,80 +330,8 @@ namespace Mantid
         // Don't need this anymore (if it was even used) so empty it out to save memory
         m_tempPosHolder.clear();
 
-        // Get cached file name
-        // If the instrument directory is writable, put them there else use temporary directory
-        std::string cacheFilename(m_filename.begin(),m_filename.end()-3);
-
-        cacheFilename += "vtp";
-        // check for the geometry cache
-        Poco::File defFile(m_filename);
-        Poco::File vtkFile(cacheFilename);
-        Poco::File instrDir(Poco::Path(defFile.path()).parent());
-
-        bool cacheAvailable = true;
-        if ((!vtkFile.exists()) || defFile.getLastModified() > vtkFile.getLastModified())
-        {
-          g_log.information() << "Cache not available at " << cacheFilename << "\n";
-
-          cacheAvailable = false;
-        }
-
-        std::string filestem = Poco::Path(cacheFilename).getFileName();
-        Poco::Path fallback_dir(Kernel::ConfigService::Instance().getTempDir());
-        Poco::File fallbackFile = Poco::File(fallback_dir.resolve(filestem));
-        if( cacheAvailable == false )
-        { 
-          g_log.information() << "Trying fallback " << fallbackFile.path() << "\n";
-          if ((!fallbackFile.exists()) || defFile.getLastModified() > fallbackFile.getLastModified())
-          {
-            cacheAvailable = false;
-          }
-          else
-          {
-            cacheAvailable = true;
-            cacheFilename = fallbackFile.path();
-          }
-        }
-
-        if (cacheAvailable)
-        {
-          g_log.information("Loading geometry cache from " + cacheFilename);
-          // create a vtk reader
-          std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
-          boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader> 
-            reader(new Mantid::Geometry::vtkGeometryCacheReader(cacheFilename));
-          for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); objItr++)
-          {
-            ((*objItr).second)->setVtkGeometryCacheReader(reader);
-          }
-        }
-        else
-        {
-          g_log.information("Geometry cache is not available");
-          try
-          {
-            if( !instrDir.canWrite() )
-            {
-              cacheFilename = fallbackFile.path();
-              g_log.information() << "Instrument directory is read only, writing cache to system temp.\n";
-            }
-          }
-          catch(Poco::FileNotFoundException &)
-          {
-            g_log.error() << "Unable to find instrument definition while attempting to write cache.\n";
-            throw std::runtime_error("Unable to find instrument definition while attempting to write cache.\n");
-          }
-          g_log.information() << "Creating cache in " << cacheFilename << "\n";
-          // create a vtk writer
-          std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
-          boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter> 
-            writer(new Mantid::Geometry::vtkGeometryCacheWriter(cacheFilename));
-          for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); objItr++)
-          {
-            ((*objItr).second)->setVtkGeometryCacheWriter(writer);
-          }
-          writer->write();
-        }
+        // Read in or create the geometry cache file
+        setupGeometryCache();
 
         // Add/overwrite any instrument params with values specified in <component-link> XML elements
         setComponentLinks(m_instrument, pRootElem);
@@ -419,6 +340,9 @@ namespace Mantid
       }
       // release XML document
       pDoc->release();
+
+      // Set the monitors output property
+      setProperty("MonitorList",m_instrument->getMonitors());
 
       // Add the instrument to the workspace
       m_workspace->setInstrument(m_instrument);
@@ -1000,10 +924,10 @@ namespace Mantid
         if ( pElem->hasAttribute("z") ) z = atof((pElem->getAttribute("z")).c_str());
 
         retVal(x,y,z);
-          }
+      }
 
-          return retVal;
-        }
+      return retVal;
+    }
         
 
     //-----------------------------------------------------------------------------------------------------------------------
@@ -1766,8 +1690,84 @@ namespace Mantid
       pNL_link->release();
     }
 
+    /// Reads in or creates the geometry cache ('vtp') file
+    void LoadInstrument::setupGeometryCache()
+    {
+      // Get cached file name
+      // If the instrument directory is writable, put them there else use temporary directory
+      std::string cacheFilename(m_filename.begin(),m_filename.end()-3);
 
+      cacheFilename += "vtp";
+      // check for the geometry cache
+      Poco::File defFile(m_filename);
+      Poco::File vtkFile(cacheFilename);
+      Poco::File instrDir(Poco::Path(defFile.path()).parent());
 
+      bool cacheAvailable = true;
+      if ((!vtkFile.exists()) || defFile.getLastModified() > vtkFile.getLastModified())
+      {
+        g_log.information() << "Cache not available at " << cacheFilename << "\n";
+
+        cacheAvailable = false;
+      }
+
+      std::string filestem = Poco::Path(cacheFilename).getFileName();
+      Poco::Path fallback_dir(Kernel::ConfigService::Instance().getTempDir());
+      Poco::File fallbackFile = Poco::File(fallback_dir.resolve(filestem));
+      if( cacheAvailable == false )
+      {
+        g_log.information() << "Trying fallback " << fallbackFile.path() << "\n";
+        if ((!fallbackFile.exists()) || defFile.getLastModified() > fallbackFile.getLastModified())
+        {
+          cacheAvailable = false;
+        }
+        else
+        {
+          cacheAvailable = true;
+          cacheFilename = fallbackFile.path();
+        }
+      }
+
+      if (cacheAvailable)
+      {
+        g_log.information("Loading geometry cache from " + cacheFilename);
+        // create a vtk reader
+        std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
+        boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader>
+          reader(new Mantid::Geometry::vtkGeometryCacheReader(cacheFilename));
+        for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); objItr++)
+        {
+          ((*objItr).second)->setVtkGeometryCacheReader(reader);
+        }
+      }
+      else
+      {
+        g_log.information("Geometry cache is not available");
+        try
+        {
+          if( !instrDir.canWrite() )
+          {
+            cacheFilename = fallbackFile.path();
+            g_log.information() << "Instrument directory is read only, writing cache to system temp.\n";
+          }
+        }
+        catch(Poco::FileNotFoundException &)
+        {
+          g_log.error() << "Unable to find instrument definition while attempting to write cache.\n";
+          throw std::runtime_error("Unable to find instrument definition while attempting to write cache.\n");
+        }
+        g_log.information() << "Creating cache in " << cacheFilename << "\n";
+        // create a vtk writer
+        std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
+        boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter>
+          writer(new Mantid::Geometry::vtkGeometryCacheWriter(cacheFilename));
+        for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); objItr++)
+        {
+          ((*objItr).second)->setVtkGeometryCacheWriter(writer);
+        }
+        writer->write();
+      }
+    }
 
     //-----------------------------------------------------------------------------------------------------------------------
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)

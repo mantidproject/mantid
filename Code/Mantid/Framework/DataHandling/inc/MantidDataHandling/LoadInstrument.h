@@ -7,7 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 
 //----------------------------------------------------------------------
-// Forward declaration
+// Forward declarations
 //----------------------------------------------------------------------
 /// @cond Exclude from doxygen documentation
 namespace Poco {
@@ -26,7 +26,6 @@ namespace Mantid
   {
     class MatrixWorkspace;
   }
-
   namespace Geometry
   {
     class CompAssembly;
@@ -57,7 +56,7 @@ namespace Mantid
     @author Anders Markvardsen, ISIS, RAL
     @date 7/3/2008
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -215,6 +214,8 @@ namespace Mantid
 
       /// Map to store positions of parent components in spherical coordinates
       std::map<const Geometry::IComponent*,SphVec> m_tempPosHolder;
+
+      void setupGeometryCache();
 
       /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
       void runLoadParameterFile();
