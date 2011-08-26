@@ -1,0 +1,117 @@
+#ifndef MANTID_CRYSTAL_INDEX_PEAKS_TEST_H_
+#define MANTID_CRYSTAL_INDEX_PEAKS_TEST_H_
+
+#include <cxxtest/TestSuite.h>
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/System.h"
+#include <iostream>
+#include <iomanip>
+
+#include "MantidCrystal/IndexPeaks.h"
+#include "MantidCrystal/LoadPeaksFile.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidCrystal/LoadIsawUB.h"
+
+using namespace Mantid;
+using namespace Mantid::Crystal;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
+
+class IndexPeaksTest : public CxxTest::TestSuite
+{
+public:
+    
+  void test_Init()
+  {
+    IndexPeaks alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+  }
+  
+  void test_exec()
+  {
+    // Name of the output workspace.
+    std::string WSName("peaks");
+    LoadPeaksFile loader;
+    TS_ASSERT_THROWS_NOTHING( loader.initialize() );
+    TS_ASSERT( loader.isInitialized() );
+    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks");
+    loader.setPropertyValue("OutputWorkspace", WSName);
+
+    TS_ASSERT( loader.execute() );
+    TS_ASSERT( loader.isExecuted() );
+    PeaksWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(WSName) ) );
+    TS_ASSERT(ws);
+                                           // clear all the peak indexes
+    std::vector<Peak> &peaks = ws->getPeaks();
+    size_t n_peaks = ws->getNumberPeaks();
+    for ( size_t i = 0; i < n_peaks; i++ )
+    {
+      peaks[i].setHKL( V3D(0,0,0) );
+    }
+                                           // now set a proper UB in the 
+                                           // oriented lattice
+    V3D row_0( -0.0122354,  0.00480056, -0.0860404 );
+    V3D row_1(  0.1165450,  0.00178145,  0.0045884 );
+    V3D row_2(  0.0273738, -0.08973560,  0.0252595 );
+
+    Matrix<double> UB(3,3,false);
+    UB.setRow( 0, row_0 ); 
+    UB.setRow( 1, row_1 ); 
+    UB.setRow( 2, row_2 ); 
+
+    OrientedLattice o_lattice;
+    o_lattice.setUB( UB );
+    ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
+
+                                           // index the peaks with the new UB
+    IndexPeaks alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", WSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("tolerance","0.1") );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    double tolerance = alg.getProperty("tolerance");
+
+                                       // Check that the peaks were all indexed 
+    for ( size_t i = 0; i < n_peaks; i++ )
+    {
+      TS_ASSERT( IndexingUtils::ValidIndex( peaks[i].getHKL(), tolerance ) );
+    } 
+                                     // spot check a few peaks
+    V3D peak_0_hkl ( -4, -1, -6 );   // first peak
+    V3D peak_1_hkl ( -3,  1, -4 );
+    V3D peak_2_hkl ( -4,  1, -5 );
+    V3D peak_10_hkl( -3,  0, -7 );
+    V3D peak_42_hkl( -2,  4, -7 );   // last peak
+    
+    V3D error = peak_0_hkl -peaks[ 0].getHKL();
+    TS_ASSERT_DELTA( error.norm(), 0.0, 0.1 );
+
+    error = peak_1_hkl  -peaks[ 1].getHKL();
+    TS_ASSERT_DELTA( error.norm(), 0.0, 0.1 );
+
+    error = peak_2_hkl  -peaks[ 2].getHKL();
+    TS_ASSERT_DELTA( error.norm(), 0.0, 0.1 );
+
+    error = peak_10_hkl -peaks[10].getHKL();
+    TS_ASSERT_DELTA( error.norm(), 0.0, 0.1 );
+
+    error = peak_42_hkl -peaks[42].getHKL();
+    TS_ASSERT_DELTA( error.norm(), 0.0, 0.1 );
+                                     // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(WSName);
+  }
+
+};
+
+
+#endif /* MANTID_CRYSTAL_INDEX_PEAKS_TEST_H_ */
+

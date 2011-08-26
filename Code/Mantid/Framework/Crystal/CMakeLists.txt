@@ -43,6 +43,7 @@ set ( TEST_FILES
         test/FindUBUsingLatticeParametersTest.h
         test/FindUBUsingMinMaxDTest.h
         test/FindUBUsingIndexedPeaksTest.h
+        test/IndexPeaksTest.h
 	test/IntegratePeakTimeSlicesTest.h
 	test/LoadIsawUBTest.h
 	test/LoadPeaksFileTest.h
