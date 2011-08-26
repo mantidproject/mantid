@@ -141,9 +141,7 @@ void AxisInteractor::setInformation(QString title, double min, double max)
 {
   this->scaleWidget->setTitle(title);
   this->scaleWidget->setScaleDiv(this->transform,
-                                 this->engine->divideScale(std::floor(min), 
-                                                           std::ceil(max), 
-                                                           10, 0));
+                                 this->engine->divideScale(min, max, 10, 0));
 }
 
 void AxisInteractor::createIndicator(const QPoint &point)
