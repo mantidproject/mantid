@@ -105,8 +105,8 @@ namespace Crystal
                                    // now tell the user how many were indexed
     char logInfo[200];
     sprintf( logInfo, 
-             std::string("Indexed %1d Peaks out of %1d").c_str(),    
-             num_indexed, n_peaks);
+             std::string("Indexed %1d Peaks out of %1d with tolerance %5.3f").c_str(),    
+             num_indexed, n_peaks, tolerance );
     g_log.notice( std::string(logInfo) );
 
     sprintf( logInfo,
