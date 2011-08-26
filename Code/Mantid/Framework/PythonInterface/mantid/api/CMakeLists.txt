@@ -7,6 +7,7 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 # Files containing export definitions, these are automatically processed
 set ( EXPORT_FILES
   src/Algorithm.cpp
+  src/FileProperty.cpp
   src/FrameworkManager.cpp
   src/AlgorithmManager.cpp
 )  
