@@ -326,11 +326,6 @@ namespace Mantid
                 yValue = yValue / (xValue - xPrev);
                 eValue = eValue / (xValue - xPrev);
               }
-              else
-              {
-                yValue = yValue;
-                eValue = eValue;
-              }
             } // file type == s
 
             // store read in data (x, y, e) to vector
