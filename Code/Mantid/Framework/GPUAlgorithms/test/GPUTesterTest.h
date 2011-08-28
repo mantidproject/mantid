@@ -41,6 +41,8 @@ public:
     bool result = alg.getProperty("Result");
     TS_ASSERT( result );
     
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
   }
 
 

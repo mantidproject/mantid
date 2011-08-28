@@ -1,29 +1,35 @@
-#include "MantidGPUAlgorithms/GPUHelper.h"
+#include "MantidGPUAlgorithms/GPUAlgorithm.h"
 #include "MantidKernel/System.h"
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <fstream>
-#include <iomanip>
-#include <iosfwd>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-#include <string>
+#include "MantidKernel/SingletonHolder.h"
 #include <CL/cl.hpp>
 #include <Poco/File.h>
-#include <Poco/Path.h>
-#include "MantidKernel/ConfigService.h"
+#include <sstream>
+#include <fstream>
 
-using Mantid::Kernel::ConfigService;
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 namespace Mantid
 {
 namespace GPUAlgorithms
 {
-namespace GPUHelper
-{
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+   */
+  GPUAlgorithm::GPUAlgorithm()
+  : err(CL_SUCCESS)
+  {
+  }
+    
+  //----------------------------------------------------------------------------------------------
+  /** Destructor
+   */
+  GPUAlgorithm::~GPUAlgorithm()
+  {
+  }
+  
 
   //------------------------------------------------------------------------------------------
   /** Method that checks the OpenCL error code and throws an exception if it is not CL_SUCCESS
@@ -31,14 +37,15 @@ namespace GPUHelper
    * @param message :: string at the beginning of the exception message
    * @param err :: error code to check
    */
-  void checkError(const std::string & message, cl_int & err)
+  void GPUAlgorithm::checkError(const std::string & message)
   {
-    std::ostringstream mess;
-    mess << "OpenCL Error: " << message << " (" << err << ")";
     if(err != CL_SUCCESS)
+    {
+      std::ostringstream mess;
+      mess << "OpenCL Error: " << message << " (" << err << ")";
       throw std::runtime_error(mess.str());
+    }
   }
-
 
   //------------------------------------------------------------------------------------------
   /** Build and compile a OpenCL kernel from a .cl file
@@ -49,49 +56,9 @@ namespace GPUHelper
    * @param[out] queue :: return the CommandQueue for this kernel
    * @param[out] context :: return the Context (devices) for this kernel
    */
-  void buildOpenCLKernel(std::string filename, std::string functionName,
+  void GPUAlgorithm::buildKernelFromFile(std::string filename, std::string functionName,
       cl::Kernel & kernel, cl::CommandQueue & queue, cl::Context & context)
   {
-    bool verbose = false;
-    cl_int err;
-
-    // Platform info
-    std::vector<cl::Platform> platforms;
-    if (verbose) std::cout<<"Getting Platform Information\n";
-    err = cl::Platform::get(&platforms);
-    checkError("Platform::get() failed", err);
-
-    std::vector<cl::Platform>::iterator i;
-    if(platforms.size() > 0)
-    {
-      for(i = platforms.begin(); i != platforms.end(); ++i)
-      {
-        if (verbose) std::cout << "Platform: " << (*i).getInfo<CL_PLATFORM_VENDOR>(&err).c_str() << std::endl;
-        if(!strcmp((*i).getInfo<CL_PLATFORM_VENDOR>(&err).c_str(), "Advanced Micro Devices, Inc."))
-          break;
-      }
-    }
-    checkError("Platform::getInfo() failed", err);
-
-    /*
-     * If we could find our platform, use it. Otherwise pass a NULL and get whatever the
-     * implementation thinks we should be using.
-     */
-
-    cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)(*i)(), 0 };
-
-    if (verbose) std::cout<<"Creating a context AMD platform\n";
-    context = cl::Context(CL_DEVICE_TYPE_CPU, cps, NULL, NULL, &err);
-    checkError("Context::Context() failed", err);
-
-    if (verbose) std::cout<<"Getting device info\n";
-    std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
-    checkError("Context::getInfo() failed", err);
-    if (devices.size() == 0)
-      throw std::runtime_error("OpenCL Error: No device available");
-
-    if (verbose) std::cout<<"Loading and compiling CL source\n";
-
     // Try the file path exactly
     std::string fullFilename = filename;
     if (!Poco::File(fullFilename).exists())
@@ -113,13 +80,71 @@ namespace GPUHelper
     }
     file.close();
 
+    // Pass-through to the build from code method
+    buildKernelFromCode(kernelStr, functionName, kernel, queue, context);
+  }
+
+
+
+  //------------------------------------------------------------------------------------------
+  /** Build and compile a OpenCL kernel from a string of code
+   *
+   * @param code :: sting containing all the kernel code
+   * @param functionName :: name of the function in the .cl file.
+   * @param[out] kernel :: return the created cl::Kernel program
+   * @param[out] queue :: return the CommandQueue for this kernel
+   * @param[out] context :: return the Context (devices) for this kernel
+   */
+  void GPUAlgorithm::buildKernelFromCode(const std::string & code, const std::string & functionName,
+      cl::Kernel & kernel, cl::CommandQueue & queue, cl::Context & context)
+  {
+    bool verbose = false;
+    cl_int err;
+    // Code is loaded in kernelStr
+    const std::string & kernelStr = code;
+
+    // Platform info
+    std::vector<cl::Platform> platforms;
+    if (verbose) std::cout << "Getting Platform Information\n";
+    err = cl::Platform::get(&platforms);
+    checkError("Platform::get() failed");
+
+    std::vector<cl::Platform>::iterator i;
+    if(platforms.size() > 0)
+    {
+      for(i = platforms.begin(); i != platforms.end(); ++i)
+      {
+        if (verbose) std::cout << "Platform: " << (*i).getInfo<CL_PLATFORM_VENDOR>(&err).c_str() << std::endl;
+        if(!strcmp((*i).getInfo<CL_PLATFORM_VENDOR>(&err).c_str(), "Advanced Micro Devices, Inc."))
+          break;
+      }
+    }
+    checkError("Platform::getInfo() failed");
+
+    /*
+     * If we could find our platform, use it. Otherwise pass a NULL and get whatever the
+     * implementation thinks we should be using.
+     */
+
+    cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)(*i)(), 0 };
+
+    if (verbose) std::cout<<"Creating a context AMD platform\n";
+    context = cl::Context(CL_DEVICE_TYPE_CPU, cps, NULL, NULL, &err);
+    checkError("Context::Context() failed");
+
+    if (verbose) std::cout<<"Getting device info\n";
+    std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
+    checkError("Context::getInfo() failed");
+    if (devices.size() == 0)
+      throw std::runtime_error("OpenCL Error: No device available");
+
 
     cl::Program::Sources sources(1, std::make_pair(kernelStr.c_str(), kernelStr.size()));
 
     cl::Program program = cl::Program(context, sources, &err);
-    checkError("Program::Program() failed", err);
+    checkError("Program::Program() failed");
 
-    std::cout << devices.size() << " devices\n";
+    if (verbose) std::cout << devices.size() << " devices\n";
     // Build the kernel program
     err = program.build(devices);
     if (err != CL_SUCCESS) {
@@ -133,20 +158,21 @@ namespace GPUHelper
         std::cout << " ************************************************\n";
       }
 
-      checkError("Program::build() failed", err);
+      checkError("Program::build() failed");
     }
 
     // Create the kernel
     kernel = cl::Kernel(program, functionName.c_str(), &err);
-    checkError("Kernel::Kernel() failed", err);
+    checkError("Kernel::Kernel() failed");
 
-    // Queue a command
+    // Create the command queue
     queue = cl::CommandQueue(context, devices[0], 0, &err);
-    checkError("CommandQueue::CommandQueue() failed", err);
+    checkError("CommandQueue::CommandQueue() failed");
 
   }
 
-} // namespace GPUHelper
+
+
 } // namespace Mantid
 } // namespace GPUAlgorithms
 

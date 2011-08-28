@@ -1,9 +1,8 @@
-#ifndef MANTID_GPUALGORITHMS_GPUTESTER_H_
-#define MANTID_GPUALGORITHMS_GPUTESTER_H_
+#ifndef MANTID_GPUALGORITHMS_GPUALGORITHM_H_
+#define MANTID_GPUALGORITHMS_GPUALGORITHM_H_
     
-#include "MantidAPI/Algorithm.h"
-#include "MantidGPUAlgorithms/GPUAlgorithm.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/Algorithm.h" 
 #include <CL/cl.hpp>
 
 namespace Mantid
@@ -11,11 +10,13 @@ namespace Mantid
 namespace GPUAlgorithms
 {
 
-  /** A simple algorithm to test the capabilities
-   * of OpenCL and the GPU card.
+  /** GPUAlgorithm is a base algorithm class for algorithms
+   * using OpenCL code.
+   * It groups together some useful methods for building OpenCL kernels.
+   *
     
     @author Janik Zikovsky
-    @date 2011-08-27
+    @date 2011-08-28
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -37,34 +38,27 @@ namespace GPUAlgorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport GPUTester  : public GPUAlgorithm
+  class DLLExport GPUAlgorithm  : public API::Algorithm
   {
   public:
-    GPUTester();
-    virtual ~GPUTester();
+    GPUAlgorithm();
+    virtual ~GPUAlgorithm();
     
-    /// Algorithm's name for identification 
-    virtual const std::string name() const { return "GPUTester";};
-    /// Algorithm's version for identification 
-    virtual int version() const { return 1;};
-    /// Algorithm's category for identification
-    virtual const std::string category() const { return "GPUAlgorithms";}
-    
-  private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
-    /// Initialise the properties
-    void init();
-    /// Run the algorithm
-    void exec();
-
   protected:
-    static cl::Kernel kernel;
-    static cl::CommandQueue queue;
-    static cl::Context context;
+    /// Check the openCL error code, throw if not CL_SUCCESS
+    void checkError(const std::string & message);
 
-    /// Bool set to true once the kernel has been built.
-    static bool m_kernelBuilt;
+    /// Build openCL kernel by loading a .cl file
+    void buildKernelFromFile(std::string filename, std::string functionName,
+        cl::Kernel & kernel, cl::CommandQueue & queue, cl::Context & context);
+
+    /// Build openCL kernel from a string
+    void buildKernelFromCode(const std::string & code, const std::string & functionName,
+          cl::Kernel & kernel, cl::CommandQueue & queue, cl::Context & context);
+
+    /// OpenCL error code from the latest command.
+    cl_int err;
+
 
   };
 
@@ -72,4 +66,4 @@ namespace GPUAlgorithms
 } // namespace GPUAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_GPUALGORITHMS_GPUTESTER_H_ */
+#endif  /* MANTID_GPUALGORITHMS_GPUALGORITHM_H_ */

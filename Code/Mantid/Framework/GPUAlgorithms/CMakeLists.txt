@@ -2,17 +2,17 @@
 find_package(OpenCL REQUIRED)
 
 set ( SRC_FILES
-	src/GPUHelper.cpp
+	src/GPUAlgorithm.cpp
 	src/GPUTester.cpp
 )
 
 set ( INC_FILES
-	inc/MantidGPUAlgorithms/GPUHelper.h
+	inc/MantidGPUAlgorithms/GPUAlgorithm.h
 	inc/MantidGPUAlgorithms/GPUTester.h
 )
 
 set ( TEST_FILES
-	test/GPUHelperTest.h
+	test/GPUAlgorithmTest.h
 	test/GPUTesterTest.h
 )
 

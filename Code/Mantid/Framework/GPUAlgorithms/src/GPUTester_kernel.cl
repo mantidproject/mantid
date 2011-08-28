@@ -13,5 +13,5 @@ GPUTester_kernel(__global float* values, __global float *outputValues)
     // Position into the data
     size_t pos = i + get_global_size(0) * j;
     
-    outputValues[pos] = pos;
+    outputValues[pos] = pos * 1;
 }

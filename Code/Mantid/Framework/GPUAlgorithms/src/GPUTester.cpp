@@ -1,13 +1,11 @@
-#include "MantidGPUAlgorithms/GPUHelper.h"
 #include "MantidGPUAlgorithms/GPUTester.h"
-#include "MantidKernel/System.h"
-#include <string>
-#include <CL/cl.hpp>
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/System.h"
+#include <CL/cl.hpp>
+#include <string>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::GPUAlgorithms::GPUHelper;
 
 namespace Mantid
 {
@@ -16,6 +14,15 @@ namespace GPUAlgorithms
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(GPUTester)
+
+  // Declare the static members here.
+  bool GPUTester::m_kernelBuilt = false;
+  cl::Kernel GPUTester::kernel;
+  cl::CommandQueue GPUTester::queue;
+  cl::Context GPUTester::context;
+
+
+  GPUTester::
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -49,28 +56,25 @@ namespace GPUAlgorithms
   {
     declareProperty("XSize", 256, "X size of the data to give to the GPU card. Default 256");
     declareProperty("YSize", 256, "Y size of the data to give to the GPU card. Default 256");
-    declareProperty( new PropertyWithValue<bool>("Result", false),
+    declareProperty( new PropertyWithValue<bool>("Result", false, Direction::Output),
         "Result of the calculation. TRUE if successful.");
   }
+
 
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
   void GPUTester::exec()
   {
+    CPUTimer tim;
+    if (!m_kernelBuilt)
+      buildKernelFromFile("GPUTester_kernel.cl", "GPUTester_kernel", kernel, queue, context);
+    m_kernelBuilt = true;
+
     int iXSize = getProperty("XSize");
     int iYSize = getProperty("XSize");
     size_t XSize = size_t(iXSize);
     size_t YSize = size_t(iYSize);
-
-    cl_int err;
-    cl::Kernel kernel;
-    cl::CommandQueue queue;
-    cl::Context context;
-    buildOpenCLKernel("GPUTester_kernel.cl", "GPUTester_kernel", kernel, queue, context);
-
-    // Create a buffer to write to target.
-    std::cout<<"Writing input buffer to host \n";
 
     // Set Presistent memory only for AMD platform
     cl_mem_flags inMemFlags = CL_MEM_READ_ONLY;
@@ -88,7 +92,7 @@ namespace GPUAlgorithms
     cl::Buffer inputBuffer = cl::Buffer(context,
         inMemFlags, bufferSize,
         /* (void *) values*/ NULL,  &err);
-    if (err != CL_SUCCESS) throw std::runtime_error("Input Buffer creation failed.");
+    checkError("Input Buffer creation failed.");
 
     /* ------------------Create memory object for output ---------------  */
     float * outputValues = new float[numValues];
@@ -97,9 +101,8 @@ namespace GPUAlgorithms
     cl::Buffer outputBuffer = cl::Buffer(context,
         CL_MEM_WRITE_ONLY, bufferSize,
         NULL, &err);
-    if (err != CL_SUCCESS) throw std::runtime_error("Output Buffer creation failed.");
+    checkError("Output Buffer creation failed.");
 
-    CPUTimer tim;
 
     /* ------------------ Write memory from host to target ---------------  */
     cl::Event writeEvt;
@@ -110,27 +113,27 @@ namespace GPUAlgorithms
         bufferSize, /* size */
         (void *) values, /* Memory location in HOST */
         NULL, &writeEvt);
-    if (err != CL_SUCCESS) throw std::runtime_error("queue.enqueueWriteBuffer() failed.");
+    checkError("queue.enqueueWriteBuffer() failed.");
 
     /* Set appropriate arguments to the kernel */
 
     /* input buffer image */
     err = kernel.setArg(0, inputBuffer);
-    if (err != CL_SUCCESS) throw std::runtime_error("kernel.setArg(0) failed.");
+    checkError("kernel.setArg(0) failed.");
 
     /* outBuffer imager */
     err = kernel.setArg(1, outputBuffer);
-    if (err != CL_SUCCESS) throw std::runtime_error("kernel.setArg(1) failed.");
+    checkError("kernel.setArg(1) failed.");
 
     // ---------------------------------------------------------------
     cl::NDRange globalThreads(XSize, YSize);
     cl::NDRange localThreads(32, 32);
 
-    std::cout<<"Running CL program\n";
+    g_log.debug() << "Running CL program" << std::endl;
     err = queue.enqueueNDRangeKernel(
         kernel, cl::NullRange, globalThreads, localThreads
     );
-    checkError("CommandQueue::enqueueNDRangeKernel()", err);
+    checkError("CommandQueue::enqueueNDRangeKernel()");
 
     /* -------------------- Enqueue readBuffer ---------------------------*/
     cl::Event readEvt;
@@ -140,15 +143,15 @@ namespace GPUAlgorithms
         bufferSize,
         outputValues,
         NULL,  &readEvt);
-    if (err != CL_SUCCESS) throw std::runtime_error(" queue.enqueueReadBuffer() failed.");
+    checkError("Queue.enqueueReadBuffer() failed.");
 
-    std::cout << tim << " to queue the commands" << std::endl;
+    std::cout << tim << " to set up the the commands" << std::endl;
 
     err = queue.finish();
-    if (err != CL_SUCCESS) throw std::runtime_error("Event::wait() failed");
+    checkError("queue.finish() failed");
     std::cout << tim << " to run the OpenCL kernel" << std::endl;
 
-    std::cout<<"Done" << std::endl;
+    g_log.debug() << "OpenCL kernel execution compute." << std::endl;
 
     // We expect that the value = the position at each point
     bool result = true;
@@ -162,9 +165,9 @@ namespace GPUAlgorithms
     }
 
     if (result)
-      g_log.notice() << "GPUTester succeeded - the output from the GPU matched the expected values." << std::endl;
+      g_log.notice() << "GPUTester runKernel succeeded - the output from the GPU matched the expected values." << std::endl;
     else
-      g_log.notice() << "GPUTester failed - the output from the GPU did not match the expected values." << std::endl;
+      g_log.notice() << "GPUTester runKernel failed - the output from the GPU did not match the expected values." << std::endl;
 
     // Set the output
     setProperty("Result", result);
