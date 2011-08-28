@@ -1,34 +1,66 @@
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
-project(GPUAlgorithms)
-
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
- 
-set(LIBRARY_OUTPUT_PATH lib/${CMAKE_BUILD_TYPE})
-set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
- 
-include(FindOpenCL)
- 
+# Look for the OPENCL paths etc
 find_package(OpenCL REQUIRED)
-include_directories(${OPENCL_INCLUDE_DIRS} 
-	/home/janik/Code/Mantid/Code/Mantid/Framework/Kernel/inc )
- 
+
 set ( SRC_FILES
-	HelloCL.cpp 
+	src/GPUHelper.cpp
+	src/GPUTester.cpp
 )
 
 set ( INC_FILES
-) 
+	inc/MantidGPUAlgorithms/GPUHelper.h
+	inc/MantidGPUAlgorithms/GPUTester.h
+)
 
-add_library(
-        GPUAlgorithms
-        ${SRC_FILES} ${INC_FILES}  )
-  
-target_link_libraries(
-        GPUAlgorithms
-        ${OPENCL_LIBRARIES} libshrutil.a     liboclUtil.a 
-         )
+set ( TEST_FILES
+	test/GPUHelperTest.h
+	test/GPUTesterTest.h
+)
 
-# ------ HELLO CL Exec -------------------------------------------
-add_executable(HelloCL HelloCL.cpp )
-target_link_libraries ( HelloCL ${OPENCL_LIBRARIES} 
-	/home/janik/Code/Mantid/Code/Mantid/bin/libMantidKernel.so )
+set ( KERNEL_FILES
+	GPUTester_kernel.cl
+)
+
+
+# Add the target for this directory
+add_library ( GPUAlgorithms ${SRC_FILES} ${INC_FILES} )
+# Set the name of the generated library
+set_target_properties ( GPUAlgorithms PROPERTIES OUTPUT_NAME MantidGPUAlgorithms )
+# Add to the 'Framework' group in VS
+set_property ( TARGET Algorithms PROPERTY FOLDER "MantidFramework" )
+
+# Add the OPENCL include folder(s) to the includes
+include_directories ( inc ${OPENCL_INCLUDE_DIRS}  )
+
+# Link to the necessary OPENCL libs
+target_link_libraries ( GPUAlgorithms ${MANTIDLIBS} ${OPENCL_LIBRARIES} )
+
+ 
+if ( CXXTEST_FOUND )
+  include_directories ( ../Kernel/inc ../API/inc)
+  cxxtest_add_test ( GPUAlgorithmsTest ${TEST_FILES} )
+  target_link_libraries ( GPUAlgorithmsTest Kernel API GPUAlgorithms)
+  add_dependencies ( FrameworkTests GPUAlgorithmsTest )
+  # Add to the 'FrameworkTests' group in VS
+  set_property ( TARGET GPUAlgorithmsTest PROPERTY FOLDER "UnitTests" )
+endif ()
+ 
+
+#==================== Copy OpenCL kernels to the bin folder ============= 
+
+# This needs to be done as a 2-step process for it to work for VS builds
+# First the part that turns relative into absolute paths in the properties file
+set ( MANTID_ROOT ${CMAKE_SOURCE_DIR} )
+# This keeps things working for people building just the framework project
+if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
+  set ( MANTID_ROOT ${CMAKE_SOURCE_DIR}/.. )
+endif ()
+
+## Make the opencl directory (under bin)
+#file( MAKE_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/opencl/" )
+
+## Go through each file in the set and copy them to bin/ folder.
+#foreach(f ${KERNEL_FILES})
+#	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/${f}
+#    	${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/opencl/${f}  COPYONLY)
+#endforeach(f) 
+    

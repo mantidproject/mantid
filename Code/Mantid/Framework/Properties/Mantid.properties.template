@@ -34,6 +34,9 @@ instrumentDefinition.directory = @MANTID_ROOT@/instrument
 # Where to load parameter definition files from
 parameterDefinition.directory = @MANTID_ROOT@/instrument
 
+# Where to load OpenCL kernel files
+openclKernelFiles.directory = @MANTID_ROOT@/Framework/GPUAlgorithms/src
+
 # Location of Python scripts that are required for certain aspects of Mantid to function
 # correctly, i.e. customized interfaces
 #
