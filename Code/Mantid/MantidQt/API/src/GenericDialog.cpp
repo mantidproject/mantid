@@ -226,6 +226,7 @@ void GenericDialog::initLayout()
   // Create a scroll area for the (rare) occasion when an algorithm has
   // so many properties it won't fit on the screen
   QScrollArea *scroll = new QScrollArea(this);
+
   QWidget *viewport = new QWidget(this);
   // Put everything in a vertical box and put it inside the scroll area
   QVBoxLayout *mainLay = new QVBoxLayout();
@@ -283,6 +284,8 @@ void GenericDialog::initLayout()
     //The property boxes
     mainLay->addLayout(m_inputGrid);
   }
+  // Add a stretchy item to allow the properties grid to be top-aligned
+  mainLay->addStretch(1);
 
   dialog_layout->addWidget(scroll); // add scroll to the QDialog's layout
   // Add the help, run and cancel buttons
@@ -292,6 +295,7 @@ void GenericDialog::initLayout()
   scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
   scroll->setWidget(viewport);
   scroll->setWidgetResizable(true);
+  scroll->setAlignment(Qt::AlignLeft & Qt::AlignTop);
 
   const int screenHeight = QApplication::desktop()->height();
   const int dialogHeight = viewport->height();
