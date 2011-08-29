@@ -26,7 +26,28 @@ public:
     coord_t origin[3] = {5, 10, 15};
     coord_t scaling[3] = {1, 2, 3};
     TSM_ASSERT_THROWS_ANYTHING( "DimtoBinFrom has too high an index", CoordTransformAligned ct(4,3, dimToBinFrom, origin, scaling); );
+    std::vector<size_t> d(3);
+    std::vector<coord_t> o(2), s(3);
+    TSM_ASSERT_THROWS_ANYTHING( "Non-matching vector lengths", CoordTransformAligned ct(3,3, d,o,s); );
   }
+
+  /** Construct from vector */
+  void test_constructor_vector_and_apply()
+  {
+    std::vector<size_t> dimToBinFrom(3, 0);
+    dimToBinFrom[1] = 1; dimToBinFrom[2] = 2;
+    std::vector<coord_t> origin(3, 1);
+    std::vector<coord_t> scaling(3, 2);
+    CoordTransformAligned ct(3,3, dimToBinFrom, origin, scaling);
+
+    coord_t input[3] = {2, 3, 4};
+    coord_t output[3] = {0,0,0};
+    ct.apply(input, output);
+    TS_ASSERT_DELTA( output[0], 2.0, 1e-6 );
+    TS_ASSERT_DELTA( output[1], 4.0, 1e-6 );
+    TS_ASSERT_DELTA( output[2], 6.0, 1e-6 );
+  }
+
 
   void test_constructor_and_apply()
   {

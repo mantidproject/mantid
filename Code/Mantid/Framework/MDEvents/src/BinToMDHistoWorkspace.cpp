@@ -17,6 +17,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
+#include "MantidMDEvents/CoordTransformAligned.h"
 
 using Mantid::Kernel::CPUTimer;
 
@@ -77,11 +78,14 @@ namespace MDEvents
   {
     std::string dimHelp = "Enter it as a comma-separated list of values with the format: 'name,minimum,maximum,number_of_bins'. Leave blank for NONE.";
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input), "An input MDEventWorkspace.");
+
     declareProperty(new PropertyWithValue<std::string>("DimX","",Direction::Input), "Binning parameters for the X dimension.\n" + dimHelp);
     declareProperty(new PropertyWithValue<std::string>("DimY","",Direction::Input), "Binning parameters for the Y dimension.\n" + dimHelp);
     declareProperty(new PropertyWithValue<std::string>("DimZ","",Direction::Input), "Binning parameters for the Z dimension.\n" + dimHelp);
     declareProperty(new PropertyWithValue<std::string>("DimT","",Direction::Input), "Binning parameters for the T dimension.\n" + dimHelp);
-    declareProperty(new PropertyWithValue<std::string>("ImplicitFunctionXML","",Direction::Input), "XML string describing the implicit function determining which bins to use.");
+
+    declareProperty(new PropertyWithValue<std::string>("ImplicitFunctionXML","",Direction::Input),
+        "XML string describing the implicit function determining which bins to use.");
     declareProperty(new PropertyWithValue<bool>("IterateEvents",true,Direction::Input),
         "Alternative binning method where you iterate through every event, placing them in the proper bin.\n"
         "This may be faster for workspaces with few events and lots of output bins.");
@@ -143,12 +147,15 @@ namespace MDEvents
   /** Bin the contents of a MDBox
    *
    * @param box :: pointer to the MDBox to bin
-   * @param chunkMin :: the minimum X in each dimension to consider "valid"
-   * @param chunkMax :: the maximum X in each dimension to consider "valid"
+   * @param chunkMin :: the minimum index in each dimension to consider "valid" (inclusive)
+   * @param chunkMax :: the maximum index in each dimension to consider "valid" (exclusive)
    */
   template<typename MDE, size_t nd>
-  inline void BinToMDHistoWorkspace::binMDBox(MDBox<MDE, nd> * box, coord_t * chunkMin, coord_t * chunkMax)
+  inline void BinToMDHistoWorkspace::binMDBox(MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax)
   {
+    // An array to hold the rotated/transformed coordinates
+    coord_t * outCenter = new coord_t[outD];
+
     // Evaluate whether the entire box is in the same bin
     if (box->getNPoints() > (1 << nd) * 2)
     {
@@ -163,7 +170,10 @@ namespace MDEvents
       for (size_t i=0; i<numVertexes; i++)
       {
         // Cache the center of the event (again for speed)
-        const coord_t * center = vertexes + i * nd;;
+        const coord_t * inCenter = vertexes + i * nd;
+
+        // Now transform to the output dimensions
+        m_transform->apply(inCenter, outCenter);
 
         // To build up the linear index
         size_t linearIndex = 0;
@@ -171,17 +181,16 @@ namespace MDEvents
         badOne = false;
 
         /// Loop through the dimensions on which we bin
-        for (size_t bd=0; bd<numBD; bd++)
+        for (size_t bd=0; bd<outD; bd++)
         {
-          // Dimension in the MDEventWorkspace
-          size_t d = dimensionToBinFrom[bd];
-          // Where the event is in that dimension?
-          coord_t x = center[d];
+          // What is the bin index in that dimension
+          coord_t x = outCenter[bd];
+          size_t ix = size_t(x);
           // Within range (for this chunk)?
-          if ((x >= chunkMin[bd]) && (x < chunkMax[bd]))
+          if ((x >= 0) && (ix >= chunkMin[bd]) && (ix < chunkMax[bd]))
           {
             // Build up the linear index
-            linearIndex += indexMultiplier[bd] * size_t((x - min[bd])/step[bd]);
+            linearIndex += indexMultiplier[bd] * ix;
           }
           else
           {
@@ -218,6 +227,7 @@ namespace MDEvents
         signals[lastLinearIndex] += box->getSignal();
         errors[lastLinearIndex] += box->getErrorSquared();
         // And don't bother looking at each event. This may save lots of time loading from disk.
+        delete [] outCenter;
         return;
       }
     }
@@ -225,16 +235,16 @@ namespace MDEvents
     // If you get here, you could not determine that the entire box was in the same bin.
     // So you need to iterate through events.
 
-    // An array to hold each event's coordinates, rotated/transformed
-    coord_t * transformedCenter = new coord_t[numBD];
-
     const std::vector<MDE> & events = box->getConstEvents();
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
     for (; it != it_end; it++)
     {
       // Cache the center of the event (again for speed)
-      const coord_t * center = it->getCenter();
+      const coord_t * inCenter = it->getCenter();
+
+      // Now transform to the output dimensions
+      m_transform->apply(inCenter, outCenter);
 
       // To build up the linear index
       size_t linearIndex = 0;
@@ -242,17 +252,16 @@ namespace MDEvents
       bool badOne = false;
 
       /// Loop through the dimensions on which we bin
-      for (size_t bd=0; bd<numBD; bd++)
+      for (size_t bd=0; bd<outD; bd++)
       {
-        // Dimension in the MDEventWorkspace
-        size_t d = dimensionToBinFrom[bd];
-        // Where the event is in that dimension?
-        coord_t x = center[d];
+        // What is the bin index in that dimension
+        coord_t x = outCenter[bd];
+        size_t ix = size_t(x);
         // Within range (for this chunk)?
-        if ((x >= chunkMin[bd]) && (x < chunkMax[bd]))
+        if ((x >= 0) && (ix >= chunkMin[bd]) && (ix < chunkMax[bd]))
         {
           // Build up the linear index
-          linearIndex += indexMultiplier[bd] * size_t((x - min[bd])/step[bd]);
+          linearIndex += indexMultiplier[bd] * ix;
         }
         else
         {
@@ -271,7 +280,7 @@ namespace MDEvents
     // Done with the events list
     box->releaseEvents();
 
-    delete [] transformedCenter;
+    delete [] outCenter;
   }
 
 
@@ -286,19 +295,10 @@ namespace MDEvents
     // Start with signal at 0.0
     outWS->setTo(0.0, 0.0);
 
-    // Number of output binning dimensions found
-    numBD = binDimensions.size();
-
     // Cache some data to speed up accessing them a bit
-    min = new coord_t[numBD];
-    max = new coord_t[numBD];
-    step = new coord_t[numBD];
-    indexMultiplier = new size_t[numBD];
-    for (size_t d=0; d<numBD; d++)
+    indexMultiplier = new size_t[outD];
+    for (size_t d=0; d<outD; d++)
     {
-      min[d] = binDimensions[d]->getMinimum();
-      max[d] = binDimensions[d]->getMaximum();
-      step[d] = binDimensions[d]->getBinWidth();
       if (d > 0)
         indexMultiplier[d] = outWS->getIndexMultiplier()[d-1];
       else
@@ -326,34 +326,35 @@ namespace MDEvents
 
     // Run the chunks in parallel. There is no overlap in the output workspace so it is
     // thread safe to write to it..
-    PRAGMA_OMP( parallel for schedule(dynamic,1) if (doParallel) )
+    //PRAGMA_OMP( parallel for schedule(dynamic,1) if (doParallel) )
     for(int chunk=0; chunk < int(binDimensions[chunkDimension]->getNBins()); chunk += chunkNumBins)
     {
       // Region of interest for this chunk.
-      coord_t * chunkMin = new coord_t[numBD];
-      coord_t * chunkMax = new coord_t[numBD];
-      for (size_t bd=0; bd<numBD; bd++)
+      size_t * chunkMin = new size_t[outD];
+      size_t * chunkMax = new size_t[outD];
+      for (size_t bd=0; bd<outD; bd++)
       {
         // Same limits in the other dimensions
-        chunkMin[bd] = min[bd];
-        chunkMax[bd] = max[bd];
+        chunkMin[bd] = 0;
+        chunkMax[bd] = binDimensions[bd]->getNBins();
       }
       // Parcel out a chunk in that single dimension dimension
-      chunkMin[chunkDimension] = binDimensions[chunkDimension]->getX( size_t(chunk) );
+      chunkMin[chunkDimension] = size_t(chunk);
       if (size_t(chunk+chunkNumBins) > binDimensions[chunkDimension]->getNBins())
-        chunkMax[chunkDimension] = binDimensions[chunkDimension]->getMaximum();
+        chunkMax[chunkDimension] = binDimensions[chunkDimension]->getNBins();
       else
-        chunkMax[chunkDimension] = binDimensions[chunkDimension]->getX( size_t(chunk+chunkNumBins) );
+        chunkMax[chunkDimension] = size_t(chunk+chunkNumBins);
 
       // Build an implicit function (it needs to be in the space of the MDEventWorkspace)
+      // TODO: Apply the transform!
       std::vector<coord_t> function_min(nd, -1e50); // default to all space if the dimension is not specified
       std::vector<coord_t> function_max(nd, +1e50); // default to all space if the dimension is not specified
-      for (size_t bd=0; bd<numBD; bd++)
+      for (size_t bd=0; bd<outD; bd++)
       {
         // Dimension in the MDEventWorkspace
         size_t d = dimensionToBinFrom[bd];
-        function_min[d] = chunkMin[bd];
-        function_max[d] = chunkMax[bd];
+        function_min[d] = binDimensions[bd]->getX(chunkMin[bd]);
+        function_max[d] = binDimensions[bd]->getX(chunkMax[bd]);
       }
       MDBoxImplicitFunction * function = new MDBoxImplicitFunction(function_min, function_max);
 
@@ -397,10 +398,6 @@ namespace MDEvents
       signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
       outWS->applyImplicitFunction(implicitFunction, nan, nan);
     }
-
-    delete [] min;
-    delete [] max;
-    delete [] step;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -417,7 +414,7 @@ namespace MDEvents
     CPUTimer tim;
 
     // Number of output binning dimensions found
-    size_t numBD = binDimensions.size();
+    size_t outD = binDimensions.size();
 
     //Since the costs are not known ahead of time, use a simple FIFO buffer.
     ThreadScheduler * ts = new ThreadSchedulerFIFO();
@@ -436,12 +433,12 @@ namespace MDEvents
     IMDBox<MDE,nd> * rootBox = ws->getBox();
 
     // This is the limit to loop over in each dimension
-    size_t * index_max = new size_t[numBD];
-    for (size_t bd=0; bd<numBD; bd++) index_max[bd] = binDimensions[bd]->getNBins();
+    size_t * index_max = new size_t[outD];
+    for (size_t bd=0; bd<outD; bd++) index_max[bd] = binDimensions[bd]->getNBins();
 
     // Cache a calculation to convert indices x,y,z,t into a linear index.
-    size_t * index_maker = new size_t[numBD];
-    Utils::NestedForLoop::SetUpIndexMaker(numBD, index_maker, index_max);
+    size_t * index_maker = new size_t[outD];
+    Utils::NestedForLoop::SetUpIndexMaker(outD, index_maker, index_max);
 
     int numPoints = int(outWS->getNPoints());
 
@@ -454,15 +451,15 @@ namespace MDEvents
       PARALLEL_START_INTERUPT_REGION
 
       size_t linear_index = size_t(i);
-      // nd >= numBD in all cases so this is safe.
+      // nd >= outD in all cases so this is safe.
       size_t index[nd];
 
       // Get the index at each dimension for this bin.
-      Utils::NestedForLoop::GetIndicesFromLinearIndex(numBD, linear_index, index_maker, index_max, index);
+      Utils::NestedForLoop::GetIndicesFromLinearIndex(outD, linear_index, index_maker, index_max, index);
 
       // Construct the bin and its coordinates
       MDBin<MDE,nd> bin;
-      for (size_t bd=0; bd<numBD; bd++)
+      for (size_t bd=0; bd<outD; bd++)
       {
         // Index in this binning dimension (i_x, i_y, etc.)
         size_t idx = index[bd];
@@ -515,10 +512,11 @@ namespace MDEvents
 
 
 
+
   //----------------------------------------------------------------------------------------------
-  /** Execute the algorithm.
+  /** Load and check the inputs in the bin dimensions parameters
    */
-  void BinToMDHistoWorkspace::exec()
+  void BinToMDHistoWorkspace::checkBinDimensions()
   {
     // Create the dimensions based on the strings from the user
     binDimensionsIn.push_back( makeMDHistoDimensionFromString( getPropertyValue("DimX")) );
@@ -526,7 +524,66 @@ namespace MDEvents
     binDimensionsIn.push_back( makeMDHistoDimensionFromString( getPropertyValue("DimZ")) );
     binDimensionsIn.push_back( makeMDHistoDimensionFromString( getPropertyValue("DimT")) );
 
-    IMDEventWorkspace_sptr in_ws = getProperty("InputWorkspace");
+    // Thin down the input dimensions for any invalid ones
+    for (size_t i = 0; i < binDimensionsIn.size(); ++i)
+    {
+      if (binDimensionsIn[i]) // (valid pointer?)
+      {
+        if (binDimensionsIn[i]->getNBins() == 0)
+          throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was set to have 0 bins. Cannot continue.");
+
+        try {
+          size_t dim_index = in_ws->getDimensionIndexByName(binDimensionsIn[i]->getName());
+          dimensionToBinFrom.push_back(dim_index);
+          binDimensions.push_back(binDimensionsIn[i]);
+        }
+        catch (std::runtime_error &)
+        {
+          // The dimension was not found, so we are not binning across it.
+          if (binDimensionsIn[i]->getNBins() > 1)
+            throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was not found in the MDEventWorkspace and has more than one bin! Cannot continue.");
+        }
+      }
+    }
+    // Number of output binning dimensions found
+    outD = binDimensions.size();
+
+    if (outD == 0)
+      throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
+    if (outD > in_ws->getNumDims())
+      throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace. Cannot bin!");
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Using the parameters, create a coordinate transformation
+   * for aligned cuts
+   */
+  void BinToMDHistoWorkspace::createAlignedTransform()
+  {
+    std::vector<coord_t> origin(outD), scaling(outD);
+    for (size_t d=0; d<outD; d++)
+    {
+      origin[d] = binDimensions[d]->getMinimum();
+      scaling[d] = coord_t(1.0) / binDimensions[d]->getBinWidth();
+    }
+
+    m_transform = new CoordTransformAligned(in_ws->getNumDims(), outD,
+        dimensionToBinFrom, origin, scaling);
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Execute the algorithm.
+   */
+  void BinToMDHistoWorkspace::exec()
+  {
+    // Input MDEventWorkspace
+    in_ws = getProperty("InputWorkspace");
+
+    // Treat the input dimensions.
+    checkBinDimensions();
+
 
     // De serialize the implicit function
     std::string ImplicitFunctionXML = getPropertyValue("ImplicitFunctionXML");
@@ -545,48 +602,17 @@ namespace MDEvents
       CoordTransformAffineParser parser;
       m_transform = parser.createTransform(pRootElem);
     }
+    else
+    {
+      // Make an aligned transform out of the parameters
+      this->createAlignedTransform();
+    }
 
 
     prog = new Progress(this, 0, 1.0, 1); // This gets deleted by the thread pool; don't delete it in here.
 
-
-    // --------------- Create the output MDHistoWorkspace ------------------
-    CPUTimer tim;
-
-    // Thin down the input dimensions for any invalid ones
-    for (size_t i = 0; i < binDimensionsIn.size(); ++i)
-    {
-      if (binDimensionsIn[i]) // (valid pointer?)
-      {
-        if (binDimensionsIn[i]->getNBins() == 0)
-          throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was set to have 0 bins. Cannot continue.");
-
-        try {
-          size_t dim_index = in_ws->getDimensionIndexByName(binDimensionsIn[i]->getName());
-          dimensionToBinFrom.push_back(dim_index);
-          binDimensions.push_back(binDimensionsIn[i]);
-        }
-        catch (std::runtime_error &)
-        {
-          // The dimension was not found, so we are not binning across it. TODO: Log message?
-          if (binDimensionsIn[i]->getNBins() > 1)
-            throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was not found in the MDEventWorkspace and has more than one bin! Cannot continue.");
-        }
-      }
-    }
-    // Number of output binning dimensions found
-    size_t numBD = binDimensions.size();
-
     // Create the dense histogram. This allocates the memory
     outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(binDimensions));
-    //if (DODEBUG) std::cout << tim << " to create the MDHistoWorkspace.\n";
-
-    if (numBD == 0)
-      throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
-    if (numBD > in_ws->getNumDims())
-      throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace. Cannot bin!");
-
-
 
     // Wrapper to cast to MDEventWorkspace then call the function
     bool IterateEvents = getProperty("IterateEvents");
@@ -598,7 +624,6 @@ namespace MDEvents
     {
       CALL_MDEVENT_FUNCTION(this->do_centerpointBin, in_ws);
     }
-
 
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outWS));

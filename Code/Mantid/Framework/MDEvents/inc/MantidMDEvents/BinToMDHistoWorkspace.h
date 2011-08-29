@@ -11,6 +11,9 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDBox.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+
+using Mantid::API::IMDEventWorkspace_sptr;
 
 
 namespace Mantid
@@ -53,6 +56,9 @@ namespace MDEvents
     /// Run the algorithm
     void exec();
 
+    void checkBinDimensions();
+    void createAlignedTransform();
+
     /// Helper method
     template<typename MDE, size_t nd>
     void do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws);
@@ -63,8 +69,10 @@ namespace MDEvents
 
     /// Method to bin a single MDBox
     template<typename MDE, size_t nd>
-    void binMDBox(MDBox<MDE, nd> * box, coord_t * chunkMin, coord_t * chunkMax);
+    void binMDBox(MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax);
 
+    // Input workspace
+    Mantid::API::IMDEventWorkspace_sptr in_ws;
     /// Input binning dimensions
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> binDimensionsIn;
     /// The output MDHistoWorkspace
@@ -82,11 +90,10 @@ namespace MDEvents
     /// Do we perform a coordinate transformation? NULL if no.
     CoordTransform * m_transform;
 
+    /// Number of dimensions in the output (binned) workspace.
+    size_t outD;
+
     /// Cached values for speed up
-    size_t numBD;
-    coord_t * min;
-    coord_t * max;
-    coord_t * step;
     size_t * indexMultiplier;
     signal_t * signals;
     signal_t * errors;

@@ -43,6 +43,37 @@ namespace MDEvents
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Constructor
+   *
+   * @param inD :: input number of dimensions, >= 1
+   * @param outD :: output number of dimensions, <= inD
+   * @param dimensionToBinFrom :: For each dimension in the output, index in the input workspace of which dimension it is
+   * @param origin :: Offset (minimum) position in each of the output dimensions, sized [outD]
+   * @param scaling :: Scaling from the input to the output dimension, sized [outD]
+   * @throw std::runtime_error if outD > inD or if an invalid index is in dimensionToBinFrom
+   *
+   */
+  CoordTransformAligned::CoordTransformAligned(const size_t inD, const size_t outD, const std::vector<size_t> dimensionToBinFrom,
+          const std::vector<coord_t> origin, const std::vector<coord_t> scaling)
+  : CoordTransform(inD, outD)
+  {
+    if (dimensionToBinFrom.size() != outD || origin.size() != outD || scaling.size() != outD)
+      throw std::runtime_error("CoordTransformAligned::ctor(): at least one of the input vectors is the wrong size.");
+    m_dimensionToBinFrom = new size_t[outD];
+    m_origin = new coord_t[outD];
+    m_scaling = new coord_t[outD];
+    for (size_t d=0; d<outD; d++)
+    {
+      m_dimensionToBinFrom[d] = dimensionToBinFrom[d];
+      if (m_dimensionToBinFrom[d] >= inD)
+        throw std::runtime_error("CoordTransformAligned::ctor(): invalid entry in dimensionToBinFrom[" +
+            Mantid::Kernel::Strings::toString(d) + "]. Cannot build the coordinate transformation.");
+      m_origin[d] = origin[d];
+      m_scaling[d] = scaling[d];
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   CoordTransformAligned::~CoordTransformAligned()
