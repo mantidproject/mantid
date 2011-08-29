@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/BoxController.cpp
 	src/CloneMDEventWorkspace.cpp
 	src/CoordTransform.cpp
+	src/CoordTransformAligned.cpp
 	src/CoordTransformDistance.cpp
 	src/CoordTransformDistanceParser.cpp
 	src/CoordTransformParser.cpp
@@ -49,6 +50,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/BoxController.h
 	inc/MantidMDEvents/CloneMDEventWorkspace.h
 	inc/MantidMDEvents/CoordTransform.h
+	inc/MantidMDEvents/CoordTransformAligned.h
 	inc/MantidMDEvents/CoordTransformDistance.h
 	inc/MantidMDEvents/CoordTransformDistanceParser.h
 	inc/MantidMDEvents/CoordTransformParser.h
@@ -82,6 +84,7 @@ set ( TEST_FILES
 	test/AffineMatrixParameterTest.h
 	test/BoxControllerTest.h
 	test/CloneMDEventWorkspaceTest.h
+	test/CoordTransformAlignedTest.h
 	test/CoordTransformDistanceParserTest.h
 	test/CoordTransformDistanceTest.h
 	test/CoordTransformParserTest.h

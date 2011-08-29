@@ -33,27 +33,24 @@ namespace MDEvents
   class DLLExport CoordTransformDistance : public CoordTransform
   {
   public:
-    typedef boost::scoped_ptr<DimensionsUsedVectorParam> DimensionUsedVec_scptr;
-    typedef boost::scoped_ptr<CoordCenterVectorParam> CoodCenterVec_scptr;
-
     CoordTransformDistance(const size_t inD, const coord_t * center, const bool * dimensionsUsed);
     virtual ~CoordTransformDistance();
     virtual std::string toXMLString() const;
 
-    virtual void apply(const coord_t * inputVector, coord_t * outVector);
+    void apply(const coord_t * inputVector, coord_t * outVector) const;
 
     /// Return the center coordinate array
-    const coord_t * getCenter() { return m_center->getPointerToStart(); }
+    const coord_t * getCenter() { return m_center; }
 
     /// Return the dimensions used bool array
-    const bool * getDimensionsUsed() { return m_dimensionsUsed->getPointerToStart(); }
+    const bool * getDimensionsUsed() { return m_dimensionsUsed; }
 
   protected:
     /// Coordinates at the center
-    CoodCenterVec_scptr m_center;
+    coord_t * m_center;
 
     /// Parmeter where True is set for those dimensions that are considered when calculating distance
-    DimensionUsedVec_scptr m_dimensionsUsed;
+    bool * m_dimensionsUsed;
   };
 
 

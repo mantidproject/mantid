@@ -79,6 +79,9 @@ namespace MDEvents
     /// Index of the dimension in the MDEW for the dimension in the output.
     std::vector<size_t> dimensionToBinFrom;
 
+    /// Do we perform a coordinate transformation? NULL if no.
+    CoordTransform * m_transform;
+
     /// Cached values for speed up
     size_t numBD;
     coord_t * min;

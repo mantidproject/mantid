@@ -13,6 +13,10 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include <boost/algorithm/string.hpp>
+#include "MantidMDEvents/CoordTransformParser.h"
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
 
 using Mantid::Kernel::CPUTimer;
 
@@ -83,7 +87,12 @@ namespace MDEvents
         "This may be faster for workspaces with few events and lots of output bins.");
     declareProperty(new PropertyWithValue<bool>("Parallel",false,Direction::Input),
         "Temporary parameter: true to run in parallel.");
+
+    declareProperty(new PropertyWithValue<std::string>("TransformationXML","",Direction::Input),
+        "XML string describing the coordinate transformation that converts from the MDEventWorkspace dimensions to the output dimensions.");
+
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "A name for the output MDHistoWorkspace.");
+
   }
 
 
@@ -216,6 +225,9 @@ namespace MDEvents
     // If you get here, you could not determine that the entire box was in the same bin.
     // So you need to iterate through events.
 
+    // An array to hold each event's coordinates, rotated/transformed
+    coord_t * transformedCenter = new coord_t[numBD];
+
     const std::vector<MDE> & events = box->getConstEvents();
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
@@ -258,6 +270,8 @@ namespace MDEvents
     }
     // Done with the events list
     box->releaseEvents();
+
+    delete [] transformedCenter;
   }
 
 
@@ -310,7 +324,7 @@ namespace MDEvents
     // Total number of steps
     size_t progNumSteps = 0;
 
-    // Run the chunks in parallel. There is no overal in the output workspace so it is
+    // Run the chunks in parallel. There is no overlap in the output workspace so it is
     // thread safe to write to it..
     PRAGMA_OMP( parallel for schedule(dynamic,1) if (doParallel) )
     for(int chunk=0; chunk < int(binDimensions[chunkDimension]->getNBins()); chunk += chunkNumBins)
@@ -372,7 +386,7 @@ namespace MDEvents
         if (prog) prog->report();
 
       }// for each box in the vector
-    } // for each chunk
+    } // for each chunk in parallel
 
 
 
@@ -518,9 +532,20 @@ namespace MDEvents
     std::string ImplicitFunctionXML = getPropertyValue("ImplicitFunctionXML");
     implicitFunction = NULL;
     if (!ImplicitFunctionXML.empty())
-    {
       implicitFunction = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(ImplicitFunctionXML);
+
+    // De-serialize the coordinate transformation XML string
+    std::string TransformationXML = getPropertyValue("TransformationXML");
+    m_transform = NULL;
+    if (!TransformationXML.empty())
+    {
+      Poco::XML::DOMParser pParser;
+      Poco::XML::Document* pDoc = pParser.parseString(TransformationXML);
+      Poco::XML::Element* pRootElem = pDoc->documentElement();
+      CoordTransformParser parser;
+      m_transform = parser.createTransform(pRootElem);
     }
+
 
     prog = new Progress(this, 0, 1.0, 1); // This gets deleted by the thread pool; don't delete it in here.
 

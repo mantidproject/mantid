@@ -26,13 +26,15 @@ namespace MDEvents
    * @return
    */
   CoordTransformDistance::CoordTransformDistance(const size_t inD, const coord_t * center, const bool * dimensionsUsed)
-    : CoordTransform(inD, 1), m_center(new CoordCenterVectorParam(inD)), m_dimensionsUsed(new DimensionsUsedVectorParam(inD))
+  : CoordTransform(inD, 1)
   {
     // Create and copy the arrays.
+    m_center = new coord_t[inD];
+    m_dimensionsUsed = new bool[inD];
     for (size_t d=0; d<inD; d++)
     {
-      m_center->addValue(d, center[d]);
-      m_dimensionsUsed->addValue(d, dimensionsUsed[d]);
+      m_center[d] = center[d];
+      m_dimensionsUsed[d] = dimensionsUsed[d];
     }
   }
     
@@ -41,6 +43,8 @@ namespace MDEvents
    */
   CoordTransformDistance::~CoordTransformDistance()
   {
+    delete m_center;
+    delete m_dimensionsUsed;
   }
   
 
@@ -53,14 +57,14 @@ namespace MDEvents
    * @param inputVector :: fixed-size array of input coordinates, of size inD
    * @param outVector :: fixed-size array of output coordinates, of size 1
    */
-  void CoordTransformDistance::apply(const coord_t * inputVector, coord_t * outVector)
+  void CoordTransformDistance::apply(const coord_t * inputVector, coord_t * outVector) const
   {
     coord_t distanceSquared = 0;
-    for (size_t d=0; d<inD.getValue(); d++)
+    for (size_t d=0; d<inD; d++)
     {
-      if (true == m_dimensionsUsed->at(d))
+      if (m_dimensionsUsed[d])
       {
-        coord_t dist = inputVector[d] - m_center->at(d);
+        coord_t dist = inputVector[d] - m_center[d];
         distanceSquared += (dist * dist);
       }
     }
@@ -96,11 +100,24 @@ namespace MDEvents
       DOMWriter writer;
       writer.writeNode(xmlstream, pDoc);
 
+      // Convert the members to parameters
+      InDimParameter inD_param(inD);
+      OutDimParameter outD_param(outD);
+      CoordCenterVectorParam m_center_param(inD);
+      DimensionsUsedVectorParam m_dimensionsUsed_param(inD);
+
+      // Create and copy the arrays.
+      for (size_t d=0; d<inD; d++)
+      {
+        m_center_param.addValue(d, m_center[d]);
+        m_dimensionsUsed_param.addValue(d, m_dimensionsUsed[d]);
+      }
+
       std::string formattedXMLString = boost::str(boost::format(xmlstream.str().c_str())
-        % inD.toXMLString().c_str() 
-        % outD.toXMLString().c_str() 
-        % m_center->toXMLString().c_str()
-        % m_dimensionsUsed->toXMLString().c_str());
+        % inD_param.toXMLString().c_str()
+        % outD_param.toXMLString().c_str()
+        % m_center_param.toXMLString().c_str()
+        % m_dimensionsUsed_param.toXMLString().c_str());
 
       return formattedXMLString;
   }

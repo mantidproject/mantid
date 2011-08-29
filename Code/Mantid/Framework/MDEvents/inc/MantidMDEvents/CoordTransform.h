@@ -32,52 +32,35 @@ namespace MDEvents
    */
   class DLLExport CoordTransform 
   {
-  protected:
-    /// Input number of dimensions
-    InDimParameter inD;
 
-    /// Output number of dimensions
-    OutDimParameter outD;
-
-    /** Affine Matrix to perform the transformation. The matrix has inD+1 columns, outD+1 rows.
-     * By using an affine, translations and rotations (or other linear transforms) can be
-     * combined by simply multiplying the matrices.
-     */
-     AffineMatrixParameter affineMatrixParameter;
 
   public:
     CoordTransform(const size_t inD, const size_t outD);
     virtual ~CoordTransform();
     virtual std::string toXMLString() const;
     void addTranslation(const coord_t * translationVector);
-    Mantid::Kernel::Matrix<coord_t> getMatrix() const;
-    void setMatrix(const Mantid::Kernel::Matrix<coord_t> newMatrix);
+    const Mantid::Kernel::Matrix<coord_t> & getMatrix() const;
+    void setMatrix(const Mantid::Kernel::Matrix<coord_t> & newMatrix);
 
-    //----------------------------------------------------------------------------------------------
-    /** Apply the coordinate transformation
-     *
-     * @param inputVector :: fixed-size array of input coordinates, of size inD
-     * @param outVector :: fixed-size array of output coordinates, of size outD
+    virtual void apply(const coord_t * inputVector, coord_t * outVector) const;
+
+  protected:
+    /// Input number of dimensions
+    size_t inD;
+
+    /// Output number of dimensions
+    size_t outD;
+
+    /** Affine Matrix to perform the transformation. The matrix has inD+1 columns, outD+1 rows.
+     * By using an affine, translations and rotations (or other linear transforms) can be
+     * combined by simply multiplying the matrices.
      */
-    virtual void apply(const coord_t * inputVector, coord_t * outVector)
-    {
-      // For each output dimension
-      for (size_t out = 0; out < outD.getValue(); ++out)
-      {
-        //Cache the row pointer to make the matrix access a bit faster
-        coord_t * rawMatrixRow = affineMatrixParameter.getRawMatrix()[out];
-        coord_t outVal = 0.0;
-        size_t in;
-        for (in = 0; in < inD.getValue(); ++in)
-          outVal += rawMatrixRow[in] * inputVector[in];
+    Mantid::Kernel::Matrix<coord_t> affineMatrix;
 
-        // The last input coordinate is "1" always (made homogenous coordinate out of the input x,y,etc.)
-        outVal += rawMatrixRow[in];
-        // Save in the output
-        outVector[out] = outVal;
-      }
-    }
+    /// Raw pointer to the same underlying matrix as affineMatrix.
+    coord_t ** rawMatrix;
 
+    void copyRawMatrix();
   };
 
 
