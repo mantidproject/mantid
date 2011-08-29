@@ -1967,7 +1967,7 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
   int numOfHist = static_cast<int>(matrix_workspace->getNumberHistograms()); //Qt has no size_t understanding
   for (int wsIndex = 0; wsIndex < numOfHist; wsIndex++)
   {
-    IDetector_sptr det;
+    IDetector_const_sptr det;
     try // for some bizarry reason when reading EMUautorun_A.tmp this 
         // underlying nexus file think there are more histogram than there is
         // hence the reason for this try/catch here
@@ -1979,11 +1979,11 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
       break;
     }
 
-    if( boost::dynamic_pointer_cast<DetectorGroup>(det) )
+    if( boost::dynamic_pointer_cast<const DetectorGroup>(det) )
     {
       // prepare IDs string
 
-      boost::shared_ptr<DetectorGroup> detG = boost::dynamic_pointer_cast<DetectorGroup>(det);
+      boost::shared_ptr<const DetectorGroup> detG = boost::dynamic_pointer_cast<const DetectorGroup>(det);
       std::vector<Mantid::detid_t> detIDs = detG->getDetectorIDs();
       if (detIDs.size() > 1)
       {
@@ -2002,13 +2002,13 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
   // Add info about grouping from Nexus file to group table
   for (int wsIndex = 0; wsIndex < numOfHist; wsIndex++)
   {
-    IDetector_sptr det = matrix_workspace->getDetector(wsIndex);
+    IDetector_const_sptr det = matrix_workspace->getDetector(wsIndex);
 
-    if( boost::dynamic_pointer_cast<DetectorGroup>(det) )
+    if( boost::dynamic_pointer_cast<const DetectorGroup>(det) )
     {
       // prepare IDs string
 
-      boost::shared_ptr<DetectorGroup> detG = boost::dynamic_pointer_cast<DetectorGroup>(det);
+      boost::shared_ptr<const DetectorGroup> detG = boost::dynamic_pointer_cast<const DetectorGroup>(det);
       std::vector<Mantid::detid_t> detIDs = detG->getDetectorIDs();
       std::stringstream idstr;
       int leftInt = detIDs[0];  // meaning left as in the left number of the range 8-18 for instance

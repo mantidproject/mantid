@@ -702,7 +702,7 @@ namespace Mantid
     *  @throw  Kernel::Exception::NotFoundError if the SpectraDetectorMap or the Instrument
     do not contain the requested spectrum number of detector ID
     */
-    Geometry::IDetector_sptr MatrixWorkspace::getDetector(const size_t workspaceIndex) const
+    Geometry::IDetector_const_sptr MatrixWorkspace::getDetector(const size_t workspaceIndex) const
     {
       const ISpectrum * spec = this->getSpectrum(workspaceIndex);
       if (!spec)
@@ -729,16 +729,16 @@ namespace Mantid
         throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): No detectors for this workspace index.", "");
       }
       // Else need to construct a DetectorGroup and return that
-      std::vector<Geometry::IDetector_sptr> dets_ptr = localInstrument->getDetectors(dets);
-      return Geometry::IDetector_sptr( new Geometry::DetectorGroup(dets_ptr, false) );
+      std::vector<Geometry::IDetector_const_sptr> dets_ptr = localInstrument->getDetectors(dets);
+      return Geometry::IDetector_const_sptr( new Geometry::DetectorGroup(dets_ptr, false) );
     }
 
-    Geometry::IDetector_sptr MatrixWorkspace::getDetector(const int workspaceIndex) const
+    Geometry::IDetector_const_sptr MatrixWorkspace::getDetector(const int workspaceIndex) const
     {
       return this->getDetector(static_cast<size_t>(workspaceIndex));
     }
 
-    Geometry::IDetector_sptr MatrixWorkspace::getDetector(const int64_t workspaceIndex) const
+    Geometry::IDetector_const_sptr MatrixWorkspace::getDetector(const int64_t workspaceIndex) const
     {
       return this->getDetector(static_cast<size_t>(workspaceIndex));
     }
@@ -1090,7 +1090,7 @@ namespace Mantid
       {
         try
         {
-          if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(sptr_instrument->getDetector(*iter).get()) )
+          if ( const Geometry::Detector* det = dynamic_cast<const Geometry::Detector*>(sptr_instrument->getDetector(*iter).get()) )
           {
             m_parmap->addBool(det,"masked",true);  // Thread-safe method
           }
@@ -1350,7 +1350,7 @@ namespace Mantid
         verts[3] = Coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram_d+1.);
       }
 
-      IDetector_sptr detector;
+      IDetector_const_sptr detector;
       const ISpectrum * spec = this->getSpectrum(histogram);
       if(spec->getDetectorIDs().size() > 0)
       {

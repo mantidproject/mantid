@@ -167,7 +167,7 @@ namespace DataHandling
     for (it = allDetectors.begin(); it != allDetectors.end(); it++)
     {
       detid_t detectorID = it->first;
-      Geometry::IDetector_sptr det = it->second;
+      Geometry::IDetector_const_sptr det = it->second;
 
       //Compute the factor
       double offset = 0.0;
@@ -209,7 +209,7 @@ namespace DataHandling
     for (it = allDetectors.begin(); it != allDetectors.end(); it++)
     {
       int detectorID = it->first;
-      Geometry::IDetector_sptr det = it->second;
+      Geometry::IDetector_const_sptr det = it->second;
 
       double offset = 0.0;
 

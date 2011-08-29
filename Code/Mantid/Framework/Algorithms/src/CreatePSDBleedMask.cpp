@@ -74,7 +74,7 @@ namespace Mantid
     /// Execute the algorithm
     void CreatePSDBleedMask::exec()
     {
-      using Geometry::IDetector_sptr;
+      using Geometry::IDetector_const_sptr;
 
       MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
       // We require the number of good frames. Check that we have this
@@ -110,7 +110,7 @@ namespace Mantid
       // order
       for( int i = 0; i < numSpectra; ++i )
       {
-        IDetector_sptr det;
+        IDetector_const_sptr det;
         try
         {
           det = inputWorkspace->getDetector(i);
@@ -121,8 +121,8 @@ namespace Mantid
         }
         if( det->isMonitor() ) continue;
 
-        boost::shared_ptr<Geometry::DetectorGroup> group = 
-          boost::dynamic_pointer_cast<Geometry::DetectorGroup>(det);
+        boost::shared_ptr<const Geometry::DetectorGroup> group =
+          boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det);
 
         if( group )
         {

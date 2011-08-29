@@ -111,7 +111,7 @@ FindDetectorsPar::exec()
    size_t ic(0);
    for (size_t i = 0; i < nHist; i++)
    {
-     Geometry::IDetector_sptr spDet;
+     Geometry::IDetector_const_sptr spDet;
      try{
         spDet= inputWS->getDetector(i);
      }catch(Kernel::Exception::NotFoundError &){
@@ -178,7 +178,7 @@ FindDetectorsPar::set_output_table()
 }
 
 void 
-FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_sptr spDet,const Geometry::IObjComponent_const_sptr sample,
+FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_const_sptr spDet,const Geometry::IObjComponent_const_sptr sample,
                                  const Kernel::V3D &GroupCenter,
                                  double &azim, double &polar, double &azim_width, double &polar_width,double &dist)
 {
@@ -202,12 +202,12 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_sptr spDet,const Geom
         double d0 = coord[1].norm();
         coord[1] /= d0;
         // access contribured detectors;
-        Geometry::DetectorGroup * pDetGroup = dynamic_cast<Geometry::DetectorGroup *>(spDet.get());
+        Geometry::DetectorGroup_const_sptr pDetGroup = boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(spDet);
         if(!pDetGroup){
              g_log.error()<<"calc_cylDetPar: can not downcast IDetector_sptr to detector group for det->ID: "<<spDet->getID()<<std::endl;
              throw(std::bad_cast());
         }
-        std::vector<Geometry::IDetector_sptr> pDets = pDetGroup->getDetectors();
+        std::vector<Geometry::IDetector_const_sptr> pDets = pDetGroup->getDetectors();
         Geometry::BoundingBox bbox;
 
         // loop through all detectors in the group 
@@ -242,7 +242,7 @@ FindDetectorsPar::calc_cylDetPar(const Geometry::IDetector_sptr spDet,const Geom
 
 void 
 FindDetectorsPar::calc_rectDetPar(const API::MatrixWorkspace_sptr inputWS, 
-                                 const Geometry::IDetector_sptr spDet,const Geometry::IObjComponent_const_sptr sample,
+                                 const Geometry::IDetector_const_sptr spDet,const Geometry::IObjComponent_const_sptr sample,
                                  const Kernel::V3D &GroupCentre,
                                  double &azim, double &polar, double &azim_width, double &polar_width,double &dist)
 {
@@ -352,7 +352,7 @@ FindDetectorsPar::populate_values_from_file(const API::MatrixWorkspace_sptr & in
        secondary_flightpath.resize(nHist);
      // Loop over the spectra
      for (size_t i = 0; i < nHist; i++){
-            Geometry::IDetector_sptr spDet;
+            Geometry::IDetector_const_sptr spDet;
             try{
                 spDet= inputWS->getDetector(i);
             }catch(Kernel::Exception::NotFoundError &){

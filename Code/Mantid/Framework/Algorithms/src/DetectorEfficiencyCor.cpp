@@ -193,7 +193,7 @@ Gets the detector information and uses this to calculate its efficiency
 */
 void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn)
 {
-  IDetector_sptr det = m_inputWS->getDetector(spectraIn);
+  IDetector_const_sptr det = m_inputWS->getDetector(spectraIn);
   if( det->isMonitor() || det->isMasked() )
   {
     return;
@@ -220,7 +220,7 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn)
   std::vector<double> oneOverWaveVectors(yValues.size());
   for( ; it != iend ; ++it )
   {
-    IDetector_sptr det_member = m_inputWS->getInstrument()->getDetector(*it);
+    IDetector_const_sptr det_member = m_inputWS->getInstrument()->getDetector(*it);
     
     Parameter_sptr par = m_paraMap->get(det_member.get(),"3He(atm)");
     if ( !par )
@@ -294,7 +294,7 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound, double uppBin
 * @param detRadius :: An output paramater that contains the detector radius
 * @param detAxis :: An output parameter that contains the detector axis vector
 */
-void DetectorEfficiencyCor::getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det, double & detRadius, V3D & detAxis)
+void DetectorEfficiencyCor::getDetectorGeometry(Geometry::IDetector_const_sptr det, double & detRadius, V3D & detAxis)
 {
   boost::shared_ptr<const Object> shape_sptr = det->shape();
   std::map<const Geometry::Object *, std::pair<double, Kernel::V3D> >::const_iterator it = 

@@ -149,15 +149,15 @@ namespace DataHandling
               truPos.spherical(fabs(l2),theta,phi);
               truepos.push_back(truPos);
               //
-              Geometry::IDetector_sptr det;
-	      try
-	      {
-		det = instrument->getDetector(detIndex);
-	      }
-	      catch(Kernel::Exception::NotFoundError &)
-	      {
-		continue;
-	      }
+              Geometry::IDetector_const_sptr det;
+              try
+              {
+                det = instrument->getDetector(detIndex);
+              }
+              catch(Kernel::Exception::NotFoundError &)
+              {
+                continue;
+              }
               Kernel::V3D detPos = det->getPos();
               Kernel::V3D shift=truPos-detPos;
               double scale=1.0;
@@ -206,15 +206,15 @@ namespace DataHandling
           for(int i=0;i<detectorCount;i++)
           {
               int detIndex=detID[i];
-              Geometry::IDetector_sptr det;
-	      try
-	      {
-		det = instrument->getDetector(detIndex);
-	      }
-	      catch(Kernel::Exception::NotFoundError &)
-	      {
-		continue;
-	      }
+              Geometry::IDetector_const_sptr det;
+              try
+              {
+                det = instrument->getDetector(detIndex);
+              }
+              catch(Kernel::Exception::NotFoundError &)
+              {
+                continue;
+              }
               Kernel::V3D detPos = det->getPos();
               Kernel::V3D shift=truepos[i]-detPos;
               double scale;

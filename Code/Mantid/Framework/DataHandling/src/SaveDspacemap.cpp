@@ -111,7 +111,7 @@ namespace DataHandling
     {
       //Compute the factor
       double factor;
-      Geometry::IDetector_sptr det;
+      Geometry::IDetector_const_sptr det;
       // Find the detector with that detector id
       it = allDetectors.find(i);
       if (it != allDetectors.end())

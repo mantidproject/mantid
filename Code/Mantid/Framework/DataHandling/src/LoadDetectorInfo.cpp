@@ -87,7 +87,7 @@ void LoadDetectorInfo::exec()
   m_moveDets = getProperty("RelocateDets");
   if( m_moveDets )
   {
-    Geometry::IObjComponent_sptr sample = m_workspace->getInstrument()->getSample();
+    Geometry::IObjComponent_const_sptr sample = m_workspace->getInstrument()->getSample();
     if( sample ) m_samplePos = sample->getPos();
   }
 
@@ -409,7 +409,7 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
   Geometry::IDetector_sptr det;
   try
   {
-    det = m_workspace->getBaseInstrument()->getDetector(params.detID);
+    det = boost::const_pointer_cast<IDetector>(m_workspace->getBaseInstrument()->getDetector(params.detID));
   }
   catch( std::runtime_error &e)
   {
@@ -417,7 +417,7 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
   }
 
   Geometry::ParameterMap &pmap = m_workspace->instrumentParameters();
-  IComponent* comp = det->getComponent();
+  const IComponent* comp = det->getComponent();
   // Set the detectors pressure.
   pmap.addDouble(comp, "3He(atm)", params.pressure);
   // Set the wall thickness

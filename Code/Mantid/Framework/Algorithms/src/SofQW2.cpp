@@ -20,9 +20,9 @@ namespace Mantid
 
     using namespace Mantid::Kernel;
     using namespace Mantid::API;
-    using Geometry::IDetector_sptr;
+    using Geometry::IDetector_const_sptr;
     using Geometry::DetectorGroup;
-    using Geometry::DetectorGroup_sptr;
+    using Geometry::DetectorGroup_const_sptr;
     using Geometry::ConvexPolygon;
     using Geometry::Quadrilateral;
     using Geometry::Vertex2D;
@@ -64,9 +64,9 @@ namespace Mantid
       for(int64_t i = 0; i < nOutHist; ++i) // signed for openmp
       {
         PARALLEL_START_INTERUPT_REGION
-	
-	const size_t index = static_cast<size_t>(i); // Avoid warning
-	const double y_i = newYBins[index];
+
+        const size_t index = static_cast<size_t>(i); // Avoid warning
+        const double y_i = newYBins[index];
         const double y_ip1 = newYBins[index+1];
         const MantidVec& X = outputWS->readX(index);
         // References to the Y and E data
@@ -184,11 +184,11 @@ namespace Mantid
       size_t start_index(0), end_index(oldAxis1.size() - 1);
       if( start_it != oldAxis1.begin() )
       {
-	start_index = (start_it - oldAxis1.begin() - 1);
+        start_index = (start_it - oldAxis1.begin() - 1);
       }
       if( end_it != oldAxis1.end() )
       {
-	end_index = end_it - oldAxis1.begin();
+        end_index = end_it - oldAxis1.begin();
       }
       const double yn_lo(newPoly[0].Y()), yn_hi(newPoly[1].Y());
 
@@ -206,12 +206,12 @@ namespace Mantid
           if( qold.upperLeft < yn_lo || qold.upperRight < yn_lo || 
               qold.lowerLeft > yn_hi || qold.lowerRight > yn_hi ) continue;
           Quadrilateral oldPoly(V2D(xo_lo, qold.lowerLeft), V2D(xo_hi, qold.lowerRight),
-				V2D(xo_hi, qold.upperRight), V2D(xo_lo, qold.upperLeft));
+              V2D(xo_hi, qold.upperRight), V2D(xo_lo, qold.upperLeft));
           try
           {
             ConvexPolygon overlap = intersectionByLaszlo(newPoly, oldPoly);
-	    // std::cerr << "Areas " << newPoly << "  " << oldPoly << "\n";
-	    // std::cerr << "Areas " << overlap.area() << "  " << oldPoly.area() << "\n";
+            // std::cerr << "Areas " << newPoly << "  " << oldPoly << "\n";
+            // std::cerr << "Areas " << overlap.area() << "  " << oldPoly.area() << "\n";
             overlaps.push_back(BinWithWeight(itr->wsIndex,j,itr->weight*overlap.area()/oldPoly.area()));
           }
           catch(Geometry::NoIntersectionException &)
@@ -286,7 +286,7 @@ namespace Mantid
       {
         PARALLEL_START_INTERUPT_REGION
 
-        IDetector_sptr det;
+        IDetector_const_sptr det;
         try
         {
            det = workspace->getDetector(i);
@@ -302,18 +302,18 @@ namespace Mantid
         if ( !det ) continue;
 
         std::vector<QValues> qvalues(nxpoints);
-        DetectorGroup_sptr detGroup = boost::dynamic_pointer_cast<DetectorGroup>(det);
+        DetectorGroup_const_sptr detGroup = boost::dynamic_pointer_cast<const DetectorGroup>(det);
         if( detGroup )
         {
-          std::vector<IDetector_sptr> dets = detGroup->getDetectors();
+          std::vector<IDetector_const_sptr> dets = detGroup->getDetectors();
           const size_t ndets(dets.size());
           for( size_t j = 0; j < ndets; ++j )
           {
-	    IDetector_sptr det_j = dets[j];
+            IDetector_const_sptr det_j = dets[j];
             QRangeCache qrange(static_cast<size_t>(i), 1.0/(double)ndets);
             for( size_t k = 0; k < nxpoints; ++k)
             {
-	      qvalues[k] = calculateQValues(det_j, X[k], X[k+1]);
+              qvalues[k] = calculateQValues(det_j, X[k], X[k+1]);
             }
             qrange.qValues = qvalues;
             PARALLEL_CRITICAL(qcache_a)
@@ -327,7 +327,7 @@ namespace Mantid
           QRangeCache qrange(static_cast<size_t>(i), 1.0);
           for( size_t k = 0; k < nxpoints; ++k)
           {
-	    qvalues[k] = calculateQValues(det, X[k], X[k+1]);
+            qvalues[k] = calculateQValues(det, X[k], X[k+1]);
           }
           qrange.qValues = qvalues;
           PARALLEL_CRITICAL(qcache_b)
@@ -344,8 +344,8 @@ namespace Mantid
     }
 
     /// Calculate the corner Q values
-    SofQW2::QValues SofQW2::calculateQValues(Geometry::IDetector_sptr det, 
-					     const double dEMin, const double dEMax) const
+    SofQW2::QValues SofQW2::calculateQValues(Geometry::IDetector_const_sptr det,
+        const double dEMin, const double dEMax) const
     {
       // Compute ki and kf wave vectors and therefore q = ki - kf
       double ei_min(0.0), ei_max(0.0), ef_min(0.0), ef_max(0.0);
@@ -384,14 +384,14 @@ namespace Mantid
         (ki_max - kf_ur).norm(), // Upper-right
         (ki_min - kf_ul).norm() ); // Upper-left
       return qValues;
-    }				   
+    }
     
     /**
      * Calculate the Kf vectors
      * @param det :: The detector
      */
     std::pair<Kernel::V3D, Kernel::V3D>
-    SofQW2::calculateScatterDir(Geometry::IDetector_sptr det) const
+    SofQW2::calculateScatterDir(Geometry::IDetector_const_sptr det) const
     {
       Geometry::BoundingBox bbox;
       det->getBoundingBox(bbox);
@@ -406,13 +406,13 @@ namespace Mantid
       V3D scatter_min, scatter_max;
       if( theta_min > theta_max ) 
       {
-	scatter_min = max;
+        scatter_min = max;
         scatter_max = min;
       }
       else
       {
-	scatter_min = min;
-	scatter_max = max;
+        scatter_min = min;
+        scatter_max = max;
       }
 
       scatter_min = (scatter_min - m_samplePos);

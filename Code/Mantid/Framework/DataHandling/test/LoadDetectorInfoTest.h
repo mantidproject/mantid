@@ -77,9 +77,9 @@ public:
     for ( int j = 0; j < NDETECTS; ++j)
     {
 
-      boost::shared_ptr<IDetector> detector =WS->getInstrument()->getDetector(j);
-      boost::shared_ptr<IComponent> comp =
-          boost::dynamic_pointer_cast<IComponent>(detector);
+      boost::shared_ptr<const IDetector> detector =WS->getInstrument()->getDetector(j);
+      boost::shared_ptr<const IComponent> comp =
+          boost::dynamic_pointer_cast<const IComponent>(detector);
 
       const IComponent* baseComp = detector->getComponent();
 
@@ -221,7 +221,7 @@ public:
     for ( int i = 0; i < NUMRANDOM; ++i)
     {
       int detID = DETECTS[i];
-      boost::shared_ptr<IDetector> detector =WS->getInstrument()->getDetector(detID);
+      boost::shared_ptr<const IDetector> detector =WS->getInstrument()->getDetector(detID);
 
       const IComponent* baseComp = detector->getComponent();
       Parameter_sptr par = pmap.get(baseComp,"3He(atm)");
@@ -235,7 +235,7 @@ public:
     }
     
     // Test that a random detector has been moved
-    IDetector_sptr det = WS->getInstrument()->getDetector(DETECTS[0]);
+    IDetector_const_sptr det = WS->getInstrument()->getDetector(DETECTS[0]);
     TS_ASSERT_EQUALS(V3D(0,0.2406324,4.014795), det->getPos());
 
     // all non-monitors should share the same array

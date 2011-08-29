@@ -81,16 +81,16 @@ public:
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
     Mantid::Geometry::Instrument_const_sptr i = output2D->getInstrument();
-    boost::shared_ptr<Mantid::Geometry::IComponent> source = i->getSource();
+    boost::shared_ptr<const Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
 
-    boost::shared_ptr<Mantid::Geometry::IComponent> samplepos = i->getSample();
+    boost::shared_ptr<const Mantid::Geometry::IComponent> samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA( samplepos->getPos().Z(), 0.0,0.01);
 
-    boost::shared_ptr<Mantid::Geometry::Detector> ptrDet103 = boost::dynamic_pointer_cast<Mantid::Geometry::Detector>(i->getDetector(103));
+    boost::shared_ptr<const Mantid::Geometry::Detector> ptrDet103 = boost::dynamic_pointer_cast<const Mantid::Geometry::Detector>(i->getDetector(103));
     TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
     TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);

@@ -70,7 +70,7 @@ private:
   ///Execution code
   void exec();
   ///Getting Efixed
-  double getEfixed(Geometry::IDetector_sptr detector, API::MatrixWorkspace_const_sptr inputWS, int emode) const;
+  double getEfixed(Geometry::IDetector_const_sptr detector, API::MatrixWorkspace_const_sptr inputWS, int emode) const;
 };
 
 } // namespace Algorithms

@@ -297,10 +297,10 @@ public:
     TS_ASSERT_EQUALS( WS->dataE(0).size(), 200001 );
     TS_ASSERT_DELTA( WS->dataE(0)[12], 0.0, 1e-6 );
     // Check geometry for a monitor
-    IDetector_sptr mon = WS->getDetector(2);
+    IDetector_const_sptr mon = WS->getDetector(2);
     TS_ASSERT( mon->isMonitor() );
     TS_ASSERT_EQUALS( mon->getID(), -3 );
-    boost::shared_ptr<IComponent> sample = WS->getInstrument()->getSample();
+    boost::shared_ptr<const IComponent> sample = WS->getInstrument()->getSample();
     TS_ASSERT_DELTA( mon->getDistance(*sample), 1.426, 1e-6 );
   }
 

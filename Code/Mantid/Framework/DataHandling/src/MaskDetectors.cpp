@@ -26,7 +26,7 @@ void MaskDetectors::initDocs()
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
-using Geometry::IDetector_sptr;
+using Geometry::IDetector_const_sptr;
 using namespace DataObjects;
 
 /// (Empty) Constructor
@@ -118,7 +118,7 @@ void MaskDetectors::exec()
     {
       try
       {
-        if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(*it).get()) )
+        if ( const Geometry::Detector* det = dynamic_cast<const Geometry::Detector*>(instrument->getDetector(*it).get()) )
         {
           pmap.addBool(det,"masked",true);
           //std::cout << "Manually masking det " << det->getID() << std::endl;
@@ -197,7 +197,7 @@ void MaskDetectors::appendToIndexListFromWS(std::vector<size_t>& indexList, cons
   
   for (int64_t i = 0; i < numHistograms; ++i)
   {
-    IDetector_sptr det;
+    IDetector_const_sptr det;
     try
     {
       det = maskedWorkspace->getDetector(i);

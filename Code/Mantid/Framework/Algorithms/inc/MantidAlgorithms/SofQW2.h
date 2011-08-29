@@ -117,10 +117,10 @@ namespace Mantid
 	double lowerLeft, lowerRight, upperRight, upperLeft;
       };
       /// Calculate the corner Q values
-      QValues calculateQValues(Geometry::IDetector_sptr det, 
+      QValues calculateQValues(Geometry::IDetector_const_sptr det,
 			       const double dEMin, const double dEMax) const;
       /// Calculate the Kf vectors
-      std::pair<Kernel::V3D, Kernel::V3D> calculateScatterDir(Geometry::IDetector_sptr det) const;
+      std::pair<Kernel::V3D, Kernel::V3D> calculateScatterDir(Geometry::IDetector_const_sptr det) const;
       /// Calculate a single Q value
       double calculateQ(const Kernel::V3D scatterDir, const double energy) const;
       /// E Mode

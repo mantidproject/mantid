@@ -103,7 +103,7 @@ public:
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
     Mantid::Geometry::Instrument_const_sptr i = ws2d->getInstrument();
-    boost::shared_ptr<Mantid::Geometry::IComponent> source = i->getSource();
+    boost::shared_ptr<const Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS( i->getName(), "GPSANS");
     TS_ASSERT_EQUALS( source->getName(), "source");

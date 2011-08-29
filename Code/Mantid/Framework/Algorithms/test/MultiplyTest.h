@@ -18,7 +18,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
-using Mantid::Geometry::IDetector_sptr;
+using Mantid::Geometry::IDetector_const_sptr;
 
 /*****************************************************************************************/
 /********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
@@ -918,7 +918,7 @@ public:
 
     for( int i = 0; i < nHist; ++i )
     {
-      IDetector_sptr det = output->getDetector(i);
+      IDetector_const_sptr det = output->getDetector(i);
       TS_ASSERT(det);
       if( !det ) TS_FAIL("No detector found");
       if( masking.count(i) == 0 )

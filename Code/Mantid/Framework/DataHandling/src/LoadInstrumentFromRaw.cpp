@@ -51,8 +51,8 @@ void LoadInstrumentFromRaw::init()
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
 		  "The filename (including its full or relative path) of an ISIS RAW file.\n"
 		  "The file extension must either be .raw or .s??" );
-  declareProperty(new ArrayProperty<int>("MonitorList"),
-      "List of detector ids of monitors loaded int to the workspace");
+  declareProperty(new ArrayProperty<int>("MonitorList",Direction::Output),
+      "List of detector ids of monitors loaded into the workspace");
  
 }
 
@@ -118,13 +118,16 @@ void LoadInstrumentFromRaw::exec()
   const int* const detID = iraw.udet;    // detector IDs
   const float* const r = iraw.len2;      // distance from sample
   const float* const angle = iraw.tthe;  // angle between indicent beam and direction from sample to detector (two-theta)
-   const float* const phi=iraw.ut;
-   // Is ut01 (=phi) present? Sometimes an array is present but has wrong values e.g.all 1.0 or all 2.0
-   bool phiPresent = iraw.i_use>0 && phi[0]!= 1.0 && phi[0] !=2.0; 
+  const float* const phi=iraw.ut;
+  // Is ut01 (=phi) present? Sometimes an array is present but has wrong values e.g.all 1.0 or all 2.0
+  bool phiPresent = iraw.i_use>0 && phi[0]!= 1.0 && phi[0] !=2.0;
+  const int numMonitors = iraw.i_mon;     // The number of monitors
+  const int* const monIndex = iraw.mdet;  // Index into the udet array for each monitor
 
   double prog=0.5;
   for (int i = 0; i < numDetector; ++i)
   {
+//    g_log.error() << " ## " << detID[i];
     // Create a new detector. Instrument will take ownership of pointer so no need to delete.
     Geometry::Detector *detector = new Geometry::Detector("det",detID[i],samplepos);
     Kernel::V3D pos;
@@ -138,23 +141,40 @@ void LoadInstrumentFromRaw::exec()
 
     // add copy to instrument and mark it
     instrument->add(detector);
-    instrument->markAsDetector(detector);
+//    instrument->markAsDetector(detector);
+
+    // Check monitor list to see if this is a monitor that should be marked as such
+    if ( std::find(monIndex,monIndex+numMonitors,i+1) != monIndex+numMonitors)
+    {
+      instrument->markAsMonitor(detector);
+      g_log.information() << "Detector with ID " << detID[i] << " marked as a monitor." << std::endl;
+    }
+    else
+    {
+      instrument->markAsDetector(detector);
+    }
+//    for (int j = 0; j < numMonitors; ++j)
+//    {
+//      if ( detID[i] == monIndex[j]) instrument->markAsMonitor(detector);
+//    }
+
     prog+=(0.5/numDetector);
     progress(prog);
   }  
    
 
 
-  // Now mark the up the monitors
-  const int numMonitors = iraw.i_mon;     // The number of monitors
-  const int* const monIndex = iraw.mdet;  // Index into the udet array for each monitor
-  
+//  // Now mark the up the monitors
+//  const int numMonitors = iraw.i_mon;     // The number of monitors
+//  const int* const monIndex = iraw.mdet;  // Index into the udet array for each monitor
+//
   for (int j = 0; j < numMonitors; ++j)
   {
     const int detectorToMark = detID[monIndex[j]-1];
-    boost::shared_ptr<Geometry::IDetector> det = instrument->getDetector(detectorToMark);
-	instrument->markAsMonitor(det.get());
-    g_log.information() << "Detector with ID " << detectorToMark << " marked as a monitor." << std::endl;
+    std::cout << ">>>>> " << monIndex[j] << " " << detectorToMark << std::endl;
+//    boost::shared_ptr<Geometry::IDetector> det = instrument->getDetector(detectorToMark);
+//	instrument->markAsMonitor(det.get());
+//    g_log.information() << "Detector with ID " << detectorToMark << " marked as a monitor." << std::endl;
   }
   std::vector<detid_t> monitorList=instrument->getMonitors();
   setProperty("MonitorList",monitorList);

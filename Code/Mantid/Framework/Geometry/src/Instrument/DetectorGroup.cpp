@@ -28,7 +28,7 @@ namespace Mantid
     *  @param warnAboutMasked :: If true a log message at warning level will be generated if a one of the detectors in dets is masked. 
     *  @throw std::invalid_argument If an empty vector is passed as argument
     */
-    DetectorGroup::DetectorGroup(const std::vector<IDetector_sptr>& dets, bool warnAboutMasked) :
+    DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr>& dets, bool warnAboutMasked) :
     IDetector(), m_id(), m_detectors(),group_topology(undef)
     {
       if ( dets.empty() )
@@ -36,7 +36,7 @@ namespace Mantid
         g_log.error("Illegal attempt to create an empty DetectorGroup");
         throw std::invalid_argument("Empty DetectorGroup objects are not allowed");
       }
-      std::vector<IDetector_sptr>::const_iterator it;
+      std::vector<IDetector_const_sptr>::const_iterator it;
       for (it = dets.begin(); it != dets.end(); ++it)
       {
         addDetector(*it, warnAboutMasked);
@@ -52,7 +52,7 @@ namespace Mantid
     *  @param det ::  A pointer to the detector to add
     *  @param warn :: Whether to issue warnings to the log
     */
-    void DetectorGroup::addDetector(IDetector_sptr det, bool& warn)
+    void DetectorGroup::addDetector(IDetector_const_sptr det, bool& warn)
     {
       // the topology of the group become undefined and needs recalculation if new detector has been added to the group
       group_topology = undef;
@@ -147,7 +147,7 @@ namespace Mantid
     * 
     *  @return vector of detector IDs
     */
-    std::vector<detid_t> DetectorGroup::getDetectorIDs()
+    std::vector<detid_t> DetectorGroup::getDetectorIDs() const
     {
       std::vector<detid_t> result;
       result.reserve(m_detectors.size());
@@ -163,9 +163,9 @@ namespace Mantid
      * Return the list of detectors held within this group
      * @returns A vector of IDetector pointers
      */
-    std::vector<IDetector_sptr> DetectorGroup::getDetectors() const
+    std::vector<IDetector_const_sptr> DetectorGroup::getDetectors() const
     {
-      std::vector<IDetector_sptr> result;
+      std::vector<IDetector_const_sptr> result;
       result.reserve(m_detectors.size());
       DetCollection::const_iterator it;
       for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
@@ -310,7 +310,7 @@ namespace Mantid
           const std::vector<V3D> *cs = &(boundingBox.getCoordSystem());
           memberBox.realign(cs);
         }
-        IComponent_sptr det = cit->second;
+        IComponent_const_sptr det = cit->second;
         det->getBoundingBox(memberBox);
         boundingBox.grow(memberBox);
       }
@@ -382,7 +382,7 @@ namespace Mantid
             // detectors caused central point not to belong to detectors; need more accrurate estinations 
             // assuming that distance between detectors can not be bigger then detector's half size
             // get detector's size:
-             IDetector_sptr spFirstDet = this->m_detectors.begin()->second;
+             IDetector_const_sptr spFirstDet = this->m_detectors.begin()->second;
             
 
              BoundingBox bbox;

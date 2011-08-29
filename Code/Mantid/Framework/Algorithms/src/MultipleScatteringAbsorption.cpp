@@ -101,7 +101,7 @@ void MultipleScatteringAbsorption::exec()
       in_WS->readX(0).size(), in_WS->readY(0).size());
 
   for (size_t index = 0; index < nHist; ++index) {
-    Geometry::IDetector_sptr det = in_WS->getDetector(index);
+    Geometry::IDetector_const_sptr det = in_WS->getDetector(index);
     if (det == NULL)
       throw std::runtime_error("Failed to find detector");
     if ( det->isMasked() ) continue;

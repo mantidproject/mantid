@@ -134,7 +134,7 @@ void AbsorptionCorrection::exec()
     correctionFactors->dataX(i) = X;
 
     // Get detector position
-    IDetector_sptr det;
+    IDetector_const_sptr det;
     try
     {
       det = m_inputWS->getDetector(i);

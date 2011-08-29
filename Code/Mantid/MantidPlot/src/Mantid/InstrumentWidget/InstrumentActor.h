@@ -92,7 +92,7 @@ public:
   double maxBinValue()const{return m_BinMaxValue;}
   bool wholeRange()const;
   size_t ndetectors()const{return m_detIDs.size();}
-  boost::shared_ptr<Mantid::Geometry::IDetector> getDetector(size_t pickID)const;
+  boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector(size_t pickID)const;
   Mantid::detid_t getDetID(size_t pickID)const{return m_detIDs.at(pickID);}
   const std::vector<Mantid::detid_t>& getAllDetIDs()const{return m_detIDs;}
   GLColor getColor(Mantid::detid_t id)const;

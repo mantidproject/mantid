@@ -437,13 +437,13 @@ int ProjectionSurface::getDetectorID(int x, int y)const
   return getDetectorID((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
 }
 
-boost::shared_ptr<Mantid::Geometry::IDetector> ProjectionSurface::getDetector(int x, int y)const
+boost::shared_ptr<const Mantid::Geometry::IDetector> ProjectionSurface::getDetector(int x, int y)const
 {
-  if (!m_pickImage || !m_pickImage->valid(x,y)) return boost::shared_ptr<Mantid::Geometry::IDetector>();
+  if (!m_pickImage || !m_pickImage->valid(x,y)) return boost::shared_ptr<const Mantid::Geometry::IDetector>();
   QRgb pixel = m_pickImage->pixel(x,y);
   int index = getDetectorIndex((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
   if ( index >= 0 ) return m_instrActor->getDetector(index);
-  return boost::shared_ptr<Mantid::Geometry::IDetector>();
+  return boost::shared_ptr<const Mantid::Geometry::IDetector>();
 }
 
 int ProjectionSurface::getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const

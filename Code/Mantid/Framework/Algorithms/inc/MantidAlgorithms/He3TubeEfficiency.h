@@ -75,7 +75,7 @@ private:
   /// Correct the given spectra index for efficiency
   void correctForEfficiency(std::size_t spectraIndex);
   /// Sets the detector geometry cache if necessary
-  void getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det,
+  void getDetectorGeometry(boost::shared_ptr<const Geometry::IDetector> det,
       double & detRadius, Kernel::V3D & detAxis);
   /// Computes the distance to the given shape from a starting point
   double distToSurface(const Kernel::V3D start,
@@ -87,11 +87,11 @@ private:
   void logErrors() const;
   /// Retrieve the detector parameters from workspace or detector properties
   double getParameter(std::string wsPropName, std::size_t currentIndex,
-      std::string detPropName, boost::shared_ptr<Geometry::IDetector> idet);
+      std::string detPropName, boost::shared_ptr<const Geometry::IDetector> idet);
   /// Helper for event handling
   template<class T> void eventHelper(std::vector<T>& events, double expval);
   /// Function to calculate exponential contribution
-  double calculateExponential(std::size_t spectraIndex, boost::shared_ptr<Geometry::IDetector> idet);
+  double calculateExponential(std::size_t spectraIndex, boost::shared_ptr<const Geometry::IDetector> idet);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr inputWS;

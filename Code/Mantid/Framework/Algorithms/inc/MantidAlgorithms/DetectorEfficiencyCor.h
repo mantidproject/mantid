@@ -103,7 +103,7 @@ class DLLExport DetectorEfficiencyCor : public API::Algorithm
   /// Calculate one over the wave vector for 2 bin bounds
   double calculateOneOverK(double loBinBound, double uppBinBound) const;
   /// Sets the detector geometry cache if necessary
-  void getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det, double & detRadius, Kernel::V3D & detAxis);
+  void getDetectorGeometry(boost::shared_ptr<const Geometry::IDetector> det, double & detRadius, Kernel::V3D & detAxis);
   /// Computes the distance to the given shape from a starting point
   double distToSurface(const Kernel::V3D start, const Geometry::Object *shape) const;
   /// Computes the detector efficiency for a given paramater

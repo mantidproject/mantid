@@ -419,7 +419,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
     try
     {
       // Now get the detector object for this histogram
-      IDetector_sptr det = outputWS->getDetector(i);
+      IDetector_const_sptr det = outputWS->getDetector(i);
       // Get the sample-detector distance for this detector (in metres)
       double l2, twoTheta;
       if ( ! det->isMonitor() )

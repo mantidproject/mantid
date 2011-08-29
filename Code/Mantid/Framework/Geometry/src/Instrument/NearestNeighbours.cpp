@@ -94,7 +94,7 @@ namespace Mantid
      */
     void NearestNeighbours::build(const int noNeighbours)
     {
-      std::map<specid_t, IDetector_sptr> spectraDets 
+      std::map<specid_t, IDetector_const_sptr> spectraDets
         = getSpectraDetectors(m_instrument, m_spectraMap);
       if( spectraDets.empty() )
       {
@@ -113,17 +113,17 @@ namespace Mantid
 
       BoundingBox bbox;
       // Base the scaling on the first detector, should be adequate but we can look at this
-      IDetector_sptr firstDet = (*spectraDets.begin()).second;
+      IDetector_const_sptr firstDet = (*spectraDets.begin()).second;
       firstDet->getBoundingBox(bbox);
       m_scale.reset(new V3D(bbox.width()));
       ANNpointArray dataPoints = annAllocPts(nspectra, 3);
       MapIV pointNoToVertex;
       
-      std::map<specid_t, IDetector_sptr>::const_iterator detIt;
+      std::map<specid_t, IDetector_const_sptr>::const_iterator detIt;
       int pointNo = 0;
       for ( detIt = spectraDets.begin(); detIt != spectraDets.end(); ++detIt )
       {
-        IDetector_sptr detector = detIt->second;
+        IDetector_const_sptr detector = detIt->second;
         const specid_t spectrum = detIt->first;
         V3D pos = detector->getPos()/(*m_scale);
         dataPoints[pointNo][0] = pos.X();
@@ -220,11 +220,11 @@ namespace Mantid
      * @param spectraMap :: A reference to the spectra map
      * @returns A map of spectra number to detector pointer
      */
-    std::map<specid_t, IDetector_sptr>
+    std::map<specid_t, IDetector_const_sptr>
     NearestNeighbours::getSpectraDetectors(Instrument_const_sptr instrument,
                                            const ISpectraDetectorMap & spectraMap)
     {
-      std::map<specid_t, IDetector_sptr> spectra;
+      std::map<specid_t, IDetector_const_sptr> spectra;
       if( spectraMap.nElements() == 0 ) return spectra;
       ISpectraDetectorMap::const_iterator cend = spectraMap.cend();
       specid_t lastSpectrum(INT_MAX);
@@ -234,7 +234,7 @@ namespace Mantid
         if( spectrumNo != lastSpectrum )
         {
           std::vector<int> detIDs = spectraMap.getDetectors(spectrumNo);
-          IDetector_sptr det = instrument->getDetector(detIDs);
+          IDetector_const_sptr det = instrument->getDetector(detIDs);
           if( !det->isMonitor() ) 
           {
             spectra.insert(std::make_pair(spectrumNo, det));

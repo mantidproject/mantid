@@ -305,7 +305,7 @@ void Projection3D::getSelectedDetectors(QList<int>& dets)
   //std::cerr << m_trackball->getModelCenter() << ' ' << rot << std::endl;
   for(size_t i = 0; i < ndet; ++i)
   {
-    boost::shared_ptr<IDetector> det = m_instrActor->getDetector(i);
+    boost::shared_ptr<const IDetector> det = m_instrActor->getDetector(i);
     V3D pos = det->getPos();
     rot.rotate(pos);
     //std::cerr << "pos=" << pos << std::endl;
@@ -332,7 +332,7 @@ void Projection3D::getMaskedDetectors(QList<int>& dets)const
     int id = getDetectorID(p.x(),p.y());
     if (ids.contains(id)) continue;
     ids.insert(id);
-    boost::shared_ptr<IDetector> det = getDetector(p.x(),p.y());
+    boost::shared_ptr<const IDetector> det = getDetector(p.x(),p.y());
     if (det)
     {
       V3D pos = det->getPos();
@@ -356,7 +356,7 @@ void Projection3D::getMaskedDetectors(QList<int>& dets)const
   size_t ndet = m_instrActor->ndetectors();
   for(size_t i = 0; i < ndet; ++i)
   {
-    boost::shared_ptr<IDetector> det = m_instrActor->getDetector(i);
+    boost::shared_ptr<const IDetector> det = m_instrActor->getDetector(i);
     V3D pos = det->getPos();
     rot.rotate(pos);
     if (pos.Z() < zmin || pos.Z() > zmax) continue;

@@ -158,7 +158,7 @@ public:
     TS_ASSERT_DELTA( ret1[0].Z(), 0.0, 0.0001);
 
     // get detector corresponding to workspace index 0
-    IDetector_sptr det = ws->getDetector(0);  
+    IDetector_const_sptr det = ws->getDetector(0);
 
     TS_ASSERT_EQUALS( det->getID(), 1001);
     TS_ASSERT_EQUALS( det->getName(), "upstream_monitor_det");
@@ -242,8 +242,8 @@ public:
     dummy = paramMap.getDouble("nickel-holder", "fjols");
     TS_ASSERT_DELTA( dummy[0], 200.0, 0.0001);
 
-    boost::shared_ptr<Instrument> i = ws->getInstrument();
-    boost::shared_ptr<IDetector> ptrDet = i->getDetector(1008);
+    boost::shared_ptr<const Instrument> i = ws->getInstrument();
+    boost::shared_ptr<const IDetector> ptrDet = i->getDetector(1008);
     TS_ASSERT_EQUALS( ptrDet->getID(), 1008);
     TS_ASSERT_EQUALS( ptrDet->getName(), "combined translation6");
     param = paramMap.get(&(*ptrDet), "fjols");
@@ -267,7 +267,7 @@ public:
     TS_ASSERT_DELTA( ptrDet->getPos().Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA( ptrDet->getPos().Z(), 0.0, 0.0001);
 
-    boost::shared_ptr<IDetector> ptrDet1 = i->getDetector(1004);
+    boost::shared_ptr<const IDetector> ptrDet1 = i->getDetector(1004);
     TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation2");
     TS_ASSERT_EQUALS( ptrDet1->getID(), 1004);
     TS_ASSERT_DELTA( ptrDet1->getRelativePos().X(), 10.0, 0.0001);
@@ -431,7 +431,7 @@ public:
     boost::shared_ptr<Instrument> i = ws->getInstrument();
 
     // check if combined translation works
-    boost::shared_ptr<IDetector> ptrDet1 = i->getDetector(1001);
+    boost::shared_ptr<const IDetector> ptrDet1 = i->getDetector(1001);
     TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translationA");
     TS_ASSERT_DELTA( ptrDet1->getPos().X(), 0.0, 0.0001);
     TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
@@ -544,7 +544,7 @@ public:
     ParameterMap& paramMap = ws->instrumentParameters();
 
     // get detector corresponding to workspace index 0
-    IDetector_sptr det = ws->getDetector(69);  
+    IDetector_const_sptr det = ws->getDetector(69);
 
     TS_ASSERT_EQUALS( det->getID(), 78);
     TS_ASSERT_EQUALS( det->getName(), "Detector #70");
@@ -605,8 +605,8 @@ public:
     // get parameter map
     ParameterMap& paramMap = ws->instrumentParameters();
 
-    boost::shared_ptr<Instrument> i = ws->getInstrument();
-    boost::shared_ptr<IDetector> det = i->getDetector(1100);  // should be a detector from bank_bsk
+    boost::shared_ptr<const Instrument> i = ws->getInstrument();
+    boost::shared_ptr<const IDetector> det = i->getDetector(1100);  // should be a detector from bank_bsk
     Parameter_sptr param = paramMap.getRecursive(&(*det), "S", "fitting");
     const FitParameter& fitParam1 = param->value<FitParameter>();
     TS_ASSERT_DELTA( fitParam1.getValue(1.0), 11.8159, 0.0001);
@@ -662,20 +662,20 @@ public:
     // get parameter map
     ParameterMap& paramMap = ws->instrumentParameters();
 
-    IDetector_sptr det = ws->getDetector(101);  
+    IDetector_const_sptr det = ws->getDetector(101);
     TS_ASSERT_EQUALS( det->getID(), 102046);
     TS_ASSERT_EQUALS( det->getName(), "Det45");
     Parameter_sptr param = paramMap.getRecursive(&(*det), "Alpha0", "fitting");
     const FitParameter& fitParam = param->value<FitParameter>();
     TS_ASSERT_DELTA( fitParam.getValue(0.0), 0.734079, 0.0001);
 
-    IDetector_sptr det1 = ws->getDetector(501);
+    IDetector_const_sptr det1 = ws->getDetector(501);
     TS_ASSERT_EQUALS( det1->getID(), 211001 );
     Parameter_sptr param1 = paramMap.getRecursive(&(*det1), "Alpha0", "fitting");
     const FitParameter& fitParam1 = param1->value<FitParameter>();
     TS_ASSERT_DELTA( fitParam1.getValue(0.0), 0.734079, 0.0001);
 
-    IDetector_sptr det2 = ws->getDetector(341);
+    IDetector_const_sptr det2 = ws->getDetector(341);
     TS_ASSERT_EQUALS( det2->getID(), 201001 );
     Parameter_sptr param2 = paramMap.getRecursive(&(*det2), "Alpha0", "fitting");
     const FitParameter& fitParam2 = param2->value<FitParameter>();
@@ -729,7 +729,7 @@ public:
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 4);
     if (ws->getNumberHistograms() < 4) return;
 
-    IDetector_sptr det = ws->getDetector(1);  
+    IDetector_const_sptr det = ws->getDetector(1);
     TS_ASSERT_EQUALS( det->getID(), 1);
     TS_ASSERT_EQUALS( det->getName(), "pixel");
     Parameter_sptr param = paramMap.get(&(*det), "tube_pressure");
@@ -785,7 +785,7 @@ public:
     MatrixWorkspace_sptr ws;
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 
-    IDetector_sptr det = ws->getDetector(1);
+    IDetector_const_sptr det = ws->getDetector(1);
     TS_ASSERT_EQUALS( (det->getNumberParameter("number-of-x-pixels"))[0], 192);
 
     Instrument_sptr inst = ws->getInstrument();
@@ -813,7 +813,7 @@ void testSANS2D()
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 
     // get parameter map
-    boost::shared_ptr<Instrument> i = ws->getInstrument();
+    boost::shared_ptr<const Instrument> i = ws->getInstrument();
 
     double pixelLength = 0.0051;
     double bankLength = 192*pixelLength;
@@ -825,7 +825,7 @@ void testSANS2D()
     {
       for (int ix = 0; ix <= 191; ix++)
       {
-        boost::shared_ptr<IDetector> ptrDet1 = i->getDetector(1000000+iy*1000+ix);
+        boost::shared_ptr<const IDetector> ptrDet1 = i->getDetector(1000000+iy*1000+ix);
         TS_ASSERT_DELTA( ptrDet1->getPos().X(), startX+pixelLength*ix, 0.0000001);
         TS_ASSERT_DELTA( ptrDet1->getPos().Y(), startY + pixelLength*iy, 0.0000001);
         TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 23.281, 0.0000001);
@@ -833,7 +833,7 @@ void testSANS2D()
 
       for (int ix = 0; ix <= 191; ix++)
       {
-        boost::shared_ptr<IDetector> ptrDet1 = i->getDetector(2000000+iy*1000+ix);
+        boost::shared_ptr<const IDetector> ptrDet1 = i->getDetector(2000000+iy*1000+ix);
         TS_ASSERT_DELTA( ptrDet1->getPos().X(), startX+pixelLength*ix+1.1, 0.0000001);
         TS_ASSERT_DELTA( ptrDet1->getPos().Y(), startY + pixelLength*iy, 0.0000001);
         TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 23.281, 0.0000001);
@@ -842,7 +842,7 @@ void testSANS2D()
 
     // check for solid angle also
     const V3D samplePos = i->getSample()->getPos();
-    boost::shared_ptr<IDetector> det = i->getDetector(1000000);
+    boost::shared_ptr<const IDetector> det = i->getDetector(1000000);
     const double solidAngle = det->solidAngle(samplePos);
     TS_ASSERT_DELTA( 10E5*solidAngle, 6.23454, 0.00001);
 

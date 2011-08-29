@@ -18,7 +18,7 @@
 namespace Mantid
 {
   /// Typedef of a map from detector ID to detector shared pointer.
-  typedef std::map<detid_t, Geometry::IDetector_sptr> detid2det_map;
+  typedef std::map<detid_t, Geometry::IDetector_const_sptr> detid2det_map;
 
   namespace Geometry
   {
@@ -67,39 +67,40 @@ namespace Mantid
       Instrument(const boost::shared_ptr<Instrument> instr, boost::shared_ptr<ParameterMap> map);
       Instrument();
       Instrument(const std::string& name);
+      Instrument(const Instrument&);
       ///Virtual destructor
       virtual ~Instrument() {}
 
-      IObjComponent_sptr getSource() const;
-      IObjComponent_sptr getSample() const;
+      IObjComponent_const_sptr getSource() const;
+      IObjComponent_const_sptr getSample() const;
       Kernel::V3D getBeamDirection() const;
 
-      IDetector_sptr getDetector(const detid_t &detector_id) const;
+      IDetector_const_sptr getDetector(const detid_t &detector_id) const;
       /// Returns a pointer to the geometrical object for the given set of IDs
-      IDetector_sptr getDetector(const std::vector<detid_t> &det_ids) const;
+      IDetector_const_sptr getDetector(const std::vector<detid_t> &det_ids) const;
 
       /// Returns a list of Detectors for the given detectors ids
-      std::vector<IDetector_sptr> getDetectors(const std::vector<detid_t> &det_ids) const;
+      std::vector<IDetector_const_sptr> getDetectors(const std::vector<detid_t> &det_ids) const;
 
       /// Returns a list of Detectors for the given detectors ids
-      std::vector<IDetector_sptr> getDetectors(const std::set<detid_t> &det_ids) const;
+      std::vector<IDetector_const_sptr> getDetectors(const std::set<detid_t> &det_ids) const;
 
       /// Returns a pointer to the geometrical object representing the monitor with the given ID
-      IDetector_sptr getMonitor(const int &detector_id) const;
+      IDetector_const_sptr getMonitor(const int &detector_id) const;
 
       /// mark a Component which has already been added to the Instrument (as a child comp.)
       /// to be 'the' samplePos Component. For now it is assumed that we have
       /// at most one of these.
-      void markAsSamplePos(ObjComponent*);
+      void markAsSamplePos(const ObjComponent*);
 
       /// mark a Component which has already been added to the Instrument (as a child comp.)
       /// to be 'the' source Component. For now it is assumed that we have
       /// at most one of these.
-      void markAsSource(ObjComponent*);
+      void markAsSource(const ObjComponent*);
 
       /// mark a Component which has already been added to the Instrument (as a child comp.)
       /// to be a Detector component by adding it to _detectorCache
-      void markAsDetector(IDetector*);
+      void markAsDetector(const IDetector*);
 
       /// mark a Component which has already been added to the Instrument (as a child comp.)
       /// to be a monitor and also add it to _detectorCache for possible later retrieval
@@ -136,10 +137,10 @@ namespace Mantid
       std::vector<boost::shared_ptr<const IComponent> > getAllComponentsWithName(const std::string & cname) const;
 
       /// Get information about the parameters described in the instrument definition file and associated parameter files
-      std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& getLogfileCache() {return _logfileCache;}
+      std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& getLogfileCache() {return m_logfileCache;}
 
       /// Get information about the units used for parameters described in the IDF and associated parameter files
-      std::map<std::string, std::string>& getLogfileUnit() {return _logfileUnit;}
+      std::map<std::string, std::string>& getLogfileUnit() {return m_logfileUnit;}
 
       /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
       std::string getDefaultAxis() const {return m_defaultViewAxis;}
@@ -188,35 +189,24 @@ namespace Mantid
     private:
       /// Private copy assignment operator
       Instrument& operator=(const Instrument&);
-      /// Private copy constructor
-      Instrument(const Instrument&);
 
       /// Static reference to the logger class
       static Kernel::Logger& g_log;
 
-      /// Get a child by name
-      IComponent* getChild(const std::string& name) const;
-
       /// Add a plottable component
       void appendPlottable(const CompAssembly& ca,std::vector<IObjComponent_const_sptr>& lst)const;
 
-      // This method is only required for efficent caching of parameterized components and
-      // should not form part of the interface. It is an implementation detail.
-      template<typename T> friend class ComponentPool;
-      /// Swap the current references to the un-parameterized component and parameter map for new ones
-      void swap(const Instrument* base, const ParameterMap * map);
-
       /// Map which holds detector-IDs and pointers to detector components
-      std::map<detid_t, IDetector_sptr > _detectorCache;
+      std::map<detid_t, IDetector_const_sptr > m_detectorCache;
 
       /// Purpose to hold copy of source component. For now assumed to be just one component
-      ObjComponent* _sourceCache;
+      const ObjComponent* m_sourceCache;
 
       /// Purpose to hold copy of samplePos component. For now assumed to be just one component
-      ObjComponent* _sampleCache;
+      const ObjComponent* m_sampleCache;
 
       /// To store info about the parameters defined in IDF. Indexed according to logfile-IDs, which equals logfile filename minus the run number and file extension
-      std::multimap<std::string, boost::shared_ptr<XMLlogfile> > _logfileCache;
+      std::multimap<std::string, boost::shared_ptr<XMLlogfile> > m_logfileCache;
 
       /// Store units used by users to specify angles in IDFs and associated parameter files.
       /// By default this one is empty meaning that the default of angle=degree etc are used
@@ -224,7 +214,7 @@ namespace Mantid
       /// However if map below contains e.g. <"angle", "radian"> it means
       /// that all "angle"-parameters in the _logfileCache are assumed to have been specified
       /// by the user in radian (not degrees)    
-      std::map<std::string, std::string> _logfileUnit;
+      std::map<std::string, std::string> m_logfileUnit;
 
       /// a vector holding detector ids of monitor s
       std::vector<detid_t> m_monitorCache;

@@ -1035,9 +1035,9 @@ void SANSRunWindow::componentLOQDistances(Mantid::API::MatrixWorkspace_sptr work
   Instrument_const_sptr instr = workspace->getInstrument();
   if( !instr ) return;
 
-  Mantid::Geometry::IObjComponent_sptr source = instr->getSource();
+  Mantid::Geometry::IObjComponent_const_sptr source = instr->getSource();
   if( source == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
-  Mantid::Geometry::IObjComponent_sptr sample = instr->getSample();
+  Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
   if( sample == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
 
   lms = source->getPos().distance(sample->getPos()) * 1000.;
@@ -1309,7 +1309,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
   }
 
   Instrument_const_sptr instr = sample_workspace->getInstrument();
-  boost::shared_ptr<Mantid::Geometry::IComponent> source = instr->getSource();
+  boost::shared_ptr<const Mantid::Geometry::IComponent> source = instr->getSource();
 
   // Moderator-monitor distance is common to LOQ and S2D
   size_t monitorWorkspaceIndex=0;
@@ -1331,7 +1331,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
   QString colour("black");
   try
   {
-    Mantid::Geometry::IDetector_sptr detector = instr->getDetector(*dets.begin());
+    Mantid::Geometry::IDetector_const_sptr detector = instr->getDetector(*dets.begin());
     dist_mm = detector->getDistance(*source) * unit_conv;
   }
   catch(std::runtime_error&)
@@ -1446,8 +1446,8 @@ void SANSRunWindow::setSANS2DGeometry(Mantid::API::MatrixWorkspace_sptr workspac
   double unitconv = 1000.;
 
   Instrument_const_sptr instr = workspace->getInstrument();
-  boost::shared_ptr<Mantid::Geometry::IComponent> sample = instr->getSample();
-  boost::shared_ptr<Mantid::Geometry::IComponent> source = instr->getSource();
+  boost::shared_ptr<const Mantid::Geometry::IComponent> sample = instr->getSample();
+  boost::shared_ptr<const Mantid::Geometry::IComponent> source = instr->getSource();
   double distance = source->getDistance(*sample) * unitconv;
   //Moderator-sample
   QLabel *dist_label(NULL); 

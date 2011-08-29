@@ -118,9 +118,9 @@ public:
       TS_ASSERT_DELTA( outputWS->dataE(0)[i], std::sqrt(double(2)), 0.0001 );
     }
 
-    boost::shared_ptr<IDetector> det;
+    boost::shared_ptr<const IDetector> det;
     TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) );
-    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) );
+    TS_ASSERT( boost::dynamic_pointer_cast<const DetectorGroup>(det) );
     TS_ASSERT_THROWS_ANYTHING(det = outputWS->getDetector(1));
     
     AnalysisDataService::Instance().remove(output);
@@ -154,9 +154,9 @@ public:
       TS_ASSERT_DELTA( outputWS->dataE(0)[i], std::sqrt(4.0), 0.0001 );
     }
 
-    boost::shared_ptr<IDetector> det;
+    boost::shared_ptr<const IDetector> det;
     TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) );
-    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) );
+    TS_ASSERT( boost::dynamic_pointer_cast<const DetectorGroup>(det) );
     TS_ASSERT_THROWS_ANYTHING(det = outputWS->getDetector(1));
     
     AnalysisDataService::Instance().remove(output);
@@ -188,9 +188,9 @@ public:
       TS_ASSERT_DELTA( outputWS->dataE(0)[i], std::sqrt(double(NHIST)), 0.0001 );
     }
 
-    boost::shared_ptr<IDetector> det;
+    boost::shared_ptr<const IDetector> det;
     TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) );
-    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) );
+    TS_ASSERT( boost::dynamic_pointer_cast<const DetectorGroup>(det) );
     TS_ASSERT_THROWS_ANYTHING( det = outputWS->getDetector(1) );
 
     AnalysisDataService::Instance().remove(output);
@@ -248,17 +248,17 @@ public:
 
     // the first two spectra should have a group of detectors the other spectra a single detector
 
-    boost::shared_ptr<IDetector> det;
+    boost::shared_ptr<const IDetector> det;
     TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) );
-    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) );
+    TS_ASSERT( boost::dynamic_pointer_cast<const DetectorGroup>(det) );
     TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(1) );
-    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) );
+    TS_ASSERT( boost::dynamic_pointer_cast<const Detector>(det) );
     TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(2) );
-    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) );
+    TS_ASSERT( boost::dynamic_pointer_cast<const Detector>(det) );
     TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(3) );
-    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) );
+    TS_ASSERT( boost::dynamic_pointer_cast<const Detector>(det) );
     TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(4) );
-    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) );
+    TS_ASSERT( boost::dynamic_pointer_cast<const Detector>(det) );
     
     AnalysisDataService::Instance().remove(output);
     remove(inputFile.c_str());

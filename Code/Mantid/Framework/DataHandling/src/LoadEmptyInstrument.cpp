@@ -72,7 +72,7 @@ namespace Mantid
 
       // Get detectors stored in instrument and create dummy c-arrays for the purpose
       // of calling method of SpectraDetectorMap 
-      std::map<detid_t, IDetector_sptr> detCache;
+      std::map<detid_t, IDetector_const_sptr> detCache;
 
       //FIXME: Use GetDetectorID's here since it'll be way faster.
       instrument->getDetectors(detCache);
@@ -115,7 +115,7 @@ namespace Mantid
 
         for (size_t i=0; i < outWS->getNumberHistograms(); i++)
         {
-          IDetector_sptr det = outWS->getDetector(i);
+          IDetector_const_sptr det = outWS->getDetector(i);
           if ( det->isMonitor() )
             outWS->setData(i, v_monitor, v_monitor);
           else

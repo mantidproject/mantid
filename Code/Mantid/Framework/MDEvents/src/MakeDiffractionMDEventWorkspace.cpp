@@ -118,7 +118,7 @@ namespace MDEvents
       out_events.reserve( el.getNumberEvents() );
 
       // Get the detector (might be a detectorGroup for multiple detectors)
-      IDetector_sptr det = in_ws->getDetector(workspaceIndex);
+      IDetector_const_sptr det = in_ws->getDetector(workspaceIndex);
 
       // Vector between the sample and the detector
       V3D detPos = det->getPos() - samplePos;

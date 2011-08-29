@@ -46,7 +46,7 @@ public:
     std::map<int, V3D> originalPositions;
     for( int i = 0; i < ndets; ++i )
     {
-      IDetector_sptr det = testWS->getDetector(i);
+      IDetector_const_sptr det = testWS->getDetector(i);
       originalPositions.insert(std::pair<int, V3D>(i, det->getPos()));
     }
 
@@ -62,7 +62,7 @@ public:
     const ParameterMap & pmap = testWS->instrumentParameters();
     for( int i = 0; i < ndets; ++i )
     {
-      IDetector_sptr det = testWS->getDetector(i);
+      IDetector_const_sptr det = testWS->getDetector(i);
       V3D newPos = det->getPos();
       V3D oldPos = originalPositions[i];
       TS_ASSERT_DELTA(newPos.Y(), expectedYPos[i], 1e-6);
@@ -112,7 +112,7 @@ public:
                               V3D(-0.09484302,-1.09506369,3.86889169) };
     for( int i = 0; i < 3; ++i )
     {
-      IDetector_sptr det = testWS->getDetector(testIndices[i]);
+      IDetector_const_sptr det = testWS->getDetector(testIndices[i]);
       V3D pos = det->getPos();
       V3D expectedPos = expectedValues[i];
       TS_ASSERT_DELTA(pos.X(), expectedPos.X(), 1e-8);
@@ -139,7 +139,7 @@ private:
            << "         w_x         w_y         w_z         f_x         f_y\n";
     for( int i = 0; i < ndets; ++i )
     {
-      IDetector_sptr det = testWS->getDetector(i);
+      IDetector_const_sptr det = testWS->getDetector(i);
       V3D oldPos(det->getPos());
       // Move in Y only
       oldPos.setY(oldPos.Y() - m_y_offset*(i+1));

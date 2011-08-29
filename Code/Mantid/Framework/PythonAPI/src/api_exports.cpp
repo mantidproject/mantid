@@ -267,7 +267,7 @@ using namespace boost::python;
          return_value_policy<return_by_value>() )
       .def("getInstrument", &API::MatrixWorkspace::getInstrument)
       .def("getSpectrum", (ISpectrum * (MatrixWorkspace::*)(const size_t))&API::MatrixWorkspace::getSpectrum, return_internal_reference<>() )
-      .def("getDetector", (Geometry::IDetector_sptr (API::MatrixWorkspace::*) (const size_t) const)&API::MatrixWorkspace::getDetector)
+      .def("getDetector", (Geometry::IDetector_const_sptr (API::MatrixWorkspace::*) (const size_t) const)&API::MatrixWorkspace::getDetector)
       .def("getRun", &API::MatrixWorkspace::run, return_internal_reference<>() )
       .def("getSampleInfo", &API::MatrixWorkspace::sample, return_internal_reference<>() )
       .def("getNumberAxes", &API::MatrixWorkspace::axes)

@@ -58,7 +58,7 @@ void UnwrappedSurface::init()
   for(size_t i = 0; i < ndet; ++i)
   {
     unsigned char color[3];
-    boost::shared_ptr<Mantid::Geometry::IDetector> det = m_instrActor->getDetector(i);
+    boost::shared_ptr<const Mantid::Geometry::IDetector> det = m_instrActor->getDetector(i);
     if (!det || det->isMonitor())
     {
       m_unwrappedDetectors.append(UnwrappedDetector(&color[0],boost::shared_ptr<Mantid::Geometry::IDetector>()));

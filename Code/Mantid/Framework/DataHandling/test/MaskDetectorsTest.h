@@ -247,7 +247,7 @@ public:
     {
       if( masked_indices.count(i) == 1 )
       {
-        IDetector_sptr det;
+        IDetector_const_sptr det;
         TS_ASSERT_THROWS_NOTHING(det = existingMask->getDetector(i));
         pmap.addBool(det.get(), "masked", true);
       }
@@ -270,7 +270,7 @@ public:
     if( !originalWS ) return;
     for( int i = 0; i < static_cast<int>(originalWS->getNumberHistograms()); ++i )
     {
-      IDetector_sptr det;
+      IDetector_const_sptr det;
       TS_ASSERT_THROWS_NOTHING(det = existingMask->getDetector(i));
       if( masked_indices.count(i) == 1 )
       {

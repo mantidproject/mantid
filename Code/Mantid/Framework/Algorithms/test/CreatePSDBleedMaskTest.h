@@ -32,7 +32,7 @@ public:
   void test_That_Tube_Based_Detector_Gives_Expected_Masking()
   {
     using Mantid::API::MatrixWorkspace_sptr;
-    using Mantid::Geometry::IDetector_sptr;
+    using Mantid::Geometry::IDetector_const_sptr;
 
     Workspace2D_sptr testWS = createTestWorkspace();
 
@@ -82,13 +82,13 @@ public:
     int failedIndexStart(50), failedIndexEnd(99);
     for( int i = failedIndexStart; i <= failedIndexEnd; ++i )
     {
-      IDetector_sptr det = outputWS->getDetector(i);
+      IDetector_const_sptr det = outputWS->getDetector(i);
       TS_ASSERT_EQUALS( det->isMasked(), true);
     }
 
     for( int i = 0; i <= 49; ++i )
     {
-      IDetector_sptr det = outputWS->getDetector(i);
+      IDetector_const_sptr det = outputWS->getDetector(i);
       TS_ASSERT_EQUALS( det->isMasked(), false );
     }
     

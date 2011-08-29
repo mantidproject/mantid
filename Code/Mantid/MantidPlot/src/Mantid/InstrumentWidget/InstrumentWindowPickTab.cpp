@@ -236,7 +236,7 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
     InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
     Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
     size_t wi = instrActor->getWorkspaceIndex(detid);
-    Mantid::Geometry::IDetector_sptr det = ws->getInstrument()->getDetector(detid);
+    Mantid::Geometry::IDetector_const_sptr det = ws->getInstrument()->getDetector(detid);
     QString text = "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
     text += "Detector ID: " + QString::number(detid) + '\n';
     text += "Workspace index: " + QString::number(wi) + '\n';
@@ -363,7 +363,7 @@ void InstrumentWindowPickTab::plotTube(int detid)
   InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
   size_t wi = instrActor->getWorkspaceIndex(detid);
-  Mantid::Geometry::IDetector_sptr det = ws->getInstrument()->getDetector(detid);
+  Mantid::Geometry::IDetector_const_sptr det = ws->getInstrument()->getDetector(detid);
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
   Mantid::Geometry::ICompAssembly_const_sptr ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent);
   if (parent && ass)

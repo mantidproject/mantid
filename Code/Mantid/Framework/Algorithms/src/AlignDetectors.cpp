@@ -79,7 +79,7 @@ std::map<detid_t, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API
   for (it = allDetectors.begin(); it != allDetectors.end(); it++)
   {
     detid_t detectorID = it->first;
-    Geometry::IDetector_sptr det = it->second;
+    Geometry::IDetector_const_sptr det = it->second;
 
     //Find the offset, if any
     double offset = offsetsWS->getValue(detectorID, 0.0);

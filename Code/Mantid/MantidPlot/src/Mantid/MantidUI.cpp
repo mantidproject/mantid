@@ -756,7 +756,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     double R(0.0), Theta(0.0), Phi(0.0);
     try
     {
-      boost::shared_ptr<Mantid::Geometry::IDetector> det = ws->getDetector(ws_index);
+      Mantid::Geometry::IDetector_const_sptr det = ws->getDetector(ws_index);
       detID = det->getID();
       // We want the position of the detector relative to the sample
       Mantid::Kernel::V3D pos = det->getPos() - sample->getPos();

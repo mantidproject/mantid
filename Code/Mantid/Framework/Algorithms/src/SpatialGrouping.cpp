@@ -89,12 +89,12 @@ void SpatialGrouping::exec()
 
   Mantid::API::Progress prog(this, 0.0, 1.0, m_detectors.size());
     
-  for ( std::map<specid_t, Mantid::Geometry::IDetector_sptr>::iterator detIt = m_detectors.begin(); detIt != m_detectors.end(); ++detIt )
+  for ( std::map<specid_t, Geometry::IDetector_const_sptr>::iterator detIt = m_detectors.begin(); detIt != m_detectors.end(); ++detIt )
   {
     prog.report();
 
     // The detector
-    Mantid::Geometry::IDetector_sptr det = detIt->second;
+    Mantid::Geometry::IDetector_const_sptr det = detIt->second;
     // The spectrum number of the detector
     specid_t specNo = detIt->first;
 
@@ -213,7 +213,7 @@ bool SpatialGrouping::expandNet(std::map<specid_t,double> & nearest, specid_t sp
 {
   const size_t incoming = nearest.size();
 
-  Mantid::Geometry::IDetector_sptr det = m_detectors[spec];
+  Mantid::Geometry::IDetector_const_sptr det = m_detectors[spec];
 
   std::map<specid_t, double> potentials;
 
@@ -295,7 +295,7 @@ void SpatialGrouping::sortByDistance(std::map<detid_t,double> & input, const siz
 * @param bndbox :: reference to BoundingBox object (changed by this function)
 * @param scale :: reference to V3D object (changed by this function)
 */
-void SpatialGrouping::createBox(boost::shared_ptr<Mantid::Geometry::IDetector> det, Mantid::Geometry::BoundingBox & bndbox)
+void SpatialGrouping::createBox(boost::shared_ptr<const Geometry::IDetector> det, Geometry::BoundingBox & bndbox)
 { 
 
   // We may have DetectorGroups here

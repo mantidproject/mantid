@@ -111,7 +111,7 @@ namespace Algorithms
         std::vector<double> xval;
         xval.push_back(inputWS->readX(i).front());
         xval.push_back(inputWS->readX(i).back());
-        IDetector_sptr detector = inputWS->getDetector(i);
+        IDetector_const_sptr detector = inputWS->getDetector(i);
         double twoTheta, l1val, l2;
         if ( ! detector->isMonitor() )
         {
@@ -181,7 +181,7 @@ namespace Algorithms
   }
 
 
-  double ConvertSpectrumAxis::getEfixed(IDetector_sptr detector, MatrixWorkspace_const_sptr inputWS, int emode) const
+  double ConvertSpectrumAxis::getEfixed(IDetector_const_sptr detector, MatrixWorkspace_const_sptr inputWS, int emode) const
   {
     double efixed(0);
     double efixedProp = getProperty("Efixed");
@@ -212,7 +212,7 @@ namespace Algorithms
         if ( efixedVec.empty() )
         {
           int detid = detector->getID();
-          IDetector_sptr detectorSingle = inputWS->getInstrument()->getDetector(detid);
+          IDetector_const_sptr detectorSingle = inputWS->getInstrument()->getDetector(detid);
           efixedVec = detectorSingle->getNumberParameter("Efixed");
         }
         if (! efixedVec.empty() ) 

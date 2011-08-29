@@ -110,7 +110,7 @@ void SofQW::exec()
   {
     try {
       // Now get the detector object for this histogram
-      IDetector_sptr spectrumDet = inputWorkspace->getDetector(i);
+      IDetector_const_sptr spectrumDet = inputWorkspace->getDetector(i);
       if( spectrumDet->isMonitor() ) continue;
       // If an indirect instrument, try getting Efixed from the geometry
       double efixed = getProperty("EFixed");
@@ -128,15 +128,15 @@ void SofQW::exec()
       // For inelastic scattering the simple relationship q=4*pi*sinTheta/lambda does not hold. In order to
       // be completely general wemust calculate the momentum transfer by calculating the incident and final
       // wave vectors and then use |q| = sqrt[(ki - kf)*(ki - kf)]
-      DetectorGroup_sptr detGroup = boost::dynamic_pointer_cast<DetectorGroup>(spectrumDet);
-      std::vector<IDetector_sptr> detectors;
+      DetectorGroup_const_sptr detGroup = boost::dynamic_pointer_cast<const DetectorGroup>(spectrumDet);
+      std::vector<IDetector_const_sptr> detectors;
       if( detGroup ) 
       {
-	      detectors = detGroup->getDetectors();
+        detectors = detGroup->getDetectors();
       }
       else
       {
-	      detectors.push_back(spectrumDet);
+        detectors.push_back(spectrumDet);
       }
       const size_t numDets = detectors.size();
       const double numDets_d = static_cast<double>(numDets); // cache to reduce number of static casts
@@ -147,40 +147,40 @@ void SofQW::exec()
       // Loop over the detectors and for each bin calculate Q
       for( size_t idet = 0; idet < numDets; ++idet )
       {
-	      IDetector_sptr det = detectors[idet];
-	      // Calculate kf vector direction and then Q for each energy bin
-	      V3D scatterDir = (det->getPos() - sample->getPos());
- 	      scatterDir.normalize();
-	      for (size_t j = 0; j < numBins; ++j)
-	      {
- 	        const double deltaE = 0.5*(X[j] + X[j+1]);
-	        // Compute ki and kf wave vectors and therefore q = ki - kf
-	        double ei(0.0),ef(0.0);
-	        if( emode == 1 )
-	        {
-	          ei = efixed;
-	          ef = efixed - deltaE;
-	        }
-	        else
-	        {
-	          ei = efixed + deltaE;
-	          ef = efixed;
-	        }
-	        const V3D ki = beamDir*sqrt(energyToK*ei);
-	        const V3D kf = scatterDir*(sqrt(energyToK*(ef)));
-	        const double q = (ki - kf).norm();
+        IDetector_const_sptr det = detectors[idet];
+        // Calculate kf vector direction and then Q for each energy bin
+        V3D scatterDir = (det->getPos() - sample->getPos());
+        scatterDir.normalize();
+        for (size_t j = 0; j < numBins; ++j)
+        {
+          const double deltaE = 0.5*(X[j] + X[j+1]);
+          // Compute ki and kf wave vectors and therefore q = ki - kf
+          double ei(0.0),ef(0.0);
+          if( emode == 1 )
+          {
+            ei = efixed;
+            ef = efixed - deltaE;
+          }
+          else
+          {
+            ei = efixed + deltaE;
+            ef = efixed;
+          }
+          const V3D ki = beamDir*sqrt(energyToK*ei);
+          const V3D kf = scatterDir*(sqrt(energyToK*(ef)));
+          const double q = (ki - kf).norm();
 
-	        // Test whether it's in range of the Q axis
-	        if ( q < verticalAxis.front() || q > verticalAxis.back() ) continue;
-	        // Find which q bin this point lies in
-	        const MantidVec::difference_type qIndex =
-	        std::upper_bound(verticalAxis.begin(),verticalAxis.end(),q) - verticalAxis.begin() - 1;
-	  
-	        // And add the data and it's error to that bin, taking into account the number of detectors contributing to this bin
-                outputWorkspace->dataY(qIndex)[j] += Y[j]/numDets_d;
-	        // Standard error on the average
-                outputWorkspace->dataE(qIndex)[j] = sqrt( (pow(outputWorkspace->readE(qIndex)[j],2) + pow(E[j],2))/numDets_d );
-	      }
+          // Test whether it's in range of the Q axis
+          if ( q < verticalAxis.front() || q > verticalAxis.back() ) continue;
+          // Find which q bin this point lies in
+          const MantidVec::difference_type qIndex =
+              std::upper_bound(verticalAxis.begin(),verticalAxis.end(),q) - verticalAxis.begin() - 1;
+
+          // And add the data and it's error to that bin, taking into account the number of detectors contributing to this bin
+          outputWorkspace->dataY(qIndex)[j] += Y[j]/numDets_d;
+          // Standard error on the average
+          outputWorkspace->dataE(qIndex)[j] = sqrt( (pow(outputWorkspace->readE(qIndex)[j],2) + pow(E[j],2))/numDets_d );
+        }
       }
 
     } catch (Exception::NotFoundError &) {

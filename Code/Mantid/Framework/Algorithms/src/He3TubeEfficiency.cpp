@@ -164,7 +164,7 @@ void He3TubeEfficiency::exec()
  */
 void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex)
 {
-  Geometry::IDetector_sptr det = this->inputWS->getDetector(spectraIndex);
+  Geometry::IDetector_const_sptr det = this->inputWS->getDetector(spectraIndex);
   if( det->isMonitor() || det->isMasked() )
   {
     return;
@@ -206,7 +206,7 @@ void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex)
  * @throw out_of_range if twice tube thickness is greater than tube diameter
  * @return the exponential contribution for the given detector
  */
-double He3TubeEfficiency::calculateExponential(std::size_t spectraIndex, boost::shared_ptr<Geometry::IDetector> idet)
+double He3TubeEfficiency::calculateExponential(std::size_t spectraIndex, Geometry::IDetector_const_sptr idet)
 {
   // Get the parameters for the current associated tube
   double pressure = this->getParameter("TubePressure", spectraIndex,
@@ -254,7 +254,7 @@ double He3TubeEfficiency::calculateExponential(std::size_t spectraIndex, boost::
  * @param detAxis :: An output parameter that contains the detector axis vector
  */
 void He3TubeEfficiency::getDetectorGeometry(\
-    boost::shared_ptr<Geometry::IDetector> det,
+    Geometry::IDetector_const_sptr det,
     double & detRadius, Kernel::V3D & detAxis)
 {
   boost::shared_ptr<const Geometry::Object> shape_sptr = det->shape();
@@ -394,7 +394,7 @@ void He3TubeEfficiency::logErrors() const
  * @return the value of the detector property
  */
 double He3TubeEfficiency::getParameter(std::string wsPropName, std::size_t currentIndex,
-    std::string detPropName, boost::shared_ptr<Geometry::IDetector> idet)
+    std::string detPropName, Geometry::IDetector_const_sptr idet)
 {
   std::vector<double> wsProp = this->getProperty(wsPropName);
 
@@ -455,7 +455,7 @@ void He3TubeEfficiency::execEvent()
   {
     PARALLEL_START_INTERUPT_REGION
 
-    Geometry::IDetector_sptr det = inputWS->getDetector(i);
+    Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
     if( det->isMonitor() || det->isMasked() )
     {
       continue;

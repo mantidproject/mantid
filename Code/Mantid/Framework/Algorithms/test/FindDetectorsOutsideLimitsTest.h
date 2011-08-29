@@ -106,7 +106,7 @@ public:
       const double val = work_out->readY(i)[0];
       double valExpected = liveValue;
       // Check masking
-      IDetector_sptr det;
+      IDetector_const_sptr det;
       TS_ASSERT_THROWS_NOTHING(det = work_out->getDetector(i));
       bool maskExpected(false);
       // Spectra set up with yVeryDead fail low counts or yStrange fail on high
@@ -140,7 +140,7 @@ public:
       const double val = work_out->readY(i)[0];
       double valExpected = liveValue;
       // Check masking
-      IDetector_sptr det;
+      IDetector_const_sptr det;
       TS_ASSERT_THROWS_NOTHING(det = work_out->getDetector(i));
       bool maskExpected(false);
       // Spectra set up with yVeryDead fail low counts or yStrange fail on high

@@ -20,8 +20,8 @@ public:
   void test_createDetector()
   {
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
-    IDetector_sptr idet = inst->getDetector(1);
-    Detector * det = boost::dynamic_pointer_cast<Detector>(idet).get();
+    IDetector_const_sptr idet = inst->getDetector(1);
+    const Detector * det = boost::dynamic_pointer_cast<const Detector>(idet).get();
     ParameterMap * map = new ParameterMap();
 
     boost::shared_ptr<Detector> pdet;

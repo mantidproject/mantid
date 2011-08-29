@@ -150,7 +150,7 @@ namespace ComponentCreationHelper
   boost::shared_ptr<DetectorGroup> createDetectorGroupWith5CylindricalDetectors()
   {
     const int ndets = 5;
-    std::vector<boost::shared_ptr<IDetector> > groupMembers(ndets);
+    std::vector<boost::shared_ptr<const IDetector> > groupMembers(ndets);
     // One object
     Object_sptr detShape = ComponentCreationHelper::createCappedCylinder(0.5, 1.5, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube"); 
     for( int i = 0; i < ndets; ++i )
@@ -172,7 +172,7 @@ namespace ComponentCreationHelper
   boost::shared_ptr<DetectorGroup> createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet,double gap)
   {
 
-    std::vector<boost::shared_ptr<IDetector> > groupMembers(nDet);
+    std::vector<boost::shared_ptr<const IDetector> > groupMembers(nDet);
     // One object
     Object_sptr detShape = ComponentCreationHelper::createCappedCylinder(0.5, 1.5, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube"); 
     for(unsigned int i = 0; i < nDet; ++i )
@@ -194,7 +194,7 @@ namespace ComponentCreationHelper
   boost::shared_ptr<DetectorGroup> createRingOfCylindricalDetectors(const double R_min, const double R_max, const double z0)
   {
 
-    std::vector<boost::shared_ptr<IDetector> > groupMembers;
+    std::vector<boost::shared_ptr<const IDetector> > groupMembers;
     // One object
     double R0=0.5;
     double h =1.5;
@@ -235,7 +235,7 @@ namespace ComponentCreationHelper
   boost::shared_ptr<DetectorGroup> createGroupOfTwoMonitors()
   {
     const int ndets(2);
-    std::vector<boost::shared_ptr<IDetector> > groupMembers(ndets);
+    std::vector<boost::shared_ptr<const IDetector> > groupMembers(ndets);
     for( int i = 0; i < ndets; ++i )
     {
       std::ostringstream os;

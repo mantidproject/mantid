@@ -146,7 +146,7 @@ void AnvredCorrection::exec()
     const MantidVec& Ein = m_inputWS->readE(i);
 
     // Get detector position
-    IDetector_sptr det;
+    IDetector_const_sptr det;
     try
     {
       det = m_inputWS->getDetector(i);
@@ -230,7 +230,7 @@ void AnvredCorrection::execEvent()
     correctionFactors->dataX(i) = X;
 
     // Get detector position
-    IDetector_sptr det;
+    IDetector_const_sptr det;
     try
     {
       det = eventW->getDetector(i);

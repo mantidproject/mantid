@@ -65,7 +65,7 @@ public:
   bool isMasked() const;
   bool isMonitor() const;
   /// Returns a reference to itself
-  IComponent* getComponent(){return static_cast<IComponent*>(this);}
+  const IComponent* getComponent() const {return static_cast<const IComponent*>(this);}
   // end IDetector methods 
   void markAsMonitor(const bool flag = true);
   /** returns the detector's topology, namely, the meaning of the detector's angular measurements.

@@ -194,7 +194,7 @@ public:
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i=0; i<numpixels; i++)
     {
-      IDetector_sptr det = ws->getDetector(i);
+      IDetector_const_sptr det = ws->getDetector(i);
       TS_ASSERT(det);
     }
   }

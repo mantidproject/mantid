@@ -108,7 +108,7 @@ const MantidColorMap& InstrumentActor::getColorMap() const
   return m_colorMap;
 }
 
-boost::shared_ptr<Mantid::Geometry::IDetector> InstrumentActor::getDetector(size_t i)const
+boost::shared_ptr<const Mantid::Geometry::IDetector> InstrumentActor::getDetector(size_t i)const
 {
   try
   {
@@ -116,7 +116,7 @@ boost::shared_ptr<Mantid::Geometry::IDetector> InstrumentActor::getDetector(size
   }
   catch(...)
   {
-    return boost::shared_ptr<Mantid::Geometry::IDetector>();
+    return boost::shared_ptr<const Mantid::Geometry::IDetector>();
   }
 }
 

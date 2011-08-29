@@ -103,7 +103,7 @@ private:
       // Data
       double expectedValue(-1.0);
       bool outputMasked(false);
-      IDetector_sptr inputDet, outputDet;
+      IDetector_const_sptr inputDet, outputDet;
       try
       {
         inputDet = inputWS->getDetector(i);

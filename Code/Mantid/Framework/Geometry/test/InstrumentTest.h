@@ -107,7 +107,7 @@ public:
     detIDs[1] = 10;
     detIDs[2] = 11;
 
-    std::vector<IDetector_sptr> dets;
+    std::vector<IDetector_const_sptr> dets;
     TS_ASSERT_THROWS_NOTHING(dets = instrument.getDetectors(detIDs));
     TS_ASSERT_EQUALS(dets.size(), ndets);
     for( size_t i = 0; i < ndets; ++i )
@@ -125,9 +125,9 @@ public:
     detIDs[1] = 10;
     detIDs[2] = 11;
 
-    IDetector_sptr det;
+    IDetector_const_sptr det;
     TS_ASSERT_THROWS_NOTHING(det = instrument.getDetector(detIDs));
-    boost::shared_ptr<DetectorGroup> detGroup = boost::dynamic_pointer_cast<DetectorGroup>(det);
+    boost::shared_ptr<const DetectorGroup> detGroup = boost::dynamic_pointer_cast<const DetectorGroup>(det);
     TS_ASSERT(detGroup);
     
     TS_ASSERT_EQUALS(detGroup->nDets(), ndets);
@@ -144,7 +144,7 @@ public:
     std::vector<detid_t> detIDs(ndets);
     detIDs[0] = 10000;
 
-    std::vector<IDetector_sptr> dets;
+    std::vector<IDetector_const_sptr> dets;
     TS_ASSERT_THROWS(dets = instrument.getDetectors(detIDs), Kernel::Exception::NotFoundError);
     
   }

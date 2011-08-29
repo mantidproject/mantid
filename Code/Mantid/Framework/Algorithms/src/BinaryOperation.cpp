@@ -339,7 +339,7 @@ namespace Mantid
         const int64_t index, API::MatrixWorkspace_sptr out)
     {
       bool continueOp(true);
-      IDetector_sptr det_lhs, det_rhs;
+      IDetector_const_sptr det_lhs, det_rhs;
       try
       {
         det_lhs = lhs->getDetector(index);
@@ -766,7 +766,7 @@ namespace Mantid
 
         try
         {
-          IDetector_sptr det_out = out->getDetector(m_indicesToMask[i]);
+          IDetector_const_sptr det_out = out->getDetector(m_indicesToMask[i]);
           PARALLEL_CRITICAL(BinaryOperation_masking)
           {
             pmap.addBool(det_out.get(), "masked", true);

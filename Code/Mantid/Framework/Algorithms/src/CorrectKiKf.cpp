@@ -129,7 +129,7 @@ void CorrectKiKf::exec()
       if ( efixedProp != EMPTY_DBL()) Efi = efixedProp;
       else try 
       {
-        IDetector_sptr det = inputWS->getDetector(i);  
+        IDetector_const_sptr det = inputWS->getDetector(i);
         if (!det->isMonitor())
         {
           std::vector< double >  wsProp=det->getNumberParameter("Efixed");
@@ -267,7 +267,7 @@ void CorrectKiKf::execEvent()
       if ( efixedProp != EMPTY_DBL()) Efi = efixedProp;
       else try 
       {
-        IDetector_sptr det = inputWS->getDetector(i);  
+        IDetector_const_sptr det = inputWS->getDetector(i);
         if (!det->isMonitor())
         {
           std::vector< double >  wsProp=det->getNumberParameter("Efixed");

@@ -65,7 +65,7 @@ public:
 
     ParameterMap& paramMap = output->instrumentParameters();
     boost::shared_ptr<Instrument> i = output->getInstrument();
-    boost::shared_ptr<IDetector> ptrDet = i->getDetector(1008);
+    boost::shared_ptr<const IDetector> ptrDet = i->getDetector(1008);
     TS_ASSERT_EQUALS( ptrDet->getID(), 1008);
     TS_ASSERT_EQUALS( ptrDet->getName(), "combined translation6");
     Parameter_sptr param = paramMap.get(&(*ptrDet), "fjols");

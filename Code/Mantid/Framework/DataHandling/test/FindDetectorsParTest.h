@@ -378,7 +378,7 @@ public:
 private:
     IAlgorithm* findPar;
     MatrixWorkspace_sptr inputWS;
-    std::vector<Geometry::IDetector_sptr>  partDetectors;
+    std::vector<Geometry::IDetector_const_sptr>  partDetectors;
 
     //
     MatrixWorkspace_sptr  buildUngroupedWS(const std::string &WS_Name)

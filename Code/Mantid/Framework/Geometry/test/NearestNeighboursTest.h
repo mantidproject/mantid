@@ -43,7 +43,7 @@ public:
 
     // Need scaling vector since changes to NN ( 22/12/10 )
     Mantid::Geometry::BoundingBox bbox = Mantid::Geometry::BoundingBox();
-    boost::shared_ptr<Detector> det = boost::dynamic_pointer_cast<Detector>(m_detectors[3]);
+    boost::shared_ptr<const Detector> det = boost::dynamic_pointer_cast<const Detector>(m_detectors[3]);
     det->getBoundingBox(bbox);
     V3D scale((bbox.xMax()-bbox.xMin()), (bbox.yMax()-bbox.yMin()), (bbox.zMax()-bbox.zMin()) );
 

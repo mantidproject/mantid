@@ -50,10 +50,10 @@ namespace Mantid
     {
     public:
       DetectorGroup();
-      DetectorGroup(const std::vector<IDetector_sptr>& dets, bool warnAboutMasked = false);
+      DetectorGroup(const std::vector<IDetector_const_sptr>& dets, bool warnAboutMasked = false);
       virtual ~DetectorGroup();
 
-      void addDetector(IDetector_sptr det, bool& warn);
+      void addDetector(IDetector_const_sptr det, bool& warn);
 
       // IDetector methods
       detid_t getID() const;
@@ -74,9 +74,9 @@ namespace Mantid
       virtual void getBoundingBox(BoundingBox& boundingBox) const;
  
       /// What detectors are contained in the group?
-      std::vector<detid_t> getDetectorIDs();
+      std::vector<detid_t> getDetectorIDs() const;
       /// What detectors are contained in the group?
-      std::vector<IDetector_sptr> getDetectors() const;
+      std::vector<IDetector_const_sptr> getDetectors() const;
 
       /** @name ParameterMap access */
       //@{
@@ -115,16 +115,17 @@ namespace Mantid
        * @returns A list of size 0 as this is not a parameterized component
        */
       std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const;
-  /** returns the detector's group topology if it has been calculated before or invokes the procedure of 
+      /** returns the detector's group topology if it has been calculated before or invokes the procedure of
       calculating such topology if it was not */
-     det_topology getTopology(Kernel::V3D &center)const;
-        protected:
+      det_topology getTopology(Kernel::V3D &center)const;
+
+    protected:
       /// The ID of this effective detector
       int m_id;
       /// The type of collection used for the detectors
       ///          - a map of detector pointers with the detector ID as the key
       // May want to change this to a hash_map in due course
-      typedef std::map<int, IDetector_sptr> DetCollection;
+      typedef std::map<int, IDetector_const_sptr> DetCollection;
       /// The collection of grouped detectors
       DetCollection m_detectors;
      /** the parameter describes the topology of the detector's group namely if detectors form a box or a ring.  

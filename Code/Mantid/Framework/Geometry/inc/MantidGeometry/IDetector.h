@@ -91,7 +91,7 @@ public:
   virtual bool isMonitor() const = 0;
 
   /// Must return a pointer to itself if derived from IComponent
-  virtual IComponent* getComponent();
+  virtual const IComponent* getComponent() const;
  /// returns the geometry of detectors, meaningful for groups, rectangular for single; returns the centre of a detector
   virtual det_topology getTopology(Kernel::V3D &center)const = 0;
 

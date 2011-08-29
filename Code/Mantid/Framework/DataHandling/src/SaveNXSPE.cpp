@@ -243,7 +243,7 @@ namespace Mantid
           // Check that we aren't writing a monitor...
           if (!inputWS->getDetector(i)->isMonitor())
             {
-              Geometry::IDetector_sptr det = inputWS->getDetector(i);
+              Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
   
               if (!inputWS->getDetector(i)->isMasked())
                 {

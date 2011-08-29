@@ -180,7 +180,7 @@ namespace Mantid
         {
           try
           {
-            Geometry::IDetector_sptr det = instrument->getDetector(detID[i]);
+            Geometry::IDetector_sptr det = boost::const_pointer_cast<Geometry::IDetector>(instrument->getDetector(detID[i]));
             if( ignoreMonitors && det->isMonitor() ) continue;
             V3D parentPos;
             if( det->getParent() ) parentPos = det->getParent()->getPos();

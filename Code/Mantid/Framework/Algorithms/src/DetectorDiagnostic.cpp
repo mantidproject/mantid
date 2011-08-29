@@ -18,7 +18,7 @@ namespace Mantid
 
     using API::MatrixWorkspace_sptr;
     using API::IAlgorithm_sptr;
-    using Geometry::IDetector_sptr;
+    using Geometry::IDetector_const_sptr;
     using namespace Mantid::DataObjects;
     using namespace Mantid::API;
 
@@ -111,7 +111,7 @@ namespace Mantid
       {
         PARALLEL_START_INTERUPT_REGION
 
-        IDetector_sptr det;
+        IDetector_const_sptr det;
         try
         {
           det = input->getDetector(i);

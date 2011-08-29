@@ -48,7 +48,7 @@ public:
 
   void testGetDetectors()
   {
-    std::vector<IDetector_sptr> dets = m_detGroup->getDetectors();
+    std::vector<IDetector_const_sptr> dets = m_detGroup->getDetectors();
     TS_ASSERT_EQUALS( dets.size(), 5 );
     for(size_t i = 0; i < dets.size(); ++i )
     {

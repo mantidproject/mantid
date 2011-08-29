@@ -190,7 +190,7 @@ void InstrumentWindow::setSurfaceType(int type)
     m_surfaceType = SurfaceType(type);
     if (!m_instrumentActor) return;
     Mantid::Geometry::Instrument_const_sptr instr = m_workspace->getInstrument();
-    Mantid::Geometry::IObjComponent_sptr sample = instr->getSample();
+    Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
     Mantid::Kernel::V3D sample_pos = sample->getPos();
     Mantid::Kernel::V3D axis;
     if (m_surfaceType == SPHERICAL_Y || m_surfaceType == CYLINDRICAL_Y)

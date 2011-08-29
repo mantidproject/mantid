@@ -96,7 +96,7 @@ namespace Mantid
       std::map<specid_t, double> defaultNeighbours(const specid_t spectrum) const;
 
       /// Get the spectra associated with all in the instrument
-      std::map<specid_t, IDetector_sptr> 
+      std::map<specid_t, IDetector_const_sptr>
         getSpectraDetectors(boost::shared_ptr<const Instrument> instrument,
                             const ISpectraDetectorMap & spectraMap);
 

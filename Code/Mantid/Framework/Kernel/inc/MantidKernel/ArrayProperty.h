@@ -63,12 +63,24 @@ public:
    *  @param direction :: The direction (Input/Output/InOut) of this property
    */
   ArrayProperty(const std::string &name,
-                IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >, 
+                IValidator<std::vector<T> > *validator,
                 const unsigned int direction = Direction::Input) :
     PropertyWithValue< std::vector<T> >(name, std::vector<T>(), validator, direction)
   {
   }
 
+  /** Constructor that's useful for output properties or inputs with an empty default and no validator.
+   *  Will lead to the property having a default-constructed (i.e. empty) vector
+   *  as its initial (default) value and no validator
+   *  @param name ::      The name to assign to the property
+   *  @param validator :: The validator to use for this property, if required
+   *  @param direction :: The direction (Input/Output/InOut) of this property
+   */
+  ArrayProperty(const std::string &name,
+                const unsigned int direction = Direction::Input) :
+    PropertyWithValue< std::vector<T> >(name, std::vector<T>(), new NullValidator<std::vector<T> >, direction)
+  {
+  }
   /** Constructor from which you can set the property's values through a string
    *  @param name ::      The name to assign to the property
    *  @param values ::    A comma-separated string containing the values to store in the property

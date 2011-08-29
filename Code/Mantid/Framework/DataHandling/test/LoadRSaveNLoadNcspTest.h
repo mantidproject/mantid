@@ -137,18 +137,18 @@ void testExecOnLoadraw()
     //
     Instrument_const_sptr i = output->getInstrument();
     //std::cerr << "Count = " << i.use_count();
-    boost::shared_ptr<IComponent> source = i->getSource();
+    boost::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT( source != NULL);
   if(source != NULL )
     {
         TS_ASSERT_EQUALS( source->getName(), "source");
         TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
 
-       boost::shared_ptr<IComponent> samplepos = i->getSample();
+       boost::shared_ptr<const IComponent> samplepos = i->getSample();
         TS_ASSERT_EQUALS( samplepos->getName(), "some-surface-holder");
         TS_ASSERT_DELTA( samplepos->getPos().Z(), 0.0,0.01);
 
-      boost::shared_ptr<Detector> ptrDet103 = boost::dynamic_pointer_cast<Detector>(i->getDetector(103));
+      boost::shared_ptr<const Detector> ptrDet103 = boost::dynamic_pointer_cast<const Detector>(i->getDetector(103));
 	  if(ptrDet103!=NULL)
 	  {
         TS_ASSERT_EQUALS( ptrDet103->getID(), 103);

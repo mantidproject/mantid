@@ -208,7 +208,7 @@ public:
     // Initially un masked
     for( int i = 0; i < numHist; ++i )
     {
-      IDetector_sptr det;
+      IDetector_const_sptr det;
       TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(i));
       if( det )
       {
@@ -224,14 +224,14 @@ public:
     ISpectrum * spec = workspace->getSpectrum(0);
     spec->addDetectorID(1);
     spec->addDetectorID(2);
-    IDetector_sptr det;
+    IDetector_const_sptr det;
     TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(0));
     TS_ASSERT(det);
 
     // Now an empty (no detector) pixel
     spec = workspace->getSpectrum(1);
     spec->clearDetectorIDs();
-    IDetector_sptr det2;
+    IDetector_const_sptr det2;
     TS_ASSERT_THROWS_ANYTHING(det2 = workspace->getDetector(1));
     TS_ASSERT(!det2);
   }
@@ -250,7 +250,7 @@ public:
       TS_ASSERT_EQUALS(workspace->readY(i)[0], 1.0);
       TS_ASSERT_EQUALS(workspace->readE(i)[0], 1.0);
 
-      IDetector_sptr det;
+      IDetector_const_sptr det;
       TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(i));
       if( det )
       {
@@ -282,7 +282,7 @@ public:
       TS_ASSERT_EQUALS(workspace->readY(i)[0], expectedValue);
       TS_ASSERT_EQUALS(workspace->readE(i)[0], expectedValue);
 
-      IDetector_sptr det;
+      IDetector_const_sptr det;
       TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(i));
       if( det )
       {

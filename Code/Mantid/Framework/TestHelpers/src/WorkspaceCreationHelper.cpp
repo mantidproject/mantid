@@ -158,7 +158,7 @@ namespace WorkspaceCreationHelper
     {
       if ( maskedWorkspaceIndices.find(i) != maskedWorkspaceIndices.end() )
       {
-        IDetector_sptr det = workspace->getDetector(i);
+        IDetector_const_sptr det = workspace->getDetector(i);
         pmap.addBool(det.get(),"masked",true);
       }
     }

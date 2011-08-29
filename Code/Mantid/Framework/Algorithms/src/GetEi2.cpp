@@ -176,9 +176,9 @@ double GetEi2::calculateEi(const double initial_guess)
  */
 double GetEi2::getDistanceFromSource(size_t ws_index) const
 {
-  const IObjComponent_sptr source = m_input_ws->getInstrument()->getSource();
+  const IObjComponent_const_sptr source = m_input_ws->getInstrument()->getSource();
   // Retrieve a pointer detector
-  IDetector_sptr det = m_input_ws->getDetector(ws_index);
+  IDetector_const_sptr det = m_input_ws->getDetector(ws_index);
   if( !det )
   {
     std::ostringstream msg;

@@ -75,7 +75,7 @@ public:
   virtual bool hasSelection()const;
 
   virtual int getDetectorID(int x, int y)const;
-  virtual boost::shared_ptr<Mantid::Geometry::IDetector> getDetector(int x, int y)const;
+  virtual boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector(int x, int y)const;
   /// NULL deselects components and selects the whole instrument
   virtual void componentSelected(Mantid::Geometry::ComponentID = NULL) = 0;
   /// fill in a list of detector ids which were selected by the selction tool

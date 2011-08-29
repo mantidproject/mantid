@@ -88,7 +88,7 @@ namespace Mantid
         return;
       }
       l1 = source->getDistance(*sample);
-      Geometry::IDetector_sptr det = wksp->getDetector(spectrum);
+      Geometry::IDetector_const_sptr det = wksp->getDetector(spectrum);
       l2 = det->getDistance(*sample);
       tth = wksp->detectorTwoTheta(det);
     }

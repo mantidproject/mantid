@@ -17,7 +17,7 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::Geometry::IDetector_sptr;
+using Mantid::Geometry::IDetector_const_sptr;
 
 class BinaryOpHelper : public Mantid::Algorithms::BinaryOperation
 {
@@ -147,7 +147,7 @@ public:
 
     for( int i = 0; i < nHist; ++i )
     {
-      IDetector_sptr det;
+      IDetector_const_sptr det;
       try
       {
         det = output->getDetector(i);

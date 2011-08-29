@@ -132,7 +132,7 @@ void GetEi::exec()
 */
 void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specid_t mon0Spec, specid_t mon1Spec, double &monitor0Dist, double &monitor1Dist) const
 {
-  const IObjComponent_sptr source = WS->getInstrument()->getSource();
+  const IObjComponent_const_sptr source = WS->getInstrument()->getSource();
 
   // retrieve a pointer to the first detector and get its distance
   size_t monWI = 0;
@@ -154,7 +154,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specid_t mon0Spec, s
     g_log.error() << "Error retrieving data for the first monitor" << std::endl;
     throw std::bad_cast();
   }
-  IDetector_sptr det = WS->getInstrument()->getDetector(*dets.begin());
+  IDetector_const_sptr det = WS->getInstrument()->getDetector(*dets.begin());
   monitor0Dist = det->getDistance(*(source.get()));
 
   // repeat for the second detector

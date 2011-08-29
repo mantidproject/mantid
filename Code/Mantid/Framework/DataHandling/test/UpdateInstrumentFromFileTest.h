@@ -76,12 +76,12 @@ private:
 
     Instrument_const_sptr i = output->getInstrument();
 
-    boost::shared_ptr<IDetector> ptrDet = i->getDetector(3100);
+    boost::shared_ptr<const IDetector> ptrDet = i->getDetector(3100);
     TS_ASSERT_EQUALS( ptrDet->getName(), "Det0");
     TS_ASSERT_DELTA( ptrDet->getPos().X(), 0.0866,0.01);
     TS_ASSERT_DELTA( ptrDet->getPos().Z(), -0.9962,0.01);
 
-    boost::shared_ptr<IDetector> mon1 = i->getDetector(1001);
+    boost::shared_ptr<const IDetector> mon1 = i->getDetector(1001);
     TS_ASSERT(mon1->isMonitor());
     double r(-1.0), theta(-1.0), phi(-1.0);
     mon1->getPos().getSpherical(r, theta, phi);

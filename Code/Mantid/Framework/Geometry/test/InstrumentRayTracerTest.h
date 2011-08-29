@@ -64,7 +64,7 @@ public:
     TS_ASSERT_EQUALS(results.size(), 2);
     // Check they are actually what we expect: 1 with the sample and 1 with the central detector
     IComponent_const_sptr centralPixel = testInst->getComponentByName("pixel-(0,0)");
-    IComponent_sptr sampleComp = testInst->getSample();
+    IComponent_const_sptr sampleComp = testInst->getSample();
 
     if( !sampleComp )
     {

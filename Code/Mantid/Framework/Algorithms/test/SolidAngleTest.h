@@ -73,7 +73,7 @@ public:
     
 
    // Mark one detector dead to test that it leads to zero solid angle
-    IDetector_sptr det143 = space2D->getDetector(143);
+    IDetector_const_sptr det143 = space2D->getDetector(143);
     ParameterMap& pmap = space2D->instrumentParameters();
     pmap.addBool(det143.get(),"masked",true);
   }

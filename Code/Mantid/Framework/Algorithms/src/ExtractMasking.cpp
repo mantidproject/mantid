@@ -30,7 +30,7 @@ namespace Mantid
     
 
     using Kernel::Direction;
-    using Geometry::IDetector_sptr;
+    using Geometry::IDetector_const_sptr;
     using namespace API;
 
     //--------------------------------------------------------------------------
@@ -77,37 +77,37 @@ namespace Mantid
         const ISpectrum * inSpec = inputWS->getSpectrum(i);
 
         // Copy X, spectrum number and detector IDs
-      	outSpec->setX(xValues);
-      	outSpec->copyInfoFrom(*inSpec);
+        outSpec->setX(xValues);
+        outSpec->copyInfoFrom(*inSpec);
 
-      	IDetector_sptr inputDet;
-      	bool inputIsMasked(false);
-      	try
-      	{
-      	  inputDet = inputWS->getDetector(i);
-      	  if( inputDet->isMasked() )
-      	  {
-      	    inputIsMasked = true;
-      	  }
-      	}
-      	catch(Kernel::Exception::NotFoundError &)
-      	{
-      	  inputIsMasked = false;
-      	}
+        IDetector_const_sptr inputDet;
+        bool inputIsMasked(false);
+        try
+        {
+          inputDet = inputWS->getDetector(i);
+          if( inputDet->isMasked() )
+          {
+            inputIsMasked = true;
+          }
+        }
+        catch(Kernel::Exception::NotFoundError &)
+        {
+          inputIsMasked = false;
+        }
 
-      	if( inputIsMasked )
-      	{
-      	  outSpec->dataY()[0] = 0.0;
-      	  outSpec->dataE()[0] = 0.0;
-      	}
-      	else
-      	{
-      	  outSpec->dataY()[0] = 1.0;
-      	  outSpec->dataE()[0] = 1.0;
-      	}
-      	prog.report();
+        if( inputIsMasked )
+        {
+          outSpec->dataY()[0] = 0.0;
+          outSpec->dataE()[0] = 0.0;
+        }
+        else
+        {
+          outSpec->dataY()[0] = 1.0;
+          outSpec->dataE()[0] = 1.0;
+        }
+        prog.report();
 
-      	PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
 

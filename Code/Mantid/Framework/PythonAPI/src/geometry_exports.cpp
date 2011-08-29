@@ -146,7 +146,7 @@ namespace Mantid
       .def("getSample", &Geometry::Instrument::getSample)
       .def("getSource", &Geometry::Instrument::getSource)
       .def("getComponentByName", (boost::shared_ptr<Geometry::IComponent> (Geometry::Instrument::*)(const std::string&))&Geometry::Instrument::getComponentByName)
-      .def("getDetector", (Geometry::IDetector_sptr (Geometry::Instrument::*)(const detid_t&)const)&Geometry::Instrument::getDetector)
+      .def("getDetector", (Geometry::IDetector_const_sptr (Geometry::Instrument::*)(const detid_t&)const)&Geometry::Instrument::getDetector)
       ;
   }
 

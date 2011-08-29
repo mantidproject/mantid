@@ -168,8 +168,8 @@ public:
     // mask the detector
     Geometry::ParameterMap* m_Pmap = &(m_2DWS->instrumentParameters());    
     boost::shared_ptr<Instrument> instru = m_2DWS->getBaseInstrument();
-    Geometry::Detector* toMask =
-      dynamic_cast<Geometry::Detector*>( instru->getDetector(THEMASKED).get() );
+    const Geometry::Detector* toMask =
+      dynamic_cast<const Geometry::Detector*>( instru->getDetector(THEMASKED).get() );
     TS_ASSERT(toMask)
     m_Pmap->addBool(toMask, "masked", true);
   }
