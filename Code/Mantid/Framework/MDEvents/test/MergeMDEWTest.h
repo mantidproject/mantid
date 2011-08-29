@@ -85,6 +85,14 @@ public:
     {
       TS_ASSERT( ws->isFileBacked() );
       TS_ASSERT( Poco::File(actualOutputFilename).exists());
+      // Remove the file
+      Poco::File(actualOutputFilename).remove();
+    }
+
+    // Cleanup generated input files
+    for (size_t i=0; i<filenames.size(); i++)
+    {
+        Poco::File(filenames[i]).remove();
     }
 
     // Remove workspace from the data service.
