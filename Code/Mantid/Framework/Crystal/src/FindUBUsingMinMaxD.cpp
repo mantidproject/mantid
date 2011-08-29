@@ -34,14 +34,37 @@ namespace Crystal
   {
   }
   
-
   //--------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
   void FindUBUsingMinMaxD::initDocs()
   {
-    this->setWikiSummary("Calculate the UB matrix from a peaks workspace, given estimates of the min and max real space unit cell edge lengths.");
-    this->setOptionalMessage("Calculate the UB matrix from a peaks workspace, given min(a,b,c) and max(a,b,c).");
-    this->setWikiDescription("Given a set of peaks, and given a range of possible a,b,c values, this algorithm will attempt to find a UB matrix, that fits the data.  The algorithm searches over a large range of possible directions and unit cell edge lengths for directions and lengths that match plane normals and plane spacings in reciprocal space.  It then chooses sets of three such directions and lengths to form possible UB matrices and after using a least squares method to optimize these possible UB matrices it chooses the best such UB.  If the specified peaks are accurate and belong to a single crystal, this method should produce some UB matrix that indexes the peaks.  However, other software will usually be needed to adjust this UB to match a desired conventional cell");
+    std::string summary("Calculate the UB matrix from a peaks workspace, ");
+    summary += "given estimates of the min and max real space unit cell ";
+    summary += "edge lengths.";
+    this->setWikiSummary( summary );
+
+    std::string message("Calculate the UB matrix from a peaks workspace, ");
+    message += "given min(a,b,c) and max(a,b,c).";
+    this->setOptionalMessage( message );
+
+    std::string description("Given a set of peaks, and given a range of ");
+    description += "possible a,b,c values, this algorithm will attempt to ";
+    description += "find a UB matrix, that fits the data.  The algorithm ";
+    description += "searches over a range of possible directions and unit ";
+    description += "cell lengths for directions and lengths that match plane ";
+    description += "normals and plane spacings in reciprocal space.  It ";
+    description += "then chooses three of these vectors with the shortest ";
+    description += "lengths that are linearly independent and that are ";
+    description += "separated by at least a minimum angle.  The minimum angle ";
+    description += "is calculated from the specified min and max d values.  ";
+    description += "A UB matrix is formed using these three vectors ";
+    description += "and the resulting UB matrix is optimized using ";
+    description += "a least squares method. If the specified peaks are ";
+    description += "accurate and belong to a single crystal, this method ";
+    description += "should produce some UB matrix that indexes the peaks. ";
+    description += "However, other software will usually be needed to adjust ";
+    description += "this UB to match a desired conventional cell.";
+    this->setWikiDescription( description );
   }
 
   //--------------------------------------------------------------------------
@@ -85,7 +108,7 @@ namespace Crystal
     int    num_initial = this->getProperty("num_initial");
     double tolerance   = this->getProperty("tolerance");
                                           
-    int    base_index         = -1;        // these "could" be properties if need be
+    int    base_index         = -1;   // these "could" be properties if need be
     double degrees_per_step   =  1;
 
     PeaksWorkspace_sptr ws;

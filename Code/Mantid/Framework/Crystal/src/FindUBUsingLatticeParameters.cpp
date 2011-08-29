@@ -33,15 +33,27 @@ namespace Crystal
   FindUBUsingLatticeParameters::~FindUBUsingLatticeParameters()
   {
   }
-  
 
   //--------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
   void FindUBUsingLatticeParameters::initDocs()
   {
-    this->setWikiSummary("Calculate the UB matrix from a peaks workspace, given lattice parameters.");
-    this->setOptionalMessage("Calculate the UB matrix from a peaks workspace, given lattice parameters.");
-    this->setWikiDescription("Given a set of peaks, and given lattice parameters (<math>a,b,c,alpha,beta,gamma</math>), this algorithm will find the UB matrix, that best fits the data.  The algorithm searches over a large range of possible orientations for the orientation for which the rotated B matrix best fits the data.  It then uses a least squares approach to optimize the complete UB matrix.");
+    std::string summary("Calculate the UB matrix from a peaks workspace, ");
+    summary += "given lattice parameters.";
+    this->setWikiSummary( summary );
+
+    std::string message("Calculate the UB matrix from a peaks workspace, ");
+    message += "given lattice parameters.";
+    this->setOptionalMessage( message );
+
+    std::string description("Given a set of peaks, and given lattice ");
+    description += "parameters (<math>a,b,c,alpha,beta,gamma</math>), ";
+    description += "this algorithm will find the UB matrix, that best fits ";
+    description += "the data.  The algorithm searches over a large range ";
+    description += "of possible orientations for the orientation for which ";
+    description += "the rotated B matrix best fits the data.  It then uses a ";
+    description += "least squares approach to optimize the complete UB matrix.";
+    this->setWikiDescription( description );
   }
 
   //--------------------------------------------------------------------------
@@ -103,7 +115,7 @@ namespace Crystal
     int    num_initial = this->getProperty("num_initial");
     double tolerance   = this->getProperty("tolerance");
                                           
-    int    base_index         = -1;        // these "could" be properties if need be
+    int    base_index         = -1;   // these "could" be properties if need be
     double degrees_per_step   = 1.5;
 
     PeaksWorkspace_sptr ws;

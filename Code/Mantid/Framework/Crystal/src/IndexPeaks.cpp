@@ -32,15 +32,23 @@ namespace Crystal
   IndexPeaks::~IndexPeaks()
   {
   }
-  
 
   //--------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
   void IndexPeaks::initDocs()
   {
-    this->setWikiSummary("Index the peaks in the PeaksWorkspace using the UB stored with the sample.");
-    this->setOptionalMessage("Index the peaks using the UB from the sample");
-    this->setWikiDescription("Given a PeaksWorkspace with a UB matrix stored with the samp, this algorithm will use UB inverse to index the peaks.  Any peak with any Miller index more than the specified tolerance away from an integer will have its (h,k,l) set to (0,0,0).");
+    std::string summary("Index the peaks in the PeaksWorkspace using the UB ");
+    summary += "stored with the sample.";
+    this->setWikiSummary( summary );
+
+    this->setOptionalMessage("Index the peaks using the UB from the sample.");
+
+    std::string description("Given a PeaksWorkspace with a UB matrix stored ");
+    description += "with the sample, this algorithm will use UB inverse to ";
+    description += "index the peaks.  Any peak with any Miller index more ";
+    description += "than the specified tolerance away from an integer will ";
+    description += "have its (h,k,l) set to (0,0,0).";
+    this->setWikiDescription( description );
   }
 
   //--------------------------------------------------------------------------
