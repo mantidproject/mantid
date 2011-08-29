@@ -160,17 +160,19 @@ void MdViewerWidget::setParaViewComponentsForView()
 
 void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
 {
-  if (this->originSource)
+  UNUSED_ARG(source);
+  if (this->currentView->origSource)
   {
-    pqApplicationCore::instance()->getObjectBuilder()->destroy(this->originSource);
+    pqApplicationCore::instance()->getObjectBuilder()->destroy(this->currentView->origSource);
   }
-  this->originSource = source;
+  //this->originSource = source;
 
   this->currentView->render();
   this->ui.proxyTabWidget->getObjectInspector()->accept();
 
-  const unsigned int val = vtkSMPropertyHelper(this->originSource->getProxy(),
-                                               "InputGeometryXML", true).GetNumberOfElements();
+  const unsigned int val = vtkSMPropertyHelper(\
+        this->currentView->origSource->getProxy(),
+        "InputGeometryXML", true).GetNumberOfElements();
   if (val > 0)
   {
     emit this->enableMultiSliceViewButton();
