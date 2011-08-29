@@ -171,14 +171,14 @@ void UnwrapSNS::exec()
       pivot++; // one-off difference between x and y
 
       // fix the counts using the pivot point
-      const MantidVec& yIn = m_inputWS->readY(workspaceIndex);
+      MantidVec yIn = m_inputWS->readY(workspaceIndex);
       MantidVec& yOut = outputWS->dataY(workspaceIndex);
       yOut.clear();
       yOut.insert(yOut.begin(), yIn.begin() + pivot, yIn.end());
       yOut.insert(yOut.end(), yIn.begin(), yIn.begin() + pivot);
 
       // fix the uncertainties using the pivot point
-      const MantidVec& eIn = m_inputWS->readE(workspaceIndex);
+      MantidVec eIn = m_inputWS->readE(workspaceIndex);
       MantidVec& eOut = outputWS->dataE(workspaceIndex);
       eOut.clear();
       eOut.insert(eOut.begin(), eIn.begin() + pivot, eIn.end());
