@@ -20,11 +20,28 @@ namespace Kernel
     IS_NOT_EQUAL_TO
   };
 
-  /** Validator for a property that sets it to enabled (in the GUI)
-   * when the value of another property is:
-   *  - its default (or not)
-   *  - equal to a string (or not)
-    
+  /** IPropertySettings for a property that sets it to enabled (in the GUI)
+     when the value of another property is:
+      - its default (or not)
+      - equal to a string (or not)
+
+      Usage:
+
+        - In an algorithm's init() method, after a call to create a property:
+
+        declareProperty("PropA", 123);
+
+        - Add a call like this:
+
+        setPropertySettings("PropA", new EnabledWhenProperty(this, "OtherProperty", IS_EQUAL_TO, "2000");
+
+        - This will make the property "PropA" show as enabled when "OtherProperty"'s value is equal to "2000". Similarly, you can use:
+
+        setPropertySettings("PropA", new VisibleWhenProperty(this, "OtherProperty", IS_NOT_DEFAULT);
+
+        - This will make the property "PropA" show as visible when "OtherProperty" is NOT the default value for it.
+
+
     @author Janik Zikovsky
     @date 2011-08-25
 

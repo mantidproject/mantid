@@ -250,7 +250,6 @@ void GenericDialog::initLayout()
 
     //Each property is on its own row
     int row = 0;
-    int oldRow = 0;
 
     for(std::vector<Property*>::const_iterator pIter = prop_list.begin();
       pIter != prop_list.end(); ++pIter)
@@ -262,23 +261,56 @@ void GenericDialog::initLayout()
       if (prop->getGroup() != group)
       {
         group = prop->getGroup();
-        // Make a separator line
-        QFrame * line = new QFrame;
-        line->setObjectName(QString::fromUtf8("line"));
-        line->setGeometry(QRect(320, 150, 118, 3));
-        line->setFrameShape(QFrame::HLine);
-        line->setFrameShadow(QFrame::Sunken);
-        m_currentGrid->addWidget(line, row, 0, 1, 4);
-        row++;
-        if (group != "")
+
+        if (false)
         {
-          QLabel * groupLabel = new QLabel(QString::fromStdString(group));
-          groupLabel->setAlignment(Qt::AlignCenter);
-          QFont font = groupLabel->font();
-          font.setBold(true);
-          groupLabel->setFont(font);
-          m_currentGrid->addWidget(groupLabel, row, 0, 1, 4);
+          // --------- Draw boxes using separator lines and labels ----------------
+          // Make a separator line
+          QFrame * line = new QFrame;
+          line->setObjectName(QString::fromUtf8("line"));
+          line->setGeometry(QRect(320, 150, 118, 3));
+          line->setFrameShape(QFrame::HLine);
+          line->setFrameShadow(QFrame::Sunken);
+          m_currentGrid->addWidget(line, row, 0, 1, 4);
           row++;
+          if (group != "")
+          {
+            QLabel * groupLabel = new QLabel(QString::fromStdString(group));
+            groupLabel->setAlignment(Qt::AlignCenter);
+            QFont font = groupLabel->font();
+            font.setBold(true);
+            groupLabel->setFont(font);
+            m_currentGrid->addWidget(groupLabel, row, 0, 1, 4);
+            row++;
+          }
+        }
+        else
+        {
+          if (group == "")
+          {
+            // Return to the original grid
+            m_currentGrid = m_inputGrid;
+          }
+          else
+          {
+            // Make a groupbox with a border and a light background
+            QGroupBox * grpBox = new QGroupBox(QString::fromStdString(group) );
+            grpBox->setAutoFillBackground(true);
+            grpBox->setStyleSheet(
+                "QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 1.8ex; }"
+                "QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px;  } ");
+            QPalette pal = grpBox->palette();
+            pal.setColor(grpBox->backgroundRole(), pal.alternateBase().color());
+            grpBox->setPalette(pal);
+
+            // Put the frame in the main grid
+            m_inputGrid->addWidget(grpBox, row, 0, 1, 4);
+
+            // Make a layout in the grp box
+            m_currentGrid = new QGridLayout;
+            grpBox->setLayout(m_currentGrid);
+            row++;
+          }
         }
 
 
@@ -287,12 +319,7 @@ void GenericDialog::initLayout()
 //          grpBox->setFlat(false);
 //          grpBox->setBackgroundColor(QColor("red"));
 //          m_inputGrid->addWidget(grpBox, row, 0, 0, 4);
-//
-//          // Make a layout in the grp box
-//          m_currentGrid = new QGridLayout;
-//          grpBox->setLayout(m_currentGrid);
-//          oldRow = row;
-//          row = 0;
+
       }
 
       // Only accept input for output properties or workspace properties

@@ -255,6 +255,13 @@ void AlgorithmDialog::hideOrDisableProperties()
       bool enabled = isWidgetEnabled(pName);
       bool visible = p->isVisible();
 
+      // Show/hide the validator label (that red star)
+      QString error = "";
+      if (m_errors.contains(pName)) error = m_errors[pName];
+      // Always show controls that are in error
+      if (error.length() != 0)
+        visible = true;
+
       // Go through all the associated widgets with this property
       QList<QWidget*> widgets = m_tied_all_widgets[pName];
       for (int i=0; i<widgets.size(); i++)
@@ -264,9 +271,6 @@ void AlgorithmDialog::hideOrDisableProperties()
         widget->setVisible( visible );
       }
 
-      // Show/hide the validator label (that red star)
-      QString error = "";
-      if (m_errors.contains(pName)) error = m_errors[pName];
       if (visible)
       {
         QLabel *validator = getValidatorMarker(pName);
