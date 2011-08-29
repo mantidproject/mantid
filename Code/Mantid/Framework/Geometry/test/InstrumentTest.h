@@ -126,7 +126,7 @@ public:
     detIDs[2] = 11;
 
     IDetector_const_sptr det;
-    TS_ASSERT_THROWS_NOTHING(det = instrument.getDetector(detIDs));
+    TS_ASSERT_THROWS_NOTHING(det = instrument.getDetectorG(detIDs));
     boost::shared_ptr<const DetectorGroup> detGroup = boost::dynamic_pointer_cast<const DetectorGroup>(det);
     TS_ASSERT(detGroup);
     

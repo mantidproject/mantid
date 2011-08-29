@@ -143,10 +143,10 @@ namespace Mantid
     //Instrument class
     class_< Geometry::Instrument, boost::python::bases<Geometry::CompAssembly>,
       boost::noncopyable>("Instrument", no_init)
-      .def("getSample", &Geometry::Instrument::getSample)
-      .def("getSource", &Geometry::Instrument::getSource)
+      .def("getSample", (boost::shared_ptr<Geometry::IObjComponent> (Geometry::Instrument::*)())&Geometry::Instrument::getSample)
+      .def("getSource", (boost::shared_ptr<Geometry::IObjComponent> (Geometry::Instrument::*)())&Geometry::Instrument::getSource)
       .def("getComponentByName", (boost::shared_ptr<Geometry::IComponent> (Geometry::Instrument::*)(const std::string&))&Geometry::Instrument::getComponentByName)
-      .def("getDetector", (Geometry::IDetector_const_sptr (Geometry::Instrument::*)(const detid_t&)const)&Geometry::Instrument::getDetector)
+      .def("getDetector", (boost::shared_ptr<Geometry::IDetector> (Geometry::Instrument::*)(const detid_t&)const)&Geometry::Instrument::getDetector)
       ;
   }
 

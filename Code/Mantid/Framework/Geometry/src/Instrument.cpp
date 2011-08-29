@@ -383,7 +383,7 @@ namespace Mantid
      *  @returns A pointer to the detector object
      *  @throw   NotFoundError If no detector is found for the detector ID given
      */
-    IDetector_const_sptr Instrument::getDetector(const std::vector<detid_t> &det_ids) const
+    IDetector_const_sptr Instrument::getDetectorG(const std::vector<detid_t> &det_ids) const
     {
       const size_t ndets(det_ids.size());
       if( ndets == 1)

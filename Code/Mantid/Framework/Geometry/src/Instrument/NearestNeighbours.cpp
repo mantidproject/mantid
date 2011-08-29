@@ -234,7 +234,7 @@ namespace Mantid
         if( spectrumNo != lastSpectrum )
         {
           std::vector<int> detIDs = spectraMap.getDetectors(spectrumNo);
-          IDetector_const_sptr det = instrument->getDetector(detIDs);
+          IDetector_const_sptr det = instrument->getDetectorG(detIDs);
           if( !det->isMonitor() ) 
           {
             spectra.insert(std::make_pair(spectrumNo, det));
