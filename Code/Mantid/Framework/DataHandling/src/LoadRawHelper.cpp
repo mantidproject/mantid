@@ -448,18 +448,12 @@ namespace Mantid
       {
         std::vector<specid_t> specList;
 
-        std::cout << Strings::join(m_monitordetectorList.begin(), m_monitordetectorList.end(), ",") << "(detectors) " << std::endl;
-
         //get the monitor spectrum list from SpectraDetectorMap
         localWorkspace->getSpectraFromDetectorIDs(m_monitordetectorList, specList);
-        std::cout << specList.size() << " entries (new way)\n";
-        std::cout << Strings::join(specList.begin(), specList.end(), ",") << std::endl;
 
         // Old way to get the spectra # for these detectors
         const Geometry::ISpectraDetectorMap& specdetMap = localWorkspace->spectraMap();
         specList = specdetMap.getSpectra(m_monitordetectorList);
-        std::cout << specList.size() << " entries (old way)\n";
-        std::cout << Strings::join(specList.begin(), specList.end(), ",") << std::endl;
 
         // remove duplicates by calling  sort & unique algorithms
         sort(specList.begin(), specList.end(), std::less<int>());

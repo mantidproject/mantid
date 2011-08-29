@@ -57,6 +57,8 @@ namespace DataHandling
    * */
   void LoadCalFile::getInstrument3WaysInit(Algorithm * alg)
   {
+    std::string grpName("Specify the Instrument");
+
     alg->declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, true),
         "Optional: An input workspace with the instrument we want to use.");
 
@@ -65,6 +67,11 @@ namespace DataHandling
 
     alg->declareProperty(new FileProperty("InstrumentFilename", "", FileProperty::OptionalLoad, ".xml"),
         "Optional: Path to the instrument definition file on which to base the GroupingWorkspace.");
+
+    alg->setPropertyGroup("InputWorkspace", grpName);
+    alg->setPropertyGroup("InstrumentName", grpName);
+    alg->setPropertyGroup("InstrumentFilename", grpName);
+
   }
 
 

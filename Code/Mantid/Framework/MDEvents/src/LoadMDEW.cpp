@@ -10,6 +10,7 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include <vector>
 #include "MantidKernel/Memory.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -59,15 +60,17 @@ namespace Mantid
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The name of the Nexus file to load, as a full or relative path");
 
+      declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),
+        "Load Metadata without events.");
+
       declareProperty(new PropertyWithValue<bool>("FileBackEnd", false),
         "Set to true to load the data only on demand.");
+      setPropertySettings("FileBackEnd", new EnabledWhenProperty(this, "MetadataOnly", IS_EQUAL_TO, "0") );
 
       declareProperty(new PropertyWithValue<double>("Memory", -1),
         "For FileBackEnd only: the amount of memory (in MB) to allocate to the in-memory cache.\n"
         "If not specified, a default of 40% of free physical memory is used.");
-
-      declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),
-        "Load Metadata without events.");
+      setPropertySettings("Memory", new EnabledWhenProperty(this, "FileBackEnd", IS_EQUAL_TO, "1") );
 
       declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output), "Name of the output MDEventWorkspace.");
     }

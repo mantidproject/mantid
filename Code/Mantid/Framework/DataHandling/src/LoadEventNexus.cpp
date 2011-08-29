@@ -19,6 +19,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include "MantidKernel/VisibleWhenProperty.h"
 
 using std::endl;
 using std::map;
@@ -650,6 +651,12 @@ void LoadEventNexus::init()
       new PropertyWithValue<double>("FilterByTime_Stop", EMPTY_DBL(), Direction::Input),
     "Optional: To only include events before the provided stop time, in seconds (relative to the start of the run).");
 
+  std::string grp1 = "Filter Events";
+  setPropertyGroup("FilterByTof_Min", grp1);
+  setPropertyGroup("FilterByTof_Max", grp1);
+  setPropertyGroup("FilterByTime_Start", grp1);
+  setPropertyGroup("FilterByTime_Stop", grp1);
+
   declareProperty(
       new PropertyWithValue<string>("BankName", "", Direction::Input),
     "Optional: To only include events from one bank. Any bank whose name does not match the given string will have no events.");
@@ -658,10 +665,11 @@ void LoadEventNexus::init()
       new PropertyWithValue<bool>("SingleBankPixelsOnly", true, Direction::Input),
     "Optional: Only applies if you specified a single bank to load with BankName.\n"
     "Only pixels in the specified bank will be created if true; all of the instrument's pixels will be created otherwise.");
+  setPropertySettings("SingleBankPixelsOnly", new VisibleWhenProperty(this, "BankName", IS_NOT_DEFAULT) );
 
-  declareProperty(
-      new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
-      "Load the monitors from the file (optional, default False).");
+  std::string grp2 = "Loading a Single Bank";
+  setPropertyGroup("BankName", grp2);
+  setPropertyGroup("SingleBankPixelsOnly", grp2);
 
   declareProperty(
       new PropertyWithValue<bool>("Precount", false, Direction::Input),
@@ -672,9 +680,21 @@ void LoadEventNexus::init()
       new PropertyWithValue<double>("CompressTolerance", -1.0, Direction::Input),
       "Run CompressEvents while loading (optional, leave blank or negative to not do). \n"
       "This specified the tolerance to use (in microseconds) when compressing.");
+  std::string grp3 = "Reduce Memory Use";
+  setPropertyGroup("Precount", grp3);
+  setPropertyGroup("CompressTolerance", grp3);
+
+  declareProperty(
+      new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
+      "Load the monitors from the file (optional, default False).");
 
   declareProperty(new PropertyWithValue<bool>("MonitorsAsEvents", false, Direction::Input),
       "If present, load the monitors as events.\nWARNING: WILL SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). \n");
+  setPropertySettings("MonitorsAsEvents", new VisibleWhenProperty(this, "LoadMonitors", IS_EQUAL_TO, "1") );
+  std::string grp4 = "Monitors";
+  setPropertyGroup("LoadMonitors", grp4);
+  setPropertyGroup("MonitorsAsEvents", grp4);
+
 }
 
 
