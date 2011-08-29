@@ -29,6 +29,8 @@ namespace MDEvents
   public:
     CoordTransform(const size_t inD, const size_t outD);
     virtual ~CoordTransform();
+
+    /// Pure abstract methods to be implemented
     virtual std::string toXMLString() const = 0;
     virtual void apply(const coord_t * inputVector, coord_t * outVector) const = 0;
 

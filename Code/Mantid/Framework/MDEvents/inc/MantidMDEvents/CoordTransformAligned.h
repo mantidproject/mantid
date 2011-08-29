@@ -14,6 +14,12 @@ namespace MDEvents
   /// Unique type declaration for which dimensions are used in the input workspace
   DECLARE_VECTOR_PARAMETER(DimensionsToBinFromParam, size_t);
 
+  /// Unique type declaration for the offset of coordinates
+  DECLARE_VECTOR_PARAMETER(OriginOffsetParam, coord_t);
+
+  /// Unique type declaration for the step size in transformation
+  DECLARE_VECTOR_PARAMETER(ScalingParam, coord_t);
+
   /** A restricted version of CoordTransform which transforms
     from one set of dimensions to another, allowing:
 
@@ -51,11 +57,19 @@ namespace MDEvents
   {
   public:
     CoordTransformAligned(const size_t inD, const size_t outD, const size_t * dimensionToBinFrom,
-        const coord_t * min, const coord_t * step);
+        const coord_t * origin, const coord_t * scaling);
     virtual ~CoordTransformAligned();
     
-  protected:
+    std::string toXMLString() const;
+    void apply(const coord_t * inputVector, coord_t * outVector) const;
 
+  protected:
+    /// For each dimension in the output, index in the input workspace of which dimension it is
+    size_t * m_dimensionToBinFrom;
+    /// Offset (minimum) position in each of the output dimensions, sized [outD]
+    coord_t * m_origin;
+    /// Scaling from the input to the output dimension, sized [outD]
+    coord_t * m_scaling;
 
   };
 
