@@ -28,6 +28,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              Description="Sum detector pixels in X direction.  Must be a factor of X total pixels.  Default is 1.")
         self.declareProperty("YPixelSum", 1,
                              Description="Sum detector pixels in Y direction.  Must be a factor of Y total pixels.  Default is 1.")
+        self.declareProperty("MaxOffset", 1.0,
+                             Description="Maximum absolute value of offsets; default is 1")
         self.declareProperty("Peak1", 0.0,
                              Description="d-space position of reference peak.")
         self.declareProperty("Peak2", 0.0,
@@ -198,7 +200,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             WorkspaceIndexMin=0, WorkspaceIndexMax=self._lastpixel, XMin=self._peakmin, XMax=self._peakmax)
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
         GetDetectorOffsets(InputWorkspace=str(wksp)+"cc", OutputWorkspace=str(wksp)+"offset", Step=abs(self._binning[1]),
-            DReference=self._peakpos, XMin=-self._ccnumber, XMax=self._ccnumber)
+            DReference=self._peakpos, XMin=-self._ccnumber, XMax=self._ccnumber, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask",)
         mtd.deleteWorkspace(str(wksp)+"cc")
         mtd.releaseFreeMemory()
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._peakmin2)+","+str(abs(self._binning[1]))+","+str(self._peakmax2))
@@ -216,7 +218,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 WorkspaceIndexMin=self._lastpixel+1, WorkspaceIndexMax=wksp.getNumberHistograms()-1, XMin=self._peakmin2, XMax=self._peakmax2)
             # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
             GetDetectorOffsets(InputWorkspace=str(wksp)+"cc2", OutputWorkspace=str(wksp)+"offset2", Step=abs(self._binning[1]),
-                DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber)
+                DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask",)
             Plus(LHSWorkspace=str(wksp)+"offset", RHSWorkspace=str(wksp)+"offset2",OutputWorkspace=str(wksp)+"offset")
             mtd.deleteWorkspace(str(wksp)+"cc2")
             mtd.deleteWorkspace(str(wksp)+"offset2")
@@ -229,7 +231,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             SaveDspacemap(InputWorkspace=str(wksp)+"offset",
                 DspacemapFile=self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat"))
         if "calibration" in self._outTypes:
-            SaveCalFile(OffsetsWorkspace=str(wksp)+"offset",GroupingWorkspace=str(wksp)+"group",Filename=calib)
+            SaveCalFile(OffsetsWorkspace=str(wksp)+"offset",GroupingWorkspace=str(wksp)+"group",MaskWorkspace=str(wksp)+"mask",Filename=calib)
         return wksp
 
     def _focus(self, wksp, calib, filterLogs=None):
@@ -270,6 +272,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self._lastpixel2 = (self.getProperty("DetectorsPeak1")+self.getProperty("DetectorsPeak2"))
         peakhalfwidth = self.getProperty("PeakHalfWidth")
         self._ccnumber = self.getProperty("CrossCorrelationPoints")
+        self._maxoffset = self.getProperty("MaxOffset")
         self._peakmin = self._peakpos-peakhalfwidth
         self._peakmax = self._peakpos+peakhalfwidth
         self._peakmin2 = self._peakpos2-peakhalfwidth

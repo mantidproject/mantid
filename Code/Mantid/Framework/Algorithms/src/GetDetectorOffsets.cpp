@@ -66,9 +66,12 @@ namespace Mantid
           "Optional: The name of the output CalFile to save the generated OffsetsWorkspace." );
       declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace","",Direction::Output),
           "An output workspace containing the offsets.");
+      declareProperty(new WorkspaceProperty<>("MaskWorkspace","Mask",Direction::Output),
+          "An output workspace containing the mask.");
       // Only keep peaks
       std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
       declareProperty("PeakFunction", "Gaussian", new ListValidator(peakNames));
+      declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
     }
 
     //-----------------------------------------------------------------------------------------
@@ -81,6 +84,7 @@ namespace Mantid
       inputW=getProperty("InputWorkspace");
       Xmin=getProperty("XMin");
       Xmax=getProperty("XMax");
+      maxOffset=getProperty("MaxOffset");
       if (Xmin>=Xmax)
         throw std::runtime_error("Must specify Xmin<Xmax");
       dreference=getProperty("DReference");
@@ -88,6 +92,8 @@ namespace Mantid
       int nspec=static_cast<int>(inputW->getNumberHistograms());
       // Create the output OffsetsWorkspace
       OffsetsWorkspace_sptr outputW(new OffsetsWorkspace(inputW->getInstrument()));
+      // Create the output MaskWorkspace
+      MatrixWorkspace_sptr maskWS(new SpecialWorkspace2D(inputW->getInstrument()));
 
       // Fit all the spectra with a gaussian
       Progress prog(this, 0, 1.0, nspec);
@@ -97,6 +103,12 @@ namespace Mantid
         PARALLEL_START_INTERUPT_REGION
         // Fit the peak
         double offset=fitSpectra(wi);
+        maskWS->dataY(wi)[0] = 1.0;
+        if (std::abs(offset) > maxOffset)
+        { 
+          offset = 0.0;
+          maskWS->maskWorkspaceIndex(wi);
+        }
 
         // Get the list of detectors in this pixel
         const std::set<detid_t> & dets = inputW->getSpectrum(wi)->getDetectorIDs();
@@ -118,6 +130,7 @@ namespace Mantid
 
       // Return the output
       setProperty("OutputWorkspace",outputW);
+      setProperty("MaskWorkspace",maskWS);
 
       // Also save to .cal file, if requested
       std::string filename=getProperty("GroupingFileName");
@@ -126,6 +139,7 @@ namespace Mantid
         progress(0.9, "Saving .cal file");
         IAlgorithm_sptr childAlg = createSubAlgorithm("SaveCalFile");
         childAlg->setProperty("OffsetsWorkspace", outputW);
+        childAlg->setProperty("MaskWorkspace", maskWS);
         childAlg->setPropertyValue("Filename", filename);
         childAlg->executeAsSubAlg();
       }
@@ -146,8 +160,9 @@ namespace Mantid
       MantidVec::const_iterator it = std::max_element(yValues.begin(), yValues.end());
       const double peakHeight = *it; 
       const double peakLoc = inputW->readX(s)[it - yValues.begin()];
-      // Return offset of 0 if peak of Cross Correlation is nan (Happens when spectra is zero)
-      if ( boost::math::isnan(peakHeight) ) return (0.);
+      // Return if peak of Cross Correlation is nan (Happens when spectra is zero)
+      //Pixel with large offset will be masked
+      if ( boost::math::isnan(peakHeight) ) return (1000.);
 
       IAlgorithm_sptr fit_alg;
       try
@@ -170,13 +185,13 @@ namespace Mantid
       fit_alg->setProperty("Function",fun_str);
       fit_alg->executeAsSubAlg();
       std::string fitStatus = fit_alg->getProperty("OutputStatus");
-      if ( fitStatus.compare("success") ) return (0.);
+      //Pixel with large offset will be masked
+      if ( fitStatus.compare("success") ) return (1000.);
 
       std::vector<double> params = fit_alg->getProperty("Parameters");
       double offset = params[3]; // f1.PeakCentre
       offset = -1.*offset*step/(dreference+offset*step);
       //factor := factor * (1+offset) for d-spacemap conversion so factor cannot be negative
-      if (offset < -1.) offset = -1.;
       return offset;
     }
 

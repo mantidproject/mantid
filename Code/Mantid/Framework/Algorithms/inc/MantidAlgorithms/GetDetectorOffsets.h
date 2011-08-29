@@ -67,6 +67,7 @@ private:
   DataObjects::OffsetsWorkspace_sptr outputW; ///< A pointer to the output workspace
   double Xmin;        ///< The start of the X range for fitting
   double Xmax;        ///< The end of the X range for fitting
+  double maxOffset;   ///< The maximum absolute value of offsets
   double dreference;  ///< The expected peak position in d-spacing (?)
   double step;        ///< The step size
   int64_t nspec;          ///< The number of spectra in the input workspace
