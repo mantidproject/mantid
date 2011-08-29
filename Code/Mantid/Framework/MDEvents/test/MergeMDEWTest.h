@@ -85,6 +85,7 @@ public:
     {
       TS_ASSERT( ws->isFileBacked() );
       TS_ASSERT( Poco::File(actualOutputFilename).exists());
+      ws->getBoxController()->getFile()->close();
       // Remove the file
       Poco::File(actualOutputFilename).remove();
     }

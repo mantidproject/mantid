@@ -612,6 +612,13 @@ namespace MDEvents
     tp.joinAll();
     g_log.information() << overallTime << " to do all the adding." << std::endl;
 
+    // Close any open file handle
+    for (size_t iw=1; iw<this->files.size(); iw++)
+    {
+      ::NeXus::File * file = this->files[iw];
+      if (file) file->close();
+    }
+
     // Finish things up
     this->finalizeOutput<MDE,nd>(outWS);
   }
