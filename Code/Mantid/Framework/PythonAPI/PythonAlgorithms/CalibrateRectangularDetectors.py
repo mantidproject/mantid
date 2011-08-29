@@ -218,10 +218,12 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 WorkspaceIndexMin=self._lastpixel+1, WorkspaceIndexMax=wksp.getNumberHistograms()-1, XMin=self._peakmin2, XMax=self._peakmax2)
             # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
             GetDetectorOffsets(InputWorkspace=str(wksp)+"cc2", OutputWorkspace=str(wksp)+"offset2", Step=abs(self._binning[1]),
-                DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask",)
+                DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask2",)
             Plus(LHSWorkspace=str(wksp)+"offset", RHSWorkspace=str(wksp)+"offset2",OutputWorkspace=str(wksp)+"offset")
+            Plus(LHSWorkspace=str(wksp)+"mask", RHSWorkspace=str(wksp)+"mask2",OutputWorkspace=str(wksp)+"mask")
             mtd.deleteWorkspace(str(wksp)+"cc2")
             mtd.deleteWorkspace(str(wksp)+"offset2")
+            mtd.deleteWorkspace(str(wksp)+"mask2")
             mtd.releaseFreeMemory()
         CreateGroupingWorkspace(InputWorkspace=wksp, GroupNames=groups, OutputWorkspace=str(wksp)+"group")
         lcinst = str(self._instrument)

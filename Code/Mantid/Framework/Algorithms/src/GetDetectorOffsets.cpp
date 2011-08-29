@@ -94,6 +94,8 @@ namespace Mantid
       OffsetsWorkspace_sptr outputW(new OffsetsWorkspace(inputW->getInstrument()));
       // Create the output MaskWorkspace
       MatrixWorkspace_sptr maskWS(new SpecialWorkspace2D(inputW->getInstrument()));
+      //To get the workspace index from the detector ID
+      detid2index_map * pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
       // Fit all the spectra with a gaussian
       Progress prog(this, 0, 1.0, nspec);
@@ -103,11 +105,11 @@ namespace Mantid
         PARALLEL_START_INTERUPT_REGION
         // Fit the peak
         double offset=fitSpectra(wi);
-        maskWS->dataY(wi)[0] = 1.0;
+        double mask=1.0;
         if (std::abs(offset) > maxOffset)
         { 
           offset = 0.0;
-          maskWS->maskWorkspaceIndex(wi);
+          mask = 0.0;
         }
 
         // Get the list of detectors in this pixel
@@ -121,6 +123,8 @@ namespace Mantid
           for (it = dets.begin(); it != dets.end(); it++)
           {
             outputW->setValue(*it, offset);
+            if (mask == 0.) maskWS->maskWorkspaceIndex((*pixel_to_wi)[*it]);
+            else maskWS->dataY((*pixel_to_wi)[*it])[0] = mask;
           }
         }
         prog.report();
