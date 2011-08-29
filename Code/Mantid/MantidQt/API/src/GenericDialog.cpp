@@ -25,6 +25,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include "MantidAPI/MultipleFileProperty.h"
+#include <QGroupBox>
 
 // Dialog stuff is defined here
 using namespace MantidQt::API;
@@ -61,9 +62,9 @@ void GenericDialog::layoutBoolProperty(PropertyWithValue<bool>* prop, int row)
 {
   QString propName = QString::fromStdString(prop->name());
   QCheckBox *checkBox = new QCheckBox(propName);
-  m_inputGrid->addWidget(new QLabel(""), row, 0, 0);
-  m_inputGrid->addWidget(checkBox, row, 1, 0);
-  tie(checkBox, propName, m_inputGrid);
+  m_currentGrid->addWidget(new QLabel(""), row, 0, 0);
+  m_currentGrid->addWidget(checkBox, row, 1, 0);
+  tie(checkBox, propName, m_currentGrid);
 
   // Map the check box state changing to the property name
   QSignalMapper * mapper = new QSignalMapper(this);
@@ -84,7 +85,7 @@ void GenericDialog::layoutOptionsProperty(Property* prop, int row)
   // The name and valid label
   QLabel *nameLbl = new QLabel(propName);
   nameLbl->setToolTip(  QString::fromStdString(prop->documentation()) );
-  m_inputGrid->addWidget(nameLbl, row, 0, 0);
+  m_currentGrid->addWidget(nameLbl, row, 0, 0);
 
   //It is a choice of certain allowed values and can use a combination box
   //Check if this is the row that matches the one that we want to link to the
@@ -95,8 +96,8 @@ void GenericDialog::layoutOptionsProperty(Property* prop, int row)
   for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend; ++vitr)
     optionsBox->addItem(QString::fromStdString(*vitr));
 
-  m_inputGrid->addWidget(optionsBox, row, 1, 0);
-  tie(optionsBox, propName, m_inputGrid, true, nameLbl);
+  m_currentGrid->addWidget(optionsBox, row, 1, 0);
+  tie(optionsBox, propName, m_currentGrid, true, nameLbl);
   bool isWorkspaceProp(dynamic_cast<IWorkspaceProperty*>(prop));
   if( isWorkspaceProp )
     flagInputWS(optionsBox);
@@ -140,7 +141,7 @@ void GenericDialog::layoutTextProperty(Property* prop, int row)
   // The name and valid label
   QLabel *nameLbl = new QLabel(propName);
   nameLbl->setToolTip(  QString::fromStdString(prop->documentation()) );
-  m_inputGrid->addWidget(nameLbl, row, 0, 0);
+  m_currentGrid->addWidget(nameLbl, row, 0, 0);
 
   // The textbox
   QLineEdit *textBox = new QLineEdit;
@@ -163,7 +164,7 @@ void GenericDialog::layoutTextProperty(Property* prop, int row)
       {
         inputWSReplace = this->createReplaceWSButton(textBox);
         if (inputWSReplace)
-          m_inputGrid->addWidget(inputWSReplace, row, 2, 0);
+          m_currentGrid->addWidget(inputWSReplace, row, 2, 0);
       }
     }
     else if( prop->direction() == Direction::Input )
@@ -183,7 +184,7 @@ void GenericDialog::layoutTextProperty(Property* prop, int row)
   {
     //Make a browser button
     browseBtn = new QPushButton(tr("Browse"));
-    m_inputGrid->addWidget(browseBtn, row, 2, 0);
+    m_currentGrid->addWidget(browseBtn, row, 2, 0);
 
     // Map click on the button to link to the browseMultipleClicked(PropName) method
     QSignalMapper * mapper = new QSignalMapper(this);
@@ -207,8 +208,8 @@ void GenericDialog::layoutTextProperty(Property* prop, int row)
  }
 
   //Add the widgets to the grid
-  m_inputGrid->addWidget(textBox, row, 1, 0);
-  tie(textBox, propName, m_inputGrid, true, nameLbl, browseBtn, inputWSReplace);
+  m_currentGrid->addWidget(textBox, row, 1, 0);
+  tie(textBox, propName, m_currentGrid, true, nameLbl, browseBtn, inputWSReplace);
 }
 
 
@@ -243,20 +244,61 @@ void GenericDialog::initLayout()
   {
     //Put the property boxes in a grid
     m_inputGrid = new QGridLayout;
+    m_currentGrid = m_inputGrid;
+
+    std::string group = "";
 
     //Each property is on its own row
-    int row(-1);
+    int row = 0;
+    int oldRow = 0;
+
     for(std::vector<Property*>::const_iterator pIter = prop_list.begin();
       pIter != prop_list.end(); ++pIter)
     {
       Property* prop = *pIter;
       QString propName = QString::fromStdString(prop->name());
 
+      // Are we entering a new group?
+      if (prop->getGroup() != group)
+      {
+        group = prop->getGroup();
+        // Make a separator line
+        QFrame * line = new QFrame;
+        line->setObjectName(QString::fromUtf8("line"));
+        line->setGeometry(QRect(320, 150, 118, 3));
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        m_currentGrid->addWidget(line, row, 0, 1, 4);
+        row++;
+        if (group != "")
+        {
+          QLabel * groupLabel = new QLabel(QString::fromStdString(group));
+          groupLabel->setAlignment(Qt::AlignCenter);
+          QFont font = groupLabel->font();
+          font.setBold(true);
+          groupLabel->setFont(font);
+          m_currentGrid->addWidget(groupLabel, row, 0, 1, 4);
+          row++;
+        }
+
+
+
+//          QGroupBox * grpBox = new QGroupBox(QString::fromStdString(group) );
+//          grpBox->setFlat(false);
+//          grpBox->setBackgroundColor(QColor("red"));
+//          m_inputGrid->addWidget(grpBox, row, 0, 0, 4);
+//
+//          // Make a layout in the grp box
+//          m_currentGrid = new QGridLayout;
+//          grpBox->setLayout(m_currentGrid);
+//          oldRow = row;
+//          row = 0;
+      }
+
       // Only accept input for output properties or workspace properties
       bool isWorkspaceProp(dynamic_cast<IWorkspaceProperty*>(prop));
       if( prop->direction() == Direction::Output && !isWorkspaceProp )
         continue;
-      ++row;
 
       // Look for specific property types
       Mantid::API::FileProperty* fileType = dynamic_cast<Mantid::API::FileProperty*>(prop);
@@ -275,6 +317,8 @@ void GenericDialog::initLayout()
       { //For everything else render a text box
         layoutTextProperty(prop, row);
       }
+
+      ++row;
     } //(end for each property)
 
     // Add the helpful summary message
@@ -283,6 +327,7 @@ void GenericDialog::initLayout()
 
     //The property boxes
     mainLay->addLayout(m_inputGrid);
+
   }
   // Add a stretchy item to allow the properties grid to be top-aligned
   mainLay->addStretch(1);

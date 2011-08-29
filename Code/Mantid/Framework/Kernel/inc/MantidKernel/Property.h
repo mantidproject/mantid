@@ -160,6 +160,15 @@ public:
   virtual  Property& merge( Property * )
   { return *this; }
 
+  /// Set the group this property belongs to
+  void setGroup(const std::string & group)
+  { m_group = group; }
+
+  /// @return the group this property belongs to
+  const std::string & getGroup()
+  { return m_group; }
+
+
 protected:
   /// Constructor
   Property( const std::string& name, const std::type_info& type, const unsigned int direction = Direction::Input);
@@ -183,6 +192,9 @@ private:
 
   /// Property settings (enabled/visible)
   IPropertySettings * m_settings;
+
+  /// Name of the "group" of this property, for grouping in the GUI. Default ""
+  std::string m_group;
 
   /// Private default constructor
   Property();

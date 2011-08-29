@@ -88,6 +88,9 @@ private:
   /// The grid widget containing the input boxes
   QGridLayout *m_inputGrid;
 
+  /// The current grid widget for sub-boxes
+  QGridLayout *m_currentGrid;
+
   /// List of the QSignalMappers for each property
   QHash<QString, QSignalMapper *> m_mappers;
 };

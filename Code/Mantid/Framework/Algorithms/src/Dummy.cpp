@@ -47,10 +47,15 @@ namespace Algorithms
    */
   void Dummy::init()
   {
+    declareProperty("FirstProp", 123);
+
     declareProperty( new FileProperty("File", "", FileProperty::Load));
     declareProperty( new MultipleFileProperty("ManyFiles"));
+    setPropertyGroup("File", "Select Some Files");
+    setPropertyGroup("ManyFiles", "Select Some Files");
 
     declareProperty( new WorkspaceProperty<>("InputWorkspace", "", Direction::Input) );
+    setPropertyGroup("InputWorkspace", "Choose a Workspace");
 
     declareProperty("IntProp1", 123);
     declareProperty("EnabledWhenDefault", 123);
@@ -59,6 +64,8 @@ namespace Algorithms
     declareProperty("BoolProp1", false);
     declareProperty("EnabledWhenNotDefault", 123);
     setPropertySettings("EnabledWhenNotDefault", new EnabledWhenProperty(this, "BoolProp1", IS_NOT_DEFAULT) );
+    setPropertyGroup("BoolProp1", "Some Other Settings");
+    setPropertyGroup("EnabledWhenNotDefault", "Some Other Settings");
 
     // Secret property!
     declareProperty("BoolProp2", false);
@@ -66,6 +73,10 @@ namespace Algorithms
     setPropertySettings("InvisibleProp", new VisibleWhenProperty(this, "BoolProp2", IS_EQUAL_TO, "1"));
     declareProperty( new WorkspaceProperty<>("InvisibleWorkspace", "", Direction::Output) );
     setPropertySettings("InvisibleWorkspace", new VisibleWhenProperty(this, "BoolProp2", IS_EQUAL_TO, "1") );
+
+    setPropertyGroup("BoolProp2", "Some Other Settings");
+    setPropertyGroup("InvisibleProp", "Some Other Settings");
+    setPropertyGroup("InvisibleWorkspace", "Some Other Settings");
 
     std::vector<std::string> propOptions;
     propOptions.push_back("Q (lab frame)");

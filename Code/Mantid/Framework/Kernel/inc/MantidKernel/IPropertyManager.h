@@ -121,7 +121,16 @@ public:
      * @param settings :: IPropertySettings     */
     void setPropertySettings(const std::string &name, IPropertySettings * settings)
     {
-      getPointerToProperty(name)->setSettings(settings);
+      Property * prop = getPointerToProperty(name);
+      if (prop) prop->setSettings(settings);
+    }
+    /** Set the group for a given property
+     * @param name :: property name
+     * @param group :: Name of the group it belongs to     */
+    void setPropertyGroup(const std::string &name, const std::string & group)
+    {
+      Property * prop = getPointerToProperty(name);
+      if (prop) prop->setGroup(group);
     }
 
 
