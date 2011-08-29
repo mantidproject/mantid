@@ -25,19 +25,19 @@ namespace Mantid
    * @author Owen Arnold
    * @date 22/july/2011
    */
-    class DLLExport CoordTransformParser
+    class DLLExport CoordTransformAffineParser
     {
     public:
-      CoordTransformParser();
+      CoordTransformAffineParser();
       virtual CoordTransform* createTransform(Poco::XML::Element* coordTransElement) const;
-      virtual void setSuccessor(CoordTransformParser* other);
-      virtual ~CoordTransformParser();
-      typedef boost::shared_ptr<CoordTransformParser> SuccessorType_sptr;
+      virtual void setSuccessor(CoordTransformAffineParser* other);
+      virtual ~CoordTransformAffineParser();
+      typedef boost::shared_ptr<CoordTransformAffineParser> SuccessorType_sptr;
     protected:
       SuccessorType_sptr m_successor;
     private:
-      CoordTransformParser(const CoordTransformParser&);
-      CoordTransformParser& operator=(const CoordTransformParser&);
+      CoordTransformAffineParser(const CoordTransformAffineParser&);
+      CoordTransformAffineParser& operator=(const CoordTransformAffineParser&);
     };
   }
 }

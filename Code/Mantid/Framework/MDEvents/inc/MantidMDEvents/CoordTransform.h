@@ -17,32 +17,20 @@ namespace MDEvents
   /// Unique SingleValueParaemter Declaration for OutputNDimensions
   DECLARE_SINGLE_VALUE_PARAMETER(OutDimParameter, size_t)
 
-  /** Generic class to transform from M input dimensions to N output dimensions.
-   *
-   * The types of conversions to account for are:
-   * * Simple rotation matrix
-   * * Affine Transformation = linear transform such as a rotation + a translation
-   * * Projection into lower dimensions, for example taking a 2D slice out of 3D data.
+  /** Abstract class for transforming coordinate systems.
+   * This will be subclassed by e.g. CoordTransformAffine to perform
+   * rotations, etc.
    * 
-   * This class could be subclassed in order to handle non-linear transforms (though
-   * making the apply() method virtual would disallow inlining = slowdown).
-   *
    * @author Janik Zikovsky
-   * @date 2011-04-14 10:03:55.944809
+   * @date 2011-04-14
    */
   class DLLExport CoordTransform 
   {
-
-
   public:
     CoordTransform(const size_t inD, const size_t outD);
     virtual ~CoordTransform();
-    virtual std::string toXMLString() const;
-    void addTranslation(const coord_t * translationVector);
-    const Mantid::Kernel::Matrix<coord_t> & getMatrix() const;
-    void setMatrix(const Mantid::Kernel::Matrix<coord_t> & newMatrix);
-
-    virtual void apply(const coord_t * inputVector, coord_t * outVector) const;
+    virtual std::string toXMLString() const = 0;
+    virtual void apply(const coord_t * inputVector, coord_t * outVector) const = 0;
 
   protected:
     /// Input number of dimensions
@@ -50,17 +38,6 @@ namespace MDEvents
 
     /// Output number of dimensions
     size_t outD;
-
-    /** Affine Matrix to perform the transformation. The matrix has inD+1 columns, outD+1 rows.
-     * By using an affine, translations and rotations (or other linear transforms) can be
-     * combined by simply multiplying the matrices.
-     */
-    Mantid::Kernel::Matrix<coord_t> affineMatrix;
-
-    /// Raw pointer to the same underlying matrix as affineMatrix.
-    coord_t ** rawMatrix;
-
-    void copyRawMatrix();
   };
 
 

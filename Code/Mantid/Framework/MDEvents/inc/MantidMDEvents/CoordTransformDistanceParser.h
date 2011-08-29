@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
-#include "MantidMDEvents/CoordTransformParser.h"
+#include "MantidMDEvents/CoordTransformAffineParser.h"
 
 namespace Mantid
 {
@@ -17,7 +17,7 @@ namespace Mantid
    * @author Owen Arnold
    * @date 25/july/2011
    */
-    class DLLExport CoordTransformDistanceParser : public CoordTransformParser
+    class DLLExport CoordTransformDistanceParser : public CoordTransformAffineParser
     {
     public:
       CoordTransformDistanceParser();

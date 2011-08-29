@@ -1,14 +1,14 @@
-#include "MantidMDEvents/CoordTransformParser.h"
-#include "MantidMDEvents/CoordTransform.h"
-#include "MantidMDEvents/AffineMatrixParameterParser.h"
 #include "MantidAPI/SingleValueParameterParser.h"
-
-#include <Poco/DOM/DOMParser.h>
+#include "MantidMDEvents/AffineMatrixParameterParser.h"
+#include "MantidMDEvents/CoordTransform.h"
+#include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidMDEvents/CoordTransformAffineParser.h"
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
@@ -17,7 +17,7 @@ namespace Mantid
   namespace MDEvents
   {
     /// Constructor
-    CoordTransformParser::CoordTransformParser()
+    CoordTransformAffineParser::CoordTransformAffineParser()
     {
     }
 
@@ -27,7 +27,7 @@ namespace Mantid
     @param coordTransElement : xml coordinate transform element
     @return a fully constructed coordinate transform object.
     */
-    CoordTransform* CoordTransformParser::createTransform(Poco::XML::Element* coordTransElement) const
+    CoordTransform * CoordTransformAffineParser::createTransform(Poco::XML::Element* coordTransElement) const
     {
       typedef Mantid::API::SingleValueParameterParser<InDimParameter> InDimParameterParser;
       typedef Mantid::API::SingleValueParameterParser<OutDimParameter> OutDimParameterParser;
@@ -37,12 +37,12 @@ namespace Mantid
         std::string message = "This is not a coordinate transform element: " + coordTransElement->localName(); 
         throw std::invalid_argument(message);
       }
-      if("CoordTransform" != coordTransElement->getChildElement("Type")->innerText())
+      if("CoordTransformAffine" != coordTransElement->getChildElement("Type")->innerText())
       {
         //Delegate
         if(!m_successor)
         {
-          throw std::runtime_error("CoordTransformParser has no successor parser.");
+          throw std::runtime_error("CoordTransformAffineParser has no successor parser.");
         }
         return m_successor->createTransform(coordTransElement);
       }
@@ -66,7 +66,7 @@ namespace Mantid
       AffineMatrixParameter* affineMatrix = affineMatrixDimParser.createParameter(parameter);
 
       //Generate the coordinate transform with the matrix and return.
-      CoordTransform* transform = new CoordTransform(inDim->getValue(), outDim->getValue());
+      CoordTransformAffine* transform = new CoordTransformAffine(inDim->getValue(), outDim->getValue());
       transform->setMatrix(affineMatrix->getAffineMatrix());
       return transform;
     }
@@ -76,13 +76,13 @@ namespace Mantid
     Set the successor parser.
     @param other : another parser to use if this one fails.
     */
-    void CoordTransformParser::setSuccessor(CoordTransformParser* other)
+    void CoordTransformAffineParser::setSuccessor(CoordTransformAffineParser* other)
     {
       m_successor = SuccessorType_sptr(other);
     }
 
     /// Destructor
-    CoordTransformParser::~CoordTransformParser()
+    CoordTransformAffineParser::~CoordTransformAffineParser()
     {
     }
 

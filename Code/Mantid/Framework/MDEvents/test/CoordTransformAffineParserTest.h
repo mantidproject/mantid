@@ -1,7 +1,7 @@
 #ifndef MANTID_MDEVENTS_COORDTRANSFORMPARSERTEST_H_
 #define MANTID_MDEVENTS_COORDTRANSFORMPARSERTEST_H_
 
-#include "MantidMDEvents/CoordTransformParser.h"
+#include "MantidMDEvents/CoordTransformAffineParser.h"
 #include "MantidMDEvents/CoordTransform.h"
 #include <cxxtest/TestSuite.h>
 
@@ -13,18 +13,19 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include "MantidMDEvents/CoordTransformAffine.h"
 
 using namespace Mantid::MDEvents;
 
-class CoordTransformParserTest : public CxxTest::TestSuite
+class CoordTransformAffineParserTest : public CxxTest::TestSuite
 {
 private:
 
-  class MockCoordTransformParser : public CoordTransformParser
+  class MockCoordTransformAffineParser : public CoordTransformAffineParser
   {
     virtual CoordTransform* createTransform(Poco::XML::Element*) const
     {
-      return new CoordTransform(1, 1);
+      return new CoordTransformAffine(1, 1);
     }
   };
 
@@ -33,7 +34,7 @@ public:
   void testSuccessfulParse()
   {
     std::string xmlToParse = std::string("<CoordTransform>") +
-    "<Type>CoordTransform</Type>" +
+    "<Type>CoordTransformAffine</Type>" +
     "<ParameterList>" +
     "<Parameter><Type>InDimParameter</Type><Value>2</Value></Parameter>" + 
     "<Parameter><Type>OutDimParameter</Type><Value>2</Value></Parameter>" + 
@@ -44,8 +45,8 @@ public:
    Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-   CoordTransformParser parser;
-   CoordTransform* transform = parser.createTransform(pRootElem);
+   CoordTransformAffineParser parser;
+   CoordTransformAffine* transform = dynamic_cast<CoordTransformAffine*>(parser.createTransform(pRootElem));
 
    AffineMatrixType product = transform->getMatrix();
 
@@ -75,7 +76,7 @@ public:
    Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-   CoordTransformParser parser;
+   CoordTransformAffineParser parser;
    TSM_ASSERT_THROWS("XML root node must be a coordinate transform", parser.createTransform(pRootElem), std::invalid_argument);
   }
 
@@ -87,7 +88,7 @@ public:
    Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-   CoordTransformParser parser;
+   CoordTransformAffineParser parser;
    TSM_ASSERT_THROWS("Should throw since no successor parser has been set", parser.createTransform(pRootElem), std::runtime_error);
   }
 
@@ -99,8 +100,8 @@ public:
    Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
-   CoordTransformParser parser;
-   parser.setSuccessor(new MockCoordTransformParser);
+   CoordTransformAffineParser parser;
+   parser.setSuccessor(new MockCoordTransformAffineParser);
    CoordTransform* product = parser.createTransform(pRootElem);
    delete product;
   }

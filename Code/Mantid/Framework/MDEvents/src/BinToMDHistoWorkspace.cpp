@@ -13,7 +13,7 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include <boost/algorithm/string.hpp>
-#include "MantidMDEvents/CoordTransformParser.h"
+#include "MantidMDEvents/CoordTransformAffineParser.h"
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
@@ -542,7 +542,7 @@ namespace MDEvents
       Poco::XML::DOMParser pParser;
       Poco::XML::Document* pDoc = pParser.parseString(TransformationXML);
       Poco::XML::Element* pRootElem = pDoc->documentElement();
-      CoordTransformParser parser;
+      CoordTransformAffineParser parser;
       m_transform = parser.createTransform(pRootElem);
     }
 

@@ -13,6 +13,7 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include "MantidMDEvents/CoordTransformAffine.h"
 
 using namespace Mantid::MDEvents;
 
@@ -21,11 +22,11 @@ class CoordTransformDistanceParserTest : public CxxTest::TestSuite
 private:
 
   //Helper type.
-  class MockCoordTransformParser : public CoordTransformParser
+  class MockCoordTransformAffineParser : public CoordTransformAffineParser
   {
     virtual CoordTransform* createTransform(Poco::XML::Element*) const
     {
-      return new CoordTransform(1, 1);
+      return new CoordTransformAffine(1, 1);
     }
   };
 
@@ -90,7 +91,7 @@ public:
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
    CoordTransformDistanceParser parser;
-   parser.setSuccessor(new MockCoordTransformParser);
+   parser.setSuccessor(new MockCoordTransformAffineParser);
    CoordTransform* product = NULL;
    TS_ASSERT_THROWS_NOTHING(product = parser.createTransform(pRootElem));
    delete product;
