@@ -12,6 +12,7 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 
 using Mantid::API::IMDEventWorkspace_sptr;
 
@@ -59,6 +60,9 @@ namespace MDEvents
     void checkBinDimensions();
     void createAlignedTransform();
 
+    template<typename MDE, size_t nd>
+    Mantid::Geometry::MDImplicitFunction * getImplicitFunctionForChunk(typename MDEventWorkspace<MDE, nd>::sptr ws, size_t * chunkMin, size_t * chunkMax);
+
     /// Helper method
     template<typename MDE, size_t nd>
     void do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws);
@@ -87,8 +91,11 @@ namespace MDEvents
     /// Index of the dimension in the MDEW for the dimension in the output.
     std::vector<size_t> dimensionToBinFrom;
 
-    /// Do we perform a coordinate transformation? NULL if no.
+    /// Coordinate transformation to apply
     CoordTransform * m_transform;
+
+    /// Set to true if the cut is aligned with the axes
+    bool m_axisAligned;
 
     /// Number of dimensions in the output (binned) workspace.
     size_t outD;

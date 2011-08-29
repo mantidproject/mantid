@@ -285,6 +285,43 @@ namespace MDEvents
 
 
   //----------------------------------------------------------------------------------------------
+  /** Create an implicit function for picking boxes, based on the indexes in the
+   * output MDHistoWorkspace.
+   * This needs to be in the space of the INPUT MDEventWorkspace
+   *
+   * @param chunkMin :: the minimum index in each dimension to consider "valid" (inclusive)
+   * @param chunkMax :: the maximum index in each dimension to consider "valid" (exclusive)
+   * @return MDImplicitFunction
+   */
+  template<typename MDE, size_t nd>
+  MDImplicitFunction * BinToMDHistoWorkspace::getImplicitFunctionForChunk(typename MDEventWorkspace<MDE, nd>::sptr ws,
+      size_t * chunkMin, size_t * chunkMax)
+  {
+    UNUSED_ARG(ws);
+
+    if (m_axisAligned)
+    {
+      std::vector<coord_t> function_min(nd, -1e50); // default to all space if the dimension is not specified
+      std::vector<coord_t> function_max(nd, +1e50); // default to all space if the dimension is not specified
+      for (size_t bd=0; bd<outD; bd++)
+      {
+        // Dimension in the MDEventWorkspace
+        size_t d = dimensionToBinFrom[bd];
+        function_min[d] = binDimensions[bd]->getX(chunkMin[bd]);
+        function_max[d] = binDimensions[bd]->getX(chunkMax[bd]);
+      }
+      MDBoxImplicitFunction * function = new MDBoxImplicitFunction(function_min, function_max);
+      return function;
+    }
+    else
+    {
+      // General implicit function
+      // TODO: Apply the transform!
+      return new MDImplicitFunction;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Perform binning by iterating through every event and placing them in the output workspace
    *
    * @param ws :: MDEventWorkspace of the given type.
@@ -326,7 +363,7 @@ namespace MDEvents
 
     // Run the chunks in parallel. There is no overlap in the output workspace so it is
     // thread safe to write to it..
-    //PRAGMA_OMP( parallel for schedule(dynamic,1) if (doParallel) )
+    PRAGMA_OMP( parallel for schedule(dynamic,1) if (doParallel) )
     for(int chunk=0; chunk < int(binDimensions[chunkDimension]->getNBins()); chunk += chunkNumBins)
     {
       // Region of interest for this chunk.
@@ -346,23 +383,12 @@ namespace MDEvents
         chunkMax[chunkDimension] = size_t(chunk+chunkNumBins);
 
       // Build an implicit function (it needs to be in the space of the MDEventWorkspace)
-      // TODO: Apply the transform!
-      std::vector<coord_t> function_min(nd, -1e50); // default to all space if the dimension is not specified
-      std::vector<coord_t> function_max(nd, +1e50); // default to all space if the dimension is not specified
-      for (size_t bd=0; bd<outD; bd++)
-      {
-        // Dimension in the MDEventWorkspace
-        size_t d = dimensionToBinFrom[bd];
-        function_min[d] = binDimensions[bd]->getX(chunkMin[bd]);
-        function_max[d] = binDimensions[bd]->getX(chunkMax[bd]);
-      }
-      MDBoxImplicitFunction * function = new MDBoxImplicitFunction(function_min, function_max);
+      MDImplicitFunction * function = this->getImplicitFunctionForChunk<MDE,nd>(ws, chunkMin, chunkMax);
 
       // Use getBoxes() to get an array with a pointer to each box
       std::vector<IMDBox<MDE,nd>*> boxes;
       // Leaf-only; no depth limit; with the implicit function passed to it.
       ws->getBox()->getBoxes(boxes, 1000, true, function);
-
 
       // For progress reporting, the # of boxes
       if (prog)
@@ -601,13 +627,14 @@ namespace MDEvents
       Poco::XML::Element* pRootElem = pDoc->documentElement();
       CoordTransformAffineParser parser;
       m_transform = parser.createTransform(pRootElem);
+      m_axisAligned = false;
     }
     else
     {
       // Make an aligned transform out of the parameters
       this->createAlignedTransform();
+      m_axisAligned = true;
     }
-
 
     prog = new Progress(this, 0, 1.0, 1); // This gets deleted by the thread pool; don't delete it in here.
 
