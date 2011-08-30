@@ -464,6 +464,7 @@ using namespace boost::python;
   {
     //Pointer
     register_ptr_to_python<API::Sample*>();
+    register_ptr_to_python<boost::shared_ptr<API::Sample> >();
 
     //Sample class
     class_< API::Sample, boost::noncopyable >("Sample", no_init)
@@ -472,6 +473,8 @@ using namespace boost::python;
       .def("getThickness", &API::Sample::getThickness)
       .def("getHeight", &API::Sample::getHeight)
       .def("getWidth", &API::Sample::getWidth)
+      .def("__getitem__", &API::Sample::operator[], return_internal_reference<>())
+      .def("size", &API::Sample::size)
      ;
   }
 
