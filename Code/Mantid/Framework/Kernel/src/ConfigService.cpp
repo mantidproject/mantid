@@ -919,16 +919,18 @@ bool ConfigServiceImpl::hasProperty(const std::string& rootName) const
   return m_pConf->hasProperty(rootName) && m_pConf->getString(rootName) != m_removedFlag;
 }
 
-/** Checks to see whether the given file target is an executable one and it exists
+/** Checks to see whether the given file target is an executable one and it exists.
+ * This method will expand environment variables found in the given file path.
  *
- *  @param keyName :: The path to the file you wish to see whether it's an executable.
+ *  @param target :: The path to the file you wish to see whether it's an executable.
  *  @returns Boolean value denoting whether the file is an executable or not.
  */
 bool ConfigServiceImpl::isExecutable(const std::string& target) const
 {    
   try
   {
-    Poco::File tempFile = Poco::File(target);
+    std::string expTarget = Poco::Path::expand(target);
+    Poco::File tempFile = Poco::File(expTarget);
 
     if (tempFile.exists())
     {
