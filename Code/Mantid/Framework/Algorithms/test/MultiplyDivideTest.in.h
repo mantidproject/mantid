@@ -125,7 +125,7 @@ public:
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(nHist,1);
       performTest(work_in1,work_in2, false /*not event*/,
-          DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.0 : 4.0, false, false, inplace /*in place*/);
+          DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.0 : 4.0, false, false, static_cast<bool>(inplace) /*in place*/);
     }
   }
 
@@ -214,7 +214,7 @@ public:
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
       performTest(work_in1,work_in2, false /*not event*/,
-          DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.0 : 4.0, false, false, inplace /*in place*/);
+          DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.0 : 4.0, false, false, static_cast<bool>(inplace) /*in place*/);
     }
   }
 
