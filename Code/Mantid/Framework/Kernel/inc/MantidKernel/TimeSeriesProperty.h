@@ -649,27 +649,33 @@ public:
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_sec, times);
 
+    this->create(times, new_values);
+  }
+
+  /** Clears and creates a TimeSeriesProperty from these parameters:
+    *
+    * @param new_times :: A vector of DateAndTime.
+    * @param new_values :: A vector of values, each corresponding to the time off set in new_time.
+    *                      Vector sizes must match.
+    */
+  void create(const std::vector<DateAndTime> & new_times, const std::vector<TYPE> & new_values)
+  {
+    if (new_times.size() != new_values.size())
+      throw std::invalid_argument("TimeSeriesProperty::create: mismatched size for the time and values vectors.");
+
     m_size = 0;
     m_propertySeries.clear();
+
     // Give a guess as to where it goes
     typename std::multimap<Kernel::DateAndTime, TYPE>::iterator iter = m_propertySeries.begin();
     std::size_t num = new_values.size();
     for (std::size_t i=0; i < num; i++)
     {
       // By providing a guess iterator to the insert method, it speeds inserting up by a good amount.
-      iter = m_propertySeries.insert(iter, typename timeMap::value_type(times[i], new_values[i]));
+      iter = m_propertySeries.insert(iter, typename timeMap::value_type(new_times[i], new_values[i]));
     }
 
-//    // Make a list of the pairs to insert
-//    std::vector<typename std::pair<Kernel::DateAndTime, TYPE> > list;
-//    std::size_t num = new_values.size();
-//    for (std::size_t i=0; i < num; i++)
-//    {
-//      list.push_back( typename std::pair<Kernel::DateAndTime, TYPE>(times[i], new_values[i]) );
-//    }
-//    // Insert the whole list in one go.
-//    m_propertySeries.insert(list.begin(), list.end());
-
+    // reset the size
     m_size = static_cast<int>(m_propertySeries.size());
   }
 
