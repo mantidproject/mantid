@@ -28,6 +28,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              Description="Sum detector pixels in X direction.  Must be a factor of X total pixels.  Default is 1.")
         self.declareProperty("YPixelSum", 1,
                              Description="Sum detector pixels in Y direction.  Must be a factor of Y total pixels.  Default is 1.")
+        self.declareProperty("UnwrapRef", 0.,
+                             Description="Reference total flight path for frame unwrapping. Zero skips the correction")
+        self.declareProperty("LowResRef", 0.,
+                             Description="Reference DIFC for resolution removal. Zero skips the correction")
         self.declareProperty("MaxOffset", 1.0,
                              Description="Maximum absolute value of offsets; default is 1")
         self.declareProperty("Peak1", 0.0,
@@ -44,7 +48,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              Description="Number of points to find peak from cross correlation.  Default is 100")
         self.declareListProperty("Binning", [0.,0.,0.],
                              Description="Min, Step, and Max of d-space bins.  Logarithmic binning is used if Step is negative.")
-        self.declareProperty("DiffractionFocus", False, Description="Diffraction focus by detectors.  Default is False")
+        self.declareProperty("DiffractionFocusWorkspace", False, Description="Diffraction focus by detectors.  Default is False")
         grouping = ["All", "Group", "Column", "bank"]
         self.declareProperty("GroupDetectorsBy", "All", Validator=ListValidator(grouping),
                              Description="Detector groups to use for future focussing: All detectors as one group, Groups (East,West for SNAP), Columns for SNAP, detector banks")
@@ -139,6 +143,13 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     def _calibrate(self, wksp, calib, filterLogs=None):
         if wksp is None:
             return None
+        LRef = self.getProperty("UnwrapRef")
+        DIFCref = self.getProperty("LowResRef")
+        if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
+            if LRef > 0:
+                UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef)
+            if DIFCref > 0:
+                RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref)
         if self._grouping == "All":
             if str(self._instrument) == "PG3":
                 groups = "POWGEN"
@@ -200,7 +211,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             WorkspaceIndexMin=0, WorkspaceIndexMax=self._lastpixel, XMin=self._peakmin, XMax=self._peakmax)
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
         GetDetectorOffsets(InputWorkspace=str(wksp)+"cc", OutputWorkspace=str(wksp)+"offset", Step=abs(self._binning[1]),
-            DReference=self._peakpos, XMin=-self._ccnumber, XMax=self._ccnumber, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask",)
+            DReference=self._peakpos, XMin=-self._ccnumber, XMax=self._ccnumber, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask")
         mtd.deleteWorkspace(str(wksp)+"cc")
         mtd.releaseFreeMemory()
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._peakmin2)+","+str(abs(self._binning[1]))+","+str(self._peakmax2))
@@ -218,7 +229,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 WorkspaceIndexMin=self._lastpixel+1, WorkspaceIndexMax=wksp.getNumberHistograms()-1, XMin=self._peakmin2, XMax=self._peakmax2)
             # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
             GetDetectorOffsets(InputWorkspace=str(wksp)+"cc2", OutputWorkspace=str(wksp)+"offset2", Step=abs(self._binning[1]),
-                DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask2",)
+                DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber, MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask2")
             Plus(LHSWorkspace=str(wksp)+"offset", RHSWorkspace=str(wksp)+"offset2",OutputWorkspace=str(wksp)+"offset")
             Plus(LHSWorkspace=str(wksp)+"mask", RHSWorkspace=str(wksp)+"mask2",OutputWorkspace=str(wksp)+"mask")
             mtd.deleteWorkspace(str(wksp)+"cc2")
@@ -279,7 +290,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self._peakmax = self._peakpos+peakhalfwidth
         self._peakmin2 = self._peakpos2-peakhalfwidth
         self._peakmax2 = self._peakpos2+peakhalfwidth
-        self._diffractionfocus = self.getProperty("DiffractionFocus")
+        self._diffractionfocus = self.getProperty("DiffractionFocusWorkspace")
         self._filterBadPulses = self.getProperty("FilterBadPulses")
         filterLogs = self.getProperty("FilterByLogValue")
         if len(filterLogs.strip()) <= 0:
@@ -308,6 +319,13 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         		samRun = alg['OutputWorkspace']
             	else:
             		samRun = self._loadData(samNum, SUFFIX, filterWall)
+                        LRef = self.getProperty("UnwrapRef")
+                        DIFCref = self.getProperty("LowResRef")
+                        if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
+                            if LRef > 0:
+                                UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef)
+                            if DIFCref > 0:
+                                RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref)
             else:
 		ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="TOF")
             samRun = self._focus(samRun, calib, filterLogs)
