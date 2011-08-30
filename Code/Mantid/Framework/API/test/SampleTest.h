@@ -153,9 +153,10 @@ public:
     sample.setName("test name for test_Single_Sample");
     TS_ASSERT_EQUALS(sample.size(),1);
 
-    TS_ASSERT_THROWS_ANYTHING(Sample& sampleRef = sample[1]);
-    TS_ASSERT_THROWS_ANYTHING(Sample& sampleRef2 = sample[999]);
-    TS_ASSERT_THROWS_ANYTHING(Sample& sampleRef3 = sample[-1]);
+    //void casts are to stop the unused variable warnings.
+    TS_ASSERT_THROWS_ANYTHING(Sample& sampleRef = sample[1]; (void) sampleRef; );
+    TS_ASSERT_THROWS_ANYTHING(Sample& sampleRef2 = sample[999]; (void) sampleRef2; );
+    TS_ASSERT_THROWS_ANYTHING(Sample& sampleRef3 = sample[-1]; (void) sampleRef3; );
     TS_ASSERT_THROWS_NOTHING
     (
       Sample& sampleRef = sample[0];
@@ -183,7 +184,7 @@ public:
       TS_ASSERT(sample[2].getName()==sample2->getName());
     );
     
-    TS_ASSERT_THROWS_ANYTHING(Sample& sampleRef = sample[3]);
+    TS_ASSERT_THROWS_ANYTHING(Sample& sampleRef = sample[3]; (void) sampleRef; );
   }
 
   
