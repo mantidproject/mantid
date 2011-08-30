@@ -63,7 +63,7 @@ namespace Mantid
       /// Reference to mutable table workspace.
       TableWorkspace& m_data;
       /// Row onto which this column object projects.
-      size_t m_rowIndex;
+      int m_rowIndex;
 
     public:
       /// Unique column index.
@@ -76,7 +76,7 @@ namespace Mantid
       @param data : ref to table workspace storing the data.
       @param rowIndex : index of the row in the table workspace that this column/memento item. is to apply.
       */
-      WorkspaceMementoItem(TableWorkspace& data, size_t rowIndex) : m_data(data), m_rowIndex(rowIndex)
+      WorkspaceMementoItem(TableWorkspace& data, int rowIndex) : m_data(data), m_rowIndex(rowIndex)
       {
         m_value = m_data.cell<ItemType>(m_rowIndex, ColIndex);
       }

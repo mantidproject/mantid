@@ -34,7 +34,7 @@ namespace Mantid
     @param runNumber : The run number.
     @return locking smart pointer wrapping workspace memento.
     */
-    LockingMemento WorkspaceMementoCollection::at(size_t runNumber)
+    LockingMemento WorkspaceMementoCollection::at(int runNumber)
     {
       WorkspaceMemento* memento = new WorkspaceMemento(m_data, runNumber);
       

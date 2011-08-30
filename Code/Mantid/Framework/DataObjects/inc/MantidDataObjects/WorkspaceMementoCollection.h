@@ -77,7 +77,7 @@ namespace Mantid
       WorkspaceMementoCollection();
       ~WorkspaceMementoCollection();
       void registerWorkspace(const Mantid::API::Workspace& ws);
-      LockingMemento at(size_t runNumber);
+      LockingMemento at(int runNumber);
       TableWorkspace* serialize() const;
     private:
       TableWorkspace m_data;
