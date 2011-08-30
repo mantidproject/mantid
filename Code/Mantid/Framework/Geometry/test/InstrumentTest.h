@@ -30,18 +30,18 @@ public:
     ObjComponent *sample = new ObjComponent("sample");
     instrument.add(sample);
     instrument.markAsSamplePos(sample);
-    det = boost::shared_ptr<Detector>(new Detector("det1",1,0));
+    det = new Detector("det1",1,0);
     det->setPos(1.0,0.0,0.0);
-    instrument.add(det.get());
-    instrument.markAsDetector(det.get());
-    det2 = boost::shared_ptr<Detector>(new Detector("det2",10,0));
+    instrument.add(det);
+    instrument.markAsDetector(det);
+    det2 = new Detector("det2",10,0);
     det2->setPos(0.0,1.0,0.0);
-    instrument.add(det2.get());
-    instrument.markAsDetector(det2.get());
-    det3 = boost::shared_ptr<Detector>(new Detector("det3",11,0));
+    instrument.add(det2);
+    instrument.markAsDetector(det2);
+    det3 = new Detector("det3",11,0);
     det->setPos(0.0,0.0,1.0);
-    instrument.add(det3.get());
-    instrument.markAsMonitor(det3.get());
+    instrument.add(det3);
+    instrument.markAsMonitor(det3);
 
     instrument.setDefaultViewAxis("X-");
     instrument.getLogfileCache().insert(std::make_pair("apple",boost::shared_ptr<XMLlogfile>()));
@@ -143,7 +143,7 @@ public:
   void testDetector()
   {
     TS_ASSERT_THROWS( instrument.getDetector(0), Exception::NotFoundError );
-    TS_ASSERT_EQUALS( instrument.getDetector(1), det );
+    TS_ASSERT_EQUALS( instrument.getDetector(1).get(), det );
     TS_ASSERT_THROWS( instrument.getDetector(2), Exception::NotFoundError );
     Detector *d = new Detector("det",2,0);
     TS_ASSERT_THROWS_NOTHING( instrument.markAsDetector(d) );
@@ -307,7 +307,7 @@ public:
 
 private:
   Instrument instrument;
-  boost::shared_ptr<Detector> det, det2, det3;
+  Detector *det, *det2, *det3;
 };
 
 #endif /*INSTRUMENTTEST_H_*/
