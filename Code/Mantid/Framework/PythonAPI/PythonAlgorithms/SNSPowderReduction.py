@@ -318,15 +318,13 @@ class SNSPowderReduction(PythonAlgorithm):
         DIFCref = self.getProperty("LowResRef")
         if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
             kwargs = {}
-            #try:
-            #    if info.tmin > 0:
-            #        kwargs["Tmin"] = info.tmin
-            #except:
-            #    pass
-            #try:
-            #    kwargs["Tmax"] = info.tmax
-            #except:
-            #    pass
+            try:
+                if info.tmin > 0:
+                    kwargs["Tmin"] = info.tmin
+                    if info.tmax > info.tmin:
+                        kwargs["Tmax"] = info.tmax
+            except:
+                pass
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF") # corrections only work in TOF for now
             if LRef > 0:
                 UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef, **kwargs)
