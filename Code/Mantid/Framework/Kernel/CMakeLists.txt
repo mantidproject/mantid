@@ -68,6 +68,7 @@ set ( SRC_FILES
 	src/Utils.cpp
 	src/V2D.cpp
 	src/V3D.cpp
+	src/VMD.cpp
 	src/VectorHelper.cpp
 	src/VisibleWhenProperty.cpp
 )
@@ -174,6 +175,7 @@ set ( INC_FILES
 	inc/MantidKernel/Utils.h
 	inc/MantidKernel/V2D.h
 	inc/MantidKernel/V3D.h
+	inc/MantidKernel/VMD.h
 	inc/MantidKernel/VectorHelper.h
 	inc/MantidKernel/VisibleWhenProperty.h
 	inc/MantidKernel/cow_ptr.h
@@ -248,6 +250,7 @@ set ( TEST_FILES
 	test/UtilsTest.h
 	test/V2DTest.h
 	test/V3DTest.h
+	test/VMDTest.h
 	test/VectorHelperTest.h
 	test/VisibleWhenPropertyTest.h
 )
