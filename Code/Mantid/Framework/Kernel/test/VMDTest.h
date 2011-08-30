@@ -18,6 +18,7 @@ public:
 
   void test_constructors()
   {
+    TS_ASSERT_EQUALS( VMD().getNumDims(), 1 );
     TS_ASSERT_EQUALS( VMD(27).getNumDims(), 27 );
     TS_ASSERT_EQUALS( VMD(2), VMD(0.0, 0.0) );
     TS_ASSERT_EQUALS( VMD(3), VMD(0.0, 0.0, 0.0) );
@@ -40,13 +41,19 @@ public:
     double v1[4] = {1,2,3,4};
     TS_ASSERT_THROWS_ANYTHING( VMD(0) );
     TS_ASSERT_THROWS_ANYTHING( VMD(0, v1) );
-    TS_ASSERT_THROWS_ANYTHING( VMD(std::vector<float>()) );
-    TS_ASSERT_THROWS_ANYTHING( VMD(std::vector<double>()) );
   }
 
   void test_notEquals()
   {
     TS_ASSERT( VMD(1,2,3) != VMD(1,2,3.0001) );
+  }
+
+  void test_assign()
+  {
+    VMD a(1,2,3);
+    VMD b(1,2);
+    b = a;
+    TS_ASSERT( a == b);
   }
 
   void test_brackets()

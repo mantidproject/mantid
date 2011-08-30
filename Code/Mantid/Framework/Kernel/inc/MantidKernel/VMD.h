@@ -43,6 +43,15 @@ namespace Kernel
   {
   public:
     //-------------------------------------------------------------------------------------------
+    /** Default constructor, build with 1 dimension */
+    VMD()
+    : nd(1)
+    {
+      data = new double[nd];
+      for (size_t d=0; d<nd; d++) data[d] = 0.0;
+    }
+
+    //-------------------------------------------------------------------------------------------
     /** Constructor
      * @param nd :: number of dimensions  */
     VMD(size_t nd)
@@ -100,6 +109,23 @@ namespace Kernel
       for (size_t d=0; d<nd; d++) data[d] = other.data[d];
     }
 
+
+    //-------------------------------------------------------------------------------------------
+    /** Assignment operator
+     * @param other :: copy into this
+     */
+    VMD& operator=(const VMD& other)
+    {
+      if ((other.nd) != nd)
+      {
+        nd = other.nd;
+        delete [] data;
+        data = new double[nd];
+      }
+      for (size_t d=0; d<nd; d++) data[d] = other.data[d];
+      return *this;
+    }
+
     //-------------------------------------------------------------------------------------------
     /** Constructor
      * @param nd :: number of dimensions
@@ -125,7 +151,7 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Constructor
      * @param vector :: vector of doubles */
-    VMD(std::vector<double> vector)
+    VMD(const std::vector<double> & vector)
     : nd(vector.size())
     {
       if (nd <= 0) throw std::invalid_argument("nd must be > 0");
@@ -136,7 +162,7 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /** Constructor
      * @param vector :: vector of floats */
-    VMD(std::vector<float> vector)
+    VMD(const std::vector<float> & vector)
     : nd(vector.size())
     {
       if (nd <= 0) throw std::invalid_argument("nd must be > 0");
@@ -154,6 +180,11 @@ namespace Kernel
     //-------------------------------------------------------------------------------------------
     /// @return the number of dimensions
     size_t getNumDims() const
+    { return nd; }
+
+    //-------------------------------------------------------------------------------------------
+    /// @return the number of dimensions
+    size_t size() const
     { return nd; }
 
     /** @return the value at the index */

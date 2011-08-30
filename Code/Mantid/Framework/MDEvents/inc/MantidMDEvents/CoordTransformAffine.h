@@ -8,6 +8,9 @@
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/AffineMatrixParameter.h"
 #include "MantidMDEvents/CoordTransform.h"
+#include "MantidKernel/VMD.h"
+
+using Mantid::Kernel::VMD;
 
 namespace Mantid
 {
@@ -36,8 +39,8 @@ namespace MDEvents
     void addTranslation(const coord_t * translationVector);
     const Mantid::Kernel::Matrix<coord_t> & getMatrix() const;
     void setMatrix(const Mantid::Kernel::Matrix<coord_t> & newMatrix);
-    void buildOrthogonal(const std::vector<coord_t> & origin, const std::vector<std::vector<coord_t> > & axes,
-        const std::vector<coord_t> & scaling = std::vector<coord_t>() );
+    void buildOrthogonal(const Mantid::Kernel::VMD & origin, const std::vector< Mantid::Kernel::VMD> & axes,
+        const Mantid::Kernel::VMD & scaling);
 
     virtual void apply(const coord_t * inputVector, coord_t * outVector) const;
 

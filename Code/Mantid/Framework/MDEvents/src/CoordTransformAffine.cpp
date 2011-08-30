@@ -137,43 +137,41 @@ namespace MDEvents
    *        and each vector must be of length inD (all coordinates in the input dimension).
    *        The vectors must be properly orthogonal: not coplanar or collinear. This is not checked!
    * @param scaling :: a vector of size outD of the scaling to perform in each of the
-   *        OUTPUT dimensions. Optionl, defaults to 1 in all dimensions.
+   *        OUTPUT dimensions.
    * @throw if inconsistent vector sizes are received, or zero-length
    */
-  void CoordTransformAffine::buildOrthogonal(const std::vector<coord_t> & origin, const std::vector<std::vector<coord_t> > & axes,
-      const std::vector<coord_t> & scaling)
+  void CoordTransformAffine::buildOrthogonal(const Mantid::Kernel::VMD & origin, const std::vector< Mantid::Kernel::VMD> & axes,
+      const Mantid::Kernel::VMD & scaling)
   {
     if (origin.size() != inD)
       throw std::runtime_error("CoordTransformAffine::buildOrthogonal(): the origin must be in the dimensions of the input workspace (length inD).");
     if (axes.size() != outD)
       throw std::runtime_error("CoordTransformAffine::buildOrthogonal(): you must give as many basis vectors as there are dimensions in the output workspace.");
-    std::vector<coord_t> scale = scaling;
-    if (scale.size() == 0) scale.resize(outD, 1.0);
-    if (scale.size() != outD)
+    if (scaling.size() != outD)
       throw std::runtime_error("CoordTransformAffine::buildOrthogonal(): the size of the scaling vector must be the same as the number of dimensions in the output workspace.");
 
     // Start with identity
     affineMatrix.identityMatrix();
 
-    std::vector<std::vector<coord_t> > bases;
     for (size_t i=0; i<axes.size(); i++)
     {
-      if (VectorHelper::lengthVector(axes[i]) == 0.0)
+      if (axes[i].length() == 0.0)
         throw std::runtime_error("CoordTransformAffine::buildOrthogonal(): one of the basis vector was of zero length.");
       if (axes[i].size() != inD)
         throw std::runtime_error("CoordTransformAffine::buildOrthogonal(): each basis vector must be of length inD (input # of dimensions).");
       // Normalize each axis to unity
-      std::vector<coord_t> basis = VectorHelper::normalizeVector(axes[i]);
+      VMD basis = axes[i];
+      basis.normalize();
       // The row of the affine matrix = the unit vector
       for (size_t j=0; j<basis.size(); j++)
-        affineMatrix[i][j] = basis[j] * scale[i];
+        affineMatrix[i][j] = basis[j] * scaling[i];
 
       // Now account for the translation
       coord_t transl = 0;
       for (size_t j=0; j<basis.size(); j++)
         transl += origin[j] * basis[j]; // dot product of origin * basis aka ( X0 . U )
       // The last column of the matrix = the translation movement
-      affineMatrix[i][inD] = -transl * scale[i];
+      affineMatrix[i][inD] = -transl * scaling[i];
     }
 
     // Copy into the raw matrix (for speed)

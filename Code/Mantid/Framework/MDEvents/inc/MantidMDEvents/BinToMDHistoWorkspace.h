@@ -75,7 +75,7 @@ namespace MDEvents
     template<typename MDE, size_t nd>
     void binMDBox(MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax);
 
-    // Input workspace
+    /// Input workspace
     Mantid::API::IMDEventWorkspace_sptr in_ws;
     /// The output MDHistoWorkspace
     Mantid::MDEvents::MDHistoWorkspace_sptr outWS;
@@ -97,6 +97,12 @@ namespace MDEvents
 
     /// Number of dimensions in the output (binned) workspace.
     size_t outD;
+
+    /// Basis vectors of the output dimensions
+    std::vector<std::vector<coord_t> > bases;
+
+    /// Origin (this position in the input workspace = 0,0,0 in the output).
+    std::vector<coord_t> origin;
 
     /// Cached values for speed up
     size_t * indexMultiplier;

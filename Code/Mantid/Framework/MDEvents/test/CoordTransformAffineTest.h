@@ -144,19 +144,17 @@ public:
     CoordTransformAffine ct(3, 2);
 
     // Origin is 1.0, 1.0, 1.0
-    std::vector<coord_t> origin(3, 1.0);
+    VMD origin(1.0, 1.0, 1.0);
 
     double angle = 0.1;
     // Build the basis vectors, a 0.1 rad rotation along +Z
-    std::vector<std::vector<coord_t> > bases;
-    std::vector<coord_t> u(3,0);
-    u[0] = cos(angle); u[1] = sin(angle);
-    std::vector<coord_t> v(3,0);
-    v[0] = -sin(angle); v[1] = cos(angle);
-    bases.push_back(u);
-    bases.push_back(v);
+    std::vector<VMD> bases;
+    bases.push_back( VMD(cos(angle), sin(angle), 0.0) );
+    bases.push_back( VMD(-sin(angle), cos(angle), 0.0) );
+    //Scaling is 1.0
+    VMD scale(1.0, 1.0);
     // Build it
-    TS_ASSERT_THROWS_NOTHING( ct.buildOrthogonal(origin, bases) );
+    TS_ASSERT_THROWS_NOTHING( ct.buildOrthogonal(origin, bases, scale) );
 
     coord_t out[2] = {0,0};
     // This is the inverse rotation to make points
@@ -175,14 +173,11 @@ public:
     compare(2, out, exp2);
 
     // Checks for failure to build
-    bases.push_back(v);
-    TSM_ASSERT_THROWS_ANYTHING( "Too many bases throws", ct.buildOrthogonal(origin, bases) );
+    bases.push_back( VMD(1,2,3) );
+    TSM_ASSERT_THROWS_ANYTHING( "Too many bases throws", ct.buildOrthogonal(origin, bases, scale) );
     bases.resize(2);
-    bases[0].resize(4);
-    TSM_ASSERT_THROWS_ANYTHING( "A base has the wrong dimensions", ct.buildOrthogonal(origin, bases) );
-    bases[0].clear();
-    bases[0].resize(3, 0);
-    TSM_ASSERT_THROWS_ANYTHING( "A base is null length", ct.buildOrthogonal(origin, bases) );
+    bases[0] = VMD(1,2,3,4);
+    TSM_ASSERT_THROWS_ANYTHING( "A base has the wrong dimensions", ct.buildOrthogonal(origin, bases, scale) );
   }
 
 
@@ -194,21 +189,15 @@ public:
     CoordTransformAffine ct(3, 2);
 
     // Origin is 1.0, 1.0, 1.0
-    std::vector<coord_t> origin(3, 1.0);
+    VMD origin(1.0, 1.0, 1.0);
 
     double angle = 0.1;
     // Build the basis vectors, a 0.1 rad rotation along +Z
-    std::vector<std::vector<coord_t> > bases;
-    std::vector<coord_t> u(3,0);
-    u[0] = cos(angle); u[1] = sin(angle);
-    std::vector<coord_t> v(3,0);
-    v[0] = -sin(angle); v[1] = cos(angle);
-    bases.push_back(u);
-    bases.push_back(v);
+    std::vector<VMD> bases;
+    bases.push_back( VMD(cos(angle), sin(angle), 0.0) );
+    bases.push_back( VMD(-sin(angle), cos(angle), 0.0) );
     //Scaling
-    std::vector<coord_t> scale;
-    scale.push_back(2.0);
-    scale.push_back(3.0);
+    VMD scale(2.0, 3.0);
     // Build it
     TS_ASSERT_THROWS_NOTHING( ct.buildOrthogonal(origin, bases, scale) );
 
@@ -225,7 +214,7 @@ public:
     compare(2, out, scaledExp2);
 
     // Checks for failure to build
-    scale.push_back(4.5);
+    scale = VMD(2,3,4);
     TSM_ASSERT_THROWS_ANYTHING( "Mismatch in scaling vector", ct.buildOrthogonal(origin, bases, scale) );
   }
 

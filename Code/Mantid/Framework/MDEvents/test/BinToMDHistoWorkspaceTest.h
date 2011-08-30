@@ -26,6 +26,7 @@
 #include <iomanip>
 #include <iostream>
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/VMD.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
@@ -269,10 +270,7 @@ public:
     MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 0);
     in_ws->splitBox();
     double theta = 0.1;
-    std::vector<coord_t> origin(3);
-    origin[0] = -2.0;
-    origin[1] = -3.0;
-    origin[2] = -4.0;
+    VMD origin(-2.0, -3.0, -4.0);
     for (coord_t ox=0.5; ox<10; ox++)
       for (coord_t oy=0.5; oy<10; oy++)
         for (coord_t oz=0.5; oz<10; oz++)
@@ -293,17 +291,13 @@ public:
 
     // Build the basis vectors, a 0.1 rad rotation along +Z
     double angle = 0.1;
-    std::vector<std::vector<coord_t> > bases;
-    std::vector<coord_t> u(3,0);
-    u[0] = cos(angle); u[1] = sin(angle);
-    std::vector<coord_t> v(3,0);
-    v[0] = -sin(angle); v[1] = cos(angle);
-    std::vector<coord_t> w(3,0);
-    w[2] = 1.0; // Point in Z vertical
-    bases.push_back(u); bases.push_back(v); bases.push_back(w);
+    std::vector<VMD> bases;
+    bases.push_back( VMD(cos(angle), sin(angle), 0.0) );
+    bases.push_back( VMD(-sin(angle), cos(angle), 0.0) );
+    bases.push_back( VMD(0.0, 0.0, 1.0) );
 
     // Scale the output dimensions to match the number of bins
-    std::vector<coord_t> scale(3);
+    VMD scale(3);
     scale[0] = double(binsX)/10.0;
     scale[1] = double(binsY)/10.0;
     scale[2] = double(binsZ)/10.0;
