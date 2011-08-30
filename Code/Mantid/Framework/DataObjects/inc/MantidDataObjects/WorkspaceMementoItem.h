@@ -78,7 +78,7 @@ namespace Mantid
       */
       WorkspaceMementoItem(TableWorkspace& data, size_t rowIndex) : m_data(data), m_rowIndex(rowIndex)
       {
-        m_value = m_data.getColumn(ColIndex)->cell<WorkspaceMementoItem::ItemType>(m_rowIndex);
+        m_value = m_data.cell<ItemType>(m_rowIndex, ColIndex);
       }
 
       /**
@@ -114,7 +114,7 @@ namespace Mantid
       */
       virtual bool hasChanged() const 
       {
-        return m_data.getColumn(ColIndex)->cell<WorkspaceMementoItem::ItemType>(m_rowIndex) != m_value;
+        return m_data.cell<ItemType>(m_rowIndex, ColIndex) != m_value;
       }
 
       /*
@@ -179,13 +179,13 @@ namespace Mantid
       /// Synchronise the changes (via setvalue) with the underlying table workspace. This is a non reversible operation. 
       void commit()
       {
-        m_data.getColumn(ColIndex)->cell<WorkspaceMementoItem::ItemType>(m_rowIndex) = m_value;
+        m_data.cell<ItemType>(m_rowIndex, ColIndex) = m_value;
       }
 
       /// Undo changes via setValue. 
       void rollback()
       {
-        m_value = m_data.getColumn(ColIndex)->cell<WorkspaceMementoItem::ItemType>(m_rowIndex);
+        m_value = m_data.cell<ItemType>(m_rowIndex, ColIndex);
       }
 
       /**
