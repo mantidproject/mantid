@@ -229,7 +229,7 @@ public:
   virtual operator std::string()const{return asString();}
   /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
-  /// @param slicing :: A string identifying the data in the worspace to be fitted, e.g. spectrum index, starting and ending x values, etc
+  /// @param slicing :: A string identifying the data in the workspace to be fitted, e.g. spectrum index, starting and ending x values, etc
   ///     Concrete form is defined by the derived functions.
   /// @param copyData :: 
   virtual void setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing,bool copyData = true) = 0;

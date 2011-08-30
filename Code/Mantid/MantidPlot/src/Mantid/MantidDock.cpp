@@ -737,11 +737,11 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
 
 
 /**
- * Add the actions that are appropriate for a MatrixWorspace
+ * Add the actions that are appropriate for a MatrixWorkspace
  * @param menu :: The menu to store the items
  * @param matrixWS :: The workspace related to the menu
  */
-void MantidDockWidget::addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::MatrixWorkspace_const_sptr matrixWS) const
+void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, Mantid::API::MatrixWorkspace_const_sptr matrixWS) const
 {
   // Add all options except plot of we only have 1 value
   menu->addAction(m_showData);
@@ -766,7 +766,7 @@ void MantidDockWidget::addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::Matr
  * @param menu :: The menu to store the items
  * @param matrixWS :: The workspace related to the menu
  */
-void MantidDockWidget::addMDEventWorspaceMenuItems(QMenu *menu, Mantid::API::IMDEventWorkspace_const_sptr WS) const
+void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDEventWorkspace_const_sptr WS) const
 {
   (void) WS;
 
@@ -779,7 +779,7 @@ void MantidDockWidget::addMDEventWorspaceMenuItems(QMenu *menu, Mantid::API::IMD
  * @param menu :: The menu to store the items
  * @param matrixWS :: The workspace related to the menu
  */
-void MantidDockWidget::addPeaksWorspaceMenuItems(QMenu *menu, Mantid::API::IPeaksWorkspace_const_sptr WS) const
+void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPeaksWorkspace_const_sptr WS) const
 {
   (void) WS;
 
@@ -795,7 +795,7 @@ void MantidDockWidget::addPeaksWorspaceMenuItems(QMenu *menu, Mantid::API::IPeak
 
 
 /**
- * Add the actions that are appropriate for a MatrixWorspace
+ * Add the actions that are appropriate for a MatrixWorkspace
  * @param menu :: The menu to store the items
  */
 void MantidDockWidget::addWorkspaceGroupMenuItems(QMenu *menu) const
@@ -808,7 +808,7 @@ void MantidDockWidget::addWorkspaceGroupMenuItems(QMenu *menu) const
 }
 
 /**
- * Add the actions that are appropriate for a MatrixWorspace
+ * Add the actions that are appropriate for a MatrixWorkspace
  * @param menu :: The menu to store the items
  */
 void MantidDockWidget::addTableWorkspaceMenuItems(QMenu * menu) const
@@ -1033,15 +1033,15 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     // Add the items that are appropriate for the type
     if( MatrixWorkspace_const_sptr matrixWS = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws) ) 
     {
-      addMatrixWorspaceMenuItems(menu, matrixWS);
+      addMatrixWorkspaceMenuItems(menu, matrixWS);
     }
     else if( IMDEventWorkspace_const_sptr mdeventWS = boost::dynamic_pointer_cast<const IMDEventWorkspace>(ws) )
     {
-      addMDEventWorspaceMenuItems(menu, mdeventWS);
+      addMDEventWorkspaceMenuItems(menu, mdeventWS);
     }
     else if( IPeaksWorkspace_const_sptr peaksWS = boost::dynamic_pointer_cast<const IPeaksWorkspace>(ws) )
     {
-      addPeaksWorspaceMenuItems(menu, peaksWS);
+      addPeaksWorkspaceMenuItems(menu, peaksWS);
     }
     else if( boost::dynamic_pointer_cast<const WorkspaceGroup>(ws) ) 
     {

@@ -239,7 +239,7 @@ private:
 
   /// Is the spectrum a histogram?
   bool m_isHistogram;
-  /// This field can be set true for a histogram worspace. If it's true x(i) returns (X[i]+X[i+1])/2
+  /// This field can be set true for a histogram workspace. If it's true x(i) returns (X[i]+X[i+1])/2
   bool m_binCentres;
   /// Indicates that the data is plotted on a log y scale
   bool m_logScale;
