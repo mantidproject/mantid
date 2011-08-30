@@ -276,7 +276,7 @@ namespace Mantid
       {
         return *this;
       }
-      else if ((index > m_samples.size()) || ( index < 0))
+      else if ((static_cast<std::size_t>(index) > m_samples.size()) || ( index < 0))
       {
         throw std::out_of_range("The index value provided was out of range");
       }
