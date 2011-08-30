@@ -117,7 +117,7 @@ void SofQW::exec()
       if (emode==2)
       {
         try {
-          Parameter_sptr par = pmap.get(spectrumDet->getComponent(),"Efixed");
+          Parameter_sptr par = pmap.get(spectrumDet.get(),"Efixed");
           if (par) 
           {
             efixed = par->value<double>();

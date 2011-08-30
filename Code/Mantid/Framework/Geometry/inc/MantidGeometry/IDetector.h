@@ -25,7 +25,14 @@ namespace Kernel
 
 namespace Geometry
 {
-
+  /** Describes the topology of a detectors group used to calculate angular position and angular
+   *  measures for detectors. The topology defines the meaning of angular measurements for a detector
+   */
+  enum det_topology{
+      rect,  //< rectangular geometry
+      cyl,   //< cylindrical geometry
+      undef  //< the geometry is yet undefined, if you need to know the geometry, a method to identify it must be deployed
+  };
 
 /** Interface class for detector objects.
 
@@ -52,14 +59,6 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-/** enum describes the toplogy of a detectors group used to calculate angular position and angular 
- *  measures for detecors. The topology defines the meaning of angular measurements for a detector
-*/
-enum det_topology{
-    rect,  //< rectangular geometry
-    cyl,   //< cylindrical geometry
-    undef  //< the geometry is yet undefined, if you need to know the geometry, a method to identify it must be deployed
-};
 class MANTID_GEOMETRY_DLL IDetector : public virtual IObjComponent
 {
 public:
@@ -90,8 +89,6 @@ public:
    /// Indicates whether this is a monitor detector
   virtual bool isMonitor() const = 0;
 
-  /// Must return a pointer to itself if derived from IComponent
-  virtual const IComponent* getComponent() const;
  /// returns the geometry of detectors, meaningful for groups, rectangular for single; returns the centre of a detector
   virtual det_topology getTopology(Kernel::V3D &center)const = 0;
 

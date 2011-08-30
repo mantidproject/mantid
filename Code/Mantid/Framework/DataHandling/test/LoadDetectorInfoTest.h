@@ -81,7 +81,7 @@ public:
       boost::shared_ptr<const IComponent> comp =
           boost::dynamic_pointer_cast<const IComponent>(detector);
 
-      const IComponent* baseComp = detector->getComponent();
+      const IComponent* baseComp = detector->getComponentID();
 
       Parameter_sptr par = pmap.get(baseComp,"3He(atm)");
       // this is only for PSD detectors, code 3
@@ -221,14 +221,13 @@ public:
     for ( int i = 0; i < NUMRANDOM; ++i)
     {
       int detID = DETECTS[i];
-      boost::shared_ptr<const IDetector> detector =WS->getInstrument()->getDetector(detID);
+      IDetector_const_sptr detector =WS->getInstrument()->getDetector(detID);
 
-      const IComponent* baseComp = detector->getComponent();
-      Parameter_sptr par = pmap.get(baseComp,"3He(atm)");
+      Parameter_sptr par = pmap.get(detector.get(),"3He(atm)");
 
       TS_ASSERT(par);
       TS_ASSERT_EQUALS(par->asString(), castaround("10.0"));
-      par = pmap.get(baseComp,"wallT(m)");
+      par = pmap.get(detector.get(),"wallT(m)");
       TS_ASSERT(par);
 
       TS_ASSERT_EQUALS(par->asString(), castaround("0.0008").substr(0,6));

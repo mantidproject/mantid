@@ -434,7 +434,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
           {
           try
           {
-            Parameter_sptr par = pmap.getRecursive(det->getComponent(),"Efixed");
+            Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
             if (par) 
             {
               efixed = par->value<double>();

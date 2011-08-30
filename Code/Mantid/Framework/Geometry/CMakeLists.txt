@@ -3,7 +3,6 @@ set ( SRC_FILES
 	src/Crystal/OrientedLattice.cpp
 	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/UnitCell.cpp
-	src/IDetector.cpp
   src/Instrument.cpp
 	src/IObjComponent.cpp
 	src/Instrument/CompAssembly.cpp

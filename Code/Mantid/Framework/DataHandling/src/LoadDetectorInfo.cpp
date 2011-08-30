@@ -417,11 +417,10 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
   }
 
   Geometry::ParameterMap &pmap = m_workspace->instrumentParameters();
-  const IComponent* comp = det->getComponent();
   // Set the detectors pressure.
-  pmap.addDouble(comp, "3He(atm)", params.pressure);
+  pmap.addDouble(det.get(), "3He(atm)", params.pressure);
   // Set the wall thickness
-  pmap.addDouble(comp, "wallT(m)", params.wallThick);
+  pmap.addDouble(det.get(), "wallT(m)", params.wallThick);
 
   // If we have a l2, theta and phi. Update the postion if required
   if( m_moveDets && 

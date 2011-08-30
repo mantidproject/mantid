@@ -155,7 +155,7 @@ void AbsorptionCorrection::exec()
     if (m_emode==2)
     {
       try {
-        Parameter_sptr par = pmap.get(det->getComponent(),"Efixed");
+        Parameter_sptr par = pmap.get(det.get(),"Efixed");
         if (par)
         {
           Unit_const_sptr energy = UnitFactory::Instance().create("Energy");
