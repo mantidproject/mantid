@@ -105,10 +105,10 @@ class SNSPowderReduction(PythonAlgorithm):
                              Description="Compress the event list when reading in the data")
         self.declareProperty("Sum", False,
                              Description="Sum the runs. Does nothing for characterization runs")
-        self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=0),
-                             Description="If specified overrides value in CharacterizationRunsFile")
-        self.declareProperty("VanadiumNumber", 0, Validator=BoundedValidator(Lower=0),
-                             Description="If specified overrides value in CharacterizationRunsFile")
+        self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=-1),
+                             Description="If specified overrides value in CharacterizationRunsFile If -1 turns off correction.")
+        self.declareProperty("VanadiumNumber", 0, Validator=BoundedValidator(Lower=-1),
+                             Description="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
         self.declareFileProperty("CalibrationFile", "", FileAction.Load,
                                  [".cal"])
         self.declareFileProperty("CharacterizationRunsFile", "", FileAction.OptionalLoad,
@@ -466,8 +466,10 @@ class SNSPowderReduction(PythonAlgorithm):
 
             # process the container
             canRun = self.getProperty("BackgroundNumber")
-            if canRun <= 0:
+            if canRun == 0: # use the version in the info
                 canRun = info.can
+            elif canRun < 0: # turn off the correction
+                canRun = 0
             if canRun > 0:
                 temp = mtd["%s_%d" % (self._instrument, canRun)]
                 if temp is None:
@@ -482,8 +484,10 @@ class SNSPowderReduction(PythonAlgorithm):
 
             # process the vanadium run
             vanRun = self.getProperty("VanadiumNumber")
-            if vanRun <= 0:
+            if vanRun == 0: # use the version in the info
                 vanRun = info.van
+            elif vanRun < 0: # turn off the correction
+                vanRun = 0
             if vanRun > 0:
                 temp = mtd["%s_%d" % (self._instrument, vanRun)]
                 if temp is None:
