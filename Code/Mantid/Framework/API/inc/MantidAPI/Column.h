@@ -104,6 +104,9 @@ public:
     /// Must return overall memory size taken by the column.
     virtual long int sizeOfData()const = 0;
 
+    /// Virtual destructor. Fully clone any column.
+    virtual Column* clone() const = 0;
+
     /// Templated method for returning a value. No type checks are done.
     template<class T>
     T& cell(int index)
