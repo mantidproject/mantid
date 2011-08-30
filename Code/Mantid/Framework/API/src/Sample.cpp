@@ -20,7 +20,7 @@ namespace Mantid
      */
     Sample::Sample() : 
       m_name(), m_shape(), m_material(), m_environment(),
-      m_lattice(NULL),
+      m_lattice(NULL),m_samples(),
       m_geom_id(0), m_thick(0.0), m_height(0.0), m_width(0.0)
     {
     }
@@ -32,7 +32,7 @@ namespace Mantid
     Sample::Sample(const Sample& copy) :
       m_name(copy.m_name), m_shape(copy.m_shape), m_material(copy.m_material), 
       m_environment(copy.m_environment),
-      m_lattice(NULL),
+      m_lattice(NULL),m_samples(copy.m_samples),
       m_geom_id(copy.m_geom_id), m_thick(copy.m_thick),
       m_height(copy.m_height), m_width(copy.m_width)
     {
@@ -45,7 +45,7 @@ namespace Mantid
      * @return A reference to this object, which will have the same 
      * state as the argument
      */
-    Sample& Sample::operator=(const Sample&rhs)
+    Sample& Sample::operator=(const Sample& rhs)
     {
       if (this == &rhs) return *this;
       m_name = rhs.m_name;
@@ -53,6 +53,7 @@ namespace Mantid
       m_material = rhs.m_material;
       m_environment = rhs.m_environment;
       m_geom_id = rhs.m_geom_id;
+      m_samples = std::vector<boost::shared_ptr<Sample> >(rhs.m_samples);
       m_thick = rhs.m_thick;
       m_height = rhs.m_height;
       m_width = rhs.m_width;
@@ -262,6 +263,46 @@ namespace Mantid
     double Sample::getWidth() const
     {
       return m_width;
+    }
+
+    /**
+     * Gets the desired sample, 0 is the current sample
+     * @param index The index of the desired sample
+     * @returns The desired sample
+     */
+    Sample& Sample::operator[] (const int index)
+    {
+      if (index == 0)
+      {
+        return *this;
+      }
+      else if ((index > m_samples.size()) || ( index < 0))
+      {
+        throw std::out_of_range("The index value provided was out of range");
+      }
+      else
+      {
+        return *m_samples[index-1];
+      }
+    }
+
+    /**
+     * Gets the number of samples in this collection
+     * @returns The count of samples
+     */
+    const std::size_t Sample::size() const
+    {
+      return m_samples.size()+1;
+    }
+    
+
+    /**
+     * Adds a sample to the sample collection
+     * @param childSample The child sample to be added
+     */
+    void Sample::addSample(boost::shared_ptr<Sample> childSample)
+    {
+      m_samples.push_back(childSample);
     }
 
   }

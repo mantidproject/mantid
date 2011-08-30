@@ -9,6 +9,7 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Material.h"
 #include <MantidGeometry/Crystal/OrientedLattice.h>
+#include <vector>
 
 using Mantid::Geometry::OrientedLattice;
 
@@ -61,6 +62,13 @@ namespace Mantid
       Sample(const Sample& copy);
       /// Private assignment operator. 
       Sample& operator=(const Sample& rhs);
+
+      /// index operator for accessing multiple samples
+      Sample& operator[] (const int index);
+      /// the number of samples
+      const std::size_t size() const;
+      /// Adds a sample to the list
+      void addSample(boost::shared_ptr<Sample> childSample);
 
       /// Returns the name of the sample
       const std::string & getName() const;
@@ -133,6 +141,9 @@ namespace Mantid
       boost::shared_ptr<SampleEnvironment> m_environment;
       /// Pointer to the OrientedLattice of the sample, NULL if not set.
       OrientedLattice * m_lattice;
+
+      /// Vector of child samples
+      std::vector<boost::shared_ptr<Sample> > m_samples;
 
       /// The sample geometry flag
       int m_geom_id;

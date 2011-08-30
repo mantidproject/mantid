@@ -147,7 +147,44 @@ public:
     delete vanBlock;
   }
 
-  
+  void test_Single_Sample()
+  {
+    Sample sample;
+    sample.setName("test name for test_Single_Sample");
+    TS_ASSERT_EQUALS(sample.size(),1);
+
+    TS_ASSERT_THROWS_ANYTHING(Sample& sampleRef = sample[1]);
+    TS_ASSERT_THROWS_ANYTHING(Sample& sampleRef2 = sample[999]);
+    TS_ASSERT_THROWS_ANYTHING(Sample& sampleRef3 = sample[-1]);
+    TS_ASSERT_THROWS_NOTHING
+    (
+      Sample& sampleRef = sample[0];
+      TS_ASSERT(sample.getName()==sampleRef.getName());
+    );
+  }
+
+  void test_Multiple_Samples()
+  {
+    Sample sample;
+    sample.setName("test name for test_Multiple_Sample");
+    boost::shared_ptr<Sample> sample2 = boost::shared_ptr<Sample>(new Sample());
+    sample2->setName("test name for test_Multiple_Sample - 2");
+    
+    TS_ASSERT_EQUALS(sample.size(),1);
+    sample.addSample(sample2);
+    TS_ASSERT_EQUALS(sample.size(),2);
+    sample.addSample(sample2);
+    TS_ASSERT_EQUALS(sample.size(),3);
+
+    TS_ASSERT_THROWS_NOTHING
+    (
+      TS_ASSERT(sample[0].getName()==sample.getName());
+      TS_ASSERT(sample[1].getName()==sample2->getName());
+      TS_ASSERT(sample[2].getName()==sample2->getName());
+    );
+    
+    TS_ASSERT_THROWS_ANYTHING(Sample& sampleRef = sample[3]);
+  }
 
   
 };
