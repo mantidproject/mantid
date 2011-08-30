@@ -84,7 +84,7 @@ namespace Algorithms
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t i=0; i < num_to_do; i++)
     {
-      // What worksapce index?
+      // What workspace index?
       int64_t wi;
       if (doAll)
         wi = i;

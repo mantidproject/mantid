@@ -400,7 +400,7 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Works
 
 /**
 * Create a tree item for the given workspace
-* @param ws_name :: The worksapce name
+* @param ws_name :: The workspace name
 * @param workspace :: A pointer to the workspace
 */
 QTreeWidgetItem * MantidDockWidget::createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)

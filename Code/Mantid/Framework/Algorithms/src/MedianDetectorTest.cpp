@@ -163,7 +163,7 @@ namespace Mantid
       m_rangeUpper = getProperty("RangeUpper");
     }
 
-    /** Makes a worksapce with the total solid angle all the detectors in each spectrum cover from the sample
+    /** Makes a workspace with the total solid angle all the detectors in each spectrum cover from the sample
      *  note returns an empty shared pointer on failure, uses the SolidAngle algorithm
      * @param firstSpec :: the index number of the first histogram to analyse
      * @param lastSpec :: the index number of the last histogram to analyse

@@ -387,7 +387,7 @@ void LoadRaw3::includeMonitors(FILE* file,const int64_t& period,DataObjects::Wor
       {
         throw std::runtime_error("Error reading raw file");
       }
-          //set worksapce data
+          //set workspace data
 		  setWorkspaceData(ws_sptr, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes,m_lengthIn,1);
 		  ++wsIndex;
 
@@ -478,7 +478,7 @@ void LoadRaw3::setOptionalProperties()
 
 }
 
-/**This method validatates worksapce sizes if exclude monitors or separate monitors options is selected
+/**This method validatates workspace sizes if exclude monitors or separate monitors options is selected
   *@param bexcludeMonitors :: boolean option for exclude monitors
   *@param bseparateMonitors :: boolean option for separate monitors
   *@param normalwsSpecs :: number of spectrums in the output workspace excluding monitors

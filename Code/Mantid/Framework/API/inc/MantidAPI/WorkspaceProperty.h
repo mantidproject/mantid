@@ -252,7 +252,7 @@ namespace Mantid
         return Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::isValid();
       }
 
-      /** Indicates if the object is still pointing to the same workspace, using the worksapce name
+      /** Indicates if the object is still pointing to the same workspace, using the workspace name
       *  @return true if the value is the same as the initial value or false otherwise
       */
       bool isDefault() const

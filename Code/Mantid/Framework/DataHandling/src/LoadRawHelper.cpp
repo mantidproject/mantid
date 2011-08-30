@@ -1014,7 +1014,7 @@ namespace Mantid
 
           //read spectrum from raw file
           readData(file, histToRead);
-          //set worksapce data
+          //set workspace data
           setWorkspaceData(ws_sptr, timeChannelsVec, wsIndex, i,noTimeRegimes,lengthIn,1);
           ++wsIndex;
 

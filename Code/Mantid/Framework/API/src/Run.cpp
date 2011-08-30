@@ -77,7 +77,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     // Other properties are added to gether if they are on the approved list
     for(int i = 0; i < ADDABLES; ++i )
     {
-      // get a pointer to the property on the right-handside worksapce
+      // get a pointer to the property on the right-handside workspace
       Property * right;
       try
       {

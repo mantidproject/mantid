@@ -80,7 +80,7 @@ namespace Algorithms
     select.push_back("False");
     declareProperty("ShowUnselected", "True", new ListValidator(select),
         "Whether to show detectors that are not in any group (default yes)" );
-    // The output worksapce (2D) that will contain the group information
+    // The output workspace (2D) that will contain the group information
     declareProperty(
         new API::WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
         "The name of the output workspace" );

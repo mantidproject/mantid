@@ -54,7 +54,7 @@ void NormaliseByCurrent::exec()
   }
   catch(Exception::NotFoundError &)
   {
-    g_log.error() << "The proton charge is not set for the run attached to this worksapce\n";
+    g_log.error() << "The proton charge is not set for the run attached to this workspace\n";
     throw;
   }
 

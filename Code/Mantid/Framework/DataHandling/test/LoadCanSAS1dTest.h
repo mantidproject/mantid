@@ -133,7 +133,7 @@ public:
 
   //some of the data is only stored to 3 decimal places
   double tolerance(1e-04);
-  //this tests just the first, a middle and last value the other worksapce has all its values check below
+  //this tests just the first, a middle and last value the other workspace has all its values check below
   const int testIndices[] = {0, 70, 142};
   for (int i = 0; i < 3; ++i)
   {

@@ -1068,7 +1068,7 @@ namespace Mantid
     *  @param pAlg ::      pointer to algorithm
     *  @param prop ::      pointer to the input properties
     *  @param nPeriod ::   period number 
-    *  @param inmemberwsName :: outputworksapce name
+    *  @param inmemberwsName :: outputworkspace name
     *  @param outwsgrp_sptr :: shared pointer for workspacegroup
     *  @param bSimilarNames :: -true if the input member workspaces are of similar names
     *  @param bequal :: -true if both the input and output group workspaces are same
