@@ -6,6 +6,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
+#include "MantidMDEvents/CoordTransformAffineParser.h"
+#include "MantidMDEvents/CoordTransformAligned.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDBoxIterator.h"
@@ -13,13 +15,13 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include <boost/algorithm/string.hpp>
-#include "MantidMDEvents/CoordTransformAffineParser.h"
-#include <Poco/DOM/Element.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
-#include "MantidMDEvents/CoordTransformAligned.h"
+#include <Poco/DOM/Element.h>
+#include "MantidKernel/EnabledWhenProperty.h"
 
 using Mantid::Kernel::CPUTimer;
+using Mantid::Kernel::EnabledWhenProperty;
 
 namespace Mantid
 {
@@ -76,69 +78,57 @@ namespace MDEvents
    */
   void BinToMDHistoWorkspace::init()
   {
-    std::string dimHelp = "Enter it as a comma-separated list of values with the format: 'name,minimum,maximum,number_of_bins'. Leave blank for NONE.";
+    std::string dimChars = "XYZT";
+
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input), "An input MDEventWorkspace.");
 
-    declareProperty(new PropertyWithValue<std::string>("DimX","",Direction::Input), "Binning parameters for the X dimension.\n" + dimHelp);
-    declareProperty(new PropertyWithValue<std::string>("DimY","",Direction::Input), "Binning parameters for the Y dimension.\n" + dimHelp);
-    declareProperty(new PropertyWithValue<std::string>("DimZ","",Direction::Input), "Binning parameters for the Z dimension.\n" + dimHelp);
-    declareProperty(new PropertyWithValue<std::string>("DimT","",Direction::Input), "Binning parameters for the T dimension.\n" + dimHelp);
+    // --------------- Axis-aligned properties ---------------------------------------
+    declareProperty("AxisAligned", true, "Perform binning aligned with the axes of the input MDEventWorkspace?");
+    setPropertyGroup("AxisAligned", "Axis-Aligned Binning");
+    for (size_t i=0; i<4; i++)
+    {
+      std::string dim(" "); dim[0] = dimChars[i];
+      std::string propName = "AlignedDim" + dim;
+      declareProperty(new PropertyWithValue<std::string>(propName,"",Direction::Input),
+          "Binning parameters for the " + dim + " dimension.\n"
+          "Enter it as a comma-separated list of values with the format: 'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
+      setPropertySettings(propName, new EnabledWhenProperty(this, "AxisAligned", IS_EQUAL_TO, "1") );
+      setPropertyGroup(propName, "Axis-Aligned Binning");
+    }
 
+    // --------------- NON-Axis-aligned properties ---------------------------------------
+    declareProperty(new PropertyWithValue<std::string>("TransformationXML","",Direction::Input),
+            "XML string describing the coordinate transformation that converts from the MDEventWorkspace dimensions to the output dimensions.\n");
+    setPropertyGroup("TransformationXML", "Non-Aligned Binning");
+
+    for (size_t i=0; i<4; i++)
+    {
+      std::string dim(" "); dim[0] = dimChars[i];
+      std::string propName = "OutDim" + dim;
+      declareProperty(new PropertyWithValue<std::string>(propName,"",Direction::Input),
+          "Description of the output dimension " + dim + " dimension."
+          "Format: 'name, number_of_bins'. Leave blank for NONE." );
+      setPropertySettings(propName, new EnabledWhenProperty(this, "TransformationXML", IS_NOT_DEFAULT, "") );
+      setPropertyGroup(propName, "Non-Aligned Binning");
+    }
+
+    // --------------- Processing methods and options ---------------------------------------
+    std::string grp = "Methods";
     declareProperty(new PropertyWithValue<std::string>("ImplicitFunctionXML","",Direction::Input),
         "XML string describing the implicit function determining which bins to use.");
+    setPropertyGroup("ImplicitFunctionXML", grp);
+
     declareProperty(new PropertyWithValue<bool>("IterateEvents",true,Direction::Input),
         "Alternative binning method where you iterate through every event, placing them in the proper bin.\n"
         "This may be faster for workspaces with few events and lots of output bins.");
+    setPropertyGroup("IterateEvents", grp);
+
     declareProperty(new PropertyWithValue<bool>("Parallel",false,Direction::Input),
         "Temporary parameter: true to run in parallel.");
-
-    declareProperty(new PropertyWithValue<std::string>("TransformationXML","",Direction::Input),
-        "XML string describing the coordinate transformation that converts from the MDEventWorkspace dimensions to the output dimensions.");
+    setPropertyGroup("Parallel", grp);
 
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "A name for the output MDHistoWorkspace.");
 
-  }
-
-
-  //----------------------------------------------------------------------------------------------
-  /** Generate a MDHistoDimension_sptr from a comma-sep string.
-   *
-   * @param str :: name,minimum,maximum,number_of_bins
-   * @return
-   */
-  MDHistoDimension_sptr makeMDHistoDimensionFromString(const std::string & str)
-  {
-    if (str.empty())
-    {
-      // Make a blank dimension
-      MDHistoDimension_sptr out;
-      return out;
-    }
-    else
-    {
-      std::string name, id;
-      double min, max;
-      int numBins = 0;
-      std::vector<std::string> strs;
-      boost::split(strs, str, boost::is_any_of(","));
-      if (strs.size() != 4)
-        throw std::invalid_argument("Wrong number of values (4 are expected) in the dimensions string: " + str);
-      // Extract the arguments
-      name = Strings::strip(strs[0]);
-      id = name;
-      Strings::convert(strs[1], min);
-      Strings::convert(strs[2], max);
-      Strings::convert(strs[3], numBins);
-      if (name.size() == 0)
-        throw std::invalid_argument("Name should not be blank.");
-      if (min >= max)
-        throw std::invalid_argument("Min should be > max.");
-      if (numBins < 1)
-        throw std::invalid_argument("Number of bins should be >= 1.");
-
-      MDHistoDimension_sptr out(new MDHistoDimension(name, id, "", min, max, numBins));
-      return out;
-    }
   }
 
 
@@ -539,45 +529,141 @@ namespace MDEvents
 
 
 
+
+
+
+
+
+
+
+
+
   //----------------------------------------------------------------------------------------------
-  /** Load and check the inputs in the bin dimensions parameters
+  /** Generate a MDHistoDimension_sptr from a comma-sep string (for AlignedDimX, etc.)
+   *
+   * @param str :: name,minimum,maximum,number_of_bins
+   * @return
    */
-  void BinToMDHistoWorkspace::checkBinDimensions()
+  MDHistoDimension_sptr makeMDHistoDimensionFromString(const std::string & str)
+  {
+    if (str.empty())
+    {
+      // Make a blank dimension
+      MDHistoDimension_sptr out;
+      return out;
+    }
+    else
+    {
+      std::string name, id;
+      double min, max;
+      int numBins = 0;
+      std::vector<std::string> strs;
+      boost::split(strs, str, boost::is_any_of(","));
+      if (strs.size() != 4)
+        throw std::invalid_argument("Wrong number of values (4 are expected) in the dimensions string: " + str);
+      // Extract the arguments
+      name = Strings::strip(strs[0]);
+      id = name;
+      Strings::convert(strs[1], min);
+      Strings::convert(strs[2], max);
+      Strings::convert(strs[3], numBins);
+      if (name.size() == 0)
+        throw std::invalid_argument("Name should not be blank.");
+      if (min >= max)
+        throw std::invalid_argument("Min should be > max.");
+      if (numBins < 1)
+        throw std::invalid_argument("Number of bins should be >= 1.");
+
+      MDHistoDimension_sptr out(new MDHistoDimension(name, id, "", min, max, numBins));
+      return out;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Generate a MDHistoDimension_sptr from a comma-sep string (for OutDimX, etc...)
+   *
+   * @param str :: name,number_of_bins
+   * @return
+   */
+  MDHistoDimension_sptr makeMDHistoDimensionFromString2(const std::string & str)
+  {
+    if (str.empty())
+    {
+      // Make a blank dimension
+      MDHistoDimension_sptr out;
+      return out;
+    }
+    else
+    {
+      std::string name, id;
+      double min, max;
+      int numBins = 0;
+      std::vector<std::string> strs;
+      boost::split(strs, str, boost::is_any_of(","));
+      if (strs.size() != 2)
+        throw std::invalid_argument("Wrong number of values (2 are expected) in the dimensions string: " + str);
+      // Extract the arguments
+      name = Strings::strip(strs[0]);
+      id = name;
+      min = 0.0;
+      Strings::convert(strs[1], numBins);
+      max = double(numBins);
+      if (name.size() == 0)
+        throw std::invalid_argument("Name should not be blank.");
+      if (numBins < 1)
+        throw std::invalid_argument("Number of bins should be >= 1.");
+
+      MDHistoDimension_sptr out(new MDHistoDimension(name, id, "", min, max, numBins));
+      return out;
+    }
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Loads the dimensions and create the coordinate transform from the XML
+   */
+  void BinToMDHistoWorkspace::createTransform()
   {
     // Create the dimensions based on the strings from the user
-    binDimensionsIn.push_back( makeMDHistoDimensionFromString( getPropertyValue("DimX")) );
-    binDimensionsIn.push_back( makeMDHistoDimensionFromString( getPropertyValue("DimY")) );
-    binDimensionsIn.push_back( makeMDHistoDimensionFromString( getPropertyValue("DimZ")) );
-    binDimensionsIn.push_back( makeMDHistoDimensionFromString( getPropertyValue("DimT")) );
-
-    // Thin down the input dimensions for any invalid ones
-    for (size_t i = 0; i < binDimensionsIn.size(); ++i)
+    std::string dimChars = "XYZT";
+    for (size_t i=0; i<4; i++)
     {
-      if (binDimensionsIn[i]) // (valid pointer?)
+      std::string propName = "OutDimX"; propName[6] = dimChars[i];
+      MDHistoDimension_sptr binDim = makeMDHistoDimensionFromString2( getPropertyValue(propName));
+      if (binDim)
       {
-        if (binDimensionsIn[i]->getNBins() == 0)
-          throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was set to have 0 bins. Cannot continue.");
-
-        try {
-          size_t dim_index = in_ws->getDimensionIndexByName(binDimensionsIn[i]->getName());
-          dimensionToBinFrom.push_back(dim_index);
-          binDimensions.push_back(binDimensionsIn[i]);
-        }
-        catch (std::runtime_error &)
-        {
-          // The dimension was not found, so we are not binning across it.
-          if (binDimensionsIn[i]->getNBins() > 1)
-            throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was not found in the MDEventWorkspace and has more than one bin! Cannot continue.");
-        }
+        // (valid pointer?)
+        if (binDim->getNBins() == 0)
+          throw std::runtime_error("Dimension " + binDim->getName() + " was set to have 0 bins. Cannot continue.");
+        // This is a dimension we'll use in the output
+        binDimensions.push_back(binDim);
       }
     }
     // Number of output binning dimensions found
     outD = binDimensions.size();
 
+    // Validate
     if (outD == 0)
       throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
     if (outD > in_ws->getNumDims())
       throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace. Cannot bin!");
+
+    // De-serialize the coordinate transformation XML string
+    std::string TransformationXML = getPropertyValue("TransformationXML");
+    if (!m_axisAligned && TransformationXML.empty())
+      throw std::invalid_argument("AxisAligned is not checked but the TransformationXML property is not set! Cannot continue.");
+
+    Poco::XML::DOMParser pParser;
+    Poco::XML::Document* pDoc = pParser.parseString(TransformationXML);
+    Poco::XML::Element* pRootElem = pDoc->documentElement();
+    CoordTransformAffineParser parser;
+    m_transform = parser.createTransform(pRootElem);
+
+    // Validate
+    if (m_transform->getInD() != in_ws->getNumDims())
+      throw std::invalid_argument("The number of input dimensions in the CoordinateTransform object is not consistent with the number of dimensions in the input workspace.");
+    if (m_transform->getOutD() != outD)
+      throw std::invalid_argument("The number of output dimensions in the CoordinateTransform object is not consistent with the number of dimensions specified in the OutDimX, etc. properties.");
   }
 
 
@@ -587,6 +673,43 @@ namespace MDEvents
    */
   void BinToMDHistoWorkspace::createAlignedTransform()
   {
+    // Create the dimensions based on the strings from the user
+    std::string dimChars = "XYZT";
+    for (size_t i=0; i<4; i++)
+    {
+      std::string propName = "AlignedDimX"; propName[10] = dimChars[i];
+      MDHistoDimension_sptr binDim = makeMDHistoDimensionFromString( getPropertyValue(propName));
+      if (binDim)
+      {
+        // (valid pointer?)
+        if (binDim->getNBins() == 0)
+          throw std::runtime_error("Dimension " + binDim->getName() + " was set to have 0 bins. Cannot continue.");
+
+        // We have to find the dimension in the INPUT workspace to set to the OUTPUT workspace
+        try {
+          size_t dim_index = in_ws->getDimensionIndexByName(binDim->getName());
+          dimensionToBinFrom.push_back(dim_index);
+        }
+        catch (std::runtime_error &)
+        {
+          // The dimension was not found, so we are not binning across it.
+          if (binDim->getNBins() > 1)
+            throw std::runtime_error("Dimension " + binDim->getName() + " was not found in the MDEventWorkspace and has more than one bin! Cannot continue.");
+        }
+        // This is a dimension we'll use in the output
+        binDimensions.push_back(binDim);
+      }
+    }
+    // Number of output binning dimensions found
+    outD = binDimensions.size();
+
+    // Validate
+    if (outD == 0)
+      throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
+    if (outD > in_ws->getNumDims())
+      throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace. Cannot bin!");
+
+    // Now we build the coordinate transformation object
     std::vector<coord_t> origin(outD), scaling(outD);
     for (size_t d=0; d<outD; d++)
     {
@@ -599,6 +722,13 @@ namespace MDEvents
   }
 
 
+
+
+
+
+
+
+
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -607,34 +737,21 @@ namespace MDEvents
     // Input MDEventWorkspace
     in_ws = getProperty("InputWorkspace");
 
-    // Treat the input dimensions.
-    checkBinDimensions();
+    // Is the transformation aligned with axes?
+    m_axisAligned = getProperty("AxisAligned");
 
+    // Create the coordinate transformation
+    m_transform = NULL;
+    if (m_axisAligned)
+      this->createAlignedTransform();
+    else
+      this->createTransform();
 
     // De serialize the implicit function
     std::string ImplicitFunctionXML = getPropertyValue("ImplicitFunctionXML");
     implicitFunction = NULL;
     if (!ImplicitFunctionXML.empty())
       implicitFunction = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(ImplicitFunctionXML);
-
-    // De-serialize the coordinate transformation XML string
-    std::string TransformationXML = getPropertyValue("TransformationXML");
-    m_transform = NULL;
-    if (!TransformationXML.empty())
-    {
-      Poco::XML::DOMParser pParser;
-      Poco::XML::Document* pDoc = pParser.parseString(TransformationXML);
-      Poco::XML::Element* pRootElem = pDoc->documentElement();
-      CoordTransformAffineParser parser;
-      m_transform = parser.createTransform(pRootElem);
-      m_axisAligned = false;
-    }
-    else
-    {
-      // Make an aligned transform out of the parameters
-      this->createAlignedTransform();
-      m_axisAligned = true;
-    }
 
     prog = new Progress(this, 0, 1.0, 1); // This gets deleted by the thread pool; don't delete it in here.
 

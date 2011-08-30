@@ -57,7 +57,7 @@ namespace MDEvents
     /// Run the algorithm
     void exec();
 
-    void checkBinDimensions();
+    void createTransform();
     void createAlignedTransform();
 
     template<typename MDE, size_t nd>
@@ -77,8 +77,6 @@ namespace MDEvents
 
     // Input workspace
     Mantid::API::IMDEventWorkspace_sptr in_ws;
-    /// Input binning dimensions
-    std::vector<Mantid::Geometry::MDHistoDimension_sptr> binDimensionsIn;
     /// The output MDHistoWorkspace
     Mantid::MDEvents::MDHistoWorkspace_sptr outWS;
     /// Progress reporting

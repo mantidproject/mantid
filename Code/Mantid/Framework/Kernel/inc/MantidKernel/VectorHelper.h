@@ -64,6 +64,44 @@ namespace VectorHelper
   // Linearly interpolate between a set of Y values. Assumes the values are set for the calculated nodes
   MANTID_KERNEL_DLL void linearlyInterpolateY(const std::vector<double> & x, std::vector<double> & y, const double stepSize);
 
+
+  //-------------------------------------------------------------------------------------
+  /** Return the length of the vector (in the physical sense),
+   * the sqrt of the sum of the squares of the components
+   *
+   * @param x :: input vector, x should be float or double.
+   * @return length of the vector
+   */
+  template<typename T>
+  T lengthVector(const std::vector<T> & x)
+  {
+    T total = 0;
+    for (size_t i=0; i<x.size(); i++)
+      total += x[i] * x[i];
+    // Length is sqrt
+    total = sqrt(total);
+    return total;
+  }
+
+  //-------------------------------------------------------------------------------------
+  /** Normalize a vector of any size to unity, using the sum of the squares of the components
+   *
+   * @param x :: input vector, x should be float or double. Length 1+
+   * @return the vector, normalized to 1.
+   */
+  template<typename T>
+  std::vector<T> normalizeVector(const std::vector<T> & x)
+  {
+    // Ignore 0-sized vectors
+    if (x.size() == 0) return x;
+    std::vector<T> out(x.size(), 0);
+    // Length is sqrt
+    T length = lengthVector(x);
+    for (size_t i=0; i<x.size(); i++)
+      out[i] = x[i] / length;
+    return out;
+  }
+
   //-------------------------------------------------------------------------------------
   /** Generic method to convert an iterator to an array of type T.
    * Data type is converted at the same type.

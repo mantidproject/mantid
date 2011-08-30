@@ -50,6 +50,30 @@ public:
     TS_ASSERT_EQUALS( vec[1], "Jude");
   }
 
+  void test_normalizeVector_and_length()
+  {
+    std::vector<double> x;
+    std::vector<double> y;
+    TS_ASSERT_DELTA( VectorHelper::lengthVector(x), 0.0, 1e-5);
+
+    y = VectorHelper::normalizeVector(x);
+    TSM_ASSERT_EQUALS( "Pass-through empty vectors", y.size(), 0);
+    x.push_back(3.0);
+    x.push_back(4.0);
+    TS_ASSERT_DELTA( VectorHelper::lengthVector(x), 5.0, 1e-5);
+    y = VectorHelper::normalizeVector(x);
+    TS_ASSERT_EQUALS( y.size(), 2);
+    TS_ASSERT_DELTA( y[0], 0.6, 1e-5);
+    TS_ASSERT_DELTA( y[1], 0.8, 1e-5);
+
+    // Handle 0-length
+    x[0] = 0.0;
+    x[1] = 0.0;
+    TS_ASSERT_DELTA( VectorHelper::lengthVector(x), 0.0, 1e-5);
+    y = VectorHelper::normalizeVector(x);
+    TS_ASSERT_EQUALS( y.size(), 2);
+  }
+
   // TODO: Figure out proper behavior if given stupidity as inputs
 //  void test_splitStringIntoVector_badNumber_gives0()
 //  {

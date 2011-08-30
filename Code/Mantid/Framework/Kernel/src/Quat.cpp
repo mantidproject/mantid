@@ -26,7 +26,7 @@ Quat::Quat():w(1),a(0),b(0),c(0)
  * Construct a Quat between two vectors; 
  * The angle between them is defined differently from usual if vectors are not unit or the same length vectors, so quat would be not consistent
  *
- * v=(src+des)/�src+des�
+ * v=(src+des)/(src+des)
  * w=v.des
  * (a,b,c)=(v x des)
  * @param src :: the source position

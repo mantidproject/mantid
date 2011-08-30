@@ -36,6 +36,8 @@ namespace MDEvents
     void addTranslation(const coord_t * translationVector);
     const Mantid::Kernel::Matrix<coord_t> & getMatrix() const;
     void setMatrix(const Mantid::Kernel::Matrix<coord_t> & newMatrix);
+    void buildOrthogonal(const std::vector<coord_t> & origin, const std::vector<std::vector<coord_t> > & axes,
+        const std::vector<coord_t> & scaling = std::vector<coord_t>() );
 
     virtual void apply(const coord_t * inputVector, coord_t * outVector) const;
 

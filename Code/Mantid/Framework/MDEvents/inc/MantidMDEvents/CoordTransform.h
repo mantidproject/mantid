@@ -34,6 +34,14 @@ namespace MDEvents
     virtual std::string toXMLString() const = 0;
     virtual void apply(const coord_t * inputVector, coord_t * outVector) const = 0;
 
+    /// @return the number of input dimensions
+    size_t getInD() const
+    { return inD; };
+
+    /// @return the number of output dimensions
+    size_t getOutD() const
+    { return outD; };
+
   protected:
     /// Input number of dimensions
     size_t inD;

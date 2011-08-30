@@ -2,18 +2,22 @@
 #define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidAPI/ImplicitFunctionParserFactory.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
+#include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
@@ -21,10 +25,12 @@
 #include <gtest/gtest.h>
 #include <iomanip>
 #include <iostream>
-#include "MantidTestHelpers/AlgorithmHelper.h"
+#include "MantidKernel/Strings.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using Mantid::coord_t;
 
 
 class BinToMDHistoWorkspaceTest : public CxxTest::TestSuite
@@ -112,10 +118,10 @@ public:
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000*numEventsPerBox);
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinToMDHistoWorkspaceTest_ws") );
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimX", name1));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimY", name2));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimZ", name3));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", name4));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimX", name1));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimY", name2));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimZ", name3));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimT", name4));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML",functionXML));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws"));
@@ -237,6 +243,129 @@ public:
   { do_test_exec("", "Axis2,2.0,8.0, 1", "", "", "", 20*6.0*100.0 /*signal*/, 1 /*# of bins*/, true /*IterateEvents*/, 20 /*numEventsPerBox*/ );
   }
 
+
+
+
+
+
+
+
+  /** Test the algorithm, with a coordinate transformation.
+   *
+  * @param binsX : # of bins in the output
+  * @param expected_signal :: how many events in each resulting bin
+  * @param expected_numBins :: how many points/bins in the output
+  */
+  void do_test_transform(int binsX, int binsY, int binsZ,
+      double expected_signal,
+      size_t expected_numBins,
+      bool IterateEvents=false)
+  {
+    BinToMDHistoWorkspace alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+
+    // Make a workspace with events along a regular grid that is rotated and offset along x,y
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 0);
+    in_ws->splitBox();
+    double theta = 0.1;
+    std::vector<coord_t> origin(3);
+    origin[0] = -2.0;
+    origin[1] = -3.0;
+    origin[2] = -4.0;
+    for (coord_t ox=0.5; ox<10; ox++)
+      for (coord_t oy=0.5; oy<10; oy++)
+        for (coord_t oz=0.5; oz<10; oz++)
+        {
+          coord_t x = ox*cos(theta) - oy*sin(theta) + origin[0];
+          coord_t y = oy*cos(theta) + ox*sin(theta) + origin[1];
+          coord_t z = oz + origin[2];
+          coord_t center[3] = {x,y,z};
+          MDLeanEvent<3> ev(1.0, 1.0, center);
+//          std::cout << x << "," << y << "," << z << std::endl;
+          in_ws->addEvent(ev);
+        }
+    in_ws->refreshCache();
+
+
+    // Build the transformation (from eventWS to binned workspace)
+    CoordTransformAffine ct(3,3);
+
+    // Build the basis vectors, a 0.1 rad rotation along +Z
+    double angle = 0.1;
+    std::vector<std::vector<coord_t> > bases;
+    std::vector<coord_t> u(3,0);
+    u[0] = cos(angle); u[1] = sin(angle);
+    std::vector<coord_t> v(3,0);
+    v[0] = -sin(angle); v[1] = cos(angle);
+    std::vector<coord_t> w(3,0);
+    w[2] = 1.0; // Point in Z vertical
+    bases.push_back(u); bases.push_back(v); bases.push_back(w);
+
+    // Scale the output dimensions to match the number of bins
+    std::vector<coord_t> scale(3);
+    scale[0] = double(binsX)/10.0;
+    scale[1] = double(binsY)/10.0;
+    scale[2] = double(binsZ)/10.0;
+
+    // Build the transformation
+    TS_ASSERT_THROWS_NOTHING( ct.buildOrthogonal(origin, bases, scale) );
+
+    // Save to NXS file for testing
+    AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
+    AlgorithmHelper::runAlgorithm("SaveMDEW", 4,
+        "InputWorkspace", "BinToMDHistoWorkspaceTest_ws",
+        "Filename", "BinToMDHistoWorkspaceTest_ws_rotated.nxs");
+
+
+    // 1000 boxes with 1 event each
+    TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
+
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinToMDHistoWorkspaceTest_ws") );
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AxisAligned", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutDimX", "OutX," + Strings::toString(binsX) ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutDimY", "OutY," + Strings::toString(binsY) ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutDimZ", "OutZ," + Strings::toString(binsZ) ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutDimT", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML",""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TransformationXML",ct.toXMLString()));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws"));
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+
+    TS_ASSERT( alg.isExecuted() );
+
+    IMDWorkspace_sptr out ;
+    TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<IMDWorkspace>(
+        AnalysisDataService::Instance().retrieve("BinToMDHistoWorkspaceTest_ws")); )
+    TS_ASSERT(out);
+    if(!out) return;
+
+    // Took 6x6x6 bins in the middle of the box
+    TS_ASSERT_EQUALS(out->getNPoints(), expected_numBins);
+    // Every box has a single event summed into it, so 1.0 weight
+    for (size_t i=0; i < out->getNPoints(); i++)
+    {
+      // Nothing rejected
+      TS_ASSERT_DELTA(out->getSignalAt(i), expected_signal, 1e-5);
+      TS_ASSERT_DELTA(out->getErrorAt(i), expected_signal, 1e-5);
+    }
+    AnalysisDataService::Instance().remove("BinToMDHistoWorkspaceTest_ws");
+  }
+
+
+  void test_exec_with_transform()
+  {
+    do_test_transform(10, 10, 10,
+        1.0 /*signal*/, 1000 /*# of bins*/, true /*IterateEvents*/);
+  }
+
+  void test_exec_with_transform_unevenSizes()
+  {
+    do_test_transform(5, 10, 2,
+        10*1.0 /*signal*/, 100 /*# of bins*/, true /*IterateEvents*/);
+  }
 
 };
 
