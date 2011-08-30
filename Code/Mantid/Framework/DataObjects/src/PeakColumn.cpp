@@ -166,6 +166,12 @@ namespace DataObjects
     throw std::runtime_error("const version of void_pointer() not implemented. Looks to be unused?");
   }
 
+  PeakColumn* PeakColumn::clone() const
+  {
+    PeakColumn* temp = new PeakColumn(this->peaks, this->m_name);
+    return temp;
+  }
+
 } // namespace Mantid
 } // namespace DataObjects
 

@@ -95,7 +95,6 @@ namespace DataObjects
     virtual const std::string id() const{return "TableWorkspace";}
     /// Get the footprint in memory in KB.
     virtual size_t getMemorySize() const;
-
     /// Creates a new column.
     bool addColumn(const std::string& type, const std::string& name);
     /// Removes a column.
@@ -118,6 +117,8 @@ namespace DataObjects
     int insertRow(int index);
     /// Delets a row if it exists.
     void removeRow(int index);
+    /// Clone table workspace instance.
+    TableWorkspace* clone() const;
 
     /** This method finds the row and column index of an integer cell value in a table workspace
      * @param value :: -value to search
@@ -209,7 +210,9 @@ private:
 			throw;
 		}
 	}
-	
+
+    bool addColumn(boost::shared_ptr<API::Column> column);
+
     /** This method finds the row and column index of an integer cell value in a table workspace
     * @param value :: -value to search
     * @param  row  row number of the value  searched

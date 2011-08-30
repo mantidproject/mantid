@@ -173,6 +173,32 @@ namespace Mantid
         return nameList;
     }
 
+    bool TableWorkspace::addColumn(boost::shared_ptr<API::Column> column)
+    {
+      column_it ci = std::find_if(m_columns.begin(),m_columns.end(),FindName(column->name()));
+      if (ci != m_columns.end())
+      {
+        g_log.error()<<"Column with name "<<column->name()<<" already exists.\n";
+        return false;
+      }
+      else
+      {
+        m_columns.push_back(column);
+      }
+    }
+
+    TableWorkspace* TableWorkspace::clone() const
+    {
+      TableWorkspace* copy = new TableWorkspace(this->m_rowCount);
+      column_const_it it=m_columns.begin();
+      while(it != m_columns.end())
+      {
+        copy->addColumn(boost::shared_ptr<API::Column>((*it)->clone()));
+        it++;
+      }
+      return copy;
+    };
+
 //    template<>
 //    boost::tuples::null_type TableWorkspace::make_TupleRef< boost::tuples::null_type >(int j,const std::vector<std::string>& names,int i)
 //    {return boost::tuples::null_type();}

@@ -4,6 +4,7 @@
 #include <vector> 
 #include <algorithm> 
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/TableWorkspace.h" 
@@ -249,8 +250,27 @@ public:
 	  tw.find(searchstr,row,formatcol);
 	  TS_ASSERT_EQUALS(row,7);
 
+  }
 
+  void testClone()
+  {
+    TableWorkspace tw(1);
+	  tw.addColumn("str","X");
+	  tw.addColumn("str","Y");
+	  tw.addColumn("str","Z");
+   
+    tw.getColumn(0)->cell<std::string>(0) = "a";
+    tw.getColumn(1)->cell<std::string>(0) = "b";
+    tw.getColumn(2)->cell<std::string>(0) = "c";
 
+    boost::scoped_ptr<TableWorkspace> cloned(tw.clone());
+
+    //Check clone is same as original.
+    TS_ASSERT_EQUALS(tw.columnCount(), cloned->columnCount());
+    TS_ASSERT_EQUALS(tw.rowCount(), cloned->rowCount());
+    TS_ASSERT_EQUALS("a", cloned->getColumn(0)->cell<std::string>(0));
+    TS_ASSERT_EQUALS("b", cloned->getColumn(1)->cell<std::string>(0));
+    TS_ASSERT_EQUALS("c", cloned->getColumn(2)->cell<std::string>(0));
 
   }
 

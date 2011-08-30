@@ -85,6 +85,14 @@ public:
     bool isBool()const{return typeid(Type) == typeid(API::Boolean);}
     /// Memory used by the column
     long int sizeOfData()const{return static_cast<long int>(m_data.size()*sizeof(Type));}
+    /// Clone
+    virtual TableColumn* clone() const
+    {
+      TableColumn* temp = new TableColumn();
+      temp->m_data = this->m_data;
+      temp->setName(this->m_name);
+      return temp;
+    }
 
     /// Reference to the data.
     std::vector<Type>& data(){return m_data;}

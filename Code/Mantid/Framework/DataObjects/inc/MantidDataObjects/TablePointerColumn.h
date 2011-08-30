@@ -75,6 +75,13 @@ public:
     bool isBool()const{return typeid(Type) == typeid(API::Boolean);}
     /// Memory used by the column
     long int sizeOfData()const{return static_cast<long int>(m_data.size()*sizeof(Type));}
+    /// Clone 
+    virtual TablePointerColumn* clone() const
+    {
+      TablePointerColumn* temp = new TablePointerColumn();
+      temp->m_data = this->m_data;
+      return temp;
+    }
 protected:
     /// Resize.
     void resize(int count)
