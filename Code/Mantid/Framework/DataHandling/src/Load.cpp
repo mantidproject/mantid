@@ -178,7 +178,9 @@ namespace Mantid
         if( loadProp->name() == filePropName ) continue;
         try
         {
-          declareProperty(loadProp->clone(), loadProp->documentation());
+          Property * propClone = loadProp->clone();
+          propClone->deleteSettings(); //Get rid of special settings because it does not work in custom GUI.
+          declareProperty(propClone, loadProp->documentation());
         }
         catch(Exception::ExistsError&)
         {

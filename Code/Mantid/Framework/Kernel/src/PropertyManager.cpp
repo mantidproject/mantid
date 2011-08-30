@@ -34,6 +34,8 @@ namespace Mantid
       for (unsigned int i = 0; i < m_orderedProperties.size(); ++i)
       {
         Property * p = other.m_orderedProperties[i]->clone();
+        if (p->getSettings())
+          p->getSettings()->setPropertyManager(this);
         this->m_orderedProperties[i] = p;
         std::string key = p->name();
         std::transform(key.begin(), key.end(), key.begin(), toupper);
@@ -59,6 +61,8 @@ namespace Mantid
         for (unsigned int i = 0; i < m_orderedProperties.size(); ++i)
         {
           Property * p = other.m_orderedProperties[i]->clone();
+          if (p->getSettings())
+            p->getSettings()->setPropertyManager(this);
           this->m_orderedProperties[i] = p;
           std::string key = p->name();
           std::transform(key.begin(), key.end(), key.begin(), toupper);
@@ -188,6 +192,9 @@ namespace Mantid
         delete p;
         throw std::invalid_argument("An empty property name is not permitted");
       }
+      // Make sure the settings has the right property manager attached
+      if (p->getSettings())
+        p->getSettings()->setPropertyManager(this);
 
       std::transform(key.begin(), key.end(), key.begin(), toupper);
       if ( m_properties.insert(PropertyMap::value_type(key, p)).second)

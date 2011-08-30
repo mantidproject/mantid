@@ -113,6 +113,15 @@ public:
   void setSettings(IPropertySettings * settings)
   { m_settings = settings; }
 
+  /** @return the PropertySettings for this property */
+  IPropertySettings * getSettings()
+  { return m_settings; }
+
+  /** Deletes the PropertySettings object contained */
+  void deleteSettings()
+  { delete m_settings; m_settings = NULL; }
+
+
   ///Overriden function that returns if property has the same value that it was initialised with, if applicable
   virtual bool isDefault() const = 0;
   ///Whether to save input values
