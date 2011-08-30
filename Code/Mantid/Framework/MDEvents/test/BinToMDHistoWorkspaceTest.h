@@ -405,10 +405,10 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinToMDHistoWorkspaceTest_ws") );
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimX", "Axis0," + binParams));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimY", "Axis1," + binParams));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimZ", "Axis2," + binParams));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimX", "Axis0," + binParams));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimY", "Axis1," + binParams));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimZ", "Axis2," + binParams));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDimT", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws_histo"));
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )

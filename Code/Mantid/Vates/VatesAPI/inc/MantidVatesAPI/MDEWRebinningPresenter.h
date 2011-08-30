@@ -321,19 +321,19 @@ namespace Mantid
         std::string id; 
         if(sourceGeometry.hasXDimension())
         {
-          hist_alg.setPropertyValue("DimX",  extractFormattedPropertyFromDimension(sourceGeometry.getXDimension())); 
+          hist_alg.setPropertyValue("AlignedDimX",  extractFormattedPropertyFromDimension(sourceGeometry.getXDimension()));
         }
         if(sourceGeometry.hasYDimension())
         {
-          hist_alg.setPropertyValue("DimY",  extractFormattedPropertyFromDimension(sourceGeometry.getYDimension())); 
+          hist_alg.setPropertyValue("AlignedDimY",  extractFormattedPropertyFromDimension(sourceGeometry.getYDimension()));
         }
         if(sourceGeometry.hasZDimension())
         {
-          hist_alg.setPropertyValue("DimZ",  extractFormattedPropertyFromDimension(sourceGeometry.getZDimension())); 
+          hist_alg.setPropertyValue("AlignedDimZ",  extractFormattedPropertyFromDimension(sourceGeometry.getZDimension()));
         }
         if(sourceGeometry.hasTDimension())
         {
-          hist_alg.setPropertyValue("DimT",  extractFormattedPropertyFromDimension(sourceGeometry.getTDimension())); 
+          hist_alg.setPropertyValue("AlignedDimT",  extractFormattedPropertyFromDimension(sourceGeometry.getTDimension()));
         }
         if(m_view->getApplyClip())
         {
