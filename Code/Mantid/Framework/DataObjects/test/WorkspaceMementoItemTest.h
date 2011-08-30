@@ -31,7 +31,8 @@ void testConstructor()
 {
   //Integer Item
   WorkspaceMementoItem<0, int> a(ws, 0);
-  TS_ASSERT_EQUALS(0, a.ColIndex);
+  size_t colindex = a.ColIndex;
+  TS_ASSERT_EQUALS(0, colindex);
   TS_ASSERT_EQUALS(1, a.getValue());
 }
 
