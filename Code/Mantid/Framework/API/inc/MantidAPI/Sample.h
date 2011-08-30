@@ -66,7 +66,7 @@ namespace Mantid
       /// index operator for accessing multiple samples
       Sample& operator[] (const int index);
       /// the number of samples
-      const std::size_t size() const;
+      std::size_t size() const;
       /// Adds a sample to the list
       void addSample(boost::shared_ptr<Sample> childSample);
 

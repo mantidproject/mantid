@@ -290,7 +290,7 @@ namespace Mantid
      * Gets the number of samples in this collection
      * @returns The count of samples
      */
-    const std::size_t Sample::size() const
+    std::size_t Sample::size() const
     {
       return m_samples.size()+1;
     }
