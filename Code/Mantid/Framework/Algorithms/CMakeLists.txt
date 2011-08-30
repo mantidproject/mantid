@@ -135,6 +135,7 @@ set ( SRC_FILES
 	src/Scale.cpp
 	src/ScaleX.cpp
 	src/SetUncertaintiesToZero.cpp
+	src/ShiftLogTime.cpp
 	src/SmoothData.cpp
 	src/SmoothNeighbours.cpp
 	src/SofQW.cpp
@@ -298,6 +299,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
 	inc/MantidAlgorithms/SetUncertaintiesToZero.h
+	inc/MantidAlgorithms/ShiftLogTime.h
 	inc/MantidAlgorithms/SmoothData.h
 	inc/MantidAlgorithms/SmoothNeighbours.h
 	inc/MantidAlgorithms/SofQW.h
@@ -445,6 +447,7 @@ set ( TEST_FILES
 	test/ReplaceSpecialValuesTest.h
 	test/ScaleTest.h
 	test/ScaleXTest.h
+	test/ShiftLogTimeTest.h
 	test/SmoothDataTest.h
 	test/SmoothNeighboursTest.h
 	test/SofQW2Test.h
