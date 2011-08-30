@@ -45,36 +45,45 @@ namespace Mantid
       m_ValidFrom(instr->m_ValidFrom), m_ValidTo(instr->m_ValidTo)
     {}
 
-    /// Copy constructor
-    Instrument::Instrument(const Instrument& instr)
-      : CompAssembly(instr), m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit),
+    /** Copy constructor
+     *  This method was added to deal with having distinct neutronic and physical positions
+     *  in indirect instruments.
+     */
+    Instrument::Instrument(const Instrument& instr) : CompAssembly(instr),
+        m_sourceCache(NULL), m_sampleCache(NULL), /* Should only be temporarily null */
+        m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit),
         m_monitorCache(instr.m_monitorCache), m_defaultViewAxis(instr.m_defaultViewAxis),
         m_instr(), m_map_nonconst(), /* Should not be parameterized */
         m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo)
     {
-      // m_detectorCache, m_sourceCache, m_sampleCache
+      // Now we need to fill the detector, source and sample caches with pointers into the new instrument
       std::vector<IComponent_const_sptr> children;
       getChildren(children,true);
       std::vector<IComponent_const_sptr>::const_iterator it;
       for ( it = children.begin(); it != children.end(); ++it)
       {
+        // First check if the current component is a detector and add to cache if it is
+        // N.B. The list of monitors should remain unchanged. As the cache holds detector id
+        // numbers rather than pointers, there's no need for special handling
         if ( const IDetector* det = dynamic_cast<const Detector*>(it->get()) )
         {
           markAsDetector(det);
-          break;
+          continue;
         }
-        const ObjComponent* obj = dynamic_cast<const ObjComponent*>(it->get());
-        if ( obj )
+        // Now check whether the current component is the source or sample.
+        // As the majority of components will be detectors, we will rarely get to here
+        if ( const ObjComponent* obj = dynamic_cast<const ObjComponent*>(it->get()) )
         {
+          // This relies on the source and sample having a unique name
           if ( obj->getName() == instr.m_sourceCache->getName() )
           {
             markAsSource(obj);
-            break;
+            continue;
           }
           if ( obj->getName() == instr.m_sampleCache->getName() )
           {
             markAsSamplePos(obj);
-            break;
+            continue;
           }
         }
       }

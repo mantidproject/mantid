@@ -15,26 +15,37 @@ using namespace Mantid::Geometry;
 class InstrumentTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static InstrumentTest *createSuite() { return new InstrumentTest(); }
+  static void destroySuite( InstrumentTest *suite ) { delete suite; }
+
   InstrumentTest()
   {
+    instrument.setName("TestInst");
     ObjComponent *source = new ObjComponent("source");
     source->setPos(0.0,0.0,-10.0);
+    instrument.add(source);
     instrument.markAsSource(source);
     ObjComponent *sample = new ObjComponent("sample");
+    instrument.add(sample);
     instrument.markAsSamplePos(sample);
     det = boost::shared_ptr<Detector>(new Detector("det1",1,0));
     det->setPos(1.0,0.0,0.0);
+    instrument.add(det.get());
     instrument.markAsDetector(det.get());
     det2 = boost::shared_ptr<Detector>(new Detector("det2",10,0));
+    det2->setPos(0.0,1.0,0.0);
+    instrument.add(det2.get());
     instrument.markAsDetector(det2.get());
     det3 = boost::shared_ptr<Detector>(new Detector("det3",11,0));
-    instrument.markAsDetector(det3.get());
-  }
+    det->setPos(0.0,0.0,1.0);
+    instrument.add(det3.get());
+    instrument.markAsMonitor(det3.get());
 
-  ~InstrumentTest()
-  {
-    //delete det, det2, det3;
-    //delete instrument.getSample();
+    instrument.setDefaultViewAxis("X-");
+    instrument.getLogfileCache().insert(std::make_pair("apple",boost::shared_ptr<XMLlogfile>()));
+    instrument.getLogfileUnit()["banana"] = "yellow";
   }
 
   void testType()
@@ -48,11 +59,52 @@ public:
     TS_ASSERT( ! i.getSource() );
     TS_ASSERT( ! i.getSample() );
     TS_ASSERT( ! i.isParametrized() );
+    TS_ASSERT_THROWS( i.baseInstrument(), std::runtime_error );
+    TS_ASSERT_THROWS( i.getParameterMap(), std::runtime_error );
 
     Instrument ii("anInstrument");
     TS_ASSERT( ! ii.getSource() );
     TS_ASSERT( ! ii.getSample() );
     TS_ASSERT_EQUALS( ii.getName(), "anInstrument" );
+  }
+
+  void testCopyConstructor()
+  {
+    Instrument i = instrument;
+    TS_ASSERT_EQUALS( i.getName(), instrument.getName() );
+    TS_ASSERT_EQUALS( i.nelements(), instrument.nelements() );
+    TS_ASSERT_EQUALS( i.getLogfileCache(), instrument.getLogfileCache() );
+    TS_ASSERT_EQUALS( i.getLogfileUnit(), instrument.getLogfileUnit() );
+    TS_ASSERT_EQUALS( i.getMonitors(), instrument.getMonitors() );
+    TS_ASSERT_EQUALS( i.getDefaultAxis(), instrument.getDefaultAxis() );
+    // Should not be parameterized - there's a different constructor for that
+    TS_ASSERT_THROWS( i.baseInstrument(), std::runtime_error );
+    TS_ASSERT_THROWS( i.getParameterMap(), std::runtime_error );
+    TS_ASSERT_EQUALS( i.getValidFromDate(), instrument.getValidFromDate() );
+    TS_ASSERT_EQUALS( i.getValidToDate(), instrument.getValidToDate() );
+
+    // Check source and sample copied correctly, but different objects
+    TS_ASSERT_EQUALS( i.getSource()->getName(), instrument.getSource()->getName() );
+    TS_ASSERT_EQUALS( i.getSource()->getPos(), instrument.getSource()->getPos() );
+    TS_ASSERT_DIFFERS( i.getSource(), instrument.getSource() );
+    TS_ASSERT_EQUALS( i.getSample()->getName(), instrument.getSample()->getName() );
+    TS_ASSERT_EQUALS( i.getSample()->getPos(), instrument.getSample()->getPos() );
+    TS_ASSERT_DIFFERS( i.getSample(), instrument.getSample() );
+
+    // Ditto for the detectors
+    detid2det_map origMap, copyMap;
+    instrument.getDetectors(origMap);
+    i.getDetectors(copyMap);
+    TS_ASSERT_EQUALS( copyMap.size(), origMap.size() );
+    detid2det_map::const_iterator origIt = origMap.begin();
+    detid2det_map::const_iterator copyIt = copyMap.begin();
+    for ( ; origIt != origMap.end(); ++origIt, ++copyIt )
+    {
+      TS_ASSERT_EQUALS( copyIt->first, origIt->first );
+      TS_ASSERT_DIFFERS( copyIt->second.get(), origIt->second.get() );
+      TS_ASSERT_EQUALS( copyIt->second->getName(), origIt->second->getName() );
+      TS_ASSERT_EQUALS( copyIt->second->getPos(), origIt->second->getPos() );
+    }
   }
 
   void testSource()

@@ -139,9 +139,8 @@ void LoadInstrumentFromRaw::exec()
 
     detector->setPos(pos);
 
-    // add copy to instrument and mark it
+    // add to instrument
     instrument->add(detector);
-//    instrument->markAsDetector(detector);
 
     // Check monitor list to see if this is a monitor that should be marked as such
     if ( std::find(monIndex,monIndex+numMonitors,i+1) != monIndex+numMonitors)
@@ -149,33 +148,16 @@ void LoadInstrumentFromRaw::exec()
       instrument->markAsMonitor(detector);
       g_log.information() << "Detector with ID " << detID[i] << " marked as a monitor." << std::endl;
     }
+    // otherwise mark as a detector
     else
     {
       instrument->markAsDetector(detector);
     }
-//    for (int j = 0; j < numMonitors; ++j)
-//    {
-//      if ( detID[i] == monIndex[j]) instrument->markAsMonitor(detector);
-//    }
 
     prog+=(0.5/numDetector);
     progress(prog);
   }  
-   
 
-
-//  // Now mark the up the monitors
-//  const int numMonitors = iraw.i_mon;     // The number of monitors
-//  const int* const monIndex = iraw.mdet;  // Index into the udet array for each monitor
-//
-  for (int j = 0; j < numMonitors; ++j)
-  {
-    const int detectorToMark = detID[monIndex[j]-1];
-    std::cout << ">>>>> " << monIndex[j] << " " << detectorToMark << std::endl;
-//    boost::shared_ptr<Geometry::IDetector> det = instrument->getDetector(detectorToMark);
-//	instrument->markAsMonitor(det.get());
-//    g_log.information() << "Detector with ID " << detectorToMark << " marked as a monitor." << std::endl;
-  }
   std::vector<detid_t> monitorList=instrument->getMonitors();
   setProperty("MonitorList",monitorList);
   // Information to the user about what info is extracted from raw file
