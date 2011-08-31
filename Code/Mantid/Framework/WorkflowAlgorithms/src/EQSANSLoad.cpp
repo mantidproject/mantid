@@ -375,7 +375,6 @@ void EQSANSLoad::exec()
   loadAlg->setProperty("Filename", fileName);
   loadAlg->executeAsSubAlg();
   IEventWorkspace_sptr dataWS_tmp = loadAlg->getProperty("OutputWorkspace");
-  setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS_tmp);
   dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
 
   // Get the sample-detector distance
@@ -485,6 +484,7 @@ void EQSANSLoad::exec()
   scAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
   scAlg->setProperty("Factor", conversion_factor);
   scAlg->executeAsSubAlg();
+  dataWS = scAlg->getProperty("OutputWorkspace");
   dataWS->getAxis(0)->setUnit("Wavelength");
 
   // Rebin so all the wavelength bins are aligned
@@ -498,7 +498,10 @@ void EQSANSLoad::exec()
   rebinAlg->setPropertyValue("Params", params);
   rebinAlg->setProperty("PreserveEvents", true);
   rebinAlg->executeAsSubAlg();
+  dataWS = rebinAlg->getProperty("OutputWorkspace");
+
   dataWS->mutableRun().addProperty("event_ws", getPropertyValue("OutputWorkspace"), true);
+  setProperty<MatrixWorkspace_sptr>("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
 }
 
 } // namespace WorkflowAlgorithms
