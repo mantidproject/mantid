@@ -952,6 +952,8 @@ bool ConfigServiceImpl::isExecutable(const std::string& target) const
 /** Runs a command line string to open a program. The function can take program arguments.
  *  i.e it can load in a file to the program on startup.
  *
+ *  This method will expand environment variables found in the given file path.
+ *
  *  @param programFilePath :: The directory where the program is located.
  *  @param programArguments :: The arguments that the program can take on startup. For example,
  *  the file to load up.
@@ -961,7 +963,8 @@ void ConfigServiceImpl::launchProcess(const std::string& programFilePath, const 
 {
   try
   {
-    Poco::Process::launch(programFilePath, programArguments);
+    std::string expTarget = Poco::Path::expand(programFilePath);
+    Poco::Process::launch(expTarget, programArguments);
   }
   catch(Poco::SystemException &e)
   {
