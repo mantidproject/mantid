@@ -33,6 +33,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include <iomanip>
 #include <cstdio>
+#include <Poco/Path.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -882,7 +883,9 @@ void MantidDockWidget::saveToProgram(const QString & name)
   //Check to see if mandatory information is included
   if ((programKeysAndDetails.count("name") != 0) && (programKeysAndDetails.count("target") != 0) && (programKeysAndDetails.count("saveusing") != 0))    
   {
-    QFileInfo target = QString::fromStdString(programKeysAndDetails.find("target")->second);
+    std::string expTarget = Poco::Path::expand(programKeysAndDetails.find("target")->second);
+
+    QFileInfo target = QString::fromStdString(expTarget);
     if(target.exists())
     {
       //Setup a shared pointer for the algorithm using the appropriate save type
@@ -964,15 +967,15 @@ void MantidDockWidget::saveToProgram(const QString & name)
       //Execute the program
       try
       {
-        Mantid::Kernel::ConfigService::Instance().launchProcess(programKeysAndDetails.find("target")->second, argumentsV);
+        Mantid::Kernel::ConfigService::Instance().launchProcess(expTarget, argumentsV);
       }
       catch(std::runtime_error&)
       {
-        QMessageBox::information(this, "Error", "User tried to open program from: " + QString::fromStdString(programKeysAndDetails.find("target")->second) + " There was an error opening the program. Please check the target and arguments list to ensure that these are correct");
+        QMessageBox::information(this, "Error", "User tried to open program from: " + QString::fromStdString(expTarget) + " There was an error opening the program. Please check the target and arguments list to ensure that these are correct");
       }
     }
     else
-      QMessageBox::information(this, "Target Path Error", "User tried to open program from: " + QString::fromStdString(programKeysAndDetails.find("target")->second) + " The target file path for the program can't be found. Please check that the full path is correct");
+      QMessageBox::information(this, "Target Path Error", "User tried to open program from: " + QString::fromStdString(expTarget) + " The target file path for the program can't be found. Please check that the full path is correct");
   }
 }
 
