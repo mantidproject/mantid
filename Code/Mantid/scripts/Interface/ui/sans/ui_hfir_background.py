@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_background.ui'
 #
-# Created: Tue Aug 23 06:54:03 2011
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Wed Aug 31 10:50:50 2011
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -295,7 +295,7 @@ class Ui_Frame(object):
         self.background_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.thickness_label.setText(QtGui.QApplication.translate("Frame", "Sample thickness [cm]:", None, QtGui.QApplication.UnicodeUTF8))
         self.thickness_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter thickness of the background sample [cm]", None, QtGui.QApplication.UnicodeUTF8))
-        self.geometry_options_groupbox.setTitle(QtGui.QApplication.translate("Frame", "Experiment Parameters from Data File", None, QtGui.QApplication.UnicodeUTF8))
+        self.geometry_options_groupbox.setTitle(QtGui.QApplication.translate("Frame", "Experiment Parameters from Data File (for information only)", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("Frame", "Sample-dectector distance [mm]", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_dist_edit.setToolTip(QtGui.QApplication.translate("Frame", "Sample-to-detector distance read from the data file, in mm.", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("Frame", "Wavelength [Angstrom]", None, QtGui.QApplication.UnicodeUTF8))

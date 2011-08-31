@@ -377,7 +377,7 @@
                <string>Select to overright the beam diameter.</string>
               </property>
               <property name="text">
-               <string>Beam diameter [mm]</string>
+               <string>Beam spot diameter [mm]</string>
               </property>
              </widget>
             </item>
@@ -396,7 +396,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter the beam diameter in mm.</string>
+               <string>Enter the diameter around the beam center to include when measuring the total beam signal, in mm.</string>
               </property>
              </widget>
             </item>
@@ -444,7 +444,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter the attenuator transmission.</string>
+               <string>Enter the attenuator transmission from the Attenuator Efficiency Chart.</string>
               </property>
              </widget>
             </item>

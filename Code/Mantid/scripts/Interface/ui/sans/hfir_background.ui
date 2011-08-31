@@ -309,7 +309,7 @@
           </size>
          </property>
          <property name="title">
-          <string>Experiment Parameters from Data File</string>
+          <string>Experiment Parameters from Data File (for information only)</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>

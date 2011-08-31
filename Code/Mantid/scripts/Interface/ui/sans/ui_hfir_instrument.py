@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_instrument.ui'
 #
-# Created: Tue Aug 23 06:54:04 2011
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Wed Aug 31 10:50:50 2011
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -58,6 +58,20 @@ class Ui_Frame(object):
         self.reduction_options_group.setObjectName("reduction_options_group")
         self.verticalLayout_6 = QtGui.QVBoxLayout(self.reduction_options_group)
         self.verticalLayout_6.setObjectName("verticalLayout_6")
+        self.horizontalLayout_2 = QtGui.QHBoxLayout()
+        self.horizontalLayout_2.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.label_6 = QtGui.QLabel(self.reduction_options_group)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_6.sizePolicy().hasHeightForWidth())
+        self.label_6.setSizePolicy(sizePolicy)
+        self.label_6.setStyleSheet("font: italic 10pt \"Bitstream Charter\";")
+        self.label_6.setOpenExternalLinks(True)
+        self.label_6.setObjectName("label_6")
+        self.horizontalLayout_2.addWidget(self.label_6)
+        self.verticalLayout_6.addLayout(self.horizontalLayout_2)
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
         self.label_4 = QtGui.QLabel(self.reduction_options_group)
@@ -389,6 +403,8 @@ class Ui_Frame(object):
         font.setFamily("Bitstream Charter")
         font.setItalic(True)
         self.label_5.setFont(font)
+        self.label_5.setOpenExternalLinks(True)
+        self.label_5.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextSelectableByMouse)
         self.label_5.setObjectName("label_5")
         self.verticalLayout_3.addWidget(self.label_5)
         self.horizontalLayout = QtGui.QHBoxLayout()
@@ -417,7 +433,7 @@ class Ui_Frame(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout)
         self.verticalLayout_2.addLayout(self.verticalLayout_3)
         self.verticalLayout_4.addWidget(self.groupBox)
-        spacerItem10 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem10 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         self.verticalLayout_4.addItem(spacerItem10)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
@@ -429,6 +445,11 @@ class Ui_Frame(object):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
         self.instr_name_label.setText(QtGui.QApplication.translate("Frame", "BIOSANS", None, QtGui.QApplication.UnicodeUTF8))
         self.reduction_options_group.setTitle(QtGui.QApplication.translate("Frame", "Reduction Options", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_6.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Bitstream Charter\'; font-size:10pt; font-weight:400; font-style:italic;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">For more information, go to <a style=\"text-decoration: none\" href=\"http://www.mantidproject.org/Reduction_for_HFIR_SANS\"><span style=\" color:#5555ff;\">http://www.mantidproject.org/Reduction_for_HFIR_SANS</span></a></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("Frame", "Normalization", None, QtGui.QApplication.UnicodeUTF8))
         self.normalization_none_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to skip data normalization.", None, QtGui.QApplication.UnicodeUTF8))
         self.normalization_none_radio.setText(QtGui.QApplication.translate("Frame", "None", None, QtGui.QApplication.UnicodeUTF8))
@@ -446,10 +467,10 @@ class Ui_Frame(object):
         self.scale_data_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_data_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_data_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
-        self.beamstop_chk.setText(QtGui.QApplication.translate("Frame", "Beam diameter [mm]", None, QtGui.QApplication.UnicodeUTF8))
-        self.scale_beam_radius_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the beam diameter in mm.", None, QtGui.QApplication.UnicodeUTF8))
+        self.beamstop_chk.setText(QtGui.QApplication.translate("Frame", "Beam spot diameter [mm]", None, QtGui.QApplication.UnicodeUTF8))
+        self.scale_beam_radius_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the diameter around the beam center to include when measuring the total beam signal, in mm.", None, QtGui.QApplication.UnicodeUTF8))
         self.att_trans_label.setText(QtGui.QApplication.translate("Frame", "Attenuator Transmission", None, QtGui.QApplication.UnicodeUTF8))
-        self.scale_att_trans_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the attenuator transmission.", None, QtGui.QApplication.UnicodeUTF8))
+        self.scale_att_trans_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the attenuator transmission from the Attenuator Efficiency Chart.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_current_check.setText(QtGui.QApplication.translate("Frame", "Dark current file", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the dark current data.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))

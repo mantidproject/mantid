@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_instrument.ui'
 #
-# Created: Tue Aug 23 06:54:04 2011
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Wed Aug 31 10:50:51 2011
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -478,10 +478,10 @@ class Ui_Frame(object):
         self.scale_data_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_data_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.beamstop_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to overright the beam diameter.", None, QtGui.QApplication.UnicodeUTF8))
-        self.beamstop_chk.setText(QtGui.QApplication.translate("Frame", "Beam diameter [mm]", None, QtGui.QApplication.UnicodeUTF8))
-        self.scale_beam_radius_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the beam diameter in mm.", None, QtGui.QApplication.UnicodeUTF8))
+        self.beamstop_chk.setText(QtGui.QApplication.translate("Frame", "Beam spot diameter [mm]", None, QtGui.QApplication.UnicodeUTF8))
+        self.scale_beam_radius_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the diameter around the beam center to include when measuring the total beam signal, in mm.", None, QtGui.QApplication.UnicodeUTF8))
         self.att_trans_label.setText(QtGui.QApplication.translate("Frame", "Attenuator Transmission", None, QtGui.QApplication.UnicodeUTF8))
-        self.scale_att_trans_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the attenuator transmission.", None, QtGui.QApplication.UnicodeUTF8))
+        self.scale_att_trans_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the attenuator transmission from the Attenuator Efficiency Chart.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_current_check.setToolTip(QtGui.QApplication.translate("Frame", "Select to specify a dark current data set.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_current_check.setText(QtGui.QApplication.translate("Frame", "Dark current file", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the dark current data.", None, QtGui.QApplication.UnicodeUTF8))

@@ -103,6 +103,36 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">font: italic 10pt &quot;Bitstream Charter&quot;;</string>
+              </property>
+              <property name="text">
+               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Bitstream Charter'; font-size:10pt; font-weight:400; font-style:italic;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;For more information, go to &lt;a style=&quot;text-decoration: none&quot; href=&quot;http://www.mantidproject.org/Reduction_for_HFIR_SANS&quot;&gt;&lt;span style=&quot; color:#5555ff;&quot;&gt;http://www.mantidproject.org/Reduction_for_HFIR_SANS&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="openExternalLinks">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
              <widget class="QLabel" name="label_4">
@@ -427,7 +457,7 @@
             <item>
              <widget class="QCheckBox" name="beamstop_chk">
               <property name="text">
-               <string>Beam diameter [mm]</string>
+               <string>Beam spot diameter [mm]</string>
               </property>
              </widget>
             </item>
@@ -446,7 +476,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter the beam diameter in mm.</string>
+               <string>Enter the diameter around the beam center to include when measuring the total beam signal, in mm.</string>
               </property>
              </widget>
             </item>
@@ -494,7 +524,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter the attenuator transmission.</string>
+               <string>Enter the attenuator transmission from the Attenuator Efficiency Chart.</string>
               </property>
              </widget>
             </item>
@@ -1041,6 +1071,12 @@ Values can be selected by hand by checking the boxes below.</string>
 The data is only used to help you setting the mask.
 The mask information is saved separately so that your data file will NOT be modified.</string>
               </property>
+              <property name="openExternalLinks">
+               <bool>true</bool>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+              </property>
              </widget>
             </item>
             <item>
@@ -1129,7 +1165,7 @@ The mask information is saved separately so that your data file will NOT be modi
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Expanding</enum>
+          <enum>QSizePolicy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
