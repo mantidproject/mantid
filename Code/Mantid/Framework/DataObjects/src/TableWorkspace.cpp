@@ -185,6 +185,7 @@ namespace Mantid
       {
         m_columns.push_back(column);
       }
+      return true;
     }
 
     TableWorkspace* TableWorkspace::clone() const
