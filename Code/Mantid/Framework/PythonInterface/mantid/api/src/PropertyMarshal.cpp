@@ -42,6 +42,20 @@ namespace Mantid
       alg->setProperty(name, value);
     }
 
+    /**
+     * Set a named property's value
+     * @param self :: A reference to the calling object
+     * @param name :: The name of the property
+     * @param value :: The value of the property as a boost::python object
+     */
+    template<>
+    void PropertyMarshal<std::string>::setProperty(python::object self, const std::string & name,
+						   std::string value)
+    {
+      IAlgorithm * alg = getAlgorithm(self);
+      alg->setPropertyValue(name, value);
+    }
+  
     //---------------------------------------------------------------------------
     // Concrete implementations.
     //---------------------------------------------------------------------------
