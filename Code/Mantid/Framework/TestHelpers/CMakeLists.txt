@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/WorkspaceCreationHelper.cpp 
 	src/ComponentCreationHelper.cpp 
 	src/MDEventsTestHelper.cpp 
+	src/SANSInstrumentCreationHelper.cpp
 )
 
 set ( INC_FILES
@@ -11,7 +12,9 @@ set ( INC_FILES
 	inc/MantidTestHelpers/WorkspaceCreationHelper.h
 	inc/MantidTestHelpers/ComponentCreationHelper.h 
 	inc/MantidTestHelpers/MDEventsTestHelper.h 
+  inc/MantidTestHelpers/SANSInstrumentCreationHelper.h 
 )
+
 # Requires DataHandling for a load call
 include_directories ( inc)
 include_directories ( ../DataHandling/inc )

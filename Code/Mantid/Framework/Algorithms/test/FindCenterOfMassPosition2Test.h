@@ -10,8 +10,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-// For SANSInstrumentCreationHelper
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

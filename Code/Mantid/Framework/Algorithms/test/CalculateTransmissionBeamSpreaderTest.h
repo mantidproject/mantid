@@ -9,7 +9,7 @@
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidCurveFitting/Linear.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

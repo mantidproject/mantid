@@ -5,7 +5,7 @@
 #include "MantidAlgorithms/CalculateEfficiency.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

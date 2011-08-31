@@ -11,7 +11,6 @@
 #include <iostream>
 
 using namespace Mantid::Geometry;
-using namespace Mantid::API;
 
 class ParComponentFactoryTest : public CxxTest::TestSuite
 {

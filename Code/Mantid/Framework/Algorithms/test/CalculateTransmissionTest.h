@@ -10,7 +10,7 @@
 #include "MantidCurveFitting/Linear.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::Algorithms;
