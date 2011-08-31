@@ -954,6 +954,12 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
       if (f) setCurrentFunction(f);
       emit functionChanged();
   }
+  else if (prop->propertyName() == "Workspace")
+  {
+      PropertyHandler* h = getHandler()->findHandler(prop);
+      if (!h) return;
+      h->setFunctionWorkspace();
+  }
 }
 
 /** Called when a bool property changed
@@ -1001,6 +1007,12 @@ void FitPropertyBrowser::intChanged(QtProperty* prop)
       setWorkspaceIndex(n-1);
     }
     emit workspaceIndexChanged(wi);
+  }
+  else if (prop->propertyName() == "Workspace Index")
+  {
+    PropertyHandler* h = getHandler()->findHandler(prop);
+    if (!h) return;
+    h->setFunctionWorkspace();
   }
   else
   {// it could be an attribute
@@ -1282,7 +1294,27 @@ void FitPropertyBrowser::fit()
     }
     else
     {
-      funStr = *(m_compositeFunction->getFunction(0));
+      Mantid::API::CompositeFunction* cf =  dynamic_cast<Mantid::API::CompositeFunction*>(m_compositeFunction->getFunction(0));
+      if (cf && cf->name() == "MultiBG")
+      {
+        funStr = "composite=MultiBG;";
+        for(size_t i=0;i<cf->nFunctions();++i)
+        {
+          Mantid::API::IFunctionMW* f = dynamic_cast<Mantid::API::IFunctionMW*>(cf->getFunction(i));
+          if (!f) continue;
+          funStr += f->asString();
+          if (f->getMatrixWorkspace() && !f->getMatrixWorkspace()->getName().empty())
+          {
+            funStr += ",Workspace=" + f->getMatrixWorkspace()->getName() + ",WSParam=(WorkspaceIndex="+
+              boost::lexical_cast<std::string>(f->getWorkspaceIndex()) + ")";
+          }
+          funStr += ";";
+        }
+      }
+      else
+      {
+        funStr = *(m_compositeFunction->getFunction(0));
+      }
     }
 
     if (isWorkspaceAGroup())
@@ -1329,10 +1361,10 @@ void FitPropertyBrowser::fit()
 
 void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
 {
-  std::string out = alg->getProperty("OutputWorkspace");
   getFitResults();
-  if (!isWorkspaceAGroup())
+  if (!isWorkspaceAGroup() && alg->existsProperty("OutputWorkspace"))
   {
+    std::string out = alg->getProperty("OutputWorkspace");
     emit algorithmFinished(QString::fromStdString(out));
   }
   // update Quality string
@@ -1375,6 +1407,7 @@ void FitPropertyBrowser::populateWorkspaceNames()
 void FitPropertyBrowser::workspace_added(const QString &wsName, Mantid::API::Workspace_sptr ws)
 {
   if ( !isWorkspaceValid(ws) ) return;
+  QStringList oldWorkspaces = m_workspaceNames;
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(wsName);
   if (i < 0)
@@ -1388,10 +1421,12 @@ void FitPropertyBrowser::workspace_added(const QString &wsName, Mantid::API::Wor
   {
     m_enumManager->setValue(m_workspace,i);
   }
+  getHandler()->updateWorkspaces(oldWorkspaces);
 }
 
 void FitPropertyBrowser::workspace_removed(const QString &wsName)
 {
+  QStringList oldWorkspaces = m_workspaceNames;
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(wsName);
   if (i >= 0)
@@ -1404,6 +1439,7 @@ void FitPropertyBrowser::workspace_removed(const QString &wsName)
   {
     m_enumManager->setValue(m_workspace,i);
   }
+  getHandler()->updateWorkspaces(oldWorkspaces);
 }
 
 void FitPropertyBrowser::init()
@@ -1416,6 +1452,7 @@ void FitPropertyBrowser::init()
 void FitPropertyBrowser::addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   if ( !isWorkspaceValid(ws) ) return;
+  QStringList oldWorkspaces = m_workspaceNames;
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
   if (i < 0)
@@ -1429,11 +1466,13 @@ void FitPropertyBrowser::addHandle(const std::string& wsName,const boost::shared
   {
     m_enumManager->setValue(m_workspace,i);
   }
+  getHandler()->updateWorkspaces(oldWorkspaces);
 }
 
 /// workspace was removed
 void FitPropertyBrowser::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace>)
 {
+  QStringList oldWorkspaces = m_workspaceNames;
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
   if (i >= 0)
@@ -1446,6 +1485,7 @@ void FitPropertyBrowser::deleteHandle(const std::string& wsName,const boost::sha
   {
     m_enumManager->setValue(m_workspace,i);
   } 
+  getHandler()->updateWorkspaces(oldWorkspaces);
 }
 
 

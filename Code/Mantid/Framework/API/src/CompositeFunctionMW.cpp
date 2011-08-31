@@ -145,7 +145,8 @@ void CompositeFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::Matrix
   for(size_t i=0;i<nFunctions();i++)
   {
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(i));
-    fun->setMatrixWorkspace(workspace,spec,xMin,xMax);
+    if (fun)
+      fun->setMatrixWorkspace(workspace,spec,xMin,xMax);
   }
 }
 
@@ -157,7 +158,8 @@ void CompositeFunctionMW::setWorkspace(boost::shared_ptr<const Workspace> ws,con
   {
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(iFun));
     //fun->setWorkspace(ws, slicing, copyData); // TODO: This was added by JZ May 13, 2011, to fix tests. Does this make sense to someone who knows?
-    fun->setUpNewStuff(m_xValues,m_weights);
+    if (fun)
+      fun->setUpNewStuff(m_xValues,m_weights);
   }
 }
 

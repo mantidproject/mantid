@@ -169,7 +169,9 @@ namespace CurveFitting
       while (status == GSL_CONTINUE && iter < maxInterations)
       {
         iter++;
+
         status = minimizer->iterate();
+
         if (status != GSL_SUCCESS && minimizer->hasConverged() != GSL_SUCCESS)
         { 
           // From experience it is found that gsl_multifit_fdfsolver_iterate occasionally get

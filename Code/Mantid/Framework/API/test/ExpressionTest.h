@@ -379,6 +379,14 @@ public:
     TS_ASSERT(vars.find("x")!=vars.end());
   }
 
+  void testToList()
+  {
+    Expression e;
+    e.parse("x");
+    e.toList();
+    TS_ASSERT_EQUALS(e.name(),",");
+  }
+
 };
 
 #endif /*EXPRESSIONTEST_H_*/

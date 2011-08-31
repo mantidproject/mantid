@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/Column.cpp
 	src/ColumnFactory.cpp
 	src/CompositeFunction.cpp
+	src/CompositeFunctionMD.cpp
 	src/CompositeFunctionMW.cpp
 	src/ConstraintFactory.cpp
 	src/CostFunctionFactory.cpp

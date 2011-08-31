@@ -577,7 +577,7 @@ public:
   {
     // Should be all of them
     // TODO: Should this be 35 or 36?
-    doFunctionNameTest<IFitFunction>(35, "", "");
+    doFunctionNameTest<IFitFunction>(37, "", "");
   }
 
   void test_PeakFunction_Name_Retrieval()

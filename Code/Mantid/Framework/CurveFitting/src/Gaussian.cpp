@@ -71,7 +71,7 @@ void Gaussian::setActiveParameter(int i,double value)
   int j = indexOfActive(i);
 
   if (parameterName(j) == "Sigma") 
-    setParameter(j,sqrt(1./value),false);
+    setParameter(j,sqrt(fabs(1./value)),false);
   else
     setParameter(j,value,false);
 }

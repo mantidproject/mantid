@@ -178,6 +178,11 @@ public:
 
   void fit();
 
+  // update workspace property when workspaces added to or removed from ADS
+  void updateWorkspaces(QStringList oldWorkspaces);
+  // set workspace in workspace property to the function 
+  void setFunctionWorkspace();
+
 protected slots:
 
   // 
@@ -195,6 +200,9 @@ private:
   QList<QtProperty*> m_parameters; //< function parameter properties
   QMap<QString,QtProperty*> m_ties;//< tie properties
   QMap<QString,std::pair<QtProperty*,QtProperty*> > m_constraints;//< constraints
+  bool m_isMultispectral; ///< true if fitting to multiple spectra using MultiBG function
+  QtProperty* m_workspace; ///< workspace name for multispectral fitting
+  QtProperty* m_workspaceIndex; ///< workspace index for multispectral fitting
   double m_base; //< the baseline for a peak
   int m_ci; //< approximate index in the workspace at the peak centre
   //mutable FunctionCurve* m_curve;//< the curve to plot the handled function

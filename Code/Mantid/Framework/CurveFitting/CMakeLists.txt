@@ -25,6 +25,7 @@ set ( SRC_FILES
         src/LinearBackground.cpp
         src/Lorentzian.cpp
         src/Lorentzian1D.cpp
+        src/MultiBG.cpp
         src/PRConjugateGradientMinimizer.cpp
         src/PlotPeakByLogValue.cpp
         src/ProductFunctionMW.cpp
@@ -68,6 +69,7 @@ set ( INC_FILES
         inc/MantidCurveFitting/LinearBackground.h
         inc/MantidCurveFitting/Lorentzian.h
         inc/MantidCurveFitting/Lorentzian1D.h
+        inc/MantidCurveFitting/MultiBG.h
         inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
         inc/MantidCurveFitting/PlotPeakByLogValue.h
         inc/MantidCurveFitting/ProductFunctionMW.h
@@ -99,6 +101,7 @@ set ( TEST_FILES
         test/LinearTest.h
         test/Lorentzian1DTest.h
         test/LorentzianTest.h
+        test/MultiBGTest.h
         test/PlotPeakByLogValueTest.h
         test/ProductFunctionMWTest.h
         test/QuadraticTest.h

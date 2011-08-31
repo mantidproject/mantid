@@ -649,6 +649,15 @@ void Expression::renameAll(const std::string& oldName,const std::string& newName
   }
 }
 
+void Expression::toList(const std::string& sep)
+{
+  if (name() == sep) return;
+  Expression term(*this);
+  m_terms.resize(1);
+  m_terms[0] = term;
+  setFunct(sep);
+}
+
 
 }//API
 }//Mantid

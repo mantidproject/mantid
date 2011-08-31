@@ -107,6 +107,13 @@ namespace Mantid
        * @param newName :: The new name
        */
       void rename(const std::string& newName);
+
+      /**
+       * Make sure the expression is a list of expression separated by sep, eg "term1,term2,..."
+       * If it's not a list turn it into one, eg "expr,"
+       * @param sep :: Separator
+       */
+      void toList(const std::string& sep = ",");
     private:
 
       /// copy contructor

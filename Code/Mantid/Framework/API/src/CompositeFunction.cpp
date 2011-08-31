@@ -71,6 +71,10 @@ void CompositeFunction::init()
 std::string CompositeFunction::asString()const
 {
   std::ostringstream ostr;
+  if (name() != "CompositeFunctionMW")
+  {
+    ostr << "composite=" <<name() << ";";
+  }
   for(size_t i=0;i<nFunctions();i++)
   {
     IFitFunction* fun = getFunction(i);

@@ -44,6 +44,7 @@ PropertyHandler::PropertyHandler(Mantid::API::IFitFunction* fun,
                 m_parent(parent),
                 m_type(NULL),
                 m_item(item),
+                m_isMultispectral(false),
                 m_base(0),
                 m_ci(0),
                 m_hasPlot(false)
@@ -120,6 +121,27 @@ void PropertyHandler::init()
   }
   m_browser->m_enumManager->setValue(m_type,itype);
 
+  // create worspace and workspace index properties if parent is a MultiBG
+  if (m_parent && m_parent->name() == "MultiBG")
+  {
+    m_workspace = m_browser->m_enumManager->addProperty("Workspace");
+    fnProp->addSubProperty(m_workspace);
+    m_workspaceIndex = m_browser->m_intManager->addProperty("Workspace Index");
+    fnProp->addSubProperty(m_workspaceIndex);
+    if (! m_browser->m_workspaceNames.isEmpty() )
+    {
+      QStringList names("");
+      names.append(m_browser->m_workspaceNames);
+      m_browser->m_enumManager->setEnumNames(m_workspace, names);
+      m_browser->m_enumManager->setValue(m_workspace,0);
+      m_browser->m_intManager->setValue(m_workspaceIndex,0);
+    }
+  }
+  else
+  {
+    m_workspace = m_workspaceIndex = NULL;
+  }
+
   // create attribute properties
   initAttributes();
 
@@ -178,6 +200,9 @@ private:
   QString m_name;
 };
 
+/**
+ * Create and attach QtProperties for function attributes. 
+ */
 void PropertyHandler::initAttributes()
 {
   std::vector<std::string> attNames = function()->getAttributeNames();
@@ -533,8 +558,11 @@ const Mantid::API::IFitFunction* PropertyHandler::findFunction(QtBrowserItem* it
 
 PropertyHandler* PropertyHandler::findHandler(QtProperty* prop)
 {
+  if (prop == NULL) return NULL;
   if (prop == m_item->property()) return this;
   if (prop == m_type) return this;
+  if (prop == m_workspace) return this;
+  if (prop == m_workspaceIndex) return this;
   if (m_attributes.contains(prop)) return this;
   if (m_parameters.contains(prop)) return this;
   if (!m_ties.key(prop,"").isEmpty()) return this;
@@ -1302,6 +1330,52 @@ void PropertyHandler::fit()
   }
   catch(...)
   {
+  }
+}
+
+void PropertyHandler::updateWorkspaces(QStringList oldWorkspaces)
+{
+  if (m_workspace)
+  {
+    int index = m_browser->m_enumManager->value(m_workspace) - 1;
+    QString wsName;
+    if (index >= 0 && index < oldWorkspaces.size())
+    {
+      wsName = oldWorkspaces[index];
+    }
+    QStringList names("");
+    names.append(m_browser->m_workspaceNames);
+    m_browser->m_enumManager->setEnumNames(m_workspace, names);
+    if (m_browser->m_workspaceNames.contains(wsName))
+    {
+      m_browser->m_enumManager->setValue(m_workspace,m_browser->m_workspaceNames.indexOf(wsName) + 1);
+    }
+  }
+  if (cfun())
+  {
+    for(size_t i = 0; i < cfun()->nFunctions(); ++i)
+    {
+      getHandler(i)->updateWorkspaces(oldWorkspaces);
+    }
+  }
+}
+
+void PropertyHandler::setFunctionWorkspace()
+{
+  if (m_workspace)
+  {
+    int index = m_browser->m_enumManager->value(m_workspace) - 1;
+    if (index >= 0 && index < m_browser->m_workspaceNames.size())
+    {
+      std::string wsName = m_browser->m_workspaceNames[index].toStdString();
+      Mantid::API::Workspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
+      QString wsPar = QString("WorkspaceIndex=%1").arg(m_browser->m_intManager->value(m_workspaceIndex));
+      ifun()->setWorkspace(ws,wsPar.toStdString());
+    }
+  }
+  else
+  {
+    ifun()->setWorkspace(Mantid::API::Workspace_sptr(),"");
   }
 }
 

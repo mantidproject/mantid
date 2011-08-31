@@ -758,6 +758,5 @@ void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const 
     }
 }
 
-
 } // namespace API
 } // namespace Mantid
