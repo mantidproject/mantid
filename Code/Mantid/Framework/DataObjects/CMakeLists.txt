@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/ManagedDataBlock2D.cpp
 	src/ManagedHistogram1D.cpp
 	src/ManagedWorkspace2D.cpp
+	src/MementoTableWorkspace.cpp
 	src/OffsetsWorkspace.cpp
 	src/Peak.cpp
 	src/PeakColumn.cpp
@@ -45,6 +46,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/ManagedDataBlock2D.h
 	inc/MantidDataObjects/ManagedHistogram1D.h
 	inc/MantidDataObjects/ManagedWorkspace2D.h
+	inc/MantidDataObjects/MementoTableWorkspace.h
 	inc/MantidDataObjects/OffsetsWorkspace.h
 	inc/MantidDataObjects/Peak.h
 	inc/MantidDataObjects/PeakColumn.h
@@ -60,7 +62,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/WorkspaceSingleValue.h
 )
 
-set ( TEST_FILES
+set ( TEST_FILES 
 	test/CompressedWorkspace2DTest.h
 	test/EventListTest.h
 	test/EventWorkspaceMRUTest.h
@@ -71,6 +73,7 @@ set ( TEST_FILES
 	test/ManagedDataBlock2DTest.h
 	test/ManagedHistogram1DTest.h
 	test/ManagedWorkspace2DTest.h
+	test/MementoTableWorkspaceTest.h
 	test/OffsetsWorkspaceTest.h
 	test/PeakColumnTest.h
 	test/PeakTest.h
