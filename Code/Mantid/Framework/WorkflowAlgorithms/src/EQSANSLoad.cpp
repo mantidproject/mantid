@@ -17,6 +17,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 namespace Mantid
 {
@@ -306,6 +307,7 @@ void EQSANSLoad::moveToBeamCenter()
   mvAlg->setProperty("Y", -y_offset-beam_ctr_y);
   mvAlg->setProperty("RelativePosition", true);
   mvAlg->executeAsSubAlg();
+  g_log.information() << "Moving beam center to " << m_center_x << " " << m_center_y << std::endl;
 
 }
 
@@ -339,6 +341,8 @@ void EQSANSLoad::readConfigFile(const std::string& filePath)
     if (use_config_mask) readRectangularMasks(line);
     if (use_config_cutoff) readTOFcuts(line);
     if (use_config_center) readBeamCenter(line);
+    readModeratorPosition(line);
+    readSourceSlitSize(line);
   }
 
   if (use_config_mask)
@@ -390,6 +394,7 @@ void EQSANSLoad::exec()
   mvAlg->setProperty("Z", sdd/1000.0);
   mvAlg->setProperty("RelativePosition", false);
   mvAlg->executeAsSubAlg();
+  g_log.information() << "Moving detector to " << sdd/1000.0 << std::endl;
 
   // Get the run number so we can find the proper config file
   int run_number = 0;
@@ -411,12 +416,16 @@ void EQSANSLoad::exec()
   {
     readConfigFile(config_file);
   } else {
+    m_use_config = false;
     g_log.error() << "Cound not find config file for workspace " << getPropertyValue("OutputWorkspace") << std::endl;
   }
 
   // If we use the config file, move the sample position
   if (m_use_config)
   {
+      if (m_moderator_position > -13.0)
+        g_log.error() << "Moderator position seems close to the sample, please check" << std::endl;
+      g_log.information() << "Moving moderator to " << m_moderator_position << std::endl;
       mvAlg = createSubAlgorithm("MoveInstrumentComponent", 0.4, 0.45);
       mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
       mvAlg->setProperty("ComponentName", "moderator");
@@ -477,14 +486,13 @@ void EQSANSLoad::exec()
   }
 
   // Convert to wavelength
-  const double ssd = fabs(dataWS->getInstrument()->getSource()->getPos().Z());
+  const double ssd = fabs(dataWS->getInstrument()->getSource()->getPos().Z())*1000.0;
   const double conversion_factor = 3.9560346 / (sdd+ssd);
   IAlgorithm_sptr scAlg = createSubAlgorithm("ScaleX", 0.7, 0.71);
   scAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   scAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
   scAlg->setProperty("Factor", conversion_factor);
   scAlg->executeAsSubAlg();
-  dataWS = scAlg->getProperty("OutputWorkspace");
   dataWS->getAxis(0)->setUnit("Wavelength");
 
   // Rebin so all the wavelength bins are aligned
@@ -498,7 +506,6 @@ void EQSANSLoad::exec()
   rebinAlg->setPropertyValue("Params", params);
   rebinAlg->setProperty("PreserveEvents", true);
   rebinAlg->executeAsSubAlg();
-  dataWS = rebinAlg->getProperty("OutputWorkspace");
 
   dataWS->mutableRun().addProperty("event_ws", getPropertyValue("OutputWorkspace"), true);
   setProperty<MatrixWorkspace_sptr>("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
