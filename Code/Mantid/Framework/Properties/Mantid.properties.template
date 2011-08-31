@@ -140,3 +140,9 @@ logging.formatters.f1.times = local
 logging.channels.fileChannel.formatter.times = local
 # SignalChannel - Passes messages to the MantidPlot User interface
 logging.channels.signalChannel.class = SignalChannel
+
+workspace.sendto.SansView.arguments=[file]
+workspace.sendto.SansView.saveusing=SaveCanSAS1D
+workspace.sendto.SansView.target=%SANSVIEWPATH%/SansView.exe
+workspace.sendto.SansView.visible=Yes
+workspace.sendto.name.SansView=0

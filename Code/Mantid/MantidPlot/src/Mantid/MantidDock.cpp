@@ -1065,7 +1065,8 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     for (size_t i = 0; i<programNames.size(); i++)
     {
       programVisible[programNames[i]] = Mantid::Kernel::ConfigService::Instance().getString("workspace.sendto." + programNames[i] + ".visible");
-      if(programVisible.find(programNames[i])->second == "Yes")
+      std::string target = Mantid::Kernel::ConfigService::Instance().getString("workspace.sendto." + programNames[i] + ".target");
+      if (Mantid::Kernel::ConfigService::Instance().isExecutable(target) && programVisible.find(programNames[i])->second == "Yes")
         allVisible = true;
     }
 
