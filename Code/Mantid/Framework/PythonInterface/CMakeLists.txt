@@ -36,21 +36,22 @@ add_subdirectory ( mantid )
 ###########################################################################
 # tests 
 ###########################################################################
-# cxx unit tests
-set ( TEST_FILES
-  test/cpp/PythonObjectInstantiatorTest.h
-)
+# cxx unit tests # Not currently stable on all environments
 
-if ( CXXTEST_FOUND )
-  include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc )
-  cxxtest_add_test ( PythonInterfaceTest ${TEST_FILES} )
-  target_link_libraries( PythonInterfaceTest _kernel _api TestHelpers )
-  # Specify implicit dependency, but don't link to it
-  add_dependencies ( PythonInterfaceTest UserAlgorithms )
-  add_dependencies ( FrameworkTests PythonInterfaceTest )
-  # Add to the 'UnitTests' group in VS
-  set_property ( TARGET PythonInterfaceTest PROPERTY FOLDER "UnitTests" )
-endif ()
+#set ( TEST_FILES
+#  test/cpp/PythonObjectInstantiatorTest.h 
+#)  
+#  
+#if ( CXXTEST_FOUND )
+#  include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc )
+#  cxxtest_add_test ( PythonInterfaceTest ${TEST_FILES} )
+#  target_link_libraries( PythonInterfaceTest _kernel _api TestHelpers )
+#  # Specify implicit dependency, but don't link to it
+#  add_dependencies ( PythonInterfaceTest UserAlgorithms )
+#  add_dependencies ( FrameworkTests PythonInterfaceTest )
+#  # Add to the 'UnitTests' group in VS
+#  set_property ( TARGET PythonInterfaceTest PROPERTY FOLDER "UnitTests" )
+#endif ()
 
 # python unit tests
 set ( TEST_PY_FILES
