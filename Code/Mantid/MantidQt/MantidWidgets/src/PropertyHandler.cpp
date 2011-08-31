@@ -131,7 +131,10 @@ void PropertyHandler::init()
     if (! m_browser->m_workspaceNames.isEmpty() )
     {
       QStringList names("");
-      names.append(m_browser->m_workspaceNames);
+      foreach(QString name,m_browser->m_workspaceNames)
+      {
+        names.append(name);
+      }
       m_browser->m_enumManager->setEnumNames(m_workspace, names);
       m_browser->m_enumManager->setValue(m_workspace,0);
       m_browser->m_intManager->setValue(m_workspaceIndex,0);
@@ -1344,7 +1347,10 @@ void PropertyHandler::updateWorkspaces(QStringList oldWorkspaces)
       wsName = oldWorkspaces[index];
     }
     QStringList names("");
-    names.append(m_browser->m_workspaceNames);
+    foreach(QString name,m_browser->m_workspaceNames)
+    {
+      names.append(name);
+    }
     m_browser->m_enumManager->setEnumNames(m_workspace, names);
     if (m_browser->m_workspaceNames.contains(wsName))
     {

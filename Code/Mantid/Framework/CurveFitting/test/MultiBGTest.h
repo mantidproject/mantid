@@ -8,6 +8,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/IPeakFunction.h"
 
 #include <fstream>
 
