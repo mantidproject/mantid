@@ -1,4 +1,4 @@
-macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
+macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file _helper_files )
   # decide where to copy the unit tests
   get_filename_component ( _pyunit_testname ${_pyunit_testname_file} NAME_WE )
   set ( _pyunit_outputdir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname} )
@@ -9,6 +9,7 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
   add_custom_command ( OUTPUT ${_pyunit_outputdir}/__init__.py
                        DEPENDS ${_pyunit_outputdir}
                        COMMAND ${CMAKE_COMMAND} ARGS -E touch ${_pyunit_outputdir}/__init__.py )
+ 
   # copy the unit tests
   set ( _pyunit_testfiles "" )
   foreach (part ${ARGN})
@@ -21,17 +22,27 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
     set ( _pyunit_testfiles ${_pyunit_testfiles} ${_pyunit_outputdir}/${_pyunit_file} )
   endforeach (part ${ARGN})
 
-  # create the driver script
   add_custom_target ( ${_pyunit_testname_file}
-                      DEPENDS ${_pyunit_outputdir}/__init__.py ${_pyunit_testfiles}
-                      COMMAND  ${PYTHON_EXECUTABLE} ${PYUNITTEST_GEN_EXEC}
-                               -o ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname_file}
-                               -d ${_pyunit_outputdir}
-                               --xmlrunner=${PYUNITTEST_XMLRUNNER}
-                               --python="${PYTHON_EXECUTABLE}" )
+                      DEPENDS ${_pyunit_outputdir}/__init__.py ${_pyunit_testfiles} 
+                      COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname_file}
+                      COMMAND ${PYTHON_EXECUTABLE} ${PYUNITTEST_GEN_EXEC}
+                              -o ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname_file}
+                              -d ${_pyunit_outputdir}
+                              --xmlrunner=${PYUNITTEST_XMLRUNNER}
+                              --python="${PYTHON_EXECUTABLE}" )
   set_source_files_properties( ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname_file}
                                PROPERTIES GENERATED true)
 
+    # Copy the stand alone helpers
+  foreach( file ${_helper_files} )
+    get_filename_component(helper_file ${file} NAME)  
+    add_custom_command ( OUTPUT ${_pyunit_outputdir}/${helper_file}
+                         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${helper_file} ${_pyunit_testname_file}
+                         COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+                           ${CMAKE_CURRENT_SOURCE_DIR}/${part}
+                           ${_pyunit_outputdir}/${helper_file} )
+  endforeach( file ${_helper_files} )
+  
 
   add_test (NAME ${_pyunit_testname}_py
             COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"

@@ -204,7 +204,7 @@ endif ()
 
 # python unit tests
 if (PYUNITTEST_FOUND)
-  pyunittest_add_test ( VanillaPythonTest.py ${TEST_PY_FILES} )
+  pyunittest_add_test ( VanillaPythonTest.py ${TEST_PY_FILES} "" )
   add_dependencies ( VanillaPythonTest.py PythonAPI Algorithms )
   add_dependencies ( FrameworkTests VanillaPythonTest.py )
   # Add to the 'UnitTests' group in VS

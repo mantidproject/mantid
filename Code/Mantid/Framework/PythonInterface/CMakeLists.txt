@@ -56,16 +56,23 @@ endif ()
 set ( TEST_PY_FILES
   test/python/AlgorithmTest.py
   test/python/AlgorithmManagerTest.py
+  test/python/AnalysisDataServiceTest.py
+  test/python/FilePropertyTest.py
   test/python/FrameworkManagerTest.py
   test/python/ImportModuleTest.py
   test/python/PythonAlgorithmTest.py
   test/python/QuatTest.py
   test/python/V3DTest.py
+  test/python/WorkspaceTest.py
+)
+
+set ( PYTEST_HELPERS
+  test/python/testhelpers.py
 )
 
 # python unit tests
 if (PYUNITTEST_FOUND)
-  pyunittest_add_test ( VanillaPythonInterfaceTest.py ${TEST_PY_FILES} )
+  pyunittest_add_test ( VanillaPythonInterfaceTest.py ${TEST_PY_FILES} ${PYTEST_HELPERS} )
   add_dependencies ( VanillaPythonInterfaceTest.py PythonInterface Algorithms )
   add_dependencies ( FrameworkTests VanillaPythonInterfaceTest.py )
   # Add to the 'UnitTests' group in VS

@@ -7,13 +7,15 @@ flags = dlopen.setup_dlopen() # Ensure the library is open with the correct flag
 from _api import *
 dlopen.restore_flags(flags)
 
-# Alias the singleton objects
+# Singleton objects
 framework_mgr = get_framework_mgr() # The first import of this starts the framework
 algorithm_mgr = get_algorithm_mgr()
+analysis_data_svc = get_analysis_data_service()
+
 
 # Control what an import * does
 __all__ = dir(_api)
-__all__.extend(['algorithm_mgr', 'framework_mgr'])
+__all__.extend(['algorithm_mgr', 'framework_mgr', 'analysis_data_svc'])
 
 
 #########################################################################################

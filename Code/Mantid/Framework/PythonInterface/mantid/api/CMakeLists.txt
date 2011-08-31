@@ -5,11 +5,17 @@
 set ( MODULE_TEMPLATE src/api.cpp.in )
 
 # Files containing export definitions, these are automatically processed
+# -- Do NOT sort this list. The order defines the order in which the export
+#    definitions occur and some depend on their base classes being exported first -- 
 set ( EXPORT_FILES
   src/Algorithm.cpp
+  src/AlgorithmManager.cpp
+  src/AnalysisDataService.cpp
+  src/ExperimentInfo.cpp
   src/FileProperty.cpp
   src/FrameworkManager.cpp
-  src/AlgorithmManager.cpp
+  src/Workspace.cpp
+  src/MatrixWorkspace.cpp
 )  
 
 # Files containing addtional helper code that do not require processing

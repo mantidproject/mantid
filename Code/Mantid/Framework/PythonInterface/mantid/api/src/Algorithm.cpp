@@ -20,8 +20,7 @@ using boost::python::return_internal_reference;
 
 // Use a macro for the different property types
 #define EXPORT_PROPERTY_ACCESSORS(type, ...) \
-  .def("set_property"#__VA_ARGS__, &PropertyMarshal<type>::setProperty, "Sets a property of type "#type) \
-  //.def("get_property", &PropertyMarshal<type>::getProperty, "Returns a property of type "#type)
+  .def("set_property"#__VA_ARGS__, &PropertyMarshal<type>::setProperty, "Sets a property of type "#type)
 
 void export_algorithm()
 {

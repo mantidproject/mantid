@@ -30,9 +30,17 @@ class AlgorithmTest(unittest.TestCase):
         alg = algorithm_mgr.create_unmanaged('Load')
         alg.initialize()
         alg.set_property('Filename', 'ALF15739.raw')
-        alg.set_property('SpectrumMax', 10)
-        alg.set_property('OutputWorkspace', 'ALF15739')
+        nspec = 10
+        alg.set_property('SpectrumMax', nspec)
+        wsname = 'ALF15739' 
+        alg.set_property('OutputWorkspace', wsname)
         alg.set_child(True) # Just to keep the output from the data service
         alg.execute()
-        self.assertEquals(alg.get_property('SpectrumMax').value, 10)
+
+        #self.assertEquals(alg.get_property('SpectrumMax').value, nspec)
+        #self.assertEquals(type(alg.get_property('SpectrumMax')), int)
+        #self.assertEquals(type(alg.get_property('OutputWorkspace')), int)
+                
+        ws = alg.get_property('OutputWorkspace').value
+        self.assertTrue(ws.get_memory_size() > 0.0 )
        

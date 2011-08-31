@@ -5,6 +5,8 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 
+#include "MantidKernel/ConfigService.h"
+
 #include <boost/python/object.hpp>
 
 using Mantid::PythonInterface::PythonObjectInstantiator;
@@ -57,7 +59,11 @@ private:
   {
     if( !m_creator )
     {
-      std::string code = "from mantid.api import PythonAlgorithm\n"
+      std::string propDir = Mantid::Kernel::ConfigService::Instance().getPropertiesDir();
+      //Assume this is where the mantid package is too
+      std::string code = "import sys\n"
+        "sys.path.append(r'" + propDir + "')\n"
+        "from mantid.api import PythonAlgorithm\n"
         "class PyAlg(PythonAlgorithm):\n"
         "  pass\n";
       PyRun_SimpleString(code.c_str());
