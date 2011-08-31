@@ -63,12 +63,13 @@ namespace Mantid
     {
       // Get the input workspace
       MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+      MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
       // Are we preserving event workspace-iness?
       bool PreserveEvents = getProperty("PreserveEvents");
 
       // Rebinning in-place
-      bool inPlace = (getPropertyValue("OutputWorkspace") == getPropertyValue("InputWorkspace"));
+      bool inPlace = (inputWS == outputWS);
 
       // retrieve the properties
       const std::vector<double> rb_params=getProperty("Params");
@@ -90,7 +91,6 @@ namespace Mantid
       if (eventInputWS != NULL)
       {
         //------- EventWorkspace as input -------------------------------------
-        MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
         EventWorkspace_sptr eventOutputWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
         if (inPlace && PreserveEvents)
