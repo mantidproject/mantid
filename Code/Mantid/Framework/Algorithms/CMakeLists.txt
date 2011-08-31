@@ -505,18 +505,18 @@ if ( CXXTEST_FOUND )
   # Generate the MultiplyTest.h and DivideTest.h
   set ( MULTIPLYDIVIDETEST_CLASS MultiplyTest )
   set ( MULTIPLYDIVIDETEST_DO_DIVIDE false )
-  configure_file ( test/MultiplyDivideTest.in.h      test/MultiplyTest.h)
+  configure_file ( test/MultiplyDivideTest.in.h      ${CMAKE_CURRENT_SOURCE_DIR}/test/MultiplyTest.h)
   set ( MULTIPLYDIVIDETEST_CLASS DivideTest )
   set ( MULTIPLYDIVIDETEST_DO_DIVIDE true )
-  configure_file ( test/MultiplyDivideTest.in.h      test/DivideTest.h)
+  configure_file ( test/MultiplyDivideTest.in.h      ${CMAKE_CURRENT_SOURCE_DIR}/test/DivideTest.h)
 
   # Generate the PlusTest.h and MinusTest.h
   set ( PLUSMINUSTEST_CLASS PlusTest )
   set ( PLUSMINUSTEST_DO_PLUS true )
-  configure_file ( test/PlusMinusTest.in.h      test/PlusTest.h)
+  configure_file ( test/PlusMinusTest.in.h      ${CMAKE_CURRENT_SOURCE_DIR}/test/PlusTest.h)
   set ( PLUSMINUSTEST_CLASS MinusTest )
   set ( PLUSMINUSTEST_DO_PLUS false )
-  configure_file ( test/PlusMinusTest.in.h      test/MinusTest.h)
+  configure_file ( test/PlusMinusTest.in.h      ${CMAKE_CURRENT_SOURCE_DIR}/test/MinusTest.h)
   
   # Make the rest of the tests
   include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc ../MDEvents/inc)
