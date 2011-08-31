@@ -395,9 +395,9 @@ public:
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(1, nBins);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
       if (DO_PLUS)
-        performTest(work_in1,work_in2, static_cast<bool>(inplace), false /*not event*/, 4.0, 2.0); // Commutes if doing it with event workspace
+        performTest(work_in1,work_in2, inplace!=0, false /*not event*/, 4.0, 2.0); // Commutes if doing it with event workspace
       else
-        performTest_fails(work_in1,work_in2, static_cast<bool>(inplace));
+        performTest_fails(work_in1,work_in2, inplace!=0);
     }
   }
 
@@ -446,7 +446,7 @@ public:
       int nHist = 10,nBins=1;
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
-      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, static_cast<bool>(inplace), true /*outputIsEvent*/,
+      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
           DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
     }
   }
@@ -458,7 +458,7 @@ public:
       int nHist = 10,nBins=20;
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,1,100,0.0,1.0,2);
-      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, static_cast<bool>(inplace), true /*outputIsEvent*/,
+      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
           DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
     }
   }
@@ -470,7 +470,7 @@ public:
       int nHist = 10,nBins=20;
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,1,100,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
-      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, static_cast<bool>(inplace), true /*outputIsEvent*/,
+      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
           DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
     }
   }
@@ -482,7 +482,7 @@ public:
       int nHist=1,nBins=1;
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
-      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, static_cast<bool>(inplace), true /*outputIsEvent*/,
+      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
           DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
     }
   }
@@ -533,7 +533,7 @@ public:
       index2detid_map *rhs_map = work_in2->getWorkspaceIndexToDetectorIDMap();
       TS_ASSERT_EQUALS( (*rhs_map)[0], 100);
 
-      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, static_cast<bool>(inplace), true /*outputIsEvent*/,
+      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
           DO_PLUS ? 3.0 : -1.0,   DO_PLUS ? 1.7320 : 1.7320);
 
       //Ya, its an event workspace
