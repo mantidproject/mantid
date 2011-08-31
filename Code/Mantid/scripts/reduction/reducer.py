@@ -27,6 +27,8 @@ import MantidFramework
 import mantidsimple
 import warnings
 import inspect
+import random
+import string
 from find_data import find_data
 
 
@@ -581,6 +583,14 @@ class ReductionStep(object):
             @param workspace: workspace to delete 
         """
         return
+
+    @classmethod
+    def _create_unique_name(cls, filepath, descriptor):
+        """
+            Generate a unique name for an internal workspace
+        """
+        random_str = ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
+        return "__"+descriptor+"_"+extract_workspace_name(filepath)+"_"+random_str
     
     def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
         """
