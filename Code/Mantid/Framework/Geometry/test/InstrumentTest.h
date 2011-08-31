@@ -111,10 +111,14 @@ public:
   {
     Instrument i;
     TS_ASSERT( ! i.getSource() );
-    ObjComponent *s = new ObjComponent("source");
+    ObjComponent *s = new ObjComponent("");
+    // Cannot have an unnamed source
+    TS_ASSERT_THROWS( i.markAsSource(s), Exception::InstrumentDefinitionError );
+    s->setName("source");
     TS_ASSERT_THROWS_NOTHING( i.markAsSource(s) );
     TS_ASSERT_EQUALS( i.getSource().get(), s );
     ObjComponent *ss = new ObjComponent("source2");
+    // Trying to add source a second time does nothing
     TS_ASSERT_THROWS_NOTHING( i.markAsSource(ss) );
     TS_ASSERT_EQUALS( i.getSource().get(), s );
     delete s;
@@ -125,10 +129,14 @@ public:
   {
     Instrument i;
     TS_ASSERT( ! i.getSample() );
-    ObjComponent *s = new ObjComponent("sample");
+    ObjComponent *s = new ObjComponent("");
+    // Cannot have an unnamed source
+    TS_ASSERT_THROWS( i.markAsSamplePos(s), Exception::InstrumentDefinitionError );
+    s->setName("sample");
     TS_ASSERT_THROWS_NOTHING( i.markAsSamplePos(s) );
     TS_ASSERT_EQUALS( i.getSample().get(), s );
     ObjComponent *ss = new ObjComponent("sample2");
+    // Trying to add sample a second time does nothing
     TS_ASSERT_THROWS_NOTHING( i.markAsSamplePos(ss) );
     TS_ASSERT_EQUALS( i.getSample().get(), s );
     delete s;

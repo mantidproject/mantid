@@ -74,7 +74,8 @@ namespace Mantid
         // As the majority of components will be detectors, we will rarely get to here
         if ( const ObjComponent* obj = dynamic_cast<const ObjComponent*>(it->get()) )
         {
-          // This relies on the source and sample having a unique name
+          // This relies on the source and sample having a unique name.
+          // I think the way our instrument definition files work ensures this is the case.
           if ( obj->getName() == instr.m_sourceCache->getName() )
           {
             markAsSource(obj);
@@ -467,38 +468,56 @@ namespace Mantid
       return monitor;
     }
 
-    /** Mark a Component which has already been added to the Instrument (as a child component)
-    * to be 'the' samplePos Component. For now it is assumed that we have
-    * at most one of these.
-    *
-    * @param comp :: Component to be marked (stored for later retrievel) as a "SamplePos" Component
-    */
+    /** Mark a component which has already been added to the Instrument (as a child component)
+     *  to be 'the' samplePos component. NOTE THOUGH THAT THIS METHOD DOES NOT VERIFY THAT THIS
+     *  IS THE CASE. It is assumed that we have at only one of these.
+     *  The component is required to have a name.
+     *
+     *  @param comp :: Component to be marked (stored for later retrieval) as a "SamplePos" Component
+     */
     void Instrument::markAsSamplePos(const ObjComponent* comp)
     {
       if (m_isParametrized)
         throw std::runtime_error("Instrument::markAsSamplePos() called on a parametrized Instrument object.");
 
       if ( !m_sampleCache )
+      {
+        if ( comp->getName().empty() )
+        {
+          throw Exception::InstrumentDefinitionError("The sample component is required to have a name.");
+        }
         m_sampleCache = comp;
+      }
       else
+      {
         g_log.warning("Have already added samplePos component to the _sampleCache.");
+      }
     }
 
-    /** Mark a Component which has already been added to the Instrument (as a child component)
-    * to be 'the' source Component. For now it is assumed that we have
-    * at most one of these.
-    *
-    * @param comp :: Component to be marked (stored for later retrievel) as a "source" Component
-    */
+    /** Mark a component which has already been added to the Instrument (as a child component)
+     *  to be 'the' source component.NOTE THOUGH THAT THIS METHOD DOES NOT VERIFY THAT THIS
+     *  IS THE CASE. It is assumed that we have at only one of these.
+     *  The component is required to have a name.
+     *
+     *  @param comp :: Component to be marked (stored for later retrieval) as a "source" Component
+     */
     void Instrument::markAsSource(const ObjComponent* comp)
     {
       if (m_isParametrized)
         throw std::runtime_error("Instrument::markAsSource() called on a parametrized Instrument object.");
 
       if ( !m_sourceCache )
+      {
+        if ( comp->getName().empty() )
+        {
+          throw Exception::InstrumentDefinitionError("The source component is required to have a name.");
+        }
         m_sourceCache = comp;
+      }
       else
+      {
         g_log.warning("Have already added source component to the _sourceCache.");
+      }
     }
 
     /** Mark a Component which has already been added to the Instrument (as a child component)
