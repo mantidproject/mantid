@@ -20,9 +20,6 @@ set ( SRC_FILES
 	src/TableColumn.cpp
 	src/TableWorkspace.cpp
 	src/Workspace2D.cpp
-	src/WorkspaceMemento.cpp
-	src/WorkspaceMementoCollection.cpp
-	src/WorkspaceMementoItem.cpp
 	src/WorkspaceSingleValue.cpp
 )
 
@@ -56,9 +53,6 @@ set ( INC_FILES
 	inc/MantidDataObjects/TablePointerColumn.h
 	inc/MantidDataObjects/TableWorkspace.h
 	inc/MantidDataObjects/Workspace2D.h
-	inc/MantidDataObjects/WorkspaceMemento.h
-	inc/MantidDataObjects/WorkspaceMementoCollection.h
-	inc/MantidDataObjects/WorkspaceMementoItem.h
 	inc/MantidDataObjects/WorkspaceSingleValue.h
 )
 
@@ -86,9 +80,6 @@ set ( TEST_FILES
 	test/WeightedEventNoTimeTest.h
 	test/WeightedEventTest.h
 	test/Workspace2DTest.h
-	test/WorkspaceMementoTest.h
-	test/WorkspaceMementoCollectionTest.h
-	test/WorkspaceMementoItemTest.h
 	test/WorkspaceIteratorTest.h
 	test/WorkspaceSingleValueTest.h
 	test/WorkspaceValidatorsTest.h

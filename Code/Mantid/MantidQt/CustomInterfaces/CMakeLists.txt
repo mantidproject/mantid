@@ -1,5 +1,6 @@
 set ( SRC_FILES src/background.cpp
                 src/ConvertToEnergy.cpp
+                #src/CreateMDWorkspace.cpp
                 src/deltaECalc.cpp
                 src/Homer.cpp
                 src/Indirect.cpp
@@ -8,16 +9,19 @@ set ( SRC_FILES src/background.cpp
                 src/IO_MuonGrouping.cpp
                 src/MuonAnalysis.cpp
                 src/MuonAnalysisHelper.cpp
-		src/MuonAnalysisOptionTab.cpp
+		        src/MuonAnalysisOptionTab.cpp
                 src/SANSAddFiles.cpp
                 src/SANSPlotSpecial.cpp
                 src/SANSRunWindow.cpp
                 src/SANSDiagnostics.cpp
+				src/WorkspaceMementoCollection.cpp
+				src/WorkspaceMemento.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
+                #inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
                 inc/MantidQtCustomInterfaces/deltaECalc.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/Indirect.h
@@ -31,12 +35,16 @@ set ( INC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
+				        inc/MantidQtCustomInterfaces/WorkspaceMementoCollection.h
+				        inc/MantidQtCustomInterfaces/WorkspaceMemento.h
+				        inc/MantidQtCustomInterfaces/WorkspaceMementoItem.h
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
 
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
+                #inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/Indirect.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
@@ -50,6 +58,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
+               #inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.ui
                inc/MantidQtCustomInterfaces/MuonAnalysis.ui
