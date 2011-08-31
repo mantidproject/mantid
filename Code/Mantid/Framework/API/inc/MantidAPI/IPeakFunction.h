@@ -52,7 +52,7 @@ public:
   /// General implementation of the method for all peaks. 
   void functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData);
   /// Set new peak radius
-  static void setPeakRadius(const int& r);
+  static void setPeakRadius(const int& r = 5);
 
 protected:
   /// Function evaluation method to be implemented in the inherited classes

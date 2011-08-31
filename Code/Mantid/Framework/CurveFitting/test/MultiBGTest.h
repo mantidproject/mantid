@@ -55,18 +55,18 @@ public:
     c = 0.1;
     numBins = 31;
     x0 = -10.0;
-    dx = 20.0 / numBins;
+    dx = 20.0 / static_cast<double>(numBins);
     Mantid::DataObjects::Workspace2D_sptr WS(new Mantid::DataObjects::Workspace2D);
     WS->initialize(2,numBins+1,numBins);
     
-    for (int i = 0; i < numBins + 1; ++i)
+    for (size_t i = 0; i < numBins + 1; ++i)
     {
-      WS->dataX(0)[i] = x0 + dx * i;
+      WS->dataX(0)[i] = x0 + dx * static_cast<double>(i);
     }
     for(size_t spec = 0; spec < WS->getNumberHistograms(); ++spec)
     {
       WS->dataX(spec) = WS->readX(0);
-      for (int i = 0; i < numBins; ++i)
+      for (size_t i = 0; i < numBins; ++i)
       {
         const double x = (WS->readX(0)[i] + WS->readX(0)[i+1])/2;
         WS->dataY(spec)[i] = a[spec] + b[spec] * x + h * exp(-0.5 * (x - c) * (x - c) /s/s );// + noise();
@@ -74,12 +74,16 @@ public:
       }
     }
     std::ofstream fil("MultiBGTestWS.txt");
-    for(int i = 0; i < numBins; ++i)
+    for(size_t i = 0; i < numBins; ++i)
     {
       fil << (WS->readX(0)[i] + WS->readX(0)[i+1])/2 << ',' << WS->readY(0)[i] << ',' << WS->readE(0)[i] << ',' << WS->readY(1)[i] << ',' << WS->readE(1)[i] << std::endl;
     }
     AnalysisDataService::Instance().add("MultiBGTestWS",WS);
-    Mantid::API::IPeakFunction::setPeakRadius(1000);
+  }
+
+  ~MultiBGTest()
+  {
+    AnalysisDataService::Instance().remove("MultiBGTestWS");
   }
   
   void testCorrectDataVectorConstrucion()
@@ -157,6 +161,7 @@ public:
 
   void testExists()
   {
+    Mantid::API::IPeakFunction::setPeakRadius(1000);
     std::string funIni =       
       "composite=MultiBG;name=Gaussian,Height=22.,Sigma=1,PeakCentre=0.2;"
       "name=LinearBackground,A0=2,A1=-0.1,Workspace=MultiBGTestWS,WSParam=(WorkspaceIndex=0);"
@@ -190,6 +195,7 @@ public:
     fit.execute();
     TS_ASSERT(fit.isExecuted());
 
+    Mantid::API::IPeakFunction::setPeakRadius();
   }
 
   double noise()const
