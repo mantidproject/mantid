@@ -51885,10 +51885,10 @@
   <!--PIXEL-->
   <type is="detector" name="pixel">
     <cuboid id="shape">
-      <left-front-bottom-point y="-0.00277777761221" x="-0.032292380929" z="0.0"/>
-      <left-front-top-point y="0.00277777761221" x="-0.032292380929" z="0.0"/>
-      <left-back-bottom-point y="-0.00277777761221" x="-0.032292380929" z="-0.01"/>
-      <right-front-bottom-point y="-0.00277777761221" x="0.032292380929" z="0.0"/>
+      <left-front-bottom-point y="-0.0013888888061" x="-0.0064584761858" z="0.0"/>
+      <left-front-top-point y="0.0013888888061" x="-0.0064584761858" z="0.0"/>
+      <left-back-bottom-point y="-0.0013888888061" x="-0.0064584761858" z="-0.01"/>
+      <right-front-bottom-point y="-0.0013888888061" x="0.0064584761858" z="0.0"/>
     </cuboid>
     <algebra val="shape"/>
   </type>
