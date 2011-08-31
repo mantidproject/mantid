@@ -230,69 +230,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
   }
 
-
-
-  void xtestExecOnMuonXml()
-  {
-    SaveNexusProcessed algToBeTested;
-
-    //  std::string s;
-    //std::getline(std::cin,s);
-
-    LoadNexus nxLoad;
-    std::string outputSpace,inputFile;
-    nxLoad.initialize();
-    // Now set required filename and output workspace name
-    inputFile = "emu00006473.nxs";
-    nxLoad.setPropertyValue("Filename", inputFile);
-    inputFile = nxLoad.getPropertyValue("Filename"); //Get the absolute path
-    outputSpace="outer";
-    nxLoad.setPropertyValue("OutputWorkspace", outputSpace);
-    //
-    // Test execute to read file and populate workspace
-    //
-    TS_ASSERT_THROWS_NOTHING(nxLoad.execute());
-    TS_ASSERT( nxLoad.isExecuted() );
-    //
-    // get workspace
-    //
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
-    algToBeTested.setRethrows(true);
-
-    algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
-    // specify name of file to save workspace to
-    outputFile = "SaveNexusProcessedTest_testExecOnMuonXml.xml";
-    //entryName = "entry4";
-    dataName = "spectra";
-    title = "A save of a 2D workspace from Muon file";
-    algToBeTested.setPropertyValue("Filename", outputFile);
-    //algToBeTested.setPropertyValue("EntryName", entryName);
-    algToBeTested.setPropertyValue("Title", title);
-    outputFile = algToBeTested.getPropertyValue("Filename");
-    if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
-    TS_ASSERT( ! result.compare(outputFile));
-    //TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") );
-    //TS_ASSERT( ! result.compare(entryName));
-
-    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
-    TS_ASSERT( algToBeTested.isExecuted() );
-
-    if(clearfiles)
-    {
-      if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
-    }
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
-  }
-
-
-
-
   static EventWorkspace_sptr do_testExec_EventWorkspaces(std::string filename_root, EventType type,
       std::string & outputFile,  bool makeDifferentTypes, bool clearfiles)
   {
