@@ -31,7 +31,7 @@ public:
   ~PythonObjectInstantiatorTest()
   {
     delete m_creator;
-    Py_Finalize();
+    //Py_Finalize(); - Causes Python 2.4 to fail. Need to find out why
   }
 
   void test_Bare_Pointer()
