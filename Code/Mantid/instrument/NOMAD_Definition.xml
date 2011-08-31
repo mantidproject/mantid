@@ -3,7 +3,7 @@
      see http://www.mantidproject.org/IDF -->
 <instrument name="NOMAD" valid-from   ="1900-01-31 23:59:59"
                            valid-to     ="2100-01-31 23:59:59"
-		           last-modified="2011-08-31 10:00:00">
+		           last-modified="2011-08-31 14:00:00">
   <!--Data taken from /SNS/NOM/2010_2_1B_CAL/calibrations/NOM_geom_2010_12_01.xml-->
   <!--Created by Vickie Lynch-->
   <!--DEFAULTS-->
@@ -60,7 +60,7 @@
   </component>
 
 
-  <type name="Group1">
+  <type name="Group5">
   <component type="half_inch_back"  idstart="74752" idfillbyfirst="y" idstepbyrow="128">
     <location x="0.0994933" y="0.003906" z="-0.687783" name="bank74" rot="180.0" axis-x="0" axis-y="1" axis-z="0">
     </location>
@@ -79,7 +79,7 @@
   </component>
   </type>
 
-  <type name="Group2">
+  <type name="Group4">
   <component type="one_inch" idstart="55296" idfillbyfirst="y" idstepbyrow="128">
     <location x="-0.88651975" y="0.152392725" z="-0.590803" name="bank55" rot="-102.382153342" axis-x="0" axis-y="1" axis-z="0">
       <rot val="92.5513960694">
@@ -190,7 +190,7 @@
   </component>
   </type>
 
-  <type name="Group4">
+  <type name="Group2">
   <component type="one_inch" idstart="19456" idfillbyfirst="y" idstepbyrow="128">
     <location x="-0.8375565" y="-0.08055513" z="1.445654" name="bank20" rot="-90.0" axis-x="0" axis-y="1" axis-z="0">
       <rot val="90.0">
@@ -256,7 +256,7 @@
   </component>
   </type>
 
-  <type name="Group5">
+  <type name="Group1">
   <component type="one_inch" idstart="3072" idfillbyfirst="y" idstepbyrow="128">
     <location x="-0.507842" y="-0.023511625" z="1.940845" name="bank4" rot="-87.1545655812" axis-x="0" axis-y="1" axis-z="0">
       <rot val="90.0">
