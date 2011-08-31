@@ -60,6 +60,9 @@ class BaseBeamFinder(ReductionStep):
             Find the beam center.
             @param reducer: Reducer object for which this step is executed
         """
+        if self._beam_center_x is not None and self._beam_center_y is not None:
+            return "Using Beam Center at: %g %g" % (self._beam_center_x, self._beam_center_y)
+        
         # Load the file to extract the beam center from, and process it.
         filepath = find_data(self._datafile, instrument=reducer.instrument.name())
         
@@ -801,9 +804,12 @@ class WeightedAzimuthalAverage(ReductionStep):
             qmax = float(toks[2])
             
         output_ws = workspace+str(self._suffix)
-        if mtd[workspace].getRun().hasProperty("data_ws"):
-            data_ws = mtd[workspace].getRun().getProperty("data_ws").value 
-            Q1DTOF(InputWorkspace=data_ws, CorrectionWorkspace=workspace, OutputWorkspace=output_ws, OutputBinning=self._binning)
+        if mtd[workspace].getRun().hasProperty("is_separate_corrections"):
+            pixel_adj = mtd[workspace].getRun().getProperty("pixel_adj").value
+            wl_adj = mtd[workspace].getRun().getProperty("wl_adj").value
+            Q1D(DetBankWorkspace=workspace, OutputWorkspace=output_ws,
+                OutputBinning=self._binning, 
+                PixelAdj=pixel_adj, WavelengthAdj=wl_adj)
         else:
             #Q1D(InputWorkspace=workspace, InputForErrors=workspace, OutputWorkspace=output_ws, OutputBinning=self._binning)
             Q1DWeighted(workspace, output_ws, self._binning,
@@ -1072,7 +1078,19 @@ class Mask(ReductionStep):
         
         # Check whether the workspace has mask information
         if not self._ignore_run_properties and mtd[workspace].getRun().hasProperty("rectangular_masks"):
-            rectangular_masks = pickle.loads(mtd[workspace].getRun().getProperty("rectangular_masks").value)
+            mask_str = mtd[workspace].getRun().getProperty("rectangular_masks").value
+            try:
+                rectangular_masks = pickle.loads(mask_str)
+            except:
+                rectangular_masks = []
+                toks = mask_str.split(',')
+                for item in toks:
+                    if len(item)>0:
+                        c = item.split(' ')
+                        if len(c)==4:
+                            print c
+                            rectangular_masks.append([int(c[0]), int(c[1]), int(c[2]), int(c[3])])
+                
             for rec in rectangular_masks:
                 try:
                     self.add_pixel_rectangle(rec[0], rec[1], rec[2], rec[3])
@@ -1471,12 +1489,11 @@ class SubtractBackground(ReductionStep):
         
         # Make sure that we have the same binning
         RebinToWorkspace(self._background_ws, workspace, OutputWorkspace="__tmp_bck")
-        if mtd[workspace].getRun().hasProperty("data_ws"):
+        if mtd[workspace].getRun().hasProperty("is_separate_corrections"):
             if reducer._absolute_scale is not None:
                 reducer._absolute_scale.execute(reducer, "__tmp_bck")
             if reducer._azimuthal_averager is not None:
                 reducer._azimuthal_averager.execute(reducer, "__tmp_bck")
-
         else:
             Minus(workspace, "__tmp_bck", workspace)
         if mtd.workspaceExists("__tmp_bck"):
