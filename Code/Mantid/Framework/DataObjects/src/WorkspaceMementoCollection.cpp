@@ -1,6 +1,7 @@
 #include "MantidDataObjects/WorkspaceMementoCollection.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h" 
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/WorkspaceMemento.h"
 
 namespace Mantid
@@ -10,8 +11,12 @@ namespace Mantid
     /// Constructor
     WorkspaceMementoCollection::WorkspaceMementoCollection()
     {
+      using namespace Mantid::API;
+      //Call workspace factory to populate m_data.
+      m_data = WorkspaceFactory::Instance().createTable("TableWorkspace");
+
       //Define the table schema here
-      m_data.addColumn("str", "WorkspaceName");
+      m_data->addColumn("str", "WorkspaceName");
       //TODO, lots more columns will be required here.
     }
 
@@ -23,8 +28,8 @@ namespace Mantid
     {
       using namespace API;
       //Add row to table.
-      m_data.insertRow(m_data.rowCount() + 1);
-      TableRow row = m_data.getRow(m_data.rowCount()-1);
+      m_data->insertRow(m_data->rowCount() + 1);
+      TableRow row = m_data->getRow(m_data->rowCount()-1);
       row << ws.getName();
     }
 
@@ -51,10 +56,10 @@ namespace Mantid
     Serializes workspace changes to xml.
     @return serialized table workspace containing all diffs.
     */
-    TableWorkspace* WorkspaceMementoCollection::serialize() const
+    Mantid::API::ITableWorkspace* WorkspaceMementoCollection::serialize() const
     {
       //TODO, should hasChanges be checked first? Presumbably we need to ensure that all mementos are in an unmodified state before this is allowed.
-      return m_data.clone();
+      return m_data->clone();
     }
 
     /// Destructor

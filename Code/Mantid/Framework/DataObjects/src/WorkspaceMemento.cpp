@@ -10,7 +10,7 @@ namespace Mantid
     @param ws : ref to underlying table workspace where persisted data is stored.
     @param runNumber : the run number corresponding to this memento.
     */
-    WorkspaceMemento::WorkspaceMemento(TableWorkspace& ws, size_t runNumber) :
+    WorkspaceMemento::WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, size_t runNumber) :
       m_data(ws), 
       m_validMemento(false), 
       m_runNumber(runNumber), 
@@ -24,7 +24,7 @@ namespace Mantid
     @param runNumber : the run number corresponding to this memento.
     @param lock : locking object to use internally.
     */
-     WorkspaceMemento::WorkspaceMemento(TableWorkspace& ws, size_t runNumber, WorkspaceMementoLock* lock) : 
+     WorkspaceMemento::WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, size_t runNumber, WorkspaceMementoLock* lock) : 
       m_data(ws), 
       m_validMemento(false), 
       m_runNumber(runNumber), 
@@ -45,7 +45,7 @@ namespace Mantid
       //TODO check types here. Type of item should be the same as the corresponding colum in the table.
       AbstractMementoItem_sptr temp(item);
       m_items.push_back(temp);
-      m_items.size() == size_t(m_data.columnCount()) ? m_validMemento = true : m_validMemento = false;
+      m_items.size() == size_t(m_data->columnCount()) ? m_validMemento = true : m_validMemento = false;
     }
 
     /* Getter for the item at a column

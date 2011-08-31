@@ -6,6 +6,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 
 using namespace Mantid::DataObjects;
+using namespace Mantid::API;
 
 class WorkspaceMementoCollectionTest : public CxxTest::TestSuite
 {
@@ -14,8 +15,8 @@ public:
   void testSerialize()
   {
     WorkspaceMementoCollection collection;
-    TableWorkspace* productA = collection.serialize();
-    TableWorkspace* productB = collection.serialize();
+    ITableWorkspace* productA = collection.serialize();
+    ITableWorkspace* productB = collection.serialize();
 
     TSM_ASSERT_EQUALS("Characterisation test. Current table schema has 1 column", 1, productA->columnCount());
     TSM_ASSERT_EQUALS("No workspaces registered, so should have no rows.", 0, productA->rowCount());
@@ -31,7 +32,7 @@ void testRegisterWorkspace()
 
   WorkspaceMementoCollection collection;
   collection.registerWorkspace(ws); //Could be any other kind of workspace.
-  TableWorkspace* product = collection.serialize();
+  ITableWorkspace* product = collection.serialize();
   
   TSM_ASSERT_EQUALS("Registered workspace property not serialized.", "WSName", product->cell<std::string>(0, 0));
   delete product;

@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAOBJECTS_MEMENTO_ITEM_H_
 #define MANTID_DATAOBJECTS_MEMENTO_ITEM_H_
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "boost/shared_ptr.hpp"
+#include "MantidAPI/ITableWorkspace.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -61,7 +61,7 @@ namespace Mantid
       /// Actual/outstanding value stored in cell.
       ColType m_value;
       /// Reference to mutable table workspace.
-      TableWorkspace& m_data;
+      Mantid::API::ITableWorkspace_sptr m_data;
       /// Row onto which this column object projects.
       int m_rowIndex;
 
@@ -76,9 +76,9 @@ namespace Mantid
       @param data : ref to table workspace storing the data.
       @param rowIndex : index of the row in the table workspace that this column/memento item. is to apply.
       */
-      WorkspaceMementoItem(TableWorkspace& data, int rowIndex) : m_data(data), m_rowIndex(rowIndex)
+      WorkspaceMementoItem(Mantid::API::ITableWorkspace_sptr data, int rowIndex) : m_data(data), m_rowIndex(rowIndex)
       {
-        m_value = m_data.cell<ItemType>(m_rowIndex, ColIndex);
+        m_value = m_data->cell<ItemType>(m_rowIndex, ColIndex);
       }
 
       /**
@@ -114,7 +114,7 @@ namespace Mantid
       */
       virtual bool hasChanged() const 
       {
-        return m_data.cell<ItemType>(m_rowIndex, ColIndex) != m_value;
+        return m_data->cell<ItemType>(m_rowIndex, ColIndex) != m_value;
       }
 
       /*
@@ -179,13 +179,13 @@ namespace Mantid
       /// Synchronise the changes (via setvalue) with the underlying table workspace. This is a non reversible operation. 
       void commit()
       {
-        m_data.cell<ItemType>(m_rowIndex, ColIndex) = m_value;
+        m_data->cell<ItemType>(m_rowIndex, ColIndex) = m_value;
       }
 
       /// Undo changes via setValue. 
       void rollback()
       {
-        m_value = m_data.cell<ItemType>(m_rowIndex, ColIndex);
+        m_value = m_data->cell<ItemType>(m_rowIndex, ColIndex);
       }
 
       /**

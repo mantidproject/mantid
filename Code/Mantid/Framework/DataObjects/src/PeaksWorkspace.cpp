@@ -50,6 +50,17 @@ namespace DataObjects
     initColumns();
   }
 
+  //---------------------------------------------------------------------------------------------
+  /** Virtual constructor. Clone method to duplicate the peaks workspace.
+   *
+   * @return PeaksWorkspace object
+   */
+  PeaksWorkspace* PeaksWorkspace::clone() const
+  {
+    //Deep copy via copy construtor.
+    return new PeaksWorkspace(*this);
+  }
+
 
   //---------------------------------------------------------------------------------------------
   /** Copy constructor
@@ -57,7 +68,7 @@ namespace DataObjects
    * @param other :: other PeaksWorkspace to copy from
    * @return
    */
-  PeaksWorkspace::PeaksWorkspace(PeaksWorkspace & other)
+  PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace & other)
   : IPeaksWorkspace(other),
     peaks(other.peaks)
   {

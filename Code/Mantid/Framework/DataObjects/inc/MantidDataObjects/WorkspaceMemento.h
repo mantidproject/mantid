@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -74,8 +75,8 @@ namespace Mantid
     public:
 
       typedef std::vector<AbstractMementoItem_sptr> VecMementoItems;
-      WorkspaceMemento(TableWorkspace& ws, size_t runNumber);
-      WorkspaceMemento(TableWorkspace& ws, size_t runNumber, WorkspaceMementoLock* lock);
+      WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, size_t runNumber);
+      WorkspaceMemento(Mantid::API::ITableWorkspace_sptr ws, size_t runNumber, WorkspaceMementoLock* lock);
       ~WorkspaceMemento(); 
       void addItem(AbstractMementoItem* item);
       AbstractMementoItem_sptr getItem(const size_t col) const;
@@ -91,7 +92,7 @@ namespace Mantid
       void lock();
     private:
       /// Reference to underlying data.
-      const TableWorkspace& m_data;
+      Mantid::API::ITableWorkspace_sptr m_data;
       /// Memento items to store local/un-saved changes.
       VecMementoItems m_items;
       /// Flag indicating memento is valid.

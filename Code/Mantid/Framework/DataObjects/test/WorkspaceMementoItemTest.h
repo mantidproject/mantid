@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/WorkspaceMementoItem.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include <string>
 
 using Mantid::DataObjects::WorkspaceMementoItem;
@@ -13,18 +14,18 @@ class WorkspaceMementoItemTest : public CxxTest::TestSuite
 
 private:
 
-  TableWorkspace ws;
+  boost::shared_ptr<Mantid::API::ITableWorkspace>  ws;
 
 public:
 
-WorkspaceMementoItemTest() : ws(2)
+WorkspaceMementoItemTest() : ws(new TableWorkspace(2))
 {
   //Set up a table workspace with one column and one row. then put a single 
   //value integer in that workspace with value 1.
-  ws.addColumn("int", "test_col1");
-  ws.addColumn("int", "test_col2");
-  ws.getColumn(0)->cell<int>(0) = 1;
-  ws.getColumn(1)->cell<int>(0) = 1;
+  ws->addColumn("int", "test_col1");
+  ws->addColumn("int", "test_col2");
+  ws->cell<int>(0, 0) = 1;
+  ws->cell<int>(0, 1) = 1;
 }
 
 void testConstructor()
@@ -118,7 +119,7 @@ void testApplyChanges()
   TS_ASSERT_THROWS_NOTHING(item.commit());
 
   //Check that the chanes arrive.
-  TS_ASSERT_EQUALS(2, ws.getColumn(0)->cell<int>(0));
+  TS_ASSERT_EQUALS(2, ws->cell<int>(0, 0));
   TSM_ASSERT("Changes have been applied. Should not indicate outstanding!", !item.hasChanged())
 }
 

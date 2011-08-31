@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/WorkspaceMemento.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 using namespace Mantid::DataObjects;
 
@@ -11,22 +12,22 @@ class WorkspaceMementoTest : public CxxTest::TestSuite
 
 private:
 
-  TableWorkspace ws;
+  boost::shared_ptr<Mantid::API::ITableWorkspace>  ws;
 
 public:
 
-WorkspaceMementoTest() : ws(2)
+WorkspaceMementoTest() : ws(new TableWorkspace(2))
 {
   //Set up a table workspace with one column and one row. then put a single 
   //value integer in that workspace with value 1.
-  ws.addColumn("int", "test_col1");
-  ws.addColumn("int", "test_col2");
+  ws->addColumn("int", "test_col1");
+  ws->addColumn("int", "test_col2");
 }
 
 void setUp()
 {
-  ws.getColumn(0)->cell<int>(0) = 1;
-  ws.getColumn(1)->cell<int>(0) = 1;
+  ws->getColumn(0)->cell<int>(0) = 1;
+  ws->getColumn(1)->cell<int>(0) = 1;
 }
 
 void testInvalidWithoutAddingItems()

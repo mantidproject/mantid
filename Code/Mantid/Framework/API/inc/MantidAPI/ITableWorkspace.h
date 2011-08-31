@@ -145,6 +145,9 @@ public:
   /// Removes a column.
   virtual void removeColumn( const std::string& name) = 0;
 
+  /// Clones the table workspace
+  virtual ITableWorkspace* clone() const = 0;
+
   /// Number of columns in the workspace.
   virtual int columnCount() const = 0;
 

@@ -71,7 +71,9 @@ namespace DataObjects
 
     PeaksWorkspace();
 
-    PeaksWorkspace(PeaksWorkspace & other);
+    PeaksWorkspace(const PeaksWorkspace & other);
+
+    PeaksWorkspace* clone() const;
 
     virtual ~PeaksWorkspace();
 
