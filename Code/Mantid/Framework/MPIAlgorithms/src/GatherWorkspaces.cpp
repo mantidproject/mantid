@@ -41,16 +41,30 @@ void GatherWorkspaces::exec()
   mpi::communicator included = world.split(haveWorkspace);
 
   // If the present process doesn't have an input workspace then its work is done
-  if ( !haveWorkspace ) return;
+  if ( !haveWorkspace )
+  {
+    g_log.information("No input workspace on this process, so nothing to do.");
+    return;
+  }
 
-  // Get the number of bins in each histogram and check they're all the same
+  // Get the number of bins in each workspace and check they're all the same
   const std::size_t numBins = inputWorkspace->blocksize();
   std::vector<std::size_t> all_numBins;
   all_gather(included, numBins, all_numBins);
-  if ( std::count(all_numBins.begin(),all_numBins.end(),numBins) != all_numBins.size() )
+  if ( std::count(all_numBins.begin(),all_numBins.end(),numBins) != (int)all_numBins.size() )
   {
     // All the processes will error out if all the workspaces don't have the same number of bins
     throw Exception::MisMatch<std::size_t>(numBins, 0, "All input workspaces must have the same number of bins");
+  }
+  // Also check that all workspaces are either histogram or not
+  // N.B. boost mpi doesn't seem to like me using booleans in the all_gather
+  const int hist = inputWorkspace->isHistogramData();
+  std::vector<int> all_hist;
+  all_gather(included, hist, all_hist);
+  if ( std::count(all_hist.begin(),all_hist.end(),hist) != (int)all_hist.size() )
+  {
+    // All the processes will error out if we don't have either all histogram or all point-data workspaces
+    throw Exception::MisMatch<int>(hist, 0, "The input workspaces must be all histogram or all point data");
   }
 
   // Get the total number of spectra in the combined inputs
@@ -63,12 +77,12 @@ void GatherWorkspaces::exec()
   {
     g_log.debug() << "Total number of spectra is " << totalSpec << "\n";
     // Create the workspace for the output
-    outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,totalSpec,inputWorkspace->readX(0).size(),numBins);
+    outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,totalSpec,numBins+hist,numBins);
     setProperty("OutputWorkspace",outputWorkspace);
 
     // Keep it lean-and-mean and don't bother with the spectra map, etc.
     // This line is needed to stop a crash on a subsequent SaveNexus
-    outputWorkspace->replaceSpectraMap(new SpectraDetectorMap);
+//    outputWorkspace->replaceSpectraMap(new SpectraDetectorMap);
   }
 
   // Let's assume 1 spectrum in each workspace for the first try....

@@ -37,18 +37,26 @@ void BroadcastWorkspace::exec()
   MatrixWorkspace_const_sptr inputWorkspace;
   std::size_t numSpec, numBins;
   bool hist;
+  std::string xUnit, yUnit, yUnitLabel;
+  bool distribution;
 
   if ( world.rank() == root )
   {
     inputWorkspace = getProperty("InputWorkspace");
     if ( !inputWorkspace )
     {
-      throw Exception::NotFoundError("InputWorkspace not found in root process",getPropertyValue("InputWorkspace"));
-      // TODO: Stop all the other processes
+      g_log.fatal("InputWorkspace '" + getPropertyValue("InputWorkspace") + "' not found in root process");
+      // We need to stop all the other processes. Not very graceful, but there's not much point in trying to be cleverer
+      mpi::environment::abort(-1);
     }
     numSpec = inputWorkspace->getNumberHistograms();
     numBins = inputWorkspace->blocksize();
     hist = inputWorkspace->isHistogramData();
+
+    xUnit = inputWorkspace->getAxis(0)->unit()->unitID();
+    yUnit = inputWorkspace->YUnit();
+    yUnitLabel = inputWorkspace->YUnitLabel();
+    distribution = inputWorkspace->isDistribution();
   }
 
   // Broadcast the size of the workspace
@@ -58,10 +66,19 @@ void BroadcastWorkspace::exec()
 
   // Create an output workspace in each process. Assume Workspace2D for now
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D",numSpec,numBins+hist,numBins);
-  // Hard-code the unit for now as it's needed in my example to allow a divide.
-  // TODO: Broadcast this and any other pertinent details
-  outputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
   setProperty("OutputWorkspace",outputWorkspace);
+
+  // Broadcast the units
+  broadcast(world,xUnit,root);
+  broadcast(world,yUnit,root);
+  broadcast(world,yUnit,root);
+  broadcast(world,distribution,root);
+  outputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(xUnit);
+  outputWorkspace->setYUnit(yUnit);
+  outputWorkspace->setYUnitLabel(yUnitLabel);
+  outputWorkspace->isDistribution(distribution);
+
+  // TODO: broadcast any other pertinent details. Want to keep this to a minimum though.
 
   for ( std::size_t i = 0; i < numSpec; ++i )
   {

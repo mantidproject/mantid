@@ -1,21 +1,13 @@
 #ifndef INSTRUMENTRAYTRACERTEST_H_
 #define INSTRUMENTRAYTRACERTEST_H_
 
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidKernel/V3D.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidTestHelpers/AlgorithmHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include <iterator>
 
 using namespace Mantid::Geometry;
-using Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::API::AnalysisDataService;
 using Mantid::Kernel::V3D;
 
 //-------------------------------------------------------------
@@ -24,6 +16,10 @@ using Mantid::Kernel::V3D;
 class InstrumentRayTracerTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static InstrumentRayTracerTest *createSuite() { return new InstrumentRayTracerTest(); }
+  static void destroySuite( InstrumentRayTracerTest *suite ) { delete suite; }
 
   InstrumentRayTracerTest() : m_testInst()
   {
@@ -204,18 +200,6 @@ public:
     doTestRectangularDetector("Zero-beam", inst, V3D(0.0, 0.0, 0.0), -1, -1);
   }
 
-
-  static void showResults(Links & results, Instrument_sptr inst)
-  {
-    Links::const_iterator resultItr = results.begin();
-    for (; resultItr != results.end(); resultItr++)
-    {
-      IComponent_const_sptr component = inst->getComponentByID(resultItr->componentID);
-      std::cout << component->getName() << ", ";
-    }
-    std::cout << "\n";
-  }
-
 private:
   /// Setup the shared test instrument
   Instrument_sptr setupInstrument()
@@ -228,89 +212,12 @@ private:
     return m_testInst;
   }
 
-private:
   /// Test instrument
   Instrument_sptr m_testInst;
 };
 
-
-
-
-
-
-
-
-
-
-/** Performance test for large rectangular detectors */
-class InstrumentRayTracerTestPerformance : public CxxTest::TestSuite
-{
-public:
-  /// Test instrument
-  Instrument_sptr m_inst;
-  Workspace2D_sptr topazWS;
-
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static InstrumentRayTracerTestPerformance *createSuite() { return new InstrumentRayTracerTestPerformance(); }
-  static void destroySuite( InstrumentRayTracerTestPerformance *suite ) { delete suite; }
-
-  InstrumentRayTracerTestPerformance()
-  {
-    m_inst = ComponentCreationHelper::createTestInstrumentRectangular(2, 100);
-
-    topazWS = WorkspaceCreationHelper::Create2DWorkspace(1, 2);
-    AnalysisDataService::Instance().add("TOPAZ_2010", topazWS);
-    // Load a small test file
-    AlgorithmHelper::runAlgorithm("LoadInstrument", 4,
-        "Filename", "TOPAZ_Definition_2010.xml",
-        "Workspace", "TOPAZ_2010");
-  }
-
-  ~InstrumentRayTracerTestPerformance()
-  {
-    AnalysisDataService::Instance().remove("TOPAZ_2010");
-  }
-
-  void test_RectangularDetector()
-  {
-    // Directly in Z+ = towards the detector center
-    V3D testDir(0.0, 0.0, 1.0);
-    for (size_t i=0; i < 100; i++)
-    {
-      InstrumentRayTracer tracker(m_inst);
-      tracker.traceFromSample(testDir);
-      Links results = tracker.getResults();
-      TS_ASSERT_EQUALS(results.size(), 3);
-      //InstrumentRayTracerTest::showResults(results, m_inst);
-    }
-  }
-
-  void test_TOPAZ()
-  {
-    bool verbose=false;
-    Instrument_sptr inst = topazWS->getInstrument();
-    // Directly in Z+ = towards the detector center
-    for (int azimuth=0; azimuth < 360; azimuth += 3)
-      for (int elev=-89; elev < 89; elev += 3)
-      {
-        // Make a vector pointing in every direction
-        V3D testDir;
-        testDir.spherical(1, double(elev), double(azimuth));
-        if (verbose) std::cout << testDir << " : ";
-        // Track it
-        InstrumentRayTracer tracker(inst);
-        tracker.traceFromSample(testDir);
-        Links results = tracker.getResults();
-
-        if (verbose)
-          InstrumentRayTracerTest::showResults(results, inst);
-      }
-  }
-
-
-
-};
-
+//------------------------------------------------------------------------------------------------------
+// PERFORMANCE TEST IS IN DataHandling/test/InstrumentRayTracerTest.h because it requires LoadInstrument
+//------------------------------------------------------------------------------------------------------
 
 #endif //InstrumentRayTracerTEST_H_

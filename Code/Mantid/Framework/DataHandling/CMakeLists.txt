@@ -201,6 +201,7 @@ set ( TEST_FILES
 	test/GetMaskedDetectorsTest.h
 	test/GroupDetectors2Test.h
 	test/GroupDetectorsTest.h
+  test/InstrumentRayTracerTest.h
 	test/ISISDataArchiveTest.h
 	test/LoadAsciiTest.h
 	test/LoadCalFileTest.h

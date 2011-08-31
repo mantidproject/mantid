@@ -15,11 +15,15 @@ using Mantid::Kernel::Quat;
 class DetectorGroupTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static DetectorGroupTest *createSuite() { return new DetectorGroupTest(); }
+  static void destroySuite( DetectorGroupTest *suite ) { delete suite; }
+
   DetectorGroupTest() : m_origin()
   {
     m_detGroup = ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
   }
-
 
   void testConstructors()
   {

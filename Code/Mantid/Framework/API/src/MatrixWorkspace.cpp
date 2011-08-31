@@ -736,7 +736,7 @@ namespace Mantid
     /** Returns the 2Theta scattering angle for a detector
      *  @param det :: A pointer to the detector object (N.B. might be a DetectorGroup)
      *  @return The scattering angle (0 < theta < pi)
-     *  @throws InstrumentDefinitionError if source or sample is missing, or they are in the place
+     *  @throws InstrumentDefinitionError if source or sample is missing, or they are in the same place
      */
     double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const
     {
