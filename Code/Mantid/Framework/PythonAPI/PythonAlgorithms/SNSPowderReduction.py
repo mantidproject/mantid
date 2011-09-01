@@ -8,7 +8,7 @@ class SNSPowderReduction(PythonAlgorithm):
     class PDConfigFile(object):
         class PDInfo:
             """Inner class for holding configuration information for a reduction."""
-            def __init__(self, data, has_dspace=False, has_vback=False):
+            def __init__(self, data, has_dspace=False, has_vnoise=False):
                 if data is None:
                     data = [None, None, 1, 0, 0, 0., 0.]
                 self.freq = data[0]
@@ -16,15 +16,15 @@ class SNSPowderReduction(PythonAlgorithm):
                 self.bank = int(data[2])
                 self.van = int(data[3])
                 self.can = int(data[4])
-                self.vback = 0 # default value
+                self.vnoise = 0 # default value
                 self.has_dspace = has_dspace
                 self.tmin = 0. # default value
                 self.tmax = 0. # default value
 
                 # calculate the remaining indices
                 offset = 5
-                if has_vback:
-                    self.vback = int(data[offset])
+                if has_vnoise:
+                    self.vnoise = int(data[offset])
                     offset += 1
 
                 if has_dspace:
@@ -42,7 +42,7 @@ class SNSPowderReduction(PythonAlgorithm):
             self.filename = filename
             self._data = {}
             self.use_dspace = False
-            self._use_vback = False
+            self._use_vnoise = False
             if self.filename is None:
                 return
             handle = file(filename, 'r')
@@ -53,13 +53,13 @@ class SNSPowderReduction(PythonAlgorithm):
                 if "d_min" in line and "d_max" in line:
                     self.use_dspace = True
                 if "vanadium_back" in line:
-                    self._use_vback = True
+                    self._use_vnoise = True
                 return
             data = line.strip().split()
             data = [float(i) for i in data]
             if data[0] not in self._data.keys():
                 self._data[data[0]]={}
-            info = self.PDInfo(data, self.use_dspace, self._use_vback)
+            info = self.PDInfo(data, self.use_dspace, self._use_vnoise)
             self._data[info.freq][info.wl]=info
         def __getFrequency(self, request):
             for freq in self._data.keys():
@@ -101,14 +101,15 @@ class SNSPowderReduction(PythonAlgorithm):
                       "_neutron0_event.dat", "_neutron1_event.dat", "_neutron0_event.dat and _neutron1_event.dat"]
         self.declareProperty("Extension", "_event.nxs",
                              Validator=ListValidator(extensions))
-        self.declareProperty("CompressOnRead", False,
-                             Description="Compress the event list when reading in the data")
+        self.declareProperty("PreserveEvents", True,
+                             Description="Argument to supply to algorithms that can change from events to histograms.")
         self.declareProperty("Sum", False,
                              Description="Sum the runs. Does nothing for characterization runs")
         self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=-1),
                              Description="If specified overrides value in CharacterizationRunsFile If -1 turns off correction.")
         self.declareProperty("VanadiumNumber", 0, Validator=BoundedValidator(Lower=-1),
                              Description="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
+        self.declareProperty("VanadiumBackgroundNumber", 0, Validator=BoundedValidator(Lower=-1))
         self.declareFileProperty("CalibrationFile", "", FileAction.Load,
                                  [".cal"])
         self.declareFileProperty("CharacterizationRunsFile", "", FileAction.OptionalLoad,
@@ -197,10 +198,7 @@ class SNSPowderReduction(PythonAlgorithm):
         return wksp
 
     def _loadEventNeXusData(self, runnumber, extension, **kwargs):
-        if self.getProperty("CompressOnRead"):
-            kwargs["CompressTolerance"] = COMPRESS_TOL_TOF
-        else:
-            kwargs["Precount"] = True
+        kwargs["Precount"] = True
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
@@ -263,8 +261,8 @@ class SNSPowderReduction(PythonAlgorithm):
         else:
             return self._loadPreNeXusData(runnumber, extension)
 
-    def _focus(self, wksp, calib, info, filterLogs=None, preserveEvents=True, normByCurrent=True,
-               filterBadPulsesOverride=True):
+    def _focus(self, wksp, calib, info, filterLogs=None, preserveEvents=True,
+               normByCurrent=True, filterBadPulsesOverride=True):
         if wksp is None:
             return None
 
@@ -280,7 +278,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
         if not "histo" in self.getProperty("Extension"):
             # take care of filtering events
-            if self._filterBadPulses and not self.getProperty("CompressOnRead") and filterBadPulsesOverride:
+            if self._filterBadPulses and filterBadPulsesOverride:
                 FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
             if self._removePromptPulseWidth > 0.:
                 RemovePromptPulse(InputWorkspace=wksp, OutputWorkspace=wksp, Width= self._removePromptPulseWidth)
@@ -293,8 +291,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 except KeyError, e:
                     raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
                                        % (filterLogs[0], str(wksp)))            
-            if not self.getProperty("CompressOnRead"):
-                CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
+            CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
             SortEvents(wksp)
         if "histo" in self.getProperty("Extension"):
             cropkwargs = {}
@@ -345,7 +342,8 @@ class SNSPowderReduction(PythonAlgorithm):
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         else:
             preserveEvents = True
-        DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp, GroupingWorkspace=self._instrument + "_group", PreserveEvents=preserveEvents)
+        DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp, GroupingWorkspace=self._instrument + "_group",
+                             PreserveEvents=preserveEvents)
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         if preserveEvents and not "histo" in self.getProperty("Extension"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
@@ -429,6 +427,7 @@ class SNSPowderReduction(PythonAlgorithm):
         self._outTypes = self.getProperty("SaveAs")
         samRuns = self.getProperty("RunNumber")
         filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
+        preserveEvents = self.getProperty("PreserveEvents")
 
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
 
@@ -438,7 +437,7 @@ class SNSPowderReduction(PythonAlgorithm):
             for temp in samRuns:
                 temp = self._loadData(temp, SUFFIX, filterWall)
                 tempinfo = self._getinfo(temp)
-                temp = self._focus(temp, calib, tempinfo, filterLogs)
+                temp = self._focus(temp, calib, tempinfo, filterLogs, preserveEvents=preserveEvents)
                 if samRun is None:
                     samRun = temp
                     info = tempinfo
@@ -461,7 +460,7 @@ class SNSPowderReduction(PythonAlgorithm):
             if not self.getProperty("Sum"):
                 samRun = self._loadData(samRun, SUFFIX, filterWall)
                 info = self._getinfo(samRun)
-                samRun = self._focus(samRun, calib, info, filterLogs)
+                samRun = self._focus(samRun, calib, info, filterLogs, preserveEvents=preserveEvents)
                 workspacelist.append(str(samRun))
 
             # process the container
@@ -474,7 +473,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 temp = mtd["%s_%d" % (self._instrument, canRun)]
                 if temp is None:
                     canRun = self._loadData(canRun, SUFFIX, (0., 0.))
-                    canRun = self._focus(canRun, calib, info)
+                    canRun = self._focus(canRun, calib, info, preserveEvents=preserveEvents)
                 else:
                     canRun = temp
                 ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
@@ -492,18 +491,18 @@ class SNSPowderReduction(PythonAlgorithm):
                 temp = mtd["%s_%d" % (self._instrument, vanRun)]
                 if temp is None:
                     vanRun = self._loadData(vanRun, SUFFIX, (0., 0.))
-                    vbackRun = info.vback # background run for the vanadium
-                    vanRun = self._focus(vanRun, calib, info, preserveEvents=False, normByCurrent = (vbackRun < 0))
+                    vnoiseRun = info.vnoise # noise run for the vanadium
+                    vanRun = self._focus(vanRun, calib, info, preserveEvents=False, normByCurrent = (vnoiseRun < 0))
 
-                    if (vbackRun > 0):
-                        vbackRun = self._loadData(vbackRun, SUFFIX, (0., 0.))
-                        vbackRun = self._focus(vbackRun, calib, info, preserveEvents=False,
+                    if (vnoiseRun > 0):
+                        vnoiseRun = self._loadData(vnoiseRun, SUFFIX, (0., 0.))
+                        vnoiseRun = self._focus(vnoiseRun, calib, info, preserveEvents=False,
                                                normByCurrent=False, filterBadPulsesOverride=False)
-                        ConvertUnits(InputWorkspace=vbackRun, OutputWorkspace=vbackRun, Target="TOF")
-                        FFTSmooth(InputWorkspace=vbackRun, OutputWorkspace=vbackRun, Filter="Butterworth",
+                        ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
+                        FFTSmooth(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Filter="Butterworth",
                                   Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
                     else:
-                        vbackRun = None
+                        vnoiseRun = None
 
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
                     StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, PeakWidthPercent=self._vanPeakWidthPercent)
@@ -513,21 +512,21 @@ class SNSPowderReduction(PythonAlgorithm):
                     MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun, # numbers for vanadium
                                                          AttenuationXSection=2.8, ScatteringXSection=5.1,
                                                          SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
-                    if vbackRun is not None:
+                    if vnoiseRun is not None:
                         try:
                             vanDuration = vanRun.getRun().get('duration')
                             vanDuration = vanDuration.value
                         except:
                             vanDuration = 1.
                         try:
-                            vbackDuration = vbackRun.getRun().get('duration')
+                            vbackDuration = vnoiseRun.getRun().get('duration')
                             vbackDuration = vbackDuration.value
                         except:
                             vbackDuration = 1.
-                        vbackRun *= (vanDuration/vbackDuration)
-                        vanRun -= vbackRun
+                        vnoiseRun *= (vanDuration/vbackDuration)
+                        vanRun -= vnoiseRun
                         NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
-                        workspacelist.append(str(vbackRun))
+                        workspacelist.append(str(vnoiseRun))
                     SetUncertaintiesToZero(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                 else:
                     vanRun = temp
@@ -552,7 +551,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 normalized = False
 
             # write out the files
-            if not "histo" in self.getProperty("Extension"):
+            if not "histo" in self.getProperty("Extension") and preserveEvents:
                 CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                            Tolerance=COMPRESS_TOL_TOF) # 5ns
             self._save(samRun, info, normalized)
