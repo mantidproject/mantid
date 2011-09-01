@@ -369,11 +369,21 @@ void GenericDialog::initLayout()
   scroll->setWidgetResizable(true);
   scroll->setAlignment(Qt::AlignLeft & Qt::AlignTop);
 
+  // At this point, all the widgets have been added and are visible.
+  //std::cout << "viewport->height() " << viewport->height() << std::endl;
+  // This makes sure the viewport does not get scaled smaller, even if some controls are hidden.
+  viewport->setMinimumHeight( viewport->height() + 10 );
+
   const int screenHeight = QApplication::desktop()->height();
   const int dialogHeight = viewport->height();
   // If the thing won't end up too big compared to the screen height,
   // resize the scroll area so we don't get a scroll bar
-  if ( dialogHeight < 0.8*screenHeight ) scroll->setFixedHeight(viewport->height()+10);
+  if ( dialogHeight < 0.8*screenHeight )
+  {
+    scroll->setFixedHeight(viewport->height()+10);
+    // Resize it to the smallest height possible.
+    this->resize(this->width(),0);
+  }
 
   dialog_layout->setSizeConstraint(QLayout::SetMinimumSize);
 }
