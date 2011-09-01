@@ -11,6 +11,7 @@
 #include "Poco/RegularExpression.h"
 #include "Poco/NumberParser.h"
 #include "Poco/NumberFormatter.h"
+#include "Poco/String.h"
 #include <iostream>
 #include <fstream>
 #include <istream>
@@ -319,6 +320,7 @@ void EQSANSLoad::moveToBeamCenter()
 
 void EQSANSLoad::readConfigFile(const std::string& filePath)
 {
+  m_output_message += "   Using configuration file: " + filePath +"\n";
   // Initialize parameters
   m_mask_as_string = "";
   m_low_TOF_cut = 0;
@@ -344,6 +346,8 @@ void EQSANSLoad::readConfigFile(const std::string& filePath)
   while( getline(file,line) )
   {
     boost::trim(line);
+    std::string comment = line.substr(0, 1);
+    if (Poco::icompare(comment, "#") == 0) continue;
     if (use_config_mask) readRectangularMasks(line);
     if (use_config_cutoff) readTOFcuts(line);
     if (use_config_center) readBeamCenter(line);

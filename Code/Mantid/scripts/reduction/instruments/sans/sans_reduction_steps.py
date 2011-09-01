@@ -1086,11 +1086,9 @@ class Mask(ReductionStep):
                 toks = mask_str.split(',')
                 for item in toks:
                     if len(item)>0:
-                        c = item.split(' ')
+                        c = item.strip().split(' ')
                         if len(c)==4:
-                            print c
-                            rectangular_masks.append([int(c[0]), int(c[1]), int(c[2]), int(c[3])])
-                
+                            rectangular_masks.append([int(c[0]), int(c[2]), int(c[1]), int(c[3])])
             for rec in rectangular_masks:
                 try:
                     self.add_pixel_rectangle(rec[0], rec[1], rec[2], rec[3])
