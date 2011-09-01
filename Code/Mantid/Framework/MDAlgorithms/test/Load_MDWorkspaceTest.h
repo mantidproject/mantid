@@ -70,8 +70,5 @@ class Load_MDWorkspaceTest :    public CxxTest::TestSuite
      }
     
 
-~Load_MDWorkspaceTest(){
-}
-
 };
 #endif

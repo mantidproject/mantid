@@ -23,14 +23,6 @@ using namespace Mantid::Kernel;
 class FindDetectorsOutsideLimitsTest : public CxxTest::TestSuite
 {
 public:
-
-  FindDetectorsOutsideLimitsTest()
-  {
-  }
-
-  ~FindDetectorsOutsideLimitsTest()
-  {}
-
   void testInit()
   {
     FindDetectorsOutsideLimits alg;

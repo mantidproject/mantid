@@ -303,8 +303,6 @@ private:
 
 public:
 
-    QuadEnBackgroundTest() {};
-
     // create a test data set of 6 MDPoints contributing to 4 MDCells with 1, 2 and 3, 4 points each.
     void testInit()
     {

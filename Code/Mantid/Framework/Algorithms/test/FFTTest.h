@@ -15,6 +15,11 @@ using namespace Mantid::API;
 class FFTTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FFTTest *createSuite() { return new FFTTest(); }
+  static void destroySuite( FFTTest *suite ) { delete suite; }
+
   FFTTest():dX(0.2),PI(3.1415926535897932384626433832795),h(sqrt(PI/3)),a(PI*PI/3)
   {
   }

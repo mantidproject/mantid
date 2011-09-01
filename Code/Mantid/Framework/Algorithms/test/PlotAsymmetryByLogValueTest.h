@@ -18,6 +18,10 @@ using namespace Mantid::DataObjects;
 class PlotAsymmetryByLogValueTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PlotAsymmetryByLogValueTest *createSuite() { return new PlotAsymmetryByLogValueTest(); }
+  static void destroySuite( PlotAsymmetryByLogValueTest *suite ) { delete suite; }
 
     PlotAsymmetryByLogValueTest()
       :firstRun("MUSR00015189.nxs"),lastRun("MUSR00015199.nxs")

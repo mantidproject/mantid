@@ -146,11 +146,6 @@ DECLARE_FUNCTION(ConvolutionTest_Linear);
 class ConvolutionTest : public CxxTest::TestSuite
 {
 public:
-  ConvolutionTest()
-  {
-    //FrameworkManager::Instance();
-  }
-
   void testFunction()
   {
     Convolution conv;

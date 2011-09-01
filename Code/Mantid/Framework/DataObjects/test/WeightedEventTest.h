@@ -19,13 +19,7 @@ using std::vector;
 //==========================================================================================
 class WeightedEventTest : public CxxTest::TestSuite
 {
-private:
-
 public:
-  WeightedEventTest()
-  {
-  }
-
   void testConstructors()
   {
     TofEvent e(123, 456);

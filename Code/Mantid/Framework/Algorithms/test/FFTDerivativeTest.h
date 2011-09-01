@@ -15,13 +15,6 @@ using namespace Mantid::API;
 class FFTDerivativeTest : public CxxTest::TestSuite
 {
 public:
-  FFTDerivativeTest()
-  {
-  }
-  ~FFTDerivativeTest()
-  {
-  }
-
   void testGaussianDerivative()
   {
     const int N = 100;

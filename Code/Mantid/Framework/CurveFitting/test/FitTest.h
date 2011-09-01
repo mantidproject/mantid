@@ -148,6 +148,11 @@ DECLARE_FUNCTION(FitTest_Linear);
 class FitTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FitTest *createSuite() { return new FitTest(); }
+  static void destroySuite( FitTest *suite ) { delete suite; }
+
   FitTest()
   {
     Kernel::ConfigService::Instance().setString("curvefitting.peakRadius","100");

@@ -46,6 +46,11 @@ private:
   }
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static RemovePromptPulseTest *createSuite() { return new RemovePromptPulseTest(); }
+  static void destroySuite( RemovePromptPulseTest *suite ) { delete suite; }
+
   RemovePromptPulseTest()
   {
     BIN_DELTA = 100.;

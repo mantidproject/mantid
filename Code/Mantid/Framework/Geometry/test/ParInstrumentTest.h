@@ -14,6 +14,11 @@ using namespace Mantid::Geometry;
 class ParInstrumentTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ParInstrumentTest *createSuite() { return new ParInstrumentTest(); }
+  static void destroySuite( ParInstrumentTest *suite ) { delete suite; }
+
   ParInstrumentTest()
   {
     instrument.reset(new Instrument);

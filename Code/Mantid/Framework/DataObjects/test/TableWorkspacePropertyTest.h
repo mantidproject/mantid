@@ -58,6 +58,11 @@ void TableWorkspaceAlgorithm::exec()
 class TableWorkspacePropertyTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static TableWorkspacePropertyTest *createSuite() { return new TableWorkspacePropertyTest(); }
+  static void destroySuite( TableWorkspacePropertyTest *suite ) { delete suite; }
+
     TableWorkspacePropertyTest()
     {
         t.reset(new TableWorkspace(10));

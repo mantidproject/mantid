@@ -57,6 +57,11 @@ DECLARE_FUNCMINIMIZER(FuncMinimizerFactoryTest_A, nedtur);
 class FuncMinimizerFactoryTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FuncMinimizerFactoryTest *createSuite() { return new FuncMinimizerFactoryTest(); }
+  static void destroySuite( FuncMinimizerFactoryTest *suite ) { delete suite; }
+
   FuncMinimizerFactoryTest()
   {
     Mantid::API::FrameworkManager::Instance();

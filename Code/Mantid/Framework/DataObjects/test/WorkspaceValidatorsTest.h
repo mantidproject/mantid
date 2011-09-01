@@ -25,6 +25,11 @@ private:
   MatrixWorkspace_sptr ws2;
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static WorkspaceValidatorsTest *createSuite() { return new WorkspaceValidatorsTest(); }
+  static void destroySuite( WorkspaceValidatorsTest *suite ) { delete suite; }
+
   WorkspaceValidatorsTest()
   {
     wavUnitVal = new WorkspaceUnitValidator<>("Wavelength");

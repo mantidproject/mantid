@@ -36,18 +36,12 @@ using namespace std;
 class SaveIsawUBTest: public CxxTest::TestSuite
 {
 public:
-
-  SaveIsawUBTest()
-  {
-
-  }
-
   void test_Init()
   {
     SaveIsawUB alg;
-TS_ASSERT_THROWS_NOTHING  ( alg.initialize() )
-  TS_ASSERT( alg.isInitialized() )
-}
+    TS_ASSERT_THROWS_NOTHING  ( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+  }
 
 void test_exec()
 {

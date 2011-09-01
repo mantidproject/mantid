@@ -11,6 +11,11 @@ using namespace Mantid::Kernel;
 class LinearTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LinearTest *createSuite() { return new LinearTest(); }
+  static void destroySuite( LinearTest *suite ) { delete suite; }
+
   LinearTest()
   {
     c0 = 10.0;

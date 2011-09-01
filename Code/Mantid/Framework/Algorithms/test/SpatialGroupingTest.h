@@ -18,9 +18,6 @@
 class SpatialGroupingTest : public CxxTest::TestSuite
 {
 public:
-  SpatialGroupingTest() {}
-  ~SpatialGroupingTest() {}
-
   void testMetaInfo()
   {
     alg = new Mantid::Algorithms::SpatialGrouping();

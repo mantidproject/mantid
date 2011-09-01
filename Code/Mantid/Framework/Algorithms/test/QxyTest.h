@@ -12,6 +12,13 @@ using namespace Mantid::Kernel;
 class QxyTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static QxyTest *createSuite() { return new QxyTest(); }
+  static void destroySuite( QxyTest *suite ) { delete suite; }
+
+  QxyTest() : m_inputWS("QxyTest_input_in_wav") {}
+
   void testName()
   {
     TS_ASSERT_EQUALS( qxy.name(), "Qxy" )
@@ -136,7 +143,6 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 
-  QxyTest() : m_inputWS("QxyTest_input_in_wav") {}
 private:
   Mantid::Algorithms::Qxy qxy;
   const std::string m_inputWS;

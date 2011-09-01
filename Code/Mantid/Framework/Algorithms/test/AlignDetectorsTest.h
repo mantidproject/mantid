@@ -18,10 +18,6 @@ using namespace Mantid::API;
 class AlignDetectorsTest : public CxxTest::TestSuite
 {
 public:
-  AlignDetectorsTest()
-  {
-  }
-
   /** Setup for loading raw data */
   void setUp_Raw()
   {

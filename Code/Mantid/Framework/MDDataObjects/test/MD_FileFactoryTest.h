@@ -66,8 +66,6 @@ public:
 
     TSM_ASSERT("FileFormat factory have not returned a pointer to a Horace file reader ",dynamic_cast<HoraceReader::MD_FileHoraceReader*>(horaceFormat.get())!=0);
   }
-  ~MD_FileFactoryTest(){
-  }
 
 };
 

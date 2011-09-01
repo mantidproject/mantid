@@ -23,6 +23,9 @@ private:
   std::stringstream testStream;
 
 public:
+  static RegexStringsTest *createSuite() { return new RegexStringsTest(); }
+  static void destroySuite(RegexStringsTest *suite) { delete suite; }
+
   RegexStringsTest()
   {
     testStream << "2007-11-16T13:25:48 END\n"

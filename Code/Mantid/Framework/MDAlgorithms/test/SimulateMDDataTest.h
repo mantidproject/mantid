@@ -222,8 +222,6 @@ private:
 
 public:
 
-    SimulateMDDataTest() {};
-
     // create a test data set of 3 pixels contributing to 2 points to 1 cut
     void testInit()
     {

@@ -41,13 +41,16 @@ using namespace Mantid::Geometry;
 class MDGridBoxTest :    public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MDGridBoxTest *createSuite() { return new MDGridBoxTest(); }
+  static void destroySuite( MDGridBoxTest *suite ) { delete suite; }
+
   bool DODEBUG;
   MDGridBoxTest()
   {
     DODEBUG = false;
   }
-
-public:
 
   //-------------------------------------------------------------------------------------
   void test_MDBoxConstructor()

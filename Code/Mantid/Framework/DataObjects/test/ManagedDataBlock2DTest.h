@@ -13,6 +13,11 @@ using Mantid::MantidVecPtr;
 class ManagedDataBlock2DTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ManagedDataBlock2DTest *createSuite() { return new ManagedDataBlock2DTest(); }
+  static void destroySuite( ManagedDataBlock2DTest *suite ) { delete suite; }
+
   ManagedDataBlock2DTest()
     : data(0,2,4,3, NULL, MantidVecPtr() )
   {

@@ -23,6 +23,10 @@ using Mantid::Kernel::Quat;
 class ParametrizedComponentTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ParametrizedComponentTest *createSuite() { return new ParametrizedComponentTest(); }
+  static void destroySuite( ParametrizedComponentTest *suite ) { delete suite; }
 
   ParametrizedComponentTest() : m_parentComp(NULL), m_childOneComp(NULL), m_childTwoComp(NULL), m_paramMap(),
   m_strName("StringParam"), m_strValue("test-string"), m_dblName("DblParam"), m_dblValue(10.0),

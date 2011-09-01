@@ -25,6 +25,10 @@ private:
   const double PI;
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PlaneImplicitFunctionTest *createSuite() { return new PlaneImplicitFunctionTest(); }
+  static void destroySuite( PlaneImplicitFunctionTest *suite ) { delete suite; }
 
   PlaneImplicitFunctionTest() :
     normal(1, 1, 1), origin(2, 3, 4), width(2), PI(3.14159265)

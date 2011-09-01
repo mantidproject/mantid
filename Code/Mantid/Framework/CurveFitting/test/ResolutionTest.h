@@ -89,6 +89,10 @@ DECLARE_FUNCTION(ResolutionTest_Gauss);
 class ResolutionTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ResolutionTest *createSuite() { return new ResolutionTest(); }
+  static void destroySuite( ResolutionTest *suite ) { delete suite; }
 
   ResolutionTest()
     :resH(3),resS(acos(0.)),

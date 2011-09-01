@@ -35,6 +35,10 @@ using namespace Mantid::NeXus;
 class SaveNexusProcessedTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static SaveNexusProcessedTest *createSuite() { return new SaveNexusProcessedTest(); }
+  static void destroySuite( SaveNexusProcessedTest *suite ) { delete suite; }
 
   SaveNexusProcessedTest()
   {

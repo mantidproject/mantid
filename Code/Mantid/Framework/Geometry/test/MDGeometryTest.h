@@ -69,7 +69,12 @@ class MDGeometryTest : public CxxTest::TestSuite
 
   std::auto_ptr<testMDGeometry> tDND_geometry;
   std::auto_ptr<MDGeometryDescription> pSlice;
+
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MDGeometryTest *createSuite() { return new MDGeometryTest(); }
+  static void destroySuite( MDGeometryTest *suite ) { delete suite; }
 
   MDGeometryTest()
   {

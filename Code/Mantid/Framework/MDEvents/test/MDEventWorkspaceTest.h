@@ -33,6 +33,11 @@ using namespace Mantid::Geometry;
 class MDEventWorkspaceTest :    public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MDEventWorkspaceTest *createSuite() { return new MDEventWorkspaceTest(); }
+  static void destroySuite( MDEventWorkspaceTest *suite ) { delete suite; }
+
   bool DODEBUG;
   MDEventWorkspaceTest()
   {

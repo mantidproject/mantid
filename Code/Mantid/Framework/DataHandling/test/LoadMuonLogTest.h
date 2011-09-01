@@ -30,12 +30,6 @@ using Mantid::DataHandling::LoadMuonLog;
 class LoadMuonLogTest : public CxxTest::TestSuite
 {
 public:
-
-  LoadMuonLogTest()
-  {
-	  //initialise framework manager to allow logging
-	//Mantid::API::FrameworkManager::Instance().initialize();
-  }
   void testInit()
   {
     TS_ASSERT( !loader.isInitialized() );

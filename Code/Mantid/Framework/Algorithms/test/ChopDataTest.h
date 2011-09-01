@@ -11,10 +11,7 @@ using namespace Mantid::Algorithms;
 
 class ChopDataTest : public CxxTest::TestSuite
 {
-
 public:
-  ChopDataTest() {}
-  ~ChopDataTest() {}
 
   void testMetaInfo()
   {

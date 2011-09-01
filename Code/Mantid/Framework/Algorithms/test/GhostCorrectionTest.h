@@ -29,6 +29,11 @@ public:
   double BIN_DELTA;
   int NUMPIXELS, NUMBINS;
 
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static GhostCorrectionTest *createSuite() { return new GhostCorrectionTest(); }
+  static void destroySuite( GhostCorrectionTest *suite ) { delete suite; }
+
   GhostCorrectionTest()
   {
     BIN_DELTA = 2.0;

@@ -22,6 +22,11 @@ public:
   double BIN_DELTA;
   int NUMPIXELS, NUMBINS;
 
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static SortEventsTest *createSuite() { return new SortEventsTest(); }
+  static void destroySuite( SortEventsTest *suite ) { delete suite; }
+
   SortEventsTest()
   {
     BIN_DELTA = 2.0;

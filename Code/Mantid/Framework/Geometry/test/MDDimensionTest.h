@@ -61,6 +61,10 @@ class MDDimensionTest :    public CxxTest::TestSuite
     tDimensionRes *pResDim;
     tDimension    *pOrtDim;
 public:
+    // This pair of boilerplate methods prevent the suite being created statically
+    // This means the constructor isn't called when running other tests
+    static MDDimensionTest *createSuite() { return new MDDimensionTest(); }
+    static void destroySuite( MDDimensionTest *suite ) { delete suite; }
 
     void testPublicConstructor()
 	{

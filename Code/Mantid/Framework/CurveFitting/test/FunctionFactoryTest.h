@@ -166,6 +166,11 @@ DECLARE_FUNCTION(FunctionFactoryTest_CompFunctB);
 class FunctionFactoryTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FunctionFactoryTest *createSuite() { return new FunctionFactoryTest(); }
+  static void destroySuite( FunctionFactoryTest *suite ) { delete suite; }
+
   FunctionFactoryTest()
   {
     Mantid::API::FrameworkManager::Instance();

@@ -11,11 +11,7 @@ using namespace Mantid::Algorithms;
 
 class IdentifyNoisyDetectorsTest : public CxxTest::TestSuite
 {
-
 public:
-  IdentifyNoisyDetectorsTest() {}
-  ~IdentifyNoisyDetectorsTest() {}
-
   void testMetaInfo()
   {
     alg = new IdentifyNoisyDetectors();

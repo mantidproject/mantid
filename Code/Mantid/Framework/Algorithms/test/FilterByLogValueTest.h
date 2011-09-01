@@ -27,6 +27,11 @@ using namespace Mantid::API;
 class FilterByLogValueTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FilterByLogValueTest *createSuite() { return new FilterByLogValueTest(); }
+  static void destroySuite( FilterByLogValueTest *suite ) { delete suite; }
+
   FilterByLogValueTest()
   {
     inputWS = "eventWS";

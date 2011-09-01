@@ -14,6 +14,11 @@ using namespace Mantid::DataObjects;
 class FilterBadPulsesTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FilterBadPulsesTest *createSuite() { return new FilterBadPulsesTest(); }
+  static void destroySuite( FilterBadPulsesTest *suite ) { delete suite; }
+
   FilterBadPulsesTest(): inputWS("testInput"), outputWS("testOutput")
   {
   }

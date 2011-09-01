@@ -17,8 +17,6 @@ using namespace Mantid::DataObjects;
 class CalculateTransmissionBeamSpreaderTest : public CxxTest::TestSuite
 {
 public:
-  CalculateTransmissionBeamSpreaderTest() : trans() {}
-  
   void testName()
   {
     TS_ASSERT_EQUALS( trans.name(), "CalculateTransmissionBeamSpreader" )

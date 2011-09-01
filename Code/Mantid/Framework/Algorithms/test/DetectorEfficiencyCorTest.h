@@ -36,7 +36,12 @@ using Mantid::MantidVecPtr;
 class DetectorEfficiencyCorTest : public CxxTest::TestSuite
 {
 public:
-    DetectorEfficiencyCorTest() :
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static DetectorEfficiencyCorTest *createSuite() { return new DetectorEfficiencyCorTest(); }
+  static void destroySuite( DetectorEfficiencyCorTest *suite ) { delete suite; }
+
+  DetectorEfficiencyCorTest() :
       m_InoutWS("DetectorEfficiencyCorTest_input_workspace"),
       m_OutWS("DetectorEfficiencyCorTest_output_workspace")
   {

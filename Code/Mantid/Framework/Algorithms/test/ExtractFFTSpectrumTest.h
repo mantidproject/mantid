@@ -17,9 +17,6 @@ class ExtractFFTSpectrumTest : public CxxTest::TestSuite
 {
 
 public:
-  ExtractFFTSpectrumTest() {}
-  ~ExtractFFTSpectrumTest() {}
-
   void testMetaInfo()
   {
     alg = new ExtractFFTSpectrum();

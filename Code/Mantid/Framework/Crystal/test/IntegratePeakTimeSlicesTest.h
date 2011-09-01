@@ -48,11 +48,6 @@ using namespace std;
 class IntegratePeakTimeSlicesTest: public CxxTest::TestSuite
 {
 public:
-  IntegratePeakTimeSlicesTest()
-  {
-
-  }
-
   void test_abc()
   {
     int NRC = 30;

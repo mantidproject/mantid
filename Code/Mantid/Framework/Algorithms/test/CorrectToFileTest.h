@@ -18,6 +18,10 @@ using Mantid::API::MatrixWorkspace_sptr;
 class CorrectToFileTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static CorrectToFileTest *createSuite() { return new CorrectToFileTest(); }
+  static void destroySuite( CorrectToFileTest *suite ) { delete suite; }
 
   CorrectToFileTest() : inputFile("DIRECT.041")
   {}

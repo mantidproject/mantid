@@ -169,10 +169,6 @@ public:
      TSM_ASSERT_EQUALS("Each DIM_id obrained has to belong to dimensions",true,mdBasis->checkIdCompartibility(dimID));
 
   }
-  ~MDGeometryBasisTest()
-  {
-  }
-
 
 };
 

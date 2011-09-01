@@ -92,8 +92,6 @@ class CPRebinKeepPixTest :    public CxxTest::TestSuite
 		AnalysisDataService::Instance().remove("CPRebinKeepPixTestOut");
 		
 	 }
-	~CPRebinKeepPixTest(){
-	}
 };
 
 

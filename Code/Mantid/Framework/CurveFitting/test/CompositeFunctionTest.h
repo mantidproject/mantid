@@ -169,6 +169,11 @@ DECLARE_FUNCTION(CurveFittingGauss);
 class CompositeFunctionTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static CompositeFunctionTest *createSuite() { return new CompositeFunctionTest(); }
+  static void destroySuite( CompositeFunctionTest *suite ) { delete suite; }
+
   CompositeFunctionTest()
   {
     Kernel::ConfigService::Instance().setString("curvefitting.peakRadius","100");

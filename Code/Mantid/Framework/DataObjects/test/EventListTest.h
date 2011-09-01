@@ -29,6 +29,11 @@ private:
 
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static EventListTest *createSuite() { return new EventListTest(); }
+  static void destroySuite( EventListTest *suite ) { delete suite; }
+
   EventListTest()
   {
     BIN_DELTA = 10000;

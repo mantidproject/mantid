@@ -19,25 +19,6 @@ using namespace Mantid::DataObjects;
 class SumNeighboursTest : public CxxTest::TestSuite
 {
 public:
-
-  SumNeighboursTest()
-  {
-//    outputSpace1 = "SNAP_sum";
-//    inputSpace = "SNAP";
-//
-//    Mantid::NeXus::LoadSNSEventNexus loader;
-//    loader.initialize();
-//    loader.setPropertyValue("Filename","/home/janik/data/SNAP_4105_event.nxs");
-//    loader.setPropertyValue("OutputWorkspace",inputSpace);
-//    loader.execute();
-
-  }
-
-  ~SumNeighboursTest()
-  {}
-
-
-
   void testTheBasics()
   {
     TS_ASSERT_EQUALS( alg.name(), "SumNeighbours" );

@@ -44,6 +44,11 @@ public:
   vector<float> r4_array;
   vector<double> r8_array;
 
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static NexusAPITest *createSuite() { return new NexusAPITest(); }
+  static void destroySuite( NexusAPITest *suite ) { delete suite; }
+
   NexusAPITest()
   {
 

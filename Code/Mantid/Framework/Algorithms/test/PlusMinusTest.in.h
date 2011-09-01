@@ -32,6 +32,9 @@ public:
   bool DO_PLUS;
   std::string message;
 
+  static @PLUSMINUSTEST_CLASS@ *createSuite() { return new @PLUSMINUSTEST_CLASS@(); }
+  static void destroySuite( @PLUSMINUSTEST_CLASS@ *suite ) { delete suite; }
+
   @PLUSMINUSTEST_CLASS@()
   {
     numBins = 10;

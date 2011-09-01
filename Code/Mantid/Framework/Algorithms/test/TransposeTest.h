@@ -16,11 +16,7 @@ using namespace Mantid::DataObjects;
 
 class TransposeTest : public CxxTest::TestSuite
 {
-
 public:
-  TransposeTest() {}
-  ~TransposeTest() {}
-
   void testMetaInfo()
   {
     transpose = new Transpose();

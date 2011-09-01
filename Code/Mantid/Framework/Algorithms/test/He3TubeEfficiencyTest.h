@@ -24,6 +24,11 @@ using namespace std;
 class He3TubeEfficiencyTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static He3TubeEfficiencyTest *createSuite() { return new He3TubeEfficiencyTest(); }
+  static void destroySuite( He3TubeEfficiencyTest *suite ) { delete suite; }
+
   He3TubeEfficiencyTest() : inputWS("testInput"), inputEvWS("testEvInput")
   {
   }

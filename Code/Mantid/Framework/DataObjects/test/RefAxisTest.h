@@ -17,6 +17,11 @@ using namespace Mantid::Kernel;
 class RefAxisTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static RefAxisTest *createSuite() { return new RefAxisTest(); }
+  static void destroySuite( RefAxisTest *suite ) { delete suite; }
+
   RefAxisTest()
   {
     // Set up two small workspaces for these tests

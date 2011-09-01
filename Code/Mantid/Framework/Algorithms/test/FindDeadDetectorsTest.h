@@ -20,14 +20,6 @@ using namespace Mantid::DataObjects;
 class FindDeadDetectorsTest : public CxxTest::TestSuite
 {
 public:
-
-  FindDeadDetectorsTest()
-  {
-  }
-
-  ~FindDeadDetectorsTest()
-  {}
-
   void testInit()
   {
     FindDeadDetectors alg;

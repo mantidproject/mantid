@@ -46,6 +46,10 @@ private:
   int NUMPIXELS, NUMBINS, NUMEVENTS, BIN_DELTA;
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static EventWorkspaceTest *createSuite() { return new EventWorkspaceTest(); }
+  static void destroySuite( EventWorkspaceTest *suite ) { delete suite; }
 
   EventWorkspaceTest()
   {

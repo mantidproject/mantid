@@ -470,6 +470,11 @@ public:
 
   }
 
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MDDPoints_MemManagerTest *createSuite() { return new MDDPoints_MemManagerTest(); }
+  static void destroySuite( MDDPoints_MemManagerTest *suite ) { delete suite; }
+
   MDDPoints_MemManagerTest():pMemMan(NULL){};
   ~MDDPoints_MemManagerTest(){
     if(pMemMan)delete pMemMan;

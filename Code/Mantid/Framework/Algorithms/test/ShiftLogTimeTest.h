@@ -19,6 +19,11 @@ using namespace Mantid::Kernel;
 class ShiftLogTimeTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ShiftLogTimeTest *createSuite() { return new ShiftLogTimeTest(); }
+  static void destroySuite( ShiftLogTimeTest *suite ) { delete suite; }
+
   /// Set up the parameters for what the tests do.
   ShiftLogTimeTest()
   {

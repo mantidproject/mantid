@@ -39,6 +39,11 @@ private:
   }
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static UnwrapSNSTest *createSuite() { return new UnwrapSNSTest(); }
+  static void destroySuite( UnwrapSNSTest *suite ) { delete suite; }
+
   UnwrapSNSTest()
   {
     BIN_DELTA = 2.;

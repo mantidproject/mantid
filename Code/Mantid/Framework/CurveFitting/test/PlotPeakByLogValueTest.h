@@ -45,6 +45,11 @@ private:
 class PlotPeakByLogValueTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PlotPeakByLogValueTest *createSuite() { return new PlotPeakByLogValueTest(); }
+  static void destroySuite( PlotPeakByLogValueTest *suite ) { delete suite; }
+
   PlotPeakByLogValueTest()
   {
     FrameworkManager::Instance();

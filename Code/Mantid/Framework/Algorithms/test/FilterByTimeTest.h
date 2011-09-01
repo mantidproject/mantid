@@ -24,11 +24,6 @@ using namespace Mantid::API;
 class FilterByTimeTest : public CxxTest::TestSuite
 {
 public:
-  FilterByTimeTest()
-  {
-  }
-
-
   /** Setup for loading raw data */
   void setUp_Event()
   {

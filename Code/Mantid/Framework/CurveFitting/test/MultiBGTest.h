@@ -45,6 +45,11 @@ private:
 class MultiBGTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MultiBGTest *createSuite() { return new MultiBGTest(); }
+  static void destroySuite( MultiBGTest *suite ) { delete suite; }
+
   MultiBGTest()
   {
     a.resize(2);    b.resize(2);

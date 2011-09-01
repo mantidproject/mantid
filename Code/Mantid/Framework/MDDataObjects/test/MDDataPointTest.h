@@ -464,6 +464,10 @@ public:
     }
   }
 
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MDDataPointTest *createSuite() { return new MDDataPointTest(); }
+  static void destroySuite( MDDataPointTest *suite ) { delete suite; }
 
   MDDataPointTest()
   {

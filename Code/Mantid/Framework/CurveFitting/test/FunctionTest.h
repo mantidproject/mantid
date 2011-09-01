@@ -104,6 +104,11 @@ public:
 class FunctionTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FunctionTest *createSuite() { return new FunctionTest(); }
+  static void destroySuite( FunctionTest *suite ) { delete suite; }
+
   FunctionTest()
   {
     FrameworkManager::Instance();

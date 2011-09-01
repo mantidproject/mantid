@@ -22,6 +22,11 @@ private:
   TofEvent e;
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static TofEventTest *createSuite() { return new TofEventTest(); }
+  static void destroySuite( TofEventTest *suite ) { delete suite; }
+
   TofEventTest()
   {
     e = TofEvent(123, 456);

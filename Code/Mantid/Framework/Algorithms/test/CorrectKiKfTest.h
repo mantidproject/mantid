@@ -19,6 +19,10 @@ using namespace Mantid::DataObjects;
 class CorrectKiKfTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static CorrectKiKfTest *createSuite() { return new CorrectKiKfTest(); }
+  static void destroySuite( CorrectKiKfTest *suite ) { delete suite; }
 
   CorrectKiKfTest(): inputWSname("testInput"), inputEvWSname("testEvInput"), outputWSname("testOutput"), outputEvWSname("testEvOutput")
   {

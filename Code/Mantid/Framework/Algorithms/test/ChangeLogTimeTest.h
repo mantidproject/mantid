@@ -15,6 +15,11 @@ using namespace Mantid::Kernel;
 class ChangeLogTimeTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ChangeLogTimeTest *createSuite() { return new ChangeLogTimeTest(); }
+  static void destroySuite( ChangeLogTimeTest *suite ) { delete suite; }
+
   /// Set up the parameters for what the tests do.
   ChangeLogTimeTest()
   {

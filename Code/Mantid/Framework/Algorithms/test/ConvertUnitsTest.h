@@ -24,11 +24,6 @@ using namespace Mantid::DataObjects;
 class ConvertUnitsTest : public CxxTest::TestSuite
 {
 public:
-
-  ConvertUnitsTest()
-  {
-  }
-
   void setup_WS()
   {
     // Set up a small workspace for testing

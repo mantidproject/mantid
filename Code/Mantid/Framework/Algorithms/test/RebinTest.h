@@ -24,6 +24,11 @@ public:
   double BIN_DELTA;
   int NUMPIXELS, NUMBINS;
 
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static RebinTest *createSuite() { return new RebinTest(); }
+  static void destroySuite( RebinTest *suite ) { delete suite; }
+
   RebinTest()
   {
     BIN_DELTA = 2.0;

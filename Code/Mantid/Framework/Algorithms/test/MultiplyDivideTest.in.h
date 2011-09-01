@@ -31,6 +31,9 @@ public:
   bool DO_DIVIDE;
   std::string message;
 
+  static @MULTIPLYDIVIDETEST_CLASS@ *createSuite() { return new @MULTIPLYDIVIDETEST_CLASS@(); }
+  static void destroySuite( @MULTIPLYDIVIDETEST_CLASS@ *suite ) { delete suite; }
+
   @MULTIPLYDIVIDETEST_CLASS@()
   {
     DO_DIVIDE = @MULTIPLYDIVIDETEST_DO_DIVIDE@;

@@ -25,8 +25,6 @@ private:
 
 public:
   
-  RunParamTest() {};
-
   // set up a simple RunParam object and test
   void testInit()
   {

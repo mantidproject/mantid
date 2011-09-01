@@ -24,6 +24,11 @@ public:
   int nbins, nhist;
   Workspace2D_sptr ws;
 
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static Workspace2DTest *createSuite() { return new Workspace2DTest(); }
+  static void destroySuite( Workspace2DTest *suite ) { delete suite; }
+
   Workspace2DTest()
   {
     nbins = 5;

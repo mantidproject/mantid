@@ -18,10 +18,6 @@ using namespace Mantid::DataObjects;
 class NormaliseByCurrentTest : public CxxTest::TestSuite
 {
 public:
-  NormaliseByCurrentTest()
-  {
-  }
-
   void testName()
   {
     TS_ASSERT_EQUALS( norm.name(), "NormaliseByCurrent" );
