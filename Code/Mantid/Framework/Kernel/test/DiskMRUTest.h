@@ -819,6 +819,26 @@ public:
 
   }
 
+
+  /// Various tests of allocating and relocating
+  void test_allocate_from_empty_freeMap()
+  {
+    DiskMRU mru(4, 3);
+    mru.setFileLength(1000); // Lets say the file goes up to 1000
+    DiskMRU::freeSpace_t & map = mru.getFreeSpaceMap();
+    FreeBlock b;
+    TS_ASSERT_EQUALS( map.size(), 0);
+    // No free blocks? End up at the end
+    TS_ASSERT_EQUALS( mru.allocate(20), 1000 );
+    TS_ASSERT_EQUALS( mru.getFileLength(), 1020 );
+
+    DiskMRU mru2;
+    mru2.setFileLength(1000);
+    TS_ASSERT_EQUALS( mru2.allocate(20), 1000 );
+
+  }
+
+
   /// Various tests of allocating and relocating
   void test_allocate_and_relocate()
   {
