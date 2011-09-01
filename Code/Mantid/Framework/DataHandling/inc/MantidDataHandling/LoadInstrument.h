@@ -125,12 +125,12 @@ namespace Mantid
       /// Method for populating IdList
       void populateIdList(Poco::XML::Element* pElem, IdList& idList);
 
+      std::vector<std::string> buildExcludeList(const Poco::XML::Element* const location);
+
       /// Add XML element to parent assuming the element contains other component elements
-      void appendAssembly(Geometry::ICompAssembly* parent, Poco::XML::Element* pElem, IdList& idList,
-                          const std::vector<std::string> excludeList);
+      void appendAssembly(Geometry::ICompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
       /// Add XML element to parent assuming the element contains other component elements
-      void appendAssembly(boost::shared_ptr<Geometry::ICompAssembly> parent, Poco::XML::Element* pElem, IdList& idList,
-                          const std::vector<std::string> excludeList);
+      void appendAssembly(boost::shared_ptr<Geometry::ICompAssembly> parent, Poco::XML::Element* pElem, IdList& idList);
       /// Return true if assembly, false if not assembly and throws exception if string not in assembly
       bool isAssembly(std::string) const;
 
@@ -165,7 +165,11 @@ namespace Mantid
 
       /// Reads in or creates the geometry cache ('vtp') file
       void setupGeometryCache();
-      /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
+
+      /// If appropriate, creates a second instrument containing neutronic detector positions
+      void createNeutronicInstrument();
+
+      /// Run the sub-algorithm LoadParameters
       void runLoadParameterFile();
 
       /** Holds all the xml elements that have a \<parameter\> child element.
@@ -221,6 +225,10 @@ namespace Mantid
       
       /// Everything can reference the workspace if it needs to
       boost::shared_ptr<API::MatrixWorkspace> m_workspace;
+
+      bool m_indirectPositions; ///< Flag to indicate whether IDF contains physical & neutronic positions
+      /// A map containing the neutronic position for each detector. Used when m_indirectPositions is true.
+      std::map<Geometry::ComponentID,Kernel::V3D*> m_neutronicPos;
     };
 
   } // namespace DataHandling

@@ -283,21 +283,9 @@ namespace Mantid
               {
                 Element* pLocElem = static_cast<Element*>(pNL_location->item(i_loc));
 
-                // check if <exclude> sub-elements for this location and create new exclude list to pass on 
-                NodeList* pNLexclude = pLocElem->getElementsByTagName("exclude");
-                unsigned long numberExcludeEle = pNLexclude->length();
-                std::vector<std::string> newExcludeList;
-                for (unsigned long i = 0; i < numberExcludeEle; i++)
-                {
-                  Element* pExElem = static_cast<Element*>(pNLexclude->item(i));
-                  if ( pExElem->hasAttribute("sub-part") )
-                    newExcludeList.push_back(pExElem->getAttribute("sub-part"));
-                }
-                pNLexclude->release();
-
                 if (VERBOSE) std::cout << "exec(): AppendAssembly of " << pLocElem->nodeName() << "\n";
 
-                appendAssembly(m_instrument, pLocElem, idList, newExcludeList);
+                appendAssembly(m_instrument, pLocElem, idList);
               }
 
               // a check
@@ -340,6 +328,8 @@ namespace Mantid
       }
       // release XML document
       pDoc->release();
+
+      if ( m_indirectPositions ) createNeutronicInstrument();
 
       // Set the monitors output property
       setProperty("MonitorList",m_instrument->getMonitors());
@@ -445,8 +435,30 @@ namespace Mantid
           units["angle"] = "radian";
         }
       }
+
+      // Check if the IDF specifies that this is an indirect geometry instrument that includes
+      // both physical and 'neutronic' postions.
+      // Any neutronic position tags will be ignored if this tag is missing
+      if ( defaults->getChildElement("indirect-neutronic-positions") )
+        m_indirectPositions = true;
     }
 
+    std::vector<std::string> LoadInstrument::buildExcludeList(const Poco::XML::Element* const location)
+    {
+      // check if <exclude> sub-elements for this location and create new exclude list to pass on
+      NodeList* pNLexclude = location->getElementsByTagName("exclude");
+      unsigned long numberExcludeEle = pNLexclude->length();
+      std::vector<std::string> newExcludeList;
+      for (unsigned long i = 0; i < numberExcludeEle; i++)
+      {
+        Element* pExElem = static_cast<Element*>(pNLexclude->item(i));
+        if ( pExElem->hasAttribute("sub-part") )
+          newExcludeList.push_back(pExElem->getAttribute("sub-part"));
+      }
+      pNLexclude->release();
+
+      return newExcludeList;
+    }
 
     //-----------------------------------------------------------------------------------------------------------------------
     /** Assumes second argument is a XML location element and its parent is a component element
@@ -457,10 +469,8 @@ namespace Mantid
     *  @param parent :: CompAssembly to append new component to
     *  @param pLocElem ::  Poco::XML element that points to a location element in an instrument description XML file
     *  @param idList :: The current IDList
-    *  @param excludeList :: The exclude List
     */
-    void LoadInstrument::appendAssembly(Geometry::ICompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList, 
-      const std::vector<std::string> excludeList)
+    void LoadInstrument::appendAssembly(Geometry::ICompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
     {
       if (VERBOSE) std::cout << "appendAssembly() starting for parent " << parent->getName() << "\n";
 
@@ -515,6 +525,8 @@ namespace Mantid
       setLogfile(ass, pCompElem, m_instrument->getLogfileCache());  // params specified within <component>
       setLogfile(ass, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
 
+      // Check for <exclude> tags for this location
+      const std::vector<std::string> excludeList = buildExcludeList(pLocElem);
 
       NodeIterator it(pType, NodeFilter::SHOW_ELEMENT);
 
@@ -536,23 +548,12 @@ namespace Mantid
 
             if ( isAssembly(typeName) )
             {
-
-              // check if <exclude> sub-elements for this location and create new exclude list to pass on 
-              NodeList* pNLexclude = pElem->getElementsByTagName("exclude");
-              unsigned long numberExcludeEle = pNLexclude->length();
-              std::vector<std::string> newExcludeList;
-              for (unsigned long i = 0; i < numberExcludeEle; i++)
-              {
-                Element* pExElem = static_cast<Element*>(pNLexclude->item(i));
-                if ( pExElem->hasAttribute("sub-part") )
-                  newExcludeList.push_back(pExElem->getAttribute("sub-part"));
-              }
-              pNLexclude->release();
-
-              appendAssembly(ass, pElem, idList, newExcludeList);
+              appendAssembly(ass, pElem, idList);
             }
             else
+            {
               appendLeaf(ass, pElem, idList);
+            }
           }
         }
         pNode = it.nextNode();
@@ -594,12 +595,10 @@ namespace Mantid
     *  @param parent :: CompAssembly to append new component to
     *  @param pLocElem ::  Poco::XML element that points to a location element in an instrument description XML file
     *  @param idList :: The current IDList
-    *  @param excludeList :: The exclude List
     */
-    void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::ICompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList,
-      const std::vector<std::string> excludeList)
+    void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::ICompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList)
     {
-      appendAssembly(parent.get(), pLocElem, idList, excludeList);
+      appendAssembly(parent.get(), pLocElem, idList);
     }
 
 
@@ -1760,6 +1759,11 @@ namespace Mantid
       }
     }
 
+    void LoadInstrument::createNeutronicInstrument()
+    {
+
+    }
+
     //-----------------------------------------------------------------------------------------------------------------------
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
     void LoadInstrument::runLoadParameterFile()
@@ -1796,7 +1800,7 @@ namespace Mantid
         loadInstParam->execute();
       } catch (std::invalid_argument& e)
       {
-        g_log.information("Invalid argument to LoadParameter sub-algorithm");
+        g_log.information("LoadParameter: No parameter file found for this instrument");
         g_log.information(e.what());
       } catch (std::runtime_error& e)
       {
