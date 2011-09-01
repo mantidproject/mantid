@@ -42,8 +42,7 @@ class DLLExport EQSANSLoad : public API::Algorithm
 public:
   /// (Empty) Constructor
   EQSANSLoad() : API::Algorithm(), m_low_TOF_cut(0), m_high_TOF_cut(0),
-  m_center_x(0), m_center_y(0), m_moderator_position(0),
-  m_use_config(true){
+  m_center_x(0), m_center_y(0), m_moderator_position(0) {
     m_mask_as_string = "";
     m_output_message = "";
     for(int i=0; i<3; i++)
@@ -90,7 +89,6 @@ private:
   std::string m_output_message;
   double m_moderator_position;
   API::MatrixWorkspace_sptr dataWS;
-  bool m_use_config;
   double m_slit_positions[3][8];
   int m_slit_to_source[3];
 };

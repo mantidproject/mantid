@@ -48,7 +48,13 @@ void EQSANSLoad::init()
   declareProperty("UseConfigBeam", true);
   declareProperty("BeamCenterX", EMPTY_DBL());
   declareProperty("BeamCenterY", EMPTY_DBL());
-  //declareProperty("OutputMessage","",Direction::Output);
+  declareProperty("UseConfigWlCuts", false);
+  declareProperty("UseConfigMask", false);
+  declareProperty("UseConfig", true);
+  declareProperty("CorrectForFlightPath", false);
+  declareProperty("SampleDetectorDistance", EMPTY_DBL());
+  declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL());
+  declareProperty("OutputMessage","",Direction::Output);
 
 }
 
@@ -322,8 +328,8 @@ void EQSANSLoad::readConfigFile(const std::string& filePath)
   m_moderator_position = 0;
 
   // The following should be properties
-  bool use_config_mask = true;
-  bool use_config_cutoff = true;
+  bool use_config_mask = getProperty("UseConfigMask");
+  bool use_config_cutoff = getProperty("UseConfigWlCuts");
   bool use_config_center = getProperty("UseConfigBeam");
 
   std::ifstream file(filePath.c_str());
@@ -412,16 +418,17 @@ void EQSANSLoad::exec()
   }
 
   // Process the config file
-  if (config_file.size()>0)
+  bool use_config = getProperty("UseConfig");
+  if (use_config && config_file.size()>0)
   {
     readConfigFile(config_file);
   } else {
-    m_use_config = false;
+    use_config = false;
     g_log.error() << "Cound not find config file for workspace " << getPropertyValue("OutputWorkspace") << std::endl;
   }
 
-  // If we use the config file, move the sample position
-  if (m_use_config)
+  // If we use the config file, move the moderator position
+  if (use_config)
   {
       if (m_moderator_position > -13.0)
         g_log.error() << "Moderator position seems close to the sample, please check" << std::endl;
@@ -447,27 +454,35 @@ void EQSANSLoad::exec()
     {
       m_center_x = pixel_ctr_x;
       m_center_y = pixel_ctr_y;
+      g_log.information() << "Beam center: "
+        << Poco::NumberFormatter::format(m_center_x, 1) << ", "
+        << Poco::NumberFormatter::format(m_center_y, 1) << std::endl;
     } else {
       EQSANSInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
+      g_log.information() << "No beam finding method: setting to default ["
+        << Poco::NumberFormatter::format(m_center_x, 1) << ", "
+        << Poco::NumberFormatter::format(m_center_y, 1) << "]" << std::endl;
     }
   }
 
   dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel", true);
   dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel", true);
-  m_output_message += "Beam center: ";
-  Poco::NumberFormatter::append(m_output_message, m_center_x, 1);
-  m_output_message += ", ";
-  Poco::NumberFormatter::append(m_output_message, m_center_y, 1);
+  m_output_message += "   Beam center: " + Poco::NumberFormatter::format(m_center_x, 1)
+      + ", " + Poco::NumberFormatter::format(m_center_y, 1) + "\n";
 
   moveToBeamCenter();
 
   // Modify TOF
+  m_output_message += "   Discarding lower " + Poco::NumberFormatter::format(m_low_TOF_cut, 1)
+      + " and upper " + Poco::NumberFormatter::format(m_high_TOF_cut, 1) + " microsec\n";
+
+  bool correct_for_flight_path = getProperty("CorrectForFlightPath");
   DataObjects::EventWorkspace_sptr dataWS_evt = boost::dynamic_pointer_cast<EventWorkspace>(dataWS_tmp);
   IAlgorithm_sptr tofAlg = createSubAlgorithm("EQSANSTofStructure", 0.5, 0.7);
   tofAlg->setProperty<EventWorkspace_sptr>("InputWorkspace", dataWS_evt);
   tofAlg->setProperty("LowTOFCut", m_low_TOF_cut);
   tofAlg->setProperty("HighTOFCut", m_high_TOF_cut);
-  tofAlg->setProperty("FlightPathCorrection", true);
+  tofAlg->setProperty("FlightPathCorrection", correct_for_flight_path);
   tofAlg->executeAsSubAlg();
   const double wl_min = tofAlg->getProperty("WavelengthMin");
   const double wl_max = tofAlg->getProperty("WavelengthMax");
@@ -476,6 +491,8 @@ void EQSANSLoad::exec()
   dataWS->mutableRun().addProperty("wavelength_max", wl_max, "Angstrom", true);
   dataWS->mutableRun().addProperty("is_frame_skipping", int(frame_skipping), true);
   double wl_combined_max = wl_max;
+  m_output_message += "   Wavelength range: " + Poco::NumberFormatter::format(wl_min, 1)
+      + " - " + Poco::NumberFormatter::format(wl_max, 1);
   if (frame_skipping)
   {
     const double wl_min2 = tofAlg->getProperty("WavelengthMinFrame2");
@@ -483,7 +500,10 @@ void EQSANSLoad::exec()
     wl_combined_max = wl_max2;
     dataWS->mutableRun().addProperty("wavelength_min_frame2", wl_min2, "Angstrom", true);
     dataWS->mutableRun().addProperty("wavelength_max_frame2", wl_max2, "Angstrom", true);
-  }
+    m_output_message += " and " + Poco::NumberFormatter::format(wl_min2, 1)
+        + " - " + Poco::NumberFormatter::format(wl_max2, 1) + " Angstrom\n";
+  } else
+    m_output_message += " Angstrom\n";
 
   // Convert to wavelength
   const double ssd = fabs(dataWS->getInstrument()->getSource()->getPos().Z())*1000.0;
@@ -496,10 +516,8 @@ void EQSANSLoad::exec()
   dataWS->getAxis(0)->setUnit("Wavelength");
 
   // Rebin so all the wavelength bins are aligned
-  std::string params = "";
-  Poco::NumberFormatter::append(params, wl_min, 1);
-  params += ",0.1,";
-  Poco::NumberFormatter::append(params, wl_combined_max, 1);
+  std::string params = Poco::NumberFormatter::format(wl_min, 1)
+      + ",0.1," + Poco::NumberFormatter::format(wl_combined_max, 1);
   IAlgorithm_sptr rebinAlg = createSubAlgorithm("Rebin", 0.71, 0.72);
   rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   rebinAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
@@ -509,6 +527,7 @@ void EQSANSLoad::exec()
 
   dataWS->mutableRun().addProperty("event_ws", getPropertyValue("OutputWorkspace"), true);
   setProperty<MatrixWorkspace_sptr>("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
+  setPropertyValue("OutputMessage", m_output_message);
 }
 
 } // namespace WorkflowAlgorithms
