@@ -50,6 +50,11 @@ DECLARE_COSTFUNCTION(CostFunctionFactoryTest_A, nedtur);
 class CostFunctionFactoryTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static CostFunctionFactoryTest *createSuite() { return new CostFunctionFactoryTest(); }
+  static void destroySuite( CostFunctionFactoryTest *suite ) { delete suite; }
+
   CostFunctionFactoryTest()
   {
     Mantid::API::FrameworkManager::Instance();

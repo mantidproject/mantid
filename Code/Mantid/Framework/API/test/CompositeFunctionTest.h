@@ -6,6 +6,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 using namespace Mantid;
@@ -1220,6 +1221,7 @@ public:
     mfun->addFunction(bk);
     mfun->addFunction(g1);
 
+    FrameworkManager::Instance();
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",10,11,10);
     MantidVec& x = ws->dataX(3);
     MantidVec& y = ws->dataY(3);

@@ -23,6 +23,11 @@ public:
 class NumericAxisTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static NumericAxisTest *createSuite() { return new NumericAxisTest(); }
+  static void destroySuite( NumericAxisTest *suite ) { delete suite; }
+
   NumericAxisTest()
   {
     numericAxis = new NumericAxis(5);

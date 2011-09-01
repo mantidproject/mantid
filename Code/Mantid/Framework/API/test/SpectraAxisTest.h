@@ -25,6 +25,11 @@ public:
 class SpectraAxisTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static SpectraAxisTest *createSuite() { return new SpectraAxisTest(); }
+  static void destroySuite( SpectraAxisTest *suite ) { delete suite; }
+
   SpectraAxisTest()
   {
     spectraAxis = new SpectraAxis(5);

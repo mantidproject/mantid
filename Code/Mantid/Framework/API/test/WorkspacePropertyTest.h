@@ -32,6 +32,11 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
 
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static WorkspacePropertyTest *createSuite() { return new WorkspacePropertyTest(); }
+  static void destroySuite( WorkspacePropertyTest *suite ) { delete suite; }
+
   WorkspacePropertyTest()
   {
     wsp1 = new WorkspaceProperty<Workspace>("workspace1","ws1",Direction::Input);

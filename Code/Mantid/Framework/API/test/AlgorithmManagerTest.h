@@ -74,6 +74,10 @@ DECLARE_ALGORITHM(AlgTestSecond)
 class AlgorithmManagerTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static AlgorithmManagerTest *createSuite() { return new AlgorithmManagerTest(); }
+  static void destroySuite( AlgorithmManagerTest *suite ) { delete suite; }
 
   AlgorithmManagerTest() 
   {

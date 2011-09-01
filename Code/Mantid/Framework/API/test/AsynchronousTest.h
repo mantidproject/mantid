@@ -44,6 +44,10 @@ DECLARE_ALGORITHM(AsyncAlgorithm)
 class AsynchronousTest : public CxxTest::TestSuite
 {
 public: 
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static AsynchronousTest *createSuite() { return new AsynchronousTest(); }
+  static void destroySuite( AsynchronousTest *suite ) { delete suite; }
 
     AsynchronousTest():
       m_startedObserver(*this,&AsynchronousTest::handleStarted),

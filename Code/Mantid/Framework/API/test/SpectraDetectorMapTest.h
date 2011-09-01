@@ -14,6 +14,10 @@ using namespace Mantid;
 class SpectraDetectorMapTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static SpectraDetectorMapTest *createSuite() { return new SpectraDetectorMapTest(); }
+  static void destroySuite( SpectraDetectorMapTest *suite ) { delete suite; }
 
   SpectraDetectorMapTest()
   {

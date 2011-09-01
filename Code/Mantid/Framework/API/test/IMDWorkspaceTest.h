@@ -28,6 +28,10 @@ private:
   WorkspaceTester workspace;
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static IMDWorkspaceTest *createSuite() { return new IMDWorkspaceTest(); }
+  static void destroySuite( IMDWorkspaceTest *suite ) { delete suite; }
 
   IMDWorkspaceTest()
   {

@@ -35,10 +35,6 @@ class RunTest : public CxxTest::TestSuite
 {
  
 public:
-  RunTest()
-  {
-  }
-
   void testAddGetData()
   {
     Run runInfo;

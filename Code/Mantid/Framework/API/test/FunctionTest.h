@@ -5,6 +5,7 @@
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include <cxxtest/TestSuite.h>
 
@@ -424,6 +425,7 @@ public:
 
   void test_setWorkspace_works()
   {
+    FrameworkManager::Instance();
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",10,11,10);
 
     MantidVec& x = ws->dataX(3);

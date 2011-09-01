@@ -46,6 +46,11 @@ class MDPropertyGeometryTest : public CxxTest::TestSuite
   }
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MDPropertyGeometryTest *createSuite() { return new MDPropertyGeometryTest(); }
+  static void destroySuite( MDPropertyGeometryTest *suite ) { delete suite; }
+
   MDPropertyGeometryTest():wsp1(NULL),wsp2(NULL)
   {
    // wsp2 = new WorkspaceProperty<Workspace>("workspace2","",Direction::Output);
