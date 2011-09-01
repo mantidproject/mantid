@@ -566,6 +566,7 @@ class Reducer(object):
         
         # Write the log to file
         f = open(log_path, 'a')
+        f.write("\n-------------------------------------------\n")
         f.write(self.log_text)
         f.close()
         return self.log_text
