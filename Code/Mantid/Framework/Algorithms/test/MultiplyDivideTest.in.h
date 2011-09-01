@@ -581,7 +581,7 @@ public:
     for (int lhs_2D=0; lhs_2D<2; lhs_2D++)
       for (int rhs_2D=0; rhs_2D<2; rhs_2D++)
         // Because there is only 1 event in LHS, the 2D and Event versions are equivalent
-        doGroupedTest(1, lhs_2D, 2, rhs_2D, 0.5, sqrt(0.375),   2.0, sqrt(6.0));
+        doGroupedTest(1, lhs_2D!=0, 2, rhs_2D!=0, 0.5, sqrt(0.375),   2.0, sqrt(6.0));
   }
 
 
@@ -590,10 +590,10 @@ public:
     for (int lhs_2D=0; lhs_2D<2; lhs_2D++)
       for (int rhs_2D=0; rhs_2D<2; rhs_2D++)
         if (lhs_2D)
-          doGroupedTest(2, lhs_2D, 4, rhs_2D, 0.5, 0.4330,    8.0, sqrt(48.0));
+          doGroupedTest(2, lhs_2D!=0, 4, rhs_2D!=0, 0.5, 0.4330,    8.0, sqrt(48.0));
         else
           // Errors are different when LHS is events!
-          doGroupedTest(2, lhs_2D, 4, rhs_2D, 0.5, 0.3952,    8.0, sqrt(40.0));
+          doGroupedTest(2, lhs_2D!=0, 4, rhs_2D!=0, 0.5, 0.3952,    8.0, sqrt(40.0));
   }
 
   void test_Grouped_NotGrouped()
@@ -608,9 +608,9 @@ public:
         else
         {
           if (lhs_2D)
-            doGroupedTest(2, lhs_2D, 1, rhs_2D, 2.0, sqrt(2.0),    2.0, sqrt(6.0));
+            doGroupedTest(2, lhs_2D!=0, 1, rhs_2D!=0, 2.0, sqrt(2.0),    2.0, sqrt(6.0));
           else
-            doGroupedTest(2, lhs_2D, 1, rhs_2D, 2.0, sqrt(2.0),    2.0, sqrt(6.0));
+            doGroupedTest(2, lhs_2D!=0, 1, rhs_2D!=0, 2.0, sqrt(2.0),    2.0, sqrt(6.0));
         }
   }
 
