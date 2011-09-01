@@ -832,9 +832,13 @@ public:
     TS_ASSERT_EQUALS( mru.allocate(20), 1000 );
     TS_ASSERT_EQUALS( mru.getFileLength(), 1020 );
 
+    for (size_t i=0; i<100000; i++)
+      mru.allocate(20);
+
     DiskMRU mru2;
     mru2.setFileLength(1000);
-    TS_ASSERT_EQUALS( mru2.allocate(20), 1000 );
+    for (size_t i=0; i<100000; i++)
+      mru2.allocate(20);
 
   }
 
