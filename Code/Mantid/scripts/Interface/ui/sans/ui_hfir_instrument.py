@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_instrument.ui'
 #
-# Created: Wed Aug 31 10:50:50 2011
+# Created: Thu Sep  1 14:52:38 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -433,7 +433,7 @@ class Ui_Frame(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout)
         self.verticalLayout_2.addLayout(self.verticalLayout_3)
         self.verticalLayout_4.addWidget(self.groupBox)
-        spacerItem10 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        spacerItem10 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_4.addItem(spacerItem10)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
