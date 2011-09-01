@@ -196,7 +196,6 @@ def write_test(subproject, classname, filename, args):
 
     guard = "MANTID_%s_%sTEST_H_" % (subproject.upper(), classname.upper())
     algorithm_test = """
-    
   void test_Init()
   {
     %s alg;
@@ -251,6 +250,11 @@ using namespace Mantid::API;
 class %sTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static %sTest *createSuite() { return new %sTest(); }
+  static void destroySuite( %sTest *suite ) { delete suite; }
+
 %s
   void test_Something()
   {
@@ -262,7 +266,7 @@ public:
 
 #endif /* %s */
 
-""" % (guard, guard, subproject, args.subfolder, classname, subproject, classname, algorithm_test, guard)
+""" % (guard, guard, subproject, args.subfolder, classname, subproject, classname, classname, classname, classname, algorithm_test, guard)
     f.write(s)
     f.close()
     
