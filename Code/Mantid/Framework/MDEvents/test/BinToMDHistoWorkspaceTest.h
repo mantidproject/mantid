@@ -291,19 +291,9 @@ public:
 
     // Build the basis vectors, a 0.1 rad rotation along +Z
     double angle = 0.1;
-    std::vector<VMD> bases;
-    bases.push_back( VMD(cos(angle), sin(angle), 0.0) );
-    bases.push_back( VMD(-sin(angle), cos(angle), 0.0) );
-    bases.push_back( VMD(0.0, 0.0, 1.0) );
-
-    // Scale the output dimensions to match the number of bins
-    VMD scale(3);
-    scale[0] = double(binsX)/10.0;
-    scale[1] = double(binsY)/10.0;
-    scale[2] = double(binsZ)/10.0;
-
-    // Build the transformation
-    TS_ASSERT_THROWS_NOTHING( ct.buildOrthogonal(origin, bases, scale) );
+    VMD baseX(cos(angle), sin(angle), 0.0);
+    VMD baseY(-sin(angle), cos(angle), 0.0);
+    VMD baseZ(0.0, 0.0, 1.0);
 
     // Save to NXS file for testing
     AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
@@ -311,18 +301,17 @@ public:
         "InputWorkspace", "BinToMDHistoWorkspaceTest_ws",
         "Filename", "BinToMDHistoWorkspaceTest_ws_rotated.nxs");
 
-
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinToMDHistoWorkspaceTest_ws") );
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AxisAligned", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutDimX", "OutX," + Strings::toString(binsX) ));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutDimY", "OutY," + Strings::toString(binsY) ));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutDimZ", "OutZ," + Strings::toString(binsZ) ));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutDimT", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorX", "OutX,m," + baseX.toString(",") + ",10," + Strings::toString(binsX) ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorY", "OutY,m," + baseY.toString(",") + ",10," + Strings::toString(binsY) ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorZ", "OutZ,m," + baseZ.toString(",") + ",10," + Strings::toString(binsZ) ));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BasisVectorT", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Origin", origin.toString(",") ));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML",""));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TransformationXML",ct.toXMLString()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IterateEvents", IterateEvents));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws"));
 

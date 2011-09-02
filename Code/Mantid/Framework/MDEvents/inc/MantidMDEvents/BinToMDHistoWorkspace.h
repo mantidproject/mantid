@@ -13,6 +13,7 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/VMD.h"
 
 using Mantid::API::IMDEventWorkspace_sptr;
 
@@ -60,6 +61,8 @@ namespace MDEvents
     void createTransform();
     void createAlignedTransform();
 
+    void makeBasisVectorFromString(const std::string & str);
+
     template<typename MDE, size_t nd>
     Mantid::Geometry::MDImplicitFunction * getImplicitFunctionForChunk(typename MDEventWorkspace<MDE, nd>::sptr ws, size_t * chunkMin, size_t * chunkMax);
 
@@ -99,10 +102,13 @@ namespace MDEvents
     size_t outD;
 
     /// Basis vectors of the output dimensions
-    std::vector<std::vector<coord_t> > bases;
+    std::vector<Mantid::Kernel::VMD> m_bases;
+
+    /// Scaling factor to apply for each basis vector (to map to the bins)
+    std::vector<double> m_scaling;
 
     /// Origin (this position in the input workspace = 0,0,0 in the output).
-    std::vector<coord_t> origin;
+    Mantid::Kernel::VMD m_origin;
 
     /// Cached values for speed up
     size_t * indexMultiplier;

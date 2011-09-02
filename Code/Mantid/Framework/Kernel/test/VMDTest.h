@@ -166,6 +166,25 @@ public:
     TS_ASSERT_DELTA( a.angle(b), 3.1415926/2, 1e-4);
   }
 
+  void test_toString()
+  {
+    VMD a(1,2,3);
+    TS_ASSERT_EQUALS( a.toString(), "1 2 3");
+    TS_ASSERT_EQUALS( a.toString(","), "1,2,3");
+    TS_ASSERT_EQUALS( a.toString(""), "123");
+  }
+
+  void test_fromString()
+  {
+    TS_ASSERT_EQUALS( VMD("1,2,3"), VMD(1,2,3) );
+    TS_ASSERT_EQUALS( VMD("1, 2, 3"), VMD(1,2,3) );
+    TS_ASSERT_EQUALS( VMD("1.234, 2"), VMD(1.234, 2) );
+    TS_ASSERT_EQUALS( VMD("4 5 6 7"), VMD(4,5,6,7) );
+    TS_ASSERT_THROWS_ANYTHING( VMD("monkey") );
+    TS_ASSERT_THROWS_ANYTHING( VMD("") );
+    TS_ASSERT_THROWS_ANYTHING( VMD("   ,  ,   ") );
+  }
+
 };
 
 

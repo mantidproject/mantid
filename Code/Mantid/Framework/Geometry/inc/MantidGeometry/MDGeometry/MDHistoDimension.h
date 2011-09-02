@@ -4,6 +4,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/VMD.h"
 
 namespace Mantid
 {
@@ -95,6 +96,15 @@ namespace Geometry
       return m_binWidth;
     }
 
+    /// @return the basis vector of this dimension as expressed in the dimensions of the original MDEventWorkspace.
+    const Mantid::Kernel::VMD & getBasisVector() const
+    { return m_basisVector; }
+
+    /// Sets the basis vector of this dimension as expressed in the dimensions of the original MDEventWorkspace.
+    void setBasisVector(const Mantid::Kernel::VMD & vector)
+    { m_basisVector = vector; }
+
+
   private:
     /// Name
     std::string m_name;
@@ -116,6 +126,9 @@ namespace Geometry
 
     /// Calculated bin size
     double m_binWidth;
+
+    /// Unit-length basis vector of this dimension as expressed in the dimensions of the original MDEventWorkspace.
+    Mantid::Kernel::VMD m_basisVector;
 
 
   };

@@ -2,11 +2,17 @@
 #define MANTID_KERNEL_VMD_H_
     
 #include "MantidKernel/System.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
 #include <cstddef>
 #include <stdexcept>
 #include <sstream>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
+
+using boost::algorithm::split;
+using boost::algorithm::is_any_of;
 
 
 namespace Mantid
@@ -171,6 +177,32 @@ namespace Kernel
     }
 
     //-------------------------------------------------------------------------------------------
+    /** Constructor from string
+     * @param str :: string of comma or space-separated numbers for each component */
+    VMD(const std::string & str)
+    : nd(nd)
+    {
+      std::vector<std::string> strs;
+      boost::split(strs, str, boost::is_any_of(", "));
+
+      std::vector<double> vals;
+      for (size_t d=0; d<strs.size(); d++)
+      {
+        if (!strs[d].empty())
+        {
+          double v;
+          if (!Strings::convert(strs[d], v))
+            throw std::invalid_argument("VMD: Unable to convert the string '" + strs[d] + "' to a number.");
+          vals.push_back(v);
+        }
+      }
+      nd = vals.size();
+      if (nd <= 0) throw std::invalid_argument("nd must be > 0");
+      data = new double[nd];
+      for (size_t d=0; d<nd; d++) data[d] = vals[d];
+    }
+
+    //-------------------------------------------------------------------------------------------
     /// Destructor
     virtual ~VMD()
     {
@@ -196,12 +228,14 @@ namespace Kernel
     { return data[index]; }
 
     //-------------------------------------------------------------------------------------------
-    /** Return a simple string representation of the vector */
-    std::string toString() const
+    /** Return a simple string representation of the vector
+     * @param separator :: string to place between values, one space is the default
+     */
+    std::string toString(const std::string & separator = " ") const
     {
       std::ostringstream mess;
       for (size_t d=0; d<nd; d++)
-        mess << (d>0?" ":"")
+        mess << (d>0?separator:"")
         << data[d];
       return mess.str();
     }

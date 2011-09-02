@@ -158,7 +158,7 @@ namespace MDEvents
       if (axes[i].length() == 0.0)
         throw std::runtime_error("CoordTransformAffine::buildOrthogonal(): one of the basis vector was of zero length.");
       if (axes[i].size() != inD)
-        throw std::runtime_error("CoordTransformAffine::buildOrthogonal(): each basis vector must be of length inD (input # of dimensions).");
+        throw std::runtime_error("CoordTransformAffine::buildOrthogonal(): one of the basis vectors had the wrong number of dimensions (must be inD).");
       // Normalize each axis to unity
       VMD basis = axes[i];
       basis.normalize();
