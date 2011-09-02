@@ -314,6 +314,10 @@ namespace Kernel
     FreeBlock newBlock(pos, size);
     // Insert it
     std::pair<freeSpace_t::iterator,bool> p = m_free.insert( newBlock );
+
+    // Failed insert? Should not happen since the map is NOT unique
+    if (!p.second) return;
+
     // This is where we inserted
     freeSpace_t::iterator it = p.first;
     if (it != m_free.begin())

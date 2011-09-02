@@ -371,37 +371,20 @@ namespace MDEvents
     this->clonedFirst = true;
     std::string outputFile = getProperty("OutputFilename");
 
-    if (outputFile.empty())
+    // Convert the output workspace to file-backed
+    if (!outputFile.empty())
     {
-      // ---- in-memory output ------------------------
-      // Load the first workspace again, this time in memory
-      IAlgorithm_sptr loader = createSubAlgorithm("LoadMDEW", 0.05, 0.10, false);
-      loader->setPropertyValue("Filename", m_filenames[0]);
-      loader->setPropertyValue("MetadataOnly", "0");
-      loader->setPropertyValue("FileBackEnd", "0");
-      loader->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace") );
-      loader->executeAsSubAlg();
-      outIWS = loader->getProperty("OutputWorkspace");
+      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMDEW" ,0.05, 0.10, true);
+      saver->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws) );
+      saver->setPropertyValue("Filename", outputFile);
+      saver->setProperty("MakeFileBacked", true);
+      saver->executeAsSubAlg();
     }
-    else
-    {
-      // -------- file-backed output ---------------------
-      IAlgorithm_sptr cloner = this->createSubAlgorithm("CloneMDEventWorkspace" ,0.05, 0.10, true);
-      cloner->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws) );
-      cloner->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
-      cloner->setPropertyValue("Filename", outputFile);
-      cloner->executeAsSubAlg();
-      outIWS = cloner->getProperty("OutputWorkspace");
-    }
-
-    // Make sure it is correct type
-    typename MDEventWorkspace<MDE, nd>::sptr outWS =
-        boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd> >(outIWS);
-    if (!outWS)
-      throw std::runtime_error("NULL or unexpected type resulting from the CloneMDEventWorkspace algorithm");
+    // For the output
+    outIWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
 
     // Fix the box controller settings in the output workspace so that it splits normally
-    BoxController_sptr bc = outWS->getBoxController();
+    BoxController_sptr bc = ws->getBoxController();
     // Fix the max depth to something bigger.
     bc->setMaxDepth(20);
     bc->setSplitThreshold(5000);
@@ -411,7 +394,7 @@ namespace MDEvents
     g_log.notice() << "Setting cache to 2000 MB read, 400 MB write, 0 MB small objects." << std::endl;
     bc->setCacheParameters(sizeof(MDE), 2000000000/sizeof(MDE), 400000000/sizeof(MDE), 0/sizeof(MDE));
 
-    return outWS;
+    return ws;
   }
 
 
@@ -496,7 +479,7 @@ namespace MDEvents
       // Go through each file
       this->m_alg->fileMutex.lock();
       //bc->fileMutex.lock();
-      for (size_t iw=1; iw<this->m_alg->files.size(); iw++)
+      for (size_t iw=0; iw<this->m_alg->files.size(); iw++)
       {
         // The file and the indexes into that file
         ::NeXus::File * file = this->m_alg->files[iw];
@@ -660,12 +643,13 @@ namespace MDEvents
       throw std::invalid_argument("Must specify at least one filename.");
     std::string firstFile = m_filenames[0];
 
-    // Start by loading the first file but just the meta data to get dimensions, etc.
+    // Start by loading the first file but just the box structure, no events, and not file-backed
     IAlgorithm_sptr loader = createSubAlgorithm("LoadMDEW", 0.0, 0.05, false);
     loader->setPropertyValue("Filename", firstFile);
-    loader->setPropertyValue("MetadataOnly", "0");
-    loader->setPropertyValue("FileBackEnd", "1");
-    loader->setPropertyValue("OutputWorkspace", "anonymous");
+    loader->setProperty("MetadataOnly", false);
+    loader->setProperty("BoxStructureOnly", true);
+    loader->setProperty("FileBackEnd", false);
+    loader->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace") );
     loader->executeAsSubAlg();
     IMDEventWorkspace_sptr firstWS = loader->getProperty("OutputWorkspace");
 
