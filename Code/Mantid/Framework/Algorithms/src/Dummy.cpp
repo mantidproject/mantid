@@ -52,7 +52,7 @@ namespace Algorithms
     for (int i=1; i<10; i++)
     {
       std::string pname = "Int" + Strings::toString(i);
-      declareProperty(pname, 123);
+      declareProperty(pname, 1, new BoundedValidator<int>(100, 200));
       setPropertySettings(pname, new VisibleWhenProperty(this, "ShowStuff", IS_EQUAL_TO, "1") );
     }
 

@@ -344,7 +344,10 @@ bool AlgorithmDialog::setPropertyValues(const QStringList & skipList)
       if (!error.empty()) allValid = false;
     }
     else
-      allValid = allValid && this->setPropertyValue(pName, false);
+    {
+      bool thisValid = this->setPropertyValue(pName, false);
+      allValid = allValid && thisValid;
+    }
   }
 
   // OK all the values have been set once. Time to look for which should be enabled
