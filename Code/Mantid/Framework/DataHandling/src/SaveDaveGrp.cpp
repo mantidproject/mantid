@@ -107,7 +107,15 @@ namespace DataHandling
       file<<"# "<<ycaption<<" ("<< yunit <<") values"<<std::endl;
       for (std::size_t i=0;i<nSpectra;i++)
       {
-          double yvalue=(*ws->getAxis(1))(i);
+          double yvalue;
+          if (ycaption=="q")
+          {
+              yvalue = ((*ws->getAxis(1))(i)+(*ws->getAxis(1))(i+1))/2.0;
+          }
+          else
+          {
+              yvalue=(*ws->getAxis(1))(i);
+          }
           if (yToMicroeV) yvalue*=1000.;
           file<<yvalue<<std::endl;
       }
