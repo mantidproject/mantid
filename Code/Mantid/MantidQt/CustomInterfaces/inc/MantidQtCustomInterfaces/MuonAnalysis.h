@@ -137,6 +137,14 @@ private slots:
   /// Changes the format of the file string. i.e file MUSR001-06 are files 01-06
   ///void appendSelected();
 
+  /// Bunch the data (rebin)
+  void reBunch(const std::string&);
+
+  /// Remove any rebinned data so that the plot shows the raw data again
+  void makeRaw(const std::string&);
+
+  /// Assigns a peak picker tool to the workspace (@param::workspace name)
+  void assignPeakPickerTool(const QString &);
 
 private:
   /// Initialize the layout
@@ -229,6 +237,15 @@ private:
 
   /// used to test that a new filename has been entered 
   QString m_previousFilename;
+
+  /// used to test that a new number of steps to rebin by has been entered
+  QString m_previousRebinSteps;
+
+  /// used to test whether the data has already been bunched before
+  std::string m_previousBunchWsName;
+
+  /// used to test whether the data has already got the peak picker tool assigned
+  QString m_previousFittingRequested;
 
   /// List of current group names 
   std::vector<std::string> m_groupNames;

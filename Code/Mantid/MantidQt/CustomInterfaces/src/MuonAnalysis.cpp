@@ -162,6 +162,13 @@ void MuonAnalysis::initLayout()
 
   // connect the fit function widget buttons to their respective slots.
   loadFittings();
+
+  // If the data is set to bunch then fit against the bunched data, if make raw then fit against the raw data
+  connect(m_uiForm.fitBrowser,SIGNAL(rawData(const std::string&)), this, SLOT(makeRaw(const std::string&)));
+  connect(m_uiForm.fitBrowser,SIGNAL(bunchData(const std::string&)), this, SLOT(reBunch(const std::string&)));
+
+  // Detected a workspace change and therefore the peak picker tool needs to be reassigned.
+  connect(m_uiForm.fitBrowser,SIGNAL(wsChangePPAssign(const QString &)), this, SLOT(assignPeakPickerTool(const QString &)));
 }
 
 
@@ -1361,6 +1368,11 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
   // rebin data if option set in Plot Options
   if ( m_uiForm.rebinComboBox->currentText() == "Fixed" )
   {
+    // @Rob.Whitley Need to implement.
+    // Record the bunch data so that a fit can be done against it
+    m_previousBunchWsName = wsname;
+    m_previousRebinSteps = m_uiForm.optionStepSizeText->text();
+
     QString reBunchStr = QString("Rebunch(\"") + wsname.c_str() + "\",\""
         + wsname.c_str() + QString("\",") + m_uiForm.optionStepSizeText->text() + ");";
     runPythonCode( reBunchStr ).trimmed(); 
@@ -1385,6 +1397,58 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
 }
 
 
+// @Rob.Whitley Need to implement
+/**
+* Check the bunch details then fit using the rebinned data but plot against 
+* the data that is currently plotted, this may be the same.
+*
+* @params wsName :: The name of the workspace the user wants to fit against. 
+*/
+void MuonAnalysis::reBunch(const std::string & wsName)
+{
+  // When bunch is selected but no plot option rebin has been stated output message
+  if ( m_uiForm.rebinComboBox->currentText() != "Fixed" )
+  {
+    QMessageBox::warning(this, "Mantid - Moun Analysis", "Warning - Bunch data was selected but the number of steps wasn't specified. "
+         "\nThe option for this is located on the Plot Options tab. \n\n Default fit will be against current data."); 
+    return;
+  }
+  
+  m_previousRebinFitSteps = "";
+
+  // If the fitting has already been plotted with the bunched settings AND against the same workspace then return. (assume last fitting)
+  if ((m_previousBunchWsName == wsName) && (m_previousRebinFitSteps == m_uiForm.optionStepSizeText->text())) 
+    return;
+
+  else if (m_previousBunchWsName == wsName)
+  {
+    //Put back to original, then bunch to specification (make raw currently creates a new plot @Rob.Whitley Need to implement)
+    makeRaw(wsName);
+    m_previousBunchWsName = wsName;
+    m_previousRebinSteps = m_uiForm.optionStepSizeText->text();
+    QString reBunchStr = QString("Rebunch(\"") + wsName.c_str() + "\",\"" + wsName.c_str() + QString("\",") + m_uiForm.optionStepSizeText->text() + ");"; 
+    runPythonCode( reBunchStr ).trimmed(); 
+  }
+  else
+  {
+    m_previousBunchWsName = wsName;
+    m_previousRebinSteps = m_uiForm.optionStepSizeText->text();
+    QString reBunchStr = QString("Rebunch(\"") + wsName.c_str() + "\",\"" + wsName.c_str() + QString("\",") + m_uiForm.optionStepSizeText->text() + ");"; 
+    runPythonCode( reBunchStr ).trimmed(); 
+  }
+}
+
+/**
+* Setup a temporary fit against the current data, then either:
+* 1) remove the data from the plot, load up the original raw data, bring the fitting to the front
+* 2) copy the fitting onto a new plot where the raw data has been loaded up again and then delete the plot that contains the data you began the function with
+*
+* @params wsName :: The name of the workspace the user wants to fit against. 
+*/
+void MuonAnalysis::makeRaw(const std::string & wsName)
+{
+  //Load back original without bunching
+}
 
 
 /**
@@ -1432,7 +1496,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     QString pyS;
     if ( m_uiForm.showErrorBars->isChecked() )
       pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ",True)\n";
-    else
+    else  
       pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ")\n";
     // Add the objectName for the peakPickerTool to find
     pyS += "gs.setObjectName(\"" + titleLabel + "\")\n"
@@ -1520,8 +1584,8 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     // run python script
     QString pyOutput = runPythonCode( pyString ).trimmed();
     
-    // Emit the signal to load the peak picker tool associating itself with the fitPropertyBrowser in the muon analysis widget
-    emit fittingRequested(m_uiForm.fitBrowser, titleLabel);
+    //Manually add the workspace to the fit property browser
+    m_uiForm.fitBrowser->manualAddWorkspace(titleLabel);
   }  
 }
 
@@ -1640,10 +1704,9 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     
     QString pyOutput = runPythonCode( pyString ).trimmed();
     
-    //emit the signal to load the peak picker tool associating itself with the fitPropertyBrowser in the muon analysis widget
-    emit fittingRequested(m_uiForm.fitBrowser, titleLabel);
-  }
-  
+    //Manually add the workspace to the fit property browser
+    m_uiForm.fitBrowser->manualAddWorkspace(titleLabel);
+  }  
 }
 
 /**
@@ -2372,6 +2435,10 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   m_optionTab->runRebinComboBox(rebinComboBoxIndex);
 }
 
+
+/**
+*   Loads up the options for the fit browser so that it works in a muon analysis tab
+*/
 void MuonAnalysis::loadFittings()
 {
   // Title of the fitting dock widget that now lies within the fittings tab. Should be made 
@@ -2382,6 +2449,9 @@ void MuonAnalysis::loadFittings()
 }
 
 
+/**
+*   Check to see if the appending option is true when the previous button has been pressed and acts accordingly 
+*/
 void MuonAnalysis::checkAppendingPreviousRun()
 {  
   if ( m_uiForm.mwRunFiles->getText().isEmpty() )
@@ -2406,6 +2476,9 @@ void MuonAnalysis::checkAppendingPreviousRun()
 }
 
 
+/**
+*   Check to see if the appending option is true when the next button has been pressed and acts accordingly 
+*/
 void MuonAnalysis::checkAppendingNextRun()
 {
   if (m_uiForm.mwRunFiles->getText().isEmpty() )
@@ -2425,6 +2498,13 @@ void MuonAnalysis::checkAppendingNextRun()
 }
 
 
+/**
+*   This sets up an appending lot of files so that when the user hits enter
+*   all files within the range will open. 
+*
+*   @params setAppendingRun :: The number to increase the run by, this can be
+*   -1 if previous has been selected.
+*/
 void MuonAnalysis::setAppendingRun(int inc)
 {
   //Use this for appending the next run
@@ -2506,7 +2586,12 @@ void MuonAnalysis::setAppendingRun(int inc)
 
 }
 
-
+/**
+*   Opens up the next file if clicked next or previous on the muon analysis
+*
+*   @params amountToChange :: if clicked next then you need to open the next
+*   file so 1 is passed, -1 is passed if previous was clicked by the user.
+*/
 void MuonAnalysis::changeRun(int amountToChange)
 {
   int firstFileNumber(-1);
@@ -2572,6 +2657,15 @@ void MuonAnalysis::changeRun(int amountToChange)
 }
 
 
+/**
+*   Seperates the a given file into instrument, code and size of the code. 
+*   i.e MUSR0002419 becomes MUSR, 7, 2419
+*
+*   @params currentFile :: This is the file to convert in QString format and once
+*   finished will be returned containing the instrument used i.e MUSR or ELF.
+*   @params runNumberSize :: Size of the code
+*   @params runNumber :: contains the code as an integer, preceeding 0's are lost.
+*/
 void MuonAnalysis::separateMuonFile(QString &currentFile, int &runNumberSize, int &runNumber)
 {
    //QString currentFile = m_uiForm.mwRunFiles->getFirstFilename();
@@ -2604,6 +2698,15 @@ void MuonAnalysis::separateMuonFile(QString &currentFile, int &runNumberSize, in
   currentFile.chop(runNumberSize);
 }  
 
+
+/**
+*   Adds the 0's back onto the file code which were lost when converting 
+*   it to an integer.
+*   
+*   @params size :: The size of the original file code before conversion
+*   @params limitedCode :: This is the code after it was incremented or 
+*   decremented and then converted back into a QString 
+*/
 void MuonAnalysis::getFullCode(int size, QString & limitedCode)
 {
   while (size > limitedCode.size())
@@ -2611,6 +2714,24 @@ void MuonAnalysis::getFullCode(int size, QString & limitedCode)
     limitedCode = "0" + limitedCode;
   }
 }
+
+
+/**
+*   Emits a signal containing the fitBrowser and the name of the 
+*   workspace we want to attach a peak picker tool to 
+*
+*   @params workspaceName :: The QString name of the workspace the user wishes 
+*   to attach a plot picker tool to.
+*/
+void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
+{ 
+  if (m_previousFittingRequested != workspaceName)
+  {
+    m_previousFittingRequested = workspaceName;
+  emit fittingRequested(m_uiForm.fitBrowser, workspaceName);
+  }
+}
+
 
 }//namespace MantidQT
 }//namespace CustomInterfaces

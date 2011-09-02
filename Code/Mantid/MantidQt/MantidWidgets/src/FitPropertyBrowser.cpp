@@ -104,7 +104,8 @@ m_auto_back(false),
 m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"))),
 m_autoBackground(NULL),
 m_decimals(-1),
-m_mantidui(mantidui)
+m_mantidui(mantidui),
+m_customFittings(customFittings)
 {
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser");
@@ -212,7 +213,7 @@ m_mantidui(mantidui)
   settingsGroup->addSubProperty(m_minimizer);
   
   // Only include the cost function when in the dock widget inside mantid plot, not on muon analysis widget
-  if (customFittings == false)
+  if (!m_customFittings)
   {
     settingsGroup->addSubProperty(m_costFunction);
   }
@@ -246,10 +247,13 @@ m_mantidui(mantidui)
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
   // Custom settings that are specific to the muon analysis group
-  if (customFittings == true)
+  if (m_customFittings)
   {
     QtProperty* customGroup = m_groupManager->addProperty("Custom");
     m_data = m_enumManager->addProperty("Data");
+    m_dataTypes << "Bunch"
+                << "Raw";
+    m_enumManager->setEnumNames(m_data, m_dataTypes);
     customGroup->addSubProperty(m_data);
     m_customGroup = m_browser->addProperty(customGroup);
   }
@@ -368,9 +372,14 @@ m_mantidui(mantidui)
   createCompositeFunction();
 
   m_changeSlotsEnabled = true;
-
+    
+  // Observe what workspaces are added and deleted unless it's a custom fitting, all workspaces for custom fitting (eg muon analysis) 
+  // should be manually added.
+  if (!customFittings)
+  {
+    observeAdd();
+  }
   observeDelete();
-  observeAdd();
 
   init();
 }
@@ -869,10 +878,6 @@ void FitPropertyBrowser::setWorkspaceName(const QString& wsName)
   {
     m_enumManager->setValue(m_workspace,i);
   }
-  if (!isWorkspaceAGroup())
-  {
-    m_groupMember = wsName.toStdString();
-  }
 }
 
 /// Get workspace index
@@ -893,10 +898,22 @@ std::string FitPropertyBrowser::outputName()const
   return m_stringManager->value(m_output).toStdString();
 }
 
-/// Get the output name
+/// Set the output name
 void FitPropertyBrowser::setOutputName(const std::string& name)
 {
   m_stringManager->setValue(m_output,QString::fromStdString(name));
+}
+
+/**
+* Find out what data has been selected. The current options to choose 
+* from are raw data and bunched data.
+*
+* return :: data type as a string
+*/
+std::string FitPropertyBrowser::data() const
+{
+  int i = m_enumManager->value(m_data);
+  return m_dataTypes[i].toStdString();
 }
 
 /// Get the minimizer
@@ -922,27 +939,7 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
 
   if (prop == m_workspace)
   {
-    if (m_guessOutputName)
-    {
-      if (isWorkspaceAGroup())
-      {
-        m_stringManager->setValue(m_output,QString::fromStdString(workspaceName()+"_params"));
-      }
-      else
-      {
-        m_stringManager->setValue(m_output,QString::fromStdString(workspaceName()));
-      }
-    }
-    if (isWorkspaceAGroup())
-    {
-      setLogValue();
-    }
-    else
-    {
-      m_groupMember = workspaceName();
-      removeLogValue();
-    }
-    emit workspaceNameChanged(QString::fromStdString(workspaceName()));
+    workspaceChange(QString::fromStdString(workspaceName()));
   }
   else if (prop->propertyName() == "Type")
   {
@@ -1316,7 +1313,20 @@ void FitPropertyBrowser::fit()
         funStr = *(m_compositeFunction->getFunction(0));
       }
     }
-
+    // If it is in the custom fitting (muon analysis) i.e not a docked widget in mantidPlot
+    if (m_customFittings)
+    {
+      // Find out if it bunch has been selected and rebunch if appropraite
+      std::string dType(data());
+      if (dType == "Bunch")
+      {
+        emit bunchData(wsName);
+      }
+      else //Raw must have been selected (only 2 options implemented so far)
+      {
+        emit rawData(wsName);
+      } 
+    }
     if (isWorkspaceAGroup())
     {
       Mantid::API::IAlgorithm_sptr alg = 
@@ -1455,12 +1465,14 @@ void FitPropertyBrowser::addHandle(const std::string& wsName,const boost::shared
   QStringList oldWorkspaces = m_workspaceNames;
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
+  // if new workspace append this workspace name
   if (i < 0)
   {
     m_workspaceNames.append(QString(wsName.c_str()));
     m_workspaceNames.sort();
+    m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
   }
-  m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
+  // get hold of index of oldName
   i = m_workspaceNames.indexOf(oldName);
   if (i >= 0)
   {
@@ -1610,31 +1622,31 @@ void FitPropertyBrowser::clearBrowser()
 /// Set the parameters to the fit outcome
 void FitPropertyBrowser::getFitResults()
 {
-  if (isWorkspaceAGroup())
-  {
-    std::string wsName = outputName();
-    Mantid::API::ITableWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
-    if (ws)
-    {
-      if ((ws->columnCount() - 1)/2 != compositeFunction()->nParams()) return;
-      Mantid::API::WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()) );
-      std::vector<std::string> names = wsg->getNames();
-      std::vector<std::string>::iterator it = 
-        std::find(names.begin(),names.end(),m_groupMember);
-      if (it == names.end()) return;
-      int row = static_cast<int>(it - names.begin()) - 1;// take into account the group name
-      if (row >= ws->rowCount()) return;
-      for(int i=0;i<compositeFunction()->nParams();++i)
-      {
-        compositeFunction()->setParameter(i,ws->Double(row,2*i+1));
-      }
-      updateParameters();
-      plotGuessAll();
-    }
-  }
-  else
+  //if (isWorkspaceAGroup())
+  //{
+  //  std::string wsName = outputName();
+  //  Mantid::API::ITableWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+  //    Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
+  //  if (ws)
+  //  {
+  //    if ((ws->columnCount() - 1)/2 != compositeFunction()->nParams()) return;
+  //    Mantid::API::WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
+  //      Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()) );
+  //    std::vector<std::string> names = wsg->getNames();
+  //    std::vector<std::string>::iterator it = 
+  //      std::find(names.begin(),names.end(),m_groupMember);
+  //    if (it == names.end()) return;
+  //    int row = static_cast<int>(it - names.begin()) - 1;// take into account the group name
+  //    if (row >= ws->rowCount()) return;
+  //    for(int i=0;i<compositeFunction()->nParams();++i)
+  //    {
+  //      compositeFunction()->setParameter(i,ws->Double(row,2*i+1));
+  //    }
+  //    updateParameters();
+  //    plotGuessAll();
+  //  }
+  //}
+  //else
   {
     std::string wsName = outputName() + "_Parameters";
     if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName))
@@ -2311,7 +2323,7 @@ void FitPropertyBrowser::setLogValue(const QString& lv)
 {
   if (isWorkspaceAGroup())
   {
-    validateGroupMember();
+    //validateGroupMember();
     if (!m_logValue)
     {
       m_logValue = m_enumManager->addProperty("LogValue");
@@ -2319,7 +2331,7 @@ void FitPropertyBrowser::setLogValue(const QString& lv)
     }
     m_logs.clear();
     m_logs << "";
-    if (!m_groupMember.empty())
+   /* if (!m_groupMember.empty())
     {
       Mantid::API::MatrixWorkspace_sptr ws = 
         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
@@ -2333,7 +2345,7 @@ void FitPropertyBrowser::setLogValue(const QString& lv)
           m_logs << QString::fromStdString(logs[i]->name());
         }
       }
-    }
+    }*/
     m_enumManager->setEnumNames(m_logValue,m_logs);
     int i = m_logs.indexOf(lv);
     if (i < 0) i = 0;
@@ -2359,42 +2371,42 @@ void FitPropertyBrowser::removeLogValue()
   m_logValue = NULL;
 }
 
-void FitPropertyBrowser::validateGroupMember()
-{
-  std::string wsName = workspaceName();
-  Mantid::API::WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
-    Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
-  if (!wsg)
-  {
-    m_groupMember = workspaceName();
-    return;
-  }
-  std::vector<std::string> names = wsg->getNames();
-  if (names.empty())
-  {
-    m_groupMember = "";
-    return;
-  }
-  if (std::find(names.begin(),names.end(),m_groupMember) != names.end())
-  {
-    return;
-  }
-  if (names[0] == wsName)
-  {
-    if (names.size() > 1)
-    {
-      m_groupMember = names[1];
-    }
-    else
-    {
-      m_groupMember = "";
-    }
-  }
-  else
-  {
-    m_groupMember = names[0];
-  }
-}
+//void FitPropertyBrowser::validateGroupMember()
+//{
+//  std::string wsName = workspaceName();
+//  Mantid::API::WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
+//    Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
+//  if (!wsg)
+//  {
+//    m_groupMember = workspaceName();
+//    return;
+//  }
+//  std::vector<std::string> names = wsg->getNames();
+//  if (names.empty())
+//  {
+//    m_groupMember = "";
+//    return;
+//  }
+//  if (std::find(names.begin(),names.end(),m_groupMember) != names.end())
+//  {
+//    return;
+//  }
+//  if (names[0] == wsName)
+//  {
+//    if (names.size() > 1)
+//    {
+//      m_groupMember = names[1];
+//    }
+//    else
+//    {
+//      m_groupMember = "";
+//    }
+//  }
+//  else
+//  {
+//    m_groupMember = names[0];
+//  }
+//}
 
 void FitPropertyBrowser::sequentialFit()
 {
@@ -2514,6 +2526,67 @@ bool FitPropertyBrowser::plotDiff()const
 void FitPropertyBrowser::setTextPlotGuess(const QString text) 
 {
   m_displayActionPlotGuess->setText(text);
+}
+
+/**
+* Currently only called by the custom interface for the muon analysis fit browser.
+* It adds the name of a loaded workspace to a drop down property box . 
+*
+* @params wsName :: The workspace name to be added.
+*/
+void FitPropertyBrowser::manualAddWorkspace(const QString& wsName)
+{
+  QString oldName = QString::fromStdString(workspaceName());
+  int i = m_workspaceNames.indexOf(wsName);
+  // if new workspace append this workspace name
+  if (i < 0)
+  {
+    m_workspaceNames.append(wsName);
+    m_workspaceNames.sort();
+    m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
+  }
+  // get hold of index of oldName
+  i = m_workspaceNames.indexOf(oldName);
+  if (i >= 0)
+  {
+    m_enumManager->setValue(m_workspace,i);
+  }    
+  //Set the workspace to the most recent one.
+  workspaceChange(wsName);
+}
+
+
+/**
+* Sets a new workspace
+*/
+void FitPropertyBrowser::workspaceChange(const QString& wsName)
+{
+  if (m_guessOutputName)
+  {
+    if (isWorkspaceAGroup())
+    {
+      m_stringManager->setValue(m_output,QString::fromStdString(workspaceName()+"_params"));
+    }
+    else
+    {
+      m_stringManager->setValue(m_output,QString::fromStdString(workspaceName()));
+    }
+  }
+  if (isWorkspaceAGroup())
+  {
+    setLogValue();
+  }
+  else
+  {
+    //m_groupMember = workspaceName();
+    removeLogValue();
+  }
+  emit workspaceNameChanged(wsName);
+  // If fit property browser is a custom fitting then emit signal that workspace has changed and to assign a new peak picker tool to it
+  if (m_customFittings)
+  {
+    emit wsChangePPAssign(wsName);
+  }
 }
 
 } // MantidQt

@@ -122,6 +122,8 @@ public:
   std::string outputName()const;
   /// Set the output name
   void setOutputName(const std::string&);
+  /// Get the data type
+  std::string data() const;
   /// Get the minimizer
   std::string minimizer()const;
   /// Get the cost function
@@ -161,7 +163,7 @@ public:
   void setTip(const QString& txt);
 
   /// return groupMember
-  const std::string groupMember() const {return m_groupMember;};
+  //const std::string groupMember() const {return m_groupMember;};
   /// alter text of Plot Guess 
   void setTextPlotGuess(const QString text);
 
@@ -193,6 +195,9 @@ public:
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
+  /// Add a workspace property
+  void manualAddWorkspace(const QString& wsName);
+
 public slots:
   void fit();
   void sequentialFit();
@@ -212,7 +217,13 @@ signals:
   void algorithmFinished(const QString&);
   void workspaceIndexChanged(int i);
   void workspaceNameChanged(const QString&);
+  void wsChangePPAssign(const QString&);
   void functionChanged();
+
+  // @Rob_Whitley Need to implement. 
+  void bunchData(const std::string&);
+  void rawData(const std::string&);
+
   void startXChanged(double);
   void endXChanged(double);
   void parameterChanged(const Mantid::API::IFitFunction*);
@@ -310,13 +321,16 @@ private:
 
   void setCurrentFunction(const Mantid::API::IFitFunction* f)const;
 
+  /// Sets the new workspace to the current one
+  void workspaceChange(const QString&);
+
   /// Does a parameter have a tie
   void hasConstraints(QtProperty* parProp,bool& hasTie,bool& hasBounds)const;
   /// Returns the tie property for a parameter property, or NULL
   QtProperty* getTieProperty(QtProperty* parProp)const;
 
   /// Make sure m_groupMember belongs to the group
-  void validateGroupMember();
+  //void validateGroupMember();
 
   /// Fit and Display menu
   QSignalMapper* m_fitMapper;
@@ -351,6 +365,8 @@ private:
   /// <attribute_name,string_manager>
   QMap<QString,QtStringPropertyManager*> m_stringManagers;
 
+  bool m_customFittings;
+
   mutable PropertyHandler* m_currentHandler;
 
   /// Group for functions
@@ -383,6 +399,8 @@ private:
   mutable QStringList m_workspaceNames;
   /// A list of available minimizers
   mutable QStringList m_minimizers;
+  /// A list of available data types
+  mutable QStringList m_dataTypes;
   /// A list of available cost functions
   mutable QStringList m_costFunctions;
 
@@ -423,7 +441,7 @@ private:
 
   /// if isWorkspaceAGroup() is true m_groupMember keeps name of the MatrixWorkspace
   /// fitted with theFunction() 
-  std::string m_groupMember;
+  //std::string m_groupMember;
 
   /// Log names
   QStringList m_logs;

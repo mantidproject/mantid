@@ -575,26 +575,8 @@ void PeakPickerTool::workspaceNameChanged(const QString& wsName)
  
     if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()))
     {
-      ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString());
-    }
-
-    Mantid::API::WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
-    if (wsg)
-    {
-      std::vector<std::string> names = wsg->getNames();
-      for(int i=0;i<static_cast<int>(names.size());++i)
-      {
-        if (names[i] == m_wsName.toStdString()) 
-        {// accept the new name
-          return;
-        }
-      }
-      // reject the new name
-      m_fitPropertyBrowser->setWorkspaceName(m_wsName);
-    }
-    else
-    {// reject the new name
-      m_fitPropertyBrowser->setWorkspaceName(m_wsName);
+       m_wsName = wsName;
+       m_fitPropertyBrowser->setWorkspaceName(m_wsName);
     }
   }
 }
@@ -918,8 +900,8 @@ void PeakPickerTool::plotFitFunction(MantidQt::MantidWidgets::PropertyHandler* h
     if (!alreadyPlotted)
     {
       fc = new FunctionCurve(
-        h->ifun(),
-        QString::fromStdString(m_fitPropertyBrowser->groupMember()),//m_browser->workspaceName()),
+        h->ifun(), "",
+        //QString::fromStdString(m_fitPropertyBrowser->groupMember()),//m_browser->workspaceName()),
         m_fitPropertyBrowser->workspaceIndex(),
         h->functionName());
       fc->setRange(m_fitPropertyBrowser->startX(),m_fitPropertyBrowser->endX());
