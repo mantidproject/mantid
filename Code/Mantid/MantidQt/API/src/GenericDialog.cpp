@@ -382,7 +382,7 @@ void GenericDialog::initLayout()
   {
     scroll->setFixedHeight(viewport->height()+10);
     // Resize it to the smallest height possible.
-    this->resize(this->width(),0);
+    //this->resize(this->width(),0);
   }
 
   dialog_layout->setSizeConstraint(QLayout::SetMinimumSize);
