@@ -23,7 +23,6 @@ class ShapeFactoryTest : public CxxTest::TestSuite
 {
 public:
 
-
 	void testCuboid()
 	{
 		std::string xmlShape = "<cuboid id=\"shape\"> ";
@@ -42,6 +41,25 @@ public:
     TS_ASSERT( !shape_sptr->isValid(V3D(-0.006,0.0,0.00001)) );
     TS_ASSERT( shape_sptr->isValid(V3D(0.0,0.09, 0.00001)) );
 	}
+
+  void testRelayShapeXML()
+  {
+    //Create a cuboid.
+    std::string xmlShape = "<cuboid id=\"shape\"> ";
+		xmlShape +=	"<left-front-bottom-point x=\"0.005\" y=\"-0.1\" z=\"0.0\"/> " ;
+  	xmlShape +=	"<left-front-top-point x=\"0.005\" y=\"-0.1\" z=\"0.0001\"/>  " ;
+  	xmlShape +=	"<left-back-bottom-point x=\"-0.005\" y=\"-0.1\" z=\"0.0\"/>  " ;
+  	xmlShape +=	"<right-front-bottom-point x=\"0.005\" y=\"0.1\" z=\"0.0\"/>  " ;
+  	xmlShape +=	"</cuboid> ";
+		xmlShape +=	"<algebra val=\"shape\"/> ";  
+
+    std::string expectedXML = "<type name=\"userShape\"> " + xmlShape + " </type>";
+		
+		boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+    TSM_ASSERT("Empty shape xml given.", !shape_sptr->getShapeXML().empty());
+    TSM_ASSERT_EQUALS("Shape xml not relayed through to shape object.", expectedXML, shape_sptr->getShapeXML());
+  }
+
 
 
 	void testHexahedron()

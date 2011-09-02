@@ -19,6 +19,7 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/DOMWriter.h>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
@@ -27,6 +28,7 @@ using Poco::XML::Node;
 using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
+using Poco::XML::DOMWriter;
 
 namespace Mantid
 {
@@ -93,7 +95,13 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
     throw std::logic_error( "Argument to function createShape must be a pointer to an XML element with tag name type." );
   }
 
-  boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
+  std::stringstream xmlstream;
+  DOMWriter writer;
+  writer.writeNode(xmlstream, pElem);
+
+  std::string shapeXML = xmlstream.str();
+
+  boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object(shapeXML));
 
   bool defaultAlgebra = false; // if no <algebra> element then use default algebra
 

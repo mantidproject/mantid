@@ -68,6 +68,8 @@ namespace Mantid
     public:
       /// Default constructor
       Object();
+      /// Constructor providing shape xml.
+      Object(const std::string& shapeXML);
       /// Copy constructor
       Object(const Object&);
       /// Assignment operator
@@ -156,6 +158,8 @@ namespace Mantid
       ///set vtkGeometryCache reader
       void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
       void GetObjectGeom(int& type, std::vector<Kernel::V3D>& vectors, double& myradius, double & myheight) const;
+      /// Getter for the shape xml
+      std::string getShapeXML() const;
     private:
       static Kernel::Logger& PLog;           ///< The official logger
       int ObjName;       ///< Creation number
@@ -202,6 +206,8 @@ namespace Mantid
       int NumberOfPoints() const;
       int* getTriangleFaces() const;
       double* getTriangleVertices() const;
+      /// original shape xml used to generate this object.
+      std::string m_shapeXML;
 
     protected:
       std::vector<const Surface*> SurList;  ///< Full surfaces (make a map including complementary object ?)

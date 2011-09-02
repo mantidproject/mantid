@@ -43,6 +43,19 @@ namespace Mantid
     }
 
     /**
+    *  Construct with original shape xml knowledge.
+    *  @param shapeXML : string with original shape xml.
+    */
+    Object::Object(const std::string& shapeXML) :
+      ObjName(0), TopRule(0), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
+      AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), bGeometryCaching(false),
+      vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()), vtkCacheWriter(boost::shared_ptr<
+      vtkGeometryCacheWriter>()), m_shapeXML(shapeXML)
+    {
+      handle = boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
+    }
+
+    /**
      * Copy constructor
      * @param A :: The object to initialise this copy from
      */
@@ -1810,6 +1823,14 @@ namespace Mantid
       if (handle == NULL)
         return;
       handle->GetObjectGeom(type, vectors, myradius, myheight);
+    }
+
+    /** Getter for the shape xml
+    @return the shape xml.
+    */
+    std::string Object::getShapeXML() const
+    {
+      return this->m_shapeXML;
     }
 
   } // NAMESPACE Geometry
