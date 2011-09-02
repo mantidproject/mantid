@@ -86,6 +86,11 @@ void EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inpu
   const size_t numHists = inputWS->getNumberHistograms();
   Progress progress(this,0.0,1.0,numHists);
 
+  // Get the nominal sample-to-detector distance (in mm)
+  Mantid::Kernel::Property* prop = inputWS->run().getProperty("sample_detector_distance");
+  Mantid::Kernel::PropertyWithValue<double>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
+  const double SDD = *dp/1000.0;
+
   // Loop through the spectra and apply correction
   PARALLEL_FOR1(inputWS)
   for (int64_t ispec = 0; ispec < int64_t(numHists); ++ispec)
@@ -104,11 +109,6 @@ void EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inpu
     // Get the flight path from the sample to the detector pixel
     const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
     const V3D scattered_flight_path = det->getPos() - samplePos;
-
-    // Get the nominal sample-to-detector distance (in mm)
-    Mantid::Kernel::Property* prop = inputWS->run().getProperty("sample_detector_distance");
-    Mantid::Kernel::PropertyWithValue<double>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
-    const double SDD = *dp/1000.0;
 
     // Sample-to-source distance
     const V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
