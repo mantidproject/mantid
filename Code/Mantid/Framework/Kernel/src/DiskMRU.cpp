@@ -347,15 +347,14 @@ namespace Kernel
         it = it_before;
       }
     }
-    if (it != m_free.end())
+    // Get an iterator to the block AFTER this one
+    freeSpace_t::iterator it_after = it; it_after++;
+    // There is a block after
+    if (it_after != m_free.end())
     {
-      // There is a block after
-      freeSpace_t::iterator it_after = it; it_after++;
-      //std::cout << "There is a block after " << pos << std::endl;
       FreeBlock block_after = *it_after;
       if (FreeBlock::merge(newBlock, block_after))
       {
-        //std::cout << "Merged with after block" << std::endl;
         // Change the map by replacing the old "new" block with the new merged one
         m_free.replace(it, newBlock);
         // Remove the block that was after this one
