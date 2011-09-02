@@ -25,9 +25,11 @@ namespace Kernel
     m_smallBufferSize(0),
     m_smallBufferUsed(0),
     m_smallThreshold(0),
+    m_free(),
     m_free_bySize( m_free.get<1>() ),
     m_fileLength(0)
   {
+    m_free.clear();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -51,10 +53,12 @@ namespace Kernel
     m_smallBufferSize(smallBufferSize),
     m_smallBufferUsed(0),
     m_smallThreshold(0),
+    m_free(),
     m_free_bySize( m_free.get<1>() ),
     m_fileLength(0)
   {
     calcSmallThreshold();
+    m_free.clear();
   }
     
   //----------------------------------------------------------------------------------------------
@@ -316,7 +320,12 @@ namespace Kernel
     std::pair<freeSpace_t::iterator,bool> p = m_free.insert( newBlock );
 
     // Failed insert? Should not happen since the map is NOT unique
-    if (!p.second) return;
+    // Or, if the map has only 1 item then it cannot do any merging. This solves a hanging bug in MacOS. Refs #3652
+    if (!p.second || m_free.size() <= 1)
+    {
+      m_freeMutex.unlock();
+      return;
+    }
 
     // This is where we inserted
     freeSpace_t::iterator it = p.first;
@@ -406,9 +415,18 @@ namespace Kernel
   uint64_t DiskMRU::allocate(uint64_t const newSize)
   {
     m_freeMutex.lock();
+
     // Now, find the first available block of sufficient size.
-    freeSpace_bySize_t::iterator it = m_free_bySize.lower_bound( newSize );
-    if (it == m_free_bySize.end())
+    freeSpace_bySize_t::iterator it;
+    bool putAtFileEnd = true;
+    if (m_free.size() > 0)
+    {
+      // Unless there is nothing in the free space map
+      it = m_free_bySize.lower_bound( newSize );
+      putAtFileEnd = (it == m_free_bySize.end());
+    }
+
+    if (putAtFileEnd)
     {
       // No block found
       // Go to the end of the file.

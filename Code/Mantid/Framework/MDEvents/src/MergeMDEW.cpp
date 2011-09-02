@@ -563,8 +563,6 @@ namespace MDEvents
       boxesById[box->getId()] = box;
     }
 
-
-
     // Progress report based on events processed.
     this->prog = new Progress(this, 0.1, 0.9, size_t(totalEvents));
     prog->setNotifyStep(0.1);
@@ -596,7 +594,7 @@ namespace MDEvents
     g_log.information() << overallTime << " to do all the adding." << std::endl;
 
     // Close any open file handle
-    for (size_t iw=1; iw<this->files.size(); iw++)
+    for (size_t iw=0; iw<this->files.size(); iw++)
     {
       ::NeXus::File * file = this->files[iw];
       if (file) file->close();
