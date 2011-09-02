@@ -130,7 +130,7 @@ public:
       Poco::File(outputFile).remove();
   }
 
-  void test_compare_to_original()
+  void xtest_compare_to_original()
   {
     const std::string WSName("dave_grp");
     LoadDaveGrp loader;
