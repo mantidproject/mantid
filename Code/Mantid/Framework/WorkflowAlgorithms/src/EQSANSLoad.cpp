@@ -314,13 +314,16 @@ void EQSANSLoad::moveToBeamCenter()
   mvAlg->setProperty("Y", -y_offset-beam_ctr_y);
   mvAlg->setProperty("RelativePosition", true);
   mvAlg->executeAsSubAlg();
+  m_output_message += "   Beam center offset: " + Poco::NumberFormatter::format(x_offset)
+      + ", " + Poco::NumberFormatter::format(y_offset) + " m\n";
+  //m_output_message += "   Beam center in real-space: " + Poco::NumberFormatter::format(-x_offset-beam_ctr_x)
+  //    + ", " + Poco::NumberFormatter::format(-y_offset-beam_ctr_y) + " m\n";
   g_log.information() << "Moving beam center to " << m_center_x << " " << m_center_y << std::endl;
 
 }
 
 void EQSANSLoad::readConfigFile(const std::string& filePath)
 {
-  m_output_message += "   Using configuration file: " + filePath +"\n";
   // Initialize parameters
   m_mask_as_string = "";
   m_low_TOF_cut = 0;
@@ -341,6 +344,7 @@ void EQSANSLoad::readConfigFile(const std::string& filePath)
     throw Exception::FileError("Unable to open file: " , filePath);
   }
   g_log.information() << "Using config file: " << filePath << std::endl;
+  m_output_message += "   Using configuration file: " + filePath +"\n";
 
   std::string line;
   while( getline(file,line) )
@@ -405,6 +409,7 @@ void EQSANSLoad::exec()
   mvAlg->setProperty("RelativePosition", false);
   mvAlg->executeAsSubAlg();
   g_log.information() << "Moving detector to " << sdd/1000.0 << std::endl;
+  m_output_message += "   Detector position: " + Poco::NumberFormatter::format(sdd/1000.0, 3) + " m\n";
 
   // Get the run number so we can find the proper config file
   int run_number = 0;
@@ -419,6 +424,7 @@ void EQSANSLoad::exec()
     config_file = findConfigFile(run_number);
   } else {
     g_log.error() << "Could not find run number for workspace " << getPropertyValue("OutputWorkspace") << std::endl;
+    m_output_message += "   Could not find run number for data file\n";
   }
 
   // Process the config file
@@ -426,9 +432,10 @@ void EQSANSLoad::exec()
   if (use_config && config_file.size()>0)
   {
     readConfigFile(config_file);
-  } else {
+  } else if (use_config) {
     use_config = false;
     g_log.error() << "Cound not find config file for workspace " << getPropertyValue("OutputWorkspace") << std::endl;
+    m_output_message += "   Could not find configuration file for run " + Poco::NumberFormatter::format(run_number) + "\n";
   }
 
   // If we use the config file, move the moderator position
@@ -437,6 +444,7 @@ void EQSANSLoad::exec()
       if (m_moderator_position > -13.0)
         g_log.error() << "Moderator position seems close to the sample, please check" << std::endl;
       g_log.information() << "Moving moderator to " << m_moderator_position << std::endl;
+      m_output_message += "   Moderator position: " + Poco::NumberFormatter::format(m_moderator_position, 3) + " m\n";
       mvAlg = createSubAlgorithm("MoveInstrumentComponent", 0.4, 0.45);
       mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
       mvAlg->setProperty("ComponentName", "moderator");
@@ -481,6 +489,9 @@ void EQSANSLoad::exec()
       + " and upper " + Poco::NumberFormatter::format(m_high_TOF_cut, 1) + " microsec\n";
 
   bool correct_for_flight_path = getProperty("CorrectForFlightPath");
+  m_output_message += "   Flight path correction ";
+  if (!correct_for_flight_path) m_output_message += "NOT ";
+  m_output_message += "applied\n";
   DataObjects::EventWorkspace_sptr dataWS_evt = boost::dynamic_pointer_cast<EventWorkspace>(dataWS_tmp);
   IAlgorithm_sptr tofAlg = createSubAlgorithm("EQSANSTofStructure", 0.5, 0.7);
   tofAlg->setProperty<EventWorkspace_sptr>("InputWorkspace", dataWS_evt);
@@ -512,6 +523,7 @@ void EQSANSLoad::exec()
   // Convert to wavelength
   const double ssd = fabs(dataWS->getInstrument()->getSource()->getPos().Z())*1000.0;
   const double conversion_factor = 3.9560346 / (sdd+ssd);
+  m_output_message += "   TOF to wavelength conversion factor: " + Poco::NumberFormatter::format(conversion_factor) + "\n";
   IAlgorithm_sptr scAlg = createSubAlgorithm("ScaleX", 0.7, 0.71);
   scAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   scAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
