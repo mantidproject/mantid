@@ -91,6 +91,7 @@ protected:
  */
 FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui, bool customFittings)
 :QDockWidget("Fit Function",parent),
+m_customFittings(customFittings),
 m_currentHandler(0),
 m_logValue(NULL),
 m_compositeFunction(0),
@@ -104,8 +105,7 @@ m_auto_back(false),
 m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.autoBackground"))),
 m_autoBackground(NULL),
 m_decimals(-1),
-m_mantidui(mantidui),
-m_customFittings(customFittings)
+m_mantidui(mantidui)
 {
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser");
@@ -375,7 +375,7 @@ m_customFittings(customFittings)
     
   // Observe what workspaces are added and deleted unless it's a custom fitting, all workspaces for custom fitting (eg muon analysis) 
   // should be manually added.
-  if (!customFittings)
+  if (!m_customFittings)
   {
     observeAdd();
   }
