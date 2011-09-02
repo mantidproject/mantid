@@ -66,7 +66,8 @@ namespace Mantid
 
     /// Empty default constructor
     LoadInstrument::LoadInstrument() : Algorithm(), hasParameterElement_beenSet(false),
-      m_haveDefaultFacing(false), m_deltaOffsets(false), m_angleConvertConst(1.0)
+      m_haveDefaultFacing(false), m_deltaOffsets(false), m_angleConvertConst(1.0),
+      m_indirectPositions(false)
     {}
 
 
@@ -323,13 +324,14 @@ namespace Mantid
 
         // Add/overwrite any instrument params with values specified in <component-link> XML elements
         setComponentLinks(m_instrument, pRootElem);
+
+        if ( m_indirectPositions ) createNeutronicInstrument(instrumentFile+"-PHYSICAL");
+
         // Add the instrument to the InstrumentDataService
         InstrumentDataService::Instance().add(instrumentFile,m_instrument);
       }
       // release XML document
       pDoc->release();
-
-      if ( m_indirectPositions ) createNeutronicInstrument();
 
       // Set the monitors output property
       setProperty("MonitorList",m_instrument->getMonitors());
@@ -525,6 +527,13 @@ namespace Mantid
       setLogfile(ass, pCompElem, m_instrument->getLogfileCache());  // params specified within <component>
       setLogfile(ass, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
 
+      // If enabled, check for a 'neutronic position' tag and add to cache if found
+      if ( m_indirectPositions )
+      {
+        Element* neutronic = pLocElem->getChildElement("neutronic");
+        if ( neutronic ) m_neutronicPos[ass] = neutronic;
+      }
+
       // Check for <exclude> tags for this location
       const std::vector<std::string> excludeList = buildExcludeList(pLocElem);
 
@@ -610,7 +619,7 @@ namespace Mantid
 
       // Read detector IDs into idlist if required
       // Note idlist may be defined for any component
-      // Note any new idlist found will take presedence. 
+      // Note any new idlist found will take precedence.
 
       if ( pCompElem->hasAttribute("idlist") )
       {
@@ -633,7 +642,7 @@ namespace Mantid
 
 
       // get the type element of the component element in order to determine if the type
-      // belong to the catogory: "detector", "SamplePos or "Source".
+      // belong to the category: "detector", "SamplePos or "Source".
 
       std::string typeName = pCompElem->getAttribute("type");
       Element* pType = getTypeElement[typeName];
@@ -757,6 +766,12 @@ namespace Mantid
         setLogfile(detector, pCompElem, m_instrument->getLogfileCache()); // params specified within <component>
         setLogfile(detector, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
 
+        // If enabled, check for a 'neutronic position' tag and add to cache (null pointer added if not found)
+        if ( m_indirectPositions )
+        {
+          m_neutronicPos[detector] = pLocElem->getChildElement("neutronic");
+        }
+
         try
         {
           if ( pCompElem->hasAttribute("mark-as") || pLocElem->hasAttribute("mark-as") )
@@ -775,7 +790,6 @@ namespace Mantid
 
         // Add all monitors and detectors to 'facing component' container. This is only used if the
         // "facing" elements are defined in the instrument definition file
-
         m_facingComponent.push_back(detector);
       }
       else
@@ -905,23 +919,17 @@ namespace Mantid
     */
     void LoadInstrument::setLocation(Geometry::IComponent* comp, Poco::XML::Element* pElem)
     {
-      // Require that pElem points to an element with tag name 'location'
-
-      if ( (pElem->tagName()).compare("location") )
+      // Require that pElem points to an element with tag name 'location' or 'neutronic'
+      if ( pElem->tagName() != "location" && pElem->tagName() != "neutronic" )
       {
         g_log.error("Second argument to function setLocation must be a pointer to an XML element with tag name location.");
         throw std::logic_error( "Second argument to function setLocation must be a pointer to an XML element with tag name location." );
       }
 
-      //Kernel::V3D pos;  // position for <location>
-
-
-      comp->translate(getRelativeTranslation(comp, pElem));
-      
-
+//      comp->translate(getRelativeTranslation(comp, pElem));
+      comp->setPos(getRelativeTranslation(comp, pElem));
 
       // Rotate coordinate system of this component
-
       if ( pElem->hasAttribute("rot") )
       {
         double rotAngle = m_angleConvertConst*atof( (pElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
@@ -1725,9 +1733,29 @@ namespace Mantid
       }
     }
 
-    void LoadInstrument::createNeutronicInstrument()
+    void LoadInstrument::createNeutronicInstrument(const std::string& idsName)
     {
+      // Create a copy of the instrument
+      Instrument_sptr physical(new Instrument(*m_instrument));
+      // Put the physical instrument in the Instrument Data Service
+      InstrumentDataService::Instance().add(idsName,physical);
 
+      // Now we manipulate the original instrument (m_instrument) to hold neutronic positions
+      std::map<Geometry::IComponent*,Poco::XML::Element*>::const_iterator it;
+      for ( it = m_neutronicPos.begin(); it != m_neutronicPos.end(); ++it )
+      {
+        if ( it->second )
+        {
+          setLocation(it->first,it->second);
+        }
+        else
+        {
+          // This should only happen for detectors
+          Detector * det = dynamic_cast<Detector*>(it->first);
+          if (det) m_instrument->removeDetector(det);
+        }
+
+      }
     }
 
     //-----------------------------------------------------------------------------------------------------------------------

@@ -90,6 +90,12 @@ namespace Mantid
       }
     }
 
+    /// Virtual copy constructor
+    Instrument* Instrument::clone() const
+    {
+      return new Instrument(*this);
+    }
+
     /// Pointer to the 'real' instrument, for parametrized instruments
     boost::shared_ptr<Instrument> Instrument::baseInstrument() const
     {
@@ -569,6 +575,34 @@ namespace Mantid
       }
     }
 
+    /** Removes a detector from the instrument and from the detector cache.
+     *  The object is deleted.
+     *  @param det The detector to remove
+     */
+    void Instrument::removeDetector(Detector* det)
+    {
+      if (m_isParametrized)
+        throw std::runtime_error("Instrument::removeDetector() called on a parameterized Instrument object.");
+
+      const detid_t id = det->getID();
+      // Remove the detector from the detector cache
+      m_detectorCache.erase(id);
+      // Also need to remove from monitor cache if appropriate
+      std::vector<detid_t>::iterator it;
+      if ( det->isMonitor() )
+      {
+        it = std::find(m_monitorCache.begin(),m_monitorCache.end(),id);
+        if ( it != m_monitorCache.end() ) m_monitorCache.erase(it);
+      }
+
+      // Remove it from the parent assembly (and thus the instrument). Evilness required here unfortunately.
+      CompAssembly * parentAssembly =
+          dynamic_cast<CompAssembly*>(const_cast<IComponent*>(det->getBareParent()));
+      if ( parentAssembly )  // Should always be true, but check just in case
+      {
+        parentAssembly->remove(det);
+      }
+    }
 
     /** This method returns monitor detector ids
     *@return a vector holding detector ids of  monitors

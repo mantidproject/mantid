@@ -760,7 +760,48 @@ public:
       AnalysisDataService::Instance().remove(wsName);
   }
 
+  void testNeutronicPositions()
+  {
+    // Make sure the IDS is empty
+    InstrumentDataServiceImpl& IDS = InstrumentDataService::Instance();
+    IDS.clear();
 
+    LoadInstrument loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/INDIRECT_Definition.xml");
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    loader.setProperty("Workspace", ws );
+    TS_ASSERT( loader.execute() );
+
+    // This kind of IDF should lead to 2 instrument definitions - the physical and the neutronic
+    TS_ASSERT_EQUALS( IDS.size(), 2 );
+    std::string name("INDIRECT_Definition.xml2011-08-25T12:00:00");
+    TS_ASSERT( IDS.doesExist(name) );
+    TS_ASSERT( IDS.doesExist(name+"-PHYSICAL") );
+
+    Instrument_const_sptr physicalInst = IDS.retrieve(name+"-PHYSICAL");
+    Instrument_const_sptr neutronicInst = IDS.retrieve(name);
+    TS_ASSERT_DIFFERS( physicalInst.get(), neutronicInst.get() );
+
+    TS_ASSERT_EQUALS( physicalInst->getDetector(1000)->getPos(), V3D(0,0,0) );
+    TS_ASSERT_EQUALS( physicalInst->getDetector(1001)->getPos(), V3D(0,1,0) );
+    TS_ASSERT_EQUALS( physicalInst->getDetector(1002)->getPos(), V3D(1,0,0) );
+    TS_ASSERT_EQUALS( physicalInst->getDetector(1003)->getPos(), V3D(1,1,0) );
+    TS_ASSERT_EQUALS( physicalInst->getDetector(1004)->getPos(), V3D(2,0,0) );
+    TS_ASSERT_EQUALS( physicalInst->getDetector(1005)->getPos(), V3D(2,1,0) );
+
+    TS_ASSERT_EQUALS( neutronicInst.get(), ws->getBaseInstrument().get() );
+    TS_ASSERT_EQUALS( neutronicInst->getDetector(1000)->getPos(), V3D(2,2,0) );
+    TS_ASSERT_EQUALS( neutronicInst->getDetector(1001)->getPos(), V3D(2,3,0) );
+    TS_ASSERT_EQUALS( neutronicInst->getDetector(1002)->getPos(), V3D(3,2,0) );
+    TS_ASSERT_EQUALS( neutronicInst->getDetector(1003)->getPos(), V3D(3,3,0) );
+    TS_ASSERT_THROWS( neutronicInst->getDetector(1004), Exception::NotFoundError );
+    TS_ASSERT_EQUALS( neutronicInst->getDetector(1005)->getPos(), V3D(4,3,0) );
+
+//    TS_FAIL("");
+    // Clean up
+    IDS.clear();
+  }
 
 
 //

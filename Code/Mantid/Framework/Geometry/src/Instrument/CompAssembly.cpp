@@ -170,6 +170,32 @@ int CompAssembly::addCopy(IComponent* comp, const std::string& n)
   return static_cast<int>(m_children.size());
 }
 
+/** Removes a component from the assembly. The component will be deleted.
+ *  @param comp The component to be removed
+ *  @return The (new) number of components in the assembly
+ *  @throws std::runtime_error if the component is not a child of this assembly
+ */
+int CompAssembly::remove(IComponent* comp)
+{
+  if (m_isParametrized)
+    throw std::runtime_error("CompAssembly::remove() called for a parameterized CompAssembly.");
+
+  // Look for the passed in component in the list of children
+  std::vector<IComponent*>::iterator it = std::find(m_children.begin(),m_children.end(),comp);
+  if ( it != m_children.end() )
+  {
+    // If it's found, remove it from the list and then delete it
+    m_children.erase(it);
+    delete comp;
+  }
+  else
+  {
+    throw std::runtime_error("Component " + comp->getName() + " is not a child of this assembly.");
+  }
+
+  return static_cast<int>(m_children.size());
+}
+
 /** Return the number of components in the assembly
  * @return m_children.size() 
  */

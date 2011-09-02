@@ -71,6 +71,8 @@ namespace Mantid
       ///Virtual destructor
       virtual ~Instrument() {}
 
+      Instrument* clone() const;
+
       IObjComponent_const_sptr getSource() const;
       IObjComponent_const_sptr getSample() const;
       Kernel::V3D getBeamDirection() const;
@@ -105,6 +107,9 @@ namespace Mantid
       /// mark a Component which has already been added to the Instrument (as a child comp.)
       /// to be a monitor and also add it to _detectorCache for possible later retrieval
       void markAsMonitor(IDetector*);
+
+      /// Remove a detector from the instrument
+      void removeDetector(Detector*);
 
       /// return reference to detector cache 
       void getDetectors(detid2det_map & out_map) const;

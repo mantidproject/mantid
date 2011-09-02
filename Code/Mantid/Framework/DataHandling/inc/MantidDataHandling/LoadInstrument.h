@@ -163,7 +163,7 @@ namespace Mantid
       void setupGeometryCache();
 
       /// If appropriate, creates a second instrument containing neutronic detector positions
-      void createNeutronicInstrument();
+      void createNeutronicInstrument(const std::string& idsName);
 
       /// Run the sub-algorithm LoadParameters
       void runLoadParameterFile();
@@ -224,7 +224,7 @@ namespace Mantid
 
       bool m_indirectPositions; ///< Flag to indicate whether IDF contains physical & neutronic positions
       /// A map containing the neutronic position for each detector. Used when m_indirectPositions is true.
-      std::map<Geometry::ComponentID,Kernel::V3D*> m_neutronicPos;
+      std::map<Geometry::IComponent*,Poco::XML::Element*> m_neutronicPos;
     };
 
   } // namespace DataHandling
