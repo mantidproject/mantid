@@ -233,7 +233,6 @@ namespace Kernel
       return !operator==(v);
     }
 
-
     //-------------------------------------------------------------------------------------------
     /** Add two vectors together
      * @param v :: other vector, must match number of dimensions  */
@@ -372,6 +371,13 @@ namespace Kernel
       return sqrt(this->scalar_prod(*this));
     }
 
+    /** @return the length of this vector */
+    double norm() const
+    {
+      return this->length();
+    }
+
+
     //-------------------------------------------------------------------------------------------
     /** Normalize this vector to unity length
      * @return the length of this vector BEFORE normalizing */
@@ -381,6 +387,17 @@ namespace Kernel
       for (size_t d=0; d<nd; d++)
         data[d] /= length;
       return length;
+    }
+
+
+    //-------------------------------------------------------------------------------------------
+    /** Return the angle between this and another vector
+     *  @param v :: The other vector
+     *  @return The angle between the vectors in radians (0 < theta < pi)
+     */
+    double angle(const VMD& v) const
+    {
+      return acos( this->scalar_prod(v) / (this->norm() * v.norm()) );
     }
 
   protected:

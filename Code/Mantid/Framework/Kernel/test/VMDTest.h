@@ -148,6 +148,7 @@ public:
   {
     VMD a(3,4,sqrt(39.0));
     TS_ASSERT_EQUALS( a.length(), 8.0);
+    TS_ASSERT_EQUALS( a.norm(), 8.0);
   }
 
   void test_normalize()
@@ -156,6 +157,13 @@ public:
     VMD b(3./8,4./8,sqrt(39.0)/8.);
     TS_ASSERT_EQUALS( a.normalize(), 8.0);
     TS_ASSERT_EQUALS( a, b);
+  }
+
+  void test_angle()
+  {
+    VMD a(1,0,0);
+    VMD b(0,1,0);
+    TS_ASSERT_DELTA( a.angle(b), 3.1415926/2, 1e-4);
   }
 
 };
