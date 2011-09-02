@@ -129,15 +129,11 @@ namespace Mantid
 
       /// Add XML element to parent assuming the element contains other component elements
       void appendAssembly(Geometry::ICompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
-      /// Add XML element to parent assuming the element contains other component elements
-      void appendAssembly(boost::shared_ptr<Geometry::ICompAssembly> parent, Poco::XML::Element* pElem, IdList& idList);
       /// Return true if assembly, false if not assembly and throws exception if string not in assembly
       bool isAssembly(std::string) const;
 
       /// Add XML element to parent assuming the element contains no other component elements
       void appendLeaf(Geometry::ICompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
-      /// Add XML element to parent assuming the element contains no other component elements
-      void appendLeaf(boost::shared_ptr<Geometry::ICompAssembly> parent, Poco::XML::Element* pElem, IdList& idList);
 
       /// Set location (position) of comp as specified in XML location element
       void setLocation(Geometry::IComponent* comp, Poco::XML::Element* pElem);

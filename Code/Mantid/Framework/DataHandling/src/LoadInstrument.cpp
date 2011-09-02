@@ -285,7 +285,7 @@ namespace Mantid
 
                 if (VERBOSE) std::cout << "exec(): AppendAssembly of " << pLocElem->nodeName() << "\n";
 
-                appendAssembly(m_instrument, pLocElem, idList);
+                appendAssembly(m_instrument.get(), pLocElem, idList);
               }
 
               // a check
@@ -307,7 +307,7 @@ namespace Mantid
 
               for (unsigned long i_loc = 0; i_loc < pNL_location_length; i_loc++)
               {
-                appendLeaf(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
+                appendLeaf(m_instrument.get(), static_cast<Element*>(pNL_location->item(i_loc)), idList);
               }
             }
             pNL_location->release();
@@ -587,22 +587,6 @@ namespace Mantid
 
 
     //-----------------------------------------------------------------------------------------------------------------------
-    /** Assumes second argument is a XML location element and its parent is a component element
-    *  which is assigned to be an assemble. This method appends the parent component element of
-    %  the location element to the CompAssembly passed as the 1st arg. Note this method may call
-    %  itself, i.e. it may act recursively.
-    *
-    *  @param parent :: CompAssembly to append new component to
-    *  @param pLocElem ::  Poco::XML element that points to a location element in an instrument description XML file
-    *  @param idList :: The current IDList
-    */
-    void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::ICompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList)
-    {
-      appendAssembly(parent.get(), pLocElem, idList);
-    }
-
-
-    //-----------------------------------------------------------------------------------------------------------------------
     /** Assumes second argument is pointing to a leaf, which here means the location element (indirectly
     *  representing a component element) that contains no sub-components. This component is appended
     %  to the parent (1st argument).
@@ -820,24 +804,6 @@ namespace Mantid
         setLogfile(comp, pCompElem, m_instrument->getLogfileCache()); // params specified within <component>
         setLogfile(comp, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
       }
-    }
-
-
-
-    //-----------------------------------------------------------------------------------------------------------------------
-    /** Assumes second argument is pointing to a leaf, which here means the location element (indirectly
-    *  representing a component element) that contains no sub-components. This component is appended
-    %  to the parent (1st argument).
-    *
-    *  @param parent :: pointer to the CompAssembly to append component to
-    *  @param pLocElem ::  Poco::XML element that points to the element in the XML doc we want to add
-    *  @param idList :: The current IDList
-    *
-    *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
-    */
-    void LoadInstrument::appendLeaf(boost::shared_ptr<Geometry::ICompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList)
-    {
-      appendLeaf(parent.get(), pLocElem, idList);
     }
 
 
