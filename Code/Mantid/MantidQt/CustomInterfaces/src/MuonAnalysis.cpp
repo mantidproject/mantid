@@ -1445,6 +1445,7 @@ void MuonAnalysis::reBunch(const std::string & wsName)
 */
 void MuonAnalysis::makeRaw(const std::string & wsName)
 {
+  UNUSED_ARG(wsName)
   //Load back original without bunching
 }
 
