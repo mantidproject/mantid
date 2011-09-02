@@ -63,6 +63,9 @@ namespace Mantid
       declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),
         "Load Metadata without events.");
 
+      declareProperty(new Kernel::PropertyWithValue<bool>("BoxStructureOnly", false),
+        "Load the structure of boxes but do not fill them with events. The loaded workspace will be empty and not file-backed.");
+
       declareProperty(new PropertyWithValue<bool>("FileBackEnd", false),
         "Set to true to load the data only on demand.");
       setPropertySettings("FileBackEnd", new EnabledWhenProperty(this, "MetadataOnly", IS_EQUAL_TO, "0") );
@@ -126,6 +129,10 @@ namespace Mantid
     {
       // Are we using the file back end?
       bool FileBackEnd = getProperty("FileBackEnd");
+      bool BoxStructureOnly = getProperty("BoxStructureOnly");
+
+      if (FileBackEnd && BoxStructureOnly)
+        throw std::invalid_argument("Both BoxStructureOnly and FileBackEnd were set to TRUE: this is not possible.");
 
       CPUTimer tim;
       Progress * prog = new Progress(this, 0.0, 1.0, 100);
@@ -279,25 +286,35 @@ namespace Mantid
               MDBox<MDE,nd> * box = new MDBox<MDE,nd>(bc, depth[i], extentsVector);
               ibox = box;
 
-              // Load the events now
-              uint64_t indexStart = box_event_index[i*2];
-              uint64_t numEvents = box_event_index[i*2+1];
-              // Save the index in the file in the box data
-              box->setFileIndex(uint64_t(indexStart), uint64_t(numEvents));
-
-              if (!FileBackEnd || mru.shouldStayInMemory(i, numEvents) )
+              if (!BoxStructureOnly)
               {
-                // Load if NOT using the file as the back-end,
-                // or if the box is small enough to keep in memory always
-                box->loadNexus(file);
-                box->setOnDisk(false);
-                box->setInMemory(true);
+                // Load the events now
+                uint64_t indexStart = box_event_index[i*2];
+                uint64_t numEvents = box_event_index[i*2+1];
+                // Save the index in the file in the box data
+                box->setFileIndex(uint64_t(indexStart), uint64_t(numEvents));
+
+                if (!FileBackEnd || mru.shouldStayInMemory(i, numEvents) )
+                {
+                  // Load if NOT using the file as the back-end,
+                  // or if the box is small enough to keep in memory always
+                  box->loadNexus(file);
+                  box->setOnDisk(false);
+                  box->setInMemory(true);
+                }
+                else
+                {
+                  // Box is on disk and NOT in memory
+                  box->setOnDisk(true);
+                  box->setInMemory(false);
+                }
               }
               else
               {
-                // Box is on disk and NOT in memory
-                box->setOnDisk(true);
-                box->setInMemory(false);
+                // Only the box structure is being loaded
+                box->setOnDisk(false);
+                box->setInMemory(true);
+                box->setFileIndex(0,0);
               }
             }
             else if (box_type == 2)

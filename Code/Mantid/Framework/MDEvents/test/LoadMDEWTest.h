@@ -52,16 +52,19 @@ public:
    *
    * @param ws :: workspace to check
    * @param ws1 :: reference workspace
+   * @param BoxStructureOnly :: true if you only compare the box structure and ignore differences in event lists
    */
   template<typename MDE, size_t nd>
   static void do_compare_MDEW(boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws,
-      boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws1)
+      boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws1,
+      bool BoxStructureOnly = false)
   {
     TS_ASSERT(ws->getBox());
 
     // Compare the initial to the final workspace
     TS_ASSERT_EQUALS(ws->getBox()->getNumChildren(), ws1->getBox()->getNumChildren());
-    TS_ASSERT_EQUALS(ws->getNPoints(), ws1->getNPoints());
+    if (!BoxStructureOnly)
+    { TS_ASSERT_EQUALS(ws->getNPoints(), ws1->getNPoints()); }
 
     TS_ASSERT_EQUALS(ws->getBoxController()->getMaxId(), ws1->getBoxController()->getMaxId());
     // Compare all the details of the box controllers
@@ -90,15 +93,18 @@ public:
       {
         TS_ASSERT_EQUALS( box->getChild(i)->getId(), box1->getChild(i)->getId() );
       }
-      TS_ASSERT_DELTA( box->getSignal(), box1->getSignal(), 1e-3);
-      TS_ASSERT_DELTA( box->getErrorSquared(), box1->getErrorSquared(), 1e-3);
       for (size_t d=0; d<nd; d++)
       {
         TS_ASSERT_DELTA( box->getExtents(d).min, box1->getExtents(d).min, 1e-5);
         TS_ASSERT_DELTA( box->getExtents(d).max, box1->getExtents(d).max, 1e-5);
       }
       TS_ASSERT_DELTA( box->getVolume(), box1->getVolume(), 1e-3);
-      TS_ASSERT_EQUALS( box->getNPoints(), box1->getNPoints() );
+      if (!BoxStructureOnly)
+      {
+        TS_ASSERT_DELTA( box->getSignal(), box1->getSignal(), 1e-3);
+        TS_ASSERT_DELTA( box->getErrorSquared(), box1->getErrorSquared(), 1e-3);
+        TS_ASSERT_EQUALS( box->getNPoints(), box1->getNPoints() );
+      }
       TS_ASSERT( box->getBoxController() );
       TS_ASSERT_EQUALS( box->getBoxController(), ws->getBoxController() );
 
@@ -119,25 +125,28 @@ public:
       if (mdbox)
       {
         TS_ASSERT( mdbox1 );
-        const std::vector<MDE > & events = mdbox->getConstEvents();
-        const std::vector<MDE > & events1 = mdbox1->getConstEvents();
-        TS_ASSERT_EQUALS( events.size(), events1.size() );
-        if (events.size() == events1.size() && events.size() > 2)
+        if (!BoxStructureOnly)
         {
-          // Check first and last event
-          for (size_t i=0; i<events.size(); i+=events.size()-1)
+          const std::vector<MDE > & events = mdbox->getConstEvents();
+          const std::vector<MDE > & events1 = mdbox1->getConstEvents();
+          TS_ASSERT_EQUALS( events.size(), events1.size() );
+          if (events.size() == events1.size() && events.size() > 2)
           {
-            for (size_t d=0; d<nd; d++)
+            // Check first and last event
+            for (size_t i=0; i<events.size(); i+=events.size()-1)
             {
-              TS_ASSERT_DELTA( events[i].getCenter(d), events1[i].getCenter(d), 1e-4);
+              for (size_t d=0; d<nd; d++)
+              {
+                TS_ASSERT_DELTA( events[i].getCenter(d), events1[i].getCenter(d), 1e-4);
+              }
+              TS_ASSERT_DELTA( events[i].getSignal(), events1[i].getSignal(), 1e-4);
+              TS_ASSERT_DELTA( events[i].getErrorSquared(), events1[i].getErrorSquared(), 1e-4);
             }
-            TS_ASSERT_DELTA( events[i].getSignal(), events1[i].getSignal(), 1e-4);
-            TS_ASSERT_DELTA( events[i].getErrorSquared(), events1[i].getErrorSquared(), 1e-4);
           }
-        }
-        mdbox->releaseEvents();
-        mdbox1->releaseEvents();
-      }
+          mdbox->releaseEvents();
+          mdbox1->releaseEvents();
+        }// Don't compare if BoxStructureOnly
+      } // is MDBox
     }
 
   }
@@ -145,7 +154,7 @@ public:
 
 
   template <size_t nd>
-  void do_test_exec(bool FileBackEnd, bool deleteWorkspace=true, double memory=0)
+  void do_test_exec(bool FileBackEnd, bool deleteWorkspace=true, double memory=0, bool BoxStructureOnly = false)
   {
     typedef MDLeanEvent<nd> MDE;
 
@@ -189,6 +198,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Memory", memory) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("MetadataOnly", false));
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("BoxStructureOnly", BoxStructureOnly));
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
@@ -203,7 +213,7 @@ public:
     boost::shared_ptr<MDEventWorkspace<MDE,nd> > ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<nd>,nd> >(iws);
 
     // Perform the full comparison
-    do_compare_MDEW(ws, ws1);
+    do_compare_MDEW(ws, ws1, BoxStructureOnly);
 
     // Look for the not-disk-cached-cause-they-are-too-small
     if (memory > 0)
@@ -420,6 +430,12 @@ public:
     do_test_UpdateFileBackEnd<3>();
   }
 
+
+  /// Only load the box structure, no events
+  void test_exec_3D_BoxStructureOnly()
+  {
+    do_test_exec<3>(false, true, 0.0, true);
+  }
 
 };
 
