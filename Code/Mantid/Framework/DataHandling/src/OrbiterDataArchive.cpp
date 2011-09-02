@@ -9,8 +9,8 @@
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/Context.h>
+#include <Poco/Net/NetException.h>
 #include <Poco/URI.h>
-
 #include <boost/algorithm/string.hpp>
 
 #include <iostream>
@@ -19,6 +19,7 @@ using Poco::Net::HTTPSClientSession;
 using Poco::Net::HTTPRequest;
 using Poco::Net::HTTPResponse;
 using Poco::Net::HTTPMessage;
+using Poco::Net::ConnectionRefusedException;
 using Poco::URI;
 
 namespace Mantid
@@ -77,6 +78,9 @@ namespace Mantid
           n = rs.gcount();
           wsResult.append(&buff[0], n);
         } while (n == 300);
+      } catch (ConnectionRefusedException &e) {
+        g_log.error() << "Connection refused by orbiter\n";
+        throw;
       } catch(Poco::IOException &e) {
         g_log.debug() << "Poco::IOException: \'" << e.message() << "\'\n"; // REMOVE
       }
