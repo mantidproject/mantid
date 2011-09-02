@@ -22,7 +22,7 @@ class LoadRun(ReductionStep):
         Load a data file, move its detector to the right position according
         to the beam center and normalize the data.
     """
-    def __init__(self, datafile=None, keep_events=False):
+    def __init__(self, datafile=None, keep_events=False, is_new=False):
         super(LoadRun, self).__init__()
         self._data_file = datafile
         
@@ -48,6 +48,7 @@ class LoadRun(ReductionStep):
         
         # Flag to tell us whether we should do the full reduction with events
         self._keep_events = keep_events
+        self._is_new = is_new
    
     def clone(self, data_file=None, keep_events=None):
         if data_file is None:
@@ -245,8 +246,91 @@ class LoadRun(ReductionStep):
                     
         mtd[workspace].getRun().addProperty_dbl("source-aperture-diameter", S1, 'mm', True) 
         return "   Source aperture diameter = %g mm\n" % S1    
-                
+            
     def execute(self, reducer, workspace, force=False):
+        if self._is_new:
+            return self.new_execute(reducer, workspace, force)
+        else:
+            return self.old_execute(reducer, workspace, force)
+                
+    def new_execute(self, reducer, workspace, force=False):
+        output_str = ""      
+        # If we don't have a data file, look up the workspace handle
+        # Only files that are used for computing data corrections have
+        # a path that is passed directly. Data files that are reduced
+        # are simply found in reducer._data_files 
+        if self._data_file is None:
+            if workspace in reducer._data_files:
+                data_file = reducer._data_files[workspace]
+            elif workspace in reducer._extra_files:
+                data_file = reducer._extra_files[workspace]
+                force = True
+            else:
+                raise RuntimeError, "SNSReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace
+        else:
+            data_file = self._data_file
+
+        # Load data
+        use_config_beam = False
+        [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
+        if pixel_ctr_x == 0.0 and pixel_ctr_y == 0.0:
+            use_config_beam = True            
+            
+        def _load_data_file(file_name, wks_name):
+            #TODO: DEAL WITH SAMPLE DET DIST 
+            #if self._sample_det_dist is not None:
+            #    sdd = self._sample_det_dist            
+            #elif not self._sample_det_offset == 0:
+            #    sdd += self._sample_det_offset
+
+            filepath = find_data(file_name, instrument=reducer.instrument.name())
+            l = EQSANSLoad(Filename=filepath, OutputWorkspace=wks_name,
+                       UseConfigBeam=use_config_beam,
+                       BeamCenterX=pixel_ctr_x,
+                       BeamCenterY=pixel_ctr_y,
+                       UseConfigWlCuts=self._use_config_cutoff,
+                       UseConfigMask=self._use_config_mask,
+                       UseConfig=self._use_config,
+                       CorrectForFlightPath=self._correct_for_flight_path,
+                       SampleDetectorDistance=self._sample_det_dist,
+                       SampleDetectorDistanceOffset=self._sample_det_offset
+                       )            
+            return l.getPropertyValue("OutputMessage")
+        
+        # Check whether there is an equivalent event workspace
+        eq_histo_ws, eq_event_ws = self._look_for_loaded_data(reducer, data_file)
+        if eq_event_ws is not None:
+            # The data is available as an event workspace. We just need to process it.
+            if self._process_existing_event_ws(reducer, eq_event_ws, workspace):
+                mantid.sendLogMessage("INFO: %s already loaded as %s" % (workspace, eq_event_ws))
+                return "INFO: %s already loaded as %s" % (workspace, eq_event_ws)
+        
+        # Check whether we have a list of files that need merging
+        if type(data_file)==list:
+            for i in range(len(data_file)):
+                output_str += "Loaded %s\n" % data_file[i]
+                if i==0:
+                    output_str += _load_data_file(data_file[i], workspace)
+                else:
+                    output_str += _load_data_file(data_file[i], '__tmp_wksp')
+                    Plus(LHSWorkspace=workspace,
+                         RHSWorkspace='__tmp_wksp',
+                         OutputWorkspace=workspace)
+            if mtd.workspaceExists('__tmp_wksp'):
+                mtd.deleteWorkspace('__tmp_wksp')
+        else:
+            output_str += "Loaded %s\n" % data_file
+            output_str += _load_data_file(data_file, workspace)
+        
+        if mtd[workspace].getRun().hasProperty("beam_center_x") and \
+            mtd[workspace].getRun().hasProperty("beam_center_y"):
+            beam_center_x = mtd[workspace].getRun().getProperty("beam_center_x").value
+            beam_center_y = mtd[workspace].getRun().getProperty("beam_center_y").value
+            reducer.set_beam_finder(BaseBeamFinder(beam_center_x, beam_center_y))   
+        
+        return output_str
+        
+    def old_execute(self, reducer, workspace, force=False):
         output_str = ""      
         # If we don't have a data file, look up the workspace handle
         # Only files that are used for computing data corrections have
@@ -336,7 +420,7 @@ class LoadRun(ReductionStep):
             return "   Loaded %s\n" % wks_name
         
         # If the event workspace exists, don't reload it
-        if mtd.workspaceExists(workspace+'_evt'):
+        if not self._keep_events and mtd.workspaceExists(workspace+'_evt'):
             if self._process_existing_event_ws(reducer, workspace+'_evt', workspace):
                 mantid.sendLogMessage("INFO: %s already loaded" % workspace+'_evt')
                 return "INFO: %s_evt already loaded" % workspace
@@ -382,6 +466,7 @@ class LoadRun(ReductionStep):
         
         # Move the detector to its correct position
         MoveInstrumentComponent(workspace+'_evt', "detector1", Z=sdd/1000.0, RelativePosition=0)
+        output_str += "   Detector position: %-6.3f\n" % (sdd/1000.0)
 
         # Choose and process configuration file
         if len(config_files)>0:
@@ -410,7 +495,7 @@ class LoadRun(ReductionStep):
                     # Could not read in the run number
                     pass
             else:
-                mantid.sendLogMessage("Could not find run number file for %s" % workspace)
+                mantid.sendLogMessage("Could not find run number for %s" % workspace)
             
         # Process the configuration file
         low_TOF_cut = self._low_TOF_cut
@@ -424,14 +509,14 @@ class LoadRun(ReductionStep):
             mantid.sendLogMessage("Using configuration file: %s\n" % config_file)
             output_str +=  "   Using configuration file: %s\n" % config_file
             conf = EQSANSConfig(config_file)
-            mtd[workspace+'_evt'].getRun().addProperty_dbl("low_tof_cut", conf.low_TOF_cut, "microsecond", True)
-            mtd[workspace+'_evt'].getRun().addProperty_dbl("high_tof_cut", conf.high_TOF_cut, "microsecond", True)
             
             if conf.prompt_pulse_width is not None and conf.prompt_pulse_width>0:
                 mtd[workspace+'_evt'].getRun().addProperty_dbl("prompt_pulse_width", conf.prompt_pulse_width, "microsecond", True)  
                 prompt_pulse_width = conf.prompt_pulse_width
                 
             if self._use_config_cutoff:
+                mtd[workspace+'_evt'].getRun().addProperty_dbl("low_tof_cut", conf.low_TOF_cut, "microsecond", True)
+                mtd[workspace+'_evt'].getRun().addProperty_dbl("high_tof_cut", conf.high_TOF_cut, "microsecond", True)
                 low_TOF_cut = conf.low_TOF_cut
                 high_TOF_cut = conf.high_TOF_cut
                 
@@ -443,7 +528,7 @@ class LoadRun(ReductionStep):
             if type(reducer._beam_finder) is BaseBeamFinder:
                 if reducer.get_beam_center() == [0.0,0.0]:
                     reducer.set_beam_finder(BaseBeamFinder(conf.center_x, conf.center_y))   
-                    output_str += "   Beam center set from config file: %-6.1f, %-6.1f\n" % (conf.center_x, conf.center_y)          
+                    output_str += "   Beam center set from config file: %-6.2f, %-6.2f\n" % (conf.center_x, conf.center_y)          
                     
             # Modify moderator position
             if conf.moderator_position is not None:
@@ -452,7 +537,8 @@ class LoadRun(ReductionStep):
                                         Z=sample_to_mod,
                                         RelativePosition="0")
                 mtd[workspace+'_evt'].getRun().addProperty_dbl("moderator_position", sample_to_mod, "mm", True)  
-        else:
+                output_str +=  "   Moderator position: %-6.3f m\n" % sample_to_mod
+        elif self._use_config:
             mantid.sendLogMessage("Could not find configuration file for %s" % workspace)
             output_str += "   Could not find configuration file for %s\n" % workspace
 
@@ -479,7 +565,8 @@ class LoadRun(ReductionStep):
                                     RelativePosition="1")
             mtd[workspace+'_evt'].getRun().addProperty_dbl("beam_center_x", pixel_ctr_x, 'pixel', True)            
             mtd[workspace+'_evt'].getRun().addProperty_dbl("beam_center_y", pixel_ctr_y, 'pixel', True)   
-            mantid.sendLogMessage("Beam center: %-6.1f, %-6.1f" % (pixel_ctr_x, pixel_ctr_y))                             
+            mantid.sendLogMessage("Beam center: %-6.1f, %-6.1f" % (pixel_ctr_x, pixel_ctr_y))    
+            output_str += "   Beam center offset: %g, %g m\n" % (x_offset, y_offset)
         else:
             # Don't move the detector and use the default beam center
             [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
@@ -495,7 +582,9 @@ class LoadRun(ReductionStep):
         # Modify TOF
         output_str += "   Discarding low %6.1f and high %6.1f microsec\n" % (low_TOF_cut, high_TOF_cut)
         if self._correct_for_flight_path:
-            output_str += "   Correcting TOF for flight path\n"
+            output_str += "   Flight path correction applied\n"
+        else:
+            output_str += "   Flight path correction NOT applied\n"
         a = EQSANSTofStructure(InputWorkspace=workspace+'_evt', 
                                LowTOFCut=low_TOF_cut, HighTOFCut=high_TOF_cut,
                                FlightPathCorrection=self._correct_for_flight_path)
@@ -507,14 +596,16 @@ class LoadRun(ReductionStep):
         mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_min", wl_min, "Angstrom", True)
         mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_max", wl_max, "Angstrom", True)
         mtd[workspace+'_evt'].getRun().addProperty_int("is_frame_skipping", int(frame_skipping), True)
-        output_str += "   Wavelength range: %6.1f - %-6.1f Angstrom  [Frame skipping = %s]" % (wl_min, wl_max, str(frame_skipping))
+        output_str += "   Wavelength range: %6.1f - %-6.1f " % (wl_min, wl_max)
         if frame_skipping:
             wl_min2 = float(a.getPropertyValue("WavelengthMinFrame2"))
             wl_max2 = float(a.getPropertyValue("WavelengthMaxFrame2"))
             mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_min_frame2", wl_min2, "Angstrom", True)
             mtd[workspace+'_evt'].getRun().addProperty_dbl("wavelength_max_frame2", wl_max2, "Angstrom", True)
             wl_combined_max = wl_max2
-            output_str += "   Second frame: %6.1f - %-6.1f Angstrom" % (wl_min2, wl_max2)
+            output_str += "and %6.1f - %-6.1f Angstrom\n" % (wl_min2, wl_max2)
+        else:
+            output_str += "Angstrom\n"
         
         # Remove prompt pulses
         #RemovePromptPulse(workspace+'_evt', workspace+'_evt', Width=prompt_pulse_width)
@@ -522,6 +613,7 @@ class LoadRun(ReductionStep):
         # Convert TOF to wavelength
         source_to_sample = math.fabs(mtd[workspace+'_evt'].getInstrument().getSource().getPos().getZ())*1000.0
         conversion_factor = 3.9560346 / (sdd+source_to_sample);
+        output_str += "   TOF to wavelength conversion factor: %g\n" % conversion_factor
         ScaleX(workspace+'_evt', workspace+'_evt', conversion_factor)
         mtd[workspace+'_evt'].getAxis(0).setUnit("Wavelength")
         
@@ -543,17 +635,26 @@ class LoadRun(ReductionStep):
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [frame-skipping: %s]" %(workspace, sdd, str(frame_skipping)))
                     
         if self._separate_corrections:
-            # If we pick up the data file from the workspace, it's because we 
-            # are going through the reduction chain, otherwise we are just loading
-            # the file to compute a correction
             if self._data_file is None:    
-                data_ws = "%s_data" % workspace
-                mantid[workspace].getRun().addProperty_str("data_ws", data_ws, True)
-        
-                CloneWorkspace(workspace, data_ws)
-                Divide(workspace, workspace, workspace)
-                #mtd[workspace].setYUnit("Counts")                
-                reducer.clean(data_ws)
+                mantid[workspace].getRun().addProperty_int("is_separate_corrections", 1, True)
+                
+                # Create workspace of pixel weights
+                nhist = mtd[workspace].getNumberHistograms()
+                xvec = mtd[workspace].readX(0)
+                yvec = nhist*[1]
+                evec = nhist*[0]
+                ws_pix = "__pixel_adj_"+workspace
+                CreateWorkspace(OutputWorkspace=ws_pix,
+                                DataX=[min(xvec), max(xvec)], DataY=yvec, DataE=evec, NSpec=nhist)
+                mantid[workspace].getRun().addProperty_str("pixel_adj", ws_pix, True)
+                
+                # Create workspace of wavelength weights
+                ws_wl = "__wl_adj_"+workspace
+                yvec = (len(xvec)-1)*[1]
+                evec = (len(xvec)-1)*[0]
+                CreateWorkspace(OutputWorkspace=ws_wl, UnitX="Wavelength",
+                                DataX=xvec, DataY=yvec, DataE=evec, NSpec=1)
+                mantid[workspace].getRun().addProperty_str("wl_adj", ws_wl, True)
                     
         # Remove the dirty flag if it existed
         reducer.clean(workspace)
@@ -607,7 +708,12 @@ class Normalize(ReductionStep):
         duration = mantid.getMatrixWorkspace(workspace).getRun()["proton_charge"].getStatistics().duration
         frequency = mantid.getMatrixWorkspace(workspace).getRun()["frequency"].getStatistics().mean
         acc_current = 1.0e-12 * proton_charge * duration * frequency
-        Scale(InputWorkspace=workspace, OutputWorkspace=workspace, Factor=1.0/acc_current, Operation="Multiply")
+        
+        if mtd[workspace].getRun().hasProperty("is_separate_corrections"):
+            pixel_adj = mtd[workspace].getRun().getProperty("pixel_adj").value
+            Scale(InputWorkspace=pixel_adj, OutputWorkspace=pixel_adj, Factor=1.0/acc_current, Operation="Multiply")    
+        else:
+            Scale(InputWorkspace=workspace, OutputWorkspace=workspace, Factor=1.0/acc_current, Operation="Multiply")
         
         return "Data [%s] normalized to accelerator current\n  Beam flux file: %s" % (workspace, flux_data_path) 
     
@@ -746,7 +852,8 @@ class SubtractDarkCurrent(ReductionStep):
         # Load dark current, which will be used repeatedly
         if self._dark_current_ws is None:
             filepath = find_data(self._dark_current_file, instrument=reducer.instrument.name())
-            self._dark_current_ws = "__dc_"+extract_workspace_name(filepath)
+            self._dark_current_ws = ReductionStep._create_unique_name(filepath, "dc")
+            #self._dark_current_ws = "__dc_"+extract_workspace_name(filepath)
             reducer._data_loader.clone(data_file=filepath).execute(reducer, self._dark_current_ws)
         # Normalize the dark current data to counting time
         dark_duration = mtd[self._dark_current_ws].getRun()["proton_charge"].getStatistics().duration
@@ -843,15 +950,14 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         qmin, qstep, qmax = self._get_binning(reducer, workspace, min(wl_min_f1, wl_min_f2), max(wl_max_f1, wl_max_f2))
         self._binning = "%g, %g, %g" % (qmin, qstep, qmax)
         # Average second frame
-        CropWorkspace(workspace, workspace+'_frame2', XMin=wl_min_f2, XMax=wl_max_f2)
+        Rebin(workspace, workspace+'_frame2', "%4.2f,%4.2f,%4.2f" % (wl_min_f2, 0.1, wl_max_f2), False)
         ReplaceSpecialValues(workspace+'_frame2', workspace+'_frame2', NaNValue=0.0,NaNError=0.0)
-        output_str = "Performed radial averaging: frame 2 = [%6.1f, %-6.1f], " % (wl_min_f2, wl_max_f2)
         
-        if mtd[workspace].getRun().hasProperty("data_ws"):
-            data_ws = mtd[workspace].getRun().getProperty("data_ws").value
-            CropWorkspace(data_ws, data_ws+'_frame2', XMin=wl_min_f2, XMax=wl_max_f2)
-            mantid[workspace+'_frame2'].getRun().addProperty_str("data_ws", data_ws+'_frame2', True)
-        
+        if mtd[workspace].getRun().hasProperty("is_separate_corrections"):
+            wl_adj = mtd[workspace].getRun().getProperty("wl_adj").value
+            Rebin(wl_adj, wl_adj+'_frame2', "%4.2f,%4.2f,%4.2f" % (wl_min_f2, 0.1, wl_max_f2), False)
+            mtd[workspace+'_frame2'].getRun().addProperty_str("wl_adj", wl_adj+'_frame2', True)
+            
         super(AzimuthalAverageByFrame, self).execute(reducer, workspace+'_frame2')
         if self._compute_resolution:
             EQSANSResolution(InputWorkspace=workspace+'_frame2'+self._suffix, 
@@ -862,14 +968,13 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
                               SampleApertureRadius=self._sample_aperture_radius)                                                                        
             
         # Average first frame
-        CropWorkspace(workspace, workspace+'_frame1', XMin=wl_min_f1, XMax=wl_max_f1)
+        Rebin(workspace, workspace+'_frame1', "%4.2f,%4.2f,%4.2f" % (wl_min_f1, 0.1, wl_max_f1), False)
         ReplaceSpecialValues(workspace+'_frame1', workspace+'_frame1', NaNValue=0.0,NaNError=0.0)
-        output_str += "frame 1 = [%6.1f, %-6.1f]" % (wl_min_f1, wl_max_f1)
         
-        if mtd[workspace].getRun().hasProperty("data_ws"):
-            CropWorkspace(data_ws, data_ws+'_frame1', XMin=wl_min_f1, XMax=wl_max_f1)
-            mantid[workspace+'_frame1'].getRun().addProperty_str("data_ws", data_ws+'_frame1', True)
-        
+        if mtd[workspace].getRun().hasProperty("is_separate_corrections"):
+            wl_adj = mtd[workspace].getRun().getProperty("wl_adj").value
+            Rebin(wl_adj, wl_adj+'_frame1', "%4.2f,%4.2f,%4.2f" % (wl_min_f1, 0.1, wl_max_f1), False)
+            mtd[workspace+'_frame1'].getRun().addProperty_str("wl_adj", wl_adj+'_frame1', True)
         super(AzimuthalAverageByFrame, self).execute(reducer, workspace+'_frame1')
         
         # Workspace operations do not keep Dx, so scale frame 1 before putting
@@ -920,7 +1025,7 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
             if mtd.workspaceExists(ws):
                 mtd.deleteWorkspace(ws)
         
-        return output_str
+        return "Performed radial averaging for two frames"
         
     def get_data(self, workspace):
         if not self._is_frame_skipping:
@@ -979,9 +1084,9 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
                 else:
                     raise RuntimeError, "DirectBeamTransmission could not retrieve the %s property" % wl_max_prop
                 
-                CropWorkspace(workspace, workspace+suffix, XMin=wl_min, XMax=wl_max)
-                CropWorkspace(sample_mon_ws, sample_mon_ws+suffix, XMin=wl_min, XMax=wl_max)
-                CropWorkspace(empty_mon_ws, empty_mon_ws+suffix, XMin=wl_min, XMax=wl_max)
+                Rebin(workspace, workspace+suffix, "%4.1f,%4.1f,%4.1f" % (wl_min, 0.1, wl_max), False)
+                Rebin(sample_mon_ws, sample_mon_ws+suffix, "%4.1f,%4.1f,%4.1f" % (wl_min, 0.1, wl_max), False)
+                Rebin(empty_mon_ws, empty_mon_ws+suffix, "%4.1f,%4.1f,%4.1f" % (wl_min, 0.1, wl_max), False)
                 self._calculate_transmission(sample_mon_ws+suffix, empty_mon_ws+suffix, first_det, self._transmission_ws+suffix)
                 RebinToWorkspace(self._transmission_ws+suffix, workspace, OutputWorkspace=self._transmission_ws+suffix)
                 RebinToWorkspace(self._transmission_ws+suffix+'_unfitted', workspace, OutputWorkspace=self._transmission_ws+suffix+'_unfitted')
@@ -1008,12 +1113,16 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
             
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission
-        if self._theta_dependent:
-            ApplyTransmissionCorrection(InputWorkspace=workspace, 
-                                        TransmissionWorkspace=self._transmission_ws, 
-                                        OutputWorkspace=workspace)          
+        if mtd[workspace].getRun().hasProperty("is_separate_corrections"):
+            wl_adj = mtd[workspace].getRun().getProperty("wl_adj").value
+            Divide(wl_adj, self._transmission_ws, wl_adj)  
         else:
-            Divide(workspace, self._transmission_ws, workspace)  
+            if self._theta_dependent:
+                ApplyTransmissionCorrection(InputWorkspace=workspace, 
+                                            TransmissionWorkspace=self._transmission_ws, 
+                                            OutputWorkspace=workspace)          
+            else:
+                Divide(workspace, self._transmission_ws, workspace)  
         
         return "Transmission correction applied for both frame independently [%s]\n%s\n" % (self._transmission_ws, output_str)
     
@@ -1066,10 +1175,22 @@ class SensitivityCorrection(BaseSensitivityCorrection):
         if self._efficiency_ws is None:
             self._compute_efficiency(reducer, workspace)
             
-        # Modify for wavelength dependency of the efficiency of the detector tubes
-        EQSANSSensitivityCorrection(InputWorkspace=workspace, EfficiencyWorkspace=self._efficiency_ws,
-                                    Factor=0.95661, Error=0.005, OutputWorkspace=workspace,
-                                    OutputEfficiencyWorkspace="__wl_efficiency")
+        if mtd[workspace].getRun().hasProperty("is_separate_corrections"):
+            wl_adj = mtd[workspace].getRun().getProperty("wl_adj").value
+            pixel_adj = mtd[workspace].getRun().getProperty("pixel_adj").value
+            Divide(pixel_adj, self._efficiency_ws, pixel_adj)
+            xvec = mtd[wl_adj].dataX(0)
+            yvec = mtd[wl_adj].dataY(0)
+            evec = mtd[wl_adj].dataE(0)
+            for i in range(mtd[wl_adj].getNumberBins()):
+                wl = (xvec[i+1]+xvec[i])/2.0
+                yvec[i] /= 1.0-math.exp(-0.105*wl)
+                evec[i] /= 1.0-math.exp(-0.105*wl)            
+        else:
+            # Modify for wavelength dependency of the efficiency of the detector tubes
+            EQSANSSensitivityCorrection(InputWorkspace=workspace, EfficiencyWorkspace=self._efficiency_ws,     
+                                        Factor=0.95661, Error=0.005, OutputWorkspace=workspace,
+                                        OutputEfficiencyWorkspace="__wl_efficiency")
         
         # Copy over the efficiency's masked pixels to the reduced workspace
         masked_detectors = GetMaskedDetectors(self._efficiency_ws)
