@@ -1413,11 +1413,9 @@ void MuonAnalysis::reBunch(const std::string & wsName)
          "\nThe option for this is located on the Plot Options tab. \n\n Default fit will be against current data."); 
     return;
   }
-  
-  m_previousRebinFitSteps = "";
 
   // If the fitting has already been plotted with the bunched settings AND against the same workspace then return. (assume last fitting)
-  if ((m_previousBunchWsName == wsName) && (m_previousRebinFitSteps == m_uiForm.optionStepSizeText->text())) 
+  if ((m_previousBunchWsName == wsName) && (m_previousRebinSteps == m_uiForm.optionStepSizeText->text())) 
     return;
 
   else if (m_previousBunchWsName == wsName)
