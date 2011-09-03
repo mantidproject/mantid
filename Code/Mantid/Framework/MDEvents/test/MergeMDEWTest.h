@@ -87,7 +87,7 @@ public:
       TS_ASSERT( Poco::File(actualOutputFilename).exists());
       ws->getBoxController()->getFile()->close();
       // Remove the file
-      Poco::File(actualOutputFilename).remove();
+      //Poco::File(actualOutputFilename).remove();
     }
 
     // Cleanup generated input files
