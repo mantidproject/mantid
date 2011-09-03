@@ -93,7 +93,7 @@ public:
     // Cleanup generated input files
     for (size_t i=0; i<filenames.size(); i++)
     {
-        Poco::File(filenames[i]).remove();
+        //Poco::File(filenames[i]).remove();
     }
 
     // Remove workspace from the data service.
