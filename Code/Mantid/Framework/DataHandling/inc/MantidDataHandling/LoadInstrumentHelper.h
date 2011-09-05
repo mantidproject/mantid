@@ -31,6 +31,10 @@ namespace Mantid
     class Instrument;
     class IComponent;
   }
+  namespace Kernel
+  {
+    class V3D;
+  }
   namespace API
   {
     class MatrixWorkspace;
