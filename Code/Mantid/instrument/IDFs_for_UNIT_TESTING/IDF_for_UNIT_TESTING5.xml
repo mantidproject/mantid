@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+
+<!-- Purpose of this unit testing IDF is to 
+
+   a) Test <combine-components-into-one-shape>
+   
+-->
+
+<instrument name="For Unit Testing" valid-from   ="1900-01-31 23:59:59"
+                                         valid-to     ="2100-01-31 23:59:59">
+<defaults>
+  <length unit="meter" />
+  <angle unit="degree" />
+  <reference-frame>
+    <along-beam axis="z" />
+    <pointing-up axis="y" />
+    <handedness val="right" />
+  </reference-frame>
+</defaults>
+
+  <component type="source">
+    <location />
+  </component>
+
+  <type name="source" is="Source">
+  </type> 
+  
+  
+  <component type="some-sample-holder">
+    <location x="10.25"/>
+  </component>
+
+  <type name="some-sample-holder" is="SamplePos">
+  </type>
+
+
+<component type="adjusted cuboid" idlist="adjust cuboid">
+  <location />
+</component>
+
+<component type="cuboid1" idlist="normal cuboid">
+  <location z="3"/>
+</component>
+
+<type name="adjusted cuboid" is="detector">
+  <combine-components-into-one-shape />
+  <component type="cuboid1">
+    <location name="A"/>
+    <location name="B" y="10" rot="90" axis-x="1" axis-y="0" axis-z="0" />
+  </component>
+  <algebra val="A : B" />
+</type>
+
+<type name="cuboid1" is="detector"> 
+  <cuboid id="bob">
+    <left-front-bottom-point x="0.5" y="-5.0" z="-0.5"  />
+    <left-front-top-point  x="0.5" y="-5.0" z="0.5"  />
+    <left-back-bottom-point  x="-0.5" y="-5.0" z="-0.5"  />
+    <right-front-bottom-point  x="0.5" y="5.0" z="-0.5"  />
+  </cuboid>
+</type>
+
+<idlist idname="adjust cuboid">
+  <id start="1300" end="1300" />
+</idlist>
+
+<idlist idname="normal cuboid">
+  <id start="1400" end="1400" />
+</idlist>
+
+</instrument>

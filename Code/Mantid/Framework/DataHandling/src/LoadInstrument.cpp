@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadInstCompsIntoOneShape.h"
 #include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument.h"
@@ -184,17 +185,24 @@ namespace Mantid
           throw Kernel::Exception::InstrumentDefinitionError("No type elements in XML instrument file", m_filename);
         }
         
-        // Collect some information about types and components for later use including:
+        // Collect some information about types for later use including:
         //  * populate directory getTypeElement
         //  * populate directory isTypeAssemply
         //  * create shapes for all none assemply components and store in mapTyepNameToShape
         //  * If 'Outline' attribute set for assemply add attribute object_created=no to tell
-        //    create shape for such assemply also later  
+        //    create shape for such assemply also later   
         unsigned long numberTypes = pNL_type->length();
         for (unsigned long iType = 0; iType < numberTypes; iType++)
         {
           Element* pTypeElem = static_cast<Element*>(pNL_type->item(iType));
           std::string typeName = pTypeElem->getAttribute("name");
+
+          // check if contain <combine-components-into-one-shape>. If this then such
+          // types are adjusted after this loop has completed
+          NodeList* pNL_type_combine_into_one_shape = pTypeElem->getElementsByTagName("combine-components-into-one-shape");
+          if ( pNL_type_combine_into_one_shape->length() )
+            continue;
+          pNL_type_combine_into_one_shape->release();
 
           // Each type in the IDF must be uniquely named, hence return error if type
           // has already been defined
@@ -227,7 +235,38 @@ namespace Mantid
           }
           pNL_local->release();
         }
+
+        // Deal with adjusting types containing <combine-components-into-one-shape>
+        for (unsigned long iType = 0; iType < numberTypes; iType++)
+        {
+          Element* pTypeElem = static_cast<Element*>(pNL_type->item(iType));
+          std::string typeName = pTypeElem->getAttribute("name");
+
+          // In this loop only interested in types containing <combine-components-into-one-shape>
+          NodeList* pNL_type_combine_into_one_shape = pTypeElem->getElementsByTagName("combine-components-into-one-shape");
+          if ( pNL_type_combine_into_one_shape->length() == 0 )
+            continue;
+          pNL_type_combine_into_one_shape->release();
+
+          // Each type in the IDF must be uniquely named, hence return error if type
+          // has already been defined
+          if ( getTypeElement.find(typeName) != getTypeElement.end() )
+          {
+            g_log.error("XML file: " + m_filename + "contains more than one type element named " + typeName);
+            throw Kernel::Exception::InstrumentDefinitionError("XML instrument file contains more than one type element named " + typeName, m_filename);
+          }
+          getTypeElement[typeName] = pTypeElem;
+
+          LoadInstCompsIntoOneShape helper;
+          helper.adjust(pTypeElem, isTypeAssembly, getTypeElement);
+
+          isTypeAssembly[typeName] = false;
+
+          mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
+          mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
+        }
         pNL_type->release();
+
 
         // create hasParameterElement
         NodeList* pNL_parameter = pRootElem->getElementsByTagName("parameter");
@@ -317,7 +356,7 @@ namespace Mantid
 
         pNL_comp->release();
         // Don't need this anymore (if it was even used) so empty it out to save memory
-        m_tempPosHolder.clear();
+        LoadInstrumentHelper::m_tempPosHolder.clear();
 
         // Read in or create the geometry cache file
         setupGeometryCache();
@@ -477,7 +516,7 @@ namespace Mantid
       if (VERBOSE) std::cout << "appendAssembly() starting for parent " << parent->getName() << "\n";
 
       // The location element is required to be a child of a component element. Get this component element
-      Element* pCompElem = getParentComponent(pLocElem);
+      Element* pCompElem = LoadInstrumentHelper::getParentComponent(pLocElem);
 
       // Read detector IDs into idlist if required
       // Note idlist may be defined for any component
@@ -522,7 +561,7 @@ namespace Mantid
       // set location for this newly added comp and set facing if specified in instrument def. file. Also
       // check if any logfiles are referred to through the <parameter> element.
 
-      setLocation(ass, pLocElem);
+      LoadInstrumentHelper::setLocation(ass, pLocElem, m_angleConvertConst, m_deltaOffsets);
       setFacing(ass, pLocElem);
       setLogfile(ass, pCompElem, m_instrument->getLogfileCache());  // params specified within <component>
       setLogfile(ass, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
@@ -551,7 +590,7 @@ namespace Mantid
           if ( it == excludeList.end() )
           {
 
-            std::string typeName = (getParentComponent(pElem))->getAttribute("type");
+            std::string typeName = (LoadInstrumentHelper::getParentComponent(pElem))->getAttribute("type");
 
             if (VERBOSE) std::cout << "appendAssembly() has found that its parent's type = " << typeName << "\n";
 
@@ -609,7 +648,7 @@ namespace Mantid
     void LoadInstrument::appendLeaf(Geometry::ICompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
     {
       // The location element is required to be a child of a component element. Get this component element
-      Element* pCompElem = getParentComponent(pLocElem);
+      Element* pCompElem = LoadInstrumentHelper::getParentComponent(pLocElem);
 
       //--- Get the detector's X/Y pixel sizes (optional) ---
       if (VERBOSE) std::cout << "AppendLeaf: I am " << pLocElem->getAttribute("name") << " . " <<
@@ -665,7 +704,7 @@ namespace Mantid
 
         // set location for this newly added comp and set facing if specified in instrument def. file. Also
         // check if any logfiles are referred to through the <parameter> element.
-        setLocation(bank, pLocElem);
+        LoadInstrumentHelper::setLocation(bank, pLocElem, m_angleConvertConst, m_deltaOffsets);
         setFacing(bank, pLocElem);
         setLogfile(bank, pCompElem, m_instrument->getLogfileCache()); // params specified within <component>
         setLogfile(bank, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
@@ -761,7 +800,7 @@ namespace Mantid
 
         // set location for this newly added comp and set facing if specified in instrument def. file. Also
         // check if any logfiles are referred to through the <parameter> element.
-        setLocation(detector, pLocElem);
+        LoadInstrumentHelper::setLocation(detector, pLocElem, m_angleConvertConst, m_deltaOffsets);
         setFacing(detector, pLocElem);
         setLogfile(detector, pCompElem, m_instrument->getLogfileCache()); // params specified within <component>
         setLogfile(detector, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
@@ -813,247 +852,11 @@ namespace Mantid
         // set location for this newly added comp and set facing if specified in instrument def. file. Also
         // check if any logfiles are referred to through the <parameter> element.
 
-        setLocation(comp, pLocElem);
+        LoadInstrumentHelper::setLocation(comp, pLocElem, m_angleConvertConst, m_deltaOffsets);
         setFacing(comp, pLocElem);
         setLogfile(comp, pCompElem, m_instrument->getLogfileCache()); // params specified within <component>
         setLogfile(comp, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
       }
-    }
-
-
-    //-----------------------------------------------------------------------------------------------------------------------
-    /** Calculate the position of comp relative to its parent from info provided by \<location\> element.
-    *
-    *  @param comp :: To set position/location off
-    *  @param pElem ::  Poco::XML element that points a location element in the XML doc
-    *
-    *  @return  Thrown if second argument is not a pointer to a 'location' XML element
-    */
-    Kernel::V3D LoadInstrument::getRelativeTranslation(const Geometry::IComponent* comp, const Poco::XML::Element* pElem)
-    {
-
-      Kernel::V3D retVal;  // position relative to parent
-
-      // Polar coordinates can be labelled as (r,t,p) or (R,theta,phi)
-      if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") || pElem->hasAttribute("p") ||
-        pElem->hasAttribute("R") || pElem->hasAttribute("theta") || pElem->hasAttribute("phi") )
-      {
-        double R=0.0, theta=0.0, phi=0.0;
-
-        if ( pElem->hasAttribute("r") ) R = atof((pElem->getAttribute("r")).c_str());
-        if ( pElem->hasAttribute("t") ) theta = m_angleConvertConst*atof((pElem->getAttribute("t")).c_str());
-        if ( pElem->hasAttribute("p") ) phi = m_angleConvertConst*atof((pElem->getAttribute("p")).c_str());
-
-        if ( pElem->hasAttribute("R") ) R = atof((pElem->getAttribute("R")).c_str());
-        if ( pElem->hasAttribute("theta") ) theta = m_angleConvertConst*atof((pElem->getAttribute("theta")).c_str());
-        if ( pElem->hasAttribute("phi") ) phi = m_angleConvertConst*atof((pElem->getAttribute("phi")).c_str());
-
-        if ( m_deltaOffsets )
-        {
-          // In this case, locations given are radial offsets to the (radial) position of the parent,
-          // so need to do some extra calculation before they're stored internally as x,y,z offsets.
-
-          // Temporary vector to hold the parent's absolute position (will be 0,0,0 if no parent)
-          Kernel::V3D parentPos;
-          // Get the parent's absolute position (if the component has a parent)
-          if ( comp->getParent() )
-          {
-            std::map<const Geometry::IComponent*, SphVec>::iterator it;
-            it = m_tempPosHolder.find(comp);
-            SphVec parent;
-            if ( it == m_tempPosHolder.end() )
-              parent = m_tempPosHolder[comp->getParent().get()];
-            else
-              parent = it->second;
-
-            // Add to the current component to get its absolute position
-            R     += parent.r;
-            theta += parent.theta;
-            phi   += parent.phi;
-            // Set the temporary V3D with the parent's absolute position
-            parentPos.spherical(parent.r,parent.theta,parent.phi);
-          }
-
-          // Create a temporary vector that holds the absolute r,theta,phi position
-          // Needed to make things work in situation when a parent object has a phi value but a theta of zero
-          SphVec tmp(R,theta,phi);
-          // Add it to the map with the pointer to the Component object as key
-          m_tempPosHolder[comp] = tmp;
-
-          // Create a V3D and set its position to be the child's absolute position
-          Kernel::V3D absPos;
-          absPos.spherical(R,theta,phi);
-
-          // Subtract the two V3D's to get what we want (child's relative position in x,y,z)
-          retVal = absPos - parentPos;
-        }
-        else
-        {
-          // In this case, the value given represents a vector from the parent to the child
-          retVal.spherical(R,theta,phi);
-        }
-
-      }
-      else
-      {
-        double x=0.0, y=0.0, z=0.0;
-
-        if ( pElem->hasAttribute("x") ) x = atof((pElem->getAttribute("x")).c_str());
-        if ( pElem->hasAttribute("y") ) y = atof((pElem->getAttribute("y")).c_str());
-        if ( pElem->hasAttribute("z") ) z = atof((pElem->getAttribute("z")).c_str());
-
-        retVal(x,y,z);
-      }
-
-      return retVal;
-    }
-        
-
-    //-----------------------------------------------------------------------------------------------------------------------
-    /** Set location (position) of comp as specified in XML location element.
-    *
-    *  @param comp :: To set position/location off
-    *  @param pElem ::  Poco::XML element that points a location element in the XML doc
-    *
-    *  @throw logic_error Thrown if second argument is not a pointer to a 'location' XML element
-    */
-    void LoadInstrument::setLocation(Geometry::IComponent* comp, Poco::XML::Element* pElem)
-    {
-      // Require that pElem points to an element with tag name 'location' or 'neutronic'
-      if ( pElem->tagName() != "location" && pElem->tagName() != "neutronic" )
-      {
-        g_log.error("Second argument to function setLocation must be a pointer to an XML element with tag name location.");
-        throw std::logic_error( "Second argument to function setLocation must be a pointer to an XML element with tag name location." );
-      }
-
-//      comp->translate(getRelativeTranslation(comp, pElem));
-      comp->setPos(getRelativeTranslation(comp, pElem));
-
-      // Rotate coordinate system of this component
-      if ( pElem->hasAttribute("rot") )
-      {
-        double rotAngle = m_angleConvertConst*atof( (pElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
-
-        double axis_x = 0.0;
-        double axis_y = 0.0;
-        double axis_z = 1.0;
-
-        if ( pElem->hasAttribute("axis-x") )
-          axis_x = atof( (pElem->getAttribute("axis-x")).c_str() );
-        if ( pElem->hasAttribute("axis-y") )
-          axis_y = atof( (pElem->getAttribute("axis-y")).c_str() );
-        if ( pElem->hasAttribute("axis-z") )
-          axis_z = atof( (pElem->getAttribute("axis-z")).c_str() );
-
-        comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(axis_x,axis_y,axis_z)));
-      }
-
-
-      // Check if sub-elements <trans> or <rot> of present - for now ignore these if m_deltaOffset = true
-
-      Element* pRecursive = pElem;
-      bool stillTransElement = true;
-      while ( stillTransElement )
-      {
-          // figure out if child element is <trans> or <rot> or none of these
-
-          Element* tElem = pRecursive->getChildElement("trans");
-          Element* rElem = pRecursive->getChildElement("rot");
-
-          if (tElem && rElem)
-          {
-          // if both a <trans> and <rot> child element present. Ignore <rot> element
-          rElem = NULL;
-          }
-
-          if (!tElem && !rElem)
-          {
-          stillTransElement = false;
-          }
-
-          Kernel::V3D posTrans;
-
-          if (tElem)
-          {
-             posTrans = getRelativeTranslation(comp, tElem);
-
-          // to get the change in translation relative to current rotation of comp
-          Geometry::CompAssembly compToGetRot;
-          Geometry::CompAssembly compRot;
-          compRot.setRot(comp->getRotation());
-          compToGetRot.setParent(&compRot);
-          compToGetRot.setPos(posTrans);
-
-          // Apply translation
-          comp->translate(compToGetRot.getPos());   
-
-          // for recursive action
-          pRecursive = tElem; 
-          }  // end translation
-
-          if (rElem) 
-          {
-          double rotAngle = m_angleConvertConst*atof( (rElem->getAttribute("val")).c_str() ); // assumed to be in degrees
-
-          double axis_x = 0.0;
-          double axis_y = 0.0;
-          double axis_z = 1.0;
-
-          if ( rElem->hasAttribute("axis-x") )
-              axis_x = atof( (rElem->getAttribute("axis-x")).c_str() );
-          if ( rElem->hasAttribute("axis-y") )
-              axis_y = atof( (rElem->getAttribute("axis-y")).c_str() );
-          if ( rElem->hasAttribute("axis-z") )
-              axis_z = atof( (rElem->getAttribute("axis-z")).c_str() );
-
-          comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(axis_x,axis_y,axis_z)));      
-
-          // for recursive action
-          pRecursive = rElem; 
-          }
-
-      } // end while
-
-    }
-
-
-    //-----------------------------------------------------------------------------------------------------------------------
-    /** Get parent component element of location element.
-    *
-    *  @param pLocElem ::  Poco::XML element that points a location element in the XML doc
-    *  @return Parent XML element to a location XML element
-    *
-    *  @throw logic_error Thrown if argument is not a child of component element
-    */
-    Poco::XML::Element* LoadInstrument::getParentComponent(Poco::XML::Element* pLocElem)
-    {
-      if ( (pLocElem->tagName()).compare("location") )
-      {
-        g_log.error("Argument to function getParentComponent must be a pointer to an XML element with tag name location.");
-        throw std::logic_error( "Argument to function getParentComponent must be a pointer to an XML element with tag name location." );
-      }
-
-      // The location element is required to be a child of a component element. Get this component element
-
-      Node* pCompNode = pLocElem->parentNode();
-
-      Element* pCompElem;
-      if (pCompNode->nodeType() == 1)
-      {
-        pCompElem = static_cast<Element*>(pCompNode);
-        if ( (pCompElem->tagName()).compare("component") )
-        {
-          g_log.error("Argument to function getParentComponent must be a XML element sitting inside a component element.");
-          throw std::logic_error( "Argument to function getParentComponent must be a XML element sitting inside a component element." );
-        }
-      }
-      else
-      {
-        g_log.error("Argument to function getParentComponent must be a XML element whos parent is an element.");
-        throw std::logic_error( "Argument to function getParentComponent must be a XML element whos parent is an element." );
-      }
-
-      return pCompElem;
     }
 
 
@@ -1746,7 +1549,7 @@ namespace Mantid
       {
         if ( it->second )
         {
-          setLocation(it->first,it->second);
+          LoadInstrumentHelper::setLocation(it->first,it->second, m_angleConvertConst, m_deltaOffsets);
         }
         else
         {
@@ -1814,7 +1617,7 @@ namespace Mantid
     */
     std::string LoadInstrument::getNameOfLocationElement(Poco::XML::Element* pElem)
     {
-      Element* pCompElem = getParentComponent(pElem);
+      Element* pCompElem = LoadInstrumentHelper::getParentComponent(pElem);
 
       std::string retVal;
 

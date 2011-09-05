@@ -29,6 +29,7 @@ namespace Mantid
   {
     class ISpectraDetectorMap;
     class Instrument;
+    class IComponent;
   }
   namespace API
   {
@@ -37,6 +38,19 @@ namespace Mantid
 
   namespace DataHandling
   {
+
+    /** Stripped down vector that holds position in terms of spherical coordinates,
+      *  Needed when processing instrument definition files that use the 'Ariel format'
+      */
+    struct SphVec
+    {
+      ///@cond Exclude from doxygen documentation
+      double r,theta,phi;
+      SphVec() : r(0.0), theta(0.0), phi(0.0) {}
+      SphVec(const double& r, const double& theta, const double& phi) : r(r), theta(theta), phi(phi) {}
+      ///@endcond
+    };
+
     /** @class LoadInstrumentHelper LoadInstrumentHelper.h DataHandling/LoadInstrumentHelper.h
 
     Contains method for assisting the loading of an instrument definition file (IDF)
@@ -70,7 +84,11 @@ namespace Mantid
       LoadInstrumentHelper() {};
 
       /// Destructor
-      virtual ~LoadInstrumentHelper() {}
+      virtual ~LoadInstrumentHelper() 
+      {
+        // Don't need this anymore (if it was even used) so empty it out to save memory
+        //m_tempPosHolder.clear();
+      }
 
       /// Return from an IDF the values of the valid-from and valid-to attributes
       static void getValidFromTo(const std::string& IDFfilename, std::string& outValidFrom,
@@ -80,10 +98,26 @@ namespace Mantid
       /// Return workspace start date as an ISO 8601 string
       static std::string getWorkspaceStartDate(const boost::shared_ptr<API::MatrixWorkspace>& workspace);
 
+      /// Set location (position) of comp as specified in XML location element
+      static void setLocation(Geometry::IComponent* comp, Poco::XML::Element* pElem, const double angleConvertConst,
+                              const bool deltaOffsets=false);
+
+      /// Calculate the position of comp relative to its parent from info provided by \<location\> element
+      static Kernel::V3D getRelativeTranslation(const Geometry::IComponent* comp, const Poco::XML::Element* pElem,
+                                     const double angleConvertConst, const bool deltaOffsets=false);
+
+      /// Get parent component element of location element
+      static Poco::XML::Element* getParentComponent(Poco::XML::Element* pLocElem);
+
     private:
       /// static reference to the logger class
       static Kernel::Logger& g_log;
+
+    public:
+      /// Map to store positions of parent components in spherical coordinates
+      static std::map<const Geometry::IComponent*,SphVec> m_tempPosHolder;
     };
+
 
   } // namespace DataHandling
 } // namespace Mantid

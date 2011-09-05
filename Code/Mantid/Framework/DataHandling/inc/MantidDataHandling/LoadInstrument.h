@@ -135,20 +135,12 @@ namespace Mantid
       /// Add XML element to parent assuming the element contains no other component elements
       void appendLeaf(Geometry::ICompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
 
-      /// Set location (position) of comp as specified in XML location element
-      void setLocation(Geometry::IComponent* comp, Poco::XML::Element* pElem);
-
       /// Set parameter/logfile info (if any) associated with component
       void setLogfile(const Geometry::IComponent* comp, Poco::XML::Element* pElem, 
                                 std::multimap<std::string, boost::shared_ptr<Geometry::XMLlogfile> >& logfileCache);
 
-      /// Get parent component element of location element
-      Poco::XML::Element* getParentComponent(Poco::XML::Element* pLocElem);
       /// get name of location element
       std::string getNameOfLocationElement(Poco::XML::Element* pElem);
-
-      /// Calculate the position of comp relative to its parent from info provided by \<location\> element
-      Kernel::V3D getRelativeTranslation(const Geometry::IComponent* comp, const Poco::XML::Element* pElem);
 
       /// Parse position of facing element to V3D
       Kernel::V3D parseFacingElementToV3D(Poco::XML::Element* pElem);
@@ -199,21 +191,6 @@ namespace Mantid
       /// Flag to indicate whether offsets given in spherical coordinates are to be added to the current
       /// position (true) or are a vector from the current position (false, default)
       bool m_deltaOffsets;
-
-      /** Stripped down vector that holds position in terms of spherical coordinates,
-       *  Needed when processing instrument definition files that use the 'Ariel format'
-       */
-      struct SphVec
-      {
-        ///@cond Exclude from doxygen documentation
-        double r,theta,phi;
-        SphVec() : r(0.0), theta(0.0), phi(0.0) {}
-        SphVec(const double& r, const double& theta, const double& phi) : r(r), theta(theta), phi(phi) {}
-        ///@endcond
-      };
-
-      /// Map to store positions of parent components in spherical coordinates
-      std::map<const Geometry::IComponent*,SphVec> m_tempPosHolder;
 
       /// when this const equals 1 it means that angle=degree (default) is set in IDF
       /// otherwise if this const equals 180/pi it means that angle=radian is set in IDF 

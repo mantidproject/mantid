@@ -25,6 +25,7 @@ set ( SRC_FILES
 	src/LoadEventPreNexus.cpp
 	src/LoadGSS.cpp
 	src/LoadInstrument.cpp
+	src/LoadInstCompsIntoOneShape.cpp
 	src/LoadInstrumentFromNexus.cpp
 	src/LoadInstrumentFromRaw.cpp
 	src/LoadInstrumentHelper.cpp
@@ -121,6 +122,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadInstrument.h
+	inc/MantidDataHandling/LoadInstCompsIntoOneShape.h
 	inc/MantidDataHandling/LoadInstrumentFromNexus.h
 	inc/MantidDataHandling/LoadInstrumentFromRaw.h
 	inc/MantidDataHandling/LoadInstrumentHelper.h
@@ -216,6 +218,7 @@ set ( TEST_FILES
 	test/LoadInstrumentFromRawTest.h
 	test/LoadInstrumentHelperTest.h
 	test/LoadInstrumentTest.h
+	test/LoadInstCompsIntoOneShapeTest.h
 	test/LoadISISNexusTest.h
 	test/LoadLogTest.h
 	test/LoadLogsFromSNSNexusTest.h
