@@ -6,6 +6,8 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
 
+#include <boost/lexical_cast.hpp>
+
 #include <sstream>
 #include <iostream>
 #include <limits>
