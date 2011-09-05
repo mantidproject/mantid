@@ -141,8 +141,8 @@ float getVAXnum(const float A);
 MANTID_KERNEL_DLL void readToEndOfLine( std::ifstream& in ,  bool ConsumeEOL );
 
 MANTID_KERNEL_DLL std::string getWord( std::ifstream &in ,  bool consumeEOL );
-
-
+///  function parses a path, found in input string "path" and returns vector of the folders contributed into the path */
+MANTID_KERNEL_DLL size_t split_path(const std::string &path, std::vector<std::string> &path_components);
 }   // NAMESPACE Strings
 
 }   // NAMESPACE Kernel

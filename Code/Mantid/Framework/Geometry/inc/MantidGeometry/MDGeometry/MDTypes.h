@@ -42,6 +42,10 @@ namespace Mantid
    */
   typedef double coord_t;  // moved our of here to the coordinate and the header itself -- from coordinate header to 
   typedef double signal_t; // avoid strange conflict between numeric_limits and <climits> (presumably)
+  // win builds sometimes pick up macro max((a),(b)) (a)>(b)?((a):(b))
+#ifdef max
+#undef max
+#endif
  
   
   /// Minimum value (large negative number) that a coordinate can take

@@ -5,8 +5,10 @@
 #include <cmath>
 #include <vector>
 #include <string.h>
+#include <Poco/Path.h>
 
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/Exception.h"
 #include <iosfwd>
 
 using std::size_t;
@@ -806,8 +808,78 @@ void readToEndOfLine( std::ifstream& in ,  bool ConsumeEOL )
     return ;
   getWord( in ,  true );
 }
+/**  function parses a path, placed into input string "path" and returns vector of the folders contributed into the path 
+*  @param in :: path -- the string containing input path, 
+     found in path string, if they are separated by \ or / symbols. 
+	 Treats special symbols, if defined in the input string as path-es
+	 returns 0 for empty input string
 
+	 used to genrate path in hdf file, so the resulting path has to obey hdf constrains;
+*/
+size_t split_path(const std::string &path, std::vector<std::string> &path_components)
+{
+	if(path.empty()){
+		path_components.resize(0);
+		return 0;
+	}
+	// convert Windows path into the unix one
+	std::string working_path(path);
+	for(size_t i=0;i<path.size();i++){
+		if(working_path[i]<0x20||working_path[i]>0x7E)working_path[i]='_';
+		if(working_path[i]=='\\')working_path[i]='/';
+		if(working_path[i]==' ')working_path[i]='_';
+	}
+	
 
+	// path start with relative character, and we need to convert it into full path
+	if(path[0]=='.'){
+		// get absolute path using working directory as base;
+		Poco::Path absol;
+		absol = absol.absolute();
+		working_path = absol.toString(Poco::Path::PATH_UNIX)+working_path;
+	}
+
+	// as poco splt using regular expressions is doing some rubbish, we need to split manually
+	std::list<int64_t> split_pos;
+	split_pos.push_back(-1);
+	size_t path_size = working_path.size();
+	for(size_t i=0;i<path_size;i++){
+		if(working_path[i]=='/'){
+			split_pos.push_back(i);
+		}
+	}
+	split_pos.push_back(path_size);
+	// allocate target vector to keep folder structure and fill it in 
+	size_t n_folders = split_pos.size()-1;
+	path_components.resize(n_folders);
+	std::list<int64_t>::iterator it1 = split_pos.begin();
+	std::list<int64_t>::iterator it2 = it1;
+	it2++;
+
+	int64_t ic(0);
+	for(it2; it2!=split_pos.end();it2++){
+		std::string folder = working_path.substr(*it1+1,*it2-*it1-1);
+		if(folder.empty()||(folder.size()==1&&folder==".")){ // skip self-references and double slashes;
+			it1=it2;
+			continue;
+		}
+		// reprocess up-references;
+		if(folder==".."){
+			if(folder.size()!=2)throw(std::invalid_argument("path contains wrong path group"));
+			ic--;
+		    if(ic<0)throw(std::invalid_argument("path contains relative references to a folder outside of the seach tree"));
+			it1=it2;
+			continue;
+		}
+		path_components[ic]=folder;
+		ic++;
+    	it1=it2;
+	}
+
+	n_folders=size_t(ic);
+	path_components.resize(n_folders);
+	return n_folders;
+}
 
 /// \cond TEMPLATE
 
